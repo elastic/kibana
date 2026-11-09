@@ -13,6 +13,7 @@ import {
 } from '@kbn/securitysolution-list-utils';
 
 import { migrations } from './migrations';
+import { exceptionListModelVersions } from './model_versions';
 
 /**
  * This is a super set of exception list and exception list items. The switch
@@ -86,6 +87,10 @@ export const exceptionListMapping: SavedObjectsType['mappings'] = {
 
 export const exceptionListItemMapping: SavedObjectsType['mappings'] = {
   properties: {
+    applies_to: {
+      ignore_above: 1024,
+      type: 'keyword',
+    },
     comments: {
       properties: {
         comment: {
@@ -110,6 +115,10 @@ export const exceptionListItemMapping: SavedObjectsType['mappings'] = {
     },
     entries: {
       properties: {
+        column_type: {
+          ignore_above: 1024,
+          type: 'keyword',
+        },
         entries: {
           properties: {
             field: {
@@ -186,6 +195,7 @@ export const exceptionListType: SavedObjectsType = {
   indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
   mappings: combinedMappings,
   migrations,
+  modelVersions: exceptionListModelVersions,
   name: exceptionListSavedObjectType,
   namespaceType: 'multiple-isolated',
 };
@@ -195,6 +205,7 @@ export const exceptionListAgnosticType: SavedObjectsType = {
   indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
   mappings: combinedMappings,
   migrations,
+  modelVersions: exceptionListModelVersions,
   name: exceptionListAgnosticSavedObjectType,
   namespaceType: 'agnostic',
 };

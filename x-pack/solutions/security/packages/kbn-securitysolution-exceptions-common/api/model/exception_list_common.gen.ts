@@ -191,6 +191,19 @@ export const ExceptionListItemType = lazySchema(() => z.literal('simple'));
 export type ExceptionListItemType = z.infer<typeof ExceptionListItemType>;
 
 /**
+  * What the exception item applies to:
+* `source_documents`: the documents of the source indices, before the query of the rule runs. This is how every exception works, and an item without `applies_to` has this value.
+* `esql_output_columns`: the rows that the query of an ES|QL rule outputs, tested on the output columns of the query. Every entry of such an item needs a `column_type`. Only ES|QL rules apply these items, and no other rule type does.
+
+  */
+export const ExceptionListItemAppliesTo = lazySchema(() =>
+  z.enum(['source_documents', 'esql_output_columns'])
+);
+export type ExceptionListItemAppliesTo = z.infer<typeof ExceptionListItemAppliesTo>;
+export type ExceptionListItemAppliesToEnum = typeof ExceptionListItemAppliesTo.enum;
+export const ExceptionListItemAppliesToEnum = ExceptionListItemAppliesTo.enum;
+
+/**
  * Exception list name.
  */
 export const ExceptionListItemName = lazySchema(() =>
@@ -934,6 +947,7 @@ export const ExceptionListItem = lazySchema(() =>
     item_id: ExceptionListItemHumanId,
     list_id: ExceptionListHumanId,
     type: ExceptionListItemType,
+    applies_to: ExceptionListItemAppliesTo.optional(),
     name: ExceptionListItemName,
     description: ExceptionListItemDescription,
     entries: ExceptionListItemEntryArray,
@@ -985,6 +999,7 @@ export const ExceptionListSO = lazySchema(() =>
     list_type: z.enum(['item', 'list']),
     immutable: z.boolean().optional(),
     type: ExceptionListItemType,
+    applies_to: ExceptionListItemAppliesTo.optional(),
     name: ExceptionListItemName,
     description: ExceptionListItemDescription,
     entries: ExceptionListItemEntryArray.optional(),

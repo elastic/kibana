@@ -6,6 +6,8 @@
  */
 
 import type { ExceptionListSchema, OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
+import { EXCEPTION_APPLIES_TO } from '@kbn/securitysolution-exceptions-common/esql_output_columns';
+import type { ExceptionAppliesTo } from '@kbn/securitysolution-exceptions-common/esql_output_columns';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type {
   ExceptionsBuilderExceptionItem,
@@ -17,6 +19,7 @@ import type { AlertClosingReason } from '../../../../../common/types';
 import type { Rule } from '../../../rule_management/logic/types';
 
 export interface State {
+  appliesTo: ExceptionAppliesTo;
   exceptionItemMeta: { name: string };
   listType: ExceptionListTypeEnum;
   initialItems: ExceptionsBuilderExceptionItem[];
@@ -43,6 +46,7 @@ export interface State {
 }
 
 export const initialState: State = {
+  appliesTo: EXCEPTION_APPLIES_TO.SOURCE_DOCUMENTS,
   initialItems: [],
   exceptionItems: [],
   exceptionItemMeta: { name: '' },
@@ -69,6 +73,10 @@ export const initialState: State = {
 };
 
 export type Action =
+  | {
+      type: 'setAppliesTo';
+      appliesTo: ExceptionAppliesTo;
+    }
   | {
       type: 'setExceptionItemMeta';
       value: [string, string];
@@ -160,7 +168,7 @@ export type Action =
 
 export const createExceptionItemsReducer =
   () =>
-  /* eslint complexity: ["error", 25]*/
+  /* eslint complexity: ["error", 26]*/
   (state: State, action: Action): State => {
     switch (action.type) {
       case 'setExceptionItemMeta': {
@@ -303,6 +311,14 @@ export const createExceptionItemsReducer =
         return {
           ...state,
           selectedRulesToAddTo: rules,
+        };
+      }
+      case 'setAppliesTo': {
+        const { appliesTo } = action;
+
+        return {
+          ...state,
+          appliesTo,
         };
       }
       case 'setListType': {

@@ -26,7 +26,7 @@ export class InvalidExceptionValuesError extends Error {
         ? ` and ${invalidItems.length - MAX_NAMED_REASONS} more`
         : '';
     super(
-      `The rule did not run because exception items have a value that cannot be used for the type of the field: ${named}${others}. Fix or delete these exception items.`
+      `The rule did not run because exception items have a value or a column type that cannot be used at the end of the query: ${named}${others}. Fix or delete these exception items.`
     );
     this.name = 'InvalidExceptionValuesError';
     this.invalidItems = invalidItems;

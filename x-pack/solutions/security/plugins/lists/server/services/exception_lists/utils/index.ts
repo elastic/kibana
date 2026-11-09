@@ -141,6 +141,7 @@ export const transformSavedObjectToExceptionListItem = ({
   const {
     version: _version,
     attributes: {
+      applies_to: appliesTo,
       comments,
       created_at,
       created_by,
@@ -165,6 +166,8 @@ export const transformSavedObjectToExceptionListItem = ({
   // TODO: Do a throw if item_id or entries is not defined.
   return {
     _version,
+    // an item that does not say what it applies to has no `applies_to`, and applies to the source documents
+    ...(appliesTo != null ? { applies_to: appliesTo } : {}),
     comments: comments ?? [],
     created_at,
     created_by,
@@ -197,6 +200,7 @@ export const transformSavedObjectUpdateToExceptionListItem = ({
   const {
     version: _version,
     attributes: {
+      applies_to: appliesTo,
       comments,
       description,
       entries,
@@ -216,8 +220,10 @@ export const transformSavedObjectUpdateToExceptionListItem = ({
   // TODO: Do a throw if after the decode this is not the correct "list_type: list"
   // TODO: Update exception list and item types (perhaps separating out) so as to avoid
   // defaulting
+  const itemAppliesTo = appliesTo ?? exceptionListItem.applies_to;
   return {
     _version,
+    ...(itemAppliesTo != null ? { applies_to: itemAppliesTo } : {}),
     comments: comments ?? exceptionListItem.comments,
     created_at: exceptionListItem.created_at,
     created_by: exceptionListItem.created_by,
@@ -307,6 +313,7 @@ export const transformCreateCommentsToComments = ({
 };
 
 export const transformCreateExceptionListItemOptionsToCreateExceptionListItemSchema = ({
+  appliesTo,
   expireTime,
   listId,
   itemId,
@@ -316,6 +323,7 @@ export const transformCreateExceptionListItemOptionsToCreateExceptionListItemSch
 }: CreateExceptionListItemOptions): CreateExceptionListItemSchema => {
   return {
     ...rest,
+    ...(appliesTo != null ? { applies_to: appliesTo } : {}),
     expire_time: expireTime,
     item_id: itemId,
     list_id: listId,
@@ -325,6 +333,7 @@ export const transformCreateExceptionListItemOptionsToCreateExceptionListItemSch
 };
 
 export const transformUpdateExceptionListItemOptionsToUpdateExceptionListItemSchema = ({
+  appliesTo,
   itemId,
   namespaceType,
   osTypes,
@@ -339,6 +348,7 @@ export const transformUpdateExceptionListItemOptionsToUpdateExceptionListItemSch
 }: UpdateExceptionListItemOptions): UpdateExceptionListItemSchema => {
   return {
     ...rest,
+    ...(appliesTo != null ? { applies_to: appliesTo } : {}),
     description,
     expire_time: expireTime,
     item_id: itemId,

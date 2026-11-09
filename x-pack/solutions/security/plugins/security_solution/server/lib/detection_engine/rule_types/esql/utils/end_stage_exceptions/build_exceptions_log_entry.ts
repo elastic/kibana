@@ -26,8 +26,6 @@ export interface ExceptionsLogEntry {
   query: string;
   /** True when `query` was cut at the maximum length. */
   queryTruncated: boolean;
-  /** Items that stay in the DSL filter, as they always did. */
-  dslItemCount: number;
   appliedAtEndOfQuery: ItemReference[];
   notApplied: Array<
     ItemReference & {
@@ -44,12 +42,10 @@ export interface ExceptionsLogEntry {
 
 export const buildExceptionsLogEntry = ({
   query,
-  dslItemCount,
   endStageItems,
   skippedItems,
 }: {
   query: string;
-  dslItemCount: number;
   endStageItems: readonly EndStageItem[];
   skippedItems: readonly SkippedItem[];
 }): ExceptionsLogEntry => ({
@@ -57,7 +53,6 @@ export const buildExceptionsLogEntry = ({
   version: 1,
   query: query.slice(0, MAX_LOGGED_QUERY_LENGTH),
   queryTruncated: query.length > MAX_LOGGED_QUERY_LENGTH,
-  dslItemCount,
   appliedAtEndOfQuery: endStageItems.map(({ item }) => ({
     list_id: item.list_id,
     item_id: item.item_id,

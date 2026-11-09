@@ -177,6 +177,7 @@ export const createExceptionListItems = async ({
   return Promise.all(
     items.map((item) =>
       listsClient?.createExceptionListItem({
+        appliesTo: item.applies_to,
         comments: item.comments,
         description: item.description,
         entries: item.entries,

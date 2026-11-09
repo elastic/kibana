@@ -12,10 +12,10 @@
 //
 //   node esql_exceptions_try_matrix.mjs --list                    count the cases of each layer, run nothing
 //   node esql_exceptions_try_matrix.mjs --check-prompts           feed every case to the script with no stack, to check the answers
-//   node esql_exceptions_try_matrix.mjs                           run every case, with the setting on and then off
-//   node esql_exceptions_try_matrix.mjs --restore                 after a crash: restore the setting and remove what the runs left
+//   node esql_exceptions_try_matrix.mjs                           run every case once
+//   node esql_exceptions_try_matrix.mjs --restore                 after a crash: remove what the runs left
 //
-// Options: --layers=1,2,3  --setting=on|off|both  --only=text  --limit=n  --concurrency=n (default 4, at most 16)  --retries=n (default 1)
+// Options: --layers=1,2,3  --only=text  --limit=n  --concurrency=n (default 4, at most 16)  --retries=n (default 1)
 //          --timeout=seconds (default 240)  --full-types  --no-cleanup  --fresh  --rerun-differs
 //          --out=file (default esql_try_matrix_results.jsonl)  --log=file (default: the --out name with .log)
 //
@@ -23,16 +23,26 @@
 // everything that is printed is also appended to the log file. When the run ends or stops, the summary is written to <out>.summary.txt
 // and the keys of the runs that did not match to <out>.failed.txt.
 //
-// Interrupting: Ctrl-C or SIGTERM stops the runs in flight (they are not recorded), restores the setting and removes the rules, lists
-// and indices of the runs. Run the same command again to continue: it skips the runs that the results file records as a match, and the
+// Interrupting: Ctrl-C or SIGTERM stops the runs in flight (they are not recorded) and removes the rules, lists and indices of
+// the runs. Run the same command again to continue: it skips the runs that the results file records as a match, and the
 // ones that differed (--rerun-differs runs those again, for example after a fix); runs that failed with an error or a timeout run again.
-// If the process is killed hard (SIGKILL, power loss), <out>.state.json keeps the value of the setting from before the first run: the
-// next run restores it at its end, and --restore does it at once. --fresh ignores the earlier results.
+// If the process is killed hard (SIGKILL, power loss), <out>.state.json records that the runs were not cleaned up: the
+// next run removes what they left at its end, and --restore does it at once. --fresh ignores the earlier results.
 //
 // Layer 1: one exception with one item, for every kind, type and operator, with every invalid value and every redefined-field mode.
-// Layer 2: one exception with two items, for every pair of kinds and every pair of operators, on a few pairs of types
-//          (--full-types: on pairs that cover all the types), and an invalid value in either item.
-// Layer 3: lists of two and three exceptions drawn, with repetition, from a set of exceptions that each end up in a different place.
+//          For wrong_type, with a declared column type that is not the type of the column.
+// Layer 2: one exception with two items, for every pair of kinds of one applies_to (an exception has one) and every pair of
+//          operators, on a few pairs of types (--full-types: on pairs that cover all the types), and an invalid value in either item.
+// Layer 3: lists of two and three exceptions drawn, with repetition, from a set of exceptions that each have a different effect:
+//          applied in the DSL filter, applied at the end of the query, skipped, rejected by the API at creation, or failing the rule.
+//
+// Cases that the API refuses at creation (an output-column item with "is" or "is one of" on double, "matches" on a type that is not
+// keyword or text, or a value that does not parse for the declared type) are valid cases: the expected result is a 400, and the
+// script reports a match when the API answers 400.
+//
+// Result keys: the key of a run is KEY_VERSION plus the id of the case. The kinds of the earlier version of the script meant other
+// things (redefined and missing were handled by inspecting the data). Its results are not comparable. Results files from before
+// KEY_VERSION v2 are ignored by the new keys; use --fresh or a new --out to start from an empty file.
 
 import { spawn } from 'node:child_process';
 import { appendFileSync, existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -47,7 +57,6 @@ const auth =
   Buffer.from(`${process.env.ES_USER || 'elastic'}:${process.env.ES_PASS || 'changeme'}`).toString(
     'base64'
   );
-const SETTING_ID = 'securitySolution:enableEsqlRuleComputedFieldExceptions';
 
 const args = Object.fromEntries(
   process.argv
@@ -60,8 +69,6 @@ const args = Object.fromEntries(
 );
 const checkPrompts = args['check-prompts'] === 'true';
 const layers = (args.layers ?? '1,2,3').split(',').map(Number);
-const settings = { on: ['on'], off: ['off'], both: ['on', 'off'] }[args.setting ?? 'both'];
-if (!settings) throw new Error('--setting must be on, off or both');
 const concurrency = Number(args.concurrency ?? (checkPrompts ? 8 : 4));
 const retries = Number(args.retries ?? 1);
 const timeoutMs = Number(args.timeout ?? 240) * 1000;
@@ -77,8 +84,37 @@ const log = (line = '') => {
   appendFileSync(logFile, line === '' ? '\n' : `${new Date().toISOString()} ${line}\n`);
 };
 
-// The questions of the script (keep in step with askItem in esql_exceptions_try.mjs)
-const KINDS = ['source', 'computed', 'redefined', 'missing'];
+// The questions of the script (they must match askItem in esql_exceptions_try.mjs)
+const KEY_VERSION = 'v2';
+const KINDS = [
+  'source',
+  'computed',
+  'redefined',
+  'missing',
+  'output_redefined',
+  'output_missing',
+  'wrong_type',
+];
+// An exception has one applies_to: the two items of an exception of layer 2 come from one group
+const KIND_GROUPS = [
+  ['source', 'redefined', 'missing'],
+  ['computed', 'output_redefined', 'output_missing', 'wrong_type'],
+];
+// wrong_type: the declared column type of an item, for each type of the column (never the type of the column)
+const WRONG_DECLARED = {
+  keyword: ['integer'],
+  text: ['boolean'],
+  integer: ['keyword', 'long'],
+  long: ['integer'],
+  unsigned_long: ['long'],
+  double: ['integer'],
+  boolean: ['keyword'],
+  ip: ['keyword'],
+  version: ['keyword'],
+  date: ['date_nanos'],
+  date_nanos: ['date'],
+};
+const EXCLUSIVE_OPERATORS = ['is_not', 'is_not_one_of', 'does_not_match', 'does_not_exist'];
 const TYPES = [
   'keyword',
   'text',
@@ -116,16 +152,25 @@ const TYPES_WITH_INVALID_VALUE = [
 const OPERATORS_WITH_VALUE = ['is', 'is_not', 'is_one_of', 'is_not_one_of'];
 const TYPES_WITH_MODE = ['keyword', 'text'];
 
-const item = (kind, type, operator, extra = {}) => ({ kind, type, operator, ...extra });
+const item = (kind, type, operator, extra = {}) => ({
+  kind,
+  type,
+  operator,
+  ...(kind === 'wrong_type' ? { declared: WRONG_DECLARED[type][0] } : {}),
+  ...extra,
+});
 const canBeInvalid = (it) =>
-  TYPES_WITH_INVALID_VALUE.includes(it.type) && OPERATORS_WITH_VALUE.includes(it.operator);
+  it.kind !== 'wrong_type' &&
+  TYPES_WITH_INVALID_VALUE.includes(it.type) &&
+  OPERATORS_WITH_VALUE.includes(it.operator);
 const needsMode = (it) =>
-  it.kind === 'redefined' && TYPES_WITH_MODE.includes(it.type) && !it.invalid;
+  ['redefined', 'output_redefined'].includes(it.kind) &&
+  TYPES_WITH_MODE.includes(it.type) &&
+  !it.invalid;
 const describeItem = (it) =>
-  `${it.kind}:${it.type}:${it.operator}${it.invalid ? ':invalid' : ''}${
-    it.mode === 'shown' ? ':shown' : ''
-  }`;
-
+  `${it.kind}:${it.type}${it.declared ? `>${it.declared}` : ''}:${it.operator}${
+    it.invalid ? ':invalid' : ''
+  }${it.mode === 'shown' ? ':shown' : ''}`;
 // With repetition and without order: [a, b, c] gives aa, ab, ac, bb, bc, cc
 const combinations = (values, size, from = 0) =>
   size === 0
@@ -141,13 +186,14 @@ const layer1 = () => {
   const cases = [];
   for (const kind of KINDS)
     for (const type of TYPES)
-      for (const operator of OPERATORS) {
-        const base = item(kind, type, operator);
-        const variants = [base];
-        if (needsMode(base)) variants.push({ ...base, mode: 'shown' });
-        if (canBeInvalid(base)) variants.push({ ...base, invalid: true });
-        for (const variant of variants) cases.push({ layer: 1, exceptions: [[variant]] });
-      }
+      for (const declared of kind === 'wrong_type' ? WRONG_DECLARED[type] : [undefined])
+        for (const operator of OPERATORS) {
+          const base = item(kind, type, operator, declared ? { declared } : {});
+          const variants = [base];
+          if (needsMode(base)) variants.push({ ...base, mode: 'shown' });
+          if (canBeInvalid(base)) variants.push({ ...base, invalid: true });
+          for (const variant of variants) cases.push({ layer: 1, exceptions: [[variant]] });
+        }
   return cases;
 };
 
@@ -166,49 +212,51 @@ const TYPE_PAIRS = [
 ];
 const layer2 = () => {
   const cases = [];
-  for (const [kindA, kindB] of combinations(KINDS, 2))
+  const add = (items) => {
+    cases.push({ layer: 2, exceptions: [items] });
+  };
+  for (const [kindA, kindB] of KIND_GROUPS.flatMap((group) => combinations(group, 2)))
     for (const [typeA, typeB] of TYPE_PAIRS) {
       for (const [operatorA, operatorB] of combinations(OPERATORS, 2))
-        cases.push({
-          layer: 2,
-          exceptions: [[item(kindA, typeA, operatorA), item(kindB, typeB, operatorB)]],
-        });
+        add([item(kindA, typeA, operatorA), item(kindB, typeB, operatorB)]);
       // An invalid value in either item, with the other item testing "is"
       for (const operator of OPERATORS_WITH_VALUE) {
         const first = item(kindA, typeA, operator, { invalid: true });
         const second = item(kindB, typeB, operator, { invalid: true });
-        if (canBeInvalid(first))
-          cases.push({ layer: 2, exceptions: [[first, item(kindB, typeB, 'is')]] });
-        if (canBeInvalid(second))
-          cases.push({ layer: 2, exceptions: [[item(kindA, typeA, 'is'), second]] });
+        if (canBeInvalid(first)) add([first, item(kindB, typeB, 'is')]);
+        if (canBeInvalid(second)) add([item(kindA, typeA, 'is'), second]);
       }
     }
   return cases;
 };
 
-// Layer 3: each exception ends up in a different place or has a different effect
+// Layer 3: each exception has a different effect: applied in the DSL filter, applied at the end of the query, skipped, rejected by
+// the API at creation, or failing the rule
 const ARCHETYPES = {
   'dsl-source-is': [item('source', 'keyword', 'is')],
-  'dsl-source-is-not-one-of': [item('source', 'integer', 'is_not_one_of')],
   'dsl-redefined-is': [item('redefined', 'keyword', 'is')],
   'dsl-redefined-shown-one-of': [item('redefined', 'text', 'is_one_of', { mode: 'shown' })],
-  'dsl-missing-is': [item('missing', 'keyword', 'is')],
   'dsl-missing-is-not': [item('missing', 'keyword', 'is_not')],
   'end-computed-is': [item('computed', 'keyword', 'is')],
   'end-computed-is-not-one-of': [item('computed', 'integer', 'is_not_one_of')],
-  'end-computed-exists': [item('computed', 'ip', 'exists')],
-  'end-computed-and-source': [item('computed', 'keyword', 'is'), item('source', 'integer', 'is')],
+  'end-redefined-column-is': [item('output_redefined', 'keyword', 'is')],
+  'end-redefined-column-shown-one-of': [
+    item('output_redefined', 'text', 'is_one_of', { mode: 'shown' }),
+  ],
+  'end-computed-and-computed': [item('computed', 'keyword', 'is'), item('computed', 'integer', 'is')],
   'end-computed-and-missing-is-not': [
     item('computed', 'keyword', 'is'),
-    item('missing', 'keyword', 'is_not'),
+    item('output_missing', 'keyword', 'is_not'),
   ],
-  'skipped-computed-double': [item('computed', 'double', 'is')],
-  'skipped-computed-matches-on-ip': [item('computed', 'ip', 'matches')],
+  'skipped-missing-column-is': [item('output_missing', 'keyword', 'is')],
+  'skipped-missing-column-is-not': [item('output_missing', 'keyword', 'is_not')],
   'skipped-computed-and-missing-is': [
     item('computed', 'keyword', 'is'),
-    item('missing', 'keyword', 'is'),
+    item('output_missing', 'keyword', 'is'),
   ],
-  'fails-computed-invalid-value': [item('computed', 'integer', 'is', { invalid: true })],
+  'rejected-computed-double': [item('computed', 'double', 'is')],
+  'rejected-computed-invalid-value': [item('computed', 'integer', 'is', { invalid: true })],
+  'fails-wrong-type': [item('wrong_type', 'keyword', 'is')],
 };
 const layer3 = () => {
   const names = Object.keys(ARCHETYPES);
@@ -239,6 +287,7 @@ const answersFor = (exceptions) =>
     ...items.flatMap((it, i) => [
       it.kind,
       it.type,
+      ...(it.kind === 'wrong_type' ? [it.declared] : []),
       it.operator,
       ...(canBeInvalid(it) ? [it.invalid ? 'yes' : 'no'] : []),
       ...(needsMode(it) ? [it.mode ?? 'source'] : []),
@@ -252,24 +301,24 @@ if (args.list) {
     const count = cases.filter((c) => c.layer === layer).length;
     if (count) console.log(`Layer ${layer}: ${count} cases`);
   }
-  const runs = cases.length * (checkPrompts ? 1 : settings.length);
-  console.log(
-    `${cases.length} cases, ${runs} runs (about 20 seconds each, ${concurrency} at once)`
-  );
+  console.log(`${cases.length} cases (about 20 seconds each, ${concurrency} at once)`);
   process.exit(0);
 }
 
 const control = { stopping: false };
 const children = new Set();
-const runScript = (c, setting, slot) =>
+const runScript = (c, slot) =>
   new Promise((resolve) => {
     const env = checkPrompts
       ? { ...process.env, KBN_URL: 'http://127.0.0.1:1', ES_URL: 'http://127.0.0.1:1' }
       : process.env;
     const child = spawn(
       process.execPath,
-      [SCRIPT, `--setting=${setting}`, ...(checkPrompts ? [] : [`--suffix=w${slot}`])],
-      { env, stdio: ['pipe', 'pipe', 'pipe'] }
+      [SCRIPT, ...(checkPrompts ? [] : [`--suffix=w${slot}`])],
+      {
+        env,
+        stdio: ['pipe', 'pipe', 'pipe'],
+      }
     );
     children.add(child);
     let out = '';
@@ -296,9 +345,7 @@ const keyLines = (out) =>
   out
     .split('\n')
     .filter((l) =>
-      /^(  Alerts for|  The rule fails|  With the setting|Result:|Alerts created|This |Applied at|Not applied)/.test(
-        l
-      )
+      /^(  Alerts for|  The rule fails|  API:|Result:|Alerts created|This |Applied at|Not applied)/.test(l)
     );
 
 const http = async (url, method = 'GET', body) => {
@@ -338,9 +385,7 @@ const readRecords = () =>
 // The last record of each run decides: a run that is done again replaces the earlier result
 const latestVerdicts = () => new Map(readRecords().map((r) => [r.key, r.verdict]));
 
-const planned = (checkPrompts ? ['on'] : settings).flatMap((setting) =>
-  cases.map((c) => ({ ...c, setting, key: `${setting}|${c.id}` }))
-);
+const planned = cases.map((c) => ({ ...c, key: `${KEY_VERSION}:${c.id}` }));
 
 const summarize = () => {
   const verdicts = latestVerdicts();
@@ -348,7 +393,7 @@ const summarize = () => {
   const notMatched = [];
   for (const job of planned) {
     const verdict = verdicts.get(job.key) ?? 'NOT RUN';
-    const bucket = `layer ${job.layer}, setting ${job.setting}`;
+    const bucket = `layer ${job.layer}`;
     counts[bucket] ??= {};
     counts[bucket][verdict] = (counts[bucket][verdict] ?? 0) + 1;
     if (!['MATCH', 'NOT RUN'].includes(verdict)) notMatched.push(`${verdict}\t${job.key}`);
@@ -397,18 +442,10 @@ const isAlive = (pid) => {
   }
 };
 
-// Puts the stack back as it was before the first run
+// Removes what the runs created
 const restoreStack = async () => {
   const state = readState();
   if (!state) return;
-  await http(`${KBN}/internal/kibana/settings`, 'POST', {
-    changes: { [SETTING_ID]: state.previousSetting },
-  });
-  log(
-    `The setting ${SETTING_ID} is back to ${
-      state.previousSetting === null ? 'its default' : state.previousSetting
-    }`
-  );
   if (!args['no-cleanup']) {
     await removeLeftovers();
     log('The rules, exception lists, indices and alerts of the runs are removed');
@@ -442,26 +479,24 @@ const verdicts = args.fresh ? new Map() : latestVerdicts();
 const skipVerdicts = args['rerun-differs'] ? ['MATCH'] : ['MATCH', 'DIFFERS'];
 const jobs = planned.filter((job) => !skipVerdicts.includes(verdicts.get(job.key)));
 log(
-  `Run of ${planned.length} runs (${cases.length} cases${
-    checkPrompts ? ', prompts only' : `, settings ${settings.join(' and ')}`
-  }), concurrency ${concurrency}, results in ${outFile}`
+  `Run of ${planned.length} cases${
+    checkPrompts ? ' (prompts only)' : ''
+  }, concurrency ${concurrency}, results in ${outFile}`
 );
 log(
-  `${planned.length - jobs.length} runs are already recorded and skipped, ${jobs.length} to do${
+  `${planned.length - jobs.length} cases are already recorded and skipped, ${jobs.length} to do${
     planned.length > jobs.length ? ' (resuming)' : ''
   }`
 );
 
 const stop = (signal) => {
   if (control.stopping) {
-    log(
-      `${signal} again: leaving now. ${stateFile} keeps the setting to restore (run with --restore)`
-    );
+    log(`${signal} again: leaving now. ${stateFile} keeps the cleanup to do (run with --restore)`);
     process.exit(130);
   }
   control.stopping = true;
   log(
-    `${signal}: no new run starts, the ${children.size} in flight are stopped and not recorded, then the stack is restored`
+    `${signal}: no new run starts, the ${children.size} in flight are stopped and not recorded, then what the runs created is removed`
   );
   for (const child of children) child.kill('SIGTERM');
 };
@@ -475,7 +510,7 @@ const runJob = async (job, slot) => {
   let attempts = 0;
   do {
     attempts++;
-    result = await runScript(job, job.setting, slot);
+    result = await runScript(job, slot);
   } while (
     verdictOf(result) !== 'MATCH' &&
     attempts <= retries &&
@@ -488,7 +523,6 @@ const runJob = async (job, slot) => {
     key: job.key,
     id: job.id,
     layer: job.layer,
-    setting: job.setting,
     verdict,
     attempts,
     checkPrompts,
@@ -500,7 +534,7 @@ const runJob = async (job, slot) => {
   appendFileSync(outFile, JSON.stringify(record) + '\n');
   finished++;
   log(
-    `[${finished}/${jobs.length}] ${verdict.padEnd(7)} ${job.setting} ${job.id}${
+    `[${finished}/${jobs.length}] ${verdict.padEnd(7)} ${job.id}${
       attempts > 1 ? ` (${attempts} attempts)` : ''
     }`
   );
@@ -514,32 +548,17 @@ try {
       throw new Error(`Another run (pid ${state.pid}) is using ${stateFile}`);
     if (state)
       log(
-        `An earlier run stopped before it restored the setting: it goes back to ${JSON.stringify(
-          state.previousSetting
-        )}`
+        'An earlier run stopped before it cleaned up: what it left is removed at the end of this run'
       );
-    const current = (await http(`${KBN}/internal/kibana/settings`)).body?.settings?.[SETTING_ID]
-      ?.userValue;
-    writeFileSync(
-      stateFile,
-      JSON.stringify({
-        pid: process.pid,
-        previousSetting: state ? state.previousSetting : current ?? null,
-        startedAt: new Date(),
-      })
-    );
+    writeFileSync(stateFile, JSON.stringify({ pid: process.pid, startedAt: new Date() }));
     ownsState = true;
   }
-  // All the runs of one setting go first, because the setting is global
-  for (const setting of checkPrompts ? ['on'] : settings) {
-    const batch = jobs.filter((j) => j.setting === setting);
-    let next = 0;
-    await Promise.all(
-      Array.from({ length: batch.length ? concurrency : 0 }, async (_, slot) => {
-        while (next < batch.length && !control.stopping) await runJob(batch[next++], slot);
-      })
-    );
-  }
+  let next = 0;
+  await Promise.all(
+    Array.from({ length: jobs.length ? concurrency : 0 }, async (_, slot) => {
+      while (next < jobs.length && !control.stopping) await runJob(jobs[next++], slot);
+    })
+  );
 } finally {
   if (ownsState) await restoreStack();
   const { lines, notMatched } = summarize();

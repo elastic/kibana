@@ -8,13 +8,17 @@
 import * as t from 'io-ts';
 import { NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 import { listOperator as operator } from '../list_operator';
+import { columnType } from '../column_type';
 
 export const entriesMatch = t.exact(
-  t.type({
-    field: NonEmptyString,
-    operator,
-    type: t.keyof({ match: null }),
-    value: NonEmptyString,
-  })
+  t.intersection([
+    t.type({
+      field: NonEmptyString,
+      operator,
+      type: t.keyof({ match: null }),
+      value: NonEmptyString,
+    }),
+    t.partial({ column_type: columnType }),
+  ])
 );
 export type EntryMatch = t.TypeOf<typeof entriesMatch>;

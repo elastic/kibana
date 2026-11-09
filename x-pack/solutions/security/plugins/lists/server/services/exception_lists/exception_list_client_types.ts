@@ -14,6 +14,7 @@ import type {
 } from '@kbn/core/server';
 import type { ExceptionListItemEntryArray } from '@kbn/securitysolution-exceptions-common/api';
 import type {
+  AppliesTo,
   CreateCommentsArray,
   Description,
   DescriptionOrUndefined,
@@ -79,6 +80,7 @@ export interface ConstructorOptions {
   enableServerExtensionPoints?: boolean;
   /** Should be provided when creating an instance from an HTTP request handler */
   request?: KibanaRequest;
+  /** Set to `true` to allow the items that apply to the ES|QL output columns (`applies_to: "esql_output_columns"`). Default is false. */
 }
 
 /**
@@ -254,6 +256,8 @@ export interface GetEndpointListItemOptions {
  * {@link ExceptionListClient.createExceptionListItem}
  */
 export interface CreateExceptionListItemOptions {
+  /** what the item applies to, `source_documents` when it is not set */
+  appliesTo?: AppliesTo;
   /** User comments for the exception list item */
   comments: CreateCommentsArray;
   /** an array with the exception list item entries */
@@ -325,6 +329,8 @@ export interface DuplicateExceptionListOptions {
 export interface UpdateExceptionListItemOptions {
   /** document version */
   _version: _VersionOrUndefined;
+  /** what the item applies to, `source_documents` when it is not set. It cannot be changed. */
+  appliesTo?: AppliesTo;
   /** user comments attached to item */
   comments: UpdateCommentsArray;
   /** item exception entries logic */

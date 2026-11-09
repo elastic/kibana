@@ -25,6 +25,7 @@ import { item_id } from '../../common/item_id';
 import { meta } from '../../common/meta';
 import { namespace_type } from '../../common/namespace_type';
 import type { ExpireTimeOrUndefined } from '../../common';
+import { appliesTo } from '../../common/applies_to';
 import { expireTimeOrUndefined } from '../../common';
 
 export const updateExceptionListItemSchema = t.intersection([
@@ -39,6 +40,7 @@ export const updateExceptionListItemSchema = t.intersection([
   t.exact(
     t.partial({
       _version, // defaults to undefined if not set during decode
+      applies_to: appliesTo, // an item without it applies to the source documents
       comments: DefaultUpdateCommentsArray, // defaults to empty array if not set during decode
       expire_time: expireTimeOrUndefined,
       id, // defaults to undefined if not set during decode

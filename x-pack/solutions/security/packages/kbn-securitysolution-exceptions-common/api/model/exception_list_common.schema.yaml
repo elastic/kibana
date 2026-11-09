@@ -176,6 +176,16 @@ components:
       type: string
       enum: [simple]
 
+    ExceptionListItemAppliesTo:
+      type: string
+      description: |
+        What the exception item applies to:
+        * `source_documents`: the documents of the source indices, before the query of the rule runs. This is how every exception works, and an item without `applies_to` has this value.
+        * `esql_output_columns`: the rows that the query of an ES|QL rule outputs, tested on the output columns of the query. Every entry of such an item needs a `column_type`. Only ES|QL rules apply these items, and no other rule type does.
+      enum:
+        - source_documents
+        - esql_output_columns
+
     ExceptionListItemName:
       type: string
       minLength: 1
@@ -1016,6 +1026,8 @@ components:
           $ref: '#/components/schemas/ExceptionListHumanId'
         type:
           $ref: '#/components/schemas/ExceptionListItemType'
+        applies_to:
+          $ref: '#/components/schemas/ExceptionListItemAppliesTo'
         name:
           $ref: '#/components/schemas/ExceptionListItemName'
         description:
@@ -1084,6 +1096,8 @@ components:
           type: boolean
         type:
           $ref: '#/components/schemas/ExceptionListItemType'
+        applies_to:
+          $ref: '#/components/schemas/ExceptionListItemAppliesTo'
         name:
           $ref: '#/components/schemas/ExceptionListItemName'
         description:

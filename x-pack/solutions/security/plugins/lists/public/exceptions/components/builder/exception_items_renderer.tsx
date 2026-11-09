@@ -11,6 +11,8 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from '@emotion/styled';
 import type { HttpStart } from '@kbn/core/public';
 import { addIdToItem } from '@kbn/securitysolution-utils';
+import { isEsqlOutputColumnsItem } from '@kbn/securitysolution-exceptions-common/esql_output_columns';
+import type { ExceptionAppliesTo } from '@kbn/securitysolution-exceptions-common/esql_output_columns';
 import type {
   ExceptionListItemSchema,
   ExceptionListType,
@@ -43,6 +45,7 @@ import deepEqual from 'fast-deep-equal';
 
 import { AndOrBadge } from '../and_or_badge';
 
+import { BuilderEsqlOutputColumnExceptionItem } from './esql_output_column_item_renderer';
 import { BuilderExceptionListItemComponent } from './exception_item_renderer';
 import { BuilderLogicButtons } from './logic_buttons';
 import { getTotalErrorExist } from './selectors';
@@ -84,6 +87,8 @@ export interface OnChangeProps {
 
 export interface ExceptionBuilderProps {
   allowLargeValueLists: boolean;
+  /** What the items of the builder apply to. The items that apply to the ES|QL output columns have typed fields and column types, and no nested entries. */
+  appliesTo?: ExceptionAppliesTo;
   autocompleteService: AutocompleteStart;
   exceptionListItems: ExceptionsBuilderExceptionItem[];
   httpService: HttpStart;
@@ -108,6 +113,7 @@ export interface ExceptionBuilderProps {
 
 export const ExceptionBuilderComponent = ({
   allowLargeValueLists,
+  appliesTo,
   autocompleteService,
   exceptionListItems,
   httpService,
@@ -149,6 +155,7 @@ export const ExceptionBuilderComponent = ({
   } = state;
 
   const errorExists = getTotalErrorExist(state);
+  const isEsqlOutputColumns = isEsqlOutputColumnsItem({ applies_to: appliesTo });
 
   const setErrorsExist = useCallback(
     (error: EntryFieldError): void => {
@@ -299,13 +306,22 @@ export const ExceptionBuilderComponent = ({
     // empty `entries` array. Thought about appending an entry item to one, but that
     // would then be arbitrary, decided to just create a new exception list item
     const newException = getNewExceptionItem({
+      appliesTo,
       listId,
       name: exceptionItemName ?? `${ruleName ?? 'Rule'} - Exception item`,
       namespaceType: listNamespaceType,
     });
 
     setUpdateExceptions([...exceptions, { ...newException }]);
-  }, [setUpdateExceptions, exceptions, listId, listNamespaceType, ruleName, exceptionItemName]);
+  }, [
+    setUpdateExceptions,
+    exceptions,
+    listId,
+    listNamespaceType,
+    ruleName,
+    exceptionItemName,
+    appliesTo,
+  ]);
 
   // The builder can have existing exception items, or new exception items that have yet
   // to be created (and thus lack an id), this was creating some React bugs with relying
@@ -454,29 +470,43 @@ export const ExceptionBuilderComponent = ({
                 </EuiFlexItem>
               ))}
             <EuiFlexItem grow={false}>
-              <BuilderExceptionListItemComponent
-                allowLargeValueLists={allowLargeValueLists}
-                andLogicIncluded={andLogicIncluded}
-                autocompleteService={autocompleteService}
-                exceptionItem={exceptionListItem}
-                exceptionItemIndex={index}
-                httpService={httpService}
-                indexPattern={indexPatterns}
-                isOnlyItem={exceptions.length === 1}
-                key={getExceptionListItemId(exceptionListItem, index)}
-                listType={listType}
-                onChangeExceptionItem={handleExceptionItemChange}
-                onDeleteExceptionItem={handleDeleteExceptionItem}
-                onlyShowListOperators={containsValueListEntry(exceptions)}
-                setErrorsExist={setErrorsExist}
-                setWarningsExist={setWarningsExist}
-                osTypes={osTypes}
-                isDisabled={isDisabled}
-                operatorsList={operatorsList}
-                allowCustomOptions={allowCustomFieldOptions}
-                getExtendedFields={getExtendedFields}
-                showValueListModal={showValueListModal}
-              />
+              {isEsqlOutputColumns ? (
+                <BuilderEsqlOutputColumnExceptionItem
+                  andLogicIncluded={andLogicIncluded}
+                  exceptionItem={exceptionListItem}
+                  exceptionItemIndex={index}
+                  isDisabled={isDisabled}
+                  isOnlyItem={exceptions.length === 1}
+                  key={getExceptionListItemId(exceptionListItem, index)}
+                  onChangeExceptionItem={handleExceptionItemChange}
+                  onDeleteExceptionItem={handleDeleteExceptionItem}
+                  setErrorsExist={setErrorsExist}
+                />
+              ) : (
+                <BuilderExceptionListItemComponent
+                  allowLargeValueLists={allowLargeValueLists}
+                  andLogicIncluded={andLogicIncluded}
+                  autocompleteService={autocompleteService}
+                  exceptionItem={exceptionListItem}
+                  exceptionItemIndex={index}
+                  httpService={httpService}
+                  indexPattern={indexPatterns}
+                  isOnlyItem={exceptions.length === 1}
+                  key={getExceptionListItemId(exceptionListItem, index)}
+                  listType={listType}
+                  onChangeExceptionItem={handleExceptionItemChange}
+                  onDeleteExceptionItem={handleDeleteExceptionItem}
+                  onlyShowListOperators={containsValueListEntry(exceptions)}
+                  setErrorsExist={setErrorsExist}
+                  setWarningsExist={setWarningsExist}
+                  osTypes={osTypes}
+                  isDisabled={isDisabled}
+                  operatorsList={operatorsList}
+                  allowCustomOptions={allowCustomFieldOptions}
+                  getExtendedFields={getExtendedFields}
+                  showValueListModal={showValueListModal}
+                />
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -496,7 +526,7 @@ export const ExceptionBuilderComponent = ({
               isAndDisabled={isAndDisabled ? isAndDisabled : disableAnd}
               isNestedDisabled={isNestedDisabled ? isNestedDisabled : disableNested}
               isNested={addNested}
-              showNestedButton
+              showNestedButton={!isEsqlOutputColumns}
               onOrClicked={handleAddNewExceptionItem}
               onAndClicked={handleAddClick}
               onNestedClicked={handleAddNestedClick}

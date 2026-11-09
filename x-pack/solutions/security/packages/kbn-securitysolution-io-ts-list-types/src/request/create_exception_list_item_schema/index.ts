@@ -26,6 +26,7 @@ import { meta } from '../../common/meta';
 import { namespace_type } from '../../common/namespace_type';
 import { nonEmptyEntriesArray } from '../../common/non_empty_entries_array';
 import type { ExpireTimeOrUndefined } from '../../common';
+import { appliesTo } from '../../common/applies_to';
 import { expireTimeOrUndefined } from '../../common';
 
 export const createExceptionListItemSchema = t.intersection([
@@ -40,6 +41,7 @@ export const createExceptionListItemSchema = t.intersection([
   ),
   t.exact(
     t.partial({
+      applies_to: appliesTo, // an item without it applies to the source documents
       comments: DefaultCreateCommentsArray, // defaults to empty array if not set during decode
       expire_time: expireTimeOrUndefined,
       item_id: DefaultUuid, // defaults to GUID (uuid v4) if not set during decode

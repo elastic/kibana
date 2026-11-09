@@ -8,6 +8,7 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
 import type { NonEmptyEntriesArray, OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionAppliesTo } from '@kbn/securitysolution-exceptions-common/esql_output_columns';
 import type { RuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 import {
@@ -34,6 +35,7 @@ export const previewRuleWithExceptionEntries = async ({
   endpointEntries,
   invocationCount,
   timeframeEnd,
+  appliesTo,
 }: {
   supertest: SuperTest.Agent;
   log: ToolingLog;
@@ -45,8 +47,10 @@ export const previewRuleWithExceptionEntries = async ({
   }>;
   invocationCount?: number;
   timeframeEnd?: Date;
+  /** What the items of the rule list apply to, when it is not the source documents. */
+  appliesTo?: ExceptionAppliesTo;
 }) => {
-  const maybeExceptionList = await createContainerWithEntries(supertest, log, entries);
+  const maybeExceptionList = await createContainerWithEntries(supertest, log, entries, appliesTo);
   const maybeEndpointList = await createContainerWithEndpointEntries(
     supertest,
     log,

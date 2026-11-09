@@ -9,12 +9,16 @@ import * as t from 'io-ts';
 
 import { NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 import { listOperator as operator } from '../list_operator';
+import { columnType } from '../column_type';
 
 export const entriesExists = t.exact(
-  t.type({
-    field: NonEmptyString,
-    operator,
-    type: t.keyof({ exists: null }),
-  })
+  t.intersection([
+    t.type({
+      field: NonEmptyString,
+      operator,
+      type: t.keyof({ exists: null }),
+    }),
+    t.partial({ column_type: columnType }),
+  ])
 );
 export type EntryExists = t.TypeOf<typeof entriesExists>;

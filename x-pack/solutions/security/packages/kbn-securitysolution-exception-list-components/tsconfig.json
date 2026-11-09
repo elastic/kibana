@@ -15,6 +15,7 @@
     "**/*.d.ts"
   ],
   "kbn_references": [
+    "@kbn/securitysolution-exceptions-common",
     "@kbn/securitysolution-io-ts-list-types",
     "@kbn/securitysolution-autocomplete",
     "@kbn/i18n",

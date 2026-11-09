@@ -3,125 +3,103 @@
 
 ## Summary
 
-An ES|QL rule applies exceptions today as a DSL filter attached to the `_query` request. The filter runs on the source documents before the rule's pipeline. That works for exceptions on source fields. It cannot work for an exception on a column the pipeline computes (a `STATS` output, an `EVAL` value, a renamed column), because the column does not exist when the filter runs.
+An ES|QL rule applies exceptions today as a DSL filter attached to the `_query` request. The filter runs on the source documents before the rule's pipeline. That works for exceptions on source fields. It cannot work for an exception on a column the pipeline computes (a `STATS` output, an `EVAL` value, a renamed column), because the column does not exist when the filter runs. 
 
-This proposal keeps the DSL filter for source fields and adds exceptions on computed output columns, which are compiled into one ES|QL `WHERE` stage appended at the end of the rule query, where those columns exist.
+This proposal keeps the DSL filter for exceptions on source fields and adds a new type of exceptions that are applied to the output columns of an ES|QL query.
 
-- Exceptions on source fields and on fields that exist nowhere (neither in the source indices nor in the output of the query) stay in the DSL filter and behave as they do today (see [Fields that exist nowhere](#fields-that-exist-nowhere)).
-- Exceptions on computed columns are appended as one `| WHERE ...` stage at the end of the query. The entry types `match`, `match_any`, `wildcard` and `exists` are supported there. Value lists (`list`) and `nested` entries are not.
-- An item that has a computed column and cannot be evaluated at the end of the query is not applied. It is recorded in the rule execution log and adds no warning to the rule, because an exception whose field or type cannot be matched does not warn today either (see [Items that are not applied](#items-that-are-not-applied)).
-- A value that the stage cannot write for the type of its column (`bogus` for an `ip`, `1e3` on a `long`) fails the rule before the query runs (see [Values that the stage cannot write](#values-that-the-stage-cannot-write)).
+In order to achieve this, each exception item states where it should be applied via the new property `applies_to`, which can either be `source_documents` or `esql_output_columns`.
 
-Inlining source-field exceptions right after `FROM` was evaluated and rejected as too big a risk for this delivery. The DSL filter and the same exception written in ES|QL do not behave the same for every field type and operator, and the differences either change the alerts of existing rules without any error or fail the rule (see [Why source-field exceptions stay in the DSL filter](#why-source-field-exceptions-stay-in-the-dsl-filter)).
+An exception item that does not have this new property is treated as `applies_to: source_documents`.
+
+Entries of items with `applies_to: esql_output_columns` additionally carry a `column_type` property which specifies the type of the `value` of the item. They also only support the operators `match`, `match_any`, `wildcard` and `exists`. 
+
+The ES|QL rule type executor sends a probe by executing the query as it does today but with a `| LIMIT 0` appended at the end in order to determine the output columns and their types. With this information, it compiles the exceptions that have `applies_to: esql_output_columns`, and that match the output of the probe, into a single `| WHERE` stage that is appended at the end of the query.
+
+Note: from this point onwards we won't be referring to the non supported operators: `nested` and `list` in this proposal. Support for `list` is planned once we migrate value lists to lookup indices.
 
 ## How exceptions apply to ES|QL rules today
 
-An exception tells a detection rule to ignore results that an analyst has reviewed and accepts. Exceptions are kept in **exception lists**: a rule has its own list, and a **shared exception list** can be attached to many rules. A list holds **exception items**, and an item holds one or more **entries**, each a condition made of a field, an operator and a value. The entries of an item are joined with AND, and the items of a list are joined with OR. An item applies only when all of its entries hold, and an alert is excluded when any item applies.
+Exceptions are kept in **exception lists**: a rule has its own list, and a **shared exception list** can be attached to many rules. A list holds **exception items**, and an item holds one or more **entries**, each a condition made of a field, an operator and a value. The entries of an item are joined with AND, and the items of a list are joined with OR. An item matches only when all of its entries match, and an alert is excluded when it matches any item.
 
 Operators are **inclusive** (`is`, `is one of`, `matches` with a wildcard pattern, and `exists`) or **exclusive** (`is not`, `is not one of`, `does not match` and `does not exist`). An exclusive operator holds for a document that lacks the field, because the field does not have the value. For example, `host.name is not dc-01` excludes the alerts of every host except `dc-01`, and of the documents without a `host.name`.
 
-Today an ES|QL rule applies all of its exceptions in one place, a DSL filter that is sent together with the query. The rule type wrapper (`create_security_rule_type_wrapper.ts`) calls `buildExceptionFilter`, which turns the items of the lists of the rule into one DSL `exceptionFilter`, and passes it to the ES|QL rule executor. `buildEsqlSearchRequest` puts it in the `filter` field of the `_query` request, where each exception item becomes a `must_not` clause. Elasticsearch applies the filter to the source documents of the indices, and the ES|QL pipeline only sees the documents that survive it. Three consequences matter here:
+Today an ES|QL rule applies all of its exceptions in one place, a DSL filter (where each exception item becomes a `must_not` clause) that is sent together with the query. The rule type wrapper (`create_security_rule_type_wrapper.ts`) calls `buildExceptionFilter`, which turns the items of the lists of the rule into one DSL `exceptionFilter`, and passes it to the ES|QL rule executor. `buildEsqlSearchRequest` puts it in the `filter` field of the `_query` request. Elasticsearch applies the filter to the source documents of the indices, and the ES|QL pipeline only sees the documents that survive it. Three consequences matter here:
 
 1. Exceptions are always added to the filter, even when the field they reference is not present in the source indices.
-2. Exceptions with operators like `is not` exclude every document that lacks the field, because a document without the field is part of the complement of the match.
+2. Exceptions with exclusive operators like `is not` exclude every document that lacks the field, because a document without the field is part of the complement of the match.
 3. The results of an aggregating rule are computed from the surviving documents. An exception on a source field therefore changes the aggregates (event-level exclusion). This behavior remains unchanged in this proposal.
 
 ## Solution Design
 
-This solution is behind the advanced setting `securitySolution:enableEsqlRuleComputedFieldExceptions`, which is off by default. With the setting off, a rule runs as it does today. With it on, a rule that has exceptions runs the stages below each time it executes, and the stages after the first check are new.
+Each exception item says what it applies to, and that decides where the item goes. The property `applies_to` has two values:
 
-An item is placed whole, in one place: in the DSL filter, at the end of the query, or nowhere when it cannot be applied. Stage 4 gives the rules, and [Items that are not applied](#items-that-are-not-applied) and [Error handling](#error-handling) describe what happens to an item that is not applied.
+- `source_documents`, which is also what an item without the property means. The item is part of the DSL filter and behaves as it does today.
+- `esql_output_columns`. The item tests the columns that the rule query outputs, and it is written at the end of the query. Each entry of such an item declares the `column_type` of its column (`keyword`, `ip`, `long`, ...). These items only apply to ES|QL rules, and ignored otherwise.
+
+The lists API checks the type, the operator and the value of each entry when an item is written (see [Types supported at the end of the query](#types-supported-at-the-end-of-the-query)). These checks live in the exceptions package (`@kbn/securitysolution-exceptions-common`), which the browser and the server share.
+
+An item cannot change what it applies to after it is created.
+
+### ES|QL rule execution
 
 **The whole flow**
 
 ```mermaid
 flowchart TD
-    start(["Rule execution starts"]) --> enabled{"Does the rule have exceptions,<br/>and is the advanced setting enabled?"}
-    enabled -- "No" --> today["Build the DSL filter from all the exception items<br/>(today's behavior)"]
-    enabled -- "Yes" --> expired["1. Drop the expired items"]
-    expired --> inspect["2 and 3. Inspect the fields of the items<br/>and the output columns of the query<br/>(see the inspection diagram)"]
-
-    inspect -- "No index has documents in the time range,<br/>or every field is a source field" --> allDsl["Keep every item in the DSL filter"]
-    inspect -- "The output columns are known" --> place["4. Place each item, one at a time<br/>(see the placement diagram)"]
-    inspect -. "a request fails" .-> failInspect(["Rule fails: the fields of the exceptions<br/>could not be inspected"])
-    place -. "a value does not fit the type of its column" .-> failValue(["Rule fails before the query runs"])
-
-    subgraph build ["Build"]
-        compile["5. Write the end-of-query items as one WHERE stage at the end of the query<br/>(at most 200 comparisons,<br/>in a query of at most 1,000,000 characters)"] --> log["6. Write one JSON message to the rule execution log:<br/>final query, applied items, items not applied with a reason"]
-        log --> rebuild["7. Rebuild the DSL filter from the DSL items only"]
-    end
-
-    place -- "The DSL items, the end-of-query items<br/>and the items not applied" --> compile
+    start(["Rule execution starts"]) --> split["The rule type wrapper splits the exception items<br/>by what they apply to"]
+    split -- "Items on source documents" --> dsl["Build the DSL filter from these items<br/>(today's behavior)"]
+    split -- "Items on output columns<br/>(ES|QL rules only)" --> expired["1. Drop the expired items"]
+    expired --> any{"Is any item left?"}
+    any -- "No" --> run
+    any -- "Yes" --> probe["2. Run the rule query followed by LIMIT 0<br/>to get the output columns"]
+    probe -. "the request fails" .-> failProbe(["Rule fails: the output columns<br/>could not be read"])
+    probe --> check["3. Check each item against the output columns<br/>(see the diagram below)"]
+    check -. "a value cannot be written,<br/>or a declared type is not the type of the column" .-> failItem(["Rule fails before the query runs"])
+    check --> compile["4. Write the items that apply as one WHERE stage<br/>at the end of the query<br/>(at most 200 comparisons,<br/>in a query of at most 1,000,000 characters)"]
     compile -. "a limit is reached" .-> failLimit(["Rule fails: the message names the limit<br/>that the exception items reached"])
-
-    today --> run["8. Run the query: the rebuilt DSL filter in the request,<br/>the WHERE stage at the end of the query,<br/>then the page size (LIMIT) that the executor adds"]
-    allDsl --> run
-    rebuild --> run
+    compile --> log["5. Write one JSON message to the rule execution log:<br/>final query, applied items, items not applied with a reason"]
+    dsl --> run["6. Run the query: the DSL filter in the request,<br/>the WHERE stage at the end of the query,<br/>then the page size (LIMIT) that the executor adds"]
+    log --> run
     run --> alerts(["Alerts"])
 ```
 
-**Inspection (stages 2 and 3)**
+**Check of each item (stage 3)**
 
 ```mermaid
 flowchart TD
-    start(["The exception items that did not expire"]) --> fieldcaps["2. Ask _field_caps for the type of the fields of the items<br/>and of their parent paths (a.b.c also asks for a and a.b),<br/>to recognize the keys below a flattened field,<br/>in the indices that the real request reads"]
-    fieldcaps --> found{"Does any index have documents<br/>in the time range?"}
-    found -- "No" --> allDsl(["Keep every item in the DSL filter"])
-    found -- "Yes" --> needs{"Does at least one exception item have an entry for a field<br/>that is not a source field?"}
-    needs -- "No" --> allDsl
-    needs -- "Yes" --> probe["3. Run the rule query followed by LIMIT 0 to get the output columns,<br/>with the filter of the real request<br/>(it includes the exception filter of all the items)"]
-    probe --> columns(["The output columns are known:<br/>place each item"])
-    fieldcaps -. "request fails" .-> failInspect(["Rule fails: the fields of the exceptions<br/>could not be inspected"])
-    probe -. "request fails" .-> failInspect
-```
-
-**Placement of each item (stage 4)**
-
-```mermaid
-flowchart TD
-    start(["An exception item, with the types of the source fields<br/>and the output columns of the query"]) --> sourceField{"Is every field of this item a source field<br/>or in neither the source nor the output?"}
-    sourceField -- "Yes" --> dslItems["Add the item to the DSL items"]
-    sourceField -- "No" --> columns{"Is every field of the item<br/>a column of the output?"}
-    columns -- "Yes" --> compileItem{"Can the item be compiled<br/>for the types of the columns?"}
-    compileItem -- "Yes" --> endItems["Add the item to the end-of-query items"]
-    columns -- "No" --> cannot["Mark the item as not applicable"]
-    compileItem -- "No" --> cannot
-    cannot --> invalid{"Is the reason a value that does not fit<br/>the type of a column?"}
-    invalid -- "Yes" --> failValue(["Rule fails before the query runs"])
-    invalid -- "No" --> skipped["Add the item to the items not applied,<br/>with the reason"]
-    dslItems --> placed
-    endItems --> placed
-    skipped --> placed
-    placed(["Collect the DSL items, the end-of-query items<br/>and the items not applied"])
+    start(["An item on output columns,<br/>and the output columns of the query"]) --> missing{"Is there an entry with an inclusive operator<br/>on a column that the query does not output?"}
+    missing -- "Yes" --> never["The item can never match.<br/>Do not apply it and record field_not_found"]
+    missing -- "No" --> leave["Leave out the entries with an exclusive operator<br/>on columns that the query does not output"]
+    leave --> empty{"Is any entry left?"}
+    empty -- "No" --> excludeAll["The item matches every row:<br/>exclude every row (WHERE false)<br/>and warn the rule"]
+    empty -- "Yes" --> value{"Does each entry declare a type,<br/>and can each value be written for it?"}
+    value -- "No" --> failValue(["Rule fails before the query runs:<br/>a value cannot be written"])
+    value -- "Yes" --> type{"Is the type that each entry declares<br/>the type that the query outputs for its column?"}
+    type -- "No" --> failType(["Rule fails before the query runs:<br/>the declared type is not the output type"])
+    type -- "Yes" --> endItems["Add the item to the items<br/>for the end of the query"]
 ```
 
 ### Stages
 
-The stages below run only when the advanced setting is enabled and the rule has exceptions. Otherwise the DSL filter is built from all the exception items, as today.
+**1. Drop the expired items.** We remove every item on output columns whose `expire_time` is before the start of the run, which is the time that the DSL filter uses for the items on source documents, whatever the end of the time range of the rule is. When no item is left, the rule has nothing to apply at the end of the query and stages 2 to 5 do not run.
 
-**1. Drop the expired items.** We remove every item whose `expire_time` is before the start of the run, which is the time that the DSL filter uses today, whatever the end of the time range of the rule is.
+**2. Run the rule query with `| LIMIT 0` to get the output columns.** We send the query of the rule with `| LIMIT 0` at the end to the `_query` API, with the filter of the real request: the time range, the rule filters, the data tiers and namespaces, the DSL filter built from the items on source documents, and the excluded documents. The response has no rows and lists the names and the ES|QL types of the output columns. When the request fails, the rule fails. This is the only extra request that a run makes, and a rule without items on output columns makes none.
 
-**2. Ask `_field_caps` for the source fields.** We call `_field_caps` on the source indices of the rule for the fields of the exception items and for the parent paths of dotted names (`a.b.c` also asks for `a` and `a.b`). The request carries the time range, the data tiers and the namespaces of the real request as an `index_filter`, without the exception filter and the excluded documents, to read the same indices as the rule query. A field that is mapped only in an index outside that filter is not a source field of the rule. When no index has documents in that time range, we do not apply the exceptions at the end of the query and the rule runs as it does today. An ungrouped aggregation still returns a row for an empty range, and an exception on a column of that row is not applied in that run.
+**3. Check each item.** An item is applied whole or not at all, because its entries are joined with AND: an item excludes an alert only when all of its entries match. We check the entries of an item in this order:
 
-A field is a source field when `_field_caps` lists it with a type that holds values, or when it sits under a `flattened` field that it lists. An `object` that it lists for the parent path of a dotted name (`host` for `host.name`) is not a source field: it holds no value, and an exception on that name can only refer to a column that the query creates with the same name (`BY host = host.name`). A `nested` path is listed only when a field below it is requested too, which is why we also ask for the paths below a nested entry (`nested_user.name`). A `nested` path counts as a source field, because the DSL filter searches it with a `nested` query, and a nested item stays in the DSL filter even when the query creates a column with the name of its path.
+1. **An entry with an inclusive operator on a column that the query does not output.** The column has no values, or has the ES|QL type `null` (`EVAL x = NULL`). An entry with an inclusive operator on it (`is`, `is one of`, `matches`, `exists`) can never match. Therefore an item with such entry would exclude nothing, so we drop it and record the reason (see [Items that are not applied](#items-that-are-not-applied)).
 
-When every field of every exception item is a source field, we keep all the items in the DSL filter and go to stage 8. Otherwise we continue with stage 3. If this request fails, the rule fails.
+2. **An entry with an exclusive operator on a column that the query does not output.** An entry with an exclusive operator on it (`is not`, `is not one of`, `does not match`, `does not exist`) is true for every row, as it is in the DSL filter. We exclude these entries. If no entry is left after this, then the item is true for every row and excludes every row of the rule. In this case the rule execution stops here, returns no alerts and succeeds with a warning that says so (see [Fields that exist nowhere](#fields-that-exist-nowhere)).
 
-**3. Run the rule query with `| LIMIT 0` to get the output columns.** We send the query of the rule with `| LIMIT 0` at the end to the `_query` API, with the filter of the real request: the time range, the rule filters, the data tiers and namespaces, the exception filter built from all the items, and the excluded documents. The response has no rows and lists the names and the ES|QL types of the output columns. When the request fails, the rule fails.
+3. **A value that cannot be written** for the declared type, or an entry with no declared type, fails the rule (see [Values that the stage cannot write](#values-that-the-stage-cannot-write)). We check the entries that are left after the previous step. The API rejects both when the item is written. This only happens for an item that was stored without those checks.
 
-**4. Place each item.** An item is placed whole, in one place, because its entries are joined with AND: an item excludes an alert only when all of its entries match. For each item, the first of these cases that applies decides what we do:
+4. **A column of another type than the entry declares.** The rule fails before the query runs, with a message that names the item, the column and both types (see [Error handling](#error-handling)). The declared type has to be the output type exactly.
 
-1. **Every field of the item is a source field or exists nowhere** (it is neither a source field nor a column of the output). We put the item in the DSL filter, as today. This holds even when the query outputs a column with the same name: a field that the query redefines (`EVAL host.name = TO_UPPER(host.name)`) is still a source field, and the exception compares the source value. A field that exists nowhere is left to the DSL, and Elasticsearch decides what the item matches (see [Fields that exist nowhere](#fields-that-exist-nowhere)).
-2. **The item has a computed column, every field of it is a column that the query returns, and the item is supported at the end of the query**. We put the item at the end of the query. An entry with a negative operator on a field that exists nowhere does not need a column. Because it is true for every row, as it is in the DSL filter, we leave it out of the stage.
-3. **Otherwise,** the item has a computed column and an entry that the end of the query cannot use: an entry that is not negative on a field that exists nowhere (it never matches), or an entry on a source field that the query does not output. We do not apply the item and we record the reason (see [Items that are not applied](#items-that-are-not-applied)). When the reason is a value that the stage cannot write, the rule fails before the query runs (see [Error handling](#error-handling)).
+**4. Write the items as one `WHERE` stage.** We compile each item to an expression, with each entry written for the type that it declares, and join the expressions with `AND` in one `| WHERE` stage at the end of the query (see [How the items become a WHERE stage](#how-the-items-become-a-where-stage)). If the resulting comparison count in the `| WHERE` stage goes above 200, or the final query is longer than 1,000,000 characters, the rule fails and the message names the limit and the items to reduce (see [Limits](#limits)).
 
-**5. Write the end-of-query items as one `WHERE` stage.** We compile each item to an expression and join the expressions with `AND` in one `| WHERE` stage at the end of the query (see [How the items become a WHERE stage](#how-the-items-become-a-where-stage)). When the stage needs more than 200 comparisons, or the final query would be longer than 1,000,000 characters, the rule fails and the message names the limit and the items to reduce (see [Limits](#limits)).
+**5. Write the log message.** We write one JSON message to the rule execution log with the final query, the items applied at the end of the query and the items not applied with their reasons (see [Items that are not applied](#items-that-are-not-applied)).
 
-**6. Write the log message.** We write one JSON message to the rule execution log with the final query, the items applied at the end of the query and the items not applied with their reasons (see [Items that are not applied](#items-that-are-not-applied)).
-
-**7. Rebuild the DSL filter.** We build it again from the DSL items only. The items at the end of the query and the items not applied no longer appear in it.
-
-**8. Run the query.** The request carries the rebuilt DSL filter. The query has the `WHERE` stage at the end, followed by the page size (`LIMIT`) that the executor adds.
+**6. Run the query.** The request carries the DSL filter, which has the items on source documents only. The query has the `WHERE` stage at the end, followed by the page size (`LIMIT`) that the executor adds.
 
 ### Worked examples
 
@@ -134,9 +112,9 @@ FROM logs-*
 | RENAME host.name AS target_host
 ```
 
-**An exception that goes in the DSL filter: `user.name is vuln-scanner-svc`.** `user.name` is a field in the source indices. The item goes in the DSL filter and the query does not change. Because the scanner events are excluded before `COUNT_DISTINCT`, they do not inflate any distinct-user count.
+**An exception on source documents: `user.name is vuln-scanner-svc`.** The item applies to source documents. It goes in the DSL filter and the query does not change. Because the scanner events are excluded before `COUNT_DISTINCT`, they do not inflate any distinct-user count.
 
-**An exception that goes at the end of the query: `target_host is dc-01`.** `target_host` is not in the source indices, and it is a `keyword` column of the query output. The item is therefore supported at the end of the query, and the query becomes:
+**An exception on an output column: `target_host is dc-01`.** The item applies to the output columns and declares `target_host` as a `keyword`. The query outputs `target_host` as a `keyword`, and the query becomes:
 
 ```esql
 FROM logs-*
@@ -148,7 +126,11 @@ FROM logs-*
 
 Only the alert row of `dc-01` is excluded.
 
-**An exception on a field that exists nowhere: `winlog.event_id is 4624`.** `winlog.event_id` is neither in the source indices nor a column of the query output, as happens with a list shared by rules over other indices. The item stays in the DSL filter and the query does not change. Elasticsearch decides what it matches, as it does today, and nothing is logged. When the item also has a computed column, the entries on that field are read as [Fields that exist nowhere](#fields-that-exist-nowhere) describes.
+**A name that the query redefines: `host.name is dc-01`.** With `EVAL host.name = TO_UPPER(host.name)` in the query, the name exists in the source documents and in the output, and the item says which one it means. An item on source documents compares the source value before the pipeline (`dc-01`). An item on output columns compares the column after the pipeline (`DC-01`).
+
+**An exception on a field that exists nowhere: `winlog.event_id is 4624`.** `winlog.event_id` is neither in the source indices nor a column of the query output, as happens with a list shared by rules over other indices. As an item on source documents, it stays in the DSL filter and the query does not change. Elasticsearch decides what it matches, as it does today, and nothing is logged. As an item on output columns, the entry is on a column that the query does not output, and [Fields that exist nowhere](#fields-that-exist-nowhere) describes how it is read.
+
+**A column of another type: `user_count is 50` declared as `keyword`.** The query outputs `user_count` as a `long`. The rule fails before the query runs and the message names the item, the column and both types. The type of the entry has to be `long`.
 
 ### What each position means
 
@@ -156,24 +138,25 @@ Since the DSL filter excludes source events before the pipeline, it changes the 
 
 ### Fields that exist nowhere
 
-A shared exception list may hold items for fields that some indices do not have. For a field that exists nowhere, the DSL filter gives these results, which are not changed:
+An exception list may hold items for fields that some indices do not have (e.g shared exception lists). For a field that exists nowhere, the DSL filter gives these results, which are not changed:
 
-- A positive operator (`is`, `is one of`, `matches`, `exists`) matches no document and the item excludes nothing.
-- A negative operator (`is not`, `is not one of`, `does not match`, `does not exist`) matches every document, because no document has the value. An item such as `process.name is not ping AND host.name is web-1` on an index without `process.name` excludes every `web-1` event. This is how exceptions behave today.
+- An inclusive operator (`is`, `is one of`, `matches`, `exists`) matches no document and the item excludes nothing.
+- An exclusive operator (`is not`, `is not one of`, `does not match`, `does not exist`) matches every document, because no document has the value. An item such as `process.name is not ping AND host.name is web-1` on an index without `process.name` excludes every `web-1` event. This is how exceptions behave today.
 
-The Elastic Security documentation does not describe this case. It only warns that an exception on an unmapped field can "prevent it from working as expected". We keep the behavior that users already have: the item stays in the DSL filter, and the setting does not change which alerts such a rule creates.
+The Elastic Security documentation does not describe this case. It only warns that an exception on an unmapped field can "prevent it from working as expected". We keep the behavior that users already have: an item on source documents stays in the DSL filter, and the end of the query does not change which alerts such a rule creates.
 
-An item that also has a computed column cannot stay in the DSL filter, because the DSL filter cannot evaluate the computed column. For that item we read the field that exists nowhere as the DSL filter reads it:
+Exceptions on computed columns read a column that the query does not output the same way:
 
-| Entry on a field that exists nowhere | Meaning | At the end of the query |
+| Entry on a column that the query does not output | Meaning | Result |
 |---|---|---|
-| `is not`, `is not one of`, `does not exist`, `does not match` | True for every row | Left out of the stage. The other entries decide. |
-| `is`, `is one of`, `exists`, `matches` | Never matches, so the item excludes nothing | The item is not applied. It is recorded in the rule execution log with the code `field_not_found`. |
-| A `nested` entry | The DSL filter fails the query for a nested path that is not mapped (`[nested] failed to find nested object under path`), with either operator. Without a computed column the item stays in the DSL filter and the rule fails, as it does today | The item is not applied, with the same code, and the rule runs. |
+| Exclusive operator | True for every row | The entry is left out of the stage. The other entries decide. |
+| Inclusive operator | Never matches | The item is not applied. The code `field_not_found` is recorded in the rule execution log. |
+
+When every entry of an item has an exclusive operator, nothing is left to test. The item excludes every row of the rule (`| WHERE false`), as it does in the DSL filter today. The difference is a warning: the rule shows the status "partial failure", with a message that names the items and says that the rule creates no alerts because of them. The warning repeats on every run, for every rule that uses the list.
 
 ### The stage goes after any LIMIT
 
-The `| WHERE` stage with the exceptions on computed columns always goes at the very end of the rule query, after any `LIMIT` that the rule author wrote. We do not insert it before the last `LIMIT`, because a `LIMIT` can appear anywhere in a query and more than once, so that placement would need rules of its own. The consequence is that an exception at the end of the query removes rows from the rows that the query already returned, and no further rows take their place.
+The `| WHERE` stage with the exceptions on computed columns always goes at the very end of the rule query, after any `LIMIT` that the rule author wrote. We do not insert it before the last `LIMIT`, because a `LIMIT` can appear anywhere in a query and more than once. That placement would need rules of its own. The consequence is that an exception at the end of the query removes rows from the rows that the query already returned, and no further rows take their place.
 
 ### How the items become a WHERE stage
 
@@ -188,7 +171,7 @@ An item excludes a row only when all of its entries match. An item compiles to a
 | `risk is not low` | `\| WHERE MV_CONTAINS(risk, "low")` |
 | `risk is not low` AND `count exists` | `\| WHERE NOT ((NOT (MV_CONTAINS(risk, "low"))) AND (count IS NOT NULL))` |
 
-The comparisons use functions that return a real boolean for null and multi-valued inputs (`MV_CONTAINS`, `IS NULL`, `IS NOT NULL`), and the two that can be null (`MV_LIKE` and `MV_IN_RANGE`) are wrapped in `COALESCE(..., false)`. This reproduces the any-element matching of the DSL filter: a null column keeps the row for a positive operator and excludes it for a negative one.
+The comparisons use functions that return a real boolean for null and multi-valued inputs (`MV_CONTAINS`, `IS NULL`, `IS NOT NULL`), and the two that can be null (`MV_LIKE` and `MV_IN_RANGE`) are wrapped in `COALESCE(..., false)`. This reproduces the any-element matching of the DSL filter: a null column keeps the row for an inclusive operator and excludes it for an exclusive one.
 
 The stage joins the expressions of all the items with `AND`, because `NOT A AND NOT B` excludes what `A OR B` would. Take these three exception items, on the `keyword` columns `c_tier`, `c_keyword` and `c_opt` and the `ip` column `c_ip`:
 
@@ -213,9 +196,20 @@ The stage that we append is the following (the compiler writes it on one line, a
 
 The stage has 5 comparisons: one for `a`, one for each entry of `b`, and one for each CIDR value of `c`. The stage is limited to 200 comparisons and 1,000,000 characters, and the `WHERE` expressions of the rule query count against the clause limit of Elasticsearch together with ours (see [Limits](#limits)).
 
+## User interface
+
+The exception flyouts (add and edit) let the user choose what an item applies to, and they check the values before the user saves.
+
+- **Choosing what the item applies to.** The Conditions section has an "Applies to" control with the choices "Source fields" and "Computed columns". The control is offered when the user adds an exception from any place except an Endpoint exception: a single rule of any type, a bulk action on several rules, and a shared list. An item that applies to computed columns has only entries of that kind. The choice belongs to the item and not to the entry. When the user edits an existing item, the flyout shows the choice and does not let the user change it, because the API does not accept that either.
+- **Warnings next to the control.** An item on computed columns shows a callout, "This exception only applies to ES|QL rules", with the sentence that it excludes the rows that the query returns by the columns that the query computes. When the rules that the item is added to are all of other types, the callout says "This exception has no effect on the selected rules" and that it takes effect on the ES|QL rules that use the list that holds it. A shared list has no rule yet, and it shows the first callout.
+- **The entries.** An entry has a typed field (there is no list of fields to suggest, because the columns belong to a query that the form does not run), an operator, a column type and a value. The column types that the form offers are the ones that the chosen operator supports, and changing the operator clears a column type that the new operator does not support. An "is one of" entry takes several values, and "exists" takes none. The form has no nested conditions for these items, because the API does not accept them. It still offers AND and OR.
+- **Checking the values.** The form runs the same checks as the API, which live in the exceptions package that the browser and the server share. A value that does not fit the column type is shown under the Value field while the user types, with the value in the message, and the save button stays disabled until the user fixes it. An entry that is not complete yet, without a field or a column type, shows no error and is not saved. The API still checks the item as the second line of defense.
+- **What the flyout hides for these items.** The options to close alerts do not appear, because an alert cannot be found in the alerts index by the entries of such an item. The section to add the item to other rules or to shared lists stays.
+- **In the list of exceptions.** The card of an item that applies to computed columns has a "Computed columns" badge, with a tooltip that says that the item excludes rows by the columns that an ES|QL rule query computes and only applies to ES|QL rules.
+
 ## Types supported at the end of the query
 
-The entry types `match`, `match_any`, `wildcard` and `exists` are supported at the end of the query. An exception can be tested on 11 ES|QL column types: `keyword`, `text`, `integer`, `long`, `unsigned_long`, `double`, `boolean`, `ip`, `version`, `date` and `date_nanos`. A `text` column is compared as a `keyword` column is, on the whole value and respecting case (see [Text columns](#text-columns)). A `double` column supports only `exists` (see [Types not supported](#types-not-supported-at-the-end-of-the-query)). The type is the ES|QL type of the output column, not the mapping of a source field.
+The entry types `match`, `match_any`, `wildcard` and `exists` are supported at the end of the query. An exception can be tested on 11 ES|QL column types: `keyword`, `text`, `integer`, `long`, `unsigned_long`, `double`, `boolean`, `ip`, `version`, `date` and `date_nanos`. A `text` column is compared as a `keyword` column is, on the whole value and respecting case (see [Text columns](#text-columns)). A `double` column supports only `exists` (see [Types not supported](#types-not-supported-at-the-end-of-the-query)). Each entry declares its type in `column_type`, which has to be the ES|QL type of the output column, not the mapping of a source field. The lists API rejects an entry whose operator the type does not support, such as `is` on a `double`, when the item is written.
 
 `col` stands for the column name, backquoted per dotted segment when the segment is not a plain identifier (`` `host-name` ``) or is a word that ES|QL does not accept as a column name (for example `first`, `in` or `where`). When a segment is empty, the whole name is one quoted identifier (`` `a..b` ``). The table shows what the implementation generates for one item each. With several items the clauses are joined with `AND` in the same stage, as in [How the items become a WHERE stage](#how-the-items-become-a-where-stage).
 
@@ -233,7 +227,7 @@ The entry types `match`, `match_any`, `wildcard` and `exists` are supported at t
 | `date` (day value) | `\| WHERE NOT (COALESCE(MV_IN_RANGE(col, "2026-09-30T00:00:00.000Z"::date, "2026-09-30T23:59:59.999Z"::date), false))` | `\| WHERE NOT (COALESCE(MV_IN_RANGE(col, "2026-09-30T00:00:00.000Z"::date, "2026-09-30T23:59:59.999Z"::date), false) OR COALESCE(MV_IN_RANGE(col, "2026-08-01T00:00:00.000Z"::date, "2026-08-01T23:59:59.999Z"::date), false))` | not supported | `\| WHERE NOT (col IS NOT NULL)` |
 | `date_nanos` (day value) | `\| WHERE NOT (COALESCE(MV_IN_RANGE(col, "2026-09-30T00:00:00.000Z"::date_nanos, "2026-09-30T23:59:59.999999999Z"::date_nanos), false))` | the same range, one per value, joined with `OR` | not supported | `\| WHERE NOT (col IS NOT NULL)` |
 
-### Negative operators
+### Exclusive operators
 
 Every supported type uses the same pattern. Shown for `keyword`:
 
@@ -244,7 +238,7 @@ Every supported type uses the same pattern. Shown for `keyword`:
 | does not match | `\| WHERE COALESCE(MV_LIKE(col, "good*"), false)` |
 | does not exist | `\| WHERE col IS NOT NULL` |
 
-The exceptions documentation does not describe what a negative operator does with a row that has no value. In the DSL filter, "is not low" is true for a document without the field. The exception matches it and its alert is excluded. The stage gives the same result: it keeps only the rows where `MV_CONTAINS(col, "low")` is true, and that is false for a null column, therefore the row is removed.
+The exceptions documentation does not describe what an exclusive operator does with a row that has no value. In the DSL filter, "is not low" is true for a document without the field. The exception matches it and its alert is excluded. The stage gives the same result: it keeps only the rows where `MV_CONTAINS(col, "low")` is true, and that is false for a null column, therefore the row is removed.
 
 ### Value rules
 
@@ -254,12 +248,12 @@ A value that cannot be cast to the type of the column is not included in the ES|
 |---|---|---|
 | `keyword`, `text` | Any string. Quotes, backslashes, `\n`, `\r` and `\t` are escaped in the literal. A `text` column is compared on the whole value and respecting case, as a `keyword` column is. | Never for `is` and `is one of` |
 | `integer`, `long`, `unsigned_long` | Integers within the range of the type. `42` is written `42::long`. | Not a plain integer that the type can hold: `many`, `0x10`, `42.5`, `1e3`, an empty value, `2147483648` on `integer`, `-1` on `unsigned_long` |
-| `double` | Only `exists` is supported. `is` and `is one of` are not applied, whatever the value (see [Types not supported at the end of the query](#types-not-supported-at-the-end-of-the-query)). | Never |
+| `double` | Only `exists` is supported. The lists API rejects `is` and `is one of`, whatever the value (see [Types not supported at the end of the query](#types-not-supported-at-the-end-of-the-query)). | Never |
 | `boolean` | `true` or `false`, in lowercase, as the DSL filter accepts. | `TRUE`, `1`, `yes`, an empty value |
 | `ip` | An address (IPv4 or IPv6), or a range in CIDR notation (`10.0.0.0/24`, `2001:db8::/32`). A CIDR value is written as `COALESCE(MV_IN_RANGE(col, first, last), false)`, which matches on any value of a multi-valued column, as the DSL does (`CIDR_MATCH` returns `null` on those). The address bits after the prefix are ignored, as in Elasticsearch. | Not an address and not a CIDR with a valid prefix: `bogus`, `10.0.0.256`, `10.0.0`, `010.0.0.1`, `10.0.0.0/33`, an empty value. Also a CIDR that the compiler does not write: `::/0`, IPv4-mapped IPv6 prefixes and an address with a zone (`fe80::1%eth0/64`) |
 | `version` | A semantic version, for example `1.2.3` or `1.2.3-beta`, with at most 9 digits in each number. A number above 2147483647 fails the whole query in ES\|QL instead of casting to `null`, and the compiler stops at 9 digits. | A string that is not a semantic version, or a number of more than 9 digits |
 | `date`, `date_nanos` | See [Date values](#date-values). | A format that the compiler does not write (see [Date values](#date-values)) |
-| `matches` (any type) | Only `keyword` and `text` columns. The pattern keeps `*` and `?` as wildcards, keeps `\*`, `\?` and `\\` as literals, and drops other backslashes. | A pattern that ends with a lone backslash |
+| `matches` (any type) | Only `keyword` and `text` columns. The pattern keeps `*` and `?` as wildcards, keeps `\*`, `\?` and `\\` as literals, and drops other backslashes. | A pattern that ends with a lone backslash, or a pattern longer than 1,000 characters (Elasticsearch compiles a pattern into an automaton, and a very long one costs memory and time on every run) |
 
 An `is one of` list must have at least one value. Its values are written as one call, `MV_INTERSECTS(col, [...])`, which is true when any element of the column is in the list, is false for a null column, and counts as one comparison whatever its length. The types that need a conversion convert the whole list (`TO_INTEGER`, `TO_LONG`, `TO_UNSIGNED_LONG`, `TO_IP` and `TO_VERSION`), for example `MV_INTERSECTS(col, TO_IP([...]))`. The values that are compared in another way stay one comparison each, joined with `OR`: the ranges of CIDR values and of rounded date values. A list that mixes addresses and CIDR values on an `ip` column is `MV_INTERSECTS(col, TO_IP([...])) OR COALESCE(MV_IN_RANGE(...), false)`. Every value is validated before the list is written, because a value that fails a conversion is dropped from the list silently.
 
@@ -295,34 +289,34 @@ The DSL behavior is not changed by this proposal. A shared exception can therefo
 
 ### Types not supported at the end of the query
 
-A type is supported only when ES|QL has a predicate that keeps the same rows as the DSL filter for every operator, including null and multi-valued columns and the negative forms. For the other types the comparison is impossible (the column is `unsupported` or accepts no comparison) or it has different semantics. An approximation would raise no error and would silently exclude or keep the wrong alerts. An item that has a computed column of one of these types is not applied, and the skip reason is logged. A type can be added once its comparison is shown to match the DSL. The last three rows are names that have no column.
+A type is supported only when ES|QL has a predicate that keeps the same rows as the DSL filter for every operator, including null and multi-valued columns and the exclusive operators. For the other types the comparison is impossible (the column is `unsupported` or accepts no comparison) or it has different semantics. An approximation would raise no error and would silently exclude or keep the wrong alerts. The lists API rejects an entry of one of these types when the item is written. A type can be added once its comparison is shown to match the DSL. The last three rows are names that have no column.
 
 | Type | Why |
 |---|---|
-| `search_as_you_type`, `completion`, `join`, `binary`, `long_range`, `integer_range`, `float_range`, `ip_range`, `sparse_vector`, `rank_*`, `percolator` | They surface in ES\|QL as `unsupported`, so no predicate can reference the column. |
+| `search_as_you_type`, `completion`, `join`, `binary`, `long_range`, `integer_range`, `float_range`, `ip_range`, `sparse_vector`, `rank_*`, `percolator` | They surface in ES\|QL as `unsupported`. No predicate can reference the column. |
 | `geo_*`, `cartesian_*`, `dense_vector`, `double_range`, `date_range`, `flattened` root, histogram family, `aggregate_metric_double` | The column exists but accepts no value comparison. The `exists` operator could be supported on these in a later iteration. |
 | `double` for `is` and `is one of` | A `double` column can come from a `float` or `half_float` field, and the column type does not say which. ES\|QL reads a `float` holding 0.1 as `0.10000000149011612`, which is not the `double` 0.1 that the stage compares it with, and an equality can miss the value. `exists` is supported. |
 | `nested` sub-fields, `flattened` sub-keys, `passthrough` parents | ES\|QL has no column for them. The DSL filter handles them when they are source fields. |
-| Object parents (`host` for `host.name`) | An object holds no value, so it is not a source field and has no column. An exception on that name can only mean a column that the query creates with the same name. |
-| Fields that exist nowhere | No column exists. The item stays in the DSL filter (see [Fields that exist nowhere](#fields-that-exist-nowhere)). |
+| Object parents (`host` for `host.name`) | An object holds no value. It is not a source field and has no column. An exception on that name can only mean a column that the query creates with the same name. |
+| Fields that exist nowhere | No column exists. An item on source documents stays in the DSL filter, and an item on output columns is read as [Fields that exist nowhere](#fields-that-exist-nowhere) describes. |
 
 ### Values that the stage cannot write
 
-An exception can carry a value that the stage cannot write for the type of its column. The value can be not valid for the type (`bogus` for an `ip`, `maybe` for a `boolean`), which nothing prevents when the exception is created because the lists API stores values as strings. It can also be valid and written in a notation that the compiler does not support, such as `1e3` on a `long` or a date in a format that the compiler does not read. The table in [Value rules](#value-rules) lists the values that fail.
+An exception can carry a value that the stage cannot write for the declared type of its column. The value can be not valid for the type (`bogus` for an `ip`, `maybe` for a `boolean`), or valid and written in a notation that the compiler does not support, such as `1e3` on a `long` or a date in a format that the compiler does not read. The table in [Value rules](#value-rules) lists the values that fail. The lists API runs the same checks when an item on output columns is created, updated, imported or duplicated, and rejects the item with a message that names the entry. A value like this can only reach the executor in an item that was stored without those checks.
 
-When an item that is placed at the end of the query has such a value, the executor fails the rule before it sends the query:
+When an item that is checked has such a value, or an entry without a declared type, the executor fails the rule before it sends the query:
 
 ```text
-The rule did not run because exception items have a value that cannot be used for the type of the field: "src_ip is one of" (list "my-list", item "my-item"): value "bogus" cannot be written for a column of type ip at the end of the query, in the field "src_ip". Fix or delete these exception items.
+The rule did not run because exception items have a value or a column type that cannot be used at the end of the query: "src_ip is one of" (list "my-list", item "my-item"): value "bogus" cannot be written for a column of type ip at the end of the query, in the field "src_ip". Fix or delete these exception items.
 ```
 
 The message names up to 5 values that cannot be written, each with its item and its field, and counts the others. An item with several such values is named once for each value, which shows every value to fix in a single run. The rule creates no alerts and the failure is a user error.
 
-**Why fail.** A failed run is easier to notice and to fix than a run that applies some of the exceptions of a rule. An item that is silently skipped creates the alerts that the analyst already excluded, and alert noise is a main problem for customers. The items at the end of the query are on columns that the query computes, which the DSL filter has never applied, and no rule depended on them before the setting.
+**Why fail.** A failed run is easier to notice and to fix than a run that applies some of the exceptions of a rule. An item that is silently skipped creates the alerts that the analyst already excluded, and alert noise is a main problem for customers. An item on output columns has never been applied. No rule depended on it before this change.
 
-**What failing costs.** A failed run creates no alerts at all, where a skipped item only creates the alerts that the item would have excluded. Anyone who can edit a shared list can make every ES|QL rule that uses it fail with a bad value, and the same value can be valid for a field in one rule and not valid in another. The DSL filter already has this property for source fields, and the end of the query makes the surface wider. This is one reason the feature is experimental and off by default.
+**What failing costs.** A failed run creates no alerts at all, where a skipped item only creates the alerts that the item would have excluded. The same cost applies to a column that the query outputs with another type than the item declares (see [Error handling](#error-handling)). Two rules that use the same shared list can output a column with the same name and different types, and the item then fails the rule that outputs the other type. Anyone who can edit a shared list can make such a rule fail. The DSL filter already has this property for source fields, where a bad value makes the request fail.
 
-An item whose fields are all source fields or exist nowhere never fails the rule for a value: it stays in the DSL filter, and Elasticsearch decides. An item skipped before its values are checked does not fail the rule either: an item skipped because of its fields (an entry that is not negative on a field that exists nowhere, or a source field that the query does not output), or because it is restricted to some operating systems (`os_types`). In an item that is checked, an invalid value fails the rule even when another entry would be skipped for another reason.
+An item on source documents never fails the rule for a value: it is in the DSL filter, and Elasticsearch decides. An item that is not applied because its column is not in the output (see [Fields that exist nowhere](#fields-that-exist-nowhere)) does not fail the rule either, and neither does an item restricted to some operating systems (`os_types`, which the API does not accept on an item on output columns).
 
 ### Differences from the DSL filter
 
@@ -333,7 +327,7 @@ An exception on a computed column is compared with the values that the query hol
 
 ## Items that are not applied
 
-An item that is not applied excludes no alert. It is not written at the end of the query, and it is removed from the DSL filter too, because the source documents do not have the column that it refers to. It never adds a warning to the rule: today an exception that cannot be applied does not warn, and a warning on every run would be noise for rules with shared lists. The warning for value lists that are too large to process is unchanged. The reason is written to the rule execution log instead, as one JSON message per run, for a UI to use later. An item with a value that the stage cannot write is not in this section, because the rule fails (see [Values that the stage cannot write](#values-that-the-stage-cannot-write)).
+An item that is not applied excludes no alert. It is not written at the end of the query, and an item on output columns is never in the DSL filter. It adds no warning to the rule, with one exception: an exception that excludes every row (see [Fields that exist nowhere](#fields-that-exist-nowhere)) does. Today an exception that cannot be applied does not warn, and a warning on every run would be noise for rules with shared lists. The warning for value lists that are too large to process is unchanged. The reason is written to the rule execution log instead, as one JSON message per run, for a UI to use later. An item with a column type or a value that the stage cannot use is not in this section, because the rule fails (see [Values that the stage cannot write](#values-that-the-stage-cannot-write) and [Error handling](#error-handling)).
 
 The message is written with `ruleExecutionLogger.info` when at least one item is applied at the end of the query or not applied. It reaches the event log (`.kibana-event-log-*`, provider `securitySolution.ruleExecution`, action `message`) only when the experimental feature `extendedRuleExecutionLoggingEnabled` is on and the minimum level in the advanced settings is Info or lower. Otherwise it is written only to the Kibana server log, at `debug` level. Rule preview does not store `info` messages, and that is unchanged. The text of the `message` field is this JSON object:
 
@@ -343,16 +337,15 @@ The message is written with `ruleExecutionLogger.info` when at least one item is
   "version": 1,
   "query": "FROM logs-* | STATS ... | WHERE NOT (MV_CONTAINS(c_tier, \"gold\"))",
   "queryTruncated": false,
-  "dslItemCount": 12,
   "appliedAtEndOfQuery": [{ "list_id": "my-list", "item_id": "tier-gold" }],
   "notApplied": [
     {
       "list_id": "my-list",
-      "item_id": "geo",
-      "name": "geo",
-      "code": "column_type_not_supported",
-      "reason": "column \"c_geo\" has type \"geo_point\", which cannot be tested at the end of the query",
-      "fields": ["c_geo"]
+      "item_id": "region",
+      "name": "region",
+      "code": "field_not_found",
+      "reason": "\"c_region\" is not in the output of the query",
+      "fields": ["c_region"]
     }
   ],
   "notAppliedCount": 1,
@@ -361,20 +354,17 @@ The message is written with `ruleExecutionLogger.info` when at least one item is
 ```
 
 - `query` is the final query of the rule, with the stage of the items applied at the end of the query and without the page size that the executor adds. The final query is otherwise logged only at `trace` level. It is cut at 20,000 characters, and `queryTruncated` says so.
-- `dslItemCount` is the number of items in the DSL filter.
 - `notApplied` has one entry for each item and reason. An item with two reasons appears twice, each time with its own `code`, `reason` and `fields`. It lists at most 200 entries; `notAppliedCount` is the total and `truncated` says that the list was cut.
 - `code` is stable and meant for the UI. `reason` is an English explanation. `fields` names the fields that cause the reason, when they are known.
 
 | `code` | Meaning |
 |---|---|
-| `field_not_found` | An item that has a computed column and an entry that is not negative on a field that is in neither the source nor the output, which never matches. A negative entry on such a field is left out of the stage, and an item with no computed column stays in the DSL filter and is not recorded. |
-| `source_field_not_output` | A field of the source indices that the query does not output, in an item that also has a computed column. |
-| `entry_type_not_supported` | A `list` or `nested` entry on a computed column. |
-| `column_type_not_supported` | The type of the column cannot be compared at the end of the query (see [Types not supported at the end of the query](#types-not-supported-at-the-end-of-the-query)). |
-| `operator_not_supported_on_type` | `matches` on a column that is not `keyword` or `text`, and `is` or `is one of` on a `double` column. |
-| `os_types_not_supported` | The item has `os_types`, and it would be placed at the end of the query. The DSL filter turns `os_types` into conditions on `host.os.type` and `host.os.name.caseless`, which the end of the query does not compile. |
+| `field_not_found` | An item with an entry that has an inclusive operator on a column that the query does not output (or outputs with the type `null`), which never matches. An entry with an exclusive operator on such a column is left out of the stage. |
+| `item_has_no_entries` | The item has no entries at all. The API rejects such an item. This only appears for an item stored without that check. |
+| `entry_type_not_supported` | A `list` or `nested` entry. The API rejects them in an item on output columns. This only appears for an item stored without that check. |
+| `operator_not_supported_on_type` | `matches` on a column that is not `keyword` or `text`, and `is` or `is one of` on a `double` column. The API rejects them too. |
+| `os_types_not_supported` | The item has `os_types`, which the end of the query does not compile. The API rejects it too. |
 | `list_size_not_supported` | An "is one of" entry with no value. |
-| `item_has_no_entries` | The item has no entries. |
 
 ## Limits
 
@@ -487,7 +477,7 @@ The first exception is inside both `AND`s, although they are written after it. T
 | The 99 `OR`s that join the 100 ranges, nested from the left | 99 | `ranges - 1` | 210 |
 | The range test: `COALESCE` as an operand (1), `MV_IN_RANGE` as its argument (1), the cast `::ip` (1) and the literal (1) | 4 | fixed | **214** |
 
-The parentheses that are written around exceptions 2 to 100 enclose only their own exception and sit beside exception 1, so they are not on the path.
+The parentheses that are written around exceptions 2 to 100 enclose only their own exception and sit beside exception 1. They are not on the path.
 
 The eight rows of the kind "fixed" are the same for any number of exceptions, entries and ranges, and they sum to 1 + 2 + 1 + 2 + 2 + 1 + 2 + 4 = 15. The three other rows sum to `exceptions + entries + ranges - 3 = 199`. In general, the depth is `exceptions + entries + ranges + 12`, which is the number of comparisons plus 14. This is below the limit of 300 by 86 levels, for every stage of at most 200 comparisons.
 
@@ -498,8 +488,8 @@ The worst-case stage above, written by the compiler, ran. The same shape with 18
 | Shape | Largest stage that runs | Depth at that size |
 |---|---|---|
 | Items `is` | 293 items | exceptions + 7 = 300 |
-| First item with a positive entry of ranges (entries = 2, ranges = 10) | 279 items | exceptions + entries + ranges + 9 = 300 |
-| First item with a negated entry of ranges (entries = 2, ranges = 10) | 276 items | exceptions + entries + ranges + 12 = 300 |
+| First item with an entry of ranges that has an inclusive operator (entries = 2, ranges = 10) | 279 items | exceptions + entries + ranges + 9 = 300 |
+| First item with an entry of ranges that has an exclusive operator (entries = 2, ranges = 10) | 276 items | exceptions + entries + ranges + 12 = 300 |
 | A single entry of ranges (ranges = 10) | 282 items | exceptions + ranges + 8 = 300 |
 
 The bound assumes that the compiler keeps writing these forms. A new predicate with more than 4 levels, or a new way of wrapping an entry, needs the constants to be measured again. Elasticsearch has also lowered this limit before (500, then 400, then 300), and a limit below about 215 would leave no room.
@@ -510,26 +500,29 @@ Elasticsearch fails a query that has too many clauses (a clause is one test insi
 
 Only the comparisons that Elasticsearch can run against the source index cost clauses: `is`, `is one of` with plain values and `exists`, on a column that is a source field, a copy of one (`EVAL c = host`) or a rename (`RENAME host AS c`). Every other comparison costs none: `matches`, CIDR values, dates, and columns that the query computes. An item costs one clause for each of its comparisons and one more for the item, because the item is negated. The 200 comparisons are divided among at most 200 items, which gives at most 400 clauses for the stage, below the smallest limit. The stage never exhausts the clauses on its own.
 
-The `WHERE` expressions of the rule query count against the same limit, and we do not control them. A rule whose own conditions already use most of the clauses can fail once our stage is added, although it respects the 200 comparisons. Elasticsearch then rejects the query with `too many nested clauses`, and the rule fails with a message that says that the `WHERE` expressions of the rule query and the exceptions on columns that rename or copy a source field are counted together. The message includes the Elasticsearch reason and tells what to reduce.
+The `WHERE` expressions of the rule query count against the same limit, and we do not control them. A rule whose own conditions already use most of the clauses can fail once our stage is added, although it respects the 200 comparisons. Elasticsearch then rejects the query with `too many nested clauses`, and the rule fails with a message that says that the `WHERE` expressions of the rule query and the exceptions on the output columns are counted together. The message includes the Elasticsearch reason and tells what to reduce.
 
 We checked this on Elasticsearch. In stages of 200 items on distinct fields, 2,200 items in total ran and 2,400 failed with `too many nested clauses; maxClauseCount is set to 4468`, for `is`, `is one of` and `exists` alike. A rule query with 2,100 comparisons ran alone and failed once a stage of 200 `is` comparisons on a source field followed it. If Elasticsearch rejects the final query for another reason (for example a function that an older cluster or a remote cluster does not have), the rule run fails with that error, as it does for any invalid ES|QL query.
 
 ## Error handling
 
-Everything in this proposal runs only when the advanced setting `securitySolution:enableEsqlRuleComputedFieldExceptions` is enabled. With the setting disabled the executor does no lookup and no validation, and it builds the same request as today. None of the failures below can happen.
+Everything in this proposal that happens at the end of the query runs only when the rule has items on output columns. A rule without them makes no extra request and none of the failures below can happen.
 
-With the setting enabled, the rule fails before the query runs, instead of running with only some of its exceptions, in four cases. No alerts are created.
+A rule that has items on output columns fails before the query runs, instead of running with only some of its exceptions, in five cases. No alerts are created.
 
 | Case | The message | User error |
 |---|---|---|
-| A value cannot be written for its column (see [Values that the stage cannot write](#values-that-the-stage-cannot-write)) | Names the values that cannot be written, each with its item and field | Yes |
+| A value cannot be written for its column, or an entry has no declared type (see [Values that the stage cannot write](#values-that-the-stage-cannot-write)) | Names the values that cannot be written, each with its item and field | Yes |
+| An entry declares another type than the column that the query outputs (see [Check each item](#stages)) | `The rule did not run because exception items declare a column type that is not the type that the query outputs: "<item>" (list "<list>", item "<id>") declares the column "<column>" as <declared>, and the query outputs it as <actual>. Fix the type in these exception items, or remove them from this rule.` It names up to 5 items and counts the others | Yes |
 | The exceptions do not fit in the query: more than 200 comparisons, or a query longer than 1,000,000 characters (see [Limits](#limits)) | Names the limit and the items with the most comparisons | Yes |
-| Elasticsearch rejects the final query with `too many nested clauses` and exceptions were added at the end (see [Clauses of the query](#clauses-of-the-query)) | Explains that the `WHERE` expressions of the rule query and the exceptions on columns that rename or copy a source field are counted together. Without exceptions at the end, the error of Elasticsearch is shown as it is | Yes |
-| The `_field_caps` call or the `LIMIT 0` request fails | `The rule did not run because the fields of its exceptions could not be inspected to apply them: <reason of the failed request>` | As the failed request is: a failure that is a user error today (for example a missing privilege) stays one |
+| Elasticsearch rejects the final query with `too many nested clauses` and exceptions were added at the end (see [Clauses of the query](#clauses-of-the-query)) | Explains that the `WHERE` expressions of the rule query and the exceptions on the output columns are counted together. Without exceptions at the end, the error of Elasticsearch is shown as it is | Yes |
+| The `LIMIT 0` request fails | `The rule did not run because the output columns of its query could not be read to apply its exceptions on them: <reason of the failed request>` | As the failed request is: a failure that is a user error today (for example a missing privilege) stays one |
 
-When the fields cannot be inspected, the executor cannot tell which exceptions are on computed columns. Running the rule anyway would leave the computed-column exceptions out silently and create alerts that they were meant to exclude. A rule whose query is invalid fails the `LIMIT 0` request, and it now fails with this message and the Elasticsearch reason, instead of with the bare Elasticsearch error of the main query.
+When the output columns cannot be read, the executor cannot check or write the exceptions on them. Running the rule anyway would leave those exceptions out silently and create alerts that they were meant to exclude. A rule whose query is invalid fails the `LIMIT 0` request, and it now fails with this message and the Elasticsearch reason, instead of with the bare Elasticsearch error of the main query.
 
-The feature adds two lightweight requests per run (one is skipped when no item needs the output columns) and no row data.
+One case does not fail the rule and shows a warning instead: an item whose entries all have an exclusive operator on columns that the query does not output excludes every row, and the rule shows a warning with the status "partial failure", which names up to 5 items and says that the rule creates no alerts because of them (see [Fields that exist nowhere](#fields-that-exist-nowhere)).
+
+The feature adds one lightweight request per run, only when the rule has items on output columns, and no row data.
 
 ## Why source-field exceptions stay in the DSL filter
 
@@ -548,7 +541,7 @@ The exceptions documentation says that `matches` takes wildcards on `text` field
 
 ## Out of scope
 
-- **Value lists.** `list` entries are not compiled at the end of the query. They are still applied through the DSL filter on source fields, with today's limits and the existing unprocessed-exceptions warning for lists that are too large. A list exception on a computed column is not applied and is recorded in the rule execution log. A later iteration stores each list in a lookup index and applies it with `LOOKUP JOIN`, which covers computed columns as well.
+- **Value lists.** `list` entries are not compiled at the end of the query. They are still applied through the DSL filter on source fields, with today's limits and the existing unprocessed-exceptions warning for lists that are too large. The lists API rejects a `list` entry in an item on output columns. A later iteration stores each list in a lookup index and applies it with `LOOKUP JOIN`, which covers computed columns as well.
 - **In-memory filtering of large value lists.** The ES|QL executor does not do it today, and it would interact with the paging that uses `excludedDocuments`.
 - **Source-field exceptions in the query.** They stay in the DSL filter (see [Why source-field exceptions stay in the DSL filter](#why-source-field-exceptions-stay-in-the-dsl-filter)).
 - **`nested` entries at the end of the query.** They have no ES|QL representation.
@@ -578,9 +571,7 @@ These steps run the branch of [the pull request](https://github.com/elastic/kiba
 
    To let the script read the `esql_exceptions` log message, add `xpack.securitySolution.enableExperimental: ['extendedRuleExecutionLoggingEnabled']` to `config/kibana.dev.yml` before you start Kibana. The Advanced setting "Extended rule execution logging: min level" must be Info or lower. The script tells you when the message is missing.
 
-4. **Enable the advanced setting.** Open Stack Management, Advanced Settings, Security Solution, and turn on "Enable exceptions on computed fields in ES|QL rules" (`securitySolution:enableEsqlRuleComputedFieldExceptions`). The script also sets it at the start of each run, to enabled by default or to disabled with `--setting=off`.
-
-5. **Run the try script** from the root of the checkout.
+4. **Run the try script** from the root of the checkout.
 
    ```bash
    KBN_URL=http://localhost:5601 node esql_exceptions_try.mjs
@@ -588,14 +579,15 @@ These steps run the branch of [the pull request](https://github.com/elastic/kiba
 
    The script signs in as `elastic` with the password `changeme` and reads Elasticsearch at `http://localhost:9200`. The variables `ES_USER`, `ES_PASS` and `ES_URL` change these.
 
-The script asks which exceptions you want to try: for each one, where the field lives (`source`, `computed`, `redefined` or `missing`), its type, the operator, and whether to use a value that is not valid for the type. It then creates the index (one document for each exception, which only that exception excludes, and one that no exception excludes), the exception list with its items and an ES|QL rule, runs the rule, and prints what to look for: where each exception goes (the DSL filter, the end of the query, or not applied with the reason), the documents that should alert, and, after the run, the alerts that were created with "This matches what to expect" or "This DIFFERS from what to expect". When the log message is available, it also prints the final query and the items not applied. A new run deletes what the previous run created, and the rule stays enabled afterwards. Delete it when you finish.
+The script asks which exceptions you want to try. For each one, it asks where the field lives and what the exception applies to (`source`, `redefined` and `missing` are items on source documents, which go to the DSL filter; `computed`, `output_redefined`, `output_missing` and `wrong_type` are items on output columns, which go to the end of the query), its type, the operator, and whether to use a value that is not valid for the type. The items of one exception must apply to the same thing. After the first item the script offers only the kinds of the same group. For `wrong_type` it asks one more question, the column type that the item declares, which is not the real type of the column. The script then creates the index (one document for each exception, which only that exception excludes, and one that no exception excludes), the exception list with its items and an ES|QL rule, runs the rule, and prints what to look for: what each exception does (stays in the DSL filter, goes to the end of the query, is not applied with the reason, is rejected by the lists API when it is created, or fails the rule), the documents that should alert, and, after the run, the alerts that were created with "This matches what to expect" or "This DIFFERS from what to expect". When the log message is available, it also prints the final query and the items not applied, and compares them with what it expects. A new run deletes what the previous run created, and the rule stays enabled afterwards. Delete it when you finish.
 
-The script accepts the first letters of an answer, and the answers below use the names that it prints. When it asks about a value that is not valid for the type, answer `no` unless the scenario says otherwise. The five scenarios go from the simplest to the most complex.
+The script accepts the first letters of an answer, and the answers below use the names that it prints. When it asks about a value that is not valid for the type, answer `no` unless the scenario says otherwise. The six scenarios go from the simplest to the most complex.
 
 | # | Scenario and answers | Look for |
 |---|---|---|
-| 1 | One exception on a computed column: `computed`, `keyword`, `is`, then no more items and no more exceptions | The final query ends in `\| WHERE NOT (MV_CONTAINS(c1, "good.com"))`, and only `survivor` alerts |
-| 2 | The same exception with the setting disabled: run `node esql_exceptions_try.mjs --setting=off` with the same answers | `survivor` and `target-1` alert. The exception excludes nothing, and no `esql_exceptions` message is written |
-| 3 | One exception with two entries: `source`, `keyword`, `is`, another item, `computed`, `integer`, `is`, then no more items and no more exceptions | Both entries in one `NOT ((…) AND (…))` expression at the end of the query. Only `survivor` alerts, and `target-1` is excluded because both entries match it |
-| 4 | A list of three exceptions: exception 1 is `source`, `keyword`, `is`. Exception 2 is `computed`, `ip`, `is_one_of`. Exception 3 is `computed`, `double`, `is`. Add another exception after the first two | Exception 1 stays in the DSL filter, exception 2 is applied at the end of the query, and exception 3 is not applied, with the code `operator_not_supported_on_type` (a `double` column does not support `is`). `survivor` and `target-3` alert |
-| 5 | Values that cannot be written: one exception with two items, `computed`, `ip`, `is` with the invalid value (`yes`), then `computed`, `integer`, `is` with the invalid value (`yes`) | The rule ends as failed with no alerts, and the status message names both values (`"bogus"` and `"many"`), each with its item and field. No `esql_exceptions` message is written |
+| 1 | One exception on an output column: `computed`, `keyword`, `is`, then no more items and no more exceptions | The final query ends in `\| WHERE NOT (MV_CONTAINS(c1, "good.com"))`, and only `survivor` alerts |
+| 2 | One exception with two entries on output columns: `computed`, `keyword`, `is`, another item, `computed`, `integer`, `is`, then no more items and no more exceptions | Both entries in one `NOT ((…) AND (…))` expression at the end of the query. Only `survivor` alerts, and `target-1` is excluded because both entries match it |
+| 3 | A list of three exceptions: exception 1 is `source`, `keyword`, `is`. Exception 2 is `computed`, `ip`, `is_one_of`. Exception 3 is `output_missing`, `keyword`, `is`. Add another exception after the first two | Exception 1 stays in the DSL filter, exception 2 is applied at the end of the query, and exception 3 is not applied, with the code `field_not_found` (the query does not output its column). `survivor` and `target-3` alert |
+| 4 | A declared type that is not the type of the column: `wrong_type`, `integer`, then `keyword` as the declared type, `is`, then no more items and no more exceptions | The rule ends as failed with no alerts, and the status message names the item, the column and both types (declared `keyword`, output `integer`). No `esql_exceptions` message is written |
+| 5 | An entry that the lists API rejects: `computed`, `double`, `is`, then no more items and no more exceptions | The script reports that the API rejects the item when it is created and creates no rule. A `double` column supports only `exists` |
+| 6 | An exception with nothing left to test: `output_missing`, `keyword`, `is_not`, then no more items and no more exceptions | The final query ends in `\| WHERE false`, no document alerts, and the rule ends as "partial failure" with a message that names the item and says that the rule creates no alerts because exceptions exclude every row. The log message lists the item as applied |

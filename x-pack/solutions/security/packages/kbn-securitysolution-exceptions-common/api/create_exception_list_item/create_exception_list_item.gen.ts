@@ -29,6 +29,7 @@ import {
   ExceptionListHumanId,
   ExceptionListItemOsTypeArray,
   ExceptionListItemTags,
+  ExceptionListItemAppliesTo,
   EndpointListProperties,
   TrustedAppsWindowsProperties,
   TrustedAppsMacProperties,
@@ -79,6 +80,7 @@ export const CreateExceptionListItemGeneric = lazySchema(() =>
       entries: ExceptionListItemEntryArray,
       os_types: ExceptionListItemOsTypeArray.optional().default([]),
       tags: ExceptionListItemTags.optional().default([]),
+      applies_to: ExceptionListItemAppliesTo.optional(),
     })
   )
 );

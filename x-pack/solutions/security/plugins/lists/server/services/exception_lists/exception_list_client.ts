@@ -123,6 +123,8 @@ export class ExceptionListClient {
   /** Optionally, the Kibana request which is useful for extension points */
   private readonly request?: KibanaRequest;
 
+  /** Set to true to allow the items that apply to the ES|QL output columns */
+
   /**
    * Constructs the exception list
    * @param options
@@ -575,6 +577,7 @@ export class ExceptionListClient {
    * @returns the created exception list item container
    */
   public createExceptionListItem = async ({
+    appliesTo,
     comments,
     description,
     entries,
@@ -590,6 +593,7 @@ export class ExceptionListClient {
   }: CreateExceptionListItemOptions): Promise<ExceptionListItemSchema> => {
     const { savedObjectsClient, user } = this;
     let itemData: CreateExceptionListItemOptions = {
+      appliesTo,
       comments,
       description,
       entries,
@@ -649,6 +653,7 @@ export class ExceptionListClient {
    */
   public updateExceptionListItem = async ({
     _version,
+    appliesTo,
     comments,
     description,
     entries,
@@ -665,6 +670,7 @@ export class ExceptionListClient {
     const { savedObjectsClient, user } = this;
     let updatedItem: UpdateExceptionListItemOptions = {
       _version,
+      appliesTo,
       comments,
       description,
       entries,
@@ -724,6 +730,7 @@ export class ExceptionListClient {
    */
   public updateOverwriteExceptionListItem = async ({
     _version,
+    appliesTo,
     comments,
     description,
     entries,
@@ -740,6 +747,7 @@ export class ExceptionListClient {
     const { savedObjectsClient, user } = this;
     let updatedItem: UpdateExceptionListItemOptions = {
       _version,
+      appliesTo,
       comments,
       description,
       entries,

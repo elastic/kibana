@@ -43,10 +43,15 @@ const wildcard = (field: string, value: string, operator: Operator = 'included')
   value,
 });
 
+/** Declares for each entry the type of its column, as an item on the output columns does. A column that is not in `columns` has no declared type. */
+const withColumnTypes = (entries: Entry[], columns: Record<string, string>): EntriesArray =>
+  entries.map((entry) =>
+    entry.field in columns ? { ...entry, column_type: columns[entry.field] } : entry
+  ) as EntriesArray;
+
 const compileWithWeight = (entries: Entry[], columns: Record<string, string>) =>
   compileEndStageItem(
-    getExceptionListItemSchemaMock({ entries: entries as EntriesArray }),
-    new Map(Object.entries(columns))
+    getExceptionListItemSchemaMock({ entries: withColumnTypes(entries, columns) })
   );
 
 const compile = (entries: Entry[], columns: Record<string, string>) => {
@@ -277,6 +282,13 @@ describe('compileEndStageItem', () => {
       ['2026-09-30T14', 'date_nanos'],
       ['2026-09-30T14:05', 'date_nanos'],
       ['2026-09-30T14:05Z', 'date_nanos'],
+      // the cast of an instant that the type cannot hold fails at run time, and `MV_CONTAINS(col, null)` is true
+      ['2262-04-11T23:47:16.854775808Z', 'date_nanos'],
+      ['2262-04-12', 'date_nanos'],
+      ['1969-12-31T23:59:59.5Z', 'date_nanos'],
+      ['1969-12-31', 'date_nanos'],
+      ['9999-12-31T23:59:59.5-01:00', 'date'],
+      ['9999-12-31T23:00:00-01:00', 'date'],
     ])(
       'reports the date value %s on a %s column that the compiler does not write',
       (value, type) => {
@@ -500,11 +512,11 @@ describe('compileEndStageItem', () => {
   });
 
   describe('items with os_types', () => {
-    const entries = [match('risk', 'low')] as EntriesArray;
+    const entries = withColumnTypes([match('risk', 'low')], { risk: 'keyword' });
 
     it('does not apply an item that is restricted to operating systems, which only the DSL filter applies', () => {
       const item = getExceptionListItemSchemaMock({ entries, os_types: ['windows', 'linux'] });
-      expect(compileEndStageItem(item, new Map([['risk', 'keyword']]))).toEqual({
+      expect(compileEndStageItem(item)).toEqual({
         skipReasons: [
           {
             code: 'os_types_not_supported',
@@ -518,7 +530,7 @@ describe('compileEndStageItem', () => {
 
     it('applies an item with an empty os_types', () => {
       const item = getExceptionListItemSchemaMock({ entries, os_types: [] });
-      expect(compileEndStageItem(item, new Map([['risk', 'keyword']]))).toHaveProperty('clause');
+      expect(compileEndStageItem(item)).toHaveProperty('clause');
     });
   });
 
@@ -645,6 +657,24 @@ describe('compileEndStageItem', () => {
       expect(quoteColumn('@timestamp')).toBe('@timestamp');
     });
 
+    it('quotes a segment that is only an underscore or an at sign, which the ES|QL lexer cannot read unquoted', () => {
+      expect(quoteColumn('_')).toBe('`_`');
+      expect(quoteColumn('@')).toBe('`@`');
+      expect(quoteColumn('a._')).toBe('a.`_`');
+      expect(quoteColumn('@.b')).toBe('`@`.b');
+      expect(quoteColumn('_id')).toBe('_id');
+      expect(quoteColumn('__')).toBe('__');
+    });
+
+    it('cuts a long value in the reason, without repeating all of it', () => {
+      const { skipReasons } = compileWithWeight([wildcard('f', 'a'.repeat(5000))], {
+        f: 'keyword',
+      }) as { skipReasons: Array<{ explanation: string }> };
+
+      expect(skipReasons[0].explanation.length).toBeLessThan(250);
+      expect(skipReasons[0].explanation).toContain('...');
+    });
+
     it.each(['geo_point', 'unsupported', 'flattened', 'dense_vector'])(
       'does not compile a column of type %s',
       (type) => {
@@ -652,7 +682,7 @@ describe('compileEndStageItem', () => {
           skipReasons: [
             {
               code: 'column_type_not_supported',
-              explanation: `column "col" has type "${type}", which cannot be tested at the end of the query`,
+              explanation: `the entry for column "col" has the type "${type}", which cannot be tested at the end of the query`,
               fields: ['col'],
             },
           ],
@@ -660,13 +690,13 @@ describe('compileEndStageItem', () => {
       }
     );
 
-    it('does not compile an entry for a column that the query does not output', () => {
+    it('does not compile an entry that does not declare the type of its column', () => {
       expect(compile([match('missing', 'a')], {})).toEqual({
         skipReasons: [
           {
             code: 'column_type_not_supported',
             explanation:
-              'column "missing" has type "unknown", which cannot be tested at the end of the query',
+              'the entry for column "missing" has the type "unknown", which cannot be tested at the end of the query',
             fields: ['missing'],
           },
         ],

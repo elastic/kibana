@@ -14,6 +14,10 @@ import type {
   ExceptionListSchema,
   ImportExceptionListItemSchemaDecoded,
 } from '@kbn/securitysolution-io-ts-list-types';
+import {
+  getEsqlOutputColumnsItemErrors,
+  getExceptionAppliesTo,
+} from '@kbn/securitysolution-exceptions-common/esql_output_columns';
 
 import type { ExceptionListSoSchema } from '../../../../schemas/saved_objects';
 import { transformCreateCommentsToComments, transformUpdateCommentsToComments } from '..';
@@ -47,6 +51,7 @@ export const sortExceptionItemsToUpdateOrCreate = ({
 
   for (const chunk of items) {
     const {
+      applies_to: appliesTo,
       comments,
       description,
       entries,
@@ -62,8 +67,45 @@ export const sortExceptionItemsToUpdateOrCreate = ({
     } = chunk;
     const dateNow = new Date().toISOString();
     const savedObjectType = getSavedObjectType({ namespaceType });
+    const existingItem = existingItems[itemId];
+    // An item that cannot be saved is reported and skipped, and the rest of the import goes on
+    const invalidReasons =
+      existingLists[listId] == null
+        ? []
+        : [
+            ...getEsqlOutputColumnsItemErrors({
+              appliesTo,
+              entries,
+              listType: existingLists[listId].type,
+              osTypes,
+            }),
+            ...(existingItem != null &&
+            isOverwrite &&
+            getExceptionAppliesTo({ applies_to: existingItem.applies_to }) !==
+              getExceptionAppliesTo({ applies_to: appliesTo })
+              ? [
+                  `it applies to "${getExceptionAppliesTo({
+                    applies_to: existingItem.applies_to,
+                  })}" and cannot change to "${getExceptionAppliesTo({ applies_to: appliesTo })}"`,
+                ]
+              : []),
+          ];
 
-    if (existingLists[listId] == null) {
+    if (invalidReasons.length > 0) {
+      results.errors = [
+        ...results.errors,
+        {
+          error: {
+            message: `Invalid exception item with item_id: "${itemId}": ${invalidReasons.join(
+              '; '
+            )}`,
+            status_code: 400,
+          },
+          item_id: itemId,
+          list_id: listId,
+        },
+      ];
+    } else if (existingLists[listId] == null) {
       results.errors = [
         ...results.errors,
         {
@@ -85,6 +127,7 @@ export const sortExceptionItemsToUpdateOrCreate = ({
         ...results.itemsToCreate,
         {
           attributes: {
+            applies_to: appliesTo,
             comments: transformedComments,
             created_at: dateNow,
             created_by: user,
@@ -119,6 +162,7 @@ export const sortExceptionItemsToUpdateOrCreate = ({
           ...results.itemsToUpdate,
           {
             attributes: {
+              applies_to: appliesTo,
               comments: transformedComments,
               description,
               entries,

@@ -909,4 +909,88 @@ describe('When the edit exception modal is opened', () => {
       expect(screen.queryByTestId('bulkCloseAlertOnAddExceptionCheckbox')).not.toBeInTheDocument();
     });
   });
+
+  describe('an item that applies to the computed columns of an ES|QL rule', () => {
+    const itemToEdit = {
+      ...getExceptionListItemSchemaMock(),
+      applies_to: 'esql_output_columns' as const,
+    };
+
+    const renderFlyout = (item = itemToEdit) =>
+      render(
+        <TestProviders>
+          <EditExceptionFlyout
+            list={{
+              ...getExceptionListSchemaMock(),
+              type: 'rule_default',
+              namespace_type: 'single',
+              list_id: 'my_list_id',
+              id: '1234',
+            }}
+            rule={
+              {
+                ...getRulesSchemaMock(),
+                id: '345',
+                name: 'My rule',
+                rule_id: 'my_rule_id',
+                type: 'esql',
+                exceptions_list: [
+                  {
+                    id: '1234',
+                    list_id: 'my_list_id',
+                    type: 'rule_default',
+                    namespace_type: 'single',
+                  },
+                ],
+              } as unknown as Rule
+            }
+            itemToEdit={item}
+            showAlertCloseOptions
+            onCancel={jest.fn()}
+            onConfirm={jest.fn()}
+          />
+        </TestProviders>
+      );
+
+    beforeEach(() => {
+      mockUseFindExceptionListReferences.mockImplementation(() => [false, false, {}, jest.fn()]);
+    });
+
+    it('shows what the item applies to, with no choice, and the warning', () => {
+      renderFlyout();
+
+      expect(screen.getByTestId('exceptionItemAppliesTo')).toBeInTheDocument();
+      expect(screen.queryByTestId('exceptionAppliesTo')).toBeNull();
+      expect(screen.getByTestId('exceptionComputedColumnsWarning')).toBeInTheDocument();
+    });
+
+    it('gives the builder the item and what it applies to', () => {
+      renderFlyout();
+
+      const { calls } = mockGetExceptionBuilderComponentLazy.mock;
+      expect(calls[calls.length - 1][0]).toEqual(
+        expect.objectContaining({
+          appliesTo: 'esql_output_columns',
+          exceptionListItems: [itemToEdit],
+        })
+      );
+    });
+
+    it('does not offer to close alerts', async () => {
+      renderFlyout();
+      const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
+      await waitFor(() =>
+        callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] })
+      );
+
+      expect(screen.queryByTestId('bulkCloseAlertOnAddExceptionCheckbox')).toBeNull();
+    });
+
+    it('shows nothing about it for an item that does not say what it applies to', () => {
+      renderFlyout(getExceptionListItemSchemaMock());
+
+      expect(screen.queryByTestId('exceptionItemAppliesTo')).toBeNull();
+      expect(screen.queryByTestId('exceptionComputedColumnsWarning')).toBeNull();
+    });
+  });
 });

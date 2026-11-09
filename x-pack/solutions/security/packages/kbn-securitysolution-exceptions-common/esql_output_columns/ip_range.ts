@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isIP } from 'net';
+import { isIP } from './ip';
 
 const ZERO = BigInt(0);
 const ONE = BigInt(1);

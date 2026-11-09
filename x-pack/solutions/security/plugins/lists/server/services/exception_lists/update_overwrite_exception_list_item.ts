@@ -15,10 +15,12 @@ import {
   transformUpdateCommentsToComments,
 } from './utils';
 import { getExceptionListItem } from './get_exception_list_item';
+import { assertAppliesToIsNotChanged, validateItemForList } from './utils/esql_output_columns';
 import type { UpdateExceptionListItemOptions } from './update_exception_list_item';
 
 export const updateOverwriteExceptionListItem = async ({
   _version,
+  appliesTo,
   comments,
   entries,
   expireTime,
@@ -44,6 +46,16 @@ export const updateOverwriteExceptionListItem = async ({
   if (exceptionListItem == null) {
     return null;
   } else {
+    // This update replaces the item: an item without `appliesTo` applies to the source documents
+    assertAppliesToIsNotChanged({ requested: appliesTo, stored: exceptionListItem.applies_to });
+    await validateItemForList({
+      appliesTo,
+      entries,
+      listId: exceptionListItem.list_id,
+      namespaceType,
+      osTypes,
+      savedObjectsClient,
+    });
     const transformedComments = transformUpdateCommentsToComments({
       comments,
       existingComments: exceptionListItem.comments,
@@ -52,6 +64,7 @@ export const updateOverwriteExceptionListItem = async ({
     const savedObject = await savedObjectsClient.create<ExceptionListSoSchema>(
       savedObjectType,
       {
+        applies_to: appliesTo ?? exceptionListItem.applies_to,
         comments: transformedComments,
         created_at: exceptionListItem.created_at,
         created_by: exceptionListItem.created_by,
@@ -69,7 +82,8 @@ export const updateOverwriteExceptionListItem = async ({
         tie_breaker_id: exceptionListItem.tie_breaker_id,
         type: type ?? exceptionListItem.type,
         updated_by: user,
-        version: exceptionListItem._version ? parseInt(exceptionListItem._version, 10) : undefined,
+        // An item has no version of its own. The version of the saved object is a string (`_version`), which parseInt read as NaN.
+        version: undefined,
       },
       {
         id: id ?? exceptionListItem.id,

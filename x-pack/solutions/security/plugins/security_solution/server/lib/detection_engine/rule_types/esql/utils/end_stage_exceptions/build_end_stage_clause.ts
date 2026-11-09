@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { isIP } from 'net';
 import type {
   EntriesArray,
   ExceptionListItemSchema,
@@ -16,8 +15,17 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { ListOperatorEnum, ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
-import { toIpRange } from './ip_range';
-import type { EndStageColumnType, EndStageItem, OutputColumns, SkipReason } from './types';
+import {
+  isBooleanValue,
+  isIpValue,
+  isVersionValue,
+  parseDateValue,
+  parseIntegerValue,
+  toIpRange,
+  toLikePattern,
+} from '@kbn/securitysolution-exceptions-common/esql_output_columns';
+import type { DateColumnType } from '@kbn/securitysolution-exceptions-common/esql_output_columns';
+import type { EndStageColumnType, EndStageItem, SkipReason } from './types';
 import { SkipReasonCode, isEndStageColumnType } from './types';
 
 type Entry = EntriesArray[number];
@@ -39,19 +47,6 @@ const DATE_TYPES: ReadonlySet<EndStageColumnType> = new Set<EndStageColumnType>(
   'date_nanos',
 ]);
 
-const INTEGER_RANGES: Readonly<Record<IntegerColumnType, readonly [bigint, bigint]>> = {
-  integer: [BigInt('-2147483648'), BigInt('2147483647')],
-  long: [BigInt('-9223372036854775807'), BigInt('9223372036854775807')],
-  unsigned_long: [BigInt(0), BigInt('18446744073709551615')],
-};
-
-// a number with more digits fails the whole query in ES|QL, instead of the cast returning null
-const VERSION_PATTERN = /^\d{1,9}(\.\d{1,9}){0,2}([-+][0-9A-Za-z.-]+)?$/;
-const DATE_PATTERN =
-  /^(\d{4})(?:-(\d{2})(?:-(\d{2})(?:T(\d{2})(?::(\d{2})(?::(\d{2})(?:\.(\d{1,9}))?)?)?)?)?)?(Z|[+-]\d{2}(?::?\d{2})?)?$/;
-const OFFSET_PATTERN = /^([+-])(\d{2}):?(\d{2})?$/;
-/** The largest offset that the DSL accepts is 18:00, as a Java zone offset is. */
-const MAX_OFFSET_MINUTES = 18 * 60;
 const SAFE_SEGMENT = /^[@a-zA-Z_][a-zA-Z0-9_]*$/;
 /** Words that ES|QL does not accept as an unquoted column name, or reads as a literal. */
 const RESERVED_WORDS: ReadonlySet<string> = new Set([
@@ -76,6 +71,9 @@ const RESERVED_WORDS: ReadonlySet<string> = new Set([
   'with',
 ]);
 
+/** The ES|QL lexer needs a character after the `_` or the `@` that starts an unquoted name, so a segment that is only one of them is quoted. */
+const LONE_PREFIX_SEGMENTS: ReadonlySet<string> = new Set(['_', '@']);
+
 const STRING_ESCAPES: Readonly<Record<string, string>> = {
   '\\': '\\\\',
   '"': '\\"',
@@ -87,7 +85,7 @@ const STRING_ESCAPES: Readonly<Record<string, string>> = {
 const escapeEsqlString = (value: string): string =>
   value.replace(/[\\"\n\r\t]/g, (char) => STRING_ESCAPES[char] ?? char);
 
-/** Quotes each dotted segment of a column name that is not a plain identifier or is a reserved word, or the whole name when a segment is empty. */
+/** Quotes each dotted segment of a column name that is not a plain identifier, is a reserved word or is a lone `_` or `@`, or the whole name when a segment is empty. */
 export const quoteColumn = (column: string): string => {
   const segments = column.split('.');
   if (segments.some((segment) => segment === '')) {
@@ -95,7 +93,9 @@ export const quoteColumn = (column: string): string => {
   }
   return segments
     .map((segment) =>
-      SAFE_SEGMENT.test(segment) && !RESERVED_WORDS.has(segment.toLowerCase())
+      SAFE_SEGMENT.test(segment) &&
+      !LONE_PREFIX_SEGMENTS.has(segment) &&
+      !RESERVED_WORDS.has(segment.toLowerCase())
         ? segment
         : `\`${segment.replace(/`/g, '``')}\``
     )
@@ -103,12 +103,8 @@ export const quoteColumn = (column: string): string => {
 };
 
 const toIntegerLiteral = (value: string, type: IntegerColumnType): string | undefined => {
-  if (!/^[+-]?\d+$/.test(value)) {
-    return undefined;
-  }
-  const [min, max] = INTEGER_RANGES[type];
-  const parsed = BigInt(value);
-  return parsed >= min && parsed <= max ? `${parsed.toString()}::${type}` : undefined;
+  const parsed = parseIntegerValue(value, type);
+  return parsed === undefined ? undefined : `${parsed.toString()}::${type}`;
 };
 
 /** A literal for the column type, or `undefined` when the value does not parse as that type (a failed cast would become `null` and exclude every row). */
@@ -118,15 +114,15 @@ const toLiteral = (value: string, type: EndStageColumnType): string | undefined 
     case 'text':
       return `"${escapeEsqlString(value)}"`;
     case 'boolean':
-      return value === 'true' || value === 'false' ? value : undefined;
+      return isBooleanValue(value) ? value : undefined;
     case 'integer':
     case 'long':
     case 'unsigned_long':
       return toIntegerLiteral(value, type);
     case 'ip':
-      return isIP(value) !== 0 ? `"${value}"::ip` : undefined;
+      return isIpValue(value) ? `"${value}"::ip` : undefined;
     case 'version':
-      return VERSION_PATTERN.test(value) ? `"${value}"::version` : undefined;
+      return isVersionValue(value) ? `"${value}"::version` : undefined;
     default:
       return undefined;
   }
@@ -156,92 +152,26 @@ const toListExpression = (elements: readonly string[], type: EndStageColumnType)
   return conversion == null ? list : `${conversion}(${list})`;
 };
 
-const MS_PER_SECOND = 1000;
-const MS_PER_MINUTE = 60 * MS_PER_SECOND;
-const MS_PER_HOUR = 60 * MS_PER_MINUTE;
-const MS_PER_DAY = 24 * MS_PER_HOUR;
-
-const hasOffset = (zone: string | undefined): boolean => zone !== undefined && zone !== 'Z';
-
-/** The offset of a date value in milliseconds, or `undefined` for an offset that the DSL does not accept. */
-const toOffsetMs = (zone: string | undefined): number | undefined => {
-  if (zone === undefined || zone === 'Z') {
-    return 0;
-  }
-  const parts = OFFSET_PATTERN.exec(zone);
-  if (parts == null) {
-    return undefined;
-  }
-  const [, sign, hours, minutes = '00'] = parts;
-  const total = Number(hours) * 60 + Number(minutes);
-  if (Number(minutes) > 59 || total > MAX_OFFSET_MINUTES) {
-    return undefined;
-  }
-  return (sign === '-' ? -1 : 1) * total * MS_PER_MINUTE;
-};
-
 /** The predicate that matches a date value the way the DSL does, rounded to the unit that the value writes. */
 const toDatePredicate = (
   column: string,
   value: string,
   type: EndStageColumnType
 ): { predicate: string } | SkipReason => {
-  const match = DATE_PATTERN.exec(value);
-  const invalid: SkipReason = {
-    code: SkipReasonCode.ValueNotSupported,
-    explanation: `value "${value}" cannot be written for a column of type ${type} because it is not in a supported format`,
-  };
-  if (match == null) {
-    return invalid;
+  const parsed = parseDateValue(value, type as DateColumnType);
+  if (parsed === undefined) {
+    return {
+      code: SkipReasonCode.ValueNotSupported,
+      explanation: `value "${value}" cannot be written for a column of type ${type} because it is not in a supported format`,
+    };
   }
-  const [, year, month, day, hour, minute, second, fraction, zone] = match;
-  const offsetMs = toOffsetMs(zone);
-  if (offsetMs === undefined) {
-    return invalid;
-  }
-  const parts = [year, month ?? '1', day ?? '1', hour ?? '0', minute ?? '0', second ?? '0'].map(
-    Number
-  );
-  const [y, mo, d, h, mi, s] = parts;
-  const localMs = Date.UTC(y, mo - 1, d, h, mi, s);
-  // The value is read in its own offset, and the DSL matches the unit that it writes in UTC.
-  const lowerMs = localMs - offsetMs;
-  const roundTrips =
-    y >= 1000 &&
-    new Date(localMs).getUTCFullYear() === y &&
-    new Date(localMs).getUTCMonth() === mo - 1 &&
-    new Date(localMs).getUTCDate() === d &&
-    h < 24 &&
-    mi < 60 &&
-    s < 60;
-  // The DSL fails on a zone with no time (`2026-10-01Z`), and on a `date_nanos` value with an hour or a minute and
-  // no seconds, so the executor does not write them either.
-  const formatAcceptedByDsl =
-    (zone === undefined || hour !== undefined) &&
-    !(type === 'date_nanos' && hour !== undefined && second === undefined);
-  if (!roundTrips || !formatAcceptedByDsl) {
-    return invalid;
-  }
-
+  const { lowerMs, unitMs, fraction, hasOffset } = parsed;
   if (fraction != null) {
-    const maxDigits = type === 'date_nanos' ? 9 : 3;
-    if (fraction.length > maxDigits) {
-      return invalid;
-    }
     // A value with an offset is written in UTC, which is the instant that the DSL compares.
-    const instant = hasOffset(zone)
+    const instant = hasOffset
       ? `${new Date(lowerMs).toISOString().slice(0, 19)}.${fraction}Z`
       : value;
     return { predicate: `MV_CONTAINS(${column}, "${instant}"::${type})` };
-  }
-
-  let unitMs = MS_PER_DAY;
-  if (second != null) {
-    unitMs = MS_PER_SECOND;
-  } else if (minute != null) {
-    unitMs = MS_PER_MINUTE;
-  } else if (hour != null) {
-    unitMs = MS_PER_HOUR;
   }
   const lower = new Date(lowerMs).toISOString();
   const lastInstant = new Date(lowerMs + unitMs - 1).toISOString();
@@ -252,25 +182,11 @@ const toDatePredicate = (
   };
 };
 
-/** Turns a DSL wildcard value into an ES|QL `LIKE` pattern. Both treat `\` as the escape character. */
-const toLikePattern = (value: string): string | undefined => {
-  let pattern = '';
-  for (let i = 0; i < value.length; i++) {
-    const char = value[i];
-    if (char !== '\\') {
-      pattern += char;
-    } else {
-      const next = value[i + 1];
-      if (next == null) {
-        return undefined;
-      }
-      // `\*`, `\?` and `\\` stay escaped; the DSL reads an escaped ordinary character as the character itself.
-      pattern += next === '*' || next === '?' || next === '\\' ? `\\${next}` : next;
-      i++;
-    }
-  }
-  return pattern;
-};
+const MAX_VALUE_IN_REASON = 100;
+
+/** A value as it is shown in a message, cut when it is long, because a wildcard value can be very long. */
+const truncateValue = (value: string): string =>
+  value.length > MAX_VALUE_IN_REASON ? `${value.slice(0, MAX_VALUE_IN_REASON)}...` : value;
 
 /** The value cannot be written for the column. The rule fails, because an item that is not applied lets alerts through. */
 const toInvalidValueReason = (
@@ -279,7 +195,9 @@ const toInvalidValueReason = (
   field: string
 ): SkipReason => ({
   code: SkipReasonCode.ValueNotSupported,
-  explanation: `value "${value}" cannot be written for a column of type ${type} at the end of the query`,
+  explanation: `value "${truncateValue(
+    value
+  )}" cannot be written for a column of type ${type} at the end of the query`,
   fields: [field],
 });
 
@@ -299,7 +217,7 @@ const SUPPORTED_ENTRY_TYPES: ReadonlySet<string> = new Set([
 const isSupportedEntry = (entry: Entry): entry is SupportedEntry =>
   SUPPORTED_ENTRY_TYPES.has(entry.type);
 
-const compileEntry = (entry: Entry, columns: OutputColumns): CompiledEntry => {
+const compileEntry = (entry: Entry): CompiledEntry => {
   if (!isSupportedEntry(entry)) {
     return toSkipResult({
       code: SkipReasonCode.EntryTypeNotSupported,
@@ -307,11 +225,12 @@ const compileEntry = (entry: Entry, columns: OutputColumns): CompiledEntry => {
       fields: [entry.field],
     });
   }
-  const columnType = columns.get(entry.field);
+  // The API requires `column_type` on every entry of an item on the output columns, so a missing or unknown type means that the stored item is not valid
+  const columnType = entry.column_type;
   if (columnType == null || !isEndStageColumnType(columnType)) {
     return toSkipResult({
       code: SkipReasonCode.ColumnTypeNotSupported,
-      explanation: `column "${entry.field}" has type "${
+      explanation: `the entry for column "${entry.field}" has the type "${
         columnType ?? 'unknown'
       }", which cannot be tested at the end of the query`,
       fields: [entry.field],
@@ -415,12 +334,10 @@ const compileEntry = (entry: Entry, columns: OutputColumns): CompiledEntry => {
 };
 
 /**
- * Compiles an exception item into the expression of a `WHERE` stage that keeps the rows the item does not exclude.
+ * Compiles an exception item into the expression of a `WHERE` stage that keeps the rows the item does not exclude. Each entry
+ * is written for the `column_type` that it declares.
  */
-export const compileEndStageItem = (
-  item: ExceptionListItemSchema,
-  columns: OutputColumns
-): Compiled => {
+export const compileEndStageItem = (item: ExceptionListItemSchema): Compiled => {
   if (item.os_types != null && item.os_types.length > 0) {
     return toSkipResult({
       code: SkipReasonCode.OsTypesNotSupported,
@@ -433,7 +350,7 @@ export const compileEndStageItem = (
   const entries: Array<{ predicate: string; terms: number; negated?: boolean }> = [];
   const skipReasons: SkipReason[] = [];
   for (const entry of item.entries) {
-    const compiled = compileEntry(entry, columns);
+    const compiled = compileEntry(entry);
     if ('skipReasons' in compiled) {
       skipReasons.push(...compiled.skipReasons);
     } else {

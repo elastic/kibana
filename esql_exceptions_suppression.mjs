@@ -12,13 +12,13 @@
 //
 //   node esql_exceptions_suppression.mjs
 //
-// The rule groups by `host` and has two exception items: `tier is GOLD` on a column that the query computes (applied at the end of
-// the query) and `user is svc` on a source field (applied in the DSL filter).
-//   1. setting enabled, suppression per rule execution
-//   2. setting disabled, suppression per rule execution: the exception on the computed column is not applied
-//   3. setting enabled, suppression over 30 minutes: a second run adds documents, and only the ones that are not excluded
-//      create alerts or raise the suppressed count
-// The script changes the advanced setting and puts it back, and removes what it creates. It needs a running stack and never starts one.
+// The rule groups by `host` and has two exception items: `tier is GOLD` on a column that the query computes (applies_to
+// esql_output_columns, column_type keyword, applied at the end of the query) and `user is svc` on a source field (applies_to absent,
+// applied in the DSL filter).
+//   1. suppression per rule execution
+//   2. suppression over 30 minutes: a second run adds documents, and only the ones that are not excluded create alerts or raise the
+//      suppressed count
+// The script removes what it creates. It needs a running stack and never starts one.
 
 const KBN = process.env.KBN_URL || 'http://localhost:5601/kbn';
 const ES = process.env.ES_URL || 'http://localhost:9200';
@@ -27,7 +27,6 @@ const auth =
   Buffer.from(`${process.env.ES_USER || 'elastic'}:${process.env.ES_PASS || 'changeme'}`).toString(
     'base64'
   );
-const SETTING_ID = 'securitySolution:enableEsqlRuleComputedFieldExceptions';
 const INDEX = 'esql_suppression_try';
 const LIST_ID = 'esql-suppression-list';
 const RULE_ID = 'esql-suppression-rule';
@@ -86,20 +85,12 @@ const QUERY = `FROM ${INDEX} METADATA _id | EVAL tier = TO_UPPER(tier_src) | KEE
 // host -> the number of suppressed documents of its alert (a single document has 0)
 const SCENARIOS = [
   {
-    name: '1. setting enabled, suppression per rule execution',
-    setting: true,
+    name: '1. suppression per rule execution',
     duration: undefined,
     expectedFirstRun: { 'host-b': 2, 'host-c': 1, 'host-e': 0 },
   },
   {
-    name: '2. setting disabled, suppression per rule execution (the computed column is not applied)',
-    setting: false,
-    duration: undefined,
-    expectedFirstRun: { 'host-a': 3, 'host-b': 2, 'host-c': 2, 'host-e': 0 },
-  },
-  {
-    name: '3. setting enabled, suppression over 30 minutes, a second run with more documents',
-    setting: true,
+    name: '2. suppression over 30 minutes, a second run with more documents',
     duration: { value: 30, unit: 'm' },
     expectedFirstRun: { 'host-b': 2, 'host-c': 1, 'host-e': 0 },
     expectedSecondRun: { 'host-b': 3, 'host-c': 1, 'host-e': 1, 'host-f': 0 },
@@ -171,15 +162,6 @@ const readAlerts = async (ruleUuid) => {
 const sameAlerts = (actual, expected) =>
   JSON.stringify(Object.entries(actual).sort()) === JSON.stringify(Object.entries(expected).sort());
 
-const setSetting = async (value) => {
-  must(
-    'setting',
-    await kbn('/internal/kibana/settings', 'POST', { changes: { [SETTING_ID]: value } }, INTERNAL)
-  );
-  // the server keeps the value of the setting for 10 seconds
-  await sleep(11000);
-};
-
 const removeAll = async () => {
   await kbn(`/api/detection_engine/rules?rule_id=${RULE_ID}`, 'DELETE');
   await es('/.alerts-security.alerts-*/_delete_by_query?refresh=true&conflicts=proceed', 'POST', {
@@ -187,12 +169,8 @@ const removeAll = async () => {
   });
 };
 
-let previousSetting;
 let exitCode = 0;
 try {
-  previousSetting = (await kbn('/internal/kibana/settings', 'GET', undefined, INTERNAL)).body
-    ?.settings?.[SETTING_ID]?.userValue;
-
   await removeAll();
   await kbn(`/api/exception_lists?list_id=${LIST_ID}&namespace_type=single`, 'DELETE');
   await es(`/${INDEX}`, 'DELETE');
@@ -207,9 +185,10 @@ try {
       namespace_type: 'single',
     })
   );
-  for (const [itemId, field, value] of [
-    ['tier', 'tier', 'GOLD'],
-    ['user', 'user', 'svc'],
+  // The computed column is declared as an output column of type keyword (TO_UPPER returns a keyword); the source field has no applies_to
+  for (const [itemId, field, value, outputColumn] of [
+    ['tier', 'tier', 'GOLD', true],
+    ['user', 'user', 'svc', false],
   ])
     must(
       `exception ${itemId}`,
@@ -220,12 +199,23 @@ try {
         description: 'suppression try',
         type: 'simple',
         namespace_type: 'single',
-        entries: [{ field, operator: 'included', type: 'match', value }],
+        ...(outputColumn ? { applies_to: 'esql_output_columns' } : {}),
+        entries: [
+          {
+            field,
+            operator: 'included',
+            type: 'match',
+            value,
+            ...(outputColumn ? { column_type: 'keyword' } : {}),
+          },
+        ],
       })
     );
 
   console.log(`Rule query: ${QUERY}`);
-  console.log('Exceptions: "tier is GOLD" (computed column) and "user is svc" (source field)\n');
+  console.log(
+    'Exceptions: "tier is GOLD" (output column, applies_to esql_output_columns) and "user is svc" (source field, DSL filter)\n'
+  );
 
   for (const scenario of SCENARIOS) {
     console.log(scenario.name);
@@ -233,7 +223,6 @@ try {
     await es(`/${INDEX}`, 'DELETE');
     await createIndex();
     await bulk(FIRST_DOCS);
-    await setSetting(scenario.setting);
 
     const started = new Date();
     const rule = must(
@@ -291,13 +280,6 @@ try {
   await removeAll();
   await kbn(`/api/exception_lists?list_id=${LIST_ID}&namespace_type=single`, 'DELETE');
   await es(`/${INDEX}`, 'DELETE');
-  await kbn(
-    '/internal/kibana/settings',
-    'POST',
-    { changes: { [SETTING_ID]: previousSetting ?? null } },
-    INTERNAL
-  );
-  console.log(`The setting is back to ${previousSetting ?? 'its default'}`);
 }
 console.log(exitCode === 0 ? 'Every check matched.' : 'At least one check DIFFERS.');
 process.exitCode = exitCode;

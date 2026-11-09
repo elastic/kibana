@@ -7,6 +7,11 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import {
+  EXCEPTION_APPLIES_TO,
+  isEsqlOutputColumnsItem,
+} from '@kbn/securitysolution-exceptions-common/esql_output_columns';
+import type { ExceptionAppliesTo } from '@kbn/securitysolution-exceptions-common/esql_output_columns';
+import {
   addIdToItem,
   removeIdFromItem,
   validateHasWildcardWithWrongOperator,
@@ -53,6 +58,7 @@ import {
   doesNotMatchOperator,
   ALL_OPERATORS_SANS_MATCHES,
 } from '../autocomplete_operators';
+import { isEsqlOutputColumnEntryComplete } from '../esql_output_columns';
 
 import type {
   BuilderEntry,
@@ -75,7 +81,12 @@ export const filterExceptionItems = (
   exceptions: ExceptionsBuilderExceptionItem[]
 ): ExceptionsBuilderReturnExceptionItem[] => {
   return exceptions.reduce<ExceptionsBuilderReturnExceptionItem[]>((acc, exception) => {
+    const appliesToEsqlOutputColumns = isEsqlOutputColumnsItem(exception);
     const entries = exception.entries.reduce<BuilderEntry[]>((nestedAcc, singleEntry) => {
+      // The entries of an item on the ES|QL output columns need a column type, and are only the ones that the API accepts
+      if (appliesToEsqlOutputColumns && !isEsqlOutputColumnEntryComplete(singleEntry)) {
+        return nestedAcc;
+      }
       const strippedSingleEntry = removeIdFromItem(singleEntry);
       if (entriesNested.is(strippedSingleEntry)) {
         const nestedEntriesArray = strippedSingleEntry.entries.filter((singleNestedEntry) => {
@@ -146,12 +157,18 @@ export const getNewExceptionItem = ({
   listId,
   namespaceType,
   name,
+  appliesTo,
 }: {
   listId: string | undefined;
   namespaceType: NamespaceType | undefined;
   name: string;
+  /** What the item applies to. An item that does not say it applies to the source documents. */
+  appliesTo?: ExceptionAppliesTo;
 }): CreateExceptionListItemBuilderSchema => {
   return {
+    ...(appliesTo !== undefined && appliesTo !== EXCEPTION_APPLIES_TO.SOURCE_DOCUMENTS
+      ? { applies_to: appliesTo }
+      : {}),
     comments: [],
     description: `Exception list item`,
     entries: addIdToEntries([

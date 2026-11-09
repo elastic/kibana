@@ -51,6 +51,7 @@ interface ImportExceptionListAndItemsOptions {
   exceptions: PromiseFromStreams;
   overwrite: boolean;
   generateNewListId: boolean;
+  /** Whether the items that apply to the ES|QL output columns can be imported */
   savedObjectsClient: SavedObjectsClientContract;
   user: string;
 }

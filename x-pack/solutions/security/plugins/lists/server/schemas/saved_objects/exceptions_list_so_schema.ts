@@ -7,6 +7,7 @@
 
 import * as t from 'io-ts';
 import {
+  appliesTo,
   commentsArrayOrUndefined,
   created_at,
   created_by,
@@ -32,26 +33,30 @@ import { versionOrUndefined } from '@kbn/securitysolution-io-ts-types';
  * Superset saved object of both lists and list items since they share the same saved object type.
  */
 export const exceptionListSoSchema = t.exact(
-  t.type({
-    comments: commentsArrayOrUndefined,
-    created_at,
-    created_by,
-    description,
-    entries: entriesArrayOrUndefined,
-    expire_time: expireTimeOrUndefined,
-    immutable: immutableOrUndefined,
-    item_id: itemIdOrUndefined,
-    list_id,
-    list_type,
-    meta: metaOrUndefined,
-    name,
-    os_types: osTypeArray,
-    tags,
-    tie_breaker_id,
-    type: t.union([exceptionListType, exceptionListItemType]),
-    updated_by,
-    version: versionOrUndefined,
-  })
+  t.intersection([
+    t.type({
+      comments: commentsArrayOrUndefined,
+      created_at,
+      created_by,
+      description,
+      entries: entriesArrayOrUndefined,
+      expire_time: expireTimeOrUndefined,
+      immutable: immutableOrUndefined,
+      item_id: itemIdOrUndefined,
+      list_id,
+      list_type,
+      meta: metaOrUndefined,
+      name,
+      os_types: osTypeArray,
+      tags,
+      tie_breaker_id,
+      type: t.union([exceptionListType, exceptionListItemType]),
+      updated_by,
+      version: versionOrUndefined,
+    }),
+    // optional, which keeps compiling the code that builds the attributes of a list or an item without it
+    t.partial({ applies_to: appliesTo }),
+  ])
 );
 
 export type ExceptionListSoSchema = t.TypeOf<typeof exceptionListSoSchema>;

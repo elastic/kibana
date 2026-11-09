@@ -15,10 +15,7 @@ import {
   getMvExpandFields,
 } from '@kbn/securitysolution-utils';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import {
-  buildExceptionFilter,
-  removeExpiredExceptions,
-} from '@kbn/lists-plugin/server/services/exception_lists';
+import { removeExpiredExceptions } from '@kbn/lists-plugin/server/services/exception_lists';
 import { buildEsqlSearchRequest } from './build_esql_search_request';
 import type { BuildEqlSearchRequestParams } from './build_esql_search_request';
 import { performEsqlRequest } from './esql_request';
@@ -38,6 +35,7 @@ import {
 import { fetchSourceDocuments } from './fetch_source_documents';
 import { applyEndStageExceptions } from './utils/end_stage_exceptions/apply_end_stage_exceptions';
 import type { EndStageExceptionsResult } from './utils/end_stage_exceptions/apply_end_stage_exceptions';
+import { ColumnTypeMismatchError } from './utils/end_stage_exceptions/column_type_mismatch_error';
 import { EndStageLimitExceededError } from './utils/end_stage_exceptions/end_stage_limit_exceeded_error';
 import {
   ExceptionsClauseLimitError,
@@ -46,7 +44,6 @@ import {
 import { InvalidExceptionValuesError } from './utils/end_stage_exceptions/invalid_exception_values_error';
 import { buildReasonMessageForEsqlAlert } from '../utils/reason_formatters';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
-import { ENABLE_ESQL_RULE_COMPUTED_FIELD_EXCEPTIONS_SETTING } from '../../../../../common/constants';
 import type { SecurityRuleServices, SecuritySharedParams, SignalSource } from '../types';
 import { getDataTierFilter } from '../utils/get_data_tier_filter';
 import { getDataStreamNamespaceFilter } from '../utils/get_data_stream_namespace_filter';
@@ -73,8 +70,8 @@ import type { ScheduleNotificationResponseActionsService } from '../../rule_resp
 
 const MAX_EXCLUDED_DOCUMENTS = 100 * 1000;
 
-/** Returns the query and the DSL filter with the exceptions on computed columns applied at the end of the query, or `undefined` when the setting is off or there are no exceptions. */
-const getEndStageExceptions = async ({
+/** Returns the query with the exceptions on the output columns applied at the end of the query, or the same query when there are none, with the warnings for the rule. */
+const getQueryWithOutputColumnExceptions = async ({
   sharedParams,
   services,
   transformedQuery,
@@ -90,28 +87,19 @@ const getEndStageExceptions = async ({
   filters: BuildEqlSearchRequestParams['filters'];
   excludedDocuments: Record<string, ExcludedDocument[]>;
   ruleExecutionTimeout: string | undefined;
-}): Promise<EndStageExceptionsResult | undefined> => {
+}): Promise<EndStageExceptionsResult> => {
   const {
-    allExceptionItems,
+    outputColumnExceptionItems,
     startedAt = new Date(),
-    completeRule,
     tuple,
     primaryTimestamp,
     secondaryTimestamp,
     exceptionFilter,
-    unprocessedExceptions,
     ruleExecutionLogger,
-    listClient,
   } = sharedParams;
-  if (!allExceptionItems?.length) {
-    return undefined;
-  }
-
-  const isEnabled = await services.uiSettingsClient.get<boolean>(
-    ENABLE_ESQL_RULE_COMPUTED_FIELD_EXCEPTIONS_SETTING
-  );
-  if (!isEnabled) {
-    return undefined;
+  const items = removeExpiredExceptions(outputColumnExceptionItems ?? [], startedAt);
+  if (items.length === 0) {
+    return { query: transformedQuery, warnings: [] };
   }
 
   return applyEndStageExceptions({
@@ -131,32 +119,7 @@ const getEndStageExceptions = async ({
       excludedDocuments,
       ruleExecutionTimeout,
     }).filter,
-    // the time range, tiers and namespaces of the real request, without the exceptions: the source fields are those of the indices that the query reads
-    fieldCapsFilter: buildEsqlSearchRequest({
-      query: transformedQuery,
-      from: tuple.from.toISOString(),
-      to: tuple.to.toISOString(),
-      size,
-      filters,
-      primaryTimestamp,
-      secondaryTimestamp,
-      exceptionFilter: undefined,
-      excludedDocuments: {},
-      ruleExecutionTimeout,
-    }).filter,
-    indices: getIndexListFromEsqlQuery(completeRule.ruleParams.query),
-    items: removeExpiredExceptions(allExceptionItems, startedAt),
-    exceptionFilter,
-    unprocessedExceptions,
-    buildDslFilter: (dslItems) =>
-      buildExceptionFilter({
-        startedAt,
-        alias: null,
-        excludeExceptions: true,
-        chunkSize: 10,
-        lists: dslItems,
-        listClient,
-      }),
+    items,
   });
 };
 
@@ -227,23 +190,19 @@ export const esqlExecutor = async ({
     let iteration = 0;
     let totalEventsFound = 0;
     try {
-      // With the advanced setting enabled, exceptions on columns that the query computes are inlined at the
-      // end of the query, and the DSL filter only keeps the other exceptions. Without it nothing changes.
-      const endStageExceptions = await getEndStageExceptions({
-        sharedParams,
-        services,
-        transformedQuery,
-        size,
-        filters: [...dataTiersFilters, ...dataStreamNamespaceFilters],
-        excludedDocuments,
-        ruleExecutionTimeout,
-      });
-      const queryToRun = endStageExceptions?.query ?? transformedQuery;
-      const requestExceptionFilter = endStageExceptions
-        ? endStageExceptions.exceptionFilter
-        : exceptionFilter;
-      const requestUnprocessedExceptions =
-        endStageExceptions?.unprocessedExceptions ?? unprocessedExceptions;
+      // The exceptions on the output columns of the query are inlined at the end of the query. The other exceptions
+      // are in the DSL filter, which the common wrapper builds from them alone.
+      const { query: queryToRun, warnings: outputColumnExceptionWarnings } =
+        await getQueryWithOutputColumnExceptions({
+          sharedParams,
+          services,
+          transformedQuery,
+          size,
+          filters: [...dataTiersFilters, ...dataStreamNamespaceFilters],
+          excludedDocuments,
+          ruleExecutionTimeout,
+        });
+      result.warningMessages.push(...outputColumnExceptionWarnings);
 
       while (result.createdSignalsCount <= tuple.maxSignals) {
         const totalExcludedDocumentsLength = Object.values(excludedDocuments).reduce(
@@ -265,7 +224,7 @@ export const esqlExecutor = async ({
           filters: [...dataTiersFilters, ...dataStreamNamespaceFilters],
           primaryTimestamp,
           secondaryTimestamp,
-          exceptionFilter: requestExceptionFilter,
+          exceptionFilter,
           excludedDocuments,
           ruleExecutionTimeout,
         });
@@ -277,10 +236,9 @@ export const esqlExecutor = async ({
         };
         const hasLoggedRequestsReachedLimit = iteration >= 2;
 
-        const exceptionsWereAppended =
-          endStageExceptions != null && endStageExceptions.query !== transformedQuery;
+        const exceptionsWereAppended = queryToRun !== transformedQuery;
         ruleExecutionLogger.trace(`ES|QL query to execute\n${JSON.stringify(esqlRequest)}`);
-        const exceptionsWarning = getUnprocessedExceptionsWarnings(requestUnprocessedExceptions);
+        const exceptionsWarning = getUnprocessedExceptionsWarnings(unprocessedExceptions);
         if (exceptionsWarning) {
           result.warningMessages.push(exceptionsWarning);
         }
@@ -466,6 +424,7 @@ export const esqlExecutor = async ({
       if (
         checkErrorDetails(error).isUserError ||
         error instanceof InvalidExceptionValuesError ||
+        error instanceof ColumnTypeMismatchError ||
         error instanceof EndStageLimitExceededError ||
         error instanceof ExceptionsClauseLimitError
       ) {

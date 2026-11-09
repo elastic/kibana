@@ -24,12 +24,37 @@ export type ExceptionListItemEntryOperator = z.infer<typeof ExceptionListItemEnt
 export type ExceptionListItemEntryOperatorEnum = typeof ExceptionListItemEntryOperator.enum;
 export const ExceptionListItemEntryOperatorEnum = ExceptionListItemEntryOperator.enum;
 
+/**
+  * The ES|QL type of the output column that the entry is tested on. Only used, and then required, in the entries of an
+item whose `applies_to` is `esql_output_columns`.
+
+  */
+export const EsqlOutputColumnType = lazySchema(() =>
+  z.enum([
+    'keyword',
+    'text',
+    'integer',
+    'long',
+    'unsigned_long',
+    'double',
+    'boolean',
+    'ip',
+    'version',
+    'date',
+    'date_nanos',
+  ])
+);
+export type EsqlOutputColumnType = z.infer<typeof EsqlOutputColumnType>;
+export type EsqlOutputColumnTypeEnum = typeof EsqlOutputColumnType.enum;
+export const EsqlOutputColumnTypeEnum = EsqlOutputColumnType.enum;
+
 export const ExceptionListItemEntryMatch = lazySchema(() =>
   z.object({
     type: z.literal('match'),
     field: NonEmptyString,
     value: NonEmptyString,
     operator: ExceptionListItemEntryOperator,
+    column_type: EsqlOutputColumnType.optional(),
   })
 );
 export type ExceptionListItemEntryMatch = z.infer<typeof ExceptionListItemEntryMatch>;
@@ -40,6 +65,7 @@ export const ExceptionListItemEntryMatchAny = lazySchema(() =>
     field: NonEmptyString,
     value: z.array(NonEmptyString).min(1),
     operator: ExceptionListItemEntryOperator,
+    column_type: EsqlOutputColumnType.optional(),
   })
 );
 export type ExceptionListItemEntryMatchAny = z.infer<typeof ExceptionListItemEntryMatchAny>;
@@ -62,6 +88,7 @@ export const ExceptionListItemEntryExists = lazySchema(() =>
     type: z.literal('exists'),
     field: NonEmptyString,
     operator: ExceptionListItemEntryOperator,
+    column_type: EsqlOutputColumnType.optional(),
   })
 );
 export type ExceptionListItemEntryExists = z.infer<typeof ExceptionListItemEntryExists>;
@@ -95,6 +122,7 @@ export const ExceptionListItemEntryMatchWildcard = lazySchema(() =>
     field: NonEmptyString,
     value: NonEmptyString,
     operator: ExceptionListItemEntryOperator,
+    column_type: EsqlOutputColumnType.optional(),
   })
 );
 export type ExceptionListItemEntryMatchWildcard = z.infer<

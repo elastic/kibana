@@ -104,11 +104,11 @@ export interface SecuritySharedParams<TParams extends RuleParams = RuleParams> {
   unprocessedExceptions: ExceptionListItemSchema[];
   exceptionFilter: Filter | undefined;
   /**
-   * Every exception item of the rule, expired ones included, before they are turned into `exceptionFilter`.
-   * Used by the ES|QL executor when the advanced setting `securitySolution:enableEsqlRuleComputedFieldExceptions`
-   * is enabled.
+   * The exception items of the rule that apply to the output columns of an ES|QL query, expired ones included. They are
+   * not in `exceptionFilter`, which only has the items on the source documents. Only the ES|QL executor applies them, and
+   * the other rule types have none.
    */
-  allExceptionItems?: ExceptionListItemSchema[];
+  outputColumnExceptionItems?: ExceptionListItemSchema[];
   /**
    * When the execution started. The ES|QL executor decides with it which exception items have expired, as the
    * common wrapper does when it builds `exceptionFilter`, whatever the end of the time range of the tuple is.

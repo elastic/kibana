@@ -22,9 +22,7 @@ import type { PersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/s
 import { createPersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
 import { getMvExpandFields } from '@kbn/securitysolution-utils';
 import type { EntriesArray } from '@kbn/securitysolution-io-ts-list-types';
-import { buildExceptionFilter } from '@kbn/lists-plugin/server/services/exception_lists';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
-import { ENABLE_ESQL_RULE_COMPUTED_FIELD_EXCEPTIONS_SETTING } from '../../../../../common/constants';
 
 jest.mock('../../routes/index/get_index_version');
 jest.mock('../utils/get_data_tier_filter', () => ({ getDataTierFilter: jest.fn() }));
@@ -34,10 +32,6 @@ jest.mock('../utils/bulk_create_suppressed_alerts_in_memory', () => ({
 jest.mock('./fetch_source_documents', () => ({ fetchSourceDocuments: jest.fn() }));
 jest.mock('./utils/validate_esql_query', () => ({
   validateEsqlQuery: jest.fn().mockResolvedValue(true),
-}));
-jest.mock('@kbn/lists-plugin/server/services/exception_lists', () => ({
-  ...jest.requireActual('@kbn/lists-plugin/server/services/exception_lists'),
-  buildExceptionFilter: jest.fn(),
 }));
 jest.mock('@kbn/securitysolution-utils', () => ({
   ...jest.requireActual('@kbn/securitysolution-utils'),
@@ -229,67 +223,53 @@ describe('esqlExecutor', () => {
   });
 
   describe('exceptions at the end of the query', () => {
-    const exceptionItem = (id: string, field: string, value: string) =>
-      getExceptionListItemSchemaMock({
+    const columnItem = (id: string, field: string, value: string, columnType = 'keyword') => ({
+      ...getExceptionListItemSchemaMock({
         item_id: id,
         name: id,
-        entries: [{ field, operator: 'included', type: 'match', value }] as EntriesArray,
-      });
-    const computedItem = exceptionItem('computed', 'risk', 'low');
-    const sourceItem = exceptionItem('source', 'host.name', 'dc-01');
+        entries: [
+          { field, operator: 'included', type: 'match', value, column_type: columnType },
+        ] as EntriesArray,
+      }),
+      applies_to: 'esql_output_columns' as const,
+    });
+    const computedItem = columnItem('computed', 'risk', 'low');
 
     const asyncQueryMock = () =>
       ruleServices.scopedClusterClient.asCurrentUser.esql.asyncQuery as unknown as jest.Mock;
+    const probeMock = () =>
+      ruleServices.scopedClusterClient.asCurrentUser.esql.query as unknown as jest.Mock;
 
     beforeEach(() => {
-      const client = ruleServices.scopedClusterClient.asCurrentUser;
-      (client.fieldCaps as unknown as jest.Mock).mockResolvedValue({
-        indices: ['logs-1'],
-        fields: { 'host.name': { keyword: {} }, host: { object: {} } },
-      });
-      (client.esql.query as unknown as jest.Mock).mockResolvedValue({
+      probeMock().mockResolvedValue({
         columns: [{ name: 'risk', type: 'keyword' }],
         values: [],
       });
     });
 
-    const setSetting = (enabled: boolean) => {
-      (ruleServices.uiSettingsClient.get as jest.Mock).mockImplementation(async (key: string) =>
-        key === ENABLE_ESQL_RULE_COMPUTED_FIELD_EXCEPTIONS_SETTING ? enabled : undefined
-      );
-    };
-
-    const withExceptions = (enabled: boolean) => {
-      setSetting(enabled);
+    const withExceptions = () => {
       mockedArguments.sharedParams = {
         ...sharedParams,
-        allExceptionItems: [sourceItem, computedItem],
+        outputColumnExceptionItems: [computedItem],
       };
     };
 
-    it('does not look at the exceptions when the setting is off', async () => {
-      withExceptions(false);
-
-      await esqlExecutor(mockedArguments);
-
-      const client = ruleServices.scopedClusterClient.asCurrentUser;
-      expect(client.fieldCaps).not.toHaveBeenCalled();
-      expect(client.esql.query).not.toHaveBeenCalled();
-      expect(asyncQueryMock().mock.calls[0][0].query).not.toContain('WHERE NOT');
-    });
-
-    it('appends the exceptions on computed columns to the query, before the limit', async () => {
-      withExceptions(true);
-      (buildExceptionFilter as jest.Mock).mockResolvedValue({
-        filter: undefined,
-        unprocessedExceptions: [],
-      });
+    it('appends the exceptions on the output columns to the query, before the limit', async () => {
+      withExceptions();
 
       await esqlExecutor(mockedArguments);
 
       expect(asyncQueryMock().mock.calls[0][0].query).toMatch(
         /\n\| WHERE NOT \(MV_CONTAINS\(risk, "low"\)\) \| limit \d+$/
       );
+    });
+
+    it('does not read the fields of the source indices, because the items say what they apply to', async () => {
+      withExceptions();
+
+      await esqlExecutor(mockedArguments);
+
+      expect(ruleServices.scopedClusterClient.asCurrentUser.fieldCaps).not.toHaveBeenCalled();
     });
 
     describe('with alert suppression', () => {
@@ -311,10 +291,6 @@ describe('esqlExecutor', () => {
           suppressedItemsCount: 1,
           alertsWereTruncated: false,
         });
-        (buildExceptionFilter as jest.Mock).mockResolvedValue({
-          filter: undefined,
-          unprocessedExceptions: [],
-        });
         // the rows that Elasticsearch returns are the rows that no exception excluded
         asyncQueryMock().mockResolvedValue({
           id: 'QUERY-ID',
@@ -334,8 +310,8 @@ describe('esqlExecutor', () => {
         };
       });
 
-      const withSuppression = (enabled: boolean) => {
-        withExceptions(enabled);
+      const withSuppression = () => {
+        withExceptions();
         mockedArguments.sharedParams = {
           ...mockedArguments.sharedParams,
           completeRule: {
@@ -346,7 +322,7 @@ describe('esqlExecutor', () => {
       };
 
       it('applies the exceptions at the end of the query and gives the suppression the rows that remain', async () => {
-        withSuppression(true);
+        withSuppression();
 
         const result = await esqlExecutor(mockedArguments);
 
@@ -366,27 +342,13 @@ describe('esqlExecutor', () => {
         ]);
       });
 
-      it('does not change the query or the rows of the suppression when the setting is off', async () => {
-        withSuppression(false);
-
-        await esqlExecutor(mockedArguments);
-
-        expect(asyncQueryMock().mock.calls[0][0].query).not.toContain('WHERE NOT');
-        expect(bulkCreateSuppressedAlertsInMemory).toHaveBeenCalledTimes(1);
-        const { enrichedEvents } = (bulkCreateSuppressedAlertsInMemory as jest.Mock).mock
-          .calls[0][0];
-        expect(enrichedEvents).toHaveLength(rows.length);
-      });
-
       it('fails the rule before the query runs when an exception has a value that cannot be written, as it does without suppression', async () => {
-        withSuppression(true);
+        withSuppression();
         mockedArguments.sharedParams = {
           ...mockedArguments.sharedParams,
-          allExceptionItems: [exceptionItem('computed', 'risk', 'low')],
+          outputColumnExceptionItems: [columnItem('computed', 'risk', 'low', 'integer')],
         };
-        (
-          ruleServices.scopedClusterClient.asCurrentUser.esql.query as unknown as jest.Mock
-        ).mockResolvedValue({ columns: [{ name: 'risk', type: 'integer' }], values: [] });
+        probeMock().mockResolvedValue({ columns: [{ name: 'risk', type: 'integer' }], values: [] });
 
         const result = await esqlExecutor(mockedArguments);
 
@@ -401,24 +363,16 @@ describe('esqlExecutor', () => {
       // The execution started at 10:03 and its time range ends at 09:58 (a rule with `to: now-5m`, or a manual run)
       const startedAt = new Date('2026-10-14T10:03:00.000Z');
       const itemExpiringAt = (id: string, field: string, expireTime: string) => ({
-        ...exceptionItem(id, field, 'low'),
+        ...columnItem(id, field, 'low'),
         expire_time: expireTime,
       });
 
-      beforeEach(() => {
-        setSetting(true);
-        (buildExceptionFilter as jest.Mock).mockResolvedValue({
-          filter: undefined,
-          unprocessedExceptions: [],
-        });
-      });
-
-      const run = (items: ReturnType<typeof itemExpiringAt>[]) => {
+      const run = (items: Array<ReturnType<typeof itemExpiringAt>>) => {
         mockedArguments.sharedParams = {
           ...sharedParams,
           tuple: { ...sharedParams.tuple, to: moment('2026-10-14T09:58:00.000Z') },
           startedAt,
-          allExceptionItems: [sourceItem, ...items],
+          outputColumnExceptionItems: items,
         };
         return esqlExecutor(mockedArguments);
       };
@@ -434,80 +388,60 @@ describe('esqlExecutor', () => {
 
         expect(asyncQueryMock().mock.calls[0][0].query).toContain('WHERE NOT');
       });
-
-      it('builds the DSL filter with the start of the execution, as the common wrapper does', async () => {
-        await run([itemExpiringAt('computed', 'risk', '2026-10-14T10:05:00.000Z')]);
-
-        expect(buildExceptionFilter).toHaveBeenCalledWith(expect.objectContaining({ startedAt }));
-      });
     });
 
-    it('asks _field_caps with the time range and without the exceptions, and the probe with the exceptions', async () => {
-      setSetting(true);
+    it('warns on the rule that it creates no alerts when an exception is true for every row, and writes a stage that keeps no row', async () => {
+      probeMock().mockResolvedValue({ columns: [{ name: 'risk', type: 'keyword' }], values: [] });
       mockedArguments.sharedParams = {
         ...sharedParams,
-        allExceptionItems: [sourceItem, computedItem],
-        exceptionFilter: {
-          meta: { alias: null, negate: true, disabled: false },
-          query: { match_phrase: { 'host.name': 'dc-01' } },
-        },
+        outputColumnExceptionItems: [
+          {
+            ...getExceptionListItemSchemaMock({
+              item_id: 'only-exclusive',
+              name: 'only-exclusive',
+              entries: [
+                {
+                  field: 'ghost',
+                  operator: 'excluded',
+                  type: 'match',
+                  value: 'x',
+                  column_type: 'keyword',
+                },
+              ] as EntriesArray,
+            }),
+            applies_to: 'esql_output_columns' as const,
+          },
+        ],
       };
-      (buildExceptionFilter as jest.Mock).mockResolvedValue({
-        filter: undefined,
-        unprocessedExceptions: [],
-      });
 
-      await esqlExecutor(mockedArguments);
+      const result = await esqlExecutor(mockedArguments);
 
-      const client = ruleServices.scopedClusterClient.asCurrentUser;
-      const fieldCapsFilter = JSON.stringify(
-        (client.fieldCaps as unknown as jest.Mock).mock.calls[0][0].index_filter
-      );
-      const probeFilter = JSON.stringify(
-        (client.esql.query as unknown as jest.Mock).mock.calls[0][0].filter
-      );
-      expect(fieldCapsFilter).toContain('@timestamp');
-      expect(fieldCapsFilter).not.toContain('dc-01');
-      expect(probeFilter).toContain('dc-01');
+      expect(asyncQueryMock().mock.calls[0][0].query).toMatch(/\n\| WHERE false \| limit \d+$/);
+      expect(result.warningMessages).toEqual([
+        expect.stringContaining(
+          'The rule creates no alerts because exceptions exclude every row: "only-exclusive"'
+        ),
+      ]);
     });
 
-    it('builds the DSL filter only from the exceptions that stay in the DSL', async () => {
-      withExceptions(true);
-      (buildExceptionFilter as jest.Mock).mockResolvedValue({
-        filter: undefined,
-        unprocessedExceptions: [],
-      });
-
-      await esqlExecutor(mockedArguments);
-
-      expect(buildExceptionFilter).toHaveBeenCalledWith(
-        expect.objectContaining({ lists: [sourceItem], excludeExceptions: true })
-      );
-    });
-
-    it('fails the rule, without running the query, when the exceptions cannot be inspected', async () => {
-      withExceptions(true);
-      (
-        ruleServices.scopedClusterClient.asCurrentUser.fieldCaps as unknown as jest.Mock
-      ).mockRejectedValue(new Error('no access'));
+    it('fails the rule, without running the query, when the output columns cannot be read', async () => {
+      withExceptions();
+      probeMock().mockRejectedValue(new Error('no access'));
 
       const result = await esqlExecutor(mockedArguments);
 
       expect(result.success).toBe(false);
       expect(result.errors).toEqual([
-        'The rule did not run because the fields of its exceptions could not be inspected to apply them: no access',
+        'The rule did not run because the output columns of its query could not be read to apply its exceptions on them: no access',
       ]);
       expect(result.userError).toBeUndefined();
       expect(result.createdSignalsCount).toBe(0);
       expect(asyncQueryMock()).not.toHaveBeenCalled();
-      expect(buildExceptionFilter).not.toHaveBeenCalled();
     });
 
     it('keeps the user error classification of the failed request', async () => {
-      withExceptions(true);
-      (
-        ruleServices.scopedClusterClient.asCurrentUser.fieldCaps as unknown as jest.Mock
-      ).mockRejectedValue(
+      withExceptions();
+      probeMock().mockRejectedValue(
         new Error('security_exception: action [indices:data/read/field_caps] is unauthorized')
       );
 
@@ -517,61 +451,64 @@ describe('esqlExecutor', () => {
       expect(result.userError).toBe(true);
     });
 
-    it('does not inspect anything, and does not fail, when the setting is off', async () => {
-      withExceptions(false);
-      (
-        ruleServices.scopedClusterClient.asCurrentUser.fieldCaps as unknown as jest.Mock
-      ).mockRejectedValue(new Error('no access'));
-
-      const result = await esqlExecutor(mockedArguments);
-
-      expect(ruleServices.scopedClusterClient.asCurrentUser.fieldCaps).not.toHaveBeenCalled();
-      expect(result.errors.join(' ')).not.toContain('could not be inspected');
-      expect(asyncQueryMock()).toHaveBeenCalled();
-    });
-
-    it('does not add a warning to the rule for an exception that cannot be applied', async () => {
-      setSetting(true);
+    it('does not add a warning to the rule for an exception on a column that the query does not output', async () => {
       mockedArguments.sharedParams = {
         ...sharedParams,
-        allExceptionItems: [
-          sourceItem,
-          getExceptionListItemSchemaMock({
-            item_id: 'ghost',
-            name: 'ghost',
-            entries: [
-              { field: 'risk', operator: 'included', type: 'match', value: 'low' },
-              { field: 'ghost.field', operator: 'included', type: 'match', value: 'x' },
-            ] as EntriesArray,
-          }),
+        outputColumnExceptionItems: [
+          {
+            ...getExceptionListItemSchemaMock({
+              item_id: 'ghost',
+              name: 'ghost',
+              entries: [
+                {
+                  field: 'risk',
+                  operator: 'included',
+                  type: 'match',
+                  value: 'low',
+                  column_type: 'keyword',
+                },
+                {
+                  field: 'ghost.field',
+                  operator: 'included',
+                  type: 'match',
+                  value: 'x',
+                  column_type: 'keyword',
+                },
+              ] as EntriesArray,
+            }),
+            applies_to: 'esql_output_columns' as const,
+          },
         ],
       };
-      (buildExceptionFilter as jest.Mock).mockResolvedValue({
-        filter: undefined,
-        unprocessedExceptions: [],
-      });
 
       const result = await esqlExecutor(mockedArguments);
 
       expect(result.warningMessages).toEqual([]);
+      expect(asyncQueryMock().mock.calls[0][0].query).not.toContain('WHERE NOT');
       expect(sharedParams.ruleExecutionLogger.info).toHaveBeenCalledWith(
         expect.stringContaining('"code":"field_not_found"')
       );
     });
-    it('traces the whole request, as it always did, when the setting is off', async () => {
-      withExceptions(false);
 
-      await esqlExecutor(mockedArguments);
+    it('fails the rule as a user error, without running the query, when the query outputs a column with another type than the item declares', async () => {
+      probeMock().mockResolvedValue({ columns: [{ name: 'risk', type: 'long' }], values: [] });
+      withExceptions();
 
-      const trace = (sharedParams.ruleExecutionLogger.trace as jest.Mock).mock.calls
-        .map(([message]) => message as string)
-        .find((message) => message.startsWith('ES|QL query to execute'));
-      expect(trace).toMatch(/^ES\|QL query to execute\n\{"query":/);
+      const result = await esqlExecutor(mockedArguments);
+
+      expect(result.success).toBe(false);
+      expect(result.userError).toBe(true);
+      expect(result.errors).toEqual([
+        expect.stringContaining(
+          `"computed" (list "${computedItem.list_id}", item "computed") declares the column "risk" as keyword, and the query outputs it as long`
+        ),
+      ]);
+      expect(result.createdSignalsCount).toBe(0);
+      expect(asyncQueryMock()).not.toHaveBeenCalled();
     });
 
-    it('traces the whole request when the setting is on and no exception was added to the query', async () => {
-      setSetting(true);
-      mockedArguments.sharedParams = { ...sharedParams, allExceptionItems: [sourceItem] };
+    it('traces the whole request when no exception was added to the query', async () => {
+      mockedArguments.sharedParams = { ...sharedParams, outputColumnExceptionItems: [] };
 
       await esqlExecutor(mockedArguments);
 
@@ -585,35 +522,24 @@ describe('esqlExecutor', () => {
       getDataTierFilterMock.mockResolvedValue([
         { meta: { negate: true }, query: { terms: { _tier: ['data_cold'] } } },
       ]);
-      setSetting(true);
       mockedArguments.sharedParams = {
         ...sharedParams,
         exceptionFilter: {
           meta: { alias: null, disabled: false, negate: true },
           query: { bool: { should: [{ match_phrase: { 'host.name': 'marker-value' } }] } },
         },
-        allExceptionItems: [sourceItem, computedItem],
+        outputColumnExceptionItems: [computedItem],
       };
-      (buildExceptionFilter as jest.Mock).mockResolvedValue({
-        filter: undefined,
-        unprocessedExceptions: [],
-      });
 
       await esqlExecutor(mockedArguments);
 
-      const [{ filter }] = (
-        ruleServices.scopedClusterClient.asCurrentUser.esql.query as unknown as jest.Mock
-      ).mock.calls[0];
+      const [{ filter }] = probeMock().mock.calls[0];
       expect(JSON.stringify(filter)).toContain('data_cold');
       expect(JSON.stringify(filter)).toContain('marker-value');
     });
 
     it('traces the whole request, with the final query in it, when exceptions are applied at the end of the query', async () => {
-      withExceptions(true);
-      (buildExceptionFilter as jest.Mock).mockResolvedValue({
-        filter: undefined,
-        unprocessedExceptions: [],
-      });
+      withExceptions();
 
       await esqlExecutor(mockedArguments);
 
@@ -626,11 +552,7 @@ describe('esqlExecutor', () => {
     });
 
     it('sends the filter of the request with the probe of the output columns', async () => {
-      withExceptions(true);
-      (buildExceptionFilter as jest.Mock).mockResolvedValue({
-        filter: undefined,
-        unprocessedExceptions: [],
-      });
+      withExceptions();
 
       await esqlExecutor(mockedArguments);
 
@@ -644,46 +566,26 @@ describe('esqlExecutor', () => {
       });
     });
 
-    it('does not read the setting when the rule has no exceptions', async () => {
-      setSetting(true);
-      mockedArguments.sharedParams = { ...sharedParams, allExceptionItems: [] };
+    it.each([
+      ['has no exceptions on the output columns', []],
+      [
+        'has only an expired exception on the output columns',
+        [{ ...columnItem('expired', 'risk', 'low'), expire_time: '2020-01-01T00:00:00.000Z' }],
+      ],
+    ])('does not read the output columns when the rule %s', async (_, items) => {
+      mockedArguments.sharedParams = { ...sharedParams, outputColumnExceptionItems: items };
 
       await esqlExecutor(mockedArguments);
 
-      expect(ruleServices.uiSettingsClient.get).not.toHaveBeenCalledWith(
-        ENABLE_ESQL_RULE_COMPUTED_FIELD_EXCEPTIONS_SETTING
-      );
-      expect(ruleServices.scopedClusterClient.asCurrentUser.fieldCaps).not.toHaveBeenCalled();
-    });
-
-    it('does not apply an expired exception item', async () => {
-      setSetting(true);
-      const expired = getExceptionListItemSchemaMock({
-        item_id: 'expired',
-        name: 'expired',
-        entries: [
-          { field: 'risk', operator: 'included', type: 'match', value: 'low' },
-        ] as EntriesArray,
-        expire_time: '2020-01-01T00:00:00.000Z',
-      });
-      mockedArguments.sharedParams = { ...sharedParams, allExceptionItems: [expired] };
-
-      await esqlExecutor(mockedArguments);
-
+      expect(probeMock()).not.toHaveBeenCalled();
       expect(asyncQueryMock().mock.calls[0][0].query).not.toContain('WHERE NOT');
-      expect(ruleServices.scopedClusterClient.asCurrentUser.fieldCaps).not.toHaveBeenCalled();
     });
 
     it('fails the rule as a user error, without running the query, when an exception has a value that cannot be written for its column', async () => {
-      const client = ruleServices.scopedClusterClient.asCurrentUser;
-      (client.esql.query as unknown as jest.Mock).mockResolvedValue({
-        columns: [{ name: 'src_ip', type: 'ip' }],
-        values: [],
-      });
-      setSetting(true);
+      probeMock().mockResolvedValue({ columns: [{ name: 'src_ip', type: 'ip' }], values: [] });
       mockedArguments.sharedParams = {
         ...sharedParams,
-        allExceptionItems: [exceptionItem('bogus-ip', 'src_ip', 'bogus')],
+        outputColumnExceptionItems: [columnItem('bogus-ip', 'src_ip', 'bogus', 'ip')],
       };
 
       const result = await esqlExecutor(mockedArguments);
@@ -692,7 +594,7 @@ describe('esqlExecutor', () => {
       expect(result.userError).toBe(true);
       expect(result.errors).toEqual([
         expect.stringContaining(
-          'The rule did not run because exception items have a value that cannot be used for the type of the field: "bogus-ip"'
+          'The rule did not run because exception items have a value or a column type that cannot be used at the end of the query: "bogus-ip"'
         ),
       ]);
       expect(result.createdSignalsCount).toBe(0);
@@ -700,11 +602,7 @@ describe('esqlExecutor', () => {
     });
 
     it('explains that the exceptions count when Elasticsearch rejects the query for having too many clauses', async () => {
-      withExceptions(true);
-      (buildExceptionFilter as jest.Mock).mockResolvedValue({
-        filter: undefined,
-        unprocessedExceptions: [],
-      });
+      withExceptions();
       asyncQueryMock().mockRejectedValue(
         new Error(
           'failed to create query: Query contains too many nested clauses; maxClauseCount is set to 4468'
@@ -717,13 +615,13 @@ describe('esqlExecutor', () => {
       expect(result.userError).toBe(true);
       expect(result.errors).toEqual([
         expect.stringContaining(
-          'Elasticsearch rejected the query for having too many clauses (failed to create query: Query contains too many nested clauses; maxClauseCount is set to 4468). The WHERE expressions of the rule query and the exceptions on columns that rename or copy a source field are counted together.'
+          'Elasticsearch rejected the query for having too many clauses (failed to create query: Query contains too many nested clauses; maxClauseCount is set to 4468). The WHERE expressions of the rule query and the exceptions on the output columns are counted together.'
         ),
       ]);
     });
 
     it('leaves the error of Elasticsearch as it is when no exception was added to the query', async () => {
-      withExceptions(false);
+      mockedArguments.sharedParams = { ...sharedParams, outputColumnExceptionItems: [] };
       asyncQueryMock().mockRejectedValue(
         new Error('failed to create query: Query contains too many nested clauses')
       );
@@ -737,14 +635,8 @@ describe('esqlExecutor', () => {
     });
 
     it('fails the rule as a user error, without running the query, and names the limit when the exceptions do not fit in the query', async () => {
-      const client = ruleServices.scopedClusterClient.asCurrentUser;
-      (client.esql.query as unknown as jest.Mock).mockResolvedValue({
-        columns: [{ name: 'risk', type: 'keyword' }],
-        values: [],
-      });
-      setSetting(true);
-      const heavy = (id: string) =>
-        getExceptionListItemSchemaMock({
+      const heavy = (id: string) => ({
+        ...getExceptionListItemSchemaMock({
           item_id: id,
           name: id,
           entries: [
@@ -753,18 +645,22 @@ describe('esqlExecutor', () => {
               operator: 'included',
               type: 'match_any',
               value: Array.from({ length: 5 }, (_, i) => `v${i}`),
+              column_type: 'keyword',
             },
             ...Array.from({ length: 205 }, (_, i) => ({
               field: 'risk',
               operator: 'included',
               type: 'match',
               value: `w${i}`,
+              column_type: 'keyword',
             })),
           ] as EntriesArray,
-        });
+        }),
+        applies_to: 'esql_output_columns' as const,
+      });
       mockedArguments.sharedParams = {
         ...sharedParams,
-        allExceptionItems: [heavy('too-many-comparisons')],
+        outputColumnExceptionItems: [heavy('too-many-comparisons')],
       };
 
       const result = await esqlExecutor(mockedArguments);

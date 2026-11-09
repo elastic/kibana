@@ -26,6 +26,7 @@ import {
   isEsqlParams,
   getDisabledActionsWarningText,
 } from './utils/utils';
+import { getExceptionItemsForRule } from './utils/get_exception_items_for_rule';
 import { runExecutionValidation } from './validation';
 import { DEFAULT_MAX_SIGNALS, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
 import type { CreateSecurityRuleTypeWrapper } from './types';
@@ -377,11 +378,14 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               savedObjectClient: options.services.savedObjectsClient,
             });
 
-            const exceptionItems = await getExceptions({
-              client: exceptionsClient,
-              lists: params.exceptionsList,
-              shouldFilterOutEndpointExceptions:
-                await endpointAppContextService.isEndpointExceptionsPerPolicyEnabled(),
+            const { sourceItems, outputColumnItems } = getExceptionItemsForRule({
+              items: await getExceptions({
+                client: exceptionsClient,
+                lists: params.exceptionsList,
+                shouldFilterOutEndpointExceptions:
+                  await endpointAppContextService.isEndpointExceptionsPerPolicyEnabled(),
+              }),
+              isEsqlRule: isEsqlParams(params),
             });
 
             const alertTimestampOverride = isPreview ? startedAt : undefined;
@@ -408,7 +412,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               alias: null,
               excludeExceptions: true,
               chunkSize: 10,
-              lists: exceptionItems,
+              lists: sourceItems,
               listClient,
             });
 
@@ -425,7 +429,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     inputIndex,
                     exceptionFilter,
                     unprocessedExceptions,
-                    allExceptionItems: exceptionItems,
+                    outputColumnExceptionItems: outputColumnItems,
                     startedAt,
                     runtimeMappings: {
                       ...runtimeMappings,

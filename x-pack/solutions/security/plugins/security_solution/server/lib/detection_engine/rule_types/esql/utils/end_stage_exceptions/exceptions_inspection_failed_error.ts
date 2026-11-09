@@ -9,7 +9,7 @@
 export class ExceptionsInspectionFailedError extends Error {
   constructor(reason: string) {
     super(
-      `The rule did not run because the fields of its exceptions could not be inspected to apply them: ${reason}`
+      `The rule did not run because the output columns of its query could not be read to apply its exceptions on them: ${reason}`
     );
     this.name = 'ExceptionsInspectionFailedError';
   }

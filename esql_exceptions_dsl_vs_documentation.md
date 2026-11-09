@@ -70,16 +70,16 @@ The documentation says that the field type must be `keyword`, `text` or `wildcar
 
 ## Behavior that the documentation does not describe
 
-- **A field that is not in the mapping.** `is`, `matches` and `exists` never match it, and the negative operators (`is not`, `is not one of`, `does not match`, `does not exist`) exclude every document. This applies to a shared list that names a field that the rule's indices do not map. It also applies to every field on which the positive operator never matches, such as an `object`, `nested` or `passthrough` parent.
+- **A field that is not in the mapping.** `is`, `matches` and `exists` never match it, and the exclusive operators (`is not, `is not one of`, `does not match`, `does not exist`) exclude every document. This applies to a shared list that names a field that the rule's indices do not map. It also applies to every field on which the positive operator never matches, such as an `object`, `nested` or `passthrough` parent.
 - **A value that does not parse.** The filter builder does not check the value, and Elasticsearch rejects it when it runs the search: `not-an-ip` on an `ip` field, `abc` on a number, `maybe` on a `boolean` and `not-a-date` on a `date` field. The rule fails and creates no alerts.
 - **An operator that the field type does not support.** `is` on a `geo_point`, `binary` or vector field fails the search, and so does `matches` on a numeric, `ip`, `date` or `boolean` field. The rule fails and creates no alerts, and one such index fails the request for every index in the `FROM`: documents that the exception never targeted stop alerting too.
 - **A field mapped with different types.** The DSL query resolves the type per index. A conflict that the operator supports in each index works, and a conflict where it fails in one index fails the rule. The documentation says only that conflicting fields "might cause unexpected exceptions behavior".
-- **A multi-valued field.** A positive operator matches when any value of the field matches, so the exception excludes the document.
+- **A multi-valued field.** An inclusive operator matches when any value of the field matches, so the exception excludes the document.
 
 ## What this means for exceptions on computed columns
 
 An exception on a computed column (a `STATS` output, an `EVAL` value or a renamed column) is applied at the end of the query as a `| WHERE` stage, and it follows the documentation: `is` compares the whole value, `matches` takes the wildcards on the whole value, and the comparison respects case. So the same exception can exclude different documents on a source field and on a computed column in cases 1, 2 and 3 above. The end of the query reproduces the DSL behavior of cases 4 and 6 (the rounding of dates and the CIDR ranges), and it does not apply range fields (case 5), because ES|QL has no column of those types. See `esql_exceptions_proposal.md`.
 
-The statement of the documentation that exceptions "are only applied to the index source fields" for ES|QL rules stops being true when the advanced setting `securitySolution:enableEsqlRuleComputedFieldExceptions` is enabled, and the documentation has to change with the release.
+The statement of the documentation that exceptions "are only applied to the index source fields" for ES|QL rules stops being true with this change, and the documentation has to change with the release.
 
 Related documents: `esql_exceptions_v1_inventory.md` (what every operator does on every field type) and `esql_exceptions_operator_parity.md`.

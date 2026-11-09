@@ -11,7 +11,11 @@ import { mount, shallow } from 'enzyme';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
-import type { EntriesArray, EntryMatch } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  EntriesArray,
+  EntryMatch,
+  ExceptionListSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import { createStubIndexPattern, stubIndexPattern } from '@kbn/data-plugin/common/stubs';
 
@@ -1196,6 +1200,162 @@ describe('When the add exception modal is opened', () => {
       fireEvent.click(await screen.findByRole('option', { name: 'Duplicate' }));
 
       expect(screen.getByTestId('exceptionFlyoutCloseReasonSelect')).toHaveTextContent('Duplicate');
+    });
+  });
+
+  describe('items that apply to the computed columns of an ES|QL rule', () => {
+    const esqlRule = {
+      ...getRulesSchemaMock(),
+      type: 'esql',
+      language: 'esql',
+      exceptions_list: [],
+    } as unknown as Rule;
+
+    const renderFlyout = (props: Partial<React.ComponentProps<typeof AddExceptionFlyout>> = {}) =>
+      render(
+        <TestProviders>
+          <AddExceptionFlyout
+            rules={[esqlRule]}
+            isBulkAction={false}
+            alertData={alertDataMock}
+            isAlertDataLoading={false}
+            alertStatus="open"
+            isEndpointItem={false}
+            showAlertCloseOptions
+            onCancel={jest.fn()}
+            onConfirm={jest.fn()}
+            {...props}
+          />
+        </TestProviders>
+      );
+
+    const lastBuilderProps = () => {
+      const { calls } = mockGetExceptionBuilderComponentLazy.mock;
+      return calls[calls.length - 1][0];
+    };
+
+    beforeEach(() => {
+      mockFetchIndexPatterns.mockImplementation(() => ({
+        isLoading: false,
+        indexPatterns: stubIndexPattern,
+        getExtendedFields: () => Promise.resolve([]),
+      }));
+    });
+
+    it('offers the choice when adding an item to one ES|QL rule, with the source fields selected', () => {
+      renderFlyout();
+
+      expect(screen.getByTestId('exceptionAppliesTo')).toBeInTheDocument();
+      expect(screen.queryByTestId('exceptionComputedColumnsWarning')).toBeNull();
+      expect(lastBuilderProps().appliesTo).toBe('source_documents');
+    });
+
+    it.each([
+      ['a query rule', { rules: [{ ...getRulesSchemaMock(), exceptions_list: [] } as Rule] }],
+      ['a rule that is not known yet', { rules: null }],
+      ['several rules', { rules: [esqlRule, esqlRule], isBulkAction: true }],
+      [
+        'a shared list',
+        {
+          sharedListToAddTo: [
+            {
+              id: '1',
+              list_id: 'shared-list',
+              namespace_type: 'single',
+              type: 'detection',
+            } as ExceptionListSchema,
+          ],
+        },
+      ],
+    ])('offers the choice for %s', (_, props) => {
+      renderFlyout(props);
+
+      expect(screen.getByTestId('exceptionAppliesTo')).toBeInTheDocument();
+    });
+
+    it('does not offer the choice for an Endpoint exception', () => {
+      renderFlyout({ isEndpointItem: true });
+
+      expect(screen.queryByTestId('exceptionAppliesTo')).toBeNull();
+    });
+
+    it('says that the exception has no effect when none of the rules is an ES|QL rule', () => {
+      renderFlyout({
+        rules: [{ ...getRulesSchemaMock(), exceptions_list: [] } as Rule],
+      });
+
+      fireEvent.click(screen.getByTestId('exceptionAppliesToComputedColumns'));
+
+      expect(screen.getByTestId('exceptionComputedColumnsWarning')).toHaveTextContent(
+        'This exception has no effect on the selected rules'
+      );
+    });
+
+    it('keeps the generic warning when one of the rules is an ES|QL rule', () => {
+      renderFlyout({
+        rules: [{ ...getRulesSchemaMock(), exceptions_list: [] } as Rule, esqlRule],
+        isBulkAction: true,
+      });
+
+      fireEvent.click(screen.getByTestId('exceptionAppliesToComputedColumns'));
+
+      expect(screen.getByTestId('exceptionComputedColumnsWarning')).toHaveTextContent(
+        'This exception only applies to ES|QL rules'
+      );
+    });
+
+    it('warns that the exception only applies to ES|QL rules once the user picks the computed columns', () => {
+      renderFlyout();
+
+      fireEvent.click(screen.getByTestId('exceptionAppliesToComputedColumns'));
+
+      expect(screen.getByTestId('exceptionComputedColumnsWarning')).toBeInTheDocument();
+      expect(lastBuilderProps().appliesTo).toBe('esql_output_columns');
+    });
+
+    it('still offers to add the item to other rules or to shared lists', () => {
+      renderFlyout();
+
+      fireEvent.click(screen.getByTestId('exceptionAppliesToComputedColumns'));
+
+      expect(screen.getByTestId('exceptionItemAddToRuleOrListSection')).toBeInTheDocument();
+    });
+
+    it('does not offer to close alerts, which cannot be found by the entries of such an item', () => {
+      renderFlyout();
+      expect(screen.getByTestId('closeAlertOnAddExceptionCheckbox')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('exceptionAppliesToComputedColumns'));
+
+      expect(screen.queryByTestId('closeAlertOnAddExceptionCheckbox')).toBeNull();
+      expect(screen.queryByTestId('bulkCloseAlertOnAddExceptionCheckbox')).toBeNull();
+    });
+
+    it('goes back to the source fields, with the options of before', () => {
+      renderFlyout();
+      fireEvent.click(screen.getByTestId('exceptionAppliesToComputedColumns'));
+
+      fireEvent.click(screen.getByTestId('exceptionAppliesToSourceDocuments'));
+
+      expect(screen.queryByTestId('exceptionComputedColumnsWarning')).toBeNull();
+      expect(screen.getByTestId('exceptionItemAddToRuleOrListSection')).toBeInTheDocument();
+      expect(screen.getByTestId('closeAlertOnAddExceptionCheckbox')).toBeInTheDocument();
+      expect(lastBuilderProps().appliesTo).toBe('source_documents');
+    });
+  });
+
+  describe('the reducer, for what an item applies to', () => {
+    it('starts with the source documents', () => {
+      expect(exceptionItemsInitialState.appliesTo).toBe('source_documents');
+    });
+
+    it('sets what the item applies to', () => {
+      expect(
+        createExceptionItemsReducer()(exceptionItemsInitialState, {
+          type: 'setAppliesTo',
+          appliesTo: 'esql_output_columns',
+        })
+      ).toEqual({ ...exceptionItemsInitialState, appliesTo: 'esql_output_columns' });
     });
   });
 });

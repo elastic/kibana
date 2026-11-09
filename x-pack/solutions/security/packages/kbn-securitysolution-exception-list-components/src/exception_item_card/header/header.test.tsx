@@ -54,4 +54,43 @@ describe('ExceptionItemCardHeader', () => {
 
     expect(wrapper.getByTestId('exceptionItemHeaderButtonIcon')).toBeDisabled();
   });
+
+  it('it should not show the computed columns badge for an item that does not say what it applies to', () => {
+    const wrapper = render(
+      <ExceptionItemCardHeader
+        item={getExceptionListItemSchemaMock()}
+        dataTestSubj="exceptionItemHeader"
+        actions={actions}
+      />
+    );
+
+    expect(wrapper.queryByTestId('exceptionItemHeaderComputedColumnsBadge')).toBeNull();
+  });
+
+  it('it should not show the computed columns badge for an item that applies to the source documents', () => {
+    const wrapper = render(
+      <ExceptionItemCardHeader
+        item={{ ...getExceptionListItemSchemaMock(), applies_to: 'source_documents' }}
+        dataTestSubj="exceptionItemHeader"
+        actions={actions}
+      />
+    );
+
+    expect(wrapper.queryByTestId('exceptionItemHeaderComputedColumnsBadge')).toBeNull();
+  });
+
+  it('it should show the computed columns badge for an item that applies to the ES|QL output columns', () => {
+    const wrapper = render(
+      <ExceptionItemCardHeader
+        item={{ ...getExceptionListItemSchemaMock(), applies_to: 'esql_output_columns' }}
+        dataTestSubj="exceptionItemHeader"
+        actions={actions}
+      />
+    );
+
+    expect(wrapper.getByTestId('exceptionItemHeaderComputedColumnsBadge')).toHaveTextContent(
+      'Computed columns'
+    );
+    expect(wrapper.getByTestId('exceptionItemHeaderTitle')).toHaveTextContent('some name');
+  });
 });

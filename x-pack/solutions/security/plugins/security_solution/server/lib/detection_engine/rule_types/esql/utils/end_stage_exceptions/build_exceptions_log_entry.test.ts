@@ -28,7 +28,6 @@ describe('buildExceptionsLogEntry', () => {
   it('describes the final query, the items applied at the end of the query and the items that are not applied', () => {
     const entry = buildExceptionsLogEntry({
       query: 'FROM a | WHERE NOT (x IS NOT NULL)',
-      dslItemCount: 3,
       endStageItems: [{ item: item('applied'), clause: 'NOT (x IS NOT NULL)', terms: 1 }],
       skippedItems: [skipped('skipped')],
     });
@@ -38,7 +37,6 @@ describe('buildExceptionsLogEntry', () => {
       version: 1,
       query: 'FROM a | WHERE NOT (x IS NOT NULL)',
       queryTruncated: false,
-      dslItemCount: 3,
       appliedAtEndOfQuery: [{ list_id: 'endpoint_list_id', item_id: 'applied' }],
       notApplied: [
         {
@@ -58,7 +56,6 @@ describe('buildExceptionsLogEntry', () => {
   it('leaves out the fields when none is known', () => {
     const { notApplied } = buildExceptionsLogEntry({
       query: 'FROM a',
-      dslItemCount: 0,
       endStageItems: [],
       skippedItems: [
         { item: item('a'), code: SkipReasonCode.ItemHasNoEntries, explanation: 'too many' },
@@ -71,7 +68,6 @@ describe('buildExceptionsLogEntry', () => {
   it('cuts the list of items that are not applied and says so', () => {
     const entry = buildExceptionsLogEntry({
       query: 'FROM a',
-      dslItemCount: 0,
       endStageItems: [],
       skippedItems: Array.from({ length: MAX_LOGGED_ITEMS + 5 }, (_, i) => skipped(`s${i}`)),
     });
@@ -84,7 +80,6 @@ describe('buildExceptionsLogEntry', () => {
   it('cuts a query that is too long and says so', () => {
     const entry = buildExceptionsLogEntry({
       query: 'x'.repeat(MAX_LOGGED_QUERY_LENGTH + 1),
-      dslItemCount: 0,
       endStageItems: [],
       skippedItems: [],
     });

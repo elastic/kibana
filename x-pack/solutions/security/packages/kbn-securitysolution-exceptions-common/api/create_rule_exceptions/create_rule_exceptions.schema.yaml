@@ -201,6 +201,8 @@ components:
         tags:
           $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemTags'
           default: []
+        applies_to:
+          $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemAppliesTo'
         meta:
           $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemMeta'
         expire_time:

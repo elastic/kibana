@@ -18,6 +18,7 @@ import type {
   ExpireTimeOrUndefined,
 } from '../../common';
 import {
+  appliesTo,
   DefaultCreateCommentsArray,
   description,
   exceptionListItemType,
@@ -42,6 +43,7 @@ export const createRuleExceptionListItemSchema = t.intersection([
   ),
   t.exact(
     t.partial({
+      applies_to: appliesTo, // an item without it applies to the source documents
       comments: DefaultCreateCommentsArray, // defaults to empty array if not set during decode
       item_id: DefaultUuid, // defaults to GUID (uuid v4) if not set during decode
       list_id: t.undefined,
