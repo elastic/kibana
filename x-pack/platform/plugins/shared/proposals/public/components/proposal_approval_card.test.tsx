@@ -136,7 +136,7 @@ jest.mock('@kbn/proposals-ui', () => {
               `decision` yet. */}
           {!isReplaced && !decision && proposal.previousExecutionError && (
             <div data-test-subj="warning-callout">
-              A previous attempt at this action failed
+              Previous attempt to apply this proposal failed
               {proposal.previousExecutionError}
             </div>
           )}
@@ -197,6 +197,7 @@ const capabilitiesFor = (canDecide: boolean) =>
       application: {
         capabilities: { proposals: { decideProposals: canDecide } },
       },
+      http: { basePath: { serverBasePath: '', prepend: (path: string) => path } },
     },
   } as unknown as ReturnType<typeof useKibana>);
 
@@ -339,7 +340,7 @@ describe('ProposalApprovalCard', () => {
       const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
 
       const callout = getByTestId('warning-callout');
-      expect(callout).toHaveTextContent('A previous attempt at this action failed');
+      expect(callout).toHaveTextContent('Previous attempt to apply this proposal failed');
       // The reason is the actionable half: the title alone does not tell an
       // analyst whether re-approving is likely to fail the same way.
       expect(callout).toHaveTextContent(FAILURE);
@@ -464,7 +465,7 @@ describe('ProposalApprovalCard', () => {
         })
       );
       const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
-      expect(getByTestId('approval-decision')).toHaveTextContent('applying:Someone');
+      expect(getByTestId('approval-decision')).toHaveTextContent('applying:Unknown user');
     });
   });
 

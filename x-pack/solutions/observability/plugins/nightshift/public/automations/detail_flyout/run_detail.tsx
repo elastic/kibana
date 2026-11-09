@@ -91,6 +91,10 @@ const formatDate = (value: string) =>
 
 const formatStarted = (value: string) => `${formatDate(value)} (${moment(value).fromNow()})`;
 
+const DETAIL_COLUMN_WIDTHS: [string, string] = ['auto', 'minmax(0, 1fr)'];
+
+const DETAIL_VALUE_PROPS = { css: { overflowWrap: 'anywhere' } } as const;
+
 const OpenInvestigationButton = ({ investigationId }: { investigationId: string }) => {
   const { application } = useKibana().services;
   return (
@@ -144,7 +148,9 @@ export const RunDetail = ({
             <EuiSpacer size="s" />
             <EuiDescriptionList
               type="column"
-              columnWidths={['auto', 1]}
+              data-test-subj="automationRunSkippedDetails"
+              columnWidths={DETAIL_COLUMN_WIDTHS}
+              descriptionProps={DETAIL_VALUE_PROPS}
               listItems={[
                 {
                   title: labels.triggered,
@@ -166,10 +172,13 @@ export const RunDetail = ({
             <EuiSpacer size="s" />
             <EuiDescriptionList
               type="column"
-              columnWidths={['auto', 1]}
+              data-test-subj="automationRunDetails"
+              columnWidths={DETAIL_COLUMN_WIDTHS}
+              descriptionProps={DETAIL_VALUE_PROPS}
               listItems={[
                 { title: labels.source, description: run.triggeredBy ?? '—' },
                 { title: labels.message, description: run.message ?? '—' },
+                ...(run.error ? [{ title: labels.reason, description: run.error }] : []),
                 {
                   title: labels.started,
                   description: formatStarted(run.startedAt),

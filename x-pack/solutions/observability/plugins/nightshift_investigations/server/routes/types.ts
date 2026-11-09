@@ -17,6 +17,7 @@ import type {
   ListSandboxConnectors,
   ListSandboxConnectorTypes,
 } from '../lib/list_sandbox_connectors';
+import type { SandboxAllowlistClient } from '../sandbox_allowlist';
 import type { CustomContextClient } from '../custom_context';
 import type { OnboardingClient } from '../onboarding/onboarding_client';
 import type { DecisionTreeStore } from '../decision_trees/store';
@@ -65,10 +66,12 @@ export interface NightshiftInvestigationsRouteHandlerResources
   getEpisodeLookup: GetEpisodeLookup;
   getAutomationsSoClient: GetAutomationsSoClient;
   getWorkflowsManagement: GetWorkflowsManagement;
+  isUniversalAlertingAvailable: () => boolean;
   getCortexPageStore: GetCortexPageStore;
   isCortexEnabled: () => boolean;
   listSandboxConnectors: ListSandboxConnectors;
   listSandboxConnectorTypes: ListSandboxConnectorTypes;
+  sandboxAllowlistClient: SandboxAllowlistClient;
   customContextClient: CustomContextClient;
   onboardingClient: OnboardingClient;
   getDecisionTreeStore: GetDecisionTreeStore;

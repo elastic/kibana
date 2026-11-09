@@ -28,26 +28,43 @@ export interface NightshiftHeaderProps {
   title?: string;
   /** Puts the greeting in front of the title on one line ("Good morning! Meet Nightshift"). */
   isGreetingInline?: boolean;
+  /** Addresses the user by name ("Good morning, Kate!"). */
+  greetingName?: string;
 }
 
-const getGreeting = (): string => {
+const getGreeting = (name?: string): string => {
   const hour = new Date().getHours();
 
   if (hour < 12) {
-    return i18n.translate('xpack.nightshift.hero.morningGreetingDescription', {
-      defaultMessage: 'Good morning!',
-    });
+    return name
+      ? i18n.translate('xpack.nightshift.hero.morningGreetingWithName', {
+          defaultMessage: 'Good morning, {name}!',
+          values: { name },
+        })
+      : i18n.translate('xpack.nightshift.hero.morningGreetingDescription', {
+          defaultMessage: 'Good morning!',
+        });
   }
 
   if (hour < 18) {
-    return i18n.translate('xpack.nightshift.hero.afternoonGreetingDescription', {
-      defaultMessage: 'Good afternoon!',
-    });
+    return name
+      ? i18n.translate('xpack.nightshift.hero.afternoonGreetingWithName', {
+          defaultMessage: 'Good afternoon, {name}!',
+          values: { name },
+        })
+      : i18n.translate('xpack.nightshift.hero.afternoonGreetingDescription', {
+          defaultMessage: 'Good afternoon!',
+        });
   }
 
-  return i18n.translate('xpack.nightshift.hero.eveningGreetingDescription', {
-    defaultMessage: 'Good evening!',
-  });
+  return name
+    ? i18n.translate('xpack.nightshift.hero.eveningGreetingWithName', {
+        defaultMessage: 'Good evening, {name}!',
+        values: { name },
+      })
+    : i18n.translate('xpack.nightshift.hero.eveningGreetingDescription', {
+        defaultMessage: 'Good evening!',
+      });
 };
 
 const getHeroTitle = ({
@@ -80,6 +97,7 @@ export function NightshiftHeader({
   showAllEventsHref,
   title: titleOverride,
   isGreetingInline = false,
+  greetingName,
 }: NightshiftHeaderProps): React.ReactElement {
   const { euiTheme } = useEuiTheme();
 
@@ -131,7 +149,7 @@ export function NightshiftHeader({
             <EuiFlexItem>
               {!isGreetingInline && (
                 <EuiText color="subdued" size="s" textAlign="left">
-                  <p>{getGreeting()}</p>
+                  <p>{getGreeting(greetingName)}</p>
                 </EuiText>
               )}
               <EuiTitle
@@ -151,7 +169,7 @@ export function NightshiftHeader({
                         color: ${euiTheme.colors.textSubdued};
                       `}
                     >
-                      {`${getGreeting()} `}
+                      {`${getGreeting(greetingName)} `}
                     </span>
                   )}
                   {title}

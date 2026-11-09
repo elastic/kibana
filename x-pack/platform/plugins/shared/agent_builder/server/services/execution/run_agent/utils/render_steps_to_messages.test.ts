@@ -208,14 +208,13 @@ describe('renderHistorySteps', () => {
     );
   });
 
-  it('skips unanswered questions, todos, compaction and reasoning without a group', async () => {
+  it('skips unanswered questions, compaction and reasoning without a group', async () => {
     const steps: ConversationRoundStep[] = [
       {
         type: ConversationRoundStepType.askUserQuestion,
         prompt_id: 'p1',
         questions: [],
       },
-      { type: ConversationRoundStepType.updateTodos, todos: [] },
       reasoning('lonely'),
     ];
     expect(await renderHistorySteps({ steps })).toEqual([]);
@@ -331,19 +330,15 @@ describe('renderCurrentRun', () => {
     expect((messages[1] as ToolMessage).content).toBe(wrapToolResultContent('{"results":[]}'));
   });
 
-  it('positions research retry notices after the recorded non-todos step count, ignoring todos', async () => {
+  it('positions research retry notices after the recorded step count', async () => {
     const error = createAgentExecutionError('bad', AgentExecutionErrorCode.emptyResponse, {});
     const retryNotices: RetryNotice[] = [
-      { phase: 'research', afterNonTodosStepCount: 0, error },
-      { phase: 'research', afterNonTodosStepCount: 1, error },
-      { phase: 'research', afterNonTodosStepCount: 2, error },
+      { phase: 'research', afterStepCount: 0, error },
+      { phase: 'research', afterStepCount: 1, error },
+      { phase: 'research', afterStepCount: 2, error },
     ];
     const messages = await current(
-      [
-        call('c1'),
-        { type: ConversationRoundStepType.updateTodos, todos: [] },
-        call('c2', { tool_call_group_id: 'g2' }),
-      ],
+      [call('c1'), call('c2', { tool_call_group_id: 'g2' })],
       { ...rendered('c1'), ...rendered('c2', { cycle: 2 }) },
       { retryNotices }
     );
@@ -376,7 +371,7 @@ describe('renderCurrentRun', () => {
 
   it('renders the handover and answer retries only in answer phase', async () => {
     const error = createAgentExecutionError('bad', AgentExecutionErrorCode.emptyResponse, {});
-    const retryNotices: RetryNotice[] = [{ phase: 'answer', afterNonTodosStepCount: 0, error }];
+    const retryNotices: RetryNotice[] = [{ phase: 'answer', afterStepCount: 0, error }];
     const handover = { message: 'here you go', forceful: false };
 
     const answer = await current([], {}, { phase: 'answer', handover, retryNotices });
@@ -511,16 +506,16 @@ describe('renderCurrentRun', () => {
 
     it('drops retry notices within the hidden steps and keeps the one at the range start', async () => {
       const retryNotices: RetryNotice[] = [
-        { phase: 'research', afterNonTodosStepCount: 0, error },
-        { phase: 'research', afterNonTodosStepCount: 1, error },
-        { phase: 'research', afterNonTodosStepCount: 3, error },
+        { phase: 'research', afterStepCount: 0, error },
+        { phase: 'research', afterStepCount: 1, error },
+        { phase: 'research', afterStepCount: 3, error },
       ];
       const messages = await current(steps, renderState, { range: { start: 1 }, retryNotices });
       expect(types(messages)).toEqual(['ai', 'human', 'ai', 'tool', 'ai', 'tool', 'ai', 'human']);
     });
 
     it('leaves the retry notice after the range end to the steps that follow', async () => {
-      const retryNotices: RetryNotice[] = [{ phase: 'research', afterNonTodosStepCount: 2, error }];
+      const retryNotices: RetryNotice[] = [{ phase: 'research', afterStepCount: 2, error }];
       const head = await current(steps, renderState, { range: { start: 0, end: 1 }, retryNotices });
       const tail = await current(steps, renderState, { range: { start: 2 }, retryNotices });
       expect(types(head)).toEqual(['ai', 'tool', 'ai', 'tool']);

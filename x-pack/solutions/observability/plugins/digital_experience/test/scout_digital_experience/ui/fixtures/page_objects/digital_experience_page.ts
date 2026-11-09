@@ -27,6 +27,7 @@ export class DigitalExperiencePage {
   public readonly summary: Locator;
   public readonly pageLoadsChart: Locator;
   public readonly otelOverviewKpis: Locator;
+  public readonly otelOverviewVitals: Locator;
   public readonly otelOverviewPageLoads: Locator;
   public readonly overviewEmpty: Locator;
   public readonly overviewTab: Locator;
@@ -41,6 +42,7 @@ export class DigitalExperiencePage {
   public readonly sessionBack: Locator;
   public readonly sessionWaterfallSegments: Locator;
   public readonly sessionWaterfallErrors: Locator;
+  public readonly sessionPageVisits: Locator;
   public readonly breadcrumbs: Locator;
   public readonly navEntry: Locator;
   public readonly legacyNavEntry: Locator;
@@ -63,6 +65,7 @@ export class DigitalExperiencePage {
     this.summary = page.getByTestId('digitalExperienceApplicationsSummary');
     this.pageLoadsChart = page.getByTestId('digitalExperiencePageLoadsChart');
     this.otelOverviewKpis = page.getByTestId('digitalExperienceOverviewKpis');
+    this.otelOverviewVitals = page.getByTestId('digitalExperienceOverviewVitals');
     this.otelOverviewPageLoads = page.getByTestId('digitalExperienceOverviewPageLoads');
     this.overviewEmpty = page.getByTestId('digitalExperienceOverviewEmpty');
     this.overviewTab = page.getByTestId('digitalExperienceTab-overview');
@@ -74,9 +77,11 @@ export class DigitalExperiencePage {
     this.sessionsKpis = page.getByTestId('digitalExperienceSessionsKpis');
     this.sessionsEmpty = page.getByTestId('digitalExperienceSessionsEmpty');
     this.sessionSummary = page.getByTestId('digitalExperienceSessionSummary');
-    this.sessionBack = page.getByTestId('digitalExperienceSessionBack');
+    // The session page's AppHeader back control.
+    this.sessionBack = page.getByTestId('appHeaderBack');
     this.sessionWaterfallSegments = page.getByTestId('digitalExperienceSessionWaterfallSegment');
     this.sessionWaterfallErrors = page.getByTestId('digitalExperienceSessionWaterfallError');
+    this.sessionPageVisits = page.getByTestId('digitalExperiencePageVisit');
     this.breadcrumbs = page.getByTestId('breadcrumbs');
     this.navEntry = page.getByTestId('observability-nav-digital_experience-applications');
     this.legacyNavEntry = page.getByTestId('observability-nav-ux-dashboard');
@@ -95,9 +100,13 @@ export class DigitalExperiencePage {
     await this.page.goto(this.kbnUrl.get(`${APP_PATH}?${new URLSearchParams(query)}`));
   }
 
-  async gotoApplication(serviceName: string, timeRange = TIME_RANGE): Promise<void> {
+  /** Opens the Overview with the given URL query, by default only the time range. */
+  async gotoApplication(
+    serviceName: string,
+    query: Record<string, string> = TIME_RANGE
+  ): Promise<void> {
     await this.page.goto(
-      this.kbnUrl.get(`${APP_PATH}/${serviceName}?${new URLSearchParams(timeRange)}`)
+      this.kbnUrl.get(`${APP_PATH}/${serviceName}?${new URLSearchParams(query)}`)
     );
   }
 

@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { STREAMS_DEFAULT_UNIT_ID } from '@kbn/streams-plugin/common';
 import { useSelector } from '@xstate/react';
 import {
   useEdgesState,
@@ -29,13 +30,16 @@ import {
   type OnNodesDelete,
   type OnReconnect,
 } from '@xyflow/react';
+import type { ResolvedDestinationIndex } from '@kbn/streams-plugin/common';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { useTimefilter } from '../../../../hooks/use_timefilter';
 import {
   buildUnitCanvasGraph,
   configuredDestinationNodeId,
+  configuredRoutingNodeId,
   configuredSourceNodeId,
   readConfiguredDestinationId,
-  readConfiguredSourceId,
+  routingRuleHandleId,
 } from './build_unit_connection_edges';
 import {
   CanvasContextMenu,
@@ -53,16 +57,18 @@ import { applyLayout } from './layout';
 import { getGraphNodeIds, syncCanvasNodeMetadata } from './sync_graph_nodes';
 import { useCanvasKeyboardShortcuts } from './use_canvas_a11y';
 import { useCanvasHistory } from './use_canvas_history';
+import { useSyncStatsWithSavedUnit } from './use_sync_stats_with_saved_unit';
 import { IndexInspectFlyout } from '../../../index_inspect/index_inspect_flyout';
 import type { IndexInspectTabId } from '../../../index_inspect/types';
 import {
   DESTINATION_NODE_TYPE,
   PROCESSING_NODE_TYPE,
+  ROUTING_NODE_TYPE,
   SOURCE_NODE_TYPE,
   type ClassicCanvasGraph,
-  type ClassicCanvasEdge,
   type ClassicCanvasNode,
   type DestinationNode,
+  type RoutingNode,
   type SourceNode,
 } from './types';
 import { useKbnUrlStateStorageFromRouterContext } from '../../../../util/kbn_url_state_context';
@@ -100,26 +106,43 @@ import { SourceDetailsFlyout } from '../../../streams_layout/sources/source_deta
 import { useDestinations } from '../../../streams_layout/destinations/destinations_context';
 import { CreateDestinationModal } from '../../../streams_layout/destinations/create_destination_modal';
 import { UnitDestinationFlyout } from '../../../streams_layout/destinations/unit_destination_flyout';
-import type { DestinationViewModel } from '../../../streams_layout/destinations/types';
+import type {
+  DestinationViewModel,
+  ElasticsearchDestinationViewModel,
+} from '../../../streams_layout/destinations/types';
 import { DESTINATION_SIGNAL_LABELS } from '../../../streams_layout/destinations/destination_type_config';
 import {
+  getDestinationIndices,
   getUnitDestinations,
   withUnitDestinations,
 } from '../../../streams_layout/destinations/destination_models';
 import {
-  canConnectToDestination,
-  canMoveUnitConnection,
-  connectToDestination,
-  disconnectFromDestination,
-  moveUnitConnection,
+  hasSourceConnection,
   removeComponentFromPipelines,
-  type UnitConnectionOrigin,
 } from '../../../../services/unit_connections';
-import { GRAPH_ENDPOINT_KIND } from '../../../../services/unit_graph';
+import {
+  addTestRouting,
+  canConnectOrigin,
+  canMoveOriginConnection,
+  connectOrigin,
+  disconnectOrigin,
+  moveOriginConnection,
+  readConnectionOrigin as readOrigin,
+  readConnectionTarget as readTarget,
+  type ConnectionOrigin,
+  type OriginConnectionMove,
+  type ProcessingRefsByNodeId,
+  type RouteTarget,
+} from './connection_origin';
+import { getUnitRoutings } from '../../../streams_layout/routing/routing_models';
+import type { RoutingViewModel } from '../../../streams_layout/routing/types';
 import { RoutingFlyout } from '../../../stream_routing_flyout';
 import { ProcessingFlyout } from '../../../stream_processing_flyout';
+import { STATS_POLL_INTERVAL_MS } from '../../../unit_stats/state_management/constants';
+import { StatsManagerProvider } from '../../../unit_stats/state_management/use_stats_manager';
 
 const KEYBOARD_INSTRUCTIONS_ID = 'streamsCanvasKbdInstructions';
+const NO_DESTINATION_INDICES: ResolvedDestinationIndex[] = [];
 const canvasColumnStyles = css`
   display: flex;
   flex: 1 1 auto;
@@ -153,6 +176,7 @@ export function StreamsCanvas() {
       },
     },
   } = useKibana();
+  const { timeState, timeState$ } = useTimefilter();
   const urlStateStorageContainer = useKbnUrlStateStorageFromRouterContext();
   const apiKeyGenerationDeps = useSourceApiKeyGenerationDeps();
   const loadSourceEnvironment = useSourceEnvironmentLoader();
@@ -166,16 +190,24 @@ export function StreamsCanvas() {
       core={core}
       urlStateStorageContainer={urlStateStorageContainer}
       apiKeyGenerationDeps={apiKeyGenerationDeps}
+      timeState={timeState}
+      timeState$={timeState$}
       loadSourceEnvironment={loadSourceEnvironment}
       loadUnitDefinition={unitDefinitionRepository.load}
       persistUnitDefinition={unitDefinitionRepository.persist}
     >
-      <StreamsCanvasInner />
+      <StatsManagerProvider
+        unitId={STREAMS_DEFAULT_UNIT_ID}
+        pollIntervalMs={STATS_POLL_INTERVAL_MS}
+      >
+        <StreamsCanvasInner />
+      </StatsManagerProvider>
     </CanvasStateContextProvider>
   );
 }
 
 function StreamsCanvasInner() {
+  useSyncStatsWithSavedUnit();
   const { euiTheme } = useEuiTheme();
   const { flyoutName, flyoutKind, flyoutTab, query } = useCanvasUrlRef();
   const {
@@ -187,6 +219,7 @@ function StreamsCanvasInner() {
     saveUnit,
     changeUnitConnection,
     openProcessingFlyout,
+    closeRoutingFlyout,
   } = useCanvasEvents();
   const unitDefinition = useCanvasUnitDefinition();
   const hasUnsavedChanges = useCanvasHasUnsavedChanges();
@@ -246,33 +279,38 @@ function StreamsCanvasInner() {
   );
 
   const graph = useMemo<ClassicCanvasGraph>(() => {
-    const { processingNodes, edges: unitConnectionEdges } = buildUnitCanvasGraph(
+    const routings = getUnitRoutings(unitDefinition);
+    const { processingNodes, edges } = buildUnitCanvasGraph(
       unitDefinition,
       sources.map((source) => source.id),
-      destinations.map((destination) => destination.id)
+      destinations.map((destination) => destination.id),
+      routings
     );
     const connectedDestinationIds = new Set(
-      unitConnectionEdges.flatMap((edge) => {
+      edges.flatMap((edge) => {
         const destinationId = readConfiguredDestinationId(edge.target);
         return destinationId ? [destinationId] : [];
       })
     );
-    const configuredSourceNodes = sources.map(buildConfiguredSourceNode);
+    const configuredSourceNodes = sources.map((source) =>
+      buildConfiguredSourceNode(source, hasSourceConnection(unitDefinition, source.id))
+    );
     const configuredDestinationNodes = destinations.map((destination) =>
       buildConfiguredDestinationNode(
         destination,
         connectedDestinationIds.has(destination.id),
-        resolvedIndicesByDestination[destination.id]?.map((index) => index.name) ?? []
+        resolvedIndicesByDestination.get(destination.id)?.map((index) => index.name) ?? []
       )
     );
     const graphNodes = [
       ...configuredSourceNodes,
       ...processingNodes,
+      ...routings.map(buildRoutingNode),
       ...configuredDestinationNodes,
     ];
     return {
-      nodes: applyLayout(graphNodes, unitConnectionEdges),
-      edges: unitConnectionEdges,
+      nodes: applyLayout(graphNodes, edges),
+      edges,
     };
   }, [destinations, resolvedIndicesByDestination, sources, unitDefinition]);
 
@@ -417,7 +455,7 @@ function StreamsCanvasInner() {
 
   const [connectionTargetIds, setConnectionTargetIds] = useState<ReadonlySet<string> | null>(null);
 
-  const processingRefsByNodeId = useMemo(
+  const processingRefsByNodeId = useMemo<ProcessingRefsByNodeId>(
     () =>
       new Map(
         graph.nodes.flatMap((node) =>
@@ -426,126 +464,170 @@ function StreamsCanvasInner() {
       ),
     [graph.nodes]
   );
-
+  const routingIds = useMemo(
+    () =>
+      new Set(
+        graph.nodes.flatMap((node) =>
+          node.type === ROUTING_NODE_TYPE ? [node.data.pipelineId] : []
+        )
+      ),
+    [graph.nodes]
+  );
   const readConnectionOrigin = useCallback(
-    (nodeId: string | null | undefined): UnitConnectionOrigin | undefined => {
-      const sourceId = readConfiguredSourceId(nodeId);
-      if (sourceId) {
-        return { kind: GRAPH_ENDPOINT_KIND.source, id: sourceId };
-      }
-      const ref = nodeId ? processingRefsByNodeId.get(nodeId) : undefined;
-      return ref ? { kind: GRAPH_ENDPOINT_KIND.processing, ref } : undefined;
-    },
+    (nodeId: string | null | undefined, handleId: string | null | undefined) =>
+      readOrigin(nodeId, handleId, processingRefsByNodeId),
     [processingRefsByNodeId]
+  );
+  const readConnectionTarget = useCallback(
+    (nodeId: string | null | undefined) => readTarget(nodeId, processingRefsByNodeId, routingIds),
+    [processingRefsByNodeId, routingIds]
+  );
+
+  // The line being moved, if any. Drops are then checked as a move of that line,
+  // so a source or rule can swap its one connection for another target.
+  const reconnectingRef = useRef<Pick<
+    OriginConnectionMove,
+    'previousOrigin' | 'previousTarget'
+  > | null>(null);
+
+  const canDropConnection = useCallback(
+    (origin: ConnectionOrigin, target: RouteTarget): boolean => {
+      const reconnecting = reconnectingRef.current;
+      return reconnecting
+        ? canMoveOriginConnection(unitDefinition, { ...reconnecting, origin, target })
+        : canConnectOrigin(unitDefinition, origin, target);
+    },
+    [unitDefinition]
+  );
+
+  const onReconnectStart = useCallback<
+    NonNullable<React.ComponentProps<typeof CanvasShell>['onReconnectStart']>
+  >(
+    (_event, edge) => {
+      const previousOrigin = readConnectionOrigin(edge.source, edge.sourceHandle);
+      const previousTarget = readConnectionTarget(edge.target);
+      reconnectingRef.current =
+        previousOrigin && previousTarget ? { previousOrigin, previousTarget } : null;
+    },
+    [readConnectionOrigin, readConnectionTarget]
   );
 
   const onConnect = useCallback<OnConnect>(
     (connection) => {
-      const origin = readConnectionOrigin(connection.source);
-      const destinationId = readConfiguredDestinationId(connection.target);
-      if (!origin || !destinationId) {
+      const origin = readConnectionOrigin(connection.source, connection.sourceHandle);
+      const target = readConnectionTarget(connection.target);
+      if (!origin || !target) {
         return;
       }
       record();
-      changeUnitConnection(connectToDestination(unitDefinition, origin, destinationId));
+      changeUnitConnection(connectOrigin(unitDefinition, origin, target));
     },
-    [changeUnitConnection, readConnectionOrigin, record, unitDefinition]
+    [changeUnitConnection, readConnectionOrigin, readConnectionTarget, record, unitDefinition]
   );
 
   const onConnectStart = useCallback<OnConnectStart>(
     (_event, params) => {
       const origin =
-        params.handleType === 'source' ? readConnectionOrigin(params.nodeId) : undefined;
+        params.handleType === 'source'
+          ? readConnectionOrigin(params.nodeId, params.handleId)
+          : undefined;
       if (!origin) {
         setConnectionTargetIds(null);
         return;
       }
-      setConnectionTargetIds(
-        new Set(
-          destinations
-            .map((destination) => destination.id)
-            .filter((destinationId) =>
-              canConnectToDestination(unitDefinition, origin, destinationId)
-            )
-        )
-      );
+      const targets = graph.nodes
+        .map(({ id }) => id)
+        .filter((id) => {
+          const target = readConnectionTarget(id);
+          return target && canDropConnection(origin, target);
+        });
+      setConnectionTargetIds(new Set(targets));
     },
-    [destinations, readConnectionOrigin, unitDefinition]
+    [canDropConnection, graph.nodes, readConnectionOrigin, readConnectionTarget]
   );
 
   const clearConnectionTargets = useCallback(() => {
     setConnectionTargetIds(null);
   }, []);
 
-  // A dragged line is still in the unit, so its drop targets are checked with it released.
-  const reconnectingEdgeRef = useRef<ClassicCanvasEdge | null>(null);
-  const onReconnectStart = useCallback((_event: React.MouseEvent, edge: ClassicCanvasEdge) => {
-    reconnectingEdgeRef.current = edge;
-  }, []);
-
   const isValidConnection = useCallback<IsValidConnection>(
     (connection) => {
-      const origin = readConnectionOrigin(connection.source);
-      const destinationId = readConfiguredDestinationId(connection.target);
-      if (!origin || !destinationId) {
-        return false;
-      }
-      const reconnecting = reconnectingEdgeRef.current;
-      const previousOrigin = reconnecting ? readConnectionOrigin(reconnecting.source) : undefined;
-      const previousDestinationId = readConfiguredDestinationId(reconnecting?.target);
-      return previousOrigin && previousDestinationId
-        ? canMoveUnitConnection(unitDefinition, {
-            previousOrigin,
-            previousDestinationId,
-            origin,
-            destinationId,
-          })
-        : canConnectToDestination(unitDefinition, origin, destinationId);
+      const origin = readConnectionOrigin(connection.source, connection.sourceHandle);
+      const target = readConnectionTarget(connection.target);
+      return origin !== undefined && target !== undefined && canDropConnection(origin, target);
     },
-    [readConnectionOrigin, unitDefinition]
+    [canDropConnection, readConnectionOrigin, readConnectionTarget]
   );
 
   const onReconnect = useCallback<OnReconnect>(
     (oldEdge, connection) => {
-      const previousOrigin = readConnectionOrigin(oldEdge.source);
-      const previousDestinationId = readConfiguredDestinationId(oldEdge.target);
-      const origin = readConnectionOrigin(connection.source);
-      const destinationId = readConfiguredDestinationId(connection.target);
-      if (!previousOrigin || !previousDestinationId || !origin || !destinationId) {
+      const previousOrigin = readConnectionOrigin(oldEdge.source, oldEdge.sourceHandle);
+      const previousTarget = readConnectionTarget(oldEdge.target);
+      const origin = readConnectionOrigin(connection.source, connection.sourceHandle);
+      const target = readConnectionTarget(connection.target);
+      if (!previousOrigin || !previousTarget || !origin || !target) {
+        return;
+      }
+      const next = moveOriginConnection(unitDefinition, {
+        previousOrigin,
+        previousTarget,
+        origin,
+        target,
+      });
+      // Dropping the line back where it started changes nothing, so it is not an undo step.
+      if (next === unitDefinition) {
         return;
       }
       record();
-      changeUnitConnection(
-        moveUnitConnection(unitDefinition, {
-          previousOrigin,
-          previousDestinationId,
-          origin,
-          destinationId,
-        })
-      );
+      changeUnitConnection(next);
     },
-    [changeUnitConnection, readConnectionOrigin, record, unitDefinition]
+    [changeUnitConnection, readConnectionOrigin, readConnectionTarget, record, unitDefinition]
   );
 
   const onReconnectEnd = useCallback<
     NonNullable<React.ComponentProps<typeof CanvasShell>['onReconnectEnd']>
   >(
     (_event, edge, _handleType, connectionState) => {
-      reconnectingEdgeRef.current = null;
+      reconnectingRef.current = null;
       // Dropping on a handle keeps or moves the line. Releasing on the canvas unhooks it.
       if (connectionState.toHandle) {
         return;
       }
-      const origin = readConnectionOrigin(edge.source);
-      const destinationId = readConfiguredDestinationId(edge.target);
-      if (!origin || !destinationId) {
+      const origin = readConnectionOrigin(edge.source, edge.sourceHandle);
+      const target = readConnectionTarget(edge.target);
+      if (!origin || !target) {
         return;
       }
       record();
-      changeUnitConnection(disconnectFromDestination(unitDefinition, origin, destinationId));
+      changeUnitConnection(disconnectOrigin(unitDefinition, origin, target));
     },
-    [changeUnitConnection, readConnectionOrigin, record, unitDefinition]
+    [changeUnitConnection, readConnectionOrigin, readConnectionTarget, record, unitDefinition]
   );
+
+  // Testing aid for the routing flyout: unset when the line cannot be routed. TO BE REMOVED
+  const createTestRouting = useMemo(() => {
+    const edge = routingFlyout ? graph.edges.find(({ id }) => id === routingFlyout) : undefined;
+    const origin = edge ? readConnectionOrigin(edge.source, edge.sourceHandle) : undefined;
+    const target = edge ? readConnectionTarget(edge.target) : undefined;
+    const next = origin && target ? addTestRouting(unitDefinition, origin, target) : unitDefinition;
+    if (next === unitDefinition) {
+      return undefined;
+    }
+    return () => {
+      record();
+      changeUnitConnection(next);
+      closeRoutingFlyout();
+    };
+  }, [
+    changeUnitConnection,
+    closeRoutingFlyout,
+    graph.edges,
+    readConnectionOrigin,
+    readConnectionTarget,
+    record,
+    routingFlyout,
+    unitDefinition,
+  ]);
 
   const onNodesDelete = useCallback<OnNodesDelete<ClassicCanvasNode>>(
     (deletedNodes) => {
@@ -785,10 +867,15 @@ function StreamsCanvasInner() {
             <UnitDestinationFlyout
               destination={flyoutDestination}
               indices={
-                resolvedIndicesByDestination[flyoutDestination.id]?.map((index) => index.name) ?? []
+                resolvedIndicesByDestination.get(flyoutDestination.id) ?? NO_DESTINATION_INDICES
               }
               indicesStatus={resolvedIndicesStatus}
               indicesError={resolvedIndicesError}
+              destinationDetailRef={destinationsController.destinationDetailRefs.get(
+                flyoutDestination.id
+              )}
+              onShowDestinationDetail={destinationsController.showDestinationDetail}
+              onHideDestinationDetail={destinationsController.hideDestinationDetail}
               onClose={closeFlyout}
               isDeleteDisabled={isSaving}
               onIndexClick={openIndexFlyout}
@@ -823,7 +910,9 @@ function StreamsCanvasInner() {
               onClose={closeCreateDestinationModal}
             />
           )}
-          {routingFlyout && mode === 'routing' ? <RoutingFlyout edge={routingFlyout} /> : null}
+          {routingFlyout && mode === 'routing' ? (
+            <RoutingFlyout edge={routingFlyout} onCreateTestRouting={createTestRouting} />
+          ) : null}
           {processingFlyout ? (
             <ProcessingFlyout key={processingFlyout.ref.sessionId} flyout={processingFlyout} />
           ) : null}
@@ -857,7 +946,7 @@ function StreamsCanvasInner() {
   );
 }
 
-const buildConfiguredSourceNode = (source: SourceViewModel): SourceNode => {
+const buildConfiguredSourceNode = (source: SourceViewModel, hasConnection: boolean): SourceNode => {
   const signals = getSourceDisplaySignals(source, source.supportedTelemetry);
   const name = source.name ?? source.id;
   const type = SOURCE_TYPE_CONFIG_BY_TYPE[source.type].label;
@@ -882,12 +971,37 @@ const buildConfiguredSourceNode = (source: SourceViewModel): SourceNode => {
           }),
     data: {
       sourceId: source.id,
+      hasConnection,
       title: name,
       subtitle: SOURCE_TYPE_CONFIG_BY_TYPE[source.type].shortLabel,
       iconType: SOURCE_TYPE_ICONS[source.type],
       signals,
     },
   };
+};
+
+const getDestinationSubtitle = (destination: ElasticsearchDestinationViewModel): string => {
+  const indices = getDestinationIndices(destination);
+  if (destination.mode === 'auto' || indices.length === 0) {
+    return i18n.translate('xpack.streams.canvas.configuredDestinationNode.autoLabel', {
+      defaultMessage: 'Auto',
+    });
+  }
+  if (indices.length === 1) {
+    return indices[0];
+  }
+  return i18n.translate('xpack.streams.canvas.configuredDestinationNode.fixedIndicesLabel', {
+    defaultMessage: '{count} fixed indices',
+    values: { count: indices.length },
+  });
+};
+
+const getEndpointHost = (endpoint: string): string => {
+  try {
+    return new URL(endpoint).host || endpoint;
+  } catch {
+    return endpoint;
+  }
 };
 
 export const buildConfiguredDestinationNode = (
@@ -900,26 +1014,43 @@ export const buildConfiguredDestinationNode = (
     'xpack.streams.canvas.configuredDestinationNode.noSourceLabel',
     { defaultMessage: 'No source' }
   );
-  if (destination.type === 's3') {
+  if (destination.type !== 'elasticsearch') {
+    const location =
+      destination.type === 's3'
+        ? { bucket: destination.bucket }
+        : {
+            endpoint: destination.endpoint,
+            remoteIndexNames: [...new Set(Object.values(destination.indexBySignal))],
+          };
     return {
       id: configuredDestinationNodeId(destination.id),
       type: DESTINATION_NODE_TYPE,
       position: { x: 0, y: 0 },
       deletable: true,
       ariaLabel: hasConnectedSource
-        ? i18n.translate('xpack.streams.canvas.configuredDestinationNode.s3AriaLabel', {
+        ? i18n.translate('xpack.streams.canvas.configuredDestinationNode.nonLocalAriaLabel', {
             defaultMessage: 'Destination: {name}, {signal}',
             values: { name: destination.name, signal },
           })
-        : i18n.translate('xpack.streams.canvas.configuredDestinationNode.s3NoSourceAriaLabel', {
-            defaultMessage: 'Destination: {name}, {signal}, no source',
-            values: { name: destination.name, signal },
-          }),
+        : i18n.translate(
+            'xpack.streams.canvas.configuredDestinationNode.nonLocalNoSourceAriaLabel',
+            {
+              defaultMessage: 'Destination: {name}, {signal}, no source',
+              values: { name: destination.name, signal },
+            }
+          ),
       data: {
         destinationId: destination.id,
+        destinationType: destination.type,
         signals: destination.signals,
+        ...location,
         title: destination.name,
-        subtitle: !hasConnectedSource ? noSourceLabel : destination.bucket,
+        subtitle: !hasConnectedSource
+          ? noSourceLabel
+          : destination.description ||
+            (destination.type === 's3'
+              ? destination.bucket
+              : getEndpointHost(destination.endpoint)),
       },
     };
   }
@@ -949,18 +1080,61 @@ export const buildConfiguredDestinationNode = (
         }),
     data: {
       destinationId: destination.id,
+      destinationType: destination.type,
       signals: destination.signals,
-      streamName: destination.index,
+      streamName: getDestinationIndices(destination).join(' ') || undefined,
       indexCount: targetedIndexNames.length,
       targetedIndexNames,
       title: destination.name,
       subtitle: !hasConnectedSource
         ? noSourceLabel
-        : destination.mode === 'auto'
-        ? i18n.translate('xpack.streams.canvas.configuredDestinationNode.autoLabel', {
-            defaultMessage: 'Auto',
-          })
-        : destination.index,
+        : destination.description || getDestinationSubtitle(destination),
+    },
+  };
+};
+
+const buildRoutingNode = (routing: RoutingViewModel): RoutingNode => {
+  const name = routing.name || routing.id;
+  return {
+    id: configuredRoutingNodeId(routing.id),
+    type: ROUTING_NODE_TYPE,
+    position: { x: 0, y: 0 },
+    deletable: false,
+    ariaLabel: i18n.translate('xpack.streams.canvas.routingNode.ariaLabel', {
+      defaultMessage: 'Routing: {name}, {count, plural, one {# rule} other {# rules}}',
+      values: { name, count: routing.rules.length },
+    }),
+    data: {
+      pipelineId: routing.id,
+      rules: routing.rules.map((rule) => {
+        let label: string;
+
+        if (rule.when) {
+          label = i18n.translate('xpack.streams.canvas.routingNode.whenRuleLabel', {
+            defaultMessage: 'Condition: {condition}',
+            values: {
+              condition: rule.when,
+            },
+          });
+        } else if (routing.rules.length === 1) {
+          label = i18n.translate('xpack.streams.canvas.routingNode.allDataRuleLabel', {
+            defaultMessage: 'All data',
+          });
+        } else {
+          label = i18n.translate('xpack.streams.canvas.routingNode.otherwiseRuleLabel', {
+            defaultMessage: 'Otherwise',
+          });
+        }
+
+        return {
+          handleId: routingRuleHandleId(rule.index),
+          isCatchAll: rule.when === undefined,
+          action: rule.action,
+          signals: rule.telemetry,
+          label,
+          connected: rule.targets.length > 0,
+        };
+      }),
     },
   };
 };

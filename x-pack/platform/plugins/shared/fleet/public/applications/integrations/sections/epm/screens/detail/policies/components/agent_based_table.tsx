@@ -13,7 +13,12 @@ import { FormattedRelative, FormattedMessage } from '@kbn/i18n-react';
 
 import type { AgentPolicy, InMemoryPackagePolicy, PackagePolicy } from '../../../../../../types';
 import type { usePagination } from '../../../../../../hooks';
-import { useLink, useAuthz, useMultipleAgentPolicies } from '../../../../../../hooks';
+import {
+  useLink,
+  useAuthz,
+  useMultipleAgentPolicies,
+  useOnboardingInstanceUrl,
+} from '../../../../../../hooks';
 import {
   AgentEnrollmentFlyout,
   MultipleAgentPoliciesSummaryLine,
@@ -50,6 +55,7 @@ export const AgentBasedPackagePoliciesTable = ({
   from?: 'installed-integrations';
 }) => {
   const { getHref } = useLink();
+  const getOnboardingInstanceUrl = useOnboardingInstanceUrl();
   const { search } = useLocation();
   const history = useHistory();
 
@@ -107,11 +113,15 @@ export const AgentBasedPackagePoliciesTable = ({
               const editHref = getHref('integration_policy_edit', {
                 packagePolicyId: packagePolicy.id,
               });
+              // A policy managed by a cloud onboarding instance is edited in the onboarding flow.
+              const onboardingInstanceUrl =
+                packagePolicy.onboarding_deployment_id &&
+                getOnboardingInstanceUrl(packagePolicy.onboarding_deployment_id);
               return (
                 <EuiLink
                   className="eui-textTruncate"
                   data-test-subj="integrationNameLink"
-                  href={from ? `${editHref}?from=${from}` : editHref}
+                  href={onboardingInstanceUrl || (from ? `${editHref}?from=${from}` : editHref)}
                 >
                   {packagePolicy.name}
                 </EuiLink>
@@ -161,6 +171,7 @@ export const AgentBasedPackagePoliciesTable = ({
                     policies={agentPolicies}
                     packagePolicyId={packagePolicy.id}
                     onAgentPoliciesChange={refreshPackagePolicies}
+                    onboardingDeploymentId={packagePolicy.onboarding_deployment_id}
                   />
                 ) : (
                   <AgentPolicySummaryLine policy={agentPolicies[0]} />

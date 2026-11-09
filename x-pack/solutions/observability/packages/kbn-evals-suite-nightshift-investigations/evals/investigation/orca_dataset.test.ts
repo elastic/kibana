@@ -68,7 +68,7 @@ const call = {
   type: ConversationRoundStepType.toolCall,
   tool_call_id: 'call',
   tool_id: 'nightshift_sandbox_bash',
-  params: { connector_id: 'nightshift-evals-telemetry', command: 'curl ...' },
+  params: { connector_id: 'orcabench-es', command: 'curl ...' },
   results: [
     {
       tool_result_id: 'result',
@@ -126,16 +126,16 @@ describe('ORCA telemetry evidence', () => {
       ...call,
       results: [{ ...call.results[0], data: { stdout: '{"values":[[14268]]}', exit_code: 1 } }],
     },
-  ])('rejects wrong targets, empty data and masked failures: %j', (step) => {
+  ])('rejects other connectors, empty data and masked failures: %j', (step) => {
     expect(hasOrcaTelemetryQuery([{ steps: [step] }])).toBe(false);
   });
 });
 
 describe('ORCA source preflight', () => {
   const env = {
-    NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL: 'https://orca.example',
-    NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY: 'private-key',
-    NIGHTSHIFT_ORCA_TELEMETRY: '1',
+    NIGHTSHIFT_ES_URL: 'https://orca.example',
+    NIGHTSHIFT_ES_API_KEY: 'private-key',
+    NIGHTSHIFT_CONNECTOR_SET: 'orcabench',
   };
   it('checks all three historical signals with the read key', async () => {
     const request = jest.fn<ReturnType<typeof fetch>, Parameters<typeof fetch>>();

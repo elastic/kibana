@@ -12,6 +12,8 @@ import { NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/manag
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { createAgentNotFoundError } from '@kbn/agent-builder-common';
+import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
 import { BOUND_WORKFLOW_IDS } from './bound_workflows';
 import { createInvestigatorServiceAccountService } from './investigator_service_account';
 
@@ -21,6 +23,10 @@ const SPACE_ID = 'obs';
 const AGENT_ACCOUNT = 'uiam-sa-7f3c2a';
 const AUTOMATIONS_ACCOUNT = 'uiam-sa-91be04';
 const IDS = { agent: AGENT_ACCOUNT, automations: AUTOMATIONS_ACCOUNT };
+const AVAILABILITY: AgentAvailabilityConfig = {
+  handler: async () => ({ status: 'available' }),
+  cacheMode: 'global',
+};
 const ENTRY_POINT_ID = `${NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID}-${SPACE_ID}`;
 
 const setup = ({
@@ -31,6 +37,7 @@ const setup = ({
   runAs = AGENT_ACCOUNT,
   enabled = true,
   installError,
+  agentRunAs = AGENT_ACCOUNT,
   automations,
 }: {
   serviceAccountsEnabled?: boolean;
@@ -40,6 +47,8 @@ const setup = ({
   runAs?: string;
   enabled?: boolean;
   installError?: Error;
+  /** The account the installed investigation agent runs as; null for an unbound agent. */
+  agentRunAs?: string | null;
   /** Automation saved objects in the space; omit to run without automations. */
   automations?: Array<{ id: string; attributes: Record<string, unknown> }>;
 } = {}) => {
@@ -106,18 +115,42 @@ const setup = ({
     spacesService: { createSpacesClient: () => ({ get: getSpace }) },
   } as unknown as SpacesPluginStart;
 
+  const setServiceAccount = jest.fn().mockResolvedValue(undefined);
+  const ensureAgent = jest.fn().mockResolvedValue(undefined);
+  const getAgent = jest.fn(async (agentId: string) => ({
+    id: agentId,
+    ...(agentRunAs ? { service_account_id: agentRunAs } : {}),
+  }));
+  const hasAgent = jest.fn().mockResolvedValue(true);
+  const agentBuilder = {
+    agents: {
+      ensure: ensureAgent,
+      getRegistry: jest.fn().mockResolvedValue({ setServiceAccount, get: getAgent, has: hasAgent }),
+    },
+  } as unknown as NonNullable<
+    ReturnType<
+      NonNullable<Parameters<typeof createInvestigatorServiceAccountService>[0]['getAgentBuilder']>
+    >
+  >;
   const service = createInvestigatorServiceAccountService({
     core,
     workflowsExtensions,
     workflowsManagement,
     getInstalledWorkflowState,
     spaces,
+    getAgentBuilder: () => agentBuilder,
+    getAgentAvailability: () => AVAILABILITY,
     getAutomationsSoClient: automations ? () => automationsSoClient as never : undefined,
+    isUniversalAlertingAvailable: () => true,
     isServerless,
     logger: loggingSystemMock.createLogger(),
   });
   return {
     service,
+    setServiceAccount,
+    ensureAgent,
+    getAgent,
+    hasAgent,
     esClient,
     serviceAccounts,
     managedWorkflows,
@@ -184,6 +217,58 @@ describe('createInvestigatorServiceAccountService', () => {
       '_nightshift_agent',
       '_nightshift_automations',
     ]);
+  });
+
+  it('pins only the investigation agent to the space agent account', async () => {
+    const { service, setServiceAccount } = setup();
+
+    await service.enable(request, SPACE_ID, IDS);
+
+    // The reinforcement agent runs as the agent optimize workflow that starts it, so it stays unbound.
+    expect(setServiceAccount.mock.calls).toEqual([['nightshift.investigation', AGENT_ACCOUNT]]);
+  });
+
+  it('installs the investigation agent in the space before pinning it', async () => {
+    const { service, ensureAgent, setServiceAccount } = setup();
+
+    await service.enable(request, SPACE_ID, IDS);
+
+    expect(ensureAgent.mock.calls.map(([{ spaceId, agent }]) => [spaceId, agent.id])).toEqual([
+      [SPACE_ID, 'nightshift.investigation'],
+    ]);
+    expect(ensureAgent.mock.invocationCallOrder[0]).toBeLessThan(
+      setServiceAccount.mock.invocationCallOrder[0]
+    );
+  });
+
+  it('pins the agent before installing any workflow, so a failed pin leaves the space not set up', async () => {
+    const { service, setServiceAccount, managedWorkflows } = setup();
+    setServiceAccount.mockRejectedValue(Boom.forbidden('no'));
+
+    await expect(service.enable(request, SPACE_ID, IDS)).rejects.toThrow('no');
+    expect(managedWorkflows.install).not.toHaveBeenCalled();
+  });
+
+  it('waits for a just-installed agent to become visible before pinning it', async () => {
+    const { service, setServiceAccount } = setup();
+    setServiceAccount.mockRejectedValueOnce(
+      createAgentNotFoundError({ agentId: 'nightshift.investigation' })
+    );
+
+    await service.enable(request, SPACE_ID, IDS);
+
+    expect(setServiceAccount.mock.calls).toEqual([
+      ['nightshift.investigation', AGENT_ACCOUNT],
+      ['nightshift.investigation', AGENT_ACCOUNT],
+    ]);
+  });
+
+  it('fails setup when pinning an agent fails for another reason', async () => {
+    const { service, setServiceAccount } = setup();
+    setServiceAccount.mockRejectedValue(Boom.forbidden('no'));
+
+    await expect(service.enable(request, SPACE_ID, IDS)).rejects.toThrow('no');
+    expect(setServiceAccount).toHaveBeenCalledTimes(1);
   });
 
   it('turns a disabled entry point back on', async () => {
@@ -273,6 +358,73 @@ describe('createInvestigatorServiceAccountService', () => {
     await expect(
       setup({ canManageSecurity: false }).service.getStatus(request, SPACE_ID)
     ).resolves.toMatchObject({ canModifyBoundWorkflows: false });
+  });
+
+  it('unbinds the investigation agent on disable, before uninstalling anything', async () => {
+    const { service, setServiceAccount, managedWorkflows } = setup();
+
+    await service.disable(request, SPACE_ID);
+
+    expect(setServiceAccount.mock.calls).toEqual([['nightshift.investigation', null]]);
+    expect(setServiceAccount.mock.invocationCallOrder[0]).toBeLessThan(
+      managedWorkflows.uninstall.mock.invocationCallOrder[0]
+    );
+  });
+
+  it('keeps the workflows when unbinding the agent fails on disable', async () => {
+    const { service, setServiceAccount, managedWorkflows } = setup();
+    setServiceAccount.mockRejectedValue(Boom.forbidden('no'));
+
+    await expect(service.disable(request, SPACE_ID)).rejects.toThrow('no');
+    expect(managedWorkflows.uninstall).not.toHaveBeenCalled();
+  });
+
+  it('leaves an agent that is not installed alone on disable', async () => {
+    const missing = setup();
+    missing.hasAgent.mockResolvedValue(false);
+
+    await missing.service.disable(request, SPACE_ID);
+
+    expect(missing.setServiceAccount).not.toHaveBeenCalled();
+    expect(missing.managedWorkflows.uninstall).toHaveBeenCalledTimes(BOUND_WORKFLOW_IDS.length);
+  });
+
+  // The agent reports itself unavailable while the space's entry point is disabled, and that is
+  // exactly a space an admin removes the setup from.
+  it('unbinds the agent on disable without checking that it is runnable', async () => {
+    const { service, getAgent, setServiceAccount } = setup();
+
+    await service.disable(request, SPACE_ID);
+
+    expect(getAgent).not.toHaveBeenCalled();
+    expect(setServiceAccount.mock.calls).toEqual([['nightshift.investigation', null]]);
+  });
+
+  // Uninstalling without unbinding would leave the space reading as removed while the agent stays
+  // pinned, and running as that account again the moment service accounts come back.
+  it('refuses to disable an installed agent while service accounts are disabled, before uninstalling anything', async () => {
+    const { service, setServiceAccount, managedWorkflows } = setup({
+      serviceAccountsEnabled: false,
+    });
+
+    await expect(service.disable(request, SPACE_ID)).rejects.toMatchObject({
+      output: { statusCode: 400 },
+    });
+    expect(setServiceAccount).not.toHaveBeenCalled();
+    expect(managedWorkflows.uninstall).not.toHaveBeenCalled();
+  });
+
+  // Nothing can hold a binding there, so the teardown must not depend on service accounts.
+  it('tears a space down with service accounts disabled when the agent is not installed', async () => {
+    const { service, hasAgent, setServiceAccount, managedWorkflows } = setup({
+      serviceAccountsEnabled: false,
+    });
+    hasAgent.mockResolvedValue(false);
+
+    await service.disable(request, SPACE_ID);
+
+    expect(setServiceAccount).not.toHaveBeenCalled();
+    expect(managedWorkflows.uninstall).toHaveBeenCalledTimes(BOUND_WORKFLOW_IDS.length);
   });
 
   it('uninstalls every bound workflow on disable, entry point first', async () => {

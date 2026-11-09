@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Automation, CreateAutomationBody } from '../hooks/use_automations';
+import type { Automation, CreateAutomationBody } from '../../data/automations/use_automations';
 
 const getCopyName = (name: string, existingNames: string[]): string => {
   const taken = new Set(existingNames);

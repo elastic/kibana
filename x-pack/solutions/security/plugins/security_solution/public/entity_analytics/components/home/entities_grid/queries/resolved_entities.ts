@@ -7,7 +7,10 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { escapeStringValue } from '@kbn/esql-utils';
-import { CriticalityLevels } from '../../../../../../common/entity_analytics/asset_criticality/constants';
+import {
+  CRITICALITY_LEVELS,
+  getCriticalityRank,
+} from '../../../../../../common/entity_analytics/entity_store/resolution_group_values';
 import {
   CRITICALITY_FIELD,
   ENTITY_ID_FIELD,
@@ -44,26 +47,15 @@ const GROUP_VALUE_FIELDS = [
   LAST_SEEN_FIELD,
 ];
 
-/** Criticality levels from the highest: a resolved entity shows the highest of its aliases. */
-export const CRITICALITY_LEVELS = Object.values(CriticalityLevels);
-
-const getCriticalityRank = (index: number): number => CRITICALITY_LEVELS.length - index;
-
 const buildCriticalityRankExpression = (field: string): string =>
   `CASE(${CRITICALITY_LEVELS.map(
-    (level, index) => `${field} == ${escapeStringValue(level)}, ${getCriticalityRank(index)}`
+    (level) => `${field} == ${escapeStringValue(level)}, ${getCriticalityRank(level)}`
   ).join(', ')})`;
 
 const buildCriticalityLevelExpression = (rankField: string): string =>
   `CASE(${CRITICALITY_LEVELS.map(
-    (level, index) => `${rankField} == ${getCriticalityRank(index)}, ${escapeStringValue(level)}`
+    (level) => `${rankField} == ${getCriticalityRank(level)}, ${escapeStringValue(level)}`
   ).join(', ')})`;
-
-/** The sort rank of a criticality: extreme the highest, unassigned the lowest (0). */
-export const getCriticalitySortRank = (level: unknown): number => {
-  const index = CRITICALITY_LEVELS.findIndex((criticality) => criticality === level);
-  return index === -1 ? 0 : getCriticalityRank(index);
-};
 
 /** `GREATEST` or `LEAST` of two values, either of which may be missing. */
 const buildExtreme = (fn: 'GREATEST' | 'LEAST', a: string, b: string): string =>

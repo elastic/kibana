@@ -7,10 +7,10 @@
 
 import { MockUrlService } from '@kbn/share-plugin/common/mocks';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { BehaviorSubject } from 'rxjs';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
-import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { NIGHTSHIFT_INVESTIGATION_LOCATOR_ID } from '../common/locators';
 import type { InvestigationQuotaCallback, NightshiftInvestigationsSetupDeps } from './types';
 import { NightshiftInvestigationsPlugin } from './plugin';
@@ -19,10 +19,10 @@ const createPlugin = (memoryEnabled = false) =>
   new NightshiftInvestigationsPlugin(
     coreMock.createPluginInitializerContext({
       enabled: true,
-      sandbox: undefined,
       cortex: { enabled: false },
       decision_trees: { enabled: true },
       memory: { enabled: memoryEnabled },
+      findings_recorder: { enabled: true },
     })
   );
 
@@ -32,15 +32,11 @@ const createSetupDeps = () =>
   } as unknown as NightshiftInvestigationsSetupDeps);
 
 describe('NightshiftInvestigationsPlugin setup', () => {
-  it('registers every telemetry target for both the investigator and the assistant', async () => {
+  it('registers the investigator and the assistant without connectors of their own', async () => {
     const agentBuilder = agentBuilderMocks.createSetup();
     const plugin = new NightshiftInvestigationsPlugin(
       coreMock.createPluginInitializerContext({
         enabled: true,
-        sandbox: {
-          telemetry_connector_id: 'legacy',
-          telemetry_targets: { c0: { connector_id: 'c0' }, orca: { connector_id: 'orca' } },
-        },
         cortex: { enabled: false },
         decision_trees: { enabled: false },
         memory: { enabled: false },
@@ -67,18 +63,9 @@ describe('NightshiftInvestigationsPlugin setup', () => {
           : baseConfiguration;
       return configuration.connector_ids;
     };
-    await expect(connectorsFor('platform.nightshift.investigation-type')).resolves.toEqual([
-      'legacy',
-      'c0',
-      'orca',
-    ]);
-    // Before start there is no Agent Builder to read the investigator from, so the assistant
-    // lists the telemetry connectors only.
-    await expect(connectorsFor('platform.nightshift.assistant-type')).resolves.toEqual([
-      'legacy',
-      'c0',
-      'orca',
-    ]);
+    // Connectors are the ones users assign to the investigator; no setting adds one.
+    await expect(connectorsFor('platform.nightshift.investigation-type')).resolves.toEqual([]);
+    await expect(connectorsFor('platform.nightshift.assistant-type')).resolves.toEqual([]);
   });
 
   it('registers the investigation locator on the server', async () => {
@@ -133,7 +120,7 @@ describe('NightshiftInvestigationsPlugin setup', () => {
     );
   });
 
-  it('registers the reference-free judges with the evals plugin', () => {
+  it('registers the reference-free, alert-outcome and Cortex judges with the evals plugin', () => {
     const registerEvaluator = jest.fn();
 
     createPlugin().setup(coreMock.createSetup(), {
@@ -146,6 +133,9 @@ describe('NightshiftInvestigationsPlugin setup', () => {
         'nightshift_rca_reward@1.0.0',
         'nightshift_investigation_process@1.0.0',
         'nightshift_conclusion_quality@1.0.0',
+        'nightshift_alert_outcome_rca_accuracy@1.0.0',
+        'nightshift_cortex_pages_read@1.0.0',
+        'nightshift_cortex_page_influence@1.0.0',
       ]
     );
   });
@@ -168,6 +158,7 @@ describe('NightshiftInvestigationsPlugin setup', () => {
       expect.arrayContaining([
         'nightshift.resolveModel',
         'nightshift.onlineEvals.classifyRound',
+        'nightshift.onlineEvals.score',
         'nightshift.sendNotifications',
         'nightshift.obtainSandbox',
         'nightshift.cortexHydrate',

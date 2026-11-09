@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/share-plugin'
   - '@kbn/deeplinks-observability'
   - '@kbn/nightshift-decision-trees'
+  - '@kbn/config'
   - '@kbn/config-schema'
   - '@kbn/core'
   - '@kbn/core-http-server'
@@ -58,6 +59,7 @@ dependsOn:
   - '@kbn/rule-registry-plugin'
   - '@kbn/actions-plugin'
   - '@kbn/actions-types'
+  - '@kbn/connector-specs'
   - '@kbn/alerting-plugin'
   - '@kbn/sandbox-plugin'
   - '@kbn/context-engine-plugin'
@@ -76,6 +78,7 @@ dependsOn:
   - '@kbn/core-security-common'
   - '@kbn/eval-kql'
   - '@kbn/rrule'
+  - '@kbn/inference-tracing'
 tags:
   - plugin
   - prod

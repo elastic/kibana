@@ -11,6 +11,7 @@ import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
 import { isObjectLike } from 'lodash';
 
 import type { RegistryConnectionErrorType } from '../../common/types';
+import type { BreakingChangesLog } from '../../common/services/changelog_utils';
 
 import { FleetError } from '../../common/errors';
 
@@ -76,6 +77,15 @@ export class RegistryResponseError extends RegistryError {
 export class PackageInvalidDeploymentMode extends FleetError {}
 export class PackageFipsIncompatibleError extends FleetError {}
 export class PackageOutdatedError extends FleetError {}
+export class PackageBreakingChangesNotAcknowledgedError extends FleetError {
+  constructor(message: string, breakingChanges: BreakingChangesLog) {
+    super(message);
+    this.attributes = {
+      type: 'breaking_changes_not_acknowledged',
+      breaking_changes: breakingChanges,
+    };
+  }
+}
 export class PackageFailedVerificationError extends FleetError {
   constructor(pkgName: string, pkgVersion: string) {
     super(`${pkgName}-${pkgVersion} failed signature verification.`);
@@ -264,6 +274,7 @@ export class PackagePolicyRestrictionRelatedError extends FleetError {
     );
   }
 }
+export class PackagePolicyManagedByOnboardingError extends FleetError {}
 export class FleetEncryptedSavedObjectEncryptionKeyRequired extends FleetError {}
 export class FleetSetupError extends FleetError {}
 export class GenerateServiceTokenError extends FleetError {}

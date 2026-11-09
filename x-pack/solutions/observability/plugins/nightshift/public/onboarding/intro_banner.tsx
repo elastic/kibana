@@ -7,94 +7,172 @@
 
 import { css } from '@emotion/react';
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+import {
+  EuiButton,
+  EuiButtonIcon,
+  EuiIcon,
+  EuiPanel,
+  EuiText,
+  EuiTitle,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '../hooks/use_kibana';
+import posterSrc from './assets/elky_story_poster.jpg';
 
-/** Blank-landing hero: media placeholder next to the Nightshift pitch. */
-export function OnboardingIntroBanner(): React.ReactElement {
+const EXPLORE_LIVE_EXAMPLE_HREF: string | undefined = undefined;
+
+const MEDIA_WIDTH_PX = 425;
+const MEDIA_HEIGHT_PX = 239;
+const COPY_PADDING_INLINE_PX = 32;
+
+const getDismissedStorageKey = (basePath: string): string =>
+  `nightshift.onboarding.introBannerDismissed:${basePath || 'default'}`;
+
+const dismissLabel = i18n.translate('xpack.nightshift.onboarding.dismissIntroBanner', {
+  defaultMessage: 'Dismiss intro banner',
+});
+
+export function OnboardingIntroBanner(): React.ReactElement | null {
   const { euiTheme } = useEuiTheme();
+  const { http } = useKibana().services;
+  const [isDismissed = false, setIsDismissed] = useLocalStorage<boolean>(
+    getDismissedStorageKey(http.basePath.get()),
+    false
+  );
+
+  if (isDismissed) return null;
 
   return (
-    <div
-      data-test-subj="nightshiftOnboardingIntroBanner"
+    <EuiPanel
+      hasBorder
+      hasShadow={false}
+      paddingSize="none"
       css={css`
-        border: ${euiTheme.border.width.thin} solid transparent;
-        border-radius: ${euiTheme.border.radius.medium};
-        background-image: linear-gradient(
-            ${euiTheme.colors.backgroundBasePlain},
-            ${euiTheme.colors.backgroundBasePlain}
-          ),
-          linear-gradient(
-            99deg,
-            ${euiTheme.colors.borderStrongPrimary},
-            ${euiTheme.colors.borderStrongAssistance}
-          );
-        background-origin: border-box;
-        background-clip: padding-box, border-box;
+        position: relative;
+        display: flex;
         overflow: hidden;
       `}
+      data-test-subj="nightshiftOnboardingIntroBanner"
     >
-      <EuiFlexGroup gutterSize="none" responsive alignItems="stretch">
-        <EuiFlexItem grow={false}>
-          <div
-            role="img"
-            aria-label={i18n.translate('xpack.nightshift.onboarding.introMediaAriaLabel', {
-              defaultMessage: 'Nightshift introduction video',
-            })}
-            css={css`
-              align-items: center;
-              background: linear-gradient(
-                135deg,
-                ${euiTheme.colors.backgroundLightPrimary},
-                ${euiTheme.colors.backgroundLightAssistance}
-              );
-              display: flex;
-              height: 160px;
-              justify-content: center;
-              width: 284px;
-              max-width: 100%;
-            `}
-          >
-            <div
-              css={css`
-                align-items: center;
-                background: ${euiTheme.colors.backgroundBasePlain};
-                border-radius: 50%;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-                display: flex;
-                height: 48px;
-                justify-content: center;
-                width: 48px;
-              `}
-            >
-              <EuiIcon type="play" size="l" color="primary" aria-hidden={true} />
-            </div>
-          </div>
-        </EuiFlexItem>
-        <EuiFlexItem
+      <div
+        css={css`
+          position: relative;
+          flex: 0 0 ${MEDIA_WIDTH_PX}px;
+          height: ${MEDIA_HEIGHT_PX}px;
+        `}
+      >
+        <img
+          src={posterSrc}
+          alt={i18n.translate('xpack.nightshift.onboarding.introMediaAriaLabel', {
+            defaultMessage: 'Elastic nightshift overview video',
+          })}
           css={css`
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+          `}
+          data-test-subj="nightshiftOnboardingIntroBannerPoster"
+        />
+        <div
+          aria-hidden={true}
+          css={css`
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
             justify-content: center;
-            padding: ${euiTheme.size.l} ${euiTheme.size.xl};
           `}
         >
-          <EuiTitle size="xs">
-            <h3>
-              {i18n.translate('xpack.nightshift.onboarding.introTitle', {
-                defaultMessage:
-                  'Elastic Nightshift is an SRE coworker that is always there for you',
+          <div
+            css={css`
+              align-items: center;
+              background: ${euiTheme.colors.backgroundBasePlain};
+              border-radius: 50%;
+              box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+              display: flex;
+              height: 48px;
+              justify-content: center;
+              width: 48px;
+            `}
+          >
+            <EuiIcon type="play" size="l" color="primary" aria-hidden={true} />
+          </div>
+        </div>
+      </div>
+      <div
+        css={css`
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          min-width: 0;
+          padding: ${euiTheme.size.l} calc(${COPY_PADDING_INLINE_PX}px + ${euiTheme.size.xl})
+            ${euiTheme.size.l} ${COPY_PADDING_INLINE_PX}px;
+        `}
+      >
+        <EuiTitle size="xs">
+          <h2>
+            {i18n.translate('xpack.nightshift.onboarding.introTitle', {
+              defaultMessage: 'Elastic nightshift is an SRE coworker that is always there for you',
+            })}
+          </h2>
+        </EuiTitle>
+        <EuiText
+          size="s"
+          color="subdued"
+          css={css`
+            margin-top: ${euiTheme.size.s};
+          `}
+        >
+          <p>
+            {i18n.translate('xpack.nightshift.onboarding.introDescription', {
+              defaultMessage:
+                'Elastic nightshift helps you detect, investigate and resolve problems faster. Once you add data, it will start analyzing.',
+            })}
+          </p>
+        </EuiText>
+        {EXPLORE_LIVE_EXAMPLE_HREF && (
+          <div
+            css={css`
+              margin-top: ${euiTheme.size.m};
+            `}
+          >
+            <EuiButton
+              size="s"
+              iconType="external"
+              iconSide="right"
+              href={EXPLORE_LIVE_EXAMPLE_HREF}
+              target="_blank"
+              data-test-subj="nightshiftOnboardingExploreLiveExample"
+            >
+              {i18n.translate('xpack.nightshift.onboarding.exploreLiveExampleButton', {
+                defaultMessage: 'Explore live example',
               })}
-            </h3>
-          </EuiTitle>
-          <EuiText size="s" color="subdued">
-            <p>
-              {i18n.translate('xpack.nightshift.onboarding.introDescription', {
-                defaultMessage:
-                  'Nightshift explores your telemetry, and any tool you give it credentials for, to find problems worth investigating. Within a few minutes it suggests your first investigations, based on the alerts, errors and recent changes it finds.',
-              })}
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </div>
+            </EuiButton>
+          </div>
+        )}
+      </div>
+      <div
+        css={css`
+          position: absolute;
+          top: ${euiTheme.size.s};
+          right: ${euiTheme.size.s};
+        `}
+      >
+        <EuiToolTip content={dismissLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            size="xs"
+            color="text"
+            iconType="cross"
+            aria-label={dismissLabel}
+            onClick={() => setIsDismissed(true)}
+            data-test-subj="nightshiftOnboardingIntroBannerDismiss"
+          />
+        </EuiToolTip>
+      </div>
+    </EuiPanel>
   );
 }

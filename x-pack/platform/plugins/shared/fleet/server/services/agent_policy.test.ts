@@ -2799,6 +2799,61 @@ describe('Agent policy', () => {
       );
     });
 
+    it('should copy shared package policies managed by a cloud onboarding instance without the stamp', async () => {
+      jest.spyOn(agentPolicyService, 'requireUniqueName').mockResolvedValue(undefined);
+      soClient = createSavedObjectClientMock();
+      const mockPolicy = {
+        type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+        references: [],
+        attributes: { revision: 1, package_policies: ['package-1'] } as any,
+      };
+      soClient.bulkGet.mockImplementation(async (objects) => ({
+        saved_objects: objects.map(({ id }) => ({ id, ...mockPolicy })),
+      }));
+      soClient.find.mockImplementation(async () => ({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 1,
+      }));
+      soClient.create.mockImplementation(async (type, attributes) => ({
+        attributes: attributes as unknown as NewAgentPolicy,
+        id: 'mocked',
+        type: 'mocked',
+        references: [],
+      }));
+      const packagePolicies = [
+        {
+          id: 'package-1',
+          name: 'package-1',
+          policy_id: 'policy_1',
+          policy_ids: ['policy_1', 'policy_2'],
+          onboarding_deployment_id: 'deployment-1',
+        },
+      ] as any;
+      mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue(packagePolicies);
+      mockedPackagePolicyService.list.mockResolvedValue({ items: packagePolicies } as any);
+
+      await agentPolicyService.copy(soClient, esClient, 'mocked', {
+        name: 'copy mocked',
+      });
+
+      // Linking the policy would lock the new agent policy too.
+      expect(mockedPackagePolicyService.bulkCreate).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        [
+          {
+            name: 'package-1 (copy)',
+            policy_id: 'policy_1',
+            policy_ids: ['mocked'],
+          },
+        ],
+        expect.anything()
+      );
+      expect(mockedPackagePolicyService.bulkUpdate).not.toHaveBeenCalled();
+    });
+
     it('should remove copied endpoint package policy input ids before bulk create', async () => {
       jest.spyOn(agentPolicyService, 'requireUniqueName').mockResolvedValue(undefined);
       soClient = createSavedObjectClientMock();

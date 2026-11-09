@@ -38,6 +38,7 @@ import {
   PROPOSAL_CONFIDENCE_LABELS,
   VIEW_ALERT_LABEL,
   actionsCountLabel,
+  getHypothesisStatusLabel,
   hypothesesCountLabel,
   hypothesisStatusCountLabel,
   moreSubjectsLabel,
@@ -50,6 +51,8 @@ const NO_SUBJECTS: readonly SubjectRowData[] = [];
 export type HypothesisTreeFlowNodeData = HypothesisTreeNodeData & {
   isSelected: boolean;
   isDimmed: boolean;
+  /** An agent is working on the investigation, so an open hypothesis is still being checked. */
+  isRunning: boolean;
   /** Which proposed action is open in the detail panel, when the actions node is selected. */
   selectedActionIndex: number | null;
 };
@@ -347,9 +350,22 @@ const TRIGGER_ICONS: Record<InvestigationSubjectType, IconType> = {
 
 export const HypothesisStatusBadge = ({
   status,
+  isRunning,
 }: {
   status: HypothesisStatus;
+  isRunning: boolean;
 }): React.ReactElement => {
+  if (status === 'investigating' && !isRunning) {
+    return (
+      <EuiBadge
+        color="hollow"
+        iconType="question"
+        data-test-subj="investigationHypothesisTreeStatus-unresolved"
+      >
+        {getHypothesisStatusLabel(status, isRunning)}
+      </EuiBadge>
+    );
+  }
   switch (status) {
     case 'confirmed':
       return (
@@ -548,7 +564,7 @@ const HypothesisTreeNodeComponent = ({
                 ({ status, color, iconType }) => (
                   <EuiFlexItem grow={false} key={status}>
                     <EuiBadge color={color} iconType={iconType}>
-                      {hypothesisStatusCountLabel(status, data.counts[status])}
+                      {hypothesisStatusCountLabel(status, data.counts[status], data.isRunning)}
                     </EuiBadge>
                   </EuiFlexItem>
                 )
@@ -574,7 +590,7 @@ const HypothesisTreeNodeComponent = ({
               responsive={false}
             >
               <EuiFlexItem grow={false}>
-                <HypothesisStatusBadge status={data.hypothesis.status} />
+                <HypothesisStatusBadge status={data.hypothesis.status} isRunning={data.isRunning} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText size="xs" color="subdued">

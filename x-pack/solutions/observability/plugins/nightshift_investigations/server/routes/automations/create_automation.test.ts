@@ -27,14 +27,15 @@ const body = {
   runtime: { dailyDispatchLimit: 20 },
 };
 
-const call = (overrides: Record<string, unknown> = {}) =>
+const call = (overrides: Record<string, unknown> = {}, user?: Record<string, string>) =>
   handler({
     request: httpServerMock.createKibanaRequest(),
     params: params.parse({ body: { ...body, ...overrides } }),
     getAutomationsSoClient,
     getWorkflowsManagement,
+    isUniversalAlertingAvailable: () => true,
     getInvestigatorServiceAccountService: () => serviceAccountService,
-    context: createRouteContext(),
+    context: createRouteContext(user),
   } as never);
 
 let serviceAccountService = createServiceAccountService();
@@ -68,6 +69,15 @@ it('stores the current user as the author', async () => {
   );
 });
 
+it('stores the full name instead of an opaque username as the author', async () => {
+  await call({}, { username: '8675309', full_name: 'Foo Bar', email: 'foo@example.com' });
+
+  expect(soClient.create).toHaveBeenCalledWith(
+    'nightshift-automation',
+    expect.objectContaining({ author: 'Foo Bar' })
+  );
+});
+
 it('stores tags and the requested enabled state', async () => {
   const result = await call({ tags: ['oncall'], isEnabled: true });
 
@@ -83,7 +93,7 @@ it('turns the UI channel action into an investigation lifecycle destination', as
   const result = await call({ completions: [completion] });
   expect(result.completions).toEqual([completion]);
   const workflow = parse(createWorkflow.mock.calls[0][0].yaml);
-  expect(workflow.steps[0].with.notificationDestinations).toEqual([
+  expect(workflow.steps[0].steps[0].with.notificationDestinations).toEqual([
     {
       type: 'slack',
       connector_id: 'elastic-apps-slack',

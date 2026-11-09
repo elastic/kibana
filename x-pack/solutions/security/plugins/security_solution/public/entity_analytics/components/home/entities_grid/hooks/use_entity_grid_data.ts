@@ -7,8 +7,10 @@
 
 import { useCallback, useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
+import type { UseQueryResult } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
+import { isMissingIndexError } from '../../is_missing_index_error';
 import type { QueryArgs, Row } from '../common';
 import { ANOMALY_COUNT_FIELD, ENTITY_GRID_QUERY_KEY, getNumber } from '../common';
 import { findSortPageFetcher } from '../grid_columns';
@@ -129,6 +131,24 @@ type OverridesOptions = Pick<
   UseEntityGridDataOptions,
   'rowsMode' | 'entityExpression' | 'keyScope'
 >;
+
+/** What the grid has left to load, for the load telemetry. */
+export interface EntityGridLoadState {
+  isRowsPending: boolean;
+  isCountPending: boolean;
+  /** The rows asked for first (those in view) wait for their computed columns. */
+  isEnrichPending: boolean;
+  hasError: boolean;
+}
+
+/** A query that failed has settled; one that is disabled, or shows another key's data, has not. */
+const isQueryPending = ({
+  error,
+  isFetching,
+  isPreviousData,
+  data,
+}: Pick<UseQueryResult, 'error' | 'isFetching' | 'isPreviousData' | 'data'>): boolean =>
+  error == null && (isFetching || isPreviousData || data == null);
 
 const limitPageSize = (options: UseEntityGridDataOptions): UseEntityGridDataOptions =>
   options.pageSize <= MAX_LOADED_ROWS ? options : { ...options, pageSize: MAX_LOADED_ROWS };
@@ -257,14 +277,22 @@ export const useEntityGridData = (
   );
   const { rows, onRowsInViewChange } = enrichment;
   const prefetch = usePrefetch(context);
-  useErrorToast(
-    GRID_QUERY_ERROR_TITLE,
-    context.entitiesIndexError ??
-      resolvedEntityFilterOverrides.error ??
-      rowsQuery.error ??
-      countQuery.error ??
-      enrichment.error
-  );
+  // A missing index is empty data. Skip those and toast the first real failure.
+  const gridError = [
+    context.entitiesIndexError,
+    resolvedEntityFilterOverrides.error,
+    rowsQuery.error,
+    countQuery.error,
+    enrichment.error,
+  ].find((error) => error != null && !isMissingIndexError(error));
+  useErrorToast(GRID_QUERY_ERROR_TITLE, gridError);
+  const loadState: EntityGridLoadState = {
+    isRowsPending: isQueryPending(rowsQuery),
+    isCountPending: isQueryPending(countQuery),
+    // The first chunk asked for settles it: chunks that scrolling asks for later don't count.
+    isEnrichPending: rows.length > 0 && !enrichment.hasEnrichedRows,
+    hasError: gridError != null || enrichment.hasFailedColumns,
+  };
 
   return {
     prefetch,
@@ -274,6 +302,7 @@ export const useEntityGridData = (
     total: countQuery.data,
     updatedAt: Math.max(rowsQuery.dataUpdatedAt, enrichment.dataUpdatedAt) || null,
     isAtLoadLimit: !!rowsQuery.data?.isAtLoadLimit,
+    loadState,
     isFetching:
       !!options.isSearchOverridesPending ||
       resolvedEntityFilterOverrides.isFetching ||

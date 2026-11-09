@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { TestProviders } from '../../common/mock';
 import { EntityAnalyticsNewHomePage } from './entity_analytics_new_home_page';
 import * as tileHooks from '../components/home/needs_attention_tiles/hooks';
@@ -16,6 +16,7 @@ import { useEntityEnginePrivileges } from '../components/entity_store/hooks/use_
 import { useAnomalyPrivileges } from '../api/hooks/use_anomaly_privileges';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { EntitiesGrid } from '../components/home/entities_grid/components/entities_grid';
+import { EMPTY_ENTITY_FILTERS } from '../components/home/entities_grid/common';
 import { SignalCards } from '../components/home/needs_attention_tiles/signal_cards';
 import { useSearchBarExpression } from '../components/home/entities_grid/hooks/use_search_bar_expression';
 import type { SignalCardData } from '../components/home/needs_attention_tiles/data';
@@ -37,8 +38,8 @@ jest.mock('../components/home/needs_attention_tiles/hooks', () => ({
   useRiskTilesSeries: jest.fn(),
   useSearchedTileEntityIds: jest.fn(),
   useTilesLoadTelemetry: jest.fn(),
+  useTilesErrorNotice: jest.fn(),
   useTilesTimeoutNotice: jest.fn(),
-  TILE_TIMEOUT_MESSAGE: 'Timed out',
 }));
 jest.mock('../components/entity_store/hooks/use_entity_store', () => ({
   useEntityStoreStatus: jest.fn(),
@@ -63,6 +64,7 @@ jest.mock('../../common/hooks/use_app_toasts', () => ({
   useAppToasts: () => ({ addWarning: mockAddWarning }),
 }));
 let mockRowsMode: 'resolved' | 'individual' = 'individual';
+let mockUrlStateOverrides: Record<string, unknown> = {};
 jest.mock('../components/home/entities_grid/hooks/use_entity_analytics_url_state', () => ({
   useEntityAnalyticsUrlState: () => ({
     timeRange: '7d',
@@ -81,10 +83,15 @@ jest.mock('../components/home/entities_grid/hooks/use_entity_analytics_url_state
     setActiveTile: jest.fn(),
     expandedIds: [],
     toggleExpandedId: jest.fn(),
+    ...mockUrlStateOverrides,
   }),
 }));
 jest.mock('../components/home/entities_grid/hooks/use_search_bar_expression', () => ({
-  useSearchBarExpression: jest.fn(() => ({ isSearchOverridesPending: false })),
+  useSearchBarExpression: jest.fn(() => ({
+    isSearchOverridesPending: false,
+    applicableFilters: [],
+    ignoredFields: [],
+  })),
 }));
 jest.mock('../components/home/entities_grid/components/entities_grid', () => ({
   EntitiesGrid: jest.fn(() => null),
@@ -397,6 +404,15 @@ describe('EntityAnalyticsNewHomePage: privileges', () => {
     expect(screen.getByTestId('entityAnalyticsPrivilegesCalloutWrapper')).toBeEmptyDOMElement();
   });
 
+  it('titles the tiles section', () => {
+    mockPrivileges();
+    render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+    expect(screen.getByTestId('eaFaceliftNeedsAttentionTitle')).toHaveTextContent(
+      'Entities that need your attention'
+    );
+  });
+
   it.each([
     ['alerts', ['alerts'], ['entitiesWithAlerts', 'watchlisted']],
     ['anomalies', ['anomalies'], ['entitiesWithAnomalies']],
@@ -414,7 +430,10 @@ describe('EntityAnalyticsNewHomePage: privileges', () => {
         expect(lastOptions(SERIES_HOOKS[tile]).skip).toBe(isSkipped);
       });
       cardIds.forEach((id) => {
-        expect(getCard(id)?.noDataMessage).toMatch(/^Requires read access to /);
+        expect(getCard(id)?.countIssue).toEqual({
+          kind: 'locked',
+          text: expect.stringMatching(/^Requires read access to /),
+        });
       });
     }
   );
@@ -423,11 +442,21 @@ describe('EntityAnalyticsNewHomePage: privileges', () => {
 describe('EntityAnalyticsNewHomePage: alerts feature privilege', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockPrivileges();
     (useEntityStoreStatus as jest.Mock).mockReturnValue({
       data: { status: 'running' },
       isLoading: false,
     });
     mockTiles();
+  });
+
+  afterEach(() => {
+    mockUrlStateOverrides = {};
+    (useSearchBarExpression as jest.Mock).mockReturnValue({
+      isSearchOverridesPending: false,
+      applicableFilters: [],
+      ignoredFields: [],
+    });
   });
 
   it('skips the alert tiles and says why when Alerts is None but the alerts index is readable', () => {
@@ -438,9 +467,10 @@ describe('EntityAnalyticsNewHomePage: alerts feature privilege', () => {
       expect(lastOptions(hook).skip).toBe(true);
     });
     ['entitiesWithAlerts', 'watchlisted'].forEach((id) => {
-      expect(getCard(id as SignalCardData['id'])?.noDataMessage).toBe(
-        'Requires read access to alerts'
-      );
+      expect(getCard(id as SignalCardData['id'])?.countIssue).toEqual({
+        kind: 'locked',
+        text: 'Requires read access to alerts',
+      });
     });
     // The grid drops the Alerts columns (and so their count and click path) for this role.
     const gridCalls = (EntitiesGrid as unknown as jest.Mock).mock.calls;
@@ -461,9 +491,201 @@ describe('EntityAnalyticsNewHomePage: alerts feature privilege', () => {
     render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
 
     expect(lastOptions(COUNT_HOOKS.alerts).skip).toBe(false);
-    expect(getCard('entitiesWithAlerts')?.noDataMessage).toBeUndefined();
+    expect(getCard('entitiesWithAlerts')?.countIssue).toBeUndefined();
     const gridCalls = (EntitiesGrid as unknown as jest.Mock).mock.calls;
     expect(gridCalls[gridCalls.length - 1][0].readAccess.alerts).toBe(true);
+  });
+
+  it('lets the flat grid report its loads, with no tile filter or entity filters on', () => {
+    mockPrivileges();
+    render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+    const gridCalls = (EntitiesGrid as unknown as jest.Mock).mock.calls;
+    expect(gridCalls[gridCalls.length - 1][0].loadTelemetry).toEqual({
+      runKey: expect.any(String),
+      isFilterPending: false,
+      hasTileFilter: false,
+      hasEntityFilters: false,
+    });
+  });
+
+  it('keys a grid load on the search as typed, and holds it while its overrides resolve', () => {
+    mockPrivileges();
+    const loadTelemetry = () => {
+      const gridCalls = (EntitiesGrid as unknown as jest.Mock).mock.calls;
+      return gridCalls[gridCalls.length - 1][0].loadTelemetry;
+    };
+    (useSearchBarExpression as jest.Mock).mockReturnValue({
+      searchExpression: 'entity.name == "a"',
+      rawSearchExpression: 'entity.name == "a"',
+      isSearchOverridesPending: true,
+      applicableFilters: [],
+      ignoredFields: [],
+    });
+    const { rerender } = render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+    const { runKey, isFilterPending } = loadTelemetry();
+    expect(isFilterPending).toBe(true);
+
+    // The overrides arrive and patch the expression: the same load, now free to settle.
+    (useSearchBarExpression as jest.Mock).mockReturnValue({
+      searchExpression: '(entity.name == "a" AND NOT entity.id IN ("x")) OR entity.id IN ("y")',
+      rawSearchExpression: 'entity.name == "a"',
+      isSearchOverridesPending: false,
+      applicableFilters: [],
+      ignoredFields: [],
+    });
+    rerender(<EntityAnalyticsNewHomePage />);
+    expect(loadTelemetry()).toMatchObject({ runKey, isFilterPending: false });
+
+    (useSearchBarExpression as jest.Mock).mockReturnValue({
+      isSearchOverridesPending: false,
+      applicableFilters: [],
+      ignoredFields: [],
+    });
+  });
+
+  describe('the key of a grid load', () => {
+    const lastLoadTelemetry = () => {
+      const gridCalls = (EntitiesGrid as unknown as jest.Mock).mock.calls;
+      return gridCalls[gridCalls.length - 1][0].loadTelemetry;
+    };
+    const runKeyWith = (overrides: Record<string, unknown>): string => {
+      jest.clearAllMocks();
+      mockUrlStateOverrides = overrides;
+      mockTiles();
+      const { unmount } = render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+      const { runKey } = lastLoadTelemetry();
+      unmount();
+      return runKey;
+    };
+
+    it('is stable for the same request', () => {
+      expect(runKeyWith({})).toBe(runKeyWith({}));
+    });
+
+    it.each([
+      ['rows mode', { rowsMode: 'resolved' }],
+      ['sort field', { sortField: 'entity.name' }],
+      ['sort direction', { sortDirection: 'asc' }],
+      ['entity filters', { entityFilters: { ...EMPTY_ENTITY_FILTERS, entityTypes: ['host'] } }],
+      ['tile', { activeTile: 'newEntity' }],
+      ['time range', { timeRange: '30d' }],
+    ])('changes with the %s, so the new load is reported', (_name, overrides) => {
+      expect(runKeyWith(overrides)).not.toBe(runKeyWith({}));
+    });
+
+    it('changes with the search as typed', () => {
+      const keyOfSearch = (rawSearchExpression?: string): string => {
+        (useSearchBarExpression as jest.Mock).mockReturnValue({
+          rawSearchExpression,
+          isSearchOverridesPending: false,
+          applicableFilters: [],
+          ignoredFields: [],
+        });
+        return runKeyWith({});
+      };
+      const keyWithoutSearch = keyOfSearch(undefined);
+      expect(keyOfSearch('entity.name == "a"')).not.toBe(keyWithoutSearch);
+    });
+  });
+
+  describe('a tile with more entities than the table is filtered by', () => {
+    const manyIds = Array.from({ length: 1423 }, (_, i) => `entity-${i}`);
+    const lastGridProps = () => {
+      const gridCalls = (EntitiesGrid as unknown as jest.Mock).mock.calls;
+      return gridCalls[gridCalls.length - 1][0];
+    };
+    const selectBigTile = () => {
+      mockUrlStateOverrides = { activeTile: 'newEntity' };
+      hooks.useNewEntityCount.mockReturnValue({
+        count: manyIds.length,
+        entityIds: manyIds,
+        hasCount: true,
+        isLoading: false,
+        isMissingIndex: false,
+        isCountPending: false,
+      });
+    };
+
+    it('tells the grid how many entities the tile has, for the resolved rows', () => {
+      mockRowsMode = 'resolved';
+      selectBigTile();
+      render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+      expect(lastGridProps().cappedTile).toEqual({ total: 1423, limit: 1000 });
+    });
+
+    it('warns with the numbers written out, 1,000 of 1,423', () => {
+      mockRowsMode = 'resolved';
+      selectBigTile();
+      mockAddWarning.mockClear();
+      const { rerender } = render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+      // The warning fires when the selection changes, so change it by one entity.
+      hooks.useNewEntityCount.mockReturnValue({
+        count: manyIds.length + 1,
+        entityIds: [...manyIds, 'entity-extra'],
+        hasCount: true,
+        isLoading: false,
+        isMissingIndex: false,
+        isCountPending: false,
+      });
+      rerender(<EntityAnalyticsNewHomePage />);
+
+      expect(mockAddWarning).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Table shows 1,000 of 1,424 entities',
+          text: expect.stringContaining('limited to 1,000 entities'),
+        })
+      );
+    });
+
+    it('says nothing of it for individual records, which are a different count', () => {
+      mockRowsMode = 'individual';
+      selectBigTile();
+      render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+      expect(lastGridProps().cappedTile).toBeUndefined();
+    });
+
+    it('says nothing of it while the tile fits the table', () => {
+      mockRowsMode = 'resolved';
+      selectBigTile();
+      hooks.useNewEntityCount.mockReturnValue({
+        count: 1000,
+        entityIds: manyIds.slice(0, 1000),
+        hasCount: true,
+        isLoading: false,
+        isMissingIndex: false,
+        isCountPending: false,
+      });
+      render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+      expect(lastGridProps().cappedTile).toBeUndefined();
+    });
+  });
+
+  it('holds the load while the active tile is loading, and releases it once it settles', () => {
+    mockUrlStateOverrides = { activeTile: 'newEntity' };
+    const loadingTile = {
+      count: 3,
+      entityIds: [],
+      hasCount: true,
+      isLoading: true,
+      isMissingIndex: false,
+      isCountPending: false,
+    };
+    hooks.useNewEntityCount.mockReturnValue(loadingTile);
+    const loadTelemetry = () => {
+      const gridCalls = (EntitiesGrid as unknown as jest.Mock).mock.calls;
+      return gridCalls[gridCalls.length - 1][0].loadTelemetry;
+    };
+    const { rerender } = render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+    const { runKey } = loadTelemetry();
+    expect(loadTelemetry()).toMatchObject({ isFilterPending: true, hasTileFilter: true });
+
+    hooks.useNewEntityCount.mockReturnValue({ ...loadingTile, isLoading: false });
+    rerender(<EntityAnalyticsNewHomePage />);
+    expect(loadTelemetry()).toMatchObject({ runKey, isFilterPending: false });
   });
 });
 
@@ -544,6 +766,31 @@ describe('EntityAnalyticsNewHomePage: each tile waits for its own count', () => 
     });
   });
 
+  it('says the alert tiles need detection alerts in a space with no alerts index', () => {
+    mockTiles();
+    hooks.useAlertBasedTiles.mockReturnValue({
+      severeAlertsCount: 0,
+      severeAlertsEntityIds: [],
+      watchlistedCount: 0,
+      watchlistedEntityIds: [],
+      hasCount: false,
+      isLoading: false,
+      isCountPending: false,
+      isTimedOut: false,
+      isMissingIndex: true,
+    });
+    render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+    expect(getCard('entitiesWithAlerts')?.countIssue).toEqual(
+      expect.objectContaining({ kind: 'issue', text: 'Requires an alerts index' })
+    );
+    expect(getCard('watchlisted')?.countIssue).toEqual(
+      expect.objectContaining({ kind: 'issue', text: 'Requires an alerts index' })
+    );
+    expect(getCard('entitiesWithAlerts')?.isUnavailable).toBe(true);
+    expect(getCard('newEntity')?.countIssue).toBeUndefined();
+  });
+
   describe('when a count times out', () => {
     it('says so on its tiles, warns once for the page, and reports the timeout', () => {
       mockTiles();
@@ -558,10 +805,14 @@ describe('EntityAnalyticsNewHomePage: each tile waits for its own count', () => 
       });
       render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
 
-      const messageOf = (id: SignalCardData['id']) => getCard(id)?.noDataMessage;
-      expect(messageOf('entitiesWithAlerts')).toBe('Timed out');
-      expect(messageOf('watchlisted')).toBe('Timed out');
-      expect(messageOf('newEntity')).toBeUndefined();
+      const issueOf = (id: SignalCardData['id']) => getCard(id)?.countIssue;
+      expect(issueOf('entitiesWithAlerts')).toEqual(
+        expect.objectContaining({ kind: 'issue', icon: 'error', text: 'Query timed out' })
+      );
+      expect(issueOf('watchlisted')).toEqual(
+        expect.objectContaining({ kind: 'issue', icon: 'error', text: 'Query timed out' })
+      );
+      expect(issueOf('newEntity')).toBeUndefined();
       expect(lastOptions('useTilesTimeoutNotice')).toBe(true);
       expect(lastOptions('useTilesLoadTelemetry').tiles.alerts.isTimedOut).toBe(true);
     });
@@ -571,6 +822,74 @@ describe('EntityAnalyticsNewHomePage: each tile waits for its own count', () => 
       render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
       expect(lastOptions('useTilesTimeoutNotice')).toBeFalsy();
     });
+  });
+
+  describe('when a count fails', () => {
+    const lastErrorNotice = () => {
+      const { calls } = hooks.useTilesErrorNotice.mock;
+      return calls[calls.length - 1];
+    };
+
+    it('names every tile that failed in one notice, once the counts have settled', () => {
+      mockTiles();
+      hooks.useAlertBasedTiles.mockReturnValue({
+        ...hooks.useAlertBasedTiles(),
+        hasCount: false,
+        error: new Error('boom'),
+      });
+      hooks.useNewEntityCount.mockReturnValue({
+        ...hooks.useNewEntityCount(),
+        hasCount: false,
+        error: new Error('boom'),
+      });
+      render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+      const [titles, isSettled] = lastErrorNotice();
+      expect(titles).toEqual(['Severely alerting', 'New & alerting', 'Watchlisted & alerting']);
+      expect(isSettled).toBe(true);
+    });
+
+    it('does not name a tile that timed out, which has its own notice', () => {
+      mockTiles();
+      hooks.useNewEntityCount.mockReturnValue({
+        ...hooks.useNewEntityCount(),
+        hasCount: false,
+        error: new Error('boom'),
+        isTimedOut: true,
+      });
+      render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+      expect(lastErrorNotice()[0]).toEqual([]);
+      expect(lastOptions('useTilesTimeoutNotice')).toBe(true);
+    });
+
+    it('names nothing, and has not settled, while a count still loads', () => {
+      mockTiles({ alerts: { isCountPending: true } });
+      render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+      expect(lastErrorNotice()[0]).toEqual([]);
+    });
+  });
+
+  it("runs a tile's delta for a count of 0 that came back, but not for a count that did not", () => {
+    mockTiles();
+    hooks.useNewEntityCount.mockReturnValue({
+      ...hooks.useNewEntityCount(),
+      count: 0,
+      hasCount: true,
+    });
+    hooks.useRiskMoversCount.mockReturnValue({
+      ...hooks.useRiskMoversCount(),
+      count: 0,
+      hasCount: false,
+    });
+    render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+    expect(lastOptions(DELTA_HOOKS.newEntity).hasCount).toBe(true);
+    expect(lastOptions(DELTA_HOOKS.riskMovers).hasCount).toBe(false);
+    // The sparklines are told the same, so a count that did not come back draws no line.
+    expect(lastOptions(SERIES_HOOKS.newEntity).hasCount).toBe(true);
+    expect(lastOptions(SERIES_HOOKS.riskMovers).riskMoversHasCount).toBe(false);
   });
 
   it('passes whether each count has a result to its tile, so a missing count is not shown as 0', () => {
@@ -595,15 +914,18 @@ describe('EntityAnalyticsNewHomePage: each tile waits for its own count', () => 
   });
 
   it('tells the anomalies tile that it needs jobs only when no security ML job is installed', () => {
-    const anomaliesNoDataMessage = () => getCard('entitiesWithAnomalies')?.noDataMessage;
+    const anomaliesIssueText = () => {
+      const issue = getCard('entitiesWithAnomalies')?.countIssue;
+      return issue?.kind === 'issue' ? issue.text : undefined;
+    };
     mockTiles({}, { anomaliesMissingJobs: true });
     render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
-    expect(anomaliesNoDataMessage()).toBe('Requires anomaly detection jobs');
+    expect(anomaliesIssueText()).toBe('Requires anomaly detection jobs');
 
     jest.clearAllMocks();
     mockTiles({}, { anomaliesMissingJobs: false });
     render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
-    expect(anomaliesNoDataMessage()).toBeUndefined();
+    expect(anomaliesIssueText()).toBeUndefined();
   });
 });
 
@@ -619,10 +941,47 @@ describe('EntityAnalyticsNewHomePage: the search narrows the tiles', () => {
     mockTiles();
   });
 
+  it('also drops a failed comparison and a loading sparkline for the searched tiles', () => {
+    (useSearchBarExpression as jest.Mock).mockReturnValue({
+      searchExpression: 'KQL("host.name: a")',
+      isSearchOverridesPending: false,
+      applicableFilters: [],
+      ignoredFields: [],
+    });
+    hooks.useSearchedTileEntityIds.mockReturnValue({
+      searchedTileEntityIds: {
+        entitiesWithAlerts: ['host:a'],
+        entitiesWithAnomalies: [],
+        riskMovers: [],
+        newlyHighCritical: [],
+        watchlisted: [],
+        newEntity: [],
+      },
+      isPending: false,
+    });
+    // The unfiltered comparison failed and its sparkline is still loading: neither applies to a
+    // tile that now counts only the searched entities.
+    hooks.useAlertBasedTilesDelta.mockReturnValue({
+      ...hooks.useAlertBasedTilesDelta(),
+      failure: 'delta',
+    });
+    hooks.useAlertBasedTilesSeries.mockReturnValue({
+      alertsTrend: undefined,
+      watchlistedTrend: undefined,
+      isTrendLoading: true,
+    });
+    render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+    expect(getCard('entitiesWithAlerts')?.deltaFailure).toBeUndefined();
+    expect(getCard('entitiesWithAlerts')?.isTrendLoading).toBe(false);
+  });
+
   it("shows each tile's searched entities, without its delta and sparkline", () => {
     (useSearchBarExpression as jest.Mock).mockReturnValue({
       searchExpression: 'KQL("host.name: a")',
       isSearchOverridesPending: false,
+      applicableFilters: [],
+      ignoredFields: [],
     });
     hooks.useSearchedTileEntityIds.mockReturnValue({
       searchedTileEntityIds: {
@@ -653,6 +1012,8 @@ describe('EntityAnalyticsNewHomePage: the search narrows the tiles', () => {
       searchExpression: 'KQL("bob")',
       isSearchOverridesPending: false,
       mainEntityOnlySearch: 'KQL("bob")',
+      applicableFilters: [],
+      ignoredFields: [],
     });
     const { rerender } = render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
     rerender(<EntityAnalyticsNewHomePage />);
@@ -664,6 +1025,8 @@ describe('EntityAnalyticsNewHomePage: the search narrows the tiles', () => {
     (useSearchBarExpression as jest.Mock).mockReturnValue({
       searchExpression: 'KQL("host.name: a")',
       isSearchOverridesPending: false,
+      applicableFilters: [],
+      ignoredFields: [],
     });
     hooks.useSearchedTileEntityIds.mockReturnValue({
       searchedTileEntityIds: {
@@ -690,6 +1053,8 @@ describe('EntityAnalyticsNewHomePage: the search narrows the tiles', () => {
     (useSearchBarExpression as jest.Mock).mockReturnValue({
       searchExpression: 'KQL("host.name: a")',
       isSearchOverridesPending: false,
+      applicableFilters: [],
+      ignoredFields: [],
     });
     render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
 
@@ -698,7 +1063,11 @@ describe('EntityAnalyticsNewHomePage: the search narrows the tiles', () => {
   });
 
   it('keeps the counts, deltas and sparklines without a search', () => {
-    (useSearchBarExpression as jest.Mock).mockReturnValue({ isSearchOverridesPending: false });
+    (useSearchBarExpression as jest.Mock).mockReturnValue({
+      isSearchOverridesPending: false,
+      applicableFilters: [],
+      ignoredFields: [],
+    });
     render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
 
     expect(getCard('entitiesWithAlerts')).toMatchObject({ value: 5, delta: 1 });
@@ -708,6 +1077,8 @@ describe('EntityAnalyticsNewHomePage: the search narrows the tiles', () => {
     (useSearchBarExpression as jest.Mock).mockReturnValue({
       searchExpression: 'KQL("host.name: a")',
       isSearchOverridesPending: false,
+      applicableFilters: [],
+      ignoredFields: [],
     });
     hooks.useSearchedTileEntityIds.mockReturnValue({
       searchedTileEntityIds: undefined,
@@ -722,6 +1093,8 @@ describe('EntityAnalyticsNewHomePage: the search narrows the tiles', () => {
     (useSearchBarExpression as jest.Mock).mockReturnValue({
       searchExpression: 'KQL("asset.criticality: low_impact")',
       isSearchOverridesPending: true,
+      applicableFilters: [],
+      ignoredFields: [],
     });
     hooks.useSearchedTileEntityIds.mockReturnValue({
       searchedTileEntityIds: undefined,
@@ -731,5 +1104,75 @@ describe('EntityAnalyticsNewHomePage: the search narrows the tiles', () => {
 
     expect(lastOptions('useSearchedTileEntityIds').isReady).toBe(false);
     expect(getCard('entitiesWithAlerts')?.isLoading).toBe(true);
+  });
+
+  describe('the callout on the ignored filters', () => {
+    const CALLOUT = 'entity-analytics-ignored-filters-callout';
+    const mockIgnoredFields = (ignoredFields: string[]) =>
+      (useSearchBarExpression as jest.Mock).mockReturnValue({
+        isSearchOverridesPending: false,
+        applicableFilters: [],
+        ignoredFields,
+      });
+
+    it('is not shown when no filter was ignored', () => {
+      mockIgnoredFields([]);
+      render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+      expect(screen.queryByTestId(CALLOUT)).not.toBeInTheDocument();
+    });
+
+    it('is shown with the ignored fields, and hidden once dismissed', () => {
+      mockIgnoredFields(['kibana.alert.workflow_status']);
+      const { rerender } = render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+      expect(screen.getByTestId(CALLOUT)).toHaveTextContent('kibana.alert.workflow_status');
+
+      fireEvent.click(within(screen.getByTestId(CALLOUT)).getByRole('button'));
+      expect(screen.queryByTestId(CALLOUT)).not.toBeInTheDocument();
+
+      rerender(<EntityAnalyticsNewHomePage />);
+      expect(screen.queryByTestId(CALLOUT)).not.toBeInTheDocument();
+    });
+
+    it('stays hidden when an ignored field is removed after the dismiss', () => {
+      mockIgnoredFields(['kibana.alert.workflow_status']);
+      const { rerender } = render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+      fireEvent.click(within(screen.getByTestId(CALLOUT)).getByRole('button'));
+
+      mockIgnoredFields(['kibana.alert.workflow_status', 'kibana.alert.severity']);
+      rerender(<EntityAnalyticsNewHomePage />);
+      expect(screen.getByTestId(CALLOUT)).toBeInTheDocument();
+      fireEvent.click(within(screen.getByTestId(CALLOUT)).getByRole('button'));
+
+      mockIgnoredFields(['kibana.alert.workflow_status']);
+      rerender(<EntityAnalyticsNewHomePage />);
+
+      expect(screen.queryByTestId(CALLOUT)).not.toBeInTheDocument();
+    });
+
+    it('is shown again when a dismissed field is removed and added back', () => {
+      mockIgnoredFields(['kibana.alert.workflow_status']);
+      const { rerender } = render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+      fireEvent.click(within(screen.getByTestId(CALLOUT)).getByRole('button'));
+
+      mockIgnoredFields([]);
+      rerender(<EntityAnalyticsNewHomePage />);
+      mockIgnoredFields(['kibana.alert.workflow_status']);
+      rerender(<EntityAnalyticsNewHomePage />);
+
+      expect(screen.getByTestId(CALLOUT)).toBeInTheDocument();
+    });
+
+    it('is shown again for other ignored fields', () => {
+      mockIgnoredFields(['kibana.alert.workflow_status']);
+      const { rerender } = render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+      fireEvent.click(within(screen.getByTestId(CALLOUT)).getByRole('button'));
+
+      mockIgnoredFields(['kibana.alert.severity']);
+      rerender(<EntityAnalyticsNewHomePage />);
+
+      expect(screen.getByTestId(CALLOUT)).toHaveTextContent('kibana.alert.severity');
+    });
   });
 });

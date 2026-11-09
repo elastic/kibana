@@ -5,262 +5,122 @@
  * 2.0.
  */
 
-import React, { useLayoutEffect, useRef, useState } from 'react';
-import {
-  EuiBadge,
-  EuiButton,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiPanel,
-  EuiPopover,
-  EuiSpacer,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
+import React, { useState } from 'react';
+import { EuiFormRow, EuiText, EuiTextArea, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { InstructionMode } from '../automation_form_values';
-import { SectionHeader } from '../section_header';
+import { MAX_AUTOMATION_INSTRUCTIONS_LENGTH } from '@kbn/nightshift-investigations-plugin/common';
+import type { TriggerFormValues } from '../automation_form_values';
+import { getInstructionsError } from '../validation';
 
 const labels = {
-  instructions: i18n.translate('xpack.nightshift.automations.flyout.instructions', {
+  additionalInstructions: i18n.translate(
+    'xpack.nightshift.automations.flyout.additionalInstructionsLabel',
+    { defaultMessage: 'Additional Instructions' }
+  ),
+  instructions: i18n.translate('xpack.nightshift.automations.flyout.scheduledInstructionsLabel', {
     defaultMessage: 'Instructions',
   }),
-  noInstructions: i18n.translate('xpack.nightshift.automations.flyout.noInstructions', {
-    defaultMessage: 'No instructions',
+  optional: i18n.translate('xpack.nightshift.automations.flyout.instructionsOptionalLabel', {
+    defaultMessage: 'Optional',
   }),
-  mode: i18n.translate('xpack.nightshift.automations.flyout.instructionMode', {
-    defaultMessage: 'Instruction mode',
+  required: i18n.translate('xpack.nightshift.automations.flyout.instructionsRequiredLabel', {
+    defaultMessage: 'Required for scheduled automations',
   }),
-  ariaLabel: i18n.translate('xpack.nightshift.automations.flyout.instructionsAriaLabel', {
-    defaultMessage: 'Automation instructions',
+  limit: i18n.translate('xpack.nightshift.automations.flyout.instructionsLimitDescription', {
+    defaultMessage: 'Maximum {limit, number} characters.',
+    values: { limit: MAX_AUTOMATION_INSTRUCTIONS_LENGTH },
   }),
-};
-
-const modes: Record<
-  InstructionMode,
-  {
-    label: string;
-    help: string;
-    placeholder: string;
-    icon: string;
-    color: 'accentSecondary' | 'primary';
-    badgeColor: 'success' | 'primary';
-    accent: 'textAccentSecondary' | 'textPrimary';
-  }
-> = {
-  investigate: {
-    label: i18n.translate('xpack.nightshift.automations.flyout.investigateMode', {
-      defaultMessage: 'Investigate',
-    }),
-    help: i18n.translate('xpack.nightshift.automations.flyout.investigateModeHelp', {
-      defaultMessage: 'Search and reason over context to trace issues and surface likely causes.',
-    }),
-    placeholder: i18n.translate('xpack.nightshift.automations.flyout.investigatePlaceholder', {
+  empty: i18n.translate('xpack.nightshift.automations.flyout.noAdditionalInstructionsDescription', {
+    defaultMessage: 'No additional instructions',
+  }),
+  alertPlaceholder: i18n.translate(
+    'xpack.nightshift.automations.flyout.alertInstructionsPlaceholder',
+    {
       defaultMessage:
-        'Describe how Nightshift should investigate and respond when this automation runs…',
-    }),
-    icon: 'reporter',
-    color: 'primary',
-    badgeColor: 'primary',
-    accent: 'textPrimary',
-  },
-  ask: {
-    label: i18n.translate('xpack.nightshift.automations.flyout.askMode', { defaultMessage: 'Ask' }),
-    help: i18n.translate('xpack.nightshift.automations.flyout.askModeHelp', {
-      defaultMessage: 'Get direct answers and explanations without running a deep investigation.',
-    }),
-    placeholder: i18n.translate('xpack.nightshift.automations.flyout.askPlaceholder', {
-      defaultMessage: 'Ask a question when this automation runs…',
-    }),
-    icon: 'comment',
-    color: 'accentSecondary',
-    badgeColor: 'success',
-    accent: 'textAccentSecondary',
-  },
+        'Optionally add context or priorities to guide the investigation when an alert triggers this automation…',
+    }
+  ),
+  slackPlaceholder: i18n.translate(
+    'xpack.nightshift.automations.flyout.slackInstructionsPlaceholder',
+    {
+      defaultMessage:
+        'Optionally add context or priorities to guide the investigation when a Slack message triggers this automation…',
+    }
+  ),
+  schedulePlaceholder: i18n.translate(
+    'xpack.nightshift.automations.flyout.scheduledInstructionsPlaceholder',
+    {
+      defaultMessage: 'Describe what Nightshift should investigate each time this automation runs…',
+    }
+  ),
 };
-
-const MAX_HEIGHT = 260;
 
 export const AutomationInstructions = ({
   instructions,
-  mode,
+  trigger,
   onInstructionsChange,
-  onModeChange,
+  showValidationErrors = false,
   readOnly = false,
-  maxLength,
 }: {
   instructions: string;
-  mode: InstructionMode;
+  trigger: TriggerFormValues;
   onInstructionsChange: (instructions: string) => void;
-  onModeChange: (mode: InstructionMode) => void;
+  showValidationErrors?: boolean;
   readOnly?: boolean;
-  maxLength?: number;
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const { euiTheme } = useEuiTheme();
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const current = modes[mode];
-  const accent = euiTheme.colors[current.accent];
-
-  useLayoutEffect(() => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
-    textarea.style.height = 'auto';
-    textarea.style.height = `${Math.min(textarea.scrollHeight, MAX_HEIGHT)}px`;
-    textarea.style.overflowY = textarea.scrollHeight > MAX_HEIGHT ? 'auto' : 'hidden';
-  }, [instructions]);
-
-  if (readOnly) {
-    return (
-      <>
-        <SectionHeader
-          title={labels.instructions}
-          titleAppend={
-            <EuiBadge
-              color={current.badgeColor}
-              iconType={current.icon}
-              data-test-subj="automationInstructionMode"
-            >
-              {current.label}
-            </EuiBadge>
-          }
-        />
-        <EuiSpacer size="s" />
-        <EuiPanel hasBorder hasShadow={false} paddingSize="m">
-          <EuiText
-            size="s"
-            color={instructions ? undefined : 'subdued'}
-            css={{ whiteSpace: 'pre-wrap' }}
-            data-test-subj="automationInstructions"
-          >
-            {instructions || labels.noInstructions}
-          </EuiText>
-        </EuiPanel>
-      </>
-    );
-  }
+  const fieldId = useGeneratedHtmlId({ prefix: 'automationInstructions' });
+  const [hasBlurred, setHasBlurred] = useState(false);
+  const isScheduled = trigger.kind === 'every';
+  const label = isScheduled ? labels.instructions : labels.additionalInstructions;
+  const error =
+    showValidationErrors || hasBlurred || instructions.length > MAX_AUTOMATION_INSTRUCTIONS_LENGTH
+      ? getInstructionsError(instructions, trigger)
+      : undefined;
 
   return (
-    <>
-      <SectionHeader title={labels.instructions} />
-      <EuiSpacer size="s" />
-      <div
-        css={css`
-          position: relative;
-          border: ${euiTheme.border.width.thin} solid
-            color-mix(in srgb, ${accent} 28%, ${euiTheme.border.color});
-          border-radius: ${euiTheme.size.m};
-          background: ${euiTheme.colors.backgroundBasePlain};
-          transition: border-color ${euiTheme.animation.fast} ease-in-out;
-          &:focus-within {
-            border-color: ${accent};
-          }
-        `}
-      >
-        <textarea
-          ref={textareaRef}
+    <EuiFormRow
+      id={fieldId}
+      fullWidth
+      label={label}
+      labelAppend={
+        <EuiText size="xs" color="subdued">
+          {isScheduled ? labels.required : labels.optional}
+        </EuiText>
+      }
+      helpText={labels.limit}
+      isInvalid={!readOnly && Boolean(error)}
+      error={readOnly ? undefined : error}
+    >
+      {readOnly ? (
+        <EuiText
+          size="s"
+          color={instructions ? undefined : 'subdued'}
+          css={{ whiteSpace: 'pre-wrap' }}
+          data-test-subj="automationInstructions"
+        >
+          {instructions || labels.empty}
+        </EuiText>
+      ) : (
+        <EuiTextArea
+          fullWidth
           rows={3}
-          maxLength={maxLength}
-          aria-label={labels.ariaLabel}
-          placeholder={current.placeholder}
+          resize="vertical"
+          maxLength={MAX_AUTOMATION_INSTRUCTIONS_LENGTH}
+          aria-required={isScheduled}
+          isInvalid={Boolean(error)}
+          placeholder={
+            isScheduled
+              ? labels.schedulePlaceholder
+              : trigger.kind === 'alert'
+              ? labels.alertPlaceholder
+              : labels.slackPlaceholder
+          }
           value={instructions}
           onChange={(event) => onInstructionsChange(event.target.value)}
-          css={css`
-            display: block;
-            box-sizing: border-box;
-            width: 100%;
-            border: none;
-            border-radius: inherit;
-            outline: none;
-            resize: none;
-            padding: ${euiTheme.size.s} ${euiTheme.size.s}
-              calc(${euiTheme.size.s} * 2 + ${euiTheme.size.xl});
-            background: transparent;
-            color: ${euiTheme.colors.textParagraph};
-            font: inherit;
-            line-height: 1.5;
-            &::placeholder {
-              color: ${euiTheme.colors.textSubdued};
-            }
-          `}
+          onBlur={() => setHasBlurred(true)}
           data-test-subj="automationInstructions"
         />
-        <div
-          css={css`
-            position: absolute;
-            inset-block-end: ${euiTheme.size.s};
-            inset-inline-start: ${euiTheme.size.s};
-          `}
-        >
-          <EuiPopover
-            aria-label={labels.mode}
-            isOpen={isOpen}
-            closePopover={() => setIsOpen(false)}
-            panelPaddingSize="none"
-            anchorPosition="downLeft"
-            button={
-              <EuiButton
-                size="s"
-                color={current.color}
-                iconType={current.icon}
-                onClick={() => setIsOpen((open) => !open)}
-                data-test-subj="automationInstructionMode"
-              >
-                <EuiFlexGroup
-                  gutterSize="xs"
-                  alignItems="center"
-                  responsive={false}
-                  component="span"
-                >
-                  <EuiFlexItem grow={false} component="span">
-                    {current.label}
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false} component="span">
-                    <EuiIcon type="chevronSingleDown" size="s" aria-hidden={true} />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiButton>
-            }
-          >
-            <EuiContextMenuPanel
-              css={{ inlineSize: 300 }}
-              items={(Object.keys(modes) as InstructionMode[]).map((key) => (
-                <EuiContextMenuItem
-                  key={key}
-                  icon={key === mode ? 'check' : 'empty'}
-                  layoutAlign="top"
-                  onClick={() => {
-                    onModeChange(key);
-                    setIsOpen(false);
-                  }}
-                  data-test-subj={`automationInstructionMode-${key}`}
-                >
-                  <EuiFlexGroup
-                    gutterSize="s"
-                    alignItems="center"
-                    responsive={false}
-                    component="span"
-                  >
-                    <EuiFlexItem grow={false} component="span">
-                      <EuiIcon type={modes[key].icon} size="s" aria-hidden={true} />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false} component="span">
-                      <strong>{modes[key].label}</strong>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                  <EuiText size="xs" color="subdued">
-                    {modes[key].help}
-                  </EuiText>
-                </EuiContextMenuItem>
-              ))}
-            />
-          </EuiPopover>
-        </div>
-      </div>
-    </>
+      )}
+    </EuiFormRow>
   );
 };

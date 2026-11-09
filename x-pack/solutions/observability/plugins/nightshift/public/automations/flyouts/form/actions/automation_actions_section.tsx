@@ -17,7 +17,6 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiPopover,
-  EuiSelect,
   EuiSpacer,
   EuiText,
   EuiToolTip,
@@ -28,8 +27,8 @@ import { i18n } from '@kbn/i18n';
 import {
   formatChannelValue,
   useAllRelayAppBindings,
-} from '../../../../settings/components/apps_section/use_relay_app_bindings';
-import type { SlackActionFormValues, SlackTarget } from '../automation_form_values';
+} from '../../../../data/relay_apps/use_relay_app_bindings';
+import type { SlackActionFormValues } from '../automation_form_values';
 import { SectionHeader } from '../section_header';
 import { SlackChannelComboBox } from '../slack_channel_combo_box';
 import { SentenceIcon } from '../triggers/pills/sentence';
@@ -49,9 +48,6 @@ export const actionLabels = {
   }),
   postInSlack: i18n.translate('xpack.nightshift.automations.flyout.postInSlack', {
     defaultMessage: 'Post in Slack',
-  }),
-  whereToRespond: i18n.translate('xpack.nightshift.automations.flyout.whereToRespond', {
-    defaultMessage: 'Where to respond',
   }),
   channel: i18n.translate('xpack.nightshift.automations.flyout.slackChannel', {
     defaultMessage: 'Channel',
@@ -147,27 +143,13 @@ const SlackActionRow = ({
           <strong>{actionLabels.postInSlack}</strong>
         </EuiText>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        {readOnly ? (
+      {readOnly && (
+        <EuiFlexItem grow={false}>
           <EuiBadge>
             {action.target === 'channel' ? actionLabels.channel : actionLabels.directMessage}
           </EuiBadge>
-        ) : (
-          <EuiSelect
-            data-test-subj="nightshiftSlackActionRowSelect"
-            compressed
-            aria-label={actionLabels.whereToRespond}
-            value={action.target}
-            options={[
-              { value: 'channel', text: actionLabels.channel },
-              { value: 'self', text: actionLabels.directMessage },
-            ]}
-            onChange={(event) =>
-              onChange({ target: event.target.value as SlackTarget, destination: '' })
-            }
-          />
-        )}
-      </EuiFlexItem>
+        </EuiFlexItem>
+      )}
       <EuiFlexItem grow={!readOnly}>
         {readOnly ? (
           action.target === 'channel' ? (

@@ -1,5 +1,5 @@
 {
-  "sha1": "0403b4dccba417baad566d54b968cd469c898355",
+  "sha1": "c04c10365972c625a093dd9398eae951b5b3fa95",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -743,6 +743,19 @@
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/principal_uiam_service_account.spec.ts",
         "line": 28,
         "column": 15
+      }
+    },
+    {
+      "id": "c5e12f6b333e70b-60363125e676c59",
+      "title": "Refresh UIAM service account credentials before a self call finishes a short handler after its original token expires",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/refresh_uiam_self_call.spec.ts",
+        "line": 47,
+        "column": 24
       }
     },
     {

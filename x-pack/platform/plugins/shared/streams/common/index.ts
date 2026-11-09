@@ -18,6 +18,7 @@ export {
   ATTACHMENT_SUGGESTIONS_LIMIT,
   FAILURE_STORE_SELECTOR,
   STREAMS_DEFAULT_UNIT_ID,
+  MAX_STATS_STREAM_NAMES,
 } from './constants';
 
 export type { StreamDocsStat } from './doc_counts';
@@ -50,11 +51,10 @@ export {
 export type { ResolvedIndexPatternMatches } from './resolve_index_patterns';
 
 export { matchesIndexPattern } from './matches_index_pattern';
-export { getUnitDestinationWritePatterns } from './unit_destination_write_patterns';
-export type { UnitDestination } from './unit_destination_write_patterns';
 export type {
   IndexMetadataResponse,
   ResolvedDestinationIndex,
+  ResolvedDestinationIndexHealth,
   ResolveUnitIndicesResponse,
 } from './resolve_unit_indices';
 

@@ -21,6 +21,7 @@ import type {
   StartOnboardingSuggestionsResponse,
 } from '../../common/onboarding';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../common';
+import { installAssistantAgent } from '../lib/install_assistant_agent';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
 import { OnboardingUnavailableError } from './errors';
 import { parseSuggestions } from './parse_suggestions';
@@ -32,6 +33,8 @@ export interface OnboardingClientDeps {
   spaces?: SpacesPluginStart;
   agentBuilder?: AgentBuilderPluginStart;
   agentAvailability?: AgentAvailabilityConfig;
+  /** The investigator is hidden from the picker while the assistant is enabled. */
+  assistantEnabled?: boolean;
 }
 
 /**
@@ -41,7 +44,7 @@ export interface OnboardingClientDeps {
  */
 export interface OnboardingClient {
   get: (request: KibanaRequest) => Promise<GetOnboardingResponse>;
-  /** Enables Nightshift in the space: installs the investigation agent there. */
+  /** Enables Nightshift in the space: installs the investigation agent, and the assistant when enabled, there. */
   enable: (request: KibanaRequest) => Promise<EnableOnboardingResponse>;
   /** Starts an exploration run of the investigation agent. */
   start: (request: KibanaRequest) => Promise<StartOnboardingSuggestionsResponse>;
@@ -78,9 +81,11 @@ const toExecutionResponse = (execution: WorkflowExecutionDto): OnboardingSuggest
 export const createOnboardingClient = ({
   getDeps,
   logger,
+  ensureFailureSweep,
 }: {
   getDeps: () => OnboardingClientDeps;
   logger: Logger;
+  ensureFailureSweep?: (request: KibanaRequest, spaceId: string) => Promise<void>;
 }): OnboardingClient => {
   const getSpaceId = (request: KibanaRequest): string =>
     getDeps().spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
@@ -136,7 +141,7 @@ export const createOnboardingClient = ({
     },
 
     enable: async (request) => {
-      const { agentBuilder, agentAvailability } = getDeps();
+      const { agentBuilder, agentAvailability, assistantEnabled } = getDeps();
       if (!agentBuilder || !agentAvailability) {
         throw new OnboardingUnavailableError('Agent Builder is not available');
       }
@@ -146,6 +151,10 @@ export const createOnboardingClient = ({
         spaceId,
         availability: agentAvailability,
       });
+      if (assistantEnabled) {
+        await installAssistantAgent({ agentBuilder, spaceId, availability: agentAvailability });
+      }
+      await ensureFailureSweep?.(request, spaceId);
       logger.info(`Enabled Nightshift in space "${spaceId}": investigation agent installed`);
       return { agent_installed: true };
     },

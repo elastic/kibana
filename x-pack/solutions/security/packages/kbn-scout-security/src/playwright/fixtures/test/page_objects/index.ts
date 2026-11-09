@@ -13,6 +13,7 @@ import { AlertsTablePage } from './alerts_table';
 import { AgentBuilderPage } from './agent_builder';
 import { AlertDetailsRightPanelPage } from './alert_details_right_panel';
 import { EntityAnalyticsManagementPage } from './entity_analytics_management';
+import { EntityAnalyticsHomePage } from './entity_analytics_home_page';
 import { CspmIntegrationPage } from './cspm_integration_page';
 import { TimelinePage } from './timeline';
 import { DetectionsAttackDiscoveryPage } from './detections_attack_discovery';
@@ -36,6 +37,7 @@ import { EntityFlyoutAnomaliesPage } from './entity_flyout_anomalies_page';
 import { CoverageOverviewPage } from './coverage_overview';
 import { SecurityOverviewPage } from './security_overview_page';
 import { RuleEditPage } from './rule_edit_page';
+import { WatchlistEditFlyout } from './watchlist_edit_flyout';
 
 export type { RuleCreateWizardPage } from './rule_create_wizard';
 export type { RuleDetailsPage } from './rule_details_page';
@@ -50,6 +52,8 @@ export interface SecurityPageObjects extends PageObjects {
   agentBuilderPage: AgentBuilderPage;
   alertDetailsRightPanelPage: AlertDetailsRightPanelPage;
   entityAnalyticsManagementPage: EntityAnalyticsManagementPage;
+  /** New Entity Analytics home page — Needs attention tiles and entities grid (behind the useNewEntityAnalyticsPage flag). */
+  entityAnalyticsHomePage: EntityAnalyticsHomePage;
   cspmIntegrationPage: CspmIntegrationPage;
   timelinePage: TimelinePage;
   detectionsAttackDiscoveryPage: DetectionsAttackDiscoveryPage;
@@ -91,6 +95,8 @@ export interface SecurityPageObjects extends PageObjects {
   securityOverviewPage: SecurityOverviewPage;
   /** Detection rule edit page — save flow and the save-with-warnings confirmation modal. */
   ruleEditPage: RuleEditPage;
+  /** Watchlist create / edit flyout — opened from the Watchlists tab of the Entity analytics management page. */
+  watchlistEditFlyout: WatchlistEditFlyout;
 }
 
 export function extendPageObjects(
@@ -106,6 +112,7 @@ export function extendPageObjects(
     agentBuilderPage: createLazyPageObject(AgentBuilderPage, page),
     alertDetailsRightPanelPage: createLazyPageObject(AlertDetailsRightPanelPage, page),
     entityAnalyticsManagementPage: createLazyPageObject(EntityAnalyticsManagementPage, page),
+    entityAnalyticsHomePage: createLazyPageObject(EntityAnalyticsHomePage, page),
     cspmIntegrationPage: createLazyPageObject(CspmIntegrationPage, page),
     timelinePage: createLazyPageObject(TimelinePage, page),
     detectionsAttackDiscoveryPage: createLazyPageObject(
@@ -133,5 +140,6 @@ export function extendPageObjects(
     coverageOverviewPage: createLazyPageObject(CoverageOverviewPage, page),
     securityOverviewPage: createLazyPageObject(SecurityOverviewPage, page),
     ruleEditPage: createLazyPageObject(RuleEditPage, page),
+    watchlistEditFlyout: createLazyPageObject(WatchlistEditFlyout, page),
   };
 }

@@ -33,7 +33,6 @@ const options: NightshiftAgentTypeOptions = {
   memoryEnabled: true,
   investigationToolsEnabled: true,
   proposalsEnabled: true,
-  telemetryConnectorId: 'telemetry',
 };
 
 const configurationFor = async (
@@ -62,7 +61,7 @@ describe('Nightshift assistant agent type', () => {
     );
   });
 
-  it('shares the investigator configuration except for its instructions', async () => {
+  it('shares the investigator hooks and connectors, but keeps Agent Builder tools and prompt', async () => {
     const { instructions, ...assistant } = await configurationFor(getAssistantAgentType(options));
     const { instructions: investigatorInstructions, ...investigator } = await configurationFor(
       getInvestigationAgentType({ ...options, decisionTreesEnabled: true })
@@ -70,9 +69,8 @@ describe('Nightshift assistant agent type', () => {
 
     expect(instructions).toBe(ASSISTANT_INSTRUCTIONS);
     expect(instructions).not.toBe(investigatorInstructions);
-    expect(assistant).toEqual(investigator);
     expect(assistant).toMatchObject({
-      connector_ids: ['telemetry'],
+      connector_ids: [],
       workflow_ids: [
         getNightshiftBoundHookWorkflowId(
           NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
@@ -83,37 +81,26 @@ describe('Nightshift assistant agent type', () => {
         getNightshiftBoundHookWorkflowId(NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW_ID, 'default'),
       ],
     });
-  });
-
-  it('allows every configured telemetry target, like the investigator', async () => {
-    const telemetryOptions: NightshiftAgentTypeOptions = {
-      ...options,
-      telemetryConnectorId: undefined,
-      telemetryConfig: {
-        telemetry_targets: { c0: { connector_id: 'c0' }, orca: { connector_id: 'orca' } },
-      } as NightshiftAgentTypeOptions['telemetryConfig'],
-    };
-
-    const assistant = await configurationFor(getAssistantAgentType(telemetryOptions));
-    const investigator = await configurationFor(getInvestigationAgentType(telemetryOptions));
-
-    expect(assistant.connector_ids).toEqual(['c0', 'orca']);
     expect(assistant.connector_ids).toEqual(investigator.connector_ids);
+    expect(assistant.workflow_ids).toEqual(investigator.workflow_ids);
+    expect(assistant.post_execution_workflow_ids).toEqual(investigator.post_execution_workflow_ids);
+    expect(assistant.tools?.[0]?.tool_ids).toContain('proposals.create');
+    expect(investigator.tools?.[0]?.tool_ids).not.toContain('proposals.create');
   });
 
-  it('inherits the investigator saved connectors after the telemetry connectors, deduplicated', async () => {
+  it('inherits the investigator saved connectors, deduplicated', async () => {
     const request = httpServerMock.createKibanaRequest();
-    const getInheritedConnectorIds = jest.fn(async () => ['github', 'telemetry', 'pagerduty']);
+    const getInheritedConnectorIds = jest.fn(async () => ['github', 'github', 'pagerduty']);
     const { baseConfiguration } = getAssistantAgentType({ ...options, getInheritedConnectorIds });
     if (typeof baseConfiguration !== 'function') throw new Error('Expected a resolver');
 
     const { connector_ids: connectorIds } = await baseConfiguration({ request, spaceId: 'ops' });
 
-    expect(connectorIds).toEqual(['telemetry', 'github', 'pagerduty']);
+    expect(connectorIds).toEqual(['github', 'pagerduty']);
     expect(getInheritedConnectorIds).toHaveBeenCalledWith({ request, spaceId: 'ops' });
   });
 
-  it('keeps the telemetry connectors when the inherited connectors cannot be read', async () => {
+  it('keeps no connectors when the inherited connectors cannot be read', async () => {
     const logger = loggingSystemMock.createLogger();
     const { baseConfiguration } = getAssistantAgentType({
       ...options,
@@ -129,7 +116,7 @@ describe('Nightshift assistant agent type', () => {
       baseConfiguration,
     });
 
-    expect(connectorIds).toEqual(['telemetry']);
+    expect(connectorIds).toEqual([]);
     expect(logger.warn).toHaveBeenCalledWith(
       'Failed to resolve inherited connectors for space "default": registry down'
     );

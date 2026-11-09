@@ -14,14 +14,12 @@ import type {
   EventActor,
   ToolCallStep,
   TimelineEvent,
-  TodosStep,
 } from '@kbn/agent-builder-common';
 import {
   ConversationRoundStepType,
   TimelineEventType,
   executionStepEventId,
   executionTerminatedEventId,
-  findTodosStep,
   isBackgroundAgentCompleteEvent,
   isCompactionCompletedEvent,
   isCompactionStartedEvent,
@@ -35,7 +33,6 @@ import {
   isReasoningEvent,
   isSubstitutionAppliedEvent,
   isThinkingCompleteEvent,
-  isTodosUpdatedEvent,
   isToolCallEvent,
   isToolCallStep,
   isToolProgressEvent,
@@ -379,19 +376,6 @@ export const sseToEvents = (state: LiveEventsState, event: ChatEvent): LiveEvent
       ...event.data.execution,
     };
     return withAppendedStep(state, step);
-  }
-
-  if (isTodosUpdatedEvent(event)) {
-    const { todos } = event.data.data;
-    const existing = findTodosStep(state.steps);
-    if (existing) {
-      const sequence = state.steps.indexOf(existing);
-      return withStepAt(state, sequence, { ...existing, todos, carried_over: false });
-    }
-    return withAppendedStep(state, {
-      type: ConversationRoundStepType.updateTodos,
-      todos,
-    } as TodosStep);
   }
 
   return state;

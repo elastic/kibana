@@ -268,6 +268,17 @@ export const executeEvaluators = async (
         })
       );
 
+      if (result.notApplicable) {
+        return {
+          status: 'error',
+          evaluator: await describeEvaluator(definition, connectorId),
+          error: {
+            code: 'not_applicable',
+            message: `Evaluator not applicable: ${result.notApplicable.reason}`,
+          },
+        };
+      }
+
       return {
         status: 'ok',
         evaluator: await describeEvaluator(definition, connectorId),

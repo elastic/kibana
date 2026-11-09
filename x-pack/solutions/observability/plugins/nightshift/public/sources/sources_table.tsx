@@ -60,10 +60,13 @@ interface ISourcesTableProps {
   awaitingRunSourceIds?: readonly string[];
   /** Explains why onboard actions are disabled (loading / error / paused). */
   activityBlockTooltip?: string;
+  /** Onboarding actions and row selection. */
   canManage: boolean;
+  /** Enable switch and delete, which need manage and configure. */
+  canChangeSources: boolean;
   /** Source whose enable/disable request is in flight; its switch stays disabled until it settles. */
   pendingEnabledSourceId?: string;
-  /** Opens the source flyout; it is read-only without `canManage`. */
+  /** Opens the source flyout; it is read-only without `canChangeSources`. */
   onOpenSource: (source: NightshiftSource) => void;
   onToggleSourceEnabled: (source: NightshiftSource, enabled: boolean) => void;
   onOnboardSource: (sourceId: string) => void;
@@ -82,6 +85,7 @@ export function SourcesTable({
   awaitingRunSourceIds = [],
   activityBlockTooltip,
   canManage,
+  canChangeSources,
   pendingEnabledSourceId,
   onOpenSource,
   onToggleSourceEnabled,
@@ -114,7 +118,7 @@ export function SourcesTable({
         onboardTooltip={onboardTooltip}
         onOnboard={onOnboardSource}
         onStopOnboarding={onStopOnboarding}
-        onDelete={onDeleteSource}
+        onDelete={canChangeSources ? onDeleteSource : undefined}
       />
     ),
   };
@@ -154,7 +158,7 @@ export function SourcesTable({
           showLabel={false}
           compressed
           checked={enabled}
-          disabled={!canManage || pendingEnabledSourceId === source.id}
+          disabled={!canChangeSources || pendingEnabledSourceId === source.id}
           onChange={(event) => onToggleSourceEnabled(source, event.target.checked)}
         />
       ),

@@ -24,6 +24,7 @@ import { useConversationId } from '../../context/conversation/use_conversation_i
 import { useConversationScrollActions } from '../../hooks/use_conversation_scroll_actions';
 import { useAnchoredItemKey } from '../../hooks/use_anchored_item_key';
 import { useOnMessageFromOtherParticipant } from '../../hooks/use_on_message_from_other_participant';
+import { useAttachToActiveExecution } from '../../hooks/use_attach_to_active_execution';
 import { useConversationStatus } from '../../hooks/use_conversation';
 import { useSendPredefinedInitialMessage } from '../../hooks/use_initial_message';
 import {
@@ -101,6 +102,7 @@ export const Conversation: React.FC<{}> = () => {
   }, [staleAttachments, conversationId]);
 
   useOnMessageFromOtherParticipant(stopFollowingBottom);
+  useAttachToActiveExecution();
 
   // Stick to bottom when opening a conversation, once its data has loaded
   useEffect(() => {

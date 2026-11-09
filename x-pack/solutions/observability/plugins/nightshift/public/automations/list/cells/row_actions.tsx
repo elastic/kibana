@@ -16,7 +16,7 @@ import {
   useEuiI18n,
 } from '@elastic/eui';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
-import type { Automation } from '../../hooks/use_automations';
+import type { Automation } from '../../../data/automations/use_automations';
 import { listLabels } from '../translations';
 
 export const AutomationActions = ({

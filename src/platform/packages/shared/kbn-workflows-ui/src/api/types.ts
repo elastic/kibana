@@ -104,6 +104,7 @@ export interface GetWorkflowExecutionsParams {
   statuses?: ExecutionStatus[];
   executionTypes?: ExecutionType[];
   executedBy?: string[];
+  runName?: string;
   omitStepRuns?: boolean;
   /** Datemath lower bound for filtering executions by finishedAt (applied to finishedAt). */
   finishedAfter?: string;
@@ -207,6 +208,17 @@ export interface SearchTriggerEventLogResult {
   total: number;
   page: number;
   size: number;
+}
+
+export interface LinkedRule {
+  id: string;
+  name: string;
+  ruleTypeId: string;
+}
+
+export interface GetLinkedRulesResponse {
+  total: number;
+  rules: LinkedRule[];
 }
 
 export interface RestoreWorkflowVersionParams {

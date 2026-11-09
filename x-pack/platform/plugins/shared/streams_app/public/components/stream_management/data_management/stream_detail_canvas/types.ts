@@ -12,15 +12,23 @@ import type {
   UnitEdgeForwarding,
   UnitEdgeProcessingTarget,
 } from '../../../../services/unit_graph';
-import type { DestinationSignal } from '../../../streams_layout/destinations/types';
+import type {
+  DestinationSignal,
+  DestinationViewModel,
+} from '../../../streams_layout/destinations/types';
 
 export const SOURCE_NODE_TYPE = 'source';
 export const DESTINATION_NODE_TYPE = 'destination';
+export const ROUTING_NODE_TYPE = 'routing';
 export const PROCESSING_NODE_TYPE = 'processing';
 export const ANIMATED_EDGE_TYPE = 'animated';
 
 export interface SourceNodeData extends Record<string, unknown> {
   sourceId?: string;
+  /** A source has one outgoing connection, so a connected source cannot start another. */
+  hasConnection?: boolean;
+  unconfiguredNodeId?: string;
+  configurationLabel?: string;
   title: string;
   subtitle: string;
   iconType?: IconType;
@@ -31,10 +39,30 @@ export interface DestinationNodeData extends Record<string, unknown> {
   title: string;
   subtitle?: string;
   streamName?: string;
+  bucket?: string;
+  endpoint?: string;
   destinationId?: string;
+  /** Decides whether the node shows stats. A node without it shows none. */
+  destinationType?: DestinationViewModel['type'];
   signals?: DestinationSignal[];
   indexCount?: number;
   targetedIndexNames?: string[];
+  remoteIndexNames?: string[];
+}
+
+export interface RoutingNodeRule {
+  /** React Flow source handle id the rule's edges leave from. */
+  handleId: string;
+  label: string;
+  isCatchAll: boolean;
+  connected: boolean;
+  action?: 'copy' | 'move';
+  signals?: DestinationSignal[];
+}
+
+export interface RoutingNodeData extends Record<string, unknown> {
+  pipelineId: string;
+  rules: RoutingNodeRule[];
 }
 
 export interface ProcessingNodeData extends Record<string, unknown> {
@@ -42,7 +70,14 @@ export interface ProcessingNodeData extends Record<string, unknown> {
   title: string;
   processorCount: number;
   editable: boolean;
+  /**
+   * What the output handle allows: `connect` starts new lines, `reconnect`
+   * only moves the node's existing lines, and `fixed` allows neither.
+   */
+  output: ProcessingNodeOutput;
 }
+
+export type ProcessingNodeOutput = 'connect' | 'reconnect' | 'fixed';
 
 /** Edge data for lines derived from the unit's pipelines. */
 export interface UnitEdgeData extends Record<string, unknown> {
@@ -51,12 +86,15 @@ export interface UnitEdgeData extends Record<string, unknown> {
   forwarding?: UnitEdgeForwarding;
   /** The slot "Add processing" writes to; unset when the line leads to a read-only node. */
   processingTarget?: UnitEdgeProcessingTarget;
+  /** Lines into a routing node or out of one of its rules. */
+  routing?: boolean;
 }
 
 export type SourceNode = Node<SourceNodeData, typeof SOURCE_NODE_TYPE>;
 export type DestinationNode = Node<DestinationNodeData, typeof DESTINATION_NODE_TYPE>;
+export type RoutingNode = Node<RoutingNodeData, typeof ROUTING_NODE_TYPE>;
 export type ProcessingNode = Node<ProcessingNodeData, typeof PROCESSING_NODE_TYPE>;
-export type ClassicCanvasNode = SourceNode | DestinationNode | ProcessingNode;
+export type ClassicCanvasNode = SourceNode | DestinationNode | ProcessingNode | RoutingNode;
 export type ClassicCanvasEdge = Edge<UnitEdgeData>;
 
 export interface ClassicCanvasGraph {

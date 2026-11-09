@@ -76,7 +76,7 @@
   },
   "engines": {
     "node": "24.22.1",
-    "pnpm": "~12.4.2"
+    "pnpm": "~12.17.0"
   },
   "resolutions": {
     "**/@babel/core": "7.29.7",
@@ -156,8 +156,8 @@
     "@elastic/ecs": "9.3.0",
     "@elastic/elasticsearch": "9.5.1",
     "@elastic/ems-client": "8.8.1",
-    "@elastic/esql": "4.35.0",
-    "@elastic/esql-definitions": "4.35.0",
+    "@elastic/esql": "4.36.0",
+    "@elastic/esql-definitions": "4.36.0",
     "@elastic/eui": "123.3.0",
     "@elastic/eui-illustrations": "1.1.0",
     "@elastic/eui-theme-borealis": "8.1.0",
@@ -190,7 +190,7 @@
     "@formatjs/intl-utils": "3.8.4",
     "@formatjs/ts-transformer": "3.13.14",
     "@google/generative-ai": "0.24.1",
-    "@grpc/grpc-js": "1.14.5",
+    "@grpc/grpc-js": "1.14.6",
     "@hapi/accept": "6.0.3",
     "@hapi/boom": "10.0.1",
     "@hapi/cookie": "12.0.1",
@@ -1204,6 +1204,7 @@
     "@kbn/securitysolution-rules": "workspace:*",
     "@kbn/securitysolution-t-grid": "workspace:*",
     "@kbn/securitysolution-timeline-common": "workspace:*",
+    "@kbn/securitysolution-timeline-components": "workspace:*",
     "@kbn/securitysolution-utils": "workspace:*",
     "@kbn/server-http-tools": "workspace:*",
     "@kbn/server-route-repository": "workspace:*",
@@ -1562,7 +1563,7 @@
     "io-ts": "2.2.22",
     "ipaddr.js": "2.3.0",
     "jest-diff": "29.7.0",
-    "joi": "18.2.9",
+    "joi": "18.3.1",
     "joi-to-json": "5.0.0",
     "jquery": "3.7.1",
     "jsdom": "20.0.1",
@@ -1584,7 +1585,7 @@
     "markdown-it": "14.3.3",
     "memoize-one": "6.0.0",
     "mime-types": "2.1.35",
-    "minimatch": "10.2.6",
+    "minimatch": "11.0.4",
     "moment": "2.31.0",
     "moment-duration-format": "2.3.2",
     "moment-timezone": "0.6.2",
@@ -1599,7 +1600,7 @@
     "mysql2": "3.24.3",
     "node-diff3": "3.2.1",
     "node-fetch": "2.7.0",
-    "node-forge": "1.4.0",
+    "node-forge": "1.4.2",
     "nodemailer": "10.0.16",
     "normalize-path": "3.0.0",
     "object-hash": "3.0.0",
@@ -1962,6 +1963,7 @@
     "@kbn/product-doc-artifact-builder": "workspace:*",
     "@kbn/profiler": "workspace:*",
     "@kbn/pubsub-example-topic": "workspace:*",
+    "@kbn/react-fiber": "workspace:*",
     "@kbn/relocate": "workspace:*",
     "@kbn/repo-file-maps": "workspace:*",
     "@kbn/repo-linter": "workspace:*",
@@ -2052,7 +2054,7 @@
     "@parcel/watcher": "2.5.1",
     "@playwright/test": "1.63.0",
     "@pmmmwh/react-refresh-webpack-plugin": "0.6.2",
-    "@redocly/cli": "2.53.3",
+    "@redocly/cli": "2.64.1",
     "@rsdoctor/rspack-plugin": "1.6.1",
     "@rspack/core": "2.1.8",
     "@rspack/plugin-react-refresh": "2.0.2",
@@ -2324,5 +2326,5 @@
     "xml-crypto": "6.1.2",
     "yaml-language-server": "1.23.0"
   },
-  "packageManager": "pnpm@12.4.2"
+  "packageManager": "pnpm@12.17.0"
 }

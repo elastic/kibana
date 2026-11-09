@@ -23,6 +23,7 @@ import { getApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { getApmSloClient } from '../../lib/helpers/get_apm_slo_client';
 import { getMlClient } from '../../lib/helpers/get_ml_client';
+import { isServiceMapGroupingEnabled } from '../../lib/helpers/is_service_map_grouping_enabled';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getServiceGroup } from '../service_groups/get_service_group';
@@ -72,17 +73,19 @@ const serviceMapRoute = createApmServerRoute({
       uiSettings: { client: uiSettingsClient },
     } = await context.core;
 
-    const [mlClient, apmEventClient, serviceGroup, maxNumberOfServices] = await Promise.all([
-      getMlClient(resources),
-      getApmEventClient(resources),
-      serviceGroupId
-        ? getServiceGroup({
-            savedObjectsClient,
-            serviceGroupId,
-          })
-        : Promise.resolve(null),
-      uiSettingsClient.get<number>(apmServiceGroupMaxNumberOfServices),
-    ]);
+    const [mlClient, apmEventClient, serviceGroup, maxNumberOfServices, groupingEnabled] =
+      await Promise.all([
+        getMlClient(resources),
+        getApmEventClient(resources),
+        serviceGroupId
+          ? getServiceGroup({
+              savedObjectsClient,
+              serviceGroupId,
+            })
+          : Promise.resolve(null),
+        uiSettingsClient.get<number>(apmServiceGroupMaxNumberOfServices),
+        isServiceMapGroupingEnabled({ context }),
+      ]);
 
     const searchAggregatedTransactions = await getSearchTransactionsEvents({
       apmEventClient,
@@ -106,6 +109,7 @@ const serviceMapRoute = createApmServerRoute({
       serviceGroupKuery: serviceGroup?.kuery,
       kuery,
       esQuery: esQuery as { bool: BoolQuery } | undefined,
+      groupingEnabled,
     });
   },
 });

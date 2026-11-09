@@ -34,6 +34,7 @@ export const AutomationUsageCell = ({
 
   const isLimitReached = limit !== undefined && used >= limit;
   const isLimitHigh = limit !== undefined && getDailyUsageTone(used, limit) !== 'healthy';
+  const warningText = euiTheme.colors.textWarning;
   const limitColor = euiTheme.colors.vis.euiColorVisWarning0;
   return (
     <div css={{ width: '100%' }}>
@@ -68,7 +69,7 @@ export const AutomationUsageCell = ({
                 <EuiIcon
                   type="hourglass"
                   size="s"
-                  color={limitColor}
+                  color={warningText}
                   aria-label={listLabels.limitReached}
                   data-test-subj="automationLimitReached"
                 />
@@ -77,7 +78,7 @@ export const AutomationUsageCell = ({
             <EuiFlexItem grow={false}>
               <EuiText
                 size="xs"
-                color={isLimitHigh ? euiTheme.colors.textWarning : undefined}
+                color={isLimitHigh ? warningText : undefined}
                 css={{
                   fontWeight: euiTheme.font.weight.semiBold,
                   fontVariantNumeric: 'tabular-nums',

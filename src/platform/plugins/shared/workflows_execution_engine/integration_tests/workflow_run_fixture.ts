@@ -152,6 +152,27 @@ export class WorkflowRunFixture {
     }
   }
 
+  /**
+   * Re-ticks a parked workflow until it leaves WAITING. One resume can leave a
+   * later parallel branch parked.
+   */
+  public async driveToTerminal(maxGuard = 10): Promise<void> {
+    let guard = 0;
+    while (
+      this.workflowExecutionRepositoryMock.workflowExecutions.get('fake_workflow_execution_id')
+        ?.status === ExecutionStatus.WAITING &&
+      guard < maxGuard
+    ) {
+      const resumeTask = this.taskManagerMock.schedule.mock.calls.at(-1)?.[0];
+      if (resumeTask?.runAt instanceof Date) {
+        await this.resumeWorkflowAtScheduledTime();
+      } else {
+        await this.resumeWorkflow();
+      }
+      guard += 1;
+    }
+  }
+
   public resumeWorkflow() {
     return resumeWorkflow({
       workflowRunId: 'fake_workflow_execution_id',

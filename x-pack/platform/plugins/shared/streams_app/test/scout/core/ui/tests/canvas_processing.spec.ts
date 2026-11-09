@@ -9,6 +9,10 @@ import { tags, type ScoutPage } from '@kbn/scout';
 import { OBSERVABILITY_STREAMS_ENABLE_CANVAS } from '@kbn/management-settings-ids';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
+import {
+  CATALOGUE_SNAPSHOT,
+  mockComponentCatalogue,
+} from '../../../common/ui/fixtures/component_catalogue_mocks';
 
 const SOURCE_ID = 'canvas-processing-source';
 const DESTINATION_ID = 'canvas-processing-destination';
@@ -77,6 +81,18 @@ const mockUnit = async (page: ScoutPage) => {
     }
     await route.continue();
   });
+  // The unit is only a mock, so the real stats route would answer 404 for it. A failed stats
+  // request raises a toast that covers the flyout buttons.
+  await page.route('**/internal/streams/unit/*/_stats', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        components: { destinations: {}, processors: {} },
+        meta: { window: { start: '2026-01-01T00:00:00.000Z', end: '2026-01-01T00:15:00.000Z' } },
+      }),
+    });
+  });
 };
 
 test.describe(
@@ -90,6 +106,7 @@ test.describe(
     test.beforeEach(async ({ browserAuth, page, pageObjects: { streams } }) => {
       await browserAuth.loginAsAdmin();
       await mockUnit(page);
+      await mockComponentCatalogue(page);
       await streams.gotoStreamsLayoutTab('map');
     });
 
@@ -178,6 +195,57 @@ test.describe(
           { name: 'destinations', value: [FANOUT_DESTINATION_IDS[0]] },
         ],
       });
+    });
+
+    test('keeps the editor open when the distributor rejects the processor', async ({
+      page,
+      pageObjects: { streams },
+    }) => {
+      await mockComponentCatalogue(page, {
+        validation: {
+          valid: false,
+          diagnostics: [
+            {
+              severity: 'error',
+              code: 'E028_INVALID_CONFIG_TYPE',
+              message: 'action must be one of upsert, update, insert, delete',
+            },
+          ],
+        },
+      });
+      await streams.openCanvasEdgeMenu(`unit-connection-${SOURCE_ID}->${DESTINATION_ID}`);
+      await streams.canvasEdgeMenuAddProcessing.click();
+      await streams.processingFlyout
+        .getByTestId('streamsProcessingFlyoutEmptyAddProcessor')
+        .click();
+      await streams.addAddFieldsProcessor('team', 'core');
+
+      await expect(
+        streams.processingFlyout.getByTestId('streamsProcessingFlyoutEditorDiagnostics')
+      ).toContainText('E028_INVALID_CONFIG_TYPE');
+      await expect(
+        streams.processingFlyout.getByTestId('streamsProcessingFlyoutEditor')
+      ).toBeVisible();
+      await expect(streams.processingFlyoutSave).toBeDisabled();
+    });
+
+    test('shows processing read-only when the catalogue shape is newer than Kibana', async ({
+      page,
+      pageObjects: { streams },
+    }) => {
+      await mockComponentCatalogue(page, {
+        catalogue: { ...CATALOGUE_SNAPSHOT, schema_version: 'v2' },
+      });
+      await streams.openCanvasEdgeMenu(`unit-connection-${SOURCE_ID}->${DESTINATION_ID}`);
+      await streams.canvasEdgeMenuAddProcessing.click();
+
+      await expect(
+        streams.processingFlyout.getByTestId('streamsProcessingFlyoutUnsupportedCatalogue')
+      ).toBeVisible();
+      await expect(
+        streams.processingFlyout.getByTestId('streamsProcessingFlyoutEmptyAddProcessor')
+      ).toBeDisabled();
+      await expect(streams.processingFlyoutSave).toBeDisabled();
     });
   }
 );

@@ -140,6 +140,7 @@ describe('Agent policy API handlers', () => {
       jest.clearAllMocks();
       appContextService.start(createAppContextStartContractMock());
       agentPolicyServiceMock.delete.mockResolvedValue({ id: 'policy-1', name: 'Policy' } as any);
+      jest.spyOn(packagePolicyService, 'findAllForAgentPolicy').mockResolvedValue([]);
     });
 
     const deleteRequest = (force?: boolean) =>
@@ -178,6 +179,27 @@ describe('Agent policy API handlers', () => {
 
       expect(agentPolicyServiceMock.delete).toHaveBeenCalledTimes(1);
     });
+
+    it.each([false, true])(
+      'rejects deleting a policy with package policies managed by a cloud onboarding instance (force: %s)',
+      async (force) => {
+        agentPolicyServiceMock.get.mockResolvedValue({
+          id: 'policy-1',
+          supports_agentless: false,
+        } as any);
+        jest
+          .spyOn(packagePolicyService, 'findAllForAgentPolicy')
+          .mockResolvedValue([
+            { id: 'unmanaged' },
+            { id: 'managed', onboarding_deployment_id: 'deployment-1' },
+          ] as any);
+
+        await expect(
+          deleteAgentPoliciesHandler(context, deleteRequest(force), response)
+        ).rejects.toThrow(/can only be changed from the onboarding flow. Offending IDs: managed\./);
+        expect(agentPolicyServiceMock.delete).not.toHaveBeenCalled();
+      }
+    );
   });
 
   describe('copyAgentPolicyHandler', () => {

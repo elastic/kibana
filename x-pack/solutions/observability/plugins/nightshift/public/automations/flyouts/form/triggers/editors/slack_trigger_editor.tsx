@@ -10,7 +10,7 @@ import { EuiBadge, EuiPanel, EuiText, EuiTextArea } from '@elastic/eui';
 import {
   formatChannelValue,
   useAllRelayAppBindings,
-} from '../../../../../settings/components/apps_section/use_relay_app_bindings';
+} from '../../../../../data/relay_apps/use_relay_app_bindings';
 import { actionLabels } from '../../actions/automation_actions_section';
 import type { SlackTriggerFormValues, TriggerFormValues } from '../../automation_form_values';
 import { findUnconnectedChannels, SlackChannelComboBox } from '../../slack_channel_combo_box';

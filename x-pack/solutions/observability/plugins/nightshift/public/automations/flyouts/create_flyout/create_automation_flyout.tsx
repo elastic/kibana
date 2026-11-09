@@ -16,7 +16,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useCreateAutomation } from '../../hooks/use_automations';
+import { useCreateAutomation } from '../../../data/automations/use_automations';
 import {
   createAutomationFormValues,
   type AutomationFormValues,
@@ -24,7 +24,12 @@ import {
 import { AutomationFormBody } from '../form/automation_form_body';
 import { AutomationFlyoutFooter } from './automation_flyout_footer';
 import { toAutomationRequestBody } from '../form/to_automation_request';
-import { canSaveAutomation, getSaveBlocker, isTriggerValid } from '../form/validation';
+import {
+  canSaveAutomation,
+  getInstructionsError,
+  getSaveBlocker,
+  isTriggerValid,
+} from '../form/validation';
 
 const labels = {
   untitled: i18n.translate('xpack.nightshift.automations.flyout.untitled', {
@@ -77,6 +82,7 @@ export const CreateAutomationFlyout = ({
   const [initialValues] = useState(createAutomationFormValues);
   const [values, setValues] = useState(initialValues);
   const [isNameInvalid, setIsNameInvalid] = useState(false);
+  const [showValidationErrors, setShowValidationErrors] = useState(false);
   const [isDiscardOpen, setIsDiscardOpen] = useState(false);
   const titleId = useGeneratedHtmlId();
   const { euiTheme } = useEuiTheme();
@@ -92,10 +98,10 @@ export const CreateAutomationFlyout = ({
   const save = (isEnabled: boolean) => {
     const { trigger } = values;
     if (!isTriggerValid(trigger)) return;
-    if (!values.name.trim()) {
-      setIsNameInvalid(true);
-      return;
-    }
+    setShowValidationErrors(true);
+    const isNameMissing = !values.name.trim();
+    setIsNameInvalid(isNameMissing);
+    if (isNameMissing || getInstructionsError(values.instructions, trigger)) return;
     createAutomation.mutate(toAutomationRequestBody({ ...values, isEnabled, trigger }), {
       onSuccess: ({ id }) => onCreated(id),
     });
@@ -120,9 +126,13 @@ export const CreateAutomationFlyout = ({
           values={values}
           tagSuggestions={tagSuggestions}
           isNameInvalid={isNameInvalid}
+          showValidationErrors={showValidationErrors}
           onChange={(changes) => {
             update(changes);
             if ('name' in changes) setIsNameInvalid(false);
+            if ('trigger' in changes && changes.trigger?.kind !== values.trigger?.kind) {
+              setShowValidationErrors(false);
+            }
           }}
         />
       </EuiFlyoutBody>

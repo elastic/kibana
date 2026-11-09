@@ -16,7 +16,7 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-import { HuntCompleteness } from '../components/hunt.gen';
+import { HuntCompleteness, HuntIncompleteReason } from '../components/hunt.gen';
 
 export const WriteHuntEvidenceRequestBody = lazySchema(() =>
   z
@@ -29,9 +29,9 @@ export const WriteHuntEvidenceRequestBody = lazySchema(() =>
       hasConfirmedHit: z.boolean(),
       completeness: HuntCompleteness,
       /**
-       * Tier 1's total-hits count for this run.
+       * IOC Hunt's total-hits count for this run.
        */
-      totalHits: z.number().int().min(0).describe("Tier 1's total-hits count for this run."),
+      totalHits: z.number().int().min(0).describe("IOC Hunt's total-hits count for this run."),
       /**
        * Technique ids this run actually searched, from the coordinator's `searched_technique_ids`. Unioned into the report's per-space ledger so a later run does not spend its behavior budget on them again.
        */
@@ -43,23 +43,33 @@ export const WriteHuntEvidenceRequestBody = lazySchema(() =>
           "Technique ids this run actually searched, from the coordinator's `searched_technique_ids`. Unioned into the report's per-space ledger so a later run does not spend its behavior budget on them again."
         ),
       /**
-       * Technique ids this run could not search but a later run still should, from the coordinator's `pending_technique_ids`. Replaces the report's recorded list for the space, so the next run keeps them as pending even if its own extraction no longer returns them. Omit when Tier 2 did not run, which leaves the recorded list as it is.
+       * Technique ids this run could not search but a later run still should, from the coordinator's `pending_technique_ids`. Replaces the report's recorded list for the space, so the next run keeps them as pending even if its own extraction no longer returns them. Omit when Behavior Hunt did not run, which leaves the recorded list as it is.
        */
       pendingTechniqueIds: z
         .array(z.string().min(1).max(32))
         .max(100)
         .optional()
         .describe(
-          "Technique ids this run could not search but a later run still should, from the coordinator's `pending_technique_ids`. Replaces the report's recorded list for the space, so the next run keeps them as pending even if its own extraction no longer returns them. Omit when Tier 2 did not run, which leaves the recorded list as it is."
+          "Technique ids this run could not search but a later run still should, from the coordinator's `pending_technique_ids`. Replaces the report's recorded list for the space, so the next run keeps them as pending even if its own extraction no longer returns them. Omit when Behavior Hunt did not run, which leaves the recorded list as it is."
         ),
       /**
-       * From the coordinator's `replayed_whole_report`. True lets this run's result replace an earlier finding the report still carries while its coverage is pending. Omit when Tier 2 did not run.
+       * From the coordinator's `replayed_whole_report`. True lets this run's result replace an earlier finding the report still carries while its coverage is pending. Omit when Behavior Hunt did not run.
        */
       replayedWholeReport: z
         .boolean()
         .optional()
         .describe(
-          "From the coordinator's `replayed_whole_report`. True lets this run's result replace an earlier finding the report still carries while its coverage is pending. Omit when Tier 2 did not run."
+          "From the coordinator's `replayed_whole_report`. True lets this run's result replace an earlier finding the report still carries while its coverage is pending. Omit when Behavior Hunt did not run."
+        ),
+      /**
+       * From the coordinator's `retryable_reasons`: the reasons of the gaps that kept the run retryable. A retryable run whose reasons all came from the environment (an unavailable index or catalog, a partial search, enrichment not finished) leaves the retry count as it was, even when it searched something new. Omit or send none to count every retryable run.
+       */
+      retryableReasons: z
+        .array(HuntIncompleteReason)
+        .max(100)
+        .optional()
+        .describe(
+          "From the coordinator's `retryable_reasons`: the reasons of the gaps that kept the run retryable. A retryable run whose reasons all came from the environment (an unavailable index or catalog, a partial search, enrichment not finished) leaves the retry count as it was, even when it searched something new. Omit or send none to count every retryable run."
         ),
     })
     .strict()
@@ -70,6 +80,15 @@ export type WriteHuntEvidenceRequestBodyInput = z.input<typeof WriteHuntEvidence
 export const WriteHuntEvidenceResponse = lazySchema(() =>
   z.object({
     acknowledged: z.boolean(),
+    /**
+     * True when a retryable run was settled and stamped as hunted instead of left eligible for a later sweep, either because the report's coverage ledger could not hold every technique or because the report reached the retry bound.
+     */
+    settledByCap: z
+      .boolean()
+      .optional()
+      .describe(
+        "True when a retryable run was settled and stamped as hunted instead of left eligible for a later sweep, either because the report's coverage ledger could not hold every technique or because the report reached the retry bound."
+      ),
   })
 );
 export type WriteHuntEvidenceResponse = z.infer<typeof WriteHuntEvidenceResponse>;

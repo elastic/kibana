@@ -113,6 +113,9 @@ import { unscheduleWorkflowTasks } from '../task_defs/unschedule_workflow_tasks'
 // this only bounds repeated round-trips when many concurrent writers share a base ID.
 const TOCTOU_MAX_RETRIES = 5;
 
+// `OccWriter.readModifyWrite` always indexes what `mutate` returns; throwing this skips the write.
+const NOTHING_TO_DISABLE = new Error('The workflow has nothing to switch off.');
+
 const extractRestoreSnapshotYaml = (
   snapshot: Record<string, unknown> | undefined
 ): string | null => {
@@ -189,23 +192,8 @@ export class WorkflowCrudService {
     spaceId: string,
     options?: { includeDeleted?: boolean; includeGlobal?: boolean }
   ): Promise<WorkflowProperties | null> {
-    const { must, must_not } = buildWorkflowFilters({
-      ids: [id],
-      space: { id: spaceId, includeGlobal: options?.includeGlobal },
-      deleted: options?.includeDeleted ? 'all' : 'not_deleted',
-    });
-    const searchResponse = await this.deps.workflowStorage.getClient().search({
-      query: { bool: { must, must_not } },
-      size: 1,
-      track_total_hits: false,
-      allow_partial_search_results: false,
-    });
-    if (searchResponse.timed_out) {
-      throw new Error('Could not determine workflow access from an incomplete search.');
-    }
-
-    const hit = searchResponse.hits.hits[0];
-    return (hit?._source as WorkflowProperties | undefined) ?? null;
+    const versioned = await this.getWorkflowDocumentWithVersion(id, spaceId, options);
+    return versioned?.source ?? null;
   }
 
   async getWorkflowDocumentWithVersion(
@@ -223,7 +211,12 @@ export class WorkflowCrudService {
       seq_no_primary_term: true,
       size: 1,
       track_total_hits: false,
+      allow_partial_search_results: false,
     });
+    // An incomplete search with no hit would otherwise read as a missing workflow.
+    if (searchResponse.timed_out) {
+      throw new Error(`Could not read workflow ${id} from an incomplete search.`);
+    }
 
     const hit = searchResponse.hits.hits[0];
     if (!hit?._source || hit._seq_no == null || hit._primary_term == null) {
@@ -1217,17 +1210,19 @@ export class WorkflowCrudService {
         }
         if (accountId) {
           await ensureWorkflowServiceAccountMutationAuthorized(this.deps.getCoreStart(), request);
-          if (options?.force) {
-            const executions = await this.deps.executionQueryService.getWorkflowExecutions(
-              { workflowId: id, statuses: [...NonTerminalExecutionStatuses], size: 1 },
-              spaceId
+          // Deleting removes the binding, so an execution that is still running or paused could
+          // never mint its service account again.
+          const executions = await this.deps.executionQueryService.getWorkflowExecutions(
+            { workflowId: id, statuses: [...NonTerminalExecutionStatuses], size: 1 },
+            spaceId
+          );
+          if (executions.total > 0) {
+            throw new WorkflowConflictError(
+              `Cannot ${
+                options?.force ? 'force-delete' : 'delete'
+              } workflow with running executions: ${id}`,
+              id
             );
-            if (executions.total > 0) {
-              throw new WorkflowConflictError(
-                `Cannot force-delete workflow with running executions: ${id}`,
-                id
-              );
-            }
           }
         }
         await withWorkflowBindingChange({
@@ -1397,26 +1392,47 @@ export class WorkflowCrudService {
     await unscheduleWorkflowTasks([id], this.deps.getTaskScheduler());
   }
 
-  /** Disables a managed orphan without a request; the write may only turn `enabled` off. */
-  async disableManagedOrphan(
+  /**
+   * Switches a managed workflow off without a request, refusing any write that changes more than
+   * `enabled`. Resolves to the written document, or `null` without writing when the guarded read
+   * finds the workflow missing, soft-deleted, unmanaged, or already off.
+   */
+  async disableManagedWorkflowWithoutRequest(
     id: string,
     spaceId: string,
-    orphan: ManagedWorkflowOrphan
-  ): Promise<void> {
-    await this.runOccWrite(id, async () => {
+    expectedOwnership: ManagedWorkflowOrphan
+  ): Promise<WorkflowProperties | null> {
+    const written = await this.runOccWrite(id, async () => {
       const writer = this.getReadModifyWriteOccWriter(
         spaceId,
         undefined,
-        { includeDeleted: true },
         undefined,
-        orphan
+        undefined,
+        expectedOwnership
       );
-      await writer.readModifyWrite({
-        id,
-        mutate: (existing) => applyWorkflowVersion(mutateWorkflowToDisabled(existing), existing),
-      });
+      try {
+        return await writer.readModifyWrite({
+          id,
+          mutate: (existing) => {
+            // Decided on every OCC attempt, so a concurrent switch-off or delete skips the write.
+            if (!existing.managed || !existing.enabled) {
+              throw NOTHING_TO_DISABLE;
+            }
+            return applyWorkflowVersion(mutateWorkflowToDisabled(existing), existing);
+          },
+        });
+      } catch (error) {
+        if (error === NOTHING_TO_DISABLE || this.isWorkflowDocumentNotFoundError(error, id)) {
+          return null;
+        }
+        throw error;
+      }
     });
+    if (!written) {
+      return null;
+    }
     await unscheduleWorkflowTasks([id], this.deps.getTaskScheduler());
+    return written.document;
   }
 
   /**

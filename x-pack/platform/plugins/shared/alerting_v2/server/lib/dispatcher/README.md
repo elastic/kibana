@@ -268,6 +268,8 @@ An aggregated group keeps the same id from tick to tick and gets one `notified` 
 | `commit_failed`          | `DispatchStep` could not write a commit's `.alert-actions` records (the bulk request threw, or ES rejected every record) and stopped scheduling. Logged once as `DISPATCH_COMMIT_FAILED`. Watermark held; tick counts toward stuck-tick limit (see below). |
 | `inline_stats_too_large` | ES rejected the INLINE STATS pre-fetch query with `illegal_argument_exception: sub-plan execution results too large`. Watermark held; tick counts toward stuck-tick limit (see below). |
 
+Every ES|QL query in the pipeline is sent with the tick signal, so it is cancelled when the TM signal or the soft deadline fires. `FetchRulesStep`, `FetchPoliciesStep` and `ApplyMaintenanceWindowStep` read saved objects through a point-in-time finder, and the saved objects client takes no abort signal; `WaitForResourcesStep` does not take the signal either: an in-flight lookup or wait runs to completion, then the pipeline sees the signal before the next step and halts `aborted`. In-flight `bulkScheduleWorkflow` chunks are not cancelled either (see `Dispatch chunk size` in [Operational parameters](#operational-parameters)).
+
 ## Watermark contract
 
 The invariant maintained across all ticks:
