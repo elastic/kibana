@@ -77,6 +77,7 @@ import {
   LANDING_PAGE_PATH,
   SEARCH_SESSION_ID,
 } from '../common/page_bundle_constants';
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { untilPluginStartServicesReady, setKibanaServices } from './services/kibana_services';
 import { dashboardAppClientApi$ } from './services/dashboard_app_client_api';
 import { getDashboardRecentlyAccessedService } from './services/dashboard_recently_accessed_service';
@@ -151,6 +152,19 @@ export interface DashboardStart {
    * The API of the loaded dashboard rendered with `publishAsAppClientApi`, if any.
    */
   dashboardAppClientApi$: PublishingSubject<DashboardApi | undefined>;
+
+  /**
+   * Checks whether two dashboard states are equal.
+   * Panel and pinned panel configs are compared with the comparators provided by their embeddable definitions.
+   */
+  areEqual: (a: DashboardState, b: DashboardState) => Promise<boolean>;
+}
+
+function getComparators(embeddable: EmbeddableStart) {
+  return async (type: string, embeddableState: object) => {
+    const definition = await embeddable.getEmbeddableDefinition(type);
+    return definition?.getComparators?.(embeddableState);
+  };
 }
 
 export class DashboardPlugin
@@ -417,6 +431,10 @@ export class DashboardPlugin
         return findService;
       },
       dashboardAppClientApi$,
+      areEqual: async (a: DashboardState, b: DashboardState) => {
+        const { areEqual } = await import('./dashboard_renderer/dashboard_module');
+        return areEqual(a, b, getComparators(plugins.embeddable));
+      },
     };
   }
 

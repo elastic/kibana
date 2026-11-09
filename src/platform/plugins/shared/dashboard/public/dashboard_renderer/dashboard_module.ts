@@ -23,3 +23,4 @@ export { AddSectionAction } from '../dashboard_actions/add_section_action';
 export { dashboardDrilldown } from '../dashboard_drilldown/dashboard_drilldown';
 export { exportJsonConfig } from '../dashboard_app/top_nav/share/export_json/export_json_config';
 export { initializeDashboardApiServices } from '../services/dashboard_api_services';
+export { areEqual } from '../../common/are_equal';

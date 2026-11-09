@@ -75,7 +75,7 @@ async function arePanelsListEqual(
     if (widget.id) bById.set(widget.id, widget);
   });
 
-  const results = await asyncMap(a, (widgetA, index) => {
+  const results = await asyncMap(a, async (widgetA, index) => {
     const widgetB = widgetA.id ? bById.get(widgetA.id) : b[index];
     return widgetB !== undefined ? areWidgetsEqual(widgetA, widgetB, getComparators) : false;
   });
@@ -91,7 +91,7 @@ async function arePinnedPanelsEqual(
   if (a === b) return true;
   if (!a || !b || a.length !== b.length) return false;
 
-  const results = await asyncMap(a, (pinnedA, index) => {
+  const results = await asyncMap(a, async (pinnedA, index) => {
     const pinnedB = b[index];
     const { config: configA, ...restA } = pinnedA;
     const { config: configB, ...restB } = pinnedB;
