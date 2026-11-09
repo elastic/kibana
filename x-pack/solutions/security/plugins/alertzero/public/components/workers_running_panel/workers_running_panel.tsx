@@ -7,29 +7,44 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiEmptyPrompt, EuiPanel } from '@elastic/eui';
+import {
+  EuiAgentLoader,
+  EuiEmptyPrompt,
+  EuiPanel,
+  EuiShimmeringText,
+  useEuiFontSize,
+} from '@elastic/eui';
 
 const TITLE = i18n.translate('xpack.alertzero.workersRunningPanel.title', {
   defaultMessage: 'Workers are running in the background',
 });
 
-const BODY = i18n.translate('xpack.alertzero.workersRunningPanel.body', {
-  defaultMessage: 'Proposals land here as each Worker finishes. Nothing needs you right now.',
+const LOADING_LABEL = i18n.translate('xpack.alertzero.workersRunningPanel.loadingLabel', {
+  defaultMessage: 'Workers are running',
 });
 
-export const WorkersRunningPanel: React.FC = () => (
-  <EuiPanel
-    hasBorder
-    hasShadow={false}
-    paddingSize="xl"
-    data-test-subj="alertZeroWorkersRunningPanel"
-  >
-    <EuiEmptyPrompt
-      iconType="logoElastic"
-      paddingSize="none"
-      titleSize="xs"
-      title={<h4>{TITLE}</h4>}
-      body={<p>{BODY}</p>}
-    />
-  </EuiPanel>
-);
+export const WorkersRunningPanel: React.FC = () => {
+  // EuiShimmeringText sets the `m` size inline. EuiText `s` is `m` scaled by `s` (14px).
+  const titleFont = useEuiFontSize('m', { customScale: 's' });
+
+  return (
+    <EuiPanel
+      hasBorder
+      hasShadow={false}
+      paddingSize="xl"
+      data-test-subj="alertZeroWorkersRunningPanel"
+    >
+      <EuiEmptyPrompt
+        // POC: same slot as the motion-refresh orbit loader. Size m is 16px.
+        icon={<EuiAgentLoader size="m" aria-label={LOADING_LABEL} />}
+        paddingSize="none"
+        titleSize="xs"
+        title={
+          <h4>
+            <EuiShimmeringText style={titleFont}>{TITLE}</EuiShimmeringText>
+          </h4>
+        }
+      />
+    </EuiPanel>
+  );
+};
