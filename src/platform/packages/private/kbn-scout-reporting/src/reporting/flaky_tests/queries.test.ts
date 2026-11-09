@@ -479,6 +479,13 @@ describe('buildSetupBuildsQuery', () => {
         'BY test.id, buildkite.branch, setup, buildkite.build.id, buildkite.build.number'
     );
   });
+
+  it('keeps only the setups where the test failed at least once', () => {
+    expect(buildSetupBuildsQuery(scope, ['jest'], ['j1'])).toContain(
+      'INLINE STATS setup_failed = MAX(failed) BY test.id, buildkite.branch, setup | ' +
+        'WHERE setup_failed == 1 | DROP setup_failed'
+    );
+  });
 });
 
 describe('fetchSetupBuilds', () => {
@@ -515,13 +522,15 @@ describe('fetchSetupBuilds', () => {
       { testId: 'j1', framework: 'jest' },
       { testId: 'j2', framework: 'jest' },
       { testId: 'j3', framework: 'jest' },
+      { testId: 'j4', framework: 'jest' },
+      { testId: 'j5', framework: 'jest' },
       { testId: 'p1', framework: 'playwright' },
     ]);
 
     const queries = esql.mock.calls.map(([{ query }]) => query as string);
     expect(queries).toHaveLength(3);
-    expect(queries[0]).toContain('test.id IN ("j1", "j2")');
-    expect(queries[1]).toContain('test.id IN ("j3")');
+    expect(queries[0]).toContain('test.id IN ("j1", "j2", "j3", "j4")');
+    expect(queries[1]).toContain('test.id IN ("j5")');
     expect(queries[2]).toContain('test.id IN ("p1")');
     expect(truncated).toEqual([]);
     expect(byTest.get('j1')).toEqual([

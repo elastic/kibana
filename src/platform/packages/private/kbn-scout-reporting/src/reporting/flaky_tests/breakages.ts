@@ -77,29 +77,33 @@ export const findBreakages = ({ branch, setup, builds }: SetupBuilds): Breakage[
   return breakages;
 };
 
-/** Per branch, how many builds ran the test and how many failed it, leaving out the breakages. */
+/** How many builds ran a test on a branch, and how many of them failed it. */
+export interface BranchCounts {
+  branch: string;
+  builds: number;
+  failedBuilds: number;
+}
+
+/**
+ * The per-branch counts leaving out the breakages. Every build in a breakage failed the test, so
+ * each one is taken off both counts of its branch, once however many setups it broke in.
+ */
 export const branchCountsWithout = (
-  setups: readonly SetupBuilds[],
+  counts: readonly BranchCounts[],
   breakages: readonly Breakage[]
-): Array<{ branch: string; builds: number; failedBuilds: number }> => {
-  const excluded = new Set(breakages.flatMap(({ builds }) => builds.map(({ buildId }) => buildId)));
-  const byBranch = new Map<string, { builds: Set<string>; failedBuilds: Set<string> }>();
-  for (const { branch, builds } of setups) {
-    const counts = byBranch.get(branch) ?? { builds: new Set(), failedBuilds: new Set() };
-    for (const { buildId, failed } of builds) {
-      if (excluded.has(buildId)) continue;
-      counts.builds.add(buildId);
-      if (failed) {
-        counts.failedBuilds.add(buildId);
-      }
+): BranchCounts[] => {
+  const excludedByBranch = new Map<string, Set<string>>();
+  for (const { branch, builds } of breakages) {
+    const excluded = excludedByBranch.get(branch) ?? new Set();
+    for (const { buildId } of builds) {
+      excluded.add(buildId);
     }
-    byBranch.set(branch, counts);
+    excludedByBranch.set(branch, excluded);
   }
-  return [...byBranch].map(([branch, { builds, failedBuilds }]) => ({
-    branch,
-    builds: builds.size,
-    failedBuilds: failedBuilds.size,
-  }));
+  return counts.map(({ branch, builds, failedBuilds }) => {
+    const excluded = excludedByBranch.get(branch)?.size ?? 0;
+    return { branch, builds: builds - excluded, failedBuilds: failedBuilds - excluded };
+  });
 };
 
 /** `12 failed builds in a row on main (#113410 to #113421) in kibana-on-merge a.config.ts …` */

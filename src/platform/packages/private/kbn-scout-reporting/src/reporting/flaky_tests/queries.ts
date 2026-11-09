@@ -536,7 +536,8 @@ export const fetchBranchCounts = async (
 /**
  * One row per build of the given tests of one execution model, per branch and setup (pipeline,
  * config file and Scout target): whether the test failed in the build, a failure that passed on
- * a retry included. Over the same executions as the per-branch counts.
+ * a retry included. Over the same executions as the per-branch counts. Only setups where the test
+ * failed at least once: the others have no breakage, and they are most of the rows.
  */
 export const buildSetupBuildsQuery = (
   scope: FlakyTestQueryScope,
@@ -555,6 +556,9 @@ export const buildSetupBuildsQuery = (
     `EVAL failed = ${model.failedExpression}, setup = ${SETUP_EXPRESSION}`,
     'STATS failed = MAX(failed)' +
       ' BY test.id, buildkite.branch, setup, buildkite.build.id, buildkite.build.number',
+    'INLINE STATS setup_failed = MAX(failed) BY test.id, buildkite.branch, setup',
+    'WHERE setup_failed == 1',
+    'DROP setup_failed',
     'RENAME test.id AS test_id,' +
       ' buildkite.branch AS branch,' +
       ' buildkite.build.id AS build_id,' +
@@ -564,10 +568,10 @@ export const buildSetupBuildsQuery = (
 };
 
 /**
- * A test runs in close to 3,000 builds and setups over a week on the busiest pipelines, so this
- * many tests per query stays under the row limit.
+ * A flaky test runs in up to about 1,200 builds over a week, counted across the setups where it
+ * failed, on the busiest pipelines, so this many tests per query stays under the row limit.
  */
-const TESTS_PER_SETUP_BUILDS_QUERY = 2;
+const TESTS_PER_SETUP_BUILDS_QUERY = 4;
 
 const chunk = <T>(values: readonly T[], size: number): T[][] =>
   Array.from({ length: Math.ceil(values.length / size) }, (_, index) =>
@@ -575,13 +579,16 @@ const chunk = <T>(values: readonly T[], size: number): T[][] =>
   );
 
 export interface SetupBuildsResult {
-  /** Per test, its builds in each branch and setup, oldest first. */
+  /** Per test, its builds in each branch and setup where it failed, oldest first. */
   byTest: Map<string, SetupBuilds[]>;
   /** Tests whose query hit the row limit; their builds are left out, as they would have gaps. */
   truncated: string[];
 }
 
-/** Reads every build of the given tests in each branch and setup, in batches per execution model. */
+/**
+ * Reads every build of the given tests in each branch and setup where they failed, in batches per
+ * execution model.
+ */
 export const fetchSetupBuilds = async (
   es: ESClient,
   scope: FlakyTestQueryScope,

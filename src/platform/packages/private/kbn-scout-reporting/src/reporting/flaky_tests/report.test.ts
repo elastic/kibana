@@ -114,12 +114,24 @@ const setupBuilds = (pattern: string, first = 1, branch = 'main'): SetupBuilds =
   })),
 });
 
+const branchCounts = (branch: string, builds: number, failedBuilds: number) => ({
+  branch,
+  builds,
+  failedBuilds,
+});
+
 describe('breakageReason', () => {
   const strict = { ...thresholds, minFailRate: 0.03 };
 
   it('keeps a test without breakages', () => {
-    expect(breakageReason([setupBuilds(`${'.'.repeat(45)}x....x....`)], strict)).toBeUndefined();
-    expect(breakageReason([], strict)).toBeUndefined();
+    expect(
+      breakageReason(
+        [setupBuilds(`${'.'.repeat(45)}x....x....`)],
+        [branchCounts('main', 55, 2)],
+        strict
+      )
+    ).toBeUndefined();
+    expect(breakageReason([], [], strict)).toBeUndefined();
   });
 
   it('leaves out a test broken up to its latest build, whatever its other builds show', () => {
@@ -128,8 +140,9 @@ describe('breakageReason', () => {
       // flaky enough on 9.5 on its own
       setupBuilds(`${'.'.repeat(15)}x...x.x...`, 500, '9.5'),
     ];
+    const counts = [branchCounts('main', 100, 20), branchCounts('9.5', 25, 3)];
 
-    expect(breakageReason(setups, strict)).toBe(
+    expect(breakageReason(setups, counts, strict)).toBe(
       'broken right now, 20 failed builds in a row on main (#81 to #100) in ' +
         'kibana-on-merge a.config.ts stateful-classic local'
     );
@@ -139,7 +152,7 @@ describe('breakageReason', () => {
     // 13 of 200 failed, 12 of them in a row: 1 of 188 builds otherwise
     const setups = [setupBuilds(`${'.'.repeat(90)}${'x'.repeat(12)}${'.'.repeat(90)}x.......`)];
 
-    expect(breakageReason(setups, strict)).toBe(
+    expect(breakageReason(setups, [branchCounts('main', 200, 13)], strict)).toBe(
       'below the thresholds without its breakage, 12 failed builds in a row on main ' +
         '(#91 to #102) in kibana-on-merge a.config.ts stateful-classic local'
     );
@@ -150,7 +163,7 @@ describe('breakageReason', () => {
       setupBuilds(`${'.'.repeat(90)}xxxxx${'.'.repeat(50)}${'x'.repeat(8)}${'.'.repeat(50)}`),
     ];
 
-    expect(breakageReason(setups, strict)).toBe(
+    expect(breakageReason(setups, [branchCounts('main', 203, 13)], strict)).toBe(
       'below the thresholds without its 2 breakages, the longest 8 failed builds in a row on ' +
         'main (#146 to #153) in kibana-on-merge a.config.ts stateful-classic local'
     );
@@ -161,7 +174,7 @@ describe('breakageReason', () => {
     const scattered = `${'.'.repeat(20)}x`.repeat(4);
     const setups = [setupBuilds(`${scattered}.${'x'.repeat(12)}.${scattered}`)];
 
-    expect(breakageReason(setups, strict)).toBeUndefined();
+    expect(breakageReason(setups, [branchCounts('main', 182, 20)], strict)).toBeUndefined();
   });
 });
 

@@ -83,24 +83,37 @@ describe('findBreakages', () => {
 });
 
 describe('branchCountsWithout', () => {
-  it('counts each build once per branch, leaving out the builds of every breakage', () => {
-    const setups = [
-      setupBuilds(`${'.'.repeat(20)}${'x'.repeat(10)}${'.'.repeat(20)}x.x`),
-      // the same builds run the test in a second setup, where it passed
-      { ...setupBuilds('.'.repeat(53)), setup: 'kibana-on-merge b.config.ts serverless local' },
-      setupBuilds(`${'.'.repeat(18)}xx`, 200, '9.5'),
-    ];
-    const breakages = setups.flatMap(findBreakages);
+  const counts = [
+    { branch: 'main', builds: 53, failedBuilds: 12 },
+    { branch: '9.5', builds: 20, failedBuilds: 2 },
+  ];
+
+  it('takes the builds of every breakage off both counts of its branch', () => {
+    const breakages = findBreakages(
+      setupBuilds(`${'.'.repeat(20)}${'x'.repeat(10)}${'.'.repeat(20)}x.x`)
+    );
 
     expect(breakages).toHaveLength(1);
-    expect(branchCountsWithout(setups, breakages)).toEqual([
+    expect(branchCountsWithout(counts, breakages)).toEqual([
       { branch: 'main', builds: 43, failedBuilds: 2 },
       { branch: '9.5', builds: 20, failedBuilds: 2 },
     ]);
-    expect(branchCountsWithout(setups, [])).toEqual([
-      { branch: 'main', builds: 53, failedBuilds: 12 },
-      { branch: '9.5', builds: 20, failedBuilds: 2 },
-    ]);
+    expect(branchCountsWithout(counts, [])).toEqual(counts);
+  });
+
+  it('takes a build off once when it broke in several setups', () => {
+    const pattern = `${'.'.repeat(20)}${'x'.repeat(10)}${'.'.repeat(20)}x.x`;
+    const breakages = [
+      setupBuilds(pattern),
+      { ...setupBuilds(pattern), setup: 'kibana-on-merge b.config.ts serverless local' },
+    ].flatMap(findBreakages);
+
+    expect(breakages).toHaveLength(2);
+    expect(branchCountsWithout(counts, breakages)[0]).toEqual({
+      branch: 'main',
+      builds: 43,
+      failedBuilds: 2,
+    });
   });
 });
 

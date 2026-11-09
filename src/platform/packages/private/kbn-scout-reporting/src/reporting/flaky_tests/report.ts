@@ -111,6 +111,7 @@ export const flakiestQualifyingBranch = (
  */
 export const breakageReason = (
   setups: readonly SetupBuilds[],
+  branchCounts: readonly BranchCountsRow[],
   thresholds: BuildThresholds
 ): string | undefined => {
   const breakages = setups.flatMap(findBreakages);
@@ -121,7 +122,7 @@ export const breakageReason = (
   if (ongoing) {
     return `broken right now, ${describeBreakage(ongoing)}`;
   }
-  if (flakiestQualifyingBranch(branchCountsWithout(setups, breakages), thresholds)) {
+  if (flakiestQualifyingBranch(branchCountsWithout(branchCounts, breakages), thresholds)) {
     return undefined;
   }
   if (breakages.length === 1) {
@@ -298,9 +299,10 @@ const buildReport = async (
   // The thresholds proper apply per branch, before ranking, so the caps are filled with tests
   // that are flaky on at least one branch rather than only in the diluted total
   const qualified: Array<{ row: TestStatsRow; flakiestBranch: FlakyTestFlakiestBranch }> = [];
+  let branchCounts = new Map<string, BranchCountsRow[]>();
   if (candidates.length > 0) {
     startedAt = performance.now();
-    const branchCounts = await fetchBranchCounts(es, scope, candidates, thresholds);
+    branchCounts = await fetchBranchCounts(es, scope, candidates, thresholds);
     let belowThresholds = 0;
     for (const row of candidates) {
       const flakiestBranch = flakiestQualifyingBranch(
@@ -342,7 +344,11 @@ const buildReport = async (
       );
     }
     for (const row of flakyRows) {
-      const reason = breakageReason(byTest.get(row.testId) ?? [], thresholds);
+      const reason = breakageReason(
+        byTest.get(row.testId) ?? [],
+        branchCounts.get(row.testId) ?? [],
+        thresholds
+      );
       if (reason) {
         leftOut.add(row.testId);
         const { filePath, title } = metadata.get(row.testId) ?? {};
