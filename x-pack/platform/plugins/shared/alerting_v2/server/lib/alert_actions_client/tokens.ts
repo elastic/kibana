@@ -16,12 +16,3 @@ import type { StorageServiceContract } from '../services/storage_service/storage
 export const AlertActionsStorageToken = createToken<StorageServiceContract>(
   'alerting_v2.AlertActionsStorage'
 );
-
-/**
- * Whether the client refuses to write an action without a user profile uid. Defaults to
- * `false`; the start contract sets it where the internal user writes, so an action always
- * carries the actor it was made for.
- */
-export const AlertActionsRequireUserProfileToken = createToken<boolean>(
-  'alerting_v2.AlertActionsRequireUserProfile'
-);

@@ -1348,7 +1348,7 @@ describe('AlertActionsClient', () => {
     });
   });
 
-  describe('when the client writes as the internal user (requireUserProfile)', () => {
+  describe('when the client writes as the internal user', () => {
     beforeEach(() => {
       ({
         alertActionsClient: client,
@@ -1356,62 +1356,26 @@ describe('AlertActionsClient', () => {
         storageServiceEsClient,
         userProfileService,
         alertActionEventPublisher,
-      } = createAlertActionsClient({ requireUserProfile: true }));
+      } = createAlertActionsClient());
       emitEpisodeActionsSpy = jest.spyOn(alertActionEventPublisher, 'emitEpisodeActions');
       storageServiceEsClient.bulk.mockResolvedValueOnce({ items: [], errors: false, took: 1 });
     });
 
-    it('rejects with 403 and writes nothing when the request user has no profile uid', async () => {
+    it('writes the action without profile_uid when the request user has no profile uid', async () => {
       userProfileService.getCurrentProfileId.mockResolvedValue(null as unknown as string);
       queryServiceEsClient.esql.query
         .mockResolvedValueOnce(getAlertEventESQLResponse([{ episode_id: 'episode-3' }]))
         .mockResolvedValueOnce(getAlertActionStateESQLResponse());
 
-      await expect(
-        client.createEpisodeAction({
-          episodeId: 'episode-3',
-          action: { action_type: ALERT_EPISODE_ACTION_TYPE.ACK },
-        })
-      ).rejects.toMatchObject({ output: { statusCode: 403 } });
+      await client.createEpisodeAction({
+        episodeId: 'episode-3',
+        action: { action_type: ALERT_EPISODE_ACTION_TYPE.ACK },
+      });
 
-      expect(storageServiceEsClient.bulk).not.toHaveBeenCalled();
-      expect(emitEpisodeActionsSpy).not.toHaveBeenCalled();
-    });
-
-    it('rejects a series action with 403 and writes nothing when the request user has no profile uid', async () => {
-      userProfileService.getCurrentProfileId.mockResolvedValue(null as unknown as string);
-      queryServiceEsClient.esql.query
-        .mockResolvedValueOnce(getSeriesEventESQLResponse([{ group_hash: GROUP_HASH }]))
-        .mockResolvedValueOnce(getSeriesActionStateESQLResponse());
-
-      await expect(
-        client.createSeriesAction({
-          seriesId: toSeriesId(),
-          action: {
-            action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
-            snoozed_until: '2026-08-12T00:00:00.000Z',
-          },
-        })
-      ).rejects.toMatchObject({ output: { statusCode: 403 } });
-
-      expect(storageServiceEsClient.bulk).not.toHaveBeenCalled();
-    });
-
-    it('rejects a bulk episode request with 403 and writes nothing when the request user has no profile uid', async () => {
-      userProfileService.getCurrentProfileId.mockResolvedValue(null as unknown as string);
-      queryServiceEsClient.esql.query
-        .mockResolvedValueOnce(
-          getAlertEventESQLResponse([{ episode_id: 'episode-1', group_hash: 'group-1' }])
-        )
-        .mockResolvedValueOnce(getAlertActionStateESQLResponse());
-
-      await expect(
-        client.createBulkEpisodeActions([
-          { alert_id: 'episode-1', action_type: ALERT_EPISODE_ACTION_TYPE.ACK },
-        ])
-      ).rejects.toMatchObject({ output: { statusCode: 403 } });
-
-      expect(storageServiceEsClient.bulk).not.toHaveBeenCalled();
+      const operations = storageServiceEsClient.bulk.mock.calls[0][0].operations ?? [];
+      expect(operations[1]).toMatchObject({ actor: { type: 'user' } });
+      expect(operations[1]).not.toHaveProperty(['actor', 'profile_uid']);
+      expect(emitEpisodeActionsSpy).toHaveBeenCalledTimes(1);
     });
 
     it('records the request user as the actor', async () => {

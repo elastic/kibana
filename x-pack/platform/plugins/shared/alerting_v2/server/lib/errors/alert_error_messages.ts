@@ -17,9 +17,6 @@ export const getAlertEpisodeNotFoundMessage = (episodeId: string): string =>
 export const getEpisodeNotLatestMessage = (episodeId: string, groupHash: string): string =>
   `Alert [${episodeId}] is not the latest alert for group [${groupHash}]`;
 
-export const getUserProfileRequiredMessage = (): string =>
-  'A user profile is required to create this alert action';
-
 export const getAlertActionsNotPersistedMessage = (failed: number, attempted: number): string =>
   `Failed to persist ${failed} of ${attempted} alert action documents`;
 

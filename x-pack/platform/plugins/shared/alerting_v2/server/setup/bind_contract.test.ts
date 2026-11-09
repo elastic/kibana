@@ -16,10 +16,7 @@ import { ActionPolicyClient } from '../lib/action_policy_client';
 import { AlertEventsClient } from '../lib/alert_events_client';
 import { AlertActionsClient } from '../lib/alert_actions_client';
 import { AlertActionEventPublisher } from '../lib/events/alert_action_event_publisher/alert_action_event_publisher';
-import {
-  AlertActionsRequireUserProfileToken,
-  AlertActionsStorageToken,
-} from '../lib/alert_actions_client/tokens';
+import { AlertActionsStorageToken } from '../lib/alert_actions_client/tokens';
 import {
   getAlertActionStateESQLResponse,
   getAlertEventESQLResponse,
@@ -192,7 +189,7 @@ describe('bindContract', () => {
     expect(scope.get(Request)).toBe(fakeRequest);
   });
 
-  it('constructs a profile-enforcing client that writes through the internal storage service', async () => {
+  it('constructs a client that writes through the internal storage service without a profile uid', async () => {
     const fakeRequest = { headers: {} } as unknown as KibanaRequest;
     const start = container.get(AlertingStartToken);
     scope.unbind(AlertActionsClient);
@@ -209,14 +206,8 @@ describe('bindContract', () => {
       .mockResolvedValueOnce(
         getAlertEventESQLResponse([{ episode_id: 'episode-1', group_hash: 'group-1' }])
       )
-      .mockResolvedValueOnce(getAlertActionStateESQLResponse())
-      .mockResolvedValueOnce(
-        getAlertEventESQLResponse([{ episode_id: 'episode-1', group_hash: 'group-1' }])
-      )
       .mockResolvedValueOnce(getAlertActionStateESQLResponse());
-    userService.getCurrentUserProfileUid
-      .mockResolvedValueOnce(null)
-      .mockResolvedValueOnce('user-1');
+    userService.getCurrentUserProfileUid.mockResolvedValueOnce(null);
     (internalStorageService.bulkIndexDocsAcrossIndices as jest.Mock).mockResolvedValue({
       attempted: 1,
       docs: [],
@@ -226,21 +217,12 @@ describe('bindContract', () => {
     const client = await start.getAlertActionsClientWithRequest(fakeRequest);
 
     expect(client).toBeInstanceOf(AlertActionsClient);
-    await expect(
-      client.createEpisodeAction({
-        episodeId: 'episode-1',
-        action: { action_type: ALERT_EPISODE_ACTION_TYPE.ACK },
-      })
-    ).rejects.toMatchObject({ output: { statusCode: 403 } });
-    expect(internalStorageService.bulkIndexDocsAcrossIndices).not.toHaveBeenCalled();
-
     await client.createEpisodeAction({
       episodeId: 'episode-1',
       action: { action_type: ALERT_EPISODE_ACTION_TYPE.ACK },
     });
 
     expect(scope.get(AlertActionsStorageToken)).toBe(internalStorageService);
-    expect(scope.get(AlertActionsRequireUserProfileToken)).toBe(true);
     expect(internalStorageService.bulkIndexDocsAcrossIndices).toHaveBeenCalledTimes(1);
     expect(alertActionEventPublisher.emitEpisodeActions).toHaveBeenCalledTimes(1);
   });
