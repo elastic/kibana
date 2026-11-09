@@ -39,7 +39,6 @@ export const ControlDisplaySettingsPopover: React.FC<Props> = ({ api, displayNam
 
   const initialState = useMemo(
     () => {
-      console.log('RECALC');
       return api.parentApi.getLayout(api.uuid);
     },
     // We should re-calculate `initialState` when the popover opens/closes

@@ -12,10 +12,10 @@ import {
   CONTROL_WIDTH_MEDIUM,
   CONTROL_WIDTH_SMALL,
 } from '@kbn/controls-constants';
+import type { ControlWidth } from '@kbn/controls-schemas';
 import type { FlexLayoutData } from '@kbn/grid-layout';
 
 import type { ControlsLayout, PublishesFocusedPanelId, PublishesLabel } from './types';
-import { ControlWidth } from '@kbn/controls-schemas';
 
 export const apiPublishesFocusedPanelId = (api: unknown): api is PublishesFocusedPanelId =>
   Boolean((api as PublishesFocusedPanelId).focusedPanelId$);
@@ -43,7 +43,6 @@ export const getClosestControlWidth = (pixels: number): ControlWidth => {
 
 export const controlsLayoutToFlexLayout = ({ controls }: ControlsLayout): FlexLayoutData =>
   Object.entries(controls).reduce<FlexLayoutData>((flexLayout, [id, { order, width, grow }]) => {
-    console.log('controlsLayoutToFlexLayout', { width });
     flexLayout[id] = {
       type: 'panel',
       id,
@@ -61,7 +60,6 @@ export const flexLayoutToControlsLayout = (
 ): ControlsLayout => ({
   controls: Object.entries(flexLayout).reduce<ControlsLayout['controls']>(
     (nextControls, [id, { order, width, grow }]) => {
-      console.log('flexLayoutToControlsLayout', { width, closest: getClosestControlWidth(width) });
       if (!controls[id]) return nextControls;
       nextControls[id] = { ...controls[id], order, grow, width: getClosestControlWidth(width) };
       return nextControls;
