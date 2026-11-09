@@ -9,6 +9,8 @@ import { get } from 'lodash';
 import * as esKuery from '@kbn/es-query';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 
+import { AGENT_FIELDS_NOT_IN_MAPPINGS } from '../../../common/constants';
+
 type KueryNode = any;
 
 const astFunctionType = ['is', 'range', 'nested'];
@@ -254,5 +256,59 @@ export const validateKuery = (
   } catch (e) {
     isValid = false;
     error = e.message;
+  }
+};
+
+/**
+ * True when `field` targets one of the agent fields omitted from `AGENT_MAPPINGS`
+ * (`AGENT_FIELDS_NOT_IN_MAPPINGS`). A trailing `.keyword` multi-field suffix is ignored so that both
+ * the raw field and its keyword sub-field are matched.
+ */
+export const isAgentFieldNotInMappings = (field: string | null | undefined): boolean => {
+  if (!field) {
+    return false;
+  }
+  const normalized = field.endsWith('.keyword') ? field.slice(0, -'.keyword'.length) : field;
+  return (AGENT_FIELDS_NOT_IN_MAPPINGS as readonly string[]).includes(normalized);
+};
+
+/**
+ * Walks a KQL expression and returns the first agent field referenced by name that is not in
+ * `AGENT_MAPPINGS`, or `undefined` when none is present. A wildcard field name (e.g. `host*:x`)
+ * is returned as well, since it can resolve to any field on the index; this matches the agent
+ * routes that validate kuery against the mappings, which already reject wildcard field names.
+ * Field-less terms (free text) have no key and are ignored here. Returns `undefined` for a kuery
+ * that does not parse; callers that need syntax validation run {@link validateKuery} separately.
+ */
+export const findUnmappedAgentFieldInKuery = (kuery: string | undefined): string | undefined => {
+  if (!kuery) {
+    return undefined;
+  }
+  const visit = (node?: KueryNode): string | undefined => {
+    if (!node || node.type !== 'function') {
+      return undefined;
+    }
+    const keyArg = node.arguments?.[0];
+    if (keyArg && esKuery.nodeTypes.wildcard.isNode(keyArg)) {
+      return esKuery.nodeTypes.wildcard.toElasticsearchQuery(keyArg);
+    }
+    if (keyArg?.type === 'literal' && typeof keyArg.value === 'string') {
+      const field = keyArg.value.split('.')[0];
+      if (isAgentFieldNotInMappings(field) || isAgentFieldNotInMappings(keyArg.value)) {
+        return keyArg.value;
+      }
+    }
+    for (const arg of node.arguments ?? []) {
+      const found = visit(arg);
+      if (found) {
+        return found;
+      }
+    }
+    return undefined;
+  };
+  try {
+    return visit(esKuery.fromKueryExpression(kuery));
+  } catch (e) {
+    return undefined;
   }
 };

@@ -7,7 +7,11 @@
 
 import * as esKuery from '@kbn/es-query';
 
-import { validateFilterKueryNode } from './filter_utils';
+import {
+  validateFilterKueryNode,
+  isAgentFieldNotInMappings,
+  findUnmappedAgentFieldInKuery,
+} from './filter_utils';
 
 const mockMappings = {
   properties: {
@@ -440,5 +444,62 @@ describe('Filter Utils', () => {
         ]);
       });
     });
+  });
+});
+
+describe('isAgentFieldNotInMappings', () => {
+  it.each(['default_api_key', 'access_api_key', 'default_api_key.keyword'])(
+    'returns true for %s',
+    (field) => {
+      expect(isAgentFieldNotInMappings(field)).toBe(true);
+    }
+  );
+
+  it.each(['default_api_key_id', 'enrolled_at', 'local_metadata.host.hostname', '', undefined])(
+    'returns false for %s',
+    (field) => {
+      expect(isAgentFieldNotInMappings(field)).toBe(false);
+    }
+  );
+});
+
+describe('findUnmappedAgentFieldInKuery', () => {
+  it.each([
+    'default_api_key:d*',
+    'access_api_key:abc',
+    'agent.id:1 and default_api_key:d*',
+    'status:online or default_api_key:d*',
+    'not default_api_key:d*',
+  ])('finds the non-queryable field in %s', (kuery) => {
+    expect(findUnmappedAgentFieldInKuery(kuery)).toMatch(/api_key/);
+  });
+
+  it.each([
+    ['default_api*:d*', 'default_api*'],
+    ['*api_key:d*', '*api_key'],
+    ['*:d*', '*'],
+    ['local_metadata.host.*:foo', 'local_metadata.host.*'],
+    ['status:online and not (agent.id:1 or *_key:d*)', '*_key'],
+  ])('finds the wildcard field name in %s', (kuery, expected) => {
+    expect(findUnmappedAgentFieldInKuery(kuery)).toBe(expected);
+  });
+
+  it.each(['local_metadata.host.hostname:*foo*', 'policy_id: *abc*', 'tags:h*'])(
+    'allows a wildcard value on a named field (%s)',
+    (kuery) => {
+      expect(findUnmappedAgentFieldInKuery(kuery)).toBeUndefined();
+    }
+  );
+
+  it.each([
+    'status:online',
+    'local_metadata.host.hostname:foo',
+    'default_api_key_id:abc',
+    'agent.id:1 and tags:x',
+    'd*',
+    'agent.id:1 and d*',
+    undefined,
+  ])('returns undefined for %s (no named credential field)', (kuery) => {
+    expect(findUnmappedAgentFieldInKuery(kuery)).toBeUndefined();
   });
 });
