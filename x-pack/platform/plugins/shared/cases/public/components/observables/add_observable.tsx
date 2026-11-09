@@ -23,6 +23,7 @@ import * as i18n from './translations';
 import { usePostObservable } from '../../containers/use_post_observables';
 import { ObservableForm, type ObservableFormProps } from './observable_form';
 import { useCasesFeatures } from '../../common/use_cases_features';
+import { isAtObservablesLimit } from './observables_limit_callout';
 
 export interface AddObservableProps {
   caseData: CaseUI;
@@ -33,6 +34,7 @@ const AddObservableComponent: React.FC<AddObservableProps> = ({ caseData }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const { isLoading, mutateAsync: postObservable } = usePostObservable(caseData.id);
   const { observablesAuthorized: isObservablesEnabled } = useCasesFeatures();
+  const isAtLimit = isAtObservablesLimit(caseData.totalObservables ?? 0);
 
   const closeModal = () => setIsModalVisible(false);
   const showModal = () => setIsModalVisible(true);
@@ -53,8 +55,14 @@ const AddObservableComponent: React.FC<AddObservableProps> = ({ caseData }) => {
   return permissions.create && permissions.update ? (
     <EuiFlexItem grow={false}>
       <EuiButton
-        disabled={!isObservablesEnabled}
-        title={isObservablesEnabled ? undefined : i18n.PLATINUM_NOTICE}
+        disabled={!isObservablesEnabled || isAtLimit}
+        title={
+          !isObservablesEnabled
+            ? i18n.PLATINUM_NOTICE
+            : isAtLimit
+            ? i18n.ADD_OBSERVABLE_LIMIT_REACHED
+            : undefined
+        }
         data-test-subj="cases-observables-add"
         iconType="plusCircle"
         onClick={showModal}

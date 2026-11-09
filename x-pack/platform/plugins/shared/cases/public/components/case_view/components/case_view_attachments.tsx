@@ -30,7 +30,6 @@ import { useCasesFeatures } from '../../../common/use_cases_features';
 import { SEARCH_PLACEHOLDER } from '../../actions/translations';
 import { CaseViewAttachButton } from './case_view_attach_button';
 import { CaseViewObservables, OBSERVABLES_FILTER_ID } from './case_view_observables';
-import { useCaseObservables } from '../use_case_observables';
 import type { OnUpdateFields } from '../types';
 import { AttachmentAccordion } from './attachment_accordion';
 import { useGetCaseFileStats } from '../../../containers/use_get_case_file_stats';
@@ -170,12 +169,10 @@ export const CaseViewAttachments = ({
     isObservablesFeatureEnabled &&
     isTypeVisible(OBSERVABLES_FILTER_ID) &&
     !isAuthorFilterActive;
-  const { observables: filteredObservables, isLoading: isLoadingObservables } = useCaseObservables(
-    caseData,
-    searchTerm
-  );
+  // The observables table searches on the server, so a search only hides the section when the
+  // case has no observables at all.
   const hasVisibleObservables =
-    showObservables && !(searchTerm && filteredObservables.length === 0);
+    showObservables && !(searchTerm && (caseData.totalObservables ?? 0) === 0);
 
   const showNoResults = useMemo(
     () =>
@@ -373,8 +370,7 @@ export const CaseViewAttachments = ({
               {hasVisibleObservables && (
                 <CaseViewObservables
                   caseData={caseData}
-                  observables={filteredObservables}
-                  isLoading={isLoadingObservables}
+                  isLoading={false}
                   searchTerm={searchTerm}
                   onUpdateField={onUpdateField}
                   isOpen={!collapsedAttachmentIds.has(OBSERVABLES_FILTER_ID)}

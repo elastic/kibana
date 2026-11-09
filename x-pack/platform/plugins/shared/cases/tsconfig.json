@@ -130,6 +130,7 @@
     "@kbn/management-settings-ids",
     "@kbn/core-http-common",
     "@kbn/workflows-ui",
+    "@kbn/ui-callout",
   ],
   "exclude": ["target/**/*"]
 }
