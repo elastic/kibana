@@ -168,7 +168,6 @@ export function createQueryKnowledgeIndicatorTool({
           logger.debug(String(error));
         }
 
-        // Only a caller-named id survives a failed write.
         trackTelemetryBestEffort({
           logger,
           description: 'failed ki_query_create telemetry',
@@ -179,7 +178,6 @@ export function createQueryKnowledgeIndicatorTool({
               success: false,
               source_id: sourceId,
               space_id: request.spaceId,
-              ...(queryInput.id !== undefined ? { knowledge_indicator_id: queryInput.id } : {}),
               error_message: message,
             }),
         });

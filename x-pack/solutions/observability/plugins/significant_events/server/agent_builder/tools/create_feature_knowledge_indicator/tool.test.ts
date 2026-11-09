@@ -248,17 +248,19 @@ describe('ki_feature_create tool', () => {
     context.request = httpServerMock.createKibanaRequest({ spaceId: 'space-a' });
     await invokeHandler(tool as never, featureParams, context);
 
-    expect(telemetry.trackAgentBuilderKnowledgeIndicatorCreated).toHaveBeenCalledWith(
+    const [[reported]] = jest.mocked(telemetry.trackAgentBuilderKnowledgeIndicatorCreated).mock
+      .calls;
+    expect(reported).toEqual(
       expect.objectContaining({
         ki_kind: 'feature',
         tool_id: 'ki_feature_create',
         success: false,
         source_id: 'logs.test',
         space_id: 'space-a',
-        knowledge_indicator_id: 'feature-1',
         error_message: 'write failed',
       })
     );
+    expect(reported).not.toHaveProperty('knowledge_indicator_id');
   });
 
   it('tells the agent whether a refused write is worth retrying', async () => {

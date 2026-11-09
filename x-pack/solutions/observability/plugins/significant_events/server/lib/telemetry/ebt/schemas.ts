@@ -290,7 +290,7 @@ const agentBuilderKnowledgeIndicatorCreatedSchema: RootSchema<AgentBuilderKnowle
       type: 'keyword',
       _meta: {
         description:
-          'The `feature.id` or `query.id` the write addressed, unique within `source_id`; the write is an upsert and may have failed, so filter on `success`. Absent when the server generated the id for a query it did not persist',
+          'The created `feature.id` or `query.id`, unique within `source_id`; absent when creation fails',
         optional: true,
       },
     },
