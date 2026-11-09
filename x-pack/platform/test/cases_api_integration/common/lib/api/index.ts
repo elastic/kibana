@@ -18,6 +18,7 @@ import {
   CASE_REPORTERS_URL,
   CASE_SAVED_OBJECT,
   CASE_TAGS_URL,
+  CASE_TEMPLATE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
   CASES_INTERNAL_URL,
   CASES_URL,
@@ -357,6 +358,48 @@ export const deleteMappings = async (es: Client): Promise<void> => {
     refresh: true,
     body: {},
     conflicts: 'proceed',
+  });
+};
+
+/**
+ * Replaces the YAML definition of the latest version of a template directly in Elasticsearch.
+ * Use it to set up old data that the API no longer accepts.
+ */
+export const storeTemplateDefinition = async ({
+  es,
+  templateId,
+  definition,
+}: {
+  es: Client;
+  templateId: string;
+  definition: string;
+}): Promise<void> => {
+  await es.indices.refresh({ index: ALERTING_CASES_SAVED_OBJECT_INDEX });
+  const { hits } = await es.search({
+    index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    size: 2,
+    query: {
+      bool: {
+        filter: [
+          { term: { type: CASE_TEMPLATE_SAVED_OBJECT } },
+          { term: { [`${CASE_TEMPLATE_SAVED_OBJECT}.templateId`]: templateId } },
+          { term: { [`${CASE_TEMPLATE_SAVED_OBJECT}.isLatest`]: true } },
+        ],
+      },
+    },
+  });
+
+  if (hits.hits.length !== 1) {
+    throw new Error(
+      `Expected one latest version of template ${templateId}, found ${hits.hits.length}`
+    );
+  }
+
+  await es.update({
+    index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    id: hits.hits[0]._id as string,
+    doc: { [CASE_TEMPLATE_SAVED_OBJECT]: { definition } },
+    refresh: true,
   });
 };
 
