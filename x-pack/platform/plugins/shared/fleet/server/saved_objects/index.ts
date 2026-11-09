@@ -58,6 +58,7 @@ import {
   PackagePolicySchemaV22,
   PackagePolicySchemaV24,
   PackagePolicySchemaV25,
+  PackagePolicySchemaV26,
   CloudConnectorSchemaV4,
   CloudConnectorSchemaV5,
   CloudOnboardingDeploymentSchemaV1,
@@ -67,6 +68,7 @@ import {
   CloudOnboardingDeploymentSchemaV5,
   CloudOnboardingDeploymentSchemaV6,
   ProvisioningCallbackSchemaV1,
+  CloudOnboardingDeploymentSchemaV7,
 } from '../types';
 
 import { downloadSourceSchemaV2 } from '../../common/types/models/download_source_schema';
@@ -1116,6 +1118,7 @@ export const getSavedObjectTypes = (
           bump_agent_policy_revision: { type: 'boolean' },
           latest_revision: { type: 'boolean' },
           package_agent_version_condition: { type: 'keyword' },
+          onboarding_deployment_id: { type: 'keyword', ignore_above: 1024 },
         },
       },
       modelVersions: {
@@ -1369,6 +1372,20 @@ export const getSavedObjectTypes = (
             create: PackagePolicySchemaV25.extends({}, { unknowns: 'ignore' }),
           },
         },
+        '26': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                onboarding_deployment_id: { type: 'keyword', ignore_above: 1024 },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: PackagePolicySchemaV26.extends({}, { unknowns: 'ignore' }),
+            create: PackagePolicySchemaV26.extends({}, { unknowns: 'ignore' }),
+          },
+        },
       },
       migrations: {
         '7.10.0': migratePackagePolicyToV7100,
@@ -1436,6 +1453,7 @@ export const getSavedObjectTypes = (
           bump_agent_policy_revision: { type: 'boolean' },
           latest_revision: { type: 'boolean' },
           package_agent_version_condition: { type: 'keyword' },
+          onboarding_deployment_id: { type: 'keyword', ignore_above: 1024 },
         },
       },
       modelVersions: {
@@ -1551,6 +1569,20 @@ export const getSavedObjectTypes = (
           schemas: {
             forwardCompatibility: PackagePolicySchemaV25.extends({}, { unknowns: 'ignore' }),
             create: PackagePolicySchemaV25.extends({}, { unknowns: 'ignore' }),
+          },
+        },
+        '12': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                onboarding_deployment_id: { type: 'keyword', ignore_above: 1024 },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: PackagePolicySchemaV26.extends({}, { unknowns: 'ignore' }),
+            create: PackagePolicySchemaV26.extends({}, { unknowns: 'ignore' }),
           },
         },
       },
@@ -2244,6 +2276,17 @@ export const getSavedObjectTypes = (
               { unknowns: 'ignore' }
             ),
             create: CloudOnboardingDeploymentSchemaV6,
+          },
+        },
+        7: {
+          // Added policySettings. No mappings_addition — it is not indexed (dynamic: false).
+          changes: [],
+          schemas: {
+            forwardCompatibility: CloudOnboardingDeploymentSchemaV7.extends(
+              {},
+              { unknowns: 'ignore' }
+            ),
+            create: CloudOnboardingDeploymentSchemaV7,
           },
         },
       },

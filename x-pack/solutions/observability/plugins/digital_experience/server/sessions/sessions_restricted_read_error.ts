@@ -28,7 +28,7 @@ export class SessionsRestrictedReadError extends Error {
           })
         : i18n.translate('xpack.digitalExperience.sessions.api.unverifiableRead', {
             defaultMessage:
-              "Elasticsearch can't report the index privileges of an API key with its own role descriptors, so enabling sessions can't confirm unrestricted read on {indices}. Enable sessions as a user, or with an API key without role descriptors.",
+              "Elasticsearch can't report the index privileges of this API key, so enabling sessions can't confirm unrestricted read on {indices}. Enable sessions as a user instead.",
             values: { indices },
           })
     );
