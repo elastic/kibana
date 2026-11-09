@@ -431,6 +431,29 @@ describe('ORCA CI shard', () => {
       NIGHTSHIFT_ES_API_KEY: orca.apiKey,
     });
   });
+  it('reads the restricted key for the no-flags variant and leaves the full key alone', () => {
+    const withBoth = { ...existing, nightshiftOrcaEs: { ...orca, noFlagsApiKey: 'no-flags-key' } };
+
+    const ablation = runHook(withBoth, {
+      EVAL_SHARD_ID: 'orcabench',
+      NIGHTSHIFT_ORCA_TELEMETRY_VARIANT: 'no-flags',
+    });
+    expect(ablation.status).toBe(0);
+    expect(ablation.stderr).not.toContain('no-flags-key');
+    expect(ablation.output.env.NIGHTSHIFT_ES_API_KEY).toBe('no-flags-key');
+
+    const full = runHook(withBoth, { EVAL_SHARD_ID: 'orcabench' });
+    expect(full.output.env.NIGHTSHIFT_ES_API_KEY).toBe(orca.apiKey);
+  });
+  it('refuses the no-flags variant without its restricted key, rather than run on full telemetry', () => {
+    const { status, stderr } = runHook(
+      { ...existing, nightshiftOrcaEs: orca },
+      { EVAL_SHARD_ID: 'orcabench', NIGHTSHIFT_ORCA_TELEMETRY_VARIANT: 'no-flags' }
+    );
+    expect(status).toBe(1);
+    expect(stderr).toContain('nightshiftOrcaEs.noFlagsApiKey');
+    expect(stderr).not.toContain(orca.apiKey);
+  });
   it('ignores a readable-indices hint left in the ORCA block', () => {
     expect(
       runHook(

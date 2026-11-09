@@ -1,5 +1,5 @@
 {
-  "sha1": "57ca492d4b5749d77053d18382c30bcb33fa7a38",
+  "sha1": "78e2024f1f673dd087733c7f6ee7d1740c5666a2",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -334,6 +334,62 @@
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/memory_page_authorization.spec.ts",
         "line": 93,
         "column": 52
+      }
+    },
+    {
+      "id": "a6aa66627961b99-16ef9b593ba0936",
+      "title": "Nightshift online evals scores a new investigation's first round once, with the reference-free judges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/online_evals.spec.ts",
+        "line": 123,
+        "column": 47
+      }
+    },
+    {
+      "id": "a6aa66627961b99-f70a27695f88e44",
+      "title": "Nightshift online evals starts no scoring run for a follow-up, such as a question",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/online_evals.spec.ts",
+        "line": 141,
+        "column": 14
+      }
+    },
+    {
+      "id": "a6aa66627961b99-c03b14cc6336a9f",
+      "title": "Nightshift online evals leaves the investigation completed when every judge fails",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/online_evals.spec.ts",
+        "line": 162,
+        "column": 15
+      }
+    },
+    {
+      "id": "a6aa66627961b99-8b905af61dcb10e",
+      "title": "Nightshift online evals starts no scoring run while the kill switch is on",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/online_evals.spec.ts",
+        "line": 186,
+        "column": 71
       }
     },
     {
