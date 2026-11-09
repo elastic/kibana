@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React from 'react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import type { Filter } from '@kbn/es-query';
 import { createDiscoverProfile } from './profile';
 
@@ -320,6 +322,27 @@ describe('createDiscoverProfile', () => {
       expect(controls[0].isAvailable(mockRowProps)).toBe(true);
       // Second action: isCompatible returns false → isAvailable returns false
       expect(controls[1].isAvailable(mockRowProps)).toBe(false);
+    });
+
+    it('reloads the Discover data after an action succeeds', async () => {
+      const provider = createDiscoverProfile();
+      await Promise.resolve();
+      const mockRefreshData = jest.fn();
+
+      const controls = provider.profile.getRowAdditionalLeadingControls!(() => [], {
+        toolkit: { actions: { refreshData: mockRefreshData } },
+      })({} as any) as any[];
+      const MockControl = ({ onClick }: { onClick: () => void }) => (
+        <button onClick={onClick}>action</button>
+      );
+      render(controls[0].render(MockControl, { rowIndex: 0, record: { flattened: {} } }));
+
+      fireEvent.click(screen.getByText('action'));
+      const [{ onSuccess }] =
+        mockCreateEpisodeActions.mock.results[0].value[0].execute.mock.calls[0];
+      onSuccess();
+
+      expect(mockRefreshData).toHaveBeenCalledTimes(1);
     });
   });
 });

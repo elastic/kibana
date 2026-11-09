@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiSkeletonText, EuiSpacer } from '@elastic/eui';
+import { ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type {
   RowControlColumn,
@@ -27,7 +28,6 @@ import {
 import {
   EpisodeStatusCell,
   EpisodeSeverityCell,
-  EpisodeRuleCell,
   EpisodeTagsCell,
   EpisodeDurationCell,
 } from '@kbn/alerting-v2-episodes-ui/components/episodes_table_cell_renderers';
@@ -48,6 +48,10 @@ import { CoreStart } from '@kbn/core-di-browser';
 import { PluginStart } from '@kbn/core-di';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
+import {
+  EpisodeRuleCellWithFetch,
+  type EpisodeRuleCellWithFetchProps,
+} from './rule_cell_with_fetch';
 import { untilPluginStartServicesReady, type AlertingV2KibanaServices } from '../kibana_services';
 import type { AlertingV2DiscoverProfileProvider } from '../types';
 
@@ -93,12 +97,14 @@ interface EpisodeActionControlProps {
   action: EpisodeAction;
   Control: RowControlComponent;
   rowProps: RowControlRowProps;
+  onSuccess: () => void;
 }
 
 const EpisodeActionControl: React.FC<EpisodeActionControlProps> = ({
   action,
   Control,
   rowProps,
+  onSuccess,
 }) => {
   const episode = rowProps.record.flattened as unknown as AlertEpisode;
   return (
@@ -106,7 +112,7 @@ const EpisodeActionControl: React.FC<EpisodeActionControlProps> = ({
       label={action.displayName}
       iconType={action.iconType}
       onClick={() => {
-        action.execute({ episodes: [episode] });
+        action.execute({ episodes: [episode], onSuccess });
       }}
     />
   );
@@ -127,6 +133,22 @@ const AssigneeCellRenderer: React.FC<AssigneeCellRendererProps> = ({ row, queryC
         userProfile={services.userProfile}
       />
     </QueryClientProvider>
+  );
+};
+
+type RuleCellRendererProps = Omit<EpisodeRuleCellWithFetchProps, 'http' | 'getRuleDetailsHref'>;
+
+// Discover has no table-level rules cache like the alerts page, so each cell fetches its rule.
+const RuleCellRenderer: React.FC<RuleCellRendererProps> = (props) => {
+  const services = useAlertingV2Services();
+  if (!services) return <EuiSkeletonText lines={1} />;
+  return (
+    <EpisodeRuleCellWithFetch
+      {...props}
+      http={services.http}
+      // The rule details page isn't linked from Discover yet.
+      getRuleDetailsHref={() => undefined}
+    />
   );
 };
 
@@ -180,7 +202,8 @@ export const createDiscoverProfile = (): AlertingV2DiscoverProfileProvider => {
     profile: {
       getDefaultAppState: () => () => ({
         columns: [
-          { name: 'episode.status', width: 110 },
+          // Fits the longest status plus the snooze and ack badges.
+          { name: 'episode.status', width: 180 },
           { name: 'severity', width: 100 },
           { name: '@timestamp', width: 200 },
           { name: 'rule.id', width: 250 },
@@ -252,7 +275,12 @@ export const createDiscoverProfile = (): AlertingV2DiscoverProfileProvider => {
           severity: (props: any) => <EpisodeSeverityCell {...props} />,
 
           'rule.id': (props: any) => (
-            <EpisodeRuleCell {...props} rulesCache={{}} isLoadingRules={false} rowHeight={0} />
+            <QueryClientProvider client={queryClient}>
+              <RuleCellRenderer
+                {...props}
+                rowHeight={params.rowHeight ?? ROWS_HEIGHT_OPTIONS.default}
+              />
+            </QueryClientProvider>
           ),
 
           duration: (props: any) => <DurationCellRenderer {...props} />,
@@ -265,23 +293,36 @@ export const createDiscoverProfile = (): AlertingV2DiscoverProfileProvider => {
         };
       },
 
-      getRowAdditionalLeadingControls: (prev) => (params) => {
-        const prevControls = (prev as any)(params) || [];
-        if (!resolvedEpisodeActions) return prevControls;
+      getRowAdditionalLeadingControls:
+        (prev, { toolkit }) =>
+        (params) => {
+          const prevControls = (prev as any)(params) || [];
+          if (!resolvedEpisodeActions) return prevControls;
 
-        const episodeColumns: RowControlColumn[] = resolvedEpisodeActions.map((action) => ({
-          id: action.id,
-          isAvailable: (rowProps: RowControlRowProps) => {
-            const episode = rowProps.record.flattened as unknown as AlertEpisode;
-            return action.isCompatible({ episodes: [episode] });
-          },
-          render: (Control: RowControlComponent, rowProps: RowControlRowProps) => (
-            <EpisodeActionControl action={action} Control={Control} rowProps={rowProps} />
-          ),
-        }));
+          // Reloads the table and refetches what the open flyout shows, like the alerts page.
+          const onActionSuccess = () => {
+            toolkit.actions.refreshData?.();
+            queryClient.invalidateQueries();
+          };
 
-        return [...prevControls, ...episodeColumns];
-      },
+          const episodeColumns: RowControlColumn[] = resolvedEpisodeActions.map((action) => ({
+            id: action.id,
+            isAvailable: (rowProps: RowControlRowProps) => {
+              const episode = rowProps.record.flattened as unknown as AlertEpisode;
+              return action.isCompatible({ episodes: [episode] });
+            },
+            render: (Control: RowControlComponent, rowProps: RowControlRowProps) => (
+              <EpisodeActionControl
+                action={action}
+                Control={Control}
+                rowProps={rowProps}
+                onSuccess={onActionSuccess}
+              />
+            ),
+          }));
+
+          return [...prevControls, ...episodeColumns];
+        },
 
       getDocViewer: (prev: any) => (params: any) => {
         const episodeId = params.record.flattened['episode.id'] as string;
