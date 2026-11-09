@@ -13,7 +13,6 @@ import {
   ALERTING_V2_ENABLED_SETTING_ID,
   ALERTING_V2_SHOW_V1_OBSERVABILITY_ALERTS_TABLE_SETTING_ID,
   ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID,
-  ALERTING_V2_EXECUTION_HISTORY_AI_DIAGNOSE_SETTING_ID,
   type AlertingAdvancedSettingId,
   type AlertingAdvancedSettingValueMap,
 } from '@kbn/alerting-v2-constants';
@@ -77,25 +76,9 @@ export const alertingSpaceAdvancedSettings = {
     requiresPageReload: true,
     experimental: true,
   },
-  [ALERTING_V2_EXECUTION_HISTORY_AI_DIAGNOSE_SETTING_ID]: {
-    category: [ALERTING_CATEGORY],
-    name: i18n.translate('xpack.alertingV2.executionHistoryAiDiagnoseSettingName', {
-      defaultMessage: 'Universal Alerting: AI Agent failure diagnosis',
-    }),
-    type: 'boolean',
-    value: true,
-    description: i18n.translate('xpack.alertingV2.executionHistoryAiDiagnoseSettingDescription', {
-      defaultMessage:
-        'Enables the "Diagnose with AI" action on failed rule executions in the execution history.',
-    }),
-    schema: schema.boolean(),
-    requiresPageReload: false,
-    experimental: true,
-  },
 } satisfies AlertingV2AdvancedSettingsRegistration<
   | typeof ALERTING_V2_SHOW_V1_OBSERVABILITY_ALERTS_TABLE_SETTING_ID
   | typeof ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID
-  | typeof ALERTING_V2_EXECUTION_HISTORY_AI_DIAGNOSE_SETTING_ID
 >;
 
 export const registerAlertingAdvancedSettings = (uiSettings: UiSettingsServiceSetup): void => {

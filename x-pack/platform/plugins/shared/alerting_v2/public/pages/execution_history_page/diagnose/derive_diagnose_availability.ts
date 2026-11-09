@@ -47,14 +47,3 @@ export const deriveDiagnoseAvailability = ({
   }
   return 'a';
 };
-
-/** When the feature flag is off, A/B render as D (no Diagnose action). C/D are unaffected. */
-export const effectiveDiagnoseState = (
-  state: DiagnoseState,
-  diagnoseFeatureEnabled: boolean
-): DiagnoseState => {
-  if (!diagnoseFeatureEnabled && (state === 'a' || state === 'b')) {
-    return 'd';
-  }
-  return state;
-};

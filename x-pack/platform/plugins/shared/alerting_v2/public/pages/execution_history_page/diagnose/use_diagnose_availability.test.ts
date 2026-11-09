@@ -6,7 +6,6 @@
  */
 
 import { act, renderHook, waitFor } from '@testing-library/react';
-import { ALERTING_V2_EXECUTION_HISTORY_AI_DIAGNOSE_SETTING_ID } from '@kbn/alerting-v2-constants';
 import type { RuleExecutionView } from '@kbn/alerting-v2-schemas';
 import { buildRuleDiagnosisContext } from './build_rule_diagnosis_handoff';
 import { DIAGNOSE_PENDING_HANDOFF_STORAGE_KEY } from './diagnose_pending_handoff';
@@ -43,7 +42,6 @@ interface SetupOptions {
   showCapability?: boolean;
   access?: { hasRequiredLicense: boolean; hasLlmConnector: boolean } | Error;
   liveConnectors?: unknown[];
-  featureEnabled?: boolean;
 }
 
 const setup = ({
@@ -51,7 +49,6 @@ const setup = ({
   showCapability = true,
   access = { hasRequiredLicense: true, hasLlmConnector: true },
   liveConnectors = [],
-  featureEnabled = true,
 }: SetupOptions = {}) => {
   const getAgentBuilderAccess = jest.fn(() =>
     access instanceof Error ? Promise.reject(access) : Promise.resolve(access)
@@ -63,17 +60,15 @@ const setup = ({
     getUrlForApp: jest.fn(() => '/app/management/stack/license_management'),
   };
   const notifications = { toasts: { addError: jest.fn() } };
-  const uiSettings = { get: jest.fn(() => featureEnabled) };
 
   mockServices = {
     'plugin:agentBuilder': agentBuilder ? { getAgentBuilderAccess } : undefined,
     application,
     http,
     notifications,
-    uiSettings,
   };
 
-  return { getAgentBuilderAccess, http, application, notifications, uiSettings };
+  return { getAgentBuilderAccess, http, application, notifications };
 };
 
 describe('useDiagnoseAvailability', () => {
@@ -83,23 +78,11 @@ describe('useDiagnoseAvailability', () => {
     sessionStorage.clear();
   });
 
-  it('reads the feature flag with a default of true', async () => {
-    const { uiSettings } = setup();
-    const { result } = renderHook(() => useDiagnoseAvailability());
-
-    await waitFor(() => expect(result.current.state).toBe('a'));
-    expect(uiSettings.get).toHaveBeenCalledWith(
-      ALERTING_V2_EXECUTION_HISTORY_AI_DIAGNOSE_SETTING_ID,
-      true
-    );
-  });
-
   it('is state A with a license and an LLM connector', async () => {
     setup();
     const { result } = renderHook(() => useDiagnoseAvailability());
 
     await waitFor(() => expect(result.current.state).toBe('a'));
-    expect(result.current.rawState).toBe('a');
     expect(result.current.requiredLicenseTier).toBe('enterprise');
   });
 
@@ -140,21 +123,6 @@ describe('useDiagnoseAvailability', () => {
       await Promise.resolve();
     });
     expect(result.current.state).toBe('d');
-  });
-
-  it('hides A/B behind the feature flag but keeps the raw state', async () => {
-    setup({ featureEnabled: false });
-    const { result } = renderHook(() => useDiagnoseAvailability());
-
-    await waitFor(() => expect(result.current.rawState).toBe('a'));
-    expect(result.current.state).toBe('d');
-  });
-
-  it('keeps state C visible when the feature flag is off', async () => {
-    setup({ featureEnabled: false, access: { hasRequiredLicense: false, hasLlmConnector: true } });
-    const { result } = renderHook(() => useDiagnoseAvailability());
-
-    await waitFor(() => expect(result.current.state).toBe('c'));
   });
 
   describe('openDiagnose', () => {

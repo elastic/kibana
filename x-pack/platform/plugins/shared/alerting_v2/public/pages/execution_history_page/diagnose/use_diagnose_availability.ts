@@ -7,14 +7,12 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
-import { ALERTING_V2_EXECUTION_HISTORY_AI_DIAGNOSE_SETTING_ID } from '@kbn/alerting-v2-constants';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import type { RuleDiagnosisContext } from './build_rule_diagnosis_handoff';
 import {
   AGENT_BUILDER_REQUIRED_LICENSE_TIER,
   deriveDiagnoseAvailability,
-  effectiveDiagnoseState,
   type DiagnoseState,
   type EmbeddableChatAccessSnapshot,
 } from './derive_diagnose_availability';
@@ -29,10 +27,8 @@ import {
 } from './open_rule_failure_diagnosis_chat';
 
 export interface DiagnoseAvailability {
-  /** Availability after feature-flag gating (drives the control). */
+  /** Availability state (drives the control). */
   state: DiagnoseState;
-  /** Ungated derivation (for tests / debugging). */
-  rawState: DiagnoseState;
   /** Required Agent Builder license tier id (e.g. `enterprise`), not a display string. */
   requiredLicenseTier: string;
   /** True while a handoff is in flight (guards against double-opening a chat). */
@@ -51,16 +47,11 @@ export const useDiagnoseAvailability = (): DiagnoseAvailability => {
     | AgentBuilderPluginStart
     | undefined;
   const application = useService(CoreStart('application'));
-  const uiSettings = useService(CoreStart('uiSettings'));
   const http = useService(CoreStart('http'));
   const notifications = useService(CoreStart('notifications'));
 
   const isAgentBuilderAvailable = agentBuilder != null;
   const hasShowPrivilege = application.capabilities.agentBuilder?.show === true;
-  const diagnoseFeatureEnabled = uiSettings.get<boolean>(
-    ALERTING_V2_EXECUTION_HISTORY_AI_DIAGNOSE_SETTING_ID,
-    true
-  );
 
   const [access, setAccess] = useState<EmbeddableChatAccessSnapshot | null>(null);
   const [isHandoffInFlight, setIsHandoffInFlight] = useState(false);
@@ -113,7 +104,7 @@ export const useDiagnoseAvailability = (): DiagnoseAvailability => {
     void refreshAccess();
   }, [refreshAccess, isAgentBuilderAvailable]);
 
-  const rawState = useMemo(
+  const state = useMemo(
     () =>
       deriveDiagnoseAvailability({
         pluginPresent: isAgentBuilderAvailable,
@@ -121,11 +112,6 @@ export const useDiagnoseAvailability = (): DiagnoseAvailability => {
         access,
       }),
     [isAgentBuilderAvailable, hasShowPrivilege, access]
-  );
-
-  const state = useMemo(
-    () => effectiveDiagnoseState(rawState, diagnoseFeatureEnabled),
-    [rawState, diagnoseFeatureEnabled]
   );
 
   const runHandoff = useCallback((context: RuleDiagnosisContext) => {
@@ -166,7 +152,7 @@ export const useDiagnoseAvailability = (): DiagnoseAvailability => {
 
       // State B: keep the assembled context so completing LLM setup resumes the same handoff
       // without another click.
-      if (rawState === 'b') {
+      if (state === 'b') {
         savePendingDiagnoseHandoff({ context });
       } else {
         clearPendingDiagnoseHandoff();
@@ -174,12 +160,12 @@ export const useDiagnoseAvailability = (): DiagnoseAvailability => {
 
       runHandoff(context);
     },
-    [rawState, runHandoff]
+    [state, runHandoff]
   );
 
   // State B: after LLM connector setup, resume the original handoff once.
   useEffect(() => {
-    if (!isAgentBuilderAvailable || !diagnoseFeatureEnabled) {
+    if (!isAgentBuilderAvailable) {
       return;
     }
 
@@ -213,7 +199,7 @@ export const useDiagnoseAvailability = (): DiagnoseAvailability => {
       window.removeEventListener('focus', onFocus);
       document.removeEventListener('visibilitychange', onFocus);
     };
-  }, [isAgentBuilderAvailable, diagnoseFeatureEnabled, refreshAccess, runHandoff]);
+  }, [isAgentBuilderAvailable, refreshAccess, runHandoff]);
 
   const openLicenseManagement = useCallback(() => {
     application.navigateToApp('management', { deepLinkId: 'license_management' });
@@ -226,13 +212,12 @@ export const useDiagnoseAvailability = (): DiagnoseAvailability => {
   return useMemo(
     () => ({
       state,
-      rawState,
       requiredLicenseTier: AGENT_BUILDER_REQUIRED_LICENSE_TIER,
       isHandoffInFlight,
       openDiagnose,
       openLicenseManagement,
       licenseManagementHref,
     }),
-    [state, rawState, isHandoffInFlight, openDiagnose, openLicenseManagement, licenseManagementHref]
+    [state, isHandoffInFlight, openDiagnose, openLicenseManagement, licenseManagementHref]
   );
 };

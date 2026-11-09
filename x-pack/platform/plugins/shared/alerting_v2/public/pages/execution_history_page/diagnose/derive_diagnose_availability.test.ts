@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  deriveDiagnoseAvailability,
-  effectiveDiagnoseState,
-  type DiagnoseState,
-} from './derive_diagnose_availability';
+import { deriveDiagnoseAvailability } from './derive_diagnose_availability';
 
 describe('deriveDiagnoseAvailability', () => {
   const ready = { hasRequiredLicense: true, hasLlmConnector: true };
@@ -52,20 +48,5 @@ describe('deriveDiagnoseAvailability', () => {
     ],
   ])('returns D when %s', (_, input) => {
     expect(deriveDiagnoseAvailability(input)).toBe('d');
-  });
-});
-
-describe('effectiveDiagnoseState', () => {
-  it.each<[DiagnoseState, boolean, DiagnoseState]>([
-    ['a', true, 'a'],
-    ['b', true, 'b'],
-    ['c', true, 'c'],
-    ['d', true, 'd'],
-    ['a', false, 'd'],
-    ['b', false, 'd'],
-    ['c', false, 'c'],
-    ['d', false, 'd'],
-  ])('maps %s with the feature enabled=%s to %s', (state, enabled, expected) => {
-    expect(effectiveDiagnoseState(state, enabled)).toBe(expected);
   });
 });
