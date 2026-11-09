@@ -53,7 +53,7 @@ const defaultClusterValues: ClusterPayload = {
 // EuiComboBox puts aria-invalid on its search input; focusing that input also paints a long
 // polite "Combo box. Selected..." live region that VoiceOver reads instead of the form error.
 const FIRST_INVALID_FOCUSABLE_SELECTOR =
-  'input[aria-invalid="true"]:not([role="combobox"]), textarea[aria-invalid="true"]';
+  'input[aria-invalid="true"]:not([role="combobox"]):not(:disabled), textarea[aria-invalid="true"]:not(:disabled)';
 interface Props {
   confirmFormAction: (cluster: ClusterPayload) => void;
   onBack?: () => void;
@@ -98,18 +98,15 @@ export const RemoteClusterForm: React.FC<Props> = ({
   );
   const [areErrorsVisible, setAreErrorsVisible] = useState(false);
   const [formHasBeenSubmited, setFormHasBeenSubmited] = useState(false);
-  const [errorAnnouncementKey, setErrorAnnouncementKey] = useState(0);
+  const [errorAnnouncement, setErrorAnnouncement] = useState<{
+    key: number;
+    message: ReactNode;
+  }>();
   const formRef = useRef<HTMLDivElement>(null);
   const errorSectionRef = useRef<HTMLDivElement>(null);
   const errorTitle = i18n.translate('xpack.remoteClusters.remoteClusterForm.errorTitle', {
     defaultMessage: 'Some fields require your attention.',
   });
-  const firstFieldError =
-    fieldsErrors.name ??
-    fieldsErrors.cloudRemoteAddress ??
-    fieldsErrors.seeds ??
-    fieldsErrors.proxyAddress ??
-    fieldsErrors.nodeConnections;
   const getCluster = useCallback((): ClusterPayload => {
     const {
       name,
@@ -145,16 +142,29 @@ export const RemoteClusterForm: React.FC<Props> = ({
 
   const handleNext = () => {
     if (hasErrors()) {
+      const firstFieldError =
+        fieldsErrors.name ??
+        fieldsErrors.cloudRemoteAddress ??
+        fieldsErrors.seeds ??
+        fieldsErrors.proxyAddress ??
+        fieldsErrors.nodeConnections;
+      // Snapshot the message so later field edits don't re-fire the assertive live region.
       flushSync(() => {
         setAreErrorsVisible(true);
-        setErrorAnnouncementKey((key) => key + 1);
+        setErrorAnnouncement((previous) => ({
+          key: (previous?.key ?? 0) + 1,
+          message: (
+            <>
+              {errorTitle} {firstFieldError}
+            </>
+          ),
+        }));
       });
       const firstInvalidField = formRef.current?.querySelector<HTMLElement>(
         FIRST_INVALID_FOCUSABLE_SELECTOR
       );
-      if (firstInvalidField) {
-        firstInvalidField.focus();
-      } else {
+      firstInvalidField?.focus();
+      if (!firstInvalidField || document.activeElement !== firstInvalidField) {
         errorSectionRef.current
           ?.querySelector<HTMLElement>('[data-test-subj="remoteClusterFormGlobalError"]')
           ?.focus();
@@ -319,16 +329,6 @@ export const RemoteClusterForm: React.FC<Props> = ({
           title={errorTitle}
           data-test-subj="remoteClusterFormGlobalError"
         />
-        <EuiLiveAnnouncer
-          key={errorAnnouncementKey}
-          role="alert"
-          aria-live="assertive"
-          data-test-subj="remoteClusterFormErrorAnnouncement"
-        >
-          {errorTitle}
-          {firstFieldError ? ' ' : null}
-          {firstFieldError}
-        </EuiLiveAnnouncer>
         <EuiSpacer size="m" />
       </div>
     );
@@ -338,6 +338,16 @@ export const RemoteClusterForm: React.FC<Props> = ({
     <>
       {saveError && <SaveError saveError={saveError} />}
       {renderErrors()}
+      {errorAnnouncement && (
+        <EuiLiveAnnouncer
+          key={errorAnnouncement.key}
+          role="alert"
+          aria-live="assertive"
+          data-test-subj="remoteClusterFormErrorAnnouncement"
+        >
+          {errorAnnouncement.message}
+        </EuiLiveAnnouncer>
+      )}
       <EuiForm ref={formRef} data-test-subj="remoteClusterForm">
         <EuiDescribedFormGroup
           title={

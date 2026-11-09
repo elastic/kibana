@@ -171,6 +171,36 @@ describe('Create Remote cluster', () => {
             'aria-live',
             'assertive'
           );
+          expect(screen.getByTestId('remoteClusterFormNameInput')).toHaveFocus();
+        } finally {
+          jest.useRealTimers();
+        }
+      });
+
+      test('should not re-announce form errors while the user edits fields', async () => {
+        await goToFormStep({ securityModel: 'api' });
+
+        jest.useFakeTimers();
+        try {
+          const userWithFakeTimers = userEvent.setup({
+            delay: null,
+            advanceTimers: jest.advanceTimersByTime,
+          });
+          await userWithFakeTimers.click(screen.getByTestId('remoteClusterFormNextButton'));
+          act(() => jest.advanceTimersByTime(100));
+
+          const announcement = screen.getByTestId('remoteClusterFormErrorAnnouncement');
+          await userWithFakeTimers.type(screen.getByTestId('remoteClusterFormNameInput'), 'a');
+          expect(announcement).toHaveTextContent(
+            'Some fields require your attention. Name is required.'
+          );
+
+          act(() => jest.advanceTimersByTime(2000));
+          expect(announcement).toBeEmptyDOMElement();
+
+          await userWithFakeTimers.type(screen.getByTestId('remoteClusterFormNameInput'), 'b');
+          act(() => jest.advanceTimersByTime(100));
+          expect(announcement).toBeEmptyDOMElement();
         } finally {
           jest.useRealTimers();
         }
@@ -200,6 +230,7 @@ describe('Create Remote cluster', () => {
               'comboBoxSearchInput'
             )
           ).not.toHaveFocus();
+          expect(screen.getByTestId('remoteClusterFormGlobalError')).toHaveFocus();
         } finally {
           jest.useRealTimers();
         }
