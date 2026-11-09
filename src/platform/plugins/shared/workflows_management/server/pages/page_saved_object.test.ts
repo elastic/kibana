@@ -40,6 +40,32 @@ describe('workflow-page saved object', () => {
     });
   });
 
+  it('validates the merged document on update', () => {
+    const savedObjects = savedObjectsServiceMock.createSetupContract();
+    registerWorkflowPageType({
+      savedObjects,
+      encryptedSavedObjects: encryptedSavedObjectsMock.createSetup(),
+    });
+    const [[{ modelVersions }]] = savedObjects.registerType.mock.calls;
+    const versions = typeof modelVersions === 'function' ? modelVersions() : modelVersions;
+    const updateSchema = versions?.[1]?.schemas?.update;
+    const stored: WorkflowPageAttributes = {
+      workflowId: 'w',
+      pageId: 'default',
+      secret: 'ciphertext',
+      secretHash: 'a'.repeat(64),
+      access: null,
+      enabled: true,
+      workflowCreatedAt: '2026-01-01T00:00:00.000Z',
+    };
+
+    expect(() =>
+      updateSchema?.validate({ ...stored, access: { level: 'secret_link' }, enabled: false })
+    ).not.toThrow();
+    expect(() => updateSchema?.validate({ ...stored, access: { level: 'public' } })).toThrow();
+    expect(() => updateSchema?.validate({ ...stored, enabled: 'yes' })).toThrow();
+  });
+
   it('builds a UUID id, which ESO requires for encrypted types', () => {
     expect(
       SavedObjectsUtils.isRandomId(

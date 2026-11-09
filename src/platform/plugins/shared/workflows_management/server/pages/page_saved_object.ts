@@ -137,6 +137,8 @@ export const registerWorkflowPageType = ({
         schemas: {
           forwardCompatibility: workflowPageSchemaV1.extends({}, { unknowns: 'ignore' }),
           create: workflowPageSchemaV1,
+          // Core checks the merged document, so a partial update cannot store an invalid value.
+          update: workflowPageSchemaV1,
         },
       },
     },
