@@ -44,14 +44,16 @@ describe('Transform: Job List Columns', () => {
 
     const columns: ReturnType<typeof useColumns>['columns'] = result.current.columns;
 
-    expect(columns).toHaveLength(7);
-    const expanderColumn = columns[6] as EuiTableComputedColumnType<TransformListRow>;
+    expect(columns).toHaveLength(8);
+    const progressColumn = columns[5] as EuiTableComputedColumnType<TransformListRow>;
+    const expanderColumn = columns[7] as EuiTableComputedColumnType<TransformListRow>;
 
     expect(columns[0].name).toBe('ID');
     expect(columns[1].name).toBe('Health');
     expect(columns[2].name).toBe('Type');
     expect(columns[3].name).toBe('Status');
     expect(columns[4].name).toBe('Execution');
+    expect(progressColumn['data-test-subj']).toBe('transformListColumnProgress');
     expect(expanderColumn.isExpander).toBeTruthy();
   });
 
@@ -92,6 +94,8 @@ describe('Transform: Job List Columns', () => {
     const statusColumn = result.current.columns[3] as EuiTableComputedColumnType<TransformListRow>;
     const executionColumn = result.current
       .columns[4] as EuiTableComputedColumnType<TransformListRow>;
+    const progressColumn = result.current
+      .columns[5] as EuiTableComputedColumnType<TransformListRow>;
 
     const { rerender } = renderWithI18n(<>{typeColumn.render?.(item)}</>);
     expect(screen.getByText('Pivot')).toBeInTheDocument();
@@ -100,9 +104,11 @@ describe('Transform: Job List Columns', () => {
     expect(screen.getByText('Stopped')).toBeInTheDocument();
 
     rerender(<>{executionColumn.render?.(item)}</>);
-    expect(screen.getAllByText('100%')).not.toHaveLength(0);
+    expect(screen.getByText('100%')).toBeInTheDocument();
+    expect(screen.queryByTestId('transformListProgress')).not.toBeInTheDocument();
+
+    rerender(<>{progressColumn.render?.(item)}</>);
     expect(screen.getByTestId('transformListProgress')).toBeInTheDocument();
-    expect(screen.getByTestId('transformListProgressGroup')).toHaveStyle({ minWidth: '120px' });
 
     rerender(
       <>
@@ -113,6 +119,15 @@ describe('Transform: Job List Columns', () => {
       </>
     );
     expect(screen.getByText('Continuous')).toBeInTheDocument();
+
+    rerender(
+      <>
+        {progressColumn.render?.({
+          ...item,
+          mode: 'continuous',
+        })}
+      </>
+    );
     expect(screen.queryByTestId('transformListProgress')).not.toBeInTheDocument();
   });
 
@@ -140,10 +155,10 @@ describe('Transform: Job List Columns', () => {
       wrapper,
     });
 
-    expect(result.current.columns).toHaveLength(7);
+    expect(result.current.columns).toHaveLength(8);
 
     await waitFor(() => {
-      expect(result.current.columns).toHaveLength(8);
+      expect(result.current.columns).toHaveLength(9);
     });
     expect(result.current.columns[1].name).toBe('Project scope');
   });
@@ -169,7 +184,7 @@ describe('Transform: Job List Columns', () => {
       await cpsManager.whenReady();
     });
 
-    expect(result.current.columns).toHaveLength(7);
+    expect(result.current.columns).toHaveLength(8);
   });
 
   test('normalizes project scope sort values', async () => {
@@ -194,7 +209,7 @@ describe('Transform: Job List Columns', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.columns).toHaveLength(8);
+      expect(result.current.columns).toHaveLength(9);
     });
 
     const projectScopeColumn = result.current

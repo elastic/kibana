@@ -7,7 +7,7 @@
 
 import React, { type FC } from 'react';
 
-import { EuiTabbedContent } from '@elastic/eui';
+import { EuiTabbedContent, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { i18n } from '@kbn/i18n';
@@ -17,10 +17,15 @@ import type { TransformHealthAlertRule } from '../../../../../../common/types/al
 
 import type { TransformListRow } from '../../../../common';
 
-const styles = {
-  tabbedContent: css`
-    width: 100%;
-  `,
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return {
+    tabbedContent: css`
+      width: 100%;
+      padding: ${euiTheme.size.base} ${euiTheme.size.xxl};
+    `,
+  };
 };
 
 import { ExpandedRowDetailsPane } from './expanded_row_details_pane';
@@ -37,6 +42,7 @@ interface Props {
 
 export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
   const tabId = stringHash(item.id);
+  const styles = useStyles();
 
   const tabs = [
     {

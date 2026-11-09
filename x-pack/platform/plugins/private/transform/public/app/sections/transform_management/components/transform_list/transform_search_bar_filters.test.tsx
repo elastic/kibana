@@ -59,6 +59,13 @@ describe('transform search bar filters', () => {
       throw new Error('Expected status to use static field value selection options');
     }
     expect(statusFilter.options.every((option) => option.view === undefined)).toBe(true);
+    expect(statusFilter.options).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ value: 'failed', name: 'Failed' }),
+        expect.objectContaining({ value: 'started', name: 'Started' }),
+        expect.objectContaining({ value: 'stopped', name: 'Stopped' }),
+      ])
+    );
   });
 
   test('filters execution even when transform stats are unavailable', () => {

@@ -18,6 +18,7 @@ import {
 import type { CustomComponentProps } from '@elastic/eui/src/components/search_bar/filters/custom_component_filter';
 import type { Clause, Value } from '@elastic/eui/src/components/search_bar/query/ast';
 import { i18n } from '@kbn/i18n';
+import { toSentenceCase } from '@kbn/shared-ux-label-formatter';
 import {
   TRANSFORM_FUNCTION,
   TRANSFORM_MODE,
@@ -141,7 +142,7 @@ export const transformFilters: SearchFilterConfig[] = [
     multiSelect: 'or',
     options: Object.values(TRANSFORM_STATE).map((val) => ({
       value: val,
-      name: val,
+      name: toSentenceCase(val),
     })),
   },
   {

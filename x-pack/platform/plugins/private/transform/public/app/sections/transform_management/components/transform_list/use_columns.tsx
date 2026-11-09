@@ -91,7 +91,6 @@ const TransformIdWithDescription = ({ item }: { item: TransformListRow }) => {
           color="subdued"
           css={{
             fontSize: euiTheme.font.scale.xs * euiTheme.base,
-            marginBlockStart: euiTheme.size.xs,
           }}
         >
           <span data-test-subj="transformListColumnDescriptionText">{description}</span>
@@ -266,33 +265,37 @@ export const useColumns = (
         }
 
         const progress = getTransformProgress(item);
-        return progress === undefined ? null : (
-          <EuiFlexGroup
-            alignItems="center"
-            css={{ minWidth: '120px' }}
-            data-test-subj="transformListProgressGroup"
-            gutterSize="s"
-            justifyContent="flexEnd"
-            responsive={false}
+        return progress === undefined ? null : `${progress}%`;
+      },
+      width: '100px',
+    },
+    {
+      name: (
+        <EuiScreenReaderOnly>
+          <p>
+            {i18n.translate('xpack.transform.progressColumnLabel', {
+              defaultMessage: 'Progress',
+            })}
+          </p>
+        </EuiScreenReaderOnly>
+      ),
+      'data-test-subj': 'transformListColumnProgress',
+      render(item: TransformListRow) {
+        const progress = getTransformProgress(item);
+        return item.mode === TRANSFORM_MODE.CONTINUOUS || progress === undefined ? null : (
+          <EuiProgress
+            value={progress}
+            max={100}
+            color={euiTheme.colors.mediumShade}
+            css={{ minWidth: '80px' }}
+            size="m"
+            data-test-subj="transformListProgress"
           >
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">{`${progress}%`}</EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiProgress
-                value={progress}
-                max={100}
-                color={euiTheme.colors.mediumShade}
-                size="m"
-                data-test-subj="transformListProgress"
-              >
-                {progress}%
-              </EuiProgress>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+            {progress}%
+          </EuiProgress>
         );
       },
-      width: '170px',
+      width: '100px',
     },
     {
       name: (
