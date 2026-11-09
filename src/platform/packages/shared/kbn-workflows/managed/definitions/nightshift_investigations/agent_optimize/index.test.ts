@@ -63,7 +63,7 @@ describe('nightshift agent optimize workflow', () => {
     expect(properties.round_connector_id).toEqual(expect.objectContaining({ maxLength: 500 }));
   });
 
-  it('obtains one sandbox then optimizes cortex and memory in parallel with that id', () => {
+  it('obtains one sandbox then optimizes wiki and memory in parallel with that id', () => {
     expect(NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW.id).toBe(NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID);
     expect(workflow.name).toBe('Nightshift Agent Optimize');
     expect(workflow.description).toContain(
@@ -86,11 +86,11 @@ describe('nightshift agent optimize workflow', () => {
         mode: 'settled',
         branches: [
           expect.objectContaining({
-            name: 'cortex',
+            name: 'wiki',
             steps: [
               expect.objectContaining({
-                name: 'optimize_cortex',
-                type: 'nightshift.cortexOptimize',
+                name: 'optimize_wiki',
+                type: 'nightshift.wikiOptimize',
                 with: expect.objectContaining({
                   sandbox_id: '{{ steps.obtain_sandbox.output.sandbox_id }}',
                   connector_id: '{{ inputs.connector_id }}',
@@ -267,7 +267,7 @@ describe('nightshift agent optimize workflow', () => {
       .map((node) => (node as { stepId: string }).stepId);
     expect(atomicStepIds).toEqual([
       'obtain_sandbox',
-      'optimize_cortex',
+      'optimize_wiki',
       'optimize_memory',
       'prepare_turn',
       'resolve_model',

@@ -11,6 +11,8 @@ import {
   MAX_INTEGRATION_NAME_LENGTH,
   getDescriptionError,
   getIntegrationNameError,
+  getProxyUrlError,
+  MAX_PROXY_URL_LENGTH,
   supportsIntegrationSettings,
 } from './integration_settings';
 
@@ -58,5 +60,43 @@ describe('supportsIntegrationSettings', () => {
   it('is true when a service can be deployed as a policy', () => {
     expect(supportsIntegrationSettings(service(['ecf', 'managed_integration']))).toBe(true);
     expect(supportsIntegrationSettings(service(['agent_based']))).toBe(true);
+  });
+});
+
+describe('getProxyUrlError', () => {
+  it('accepts an empty value and http(s) URLs', () => {
+    expect(getProxyUrlError('')).toBeUndefined();
+    expect(getProxyUrlError('  ')).toBeUndefined();
+    expect(getProxyUrlError('http://proxy.local:3128')).toBeUndefined();
+    expect(getProxyUrlError('https://user:pass@proxy.local:8080')).toBeUndefined();
+    expect(getProxyUrlError('HTTP://proxy.local:3128')).toBeUndefined();
+    expect(getProxyUrlError('http://192.168.1.10:3128')).toBeUndefined();
+    expect(getProxyUrlError('  http://proxy.local:3128  ')).toBeUndefined();
+  });
+
+  it('rejects forms that new URL() repairs but the agent would receive unchanged', () => {
+    expect(getProxyUrlError('http:proxy.local:3128')).toBeDefined();
+    expect(getProxyUrlError('http:/proxy.local:3128')).toBeDefined();
+    expect(getProxyUrlError('http:///proxy.local:3128')).toBeDefined();
+    expect(getProxyUrlError('http:\\\\proxy.local:3128')).toBeDefined();
+    expect(getProxyUrlError('https:proxy.local')).toBeDefined();
+  });
+
+  it('rejects a URL without a host', () => {
+    expect(getProxyUrlError('http://')).toBeDefined();
+    expect(getProxyUrlError('https://:3128')).toBeDefined();
+    expect(getProxyUrlError('http://user@')).toBeDefined();
+    expect(getProxyUrlError('http:// proxy.local')).toBeDefined();
+  });
+
+  it('rejects other schemes and text that is not a URL', () => {
+    expect(getProxyUrlError('ftp://proxy.local')).toBeDefined();
+    expect(getProxyUrlError('not a url')).toBeDefined();
+    expect(getProxyUrlError('proxy.local:3128')).toBeDefined();
+  });
+
+  it('rejects a value longer than Fleet stores', () => {
+    const long = `http://${'a'.repeat(MAX_PROXY_URL_LENGTH)}`;
+    expect(getProxyUrlError(long)).toBeDefined();
   });
 });

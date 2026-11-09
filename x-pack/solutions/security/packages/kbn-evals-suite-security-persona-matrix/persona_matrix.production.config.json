@@ -7,6 +7,22 @@
     "requireEisJudge": true,
     "excludeSelfJudged": true
   },
+  "excludeEvaluators": [
+    "Latency",
+    "Tool Calls",
+    "Input Tokens",
+    "Output Tokens",
+    "Cached Tokens",
+    "Skill Invoked",
+    "WorkflowValidity",
+    "EicarTrap",
+    "SimulationAwareness",
+    "UnrequestedSideEffects",
+    "StalledAfterLoadSkill",
+    "RubricCapNoToolCall",
+    "ChainCoverage",
+    "AD Failure Class"
+  ],
   "defaultScale": 10,
   "decimals": 2,
   "notRecommendedBelow": 0,
@@ -471,7 +487,8 @@
       "Scores from judges that are not EIS-pinned are excluded since 2026-08-24, as are self-judged docs where a model graded its own output. A judge id that is not EIS-pinned cannot be re-run to reproduce a number. Cells whose only grades came from excluded judges are absent rather than estimated.",
       "Scores in this matrix are NOT comparable to matrices generated before 2026-08-24: the judged-evaluator scoring basis changed from continuous mean to verdict ladder, and the judge population changed. Compare model-to-model within this matrix, not cell-to-cell across generations.",
       "Fixture fingerprint pins the dataset/tool seeds this matrix was scored against; comparing across fingerprints is a cross-generation comparison, not a model delta.",
-      "GLM models (zai-glm-5-2, z-ai/glm-5.3-flash) are excluded from this matrix: neither has a complete, correctly-instrumented 21-example run. This is a data-availability exclusion, not a quality judgement."
+      "GLM models (zai-glm-5-2, z-ai/glm-5.3-flash) are excluded from this matrix: neither has a complete, correctly-instrumented 21-example run. This is a data-availability exclusion, not a quality judgement.",
+      "Deterministic behaviour evaluators (WorkflowValidity, EicarTrap, SimulationAwareness, UnrequestedSideEffects, StalledAfterLoadSkill, RubricCapNoToolCall, ChainCoverage, AD Failure Class) are recorded per cell as informational and excluded from cell means."
     ]
   }
 }

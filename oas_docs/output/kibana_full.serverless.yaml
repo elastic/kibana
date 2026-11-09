@@ -354,12 +354,24 @@ tags:
     description: |
       Data stream APIs enable you to manage data streams, which are collections of indices that share the same index template and are managed as a single unit for time-series data.
     x-displayName: Data streams
-  - description: Data view APIs enable you to manage data views, formerly known as Kibana index patterns.
+  - description: |
+      Data view APIs enable you to manage data views, formerly known as Kibana index patterns.
+
+      ## When to use this API
+
+      - Use this API for existing integrations and for partial updates, where you send only the properties to change.
+      - Use this API to manage individual fields and runtime fields, set the default data view, or swap references. The Data views v2 API doesn't support these tasks.
+      - To manage complete data view definitions as code, use the [Data views v2 API](../group/endpoint-data-views-v2).
     name: data views
     x-displayName: Data views
   - name: data-views-v2
     description: |
       Data view APIs enable you to manage data views, formerly known as Kibana index patterns. Use these endpoints to list, retrieve, create, replace, and delete data views with the as-code data view definition.
+
+      ## When to use this API
+
+      - Use this API to manage complete data view definitions as code. A `PUT` request creates the data view if it doesn't exist, or replaces its whole definition and removes any optional property you omit.
+      - For partial updates, or for integrations that use the existing format, use the [Data views API](../group/endpoint-data-views).
     x-displayName: Data views v2
   - name: Discover sessions
     description: |

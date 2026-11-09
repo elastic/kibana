@@ -44,7 +44,7 @@ export const degradeOnWriterFailure = ({
   error,
 }: {
   logger: { error: (message: string) => void };
-  /** What the log line calls this writer, e.g. `'Cortex hydrate'`. */
+  /** What the log line calls this writer, e.g. `'Wiki hydrate'`. */
   label: string;
   sandboxId: string;
   directory: string;
