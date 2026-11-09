@@ -329,6 +329,25 @@ const getSameIdDifferentCase = async (
   };
 };
 
+// Joins a source and a group in one TOP entry. Neither can contain it: it is outside the id and
+// source charsets the store writes.
+const SOURCE_GROUP_SEPARATOR = '\u241f';
+
+const parseGroupsBySource = (entries: string[]): Map<string, Set<string>> => {
+  const groupsBySource = new Map<string, Set<string>>();
+  for (const entry of entries) {
+    const at = entry.indexOf(SOURCE_GROUP_SEPARATOR);
+    if (at <= 0) {
+      continue;
+    }
+    const source = entry.slice(0, at);
+    const groups = groupsBySource.get(source) ?? new Set<string>();
+    groups.add(entry.slice(at + SOURCE_GROUP_SEPARATOR.length));
+    groupsBySource.set(source, groups);
+  }
+  return groupsBySource;
+};
+
 type SharedValuePair = NonNullable<
   EntityMetadataEventPayload['unlinkedDuplicates']['sameValueAcrossSources']
 >[number];
@@ -339,7 +358,8 @@ const getSharedValuePairs = async (
   field: (typeof SHARED_VALUE_FIELDS)[number],
   signal: AbortSignal
 ): Promise<SharedValuePair[]> => {
-  // TOP (not VALUES) bounds memory per value, like the resolution matcher query.
+  // The first STATS keeps one row per value, source and group, so the TOP that follows lists each
+  // source and group once. TOP (not VALUES) bounds memory per value, like the resolution matcher query.
   const rows = await esqlRows(
     esClient,
     `FROM ${index}
@@ -347,7 +367,8 @@ const getSharedValuePairs = async (
     | EVAL grp = COALESCE(${RESOLVED_TO_FIELD}, entity.id), v = TO_LOWER(${field})
     | MV_EXPAND ${SOURCE_FIELD}
     | MV_EXPAND v
-    | STATS srcs = COUNT_DISTINCT(${SOURCE_FIELD}), groups = COUNT_DISTINCT(grp), sources = TOP(${SOURCE_FIELD}, 100) BY v
+    | STATS BY v, ${SOURCE_FIELD}, grp
+    | STATS srcs = COUNT_DISTINCT(${SOURCE_FIELD}), sourceGroups = TOP(CONCAT(${SOURCE_FIELD}, "${SOURCE_GROUP_SEPARATOR}", grp), 100) BY v
     | WHERE srcs > 1
     | LIMIT ${SHARED_VALUE_ROW_LIMIT}`,
     signal
@@ -355,12 +376,15 @@ const getSharedValuePairs = async (
 
   const pairs = new Map<string, SharedValuePair>();
   for (const row of rows) {
-    const sources = [...new Set(asStrings(row.sources))]
-      .sort()
-      .slice(0, MAX_SOURCES_PER_VALUE_FOR_PAIRS);
-    const linked = asNumber(row.groups) === 1;
+    const groupsBySource = parseGroupsBySource(asStrings(row.sourceGroups));
+    const sources = [...groupsBySource.keys()].sort().slice(0, MAX_SOURCES_PER_VALUE_FOR_PAIRS);
     for (let i = 0; i < sources.length; i++) {
       for (let j = i + 1; j < sources.length; j++) {
+        // Two sources are linked for this value when one of their entities groups with the other's.
+        const groupsOfB = groupsBySource.get(sources[j]) ?? new Set<string>();
+        const linked = [...(groupsBySource.get(sources[i]) ?? [])].some((group) =>
+          groupsOfB.has(group)
+        );
         const key = `${sources[i]}\u0000${sources[j]}`;
         const pair = pairs.get(key) ?? {
           sourceA: sources[i],
