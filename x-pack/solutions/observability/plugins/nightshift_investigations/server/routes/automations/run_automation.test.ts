@@ -37,11 +37,10 @@ const yaml = generateWorkflowYaml({
   serviceAccountId: 'kibana/nightshift_automations',
 });
 const workflow = { id: 'wf-1', enabled: true, valid: true, yaml, definition: parse(yaml) };
-const call = (spaceId = 'default') => {
+const call = async (spaceId = 'default') => {
   const context = createRouteContext();
-  context.core.then(({ savedObjects }) =>
-    savedObjects.client.getCurrentNamespace.mockReturnValue(spaceId)
-  );
+  const { savedObjects } = await context.core;
+  savedObjects.client.getCurrentNamespace.mockReturnValue(spaceId);
   return handler({
     request: httpServerMock.createKibanaRequest(),
     params: params.parse({ path: { id: 'a1' }, body: null }),
