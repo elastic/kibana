@@ -42,8 +42,10 @@ export function UISettings({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseR
 
   async function handleSave() {
     try {
-      await saveAll();
-      window.location.reload();
+      const { requiresReload } = await saveAll();
+      if (requiresReload) {
+        window.location.reload();
+      }
     } catch (e) {
       const error = e as Error;
       notifications.toasts.addDanger({
