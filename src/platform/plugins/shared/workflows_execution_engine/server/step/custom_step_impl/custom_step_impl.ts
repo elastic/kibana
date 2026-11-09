@@ -63,7 +63,7 @@ export class CustomStepImpl
     }
 
     await this.stepHandler.onCancel(
-      this.getInput(),
+      await this.getInput(),
       this.node.configuration.with,
       this.getRenderedConfig()
     );
@@ -72,9 +72,9 @@ export class CustomStepImpl
   /**
    * Get and validate the input for this step
    */
-  public override getInput(): Record<string, unknown> {
+  public override getInput(): Promise<Record<string, unknown>> {
     const withData = this.node.configuration.with || {};
-    return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(withData);
+    return this.stepExecutionRuntime.contextManager.renderObjectAccordingToContextAsync(withData);
   }
 
   /**

@@ -61,6 +61,8 @@ const EcfStackSchema = schema.object({
   ),
   /** Stack-relevant settings per service when the stack was last launched or updated. Used for settings drift detection on session resume. */
   serviceConfigs: schema.maybe(schema.arrayOf(EcfServiceConfigSchema, { maxSize: 1000 })),
+  /** `DataStreamNamespace` the stack was last launched or updated with. Used for namespace drift detection on session resume. */
+  namespace: schema.maybe(schema.string({ minLength: 1, maxLength: 100 })),
 });
 
 const SharedFields = {
@@ -135,6 +137,41 @@ const PersistedInstanceSchema = schema.object({
 
 export const CloudOnboardingDeploymentSchemaV5 = CloudOnboardingDeploymentSchemaV4.extends({
   instances: schema.maybe(schema.arrayOf(PersistedInstanceSchema, { maxSize: 1000 })),
+});
+
+// ── V6: packageNames + serviceNames + updatedBy ──────────────────────────────
+// packageNames (and provider) are mapped as keyword so deployments can be listed per package.
+export const CloudOnboardingDeploymentSchemaV6 = CloudOnboardingDeploymentSchemaV5.extends({
+  packageNames: schema.maybe(schema.arrayOf(schema.string({ maxLength: 255 }), { maxSize: 100 })),
+  serviceNames: schema.maybe(
+    schema.recordOf(schema.string({ maxLength: 256 }), schema.string({ maxLength: 256 }))
+  ),
+  updatedBy: schema.maybe(schema.string({ maxLength: 1024 })),
+});
+
+// ── V7: policySettings ───────────────────────────────────────────────────────
+// Package policy settings shared by every policy of the deployment (e.g. output_id), kept as one
+// open record so a new setting needs no schema change. Not in mappings.properties (dynamic: false),
+// so no mapping change is needed.
+const POLICY_SETTINGS_MAX_KEYS = 20;
+
+// Bounded so the open record cannot store an arbitrary payload: package policy settings are short
+// strings, or null for one cleared back to its Fleet default.
+export const PolicySettingsRecordSchema = (meta?: { description: string; availability: object }) =>
+  schema.recordOf(
+    schema.string({ maxLength: 256 }),
+    schema.nullable(schema.string({ maxLength: 1024 })),
+    {
+      validate: (settings) =>
+        Object.keys(settings).length > POLICY_SETTINGS_MAX_KEYS
+          ? `must not have more than ${POLICY_SETTINGS_MAX_KEYS} settings`
+          : undefined,
+      ...(meta ? { meta } : {}),
+    }
+  );
+
+export const CloudOnboardingDeploymentSchemaV7 = CloudOnboardingDeploymentSchemaV6.extends({
+  policySettings: schema.maybe(PolicySettingsRecordSchema()),
 });
 
 // ── V1 ───────────────────────────────────────────────────────────────────────
