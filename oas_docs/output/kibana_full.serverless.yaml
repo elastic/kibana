@@ -351,12 +351,24 @@ tags:
     description: |
       Data stream APIs enable you to manage data streams, which are collections of indices that share the same index template and are managed as a single unit for time-series data.
     x-displayName: Data streams
-  - description: Data view APIs enable you to manage data views, formerly known as Kibana index patterns.
+  - description: |
+      Data view APIs enable you to manage data views, formerly known as Kibana index patterns.
+
+      ## When to use this API
+
+      - Use this API for existing integrations and for partial updates, where you send only the properties to change.
+      - Use this API to manage individual fields and runtime fields, set the default data view, or swap references. The Data views v2 API doesn't support these tasks.
+      - To manage complete data view definitions as code, use the [Data views v2 API](../group/endpoint-data-views-v2).
     name: data views
     x-displayName: Data views
   - name: data-views-v2
     description: |
       Data view APIs enable you to manage data views, formerly known as Kibana index patterns. Use these endpoints to list, retrieve, create, replace, and delete data views with the as-code data view definition.
+
+      ## When to use this API
+
+      - Use this API to manage complete data view definitions as code. A `PUT` request creates the data view if it doesn't exist, or replaces its whole definition and removes any optional property you omit.
+      - For partial updates, or for integrations that use the existing format, use the [Data views API](../group/endpoint-data-views).
     x-displayName: Data views v2
   - name: Discover sessions
     description: |
@@ -43940,6 +43952,13 @@ paths:
           schema:
             default: false
             type: boolean
+        - description: When true, include the pending restart action of each agent
+          in: query
+          name: withPendingRestart
+          required: false
+          schema:
+            default: false
+            type: boolean
         - description: When true, only return agents that are upgradeable
           in: query
           name: showUpgradeable
@@ -44222,6 +44241,19 @@ paths:
                             type: string
                           maxItems: 10000
                           type: array
+                        pending_restart:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            action_id:
+                              type: string
+                            created_at:
+                              type: string
+                            expiration:
+                              type: string
+                          required:
+                            - action_id
+                            - created_at
                         pipeline_config:
                           maxLength: 10000
                           type: string
@@ -44654,6 +44686,13 @@ paths:
           schema:
             default: false
             type: boolean
+        - description: When true, include the pending restart action of the agent
+          in: query
+          name: withPendingRestart
+          required: false
+          schema:
+            default: false
+            type: boolean
       responses:
         '200':
           content:
@@ -44888,6 +44927,19 @@ paths:
                           type: string
                         maxItems: 10000
                         type: array
+                      pending_restart:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          action_id:
+                            type: string
+                          created_at:
+                            type: string
+                          expiration:
+                            type: string
+                        required:
+                          - action_id
+                          - created_at
                       pipeline_config:
                         maxLength: 10000
                         type: string
@@ -45371,6 +45423,19 @@ paths:
                           type: string
                         maxItems: 10000
                         type: array
+                      pending_restart:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          action_id:
+                            type: string
+                          created_at:
+                            type: string
+                          expiration:
+                            type: string
+                        required:
+                          - action_id
+                          - created_at
                       pipeline_config:
                         maxLength: 10000
                         type: string
@@ -46322,7 +46387,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Restart an Elastic Agent. The request fails when the agent is inactive, on a version earlier than 9.6.0, or enrolled in a hosted agent policy.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
+        Restart an Elastic Agent. The request fails when the agent is inactive, on a version earlier than 9.6.0, or enrolled in a hosted agent policy. It also fails with a 409 when the agent already has a pending restart action, unless `force` is set.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
       operationId: post-fleet-agents-agentid-restart
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -46339,6 +46404,24 @@ paths:
           schema:
             maxLength: 512
             type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              forceRestartAgentRequest:
+                value:
+                  force: true
+              restartAgentRequest:
+                value: {}
+            schema:
+              additionalProperties: false
+              default: null
+              nullable: true
+              type: object
+              properties:
+                force:
+                  description: Restart the agent even if it already has a pending restart action.
+                  type: boolean
       responses:
         '200':
           content:
@@ -46378,6 +46461,34 @@ paths:
                   - message
                   - attributes
           description: A bad request.
+        '409':
+          content:
+            application/json:
+              examples:
+                pendingRestartResponse:
+                  value:
+                    error: Conflict
+                    message: Agent agent-1 already has a pending restart action a1b2c3d4-e5f6-7890-abcd-ef1234567890. Use force to restart anyway.
+                    statusCode: 409
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: 'A conflict occurred: the agent already has a pending restart action.'
       summary: Restart an agent
       tags:
         - Elastic Agent actions
@@ -47776,7 +47887,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Restart multiple Elastic Agents. Agents that are enrolled in a hosted policy or are on a version earlier than 9.6.0 are excluded from the action and receive individual error results.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
+        Restart multiple Elastic Agents. Agents that are enrolled in a hosted policy, are on a version earlier than 9.6.0, or already have a pending restart action (unless `force` is set) are excluded from the action and receive individual error results.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
       operationId: post-fleet-agents-bulk-restart
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -47813,6 +47924,9 @@ paths:
                 batchSize:
                   minimum: 1
                   type: number
+                force:
+                  description: Restart agents even if they already have a pending restart action.
+                  type: boolean
                 includeInactive:
                   default: false
                   type: boolean
@@ -81486,6 +81600,81 @@ paths:
             {
               "entityTypes": ["user", "host", "service", "generic"]
             }
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/security/entity_store/update_api_key:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/entity_store/update_api_key</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Replace the API key of every Entity Store background task with one owned by the user making this request, for example after the user who installed the Entity Store is removed. The tasks keep their schedules and state, and no entity data is changed. The user needs the same privileges as the install endpoint. Tasks that could not be updated are listed in `failed`; call the endpoint again to retry them.<br/><br/>[Required authorization] Route required privileges: securitySolution.
+      operationId: post-security-entity-store-update-api-key
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              updateApiKeyExample:
+                description: Re-grant the API key of every Entity Store task as the user making the request.
+                summary: Update the API key of the Entity Store tasks
+                value: {}
+            schema:
+              additionalProperties: false
+              type: object
+              properties: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                updateApiKeyPartialExample:
+                  description: Call the endpoint again to retry the tasks listed in `failed`.
+                  summary: Some tasks could not be updated
+                  value:
+                    failed:
+                      - id: entity_store:v2:status_report_task:default
+                        message: Version conflict
+                        statusCode: 409
+                    ok: false
+                    updated:
+                      - entity_store:v2:history_snapshot_task:default
+                updateApiKeySuccessExample:
+                  description: Every Entity Store task now runs with an API key owned by the caller.
+                  summary: All tasks updated
+                  value:
+                    failed: []
+                    ok: true
+                    updated:
+                      - entity_store:v2:history_snapshot_task:default
+                      - entity_store:v2:status_report_task:default
+          description: Indicates that the request was processed. Check `ok` and `failed` to see whether every task was updated.
+      summary: Update the API key of the Entity Store tasks
+      tags:
+        - Security entity store
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl -X POST -H "kbn-xsrf: true" -H "Authorization: ApiKey ${API_KEY}" \
+              -H "Content-Type: application/json" \
+              -d '{}' \
+              "${KIBANA_URL}/api/security/entity_store/update_api_key"
+        - lang: Console
+          source: |
+            POST kbn://api/security/entity_store/update_api_key
+            {}
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -140522,7 +140711,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create a copy of an existing workflow.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:create AND workflowsManagement:read.
+        Create a copy of an existing workflow.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:create AND workflowsManagement:read. Extended privileges (optional, expand functionality when granted): workflowsManagement:managed:read.
       operationId: post-workflows-workflow-id-clone
       parameters:
         - description: A required header to protect against CSRF attacks

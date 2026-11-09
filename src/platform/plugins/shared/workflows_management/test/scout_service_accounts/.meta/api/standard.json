@@ -1,5 +1,5 @@
 {
-  "sha1": "ebeebe7348bf60f411743fa9e53eb55b82c85eab",
+  "sha1": "fb4544fbfad6ba2ffcce2e648e38662b5335c2f5",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -635,6 +635,20 @@
       }
     },
     {
+      "id": "de4adc7eaf2d461-60e2d68c7d018b3",
+      "title": "[NON-MKI] Workflow service accounts: resume reports a resume identity failure to Task Manager as a user error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_resume.spec.ts",
+        "line": 89,
+        "column": 13
+      }
+    },
+    {
       "id": "de4adc7eaf2d461-c9a7ffbcf5c5b73",
       "title": "[NON-MKI] Workflow service accounts: resume SA continuation audit: timer retains the bound identity",
       "expectedStatus": "passed",
@@ -644,8 +658,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_resume.spec.ts",
-        "line": 89,
-        "column": 55
+        "line": 122,
+        "column": 15
       }
     },
     {
@@ -658,8 +672,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_resume.spec.ts",
-        "line": 89,
-        "column": 55
+        "line": 122,
+        "column": 15
       }
     },
     {
