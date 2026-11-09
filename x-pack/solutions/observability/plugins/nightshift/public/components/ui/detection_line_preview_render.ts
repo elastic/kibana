@@ -129,16 +129,29 @@ export type DetectionLinePalette = {
   grid: string;
   dotFill: string;
   px: number;
+  /** Corner radius in CSS px (from an EUI `border.radius.*` token). */
+  cornerRadiusPx: number;
   line: LineColors;
 };
 
-/** Chart line thickness on screen (CSS px). */
-const LINE_PX = 2;
-/** Background outline thickness on screen (CSS px) — matches the radar's outer ring. */
-const OUTLINE_PX = 1;
+/**
+ * Prototype banner media width — used to freeze dot radii to the on-screen size
+ * they had at that layout, independent of the current media scale.
+ */
+const PROTOTYPE_MEDIA_WIDTH_PX = 261;
 
-/** Corner radius of the tinted background (artboard units ≈ 8px in the banner). */
-const BG_RADIUS = 14;
+/** Stroke widths locked in CSS px (converted via `palette.px`). */
+const GRID_LINE_CSS_PX = 1;
+const OUTLINE_CSS_PX = 1;
+const CHART_LINE_CSS_PX = 2;
+const CHART_GLOW_CSS_PX = CHART_LINE_CSS_PX * 3.1;
+const DOT_BORDER_CSS_PX = 2;
+/** Prototype artboard radii 6 / 12 at {@link PROTOTYPE_MEDIA_WIDTH_PX}. */
+const DOT_CORE_CSS_PX = (6 * PROTOTYPE_MEDIA_WIDTH_PX) / DETECTION_LINE_ARTBOARD_WIDTH;
+const DOT_HALO_CSS_PX = (12 * PROTOTYPE_MEDIA_WIDTH_PX) / DETECTION_LINE_ARTBOARD_WIDTH;
+/** Prototype grid dash (artboard 0.1 / 6) at the same reference width. */
+const GRID_DASH_CSS_PX = (0.1 * PROTOTYPE_MEDIA_WIDTH_PX) / DETECTION_LINE_ARTBOARD_WIDTH;
+const GRID_GAP_CSS_PX = (6 * PROTOTYPE_MEDIA_WIDTH_PX) / DETECTION_LINE_ARTBOARD_WIDTH;
 
 function roundedRectPath(
   c: CanvasRenderingContext2D,
@@ -199,25 +212,29 @@ export function renderDetectionLineAt(
   }
   const M = pts.length;
 
+  /** Convert a CSS-px length into artboard units for the current display scale. */
+  const u = (cssPx: number) => cssPx * palette.px;
+  const cornerR = u(palette.cornerRadiusPx);
   const bg = ctx.createLinearGradient(L, 0, R, 0);
   pts.forEach((p) => bg.addColorStop(p.s, rgba(p.col, 0.08 + 0.02 * smooth(0.03, 0.4, p.c))));
   ctx.fillStyle = bg;
-  roundedRectPath(ctx, L, top, cw, CH, BG_RADIUS);
+  roundedRectPath(ctx, L, top, cw, CH, cornerR);
   ctx.fill();
 
   const outline = ctx.createLinearGradient(L, 0, R, 0);
   pts.forEach((p) => outline.addColorStop(p.s, rgba(p.col, 0.28)));
-  const half = (OUTLINE_PX * palette.px) / 2;
+  const outlineWidth = u(OUTLINE_CSS_PX);
+  const half = outlineWidth / 2;
   ctx.strokeStyle = outline;
-  ctx.lineWidth = OUTLINE_PX * palette.px;
-  roundedRectPath(ctx, L + half, top + half, cw - half * 2, CH - half * 2, BG_RADIUS);
+  ctx.lineWidth = outlineWidth;
+  roundedRectPath(ctx, L + half, top + half, cw - half * 2, CH - half * 2, cornerR);
   ctx.stroke();
 
   ctx.save();
   ctx.strokeStyle = palette.grid;
-  ctx.lineWidth = 2.1;
+  ctx.lineWidth = u(GRID_LINE_CSS_PX);
   ctx.lineCap = 'round';
-  ctx.setLineDash([0.1, 6]);
+  ctx.setLineDash([u(GRID_DASH_CSS_PX), u(GRID_GAP_CSS_PX)]);
   ctx.beginPath();
   [1 / 4, 2 / 4, 3 / 4].forEach((fraction) => {
     const y = top + CH * fraction;
@@ -241,7 +258,7 @@ export function renderDetectionLineAt(
   };
 
   ctx.save();
-  roundedRectPath(ctx, L, top, HX - L, CH, BG_RADIUS);
+  roundedRectPath(ctx, L, top, HX - L, CH, cornerR);
   ctx.clip();
 
   const oy = top - 5;
@@ -276,10 +293,10 @@ export function renderDetectionLineAt(
   ctx.beginPath();
   curve(ctx, 0);
   ctx.strokeStyle = glow;
-  ctx.lineWidth = LINE_PX * 3.1 * palette.px;
+  ctx.lineWidth = u(CHART_GLOW_CSS_PX);
   ctx.stroke();
   ctx.strokeStyle = lg;
-  ctx.lineWidth = LINE_PX * palette.px;
+  ctx.lineWidth = u(CHART_LINE_CSS_PX);
   ctx.stroke();
   ctx.restore();
 
@@ -293,20 +310,23 @@ export function renderDetectionLineAt(
       Y: (pts[i]!.Y + pts[i + 1]!.Y) / 2,
     };
     if (HX < A.X || HX > B.X) continue;
-    const u = (HX - A.X) / (B.X - A.X);
-    const y = (1 - u) * (1 - u) * A.Y + 2 * u * (1 - u) * pts[i]!.Y + u * u * B.Y;
+    const tAlong = (HX - A.X) / (B.X - A.X);
+    const y =
+      (1 - tAlong) * (1 - tAlong) * A.Y +
+      2 * tAlong * (1 - tAlong) * pts[i]!.Y +
+      tAlong * tAlong * B.Y;
     const lo = pts[i]!.X <= HX ? i : i - 1;
     const f = (HX - pts[lo]!.X) / (pts[lo + 1]!.X - pts[lo]!.X);
     const col = colorFor(pts[lo]!.c + (pts[lo + 1]!.c - pts[lo]!.c) * f, palette.line);
     ctx.fillStyle = rgba(col, 0.18);
     ctx.beginPath();
-    ctx.arc(HX, y, 12, 0, TAU);
+    ctx.arc(HX, y, u(DOT_HALO_CSS_PX), 0, TAU);
     ctx.fill();
     ctx.fillStyle = palette.dotFill;
     ctx.strokeStyle = rgba(col, 1);
-    ctx.lineWidth = 3;
+    ctx.lineWidth = u(DOT_BORDER_CSS_PX);
     ctx.beginPath();
-    ctx.arc(HX, y, 6, 0, TAU);
+    ctx.arc(HX, y, u(DOT_CORE_CSS_PX), 0, TAU);
     ctx.fill();
     ctx.stroke();
     break;

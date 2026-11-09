@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { css, type SerializedStyles } from '@emotion/react';
+import { css } from '@emotion/react';
 import { hexToRgb, useEuiTheme } from '@elastic/eui';
 import React, { useEffect, useRef } from 'react';
 import {
   DETECTION_LINE_ARTBOARD_WIDTH,
-  DETECTION_LINE_BLEED_ASPECT,
   DETECTION_LINE_CHART_HEIGHT,
   DETECTION_LINE_PLAYBACK,
   DETECTION_LINE_STATIC_FRAME_S,
@@ -18,22 +17,6 @@ import {
   renderDetectionLineAt,
   type DetectionLinePalette,
 } from './detection_line_preview_render';
-
-export { DETECTION_LINE_BLEED_ASPECT };
-
-/** Matches the prototype setup-detections media column (`BlankIntroBanner`). */
-export const DETECTION_SETUP_BANNER_MEDIA_WIDTH_PX = 261;
-
-/** EuiBanner `.euiBanner__media` overrides for the landscape detection chart. */
-export const detectionSetupBannerMediaCss: SerializedStyles = css`
-  .euiBanner__media {
-    --euiBannerMediaSize: unset;
-    inline-size: ${DETECTION_SETUP_BANNER_MEDIA_WIDTH_PX}px;
-    block-size: auto;
-    aspect-ratio: ${DETECTION_LINE_BLEED_ASPECT};
-    align-self: flex-start;
-  }
-`;
 
 type Rgb = readonly [number, number, number];
 
@@ -65,6 +48,7 @@ export function DetectionLinePreview({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gridColor = euiTheme.colors.borderBaseProminent;
   const dotFill = euiTheme.colors.backgroundBasePlain;
+  const cornerRadiusPx = Number.parseFloat(euiTheme.border.radius.small);
   const teal = euiTheme.colors.vis.euiColorVis0;
   const blue = euiTheme.colors.vis.euiColorVis2;
   const pink = euiTheme.colors.vis.euiColorVis4;
@@ -91,7 +75,8 @@ export function DetectionLinePreview({
     const palette: DetectionLinePalette = {
       grid: gridColor,
       dotFill,
-      px: DETECTION_LINE_ARTBOARD_WIDTH / DETECTION_SETUP_BANNER_MEDIA_WIDTH_PX,
+      px: 1,
+      cornerRadiusPx: Number.isFinite(cornerRadiusPx) ? cornerRadiusPx : 4,
       line: {
         teal: themeColorToRgb(teal, FALLBACK_TEAL),
         blue: themeColorToRgb(blue, FALLBACK_BLUE),
@@ -110,12 +95,42 @@ export function DetectionLinePreview({
       }
     };
 
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     let frame = 0;
-    const t0 = performance.now();
+    let t0 = performance.now();
+    let reducedMotion = motionQuery.matches;
 
     const draw = (time = DETECTION_LINE_STATIC_FRAME_S) => {
       renderDetectionLineAt(ctx, octx, off, dpr, palette, time);
+    };
+
+    const stopLoop = () => {
+      if (frame !== 0) {
+        window.cancelAnimationFrame(frame);
+        frame = 0;
+      }
+    };
+
+    const loop = (now: number) => {
+      draw(((now - t0) / 1000) * DETECTION_LINE_PLAYBACK);
+      frame = window.requestAnimationFrame(loop);
+    };
+
+    const startLoop = () => {
+      stopLoop();
+      t0 = performance.now();
+      frame = window.requestAnimationFrame(loop);
+    };
+
+    const syncMotionPreference = () => {
+      measure();
+      reducedMotion = motionQuery.matches;
+      if (reducedMotion) {
+        stopLoop();
+        draw();
+        return;
+      }
+      startLoop();
     };
 
     const onResize = () => {
@@ -128,24 +143,15 @@ export function DetectionLinePreview({
     measure();
     const observer = new ResizeObserver(onResize);
     observer.observe(canvas);
+    motionQuery.addEventListener('change', syncMotionPreference);
+    syncMotionPreference();
 
-    if (reducedMotion) {
-      draw();
-      return () => {
-        observer.disconnect();
-      };
-    }
-
-    const loop = (now: number) => {
-      draw(((now - t0) / 1000) * DETECTION_LINE_PLAYBACK);
-      frame = window.requestAnimationFrame(loop);
-    };
-    frame = window.requestAnimationFrame(loop);
     return () => {
-      window.cancelAnimationFrame(frame);
+      stopLoop();
       observer.disconnect();
+      motionQuery.removeEventListener('change', syncMotionPreference);
     };
-  }, [blue, dotFill, gridColor, pink, teal]);
+  }, [blue, cornerRadiusPx, dotFill, gridColor, pink, teal]);
 
   return (
     <div

@@ -56,10 +56,11 @@ export const LinkedRulesCallout = ({ workflowCount, data, isError }: LinkedRules
     );
   }
 
-  if (!data || data.total === 0) {
+  if (!data || data.total + data.hiddenTotal === 0) {
     return null;
   }
 
+  const { hiddenTotal } = data;
   const moreCount = data.total - data.rules.length;
 
   return (
@@ -68,7 +69,7 @@ export const LinkedRulesCallout = ({ workflowCount, data, isError }: LinkedRules
       title={i18n.translate('workflows.linkedRules.title', {
         defaultMessage:
           '{total, plural, one {# alerting rule runs} other {# alerting rules run}} {workflowCount, plural, one {this workflow} other {these workflows}}',
-        values: { total: data.total, workflowCount },
+        values: { total: data.total + hiddenTotal, workflowCount },
       })}
       text={i18n.translate('workflows.linkedRules.message', {
         defaultMessage:
@@ -77,20 +78,31 @@ export const LinkedRulesCallout = ({ workflowCount, data, isError }: LinkedRules
       })}
       data-test-subj="workflowLinkedRulesCallout"
     >
-      <ul>
-        {data.rules.map((rule) => (
-          <li key={rule.id}>
-            <EuiLink href={getRuleHref(application, rule)} target="_blank">
-              {rule.name}
-            </EuiLink>
-          </li>
-        ))}
-      </ul>
+      {data.rules.length > 0 && (
+        <ul>
+          {data.rules.map((rule) => (
+            <li key={rule.id}>
+              <EuiLink href={getRuleHref(application, rule)} target="_blank">
+                {rule.name}
+              </EuiLink>
+            </li>
+          ))}
+        </ul>
+      )}
       {moreCount > 0 && (
         <p>
           {i18n.translate('workflows.linkedRules.moreRules', {
             defaultMessage: 'And {moreCount} more.',
             values: { moreCount },
+          })}
+        </p>
+      )}
+      {hiddenTotal > 0 && (
+        <p data-test-subj="workflowLinkedRulesHidden">
+          {i18n.translate('workflows.linkedRules.hiddenRules', {
+            defaultMessage:
+              '{hiddenTotal, plural, one {# rule is} other {# rules are}} not visible to you.',
+            values: { hiddenTotal },
           })}
         </p>
       )}
