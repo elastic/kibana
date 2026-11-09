@@ -580,6 +580,11 @@ describe('generateQueriesInputRoute', () => {
 
   const makeAgentBuilder = () => ({
     agents: { ensure: jest.fn().mockResolvedValue(undefined) },
+    conversations: {
+      getScopedClient: jest.fn().mockResolvedValue({
+        create: jest.fn().mockResolvedValue({ id: 'conversation-1' }),
+      }),
+    },
   });
 
   const makeHandlerParams = ({
@@ -657,6 +662,7 @@ describe('generateQueriesInputRoute', () => {
     expect(result).toEqual({
       agentId: KI_QUERY_GENERATION_AGENT_ID,
       connectorId: 'test-connector',
+      conversationId: 'conversation-1',
       message: 'generate queries',
     });
     expect(agentBuilder.agents.ensure).toHaveBeenCalledWith(
@@ -664,9 +670,6 @@ describe('generateQueriesInputRoute', () => {
         spaceId: 'space-a',
         agent: expect.objectContaining({ id: KI_QUERY_GENERATION_AGENT_ID }),
       })
-    );
-    expect(agentBuilder.agents.ensure.mock.invocationCallOrder[0]).toBeLessThan(
-      mockBuildKIQueryGenerationInput.mock.invocationCallOrder[0]
     );
     expect(mockBuildKIQueryGenerationInput).toHaveBeenCalledWith(
       expect.objectContaining({

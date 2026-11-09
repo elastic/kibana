@@ -32,6 +32,7 @@ import {
   FEATURE_IDENTIFICATION_AGENT_ID,
   installFeatureIdentificationAgent,
 } from '../../../../agent_builder/agents/feature_identification';
+import { createAgentConversation } from '../../../../lib/significant_events/create_agent_conversation';
 import { FeatureNotEnabledError } from '../../../../lib/errors/feature_not_enabled_error';
 import { createSignificantEventsAvailability } from '../../../../agent_builder/tools/significant_events_availability';
 
@@ -162,7 +163,12 @@ const identifyInferredFeaturesInputRoute = createServerRoute({
     server,
     logger,
     maintenanceService,
-  }): Promise<{ agentId: string; connectorId: string; message: string }> => {
+  }): Promise<{
+    agentId: string;
+    connectorId: string;
+    conversationId: string;
+    message: string;
+  }> => {
     const scopedClients = await getScopedClients({ request });
     const { sourcesClient, licensing } = scopedClients;
 
@@ -208,7 +214,14 @@ const identifyInferredFeaturesInputRoute = createServerRoute({
       tuning,
     });
 
-    return { agentId: FEATURE_IDENTIFICATION_AGENT_ID, connectorId, message };
+    const conversationId = await createAgentConversation({
+      agentBuilder: server.agentBuilder,
+      request,
+      agentId: FEATURE_IDENTIFICATION_AGENT_ID,
+      title: `Feature identification: ${source.id}`,
+    });
+
+    return { agentId: FEATURE_IDENTIFICATION_AGENT_ID, connectorId, conversationId, message };
   },
 });
 
@@ -229,8 +242,8 @@ const identifyInferredFeaturesRoute = createServerRoute({
       path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
       body: z.object({
         connectorId: z.string().max(MAX_ID_LENGTH),
-        /** Conversation the `ai.agent` step stored. Absent or empty when the step failed. */
-        conversationId: z.string().max(MAX_ID_LENGTH).nullish(),
+        /** Conversation the `ai.agent` step ran in, as returned by `_identify/inferred/input`. */
+        conversationId: z.string().max(MAX_ID_LENGTH),
         runId: z.string().max(MAX_ID_LENGTH).optional(),
         iteration: z.number().optional(),
         documents: inferenceDocumentsSchema,
@@ -274,11 +287,18 @@ const identifyInferredFeaturesRoute = createServerRoute({
     const { source } = await sourcesClient.get(sourceId);
     const kiClient = await scopedClients.getKnowledgeIndicatorClient(source);
 
-    const agentConversation = conversationId
-      ? await (
-          await server.agentBuilder.conversations.getScopedClient({ request })
-        ).get(conversationId)
-      : undefined;
+    // An unreadable conversation is a failed agent run like any other, not a failed workflow.
+    const agentConversation = await server.agentBuilder.conversations
+      .getScopedClient({ request })
+      .then((client) => client.get(conversationId))
+      .catch((error) => {
+        routeLogger.warn(
+          `Could not read conversation [${conversationId}] of the feature identification agent: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+        return undefined;
+      });
 
     try {
       const result = await identifyInferredFeatures({

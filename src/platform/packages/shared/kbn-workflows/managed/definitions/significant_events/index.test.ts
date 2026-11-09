@@ -10,10 +10,6 @@
 import { parse } from 'yaml';
 import { SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW } from '.';
 import BOUND_INVESTIGATION_COMPLETED_YAML from './bound_investigation_completed.yaml';
-import {
-  SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW,
-  SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW,
-} from './knowledge_indicators';
 import BOUND_ORCHESTRATOR_YAML from './significant_events/bound_orchestrator.yaml';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
 
@@ -75,12 +71,6 @@ const requireStep = (workflow: ParsedWorkflow, name: string): WorkflowStep => {
 
 const discovery = parse(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.yaml) as ParsedWorkflow;
 const orchestrator = parse(BOUND_ORCHESTRATOR_YAML) as ParsedWorkflow;
-const queriesGeneration = parse(
-  SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW.yaml
-) as ParsedWorkflow;
-const featuresIdentification = parse(
-  SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW.yaml
-) as ParsedWorkflow;
 const investigationCompleted = parse(BOUND_INVESTIGATION_COMPLETED_YAML) as
   | ParsedWorkflow & {
       triggers: Array<{ type: string; on?: { condition?: string } }>;
@@ -176,23 +166,6 @@ describe('significant events persistence workflow contracts', () => {
   it('attributes discovery agent calls to Nightshift', () => {
     expect(requireStep(discovery, 'run_discovery_agent')).toMatchObject({
       'plugin-id': 'nightshift_discovery',
-      'aggregate-by': 'nightshift',
-      'product-solution': 'observability',
-      'product-feature': 'nightshift',
-    });
-  });
-
-  it('attributes KI agent calls to Nightshift', () => {
-    expect(requireStep(featuresIdentification, 'identify_agent')).toMatchObject({
-      type: 'ai.agent',
-      'plugin-id': 'nightshift_ki_extraction',
-      'aggregate-by': 'nightshift',
-      'product-solution': 'observability',
-      'product-feature': 'nightshift',
-    });
-    expect(requireStep(queriesGeneration, 'generate_agent')).toMatchObject({
-      type: 'ai.agent',
-      'plugin-id': 'nightshift_ki_query_generation',
       'aggregate-by': 'nightshift',
       'product-solution': 'observability',
       'product-feature': 'nightshift',

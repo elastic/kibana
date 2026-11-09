@@ -173,12 +173,11 @@ steps:
         aggregate-by: "nightshift"
         product-solution: "observability"
         product-feature: "nightshift"
-        create-conversation: true
-        public-conversation: true
         timeout: "10m"
         on-failure:
           continue: true
         with:
+          conversation_id: "${{ steps.build_agent_input.output.conversationId }}"
           message: "${{ steps.build_agent_input.output.message }}"
 
       # 2e: Reconcile the agent's result with the known features and persist it.
@@ -192,7 +191,7 @@ steps:
             x-nightshift-source-revision: "{{ inputs.sourceRevision }}"
           body:
             connectorId: "${{ steps.build_agent_input.output.connectorId }}"
-            conversationId: "${{ steps.identify_agent.output.conversation_id }}"
+            conversationId: "${{ steps.build_agent_input.output.conversationId }}"
             runId: "${{ execution.id }}"
             iteration: "${{ variables.iterationResults.size | plus: 1 }}"
             documents: "${{ steps.prepare.output.documents }}"

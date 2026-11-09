@@ -36,6 +36,7 @@ import {
   installKIQueryGenerationAgent,
 } from '../../../../agent_builder/agents/ki_query_generation';
 import { createSignificantEventsAvailability } from '../../../../agent_builder/tools/significant_events_availability';
+import { createAgentConversation } from '../../../../lib/significant_events/create_agent_conversation';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { assertNotPaused } from '../../../utils/assert_not_paused';
@@ -529,7 +530,12 @@ const generateQueriesInputRoute = createServerRoute({
     server,
     maintenanceService,
     logger,
-  }): Promise<{ agentId: string; connectorId: string; message: string }> => {
+  }): Promise<{
+    agentId: string;
+    connectorId: string;
+    conversationId: string;
+    message: string;
+  }> => {
     const scopedClients = await getScopedClients({ request });
     const { sourcesClient, licensing } = scopedClients;
 
@@ -574,7 +580,14 @@ const generateQueriesInputRoute = createServerRoute({
       }
     );
 
-    return { agentId: KI_QUERY_GENERATION_AGENT_ID, ...input };
+    const conversationId = await createAgentConversation({
+      agentBuilder: server.agentBuilder,
+      request,
+      agentId: KI_QUERY_GENERATION_AGENT_ID,
+      title: `KI query generation: ${source.slug}`,
+    });
+
+    return { agentId: KI_QUERY_GENERATION_AGENT_ID, conversationId, ...input };
   },
 });
 
@@ -593,7 +606,9 @@ const generateQueriesRoute = createServerRoute({
         conversationId: z
           .string()
           .max(MAX_ID_LENGTH)
-          .describe('The conversation the `ai.agent` step stored for the agent run.'),
+          .describe(
+            'The conversation the `ai.agent` step ran in, as returned by `_generate/input`.'
+          ),
       }),
     })
   ),

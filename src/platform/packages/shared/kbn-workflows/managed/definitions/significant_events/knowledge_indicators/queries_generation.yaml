@@ -80,8 +80,6 @@ steps:
     aggregate-by: "nightshift"
     product-solution: "observability"
     product-feature: "nightshift"
-    create-conversation: true
-    public-conversation: true
     timeout: "5m"
     on-failure:
       retry:
@@ -89,6 +87,7 @@ steps:
         delay: "5s"
         strategy: exponential
     with:
+      conversation_id: "${{ steps.build_agent_input.output.conversationId }}"
       message: "${{ steps.build_agent_input.output.message }}"
   # -----------------------------------------------------------------------
   # Step 3: Read the queries the agent finalized from its conversation.
@@ -103,7 +102,7 @@ steps:
         x-nightshift-source-revision: "{{ inputs.sourceRevision }}"
       body:
         connectorId: "${{ steps.build_agent_input.output.connectorId }}"
-        conversationId: "${{ steps.generate_agent.output.conversation_id }}"
+        conversationId: "${{ steps.build_agent_input.output.conversationId }}"
     on-failure:
       retry:
         max-attempts: 3

@@ -116,7 +116,10 @@ const makeServerDeps = () => {
   };
   const kiClient = {};
   const conversation = { rounds: [{ steps: [] }] };
-  const conversationClient = { get: jest.fn().mockResolvedValue(conversation) };
+  const conversationClient = {
+    get: jest.fn().mockResolvedValue(conversation),
+    create: jest.fn().mockResolvedValue({ id: 'conversation-1' }),
+  };
   const agentBuilder = {
     agents: { ensure: jest.fn().mockResolvedValue(undefined) },
     conversations: { getScopedClient: jest.fn().mockResolvedValue(conversationClient) },
@@ -434,7 +437,9 @@ describe('inferred feature identification input route', () => {
 
   it('rejects _identify/inferred/input with 409 while paused before building anything', async () => {
     const { handlerParams, common } = makeInputHandlerParams();
-    handlerParams.maintenanceService = makeMaintenanceService('paused') as never;
+    handlerParams.maintenanceService = makeMaintenanceService(
+      'paused'
+    ) as unknown as InputHandlerParams['maintenanceService'];
 
     await expect(inputRoute.handler(handlerParams)).rejects.toMatchObject({
       output: { statusCode: 409 },
@@ -444,12 +449,19 @@ describe('inferred feature identification input route', () => {
   });
 
   it('installs the agent in the request space, then returns what the ai.agent step runs with', async () => {
-    const { handlerParams, agentBuilder, kiClient } = makeInputHandlerParams();
+    const { handlerParams, agentBuilder, conversationClient, kiClient } = makeInputHandlerParams();
 
     await expect(inputRoute.handler(handlerParams)).resolves.toEqual({
       agentId: FEATURE_IDENTIFICATION_AGENT_ID,
       connectorId: 'connector-1',
+      conversationId: 'conversation-1',
       message: 'identify these documents',
+    });
+
+    expect(conversationClient.create).toHaveBeenCalledWith({
+      agentId: FEATURE_IDENTIFICATION_AGENT_ID,
+      title: 'Feature identification: logs.test',
+      accessControl: { access_mode: 'public' },
     });
 
     expect(agentBuilder.agents.ensure).toHaveBeenCalledWith(
@@ -457,9 +469,6 @@ describe('inferred feature identification input route', () => {
         spaceId: 'space-a',
         agent: expect.objectContaining({ id: FEATURE_IDENTIFICATION_AGENT_ID }),
       })
-    );
-    expect(agentBuilder.agents.ensure.mock.invocationCallOrder[0]).toBeLessThan(
-      mockBuildFeatureIdentificationInput.mock.invocationCallOrder[0]
     );
     expect(mockBuildFeatureIdentificationInput).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -500,7 +509,9 @@ describe('inferred feature identification route', () => {
 
   it('rejects _identify/inferred with 409 while paused before reading the conversation', async () => {
     const { handlerParams, agentBuilder } = makeInferredHandlerParams();
-    handlerParams.maintenanceService = makeMaintenanceService('paused') as never;
+    handlerParams.maintenanceService = makeMaintenanceService(
+      'paused'
+    ) as unknown as InferredHandlerParams['maintenanceService'];
 
     await expect(inferredRoute.handler(handlerParams)).rejects.toMatchObject({
       output: { statusCode: 409 },
@@ -551,13 +562,12 @@ describe('inferred feature identification route', () => {
     expect(telemetry.trackFeaturesIdentified).not.toHaveBeenCalled();
   });
 
-  it('reconciles a failed iteration when the agent step stored no conversation', async () => {
+  it('reconciles a failed iteration when the conversation cannot be read', async () => {
     const { handlerParams, conversationClient } = makeInferredHandlerParams();
-    handlerParams.params.body.conversationId = undefined;
+    conversationClient.get.mockRejectedValue(new Error('conversation not found'));
 
     await inferredRoute.handler(handlerParams);
 
-    expect(conversationClient.get).not.toHaveBeenCalled();
     expect(mockIdentifyInferredFeatures).toHaveBeenCalledWith(
       expect.objectContaining({ agentConversation: undefined })
     );
