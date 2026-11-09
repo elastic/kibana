@@ -167,7 +167,7 @@ export class AgentBuilderPlugin
       type: AGENT_WORKLOAD_TYPE,
       name: 'Agent',
       description: 'Agent Builder agent that runs every conversation as the bound service account',
-      resolveWorkloads: async (workloads) => {
+      resolveWorkloads: async (workloads, { signal }) => {
         const [coreStart] = await coreSetup.getStartServices();
         return resolveAgentWorkloads({
           storage: createAgentStorage({
@@ -175,6 +175,7 @@ export class AgentBuilderPlugin
             esClient: coreStart.elasticsearch.client.asInternalUser,
           }),
           workloads,
+          signal,
         });
       },
     });

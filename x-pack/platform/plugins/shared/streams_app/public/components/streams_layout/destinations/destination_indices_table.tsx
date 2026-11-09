@@ -51,6 +51,7 @@ import {
 } from '../../stream_list_view/translations';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useTimeRange } from '../../../hooks/use_time_range';
+import { useUnitId } from '../../../hooks/use_unit_id';
 import { SourceFilter, type SourceFilterOption } from '../sources/source_filter';
 import {
   buildDestinationIndexRows,
@@ -171,6 +172,7 @@ export const DestinationIndicesTable = ({
 }: DestinationIndicesTableProps) => {
   const router = useStreamsAppRouter();
   const { rangeFrom, rangeTo } = useTimeRange();
+  const unitId = useUnitId();
   const viewerId = useGeneratedHtmlId({ prefix: 'destinationIndicesTable' });
   const { stats, status: statsStatus } = useDestinationIndexStats(destinationDetailRef);
   const [query, setQuery] = useState('');
@@ -211,9 +213,9 @@ export const DestinationIndicesTable = ({
 
   const columns = useMemo<Array<EuiBasicTableColumn<DestinationIndexRow>>>(() => {
     const indexLinkProps = (indexName: string, tab: 'overview' | 'quality') => ({
-      href: router.link('/new-experience/indices/{indexName}/{tab}', {
+      href: router.link('/v2/indices/{indexName}/{tab}', {
         path: { indexName, tab },
-        query: { rangeFrom, rangeTo },
+        query: { rangeFrom, rangeTo, unitId },
       }),
       onClick: (event: React.MouseEvent) => {
         if (isModifiedClick(event)) {
@@ -224,9 +226,9 @@ export const DestinationIndicesTable = ({
           onIndexClick(indexName);
           return;
         }
-        router.push('/new-experience/indices/{indexName}/{tab}', {
+        router.push('/v2/indices/{indexName}/{tab}', {
           path: { indexName, tab },
-          query: { rangeFrom, rangeTo },
+          query: { rangeFrom, rangeTo, unitId },
         });
       },
     });
@@ -393,7 +395,7 @@ export const DestinationIndicesTable = ({
           ),
       },
     ];
-  }, [isStatsFailed, isStatsLoading, onIndexClick, rangeFrom, rangeTo, router]);
+  }, [isStatsFailed, isStatsLoading, onIndexClick, rangeFrom, rangeTo, router, unitId]);
 
   const onTableChange = ({ sort: nextSort, page }: CriteriaWithPagination<DestinationIndexRow>) => {
     if (nextSort) {
