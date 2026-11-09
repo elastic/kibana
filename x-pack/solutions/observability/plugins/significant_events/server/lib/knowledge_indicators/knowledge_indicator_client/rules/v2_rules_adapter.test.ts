@@ -747,6 +747,24 @@ describe('RulesAdapterV2', () => {
     });
   });
 
+  describe('rotateRulesApiKey with mixed errors', () => {
+    it('keeps a permanent failure from the first pass when the busy rule then succeeds', async () => {
+      const mock = makeRulesClientMock();
+      const adapter = makeAdapter(mock);
+      const error = (id: string, code: string) => ({ id, error: { code, message: code } });
+
+      mock.bulkUpdateApiKey
+        .mockResolvedValueOnce({
+          affected_count: 0,
+          errors: [error('broken', 'INTERNAL_SERVER_ERROR'), error('busy', 'RULE_ALREADY_RUNNING')],
+        })
+        .mockResolvedValueOnce({ affected_count: 1, errors: [] });
+
+      await expect(adapter.rotateRulesApiKey(['broken', 'busy'])).rejects.toThrow('broken');
+      expect(mock.bulkUpdateApiKey).toHaveBeenLastCalledWith({ ids: ['busy'] });
+    });
+  });
+
   describe('findOwnedRuleIds', () => {
     it('looks up both the source tag and the legacy stream tag for the source', async () => {
       const mock = makeRulesClientMock();

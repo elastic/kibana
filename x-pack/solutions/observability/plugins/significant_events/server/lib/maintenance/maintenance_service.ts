@@ -43,6 +43,7 @@ import type { MaintenanceAccess } from './maintenance_access';
 import { createMaintenanceSystemRequest } from './system_request';
 import { toMessage } from './to_message';
 import { logFailures } from './log_failures';
+import { bulkUpdateApiKeyWithRetry } from '../significant_events/rules/bulk_rule_operations';
 import { runRulesInBatches, setV2RulesEnabled, type RulesToggleResult } from './rules';
 import { requireAllSpaceIds } from './spaces';
 import { runForEachSpace, throwSpaceFailures } from './run_for_each_space';
@@ -320,7 +321,7 @@ export const createSignificantEventsMaintenanceService = ({
           // Bulk enable skips rules that are already on, so they would keep the previous owner's
           // key. A rule that cannot be re-keyed stays in the retry inventory.
           const rotated = await runRulesInBatches(enabled.toggledIds, (chunk) =>
-            accountClient.bulkUpdateApiKey({ ids: chunk })
+            bulkUpdateApiKeyWithRetry(accountClient, chunk)
           );
           const rotationFailed = new Set(rotated.failedIds);
           return {

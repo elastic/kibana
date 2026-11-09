@@ -9,7 +9,10 @@ import { isBoom } from '@hapi/boom';
 import { ALERTING_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import pLimit from 'p-limit';
 import { uniq } from 'lodash';
-import { deleteRules } from '../../../significant_events/rules/bulk_rule_operations';
+import {
+  bulkUpdateApiKeyWithRetry,
+  deleteRules,
+} from '../../../significant_events/rules/bulk_rule_operations';
 import { compileMatchCountBreachQuery } from '../../../significant_events/rules/match_count_query_compiler';
 import { withAllProjectsRouting } from '../../../significant_events/rules/project_routing';
 import {
@@ -29,7 +32,6 @@ import {
 } from './rules_management_client';
 
 const FIND_PAGE_SIZE = 500;
-const ROTATE_RETRIES = 1;
 const RULE_EXISTS_CONCURRENCY = 10;
 const CONFLICT_UPDATE_CONCURRENCY = 10;
 
@@ -164,16 +166,8 @@ export class RulesAdapterV2 implements IRulesManagementClient {
       ALERTING_ERROR_CODES.RULE_NOT_FOUND,
       ALERTING_ERROR_CODES.RULE_DISABLED,
     ];
-    let pending = ids;
-    let fatal: Array<{ id: string; error: { code: string; message: string } }> = [];
-    for (let attempt = 0; attempt <= ROTATE_RETRIES && pending.length > 0; attempt++) {
-      const { errors } = await this.rulesClient.bulkUpdateApiKey({ ids: pending });
-      fatal = errors.filter((e) => !skipped.includes(e.error.code));
-      // A task that flipped to running between two reads frees up on its own; retry only those.
-      pending = fatal
-        .filter((e) => e.error.code === ALERTING_ERROR_CODES.RULE_ALREADY_RUNNING)
-        .map((e) => e.id);
-    }
+    const { errors } = await bulkUpdateApiKeyWithRetry(this.rulesClient, ids);
+    const fatal = errors.filter((e) => !skipped.includes(e.error.code));
     if (fatal.length > 0) {
       const detail = fatal.map((e) => `${e.id}: ${e.error.message}`).join('; ');
       throw new Error(`V2 api key rotation failed for ${fatal.length} rule(s): ${detail}`);

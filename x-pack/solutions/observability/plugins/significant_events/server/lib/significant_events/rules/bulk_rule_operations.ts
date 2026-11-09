@@ -50,6 +50,31 @@ export const runBulkRuleOperation = async (
   return result;
 };
 
+const ROTATE_RETRIES = 1;
+
+/**
+ * Re-key rules, retrying once the rules whose task flipped to running between two reads. Every
+ * other failure from any attempt is kept, so a retry that succeeds cannot hide a permanent one.
+ */
+export const bulkUpdateApiKeyWithRetry = async (
+  rulesClient: Pick<RulesClientApi, 'bulkUpdateApiKey'>,
+  ids: string[]
+): Promise<BulkResponse> => {
+  let pending = ids;
+  let affectedCount = 0;
+  const errors: BulkResponse['errors'] = [];
+  for (let attempt = 0; attempt <= ROTATE_RETRIES && pending.length > 0; attempt++) {
+    const response = await rulesClient.bulkUpdateApiKey({ ids: pending });
+    const isBusy = ({ error }: BulkResponse['errors'][number]) =>
+      error.code === ALERTING_ERROR_CODES.RULE_ALREADY_RUNNING;
+    const lastAttempt = attempt === ROTATE_RETRIES;
+    affectedCount += response.affected_count;
+    errors.push(...response.errors.filter((e) => lastAttempt || !isBusy(e)));
+    pending = response.errors.filter(isBusy).map(({ id }) => id);
+  }
+  return { affected_count: affectedCount, errors };
+};
+
 /** Delete rules through the supplied scoped client, retaining counts and individual failures. */
 export const deleteRules = (
   rulesClient: Pick<RulesClientApi, 'bulkDeleteRules'>,
