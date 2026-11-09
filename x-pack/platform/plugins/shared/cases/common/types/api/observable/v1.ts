@@ -9,6 +9,7 @@ import {
   MAX_OBSERVABLE_DESCRIPTION_LENGTH,
   MAX_OBSERVABLE_VALUE_LENGTH,
   MAX_OBSERVABLES_PER_CASE,
+  MAX_STORED_OBSERVABLE_FIELD_LENGTH,
   MIN_BULK_DELETE_OBSERVABLE_IDS,
   OBSERVABLE_ID_MAX_LENGTH,
 } from '../../../constants';
@@ -28,10 +29,12 @@ export const ObservablePostSchema = lazySchema(() =>
   })
 );
 
+// A patch sends back the stored value and description, which can predate the bounds, so it is only held
+// to the longest a stored one can be. The client applies the bounds to the fields the patch changes.
 export const ObservablePatchSchema = lazySchema(() =>
   z.object({
-    value: BoundedObservableValueSchema,
-    description: BoundedObservableDescriptionSchema,
+    value: z.string().max(MAX_STORED_OBSERVABLE_FIELD_LENGTH),
+    description: z.string().max(MAX_STORED_OBSERVABLE_FIELD_LENGTH).nullable(),
   })
 );
 

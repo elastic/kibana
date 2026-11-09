@@ -18,11 +18,13 @@ import { LICENSING_CASE_OBSERVABLES_FEATURE } from '../../common/constants';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
 import { mockCases } from '../../mocks';
 import {
+  OBSERVABLE_TYPE_HOSTNAME,
   OBSERVABLE_TYPE_IPV4,
   OBSERVABLE_TYPE_IPV6,
   MAX_OBSERVABLE_DESCRIPTION_LENGTH,
   MAX_OBSERVABLE_VALUE_LENGTH,
   MAX_OBSERVABLES_PER_CASE,
+  MAX_STORED_OBSERVABLE_FIELD_LENGTH,
 } from '../../../common/constants';
 import type { ObservablePost } from '../../../common/types/api';
 import type { Observable } from '../../../common/types/domain';
@@ -1176,7 +1178,29 @@ describe('optimistic concurrency on observable writes', () => {
       expect(mockCaseService.patchCase).not.toHaveBeenCalled();
     });
 
-    it('rejects an update whose value exceeds the maximum length', async () => {
+    it('rejects an update whose value exceeds the longest a stored value can be', async () => {
+      await expect(
+        updateObservable(
+          caseSO.id,
+          mockObservable.id,
+          {
+            observable: {
+              value: 'a'.repeat(MAX_STORED_OBSERVABLE_FIELD_LENGTH + 1),
+              description: null,
+            },
+          },
+          mockClientArgs,
+          mockCasesClient
+        )
+      ).rejects.toThrow('Failed to update observable');
+
+      expect(mockCaseService.getCase).not.toHaveBeenCalled();
+      expect(mockCaseService.patchCase).not.toHaveBeenCalled();
+    });
+
+    it('rejects an update that changes the value to one over the maximum length', async () => {
+      mockCaseService.getCase.mockResolvedValue(versionedCase('v1', [mockObservable]));
+
       await expect(
         updateObservable(
           caseSO.id,
@@ -1187,9 +1211,97 @@ describe('optimistic concurrency on observable writes', () => {
           mockClientArgs,
           mockCasesClient
         )
-      ).rejects.toThrow('Failed to update observable');
+      ).rejects.toThrow(
+        `The observable value cannot be longer than ${MAX_OBSERVABLE_VALUE_LENGTH} characters.`
+      );
 
       expect(mockCaseService.patchCase).not.toHaveBeenCalled();
+    });
+
+    it('rejects an update that changes the description to one over the maximum length', async () => {
+      mockCaseService.getCase.mockResolvedValue(versionedCase('v1', [mockObservable]));
+
+      await expect(
+        updateObservable(
+          caseSO.id,
+          mockObservable.id,
+          {
+            observable: {
+              value: mockObservable.value,
+              description: 'a'.repeat(MAX_OBSERVABLE_DESCRIPTION_LENGTH + 1),
+            },
+          },
+          mockClientArgs,
+          mockCasesClient
+        )
+      ).rejects.toThrow(
+        `The observable description cannot be longer than ${MAX_OBSERVABLE_DESCRIPTION_LENGTH} characters.`
+      );
+
+      expect(mockCaseService.patchCase).not.toHaveBeenCalled();
+    });
+
+    describe('a stored observable that predates the bounds', () => {
+      // Failure scenario: the edit form sends both fields back, so an edit of one field must not be
+      // rejected because the other was stored over the bounds before they existed.
+      const legacyObservable: Observable = {
+        id: 'b1e0c1f4-3a1d-4c55-9a52-8a3d1f0e2c11',
+        typeKey: OBSERVABLE_TYPE_HOSTNAME.key,
+        value: 'h'.repeat(MAX_OBSERVABLE_VALUE_LENGTH + 1),
+        description: 'd'.repeat(MAX_OBSERVABLE_DESCRIPTION_LENGTH + 1),
+        createdAt: '2024-12-05',
+        updatedAt: null,
+      };
+
+      beforeEach(() => {
+        mockCaseService.getCase.mockResolvedValue(versionedCase('v1', [legacyObservable]));
+      });
+
+      it('accepts a description edit that keeps the over-length value', async () => {
+        await updateObservable(
+          caseSO.id,
+          legacyObservable.id,
+          { observable: { value: legacyObservable.value, description: 'triaged' } },
+          mockClientArgs,
+          mockCasesClient
+        );
+
+        expect(mockCaseService.patchCase).toHaveBeenCalledWith(
+          expect.objectContaining({
+            updatedAttributes: expect.objectContaining({
+              observables: [
+                expect.objectContaining({
+                  value: legacyObservable.value,
+                  description: 'triaged',
+                }),
+              ],
+            }),
+          })
+        );
+      });
+
+      it('accepts a value edit that keeps the over-length description', async () => {
+        await updateObservable(
+          caseSO.id,
+          legacyObservable.id,
+          { observable: { value: 'host-1', description: legacyObservable.description } },
+          mockClientArgs,
+          mockCasesClient
+        );
+
+        expect(mockCaseService.patchCase).toHaveBeenCalledWith(
+          expect.objectContaining({
+            updatedAttributes: expect.objectContaining({
+              observables: [
+                expect.objectContaining({
+                  value: 'host-1',
+                  description: legacyObservable.description,
+                }),
+              ],
+            }),
+          })
+        );
+      });
     });
   });
 
