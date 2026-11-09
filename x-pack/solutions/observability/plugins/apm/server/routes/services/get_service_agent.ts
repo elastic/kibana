@@ -9,7 +9,7 @@ import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import type { ServiceAgentResponse } from '@kbn/apm-api-shared';
-import { getAgentName } from '@kbn/elastic-agent-utils';
+import { getAgentName, isOpenTelemetryAgentName } from '@kbn/elastic-agent-utils';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
   AGENT_NAME,
@@ -117,12 +117,23 @@ export async function getServiceAgent({
 
   const event = accessKnownApmEventFields(hit.fields);
 
+  // The aggregations may surface `telemetry.sdk.*` from other documents in the range. Combining them
+  // with a classic agent name would describe an ingestion path that doesn't exist (e.g. a native OTel
+  // dashboard key for a classic Java agent), so only fall back to them when the sampled document is
+  // not from a classic APM agent.
+  const hitAgentName = event[AGENT_NAME];
+  const canUseRangeAggregations = !hitAgentName || isOpenTelemetryAgentName(hitAgentName);
+
   const telemetrySdkName =
     event[TELEMETRY_SDK_NAME] ??
-    (response.aggregations?.telemetrySdkName.buckets[0]?.key as string | undefined);
+    (canUseRangeAggregations
+      ? (response.aggregations?.telemetrySdkName.buckets[0]?.key as string | undefined)
+      : undefined);
   const telemetrySdkLanguage =
     event[TELEMETRY_SDK_LANGUAGE] ??
-    (response.aggregations?.telemetrySdkLanguage.buckets[0]?.key as string | undefined);
+    (canUseRangeAggregations
+      ? (response.aggregations?.telemetrySdkLanguage.buckets[0]?.key as string | undefined)
+      : undefined);
 
   const serverlessType = getServerlessTypeFromCloudData(
     event[CLOUD_PROVIDER],
