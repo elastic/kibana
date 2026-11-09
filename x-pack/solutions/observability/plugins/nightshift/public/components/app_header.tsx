@@ -174,7 +174,7 @@ export function NightshiftAppHeader({
               {
                 id: 'nightshiftDetections',
                 label: detectionsLabel,
-                iconType: 'visGauge' as const,
+                iconType: 'radar' as const,
                 href: detectionsHref,
                 run: (params?: AppMenuRunActionParams) => {
                   applyEbtProps(detectionsEbtProps, params);
