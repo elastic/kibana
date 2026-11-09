@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiIcon, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
+import { EuiAgentLoader, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ConversationDisplayStatus } from '@kbn/agent-builder-common';
 
@@ -38,7 +38,8 @@ export const ConversationStatusIndicator: React.FC<ConversationStatusIndicatorPr
 
   switch (status) {
     case ConversationDisplayStatus.inProgress:
-      return <EuiLoadingSpinner size="m" aria-label={labels.inProgress} />;
+      // POC: small agent loader while this conversation is generating.
+      return <EuiAgentLoader size="s" aria-label={labels.inProgress} />;
 
     case ConversationDisplayStatus.awaitingPrompt:
       return (
