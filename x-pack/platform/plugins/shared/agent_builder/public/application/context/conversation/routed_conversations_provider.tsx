@@ -19,6 +19,7 @@ import { useKibana } from '../../hooks/use_kibana';
 import { useConversationActions } from './use_conversation_actions';
 import { upsertAttachmentsIntoList } from './upsert_attachments_into_list';
 import { removeAttachmentFromList } from './remove_attachment_from_list';
+import { removeMatchingAttachments } from './remove_matching_attachments';
 import { ConversationChangeNotifier } from './conversation_change_notifier';
 
 interface RoutedConversationsProviderProps {
@@ -117,6 +118,13 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
     });
   }, []);
 
+  const removeAttachments = useCallback((toRemove: readonly ConversationAttachment[]) => {
+    setAttachments((prev) => {
+      if (!prev) return prev;
+      return removeMatchingAttachments(prev, toRemove);
+    });
+  }, []);
+
   const contextValue = useMemo(
     () => ({
       conversationId,
@@ -129,6 +137,7 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
       upsertAttachments,
       resetAttachments,
       removeAttachment,
+      removeAttachments,
     }),
     [
       conversationId,
@@ -140,6 +149,7 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
       upsertAttachments,
       resetAttachments,
       removeAttachment,
+      removeAttachments,
     ]
   );
 

@@ -46,7 +46,7 @@ const binaryAttachmentInput = {
 };
 
 const upsertAttachments = jest.fn();
-const removeAttachment = jest.fn();
+const removeAttachments = jest.fn();
 const addErrorToast = jest.fn();
 const createConversation = jest.fn();
 const messageEditorController = {
@@ -65,7 +65,7 @@ const setContext = ({
     conversationId,
     attachments,
     upsertAttachments,
-    removeAttachment,
+    removeAttachments,
   } as never);
 
 const createPdf = (name = 'invoice.pdf') =>
@@ -281,7 +281,7 @@ describe('useBinaryUpload', () => {
         attachmentId: 'att-1',
         permanent: true,
       });
-      expect(removeAttachment).toHaveBeenCalledWith(0);
+      expect(removeAttachments).toHaveBeenCalledWith([binaryAttachmentInput]);
       expect(
         queryClient.getQueryData<{ attachments?: unknown[] }>(
           queryKeys.conversations.byId('conv-1')

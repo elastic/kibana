@@ -23,7 +23,7 @@ jest.mock('../../../hooks/use_agent_builder_service', () => ({
 const mockReadTextFile = jest.mocked(readTextFile);
 
 const upsertAttachments = jest.fn();
-const removeAttachment = jest.fn();
+const removeAttachments = jest.fn();
 const addErrorToast = jest.fn();
 const messageEditorController = {
   getPlaceholderNames: jest.fn(),
@@ -41,8 +41,10 @@ const setContext = ({
     conversationId,
     attachments,
     upsertAttachments,
-    removeAttachment,
+    removeAttachments,
   } as never);
+
+const notesAttachment = { type: 'text', data: { content: '# Hi', name: 'notes.md' } };
 
 const createFile = (name = 'notes.md') => new File(['# Hi'], name, { type: '' });
 
@@ -131,7 +133,7 @@ describe('useTextFileUpload', () => {
       act(() => result.current.handlePasteTextFile?.(createFile(), 'notes.md'));
       await waitFor(() => expect(upsertAttachments).toHaveBeenCalled());
       setContext({
-        attachments: [{ type: 'text', data: { content: '# Hi', name: 'notes.md' } }],
+        attachments: [notesAttachment],
       });
       rerender();
 
@@ -141,7 +143,7 @@ describe('useTextFileUpload', () => {
         'notes.md',
         'text'
       );
-      expect(removeAttachment).toHaveBeenCalledWith(0);
+      expect(removeAttachments).toHaveBeenCalledWith([notesAttachment]);
     });
 
     it('while reading drops the late result', async () => {
@@ -164,7 +166,7 @@ describe('useTextFileUpload', () => {
       act(() => result.current.handlePasteTextFile?.(createFile(), 'notes.md'));
       await waitFor(() => expect(upsertAttachments).toHaveBeenCalled());
       setContext({
-        attachments: [{ type: 'text', data: { content: '# Hi', name: 'notes.md' } }],
+        attachments: [notesAttachment],
       });
       rerender();
       messageEditorController.getPlaceholderNames.mockReturnValue([]);
@@ -172,7 +174,7 @@ describe('useTextFileUpload', () => {
       act(() => result.current.handleAfterInput());
 
       expect(messageEditorController.getPlaceholderNames).toHaveBeenCalledWith('text');
-      expect(removeAttachment).toHaveBeenCalledWith(0);
+      expect(removeAttachments).toHaveBeenCalledWith([notesAttachment]);
     });
 
     it('keeps the attachment of a chip that is still in the text', async () => {
@@ -180,14 +182,14 @@ describe('useTextFileUpload', () => {
       act(() => result.current.handlePasteTextFile?.(createFile(), 'notes.md'));
       await waitFor(() => expect(upsertAttachments).toHaveBeenCalled());
       setContext({
-        attachments: [{ type: 'text', data: { content: '# Hi', name: 'notes.md' } }],
+        attachments: [notesAttachment],
       });
       rerender();
       messageEditorController.getPlaceholderNames.mockReturnValue(['notes.md']);
 
       act(() => result.current.handleAfterInput());
 
-      expect(removeAttachment).not.toHaveBeenCalled();
+      expect(removeAttachments).not.toHaveBeenCalled();
     });
 
     it('keeps a named text attachment that did not come from a paste', () => {
@@ -198,7 +200,7 @@ describe('useTextFileUpload', () => {
 
       act(() => result.current.handleAfterInput());
 
-      expect(removeAttachment).not.toHaveBeenCalled();
+      expect(removeAttachments).not.toHaveBeenCalled();
     });
 
     it('cancels a read when its chip was deleted', () => {

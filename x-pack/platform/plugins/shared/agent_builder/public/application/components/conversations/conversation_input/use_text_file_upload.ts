@@ -29,7 +29,7 @@ export const useTextFileUpload = ({
   addErrorToast,
   messageEditorController,
 }: UseTextFileUploadParams): UseTextFileUploadResult => {
-  const { attachments, conversationId, upsertAttachments, removeAttachment } =
+  const { attachments, conversationId, upsertAttachments, removeAttachments } =
     useConversationContext();
   const [loadingTextFileNames, setLoadingTextFileNames] = useState<Set<string>>(new Set());
   const readControllers = useRef<Map<string, AbortController>>(new Map());
@@ -73,16 +73,18 @@ export const useTextFileUpload = ({
     [setLoading]
   );
 
-  const removeAttachmentByName = useCallback(
-    (name: string) => {
-      addedNames.current.delete(name);
-      const current = attachmentsRef.current ?? [];
-      const index = current.findIndex(
-        (attachment) => !('items' in attachment) && getTextFileName(attachment) === name
-      );
-      if (index !== -1) removeAttachment?.(index);
+  const removeAttachmentsByName = useCallback(
+    (names: readonly string[]) => {
+      if (names.length === 0) return;
+      for (const name of names) addedNames.current.delete(name);
+      const toRemove = (attachmentsRef.current ?? []).filter((attachment) => {
+        if ('items' in attachment) return false;
+        const name = getTextFileName(attachment);
+        return name !== undefined && names.includes(name);
+      });
+      if (toRemove.length > 0) removeAttachments?.(toRemove);
     },
-    [removeAttachment]
+    [removeAttachments]
   );
 
   const handlePasteTextFile = useCallback(
@@ -116,18 +118,16 @@ export const useTextFileUpload = ({
     for (const name of [...readControllers.current.keys()]) {
       if (!chipNames.has(name)) stopReading(name);
     }
-    for (const name of [...addedNames.current]) {
-      if (!chipNames.has(name)) removeAttachmentByName(name);
-    }
-  }, [messageEditorController, stopReading, removeAttachmentByName]);
+    removeAttachmentsByName([...addedNames.current].filter((name) => !chipNames.has(name)));
+  }, [messageEditorController, stopReading, removeAttachmentsByName]);
 
   const handleRemoveTextFile = useCallback(
     (name: string) => {
       messageEditorController.removePlaceholderByName(name, 'text');
       stopReading(name);
-      removeAttachmentByName(name);
+      removeAttachmentsByName([name]);
     },
-    [messageEditorController, stopReading, removeAttachmentByName]
+    [messageEditorController, stopReading, removeAttachmentsByName]
   );
 
   return {

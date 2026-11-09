@@ -18,6 +18,7 @@ import type {
 import { ConversationContext } from './conversation_context';
 import { upsertAttachmentsIntoList } from './upsert_attachments_into_list';
 import { removeAttachmentFromList } from './remove_attachment_from_list';
+import { removeMatchingAttachments } from './remove_matching_attachments';
 import { removeAttachmentById } from './remove_attachment_by_id';
 import { AgentBuilderServicesContext } from '../agent_builder_services_context';
 import { StreamingProvider } from '../streaming/streaming_context';
@@ -263,6 +264,16 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     });
   }, []);
 
+  const removeAttachments = useCallback((toRemove: readonly ConversationAttachment[]) => {
+    setCurrentProps((prevProps) => {
+      if (!prevProps.attachments) return prevProps;
+      return {
+        ...prevProps,
+        attachments: removeMatchingAttachments(prevProps.attachments, toRemove),
+      };
+    });
+  }, []);
+
   const setAgentId = useCallback((id: string) => {
     setCurrentProps((prev) => ({ ...prev, agentId: id, newConversation: true }));
   }, []);
@@ -285,6 +296,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       upsertAttachments,
       resetAttachments,
       removeAttachment,
+      removeAttachments,
       conversationActions,
     }),
     [
@@ -303,6 +315,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       setAgentId,
       resetAttachments,
       removeAttachment,
+      removeAttachments,
       conversationActions,
     ]
   );

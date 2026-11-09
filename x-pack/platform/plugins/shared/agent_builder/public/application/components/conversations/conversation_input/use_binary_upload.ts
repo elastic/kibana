@@ -53,7 +53,7 @@ export const useBinaryUpload = ({
   const { binaryFilesClient, attachmentsService } = useAgentBuilderServices();
   const queryClient = useQueryClient();
   const agentId = useAgentId();
-  const { attachments, conversationId, upsertAttachments, removeAttachment } =
+  const { attachments, conversationId, upsertAttachments, removeAttachments } =
     useConversationContext();
   const [loadingBinaryNames, setLoadingBinaryNames] = useState<Set<string>>(new Set());
   const [pendingConversationId, setPendingConversationId] = useState<string | undefined>();
@@ -115,14 +115,15 @@ export const useBinaryUpload = ({
       if (!unsent) return;
       unsentBinaries.current.delete(name);
 
-      const current = attachmentsRef.current ?? [];
-      const index = current.findIndex((a) => isBinaryInput(a) && a.id === unsent.attachmentId);
-      if (index !== -1) removeAttachment?.(index);
+      const toRemove = (attachmentsRef.current ?? []).filter(
+        (a) => isBinaryInput(a) && a.id === unsent.attachmentId
+      );
+      if (toRemove.length > 0) removeAttachments?.(toRemove);
 
       removeFromConversationCache(unsent);
       attachmentsService.delete({ ...unsent, permanent: true }).catch(() => {});
     },
-    [attachmentsService, removeAttachment, removeFromConversationCache]
+    [attachmentsService, removeAttachments, removeFromConversationCache]
   );
 
   // Stops the work and removes everything the file left in the editor and the input attachments.
