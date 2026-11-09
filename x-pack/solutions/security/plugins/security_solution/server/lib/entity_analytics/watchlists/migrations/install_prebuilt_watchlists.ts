@@ -32,6 +32,7 @@ import { watchlistConfigTypeName } from '../management/saved_object/watchlist_co
 import type { StartPlugins } from '../../../../plugin';
 import { generateWatchlistEntityIndexMappings } from '../entities/mappings';
 import { ENTITY_ANALYTICS_WATCHLISTS_PREFIX } from '../entities/utils';
+import { installWatchlistIndex } from '../entities/ensure_watchlist_index';
 
 // Bump this when PREBUILT_WATCHLISTS definitions change
 export const PREBUILT_WATCHLISTS_VERSION = 3;
@@ -389,10 +390,18 @@ export const installPrebuiltWatchlists = async ({
     const watchlistClient = new WatchlistConfigClientClass({
       soClient,
       esClient,
-      internalEsClient: esClient,
       namespace,
       logger,
     });
+
+    try {
+      await installWatchlistIndex({ esClient, logger, namespace });
+    } catch (err) {
+      // A failure in one space must not block the remaining spaces.
+      logger.error(
+        `Failed to install watchlist index for namespace '${namespace}': ${err.message}`
+      );
+    }
 
     await ensurePrebuiltWatchlists({
       watchlistClient,

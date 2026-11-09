@@ -10,6 +10,7 @@ import {
   loggingSystemMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
+import { errors } from '@elastic/elasticsearch';
 import { createEntitySourcesService, syncWatchlistInBackground } from './entity_sources_service';
 
 jest.mock('../management/watchlist_config');
@@ -463,6 +464,39 @@ describe('createEntitySourcesService', () => {
     expect(mockListEntityStoreEntities).toHaveBeenCalledWith({
       type: 'integration',
       name: 'entityanalytics_okta',
+    });
+  });
+
+  describe('deleteWatchlistEntities', () => {
+    const createService = () =>
+      createEntitySourcesService({
+        esClient,
+        soClient,
+        logger,
+        namespace,
+        getStartServices: mockGetStartServices as never,
+        hasEncryptionKey: true,
+      });
+
+    const searchError = (statusCode: number, type: string) =>
+      new errors.ResponseError({
+        statusCode,
+        body: { error: { type } },
+        headers: {},
+        meta: {},
+        warnings: null,
+      } as unknown as ConstructorParameters<typeof errors.ResponseError>[0]);
+
+    it('succeeds when the watchlist index does not exist yet', async () => {
+      esClient.search.mockRejectedValueOnce(searchError(404, 'index_not_found_exception'));
+
+      await expect(createService().deleteWatchlistEntities('watchlist-1')).resolves.toBeUndefined();
+    });
+
+    it('fails when the watchlist index cannot be searched for any other reason', async () => {
+      esClient.search.mockRejectedValueOnce(searchError(400, 'index_closed_exception'));
+
+      await expect(createService().deleteWatchlistEntities('watchlist-1')).rejects.toThrow();
     });
   });
 

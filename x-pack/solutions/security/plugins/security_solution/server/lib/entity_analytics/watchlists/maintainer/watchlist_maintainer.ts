@@ -11,6 +11,7 @@ import type { RegisterEntityMaintainerConfig } from '@kbn/entity-store/server';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { createEntitySourcesService } from '../entity_sources/entity_sources_service';
 import { watchlistEntitySourceTypeName } from '../entity_sources/infra';
+import { ensureWatchlistIndex } from '../entities/ensure_watchlist_index';
 import { ENTITY_ANALYTICS_SPAN_NAMES, runWithSpan } from '../../telemetry/traces';
 
 export interface WatchlistMaintainerDeps {
@@ -44,6 +45,20 @@ export const createWatchlistMaintainer = ({
     }
 
     logger.debug(`Watchlist maintainer run for namespace "${namespace}"`);
+
+    // Create the watchlist index if it doesn't exist to make sure new spaces have an index.
+    // Added to "run" and not "setup" in case the first run fails. Uses the internal client because the index is hidden.
+    try {
+      await ensureWatchlistIndex({
+        esClient: coreStart.elasticsearch.client.asInternalUser,
+        logger,
+        namespace,
+      });
+    } catch (err) {
+      logger.error(
+        `Failed to ensure watchlist index for namespace "${namespace}": ${(err as Error).message}`
+      );
+    }
 
     // Use the authenticated fakeRequest from the task manager (created with the
     // credentials of the user who installed the Entity Store) rather than

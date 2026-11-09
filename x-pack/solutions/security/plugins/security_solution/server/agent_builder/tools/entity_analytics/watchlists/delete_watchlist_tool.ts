@@ -99,7 +99,6 @@ Managed (system-controlled) watchlists cannot be deleted via this tool. Deleting
         const client = new WatchlistConfigClient({
           soClient,
           esClient: esClient.asCurrentUser,
-          internalEsClient: esClient.asInternalUser,
           securityServiceStart: coreStart.security,
           namespace: spaceId,
           logger,
