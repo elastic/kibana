@@ -20,6 +20,7 @@ import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import type { ProposalWithMetadata } from '@kbn/proposals-common';
 import { INVESTIGATION_TEMPLATE_ID } from '../../../common/escalations/constants';
 import type { InvestigationHypotheses } from '../../../common/hypotheses/hypotheses';
+import type { ImpactMapEvent, InvestigationImpactMap } from '../../../common/impact_map/impact_map';
 import type { Impact } from '../../../common/impact/impact';
 import {
   INVESTIGATION_SEVERITY_NONE,
@@ -48,12 +49,19 @@ import type {
 } from '../../../common/subjects/subject';
 import { WrongTemplateError } from '../../assignments/errors';
 import type { HypothesesService } from '../../hypotheses/services/hypotheses_service';
+import type { ImpactMapService } from '../../impact_map/services/impact_map_service';
 import type { ImpactService } from '../../impact/services/impact_service';
 import type { SubjectsService } from '../../subjects/services/subjects_service';
 import { retryWhileShardUnavailable } from '../../investigation_attachments';
 import { MAX_INVESTIGATION_CANDIDATE_CONVERSATION_IDS } from '../../investigation_attachments/attachment_doc_service';
 import { bulkGetReadableConversations } from './readable_conversation_ids';
 import type { InProgressResolver } from './in_progress';
+import {
+  alertSubjectsToImpactMapEvents,
+  appliedProposalsToImpactMapEvents,
+  mergeImpactMapEvents,
+} from '../../../common/impact_map/events';
+import { toEntityName } from '../../../common/impact_map/entity_name';
 
 /** Bound on the proposals one investigation read returns. */
 const MAX_INVESTIGATION_PROPOSALS = 100;
@@ -82,6 +90,7 @@ export interface InvestigationsQueryServiceDeps {
   getImpactService: () => ImpactService;
   getSubjectsService: () => SubjectsService;
   getHypothesesService: () => HypothesesService;
+  getImpactMapService: () => ImpactMapService;
   getProposals: () => ProposalsPluginStart | undefined;
   inProgress: InProgressResolver;
   logger: Logger;
@@ -113,16 +122,29 @@ export class InvestigationsQueryService {
     }
 
     const spaceId = this.deps.getSpaceId(request);
-    const [subjects, impact, hypotheses, inProgress, proposals] = await Promise.all([
+    const [subjects, impact, hypotheses, impactMap, inProgress, proposals] = await Promise.all([
       this.deps.getSubjectsService().listByConversationIds([id], spaceId),
       this.deps.getImpactService().findByConversationId(id, spaceId),
       this.deps.getHypothesesService().findByConversationId(id, spaceId),
+      this.deps.getImpactMapService().findByConversationId(id, spaceId),
       this.deps.inProgress.isInProgress(request, spaceId, conversation),
       this.listProposals(request, id, spaceId),
     ]);
 
     const removed = removedAttachmentIds(conversation.attachments);
     const visibleHypotheses = hypotheses && !removed.has(hypotheses.id) ? hypotheses : undefined;
+    const visibleImpactMap = impactMap && !removed.has(impactMap.id) ? impactMap : undefined;
+    // Alerts and applied to-dos are read, not stored with the map, so they appear without the
+    // agent writing them; with no map yet, the timeline still shows them.
+    const derivedEvents = [
+      ...alertSubjectsToImpactMapEvents(subjects.filter(({ id: docId }) => !removed.has(docId))),
+      ...appliedProposalsToImpactMapEvents(proposals),
+    ];
+    const impactMapResponse = visibleImpactMap
+      ? toImpactMapResponse(visibleImpactMap, derivedEvents)
+      : derivedEvents.length > 0
+      ? toEventsOnlyImpactMapResponse(derivedEvents)
+      : undefined;
     return {
       ...toSummary({
         conversation,
@@ -131,6 +153,7 @@ export class InvestigationsQueryService {
         impact: impact && !removed.has(impact.id) ? impact : undefined,
       }),
       ...(visibleHypotheses && { hypotheses: toHypothesesResponse(visibleHypotheses) }),
+      ...(impactMapResponse && { impact_map: impactMapResponse }),
       proposals,
     };
   }
@@ -756,6 +779,49 @@ const toImpactResponse = (impact: Impact): InvestigationImpactResponse => ({
   ...(impact.updatedAt !== undefined && { updated_at: impact.updatedAt }),
 });
 
+const toImpactMapResponse = (
+  {
+    title,
+    entities,
+    relationships,
+    entityTypes,
+    relationshipTypes,
+    events,
+    createdAt,
+    updatedAt,
+  }: InvestigationImpactMap,
+  alertEvents: ImpactMapEvent[] = []
+): NonNullable<Investigation['impact_map']> => ({
+  ...(title !== undefined && { title }),
+  // Maps recorded before names were cleaned on write still carry types and states in labels.
+  entities: entities.map((entity) => ({ ...entity, label: toEntityName(entity.label) })),
+  relationships: relationships.map((relationship) => ({
+    ...relationship,
+    id: relationship.id ?? `${relationship.source_id}->${relationship.target_id}`,
+  })),
+  entity_types: entityTypes,
+  relationship_types: relationshipTypes,
+  // Alerts the investigation was opened on join the events the agent recorded.
+  events: mergeImpactMapEvents(events ?? [], alertEvents),
+  created_at: createdAt,
+  ...(updatedAt !== undefined && { updated_at: updatedAt }),
+});
+
+/** An impact map with no graph, so the timeline can show events before the agent draws one. */
+const toEventsOnlyImpactMapResponse = (
+  events: ImpactMapEvent[]
+): NonNullable<Investigation['impact_map']> => {
+  const sorted = mergeImpactMapEvents([], events);
+  return {
+    entities: [],
+    relationships: [],
+    entity_types: [],
+    relationship_types: [],
+    events: sorted,
+    created_at: sorted[0]?.at ?? new Date().toISOString(),
+  };
+};
+
 const toHypothesesResponse = (
   hypotheses: InvestigationHypotheses
 ): NonNullable<Investigation['hypotheses']> => ({
@@ -772,6 +838,7 @@ const toProposalSummary = (proposal: ProposalWithMetadata): InvestigationProposa
   impact: proposal.impact,
   confidence: proposal.confidence,
   ...(proposal.category !== undefined && { category: proposal.category }),
+  ...(proposal.decision !== undefined && { decision: proposal.decision }),
   created_at: proposal.createdAt,
   ...(proposal.decidedAt !== undefined && { decided_at: proposal.decidedAt }),
 });

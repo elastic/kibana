@@ -40,6 +40,9 @@ const CHART_HEIGHT = 140;
 /** Room above the plot for point annotation markers, which are drawn above its top edge. */
 const ANNOTATION_MARKER_MARGIN = 16;
 
+/** The label the recorder gives the moment an alert fired; it gets Kibana's alert icon. */
+const isAlertFired = (label: string): boolean => /^alert fired\b/i.test(label.trim());
+
 type YAxisUnit = NonNullable<EvidenceChartSpec['y_axis']['unit']>;
 
 const BYTE_UNITS = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'] as const;
@@ -74,16 +77,34 @@ interface ChartDatum {
 }
 
 /** Converts an x value to what the x scale expects; `undefined` when a time value is unparseable. */
-const toXValue = (x: string, isTime: boolean): number | string | undefined => {
+const toXValue = (
+  x: string,
+  isTime: boolean,
+  referenceTime?: string
+): number | string | undefined => {
   if (!isTime) {
     return x;
   }
-  const timestamp = Date.parse(x);
+  // A bare clock time, "16:30" or "16:30Z", is what a model often writes for a short window.
+  // Read it on the day of the thing the chart explains, as UTC, which is how such times are given.
+  const clock = /^(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(?:Z|UTC)?$/i.exec(x.trim());
+  if (clock && referenceTime && !Number.isNaN(Date.parse(referenceTime))) {
+    const day = new Date(referenceTime).toISOString().slice(0, 10);
+    const [, hours, minutes, seconds = '00'] = clock;
+    const parsed = Date.parse(`${day}T${hours.padStart(2, '0')}:${minutes}:${seconds}Z`);
+    return Number.isNaN(parsed) ? undefined : parsed;
+  }
+  // Epoch seconds or milliseconds, as a bucket key is often written.
+  const timestamp = /^\d{10}(\d{3})?$/.test(x.trim())
+    ? Number(x.trim()) * (x.trim().length === 10 ? 1000 : 1)
+    : Date.parse(x);
   return Number.isNaN(timestamp) ? undefined : timestamp;
 };
 
 export interface EvidenceChartProps {
   chart: EvidenceChartSpec;
+  /** When the thing the chart explains happened; dates a time written without one. */
+  referenceTime?: string;
 }
 
 /** Used when no Kibana `dateFormat` setting is available, e.g. outside a Kibana context. */
@@ -109,7 +130,7 @@ const useChartTimeSettings = (): { timeZone: string; dateFormat: string } => {
  * Renders the static chart spec an investigation attaches to a piece of evidence. The data points
  * travel with the spec, so the chart looks the same regardless of where the data came from.
  */
-export const EvidenceChart: React.FC<EvidenceChartProps> = ({ chart }) => {
+export const EvidenceChart: React.FC<EvidenceChartProps> = ({ chart, referenceTime }) => {
   const { euiTheme } = useEuiTheme();
   const baseTheme = useElasticChartsTheme();
   const { timeZone, dateFormat } = useChartTimeSettings();
@@ -122,14 +143,14 @@ export const EvidenceChart: React.FC<EvidenceChartProps> = ({ chart }) => {
         id: `series-${index}`,
         name: entry.name,
         data: entry.points.reduce<ChartDatum[]>((data, { x, y }) => {
-          const xValue = toXValue(x, isTime);
+          const xValue = toXValue(x, isTime, referenceTime);
           if (xValue !== undefined && Number.isFinite(y)) {
             data.push({ x: xValue, y });
           }
           return data;
         }, []),
       })),
-    [chart.series, isTime]
+    [chart.series, isTime, referenceTime]
   );
 
   const xFormatter = useMemo(() => {
@@ -143,29 +164,51 @@ export const EvidenceChart: React.FC<EvidenceChartProps> = ({ chart }) => {
   }, [isTime, series]);
 
   const { pointAnnotations, rangeAnnotations } = useMemo(() => {
-    const points: Array<{ dataValue: number | string; details: string; header: string }> = [];
+    const points: Array<{
+      dataValue: number | string;
+      details: string;
+      header: string;
+      isAlert: boolean;
+      tone?: 'success' | 'danger';
+    }> = [];
     const ranges: Array<{
       coordinates: { x0: number | string; x1: number | string };
       details: string;
+      tone?: 'success' | 'danger';
     }> = [];
     for (const annotation of chart.annotations ?? []) {
-      const start = toXValue(annotation.x, isTime);
+      const start = toXValue(annotation.x, isTime, referenceTime);
       if (start === undefined) {
         continue;
       }
-      const end = annotation.x_end ? toXValue(annotation.x_end, isTime) : undefined;
+      const end = annotation.x_end ? toXValue(annotation.x_end, isTime, referenceTime) : undefined;
       if (end !== undefined) {
-        ranges.push({ coordinates: { x0: start, x1: end }, details: annotation.label });
+        ranges.push({
+          coordinates: { x0: start, x1: end },
+          details: annotation.label,
+          tone: annotation.tone,
+        });
       } else {
         // elastic-charts titles a point annotation's tooltip with `header`, falling back to the
         // raw data value — epoch milliseconds on a time axis.
         const header =
           typeof start === 'number' ? moment.tz(start, timeZone).format(dateFormat) : start;
-        points.push({ dataValue: start, details: annotation.label, header });
+        points.push({
+          dataValue: start,
+          details: annotation.label,
+          header,
+          isAlert: isAlertFired(annotation.label),
+          tone: annotation.tone,
+        });
       }
     }
     return { pointAnnotations: points, rangeAnnotations: ranges };
-  }, [chart.annotations, isTime, timeZone, dateFormat]);
+  }, [chart.annotations, isTime, timeZone, dateFormat, referenceTime]);
+
+  const thresholdLines = (chart.thresholds ?? []).map(({ y, label }) => ({
+    dataValue: y,
+    details: label,
+  }));
 
   const hasAnnotations = pointAnnotations.length > 0 || rangeAnnotations.length > 0;
   // Point annotation markers are drawn above the plot, so reserve room for them there.
@@ -244,21 +287,70 @@ export const EvidenceChart: React.FC<EvidenceChartProps> = ({ chart }) => {
                 />
               )
             )}
-            {pointAnnotations.length > 0 && (
+            {[
+              { tone: undefined, color: euiTheme.colors.accent },
+              { tone: 'success' as const, color: euiTheme.colors.success },
+              { tone: 'danger' as const, color: euiTheme.colors.danger },
+            ].map(({ tone, color }) => {
+              const values = pointAnnotations.filter(
+                (point) => !point.isAlert && point.tone === tone
+              );
+              return (
+                values.length > 0 && (
+                  <LineAnnotation
+                    key={tone ?? 'default'}
+                    id={`evidence-point-annotations-${tone ?? 'default'}`}
+                    domainType={AnnotationDomainType.XDomain}
+                    dataValues={values}
+                    marker={<EuiIcon type="dot" color={color} aria-hidden={true} />}
+                    markerPosition={Position.Top}
+                    style={{ line: { strokeWidth: 1, stroke: color, opacity: 1 } }}
+                  />
+                )
+              );
+            })}
+            {pointAnnotations.some((point) => point.isAlert) && (
               <LineAnnotation
-                id="evidence-point-annotations"
+                id="evidence-point-annotations-alert"
                 domainType={AnnotationDomainType.XDomain}
-                dataValues={pointAnnotations}
-                marker={<EuiIcon type="dot" color={euiTheme.colors.accent} aria-hidden={true} />}
+                dataValues={pointAnnotations.filter((point) => point.isAlert)}
+                marker={
+                  <EuiIcon type="warning" color={euiTheme.colors.danger} aria-hidden={true} />
+                }
                 markerPosition={Position.Top}
-                style={{ line: { strokeWidth: 1, stroke: euiTheme.colors.accent, opacity: 1 } }}
+                style={{ line: { strokeWidth: 1, stroke: euiTheme.colors.danger, opacity: 1 } }}
               />
             )}
-            {rangeAnnotations.length > 0 && (
-              <RectAnnotation
-                id="evidence-range-annotations"
-                dataValues={rangeAnnotations}
-                style={{ fill: euiTheme.colors.accent, opacity: 0.1 }}
+            {[
+              { tone: undefined, color: euiTheme.colors.accent },
+              { tone: 'success' as const, color: euiTheme.colors.success },
+              { tone: 'danger' as const, color: euiTheme.colors.danger },
+            ].map(({ tone, color }) => {
+              const values = rangeAnnotations.filter((range) => range.tone === tone);
+              return (
+                values.length > 0 && (
+                  <RectAnnotation
+                    key={tone ?? 'default'}
+                    id={`evidence-range-annotations-${tone ?? 'default'}`}
+                    dataValues={values}
+                    style={{ fill: color, opacity: 0.1 }}
+                  />
+                )
+              );
+            })}
+            {thresholdLines.length > 0 && (
+              <LineAnnotation
+                id="evidence-thresholds"
+                domainType={AnnotationDomainType.YDomain}
+                dataValues={thresholdLines}
+                style={{
+                  line: {
+                    strokeWidth: 1,
+                    stroke: euiTheme.colors.danger,
+                    dash: [4, 3],
+                    opacity: 1,
+                  },
+                }}
               />
             )}
           </Chart>
@@ -280,15 +372,31 @@ export const EvidenceChart: React.FC<EvidenceChartProps> = ({ chart }) => {
                     </EuiHealth>
                   </EuiFlexItem>
                 ))}
-              {pointAnnotations.map(({ details }, index) => (
+              {pointAnnotations.map(({ details, isAlert }, index) => (
                 <EuiFlexItem
                   key={`point-${index}`}
                   grow={false}
                   data-test-subj="investigationEvidenceChartAnnotation"
                 >
-                  <EuiHealth color={euiTheme.colors.accent} textSize="xs">
-                    {details}
-                  </EuiHealth>
+                  {isAlert ? (
+                    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <EuiIcon
+                          type="warning"
+                          color={euiTheme.colors.danger}
+                          size="s"
+                          aria-hidden
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="xs">{details}</EuiText>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  ) : (
+                    <EuiHealth color={euiTheme.colors.accent} textSize="xs">
+                      {details}
+                    </EuiHealth>
+                  )}
                 </EuiFlexItem>
               ))}
               {rangeAnnotations.map(({ details }, index) => (

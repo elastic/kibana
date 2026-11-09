@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiMarkdownFormat } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiMarkdownFormat, EuiSpacer } from '@elastic/eui';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { Investigation } from '../../types';
 import type { FlyoutGroupedAttachmentsRegistry } from '../grouped_attachments';
@@ -52,12 +52,16 @@ export interface OverviewSections {
   impact?: React.ReactNode;
   /** The conclusion, as markdown. */
   conclusion?: string;
+  /** Shown under the conclusion, inside its section: the event it names as the root cause. */
+  conclusionEvent?: React.ReactNode;
   /**
    * How the investigation got there, such as an entry point to its hypotheses. Shown right under
    * the conclusion, in the same place whether or not there is one, so it keeps its state when the
    * conclusion arrives.
    */
   reasoning?: React.ReactNode;
+  /** Draws markdown (the summary and the conclusion); the default is plain markdown. */
+  renderMarkdown?: (text: string, options?: { subdued?: boolean }) => React.ReactNode;
 }
 
 export const OverviewTab = memo<OverviewTabProps>(
@@ -70,7 +74,7 @@ export const OverviewTab = memo<OverviewTabProps>(
     sections = {},
     showLoadingSection = false,
   }) => {
-    const { subjects, impact, conclusion, reasoning } = sections;
+    const { subjects, impact, conclusion, conclusionEvent, reasoning, renderMarkdown } = sections;
 
     return (
       <EuiFlexGroup direction="column" gutterSize="m">
@@ -79,6 +83,7 @@ export const OverviewTab = memo<OverviewTabProps>(
             summary={investigation.summary}
             attachments={attachments}
             groupedAttachments={groupedAttachments}
+            renderMarkdown={renderMarkdown}
           />
         </EuiFlexItem>
 
@@ -97,7 +102,15 @@ export const OverviewTab = memo<OverviewTabProps>(
         {conclusion && (
           <EuiFlexItem data-test-subj="investigationOverviewConclusion">
             <DetailsBlock title={DETAILS_FLYOUT_LABELS.sections.conclusion}>
-              <EuiMarkdownFormat textSize="s">{conclusion}</EuiMarkdownFormat>
+              {renderMarkdown?.(conclusion) ?? (
+                <EuiMarkdownFormat textSize="s">{conclusion}</EuiMarkdownFormat>
+              )}
+              {conclusionEvent && (
+                <>
+                  <EuiSpacer size="m" />
+                  {conclusionEvent}
+                </>
+              )}
             </DetailsBlock>
           </EuiFlexItem>
         )}

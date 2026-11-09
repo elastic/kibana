@@ -22,8 +22,16 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { useOpenInChat } from '@kbn/agentic-investigations-plugin/public';
+import {
+  useCanManageInvestigations,
+  useOpenInChat,
+} from '@kbn/agentic-investigations-plugin/public';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
+import {
+  AGENTIC_INVESTIGATIONS_API_VERSION,
+  INVESTIGATION_STATUS_URL,
+  buildAgentInstructions,
+} from '@kbn/agentic-investigations-plugin/common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { useQueryClient } from '@kbn/react-query';
@@ -41,8 +49,21 @@ const copyLinkLabel = i18n.translate('xpack.nightshift.investigations.cardCopyLi
   defaultMessage: 'Copy link',
 });
 
+const copyAgentInstructionsLabel = i18n.translate(
+  'xpack.nightshift.investigations.cardCopyAgentInstructionsLabel',
+  { defaultMessage: 'Copy agent instructions' }
+);
+
 const deleteLabel = i18n.translate('xpack.nightshift.investigations.cardDeleteLabel', {
-  defaultMessage: 'Delete',
+  defaultMessage: 'Delete investigation',
+});
+
+const closeLabel = i18n.translate('xpack.nightshift.investigations.cardCloseLabel', {
+  defaultMessage: 'Close',
+});
+
+const openLabel = i18n.translate('xpack.nightshift.investigations.cardOpenLabel', {
+  defaultMessage: 'Open',
 });
 
 const openInChatLabel = i18n.translate('xpack.nightshift.investigations.cardOpenInChatLabel', {
@@ -52,6 +73,26 @@ const openInChatLabel = i18n.translate('xpack.nightshift.investigations.cardOpen
 const openMenuLabel = i18n.translate('xpack.nightshift.investigations.cardOpenMenuLabel', {
   defaultMessage: 'Open actions menu',
 });
+
+const isInvestigationClosed = (investigation: InvestigationSummary): boolean =>
+  investigation.metadata.status === 'closed';
+
+const statusErrorMessage = (error: unknown): Error => {
+  const bodyMessage =
+    error &&
+    typeof error === 'object' &&
+    'body' in error &&
+    error.body &&
+    typeof error.body === 'object' &&
+    'message' in error.body &&
+    typeof error.body.message === 'string'
+      ? error.body.message
+      : undefined;
+  if (bodyMessage) {
+    return new Error(bodyMessage);
+  }
+  return error instanceof Error ? error : new Error(String(error));
+};
 
 export interface InvestigationCardActionsProps {
   investigation: InvestigationSummary;
@@ -63,8 +104,9 @@ export interface InvestigationCardActionsProps {
 
 /**
  * Trailing controls for a Nightshift investigation list card: the assignees, open in chat (same
- * Agent Builder route as the flyout footer) and an overflow menu with Copy link (same share URL /
- * link icon as the investigation flyout menu action) and, for Agent Builder admins, Delete.
+ * Agent Builder route as the flyout footer) and an overflow menu with Copy link, Copy agent
+ * instructions plus, for users who
+ * can manage investigations, Close/Open, then Delete separated at the bottom.
  */
 export const InvestigationCardActions = ({
   investigation,
@@ -72,15 +114,14 @@ export const InvestigationCardActions = ({
   ebtElement = NIGHTSHIFT_EBT_ELEMENTS.INVESTIGATIONS_LIST,
 }: InvestigationCardActionsProps): React.ReactElement => {
   const { euiTheme } = useEuiTheme();
-  const { application, http, notifications } = useKibana().services;
+  const { http, notifications } = useKibana().services;
   const queryClient = useQueryClient();
-  // Investigations are public conversations owned by the Nightshift service account, which Agent
-  // Builder lets only its admins delete.
-  const canDelete = Boolean(application.capabilities.agentBuilder?.isAdmin);
+  const canManage = useCanManageInvestigations();
   const { getChatHref, openChat } = useOpenInChat();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const deleteConfirmTitleId = useGeneratedHtmlId({ prefix: 'nightshiftDeleteInvestigation' });
+  const closed = isInvestigationClosed(investigation);
 
   const chatHref = getChatHref(investigation.id, investigation.agent_id);
   const handleOpenChat = useCallback(
@@ -109,6 +150,32 @@ export const InvestigationCardActions = ({
     }
   }, [investigation.id, notifications.toasts]);
 
+  const handleCopyAgentInstructions = useCallback(() => {
+    const copied = copyToClipboard(
+      buildAgentInstructions({
+        investigationId: investigation.id,
+        kibanaUrl: http.basePath.publicBaseUrl ?? `${window.location.origin}${http.basePath.get()}`,
+      })
+    );
+    if (copied) {
+      notifications.toasts.addSuccess({
+        title: i18n.translate('xpack.nightshift.investigations.cardCopyAgentInstructionsSuccess', {
+          defaultMessage: 'Copied agent instructions to clipboard',
+        }),
+      });
+    } else {
+      notifications.toasts.addDanger({
+        title: i18n.translate('xpack.nightshift.investigations.cardCopyAgentInstructionsError', {
+          defaultMessage: 'Could not copy the agent instructions',
+        }),
+      });
+    }
+  }, [http.basePath, investigation.id, notifications.toasts]);
+
+  const invalidateLists = useCallback(() => {
+    void queryClient.invalidateQueries({ queryKey: NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY });
+  }, [queryClient]);
+
   const handleDelete = useCallback(async () => {
     setIsDeleteConfirmOpen(false);
     try {
@@ -128,10 +195,46 @@ export const InvestigationCardActions = ({
         }),
       });
     } finally {
-      // Covers the home page sections, their severity counts, and the onboarding trial investigation.
-      void queryClient.invalidateQueries({ queryKey: NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY });
+      invalidateLists();
     }
-  }, [http, investigation.id, notifications.toasts, queryClient]);
+  }, [http, invalidateLists, investigation.id, notifications.toasts]);
+
+  const handleSetStatus = useCallback(
+    async (status: 'open' | 'closed') => {
+      try {
+        // Closing skips a confirm dialog. Pending proposals need a dismiss_reason; `no_reason` is
+        // the API default when the analyst does not pick one.
+        await http.put(
+          INVESTIGATION_STATUS_URL.replace('{id}', encodeURIComponent(investigation.id)),
+          {
+            version: AGENTIC_INVESTIGATIONS_API_VERSION,
+            body: JSON.stringify(
+              status === 'closed' ? { status, dismiss_reason: 'no_reason' } : { status }
+            ),
+          }
+        );
+        notifications.toasts.addSuccess({
+          title:
+            status === 'closed'
+              ? i18n.translate('xpack.nightshift.investigations.cardCloseSuccess', {
+                  defaultMessage: 'Investigation closed',
+                })
+              : i18n.translate('xpack.nightshift.investigations.cardOpenSuccess', {
+                  defaultMessage: 'Investigation reopened',
+                }),
+        });
+      } catch (error) {
+        notifications.toasts.addError(statusErrorMessage(error), {
+          title: i18n.translate('xpack.nightshift.investigations.cardStatusError', {
+            defaultMessage: 'Could not update the status',
+          }),
+        });
+      } finally {
+        invalidateLists();
+      }
+    },
+    [http, invalidateLists, investigation.id, notifications.toasts]
+  );
 
   const menuItems = useMemo(
     () => [
@@ -148,8 +251,55 @@ export const InvestigationCardActions = ({
       >
         {copyLinkLabel}
       </EuiContextMenuItem>,
-      ...(canDelete
+      <EuiContextMenuItem
+        key="copyAgentInstructions"
+        icon="copy"
+        onClick={(event) => {
+          event.stopPropagation();
+          setIsMenuOpen(false);
+          handleCopyAgentInstructions();
+        }}
+        data-test-subj="nightshiftInvestigationCardCopyAgentInstructions"
+      >
+        {copyAgentInstructionsLabel}
+      </EuiContextMenuItem>,
+      ...(canManage
         ? [
+            closed ? (
+              <EuiContextMenuItem
+                key="open"
+                icon="refresh"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setIsMenuOpen(false);
+                  void handleSetStatus('open');
+                }}
+                data-test-subj="nightshiftInvestigationCardOpen"
+                {...getEbtProps({
+                  action: NIGHTSHIFT_EBT_ACTIONS.OPEN_INVESTIGATION,
+                  element: ebtElement,
+                })}
+              >
+                {openLabel}
+              </EuiContextMenuItem>
+            ) : (
+              <EuiContextMenuItem
+                key="close"
+                icon="check"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setIsMenuOpen(false);
+                  void handleSetStatus('closed');
+                }}
+                data-test-subj="nightshiftInvestigationCardClose"
+                {...getEbtProps({
+                  action: NIGHTSHIFT_EBT_ACTIONS.CLOSE_INVESTIGATION,
+                  element: ebtElement,
+                })}
+              >
+                {closeLabel}
+              </EuiContextMenuItem>
+            ),
             <EuiHorizontalRule key="deleteSeparator" margin="none" />,
             <EuiContextMenuItem
               key="delete"
@@ -171,7 +321,7 @@ export const InvestigationCardActions = ({
           ]
         : []),
     ],
-    [canDelete, ebtElement, handleCopyLink]
+    [canManage, closed, ebtElement, handleCopyAgentInstructions, handleCopyLink, handleSetStatus]
   );
 
   return (

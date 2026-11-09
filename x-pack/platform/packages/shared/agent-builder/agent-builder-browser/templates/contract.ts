@@ -28,6 +28,8 @@ export interface ConversationTemplateDetailsFlyoutRenderProps {
    * chat's own cache, so it is `undefined` there.
    */
   refetchConversation?: () => Promise<void>;
+  /** Switches the flyout to another of its tabs, by id. */
+  selectTab?: (tabId: string) => void;
 }
 
 /**

@@ -7,9 +7,18 @@
 
 import { css } from '@emotion/react';
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { NightshiftMarkIcon } from '@kbn/observability-shared-plugin/public';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../common/ebt_constants';
 
 export interface NightshiftHeaderProps {
   isLoading?: boolean;
@@ -20,6 +29,8 @@ export interface NightshiftHeaderProps {
   isGreetingInline?: boolean;
   /** Addresses the user by name ("Good morning, Kate!"). */
   greetingName?: string;
+  /** Deep link to the Investigations page. */
+  viewAllInvestigationsHref?: string;
 }
 
 const getGreeting = (name?: string): string => {
@@ -87,10 +98,16 @@ export function NightshiftHeader({
   title: titleOverride,
   isGreetingInline = false,
   greetingName,
+  viewAllInvestigationsHref,
 }: NightshiftHeaderProps): React.ReactElement {
   const { euiTheme } = useEuiTheme();
 
   const title = titleOverride ?? getHeroTitle({ isLoading, hasActiveInvestigations });
+  const buttonCss = css`
+    &:hover {
+      text-decoration: none !important;
+    }
+  `;
 
   return (
     <EuiFlexItem
@@ -99,71 +116,80 @@ export function NightshiftHeader({
         padding: 0;
       `}
     >
-      <EuiFlexGroup
-        alignItems="flexEnd"
-        direction="row"
-        gutterSize="l"
-        justifyContent="spaceBetween"
-        responsive={false}
-      >
-        <EuiFlexItem grow>
-          <EuiFlexGroup alignItems="center" direction="row" gutterSize="m" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <div
-                aria-label={i18n.translate('xpack.nightshift.hero.nightshiftIconAriaLabel', {
-                  defaultMessage: 'Nightshift',
-                })}
-                role="img"
-                css={css`
-                  align-items: center;
-                  background: linear-gradient(
-                    99.4deg,
-                    ${euiTheme.colors.backgroundLightPrimary} 3.97%,
-                    ${euiTheme.colors.backgroundLightAssistance} 65.6%
-                  );
-                  border-radius: 50%;
-                  color: ${euiTheme.colors.textAssistance};
-                  display: inline-flex;
-                  height: calc(${euiTheme.size.xxl} + ${euiTheme.size.m});
-                  justify-content: center;
-                  width: calc(${euiTheme.size.xxl} + ${euiTheme.size.m});
-                `}
-              >
-                <NightshiftMarkIcon />
-              </div>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              {!isGreetingInline && (
-                <EuiText color="subdued" size="s" textAlign="left">
-                  <p>{getGreeting(greetingName)}</p>
-                </EuiText>
-              )}
-              <EuiTitle
-                size="m"
-                css={css`
-                  font-size: calc(${euiTheme.size.l} + ${euiTheme.size.xxs});
-                  font-weight: ${euiTheme.font.weight.medium};
-                  line-height: ${euiTheme.size.xl};
-                  text-align: left;
-                  white-space: nowrap;
-                `}
-              >
-                <h2>
-                  {isGreetingInline && (
-                    <span
-                      css={css`
-                        color: ${euiTheme.colors.textSubdued};
-                      `}
-                    >
-                      {`${getGreeting(greetingName)} `}
-                    </span>
-                  )}
-                  {title}
-                </h2>
-              </EuiTitle>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+      <EuiFlexGroup alignItems="center" direction="row" gutterSize="m" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <div
+            aria-label={i18n.translate('xpack.nightshift.hero.nightshiftIconAriaLabel', {
+              defaultMessage: 'Nightshift',
+            })}
+            role="img"
+            css={css`
+              align-items: center;
+              background: linear-gradient(
+                99.4deg,
+                ${euiTheme.colors.backgroundLightPrimary} 3.97%,
+                ${euiTheme.colors.backgroundLightAssistance} 65.6%
+              );
+              border-radius: 50%;
+              color: ${euiTheme.colors.textAssistance};
+              display: inline-flex;
+              height: calc(${euiTheme.size.xxl} + ${euiTheme.size.m});
+              justify-content: center;
+              width: calc(${euiTheme.size.xxl} + ${euiTheme.size.m});
+            `}
+          >
+            <NightshiftMarkIcon />
+          </div>
         </EuiFlexItem>
+        <EuiFlexItem>
+          {!isGreetingInline && (
+            <EuiText color="subdued" size="s" textAlign="left">
+              <p>{getGreeting(greetingName)}</p>
+            </EuiText>
+          )}
+          <EuiTitle
+            size="m"
+            css={css`
+              font-size: calc(${euiTheme.size.l} + ${euiTheme.size.xxs});
+              font-weight: ${euiTheme.font.weight.medium};
+              line-height: ${euiTheme.size.xl};
+              text-align: left;
+              white-space: nowrap;
+            `}
+          >
+            <h2>
+              {isGreetingInline && (
+                <span
+                  css={css`
+                    color: ${euiTheme.colors.textSubdued};
+                  `}
+                >
+                  {`${getGreeting(greetingName)} `}
+                </span>
+              )}
+              {title}
+            </h2>
+          </EuiTitle>
+        </EuiFlexItem>
+        {viewAllInvestigationsHref ? (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              color="text"
+              data-test-subj="nightshiftHomepageViewAllInvestigations"
+              href={viewAllInvestigationsHref}
+              size="s"
+              css={buttonCss}
+              {...getEbtProps({
+                action: NIGHTSHIFT_EBT_ACTIONS.VIEW_ALL_INVESTIGATIONS,
+                element: NIGHTSHIFT_EBT_ELEMENTS.PAGE_HEADER,
+              })}
+            >
+              {i18n.translate('xpack.nightshift.summary.viewAllInvestigationsLinkText', {
+                defaultMessage: 'View all investigations',
+              })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGroup>
     </EuiFlexItem>
   );

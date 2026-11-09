@@ -126,6 +126,7 @@
     "@kbn/server-route-repository-utils",
     "@kbn/core-analytics-browser",
     "@kbn/apm-types",
+    "@kbn/agentic-investigations-plugin",
     "@kbn/serverless",
     "@kbn/aiops-log-rate-analysis",
     "@kbn/alerting-comparators",

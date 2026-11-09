@@ -161,7 +161,7 @@ describe('ConversationDetailsFlyoutSnapshot', () => {
     return conversationTemplatesService;
   };
 
-  const renderSnapshot = (onNotFound?: () => void) => {
+  const renderSnapshot = (onNotFound?: () => void, initialTabId?: string) => {
     const get = jest.fn();
     const conversationsService = { get } as unknown as ConversationsService;
     const queryClient = new QueryClient({
@@ -181,6 +181,7 @@ describe('ConversationDetailsFlyoutSnapshot', () => {
           conversationsService={conversationsService}
           conversationTemplatesService={createTemplatesService()}
           titleId="title"
+          initialTabId={initialTabId}
           onNotFound={onNotFound}
         />,
         { wrapper: Wrapper }
@@ -196,6 +197,27 @@ describe('ConversationDetailsFlyoutSnapshot', () => {
 
   afterEach(() => {
     jest.useRealTimers();
+  });
+
+  it.each([
+    ['a full tab id', 'test.second'],
+    ['the part after the template id', 'second'],
+  ])('opens on the tab named by %s', async (_label, initialTabId) => {
+    const { get, renderResult } = renderSnapshot(undefined, initialTabId);
+    get.mockResolvedValue(createConversation({ title: 'Conversation' }));
+
+    renderResult();
+
+    expect(await screen.findByRole('button', { name: 'Second clicked 0' })).toBeInTheDocument();
+  });
+
+  it('opens on the first tab when the initial tab matches none', async () => {
+    const { get, renderResult } = renderSnapshot(undefined, 'missing');
+    get.mockResolvedValue(createConversation({ title: 'Conversation' }));
+
+    renderResult();
+
+    expect(await screen.findByRole('button', { name: 'First clicked 0' })).toBeInTheDocument();
   });
 
   it('polls the conversation every 5 seconds while open', async () => {
@@ -333,6 +355,14 @@ describe('ConversationDetailsFlyoutSnapshot', () => {
 });
 
 describe('ConversationDetailsFlyout', () => {
+  beforeEach(() => {
+    window.history.pushState({}, '', '/app/agent_builder/conversations/c1');
+  });
+
+  afterEach(() => {
+    window.history.pushState({}, '', '/');
+  });
+
   it('renders the template trailing actions in the menu bar', () => {
     const trailingActions = jest.fn(() => [
       { iconType: 'link', 'aria-label': 'Copy link', onClick: jest.fn() },
@@ -373,7 +403,7 @@ describe('ConversationDetailsFlyout', () => {
   });
 
   it('opens resizable at the remembered width', () => {
-    localStorage.setItem('agentBuilder.conversationDetailsFlyoutWidth', '620');
+    localStorage.setItem('agentBuilder.conversationSummaryFlyoutWidth', '620');
     jest.mocked(useConversation).mockReturnValue({
       conversation: createConversation(),
       isLoading: false,
@@ -386,7 +416,12 @@ describe('ConversationDetailsFlyout', () => {
 
     const [flyoutProps] = jest.mocked(EuiFlyout).mock.lastCall ?? [{}];
     expect(flyoutProps).toEqual(
-      expect.objectContaining({ size: 620, minWidth: 400, maxWidth: 640, resizable: true })
+      expect.objectContaining({
+        size: 620,
+        minWidth: 400,
+        maxWidth: Math.round(window.innerWidth * 0.9),
+        resizable: true,
+      })
     );
   });
 });

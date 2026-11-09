@@ -41,6 +41,7 @@ export {
   ConversationDetailsFlyoutFooter,
   type ConversationDetailsFlyoutFooterProps,
   type CloseInvestigationModalRenderProps,
+  type DeleteInvestigationModalRenderProps,
 } from './src/components/details/flyout_footer';
 export {
   ConversationHeaderBlocks,
@@ -111,6 +112,10 @@ export {
   type LinkedInvestigationsSlotRenderProps,
   type RenderOverview,
   type OverviewSlotRenderProps,
+  type RenderImpactMap,
+  type ImpactMapSlotRenderProps,
+  type RenderTimeline,
+  type TimelineSlotRenderProps,
   type RenderLiveState,
   type LiveStateSlotRenderProps,
   type RenderTitle,

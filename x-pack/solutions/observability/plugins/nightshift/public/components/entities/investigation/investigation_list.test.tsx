@@ -18,6 +18,9 @@ jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
       http: { basePath: { get: () => mockBasePath } },
+      application: {
+        getUrlForApp: () => '/app/nightshift/',
+      },
       agenticInvestigations: {
         InvestigationCard: ({ investigation: item }: { investigation: InvestigationSummary }) => (
           <div data-test-subj="investigationCard">{item.title}</div>
@@ -102,21 +105,57 @@ describe('InvestigationList', () => {
     expect(screen.getByTestId('nightshiftInvestigationsEmpty')).toHaveTextContent(
       'No investigations found'
     );
+    expect(screen.getByTestId('nightshiftInvestigationsEmptyHint')).toHaveTextContent(
+      'Try adjusting your time range or filter'
+    );
+    expect(screen.getByTestId('nightshiftInvestigationsEmptyIllustration')).toBeInTheDocument();
     expect(
       screen.queryByTestId('nightshiftInvestigationSection-in-progress')
     ).not.toBeInTheDocument();
     expect(screen.queryByTestId('nightshiftInvestigationSection-critical')).not.toBeInTheDocument();
   });
 
-  it('renders in progress first and not rated last', () => {
+  it('uses emptyContent when every section is empty', () => {
+    render(
+      <I18nProvider>
+        <InvestigationList
+          sections={[makeSection('in-progress'), makeSection('critical')]}
+          emptyContent={<span data-test-subj="customEmpty">Archived only</span>}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByTestId('nightshiftInvestigationsEmpty')).toContainElement(
+      screen.getByTestId('customEmpty')
+    );
+    expect(screen.queryByText('No investigations found')).not.toBeInTheDocument();
+  });
+
+  it('hides View all on Recently opened and keeps it on other sections', () => {
     renderSections([
+      makeSection('recent', { investigations: [investigation], total: 1 }),
+      makeSection('in-progress', { investigations: [investigation], total: 1 }),
+    ]);
+
+    expect(
+      screen.queryByTestId('nightshiftInvestigationSectionViewInInvestigations-recent')
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByTestId('nightshiftInvestigationSectionViewInInvestigations-in-progress')
+    ).toHaveTextContent('View all');
+  });
+
+  it('renders Recently opened above in progress, and Closed after the open buckets', () => {
+    renderSections([
+      makeSection('recent', { investigations: [investigation], total: 1 }),
       makeSection('in-progress', { investigations: [investigation], total: 1 }),
       makeSection('critical', { investigations: [investigation], total: 1 }),
       makeSection('not-rated', { investigations: [investigation], total: 1 }),
+      makeSection('closed', { investigations: [investigation], total: 1 }),
     ]);
 
     const titles = screen.getAllByRole('heading').map((heading) => heading.textContent);
-    expect(titles).toEqual(['In progress', 'Critical', 'Not rated']);
+    expect(titles).toEqual(['Recently opened', 'In progress', 'Critical', 'Not rated', 'Closed']);
   });
 
   it('renders each investigation as the shared investigation card', () => {
@@ -146,6 +185,44 @@ describe('InvestigationList', () => {
 
       expect(toggle('critical')).toHaveAttribute('aria-expanded', 'false');
       expect(toggle('high')).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it('starts Closed collapsed', () => {
+      renderSections([
+        makeSection('critical', { investigations: [investigation], total: 1 }),
+        makeSection('closed', { investigations: [investigation], total: 1 }),
+      ]);
+
+      expect(toggle('critical')).toHaveAttribute('aria-expanded', 'true');
+      expect(toggle('closed')).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it('starts Closed collapsed even when storage previously left it open', () => {
+      window.localStorage.setItem(
+        'nightshift.investigations.collapsedSections.v2:default',
+        JSON.stringify([])
+      );
+
+      renderSections([
+        makeSection('critical', { investigations: [investigation], total: 1 }),
+        makeSection('closed', { investigations: [investigation], total: 1 }),
+      ]);
+
+      expect(toggle('closed')).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it('collapses Closed again on remount after the user opens it', () => {
+      const sections = [
+        makeSection('critical', { investigations: [investigation], total: 1 }),
+        makeSection('closed', { investigations: [investigation], total: 1 }),
+      ];
+      renderSections(sections);
+      fireEvent.click(toggle('closed'));
+      expect(toggle('closed')).toHaveAttribute('aria-expanded', 'true');
+      cleanup();
+
+      renderSections(sections);
+      expect(toggle('closed')).toHaveAttribute('aria-expanded', 'false');
     });
 
     it('remembers a closed section in its own space', () => {

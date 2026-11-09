@@ -10,13 +10,17 @@ import { i18n } from '@kbn/i18n';
 import type { ConversationTemplateBriefCardRenderProps } from '@kbn/agent-builder-browser';
 import {
   registerAgenticInvestigationTemplateUI,
-  type CloseInvestigationModalRenderProps,
+  type DeleteInvestigationModalRenderProps,
   type EscalationModalRenderProps,
   type OverviewSlotRenderProps,
+  type ImpactMapSlotRenderProps,
+  type TimelineSlotRenderProps,
   type LiveStateSlotRenderProps,
   type SeveritySlotRenderProps,
   type TitleSlotRenderProps,
+  type Investigation,
 } from '@kbn/agentic-investigations-common';
+import { NoDottedLinks } from '../../../no_dotted_links';
 import { INVESTIGATION_TEMPLATE_ID, isInvestigationTitlePending } from '../../../../common';
 import { EscalationModalBoundary } from '../../shared/escalation_modal/escalation_modal_boundary';
 import {
@@ -26,6 +30,7 @@ import {
 import { getSharedInvestigationsQueryClient } from '../../../shared_query_client';
 import { NEW_INVESTIGATION_TITLE } from './translations';
 import { copyLink } from '../../shared/copy_link';
+import { copyAgentInstructions } from '../../shared/copy_agent_instructions';
 import type { TemplateDefinition } from '../../registry/types';
 
 const INVESTIGATION_TEMPLATE_NAME = i18n.translate(
@@ -36,6 +41,16 @@ const INVESTIGATION_TEMPLATE_NAME = i18n.translate(
 const OVERVIEW_LOADING_LABEL = i18n.translate(
   'xpack.agenticInvestigations.detailsFlyout.overview.loading',
   { defaultMessage: 'Loading investigation…' }
+);
+
+const IMPACT_MAP_LOADING_LABEL = i18n.translate(
+  'xpack.agenticInvestigations.detailsFlyout.impactMap.loading',
+  { defaultMessage: 'Loading impact map…' }
+);
+
+const TIMELINE_LOADING_LABEL = i18n.translate(
+  'xpack.agenticInvestigations.detailsFlyout.timeline.loading',
+  { defaultMessage: 'Loading timeline…' }
 );
 
 /**
@@ -55,6 +70,7 @@ export const investigationTemplate: TemplateDefinition = {
     renderAssignees,
     renderStatus,
     getImpactEntityOpener,
+    impactMapRenderer,
   }) => {
     const { agentBuilder, proposals } = startDeps;
 
@@ -105,6 +121,7 @@ export const investigationTemplate: TemplateDefinition = {
             React.createElement(
               QueryClientProvider,
               { client: queryClient },
+              React.createElement(NoDottedLinks),
               React.createElement(Component, props)
             )
           );
@@ -137,6 +154,20 @@ export const investigationTemplate: TemplateDefinition = {
         return Overview;
       }
     );
+
+    const LazyImpactMapTab = impactMapRenderer
+      ? makeLazyWithSharedClient<ImpactMapSlotRenderProps>(async () => {
+          const { ImpactMapTab } = await import('./flyout/impact_map_tab');
+          const Tab: React.FC<ImpactMapSlotRenderProps> = (props) =>
+            React.createElement(ImpactMapTab, { ...props, Renderer: impactMapRenderer });
+          return Tab;
+        })
+      : undefined;
+
+    const LazyTimelineTab = makeLazyWithSharedClient<TimelineSlotRenderProps>(async () => {
+      const { TimelineTab } = await import('./flyout/timeline_tab');
+      return TimelineTab;
+    });
 
     const LazyInvestigationLiveState = makeLazyWithSharedClient<LiveStateSlotRenderProps>(
       async () => {
@@ -179,29 +210,80 @@ export const investigationTemplate: TemplateDefinition = {
         React.createElement(LazyInvestigationBriefCard, props)
       );
 
-    const LazyConnectedCloseInvestigationModal =
-      makeLazyWithProviders<CloseInvestigationModalRenderProps>(async () => {
-        const [{ ConnectedCloseInvestigationModal }, { PrivilegeGate }] = await Promise.all([
-          import('../../shared/connected_status/connected_close_investigation_modal'),
+    // Footer Delete: no Suspense spinner under the Actions button (null fallback), and warm the
+    // same chunks `makeLazyWithProviders` needs as soon as Actions is on screen.
+    let footerActionChunksPreloaded = false;
+    const preloadFooterActionChunks = () => {
+      if (footerActionChunksPreloaded) {
+        return;
+      }
+      footerActionChunksPreloaded = true;
+      void Promise.all([
+        import('@kbn/kibana-react-plugin/public'),
+        import('@kbn/react-query'),
+        import('../../shared/connected_status/connected_delete_investigation_modal'),
+        import('../../shared/privileges/privilege_gate'),
+      ]);
+    };
+
+    const LazyConnectedDeleteInvestigationModal =
+      makeLazyWithProviders<DeleteInvestigationModalRenderProps>(async () => {
+        const [{ ConnectedDeleteInvestigationModal }, { PrivilegeGate }] = await Promise.all([
+          import('../../shared/connected_status/connected_delete_investigation_modal'),
           import('../../shared/privileges/privilege_gate'),
         ]);
-        const GatedCloseInvestigationModal: React.FC<CloseInvestigationModalRenderProps> = (
+        const GatedDeleteInvestigationModal: React.FC<DeleteInvestigationModalRenderProps> = (
           props
         ) =>
           React.createElement(
             PrivilegeGate,
             { privilege: 'manageInvestigations' },
-            React.createElement(ConnectedCloseInvestigationModal, props)
+            React.createElement(ConnectedDeleteInvestigationModal, props)
           );
-        return GatedCloseInvestigationModal;
+        return GatedDeleteInvestigationModal;
       });
 
-    const renderCloseInvestigationModal = (props: CloseInvestigationModalRenderProps) =>
+    const LazyManageInvestigationsGate = makeLazyWithProviders<React.PropsWithChildren>(
+      async () => {
+        const { PrivilegeGate } = await import('../../shared/privileges/privilege_gate');
+        const ManageInvestigationsGate: React.FC<React.PropsWithChildren> = ({ children }) =>
+          React.createElement(PrivilegeGate, { privilege: 'manageInvestigations' }, children);
+        return ManageInvestigationsGate;
+      }
+    );
+
+    const renderDeleteInvestigationModal = (props: DeleteInvestigationModalRenderProps) =>
       React.createElement(
         EscalationModalBoundary,
-        null,
-        React.createElement(LazyConnectedCloseInvestigationModal, props)
+        { fallback: null },
+        React.createElement(LazyConnectedDeleteInvestigationModal, props)
       );
+
+    const onCloseInvestigationImmediate = async (investigation: Investigation) => {
+      const [{ closeInvestigation }, queryClient] = await Promise.all([
+        import('../../shared/connected_status/close_investigation'),
+        getSharedInvestigationsQueryClient(),
+      ]);
+      await closeInvestigation({
+        investigation,
+        http: core.http,
+        notifications: core.notifications,
+        queryClient,
+      });
+    };
+
+    const onReopenInvestigation = async (investigation: Investigation) => {
+      const [{ reopenInvestigation }, queryClient] = await Promise.all([
+        import('../../shared/connected_status/reopen_investigation'),
+        getSharedInvestigationsQueryClient(),
+      ]);
+      await reopenInvestigation({
+        investigation,
+        http: core.http,
+        notifications: core.notifications,
+        queryClient,
+      });
+    };
 
     registerAgenticInvestigationTemplateUI({
       conversationTemplates: agentBuilder.conversationTemplates,
@@ -219,12 +301,39 @@ export const investigationTemplate: TemplateDefinition = {
           null,
           React.createElement(LazySeverityPicker, props)
         ),
-      renderCloseInvestigationModal,
+      onCloseInvestigationImmediate,
+      onReopenInvestigation,
+      renderDeleteInvestigationModal,
+      onCopyAgentInstructions: ({ id }) => {
+        copyAgentInstructions(core, id);
+      },
+      wrapActionsMenu: (menu) => {
+        preloadFooterActionChunks();
+        return React.createElement(
+          React.Suspense,
+          { fallback: null },
+          React.createElement(LazyManageInvestigationsGate, null, menu)
+        );
+      },
       renderOverview: (props) =>
         React.createElement(
           EscalationModalBoundary,
           { loadingLabel: OVERVIEW_LOADING_LABEL },
           React.createElement(LazyInvestigationOverview, props)
+        ),
+      renderImpactMap: LazyImpactMapTab
+        ? (props) =>
+            React.createElement(
+              EscalationModalBoundary,
+              { loadingLabel: IMPACT_MAP_LOADING_LABEL },
+              React.createElement(LazyImpactMapTab, props)
+            )
+        : undefined,
+      renderTimeline: (props) =>
+        React.createElement(
+          EscalationModalBoundary,
+          { loadingLabel: TIMELINE_LOADING_LABEL },
+          React.createElement(LazyTimelineTab, props)
         ),
       renderLiveState: (props) =>
         React.createElement(

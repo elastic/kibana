@@ -92,6 +92,8 @@ import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/reg
 import type { NightshiftAgentTypeOptions } from './agents/investigation';
 import { registerInvestigationAgentType } from './agents/investigation';
 import { registerFindingsRecorder } from './findings_recorder';
+import { describeLocalElasticsearch } from './findings_recorder/local_elasticsearch';
+import { resolveLocalElasticsearchUrl } from './onboarding/local_elasticsearch_connector';
 import { createRecorderProposals } from './findings_recorder/proposals_adapter';
 import { createRecorderWorkspace } from './findings_recorder/workspace_tools';
 import { registerDecisionTreeReinforcementAgentType } from './agents/decision_tree_reinforcement';
@@ -364,6 +366,19 @@ export class NightshiftInvestigationsPlugin
             getSavedObjects: () => this.savedObjects,
             getUiSettings: () => this.uiSettings,
             getAgenticInvestigations: () => this.agenticInvestigations,
+            getLocalElasticsearch: () => {
+              let url: string | undefined;
+              try {
+                url = resolveLocalElasticsearchUrl({
+                  cloud: this.cloudSetup,
+                  elasticsearch: this.elasticsearch,
+                  esHosts: this.esHosts,
+                });
+              } catch {
+                url = undefined;
+              }
+              return describeLocalElasticsearch({ cloud: this.cloudSetup, url });
+            },
             // The final pass proposes actions for a person to decide, as the investigator's
             // `proposals.create` tool did, and sees which ones the conversation already has.
             getProposals: () =>

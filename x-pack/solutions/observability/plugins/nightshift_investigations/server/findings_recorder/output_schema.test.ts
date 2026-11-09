@@ -16,6 +16,12 @@ import {
   entityIdFor,
   limitEvidence,
   limitFindings,
+  limitImpactMap,
+  limitEvents,
+  classifyEntityType,
+  withoutEntityName,
+  limitDescriptionBullets,
+  limitBulletList,
 } from './output_schema';
 
 describe('findings output', () => {
@@ -83,6 +89,24 @@ describe('evidence', () => {
     });
   });
 
+  it('keeps at most two threshold lines with a finite level', () => {
+    const kept = limitEvidence({
+      chart: {
+        ...chart(points),
+        thresholds: [
+          { y: 30, label: 'Alert at 30%' },
+          { y: Number.NaN, label: 'bad' },
+          { y: 50, label: 'b' },
+          { y: 60, label: 'c' },
+        ],
+      },
+    });
+    expect(kept?.chart?.thresholds).toEqual([
+      { y: 30, label: 'Alert at 30%' },
+      { y: 50, label: 'b' },
+    ]);
+  });
+
   it('drops points that are not finite numbers or have no x, and a chart left with none', () => {
     const kept = limitEvidence({
       chart: chart([...points, { x: '', y: 5 }, { x: '2026-08-09T01:13:00Z', y: Number.NaN }]),
@@ -94,8 +118,28 @@ describe('evidence', () => {
     expect(limitEvidence({ chart: chart([]) })).toBeUndefined();
   });
 
+  it('writes epoch bucket keys as ISO times and drops points that are not times', () => {
+    const kept = limitEvidence({
+      chart: chart([
+        { x: '1786324200000', y: 3 },
+        { x: '1786324260', y: 412 },
+        { x: 'around then', y: 9 },
+        { x: '2026-08-09T01:12:00Z', y: 398 },
+      ]),
+    });
+    expect(kept?.chart?.series[0].points.map(({ x }) => x)).toEqual([
+      '2026-08-10T01:10:00.000Z',
+      '2026-08-10T01:11:00.000Z',
+      '2026-08-09T01:12:00Z',
+    ]);
+    expect(limitEvidence({ chart: chart([{ x: 'later', y: 1 }]) })).toBeUndefined();
+  });
+
   it('trims a chart to the store limits', () => {
-    const many = Array.from({ length: 300 }, (_, i) => ({ x: `2026-08-09T01:${i}`, y: i }));
+    const many = Array.from({ length: 300 }, (_, i) => ({
+      x: new Date(Date.UTC(2026, 7, 9, 1, i)).toISOString(),
+      y: i,
+    }));
     const kept = limitEvidence({
       chart: {
         ...chart(many),
@@ -107,7 +151,10 @@ describe('evidence', () => {
   });
 
   it('thins an oversized series across the whole window, keeping the first and last point', () => {
-    const many = Array.from({ length: 300 }, (_, i) => ({ x: `2026-08-09T01:${i}`, y: i }));
+    const many = Array.from({ length: 300 }, (_, i) => ({
+      x: new Date(Date.UTC(2026, 7, 9, 1, i)).toISOString(),
+      y: i,
+    }));
     const [{ points: kept }] = limitEvidence({ chart: chart(many) })?.chart?.series ?? [];
     expect(kept).toHaveLength(100);
     expect(kept[0]).toEqual(many[0]);
@@ -115,7 +162,10 @@ describe('evidence', () => {
   });
 
   it('keeps every point of a series that fits', () => {
-    const exact = Array.from({ length: 100 }, (_, i) => ({ x: `2026-08-09T01:${i}`, y: i }));
+    const exact = Array.from({ length: 100 }, (_, i) => ({
+      x: new Date(Date.UTC(2026, 7, 9, 1, i)).toISOString(),
+      y: i,
+    }));
     expect(limitEvidence({ chart: chart(exact) })?.chart?.series[0].points).toEqual(exact);
   });
 
@@ -191,7 +241,10 @@ describe('proposals', () => {
 
 describe('entity evidence', () => {
   it('trims the evidence of each entity to what the stores accept', () => {
-    const many = Array.from({ length: 300 }, (_, i) => ({ x: `2026-08-09T01:${i}`, y: i }));
+    const many = Array.from({ length: 300 }, (_, i) => ({
+      x: new Date(Date.UTC(2026, 7, 9, 1, i)).toISOString(),
+      y: i,
+    }));
     const parsed = findingsOutputSchema.safeParse({
       summary: 's',
       impact_summary: 'x',
@@ -226,6 +279,211 @@ describe('entity evidence', () => {
   });
 });
 
+describe('classifyEntityType', () => {
+  it('draws what services rely on as a dependency and Kubernetes objects with their logo', () => {
+    expect(classifyEntityType('postgres_database')).toEqual({ kind: 'dependency' });
+    expect(classifyEntityType('message_queue')).toEqual({ kind: 'dependency' });
+    expect(classifyEntityType('host')).toEqual({ kind: 'infrastructure' });
+    expect(classifyEntityType('k8s.deployment')).toEqual({
+      kind: 'infrastructure',
+      euiIcon: 'logoKubernetes',
+    });
+    expect(classifyEntityType('java_service')).toEqual({ kind: 'service' });
+  });
+
+  it('classifies a new type the model left bare, and leaves a known one to the catalog', () => {
+    const map = {
+      entities: [
+        { id: 'ship', type: 'k8s.deployment' },
+        { id: 'db', type: 'known_db' },
+      ],
+      relationships: [],
+    };
+    const record = limitImpactMap(map, new Set(['known_db']));
+    expect(record?.entity_types).toEqual([
+      expect.objectContaining({
+        id: 'k8s.deployment',
+        kind: 'infrastructure',
+        icon: { eui_icon: 'logoKubernetes' },
+      }),
+    ]);
+  });
+});
+
+describe('a bare k8s type', () => {
+  it('becomes a Kubernetes node when a pod runs on it', () => {
+    const record = limitImpactMap({
+      entities: [
+        { id: 'shipping-pod', type: 'k8s.pod' },
+        { id: 'gke-pool-1', type: 'k8s' },
+        { id: 'other', type: 'k8s' },
+      ],
+      relationships: [{ source: 'shipping-pod', target: 'gke-pool-1', type: 'runs_on' }],
+    });
+    expect(record?.entities.map(({ id, type_id: typeId }) => [id, typeId])).toEqual([
+      ['shipping-pod', 'k8s.pod'],
+      ['gke-pool-1', 'k8s.node'],
+      ['other', 'k8s'],
+    ]);
+  });
+});
+
+describe('impact map metadata', () => {
+  it('teaches a known type only the fields it does not already have', () => {
+    const known = new Map([
+      [
+        'k8s.deployment',
+        {
+          id: 'k8s.deployment',
+          label: 'Kubernetes deployment',
+          kind: 'infrastructure' as const,
+          metadata_fields: [{ key: 'k8s.deployment.name', label: 'Deployment' }],
+        },
+      ],
+    ]);
+    const record = limitImpactMap(
+      {
+        entities: [
+          {
+            id: 'shipping',
+            type: 'k8s.deployment',
+            metadata: [
+              { key: 'k8s.deployment.name', value: 'shipping' },
+              { key: 'k8s.namespace.name', value: 'shop' },
+              { key: 'app.owner_team', value: 'logistics', label: 'Owner team' },
+            ],
+          },
+        ],
+        relationships: [],
+      },
+      new Set(['k8s.deployment']),
+      known
+    );
+    expect(record?.entity_types).toEqual([
+      {
+        id: 'k8s.deployment',
+        label: 'Kubernetes deployment',
+        kind: 'infrastructure',
+        metadata_fields: [{ key: 'app.owner_team', label: 'Owner team' }],
+      },
+    ]);
+  });
+
+  it('cleans keys and values, keeps featured, and teaches a new type its fields', () => {
+    const record = limitImpactMap({
+      entities: [
+        {
+          id: 'shipping',
+          type: 'k8s.deployment',
+          metadata: [
+            { key: 'K8s Namespace.Name', value: ' shop ', featured: true },
+            { key: 'cloud.availability_zone', value: 'eu-west-1b' },
+            { key: 'cloud.availability_zone', value: 'duplicate' },
+            { key: 'empty', value: '   ' },
+            { key: 'team pager', value: 'oncall', label: 'Pager' },
+          ],
+        },
+      ],
+      relationships: [],
+    });
+    expect(record?.entities[0].metadata).toEqual([
+      { key: 'k8s_namespace.name', value: 'shop', featured: true },
+      { key: 'cloud.availability_zone', value: 'eu-west-1b' },
+      { key: 'team_pager', value: 'oncall', label: 'Pager' },
+    ]);
+    expect(record?.entity_types[0].metadata_fields).toEqual([
+      { key: 'k8s_namespace.name', label: 'K8s namespace name', featured: true },
+      { key: 'cloud.availability_zone', label: 'Availability zone' },
+      { key: 'team_pager', label: 'Pager' },
+    ]);
+  });
+});
+
+describe('impact map', () => {
+  it('builds the store shape: types from the icon fields, normalised ids, no dangling edges', () => {
+    const map = limitImpactMap({
+      title: ' Checkout failures ',
+      entities: [
+        {
+          id: 'checkout',
+          type: 'Java Service',
+          agent_name: 'java',
+          role: 'symptom',
+          impacted: true,
+        },
+        { id: 'checkout', type: 'java_service' },
+        { id: 'payments-db', type: 'PostgreSQL', span_type: 'db', span_subtype: 'postgresql' },
+        { id: 'cart', label: 'Cart', type: 'java_service', alert_count: 2.4, health: 'healthy' },
+      ],
+      relationships: [
+        { source: 'checkout', target: 'payments-db', type: 'Reads From', on_critical_path: true },
+        { source: 'checkout', target: 'ghost', type: 'calls' },
+        { source: 'checkout', target: 'cart', type: 'calls', on_critical_path: false },
+      ],
+    });
+
+    expect(map).toEqual({
+      title: 'Checkout failures',
+      entities: [
+        {
+          id: 'checkout',
+          type_id: 'java_service',
+          label: 'checkout',
+          annotations: { role: 'symptom', impacted: true },
+        },
+        { id: 'payments-db', type_id: 'db.postgresql', label: 'payments-db' },
+        {
+          id: 'cart',
+          type_id: 'java_service',
+          label: 'Cart',
+          annotations: { health: 'healthy', alert_count: 2 },
+        },
+      ],
+      relationships: [
+        {
+          type_id: 'reads_from',
+          source_id: 'checkout',
+          target_id: 'payments-db',
+          on_critical_path: true,
+        },
+        { type_id: 'calls', source_id: 'checkout', target_id: 'cart' },
+      ],
+      entity_types: [
+        {
+          id: 'java_service',
+          label: 'Java service',
+          kind: 'service',
+          icon: { agent_name: 'java' },
+        },
+        {
+          id: 'db.postgresql',
+          label: 'Db postgresql',
+          kind: 'dependency',
+          icon: { span_type: 'db', span_subtype: 'postgresql' },
+        },
+      ],
+      relationship_types: [
+        { id: 'reads_from', label: 'reads from' },
+        { id: 'calls', label: 'calls' },
+      ],
+    });
+  });
+
+  it('leaves the map out of the record when none of its entities fit', () => {
+    const record = limitFindings({
+      summary: 's',
+      hypotheses: [],
+      impact_map: { entities: [{ id: '  ', type: 'x' }], relationships: [] },
+    });
+    expect(record).not.toHaveProperty('impact_map');
+  });
+
+  it('asks for the map in both schemas', () => {
+    expect(FINDINGS_JSON_SCHEMA.properties).toHaveProperty('impact_map');
+    expect(LIVE_FINDINGS_JSON_SCHEMA.properties).toHaveProperty('impact_map');
+  });
+});
+
 describe('entityIdFor', () => {
   it('uses the name when it fits the id limit', () => {
     expect(entityIdFor('checkout')).toBe('checkout');
@@ -238,5 +496,131 @@ describe('entityIdFor', () => {
     expect(entityIdFor(first).length).toBeLessThanOrEqual(256);
     expect(entityIdFor(first)).toBe(entityIdFor(first));
     expect(entityIdFor(first)).not.toBe(entityIdFor(second));
+  });
+});
+
+describe('limitEvents', () => {
+  const at = '2026-11-07T10:00:30Z';
+
+  it('keeps where the data of an event came from and hides credentials in it', () => {
+    const [event] = limitEvents([
+      {
+        kind: 'failure',
+        title: 'Errors rose',
+        at,
+        entity: 'checkout',
+        data_source: {
+          name: 'Elasticsearch',
+          query: { language: 'ES|QL', text: 'FROM logs-* | LIMIT 5' },
+          api_call: {
+            method: 'post',
+            endpoint: '/_query',
+            payload: '{"query":"x","api_key":"abc123"}',
+          },
+        },
+      },
+    ]);
+    expect(event.data_source).toEqual({
+      name: 'Elasticsearch',
+      query: { language: 'ES|QL', text: 'FROM logs-* | LIMIT 5' },
+      api_call: {
+        method: 'POST',
+        endpoint: '/_query',
+        payload: '{"query":"x","api_key":"[hidden]"}',
+      },
+    });
+  });
+
+  it('places events on an entity or a relationship and gives them stable ids', () => {
+    const [onEntity, onEdge] = limitEvents([
+      { kind: 'change', title: ' Deployed v2 ', at, entity: 'checkout' },
+      { kind: 'failure', title: 'Calls timed out', at, relationship: { source: 'a', target: 'b' } },
+    ]);
+    expect(onEntity).toEqual({
+      id: 'change:checkout:2026-11-07T10:00',
+      kind: 'change',
+      title: 'Deployed v2',
+      at: '2026-11-07T10:00:30.000Z',
+      entity_id: 'checkout',
+    });
+    expect(onEdge.relationship_id).toBe('a->b');
+  });
+
+  it('keeps a finding or a response without a target and drops other events without one', () => {
+    const kept = limitEvents([
+      { kind: 'response', title: 'Status page updated', at },
+      { kind: 'investigation', title: 'Bad deploy confirmed', at },
+      { kind: 'failure', title: 'Something failed', at },
+    ]);
+    expect(kept.map(({ kind }) => kind)).toEqual(['response', 'investigation']);
+  });
+
+  it('drops an event whose time cannot be read, and merges repeats of one event', () => {
+    const kept = limitEvents([
+      { kind: 'alert', title: 'Fired', at: 'soon', entity: 'x' },
+      { kind: 'alert', title: 'Fired', at, entity: 'x' },
+      { kind: 'alert', title: 'Fired again', at: '2026-11-07T10:00:50Z', entity: 'x' },
+    ]);
+    expect(kept).toHaveLength(1);
+    expect(kept[0].title).toBe('Fired again');
+  });
+});
+
+describe('withoutEntityName', () => {
+  it('drops the entity name from a type', () => {
+    expect(withoutEntityName('shipping_service', ['shipping'])).toBe('service');
+    expect(withoutEntityName('shipping', ['shipping'])).toBe('service');
+    expect(withoutEntityName('k8s_deployment', ['shipping'])).toBe('k8s_deployment');
+  });
+});
+
+describe('limitDescriptionBullets', () => {
+  it('keeps the first four bullets', () => {
+    const text = ['- a', '- b', '- c', '- d', '- e', '- f'].join('\n');
+    expect(limitDescriptionBullets(text)).toBe('- a\n- b\n- c\n- d');
+  });
+
+  it('keeps a lead sentence above its bullets', () => {
+    const text = 'Calls failed from 21:10Z.\n- 66 of 66 failed\n- Still failing at 22:00Z';
+    expect(limitDescriptionBullets(text)).toBe(
+      'Calls failed from 21:10Z.\n\n- 66 of 66 failed\n- Still failing at 22:00Z'
+    );
+  });
+
+  it('turns a paragraph into a lead sentence and at most four short bullets', () => {
+    const text =
+      'A new pod started at 16:49Z. It replaced the old pod. No event record exists for this change. ' +
+      'A direct query returned zero rows. A fifth sentence is dropped.';
+    expect(limitDescriptionBullets(text).split('\n')).toEqual([
+      'A new pod started at 16:49Z.',
+      '',
+      '- It replaced the old pod.',
+      '- No event record exists for this change.',
+      '- A direct query returned zero rows.',
+      '- A fifth sentence is dropped.',
+    ]);
+  });
+
+  it('cuts a very long bullet at a word', () => {
+    const long = `- ${'word '.repeat(80)}`;
+    expect(limitDescriptionBullets(long).length).toBeLessThanOrEqual(205);
+  });
+});
+
+describe('limitBulletList', () => {
+  it('turns a paragraph into short bullets', () => {
+    const text = 'Alert fired. Shipping pod crashed. A deploy changed it. Fourth. Fifth. Sixth.';
+    expect(limitBulletList(text, 3, 160).split('\n')).toEqual([
+      '- Alert fired.',
+      '- Shipping pod crashed.',
+      '- A deploy changed it.',
+    ]);
+  });
+
+  it('keeps bullets and never cuts inside an event link', () => {
+    const link = '[the shipping pod crashed repeatedly](event:failure:e1:2026-11-06T01:00)';
+    const out = limitBulletList(`- Something happened because ${link}\n- Two`, 5, 50);
+    expect(out).not.toMatch(/\[[^\]]*$|\]\([^)]*$/);
+    expect(out.split('\n')).toHaveLength(2);
   });
 });

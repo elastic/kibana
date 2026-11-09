@@ -64,6 +64,7 @@
       "observabilityAIAssistant",
       "observabilityAgentBuilder",
       "agentBuilder",
+      "agenticInvestigations",
       "slo",
       "cps",
     ],

@@ -176,12 +176,43 @@ describe('Nightshift investigation agent type', () => {
     expect(instructions).toContain('final message');
     for (const tool of [
       'set_conversation_metadata',
-      'agentic_investigations.set_impact',
       'agentic_investigations.set_hypotheses',
       'proposals.create',
     ]) {
       expect(instructions).not.toContain(tool);
     }
+    expect(instructions).not.toMatch(/agentic_investigations\.set_impact(?!_map)/);
+  });
+
+  it('gives the agent the impact map tools when the investigations plugin is on, and only then', async () => {
+    const withTools = await baseFor(
+      getInvestigationAgentType({
+        sandboxEnabled: false,
+        cortexEnabled: false,
+        investigationToolsEnabled: true,
+      })
+    );
+    const without = await baseFor(
+      getInvestigationAgentType({ sandboxEnabled: false, cortexEnabled: false })
+    );
+
+    expect(withTools.tools?.[0]?.tool_ids).toEqual([
+      TIME_CONVERTER_TOOL_ID,
+      'agentic_investigations.set_impact_map',
+      'agentic_investigations.upsert_impact_map_catalog',
+      'agentic_investigations.show_timeline',
+      SLACK_READ_TOOL_ID,
+    ]);
+    expect(without.tools?.[0]?.tool_ids).toEqual([TIME_CONVERTER_TOOL_ID, SLACK_READ_TOOL_ID]);
+  });
+
+  it('tells the agent how to draw an impact map when asked', async () => {
+    const { instructions } = await baseFor(
+      getInvestigationAgentType({ sandboxEnabled: true, cortexEnabled: true })
+    );
+
+    expect(instructions).toContain('agentic_investigations.set_impact_map');
+    expect(instructions).toContain('agentic_investigations.upsert_impact_map_catalog');
   });
 
   it("runs its hooks through the space's bound hook entry points", async () => {

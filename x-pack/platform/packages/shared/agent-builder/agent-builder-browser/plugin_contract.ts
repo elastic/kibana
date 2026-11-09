@@ -170,6 +170,11 @@ export interface OpenConversationSidebarOptions extends EmbeddableConversationPr
  */
 export interface OpenConversationDetailsOptions {
   conversationId: string;
+  /**
+   * The tab to open on: a tab id, or the part after the template id (for example `impactMap` for
+   * `<template>.impactMap`). Opens on the first tab when it matches none.
+   */
+  initialTabId?: string;
   onClose?: () => void;
   /** Icon buttons rendered in the flyout menu bar, before the close button (e.g. copy link). */
   trailingActions?: EuiFlyoutMenuAction[];

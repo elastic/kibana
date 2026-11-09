@@ -31,13 +31,32 @@ export const ACTIONS_TRANSLATIONS = Object.freeze({
     copyLink: i18n.translate('xpack.agenticInvestigations.baseActions.copyLink', {
       defaultMessage: 'Copy link',
     }),
+    copyAgentInstructions: i18n.translate(
+      'xpack.agenticInvestigations.baseActions.copyAgentInstructions',
+      { defaultMessage: 'Copy agent instructions' }
+    ),
     close: i18n.translate('xpack.agenticInvestigations.baseActions.closeInvestigation', {
       defaultMessage: 'Close investigation',
     }),
     reopen: i18n.translate('xpack.agenticInvestigations.baseActions.reopenInvestigation', {
       defaultMessage: 'Open investigation',
     }),
+    /** Flyout Actions menu: short Close label. */
+    closeShort: i18n.translate('xpack.agenticInvestigations.baseActions.closeShort', {
+      defaultMessage: 'Close',
+    }),
+    /** Flyout Actions menu: short Open label. */
+    openShort: i18n.translate('xpack.agenticInvestigations.baseActions.openShort', {
+      defaultMessage: 'Open',
+    }),
+    deleteInvestigation: i18n.translate(
+      'xpack.agenticInvestigations.baseActions.deleteInvestigation',
+      {
+        defaultMessage: 'Delete investigation',
+      }
+    ),
   },
+
   tooltips: {
     linkCopied: i18n.translate('xpack.agenticInvestigations.baseActions.tooltips.linkCopied', {
       defaultMessage: 'Link copied',

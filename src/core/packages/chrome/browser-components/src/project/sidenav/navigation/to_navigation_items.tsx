@@ -44,7 +44,7 @@ export interface NavigationItems {
  * - Top-level body nodes are transformed into primary navigation items:
  *   - Accordion nodes are flattened (not supported) - their children become primary items
  *   - Nodes without links that aren't panel openers are treated as section dividers and not supported in new nav - their children are flattened
- *   - panelOpener nodes create flyout secondary navigation panels, they can't have links directly, but can have sections with links
+ *   - panelOpener nodes create flyout secondary navigation panels; an optional opener href is the landing page, otherwise last-active / first child. Children are sections with links
  * - Children of panel-opener nodes become secondary navigation:
  *   - If all 3rd level items have links, they're treated as menu items and wrapped in a single section
  *   - If some don't have links, they're treated as section headers with their children becoming menu items
@@ -206,7 +206,7 @@ export const toNavigationItems = (
     }
 
     // for primary menu items there should always be a href
-    // if it's a panel opener, we use the last opened panel or the first link inside the section as the href
+    // if it's a panel opener: opener href (landing), else last opened, else first child
     // if there are no sections, we use the href directly
     const itemHref = secondarySections?.length
       ? getPanelOpenerHref(navNode, secondarySections, panelStateManager)
@@ -484,7 +484,8 @@ const findFirstAvailableHref = (sections: SecondaryMenuSection[]): string | unde
 
 /**
  * Determines the appropriate href for a panel opener node.
- * Uses last active item history first, then falls back to first available href.
+ * Prefers an explicit landing `href` on the opener when set, then last active
+ * item history, then the first available child href.
  * @param navNode - The navigation node (panel opener)
  * @param secondarySections - The secondary menu sections
  * @param panelStateManager - Manager for panel opener state
@@ -495,23 +496,15 @@ const getPanelOpenerHref = (
   secondarySections: SecondaryMenuSection[],
   panelStateManager: PanelStateManager
 ): string => {
+  // Explicit landing page on the opener (e.g. always go Home)
+  if (navNode.href) {
+    return navNode.href;
+  }
+
   // Try to use last active item first
   const lastActiveHref = findItemByLastActive(navNode.id, secondarySections, panelStateManager);
   if (lastActiveHref) return lastActiveHref;
 
   // Fall back to first available href
-  const firstAvailableHref = findFirstAvailableHref(secondarySections);
-
-  // Warn if panel opener has its own href (which it shouldn't)
-  if (navNode.href) {
-    warnOnce(
-      `Panel opener node "${navNode.id}" has a href "${
-        navNode.href
-      }", but it should not. We're using it as a panel opener that contains sections with links and we use the first link inside the section as the href ${
-        firstAvailableHref ?? 'missing-href-😭'
-      }.`
-    );
-  }
-
-  return firstAvailableHref ?? 'missing-href-😭';
+  return findFirstAvailableHref(secondarySections) ?? 'missing-href-😭';
 };

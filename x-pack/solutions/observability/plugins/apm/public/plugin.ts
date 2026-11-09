@@ -95,6 +95,7 @@ import type { ICPSManager } from '@kbn/cps-utils';
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 import type { APMClientV2 } from '@kbn/apm-api-shared';
+import type { AgenticInvestigationsPublicPluginSetup } from '@kbn/agentic-investigations-plugin/public';
 import type { ConfigSchema } from '.';
 import {
   getApmEnrollmentFlyoutData,
@@ -114,6 +115,8 @@ import {
   registerServiceMapAttachment,
   registerServiceMapContextAttachment,
 } from './agent_builder/attachment_types';
+import { createApmEntityLinkResolver } from './agent_builder/impact_map/entity_link';
+import { LazyImpactServiceMap } from './agent_builder/impact_map/lazy_impact_service_map';
 import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
 import { createServiceFlyoutRenderer } from './components/shared/service_flyout/service_flyout_feature';
 
@@ -141,6 +144,7 @@ export interface ApmPluginSetupDeps {
   profiling?: ProfilingPluginSetup;
   cloud?: CloudSetup;
   discoverShared: DiscoverSharedPublicSetup;
+  agenticInvestigations?: AgenticInvestigationsPublicPluginSetup;
 }
 
 export interface ApmServices {
@@ -151,6 +155,8 @@ export interface ApmServices {
 export interface ApmInternalServices {
   cpsManager?: ICPSManager;
   callApmApi: APMClientV2;
+  /** Draws the service flyout, for hosts that show services outside the APM app. */
+  renderServiceFlyout?: ReturnType<typeof createServiceFlyoutRenderer>;
 }
 
 const [getApmInternalServices, publishApmInternalServices] =
@@ -284,6 +290,15 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     if (pluginSetupDeps.home) {
       pluginSetupDeps.home.featureCatalogue.register(featureCatalogueEntry);
     }
+
+    // Investigation impact maps are drawn with the service map's nodes and layout.
+    plugins.agenticInvestigations?.registerImpactMapRenderer(LazyImpactServiceMap);
+    plugins.agenticInvestigations?.registerImpactEntityLink(
+      createApmEntityLinkResolver({
+        getCallApmApi: () => getApmInternalServices()?.callApmApi,
+        getRenderServiceFlyout: () => getApmInternalServices()?.renderServiceFlyout,
+      })
+    );
 
     // register observability nav if user has access to plugin
     plugins.observabilityShared.navigation.registerSections(
@@ -562,20 +577,22 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
     const { fleet } = plugins;
 
+    const renderServiceFlyout = createServiceFlyoutRenderer({
+      share: plugins.share,
+      core,
+      lens: plugins.lens,
+      dataViews: plugins.dataViews,
+      alerting: plugins.alerting,
+      telemetryClient: this.telemetry.start(),
+    });
     plugins.discoverShared.features.registry.register({
       id: 'observability-service-flyout',
-      renderServiceFlyout: createServiceFlyoutRenderer({
-        share: plugins.share,
-        core,
-        lens: plugins.lens,
-        dataViews: plugins.dataViews,
-        alerting: plugins.alerting,
-        telemetryClient: this.telemetry.start(),
-      }),
+      renderServiceFlyout,
     });
 
     const apmInternalServices: ApmInternalServices = {
       callApmApi: plugins.apmShared.callApmApi,
+      renderServiceFlyout,
     };
 
     this.cpsEnabledSubscription = core.featureFlags

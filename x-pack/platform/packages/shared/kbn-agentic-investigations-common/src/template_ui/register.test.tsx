@@ -129,6 +129,31 @@ describe('registerAgenticInvestigationTemplateUI', () => {
     ]);
   });
 
+  it('adds an Impact map tab after the overview only when renderImpactMap is supplied', () => {
+    const { contract } = createFakeService();
+    const renderImpactMap = jest.fn(({ conversationId }: { conversationId: string }) => (
+      <span>map for {conversationId}</span>
+    ));
+
+    register(contract, { renderImpactMap });
+
+    expect(contract.getTemplateUIDefinition('investigation')?.tabs).toEqual([
+      'investigation.overview',
+      'investigation.impactMap',
+    ]);
+    const tab = contract.getTab('investigation.impactMap');
+    expect(tab?.label).toBe('Impact map');
+    const ImpactMapTabContent = tab?.content;
+    if (!ImpactMapTabContent) {
+      throw new Error('Expected the Impact map tab content');
+    }
+    renderWithKibanaRenderContext(
+      <ImpactMapTabContent conversation={conversation} isOpenedFromChat={false} />
+    );
+    expect(screen.getByText('map for conversation-1')).toBeInTheDocument();
+    expect(renderImpactMap).toHaveBeenCalledWith({ conversationId: 'conversation-1' });
+  });
+
   it('threads renderProposedActions into the overview tab with the conversation id', async () => {
     const { contract } = createFakeService();
     const renderProposedActions = jest.fn(({ conversationId }: { conversationId: string }) => (

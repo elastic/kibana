@@ -13,6 +13,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ApprovalContent, type DeclineParams } from '@kbn/proposals-ui';
 import { useProposal } from '@kbn/proposals-plugin/public';
 import { KbnDangerCallout } from '@kbn/ui-callout';
+import { createCopyInstructionsAction } from '../../conversation_templates/shared/proposed_actions/copy_instructions_action';
 import { decisionErrorMessage } from '../../conversation_templates/shared/proposed_actions/decision_errors';
 import { PROPOSED_ACTIONS_LOAD_ERROR_LABEL } from '../../conversation_templates/shared/proposed_actions/translations';
 import { useProposalDecision } from '../../conversation_templates/shared/proposed_actions/use_proposal_decision';
@@ -35,7 +36,7 @@ export const ProposalDecision = ({
 }: ProposalDecisionProps): React.ReactElement => {
   const queryClient = useQueryClient();
   const {
-    services: { http },
+    services: { http, notifications },
   } = useKibana<CoreStart>();
   const { data: proposal, isLoading } = useProposal(proposalId);
   const { readOnly, isSubmitting, currentActorName, approve, dismiss, reopen, isReopening } =
@@ -96,6 +97,9 @@ export const ProposalDecision = ({
       onReopen={handleReopen}
       isReopening={isReopening}
       basePath={http.basePath}
+      secondaryActions={[
+        createCopyInstructionsAction({ http, notifications }, investigationId, proposal),
+      ]}
       data-test-subj={`investigationHypothesisTreeProposal-${proposalId}`}
     />
   );

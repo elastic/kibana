@@ -11,6 +11,8 @@ import { createFlyoutGroupedAttachmentsRegistry } from '@kbn/agentic-investigati
 import { registerEscalationConversationEventUiDefinitions } from './escalations/conversation_events';
 import { registerInvestigationConversationEventUiDefinitions } from './investigations/conversation_events';
 import { registerImpactAttachmentTypes } from './impact/attachments';
+import { registerImpactMapAttachmentTypes } from './impact_map/attachments';
+import { setImpactEntityLinkResolver } from './impact_map/entity_link';
 import type { AlertSubjectSnapshot } from '../common/subjects/subject';
 import { registerSubjectAttachmentTypes } from './subjects/attachments';
 import { registerHypothesesAttachmentTypes } from './hypotheses/attachments';
@@ -27,6 +29,7 @@ import type {
   AgenticInvestigationsPublicSetupDependencies,
   AgenticInvestigationsPublicStartDependencies,
   ImpactEntityOpener,
+  ImpactMapRenderer,
   AlertFlyoutRegistration,
 } from './types';
 
@@ -65,6 +68,7 @@ export class AgenticInvestigationsPublicPlugin
   private readonly groupedAttachments = createFlyoutGroupedAttachmentsRegistry();
   private impactEntityOpener: ImpactEntityOpener | undefined;
   private readonly alertFlyouts = new Map<string, AlertFlyoutRegistration>();
+  private impactMapRenderer: ImpactMapRenderer | undefined;
 
   constructor(context: PluginInitializerContext<AgenticInvestigationsPublicConfig>) {
     this.escalationsEnabled = context.config.get().escalations.enabled;
@@ -82,6 +86,10 @@ export class AgenticInvestigationsPublicPlugin
       registerAlertFlyout: (source, registration) => {
         this.alertFlyouts.set(source, registration);
       },
+      registerImpactMapRenderer: (renderer) => {
+        this.impactMapRenderer = renderer;
+      },
+      registerImpactEntityLink: setImpactEntityLinkResolver,
     };
   }
 
@@ -99,6 +107,7 @@ export class AgenticInvestigationsPublicPlugin
     };
     if (agentBuilder) {
       registerImpactAttachmentTypes(agentBuilder, () => this.impactEntityOpener);
+      registerImpactMapAttachmentTypes(agentBuilder, () => this.impactMapRenderer);
       registerInvestigationConversationEventUiDefinitions(agentBuilder.conversationEvents);
       if (this.escalationsEnabled) {
         registerEscalationConversationEventUiDefinitions({
@@ -128,6 +137,7 @@ export class AgenticInvestigationsPublicPlugin
         escalationsEnabled: this.escalationsEnabled,
         groupedAttachments: this.groupedAttachments,
         getImpactEntityOpener: () => this.impactEntityOpener,
+        impactMapRenderer: this.impactMapRenderer,
         templates: this.escalationsEnabled
           ? [investigationTemplate, escalationTemplate]
           : [investigationTemplate],
@@ -144,5 +154,6 @@ export class AgenticInvestigationsPublicPlugin
   stop() {
     this.impactEntityOpener = undefined;
     this.alertFlyouts.clear();
+    this.impactMapRenderer = undefined;
   }
 }

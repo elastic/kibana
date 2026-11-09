@@ -14,7 +14,10 @@ import type {
 import type { Logger } from '@kbn/core/server';
 import {
   SET_HYPOTHESES_TOOL_ID,
+  SET_IMPACT_MAP_TOOL_ID,
   SET_IMPACT_TOOL_ID,
+  SHOW_TIMELINE_TOOL_ID,
+  UPSERT_IMPACT_MAP_CATALOG_TOOL_ID,
 } from '@kbn/agentic-investigations-plugin/common';
 import {
   NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW_ID,
@@ -43,8 +46,19 @@ export const SANDBOX_TOOL_IDS = [
   SANDBOX_WRITE_FILE_TOOL_ID,
 ] as const;
 
-/** The agentic investigations tools earlier versions of the agent recorded findings with. */
-export const INVESTIGATION_TOOL_IDS = [SET_IMPACT_TOOL_ID, SET_HYPOTHESES_TOOL_ID] as const;
+/** The tools the agent draws an impact map with, on request, when the investigations plugin is on. */
+export const IMPACT_MAP_TOOL_IDS = [
+  SET_IMPACT_MAP_TOOL_ID,
+  UPSERT_IMPACT_MAP_CATALOG_TOOL_ID,
+  SHOW_TIMELINE_TOOL_ID,
+] as const;
+
+/** The agentic investigations tools the agent records findings with when they are enabled. */
+export const INVESTIGATION_TOOL_IDS = [
+  SET_IMPACT_TOOL_ID,
+  SET_HYPOTHESES_TOOL_ID,
+  ...IMPACT_MAP_TOOL_IDS,
+] as const;
 
 export const INVESTIGATION_AGENT_NAME = 'Nightshift Investigator';
 export const INVESTIGATION_AGENT_DESCRIPTION =
@@ -169,7 +183,7 @@ export type NightshiftAgentTypeOptions = Omit<
 /**
  * Builds the configuration every Nightshift agent type shares: tools, connectors, the Cortex and
  * Memory hooks and the space's custom context. Only the instructions differ between types.
- * With `standalone`, the agent lists only its own tools and the Slack read tool.
+ * With `standalone`, the agent lists only its own tools, the impact map tools and the Slack read tool.
  * Agent Builder's own prompt and internal tools still apply to it.
  */
 export const buildNightshiftAgentConfiguration = ({
@@ -198,7 +212,12 @@ export const buildNightshiftAgentConfiguration = ({
         {
           tool_ids: [
             ...(standalone
-              ? [...(sandboxEnabled ? [...SANDBOX_TOOL_IDS] : []), TIME_CONVERTER_TOOL_ID]
+              ? [
+                  ...(sandboxEnabled ? [...SANDBOX_TOOL_IDS] : []),
+                  TIME_CONVERTER_TOOL_ID,
+                  // Findings are recorded from outside the agent, but a person can ask for the map.
+                  ...(investigationToolsEnabled ? [...IMPACT_MAP_TOOL_IDS] : []),
+                ]
               : [
                   ...(investigationToolsEnabled ? [...INVESTIGATION_TOOL_IDS] : []),
                   ...(proposalsEnabled ? [PROPOSALS_CREATE_TOOL_ID] : []),

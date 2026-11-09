@@ -13,6 +13,7 @@ import {
   EuiCallOut,
   EuiFieldSearch,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
@@ -33,6 +34,11 @@ import {
   type InvestigationViewSource,
 } from '../../common/ebt_events';
 import { RETRY_BUTTON_LABEL } from '../../common/messages';
+import {
+  buildInvestigationsPath,
+  DEFAULT_HOMEPAGE_TIME_RANGE,
+} from '../../data/investigations/investigations_url';
+import { useFetchInvestigations } from '../../data/investigations/use_fetch_investigations';
 import { useInvestigationSections } from '../../data/investigations/use_investigation_sections';
 import {
   InvestigationList,
@@ -41,15 +47,18 @@ import {
 import { isInvestigationSectionVisible } from '../../components/entities/investigation/investigation_section';
 import { InvestigationSeverityTiles } from '../../components/entities/investigation/investigation_severity_tiles';
 import { useFlyoutShareUrlCustomAction } from '../../components/ui/flyout_share_url_button';
+import { NightshiftTimeRangePicker } from '../../components/ui/time_range_picker';
 import {
   buildNightshiftInvestigationFlyoutShareUrl,
   clearNightshiftInvestigationIdParam,
   getNightshiftInvestigationIdFromSearch,
   getNightshiftSearchQueryFromSearch,
   getNightshiftSeverityFromSearch,
+  getNightshiftTimeRangeFromSearch,
   setNightshiftInvestigationIdParam,
   setNightshiftSearchQueryParam,
   setNightshiftSeverityParam,
+  setNightshiftTimeRangeParams,
 } from '../../common/url_params';
 import { DetectionSetupBanner } from './detection_setup_banner';
 import { NightshiftHeader } from './header';
@@ -67,8 +76,14 @@ export function NightshiftApp({
   hideDetectionSetupBanner?: boolean;
 }): React.ReactElement {
   const { euiTheme } = useEuiTheme();
-  const { analytics, application, nightshiftInvestigations, agenticInvestigations, agentBuilder } =
-    useKibana().services;
+  const {
+    analytics,
+    application,
+    http,
+    nightshiftInvestigations,
+    agenticInvestigations,
+    agentBuilder,
+  } = useKibana().services;
   const history = useHistory();
   const { search } = useLocation();
   const sectionsRef = useRef<InvestigationListHandle>(null);
@@ -83,6 +98,10 @@ export function NightshiftApp({
   // Read filter state from URL so it survives navigation and is shareable.
   const searchQuery = useMemo(() => getNightshiftSearchQueryFromSearch(search), [search]);
   const debouncedSearchQuery = useDebouncedValue(searchQuery, INVESTIGATIONS_SEARCH_DEBOUNCE_MS);
+  const timeRange = useMemo(
+    () => getNightshiftTimeRangeFromSearch(search, DEFAULT_HOMEPAGE_TIME_RANGE),
+    [search]
+  );
   const rawSeverity = useMemo(() => getNightshiftSeverityFromSearch(search), [search]);
   const activeSeverity: Severity | undefined = useMemo(
     () => (isSeverity(rawSeverity) ? rawSeverity : undefined),
@@ -99,7 +118,57 @@ export function NightshiftApp({
     totalCount,
     loadedCount,
     refetchAll,
-  } = useInvestigationSections({ query: debouncedSearchQuery });
+  } = useInvestigationSections({
+    query: debouncedSearchQuery,
+    rangeFrom: timeRange.rangeFrom,
+    rangeTo: timeRange.rangeTo,
+  });
+
+  // Severity-tile sparklines: every investigation (any status), bucketed by opened date.
+  const trendFinished = useFetchInvestigations({
+    inProgress: false,
+    sortField: 'created_at',
+    perPage: 200,
+  });
+  const trendInProgress = useFetchInvestigations({
+    inProgress: true,
+  });
+  const investigationsAppRoot = useMemo(
+    () => application.getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/' }).replace(/\/$/, ''),
+    [application]
+  );
+
+  // Header control: Investigations with the current Home search + time range.
+  const viewAllInvestigationsHref = useMemo(
+    () =>
+      `${investigationsAppRoot}${buildInvestigationsPath({
+        query: debouncedSearchQuery ?? '',
+        severity: [],
+        state: [],
+        rangeFrom: timeRange.rangeFrom,
+        rangeTo: timeRange.rangeTo,
+      })}`,
+    [debouncedSearchQuery, investigationsAppRoot, timeRange.rangeFrom, timeRange.rangeTo]
+  );
+
+  // Prefer the dedicated open-date fetch; also fold in Home section rows so tiles
+  // never miss investigations that are already on the page.
+  const trendInvestigations = useMemo(() => {
+    const seen = new Set<string>();
+    const items: InvestigationSummary[] = [];
+    for (const investigation of [
+      ...trendFinished.investigations,
+      ...trendInProgress.investigations,
+      ...sections.flatMap((section) => section.investigations),
+    ]) {
+      if (seen.has(investigation.id)) {
+        continue;
+      }
+      seen.add(investigation.id);
+      items.push(investigation);
+    }
+    return items;
+  }, [sections, trendFinished.investigations, trendInProgress.investigations]);
 
   // A tile scrolls to its section, so it is only actionable while the list is rendering that
   // section — which the list, not the count, decides.
@@ -125,8 +194,6 @@ export function NightshiftApp({
     [search]
   );
 
-  // The detection setup banner's "Configure detection" button; the header's "Show all events"
-  // link is gone, the detections page stays reachable from here and from the header's Detections.
   const detectionsHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, {
     path: '/detections/events',
   });
@@ -195,6 +262,19 @@ export function NightshiftApp({
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const params = new URLSearchParams(history.location.search);
       setNightshiftSearchQueryParam(params, e.target.value);
+      history.replace({ search: params.toString() });
+    },
+    [history]
+  );
+
+  const handleTimeRangeChange = useCallback(
+    ({ start, end }: { start: string; end: string }) => {
+      const params = new URLSearchParams(history.location.search);
+      setNightshiftTimeRangeParams(
+        params,
+        { rangeFrom: start, rangeTo: end },
+        DEFAULT_HOMEPAGE_TIME_RANGE
+      );
       history.replace({ search: params.toString() });
     },
     [history]
@@ -353,6 +433,7 @@ export function NightshiftApp({
       <NightshiftHeader
         isLoading={isInitialLoading}
         hasActiveInvestigations={hasActiveInvestigations}
+        viewAllInvestigationsHref={viewAllInvestigationsHref}
       />
 
       <EuiSpacer size="l" />
@@ -367,22 +448,35 @@ export function NightshiftApp({
         </>
       )}
 
-      <EuiFieldSearch
-        data-test-subj="nightshiftInvestigationsSearchInput"
-        placeholder={i18n.translate('xpack.nightshift.investigations.searchPlaceholder', {
-          defaultMessage: 'Search',
-        })}
-        value={searchQuery ?? ''}
-        onChange={handleSearchChange}
-        isClearable
-        fullWidth
-        compressed
-      />
+      <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false} wrap>
+        <EuiFlexItem grow={2}>
+          <EuiFieldSearch
+            data-test-subj="nightshiftInvestigationsSearchInput"
+            placeholder={i18n.translate('xpack.nightshift.investigations.searchPlaceholder', {
+              defaultMessage: 'Search',
+            })}
+            value={searchQuery ?? ''}
+            onChange={handleSearchChange}
+            isClearable
+            fullWidth
+            compressed
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <NightshiftTimeRangePicker
+            start={timeRange.rangeFrom}
+            end={timeRange.rangeTo}
+            onChange={handleTimeRangeChange}
+            data-test-subj="nightshiftHomepageTimePicker"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
       <EuiSpacer size="m" />
 
       <InvestigationSeverityTiles
         severityCounts={severityCounts}
+        trendInvestigations={trendInvestigations}
         scrollableSeverities={scrollableSeverities}
         isLoading={isInitialLoading}
         onSeverityClick={handleSeverityClick}
@@ -395,6 +489,9 @@ export function NightshiftApp({
         sections={sections}
         selectedInvestigationId={selectedInvestigationId}
         onInvestigationClick={handleInvestigationClick}
+        searchQuery={debouncedSearchQuery}
+        rangeFrom={timeRange.rangeFrom}
+        rangeTo={timeRange.rangeTo}
       />
     </EuiFlexGroup>
   );

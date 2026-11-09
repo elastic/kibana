@@ -145,10 +145,33 @@ describe('EvidenceChart', () => {
             dataValue: Date.parse('2026-07-28T14:01:00Z'),
             details: 'Deploy v2.3.1',
             header: '2026-07-28 23:01',
+            isAlert: false,
           },
         ],
       })
     );
+  });
+
+  it('marks when an alert fired with the red alert icon, apart from other annotations', () => {
+    render(
+      <EvidenceChart
+        chart={{
+          ...chart,
+          annotations: [
+            { x: '2026-07-28T14:01:00Z', label: 'Alert fired' },
+            { x: '2026-07-28T14:05:00Z', label: 'Deploy v2.3.1' },
+          ],
+        }}
+      />
+    );
+
+    const ids = mockLineAnnotationProps.mock.calls.map(([props]) => props.id);
+    expect(ids).toContain('evidence-point-annotations-alert');
+    const alert = mockLineAnnotationProps.mock.calls.find(
+      ([props]) => props.id === 'evidence-point-annotations-alert'
+    )?.[0];
+    expect(alert.dataValues).toHaveLength(1);
+    expect(alert.dataValues[0].details).toBe('Alert fired');
   });
 
   it('titles point annotation tooltips on a category axis with the category', () => {
@@ -165,7 +188,9 @@ describe('EvidenceChart', () => {
 
     expect(mockLineAnnotationProps).toHaveBeenCalledWith(
       expect.objectContaining({
-        dataValues: [{ dataValue: 'checkout', details: 'Worst service', header: 'checkout' }],
+        dataValues: [
+          { dataValue: 'checkout', details: 'Worst service', header: 'checkout', isAlert: false },
+        ],
       })
     );
   });

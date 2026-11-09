@@ -23,6 +23,8 @@ import {
 import type { InvestigationSubject } from '../../../common/subjects/subject';
 import { WrongTemplateError } from '../../assignments/errors';
 import type { HypothesesService } from '../../hypotheses/services/hypotheses_service';
+import type { InvestigationImpactMap } from '../../../common/impact_map/impact_map';
+import type { ImpactMapService } from '../../impact_map/services/impact_map_service';
 import type { ImpactService } from '../../impact/services/impact_service';
 import { createInMemoryStorage } from '../../investigation_attachments/in_memory_storage.mock';
 import { TRANSIENT_SEARCH_RETRY_DELAYS_MS } from '../../investigation_attachments/search_with_transient_retry';
@@ -86,6 +88,7 @@ const setup = ({
   subjects = [],
   impacts = [],
   hypotheses,
+  impactMap,
   inProgressIds = [],
   proposals,
   attachmentHolders = [],
@@ -95,6 +98,7 @@ const setup = ({
   subjects?: InvestigationSubject[];
   impacts?: Impact[];
   hypotheses?: InvestigationHypotheses;
+  impactMap?: InvestigationImpactMap;
   inProgressIds?: string[];
   proposals?: ProposalsPluginStart;
   /** What a search by attachment id returns: conversations that hold such an attachment. */
@@ -134,6 +138,9 @@ const setup = ({
   const hypothesesService = {
     findByConversationId: jest.fn().mockResolvedValue(hypotheses),
   };
+  const impactMapService = {
+    findByConversationId: jest.fn().mockResolvedValue(impactMap),
+  };
   const inProgress = {
     findInProgressIds: jest.fn(
       async (_r: unknown, _s: string, conversations: Array<{ id: string }>) =>
@@ -149,6 +156,7 @@ const setup = ({
     getImpactService: () => impactService as unknown as ImpactService,
     getSubjectsService: () => subjectsService as unknown as SubjectsService,
     getHypothesesService: () => hypothesesService as unknown as HypothesesService,
+    getImpactMapService: () => impactMapService as unknown as ImpactMapService,
     getProposals: () => proposals,
     inProgress: inProgress as unknown as InProgressResolver,
     logger: loggerMock.create(),
@@ -238,6 +246,14 @@ describe('InvestigationsQueryService', () => {
           hypotheses: hypotheses.hypotheses,
           created_at: '2026-01-01T00:00:00.000Z',
         },
+        // Alerts show on the timeline even before the agent has drawn a map.
+        impact_map: expect.objectContaining({
+          entities: [],
+          events: [
+            expect.objectContaining({ id: 'alert:alert-1', kind: 'alert' }),
+            expect.objectContaining({ id: 'alert:alert-2', kind: 'alert' }),
+          ],
+        }),
         proposals: [],
       });
     });
@@ -259,6 +275,58 @@ describe('InvestigationsQueryService', () => {
 
       expect(investigation.subjects.map(({ id }) => id)).toEqual(['alert-2']);
       expect(investigation.impact).toBeUndefined();
+    });
+
+    it('joins the impact map, and hides it once the user removed its attachment', async () => {
+      const impactMap: InvestigationImpactMap = {
+        id: 'map-conv-1',
+        spaceId: SPACE_ID,
+        conversationId: 'conv-1',
+        title: 'Checkout failures',
+        entities: [
+          { id: 'checkout', type_id: 'service', label: 'checkout' },
+          {
+            id: 'payments-db',
+            type_id: 'database',
+            label: 'payments-db',
+            annotations: { role: 'root_cause', health: 'critical' },
+          },
+        ],
+        relationships: [
+          {
+            id: 'checkout->payments-db:calls',
+            type_id: 'calls',
+            source_id: 'checkout',
+            target_id: 'payments-db',
+            on_critical_path: true,
+          },
+        ],
+        entityTypes: [
+          { id: 'service', label: 'Service', kind: 'service' },
+          { id: 'database', label: 'Database', kind: 'dependency' },
+        ],
+        relationshipTypes: [{ id: 'calls', label: 'CALLS' }],
+        createdAt: '2026-01-01T00:00:00.000Z',
+      };
+      const { service, client } = setup({ impactMap });
+      client.get.mockResolvedValue({ ...conversation('conv-1'), attachments: [] });
+
+      await expect(service.get(request, 'conv-1')).resolves.toMatchObject({
+        impact_map: {
+          title: 'Checkout failures',
+          entities: impactMap.entities,
+          relationships: impactMap.relationships,
+          entity_types: impactMap.entityTypes,
+          relationship_types: impactMap.relationshipTypes,
+          created_at: '2026-01-01T00:00:00.000Z',
+        },
+      });
+
+      client.get.mockResolvedValue({
+        ...conversation('conv-1'),
+        attachments: [{ id: 'map-conv-1', active: false }],
+      });
+      expect((await service.get(request, 'conv-1')).impact_map).toBeUndefined();
     });
 
     it('retries reading a conversation whose new index has no shard available yet', async () => {
@@ -928,6 +996,8 @@ describe('InvestigationsQueryService', () => {
         getSubjectsService: () => subjectsService,
         getHypothesesService: () =>
           ({ findByConversationId: jest.fn() } as unknown as HypothesesService),
+        getImpactMapService: () =>
+          ({ findByConversationId: jest.fn() } as unknown as ImpactMapService),
         getProposals: () => undefined,
         inProgress: {
           findInProgressIds: jest.fn().mockResolvedValue(new Set()),

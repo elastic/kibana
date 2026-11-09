@@ -12,12 +12,20 @@ import type { ConversationsService } from '../services/conversations/conversatio
 import { ConversationTemplatesService } from '../services/conversation_templates';
 import { openConversationDetailsFlyout } from './open_conversation_details_flyout';
 import {
-  CONVERSATION_DETAILS_FLYOUT_DEFAULT_WIDTH,
-  CONVERSATION_DETAILS_FLYOUT_MAX_WIDTH,
   CONVERSATION_DETAILS_FLYOUT_MIN_WIDTH,
+  getSummaryFlyoutDefaultWidth,
 } from './conversation_details_flyout_width';
 
 describe('openConversationDetailsFlyout', () => {
+  // The Summary opens wide inside the Agent Builder app, so that is where these tests run.
+  beforeEach(() => {
+    window.history.pushState({}, '', '/app/agent_builder/conversations/c1');
+  });
+
+  afterEach(() => {
+    window.history.pushState({}, '', '/');
+  });
+
   const setup = () => {
     localStorage.clear();
     const core = coreMock.createStart();
@@ -86,7 +94,7 @@ describe('openConversationDetailsFlyout', () => {
     );
   });
 
-  it('opens resizable at the default width, within the shared min/max bounds', async () => {
+  it('opens resizable at two thirds of the page, up to nine tenths of it', async () => {
     const { core, open } = setup();
 
     await open();
@@ -94,10 +102,10 @@ describe('openConversationDetailsFlyout', () => {
     const [[, options]] = core.overlays.openSystemFlyout.mock.calls;
     expect(options).toEqual(
       expect.objectContaining({
-        size: CONVERSATION_DETAILS_FLYOUT_DEFAULT_WIDTH,
-        defaultSize: CONVERSATION_DETAILS_FLYOUT_DEFAULT_WIDTH,
+        size: Math.round((window.innerWidth * 2) / 3),
+        defaultSize: Math.round((window.innerWidth * 2) / 3),
         minWidth: CONVERSATION_DETAILS_FLYOUT_MIN_WIDTH,
-        maxWidth: CONVERSATION_DETAILS_FLYOUT_MAX_WIDTH,
+        maxWidth: Math.round(window.innerWidth * 0.9),
         resizable: true,
       })
     );
@@ -115,7 +123,18 @@ describe('openConversationDetailsFlyout', () => {
     const [, [, options]] = core.overlays.openSystemFlyout.mock.calls;
     expect(options?.size).toBe(620);
     // A reset still returns to the default, not to the remembered width.
-    expect(options?.defaultSize).toBe(CONVERSATION_DETAILS_FLYOUT_DEFAULT_WIDTH);
+    expect(options?.defaultSize).toBe(getSummaryFlyoutDefaultWidth());
+  });
+
+  it('stays narrow outside the Agent Builder app', async () => {
+    window.history.pushState({}, '', '/app/observability/landing');
+    const { core, open } = setup();
+
+    await open();
+
+    const [[, options]] = core.overlays.openSystemFlyout.mock.calls;
+    expect(options?.defaultSize).toBeUndefined();
+    expect(options?.size).toBe(480);
   });
 
   it('clamps a remembered width to the allowed range', async () => {
@@ -128,7 +147,7 @@ describe('openConversationDetailsFlyout', () => {
     await open();
 
     const [, [, options]] = core.overlays.openSystemFlyout.mock.calls;
-    expect(options?.size).toBe(CONVERSATION_DETAILS_FLYOUT_MAX_WIDTH);
+    expect(options?.size).toBe(Math.round(window.innerWidth * 0.9));
   });
 
   it('renders no menu actions by default', async () => {

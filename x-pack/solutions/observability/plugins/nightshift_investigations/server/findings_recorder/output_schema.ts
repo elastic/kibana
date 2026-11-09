@@ -12,6 +12,10 @@ import {
   EVIDENCE_CHART_X_AXIS_TYPES,
   EVIDENCE_CHART_Y_AXIS_UNITS,
   HYPOTHESIS_STATUSES,
+  IMPACT_MAP_ENTITY_KINDS,
+  IMPACT_MAP_EVENT_KINDS,
+  IMPACT_MAP_HEALTH_STATES,
+  IMPACT_MAP_ROLES,
   investigationEvidenceSchema,
   MAX_ENTITY_ID_LENGTH,
   MAX_ENTITY_NAME_LENGTH,
@@ -22,7 +26,24 @@ import {
   MAX_EVIDENCE_SHORT_TEXT_LENGTH,
   MAX_EVIDENCE_TEXT_LENGTH,
   MAX_HYPOTHESES,
+  MAX_IMPACT_MAP_ENTITIES,
+  MAX_IMPACT_MAP_ENTITY_METADATA,
+  MAX_IMPACT_MAP_EVENTS,
+  MAX_IMPACT_MAP_RELATIONSHIPS,
   MAX_IMPACT_TOOL_ENTITIES,
+  impactMapEventId,
+  canonicalEntityTypeId,
+  STANDARD_METADATA_FIELDS,
+  toEntityName,
+  type ImpactMapEntity,
+  type ImpactMapEntityType,
+  type ImpactMapEvent,
+  type ImpactMapMetadataEntry,
+  type ImpactMapMetadataField,
+  type ImpactMapRelationship,
+  type ImpactMapRelationshipType,
+  sanitizeDataSource,
+  clockTimeToIso,
   type InvestigationEvidence,
 } from '@kbn/agentic-investigations-plugin/common';
 import {
@@ -31,10 +52,10 @@ import {
   proposalConfidenceSchema,
   proposalImpactSchema,
 } from '@kbn/proposals-common';
+import { normalizeEventLinks } from './event_links';
 
 export const FINDINGS_SEVERITIES = ['low', 'medium', 'high', 'critical'] as const;
 
-const MAX_METADATA_TEXT_LENGTH = 10_000;
 /** Actions the final pass may propose for a person to decide. */
 export const MAX_PROPOSALS = 3;
 /** Evidence charts the recorder may attach to one hypothesis. */
@@ -68,6 +89,7 @@ export const findingsOutputSchema = lazySchema(() => {
     annotations: z
       .array(z.object({ x: z.string(), x_end: z.string().optional(), label: z.string() }))
       .optional(),
+    thresholds: z.array(z.object({ y: z.number(), label: z.string() })).optional(),
   });
   const evidenceSchema = z.object({
     description: z.string().optional(),
@@ -110,6 +132,80 @@ export const findingsOutputSchema = lazySchema(() => {
       )
       .optional(),
     hypotheses: z.array(hypothesisSchema),
+    // Omitting the map keeps the stored one; a pass that includes it replaces it.
+    impact_map: z
+      .object({
+        title: z.string().optional(),
+        entities: z.array(
+          z.object({
+            id: z.string().min(1),
+            label: z.string().optional(),
+            type: z.string().min(1),
+            kind: z.enum(IMPACT_MAP_ENTITY_KINDS).optional(),
+            agent_name: z.string().optional(),
+            eui_icon: z.string().optional(),
+            span_type: z.string().optional(),
+            span_subtype: z.string().optional(),
+            role: z.enum(IMPACT_MAP_ROLES).optional(),
+            health: z.enum(IMPACT_MAP_HEALTH_STATES).optional(),
+            impacted: z.boolean().optional(),
+            alert_count: z.number().optional(),
+            metadata: z
+              .array(
+                z.object({
+                  key: z.string().min(1),
+                  value: z.string(),
+                  label: z.string().optional(),
+                  featured: z.boolean().optional(),
+                })
+              )
+              .optional(),
+          })
+        ),
+        relationships: z.array(
+          z.object({
+            source: z.string().min(1),
+            target: z.string().min(1),
+            type: z.string().min(1),
+            on_critical_path: z.boolean().optional(),
+          })
+        ),
+      })
+      .optional(),
+    // Merged by id with the stored events, so a pass sends what is new or changed.
+    events: z
+      .array(
+        z.object({
+          kind: z.enum(IMPACT_MAP_EVENT_KINDS),
+          title: z.string().min(1),
+          description: z.string().optional(),
+          at: z.string().min(1),
+          ends_at: z.string().optional(),
+          entity: z.string().optional(),
+          relationship: z.object({ source: z.string(), target: z.string() }).optional(),
+          evidence: evidenceSchema.optional(),
+          data_source: z
+            .object({
+              name: z.string().min(1),
+              instance: z.string().optional(),
+              scope: z.enum(['local', 'remote']).optional(),
+              base_url: z.string().optional(),
+              query: z.object({ language: z.string().optional(), text: z.string() }).optional(),
+              api_call: z
+                .object({
+                  method: z.string().optional(),
+                  type: z.string().optional(),
+                  endpoint: z.string().optional(),
+                  payload: z.string().optional(),
+                })
+                .optional(),
+            })
+            // Optional here so a pass that leaves one out still saves; the JSON schema the model
+            // is given requires it, and the pass asks again before settling for less.
+            .optional(),
+        })
+      )
+      .optional(),
   });
 });
 
@@ -144,23 +240,45 @@ export const entityIdFor = (name: string): string =>
         .slice(0, 12)}`;
 
 /**
+ * A time as an ISO 8601 string, or undefined when it is not a time. Epoch milliseconds or seconds
+ * copied from a bucket key become ISO, because the chart reads only what `Date.parse` accepts: a
+ * point it cannot place would otherwise leave a chart with a title and no plot.
+ */
+const chartTimeToIso = (raw: string): string | undefined => {
+  const text = raw.trim();
+  if (/^\d{10}(\d{3})?$/.test(text)) {
+    return new Date(text.length === 10 ? Number(text) * 1000 : Number(text)).toISOString();
+  }
+  return Number.isNaN(Date.parse(text)) ? undefined : text;
+};
+
+/**
  * Trims evidence to what the stores accept. A chart is only the model's reading of numbers in the
  * conversation, so a chart that does not fit (no usable points, or a shape the schema rejects) is
  * dropped and the description is kept.
  */
-export const limitEvidence = (raw: RawEvidence): InvestigationEvidence | undefined => {
+export const limitEvidence = (
+  raw: RawEvidence,
+  referenceTime?: string
+): InvestigationEvidence | undefined => {
   const description = raw.description?.trim()
     ? truncate(raw.description, MAX_EVIDENCE_TEXT_LENGTH)
     : undefined;
   const label = (text: string) => truncate(text, MAX_EVIDENCE_CHART_LABEL_LENGTH);
   const short = (text: string) => truncate(text, MAX_EVIDENCE_SHORT_TEXT_LENGTH);
+  const isTime = raw.chart?.x_axis.type === 'time';
+  const xOf = (x: string) =>
+    isTime ? chartTimeToIso(referenceTime ? clockTimeToIso(x, referenceTime) : x) : x || undefined;
   const series = (raw.chart?.series ?? [])
     .slice(0, MAX_EVIDENCE_CHART_SERIES)
     .map(({ name, points }) => ({
       name: label(name),
       // An oversized series is thinned over its whole window, so an event near the end stays.
       points: spreadEvenly(
-        points.filter(({ x, y }) => x !== '' && Number.isFinite(y)),
+        points.flatMap(({ x, y }) => {
+          const at = xOf(x);
+          return at !== undefined && Number.isFinite(y) ? [{ x: at, y }] : [];
+        }),
         MAX_EVIDENCE_CHART_POINTS
       ).map(({ x, y }) => ({ x: label(x), y })),
     }))
@@ -185,10 +303,18 @@ export const limitEvidence = (raw: RawEvidence): InvestigationEvidence | undefin
                 annotations: raw.chart.annotations
                   .slice(0, MAX_EVIDENCE_CHART_ANNOTATIONS)
                   .map(({ x, x_end: xEnd, label: text }) => ({
-                    x: label(x),
-                    ...(xEnd ? { x_end: label(xEnd) } : {}),
+                    x: label(xOf(x) ?? x),
+                    ...(xEnd ? { x_end: label(xOf(xEnd) ?? xEnd) } : {}),
                     label: short(text),
                   })),
+              }
+            : {}),
+          ...(raw.chart.thresholds?.length
+            ? {
+                thresholds: raw.chart.thresholds
+                  .filter(({ y }) => Number.isFinite(y))
+                  .slice(0, 2)
+                  .map(({ y, label: text }) => ({ y, label: short(text) })),
               }
             : {}),
         }
@@ -201,11 +327,417 @@ export const limitEvidence = (raw: RawEvidence): InvestigationEvidence | undefin
   return description ? { description } : undefined;
 };
 
+/** The impact map in the shape the impact map store accepts. */
+export interface FindingsImpactMap {
+  title?: string;
+  entities: ImpactMapEntity[];
+  relationships: ImpactMapRelationship[];
+  entity_types: ImpactMapEntityType[];
+  relationship_types: ImpactMapRelationshipType[];
+}
+
+const MAX_MAP_ID_LENGTH = 256;
+const MAX_MAP_LABEL_LENGTH = 256;
+const MAX_MAP_TYPE_ID_LENGTH = 64;
+const MAX_MAP_ICON_KEY_LENGTH = 64;
+const MAX_MAP_ALERT_COUNT = 9_999;
+const MAX_MAP_METADATA_KEY_LENGTH = 96;
+const MAX_MAP_METADATA_VALUE_LENGTH = 500;
+
+/** A catalog type id: lowercase, with anything the store rejects replaced by `_`. */
+export const toImpactMapTypeId = (raw: string): string =>
+  canonicalEntityTypeId(
+    raw
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9_.-]+/g, '_')
+      .replace(/^[^a-z0-9]+/, '')
+      .slice(0, MAX_MAP_TYPE_ID_LENGTH) || 'entity'
+  );
+
+const GENERIC_KIND_WORDS = new Set(['service', 'database', 'deployment', 'cluster', 'queue']);
+
+/**
+ * A type names a kind of thing, never the thing: 'shipping_service' on an entity called shipping
+ * is the entity's name plus its kind, so the name is dropped ('service'). A type that is only the
+ * name has nothing left and becomes 'service'.
+ */
+export const withoutEntityName = (typeId: string, names: readonly string[]): string => {
+  const nameWords = new Set(
+    names
+      .flatMap((name) => name.toLowerCase().split(/[^a-z0-9]+/))
+      .filter((word) => word.length > 3 && !GENERIC_KIND_WORDS.has(word))
+  );
+  const kept = typeId.split(/[_.-]+/).filter((word) => word && !nameWords.has(word));
+  return kept.length === typeId.split(/[_.-]+/).filter(Boolean).length
+    ? typeId
+    : toImpactMapTypeId(kept.join('_') || 'service');
+};
+
+/** A metadata key: lowercase and dotted, with anything the store rejects replaced by `_`. */
+export const toMetadataKey = (raw: string): string =>
+  raw
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9_.-]+/g, '_')
+    .replace(/^[^a-z0-9]+/, '')
+    .slice(0, MAX_MAP_METADATA_KEY_LENGTH);
+
+const limitMetadata = (
+  raw: NonNullable<NonNullable<FindingsOutput['impact_map']>['entities'][number]['metadata']>,
+  /** The entity's own names: a value that repeats one is not metadata. */
+  names: readonly string[] = []
+): ImpactMapMetadataEntry[] => {
+  const own = names.map((name) => name.trim().toLowerCase()).filter(Boolean);
+  const byKey = new Map<string, ImpactMapMetadataEntry>();
+  for (const { key, value, label, featured } of raw) {
+    const cleanKey = toMetadataKey(key);
+    const cleanValue = truncate(value.trim(), MAX_MAP_METADATA_VALUE_LENGTH);
+    if (!cleanKey || !cleanValue || byKey.has(cleanKey)) continue;
+    if (own.includes(cleanValue.toLowerCase())) continue;
+    if (byKey.size >= MAX_IMPACT_MAP_ENTITY_METADATA) break;
+    const cleanLabel = label?.trim();
+    byKey.set(cleanKey, {
+      key: cleanKey,
+      value: cleanValue,
+      ...(cleanLabel ? { label: truncate(cleanLabel, MAX_MAP_LABEL_LENGTH) } : {}),
+      ...(featured !== undefined ? { featured } : {}),
+    });
+  }
+  return [...byKey.values()];
+};
+
+const humanizeTypeId = (id: string): string => {
+  const words = id.replace(/[_.-]+/g, ' ').trim();
+  return words.charAt(0).toUpperCase() + words.slice(1);
+};
+
+const INFRASTRUCTURE_THING =
+  /(^|[^a-z])(k8s|kubernetes|deployment|statefulset|daemonset|replicaset|pod|node|host|vm|container|cluster|namespace|load[ _-]?balancer|ec2|lambda)([^a-z]|$)/i;
+const KUBERNETES_OBJECT =
+  /(^|[^a-z])(k8s|kubernetes|deployment|statefulset|daemonset|replicaset|pod)([^a-z]|$)/i;
+const DEPENDENCY_THING =
+  /(database|(^|[^a-z])db([^a-z]|$)|sql|mongo|redis|memcache|cache|elasticsearch|kafka|queue|topic|rabbit|sqs|sns|pubsub|bucket|s3|storage|load[ _-]?balancer|gateway|proxy|external|third[ _-]?party|api[ _-]?endpoint|endpoint|http)/i;
+
+/**
+ * A first classification for a new entity type the model left unclassified: the shape (a dependency
+ * diamond for what services rely on, a service circle for what runs code) and, for a Kubernetes
+ * object, its logo. The catalog keeps it, so it is decided once for every later investigation.
+ */
+export const classifyEntityType = (
+  typeId: string
+): { kind: 'service' | 'dependency' | 'infrastructure'; euiIcon?: string } => {
+  if (KUBERNETES_OBJECT.test(typeId)) return { kind: 'infrastructure', euiIcon: 'logoKubernetes' };
+  if (INFRASTRUCTURE_THING.test(typeId)) return { kind: 'infrastructure' };
+  return { kind: DEPENDENCY_THING.test(typeId) ? 'dependency' : 'service' };
+};
+
+/**
+ * A bare `k8s` type says nothing about what the entity is. A thing a pod runs on, or one that
+ * carries node metadata or is named a node, is a Kubernetes node.
+ */
+const resolveBareKubernetesType = (
+  entity: NonNullable<FindingsOutput['impact_map']>['entities'][number],
+  map: NonNullable<FindingsOutput['impact_map']>
+): string => {
+  const typeId = toImpactMapTypeId(entity.type);
+  if (typeId !== 'k8s' && typeId !== 'kubernetes') return typeId;
+  const podIds = new Set(
+    map.entities
+      .filter(({ type }) => toImpactMapTypeId(type) === 'k8s.pod')
+      .map(({ id }) => id.trim())
+  );
+  const hostsAPod = map.relationships.some(
+    ({ source, target }) => target.trim() === entity.id.trim() && podIds.has(source.trim())
+  );
+  const looksLikeNode =
+    /(^|[^a-z])node([^a-z]|$)/i.test(`${entity.id} ${entity.label ?? ''}`) ||
+    (entity.metadata ?? []).some(({ key }) => key.toLowerCase().startsWith('k8s.node.'));
+  return hostsAPod || looksLikeNode ? 'k8s.node' : typeId;
+};
+
+/**
+ * Trims the model's impact map to what the store accepts and turns its flat entity fields into the
+ * store's shape: an entity type for each `type` that names a kind or an icon, so the catalog
+ * learns it, and a relationship type for each relationship `type`. Relationships to an entity the
+ * map does not list are dropped: the store rejects a whole map for one of them.
+ */
+export const limitImpactMap = (
+  raw: NonNullable<FindingsOutput['impact_map']>,
+  /** Type ids the catalog already holds: they are not redefined from here. */
+  knownTypeIds: ReadonlySet<string> = new Set(),
+  /** The catalog's types by id: a known type is taught the metadata fields this map shows for it. */
+  knownTypes: ReadonlyMap<string, ImpactMapEntityType> = new Map()
+): FindingsImpactMap | undefined => {
+  const icon = (value?: string) => (value ? truncate(value, MAX_MAP_ICON_KEY_LENGTH) : undefined);
+  const entityTypes = new Map<string, ImpactMapEntityType>();
+  const seen = new Set<string>();
+  const entities: ImpactMapEntity[] = [];
+  const fieldUpdates = new Map<string, Map<string, ImpactMapMetadataField>>();
+
+  for (const entity of raw.entities) {
+    const id = truncate(entity.id.trim(), MAX_MAP_ID_LENGTH);
+    if (!id || seen.has(id) || entities.length >= MAX_IMPACT_MAP_ENTITIES) continue;
+    seen.add(id);
+    const typeId = withoutEntityName(resolveBareKubernetesType(entity, raw), [
+      entity.id,
+      entity.label ?? '',
+    ]);
+    const agentName = icon(entity.agent_name);
+    const euiIcon = icon(entity.eui_icon);
+    const spanType = icon(entity.span_type);
+    const spanSubtype = icon(entity.span_subtype);
+    const metadata = entity.metadata
+      ? limitMetadata(entity.metadata, [entity.id, entity.label ?? ''])
+      : [];
+    const knownType = knownTypes.get(typeId);
+    if (knownType && metadata.length) {
+      const have = new Set([
+        ...(knownType.metadata_fields ?? []).map(({ key }) => key),
+        ...STANDARD_METADATA_FIELDS.map(({ key }) => key),
+      ]);
+      const learned = fieldUpdates.get(typeId) ?? new Map<string, ImpactMapMetadataField>();
+      metadata
+        .filter(({ key }) => !have.has(key))
+        .forEach(({ key, label, featured }) =>
+          learned.set(key, {
+            key,
+            label: label ?? humanizeTypeId(key.replace(/[._]+/g, ' ')),
+            ...(featured !== undefined ? { featured } : {}),
+          })
+        );
+      if (learned.size) fieldUpdates.set(typeId, learned);
+    }
+    if (!entityTypes.has(typeId) && !knownTypeIds.has(typeId)) {
+      const guess = classifyEntityType(typeId);
+      const euiName = euiIcon ?? (agentName || spanType || spanSubtype ? undefined : guess.euiIcon);
+      entityTypes.set(typeId, {
+        id: typeId,
+        label: humanizeTypeId(typeId),
+        kind: entity.kind ?? (spanType || spanSubtype ? 'dependency' : guess.kind),
+        ...(agentName || euiName || spanType || spanSubtype
+          ? {
+              icon: {
+                ...(agentName ? { agent_name: agentName } : {}),
+                ...(euiName ? { eui_icon: euiName } : {}),
+                ...(spanType ? { span_type: spanType } : {}),
+                ...(spanSubtype ? { span_subtype: spanSubtype } : {}),
+              },
+            }
+          : {}),
+        // The first entity of a new type teaches the catalog which fields the type carries.
+        ...(metadata.length
+          ? {
+              metadata_fields: metadata.map(({ key, label, featured }) => ({
+                key,
+                label:
+                  label ??
+                  STANDARD_METADATA_FIELDS.find((field) => field.key === key)?.label ??
+                  humanizeTypeId(key.replace(/[._]+/g, ' ')),
+                ...(featured !== undefined ? { featured } : {}),
+              })),
+            }
+          : {}),
+      });
+    }
+    const alertCount =
+      entity.alert_count !== undefined && Number.isFinite(entity.alert_count)
+        ? Math.min(MAX_MAP_ALERT_COUNT, Math.max(0, Math.round(entity.alert_count)))
+        : undefined;
+    const annotations = {
+      ...(entity.role ? { role: entity.role } : {}),
+      ...(entity.health ? { health: entity.health } : {}),
+      ...(entity.impacted !== undefined ? { impacted: entity.impacted } : {}),
+      ...(alertCount ? { alert_count: alertCount } : {}),
+    };
+    entities.push({
+      id,
+      type_id: typeId,
+      label: truncate(toEntityName(entity.label?.trim() || id), MAX_MAP_LABEL_LENGTH),
+      ...(Object.keys(annotations).length ? { annotations } : {}),
+      ...(metadata.length ? { metadata } : {}),
+    });
+  }
+  if (entities.length === 0) return undefined;
+
+  // The catalog adds fields up by key, so a known type is sent with only what it has just learned.
+  fieldUpdates.forEach((fields, typeId) => {
+    const known = knownTypes.get(typeId);
+    if (known && !entityTypes.has(typeId)) {
+      entityTypes.set(typeId, {
+        id: known.id,
+        label: known.label,
+        kind: known.kind,
+        metadata_fields: [...fields.values()],
+      });
+    }
+  });
+
+  const relationshipTypes = new Map<string, ImpactMapRelationshipType>();
+  const relationships: ImpactMapRelationship[] = [];
+  for (const relationship of raw.relationships) {
+    const source = truncate(relationship.source.trim(), MAX_MAP_ID_LENGTH);
+    const target = truncate(relationship.target.trim(), MAX_MAP_ID_LENGTH);
+    if (!seen.has(source) || !seen.has(target)) continue;
+    if (relationships.length >= MAX_IMPACT_MAP_RELATIONSHIPS) break;
+    const typeId = toImpactMapTypeId(relationship.type);
+    if (!relationshipTypes.has(typeId)) {
+      relationshipTypes.set(typeId, {
+        id: typeId,
+        label: typeId.replace(/[_.-]+/g, ' ').trim(),
+      });
+    }
+    relationships.push({
+      type_id: typeId,
+      source_id: source,
+      target_id: target,
+      ...(relationship.on_critical_path ? { on_critical_path: true } : {}),
+    });
+  }
+
+  return {
+    ...(raw.title?.trim() ? { title: truncate(raw.title.trim(), MAX_MAP_LABEL_LENGTH) } : {}),
+    entities,
+    relationships,
+    entity_types: [...entityTypes.values()],
+    relationship_types: [...relationshipTypes.values()],
+  };
+};
+
+const MAX_EVENT_DESCRIPTION_LENGTH = 1_000;
+const MAX_EVENT_DESCRIPTION_BULLETS = 4;
+
+const MAX_EVENT_BULLET_LENGTH = 200;
+
+const clipAtWord = (text: string, max: number): string => {
+  if (text.length <= max) return text;
+  let cut = text.slice(0, max);
+  // Never leave half of an event link behind: its target would show as text.
+  const openLink = cut.lastIndexOf('[');
+  if (openLink > cut.lastIndexOf(')') && openLink > max / 2) {
+    cut = cut.slice(0, openLink);
+  }
+  return `${cut.slice(0, Math.max(cut.lastIndexOf(' '), max / 2)).trimEnd()}…`;
+};
+
+/**
+ * Text as a short list of bullets, however the model wrote it: bullets are kept, a paragraph is
+ * split into sentences, and nothing runs past `maxItems` or `maxChars` an item.
+ */
+export const limitBulletList = (text: string, maxItems: number, maxChars: number): string => {
+  const lines = text.split('\n').filter((line) => line.trim());
+  const items = lines.some((line) => /^\s*[-*]\s/.test(line))
+    ? lines.map((line) => line.replace(/^\s*[-*]\s+/, '').trim())
+    : text
+        .split(/(?<=[.;!?])\s+(?=[A-Z0-9"'(`[])/)
+        .map((sentence) => sentence.trim())
+        .filter(Boolean);
+  return items
+    .slice(0, maxItems)
+    .map((item) => `- ${clipAtWord(item, maxChars)}`)
+    .join('\n');
+};
+
+/**
+ * An event description: one lead sentence, then at most four short bullets. A description of
+ * bullets only is kept as bullets. A paragraph becomes its first sentence and the next few as
+ * bullets, so a verbose answer never reaches the reader as a wall of text.
+ */
+export const limitDescriptionBullets = (text: string): string => {
+  const lines = text.split('\n').filter((line) => line.trim());
+  const isBullet = (line: string) => /^\s*[-*]\s/.test(line);
+  const unbullet = (line: string) => line.replace(/^\s*[-*]\s+/, '').trim();
+  let lead: string | undefined;
+  let items: string[];
+  if (lines.some(isBullet)) {
+    lead = lines[0] && !isBullet(lines[0]) ? lines[0].trim() : undefined;
+    items = lines.filter(isBullet).map(unbullet);
+  } else {
+    const sentences = text
+      .split(/(?<=[.;!?])\s+(?=[A-Z0-9"'(])/)
+      .map((sentence) => sentence.trim())
+      .filter(Boolean);
+    lead = sentences.shift();
+    items = sentences;
+  }
+  const bullets = items
+    .slice(0, MAX_EVENT_DESCRIPTION_BULLETS)
+    .map((item) => `- ${clipAtWord(item, MAX_EVENT_BULLET_LENGTH)}`)
+    .join('\n');
+  const head = lead ? clipAtWord(lead, MAX_EVENT_BULLET_LENGTH) : '';
+  return head && bullets ? `${head}\n\n${bullets}` : head || bullets;
+};
+
+/** An ISO 8601 time the store can sort by, or undefined when the model wrote something else. */
+const toIsoTime = (value?: string): string | undefined => {
+  if (!value) return undefined;
+  const parsed = Date.parse(value);
+  return Number.isNaN(parsed) ? undefined : new Date(parsed).toISOString();
+};
+
+/**
+ * Trims events to what the store accepts and gives each a stable id, so the next pass that
+ * describes the same event updates it. An event with no time it can be placed at is dropped, and
+ * only a finding or a response may belong to neither an entity nor a relationship.
+ */
+export const limitEvents = (raw: NonNullable<FindingsOutput['events']>): ImpactMapEvent[] => {
+  const byId = new Map<string, ImpactMapEvent>();
+  for (const event of raw) {
+    const at = toIsoTime(event.at);
+    const title = event.title.trim();
+    if (!at || !title) continue;
+    const entityId = event.entity?.trim()
+      ? truncate(event.entity.trim(), MAX_MAP_ID_LENGTH)
+      : undefined;
+    const relationshipId =
+      !entityId && event.relationship?.source.trim() && event.relationship.target.trim()
+        ? truncate(
+            `${event.relationship.source.trim()}->${event.relationship.target.trim()}`,
+            MAX_MAP_ID_LENGTH
+          )
+        : undefined;
+    if (!entityId && !relationshipId && event.kind !== 'response' && event.kind !== 'investigation')
+      continue;
+    const endsAt = toIsoTime(event.ends_at);
+    const evidence = event.evidence ? limitEvidence(event.evidence, at) : undefined;
+    const target = {
+      ...(entityId ? { entity_id: entityId } : {}),
+      ...(relationshipId ? { relationship_id: relationshipId } : {}),
+    };
+    const id = impactMapEventId({ kind: event.kind, at, ...target });
+    byId.set(id, {
+      id,
+      kind: event.kind,
+      title: truncate(title, MAX_MAP_LABEL_LENGTH),
+      ...(event.description?.trim()
+        ? {
+            description: truncate(
+              limitDescriptionBullets(event.description.trim()),
+              MAX_EVENT_DESCRIPTION_LENGTH
+            ),
+          }
+        : {}),
+      at,
+      ...(endsAt ? { ends_at: endsAt } : {}),
+      ...target,
+      ...(evidence ? { evidence } : {}),
+      ...(event.data_source?.name.trim()
+        ? { data_source: sanitizeDataSource(event.data_source) }
+        : {}),
+    });
+  }
+  return [...byId.values()].slice(0, MAX_IMPACT_MAP_EVENTS);
+};
+
 /** A parsed record with its evidence trimmed to what the stores accept. */
 export type FindingsRecord = Omit<
   FindingsOutput,
-  'impact_evidence' | 'impact_entities' | 'hypotheses' | 'proposals'
+  'impact_evidence' | 'impact_entities' | 'hypotheses' | 'proposals' | 'impact_map' | 'events'
 > & {
+  /** Absent when the pass recorded none that could be placed. */
+  events?: ImpactMapEvent[];
+  /** Absent when the model drew no map or none of its entities fit. */
+  impact_map?: FindingsImpactMap;
   proposals?: Array<{ title: string; comment: string; impact?: string; confidence?: string }>;
   /** `null` retracts the stored evidence. */
   impact_evidence?: InvestigationEvidence | null;
@@ -216,25 +748,39 @@ export type FindingsRecord = Omit<
 };
 
 /** Trims a parsed record to the sizes the metadata, hypotheses and impact stores accept. */
-export const limitFindings = (output: FindingsOutput): FindingsRecord => {
+export const limitFindings = (
+  output: FindingsOutput,
+  knownTypeIds?: ReadonlySet<string>,
+  knownTypes?: ReadonlyMap<string, ImpactMapEntityType>
+): FindingsRecord => {
   // The fields that carry evidence are rebuilt below, so the raw ones are not spread back in.
   const {
     impact_evidence: rawImpactEvidence,
     impact_entities: rawEntities,
     proposals: rawProposals,
     hypotheses: rawHypotheses,
+    impact_map: rawImpactMap,
+    events: rawEvents,
     ...rest
   } = output;
+  const events = rawEvents ? limitEvents(rawEvents) : [];
   const impactEvidence = rawImpactEvidence ? limitEvidence(rawImpactEvidence) : rawImpactEvidence;
+  const impactMap = rawImpactMap
+    ? limitImpactMap(rawImpactMap, knownTypeIds, knownTypes)
+    : undefined;
   return {
     ...rest,
+    ...(impactMap ? { impact_map: impactMap } : {}),
+    ...(events.length ? { events } : {}),
     impact_evidence: impactEvidence,
-    summary: truncate(output.summary, MAX_METADATA_TEXT_LENGTH),
+    summary: limitBulletList(normalizeEventLinks(output.summary), 5, 160),
     ...(output.verdict !== undefined
-      ? { verdict: truncate(output.verdict, MAX_METADATA_TEXT_LENGTH) }
+      ? { verdict: limitDescriptionBullets(normalizeEventLinks(output.verdict)) }
       : {}),
     ...(output.impact_summary !== undefined
-      ? { impact_summary: truncate(output.impact_summary, MAX_EVIDENCE_TEXT_LENGTH) }
+      ? {
+          impact_summary: limitBulletList(normalizeEventLinks(output.impact_summary), 2, 160),
+        }
       : {}),
     ...(rawEntities !== undefined
       ? {
@@ -267,7 +813,7 @@ export const limitFindings = (output: FindingsOutput): FindingsRecord => {
       : {}),
     hypotheses: rawHypotheses.slice(0, MAX_HYPOTHESES).map(({ evidence, ...hypothesis }) => {
       const kept = (evidence ?? [])
-        .map(limitEvidence)
+        .map((item) => limitEvidence(item))
         .filter((item): item is InvestigationEvidence => item !== undefined)
         .slice(0, MAX_HYPOTHESIS_EVIDENCE_ITEMS);
       return {
@@ -275,7 +821,7 @@ export const limitFindings = (output: FindingsOutput): FindingsRecord => {
         candidate: truncate(hypothesis.candidate, MAX_EVIDENCE_TEXT_LENGTH),
         confidence: Math.min(1, Math.max(0, hypothesis.confidence)),
         ...(hypothesis.reason !== undefined
-          ? { reason: truncate(hypothesis.reason, MAX_EVIDENCE_TEXT_LENGTH) }
+          ? { reason: truncate(normalizeEventLinks(hypothesis.reason), MAX_EVIDENCE_TEXT_LENGTH) }
           : {}),
         ...(kept.length ? { evidence: kept } : {}),
       };
@@ -354,6 +900,15 @@ const EVIDENCE_JSON_SCHEMA = {
               label: { type: 'string' },
             },
             required: ['x', 'label'],
+          },
+        },
+        thresholds: {
+          type: 'array',
+          description: 'At most 2 horizontal lines, such as the limit an alert rule fires on.',
+          items: {
+            type: 'object',
+            properties: { y: { type: 'number' }, label: { type: 'string' } },
+            required: ['y', 'label'],
           },
         },
       },
@@ -464,6 +1019,222 @@ export const FINDINGS_JSON_SCHEMA = {
         required: ['candidate', 'confidence', 'status'],
       },
     },
+    impact_map: {
+      type: 'object',
+      description: `Only once the cause is confirmed or leading: a map of the entities the problem touches and how they depend on each other, from the symptom to the root cause. At most ${MAX_IMPACT_MAP_ENTITIES} entities, usually 3 to 12. Only entities and dependencies the tool results show; leave out what was not looked at. Omit to keep the stored map.`,
+      properties: {
+        title: {
+          type: 'string',
+          description: 'A few words naming what the map shows, for example Checkout failures.',
+        },
+        entities: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              id: {
+                type: 'string',
+                description:
+                  'Unique in the map: the bare name of the thing itself, such as checkout, shipping or quote-old. Never its type, a state, a count or an endpoint.',
+              },
+              label: {
+                type: 'string',
+                description:
+                  'The bare name of the entity, as its owner would call it: shipping, not "k8s deployment: shipping (0/0)". What kind of thing it is goes in type; what is wrong with it (0 replicas, NXDOMAIN, a port, an operation) goes in events. Defaults to the id.',
+              },
+              type: {
+                type: 'string',
+                description:
+                  'One lowercase id per kind of entity, reused across investigations. Use the OpenTelemetry entity name when there is one (k8s.deployment, k8s.pod, k8s.node, k8s.namespace, host, container, process), nodejs_service, java_service and so on for services, db.postgresql, db.redis and messaging.kafka for dependencies, and make up a lowercase dotted id only for a kind of thing that is not in the catalog.',
+              },
+              kind: {
+                type: 'string',
+                enum: IMPACT_MAP_ENTITY_KINDS,
+                description:
+                  'Classify by what the thing fundamentally is. service draws a circle, for application code you run; dependency draws a diamond, for a database, queue, cache or external API that services call; infrastructure draws a rounded square, for what runs and hosts them: a Kubernetes deployment, pod or node, a host, VM, container, cloud resource or load balancer.',
+              },
+              agent_name: {
+                type: 'string',
+                description:
+                  'For a service, the APM agent name for its icon: nodejs, java, go, python, dotnet, ruby, php, rum-js or opentelemetry.',
+              },
+              eui_icon: {
+                type: 'string',
+                description:
+                  'For something with no APM agent, an EUI icon name. Always logoKubernetes for a Kubernetes deployment, pod, node, statefulset, daemonset or namespace; logoDocker for a container; logoAWS, logoGCP or logoAzure for cloud resources.',
+              },
+              span_type: {
+                type: 'string',
+                description:
+                  'For a dependency, its span type for the icon: db, messaging, cache or external.',
+              },
+              span_subtype: {
+                type: 'string',
+                description:
+                  'For a dependency, its span subtype for the icon: postgresql, mysql, elasticsearch, redis, kafka, http and so on.',
+              },
+              role: {
+                type: 'string',
+                enum: IMPACT_MAP_ROLES,
+                description:
+                  'root_cause for the confirmed or leading cause, contributor for something that made it worse, context for the rest.',
+              },
+              health: { type: 'string', enum: IMPACT_MAP_HEALTH_STATES },
+              impacted: {
+                type: 'boolean',
+                description: 'True when the problem hurt this entity or its users.',
+              },
+              alert_count: {
+                type: 'number',
+                description: 'Open alerts on this entity, only when the tool results show them.',
+              },
+              metadata: {
+                type: 'array',
+                description: `Required on every entity, and sent again each time because the map replaces the stored one: an entity sent without it loses what it had. At most ${MAX_IMPACT_MAP_ENTITY_METADATA}. Include every one of these the tool results or files show for the entity, wherever the data came from; use an empty array only when none of them appear anywhere. Facts that help a person understand and locate the entity, taken from tool results only: its cloud provider, region, availability zone, Kubernetes cluster, namespace, node, host, version, owner. Reuse the keys listed under the catalog; add your own lowercase dotted key and a label for anything else that helps. Set featured on the few that matter most, such as cluster and namespace.`,
+                items: {
+                  type: 'object',
+                  properties: {
+                    key: {
+                      type: 'string',
+                      description:
+                        'Lowercase and dotted, like an OpenTelemetry attribute: cloud.availability_zone, k8s.namespace.name.',
+                    },
+                    value: { type: 'string' },
+                    label: { type: 'string', description: 'Only for a key you made up.' },
+                    featured: { type: 'boolean' },
+                  },
+                  required: ['key', 'value'],
+                },
+              },
+            },
+            required: ['id', 'type', 'metadata'],
+          },
+        },
+        relationships: {
+          type: 'array',
+          description: `At most ${MAX_IMPACT_MAP_RELATIONSHIPS}. Point each from the caller or dependent to what it depends on.`,
+          items: {
+            type: 'object',
+            properties: {
+              source: { type: 'string', description: 'An entity id.' },
+              target: { type: 'string', description: 'An entity id.' },
+              type: {
+                type: 'string',
+                description:
+                  'A lowercase verb, reused across investigations: calls, reads_from, writes_to, publishes_to, runs_on.',
+              },
+              on_critical_path: {
+                type: 'boolean',
+                description: 'True for each hop on the path from the symptom to the root cause.',
+              },
+            },
+            required: ['source', 'target', 'type'],
+          },
+        },
+      },
+      required: ['entities', 'relationships'],
+    },
+    events: {
+      type: 'array',
+      description: `What happened, each placed against the entity or relationship of the impact map it happened to, so the map shows where and the timeline shows when. New or changed events only: they are merged with the ones already recorded. Only what the tool results or the conversation show, with the time they show. At most ${MAX_IMPACT_MAP_EVENTS}.`,
+      items: {
+        type: 'object',
+        properties: {
+          kind: {
+            type: 'string',
+            enum: IMPACT_MAP_EVENT_KINDS,
+            description:
+              'change for a deploy, config or scaling change; failure for errors, crashes, timeouts or restarts; condition for a state such as saturation, a full disk or zero replicas; alert for an alert that fired; anomaly for an anomaly an ML job or detector flagged; mitigation for a fix applied; customer_impact for what customers felt, placed on the entry point they use; investigation for a finding of the investigation, such as a hypothesis confirmed or ruled out; response for what responders did, such as opening an incident channel or updating the status page.',
+          },
+          title: {
+            type: 'string',
+            description:
+              'One line in the past tense with the measured number, for example Replicas scaled from 3 to 0 or Checkout error rate rose to 42%.',
+          },
+          description: {
+            type: 'string',
+            description:
+              "Three or four Markdown bullets ('- ...'), one short fact each of at most 20 words: what happened, how big, what it coincided with, what is still unknown. No paragraph, no restating the title, no identifiers unless a bullet is about one.",
+          },
+          at: { type: 'string', description: 'When it happened or started, ISO 8601.' },
+          ends_at: { type: 'string', description: 'When it ended, if it has.' },
+          entity: {
+            type: 'string',
+            description:
+              'The id of the impact map entity it happened to. Use the same id as in impact_map.',
+          },
+          relationship: {
+            type: 'object',
+            description:
+              'Instead of entity, the relationship it happened to, such as timeouts on calls from one service to another.',
+            properties: {
+              source: { type: 'string', description: 'An entity id.' },
+              target: { type: 'string', description: 'An entity id.' },
+            },
+            required: ['source', 'target'],
+          },
+          evidence: {
+            ...EVIDENCE_JSON_SCHEMA,
+            description:
+              'A chart that explains the event in context: the signal that shows it, over a window that starts before the change that led to it, with an annotation at that change and one at the event. Copy only numbers a tool returned; describe instead when there are none.',
+          },
+          data_source: {
+            type: 'object',
+            description:
+              'Where the data behind this event came from and how it was asked for, copied from the tool call that returned it. Required on every event, with no exception: an event without one is rejected. For an event that uses no data, such as a response, name the system it was learned from (Slack, PagerDuty, GitHub) and the call that showed it. Never include credentials, API keys or auth headers.',
+            properties: {
+              name: {
+                type: 'string',
+                description: 'The system the data came from, for example Elasticsearch or Grafana.',
+              },
+              instance: {
+                type: 'string',
+                description:
+                  "What the system is, by kind and name, as the tool call shows it: 'Cluster prod-east', 'Serverless project my-project', 'Grafana org Platform'. Leave out when the tool call does not name it.",
+              },
+              scope: {
+                type: 'string',
+                enum: ['local', 'remote'],
+                description:
+                  'local when the data came from the cluster or project this investigation runs against, remote for anywhere else (another cluster or project, Grafana, Slack, GitHub).',
+              },
+              base_url: {
+                type: 'string',
+                description:
+                  'The base URL of a remote system as the tool call used it, for example https://my-cluster.es.example.com:443, with no credentials. Leave out for a local system: it is filled in.',
+              },
+              query: {
+                type: 'object',
+                description: 'The query text, when one was used.',
+                properties: {
+                  language: { type: 'string', description: 'For example ES|QL, KQL, PromQL.' },
+                  text: { type: 'string', description: 'The query exactly as it was run.' },
+                },
+                required: ['text'],
+              },
+              api_call: {
+                type: 'object',
+                description: 'The call made, when the data came from an API or a tool.',
+                properties: {
+                  method: { type: 'string', description: 'The HTTP method, for example POST.' },
+                  type: {
+                    type: 'string',
+                    description: 'The kind of call, for example search, _query or MCP tool name.',
+                  },
+                  endpoint: { type: 'string', description: 'The path or URL called, no secrets.' },
+                  payload: {
+                    type: 'string',
+                    description: 'The request body as sent. Leave out credentials.',
+                  },
+                },
+              },
+            },
+            required: ['name'],
+          },
+        },
+        required: ['kind', 'title', 'at', 'data_source'],
+      },
+    },
   },
   required: ['summary', 'hypotheses'],
 } as const;
@@ -472,8 +1243,8 @@ const { evidence: _hypothesisEvidence, ...LIVE_HYPOTHESIS_PROPERTIES } =
   FINDINGS_JSON_SCHEMA.properties.hypotheses.items.properties;
 
 /**
- * What a live pass may answer while the investigation runs: the summary and the hypothesis tree.
- * The rest of the record, with its evidence, is written once, from the final pass.
+ * What a live pass may answer while the investigation runs: the summary, the hypothesis tree, the
+ * impact map and its events. The rest of the record, with its evidence, is written once, from the final pass.
  */
 export const LIVE_FINDINGS_JSON_SCHEMA = {
   type: 'object',
@@ -488,6 +1259,10 @@ export const LIVE_FINDINGS_JSON_SCHEMA = {
         properties: LIVE_HYPOTHESIS_PROPERTIES,
       },
     },
+    // Redrawn whenever new evidence changes it, so the map never lags the findings.
+    impact_map: FINDINGS_JSON_SCHEMA.properties.impact_map,
+    // Recorded as they are found, so the timeline fills while the investigation runs.
+    events: FINDINGS_JSON_SCHEMA.properties.events,
   },
   required: ['summary', 'hypotheses'],
 } as const;

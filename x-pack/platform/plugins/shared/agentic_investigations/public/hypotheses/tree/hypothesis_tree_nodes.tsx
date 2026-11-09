@@ -14,7 +14,6 @@ import {
   EuiIcon,
   EuiLink,
   EuiLoadingSpinner,
-  EuiMarkdownFormat,
   EuiPanel,
   EuiText,
   useEuiTheme,
@@ -24,6 +23,7 @@ import { Handle, Position, type Node, type NodeProps } from '@xyflow/react';
 import type { HypothesisStatus } from '../../../common/hypotheses/hypotheses';
 import type { InvestigationProposalSummary } from '../../../common/investigations/investigation';
 import type { InvestigationSubjectType } from '../../../common/subjects/subject';
+import { EventMarkdown } from '../../event_links/event_markdown';
 import { getSubjectDisplayType, getSubjectTitle } from '../../subjects/attachments/subject_title';
 import {
   useAlertsListLink,
@@ -340,9 +340,7 @@ const ClampedMarkdown = ({
       ${clampLines(lines)}
     `}
   >
-    <EuiMarkdownFormat textSize="s" color={color}>
-      {text}
-    </EuiMarkdownFormat>
+    <EventMarkdown text={text} color={color} />
   </div>
 );
 

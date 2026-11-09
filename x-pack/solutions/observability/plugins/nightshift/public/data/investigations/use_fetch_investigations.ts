@@ -31,11 +31,22 @@ const IN_PROGRESS_CANDIDATES = 20;
 /** How long a section's pages stay fresh, which bounds how often a refocus can refetch it. */
 const SECTION_STALE_TIME_MS = 30_000;
 
+export type InvestigationListStatus = 'open' | 'closed';
+
 export interface FetchInvestigationsParams {
   /** True: only investigations an agent is working on; false: the rest. */
   inProgress: boolean;
   severities?: InvestigationSeverityFilterValue[];
+  /**
+   * Open severity / in-progress buckets pass `open`. The Closed accordion passes `closed`.
+   * Omitted when a caller wants every status (Recent: open finished + closed).
+   */
+  status?: InvestigationListStatus;
   query?: string;
+  /** Defaults to `created_at`. Recent uses `updated_at` so just-finished work surfaces first. */
+  sortField?: 'created_at' | 'updated_at';
+  /** Overrides {@link INVESTIGATIONS_PAGE_SIZE} for non-in-progress sections. */
+  perPage?: number;
   /**
    * Poll interval in ms, or `false` to never poll. A refetch re-requests every page this
    * section has loaded, so only sections that stay shallow should poll.
@@ -85,7 +96,10 @@ export const getInvestigationsNextPageParam = ({
 export const useFetchInvestigations = ({
   inProgress,
   severities,
+  status,
   query,
+  sortField = 'created_at',
+  perPage = INVESTIGATIONS_PAGE_SIZE,
   refetchInterval = false,
 }: FetchInvestigationsParams): FetchInvestigationsResult => {
   const { http, agenticInvestigations } = useKibana().services;
@@ -101,22 +115,32 @@ export const useFetchInvestigations = ({
     isPreviousData,
     refetch,
   } = useInfiniteQuery<ListInvestigationsResponse, Error>({
-    queryKey: [...NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY, 'section', inProgress, severities, query],
+    queryKey: [
+      ...NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY,
+      'section',
+      inProgress,
+      severities,
+      status,
+      query,
+      sortField,
+      perPage,
+    ],
     // The list API belongs to agenticInvestigations, an optional dependency.
     enabled: agenticInvestigations != null,
     queryFn: async ({ pageParam, signal }) =>
       http.get<ListInvestigationsResponse>(SHARED_INVESTIGATIONS_URL, {
         version: SHARED_INVESTIGATIONS_API_VERSION,
         query: {
-          sort_field: 'created_at',
+          sort_field: sortField,
           sort_order: 'desc',
           in_progress: inProgress,
           ...(inProgress
-            ? { page: 1, per_page: IN_PROGRESS_CANDIDATES, status: 'open' }
+            ? { page: 1, per_page: IN_PROGRESS_CANDIDATES }
             : {
                 page: typeof pageParam === 'number' ? pageParam : 1,
-                per_page: INVESTIGATIONS_PAGE_SIZE,
+                per_page: perPage,
               }),
+          ...(status != null ? { status } : {}),
           ...(severities?.length ? { severity: severities } : {}),
           ...(query ? { query } : {}),
         },

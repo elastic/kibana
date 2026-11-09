@@ -130,6 +130,8 @@ export interface OverviewSlotRenderProps {
   proposedActionsContent?: React.ReactNode;
   /** The count shown beside the "Proposed actions" heading, from `renderProposedActionsCount`. */
   proposedActionsCount?: React.ReactNode;
+  /** Switches the flyout to its Timeline tab. Absent when the flyout has no Timeline tab. */
+  openTimeline?: () => void;
 }
 
 /**
@@ -138,6 +140,30 @@ export interface OverviewSlotRenderProps {
  * `sections`. When absent the tab renders `OverviewTab` from the conversation alone.
  */
 export type RenderOverview = (props: OverviewSlotRenderProps) => React.ReactNode;
+
+/** Props passed to the `renderImpactMap` render prop. */
+export interface ImpactMapSlotRenderProps {
+  conversationId: string;
+  /** Switches the flyout to its Timeline tab. Absent when the flyout has no Timeline tab. */
+  openTimeline?: () => void;
+}
+
+/**
+ * A render prop for the body of the investigation's Impact map tab. Supplied by the consuming
+ * plugin, which reads the map and draws it; without it the flyout has no Impact map tab.
+ */
+export type RenderImpactMap = (props: ImpactMapSlotRenderProps) => React.ReactNode;
+
+/** Props passed to the `renderTimeline` render prop. */
+export interface TimelineSlotRenderProps {
+  conversationId: string;
+}
+
+/**
+ * A render prop for the body of the investigation's Timeline tab: what happened, in time order,
+ * including what responders did. Without it the flyout has no Timeline tab.
+ */
+export type RenderTimeline = (props: TimelineSlotRenderProps) => React.ReactNode;
 
 /** Props passed to the `renderLiveState` render prop. */
 export interface LiveStateSlotRenderProps {

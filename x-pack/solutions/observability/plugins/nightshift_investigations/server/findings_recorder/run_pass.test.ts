@@ -16,10 +16,10 @@ import { runFindingsPass, toImpactEntities, type FindingsPassDeps } from './run_
 jest.mock('../lib/create_optimize_model', () => ({ createOptimizeModel: jest.fn() }));
 
 const output = {
-  summary: 'Checkout errors rose after the 01:00 deploy.',
+  summary: '- Checkout errors rose after the 01:00 deploy.',
   verdict: 'The deploy doubled DB latency.',
   severity: 'high',
-  impact_summary: 'Checkout failed for 10 minutes.',
+  impact_summary: '- Checkout failed for 10 minutes.',
   impact_entities: [{ name: 'checkout' }],
   hypotheses: [
     {
@@ -53,6 +53,11 @@ describe('runFindingsPass', () => {
     const writer = {
       setHypotheses: jest.fn().mockResolvedValue(undefined),
       setImpact: jest.fn().mockResolvedValue(undefined),
+      setImpactMap: jest.fn().mockResolvedValue({ warnings: [] }),
+      addImpactMapEvents: jest.fn().mockResolvedValue(undefined),
+      getImpactMapCatalog: jest
+        .fn()
+        .mockResolvedValue({ entity_types: [], relationship_types: [] }),
       getFindings: jest.fn().mockResolvedValue({ hypotheses: [], impactEntities: [] }),
     };
     const patchMetadata = jest.fn().mockResolvedValue(undefined);
@@ -336,7 +341,12 @@ describe('runFindingsPass', () => {
 
     const schemaOf = (chatComplete: jest.Mock) =>
       chatComplete.mock.calls[0][0].tools.structuredOutput.schema.properties;
-    expect(Object.keys(schemaOf(live.chatComplete))).toEqual(['summary', 'hypotheses']);
+    expect(Object.keys(schemaOf(live.chatComplete))).toEqual([
+      'summary',
+      'hypotheses',
+      'impact_map',
+      'events',
+    ]);
     expect(Object.keys(schemaOf(final.chatComplete))).toEqual(
       expect.arrayContaining(['verdict', 'severity', 'impact_summary', 'impact_entities'])
     );
@@ -437,6 +447,121 @@ describe('runFindingsPass', () => {
     await run(deps, memory, { answer: 'Root cause: bad deploy' });
 
     expect(writer.setImpact).not.toHaveBeenCalled();
+  });
+
+  it('shows the recorder the catalog types so the map reuses them', async () => {
+    const { deps, writer, memory, chatComplete } = setup();
+    writer.getImpactMapCatalog.mockResolvedValue({
+      entity_types: [
+        {
+          id: 'k8s_deployment',
+          label: 'K8s deployment',
+          kind: 'service',
+          icon: { eui_icon: 'logoKubernetes' },
+        },
+      ],
+      relationship_types: [{ id: 'scaled_to_zero', label: 'scaled to zero' }],
+    });
+    await run(deps, memory);
+    const { system } = chatComplete.mock.calls[0][0];
+    expect(system).toContain('k8s_deployment: service, eui_icon=logoKubernetes');
+    expect(system).toContain('scaled_to_zero');
+  });
+
+  it('redraws the impact map on live passes and on the final pass', async () => {
+    const impactMap = {
+      entities: [
+        { id: 'checkout', type: 'java_service', agent_name: 'java', role: 'symptom' },
+        { id: 'payments-db', type: 'postgresql', span_type: 'db', role: 'root_cause' },
+      ],
+      relationships: [
+        { source: 'checkout', target: 'payments-db', type: 'reads_from', on_critical_path: true },
+      ],
+    };
+    const live = setup({ answers: [answerWith({ ...output, impact_map: impactMap })] });
+    await run(live.deps, live.memory);
+    expect(live.writer.setImpactMap).toHaveBeenCalledTimes(1);
+
+    const quiet = setup({ answers: [answerWith(output)] });
+    await run(quiet.deps, quiet.memory);
+    expect(quiet.writer.setImpactMap).not.toHaveBeenCalled();
+
+    const { deps, writer, memory } = setup({
+      answers: [answerWith({ ...output, impact_map: impactMap })],
+    });
+    await run(deps, memory, { answer: 'Root cause: bad deploy' });
+
+    const [{ conversationId, impactMap: written }] = writer.setImpactMap.mock.calls[0];
+    expect(conversationId).toBe('c1');
+    expect(written.entities.map(({ id }: { id: string }) => id)).toEqual([
+      'checkout',
+      'payments-db',
+    ]);
+    expect(written.relationships).toEqual([
+      expect.objectContaining({ source_id: 'checkout', on_critical_path: true }),
+    ]);
+  });
+
+  it('asks again for events with no data source, then saves what it gets', async () => {
+    const bare = { kind: 'response', title: 'Incident channel opened', at: '2026-11-07T10:05:00Z' };
+    const { deps, memory, writer, chatComplete } = setup({
+      answers: [answerWith({ ...output, events: [bare] })],
+    });
+    await run(deps, memory);
+    expect(chatComplete.mock.calls.length).toBe(2);
+    expect(writer.addImpactMapEvents).toHaveBeenCalledTimes(1);
+    const [{ events }] = writer.addImpactMapEvents.mock.calls[0];
+    expect(events[0].data_source).toBeUndefined();
+  });
+
+  it('does not ask again when every event has a data source', async () => {
+    const events = [
+      {
+        ...{ kind: 'response', title: 'Opened', at: '2026-11-07T10:05:00Z' },
+        data_source: { name: 'Slack' },
+      },
+    ];
+    const { deps, memory, chatComplete } = setup({ answers: [answerWith({ ...output, events })] });
+    await run(deps, memory);
+    expect(chatComplete.mock.calls.length).toBe(1);
+  });
+
+  it('writes events with the map, or on their own when there is no map', async () => {
+    const events = [
+      {
+        kind: 'condition',
+        title: 'Replicas scaled to 0',
+        at: '2026-11-07T10:00:00Z',
+        entity: 'shipping',
+        data_source: { name: 'Elasticsearch' },
+      },
+      {
+        kind: 'response',
+        title: 'Incident channel opened',
+        at: '2026-11-07T10:05:00Z',
+        data_source: { name: 'Slack' },
+      },
+    ];
+    const impactMap = {
+      entities: [{ id: 'shipping', type: 'k8s_deployment' }],
+      relationships: [],
+    };
+    const withMap = setup({ answers: [answerWith({ ...output, impact_map: impactMap, events })] });
+    await run(withMap.deps, withMap.memory);
+    const [{ impactMap: written }] = withMap.writer.setImpactMap.mock.calls[0];
+    expect(written.events.map(({ kind }: { kind: string }) => kind)).toEqual([
+      'condition',
+      'response',
+    ]);
+    expect(withMap.writer.addImpactMapEvents).not.toHaveBeenCalled();
+
+    const alone = setup({ answers: [answerWith({ ...output, events })] });
+    await run(alone.deps, alone.memory);
+    expect(alone.writer.setImpactMap).not.toHaveBeenCalled();
+    const [{ events: added }] = alone.writer.addImpactMapEvents.mock.calls[0];
+    expect(added[0]).toEqual(
+      expect.objectContaining({ entity_id: 'shipping', at: '2026-11-07T10:00:00.000Z' })
+    );
   });
 
   it('gives an entity with a long name an id within the store limit', async () => {
@@ -735,17 +860,14 @@ describe('runFindingsPass', () => {
     expect(patchMetadata).toHaveBeenCalled();
   });
 
-  it("falls back to the agent's answer as verdict and summary when no attempt is usable", async () => {
+  it("does not record the agent's chat reply as verdict or summary when no attempt is usable", async () => {
     const { deps, writer, patchMetadata, memory } = setup({
       answers: [{ content: 'a' }, { content: 'b' }],
     });
 
-    await run(deps, memory, { answer: 'Root cause: deploy' });
+    await expect(run(deps, memory, { answer: 'Root cause: deploy' })).resolves.toBe(false);
 
-    expect(patchMetadata).toHaveBeenCalledWith('c1', {
-      summary: 'Root cause: deploy',
-      verdict: 'Root cause: deploy',
-    });
+    expect(patchMetadata).not.toHaveBeenCalled();
     expect(writer.setHypotheses).not.toHaveBeenCalled();
     expect(memory.remember).not.toHaveBeenCalled();
   });
@@ -816,6 +938,9 @@ describe('runFindingsPass with workspace files', () => {
     const writer = {
       setHypotheses: jest.fn().mockResolvedValue(undefined),
       setImpact: jest.fn().mockResolvedValue(undefined),
+      getImpactMapCatalog: jest
+        .fn()
+        .mockResolvedValue({ entity_types: [], relationship_types: [] }),
       getFindings: jest.fn().mockResolvedValue({ hypotheses: [], impactEntities: [] }),
     };
     const chatComplete = jest.fn();
@@ -940,12 +1065,16 @@ describe('runFindingsPass with workspace files', () => {
 
     // A live pass is not told about the fields it does not write, or the files it cannot read.
     expect(live).toContain('hypotheses');
-    for (const only of ['impact', 'severity', 'verdict', 'recorder_read_file']) {
+    for (const only of ['impact_evidence', 'severity', 'verdict', 'recorder_read_file']) {
       expect(live).not.toContain(only);
     }
     expect(finalPlain).toContain('impact');
     expect(finalPlain).not.toContain('recorder_read_file');
     expect(finalFiles).toContain('recorder_read_file');
+    // Only the final pass can read the files, so only it is told to chart events from them.
+    expect(finalFiles).toContain('read the file that holds the series');
+    expect(finalPlain).not.toContain('read the file that holds the series');
+    expect(live).not.toContain('read the file that holds the series');
     for (const prompt of [live, finalPlain, finalFiles]) {
       expect(prompt).toContain('structuredOutput');
     }
@@ -964,9 +1093,9 @@ describe('runFindingsPass with workspace files', () => {
     }
     expect(final).toContain('At most 70 words of Markdown');
     expect(final).toContain('Cause not confirmed:');
-    expect(final).toContain('at most 45 words in all');
+    expect(final).toContain('at most 15 words each, no lead sentence');
     expect(live).not.toContain('Cause not confirmed:');
-    expect(live).not.toContain('45 words');
+    expect(live).not.toContain('at most 15 words each, no lead sentence');
   });
 
   it('sends the prompt that matches the pass', async () => {

@@ -14,6 +14,8 @@ export interface EvidenceViewProps {
   evidence: InvestigationEvidence;
   /** Frame the chart in a bordered panel. Off when the evidence already sits inside one. */
   outlineChart?: boolean;
+  /** When the evidence's subject happened; dates chart times written without a day. */
+  referenceTime?: string;
 }
 
 /**
@@ -23,6 +25,7 @@ export interface EvidenceViewProps {
 export const EvidenceView: React.FC<EvidenceViewProps> = ({
   evidence: { description, chart },
   outlineChart = true,
+  referenceTime,
 }) => {
   const hasDescription = Boolean(description?.trim());
   if (!chart && !hasDescription) {
@@ -33,10 +36,10 @@ export const EvidenceView: React.FC<EvidenceViewProps> = ({
       {chart &&
         (outlineChart ? (
           <EuiPanel hasBorder hasShadow={false} paddingSize="s">
-            <EvidenceChart chart={chart} />
+            <EvidenceChart chart={chart} referenceTime={referenceTime} />
           </EuiPanel>
         ) : (
-          <EvidenceChart chart={chart} />
+          <EvidenceChart chart={chart} referenceTime={referenceTime} />
         ))}
       {chart && hasDescription && <EuiSpacer size="s" />}
       {hasDescription && <EuiMarkdownFormat textSize="s">{description ?? ''}</EuiMarkdownFormat>}

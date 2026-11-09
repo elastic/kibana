@@ -36,6 +36,7 @@ import {
   type FindingsRecord,
 } from './output_schema';
 import { buildRecorderSystemPrompt } from './prompt';
+import { withLocalElasticsearch, type LocalElasticsearch } from './local_elasticsearch';
 import { RECORDER_MAX_TOOL_CALLS, RECORDER_MAX_TOOL_ROUNDS } from './constants';
 import {
   RECORDER_READ_FILE_SCHEMA,
@@ -65,6 +66,8 @@ export interface FindingsPassDeps {
    * resolving to `undefined` when there is no sandbox: the final pass then answers without files.
    */
   getProposals?: () => RecorderProposals | undefined;
+  /** The Elasticsearch this Kibana runs against, so evidence can say which one it is and where. */
+  getLocalElasticsearch?: () => LocalElasticsearch | undefined;
   getWorkspace?: (args: {
     request: KibanaRequest;
     conversationId: string;
@@ -90,10 +93,14 @@ export interface FindingsPassParams {
   allowedConnectorIds?: readonly string[];
 }
 
-const MAX_METADATA_TEXT_LENGTH = 10_000;
-const FALLBACK_SUMMARY_CHARS = 1_000;
 /** A malformed structured answer is the usual failure, so a pass asks again before giving up. */
 const MAX_ATTEMPTS = 2;
+
+const MISSING_EVIDENCE_REQUEST =
+  'Some events have no data_source. Answer again with the same record, giving every event the data_source copied from the tool call that returned its data (system, query, and the API call as sent, without credentials). Only an event that rests on no data at all may go without.';
+
+const eventsWithoutEvidence = (record: FindingsRecord): number =>
+  (record.events ?? []).filter((event) => !event.data_source).length;
 
 type RecordEntity = NonNullable<FindingsRecord['impact_entities']>[number];
 
@@ -334,6 +341,12 @@ export const runFindingsPass = async (
             }
           )
         : false;
+    // The types other investigations have taught the catalog, so this map reuses them and any new
+    // type it adds is classified once, properly.
+    const catalog = await agenticInvestigations
+      .getFindingsWriter(request)
+      .getImpactMapCatalog()
+      .catch(() => undefined);
     const buildMessages = (withFiles: boolean) =>
       buildRecorderMessages({
         question,
@@ -394,7 +407,7 @@ export const runFindingsPass = async (
       withFiles: boolean
     ) =>
       (await model.inferenceClient.chatComplete({
-        system: buildRecorderSystemPrompt({ final, files: withFiles }),
+        system: buildRecorderSystemPrompt({ final, files: withFiles, catalog }),
         messages: conversationMessages,
         tools: toolDefinitions as never,
         toolChoice: toolChoice as never,
@@ -407,7 +420,19 @@ export const runFindingsPass = async (
 
     const parseRecord = (raw: unknown, label: string): FindingsRecord | undefined => {
       const parsed = findingsOutputSchema.safeParse(raw);
-      if (parsed.success) return limitFindings(parsed.data);
+      if (parsed.success) {
+        const limited = limitFindings(
+          parsed.data,
+          new Set(catalog?.entity_types.map(({ id }) => id)),
+          new Map(catalog?.entity_types.map((type) => [type.id, type]))
+        );
+        return limited.events
+          ? {
+              ...limited,
+              events: withLocalElasticsearch(limited.events, deps.getLocalElasticsearch?.()),
+            }
+          : limited;
+      }
       logger.warn(
         `Findings recorder returned an invalid record (${label}): ${parsed.error.message}`
       );
@@ -490,16 +515,27 @@ export const runFindingsPass = async (
     // One call, forced to answer. This is every live pass, and the final pass when it has no
     // files or could not use them. The replay carries no file paths it could not follow.
     const plainMessages = workspace ? buildMessages(false) : messages;
+    // A record whose events lack evidence is asked for again, once; if the model still leaves some
+    // out, the record is saved anyway (those events show that no source was recorded).
+    let withoutEvidence: FindingsRecord | undefined;
     for (let attempt = 1; attempt <= MAX_ATTEMPTS && !output && !guard.signal.aborted; attempt++) {
       try {
         const response = await ask(
-          plainMessages,
+          withoutEvidence
+            ? [...plainMessages, { role: MessageRole.User, content: MISSING_EVIDENCE_REQUEST }]
+            : plainMessages,
           tools,
           { function: STRUCTURED_OUTPUT_TOOL },
           false
         );
         const call = response.toolCalls?.find((c) => c.function.name === STRUCTURED_OUTPUT_TOOL);
-        output = parseRecord(call?.function.arguments, `attempt ${attempt}`);
+        const candidate = parseRecord(call?.function.arguments, `attempt ${attempt}`);
+        if (candidate && eventsWithoutEvidence(candidate) > 0) {
+          withoutEvidence = candidate;
+          if (attempt === MAX_ATTEMPTS) output = candidate;
+        } else {
+          output = candidate;
+        }
       } catch (error) {
         if (!guard.signal.aborted) {
           // A tool validation error says which fields failed only in its metadata.
@@ -512,6 +548,7 @@ export const runFindingsPass = async (
         }
       }
     }
+    output ??= withoutEvidence;
   } catch (error) {
     if (!guard.signal.aborted) {
       logger.warn(
@@ -522,8 +559,8 @@ export const runFindingsPass = async (
     }
   }
 
-  // A final pass that could not extract still records the agent's own answer as the verdict.
-  if (!output && !(final && answer)) return false;
+  // A final pass that could not extract writes nothing: the chat reply is not a conclusion.
+  if (!output) return false;
   if (!guard.claimWrite()) return false;
 
   // While the investigation runs only the summary and the hypotheses are recorded. A live answer
@@ -533,6 +570,8 @@ export const runFindingsPass = async (
       ? {
           summary: output.summary,
           hypotheses: output.hypotheses.map((hypothesis) => omit(hypothesis, 'evidence')),
+          ...(output.impact_map ? { impact_map: output.impact_map } : {}),
+          ...(output.events ? { events: output.events } : {}),
         }
       : output;
   // A follow-up already has hypotheses with evidence. A live pass is too thin to revise them
@@ -545,7 +584,7 @@ export const runFindingsPass = async (
   // Read again here, not before the model call: a user may change it while the model is answering.
   const severityChosenByUser =
     severityNotices(await readConversation(agentBuilder, request, conversationId)).length > 0;
-  const verdict = final ? record?.verdict ?? answer?.slice(0, MAX_METADATA_TEXT_LENGTH) : undefined;
+  const verdict = final ? record?.verdict : undefined;
   // A write replaces the hypothesis and entity lists, so what is stored is read first to keep the
   // evidence of what the pass lists again without any.
   const stored = record
@@ -557,12 +596,7 @@ export const runFindingsPass = async (
       'metadata',
       () =>
         conversations.patchMetadata(conversationId, {
-          ...(record?.summary
-            ? { summary: record.summary }
-            : // A final pass without a record replaces an early live summary with the answer.
-            final && answer
-            ? { summary: answer.slice(0, FALLBACK_SUMMARY_CHARS) }
-            : {}),
+          ...(record?.summary ? { summary: record.summary } : {}),
           ...(final && record?.severity && !severityChosenByUser
             ? { severity: record.severity }
             : {}),
@@ -611,6 +645,24 @@ export const runFindingsPass = async (
                 }
               : {}),
           }),
+      ]);
+    }
+    // Omitted keeps the stored map. A live pass redraws it too, so it follows the evidence.
+    // Events ride along with the map so one write updates both; on their own they leave it as is.
+    const { impact_map: impactMap, events } = record;
+    if (impactMap) {
+      writes.push([
+        'impact map',
+        () =>
+          writer.setImpactMap({
+            conversationId,
+            impactMap: { ...impactMap, ...(events?.length ? { events } : {}) },
+          }),
+      ]);
+    } else if (events?.length) {
+      writes.push([
+        'impact map events',
+        () => writer.addImpactMapEvents({ conversationId, events }),
       ]);
     }
     const proposals = deps.getProposals?.();

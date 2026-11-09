@@ -12,6 +12,13 @@ import { Conversation } from './conversation';
 import { ConversationAppHeader } from './conversation_header/conversation_app_header';
 import { RoutedConversationsProvider } from '../../context/conversation/routed_conversations_provider';
 import { conversationBackgroundStyles } from './conversation.styles';
+import { useCollapseSidebarForTemplate } from '../../hooks/use_collapse_sidebar_for_template';
+
+/** Renders nothing: it only closes the conversation list for a templated conversation. */
+const CollapseSidebarForTemplate: React.FC = () => {
+  useCollapseSidebarForTemplate();
+  return null;
+};
 
 export const AgentBuilderConversationsView: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
@@ -35,6 +42,7 @@ export const AgentBuilderConversationsView: React.FC<{}> = () => {
 
   return (
     <RoutedConversationsProvider>
+      <CollapseSidebarForTemplate />
       <div css={containerStyles} data-test-subj="agentBuilderPageConversations">
         <ConversationAppHeader />
         <div css={contentStyles}>

@@ -34,6 +34,10 @@ import type { ConversationTemplatesService } from '../services/conversation_temp
 import { useConversation } from '../application/hooks/use_conversation';
 import { useAgentBuilderServices } from '../application/hooks/use_agent_builder_service';
 import { useConversationFlyoutWidthProps } from './conversation_details_flyout_width';
+import {
+  registerOpenDetailsFlyout,
+  subscribeToDetailsTabRequests,
+} from './details_flyout_registry';
 
 export const FLYOUT_TITLE = i18n.translate('xpack.agentBuilder.conversationDetailsFlyout.title', {
   defaultMessage: 'Summary',
@@ -120,6 +124,8 @@ export interface ConversationDetailsFlyoutContentProps {
   conversationTemplatesService: ConversationTemplatesService;
   titleId: string;
   refetchConversation?: () => Promise<void>;
+  /** A tab id, or the part after the template id; the first tab when it matches none. */
+  initialTabId?: string;
 }
 
 /** Presentational only — renders whatever conversation it is given; not responsible for data fetching. */
@@ -129,6 +135,7 @@ export const ConversationDetailsFlyoutContent = ({
   conversationTemplatesService,
   titleId,
   refetchConversation,
+  initialTabId,
 }: ConversationDetailsFlyoutContentProps) => {
   const [selectedTabId, setSelectedTabId] = useState<string | undefined>(undefined);
 
@@ -140,7 +147,27 @@ export const ConversationDetailsFlyoutContent = ({
     () => buildTabs(conversation, conversationTemplatesService),
     [conversation, conversationTemplatesService]
   );
-  const effectiveSelectedTabId = selectedTabId ?? tabs[0]?.id;
+
+  // Something else (a card in the chat) asks this flyout, already open, to show another tab.
+  useEffect(() => {
+    const unregister = registerOpenDetailsFlyout(conversation.id);
+    const unsubscribe = subscribeToDetailsTabRequests((conversationId, tabId) => {
+      const requested =
+        tabs.find(({ id }) => id === tabId) ?? tabs.find(({ id }) => id.endsWith(`.${tabId}`));
+      if (conversationId === conversation.id && requested) {
+        setSelectedTabId(requested.id);
+      }
+    });
+    return () => {
+      unsubscribe();
+      unregister();
+    };
+  }, [conversation.id, tabs]);
+  const initialTab = initialTabId
+    ? tabs.find(({ id }) => id === initialTabId) ??
+      tabs.find(({ id }) => id.endsWith(`.${initialTabId}`))
+    : undefined;
+  const effectiveSelectedTabId = selectedTabId ?? initialTab?.id ?? tabs[0]?.id;
   const selectedTab = tabs.find((entry) => entry.id === effectiveSelectedTabId);
   // Render as a component so registered tabs can use hooks.
   const SelectedTabContent = selectedTab?.content;
@@ -192,6 +219,7 @@ export const ConversationDetailsFlyoutContent = ({
           conversation={conversation}
           isOpenedFromChat={isOpenedFromChat}
           refetchConversation={refetchConversation}
+          selectTab={setSelectedTabId}
         />
       )}
     </FlyoutFrame>
@@ -203,6 +231,7 @@ export interface ConversationDetailsFlyoutSnapshotProps {
   conversationsService: ConversationsService;
   conversationTemplatesService: ConversationTemplatesService;
   titleId: string;
+  initialTabId?: string;
   onNotFound?: () => void;
 }
 
@@ -216,6 +245,7 @@ export const ConversationDetailsFlyoutSnapshot = ({
   conversationsService,
   conversationTemplatesService,
   titleId,
+  initialTabId,
   onNotFound,
 }: ConversationDetailsFlyoutSnapshotProps) => {
   const {
@@ -267,6 +297,7 @@ export const ConversationDetailsFlyoutSnapshot = ({
       conversationTemplatesService={conversationTemplatesService}
       titleId={titleId}
       refetchConversation={refetchConversation}
+      initialTabId={initialTabId}
     />
   );
 };

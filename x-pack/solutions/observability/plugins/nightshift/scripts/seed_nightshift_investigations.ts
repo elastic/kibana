@@ -21,6 +21,8 @@
  * - Its subject, impact, and hypotheses documents in the agentic investigations side indexes,
  *   each attached to the conversation by reference (hidden, `origin` = document id).
  * - Its proposed actions, created by the proposals gate workflow that `proposals.create` runs.
+ * - For one scenario, an impact map, written through the impact map route as the
+ *   `set_impact_map` tool writes it, which also fills the space's impact map catalog.
  *
  * Kibana HTTP APIs do the writes wherever a route exists. The side-index documents and the
  * conversation timestamps have none, so they are written straight to Elasticsearch as the
@@ -39,6 +41,8 @@ import {
   HYPOTHESES_INDEX_NAME,
   IMPACT_ATTACHMENT_TYPE,
   IMPACT_INDEX_NAME,
+  IMPACT_MAP_INDEX_NAME,
+  INVESTIGATION_IMPACT_MAP_URL,
   INVESTIGATION_STATUS_URL,
   INVESTIGATION_TEMPLATE_ID,
   INVESTIGATIONS_INTERNAL_URL,
@@ -53,6 +57,10 @@ import type {
   Hypothesis,
   Impact,
   ImpactEntity,
+  ImpactMapEntity,
+  ImpactMapEntityType,
+  ImpactMapRelationship,
+  ImpactMapRelationshipType,
   InvestigationEvidence,
   InvestigationHypotheses,
   InvestigationMetadataStatus,
@@ -103,6 +111,15 @@ interface SeedProposal {
   confidence: ProposalConfidence;
 }
 
+/** The body of the impact map route, as the `set_impact_map` tool takes it. */
+interface SeedImpactMap {
+  title: string;
+  entities: ImpactMapEntity[];
+  relationships: ImpactMapRelationship[];
+  entity_types: ImpactMapEntityType[];
+  relationship_types: ImpactMapRelationshipType[];
+}
+
 interface Scenario {
   title: string;
   status: InvestigationMetadataStatus;
@@ -115,10 +132,106 @@ interface Scenario {
   triggerType: InvestigationSubjectTriggerType;
   hypotheses?: Hypothesis[];
   impact?: SeedImpact;
+  impactMap?: SeedImpactMap;
   proposals: SeedProposal[];
   createdMinutesAgo: number;
   updatedMinutesAgo: number;
 }
+
+/**
+ * The checkout path of the OpenTelemetry Astronomy Shop: shoppers fail on web-frontend, through
+ * checkout-service, because payment-service restarts. Cart and the orders topic are context.
+ */
+const CHECKOUT_IMPACT_MAP: SeedImpactMap = {
+  title: 'Checkout failures from payment-service restarts',
+  entity_types: [
+    {
+      id: 'nodejs_service',
+      label: 'Node.js service',
+      kind: 'service',
+      icon: { agent_name: 'nodejs' },
+    },
+    { id: 'go_service', label: 'Go service', kind: 'service', icon: { agent_name: 'go' } },
+    {
+      id: 'dotnet_service',
+      label: '.NET service',
+      kind: 'service',
+      icon: { agent_name: 'dotnet' },
+    },
+    {
+      id: 'redis',
+      label: 'Redis',
+      kind: 'dependency',
+      icon: { span_type: 'db', span_subtype: 'redis' },
+    },
+    {
+      id: 'kafka_topic',
+      label: 'Kafka topic',
+      kind: 'dependency',
+      icon: { span_type: 'messaging', span_subtype: 'kafka' },
+    },
+  ],
+  relationship_types: [
+    { id: 'calls', label: 'calls' },
+    { id: 'reads_from', label: 'reads from' },
+    { id: 'publishes_to', label: 'publishes to' },
+  ],
+  entities: [
+    {
+      id: 'web-frontend',
+      type_id: 'nodejs_service',
+      label: 'web-frontend',
+      annotations: { role: 'symptom', health: 'degraded', impacted: true, alert_count: 3 },
+    },
+    {
+      id: 'checkout-service',
+      type_id: 'go_service',
+      label: 'checkout-service',
+      annotations: { role: 'contributor', health: 'degraded', impacted: true },
+    },
+    {
+      id: 'payment-service',
+      type_id: 'nodejs_service',
+      label: 'payment-service',
+      annotations: { role: 'root_cause', health: 'critical', impacted: true },
+    },
+    {
+      id: 'cart-service',
+      type_id: 'dotnet_service',
+      label: 'cart-service',
+      annotations: { role: 'context', health: 'healthy' },
+    },
+    {
+      id: 'cart-cache',
+      type_id: 'redis',
+      label: 'cart-cache',
+      annotations: { role: 'context', health: 'healthy' },
+    },
+    {
+      id: 'orders',
+      type_id: 'kafka_topic',
+      label: 'orders',
+      annotations: { role: 'context', health: 'healthy' },
+    },
+  ],
+  relationships: [
+    {
+      type_id: 'calls',
+      source_id: 'web-frontend',
+      target_id: 'checkout-service',
+      on_critical_path: true,
+    },
+    {
+      type_id: 'calls',
+      source_id: 'checkout-service',
+      target_id: 'payment-service',
+      on_critical_path: true,
+    },
+    { type_id: 'calls', source_id: 'web-frontend', target_id: 'cart-service' },
+    { type_id: 'reads_from', source_id: 'cart-service', target_id: 'cart-cache' },
+    { type_id: 'publishes_to', source_id: 'checkout-service', target_id: 'orders' },
+  ],
+};
 
 const now = Date.now();
 const iso = (minutesAgo: number): string =>
@@ -267,6 +380,7 @@ const completed = ({
   hypotheses,
   recommendations = [],
   impact,
+  impactMap,
 }: {
   severity: InvestigationSeverity;
   title: string;
@@ -280,6 +394,7 @@ const completed = ({
   hypotheses?: Hypothesis[];
   recommendations?: SeedProposal[];
   impact: SeedImpact;
+  impactMap?: SeedImpactMap;
 }): Scenario => ({
   title,
   status,
@@ -290,6 +405,7 @@ const completed = ({
   triggerType,
   hypotheses,
   impact,
+  impactMap,
   proposals: recommendations,
   createdMinutesAgo: minutesAgo + durationMinutes,
   updatedMinutesAgo: minutesAgo,
@@ -779,6 +895,7 @@ const SCENARIOS: Scenario[] = [
         )
       ),
     ],
+    impactMap: CHECKOUT_IMPACT_MAP,
     recommendations: [
       recommendation(
         'Group this alert with the payment-service investigation',
@@ -1145,6 +1262,7 @@ const SIDE_INDEX_MAPPINGS: Record<string, StorageSchema['properties']> = {
 const SEEDED_DOCUMENT_INDEXES = [
   SUBJECT_INDEX_NAME,
   IMPACT_INDEX_NAME,
+  IMPACT_MAP_INDEX_NAME,
   HYPOTHESES_INDEX_NAME,
   PROPOSALS_INDEX_NAME,
 ];
@@ -1592,6 +1710,15 @@ const seedScenario = async (
       HYPOTHESES_ATTACHMENT_TYPE,
       hypothesesDocument,
       'Hypotheses'
+    );
+  }
+
+  if (scenario.impactMap) {
+    await client.internalApi(
+      'PUT',
+      INVESTIGATION_IMPACT_MAP_URL.replace('{id}', conversationId),
+      AGENTIC_INVESTIGATIONS_API_VERSION,
+      scenario.impactMap
     );
   }
 

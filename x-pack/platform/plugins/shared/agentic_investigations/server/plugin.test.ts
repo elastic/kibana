@@ -18,6 +18,11 @@ import { IMPACT_ATTACHMENT_TYPE } from '../common/impact/attachment';
 import { SET_IMPACT_TOOL_ID } from '../common/impact/constants';
 import { SUBJECT_ATTACHMENT_TYPE } from '../common/subjects/constants';
 import { HYPOTHESES_ATTACHMENT_TYPE, SET_HYPOTHESES_TOOL_ID } from '../common/hypotheses/constants';
+import {
+  IMPACT_MAP_ATTACHMENT_TYPE,
+  SET_IMPACT_MAP_TOOL_ID,
+  UPSERT_IMPACT_MAP_CATALOG_TOOL_ID,
+} from '../common/impact_map/constants';
 import { AttachImpactStepId, GetImpactStepId } from '../common/impact/step_types';
 import { ReopenInvestigationStepId } from '../common/investigations/step_types';
 import { AppendWorkflowExecutionIdStepId } from '../common/workflow_execution/step_types';
@@ -204,11 +209,12 @@ describe('AgenticInvestigationsPlugin', () => {
     it('registers the readonly investigation attachment types and workflow steps during setup', () => {
       const { workflowsExtensions, agentBuilder } = setupPlugin();
 
-      expect(agentBuilder.attachments.registerType).toHaveBeenCalledTimes(3);
+      expect(agentBuilder.attachments.registerType).toHaveBeenCalledTimes(4);
       for (const id of [
         IMPACT_ATTACHMENT_TYPE,
         SUBJECT_ATTACHMENT_TYPE,
         HYPOTHESES_ATTACHMENT_TYPE,
+        IMPACT_MAP_ATTACHMENT_TYPE,
       ]) {
         expect(agentBuilder.attachments.registerType).toHaveBeenCalledWith(
           expect.objectContaining({ id, isReadonly: true })
@@ -226,10 +232,16 @@ describe('AgenticInvestigationsPlugin', () => {
       ]);
     });
 
-    it('registers the set_impact and set_hypotheses agent tools during setup', () => {
+    it('registers the set_impact, set_hypotheses and impact map agent tools during setup', () => {
       const { agentBuilder } = setupPlugin();
 
-      expect(agentBuilder.tools.register).toHaveBeenCalledTimes(2);
+      expect(agentBuilder.tools.register).toHaveBeenCalledTimes(4);
+      expect(agentBuilder.tools.register).toHaveBeenCalledWith(
+        expect.objectContaining({ id: SET_IMPACT_MAP_TOOL_ID })
+      );
+      expect(agentBuilder.tools.register).toHaveBeenCalledWith(
+        expect.objectContaining({ id: UPSERT_IMPACT_MAP_CATALOG_TOOL_ID })
+      );
       expect(agentBuilder.tools.register).toHaveBeenCalledWith(
         expect.objectContaining({ id: SET_IMPACT_TOOL_ID })
       );

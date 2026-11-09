@@ -26,6 +26,7 @@ const setup = (privileges: Partial<InvestigationsPrivilegesChecker> = {}) => {
     subjectClaims: 1,
     impact: 1,
     hypotheses: 1,
+    impactMap: 1,
   });
   const checker: InvestigationsPrivilegesChecker = {
     assertCanRead: jest.fn().mockResolvedValue(undefined),
@@ -90,6 +91,7 @@ describe('createInvestigationsClient', () => {
       subjectClaims: 1,
       impact: 1,
       hypotheses: 1,
+      impactMap: 1,
     });
     expect(checker.assertCanManage).toHaveBeenCalledWith(request);
     expect(deleteAllInSpace).toHaveBeenCalledWith('space-1');

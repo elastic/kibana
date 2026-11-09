@@ -54,6 +54,8 @@ export interface OverviewSlotProps extends InvestigationSlotProps {
   renderOverview?: RenderOverview;
   /** Renders a count shown beside the "Proposed actions" heading. */
   renderProposedActionsCount?: (props: { conversationId: string }) => React.ReactNode;
+  /** Switches the flyout to its Timeline tab, when it has one. */
+  openTimeline?: () => void;
 }
 
 export const OverviewSlot = ({
@@ -62,6 +64,7 @@ export const OverviewSlot = ({
   renderProposedActions,
   renderOverview,
   renderProposedActionsCount,
+  openTimeline,
 }: OverviewSlotProps) => {
   const proposedActionsContent = renderProposedActions?.({ conversationId: conversation.id });
   const proposedActionsCount = renderProposedActionsCount?.({ conversationId: conversation.id });
@@ -73,6 +76,7 @@ export const OverviewSlot = ({
           groupedAttachments,
           proposedActionsContent,
           proposedActionsCount,
+          openTimeline,
         })}
       </>
     );
@@ -154,6 +158,11 @@ export interface FooterSlotProps extends InvestigationSlotProps {
   onOpenEscalation?: ConversationDetailsFlyoutFooterProps['onOpenEscalation'];
   wrapEscalationButton?: ConversationDetailsFlyoutFooterProps['wrapEscalationButton'];
   onCloseInvestigation?: ConversationDetailsFlyoutFooterProps['onCloseInvestigation'];
+  onCloseInvestigationImmediate?: ConversationDetailsFlyoutFooterProps['onCloseInvestigationImmediate'];
+  onReopenInvestigation?: ConversationDetailsFlyoutFooterProps['onReopenInvestigation'];
+  onDeleteInvestigation?: ConversationDetailsFlyoutFooterProps['onDeleteInvestigation'];
+  onCopyAgentInstructions?: ConversationDetailsFlyoutFooterProps['onCopyAgentInstructions'];
+  wrapActionsMenu?: ConversationDetailsFlyoutFooterProps['wrapActionsMenu'];
 }
 
 export const FooterSlot = ({
@@ -163,6 +172,11 @@ export const FooterSlot = ({
   onOpenEscalation,
   wrapEscalationButton,
   onCloseInvestigation,
+  onCloseInvestigationImmediate,
+  onReopenInvestigation,
+  onDeleteInvestigation,
+  onCopyAgentInstructions,
+  wrapActionsMenu,
 }: FooterSlotProps) => (
   <ConversationDetailsFlyoutFooter
     investigation={conversationToInvestigation(conversation)}
@@ -171,6 +185,11 @@ export const FooterSlot = ({
     onOpenEscalation={onOpenEscalation}
     wrapEscalationButton={wrapEscalationButton}
     onCloseInvestigation={onCloseInvestigation}
+    onCloseInvestigationImmediate={onCloseInvestigationImmediate}
+    onReopenInvestigation={onReopenInvestigation}
+    onDeleteInvestigation={onDeleteInvestigation}
+    onCopyAgentInstructions={onCopyAgentInstructions}
+    wrapActionsMenu={wrapActionsMenu}
   />
 );
 

@@ -12,6 +12,12 @@ export {
   SUGGEST_USER_PROFILES_URL,
 } from './constants';
 
+export {
+  ELASTIC_CLI_INSTALL_DOCS_URL,
+  buildAgentInstructions,
+  type AgentInstructionsOptions,
+} from './agent_instructions/build_agent_instructions';
+
 export { userSchema } from './user';
 export type { User } from './user';
 
@@ -114,6 +120,69 @@ export type {
   InvestigationHypotheses,
 } from './hypotheses/hypotheses';
 
+// Impact maps, like hypotheses: constants and types only, the schemas stay in the entity barrel.
+export {
+  IMPACT_MAP_ATTACHMENT_TYPE,
+  IMPACT_MAP_CATALOG_INDEX_NAME,
+  IMPACT_MAP_EVENTS_INDEX_NAME,
+  IMPACT_MAP_ENTITY_KINDS,
+  IMPACT_MAP_EVENT_KINDS,
+  IMPACT_MAP_HEALTH_STATES,
+  IMPACT_MAP_INDEX_NAME,
+  IMPACT_MAP_ROLES,
+  MAX_IMPACT_MAP_CATALOG_TYPES,
+  MAX_IMPACT_MAP_ENTITIES,
+  MAX_IMPACT_MAP_ENTITY_METADATA,
+  MAX_IMPACT_MAP_EVENTS,
+  MAX_IMPACT_MAP_RELATIONSHIPS,
+  SET_IMPACT_MAP_TOOL_ID,
+  SHOW_TIMELINE_TOOL_ID,
+  TIMELINE_ATTACHMENT_TYPE,
+  UPSERT_IMPACT_MAP_CATALOG_TOOL_ID,
+  INVESTIGATION_IMPACT_MAP_URL,
+} from './impact_map/constants';
+
+export type {
+  ImpactMapAnnotations,
+  ImpactMapCatalog,
+  ImpactMapEntity,
+  ImpactMapEntityKind,
+  ImpactMapEntityType,
+  ImpactMapEvent,
+  ImpactMapEventKind,
+  ImpactMapHealth,
+  ImpactMapIcon,
+  ImpactMapMetadataEntry,
+  ImpactMapMetadataField,
+  ImpactMapRelationship,
+  ImpactMapRelationshipType,
+  ImpactMapRole,
+  InvestigationImpactMap,
+} from './impact_map/impact_map';
+
+export {
+  BUILT_IN_CATALOG,
+  BUILT_IN_ENTITY_TYPES,
+  BUILT_IN_RELATIONSHIP_TYPES,
+  canonicalEntityTypeId,
+  KNOWN_EUI_ICONS,
+  normalizeEntityType,
+} from './impact_map/built_in_types';
+export { resolveEntityMetadata, STANDARD_METADATA_FIELDS } from './impact_map/metadata';
+export type { EntityMetadataRow } from './impact_map/metadata';
+
+export { toEntityName } from './impact_map/entity_name';
+export { clockTimeToIso, withChartClockTimesDated } from './impact_map/chart_times';
+export { redactSecrets, sanitizeDataSource, toBaseUrl } from './impact_map/data_source';
+export type { ImpactMapDataSource } from './impact_map/data_source';
+export {
+  impactMapEventId,
+  mergeImpactMapEvents,
+  sortImpactMapEvents,
+  withImpactMapEventId,
+} from './impact_map/events';
+export type { ImpactMapEventInput } from './impact_map/events';
+
 export {
   ESCALATION_ASSIGNEES_FIELD,
   ESCALATION_ASSIGN_URL,
@@ -178,6 +247,7 @@ export type {
   InvestigationFilters,
   InvestigationFiltersInput,
   InvestigationHypothesesResponse,
+  InvestigationImpactMapResponse,
   InvestigationImpactEntityResponse,
   InvestigationImpactResponse,
   InvestigationMetadata,

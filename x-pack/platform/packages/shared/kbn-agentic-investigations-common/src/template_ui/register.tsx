@@ -22,6 +22,8 @@ import type {
   RenderSeverity,
   RenderLinkedInvestigations,
   RenderOverview,
+  RenderImpactMap,
+  RenderTimeline,
   RenderLiveState,
   RenderTitle,
   RenderSyncIndicator,
@@ -50,10 +52,16 @@ const LazyEscalationOverviewSlot = lazy(() =>
 
 /**
  * Tab ids are prefixed with the solution's template id because Agent Builder's tab ids are a
- * global keyspace and duplicate registration throws.
+ * global keyspace and duplicate registration throws. The Impact map and Timeline tabs exist only
+ * when the caller supplies `renderImpactMap` and `renderTimeline`.
  */
-export const getInvestigationTabIds = (templateId: string): readonly string[] => [
+export const getInvestigationTabIds = (
+  templateId: string,
+  { impactMap = false, timeline = false }: { impactMap?: boolean; timeline?: boolean } = {}
+): readonly string[] => [
   `${templateId}.overview`,
+  ...(impactMap ? [`${templateId}.impactMap`] : []),
+  ...(timeline ? [`${templateId}.timeline`] : []),
 ];
 
 export interface RegisterAgenticInvestigationTemplateUIOptions {
@@ -100,15 +108,49 @@ export interface RegisterAgenticInvestigationTemplateUIOptions {
    */
   renderSeverity?: RenderSeverity;
   /**
-   * When provided, the "Close investigation" footer action renders a confirmation modal.
+   * When provided, the "Close" footer Actions item renders a confirmation modal.
    * Supplied by the caller so the modal can use HTTP hooks unavailable in this package.
+   * Ignored when {@link onCloseInvestigationImmediate} is set.
    */
   renderCloseInvestigationModal?: import('./slots').FooterSlotProps['onCloseInvestigation'];
+  /**
+   * When provided, Close runs this immediately with no confirmation.
+   * Takes precedence over {@link renderCloseInvestigationModal}.
+   */
+  onCloseInvestigationImmediate?: import('./slots').FooterSlotProps['onCloseInvestigationImmediate'];
+  /**
+   * When provided, the footer Actions menu offers "Open" on a closed investigation.
+   * Supplied by the caller so the mutation can use HTTP hooks unavailable in this package.
+   */
+  onReopenInvestigation?: import('./slots').FooterSlotProps['onReopenInvestigation'];
+  /**
+   * When provided, the footer Actions menu offers "Delete investigation" with a confirmation modal.
+   * Supplied by the caller so the modal can use HTTP hooks unavailable in this package.
+   */
+  renderDeleteInvestigationModal?: import('./slots').FooterSlotProps['onDeleteInvestigation'];
+  /**
+   * When provided, the footer Actions menu offers "Copy agent instructions". Supplied by the
+   * caller, which builds the text for its Kibana and does the copying.
+   */
+  onCopyAgentInstructions?: import('./slots').FooterSlotProps['onCopyAgentInstructions'];
+  /**
+   * Wraps the footer Actions menu so the caller can hide it when the user may not manage
+   * investigations.
+   */
+  wrapActionsMenu?: import('./slots').FooterSlotProps['wrapActionsMenu'];
   /**
    * When provided, replaces the overview tab body so the caller can add sections from data it
    * fetches. See `RenderOverview`.
    */
   renderOverview?: RenderOverview;
+  /**
+   * When provided, the flyout gets an Impact map tab with this as its body. See `RenderImpactMap`.
+   */
+  renderImpactMap?: RenderImpactMap;
+  /**
+   * When provided, the flyout gets a Timeline tab with this as its body. See `RenderTimeline`.
+   */
+  renderTimeline?: RenderTimeline;
   /**
    * When provided, the header shows the investigation's live state (severity, running indicator)
    * next to its age. See `RenderLiveState`.
@@ -152,17 +194,30 @@ export const registerAgenticInvestigationTemplateUI = ({
   renderStatus,
   renderSeverity,
   renderCloseInvestigationModal,
+  onCloseInvestigationImmediate,
+  onReopenInvestigation,
+  renderDeleteInvestigationModal,
+  onCopyAgentInstructions,
+  wrapActionsMenu,
   renderOverview,
+  renderImpactMap,
+  renderTimeline,
   renderLiveState,
   renderTitle,
   briefCard,
   onCopyLink,
 }: RegisterAgenticInvestigationTemplateUIOptions): void => {
-  const [overviewTabId] = getInvestigationTabIds(templateId);
+  const tabIds = getInvestigationTabIds(templateId, {
+    impactMap: Boolean(renderImpactMap),
+    timeline: Boolean(renderTimeline),
+  });
+  const [overviewTabId] = tabIds;
+  const impactMapTabId = tabIds.find((id) => id === `${templateId}.impactMap`);
+  const timelineTabId = tabIds.find((id) => id === `${templateId}.timeline`);
 
   conversationTemplates.registerTab(overviewTabId, () => ({
     label: DETAILS_FLYOUT_LABELS.tabs.overview,
-    content: function OverviewTabContent({ conversation }) {
+    content: function OverviewTabContent({ conversation, selectTab }) {
       return (
         <Suspense fallback={<EuiSkeletonText lines={3} />}>
           <LazyOverviewSlot
@@ -171,18 +226,44 @@ export const registerAgenticInvestigationTemplateUI = ({
             renderProposedActions={renderProposedActions}
             renderOverview={renderOverview}
             renderProposedActionsCount={renderProposedActionsCount}
+            openTimeline={selectTab && timelineTabId ? () => selectTab(timelineTabId) : undefined}
           />
         </Suspense>
       );
     },
   }));
 
+  if (renderImpactMap && impactMapTabId) {
+    conversationTemplates.registerTab(impactMapTabId, () => ({
+      label: DETAILS_FLYOUT_LABELS.tabs.impactMap,
+      content: function ImpactMapTabContent({ conversation, selectTab }) {
+        return (
+          <>
+            {renderImpactMap({
+              conversationId: conversation.id,
+              openTimeline: selectTab && timelineTabId ? () => selectTab(timelineTabId) : undefined,
+            })}
+          </>
+        );
+      },
+    }));
+  }
+
+  if (renderTimeline && timelineTabId) {
+    conversationTemplates.registerTab(timelineTabId, () => ({
+      label: DETAILS_FLYOUT_LABELS.tabs.timeline,
+      content: function TimelineTabContent({ conversation }) {
+        return <>{renderTimeline({ conversationId: conversation.id })}</>;
+      },
+    }));
+  }
+
   conversationTemplates.registerTemplateUIDefinition(
     templateId,
     ({ openFullscreenConversation, getConversationUrl }) => ({
       name,
       icon,
-      tabs: [overviewTabId],
+      tabs: [...tabIds],
       ...(briefCard && { briefCard }),
       detailsFlyout: {
         trailingActions: ({ conversation }) => [
@@ -242,6 +323,11 @@ export const registerAgenticInvestigationTemplateUI = ({
                 onOpenEscalation={renderEscalationModal}
                 wrapEscalationButton={wrapEscalationButton}
                 onCloseInvestigation={renderCloseInvestigationModal}
+                onCloseInvestigationImmediate={onCloseInvestigationImmediate}
+                onReopenInvestigation={onReopenInvestigation}
+                onDeleteInvestigation={renderDeleteInvestigationModal}
+                onCopyAgentInstructions={onCopyAgentInstructions}
+                wrapActionsMenu={wrapActionsMenu}
               />
             </Suspense>
           );

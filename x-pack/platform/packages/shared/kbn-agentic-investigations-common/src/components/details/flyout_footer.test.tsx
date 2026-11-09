@@ -123,4 +123,92 @@ describe('ConversationDetailsFlyoutFooter', () => {
       screen.getByRole('button', { name: openEscalationButtonName })
     );
   });
+
+  it('offers Delete then Close in the Actions menu for an open investigation', () => {
+    renderWithKibanaRenderContext(
+      <ConversationDetailsFlyoutFooter
+        investigation={investigation}
+        isOpenedFromChat={false}
+        onOpenChat={jest.fn()}
+        onCloseInvestigation={() => <div>Close modal</div>}
+        onDeleteInvestigation={() => <div>Delete modal</div>}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('investigationFlyoutActionsButton'));
+    const deleteItem = screen.getByTestId('investigationFlyoutActionsDelete');
+    const closeItem = screen.getByTestId('investigationFlyoutActionsClose');
+    expect(deleteItem).toHaveTextContent(ACTIONS_TRANSLATIONS.buttons.deleteInvestigation);
+    expect(closeItem).toHaveTextContent(ACTIONS_TRANSLATIONS.buttons.closeShort);
+    // Delete is first, with a divider before Close.
+    const panel = screen.getByTestId('investigationFlyoutActionsPanel');
+    const actionButtons = Array.from(panel.querySelectorAll('button'));
+    expect(actionButtons.map((button) => button.getAttribute('data-test-subj'))).toEqual([
+      'investigationFlyoutActionsDelete',
+      'investigationFlyoutActionsClose',
+    ]);
+    expect(deleteItem.compareDocumentPosition(closeItem) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(panel.querySelector('hr')).toBeInTheDocument();
+  });
+
+  it('offers Delete then Open in the Actions menu for a closed investigation', () => {
+    const onReopenInvestigation = jest.fn();
+    renderWithKibanaRenderContext(
+      <ConversationDetailsFlyoutFooter
+        investigation={{ ...investigation, status: 'closed' }}
+        isOpenedFromChat={false}
+        onOpenChat={jest.fn()}
+        onCloseInvestigation={() => null}
+        onReopenInvestigation={onReopenInvestigation}
+        onDeleteInvestigation={() => <div>Delete modal</div>}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('investigationFlyoutActionsButton'));
+    expect(screen.getByTestId('investigationFlyoutActionsOpen')).toHaveTextContent(
+      ACTIONS_TRANSLATIONS.buttons.openShort
+    );
+    fireEvent.click(screen.getByTestId('investigationFlyoutActionsOpen'));
+    expect(onReopenInvestigation).toHaveBeenCalledWith(
+      expect.objectContaining({ id: investigation.id, status: 'closed' })
+    );
+  });
+
+  it('closes immediately from Actions when onCloseInvestigationImmediate is set', () => {
+    const onCloseInvestigationImmediate = jest.fn();
+    const onCloseInvestigation = jest.fn(() => <div>Close modal</div>);
+    renderWithKibanaRenderContext(
+      <ConversationDetailsFlyoutFooter
+        investigation={investigation}
+        isOpenedFromChat={false}
+        onOpenChat={jest.fn()}
+        onCloseInvestigation={onCloseInvestigation}
+        onCloseInvestigationImmediate={onCloseInvestigationImmediate}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('investigationFlyoutActionsButton'));
+    fireEvent.click(screen.getByTestId('investigationFlyoutActionsClose'));
+
+    expect(onCloseInvestigationImmediate).toHaveBeenCalledWith(
+      expect.objectContaining({ id: investigation.id })
+    );
+    expect(onCloseInvestigation).not.toHaveBeenCalled();
+    expect(screen.queryByText('Close modal')).not.toBeInTheDocument();
+  });
+
+  it('opens the delete confirmation from Actions', () => {
+    renderWithKibanaRenderContext(
+      <ConversationDetailsFlyoutFooter
+        investigation={investigation}
+        isOpenedFromChat={false}
+        onOpenChat={jest.fn()}
+        onDeleteInvestigation={() => <div data-test-subj="deleteModalStub">Delete modal</div>}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('investigationFlyoutActionsButton'));
+    fireEvent.click(screen.getByTestId('investigationFlyoutActionsDelete'));
+    expect(screen.getByTestId('deleteModalStub')).toBeInTheDocument();
+  });
 });
