@@ -29,6 +29,9 @@ import { getSeverityLabel, SEVERITY_OPTIONS } from '@kbn/significant-events-sche
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import { SEVERITY_TILE_ICON, SEVERITY_TILE_ICON_COLORS } from '../../../common/severity';
 
+/** Owned class for primary fill — EuiNotificationBadge has no public `primary` color. */
+const FRESH_BADGE_CLASS_NAME = 'nightshiftSeverityTileFreshBadge';
+
 /** A muted tier has no section to scroll to, so its tile reads as a figure rather than a control. */
 type SeverityTileState = 'muted' | 'interactive';
 
@@ -110,7 +113,7 @@ const getSeverityTileStyles = (
       min-width: 0;
     `,
     // Position only — never pass `css` to EuiNotificationBadge (it replaces, not merges).
-    // Color uses the public `color` prop (`accent`); do not target `.euiNotificationBadge`.
+    // Primary fill via our own class (EUI has no primary color on this component).
     freshBadgeAnchor: css`
       position: absolute;
       top: 0;
@@ -118,6 +121,11 @@ const getSeverityTileStyles = (
       margin-inline-start: ${euiTheme.size.xs};
       transform: translateY(-15%);
       flex-shrink: 0;
+
+      & .${FRESH_BADGE_CLASS_NAME} {
+        background-color: ${euiTheme.colors.backgroundFilledPrimary};
+        color: ${euiTheme.colors.textInverse};
+      }
     `,
     byState: {
       // Empty tiles: border only, no panel fill; count/icon stay muted.
@@ -254,7 +262,7 @@ export const InvestigationSeverityTiles = ({
                           <span css={styles.freshBadgeAnchor}>
                             <EuiToolTip content={freshBadgeTooltip} position="top">
                               <EuiNotificationBadge
-                                color="accent"
+                                className={FRESH_BADGE_CLASS_NAME}
                                 size="s"
                                 data-test-subj={`nightshiftSeverityTileFreshBadge-${severity}`}
                               >
