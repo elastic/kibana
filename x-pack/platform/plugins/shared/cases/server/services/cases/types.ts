@@ -7,7 +7,7 @@
 
 import type { KueryNode } from '@kbn/es-query';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import type { Case, CaseStatuses } from '../../../common/types/domain';
+import type { Case, CaseAccess, CaseAssignees, CaseStatuses } from '../../../common/types/domain';
 import type { IndexRefresh } from '../types';
 import type { User } from '../../common/types/user';
 import type {
@@ -48,6 +48,12 @@ export interface DeleteCaseArgs extends GetCaseArgs, IndexRefresh {}
 
 export interface GetCasesArgs {
   caseIds: string[];
+}
+
+export interface CaseStatusAndAccess {
+  status?: CaseStatuses;
+  access?: CaseAccess;
+  assignees: CaseAssignees;
 }
 
 export interface FindCommentsArgs {
@@ -103,6 +109,8 @@ export interface CasesSearchStats {
   };
   /** Average of `duration` (seconds) across the matching cases; null when none has closed. */
   mttr: number | null;
+  /** Cases in a status that pauses time tracking; only computed when such statuses exist. */
+  paused?: number;
 }
 
 export interface GetTagsArgs {

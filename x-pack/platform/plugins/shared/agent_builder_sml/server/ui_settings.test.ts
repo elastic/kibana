@@ -21,7 +21,7 @@ describe('registerUISettings', () => {
     expect(registeredSettings[CONTEXT_ENGINE_ENABLED_SETTING_ID]).toEqual(
       expect.objectContaining({
         name: 'Context Engine',
-        value: false,
+        value: true,
         experimental: true,
       })
     );

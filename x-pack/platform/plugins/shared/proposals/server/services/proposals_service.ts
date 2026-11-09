@@ -57,6 +57,7 @@ import {
 } from './esql';
 import type { ChartsWindow } from './esql';
 import type { ProposalDocument, ProposalsStorageClient } from '../storage/proposals_storage';
+import type { ProposalCreateExtension } from '../types';
 import { CONFIDENCE_RANK_FIELD, IMPACT_RANK_FIELD, toSortRanks } from '../storage/sort_ranks';
 import {
   ProposalAlreadyExistsError,
@@ -112,6 +113,7 @@ export interface ProposalsServiceDeps {
   logger: Logger;
   getWorkflowsApi: () => WorkflowsManagementApi;
   getAttachmentsClient: (request: KibanaRequest) => Promise<AttachmentPublicClient>;
+  getCreateExtension?: () => ProposalCreateExtension | undefined;
   /**
    * Who is acting, derived from the request. A gateless decision is written
    * here rather than by the gate workflow, so the attribution the gate used to
@@ -247,9 +249,22 @@ export class ProposalsService {
     // rather than to an omission: it feeds the queue's secondary sort rank.
     const confidence = blankToUndefined(params.confidence) ?? 'medium';
 
+    const extension = this.deps.getCreateExtension?.();
+    const caseId = extension
+      ? await extension
+          .resolveCaseId({ request, conversationId: params.conversationId, spaceId })
+          .catch((error) => {
+            this.deps.logger.warn(
+              `Proposal ${id}: the case of conversation ${params.conversationId} wasn't resolved: ${error}`
+            );
+            return undefined;
+          })
+      : undefined;
+
     const document: ProposalDocument = {
       spaceId,
       conversationId: params.conversationId,
+      ...(caseId ? { caseId } : {}),
       // Resolved once here rather than re-derived by every reader: same
       // precedence as `category`, with the action's own name behind it and a
       // constant behind that, so every proposal is named exactly once.
@@ -289,6 +304,11 @@ export class ProposalsService {
     await this.attachToConversation(id, params.conversationId, document.title, request);
 
     const proposal = toProposal(id, document);
+    if (extension && caseId) {
+      await extension.onCreated({ request, proposal, spaceId }).catch((error) => {
+        this.deps.logger.warn(`Proposal ${id} wasn't added to case ${caseId}: ${error}`);
+      });
+    }
     return { ...proposal, action: metadata };
   }
 
@@ -1772,6 +1792,15 @@ export interface InProcessProposalFilters {
   categories?: string[];
   statuses?: ProposalStatus[];
   conversationIds?: string[];
+  /** Proposals whose decision is on this case. */
+  caseId?: string;
+  /** Proposals whose title starts with these words. */
+  titleSearch?: string;
+  /**
+   * `true`: pending, undecided, and with the gate not yet released (still waiting on someone).
+   * `false`: everything else. A released gate still reads `pending` until the workflow resumes.
+   */
+  awaitingDecision?: boolean;
 }
 
 /**
@@ -1810,6 +1839,21 @@ const toFilterClauses = (
   }
   if (filters.conversationIds) {
     filter.push({ terms: { conversationId: filters.conversationIds } });
+  }
+  if (filters.caseId) {
+    filter.push({ term: { caseId: filters.caseId } });
+  }
+  if (filters.titleSearch) {
+    filter.push({ match_phrase_prefix: { title: filters.titleSearch } });
+  }
+  if (filters.awaitingDecision !== undefined) {
+    const awaiting = {
+      bool: {
+        filter: [{ term: { status: 'pending' } }],
+        must_not: [{ exists: { field: 'decision' } }, { exists: { field: 'gateReleasedAt' } }],
+      },
+    };
+    filter.push(filters.awaitingDecision ? awaiting : { bool: { must_not: [awaiting] } });
   }
   if (filters.decidedWithinHours !== undefined) {
     filter.push({ range: { decidedAt: { gte: `now-${filters.decidedWithinHours}h` } } });

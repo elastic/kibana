@@ -29,6 +29,7 @@ import {
   toStringArray,
   toUnifiedAttachmentType,
 } from '../../../../common/utils/attachments';
+import { isConversationAttachment } from '../../attachments/conversation/helpers';
 
 interface ActivityLabelArgs {
   userAction: SnakeToCamelCase<CommentUserAction>;
@@ -276,6 +277,12 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
       const liveAttachment = attachments.find((c) => c.id === attachmentUserAction.commentId);
       const isDeleted = liveAttachment == null;
       const attachment = liveAttachment ?? buildAttachmentFromPayload(attachmentUserAction);
+
+      // `attachments` already lacks the conversations this user can't open, so a missing one may
+      // be hidden rather than deleted. Its payload still carries the title, so it never renders.
+      if (isDeleted && isConversationAttachment(attachment)) {
+        return [];
+      }
 
       return getCreateCommentUserAction({
         addedReferences: liveAttachment

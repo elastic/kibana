@@ -14,6 +14,7 @@ import { Category } from './category';
 import { Severity } from './severity';
 import { Description } from './description';
 import { useCasesFeatures } from '../../common/use_cases_features';
+import { AccessToggle } from './access_toggle';
 import { Assignees } from './assignees';
 import { CustomFields } from './custom_fields';
 import type { CasesConfigurationUI } from '../../containers/types';
@@ -37,7 +38,7 @@ const CaseFormFieldsComponent: React.FC<Props> = ({
   isEditMode,
   draftStorageKey,
 }) => {
-  const { caseAssignmentAuthorized } = useCasesFeatures();
+  const { caseAssignmentAuthorized, restrictedCasesAuthorized } = useCasesFeatures();
   const isTemplatesV2Enabled = KibanaServices.getConfig()?.templates?.enabled ?? false;
   const { showLegacyCustomFields } = useShowLegacyCustomFields(configurationCustomFields);
   const { setFieldValue } = useFormContext();
@@ -72,6 +73,7 @@ const CaseFormFieldsComponent: React.FC<Props> = ({
     <EuiFlexGroup data-test-subj="case-form-fields" direction="column" gutterSize="none">
       <Title isLoading={isLoading} />
       {caseAssignmentAuthorized ? <Assignees isLoading={isLoading} /> : null}
+      {restrictedCasesAuthorized && !isEditMode ? <AccessToggle isLoading={isLoading} /> : null}
       <Tags isLoading={isLoading} />
       <Category isLoading={isLoading} />
       <Severity isLoading={isLoading} />

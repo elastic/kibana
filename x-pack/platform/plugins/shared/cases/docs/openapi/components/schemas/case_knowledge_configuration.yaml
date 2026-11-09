@@ -1,0 +1,13 @@
+title: Case knowledge configuration
+description: >
+  Technical preview. Whether closed cases publish their outcome (close reason, verdicts, and the
+  rules, hosts, users, and observables involved) as a knowledge indicator to the `cases-outcomes`
+  AI index of the context engine. Restricted cases are never published, and reopening a case
+  removes its outcome. Missing means publishing is on.
+type: object
+properties:
+  publishOutcomes:
+    type: boolean
+    description: Whether closed cases publish their outcome to the context engine.
+required:
+  - publishOutcomes

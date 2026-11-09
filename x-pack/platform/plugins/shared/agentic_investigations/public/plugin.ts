@@ -18,6 +18,8 @@ import { registerImpactPublicStepDefinitions } from './impact/step_types';
 import { registerInvestigationPublicStepDefinitions } from './investigations/step_types';
 import { registerWorkflowExecutionPublicStepDefinitions } from './workflow_execution/step_types';
 import { registerTemplate } from './conversation_templates/registry/register_template';
+import { registerCasesIntegration } from './cases_bridge/register_cases_integration';
+import { setCaseBridgeHostServices } from './cases_bridge/host_components';
 import { escalationTemplate } from './conversation_templates/templates/escalation/register';
 import { investigationTemplate } from './conversation_templates/templates/investigation/register';
 import type {
@@ -61,19 +63,38 @@ export class AgenticInvestigationsPublicPlugin
       AgenticInvestigationsPublicStartDependencies
     >
 {
-  private readonly escalationsEnabled: boolean;
+  private escalationsEnabled: boolean;
+  /** Escalations are on in config; their timeline events stay registered so old ones render. */
+  private readonly escalationsConfigured: boolean;
+  private casesBridgeEnabled: boolean;
   private readonly groupedAttachments = createFlyoutGroupedAttachmentsRegistry();
   private impactEntityOpener: ImpactEntityOpener | undefined;
   private readonly alertFlyouts = new Map<string, AlertFlyoutRegistration>();
 
   constructor(context: PluginInitializerContext<AgenticInvestigationsPublicConfig>) {
-    this.escalationsEnabled = context.config.get().escalations.enabled;
+    const config = context.config.get();
+    this.escalationsConfigured = config.escalations.enabled;
+    this.casesBridgeEnabled = config.cases?.enabled ?? false;
+    // Opening a case replaces escalations, exactly as escalations configured off.
+    this.escalationsEnabled = config.escalations.enabled && !this.casesBridgeEnabled;
   }
 
   setup(
-    _core: CoreSetup,
-    { workflowsExtensions }: AgenticInvestigationsPublicSetupDependencies
+    core: CoreSetup<AgenticInvestigationsPublicStartDependencies>,
+    { workflowsExtensions, cases }: AgenticInvestigationsPublicSetupDependencies
   ): AgenticInvestigationsPublicPluginSetup {
+    if (this.casesBridgeEnabled) {
+      if (cases) {
+        registerCasesIntegration({
+          cases,
+          getStartServices: core.getStartServices,
+          uiSettings: core.uiSettings,
+        });
+      } else {
+        // Without Cases there is nothing to open: keep escalations as they were.
+        this.disableCasesBridge();
+      }
+    }
     registerImpactPublicStepDefinitions(workflowsExtensions);
     registerInvestigationPublicStepDefinitions(workflowsExtensions);
     registerWorkflowExecutionPublicStepDefinitions(workflowsExtensions);
@@ -90,6 +111,13 @@ export class AgenticInvestigationsPublicPlugin
     startDeps: AgenticInvestigationsPublicStartDependencies
   ): AgenticInvestigationsPublicPluginStart {
     const { agentBuilder } = startDeps;
+    // The bridge needs Cases' agentic UI (Related tab, verdicts, the Opened from AlertZero filter).
+    if (this.casesBridgeEnabled && startDeps.cases?.config.agenticEnabled !== true) {
+      this.disableCasesBridge();
+    }
+    if (this.casesBridgeEnabled) {
+      setCaseBridgeHostServices({ ...core, ...startDeps });
+    }
     // Read where a subject renders, so a solution can register after this plugin starts.
     const getAlertFlyout = (source?: string, snapshot?: AlertSubjectSnapshot) => {
       const registration = source ? this.alertFlyouts.get(source) : undefined;
@@ -100,7 +128,7 @@ export class AgenticInvestigationsPublicPlugin
     if (agentBuilder) {
       registerImpactAttachmentTypes(agentBuilder, () => this.impactEntityOpener);
       registerInvestigationConversationEventUiDefinitions(agentBuilder.conversationEvents);
-      if (this.escalationsEnabled) {
+      if (this.escalationsConfigured) {
         registerEscalationConversationEventUiDefinitions({
           conversationEvents: agentBuilder.conversationEvents,
           application: core.application,
@@ -126,6 +154,7 @@ export class AgenticInvestigationsPublicPlugin
         // Escalations are AlertZero-only for now: without them there is no escalation template,
         // and the investigation template has no escalate action.
         escalationsEnabled: this.escalationsEnabled,
+        casesBridgeEnabled: this.casesBridgeEnabled,
         groupedAttachments: this.groupedAttachments,
         getImpactEntityOpener: () => this.impactEntityOpener,
         templates: this.escalationsEnabled
@@ -138,7 +167,15 @@ export class AgenticInvestigationsPublicPlugin
         this.impactEntityOpener = opener;
       },
       InvestigationCard: LazyInvestigationCard,
+      isCasesBridgeEnabled: this.casesBridgeEnabled,
+      canCreateCases: () =>
+        startDeps.cases?.helpers.canUseCases(['securitySolution']).create === true,
     };
+  }
+
+  private disableCasesBridge() {
+    this.casesBridgeEnabled = false;
+    this.escalationsEnabled = this.escalationsConfigured;
   }
 
   stop() {

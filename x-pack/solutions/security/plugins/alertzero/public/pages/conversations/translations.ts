@@ -63,3 +63,70 @@ export const IDLE_HEADER = {
       values: { watchCount, enabledWorkerCount, workerCount },
     }),
 };
+
+export const QUEUE_GROUP_BY = Object.freeze({
+  label: i18n.translate('xpack.alertzero.queue.groupBy.label', {
+    defaultMessage: 'Group by',
+  }),
+  type: i18n.translate('xpack.alertzero.queue.groupBy.type', {
+    defaultMessage: 'Proposal type',
+  }),
+  case: i18n.translate('xpack.alertzero.queue.groupBy.case', {
+    defaultMessage: 'Case',
+  }),
+  none: i18n.translate('xpack.alertzero.queue.groupBy.none', {
+    defaultMessage: 'None',
+  }),
+  caseTitle: (caseNumber: string, title: string) =>
+    i18n.translate('xpack.alertzero.queue.group.case', {
+      defaultMessage: 'Case {caseNumber} · {title}',
+      values: { caseNumber, title },
+    }),
+  caseUnnumbered: (title: string) =>
+    i18n.translate('xpack.alertzero.queue.group.caseUnnumbered', {
+      defaultMessage: 'Case · {title}',
+      values: { title },
+    }),
+  caseLoading: i18n.translate('xpack.alertzero.queue.group.caseLoading', {
+    defaultMessage: 'Loading the case',
+  }),
+  noCase: i18n.translate('xpack.alertzero.queue.group.noCase', {
+    defaultMessage: 'No case',
+  }),
+  caseUnavailable: i18n.translate('xpack.alertzero.queue.group.caseUnavailable', {
+    defaultMessage: 'Case unavailable',
+  }),
+  caseUnavailableTooltip: i18n.translate('xpack.alertzero.queue.group.caseUnavailableTooltip', {
+    defaultMessage: "The case was deleted or you don't have access to it.",
+  }),
+  restricted: i18n.translate('xpack.alertzero.queue.group.restricted', {
+    defaultMessage: 'Restricted',
+  }),
+  counts: (investigations: number, proposals: number) =>
+    i18n.translate('xpack.alertzero.queue.group.counts', {
+      defaultMessage:
+        '{investigations, plural, one {# investigation} other {# investigations}} · {proposals, plural, one {# pending proposal} other {# pending proposals}}',
+      values: { investigations, proposals },
+    }),
+  flatCount: (investigations: number, proposals: number) =>
+    i18n.translate('xpack.alertzero.queue.groupBy.flatCount', {
+      defaultMessage:
+        '{investigations, plural, one {# investigation} other {# investigations}} · {proposals, plural, one {# pending proposal} other {# pending proposals}} · newest first',
+      values: { investigations, proposals },
+    }),
+  empty: i18n.translate('xpack.alertzero.queue.groupBy.empty', {
+    defaultMessage: 'No events in this category.',
+  }),
+  statusOpen: i18n.translate('xpack.alertzero.queue.group.status.open', {
+    defaultMessage: 'Open',
+  }),
+  statusInProgress: i18n.translate('xpack.alertzero.queue.group.status.inProgress', {
+    defaultMessage: 'In progress',
+  }),
+  statusClosed: i18n.translate('xpack.alertzero.queue.group.status.closed', {
+    defaultMessage: 'Closed',
+  }),
+  loadedNote: i18n.translate('xpack.alertzero.queue.groupBy.loadedNote', {
+    defaultMessage: 'Grouping the open proposals loaded in the queue.',
+  }),
+});

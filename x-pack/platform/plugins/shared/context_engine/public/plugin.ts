@@ -72,7 +72,7 @@ export class ContextEnginePlugin
       workflowsExtensions: setupDeps.workflowsExtensions,
       isContextEngineEnabled: async () => {
         const [coreStart] = await core.getStartServices();
-        return coreStart.uiSettings.get<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID, false);
+        return coreStart.uiSettings.get<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID, true);
       },
     });
 
@@ -97,7 +97,7 @@ export class ContextEnginePlugin
       keywords: ['context', 'ai index', 'context engine'],
       updater$: from(startServices).pipe(
         switchMap(([coreStart]) =>
-          coreStart.uiSettings.get$<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID, false).pipe(
+          coreStart.uiSettings.get$<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID, true).pipe(
             map(
               (settingEnabled): AppUpdater =>
                 () => ({

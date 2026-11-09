@@ -9,6 +9,7 @@ import type { EcsEvent } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
 import type { CasesSupportedOperations } from '@kbn/security-plugin/server';
 import type { ArrayElement } from '@kbn/utility-types';
+import type { CaseAccess, CaseAssignees } from '../../common/types/domain';
 
 /**
  * The tenses for describing the action performed by a API route
@@ -50,6 +51,12 @@ export enum ReadOperations {
   GetFieldDefinitions = 'getFieldDefinitions',
   GetTemplate = 'getTemplate',
   FindTemplates = 'findTemplates',
+  // Task operations
+  GetTask = 'getTask',
+  FindTasks = 'findTasks',
+  GetTaskTemplate = 'getTaskTemplate',
+  GetTaskComments = 'getTaskComments',
+  FindTaskTemplates = 'findTaskTemplates',
 }
 
 /**
@@ -70,6 +77,17 @@ export enum WriteOperations {
   ReopenCase = 'reopenCase',
   AssignCase = 'assignCase',
   ManageTemplate = 'manageTemplate',
+  // Task operations
+  CreateTask = 'createTask',
+  UpdateTask = 'updateTask',
+  DeleteTask = 'deleteTask',
+  ReorderTasks = 'reorderTasks',
+  ApplyTaskTemplate = 'applyTaskTemplate',
+  CreateTaskTemplate = 'createTaskTemplate',
+  UpdateTaskTemplate = 'updateTaskTemplate',
+  DeleteTaskTemplate = 'deleteTaskTemplate',
+  CreateTaskComment = 'createTaskComment',
+  DeleteTaskComment = 'deleteTaskComment',
 }
 
 /**
@@ -113,6 +131,13 @@ export interface OperationDetails {
 export interface OwnerEntity {
   owner: string;
   id: string;
+  /**
+   * The access control and assignees of the entity's case. When provided,
+   * restricted-case visibility is enforced: a restricted case produces a
+   * not-found outcome for callers that are not assignees (or superusers).
+   */
+  access?: CaseAccess;
+  assignees?: CaseAssignees;
 }
 
 /**

@@ -96,9 +96,77 @@ export const CUSTOM_FIELDS = i18n.translate('xpack.cases.caseView.userActions.cu
   defaultMessage: 'Custom Fields',
 });
 
+export const RESTRICTED_CASE = i18n.translate('xpack.cases.caseView.userActions.restrictedCase', {
+  defaultMessage: 'restricted this case to its assignees',
+});
+
+export const UNRESTRICTED_CASE = i18n.translate(
+  'xpack.cases.caseView.userActions.unrestrictedCase',
+  {
+    defaultMessage: 'removed the access restriction from this case',
+  }
+);
+
 export const OBSERVABLES = i18n.translate('xpack.cases.caseView.userActions.observables', {
   defaultMessage: 'Observables',
 });
+
+export const TASK = i18n.translate('xpack.cases.caseView.userActions.task', {
+  defaultMessage: 'Task',
+});
+
+export const TASK_TEMPLATE = i18n.translate('xpack.cases.caseView.userActions.taskTemplate', {
+  defaultMessage: 'Task Template',
+});
+
+export const ADDED_TASK = (title: string) =>
+  i18n.translate('xpack.cases.caseView.userActions.addedTask', {
+    values: { title },
+    defaultMessage: 'added task "{title}"',
+  });
+
+export const UPDATED_TASK = (title: string) =>
+  i18n.translate('xpack.cases.caseView.userActions.updatedTask', {
+    values: { title },
+    defaultMessage: 'updated task "{title}"',
+  });
+
+export const CHANGED_TASK_STATUS = (title: string, status: string) =>
+  i18n.translate('xpack.cases.caseView.userActions.changedTaskStatus', {
+    values: { title, status },
+    defaultMessage: 'marked task "{title}" as {status}',
+  });
+
+export const STARTED_TASK_WORKFLOW = (title: string) =>
+  i18n.translate('xpack.cases.caseView.userActions.startedTaskWorkflow', {
+    values: { title },
+    defaultMessage: 'ran the workflow of task "{title}"',
+  });
+
+export const TASK_WORKFLOW_SUCCEEDED = (title: string) =>
+  i18n.translate('xpack.cases.caseView.userActions.taskWorkflowSucceeded', {
+    values: { title },
+    defaultMessage: 'completed task "{title}" when its workflow succeeded',
+  });
+
+export const TASK_WORKFLOW_FAILED = (title: string) =>
+  i18n.translate('xpack.cases.caseView.userActions.taskWorkflowFailed', {
+    values: { title },
+    defaultMessage: 'recorded that the workflow of task "{title}" failed',
+  });
+
+export const DELETED_TASK = (title: string) =>
+  i18n.translate('xpack.cases.caseView.userActions.deletedTask', {
+    values: { title },
+    defaultMessage: 'deleted task "{title}"',
+  });
+
+export const APPLIED_TASK_LIST = (name: string, count: number) =>
+  i18n.translate('xpack.cases.caseView.userActions.appliedTaskList', {
+    values: { name, count },
+    defaultMessage:
+      'applied task list "{name}" and added {count, plural, one {# task} other {# tasks}}',
+  });
 
 export const USER_ACTION_EDITED = (type: string) =>
   i18n.translate('xpack.cases.caseView.userActions.edited', {
@@ -262,3 +330,58 @@ export const NOTHING_TO_COLLAPSE = i18n.translate(
     defaultMessage: 'No comments or attachments to collapse',
   }
 );
+
+export const SET_AI_VERDICT = i18n.translate('xpack.cases.caseView.userActions.setAiVerdict', {
+  defaultMessage: 'set the AI verdict to',
+});
+
+export const CLEARED_AI_VERDICT = i18n.translate(
+  'xpack.cases.caseView.userActions.clearedAiVerdict',
+  {
+    defaultMessage: 'cleared the AI verdict',
+  }
+);
+
+export const SET_HUMAN_VERDICT = i18n.translate(
+  'xpack.cases.caseView.userActions.setHumanVerdict',
+  {
+    defaultMessage: 'set the human verdict to',
+  }
+);
+
+export const CLEARED_HUMAN_VERDICT = i18n.translate(
+  'xpack.cases.caseView.userActions.clearedHumanVerdict',
+  { defaultMessage: 'cleared the human verdict' }
+);
+
+export const AI_VERDICT_LABEL = i18n.translate('xpack.cases.caseView.userActions.aiVerdictLabel', {
+  defaultMessage: 'AI verdict',
+});
+
+export const HUMAN_VERDICT_LABEL = i18n.translate(
+  'xpack.cases.caseView.userActions.humanVerdictLabel',
+  { defaultMessage: 'Human verdict' }
+);
+
+export const OPENED_FROM_ALERTZERO = (count: number) =>
+  i18n.translate('xpack.cases.userActions.openedFromAlertZero', {
+    values: { count },
+    defaultMessage:
+      'opened this case from AlertZero and linked {count, plural, one {# investigation} other {# investigations}}',
+  });
+
+export const DECISION_APPROVED = (title: string) =>
+  i18n.translate('xpack.cases.caseView.userActions.decisionApproved', {
+    values: { title },
+    defaultMessage: 'approved “{title}”',
+  });
+
+export const DECISION_DISMISSED = (title: string) =>
+  i18n.translate('xpack.cases.caseView.userActions.decisionDismissed', {
+    values: { title },
+    defaultMessage: 'dismissed “{title}”',
+  });
+
+export const DECISION_LABEL = i18n.translate('xpack.cases.caseView.userActions.decisionLabel', {
+  defaultMessage: 'Decision',
+});

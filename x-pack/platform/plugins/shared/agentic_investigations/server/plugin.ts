@@ -18,6 +18,27 @@ import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugi
 import type { AgenticInvestigationsConfig } from './config';
 import { resolveLinkActor } from './escalations/services/link_actor';
 import { registerFeatures } from './features';
+import { CaseBridgeService, getEventActorForUser } from './cases_bridge/case_bridge_service';
+import {
+  createInvestigationCaseAttachmentType,
+  createNextUpCaseAttachmentTypes,
+} from './cases_bridge/attachment_type';
+import { registerCaseDecisionRoutes } from './cases_bridge/decision_routes';
+import { WorkerCaseService } from './cases_bridge/worker_case_service';
+import { registerCaseBridgeConversationEvents } from './cases_bridge/conversation_events';
+import { registerCaseBridgeRoutes } from './cases_bridge/routes';
+import { subscribeToCaseEvents } from './cases_bridge/subscriber';
+import { registerCaseBridgeUiSettings } from './cases_bridge/ui_settings';
+import { getAiInvestigationTemplate } from './cases_bridge/system_template';
+import {
+  ALERTZERO_CASE_OWNER,
+  CLOSE_CASE_WHEN_INVESTIGATIONS_CLOSE_SETTING,
+  OPEN_CASES_FOR_INVESTIGATIONS_SETTING,
+  OPEN_CASES_FOR_INVESTIGATIONS_VISIBILITY_SETTING,
+  type CaseVisibility,
+} from '../common/cases_bridge';
+import type { InvestigationsClient } from './investigations/services/investigations_client';
+import type { FindingsWriter } from './findings/findings_writer';
 import { registerImpactAttachment } from './impact/attachments';
 import { registerImpactRoutes } from './impact/routes/register_routes';
 import { createInvestigationsPrivilegesChecker } from './investigations/services/check_investigations_privileges';
@@ -75,7 +96,14 @@ export class AgenticInvestigationsPlugin
     >
 {
   private readonly logger: Logger;
-  private readonly escalationsEnabled: boolean;
+  private escalationsEnabled: boolean;
+  /** Escalations are on in config; their conversation events stay registered so old ones render. */
+  private readonly escalationsConfigured: boolean;
+  private casesBridgeEnabled: boolean;
+  private caseBridgeService?: CaseBridgeService;
+  private workerCaseService?: WorkerCaseService;
+  private investigationsClientFactory?: (request: KibanaRequest) => InvestigationsClient;
+  private findingsWriterFactory?: (request: KibanaRequest) => FindingsWriter;
   private impactService?: ImpactService;
   private impactPillsService?: ImpactPillsService;
   private subjectsService?: SubjectsService;
@@ -91,7 +119,12 @@ export class AgenticInvestigationsPlugin
 
   constructor(context: PluginInitializerContext<AgenticInvestigationsConfig>) {
     this.logger = context.logger.get();
-    this.escalationsEnabled = context.config.get().escalations.enabled;
+    const config = context.config.get();
+    this.casesBridgeEnabled = config.cases.enabled;
+    this.escalationsConfigured = config.escalations.enabled;
+    // Opening a case replaces escalations. Everything gated on escalationsEnabled (sub-feature,
+    // routes, template UI) goes away exactly as it does when escalations are configured off.
+    this.escalationsEnabled = config.escalations.enabled && !config.cases.enabled;
   }
 
   setup(
@@ -101,13 +134,24 @@ export class AgenticInvestigationsPlugin
       workflowsExtensions,
       agentBuilder,
       workflowsManagement,
+      cases,
+      proposals,
     }: AgenticInvestigationsSetupDependencies
   ): AgenticInvestigationsPluginSetup {
     this.workflowsManagement = workflowsManagement?.management;
+    // Without the Cases plugin, or with its agentic cases off, there is nothing to open: escalations
+    // stay as configured.
+    if (this.casesBridgeEnabled && (!cases || !cases.config.agentic.enabled)) {
+      this.logger.warn(
+        'xpack.agenticInvestigations.cases.enabled is on but Cases or xpack.cases.agentic.enabled is unavailable, so investigations keep escalations.'
+      );
+      this.casesBridgeEnabled = false;
+      this.escalationsEnabled = this.escalationsConfigured;
+    }
     registerFeatures({ features, escalationsEnabled: this.escalationsEnabled });
 
     registerInvestigationConversationEvents(agentBuilder);
-    if (this.escalationsEnabled) {
+    if (this.escalationsConfigured) {
       registerEscalationConversationEvents(agentBuilder);
     }
 
@@ -148,12 +192,19 @@ export class AgenticInvestigationsPlugin
       })
     );
 
+    // Phase 5: an investigation's findings are copied onto its own case (setting off: a no-op).
+    const onFindingsWritten = this.casesBridgeEnabled
+      ? (request: KibanaRequest, conversationId: string) =>
+          this.copyFindingsToCase(request, conversationId)
+      : undefined;
+
     agentBuilder.tools.register(
       createSetImpactTool({
         getImpactService: () => this.requireImpactService(),
         resolveUser: (request) => this.requireUserResolver()(request),
         privileges: investigationsPrivileges,
         logger: this.logger,
+        onFindingsWritten,
       })
     );
     agentBuilder.tools.register(
@@ -162,6 +213,7 @@ export class AgenticInvestigationsPlugin
         resolveUser: (request) => this.requireUserResolver()(request),
         privileges: investigationsPrivileges,
         logger: this.logger,
+        onFindingsWritten,
       })
     );
 
@@ -172,6 +224,7 @@ export class AgenticInvestigationsPlugin
       privileges: investigationsPrivileges,
       getAttachmentClient: (request) => this.getAttachmentClient(request),
       getConversationClient: (request) => this.getConversationClient(request),
+      onFindingsWritten,
     });
 
     const router = coreSetup.http.createRouter();
@@ -198,9 +251,58 @@ export class AgenticInvestigationsPlugin
       escalationsEnabled: this.escalationsEnabled,
     });
 
+    if (this.casesBridgeEnabled) {
+      if (cases) {
+        cases.attachmentFramework.registerAttachment(
+          createInvestigationCaseAttachmentType(
+            async () => (await coreSetup.getStartServices())[1].agentBuilder
+          )
+        );
+        cases.registerSystemTemplate(ALERTZERO_CASE_OWNER, getAiInvestigationTemplate());
+        for (const type of createNextUpCaseAttachmentTypes()) {
+          cases.attachmentFramework.registerAttachment(type);
+        }
+        // Ties a new proposal to its investigation's case; inert while the setting is off.
+        proposals?.registerCreateExtension({
+          resolveCaseId: async ({ request, conversationId }) =>
+            this.workerCaseService?.resolveCaseIdForProposal(request, async () =>
+              (await this.getConversationClient(request)).get(conversationId)
+            ),
+          onCreated: async ({ request, proposal }) =>
+            this.workerCaseService?.onProposalCreated(request, proposal),
+        });
+        registerCaseDecisionRoutes({
+          router,
+          logger: this.logger,
+          getWorkerCaseService: () => this.requireWorkerCaseService(),
+        });
+        registerCaseBridgeConversationEvents(agentBuilder);
+        registerCaseBridgeUiSettings(coreSetup.uiSettings);
+        registerCaseBridgeRoutes({
+          router,
+          logger: this.logger,
+          getCaseBridgeService: () => this.requireCaseBridgeService(),
+        });
+      }
+    }
+
     registerInvestigationRoutes({
       router,
       logger: this.logger,
+      onInvestigationClosed: this.casesBridgeEnabled
+        ? async (request, investigationId) => {
+            const [coreStart] = await coreSetup.getStartServices();
+            const uiSettings = coreStart.uiSettings.asScopedToClient(
+              coreStart.savedObjects.getScopedClient(request)
+            );
+            if (await uiSettings.get<boolean>(CLOSE_CASE_WHEN_INVESTIGATIONS_CLOSE_SETTING)) {
+              await this.caseBridgeService?.closeCaseIfAllInvestigationsClosed(
+                request,
+                investigationId
+              );
+            }
+          }
+        : undefined,
       getAssignmentsService: () => this.requireAssignmentsService(),
       getInvestigationStatusService: () => this.requireInvestigationStatusService(),
       getInvestigationsQueryService: () => this.requireInvestigationsQueryService(),
@@ -214,6 +316,8 @@ export class AgenticInvestigationsPlugin
       workflowsExtensions,
       getInvestigationStatusService: () => this.requireInvestigationStatusService(),
       getConversationClient: (request) => this.getConversationClient(request),
+      getInvestigationsClient: (request) => this.requireInvestigationsClientFactory()(request),
+      getFindingsWriter: (request) => this.requireFindingsWriterFactory()(request),
     });
 
     registerWorkflowExecutionStepDefinitions({
@@ -221,7 +325,7 @@ export class AgenticInvestigationsPlugin
       getConversationClient: (request) => this.getConversationClient(request),
     });
 
-    return {};
+    return { isCasesBridgeEnabled: () => this.casesBridgeEnabled };
   }
 
   start(
@@ -333,6 +437,65 @@ export class AgenticInvestigationsPlugin
       }),
     });
 
+    if (this.casesBridgeEnabled && plugins.cases) {
+      this.caseBridgeService = new CaseBridgeService({
+        logger: this.logger.get('casesBridge'),
+        getCases: () => plugins.cases,
+        getAgentBuilder: () => plugins.agentBuilder,
+        getInvestigationStatusService: () => this.requireInvestigationStatusService(),
+        getActor: (request) =>
+          getEventActorForUser(coreStart.security.authc.getCurrentUser(request)),
+        getCurrentUserProfileUid: async (request) =>
+          (await coreStart.userProfile.getCurrent({ request }))?.uid ??
+          coreStart.security.authc.getCurrentUser(request)?.profile_uid,
+        canManageInvestigations: async (request) => {
+          try {
+            await startPrivileges.assertCanManage(request);
+            return true;
+          } catch {
+            return false;
+          }
+        },
+        onLinkedInvestigationsUpdated: (request, caseId) =>
+          this.workerCaseService?.refreshPendingDecisions(request, caseId) ?? Promise.resolve(),
+      });
+      subscribeToCaseEvents({
+        cases: plugins.cases,
+        service: this.caseBridgeService,
+        logger: this.logger.get('casesBridge'),
+      });
+      const proposalsStart = plugins.proposals;
+      this.workerCaseService = new WorkerCaseService({
+        logger: this.logger.get('workerCases'),
+        getCases: () => plugins.cases,
+        getBridge: () => this.requireCaseBridgeService(),
+        getProposals: () => proposalsStart,
+        getSpaceId: (request) => this.getSpaceId(request),
+        getSettings: async (request) => {
+          const uiSettings = coreStart.uiSettings.asScopedToClient(
+            coreStart.savedObjects.getScopedClient(request)
+          );
+          const [enabled, visibility] = await Promise.all([
+            uiSettings.get<boolean>(OPEN_CASES_FOR_INVESTIGATIONS_SETTING),
+            uiSettings.get<CaseVisibility>(OPEN_CASES_FOR_INVESTIGATIONS_VISIBILITY_SETTING),
+          ]);
+          return {
+            enabled: enabled === true,
+            visibility: visibility === 'restricted' ? 'restricted' : 'public',
+          };
+        },
+        readFindings: async (conversationId, spaceId) => {
+          const [impact, hypotheses] = await Promise.all([
+            this.requireImpactService().findByConversationId(conversationId, spaceId),
+            this.requireHypothesesService().findByConversationId(conversationId, spaceId),
+          ]);
+          return { impact, hypotheses };
+        },
+        canDecideProposals: async (request) =>
+          (await proposalsStart?.getProposalPrivileges().canManage(request)) ?? false,
+      });
+    }
+
     this.assignmentsService = new AssignmentsService({
       getConversationClient: (request) =>
         plugins.agentBuilder.conversations.getScopedClient({ request }),
@@ -355,12 +518,18 @@ export class AgenticInvestigationsPlugin
       resolveUser: (request) => this.requireUserResolver()(request),
       getConversationClient: (request) => this.getConversationClient(request),
       getAttachmentClient: (request) => this.getAttachmentClient(request),
+      onFindingsWritten: this.casesBridgeEnabled
+        ? (request, conversationId) => this.copyFindingsToCase(request, conversationId)
+        : undefined,
     });
 
     const getInvestigationsClient = createInvestigationsClient({
       getQueryService: () => this.requireInvestigationsQueryService(),
       getSpaceId: (request) => this.getSpaceId(request),
       privileges: startPrivileges,
+      getConversationClient: (request, source) =>
+        plugins.agentBuilder.conversations.getScopedClient({ request, source }),
+      getWorkerCases: () => this.workerCaseService,
       deleteAllInSpace: async (spaceId) => {
         const { subjects, claims } = await this.requireSubjectsService().deleteAllInSpace(spaceId);
         const impact = await this.requireImpactService()
@@ -373,7 +542,11 @@ export class AgenticInvestigationsPlugin
       },
     });
 
+    this.investigationsClientFactory = getInvestigationsClient;
+    this.findingsWriterFactory = getFindingsWriter;
+
     return {
+      isCasesBridgeEnabled: () => this.casesBridgeEnabled,
       getImpactClient,
       getSubjectsClient,
       getInvestigationsClient,
@@ -390,6 +563,58 @@ export class AgenticInvestigationsPlugin
       getEscalationsService: () => this.requireEscalationsService(),
       getFindingsWriter,
     };
+  }
+
+  private requireWorkerCaseService(): WorkerCaseService {
+    if (!this.workerCaseService) {
+      throw new Error(
+        'Worker cases are not available until the agenticInvestigations plugin has started with Cases'
+      );
+    }
+    return this.workerCaseService;
+  }
+
+  private requireInvestigationsClientFactory(): (request: KibanaRequest) => InvestigationsClient {
+    if (!this.investigationsClientFactory) {
+      throw new Error(
+        'The investigations client is not available until the agenticInvestigations plugin has started'
+      );
+    }
+    return this.investigationsClientFactory;
+  }
+
+  private requireFindingsWriterFactory(): (request: KibanaRequest) => FindingsWriter {
+    if (!this.findingsWriterFactory) {
+      throw new Error(
+        'The findings writer is not available until the agenticInvestigations plugin has started'
+      );
+    }
+    return this.findingsWriterFactory;
+  }
+
+  /** Best effort: a findings write never fails because its case copy did. */
+  private async copyFindingsToCase(request: KibanaRequest, conversationId: string): Promise<void> {
+    const workerCases = this.workerCaseService;
+    if (!workerCases) return;
+    try {
+      const investigation = await (await this.getConversationClient(request)).get(conversationId);
+      await workerCases.onFindingsWritten(request, investigation);
+    } catch (error) {
+      this.logger.warn(
+        `Findings of ${conversationId} not copied to its case: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+  }
+
+  private requireCaseBridgeService(): CaseBridgeService {
+    if (!this.caseBridgeService) {
+      throw new Error(
+        'The cases bridge is not available until the agenticInvestigations plugin has started with Cases'
+      );
+    }
+    return this.caseBridgeService;
   }
 
   private requireImpactPillsService(): ImpactPillsService {

@@ -267,7 +267,7 @@ steps:
   # swallows a failed patch, so those steps must read this step's error to avoid reporting
   # a close that never happened.
   - name: dismiss_investigation_if_clean
-    type: ai.conversation.metadata.patch
+    type: investigations.patch
     if: "${{ steps.decide_and_package.output.status == 'packaged' and steps.decide_and_package.output.dismiss == true }}"
     with:
       conversation_id: "{{ inputs.investigationConversationId }}"

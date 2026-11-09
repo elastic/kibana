@@ -11,8 +11,9 @@
     "browser": true,
     "server": true,
     "requiredPlugins": ["agentBuilder", "agentBuilderPlatform", "features", "workflowsExtensions"],
-    "requiredBundles": ["kibanaReact", "proposals"],
+    "requiredBundles": ["kibanaReact", "proposals", "cases"],
     "optionalPlugins": [
+      "cases",
       "security",
       "spaces",
       "proposals",

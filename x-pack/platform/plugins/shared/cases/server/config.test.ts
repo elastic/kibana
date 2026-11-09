@@ -12,6 +12,9 @@ describe('config validation', () => {
     it('sets the defaults correctly', () => {
       expect(ConfigSchema.validate({})).toMatchInlineSnapshot(`
         Object {
+          "agentic": Object {
+            "enabled": true,
+          },
           "analytics": Object {
             "index": Object {
               "enabled": false,
@@ -30,7 +33,13 @@ describe('config validation', () => {
           "attachments": Object {
             "enabled": true,
           },
+          "bidirectionalSync": Object {
+            "enabled": true,
+          },
           "chat": Object {
+            "enabled": true,
+          },
+          "customStatuses": Object {
             "enabled": true,
           },
           "enabled": true,
@@ -131,13 +140,22 @@ describe('config validation', () => {
             "taskIntervalMinutes": 10,
             "taskStartDelayMinutes": 10,
           },
+          "knowledge": Object {
+            "enabled": true,
+          },
           "markdownPlugins": Object {
             "lens": true,
+          },
+          "restrictedCases": Object {
+            "enabled": true,
           },
           "runWorkflows": Object {
             "enabled": true,
           },
           "stack": Object {
+            "enabled": true,
+          },
+          "tasks": Object {
             "enabled": true,
           },
           "templates": Object {
@@ -197,6 +215,11 @@ describe('config validation', () => {
       expect(config.templates.enabled).toBe(false);
     });
 
+    it('sets bidirectionalSync.enabled default to true', () => {
+      const config = ConfigSchema.validate({});
+      expect(config.bidirectionalSync.enabled).toBe(true);
+    });
+
     it('sets runWorkflows.enabled default to true', () => {
       const config = ConfigSchema.validate({});
       expect(config.runWorkflows.enabled).toBe(true);
@@ -205,6 +228,18 @@ describe('config validation', () => {
     it('allows runWorkflows.enabled to be set to false explicitly', () => {
       const config = ConfigSchema.validate({ runWorkflows: { enabled: false } });
       expect(config.runWorkflows.enabled).toBe(false);
+    });
+  });
+
+  describe('restrictedCases', () => {
+    it('sets restrictedCases.enabled default to true', () => {
+      const config = ConfigSchema.validate({});
+      expect(config.restrictedCases.enabled).toBe(true);
+    });
+
+    it('allows restrictedCases.enabled to be set to false explicitly', () => {
+      const config = ConfigSchema.validate({ restrictedCases: { enabled: false } });
+      expect(config.restrictedCases.enabled).toBe(false);
     });
   });
 });

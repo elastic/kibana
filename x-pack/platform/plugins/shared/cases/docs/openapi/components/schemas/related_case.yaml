@@ -22,6 +22,8 @@ properties:
     description: The case description.
   status:
     $ref: 'case_status.yaml'
+  status_key:
+    $ref: 'case_status_key.yaml'
   createdAt:
     type: string
     format: date-time

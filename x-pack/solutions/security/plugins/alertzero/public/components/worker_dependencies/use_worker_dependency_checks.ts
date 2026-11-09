@@ -53,7 +53,7 @@ export const useWorkerDependencyChecks = (workerId: string) => {
   } = useKibana<CoreStart>();
   const spaceBasePath = http.basePath.get();
   const contextEngineEnabled$ = useMemo(
-    () => uiSettings.get$<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID, false),
+    () => uiSettings.get$<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID, true),
     [uiSettings]
   );
   const attackDiscoveryWorkflowsEnabled$ = useMemo(

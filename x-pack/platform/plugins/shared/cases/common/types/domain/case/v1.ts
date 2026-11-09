@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { CaseStatuses } from '@kbn/cases-components/src/status/types';
 import { Settings } from '../../../bundled-types.gen';
 import {
@@ -47,9 +47,67 @@ export const DefaultCloseReasonSchema = z.union([
 ]);
 
 /**
+ * Access
+ */
+
+export enum CaseAccessMode {
+  DEFAULT = 'default',
+  RESTRICTED = 'restricted',
+}
+
+export const CaseAccessModeSchema = lazySchema(() =>
+  z.enum([CaseAccessMode.DEFAULT, CaseAccessMode.RESTRICTED])
+);
+
+/**
+ * Access control of a case. A `restricted` case is visible only to its
+ * assignees (and superusers on stateful deployments). A missing value is
+ * treated as `default` everywhere.
+ */
+export const CaseAccessSchema = lazySchema(() =>
+  z.object({
+    mode: CaseAccessModeSchema,
+  })
+);
+
+/**
  * Close reason
  */
 export const CaseCloseReasonSchema = z.union([DefaultCloseReasonSchema, z.string()]);
+
+/**
+ * Verdicts. `ai_verdict` is what an agent concluded (with its confidence and who set it);
+ * `human_verdict` is what the analyst decided, set from the close reason at close and editable.
+ */
+export const CaseVerdictSchema = lazySchema(() =>
+  z.enum(['true_positive', 'false_positive', 'benign_positive', 'suspicious', 'undetermined'])
+);
+
+export const CaseAiVerdictSchema = lazySchema(() =>
+  z.object({
+    verdict: CaseVerdictSchema,
+    confidence: z.number().min(0).max(1).nullable().optional(),
+    /** The agent's one-paragraph summary behind the verdict, when it gave one. */
+    summary: z.string().max(10000).nullable().optional(),
+    actor: z
+      .object({
+        type: z.string(),
+        id: z.string().nullable().optional(),
+        name: z.string().nullable().optional(),
+        run_id: z.string().nullable().optional(),
+      })
+      .nullable()
+      .optional(),
+    updated_at: z.string().nullable().optional(),
+  })
+);
+
+/**
+ * Where a case came from. Missing on cases created before this field existed.
+ */
+export const CaseSourceSchema = lazySchema(() =>
+  z.enum(['user', 'alertzero', 'rule', 'workflow', 'agent', 'api'])
+);
 
 /**
  * Severity — exposed as a TS-enum-typed schema so consumers using
@@ -136,24 +194,62 @@ const CaseBasicSchema = z.object({
   ...CaseBaseFields,
 });
 
-export const CaseAttributesSchema = CaseBasicSchema.extend({
-  duration: z.number().nullable(),
-  closed_at: z.string().nullable(),
-  closed_by: UserSchema.nullable(),
-  created_at: z.string(),
-  created_by: UserSchema,
-  external_service: ExternalServiceSchema.nullable(),
-  updated_at: z.string().nullable(),
-  updated_by: UserSchema.nullable(),
-  total_observables: z.number().nullable(),
-  incremental_id: z.number().nullable().optional(),
-  in_progress_at: z.string().nullable().optional(),
-  time_to_acknowledge: z.number().nullable().optional(),
-  time_to_investigate: z.number().nullable().optional(),
-  time_to_resolve: z.number().nullable().optional(),
-  template: CaseTemplateSchema.nullable().optional(),
-  [CASE_EXTENDED_FIELDS]: z.record(z.string(), z.string()).optional(),
-});
+export const CaseAttributesSchema = lazySchema(() =>
+  CaseBasicSchema.extend({
+    duration: z.number().nullable(),
+    closed_at: z.string().nullable(),
+    closed_by: UserSchema.nullable(),
+    created_at: z.string(),
+    created_by: UserSchema,
+    external_service: ExternalServiceSchema.nullable(),
+    updated_at: z.string().nullable(),
+    updated_by: UserSchema.nullable(),
+    total_observables: z.number().nullable(),
+    incremental_id: z.number().nullable().optional(),
+    /**
+     * Key of the configured status; null means the category's built-in status
+     */
+    status_key: z.string().nullable().optional(),
+    in_progress_at: z.string().nullable().optional(),
+    time_to_acknowledge: z.number().nullable().optional(),
+    time_to_investigate: z.number().nullable().optional(),
+    time_to_resolve: z.number().nullable().optional(),
+    /**
+     * Set while the case sits in a status that pauses time tracking
+     */
+    paused_at: z.string().nullable().optional(),
+    /**
+     * Seconds spent in pausing statuses, left out of duration and the time-to metrics
+     */
+    time_paused: z.number().nullable().optional(),
+    pause_reason: z.string().nullable().optional(),
+    /**
+     * The status key the case was paused from; Resume returns it there
+     */
+    resume_to_status_key: z.string().nullable().optional(),
+    template: CaseTemplateSchema.nullable().optional(),
+    [CASE_EXTENDED_FIELDS]: z.record(z.string(), z.string()).optional(),
+    access: CaseAccessSchema.optional(),
+    close_reason: z.string().nullable().optional(),
+    human_verdict: CaseVerdictSchema.nullable().optional(),
+    ai_verdict: CaseAiVerdictSchema.nullable().optional(),
+    source: CaseSourceSchema.nullable().optional(),
+    /**
+     * The Agent Builder conversation that is the case's room; set the first time the room opens.
+     */
+    room_conversation_id: z.string().nullable().optional(),
+    /**
+     * Profile uid of the person who opened the room and owns its conversation. They stay assigned
+     * while the room exists, so the case's access never leaves the room's owner outside it.
+     */
+    room_owner_uid: z.string().nullable().optional(),
+    /**
+     * Proposals on the case still awaiting a decision. Kept by the plugin that adds the proposals,
+     * so the list can filter on cases that need one.
+     */
+    pending_decisions: z.number().int().min(0).nullable().optional(),
+  })
+);
 
 export const CaseSchema = CaseAttributesSchema.extend({
   // Populated at response time by enrichCasesWithFieldLabels — not persisted to the SO.
@@ -180,14 +276,17 @@ export const AttachmentTotalsSchema = z.object({
   userComments: z.number(),
 });
 
-export const RelatedCaseSchema = z.object({
-  id: z.string(),
-  title: z.string(),
-  description: z.string(),
-  status: CaseStatusSchema,
-  createdAt: z.string(),
-  totals: AttachmentTotalsSchema,
-});
+export const RelatedCaseSchema = lazySchema(() =>
+  z.object({
+    id: z.string(),
+    title: z.string(),
+    description: z.string(),
+    status: CaseStatusSchema,
+    status_key: z.string().nullable().optional(),
+    createdAt: z.string(),
+    totals: AttachmentTotalsSchema,
+  })
+);
 
 export const SimilaritySchema = z.object({
   typeKey: z.string(),
@@ -201,6 +300,10 @@ export const SimilarCaseSchema = CaseSchema.extend({
 
 export type Case = z.infer<typeof CaseSchema>;
 export type Cases = z.infer<typeof CasesSchema>;
+export type CaseAccess = z.infer<typeof CaseAccessSchema>;
+export type CaseVerdict = z.infer<typeof CaseVerdictSchema>;
+export type CaseAiVerdict = z.infer<typeof CaseAiVerdictSchema>;
+export type CaseSource = z.infer<typeof CaseSourceSchema>;
 export type CaseAttributes = z.infer<typeof CaseAttributesSchema>;
 export type CaseSettings = z.infer<typeof CaseSettingsSchema>;
 export type RelatedCase = z.infer<typeof RelatedCaseSchema>;

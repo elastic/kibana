@@ -13,6 +13,7 @@ export * from './application';
 export * from './observables';
 export * from './attachments';
 export * from './workflow';
+export * from './knowledge';
 
 /**
  * Cases connector limits.
@@ -47,6 +48,9 @@ export const CASE_RULES_SAVED_OBJECT = 'cases-rules' as const;
 export const CASE_ID_INCREMENTER_SAVED_OBJECT = 'cases-incrementing-id' as const;
 export const CASE_TEMPLATE_SAVED_OBJECT = 'cases-templates' as const;
 export const CASE_FIELD_DEFINITION_SAVED_OBJECT = 'cases-field-definition' as const;
+export const CASE_TASK_SAVED_OBJECT = 'cases-tasks' as const;
+export const CASE_TASK_TEMPLATE_SAVED_OBJECT = 'cases-task-templates' as const;
+export const CASE_TASK_COMMENT_SAVED_OBJECT = 'cases-task-comments' as const;
 
 /**
  * If more values are added here please also add them here: x-pack/test/cases_api_integration/common/plugins
@@ -76,6 +80,9 @@ export const CASE_FIND_ATTACHMENTS_URL = `${CASE_COMMENTS_URL}/_find` as const;
 export const CASE_COMMENT_DETAILS_URL = `${CASE_DETAILS_URL}/comments/{comment_id}` as const;
 export const CASE_COMMENT_DELETE_URL = `${CASE_DETAILS_URL}/comments/{comment_id}` as const;
 export const CASE_PUSH_URL = `${CASE_DETAILS_URL}/connector/{connector_id}/_push` as const;
+export const CASE_SYNC_URL = `${CASE_DETAILS_URL}/_sync` as const;
+export const CASE_EXTERNAL_SYNC_NOTIFY_URL =
+  `${CASES_URL}/external_sync/{connector_id}/_notify` as const;
 export const CASE_REPORTERS_URL = `${CASES_URL}/reporters` as const;
 export const CASE_TAGS_URL = `${CASES_URL}/tags` as const;
 export const CASE_TEMPLATES_URL = `${CASES_URL}/templates` as const;
@@ -113,15 +120,24 @@ export const INTERNAL_SUGGEST_USER_PROFILES_URL =
   `${CASES_INTERNAL_URL}/_suggest_user_profiles` as const;
 export const INTERNAL_CONNECTORS_URL = `${CASES_INTERNAL_URL}/{case_id}/_connectors` as const;
 export const INTERNAL_BULK_GET_CASES_URL = `${CASES_INTERNAL_URL}/_bulk_get` as const;
+export const INTERNAL_ATTACHMENT_COUNTS_URL =
+  `${CASES_INTERNAL_URL}/attachments/_counts` as const;
+export const INTERNAL_EXTERNAL_SYNC_SERVICE_ACCOUNT_URL =
+  `${CASES_INTERNAL_URL}/external_sync/{connector_id}/service_account` as const;
 export const INTERNAL_GET_CASE_USER_ACTIONS_STATS_URL =
   `${CASES_INTERNAL_URL}/{case_id}/user_actions/_stats` as const;
 export const INTERNAL_CASE_USERS_URL = `${CASES_INTERNAL_URL}/{case_id}/_users` as const;
 export const INTERNAL_DELETE_FILE_ATTACHMENTS_URL =
   `${CASES_INTERNAL_URL}/{case_id}/attachments/files/_bulk_delete` as const;
+export const INTERNAL_CASE_FILES_URL = `${CASES_INTERNAL_URL}/{case_id}/files` as const;
 export const INTERNAL_GET_CASE_CATEGORIES_URL = `${CASES_INTERNAL_URL}/categories` as const;
 export const INTERNAL_CASE_METRICS_URL = `${CASES_INTERNAL_URL}/metrics` as const;
 export const INTERNAL_CASE_METRICS_DETAILS_URL = `${CASES_INTERNAL_URL}/metrics/{case_id}` as const;
 export const INTERNAL_CASE_SIMILAR_CASES_URL = `${CASES_INTERNAL_URL}/{case_id}/_similar` as const;
+export const INTERNAL_CASE_LINKS_URL = `${CASES_INTERNAL_URL}/{case_id}/links` as const;
+export const INTERNAL_CASE_LINK_DETAILS_URL = `${CASES_INTERNAL_URL}/{case_id}/links/{target_case_id}` as const;
+export const INTERNAL_CASE_ROOM_URL = `${CASES_INTERNAL_URL}/{case_id}/room` as const;
+export const INTERNAL_CASE_ROOM_POST_URL = `${CASES_INTERNAL_URL}/{case_id}/room/_post` as const;
 export const INTERNAL_PUT_CUSTOM_FIELDS_URL = `${CASES_INTERNAL_URL}/{case_id}/custom_fields/{custom_field_id}`;
 export const INTERNAL_CASE_OBSERVABLES_URL = `${CASES_INTERNAL_URL}/{case_id}/observables` as const;
 export const INTERNAL_CASE_OBSERVABLES_PATCH_URL =
@@ -136,6 +152,28 @@ export const INTERNAL_CASE_FIND_USER_ACTIONS_URL =
   `${CASES_INTERNAL_URL}/{case_id}/user_actions/_find` as const;
 export const INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL =
   `${CASES_INTERNAL_URL}/case/attachments/_find_containing_all` as const;
+export const INTERNAL_AGENT_BUILDER_CONVERSATIONS_BULK_GET_URL =
+  `${CASES_INTERNAL_URL}/agent_builder/conversations/_bulk_get` as const;
+
+/**
+ * Task routes
+ */
+export const CASES_TASKS_URL = `${CASES_URL}/tasks` as const;
+export const CASE_TASKS_URL = `${CASE_DETAILS_URL}/tasks` as const;
+export const CASE_TASK_DETAILS_URL = `${CASE_TASKS_URL}/{task_id}` as const;
+export const CASE_TASK_COMMENTS_URL = `${CASE_TASK_DETAILS_URL}/comments` as const;
+export const CASE_TASK_COMMENT_DETAILS_URL = `${CASE_TASK_COMMENTS_URL}/{comment_id}` as const;
+export const CASE_TASKS_REORDER_URL = `${CASE_TASKS_URL}/_reorder` as const;
+export const CASE_TASKS_APPLY_TEMPLATE_URL = `${CASE_TASKS_URL}/_apply_template` as const;
+export const CASE_TASK_RUN_WORKFLOW_URL = `${CASE_TASK_DETAILS_URL}/_run_workflow` as const;
+export const CASE_TASK_REFRESH_WORKFLOW_URL = `${CASE_TASK_DETAILS_URL}/_refresh_workflow` as const;
+export const CASES_TASKS_FIND_URL = `${CASES_TASKS_URL}/_find` as const;
+
+/**
+ * Task template routes
+ */
+export const CASES_TASK_TEMPLATES_URL = `${CASES_URL}/task_templates` as const;
+export const CASE_TASK_TEMPLATE_DETAILS_URL = `${CASES_TASK_TEMPLATES_URL}/{template_id}` as const;
 
 export const INTERNAL_TEMPLATES_URL = `${CASES_INTERNAL_URL}/templates` as const;
 export const INTERNAL_TEMPLATE_DETAILS_URL = `${INTERNAL_TEMPLATES_URL}/{template_id}` as const;
@@ -143,6 +181,7 @@ export const INTERNAL_BULK_DELETE_TEMPLATES_URL = `${INTERNAL_TEMPLATES_URL}/_bu
 export const INTERNAL_BULK_EXPORT_TEMPLATES_URL = `${INTERNAL_TEMPLATES_URL}/_bulk_export` as const;
 export const INTERNAL_TEMPLATE_TAGS_URL = `${INTERNAL_TEMPLATES_URL}/tags` as const;
 export const INTERNAL_TEMPLATE_CREATORS_URL = `${INTERNAL_TEMPLATES_URL}/creators` as const;
+export const INTERNAL_ENSURE_SYSTEM_TEMPLATES_URL = `${CASES_INTERNAL_URL}/system_templates/_ensure` as const;
 
 export const INTERNAL_FIELD_DEFINITIONS_URL = `${CASES_INTERNAL_URL}/field_definitions` as const;
 export const INTERNAL_FIELD_DEFINITION_DETAILS_URL =
@@ -223,6 +262,12 @@ export const MAX_CUSTOM_FIELDS_PER_CASE = 10 as const;
 export const MAX_CUSTOM_FIELD_KEY_LENGTH = 36 as const; // uuidv4 length
 export const MAX_CUSTOM_FIELD_LABEL_LENGTH = 50 as const;
 export const MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH = 160 as const;
+export const MAX_CASE_STATUSES_PER_CATEGORY = 10 as const;
+export const MAX_CASE_STATUSES = 30 as const; // MAX_CASE_STATUSES_PER_CATEGORY x 3 categories
+export const MAX_CASE_STATUS_KEY_LENGTH = 50 as const;
+export const MAX_CASE_STATUS_LABEL_LENGTH = 50 as const;
+export const MAX_CASE_PAUSE_REASONS = 10 as const;
+export const MAX_CASE_PAUSE_REASON_LENGTH = 50 as const;
 export const MAX_TEMPLATE_KEY_LENGTH = 36 as const; // uuidv4 length
 export const MAX_CASE_ID_LENGTH = 512 as const; // ES `_id` upper bound; connector-generated case ids are 64-char SHA-256 digests and bulk_create accepts arbitrary ids
 export const MAX_TEMPLATE_VERSION_STRING_LENGTH = 10 as const;
@@ -417,6 +462,10 @@ export const NO_ASSIGNEES_FILTERING_KEYWORD = 'none';
 export const NO_ACTION_SOURCE_FILTERING_KEYWORD = 'none';
 export const KIBANA_SYSTEM_USERNAME = 'elastic/kibana';
 export const MAX_OBSERVABLES_PER_CASE = 50;
+export const MAX_TASKS_PER_CASE = 100;
+export const MAX_TASK_TEMPLATES_PER_OWNER = 100;
+export const MAX_TASK_LISTS_PER_TEMPLATE = 10;
+export const MAX_COMMENTS_PER_TASK = 100;
 
 /**
  * Delays
@@ -518,6 +567,8 @@ export const CASE_ATTACH_EVENTS_EVENT_TYPE = 'case_attach_events' as const;
 export const CASE_VIEW_ATTACHMENTS_TAB_CLICKED_EVENT_TYPE =
   'case_view_attachments_tab_clicked' as const;
 
+export const CASE_ACCESS_CONTROL_CLICKED_EVENT_TYPE = 'case_access_control_clicked' as const;
+
 export const CASES_LIST_VIEW_MODE_CHANGED_EVENT_TYPE = 'cases_list_view_mode_changed' as const;
 
 export const CASES_LIST_PAGE_VIEW_EVENT_TYPE = 'cases_list_page_view' as const;
@@ -530,6 +581,9 @@ export const CASE_VIEW_ATTACH_BUTTON_CLICKED_EVENT_TYPE =
 
 export const CASE_VIEW_ATTACH_MENU_ITEM_CLICKED_EVENT_TYPE =
   'case_view_attach_menu_item_clicked' as const;
+
+export const CASE_VIEW_CONVERSATION_ATTACHMENT_OPENED_EVENT_TYPE =
+  'case_view_conversation_attachment_opened' as const;
 
 export const CASE_MARKDOWN_EDITOR_PLUGIN_CLICKED_EVENT_TYPE =
   'case_markdown_editor_plugin_clicked' as const;
@@ -575,6 +629,15 @@ export const CASES_TEMPLATE_CLEARED_EVENT_TYPE = 'cases_template_cleared' as con
  * method call across all callers; they do not report removed counts or UI delete scope.
  */
 export const CASES_OBSERVABLES_DELETED_EVENT_TYPE = 'cases_observables_deleted' as const;
+
+/**
+ * Custom statuses. One event per confirmed status change or settings edit; each carries the
+ * category and whether a custom status is involved, never the label or key.
+ */
+export const CASES_STATUS_CHANGED_EVENT_TYPE = 'cases_status_changed' as const;
+
+export const CASES_STATUS_CONFIGURATION_EDITED_EVENT_TYPE =
+  'cases_status_configuration_edited' as const;
 
 /**
  * Field Library management events. One confirmed UI write each, never a total — see

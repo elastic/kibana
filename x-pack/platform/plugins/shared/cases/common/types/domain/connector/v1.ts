@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { ActionType as ConnectorActionType } from '@kbn/actions-plugin/common';
 import type { ActionResult } from '@kbn/actions-plugin/server/types';
+import {
+  ExternalSyncFieldMappingsSchema,
+  ExternalSyncFieldRulesSchema,
+  ExternalSyncSettingsSchema,
+} from '../external_sync/v1';
 
 export enum ConnectorTypes {
   casesWebhook = '.cases-webhook',
@@ -212,12 +217,26 @@ const ConnectorMappingSchema = z.object({
 
 export const ConnectorMappingsSchema = z.array(ConnectorMappingSchema);
 
-export const ConnectorMappingsAttributesSchema = z.object({
-  mappings: ConnectorMappingsSchema,
-  owner: z.string(),
-});
+// Sync settings live with the per-connector mappings so each external system keeps its own policy.
+export const ConnectorSyncSettingsSchema = lazySchema(() =>
+  z.object({
+    externalSync: ExternalSyncSettingsSchema.optional(),
+    externalSyncFields: ExternalSyncFieldRulesSchema.optional(),
+    externalSyncFieldMappings: ExternalSyncFieldMappingsSchema.optional(),
+  })
+);
+
+export const ConnectorMappingsAttributesSchema = lazySchema(() =>
+  z
+    .object({
+      mappings: ConnectorMappingsSchema,
+      owner: z.string(),
+    })
+    .merge(ConnectorSyncSettingsSchema)
+);
 
 export type ConnectorMappingsAttributes = z.infer<typeof ConnectorMappingsAttributesSchema>;
+export type ConnectorSyncSettings = z.infer<typeof ConnectorSyncSettingsSchema>;
 export type ConnectorMappings = z.infer<typeof ConnectorMappingsSchema>;
 export type ConnectorMappingActionType = z.infer<typeof ConnectorMappingActionTypeSchema>;
 export type ConnectorMappingSource = z.infer<typeof ConnectorMappingSourceSchema>;

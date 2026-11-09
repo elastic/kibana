@@ -109,6 +109,7 @@ describe('registerCasesWorkflowEventBridge', () => {
     expect(mockClient.emitEvent).toHaveBeenNthCalledWith(2, CaseStatusUpdatedTriggerId, {
       caseId: 'case-1',
       owner: 'securitySolution',
+      paused: false,
       previousStatus: 'in-progress',
       status: 'closed',
     });
@@ -200,6 +201,64 @@ describe('registerCasesWorkflowEventBridge', () => {
         attachmentType: 'comment',
         owner: 'securitySolution',
       });
+    });
+  });
+
+  it('drops every event for a restricted case, so no restricted-case data reaches a workflow', async () => {
+    eventBus.emitCaseCreated(request, {
+      caseId: 'case-r',
+      owner: 'securitySolution',
+      restricted: true,
+    });
+    eventBus.emitCaseUpdated(
+      request,
+      { caseId: 'case-r', owner: 'securitySolution', updatedFields: ['title'], restricted: true },
+      { previousCase: undefined, updatedCase: undefined }
+    );
+    eventBus.emitAttachmentsAdded(request, {
+      caseId: 'case-r',
+      ids: ['attachment-1'],
+      attachmentType: 'user',
+      owner: 'securitySolution',
+      restricted: true,
+    });
+    eventBus.emitAttachmentsDeleted(request, {
+      caseId: 'case-r',
+      ids: ['attachment-1'],
+      attachmentType: 'user',
+      owner: 'securitySolution',
+      restricted: true,
+    });
+    eventBus.emitObservablesAdded(request, {
+      caseId: 'case-r',
+      owner: 'securitySolution',
+      observableIds: ['o-1'],
+      observableTypeKeys: ['ipv4'],
+      restricted: true,
+    });
+    await flushMicrotasks();
+
+    expect(mockClient.emitEvent).not.toHaveBeenCalled();
+  });
+
+  it('strips the in-process fields from what it forwards', async () => {
+    eventBus.emitCaseUpdated(
+      request,
+      {
+        caseId: 'case-1',
+        owner: 'securitySolution',
+        updatedFields: ['title'],
+        restricted: false,
+        closeLinkedInvestigations: false,
+      },
+      { previousCase: undefined, updatedCase: undefined }
+    );
+    await flushMicrotasks();
+
+    expect(mockClient.emitEvent).toHaveBeenCalledWith(CaseUpdatedTriggerId, {
+      caseId: 'case-1',
+      owner: 'securitySolution',
+      updatedFields: ['title'],
     });
   });
 

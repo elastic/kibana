@@ -25,6 +25,7 @@ import type {
   AttachmentAttributes,
   AttachmentAttributesV2,
   Case,
+  CaseAccess,
   EventAttachmentPayload,
   FileAttachmentMetadata,
   User,
@@ -33,6 +34,7 @@ import type {
 } from '../../common/types/domain';
 import {
   AttachmentType,
+  CaseAccessMode,
   CaseSeverity,
   CaseStatuses,
   ConnectorTypes,
@@ -115,14 +117,18 @@ const pinStoredTemplate = (
 export const transformNewCase = ({
   user,
   newCase: { template, ...newCase },
+  statusKey,
 }: {
   user: User;
   newCase: CasePostRequest;
+  /** Key of the owner's default open status; omitted while custom statuses are disabled */
+  statusKey?: string;
 }): CaseTransformedAttributes => ({
   ...newCase,
   // Re-added only when present so an absent template stays absent (an explicit
   // `template: undefined` key changes SO create payloads and snapshots).
   ...(template !== undefined ? { template: pinStoredTemplate(template) } : {}),
+  ...(statusKey !== undefined ? { status_key: statusKey } : {}),
   duration: null,
   severity: newCase.severity ?? CaseSeverity.LOW,
   closed_at: null,
@@ -150,6 +156,7 @@ export const transformCases = ({
   perPage,
   total,
   mttr,
+  countPausedCases,
 }: {
   casesMap: Map<string, Case>;
   countOpenCases: number;
@@ -160,6 +167,8 @@ export const transformCases = ({
   total: number;
   /** Average resolve time in seconds of the matching cases; only the search API provides it. */
   mttr?: number | null;
+  /** Cases in a status that pauses time tracking; only when such statuses are configured. */
+  countPausedCases?: number;
 }): CasesSearchResponse => ({
   page,
   per_page: perPage,
@@ -168,6 +177,7 @@ export const transformCases = ({
   count_open_cases: countOpenCases,
   count_in_progress_cases: countInProgressCases,
   count_closed_cases: countClosedCases,
+  ...(countPausedCases !== undefined ? { count_paused_cases: countPausedCases } : {}),
   // Only add the `mttr` key when a value was passed. The public `find` caller passes nothing, so
   // the resulting object has no `mttr` key and still satisfies the strict `CasesFindResponseSchema`
   // decode. Do NOT change this to `mttr: mttr ?? null` — that would leak `mttr` onto the public
@@ -638,6 +648,13 @@ export const getOrUpdateLensReferences = (
 
   return currentNonLensReferences.concat(newCommentLensReferences);
 };
+
+/**
+ * Whether a case is restricted (visible only to its assignees). A missing
+ * access field means `default`.
+ */
+export const isCaseRestricted = (theCase: { access?: CaseAccess | null }): boolean =>
+  theCase.access?.mode === CaseAccessMode.RESTRICTED;
 
 export const asArray = <T>(field?: T | T[] | null): T[] => {
   if (field === undefined || field === null) {

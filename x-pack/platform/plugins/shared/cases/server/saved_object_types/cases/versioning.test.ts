@@ -224,4 +224,65 @@ describe('caseSavedObjectType model version transformations', () => {
       expect(migrated.attributes).not.toHaveProperty('extract_observables_source');
     });
   });
+
+  describe('Model version 13 to 14', () => {
+    it('backfills access.mode to default when converting from v13 to v14', () => {
+      const migrated = migrator.migrate({
+        document: createCaseSavedObjectResponse(),
+        fromVersion: 13,
+        toVersion: 14,
+      });
+
+      expect(migrated.attributes).toEqual(expect.objectContaining({ access: { mode: 'default' } }));
+    });
+
+    it('removes the access field when converting from v14 to v13', () => {
+      const caseObj = createCaseSavedObjectResponse({
+        connector: createESJiraConnector({
+          fields: [{ key: 'issueType', value: 'task' }],
+        }),
+        overrides: {
+          // severity value accepted by the v1 schema (10, 20, 30, 40)
+          severity: 10,
+          total_observables: 0,
+        },
+      });
+
+      const migrated = migrator.migrate({
+        document: {
+          ...caseObj,
+          attributes: { ...caseObj.attributes, access: { mode: 'default' } },
+        },
+        fromVersion: 14,
+        toVersion: 13,
+      });
+
+      expect(migrated.attributes).not.toHaveProperty('access');
+    });
+  });
+
+  describe('Model version 14 to 15', () => {
+    it('does not add externalSync to the settings of existing cases', () => {
+      const document = createCaseSavedObjectResponse();
+      const migrated = migrator.migrate({ document, fromVersion: 14, toVersion: 15 });
+      expect(migrated.attributes).toHaveProperty('settings', document.attributes.settings);
+    });
+  });
+
+  describe('Model version 15 to 16', () => {
+    it('leaves existing cases without outcome fields or a source', () => {
+      const document = createCaseSavedObjectResponse();
+      const migrated = migrator.migrate({ document, fromVersion: 15, toVersion: 16 });
+      expect(migrated.attributes).not.toHaveProperty('close_reason');
+      expect(migrated.attributes).not.toHaveProperty('source');
+    });
+  });
+
+  describe('Model version 17 to 18', () => {
+    it('leaves existing cases without a pending decisions counter', () => {
+      const document = createCaseSavedObjectResponse();
+      const migrated = migrator.migrate({ document, fromVersion: 17, toVersion: 18 });
+      expect(migrated.attributes).not.toHaveProperty('pending_decisions');
+    });
+  });
 });

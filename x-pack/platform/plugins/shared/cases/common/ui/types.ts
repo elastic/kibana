@@ -24,6 +24,8 @@ import type {
 } from '../constants';
 import type { SnakeToCamelCase } from '../types';
 import type {
+  CaseAccessMode,
+  CaseSource,
   CaseSeverity,
   CaseStatuses,
   UserAction,
@@ -92,6 +94,24 @@ export interface CasesUiConfigType {
     enabled: boolean;
   };
   runWorkflows: {
+    enabled: boolean;
+  };
+  customStatuses: {
+    enabled: boolean;
+  };
+  restrictedCases?: {
+    enabled: boolean;
+  };
+  tasks?: {
+    enabled: boolean;
+  };
+  bidirectionalSync: {
+    enabled: boolean;
+  };
+  agentic?: {
+    enabled: boolean;
+  };
+  knowledge?: {
     enabled: boolean;
   };
 }
@@ -171,7 +191,14 @@ export type CasesConfigurationUI = Pick<
   | 'owner'
   | 'observableTypes'
   | 'extractObservables'
+  | 'externalSync'
+  | 'externalSyncFields'
+  | 'externalSyncFieldMappings'
   | 'workflowTags'
+  | 'statuses'
+  | 'pauseReasons'
+  | 'closeReason'
+  | 'knowledge'
 >;
 
 export type CasesConfigurationUICustomField = CasesConfigurationUI['customFields'][number];
@@ -196,11 +223,18 @@ export interface SystemFilterOptions {
   searchFields: string[];
   severity: CaseSeverity[];
   status: CaseStatuses[];
+  /** Configured status keys; used instead of `status` when custom statuses are on */
+  statusKey: string[];
   tags: string[];
   assignees: Array<string | null>;
   reporters: User[];
   owner: string[];
   category: string[];
+  access: CaseAccessMode[];
+  /** Where the cases came from; the "Opened from AlertZero" filter sets `['alertzero']`. */
+  source?: CaseSource[];
+  /** `['true']` while the "Needs decision" filter is on. */
+  needsDecision?: string[];
 }
 
 export interface ExtendedFieldFilter {
@@ -282,6 +316,7 @@ export type UpdateKey = keyof Pick<
   | 'category'
   | 'customFields'
   | 'extended_fields'
+  | 'access'
 >;
 
 export interface UpdateByKey {

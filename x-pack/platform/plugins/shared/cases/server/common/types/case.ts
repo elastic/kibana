@@ -7,7 +7,15 @@
 
 import type { SavedObject } from '@kbn/core-saved-objects-server';
 import { z, lazySchema } from '@kbn/zod/v4';
-import type { CaseAttributes, Observable } from '../../../common/types/domain';
+import type {
+  CaseAccess,
+  CaseAiVerdict,
+  CaseSource,
+  CaseVerdict,
+  CaseAttributes,
+  ExternalSyncSettings,
+  Observable,
+} from '../../../common/types/domain';
 import { CaseAttributesSchema } from '../../../common/types/domain';
 import type { ConnectorPersisted } from './connectors';
 import type { ExternalServicePersisted } from './external_service';
@@ -41,6 +49,9 @@ export interface CasePersistedAttributes {
   settings: {
     syncAlerts: boolean;
     extractObservables?: boolean;
+    externalSync?: ExternalSyncSettings;
+    /** Whether the agent answers in the case room when mentioned. */
+    agent?: { enabled?: boolean };
   };
   severity: CasePersistedSeverity;
   status: CasePersistedStatus;
@@ -56,6 +67,11 @@ export interface CasePersistedAttributes {
   customFields?: CasePersistedCustomFields;
   observables?: Observable[];
   incremental_id?: number | null;
+  status_key?: string | null;
+  paused_at?: string | null;
+  time_paused?: number | null;
+  pause_reason?: string | null;
+  resume_to_status_key?: string | null;
   time_to_acknowledge?: number | null;
   time_to_investigate?: number | null;
   time_to_resolve?: number | null;
@@ -69,6 +85,14 @@ export interface CasePersistedAttributes {
    * a response, and only the write codec for new cases keeps it.
    */
   extract_observables_source?: string;
+  access?: CaseAccess;
+  close_reason?: string | null;
+  human_verdict?: CaseVerdict | null;
+  ai_verdict?: CaseAiVerdict | null;
+  source?: CaseSource | null;
+  room_conversation_id?: string | null;
+  room_owner_uid?: string | null;
+  pending_decisions?: number | null;
 }
 
 type CasePersistedCustomFields = Array<{

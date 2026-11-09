@@ -13,7 +13,9 @@ export function registerCasesSteps(
   workflowsExtensions: CasesPublicSetupDependencies['workflowsExtensions'],
   unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry,
   isCasesAttachmentsEnabled: boolean,
-  isTemplatesEnabled: boolean
+  isTemplatesEnabled: boolean,
+  isKnowledgeEnabled: boolean = false,
+  isBidirectionalSyncEnabled: boolean = false
 ) {
   if (!workflowsExtensions) {
     return;
@@ -147,6 +149,12 @@ export function registerCasesSteps(
     import('./simple_steps').then((m) => m.pushCasesStepDefinition)
   );
 
+  if (isBidirectionalSyncEnabled) {
+    workflowsExtensions.registerStepDefinition(() =>
+      import('./simple_steps').then((m) => m.syncCaseStepDefinition)
+    );
+  }
+
   workflowsExtensions.registerStepDefinition(() =>
     import('./simple_steps').then((m) => m.deleteAttachmentsStepDefinition)
   );
@@ -154,6 +162,13 @@ export function registerCasesSteps(
   workflowsExtensions.registerStepDefinition(() =>
     import('./create_case_from_template').then((m) => m.createCreateCaseFromTemplateStepDefinition)
   );
+
+  // Docs-only, like the server step it describes: registered only with the knowledge flag on.
+  if (isKnowledgeEnabled) {
+    workflowsExtensions.registerStepDefinition(() =>
+      import('./simple_steps').then((m) => m.getCaseOutcomeStepDefinition)
+    );
+  }
 
   // Docs-only public definition, gated on the same templates feature flag that gates the server
   // handler's registration — the extended_fields surface only exists when the feature is on.

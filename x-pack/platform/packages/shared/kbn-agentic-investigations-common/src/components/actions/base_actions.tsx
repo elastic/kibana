@@ -20,6 +20,7 @@ import { ActionButton } from './action_button';
 import { ACTIONS_TRANSLATIONS } from './translations';
 import { isDecided } from '../helpers';
 import { COPY_LINK_ACTION } from './copy_link_action';
+import { useCaseBridge, useInvestigationCaseId } from '../case_bridge/case_bridge_context';
 
 interface ActionConfig {
   key: string;
@@ -137,9 +138,41 @@ export const BaseActions = memo<BaseActionsProps>(
     // dismissing it again would submit a decision the API refuses.
     const decided = isDecided(investigation);
 
+    const caseBridge = useCaseBridge();
+    const caseId = useInvestigationCaseId(investigation);
+
     const actionConfigs = useMemo<ActionConfig[]>(
       () => [
-        ...(canManageEscalations
+        // With the cases bridge, an investigation with a case offers View case instead: it
+        // records one case, and opening another would orphan the link.
+        ...(caseBridge && caseId
+          ? [
+              {
+                key: 'viewCase',
+                icon: 'casesApp' as IconType,
+                name:
+                  caseBridge.getViewCaseLabel?.(caseId) ?? ACTIONS_TRANSLATIONS.buttons.viewCase,
+                onClick: () => caseBridge.onViewCase(caseId),
+              },
+            ]
+          : []),
+        ...(caseBridge && !caseId && canManageEscalations
+          ? [
+              {
+                key: 'createEscalation',
+                icon: 'casesApp' as IconType,
+                name: ACTIONS_TRANSLATIONS.buttons.openCase,
+                onClick: () => onClickAction('createEscalation', investigation.recordId),
+              },
+              {
+                key: 'attachToEscalation',
+                icon: 'link' as IconType,
+                name: ACTIONS_TRANSLATIONS.buttons.addToExistingCase,
+                onClick: () => onClickAction('attachToEscalation', investigation.recordId),
+              },
+            ]
+          : []),
+        ...(!caseBridge && canManageEscalations
           ? [
               {
                 key: 'createEscalation',
@@ -200,6 +233,8 @@ export const BaseActions = memo<BaseActionsProps>(
         canManageEscalations,
         canCloseInvestigation,
         onCopyLink,
+        caseBridge,
+        caseId,
       ]
     );
 

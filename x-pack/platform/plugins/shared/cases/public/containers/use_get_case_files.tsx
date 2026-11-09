@@ -8,17 +8,14 @@
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 import type { UseQueryResult } from '@kbn/react-query';
 
-import { useFilesContext } from '@kbn/shared-ux-file-context';
 import { useQuery } from '@kbn/react-query';
 
-import type { Owner } from '../../common/constants/types';
 import type { ServerError } from '../types';
 
-import { constructFileKindIdByOwner } from '../../common/files';
 import { useCasesToast } from '../common/use_cases_toast';
 import { casesQueriesKeys } from './constants';
 import * as i18n from './translations';
-import { useCasesContext } from '../components/cases_context/use_cases_context';
+import { getCaseFiles } from './api';
 
 export interface CaseFilesFilteringOptions {
   page: number;
@@ -36,19 +33,17 @@ export const useGetCaseFiles = ({
   perPage,
   searchTerm,
 }: GetCaseFilesParams): UseQueryResult<{ files: FileJSON[]; total: number }> => {
-  const { owner } = useCasesContext();
   const { showErrorToast } = useCasesToast();
-  const { client: filesClient } = useFilesContext();
 
   return useQuery(
     casesQueriesKeys.caseFiles(caseId, { page, perPage, searchTerm }),
-    () => {
-      return filesClient.list({
-        kind: constructFileKindIdByOwner(owner[0] as Owner),
+    ({ signal }) => {
+      return getCaseFiles({
+        caseId,
         page: page + 1,
-        ...(searchTerm && { name: `*${searchTerm}*` }),
         perPage,
-        meta: { caseIds: [caseId] },
+        searchTerm,
+        signal,
       });
     },
     {

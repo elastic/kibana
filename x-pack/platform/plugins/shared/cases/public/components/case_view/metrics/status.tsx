@@ -24,6 +24,7 @@ import {
   CASE_IN_PROGRESS_DURATION,
   CASE_OPEN_DURATION,
   CASE_OPEN_TO_CLOSE_DURATION,
+  CASE_PAUSED_DURATION,
   CASE_REOPENED,
   CASE_REOPENED_ON,
 } from './translations';
@@ -76,6 +77,17 @@ export const CaseStatusMetrics = React.memo(
         dataTestSubject: 'case-metrics-lifespan-item-open-duration',
       },
       {
+        key: 'paused-duration',
+        component: (
+          <CaseStatusMetricsItem
+            title={CASE_PAUSED_DURATION}
+            value={getInProgressDuration(lifespanMetrics.statusInfo.pausedDuration)}
+            euiTheme={euiTheme}
+          />
+        ),
+        dataTestSubject: 'case-metrics-lifespan-item-paused-duration',
+      },
+      {
         key: 'duration-from-creation-to-close',
         component: (
           <CaseStatusMetricsOpenCloseDuration
@@ -112,7 +124,7 @@ const useGetLifespanMetrics = (
     const lifespan = metrics?.lifespan ?? {
       closeDate: '',
       creationDate: '',
-      statusInfo: { inProgressDuration: 0, reopenDates: [], openDuration: 0 },
+      statusInfo: { inProgressDuration: 0, pausedDuration: 0, reopenDates: [], openDuration: 0 },
     };
 
     if (!features.includes(CaseMetricsFeature.LIFESPAN)) {

@@ -21,8 +21,9 @@ import type { AttachmentSavedObjectTransformedV2 } from '../../common/types/atta
 
 import type { OwnerEntity } from '../../authorization';
 import { Operations } from '../../authorization';
+import { createCaseEntity } from '../../authorization/utils';
 import type { BulkCreateArgs } from './types';
-import { validateUnifiedAttachments } from './validators';
+import { resolveUnifiedAttachment, validateUnifiedAttachments } from './validators';
 import { validateMaxUserActions } from '../../common/validators';
 import { emitAttachmentsAddedEvent } from './trigger_utils';
 import { extractAndAddObservables } from './extract_observables';
@@ -34,39 +35,38 @@ const createAttachments = async (
   model: CaseCommentModel;
   createdAttachments: AttachmentSavedObjectTransformedV2[];
 }> => {
-  const { attachments, caseId } = args;
+  const { attachments, caseId, origin } = args;
 
   const {
     logger,
     authorization,
     unifiedAttachmentTypeRegistry,
-    services: { userActionService },
+    request,
+    services: { caseService, userActionService },
   } = clientArgs;
 
   try {
-    const decodedAttachments = decodeWithExcessOrThrowZod(
-      BulkCreateUnifiedAttachmentsRequestSchema
-    )(attachments);
+    const rawAttachments = decodeWithExcessOrThrowZod(BulkCreateUnifiedAttachmentsRequestSchema)(
+      attachments
+    );
 
     await validateMaxUserActions({
       caseId,
       userActionService,
-      userActionsToAdd: decodedAttachments.length,
+      userActionsToAdd: rawAttachments.length,
     });
 
-    decodedAttachments.forEach((attachment) => {
+    rawAttachments.forEach((attachment) => {
       validateUnifiedAttachments({
         query: attachment,
         unifiedAttachmentTypeRegistry,
       });
     });
 
-    const [attachmentsWithIds, entities]: [
+    const [rawAttachmentsWithIds, entities]: [
       Array<{ id: string } & UnifiedAttachmentPayload>,
       OwnerEntity[]
-    ] = decodedAttachments.reduce<
-      [Array<{ id: string } & UnifiedAttachmentPayload>, OwnerEntity[]]
-    >(
+    ] = rawAttachments.reduce<[Array<{ id: string } & UnifiedAttachmentPayload>, OwnerEntity[]]>(
       ([a, e], attachment) => {
         const savedObjectID = SavedObjectsUtils.generateId();
         return [
@@ -77,31 +77,33 @@ const createAttachments = async (
       [[], []]
     );
 
-    if (entities.length > 0) {
-      await authorization.ensureAuthorized({
-        operation: Operations.bulkCreateAttachments,
-        entities,
-      });
-    }
+    // The parent case is authorized alongside the new attachments so a restricted case the
+    // caller may not see yields a not-found outcome. An empty request has no attachment owners,
+    // so only the case is checked.
+    const theCase = await caseService.getCase({ id: caseId });
+    await authorization.ensureAuthorized({
+      operation: Operations.bulkCreateAttachments,
+      entities: [...entities, createCaseEntity(theCase)],
+    });
+
+    const attachmentsWithIds = await Promise.all(
+      rawAttachmentsWithIds.map(async ({ id, ...query }) => ({
+        id,
+        ...(await resolveUnifiedAttachment({ query, unifiedAttachmentTypeRegistry, request })),
+      }))
+    );
+    const decodedAttachments = attachmentsWithIds.map(({ id, ...attachment }) => attachment);
 
     const model = await CaseCommentModel.create(caseId, clientArgs);
-
-    // An empty request has no attachment owners, so check the case owner instead.
-    if (entities.length === 0) {
-      await authorization.ensureAuthorized({
-        operation: Operations.bulkCreateAttachments,
-        entities: [{ owner: model.savedObject.attributes.owner, id: caseId }],
-      });
-    }
 
     const { model: updatedModel, attachments: createdAttachments } = await model.bulkCreate({
       attachments: attachmentsWithIds,
     });
 
     const {
-      attributes: { owner, settings },
+      attributes: { owner, settings, access },
     } = model.savedObject;
-    const caseInfo = { id: caseId, owner };
+    const caseInfo = { id: caseId, owner, access };
 
     const idsByType = new Map<string, string[]>();
     for (const attachment of attachmentsWithIds) {
@@ -110,7 +112,7 @@ const createAttachments = async (
       idsByType.set(attachment.type, ids);
     }
     for (const [type, ids] of idsByType) {
-      emitAttachmentsAddedEvent(clientArgs, caseInfo, ids, type);
+      emitAttachmentsAddedEvent(clientArgs, caseInfo, ids, type, origin);
     }
 
     // This call never throws — failures are logged and do not abort the attachment creation.

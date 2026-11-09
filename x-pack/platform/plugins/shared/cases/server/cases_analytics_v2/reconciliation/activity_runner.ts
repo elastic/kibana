@@ -11,6 +11,7 @@ import { nodeBuilder } from '@kbn/es-query';
 import { CASE_USER_ACTION_SAVED_OBJECT } from '../../../common/constants';
 import type { UserActionPersistedAttributes } from '../../common/types/user_actions';
 import type { CasesActivityV2WriterContract } from '../writer/activity';
+import { getParentCaseId, getRestrictedCaseIds } from '../restricted_cases';
 import {
   RECONCILIATION_NAMESPACES_ALL,
   RECONCILIATION_PAGE_SIZE,
@@ -147,11 +148,26 @@ export async function runActivityReconciliation({
         break;
       }
 
+      // Activity of restricted cases must not reach `.cases-activity`. A
+      // lookup failure throws, pinning the cursor so the page is re-walked
+      // (consistent with the upsert failure semantics below).
+      const restricted = await getRestrictedCaseIds(
+        savedObjectsClient,
+        page.saved_objects.flatMap((so) => {
+          const caseId = getParentCaseId(so);
+          return caseId != null ? [{ caseId, namespace: so.namespaces?.[0] }] : [];
+        })
+      );
+      const projectable = page.saved_objects.filter((so) => {
+        const caseId = getParentCaseId(so);
+        return caseId == null || !restricted.has(caseId);
+      });
+
       // Dispatch the page as a single `_bulk` request and await it
       // before fetching the next page. Same rationale as in the cases
       // runner: bounded concurrency, one round-trip per page, retryable
       // failures pin the cursor and force a re-walk.
-      await activityWriter.bulkUpsertActionsAwait(page.saved_objects);
+      await activityWriter.bulkUpsertActionsAwait(projectable);
 
       for (const so of page.saved_objects) {
         processed++;

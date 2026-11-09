@@ -173,6 +173,11 @@ export const proposalSchema = lazySchema(() =>
     /** Conversation this proposal belongs to. The reverse link lives on the conversation. */
     conversationId: z.string().max(MAX_ID_LENGTH),
     /**
+     * The case the conversation was linked to when the proposal was raised, so the decision also
+     * shows on that case. Set only through the create extension (see the plugin's setup contract).
+     */
+    caseId: z.string().max(MAX_ID_LENGTH).optional(),
+    /**
      * Short label naming what is proposed. Plain text, not markdown: `comment` is
      * already the body. Required like `comment`, and resolved on write — the
      * caller's own title, else the action's name, else `DEFAULT_PROPOSAL_TITLE` —

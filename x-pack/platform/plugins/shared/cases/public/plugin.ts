@@ -9,6 +9,7 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { createBrowserHistory } from 'history';
+import { caseViewSectionRegistry, decisionsAvailability } from './client/case_view_sections';
 
 import { KibanaServices } from './common/lib/kibana';
 import type { CasesUiConfigType } from '../common/ui/types';
@@ -116,7 +117,9 @@ export class CasesUiPlugin
       plugins.workflowsExtensions,
       this.unifiedAttachmentTypeRegistry,
       config.attachments?.enabled === true,
-      config.templates?.enabled === true
+      config.templates?.enabled === true,
+      config.agentic?.enabled === true && config.knowledge?.enabled === true,
+      config.bidirectionalSync?.enabled === true
     );
     registerCasesWorkflowTriggers(plugins.workflowsExtensions);
 
@@ -125,6 +128,12 @@ export class CasesUiPlugin
         registerAttachment: (attachmentType) => {
           this.unifiedAttachmentTypeRegistry.register(attachmentType);
         },
+      },
+      caseView: {
+        registerSection: (section) => caseViewSectionRegistry.register(section),
+      },
+      decisions: {
+        setEnabled: (getter) => decisionsAvailability.setEnabled(getter),
       },
     };
   }
@@ -135,6 +144,8 @@ export class CasesUiPlugin
     registerInternalAttachments(this.unifiedAttachmentTypeRegistry, {
       hasDashboardPluginEnabled: Boolean(plugins.dashboard),
       hasMapsPluginEnabled: Boolean(plugins.maps),
+      hasAgentBuilderPluginEnabled: Boolean(plugins.agentBuilder) && config?.chat?.enabled === true,
+      agenticEnabled: config?.agentic?.enabled ?? false,
     });
 
     KibanaServices.init({
@@ -183,6 +194,9 @@ export class CasesUiPlugin
         attachmentsEnabled: config?.attachments?.enabled ?? false,
         chatEnabled: config?.chat?.enabled ?? false,
         runWorkflowsEnabled: config?.runWorkflows?.enabled ?? false,
+        customStatusesEnabled: config?.customStatuses?.enabled ?? false,
+        bidirectionalSyncEnabled: config?.bidirectionalSync?.enabled ?? false,
+        agenticEnabled: config?.agentic?.enabled ?? false,
       },
       api: createClientAPI({ http: core.http }),
       ui: {

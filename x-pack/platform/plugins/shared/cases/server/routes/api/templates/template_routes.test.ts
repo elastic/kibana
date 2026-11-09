@@ -905,6 +905,24 @@ describe('Template Routes', () => {
   // NOTE: single-template delete is implemented by calling the bulk delete endpoint with a single id.
 
   describe('POST /internal/cases/templates/_bulk_delete', () => {
+    it('refuses the whole request, deleting nothing, when it names a shipped template', async () => {
+      const context = createMockContext();
+      const request = { body: { ids: ['template-1', 'system-ai-investigation'] } };
+      const response = createMockResponse();
+      const before = mockTemplates.find((t) => t.templateId === 'template-1')?.deletedAt;
+
+      // @ts-expect-error: mocking necessary properties for handler logic only
+      await bulkDeleteTemplatesRoute.handler({ context, request, response });
+
+      expect(response.badRequest).toHaveBeenCalledWith({
+        body: {
+          message:
+            "Shipped templates can't be deleted. Turn the template off instead: system-ai-investigation",
+        },
+      });
+      expect(mockTemplates.find((t) => t.templateId === 'template-1')?.deletedAt).toBe(before);
+    });
+
     it('bulk soft deletes multiple templates', async () => {
       const context = createMockContext();
       const request = { body: { ids: ['template-1', 'template-2'] } };

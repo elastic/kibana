@@ -23,11 +23,13 @@ import { NEW_COMMENT_ID } from './constants';
 import { hasActiveUserActivityFilter } from '../user_actions_activity_bar/utils';
 import { UserActionsList } from './user_actions_list';
 import { useUserActionsPagination } from './hooks/use_user_actions_pagination';
+import { useVisibleConversationAttachments } from '../attachments/conversation/use_visible_conversations';
 import { useLastPageUserActions } from './use_user_actions_last_page';
 import { useLastPage } from './use_last_page';
 import { useUserPermissions } from './use_user_permissions';
 import { useBuildUserActions } from './hooks/use_build_user_actions';
 import { useBuilderContext } from './hooks/use_builder_context';
+import { useCasesConfig } from '../../common/lib/kibana';
 import { useCommentsList } from './hooks/use_comments_list';
 import { NO_SEARCH_RESULTS_BODY, NO_SEARCH_RESULTS_TITLE } from './translations';
 import { useGetCaseConnectors } from '../../containers/use_get_case_connectors';
@@ -119,16 +121,23 @@ export const UserActions = React.memo((props: UserActionsProps) => {
     handleDeleteComment,
   });
 
+  const visibleInfiniteAttachments = useVisibleConversationAttachments(infiniteLatestAttachments);
+  const visibleLastPageAttachments = useVisibleConversationAttachments(lastPageAttachments);
+
+  const { agenticEnabled } = useCasesConfig();
+
   const builtInfiniteActions = useBuildUserActions({
     caseUserActions: infiniteCaseUserActions,
-    attachments: infiniteLatestAttachments,
+    attachments: visibleInfiniteAttachments,
     ...builderContext,
+    mergeAlertZeroOpening: agenticEnabled,
   });
 
   const builtLastPageActions = useBuildUserActions({
     caseUserActions: lastPageUserActions,
-    attachments: lastPageAttachments,
+    attachments: visibleLastPageAttachments,
     ...builderContext,
+    mergeAlertZeroOpening: agenticEnabled,
   });
 
   const commentEditor = useMemo(

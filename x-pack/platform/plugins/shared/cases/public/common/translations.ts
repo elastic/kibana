@@ -171,6 +171,28 @@ export const REOPEN_CASE = i18n.translate('xpack.cases.caseView.reopenCase', {
   defaultMessage: 'Reopen case',
 });
 
+export const RESUME = i18n.translate('xpack.cases.caseView.resume', {
+  defaultMessage: 'Resume',
+});
+
+export const RESUME_TO = (status: string) =>
+  i18n.translate('xpack.cases.caseView.resumeTo', {
+    values: { status },
+    defaultMessage: 'Resume to {status}',
+  });
+
+export const PAUSED_SINCE = (reason: string) =>
+  i18n.translate('xpack.cases.caseView.pausedSince', {
+    values: { reason },
+    defaultMessage: 'Paused: {reason} ·',
+  });
+
+export const PAUSED_TOOLTIP = (reason: string) =>
+  i18n.translate('xpack.cases.caseView.pausedTooltip', {
+    values: { reason },
+    defaultMessage: '{reason} · paused',
+  });
+
 export const OPEN_CASE = i18n.translate('xpack.cases.caseView.openCase', {
   defaultMessage: 'Open case',
 });
@@ -505,3 +527,60 @@ export const EXPERIMENTAL_DESC = i18n.translate('xpack.cases.badge.experimentalD
   defaultMessage:
     'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
 });
+
+export const ACCESS = i18n.translate('xpack.cases.access.label', {
+  defaultMessage: 'Access',
+});
+
+export const ACCESS_EVERYONE = i18n.translate('xpack.cases.access.everyone', {
+  defaultMessage: 'Everyone',
+});
+
+export const ACCESS_RESTRICTED = i18n.translate('xpack.cases.access.restricted', {
+  defaultMessage: 'Restricted',
+});
+
+export const FILTER_FROM_ALERTZERO = i18n.translate('xpack.cases.allCases.filter.fromAlertZero', {
+  defaultMessage: 'Opened from AlertZero',
+});
+
+export const FILTER_NEEDS_DECISION = i18n.translate('xpack.cases.allCases.filter.needsDecision', {
+  defaultMessage: 'Needs decision',
+});
+
+export const PENDING_DECISIONS = (count: number) =>
+  i18n.translate('xpack.cases.caseView.pendingDecisions', {
+    values: { count },
+    defaultMessage: '{count, plural, one {# decision} other {# decisions}} pending',
+  });
+
+export const PENDING_DECISIONS_SHORT = (count: number) =>
+  i18n.translate('xpack.cases.allCases.pendingDecisionsShort', {
+    values: { count },
+    defaultMessage: '{count} pending',
+  });
+
+export const SOURCE_COLUMN = i18n.translate('xpack.cases.allCases.column.source', {
+  defaultMessage: 'Source',
+});
+
+export const AI_VERDICT_COLUMN = i18n.translate('xpack.cases.allCases.column.aiVerdict', {
+  defaultMessage: 'AI verdict',
+});
+
+export const INVESTIGATIONS_COLUMN = i18n.translate('xpack.cases.allCases.column.investigations', {
+  defaultMessage: 'Investigations',
+});
+
+export const SOURCE_LABELS = {
+  alertzero: i18n.translate('xpack.cases.allCases.source.alertzero', {
+    defaultMessage: 'AlertZero',
+  }),
+  user: i18n.translate('xpack.cases.allCases.source.user', { defaultMessage: 'Manual' }),
+  rule: i18n.translate('xpack.cases.allCases.source.rule', { defaultMessage: 'Rule' }),
+  workflow: i18n.translate('xpack.cases.allCases.source.workflow', {
+    defaultMessage: 'Workflow',
+  }),
+  agent: i18n.translate('xpack.cases.allCases.source.agent', { defaultMessage: 'Agent' }),
+  api: i18n.translate('xpack.cases.allCases.source.api', { defaultMessage: 'API' }),
+};

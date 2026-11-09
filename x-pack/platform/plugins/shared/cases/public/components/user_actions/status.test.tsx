@@ -14,6 +14,7 @@ import { getUserAction } from '../../containers/mock';
 import { TestProviders } from '../../common/mock';
 import { createStatusUserActionBuilder } from './status';
 import { getMockBuilderArgs } from './mock';
+import { useCasesConfig } from '../../common/lib/kibana';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');
@@ -49,6 +50,27 @@ describe('createStatusUserActionBuilder ', () => {
     expect(screen.getByText(label)).toBeInTheDocument();
   });
 
+  it('renders the pause reason next to the status', () => {
+    const userAction = getUserAction('status', UserActionActions.update, {
+      payload: {
+        status: CaseStatuses['in-progress'],
+        statusKey: 'on_hold',
+        pauseReason: 'Awaiting customer',
+      },
+    });
+    const builder = createStatusUserActionBuilder({ ...builderArgs, userAction });
+
+    render(
+      <TestProviders>
+        <EuiCommentList comments={builder.build()} />
+      </TestProviders>
+    );
+
+    expect(screen.getByTestId(`${userAction.id}-user-action-pause-reason`)).toHaveTextContent(
+      'Awaiting customer'
+    );
+  });
+
   it('renders close reason details when provided by status user action', () => {
     const userAction = getUserAction('status', UserActionActions.update, {
       payload: { status: CaseStatuses.closed, closeReason: 'false_positive', syncedAlertCount: 2 },
@@ -70,27 +92,43 @@ describe('createStatusUserActionBuilder ', () => {
     expect(screen.getByTestId('status-update-user-action-close-reason-badge')).toBeInTheDocument();
   });
 
-  it('does not render sync details when only close reason is present', () => {
+  it('does not render a close reason without synced alerts when agentic cases are off', () => {
     const userAction = getUserAction('status', UserActionActions.update, {
       payload: { status: CaseStatuses.closed, closeReason: 'false_positive' },
     });
-    const builder = createStatusUserActionBuilder({
-      ...builderArgs,
-      userAction,
-    });
+    const builder = createStatusUserActionBuilder({ ...builderArgs, userAction });
 
-    const createdUserAction = builder.build();
     render(
       <TestProviders>
-        <EuiCommentList comments={createdUserAction} />
+        <EuiCommentList comments={builder.build()} />
       </TestProviders>
     );
 
     expect(screen.queryByText('and synced 1 alert with close reason')).not.toBeInTheDocument();
-    expect(screen.queryByText('False Positive')).not.toBeInTheDocument();
     expect(
       screen.queryByTestId('status-update-user-action-close-reason-badge')
     ).not.toBeInTheDocument();
+  });
+
+  it('renders the close reason kept on the case when agentic cases are on', () => {
+    const config = useCasesConfig as jest.Mock;
+    const defaults = config();
+    config.mockReturnValue({ ...defaults, agenticEnabled: true });
+    const userAction = getUserAction('status', UserActionActions.update, {
+      payload: { status: CaseStatuses.closed, closeReason: 'false_positive' },
+    });
+    const builder = createStatusUserActionBuilder({ ...builderArgs, userAction });
+
+    render(
+      <TestProviders>
+        <EuiCommentList comments={builder.build()} />
+      </TestProviders>
+    );
+
+    expect(screen.getByTestId('status-update-user-action-close-reason-badge')).toHaveTextContent(
+      'False Positive'
+    );
+    config.mockReturnValue(defaults);
   });
 
   it('renders custom close reason values as-is', () => {

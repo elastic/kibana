@@ -441,7 +441,7 @@ describe('Detection Coverage review', () => {
     // It opens before the check, so the manual entry gate has somewhere to ask.
     it('opens an investigation from the template before the coverage check', () => {
       const create = stepByName('create_investigation');
-      expect(create?.type).toBe('ai.conversation.create');
+      expect(create?.type).toBe('investigations.create');
       expect(create?.with?.template_id).toBe('investigation');
       expect(create?.if).toContain('steps.gap.output.ready == true');
       expect(create?.if).not.toContain('verdict');
@@ -524,7 +524,7 @@ describe('Detection Coverage review', () => {
 
       const resolved = stepByName('close_investigation_resolved');
       const dismissed = stepByName('close_investigation_dismissed');
-      expect(resolved?.type).toBe('ai.conversation.metadata.patch');
+      expect(resolved?.type).toBe('investigations.patch');
       expect(resolved).not.toHaveProperty('if');
       expect(dismissed).not.toHaveProperty('if');
       expect((resolved?.with?.updates as Record<string, string>).status).toBe('closed');
@@ -886,7 +886,7 @@ describe('Detection Coverage review', () => {
       expect(mark?.type).toBe('context-engine.updateKi');
       expect(mark?.with).toEqual(stepByName('mark_processed')?.with);
 
-      expect(close?.type).toBe('ai.conversation.metadata.patch');
+      expect(close?.type).toBe('investigations.patch');
       expect(close?.with?.conversation_id).toBe(
         '{{ steps.create_investigation.output.conversation_id }}'
       );

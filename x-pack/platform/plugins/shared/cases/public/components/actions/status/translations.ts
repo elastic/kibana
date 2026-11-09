@@ -55,6 +55,21 @@ export const MARK_IN_PROGRESS_CASES = ({
       'Marked {totalCases, plural, =1 {"{caseTitle}"} other {{totalCases} cases}} as in progress',
   });
 
+export const MOVED_CASES_TO = ({
+  totalCases,
+  caseTitle,
+  status,
+}: {
+  totalCases: number;
+  caseTitle?: string;
+  status: string;
+}) =>
+  i18n.translate('xpack.cases.actions.movedCasesTo', {
+    values: { caseTitle, totalCases, status },
+    defaultMessage:
+      'Moved {totalCases, plural, =1 {"{caseTitle}"} other {{totalCases} cases}} to {status}',
+  });
+
 export const BULK_ACTION_STATUS_CLOSE = i18n.translate('xpack.cases.actions.status.close', {
   defaultMessage: 'Close selected',
 });

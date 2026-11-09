@@ -1,0 +1,8 @@
+in: query
+name: status_key
+description: Filters the returned cases by the key of their configured status. Technical preview.
+schema:
+  oneOf:
+    - $ref: '../schemas/string.yaml'
+    - $ref: '../schemas/string_array.yaml'
+example: awaiting_customer

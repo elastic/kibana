@@ -13,10 +13,14 @@ import { getFileAttachmentType } from './file';
 import { getMapAttachmentType } from './map';
 import { getVisualizationAttachmentType } from './lens';
 import { getStackAlertAttachmentType } from './alert';
+import { getConversationAttachmentType } from './conversation';
+import { getCaseLinkAttachmentType } from './case_link';
 
 export interface RegisterInternalAttachmentsOptions {
   hasDashboardPluginEnabled?: boolean;
   hasMapsPluginEnabled?: boolean;
+  hasAgentBuilderPluginEnabled?: boolean;
+  agenticEnabled?: boolean;
 }
 
 export const registerInternalAttachments = (
@@ -24,6 +28,8 @@ export const registerInternalAttachments = (
   {
     hasDashboardPluginEnabled = false,
     hasMapsPluginEnabled = false,
+    hasAgentBuilderPluginEnabled = false,
+    agenticEnabled = false,
   }: RegisterInternalAttachmentsOptions = {}
 ) => {
   unifiedRegistry.register(getFileAttachmentType());
@@ -36,5 +42,11 @@ export const registerInternalAttachments = (
   }
   if (hasMapsPluginEnabled) {
     unifiedRegistry.register(getMapAttachmentType());
+  }
+  if (hasAgentBuilderPluginEnabled) {
+    unifiedRegistry.register(getConversationAttachmentType());
+  }
+  if (agenticEnabled) {
+    unifiedRegistry.register(getCaseLinkAttachmentType());
   }
 };

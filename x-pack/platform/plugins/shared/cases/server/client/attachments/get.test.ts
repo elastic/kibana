@@ -6,7 +6,7 @@
  */
 
 import { omit } from 'lodash';
-import { mockCaseUnifiedAttachments } from '../../mocks';
+import { mockCases, mockCaseUnifiedAttachments } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
 import { find, get } from './get';
 
@@ -127,6 +127,7 @@ describe('get', () => {
     beforeEach(() => {
       jest.clearAllMocks();
       clientArgs.services.attachmentService.getter.get.mockResolvedValue(attachmentSO as never);
+      clientArgs.services.caseService.getCase.mockResolvedValue(mockCases[0]);
     });
 
     it('returns the attachment when it belongs to the case', async () => {

@@ -7,6 +7,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { useCasesConfig } from '../../../common/lib/kibana';
 
 import { useGetSimilarCases, initialData } from '../../../containers/use_get_similar_cases';
 import type { CaseUI, SortOrder } from '../../../../common/ui/types';
@@ -21,6 +22,7 @@ import { ColumnsPopover } from '../../all_cases/components/columns_popover';
 import { SimilarCasesTable } from '../../similar_cases/table';
 import { useSimilarCasesColumnsSelection } from '../../similar_cases/use_similar_cases_columns_selection';
 import { SidebarToggleButton } from './sidebar/sidebar_toggle_button';
+import { RelatedTab } from './related/related_tab';
 
 const DEFAULT_SORT_FIELD = SortFieldCase.createdAt;
 const DEFAULT_SORT_ORDER: SortOrder = 'desc';
@@ -33,6 +35,16 @@ interface CaseViewSimilarCasesProps {
 }
 
 export const CaseViewSimilarCases = ({ caseData }: CaseViewSimilarCasesProps) => {
+  const { agenticEnabled } = useCasesConfig();
+  // With agentic cases on, this tab is Related: its own filters, the plugins' sections, and one
+  // Cases section that keeps the observable matching below. Off, it is main's Similar cases.
+  if (agenticEnabled) {
+    return <RelatedTab caseData={caseData} />;
+  }
+  return <SimilarCasesOnly caseData={caseData} />;
+};
+
+const SimilarCasesOnly = ({ caseData }: CaseViewSimilarCasesProps) => {
   const { euiTheme } = useEuiTheme();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(CASES_TABLE_PER_PAGE_VALUES[0]);

@@ -100,6 +100,25 @@ const simpleStepTestCases: SimpleStepTestCase[] = [
     updatedCase: { ...createCaseResponseFixture, status: 'in-progress' },
   },
   {
+    name: 'moves a case to a configured status that pauses time tracking',
+    stepType: 'cases.setStatus',
+    expectedId: 'cases.setStatus',
+    createDefinition: setStatusStepDefinition,
+    input: {
+      case_id: 'case-1',
+      version: 'provided-version',
+      status_key: 'on_hold',
+      pause_reason: 'Awaiting vendor',
+    },
+    updateExpectation: { status_key: 'on_hold', pause_reason: 'Awaiting vendor' },
+    updatedCase: {
+      ...createCaseResponseFixture,
+      status: 'in-progress',
+      status_key: 'on_hold',
+      pause_reason: 'Awaiting vendor',
+    },
+  },
+  {
     name: 'updates case title',
     stepType: 'cases.setTitle',
     expectedId: 'cases.setTitle',

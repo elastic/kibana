@@ -12,6 +12,7 @@ import type {
   TemplateListItem,
 } from '../../../../common/types/api/template/v1';
 import { useSyncedQueryParams } from './use_synced_query_params';
+import { isSystemTemplateId } from '../../../../common/utils/system_templates';
 
 interface UseTemplatesStateReturn {
   queryParams: TemplatesFindRequest;
@@ -52,6 +53,8 @@ export const useTemplatesState = (): UseTemplatesStateReturn => {
     () => ({
       onSelectionChange: setSelectedTemplates,
       selected: selectedTemplates,
+      // Shipped templates can be turned off but not deleted, so bulk actions never include them.
+      selectable: (template: TemplateListItem) => !isSystemTemplateId(template.templateId),
     }),
     [selectedTemplates]
   );

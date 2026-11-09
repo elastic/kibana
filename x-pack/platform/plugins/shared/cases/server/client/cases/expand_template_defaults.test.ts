@@ -232,6 +232,21 @@ describe('expand_template_defaults', () => {
       expect(expanded.tags).toEqual([]);
     });
 
+    it('applies the template externalSync default only when the caller omitted it', async () => {
+      const externalSync = { autoPush: true, conflictStrategy: 'external' };
+      const definition = { ...kitchenSinkDefinition, settings: { externalSync } };
+
+      const expanded = await expand(baseRequest, definition);
+      expect(expanded.settings).toEqual({ syncAlerts: true, externalSync });
+
+      const callerValue = { autoPush: false, conflictStrategy: 'kibana' as const };
+      const kept = await expand(
+        { ...baseRequest, settings: { syncAlerts: true, externalSync: callerValue } },
+        definition
+      );
+      expect(kept.settings).toEqual({ syncAlerts: true, externalSync: callerValue });
+    });
+
     it('caller-sent values win over template defaults', async () => {
       const expanded = await expand({
         ...baseRequest,

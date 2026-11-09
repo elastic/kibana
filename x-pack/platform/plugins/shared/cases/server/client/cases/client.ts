@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { Case, CaseCustomField, User } from '../../../common/types/domain';
+import type {
+  Case,
+  CaseCustomField,
+  User,
+  ActionSource,
+  UnifiedAttachment,
+} from '../../../common/types/domain';
 import type {
   CasePostRequest,
   CasesFindResponse,
@@ -29,6 +35,8 @@ import type {
   BulkAddObservablesRequest,
   BulkDeleteObservablesRequest,
   CasesPatchResponse,
+  CaseLinkRequest,
+  RelatedCasesResponse,
 } from '../../../common/types/api';
 import type { CasesClient } from '../client';
 import type { CasesClientInternal } from '../client_internal';
@@ -53,8 +61,13 @@ import {
   getTags,
   getCategories,
 } from './get';
+import type { FindByExternalIdParams } from './find_by_external_id';
+import { findByExternalId } from './find_by_external_id';
 import type { PushParams } from './push';
 import { push } from './push';
+import type { SyncParams } from './sync';
+import { sync } from './sync';
+import type { BulkUpdateCasesClientOptions } from './bulk_update';
 import { bulkUpdate } from './bulk_update';
 import type { BulkCreateCasesClientOptions } from './bulk_create';
 import { bulkCreate } from './bulk_create';
@@ -72,6 +85,11 @@ import type { GetApplicableFieldsParams } from './applicable_fields';
 import { getApplicableFields } from './applicable_fields';
 import type { ApplicableFieldsResponse } from '../../../common/types/domain/template/applicable_field';
 import { withUsageCounter } from '../usage_counters';
+import { getRelatedCases, linkCases, unlinkCase } from './links';
+import type { CaseRoomResponse, PostFromRoomRequest } from './room';
+import { ensureRoom, postFromRoom } from './room';
+import type { RecordDecisionParams, SetPendingDecisionsParams } from './decisions';
+import { recordDecision, setPendingDecisions } from './decisions';
 
 /**
  * API for interacting with the cases entities.
@@ -119,9 +137,20 @@ export interface CasesSubClient {
    */
   push(args: PushParams): Promise<Case>;
   /**
+   * Applies the linked external incident to the case. Technical preview.
+   */
+  sync(args: SyncParams): Promise<Case>;
+  /**
+   * Finds the cases last pushed to the given external incident. Technical preview.
+   */
+  findByExternalId(params: FindByExternalIdParams): Promise<Case[]>;
+  /**
    * Update the specified cases with the passed in values.
    */
-  bulkUpdate(cases: CasesPatchRequest): Promise<CasesPatchResponse>;
+  bulkUpdate(
+    cases: CasesPatchRequest,
+    options?: BulkUpdateCasesClientOptions
+  ): Promise<CasesPatchResponse>;
   /**
    * Delete a case and all its comments.
    *
@@ -188,6 +217,41 @@ export interface CasesSubClient {
    * applied template from an existing case, or `owner` (+ optional `templateId`) for a prospective case.
    */
   getApplicableFields(params: GetApplicableFieldsParams): Promise<ApplicableFieldsResponse>;
+  /**
+   * Links the case to other cases, on both sides (a reference each; nothing merged or copied).
+   */
+  linkCases(caseId: string, request: CaseLinkRequest): Promise<RelatedCasesResponse>;
+  /**
+   * Removes a link from both cases.
+   */
+  unlinkCase(caseId: string, targetCaseId: string): Promise<RelatedCasesResponse>;
+  /**
+   * Linked cases and cases sharing an alert with this one, as the caller can see them.
+   */
+  getRelatedCases(caseId: string): Promise<RelatedCasesResponse>;
+  /**
+   * Returns the case's room (an Agent Builder conversation), creating it on first use.
+   */
+  ensureRoom(caseId: string): Promise<CaseRoomResponse>;
+  /**
+   * Posts one room message to the case as a comment. `getCasesClientAs` gives a client that
+   * records the agent as the actor, for agent replies.
+   */
+  postFromRoom(
+    caseId: string,
+    request: PostFromRoomRequest,
+    getCasesClientAs: (actionSource: ActionSource) => Promise<CasesClient>
+  ): Promise<UnifiedAttachment>;
+  /**
+   * Sets how many proposals on the case still await a decision. Bookkeeping for the plugin that
+   * adds them: no user action is written.
+   */
+  setPendingDecisions(params: SetPendingDecisionsParams): Promise<void>;
+  /**
+   * Records a proposal decided on the case as a `decision` user action by the caller, and sets the
+   * pending decisions left.
+   */
+  recordDecision(params: RecordDecisionParams): Promise<void>;
 }
 
 // Keep this exhaustive so every new client method requires an explicit telemetry decision.
@@ -200,6 +264,8 @@ const usageCounterByMethod = {
   resolve: null,
   bulkGet: null,
   push: 'push_case',
+  sync: 'sync_case',
+  findByExternalId: null,
   bulkUpdate: 'bulk_update_cases',
   delete: 'delete_cases',
   getTags: null,
@@ -215,6 +281,13 @@ const usageCounterByMethod = {
   bulkAddObservables: 'bulk_add_observables',
   bulkDeleteObservables: 'bulk_delete_observables',
   getApplicableFields: null,
+  linkCases: 'link_cases',
+  unlinkCase: 'unlink_case',
+  getRelatedCases: null,
+  ensureRoom: null,
+  postFromRoom: 'post_from_room',
+  setPendingDecisions: null,
+  recordDecision: 'record_decision',
 } as const satisfies Record<keyof CasesSubClient, string | null>;
 
 /**
@@ -245,10 +318,15 @@ export const createCasesSubClient = (
     push: withUsageCounter(usageCounterByMethod.push, clientArgs, (params: PushParams) =>
       push(params, clientArgs, casesClient)
     ),
+    sync: withUsageCounter(usageCounterByMethod.sync, clientArgs, (params: SyncParams) =>
+      sync(params, clientArgs, casesClient)
+    ),
+    findByExternalId: (params: FindByExternalIdParams) => findByExternalId(params, clientArgs),
     bulkUpdate: withUsageCounter(
       usageCounterByMethod.bulkUpdate,
       clientArgs,
-      (cases: CasesPatchRequest) => bulkUpdate(cases, clientArgs, casesClient)
+      (cases: CasesPatchRequest, options?: BulkUpdateCasesClientOptions) =>
+        bulkUpdate(cases, clientArgs, casesClient, options)
     ),
     delete: withUsageCounter(usageCounterByMethod.delete, clientArgs, (ids: string[]) =>
       deleteCases(ids, clientArgs)
@@ -296,6 +374,36 @@ export const createCasesSubClient = (
     ),
     getApplicableFields: (params: GetApplicableFieldsParams) =>
       getApplicableFields(params, clientArgs),
+    linkCases: withUsageCounter(
+      usageCounterByMethod.linkCases,
+      clientArgs,
+      (caseId: string, request: CaseLinkRequest) =>
+        linkCases({ caseId, request }, clientArgs, casesClient)
+    ),
+    unlinkCase: withUsageCounter(
+      usageCounterByMethod.unlinkCase,
+      clientArgs,
+      (caseId: string, targetCaseId: string) =>
+        unlinkCase({ caseId, targetCaseId }, clientArgs, casesClient)
+    ),
+    getRelatedCases: (caseId: string) => getRelatedCases({ caseId }, clientArgs, casesClient),
+    ensureRoom: (caseId: string) => ensureRoom({ caseId }, clientArgs, casesClient),
+    postFromRoom: withUsageCounter(
+      usageCounterByMethod.postFromRoom,
+      clientArgs,
+      (
+        caseId: string,
+        request: PostFromRoomRequest,
+        getCasesClientAs: (actionSource: ActionSource) => Promise<CasesClient>
+      ) => postFromRoom({ caseId, request }, clientArgs, casesClient, getCasesClientAs)
+    ),
+    setPendingDecisions: (params: SetPendingDecisionsParams) =>
+      setPendingDecisions(params, clientArgs, casesClient),
+    recordDecision: withUsageCounter(
+      usageCounterByMethod.recordDecision,
+      clientArgs,
+      (params: RecordDecisionParams) => recordDecision(params, clientArgs, casesClient)
+    ),
   };
 
   return Object.freeze(casesSubClient);

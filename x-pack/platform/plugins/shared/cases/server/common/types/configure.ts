@@ -12,6 +12,8 @@ import type {
   CaseConnector,
   CaseCustomFields,
   CaseSeverity,
+  CloseReasonConfiguration,
+  KnowledgeConfiguration,
   ConfigurationAttributes,
 } from '../../../common/types/domain';
 import {
@@ -35,6 +37,10 @@ export interface ConfigurationPersistedAttributes {
   observableTypes?: PersistedObservableTypesConfiguration;
   extractObservables?: boolean;
   workflowTags?: string[];
+  statuses?: PersistedCaseStatusesConfiguration;
+  pauseReasons?: string[];
+  closeReason?: CloseReasonConfiguration;
+  knowledge?: KnowledgeConfiguration;
   legacyTemplatesMigrated?: boolean;
   legacyCustomFieldsMigrated?: boolean;
   /**
@@ -49,6 +55,16 @@ export interface ConfigurationPersistedAttributes {
 type PersistedObservableTypesConfiguration = Array<{
   key: string;
   label: string;
+}>;
+
+type PersistedCaseStatusesConfiguration = Array<{
+  key: string;
+  label: string;
+  category: string;
+  order: number;
+  isDefault: boolean;
+  disabled: boolean;
+  pausesTimeTracking?: boolean;
 }>;
 
 type PersistedCustomFieldsConfiguration = Array<{

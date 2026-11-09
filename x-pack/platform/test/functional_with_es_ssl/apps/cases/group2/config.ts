@@ -20,6 +20,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         // Pin the templates flag ON explicitly so this suite is deterministic
         // regardless of the plugin default.
         '--xpack.cases.templates.enabled=true',
+        '--xpack.cases.customStatuses.enabled=true',
       ],
     },
     junit: {

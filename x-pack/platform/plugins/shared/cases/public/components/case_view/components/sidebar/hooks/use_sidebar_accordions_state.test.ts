@@ -38,6 +38,7 @@ describe('useSidebarAccordionsState', () => {
         legacyCustomFields: false,
         templateFields: true,
         connectors: true,
+        verdict: true,
       }
     );
   });
@@ -74,6 +75,7 @@ describe('useSidebarAccordionsState', () => {
       legacyCustomFields: false,
       templateFields: false,
       connectors: true,
+      verdict: true,
     });
   });
 });

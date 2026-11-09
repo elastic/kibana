@@ -25,6 +25,14 @@ export interface Buckets<T extends string | number = string | number> {
   buckets: Array<Bucket<T>>;
 }
 
+export interface TasksTelemetry {
+  total: number;
+  byStatus: { open: number; inProgress: number; completed: number; cancelled: number };
+  casesWithTasks: number;
+  fromTaskList: number;
+  taskLists: number;
+}
+
 export interface Cardinality {
   value: number;
 }
@@ -134,6 +142,7 @@ export type CaseAggregationResult = Record<
     assigneeFilters: AssigneesFilters;
     observables: ObservablesAggregationResult;
     totalWithMaxObservables: TotalWithMaxObservablesAggregationResult;
+    restrictedCases?: { doc_count: number };
   }
 > & {
   assigneeFilters: AssigneesFilters;
@@ -143,11 +152,14 @@ export type CaseAggregationResult = Record<
   extractObservablesSource: Buckets;
   observables: ObservablesAggregationResult;
   status: Buckets;
+  customStatuses?: { buckets: Array<Bucket<string> & { status: Buckets<number> }> };
+  pausedCases?: { status: Buckets<number> };
   users: Cardinality;
   tags: Cardinality;
   totalAssignees: ValueCount;
   totalsByOwner: Buckets;
   totalWithMaxObservables: TotalWithMaxObservablesAggregationResult;
+  restrictedCases?: { doc_count: number };
 };
 
 export interface Assignees {
@@ -202,6 +214,7 @@ export interface SolutionTelemetry extends Count, AttachmentFramework {
   status: Status;
   observables: ObservablesTelemetry;
   totalWithMaxObservables: number;
+  totalRestrictedCases: number;
 }
 
 export interface Status {
@@ -357,6 +370,10 @@ export interface CasesTelemetry {
       AttachmentFramework & {
         assignees: Assignees;
         status: Status;
+        /** Cases currently on a custom (non built-in) status, per category */
+        customStatuses: Status;
+        /** Cases currently in a status that pauses time tracking, per category */
+        pausedCases: Status;
         syncAlertsOn: number;
         syncAlertsOff: number;
         extractObservablesOn: number;
@@ -372,6 +389,7 @@ export interface CasesTelemetry {
         totalTags: number;
         totalWithAlerts: number;
         totalWithConnectors: number;
+        totalRestrictedCases: number;
         latestDates: LatestDates;
       };
     sec: SolutionTelemetry;
@@ -409,6 +427,20 @@ export interface CasesTelemetry {
       extractObservablesDefaultOn: number;
       extractObservablesDefaultOff: number;
       customFields: CustomFieldsTelemetry;
+      customStatuses: {
+        /** Configurations with at least one custom status */
+        configurations: number;
+        /** Configured custom statuses, per category */
+        statuses: Status;
+        pausing: {
+          /** Configurations with at least one enabled status that pauses time tracking */
+          configurations: number;
+          /** Enabled statuses that pause time tracking, per category */
+          statuses: Status;
+          /** Configurations whose pause reason list differs from the defaults */
+          customizedReasons: number;
+        };
+      };
     };
     sec: CustomFieldsSolutionTelemetry;
     obs: CustomFieldsSolutionTelemetry;
@@ -426,6 +458,7 @@ export interface CasesTelemetry {
     obs: WorkflowsSolutionTelemetry;
     main: WorkflowsSolutionTelemetry;
   };
+  tasks: TasksTelemetry;
 }
 
 export type CountSchema = MakeSchemaFrom<Count>;

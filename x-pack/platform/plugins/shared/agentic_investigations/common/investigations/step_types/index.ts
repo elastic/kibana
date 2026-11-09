@@ -11,3 +11,13 @@ export {
   reopenInvestigationStepInputSchema,
   reopenInvestigationStepOutputSchema,
 } from './reopen_investigation_step';
+export {
+  CreateInvestigationStepId,
+  PatchInvestigationStepId,
+  SetHypothesesStepId,
+  createInvestigationStepCommonDefinition,
+  patchInvestigationStepCommonDefinition,
+  setHypothesesStepCommonDefinition,
+  type CreateInvestigationStepInput,
+  type PatchInvestigationStepInput,
+} from './write_investigation_steps';

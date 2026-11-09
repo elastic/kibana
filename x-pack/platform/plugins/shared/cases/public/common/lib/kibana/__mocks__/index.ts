@@ -60,4 +60,9 @@ export const useCasesConfig = jest.fn().mockReturnValue({
   chatEnabled: false,
   templatesEnabled: false,
   runWorkflowsEnabled: false,
+  customStatusesEnabled: false,
+  restrictedCasesEnabled: false,
+  bidirectionalSyncEnabled: false,
+  agenticEnabled: false,
+  knowledgeEnabled: false,
 });

@@ -1,0 +1,35 @@
+type: object
+properties:
+  sync:
+    type: object
+    description: Technical preview. The case was reconciled from its external incident.
+    required:
+      - connector_name
+      - external_id
+      - external_title
+      - external_url
+      - updated_fields
+      - conflicted_fields
+    properties:
+      connector_name:
+        type: string
+      external_id:
+        type: string
+      external_title:
+        type: string
+      external_url:
+        type: string
+      updated_fields:
+        description: Case fields updated from the external incident.
+        type: array
+        items:
+          type: string
+      conflicted_fields:
+        description: Case fields kept because they changed in Kibana and the conflict strategy is `kibana`.
+        type: array
+        items:
+          type: string
+      external_updated_at:
+        type: string
+      external_updated_by:
+        type: string

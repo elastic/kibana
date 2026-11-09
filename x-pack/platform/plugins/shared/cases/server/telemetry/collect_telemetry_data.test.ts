@@ -19,6 +19,7 @@ import { getUserActionsTelemetryData } from './queries/user_actions';
 import { getTemplatesTelemetryData } from './queries/templates';
 import { getFieldLibraryTelemetryData } from './queries/field_definitions';
 import { getWorkflowsTelemetryData } from './queries/workflows';
+import { getTasksTelemetryData } from './queries/tasks';
 
 jest.mock('./queries/alerts');
 jest.mock('./queries/cases');
@@ -31,6 +32,7 @@ jest.mock('./queries/user_actions');
 jest.mock('./queries/templates');
 jest.mock('./queries/field_definitions');
 jest.mock('./queries/workflows');
+jest.mock('./queries/tasks');
 
 const getAlertsMock = getAlertsTelemetryData as jest.Mock;
 const getCasesMock = getCasesTelemetryData as jest.Mock;
@@ -43,6 +45,7 @@ const getUserActionsMock = getUserActionsTelemetryData as jest.Mock;
 const getTemplatesMock = getTemplatesTelemetryData as jest.Mock;
 const getFieldLibraryMock = getFieldLibraryTelemetryData as jest.Mock;
 const getWorkflowsMock = getWorkflowsTelemetryData as jest.Mock;
+const getTasksMock = getTasksTelemetryData as jest.Mock;
 
 const preExistingAreas = {
   cases: getCasesMock,
@@ -115,6 +118,14 @@ const expectedWorkflows = {
   main: workflowsScope,
 };
 
+const expectedTasks = {
+  total: 3,
+  byStatus: { open: 1, inProgress: 1, completed: 1, cancelled: 0 },
+  casesWithTasks: 2,
+  fromTaskList: 1,
+  taskLists: 1,
+};
+
 describe('collectTelemetryData', () => {
   const logger = loggingSystemMock.createLogger();
   const savedObjectsClient = new TelemetrySavedObjectsClient(savedObjectsRepositoryMock.create());
@@ -140,6 +151,7 @@ describe('collectTelemetryData', () => {
       main: populatedFieldLibraryScope,
     });
     getWorkflowsMock.mockResolvedValue(expectedWorkflows);
+    getTasksMock.mockResolvedValue(expectedTasks);
   });
 
   it('reports templates, field library, and workflows alongside every pre-existing area', async () => {
@@ -153,6 +165,21 @@ describe('collectTelemetryData', () => {
       templates: expectedTemplates,
       fieldLibrary: expectedFieldLibrary,
       workflows: expectedWorkflows,
+      tasks: expectedTasks,
+    });
+  });
+
+  describe('when the tasks query fails', () => {
+    it('omits only the tasks key', async () => {
+      getTasksMock.mockRejectedValue(new Error('tasks boom'));
+
+      expect(await collect()).toStrictEqual({
+        ...preExistingPayload(),
+        templates: expectedTemplates,
+        fieldLibrary: expectedFieldLibrary,
+        workflows: expectedWorkflows,
+      });
+      expect(logger.debug).toHaveBeenCalledWith('Failed collecting Cases tasks telemetry data');
     });
   });
 
@@ -171,6 +198,7 @@ describe('collectTelemetryData', () => {
         ...preExistingPayload(),
         fieldLibrary: expectedFieldLibrary,
         workflows: expectedWorkflows,
+        tasks: expectedTasks,
       });
     });
 
@@ -195,6 +223,7 @@ describe('collectTelemetryData', () => {
         ...preExistingPayload(),
         templates: expectedTemplates,
         workflows: expectedWorkflows,
+        tasks: expectedTasks,
       });
     });
   });
@@ -213,6 +242,7 @@ describe('collectTelemetryData', () => {
         ...preExistingPayload(),
         templates: expectedTemplates,
         fieldLibrary: expectedFieldLibrary,
+        tasks: expectedTasks,
       });
     });
 

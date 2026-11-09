@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ProposalCreateExtension } from '../types';
 import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -138,7 +139,8 @@ const PAST_DEADLINE = '2000-01-01T00:00:00.000Z';
 /** Pass `null` for `workflowsApi` to simulate the API being unavailable. */
 const createService = (
   storage: ReturnType<typeof createStorage>,
-  workflowsApi: ReturnType<typeof createWorkflowsApi> | null = createWorkflowsApi()
+  workflowsApi: ReturnType<typeof createWorkflowsApi> | null = createWorkflowsApi(),
+  createExtension?: ProposalCreateExtension
 ) => {
   const logger = loggerMock.create();
   const attachmentsClient = {
@@ -159,6 +161,7 @@ const createService = (
       logger,
       getWorkflowsApi: () => (workflowsApi ?? undefined) as never,
       getAttachmentsClient,
+      getCreateExtension: () => createExtension,
       resolveUser,
     }),
     workflowsApi: workflowsApi ?? createWorkflowsApi(),
@@ -180,6 +183,54 @@ describe('ProposalsService', () => {
   });
 
   describe('create', () => {
+    describe('create extension', () => {
+      const newProposal = {
+        conversationId: 'conv-1',
+        comment: 'Close the alert',
+        confidence: 'medium' as const,
+        origin: 'alertzero' as const,
+        workflowExecutionId: 'exec-1',
+      };
+
+      it('stores the resolved case id and hands the stored proposal to onCreated', async () => {
+        const storage = createStorage();
+        const extension = {
+          resolveCaseId: jest.fn().mockResolvedValue('case-1'),
+          onCreated: jest.fn().mockResolvedValue(undefined),
+        };
+        const { service } = createService(storage, createWorkflowsApi(), extension);
+
+        await service.create(newProposal, { spaceId: SPACE_ID, request });
+
+        expect(extension.resolveCaseId).toHaveBeenCalledWith({
+          request,
+          conversationId: 'conv-1',
+          spaceId: SPACE_ID,
+        });
+        expect(storage.index).toHaveBeenCalledWith(
+          expect.objectContaining({ document: expect.objectContaining({ caseId: 'case-1' }) })
+        );
+        expect(extension.onCreated).toHaveBeenCalledWith(
+          expect.objectContaining({ proposal: expect.objectContaining({ caseId: 'case-1' }) })
+        );
+      });
+
+      it('still creates the proposal, without a case, when the extension fails', async () => {
+        const storage = createStorage();
+        const extension = {
+          resolveCaseId: jest.fn().mockRejectedValue(new Error('boom')),
+          onCreated: jest.fn(),
+        };
+        const { service } = createService(storage, createWorkflowsApi(), extension);
+
+        await service.create(newProposal, { spaceId: SPACE_ID, request });
+
+        const [[{ document }]] = storage.index.mock.calls;
+        expect(document.caseId).toBeUndefined();
+        expect(extension.onCreated).not.toHaveBeenCalled();
+      });
+    });
+
     it('refuses a to-do that would run an action workflow', async () => {
       const storage = createStorage();
       const { service } = createService(storage);
@@ -3037,6 +3088,37 @@ describe('ProposalsService', () => {
       const [[searchArgs]] = storage.search.mock.calls;
       expect(searchArgs.query.bool.filter).toEqual(
         expect.arrayContaining([{ terms: { conversationId: ['conv-1', 'conv-2'] } }])
+      );
+    });
+
+    it("should restrict to a case's decisions still waiting on someone, by title", async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+
+      await service.list(
+        { ...listQuery(), caseId: 'case-1', titleSearch: 'isolate', awaitingDecision: true },
+        SPACE_ID,
+        request
+      );
+
+      const [[searchArgs]] = storage.search.mock.calls;
+      const awaiting = {
+        bool: {
+          filter: [{ term: { status: 'pending' } }],
+          must_not: [{ exists: { field: 'decision' } }, { exists: { field: 'gateReleasedAt' } }],
+        },
+      };
+      expect(searchArgs.query.bool.filter).toEqual(
+        expect.arrayContaining([
+          { term: { caseId: 'case-1' } },
+          { match_phrase_prefix: { title: 'isolate' } },
+          awaiting,
+        ])
+      );
+
+      await service.list({ ...listQuery(), awaitingDecision: false }, SPACE_ID, request);
+      expect(storage.search.mock.calls[1][0].query.bool.filter).toEqual(
+        expect.arrayContaining([{ bool: { must_not: [awaiting] } }])
       );
     });
 

@@ -152,6 +152,14 @@ export const STATUS = i18n.translate('xpack.cases.caseTable.status', {
   defaultMessage: 'Status',
 });
 
+export const STATUS_PAUSED = i18n.translate('xpack.cases.caseTable.statusPaused', {
+  defaultMessage: 'Paused',
+});
+
+export const PAUSED_CASES_STAT = i18n.translate('xpack.cases.casesStats.pausedCases', {
+  defaultMessage: 'Paused cases',
+});
+
 export const CHANGE_STATUS = i18n.translate('xpack.cases.caseTable.changeStatus', {
   defaultMessage: 'Change status',
 });
@@ -303,6 +311,46 @@ export const CLOSE_CASE_MODAL_CLOSE_BUTTON = i18n.translate(
     defaultMessage: 'Cancel',
   }
 );
+
+export const PAUSE_REASON_MODAL_TITLE = i18n.translate(
+  'xpack.cases.allCasesView.pauseReasonModal.title',
+  {
+    defaultMessage: 'Pause time tracking',
+  }
+);
+
+export const PAUSE_REASON_MODAL_BODY = (status: string) =>
+  i18n.translate('xpack.cases.allCasesView.pauseReasonModal.body', {
+    values: { status },
+    defaultMessage:
+      "Pick why this case is waiting. Time in {status} is left out of the case's duration and the team's MTTR.",
+  });
+
+export const PAUSE_REASON_MODAL_BULK_BODY = (status: string) =>
+  i18n.translate('xpack.cases.allCasesView.pauseReasonModal.bulkBody', {
+    values: { status },
+    defaultMessage:
+      "Pick why these cases are waiting. Time in {status} is left out of their duration and the team's MTTR.",
+  });
+
+export const PAUSE_REASON_MODAL_REASON_LABEL = i18n.translate(
+  'xpack.cases.allCasesView.pauseReasonModal.reasonLabel',
+  {
+    defaultMessage: 'Pause reason',
+  }
+);
+
+export const PAUSE_REASON_MODAL_CONFIRM = (status: string) =>
+  i18n.translate('xpack.cases.allCasesView.pauseReasonModal.confirm', {
+    values: { status },
+    defaultMessage: 'Move to {status}',
+  });
+
+export const PAUSE_REASON_MODAL_CONFIRM_BULK = (status: string, count: number) =>
+  i18n.translate('xpack.cases.allCasesView.pauseReasonModal.confirmBulk', {
+    values: { status, count },
+    defaultMessage: 'Move {count} cases to {status}',
+  });
 
 export const CLOSE_CASE_MODAL_REASON_SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.cases.allCasesView.closeCaseModal.reasonSearchPlaceholder',

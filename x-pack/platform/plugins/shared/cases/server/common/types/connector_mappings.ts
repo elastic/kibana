@@ -6,10 +6,13 @@
  */
 
 import type { SavedObject } from '@kbn/core/server';
-import type { ConnectorMappingsAttributes } from '../../../common/types/domain';
+import type {
+  ConnectorMappingsAttributes,
+  ConnectorSyncSettings,
+} from '../../../common/types/domain';
 import { ConnectorMappingsAttributesSchema } from '../../../common/types/domain';
 
-export interface ConnectorMappingsPersistedAttributes {
+export interface ConnectorMappingsPersistedAttributes extends ConnectorSyncSettings {
   mappings: Array<{
     action_type: string;
     source: string;

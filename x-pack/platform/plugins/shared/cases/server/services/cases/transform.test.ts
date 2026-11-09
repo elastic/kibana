@@ -523,6 +523,20 @@ describe('case transforms', () => {
       `);
     });
 
+    it('defaults status_key to null', () => {
+      expect(
+        transformSavedObjectToExternalModel(createCaseSavedObjectResponse()).attributes.status_key
+      ).toBeNull();
+    });
+
+    it('returns the persisted status_key', () => {
+      expect(
+        transformSavedObjectToExternalModel(
+          createCaseSavedObjectResponse({ overrides: { status_key: 'awaiting_customer' } })
+        ).attributes.status_key
+      ).toBe('awaiting_customer');
+    });
+
     it('sets external_service to null when it is null', () => {
       expect(
         transformSavedObjectToExternalModel(
@@ -735,6 +749,19 @@ describe('case transforms', () => {
       ).toBe(false);
     });
 
+    it('keeps externalSync when it is defined', () => {
+      const externalSync = { autoPush: true, conflictStrategy: 'kibana' as const };
+      const res = createCaseSavedObjectResponse({
+        overrides: { settings: { syncAlerts: true, externalSync } },
+      });
+
+      expect(transformSavedObjectToExternalModel(res).attributes.settings).toEqual({
+        syncAlerts: true,
+        extractObservables: false,
+        externalSync,
+      });
+    });
+
     it('does not return the total comments', () => {
       const resWithTotalComments = createCaseSavedObjectResponse({
         overrides: {
@@ -797,6 +824,17 @@ describe('case transforms', () => {
       expect(result.totalEvents).toBe(2);
       expect(result.severity).toBe(CaseSeverity.LOW);
       expect(result.status).toBe(CaseStatuses.open);
+      expect(result.status_key).toBeNull();
+    });
+
+    it('returns the persisted status_key', () => {
+      const result = transformESModelToCase(
+        'case-1',
+        { ...basicESCaseFields, status_key: 'awaiting_customer' },
+        createMockSearchHit([])
+      );
+
+      expect(result.status_key).toBe('awaiting_customer');
     });
 
     it('does not expose the server-owned extract_observables_source attribute', () => {
@@ -811,6 +849,22 @@ describe('case transforms', () => {
       const result = transformESModelToCase('case-1', caseData, createMockSearchHit([]));
 
       expect(result).not.toHaveProperty('extract_observables_source');
+    });
+
+    it('keeps externalSync settings', () => {
+      const externalSync = { autoPush: true, conflictStrategy: 'external' as const };
+      const caseData: CasePersistedAttributes = {
+        ...basicESCaseFields,
+        settings: { syncAlerts: false, externalSync },
+      };
+
+      const result = transformESModelToCase('case-1', caseData, createMockSearchHit([], 5, 1));
+
+      expect(result.settings).toEqual({
+        syncAlerts: false,
+        extractObservables: false,
+        externalSync,
+      });
     });
 
     it('transforms connector with reference correctly', () => {

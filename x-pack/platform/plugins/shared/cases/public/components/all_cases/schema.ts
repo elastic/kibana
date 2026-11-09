@@ -6,7 +6,12 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { CaseSeveritySchema, CaseStatusSchema } from '../../../common/types/domain';
+import {
+  CaseAccessModeSchema,
+  CaseSourceSchema,
+  CaseSeveritySchema,
+  CaseStatusSchema,
+} from '../../../common/types/domain';
 import {
   MAX_EXTENDED_FIELD_FILTER_VALUE_LENGTH,
   MAX_EXTENDED_FIELD_FILTERS,
@@ -19,6 +24,10 @@ export const AllCasesURLQueryParamsSchema = z
     search: z.string(),
     severity: z.array(CaseSeveritySchema),
     status: z.array(CaseStatusSchema),
+    statusKey: z.array(z.string()),
+    access: z.array(CaseAccessModeSchema),
+    source: z.array(CaseSourceSchema).optional(),
+    needsDecision: z.array(z.string().max(5)).max(1).optional(),
     tags: z.array(z.string()),
     category: z.array(z.string()),
     assignees: z.array(z.union([z.string(), z.null()])),

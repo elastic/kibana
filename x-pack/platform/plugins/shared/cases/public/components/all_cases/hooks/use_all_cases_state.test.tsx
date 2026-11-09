@@ -200,9 +200,13 @@ describe('useAllCasesQueryParams', () => {
         assignees: ['elastic'],
         reporters: [],
         status: [CaseStatuses.closed],
+        statusKey: [],
         tags: ['test-tag'],
         owner: ['cases'],
         category: ['test-category'],
+        access: [],
+        source: [],
+        needsDecision: [],
         customFields: {
           testCustomField: { options: ['foo'], type: CustomFieldTypes.TEXT },
         },

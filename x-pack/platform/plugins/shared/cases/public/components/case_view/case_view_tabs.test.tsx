@@ -20,6 +20,8 @@ import { CaseViewTabs } from './case_view_tabs';
 import { caseData, defaultGetCase } from './mocks';
 import { useGetCaseFileStats } from '../../containers/use_get_case_file_stats';
 import { useCaseObservables } from './use_case_observables';
+import * as kibanaLib from '../../common/lib/kibana';
+import { caseViewSectionRegistry } from '../../client/case_view_sections';
 
 jest.mock('../../containers/use_get_case');
 jest.mock('../../common/navigation/hooks');
@@ -138,6 +140,40 @@ describe('CaseViewTabs', () => {
       expect(navigateToCaseViewMock).toHaveBeenCalledWith({
         detailName: caseData.id,
         tabId: CASE_VIEW_PAGE_TABS.SIMILAR_CASES,
+      });
+    });
+  });
+
+  describe('tabs other plugins register', () => {
+    beforeAll(() => {
+      caseViewSectionRegistry.register({
+        id: 'test.decisions',
+        position: 'tab',
+        tabId: 'decisions',
+        name: 'Decisions',
+        getBadgeCount: () => 3,
+        render: () => null,
+      });
+    });
+
+    beforeEach(() => {
+      const { useCasesConfig } = jest.requireActual('../../common/lib/kibana');
+      jest
+        .spyOn(kibanaLib, 'useCasesConfig')
+        .mockImplementation(() => ({ ...useCasesConfig(), agenticEnabled: true }));
+    });
+
+    it('shows the tab with its count after Cases tabs and navigates to its tabId', async () => {
+      const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
+      renderWithTestingProviders(<CaseViewTabs {...caseProps} />, {
+        wrapperProps: { license: basicLicense },
+      });
+
+      expect(await screen.findByTestId('case-view-tab-badge-decisions')).toHaveTextContent('3');
+      fireEvent.click(screen.getByTestId('case-view-tab-title-decisions'));
+      expect(navigateToCaseViewMock).toHaveBeenCalledWith({
+        detailName: caseData.id,
+        tabId: 'decisions',
       });
     });
   });

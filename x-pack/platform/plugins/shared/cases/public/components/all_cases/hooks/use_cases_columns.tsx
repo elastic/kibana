@@ -21,7 +21,14 @@ import {
 } from '@elastic/eui';
 import { Status } from '@kbn/cases-components/src/status/status';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { CaseStatuses } from '../../../../common/types/domain';
+import { VerdictBadge } from '../../verdict/verdict_badge';
+import {
+  PENDING_DECISIONS,
+  PENDING_DECISIONS_SHORT,
+  SOURCE_LABELS,
+} from '../../../common/translations';
+import { decisionsAvailability } from '../../../client/case_view_sections';
+import { CaseAccessMode, CaseStatuses } from '../../../../common/types/domain';
 
 import { tableColumnPresetDateRelative } from '../../../utils/table_column_presets';
 import type { ActionConnector } from '../../../../common/types/domain';
@@ -41,6 +48,8 @@ import { AssigneesColumn } from '../components/assignees_column';
 import { useGetCaseConfiguration } from '../../../containers/configure/use_get_case_configuration';
 import { IncrementalIdText } from '../../incremental_id';
 import { severities } from '../../severity/config';
+import { useCaseStatuses } from '../../status/use_case_statuses';
+import { PausedStatusTooltip } from '../../status/paused_status_tooltip';
 
 type CasesColumns = EuiBasicTableColumn<CaseUI>;
 
@@ -65,6 +74,8 @@ export interface GetCasesColumn {
   onRowClick?: (theCase: CaseUI) => void;
   disableActions?: boolean;
   disabledCases?: Set<string>;
+  /** Linked investigations per case id, for the Investigations column (agentic cases). */
+  linkedInvestigationCounts?: Record<string, number>;
 }
 
 export interface UseCasesColumnsReturnValue {
@@ -81,10 +92,13 @@ export const useCasesColumns = ({
   disableActions = false,
   selectedColumns,
   disabledCases,
+  linkedInvestigationCounts,
 }: GetCasesColumn): UseCasesColumnsReturnValue => {
   const casesColumnsConfig = useCasesColumnsConfiguration(isSelectorView);
   const { actions } = useActions({ disableActions });
-  const { templatesEnabled } = useCasesConfig();
+  const { templatesEnabled, agenticEnabled } = useCasesConfig();
+  const showPendingDecisions = agenticEnabled && decisionsAvailability.isEnabled();
+  const { getStatus } = useCaseStatuses();
 
   const {
     data: { customFields },
@@ -134,6 +148,29 @@ export const useCasesColumns = ({
                   <TruncatedText text={theCase.title} />
                 </CaseDetailsLink>
               </EuiFlexItem>
+              {theCase.access?.mode === CaseAccessMode.RESTRICTED && (
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip content={i18n.ACCESS_RESTRICTED}>
+                    <EuiIcon
+                      type="lock"
+                      size="s"
+                      aria-label={i18n.ACCESS_RESTRICTED}
+                      data-test-subj={`case-table-column-restricted-${theCase.id}`}
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
+              )}
+              {showPendingDecisions && (theCase.pendingDecisions ?? 0) > 0 && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge
+                    color="warning"
+                    title={PENDING_DECISIONS(theCase.pendingDecisions ?? 0)}
+                    data-test-subj="case-table-pending-decisions"
+                  >
+                    {PENDING_DECISIONS_SHORT(theCase.pendingDecisions ?? 0)}
+                  </EuiBadge>
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           );
         },
@@ -289,9 +326,13 @@ export const useCasesColumns = ({
         field: casesColumnsConfig.status.field,
         name: casesColumnsConfig.status.name,
         sortable: true,
-        render: (status: CaseUI['status']) => {
+        render: (status: CaseUI['status'], theCase: CaseUI) => {
           if (status != null) {
-            return <Status status={status} />;
+            return (
+              <PausedStatusTooltip pausedAt={theCase.pausedAt} pauseReason={theCase.pauseReason}>
+                <Status status={status} label={getStatus(theCase.statusKey, status).label} />
+              </PausedStatusTooltip>
+            );
           }
 
           return getEmptyCellValue();
@@ -361,12 +402,75 @@ export const useCasesColumns = ({
         width: '8em',
       },
     }),
-    [assignCaseAction, casesColumnsConfig, connectors, isSelectorView, userProfiles, disabledCases]
+    [
+      assignCaseAction,
+      casesColumnsConfig,
+      connectors,
+      isSelectorView,
+      userProfiles,
+      disabledCases,
+      getStatus,
+      showPendingDecisions,
+    ]
   );
+
+  const agenticColumnsDict = useMemo(() => {
+    const dict: Record<string, CasesColumns> = {};
+    if (!casesColumnsConfig.source || !casesColumnsConfig.aiVerdict) {
+      return dict;
+    }
+    dict.source = {
+      field: casesColumnsConfig.source.field,
+      name: casesColumnsConfig.source.name,
+      width: '10em',
+      render: (source: CaseUI['source']) => (
+        // The table squeezes columns below their width when many are shown, and "AlertZero"
+        // then breaks mid-word.
+        <span
+          className="eui-textNoWrap"
+          data-test-subj={`case-table-column-source-${source ?? 'user'}`}
+        >
+          {SOURCE_LABELS[source ?? 'user']}
+        </span>
+      ),
+    };
+    dict.aiVerdict = {
+      field: casesColumnsConfig.aiVerdict.field,
+      name: casesColumnsConfig.aiVerdict.name,
+      width: '10em',
+      render: (aiVerdict: CaseUI['aiVerdict']) =>
+        aiVerdict != null ? (
+          <VerdictBadge
+            verdict={aiVerdict.verdict}
+            confidence={aiVerdict.confidence}
+            data-test-subj="case-table-column-ai-verdict"
+          />
+        ) : (
+          getEmptyCellValue()
+        ),
+    };
+    if (casesColumnsConfig.linkedInvestigations) {
+      dict.linkedInvestigations = {
+        field: casesColumnsConfig.linkedInvestigations.field,
+        name: casesColumnsConfig.linkedInvestigations.name,
+        width: '9em',
+        render: (_: unknown, theCase: CaseUI) => {
+          const count = linkedInvestigationCounts?.[theCase.id] ?? 0;
+          return count > 0 ? (
+            <span data-test-subj={`case-table-column-investigations-${theCase.id}`}>{count}</span>
+          ) : (
+            getEmptyCellValue()
+          );
+        },
+      };
+    }
+    return dict;
+  }, [casesColumnsConfig, linkedInvestigationCounts]);
 
   const allColumnsDict = useMemo(
     () => ({
       ...columnsDict,
+      ...agenticColumnsDict,
       ...getFieldColumns<CaseUI>({
         templatesEnabled,
         globalInlineFields,
@@ -374,7 +478,14 @@ export const useCasesColumns = ({
         userProfiles,
       }),
     }),
-    [columnsDict, customFields, templatesEnabled, globalInlineFields, userProfiles]
+    [
+      columnsDict,
+      agenticColumnsDict,
+      customFields,
+      templatesEnabled,
+      globalInlineFields,
+      userProfiles,
+    ]
   );
 
   const columns: CasesColumns[] = [];

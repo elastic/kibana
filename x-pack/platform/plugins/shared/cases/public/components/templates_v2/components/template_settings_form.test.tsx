@@ -34,6 +34,11 @@ jest.mock('../../../common/use_cases_features', () => ({
   useCasesFeatures: () => mockUseCasesFeatures(),
 }));
 
+const mockUseIsExternalSyncEnabled = jest.fn(() => false);
+jest.mock('../../../common/use_is_external_sync_enabled', () => ({
+  useIsExternalSyncEnabled: () => mockUseIsExternalSyncEnabled(),
+}));
+
 describe('TemplateSettingsForm', () => {
   const base = {
     onSettingsChange: jest.fn(),
@@ -43,6 +48,7 @@ describe('TemplateSettingsForm', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockConnectorFormMounts.count = 0;
+    mockUseIsExternalSyncEnabled.mockReturnValue(false);
     mockUseCasesFeatures.mockReturnValue({
       isSyncAlertsEnabled: true,
       observablesAuthorized: true,
@@ -158,5 +164,56 @@ describe('TemplateSettingsForm', () => {
       screen.queryByTestId('templateSettingsExtractObservablesSwitch')
     ).not.toBeInTheDocument();
     expect(screen.getByTestId('templateSettingsSyncAlertsSwitch')).toBeInTheDocument();
+  });
+
+  it('hides the sync defaults when external sync is unavailable', () => {
+    render(<TemplateSettingsForm {...base} settings={{ syncAlerts: true }} />);
+
+    expect(screen.queryByTestId('connector-sync-settings')).not.toBeInTheDocument();
+  });
+
+  it('shows the sync defaults with a technical preview badge and reports changes', async () => {
+    mockUseIsExternalSyncEnabled.mockReturnValue(true);
+    const user = userEvent.setup();
+    const onSettingsChange = jest.fn();
+    render(
+      <TemplateSettingsForm
+        {...base}
+        onSettingsChange={onSettingsChange}
+        settings={{ syncAlerts: true, extractObservables: false }}
+      />
+    );
+
+    expect(screen.getByTestId('templateSettingsSyncTechPreviewBadge')).toBeInTheDocument();
+
+    await user.click(screen.getByTestId('connector-auto-push-switch'));
+
+    expect(onSettingsChange).toHaveBeenCalledWith({
+      syncAlerts: true,
+      extractObservables: false,
+      externalSync: { autoPush: true, conflictStrategy: 'external' },
+    });
+  });
+
+  it('keeps the sync defaults when another setting toggles', async () => {
+    mockUseIsExternalSyncEnabled.mockReturnValue(true);
+    const user = userEvent.setup();
+    const onSettingsChange = jest.fn();
+    const externalSync = { autoPush: true, conflictStrategy: 'kibana' as const };
+    render(
+      <TemplateSettingsForm
+        {...base}
+        onSettingsChange={onSettingsChange}
+        settings={{ syncAlerts: false, externalSync }}
+      />
+    );
+
+    await user.click(screen.getByTestId('templateSettingsSyncAlertsSwitch'));
+
+    expect(onSettingsChange).toHaveBeenCalledWith({
+      syncAlerts: true,
+      extractObservables: false,
+      externalSync,
+    });
   });
 });

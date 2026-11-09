@@ -11,6 +11,7 @@ import type { CasesClient } from '../client';
 import type { UnifiedAttachmentTypeRegistry } from '../attachment_framework/unified_attachment_registry';
 
 import { casesStepRegistry } from './registry';
+import { syncCaseStepDefinition } from './steps/sync_case';
 import { createCaseFromTemplateStepDefinition } from './steps/create_case_from_template';
 import { setExtendedFieldsStepDefinition } from './steps/set_extended_fields';
 
@@ -25,13 +26,16 @@ export function registerCaseWorkflowSteps(
    * `cases.addAttachments` loader so the discriminated union sees
    * solution-contributed attachment types.
    */
-  waitForStartServices: () => Promise<unknown>
+  waitForStartServices: () => Promise<unknown>,
+  isBidirectionalSyncEnabled: boolean = false
 ) {
   if (!workflowsExtensions) {
     return;
   }
 
   for (const factory of casesStepRegistry) {
+    // `cases.syncCase` pulls from the external incident; it exists only with sync on.
+    if (factory === syncCaseStepDefinition && !isBidirectionalSyncEnabled) continue;
     workflowsExtensions.registerStepDefinition(factory(getCasesClient));
   }
 

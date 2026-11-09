@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import type {
+  SavedObjectModelDataBackfillFn,
+  SavedObjectsModelDataBackfillChange,
+} from '@kbn/core-saved-objects-server';
 import {
   modelVersion1,
   modelVersion2,
@@ -16,6 +20,13 @@ import {
   modelVersion8,
   modelVersion9,
   modelVersion11,
+  modelVersion12,
+  modelVersion13,
+  modelVersion14,
+  modelVersion15,
+  modelVersion16,
+  modelVersion17,
+  modelVersion18,
 } from '.';
 
 describe('Model versions', () => {
@@ -273,6 +284,165 @@ describe('Model versions', () => {
           },
         ]
       `);
+    });
+  });
+
+  describe('version 12', () => {
+    it('returns version 12 changes correctly', () => {
+      expect(modelVersion12.changes).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "addedMappings": Object {
+              "status_key": Object {
+                "type": "keyword",
+              },
+            },
+            "type": "mappings_addition",
+          },
+        ]
+      `);
+    });
+  });
+
+  describe('version 13', () => {
+    it('returns version 13 changes correctly', () => {
+      expect(modelVersion13.changes).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "addedMappings": Object {
+              "pause_reason": Object {
+                "type": "keyword",
+              },
+              "paused_at": Object {
+                "type": "date",
+              },
+              "resume_to_status_key": Object {
+                "type": "keyword",
+              },
+              "time_paused": Object {
+                "type": "long",
+              },
+            },
+            "type": "mappings_addition",
+          },
+        ]
+      `);
+    });
+  });
+
+  describe('version 14', () => {
+    it('returns version 14 changes correctly', () => {
+      expect(modelVersion14.changes).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "addedMappings": Object {
+              "access": Object {
+                "properties": Object {
+                  "mode": Object {
+                    "type": "keyword",
+                  },
+                },
+              },
+            },
+            "type": "mappings_addition",
+          },
+          Object {
+            "backfillFn": [Function],
+            "type": "data_backfill",
+          },
+        ]
+      `);
+    });
+
+    it('backfills access.mode to default', () => {
+      const backfill = modelVersion14.changes.find(
+        (change): change is SavedObjectsModelDataBackfillChange => change.type === 'data_backfill'
+      );
+      const backfillFn = backfill?.backfillFn as SavedObjectModelDataBackfillFn;
+      const doc = { id: 'case-1', type: 'cases', attributes: {} } as Parameters<
+        typeof backfillFn
+      >[0];
+      const context = {} as Parameters<typeof backfillFn>[1];
+
+      expect(backfillFn(doc, context)).toEqual({ attributes: { access: { mode: 'default' } } });
+    });
+
+    it('leaves a case that already has an access mode alone', () => {
+      const backfill = modelVersion14.changes.find(
+        (change): change is SavedObjectsModelDataBackfillChange => change.type === 'data_backfill'
+      );
+      const backfillFn = backfill?.backfillFn as SavedObjectModelDataBackfillFn;
+      const doc = {
+        id: 'case-1',
+        type: 'cases',
+        attributes: { access: { mode: 'restricted' } },
+      } as Parameters<typeof backfillFn>[0];
+      const context = {} as Parameters<typeof backfillFn>[1];
+
+      expect(backfillFn(doc, context)).toEqual({ attributes: {} });
+    });
+  });
+
+  describe('version 15', () => {
+    it('returns version 15 changes correctly', () => {
+      expect(modelVersion15.changes).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "addedMappings": Object {
+              "settings": Object {
+                "properties": Object {
+                  "externalSync": Object {
+                    "properties": Object {
+                      "autoPush": Object {
+                        "type": "boolean",
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            "type": "mappings_addition",
+          },
+        ]
+      `);
+    });
+  });
+
+  describe('version 16', () => {
+    it('maps the outcome fields and the source, with no backfill', () => {
+      expect(modelVersion16.changes).toEqual([
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            close_reason: { type: 'keyword' },
+            human_verdict: { type: 'keyword' },
+            source: { type: 'keyword' },
+            ai_verdict: { properties: { verdict: { type: 'keyword' } } },
+          },
+        },
+      ]);
+    });
+  });
+
+  describe('version 17', () => {
+    it('maps the room conversation id, with no backfill', () => {
+      expect(modelVersion17.changes).toEqual([
+        {
+          type: 'mappings_addition',
+          addedMappings: { room_conversation_id: { type: 'keyword' } },
+        },
+      ]);
+    });
+  });
+
+  describe('version 18', () => {
+    it('maps the pending decisions counter, with no backfill', () => {
+      expect(modelVersion18.changes).toEqual([
+        {
+          type: 'mappings_addition',
+          addedMappings: { pending_decisions: { type: 'integer' } },
+        },
+      ]);
     });
   });
 });

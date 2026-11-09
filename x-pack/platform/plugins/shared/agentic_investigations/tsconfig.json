@@ -32,6 +32,7 @@
     "@kbn/core-http-server-mocks",
     "@kbn/zod-helpers",
     "@kbn/agent-builder-common",
+    "@kbn/cases-plugin",
     "@kbn/agent-builder-plugin",
     "@kbn/agent-builder-server",
     "@kbn/es-query",

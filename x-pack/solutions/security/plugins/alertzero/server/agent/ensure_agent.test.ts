@@ -16,6 +16,7 @@ import {
   ALERTZERO_THIN_AGENT_NAME,
   ALERTZERO_THIN_AGENT_TYPE_ID,
   agentType,
+  getAgentType,
   registerAgentType,
 } from './agent';
 import { ensureAgent } from './ensure_agent';
@@ -58,6 +59,15 @@ describe('thin agent', () => {
         enable_elastic_capabilities: false,
       },
     });
+  });
+
+  it('reads prior case outcomes before deciding, only with the Cases bridge on', () => {
+    expect(getAgentType({ casesOutcomes: true }).baseConfiguration).toMatchObject({
+      ai_indices: ['cases-outcomes'],
+      instructions: expect.stringContaining('query prior case outcomes'),
+    });
+    expect(getAgentType({ casesOutcomes: false })).toBe(agentType);
+    expect(agentType.baseConfiguration).not.toHaveProperty('ai_indices');
   });
 });
 

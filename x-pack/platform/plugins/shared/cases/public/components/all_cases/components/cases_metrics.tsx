@@ -19,7 +19,12 @@ import {
 import prettyMilliseconds from 'pretty-ms';
 import { CaseStatuses } from '../../../../common/types/domain';
 import { StatusStats } from '../../status/status_stats';
-import { ATTC_DESCRIPTION, ATTC_STAT, ATTC_STAT_INFO_ARIA_LABEL } from '../translations';
+import {
+  ATTC_DESCRIPTION,
+  ATTC_STAT,
+  ATTC_STAT_INFO_ARIA_LABEL,
+  PAUSED_CASES_STAT,
+} from '../translations';
 
 const PRETTY_MS_OPTIONS = { compact: true, verbose: false } as const;
 const MTTR_MULTIPLIER = 1000;
@@ -32,6 +37,8 @@ export interface CasesMetricsProps {
   countOpenCases: number;
   countInProgressCases: number;
   countClosedCases: number;
+  /** Present only when a status that pauses time tracking is configured */
+  countPausedCases?: number;
   mttr: number | null | undefined;
   isLoading: boolean;
 }
@@ -40,6 +47,7 @@ const CasesMetricsComponent: React.FC<CasesMetricsProps> = ({
   countOpenCases,
   countInProgressCases,
   countClosedCases,
+  countPausedCases,
   mttr,
   isLoading,
 }) => {
@@ -84,6 +92,23 @@ const CasesMetricsComponent: React.FC<CasesMetricsProps> = ({
             isLoading={isLoading}
           />
         </EuiFlexItem>
+        {countPausedCases !== undefined && (
+          <EuiFlexItem grow={true}>
+            <EuiStat
+              data-test-subj="pausedStatsHeader"
+              description={PAUSED_CASES_STAT}
+              title={
+                isLoading ? (
+                  <EuiLoadingSpinner data-test-subj="pausedStatsHeader-loading-spinner" />
+                ) : (
+                  countPausedCases
+                )
+              }
+              titleSize="xs"
+              text-align="left"
+            />
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={true}>
           <EuiStat
             data-test-subj={'mttrStatsHeader'}

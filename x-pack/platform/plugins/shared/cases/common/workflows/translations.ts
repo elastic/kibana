@@ -231,7 +231,7 @@ export const SET_STATUS_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   'xpack.cases.workflowSteps.setStatus.documentation.details',
   {
     defaultMessage:
-      'This step sets only the status field of an existing case. If version is not specified, the latest case version is resolved automatically.',
+      'This step sets only the status of an existing case, by category (`status`) or by configured status key (`status_key`). A status that pauses time tracking needs a `pause_reason` from Case settings. If version is not specified, the latest case version is resolved automatically.',
   }
 );
 
@@ -578,6 +578,25 @@ export const CASE_STATUS_UPDATED_TRIGGER_EVENT_SCHEMA_PREVIOUS_STATUS_DESCRIPTIO
   }
 );
 
+export const CASE_STATUS_UPDATED_TRIGGER_EVENT_SCHEMA_STATUS_KEY_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowTriggers.caseStatusUpdated.eventSchema.statusKey',
+  {
+    defaultMessage: 'The key of the configured status the case moved to.',
+  }
+);
+
+export const CASE_STATUS_UPDATED_TRIGGER_EVENT_SCHEMA_PREVIOUS_STATUS_KEY_DESCRIPTION =
+  i18n.translate('xpack.cases.workflowTriggers.caseStatusUpdated.eventSchema.previousStatusKey', {
+    defaultMessage: 'The key of the configured status the case moved from.',
+  });
+
+export const CASE_STATUS_UPDATED_TRIGGER_EVENT_SCHEMA_PAUSED_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowTriggers.caseStatusUpdated.eventSchema.paused',
+  {
+    defaultMessage: 'Whether the new status pauses time tracking for the case.',
+  }
+);
+
 export const ATTACHMENTS_ADDED_TRIGGER_EVENT_SCHEMA_IDS_DESCRIPTION = i18n.translate(
   'xpack.cases.workflowTriggers.attachmentsAdded.eventSchema.ids',
   {
@@ -873,5 +892,46 @@ export const PUSH_CASE_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   {
     defaultMessage:
       'This step pushes a case or multiple cases to their external connector. If no connector is configured on a case, the step will fail. The step returns the updated case objects after the push.',
+  }
+);
+
+export const SYNC_CASE_STEP_LABEL = i18n.translate('xpack.cases.workflowSteps.syncCase.label', {
+  defaultMessage: 'Cases - Sync case from external incident',
+});
+
+export const SYNC_CASE_STEP_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowSteps.syncCase.description',
+  {
+    defaultMessage:
+      'Applies the external incident to the case it was pushed to. Technical preview.',
+  }
+);
+
+export const SYNC_CASE_STEP_DOCUMENTATION_DETAILS = i18n.translate(
+  'xpack.cases.workflowSteps.syncCase.documentation.details',
+  {
+    defaultMessage:
+      'This step reads the external incident linked to a case and applies its changes (title, description, status, tags, comments and mapped fields) according to the connector sync rules. Identify the case by its id, or by the external incident id (and connector id) carried by the external system webhook. The step returns the updated cases. Cases that were never pushed are skipped.',
+  }
+);
+
+export const GET_CASE_OUTCOME_STEP_LABEL = i18n.translate(
+  'xpack.cases.workflowSteps.getCaseOutcome.label',
+  { defaultMessage: 'Cases - Get case outcome' }
+);
+
+export const GET_CASE_OUTCOME_STEP_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowSteps.getCaseOutcome.description',
+  {
+    defaultMessage:
+      'Builds the knowledge item for a closed case: its close reason, verdicts, closing notes, rules, and observables. Returns publish: false when the case is restricted, still open, or in a space that turned publishing off.',
+  }
+);
+
+export const GET_CASE_OUTCOME_STEP_DOCUMENTATION_DETAILS = i18n.translate(
+  'xpack.cases.workflowSteps.getCaseOutcome.documentation.details',
+  {
+    defaultMessage:
+      'Returns publish (true or false), retract (true when a published outcome should be removed, such as after a reopen), ki_id (one per case), and, when publish is true, ki: a knowledge item ready for the context-engine.createKi step. Restricted cases are never published. Only the comment the closer wrote just before closing is included, as the closing notes.',
   }
 );

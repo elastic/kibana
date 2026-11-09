@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { hasOpenRequiredTasks } from './required_tasks';
 import { nodeBuilder } from '@kbn/es-query';
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
@@ -34,12 +35,19 @@ import {
   SECURITY_ATTACK_ATTACHMENT_TYPE,
 } from '../../../common/constants';
 import { UNIFIED_ALERT_TYPES_ARRAY } from '../../../common/utils/attachments';
+import {
+  pushesToExternal,
+  resolveExternalSyncFieldRules,
+} from '../../../common/utils/external_sync_fields';
 
 import {
   createIncident,
+  getConfiguredStatuses,
   getDurationInSeconds,
+  getPauseFieldsForUpdate,
   getTimingMetricsForUpdate,
   getUserProfiles,
+  resolveStatusForUpdate,
 } from './utils';
 import { createCaseError } from '../../common/error';
 import {
@@ -52,6 +60,7 @@ import type { CasesClient, CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import { casesConnectors } from '../../connectors';
 import { getAlerts } from '../alerts/get';
+import { getConnectorSyncSettings } from '../configure/get_connector_sync_settings';
 import { buildFilter, combineFilters, NodeBuilderOperators } from '../utils';
 import { decodeOrThrowZod } from '../../common/runtime_types';
 import type { ExternalServiceResponse } from '../../../common/types/api';
@@ -178,9 +187,21 @@ export const push = async (
       operation: Operations.pushCase,
     });
 
+    const ownerFilter = buildFilter({
+      filters: theCase.owner,
+      field: OWNER_FIELD,
+      operator: 'or',
+      type: Operations.findConfigurations.savedObjectType,
+    });
+
     const alertsInfo = getAlertInfoFromComments(theCase?.comments);
-    const alerts = await getAlerts(alertsInfo, clientArgs);
-    const profiles = await getProfiles(theCase, securityStartPlugin);
+    const [alerts, profiles, myCaseConfigure, connectorSync] = await Promise.all([
+      getAlerts(alertsInfo, clientArgs),
+      getProfiles(theCase, securityStartPlugin),
+      caseConfigureService.find({ unsecuredSavedObjectsClient, options: { filter: ownerFilter } }),
+      getConnectorSyncSettings({ connectorId }, clientArgs),
+    ]);
+    const fieldRules = resolveExternalSyncFieldRules(connectorSync.externalSyncFields);
 
     const externalServiceIncident = await createIncident({
       theCase,
@@ -191,6 +212,8 @@ export const push = async (
       userProfiles: profiles,
       spaceId,
       publicBaseUrl,
+      fieldRules,
+      fieldMappings: connectorSync.externalSyncFieldMappings,
     });
 
     const pushRes = await actionsClient.execute({
@@ -217,19 +240,11 @@ export const push = async (
 
     /* End of push to external service */
 
-    const ownerFilter = buildFilter({
-      filters: theCase.owner,
-      field: OWNER_FIELD,
-      operator: 'or',
-      type: Operations.findConfigurations.savedObjectType,
-    });
-
     /* Start of update case with push information */
-    const [myCase, myCaseConfigure, comments] = await Promise.all([
+    const [myCase, comments] = await Promise.all([
       caseService.getCase({
         id: caseId,
       }),
-      caseConfigureService.find({ unsecuredSavedObjectsClient, options: { filter: ownerFilter } }),
       caseService.getAllCaseComments({
         id: caseId,
         options: {
@@ -253,24 +268,51 @@ export const push = async (
       external_url: externalServiceResponse.url,
     };
 
-    const shouldMarkAsClosed = shouldCloseByPush(myCaseConfigure);
+    // A push is never refused for open required tasks (the incident already exists by now); the
+    // case just stays open until they are done.
+    const shouldMarkAsClosed =
+      shouldCloseByPush(myCaseConfigure) &&
+      !(await hasOpenRequiredTasks({ caseId: theCase.id, clientArgs }));
+    const customStatusesEnabled = clientArgs.config.customStatuses.enabled;
+    const statuses = getConfiguredStatuses({
+      configuration: myCaseConfigure.saved_objects[0]?.attributes,
+      customStatusesEnabled,
+    });
+    const closedStatus = shouldMarkAsClosed
+      ? resolveStatusForUpdate({ status: CaseStatuses.closed, statuses, customStatusesEnabled })
+      : undefined;
+    // Closing ends any running pause so the closing metrics leave the paused time out.
+    const pauseFields = shouldMarkAsClosed
+      ? getPauseFieldsForUpdate({
+          originalCase: theCase,
+          targetStatusKey: closedStatus?.status_key,
+          targetCategory: CaseStatuses.closed,
+          statuses,
+          pauseReasons: myCaseConfigure.saved_objects[0]?.attributes.pauseReasons ?? [],
+          customStatusesEnabled,
+          stateTransitionTimestamp: pushedDate,
+        })
+      : undefined;
+    const timePaused = pauseFields?.time_paused ?? theCase.time_paused ?? 0;
 
     const [updatedCase, updatedComments] = await Promise.all([
       caseService.patchCase({
         originalCase: myCase,
         caseId,
         updatedAttributes: {
-          ...(shouldMarkAsClosed
+          ...(closedStatus
             ? {
-                status: CaseStatuses.closed,
+                ...closedStatus,
                 closed_at: pushedDate,
                 closed_by: { email, full_name, username, profile_uid },
               }
             : {}),
+          ...pauseFields,
           ...(shouldMarkAsClosed
             ? getDurationInSeconds({
                 closedAt: pushedDate,
                 createdAt: theCase.created_at,
+                timePaused,
               })
             : {}),
           ...(shouldMarkAsClosed
@@ -279,6 +321,7 @@ export const push = async (
                 stateTransitionTimestamp: pushedDate,
                 createdAt: theCase.created_at,
                 inProgressAt: theCase.in_progress_at,
+                timePaused,
               })
             : {}),
           external_service: externalService,
@@ -290,7 +333,8 @@ export const push = async (
       }),
 
       attachmentService.bulkUpdate({
-        comments: comments.saved_objects
+        // Comments that were not sent must not be marked as pushed.
+        comments: (pushesToExternal(fieldRules.comments.direction) ? comments.saved_objects : [])
           .filter((comment) => comment.attributes.pushed_at == null)
           .map((comment) => ({
             savedObjectId: comment.id,
@@ -305,11 +349,11 @@ export const push = async (
       }),
     ]);
 
-    if (shouldMarkAsClosed) {
+    if (closedStatus) {
       await userActionService.creator.createUserAction({
         userAction: {
           type: UserActionTypes.status,
-          payload: { status: CaseStatuses.closed },
+          payload: closedStatus,
           user,
           caseId,
           owner: myCase.attributes.owner,

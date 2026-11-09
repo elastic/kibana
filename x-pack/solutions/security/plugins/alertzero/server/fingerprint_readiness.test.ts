@@ -25,6 +25,7 @@ jest.mock('./managed_workflows/initialize_managed_workflows', () => ({
 
 jest.mock('./agent', () => ({
   agentType: { id: 'mock-alertzero-type', baseConfiguration: {} },
+  getAgentType: () => ({ id: 'mock-alertzero-type', baseConfiguration: {} }),
   ensureAgentSafe: jest.fn().mockResolvedValue(undefined),
   registerAgentType: jest.fn(),
 }));

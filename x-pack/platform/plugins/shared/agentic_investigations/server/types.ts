@@ -9,10 +9,11 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { CasesServerSetup, CasesServerStart } from '@kbn/cases-plugin/server';
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { AgentBuilderPlatformPluginSetup } from '@kbn/agent-builder-platform-plugin/server';
 import type { EntityStoreStartContract } from '@kbn/entity-store/server';
-import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
+import type { ProposalsPluginSetup, ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { ImpactReadClient } from './impact/services/impact_client';
@@ -44,6 +45,10 @@ export interface AgenticInvestigationsSetupDependencies {
    * progress. Without it no investigation is in progress.
    */
   workflowsManagement?: WorkflowsServerPluginSetup;
+  /** Registers the investigation link attachment type, when the cases bridge is on. */
+  cases?: CasesServerSetup;
+  /** Ties new proposals to their investigation's case (Phase 5, behind its setting). */
+  proposals?: ProposalsPluginSetup;
 }
 
 export interface AgenticInvestigationsStartDependencies {
@@ -61,6 +66,8 @@ export interface AgenticInvestigationsStartDependencies {
    */
   entityStore?: EntityStoreStartContract;
   agentBuilder: AgentBuilderPluginStart;
+  /** Opens and links cases, and follows case changes, when the cases bridge is on. */
+  cases?: CasesServerStart;
 }
 
 /**
@@ -69,6 +76,8 @@ export interface AgenticInvestigationsStartDependencies {
  * per entity this plugin owns.
  */
 export interface AgenticInvestigationsPluginStart {
+  /** True when "Open a case" replaces escalations (`xpack.agenticInvestigations.cases.enabled`). */
+  isCasesBridgeEnabled: () => boolean;
   /**
    * Request-scoped impact reads. Reads accept the investigations read or manage
    * privilege, and the space comes from the request, because in-process callers
@@ -84,8 +93,9 @@ export interface AgenticInvestigationsPluginStart {
   getSubjectsClient: (request: KibanaRequest) => SubjectsClient;
   /**
    * Request-scoped investigation reads (get, list, severity counts, open investigations by
-   * subject) and the maintenance delete. Reads check the investigations read or manage
-   * privilege; space comes from the request.
+   * subject), the maintenance delete, and the one writer of new investigations (`create`,
+   * `patchMetadata`). Reads check the investigations read or manage privilege; writes are
+   * authorized by Agent Builder, as its conversation steps are. Space comes from the request.
    */
   getInvestigationsClient: (request: KibanaRequest) => InvestigationsClient;
   /**
@@ -104,4 +114,7 @@ export interface AgenticInvestigationsPluginStart {
   getFindingsWriter: (request: KibanaRequest) => FindingsWriter;
 }
 
-export type AgenticInvestigationsPluginSetup = Record<string, never>;
+export interface AgenticInvestigationsPluginSetup {
+  /** True when "Open a case" replaces escalations (`xpack.agenticInvestigations.cases.enabled`). */
+  isCasesBridgeEnabled: () => boolean;
+}

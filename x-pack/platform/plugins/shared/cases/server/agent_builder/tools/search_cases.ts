@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition, ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -32,6 +32,8 @@ import {
   injectAttachmentIds,
   toCaseAttachmentData,
 } from '../attachments/emit_attachments';
+import { LINKED_INVESTIGATION_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
+import { getEffectiveStatuses } from '../../../common/utils/statuses';
 import { CASES_SOLUTION_CONTEXT_INSTRUCTION } from '../utils/tool_instructions';
 
 const emitSearchAttachments = async (
@@ -55,36 +57,64 @@ const emitSearchAttachments = async (
 // array must stay bounded to avoid resource exhaustion.
 const MAX_ALERT_IDS = 100;
 
-const casesSchema = z.object({
-  mode: z
-    .enum(['get', 'bulk_get', 'similar', 'by_alert', 'search'])
-    .describe(
-      'Required fields per mode:\n' +
-        '- get: case_id\n' +
-        '- bulk_get: case_ids (keep ≤10)\n' +
-        '- similar: similar_to_case_id (+ optional page, perPage)\n' +
-        `- by_alert: alert_ids (max ${MAX_ALERT_IDS}) (+ optional owner)\n` +
-        '- search: owner (required) + optional search, severity, status, tags, assignees, reporters, category, from, to, searchFields, sortField, sortOrder, page, perPage'
-    ),
-  ...getCaseStepCommonDefinition.inputSchema.omit({ include_comments: true }).partial().shape,
-  ...getCasesStepCommonDefinition.inputSchema.partial().shape,
-  ...findCasesStepCommonDefinition.inputSchema.partial().shape,
-  // Custom fields not in any step schema:
-  similar_to_case_id: z
-    .string()
+const BASE_SEARCH_MODES = ['get', 'bulk_get', 'similar', 'by_alert', 'search'] as const;
+/** Modes for agentic cases (`xpack.cases.agentic.enabled`); absent otherwise, as on main. */
+const AGENTIC_SEARCH_MODES = ['status', 'related', 'sync_state'] as const;
+type SearchMode = (typeof BASE_SEARCH_MODES)[number] | (typeof AGENTIC_SEARCH_MODES)[number];
+
+const AGENTIC_SEARCH_MODE_DESCRIPTION =
+  "- status: case_id. The case's status, its category (open, in progress, closed), whether time tracking is paused and for how long, and the statuses it can move to.\n" +
+  "- related: case_id. The case's Related list: linked cases, cases that share its alerts or observables, and linked investigations.\n" +
+  "- sync_state: case_id. The case's external incident: connector, incident, when it last synced, and the sync settings.\n";
+
+const STATUS_KEY_FIELD = {
+  status_key: z
+    .union([z.string(), z.array(z.string()).max(30)])
     .optional()
-    .describe(
-      'Find cases similar to this case ID based on shared observables. Required for similar mode.'
-    ),
-  alert_ids: z
-    .array(z.string().min(1))
-    .max(MAX_ALERT_IDS)
-    .optional()
-    .describe(
-      `Array of alert IDs to find cases containing these alerts (max ${MAX_ALERT_IDS}). Required for by_alert mode.`
-    ),
-  // owner, assignees, from, to, search: descriptions inherited from step schemas
-});
+    .describe('search mode: filter by configured status key (for example awaiting_analyst).'),
+};
+
+const buildCasesSchema = (isAgenticEnabled: boolean) =>
+  z.object({
+    mode: z
+      .enum([...BASE_SEARCH_MODES, ...(isAgenticEnabled ? AGENTIC_SEARCH_MODES : [])] as [
+        SearchMode,
+        ...SearchMode[]
+      ])
+      .describe(
+        `Required fields per mode:\n` +
+          `- get: case_id\n${
+            isAgenticEnabled ? AGENTIC_SEARCH_MODE_DESCRIPTION : ''
+          }- bulk_get: case_ids (keep ≤10)\n` +
+          `- similar: similar_to_case_id (+ optional page, perPage)\n` +
+          `- by_alert: alert_ids (max ${MAX_ALERT_IDS}) (+ optional owner)\n` +
+          `- search: owner (required) + optional search, severity, status, ${
+            isAgenticEnabled ? 'status_key, ' : ''
+          }tags, assignees, reporters, category, from, to, searchFields, sortField, sortOrder, page, perPage`
+      ),
+    // Present at runtime only with agentic cases on, so main's schema is unchanged when off.
+    ...((isAgenticEnabled ? STATUS_KEY_FIELD : {}) as typeof STATUS_KEY_FIELD),
+    ...getCaseStepCommonDefinition.inputSchema.omit({ include_comments: true }).partial().shape,
+    ...getCasesStepCommonDefinition.inputSchema.partial().shape,
+    ...findCasesStepCommonDefinition.inputSchema.partial().shape,
+    // Custom fields not in any step schema:
+    similar_to_case_id: z
+      .string()
+      .optional()
+      .describe(
+        'Find cases similar to this case ID based on shared observables. Required for similar mode.'
+      ),
+    alert_ids: z
+      .array(z.string().min(1))
+      .max(MAX_ALERT_IDS)
+      .optional()
+      .describe(
+        `Array of alert IDs to find cases containing these alerts (max ${MAX_ALERT_IDS}). Required for by_alert mode.`
+      ),
+    // owner, assignees, from, to, search: descriptions inherited from step schemas
+  });
+
+const casesSchema = lazySchema(() => buildCasesSchema(true));
 
 async function fetchCaseById(
   caseId: string,
@@ -149,9 +179,85 @@ function enhanceCases(
   return cases.map((theCase) => enhanceCaseData(theCase, request, coreServices, logger));
 }
 
+/**
+ * The details behind the status, related, and sync_state modes. Every read goes through the
+ * user's Cases client, so a restricted case they aren't assigned to is not found.
+ */
+export const readCaseDetail = async (
+  mode: 'status' | 'related' | 'sync_state',
+  caseId: string,
+  casesClient: CasesClient
+): Promise<Record<string, unknown>> => {
+  const theCase = await casesClient.cases.get({ id: caseId, includeComments: false });
+  if (mode === 'status') {
+    const [configuration] = await casesClient.configure.get({ owner: theCase.owner });
+    const statuses = getEffectiveStatuses(configuration?.statuses);
+    const current = statuses.find(({ key }) => key === theCase.status_key);
+    const pausedForSeconds = theCase.paused_at
+      ? Math.round((Date.now() - new Date(theCase.paused_at).getTime()) / 1000)
+      : null;
+    return {
+      case_id: theCase.id,
+      status: theCase.status,
+      status_key: theCase.status_key ?? theCase.status,
+      status_label: current?.label ?? theCase.status,
+      category: current?.category ?? theCase.status,
+      paused: theCase.paused_at != null,
+      paused_at: theCase.paused_at ?? null,
+      paused_for_seconds: pausedForSeconds,
+      pause_reason: theCase.pause_reason ?? null,
+      time_paused_seconds: theCase.time_paused ?? 0,
+      pause_reasons: configuration?.pauseReasons ?? [],
+      available_statuses: statuses
+        .filter((status) => !status.disabled)
+        .map(({ key, label, category, pausesTimeTracking }) => ({
+          key,
+          label,
+          category,
+          pauses: Boolean(pausesTimeTracking),
+        })),
+    };
+  }
+  if (mode === 'related') {
+    const related = await casesClient.cases.getRelatedCases(theCase.id);
+    const similar = await casesClient.cases.similar(theCase.id, { page: 1, perPage: 20 });
+    const investigations = await casesClient.attachments.find({
+      caseID: theCase.id,
+      findQueryParams: { type: LINKED_INVESTIGATION_ATTACHMENT_TYPE, perPage: 100 },
+    });
+    return {
+      case_id: theCase.id,
+      cases: related.cases,
+      similar_by_observable: similar.cases.map((c) => ({
+        id: c.id,
+        title: c.title,
+        status: c.status,
+        observables: c.similarities.observables.map(({ typeKey, value }) => ({ typeKey, value })),
+      })),
+      linked_investigations: investigations.data.flatMap((attachment) =>
+        'attachmentId' in attachment
+          ? [{ investigation_id: attachment.attachmentId, metadata: attachment.metadata ?? null }]
+          : []
+      ),
+      inaccessible_linked_cases: related.inaccessible_linked_count,
+    };
+  }
+  return {
+    case_id: theCase.id,
+    connector: {
+      id: theCase.connector.id,
+      name: theCase.connector.name,
+      type: theCase.connector.type,
+    },
+    external_incident: theCase.external_service ?? null,
+    sync_settings: theCase.settings?.externalSync ?? null,
+  };
+};
+
 export const searchCasesTool = (
   coreSetup: CoreSetup<CasesServerStartDependencies>,
-  getCasesClientFn: (request: KibanaRequest) => Promise<CasesClient>
+  getCasesClientFn: (request: KibanaRequest) => Promise<CasesClient>,
+  isAgenticEnabled = false
 ): BuiltinToolDefinition<typeof casesSchema> => {
   return {
     id: platformCoreTools.cases,
@@ -160,14 +266,18 @@ export const searchCasesTool = (
 
 ${CASES_SOLUTION_CONTEXT_INSTRUCTION}
 
-Modes: \`get\`, \`bulk_get\`, \`similar\`, \`by_alert\`, \`search\`. See \`mode\` field for required inputs.
+Modes: \`get\`, \`bulk_get\`, \`similar\`, \`by_alert\`, \`search\`${
+      isAgenticEnabled ? ', `status`, `related`, `sync_state`' : ''
+    }. See \`mode\` field for required inputs.
 
 \`owner\` is required for \`search\` (other modes use specific identifiers instead). Never call this tool multiple times with different \`owner\` values — that's always a bug.
 
 \`search\` mode returns one page; default \`perPage\` **10**, max **50**, paginate with \`page\` (1-indexed).
 
-Returns metadata only; for comments/alert/event attachments call \`platform.core.cases.get_attachments\`. Cases auto-render as structured attachments — emit \`<render_attachment id="..." />\` for each ID in \`attachment_ids\` and don't format markdown links to the case in your text.`,
-    schema: casesSchema,
+Returns metadata only; for comments/alert/event attachments call \`platform.core.cases.get_attachments\`. Cases auto-render as structured attachments — emit \`<render_attachment id="..." />\` for each ID in \`attachment_ids\` and don't format markdown links to the case in your text.
+
+Restricted cases (\`access.mode: "restricted"\`) are visible only to their assignees: they are omitted from results and a direct get returns not-found when the calling user is not an assignee.`,
+    schema: isAgenticEnabled ? casesSchema : (buildCasesSchema(false) as typeof casesSchema),
     annotations: {
       title: 'Search Cases',
       readOnlyHint: true,
@@ -197,6 +307,7 @@ Returns metadata only; for comments/alert/event attachments call \`platform.core
         category,
         page,
         perPage,
+        status_key: statusKey,
       },
       { request, spaceId, logger, attachments }
     ) => {
@@ -357,6 +468,7 @@ Returns metadata only; for comments/alert/event attachments call \`platform.core
               }),
               ...(severity && { severity: severity as CasesFindRequest['severity'] }),
               ...(status && { status: status as CasesFindRequest['status'] }),
+              ...(statusKey && { status_key: statusKey }),
               ...(tags && { tags }),
               ...(assignees && { assignees }),
               ...(reporters && { reporters }),
@@ -375,6 +487,23 @@ Returns metadata only; for comments/alert/event attachments call \`platform.core
                 ? `Showing page ${requestedPage} of ${totalPages} (${casesData.length} of ${findResult.total} matches). Pass \`page\` to fetch additional pages.`
                 : undefined;
             return injectAttachmentIds(createResult(casesData, message), searchAttachmentIds);
+          }
+
+          case 'status':
+          case 'related':
+          case 'sync_state': {
+            if (!case_id) {
+              return createErrorResponse(
+                new Error(`case_id is required for ${mode} mode`),
+                '[Cases Tool] Missing required field',
+                'Missing required field: case_id',
+                logger
+              );
+            }
+            return createResult(
+              [(await readCaseDetail(mode, case_id, casesClient)) as unknown as EnhancedCaseData],
+              undefined
+            );
           }
 
           default: {

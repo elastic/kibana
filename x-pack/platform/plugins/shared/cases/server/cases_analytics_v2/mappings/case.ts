@@ -94,7 +94,33 @@ export const CASE_INDEX_MAPPING: MappingTypeMapping = {
         // Human-readable strings, converted in the doc-builder from
         // the SO's numeric enums. See the file-level comment.
         status: { type: 'keyword' },
+        status_key: { type: 'keyword' },
+        paused_at: { type: 'date' },
+        time_paused: { type: 'long', meta: { unit: 's' } },
+        pause_reason: { type: 'keyword' },
+        resume_to_status_key: { type: 'keyword' },
         severity: { type: 'keyword' },
+        // Case outcome. `human_verdict` defaults from `close_reason` at close;
+        // `ai_verdict` is what an agent concluded. Agreement between the two is
+        // a dashboard question, so both are plain keywords here.
+        close_reason: { type: 'keyword' },
+        human_verdict: { type: 'keyword' },
+        source: { type: 'keyword' },
+        ai_verdict: {
+          properties: {
+            verdict: { type: 'keyword' },
+            confidence: { type: 'float' },
+            actor: {
+              properties: {
+                type: { type: 'keyword' },
+                id: { type: 'keyword' },
+                name: { type: 'keyword' },
+                run_id: { type: 'keyword' },
+              },
+            },
+            updated_at: { type: 'date' },
+          },
+        },
         // Object (not `nested`) — matches the SO. `nested` is only
         // needed when sub-fields must be queried independently per
         // element, which isn't a case-level use case.

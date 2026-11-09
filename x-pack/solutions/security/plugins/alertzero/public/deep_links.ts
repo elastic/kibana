@@ -22,9 +22,15 @@ import * as i18n from './components/app_chrome/translations';
  * capability are omitted when that capability is false. The escalations link requires
  * `capabilities.agenticInvestigations.showEscalations`.
  */
-export const getAlertZeroDeepLinks = (capabilities?: Capabilities): AppDeepLink[] => {
+export const getAlertZeroDeepLinks = (
+  capabilities?: Capabilities,
+  { casesBridgeEnabled = false }: { casesBridgeEnabled?: boolean } = {}
+): AppDeepLink[] => {
+  // Investigations open cases instead of escalations: the page is gone, and with it its nav entry
+  // (the nav tree drops a node whose deep link is missing).
   const showEscalations =
-    capabilities === undefined || capabilities.agenticInvestigations?.showEscalations !== false;
+    !casesBridgeEnabled &&
+    (capabilities === undefined || capabilities.agenticInvestigations?.showEscalations !== false);
 
   return [
     ...(showEscalations

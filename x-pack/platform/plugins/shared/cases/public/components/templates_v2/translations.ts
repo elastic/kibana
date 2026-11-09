@@ -1274,3 +1274,11 @@ export const REQUIRED_FIELD_NO_DEFAULT = (fieldName: string) =>
       '"{fieldName}" is required but has no default value, so it will be empty on cases created automatically (for example, from alert rules). Add metadata.default to guarantee a value.',
     values: { fieldName },
   });
+
+export const SHIPPED_BADGE = i18n.translate('xpack.cases.templates.shippedBadge', {
+  defaultMessage: 'Shipped',
+});
+
+export const SHIPPED_BADGE_TOOLTIP = i18n.translate('xpack.cases.templates.shippedBadgeTooltip', {
+  defaultMessage: 'Elastic ships this template. You can turn it off, but not delete it.',
+});

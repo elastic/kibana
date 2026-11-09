@@ -27,7 +27,7 @@ describe('CommentAttachmentPayloadSchema', () => {
     expect(result.success).toBe(true);
   });
 
-  it('rejects an unknown metadata field (strict payload)', () => {
+  it('rejects unknown metadata (strict payload)', () => {
     expect(
       CommentAttachmentPayloadSchema.safeParse({ ...validPayload, metadata: null }).success
     ).toBe(false);
@@ -37,6 +37,28 @@ describe('CommentAttachmentPayloadSchema', () => {
         metadata: { foo: 'bar' },
       }).success
     ).toBe(false);
+    expect(
+      CommentAttachmentPayloadSchema.safeParse({
+        ...validPayload,
+        metadata: { externalSync: { externalId: '1', connectorName: 'Jira', foo: 'bar' } },
+      }).success
+    ).toBe(false);
+  });
+
+  it('accepts the external sync attribution metadata', () => {
+    expect(
+      CommentAttachmentPayloadSchema.safeParse({
+        ...validPayload,
+        metadata: {
+          externalSync: {
+            externalId: '10001',
+            connectorName: 'Jira',
+            actor: { name: 'Jane Smith', email: 'jane@example.com' },
+            externalCreatedAt: '2026-10-01T10:00:00.000+0000',
+          },
+        },
+      }).success
+    ).toBe(true);
   });
 
   it('rejects content over the maximum length', () => {

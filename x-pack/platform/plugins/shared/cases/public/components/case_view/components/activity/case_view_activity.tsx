@@ -31,6 +31,8 @@ export const CaseViewActivity = ({ caseData }: { caseData: CaseUI }) => {
     isLoadingDescription,
     isStatusLoading,
     changeStatus,
+    resumeStatus,
+    onResume,
     handleUserActivityParamsChanged,
   } = useCaseViewActivity({ caseData });
 
@@ -98,6 +100,8 @@ export const CaseViewActivity = ({ caseData }: { caseData: CaseUI }) => {
                     syncAlertsEnabled={caseData.settings.syncAlerts}
                     onStatusChanged={changeStatus}
                     isLoading={isStatusLoading}
+                    resumeStatus={resumeStatus}
+                    onResume={onResume}
                   />
                 ) : null
               }

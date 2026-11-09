@@ -162,7 +162,7 @@ export class AlertZeroPublicPlugin
       .subscribe(this.availability$);
 
     const canRead = core.application.capabilities[ALERTZERO_FEATURE_ID]?.show === true;
-    const settingEnabled$ = core.uiSettings.get$<boolean>(ALERTZERO_ENABLED_SETTING_ID, false);
+    const settingEnabled$ = core.uiSettings.get$<boolean>(ALERTZERO_ENABLED_SETTING_ID, true);
     this.spaceSupportedSubscription = isSpaceSupported$({
       isServerless: this.isServerless,
       spaces: startDeps.spaces,
@@ -180,7 +180,11 @@ export class AlertZeroPublicPlugin
       this.appUpdater$.next(() => ({
         status: settingEnabled || !spaceSupported ? AppStatus.accessible : AppStatus.inaccessible,
         visibleIn: showNavigation ? ['projectSideNav', 'globalSearch'] : [],
-        deepLinks: showNavigation ? getAlertZeroDeepLinks(core.application.capabilities) : [],
+        deepLinks: showNavigation
+          ? getAlertZeroDeepLinks(core.application.capabilities, {
+              casesBridgeEnabled: startDeps.agenticInvestigations?.isCasesBridgeEnabled === true,
+            })
+          : [],
       }));
     });
 

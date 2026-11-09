@@ -6,7 +6,12 @@
  */
 
 import type { SavedObject } from '@kbn/core/server';
-import type { StatusUserAction, UserActionAttributes } from '../../../common/types/domain';
+import type {
+  CaseStatusesConfiguration,
+  StatusUserAction,
+  UserActionAttributes,
+} from '../../../common/types/domain';
+import { getEffectiveStatuses } from '../../../common/utils/statuses';
 import type {
   UserActionWithResponse,
   SingleCaseMetricsResponse,
@@ -52,7 +57,13 @@ export class Lifespan extends SingleCaseBaseHandler {
         filter: authorizationFilter,
       });
 
-      const statusInfo = getStatusInfo(statusUserActions, caseOpenTimestamp);
+      const pausingStatusKeys = this.options.clientArgs.config.customStatuses.enabled
+        ? getPausingStatusKeys(
+            (await casesClient.configure.get({ owner: caseInfo.owner }))[0]?.statuses
+          )
+        : new Set<string>();
+
+      const statusInfo = getStatusInfo(statusUserActions, caseOpenTimestamp, pausingStatusKeys);
 
       return {
         lifespan: {
@@ -75,17 +86,31 @@ function isDateValid(date: Date): boolean {
   return date.toString() !== 'Invalid Date' && !isNaN(date.getTime());
 }
 
+export const getPausingStatusKeys = (statuses?: CaseStatusesConfiguration): Set<string> =>
+  new Set(
+    getEffectiveStatuses(statuses)
+      .filter((status) => status.pausesTimeTracking)
+      .map((status) => status.key)
+  );
+
 interface StatusCalculations {
   durations: Map<CaseStatuses, number>;
+  /** Time spent in statuses that pause time tracking; a subset of the category durations */
+  pausedDuration: number;
   reopenDates: string[];
   lastStatus: CaseStatuses;
+  lastStatusKey: string | undefined;
   lastStatusChangeTimestamp: Date;
 }
 
 export function getStatusInfo(
   statusUserActions: Array<SavedObject<UserActionAttributes>>,
-  caseOpenTimestamp: Date
+  caseOpenTimestamp: Date,
+  pausingStatusKeys: Set<string> = new Set()
 ): StatusInfo {
+  const isPausing = (statusKey: string | undefined) =>
+    statusKey != null && pausingStatusKeys.has(statusKey);
+
   const accStatusInfo = statusUserActions.reduce<StatusCalculations>(
     (acc, userAction) => {
       const newStatusChangeTimestamp = new Date(userAction.attributes.created_at);
@@ -94,18 +119,17 @@ export function getStatusInfo(
         return acc;
       }
 
-      const { durations, lastStatus, lastStatusChangeTimestamp, reopenDates } = acc;
+      const { durations, lastStatus, lastStatusKey, lastStatusChangeTimestamp, reopenDates } = acc;
 
       const attributes = userAction.attributes;
       const newStatus = attributes.payload.status;
+      const additionalDuration = datesDiff(newStatusChangeTimestamp, lastStatusChangeTimestamp);
 
       return {
-        durations: updateStatusDuration({
-          durations,
-          status: lastStatus,
-          additionalDuration: datesDiff(newStatusChangeTimestamp, lastStatusChangeTimestamp),
-        }),
+        durations: updateStatusDuration({ durations, status: lastStatus, additionalDuration }),
+        pausedDuration: acc.pausedDuration + (isPausing(lastStatusKey) ? additionalDuration : 0),
         lastStatus: newStatus,
+        lastStatusKey: attributes.payload.status_key,
         lastStatusChangeTimestamp: newStatusChangeTimestamp,
         reopenDates: isReopen(newStatus, lastStatus)
           ? [...reopenDates, newStatusChangeTimestamp.toISOString()]
@@ -117,22 +141,27 @@ export function getStatusInfo(
         [CaseStatuses.open, 0],
         [CaseStatuses['in-progress'], 0],
       ]),
+      pausedDuration: 0,
       reopenDates: [],
       lastStatus: CaseStatuses.open,
+      lastStatusKey: undefined,
       lastStatusChangeTimestamp: caseOpenTimestamp,
     }
   );
 
   // add in the duration from the current time to the duration of the last known status of the case
+  const sinceLastChange = datesDiff(new Date(), accStatusInfo.lastStatusChangeTimestamp);
   const accumulatedDurations = updateStatusDuration({
     durations: accStatusInfo.durations,
     status: accStatusInfo.lastStatus,
-    additionalDuration: datesDiff(new Date(), accStatusInfo.lastStatusChangeTimestamp),
+    additionalDuration: sinceLastChange,
   });
 
   return {
     openDuration: accumulatedDurations.get(CaseStatuses.open) ?? 0,
     inProgressDuration: accumulatedDurations.get(CaseStatuses['in-progress']) ?? 0,
+    pausedDuration:
+      accStatusInfo.pausedDuration + (isPausing(accStatusInfo.lastStatusKey) ? sinceLastChange : 0),
     reopenDates: accStatusInfo.reopenDates,
   };
 }

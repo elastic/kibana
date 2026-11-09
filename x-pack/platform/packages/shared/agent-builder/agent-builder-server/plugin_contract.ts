@@ -270,8 +270,13 @@ export interface ConversationsSetup {
 export interface ConversationsStart {
   /**
    * Returns a conversation client scoped to the given request's user and space.
+   * `source` is what its writes record on `ai.conversation.updated` (default `server_api`); a
+   * workflow step that writes through another plugin's client passes `workflow`.
    */
-  getScopedClient(opts: { request: KibanaRequest }): Promise<ConversationPublicClient>;
+  getScopedClient(opts: {
+    request: KibanaRequest;
+    source?: 'server_api' | 'workflow';
+  }): Promise<ConversationPublicClient>;
 }
 
 /** AgentBuilder callbacks setup contract. */

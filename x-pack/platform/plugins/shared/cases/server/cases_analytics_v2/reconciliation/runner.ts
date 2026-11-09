@@ -9,6 +9,7 @@ import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, SavedObjectsClientContract, SavedObjectsFindResult } from '@kbn/core/server';
 import { fromKueryExpression, nodeBuilder } from '@kbn/es-query';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
+import { CaseAccessMode } from '../../../common/types/domain';
 import type { CasePersistedAttributes } from '../../common/types/case';
 import type { CasesAnalyticsV2WriterContract } from '../writer';
 import {
@@ -227,7 +228,18 @@ export async function runReconciliation({
       // per-item failures (e.g. mapper errors) are logged inside the
       // writer but do not throw; those cases can't be repaired by
       // reconciliation and rely on the case's next update to retry.
+      // The writer skips restricted cases internally.
       await writer.bulkUpsertCasesAwait(page.saved_objects);
+
+      // Restricted cases must not have an analytics doc at all. The write
+      // hooks delete it when a case is restricted; this covers hooks that
+      // were dropped (fire-and-forget deletes exhaust their retry budget).
+      const restrictedCaseIds = page.saved_objects
+        .filter((so) => so.attributes.access?.mode === CaseAccessMode.RESTRICTED)
+        .map((so) => so.id);
+      if (restrictedCaseIds.length > 0) {
+        writer.bulkDeleteCases(restrictedCaseIds);
+      }
 
       for (const so of page.saved_objects) {
         processed++;

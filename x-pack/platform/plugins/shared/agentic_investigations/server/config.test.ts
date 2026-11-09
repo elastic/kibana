@@ -8,17 +8,19 @@
 import { config } from './config';
 
 describe('agenticInvestigations config', () => {
-  it('turns the plugin and escalations on by default in traditional deployments', () => {
+  it('turns the plugin, escalations and the cases bridge on by default in traditional deployments', () => {
     expect(config.schema.validate({}, { serverless: false })).toEqual({
       enabled: true,
       escalations: { enabled: true },
+      cases: { enabled: true },
     });
   });
 
-  it('keeps the plugin off and escalations on by default in serverless', () => {
+  it('keeps the plugin off, and escalations and the cases bridge on, by default in serverless', () => {
     expect(config.schema.validate({}, { serverless: true })).toEqual({
       enabled: false,
       escalations: { enabled: true },
+      cases: { enabled: true },
     });
   });
 
@@ -28,7 +30,10 @@ describe('agenticInvestigations config', () => {
     );
   });
 
-  it('exposes only the escalations flag to the browser', () => {
-    expect(config.exposeToBrowser).toEqual({ escalations: { enabled: true } });
+  it('exposes the escalations and cases bridge flags to the browser', () => {
+    expect(config.exposeToBrowser).toEqual({
+      escalations: { enabled: true },
+      cases: { enabled: true },
+    });
   });
 });

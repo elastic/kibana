@@ -57,6 +57,7 @@ import {
 } from '../type_guards';
 import type { IndexRefresh } from '../../types';
 import { UserActionAuditLogger } from '../audit_logger';
+import { getParentCaseId, getRestrictedCaseIds } from '../../../cases_analytics_v2/restricted_cases';
 
 export class UserActionPersister {
   private static readonly userActionFieldsAllowed: Set<string> = new Set(
@@ -70,6 +71,44 @@ export class UserActionPersister {
     this.builderFactory = new BuilderFactory();
 
     this.auditLogger = new UserActionAuditLogger(this.context.auditLogger);
+  }
+
+  /**
+   * Analytics mirror that drops user actions whose parent case is restricted —
+   * those must never reach `.cases-activity`. Never throws: the SO write is
+   * the source of truth and reconciliation repairs skips caused by transient
+   * lookup failures.
+   */
+  private async mirrorActionsUnlessRestricted(
+    actions: Array<SavedObject<UserActionPersistedAttributes>>
+  ): Promise<void> {
+    if (actions.length === 0) {
+      return;
+    }
+
+    try {
+      const withCaseIds = actions.map((so) => ({ so, caseId: getParentCaseId(so) }));
+      const restricted = await getRestrictedCaseIds(
+        this.context.unsecuredSavedObjectsClient,
+        withCaseIds.flatMap(({ caseId }) => (caseId != null ? [{ caseId }] : []))
+      );
+      // a doc without a case reference belongs to no case and cannot be restricted
+      const toMirror = withCaseIds
+        .filter(({ caseId }) => caseId == null || !restricted.has(caseId))
+        .map(({ so }) => so);
+
+      if (toMirror.length === 1) {
+        this.context.analyticsV2ActivityWriter.upsertAction(toMirror[0]);
+      } else if (toMirror.length > 1) {
+        this.context.analyticsV2ActivityWriter.bulkUpsertActions(toMirror);
+      }
+    } catch (error) {
+      this.context.log.warn(
+        `cases-analyticsV2: activity mirror failed (non-fatal, reconciliation will repair): ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
   }
 
   public buildUserActions({
@@ -96,19 +135,34 @@ export class UserActionPersister {
       // action already records are suppressed (#282474) — see getSuppressedCustomFieldKeys.
       const suppressedCustomFieldKeys = this.getSuppressedCustomFieldKeys(updatedCase);
 
+      // A move between two statuses of the same category only changes `status_key`; it still
+      // gets the one status user action.
+      const statusKeyOnlyChange =
+        updatedCase.updatedAttributes.status == null &&
+        updatedCase.updatedAttributes.status_key != null;
+
       updatedFields
-        .filter((field) => UserActionPersister.userActionFieldsAllowed.has(field))
+        .filter(
+          (field) =>
+            UserActionPersister.userActionFieldsAllowed.has(field) ||
+            (field === 'status_key' && statusKeyOnlyChange)
+        )
         .forEach((field) => {
           // Special case for status as it can possibly have an associated closeReason (syncing to alerts)
           // Persist the closeReason to the status userAction
-          if (field === UserActionTypes.status && updatedCase.updatedAttributes.status != null) {
+          if (
+            (field === UserActionTypes.status && updatedCase.updatedAttributes.status != null) ||
+            field === 'status_key'
+          ) {
             const userActionBuilder = this.builderFactory.getBuilder(UserActionTypes.status);
             const statusUserAction = userActionBuilder?.build({
               caseId,
               owner,
               user,
               payload: {
-                status: updatedCase.updatedAttributes.status,
+                status: updatedCase.updatedAttributes.status ?? originalCase.attributes.status,
+                status_key: updatedCase.updatedAttributes.status_key ?? undefined,
+                pause_reason: updatedCase.updatedAttributes.pause_reason ?? undefined,
                 closeReason: updatedCase.closeReason,
                 syncAlerts:
                   updatedCase.updatedAttributes.settings?.syncAlerts ??
@@ -684,9 +738,7 @@ export class UserActionPersister {
       for (const so of response.saved_objects) {
         if (!isSavedObjectErrorResult(so)) successes.push(so);
       }
-      if (successes.length > 0) {
-        this.context.analyticsV2ActivityWriter.bulkUpsertActions(successes);
-      }
+      await this.mirrorActionsUnlessRestricted(successes);
 
       return response;
     } catch (error) {
@@ -825,9 +877,9 @@ export class UserActionPersister {
       // generic `T`: callers pass `UserActionPersistedAttributes`-shaped
       // attributes; the Saved Objects API just forwards them through `T`
       // for consumer convenience, so re-narrowing here is safe.
-      this.context.analyticsV2ActivityWriter.upsertAction(
-        res as unknown as SavedObject<UserActionPersistedAttributes>
-      );
+      await this.mirrorActionsUnlessRestricted([
+        res as unknown as SavedObject<UserActionPersistedAttributes>,
+      ]);
 
       return res;
     } catch (error) {

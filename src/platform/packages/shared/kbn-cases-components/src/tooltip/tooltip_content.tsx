@@ -23,12 +23,12 @@ const DESCRIPTION_TRUNCATE_LENGTH = 80;
 const USER_TRUNCATE_LENGTH = 15;
 
 const CaseTooltipContentComponent = React.memo<CaseTooltipContentProps>(
-  ({ title, description, status, totalComments, createdAt, createdBy }) => (
+  ({ title, description, status, statusLabel, totalComments, createdAt, createdBy }) => (
     <>
       <EuiFlexGroup gutterSize="xs" direction="column">
         <EuiFlexGroup gutterSize="xs" responsive={false}>
           <EuiFlexItem grow={false}>
-            <Status status={status} />
+            <Status status={status} label={statusLabel} />
           </EuiFlexItem>
           <IconWithCount count={totalComments} icon={'comment'} />
         </EuiFlexGroup>

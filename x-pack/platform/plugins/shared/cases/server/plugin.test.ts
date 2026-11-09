@@ -58,8 +58,14 @@ function getConfig(overrides: Partial<ConfigType> = {}): ConfigType {
     },
     templates: { enabled: true },
     runWorkflows: { enabled: true },
+    restrictedCases: { enabled: false },
+    bidirectionalSync: { enabled: false },
     attachments: { enabled: true },
     chat: { enabled: true },
+    customStatuses: { enabled: false },
+    tasks: { enabled: true },
+    agentic: { enabled: true },
+    knowledge: { enabled: true },
     ...overrides,
   };
 }
@@ -216,6 +222,9 @@ describe('Cases Plugin', () => {
       expect(pluginStart).toMatchInlineSnapshot(`
         Object {
           "config": Object {
+            "agentic": Object {
+              "enabled": true,
+            },
             "analytics": Object {
               "index": Object {
                 "enabled": true,
@@ -234,8 +243,14 @@ describe('Cases Plugin', () => {
             "attachments": Object {
               "enabled": true,
             },
+            "bidirectionalSync": Object {
+              "enabled": false,
+            },
             "chat": Object {
               "enabled": true,
+            },
+            "customStatuses": Object {
+              "enabled": false,
             },
             "enabled": true,
             "files": Object {
@@ -336,13 +351,22 @@ describe('Cases Plugin', () => {
               "taskIntervalMinutes": 10,
               "taskStartDelayMinutes": 10,
             },
+            "knowledge": Object {
+              "enabled": true,
+            },
             "markdownPlugins": Object {
               "lens": true,
+            },
+            "restrictedCases": Object {
+              "enabled": false,
             },
             "runWorkflows": Object {
               "enabled": true,
             },
             "stack": Object {
+              "enabled": true,
+            },
+            "tasks": Object {
               "enabled": true,
             },
             "templates": Object {
@@ -427,6 +451,44 @@ describe('Cases Plugin', () => {
       plugin.setup(coreSetup, pluginsSetup);
 
       expect(registerCasesAgentBuilderTools).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('conversation attachment type registration', () => {
+    const CONVERSATION_TYPE = 'agentBuilder.conversation';
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    // The incremental id task is disabled so `start()` does not schedule a task
+    // against the mocked task manager.
+    const incrementalId = { enabled: false, taskIntervalMinutes: 10, taskStartDelayMinutes: 10 };
+
+    const registeredTypes = (config: ConfigType, withAgentBuilder: boolean) => {
+      context = coreMock.createPluginInitializerContext<ConfigType>({ ...config, incrementalId });
+      plugin = new CasePlugin(context);
+      if (withAgentBuilder) {
+        pluginsSetup.agentBuilder = {} as NonNullable<CasesServerSetupDependencies['agentBuilder']>;
+      } else {
+        delete pluginsSetup.agentBuilder;
+      }
+      plugin.setup(coreSetup, pluginsSetup);
+      return plugin.start(coreStart, pluginsStart).getUnifiedAttachmentTypeRegistry();
+    };
+
+    it('registers the type when agentBuilder is present and chat is enabled', () => {
+      expect(registeredTypes(getConfig(), true).has(CONVERSATION_TYPE)).toBe(true);
+    });
+
+    it('does not register the type when chat is disabled', () => {
+      expect(
+        registeredTypes(getConfig({ chat: { enabled: false } }), true).has(CONVERSATION_TYPE)
+      ).toBe(false);
+    });
+
+    it('does not register the type when agentBuilder is not available', () => {
+      expect(registeredTypes(getConfig(), false).has(CONVERSATION_TYPE)).toBe(false);
     });
   });
 

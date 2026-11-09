@@ -122,6 +122,19 @@ describe('ConnectorMappingResponseSchema', () => {
       expect(result.data).toStrictEqual({ id: 'test', version: 'test', mappings });
     });
 
+    it('keeps the connector sync settings', () => {
+      const response = {
+        id: 'test',
+        version: 'test',
+        mappings,
+        externalSync: { autoPush: true, conflictStrategy: 'kibana' },
+        externalSyncFields: [{ field: 'comments', direction: 'off' }],
+      };
+      const result = ConnectorMappingResponseSchema.safeParse(response);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(response);
+    });
+
     it('strips unknown fields', () => {
       const result = ConnectorMappingResponseSchema.safeParse({
         id: 'test',

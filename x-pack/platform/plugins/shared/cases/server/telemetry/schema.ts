@@ -154,6 +154,10 @@ const solutionTelemetry: SolutionTelemetrySchema = {
     type: 'long',
     _meta: { description: 'Number of cases with maximum observables' },
   },
+  totalRestrictedCases: {
+    type: 'long',
+    _meta: { description: 'Number of cases restricted to their assignees' },
+  },
 };
 
 const customFieldsSolutionTelemetrySchema: CustomFieldsSolutionTelemetrySchema = {
@@ -430,6 +434,8 @@ export const casesSchema: CasesTelemetrySchema = {
       attachmentFramework: attachmentFrameworkSchema,
       assignees: assigneesSchema,
       status: statusSchema,
+      customStatuses: statusSchema,
+      pausedCases: statusSchema,
       syncAlertsOn: long,
       syncAlertsOff: long,
       extractObservablesOn: {
@@ -478,6 +484,10 @@ export const casesSchema: CasesTelemetrySchema = {
       totalTags: long,
       totalWithAlerts: long,
       totalWithConnectors: long,
+      totalRestrictedCases: {
+        type: 'long',
+        _meta: { description: 'Number of cases restricted to their assignees' },
+      },
       latestDates: latestDatesSchema,
     },
     sec: solutionTelemetry,
@@ -574,6 +584,29 @@ export const casesSchema: CasesTelemetrySchema = {
         },
       },
       ...customFieldsSolutionTelemetrySchema,
+      customStatuses: {
+        configurations: {
+          type: 'long',
+          _meta: { description: 'Number of configurations with at least one custom status' },
+        },
+        statuses: statusSchema,
+        pausing: {
+          configurations: {
+            type: 'long',
+            _meta: {
+              description:
+                'Number of configurations with at least one enabled status that pauses time tracking',
+            },
+          },
+          statuses: statusSchema,
+          customizedReasons: {
+            type: 'long',
+            _meta: {
+              description: 'Number of configurations whose pause reasons differ from the defaults',
+            },
+          },
+        },
+      },
     },
     sec: customFieldsSolutionTelemetrySchema,
     obs: customFieldsSolutionTelemetrySchema,
@@ -600,5 +633,17 @@ export const casesSchema: CasesTelemetrySchema = {
     sec: workflowsSolutionTelemetrySchema,
     obs: workflowsSolutionTelemetrySchema,
     main: workflowsSolutionTelemetrySchema,
+  },
+  tasks: {
+    total: long,
+    byStatus: {
+      open: long,
+      inProgress: long,
+      completed: long,
+      cancelled: long,
+    },
+    casesWithTasks: long,
+    fromTaskList: long,
+    taskLists: long,
   },
 };

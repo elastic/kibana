@@ -15,6 +15,7 @@ import type {
 } from '@kbn/workflows-extensions/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { Proposal } from '@kbn/proposals-common';
 import type { ProposalsService } from './services/proposals_service';
 import type { ProposalCreator } from './services/create_proposal';
 import type { ProposalPrivilegesChecker } from './services/check_proposal_privileges';
@@ -66,4 +67,26 @@ export interface ProposalsPluginStart {
   createProposal: ProposalCreator;
 }
 
-export type ProposalsPluginSetup = Record<string, never>;
+/**
+ * Lets a plugin tie new proposals to a record it owns (the Cases bridge ties them to the case the
+ * conversation is linked to), without this plugin depending on that plugin.
+ */
+export interface ProposalCreateExtension {
+  /** Before the proposal is stored: the case to record on it, if any. Errors are logged, not thrown. */
+  resolveCaseId: (args: {
+    request: KibanaRequest;
+    conversationId: string;
+    spaceId: string;
+  }) => Promise<string | undefined>;
+  /** After the proposal is stored and attached to its conversation. Errors are logged, not thrown. */
+  onCreated: (args: {
+    request: KibanaRequest;
+    proposal: Proposal;
+    spaceId: string;
+  }) => Promise<void>;
+}
+
+export interface ProposalsPluginSetup {
+  /** One extension only; a second registration throws. */
+  registerCreateExtension: (extension: ProposalCreateExtension) => void;
+}

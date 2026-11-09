@@ -112,6 +112,7 @@ export default ({ getService }: FtrProviderContext): void => {
           title: case3.title,
           description: case3.description,
           status: case3.status,
+          status_key: case3.status_key,
           createdAt: case3.created_at,
           totals: {
             userComments: 0,

@@ -14,6 +14,11 @@ export const DEFAULT_TABLE_LIMIT = 10;
 
 export const casesQueriesKeys = {
   all: ['cases'] as const,
+  tasks: ['tasks'] as const,
+  caseTasks: (caseId: string) => [...casesQueriesKeys.tasks, caseId] as const,
+  taskComments: (caseId: string, taskId: string) =>
+    [...casesQueriesKeys.caseTasks(caseId), 'comments', taskId] as const,
+  taskTemplates: (owners: string[]) => ['task-templates', ...owners] as const,
   users: ['users'] as const,
   connectors: ['connectors'] as const,
   alerts: ['alerts'] as const,
@@ -50,9 +55,13 @@ export const casesQueriesKeys = {
   caseMetrics: (id: string, features: SingleCaseMetricsFeature[]) =>
     [...casesQueriesKeys.case(id), 'metrics', features] as const,
   caseConnectors: (id: string) => [...casesQueriesKeys.case(id), 'connectors'],
+  externalFieldCatalog: (connectorId: string) =>
+    [...casesQueriesKeys.connectors, 'externalFieldCatalog', connectorId] as const,
   caseUsers: (id: string) => [...casesQueriesKeys.case(id), 'users'],
   conversationAccess: (conversationId: string) =>
     [...casesQueriesKeys.userActions, 'conversation-access', conversationId] as const,
+  conversationsAccess: (conversationIds: string[]) =>
+    [...casesQueriesKeys.userActions, 'conversations-access', conversationIds] as const,
   caseUserActions: (id: string, params: unknown) =>
     [...casesQueriesKeys.case(id), ...casesQueriesKeys.userActions, params] as const,
   caseUserActionsStats: (id: string) => [
@@ -80,6 +89,7 @@ export const casesMutationsKeys = {
   updateCase: ['update-case'] as const,
   updateCases: ['update-cases'] as const,
   pushCase: ['push-case'] as const,
+  syncCase: ['sync-case'] as const,
   updateComment: ['update-comment'] as const,
   deleteComment: ['delete-comment'] as const,
   deleteFileAttachment: ['delete-file-attachment'] as const,
@@ -101,6 +111,16 @@ export const casesMutationsKeys = {
   bulkDeleteTemplates: ['bulk-delete-templates'] as const,
   bulkExportTemplates: ['bulk-export-templates'] as const,
   changeAppliedTemplate: ['change-applied-template'] as const,
+  createTask: ['create-task'] as const,
+  updateTask: ['update-task'] as const,
+  deleteTask: ['delete-task'] as const,
+  applyTaskTemplate: ['apply-task-template'] as const,
+  runTaskWorkflow: ['run-task-workflow'] as const,
+  createTaskTemplate: ['create-task-template'] as const,
+  updateTaskTemplate: ['update-task-template'] as const,
+  deleteTaskTemplate: ['delete-task-template'] as const,
+  addTaskComment: ['add-task-comment'] as const,
+  deleteTaskComment: ['delete-task-comment'] as const,
 };
 
 export const inferenceKeys = {
@@ -131,9 +151,13 @@ export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
   assignees: [],
   reporters: [],
   status: [],
+  statusKey: [],
   tags: [],
   owner: [],
   category: [],
+  access: [],
+  source: [],
+  needsDecision: [],
   customFields: {},
   extendedFieldFilters: [],
   from: DEFAULT_FROM_DATE,

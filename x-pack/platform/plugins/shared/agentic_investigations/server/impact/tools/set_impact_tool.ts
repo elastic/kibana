@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { z } from '@kbn/zod/v4';
 import { createErrorResult, createOtherResult } from '@kbn/agent-builder-server';
 import { investigationEvidenceSchema, MAX_EVIDENCE_TEXT_LENGTH } from '../../../common/evidence';
@@ -124,11 +124,13 @@ export const createSetImpactTool = ({
   resolveUser,
   privileges,
   logger,
+  onFindingsWritten,
 }: {
   getImpactService: () => ImpactService;
   resolveUser: ResolveUser;
   privileges: InvestigationsPrivilegesChecker;
   logger: Logger;
+  onFindingsWritten?: (request: KibanaRequest, conversationId: string) => Promise<void>;
 }) =>
   createInvestigationTool({
     id: SET_IMPACT_TOOL_ID,
@@ -165,6 +167,8 @@ export const createSetImpactTool = ({
           ),
         revertImpact: (written) => service.revertAttach(written),
       });
+
+      await onFindingsWritten?.(request, conversationId);
 
       const notes = [
         ...getImpactWarnings(impact),

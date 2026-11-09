@@ -62,6 +62,7 @@ export {
   type AgenticInvestigationsCapabilities,
 } from './hooks/use_agentic_investigations_capabilities';
 export { useOpenInChat, type OpenInChat } from './hooks/use_open_in_chat';
+export { CaseBridgeForQueue, OpenCaseModalForQueue } from './cases_bridge/host_components';
 export { getSharedInvestigationsQueryClient } from './shared_query_client';
 export {
   useAssigneePickers,

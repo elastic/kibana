@@ -2649,6 +2649,15 @@ describe('TemplatesService', () => {
   });
 
   describe('deleteTemplate', () => {
+    it('refuses a shipped template: it can be turned off but not deleted', async () => {
+      const service = createService();
+
+      await expect(
+        service.deleteTemplate('system-ai-investigation')
+      ).rejects.toThrow("Shipped templates can't be deleted. Turn the template off instead.");
+      expect(unsecuredSavedObjectsClient.bulkUpdate).not.toHaveBeenCalled();
+    });
+
     it('marks all matching templates as deleted', async () => {
       const service = createService();
 

@@ -96,6 +96,7 @@ export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
             canCloseInvestigation={canCloseInvestigation}
             onCopyLink={onCopyLink}
             canOpenInvestigationDetails={canOpenInvestigationDetails}
+            data-test-subj="conversationCardActions"
           />
         </EuiFlexItem>
       </EuiFlexGroup>

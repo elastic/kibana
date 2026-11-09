@@ -17,6 +17,14 @@ export {
 } from './src/components/escalation_queue';
 
 export { ActionButton } from './src/components/actions/action_button';
+export {
+  CaseBridgeProvider,
+  useCaseBridge,
+  getInvestigationCaseId,
+  useInvestigationCaseId,
+  type CaseBridgeContextValue,
+  type CaseBridgeCaseSummary,
+} from './src/components/case_bridge/case_bridge_context';
 export { getCopyLinkFlyoutAction } from './src/components/actions/copy_link_action';
 export {
   BaseActions,

@@ -52,7 +52,9 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
     isDisabled: false,
     onAction: () => {},
     onActionSuccess: refreshCaseViewPage,
+    entryPoint: 'case_view_header',
     selectedStatus: caseData.status,
+    selectedStatusKey: caseData.statusKey,
   });
 
   const onStatusChanged = useCallback(

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isSystemTemplateId } from '../../../../common/utils/system_templates';
 import { schema } from '@kbn/config-schema';
 import { INTERNAL_BULK_DELETE_TEMPLATES_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
@@ -38,6 +39,18 @@ export const bulkDeleteTemplatesRoute = createCasesRoute({
       if (!Array.isArray(ids) || ids.length === 0) {
         return response.badRequest({
           body: { message: 'ids must be a non-empty array of template IDs' },
+        });
+      }
+
+      // Refused before anything is deleted, so a request never half-succeeds.
+      const shipped = ids.filter(isSystemTemplateId);
+      if (shipped.length > 0) {
+        return response.badRequest({
+          body: {
+            message: `Shipped templates can't be deleted. Turn the template off instead: ${shipped.join(
+              ', '
+            )}`,
+          },
         });
       }
 

@@ -25,6 +25,8 @@ import { createCaseError } from '../../common/error';
 import type { CasesClientArgs } from '..';
 import type { Authorization, OwnerEntity } from '../../authorization';
 import { Operations } from '../../authorization';
+import { createCaseEntity } from '../../authorization/utils';
+import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import type { GetConnectorsRequest } from './types';
 import type { CaseConnectorActivity } from '../../services/user_actions/types';
 import type { CaseUserActionService } from '../../services';
@@ -40,19 +42,22 @@ export const getConnectors = async (
   clientArgs: CasesClientArgs
 ): Promise<GetCaseConnectorsResponse> => {
   const {
-    services: { userActionService },
+    services: { caseService, userActionService },
     logger,
     authorization,
     actionsClient,
   } = clientArgs;
 
   try {
-    const [connectors, latestUserAction] = await Promise.all([
+    const [connectors, latestUserAction, theCase] = await Promise.all([
       userActionService.getCaseConnectorInformation(caseId),
       userActionService.getMostRecentUserAction(caseId),
+      // the parent case is authorized alongside the user actions so a restricted
+      // case the caller may not see yields a not-found outcome
+      caseService.getCase({ id: caseId }),
     ]);
 
-    await checkConnectorsAuthorization({ authorization, connectors, latestUserAction });
+    await checkConnectorsAuthorization({ authorization, connectors, latestUserAction, theCase });
 
     const res = await getConnectorsInfo({
       caseId,
@@ -77,14 +82,19 @@ const checkConnectorsAuthorization = async ({
   connectors,
   latestUserAction,
   authorization,
+  theCase,
 }: {
   connectors: CaseConnectorActivity[];
   latestUserAction?: SavedObject<UserActionAttributes>;
   authorization: PublicMethodsOf<Authorization>;
+  theCase: CaseSavedObjectTransformed;
 }) => {
-  const entities: OwnerEntity[] = latestUserAction
-    ? [{ owner: latestUserAction.attributes.owner, id: latestUserAction.id }]
-    : [];
+  const entities: OwnerEntity[] = [
+    createCaseEntity(theCase),
+    ...(latestUserAction
+      ? [{ owner: latestUserAction.attributes.owner, id: latestUserAction.id }]
+      : []),
+  ];
 
   for (const connector of connectors) {
     entities.push({

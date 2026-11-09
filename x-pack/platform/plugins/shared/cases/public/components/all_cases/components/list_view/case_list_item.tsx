@@ -30,8 +30,13 @@ import { FormattedRelativePreferenceDate } from '../../../formatted_date';
 import { useCaseViewNavigation } from '../../../../common/navigation/hooks';
 import { ActionColumnComponent as ActionColumn } from '../../hooks/use_actions';
 import { severities } from '../../../severity/config';
+import { useCaseStatuses } from '../../../status/use_case_statuses';
+import { PausedStatusTooltip } from '../../../status/paused_status_tooltip';
 import { CASE_DETAILS_LINK_ARIA } from '../../../links/translations';
 import * as i18n from '../../translations';
+import { PENDING_DECISIONS, PENDING_DECISIONS_SHORT } from '../../../../common/translations';
+import { useCasesConfig } from '../../../../common/lib/kibana';
+import { decisionsAvailability } from '../../../../client/case_view_sections';
 
 const LIST_ITEM_HEIGHT = 80;
 const MAX_VISIBLE_ASSIGNEES = 3;
@@ -58,6 +63,9 @@ export const CaseListItem: React.FC<{
   }) => {
     const { euiTheme } = useEuiTheme();
     const { navigateToCaseView, getCaseViewUrl } = useCaseViewNavigation();
+    const { getStatus } = useCaseStatuses();
+    const { agenticEnabled } = useCasesConfig();
+    const showPendingDecisions = agenticEnabled && decisionsAvailability.isEnabled();
 
     const caseUrl = getCaseViewUrl({ detailName: theCase.id });
 
@@ -244,8 +252,27 @@ export const CaseListItem: React.FC<{
                         </EuiBadge>
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
-                        <Status status={theCase.status} />
+                        <PausedStatusTooltip
+                          pausedAt={theCase.pausedAt}
+                          pauseReason={theCase.pauseReason}
+                        >
+                          <Status
+                            status={theCase.status}
+                            label={getStatus(theCase.statusKey, theCase.status).label}
+                          />
+                        </PausedStatusTooltip>
                       </EuiFlexItem>
+                      {showPendingDecisions && (theCase.pendingDecisions ?? 0) > 0 && (
+                        <EuiFlexItem grow={false}>
+                          <EuiBadge
+                            color="warning"
+                            title={PENDING_DECISIONS(theCase.pendingDecisions ?? 0)}
+                            data-test-subj="case-table-pending-decisions"
+                          >
+                            {PENDING_DECISIONS_SHORT(theCase.pendingDecisions ?? 0)}
+                          </EuiBadge>
+                        </EuiFlexItem>
+                      )}
                       {theCase.totalAlerts > 0 && (
                         <EuiFlexItem grow={false}>
                           <EuiBadge

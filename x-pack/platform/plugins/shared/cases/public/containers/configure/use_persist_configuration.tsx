@@ -37,7 +37,13 @@ export const usePersistConfiguration = () => {
       connector,
       observableTypes,
       extractObservables,
+      externalSync,
+      externalSyncFields,
+      externalSyncFieldMappings,
       workflowTags,
+      statuses,
+      pauseReasons,
+      knowledge,
     }: Request) => {
       if (isEmpty(id) || isEmpty(version)) {
         return postCaseConfigure({
@@ -48,7 +54,13 @@ export const usePersistConfiguration = () => {
           owner: owner[0],
           observableTypes,
           extractObservables,
+          externalSync,
+          externalSyncFields,
+          externalSyncFieldMappings,
           workflowTags,
+          statuses,
+          pauseReasons,
+          knowledge,
         });
       }
 
@@ -60,7 +72,13 @@ export const usePersistConfiguration = () => {
         templates: templates ?? [],
         observableTypes,
         extractObservables,
+        externalSync,
+        externalSyncFields,
+        externalSyncFieldMappings,
         workflowTags,
+        statuses,
+        pauseReasons,
+        knowledge,
       });
     },
     {

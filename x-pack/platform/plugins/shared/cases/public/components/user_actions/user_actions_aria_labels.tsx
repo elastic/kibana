@@ -10,6 +10,7 @@ import * as i18n from './translations';
 
 export const getUserActionAriaLabel = (type: keyof typeof UserActionTypes) => {
   const actionsMap: Record<keyof typeof UserActionTypes, string> = {
+    access: i18n.ACCESS,
     assignees: i18n.ASSIGNEES,
     comment: i18n.COMMENT,
     connector: i18n.CONNECTORS,
@@ -28,7 +29,15 @@ export const getUserActionAriaLabel = (type: keyof typeof UserActionTypes) => {
     extended_fields: i18n.EXTENDED_FIELDS,
     template: i18n.APPLIED_TEMPLATE,
     workflow: i18n.WORKFLOW_RAN,
+    sync: i18n.SYNCED_FROM_EXTERNAL,
     bulkAttachments: i18n.ATTACHMENTS_REMOVED,
+    create_task: i18n.TASK,
+    update_task: i18n.TASK,
+    delete_task: i18n.TASK,
+    apply_task_template: i18n.TASK_TEMPLATE,
+    ai_verdict: i18n.AI_VERDICT_LABEL,
+    human_verdict: i18n.HUMAN_VERDICT_LABEL,
+    decision: i18n.DECISION_LABEL,
   };
 
   switch (type) {
@@ -36,6 +45,7 @@ export const getUserActionAriaLabel = (type: keyof typeof UserActionTypes) => {
     case 'delete_case':
     case 'pushed':
     case 'workflow':
+    case 'sync':
     case 'bulkAttachments':
       return actionsMap[type];
     default:

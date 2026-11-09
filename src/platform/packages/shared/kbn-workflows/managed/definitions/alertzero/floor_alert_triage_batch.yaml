@@ -236,7 +236,7 @@ steps:
         delay: 30s
       fallback:
         - name: create_classify_failed_investigation
-          type: ai.conversation.create
+          type: investigations.create
           with:
             template_id: investigation
             title: "Alert Triage — {{ inputs.rule_name }}"
@@ -371,7 +371,7 @@ steps:
         condition: "${{ variables.verdict_count == 0 }}"
         steps:
           - name: create_classification_empty_investigation
-            type: ai.conversation.create
+            type: investigations.create
             with:
               template_id: investigation
               title: "Alert Triage — {{ inputs.rule_name }}"
@@ -431,7 +431,7 @@ steps:
             condition: "${{ variables.missing_alert_count > 0 }}"
             steps:
               - name: create_missing_alert_ids_investigation
-                type: ai.conversation.create
+                type: investigations.create
                 with:
                   template_id: investigation
                   title: "Alert Triage — {{ inputs.rule_name }}"
@@ -755,7 +755,7 @@ steps:
                   tags_to_add:
                     - "az:inconclusive"
         - name: create_grouping_failed_investigation
-          type: ai.conversation.create
+          type: investigations.create
           with:
             template_id: investigation
             title: "Alert Triage — {{ inputs.rule_name }}"
@@ -820,7 +820,7 @@ steps:
       # mint keeps its place in `mint_conversation_ids` as an empty id, and `start_reviews` re-tags
       # its alerts instead of starting a review that has no Investigation.
       - name: create_proposal_investigation
-        type: ai.conversation.create
+        type: investigations.create
         on-failure:
           retry:
             max-attempts: 3
@@ -1059,7 +1059,7 @@ steps:
           # reviews start after this, so failing here would strand them without a proposal. The alerts
           # then keep their verdict tags and notes, and the notes carry no Investigation link.
           - name: create_batch_investigation
-            type: ai.conversation.create
+            type: investigations.create
             on-failure:
               retry:
                 max-attempts: 3
@@ -1172,7 +1172,7 @@ steps:
           # Nothing is left to decide, so the Investigation of a batch without a proposal is closed.
           # The patch errors when `agentBuilder:experimentalFeatures` is off, which must not fail the run.
           - name: close_batch_investigation
-            type: ai.conversation.metadata.patch
+            type: investigations.patch
             if: "${{ variables.batch_conversation_created }}"
             on-failure:
               continue: true

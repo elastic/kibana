@@ -18,7 +18,10 @@ import {
   FIND_OR_CREATE_INVESTIGATION_URL,
 } from '../../../common/constants';
 import { loadReportHuntContext } from '../../services/watches/hunt/common/load_report_context';
-import { runFindOrCreateInvestigation } from '../../services/watches/hunt/common/find_or_create_investigation';
+import {
+  runFindOrCreateInvestigation,
+  type FindOrCreateConversationClient,
+} from '../../services/watches/hunt/common/find_or_create_investigation';
 import {
   ALERTZERO_TELEMETRY_EVENTS,
   buildWorkerInvestigationReopenedPayload,
@@ -40,6 +43,7 @@ export const registerFindOrCreateInvestigationRoute = ({
   logger,
   getSpaceId,
   getAgentBuilderConversations,
+  getInvestigationsClient,
   reportTelemetryEvent,
 }: RouteDependencies): void => {
   router.versioned
@@ -76,7 +80,30 @@ export const registerFindOrCreateInvestigationRoute = ({
           }
 
           const conversations = getAgentBuilderConversations();
-          const conversationClient = await conversations.getScopedClient({ request });
+          const scopedConversations = await conversations.getScopedClient({ request });
+          // Creates and reopens go through the investigations client, the one writer of
+          // investigations, so an investigation's case follows it when the space opens one.
+          const investigations = getInvestigationsClient(request);
+          const conversationClient: FindOrCreateConversationClient = investigations
+            ? {
+                get: (id) => scopedConversations.get(id),
+                create: async ({ id, agentId, title, accessControl }) =>
+                  investigations.create({
+                    conversation_id: id,
+                    agent_id: agentId,
+                    title,
+                    template_id: 'investigation',
+                    access_control: accessControl,
+                  }),
+                patchMetadata: async (id, updates) => {
+                  const { changed_fields: changedFields } = await investigations.patchMetadata({
+                    conversation_id: id,
+                    updates,
+                  });
+                  return { changedFields };
+                },
+              }
+            : scopedConversations;
 
           const output = await runFindOrCreateInvestigation(
             { spaceId, reportId },

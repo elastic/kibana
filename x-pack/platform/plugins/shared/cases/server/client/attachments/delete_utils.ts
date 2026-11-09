@@ -12,6 +12,7 @@ import { CASE_ATTACHMENT_SAVED_OBJECT, CASE_COMMENT_SAVED_OBJECT } from '../../.
 import { FILE_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import type {
   AttachmentAttributesV2,
+  CaseAccess,
   UnifiedAttachmentAttributes,
   UnifiedReferenceAttachmentPayload,
 } from '../../../common/types/domain';
@@ -23,7 +24,12 @@ import {
   resolveUnifiedAttachmentType,
 } from '../../../common/utils/attachments';
 import { decodeOrThrowZod } from '../../common/runtime_types';
-import { getAlertInfoFromComments, getIDsAndIndicesAsArrays } from '../../common/utils';
+import {
+  getAlertInfoFromComments,
+  getIDsAndIndicesAsArrays,
+  isCaseRestricted,
+} from '../../common/utils';
+import { createCaseEntity } from '../../authorization/utils';
 import { getCaseReferenceId } from '../../common/references';
 import type { SOWithErrors } from '../../common/types';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
@@ -110,6 +116,11 @@ export const deleteCaseAttachments = async (
     operation,
   });
 
+  // The parent case is authorized too, before the checks below, so a restricted case the caller
+  // may not see yields a not-found outcome.
+  const theCase = await getCase();
+  await authorization.ensureAuthorized({ entities: [createCaseEntity(theCase)], operation });
+
   const notInCaseIds = ownedAttachments
     .filter(({ references }) => getCaseReferenceId(references) !== caseId)
     .map(({ id }) => id);
@@ -172,6 +183,7 @@ export const deleteCaseAttachments = async (
     await recordDeletion(
       {
         caseId,
+        caseAccess: theCase.attributes.access,
         attachments: decodedAttachments.filter(({ id }) => deletedIds.has(id)),
         fileIds: fileEntities.filter(({ id }) => !keptFileIds.has(id)).map(({ id }) => id),
         recordUserActions,
@@ -192,6 +204,7 @@ export const deleteCaseAttachments = async (
 
 interface RecordDeletionArgs {
   caseId: string;
+  caseAccess?: CaseAccess | null;
   attachments: DecodedAttachment[];
   fileIds: string[];
   recordUserActions?: RecordUserActions;
@@ -199,7 +212,14 @@ interface RecordDeletionArgs {
 }
 
 const recordDeletion = async (
-  { caseId, attachments, fileIds, recordUserActions, deferCaseUpdates }: RecordDeletionArgs,
+  {
+    caseId,
+    caseAccess,
+    attachments,
+    fileIds,
+    recordUserActions,
+    deferCaseUpdates,
+  }: RecordDeletionArgs,
   clientArgs: CasesClientArgs
 ): Promise<void> => {
   const {
@@ -251,7 +271,7 @@ const recordDeletion = async (
   });
 
   if (!deferCaseUpdates) {
-    emitAttachmentsDeletedEvents(clientArgs, caseId, attachments);
+    emitAttachmentsDeletedEvents(clientArgs, { id: caseId, access: caseAccess }, attachments);
   }
 };
 
@@ -422,7 +442,7 @@ export const deleteByAttachmentIds = async (
   // Authorized before the not attached check below, so its message cannot tell an unauthorized
   // caller which ids are attached to the case.
   await authorization.ensureAuthorized({
-    entities: [{ id: caseId, owner: caseOwner }],
+    entities: [createCaseEntity(originalCase)],
     operation: Operations.deleteComment,
   });
 
@@ -529,12 +549,14 @@ export const deleteByAttachmentIds = async (
       await alertsService.removeCaseIdFromAlerts({ alerts, caseId });
     }
 
+    // Restricted cases emit too, flagged; the Workflows bridge drops them.
     emitAttachmentsDeletedEvent(clientArgs, {
       caseId,
       owner: caseOwner,
       attachmentType: type,
       ids: deleted.map(({ id }) => id),
       removedAttributes,
+      restricted: isCaseRestricted(originalCase.attributes),
     });
   };
 

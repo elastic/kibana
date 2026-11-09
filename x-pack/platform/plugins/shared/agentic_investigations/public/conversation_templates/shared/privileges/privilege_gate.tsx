@@ -7,18 +7,24 @@
 
 import React from 'react';
 import { useCanManageInvestigations } from '../../../investigations/hooks/use_can_manage_investigations';
+import { useCanOpenCaseFromInvestigation } from '../../../cases_bridge/use_can_open_cases';
 import {
   useCanManageEscalations,
   useCanReadEscalations,
 } from '../../../escalations/hooks/use_escalation_privileges';
 
 /** What a flyout slot can require of the user. */
-export type TemplatePrivilege = 'manageInvestigations' | 'manageEscalations' | 'readEscalations';
+export type TemplatePrivilege =
+  | 'manageInvestigations'
+  | 'manageEscalations'
+  | 'readEscalations'
+  | 'openCases';
 
 const PRIVILEGE_HOOKS: Readonly<Record<TemplatePrivilege, () => boolean>> = {
   manageInvestigations: useCanManageInvestigations,
   manageEscalations: useCanManageEscalations,
   readEscalations: useCanReadEscalations,
+  openCases: useCanOpenCaseFromInvestigation,
 };
 
 export type PrivilegeGateProps = React.PropsWithChildren<{ privilege: TemplatePrivilege }>;

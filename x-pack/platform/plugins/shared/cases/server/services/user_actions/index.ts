@@ -504,6 +504,38 @@ export class CaseUserActionService {
     };
   }
 
+  /**
+   * Re-emits every activity doc of a case into `.cases-activity`. Used when a
+   * case is unrestricted: its activity docs were deleted on restrict and the
+   * reconciliation runners only walk recent writes, so they would never
+   * return on their own. Fire-and-forget, mirroring the write hooks.
+   */
+  public reprojectCaseActivity(caseId: string): void {
+    void (async () => {
+      try {
+        const userActions =
+          await this.context.unsecuredSavedObjectsClient.find<UserActionPersistedAttributes>({
+            type: CASE_USER_ACTION_SAVED_OBJECT,
+            hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
+            page: 1,
+            perPage: MAX_DOCS_PER_PAGE,
+            sortField: 'created_at',
+            sortOrder: 'asc',
+          });
+
+        if (userActions.saved_objects.length > 0) {
+          this.context.analyticsV2ActivityWriter.bulkUpsertActions(userActions.saved_objects);
+        }
+      } catch (error) {
+        this.context.log.warn(
+          `cases-analyticsV2: failed to re-project activity for case ${caseId}: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      }
+    })();
+  }
+
   public async getAll(
     caseId: string
   ): Promise<SavedObjectsFindResponse<CaseUserActionDeprecatedResponse>> {

@@ -11,6 +11,8 @@ import { UserActionTypes } from '../action/v1';
 
 export const StatusUserActionPayloadSchema = z.object({
   status: CaseStatusSchema,
+  status_key: z.string().optional(),
+  pause_reason: z.string().optional(),
   closeReason: CaseCloseReasonSchema.optional(),
   syncedAlertCount: z.number().optional(),
 });

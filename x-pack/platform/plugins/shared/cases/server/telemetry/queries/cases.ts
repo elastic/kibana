@@ -18,6 +18,7 @@ import {
   OWNERS,
 } from '../../../common/constants';
 import type { Owner } from '../../../common/constants/types';
+import { CASE_STATUS_CATEGORIES } from '../../../common/utils/statuses';
 import type {
   CollectTelemetryDataParams,
   CasesTelemetry,
@@ -105,6 +106,13 @@ export const getCasesTelemetryData = async ({
         'totalAssignees',
       ],
     });
+    const pausedCaseBuckets = casesRes.aggregations?.pausedCases?.status?.buckets ?? [];
+    const customStatusesByCategory = (casesRes.aggregations?.customStatuses?.buckets ?? [])
+      .flatMap((bucket) => bucket.status.buckets)
+      .reduce<Record<number, number>>(
+        (acc, { key, doc_count: count }) => ({ ...acc, [key]: (acc[key] ?? 0) + count }),
+        {}
+      );
 
     const allAttachmentFrameworkStats = buildAttachmentFramework({
       rawScope: attachmentsByType.all,
@@ -125,6 +133,16 @@ export const getCasesTelemetryData = async ({
             CasePersistedStatus.IN_PROGRESS
           ),
           closed: findValueInBuckets(aggregationsBuckets.status, CasePersistedStatus.CLOSED),
+        },
+        customStatuses: {
+          open: customStatusesByCategory[CasePersistedStatus.OPEN] ?? 0,
+          inProgress: customStatusesByCategory[CasePersistedStatus.IN_PROGRESS] ?? 0,
+          closed: customStatusesByCategory[CasePersistedStatus.CLOSED] ?? 0,
+        },
+        pausedCases: {
+          open: findValueInBuckets(pausedCaseBuckets, CasePersistedStatus.OPEN),
+          inProgress: findValueInBuckets(pausedCaseBuckets, CasePersistedStatus.IN_PROGRESS),
+          closed: findValueInBuckets(pausedCaseBuckets, CasePersistedStatus.CLOSED),
         },
         syncAlertsOn: findValueInBuckets(aggregationsBuckets.syncAlerts, 1),
         syncAlertsOff: findValueInBuckets(aggregationsBuckets.syncAlerts, 0),
@@ -163,6 +181,7 @@ export const getCasesTelemetryData = async ({
           totalWithAtLeastOne:
             casesRes.aggregations?.assigneeFilters.buckets.atLeastOne.doc_count ?? 0,
         },
+        totalRestrictedCases: casesRes.aggregations?.restrictedCases?.doc_count ?? 0,
         ...allAttachmentFrameworkStats,
       },
       sec: getSolutionValues({
@@ -210,6 +229,7 @@ const getCasesSavedObjectTelemetry = async (
           ...getAssigneesAggregations(),
           ...getObservablesAggregations(),
           ...getStatusAggregation(),
+          ...getRestrictedCasesAggregation(),
         },
       },
     }),
@@ -226,7 +246,9 @@ const getCasesSavedObjectTelemetry = async (
       ...getCountsAggregationQuery(CASE_SAVED_OBJECT),
       ...getAssigneesAggregations(),
       ...getStatusAggregation(),
+      ...getCustomStatusesAggregation(),
       ...getObservablesAggregations(),
+      ...getRestrictedCasesAggregation(),
       totalsByOwner: {
         terms: { field: `${CASE_SAVED_OBJECT}.attributes.owner` },
       },
@@ -285,10 +307,53 @@ const getAssigneesAggregations = () => ({
   },
 });
 
+/**
+ * Cases on a custom status, bucketed by category. The built-in statuses share their key with
+ * their category, so excluding those keys leaves only custom ones.
+ */
+// Saved object aggregations only allow `term`/`exists` filters, so custom keys are found by
+// excluding the built-in ones from a terms aggregation and summing per category afterwards.
+const getCustomStatusesAggregation = () => ({
+  pausedCases: {
+    filter: { exists: { field: `${CASE_SAVED_OBJECT}.attributes.paused_at` } },
+    aggs: {
+      status: {
+        terms: {
+          field: `${CASE_SAVED_OBJECT}.attributes.status`,
+        },
+      },
+    },
+  },
+  customStatuses: {
+    terms: {
+      field: `${CASE_SAVED_OBJECT}.attributes.status_key`,
+      exclude: CASE_STATUS_CATEGORIES,
+      size: 100,
+    },
+    aggs: {
+      status: {
+        terms: {
+          field: `${CASE_SAVED_OBJECT}.attributes.status`,
+        },
+      },
+    },
+  },
+});
+
 const getStatusAggregation = () => ({
   status: {
     terms: {
       field: `${CASE_SAVED_OBJECT}.attributes.status`,
+    },
+  },
+});
+
+const getRestrictedCasesAggregation = () => ({
+  restrictedCases: {
+    filter: {
+      term: {
+        [`${CASE_SAVED_OBJECT}.attributes.access.mode`]: 'restricted',
+      },
     },
   },
 });

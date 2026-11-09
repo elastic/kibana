@@ -420,6 +420,7 @@ describe('common utils', () => {
               },
               "severity": "low",
               "status": "open",
+              "status_key": null,
               "tags": Array [
                 "defacement",
               ],
@@ -468,6 +469,7 @@ describe('common utils', () => {
               },
               "severity": "low",
               "status": "open",
+              "status_key": null,
               "tags": Array [
                 "Data Destruction",
               ],
@@ -520,6 +522,7 @@ describe('common utils', () => {
               },
               "severity": "low",
               "status": "open",
+              "status_key": null,
               "tags": Array [
                 "LOLBins",
               ],
@@ -576,6 +579,7 @@ describe('common utils', () => {
               },
               "severity": "low",
               "status": "closed",
+              "status_key": null,
               "tags": Array [
                 "LOLBins",
               ],
@@ -661,6 +665,7 @@ describe('common utils', () => {
               },
               "severity": "low",
               "status": "open",
+              "status_key": null,
               "tags": Array [
                 "defacement",
               ],
@@ -734,6 +739,7 @@ describe('common utils', () => {
           },
           "severity": "low",
           "status": "open",
+          "status_key": null,
           "tags": Array [
             "LOLBins",
           ],
@@ -798,6 +804,7 @@ describe('common utils', () => {
           },
           "severity": "low",
           "status": "open",
+          "status_key": null,
           "tags": Array [
             "LOLBins",
           ],
@@ -887,6 +894,7 @@ describe('common utils', () => {
           },
           "severity": "low",
           "status": "open",
+          "status_key": null,
           "tags": Array [
             "LOLBins",
           ],
@@ -949,6 +957,7 @@ describe('common utils', () => {
           },
           "severity": "low",
           "status": "open",
+          "status_key": null,
           "tags": Array [
             "defacement",
           ],
@@ -1016,6 +1025,7 @@ describe('common utils', () => {
           },
           "severity": "low",
           "status": "open",
+          "status_key": null,
           "tags": Array [
             "defacement",
           ],

@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import type { SystemTemplateDefinition } from './system_templates';
+import type {
+  ContextEnginePluginSetup,
+  ContextEnginePluginStart,
+} from '@kbn/context-engine-plugin/server';
 import type { IRouter, CustomRequestHandlerContext, KibanaRequest } from '@kbn/core/server';
 
 /**
@@ -49,7 +54,10 @@ import type {
   AlertingServerSetup,
 } from '@kbn/alerting-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
+import type {
+  AgentBuilderPluginSetup,
+  AgentBuilderPluginStart,
+} from '@kbn/agent-builder-plugin/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type {
   WorkflowsExtensionsServerPluginSetup,
@@ -78,6 +86,7 @@ export interface CasesServerSetupDependencies {
   workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
   workflowsManagement?: WorkflowsServerPluginSetup;
   agentBuilder?: AgentBuilderPluginSetup;
+  contextEngine?: ContextEnginePluginSetup;
 }
 
 export interface CasesServerStartDependencies {
@@ -91,6 +100,8 @@ export interface CasesServerStartDependencies {
   notifications: NotificationsPluginStart;
   ruleRegistry: RuleRegistryPluginStartContract;
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
+  agentBuilder?: AgentBuilderPluginStart;
+  contextEngine?: ContextEnginePluginStart;
   /**
    * Data views server plugin — needed by cases-analytics v2 to create
    * per-space managed `Cases` data views. Optional because v2 is the only
@@ -144,6 +155,8 @@ export interface CasesServerStart {
   config: ConfigType;
 }
 
+export type { SystemTemplateDefinition };
+
 export interface CasesServerSetup {
   attachmentFramework: AttachmentFramework;
   config: ConfigType;
@@ -158,6 +171,12 @@ export interface CasesServerSetup {
    * dynamically registered owners (e.g. FTR fixtures); built-in solutions are pre-registered.
    */
   registerOwnerPrefix: (owner: string, prefix: string) => void;
+  /**
+   * Registers a template Cases ships for an owner: a case template with a task list, plus the
+   * statuses it uses. Cases writes it into every space (stable ids, internal user) when it is
+   * missing; it can be turned off but not deleted.
+   */
+  registerSystemTemplate: (owner: string, definition: SystemTemplateDefinition) => void;
 }
 
 export type PartialField<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
