@@ -262,7 +262,29 @@ export const proposeCandidate = async ({
   Fs.writeFileSync(Path.join(scratchDir, 'bundle.json'), buildTraceBundle(summary));
   const traceCount = copyTraces(summary, scratchDir);
   log.info(`[harness-opt] bundle written with ${traceCount} full graph trace(s)`);
-  Fs.writeFileSync(Path.join(scratchDir, 'history.json'), JSON.stringify(history, null, 2));
+  // History is for learning from, so it carries the verdict and the reason — not the per-seed
+  // tables and full diffs, which buried the one line that matters under tens of KB.
+  const digest = (history as Array<Record<string, unknown>>).map((entry) => {
+    const gate = (entry.gate ?? {}) as Record<string, unknown>;
+    return {
+      round: entry.round,
+      filesChanged: ((entry.filesChanged as string[]) ?? []).map((file) =>
+        file.split('generate_esql/').pop()
+      ),
+      rationale: ((entry.manifest ?? {}) as { rationale?: string }).rationale,
+      outcome: entry.rejected
+        ? `rejected before measurement (${entry.rejected})`
+        : gate.accepted
+        ? 'ACCEPTED'
+        : 'rejected at the gate',
+      why: entry.rejected
+        ? ((entry.failures as string[]) ?? []).join(' ').slice(0, 400)
+        : ((gate.reasons as string[]) ?? []).join('; '),
+      deltaReward: gate.meanDelta,
+      costRatio: gate.costRatio,
+    };
+  });
+  Fs.writeFileSync(Path.join(scratchDir, 'history.json'), JSON.stringify(digest, null, 2));
   Fs.writeFileSync(Path.join(scratchDir, 'feedback.md'), feedback);
   const proposalPath = Path.join(scratchDir, 'proposal.json');
   if (Fs.existsSync(proposalPath)) {

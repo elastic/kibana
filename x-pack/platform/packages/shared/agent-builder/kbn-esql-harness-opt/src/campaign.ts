@@ -213,6 +213,7 @@ export const runCampaign = async ({
         parentHash: incumbentVariant.hash,
         rejected: 'review',
         failures: review.reasons,
+        gate: { accepted: false, reasons: review.reasons },
         manifest: proposal.manifest,
         filesChanged: codeEdits.map((edit) => edit.path),
         diff: attemptedDiff.slice(0, 40_000),
