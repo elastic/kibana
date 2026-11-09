@@ -172,7 +172,9 @@ describe('test getDataStateContainer', () => {
       expect(dataStateContainer.data$.main$.getValue().fetchStatus).toBe(FetchStatus.COMPLETE)
     );
 
-    expect(trackSpy).toHaveBeenCalledWith(expect.objectContaining({ eventName: 'discoverFetchAll' }));
+    expect(trackSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ eventName: 'discoverFetchAll' })
+    );
     expect(reportEvent).not.toHaveBeenCalled();
     trackSpy.mockRestore();
   });
