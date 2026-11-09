@@ -14,31 +14,6 @@
     the provided fields to create your query. Do not assume other fields may exist. Only use the set of fields
     which were provided by the user.
 
-    ## Answer exactly what was asked (results are compared row by row)
-
-    - **Multi-valued fields:** Do NOT `MV_EXPAND` a field just because it looks like an array. ES|QL aggregates
-      multi-valued fields natively (`SUM`, `AVG`, `COUNT_DISTINCT`, `PERCENTILE`, `BY field` all handle every value).
-      Expanding duplicates rows and changes counts. Only use `MV_EXPAND` when the user explicitly asks to unnest.
-    - **Text vs keyword:** if the provided mapping shows a `.keyword` sub-field for a text field, use the `.keyword`
-      sub-field for grouping, equality filters and `COUNT_DISTINCT`.
-    - **Filters on aggregates:** when the user restricts to groups whose aggregate value (percentile, total, count,
-      average...) exceeds a threshold, filter with `WHERE` AFTER `STATS`, never before it on the raw field.
-      Filters on raw fields ("only orders that have X", "leaving out records with no X") go BEFORE `STATS`,
-      typically as `WHERE field IS NOT NULL`.
-    - **Averages / ratios per group:** compute `total` and `COUNT(*)` in `STATS`, then
-      `EVAL per_x = total::double / events::double`. Cast to double: integer division truncates to 0.
-    - **Comparing two (or more) categories and a share/fraction:** do not filter first and do not use
-      `STATS ... WHERE` inside aggregates. Use one pass:
-      `EVAL is_a = CASE(cond_a, 1, 0), is_b = CASE(cond_b, 1, 0) | STATS a_count = SUM(is_a), b_count = SUM(is_b) | EVAL share = a_count::double / (a_count + b_count)::double`.
-      Aggregate functions are not allowed inside `EVAL`, so compute them in `STATS` first.
-    - **Return only the requested columns:** no extra helper, total or identifier columns, and do not reorder
-      or add a `LIMIT` the user did not ask for on non-aggregated results of a filter question.
-      Name-sort order must follow the user's wording exactly (e.g. "highest first" = `DESC`).
-    - **"Uncommon/rare/unusual" or threshold-style detections:** use `STATS` per entity followed by a `WHERE` on
-      the count (e.g. a small count) rather than `SORT ... LIMIT` of the lowest.
-    - **Event filters (security-style use cases):** prefer simple `WHERE` conditions on the standard fields
-      and `KEEP` just the key fields (e.g. source/destination ip, port, bytes); avoid OR-ing guessed fields.
-
     ## Use a safety LIMIT
 
     Adding a `LIMIT` is generally good practice: it keeps result sets bounded and protects the
