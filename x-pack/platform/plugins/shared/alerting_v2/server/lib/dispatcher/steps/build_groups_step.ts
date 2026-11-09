@@ -81,7 +81,7 @@ export function buildActionGroups(
     const ruleId = alert.rule_id;
     const rule = rules.forAlert(alert);
     if (rule && ruleId != null) {
-      group.rules[ruleId] = { name: rule.name };
+      group.rules[ruleId] = { name: rule.name, grouping_fields: rule.groupingFields };
     }
   }
 

@@ -28,6 +28,7 @@ export const createRuleSmlType = ({
   getIsAlertingV2Enabled,
 }: CreateRuleSmlTypeOptions): SmlTypeDefinition => ({
   id: RULE_KI_TYPE,
+  attachmentType: RULE_ATTACHMENT_TYPE,
   fetchFrequency: () => '1m',
 
   async *list(context) {
@@ -96,6 +97,17 @@ export const createRuleSmlType = ({
    * with that declaration.
    */
   getPermissions: () => kibanaPermissions({ kiType: RULE_KI_TYPE }),
+
+  searchByTitle: async ({ title, size }, { request }) => {
+    if (!(await getIsAlertingV2Enabled())) {
+      return [];
+    }
+    const { items } = await getScopedRulesClient(request).findRules({
+      ...(title ? { search: title } : {}),
+      perPage: size,
+    });
+    return items.map(({ id, metadata }) => ({ originId: id, title: metadata?.name ?? id }));
+  },
 
   toAttachment: async (item, context) => {
     if (!(await getIsAlertingV2Enabled())) {

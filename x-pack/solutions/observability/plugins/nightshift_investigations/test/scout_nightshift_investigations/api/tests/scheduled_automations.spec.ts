@@ -154,9 +154,8 @@ apiTest.describe('Scheduled Nightshift automations', { tag: tags.stateful.classi
         .toBe(true);
       if (!investigation) throw new Error('Scheduled investigation was not created');
       const investigationId = investigation.id;
-      expect(investigation.subjects).toMatchObject([
-        { type: 'manual', id: investigationId, trigger_type: 'automatic' },
-      ]);
+      expect(investigation.subjects).toMatchObject([{ type: 'manual', trigger_type: 'automatic' }]);
+      expect(investigation.subjects[0].id).toMatch(/^scheduled-.+-\d{4}-\d{2}-\d{2}T/);
 
       const getRuns = () =>
         kbnClient.request<WorkflowExecutionListDto>({
@@ -178,7 +177,7 @@ apiTest.describe('Scheduled Nightshift automations', { tag: tags.stateful.classi
       expect(execution.data.workflowDefinition.settings?.timeout).toBe('60m');
       expect(execution.data.context).toMatchObject({
         inputs: {
-          message: body.execution.promptTemplate,
+          message: `Instructions:\n${body.execution.promptTemplate}`,
           timeout_seconds: body.runtime.timeoutSeconds,
           context: { scope_query: schedule.scopeQuery, source: 'manual' },
         },

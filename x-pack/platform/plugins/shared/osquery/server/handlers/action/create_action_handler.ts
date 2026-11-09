@@ -26,6 +26,11 @@ import {
   QUERY_NOT_PROVIDED,
 } from '../../../common/translations/errors';
 import { getInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
+import {
+  agentLimitMessage,
+  NO_AGENTS_FOUND_MESSAGE,
+  RouteErrorCode,
+} from '../../../common/workflows/contract/route_messages';
 import type { DispatchEntryPoint } from './dispatch_source';
 import { resolveRuleRunDispatchSource } from './dispatch_source';
 
@@ -52,6 +57,8 @@ interface CreateActionHandlerOptions {
   alertData?: ParsedTechnicalFields & { _index: string };
   error?: string;
   dispatch: DispatchEntryPoint;
+  /** When set, reject before any Fleet action is written if the selection is larger. */
+  maxAgents?: number;
 }
 
 export const createActionHandler = async (
@@ -90,7 +97,15 @@ export const createActionHandler = async (
   );
 
   if (!selectedAgents.length) {
-    throw new CustomHttpRequestError('No agents found for selection', 400);
+    throw new CustomHttpRequestError(NO_AGENTS_FOUND_MESSAGE, 400, RouteErrorCode.NO_AGENTS_FOUND);
+  }
+
+  if (options.maxAgents !== undefined && selectedAgents.length > options.maxAgents) {
+    throw new CustomHttpRequestError(
+      agentLimitMessage(selectedAgents.length, options.maxAgents),
+      400,
+      RouteErrorCode.AGENT_LIMIT_EXCEEDED
+    );
   }
 
   // Resolve the dispatch source once per entry point.
