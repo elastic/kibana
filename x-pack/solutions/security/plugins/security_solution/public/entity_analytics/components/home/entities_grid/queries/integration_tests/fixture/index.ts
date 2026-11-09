@@ -12,7 +12,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import type { QueryArgs, Row } from '../../../common';
 import type { EsqlRunner } from '../../types';
 import { alertsIndex } from './alerts';
-import { anomaliesIndex, ANOMALY_JOB_ID } from './anomalies';
+import { anomaliesIndex, ANOMALY_JOB_ID, customAnomaliesIndex } from './anomalies';
 import { entitiesIndex, ENTITY_INDEX } from './entities';
 import { riskScoresIndex } from './risk_scores';
 import { HOUR_MS, NAMESPACE, toIsoAgo } from './fixture_index';
@@ -30,7 +30,7 @@ import type { FixtureIndex } from './fixture_index';
  * | host:h1          | web-1    | 90, Critical | high_impact | 3       | 4 (1 C, 2 H, 1 M), last 3h | –         | +30         |
  * | host:h2          | web-2    | 50, Moderate | –           | 1       | 1 (L), last 1h             | 1         | 0           |
  * | host:h3          | web-3    | –            | –           | 1       | 0                          | –         | –           |
- * | service:payments | payments | 20, Low      | –           | 1       | 0                          | –         | –           |
+ * | service:payments | payments | 20, Unknown  | –           | 1       | 0                          | –         | –           |
  * | user:alice@okta  | alice    | 70, High     | –           | 1       | 2 (2 M), last 2h           | 2         | -10         |
  * | user:bob@okta    | bob      | –            | –           | 2       | 0                          | –         | –           |
  *
@@ -50,6 +50,7 @@ const FIXTURE_INDICES: readonly FixtureIndex[] = [
   entitiesIndex,
   alertsIndex,
   anomaliesIndex,
+  customAnomaliesIndex,
   riskScoresIndex,
 ];
 

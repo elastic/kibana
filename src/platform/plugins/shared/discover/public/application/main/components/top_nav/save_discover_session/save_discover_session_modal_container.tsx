@@ -11,6 +11,7 @@ import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
+import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import {
   DiscoverInDashboardEventDataKeys,
   DiscoverInDashboardEventName,
@@ -32,6 +33,8 @@ import {
   useInternalStateGetState,
   useInternalStateSelector,
   useRuntimeStateManager,
+  type RuntimeStateManager,
+  type TabState,
 } from '../../../state_management/redux';
 import {
   DiscoverSessionSaveDashboardModal,
@@ -65,22 +68,17 @@ export const DiscoverSessionSaveModalContainer = ({
   const isEmbeddedEditor = services.embeddableEditor.isEmbeddedEditor();
 
   const timeRestore = persistedDiscoverSession?.tabs.some((tab) => tab.timeRestore) ?? false;
-  const isTimeBased = allTabs.some((tab) => {
-    const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tab.id);
-    const tabDataSource = tabRuntimeState.currentDataSource$.getValue();
-
-    if (tabDataSource) return tabDataSource.isTimeBased();
-
-    const tabDataViewDetails = getSerializedSearchSourceDataViewDetails(
-      tab.initialInternalState?.serializedSearchSource,
-      savedDataViews
-    );
-
-    return Boolean(tabDataViewDetails?.timeFieldName);
+  const isTimeBased = hasTimeBasedTab({ tabs: allTabs, savedDataViews, runtimeStateManager });
+  const hasUnresolvedTab = hasUnresolvedDataViewTab({
+    tabs: allTabs,
+    savedDataViews,
+    runtimeStateManager,
   });
+  const initialTimeRestore = timeRestore && (isTimeBased || hasUnresolvedTab);
 
   const isSaveCallbackFlow = Boolean(onSaveCb);
 
+  const [hasTimeRestoreError, setHasTimeRestoreError] = useState(false);
   const [copyOnSaveToggled, setCopyOnSaveToggled] = useState(false);
 
   const showDashboardOptionsForSaveAs = initialCopyOnSave || copyOnSaveToggled;
@@ -108,6 +106,23 @@ export const DiscoverSessionSaveModalContainer = ({
   }> => {
     const userWantsCopy = initialCopyOnSave || newCopyOnSave;
     const effectiveCopyOnSave = userWantsCopy && !!persistedDiscoverSession?.id;
+
+    // Tabs that have not been opened yet need the data view list to tell whether they are time-based
+    await dispatch(internalStateActions.loadDataViewListOnce());
+
+    const state = getState();
+    const isTimeBasedOnSave = hasTimeBasedTab({
+      tabs: selectAllTabs(state),
+      savedDataViews: selectSavedDataViews(state),
+      runtimeStateManager,
+    });
+
+    if (newTimeRestore && !isTimeBasedOnSave) {
+      setHasTimeRestoreError(true);
+      return { discoverSession: undefined };
+    }
+
+    setHasTimeRestoreError(false);
 
     return await dispatch(
       internalStateActions.saveDiscoverSession({
@@ -209,8 +224,9 @@ export const DiscoverSessionSaveModalContainer = ({
       hasLibraryItemWithTitle={services.savedSearch.hasLibraryItemWithTitle}
       hideDashboardOptions={!showDashboardOptions}
       initialTags={persistedDiscoverSession?.tags ?? []}
-      initialTimeRestore={timeRestore}
+      initialTimeRestore={initialTimeRestore}
       isTimeBased={isTimeBased}
+      hasTimeRestoreError={hasTimeRestoreError}
       managed={persistedDiscoverSession?.managed ?? false}
       onClose={onClose}
       onCopyOnSaveChange={onCopyOnSaveChange}
@@ -221,3 +237,43 @@ export const DiscoverSessionSaveModalContainer = ({
     />
   );
 };
+
+const hasTimeBasedTab = ({
+  tabs,
+  savedDataViews,
+  runtimeStateManager,
+}: {
+  tabs: TabState[];
+  savedDataViews: DataViewListItem[];
+  runtimeStateManager: RuntimeStateManager;
+}) =>
+  tabs.some((tab) => {
+    const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tab.id);
+    const tabDataSource = tabRuntimeState.currentDataSource$.getValue();
+
+    if (tabDataSource) return tabDataSource.isTimeBased();
+
+    const tabDataViewDetails = getSerializedSearchSourceDataViewDetails(
+      tab.initialInternalState?.serializedSearchSource,
+      savedDataViews
+    );
+
+    return Boolean(tabDataViewDetails?.timeFieldName);
+  });
+
+const hasUnresolvedDataViewTab = ({
+  tabs,
+  savedDataViews,
+  runtimeStateManager,
+}: Parameters<typeof hasTimeBasedTab>[0]) =>
+  tabs.some((tab) => {
+    const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tab.id);
+
+    if (tabRuntimeState.currentDataSource$.getValue()) return false;
+
+    const serializedSearchSource = tab.initialInternalState?.serializedSearchSource;
+
+    if (typeof serializedSearchSource?.index !== 'string') return false;
+
+    return !getSerializedSearchSourceDataViewDetails(serializedSearchSource, savedDataViews);
+  });

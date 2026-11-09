@@ -52,6 +52,8 @@ export interface IngestChartStatisticsProps {
   isDraft: boolean;
   /** Precomputed totals for sources that span several streams; skips the per-stream fetches. */
   totals?: IngestChartTotals;
+  /** The histogram failed, so values derived from it are unknown rather than zero. */
+  histogramUnavailable?: boolean;
 }
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
@@ -66,6 +68,7 @@ export function IngestChartStatistics({
   isQueryStream,
   isDraft,
   totals,
+  histogramUnavailable = false,
 }: IngestChartStatisticsProps) {
   const {
     core: { uiSettings },
@@ -166,6 +169,7 @@ export function IngestChartStatistics({
       <EuiFlexGroup responsive wrap={false} gutterSize="xl">
         {showTotalDocs && (
           <StatCell
+            data-test-subj="streamsAppIngestStatDocsTotal"
             title={i18n.translate('xpack.streams.ingestChartStatistics.docsTotal.label', {
               defaultMessage: 'Docs total',
             })}
@@ -185,33 +189,39 @@ export function IngestChartStatistics({
         )}
 
         <StatCell
+          data-test-subj="streamsAppIngestStatDocsInRange"
           title={i18n.translate('xpack.streams.ingestChartStatistics.docsInRange.label', {
             defaultMessage: 'Docs in time range',
           })}
-          value={formatNumber(docsInRange, '0,0')}
+          value={histogramUnavailable ? UNKNOWN_STAT_VALUE : formatNumber(docsInRange, '0,0')}
           unit={i18n.translate('xpack.streams.ingestChartStatistics.docsInRange.unit', {
             defaultMessage: 'docs',
           })}
           subtitle={
-            <TrendSubtitle trend={docsInRangeTrend} loading={previousPeriodFetch.loading} />
+            histogramUnavailable ? undefined : (
+              <TrendSubtitle trend={docsInRangeTrend} loading={previousPeriodFetch.loading} />
+            )
           }
         />
 
         <StatCell
+          data-test-subj="streamsAppIngestStatPeakIngestRate"
           title={i18n.translate('xpack.streams.ingestChartStatistics.peakIngestRate.label', {
             defaultMessage: 'Peak ingest rate',
           })}
-          value={formatDocsPerSec(peakRateDocsSec)}
+          value={histogramUnavailable ? UNKNOWN_STAT_VALUE : formatDocsPerSec(peakRateDocsSec)}
           unit={i18n.translate('xpack.streams.ingestChartStatistics.peakIngestRate.unit', {
             defaultMessage: 'docs/sec',
           })}
           subtitle={
-            <TrendSubtitle>
-              {i18n.translate('xpack.streams.ingestChartStatistics.peakIngestRate.avg', {
-                defaultMessage: 'avg. {count}/day',
-                values: { count: formatNumber(avgDocsPerDay, '0,0') },
-              })}
-            </TrendSubtitle>
+            histogramUnavailable ? undefined : (
+              <TrendSubtitle>
+                {i18n.translate('xpack.streams.ingestChartStatistics.peakIngestRate.avg', {
+                  defaultMessage: 'avg. {count}/day',
+                  values: { count: formatNumber(avgDocsPerDay, '0,0') },
+                })}
+              </TrendSubtitle>
+            )
           }
         />
 

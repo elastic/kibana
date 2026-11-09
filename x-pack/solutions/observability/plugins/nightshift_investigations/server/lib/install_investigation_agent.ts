@@ -51,7 +51,6 @@ export const installInvestigationAgent = async ({
       configuration: {
         tools: [],
         skill_ids: [],
-        connector_ids: [],
       },
     },
   });

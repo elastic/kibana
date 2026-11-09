@@ -142,6 +142,7 @@ const setup = ({
     getAgentBuilder: () => agentBuilder,
     getAgentAvailability: () => AVAILABILITY,
     getAutomationsSoClient: automations ? () => automationsSoClient as never : undefined,
+    isUniversalAlertingAvailable: () => true,
     isServerless,
     logger: loggingSystemMock.createLogger(),
   });

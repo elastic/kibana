@@ -6,7 +6,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { offeringBasedSchema, schema } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
 
 /**
@@ -16,9 +16,15 @@ import type { PluginConfigDescriptor } from '@kbn/core/server';
  * startup failure rather than a way to disable the plugin. No plugin-side gate
  * is needed — when the flag is `false` core never adds the plugin to the plugin
  * system, so `setup` is never called.
+ *
+ * On by default in traditional deployments so AlertZero is available on ECH without
+ * `kibana.yml` changes; still off by default in serverless.
  */
 const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: false }),
+  enabled: offeringBasedSchema({
+    serverless: schema.boolean({ defaultValue: false }),
+    traditional: schema.boolean({ defaultValue: true }),
+  }),
 });
 
 export type ProposalsConfig = TypeOf<typeof configSchema>;

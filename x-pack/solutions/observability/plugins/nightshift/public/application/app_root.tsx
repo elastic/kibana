@@ -17,7 +17,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { EMPTY } from 'rxjs';
 import React, { useMemo } from 'react';
 import type { FocusedSignificantEventService } from '../chat/focused_significant_event_service';
-import { NightshiftPage } from '../nightshift_page';
+import { NightshiftPage } from './nightshift_page';
 import type { NightshiftStartDependencies } from '../types';
 import { UnsupportedSpacePrompt } from './unsupported_space_prompt';
 

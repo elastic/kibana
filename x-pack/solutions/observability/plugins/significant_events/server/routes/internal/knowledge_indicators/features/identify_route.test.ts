@@ -249,11 +249,30 @@ describe('feature identification route schemas', () => {
         sampleSize: 20,
         entityFilteredRatio: 0,
         diverseRatio: 1,
+        maxEntityFilters: 10,
         samplingTimeoutMs: 1_000,
       },
     };
 
     expect(prepareRoute.params.safeParse(prepareParams).success).toBe(true);
+    expect(
+      prepareRoute.params.safeParse({
+        ...prepareParams,
+        body: { ...prepareParams.body, maxEntityFilters: undefined },
+      }).success
+    ).toBe(false);
+    expect(
+      prepareRoute.params.safeParse({
+        ...prepareParams,
+        body: { ...prepareParams.body, maxEntityFilters: 51 },
+      }).success
+    ).toBe(false);
+    expect(
+      prepareRoute.params.safeParse({
+        ...prepareParams,
+        body: { ...prepareParams.body, samplingTimeoutMs: undefined },
+      }).success
+    ).toBe(false);
     expect(
       prepareRoute.params.safeParse({
         ...prepareParams,
@@ -300,6 +319,18 @@ describe('feature identification route schemas', () => {
       computedRoute.params.safeParse({
         path: { sourceId: 'logs.test' },
         body: { computedFeaturesTimeoutMs: 240_001 },
+      }).success
+    ).toBe(false);
+    expect(
+      computedRoute.params.safeParse({
+        path: { sourceId: 'logs.test' },
+        body: { computedFeaturesTimeoutMs: 60_000 },
+      }).success
+    ).toBe(true);
+    expect(
+      computedRoute.params.safeParse({
+        path: { sourceId: 'logs.test' },
+        body: {},
       }).success
     ).toBe(false);
   });

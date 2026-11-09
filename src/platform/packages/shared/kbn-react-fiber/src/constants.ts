@@ -19,14 +19,21 @@ export const LEGACY_ROOT_TAG = 0;
 export const EUI_COMPONENT_PREFIX = 'Eui';
 
 /**
+ * Names of components that never identify an application component: react-router's `Route` and
+ * the `@kbn/shared-ux-router` wrapper of the same name run render props written by the component
+ * rendering them. Matched as a whole, so that application components such as `DiscoverMainRoute`
+ * keep their frames.
+ */
+export const IGNORED_COMPONENT_NAMES = ['Route'];
+
+/**
  * Substrings of component names that never identify an application component:
- * higher order components, Emotion wrappers, router and i18n internals.
+ * higher order components, Emotion wrappers and i18n internals.
  */
 export const IGNORED_COMPONENT_NAME_PARTS = [
   'Emotion',
   'ConnectFunction',
   '_',
   'EuiI18n',
-  'Route',
   'Wrapper',
 ];

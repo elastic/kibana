@@ -75,6 +75,7 @@
     "@kbn/eval-kql",
     "@kbn/rrule",
     "@kbn/inference-tracing",
-    "@kbn/server-route-repository-utils"
+    "@kbn/server-route-repository-utils",
+    "@kbn/cloud-plugin"
   ]
 }
