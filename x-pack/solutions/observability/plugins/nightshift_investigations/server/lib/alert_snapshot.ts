@@ -171,30 +171,50 @@ const buildEpisodesSummaryQuery = (spaceId: string, episodeIds: string[]) => {
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
+const fieldJsonLength = (key: string, value: unknown): number =>
+  JSON.stringify(key).length + 1 + JSON.stringify(value).length;
+
 export const truncateV2AlertData = (data: Record<string, unknown>): Record<string, unknown> => {
   const truncated = { ...data };
-  const originalLengths = new Map(
-    Object.entries(data).flatMap(([key, value]) =>
-      Array.isArray(value) ? [[key, value.length]] : []
-    )
+  const sizes = new Map<string, number>(
+    Object.entries(data).map(([key, value]) => [key, fieldJsonLength(key, value)])
   );
-  while (JSON.stringify(truncated).length > MAX_V2_ALERT_DATA_LENGTH) {
-    const [largest] = Object.entries(truncated)
-      .flatMap(([key, value]) =>
-        Array.isArray(value) && value.length > 0
-          ? [{ key, value, size: JSON.stringify(value).length }]
-          : []
-      )
-      .sort((a, b) => b.size - a.size);
-    if (!largest) break;
-    truncated[largest.key] = largest.value.slice(0, Math.floor(largest.value.length / 2));
-    truncated[`${largest.key}_truncated`] = originalLengths.get(largest.key);
-  }
-  while (JSON.stringify(truncated).length > MAX_V2_ALERT_DATA_LENGTH) {
-    const [largestField] = Object.entries(truncated).sort(
-      (a, b) => JSON.stringify(b[1]).length - JSON.stringify(a[1]).length
+  let fieldsTotal = [...sizes.values()].reduce((sum, size) => sum + size, 0);
+  const jsonLength = () => 2 + fieldsTotal + Math.max(sizes.size - 1, 0);
+  const setField = (key: string, value: unknown) => {
+    const size = fieldJsonLength(key, value);
+    fieldsTotal += size - (sizes.get(key) ?? 0);
+    sizes.set(key, size);
+    truncated[key] = value;
+  };
+  const largestOf = (keys: string[]): string | undefined =>
+    keys.reduce<string | undefined>(
+      (best, key) =>
+        best === undefined || (sizes.get(key) ?? 0) > (sizes.get(best) ?? 0) ? key : best,
+      undefined
     );
-    delete truncated[largestField[0]];
+
+  const arrayKeys = Object.keys(data).filter((key) => Array.isArray(data[key]));
+  while (jsonLength() > MAX_V2_ALERT_DATA_LENGTH) {
+    const key = largestOf(
+      arrayKeys.filter((arrayKey) => {
+        const value = truncated[arrayKey];
+        return Array.isArray(value) && value.length > 0;
+      })
+    );
+    if (key === undefined) break;
+    const original = data[key];
+    const value = truncated[key];
+    if (!Array.isArray(original) || !Array.isArray(value)) break;
+    setField(key, value.slice(0, Math.floor(value.length / 2)));
+    setField(`${key}_truncated`, original.length);
+  }
+  while (jsonLength() > MAX_V2_ALERT_DATA_LENGTH) {
+    const key = largestOf([...sizes.keys()]);
+    if (key === undefined) break;
+    fieldsTotal -= sizes.get(key) ?? 0;
+    sizes.delete(key);
+    delete truncated[key];
   }
   return truncated;
 };

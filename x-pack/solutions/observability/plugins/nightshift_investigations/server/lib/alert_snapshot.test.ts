@@ -8,7 +8,12 @@
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
-import { fetchInvestigationAlertSnapshots, parseAlertSnapshot } from './alert_snapshot';
+import { MAX_V2_ALERT_DATA_LENGTH } from '../../common';
+import {
+  fetchInvestigationAlertSnapshots,
+  parseAlertSnapshot,
+  truncateV2AlertData,
+} from './alert_snapshot';
 
 const alert = {
   'kibana.alert.uuid': 'alert-1',
@@ -403,5 +408,59 @@ describe('fetchInvestigationAlertSnapshots', () => {
     alertsClient.find.mockRejectedValue(lookupError);
 
     await expect(run(alertsClient, makeLookup(), ['alert-1'])).rejects.toBe(lookupError);
+  });
+});
+
+describe('truncateV2AlertData', () => {
+  const lines = (count: number, width: number) =>
+    Array.from({ length: count }, (_, i) => `line-${i}-${'x'.repeat(width)}`);
+  const jsonLength = (value: unknown) => JSON.stringify(value).length;
+
+  it('returns data within the limit untouched', () => {
+    const data = { event_id: 'evt-1', signals: lines(3, 10) };
+
+    expect(truncateV2AlertData(data)).toEqual(data);
+  });
+
+  it('halves the largest array until the data fits and records its original length', () => {
+    const data = { event_id: 'evt-1', signals: lines(400, 100), tags: lines(5, 10) };
+
+    const result = truncateV2AlertData(data);
+
+    expect(jsonLength(result)).toBeLessThanOrEqual(MAX_V2_ALERT_DATA_LENGTH);
+    expect(result).toMatchObject({ event_id: 'evt-1', signals_truncated: 400, tags: data.tags });
+    expect(result).not.toHaveProperty('tags_truncated');
+    expect((result.signals as string[]).length).toBeLessThan(400);
+  });
+
+  it('keeps the serialized length within the limit when several arrays are large', () => {
+    const data = {
+      event_id: 'evt-1',
+      signals: lines(300, 90),
+      blast_radius: lines(300, 70),
+      causal_features: lines(300, 50),
+    };
+
+    expect(jsonLength(truncateV2AlertData(data))).toBeLessThanOrEqual(MAX_V2_ALERT_DATA_LENGTH);
+  });
+
+  it('drops the largest field, keeping the small ones, when no array is left to halve', () => {
+    const data = { event_id: 'evt-1', title: 'Checkout errors', summary: 'x'.repeat(40_000) };
+
+    expect(truncateV2AlertData(data)).toEqual({ event_id: 'evt-1', title: 'Checkout errors' });
+  });
+
+  it('drops an oversize non-array field once halving the arrays is not enough', () => {
+    const data = {
+      event_id: 'evt-1',
+      signals: lines(50, 10),
+      summary: 'x'.repeat(40_000),
+    };
+
+    const result = truncateV2AlertData(data);
+
+    expect(jsonLength(result)).toBeLessThanOrEqual(MAX_V2_ALERT_DATA_LENGTH);
+    expect(result).toMatchObject({ event_id: 'evt-1', signals_truncated: 50 });
+    expect(result).not.toHaveProperty('summary');
   });
 });
