@@ -112,10 +112,11 @@ off.
 - The body text stays as filed. Only the hidden metadata is updated (report count, history, last
   report); the test ids and branches recorded before are kept, so `/skip` still covers a branch
   the suite stopped failing on this week.
-- A comment with the new numbers ("This test suite still appears to be flaky […]") is posted when
-  the suite failed since the last one, or since the issue was filed, and at least
+- A one-line comment ("Still flaky on `main`: 4% of builds (18 / 441). Last failed […]") is
+  posted when the suite failed since the last one, or since the issue was filed, and at least
   `--comment-cooldown-days` later (default 3). Failures in between are covered by the next
-  comment. Every comment ends with how to skip the test.
+  comment. It says what changed since the issue or the last comment showed it (tests, branches
+  and errors), or that nothing did. How to skip the test is at the end of the body.
 - A closed issue is reopened, with a comment, when the suite failed after it was closed. It stays
   closed when it was closed as a duplicate, or when the suite has not failed since: the report
   window can still hold the failures a fix was merged for.
@@ -136,10 +137,12 @@ refreshes them any more.
 The body ends with `flaky-test-suite` metadata (`<!-- kibanaCiData = … -->`): the suite's file,
 title, framework and test ids, the branches its tests failed on (`suite.branches`, pull requests
 left out), the pipelines its file failed on (`suite.pipelines`), and the reports that found it
-flaky (`report.count`, `report.generatedAt`, the last 30 in `report.history`, and
-`report.commentedAt` once a comment was posted). This command uses it to recognise its own issues;
-`elastic/kibana-operations` (`triage/`) reads it too: `/skip` for the `describe` block to skip and
-the branches to skip it on, the failed-test alerts for the pipelines and the report count.
+flaky (`report.count`, `report.generatedAt`, the last 30 in `report.history`,
+`report.commentedAt` once a comment was posted, and in `report.posted` the flaky tests, their
+branches and the errors the issue or the last comment showed). This command uses it to recognise
+its own issues; `elastic/kibana-operations` (`triage/`) reads it too: `/skip` for the `describe`
+block to skip and the branches to skip it on, the failed-test alerts for the pipelines and the
+report count.
 
 ### How issues are matched
 
