@@ -16,6 +16,7 @@ import type {
 } from './types';
 import { registerTools } from './tools';
 import { registerAttachmentTypes } from './attachment_types';
+import { registerConversationEventTypes } from './conversation_events';
 import { registerConversationTemplates } from './conversation_templates';
 import { registerSkills } from './skills';
 import { createConnectorSmlType } from './sml_types/connector';
@@ -32,9 +33,11 @@ export class AgentBuilderPlatformPlugin
     >
 {
   private logger: Logger;
+  private readonly isServerless: boolean;
 
   constructor(context: PluginInitializerContext<PluginConfig>) {
     this.logger = context.logger.get();
+    this.isServerless = context.env.packageInfo.buildFlavor === 'serverless';
   }
 
   setup(
@@ -44,12 +47,15 @@ export class AgentBuilderPlatformPlugin
     registerTools({
       coreSetup,
       setupDeps,
+      isServerless: this.isServerless,
     });
     registerAttachmentTypes({
       coreSetup,
       setupDeps,
+      logger: this.logger,
     });
     registerConversationTemplates({ setupDeps });
+    registerConversationEventTypes({ setupDeps });
     const getActionsStart = async () => {
       const [, startDeps] = await coreSetup.getStartServices();
       return startDeps.actions;

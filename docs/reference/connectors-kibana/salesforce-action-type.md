@@ -11,6 +11,8 @@ applies_to:
 
 The Salesforce connector communicates with the Salesforce REST API to query and retrieve data from your Salesforce org. It supports SOQL queries, SOSL full-text search, fetching records by ID, listing records for standard and custom objects, retrieving sobject metadata (describe), and downloading file content from ContentVersion records.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 ## Create connectors in {{kib}} [define-salesforce-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.

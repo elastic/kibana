@@ -41,3 +41,24 @@ export const EPISODE_SEVERITY_CRITICAL_LABEL = i18n.translate(
     defaultMessage: 'Critical',
   }
 );
+
+export const EPISODE_SEVERITY_WARNING_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.severity.warningLabel',
+  {
+    defaultMessage: 'Warning',
+  }
+);
+
+export const EPISODE_SEVERITY_MINOR_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.severity.minorLabel',
+  {
+    defaultMessage: 'Minor',
+  }
+);
+
+export const EPISODE_SEVERITY_MAJOR_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.severity.majorLabel',
+  {
+    defaultMessage: 'Major',
+  }
+);

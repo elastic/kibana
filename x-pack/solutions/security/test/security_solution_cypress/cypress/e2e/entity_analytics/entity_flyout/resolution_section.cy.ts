@@ -7,7 +7,6 @@
 
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
-import { disableNewFlyout } from '../../../tasks/api_calls/kibana_advanced_settings';
 import {
   interceptEntityStoreStatus,
   setGrouping,
@@ -44,7 +43,7 @@ import {
   interceptResolutionGroup,
   interceptResolutionMutations,
   openEntityFlyoutFromHomeByName,
-  openResolutionTabFromRightPanel,
+  openResolutionGroupTool,
   searchForEntity,
 } from '../../../tasks/entity_analytics/entity_flyout_resolution';
 
@@ -58,9 +57,9 @@ const waitForTableToLoad = () => {
   cy.get(DATA_GRID_ROW_CELL).should('have.length.at.least', 1);
 };
 
-// The ResolutionGroupTable is rendered in both the right-panel ResolutionSection
-// (read-only) and the left-panel ResolutionGroupTab — same `data-test-subj` in
-// two places. Tests assert against the left-tab instance where users interact;
+// The ResolutionGroupTable is rendered in both the entity flyout's ResolutionSection
+// (read-only) and the Resolution group tool flyout — same `data-test-subj` in
+// two places. Tests assert against the tool instance where users interact;
 // scoping to RESOLUTION_GROUP_TAB_CONTENT disambiguates.
 const groupTable = () => cy.get(RESOLUTION_GROUP_TAB_CONTENT).find(RESOLUTION_GROUP_TABLE);
 
@@ -71,10 +70,10 @@ describe(
     env: {
       ftrConfig: {
         kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'entityAnalyticsNewHomePageEnabled',
-          ])}`,
           '--uiSettings.overrides.securitySolution:entityStoreEnableV2=true',
+          // This suite asserts against the legacy home page's `entityAnalyticsHomePage`
+          // test subject; pin the flag until the suite is migrated to the new page.
+          '--feature_flags.overrides.securitySolution.useNewEntityAnalyticsPage=false',
         ],
       },
     },
@@ -95,7 +94,6 @@ describe(
       interceptResolutionGroup();
       interceptResolutionMutations();
       login();
-      disableNewFlyout();
       // Flat data-grid mode so we can click the row-expand button to open the entity flyout.
       setGrouping(['none']);
       visit(ENTITY_ANALYTICS_HOME_PAGE_URL);
@@ -104,7 +102,7 @@ describe(
     });
 
     describe('User flyout — solo entity (read-only)', () => {
-      it('renders ResolutionSection on the right panel and opens the empty-state Resolution group tab on the left', () => {
+      it('renders ResolutionSection in the entity flyout and opens the empty-state Resolution group tool', () => {
         openEntityFlyoutFromHomeByName('Charlie Brown');
         cy.wait('@resolutionGroup', { timeout: 20000 });
 
@@ -114,11 +112,11 @@ describe(
         cy.get(RESOLUTION_SECTION).scrollIntoView();
         cy.get(RESOLUTION_SECTION).should('be.visible');
 
-        openResolutionTabFromRightPanel();
+        openResolutionGroupTool();
 
-        // The empty-state component is rendered in both the right-panel
-        // ResolutionSection and the left-panel ResolutionGroupTabContent — same
-        // data-test-subj appears twice. Scope the assertion to the left tab.
+        // The empty-state component is rendered in both the entity flyout
+        // ResolutionSection and the tool's ResolutionGroupTabContent — same
+        // data-test-subj appears twice. Scope the assertion to the tool.
         cy.get(RESOLUTION_GROUP_TAB_CONTENT)
           .find(RESOLUTION_EMPTY_STATE)
           .should('be.visible')
@@ -134,7 +132,7 @@ describe(
       it('"Add entities" accordion is collapsed by default and reveals the search field when expanded', () => {
         openEntityFlyoutFromHomeByName('Charlie Brown');
         cy.wait('@resolutionGroup', { timeout: 20000 });
-        openResolutionTabFromRightPanel();
+        openResolutionGroupTool();
 
         // Collapsed state: the inner section content is rendered but not visible.
         cy.get(ADD_ENTITIES_ACCORDION).should('exist');
@@ -148,7 +146,7 @@ describe(
       it('search debounces, populates the table with Last seen + risk-score cells, exposes the showing counter, and supports 10 / 25 / 50 page sizes', () => {
         openEntityFlyoutFromHomeByName('Charlie Brown');
         cy.wait('@resolutionGroup', { timeout: 20000 });
-        openResolutionTabFromRightPanel();
+        openResolutionGroupTool();
         expandAddEntitiesAccordion();
 
         searchForEntity(SEARCH_QUERY);
@@ -189,7 +187,7 @@ describe(
       it('first link from a solo entity opens the confirm modal, defaults primary to the current entity, and creates the resolution group on confirm', () => {
         openEntityFlyoutFromHomeByName('Eric Cartman');
         cy.wait('@resolutionGroup', { timeout: 20000 });
-        openResolutionTabFromRightPanel();
+        openResolutionGroupTool();
         expandAddEntitiesAccordion();
 
         searchForEntity(SEARCH_QUERY);
@@ -217,7 +215,7 @@ describe(
         // Part A — pre-existing group of 3 (Alice + 2 aliases): direct link, no modal.
         openEntityFlyoutFromHomeByName('Alice Johnson');
         cy.wait('@resolutionGroup', { timeout: 20000 });
-        openResolutionTabFromRightPanel();
+        openResolutionGroupTool();
 
         groupTable().should('be.visible');
         groupTable().find(EUI_BASIC_TABLE_ROW).should('have.length', 3);
@@ -245,7 +243,7 @@ describe(
 
         openEntityFlyoutFromHomeByName('Frank Castle');
         cy.wait('@resolutionGroup', { timeout: 20000 });
-        openResolutionTabFromRightPanel();
+        openResolutionGroupTool();
         expandAddEntitiesAccordion();
         searchForEntity(SEARCH_QUERY);
         cy.wait('@entitiesList', { timeout: 20000 });
@@ -271,7 +269,7 @@ describe(
       it('removes an alias from an existing group, and disables the remove button on the primary entity', () => {
         openEntityFlyoutFromHomeByName('Greg House');
         cy.wait('@resolutionGroup', { timeout: 20000 });
-        openResolutionTabFromRightPanel();
+        openResolutionGroupTool();
 
         groupTable().should('be.visible');
         groupTable().find(EUI_BASIC_TABLE_ROW).should('have.length', 3);
@@ -293,11 +291,11 @@ describe(
       });
     });
 
-    describe('User flyout — group risk-score badge in the left tab header', () => {
+    describe('User flyout — group risk-score badge in the Resolution group tool header', () => {
       it('shows a numeric RiskScoreCell badge when the group has a calculated resolution risk score', () => {
         openEntityFlyoutFromHomeByName('Alice Johnson');
         cy.wait('@resolutionGroup', { timeout: 20000 });
-        openResolutionTabFromRightPanel();
+        openResolutionGroupTool();
 
         cy.get(RESOLUTION_GROUP_TAB_CONTENT).within(() => {
           cy.contains('Group risk score').should('be.visible');
@@ -309,7 +307,7 @@ describe(
       it('shows the N/A fallback badge when the group lacks a calculated resolution risk score', () => {
         openEntityFlyoutFromHomeByName('Diana Prince');
         cy.wait('@resolutionGroup', { timeout: 20000 });
-        openResolutionTabFromRightPanel();
+        openResolutionGroupTool();
 
         cy.get(RESOLUTION_GROUP_TAB_CONTENT).within(() => {
           cy.contains('Group risk score').should('be.visible');
@@ -329,7 +327,7 @@ describe(
         cy.get(RESOLUTION_SECTION).scrollIntoView();
         cy.get(RESOLUTION_SECTION).should('be.visible');
 
-        openResolutionTabFromRightPanel();
+        openResolutionGroupTool();
 
         groupTable().should('be.visible');
         groupTable().find(EUI_BASIC_TABLE_ROW).should('have.length.at.least', 2);
@@ -352,7 +350,7 @@ describe(
     });
 
     describe('Service flyout — smoke', () => {
-      it('renders ResolutionSection and lists the existing service alias on the left tab', () => {
+      it('renders ResolutionSection and lists the existing service alias in the Resolution group tool', () => {
         openEntityFlyoutFromHomeByName('api-gateway-prod');
         cy.wait('@resolutionGroup', { timeout: 20000 });
 
@@ -362,7 +360,7 @@ describe(
         cy.get(RESOLUTION_SECTION).scrollIntoView();
         cy.get(RESOLUTION_SECTION).should('be.visible');
 
-        openResolutionTabFromRightPanel();
+        openResolutionGroupTool();
 
         groupTable().should('be.visible');
         groupTable().find(EUI_BASIC_TABLE_ROW).should('have.length.at.least', 2);

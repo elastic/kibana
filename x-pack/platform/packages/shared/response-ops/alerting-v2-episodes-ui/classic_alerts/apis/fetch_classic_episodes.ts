@@ -14,6 +14,7 @@ import type {
   EpisodesFilterState,
   EpisodesSortState,
 } from '../../queries/episodes_query';
+import type { SeverityExtension } from '../../types/episode_data_source';
 import { buildClassicAlertsQuery, buildClassicAlertsSort } from '../utils/query';
 import {
   type ClassicAlertSource,
@@ -29,6 +30,7 @@ export interface FetchClassicAlertsAsEpisodesOptions extends BaseRacOptions {
   timeRange?: TimeRange | null;
   filterState?: EpisodesFilterState;
   sortState?: EpisodesSortState;
+  severityExtensions?: SeverityExtension[];
   abortSignal?: AbortSignal;
   services: { http: HttpStart };
 }
@@ -44,6 +46,7 @@ export const fetchClassicAlertsAsEpisodes = async ({
   timeRange,
   filterState,
   sortState,
+  severityExtensions,
   abortSignal,
   services: { http },
 }: FetchClassicAlertsAsEpisodesOptions): Promise<AlertEpisode[]> => {
@@ -52,7 +55,7 @@ export const fetchClassicAlertsAsEpisodes = async ({
     {
       rule_type_ids: ruleTypeIds,
       query: buildClassicAlertsQuery(filterState, toTimeRangeParam(timeRange)),
-      sort: buildClassicAlertsSort(sortState),
+      sort: buildClassicAlertsSort(sortState, severityExtensions),
       size: Math.min(pageSize, CLASSIC_ALERTS_LIST_PAGE_SIZE),
       track_total_hits: false,
       _source: [...CLASSIC_ALERT_EPISODE_SOURCE_FIELDS],
@@ -68,10 +71,11 @@ export const fetchClassicAlertsAsEpisodes = async ({
 
   if (episodes.length === 0) return episodes;
 
-  return enrichWithSnoozeState(episodes, http, abortSignal);
+  return enrichClassicEpisodesWithSnoozeState(episodes, http, abortSignal);
 };
 
-const enrichWithSnoozeState = async (
+/** Stamps classic snooze fields from the rules API, rethrowing abort and ignoring other lookup failures. */
+export const enrichClassicEpisodesWithSnoozeState = async (
   episodes: AlertEpisode[],
   http: HttpStart,
   abortSignal?: AbortSignal
@@ -83,7 +87,11 @@ const enrichWithSnoozeState = async (
   try {
     const result = await getAlertSnoozeStateByRule({ http, ruleIds, signal: abortSignal });
     snoozeData = result.data;
-  } catch {
+  } catch (error) {
+    // A cancelled query must not cache episodes that are missing snooze state.
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw error;
+    }
     return episodes;
   }
 
@@ -111,11 +119,11 @@ const enrichWithSnoozeState = async (
     const snoozedInstances = snoozedByRule.get(ruleId);
     const isSnoozed = snoozedInstances?.has(instanceId) ?? false;
 
-    if (isSnoozed) {
+    if (isSnoozed && snoozedInstances) {
       return {
         ...ep,
         last_snooze_action: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
-        snooze_expiry: snoozedInstances!.get(instanceId) ?? null,
+        snoozed_until: snoozedInstances.get(instanceId) ?? null,
         ...(isMuted ? { is_muted: true } : {}),
       };
     }
@@ -124,7 +132,7 @@ const enrichWithSnoozeState = async (
       return {
         ...ep,
         last_snooze_action: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
-        snooze_expiry: null,
+        snoozed_until: null,
         is_muted: true,
       };
     }

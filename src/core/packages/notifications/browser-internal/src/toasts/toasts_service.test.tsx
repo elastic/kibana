@@ -24,6 +24,7 @@ const mockRendering = renderingServiceMock.create();
 const mockAnalyticsSetup = analyticsServiceMock.createAnalyticsServiceSetup();
 
 const coordinator = notificationCoordinator.bind(new Coordinator());
+const mockScreenReader = { notify: jest.fn() };
 
 describe('#setup()', () => {
   it('returns a ToastsApi', () => {
@@ -55,6 +56,7 @@ describe('#start()', () => {
       overlays: mockOverlays,
       analytics: mockAnalytics,
       notificationCoordinator: coordinator,
+      screenReader: mockScreenReader,
     });
     expect(mockReactDomRender.mock.calls).toMatchSnapshot();
   });
@@ -76,6 +78,7 @@ describe('#start()', () => {
         overlays: mockOverlays,
         analytics: mockAnalytics,
         notificationCoordinator: coordinator,
+        screenReader: mockScreenReader,
       })
     ).toBeInstanceOf(ToastsApi);
   });
@@ -97,6 +100,7 @@ describe('#stop()', () => {
       overlays: mockOverlays,
       analytics: mockAnalytics,
       notificationCoordinator: coordinator,
+      screenReader: mockScreenReader,
     });
 
     expect(mockReactDomUnmount).not.toHaveBeenCalled();
@@ -125,6 +129,7 @@ describe('#stop()', () => {
       overlays: mockOverlays,
       analytics: mockAnalytics,
       notificationCoordinator: coordinator,
+      screenReader: mockScreenReader,
     });
     toasts.stop();
     expect(targetDomElement.childNodes).toHaveLength(0);

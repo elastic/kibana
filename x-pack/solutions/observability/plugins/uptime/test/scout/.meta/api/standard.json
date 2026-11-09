@@ -1,5 +1,5 @@
 {
-  "sha1": "19098b207a27397dccdd42aac23a8e232725113f",
+  "sha1": "75328191b4d9faac0bfca968e8b163493387d3f2",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -377,7 +377,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/ping_list.spec.ts",
-        "line": 19,
+        "line": 21,
         "column": 24
       }
     },
@@ -390,8 +390,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/ping_list.spec.ts",
-        "line": 137,
-        "column": 7
+        "line": 139,
+        "column": 13
       }
     },
     {
@@ -403,7 +403,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/ping_list.spec.ts",
-        "line": 129,
+        "line": 132,
         "column": 27
       }
     },

@@ -6,7 +6,7 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import type { PluginInitializerContext, SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { RuleEventPublisher } from '../events/rule_event_publisher/rule_event_publisher';
 import { createRuleEventPublisher } from '../events/rule_event_publisher/rule_event_publisher.mock';
@@ -16,6 +16,7 @@ import { createUserService } from '../services/user_service/user_service.mock';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { ArtifactTypeRegistry, registerBuiltinArtifactTypes } from '../artifact_types';
 import { RulesClient } from './rules_client';
+import { createConfigServiceMock } from '../services/config_service/config_service.mock';
 
 export function createRulesClient(): {
   rulesClient: RulesClient;
@@ -37,21 +38,18 @@ export function createRulesClient(): {
     rules: { minimumScheduleInterval: '1m', maxScheduledPerMinute: 400 },
   } as PluginConfig;
 
-  const pluginConfigAccessor = {
-    get: () => config,
-  } as unknown as PluginInitializerContext<PluginConfig>['config'];
-
   const rulesClient = new RulesClient(
     request,
     rulesSavedObjectService,
     taskManager,
     userService,
     'default',
-    pluginConfigAccessor,
+    createConfigServiceMock(config),
     rulesSavedObjectService,
     ruleEventPublisher,
     loggerService,
-    artifactTypeRegistry
+    artifactTypeRegistry,
+    { actor: 'user', options: {} }
   );
 
   return { rulesClient, mockSavedObjectsClient, ruleEventPublisher };

@@ -7,6 +7,7 @@
 
 import { withActiveInferenceSpan, ElasticGenAIAttributes } from '@kbn/inference-tracing';
 import type { TimeRange } from '@kbn/agent-builder-common';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import { EffortLevels } from '@kbn/agent-builder-common';
 import type { ModelProvider, ScopedModel } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
@@ -20,6 +21,9 @@ import type { RequestDocumentationAction } from './actions';
 import { indexExplorer } from '../index_explorer';
 import { loadDocumentation } from './documentation';
 import { createRequestDocumentationPromptNoResource } from './prompts';
+import { withPromqlKeyword } from './promql_keyword';
+
+export const DEFAULT_EXECUTION_TIMEOUT_MS = 30_000;
 
 export class GenerateEsqlNoDataError extends Error {
   readonly code = 'NO_DATA' as const;
@@ -44,7 +48,9 @@ export interface GenerateEsqlResponse {
   answer?: string;
   /**
    * Results from executing the query.
-   * Available if `executeQuery` was true and if a successful query was executed.
+   * Available when {@link GenerateEsqlOptions.execute} is `'data'` or `'schema'`
+   * and the query ran successfully. When `'schema'`, `values` is a probe sample
+   * of at most one row, not the full result set.
    */
   results?: EsqlResponse;
   /**
@@ -63,9 +69,12 @@ export type GenerateEsqlModelDeps =
 
 export type GenerateEsqlDeps = GenerateEsqlModelDeps & {
   esClient: ElasticsearchClient;
+  internalEsClient?: ElasticsearchClient;
   logger: Logger;
   events?: ToolEventEmitter;
 };
+
+type GenerateEsqlExecute = 'none' | 'schema' | 'data';
 
 export interface GenerateEsqlOptions {
   /**
@@ -73,7 +82,7 @@ export interface GenerateEsqlOptions {
    */
   nlQuery: string;
   /**
-   * The resource (index/datastream/alias) to target
+   * The resource (index, datastream, alias, or ES|QL view) to target
    */
   index?: string;
   /**
@@ -85,16 +94,29 @@ export interface GenerateEsqlOptions {
    */
   additionalInstructions?: string;
   /**
-   * If true, will attempt to execute the query and will return the results.
-   * Defaults to `true`
+   * How to run the generated query.
+   * - `'data'` (default): execute and return rows — search and other callers that
+   *   need the result set.
+   * - `'schema'`: probe-execute to validate and collect columns (`LIMIT 1`,
+   *   keep all-null columns). Does not change the generated query text.
+   *   `results.values` is a sample of at most one row, not the dataset.
+   *   Use this when rows are not the product (e.g. visualization authoring).
+   * - `'none'`: do not execute; AST-validate only.
    */
-  executeQuery?: boolean;
+  execute?: GenerateEsqlExecute;
   /**
    * Maximum number of retries if the query fails (execute or AST validation).
-   * When `executeQuery` is true: retries after execution errors; when false: retries after AST validation errors.
+   * When `execute` is `'data'` or `'schema'`: retries after execution errors;
+   * when `'none'`: retries after AST validation errors.
    * Defaults to `3`
    * */
   maxRetries?: number;
+  /**
+   * How long, in milliseconds, a generated query may run before it is given up on. Applies to
+   * every execution of the generation loop.
+   * Defaults to {@link DEFAULT_EXECUTION_TIMEOUT_MS} (30 seconds).
+   */
+  executionTimeoutMs?: number;
   /**
    * Maximum row limit to use in generated ES|QL queries.
    */
@@ -105,6 +127,8 @@ export interface GenerateEsqlOptions {
    * Defaults to last 24 hours if not provided.
    */
   timeRange?: TimeRange;
+  /** The values of the dashboard controls a query may refer to (`?name`), bound when a candidate is executed. */
+  esqlVariables?: ESQLControlVariable[];
   /**
    * If true, omits the instruction to use named parameters (?_tstart, ?_tend)
    * for time range filtering in generated queries.
@@ -114,6 +138,14 @@ export interface GenerateEsqlOptions {
    * If true, external ES|QL datasets are considered when discovering and resolving the target.
    */
   includeDatasets?: boolean;
+  /**
+   * If true, ES|QL views are considered when discovering and resolving the target.
+   */
+  includeViews?: boolean;
+  /**
+   * If true, frozen tier indices are queried.
+   */
+  includeFrozen?: boolean;
   /**
    * EIS session id for best-effort provider stickiness across calls. Non-EIS connectors ignore it.
    */
@@ -125,17 +157,22 @@ export type GenerateEsqlParams = GenerateEsqlOptions & GenerateEsqlDeps;
 export const generateEsql = async ({
   nlQuery,
   index,
-  executeQuery = true,
+  execute = 'data',
   additionalInstructions,
   additionalContext,
   maxRetries = 3,
+  executionTimeoutMs = DEFAULT_EXECUTION_TIMEOUT_MS,
   rowLimit,
   timeRange: inputTimeRange,
+  esqlVariables,
   disableNamedParams,
   includeDatasets = false,
+  includeViews = false,
+  includeFrozen = false,
   model: inputModel,
   modelProvider,
   esClient,
+  internalEsClient,
   logger,
   sessionId,
 }: GenerateEsqlParams): Promise<GenerateEsqlResponse> => {
@@ -145,7 +182,10 @@ export const generateEsql = async ({
   const timeRange = inputTimeRange ?? { from: 'now-24h', to: 'now' };
   const docBase = await EsqlDocumentBase.load();
   const documentation = await loadDocumentation();
-  const esqlCallbacks = buildServerESQLCallbacks({ client: esClient });
+  const esqlCallbacks = buildServerESQLCallbacks({
+    esClient: { asCurrentUser: esClient, asInternalUser: internalEsClient ?? esClient },
+    logger,
+  });
 
   const graph = createNlToEsqlGraph({
     model,
@@ -154,6 +194,8 @@ export const generateEsql = async ({
     documentation,
     esqlCallbacks,
     includeDatasets,
+    includeViews,
+    includeFrozen,
     sessionId,
   });
 
@@ -180,9 +222,19 @@ export const generateEsql = async ({
             name: 'request_documentation',
           });
           const docPromise = requestDocModel
-            .invoke(createRequestDocumentationPromptNoResource({ nlQuery, documentation }))
+            .invoke(
+              createRequestDocumentationPromptNoResource({
+                nlQuery,
+                documentation,
+                additionalContext,
+              })
+            )
             .then(({ commands = [], functions = [] }) => {
-              const requestedKeywords = [...commands, ...functions];
+              const requestedKeywords = withPromqlKeyword(
+                [...commands, ...functions],
+                nlQuery,
+                additionalContext
+              );
               return {
                 type: 'request_documentation' as const,
                 requestedKeywords,
@@ -201,6 +253,8 @@ export const generateEsql = async ({
               esClient,
               limit: 1,
               includeDatasets,
+              includeViews,
+              includeFrozen,
               model,
               logger,
             }),
@@ -220,13 +274,15 @@ export const generateEsql = async ({
           {
             nlQuery,
             target: selectedTarget,
-            executeQuery,
+            execute,
             maxRetries,
             additionalInstructions,
             additionalContext,
             rowLimit,
             disableNamedParams,
             timeRange,
+            esqlVariables,
+            executionTimeoutMs,
             // Empty when index is known — graph runs request_documentation in-graph with resource context.
             actions: precomputedDocAction ? [precomputedDocAction] : [],
           },

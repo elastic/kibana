@@ -6,9 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
-
 export const FakeConnectors = {
   slack1: {
     id: 'a1b2c3d4-e5f6-7890-ab12-cd34ef567890',
@@ -30,6 +28,13 @@ export const FakeConnectors = {
     id: 'b2c3d4e5-f6a7-8901-bc23-de45fa678901',
     actionTypeId: 'slack',
     name: 'fake_slack_failing_connector',
+  },
+  /** Fails params.failures times (default 1) then succeeds; the proxy for a
+   *  conflict that clears once the preceding step re-runs. */
+  transientlyFailing: {
+    id: 'c4d5e6f7-a8b9-0123-cd45-ef67ab890123',
+    actionTypeId: 'inference',
+    name: 'transiently_failing_connector',
   },
   slow_3sec_inference: {
     id: 'd4e5f6a7-b8c9-0123-de45-fa67bc890123',
@@ -53,13 +58,12 @@ export const FakeConnectors = {
     name: 'large_response_connector',
   },
 };
-
+const transientFailures = new Map<string, number>();
 export async function getMockedConnectorResult(
   id: string,
   params: Record<string, unknown>
 ): Promise<ActionTypeExecutorResult<unknown>> {
   const fakeConnector = Object.values(FakeConnectors).find((c) => c.id === id);
-
   switch (fakeConnector?.name) {
     case FakeConnectors.slack1.name:
     case FakeConnectors.slack2.name: {
@@ -82,6 +86,20 @@ export async function getMockedConnectorResult(
     }
     case FakeConnectors.constantlyFailing.name: {
       throw new Error('Error: Constantly failing connector');
+    }
+    case FakeConnectors.transientlyFailing.name: {
+      const wanted = typeof params?.failures === 'number' ? params.failures : 1;
+      const seen = transientFailures.get(id) ?? 0;
+      if (seen < wanted) {
+        transientFailures.set(id, seen + 1);
+        throw new Error('Error: Transient conflict');
+      }
+      transientFailures.delete(id);
+      return {
+        status: 'ok',
+        actionId: id,
+        data: { result: params?.text },
+      };
     }
     case FakeConnectors.slow_1sec_inference.name: {
       await new Promise<void>((resolve) => setTimeout(() => resolve(), 1000));
@@ -117,6 +135,5 @@ export async function getMockedConnectorResult(
       };
     }
   }
-
   throw new Error(`Connector with id ${id} not found in mock`);
 }

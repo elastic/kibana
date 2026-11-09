@@ -31,13 +31,25 @@ type ManagedWorkflowInstallValuesOption<TId extends ManagedWorkflowId> =
 
 export type ManagedWorkflowOperationOptions = ManagedWorkflowOperationBaseOptions;
 
+/**
+ * When set, install skips the write unless the stored document is still this version.
+ * `null` matches a document that has no version. Omit it to write against the document
+ * install reads. Seq_no concurrency only covers that read-to-write gap, not an earlier list.
+ */
+interface ManagedWorkflowExpectedDocumentVersionOption {
+  expectedDocumentVersion?: number | null;
+}
+
 export type ManagedWorkflowInstallOptions<TId extends ManagedWorkflowId> =
-  ManagedWorkflowOperationBaseOptions & ManagedWorkflowInstallValuesOption<TId>;
+  ManagedWorkflowOperationBaseOptions &
+    ManagedWorkflowInstallValuesOption<TId> &
+    ManagedWorkflowExpectedDocumentVersionOption;
 
 // Service installs can reuse persisted template values during reconciliation.
-export type ManagedWorkflowServiceInstallOptions = ManagedWorkflowOperationBaseOptions & {
-  values?: ManagedWorkflowTemplateValues;
-};
+export type ManagedWorkflowServiceInstallOptions = ManagedWorkflowOperationBaseOptions &
+  ManagedWorkflowExpectedDocumentVersionOption & {
+    values?: ManagedWorkflowTemplateValues;
+  };
 
 export type ExecuteManagedWorkflowOptions = ManagedWorkflowOperationOptions & {
   inputs?: Record<string, unknown>;
@@ -116,6 +128,15 @@ export interface RegisteredManagedWorkflowsLifecycleApi {
     id: TId,
     options: ManagedWorkflowOperationOptions
   ) => Promise<void>;
+  /**
+   * Switch off this plugin's managed workflow without a request, including one bound to a
+   * service account. Resolves `false` when nothing was switched off (missing, not managed,
+   * already off, or Workflows unavailable); throws when the caller does not own the workflow.
+   */
+  disable: <TId extends ManagedWorkflowId>(
+    id: TId,
+    options: ManagedWorkflowOperationOptions
+  ) => Promise<boolean>;
   /**
    * Signal that the plugin has finished installing all its static managed workflows.
    * Triggers per-plugin reconciliation: removes persisted static workflows that were
@@ -202,9 +223,25 @@ export interface PluginScopedManagedWorkflowsApi
  * This is the public interface for workflows operations that can be used by any plugin.
  * It is registered to the `workflows` API request context, and exposed by `workflowsExtensions` plugin in its start contract.
  */
+export interface ResumeExternalHitlParams {
+  token: string;
+  executionId: string;
+  stepId: string;
+  spaceId: string;
+  input: Record<string, unknown>;
+}
+
 export interface WorkflowsClient {
   isWorkflowsAvailable: boolean;
-  emitEvent: (triggerId: string, payload: Record<string, unknown>) => Promise<void>;
+  emitEvent: (
+    triggerId: string,
+    payload: Record<string, unknown>,
+    options?: { authenticatedUser?: string }
+  ) => Promise<void>;
+  /**
+   * Resume a paused HITL wait step using the external resume token (e.g. Slack interactivity).
+   */
+  resumeExternalHitl: (params: ResumeExternalHitlParams) => Promise<void>;
   managedWorkflows: ManagedWorkflowsApi;
 }
 

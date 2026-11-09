@@ -14,3 +14,13 @@ export const SHOW_TABLE_TOOLTIP = i18n.translate('xpack.cases.attachments.showTa
 export const SHOW_TABLE_ARIA_LABEL = i18n.translate('xpack.cases.attachments.showTableAriaLabel', {
   defaultMessage: 'Show table',
 });
+
+export const SELECTED_ATTACHMENTS = (count: number) =>
+  i18n.translate('xpack.cases.attachments.selectedAttachments', {
+    values: { count },
+    defaultMessage: '{count} selected',
+  });
+
+export const REMOVE = i18n.translate('xpack.cases.attachments.remove', {
+  defaultMessage: 'Remove',
+});

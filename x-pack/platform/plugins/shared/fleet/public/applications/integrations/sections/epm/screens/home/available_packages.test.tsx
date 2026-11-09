@@ -118,7 +118,10 @@ describe('AvailablePackages — collection flyout URL state', () => {
 
   it('renders the CollectionFlyout when ?collection=nginx is in the URL', async () => {
     mockUseAvailablePackages.mockReturnValue(
-      makeDefaultHookReturn({ allCards: [nginxCollectionCard] })
+      makeDefaultHookReturn({
+        filteredCards: [nginxCollectionCard],
+        allCards: [nginxCollectionCard],
+      })
     );
     mockUseLocation.mockReturnValue({
       pathname: '/app/integrations/browse',
@@ -137,6 +140,46 @@ describe('AvailablePackages — collection flyout URL state', () => {
     const { queryByTestId } = renderPage();
     await waitFor(() => {
       expect(queryByTestId('collectionFlyout')).not.toBeInTheDocument();
+    });
+  });
+
+  it('calls history.replace without the collection param when a filter removes the open collection', async () => {
+    mockUseAvailablePackages.mockReturnValue(
+      makeDefaultHookReturn({
+        filteredCards: [nginxCollectionCard],
+        allCards: [nginxCollectionCard],
+      })
+    );
+    mockUseLocation.mockReturnValue({
+      pathname: '/app/integrations/browse',
+      search: '?collection=nginx',
+    });
+    const { rerender } = renderPage();
+    await waitFor(() => {
+      expect(capturedFilteredCards.some((c) => c.isCollectionCard)).toBe(true);
+    });
+
+    mockHistoryReplace.mockClear();
+
+    // Simulate a filter removing the open collection
+    mockUseAvailablePackages.mockReturnValue(
+      makeDefaultHookReturn({
+        filteredCards: [],
+        allCards: [nginxCollectionCard],
+      })
+    );
+    rerender(
+      <I18nProvider>
+        <EuiThemeProvider>
+          <AvailablePackages prereleaseIntegrationsEnabled={false} />
+        </EuiThemeProvider>
+      </I18nProvider>
+    );
+
+    await waitFor(() => {
+      expect(mockHistoryReplace).toHaveBeenCalledWith(
+        expect.objectContaining({ search: expect.not.stringContaining('collection') })
+      );
     });
   });
 
@@ -165,7 +208,10 @@ describe('AvailablePackages — collection flyout URL state', () => {
 
   it('calls history.replace without the collection param when the flyout is closed', async () => {
     mockUseAvailablePackages.mockReturnValue(
-      makeDefaultHookReturn({ allCards: [nginxCollectionCard] })
+      makeDefaultHookReturn({
+        filteredCards: [nginxCollectionCard],
+        allCards: [nginxCollectionCard],
+      })
     );
     mockUseLocation.mockReturnValue({
       pathname: '/app/integrations/browse',

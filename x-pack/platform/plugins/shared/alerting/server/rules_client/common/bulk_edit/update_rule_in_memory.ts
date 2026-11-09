@@ -17,7 +17,6 @@ import type { RuleDomain, RuleParams } from '../../../application/rule/types';
 import {
   injectReferencesIntoActions,
   injectReferencesIntoArtifacts,
-  addMissingUiamKeyTagIfNeeded,
   API_KEY_ATTRIBUTES_TO_STRIP,
 } from '..';
 import { createNewAPIKeySet, extractReferences, updateMeta } from '../../lib';
@@ -55,12 +54,14 @@ export interface UpdateRuleInMemoryOpts<Params extends RuleParams> {
   skipped: BulkEditActionSkipResult[];
   errors: BulkOperationError[];
   username: string | null;
+  profileUid: string | null;
   updateAttributesFn: (
     opts: UpdateAttributesFnOpts<Params>
   ) => Promise<UpdateAttributesFnResult<Params>>;
   shouldInvalidateApiKeys: boolean;
   paramsModifier?: ParamsModifier<Params>;
   shouldIncrementRevision?: ShouldIncrementRevision<Params>;
+  hasMigratedLegacyActions?: boolean;
 }
 
 export async function updateRuleInMemory<Params extends RuleParams>(
@@ -74,14 +75,16 @@ export async function updateRuleInMemory<Params extends RuleParams>(
     skipped,
     errors,
     username,
+    profileUid,
     shouldInvalidateApiKeys,
     shouldIncrementRevision = () => true,
+    hasMigratedLegacyActions = false,
   }: UpdateRuleInMemoryOpts<Params>
 ): Promise<void> {
   context.logger.info(`Updating rule in memory for rule: ${rule.id}`);
-  if (rule.attributes.apiKey) {
+  if (rule.attributes.apiKey || rule.attributes.uiamApiKey) {
     apiKeysMap.set(rule.id, {
-      oldApiKey: rule.attributes.apiKey,
+      oldApiKey: rule.attributes.apiKey ?? undefined,
       oldApiKeyCreatedByUser: rule.attributes.apiKeyCreatedByUser,
       oldUiamApiKey: rule.attributes.uiamApiKey,
     });
@@ -138,7 +141,8 @@ export async function updateRuleInMemory<Params extends RuleParams>(
 
   // If neither attributes nor parameters were updated, mark
   // the rule as skipped and continue to the next rule.
-  if (isAttributesUpdateSkipped && isParamsUpdateSkipped) {
+  // A rule with migrated legacy actions is never skipped: it has to be saved to persist them.
+  if (isAttributesUpdateSkipped && isParamsUpdateSkipped && !hasMigratedLegacyActions) {
     skipped.push({
       id: rule.id,
       name: rule.attributes.name,
@@ -191,7 +195,8 @@ export async function updateRuleInMemory<Params extends RuleParams>(
       apiKeysMap,
       ruleAttributes,
       hasUpdateApiKeyOperation,
-      username
+      username,
+      profileUid
     );
     apiKeyAttributes = preparedApiKeyAttributes;
   }
@@ -203,6 +208,7 @@ export async function updateRuleInMemory<Params extends RuleParams>(
     updatedParams,
     rawAlertActions: ruleAttributes.actions,
     username,
+    profileUid,
   });
 
   rules.push({ ...rule, references, attributes: updatedAttributes });
@@ -215,12 +221,14 @@ async function prepareApiKeys(
   apiKeysMap: ApiKeysMap,
   attributes: RawRule,
   hasUpdateApiKeyOperation: boolean,
-  username: string | null
+  username: string | null,
+  profileUid: string | null
 ): Promise<{ apiKeyAttributes: ApiKeyAttributes }> {
   const apiKeyAttributes = await createNewAPIKeySet(context, {
     id: ruleType.id,
     ruleName: attributes.name,
     username,
+    profileUid,
     shouldUpdateApiKey: attributes.enabled || hasUpdateApiKeyOperation,
     errorMessage: 'Error updating rule: could not create API key',
     apiKeyOwnership: { apiKeyCreatedByUser: rule.attributes.apiKeyCreatedByUser },
@@ -228,12 +236,12 @@ async function prepareApiKeys(
   });
 
   // collect generated API keys
-  if (apiKeyAttributes.apiKey) {
+  if (apiKeyAttributes.apiKey || apiKeyAttributes.uiamApiKey) {
     const { apiKey, apiKeyCreatedByUser, uiamApiKey } = apiKeyAttributes;
 
     apiKeysMap.set(rule.id, {
       ...apiKeysMap.get(rule.id),
-      newApiKey: apiKey,
+      newApiKey: apiKey ?? undefined,
       newApiKeyCreatedByUser: apiKeyCreatedByUser,
       ...(uiamApiKey ? { newUiamApiKey: uiamApiKey } : {}),
     });
@@ -251,6 +259,7 @@ async function updateAttributes({
   updatedParams,
   rawAlertActions,
   username,
+  profileUid,
 }: {
   context: RulesClientContext;
   attributes: RawRule;
@@ -258,6 +267,7 @@ async function updateAttributes({
   updatedParams: RuleParams;
   rawAlertActions: RawRuleAction[];
   username: string | null;
+  profileUid: string | null;
 }): Promise<{
   updatedAttributes: RawRule;
 }> {
@@ -265,14 +275,6 @@ async function updateAttributes({
   const notifyWhen = getRuleNotifyWhenType(
     attributes.notifyWhen ?? null,
     attributes.throttle ?? null
-  );
-
-  const tagsWithUiamCheck = addMissingUiamKeyTagIfNeeded(
-    attributes.tags,
-    apiKeyAttributes?.uiamApiKey,
-    context.isServerless,
-    context.shouldGrantUiam,
-    context.apiKeyType
   );
 
   // TODO (http-versioning) Remove casts when updateMeta has been converted
@@ -283,11 +285,11 @@ async function updateAttributes({
           ...apiKeyAttributes,
         }
       : attributes),
-    tags: tagsWithUiamCheck,
     params: updatedParams,
     actions: rawAlertActions,
     notifyWhen,
     updatedBy: username,
+    updatedByProfileUid: profileUid,
     updatedAt: new Date().toISOString(),
   });
 

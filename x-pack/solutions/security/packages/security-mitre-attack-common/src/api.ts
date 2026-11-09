@@ -7,25 +7,10 @@
 
 import { z } from '@kbn/zod';
 import { ArrayFromString } from '@kbn/zod-helpers';
-import type { MitreFramework, MitreTactic, MitreTechnique, MitreSubtechnique } from './schema';
-
-// -------------------------------------------------------------------------
-// Summary types (description omitted for list responses)
-// -------------------------------------------------------------------------
-
-export type MitreTacticSummary = Omit<MitreTactic, 'description'>;
-export type MitreTechniqueSummary = Omit<MitreTechnique, 'description'>;
-export type MitreSubtechniqueSummary = Omit<MitreSubtechnique, 'description'>;
-export type MitreEntitySummary =
-  | MitreTacticSummary
-  | MitreTechniqueSummary
-  | MitreSubtechniqueSummary;
-
-export interface MitreEntitySummaryBuckets {
-  tactics: MitreTacticSummary[];
-  techniques: MitreTechniqueSummary[];
-  subtechniques: MitreSubtechniqueSummary[];
-}
+import type { MitreFramework, MitreEntityType } from './schema';
+import { mitreFrameworkSchema } from './schema';
+import { DEFAULT_MITRE_FRAMEWORK } from './constants';
+import type { MitreEntityStatus, MitreEntitySummaryBuckets } from './types';
 
 // -------------------------------------------------------------------------
 // Request query schema
@@ -33,8 +18,8 @@ export interface MitreEntitySummaryBuckets {
 
 /** Zod schema for the GET /internal/mitre/entities request query parameters. */
 export const GetMitreEntitiesRequestQuery = z.object({
-  /** MITRE framework to query. Currently only 'enterprise' is supported. */
-  framework: z.enum(['enterprise']).optional().default('enterprise'),
+  /** MITRE framework to query. One framework per request; defaults to ATT&CK Enterprise. */
+  framework: mitreFrameworkSchema.optional().default(DEFAULT_MITRE_FRAMEWORK),
   /** Pin results to a specific framework version. Defaults to the latest indexed version. */
   framework_version: z.string().min(1).max(32).optional(),
   /**
@@ -53,11 +38,21 @@ export const GetMitreEntitiesRequestQuery = z.object({
 export type GetMitreEntitiesRequestQueryInput = z.input<typeof GetMitreEntitiesRequestQuery>;
 export type GetMitreEntitiesRequestQueryOutput = z.output<typeof GetMitreEntitiesRequestQuery>;
 
+/**
+ * Client-side request params for GET /internal/mitre/entities. Mirrors GetMitreEntitiesRequestQuery before serialization.
+ */
+export interface GetMitreEntitiesRequestParams {
+  framework?: MitreFramework;
+  framework_version?: string;
+  types?: MitreEntityType[];
+  status?: MitreEntityStatus;
+}
+
 // -------------------------------------------------------------------------
 // Response type
 // -------------------------------------------------------------------------
 
-/** Response body for GET /internal/mitre/entities. */
+/** Response body for GET /internal/mitre/entities. Bucket order is guaranteed: tactics ascending by position, techniques and subtechniques ascending by name. */
 export interface GetMitreEntitiesResponse extends MitreEntitySummaryBuckets {
   framework: MitreFramework;
   /**

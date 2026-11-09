@@ -21,7 +21,6 @@ import { Controller, useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import { SELF_AGENT_ID } from '@kbn/agent-builder-common';
 import { useAgentBuilderAgents } from '../../../../hooks/agents/use_agents';
-import { useExperimentalFeatures } from '../../../../hooks/use_experimental_features';
 
 /**
  * Values written into `configuration.subagent_ids`. Kept as a plain string
@@ -66,7 +65,6 @@ export const SubagentsSection: React.FC<SubagentsSectionProps<any>> = ({
   fieldName = 'configuration.subagent_ids',
   agentId,
 }) => {
-  const experimentalOn = useExperimentalFeatures();
   const { agents } = useAgentBuilderAgents();
 
   const { control, getValues, formState } = useFormContext();
@@ -91,8 +89,6 @@ export const SubagentsSection: React.FC<SubagentsSectionProps<any>> = ({
       .map((a) => ({ value: a.id, label: `${a.name} (${a.id})` }));
     return [selfOption, ...others];
   }, [agents, agentId]);
-
-  if (!experimentalOn) return null;
 
   return (
     <>

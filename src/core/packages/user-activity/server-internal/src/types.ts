@@ -61,11 +61,10 @@ export interface InjectedContext {
   http?: {
     request?: HttpRequestContext;
   };
-  /** Session information. */
-  session?: SessionContext;
   /** Kibana-specific information. */
   kibana?: {
     space?: SpaceContext;
+    session?: SessionContext;
   };
   /** User information. */
   user?: UserContext;

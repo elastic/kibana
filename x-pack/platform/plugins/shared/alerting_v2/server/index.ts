@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ContainerModule } from 'inversify';
+import { KibanaContainerModule } from '@kbn/core-di';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
 import type { PluginConfig } from './config';
 import { configSchema } from './config';
@@ -26,15 +26,9 @@ export const config: PluginConfigDescriptor<PluginConfig> = {
   exposeToBrowser: {
     rules: { minimumScheduleInterval: true },
   },
-  // Exposed as dynamic config solely for testing: it lets Scout tests
-  // flip the ES|QL response format at runtime via the `PUT /internal/core/_settings`
-  // API to exercise the Arrow path, instead of booting a dedicated Kibana instance.
-  dynamicConfig: {
-    esql: { responseFormat: true },
-  },
 };
 
-const pluginModule = new ContainerModule((options) => {
+const pluginModule = new KibanaContainerModule((options) => {
   bindOnSetup(options);
   bindArtifactTypes(options);
   bindAgentBuilder(options);
@@ -55,11 +49,14 @@ export type {
   AlertingServerSetup,
   AlertingServerStart,
   RulesClientApi,
+  InternalRulesClientApi,
   ActionPolicyClientApi,
+  AlertEventsClientApi,
 } from './types';
 export type { ArtifactTypeDefinition, ArtifactReferenceDescriptor } from './lib/artifact_types';
-export type { FindRulesArgs } from './lib/rules_client';
+export type { FindRulesArgs, CreateRulesClientOptions } from './lib/rules_client';
 export type { FindActionPoliciesArgs } from './lib/action_policy_client';
+export type { AlertStatusChangedOptIn } from './lib/alert_status_changed';
 
 /**
  * Public catalog of machine-readable error codes emitted by alerting v2 HTTP

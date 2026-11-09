@@ -6,6 +6,7 @@
  */
 
 import { createAttackDiscoveryBasicEvaluator } from './attack_discovery_basic_evaluator';
+import { EMPTY_RETRIEVAL_EVIDENCE } from '../types';
 import type {
   AttackDiscovery,
   AttackDiscoveryAgentBuilderExample,
@@ -36,8 +37,10 @@ const baseOutput = (
   workflow: {
     stages: [],
     retrievedAlertCount: null,
+    retrievedAlertCountSource: 'none',
     passedAlertCount: null,
     validatedDiscoveryCount: null,
+    retrievalEvidence: EMPTY_RETRIEVAL_EVIDENCE,
   },
 });
 
@@ -81,6 +84,20 @@ describe('createAttackDiscoveryBasicEvaluator', () => {
     // score 0.
     it('scores 0 when insights are missing', async () => {
       const result = await evaluator.evaluate(params({ insights: null, expected: applicable }));
+
+      expect(result.score).toBe(0);
+      expect(result.label).toBe('missing_insights');
+    });
+
+    // An EMPTY array is also "missing": a slow-path run whose every discovery
+    // was filtered produces `insights: []`, and the shape check treats an
+    // empty array as vacuously well-formed (`[].find(...) === undefined`).
+    // Without this guard that run gains a passing basic-discovery score
+    // despite producing no insights. The zero count is still preserved in
+    // workflow evidence (`validatedDiscoveryCount`), which is asserted
+    // separately in `evaluate_dataset.test.ts`.
+    it('scores 0 when insights are an empty array (all discoveries filtered)', async () => {
+      const result = await evaluator.evaluate(params({ insights: [], expected: applicable }));
 
       expect(result.score).toBe(0);
       expect(result.label).toBe('missing_insights');

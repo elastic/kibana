@@ -20,11 +20,13 @@ export const useIacProvisioner = (): { isIacProvisionerEnabled: boolean } => {
   const config = useConfig();
   const { cloud, featureFlags } = useStartServices();
   const isHosted = Boolean(cloud?.isCloudEnabled || cloud?.isServerlessEnabled);
+  const isIacProvisionerFlagEnabled = featureFlags.useBooleanValue(
+    ENABLE_IAC_PROVISIONER_FLAG,
+    false
+  );
 
   return {
     isIacProvisionerEnabled:
-      isHosted &&
-      config.agentless?.enabled === true &&
-      featureFlags.getBooleanValue(ENABLE_IAC_PROVISIONER_FLAG, false),
+      isHosted && config.agentless?.enabled === true && isIacProvisionerFlagEnabled,
   };
 };

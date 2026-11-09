@@ -1,0 +1,273 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useState } from 'react';
+import {
+  EuiBadge,
+  EuiBadgeGroup,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiSplitPanel,
+  EuiText,
+  EuiToolTip,
+  useEuiTheme,
+  useResizeObserver,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
+import type {
+  ActionButton,
+  HeaderBadge,
+  HeaderColor,
+} from '@kbn/agent-builder-browser/attachments';
+import { i18n } from '@kbn/i18n';
+import type { IconType } from '@elastic/eui';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
+import { AttachmentActions } from './attachment_actions';
+import { ATTACHMENT_INNER_RADIUS } from './attachment_card';
+import { useHeaderColorTokens } from './header_color';
+
+const PREVIEW_ONLY_LABEL = i18n.translate('xpack.agentBuilder.attachmentHeader.previewOnly', {
+  defaultMessage: 'Read-only preview',
+});
+
+const PREVIEWING_LABEL = i18n.translate('xpack.agentBuilder.attachmentHeader.previewing', {
+  defaultMessage: "You're previewing this",
+});
+
+const CLOSE_BUTTON_ARIA_LABEL = i18n.translate('xpack.agentBuilder.attachmentHeader.close', {
+  defaultMessage: 'Close',
+});
+
+/** Min height of the header when rendered inline in the conversation. */
+export const INLINE_HEADER_HEIGHT = 48;
+/** Min height of the header when rendered as the canvas flyout header. */
+export const CANVAS_HEADER_HEIGHT = 72;
+
+interface AttachmentHeaderProps {
+  icon?: IconType;
+  title: string;
+  /** Optional subtitle rendered under the title. */
+  subtitle?: string;
+  /** Optional badges rendered alongside the title. */
+  badges?: HeaderBadge[];
+  /** Optional color variant tinting the header background, border, title and icon. */
+  color?: HeaderColor;
+  actionButtons?: ActionButton[];
+  onClose?: () => void;
+  /**
+   * Controls preview UI state from the parent.
+   * - none: show regular action buttons
+   * - preview_available: show "Preview Only" badge
+   * - previewing: show "You're previewing this" badge and hide action buttons
+   */
+  previewBadgeState?: 'none' | 'preview_available' | 'previewing';
+  /** When true, uses canvas flyout corner radius (top-right only). */
+  isCanvas?: boolean;
+  /** When true, rounds all corners and omits the bottom border (no body content). */
+  isHeaderOnly?: boolean;
+}
+
+export const COMPACT_WIDTH_THRESHOLD = 560;
+
+export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
+  icon,
+  title,
+  subtitle,
+  badges,
+  color,
+  actionButtons,
+  onClose,
+  previewBadgeState = 'none',
+  isCanvas = false,
+  isHeaderOnly = false,
+}) => {
+  const { euiTheme } = useEuiTheme();
+
+  const [measureElement, setMeasureElement] = useState<HTMLDivElement | null>(null);
+  const { width: headerWidth } = useResizeObserver(measureElement);
+  const isCompact = headerWidth > 0 && headerWidth <= COMPACT_WIDTH_THRESHOLD;
+
+  const colorTokens = useHeaderColorTokens(color);
+  const dividerColor = isCanvas && !color ? euiTheme.colors.borderBaseSubdued : colorTokens.divider;
+
+  const textStyles = css`
+    color: ${colorTokens.text ?? euiTheme.colors.textHeading};
+    font-weight: ${euiTheme.font.weight.bold};
+    line-height: ${euiTheme.size.base};
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  `;
+
+  const subtitleStyles = css`
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  `;
+
+  const headerBorderRadius = isCanvas
+    ? `0 ${euiTheme.border.radius.small} 0 0`
+    : isHeaderOnly
+    ? `${ATTACHMENT_INNER_RADIUS}px`
+    : `${ATTACHMENT_INNER_RADIUS}px ${ATTACHMENT_INNER_RADIUS}px 0 0`;
+
+  const headerStyles = css`
+    position: relative;
+    display: flex;
+    ${!isHeaderOnly
+      ? `
+      border-bottom: ${euiTheme.border.thin};
+      border-color: ${dividerColor};
+    `
+      : ''}
+    border-radius: ${headerBorderRadius};
+    min-height: ${isCanvas ? CANVAS_HEADER_HEIGHT : INLINE_HEADER_HEIGHT}px;
+    padding: ${isCanvas ? euiTheme.size.base : euiTheme.size.xs} ${euiTheme.size.s}
+      ${isCanvas ? euiTheme.size.base : euiTheme.size.xs} ${euiTheme.size.base};
+  `;
+
+  const badgeStyles = css`
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    transform: translate(-50%, 50%);
+    /* Above the canvas body, which can start right at the header (canvasHideTopPadding). */
+    z-index: ${Number(euiTheme.levels.content) + 1};
+  `;
+
+  const hasCloseButton = Boolean(onClose);
+  const hasActionButtons = actionButtons && actionButtons.length > 0;
+
+  if (!hasCloseButton && !hasActionButtons && previewBadgeState === 'none') {
+    return null;
+  }
+
+  return (
+    <div ref={setMeasureElement} style={{ width: '100%' }}>
+      <EuiSplitPanel.Inner color={color ?? 'subdued'} css={headerStyles} paddingSize="none">
+        {previewBadgeState === 'preview_available' && (
+          <EuiBadge iconType="readOnly" css={badgeStyles}>
+            {PREVIEW_ONLY_LABEL}
+          </EuiBadge>
+        )}
+        <EuiFlexGroup
+          responsive={false}
+          direction="row"
+          justifyContent="spaceBetween"
+          alignItems="center"
+          gutterSize="m"
+          style={{ width: '100%' }}
+        >
+          {/* Start: icon + title/badges/subtitle */}
+          <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
+            <EuiFlexGroup
+              gutterSize="s"
+              alignItems="center"
+              responsive={false}
+              style={{ minWidth: 0 }}
+            >
+              {icon && (
+                <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
+                  <EuiIcon
+                    type={icon}
+                    color={colorTokens.text ?? 'subdued'}
+                    size="m"
+                    aria-hidden={true}
+                  />
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
+                <EuiFlexGroup
+                  direction="column"
+                  gutterSize="none"
+                  responsive={false}
+                  style={{ minWidth: 0 }}
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup
+                      gutterSize="none"
+                      alignItems="center"
+                      responsive={false}
+                      wrap
+                      style={{
+                        minWidth: 0,
+                        columnGap: euiTheme.size.s,
+                        rowGap: isCompact ? 0 : euiTheme.size.xs,
+                      }}
+                    >
+                      <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
+                        <EuiText css={textStyles} size="s">
+                          {title}
+                        </EuiText>
+                      </EuiFlexItem>
+                      {badges && badges.length > 0 && (
+                        <EuiFlexItem grow={false}>
+                          <EuiBadgeGroup gutterSize="xs">
+                            {badges.map((badge, index) => (
+                              <EuiBadge key={index} color={badge.color} iconType={badge.iconType}>
+                                {badge.label}
+                              </EuiBadge>
+                            ))}
+                          </EuiBadgeGroup>
+                        </EuiFlexItem>
+                      )}
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                  {subtitle && (
+                    <EuiFlexItem grow={false}>
+                      <EuiText css={subtitleStyles} size="xs" color="subdued">
+                        {subtitle}
+                      </EuiText>
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          {/* End: action buttons + close button */}
+          <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              {previewBadgeState !== 'previewing' && hasActionButtons && (
+                <EuiFlexItem grow={false}>
+                  <AttachmentActions buttons={actionButtons} iconOnly={isCompact} />
+                </EuiFlexItem>
+              )}
+              {previewBadgeState === 'previewing' && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge iconType="eye" color="primary">
+                    {PREVIEWING_LABEL}
+                  </EuiBadge>
+                </EuiFlexItem>
+              )}
+              {onClose && (
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip content={CLOSE_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      aria-label={CLOSE_BUTTON_ARIA_LABEL}
+                      iconType="cross"
+                      onClick={onClose}
+                      size="xs"
+                      color="text"
+                      {...getEbtProps({
+                        element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                        action: AGENT_BUILDER_UI_EBT.action.conversation.ATTACHMENT_CLOSE,
+                        detail: 'attachment',
+                      })}
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiSplitPanel.Inner>
+    </div>
+  );
+};

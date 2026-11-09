@@ -20,9 +20,13 @@ import type {
 import { apm } from '@elastic/apm-rum';
 import { type Client, ClientProviderEvents, OpenFeature } from '@openfeature/web-sdk';
 import deepMerge from 'deepmerge';
+import { useMemo } from 'react';
+import type { Observable } from 'rxjs';
 import { filter, map, merge, startWith, Subject } from 'rxjs';
-import { get } from 'lodash';
+import { useObservable, type ValueObservable } from '@kbn/use-observable';
 import { buildPath } from '@kbn/core-http-browser';
+import { getFlattenedObject, withTimeout } from '@kbn/std';
+import { createKibanaOfrepProvider } from './kibana_ofrep_provider';
 
 /**
  * setup method dependencies
@@ -51,6 +55,19 @@ interface ReportedFlagValue {
   value: FeatureFlagValue;
 }
 
+/** Injected provider values, with `feature_flags.overrides` winning. */
+function seedFlags(
+  injectedMetadata: ReturnType<InternalInjectedMetadataSetup['getFeatureFlags']>
+): Record<string, unknown> {
+  if (!injectedMetadata) {
+    return {};
+  }
+  return {
+    ...injectedMetadata.initialFeatureFlags,
+    ...getFlattenedObject(injectedMetadata.overrides ?? {}),
+  };
+}
+
 const getFeatureFlagValueType = (value: FeatureFlagValue): FeatureFlagValueType => {
   if (typeof value === 'boolean') {
     return 'boolean';
@@ -63,6 +80,32 @@ const getFeatureFlagValueType = (value: FeatureFlagValue): FeatureFlagValueType 
   return 'string';
 };
 
+/** Lets useObservable reseed during render when the flag or fallback changes. */
+function withSyncValue<T extends FeatureFlagValue>(
+  source$: Observable<T>,
+  readValue: () => T
+): ValueObservable<T> {
+  return {
+    subscribe: (listener) => source$.subscribe(listener),
+    getValue: readValue,
+  };
+}
+
+/** Subscribes to a flag and reads the synchronous evaluation on each render that changes arguments. */
+function useFeatureFlagValue<T extends FeatureFlagValue>(
+  flagName: string,
+  fallbackValue: T,
+  getValue$: (flagName: string, fallbackValue: T) => Observable<T>,
+  getValue: (flagName: string, fallbackValue: T) => T
+): T {
+  const value$ = useMemo(
+    () =>
+      withSyncValue(getValue$(flagName, fallbackValue), () => getValue(flagName, fallbackValue)),
+    [getValue$, getValue, flagName, fallbackValue]
+  );
+  return useObservable(value$);
+}
+
 export class FeatureFlagsService {
   private readonly featureFlagsClient: Client;
   private readonly logger: Logger;
@@ -70,7 +113,6 @@ export class FeatureFlagsService {
   private readonly lastReportedValues = new Map<string, ReportedFlagValue>();
   private isProviderReadyPromise?: Promise<void>;
   private context: MultiContextEvaluationContext = { kind: 'multi' };
-  private overrides: Record<string, unknown> = {};
   private http?: InternalHttpSetup;
 
   /**
@@ -89,36 +131,10 @@ export class FeatureFlagsService {
    */
   public setup(deps: FeatureFlagsSetupDeps): FeatureFlagsSetup {
     const featureFlagsInjectedMetadata = deps.injectedMetadata.getFeatureFlags();
-    if (featureFlagsInjectedMetadata) {
-      this.overrides = featureFlagsInjectedMetadata.overrides;
-    }
     this.http = deps.http;
+    this.installProvider(deps.http, featureFlagsInjectedMetadata);
     return {
       getInitialFeatureFlags: () => featureFlagsInjectedMetadata?.initialFeatureFlags ?? {},
-      setProvider: (provider) => {
-        if (this.isProviderReadyPromise) {
-          throw new Error('A provider has already been set. This API cannot be called twice.');
-        }
-        const transaction = apm.startTransaction('set-provider', 'feature-flags');
-        this.isProviderReadyPromise = OpenFeature.setProviderAndWait(provider);
-        this.isProviderReadyPromise
-          .then(() => {
-            if (transaction) {
-              // @ts-expect-error RUM types are not correct
-              transaction.outcome = 'success';
-              transaction.end();
-            }
-          })
-          .catch((err) => {
-            this.logger.error(err);
-            apm.captureError(err);
-            if (transaction) {
-              // @ts-expect-error RUM types are not correct
-              transaction.outcome = 'failure';
-              transaction.end();
-            }
-          });
-      },
       appendContext: (contextToAppend) => this.appendContext(contextToAppend),
     };
   }
@@ -144,45 +160,43 @@ export class FeatureFlagsService {
         startWith([flagName]) // only to emit on the first call
       );
 
-    await this.waitForProviderInitialization();
+    try {
+      await this.waitForProviderInitialization();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(
+        `Feature flags provider failed to initialize. Evaluations use fallbacks until it recovers: ${message}`
+      );
+    }
+
+    const getBooleanValue = (flagName: string, fallbackValue: boolean) =>
+      this.evaluateFlag(this.featureFlagsClient.getBooleanValue, flagName, fallbackValue);
+    const getBooleanValue$ = (flagName: string, fallbackValue: boolean) =>
+      observeFeatureFlag$(flagName).pipe(map(() => getBooleanValue(flagName, fallbackValue)));
+    const getStringValue = <Value extends string>(flagName: string, fallbackValue: Value) =>
+      this.evaluateFlag<Value>(this.featureFlagsClient.getStringValue, flagName, fallbackValue);
+    const getStringValue$ = <Value extends string>(flagName: string, fallbackValue: Value) =>
+      observeFeatureFlag$(flagName).pipe(map(() => getStringValue(flagName, fallbackValue)));
+    const getNumberValue = <Value extends number>(flagName: string, fallbackValue: Value) =>
+      this.evaluateFlag<Value>(this.featureFlagsClient.getNumberValue, flagName, fallbackValue);
+    const getNumberValue$ = <Value extends number>(flagName: string, fallbackValue: Value) =>
+      observeFeatureFlag$(flagName).pipe(map(() => getNumberValue(flagName, fallbackValue)));
+
+    const useBooleanValue = (flagName: string, fallbackValue: boolean): boolean =>
+      useFeatureFlagValue(flagName, fallbackValue, getBooleanValue$, getBooleanValue);
+    const useStringValue = <Value extends string>(flagName: string, fallbackValue: Value): Value =>
+      useFeatureFlagValue(flagName, fallbackValue, getStringValue$, getStringValue);
+    const useNumberValue = <Value extends number>(flagName: string, fallbackValue: Value): Value =>
+      useFeatureFlagValue(flagName, fallbackValue, getNumberValue$, getNumberValue);
 
     return {
       appendContext: (contextToAppend) => this.appendContext(contextToAppend),
-      getBooleanValue: (flagName: string, fallbackValue: boolean) =>
-        this.evaluateFlag(this.featureFlagsClient.getBooleanValue, flagName, fallbackValue),
-      getStringValue: <Value extends string>(flagName: string, fallbackValue: Value) =>
-        this.evaluateFlag<Value>(this.featureFlagsClient.getStringValue, flagName, fallbackValue),
-      getNumberValue: <Value extends number>(flagName: string, fallbackValue: Value) =>
-        this.evaluateFlag<Value>(this.featureFlagsClient.getNumberValue, flagName, fallbackValue),
-      getBooleanValue$: (flagName, fallbackValue) => {
-        return observeFeatureFlag$(flagName).pipe(
-          map(() =>
-            this.evaluateFlag(this.featureFlagsClient.getBooleanValue, flagName, fallbackValue)
-          )
-        );
-      },
-      getStringValue$: <Value extends string>(flagName: string, fallbackValue: Value) => {
-        return observeFeatureFlag$(flagName).pipe(
-          map(() =>
-            this.evaluateFlag<Value>(
-              this.featureFlagsClient.getStringValue,
-              flagName,
-              fallbackValue
-            )
-          )
-        );
-      },
-      getNumberValue$: <Value extends number>(flagName: string, fallbackValue: Value) => {
-        return observeFeatureFlag$(flagName).pipe(
-          map(() =>
-            this.evaluateFlag<Value>(
-              this.featureFlagsClient.getNumberValue,
-              flagName,
-              fallbackValue
-            )
-          )
-        );
-      },
+      getBooleanValue$,
+      useBooleanValue,
+      getStringValue$,
+      useStringValue,
+      getNumberValue$,
+      useNumberValue,
     };
   }
 
@@ -194,26 +208,62 @@ export class FeatureFlagsService {
   }
 
   /**
+   * Installs the Kibana OFREP provider. Injected flags and config overrides are served until the first response.
+   */
+  private installProvider(
+    http: InternalHttpSetup,
+    injectedMetadata: ReturnType<InternalInjectedMetadataSetup['getFeatureFlags']>
+  ): void {
+    const transaction = apm.startTransaction('set-provider', 'feature-flags');
+    const provider = createKibanaOfrepProvider({
+      http,
+      initialFlags: seedFlags(injectedMetadata),
+      logger: this.logger,
+    });
+    this.isProviderReadyPromise = OpenFeature.setProviderAndWait(provider);
+    this.isProviderReadyPromise
+      .then(() => {
+        if (transaction) {
+          // @ts-expect-error RUM types are not correct
+          transaction.outcome = 'success';
+          transaction.end();
+        }
+      })
+      .catch((err) => {
+        this.logger.error(err);
+        apm.captureError(err);
+        if (transaction) {
+          // @ts-expect-error RUM types are not correct
+          transaction.outcome = 'failure';
+          transaction.end();
+        }
+      });
+
+    // Reevaluate subscribed flags once the provider is ready.
+    OpenFeature.addHandler(ClientProviderEvents.Ready, () => this.contextChanged$.next());
+  }
+
+  /**
    * Waits for the provider initialization with a timeout to avoid holding the page load for too long
    * @internal
    */
   private async waitForProviderInitialization() {
     // Adding a timeout here to avoid hanging the start for too long if the provider is unresponsive
-    let timeoutId: NodeJS.Timeout | undefined;
-    await Promise.race([
-      this.isProviderReadyPromise,
-      new Promise((resolve) => {
-        timeoutId = setTimeout(resolve, 2 * 1000);
-      }).then(() => {
-        const msg = `The feature flags provider took too long to initialize.
+    if (!this.isProviderReadyPromise) {
+      return;
+    }
+    const outcome = await withTimeout({
+      promise: this.isProviderReadyPromise,
+      timeoutMs: 2 * 1000,
+    });
+    if (outcome.timedout) {
+      const msg = `The feature flags provider took too long to initialize.
         Won't hold the page load any longer.
         Feature flags will return the provided fallbacks until the provider is eventually initialized.`;
-        this.logger.warn(msg);
-        // Flag the transaction as slow so that we can quantify how often it happens
-        apm.getCurrentTransaction()?.addLabels({ slow_setup: true });
-      }),
-    ]);
-    clearTimeout(timeoutId);
+      this.logger.warn(msg);
+      // Flag the transaction as slow so that we can quantify how often it happens
+      apm.getCurrentTransaction()?.addLabels({ slow_setup: true });
+    }
   }
 
   /**
@@ -228,12 +278,10 @@ export class FeatureFlagsService {
     flagName: string,
     fallbackValue: T
   ): T {
-    const override = get(this.overrides, flagName); // using lodash get because flagName can come with dots and the config parser might structure it in objects.
-    const value =
-      typeof override !== 'undefined'
-        ? (override as T)
-        : // We have to bind the evaluation or the client will lose its internal context
-          evaluationFn.bind(this.featureFlagsClient)(flagName, fallbackValue);
+    // Bind the evaluation or the client will lose its internal context.
+    // Overrides are already part of the server snapshot this provider reads
+    // and are taken into account in the `initialFlags` property when bootstrapping the client.
+    const value = evaluationFn.bind(this.featureFlagsClient)(flagName, fallbackValue);
     apm.addLabels({ [`flag_${flagName.replaceAll('.', '_')}`]: value });
 
     this.reportValueIfChanged(flagName, value);

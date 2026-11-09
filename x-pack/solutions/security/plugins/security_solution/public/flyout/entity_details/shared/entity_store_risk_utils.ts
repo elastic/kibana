@@ -8,7 +8,7 @@
 import type { EntitySummaryStalenessEntitySnapshot } from '@kbn/entity-store/common';
 import type { EntityType } from '../../../../common/entity_analytics/types';
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
-import type { EntityRiskScore, RiskStats } from '../../../../common/search_strategy';
+import type { EntityRiskScore, RiskSeverity, RiskStats } from '../../../../common/search_strategy';
 import type { EntityStoreRecord } from './hooks/use_entity_from_store';
 
 export function getRiskFromEntityRecord(record: EntityStoreRecord): {
@@ -19,11 +19,49 @@ export function getRiskFromEntityRecord(record: EntityStoreRecord): {
   return getRiskFromRecord(record);
 }
 
-/** Current entity signals used for AI summary staleness checks. */
+// Resolution-group risk stored on the entity record, when a normalized score is present.
+export function getResolutionRiskFromEntityRecord(record: EntityStoreRecord): {
+  calculated_level?: string;
+  calculated_score?: number;
+  calculated_score_norm?: number;
+} | null {
+  const resolutionRisk = record.entity?.relationships?.resolution?.risk;
+  if (typeof resolutionRisk?.calculated_score_norm !== 'number') {
+    return null;
+  }
+
+  return {
+    calculated_level: resolutionRisk.calculated_level,
+    calculated_score: resolutionRisk.calculated_score,
+    calculated_score_norm: resolutionRisk.calculated_score_norm,
+  };
+}
+
+// Returns the appropriate risk level for the header badge, preferring the resolution-group risk if specified.
+// Only the resolution target contains a resolution risk level, not all the entities within a resolution group
+export function getHeaderRiskLevel(
+  record: EntityStoreRecord | null | undefined,
+  preferResolutionRisk: boolean
+): RiskSeverity | undefined {
+  if (!record) {
+    return undefined;
+  }
+
+  const resolutionRisk = preferResolutionRisk ? getResolutionRiskFromEntityRecord(record) : null;
+  const risk = resolutionRisk ?? getRiskFromEntityRecord(record);
+  return (risk?.calculated_level ?? 'Unknown') as RiskSeverity;
+}
+
+/**
+ * Current entity signals used for AI summary staleness checks. In resolved mode the summary is
+ * generated from the resolution-group risk, so that is the score the snapshot must track.
+ */
 export function buildEntitySummaryStalenessEntitySnapshot(
-  record?: EntityStoreRecord | null
+  record?: EntityStoreRecord | null,
+  { useResolutionRisk = false }: { useResolutionRisk?: boolean } = {}
 ): EntitySummaryStalenessEntitySnapshot {
-  const risk = record ? getRiskFromEntityRecord(record) : null;
+  const getRisk = useResolutionRisk ? getResolutionRiskFromEntityRecord : getRiskFromEntityRecord;
+  const risk = record ? getRisk(record) : null;
   return {
     // Matches flyout risk summary (`entity.risk.calculated_score_norm`), not raw calculated_score.
     riskScoreNorm: risk?.calculated_score_norm ?? null,

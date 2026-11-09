@@ -51,9 +51,9 @@ describe('createActionPolicyAttachmentDefinition', () => {
   });
 
   describe('getIcon', () => {
-    it('returns workflow', () => {
+    it('returns reporter', () => {
       const definition = createActionPolicyAttachmentDefinition(createMockServices());
-      expect(definition.getIcon!()).toBe('workflow');
+      expect(definition.getIcon!()).toBe('reporter');
     });
   });
 

@@ -82,8 +82,9 @@ export const filterFieldsBySearch = (
   searchQuery?: string,
   isFilterSelectedEnabled: boolean = false
 ) => {
+  // Metadata fields (_index, _ignored, _id, ...) can't be read by the ES|QL queries behind the grid.
   const allowedFields = fields
-    .filter((field) => field.name !== '_index' && field.visualizable)
+    .filter((field) => !field.name.startsWith('_') && field.visualizable)
     .map((field) => ({
       id: field.name,
       name: field.name,

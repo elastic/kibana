@@ -14,9 +14,6 @@
     "configPath": [
       "xpack",
       "encryptedSavedObjects"
-    ],
-    "optionalPlugins": [
-      "security"
     ]
   }
 }

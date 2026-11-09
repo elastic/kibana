@@ -22,12 +22,18 @@ import {
   DATE_WITH_POD_DATA_TO,
   DATE_WITH_SEMCONV_DATA_FROM,
   DATE_WITH_SEMCONV_DATA_TO,
+  DATE_WITH_SEMCONV_POD_DATA_FROM,
+  DATE_WITH_SEMCONV_POD_DATA_TO,
+  DATE_WITH_MIXED_POD_DATA_FROM,
+  DATE_WITH_MIXED_POD_DATA_TO,
   HOST_NAME_WITH_SERVICES,
   HOSTS,
   HOSTS_WITHOUT_DATA,
+  LOGS_ML_INDEX,
   METRICS_AND_LOGS_ARCHIVE,
   POD_COUNT,
   SEMCONV_HOSTS,
+  SEMCONV_PODS,
   SERVICE_PER_HOST_COUNT,
 } from '../fixtures/constants';
 import { generateHostsWithK8sNodeData } from '../fixtures/synthtrace/hosts_with_k8s_node_data';
@@ -36,6 +42,7 @@ import { generateLogsDataForHostsOrContainers } from '../fixtures/synthtrace/log
 import { generateAddServicesToExistingHost } from '../fixtures/synthtrace/add_services_to_existing_hosts';
 import { generateDockerContainersData } from '../fixtures/synthtrace/docker_containers_data';
 import { generateSemconvHostData } from '../fixtures/synthtrace/semconv_host_data';
+import { generateSemconvPodsData } from '../fixtures/synthtrace/semconv_pods_data';
 import { globalSetupHook } from '../fixtures';
 import { ensureNonTsdsSystemTemplate } from '../fixtures/sequential_hosts_synthtrace';
 import { loadMetricsAnomaliesMlData } from '../fixtures/metrics_anomalies_ml';
@@ -139,6 +146,40 @@ globalSetupHook(
       })
     );
     log.info('Semconv host data indexed');
+
+    await infraSynthtraceEsClient.index(
+      generateSemconvPodsData({
+        from: DATE_WITH_SEMCONV_DATA_FROM,
+        to: DATE_WITH_SEMCONV_DATA_TO,
+        pods: SEMCONV_PODS,
+      })
+    );
+    log.info('Semconv pod data indexed in the SemConv hosts window');
+
+    await infraSynthtraceEsClient.index(
+      generateSemconvPodsData({
+        from: DATE_WITH_SEMCONV_POD_DATA_FROM,
+        to: DATE_WITH_SEMCONV_POD_DATA_TO,
+        pods: SEMCONV_PODS,
+      })
+    );
+    log.info('Semconv pod data indexed');
+
+    await infraSynthtraceEsClient.index(
+      generatePodsData({
+        from: DATE_WITH_MIXED_POD_DATA_FROM,
+        to: DATE_WITH_MIXED_POD_DATA_TO,
+        count: POD_COUNT,
+      })
+    );
+    await infraSynthtraceEsClient.index(
+      generateSemconvPodsData({
+        from: DATE_WITH_MIXED_POD_DATA_FROM,
+        to: DATE_WITH_MIXED_POD_DATA_TO,
+        pods: SEMCONV_PODS,
+      })
+    );
+    log.info('Mixed ECS and SemConv pod data indexed');
   }
 );
 
@@ -165,5 +206,28 @@ globalSetupHook(
   async ({ esArchiver, log }) => {
     await esArchiver.loadIfNeeded(METRICS_AND_LOGS_ARCHIVE);
     log.info('metrics_and_logs archive loaded');
+  }
+);
+
+// The Logs ML page specs (`logs_ml/*.spec.ts`) point their space's `observability:logSources` setting
+// at this index. It only needs to exist, not hold documents: an existing empty index counts as
+// having data, so the pages show their setup screen / privilege prompts instead of the no-data page.
+globalSetupHook(
+  'Create the empty index for the Logs ML pages',
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  async ({ esClient, log }) => {
+    const exists = await esClient.indices.exists({ index: LOGS_ML_INDEX });
+    if (!exists) {
+      await esClient.indices.create({
+        index: LOGS_ML_INDEX,
+        mappings: {
+          properties: {
+            '@timestamp': { type: 'date' },
+            message: { type: 'text' },
+          },
+        },
+      });
+    }
+    log.info(`${LOGS_ML_INDEX} index ready`);
   }
 );

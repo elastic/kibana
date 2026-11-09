@@ -363,7 +363,7 @@ In Kibana's TypeScript code it is considered a formatting issue to use snake cas
 
   If you would like to use object destructuring in your code:
   - Convert to camel case by renaming inline `const { snake_case: camelCase } = body`
-  - Consider opting-out of this eslint rule about naming conventions `// eslint-disable-next-line @typescript-eslint/naming-convention` or disable the lint rule for a section `/* eslint-disable @typescript-eslint/naming-convention */` and re-enabling with `/* eslint-enable ... */`.
+  - Consider opting-out of this eslint rule about naming conventions `// eslint-disable-next-line @kbn/compat/typescript-naming-convention` or disable the lint rule for a section `/* eslint-disable @kbn/compat/typescript-naming-convention */` and re-enabling with `/* eslint-enable ... */`.
 :::
 
 **Use JSON**
@@ -420,6 +420,10 @@ Refer to [Terraform](./guidelines-for-terraform-friendly-http-apis.md#return-as-
 **It is easier to relax requirements than tighten them up**
 
 If you are in doubt, rather go with stricter validation. Making a requirement more lax if needed is never a breaking change!
+
+**Prefer the built-in string helpers over hand-picked lengths**
+
+`@kbn/config-schema` and `@kbn/zod` ship semantic helpers (`savedObjectId`, `displayName`, `description`, ...) that carry shared default bounds, plus a reporting mode for measuring an existing route before enforcing one. Refer to [Bounded string schemas](../../key-concepts/security/bounded-string-schemas.md).
 
 ### Headers
 
@@ -636,6 +640,8 @@ Alternatively, use 2 numbers in milliseconds or [ISO 8601](https://en.wikipedia.
 See our current reference documentation for [Kibana](https://www.elastic.co/docs/api/doc/kibana/). This is compiled from our OpenAPI spec.
 
 See [this tutorial](../../tutorials/generating-oas-for-http-apis.md) about the code-first approach to generating OpenAPI spec available in Kibana.
+
+On public routes, set an explicit `operationId` instead of relying on the name derived from the method and path. See [Set an operation ID](../../tutorials/generating-oas-for-http-apis.md#set-an-operation-id).
 
 If a public REST API is undocumented, you should either document it, or make it internal.
 

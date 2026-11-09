@@ -17,9 +17,15 @@ import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { EsqlEsqlShardFailure, EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
-import { hasStartEndParams, appendLimitToQuery } from '@kbn/esql-utils';
+import {
+  hasStartEndParams,
+  appendLimitToQuery,
+  getIndexPatternFromESQLQuery,
+} from '@kbn/esql-utils';
 import { getEsqlQueryHits } from '../../../../common';
 import type { OnlyEsqlQueryRuleParams, EsQuerySourceFields } from '../types';
+
+const UNKNOWN_INDEX_REGEX = /Unknown index \[([^\]]+)\]/g;
 
 export interface FetchEsqlQueryOpts {
   ruleId: string;
@@ -58,10 +64,27 @@ export async function fetchEsqlQuery({
   try {
     response = await esClient.esql.query(query);
   } catch (e) {
-    if (e.message?.includes('verification_exception')) {
+    const unknownIndices = getUnknownSourceIndices(e, params.esqlQuery.esql);
+    if (unknownIndices.length > 0) {
+      logger.debug(
+        () =>
+          `ES|QL query rule (${ruleId}) returned no results because the target index does not exist: ${e.message}`
+      );
+      response = { columns: [], values: [] };
+      if (ruleResultService) {
+        const warning = i18n.translate('xpack.stackAlerts.esQuery.unknownIndexWarning', {
+          defaultMessage:
+            'The target index [{indices}] does not exist. The query returned no results.',
+          values: { indices: unknownIndices.join(', ') },
+        });
+        ruleResultService.addLastRunWarning(warning);
+        ruleResultService.setLastRunOutcomeMessage(warning);
+      }
+    } else if (e.message?.includes('verification_exception')) {
       throw createTaskRunError(e, TaskErrorSource.USER);
+    } else {
+      throw e;
     }
-    throw e;
   }
 
   const isGroupAgg = isPerRowAggregation(params.groupBy);
@@ -152,6 +175,18 @@ export function generateLink(
 
   return redirectUrl;
 }
+
+const getUnknownSourceIndices = (e: Error, esql: string): string[] => {
+  if (!e.message?.includes('verification_exception')) {
+    return [];
+  }
+
+  const unknownIndices = [...e.message.matchAll(UNKNOWN_INDEX_REGEX)].flatMap(([, indices]) =>
+    indices.split(',').map((index) => index.trim())
+  );
+  const sourceIndices = new Set(getIndexPatternFromESQLQuery(esql).split(','));
+  return unknownIndices.every((index) => sourceIndices.has(index)) ? unknownIndices : [];
+};
 
 function getPartialResultsWarning(response: EsqlQueryResponse) {
   const clusters = response?._clusters?.details ?? {};

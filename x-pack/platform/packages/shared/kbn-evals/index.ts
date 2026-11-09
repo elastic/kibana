@@ -69,6 +69,7 @@ export { evaluate } from './src/evaluate';
 export { createAgentBuilderClient } from './src/utils/agent_builder_client';
 export type {
   AgentBuilderClient,
+  AgentBuilderConverseAttachment,
   AgentBuilderConverseParams,
   AgentBuilderClientResponse,
   ConverseStep,
@@ -76,6 +77,7 @@ export type {
 export type { DefaultEvaluators, EvaluatorKind, ReportDisplayOptions } from './src/types';
 export type { Direction } from '@kbn/evals-common';
 export type { EvaluationCriterion, EvaluationCriterionStructured } from './src/evaluators/criteria';
+export { createCriteriaEvaluator } from './src/evaluators/criteria';
 export { createPlaywrightEvalsConfig } from './src/config/create_playwright_eval_config';
 export type {
   Example,
@@ -98,7 +100,10 @@ export {
   calculateFactualScore,
   calculateRelevanceScore,
 } from './src/evaluators/correctness/scoring';
-export { createQuantitativeGroundednessEvaluator } from './src/evaluators/groundedness';
+export {
+  createQuantitativeGroundednessEvaluator,
+  createGroundednessAnalysisEvaluator,
+} from './src/evaluators/groundedness';
 export type { EvaluationDataset, EvaluationWorkerFixtures, EvaluationReport } from './src/types';
 export { withEvaluatorSpan, withTaskSpan, getCurrentTraceId } from './src/utils/tracing';
 export { withRetry, type RetryOptions } from './src/utils/retry_utils';
@@ -185,7 +190,21 @@ export {
 } from './src/evaluators/security';
 export { createSimilarityEvaluator } from './src/evaluators/similarity';
 
-export { deleteConnectorById, getConnectorIdAsUuid } from './src/utils/create_connector_fixture';
+export { getConnectorIdAsUuid } from './src/utils/create_stack_connector_fixture';
+export {
+  loadInferenceEndpoints,
+  type InferenceEndpointDefinition,
+} from './src/utils/inference_endpoint_definition';
+export {
+  getConnectorActionTypeId,
+  getInferenceEndpointId,
+  isInferenceEndpointDefinition,
+  toStackConnectorDefinition,
+  type EvalConnector,
+  type StackConnectorDefinition,
+} from './src/utils/eval_connector';
+export { buildModelFromConnector } from './src/utils/build_model_from_connector';
+export { inferenceEndpointExists } from './src/utils/inference_endpoint_api';
 
 // Re-export Scout tags here to avoid requiring a direct dependency on @kbn/scout for modules using @kbn/evals
 export { tags } from '@kbn/scout';

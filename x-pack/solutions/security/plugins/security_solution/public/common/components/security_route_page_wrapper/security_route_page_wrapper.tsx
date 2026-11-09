@@ -13,6 +13,7 @@ import { useLinkInfo } from '../../links';
 import { NoPrivilegesPage } from '../no_privileges';
 import { useUpsellingPage } from '../../hooks/use_upselling';
 import { SpyRoute } from '../../utils/route/spy_routes';
+import { SecurityAppHeader } from '../app_header';
 
 interface SecurityRoutePageWrapperOptionProps {
   /**
@@ -31,7 +32,11 @@ type SecurityRoutePageWrapperProps = {
   pageName: SecurityPageName;
 } & SecurityRoutePageWrapperOptionProps;
 
-const deprectedPagesWithRedirect = [SecurityPageName.detections];
+const deprectedPagesWithRedirect = [
+  SecurityPageName.detections,
+  // Bookmark URL still registered so the inner route can redirect to the homepage.
+  SecurityPageName.entityAnalytics,
+];
 
 /**
  * This component is created to wrap all the pages in the security solution app.
@@ -61,7 +66,7 @@ export const SecurityRoutePageWrapper: React.FC<PropsWithChildren<SecurityRouteP
       return (
         <>
           <SpyRoute pageName={pageName} />
-          <UpsellingPage />
+          <UpsellingPage appHeader={SecurityAppHeader} />
         </>
       );
     }

@@ -18,6 +18,7 @@ import type { AlertEpisode } from '../queries/episodes_query';
 import type { EpisodeActionExtension, SourceActionResult } from '../types/episode_data_source';
 import { isEpisodeSnoozed } from '../utils/is_episode_snoozed';
 import type { ClassicAlertActionContext } from './utils/map_alert';
+import { getErrorMessage } from '../actions/helpers';
 
 const getActionContext = (episode: {
   source_action_context?: unknown;
@@ -71,7 +72,7 @@ const updateWorkflowStatus = async (
       succeeded += groups[i].ids.length;
     } else {
       failed += groups[i].ids.length;
-      errors.push(result.reason?.message ?? 'Unknown error');
+      errors.push(getErrorMessage(result.reason));
     }
   }
 
@@ -97,7 +98,7 @@ const updateWorkflowTags = async (
   const remove = [...allCurrentTags].filter((t) => !tags.includes(t));
 
   if (add.length === 0 && remove.length === 0) {
-    return { succeeded: episodes.length, failed: 0 };
+    return { succeeded: 0, failed: 0, unchanged: episodes.length };
   }
 
   const results = await Promise.allSettled(
@@ -114,7 +115,7 @@ const updateWorkflowTags = async (
       succeeded += groups[idx].ids.length;
     } else {
       failed += groups[idx].ids.length;
-      errors.push(result.reason?.message ?? 'Unknown error');
+      errors.push(getErrorMessage(result.reason));
     }
   }
 
@@ -146,7 +147,7 @@ export const classicActionExtensions: Array<EpisodeActionExtension<any>> = [
         await bulkUntrackAlerts({ http, indices, alertUuids });
         return { succeeded: alertUuids.length, failed: 0 };
       } catch (e) {
-        return { succeeded: 0, failed: alertUuids.length, errors: [e?.message ?? 'Unknown error'] };
+        return { succeeded: 0, failed: alertUuids.length, errors: [getErrorMessage(e)] };
       }
     },
   },
@@ -157,23 +158,23 @@ export const classicActionExtensions: Array<EpisodeActionExtension<any>> = [
       return (
         Boolean(ctx?.instanceId) &&
         Boolean(ctx?.ruleId) &&
-        !isEpisodeSnoozed(ep.last_snooze_action, ep.snooze_expiry)
+        !isEpisodeSnoozed(ep.last_snooze_action, ep.snoozed_until)
       );
     },
     execute: async (eps, http, context) => {
-      const expiry: string | null = context?.expiry ?? null;
+      const snoozedUntil: string | null = context?.snoozedUntil ?? null;
       let succeeded = 0;
       let failed = 0;
       const errors: string[] = [];
 
-      if (expiry === null) {
+      if (snoozedUntil === null) {
         const rules = groupByRule(eps);
         try {
           await bulkMuteAlerts({ http, rules });
           succeeded = eps.length;
         } catch (e) {
           failed = eps.length;
-          errors.push(e?.message ?? 'Unknown error');
+          errors.push(getErrorMessage(e));
         }
       } else {
         const episodesByRuleId = new Map<string, AlertEpisode[]>();
@@ -193,12 +194,12 @@ export const classicActionExtensions: Array<EpisodeActionExtension<any>> = [
                   http,
                   id: ctx.ruleId,
                   instanceId: ctx.instanceId!,
-                  expiresAt: expiry,
+                  expiresAt: snoozedUntil,
                 });
                 succeeded++;
               } catch (e) {
                 failed++;
-                errors.push(e?.message ?? 'Unknown error');
+                errors.push(getErrorMessage(e));
               }
             }
           })
@@ -215,7 +216,7 @@ export const classicActionExtensions: Array<EpisodeActionExtension<any>> = [
       return (
         Boolean(ctx?.instanceId) &&
         Boolean(ctx?.ruleId) &&
-        isEpisodeSnoozed(ep.last_snooze_action, ep.snooze_expiry)
+        isEpisodeSnoozed(ep.last_snooze_action, ep.snoozed_until)
       );
     },
     execute: async (eps, http) => {
@@ -224,20 +225,20 @@ export const classicActionExtensions: Array<EpisodeActionExtension<any>> = [
       const errors: string[] = [];
 
       const epsToUnmute = eps.filter((ep) => ep.is_muted === true);
-      const epsToUnsnooze = eps.filter((ep) => ep.snooze_expiry != null);
+      const epsToUnsnooze = eps.filter((ep) => ep.snoozed_until != null);
 
       let unmuteFailed = false;
 
       if (epsToUnmute.length > 0) {
         const rules = groupByRule(epsToUnmute);
-        const mutedOnlyCount = epsToUnmute.filter((ep) => ep.snooze_expiry == null).length;
+        const mutedOnlyCount = epsToUnmute.filter((ep) => ep.snoozed_until == null).length;
         try {
           await bulkUnmuteAlerts({ http, rules });
           succeeded += mutedOnlyCount;
         } catch (e) {
           unmuteFailed = true;
           failed += epsToUnmute.length;
-          errors.push(e?.message ?? 'Unknown error');
+          errors.push(getErrorMessage(e));
         }
       }
 
@@ -260,7 +261,7 @@ export const classicActionExtensions: Array<EpisodeActionExtension<any>> = [
             if (!skipCount) succeeded++;
           } else {
             if (!skipCount) failed++;
-            errors.push(r.reason?.message ?? 'Unknown error');
+            errors.push(getErrorMessage(r.reason));
           }
         }
       }

@@ -13,7 +13,7 @@ import type {
   PostTransformsPreviewRequestSchema,
   PostTransformsPreviewResponseSchema,
 } from '../../../server/routes/api_schemas/transforms';
-import { addInternalBasePath, TRANSFORM_REACT_QUERY_KEYS } from '../../../common/constants';
+import { TRANSFORM_REACT_QUERY_KEYS } from '../../../common/constants';
 
 import { useAppDependencies } from '../app_dependencies';
 
@@ -26,7 +26,7 @@ export const useGetTransformsPreview = (
   return useQuery<PostTransformsPreviewResponseSchema, IHttpFetchError>(
     [TRANSFORM_REACT_QUERY_KEYS.GET_TRANSFORMS_PREVIEW, obj],
     ({ signal }) =>
-      http.post<PostTransformsPreviewResponseSchema>(addInternalBasePath('transforms/_preview'), {
+      http.post<PostTransformsPreviewResponseSchema>('/internal/transform/transforms/_preview', {
         body: JSON.stringify(obj),
         version: '1',
         signal,

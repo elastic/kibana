@@ -7,14 +7,22 @@
 
 export { dispatchConnectorEvents } from './dispatch_connector_events';
 export { computeIngestTokenHash } from './compute_ingest_token_hash';
+export { generateIngestToken } from './generate_ingest_token';
+export { resolveInboundEventsSpaceId } from './resolve_inbound_events_space_id';
 export {
-  applyInboundIngressCredentialsIfNeeded,
-  ensureConnectorIngressCredentials,
-  preserveInboundIngressHashIfNeeded,
-  resolveInboundEventsSpaceId,
-} from './ensure_connector_ingress_credentials';
+  composeIngestToken,
+  deleteIngressCredentialForConnector,
+  loadIngressCredential,
+  mintIngressCredential,
+  parseIngestToken,
+} from './ingress_credential';
 export type { InboundEventsClient, InboundEventsClientArgs } from './factory';
 export { createInboundEventsClient } from './factory';
+export { InboundEventRateLimiter } from './inbound_event_rate_limiter';
+export { InboundEventAdmission } from './inbound_event_admission';
+export { registerInboundEventAdmission } from './register_inbound_event_admission';
+export type { InboundEventsSetup } from './setup_inbound_events';
+export { setupInboundEvents } from './setup_inbound_events';
 export type {
   ConnectorEventEmitParams,
   ConnectorEventEmitter,

@@ -22,7 +22,7 @@ const normalize = (path) => (Path.sep !== '/' ? path.split('\\').join('/') : pat
 /**
  * @type {import('@kbn/projects-solutions-groups').KibanaSolution[]}
  */
-const KIBANA_SOLUTIONS = ['search', 'security', 'observability', 'workplaceai', 'vectordb'];
+const KIBANA_SOLUTIONS = ['search', 'security', 'observability', 'vectordb'];
 
 /**
  * Representation of a Package in the Kibana repository
@@ -229,9 +229,6 @@ class Package {
       visibility = 'private';
     } else if (dir.startsWith('x-pack/solutions/observability/')) {
       group = 'observability';
-      visibility = 'private';
-    } else if (dir.startsWith('x-pack/solutions/workplaceai/')) {
-      group = 'workplaceai';
       visibility = 'private';
     } else if (dir.startsWith('x-pack/solutions/vectordb/')) {
       group = 'vectordb';

@@ -14,18 +14,23 @@ import {
   SAVE_PACK_BUTTON,
   FLYOUT_SAVED_QUERY_SAVE_BUTTON,
   customActionEditSavedQuerySelector,
-  POLICY_SELECT_COMBOBOX,
   SAVED_QUERY_DROPDOWN_SELECT,
   UPDATE_PACK_BUTTON,
   TABLE_ROWS,
   formFieldInputSelector,
 } from '../../screens/packs';
 import { navigateTo } from '../../tasks/navigation';
-import { checkResults, deleteAndConfirm, inputQuery } from '../../tasks/live_query';
+import {
+  checkResults,
+  deleteAndConfirm,
+  inputQuery,
+  openResultsViewInMenu,
+} from '../../tasks/live_query';
 import {
   changePackActiveStatus,
   preparePack,
   openScheduledPackExecutionDetails,
+  selectPackPolicy,
 } from '../../tasks/packs';
 import {
   closeModalIfVisible,
@@ -153,7 +158,7 @@ describe.skip(
         inputQuery('select * from uptime;');
         cy.getBySel('timeout-input').clear().type('603');
         cy.getBySel('resultsTypeField').click();
-        cy.contains('Differential (Ignore removals)').click();
+        cy.contains('Differential (ignore removals)').click();
         cy.wait(500); // wait for the validation to trigger - cypress is way faster than users ;)
         cy.getBySel(FLYOUT_SAVED_QUERY_SAVE_BUTTON).click();
 
@@ -178,16 +183,16 @@ describe.skip(
         cy.get(customActionEditSavedQuerySelector('Query2')).click();
 
         cy.getBySel('resultsTypeField').contains('Differential').click();
-        cy.contains('Differential (Ignore removals)').click();
+        cy.contains('Differential (ignore removals)').click();
         cy.getBySel(FLYOUT_SAVED_QUERY_SAVE_BUTTON).click();
 
         cy.get(customActionEditSavedQuerySelector('Query3')).click();
 
-        cy.getBySel('resultsTypeField').contains('(Ignore removals)').click();
+        cy.getBySel('resultsTypeField').contains('(ignore removals)').click();
         cy.contains('Snapshot').click();
         cy.getBySel(FLYOUT_SAVED_QUERY_SAVE_BUTTON).click();
 
-        cy.getBySel(POLICY_SELECT_COMBOBOX).type(`${DEFAULT_POLICY} {downArrow}{enter}`);
+        selectPackPolicy(DEFAULT_POLICY);
 
         cy.getBySel(UPDATE_PACK_BUTTON).click();
         closeModalIfVisible();
@@ -260,7 +265,7 @@ describe.skip(
         cy.getBySel(ADD_PACK_HEADER_BUTTON).click();
         cy.get(formFieldInputSelector('name')).type(`${packName}{downArrow}{enter}`);
         cy.get(formFieldInputSelector('description')).type(`Pack description{downArrow}{enter}`);
-        cy.getBySel(POLICY_SELECT_COMBOBOX).type(`${DEFAULT_POLICY} {downArrow}{enter}`);
+        selectPackPolicy(DEFAULT_POLICY);
         cy.getBySel(ADD_QUERY_BUTTON).click();
 
         cy.contains('Attach next query');
@@ -394,7 +399,8 @@ describe.skip(
                   lensUrl = url;
                 });
             });
-            cy.get(`[aria-label="View in Lens"]`).eq(0).click();
+            openResultsViewInMenu();
+            cy.getBySel('query-details-view-in-lens').click();
             cy.window()
               .its('open')
               .then(() => {
@@ -448,8 +454,8 @@ describe.skip(
           .then((pathname) => {
             const scheduleId = pathname.split('/history/scheduled/')[1].split('/')[0];
 
-            cy.get(`[aria-label="View in Discover"]`)
-              .eq(0)
+            openResultsViewInMenu();
+            cy.getBySel('query-details-view-in-discover')
               .should('have.attr', 'href')
               .then(($href) => {
                 expect($href).to.include(encodeURIComponent(scheduleId));

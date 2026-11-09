@@ -109,9 +109,6 @@ export const APP_DASHBOARDS_URL = '/app/dashboards';
 export const ADVANCED_SETTINGS_URL = '/app/management/kibana/settings';
 
 // Entity Analytics
-export const ENTITY_ANALYTICS_DASHBOARD_URL = '/app/security/entity_analytics';
-export const ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_URL =
-  '/app/security/entity_analytics_privileged_user_monitoring';
 export const ENTITY_ANALYTICS_HOME_PAGE_URL = '/app/security/entity_analytics_home_page';
 
 // Asset Inventory

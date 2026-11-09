@@ -32,6 +32,27 @@ export const AUTHORS_SELECTED = (count: number) =>
     values: { count },
   });
 
+export const SOURCE = i18n.translate('xpack.cases.userActionsFilterBar.source', {
+  defaultMessage: 'Source',
+});
+
+export const ALL_SOURCES = i18n.translate('xpack.cases.userActionsFilterBar.allSources', {
+  defaultMessage: 'All',
+});
+
+export const NOT_RECORDED_SOURCE = i18n.translate(
+  'xpack.cases.userActionsFilterBar.notRecordedSource',
+  {
+    defaultMessage: 'Not recorded',
+  }
+);
+
+export const SOURCES_SELECTED = (count: number) =>
+  i18n.translate('xpack.cases.userActionsFilterBar.sourcesSelected', {
+    defaultMessage: '{count} selected',
+    values: { count },
+  });
+
 export const CLEAR_FILTERS = i18n.translate('xpack.cases.userActionsFilterBar.clearFilters', {
   defaultMessage: 'Clear filters',
 });

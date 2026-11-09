@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { CHROME_HEADER_TEST_SUBJECTS } from '@kbn/core-chrome-browser-components';
 import { subj } from '@kbn/test-subj-selector';
 import { KibanaPage } from './kibana_page';
 
 export class ProjectPage extends KibanaPage {
   async waitForHeader() {
-    return this.page.waitForSelector(subj('chromeNextGlobalHeader'), {
+    return this.page.waitForSelector(subj(CHROME_HEADER_TEST_SUBJECTS.root), {
       state: 'attached',
     });
   }

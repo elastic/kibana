@@ -20,7 +20,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest } from '../fixtures';
+import { getPageA11yViolations, spaceTest } from '../fixtures';
 
 /** Wide enough for the push flyout. Matches the FTR `browser.setWindowSize(1600, 1200)`. */
 const PUSH_VIEWPORT = { width: 1600, height: 1200 };
@@ -28,13 +28,23 @@ const PUSH_VIEWPORT = { width: 1600, height: 1200 };
 const OVERLAY_VIEWPORT = { width: 800, height: 1200 };
 
 /**
- * Excluded from the a11y scan below. The fields table renders an `EuiDataGrid`
- * whose virtualized body scrolls without being keyboard focusable, which axe
- * reports as `scrollable-region-focusable` (serious). The violation is
- * pre-existing and lives in EUI's grid rather than in the flyout, so it is
- * scoped out to keep the rest of the flyout covered.
+ * Excluded from the scans below: the fields table's virtualized body scrolls
+ * without being keyboard focusable, which axe reports as
+ * `scrollable-region-focusable` (serious). The violation is pre-existing and
+ * lives in EUI's grid rather than in the flyout.
+ *
+ * Scoped to the scroll container rather than the whole grid, so the field rows
+ * and their actions stay covered. That container has no test subject or role,
+ * so its EUI class is the only handle — if the class is ever renamed the scan
+ * fails loudly on the violation rather than silently losing coverage.
  */
-const FIELDS_GRID_TEST_SUBJ = '[data-test-subj="UnifiedDocViewerTableGrid"]';
+const FIELDS_GRID_SCROLL_CONTAINER =
+  '[data-test-subj="UnifiedDocViewerTableGrid"] .euiDataGrid__virtualized';
+
+const FLYOUT_TEST_SUBJ = '[data-test-subj="docViewerFlyout"]';
+
+/** Scanned alongside the flyout: the cell popover mounts in an EUI portal. */
+const EXPANSION_POPOVER_TEST_SUBJ = '[data-test-subj="euiDataGridExpansionPopover"]';
 
 spaceTest.describe(
   'Discover doc viewer flyout - accessibility',
@@ -186,21 +196,58 @@ spaceTest.describe(
 
       await spaceTest.step('push flyout', async () => {
         const { violations } = await page.checkA11y({
-          include: ['[data-test-subj="docViewerFlyout"]'],
-          exclude: [FIELDS_GRID_TEST_SUBJ],
+          include: [FLYOUT_TEST_SUBJ],
+          exclude: [FIELDS_GRID_SCROLL_CONTAINER],
         });
         expect(violations).toStrictEqual([]);
+
+        // The push flyout does not trap focus, so the page behind it stays
+        // interactive and is resized around it. The flyout portals outside the
+        // page root, so this second scan covers that layout rather than
+        // repeating the one above. The overlay step below needs no equivalent:
+        // that variant traps focus and leaves the page inert.
+        expect(await getPageA11yViolations(page)).toStrictEqual([]);
       });
 
       await spaceTest.step('overlay flyout', async () => {
         await page.setViewportSize(OVERLAY_VIEWPORT);
 
         const { violations } = await page.checkA11y({
-          include: ['[data-test-subj="docViewerFlyout"]'],
-          exclude: [FIELDS_GRID_TEST_SUBJ],
+          include: [FLYOUT_TEST_SUBJ],
+          exclude: [FIELDS_GRID_SCROLL_CONTAINER],
         });
         expect(violations).toStrictEqual([]);
       });
     });
+
+    spaceTest(
+      'has no automated a11y violations in the source tab or an expanded field cell',
+      async ({ page, pageObjects }) => {
+        const { docViewer } = pageObjects;
+
+        await docViewer.openAndWaitForFlyout({ rowIndex: 0 });
+
+        await spaceTest.step('source tab', async () => {
+          await docViewer.openTab('doc_view_source');
+          // The flyout is the scan root in both tabs, so without this gate the
+          // scan could still be looking at the fields table.
+          await expect(docViewer.getJsonCodeEditor()).toBeVisible();
+
+          // No grid exclusion needed: the JSON editor replaces the fields table.
+          const { violations } = await page.checkA11y({ include: [FLYOUT_TEST_SUBJ] });
+          expect(violations).toStrictEqual([]);
+        });
+
+        await spaceTest.step('expanded field name cell', async () => {
+          await docViewer.expandFieldNameCell('extension');
+
+          const { violations } = await page.checkA11y({
+            include: [FLYOUT_TEST_SUBJ, EXPANSION_POPOVER_TEST_SUBJ],
+            exclude: [FIELDS_GRID_SCROLL_CONTAINER],
+          });
+          expect(violations).toStrictEqual([]);
+        });
+      }
+    );
   }
 );

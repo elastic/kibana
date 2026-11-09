@@ -108,7 +108,6 @@ it('passes correct args to sub-classes', () => {
           "proxyUrl": undefined,
           "script": <absolute path>/scripts/kibana,
           "watcher": Watcher {
-            "optimizerShouldRestart$": [MockFunction],
             "serverShouldRestart$": [MockFunction],
           },
         },
@@ -229,7 +228,6 @@ describe('#start()/#stop()', () => {
       watcherRun$ = new Rx.Subject();
       return {
         run$: watcherRun$,
-        optimizerShouldRestart$: jest.fn(() => Rx.NEVER),
       };
     });
     DevServer.mockImplementation(() => {
@@ -320,7 +318,7 @@ describe('#start()/#stop()', () => {
       Array [
         Object {
           "args": Array [
-            "[@kbn/optimizer] fatal error",
+            "[@kbn/rspack-optimizer] fatal error",
             "Error: foo bar",
           ],
           "type": "bad",

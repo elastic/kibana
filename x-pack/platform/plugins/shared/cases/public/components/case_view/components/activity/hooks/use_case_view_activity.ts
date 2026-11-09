@@ -67,6 +67,7 @@ export const useCaseViewActivity = ({ caseData }: { caseData: CaseUI }) => {
         type: params.type,
         sortOrder: params.sortOrder,
         authors: params.authors,
+        sources: params.sources,
       });
       setUserActivityQueryParams({ ...params, page: 1 });
     },

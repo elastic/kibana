@@ -12,7 +12,9 @@ import { test } from '../fixtures';
 import {
   CONNECTORS_API,
   CONNECTORS_WITH_ONE,
+  CONNECTORS_EMPTY_RESPONSE,
   FLEET_PACKAGES_API,
+  INTEGRATION_NAMES_API,
   INTEGRATIONS_LIST_API,
 } from '../fixtures/mock_data';
 
@@ -49,6 +51,14 @@ test.describe(
         }
       });
 
+      await page.route(INTEGRATION_NAMES_API, (route) =>
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify([]),
+        })
+      );
+
       await browserAuth.loginAsPrivilegedUser();
       await pageObjects.integrationManagement.navigateToCreate();
       await expect(pageObjects.integrationManagement.getIntegrationTitleInput()).toBeVisible();
@@ -65,6 +75,23 @@ test.describe(
     }) => {
       await pageObjects.integrationManagement.getConnectorSelector().click();
       await expect(pageObjects.integrationManagement.getConnectorSelector()).toBeVisible();
+      const { violations } = await page.checkA11y({ include: ['.kbnAppWrapper'] });
+      expect(violations).toStrictEqual([]);
+    });
+
+    test('has no detectable a11y violations with the AI connector callout shown', async ({
+      page,
+      pageObjects,
+    }) => {
+      await page.route(CONNECTORS_API, (route) =>
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify(CONNECTORS_EMPTY_RESPONSE),
+        })
+      );
+      await pageObjects.integrationManagement.navigateToCreate();
+      await expect(pageObjects.integrationManagement.getAiConnectorRequiredCallout()).toBeVisible();
       const { violations } = await page.checkA11y({ include: ['.kbnAppWrapper'] });
       expect(violations).toStrictEqual([]);
     });

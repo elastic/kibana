@@ -6,36 +6,24 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { ByteSizeValue } from '@kbn/config-schema';
-import { coreMock } from '@kbn/core/server/mocks';
 import { createMockEsClient } from '../../test_utils';
 import { createLoggerService } from '../logger_service/logger_service.mock';
+import { createEsqlResponseFormatService } from '../esql_response_format_service/esql_response_format_service.mock';
 import { QueryService } from './query_service';
-import type { EsqlConfig, PluginConfig } from '../../../config';
+import type { EsqlResponseFormatName } from './formats';
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
 
-export function createQueryService(responseFormat: EsqlConfig['responseFormat'] = 'json'): {
+export function createQueryService(responseFormat: EsqlResponseFormatName = 'json'): {
   queryService: QueryService;
   mockEsClient: DeeplyMockedApi<ElasticsearchClient>;
   mockLogger: jest.Mocked<Logger>;
 } {
   const mockEsClient = createMockEsClient();
   const { loggerService, mockLogger } = createLoggerService();
-  const config: PluginConfig = {
-    enabled: true,
-    invalidateApiKeysTask: { interval: '5m', removalDelay: '1h' },
-    rules: {
-      minimumScheduleInterval: '1m',
-      maxScheduledPerMinute: 400,
-      run: {
-        alerts: { max: 10000 },
-        maxGroupsPerExecution: 10000,
-        query: { maxResponseSize: ByteSizeValue.parse('50mb') },
-      },
-    },
-    esql: { responseFormat },
-  };
-  const pluginConfigAccessor = coreMock.createPluginInitializerContext<PluginConfig>(config).config;
-  const queryService = new QueryService(mockEsClient, loggerService, pluginConfigAccessor);
+  const queryService = new QueryService(
+    mockEsClient,
+    loggerService,
+    createEsqlResponseFormatService(responseFormat)
+  );
   return { queryService, mockEsClient, mockLogger };
 }

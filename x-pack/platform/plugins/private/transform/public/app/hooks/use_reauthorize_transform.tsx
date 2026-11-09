@@ -13,7 +13,6 @@ import type {
   ReauthorizeTransformsRequestSchema,
   ReauthorizeTransformsResponseSchema,
 } from '../../../server/routes/api_schemas/reauthorize_transforms';
-import { addInternalBasePath } from '../../../common/constants';
 import { getErrorMessage } from '../../../common/utils/errors';
 
 import { useAppDependencies, useToastNotifications } from '../app_dependencies';
@@ -29,13 +28,10 @@ export const useReauthorizeTransforms = () => {
 
   const mutation = useMutation({
     mutationFn: (reqBody: ReauthorizeTransformsRequestSchema) =>
-      http.post<ReauthorizeTransformsResponseSchema>(
-        addInternalBasePath('reauthorize_transforms'),
-        {
-          body: JSON.stringify(reqBody),
-          version: '1',
-        }
-      ),
+      http.post<ReauthorizeTransformsResponseSchema>('/internal/transform/reauthorize_transforms', {
+        body: JSON.stringify(reqBody),
+        version: '1',
+      }),
     onError: (error) =>
       toastNotifications.addDanger({
         title: i18n.translate(

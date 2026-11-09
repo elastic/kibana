@@ -80,4 +80,42 @@ describe('conversation storage mapping', () => {
       })
     );
   });
+
+  it('maps attachments id and type as keyword sub-properties', async () => {
+    const esClient = createMockEsClient();
+    const storage = createStorage({ logger: createLoggerMock(), esClient });
+
+    await storage.getClient().index({
+      id: 'conversation-1',
+      document: {
+        user_name: 'User',
+        agent_id: 'agent-1',
+        space: 'default',
+        title: 'Conversation',
+        created_at: '2026-08-24T00:00:00.000Z',
+        updated_at: '2026-08-24T00:00:00.000Z',
+        conversation_rounds: [],
+        attachments: [],
+      },
+    });
+
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        template: expect.objectContaining({
+          mappings: expect.objectContaining({
+            properties: expect.objectContaining({
+              attachments: expect.objectContaining({
+                type: 'object',
+                dynamic: false,
+                properties: {
+                  id: expect.objectContaining({ type: 'keyword' }),
+                  type: expect.objectContaining({ type: 'keyword' }),
+                },
+              }),
+            }),
+          }),
+        }),
+      })
+    );
+  });
 });

@@ -16,7 +16,6 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
-import { useStreamingContext } from '../../../context/streaming/streaming_context';
 import { useConversationList } from '../../../hooks/use_conversation_list';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { getConversationTemplateIcon } from '../../../hooks/use_conversation_template_display';
@@ -38,7 +37,6 @@ export const EmbeddableConversationList: React.FC<EmbeddableConversationListProp
 }) => {
   const { euiTheme } = useEuiTheme();
   const { agentId, conversationId, setConversationId, resetAttachments } = useConversationContext();
-  const { removeAllErrors } = useStreamingContext();
   const { conversationTemplatesService } = useAgentBuilderServices();
   const {
     conversations: rawConversations,
@@ -95,7 +93,6 @@ export const EmbeddableConversationList: React.FC<EmbeddableConversationListProp
             <button
               css={isActive ? activeItemStyles : itemStyles}
               onClick={() => {
-                removeAllErrors();
                 if (!isActive) {
                   resetAttachments?.();
                 }

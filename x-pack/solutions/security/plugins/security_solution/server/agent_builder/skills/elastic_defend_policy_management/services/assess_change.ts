@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
 import { buildPolicyChangeAssessment } from '../domain/impact';
-import type { PolicyChangeAssessment, PolicyChangeCapabilities } from '../domain/impact';
+import type { PolicyChangeAssessment } from '../domain/impact';
 import { assertParameterBounds } from '../domain/impact/parameter_bounds';
 import { parseAssessPolicyChangeParams } from '../domain/impact/policy_change_operation';
 import type { PolicyAccessContext } from './access_context';
 import type { EndpointCountResult } from './count_endpoints';
 import { countEndpoints } from './count_endpoints';
+import { toPolicyChangeCapabilities } from './policy_change_capabilities';
 import { getNormalizedEndpointPolicy } from './read_policy';
 
 export interface AssessPolicyChangeDto {
@@ -21,32 +21,6 @@ export interface AssessPolicyChangeDto {
   readonly spaceId: string;
   readonly enrollment: EndpointCountResult;
 }
-
-const toPolicyChangeCapabilities = (
-  endpointAppContextService: EndpointAppContextService
-): PolicyChangeCapabilities => {
-  const licenseService = endpointAppContextService.getLicenseService();
-  const productFeatures = endpointAppContextService.getProductFeaturesService();
-  const { experimentalFeatures } = endpointAppContextService;
-
-  return {
-    licenseInformation: licenseService.getLicenseInformation(),
-    endpointPolicyProtections: productFeatures.isEnabled(
-      ProductFeatureSecurityKey.endpointPolicyProtections
-    ),
-    endpointTrustedDevices: productFeatures.isEnabled(
-      ProductFeatureSecurityKey.endpointTrustedDevices
-    ),
-    trustedDevicesExperimental: experimentalFeatures.trustedDevices,
-    endpointProtectionUpdates: productFeatures.isEnabled(
-      ProductFeatureSecurityKey.endpointProtectionUpdates
-    ),
-    endpointCustomNotification: productFeatures.isEnabled(
-      ProductFeatureSecurityKey.endpointCustomNotification
-    ),
-    serverless: endpointAppContextService.isServerless(),
-  };
-};
 
 export const assessChange = async (
   access: PolicyAccessContext,

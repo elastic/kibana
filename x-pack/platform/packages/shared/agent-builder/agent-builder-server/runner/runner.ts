@@ -8,7 +8,7 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { PromptRequest, PromptStorageState } from '@kbn/agent-builder-common/agents/prompts';
-import type { AutoApprovedApi, ToolType } from '@kbn/agent-builder-common';
+import type { AutoApprovedApi, ConversationOriginType, ToolType } from '@kbn/agent-builder-common';
 import type { ToolEventHandlerFn } from './events';
 import type { RunAgentFn, ScopedRunAgentFn } from '../agents/runner';
 import type { InternalToolDefinition } from '../tools/internal';
@@ -29,6 +29,19 @@ export interface RunToolReturn {
    */
   prompt?: PromptRequest;
 }
+
+/**
+ * Return of `execute_dynamic_tool`: the inner tool's return, tagged with the inner tool id so the
+ * call's result content is attributed to the inner tool (its token budget, its filestore path).
+ */
+export interface DynamicToolRunReturn extends RunToolReturn {
+  dynamicToolId: string;
+}
+
+export const isDynamicToolRunReturn = (
+  toolReturn: RunToolReturn
+): toolReturn is DynamicToolRunReturn =>
+  'dynamicToolId' in toolReturn && typeof toolReturn.dynamicToolId === 'string';
 
 /**
  * Represents a runner, which is the entry point to execute all agentBuilder primitives,
@@ -110,6 +123,7 @@ export interface RunAgentStackEntry {
   agentName?: string;
   conversationId?: string;
   executionId?: string;
+  origin?: ConversationOriginType;
 }
 
 export interface RunToolStackEntry {

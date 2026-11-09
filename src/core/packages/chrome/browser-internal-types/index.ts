@@ -25,7 +25,6 @@ import type {
   ChromeControls,
   ChromeHelp,
   ChromeNewsfeedHandler,
-  ChromeNext,
   ChromeUserBanner,
   GlobalSearchConfig,
   NavigationCustomization,
@@ -191,9 +190,6 @@ export interface InternalChromeStart extends ChromeStart {
     get$(): Observable<InlineAppHeaderState | undefined>;
     register(title?: AppHeaderTitle): InlineAppHeaderRegistration;
   };
-
-  /** @internal Extends public `next` with `get$` for Chrome layout components. */
-  next: InternalChromeNext;
 }
 
 /** @internal */
@@ -210,6 +206,9 @@ export interface InternalChromeControls extends ChromeControls {
   projectPicker: ChromeControls['projectPicker'] & {
     get$(): Observable<ReactNode>;
   };
+  subscriptionBadge: ChromeControls['subscriptionBadge'] & {
+    get$(): Observable<ReactNode>;
+  };
   userMenu: ChromeControls['userMenu'] & {
     get$(): Observable<ReactNode>;
   };
@@ -219,15 +218,4 @@ export interface InternalChromeControls extends ChromeControls {
 export interface InternalChromeHelp extends ChromeHelp {
   getFeedbackHandler$(): Observable<(() => void) | undefined>;
   getNewsfeedHandler$(): Observable<ChromeNewsfeedHandler | undefined>;
-}
-
-/** @internal */
-export interface InternalChromeNext extends ChromeNext {
-  aiButton: InternalChromeControls['aiButton'];
-  contextSwitcher: InternalChromeControls['contextSwitcher'];
-  projectPicker: InternalChromeControls['projectPicker'];
-  globalSearch: InternalChromeControls['globalSearch'];
-  userMenu: InternalChromeControls['userMenu'];
-  inlineAppHeader: InternalChromeStart['inlineAppHeader'];
-  appHeader: InternalChromeStart['appHeader'];
 }

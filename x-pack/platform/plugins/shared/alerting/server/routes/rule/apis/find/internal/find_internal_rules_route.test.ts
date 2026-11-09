@@ -10,6 +10,7 @@ import { findInternalRulesRoute } from './find_internal_rules_route';
 import { mockHandlerArguments } from '../../../../_mock_handler_arguments';
 import { rulesClientMock } from '../../../../../rules_client.mock';
 import type { FindResult } from '../../../../../application/rule/methods/find/find_rules';
+import { findRulesInternalRequestBodySchemaV1 } from '../../../../../../common/routes/rule/apis/find/internal';
 
 jest.mock('../../../../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
@@ -86,6 +87,7 @@ describe('findInternalRulesRoute', () => {
     expect(rulesClient.find.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
+          "allowPartialResults": false,
           "options": Object {
             "consumers": Array [
               "bar",
@@ -107,6 +109,85 @@ describe('findInternalRulesRoute', () => {
         per_page: 1,
         total: 0,
         data: [],
+      },
+    });
+  });
+
+  it.each([undefined, false, true])(
+    'forwards the partial-results preference when allow_partial_results is %s',
+    async (allowPartialResults) => {
+      const licenseState = licenseStateMock.create();
+      const router = httpServiceMock.createRouter();
+      findInternalRulesRoute(router, licenseState);
+      const [, handler] = router.post.mock.calls[0];
+      rulesClient.find.mockResolvedValueOnce({ page: 1, perPage: 1, total: 0, data: [] });
+
+      const body = findRulesInternalRequestBodySchemaV1.validate({
+        per_page: 1,
+        allow_partial_results: allowPartialResults,
+      });
+      const [context, req, res] = mockHandlerArguments({ rulesClient }, { body }, ['ok']);
+
+      await handler(context, req, res);
+
+      expect(rulesClient.find).toHaveBeenCalledWith({
+        options: { perPage: 1, page: 1, defaultSearchOperator: 'OR' },
+        allowPartialResults: !!allowPartialResults,
+      });
+    }
+  );
+
+  it('includes errors in the response when the rules client returns them', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    findInternalRulesRoute(router, licenseState);
+
+    const [, handler] = router.post.mock.calls[0];
+
+    const findResult = {
+      page: 1,
+      perPage: 1,
+      total: 2,
+      data: [],
+      errors: [
+        {
+          message:
+            'Error injecting reference into rule params for rule id 2 - something went wrong',
+          rule: { id: '2', name: 'broken rule' },
+        },
+      ],
+    };
+    rulesClient.find.mockResolvedValueOnce(findResult);
+
+    const [context, req, res] = mockHandlerArguments(
+      { rulesClient },
+      {
+        body: {
+          per_page: 1,
+          page: 1,
+          default_search_operator: 'OR',
+          allow_partial_results: true,
+        },
+      },
+      ['ok']
+    );
+
+    await handler(context, req, res);
+
+    expect(res.ok).toHaveBeenCalledWith({
+      body: {
+        page: 1,
+        per_page: 1,
+        total: 2,
+        data: [],
+        errors: [
+          {
+            message:
+              'Error injecting reference into rule params for rule id 2 - something went wrong',
+            rule: { id: '2', name: 'broken rule' },
+          },
+        ],
       },
     });
   });
@@ -158,6 +239,7 @@ describe('findInternalRulesRoute', () => {
     expect(rulesClient.find.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
+          "allowPartialResults": false,
           "options": Object {
             "consumers": Array [
               "bar",
@@ -338,6 +420,7 @@ describe('findInternalRulesRoute', () => {
     expect(rulesClient.find.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
+          "allowPartialResults": false,
           "options": Object {
             "consumers": Array [
               "bar",
@@ -420,6 +503,66 @@ describe('findInternalRulesRoute', () => {
         },
       }
     `);
+  });
+
+  it('includes the profile uid fields when present', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    findInternalRulesRoute(router, licenseState);
+
+    const [, handler] = router.post.mock.calls[0];
+
+    rulesClient.find.mockResolvedValueOnce({
+      page: 1,
+      perPage: 1,
+      total: 1,
+      data: [
+        {
+          id: 'rule-id-1',
+          alertTypeId: '.index-threshold',
+          name: 'test rule',
+          consumer: 'alerts',
+          tags: [],
+          enabled: true,
+          throttle: null,
+          apiKeyOwner: '2889684073',
+          createdBy: '2889684073',
+          updatedBy: '2889684073',
+          createdByProfileUid: 'u_profile_created',
+          updatedByProfileUid: 'u_profile_updated',
+          apiKeyOwnerProfileUid: 'u_profile_api_key_owner',
+          muteAll: false,
+          mutedInstanceIds: [],
+          schedule: { interval: '1m' },
+          snoozeSchedule: [],
+          actions: [],
+          params: {},
+          updatedAt: new Date('2024-03-21T13:15:00.498Z'),
+          createdAt: new Date('2024-03-21T13:15:00.498Z'),
+          executionStatus: {
+            status: 'ok' as const,
+            lastExecutionDate: new Date('2024-03-21T13:15:00.498Z'),
+          },
+          revision: 0,
+        },
+      ],
+    } as unknown as FindResult<{}>);
+
+    const [context, req, res] = mockHandlerArguments(
+      { rulesClient },
+      { body: { per_page: 1, page: 1, default_search_operator: 'OR' } },
+      ['ok']
+    );
+
+    await handler(context, req, res);
+
+    // @ts-expect-error - res.ok is mocked
+    const { data } = res.ok.mock.calls[0][0].body;
+
+    expect(data[0].created_by_profile_uid).toBe('u_profile_created');
+    expect(data[0].updated_by_profile_uid).toBe('u_profile_updated');
+    expect(data[0].api_key_owner_profile_uid).toBe('u_profile_api_key_owner');
   });
 
   it('transforms snoozedInstances into snoozed_alert_instances in the response', async () => {

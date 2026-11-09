@@ -12,12 +12,14 @@ import { AIValueReportPage } from './ai_value_report';
 import { AlertsTablePage } from './alerts_table';
 import { AgentBuilderPage } from './agent_builder';
 import { AlertDetailsRightPanelPage } from './alert_details_right_panel';
-import { EntityAnalyticsDashboardsPage } from './entity_analytics_dashboards';
 import { EntityAnalyticsManagementPage } from './entity_analytics_management';
+import { EntityAnalyticsHomePage } from './entity_analytics_home_page';
 import { CspmIntegrationPage } from './cspm_integration_page';
 import { TimelinePage } from './timeline';
 import { DetectionsAttackDiscoveryPage } from './detections_attack_discovery';
 import { RuleCreateWizardPage } from './rule_create_wizard';
+import { RuleDetailsPage } from './rule_details_page';
+import { RulesManagementPage } from './rules_management_page';
 import { ThreatMatchRuleCreatePage } from './threat_match_rule_create_page';
 import { AttackDetailsRightPanelPage } from './attack_details_right_panel';
 import { ServerlessProjectChromePage } from './serverless_project_chrome_page';
@@ -30,9 +32,16 @@ import { UserFlyout } from './flyout_v2/entity/user_flyout';
 import { CorrelationsTool } from './flyout_v2/document/tools/correlations_tool';
 import { PrevalenceTool } from './flyout_v2/document/tools/prevalence_tool';
 import { AnalyzerTool } from './flyout_v2/document/tools/analyzer_tool';
+import { ResponseTool } from './flyout_v2/document/tools/response_tool';
 import { EntityFlyoutAnomaliesPage } from './entity_flyout_anomalies_page';
+import { CoverageOverviewPage } from './coverage_overview';
+import { SecurityOverviewPage } from './security_overview_page';
+import { RuleEditPage } from './rule_edit_page';
+import { WatchlistEditFlyout } from './watchlist_edit_flyout';
 
 export type { RuleCreateWizardPage } from './rule_create_wizard';
+export type { RuleDetailsPage } from './rule_details_page';
+export type { RulesManagementPage } from './rules_management_page';
 export type { ThreatMatchRuleCreatePage } from './threat_match_rule_create_page';
 export { AddExceptionButtonType } from './add_exception_flyout';
 
@@ -42,20 +51,25 @@ export interface SecurityPageObjects extends PageObjects {
   alertsTablePage: AlertsTablePage;
   agentBuilderPage: AgentBuilderPage;
   alertDetailsRightPanelPage: AlertDetailsRightPanelPage;
-  entityAnalyticsDashboardsPage: EntityAnalyticsDashboardsPage;
   entityAnalyticsManagementPage: EntityAnalyticsManagementPage;
+  /** New Entity Analytics home page — Needs attention tiles and entities grid (behind the useNewEntityAnalyticsPage flag). */
+  entityAnalyticsHomePage: EntityAnalyticsHomePage;
   cspmIntegrationPage: CspmIntegrationPage;
   timelinePage: TimelinePage;
   detectionsAttackDiscoveryPage: DetectionsAttackDiscoveryPage;
   /** Custom query rule create wizard — Define → About → Schedule → Actions. */
   ruleCreateWizard: RuleCreateWizardPage;
+  /** Detection rules management page: rules table, row actions and bulk actions. */
+  rulesManagementPage: RulesManagementPage;
+  /** Rule details page: about/definition/schedule sections, execution status and alerts tab. */
+  ruleDetailsPage: RuleDetailsPage;
   /** Indicator match (threat match) rule creation page — threat index and field mapping controls. */
   threatMatchRuleCreatePage: ThreatMatchRuleCreatePage;
   attackDetailsRightPanelPage: AttackDetailsRightPanelPage;
   serverlessProjectChromePage: ServerlessProjectChromePage;
-  /** Graph Visualization tab inside the alert/event details left panel. */
+  /** Graph tool of the v2 document flyout (alert / event), opened from the graph preview. */
   graphFlyoutPage: GraphFlyoutPage;
-  /** v2 document flyout (alert / event) — enabled by default via the `securitySolution:enableNewFlyout` advanced setting. */
+  /** v2 document flyout (alert / event) — opened from the alerts table or Timeline. */
   documentFlyout: DocumentFlyout;
   /** v2 rule flyout — opened from the alerts table rule column or the document flyout About section. */
   ruleFlyout: RuleFlyout;
@@ -71,8 +85,18 @@ export interface SecurityPageObjects extends PageObjects {
   prevalenceTool: PrevalenceTool;
   /** Analyzer tool overlay (resolver process-tree graph) inside the flyout v2 document flyout. */
   analyzerTool: AnalyzerTool;
+  /** Response section and details inside the flyout v2 document overview. */
+  responseTool: ResponseTool;
   /** Entity flyout anomalies section and tab — requires entityAnalyticsAnomalyDetails feature flag. */
   entityFlyoutAnomaliesPage: EntityFlyoutAnomaliesPage;
+  /** MITRE ATT&CK coverage overview dashboard — rule coverage matrix. */
+  coverageOverviewPage: CoverageOverviewPage;
+  /** Security Overview page — threat intelligence panel. */
+  securityOverviewPage: SecurityOverviewPage;
+  /** Detection rule edit page — save flow and the save-with-warnings confirmation modal. */
+  ruleEditPage: RuleEditPage;
+  /** Watchlist create / edit flyout — opened from the Watchlists tab of the Entity analytics management page. */
+  watchlistEditFlyout: WatchlistEditFlyout;
 }
 
 export function extendPageObjects(
@@ -87,8 +111,8 @@ export function extendPageObjects(
     alertsTablePage: createLazyPageObject(AlertsTablePage, page),
     agentBuilderPage: createLazyPageObject(AgentBuilderPage, page),
     alertDetailsRightPanelPage: createLazyPageObject(AlertDetailsRightPanelPage, page),
-    entityAnalyticsDashboardsPage: createLazyPageObject(EntityAnalyticsDashboardsPage, page),
     entityAnalyticsManagementPage: createLazyPageObject(EntityAnalyticsManagementPage, page),
+    entityAnalyticsHomePage: createLazyPageObject(EntityAnalyticsHomePage, page),
     cspmIntegrationPage: createLazyPageObject(CspmIntegrationPage, page),
     timelinePage: createLazyPageObject(TimelinePage, page),
     detectionsAttackDiscoveryPage: createLazyPageObject(
@@ -97,6 +121,8 @@ export function extendPageObjects(
       config
     ),
     ruleCreateWizard: createLazyPageObject(RuleCreateWizardPage, page),
+    rulesManagementPage: createLazyPageObject(RulesManagementPage, page),
+    ruleDetailsPage: createLazyPageObject(RuleDetailsPage, page),
     threatMatchRuleCreatePage: createLazyPageObject(ThreatMatchRuleCreatePage, page),
     attackDetailsRightPanelPage: createLazyPageObject(AttackDetailsRightPanelPage, page),
     serverlessProjectChromePage: createLazyPageObject(ServerlessProjectChromePage, page),
@@ -109,6 +135,11 @@ export function extendPageObjects(
     correlationsTool: createLazyPageObject(CorrelationsTool, page),
     prevalenceTool: createLazyPageObject(PrevalenceTool, page),
     analyzerTool: createLazyPageObject(AnalyzerTool, page),
+    responseTool: createLazyPageObject(ResponseTool, page),
     entityFlyoutAnomaliesPage: createLazyPageObject(EntityFlyoutAnomaliesPage, page),
+    coverageOverviewPage: createLazyPageObject(CoverageOverviewPage, page),
+    securityOverviewPage: createLazyPageObject(SecurityOverviewPage, page),
+    ruleEditPage: createLazyPageObject(RuleEditPage, page),
+    watchlistEditFlyout: createLazyPageObject(WatchlistEditFlyout, page),
   };
 }

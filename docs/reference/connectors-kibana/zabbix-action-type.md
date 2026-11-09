@@ -9,11 +9,15 @@ applies_to:
 
 # Zabbix connector [zabbix-action-type]
 
-The Zabbix connector connects directly to a self-hosted Zabbix server's JSON-RPC API. It lets a workflow or agent read current problems and full event history, acknowledge and annotate problems, close and re-rank them, suppress noise, open and manage maintenance windows, and enable or disable hosts and triggers — without an operator opening the Zabbix frontend.
+The Zabbix connector connects directly to a self-hosted Zabbix server's JSON-RPC API. It lets an agent read current problems and full event history, acknowledge and annotate problems, close and re-rank them, suppress noise, open and manage maintenance windows, and enable or disable hosts and triggers — without an operator opening the Zabbix frontend.
+
+::::{note}
+This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release.
+::::
 
 ## Overview
 
-This is a **custom connector** that uses the single Zabbix JSON-RPC endpoint (`api_jsonrpc.php`) with Bearer token authentication. You configure your Zabbix frontend base URL and an API token when creating the connector; every action then runs under that token's account and permissions.
+The Zabbix connector uses the single Zabbix JSON-RPC endpoint (`api_jsonrpc.php`) with Bearer token authentication. You configure your Zabbix frontend base URL and an API token when creating the connector; every action then runs under that token's account and permissions.
 
 Zabbix must be network-reachable from Kibana, and the connector requires Zabbix 6.4 or later (Bearer-header authentication for the API was added in that release).
 

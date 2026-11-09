@@ -7,8 +7,8 @@
 
 import {
   buildNightshiftEventFlyoutShareUrl,
+  buildNightshiftEventsPageUrl,
   clearNightshiftEventIdParam,
-  clearNightshiftSeverityParam,
   getNightshiftEventIdFromSearch,
   getNightshiftSearchQueryFromSearch,
   getNightshiftSeverityFromSearch,
@@ -21,6 +21,20 @@ import {
 } from './url_params';
 
 describe('url_params', () => {
+  it('builds a link to the events page that restores the flyout, whatever page hosts it', () => {
+    window.history.pushState({}, '', '/app/observability/investigations?tab=overview');
+    const getUrlForApp = jest.fn(
+      (appId: string, { path }: { path?: string } = {}) => `/s/space-1/app/${appId}${path}`
+    );
+
+    expect(buildNightshiftEventsPageUrl(getUrlForApp, 'evt 001&x')).toBe(
+      `${window.location.origin}/s/space-1/app/nightshift/detections/events?${NIGHTSHIFT_EVENT_ID_QUERY_PARAM}=evt+001%26x`
+    );
+    expect(getUrlForApp).toHaveBeenCalledWith('nightshift', {
+      path: `/detections/events?${NIGHTSHIFT_EVENT_ID_QUERY_PARAM}=evt+001%26x`,
+    });
+  });
+
   it('builds a share URL with the eventId query param', () => {
     window.history.pushState({}, '', '/app/observability/nightshift?filter=logs.web');
 
@@ -68,16 +82,13 @@ describe('url_params', () => {
   });
 
   it('reads and writes the severity param', () => {
-    expect(getNightshiftSeverityFromSearch(`?${NIGHTSHIFT_SEVERITY_QUERY_PARAM}=80-critical`)).toBe(
-      '80-critical'
+    expect(getNightshiftSeverityFromSearch(`?${NIGHTSHIFT_SEVERITY_QUERY_PARAM}=critical`)).toBe(
+      'critical'
     );
     expect(getNightshiftSeverityFromSearch('')).toBeUndefined();
 
     const params = new URLSearchParams();
-    setNightshiftSeverityParam(params, '80-critical');
-    expect(params.get(NIGHTSHIFT_SEVERITY_QUERY_PARAM)).toBe('80-critical');
-
-    clearNightshiftSeverityParam(params);
-    expect(params.has(NIGHTSHIFT_SEVERITY_QUERY_PARAM)).toBe(false);
+    setNightshiftSeverityParam(params, 'critical');
+    expect(params.get(NIGHTSHIFT_SEVERITY_QUERY_PARAM)).toBe('critical');
   });
 });

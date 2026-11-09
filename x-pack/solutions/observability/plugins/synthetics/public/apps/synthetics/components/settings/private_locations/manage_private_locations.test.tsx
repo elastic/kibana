@@ -19,10 +19,16 @@ jest.mock('../../../hooks');
 jest.mock('./hooks/use_locations_api');
 jest.mock('../../../contexts/synthetics_settings_context');
 
+let mockHasEnterprise = false;
+jest.mock('../../../hooks/use_license', () => ({
+  useLicense: () => ({ hasAtLeast: () => mockHasEnterprise, getLicense: () => null }),
+}));
+
 const queryClient = new QueryClient();
 
 describe('<ManagePrivateLocations />', () => {
   beforeEach(() => {
+    mockHasEnterprise = false;
     jest.spyOn(permissionsHooks, 'useCanManagePrivateLocation').mockReturnValue(true);
     jest.spyOn(permissionsHooks, 'useFleetPermissions').mockReturnValue({
       canReadAgentPolicies: true,
@@ -129,65 +135,53 @@ describe('<ManagePrivateLocations />', () => {
     }
   );
 
-  it.each([true, false])(
-    'handles location table when the user does and does not have permissions',
-    async (canSave) => {
-      const privateLocationName = 'Test private location';
-      jest.spyOn(settingsHooks, 'useSyntheticsSettingsContext').mockReturnValue({
-        canSave,
-        canManagePrivateLocations: true,
-      } as SyntheticsSettingsContextValues);
+  it('handles location table when locations exist', async () => {
+    const privateLocationName = 'Test private location';
+    jest.spyOn(settingsHooks, 'useSyntheticsSettingsContext').mockReturnValue({
+      canSave: true,
+      canManagePrivateLocations: true,
+    } as SyntheticsSettingsContextValues);
 
-      jest.spyOn(locationHooks, 'usePrivateLocationsAPI').mockReturnValue({
-        loading: false,
-        onCreateLocationAPI: jest.fn(),
-        onEditLocationAPI: jest.fn(),
-        privateLocations: [
-          {
-            label: privateLocationName,
-            id: 'lkjlere',
-            agentPolicyId: 'lkjelrje',
-            isServiceManaged: false,
-          },
-        ],
-        onDeleteLocationAPI: jest.fn(),
-        deleteLoading: false,
-        createLoading: false,
-      });
-      const { getByText, getByRole, findByText, queryByTestId } = render(
-        <QueryClientProvider client={queryClient}>
-          <ManagePrivateLocations />
-        </QueryClientProvider>,
+    jest.spyOn(locationHooks, 'usePrivateLocationsAPI').mockReturnValue({
+      loading: false,
+      onCreateLocationAPI: jest.fn(),
+      onEditLocationAPI: jest.fn(),
+      privateLocations: [
         {
-          state: {
-            agentPolicies: {
-              data: [{}],
-              loading: false,
-              error: null,
-            },
-            privateLocations: {
-              isPrivateLocationFlyoutVisible: false,
-            },
+          label: privateLocationName,
+          id: 'lkjlere',
+          agentPolicyId: 'lkjelrje',
+          isServiceManaged: false,
+        },
+      ],
+      onDeleteLocationAPI: jest.fn(),
+      deleteLoading: false,
+      createLoading: false,
+    });
+    const { getByText, queryByTestId } = render(
+      <QueryClientProvider client={queryClient}>
+        <ManagePrivateLocations />
+      </QueryClientProvider>,
+      {
+        state: {
+          agentPolicies: {
+            data: [{}],
+            loading: false,
+            error: null,
           },
-        }
-      );
-      expect(getByText(privateLocationName)).toBeInTheDocument();
-      expect(queryByTestId('syntheticsScalableLocationBadge')).not.toBeInTheDocument();
-      const button = getByRole('button', { name: 'Create location' });
-
-      if (canSave) {
-        expect(button).not.toBeDisabled();
-      } else {
-        expect(button).toBeDisabled();
-        fireEvent.mouseOver(button);
-        expect(
-          await findByText('You do not have sufficient permissions to perform this action.')
-        ).toBeInTheDocument();
+          privateLocations: {
+            isPrivateLocationFlyoutVisible: false,
+          },
+        },
       }
-    }
-  );
+    );
+    expect(getByText(privateLocationName)).toBeInTheDocument();
+    expect(queryByTestId('syntheticsScalableLocationBadge')).not.toBeInTheDocument();
+    expect(queryByTestId('addPrivateLocationButton')).not.toBeInTheDocument();
+  });
 
-  it('shows a Scalable badge for a sharded private location', () => {
+  it('shows a Scalable badge with an Enterprise license', () => {
+    mockHasEnterprise = true;
     jest.spyOn(settingsHooks, 'useSyntheticsSettingsContext').mockReturnValue({
       canSave: true,
       canManagePrivateLocations: true,
@@ -203,7 +197,6 @@ describe('<ManagePrivateLocations />', () => {
           id: 'loc-sharded',
           agentPolicyId: 'policy-sharded',
           isServiceManaged: false,
-          isAgentSharding: true,
         },
       ],
       onDeleteLocationAPI: jest.fn(),

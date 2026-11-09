@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import type { z } from '@kbn/zod';
 import {
   allOrAnyString,
   groupingsSchema,
@@ -16,16 +16,15 @@ import {
 } from '../schema';
 import type { SLODefinitionResponse } from './routes/find_definition';
 
-const sloWithDataResponseSchema = t.intersection([
-  sloDefinitionSchema,
-  t.type({ summary: summarySchema, groupings: groupingsSchema, instanceId: allOrAnyString }),
-  t.partial({
-    meta: metaSchema,
-    remote: remoteSchema,
-  }),
-]);
+const sloWithDataResponseSchema = sloDefinitionSchema.extend({
+  summary: summarySchema,
+  groupings: groupingsSchema,
+  instanceId: allOrAnyString,
+  meta: metaSchema.optional(),
+  remote: remoteSchema.optional(),
+});
 
-type SLOWithSummaryResponse = t.OutputOf<typeof sloWithDataResponseSchema>;
+type SLOWithSummaryResponse = z.input<typeof sloWithDataResponseSchema>;
 
 export { sloWithDataResponseSchema };
 export type { SLODefinitionResponse, SLOWithSummaryResponse };

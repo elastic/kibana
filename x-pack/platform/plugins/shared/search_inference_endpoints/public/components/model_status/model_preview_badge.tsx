@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiBadge } from '@elastic/eui';
+import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 interface ModelPreviewProps {
@@ -16,10 +16,27 @@ interface ModelPreviewProps {
 
 export const ModelPreviewBadge = ({ id }: ModelPreviewProps) => {
   return (
-    <EuiBadge color="primary" data-test-subj={`modelPreviewBadge-${id}`}>
-      {i18n.translate('xpack.searchInferenceEndpoints.eisModelCard.previewStatusBadge.content', {
-        defaultMessage: 'Preview',
-      })}
-    </EuiBadge>
+    <EuiToolTip
+      position="bottom"
+      title={i18n.translate(
+        'xpack.searchInferenceEndpoints.eisModelCard.previewStatusBadge.tooltip.title',
+        { defaultMessage: 'Preview model' }
+      )}
+      content={i18n.translate(
+        'xpack.searchInferenceEndpoints.eisModelCard.previewStatusBadge.tooltip.content',
+        {
+          defaultMessage:
+            'This model is still in preview status and not recommended for production applications.',
+        }
+      )}
+      anchorProps={{ style: { alignSelf: 'flex-start' } }}
+      data-test-subj={`modelPreviewBadgeTooltip-${id}`}
+    >
+      <EuiBadge color="primary" tabIndex={0} data-test-subj={`modelPreviewBadge-${id}`}>
+        {i18n.translate('xpack.searchInferenceEndpoints.eisModelCard.previewStatusBadge.content', {
+          defaultMessage: 'Preview',
+        })}
+      </EuiBadge>
+    </EuiToolTip>
   );
 };

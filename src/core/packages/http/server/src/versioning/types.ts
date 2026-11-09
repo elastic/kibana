@@ -106,6 +106,12 @@ export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
    * @default undefined
    */
   discontinued?: string;
+
+  /**
+   * @public
+   * {@inheritdoc RouteConfigOptions['operationId']}
+   */
+  operationId?: RouteConfigOptions<RouteMethod>['operationId'];
 };
 
 /**
@@ -128,6 +134,7 @@ export type VersionedRouteRegistrar<Method extends RouteMethod, Ctx extends RqCt
  *   .post({
  *     access: 'internal',
  *     path: '/api/my-app/foo/{id?}',
+ *     security: { authz: { requiredPrivileges: ['my-app'] } },
  *     options: { timeout: { payload: 60000 } },
  *   })
  *   .addVersion(
@@ -141,17 +148,16 @@ export type VersionedRouteRegistrar<Method extends RouteMethod, Ctx extends RqCt
  *           params: schema.object({
  *             id: schema.maybe(schema.string({ minLength: 10, maxLength: 13 })),
  *           }),
- *           body: schema.object({ foo: schema.string() }),
+ *           body: schema.object({ foo: schema.description() }),
  *         },
  *         response: {
  *           200: {
- *             body: schema.object({ foo: schema.string() }),
+ *             body: () => schema.object({ foo: schema.description() }),
  *           },
  *         },
  *       },
  *     },
  *     async (ctx, req, res) => {
- *       await ctx.fooService.create(req.body.foo, req.params.id, req.query.name);
  *       return res.ok({ body: { foo: req.body.foo } });
  *     }
  *   )
@@ -167,21 +173,20 @@ export type VersionedRouteRegistrar<Method extends RouteMethod, Ctx extends RqCt
  *           params: schema.object({
  *             id: schema.maybe(schema.string({ minLength: 10, maxLength: 13 })),
  *           }),
- *           body: schema.object({ fooString: schema.string() }),
+ *           body: schema.object({ fooString: schema.description() }),
  *         },
  *         response: {
  *           200: {
- *             body: schema.object({ fooName: schema.string() }),
+ *             body: () => schema.object({ fooName: schema.description() }),
  *           },
  *         },
  *       },
  *     },
  *     async (ctx, req, res) => {
- *       await ctx.fooService.create(req.body.fooString, req.params.id, req.query.name);
  *       return res.ok({ body: { fooName: req.body.fooString } });
  *     }
  *   )
- *   // BREAKING CHANGES: Enforce min/max length on fooString
+ *   // BREAKING CHANGE: fooString maxLength drops from the description() default to 1000
  *   .addVersion(
  *     {
  *       version: '3',
@@ -193,17 +198,16 @@ export type VersionedRouteRegistrar<Method extends RouteMethod, Ctx extends RqCt
  *           params: schema.object({
  *             id: schema.maybe(schema.string({ minLength: 10, maxLength: 13 })),
  *           }),
- *           body: schema.object({ fooString: schema.string({ minLength: 0, maxLength: 1000 }) }),
+ *           body: schema.object({ fooString: schema.description({ maxLength: 1000 }) }),
  *         },
  *         response: {
  *           200: {
- *             body: schema.object({ fooName: schema.string() }),
+ *             body: () => schema.object({ fooName: schema.description({ maxLength: 1000 }) }),
  *           },
  *         },
  *       },
  *     },
  *     async (ctx, req, res) => {
- *       await ctx.fooService.create(req.body.fooString, req.params.id, req.query.name);
  *       return res.ok({ body: { fooName: req.body.fooString } });
  *     }
  *   );

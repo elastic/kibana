@@ -29,6 +29,7 @@ import type { WorkflowsMeteringService } from '../metering';
 import { workflowsExecutionEngineMock } from '../mocks';
 import { createMockWorkflowDataClient } from '../repositories/data_access_layer/mocks';
 import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import { DYNAMIC_TIMEOUT_STATE_KEY } from '../step/wait_for_input_step/hitl_timeout_helpers';
 import type { WorkflowsExecutionEnginePluginStart } from '../types';
 import { workflowExecutionLoop } from '../workflow_execution_loop';
 
@@ -45,6 +46,98 @@ const mockWorkflowExecutionLoop = workflowExecutionLoop as jest.MockedFunction<
 const mockWorkflowExecutionEngine = workflowsExecutionEngineMock.createStart();
 
 describe('resumeWorkflow', () => {
+  it.each([false, true])('finalizes identity failure (inherited: %s)', async (inherited) => {
+    jest.clearAllMocks();
+    const dependencies = mockContextDependencies();
+    jest.spyOn(dependencies.coreStart.security.serviceAccounts, 'isEnabled').mockReturnValue(true);
+    jest
+      .spyOn(dependencies.coreStart.security.serviceAccounts, 'withScopedRequestForWorkload')
+      .mockRejectedValue(
+        new Error('The workload binding does not match the expected service account.')
+      );
+    const workflowExecutionRepository = new WorkflowExecutionRepository(
+      createMockWorkflowDataClient()
+    );
+    jest.spyOn(workflowExecutionRepository, 'updateWorkflowExecution').mockResolvedValue(undefined);
+    jest.spyOn(workflowExecutionRepository, 'getWorkflowExecutionById').mockResolvedValue({
+      isTestRun: false,
+      context: {},
+      yaml: '',
+      scopeStack: [],
+      createdAt: '2026-09-22T00:00:00Z',
+      startedAt: '2026-09-22T00:00:00Z',
+      finishedAt: '',
+      error: null,
+      cancelRequested: false,
+      duration: 0,
+      id: 'run-identity-failure',
+      workflowId: 'workflow',
+      spaceId: 'default',
+      status: ExecutionStatus.WAITING_FOR_INPUT,
+      effectiveIdentity: inherited
+        ? {
+            type: 'service_account',
+            id: 'account-a',
+            inheritedFrom: {
+              workloadId: 'root-parent',
+            },
+          }
+        : undefined,
+      workflowDefinition: {
+        version: '1',
+        name: 'Identity test',
+        enabled: true,
+        triggers: [{ type: 'manual' }],
+        steps: [],
+        settings: inherited ? undefined : { run_as: 'account-a' },
+      },
+    });
+    const execution = await workflowExecutionRepository.getWorkflowExecutionById(
+      'run-identity-failure',
+      'default'
+    );
+    if (!execution) throw new Error('Missing test execution');
+    jest
+      .spyOn(workflowExecutionRepository, 'getWorkflowExecutionWithVersion')
+      .mockResolvedValue({ execution, seqNo: 1, primaryTerm: 1 });
+    jest
+      .spyOn(workflowExecutionRepository, 'tryUpdateWorkflowExecutionWithVersion')
+      .mockResolvedValue(true);
+    const stepExecutionRepository = createMockStepExecutionRepository();
+    stepExecutionRepository.markNonTerminalStepsFailed.mockImplementation(async () => {
+      expect(
+        workflowExecutionRepository.tryUpdateWorkflowExecutionWithVersion
+      ).not.toHaveBeenCalled();
+    });
+
+    await expect(
+      resumeWorkflow({
+        workflowRunId: 'run-identity-failure',
+        spaceId: 'default',
+        signal: new AbortController().signal,
+        dependencies,
+        logger: createMockLogger(),
+        config: createMockWorkflowExecutionEngineConfig(),
+        fakeRequest: createFakeKibanaRequest(),
+        workflowsExecutionEngine: mockWorkflowExecutionEngine,
+        workflowExecutionRepository,
+        stepExecutionRepository,
+      })
+    ).rejects.toThrow('expected service account');
+
+    expect(stepExecutionRepository.markNonTerminalStepsFailed).toHaveBeenCalledWith(
+      'run-identity-failure',
+      expect.objectContaining({ type: 'ServiceAccountExecutionError' }),
+      undefined
+    );
+    expect(workflowExecutionRepository.tryUpdateWorkflowExecutionWithVersion).toHaveBeenCalledWith(
+      expect.objectContaining({ status: ExecutionStatus.FAILED, finishedAt: expect.any(String) }),
+      { seqNo: 1, primaryTerm: 1 }
+    );
+    expect(mockSetupDependencies).not.toHaveBeenCalled();
+    expect(mockWorkflowExecutionLoop).not.toHaveBeenCalled();
+  });
+
   describe('terminal state and resume gating', () => {
     const workflowRunId = 'run-1';
     const spaceId = 'default';
@@ -125,7 +218,7 @@ describe('resumeWorkflow', () => {
         signal: new AbortController().signal,
         dependencies,
         logger: logger as Logger,
-        config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as never,
+        config: { logging: { console: false } } as never,
         fakeRequest,
         workflowsExecutionEngine: mockWorkflowExecutionEngine,
         workflowExecutionRepository: mockWorkflowExecutionRepositoryForResume as any,
@@ -172,7 +265,11 @@ describe('resumeWorkflow', () => {
           fakeRequest,
           workflowsExecutionEngine: mockWorkflowExecutionEngine,
           workflowExecutionRepository: new WorkflowExecutionRepository(
-            createMockWorkflowDataClient()
+            Object.assign(createMockWorkflowDataClient(), {
+              getByIds: jest.fn().mockResolvedValue({
+                items: [{ document: { id: workflowRunId, workflowId: 'workflow', spaceId } }],
+              }),
+            })
           ),
           stepExecutionRepository: mockStepExecutionRepositoryForResume,
         });
@@ -182,6 +279,69 @@ describe('resumeWorkflow', () => {
         expect(mockWorkflowExecutionLoop).not.toHaveBeenCalled();
       }
     );
+
+    it('defers a HITL notification using persisted dynamicTimeout, not the YAML template', async () => {
+      jest.useFakeTimers();
+      try {
+        jest.setSystemTime(new Date('2025-06-01T12:00:15.000Z'));
+        const startedAt = '2025-06-01T12:00:00.000Z';
+        const resume = jest.fn();
+        const load = jest.fn().mockResolvedValue(undefined);
+        mockSetupDependencies.mockResolvedValue({
+          stepIoService: { load },
+          workflowRuntime: {
+            resume,
+            getCurrentNode: () => ({
+              type: 'waitForApproval',
+              stepId: 'await_decision',
+              configuration: { timeout: "{{ inputs.expiresIn | default: '72h' }}" },
+            }),
+          },
+          workflowExecutionGraph: {
+            getWorkflowLevelTimeout: () => undefined,
+            getNode: () => undefined,
+          },
+          workflowExecutionCursor: { currentStackFrames: [] },
+          workflowExecutionState: {
+            getWorkflowExecution: () => ({
+              status: ExecutionStatus.WAITING_FOR_INPUT,
+              currentNodeId: 'await_decision',
+              startedAt,
+            }),
+            getLatestStepExecution: () => ({
+              startedAt,
+              state: { [DYNAMIC_TIMEOUT_STATE_KEY]: '30s' },
+            }),
+          },
+        } as never);
+
+        const result = await resumeWorkflow({
+          workflowRunId,
+          spaceId,
+          signal: new AbortController().signal,
+          dependencies,
+          logger,
+          config: createMockWorkflowExecutionEngineConfig(),
+          fakeRequest,
+          workflowsExecutionEngine: mockWorkflowExecutionEngine,
+          workflowExecutionRepository: new WorkflowExecutionRepository(
+            Object.assign(createMockWorkflowDataClient(), {
+              getByIds: jest.fn().mockResolvedValue({
+                items: [{ document: { id: workflowRunId, workflowId: 'workflow', spaceId } }],
+              }),
+            })
+          ),
+          stepExecutionRepository: mockStepExecutionRepositoryForResume,
+        });
+
+        expect(result).toEqual({ retryAt: new Date('2025-06-01T12:00:30.000Z') });
+        expect(load).toHaveBeenCalledTimes(1);
+        expect(resume).not.toHaveBeenCalled();
+        expect(mockWorkflowExecutionLoop).not.toHaveBeenCalled();
+      } finally {
+        jest.useRealTimers();
+      }
+    });
 
     it('runs resume and loop when execution is not terminal', async () => {
       const resume = jest.fn().mockResolvedValue(undefined);
@@ -212,7 +372,7 @@ describe('resumeWorkflow', () => {
         signal: new AbortController().signal,
         dependencies,
         logger: logger as Logger,
-        config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as never,
+        config: { logging: { console: false } } as never,
         fakeRequest,
         workflowsExecutionEngine: mockWorkflowExecutionEngine,
         workflowExecutionRepository: mockWorkflowExecutionRepositoryForResume as any,
@@ -251,7 +411,7 @@ describe('resumeWorkflow', () => {
         signal: new AbortController().signal,
         dependencies,
         logger: logger as Logger,
-        config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as never,
+        config: { logging: { console: false } } as never,
         fakeRequest,
         workflowsExecutionEngine: mockWorkflowExecutionEngine,
         workflowExecutionRepository: mockWorkflowExecutionRepositoryForResume as any,
@@ -260,6 +420,82 @@ describe('resumeWorkflow', () => {
 
       expect(resume).not.toHaveBeenCalled();
       expect(mockWorkflowExecutionLoop).not.toHaveBeenCalled();
+    });
+
+    describe('a stored HITL response', () => {
+      const stamp = { resumedBy: 'analyst', resumedAt: '2026-10-20T16:00:48.350Z' };
+      const resumeWith = async (context: Record<string, unknown>, taken: boolean) => {
+        const resume = jest.fn().mockResolvedValue(undefined);
+        mockSetupDependencies.mockResolvedValue({
+          workflowRuntime: { resume, ...nonFailedRuntimeMethods() },
+          stepExecutionRuntimeFactory: {},
+          workflowExecutionState: {
+            getWorkflowExecution: () => ({
+              status: ExecutionStatus.WAITING_FOR_INPUT,
+              context: { resumeInput: { approved: true }, ...context },
+            }),
+          },
+          workflowLogger: {},
+          nodesFactory: {},
+          workflowExecutionGraph: {},
+          esClient: {},
+          workflowTaskManager: {},
+          workflowExecutionRepository: {
+            getWorkflowExecutionById: jest.fn().mockResolvedValue(null),
+          },
+        } as never);
+        const workflowExecutionRepository = {
+          ...mockWorkflowExecutionRepositoryForResume,
+          tryTakeResumeInput: jest.fn().mockResolvedValue(taken),
+        };
+
+        const result = await resumeWorkflow({
+          workflowRunId,
+          spaceId,
+          signal: new AbortController().signal,
+          dependencies,
+          logger: logger as Logger,
+          config: { logging: { console: false } } as never,
+          fakeRequest,
+          workflowsExecutionEngine: mockWorkflowExecutionEngine,
+          workflowExecutionRepository: workflowExecutionRepository as any,
+          stepExecutionRepository: mockStepExecutionRepositoryForResume,
+        });
+        return {
+          result,
+          resume,
+          tryTakeResumeInput: workflowExecutionRepository.tryTakeResumeInput,
+        };
+      };
+
+      it('is marked as taken before the workflow resumes', async () => {
+        const { resume, tryTakeResumeInput } = await resumeWith(stamp, true);
+
+        expect(tryTakeResumeInput).toHaveBeenCalledWith({
+          workflowExecutionId: workflowRunId,
+          spaceId,
+          ...stamp,
+        });
+        expect(resume).toHaveBeenCalledTimes(1);
+        expect(mockWorkflowExecutionLoop).toHaveBeenCalledTimes(1);
+      });
+
+      it('is not applied when it was taken back, and the run is retried shortly', async () => {
+        const before = Date.now();
+
+        const { result, resume } = await resumeWith(stamp, false);
+
+        expect(result.retryAt?.getTime()).toBeGreaterThanOrEqual(before + 1_000);
+        expect(resume).not.toHaveBeenCalled();
+        expect(mockWorkflowExecutionLoop).not.toHaveBeenCalled();
+      });
+
+      it('is applied as before when it carries no stamp', async () => {
+        const { resume, tryTakeResumeInput } = await resumeWith({}, false);
+
+        expect(tryTakeResumeInput).not.toHaveBeenCalled();
+        expect(resume).toHaveBeenCalledTimes(1);
+      });
     });
 
     it('runs resume when status is RUNNING (e.g. mid-loop)', async () => {
@@ -291,7 +527,7 @@ describe('resumeWorkflow', () => {
         signal: new AbortController().signal,
         dependencies,
         logger: logger as Logger,
-        config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as never,
+        config: { logging: { console: false } } as never,
         fakeRequest,
         workflowsExecutionEngine: mockWorkflowExecutionEngine,
         workflowExecutionRepository: mockWorkflowExecutionRepositoryForResume as any,
@@ -459,7 +695,9 @@ describe('resumeWorkflow', () => {
         const reportWorkflowExecution = jest.fn().mockResolvedValue(undefined);
         const meteringService = { reportWorkflowExecution } as unknown as WorkflowsMeteringService;
 
-        workflowExecutionRepository.getWorkflowExecutionById.mockResolvedValue(finalExecution);
+        workflowExecutionRepository.getWorkflowExecutionById
+          .mockResolvedValueOnce({ ...finalExecution, status: ExecutionStatus.WAITING })
+          .mockResolvedValue(finalExecution);
 
         await resumeWorkflowWithDefaults({ meteringService });
 
@@ -474,7 +712,9 @@ describe('resumeWorkflow', () => {
         const reportWorkflowExecution = jest.fn().mockResolvedValue(undefined);
         const meteringService = { reportWorkflowExecution } as unknown as WorkflowsMeteringService;
 
-        workflowExecutionRepository.getWorkflowExecutionById.mockResolvedValue(null);
+        workflowExecutionRepository.getWorkflowExecutionById
+          .mockResolvedValueOnce({ workflowId: 'workflow', spaceId: 'default' })
+          .mockResolvedValue(null);
 
         await resumeWorkflowWithDefaults({ meteringService });
 
@@ -485,9 +725,9 @@ describe('resumeWorkflow', () => {
         const reportWorkflowExecution = jest.fn().mockResolvedValue(undefined);
         const meteringService = { reportWorkflowExecution } as unknown as WorkflowsMeteringService;
 
-        workflowExecutionRepository.getWorkflowExecutionById.mockRejectedValue(
-          new Error('fetch failed')
-        );
+        workflowExecutionRepository.getWorkflowExecutionById
+          .mockResolvedValueOnce({ workflowId: 'workflow', spaceId: 'default' })
+          .mockRejectedValue(new Error('fetch failed'));
 
         await expect(resumeWorkflowWithDefaults({ meteringService })).resolves.toEqual({});
 
@@ -583,7 +823,7 @@ describe('resumeWorkflow', () => {
           spaceId,
           signal: new AbortController().signal,
           logger: logger as Logger,
-          config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as any,
+          config: { logging: { console: false } } as any,
           fakeRequest,
           dependencies,
           workflowsExecutionEngine: mockWorkflowExecutionEngineEmit,
@@ -639,7 +879,7 @@ describe('resumeWorkflow', () => {
           spaceId,
           signal: new AbortController().signal,
           logger: logger as Logger,
-          config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as any,
+          config: { logging: { console: false } } as any,
           fakeRequest,
           dependencies,
           workflowsExecutionEngine: mockWorkflowExecutionEngineEmit,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import type { RequestHandler } from '@kbn/core/server';
 import { API_VERSIONS, DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
@@ -146,6 +146,65 @@ describe('getLiveQueryResultsRoute', () => {
     expect(searchFn).not.toHaveBeenCalledWith(
       expect.objectContaining({ factoryQueryType: OsqueryQueries.results }),
       expect.anything()
+    );
+  });
+
+  it('returns not found when the parent action is missing in the active space', async () => {
+    const searchFn = jest.fn().mockReturnValueOnce(of({ actionDetails: undefined }));
+
+    routeHandler = getRouteHandler();
+
+    const mockResponse = httpServerMock.createResponseFactory();
+
+    await routeHandler(
+      { search: Promise.resolve({ search: searchFn }) } as any,
+      httpServerMock.createKibanaRequest({
+        params: { id: 'other-space-action', actionId: 'query-1' },
+        query: {},
+      }),
+      mockResponse
+    );
+
+    expect(mockResponse.notFound).toHaveBeenCalledWith({ body: { message: 'Action not found' } });
+    expect(searchFn).toHaveBeenCalledTimes(1);
+  });
+
+  it('keys the results read on the sub-action id and surfaces a strategy 404', async () => {
+    (getActionResponses as jest.Mock).mockReturnValue(of({}));
+
+    const searchFn = jest
+      .fn()
+      .mockReturnValueOnce(
+        of({
+          actionDetails: {
+            _source: { queries: [{ action_id: 'query-1', agents: ['agent-1'] }] },
+          },
+        })
+      )
+      .mockReturnValueOnce(
+        throwError(() => Object.assign(new Error('Action not found'), { statusCode: 404 }))
+      );
+
+    routeHandler = getRouteHandler();
+
+    const mockResponse = httpServerMock.createResponseFactory();
+
+    await routeHandler(
+      { search: Promise.resolve({ search: searchFn }) } as any,
+      httpServerMock.createKibanaRequest({
+        params: { id: 'action-1', actionId: 'query-1' },
+        query: {},
+      }),
+      mockResponse
+    );
+
+    expect(searchFn).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ factoryQueryType: OsqueryQueries.results, actionId: 'query-1' }),
+      expect.anything()
+    );
+    expect(mockResponse.customError).toHaveBeenCalledWith(
+      expect.objectContaining({ statusCode: 404 })
     );
   });
 

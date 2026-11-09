@@ -11,6 +11,7 @@ import { createPrebuiltRuleObjectsClient } from '../../../detection_engine/prebu
 import { fetchRuleVersionsTriad } from '../../../detection_engine/prebuilt_rules/logic/rule_versions/fetch_rule_versions_triad';
 import { SiemMigrationsDataBaseClient } from '../../common/data/siem_migrations_data_base_client';
 import type { RuleMigrationPrebuiltRule } from '../types';
+import { filterUnchangedByVersion } from './utils/filter_unchanged_by_version';
 
 export type { RuleVersions };
 export type PrebuildRuleVersionsMap = Map<string, RuleVersions>;
@@ -31,9 +32,12 @@ export class RuleMigrationsDataPrebuiltRulesClient extends SiemMigrationsDataBas
     return fetchRuleVersionsTriad({ ruleAssetsClient, ruleObjectsClient });
   }
 
-  /** Indexes an array of prebuilt rules to be used with ELSER semantic search queries */
+  /**
+   * Indexes prebuilt rules for ELSER semantic search, skipping rules whose asset version is already indexed.
+   * Note: changes to how the doc or `elser_embedding` is built only apply to a rule once its version changes.
+   */
   async populate(ruleVersionsMap: PrebuildRuleVersionsMap): Promise<void> {
-    const filteredRules: RuleMigrationPrebuiltRule[] = [];
+    const prebuiltRules: RuleMigrationPrebuiltRule[] = [];
 
     ruleVersionsMap.forEach((ruleVersions) => {
       const rule = ruleVersions.target;
@@ -42,17 +46,25 @@ export class RuleMigrationsDataPrebuiltRulesClient extends SiemMigrationsDataBas
           ({ technique }) => technique?.map(({ id }) => id) ?? []
         );
 
-        filteredRules.push({
+        prebuiltRules.push({
           rule_id: rule.rule_id,
           name: rule.name,
           description: rule.description,
           elser_embedding: `${rule.name} - ${rule.description}`,
+          version: String(rule.version),
           ...(mitreAttackIds?.length && { mitre_attack_ids: mitreAttackIds }),
         });
       }
     });
 
     const index = await this.getIndexName();
+    const filteredRules = await filterUnchangedByVersion({
+      esClient: this.esClient,
+      index,
+      logger: this.logger,
+      items: prebuiltRules,
+      getItemDetails: ({ rule_id: id, version }) => ({ id, version }),
+    });
     const createdAt = new Date().toISOString();
     let prebuiltRuleSlice: RuleMigrationPrebuiltRule[];
     while ((prebuiltRuleSlice = filteredRules.splice(0, BULK_MAX_SIZE)).length) {

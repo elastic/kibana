@@ -65,7 +65,7 @@ elif echo "$TEST_FILE" | grep -q "fleet_tasks"; then
     | sed 's/^/    /' || echo "    (no config found)"
 else
   echo "  Type: Jest unit"
-  echo "  Run: yarn jest '$TEST_FILE'"
+  echo "  Run: pnpm exec jest '$TEST_FILE'"
 fi
 echo ""
 

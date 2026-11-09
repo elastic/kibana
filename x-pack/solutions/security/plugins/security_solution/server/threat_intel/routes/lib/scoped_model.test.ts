@@ -12,7 +12,8 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
 import { resolveScopedModel } from './scoped_model';
 
-const FEATURE_ID = 'threat_intel_enrich';
+const FEATURE_ID = 'alertzero_efficient';
+const TELEMETRY_PLUGIN_ID = 'alertzero_threat_intel_classify_severity';
 
 const request = {} as KibanaRequest;
 
@@ -30,6 +31,7 @@ const createSearchInferenceEndpoints = (
   connectorId: string | undefined
 ): SearchInferenceEndpointsPluginStart =>
   ({
+    features: { get: jest.fn().mockReturnValue({ featureId: FEATURE_ID }) },
     endpoints: {
       getForFeature: jest.fn().mockResolvedValue({
         endpoints: connectorId ? [{ connectorId }] : [],
@@ -60,6 +62,7 @@ describe('resolveScopedModel', () => {
       request,
       uiSettingsClient: createUiSettingsClient(),
       featureId: FEATURE_ID,
+      telemetryPluginId: TELEMETRY_PLUGIN_ID,
       logger,
     });
 
@@ -75,14 +78,44 @@ describe('resolveScopedModel', () => {
       request,
       uiSettingsClient: createUiSettingsClient('genai-default'),
       featureId: FEATURE_ID,
+      telemetryPluginId: TELEMETRY_PLUGIN_ID,
       logger,
     });
 
     expect(outcome.ok).toBe(true);
     expect(inference.getChatModel).toHaveBeenCalledWith(
-      expect.objectContaining({ connectorId: 'feature-endpoint' })
+      expect.objectContaining({
+        connectorId: 'feature-endpoint',
+        chatModelOptions: {
+          telemetryMetadata: { pluginId: TELEMETRY_PLUGIN_ID, aggregateBy: 'alertzero_parent' },
+        },
+      })
     );
   });
+
+  it.each(['alertzero_efficient', 'alertzero_frontier'])(
+    'returns no_connector when %s is unregistered even if the registry offers a default',
+    async (featureId) => {
+      const inference = createInference();
+      const searchInferenceEndpoints = createSearchInferenceEndpoints('genai-default');
+      jest.mocked(searchInferenceEndpoints.features.get).mockReturnValue(undefined);
+
+      const outcome = await resolveScopedModel({
+        inference,
+        searchInferenceEndpoints,
+        request,
+        uiSettingsClient: createUiSettingsClient('genai-default'),
+        featureId,
+        telemetryPluginId: TELEMETRY_PLUGIN_ID,
+        logger,
+      });
+
+      expect(outcome).toEqual(expect.objectContaining({ ok: false, reason: 'no_connector' }));
+      expect(searchInferenceEndpoints.endpoints.getForFeature).not.toHaveBeenCalled();
+      expect(inference.getChatModel).not.toHaveBeenCalled();
+      expect(inference.getDefaultConnector).not.toHaveBeenCalled();
+    }
+  );
 
   it('does not fall back to the genAi default when the registry resolves no endpoint', async () => {
     // Both threat-intel features set `ignoreGlobalDefault`, so taking the
@@ -95,6 +128,7 @@ describe('resolveScopedModel', () => {
       request,
       uiSettingsClient: createUiSettingsClient('genai-default'),
       featureId: FEATURE_ID,
+      telemetryPluginId: TELEMETRY_PLUGIN_ID,
       logger,
     });
 
@@ -112,12 +146,18 @@ describe('resolveScopedModel', () => {
       request,
       uiSettingsClient: createUiSettingsClient('genai-default'),
       featureId: FEATURE_ID,
+      telemetryPluginId: TELEMETRY_PLUGIN_ID,
       logger,
     });
 
     expect(outcome.ok).toBe(true);
     expect(inference.getChatModel).toHaveBeenCalledWith(
-      expect.objectContaining({ connectorId: 'genai-default' })
+      expect.objectContaining({
+        connectorId: 'genai-default',
+        chatModelOptions: {
+          telemetryMetadata: { pluginId: TELEMETRY_PLUGIN_ID, aggregateBy: 'alertzero_parent' },
+        },
+      })
     );
   });
 
@@ -136,6 +176,7 @@ describe('resolveScopedModel', () => {
       request,
       uiSettingsClient,
       featureId: FEATURE_ID,
+      telemetryPluginId: TELEMETRY_PLUGIN_ID,
       logger,
     });
 
@@ -154,6 +195,7 @@ describe('resolveScopedModel', () => {
       request,
       uiSettingsClient: createUiSettingsClient('genai-default'),
       featureId: FEATURE_ID,
+      telemetryPluginId: TELEMETRY_PLUGIN_ID,
       logger,
     });
 
@@ -172,6 +214,7 @@ describe('resolveScopedModel', () => {
       request,
       uiSettingsClient: createUiSettingsClient(),
       featureId: FEATURE_ID,
+      telemetryPluginId: TELEMETRY_PLUGIN_ID,
       logger,
     });
 
@@ -184,6 +227,7 @@ describe('resolveScopedModel', () => {
 // endpoint skipped straight past the alternative to a hard failure.
 describe('resolveScopedModel — endpoint fallback within a feature', () => {
   const twoEndpoints = {
+    features: { get: jest.fn().mockReturnValue({ featureId: FEATURE_ID }) },
     endpoints: {
       getForFeature: jest.fn().mockResolvedValue({
         endpoints: [{ connectorId: '.preferred' }, { connectorId: '.alternative' }],
@@ -206,7 +250,8 @@ describe('resolveScopedModel — endpoint fallback within a feature', () => {
       searchInferenceEndpoints: twoEndpoints as never,
       request: {} as never,
       uiSettingsClient: { get: jest.fn() } as never,
-      featureId: 'threat_intel_enrich',
+      featureId: 'alertzero_efficient',
+      telemetryPluginId: TELEMETRY_PLUGIN_ID,
       logger: loggingSystemMock.createLogger(),
     });
 
@@ -227,7 +272,8 @@ describe('resolveScopedModel — endpoint fallback within a feature', () => {
       searchInferenceEndpoints: twoEndpoints as never,
       request: {} as never,
       uiSettingsClient: { get: jest.fn() } as never,
-      featureId: 'threat_intel_enrich',
+      featureId: 'alertzero_efficient',
+      telemetryPluginId: TELEMETRY_PLUGIN_ID,
       logger: loggingSystemMock.createLogger(),
     });
 

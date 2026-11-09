@@ -10,10 +10,12 @@ import type { FtrProviderContext } from '../../../api_integration/ftr_provider_c
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { SpaceTestApiClient } from './api_helper';
 import { cleanFleetIndices, createFleetAgent, createTestSpace } from './helpers';
+import { setupTestUsers, testUsers } from '../test_users';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esClient = getService('es');
   const kibanaServer = getService('kibanaServer');
   const spaces = getService('spaces');
@@ -33,6 +35,7 @@ export default function (providerContext: FtrProviderContext) {
       });
       await cleanFleetIndices(esClient);
       await createTestSpace(providerContext, TEST_SPACE_1);
+      await setupTestUsers(getService('security'), true);
     });
 
     after(async () => {
@@ -351,6 +354,132 @@ export default function (providerContext: FtrProviderContext) {
         }
         expect(err).to.be.an(Error);
         expect(err?.message).to.match(/400 "Bad Request"/);
+      });
+    });
+
+    describe('uninstall authz', () => {
+      const defaultSpaceOnlyApiClient = new SpaceTestApiClient(supertestWithoutAuth, {
+        username: testUsers.fleet_all_int_all_default_space_only.username,
+        password: testUsers.fleet_all_int_all_default_space_only.password,
+      });
+      const allSpacesApiClient = new SpaceTestApiClient(supertestWithoutAuth, {
+        username: testUsers.fleet_all_int_all.username,
+        password: testUsers.fleet_all_int_all.password,
+      });
+
+      beforeEach(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+        await kibanaServer.savedObjects.cleanStandardList({ space: TEST_SPACE_1 });
+        await cleanFleetIndices(esClient);
+
+        // Install nginx in default space using superuser
+        await apiClient.installPackage({
+          pkgName: 'nginx',
+          pkgVersion: NGINX_PACKAGE_VERSION,
+          force: true,
+        });
+      });
+
+      afterEach(async () => {
+        // Clean up after each test
+        try {
+          await apiClient.uninstallPackage({
+            pkgName: 'nginx',
+            pkgVersion: NGINX_PACKAGE_VERSION,
+            force: true,
+          });
+        } catch (_err) {
+          // Ignore cleanup errors
+        }
+      });
+
+      it('should return 403 when user lacks privileges in spaces where package policies exist', async () => {
+        // Create an agent policy + package policy in TEST_SPACE_1 using superuser
+        const agentPolicyRes = await apiClient.createAgentPolicy(TEST_SPACE_1);
+        const packagePolicyRes = await apiClient.createPackagePolicy(TEST_SPACE_1, {
+          policy_ids: [agentPolicyRes.item.id],
+          name: `test-nginx-authz-${Date.now()}`,
+          description: 'test',
+          package: {
+            name: 'nginx',
+            version: NGINX_PACKAGE_VERSION,
+          },
+          inputs: {},
+        });
+        const packagePolicyId = packagePolicyRes.item.id;
+
+        // The default-space-only user tries to uninstall from default space — should be rejected
+        // because there are package policies in TEST_SPACE_1 which the user cannot access
+        let err: Error | undefined;
+        try {
+          await defaultSpaceOnlyApiClient.uninstallPackage({
+            pkgName: 'nginx',
+            pkgVersion: NGINX_PACKAGE_VERSION,
+          });
+        } catch (_err) {
+          err = _err;
+        }
+        expect(err).to.be.an(Error);
+        expect(err?.message).to.match(/403 "Forbidden"/);
+
+        // Package must still be installed after the rejected call
+        const installedPkg = await apiClient.getPackage({
+          pkgName: 'nginx',
+          pkgVersion: NGINX_PACKAGE_VERSION,
+        });
+        expect(installedPkg.item.status).to.eql('installed');
+
+        // The TEST_SPACE_1 package policy must not have been deleted
+        const survivingPolicy = await apiClient.getPackagePolicy(packagePolicyId, TEST_SPACE_1);
+        expect(survivingPolicy.item.id).to.eql(packagePolicyId);
+      });
+
+      it('should allow uninstall when user has privileges in all affected spaces and no agents', async () => {
+        // No package policies in any space — all-spaces user should be able to uninstall
+        let err: Error | undefined;
+        try {
+          await allSpacesApiClient.uninstallPackage({
+            pkgName: 'nginx',
+            pkgVersion: NGINX_PACKAGE_VERSION,
+          });
+        } catch (_err) {
+          err = _err;
+        }
+        expect(err).to.be(undefined);
+      });
+
+      it('should return 403 on bulk uninstall when user lacks privileges in spaces where package policies exist', async () => {
+        // Create a package policy in TEST_SPACE_1
+        const agentPolicyRes = await apiClient.createAgentPolicy(TEST_SPACE_1);
+        await apiClient.createPackagePolicy(TEST_SPACE_1, {
+          policy_ids: [agentPolicyRes.item.id],
+          name: `test-nginx-bulk-authz-${Date.now()}`,
+          description: 'test',
+          package: {
+            name: 'nginx',
+            version: NGINX_PACKAGE_VERSION,
+          },
+          inputs: {},
+        });
+
+        // The default-space-only user tries bulk uninstall — should be rejected
+        const res = await supertestWithoutAuth
+          .post(`/api/fleet/epm/packages/_bulk_uninstall`)
+          .auth(
+            testUsers.fleet_all_int_all_default_space_only.username,
+            testUsers.fleet_all_int_all_default_space_only.password
+          )
+          .set('kbn-xsrf', 'xxxx')
+          .send({ packages: [{ name: 'nginx', version: NGINX_PACKAGE_VERSION }] });
+
+        expect(res.status).to.eql(403);
+
+        // Package must still be installed
+        const installedPkg = await apiClient.getPackage({
+          pkgName: 'nginx',
+          pkgVersion: NGINX_PACKAGE_VERSION,
+        });
+        expect(installedPkg.item.status).to.eql('installed');
       });
     });
 

@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { UserAtSpaceScenarios } from '../../../../scenarios';
+import { SuperuserAtSpace1, UserAtSpaceScenarios } from '../../../../scenarios';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover, getTestRuleData } from '../../../../../common/lib';
 
@@ -59,6 +59,46 @@ export default function getGapsSummaryByRuleIdsTests({ getService }: FtrProvider
           });
 
           it('should return gaps summary for multiple rules', async () => {
+            // Unauthorized scenarios are rejected before any rule type is resolved, so assert
+            // the denial without paying for the rule and gap fixtures.
+            switch (scenario.id) {
+              case 'no_kibana_privileges at space1':
+              case 'space_1_all at space2': {
+                const deniedResponse = await supertestWithoutAuth
+                  .post(
+                    `${getUrlPrefix(
+                      apiOptions.spaceId
+                    )}/internal/alerting/rules/gaps/_get_gaps_summary_by_rule_ids`
+                  )
+                  .set('kbn-xsrf', 'foo')
+                  .auth(apiOptions.username, apiOptions.password)
+                  .send({
+                    start: searchStart,
+                    end: searchEnd,
+                    rule_ids: ['ac612b4b-5d0c-46d7-855a-98dd920e3aa6'],
+                  });
+
+                expect(deniedResponse.statusCode).to.eql(403);
+                expect(deniedResponse.body).to.eql({
+                  error: 'Forbidden',
+                  message:
+                    'Failed to find gaps summary for rules: Unauthorized to find rules for any rule types.',
+                  statusCode: 403,
+                });
+                return;
+              }
+
+              case 'global_read at space1':
+              case 'space_1_all_alerts_none_actions at space1':
+              case 'superuser at space1':
+              case 'space_1_all at space1':
+              case 'space_1_all_with_restricted_fixture at space1':
+                break;
+
+              default:
+                throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+            }
+
             // Create 2 rules
             const rresponse1 = await supertest
               .post(`${getUrlPrefix(apiOptions.spaceId)}/api/alerting/rule`)
@@ -111,46 +151,24 @@ export default function getGapsSummaryByRuleIdsTests({ getService }: FtrProvider
                 rule_ids: [ruleId1, ruleId2],
               });
 
-            switch (scenario.id) {
-              case 'no_kibana_privileges at space1':
-              case 'space_1_all at space2':
-                expect(response.statusCode).to.eql(403);
-                expect(response.body).to.eql({
-                  error: 'Forbidden',
-                  message:
-                    'Failed to find gaps summary for rules: Unauthorized to find rules for any rule types.',
-                  statusCode: 403,
-                });
-                break;
+            expect(response.statusCode).to.eql(200);
+            expect(response.body.data).to.have.length(2);
 
-              case 'global_read at space1':
-              case 'space_1_all_alerts_none_actions at space1':
-              case 'superuser at space1':
-              case 'space_1_all at space1':
-              case 'space_1_all_with_restricted_fixture at space1':
-                expect(response.statusCode).to.eql(200);
-                expect(response.body.data).to.have.length(2);
+            const rule1Data = response.body.data.find((d: any) => d.rule_id === ruleId1);
+            const rule2Data = response.body.data.find((d: any) => d.rule_id === ruleId2);
 
-                const rule1Data = response.body.data.find((d: any) => d.rule_id === ruleId1);
-                const rule2Data = response.body.data.find((d: any) => d.rule_id === ruleId2);
+            expect(rule1Data).to.not.be(undefined);
+            expect(rule2Data).to.not.be(undefined);
 
-                expect(rule1Data).to.not.be(undefined);
-                expect(rule2Data).to.not.be(undefined);
-
-                // Verify gap durations are calculated correctly
-                expect(rule1Data.total_unfilled_duration_ms).to.eql(86400000);
-                expect(rule2Data.total_unfilled_duration_ms).to.eql(86400000);
-                expect(rule1Data.total_in_progress_duration_ms).to.eql(0);
-                expect(rule2Data.total_in_progress_duration_ms).to.eql(0);
-                expect(rule1Data.total_filled_duration_ms).to.eql(0);
-                expect(rule2Data.total_filled_duration_ms).to.eql(0);
-                expect(rule1Data.gap_fill_status).to.eql('unfilled');
-                expect(rule2Data.gap_fill_status).to.eql('unfilled');
-                break;
-
-              default:
-                throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
-            }
+            // Verify gap durations are calculated correctly
+            expect(rule1Data.total_unfilled_duration_ms).to.eql(86400000);
+            expect(rule2Data.total_unfilled_duration_ms).to.eql(86400000);
+            expect(rule1Data.total_in_progress_duration_ms).to.eql(0);
+            expect(rule2Data.total_in_progress_duration_ms).to.eql(0);
+            expect(rule1Data.total_filled_duration_ms).to.eql(0);
+            expect(rule2Data.total_filled_duration_ms).to.eql(0);
+            expect(rule1Data.gap_fill_status).to.eql('unfilled');
+            expect(rule2Data.gap_fill_status).to.eql('unfilled');
           });
 
           it('should handle request with non-existent rule ids', async () => {
@@ -199,59 +217,57 @@ export default function getGapsSummaryByRuleIdsTests({ getService }: FtrProvider
                 throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
             }
           });
+        });
+      });
+    }
 
-          it('should handle invalid parameters', async () => {
-            const ruleResponse = await supertest
-              .post(`${getUrlPrefix(apiOptions.spaceId)}/api/alerting/rule`)
-              .set('kbn-xsrf', 'foo')
-              .send(getRule())
-              .expect(200);
-            const ruleId = ruleResponse.body.id;
-            objectRemover.add(apiOptions.spaceId, ruleId, 'rule', 'alerting');
+    // Request validation does not vary by role, so it runs once.
+    describe(`${SuperuserAtSpace1.id} (runs once)`, () => {
+      const { user, space } = SuperuserAtSpace1;
+      const apiOptions = {
+        spaceId: space.id,
+        username: user.username,
+        password: user.password,
+      };
 
-            const invalidBodies = [
-              {
-                body: {
-                  start: 'invalid-date',
-                  end: searchEnd,
-                  rule_ids: [ruleId],
-                },
-                expectedError: '[request body]: [start]: query start must be valid date',
+      describe('get gaps summary by rule ids', () => {
+        beforeEach(async () => {
+          await supertest
+            .post(`${getUrlPrefix(apiOptions.spaceId)}/_test/delete_gaps`)
+            .set('kbn-xsrf', 'foo')
+            .send({})
+            .expect(200);
+        });
+
+        it('should handle invalid parameters', async () => {
+          const ruleResponse = await supertest
+            .post(`${getUrlPrefix(apiOptions.spaceId)}/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .send(getRule())
+            .expect(200);
+          const ruleId = ruleResponse.body.id;
+          objectRemover.add(apiOptions.spaceId, ruleId, 'rule', 'alerting');
+
+          const invalidBodies = [
+            {
+              body: {
+                start: 'invalid-date',
+                end: searchEnd,
+                rule_ids: [ruleId],
               },
-              {
-                body: {
-                  start: searchStart,
-                  end: 'invalid-date',
-                  rule_ids: [ruleId],
-                },
-                expectedError: '[request body]: [end]: query end must be valid date',
+              expectedError: '[request body]: [start]: query start must be valid date',
+            },
+            {
+              body: {
+                start: searchStart,
+                end: 'invalid-date',
+                rule_ids: [ruleId],
               },
-            ];
+              expectedError: '[request body]: [end]: query end must be valid date',
+            },
+          ];
 
-            for (const { body, expectedError } of invalidBodies) {
-              const response = await supertestWithoutAuth
-                .post(
-                  `${getUrlPrefix(
-                    apiOptions.spaceId
-                  )}/internal/alerting/rules/gaps/_get_gaps_summary_by_rule_ids`
-                )
-                .set('kbn-xsrf', 'foo')
-                .auth(apiOptions.username, apiOptions.password)
-                .send(body);
-
-              expect(response.statusCode).to.eql(400);
-              expect(response.body).to.eql({
-                statusCode: 400,
-                error: 'Bad Request',
-                message: expectedError,
-              });
-            }
-          });
-
-          it('rejects when rule_ids exceed maximum allowed size', async () => {
-            const maxSize = 100;
-            const tooManyRuleIds = Array.from({ length: maxSize + 1 }, (_, i) => `rule-${i}`);
-
+          for (const { body, expectedError } of invalidBodies) {
             const response = await supertestWithoutAuth
               .post(
                 `${getUrlPrefix(
@@ -260,21 +276,43 @@ export default function getGapsSummaryByRuleIdsTests({ getService }: FtrProvider
               )
               .set('kbn-xsrf', 'foo')
               .auth(apiOptions.username, apiOptions.password)
-              .send({
-                start: searchStart,
-                end: searchEnd,
-                rule_ids: tooManyRuleIds,
-              });
+              .send(body);
 
             expect(response.statusCode).to.eql(400);
             expect(response.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `[request body.rule_ids]: array size is [101], but cannot be greater than [${maxSize}]`,
+              message: expectedError,
             });
+          }
+        });
+
+        it('rejects when rule_ids exceed maximum allowed size', async () => {
+          const maxSize = 100;
+          const tooManyRuleIds = Array.from({ length: maxSize + 1 }, (_, i) => `rule-${i}`);
+
+          const response = await supertestWithoutAuth
+            .post(
+              `${getUrlPrefix(
+                apiOptions.spaceId
+              )}/internal/alerting/rules/gaps/_get_gaps_summary_by_rule_ids`
+            )
+            .set('kbn-xsrf', 'foo')
+            .auth(apiOptions.username, apiOptions.password)
+            .send({
+              start: searchStart,
+              end: searchEnd,
+              rule_ids: tooManyRuleIds,
+            });
+
+          expect(response.statusCode).to.eql(400);
+          expect(response.body).to.eql({
+            statusCode: 400,
+            error: 'Bad Request',
+            message: `[request body.rule_ids]: array size is [101], but cannot be greater than [${maxSize}]`,
           });
         });
       });
-    }
+    });
   });
 }

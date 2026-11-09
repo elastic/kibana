@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import type { AlertEpisode, RuleResponse } from '@kbn/alerting-v2-schemas';
 import { parseEpisodeDataJson } from '@kbn/alerting-v2-utils';
 import { AddToChatButton } from './add_to_chat_button';
-import { episodeAttachmentConverter } from '../../episode_attachment_converter';
+import { alertAttachmentConverter } from '../../alert_attachment_converter';
 import type { FocusedEpisode } from '../../types';
 import type { ManualAddToChatServices } from './use_manual_add_to_chat';
 
@@ -36,7 +36,7 @@ export const EpisodeAddToChatButton = ({
   return (
     <AddToChatButton
       item={focused}
-      converter={episodeAttachmentConverter}
+      converter={alertAttachmentConverter}
       services={services}
       data-test-subj="alertingV2EpisodeAddToChatButton"
     />

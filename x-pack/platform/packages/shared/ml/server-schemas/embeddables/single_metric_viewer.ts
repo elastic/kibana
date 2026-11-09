@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import {
   serializedTimeRangeSchema,
   serializedTitlesSchema,
 } from '@kbn/presentation-publishing-schemas';
 import { mlEntityFieldValueSchema } from '@kbn/ml-anomaly-utils/schemas';
+import { MAX_STRING_LENGTH } from '../constants';
 
 export const singleMetricViewerEmbeddableStateSchema = z
   .object({
     ...serializedTitlesSchema.shape,
     ...serializedTimeRangeSchema.shape,
-    job_ids: z.array(z.string().min(1).max(1000)).min(1).max(1).meta({
+    job_ids: z.array(z.string().min(1).max(MAX_STRING_LENGTH)).min(1).max(1).meta({
       description: 'Anomaly detection job ID whose results are shown in the single metric viewer.',
     }),
     selected_detector_index: z.number().min(0).default(0).meta({
@@ -24,17 +25,17 @@ export const singleMetricViewerEmbeddableStateSchema = z
         'Zero-based index of the detector (the Elasticsearch detector_index) within the job whose results are shown.',
     }),
     selected_entities: z
-      .record(z.string().max(1000), mlEntityFieldValueSchema.optional())
+      .record(z.string().max(MAX_STRING_LENGTH), mlEntityFieldValueSchema.optional())
       .optional()
       .meta({
         description:
           'Values of the partition, by, or over fields that identify the single time series to display.',
       }),
-    function_description: z.string().max(1000).optional().meta({
+    function_description: z.string().max(MAX_STRING_LENGTH).optional().meta({
       description:
         'For detectors that use the `metric` function, selects which value to plot: `min`, `max`, or `mean`. Ignored for other detector functions. When omitted, the viewer derives a default from the highest-scoring anomaly record.',
     }),
-    forecast_id: z.string().max(1000).optional().meta({
+    forecast_id: z.string().max(MAX_STRING_LENGTH).optional().meta({
       description: 'Identifier of a forecast to overlay on the chart.',
     }),
   })

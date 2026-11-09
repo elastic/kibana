@@ -17,4 +17,5 @@ export const apiPrivileges = {
 
 export const uiPrivileges = {
   show: 'show',
+  write: 'write',
 };

@@ -5,14 +5,19 @@
  * 2.0.
  */
 
+import { euiSelectors } from '@kbn/scout-oblt';
 import type { ScoutPage, KibanaUrl, Locator } from '@kbn/scout-oblt';
+import { KibanaCodeEditorWrapper } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { FormMonitorType } from '../constants';
 
 export class SyntheticsAppPage {
   public readonly ruleMonitorCount: Locator;
+  public readonly kibanaMonacoEditor: KibanaCodeEditorWrapper;
+
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.ruleMonitorCount = page.testSubj.locator('syntheticsStatusRuleVizMonitorCount');
+    this.kibanaMonacoEditor = new KibanaCodeEditorWrapper(page);
   }
 
   async navigateToMonitorManagement() {
@@ -38,13 +43,17 @@ export class SyntheticsAppPage {
     await this.page.testSubj.waitForSelector('createConnectorButton');
   }
 
+  async navigateToPrivateLocations() {
+    await this.page.goto(this.kbnUrl.get('/app/synthetics/settings/private-locations'));
+  }
+
   async navigateToParamsSettings() {
     await this.page.goto(this.kbnUrl.get('/app/synthetics/settings/params'));
     await this.page.testSubj.waitForSelector('syntheticsParamsTable-loaded');
   }
 
   async navigateToSettingsTab(tabText: string) {
-    await this.page.click(`text=${tabText}`);
+    await this.page.getByRole('tab', { name: tabText, exact: true }).click();
   }
 
   async navigateToFleetIntegrationPolicies() {
@@ -82,7 +91,7 @@ export class SyntheticsAppPage {
     await this.ensureIsOnMonitorConfigPage();
     await this.page.testSubj.click('syntheticsMonitorConfigSubmitButton');
     const msg = isUpdate ? 'Monitor updated successfully.' : 'Monitor added successfully.';
-    await expect(this.page.getByText(msg)).toBeVisible();
+    await expect(this.page.testSubj.locator('globalToastList').getByText(msg)).toBeVisible();
     await this.page.testSubj.locator('toastCloseButton').click();
   }
 
@@ -193,7 +202,10 @@ export class SyntheticsAppPage {
     await this.createBasicMonitorDetails({ name, apmServiceName, locations });
     if (inlineScript) {
       await this.page.testSubj.click('syntheticsSourceTab__inline');
-      await this.page.fill('[data-test-subj=codeEditorContainer] textarea', inlineScript);
+      await this.kibanaMonacoEditor.setCodeEditorValueByContainer(
+        this.page.getByRole('tabpanel', { name: 'Script editor' }),
+        inlineScript
+      );
       return;
     }
     if (recorderScript) {
@@ -219,7 +231,10 @@ export class SyntheticsAppPage {
     await this.selectMonitorType('syntheticsMonitorTypeAPI');
     await this.createBasicMonitorDetails({ name, apmServiceName, locations });
     await this.page.testSubj.click('syntheticsSourceTab__inline');
-    await this.page.fill('[data-test-subj=codeEditorContainer] textarea', inlineScript);
+    await this.kibanaMonacoEditor.setCodeEditorValueByContainer(
+      this.page.getByRole('tabpanel', { name: 'Script editor' }),
+      inlineScript
+    );
   }
 
   async createMonitor({
@@ -250,25 +265,9 @@ export class SyntheticsAppPage {
     }
   }
 
-  async enableMonitorManagement(shouldEnable = true) {
-    const addMonitorBtn = this.page.getByRole('button', { name: 'Create monitor' });
-    const isDisabled = await addMonitorBtn.isDisabled();
-    const isEnabled = !isDisabled;
-    if (isEnabled === shouldEnable) {
-      return;
-    }
-    const toggle = this.page.testSubj.locator('syntheticsEnableSwitch');
-    const button = this.page.testSubj.locator('syntheticsEnableButton');
-    if (await toggle.isVisible({ timeout: 3000 })) {
-      await toggle.click();
-    } else if (await button.isVisible({ timeout: 3000 })) {
-      await button.click();
-    }
-  }
-
   async getMonitorRowLocator(monitorName: string) {
     const monitorRow = this.page.locator(
-      `.euiTableRow:has([data-test-subj="syntheticsMonitorDetailsLinkLink"]:has-text("${monitorName}"))`
+      `${euiSelectors.basicTable.ROW_SELECTOR}:has([data-test-subj="syntheticsMonitorDetailsLinkLink"]:has-text("${monitorName}"))`
     );
     await expect(monitorRow).toBeVisible();
     await monitorRow.scrollIntoViewIfNeeded();
@@ -277,8 +276,8 @@ export class SyntheticsAppPage {
 
   async deleteMonitor(monitorName: string) {
     const monitorRow = await this.getMonitorRowLocator(monitorName);
-    await monitorRow.locator('[data-test-subj="euiCollapsedItemActionsButton"]').click();
-    await this.page.testSubj.click('syntheticsMonitorDeleteAction');
+    await monitorRow.hover();
+    await monitorRow.locator('[data-test-subj="syntheticsMonitorDeleteAction"]').click();
     await expect(this.page.testSubj.locator('confirmModalTitleText')).toBeVisible();
     await this.page.testSubj.click('confirmModalConfirmButton');
   }
@@ -340,9 +339,9 @@ export class SyntheticsAppPage {
     agentPolicy: string;
     tags?: string[];
   }) {
-    await this.page.click('button:has-text("Create location")');
+    await this.page.testSubj.click('addPrivateLocationButton');
     await this.page.testSubj.fill('syntheticsLocationFormFieldText', name);
-    await this.page.click('[aria-label="Select agent policy"]');
+    await this.page.testSubj.click('syntheticsAgentPolicySelect');
     await this.page.click(`button[role="option"]:has-text("${agentPolicy}Agents: 0")`);
     if (tags?.length) {
       await this.page.click('.euiComboBox__inputWrap');
@@ -417,9 +416,25 @@ export class SyntheticsAppPage {
   }
 
   async selectFilterOption(filterLabel: string, optionText: string) {
-    await this.page.click(`[aria-label="expands filter group for ${filterLabel} filter"]`);
-    await this.page.click(`span >> text="${optionText}"`);
-    await this.page.click(`[aria-label="Apply the selected filters for ${filterLabel}"]`);
+    await this.page.getByLabel(`expands filter group for ${filterLabel} filter`).click();
+    const option = this.page.testSubj
+      .locator('o11yFieldValueSelectionSelectable')
+      .getByRole('option', { name: optionText });
+    await option.waitFor({ state: 'visible' });
+    const wasChecked = (await option.getAttribute('aria-checked')) === 'true';
+    await option.click();
+    await option
+      .and(this.page.locator(`[aria-checked="${wasChecked ? 'false' : 'true'}"]`))
+      .waitFor({ state: 'visible' });
+    const applyButton = this.page.testSubj
+      .locator('o11yFieldValueSelectionApplyButton')
+      .and(this.page.locator(':enabled'));
+    await applyButton.waitFor({ state: 'visible' });
+    await applyButton.click();
+  }
+
+  async clearAllFilters() {
+    await this.page.testSubj.click('syntheticsClearAllFiltersButton');
   }
 
   async deleteMonitorFromEditPage() {

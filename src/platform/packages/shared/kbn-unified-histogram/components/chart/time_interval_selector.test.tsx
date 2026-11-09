@@ -11,6 +11,23 @@ import { render, act, screen } from '@testing-library/react';
 import React from 'react';
 import { TimeIntervalSelector } from './time_interval_selector';
 
+const getRenderedOptions = () =>
+  screen.getAllByRole('option').map((option) => {
+    // EUI sets the label `title` on the inner text element rather than on the option
+    // itself, so that it doesn't turn into the option's accessible description.
+    const labelElement = option.querySelector<HTMLElement>('[title]');
+
+    if (!labelElement) {
+      throw new Error(`Option "${option.getAttribute('value')}" is missing its label element`);
+    }
+
+    return {
+      label: labelElement.title,
+      value: option.getAttribute('value'),
+      selected: option.getAttribute('aria-selected'),
+    };
+  });
+
 describe('TimeIntervalSelector', () => {
   it('should render correctly', () => {
     const onTimeIntervalChange = jest.fn();
@@ -31,14 +48,7 @@ describe('TimeIntervalSelector', () => {
       button.click();
     });
 
-    const options = screen.getAllByRole('option');
-    expect(
-      options.map((option) => ({
-        label: option.getAttribute('title'),
-        value: option.getAttribute('value'),
-        selected: option.getAttribute('aria-selected'),
-      }))
-    ).toMatchInlineSnapshot(`
+    expect(getRenderedOptions()).toMatchInlineSnapshot(`
       Array [
         Object {
           "label": "Auto",
@@ -108,14 +118,7 @@ describe('TimeIntervalSelector', () => {
       button.click();
     });
 
-    const options = screen.getAllByRole('option');
-    expect(
-      options.map((option) => ({
-        label: option.getAttribute('title'),
-        value: option.getAttribute('value'),
-        selected: option.getAttribute('aria-selected'),
-      }))
-    ).toMatchInlineSnapshot(`
+    expect(getRenderedOptions()).toMatchInlineSnapshot(`
       Array [
         Object {
           "label": "Auto",

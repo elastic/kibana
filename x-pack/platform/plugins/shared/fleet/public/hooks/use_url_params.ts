@@ -6,7 +6,7 @@
  */
 
 import { useLocation } from 'react-router-dom';
-import { parse, stringify, type StringifyOptions } from 'query-string';
+import queryString, { type StringifyOptions } from 'query-string';
 import { useCallback, useEffect, useState } from 'react';
 
 /**
@@ -17,13 +17,13 @@ import { useCallback, useEffect, useState } from 'react';
  */
 export function useUrlParams() {
   const { search } = useLocation();
-  const [urlParams, setUrlParams] = useState(() => parse(search));
+  const [urlParams, setUrlParams] = useState(() => queryString.parse(search));
   const toUrlParams = useCallback(
-    (params = urlParams, options?: StringifyOptions) => stringify(params, options),
+    (params = urlParams, options?: StringifyOptions) => queryString.stringify(params, options),
     [urlParams]
   );
   useEffect(() => {
-    setUrlParams(parse(search));
+    setUrlParams(queryString.parse(search));
   }, [search]);
   return {
     urlParams,

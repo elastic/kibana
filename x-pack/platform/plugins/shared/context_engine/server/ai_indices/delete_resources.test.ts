@@ -83,6 +83,30 @@ describe('deleteBackingStoreResource', () => {
       expect(warn).not.toHaveBeenCalled();
     });
 
+    it('does not forward a stringified ES response body in the error string', async () => {
+      deleteDataStream.mockRejectedValue(
+        new errors.ResponseError({
+          meta: {
+            aborted: false,
+            attempts: 1,
+            connection: null,
+            context: null,
+            name: 'response_error',
+            request: {} as never,
+          },
+          warnings: [],
+          body: { unexpected: 'shape', secret: 'internal-detail' },
+          statusCode: 500,
+        })
+      );
+
+      const result = await deleteBackingStore(dest);
+
+      expect(result).toMatch(/Failed to delete the backing store/);
+      expect(result).not.toContain('internal-detail');
+      expect(result).toContain('Elasticsearch returned an unexpected error');
+    });
+
     it('returns an error string for non-404 ES errors', async () => {
       deleteDataStream.mockRejectedValue(makeResponseError(403));
 

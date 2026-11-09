@@ -35,6 +35,7 @@ describe('workflowComputationMiddleware', () => {
 
   it('should clear computed data when yamlString is empty', () => {
     performComputation.mockReturnValue({
+      yamlString: 'name: test',
       yamlDocument: YAML.parseDocument('name: test'),
       yamlLineCounter: new LineCounter(),
       workflowLookup: { steps: {} },
@@ -54,6 +55,7 @@ describe('workflowComputationMiddleware', () => {
 
   it('should perform immediate computation when computed is undefined', () => {
     const mockComputed: ComputedData = {
+      yamlString: 'name: test',
       yamlDocument: YAML.parseDocument('name: test'),
       yamlLineCounter: new LineCounter(),
       workflowLookup: { steps: {} },
@@ -72,6 +74,7 @@ describe('workflowComputationMiddleware', () => {
     jest.useFakeTimers();
 
     const mockComputed: ComputedData = {
+      yamlString: 'name: test',
       yamlDocument: YAML.parseDocument('name: test'),
       yamlLineCounter: new LineCounter(),
       workflowLookup: { steps: {} },
@@ -98,6 +101,7 @@ describe('workflowComputationMiddleware', () => {
 
   it('should clear computed data when performComputation throws', () => {
     const mockComputed: ComputedData = {
+      yamlString: 'name: test',
       yamlDocument: YAML.parseDocument('name: test'),
       yamlLineCounter: new LineCounter(),
       workflowLookup: { steps: {} },
@@ -132,6 +136,7 @@ describe('workflowComputationMiddleware', () => {
 
     it('resets computed, cursorPosition, focusedStepId when the workflow id changes', () => {
       const mockComputed: ComputedData = {
+        yamlString: 'name: test',
         yamlDocument: YAML.parseDocument('name: test'),
         yamlLineCounter: new LineCounter(),
         workflowLookup: { steps: {} },
@@ -154,6 +159,7 @@ describe('workflowComputationMiddleware', () => {
 
     it('does NOT reset computed when re-dispatching the same workflow id (e.g. after save)', () => {
       const mockComputed: ComputedData = {
+        yamlString: 'name: test',
         yamlDocument: YAML.parseDocument('name: test'),
         yamlLineCounter: new LineCounter(),
         workflowLookup: { steps: {} },
@@ -171,11 +177,13 @@ describe('workflowComputationMiddleware', () => {
 
     it('re-arms the synchronous bootstrap after a workflow-id change', () => {
       const computedA: ComputedData = {
+        yamlString: 'name: a',
         yamlDocument: YAML.parseDocument('name: a'),
         yamlLineCounter: new LineCounter(),
         workflowLookup: { steps: {} },
       };
       const computedB: ComputedData = {
+        yamlString: 'name: b',
         yamlDocument: YAML.parseDocument('name: b'),
         yamlLineCounter: new LineCounter(),
         workflowLookup: { steps: {} },
@@ -203,6 +211,7 @@ describe('workflowComputationMiddleware', () => {
     const triggerStep = createStepInfo({ stepId: 'step-1', lineStart: 10, lineEnd: 20 });
     const lookup = createWorkflowLookup([triggerStep], { triggersLineStart: 3 });
     const mockComputed: ComputedData = {
+      yamlString: 'name: test',
       yamlDocument: YAML.parseDocument('name: test'),
       yamlLineCounter: new LineCounter(),
       workflowLookup: lookup,
@@ -244,6 +253,7 @@ describe('workflowComputationMiddleware', () => {
     jest.useFakeTimers();
 
     const mockComputed: ComputedData = {
+      yamlString: 'name: test',
       yamlDocument: YAML.parseDocument('name: test'),
       yamlLineCounter: new LineCounter(),
       workflowLookup: { steps: {} },

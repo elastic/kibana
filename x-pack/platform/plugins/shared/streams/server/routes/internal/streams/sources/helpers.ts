@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { UnitApiKey } from '../../../../lib/unit_config/unit_api_keys';
+
 export const STREAMS_SOURCES_MANAGED_BY = 'streams-sources';
 
 export const MANAGED_SOURCE_TYPE_SLUGS = ['otlp', 'async-bulk', 'prometheus-remote-write'] as const;
@@ -15,8 +17,7 @@ export type ManagedSourceTypeSlug = (typeof MANAGED_SOURCE_TYPE_SLUGS)[number];
 export type DirectSourceTypeSlug = (typeof DIRECT_SOURCE_TYPE_SLUGS)[number];
 export type SourceTypeSlug = ManagedSourceTypeSlug | DirectSourceTypeSlug;
 
-// TODO: Temporary until we can use "ingest" https://github.com/elastic/hosted-otel-collector/pull/3729
-export const SOURCE_API_KEY_APPLICATION = 'apm';
+export const SOURCE_API_KEY_APPLICATION = 'streams';
 export const SOURCE_API_KEY_APPLICATION_PRIVILEGE = 'write';
 export const SOURCE_API_KEY_CLUSTER_PRIVILEGE = 'manage_own_api_key';
 
@@ -92,36 +93,41 @@ export const createSourceApiKeyPrivilegeCheck = ({
   };
 };
 
-export type SourceApiKeyPrivilegeFailure = 'none' | 'cluster' | 'source';
+/**
+ * `source`: a managed source type, missing the `streams` application `write` privilege on `source:<id>`.
+ * `index`: a direct source type, missing the index privileges its key writes with.
+ */
+export type SourceApiKeyPrivilegeFailure = 'none' | 'cluster' | 'source' | 'index';
 
 export interface SourceApiKeyPrivilegeResult {
   canCreate: boolean;
-  canList: boolean;
   failure: SourceApiKeyPrivilegeFailure;
 }
 
 export const interpretSourceApiKeyPrivileges = ({
+  sourceTypeSlug,
   hasAllRequested,
   canManageApiKeys,
 }: {
+  sourceTypeSlug: SourceTypeSlug;
   hasAllRequested: boolean;
   canManageApiKeys: boolean;
 }): SourceApiKeyPrivilegeResult => {
   if (!canManageApiKeys) {
-    return { canCreate: false, canList: false, failure: 'cluster' };
+    return { canCreate: false, failure: 'cluster' };
   }
   if (!hasAllRequested) {
-    return { canCreate: false, canList: true, failure: 'source' };
+    return {
+      canCreate: false,
+      failure: isDirectSourceTypeSlug(sourceTypeSlug) ? 'index' : 'source',
+    };
   }
-  return { canCreate: true, canList: true, failure: 'none' };
+  return { canCreate: true, failure: 'none' };
 };
 
-export const isOwnedBySource = ({
-  metadata,
-  sourceResource,
-}: {
-  metadata: Record<string, unknown> | undefined;
-  sourceResource: string;
-}): boolean =>
-  metadata?.managed_by === STREAMS_SOURCES_MANAGED_BY &&
-  metadata?.source_resource === sourceResource;
+export const sourceApiKeyName = (sourceId: string): string => `stream-source-${sourceId}`;
+
+export const isSourceApiKey =
+  (sourceId: string) =>
+  ({ component_type: componentType, component_id: componentId }: UnitApiKey): boolean =>
+    componentType === 'source' && componentId === sourceId;

@@ -73,7 +73,6 @@ export const MultiSelectFilter: React.FC<UseFilterParams> = ({
           numFilters={options.length}
           hasActiveFilters={selectedOptionKeys.length > 0}
           numActiveFilters={selectedOptionKeys.length}
-          aria-label={buttonLabel}
         >
           <EuiText size="s" className="eui-textTruncate">
             {buttonLabel}

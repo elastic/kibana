@@ -43,8 +43,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const retry = getService('retry');
   const authSpace1 = getAuthWithSuperUser();
 
-  // Failing: See https://github.com/elastic/kibana/issues/227734
-  describe.skip('analytics indexes synchronization task', () => {
+  describe('analytics indexes synchronization task', () => {
     beforeEach(async () => {
       await deleteAllCaseAnalyticsItems(esClient);
       await deleteAllCaseItems(esClient);
@@ -187,7 +186,7 @@ export default ({ getService }: FtrProviderContext): void => {
         auth: authSpace1,
       });
 
-      await runCAISynchronizationTask(supertest);
+      await runCAISynchronizationTask(supertest, 'space1');
 
       await retry.tryForTime(300000, async () => {
         const firstAttachmentAnalytics = await esClient.get({

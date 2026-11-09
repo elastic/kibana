@@ -12,6 +12,7 @@ import type { ActionsConfigurationUtilities } from '../../actions_config';
 import type { ConnectorTokenClientContract } from '../../types';
 import { requestEarsRefreshToken } from './request_ears_refresh_token';
 import { getStoredTokenWithRefresh } from '../get_stored_oauth_token_with_refresh';
+import { getEarsErrorLogFields, logEarsEvent } from './log_ears_event';
 
 interface GetEarsAccessTokenOpts {
   connectorId: string;
@@ -66,7 +67,32 @@ export const getEarsAccessToken = async ({
     profileUid,
     authMode,
     treatRefreshFailureAsAuthError: true,
-    refreshFn: (refreshToken) =>
-      requestEarsRefreshToken(provider, logger, { refreshToken }, configurationUtilities),
+    refreshFn: async (refreshToken) => {
+      const logFields = { step: 'token_refresh', connectorId, provider, profileUid } as const;
+      try {
+        const tokenResult = await requestEarsRefreshToken(
+          provider,
+          logger,
+          { refreshToken },
+          configurationUtilities
+        );
+        logEarsEvent(logger, {
+          ...logFields,
+          outcome: 'success',
+          earsRequestId: tokenResult.earsRequestId,
+          extra: { forced: forceRefresh },
+        });
+        return tokenResult;
+      } catch (err) {
+        const { extra, ...errorFields } = getEarsErrorLogFields(err);
+        logEarsEvent(logger, {
+          ...logFields,
+          outcome: 'failure',
+          ...errorFields,
+          extra: { forced: forceRefresh, ...extra },
+        });
+        throw err;
+      }
+    },
   });
 };

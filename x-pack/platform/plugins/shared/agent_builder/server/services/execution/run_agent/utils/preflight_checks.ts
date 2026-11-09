@@ -6,29 +6,27 @@
  */
 
 import { createBadRequestError } from '@kbn/agent-builder-common/base/errors';
-import type { ConverseInput, ConversationAction, TimelineEvent } from '@kbn/agent-builder-common';
-import { lastExecutionTerminated } from './context_timeline';
+import type { ConverseInput } from '@kbn/agent-builder-common';
+import { pendingPromptRequest } from '@kbn/agent-builder-common';
+import type { ContextTimelineEvent } from './context_timeline';
 
 export const ensureValidInput = ({
   input,
   timeline,
-  action,
+  allowResume = true,
 }: {
   input: ConverseInput;
-  timeline: TimelineEvent[];
-  action?: ConversationAction;
+  timeline: ContextTimelineEvent[];
+  /** When false, a paused conversation takes standard input: the run does not resume it. */
+  allowResume?: boolean;
 }) => {
-  // Regenerate uses the last round's input via prepareConversation - skip standard input check
-  if (action === 'regenerate') {
-    return;
-  }
-
-  // The last execution's terminal event tells whether the conversation is paused for a prompt.
-  const outcome = lastExecutionTerminated(timeline)?.data.outcome;
-  const pendingPrompts = outcome?.type === 'prompt_requested' ? outcome.prompts : [];
+  // The single definition of "paused": an unanswered prompt_requested as the last terminal.
+  const pending = allowResume ? pendingPromptRequest(timeline) : undefined;
+  const pendingPrompts =
+    pending?.data.outcome.type === 'prompt_requested' ? pending.data.outcome.prompts : [];
 
   // standard scenario - we need input to continue
-  if (outcome?.type !== 'prompt_requested') {
+  if (!pending) {
     if (!hasStandardInput(input)) {
       throw createBadRequestError(`No standard input was provided to continue the conversation.`);
     }

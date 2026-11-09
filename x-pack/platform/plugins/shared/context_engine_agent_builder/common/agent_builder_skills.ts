@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-export const KI_RETRIEVAL_SKILL_ID = 'ki-retrieval' as const;
+export { kiRetrievalSkillId as KI_RETRIEVAL_SKILL_ID } from '@kbn/agent-builder-common';
 
 /**
  * Decides what an AI index should hold and whether what it holds is working, whether the index is
  * new or already misbehaving. Read-only on its own: the skills below carry the tools.
  */
 export const ANALYZE_AND_IMPROVE_SKILL_ID = 'analyze-and-improve' as const;
+
+/** Reads the retrieval signals an AI index has accumulated; the evidence every finding rests on. */
+export const CONTEXT_ENGINE_SIGNALS_SKILL_ID = 'context-engine-signals' as const;
 
 /** Chooses and configures the data an AI index draws on, and the corpus filter bounding it. */
 export const AI_INDEX_SOURCES_SKILL_ID = 'ai-index-sources' as const;

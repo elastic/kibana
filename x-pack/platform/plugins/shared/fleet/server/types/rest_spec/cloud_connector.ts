@@ -6,8 +6,16 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { Type } from '@kbn/config-schema';
 
 import { SINGLE_ACCOUNT, ORGANIZATION_ACCOUNT } from '../../../common/constants';
+import { isCloudFormationStackArn } from '../../../common/services/cloud_connectors';
+import {
+  IAC_KEY_VERIFICATION_OUTCOMES,
+  type IacKeyVerificationOutcome,
+} from '../../../common/telemetry/iac_provisioner_events';
+
+import { MAX_IAC_RENDER_INTEGRATIONS, RenderIacTemplateIntegrationSchema } from './iac_provisioner';
 
 const IAC_FIELD_AVAILABILITY = {
   stability: 'experimental' as const,
@@ -58,8 +66,16 @@ const IacRequestFieldsSchema = {
     schema.string({
       minLength: 1,
       maxLength: 2048,
+      // Same rule as the browser's stack ARN fields: the value is deep-linked into the
+      // CloudFormation console as a stack, so any other ARN (IAM role, CloudWatch Logs group) is
+      // rejected here too, not only in the UI.
+      validate: (value) =>
+        isCloudFormationStackArn(value)
+          ? undefined
+          : 'must be a CloudFormation stack ARN (arn:<partition>:cloudformation:<region>:<account>:stack/<name>/<id>)',
       meta: {
-        description: 'Identifier of the last CloudFormation stack deployed for this connector.',
+        description:
+          'ARN of the last CloudFormation stack deployed for this connector (`arn:<partition>:cloudformation:<region>:<account>:stack/<name>/<id>`).',
         availability: IAC_FIELD_AVAILABILITY,
       },
     })
@@ -169,7 +185,8 @@ export const GetCloudConnectorsRequestSchema = {
       })
     ),
     kuery: schema.maybe(
-      schema.string({
+      schema.searchFilter.warn({
+        label: 'fleet.cloud_connectors.kuery',
         meta: { description: 'KQL query to filter cloud connectors.' },
       })
     ),
@@ -197,7 +214,9 @@ export const GetCloudConnectorsResponseSchema = schema.object({
 
 export const GetCloudConnectorRequestSchema = {
   params: schema.object({
-    cloudConnectorId: schema.string({
+    cloudConnectorId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.cloud_connectors.get.cloudConnectorId',
       meta: { description: 'The unique identifier of the cloud connector.' },
     }),
   }),
@@ -221,7 +240,9 @@ export const GetCloudConnectorResponseSchema = schema.object({
 
 export const DeleteCloudConnectorRequestSchema = {
   params: schema.object({
-    cloudConnectorId: schema.string({
+    cloudConnectorId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.cloud_connectors.delete.cloudConnectorId',
       meta: { description: 'The unique identifier of the cloud connector to delete.' },
     }),
   }),
@@ -240,7 +261,9 @@ export const DeleteCloudConnectorResponseSchema = schema.object({
 
 export const UpdateCloudConnectorRequestSchema = {
   params: schema.object({
-    cloudConnectorId: schema.string({
+    cloudConnectorId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.cloud_connectors.update.cloudConnectorId',
       meta: { description: 'The unique identifier of the cloud connector to update.' },
     }),
   }),
@@ -303,7 +326,9 @@ export const UpdateCloudConnectorResponseSchema = schema.object({
 
 export const GetCloudConnectorUsageRequestSchema = {
   params: schema.object({
-    cloudConnectorId: schema.string({
+    cloudConnectorId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.cloud_connectors.usage.cloudConnectorId',
       meta: { description: 'The unique identifier of the cloud connector.' },
     }),
   }),
@@ -344,4 +369,43 @@ export const GetCloudConnectorUsageResponseSchema = schema.object({
   total: schema.number(),
   page: schema.number(),
   perPage: schema.number(),
+});
+
+export const VerifyCloudConnectorIacKeyRequestSchema = {
+  params: schema.object({
+    cloudConnectorId: schema.string({
+      maxLength: 255,
+      meta: { description: 'The unique identifier of the cloud connector.' },
+    }),
+  }),
+  body: schema.object({
+    // The integrations being added carry the same shape the render route takes: per package,
+    // the policy templates the user enabled, with only the inputs they enabled. Omitted or
+    // empty means "check the connector's current set only" (flyout). The size limit matches
+    // the render route because the merged set this route returns is re-rendered as-is.
+    integrations: schema.maybe(
+      schema.arrayOf(RenderIacTemplateIntegrationSchema, { maxSize: MAX_IAC_RENDER_INTEGRATIONS })
+    ),
+    // False: return the integration set only (outcome `not_checked`), no IaCP call, no write.
+    compare: schema.maybe(schema.boolean()),
+  }),
+};
+
+export const VerifyCloudConnectorIacKeyResponseSchema = schema.object({
+  matches: schema.boolean(),
+  reason: schema.maybe(schema.oneOf([schema.literal('no_key'), schema.literal('key_mismatch')])),
+  // `matches` is true for a definite match, a check that could not run (fail open) and a
+  // `compare: false` read (`not_checked`); `outcome` tells them apart.
+  outcome: schema.oneOf(
+    IAC_KEY_VERIFICATION_OUTCOMES.map((outcome) => schema.literal(outcome)) as [
+      Type<IacKeyVerificationOutcome>
+    ]
+  ),
+  deploymentId: schema.maybe(schema.string()),
+  region: schema.maybe(schema.string()),
+  // Same shape and size limit as the render route takes, so the browser can re-render exactly
+  // this set: the service returns an empty set instead of one the render route would reject.
+  integrations: schema.arrayOf(RenderIacTemplateIntegrationSchema, {
+    maxSize: MAX_IAC_RENDER_INTEGRATIONS,
+  }),
 });

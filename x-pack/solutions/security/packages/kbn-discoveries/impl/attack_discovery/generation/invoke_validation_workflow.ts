@@ -783,7 +783,7 @@ export const invokeValidationWorkflow = async ({
 
   try {
     // Step 1: Get and validate the workflow
-    const rawWorkflow = await workflowsManagementApi.getWorkflow(workflowId, spaceId);
+    const rawWorkflow = await workflowsManagementApi.getWorkflow(workflowId, spaceId, request);
     const validatedWorkflow = validateWorkflow(rawWorkflow, workflowId);
     workflowName = validatedWorkflow.name;
 
@@ -859,6 +859,7 @@ export const invokeValidationWorkflow = async ({
 
     // Step 5: Poll for completion
     const execution = await pollForWorkflowCompletion({
+      request,
       executionId: workflowRunId,
       isReady: (exec) => exec.stepExecutions.length > 0,
       logger,

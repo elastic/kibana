@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { firstValueFrom } from 'rxjs';
 import type { estypes } from '@elastic/elasticsearch';
 import type { CPSServerSetup } from '@kbn/cps/server';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
@@ -68,9 +69,11 @@ export const createIsCpsPlatformGateEnabled =
     }
 
     const [coreStart] = await getStartServices();
-    const isCpsFeatureFlagEnabled = await coreStart.featureFlags.getBooleanValue(
-      OBSERVABILITY_INFRA_CPS_ENABLED_FEATURE_FLAG,
-      OBSERVABILITY_INFRA_CPS_ENABLED_DEFAULT
+    const isCpsFeatureFlagEnabled = await firstValueFrom(
+      coreStart.featureFlags.getBooleanValue$(
+        OBSERVABILITY_INFRA_CPS_ENABLED_FEATURE_FLAG,
+        OBSERVABILITY_INFRA_CPS_ENABLED_DEFAULT
+      )
     );
     if (!isCpsFeatureFlagEnabled) {
       return false;

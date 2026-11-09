@@ -30,6 +30,7 @@ export class BulkDeleteRulesRoute extends BaseAlertingRoute {
   };
   static routeOptions = {
     access: 'public' as const,
+    availability: { stability: 'stable', since: '9.6.0' },
     summary: 'Delete rules in bulk by ID',
     oasOperationObject: bulkDeleteRulesOasExamples,
   } as const;

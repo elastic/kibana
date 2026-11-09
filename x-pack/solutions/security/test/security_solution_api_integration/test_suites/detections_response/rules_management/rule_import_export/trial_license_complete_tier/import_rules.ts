@@ -10,6 +10,8 @@ import { DETECTION_ENGINE_RULES_IMPORT_URL } from '@kbn/security-solution-plugin
 import { createRule, deleteAllRules } from '@kbn/detections-response-ftr-services';
 import { PRECONFIGURED_EMAIL_ACTION_CONNECTOR_ID } from '../../../../../config/shared';
 import {
+  assertNoRuleTask,
+  assertRuleTask,
   fetchRule,
   getCustomQueryRuleParams,
   getThresholdRuleForAlertTesting,
@@ -60,6 +62,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(importResponse).toEqual({
         success: true,
         success_count: 1,
+        rules_summary: { created: 1, updated: 0, skipped: 0, failed: 0 },
         rules_count: 1,
         errors: [],
         exceptions_success: true,
@@ -213,6 +216,37 @@ export default ({ getService }: FtrProviderContext): void => {
           );
 
           expect(importedRule).toMatchObject(IMPORT_PAYLOAD[0]);
+          await assertNoRuleTask({
+            getService,
+            ruleId: importedRule.id,
+            spaceId: kibanaSpaceId,
+          });
+        });
+
+        it('imports an enabled custom query rule', async () => {
+          const rule = getCustomQueryRuleParams({
+            rule_id: RULE_TO_IMPORT_RULE_ID,
+            enabled: true,
+          });
+
+          await importRulesWithSuccess({
+            getService,
+            rules: [rule],
+            overwrite: false,
+            spaceId: kibanaSpaceId,
+          });
+
+          const { body: imported } = await detectionsApi
+            .readRule({ query: { rule_id: RULE_TO_IMPORT_RULE_ID } }, kibanaSpaceId)
+            .expect(200);
+
+          expect(imported).toMatchObject(rule);
+          await assertRuleTask({
+            getService,
+            ruleId: imported.id,
+            enabled: true,
+            spaceId: kibanaSpaceId,
+          });
         });
 
         it('imports a rule with defined optional fields', async () => {
@@ -320,7 +354,7 @@ export default ({ getService }: FtrProviderContext): void => {
           })
         );
 
-        await importRulesWithSuccess({
+        const createResponse = await importRules({
           getService,
           rules: [
             getCustomQueryRuleParams({
@@ -333,7 +367,13 @@ export default ({ getService }: FtrProviderContext): void => {
           spaceId,
         });
 
-        await importRulesWithSuccess({
+        expect(createResponse).toMatchObject({
+          rules_count: 1,
+          success: true,
+          success_count: 1,
+        });
+
+        const overwriteResponse = await importRules({
           getService,
           rules: [
             getCustomQueryRuleParams({
@@ -344,6 +384,13 @@ export default ({ getService }: FtrProviderContext): void => {
           ],
           overwrite: true,
           spaceId,
+        });
+
+        expect(overwriteResponse).toMatchObject({
+          rules_count: 1,
+          success: true,
+          success_count: 1,
+          rules_summary: { created: 0, updated: 1, skipped: 0, failed: 0 },
         });
 
         const { body: defaultRule } = await detectionsApi

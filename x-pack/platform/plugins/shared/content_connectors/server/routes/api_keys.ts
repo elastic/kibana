@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { SearchConnectorsPluginSetupDependencies } from '../types';
+import { idSchema } from './schemas';
 
 export function registerApiKeysRoutes({ router }: SearchConnectorsPluginSetupDependencies) {
   router.get(
@@ -57,7 +58,7 @@ export function registerApiKeysRoutes({ router }: SearchConnectorsPluginSetupDep
       },
       validate: {
         params: schema.object({
-          apiKeyId: schema.string(),
+          apiKeyId: idSchema,
         }),
       },
     },

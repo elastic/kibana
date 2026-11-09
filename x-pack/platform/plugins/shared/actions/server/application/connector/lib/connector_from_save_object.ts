@@ -20,6 +20,7 @@ export function connectorFromSavedObject(
     apiKey: _apiKey,
     uiamApiKey: _uiamApiKey,
     uiamApiKeyExternal: _uiamApiKeyExternal,
+    hasInboundEventIdentity: _hasInboundEventIdentity,
     ...restAttributes
   } = savedObject.attributes;
   const authMode = getAuthMode(savedAuthMode as Connector['authMode'] | undefined);

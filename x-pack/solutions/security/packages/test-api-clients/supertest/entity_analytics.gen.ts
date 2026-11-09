@@ -90,6 +90,7 @@ import type {
   UpdateWatchlistEntitySourceRequestParamsInput,
   UpdateWatchlistEntitySourceRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/data_source/update.gen';
+import type { UpdateWatchlistEntitySourceApiKeyRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/data_source/update_api_key.gen';
 import type { UploadWatchlistCsvRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/csv_upload/csv_upload.gen';
 
 import type { FtrProviderContext } from '@kbn/ftr-common-functional-services';
@@ -411,7 +412,7 @@ Removes a privileged user from monitoring by their document ID.
       .query(props.query);
   },
   /**
-   * Returns time-bucketed anomaly counts and tactic distribution for a given entity.
+   * Returns time-bucketed anomaly counts and tactic distribution for a given entity. In `resolved` mode the entity's resolution group is combined.
    */
   getAnomalyOverview(props: GetAnomalyOverviewProps, kibanaSpace: string = 'default') {
     return supertest
@@ -425,12 +426,12 @@ Removes a privileged user from monitoring by their document ID.
         )
       )
       .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
   /**
-   * Queries ML anomaly records on demand, enriches them with baseline data, and returns results for a given entity.
+   * Queries ML anomaly records on demand, enriches them with baseline data, and returns results for a given entity. In `resolved` mode the entity's resolution group is combined.
    */
   getAnomalySummary(props: GetAnomalySummaryProps, kibanaSpace: string = 'default') {
     return supertest
@@ -444,7 +445,7 @@ Removes a privileged user from monitoring by their document ID.
         )
       )
       .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
@@ -897,6 +898,27 @@ Updates the details of an existing monitored privileged user by their document I
       .send(props.body as object);
   },
   /**
+   * Replace the API key of an index entity source with a new one owned by the user making this request, for example after the user who created the source is removed or loses access to the index. The new key is created and saved first; the previous key is invalidated only afterwards, so a failure leaves the source with its previous key. The user must be able to read the source's index pattern.
+   */
+  updateWatchlistEntitySourceApiKey(
+    props: UpdateWatchlistEntitySourceApiKeyProps,
+    kibanaSpace: string = 'default'
+  ) {
+    return supertest
+      .post(
+        getRouteUrlForSpace(
+          replaceParams(
+            '/api/entity_analytics/watchlists/{watchlist_id}/entity_source/{id}/_update_api_key',
+            props.params
+          ),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  /**
       * **Deprecated in 9.4.0.** Use `POST /internal/asset_criticality/upload_csv_v2` instead.
 
       */
@@ -1068,6 +1090,9 @@ export interface UpdateWatchlistProps {
 export interface UpdateWatchlistEntitySourceProps {
   params: UpdateWatchlistEntitySourceRequestParamsInput;
   body: UpdateWatchlistEntitySourceRequestBodyInput;
+}
+export interface UpdateWatchlistEntitySourceApiKeyProps {
+  params: UpdateWatchlistEntitySourceApiKeyRequestParamsInput;
 }
 export interface UploadWatchlistCsvProps {
   params: UploadWatchlistCsvRequestParamsInput;

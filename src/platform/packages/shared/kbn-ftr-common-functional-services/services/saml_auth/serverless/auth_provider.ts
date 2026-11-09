@@ -24,7 +24,6 @@ const projectDefaultRoles = new Map<string, Role>([
   ['es', 'developer'],
   ['security', 'editor'],
   ['oblt', 'editor'],
-  ['workplaceai', 'developer'], // TODO: double check if it's really 'developer'
   ['vectordb', 'developer'],
 ]);
 

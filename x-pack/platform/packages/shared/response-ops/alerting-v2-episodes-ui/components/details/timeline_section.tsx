@@ -23,12 +23,14 @@ import * as i18n from './timeline/translations';
 
 export interface AlertEpisodeTimelineSectionProps {
   episodeId: string;
+  seriesId: string | null | undefined;
   groupHash: string | undefined;
   services: Pick<AlertEpisodeDetailsServices, 'data' | 'spaces' | 'userProfile'>;
 }
 
 export const AlertEpisodeTimelineSection = ({
   episodeId,
+  seriesId,
   groupHash,
   services,
 }: AlertEpisodeTimelineSectionProps) => {
@@ -45,6 +47,7 @@ export const AlertEpisodeTimelineSection = ({
     isFetchingNextPage,
   } = useFetchEpisodeActionsHistoryQuery({
     episodeId,
+    seriesId,
     groupHash,
     services,
   });
@@ -56,7 +59,7 @@ export const AlertEpisodeTimelineSection = ({
       ...new Set(
         actionEntries.flatMap((e) => {
           const uids: string[] = [];
-          if (e.actor) uids.push(e.actor);
+          if (e.actor.profile_uid) uids.push(e.actor.profile_uid);
           if (e.assignee_uid) uids.push(e.assignee_uid);
           return uids;
         })

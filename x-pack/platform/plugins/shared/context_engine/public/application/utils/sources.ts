@@ -45,3 +45,31 @@ export const toSelectedSources = (sources: AiIndexSource[]): SelectedSource[] =>
     label: source.value,
     value: source.value,
   }));
+
+/** Builds the ES|QL query used when an index or data stream is selected as a source. */
+export const createIndexEsqlQuery = (indexName: string): string => `FROM ${indexName}`;
+
+export const hasSelectedEsqlQuery = (
+  selectedSources: SelectedSource[],
+  esqlQuery: string
+): boolean => selectedSources.some((source) => source.type === 'esql' && source.id === esqlQuery);
+
+/** Whether a simple index-picker source (`FROM <index>`) is already in the selection. */
+export const isIndexPickerSourceSelected = (
+  selectedSources: SelectedSource[],
+  indexName: string
+): boolean => hasSelectedEsqlQuery(selectedSources, createIndexEsqlQuery(indexName));
+
+const sourceKey = ({ type, value }: SelectedSource) => `${type}:${value}`;
+
+/** Order-independent equality check on the {type, value} identity of two source lists. */
+export const areSourceSelectionsEqual = (a: SelectedSource[], b: SelectedSource[]): boolean => {
+  if (a.length !== b.length) {
+    return false;
+  }
+
+  const sortedA = a.map(sourceKey).sort();
+  const sortedB = b.map(sourceKey).sort();
+
+  return sortedA.every((key, index) => key === sortedB[index]);
+};

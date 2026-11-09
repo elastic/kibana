@@ -11,11 +11,9 @@ import {
   SECURITY_FEATURE_ID_V5,
 } from '@kbn/security-solution-features/constants';
 import * as i18n from './translations';
-import { MITRE_ATTACK_VERSION } from './detection_engine/mitre/mitre_version';
 
 export {
   ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING,
-  ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
   SecurityPageName,
 } from '@kbn/security-solution-navigation';
 
@@ -152,15 +150,17 @@ export const CUSTOM_YARA_SIGNATURES_PATH = `${MANAGEMENT_PATH}/custom_yara_signa
 export const RESPONSE_ACTIONS_HISTORY_PATH = `${MANAGEMENT_PATH}/response_actions_history` as const;
 export const SCRIPT_LIBRARY_PATH = `${MANAGEMENT_PATH}/script_library` as const;
 export const ENTITY_ANALYTICS_PATH = '/entity_analytics' as const;
+/** @deprecated Bookmark-only; redirects to {@link ENTITY_ANALYTICS_HOME_PAGE_PATH}. */
+export const ENTITY_ANALYTICS_LANDING_PATH = '/entity_analytics_landing' as const;
+/** @deprecated Bookmark-only; redirects to {@link ENTITY_ANALYTICS_HOME_PAGE_PATH}. */
+export const ENTITY_ANALYTICS_OVERVIEW_PATH = '/entity_analytics_overview' as const;
 export const ENTITY_ANALYTICS_MANAGEMENT_PATH = `/entity_analytics_management` as const;
 export const ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH =
   `/entity_analytics_asset_criticality` as const;
 export const ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH =
   `/entity_analytics_entity_store` as const;
-export const ENTITY_ANALYTICS_LANDING_PATH = '/entity_analytics_landing' as const;
 export const ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH =
   '/entity_analytics_privileged_user_monitoring' as const;
-export const ENTITY_ANALYTICS_OVERVIEW_PATH = `/entity_analytics_overview` as const;
 export const ENTITY_ANALYTICS_HOME_PAGE_PATH = '/entity_analytics_home_page' as const;
 export const USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG =
   'securitySolution.useNewEntityAnalyticsPage' as const;
@@ -287,9 +287,6 @@ export const ENABLE_SIEM_READINESS_SETTING = 'securitySolution:enableSiemReadine
 
 /** This Kibana Advanced Setting allows users to enable/disable the Cloud Connector Feature */
 export const ENABLE_CLOUD_CONNECTOR_SETTING = 'securitySolution:enableCloudConnector' as const;
-
-/** This Kibana Advanced Setting allows users to enable/disable the new EUI-based flyout system */
-export const ENABLE_NEW_FLYOUT_SETTING = 'securitySolution:enableNewFlyout' as const;
 
 /** This Kibana Advanced Setting allows users to enable/disable the rule changes history feature */
 export const ENABLE_RULE_CHANGES_HISTORY_SETTING =
@@ -522,9 +519,8 @@ export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
   ATTACKS_PAGE_CALLOUT: 'securitySolution.attacksPage.tourCalloutDismissed.v9.5',
   ATTACKS_PAGE_WORKFLOWS_PROMOTION_CALLOUT:
     'securitySolution.attacksPage.workflowsPromotionCalloutDismissed.v9.5',
-  // Notifies users that the bundled MITRE ATT&CK® dataset was bumped. Keyed to
-  // MITRE_ATTACK_VERSION so each upgrade automatically re-surfaces the callout.
-  MITRE_VERSION_UPGRADED_CALLOUT: `securitySolution.rulesManagementPage.mitreVersionUpgradedCallout.${MITRE_ATTACK_VERSION}`,
+  ENTITY_ANALYTICS_HOME_PAGE_BANNER:
+    'securitySolution.entityAnalyticsHomePage.productTourBannerDismissed.v9.6',
 };
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
@@ -749,12 +745,19 @@ export const ESSENTIAL_ALERT_FIELDS: string[] = [
 export enum SecurityAgentBuilderAttachments {
   alert = 'security.alert',
   alerts = 'security.alerts',
+  attackDiscovery = 'security.attack_discovery',
+  attackDiscoveryVerdict = 'security.attack_discovery.verdict',
   entity = 'security.entity',
   entityAnalyticsDashboard = 'security.entity_analytics_dashboard',
   entityGraph = 'security.entity_graph',
+  entityAnalyticsAiBrief = 'security.entity_analytics_ai_brief',
   entityRiskScoreHistory = 'security.entity_risk_score_history',
+  exception = 'security.exception',
+  investigationIocs = 'security.investigation.iocs',
+  investigationTimeline = 'security.investigation.timeline',
   rule = 'security.rule',
   rulePreview = 'security.rule.preview',
+  ruleMigrationItems = 'security.siem_migration.rule_migration_items',
 }
 
 export const SECURITY_RULE_ATTACHMENT_ID = 'ai-rule-creation';

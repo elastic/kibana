@@ -1,0 +1,9 @@
+{
+  "10.1.0": [
+    {
+      "connectorId": "connector-1",
+      "ingestTokenHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "createdAt": "2026-01-01T00:00:00.000Z"
+    }
+  ]
+}

@@ -156,6 +156,59 @@ describe('fromConnectorSpecSchema', () => {
       ).not.toThrow();
     });
 
+    it('round-trips nullable and union config fields with validation', () => {
+      const testSpec = {
+        metadata: {
+          id: '.test-nullable-union',
+          displayName: 'Test Nullable Union',
+          description: 'Test connector config with nullable and union fields',
+          minimumLicense: 'basic' as const,
+          supportedFeatureIds: ['workflows' as const],
+        },
+        schema: z.object({
+          optionalLabel: z.string().nullable().describe('Optional label'),
+          mode: z.union([z.literal('fast'), z.literal('full')]).describe('Processing mode'),
+        }),
+        actions: {
+          testAction: {
+            input: z.object({}),
+            scope: 'read' as const,
+            handler: async () => ({ success: true }),
+          },
+        },
+        test: { handler: async () => ({}), enabled: false },
+      };
+
+      const serialized = serializeConnectorSpec(testSpec);
+      const zodSchema = fromConnectorSpecSchema(serialized.schema);
+
+      expect(zodSchema).toBeDefined();
+      expect(() =>
+        zodSchema?.parse({
+          config: { optionalLabel: null, mode: 'fast' },
+          secrets: {},
+        })
+      ).not.toThrow();
+      expect(() =>
+        zodSchema?.parse({
+          config: { optionalLabel: 'hello', mode: 'full' },
+          secrets: {},
+        })
+      ).not.toThrow();
+      expect(() =>
+        zodSchema?.parse({
+          config: { optionalLabel: 'hello', mode: 'invalid' },
+          secrets: {},
+        })
+      ).toThrow();
+      expect(() =>
+        zodSchema?.parse({
+          config: { optionalLabel: 42, mode: 'fast' },
+          secrets: {},
+        })
+      ).toThrow();
+    });
+
     it('handles connector without auth types', () => {
       const testSpec = {
         metadata: {

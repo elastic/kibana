@@ -179,3 +179,37 @@ export async function getServiceUrls({
     esUrl: formattedEsUrl,
   };
 }
+
+/** Confirms the id is a chat_completion inference endpoint before the script calls the LLM through Kibana. */
+export async function assertChatCompletionInferenceEndpoint({
+  esUrl,
+  inferenceId,
+}: {
+  esUrl: string;
+  inferenceId: string;
+}): Promise<void> {
+  const parsed = parse(esUrl);
+  const endpointUrl = format({
+    protocol: parsed.protocol,
+    hostname: parsed.hostname,
+    port: parsed.port,
+    pathname: `/_inference/chat_completion/${encodeURIComponent(inferenceId)}`,
+  });
+  const headers: Record<string, string> = {};
+  if (parsed.auth) {
+    headers.Authorization = `Basic ${Buffer.from(parsed.auth).toString('base64')}`;
+  }
+
+  const response = await fetch(endpointUrl, { headers });
+  if (response.status === 404) {
+    throw new Error(
+      `Inference endpoint '${inferenceId}' was not found as a chat_completion endpoint`
+    );
+  }
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(
+      `Failed to read inference endpoint '${inferenceId}': ${response.status} ${body}`
+    );
+  }
+}

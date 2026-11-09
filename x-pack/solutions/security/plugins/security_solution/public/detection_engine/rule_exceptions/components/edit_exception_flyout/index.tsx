@@ -48,6 +48,7 @@ import {
   isNewTermsRule,
   isThresholdRule,
 } from '../../../../../common/detection_engine/utils';
+import type { AlertClosingReason } from '../../../../../common/types';
 import { useKibana } from '../../../../common/lib/kibana';
 
 import type { Rule } from '../../../rule_management/logic/types';
@@ -130,6 +131,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
       bulkCloseAlerts,
       disableBulkClose,
       bulkCloseIndex,
+      closeAlertsReason,
       entryErrorExists,
       expireTime,
       expireErrorExists,
@@ -147,6 +149,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
     bulkCloseAlerts: false,
     disableBulkClose: true,
     bulkCloseIndex: undefined,
+    closeAlertsReason: undefined,
     entryErrorExists: false,
     expireTime: itemToEdit.expire_time !== undefined ? moment(itemToEdit.expire_time) : undefined,
     expireErrorExists: false,
@@ -285,6 +288,16 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
     [dispatch]
   );
 
+  const setCloseAlertsReason = useCallback(
+    (reason?: AlertClosingReason): void => {
+      dispatch({
+        type: 'setCloseAlertsReason',
+        reason,
+      });
+    },
+    [dispatch]
+  );
+
   const setConditionsValidationError = useCallback(
     (errorExists: boolean): void => {
       dispatch({
@@ -353,13 +366,13 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
           listType === ExceptionListTypeEnum.RULE_DEFAULT ? ruleDefaultRule : referencedRules;
 
         if (closeAlerts != null && !isEmpty(ruleIdsForBulkClose) && bulkCloseAlerts) {
-          await closeAlerts(
-            ruleIdsForBulkClose,
-            items,
-            undefined,
+          await closeAlerts({
+            ruleStaticIds: ruleIdsForBulkClose,
+            exceptionItems: items,
             bulkCloseIndex,
-            runtimeFieldsResolution.runtimeFields
-          );
+            runtimeFields: runtimeFieldsResolution.runtimeFields,
+            reason: closeAlertsReason,
+          });
         }
 
         onConfirm(true);
@@ -382,6 +395,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
     bulkCloseAlerts,
     onConfirm,
     bulkCloseIndex,
+    closeAlertsReason,
     runtimeFieldsResolution.runtimeFields,
     onCancel,
     expireTime,
@@ -547,9 +561,11 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
               isSignalIndexPatternLoading={isSignalIndexPatternLoading}
               signalIndexPatterns={signalIndexPatterns}
               hasUntypedRuntimeFields={runtimeFieldsResolution.hasUntypedFields}
+              closeAlertsReason={closeAlertsReason}
               onDisableBulkClose={setDisableBulkCloseAlerts}
               onUpdateBulkCloseIndex={setBulkCloseIndex}
               onBulkCloseCheckboxChange={setBulkCloseAlerts}
+              onCloseAlertsReasonChange={setCloseAlertsReason}
             />
           </>
         )}

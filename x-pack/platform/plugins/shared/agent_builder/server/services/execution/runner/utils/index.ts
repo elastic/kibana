@@ -19,3 +19,4 @@ export { createToolProvider } from './tools';
 export { createPromptManager } from './prompts';
 export { createConversationStateManager } from './state_manager';
 export { createSubAgentExecutor } from './sub_agent_executor';
+export { resolveDeploymentContext } from './deployment';

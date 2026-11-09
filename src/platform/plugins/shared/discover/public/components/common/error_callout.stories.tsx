@@ -9,7 +9,7 @@
 
 import { EuiProvider } from '@elastic/eui';
 import { action } from '@storybook/addon-actions';
-import { ErrorCallout } from '@kbn/discover-utils';
+import { ErrorCallout } from '@kbn/discover-utils/components';
 import React from 'react';
 
 const withEui = (children: React.ReactNode) => (

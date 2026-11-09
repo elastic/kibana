@@ -1,0 +1,117 @@
+responses:
+  200:
+    content:
+      application/json:
+        examples:
+          describeAiIndexResponseExample:
+            summary: "Context block for an agent"
+            description: "Example response with a context block for an agent"
+            value:
+              response: |-
+                AI index: customer_support
+                Knowledge about customer support cases.
+                Query with ES|QL against: ai-index-ds-customer-support
+
+                Fields
+                @timestamp: date, searchable, aggregatable
+                content: text, searchable
+                content.semantic: semantic_text, searchable
+                description: text, searchable
+                description.semantic: semantic_text, searchable
+                tags: keyword, searchable, aggregatable
+                title: text, searchable
+                title.semantic: semantic_text, searchable
+                type: keyword, searchable, aggregatable
+
+                Semantic fields
+                content.semantic
+                description.semantic
+                title.semantic
+
+                Knowledge item types
+                "faq": 12
+                "runbook": 4
+
+                Tags
+                "billing": 7
+                "password": 5
+
+                Example queries (adapt field names for non-canonical indices)
+
+                Full text search, lexical and semantic fused together (?query)
+                FROM ai-index-ds-customer-support METADATA _id, _index, _score
+                | FORK
+                    ( WHERE MATCH(title, ?query) OR MATCH(description, ?query) OR MATCH(content, ?query) | SORT _score DESC | LIMIT 20 )
+                    ( WHERE MATCH(title.semantic, ?query) OR MATCH(description.semantic, ?query) OR MATCH(content.semantic, ?query) | SORT _score DESC | LIMIT 20 )
+                | FUSE
+                | SORT _score DESC, _id ASC
+                | KEEP title, description, content, type, tags
+                | LIMIT 5
+
+                Filter by knowledge item type and tag (?type, ?tag; tags is multi-valued, so MATCH)
+                FROM ai-index-ds-customer-support
+                | WHERE type == ?type AND MATCH(tags, ?tag)
+                | KEEP title, description, content, type, tags
+                | LIMIT 20
+
+                Count by type
+                FROM ai-index-ds-customer-support
+                | STATS count = COUNT(*) BY type
+                | SORT count DESC
+                | LIMIT 20
+  400:
+    content:
+      application/json:
+        examples:
+          tooLargeExample:
+            summary: "Response too large"
+            description: "The field metadata for the backing indices exceeded the size limit"
+            value:
+              statusCode: 400
+              error: Bad Request
+              message: "Field metadata for the AI index exceeded the maximum allowed size of 20MB. Point the AI index at fewer or smaller indices."
+  403:
+    content:
+      application/json:
+        examples:
+          notReadableExample:
+            summary: "Backing indices not readable"
+            description: "The caller cannot read the backing indices of the AI Index"
+            value:
+              statusCode: 403
+              error: Forbidden
+              message: "AI index 'customer_support' is not readable. Reading it needs the Elasticsearch 'read' and 'view_index_metadata' privileges on its backing indices."
+          forbiddenExample:
+            summary: "Missing view_index_metadata privilege"
+            description: "The caller can read the backing indices but cannot read their mappings"
+            value:
+              statusCode: 403
+              error: Forbidden
+              message: "security_exception\n\tRoot causes:\n\t\tsecurity_exception: action [indices:admin/mappings/get] is unauthorized for user [jdoe] with effective roles [support_reader] on indices [ai-index-ds-customer-support], this action is granted by the index privileges [view_index_metadata,manage,all]"
+  404:
+    content:
+      application/json:
+        examples:
+          notFoundExample:
+            summary: "AI Index not found"
+            description: "No AI Index with the given ID exists in the current space"
+            value:
+              statusCode: 404
+              error: Not Found
+              message: "AI index 'customer_support' not found"
+          contextEngineDisabledExample:
+            summary: "Context Engine turned off"
+            description: "Context Engine is turned off in this space"
+            value:
+              statusCode: 404
+              error: Not Found
+              message: Not Found
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X GET "https://${KIBANA_URL}/api/context_engine/ai_index/customer_support/_describe" \
+        -H "Authorization: ApiKey ${API_KEY}"
+  - lang: Console
+    source: |
+      GET kbn:/api/context_engine/ai_index/customer_support/_describe

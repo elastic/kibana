@@ -79,7 +79,9 @@ describe('useWorkflowExecuteHitSearch', () => {
       expect(result.current.hits).toEqual([hit]);
     });
 
-    rerender({ searchIdentityKey: 'identity-2' });
+    await act(async () => {
+      rerender({ searchIdentityKey: 'identity-2' });
+    });
 
     await waitFor(() => {
       expect(result.current.hits).toEqual([

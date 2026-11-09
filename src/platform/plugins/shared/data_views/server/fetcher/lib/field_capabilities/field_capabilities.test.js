@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint import/no-duplicates: 0 */
 import sinon from 'sinon';
 import { identity, shuffle, sortBy } from 'lodash';
 
@@ -54,9 +53,11 @@ describe('index_patterns/field_capabilities/field_capabilities', () => {
 
     sandbox
       .stub(callFieldCapsApiNS, 'callFieldCapsApi')
-      .callsFake(async () => ({ body: esResponse }));
-    sandbox.stub(readFieldCapsResponseNS, 'readFieldCapsResponse').returns(fieldsFromFieldCaps);
-    sandbox.stub(mergeOverridesNS, 'mergeOverrides').callsFake(mergeOverrides);
+      .value(sinon.stub().callsFake(async () => ({ body: esResponse })));
+    sandbox
+      .stub(readFieldCapsResponseNS, 'readFieldCapsResponse')
+      .value(sinon.stub().returns(fieldsFromFieldCaps));
+    sandbox.stub(mergeOverridesNS, 'mergeOverrides').value(sinon.stub().callsFake(mergeOverrides));
   };
 
   describe('calls `callFieldCapsApi()`', () => {

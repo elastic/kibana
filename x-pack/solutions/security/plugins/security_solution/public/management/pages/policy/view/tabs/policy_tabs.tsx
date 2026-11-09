@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { css } from '@emotion/react';
-import type { EuiTabbedContentTab } from '@elastic/eui';
-import { EuiSpacer, EuiTabbedContent, useEuiTheme } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import type { AppHeaderTab } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -21,10 +20,12 @@ import { PolicySettingsLayout } from '../policy_settings_layout';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import {
   getBlocklistsListPath,
+  getCustomYaraSignaturesListPath,
   getEndpointExceptionsListPath,
   getEventFiltersListPath,
   getHostIsolationExceptionsListPath,
   getPolicyBlocklistsPath,
+  getPolicyCustomYaraSignaturesPath,
   getPolicyDetailPath,
   getPolicyDetailsArtifactsListPath,
   getPolicyEndpointExceptionsPath,
@@ -40,6 +41,7 @@ import { useHttp, useToasts } from '../../../../../common/lib/kibana';
 import { ManagementPageLoader } from '../../../../components/management_page_loader';
 import {
   isOnBlocklistsView,
+  isOnCustomYaraSignaturesView,
   isOnEndpointExceptionsView,
   isOnHostIsolationExceptionsView,
   isOnPolicyEventFiltersView,
@@ -64,14 +66,19 @@ import { SEARCHABLE_FIELDS as TRUSTED_APPS_SEARCHABLE_FIELDS } from '../../../tr
 import { SEARCHABLE_FIELDS as EVENT_FILTERS_SEARCHABLE_FIELDS } from '../../../event_filters/constants';
 import { SEARCHABLE_FIELDS as HOST_ISOLATION_EXCEPTIONS_SEARCHABLE_FIELDS } from '../../../host_isolation_exceptions/constants';
 import { SEARCHABLE_FIELDS as BLOCKLISTS_SEARCHABLE_FIELDS } from '../../../blocklist/constants';
+import { SEARCHABLE_FIELDS as CUSTOM_YARA_SIGNATURES_SEARCHABLE_FIELDS } from '../../../custom_yara_signatures/constants';
 import { SEARCHABLE_FIELDS as TRUSTED_DEVICES_SEARCHABLE_FIELDS } from '../../../trusted_devices/constants';
 import type { PolicyDetailsRouteState } from '../../../../../../common/endpoint/types';
+import { POLICY_PROTECTION_UPDATES_LABEL } from '../../../../../../common/endpoint/models/policy_settings_ui_labels';
 import { useHostIsolationExceptionsAccess } from '../../../../hooks/artifacts/use_host_isolation_exceptions_access';
 import { TrustedDevicesApiClient } from '../../../trusted_devices/service/api_client';
 import { POLICY_ARTIFACT_TRUSTED_DEVICES_LABELS } from './trusted_devices_translations';
 import { ENDPOINT_EXCEPTIONS_SEARCHABLE_FIELDS } from '../../../endpoint_exceptions/constants';
 import { EndpointExceptionsApiClient } from '../../../endpoint_exceptions/service/api_client';
 import { POLICY_ARTIFACT_ENDPOINT_EXCEPTIONS_LABELS } from './endpoint_exceptions_translations';
+import { POLICY_ARTIFACT_CUSTOM_YARA_SIGNATURES_LABELS } from './custom_yara_signatures_translations';
+import { CustomYaraSignaturesApiClient } from '../../../custom_yara_signatures/service/api_client';
+import { CustomYaraSignatureCriteria } from '../../../custom_yara_signatures/view/components/custom_yara_signature_criteria';
 import { TrustedAppsCardDecorator } from '../../../trusted_apps/view/trusted_apps_list';
 import { EventFiltersCardDecorator } from '../../../event_filters/view/event_filters_list';
 
@@ -84,19 +91,57 @@ enum PolicyTabKeys {
   PROTECTION_UPDATES = 'protectionUpdates',
   TRUSTED_DEVICES = 'trustedDevices',
   ENDPOINT_EXCEPTIONS = 'endpointExceptions',
+  CUSTOM_YARA_SIGNATURES = 'customYaraSignatures',
 }
 
 interface PolicyTab {
   id: PolicyTabKeys;
   name: string;
   content: React.ReactNode;
+  'data-test-subj': string;
 }
 
-export const PolicyTabs = React.memo(() => {
+export interface UsePolicyTabsResult {
+  /** Tab definitions for the page's `AppHeader` `tabs` prop. */
+  tabs: AppHeaderTab[];
+  /** The content of the active tab (plus the unsaved-changes confirm modal when pending). */
+  body: React.ReactNode;
+}
+
+function getPathForPolicyTab(tabId: PolicyTabKeys, policyId: string): string {
+  switch (tabId) {
+    case PolicyTabKeys.SETTINGS:
+      return getPolicyDetailPath(policyId);
+    case PolicyTabKeys.TRUSTED_APPS:
+      return getPolicyTrustedAppsPath(policyId);
+    case PolicyTabKeys.TRUSTED_DEVICES:
+      return getPolicyTrustedDevicesPath(policyId);
+    case PolicyTabKeys.EVENT_FILTERS:
+      return getPolicyEventFiltersPath(policyId);
+    case PolicyTabKeys.HOST_ISOLATION_EXCEPTIONS:
+      return getPolicyHostIsolationExceptionsPath(policyId);
+    case PolicyTabKeys.BLOCKLISTS:
+      return getPolicyBlocklistsPath(policyId);
+    case PolicyTabKeys.ENDPOINT_EXCEPTIONS:
+      return getPolicyEndpointExceptionsPath(policyId);
+    case PolicyTabKeys.CUSTOM_YARA_SIGNATURES:
+      return getPolicyCustomYaraSignaturesPath(policyId);
+    case PolicyTabKeys.PROTECTION_UPDATES:
+      return getPolicyProtectionUpdatesPath(policyId);
+    default:
+      return getPolicyDetailPath(policyId);
+  }
+}
+
+/**
+ * Builds the Policy details tabs (RBAC/flag-gated) and their content. Must only be called once
+ * the policy item has loaded (mirrors the previous `PolicyTabs` component's assumption).
+ */
+export const usePolicyTabs = (): UsePolicyTabsResult => {
   const history = useHistory();
   const http = useHttp();
   const toasts = useToasts();
-  const theme = useEuiTheme();
+  const { state: routeState = {} } = useLocation<PolicyDetailsRouteState>();
 
   const isInSettingsTab = usePolicyDetailsSelector(isOnPolicyFormView);
   const isInTrustedAppsTab = usePolicyDetailsSelector(isOnPolicyTrustedAppsView);
@@ -104,14 +149,10 @@ export const PolicyTabs = React.memo(() => {
   const isInEventFiltersTab = usePolicyDetailsSelector(isOnPolicyEventFiltersView);
   const isInHostIsolationExceptionsTab = usePolicyDetailsSelector(isOnHostIsolationExceptionsView);
   const isInBlocklistsTab = usePolicyDetailsSelector(isOnBlocklistsView);
+  const isInCustomYaraSignaturesTab = usePolicyDetailsSelector(isOnCustomYaraSignaturesView);
   const isInEndpointExceptionsTab = usePolicyDetailsSelector(isOnEndpointExceptionsView);
   const isInProtectionUpdatesTab = usePolicyDetailsSelector(isOnProtectionUpdatesView);
   const policyId = usePolicyDetailsSelector(policyIdFromParams);
-
-  const [unsavedChangesModal, setUnsavedChangesModal] = useState<{
-    showModal: boolean;
-    nextTab: EuiTabbedContentTab | null;
-  }>({ showModal: false, nextTab: null });
 
   const [unsavedChanges, setUnsavedChanges] = useState<
     Record<PolicyTabKeys.SETTINGS | PolicyTabKeys.PROTECTION_UPDATES, boolean>
@@ -148,13 +189,17 @@ export const PolicyTabs = React.memo(() => {
     canWriteTrustedDevices,
     canReadEndpointExceptions,
     canWriteEndpointExceptions,
+    canReadCustomYaraSignatures,
+    canWriteCustomYaraSignatures,
     loading: isPrivilegesLoading,
   } = useUserPrivileges().endpointPrivileges;
-  const { state: routeState = {} } = useLocation<PolicyDetailsRouteState>();
 
   const isTrustedDevicesFeatureEnabled = useIsExperimentalFeatureEnabled('trustedDevices');
   const isEndpointExceptionsMovedUnderManagementFeatureEnabled = useIsExperimentalFeatureEnabled(
     'endpointExceptionsMovedUnderManagement'
+  );
+  const isCustomYaraSignaturesEnabled = useIsExperimentalFeatureEnabled(
+    'customYaraSignaturesEnabled'
   );
 
   const isEnterprise = useLicense().isEnterprise();
@@ -189,6 +234,7 @@ export const PolicyTabs = React.memo(() => {
       (isInEventFiltersTab && !canReadEventFilters) ||
       redirectHostIsolationException ||
       (isInBlocklistsTab && !canReadBlocklist) ||
+      (isInCustomYaraSignaturesTab && !canReadCustomYaraSignatures) ||
       (isInEndpointExceptionsTab && !canReadEndpointExceptions) ||
       (isInTrustedDevicesTab && !canReadTrustedDevices)
     ) {
@@ -202,6 +248,7 @@ export const PolicyTabs = React.memo(() => {
     }
   }, [
     canReadBlocklist,
+    canReadCustomYaraSignatures,
     canReadEndpointExceptions,
     canReadEventFilters,
     canReadHostIsolationExceptions,
@@ -211,6 +258,7 @@ export const PolicyTabs = React.memo(() => {
     history,
     isHostIsolationExceptionsAccessLoading,
     isInBlocklistsTab,
+    isInCustomYaraSignaturesTab,
     isInEndpointExceptionsTab,
     isInEventFiltersTab,
     isInHostIsolationExceptionsTab,
@@ -244,6 +292,11 @@ export const PolicyTabs = React.memo(() => {
 
   const getEndpointExceptionsApiClientInstance = useCallback(
     () => EndpointExceptionsApiClient.getInstance(http),
+    [http]
+  );
+
+  const getCustomYaraSignaturesApiClientInstance = useCallback(
+    () => CustomYaraSignaturesApiClient.getInstance(http),
     [http]
   );
 
@@ -300,6 +353,17 @@ export const PolicyTabs = React.memo(() => {
         <FormattedMessage
           id="xpack.securitySolution.endpoint.policy.blocklist.list.about"
           defaultMessage="There {count, plural, one {is} other {are}} {count} {count, plural, =1 {blocklist} other {blocklist entries}} associated with this policy. Click here to {link}"
+          values={{ count, link }}
+        />
+      ),
+    };
+
+    const customYaraSignaturesLabels = {
+      ...POLICY_ARTIFACT_CUSTOM_YARA_SIGNATURES_LABELS,
+      layoutAboutMessage: (count: number, link: React.ReactElement): React.ReactNode => (
+        <FormattedMessage
+          id="xpack.securitySolution.endpoint.policy.customYaraSignatures.list.about"
+          defaultMessage="There {count, plural, one {is} other {are}} {count} custom YARA {count, plural, =1 {signature} other {signatures}} associated with this policy. Click here to {link}"
           values={{ count, link }}
         />
       ),
@@ -491,16 +555,40 @@ export const PolicyTabs = React.memo(() => {
               'data-test-subj': 'policyEndpointExceptionsTab',
             }
           : undefined,
+      [PolicyTabKeys.CUSTOM_YARA_SIGNATURES]:
+        isCustomYaraSignaturesEnabled && canReadCustomYaraSignatures
+          ? {
+              id: PolicyTabKeys.CUSTOM_YARA_SIGNATURES,
+              name: i18n.translate(
+                'xpack.securitySolution.endpoint.policy.details.tabs.customYaraSignatures',
+                {
+                  defaultMessage: 'Custom YARA signatures',
+                }
+              ),
+              content: (
+                <>
+                  <EuiSpacer />
+                  <PolicyArtifactsLayout
+                    policyItem={policyItem}
+                    labels={customYaraSignaturesLabels}
+                    getExceptionsListApiClient={getCustomYaraSignaturesApiClientInstance}
+                    searchableFields={CUSTOM_YARA_SIGNATURES_SEARCHABLE_FIELDS}
+                    getArtifactPath={getCustomYaraSignaturesListPath}
+                    getPolicyArtifactsPath={getPolicyCustomYaraSignaturesPath}
+                    canWriteArtifact={canWriteCustomYaraSignatures}
+                    CriteriaComponent={CustomYaraSignatureCriteria}
+                    showEnabledColumn
+                  />
+                </>
+              ),
+              'data-test-subj': 'policyCustomYaraSignaturesTab',
+            }
+          : undefined,
 
       [PolicyTabKeys.PROTECTION_UPDATES]: isEnterprise
         ? {
             id: PolicyTabKeys.PROTECTION_UPDATES,
-            name: i18n.translate(
-              'xpack.securitySolution.endpoint.policy.details.tabs.protectionUpdates',
-              {
-                defaultMessage: 'Protection updates',
-              }
-            ),
+            name: POLICY_PROTECTION_UPDATES_LABEL.label,
             content: (
               <>
                 <EuiSpacer />
@@ -537,17 +625,23 @@ export const PolicyTabs = React.memo(() => {
     getEndpointExceptionsApiClientInstance,
     canWriteEndpointExceptions,
     isPerPolicyOptIn?.status,
+    isCustomYaraSignaturesEnabled,
+    canReadCustomYaraSignatures,
+    getCustomYaraSignaturesApiClientInstance,
+    canWriteCustomYaraSignatures,
     isEnterprise,
   ]);
 
-  // convert tabs object into an array EuiTabbedContent can understand
+  // tabsList preserves the PolicyTabKeys declaration order (object literal key order above).
   const tabsList: PolicyTab[] = useMemo(
     () => Object.values(tabs).filter((tab): tab is PolicyTab => tab !== undefined),
     [tabs]
   );
 
-  const currentSelectedTab = useMemo(() => {
-    const defaultTab = tabs[PolicyTabKeys.SETTINGS];
+  // `PolicyTabKeys.SETTINGS` is always defined above (it's never gated behind a feature flag/RBAC
+  // check), so it's safe to use as the fallback.
+  const currentSelectedTab = useMemo((): PolicyTab => {
+    const defaultTab = tabs[PolicyTabKeys.SETTINGS] as PolicyTab;
     let selectedTab: PolicyTab | undefined;
 
     if (isInSettingsTab) {
@@ -564,11 +658,13 @@ export const PolicyTabs = React.memo(() => {
       selectedTab = tabs[PolicyTabKeys.BLOCKLISTS];
     } else if (isInEndpointExceptionsTab) {
       selectedTab = tabs[PolicyTabKeys.ENDPOINT_EXCEPTIONS];
+    } else if (isInCustomYaraSignaturesTab) {
+      selectedTab = tabs[PolicyTabKeys.CUSTOM_YARA_SIGNATURES];
     } else if (isInProtectionUpdatesTab) {
       selectedTab = tabs[PolicyTabKeys.PROTECTION_UPDATES];
     }
 
-    return selectedTab || defaultTab;
+    return selectedTab ?? defaultTab;
   }, [
     tabs,
     isInSettingsTab,
@@ -578,105 +674,84 @@ export const PolicyTabs = React.memo(() => {
     isInHostIsolationExceptionsTab,
     isInBlocklistsTab,
     isInEndpointExceptionsTab,
+    isInCustomYaraSignaturesTab,
     isInProtectionUpdatesTab,
   ]);
 
-  const cancelUnsavedChangesModal = useCallback(() => {
-    setUnsavedChangesModal({ showModal: false, nextTab: null });
-  }, [setUnsavedChangesModal]);
+  const [unsavedChangesModal, setUnsavedChangesModal] = useState<{
+    showModal: boolean;
+    nextTabId: PolicyTabKeys | null;
+  }>({ showModal: false, nextTabId: null });
 
   const changeTab = useCallback(
-    (selectedTab: EuiTabbedContentTab) => {
-      if (unsavedChangesModal.showModal) {
-        cancelUnsavedChangesModal();
-      }
-      let path: string = '';
-      switch (selectedTab.id) {
-        case PolicyTabKeys.SETTINGS:
-          path = getPolicyDetailPath(policyId);
-          break;
-        case PolicyTabKeys.TRUSTED_APPS:
-          path = getPolicyTrustedAppsPath(policyId);
-          break;
-        case PolicyTabKeys.TRUSTED_DEVICES:
-          path = getPolicyTrustedDevicesPath(policyId);
-          break;
-        case PolicyTabKeys.EVENT_FILTERS:
-          path = getPolicyEventFiltersPath(policyId);
-          break;
-        case PolicyTabKeys.HOST_ISOLATION_EXCEPTIONS:
-          path = getPolicyHostIsolationExceptionsPath(policyId);
-          break;
-        case PolicyTabKeys.BLOCKLISTS:
-          path = getPolicyBlocklistsPath(policyId);
-          break;
-        case PolicyTabKeys.ENDPOINT_EXCEPTIONS:
-          path = getPolicyEndpointExceptionsPath(policyId);
-          break;
-        case PolicyTabKeys.PROTECTION_UPDATES:
-          path = getPolicyProtectionUpdatesPath(policyId);
-          break;
-      }
-      history.push(path, routeState?.backLink ? { backLink: routeState.backLink } : null);
+    (tabId: PolicyTabKeys) => {
+      setUnsavedChangesModal({ showModal: false, nextTabId: null });
+      history.push(
+        getPathForPolicyTab(tabId, policyId),
+        routeState?.backLink ? { backLink: routeState.backLink } : null
+      );
     },
-    [
-      cancelUnsavedChangesModal,
-      history,
-      policyId,
-      routeState?.backLink,
-      unsavedChangesModal.showModal,
-    ]
+    [history, policyId, routeState?.backLink]
   );
 
-  const onTabClickHandler = useCallback(
-    (selectedTab: EuiTabbedContentTab) => {
+  // Header tabs navigate via `onClick` (not `href`) so that leaving a tab with unsaved changes can
+  // be confirmed before the URL changes.
+  const onTabClick = useCallback(
+    (tabId: PolicyTabKeys) => {
       if (
         (isInSettingsTab && unsavedChanges[PolicyTabKeys.SETTINGS]) ||
         (isInProtectionUpdatesTab && unsavedChanges[PolicyTabKeys.PROTECTION_UPDATES])
       ) {
-        setUnsavedChangesModal({ showModal: true, nextTab: selectedTab });
+        setUnsavedChangesModal({ showModal: true, nextTabId: tabId });
       } else {
-        changeTab(selectedTab);
+        changeTab(tabId);
       }
     },
     [changeTab, isInProtectionUpdatesTab, isInSettingsTab, unsavedChanges]
   );
 
+  const cancelUnsavedChangesModal = useCallback(() => {
+    setUnsavedChangesModal({ showModal: false, nextTabId: null });
+  }, []);
+
   const confirmUnsavedChangesModal = useCallback(() => {
-    if (unsavedChangesModal.nextTab) {
-      changeTab(unsavedChangesModal.nextTab);
+    if (unsavedChangesModal.nextTabId) {
+      changeTab(unsavedChangesModal.nextTabId);
     }
-  }, [changeTab, unsavedChangesModal.nextTab]);
+  }, [changeTab, unsavedChangesModal.nextTabId]);
+
+  const headerTabs: AppHeaderTab[] = useMemo(
+    () =>
+      tabsList.map((tab) => ({
+        id: tab.id,
+        label: tab.name,
+        isSelected: tab.id === currentSelectedTab.id,
+        onClick: () => onTabClick(tab.id),
+        'data-test-subj': tab['data-test-subj'],
+      })),
+    [tabsList, currentSelectedTab.id, onTabClick]
+  );
 
   // show loader for privileges validation
   if (isPrivilegesLoading || isHostIsolationExceptionsAccessLoading) {
-    return <ManagementPageLoader data-test-subj="privilegesLoading" />;
+    return { tabs: [], body: <ManagementPageLoader data-test-subj="privilegesLoading" /> };
   }
 
-  return (
-    <>
-      {unsavedChangesModal.showModal && (
-        <UnsavedChangesConfirmModal
-          onCancel={cancelUnsavedChangesModal}
-          onConfirm={confirmUnsavedChangesModal}
-        />
-      )}
-      <EuiTabbedContent
-        data-test-subj="policyTabs"
-        tabs={tabsList}
-        selectedTab={currentSelectedTab}
-        size="l"
-        onTabClick={onTabClickHandler}
-        css={css`
-          & [role='tablist'] {
-            flex-wrap: wrap;
-            row-gap: ${theme.euiTheme.size.xs};
-            column-gap: ${theme.euiTheme.size.l};
-          }
-        `}
-      />
-    </>
-  );
-});
-
-PolicyTabs.displayName = 'PolicyTabs';
+  return {
+    tabs: headerTabs,
+    body: (
+      <>
+        {unsavedChangesModal.showModal && (
+          <UnsavedChangesConfirmModal
+            onCancel={cancelUnsavedChangesModal}
+            onConfirm={confirmUnsavedChangesModal}
+          />
+        )}
+        {/* Header tabs can't reference a panel (`aria-controls`), so name the panel instead */}
+        <div role="tabpanel" aria-label={currentSelectedTab.name}>
+          {currentSelectedTab.content}
+        </div>
+      </>
+    ),
+  };
+};

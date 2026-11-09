@@ -1,5 +1,5 @@
 {
-  "sha1": "4fee04a41c2367d9c02fc70592ea04a5cc3dc085",
+  "sha1": "bae672d56fab113ed6b843664461bb0793b98327",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -92,8 +92,22 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/create_monitor.spec.ts",
-        "line": 44,
+        "line": 46,
         "column": 25
+      }
+    },
+    {
+      "id": "219ae9c20262242-4178b6dbdd9b735",
+      "title": "AddNewMonitorsUI hydrates default kerberos/ntlm when omitted from the request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/create_monitor.spec.ts",
+        "line": 53,
+        "column": 57
       }
     },
     {
@@ -106,8 +120,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/create_monitor.spec.ts",
-        "line": 51,
-        "column": 57
+        "line": 78,
+        "column": 10
       }
     },
     {
@@ -461,6 +475,20 @@
       }
     },
     {
+      "id": "f25c77e74093a83-279d42b82a25d63",
+      "title": "getMonitorFilters keeps equal-number seconds and minutes schedules in separate buckets",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/get_filters.spec.ts",
+        "line": 258,
+        "column": 27
+      }
+    },
+    {
       "id": "2542e127239de1a-e12d61f1b5b4fbb",
       "title": "getSyntheticsMonitors get many monitors - without params",
       "expectedStatus": "passed",
@@ -708,7 +736,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/monitor_validation.spec.ts",
-        "line": 59,
+        "line": 57,
         "column": 31
       }
     },
@@ -722,7 +750,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/monitor_validation.spec.ts",
-        "line": 61,
+        "line": 59,
         "column": 7
       }
     },
@@ -736,7 +764,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/monitor_validation.spec.ts",
-        "line": 64,
+        "line": 62,
         "column": 89
       }
     },
@@ -750,7 +778,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/monitor_validation.spec.ts",
-        "line": 68,
+        "line": 66,
         "column": 61
       }
     },
@@ -764,7 +792,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/monitor_validation.spec.ts",
-        "line": 71,
+        "line": 69,
         "column": 77
       }
     },
@@ -778,7 +806,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/monitor_validation.spec.ts",
-        "line": 75,
+        "line": 73,
         "column": 13
       }
     },
@@ -1087,8 +1115,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/synthetics_api_security.spec.ts",
-        "line": 143,
-        "column": 12
+        "line": 149,
+        "column": 5
       }
     },
     {
@@ -1100,8 +1128,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/synthetics_api_security.spec.ts",
-        "line": 161,
-        "column": 17
+        "line": 162,
+        "column": 25
       }
     },
     {

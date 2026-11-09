@@ -11,10 +11,11 @@ import { CoreStart } from '@kbn/core-di-server';
 import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
 import type { Container, ContainerModuleLoadOptions } from 'inversify';
 import { createActionPolicyAttachmentType } from '../agent_builder/attachments/action_policy_attachment_type';
-import { createEpisodeAttachmentType } from '../agent_builder/attachments/episode_attachment_type';
+import { createAlertAttachmentType } from '../agent_builder/attachments/alert_attachment_type';
 import { createRuleAttachmentType } from '../agent_builder/attachments/rule_attachment_type';
 import { resolveRequestScoped } from '../agent_builder/resolve_request_scoped';
 import { registerSkills } from '../agent_builder/skills/register_skills';
+import { createAlertingV2Availability } from '../agent_builder/skills/alerting_v2_availability';
 import { createActionPolicySmlType } from '../agent_builder/sml/action_policy_sml_type';
 import { createRuleSmlType } from '../agent_builder/sml/rule_sml_type';
 import { AttachmentTypeToken } from '../agent_builder/tokens';
@@ -22,12 +23,13 @@ import { ActionPolicyClient } from '../lib/action_policy_client';
 import { WorkflowsManagementApiToken } from '../lib/dispatcher/steps/dispatch_step_tokens';
 import { EpisodesClient } from '../lib/episodes_client';
 import { PrivilegeChecker } from '../lib/services/privilege_checker/privilege_checker';
+import { SpacesService } from '../lib/services/spaces_service/spaces_service';
 import { RulesClient } from '../lib/rules_client';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../lib/services/logger_service/logger_service';
-import { SettingsServiceToken } from '../lib/services/settings_service/tokens';
+import { UiSettingsClientToken } from '../lib/services/settings_service/tokens';
 import type { AlertingServerSetupDependencies } from '../types';
 
 type AgentBuilderSetup = NonNullable<AlertingServerSetupDependencies['agentBuilder']>;
@@ -74,7 +76,7 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
   );
   bind(AttachmentTypeToken).toResolvedValue(
     (loggerService: LoggerServiceContract, injection) =>
-      createEpisodeAttachmentType({
+      createAlertAttachmentType({
         logger: loggerService.forSubsystem('agentBuilder'),
         getEpisodesClient: (context) =>
           resolveRequestScoped(injection, context.request, EpisodesClient),
@@ -104,7 +106,7 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
     // current value of the `alerting:v2:enabled` global advanced setting on
     // every crawl, rather than a value captured once at setup.
     const getIsAlertingV2Enabled = () =>
-      container.get(SettingsServiceToken).get(ALERTING_V2_ENABLED_SETTING_ID);
+      container.get(UiSettingsClientToken).get<boolean>(ALERTING_V2_ENABLED_SETTING_ID);
 
     // SML types are registered inline (not via a token registry like attachments):
     // registration happens at setup, but their clients must be resolved lazily at
@@ -137,10 +139,26 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
 
     const workflowsManagementApi = container.get(WorkflowsManagementApiToken);
     const agentBuilderLogger = container.get(LoggerServiceToken).forSubsystem('agentBuilder');
+    const spacesService = container.get(SpacesService);
+    const cloudToken = PluginSetup<NonNullable<AlertingServerSetupDependencies['cloud']>>('cloud');
+    const projectType = container.isBound(cloudToken)
+      ? container.get(cloudToken).serverless.projectType
+      : undefined;
+    const getInjection = () => container.get(CoreStart('injection'));
     registerSkills(agentBuilder, {
       logger: agentBuilderLogger,
-      getWorkflow: (id, sid) => workflowsManagementApi.getWorkflow(id, sid),
+      getRulesClient: ({ request }) => resolveRequestScoped(getInjection(), request, RulesClient),
+      getActionPolicyClient: ({ request }) =>
+        resolveRequestScoped(getInjection(), request, ActionPolicyClient),
+      getPrivilegeChecker: ({ request }) =>
+        resolveRequestScoped(getInjection(), request, PrivilegeChecker),
+      getWorkflowClient: (request) => workflowsManagementApi.getClient(request),
       getAvailableConnectors: (sid, req) => workflowsManagementApi.getAvailableConnectors(sid, req),
+      availability: createAlertingV2Availability({
+        getActiveSpace: (request) => spacesService.getActiveSpace(request),
+        projectType,
+      }),
+      validateWorkflow: (yaml, sid, req) => workflowsManagementApi.validateWorkflow(yaml, sid, req),
     });
   });
 }

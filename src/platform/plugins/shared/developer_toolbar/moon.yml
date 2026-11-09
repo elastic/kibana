@@ -27,7 +27,7 @@ dependsOn:
   - '@kbn/design-tools'
 tags:
   - plugin
-  - prod
+  - dev
   - group-undefined
 fileGroups:
   src:

@@ -16,7 +16,6 @@ import {
 } from '@kbn/search-index-documents';
 
 import { EuiSpacer } from '@elastic/eui';
-import { RecentDocsActionMessage } from './recent_docs_action_message';
 
 export interface DocumentListProps {
   docs: SearchHit[];
@@ -26,8 +25,6 @@ export interface DocumentListProps {
 export const DocumentList = ({ docs, mappingProperties }: DocumentListProps) => {
   return (
     <>
-      <RecentDocsActionMessage numOfDocs={docs.length} />
-      <EuiSpacer size="m" />
       {docs.map((doc) => {
         return (
           <React.Fragment key={doc._id}>

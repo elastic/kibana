@@ -8,6 +8,23 @@
 import type { OverviewStatusMetaData } from '../runtime_types';
 
 /**
+ * CCS/CPS and Heartbeat overview rows are one location each. A `remote` /
+ * `heartbeat` tag on a config with more than one location is a local
+ * SO-backed monitor whose winning ping for one location resolved through a
+ * linked cluster — treat it as local, not an external row.
+ *
+ * Must stay aligned with `placeExternalConfig` in overview_status_service.
+ */
+export const isSingleLocationExternalOverviewRow = (
+  config: Pick<OverviewStatusMetaData, 'origin' | 'remote' | 'locations'>
+): boolean =>
+  Boolean(
+    config.locations[0]?.id &&
+      config.locations.length <= 1 &&
+      (config.remote?.remoteName || config.origin === 'heartbeat')
+  );
+
+/**
  * Stable identity for one overview row. Local saved-object monitors are one
  * row per config (all locations grouped). CCS/CPS and Heartbeat rows are
  * already one location each, so the key must include cluster/origin and
@@ -20,17 +37,11 @@ export const getOverviewConfigKey = (
   config: Pick<OverviewStatusMetaData, 'configId' | 'origin' | 'remote' | 'locations'>
 ): string => {
   const locationId = config.locations[0]?.id;
-  // A genuine CCS/CPS-only or Heartbeat row is always one location (per the
-  // contract above), so a `remote`/`heartbeat` tag on a config with more than
-  // one location means it's actually a local, SO-backed multi-location
-  // monitor whose winning ping for *one* location happened to resolve through
-  // a linked cluster — key it by plain `configId` like any other local
-  // monitor instead of the compound remote/heartbeat form.
-  if (config.remote?.remoteName && locationId && config.locations.length <= 1) {
+  if (!locationId || !isSingleLocationExternalOverviewRow(config)) {
+    return config.configId;
+  }
+  if (config.remote?.remoteName) {
     return `${config.remote.remoteName}-${config.configId}-${locationId}`;
   }
-  if (config.origin === 'heartbeat' && locationId && config.locations.length <= 1) {
-    return `heartbeat-${config.configId}-${locationId}`;
-  }
-  return config.configId;
+  return `heartbeat-${config.configId}-${locationId}`;
 };

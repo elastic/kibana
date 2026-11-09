@@ -13,7 +13,11 @@ import type {
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { isImpliedDefaultElserInferenceId } from '@kbn/product-doc-common/src/is_default_inference_endpoint';
 import type { InternalServices } from '../types';
-import { isTaskCurrentlyRunningError } from './utils';
+import {
+  isTaskCurrentlyRunningError,
+  runTaskUnderInstallLock,
+  type InstallLockManager,
+} from './utils';
 
 export const ENSURE_SECURITY_LABS_UP_TO_DATE_TASK_TYPE =
   'ProductDocBase:EnsureSecurityLabsUpToDate';
@@ -24,9 +28,11 @@ export const ENSURE_SECURITY_LABS_UP_TO_DATE_TASK_ID_MULTILINGUAL =
 export const registerEnsureSecurityLabsUpToDateTaskDefinition = ({
   getServices,
   taskManager,
+  lockManager,
 }: {
   getServices: () => InternalServices;
   taskManager: TaskManagerSetupContract;
+  lockManager: InstallLockManager;
 }) => {
   taskManager.registerTaskDefinitions({
     [ENSURE_SECURITY_LABS_UP_TO_DATE_TASK_TYPE]: {
@@ -40,7 +46,11 @@ export const registerEnsureSecurityLabsUpToDateTaskDefinition = ({
               context.taskInstance?.params?.inferenceId ?? defaultInferenceEndpoints.ELSER;
             const forceUpdate = context.taskInstance?.params?.forceUpdate;
             const { packageInstaller } = getServices();
-            return packageInstaller.ensureSecurityLabsUpToDate({ inferenceId, forceUpdate });
+            return runTaskUnderInstallLock({
+              lockManager,
+              run: () => packageInstaller.ensureSecurityLabsUpToDate({ inferenceId, forceUpdate }),
+              metadata: { taskType: ENSURE_SECURITY_LABS_UP_TO_DATE_TASK_TYPE, inferenceId },
+            });
           },
         };
       },

@@ -81,7 +81,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
     });
 
     it('cases list screenshot', async () => {
-      await cases.navigation.navigateToApp('observability/cases', 'cases-all-title');
+      await cases.navigation.navigateToApp('observability/cases');
       await commonScreenshots.takeScreenshot('cases', screenshotDirectories, 1700, 1024);
     });
 

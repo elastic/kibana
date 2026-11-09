@@ -6,6 +6,7 @@
  */
 
 import { EuiButtonEmpty, EuiEmptyPrompt, EuiFlexGrid, EuiSpacer, EuiText } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -15,6 +16,7 @@ import {
 } from '@kbn/content-list-provider';
 import React, { useCallback, useState } from 'react';
 import type { AiIndexHttpItem } from '../../../../common/http_api/ai_indices';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { useKibana } from '../../hooks/use_kibana';
 import { useNavigation } from '../../hooks/use_navigation';
 import { getAiIndexDetailPath } from '../../paths';
@@ -74,6 +76,10 @@ export const AiIndexCardGrid = () => {
           <EuiButtonEmpty
             data-test-subj="contextAiIndexListClearFilters"
             onClick={() => setQueryFromText('')}
+            {...getEbtProps({
+              element: CONTEXT_ENGINE_UI_EBT.element.aiIndexListPageToolbar,
+              action: CONTEXT_ENGINE_UI_EBT.action.aiIndexList.CLEAR_FILTERS,
+            })}
           >
             <FormattedMessage
               id="xpack.contextEngine.landing.clearFilters"

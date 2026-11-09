@@ -63,7 +63,6 @@ import { useAgentless } from '../../../single_page_layout/hooks/setup_technology
 import { useIndexTemplateExists } from '../../datastream_hooks';
 
 import { shouldShowVar, isVarRequiredByVarGroup } from '../../../services/var_group_helpers';
-import { ExperimentalFeaturesService } from '../../../../../../services';
 
 import { useCreatePackagePolicyFormContext } from '../../../contexts/create_package_policy_form_context';
 
@@ -113,12 +112,8 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     const { docLinks } = useStartServices();
     const { isAgentlessEnabled } = useAgentless();
     const formContext = useCreatePackagePolicyFormContext();
-    const { enableVarGroups } = ExperimentalFeaturesService.get();
-
-    const pkgVarGroups =
-      enableVarGroups && packageInfo.var_groups ? packageInfo.var_groups : undefined;
-    const streamVarGroups =
-      enableVarGroups && packageInputStream.var_groups ? packageInputStream.var_groups : undefined;
+    const pkgVarGroups = packageInfo.var_groups;
+    const streamVarGroups = packageInputStream.var_groups;
 
     const {
       params: { packagePolicyId },

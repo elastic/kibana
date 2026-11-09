@@ -5,27 +5,24 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
+import { z } from '@kbn/zod/v4';
 
-export const CaseObservableBaseRt = rt.strict({
-  typeKey: rt.string,
-  value: rt.string,
-  description: rt.union([rt.string, rt.null]),
+export const CaseObservableBaseSchema = z.object({
+  typeKey: z.string(),
+  value: z.string(),
+  description: z.string().nullable(),
 });
 
-export const CaseObservableRt = rt.intersection([
-  rt.strict({
-    id: rt.string,
-    createdAt: rt.string,
-    updatedAt: rt.union([rt.string, rt.null]),
-  }),
-  CaseObservableBaseRt,
-]);
-
-export const CaseObservableTypeRt = rt.strict({
-  key: rt.string,
-  label: rt.string,
+export const CaseObservableSchema = CaseObservableBaseSchema.extend({
+  id: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string().nullable(),
 });
 
-export type Observable = rt.TypeOf<typeof CaseObservableRt>;
-export type ObservableType = rt.TypeOf<typeof CaseObservableTypeRt>;
+export const CaseObservableTypeSchema = z.object({
+  key: z.string(),
+  label: z.string(),
+});
+
+export type Observable = z.infer<typeof CaseObservableSchema>;
+export type ObservableType = z.infer<typeof CaseObservableTypeSchema>;

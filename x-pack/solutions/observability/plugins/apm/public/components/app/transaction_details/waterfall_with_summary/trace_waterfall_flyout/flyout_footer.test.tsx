@@ -8,37 +8,50 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/common/config_schema';
 import { TraceWaterfallFlyoutFooter } from './flyout_footer';
 
 const mockGetRedirectUrl = jest.fn();
-
-jest.mock('../../../../../context/apm_plugin/use_apm_plugin_context', () => ({
-  useApmPluginContext: () => ({
-    share: {
-      url: {
-        locators: {
-          get: () => ({ getRedirectUrl: mockGetRedirectUrl }),
-        },
-      },
+const mockShare = {
+  url: {
+    locators: {
+      get: () => ({ getRedirectUrl: mockGetRedirectUrl }),
     },
-  }),
+  },
+};
+const mockHttp = {} as any;
+
+const FETCHED_INDICES = { transaction: 'traces-*' } as APMIndices;
+
+const mockUseResolvedApmIndices = jest.fn(
+  (_args: unknown): APMIndices | null | undefined => FETCHED_INDICES
+);
+
+jest.mock('../../../../../hooks/use_apm_indices', () => ({
+  useResolvedApmIndices: (args: unknown) => mockUseResolvedApmIndices(args),
 }));
 
-jest.mock('../../../../shared/links/discover_links/use_discover_href', () => ({
-  useDiscoverHref: jest.fn(),
+jest.mock('../../../../shared/service_flyout/utils/get_flyout_discover_navigation', () => ({
+  getFlyoutDiscoverNavigation: jest.fn(),
 }));
 
-import { useDiscoverHref } from '../../../../shared/links/discover_links/use_discover_href';
+import { getFlyoutDiscoverNavigation } from '../../../../shared/service_flyout/utils/get_flyout_discover_navigation';
 
 const defaultProps = {
   traceId: 'abc123',
   rangeFrom: 'now-15m',
   rangeTo: 'now',
+  share: mockShare as any,
+  http: mockHttp,
 };
 
 describe('TraceWaterfallFlyoutFooter', () => {
   beforeEach(() => {
-    (useDiscoverHref as jest.Mock).mockReturnValue('https://discover-url');
+    mockUseResolvedApmIndices.mockReturnValue(FETCHED_INDICES);
+    (getFlyoutDiscoverNavigation as jest.Mock).mockReturnValue({
+      href: 'https://discover-url',
+      esqlQuery: 'FROM traces',
+    });
     mockGetRedirectUrl.mockReturnValue('https://apm-url');
   });
 
@@ -83,7 +96,10 @@ describe('TraceWaterfallFlyoutFooter', () => {
   });
 
   it('does not render "In Discover" when discoverHref is undefined', async () => {
-    (useDiscoverHref as jest.Mock).mockReturnValue(undefined);
+    (getFlyoutDiscoverNavigation as jest.Mock).mockReturnValue({
+      href: undefined,
+      esqlQuery: null,
+    });
 
     render(<TraceWaterfallFlyoutFooter {...defaultProps} />);
 
@@ -103,7 +119,10 @@ describe('TraceWaterfallFlyoutFooter', () => {
   });
 
   it('does not render the footer when both hrefs are undefined', () => {
-    (useDiscoverHref as jest.Mock).mockReturnValue(undefined);
+    (getFlyoutDiscoverNavigation as jest.Mock).mockReturnValue({
+      href: undefined,
+      esqlQuery: null,
+    });
     mockGetRedirectUrl.mockReturnValue(undefined);
 
     render(<TraceWaterfallFlyoutFooter {...defaultProps} />);
@@ -119,5 +138,34 @@ describe('TraceWaterfallFlyoutFooter', () => {
       rangeFrom: 'now-15m',
       rangeTo: 'now',
     });
+  });
+
+  it('fetches indices when no parent source is provided', () => {
+    render(<TraceWaterfallFlyoutFooter {...defaultProps} />);
+
+    expect(mockUseResolvedApmIndices).toHaveBeenCalledWith({
+      http: mockHttp,
+      indicesSource: undefined,
+    });
+    expect(getFlyoutDiscoverNavigation).toHaveBeenCalledWith(
+      expect.objectContaining({ indices: FETCHED_INDICES })
+    );
+  });
+
+  it('uses parent indices for the Discover link', () => {
+    const parentIndices = { transaction: 'traces-parent*' } as APMIndices;
+    mockUseResolvedApmIndices.mockReturnValue(parentIndices);
+
+    render(
+      <TraceWaterfallFlyoutFooter {...defaultProps} indicesSource={{ indices: parentIndices }} />
+    );
+
+    expect(mockUseResolvedApmIndices).toHaveBeenCalledWith({
+      http: mockHttp,
+      indicesSource: { indices: parentIndices },
+    });
+    expect(getFlyoutDiscoverNavigation).toHaveBeenCalledWith(
+      expect.objectContaining({ indices: parentIndices })
+    );
   });
 });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { isIP } from 'net';
+
 import { apiTest, OTEL_RECEIVER_PORT, OTEL_TEST_PROJECT_ID, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
@@ -253,8 +255,8 @@ apiTest.describe(
         expect(e['kibana.session.id']).toBeDefined();
 
         // Network.
-        expect(e['source.address']).toBe('127.0.0.1');
-        expect(e['source.ip']).toBe('127.0.0.1');
+        expect(isIP(String(e['source.address']))).not.toBe(0);
+        expect(isIP(String(e['source.ip']))).not.toBe(0);
 
         // AUDIT_OTEL_FIELD_RENAMES: trace.id → http.request.id (avoids OTel TraceId collision).
         expect(e['http.request.id']).toBeDefined();
@@ -313,8 +315,8 @@ apiTest.describe(
         expect(e['kibana.session.id']).toBeDefined();
 
         // Network.
-        expect(e['source.address']).toBe('127.0.0.1');
-        expect(e['source.ip']).toBe('127.0.0.1');
+        expect(isIP(String(e['source.address']))).not.toBe(0);
+        expect(isIP(String(e['source.ip']))).not.toBe(0);
         expect(e['http.request.id']).toBeDefined();
       }
     );

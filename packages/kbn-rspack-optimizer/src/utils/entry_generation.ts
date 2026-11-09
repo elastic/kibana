@@ -20,13 +20,8 @@ const ENTRY_VERSION = 'v11';
 /**
  * Find the index entry file for a given target directory within a plugin.
  *
- * Generalizes the previous `findEntry` (which only looked in `public/`) to
- * support any target directory declared in `extraPublicDirs`. This mirrors
- * the legacy webpack optimizer's val-loader entry generation where each
- * target in `bundle.remoteInfo.targets` was resolved via
- * `Path.resolve(bundle.contextDir, target)`.
- *
- * @see packages/kbn-optimizer/src/worker/webpack.config.ts (val-loader entries)
+ * Supports any target directory declared in `extraPublicDirs`, resolved
+ * relative to the plugin's `contextDir`.
  */
 export function findTargetEntry(contextDir: string, target: string = 'public'): string | null {
   const targetDir = Path.join(contextDir, target);
@@ -46,10 +41,9 @@ export function findTargetEntry(contextDir: string, target: string = 'public'): 
  * Collect plugin entries from discovered plugins, including extra targets
  * declared in `extraPublicDirs`.
  *
- * The legacy webpack optimizer registered a `__kbnBundles__.define()` call
- * for every target in `['public', ...extraPublicDirs]` via the val-loader
- * entry creator. This function produces the equivalent set of entries so
- * that `createUnifiedEntry` can generate matching registrations.
+ * Every target in `['public', ...extraPublicDirs]` gets a
+ * `__kbnBundles__.define()` registration; this function produces the set of
+ * entries `createUnifiedEntry` uses to generate those registrations.
  *
  * Each entry includes a `pluginId` field used by `createUnifiedEntry` to
  * group targets under the same `webpackChunkName`, ensuring rspack merges

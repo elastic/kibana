@@ -8,6 +8,7 @@
 import { RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server/saved_objects';
 import type { Agent as SupertestAgent } from 'supertest';
 
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { Superuser } from '../../security_and_spaces/scenarios';
 
@@ -88,12 +89,13 @@ export async function createAlertingV2RuleTemplateSO(
             lookback: '15m',
           },
           query: {
-            format: 'composed',
             base: 'FROM logs-*',
             breach: {
               segment: '| WHERE true',
             },
           },
+          recovery: { strategy: 'no_breach' },
+          no_data: { strategy: 'ignore' },
           time_field: '@timestamp',
         },
       },
@@ -102,7 +104,7 @@ export async function createAlertingV2RuleTemplateSO(
       managed: false,
       namespaces: [space],
       coreMigrationVersion: '8.8.0',
-      typeMigrationVersion: '10.4.0',
+      typeMigrationVersion: '10.6.0',
       updated_at: '2025-09-09T09:57:45.733Z',
       created_at: '2025-09-09T09:57:45.733Z',
     },
@@ -136,6 +138,7 @@ export function getRuleTemplate({
   return supertest
     .get(`${auth.space ? `/s/${auth.space}` : ''}/internal/alerting/rule_template/${templateId}`)
     .set('kbn-xsrf', 'true')
+    .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
     .auth(auth.user.username, auth.user.password)
     .send();
 }
@@ -153,6 +156,7 @@ export function findRuleTemplates({
     .get(`${auth.space ? `/s/${auth.space}` : ''}/internal/alerting/rule_template/_find`)
     .query(query)
     .set('kbn-xsrf', 'true')
+    .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
     .auth(auth.user.username, auth.user.password)
     .send();
 }

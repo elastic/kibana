@@ -55,14 +55,17 @@ const mockKpisRow = {
   snoozed: 0,
 };
 
-const createWrapper = (dataSource?: ReturnType<typeof createTestEpisodeSource>) => {
+const createWrapper = (
+  dataSource?: ReturnType<typeof createTestEpisodeSource>,
+  queryV2Source = true
+) => {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
   return ({ children }: { children: React.ReactNode }) => {
     const qcProvider = React.createElement(QueryClientProvider, { client: queryClient }, children);
-    return dataSource
-      ? React.createElement(EpisodeDataSourceProvider, { dataSource }, qcProvider)
+    return dataSource || !queryV2Source
+      ? React.createElement(EpisodeDataSourceProvider, { dataSource, queryV2Source }, qcProvider)
       : qcProvider;
   };
 };
@@ -89,6 +92,7 @@ describe('useEpisodesKpisQuery', () => {
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     expect(result.current.isError).toBe(false);
+    expect(result.current.sourceErrors).toEqual([]);
     expect(result.current.data).toEqual({
       alertsCount: 5,
       firingRules: 2,
@@ -99,8 +103,9 @@ describe('useEpisodesKpisQuery', () => {
     });
   });
 
-  it('returns undefined data and isError=true when the query fails', async () => {
-    mockExecuteEsqlQuery.mockRejectedValue(new Error('ES|QL error'));
+  it('returns sourceErrors and keeps isError=false when the v2 query fails', async () => {
+    const v2Error = new Error('ES|QL error');
+    mockExecuteEsqlQuery.mockRejectedValue(v2Error);
 
     const { result } = renderHook(
       () =>
@@ -114,8 +119,9 @@ describe('useEpisodesKpisQuery', () => {
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    expect(result.current.isError).toBe(true);
+    expect(result.current.isError).toBe(false);
     expect(result.current.data).toBeUndefined();
+    expect(result.current.sourceErrors).toEqual([{ sourceId: 'v2', error: v2Error }]);
   });
 
   it('returns undefined data when ES|QL returns no rows', async () => {
@@ -279,6 +285,89 @@ describe('useEpisodesKpisQuery', () => {
       unassigned: 3,
       acknowledged: 4,
       snoozed: 0,
+    });
+    expect(result.current.sourceErrors).toEqual([
+      { sourceId: 'test-source', error: new Error('source fetch failed') },
+    ]);
+  });
+
+  it('returns source-only KPIs and reports the error when the v2 query fails', async () => {
+    const v2Error = new Error('ES|QL error');
+    mockExecuteEsqlQuery.mockRejectedValue(v2Error);
+
+    const { result } = renderHook(
+      () =>
+        useEpisodesKpisQuery({
+          services: mockServices,
+          filterState: {},
+          timeRange: mockTimeRange,
+        }),
+      {
+        wrapper: createWrapper(
+          sourceWithKpis(
+            jest.fn().mockResolvedValue({
+              alerts_count: 10,
+              firing_rules: 3,
+              assigned_to_me: 0,
+              unassigned: 10,
+              acknowledged: 2,
+              snoozed: 1,
+            })
+          )
+        ),
+      }
+    );
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.isError).toBe(false);
+    expect(result.current.data).toEqual({
+      alertsCount: 10,
+      firingRules: 3,
+      assignedToMe: 0,
+      unassigned: 10,
+      acknowledged: 2,
+      snoozed: 1,
+    });
+    expect(result.current.sourceErrors).toEqual([{ sourceId: 'v2', error: v2Error }]);
+  });
+
+  it('skips the v2 query and returns source-only KPIs when queryV2Source is false', async () => {
+    const { result } = renderHook(
+      () =>
+        useEpisodesKpisQuery({
+          services: mockServices,
+          filterState: {},
+          timeRange: mockTimeRange,
+        }),
+      {
+        wrapper: createWrapper(
+          sourceWithKpis(
+            jest.fn().mockResolvedValue({
+              alerts_count: 10,
+              firing_rules: 3,
+              assigned_to_me: 0,
+              unassigned: 10,
+              acknowledged: 2,
+              snoozed: 1,
+            })
+          ),
+          false
+        ),
+      }
+    );
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
+    expect(result.current.sourceErrors).toEqual([]);
+    expect(result.current.data).toEqual({
+      alertsCount: 10,
+      firingRules: 3,
+      assignedToMe: 0,
+      unassigned: 10,
+      acknowledged: 2,
+      snoozed: 1,
     });
   });
 

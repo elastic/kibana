@@ -34,7 +34,7 @@ describe('MatcherSummary', () => {
   it('renders tag values joined by "or"', () => {
     renderWithI18n({ tags: ['prod', 'alerts'] });
 
-    expect(screen.getByText('Rule tagged with')).toBeInTheDocument();
+    expect(screen.getByText('Rule routing tags include')).toBeInTheDocument();
     expect(screen.getByText('prod')).toBeInTheDocument();
     expect(screen.getByText('alerts')).toBeInTheDocument();
     expect(screen.getByText('or')).toBeInTheDocument();
@@ -56,7 +56,7 @@ describe('MatcherSummary', () => {
     });
 
     expect(screen.getByText('Matches alerts where')).toBeInTheDocument();
-    expect(screen.getByText('Rule tagged with')).toBeInTheDocument();
+    expect(screen.getByText('Rule routing tags include')).toBeInTheDocument();
     expect(screen.getByText('Matches query')).toBeInTheDocument();
     expect(screen.getAllByText('and').length).toBeGreaterThanOrEqual(1);
   });

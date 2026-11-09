@@ -24,10 +24,10 @@ describe(
     env: {
       ftrConfig: {
         kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'entityAnalyticsNewHomePageEnabled',
-          ])}`,
           '--uiSettings.overrides.securitySolution:entityStoreEnableV2=true',
+          // This suite asserts against the legacy home page's `entityAnalyticsHomePage`
+          // test subject; pin the flag until the suite is migrated to the new page.
+          '--feature_flags.overrides.securitySolution.useNewEntityAnalyticsPage=false',
         ],
       },
     },

@@ -41,7 +41,7 @@ export const assertContextEngineWriteAccess = async ({
 
   const checkPrivileges = security.authz.checkPrivilegesWithRequest(request);
   const privileges = await checkPrivileges.atSpace(spaceId, {
-    kibana: [apiPrivileges.writeContextEngine],
+    kibana: [security.authz.actions.api.get(apiPrivileges.writeContextEngine)],
   });
 
   if (!privileges.hasAllRequested) {

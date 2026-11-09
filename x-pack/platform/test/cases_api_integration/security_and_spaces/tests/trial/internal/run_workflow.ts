@@ -19,6 +19,7 @@ import {
   addObservable,
   createWorkflow,
   deleteWorkflow,
+  getWorkflowExecution,
   runCaseWorkflow,
 } from '../../../../common/lib/api';
 import { superUser } from '../../../../common/lib/authentication/users';
@@ -61,6 +62,7 @@ steps:
 export default ({ getService }: FtrProviderContext): void => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
+  const retry = getService('retry');
 
   describe('run workflow', () => {
     let enabledWorkflowId: string;
@@ -216,7 +218,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(result.workflowExecutionId).to.be.a('string');
       });
 
-      it('returns 200 with origin cases.alerts and a real alert attachment', async () => {
+      it('returns 200 with a bulk attachment origin and a real alert attachment', async () => {
         const theCase = await createCase(
           supertestWithoutAuth,
           getPostCaseRequest({ owner: 'securitySolutionFixture' }),
@@ -241,7 +243,12 @@ export default ({ getService }: FtrProviderContext): void => {
                 alertIds: [{ _id: postCommentAlertReq.alertId, _index: postCommentAlertReq.index }],
               },
             },
-            origin: { type: 'cases.alerts', caseId: theCase.id },
+            origin: {
+              type: 'cases.attachments',
+              caseId: theCase.id,
+              attachmentType: 'security.alert',
+              attachmentIds: [postCommentAlertReq.alertId as string],
+            },
           },
           auth: { user: secAllWorkflowExecuteUser, space: 'space1' },
         });
@@ -607,7 +614,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('returns 400 for cases.alert origin with no selected alerts in inputs', async () => {
+      it('returns 400 for a singular alert attachment origin with no selected alerts', async () => {
         const theCase = await createCase(
           supertestWithoutAuth,
           getPostCaseRequest({ owner: 'securitySolutionFixture' }),
@@ -621,14 +628,19 @@ export default ({ getService }: FtrProviderContext): void => {
           params: {
             caseIds: [theCase.id],
             inputs: {},
-            origin: { type: 'cases.alert', caseId: theCase.id, alertId: 'test-id' },
+            origin: {
+              type: 'cases.attachment',
+              caseId: theCase.id,
+              attachmentType: 'security.alert',
+              attachmentId: 'test-id',
+            },
           },
           expectedHttpCode: 400,
           auth: { user: secAllWorkflowExecuteUser, space: 'space1' },
         });
       });
 
-      it('returns 400 for cases.alerts origin with no selected alerts in inputs', async () => {
+      it('returns 400 for a bulk alert attachment origin with no selected alerts', async () => {
         const theCase = await createCase(
           supertestWithoutAuth,
           getPostCaseRequest({ owner: 'securitySolutionFixture' }),
@@ -642,7 +654,12 @@ export default ({ getService }: FtrProviderContext): void => {
           params: {
             caseIds: [theCase.id],
             inputs: {},
-            origin: { type: 'cases.alerts', caseId: theCase.id },
+            origin: {
+              type: 'cases.attachments',
+              caseId: theCase.id,
+              attachmentType: 'security.alert',
+              attachmentIds: ['test-id'],
+            },
           },
           expectedHttpCode: 400,
           auth: { user: secAllWorkflowExecuteUser, space: 'space1' },
@@ -700,14 +717,203 @@ export default ({ getService }: FtrProviderContext): void => {
                 alertIds: [{ _id: 'test-id', _index: 'test-index' }],
               },
             },
-            origin: { type: 'cases.alerts', caseId: theCase.id },
+            origin: {
+              type: 'cases.attachments',
+              caseId: theCase.id,
+              attachmentType: 'security.alert',
+              attachmentIds: ['test-id'],
+            },
           },
           expectedHttpCode: 400,
           auth: { user: secAllWorkflowExecuteUser, space: 'space1' },
         });
       });
 
-      it('returns 400 when cases.alert origin alertId is not among the selected alerts', async () => {
+      describe('when the alert is attached under an alias of its index', () => {
+        // Two backing indices, as after a rollover, so single-document reads through the alias
+        // fail and the alert's concrete index can only be found by searching the alias.
+        const alias = 'cases-ftr-run-workflow-alerts';
+        const olderIndex = `${alias}-000001`;
+        const newerIndex = `${alias}-000002`;
+        const alertId = 'alias-alert-1';
+        // Ids are unique only within an index, so an alias can expose one in several backing indices.
+        const duplicatedAlertId = 'alias-alert-in-both-indices';
+        const ruleId = 'cases-ftr-run-workflow-rule';
+        let caseId: string;
+
+        // Alert preprocessing reads the rule from the alert, so the fixture carries its fields.
+        const alertDocument = (id: string) => ({
+          '@timestamp': new Date().toISOString(),
+          'kibana.alert.uuid': id,
+          'kibana.alert.rule.uuid': ruleId,
+          'kibana.alert.rule.name': 'Cases run workflow FTR rule',
+          'kibana.alert.rule.consumer': 'siem',
+          'kibana.alert.rule.producer': 'siem',
+          'kibana.alert.rule.rule_type_id': 'siem.queryRule',
+        });
+
+        before(async () => {
+          await es.indices.create({ index: olderIndex, aliases: { [alias]: {} } });
+          await es.indices.create({ index: newerIndex, aliases: { [alias]: {} } });
+          await es.bulk({
+            refresh: 'wait_for',
+            operations: [
+              { index: { _index: olderIndex, _id: alertId } },
+              alertDocument(alertId),
+              { index: { _index: olderIndex, _id: duplicatedAlertId } },
+              alertDocument(duplicatedAlertId),
+              { index: { _index: newerIndex, _id: duplicatedAlertId } },
+              alertDocument(duplicatedAlertId),
+            ],
+          });
+        });
+
+        after(async () => {
+          await es.indices.delete({ index: [olderIndex, newerIndex], ignore_unavailable: true });
+        });
+
+        beforeEach(async () => {
+          const theCase = await createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+            200,
+            { user: superUser, space: 'space1' }
+          );
+          await createComment({
+            supertest: supertestWithoutAuth,
+            caseId: theCase.id,
+            params: {
+              ...postCommentAlertReq,
+              alertId: [alertId, duplicatedAlertId],
+              index: [alias, alias],
+            },
+            auth: { user: superUser, space: 'space1' },
+          });
+          caseId = theCase.id;
+        });
+
+        // Mirrors a run from the case's Alerts tab, which selects each hit under its own `_index`.
+        const runOnAlertSelectedIn = ({
+          id = alertId,
+          index,
+          expectedHttpCode,
+        }: {
+          id?: string;
+          index: string;
+          expectedHttpCode?: number;
+        }) =>
+          runCaseWorkflow({
+            supertest: supertestWithoutAuth,
+            workflowId: enabledWorkflowId,
+            params: {
+              caseIds: [caseId],
+              inputs: { event: { triggerType: 'alert', alertIds: [{ _id: id, _index: index }] } },
+              origin: {
+                type: 'cases.attachments',
+                caseId,
+                attachmentType: 'security.alert',
+                attachmentIds: [id],
+              },
+            },
+            expectedHttpCode,
+            auth: { user: secAllWorkflowExecuteUser, space: 'space1' },
+          });
+
+        const expectCompletedOnAlertIn = async ({
+          workflowExecutionId,
+          id,
+          index,
+        }: {
+          workflowExecutionId: string;
+          id: string;
+          index: string;
+        }) => {
+          // The suite deletes the workflow afterwards, which is refused while an execution is running.
+          await retry.try(async () => {
+            const { status, context } = await getWorkflowExecution({
+              supertest: supertestWithoutAuth,
+              executionId: workflowExecutionId,
+              auth: { user: superUser, space: 'space1' },
+            });
+
+            expect(status).to.be('completed');
+            // Preprocessing replaced the selection with the alert it read from the selected index.
+            const alerts = context?.event?.alerts ?? [];
+            expect(alerts.map(({ _id, _index }) => ({ _id, _index }))).to.eql([
+              { _id: id, _index: index },
+            ]);
+            expect(context?.event?.rule?.id).to.be(ruleId);
+          });
+        };
+
+        it('returns 200 when the alert is selected under the backing index it lives in', async () => {
+          const { workflowExecutionId } = await runOnAlertSelectedIn({ index: olderIndex });
+
+          await expectCompletedOnAlertIn({ workflowExecutionId, id: alertId, index: olderIndex });
+        });
+
+        it('returns 200 for each backing index an alert id the alias exposes twice lives in', async () => {
+          for (const index of [olderIndex, newerIndex]) {
+            const { workflowExecutionId } = await runOnAlertSelectedIn({
+              id: duplicatedAlertId,
+              index,
+            });
+
+            await expectCompletedOnAlertIn({ workflowExecutionId, id: duplicatedAlertId, index });
+          }
+        });
+
+        it('returns 400 when the alert is selected under a backing index it does not live in', async () => {
+          await runOnAlertSelectedIn({ index: newerIndex, expectedHttpCode: 400 });
+        });
+      });
+
+      it('returns 400 when the attachment target belongs to a different case', async () => {
+        const [targetCase, otherCase] = await Promise.all([
+          createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+            200,
+            { user: superUser, space: 'space1' }
+          ),
+          createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+            200,
+            { user: superUser, space: 'space1' }
+          ),
+        ]);
+
+        await createComment({
+          supertest: supertestWithoutAuth,
+          caseId: otherCase.id,
+          params: postCommentAlertReq,
+          auth: { user: superUser, space: 'space1' },
+        });
+
+        await runCaseWorkflow({
+          supertest: supertestWithoutAuth,
+          workflowId: enabledWorkflowId,
+          params: {
+            caseIds: [targetCase.id],
+            inputs: {
+              event: {
+                alertIds: [{ _id: postCommentAlertReq.alertId, _index: postCommentAlertReq.index }],
+              },
+            },
+            origin: {
+              type: 'cases.attachment',
+              caseId: targetCase.id,
+              attachmentType: 'security.alert',
+              attachmentId: postCommentAlertReq.alertId as string,
+            },
+          },
+          expectedHttpCode: 400,
+          auth: { user: secAllWorkflowExecuteUser, space: 'space1' },
+        });
+      });
+
+      it('returns 400 when the attachment type does not match the stored target', async () => {
         const theCase = await createCase(
           supertestWithoutAuth,
           getPostCaseRequest({ owner: 'securitySolutionFixture' }),
@@ -732,8 +938,49 @@ export default ({ getService }: FtrProviderContext): void => {
                 alertIds: [{ _id: postCommentAlertReq.alertId, _index: postCommentAlertReq.index }],
               },
             },
-            // alertId is different from what's in alertIds
-            origin: { type: 'cases.alert', caseId: theCase.id, alertId: 'different-alert-id' },
+            origin: {
+              type: 'cases.attachment',
+              caseId: theCase.id,
+              attachmentType: 'security.event',
+              attachmentId: postCommentAlertReq.alertId as string,
+            },
+          },
+          expectedHttpCode: 400,
+          auth: { user: secAllWorkflowExecuteUser, space: 'space1' },
+        });
+      });
+
+      it('returns 400 when the attachment target is not among the selected alerts', async () => {
+        const theCase = await createCase(
+          supertestWithoutAuth,
+          getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+          200,
+          { user: superUser, space: 'space1' }
+        );
+
+        await createComment({
+          supertest: supertestWithoutAuth,
+          caseId: theCase.id,
+          params: postCommentAlertReq,
+          auth: { user: superUser, space: 'space1' },
+        });
+
+        await runCaseWorkflow({
+          supertest: supertestWithoutAuth,
+          workflowId: enabledWorkflowId,
+          params: {
+            caseIds: [theCase.id],
+            inputs: {
+              event: {
+                alertIds: [{ _id: postCommentAlertReq.alertId, _index: postCommentAlertReq.index }],
+              },
+            },
+            origin: {
+              type: 'cases.attachment',
+              caseId: theCase.id,
+              attachmentType: 'security.alert',
+              attachmentId: 'different-alert-id',
+            },
           },
           expectedHttpCode: 400,
           auth: { user: secAllWorkflowExecuteUser, space: 'space1' },
@@ -755,7 +1002,12 @@ export default ({ getService }: FtrProviderContext): void => {
             caseIds: [theCase.id],
             // inputs.event.alertIds is a string — rejected by parseSelectedAlertPairs at runtime.
             inputs: { event: { alertIds: 'not-an-array' } },
-            origin: { type: 'cases.alerts', caseId: theCase.id },
+            origin: {
+              type: 'cases.attachments',
+              caseId: theCase.id,
+              attachmentType: 'security.alert',
+              attachmentIds: ['test-id'],
+            },
           },
           expectedHttpCode: 400,
           auth: { user: secAllWorkflowExecuteUser, space: 'space1' },
@@ -777,7 +1029,12 @@ export default ({ getService }: FtrProviderContext): void => {
             caseIds: [theCase.id],
             // _index is missing — rejected by parseSelectedAlertPairs at runtime.
             inputs: { event: { alertIds: [{ _id: 'test-id' }] } },
-            origin: { type: 'cases.alerts', caseId: theCase.id },
+            origin: {
+              type: 'cases.attachments',
+              caseId: theCase.id,
+              attachmentType: 'security.alert',
+              attachmentIds: ['test-id'],
+            },
           },
           expectedHttpCode: 400,
           auth: { user: secAllWorkflowExecuteUser, space: 'space1' },

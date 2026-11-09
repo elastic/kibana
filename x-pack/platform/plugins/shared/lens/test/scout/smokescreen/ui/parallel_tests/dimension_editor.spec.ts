@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { NULL_LABEL } from '@kbn/field-formats-common';
+import { NULL_PLACEHOLDER } from '@kbn/field-formats-common';
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   createLogstashLensEditorSuiteSetup,
@@ -20,7 +21,7 @@ const LONG_DIMENSION_LABEL =
 /** Three percentiles of the same field, which Lens has to collapse into one `percentiles` agg. */
 const PERCENTILE_VALUES = [90, 95.5, 99.9] as const;
 
-spaceTest.describe('Lens dimension editor', { tag: '@local-stateful-classic' }, () => {
+spaceTest.describe('Lens dimension editor', { tag: tags.deploymentAgnostic }, () => {
   const suiteSetup = createLogstashLensEditorSuiteSetup({
     loadLensArchives: true,
     skipEmptyLensOpen: true,
@@ -160,7 +161,7 @@ spaceTest.describe('Lens dimension editor', { tag: '@local-stateful-classic' }, 
     await lens.closeDimensionEditor();
     await lens.waitForVisualization();
 
-    await expect(lens.datatable.getCellLocator(0, 1)).toContainText(NULL_LABEL);
+    await expect(lens.datatable.getCellLocator(0, 1)).toContainText(NULL_PLACEHOLDER);
     await expect(lens.datatable.getCellLocator(1, 1)).toContainText('222,420.00');
     await expect(lens.datatable.getCellLocator(2, 1)).toContainText('702,050.00');
     await expect(lens.datatable.getCellLocator(3, 1)).toContainText('1,879,613.33');

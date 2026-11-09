@@ -21,7 +21,10 @@ export type FieldRegistryTier = 1 | 2;
 
 export type FieldRegistrySource = 'factory' | 'advanced_schema' | 'both';
 
-export type FieldRegistryProductFeatureGate = ProductFeatureSecurityKey.endpointProtectionUpdates;
+export type FieldRegistryProductFeatureGate =
+  | ProductFeatureSecurityKey.endpointProtectionUpdates
+  | ProductFeatureSecurityKey.endpointCustomYaraSignatures
+  | ProductFeatureSecurityKey.endpointRegistryCredentialHardening;
 
 export interface FieldRegistryEntry {
   readonly path: string;

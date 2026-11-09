@@ -198,11 +198,14 @@ export const logStageUsage = (
   logger: Logger,
   stage: string,
   inferenceEndpointId: string,
-  metadata: Record<string, unknown>
+  metadata: Record<string, unknown>,
+  wallMs?: number
 ): void => {
   const { inputTokens, outputTokens, totalTokens } = extractUsageFromMetadata(metadata);
   logger.info(
     `[ti:cost] stage=${stage} inference_endpoint=${inferenceEndpointId} ` +
-      `input_tokens=${inputTokens} output_tokens=${outputTokens} total_tokens=${totalTokens}`
+      `input_tokens=${inputTokens} output_tokens=${outputTokens} total_tokens=${totalTokens}${
+        wallMs === undefined ? '' : ` wall_ms=${wallMs}`
+      }`
   );
 };

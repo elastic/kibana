@@ -8,11 +8,6 @@
 import type { BaseMessage, MessageContentComplex } from '@langchain/core/messages';
 import { isAIMessage } from '@langchain/core/messages';
 import { estimateTokens } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
-import type { ProcessedTimelineEvent } from './context_timeline';
-import { groupTimelineRounds } from './context_timeline';
-import type { ToolSummarizationDeps } from './tool_summarization';
-import { createSummarizationTransformer } from './tool_summarization';
-import { roundToLangchain } from './to_langchain_messages';
 
 // Flat per-image cost. Measured internally: vision models tile images into 16x16
 // pixel patches, ~1 token per patch. For a representative 500x500 image, that's
@@ -46,17 +41,4 @@ export const estimateMessagesTokens = (messages: BaseMessage[]): number => {
     }
   }
   return total;
-};
-
-/** Token estimates for the timeline's rounds, in round order (the order compaction indexes). */
-export const estimatePerRoundTokens = async (
-  timeline: ProcessedTimelineEvent[],
-  deps: ToolSummarizationDeps
-): Promise<number[]> => {
-  const resultTransformer = createSummarizationTransformer(deps);
-  return Promise.all(
-    groupTimelineRounds(timeline).map(async (round) =>
-      estimateMessagesTokens(await roundToLangchain(round, { resultTransformer }))
-    )
-  );
 };

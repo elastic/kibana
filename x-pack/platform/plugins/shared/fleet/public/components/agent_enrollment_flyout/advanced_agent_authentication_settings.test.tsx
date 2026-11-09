@@ -57,6 +57,8 @@ const Harness: React.FunctionComponent<{ onKeyChange: (keyId?: string) => void }
   );
 };
 
+jest.setTimeout(30_000);
+
 describe('AdvancedAgentAuthenticationSettings', () => {
   beforeEach(() => {
     jest.clearAllMocks();

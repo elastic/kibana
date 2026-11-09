@@ -67,6 +67,9 @@ import {
   PostBulkActionResponseSchema,
   PostBulkAgentRollbackRequestSchema,
   PostBulkAgentRollbackResponseSchema,
+  PostAgentRestartRequestSchema,
+  PostAgentRestartResponseSchema,
+  PostBulkAgentRestartRequestSchema,
   PostBulkUpdateAgentTagsRequestSchema,
   PostCancelActionRequestSchema,
   PostNewAgentActionResponseSchema,
@@ -120,6 +123,7 @@ import {
   changeAgentPrivilegeLevelHandler,
 } from './change_privilege_level_handlers';
 import { bulkRollbackAgentHandler, rollbackAgentHandler } from './rollback_handlers';
+import { bulkRestartAgentsHandler, restartAgentHandler } from './restart_handler';
 import { generateReportHandler } from './generate_report_handler';
 
 export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
@@ -709,7 +713,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         },
       },
       summary: `Unenroll an agent`,
-      description: `Unenroll a specific agent, optionally revoking its enrollment API key.`,
+      description: `Unenroll a specific agent. By default, the agent stops sending data and its API keys are invalidated after it acknowledges the unenroll action. To invalidate the API keys immediately, use \`revoke\`. **Force unenroll** in the UI sends \`revoke: true\`.`,
       options: {
         tags: ['oas-tag:Elastic Agent actions'],
       },
@@ -1185,7 +1189,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         },
       },
       summary: `Bulk unenroll agents`,
-      description: `Unenroll multiple agents, optionally revoking their enrollment API keys.`,
+      description: `Unenroll multiple agents. By default, the agents stop sending data and their API keys are invalidated after they acknowledge the unenroll action. To invalidate the API keys immediately, use \`revoke\`. **Force unenroll** in the UI sends \`revoke: true\`.`,
       options: {
         tags: ['oas-tag:Elastic Agent actions'],
       },
@@ -1657,4 +1661,197 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         bulkRollbackAgentHandler
       );
   }
+
+  // Restart agent
+  router.versioned
+    .post({
+      path: AGENT_API_ROUTES.RESTART_PATTERN,
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+        },
+      },
+      summary: `Restart an agent`,
+      description: `Restart an Elastic Agent. The request fails when the agent is inactive, on a version earlier than 9.6.0, or enrolled in a hosted agent policy. It also fails with a 409 when the agent already has a pending restart action, unless \`force\` is set.`,
+      options: {
+        tags: ['oas-tag:Elastic Agent actions'],
+        availability: {
+          since: '9.6.0',
+          stability: 'experimental',
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: PostAgentRestartRequestSchema,
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+              body: () => PostAgentRestartResponseSchema,
+            },
+            400: {
+              description: 'A bad request.',
+              body: genericErrorResponse,
+            },
+            409: {
+              description: 'A conflict occurred: the agent already has a pending restart action.',
+              body: genericErrorResponse,
+            },
+          },
+        },
+        options: {
+          oasOperationObject: () => ({
+            requestBody: {
+              content: {
+                'application/json': {
+                  examples: {
+                    restartAgentRequest: {
+                      value: {},
+                    },
+                    forceRestartAgentRequest: {
+                      value: {
+                        force: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            responses: {
+              200: {
+                content: {
+                  'application/json': {
+                    examples: {
+                      successResponse: {
+                        value: {
+                          actionId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              400: {
+                content: {
+                  'application/json': {
+                    examples: {
+                      badRequestResponse: {
+                        value: {
+                          message: 'Bad Request',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              409: {
+                content: {
+                  'application/json': {
+                    examples: {
+                      pendingRestartResponse: {
+                        value: {
+                          statusCode: 409,
+                          error: 'Conflict',
+                          message:
+                            'Agent agent-1 already has a pending restart action a1b2c3d4-e5f6-7890-abcd-ef1234567890. Use force to restart anyway.',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          }),
+        },
+      },
+      restartAgentHandler
+    );
+
+  // Bulk restart agents
+  router.versioned
+    .post({
+      path: AGENT_API_ROUTES.BULK_RESTART_PATTERN,
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+        },
+      },
+      summary: `Bulk restart agents`,
+      description: `Restart multiple Elastic Agents. Agents that are enrolled in a hosted policy, are on a version earlier than 9.6.0, or already have a pending restart action (unless \`force\` is set) are excluded from the action and receive individual error results.`,
+      options: {
+        tags: ['oas-tag:Elastic Agent actions'],
+        availability: {
+          since: '9.6.0',
+          stability: 'experimental',
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: PostBulkAgentRestartRequestSchema,
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+              body: () => PostAgentRestartResponseSchema,
+            },
+            400: {
+              description: 'A bad request.',
+              body: genericErrorResponse,
+            },
+          },
+        },
+        options: {
+          oasOperationObject: () => ({
+            requestBody: {
+              content: {
+                'application/json': {
+                  examples: {
+                    bulkRestartAgentsRequest: {
+                      value: {
+                        agents: ['agent-1', 'agent-2'],
+                        batchSize: 100,
+                        includeInactive: false,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            responses: {
+              200: {
+                content: {
+                  'application/json': {
+                    examples: {
+                      successResponse: {
+                        value: {
+                          actionId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              400: {
+                content: {
+                  'application/json': {
+                    examples: {
+                      badRequestResponse: {
+                        value: {
+                          message: 'Bad Request',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          }),
+        },
+      },
+      bulkRestartAgentsHandler
+    );
 };

@@ -116,6 +116,16 @@ spaceTest.describe('Discover — data view flyout', { tag: '@local-stateful-clas
         await expect(datePicker.getTimePickerControl()).toBeVisible();
         await expect(datePicker.getDisabledDatePickerIndicator()).toBeAttached();
       });
+
+      await spaceTest.step('restores the time field and histogram', async () => {
+        await discover.editDataViewFromSearchBar({ newTimeField: 'timestamp' });
+        await unifiedFieldList.waitUntilSidebarHasLoaded();
+        await discover.waitUntilSearchingHasFinished();
+
+        expect(await discover.getHitCountInt()).toBe(3);
+        await expect(page.testSubj.locator('unifiedHistogramChart')).toBeVisible();
+        expect(await discover.getHistogramSuggestionType()).toBe('histogramForDataView');
+      });
     }
   );
 });

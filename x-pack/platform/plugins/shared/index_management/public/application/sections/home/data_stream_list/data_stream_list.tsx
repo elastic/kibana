@@ -212,7 +212,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
   } else if (Array.isArray(dataStreams) && dataStreams.length === 0) {
     content = (
       <EuiEmptyPrompt
-        iconType="managementApp"
+        iconType="gear"
         title={
           <h1 data-test-subj="title">
             <FormattedMessage

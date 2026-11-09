@@ -16,6 +16,15 @@ import { HexagonNode, PentagonNode, EllipseNode, RectangleNode, DiamondNode } fr
 import '@xyflow/react/dist/style.css';
 import { GlobalGraphStyles } from '../graph/styles';
 
+/** Static toolbar items used in Storybook to preview the node toolbar. */
+const storybookToolbarItems = () => [
+  { iconType: 'cluster', label: 'Show entity relationships', onClick: () => {} },
+  { iconType: 'sortRight', label: "Show this entity's actions", onClick: () => {} },
+  { iconType: 'sortLeft', label: 'Show actions done to this entity', onClick: () => {} },
+  { iconType: 'analyzeEvent', label: 'Show related events', onClick: () => {} },
+  { iconType: 'maximize', label: 'Show entity details', onClick: () => {} },
+];
+
 const meta: Meta<NodeViewModel> = {
   title: 'Components/Graph Components/Node',
   argTypes: {
@@ -28,6 +37,11 @@ const meta: Meta<NodeViewModel> = {
       control: { type: 'radio' },
     },
     expandButtonClick: { action: 'expandButtonClick' },
+    toolbarItemsFn: { control: false },
+    isOrigin: {
+      control: { type: 'boolean' },
+      description: 'Origin entity — draws the starting point highlight ring',
+    },
   },
   args: {
     id: 'siem-windows',
@@ -47,6 +61,8 @@ const meta: Meta<NodeViewModel> = {
     shape: 'hexagon',
     icon: 'aws',
     interactive: true,
+    toolbarItemsFn: storybookToolbarItems,
+    isOrigin: false,
   },
   decorators: [GlobalStylesStorybookDecorator],
 };
@@ -83,6 +99,8 @@ const Template: StoryFn<NodeViewModel> = (args: NodeViewModel) => (
             'countryCodes',
             'interactive',
             'expandButtonClick',
+            'toolbarItemsFn',
+            'isOrigin',
           ]),
           position: { x: 0, y: 0 },
         },
@@ -97,6 +115,15 @@ const Template: StoryFn<NodeViewModel> = (args: NodeViewModel) => (
 
 export const Node: StoryObj<NodeViewModel> = {
   render: Template,
+};
+
+/** Origin entity with the starting point highlight ring. */
+export const OriginHighlight: StoryObj<NodeViewModel> = {
+  render: Template,
+  args: {
+    isOrigin: true,
+    count: 1,
+  },
 };
 
 export const Colors: StoryObj = {
@@ -226,6 +253,7 @@ export const Interactivity: StoryObj = {
           icon: 'gear',
           interactive: true,
           shape: 'hexagon',
+          toolbarItemsFn: storybookToolbarItems,
         },
         position: { x: 0, y: 0 },
       },

@@ -169,6 +169,15 @@ export interface SmlTypeDefinition {
     context: SmlContext
   ) => Promise<SmlPermissionsInput> | SmlPermissionsInput;
 
+  /** Optional: the attachment type items of this type are attached as, by reference, when linked in a message. */
+  attachmentType?: string;
+
+  /** Optional: typeahead through the owning API, for when the SML index is not in use. `title` may be empty. */
+  searchByTitle?: (
+    params: { title: string; size: number; constraints?: SmlSearchConstraints },
+    context: SmlToAttachmentContext
+  ) => Promise<Array<{ originId: string; title: string }>>;
+
   /**
    * Optional: custom crawl interval for the crawler.
    * Defaults to '10m' if not provided.
@@ -193,15 +202,32 @@ export interface SmlTypeDefinition {
  */
 export type SmlIngestionMethod = 'manual' | 'crawled';
 
+/** How a referenced URI relates to the entry. */
+export type SmlReferenceRelation = 'derived_from' | 'relates_to' | 'supersedes';
+
+export interface SmlReference {
+  uri: string;
+  relation?: SmlReferenceRelation;
+}
+
+/** The writer recorded under `governance.provenance`. */
+export interface SmlWriter {
+  /** `user://<id>` for a user, `crawler://sml` for the crawler. */
+  uri: string;
+  metadata: { ingestion_method: SmlIngestionMethod };
+}
+
 /**
  * An SML document, exactly as stored in the index and as handed to consumers (notably
  * {@link SmlTypeDefinition.toAttachment}).
  *
- * The index is `dynamic: strict` with mappings owned by the shared AI index templates, so SML's
- * own bookkeeping lives under the `flattened` `attributes` field. Query DSL can address those
- * keys as `attributes.x`; ES|QL needs `FIELD_EXTRACT(attributes, "x")` — see `buildSmlEsqlQuery`.
+ * `id` is `${type}:${originId}` and the origin is the `derived_from` reference.
  */
 export interface SmlDocument {
+  /** Creation time */
+  '@timestamp': string;
+  /** Unique id of the entry: `${type}:${originId}`. */
+  id: string;
   /** SML type (e.g., 'visualization', 'dashboard') */
   type: string;
   /** Display title */
@@ -212,30 +238,17 @@ export interface SmlDocument {
   description?: string;
   /** Free-form labels */
   tags?: string[];
-  /** Other SML entries this item references. Each entry carries a `uri` field; the object shape allows sub-fields (e.g. relationship kind) without a future migration. */
-  references?: Array<{ uri: string }>;
+  /** Last write time */
+  updated_at: string;
+  /** The origin as a `derived_from` reference, plus the type writer's references. */
+  references: SmlReference[];
+  governance: { provenance: { created_by: SmlWriter; updated_by: SmlWriter } };
   /**
    * Permissions required to access this entry. See {@link SmlPermissions} for the per-space group shape.
    */
   permissions: SmlPermissions;
-  /** SML bookkeeping keys, written over the type writer's own {@link SmlEntry.attributes}. */
-  attributes: SmlDocumentAttributes;
-}
-
-/** The `attributes` payload of an {@link SmlDocument}. */
-export interface SmlDocumentAttributes extends Record<string, unknown> {
-  /** Unique id of the entry */
-  id: string;
-  /** Self-describing URI for the origin, e.g. `${type}://${originId}`. `getSmlOriginId` parses the raw origin id back out. */
-  origin: { uri: string };
-  /** Timestamp when first created */
-  created_at: string;
-  /** Timestamp when last updated */
-  updated_at: string;
-  /** How this entry was produced. */
-  ingestion_method: SmlIngestionMethod;
-  /** Owner or last-modifier user id */
-  user_id?: string;
+  /** The type writer's own {@link SmlEntry.attributes}. */
+  attributes?: Record<string, unknown>;
 }
 
 /**
@@ -258,13 +271,13 @@ export interface SmlSearchResult {
   origin: { uri: string };
   content?: string;
   description?: string;
-  references?: Array<{ uri: string }>;
+  references?: SmlReference[];
   tags?: string[];
 }
 
 /**
  * An SML autocomplete result — narrower than {@link SmlSearchResult}, tuned for
- * @ menu / typeahead rendering. Drops bulk content (`content`, `description`,
+ * # menu / typeahead rendering. Drops bulk content (`content`, `description`,
  * `attributes`, etc.).
  */
 export interface SmlAutocompleteResult {
@@ -397,6 +410,8 @@ export type SmlIndexerParams = SmlIndexerOriginParams;
  * space it was written from.
  */
 export interface SmlIndexerDeleteAttachmentParams {
+  /** Waits for refresh and rejects failed or incomplete deletions. */
+  strict?: boolean;
   originId: string;
   attachmentType: string;
   /**
@@ -458,7 +473,7 @@ export interface SmlService {
    * so a "type/title" query matches each half against its own field. Filters by
    * space and permissions the same way as `search`, and accepts the same
    * per-type `constraints` and caller-supplied `filters` so a specialized UI
-   * picker (e.g. connectors-only or dashboards-only @ menu) can restrict
+   * picker (e.g. connectors-only or dashboards-only # menu) can restrict
    * results without any LLM involvement.
    */
   autocomplete: (params: {

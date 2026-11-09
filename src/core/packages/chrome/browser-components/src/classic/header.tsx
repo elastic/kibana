@@ -12,6 +12,7 @@ import {
   EuiHeaderSection,
   EuiHeaderSectionItem,
   htmlIdGenerator,
+  useEuiTheme,
   useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -32,18 +33,21 @@ import {
   useHasAppMenuConfig,
   useHasInlineAppHeader,
   useProjectPicker,
+  useSubscriptionBadge,
   useUserMenu,
 } from '../shared/chrome_hooks';
-import { SearchButton } from '../chrome_next/global_header/search_button';
-import { AiButtonSlot } from '../chrome_next/global_header/ai_button_slot';
-import { HelpButton } from '../chrome_next/global_header/help_button';
-import { GlobalHeaderRightGroup } from '../chrome_next/global_header/global_header_shell';
+import { SearchButton } from '../shared/search_button';
+import { AiButtonSlot } from '../shared/ai_button_slot';
+import { HelpButton } from '../shared/help_button';
+import { HeaderRightGroup } from '../shared/header_right_group';
 import { ClassicHeaderDarkColorMode } from '../shared/header_color_mode';
+import { CHROME_HEADER_TEST_SUBJECTS } from '../test_subjects';
 
 const dark = (node: ReactNode) =>
   node ? <ClassicHeaderDarkColorMode>{node}</ClassicHeaderDarkColorMode> : null;
 
 export const ClassicHeader = React.memo(() => {
+  const { euiTheme } = useEuiTheme();
   const breadcrumbs = useClassicBreadcrumbs();
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [navId] = useState(htmlIdGenerator()());
@@ -52,10 +56,11 @@ export const ClassicHeader = React.memo(() => {
   const userMenu = useUserMenu();
   const contextSwitcher = useContextSwitcher();
   const projectPicker = useProjectPicker();
+  const subscriptionBadge = useSubscriptionBadge();
   const isSmall = useIsWithinMaxBreakpoint('s');
   const search = dark(<SearchButton layout={isSmall ? 'compact' : 'expanded'} />);
   const rightGroup = (
-    <GlobalHeaderRightGroup
+    <HeaderRightGroup
       search={isSmall ? search : undefined}
       help={dark(<HelpButton />)}
       actions={<AiButtonSlot />}
@@ -86,7 +91,19 @@ export const ClassicHeader = React.memo(() => {
                 ],
               },
               ...(!isSmall ? [{ items: [search] }] : []),
-              { items: [rightGroup] },
+              {
+                items: subscriptionBadge
+                  ? [
+                      <div
+                        css={{ marginInlineEnd: euiTheme.size.s }}
+                        data-test-subj={CHROME_HEADER_TEST_SUBJECTS.subscriptionBadge}
+                      >
+                        {subscriptionBadge}
+                      </div>,
+                      rightGroup,
+                    ]
+                  : [rightGroup],
+              },
             ]}
           />
 

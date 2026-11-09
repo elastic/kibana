@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/proposals-common",
+  "owner": ["@elastic/alertzero-common-layer"],
+  "group": "platform",
+  "visibility": "shared"
+}

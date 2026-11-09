@@ -148,8 +148,12 @@ describe('current status route', () => {
       expect(await overviewStatusService.getOverviewStatus()).toMatchInlineSnapshot(`
         Object {
           "allIds": Array [
-            "id1",
-            "id2",
+            Object {
+              "monitorQueryId": "id1",
+            },
+            Object {
+              "monitorQueryId": "id2",
+            },
           ],
           "allMonitorsCount": 2,
           "disabledConfigs": Object {},
@@ -160,6 +164,7 @@ describe('current status route', () => {
           "downConfigs": Object {
             "id2": Object {
               "configId": "id2",
+              "created_at": undefined,
               "isEnabled": true,
               "isStatusAlertEnabled": false,
               "locations": Array [
@@ -204,6 +209,7 @@ describe('current status route', () => {
           "upConfigs": Object {
             "id1": Object {
               "configId": "id1",
+              "created_at": undefined,
               "isEnabled": true,
               "isStatusAlertEnabled": false,
               "locations": Array [
@@ -311,8 +317,12 @@ describe('current status route', () => {
       expect(await overviewStatusService.getOverviewStatus()).toMatchInlineSnapshot(`
         Object {
           "allIds": Array [
-            "id1",
-            "id2",
+            Object {
+              "monitorQueryId": "id1",
+            },
+            Object {
+              "monitorQueryId": "id2",
+            },
           ],
           "allMonitorsCount": 2,
           "disabledConfigs": Object {},
@@ -323,6 +333,7 @@ describe('current status route', () => {
           "downConfigs": Object {
             "id2": Object {
               "configId": "id2",
+              "created_at": undefined,
               "isEnabled": true,
               "isStatusAlertEnabled": false,
               "locations": Array [
@@ -367,6 +378,7 @@ describe('current status route', () => {
           "upConfigs": Object {
             "id1": Object {
               "configId": "id1",
+              "created_at": undefined,
               "isEnabled": true,
               "isStatusAlertEnabled": false,
               "locations": Array [
@@ -418,8 +430,12 @@ describe('current status route', () => {
       expect(await overviewStatusService.getOverviewStatus()).toMatchInlineSnapshot(`
         Object {
           "allIds": Array [
-            "id1",
-            "id2",
+            Object {
+              "monitorQueryId": "id1",
+            },
+            Object {
+              "monitorQueryId": "id2",
+            },
           ],
           "allMonitorsCount": 2,
           "disabledConfigs": Object {},
@@ -436,6 +452,7 @@ describe('current status route', () => {
           "pendingConfigs": Object {
             "id1": Object {
               "configId": "id1",
+              "created_at": undefined,
               "isEnabled": true,
               "isStatusAlertEnabled": false,
               "locations": Array [
@@ -463,6 +480,7 @@ describe('current status route', () => {
             },
             "id2": Object {
               "configId": "id2",
+              "created_at": undefined,
               "isEnabled": true,
               "isStatusAlertEnabled": false,
               "locations": Array [
@@ -501,6 +519,72 @@ describe('current status route', () => {
           "upConfigs": Object {},
         }
       `);
+    });
+
+    it('builds the paginated upIds/downIds/pendingIds/staleIds from monitorQueryId, not the configId bucket key', async () => {
+      // A managed/project monitor's saved-object `id` (monitorQueryId, what
+      // ping docs' `monitor.id` actually holds) can differ from its
+      // `config_id` (the bucket key) — this must survive that distinction.
+      const monitorsWithDifferingIds = [
+        {
+          attributes: {
+            ...testMonitors[0].attributes,
+            config_id: 'config-up',
+            id: 'query-up',
+          },
+        },
+        {
+          attributes: {
+            ...testMonitors[1].attributes,
+            config_id: 'config-down',
+            id: 'query-down',
+          },
+        },
+      ];
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [
+            {
+              key: { monitorId: 'query-up', locationId: japanLoc.id },
+              status: {
+                key: japanLoc.id,
+                top: [{ metrics: { 'monitor.status': 'up' }, sort: ['2022-09-15T16:19:16.724Z'] }],
+              },
+            },
+            {
+              key: { monitorId: 'query-down', locationId: japanLoc.id },
+              status: {
+                key: japanLoc.id,
+                top: [
+                  { metrics: { 'monitor.status': 'down' }, sort: ['2022-09-15T16:19:16.724Z'] },
+                ],
+              },
+            },
+          ],
+        })
+      );
+      const routeContext: any = {
+        request: { query: { page: 1, perPage: 10 } },
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: false,
+        },
+      };
+
+      const overviewStatusService = new OverviewStatusService(routeContext);
+      overviewStatusService.getMonitorConfigs = jest
+        .fn()
+        .mockResolvedValue(monitorsWithDifferingIds as any);
+
+      const result = await overviewStatusService.getOverviewStatus();
+
+      expect(result.upIds).toEqual([{ monitorQueryId: 'query-up' }]);
+      expect(result.downIds).toEqual([{ monitorQueryId: 'query-down' }]);
+      expect(result.upIds?.map(({ monitorQueryId }) => monitorQueryId)).not.toContain('config-up');
+      expect(result.downIds?.map(({ monitorQueryId }) => monitorQueryId)).not.toContain(
+        'config-down'
+      );
     });
   });
 
@@ -1448,6 +1532,140 @@ describe('current status route', () => {
       // Counts should include the remote monitor
       expect(result.down).toBe(1);
       expect(result.up).toBe(1);
+      expect(result.allIds.map(({ monitorQueryId }) => monitorQueryId)).toContain(
+        'remote-monitor-1'
+      );
+      expect(result.allIds).toEqual(
+        expect.arrayContaining([
+          {
+            monitorQueryId: 'remote-monitor-1',
+            remoteName: 'cluster-east',
+            locationId: 'us-east-1',
+          },
+        ])
+      );
+    });
+
+    it('does not put remote-only monitor ids into allIds when a schedule filter is active', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [
+            {
+              key: {
+                monitorId: 'id1',
+                locationId: japanLoc.id,
+              },
+              status: {
+                key: japanLoc.id,
+                top: [
+                  {
+                    metrics: {
+                      'monitor.status': 'up',
+                    },
+                    sort: ['2022-09-15T16:19:16.724Z'],
+                  },
+                ],
+              },
+            },
+            {
+              key: {
+                monitorId: 'remote-monitor-1',
+                locationId: 'us-east-1',
+              },
+              status: {
+                key: 'us-east-1',
+                top: [
+                  {
+                    metrics: {
+                      'monitor.status': 'down',
+                      kibanaUrl: 'https://east.kibana.example.com',
+                      'monitor.name': 'Remote API Check',
+                      'monitor.type': 'http',
+                      config_id: 'remote-config-1',
+                      _index: 'cluster-east:synthetics-browser-default',
+                    },
+                    sort: ['2022-09-15T16:20:00.000Z'],
+                  },
+                ],
+              },
+            },
+          ],
+        })
+      );
+
+      const routeContext: any = {
+        request: { query: { schedules: ['1'] } },
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: false,
+        },
+      };
+
+      const overviewStatusService = new OverviewStatusService(routeContext);
+      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue(testMonitors as any);
+
+      const result = await overviewStatusService.getOverviewStatus();
+
+      expect(result.downConfigs['cluster-east-remote-config-1-us-east-1']).toBeDefined();
+      expect(result.allIds.map(({ monitorQueryId }) => monitorQueryId)).not.toContain(
+        'remote-monitor-1'
+      );
+      expect(result.allIds.map(({ monitorQueryId }) => monitorQueryId)).toEqual(
+        expect.arrayContaining(['id1', 'id2'])
+      );
+    });
+
+    it('keeps a local monitor linked-cluster location on schedule-filtered allIds', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [
+            {
+              key: { monitorId: 'id2', locationId: japanLoc.id },
+              status: {
+                key: japanLoc.id,
+                top: [{ metrics: { 'monitor.status': 'up' }, sort: ['2022-09-15T16:19:16.724Z'] }],
+              },
+            },
+            {
+              key: { monitorId: 'id2', locationId: germanyLoc.id },
+              status: {
+                key: germanyLoc.id,
+                top: [
+                  {
+                    metrics: {
+                      'monitor.status': 'down',
+                      _index: 'cluster-east:synthetics-http-default',
+                    },
+                    sort: ['2022-09-15T16:20:00.000Z'],
+                  },
+                ],
+              },
+            },
+          ],
+        })
+      );
+
+      const routeContext: any = {
+        request: { query: { schedules: ['1'] } },
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: false,
+        },
+      };
+
+      const overviewStatusService = new OverviewStatusService(routeContext);
+      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue(testMonitors as any);
+
+      const result = await overviewStatusService.getOverviewStatus();
+
+      expect(result.allIds.find((id) => id.monitorQueryId === 'id2')).toEqual({
+        monitorQueryId: 'id2',
+        linkedRemoteLocations: [{ remoteName: 'cluster-east', locationId: germanyLoc.id }],
+      });
     });
 
     it('discovers CPS linked-project monitors that have no local saved object', async () => {
@@ -1650,6 +1868,103 @@ describe('current status route', () => {
       });
       expect(result.down).toBe(1);
       expect(result.up).toBe(1);
+    });
+
+    it('keeps remoteName on status id lists so two CCS copies of the same id can differ in status', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [
+            {
+              key: {
+                monitorId: 'shared-remote-monitor',
+                locationId: 'us-east-1',
+              },
+              status: {
+                key: 'us-east-1',
+                top: [
+                  {
+                    metrics: {
+                      'monitor.status': 'down',
+                      kibanaUrl: 'https://east.kibana.example.com',
+                      'monitor.name': 'Shared Remote Check',
+                      'monitor.type': 'http',
+                      config_id: 'shared-config',
+                      _index: 'cluster-east:synthetics-http-default',
+                    },
+                    sort: ['2022-09-15T16:20:00.000Z'],
+                  },
+                ],
+              },
+            },
+            {
+              key: {
+                monitorId: 'shared-remote-monitor',
+                locationId: 'us-east-1',
+              },
+              status: {
+                key: 'us-east-1',
+                top: [
+                  {
+                    metrics: {
+                      'monitor.status': 'up',
+                      kibanaUrl: 'https://west.kibana.example.com',
+                      'monitor.name': 'Shared Remote Check',
+                      'monitor.type': 'http',
+                      config_id: 'shared-config',
+                      _index: 'cluster-west:synthetics-http-default',
+                    },
+                    sort: ['2022-09-15T16:21:00.000Z'],
+                  },
+                ],
+              },
+            },
+          ],
+        })
+      );
+
+      const routeContext: any = {
+        request: { query: { page: 1, perPage: 10 } },
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: false,
+        },
+      };
+
+      const overviewStatusService = new OverviewStatusService(routeContext);
+      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue([] as any);
+
+      const result = await overviewStatusService.getOverviewStatus();
+
+      expect(result.downIds).toEqual([
+        {
+          monitorQueryId: 'shared-remote-monitor',
+          remoteName: 'cluster-east',
+          locationId: 'us-east-1',
+        },
+      ]);
+      expect(result.upIds).toEqual([
+        {
+          monitorQueryId: 'shared-remote-monitor',
+          remoteName: 'cluster-west',
+          locationId: 'us-east-1',
+        },
+      ]);
+      expect(result.allIds).toEqual(
+        expect.arrayContaining([
+          {
+            monitorQueryId: 'shared-remote-monitor',
+            remoteName: 'cluster-east',
+            locationId: 'us-east-1',
+          },
+          {
+            monitorQueryId: 'shared-remote-monitor',
+            remoteName: 'cluster-west',
+            locationId: 'us-east-1',
+          },
+        ])
+      );
     });
 
     it('does not place a local no-saved-object ping into the remote branch', async () => {
@@ -2236,7 +2551,9 @@ describe('current status route', () => {
         // id2 never reported in the window, so it stays in the list as pending
         // rather than being dropped — the overview never hides a configured monitor.
         expect(result.allMonitorsCount).toBe(2);
-        expect(result.allIds).toEqual(expect.arrayContaining(['id1', 'id2']));
+        expect(result.allIds.map(({ monitorQueryId }) => monitorQueryId)).toEqual(
+          expect.arrayContaining(['id1', 'id2'])
+        );
         expect(result.upConfigs.id1).toBeDefined();
         expect(result.pendingConfigs.id2).toBeDefined();
       });
@@ -2253,7 +2570,9 @@ describe('current status route', () => {
         const result = await overviewStatusService.getOverviewStatus();
 
         expect(result.allMonitorsCount).toBe(2);
-        expect(result.allIds).toEqual(expect.arrayContaining(['id1', 'id2']));
+        expect(result.allIds.map(({ monitorQueryId }) => monitorQueryId)).toEqual(
+          expect.arrayContaining(['id1', 'id2'])
+        );
         expect(result.pendingConfigs.id2).toBeDefined();
       });
 
@@ -2352,6 +2671,104 @@ describe('current status route', () => {
           expect(result.staleConfigs.id2).toBeUndefined();
           expect(result.pendingConfigs.id2).toBeDefined();
           expect(result.pendingConfigs.id2.locations[0].status).toBe('pending');
+        });
+
+        it('classifies pending-before-window as stale before statusFilter pagination', async () => {
+          const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+          const priorTs = moment().subtract(3, 'hours').toISOString();
+          // In-window: neither monitor ran → both pending. Prior-window: id1
+          // stopped reporting, so a `statusFilter=stale` page must include it
+          // rather than paging only the (empty) in-window stale bucket.
+          esClient.search.mockResponseOnce(getEsResponse({ buckets: [] })).mockResponseOnce(
+            getEsResponse({
+              buckets: [
+                {
+                  key: { monitorId: 'id1', locationId: japanLoc.id },
+                  status: {
+                    key: japanLoc.id,
+                    top: [{ metrics: { 'monitor.status': 'up' }, sort: [priorTs] }],
+                  },
+                },
+              ],
+            })
+          );
+
+          const overviewStatusService = new OverviewStatusService(
+            buildRouteContext(
+              {
+                dateRangeStart: 'now-24h',
+                dateRangeEnd: 'now',
+                page: 1,
+                perPage: 20,
+                statusFilter: 'stale',
+              },
+              syntheticsEsClient
+            )
+          );
+          overviewStatusService.getMonitorConfigs = jest
+            .fn()
+            .mockResolvedValue(testMonitors as any);
+
+          const result = await overviewStatusService.getOverviewStatus();
+          if (!result.configs || !result.pendingIds) {
+            throw new Error('expected a paginated overview status');
+          }
+
+          expect(result.configs.map((config) => config.configId)).toEqual(['id1']);
+          expect(result.staleConfigs.id1?.overallStatus).toBe('stale');
+          expect(result.pendingConfigs.id1).toBeUndefined();
+          expect(result.staleIds).toEqual([{ monitorQueryId: 'id1' }]);
+          expect(
+            result.pendingIds.map((id: { monitorQueryId: string }) => id.monitorQueryId)
+          ).toEqual(expect.arrayContaining(['id2']));
+        });
+
+        it('classifies pending-before-window as stale when a non-pending status is selected', async () => {
+          const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+          const priorTs = moment().subtract(3, 'hours').toISOString();
+          // Up pagination never returns the pending configs, so the client
+          // cannot promote them. The unpaginated stale/pending ids still have
+          // to reflect the prior-window classification.
+          esClient.search.mockResponseOnce(getEsResponse({ buckets: [] })).mockResponseOnce(
+            getEsResponse({
+              buckets: [
+                {
+                  key: { monitorId: 'id1', locationId: japanLoc.id },
+                  status: {
+                    key: japanLoc.id,
+                    top: [{ metrics: { 'monitor.status': 'up' }, sort: [priorTs] }],
+                  },
+                },
+              ],
+            })
+          );
+
+          const overviewStatusService = new OverviewStatusService(
+            buildRouteContext(
+              {
+                dateRangeStart: 'now-24h',
+                dateRangeEnd: 'now',
+                page: 1,
+                perPage: 20,
+                statusFilter: 'up',
+              },
+              syntheticsEsClient
+            )
+          );
+          overviewStatusService.getMonitorConfigs = jest
+            .fn()
+            .mockResolvedValue(testMonitors as any);
+
+          const result = await overviewStatusService.getOverviewStatus();
+          if (!result.configs || !result.staleIds || !result.pendingIds) {
+            throw new Error('expected a paginated overview status');
+          }
+
+          expect(result.configs).toEqual([]);
+          expect(result.stale).toBe(1);
+          expect(result.pending).toBe(1);
+          expect(result.staleIds).toEqual([{ monitorQueryId: 'id1' }]);
+          expect(result.pendingIds.map((id) => id.monitorQueryId)).toEqual(['id2']);
         });
 
         it("keeps a stale run's last-known status when inspecting a historical window", async () => {
@@ -2588,26 +3005,34 @@ describe('current status route', () => {
     // A genuine autodiscovery ping carries neither `config_id` nor
     // `meta.space_id` — its identity is `monitor.id`. Tests that want to model a
     // Kibana-pushed (deleted) monitor add those markers explicitly.
-    const heartbeatBucket = (overrides: { monitorId: string; status: string; metrics?: any }) => ({
-      key: { monitorId: overrides.monitorId, locationId: japanLoc.id },
-      status: {
-        key: japanLoc.id,
-        top: [
-          {
-            metrics: {
-              'monitor.status': overrides.status,
-              'monitor.name': 'k8s autodiscovered monitor',
-              'monitor.type': 'http',
-              'monitor.interval': 600,
-              tags: ['kube-system'],
-              ...overrides.metrics,
+    const heartbeatBucket = (overrides: {
+      monitorId: string;
+      status: string;
+      metrics?: any;
+      locationId?: string;
+    }) => {
+      const locationId = overrides.locationId ?? japanLoc.id;
+      return {
+        key: { monitorId: overrides.monitorId, locationId },
+        status: {
+          key: locationId,
+          top: [
+            {
+              metrics: {
+                'monitor.status': overrides.status,
+                'monitor.name': 'k8s autodiscovered monitor',
+                'monitor.type': 'http',
+                'monitor.interval': 600,
+                tags: ['kube-system'],
+                ...overrides.metrics,
+              },
+              sort: ['2025-05-28T10:00:00.000Z'],
             },
-            sort: ['2025-05-28T10:00:00.000Z'],
-          },
-        ],
-      },
-      location_name: { buckets: [{ key: 'My K8s Cluster', doc_count: 1 }] },
-    });
+          ],
+        },
+        location_name: { buckets: [{ key: 'My K8s Cluster', doc_count: 1 }] },
+      };
+    };
 
     it('surfaces a local monitor with no saved object as origin: heartbeat', async () => {
       const { esClient, syntheticsEsClient } = getUptimeESMockClient();
@@ -2633,6 +3058,9 @@ describe('current status route', () => {
       const entry = result.upConfigs['heartbeat-hb-1-asia_japan'];
       expect(entry).toBeDefined();
       expect(entry.origin).toBe('heartbeat');
+      expect(result.allIds).toEqual(
+        expect.arrayContaining([{ monitorQueryId: 'hb-1', locationId: japanLoc.id }])
+      );
       expect(entry.remote).toBeUndefined();
       expect(entry.isEnabled).toBe(true);
       expect(entry.isStatusAlertEnabled).toBe(false);
@@ -2644,6 +3072,71 @@ describe('current status route', () => {
       expect(entry.tags).toEqual(['kube-system']);
       expect(entry.locations).toEqual([{ id: japanLoc.id, label: 'My K8s Cluster', status: 'up' }]);
       expect(result.up).toBe(1);
+    });
+
+    it('does not put Heartbeat monitor ids into allIds when a schedule filter is active', async () => {
+      // Schedules only apply to saved-object configs. The ping-synthesized
+      // Heartbeat monitor must not leak onto the activity chart's allIds set.
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [heartbeatBucket({ monitorId: 'hb-1', status: 'up' })],
+        })
+      );
+
+      const routeContext: any = {
+        request: { query: { schedules: ['1'] } },
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: false,
+          config: { experimental: { ccs: { enabled: false } } },
+        },
+      };
+      const service = new OverviewStatusService(routeContext);
+      service.getMonitorConfigs = jest.fn().mockResolvedValue([] as any);
+
+      const result = await service.getOverviewStatus();
+
+      expect(result.upConfigs['heartbeat-hb-1-asia_japan']).toBeDefined();
+      expect(result.allIds.map(({ monitorQueryId }) => monitorQueryId)).not.toContain('hb-1');
+    });
+
+    it('keeps locationId on Heartbeat status ids so two locations of the same monitor can differ in status', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [
+            heartbeatBucket({ monitorId: 'hb-1', status: 'down' }),
+            heartbeatBucket({
+              monitorId: 'hb-1',
+              status: 'up',
+              locationId: germanyLoc.id,
+            }),
+          ],
+        })
+      );
+
+      const routeContext: any = {
+        request: { query: { page: 1, perPage: 10 } },
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: false,
+          config: { experimental: { ccs: { enabled: false } } },
+        },
+      };
+      const service = new OverviewStatusService(routeContext);
+      service.getMonitorConfigs = jest.fn().mockResolvedValue([] as any);
+
+      const result = await service.getOverviewStatus();
+
+      expect(result.downIds).toEqual([{ monitorQueryId: 'hb-1', locationId: japanLoc.id }]);
+      expect(result.upIds).toEqual([{ monitorQueryId: 'hb-1', locationId: germanyLoc.id }]);
+      expect(result.allIds).toEqual(
+        expect.arrayContaining([
+          { monitorQueryId: 'hb-1', locationId: japanLoc.id },
+          { monitorQueryId: 'hb-1', locationId: germanyLoc.id },
+        ])
+      );
     });
 
     const runWithBuckets = async (buckets: any[]) => {
@@ -2980,6 +3473,7 @@ describe('current status route', () => {
         urls: string;
         type: string;
         updated_at: string;
+        created_at: string;
       }> = {}
     ): any => ({
       configId: id,
@@ -2994,6 +3488,7 @@ describe('current status route', () => {
       locations: [{ id: 'loc1', label: 'Loc 1', status: overrides.overallStatus ?? 'up' }],
       urls: overrides.urls,
       updated_at: overrides.updated_at,
+      created_at: overrides.created_at,
     });
 
     const upConfigs: Record<string, any> = {
@@ -3001,11 +3496,13 @@ describe('current status route', () => {
         name: 'Alpha',
         urls: 'https://alpha.io',
         updated_at: '2025-01-01T00:00:00Z',
+        created_at: '2025-04-01T00:00:00Z',
       }),
       m2: makeMeta('m2', {
         name: 'Beta',
         urls: 'https://beta.io',
         updated_at: '2025-03-01T00:00:00Z',
+        created_at: '2025-05-01T00:00:00Z',
       }),
       m3: makeMeta('m3', { name: 'Gamma', updated_at: '2025-02-01T00:00:00Z' }),
     };
@@ -3015,11 +3512,13 @@ describe('current status route', () => {
         name: 'Delta',
         urls: 'https://delta.io',
         updated_at: '2025-04-01T00:00:00Z',
+        created_at: '2025-01-01T00:00:00Z',
       }),
       m5: makeMeta('m5', {
         overallStatus: 'down',
         name: 'Epsilon',
         updated_at: '2025-05-01T00:00:00Z',
+        created_at: '2025-03-01T00:00:00Z',
       }),
     };
     const pendingConfigs: Record<string, any> = {
@@ -3203,6 +3702,49 @@ describe('current status route', () => {
       // ...and first in descending (most-recent-first) order.
       expect(descNames.indexOf('Zeta')).toBeLessThan(descNames.indexOf('Epsilon'));
       expect(descNames.indexOf('Eta')).toBeLessThan(descNames.indexOf('Epsilon'));
+    });
+
+    it('sorts by created_at ascending, independently of updated_at', () => {
+      const service = createService({
+        page: 1,
+        perPage: 20,
+        sortField: 'created_at',
+        sortOrder: 'asc',
+      });
+      const result = service.paginateConfigs(allBuckets);
+
+      const names = result.configs.map((c: any) => c.name);
+      // created_at deliberately runs in the opposite relative order from
+      // updated_at (Delta earliest, Beta latest) to prove this sorts by
+      // created_at and not by falling through to the updated_at case.
+      expect(names.indexOf('Delta')).toBeLessThan(names.indexOf('Epsilon'));
+      expect(names.indexOf('Epsilon')).toBeLessThan(names.indexOf('Alpha'));
+      expect(names.indexOf('Alpha')).toBeLessThan(names.indexOf('Beta'));
+    });
+
+    it('treats a missing created_at as "now", not epoch 0', () => {
+      // Gamma, Zeta, and Eta have no created_at.
+      const asc = createService({
+        page: 1,
+        perPage: 20,
+        sortField: 'created_at',
+        sortOrder: 'asc',
+      }).paginateConfigs(allBuckets);
+      const ascNames = asc.configs.map((c: any) => c.name);
+      expect(ascNames.indexOf('Gamma')).toBeGreaterThan(ascNames.indexOf('Beta'));
+      expect(ascNames.indexOf('Zeta')).toBeGreaterThan(ascNames.indexOf('Beta'));
+      expect(ascNames.indexOf('Eta')).toBeGreaterThan(ascNames.indexOf('Beta'));
+
+      const desc = createService({
+        page: 1,
+        perPage: 20,
+        sortField: 'created_at',
+        sortOrder: 'desc',
+      }).paginateConfigs(allBuckets);
+      const descNames = desc.configs.map((c: any) => c.name);
+      expect(descNames.indexOf('Gamma')).toBeLessThan(descNames.indexOf('Beta'));
+      expect(descNames.indexOf('Zeta')).toBeLessThan(descNames.indexOf('Beta'));
+      expect(descNames.indexOf('Eta')).toBeLessThan(descNames.indexOf('Beta'));
     });
 
     it('sorts by urls with empty urls last', () => {

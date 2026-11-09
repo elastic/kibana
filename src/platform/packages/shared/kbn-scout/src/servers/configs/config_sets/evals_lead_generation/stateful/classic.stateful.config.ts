@@ -24,7 +24,7 @@ import type { ScoutServerConfig } from '../../../../../types';
  * Note: Requires Entity Store V2 to be initialised with entities before running
  * meaningful quality evaluations. For smoke tests an empty entity store is fine.
  * To seed entities use the security-documents-generator:
- *   yarn start organization-quick && yarn start generate-entity-maintainers-data --quick
+ *   pnpm start organization-quick && pnpm start generate-entity-maintainers-data --quick
  */
 export const servers: ScoutServerConfig = {
   ...evalsEntityAnalyticsV2Config,

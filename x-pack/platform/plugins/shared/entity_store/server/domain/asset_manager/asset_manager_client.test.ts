@@ -16,6 +16,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { AssetManagerClient } from './asset_manager_client';
 import { LATEST_LOG_EXTRACTION_DEFAULTS } from '../saved_objects/global_state/constants';
+import { ENGINE_STATUS } from '../constants';
 import {
   installSharedElasticsearchAssets,
   installIndicesAndDataStreams,
@@ -31,6 +32,7 @@ import { scheduleResilienceTask, stopResilienceTask } from '../../tasks/resilien
 import { removeEntityMaintainer } from '../../tasks/entity_maintainers';
 import { entityMaintainersRegistry } from '../../tasks/entity_maintainers/entity_maintainers_registry';
 import { stopAndRemoveV1, stopAndRemoveV1SharedTasks } from '../../infra/remove_v1';
+import { EXTRACTION_MODE } from '../../../common/domain/definitions/entity_schema';
 
 jest.mock('./install_assets');
 jest.mock('../../tasks/extract_entity_task');
@@ -186,7 +188,11 @@ describe('AssetManagerClient', () => {
     expect(mockEngineDescriptorClient.init).toHaveBeenCalledTimes(2);
     expect(mockEngineDescriptorClient.init).toHaveBeenCalledWith('host');
     expect(mockEngineDescriptorClient.init).toHaveBeenCalledWith('user');
-    expect(mockScheduleExtractEntityTask).toHaveBeenCalledTimes(2);
+    // host: 1 (single) + user: 2 (priority + non-priority, always scheduled regardless of FF)
+    expect(mockScheduleExtractEntityTask).toHaveBeenCalledTimes(3);
+    expect(mockScheduleExtractEntityTask).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'user', extractionMode: EXTRACTION_MODE.nonPriority })
+    );
   });
 
   it('schedules status and history tasks only after engine descriptors exist', async () => {
@@ -483,6 +489,281 @@ describe('AssetManagerClient', () => {
       );
     });
   });
+
+  /**
+   * Dual-process types run two tasks. The pair must be scheduled and removed together: one
+   * scheduled without the other would silently extract only half the logs.
+   */
+  describe('dual-process lifecycle', () => {
+    const createDualProcessClient = () =>
+      new AssetManagerClient({
+        logger: loggerMock.create(),
+        esClient: mockUserEsClient,
+        internalEsClient: mockInternalEsClient,
+        taskManager: {} as jest.Mocked<TaskManagerStartContract>,
+        engineDescriptorClient:
+          mockEngineDescriptorClient as unknown as import('../saved_objects').EngineDescriptorClient,
+        globalStateClient:
+          mockGlobalStateClient as unknown as import('../saved_objects').EntityStoreGlobalStateClient,
+        namespace,
+        isServerless: false,
+        logsExtractionClient: {} as unknown as import('../logs_extraction').LogsExtractionClient,
+        security: {} as SecurityPluginStart,
+        analytics: {
+          reportEvent: jest.fn(),
+        } as unknown as import('../../telemetry/events').TelemetryReporter,
+        savedObjectsClient: {
+          delete: jest.fn().mockResolvedValue({}),
+        } as unknown as SavedObjectsClientContract,
+        isDualProcessEnabled: async () => true,
+      });
+
+    const scheduledModes = () =>
+      mockScheduleExtractEntityTask.mock.calls.map(
+        ([args]) => args.extractionMode ?? EXTRACTION_MODE.single
+      );
+
+    it('start schedules both tasks for a dual-capable type', async () => {
+      await createDualProcessClient().start({} as KibanaRequest, 'user');
+
+      expect(scheduledModes()).toEqual([EXTRACTION_MODE.single, EXTRACTION_MODE.nonPriority]);
+      expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith(
+        'user',
+        expect.objectContaining({ nonPriorityStatus: 'started' })
+      );
+    });
+
+    it('start schedules only the shared task for a type with no priority variant', async () => {
+      await createDualProcessClient().start({} as KibanaRequest, 'host');
+
+      expect(scheduledModes()).toEqual([EXTRACTION_MODE.single]);
+    });
+
+    describe('getStatus config', () => {
+      beforeEach(() => {
+        mockEngineDescriptorClient.getAll.mockResolvedValue([
+          { type: 'host', status: 'started' },
+          {
+            type: 'user',
+            status: 'started',
+            nonPriorityLogExtractionConfig: { frequency: '5m' },
+          },
+        ]);
+        mockGlobalStateClient.findLogExtractionOverrides.mockResolvedValue({
+          maxLogsPerWindow: 500000,
+        });
+      });
+
+      it('resolves priority and non-priority config for dual-process types', async () => {
+        const result = await createDualProcessClient().getStatus();
+        if (!('logsExtractionConfigByType' in result)) throw new Error('expected installed');
+        const { logsExtractionConfigByType, nonPriorityLogsExtractionConfigByType } = result;
+
+        expect(logsExtractionConfigByType.user).toMatchObject({
+          maxLogsPerWindowCapBehavior: 'defer',
+          maxLogsPerWindow: 500000,
+          frequency: '1m',
+        });
+        expect(nonPriorityLogsExtractionConfigByType.user).toMatchObject({
+          maxLogsPerWindowCapBehavior: 'drop',
+          maxLogsPerWindow: 500000,
+          frequency: '5m',
+        });
+        expect(logsExtractionConfigByType.host).toMatchObject({
+          maxLogsPerWindowCapBehavior: 'drop',
+          maxLogsPerWindow: 500000,
+        });
+        expect(nonPriorityLogsExtractionConfigByType.host).toBeUndefined();
+      });
+
+      it('resolves single config only with the flag off', async () => {
+        const result = await client.getStatus();
+        if (!('logsExtractionConfigByType' in result)) throw new Error('expected installed');
+
+        expect(result.logsExtractionConfigByType.user).toMatchObject({
+          maxLogsPerWindowCapBehavior: 'drop',
+        });
+        expect(result.nonPriorityLogsExtractionConfigByType).toEqual({});
+      });
+    });
+
+    it('start rolls the shared task back when the non-priority schedule fails', async () => {
+      mockScheduleExtractEntityTask
+        .mockResolvedValueOnce(undefined)
+        .mockRejectedValueOnce(new Error('schedule failed'));
+
+      await expect(createDualProcessClient().start({} as KibanaRequest, 'user')).rejects.toThrow(
+        'schedule failed'
+      );
+
+      expect(mockStopExtractEntityTask).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'user' })
+      );
+    });
+
+    it('stop removes both tasks even when the flag is off', async () => {
+      await client.stop('user');
+
+      // Asserted as "the shared task plus non-priority" rather than a specific label, because
+      // single and priority resolve to the same task id.
+      const removedModes = mockStopExtractEntityTask.mock.calls.map(
+        ([args]) => args.extractionMode ?? EXTRACTION_MODE.single
+      );
+      expect(removedModes).toHaveLength(2);
+      expect(removedModes).toContain(EXTRACTION_MODE.nonPriority);
+      expect(
+        removedModes.some(
+          (mode) => mode === EXTRACTION_MODE.single || mode === EXTRACTION_MODE.priority
+        )
+      ).toBe(true);
+    });
+
+    it('stop sets nonPriorityStatus to stopped for a dual-capable type (user)', async () => {
+      await createDualProcessClient().stop('user');
+
+      expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith(
+        'user',
+        expect.objectContaining({ nonPriorityStatus: ENGINE_STATUS.STOPPED })
+      );
+    });
+
+    it('stop does not set nonPriorityStatus for types without a priority gate (host)', async () => {
+      await createDualProcessClient().stop('host');
+
+      const updateCalls = mockEngineDescriptorClient.update.mock.calls;
+      for (const [, attrs] of updateCalls) {
+        expect(attrs).not.toHaveProperty('nonPriorityStatus');
+      }
+    });
+
+    it('stop completes even when one task removal fails', async () => {
+      // First stopExtractEntityTask call (priority) succeeds; second (nonPriority) fails.
+      mockStopExtractEntityTask
+        .mockResolvedValueOnce(undefined)
+        .mockRejectedValueOnce(new Error('task removal failed'));
+
+      await expect(createDualProcessClient().stop('user')).resolves.not.toThrow();
+
+      // Both tasks were attempted.
+      expect(mockStopExtractEntityTask).toHaveBeenCalledTimes(2);
+      // The descriptor is still updated to STOPPED after the partial failure.
+      expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith(
+        'user',
+        expect.objectContaining({ status: ENGINE_STATUS.STOPPED })
+      );
+    });
+
+    it('attempts both task removals even when the first one fails', async () => {
+      mockStopExtractEntityTask
+        .mockRejectedValueOnce(new Error('priority task removal failed'))
+        .mockResolvedValueOnce(undefined);
+
+      await createDualProcessClient().stop('user');
+
+      expect(mockStopExtractEntityTask).toHaveBeenCalledTimes(2);
+    });
+
+    it('stop sets nonPriorityStatus to error when the operation fails for a dual-capable type', async () => {
+      // Make the STOPPED update throw so the catch block runs.
+      mockEngineDescriptorClient.update.mockRejectedValueOnce(new Error('update failed'));
+
+      await expect(createDualProcessClient().stop('user')).rejects.toThrow('update failed');
+
+      const errorUpdate = mockEngineDescriptorClient.update.mock.calls.find(
+        ([, attrs]) => attrs.status === ENGINE_STATUS.ERROR
+      );
+      expect(errorUpdate).toBeDefined();
+      expect(errorUpdate![1]).toMatchObject({
+        status: ENGINE_STATUS.ERROR,
+        nonPriorityStatus: ENGINE_STATUS.ERROR,
+      });
+    });
+
+    it('stop does not set nonPriorityStatus when the operation fails for a type without a priority gate', async () => {
+      mockEngineDescriptorClient.update.mockRejectedValueOnce(new Error('update failed'));
+
+      await expect(createDualProcessClient().stop('host')).rejects.toThrow('update failed');
+
+      const errorUpdate = mockEngineDescriptorClient.update.mock.calls.find(
+        ([, attrs]) => attrs.status === ENGINE_STATUS.ERROR
+      );
+      expect(errorUpdate).toBeDefined();
+      expect(errorUpdate![1]).not.toHaveProperty('nonPriorityStatus');
+    });
+
+    describe('per-process start/stop', () => {
+      it('startProcess schedules only the non-priority task and writes only its status', async () => {
+        await createDualProcessClient().startProcess(
+          {} as KibanaRequest,
+          'user',
+          EXTRACTION_MODE.nonPriority
+        );
+
+        expect(scheduledModes()).toEqual([EXTRACTION_MODE.nonPriority]);
+        expect(mockEngineDescriptorClient.update).toHaveBeenCalledTimes(1);
+        expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith('user', {
+          nonPriorityStatus: ENGINE_STATUS.STARTED,
+          nonPriorityError: null,
+        });
+      });
+
+      it('startProcess schedules only the priority task and writes only the shared status', async () => {
+        await createDualProcessClient().startProcess(
+          {} as KibanaRequest,
+          'user',
+          EXTRACTION_MODE.priority
+        );
+
+        expect(scheduledModes()).toEqual([EXTRACTION_MODE.single]);
+        expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith('user', {
+          status: ENGINE_STATUS.STARTED,
+          error: null,
+        });
+      });
+
+      // `priority` and `single` resolve to the same task id, so a `priority` request on a type
+      // with no priority variant acts on its only task — and must schedule it at the same
+      // frequency. This fails loudly if a mode-level frequency is ever introduced and starts
+      // silently rescheduling ungated types at a different cadence.
+      it('startProcess priority keeps an ungated type on its single-process frequency', async () => {
+        const dualProcessClient = createDualProcessClient();
+
+        await dualProcessClient.start({} as KibanaRequest, 'host');
+        const [singleArgs] = mockScheduleExtractEntityTask.mock.calls.at(-1)!;
+
+        mockScheduleExtractEntityTask.mockClear();
+        await dualProcessClient.startProcess({} as KibanaRequest, 'host', EXTRACTION_MODE.priority);
+        const [priorityArgs] = mockScheduleExtractEntityTask.mock.calls.at(-1)!;
+
+        expect(priorityArgs.extractionMode ?? EXTRACTION_MODE.single).toBe(EXTRACTION_MODE.single);
+        expect(priorityArgs.frequency).toBe(singleArgs.frequency);
+      });
+
+      it('stopProcess removes only the non-priority task', async () => {
+        await createDualProcessClient().stopProcess('user', EXTRACTION_MODE.nonPriority);
+
+        expect(mockStopExtractEntityTask).toHaveBeenCalledTimes(1);
+        expect(mockStopExtractEntityTask).toHaveBeenCalledWith(
+          expect.objectContaining({ type: 'user', extractionMode: EXTRACTION_MODE.nonPriority })
+        );
+        expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith('user', {
+          nonPriorityStatus: ENGINE_STATUS.STOPPED,
+        });
+      });
+
+      it('stopProcess marks only its own process errored on failure', async () => {
+        mockStopExtractEntityTask.mockRejectedValueOnce(new Error('remove failed'));
+
+        await expect(
+          createDualProcessClient().stopProcess('user', EXTRACTION_MODE.nonPriority)
+        ).rejects.toThrow('remove failed');
+
+        expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith('user', {
+          nonPriorityStatus: ENGINE_STATUS.ERROR,
+        });
+      });
+    });
+  });
 });
 
 describe('AssetManagerClient.reinstallSharedAssetsIfMissing', () => {
@@ -610,32 +891,35 @@ describe('AssetManagerClient.getStatus component name resolution', () => {
 
   const namespace = 'default';
 
-  const buildClient = ({
-    latestTemplateExists,
-    legacyLatestTemplateExists,
-    updatesTemplateExists,
-    legacyUpdatesTemplateExists,
-    latestComponentTemplateExists,
-    legacyLatestComponentTemplateExists,
-    updatesComponentTemplateExists,
-    legacyUpdatesComponentTemplateExists,
-  }: {
-    latestTemplateExists: boolean;
-    legacyLatestTemplateExists: boolean;
-    updatesTemplateExists: boolean;
-    legacyUpdatesTemplateExists: boolean;
-    latestComponentTemplateExists: boolean;
-    legacyLatestComponentTemplateExists: boolean;
-    updatesComponentTemplateExists: boolean;
-    legacyUpdatesComponentTemplateExists: boolean;
-  }) => {
+  const buildClient = (
+    {
+      latestTemplateExists,
+      legacyLatestTemplateExists,
+      updatesTemplateExists,
+      legacyUpdatesTemplateExists,
+      latestComponentTemplateExists,
+      legacyLatestComponentTemplateExists,
+      updatesComponentTemplateExists,
+      legacyUpdatesComponentTemplateExists,
+    }: {
+      latestTemplateExists: boolean;
+      legacyLatestTemplateExists: boolean;
+      updatesTemplateExists: boolean;
+      legacyUpdatesTemplateExists: boolean;
+      latestComponentTemplateExists: boolean;
+      legacyLatestComponentTemplateExists: boolean;
+      updatesComponentTemplateExists: boolean;
+      legacyUpdatesComponentTemplateExists: boolean;
+    },
+    overrides: { userEsClient?: ElasticsearchClient; internalEsClient?: ElasticsearchClient } = {}
+  ) => {
     const getIndexTemplate = jest.fn().mockImplementation(async ({ name }: { name: string }) => {
       const exists =
         (name.includes('security_') && name.includes('latest') && legacyLatestTemplateExists) ||
         (!name.includes('security_') && name.includes('latest') && latestTemplateExists) ||
         (name.includes('security_') && name.includes('updates') && legacyUpdatesTemplateExists) ||
         (!name.includes('security_') && name.includes('updates') && updatesTemplateExists);
-      if (!exists) throw new Error('index_template not found [404]');
+      if (!exists) throw Object.assign(new Error('index_template not found'), { statusCode: 404 });
       return {};
     });
 
@@ -655,7 +939,8 @@ describe('AssetManagerClient.getStatus component name resolution', () => {
           (!name.includes('security_') &&
             name.includes('updates') &&
             updatesComponentTemplateExists);
-        if (!exists) throw new Error('component_template not found [404]');
+        if (!exists)
+          throw Object.assign(new Error('component_template not found'), { statusCode: 404 });
         return {};
       });
 
@@ -696,8 +981,8 @@ describe('AssetManagerClient.getStatus component name resolution', () => {
 
     return new AssetManagerClient({
       logger: loggerMock.create(),
-      esClient,
-      internalEsClient: esClient,
+      esClient: overrides.userEsClient ?? esClient,
+      internalEsClient: overrides.internalEsClient ?? esClient,
       taskManager,
       engineDescriptorClient:
         engineDescriptorClient as unknown as import('../saved_objects').EngineDescriptorClient,
@@ -820,6 +1105,51 @@ describe('AssetManagerClient.getStatus component name resolution', () => {
 
       expect(templates.every((t) => !t.installed)).toBe(true);
       expect(componentTemplates.every((t) => !t.installed)).toBe(true);
+    });
+  });
+  describe('privilege-independent probes', () => {
+    const allExist = {
+      latestTemplateExists: true,
+      legacyLatestTemplateExists: false,
+      updatesTemplateExists: true,
+      legacyUpdatesTemplateExists: false,
+      latestComponentTemplateExists: true,
+      legacyLatestComponentTemplateExists: false,
+      updatesComponentTemplateExists: true,
+      legacyUpdatesComponentTemplateExists: false,
+    };
+    const forbidden = () => Object.assign(new Error('security_exception'), { statusCode: 403 });
+    const forbiddenUserEsClient = {
+      indices: {
+        exists: jest.fn().mockRejectedValue(forbidden()),
+        getIndexTemplate: jest.fn().mockRejectedValue(forbidden()),
+      },
+      cluster: { getComponentTemplate: jest.fn().mockRejectedValue(forbidden()) },
+    } as unknown as ElasticsearchClient;
+
+    it('reports templates as installed even when the requesting user is forbidden from reading them', async () => {
+      const client = buildClient(allExist, { userEsClient: forbiddenUserEsClient });
+
+      const templates = await getComponentsByResource(client, 'index_template');
+      const componentTemplates = await getComponentsByResource(client, 'component_template');
+      const indices = await getComponentsByResource(client, 'index');
+
+      expect(templates[0].installed).toBe(true);
+      expect(componentTemplates[0].installed).toBe(true);
+      expect(indices[0].installed).toBe(true);
+    });
+
+    it('propagates non-404 probe errors instead of reporting the component as missing', async () => {
+      const failingInternalEsClient = {
+        indices: {
+          exists: jest.fn().mockResolvedValue(true),
+          getIndexTemplate: jest.fn().mockRejectedValue({ statusCode: 503 }),
+        },
+        cluster: { getComponentTemplate: jest.fn().mockResolvedValue({}) },
+      } as unknown as ElasticsearchClient;
+      const client = buildClient(allExist, { internalEsClient: failingInternalEsClient });
+
+      await expect(client.getStatus(true)).rejects.toMatchObject({ statusCode: 503 });
     });
   });
 });

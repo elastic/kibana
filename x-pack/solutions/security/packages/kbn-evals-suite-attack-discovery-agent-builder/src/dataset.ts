@@ -6,6 +6,7 @@
  */
 
 import {
+  attackDiscoveryFixtureMarker,
   liveRetrievalFixture,
   missingAlertRetrievalFixture,
   multipleAlertSetsFixture,
@@ -69,6 +70,12 @@ export const goldenPathExamples: AttackDiscoveryAgentBuilderExample[] = [
         'platform.core.execute_esql',
         'security.attack-discovery.run',
       ],
+      // The question names this marker, and the assertion below is an EXACT
+      // population of a SHARED index, so the retrieval is counted only when its
+      // query carries the marker. Measured on the recorded reps of this example:
+      // every one that ran ES|QL carried it (`tags == "x"`, `tags LIKE "*x*"`,
+      // `QSTR("x")`, an OR-chain).
+      retrievalScope: attackDiscoveryFixtureMarker,
     },
     output: {
       expectedToolPath: [
@@ -129,8 +136,13 @@ export const goldenPathExamples: AttackDiscoveryAgentBuilderExample[] = [
         'platform.core.execute_esql',
       ],
       expectedWorkflowStages: [],
+      // No alerts are seeded, so the product short-circuits before generation
+      // and reports `alerts_context_count: 0`; an agent that skips the AD tool
+      // reports null. Both are correct, so the passed count is left unscored
+      // (key ABSENT, not `null`) and a run that pushed alerts through the
+      // pipeline is caught by the forbidden stages instead.
+      forbiddenWorkflowStages: ['generation', 'validation'],
       expectedRetrievedAlertCount: null,
-      expectedPassedAlertCount: null,
     },
     metadata: {
       alertCount: missingAlertRetrievalFixture.alertCount,

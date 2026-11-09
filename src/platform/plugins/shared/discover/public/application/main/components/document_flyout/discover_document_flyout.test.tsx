@@ -13,10 +13,12 @@ import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { copyToClipboard, type EuiFlyoutProps } from '@elastic/eui';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { buildDataTableRecord, type DataTableColumnsMeta } from '@kbn/discover-utils';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import type { AggregateQuery, Query } from '@kbn/es-query';
+import { constructCascadeQuery } from '@kbn/esql-utils';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { setUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/plugin';
@@ -33,6 +35,26 @@ import {
   getExpandedDocLinkDisabledReason,
   type ExpandedDocRef,
 } from '../../utils/expanded_doc';
+
+jest.mock('../../data_fetching/create_esql_source', () => ({
+  createEsqlSource: jest.fn().mockResolvedValue({
+    kind: 'esql',
+    id: 'mock-esql-source',
+    query: 'FROM mock',
+    title: 'mock',
+    name: 'mock',
+    datasetId: 'esql-mock-dataset',
+    timeFieldName: undefined,
+    references: [],
+    fields: [],
+    resultColumns: [],
+    getColumns: () => [],
+    getColumn: () => undefined,
+    getFilterableFields: async () => [],
+    isTimeBased: () => false,
+    isPersisted: () => false,
+  }),
+}));
 
 jest.mock('@elastic/eui', () => {
   const actual = jest.requireActual('@elastic/eui');
@@ -123,6 +145,8 @@ const setup = async ({
     fetchStatus,
     result: hits.map((hit) => buildDataTableRecord(hit, dataViewMock)),
   });
+  // Freeze before rendering: the unawaited initial fetch emits LOADING without `result`, wiping the seed.
+  dataStateContainer.data$.documents$.next = jest.fn();
 
   await act(async () => {
     if (initialFlyout.type === 'restoreFromRef') {
@@ -172,9 +196,7 @@ describe('DiscoverDocumentFlyout', () => {
   });
 
   it('copies a document link from the flyout menu and ignores duplicate clicks', async () => {
-    const { services, toolkit } = await setup({ hits: esHitsMock });
-    // Freeze the seeded results so the unawaited main fetch can't remount the menu mid-click.
-    toolkit.getCurrentTabDataStateContainer().data$.documents$.next = jest.fn();
+    const { services } = await setup({ hits: esHitsMock });
 
     const shareButton = await screen.findByRole('button', {
       name: 'Copy link',
@@ -314,10 +336,10 @@ describe('DiscoverDocumentFlyout', () => {
       fireEvent.click(shareButton);
 
       expect(services.toastNotifications.addWarning).toHaveBeenCalledWith({
-        title: 'Link not copied',
+        title: 'Cannot copy link',
         text: toastText,
         'data-test-subj': 'discoverDocFlyoutCopyLinkWarning',
-        toastLifeTimeMs,
+        ...(toastLifeTimeMs !== undefined && { toastLifeTimeMs }),
       });
 
       renderWithI18n(<>{toastText}</>);
@@ -368,8 +390,6 @@ describe('DiscoverDocumentFlyout', () => {
       searchResult: searchResponseFor(outOfResultsHit),
       hits: esHitsMock,
     });
-    // Freeze the seeded results so the unawaited main fetch can't replace them mid-assertion.
-    toolkit.getCurrentTabDataStateContainer().data$.documents$.next = jest.fn();
 
     await waitFor(() => {
       expect(toolkit.getCurrentTab().expandedDoc?.raw._id).toBe(outOfResultsHit._id);
@@ -469,8 +489,6 @@ describe('DiscoverDocumentFlyout', () => {
   it('keeps flyout pagination populated when the URL reference changes to another document already in the results (e.g. browser back navigation)', async () => {
     const { toolkit } = await setup({ hits: esHitsMock });
     const tabId = toolkit.getCurrentTab().id;
-    // Freeze the seeded results so the unawaited main fetch can't replace them mid-assertion.
-    toolkit.getCurrentTabDataStateContainer().data$.documents$.next = jest.fn();
 
     await waitFor(() => {
       expect(toolkit.getCurrentTab().expandedDoc?.raw._id).toBe(outOfResultsHit._id);
@@ -624,8 +642,19 @@ describe('DiscoverDocumentFlyout', () => {
   it('renders a cascade owned document with the columns and meta reported by its grid', async () => {
     const services = createDiscoverServicesMock();
     const toolkit = getDiscoverInternalStateMock({ services });
+    const groupingQuery = { esql: 'FROM logs | STATS count() BY extension' };
+    const expandedDocCascadePath = {
+      nodePath: ['extension'],
+      nodePathMap: { extension: 'png' },
+    };
 
     await toolkit.initializeTabs();
+    toolkit.internalState.dispatch(
+      internalStateActions.updateAppState({
+        tabId: toolkit.getCurrentTab().id,
+        appState: { query: groupingQuery },
+      })
+    );
     await toolkit.initializeSingleTab({
       tabId: toolkit.getCurrentTab().id,
       skipWaitForDataFetching: true,
@@ -634,10 +663,14 @@ describe('DiscoverDocumentFlyout', () => {
     const tabId = toolkit.getCurrentTab().id;
     const expandedDoc = buildDataTableRecord(esHitsMock[0], dataViewMock);
     const nextExpandedDoc = buildDataTableRecord(esHitsMock[1], dataViewMock);
-    const cascadedColumnsMeta: DataTableColumnsMeta = { bytes: { type: 'number' } };
 
     toolkit.internalState.dispatch(
-      internalStateActions.setExpandedDoc({ tabId, expandedDoc, expandedDocOwner: 'nested-grid' })
+      internalStateActions.setExpandedDoc({
+        tabId,
+        expandedDoc,
+        expandedDocOwner: 'nested-grid',
+        expandedDocCascadePath,
+      })
     );
     toolkit.internalState.dispatch(
       internalStateActions.setRenderDocumentViewMeta({
@@ -648,14 +681,8 @@ describe('DiscoverDocumentFlyout', () => {
         },
       })
     );
-    toolkit.internalState.dispatch(
-      internalStateActions.setCascadedDocumentsState({
-        tabId,
-        cascadedDocumentsState: {
-          ...toolkit.getCurrentTab().cascadedDocumentsState,
-          columnsMeta: cascadedColumnsMeta,
-        },
-      })
+    toolkit.runtimeStateManager.tabs.byId[tabId].cascadedLeafDataSource$.next(
+      createMockEsqlSource([{ name: 'bytes', type: 'number', source: 'index' }])
     );
 
     setUnifiedDocViewerServices(mockUnifiedDocViewerServices);
@@ -684,7 +711,7 @@ describe('DiscoverDocumentFlyout', () => {
       expect(screen.getByTestId('docViewerFlyout')).toBeVisible();
     });
 
-    expect(screen.queryByRole('button', { name: /copy link/i })).not.toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: 'Copy link' })).toBeVisible();
 
     await waitFor(() => {
       expect(screen.getByTestId('docViewerFlyoutNavigation')).toBeVisible();
@@ -696,6 +723,7 @@ describe('DiscoverDocumentFlyout', () => {
           tabId,
           expandedDoc: nextExpandedDoc,
           expandedDocOwner: 'nested-grid',
+          expandedDocCascadePath,
         })
       );
     });
@@ -703,9 +731,98 @@ describe('DiscoverDocumentFlyout', () => {
     await waitFor(() => {
       expect(toolkit.getCurrentTab().expandedDoc).toEqual(nextExpandedDoc);
       expect(toolkit.getCurrentTab().expandedDocOwner).toBe('nested-grid');
+      expect(toolkit.getCurrentTab().expandedDocCascadePath).toEqual(expandedDocCascadePath);
     });
 
     expect(toolkit.getCurrentTab().appState.expandedDoc).toBeUndefined();
+  });
+
+  it('copies a document link that uses the nested grid query instead of the group-by query', async () => {
+    const services = createDiscoverServicesMock();
+    const toolkit = getDiscoverInternalStateMock({ services });
+    const groupingQuery = { esql: 'FROM logs | STATS count() BY extension' };
+    const expandedDocCascadePath = {
+      nodePath: ['extension'],
+      nodePathMap: { extension: 'png' },
+    };
+    const cascadeQuery = constructCascadeQuery({
+      query: groupingQuery,
+      dataView: dataViewMock,
+      esqlVariables: undefined,
+      nodeType: 'leaf',
+      ...expandedDocCascadePath,
+    });
+
+    await toolkit.initializeTabs();
+    toolkit.internalState.dispatch(
+      internalStateActions.updateAppState({
+        tabId: toolkit.getCurrentTab().id,
+        appState: { query: groupingQuery },
+      })
+    );
+    await toolkit.initializeSingleTab({
+      tabId: toolkit.getCurrentTab().id,
+      skipWaitForDataFetching: true,
+    });
+
+    const tabId = toolkit.getCurrentTab().id;
+    const expandedDoc = buildDataTableRecord(esHitsMock[0], dataViewMock);
+
+    toolkit.internalState.dispatch(
+      internalStateActions.setExpandedDoc({
+        tabId,
+        expandedDoc,
+        expandedDocOwner: 'nested-grid',
+        expandedDocCascadePath,
+      })
+    );
+
+    setUnifiedDocViewerServices(mockUnifiedDocViewerServices);
+
+    const dataStateContainer = toolkit.getCurrentTabDataStateContainer();
+
+    dataStateContainer.data$.documents$.next({
+      fetchStatus: FetchStatus.COMPLETE,
+      result: esHitsMock.map((hit) => buildDataTableRecord(hit, dataViewMock)),
+    });
+
+    renderWithI18n(
+      <DiscoverToolkitTestProvider toolkit={toolkit}>
+        <DiscoverDocumentFlyout
+          dataView={dataViewMock}
+          columns={['bytes']}
+          onAddColumn={jest.fn()}
+          onRemoveColumn={jest.fn()}
+          onAddFilter={jest.fn()}
+        />
+      </DiscoverToolkitTestProvider>
+    );
+
+    const shareButton = await screen.findByRole('button', { name: 'Copy link' });
+    expectShareButtonEbt(shareButton, 'linkable');
+
+    act(() => {
+      shareButton.click();
+    });
+
+    await waitFor(() => {
+      expect(copyToClipboard).toHaveBeenCalledTimes(1);
+    });
+    expect(services.locator.getRedirectUrl).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: cascadeQuery,
+        columns: [],
+        expandedDoc: {
+          id: esHitsMock[0]._id,
+          index: esHitsMock[0]._index,
+        },
+      })
+    );
+    expect(services.locator.getRedirectUrl).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: groupingQuery,
+      })
+    );
   });
 
   it('does not fetch when the expanded document already matches the reference', async () => {

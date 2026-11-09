@@ -9,4 +9,4 @@
 
 export { runFailedTestsReporterCli } from './failed_tests_reporter/failed_tests_reporter_cli';
 export { runRetryResultCheckerCli } from './failed_tests_reporter/retry_result_checker';
-export { runCheckFlakyTestIssuesCli } from './flaky_test_issues';
+export { runReportFlakyTestIssuesCli } from './flaky_test_issues';

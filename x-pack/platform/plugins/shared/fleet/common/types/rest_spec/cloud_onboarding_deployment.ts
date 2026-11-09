@@ -8,6 +8,9 @@
 import type {
   CloudOnboardingDeployment,
   CloudOnboardingDeploymentAuthMethod,
+  CloudOnboardingDeploymentListItem,
+  CloudOnboardingInstance,
+  CloudOnboardingPolicySettings,
   CloudProvider,
   DeploymentMethod,
   CloudOnboardingDeploymentStatus,
@@ -22,8 +25,17 @@ export interface CreateCloudOnboardingDeploymentRequest {
     services: string[];
     serviceVars?: Record<string, Record<string, unknown>>;
     globalRegion?: string;
+    /** Global data stream namespace from the Service settings step. */
+    namespace?: string;
+    /** The service instances (originals and duplicates) being deployed. */
+    instances?: CloudOnboardingInstance[];
+    /** Package policy settings that apply to every package policy of the deployment. */
+    policySettings?: CloudOnboardingPolicySettings;
     dataFormat?: 'ecs' | 'otel';
     authMethod?: CloudOnboardingDeploymentAuthMethod;
+    agentPolicyIds?: string[];
+    packageNames?: string[];
+    serviceNames?: Record<string, string>;
   };
 }
 
@@ -35,6 +47,33 @@ export interface GetCloudOnboardingDeploymentResponse {
   item: CloudOnboardingDeployment;
 }
 
+export interface GetCloudOnboardingDeploymentsRequest {
+  query?: {
+    packageName?: string;
+    provider?: CloudProvider;
+    page?: number;
+    perPage?: number;
+  };
+}
+
+export interface GetCloudOnboardingDeploymentsResponse {
+  items: CloudOnboardingDeploymentListItem[];
+  total: number;
+  page: number;
+  perPage: number;
+}
+
+export interface GetCloudOnboardingDeploymentCountsRequest {
+  query?: {
+    provider?: CloudProvider;
+  };
+}
+
+export interface GetCloudOnboardingDeploymentCountsResponse {
+  /** Number of deployment instances that cover each package, by package name. */
+  counts: Record<string, number>;
+}
+
 export interface UpdateCloudOnboardingDeploymentRequest {
   params: { id: string };
   body: {
@@ -42,13 +81,35 @@ export interface UpdateCloudOnboardingDeploymentRequest {
     statusMessage?: string;
     deploymentId?: string;
     deploymentName?: string;
+    /** Integration name used by the last deploy, before any per-package suffix. */
+    integrationName?: string;
+    /** Set to null to clear the description. */
+    description?: string | null;
+    /** Set to null to clear the namespace. */
+    namespace?: string | null;
+    services?: string[];
+    packageNames?: string[];
+    serviceNames?: Record<string, string>;
     serviceVars?: Record<string, Record<string, unknown>>;
+    /** Replaces the stored list of service instances. */
+    instances?: CloudOnboardingInstance[];
+    /** Replaces the stored package policy settings. */
+    policySettings?: CloudOnboardingPolicySettings;
     attemptCount?: number;
-    agentPolicyId?: string;
+    authMethod?: CloudOnboardingDeploymentAuthMethod | null;
+    agentPolicyIds?: string[];
     packagePolicyIds?: string[];
+    policyIdsByInstance?: Record<string, string>;
     apiKeyId?: string;
+    mechanisms?: DeploymentMethod[];
     ecfStacks?: CloudOnboardingEcfStack[];
+    /** Set to null to clear the connector association (e.g. on MI→ECF transition). */
+    connectorId?: string | null;
   };
+}
+
+export interface DeleteCloudOnboardingDeploymentResponse {
+  id: string;
 }
 
 export interface UpdateCloudOnboardingDeploymentResponse {

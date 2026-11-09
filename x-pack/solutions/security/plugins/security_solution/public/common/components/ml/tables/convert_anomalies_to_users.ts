@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EntityStoreEuid } from '@kbn/entity-store/public';
+import type { EntityStoreEuidApi } from '@kbn/entity-store/public';
 
 import type { Anomalies, AnomaliesByUser, Anomaly } from '../types';
 import {
@@ -22,7 +22,7 @@ export const convertAnomaliesToUsers = (
   jobNameById: Record<string, string | undefined>,
   userName?: string,
   identityFields?: Record<string, string>,
-  euid?: EntityStoreEuid
+  euidApi?: EntityStoreEuidApi
 ): AnomaliesByUser[] => {
   if (anomalies == null) {
     return [];
@@ -30,9 +30,16 @@ export const convertAnomaliesToUsers = (
   const isScoped = userName != null;
   const doc = buildEuidSampleDocumentForAnomaliesTable('user', identityFields, userName);
   const identifiers =
-    euid && isScoped ? euid.getEntityIdentifiersFromDocument('user', doc) : undefined;
+    euidApi && isScoped
+      ? euidApi.euid.getEntityIdentifiersFromDocument(
+          euidApi.getBuiltInEntityDefinition('user'),
+          doc
+        )
+      : undefined;
   const identifiersUsable = identifiers != null && Object.keys(identifiers).length > 0;
-  const identitySourceFields = euid?.getEuidSourceFields('user').identitySourceFields ?? [];
+  const identitySourceFields =
+    euidApi?.euid.getEuidSourceFields(euidApi.getBuiltInEntityDefinition('user'))
+      .identitySourceFields ?? [];
 
   return anomalies.anomalies.reduce<AnomaliesByUser[]>((accum, item) => {
     let matched = false;
@@ -54,8 +61,8 @@ export const convertAnomaliesToUsers = (
           label = fromInfl;
         }
       }
-    } else if (euid) {
-      if (anomalyEntityNameInEuidIdentitySourceFields(item, euid, 'user')) {
+    } else if (euidApi) {
+      if (anomalyEntityNameInEuidIdentitySourceFields(item, euidApi, 'user')) {
         matched = true;
         label = String(item.entityValue);
       } else {

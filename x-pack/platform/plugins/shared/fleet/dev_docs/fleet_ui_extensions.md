@@ -65,6 +65,17 @@ export class Plugin {
 
 For a list of supported Fleet UI extensions, see the `UIExtensionPoint` and associated Union types defined here: `x-pack/platform/plugins/shared/fleet/public/types/ui_extensions.ts`.
 
+`package-policy-replace-define-step` can opt into Fleet's wide page layout (1200px) instead of the 800px create/edit form:
+
+```typescript
+registerExtension({
+  package: 'cribl',
+  view: 'package-policy-replace-define-step',
+  Component: LazyCustomCriblExtension,
+  useWidePageLayout: true,
+});
+```
+
 
 
 

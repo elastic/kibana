@@ -10,8 +10,8 @@ import { CaseStatuses } from '../../../../../../common/types/domain';
 import type { CaseUI } from '../../../../../../common';
 import { useRefreshCaseViewPage } from '../../../use_on_refresh_case_view_page';
 import { useStatusAction } from '../../../../actions/status/use_status_action';
-import { useCloseCaseModal } from '../../../../all_cases/use_close_case_modal';
-import { useCanSyncCloseReasonToAlerts } from '../../../../all_cases/use_can_sync_close_reason_to_alerts';
+import { useCloseCaseModal } from '../../../../all_cases/hooks/use_close_case_modal';
+import { useCanSyncCloseReasonToAlerts } from '../../../../all_cases/hooks/use_can_sync_close_reason_to_alerts';
 import type { OnUpdateFields } from '../../../types';
 
 interface UseCloseCaseFlowArgs {

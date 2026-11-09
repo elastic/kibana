@@ -183,4 +183,14 @@ export const executionTranslations = Object.freeze({
       </ConsoleCodeBlock>
     );
   },
+
+  unsupportedPositionalArguments: (params: string) => (
+    <ConsoleCodeBlock>
+      <FormattedMessage
+        id="xpack.securitySolution.console.commandValidation.unsupportedPositionalArguments"
+        defaultMessage="Positional arguments ({params}) are not supported. All command arguments must be prefixed with '--'"
+        values={{ params }}
+      />
+    </ConsoleCodeBlock>
+  ),
 });

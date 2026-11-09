@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { AlertClosingReason } from '../../../../../common/types';
 import type { Status } from '../../../../../common/api/detection_engine';
 import type { RuntimeFieldType } from '../../../../../common/api/detection_engine/signals/set_signal_status/set_signals_status_route.gen';
@@ -15,6 +16,11 @@ export interface BasicSignals {
 }
 export interface QueryAlerts extends BasicSignals {
   query: object;
+  /**
+   * Optional Kibana execution context forwarded to `http.fetch` so slow logs and APM traces can
+   * attribute the alert query to the calling page/panel.
+   */
+  context?: KibanaExecutionContext;
 }
 
 export interface AlertsResponse {

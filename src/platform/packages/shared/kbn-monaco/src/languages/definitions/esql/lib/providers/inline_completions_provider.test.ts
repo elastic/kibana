@@ -1,0 +1,108 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { ESQLCallbacks } from '@kbn/esql-types';
+import { monaco } from '../../../../../monaco_imports';
+import { getInlineCompletionsProvider } from './inline_completions_provider';
+import { createDisposedTextModel, createField, createTextModel } from './test_helpers';
+
+describe('Inline completion provider', () => {
+  let tokenSource: monaco.CancellationTokenSource;
+
+  beforeEach(() => {
+    tokenSource = new monaco.CancellationTokenSource();
+  });
+
+  afterEach(() => {
+    // Settle the Promise.race cancellation arm so Jest does not detect open handles.
+    tokenSource.cancel();
+    tokenSource.dispose();
+  });
+
+  describe('provideInlineCompletions', () => {
+    it('returns inline suggestions from the language service', async () => {
+      const fullText = 'FROM logs*';
+      const callbacks: ESQLCallbacks = {
+        getColumnsFor: jest.fn(async () => [
+          createField('@timestamp', 'date'),
+          createField('message', 'text'),
+        ]),
+        getEditorExtensions: jest.fn(async () => ({
+          recommendedQueries: [
+            { query: 'FROM logs* | STATS count = COUNT(*)', name: 'Count aggregation' },
+          ],
+          recommendedFields: [],
+        })),
+        getHistoryStarredItems: jest.fn(async () => []),
+      };
+      const model = createTextModel({ value: fullText });
+
+      const provider = getInlineCompletionsProvider(callbacks);
+      const result = await provider.provideInlineCompletions(
+        model,
+        new monaco.Position(1, fullText.length + 1),
+        {} as monaco.languages.InlineCompletionContext,
+        tokenSource.token
+      );
+
+      expect(result!.items).toContainEqual(
+        expect.objectContaining({
+          insertText: ' | STATS count = COUNT(*)',
+        })
+      );
+    });
+  });
+
+  describe('disposed model', () => {
+    it('returns an empty item list without accessing the model value', async () => {
+      const disposedModel = createDisposedTextModel();
+
+      const provider = getInlineCompletionsProvider();
+      const result = await provider.provideInlineCompletions(
+        disposedModel,
+        new monaco.Position(1, 1),
+        {} as monaco.languages.InlineCompletionContext,
+        tokenSource.token
+      );
+
+      expect(result).toEqual({ items: [] });
+      expect(disposedModel.getValue).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('cancellation', () => {
+    it('returns empty items when the token is cancelled before completions resolve', async () => {
+      const settleHangs: Array<(value: unknown) => void> = [];
+      const hang = () =>
+        new Promise((resolve) => {
+          settleHangs.push(resolve);
+        });
+      const callbacks = {
+        getColumnsFor: jest.fn(hang),
+        getEditorExtensions: jest.fn(hang),
+        getHistoryStarredItems: jest.fn(hang),
+      } as unknown as ESQLCallbacks;
+      const model = createTextModel({ value: 'FROM logs*' });
+      const provider = getInlineCompletionsProvider(callbacks);
+
+      const resultPromise = provider.provideInlineCompletions(
+        model,
+        new monaco.Position(1, 1),
+        {} as monaco.languages.InlineCompletionContext,
+        tokenSource.token
+      );
+
+      tokenSource.cancel();
+
+      await expect(resultPromise).resolves.toEqual({ items: [] });
+
+      settleHangs.forEach((resolveHang) => resolveHang(undefined));
+    });
+  });
+});

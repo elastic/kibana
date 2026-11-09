@@ -34,15 +34,20 @@ import {
   takeUntil,
   merge,
   map,
+  firstValueFrom,
+  timeout,
+  EMPTY,
 } from 'rxjs';
 import { get } from 'lodash';
 import type { InitialFeatureFlagsGetter } from '@kbn/core-feature-flags-server/src/contracts';
+import type { IRouter } from '@kbn/core-http-server';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import { schema } from '@kbn/config-schema';
 import { createOpenFeatureLogger } from './create_open_feature_logger';
 import { setProviderWithRetries } from './set_provider_with_retries';
 import { type FeatureFlagsConfig, featureFlagsConfig } from './feature_flags_config';
 import { incrementCounter } from './increment_counter';
+import { registerOfrepRoutes } from './ofrep_routes';
 
 /**
  * Core-internal contract for the setup lifecycle step.
@@ -65,6 +70,58 @@ export interface FeatureFlagsSetupDeps {
 }
 
 /**
+ * Start contract used inside core. One-shot evaluation stays available for the HTTP
+ * request-handler context. Plugin start contracts only receive {@link FeatureFlagsStart}.
+ * @internal
+ */
+export interface InternalFeatureFlagsStart extends FeatureFlagsStart {
+  /**
+   * Evaluates a boolean flag for the current request-handler context.
+   * @param flagName The flag ID to evaluate
+   * @param fallbackValue If the flag cannot be evaluated for whatever reason, the fallback value is provided.
+   */
+  getBooleanValue(flagName: string, fallbackValue: boolean): Promise<boolean>;
+
+  /**
+   * Evaluates a string flag for the current request-handler context.
+   * @param flagName The flag ID to evaluate
+   * @param fallbackValue If the flag cannot be evaluated for whatever reason, the fallback value is provided.
+   */
+  getStringValue<Value extends string>(flagName: string, fallbackValue: Value): Promise<Value>;
+
+  /**
+   * Evaluates a number flag for the current request-handler context.
+   * @param flagName The flag ID to evaluate
+   * @param fallbackValue If the flag cannot be evaluated for whatever reason, the fallback value is provided.
+   */
+  getNumberValue<Value extends number>(flagName: string, fallbackValue: Value): Promise<Value>;
+}
+
+/**
+ * Config overrides are often the strings `"true"` and `"false"`.
+ * Boolean evaluation has to match the browser, which treats those strings as booleans.
+ * The provider is not asked, so LaunchDarkly never performs this conversion.
+ */
+function overrideForEvaluation<T extends string | boolean | number>(
+  override: unknown,
+  fallbackValue: T
+): T {
+  if (typeof fallbackValue !== 'boolean') {
+    return override as T;
+  }
+  if (typeof override === 'boolean') {
+    return override as T;
+  }
+  if (override === 'true') {
+    return true as T;
+  }
+  if (override === 'false') {
+    return false as T;
+  }
+  return override as T;
+}
+
+/**
  * The server-side Feature Flags Service
  * @internal
  */
@@ -76,6 +133,7 @@ export class FeatureFlagsService {
   private readonly contextChanged$ = new Subject<void>();
   private context: MultiContextEvaluationContext = { kind: 'multi' };
   private initialFeatureFlagsGetter: InitialFeatureFlagsGetter = async () => ({});
+  private waitForContextReadyPromise: Promise<void> | undefined;
 
   /**
    * The core service's constructor
@@ -100,7 +158,7 @@ export class FeatureFlagsService {
         this.overrides$.next(getFlattenedObject(overrides));
       });
 
-    this.registerCounterRoute(http);
+    this.registerRoutes(http);
 
     return {
       getOverrides: () => this.overrides$.value,
@@ -113,6 +171,8 @@ export class FeatureFlagsService {
           throw new Error('A provider has already been set. This API cannot be called twice.');
         }
         setProviderWithRetries(provider, this.logger);
+        // Emit a context change event when the provider is ready to force the reevaluation of the subscribed flags.
+        OpenFeature.addHandler(ServerProviderEvents.Ready, () => this.contextChanged$.next());
       },
       appendContext: (contextToAppend) => this.appendContext(contextToAppend),
     };
@@ -121,7 +181,7 @@ export class FeatureFlagsService {
   /**
    * Start lifecycle method
    */
-  public start(): FeatureFlagsStart {
+  public start(): InternalFeatureFlagsStart {
     const featureFlagsChanged$ = new Subject<string[]>();
     this.featureFlagsClient.addHandler(ServerProviderEvents.ConfigurationChanged, (event) => {
       if (event?.flagsChanged) {
@@ -200,10 +260,14 @@ export class FeatureFlagsService {
    * Stop lifecycle method
    */
   public async stop() {
-    await OpenFeature.close();
-    this.overrides$.complete();
-    this.stop$.next();
-    this.stop$.complete();
+    try {
+      await OpenFeature.close();
+    } finally {
+      this.overrides$.complete();
+      this.contextChanged$.complete();
+      this.stop$.next();
+      this.stop$.complete();
+    }
   }
 
   /**
@@ -219,11 +283,21 @@ export class FeatureFlagsService {
     fallbackValue: T
   ): Promise<T> {
     const override = get(this.overrides$.value, flagName); // using lodash get because flagName can come with dots and the config parser might structure it in objects.
+
+    // Only wait for the context to be ready if there is no override.
+    if (typeof override === 'undefined') {
+      // DISCLAIMER: During evaluations, we're only waiting for the context to be ready.
+      // We don't check the provider's status because we don't want to halt Kibana if the provider is suffering any sort of downtime.
+      // This is by design.
+      await this.waitForContextReady();
+    }
+
     const value =
       typeof override !== 'undefined'
-        ? (override as T)
+        ? overrideForEvaluation(override, fallbackValue)
         : // We have to bind the evaluation or the client will lose its internal context
           await evaluationFn.bind(this.featureFlagsClient)(flagName, fallbackValue);
+
     addSpanLabels({ [`flag_${flagName.replaceAll('.', '_')}`]: value });
 
     // Report the counter for the flag evaluation.
@@ -252,8 +326,23 @@ export class FeatureFlagsService {
     this.contextChanged$.next();
   }
 
-  private registerCounterRoute(http: InternalHttpServiceSetup): void {
-    http.createRouter('').post(
+  /**
+   * Flag values the browser should render. Config overrides win over the provider snapshot,
+   * matching server-side evaluation.
+   */
+  private async getBrowserSnapshot(): Promise<Record<string, unknown>> {
+    const flags = await this.initialFeatureFlagsGetter();
+    return { ...flags, ...this.overrides$.value };
+  }
+
+  private registerRoutes(http: InternalHttpServiceSetup): void {
+    const router = http.createRouter('');
+    this.registerCounterRoute(router);
+    registerOfrepRoutes(router, () => this.getBrowserSnapshot(), this.logger);
+  }
+
+  private registerCounterRoute(router: IRouter): void {
+    router.post(
       {
         path: '/internal/feature-flags/{flagName}/counter',
         validate: {
@@ -287,6 +376,48 @@ export class FeatureFlagsService {
         incrementCounter(flagName, value);
         return response.accepted();
       }
+    );
+  }
+
+  /**
+   * Waits for the context to be ready.
+   * This is needed to avoid race conditions on early flag evaluations during startup.
+   * @internal
+   */
+  private waitForContextReady(): Promise<void> {
+    if (this.mustWaitForContextReady()) {
+      // Wait until the context is ready but only if we haven't already waited for it before.
+      this.waitForContextReadyPromise =
+        this.waitForContextReadyPromise ??
+        firstValueFrom(
+          this.contextChanged$.pipe(
+            // Re-check in case the context was "updated" without actually adding anything.
+            filter(() => !this.mustWaitForContextReady()),
+            // Wait for 200ms before timing out. `appendContext` is typically called with a debounce of 100ms.
+            // If context is not available in double that time, we probably will not have any context.
+            timeout({ first: 200, with: () => EMPTY })
+          ),
+          // Adding a default value to avoid the promise being rejected if the service stops before the context is ready.
+          { defaultValue: undefined }
+        );
+
+      return this.waitForContextReadyPromise;
+    }
+
+    return Promise.resolve();
+  }
+
+  /**
+   * Checks if we need to wait for the context to be ready.
+   * @internal
+   */
+  private mustWaitForContextReady(): boolean {
+    return (
+      // There is a provider configured (we don't need to wait for the context if there is no provider to evaluate the flags)
+      OpenFeature.providerMetadata !== NOOP_PROVIDER.metadata &&
+      // And the context is still the plain { kind: 'multi' } (no context keys set yet)
+      Object.keys(this.context).length === 1 &&
+      this.context.kind === 'multi'
     );
   }
 }

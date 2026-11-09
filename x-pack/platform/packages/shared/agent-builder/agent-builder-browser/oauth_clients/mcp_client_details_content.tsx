@@ -8,7 +8,8 @@
 import React, { useCallback } from 'react';
 import { EuiButtonIcon, EuiCallOut, EuiCopy, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 import type { OAuthClient } from '@kbn/agent-builder-common';
-import { AGENT_BUILDER_UI_EBT, OAuthClientType } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT, MCP_SERVER_PATH, OAuthClientType } from '@kbn/agent-builder-common';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import fileSaver from 'file-saver';
 import { isEmpty } from 'lodash';
@@ -29,18 +30,31 @@ const isConfidentialClient = (details: McpClientDetailsData): boolean =>
 
 const maskSecret = (secret: string) => '•'.repeat(secret.length);
 
+const getMcpServerUrl = (resource: string, spaceId: string): string => {
+  const url = new URL(resource);
+
+  if (url.pathname.includes(MCP_SERVER_PATH)) {
+    return resource;
+  }
+
+  return addSpaceIdToPath(resource, spaceId, MCP_SERVER_PATH);
+};
+
 export interface McpClientDetailsContentProps {
   clientDetails: McpClientDetailsData;
+  spaceId: string;
   presentation: McpClientDetailsPresentation;
 }
 
 export const McpClientDetailsContent = ({
   clientDetails,
+  spaceId,
   presentation,
 }: McpClientDetailsContentProps) => {
   const [isSecretVisible, toggleSecretVisibility] = useToggle(false);
 
-  const { client_name: clientName, id, resource: mcpServerUrl } = clientDetails;
+  const { client_name: clientName, id, resource } = clientDetails;
+  const mcpServerUrl = getMcpServerUrl(resource, spaceId);
   const showSecretField = presentation === 'modal' && hasClientSecret(clientDetails);
   const showSecretRequiredCallout =
     presentation === 'flyout' && isConfidentialClient(clientDetails);

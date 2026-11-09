@@ -21,13 +21,13 @@ Cloud Security Posture integration components for Kibana Fleet.
 
 ```bash
 # Run all fleet extension tests
-yarn test:jest --testPathPattern=fleet_extensions
+pnpm test:jest --testPathPattern=fleet_extensions
 
 # Run specific test file
-yarn test:jest path/to/test.test.tsx
+pnpm test:jest path/to/test.test.tsx
 
 # Watch mode
-yarn test:jest --watch path/to/test.test.tsx
+pnpm test:jest --watch path/to/test.test.tsx
 ```
 
 ## 🏗️ Component Structure

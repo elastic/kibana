@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout-oblt';
+import { euiSelectors, tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
 
-test.describe(
+// Failing: See https://github.com/elastic/kibana/issues/290729
+test.describe.skip(
   'Annotations List',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
@@ -18,8 +19,8 @@ test.describe(
       await pageObjects.annotations.goto();
     });
 
-    test('create an annotation', async ({ page }) => {
-      await page.getByTestId('o11yRenderToolsRightCreateAnnotationButton').click();
+    test('create an annotation', async ({ page, pageObjects }) => {
+      await pageObjects.annotations.clickCreateAnnotation();
       await page.getByTestId('annotationTitle').fill('Test annotation');
       await page.getByTestId('annotationTitle').blur();
       await page.getByTestId('annotationMessage').fill('Test annotation description');
@@ -32,7 +33,7 @@ test.describe(
       await expect(
         page.locator('[data-test-subj="annotation-marker-body"]:has-text("Test annotation")')
       ).toBeVisible();
-      await expect(page.locator('.euiTableRow')).toHaveCount(1);
+      await expect(page.locator(euiSelectors.basicTable.ROW_SELECTOR)).toHaveCount(1);
       await page.locator('.echAnnotation__marker').hover();
       await expect(
         page.locator(

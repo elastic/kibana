@@ -7,8 +7,12 @@
 
 import pMap from 'p-map';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { IndicesSourceMode } from '@elastic/elasticsearch/lib/api/types';
 
 import { appContextService } from '..';
+
+const isIndexSettingsSourceMode = (mode: string | undefined): mode is IndicesSourceMode =>
+  mode === 'disabled' || mode === 'stored' || mode === 'synthetic';
 
 export async function updateDeprecatedComponentTemplates(esClient: ElasticsearchClient) {
   const componentTemplates = await esClient.cluster.getComponentTemplate({
@@ -18,7 +22,9 @@ export async function updateDeprecatedComponentTemplates(esClient: Elasticsearch
   const deprecatedTemplates = componentTemplates.component_templates.filter(
     (componentTemplate) =>
       componentTemplate.component_template._meta?.managed_by === 'fleet' &&
-      !!componentTemplate.component_template.template.mappings?._source?.mode
+      isIndexSettingsSourceMode(
+        componentTemplate.component_template.template.mappings?._source?.mode
+      )
   );
 
   appContextService
@@ -34,8 +40,11 @@ export async function updateDeprecatedComponentTemplates(esClient: Elasticsearch
     async (componentTemplate) => {
       const source = componentTemplate.component_template.template.mappings!._source;
       const { mode, ...restOfSource } = source!;
-      // export type IndicesSourceMode = 'disabled' | 'stored' | 'synthetic';
-      // export type MappingSourceFieldMode = 'disabled' | 'stored' | 'synthetic';
+      // Mapping `_source.mode` also allows `columnar_stored`, which index settings do not.
+      // Those templates are filtered out above; `mode` here is an `IndicesSourceMode`.
+      if (!isIndexSettingsSourceMode(mode)) {
+        return;
+      }
       const settings = componentTemplate.component_template.template.settings;
       await esClient.cluster.putComponentTemplate({
         name: componentTemplate.name,
@@ -48,7 +57,7 @@ export async function updateDeprecatedComponentTemplates(esClient: Elasticsearch
                 ...settings?.index?.mapping,
                 source: {
                   ...settings?.index?.mapping?.source,
-                  mode: mode!,
+                  mode,
                 },
               },
             },

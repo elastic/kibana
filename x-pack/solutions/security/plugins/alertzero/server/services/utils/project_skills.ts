@@ -7,7 +7,7 @@
 
 import type { WatchCallableRef } from '@kbn/alertzero-common';
 import type { WorkflowYaml } from '@kbn/workflows';
-import { isRecord } from '@kbn/workflows-management-plugin/common/lib/type_guards';
+import { isRecord } from '@kbn/workflows-yaml';
 import type { AgentLookup } from './build_agent_lookup';
 
 const asString = (value: unknown, fallback = ''): string =>

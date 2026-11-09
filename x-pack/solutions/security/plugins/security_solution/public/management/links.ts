@@ -30,6 +30,7 @@ import {
   ARTIFACTS,
   ENDPOINTS,
   ENTITY_ANALYTICS,
+  ENTITY_ANALYTICS_SETTINGS,
   MANAGE,
   POLICIES,
   RESPONSE_ACTIONS_HISTORY,
@@ -143,7 +144,7 @@ export const links: LinkItem = {
     },
     {
       id: SecurityPageName.entityAnalyticsManagement,
-      title: ENTITY_ANALYTICS,
+      title: ENTITY_ANALYTICS_SETTINGS,
       description: i18n.translate(
         'xpack.securitySolution.appLinks.entityAnalyticsManagementDescription',
         {
@@ -157,6 +158,7 @@ export const links: LinkItem = {
       hideTimeline: true,
       capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
       licenseType: 'platinum',
+      globalSearchKeywords: [ENTITY_ANALYTICS, ENTITY_ANALYTICS_SETTINGS],
     },
     {
       id: SecurityPageName.responseActionsHistory,

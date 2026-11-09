@@ -15,17 +15,17 @@ export {
   CUSTOM_CONTENT_DEFAULT_HEIGHT,
   CUSTOM_CONTENT_MIN_HEIGHT,
   CUSTOM_CONTENT_MAX_HEIGHT,
+  CUSTOM_CONTENT_UPDATE_PANEL_TOOL_ID,
+  CUSTOM_CONTENT_GENERATE_DASHBOARD_TOOL_ID,
 } from './constants';
 
 export {
   customContentStateSchema,
-  customContentUpdateSchema,
   customContentPanelUpdateSchema,
   readEsqlQuery,
   toEsqlQueryState,
-  resolveEsqlQueryEdit,
 } from './schema';
-export type { CustomContentUpdate } from './schema';
-export type { ResolvedEsqlQueryEdit, CustomContentState } from './schema';
+export type { CustomContentState } from './schema';
 
 export { stripMarkdownFences } from './strip_markdown_fences';
+export { CUSTOM_CONTENT_LIQUID_OPTIONS } from './liquid_options';

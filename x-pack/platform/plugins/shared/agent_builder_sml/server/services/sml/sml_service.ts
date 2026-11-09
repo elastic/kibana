@@ -26,6 +26,7 @@ import { createSmlIndexer, type SmlIndexer } from './sml_indexer';
 import { SmlCrawlerImpl } from './sml_crawler';
 import type { SmlCrawler } from './types';
 import { smlIndexName } from './sml_storage';
+import { getSmlOriginUri, smlEntryId } from './sml_origin';
 import { SmlAuthzEnumerationIncompleteError, SmlCorpusTooLargeError } from './sml_errors';
 // ES client usage pattern in this module:
 // - Read operations (search, getDocuments, checkAccess) use `esClient.asInternalUser` directly with
@@ -529,19 +530,17 @@ const checkItemsAccess = async ({
 
   let docAuthz: Map<string, SmlKibanaPrivilegeGroup[]>;
   try {
-    const response = await esClient.asInternalUser.search<
-      Pick<SmlDocument, 'attributes' | 'permissions'>
-    >({
+    const response = await esClient.asInternalUser.search<Pick<SmlDocument, 'id' | 'permissions'>>({
       index: smlIndexName,
       size: ids.length,
       allow_no_indices: true,
       ignore_unavailable: true,
       query: {
         bool: {
-          filter: [{ terms: { 'attributes.id': ids } }],
+          filter: [{ terms: { id: ids } }],
         },
       },
-      _source: ['attributes.id', 'permissions'],
+      _source: ['id', 'permissions'],
     });
 
     docAuthz = new Map(
@@ -549,7 +548,7 @@ const checkItemsAccess = async ({
         .filter((hit) => hit._source != null)
         .map((hit) => {
           const source = hit._source!;
-          return [source.attributes?.id ?? '', source.permissions?.kibana?.privileges ?? []] as [
+          return [source.id ?? '', source.permissions?.kibana?.privileges ?? []] as [
             string,
             SmlKibanaPrivilegeGroup[]
           ];
@@ -652,8 +651,7 @@ const SML_SEMANTIC_FIELDS = ['title.semantic', 'description.semantic', 'content.
  * index resolution excludes `nested` fields, so `permissions.kibana.privileges.*` cannot be
  * referenced as a column at all. Space scoping lives in the filter's `.space` term.
  *
- * `references.uri` is extracted via EVAL before KEEP so the result column is
- * a flat keyword array that can be reconstructed into Array<{uri}> client-side.
+ * The origin uri is rebuilt from `id`.
  */
 const buildSmlEsqlQuery = ({
   query,
@@ -672,11 +670,7 @@ const buildSmlEsqlQuery = ({
   // METADATA is required for FUSE (which needs _id, _index, _score to compute RRF).
   const lines: string[] = [`FROM ${smlIndexName} METADATA _id, _index, _score`];
 
-  // ES|QL cannot address keys of a `flattened` field as `attributes.x`; FIELD_EXTRACT them into
-  // plain keyword columns up front so the WHERE / SORT / KEEP below can use them.
-  lines.push(
-    '| EVAL id = FIELD_EXTRACT(attributes, "id"), origin_uri = FIELD_EXTRACT(attributes, "origin.uri")'
-  );
+  lines.push('| EVAL origin_uri = CONCAT(type, "://", SUBSTRING(id, LENGTH(type) + 2))');
 
   // runtime-imposed per-type id-allowlist constraints
   if (constraints) {
@@ -688,9 +682,9 @@ const buildSmlEsqlQuery = ({
         lines.push('| WHERE type != ?');
       } else {
         // Non-empty → allow matching docs of this type, pass through other types
-        const uriPlaceholders = criteria.ids.map(() => '?').join(', ');
-        params.push(typeId, ...criteria.ids.map((id) => `${typeId}://${id}`));
-        lines.push(`| WHERE type != ? OR origin_uri IN (${uriPlaceholders})`);
+        const idPlaceholders = criteria.ids.map(() => '?').join(', ');
+        params.push(typeId, ...criteria.ids.map((id) => smlEntryId(typeId, id)));
+        lines.push(`| WHERE type != ? OR id IN (${idPlaceholders})`);
       }
     }
   }
@@ -798,9 +792,7 @@ export const buildConstraintsFilter = (
       clauses.push({
         bool: {
           should: [
-            {
-              terms: { 'attributes.origin.uri': criteria.ids.map((id) => `${typeId}://${id}`) },
-            },
+            { terms: { id: criteria.ids.map((id) => smlEntryId(typeId, id)) } },
             {
               bool: {
                 must_not: [{ term: { type: typeId } }],
@@ -986,7 +978,8 @@ const searchSml = async ({
 
     const refUrisIdx = colIndex.get('ref_uris');
     if (refUrisIdx !== undefined) {
-      const refUris = toStringArray(row[refUrisIdx]);
+      // Drop the origin; it is returned as `origin`.
+      const refUris = toStringArray(row[refUrisIdx]).filter((uri) => uri !== result.origin.uri);
       if (refUris.length > 0) result.references = refUris.map((uri) => ({ uri }));
     }
 
@@ -1021,31 +1014,32 @@ const resolveTypeIds = (text: string, registeredTypeIds: string[]): string[] => 
   return registeredTypeIds.filter((id) => id.toLowerCase().startsWith(lowered));
 };
 
+/** What a typed autocomplete query asks for. */
+export type SmlAutocompleteIntent =
+  | { kind: 'all' }
+  /** No slash typed yet: the text could be a type prefix or a title prefix. */
+  | { kind: 'either'; text: string }
+  | { kind: 'title'; titleTerm: string }
+  | { kind: 'type'; typeIds: string[]; titleTerm: string };
+
 /**
- * Build the autocomplete query. Results render as "type/title", so a slash splits
+ * Interpret the autocomplete query. Results render as "type/title", so a slash splits
  * the input: the left side must name a registered type, the right prefix-matches
  * the title. A slash that names no type is part of the title, e.g.
  * "sales/marketing".
  */
-const buildSmlAutocompleteQuery = (
+export const interpretAutocompleteQuery = (
   query: string,
   registeredTypeIds: string[]
-): Record<string, unknown> => {
+): SmlAutocompleteIntent => {
   const trimmed = query.trim();
   if (trimmed === '' || trimmed === '*') {
-    return { match_all: {} };
+    return { kind: 'all' };
   }
 
   const slashIdx = trimmed.indexOf('/');
-
-  // No slash typed yet: the text could be either half, so match against both.
   if (slashIdx === -1) {
-    return {
-      bool: {
-        should: [buildTitlePrefixClause(trimmed), buildTypePrefixClause(trimmed)],
-        minimum_should_match: 1,
-      },
-    };
+    return { kind: 'either', text: trimmed };
   }
 
   const typePart = trimmed.slice(0, slashIdx).trim();
@@ -1053,32 +1047,52 @@ const buildSmlAutocompleteQuery = (
 
   // A lone "/" carries no signal, thus, match everything
   if (typePart === '' && namePart === '') {
-    return { match_all: {} };
+    return { kind: 'all' };
   }
 
   if (typePart === '') {
-    return buildTitlePrefixClause(namePart);
+    return { kind: 'title', titleTerm: namePart };
   }
 
   const typeIds = resolveTypeIds(typePart, registeredTypeIds);
   if (typeIds.length === 0) {
-    return buildTitlePrefixClause(trimmed);
+    return { kind: 'title', titleTerm: trimmed };
   }
 
-  if (namePart === '') {
-    return { bool: { filter: [buildTypeTermsClause(typeIds)] } };
-  }
+  return { kind: 'type', typeIds, titleTerm: namePart };
+};
 
-  return {
-    bool: {
-      filter: [buildTypeTermsClause(typeIds)],
-      must: [buildTitlePrefixClause(namePart)],
-    },
-  };
+const buildSmlAutocompleteQuery = (
+  query: string,
+  registeredTypeIds: string[]
+): Record<string, unknown> => {
+  const intent = interpretAutocompleteQuery(query, registeredTypeIds);
+  switch (intent.kind) {
+    case 'all':
+      return { match_all: {} };
+    case 'either':
+      return {
+        bool: {
+          should: [buildTitlePrefixClause(intent.text), buildTypePrefixClause(intent.text)],
+          minimum_should_match: 1,
+        },
+      };
+    case 'title':
+      return buildTitlePrefixClause(intent.titleTerm);
+    case 'type':
+      return intent.titleTerm === ''
+        ? { bool: { filter: [buildTypeTermsClause(intent.typeIds)] } }
+        : {
+            bool: {
+              filter: [buildTypeTermsClause(intent.typeIds)],
+              must: [buildTitlePrefixClause(intent.titleTerm)],
+            },
+          };
+  }
 };
 
 /**
- * Autocomplete the SML index. Prefix-only, with per-row provenance for the @ menu.
+ * Autocomplete the SML index. Prefix-only, with per-row provenance for the # menu.
  *
  * When the security plugin is absent (dev / test), privilege enforcement is
  * skipped but space scoping is still applied — only docs visible in the requested space are
@@ -1150,14 +1164,9 @@ const autocompleteSml = async ({
           filter: filterClauses,
         },
       },
-      // Order will be arbitrary as every result scores the same. `attributes.updated_at` is a
-      // `flattened` keyword holding an ISO-8601 string, so a lexical sort is still chronological.
-      sort: [
-        { _score: { order: 'desc' } },
-        { 'attributes.updated_at': 'desc' },
-        { 'attributes.id': 'asc' },
-      ],
-      _source: ['attributes.id', 'type', 'title', 'attributes.origin'],
+      // Every hit scores the same; sort keys make the order stable.
+      sort: [{ _score: { order: 'desc' } }, { updated_at: 'desc' }, { id: 'asc' }],
+      _source: ['id', 'type', 'title', 'references'],
     });
 
     const results: SmlAutocompleteResult[] = response.hits.hits
@@ -1165,10 +1174,10 @@ const autocompleteSml = async ({
       .map((hit) => {
         const source = hit._source!;
         return {
-          id: source.attributes?.id ?? '',
+          id: source.id ?? '',
           type: source.type ?? '',
           title: source.title ?? '',
-          origin: { uri: source.attributes?.origin?.uri ?? '' },
+          origin: { uri: getSmlOriginUri(source) },
         };
       });
 
@@ -1210,14 +1219,14 @@ const getDocumentsByIds = async ({
       ignore_unavailable: true,
       query: {
         bool: {
-          filter: [{ terms: { 'attributes.id': ids } }, buildVisibilityFilter({ spaceId })],
+          filter: [{ terms: { id: ids } }, buildVisibilityFilter({ spaceId })],
         },
       },
     });
 
     for (const { _source: doc } of response.hits.hits) {
       if (!doc) continue;
-      docMap.set(doc.attributes.id, doc);
+      docMap.set(doc.id, doc);
     }
   } catch (error) {
     if (!isNotFoundError(error)) {

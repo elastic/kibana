@@ -91,32 +91,86 @@ describe('pending cloud connector IaC', () => {
     expect(mockedSendUpdateCloudConnector).not.toHaveBeenCalled();
   });
 
-  it('keeps pending IaC when the connector update returns an error', async () => {
+  it('keeps pending IaC and reports the error when the connector update returns an error', async () => {
     const pending = {
       iac_key: 'sha256:abc',
       iac_blueprint_id: 'federated-identity',
       iac_blueprint_version: 'v1',
     };
-    mockedSendUpdateCloudConnector.mockResolvedValue({
-      data: null,
-      error: new Error('update failed'),
-    });
+    const updateError = new Error('update failed');
+    mockedSendUpdateCloudConnector.mockResolvedValue({ data: null, error: updateError });
     setPendingCloudConnectorIac('test-policy', pending);
+    const onError = jest.fn();
 
     await expect(
       persistPendingCloudConnectorIac({
         policyName: 'test-policy',
         cloudConnectorId: 'connector-1',
+        onError,
       })
     ).resolves.toBeUndefined();
 
+    expect(onError).toHaveBeenCalledWith(updateError);
     expect(takePendingCloudConnectorIac('test-policy')).toEqual(pending);
   });
 
-  it('keeps pending IaC when the connector update throws', async () => {
+  it('keeps pending IaC and reports the error when the connector update throws', async () => {
     const pending = { iac_key: 'sha256:abc' };
-    mockedSendUpdateCloudConnector.mockRejectedValue(new Error('network down'));
+    const thrown = new Error('network down');
+    mockedSendUpdateCloudConnector.mockRejectedValue(thrown);
     setPendingCloudConnectorIac('test-policy', pending);
+    const onError = jest.fn();
+
+    await expect(
+      persistPendingCloudConnectorIac({
+        policyName: 'test-policy',
+        cloudConnectorId: 'connector-1',
+        onError,
+      })
+    ).resolves.toBeUndefined();
+
+    expect(onError).toHaveBeenCalledWith(thrown);
+    expect(takePendingCloudConnectorIac('test-policy')).toEqual(pending);
+  });
+
+  it('wraps a non-Error throw before reporting it', async () => {
+    mockedSendUpdateCloudConnector.mockRejectedValue('string failure');
+    setPendingCloudConnectorIac('test-policy', { iac_key: 'sha256:abc' });
+    const onError = jest.fn();
+
+    await persistPendingCloudConnectorIac({
+      policyName: 'test-policy',
+      cloudConnectorId: 'connector-1',
+      onError,
+    });
+
+    expect(onError).toHaveBeenCalledTimes(1);
+    expect(onError.mock.calls[0][0]).toBeInstanceOf(Error);
+    expect(onError.mock.calls[0][0].message).toBe('string failure');
+  });
+
+  it('reports a failed write once and swallows a throwing handler', async () => {
+    mockedSendUpdateCloudConnector.mockRejectedValue(new Error('network down'));
+    setPendingCloudConnectorIac('test-policy', { iac_key: 'sha256:abc' });
+    const onError = jest.fn(() => {
+      throw new Error('toast service down');
+    });
+
+    await expect(
+      persistPendingCloudConnectorIac({
+        policyName: 'test-policy',
+        cloudConnectorId: 'connector-1',
+        onError,
+      })
+    ).resolves.toBeUndefined();
+
+    expect(onError).toHaveBeenCalledTimes(1);
+    expect(takePendingCloudConnectorIac('test-policy')).toEqual({ iac_key: 'sha256:abc' });
+  });
+
+  it('still swallows a failed write when no onError handler is given', async () => {
+    mockedSendUpdateCloudConnector.mockRejectedValue(new Error('network down'));
+    setPendingCloudConnectorIac('test-policy', { iac_key: 'sha256:abc' });
 
     await expect(
       persistPendingCloudConnectorIac({
@@ -124,7 +178,24 @@ describe('pending cloud connector IaC', () => {
         cloudConnectorId: 'connector-1',
       })
     ).resolves.toBeUndefined();
+  });
 
-    expect(takePendingCloudConnectorIac('test-policy')).toEqual(pending);
+  it('does not report an error when the write succeeds or nothing is pending', async () => {
+    mockedSendUpdateCloudConnector.mockResolvedValue({ data: {} as any, error: null });
+    setPendingCloudConnectorIac('test-policy', { iac_key: 'sha256:abc' });
+    const onError = jest.fn();
+
+    await persistPendingCloudConnectorIac({
+      policyName: 'test-policy',
+      cloudConnectorId: 'connector-1',
+      onError,
+    });
+    await persistPendingCloudConnectorIac({
+      policyName: 'missing-policy',
+      cloudConnectorId: 'connector-1',
+      onError,
+    });
+
+    expect(onError).not.toHaveBeenCalled();
   });
 });

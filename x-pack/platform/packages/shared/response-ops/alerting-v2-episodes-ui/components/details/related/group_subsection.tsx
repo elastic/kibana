@@ -12,9 +12,14 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getRuleIdFromRuleState, type RuleState } from '../../../types/rule_state';
+import type { RelatedEpisodesScope } from '../../../queries/related_episodes_query';
 import { RELATED_ALERT_EPISODES_PAGE_SIZE } from '../../../constants';
 import { useFetchEpisodeActions } from '../../../hooks/use_fetch_episode_actions';
-import { useFetchGroupActions } from '../../../hooks/use_fetch_group_actions';
+import {
+  useFetchEpisodesDataQuery,
+  withEpisodesData,
+} from '../../../hooks/use_fetch_episodes_data_query';
+import { getGroupAction, useFetchGroupActions } from '../../../hooks/use_fetch_group_actions';
 import { useFetchSameGroupEpisodesQuery } from '../../../hooks/use_fetch_same_group_episodes_query';
 import { AlertEpisodeCardListSkeleton } from '../section_skeletons';
 import { RelatedAlertEpisodesList } from './related_list';
@@ -30,6 +35,7 @@ export interface RelatedEpisodesGroupSubsectionProps {
   currentEpisodeId: string | undefined;
   groupHash: string | undefined;
   ruleState: RuleState;
+  scope: RelatedEpisodesScope;
   getEpisodeDetailsHref: (episodeId: string) => string;
   /**
    * When `true`, drop the inner horizontal padding so the subsection sits
@@ -46,6 +52,7 @@ export function RelatedEpisodesGroupSubsection({
   currentEpisodeId,
   groupHash,
   ruleState,
+  scope,
   getEpisodeDetailsHref,
   compressed = false,
 }: RelatedEpisodesGroupSubsectionProps) {
@@ -64,7 +71,7 @@ export function RelatedEpisodesGroupSubsection({
 
   const { data: sameGroupRows = [], isLoading: isLoadingSameGroupRows } =
     useFetchSameGroupEpisodesQuery({
-      ruleId,
+      scope,
       excludeEpisodeId: currentEpisodeId,
       pageSize: RELATED_ALERT_EPISODES_PAGE_SIZE,
       groupHash,
@@ -86,6 +93,17 @@ export function RelatedEpisodesGroupSubsection({
     [sameGroupRows]
   );
 
+  // Loaded on its own, so the rows show up without waiting for it. Without the
+  // data the rows just miss the grouping badges.
+  const { data: sameGroupEpisodesData } = useFetchEpisodesDataQuery({
+    episodeIds: sameGroupEpisodeIds,
+    services: { expressions, spaces },
+  });
+  const sameGroupRowsWithData = useMemo(
+    () => withEpisodesData(sameGroupRows, sameGroupEpisodesData),
+    [sameGroupRows, sameGroupEpisodesData]
+  );
+
   /** We need the actions to display the correct status badges. */
   const { data: sameGroupEpisodeActionsMap } = useFetchEpisodeActions({
     episodeIds: sameGroupEpisodeIds,
@@ -97,7 +115,7 @@ export function RelatedEpisodesGroupSubsection({
     services: { expressions, spaces },
   });
 
-  if (!ruleId || !groupHash) {
+  if (!groupHash) {
     return null;
   }
 
@@ -111,7 +129,9 @@ export function RelatedEpisodesGroupSubsection({
         color="subdued"
         css={{ marginBlockStart: euiTheme.size.xs }}
       >
-        {i18n.RELATED_SAME_GROUP_DESCRIPTION}
+        {scope.type === 'rule'
+          ? i18n.RELATED_SAME_GROUP_DESCRIPTION
+          : i18n.RELATED_SAME_GROUP_SOURCE_DESCRIPTION}
       </EuiText>
       <EuiSpacer size="s" />
       {isLoadingSameGroupRows ? (
@@ -129,10 +149,10 @@ export function RelatedEpisodesGroupSubsection({
         </EuiPanel>
       ) : (
         <RelatedAlertEpisodesList
-          rows={sameGroupRows}
+          rows={sameGroupRowsWithData}
           ruleState={ruleState}
           getEpisodeAction={(id) => sameGroupEpisodeActionsMap?.get(id)}
-          getGroupAction={(gh) => sameGroupGroupActionsMap?.get(gh)}
+          getGroupAction={(gh) => getGroupAction(sameGroupGroupActionsMap, ruleId, gh)}
           getEpisodeDetailsHref={getEpisodeDetailsHref}
           compressed={compressed}
         />

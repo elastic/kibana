@@ -11,21 +11,26 @@ import type { Document, LineCounter } from 'yaml';
 import type { monaco } from '@kbn/code-editor';
 import type { WorkflowYaml } from '@kbn/workflows';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
-import { collectAllVariables } from './collect_all_variables';
+import type { WorkflowContextRegistry, YamlValidationResult } from '@kbn/workflows-yaml';
+import {
+  collectAllVariables,
+  createStepContextResolver,
+  validateLiquidYamlScalars,
+  validateVariables as validateVariablesInternal,
+} from '@kbn/workflows-yaml';
 import { validateDeprecatedStepTypes } from './validate_deprecated_step_types';
 import { validateIfConditions } from './validate_if_conditions';
+import { validateIgnoredFetcherSetting } from './validate_ignored_fetcher_setting';
 import { validateJsonSchemaDefaults } from './validate_json_schema_defaults';
-import { validateLiquidYamlScalars } from './validate_liquid_yaml_scalars';
 import { validateParallelFanOut } from './validate_parallel_fan_out';
 import { validateParallelMode } from './validate_parallel_mode';
 import { validateStepNameUniqueness } from './validate_step_name_uniqueness';
 import { validateTriggerConditions } from './validate_trigger_conditions';
-import { validateVariables as validateVariablesInternal } from './validate_variables';
 import { validateWorkflowOutputsInYaml } from './validate_workflow_outputs_in_yaml';
 import type { WorkflowLookup } from '../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
-import type { YamlValidationResult } from '../model/types';
 
 export interface RunWorkflowYamlValidationsParams {
+  registry: WorkflowContextRegistry;
   yamlString: string;
   model: monaco.editor.ITextModel;
   yamlDocument: Document;
@@ -33,6 +38,7 @@ export interface RunWorkflowYamlValidationsParams {
   workflowLookup?: WorkflowLookup;
   workflowGraph?: WorkflowGraph;
   workflowDefinition?: WorkflowYaml;
+  warnIgnoredKibanaFetcher?: boolean;
 }
 
 /**
@@ -43,6 +49,7 @@ export interface RunWorkflowYamlValidationsParams {
  * `collectFullWorkflowYamlValidationResults`.
  */
 export function runWorkflowYamlValidations({
+  registry,
   yamlString,
   model,
   yamlDocument,
@@ -50,17 +57,18 @@ export function runWorkflowYamlValidations({
   workflowLookup,
   workflowGraph,
   workflowDefinition,
+  warnIgnoredKibanaFetcher = false,
 }: RunWorkflowYamlValidationsParams): YamlValidationResult[] {
-  const liquidScalarResults =
+  const stepContext =
     workflowGraph && workflowDefinition
-      ? validateLiquidYamlScalars(
-          yamlString,
-          yamlDocument,
-          model,
-          workflowGraph,
-          workflowDefinition
-        )
-      : validateLiquidYamlScalars(yamlString, yamlDocument, model);
+      ? createStepContextResolver(registry, workflowDefinition, workflowGraph, yamlDocument)
+      : undefined;
+  const liquidScalarResults = validateLiquidYamlScalars(
+    yamlString,
+    yamlDocument,
+    lineCounter,
+    workflowDefinition && stepContext ? { workflowDefinition, stepContext } : undefined
+  );
 
   const results: YamlValidationResult[] = [
     ...validateStepNameUniqueness(yamlDocument, lineCounter),
@@ -68,25 +76,26 @@ export function runWorkflowYamlValidations({
     ...validateWorkflowOutputsInYaml(yamlDocument, model, workflowDefinition?.outputs),
   ];
 
-  if (workflowLookup && lineCounter) {
+  if (workflowLookup) {
     results.push(
       ...validateDeprecatedStepTypes(workflowLookup, lineCounter),
+      ...validateIgnoredFetcherSetting(workflowLookup, lineCounter, warnIgnoredKibanaFetcher),
       ...validateIfConditions(workflowLookup, lineCounter),
       ...validateParallelMode(workflowLookup, lineCounter),
       ...validateParallelFanOut(workflowLookup, lineCounter)
     );
   }
 
-  if (workflowGraph && workflowDefinition) {
-    const variableItems = collectAllVariables(model, yamlDocument, workflowGraph);
+  if (workflowGraph && workflowDefinition && stepContext) {
+    const variableItems = collectAllVariables(yamlString, yamlDocument, lineCounter, workflowGraph);
     results.push(
       ...validateTriggerConditions(workflowDefinition, yamlDocument),
       ...validateVariablesInternal(
+        stepContext,
         variableItems,
-        workflowGraph,
         workflowDefinition,
         yamlDocument,
-        model
+        yamlString
       ),
       ...liquidScalarResults.filter((result) => result.owner === 'variable-validation'),
       ...validateJsonSchemaDefaults(yamlDocument, workflowDefinition, model)

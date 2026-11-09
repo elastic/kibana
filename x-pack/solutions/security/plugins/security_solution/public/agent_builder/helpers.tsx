@@ -33,9 +33,10 @@ export const hashIds = (ids: string[]): number => {
 const chunkAlerts = (alertItems: TimelineItem[]): BulkAlertsAttachmentInput[] => {
   const batches: BulkAlertsAttachmentInput[] = [];
   for (let i = 0; i < alertItems.length; i += ALERTS_BATCH_MAX_SIZE) {
+    const chunk = alertItems.slice(i, i + ALERTS_BATCH_MAX_SIZE);
     batches.push({
       type: SecurityAgentBuilderAttachments.alerts,
-      data: { alertIds: alertItems.slice(i, i + ALERTS_BATCH_MAX_SIZE).map((a) => a._id) },
+      data: { alertIds: chunk.map((a) => a._id) },
     });
   }
   return batches;

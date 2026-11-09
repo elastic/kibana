@@ -16,8 +16,8 @@ const sampleTaskPlugin = path.resolve(
 /**
  * Task Manager running with UIAM API keys, which only serverless does. Serverless FTR brings up a
  * real UIAM service alongside Elasticsearch (`esServerlessOptions: { uiam: true }` in
- * `serverless/shared/config.base.ts`), so tasks can be granted, provisioned and executed against
- * real credentials rather than mocks.
+ * `serverless/shared/config.base.ts`), so tasks can be granted and executed against real
+ * credentials rather than mocks.
  *
  * Uses the `sample_task_plugin` fixture from `plugin_api_integration` to schedule tasks and read
  * back their state.
@@ -34,10 +34,7 @@ export default createTestConfig({
     // Use the UIAM key persisted on a task as the credential at execution time.
     '--xpack.task_manager.api_key_type=uiam',
     '--xpack.task_manager.grant_uiam_api_keys=true',
-    // The provisioning task backfills UIAM keys onto tasks that only carry an ES key; it is
-    // feature-flagged off by default.
-    '--feature_flags.overrides.taskManager.provisionUiamApiKeys=true',
-    // Poll frequently so `runSoon` turns around quickly.
+    // Poll frequently so scheduled tasks turn around quickly.
     '--xpack.task_manager.poll_interval=1000',
     `--plugin-path=${sampleTaskPlugin}`,
   ],

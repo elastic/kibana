@@ -61,16 +61,30 @@ dependsOn:
   - '@kbn/unified-data-table'
   - '@kbn/core-spaces-common'
   - '@kbn/coloring'
+  - '@kbn/palettes'
   - '@kbn/lens-plugin'
   - '@kbn/charts-plugin'
   - '@kbn/core-ui-settings-browser'
   - '@kbn/unified-doc-viewer-plugin'
   - '@kbn/rule-data-utils'
+  - '@kbn/object-utils'
   - '@kbn/rule-registry-plugin'
   - '@kbn/tooling-log'
   - '@kbn/test'
   - '@kbn/ui-callout'
+  - '@kbn/flyout-template'
+  - '@kbn/flyout-sections'
   - '@kbn/response-ops-alerts-apis'
+  - '@kbn/connector-specs'
+  - '@kbn/data-source'
+  - '@kbn/kibana-utils-plugin'
+  - '@kbn/ui-actions-plugin'
+  - '@kbn/unified-histogram'
+  - '@kbn/zod'
+  - '@kbn/cell-actions'
+  - '@kbn/alerts-ui-shared'
+  - '@kbn/share-plugin'
+  - '@kbn/deeplinks-analytics'
 tags:
   - shared-browser
   - package
@@ -78,11 +92,10 @@ tags:
   - group-platform
   - shared
   - jest-unit-tests
+  - jest-integration-tests
 fileGroups:
   src:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

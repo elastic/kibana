@@ -35,12 +35,17 @@ module.exports = {
     ],
   },
 
-  create(context) {
-    const options = context.options[0] || {};
-    const restricted = new Set(options.restricted || []);
-    if (restricted.size === 0) return {};
+  createOnce(context) {
+    let restricted;
 
     return {
+      before() {
+        const options = context.options[0] || {};
+        restricted = new Set(options.restricted || []);
+        if (restricted.size === 0) {
+          return false;
+        }
+      },
       CallExpression(node) {
         const { callee } = node;
 

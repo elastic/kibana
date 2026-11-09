@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiButtonEmpty, EuiLoadingSpinner, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiButtonEmpty, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import React, { useCallback, useMemo } from 'react';
 import { DraggableBadge } from '../../../../../common/components/draggables';
-import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry/events/flyout_v2/types';
-import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
 import { DEFAULT_ALERTS_INDEX } from '../../../../../../common/constants';
 import { ENTITY_TYPE_BY_FIELD, getFlyoutPanelProps } from './helpers';
 import { useEntityEuidFromAlerts } from './use_entity_euid_from_alerts';
 import { useMarkdownFormatterContext } from '../context';
+import { DisabledFieldMarkdownRenderer } from './disabled_field_markdown_renderer';
+import { chipLabelCss, inlineFieldWrapperCss } from './styles';
+import { useIsChipLabelTruncated } from './use_is_chip_label_truncated';
 import { getAlertIdChipAriaLabel } from './translations';
 import type { ParsedField } from '../types';
 
@@ -28,45 +28,12 @@ const ALERT_ID_FIELDS: ReadonlySet<string> = new Set(['_id', 'kibana.alert.uuid'
 
 const contextId = 'FieldMarkdownRenderer';
 
-const inlineFieldWrapperCss = css`
-  display: inline-block;
-  vertical-align: middle;
-
-  .euiBadge {
-    vertical-align: middle;
-  }
-`;
-
-/** Constrains long chip labels (UUIDs, hashes) to a readable width.
- *  10rem keeps the value theme-relative (scales with the root font size). */
-const chipLabelCss = css`
-  display: inline-block;
-  max-width: 10rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  vertical-align: middle;
-  white-space: nowrap;
-`;
-
-export const FieldMarkdownRenderer = ({ icon, name, value }: ParsedField) => {
-  const { disableActions, scopeId, alertIds } = useMarkdownFormatterContext();
-  const { openFlyout, openRightPanel } = useExpandableFlyoutApi();
+const InteractiveFieldMarkdownRenderer = ({ icon, name, value }: ParsedField) => {
+  const { scopeId, alertIds } = useMarkdownFormatterContext();
   const { openDocumentFlyoutFromPattern, openHostFlyout, openUserFlyout } = useFlyoutApi();
   const { euiTheme } = useEuiTheme();
-  const enableNewFlyout = useIsNewFlyoutEnabled();
 
-  // Detect whether the chip label is visually truncated so the full-value tooltip is only shown
-  // when needed — avoids a redundant tooltip for short values that already fit in the chip.
-  // Re-run whenever `value` or `disableActions` changes: a different value changes the text width,
-  // and a different `disableActions` switches the render path (attaching `chipLabelRef` to a
-  // different DOM node), so the measurement needs to be refreshed in both cases.
-  const chipLabelRef = useRef<HTMLSpanElement>(null);
-  const [isValueTruncated, setIsValueTruncated] = useState(false);
-
-  useLayoutEffect(() => {
-    const el = chipLabelRef.current;
-    setIsValueTruncated(el != null && el.scrollWidth > el.clientWidth);
-  }, [value, disableActions]);
+  const { chipLabelRef, isValueTruncated } = useIsChipLabelTruncated(value);
 
   const stringValue = typeof value === 'string' ? value : undefined;
 
@@ -76,28 +43,16 @@ export const FieldMarkdownRenderer = ({ icon, name, value }: ParsedField) => {
 
   // Alert-id chips are clickable only when the value is a known alert id for this attack.
   const isClickableAlertId =
-    ALERT_ID_FIELDS.has(name) &&
-    !disableActions &&
-    stringValue != null &&
-    alertIdSet.has(stringValue);
+    ALERT_ID_FIELDS.has(name) && stringValue != null && alertIdSet.has(stringValue);
 
   const onAlertIdClick = useCallback(() => {
     if (stringValue == null) return;
-    if (enableNewFlyout) {
-      openDocumentFlyoutFromPattern({
-        documentId: stringValue,
-        indexName: ALERTS_INDEX_PATTERN,
-        origin: FLYOUT_ORIGIN.ATTACK_SUMMARY_ALERT,
-      });
-    } else {
-      openFlyout({
-        right: {
-          id: DocumentDetailsRightPanelKey,
-          params: { id: stringValue, indexName: ALERTS_INDEX_PATTERN, scopeId },
-        },
-      });
-    }
-  }, [enableNewFlyout, openDocumentFlyoutFromPattern, openFlyout, scopeId, stringValue]);
+    openDocumentFlyoutFromPattern({
+      documentId: stringValue,
+      indexName: ALERTS_INDEX_PATTERN,
+      origin: FLYOUT_ORIGIN.ATTACK_SUMMARY_ALERT,
+    });
+  }, [openDocumentFlyoutFromPattern, stringValue]);
 
   const isEntityField = name in ENTITY_TYPE_BY_FIELD && typeof value === 'string';
 
@@ -105,7 +60,7 @@ export const FieldMarkdownRenderer = ({ icon, name, value }: ParsedField) => {
     alertIds: alertIds ?? [],
     fieldName: name,
     fieldValue: typeof value === 'string' ? value : '',
-    enabled: !disableActions && isEntityField,
+    enabled: isEntityField,
   });
 
   const flyoutPanelProps = useMemo(
@@ -122,27 +77,13 @@ export const FieldMarkdownRenderer = ({ icon, name, value }: ParsedField) => {
         return;
       }
 
-      if (enableNewFlyout) {
-        if (ENTITY_TYPE_BY_FIELD[name] === 'host') {
-          openHostFlyout({ hostName: value as string, entityId: euid, scopeId });
-        } else {
-          openUserFlyout({ userName: value as string, entityId: euid, scopeId });
-        }
+      if (ENTITY_TYPE_BY_FIELD[name] === 'host') {
+        openHostFlyout({ hostName: value as string, entityId: euid, scopeId });
       } else {
-        openRightPanel(flyoutPanelProps);
+        openUserFlyout({ userName: value as string, entityId: euid, scopeId });
       }
     },
-    [
-      flyoutPanelProps,
-      openRightPanel,
-      openHostFlyout,
-      openUserFlyout,
-      enableNewFlyout,
-      name,
-      value,
-      euid,
-      scopeId,
-    ]
+    [flyoutPanelProps, openHostFlyout, openUserFlyout, name, value, euid, scopeId]
   );
 
   const entityButton: React.ReactElement | null = useMemo(
@@ -171,29 +112,6 @@ export const FieldMarkdownRenderer = ({ icon, name, value }: ParsedField) => {
       ) : null,
     [euiTheme.font.scale.s, euiTheme.size.xs, flyoutPanelProps, isLoading, onEntityClick, value]
   );
-
-  if (disableActions) {
-    return (
-      <span css={inlineFieldWrapperCss} data-test-subj="fieldMarkdownRendererInlineWrapper">
-        <EuiToolTip
-          content={isValueTruncated ? `${name}: ${value}` : name}
-          data-test-subj="fieldMarkdownRendererToolTip"
-          position="top"
-        >
-          <EuiBadge
-            color="hollow"
-            data-test-subj="disabledActionsBadge"
-            iconType={icon}
-            tabIndex={0}
-          >
-            <span ref={chipLabelRef} css={chipLabelCss}>
-              {value}
-            </span>
-          </EuiBadge>
-        </EuiToolTip>
-      </span>
-    );
-  }
 
   if (isClickableAlertId && stringValue != null) {
     return (
@@ -257,4 +175,18 @@ export const FieldMarkdownRenderer = ({ icon, name, value }: ParsedField) => {
       </DraggableBadge>
     </span>
   );
+};
+
+/**
+ * Renders a parsed `{{ field value }}` chip. Interactive chips need the Security app's flyout
+ * providers, so their hooks only run when actions are enabled.
+ */
+export const FieldMarkdownRenderer = (props: ParsedField) => {
+  const { disableActions, wrapFieldValues } = useMarkdownFormatterContext();
+
+  if (disableActions) {
+    return <DisabledFieldMarkdownRenderer {...props} wrapFieldValues={wrapFieldValues} />;
+  }
+
+  return <InteractiveFieldMarkdownRenderer {...props} />;
 };

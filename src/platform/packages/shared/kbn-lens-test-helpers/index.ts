@@ -8,3 +8,20 @@
  */
 
 export { buildTrendlineQueryCases, type TrendlineQueryCase } from './src/trendline_query_cases';
+export {
+  buildEsqlConversionCasesByGroup,
+  createEsqlConversionIndexPattern,
+  createEsqlConversionInput,
+  createEsqlConversionUiSettings,
+  ESQL_CONVERSION_DATE_RANGE,
+  ESQL_CONVERSION_DATASETS,
+  ESQL_CONVERSION_NOW,
+  type EsqlConversionCase,
+  type EsqlConversionColumn,
+  type EsqlConversionDataset,
+  type EsqlConversionDatasetId,
+  type FailedEsqlConversionCase,
+  isFailedEsqlConversionCase,
+  type SuccessfulEsqlConversionCase,
+  isSuccessfulEsqlConversionCase,
+} from './src/esql_conversion_cases';

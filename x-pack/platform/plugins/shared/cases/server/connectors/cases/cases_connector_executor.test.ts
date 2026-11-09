@@ -50,6 +50,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { Logger } from '@kbn/core/server';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import type { CasesConnectorRunParams } from './types';
+import type { ExtractObservablesSource } from '../../common/types/case';
 import { INITIAL_ORACLE_RECORD_COUNTER } from './constants';
 import { CaseSeverity, ConnectorTypes, CustomFieldTypes } from '../../../common/types/domain';
 
@@ -123,7 +124,7 @@ describe('CasesConnectorExecutor', () => {
     casesClientMock.cases.bulkGet.mockResolvedValue({ cases, errors: [] });
     casesClientMock.cases.bulkCreate.mockResolvedValue({ cases: [] });
     casesClientMock.cases.bulkUpdate.mockResolvedValue([]);
-    casesClientMock.attachments.bulkCreate.mockResolvedValue(cases[0]);
+    casesClientMock.attachments.bulkCreate.mockResolvedValue([]);
     casesClientMock.configure.get = jest.fn().mockResolvedValue([]);
     casesClientMock.fieldDefinitions.getFieldDefinitions.mockResolvedValue({
       fieldDefinitions: [],
@@ -355,6 +356,11 @@ describe('CasesConnectorExecutor', () => {
                   ],
                 },
                 Object {
+                  "extractObservablesSourceByCaseId": Map {
+                    "mock-id-1" => "space_default",
+                    "mock-id-2" => "space_default",
+                    "mock-id-3" => "space_default",
+                  },
                   "relaxRequiredFields": true,
                 },
               ],
@@ -1371,6 +1377,64 @@ fields: []
             expect(actionsClient.get).toHaveBeenCalledWith({ id: 'jira-1' });
           });
 
+          describe('extractObservables override', () => {
+            const v2TemplateWithExtractObservables = {
+              ...v2TemplateSO,
+              attributes: {
+                ...v2TemplateSO.attributes,
+                definition: `
+name: "V2 Template"
+description: "Created from v2 template"
+settings:
+  syncAlerts: true
+  extractObservables: true
+fields: []
+`,
+              },
+            };
+
+            beforeEach(() => {
+              casesClientMock.templates.getTemplate = jest
+                .fn()
+                .mockResolvedValue(v2TemplateWithExtractObservables);
+              casesClientMock.cases.bulkGet.mockResolvedValue({
+                cases: [],
+                errors: [
+                  { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+                ],
+              });
+            });
+
+            it('wins over the template settings value', async () => {
+              await connectorExecutor.execute({
+                ...params,
+                owner: SECURITY_SOLUTION_OWNER,
+                templateId: 'tmpl-v2-id',
+                templateVersion: '1',
+                extractObservables: false,
+              });
+
+              expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
+                syncAlerts: true,
+                extractObservables: false,
+              });
+            });
+
+            it('falls back to the template settings value when the override is null', async () => {
+              await connectorExecutor.execute({
+                ...params,
+                templateId: 'tmpl-v2-id',
+                templateVersion: '1',
+                extractObservables: null,
+              });
+
+              expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
+                syncAlerts: true,
+                extractObservables: true,
+              });
+            });
+          });
+
           it('skips template assignees without a Platinum license so case creation still succeeds', async () => {
             const v2TemplateWithAssignees = {
               ...v2TemplateSO,
@@ -2261,8 +2325,16 @@ fields: []
             });
           };
 
-          it('turns syncAlerts and extractObservables on for Security when no template is selected', async () => {
+          it('uses extractObservables from the space configuration', async () => {
             mockCaseNotFound();
+            casesClientMock.configure.get = jest.fn().mockResolvedValue([
+              {
+                owner: SECURITY_SOLUTION_OWNER,
+                customFields: [],
+                templates: [],
+                extractObservables: true,
+              },
+            ]);
 
             await connectorExecutor.execute({
               ...params,
@@ -2276,8 +2348,9 @@ fields: []
             });
           });
 
-          it('keeps syncAlerts and extractObservables off for Observability when no template is selected', async () => {
+          it('falls back to the owner default when no space configuration exists', async () => {
             mockCaseNotFound();
+            casesClientMock.configure.get = jest.fn().mockResolvedValue([]);
 
             await connectorExecutor.execute({
               ...params,
@@ -2289,6 +2362,338 @@ fields: []
               syncAlerts: false,
               extractObservables: false,
             });
+          });
+
+          it('falls back to true for securitySolution when no space configuration exists', async () => {
+            mockCaseNotFound();
+            casesClientMock.configure.get = jest.fn().mockResolvedValue([]);
+
+            await connectorExecutor.execute({
+              ...params,
+              owner: SECURITY_SOLUTION_OWNER,
+              templateId: null,
+            });
+
+            expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
+              syncAlerts: true,
+              extractObservables: true,
+            });
+          });
+
+          it('uses space config extractObservables: false when explicitly set', async () => {
+            mockCaseNotFound();
+            casesClientMock.configure.get = jest.fn().mockResolvedValue([
+              {
+                owner: SECURITY_SOLUTION_OWNER,
+                customFields: [],
+                templates: [],
+                extractObservables: false,
+              },
+            ]);
+
+            await connectorExecutor.execute({
+              ...params,
+              owner: SECURITY_SOLUTION_OWNER,
+              templateId: null,
+            });
+
+            expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
+              syncAlerts: true,
+              extractObservables: false,
+            });
+          });
+
+          it('per-rule extractObservables override wins over space config default', async () => {
+            mockCaseNotFound();
+            casesClientMock.configure.get = jest.fn().mockResolvedValue([
+              {
+                owner: SECURITY_SOLUTION_OWNER,
+                customFields: [],
+                templates: [],
+                extractObservables: true,
+              },
+            ]);
+
+            await connectorExecutor.execute({
+              ...params,
+              owner: SECURITY_SOLUTION_OWNER,
+              templateId: null,
+              extractObservables: false,
+            });
+
+            expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
+              syncAlerts: true,
+              extractObservables: false,
+            });
+          });
+
+          it('per-rule extractObservables: true overrides space config false', async () => {
+            mockCaseNotFound();
+            casesClientMock.configure.get = jest.fn().mockResolvedValue([
+              {
+                owner: SECURITY_SOLUTION_OWNER,
+                customFields: [],
+                templates: [],
+                extractObservables: false,
+              },
+            ]);
+
+            await connectorExecutor.execute({
+              ...params,
+              owner: SECURITY_SOLUTION_OWNER,
+              templateId: null,
+              extractObservables: true,
+            });
+
+            expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
+              syncAlerts: true,
+              extractObservables: true,
+            });
+          });
+
+          it('per-rule extractObservables: null inherits space config', async () => {
+            mockCaseNotFound();
+            casesClientMock.configure.get = jest.fn().mockResolvedValue([
+              {
+                owner: SECURITY_SOLUTION_OWNER,
+                customFields: [],
+                templates: [],
+                extractObservables: true,
+              },
+            ]);
+
+            await connectorExecutor.execute({
+              ...params,
+              owner: SECURITY_SOLUTION_OWNER,
+              templateId: null,
+              extractObservables: null,
+            });
+
+            expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
+              syncAlerts: true,
+              extractObservables: true,
+            });
+          });
+
+          it('ignores the per-rule override for an owner that disables observables', async () => {
+            mockCaseNotFound();
+            casesClientMock.configure.get = jest.fn().mockResolvedValue([]);
+
+            await connectorExecutor.execute({
+              ...params,
+              owner: OBSERVABILITY_OWNER,
+              templateId: null,
+              extractObservables: true,
+            });
+
+            expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
+              syncAlerts: false,
+              extractObservables: false,
+            });
+          });
+
+          it('ignores the per-rule override for an owner that does not auto-extract by default (Stack)', async () => {
+            mockCaseNotFound();
+            casesClientMock.configure.get = jest.fn().mockResolvedValue([
+              {
+                owner: 'cases',
+                customFields: [],
+                templates: [],
+                extractObservables: false,
+              },
+            ]);
+
+            await connectorExecutor.execute({
+              ...params,
+              owner: 'cases',
+              templateId: null,
+              extractObservables: true,
+            });
+
+            expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
+              syncAlerts: false,
+              extractObservables: false,
+            });
+          });
+        });
+
+        describe('extractObservables source map', () => {
+          const legacyTemplateKey = 'source-legacy-template';
+          const v2TemplateId = 'source-v2-template';
+          const caseIds = ['mock-id-1', 'mock-id-2', 'mock-id-3'];
+
+          const mockAllCasesNotFound = () => {
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: caseIds.map((caseId) => ({
+                caseId,
+                error: 'Not found',
+                message: 'Not found',
+                status: 404,
+              })),
+            });
+          };
+
+          const getBulkCreateCall = () => {
+            const [[data, options]] = casesClientMock.cases.bulkCreate.mock.calls;
+            return { data, options };
+          };
+
+          /** Sets up the builder under test and returns the template params of the run. */
+          const setUpBuilder = ({
+            builder,
+            templateSetsExtractObservables,
+          }: {
+            builder: 'legacy-no-template' | 'legacy-template' | 'v2-template';
+            templateSetsExtractObservables: boolean;
+          }) => {
+            if (builder === 'v2-template') {
+              casesClientMock.templates.getTemplate = jest.fn().mockResolvedValue({
+                id: v2TemplateId,
+                type: 'cases-templates',
+                references: [],
+                attributes: {
+                  templateId: v2TemplateId,
+                  name: 'Source template',
+                  owner: SECURITY_SOLUTION_OWNER,
+                  definition: `
+name: "Source template"
+settings:
+  syncAlerts: true${templateSetsExtractObservables ? '\n  extractObservables: false' : ''}
+fields: []
+`,
+                  templateVersion: 1,
+                  deletedAt: null,
+                  isEnabled: true,
+                  isLatest: true,
+                },
+              });
+              return { templateId: v2TemplateId, templateVersion: '1' };
+            }
+
+            casesClientMock.configure.get = jest.fn().mockResolvedValue([
+              {
+                owner: SECURITY_SOLUTION_OWNER,
+                customFields: [],
+                templates:
+                  builder === 'legacy-template'
+                    ? [
+                        {
+                          key: legacyTemplateKey,
+                          name: 'Source legacy template',
+                          caseFields: {
+                            settings: {
+                              syncAlerts: true,
+                              ...(templateSetsExtractObservables
+                                ? { extractObservables: false }
+                                : {}),
+                            },
+                          },
+                        },
+                      ]
+                    : [],
+                extractObservables: true,
+              },
+            ]);
+
+            return {
+              templateId: builder === 'legacy-template' ? legacyTemplateKey : null,
+              templateVersion: null,
+            };
+          };
+
+          const overrides = [undefined, null, true, false] as const;
+          const builders = ['legacy-no-template', 'legacy-template', 'v2-template'] as const;
+
+          const table = builders.flatMap((builder) =>
+            [false, true]
+              // A case without a template cannot get a value from a template.
+              .filter((templateSets) => builder !== 'legacy-no-template' || !templateSets)
+              .flatMap((templateSetsExtractObservables) =>
+                overrides.map((override) => {
+                  // The space default is `true`. The template value, when set, is `false`.
+                  const baselineValue = !templateSetsExtractObservables;
+                  const baselineSource: ExtractObservablesSource = templateSetsExtractObservables
+                    ? 'template'
+                    : 'space_default';
+
+                  return {
+                    builder,
+                    templateSetsExtractObservables,
+                    override,
+                    // An override that equals the baseline value is not a rule choice.
+                    expected:
+                      override == null || override === baselineValue
+                        ? baselineSource
+                        : ('rule' as ExtractObservablesSource),
+                  };
+                })
+              )
+          );
+
+          it.each(table)(
+            'stores "$expected" for every created case: $builder, template sets value: $templateSetsExtractObservables, override: $override',
+            async ({ builder, templateSetsExtractObservables, override, expected }) => {
+              mockAllCasesNotFound();
+              const templateParams = setUpBuilder({ builder, templateSetsExtractObservables });
+
+              await connectorExecutor.execute({
+                ...params,
+                owner: SECURITY_SOLUTION_OWNER,
+                ...templateParams,
+                extractObservables: override,
+              });
+
+              expect(casesClientMock.cases.bulkCreate).toHaveBeenCalledTimes(1);
+              const { data, options } = getBulkCreateCall();
+
+              expect(data.cases.map(({ id }) => id)).toEqual(caseIds);
+              expect(options).toEqual({
+                relaxRequiredFields: true,
+                extractObservablesSourceByCaseId: new Map(caseIds.map((id) => [id, expected])),
+              });
+              data.cases.forEach(({ settings }) => {
+                expect(settings).not.toHaveProperty('extractObservablesSource');
+              });
+            }
+          );
+
+          it('stores "space_default" when the owner ignores the per-rule override', async () => {
+            mockAllCasesNotFound();
+
+            await connectorExecutor.execute({
+              ...params,
+              owner: OBSERVABILITY_OWNER,
+              templateId: null,
+              extractObservables: true,
+            });
+
+            expect(getBulkCreateCall().options?.extractObservablesSourceByCaseId).toEqual(
+              new Map(caseIds.map((id) => [id, 'space_default']))
+            );
+          });
+
+          it('stores the source for cases created out of closed cases', async () => {
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [{ ...cases[0], status: CaseStatuses.closed }, cases[1]],
+              errors: [],
+            });
+            mockBulkUpdateRecord.mockResolvedValue([{ ...oracleRecords[0], counter: 2 }]);
+
+            await connectorExecutor.execute({
+              ...params,
+              owner: SECURITY_SOLUTION_OWNER,
+              reopenClosedCases: false,
+              extractObservables: false,
+            });
+
+            const { data, options } = getBulkCreateCall();
+            expect(data.cases).toHaveLength(1);
+            expect(options).toEqual({
+              relaxRequiredFields: true,
+              extractObservablesSourceByCaseId: new Map([[data.cases[0].id, 'rule']]),
+            });
+            expect(data.cases[0].settings).not.toHaveProperty('extractObservablesSource');
           });
         });
 
@@ -2427,6 +2832,7 @@ fields: []
             // on this create path too, not only on upsertCases.
             expect(casesClientMock.cases.bulkCreate.mock.calls[0][1]).toEqual({
               relaxRequiredFields: true,
+              extractObservablesSourceByCaseId: new Map([['mock-id-4', 'space_default']]),
             });
 
             expect(casesClientMock.cases.bulkCreate.mock.calls[0][0]).toMatchInlineSnapshot(`
@@ -3079,7 +3485,7 @@ fields: []
       });
 
       casesClientMock.cases.bulkGet.mockResolvedValue({ cases: [cases[0]], errors: [] });
-      casesClientMock.attachments.bulkCreate.mockResolvedValue(cases[0]);
+      casesClientMock.attachments.bulkCreate.mockResolvedValue([]);
 
       getCasesClient.mockReturnValue(casesClientMock);
 
@@ -4451,6 +4857,11 @@ fields: []
                   ],
                 },
                 Object {
+                  "extractObservablesSourceByCaseId": Map {
+                    "mock-id-1" => "space_default",
+                    "mock-id-2" => "space_default",
+                    "mock-id-3" => "space_default",
+                  },
                   "relaxRequiredFields": true,
                 },
               ],

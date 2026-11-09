@@ -26,7 +26,7 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 export interface CreateOptionItem {
   id: string;
   iconType: string;
-  title: string;
+  title: ReactNode;
   description: string;
   onClick: () => void;
   /** When `true`, the option is rendered disabled and its click is a no-op. */
@@ -102,6 +102,8 @@ const actionPanelDisabledStyle = css({
   opacity: 0.5,
 });
 
+const actionPanelTitleStyle = css({ fontWeight: 700 });
+
 const noop = () => undefined;
 
 export const CreateOptionActionPanel: React.FC<{
@@ -125,8 +127,8 @@ export const CreateOptionActionPanel: React.FC<{
           <EuiIcon type={item.iconType} size="l" color="text" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem css={listEmptyStateStyles.actionPanelTextWrapper}>
-          <EuiText size="s">
-            <strong>{item.title}</strong>
+          <EuiText size="s" css={actionPanelTitleStyle}>
+            {item.title}
           </EuiText>
           <EuiText size="xs" color="subdued">
             {item.description}

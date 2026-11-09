@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest, testData } from '../../../common/ui/fixtures';
 
-spaceTest.describe('Discover app - errors', { tag: tags.stateful.all }, () => {
+// Suite fails on ECH: https://github.com/elastic/kibana/issues/268458
+spaceTest.describe('Discover app - errors', { tag: '@local-stateful-classic' }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.cleanStandardList();
     await scoutSpace.savedObjects.load(testData.INVALID_SCRIPTED_FIELD_KBN_ARCHIVE);

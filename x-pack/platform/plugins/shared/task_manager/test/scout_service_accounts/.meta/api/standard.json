@@ -1,0 +1,242 @@
+{
+  "sha1": "a0b6075822c5be1c44f8c30d49397739b49853a3",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "018134b55a471eb-4e4673fe7ca0ac0",
+      "title": "Task Manager service account credentials stores the credential as plain attributes and its value encrypted",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_service_accounts/api/tests/credential_round_trip.spec.ts",
+        "line": 124,
+        "column": 25
+      }
+    },
+    {
+      "id": "018134b55a471eb-890695b649843e4",
+      "title": "Task Manager service account credentials bulk schedules a service account task and an API key task together",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_service_accounts/api/tests/credential_round_trip.spec.ts",
+        "line": 130,
+        "column": 7
+      }
+    },
+    {
+      "id": "018134b55a471eb-609e62265393559",
+      "title": "Task Manager service account credentials does not let bulkSchedule overwrite a task that has a credential",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_service_accounts/api/tests/credential_round_trip.spec.ts",
+        "line": 156,
+        "column": 15
+      }
+    },
+    {
+      "id": "018134b55a471eb-e59f01790802035",
+      "title": "Task Manager service account credentials does not let bulkSchedule replace the service account of a task",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_service_accounts/api/tests/credential_round_trip.spec.ts",
+        "line": 171,
+        "column": 16
+      }
+    },
+    {
+      "id": "018134b55a471eb-9d6d22084881d0f",
+      "title": "Task Manager service account credentials keeps the credential decryptable after bulkUpdateState",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_service_accounts/api/tests/credential_round_trip.spec.ts",
+        "line": 199,
+        "column": 29
+      }
+    },
+    {
+      "id": "018134b55a471eb-1bffcaae54415e1",
+      "title": "Task Manager service account credentials keeps the credential decryptable after bulkUpdateSchedules",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_service_accounts/api/tests/credential_round_trip.spec.ts",
+        "line": 199,
+        "column": 29
+      }
+    },
+    {
+      "id": "018134b55a471eb-cbef04313549272",
+      "title": "Task Manager service account credentials mints no API key when bulkUpdateSchedules regenerates API keys with a request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_service_accounts/api/tests/credential_round_trip.spec.ts",
+        "line": 212,
+        "column": 26
+      }
+    },
+    {
+      "id": "018134b55a471eb-5a7a80272f8dd51",
+      "title": "Task Manager service account credentials fails to decrypt once the credential is changed outside Task Manager",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_service_accounts/api/tests/credential_round_trip.spec.ts",
+        "line": 233,
+        "column": 26
+      }
+    },
+    {
+      "id": "018134b55a471eb-6fae533d4d863c6",
+      "title": "Task Manager service account credentials keeps API key tasks decryptable after a merged update",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_service_accounts/api/tests/credential_round_trip.spec.ts",
+        "line": 248,
+        "column": 16
+      }
+    },
+    {
+      "id": "5a2b6c3cc70e864-5a7ade47c7de25c",
+      "title": "Task Manager service account task lifecycle runs as the bound service account",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_service_accounts/api/tests/lifecycle.spec.ts",
+        "line": 211,
+        "column": 26
+      }
+    },
+    {
+      "id": "5a2b6c3cc70e864-ad3f21df8a10770",
+      "title": "Task Manager service account task lifecycle removes a service account task without marking an API key for invalidation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_service_accounts/api/tests/lifecycle.spec.ts",
+        "line": 236,
+        "column": 25
+      }
+    },
+    {
+      "id": "5a2b6c3cc70e864-70b6660c9a51109",
+      "title": "Task Manager service account task lifecycle runs the replacement task as the new service account after an identity transition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_service_accounts/api/tests/lifecycle.spec.ts",
+        "line": 257,
+        "column": 63
+      }
+    },
+    {
+      "id": "5a2b6c3cc70e864-28c5e204d9d6ea1",
+      "title": "Task Manager service account task lifecycle rejects a run-time service account that differs from the stored one as a user error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_service_accounts/api/tests/lifecycle.spec.ts",
+        "line": 290,
+        "column": 23
+      }
+    },
+    {
+      "id": "5a2b6c3cc70e864-5c46a99eda6b76b",
+      "title": "Task Manager service account task lifecycle refuses an in-flight run its next token once the workload is unbound",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_service_accounts/api/tests/lifecycle.spec.ts",
+        "line": 323,
+        "column": 32
+      }
+    },
+    {
+      "id": "2536884c5c197a7-5788ded8b5f9b56",
+      "title": "Task Manager UIAM service account runs runs as the bound UIAM service account",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_service_accounts/api/tests/run_as_uiam.spec.ts",
+        "line": 146,
+        "column": 7
+      }
+    },
+    {
+      "id": "2536884c5c197a7-285051bac3641ff",
+      "title": "Task Manager UIAM service account runs fails as a user error once the workload is unbound",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_service_accounts/api/tests/run_as_uiam.spec.ts",
+        "line": 167,
+        "column": 62
+      }
+    },
+    {
+      "id": "98afccc954d3e1b-c39eceedf58d35f",
+      "title": "Task Manager service account runs runs as the bound service account, and fails as a user error once it is unbound",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_service_accounts/api/tests/run_as.spec.ts",
+        "line": 133,
+        "column": 15
+      }
+    },
+    {
+      "id": "98afccc954d3e1b-611c1f3adc6bed8",
+      "title": "Task Manager service account runs marks the task as failed without deleting it once its credential is changed outside Task Manager",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_service_accounts/api/tests/run_as.spec.ts",
+        "line": 180,
+        "column": 25
+      }
+    }
+  ]
+}

@@ -392,5 +392,6 @@ Returns metadata only; for comments/alert/event attachments call \`platform.core
       }
     },
     tags: ['cases'],
+    excludeFromMcp: true,
   };
 };

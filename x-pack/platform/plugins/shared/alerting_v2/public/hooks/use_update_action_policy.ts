@@ -8,13 +8,13 @@
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
-import type { ActionPolicyResponse, UpdateActionPolicyBody } from '@kbn/alerting-v2-schemas';
+import type { ActionPolicyResponse, UpdateActionPolicyData } from '@kbn/alerting-v2-schemas';
 import { ActionPoliciesApi } from '../services/action_policies_api';
 import { actionPolicyKeys } from './query_key_factory';
 
 interface UpdateActionPolicyVariables {
   id: string;
-  data: UpdateActionPolicyBody;
+  data: UpdateActionPolicyData;
 }
 
 export const useUpdateActionPolicy = () => {
@@ -27,7 +27,6 @@ export const useUpdateActionPolicy = () => {
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: actionPolicyKeys.lists(), exact: false });
       queryClient.invalidateQueries({ queryKey: actionPolicyKeys.detail(id), exact: false });
-      queryClient.invalidateQueries({ queryKey: actionPolicyKeys.allTags(), exact: false });
       toasts.addSuccess(
         i18n.translate('xpack.alertingV2.actionPolicy.updateSuccess', {
           defaultMessage: 'Action policy updated successfully',

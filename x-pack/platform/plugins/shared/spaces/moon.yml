@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/app-header'
   - '@kbn/features-plugin'
+  - '@kbn/content-sanitization'
   - '@kbn/licensing-plugin'
   - '@kbn/es-ui-shared-plugin'
   - '@kbn/home-plugin'
@@ -85,17 +86,18 @@ dependsOn:
   - '@kbn/deeplinks-security'
   - '@kbn/deeplinks-shared'
   - '@kbn/deeplinks-vectordb'
-  - '@kbn/deeplinks-workplace-ai'
   - '@kbn/core-user-profile-server'
   - '@kbn/core-http-browser'
   - '@kbn/ui-callout'
   - '@kbn/core-user-profile-common'
+  - '@kbn/core-chrome-browser-components'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
@@ -106,6 +108,4 @@ fileGroups:
     - test/scout_initial_solution_setup/**/*
     - test/scout_initial_solution_setup_api/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

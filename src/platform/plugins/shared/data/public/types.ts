@@ -18,7 +18,6 @@ import type {
 } from '@kbn/inspector-plugin/public';
 import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
@@ -27,6 +26,7 @@ import type { DatatableUtilitiesService } from '../common';
 import type { ISearchSetup, ISearchStart } from './search';
 import type { QuerySetup, QueryStart } from './query';
 import type { NowProviderPublicContract } from './now_provider';
+import type { ReplayCacheContract } from './replay_cache';
 import type {
   MultiValueClickDataContext,
   RangeSelectDataContext,
@@ -39,7 +39,6 @@ export interface DataSetupDependencies {
   inspector: InspectorSetup;
   usageCollection?: UsageCollectionSetup;
   fieldFormats: FieldFormatsSetup;
-  management: ManagementSetup;
 }
 
 export interface DataStartDependencies {
@@ -96,6 +95,7 @@ export interface DataPublicPluginStart {
    * {@link ISearchStart}
    */
   search: ISearchStart;
+  replayCache: ReplayCacheContract;
   /**
    * @deprecated Use fieldFormats plugin instead
    */

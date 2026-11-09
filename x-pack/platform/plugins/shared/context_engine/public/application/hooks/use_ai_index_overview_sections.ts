@@ -6,16 +6,17 @@
  */
 
 import type { GetAiIndexResponse } from '../../../common/http_api/ai_indices';
-import { useFeedbackLoopEnabled } from './use_feedback_loop_enabled';
-import { useSignalGroups } from './use_signal_groups';
 
 interface UseAiIndexOverviewSectionsParams {
   aiIndex: GetAiIndexResponse | undefined;
   isLoading: boolean;
+  hasKnowledgeIndicators: boolean;
+  isKnowledgeIndicatorsLoading: boolean;
 }
 
 export interface AiIndexOverviewSections {
   hideEditControls: boolean;
+  showOnboardingPanel: boolean;
   showAutomationsPanel: boolean;
   showSignalsSection: boolean;
   showSignalsPanel: boolean;
@@ -25,20 +26,19 @@ export interface AiIndexOverviewSections {
 export const useAiIndexOverviewSections = ({
   aiIndex,
   isLoading,
+  hasKnowledgeIndicators,
+  isKnowledgeIndicatorsLoading,
 }: UseAiIndexOverviewSectionsParams): AiIndexOverviewSections => {
   const isManaged = aiIndex?.managed === true;
   const hasSources = (aiIndex?.sources.length ?? 0) > 0;
   const hasAutomations = (aiIndex?.automations.length ?? 0) > 0;
-  const feedbackLoopEnabled = useFeedbackLoopEnabled();
-  const { groups: signalGroups } = useSignalGroups({ enabled: feedbackLoopEnabled });
-  // Signal groups are space-global (`GET /signals/groups` has no ai_index filter). Until the API
-  // supports per-index aggregation, unlocking Signals from groups applies across all AI indexes.
-  const hasSignals = signalGroups.length > 0;
 
   return {
     hideEditControls: isLoading || isManaged,
+    showOnboardingPanel:
+      !isManaged && !isLoading && !isKnowledgeIndicatorsLoading && !hasKnowledgeIndicators,
     showAutomationsPanel: isManaged || isLoading || hasSources || hasAutomations,
-    showSignalsSection: feedbackLoopEnabled,
-    showSignalsPanel: isManaged || isLoading || hasAutomations || hasSignals,
+    showSignalsSection: false,
+    showSignalsPanel: false,
   };
 };

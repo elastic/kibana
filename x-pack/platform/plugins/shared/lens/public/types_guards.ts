@@ -9,6 +9,7 @@ import type {
   ClickTriggerEvent,
   MultiClickTriggerEvent,
   BrushTriggerEvent,
+  AnnotationClickTriggerEvent,
 } from '@kbn/charts-plugin/public';
 import type { ExpressionRendererEvent } from '@kbn/expressions-plugin/public';
 import type {
@@ -33,6 +34,12 @@ export function isLensBrushEvent(event: ExpressionRendererEvent): event is Brush
   return event.name === 'brush';
 }
 
+export function isLensAnnotationClickEvent(
+  event: ExpressionRendererEvent
+): event is AnnotationClickTriggerEvent {
+  return event.name === 'annotationClick';
+}
+
 export function isLensEditEvent<T extends LensEditSupportedActions>(
   event: ExpressionRendererEvent
 ): event is LensEditEvent<T> {
@@ -55,4 +62,8 @@ export function isOperation(operationCandidate: unknown): operationCandidate is 
     operationCandidate !== null &&
     'columnId' in operationCandidate
   );
+}
+
+export function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { parse, stringify } from 'query-string';
+import queryString from 'query-string';
 import React, {
   createContext,
   useCallback,
@@ -69,7 +69,7 @@ export function isRisonSerializationRequired(queryParam: string): boolean {
 
 export function parseUrlState(search: string): Dictionary<any> {
   const urlState: Dictionary<any> = Object.create(null);
-  const parsedQueryString = parse(search, { sort: false });
+  const parsedQueryString = queryString.parse(search, { sort: false });
 
   try {
     Object.keys(parsedQueryString).forEach((a) => {
@@ -123,7 +123,7 @@ export const UrlStateProvider: FC<PropsWithChildren<unknown>> = ({ children }) =
       const prevSearchString = searchStringRef.current;
 
       const urlState = parseUrlState(prevSearchString);
-      const parsedQueryString = parse(prevSearchString, { sort: false });
+      const parsedQueryString = queryString.parse(prevSearchString, { sort: false });
 
       if (!Object.hasOwn(urlState, accessor)) {
         urlState[accessor] = Object.create(null);
@@ -143,7 +143,7 @@ export const UrlStateProvider: FC<PropsWithChildren<unknown>> = ({ children }) =
       }
 
       try {
-        const oldLocationSearchString = stringify(parsedQueryString, {
+        const oldLocationSearchString = queryString.stringify(parsedQueryString, {
           sort: false,
           encode: false,
         });
@@ -155,13 +155,13 @@ export const UrlStateProvider: FC<PropsWithChildren<unknown>> = ({ children }) =
             parsedQueryString[a] = urlState[a];
           }
         });
-        const newLocationSearchString = stringify(parsedQueryString, {
+        const newLocationSearchString = queryString.stringify(parsedQueryString, {
           sort: false,
           encode: false,
         });
 
         if (oldLocationSearchString !== newLocationSearchString) {
-          const newSearchString = stringify(parsedQueryString, { sort: false });
+          const newSearchString = queryString.stringify(parsedQueryString, { sort: false });
           // Another `setUrlState` call could happen before the updated
           // `searchString` gets propagated via `useLocation` therefore
           // we update the ref right away too.

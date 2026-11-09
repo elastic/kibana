@@ -11,7 +11,11 @@ import {
   ESQL_VALID_SYNTAX_VERIFIER_ID,
   KI_VERIFIER_IDS,
 } from '../ki_verification';
-import { VerifyKiInputSchema } from './verify_ki_step';
+import {
+  MAX_KI_VERIFIERS,
+  MAX_KI_VERIFIER_TIMEOUT_SEC,
+  VerifyKiInputSchema,
+} from './verify_ki_step';
 
 const BASE = { verifiers: [ESQL_VALID_RUNTIME_VERIFIER_ID] };
 
@@ -88,6 +92,56 @@ describe('VerifyKiInputSchema', () => {
         }),
       ])
     );
+  });
+
+  it('accepts built-in ids mixed with custom verifier workflows', () => {
+    const result = VerifyKiInputSchema.safeParse({
+      ki: { type: 'runbook' },
+      verifiers: [
+        ESQL_VALID_SYNTAX_VERIFIER_ID,
+        { workflow_id: 'no-pii' },
+        { workflow_id: 'has-owner', timeout_sec: 30, applies_to: { types: ['runbook'] } },
+      ],
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it.each(['types', 'attributes'])('rejects an empty applies_to.%s list', (key) => {
+    const result = VerifyKiInputSchema.safeParse({
+      ki: {},
+      verifiers: [{ workflow_id: 'no-pii', applies_to: { [key]: [] } }],
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects duplicate custom verifier workflows', () => {
+    const result = VerifyKiInputSchema.safeParse({
+      ki: {},
+      verifiers: [{ workflow_id: 'no-pii' }, { workflow_id: 'no-pii', timeout_sec: 5 }],
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects too many verifiers', () => {
+    const verifiers = Array.from({ length: MAX_KI_VERIFIERS + 1 }, (_, i) => ({
+      workflow_id: `v${i}`,
+    }));
+
+    const result = VerifyKiInputSchema.safeParse({ ki: {}, verifiers });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects a custom verifier timeout above the cap', () => {
+    const result = VerifyKiInputSchema.safeParse({
+      ki: {},
+      verifiers: [{ workflow_id: 'slow', timeout_sec: MAX_KI_VERIFIER_TIMEOUT_SEC + 1 }],
+    });
+
+    expect(result.success).toBe(false);
   });
 
   it('rejects attributes with too many entries', () => {
