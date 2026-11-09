@@ -6,6 +6,7 @@
  */
 
 export * from './use_authz';
+export * from './use_automatic_import_authz';
 export * from './use_core';
 export * from './use_config';
 export * from './use_kibana_version';

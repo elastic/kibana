@@ -95,6 +95,67 @@ describe('generate_esql actions', () => {
       });
     });
 
+    describe('execute_query', () => {
+      const timedOutAction: ExecuteQueryAction = {
+        type: 'execute_query',
+        query: 'FROM index | WHERE _id == "abc"',
+        success: false,
+        error: 'Stopped waiting for the ES|QL query after 30s.',
+        timedOut: true,
+      };
+
+      it('asks for a fix when execution failed with a regular error', () => {
+        const messages = formatAction(
+          {
+            type: 'execute_query',
+            query: 'FROM index | WHERE missing == 1',
+            success: false,
+            error: 'Unknown column [missing]',
+          },
+          true
+        );
+        const userContent = (messages[1] as HumanMessage).content as string;
+        expect(userContent).toContain('Unknown column [missing]');
+        expect(userContent).toContain('Can you fix the query?');
+        expect(userContent).not.toContain('too expensive');
+      });
+
+      it('asks for a cheaper query, not a fix, when execution timed out (withoutToolCalls=true)', () => {
+        const messages = formatAction(timedOutAction, true);
+        expect(messages).toHaveLength(2);
+        expect(messages[0]).toBeInstanceOf(AIMessage);
+        expect(messages[1]).toBeInstanceOf(HumanMessage);
+        const userContent = (messages[1] as HumanMessage).content as string;
+        expect(userContent).toContain('it timed out');
+        expect(userContent).toContain(timedOutAction.error);
+        expect(userContent).toContain('too expensive to run as written');
+        expect(userContent).toContain('do not resubmit it unchanged');
+        expect(userContent).toContain('restrict the time range');
+        expect(userContent).toContain('`_id`');
+        expect(userContent).not.toContain('Can you fix the query?');
+      });
+
+      it('flags the timeout in the tool result when execution timed out (withoutToolCalls=false)', () => {
+        const messages = formatAction(timedOutAction, false);
+        expect(messages).toHaveLength(2);
+        const toolContent = JSON.parse((messages[1] as ToolMessage).content as string);
+        expect(toolContent).toEqual({
+          success: false,
+          error: timedOutAction.error,
+          timedOut: true,
+        });
+      });
+
+      it('does not flag the tool result when execution failed for another reason', () => {
+        const messages = formatAction(
+          { type: 'execute_query', query: 'FROM index', success: false, error: 'boom' },
+          false
+        );
+        const toolContent = JSON.parse((messages[1] as ToolMessage).content as string);
+        expect(toolContent).toEqual({ success: false, error: 'boom' });
+      });
+    });
+
     describe('request_documentation', () => {
       const action: RequestDocumentationAction = {
         type: 'request_documentation',

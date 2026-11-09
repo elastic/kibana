@@ -24,7 +24,7 @@ export const LegacyUrlConflictCallOut = React.memo<LegacyUrlConflictCallOutProps
       const otherRulePath = `rules/id/${aliasTargetId}${window.location.search}${window.location.hash}`;
       return (
         <div data-test-subj="legacyUrlConflictCallOut-wrapper">
-          <EuiSpacer />
+          <EuiSpacer size="s" />
           {spacesApi.ui.components.getLegacyUrlConflict({
             objectNoun: i18nTranslate.translate(
               'xpack.securitySolution.sections.ruleDetails.redirectObjectNoun',

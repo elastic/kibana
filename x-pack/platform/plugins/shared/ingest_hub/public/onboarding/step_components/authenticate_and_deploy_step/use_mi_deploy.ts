@@ -400,6 +400,7 @@ export function useMiDeploy({
               globalRegion: serviceSettings?.globalRegion ?? '',
               namespace,
               globalNamespace: serviceSettings?.namespace,
+              policySettings: serviceSettings?.policySettings,
               authenticateAndDeployStep: withSharedRefs(sharedRefs),
               servicesMap: servicesMap ?? new Map(),
               onboardingDeploymentId,
@@ -536,6 +537,7 @@ export function useMiDeploy({
             globalRegion: serviceSettings?.globalRegion ?? '',
             namespace,
             globalNamespace: serviceSettings?.namespace,
+            policySettings: serviceSettings?.policySettings,
             // A dirty update may have just stored new keys for the policies this updates: keep
             // them instead of storing the typed ones again, which would orphan the shared refs.
             authenticateAndDeployStep: withSharedRefs(storedSharedRefs),
@@ -642,6 +644,7 @@ export function useMiDeploy({
             globalRegion: serviceSettings?.globalRegion ?? '',
             namespace,
             globalNamespace: serviceSettings?.namespace,
+            policySettings: serviceSettings?.policySettings,
             // A dirty update may have just stored new keys for the policies this updates: keep
             // them instead of storing the typed ones again, which would orphan the shared refs.
             authenticateAndDeployStep: withSharedRefs(storedSharedRefs),
@@ -760,6 +763,7 @@ export function useMiDeploy({
               storedServiceVars,
               globalRegion,
               globalNamespace: serviceSettings?.namespace,
+              policySettings: serviceSettings?.policySettings,
               namespace,
               authenticateAndDeployStep: withSharedRefs(sharedRefs),
               servicesMap: servicesMap ?? new Map(),
@@ -794,6 +798,7 @@ export function useMiDeploy({
             storedServiceVars,
             integrationName,
             description,
+            policySettings: serviceSettings?.policySettings,
             authenticateAndDeployStep: sharedRefs
               ? withSharedRefs(sharedRefs)
               : { ...authenticateAndDeployStep, existingSecretRefs: keptSecretRefs },
