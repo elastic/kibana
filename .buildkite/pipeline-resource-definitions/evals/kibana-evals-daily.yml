@@ -16,7 +16,7 @@ spec:
     kind: Pipeline
     metadata:
       name: 'Kibana / Evals / Daily LLM Evals'
-      description: 'Runs the latest golden, ORCA and connector datasets of the Nightshift investigations suite every weekday'
+      description: 'Runs the pinned golden cut, the ORCA sample and the connector probes of the Nightshift investigations suite every weekday'
     spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#kbn-evals-notifications'

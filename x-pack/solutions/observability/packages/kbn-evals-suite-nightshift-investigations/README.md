@@ -804,6 +804,9 @@ as `nightshift-investigations`.
 
 - **Where it runs:** a serverless observability Scout cluster; `run_suite.sh` reads `scoutArch` /
   `scoutDomain` from the suite entry.
+- **Run limits:** eval investigations are manual starts, which Significant Events caps at 5 a day.
+  Space setup turns the investigation limits off on the eval stack
+  (`PUT /internal/significant_events/run_quotas`), so a dataset larger than that runs in full.
 - **What runs:** the same three shards on PRs, weekly and daily, each on its own Scout server:
 
   | Shard                        | Dataset                                                      | Judge                  |

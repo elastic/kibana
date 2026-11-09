@@ -126,7 +126,7 @@ export const resolveEvalSelection = (
       throw new Error(
         `NIGHTSHIFT_DATASETS=${
           requested ?? ALL_DATASETS
-        } selects ${selected}, which runs investigation evals, ` +
+        } selects ${selected}, which runs the Nightshift agents in the sandbox, ` +
           `but SANDBOX_API_KEY is required; use --profile dev-vault, export SANDBOX_*, or select only ${WIKI_OPTIMIZE_DATASET_ID}.`
       );
     }

@@ -18,9 +18,9 @@ import { createAdminSessionRequest } from './admin_session_request';
 import type { AdminSessionRequestOptions } from './admin_session_request';
 
 /**
- * Binds the space to the Nightshift service accounts and waits until it can run the Nightshift
- * agents. Until then Agent Builder reports both agents unavailable, so every eval that calls them
- * on a fresh stack needs this first.
+ * Binds the space to the Nightshift service accounts, lifts the daily investigation limits, and
+ * waits until the space can run the Nightshift agents. Until then Agent Builder reports both agents
+ * unavailable, so every eval that calls them on a fresh stack needs this first.
  */
 export const enableNightshiftSpace = async ({
   config,
@@ -83,6 +83,14 @@ export const enableNightshiftSpace = async ({
       { timeout: 120_000, intervals: [5_000] }
     )
     .toBe(true);
+  // Eval investigations are manual starts, which Significant Events caps at 5 a day (10 for all
+  // investigations), so a larger dataset would be denied most of its runs. Each CI shard runs on
+  // its own stack, so lifting the limits there affects nothing else.
+  await setupRequest('/internal/significant_events/run_quotas', {
+    method: 'PUT',
+    version: '1',
+    body: JSON.stringify({ investigationLimitsEnabled: false }),
+  });
   await expect
     .poll(
       async () =>

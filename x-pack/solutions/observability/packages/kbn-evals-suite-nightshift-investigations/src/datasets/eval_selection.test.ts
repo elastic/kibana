@@ -36,7 +36,7 @@ describe('resolveEvalSelection', () => {
     'rejects NIGHTSHIFT_DATASETS=%s without credentials, even when Scout would be reused',
     (value) => {
       expect(() => resolveEvalSelection({ NIGHTSHIFT_DATASETS: value })).toThrow(
-        'NIGHTSHIFT_DATASETS=all selects all, which runs investigation evals, but SANDBOX_API_KEY is required'
+        'NIGHTSHIFT_DATASETS=all selects all, which runs the Nightshift agents in the sandbox, but SANDBOX_API_KEY is required'
       );
     }
   );
@@ -88,7 +88,7 @@ describe('resolveEvalSelection', () => {
 
   it('rejects trace-only without credentials', () => {
     expect(() => resolveEvalSelection({ NIGHTSHIFT_DATASETS: 'trace-only' })).toThrow(
-      'NIGHTSHIFT_DATASETS=trace-only selects trace-only, which runs investigation evals, but SANDBOX_API_KEY is required'
+      'NIGHTSHIFT_DATASETS=trace-only selects trace-only, which runs the Nightshift agents in the sandbox, but SANDBOX_API_KEY is required'
     );
   });
 
@@ -163,7 +163,7 @@ describe('stored dataset selection', () => {
 
   it('rejects a stored dataset id without credentials', () => {
     expect(() => resolveEvalSelection({ NIGHTSHIFT_DATASETS: 'golden' })).toThrow(
-      'NIGHTSHIFT_DATASETS=golden selects golden, which runs investigation evals'
+      'NIGHTSHIFT_DATASETS=golden selects golden, which runs the Nightshift agents in the sandbox'
     );
   });
 
