@@ -58,6 +58,7 @@ import { AlertEpisodeDetailsFlyout } from '../details/details_flyout';
 import { AlertEpisodeAssigneeCell } from '../assignee_cell';
 import {
   EpisodeDurationCell,
+  EpisodeReasonCell,
   EpisodeSuppressedCell,
   EpisodeSourceCell,
   EpisodeStatusCell,
@@ -90,6 +91,7 @@ import {
 import {
   EPISODES_LIST_COLUMN_ALERT_TAGS,
   EPISODES_LIST_COLUMN_ASSIGNEES,
+  EPISODES_LIST_COLUMN_REASON,
   EPISODES_LIST_COLUMN_SUPPRESSED,
   EPISODES_LIST_COLUMN_RULE_TAGS,
   EPISODES_LIST_COLUMN_SOURCE,
@@ -103,8 +105,10 @@ const SUPPRESSED_COLUMN_ID = 'suppressed';
 
 const EPISODES_TABLE_CONSUMER = 'alertingV2Alerts';
 
-// Neither tag column is in the episodes query's `ALLOWLISTED_SORT_FIELDS`, so a sort on them
-// falls back to `@timestamp` and only looks like it works.
+/*
+ * Some fields are not in the episodes query's `ALLOWLISTED_SORT_FIELDS`, so a
+ * sort on them falls back to `@timestamp` and only looks like it works.
+ */
 const COLUMN_CUSTOMIZATIONS: CustomGridColumnsConfiguration = {
   tags: ({ column }: { column: EuiDataGridColumn }): EuiDataGridColumn => ({
     ...column,
@@ -128,6 +132,11 @@ const COLUMN_CUSTOMIZATIONS: CustomGridColumnsConfiguration = {
   [SUPPRESSED_COLUMN_ID]: ({ column }) => ({
     ...column,
     displayAsText: EPISODES_LIST_COLUMN_SUPPRESSED,
+    isSortable: false,
+  }),
+  reason: ({ column }) => ({
+    ...column,
+    displayAsText: EPISODES_LIST_COLUMN_REASON,
     isSortable: false,
   }),
 };
@@ -583,6 +592,7 @@ export const EpisodesTable = ({
       alerting_source: (props) => <EpisodeSourceCell {...props} />,
       [SUPPRESSED_COLUMN_ID]: (props) => <EpisodeSuppressedCell {...props} />,
       duration: (props) => <EpisodeDurationCell {...props} />,
+      reason: (props) => <EpisodeReasonCell {...props} />,
       severity: (props) => <EpisodeSeverityCell {...props} />,
       tags: (props) => <EpisodeTagsCell {...props} />,
       rule_tags: (props) => (

@@ -7,6 +7,7 @@
 
 import type { RegistryVarGroup } from '@kbn/fleet-plugin/common';
 import type { AwsServiceMatrixEntry } from '../../../aws_service_matrix';
+import { getDefaultEnabledDataStreams } from '../../../aws_service_matrix';
 import type { AuthenticateAndDeployStepState } from '../../../onboarding_flow_context';
 import type { ServiceVars } from '../../service_settings_step/use_service_settings';
 import { buildPackageInputs, buildPackageVars, getPackageVarNames } from '../package_inputs';
@@ -15,7 +16,11 @@ import { REGION_FIELD_NAMES } from '../../service_settings_step/field_config';
 import type { DeployGroup } from '../deploy_groups';
 import type { SecretRefValue } from '../secret_refs';
 import { buildGroupPolicyNameStem, deriveGroupPolicyName } from '../deploy_group_helpers';
-import { getPolicySettings, type PolicySettings } from '../../../common/policy_settings';
+import {
+  getPolicySettings,
+  getPolicyVarSettings,
+  type PolicySettings,
+} from '../../../common/policy_settings';
 
 export interface BuildPackagePolicyOpts {
   namespace: string;
@@ -264,7 +269,7 @@ export async function buildGroupPackagePolicy(
   package: { name: string; version: string };
   namespace?: string;
   output_id?: string;
-  vars?: Record<string, string | SecretRefValue>;
+  vars?: Record<string, string | SecretRefValue | null>;
   inputs: Record<string, unknown>;
 }> {
   const { members } = group;
@@ -291,7 +296,7 @@ export async function buildGroupPackagePolicy(
     const rawVars = storedServiceVars[instance.instanceId] ?? storedServiceVars[instance.serviceId];
     if (!rawVars) {
       serviceVarsMap[service.id] = {
-        enabledDataStreams: service.dataStreams,
+        enabledDataStreams: getDefaultEnabledDataStreams(service),
         varsByDataStream: {},
       };
     } else {
@@ -306,7 +311,12 @@ export async function buildGroupPackagePolicy(
   }
 
   const services = members.map(({ service }) => service);
-  const allInputs = buildPackageInputs(services, serviceVarsMap, globalRegion);
+  const allInputs = buildPackageInputs(
+    services,
+    serviceVarsMap,
+    globalRegion,
+    getPolicyVarSettings(policySettings, 'agent_based')
+  );
 
   // For a bundled group (multiple services), we apply per-service pruning independently.
   // For a duplicate group (one member), this is equivalent to the old single-target pruning.
@@ -335,7 +345,8 @@ export async function buildGroupPackagePolicy(
     authenticateAndDeployStep.staticKeys,
     pkgVarNames,
     agentCredentials,
-    authenticateAndDeployStep.existingSecretRefs
+    authenticateAndDeployStep.existingSecretRefs,
+    getPolicyVarSettings(policySettings, 'agent_based', pkgVarNames)
   );
 
   if (Object.keys(prunedInputs).length === 0) {

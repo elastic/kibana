@@ -37,6 +37,10 @@ export interface ProcessorStatsView {
   instances: ProcessorInstanceStatsView[];
 }
 
+export interface SourceStatsView {
+  acceptedRate: number | null;
+}
+
 /** What the mapper returns for one component of a response. */
 export interface MappedComponentStats<TStats> {
   status: 'ready' | 'noData' | 'error';
@@ -48,6 +52,7 @@ export interface MappedComponentStats<TStats> {
 export interface MappedStatsResponse {
   destinations: Record<string, MappedComponentStats<DestinationStatsView>>;
   processors: Record<string, MappedComponentStats<ProcessorStatsView>>;
+  sources: Record<string, MappedComponentStats<SourceStatsView>>;
   window: StreamsUnit.StatsMeta['window'];
 }
 

@@ -44,7 +44,7 @@ describe('POST /internal/significant_events/events/_cleanup', () => {
 
     const result = await cleanupRoute.handler({
       params: { body: { candidateRuleIds: ['rule-1'] } },
-      request: {},
+      request: { spaceId: 'default' },
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
         getEventSearchClient: () => eventClient,
@@ -92,7 +92,7 @@ describe('POST /internal/significant_events/events/{id}/investigate', () => {
 
       const result = await investigateRoute.handler({
         params: { path: { id: 'event-1' } },
-        request: {},
+        request: { spaceId: 'default' },
         getScopedClients: jest.fn().mockResolvedValue({
           licensing: {},
           getEventSearchClient: () => ({ findLatestByEventId: jest.fn().mockResolvedValue(event) }),
@@ -118,7 +118,7 @@ describe('POST /internal/significant_events/events/{id}/investigate', () => {
     const findLatestByEventId = jest.fn();
     const handlerParams = {
       params: { path: { id: 'event-1' } },
-      request: {},
+      request: { spaceId: 'default' },
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
         getEventSearchClient: () => ({ findLatestByEventId }),
@@ -158,7 +158,7 @@ describe('GET /internal/significant_events/events', () => {
       });
       const resources = {
         params: { query: { unassigned_entities: true, topology_feature_id: selected } },
-        request: {},
+        request: { spaceId: 'default' },
         server: {},
         getScopedClients: jest.fn().mockResolvedValue({
           licensing: {},
@@ -247,7 +247,7 @@ describe('GET /internal/significant_events/events', () => {
 
     const response = await eventsSearchRoute.handler({
       params: { query: {} },
-      request: {},
+      request: { spaceId: 'default' },
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
         getEventSearchClient: () => ({ findLatestByCurrentStatePaginated }),
@@ -289,7 +289,7 @@ describe('GET /internal/significant_events/events', () => {
           perPage: 10,
         },
       },
-      request: {},
+      request: { spaceId: 'default' },
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
         getEventSearchClient: () => ({ findLatestByCurrentStatePaginated }),
@@ -336,7 +336,7 @@ describe('GET /internal/significant_events/events', () => {
 
     const response = await eventsSearchRoute.handler({
       params: { query: {} },
-      request: {},
+      request: { spaceId: 'default' },
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
         getEventSearchClient: () => ({ findLatestByCurrentStatePaginated }),
@@ -379,7 +379,7 @@ describe('GET /internal/significant_events/events/{id}/lifecycle', () => {
 
     const response = await lifecycleRoute.handler({
       params: { path: { id: latestVersion.event_id } },
-      request: {},
+      request: { spaceId: 'default' },
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
         getEventSearchClient: () => ({
@@ -436,7 +436,7 @@ describe('GET /internal/significant_events/events/{id}/lifecycle, deactivations'
         path: { id: 'event-1' },
         ...(includeSkipped ? { query: { include_skipped: 'true' as const } } : {}),
       },
-      request: {},
+      request: { spaceId: 'default' },
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
         getEventSearchClient: () => ({
@@ -622,7 +622,7 @@ describe('GET /internal/significant_events/events/{id}/lifecycle, skipped detect
         path: { id: event.event_id },
         ...(includeSkipped ? { query: { include_skipped: 'true' as const } } : {}),
       },
-      request: {},
+      request: { spaceId: 'default' },
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
         getEventSearchClient: () => ({
@@ -712,7 +712,7 @@ describe('POST /internal/significant_events/events/{id}/update', () => {
   }) =>
     eventsUpdateRoute.handler({
       params: { path: { id: 'event-1' }, body },
-      request: {},
+      request: { spaceId: 'default' },
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
         getEventSearchClient: () =>

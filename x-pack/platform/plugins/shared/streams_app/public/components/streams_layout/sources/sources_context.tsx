@@ -8,9 +8,9 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import { useActorRef, useSelector } from '@xstate/react';
 import { i18n } from '@kbn/i18n';
-import { STREAMS_DEFAULT_UNIT_ID } from '@kbn/streams-plugin/common';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
+import { useUnitId } from '../../../hooks/use_unit_id';
 import type { SourceApiKeyGenerationDeps } from './source_api_keys';
 import { createSourceEnvironmentLoader, type SourceEnvironmentLoader } from './source_environment';
 import type { SourceApiKeyPrivileges } from './source_api_keys';
@@ -91,15 +91,17 @@ export const useSourcesTable = (): SourcesTableController => {
       start: { streams },
     },
   } = useKibana();
+  const unitId = useUnitId();
   const apiKeyGenerationDeps = useSourceApiKeyGenerationDeps();
   const loadSourceEnvironment = useSourceEnvironmentLoader();
   const unitDefinitionRepository = useMemo(
     () =>
       createUnitRepository({
         streamsRepositoryClient: streams.streamsRepositoryClient,
+        unitId,
         toasts,
       }),
-    [streams.streamsRepositoryClient, toasts]
+    [streams.streamsRepositoryClient, toasts, unitId]
   );
   const tableActorRef = useActorRef(sourcesTableStateMachine, {
     input: {
@@ -185,14 +187,15 @@ export const useSourceApiKeyGenerationDeps = (): SourceApiKeyGenerationDeps => {
   const {
     v2: { manage: canManage },
   } = useStreamsPrivileges();
+  const unitId = useUnitId();
 
   return useMemo(
     () => ({
       streamsRepositoryClient: streams.streamsRepositoryClient,
-      unitId: STREAMS_DEFAULT_UNIT_ID,
+      unitId,
       canManage,
     }),
-    [canManage, streams.streamsRepositoryClient]
+    [canManage, streams.streamsRepositoryClient, unitId]
   );
 };
 
