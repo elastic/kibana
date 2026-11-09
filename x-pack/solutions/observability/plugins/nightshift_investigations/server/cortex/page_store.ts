@@ -34,8 +34,21 @@ interface CortexKiSource {
     corroborations?: number | string;
     slug?: string;
     space_id?: string;
+    version?: number | string;
+    conversation_id?: string;
+    round_id?: string;
+    workflow_execution_id?: string;
+    authored_by?: string[] | string;
   };
 }
+
+/** Keeps the page document small: the most recent authors are the ones a later round asks about. */
+const MAX_AUTHORED_BY = 20;
+
+const toAuthoredBy = (value: string[] | string | undefined): string[] =>
+  (Array.isArray(value) ? value : value ? [value] : []).filter(
+    (entry): entry is string => typeof entry === 'string' && entry.length > 0
+  );
 
 interface CortexPageWrite {
   entityType: CortexEntityType;
@@ -47,6 +60,12 @@ interface CortexPageWrite {
   corroborations?: number;
   /** When set, the write fails with a version conflict if the stored page has changed since. */
   version?: string;
+  docVersion?: number;
+  conversationId?: string;
+  roundId?: string;
+  workflowExecutionId?: string;
+  /** Replaces the stored list of authoring conversations; omit it to keep the stored one. */
+  authoredBy?: string[];
 }
 
 export interface CortexPageStore {
@@ -58,8 +77,15 @@ export interface CortexPageStore {
   upsert: (page: CortexPageWrite) => Promise<CortexPage>;
   /** Writes a new page atomically; resolves undefined when the page already exists. */
   create: (page: CortexPageWrite) => Promise<CortexPage | undefined>;
-  corroborate: (id: string) => Promise<CortexPage | undefined>;
-  archive: (id: string, version?: string) => Promise<CortexPage | undefined>;
+  corroborate: (
+    id: string,
+    provenance?: { conversationId?: string; roundId?: string; workflowExecutionId?: string }
+  ) => Promise<CortexPage | undefined>;
+  archive: (
+    id: string,
+    version?: string,
+    provenance?: { conversationId?: string; roundId?: string; workflowExecutionId?: string }
+  ) => Promise<CortexPage | undefined>;
   pruneDuplicates: () => Promise<number>;
 }
 
@@ -167,6 +193,10 @@ const toSummary = (id: string, source: CortexKiSource): CortexPageSummary | unde
   }
 
   const status = isStatus(source.attributes?.status) ? source.attributes.status : 'tentative';
+  const docVersion =
+    source.attributes?.version !== undefined
+      ? toCorroborations(source.attributes.version)
+      : undefined;
 
   return {
     id,
@@ -178,6 +208,17 @@ const toSummary = (id: string, source: CortexKiSource): CortexPageSummary | unde
     ...(source.description !== undefined && source.description.length > 0
       ? { description: source.description }
       : {}),
+    ...(source.attributes?.conversation_id
+      ? { conversation_id: source.attributes.conversation_id }
+      : {}),
+    ...(source.attributes?.round_id ? { round_id: source.attributes.round_id } : {}),
+    ...(source.attributes?.workflow_execution_id
+      ? { workflow_execution_id: source.attributes.workflow_execution_id }
+      : {}),
+    ...(toAuthoredBy(source.attributes?.authored_by).length > 0
+      ? { authored_by: toAuthoredBy(source.attributes?.authored_by) }
+      : {}),
+    ...(docVersion && docVersion > 0 ? { doc_version: docVersion } : {}),
   };
 };
 
@@ -334,10 +375,35 @@ export const createCortexPageStore = ({
   };
 
   const buildDocument = (
-    { entityType, slug, title, description, content, status }: CortexPageWrite,
-    corroborations: number
+    {
+      entityType,
+      slug,
+      title,
+      description,
+      content,
+      status,
+      docVersion,
+      conversationId,
+      roundId,
+      workflowExecutionId,
+      authoredBy,
+    }: CortexPageWrite,
+    corroborations: number,
+    existingSource?: CortexKiSource
   ): { id: string; document: CortexKiSource } => {
     const canonicalSlug = canonicalizeSlug(entityType, slug);
+    const existingAttrs = existingSource?.attributes;
+    const resolvedVersion =
+      docVersion ??
+      (typeof existingAttrs?.version === 'number' && Number.isFinite(existingAttrs.version)
+        ? existingAttrs.version + 1
+        : 1);
+    const resolvedConversationId = conversationId ?? existingAttrs?.conversation_id;
+    const resolvedRoundId = roundId ?? existingAttrs?.round_id;
+    const resolvedWorkflowExecutionId = workflowExecutionId ?? existingAttrs?.workflow_execution_id;
+    const resolvedAuthoredBy = (authoredBy ?? toAuthoredBy(existingAttrs?.authored_by)).slice(
+      -MAX_AUTHORED_BY
+    );
     return {
       id: toCortexPageId(entityType, slug),
       document: {
@@ -352,6 +418,13 @@ export const createCortexPageStore = ({
           corroborations,
           slug: canonicalSlug,
           space_id: spaceId,
+          version: resolvedVersion,
+          ...(resolvedConversationId ? { conversation_id: resolvedConversationId } : {}),
+          ...(resolvedRoundId ? { round_id: resolvedRoundId } : {}),
+          ...(resolvedWorkflowExecutionId
+            ? { workflow_execution_id: resolvedWorkflowExecutionId }
+            : {}),
+          ...(resolvedAuthoredBy.length > 0 ? { authored_by: resolvedAuthoredBy } : {}),
         },
       },
     };
@@ -412,7 +485,8 @@ export const createCortexPageStore = ({
       const existing = await getSource(id);
       const { document } = buildDocument(
         page,
-        page.corroborations ?? toCorroborations(existing?.source.attributes?.corroborations)
+        page.corroborations ?? toCorroborations(existing?.source.attributes?.corroborations),
+        existing?.source
       );
 
       const response = await esClient.index(
@@ -452,7 +526,7 @@ export const createCortexPageStore = ({
       }
     },
 
-    async corroborate(id) {
+    async corroborate(id, provenance) {
       const found = await getSource(id);
       if (!found) {
         return undefined;
@@ -462,6 +536,9 @@ export const createCortexPageStore = ({
         return undefined;
       }
       const corroborations = page.corroborations + 1;
+      const hasProvenance = Boolean(
+        provenance?.conversationId || provenance?.roundId || provenance?.workflowExecutionId
+      );
       return this.upsert({
         entityType: page.entity_type,
         slug: page.slug,
@@ -470,10 +547,16 @@ export const createCortexPageStore = ({
         content: page.content,
         status: statusAfterCorroboration(page.status, corroborations),
         corroborations,
+        ...(hasProvenance || page.doc_version !== undefined
+          ? { docVersion: (page.doc_version ?? 0) + 1 }
+          : {}),
+        conversationId: provenance?.conversationId ?? page.conversation_id,
+        roundId: provenance?.roundId ?? page.round_id,
+        workflowExecutionId: provenance?.workflowExecutionId ?? page.workflow_execution_id,
       });
     },
 
-    async archive(id, version) {
+    async archive(id, version, provenance) {
       const found = await getSource(id);
       if (!found) {
         return undefined;
@@ -482,6 +565,9 @@ export const createCortexPageStore = ({
       if (!page) {
         return undefined;
       }
+      const hasProvenance = Boolean(
+        provenance?.conversationId || provenance?.roundId || provenance?.workflowExecutionId
+      );
       return this.upsert({
         entityType: page.entity_type,
         slug: page.slug,
@@ -491,6 +577,12 @@ export const createCortexPageStore = ({
         status: 'archived',
         corroborations: page.corroborations,
         version,
+        ...(hasProvenance || page.doc_version !== undefined
+          ? { docVersion: (page.doc_version ?? 0) + 1 }
+          : {}),
+        conversationId: provenance?.conversationId ?? page.conversation_id,
+        roundId: provenance?.roundId ?? page.round_id,
+        workflowExecutionId: provenance?.workflowExecutionId ?? page.workflow_execution_id,
       });
     },
 

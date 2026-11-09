@@ -7,7 +7,7 @@
 
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
 import { sloDetailsLocatorID, type SloDetailsLocatorParams } from '@kbn/deeplinks-observability';
-import { ALL_VALUE } from '@kbn/slo-schema/src/schema/common';
+import { ALL_VALUE } from '@kbn/slo-constants';
 
 export class SloDetailsLocatorDefinition implements LocatorDefinition<SloDetailsLocatorParams> {
   public readonly id = sloDetailsLocatorID;

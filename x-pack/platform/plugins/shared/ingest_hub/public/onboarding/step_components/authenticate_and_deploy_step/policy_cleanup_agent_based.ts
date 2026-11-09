@@ -12,6 +12,8 @@ import {
   sendGetPackageInfoByKey,
 } from '@kbn/fleet-plugin/public';
 
+import { getEffectiveNamespace } from '../../common/effective_namespace';
+import { getDefaultEnabledDataStreams } from '../../aws_service_matrix';
 import type { ServiceVars } from '../service_settings_step/use_service_settings';
 import { buildPackageInputs, buildPackageVars, getPackageVarNames } from './package_inputs';
 import {
@@ -22,8 +24,13 @@ import {
 import type { ExistingSecretRefs } from './secret_refs';
 import { runWithSharedSecrets } from './shared_secrets';
 import type { AgentCredentialVars } from './package_inputs';
-import { computePolicyCleanupOps, resolveSurvivingMembers } from './policy_cleanup';
+import {
+  computePolicyCleanupOps,
+  resolveSurvivingMembers,
+  toOnboardingDeploymentQuery,
+} from './policy_cleanup';
 import type { BuildPolicyBodyOpts, PolicyCleanupOps } from './policy_cleanup';
+import { getPolicySettingsUpdate } from '../../common/policy_settings';
 
 export interface UpdateAgentBasedPolicyOpts extends BuildPolicyBodyOpts {
   selectedAgentPolicyIds: string[];
@@ -57,6 +64,7 @@ export async function cleanupAgentBasedPolicies(
     currentPolicyIdsByInstance,
     hasTypedSecrets,
     addedInstanceIdsByPolicy,
+    onboardingDeploymentId,
   } = opts;
   const planned = computePolicyCleanupOps(pendingCleanupPolicyIds, currentPolicyIdsByInstance);
 
@@ -65,8 +73,18 @@ export async function cleanupAgentBasedPolicies(
 
   const deletes = Promise.allSettled(
     planned.toDelete.map((policyId) =>
-      sendDeletePackagePolicy({ packagePolicyIds: [policyId] })
-        .then(() => {
+      sendDeletePackagePolicy(
+        { packagePolicyIds: [policyId] },
+        toOnboardingDeploymentQuery(onboardingDeploymentId)
+      )
+        .then(({ data, error }) => {
+          // Resolves with { error } on HTTP failure, and reports a failed delete in the body. A
+          // policy that is already gone counts as deleted.
+          if (error) throw error;
+          const result = data?.find(({ id }) => id === policyId);
+          if (result && !result.success && result.statusCode !== 404) {
+            throw new Error(result.body?.message ?? 'Delete failed');
+          }
           succeededDeletes.push(policyId);
         })
         .catch((err) => {
@@ -125,10 +143,12 @@ export async function updateAgentBasedPolicy(
     storedServiceVars,
     globalRegion,
     namespace,
+    globalNamespace,
     authenticateAndDeployStep,
     servicesMap,
     selectedAgentPolicyIds,
     agentCredentials,
+    policySettings,
   } = opts;
 
   const members = resolveSurvivingMembers(survivingInstanceIds, instances, servicesMap);
@@ -190,7 +210,7 @@ export async function updateAgentBasedPolicy(
   const serviceVarsMap: Record<string, ServiceVars> = {};
   for (const { instance, service } of members) {
     serviceVarsMap[service.id] = storedServiceVars[instance.instanceId] ?? {
-      enabledDataStreams: service.dataStreams,
+      enabledDataStreams: getDefaultEnabledDataStreams(service),
       varsByDataStream: {},
     };
   }
@@ -236,7 +256,11 @@ export async function updateAgentBasedPolicy(
   }
 
   const policyName = existingName ?? `${packageName.replace(/[^a-zA-Z0-9_-]/g, '_')}-${Date.now()}`;
-  const policyNamespace = existingNamespace ?? namespace;
+  // The namespace the instances now deploy into wins, so a change made while editing a deployed
+  // flow reaches the policy. Without one the policy keeps what it has, which may be inherited.
+  const policyNamespace =
+    getEffectiveNamespace(members[0].instance.instanceId, storedServiceVars, globalNamespace) ||
+    (existingNamespace ?? namespace);
 
   // Simplified-schema PUT: inputs is a record (keyed by `<ptName>-<inputType>`).
   // The legacy schema accepts `enabled` at the top level but requires inputs as an array.
@@ -244,18 +268,24 @@ export async function updateAgentBasedPolicy(
   // Use simplified consistently — `enabled` is intentionally omitted.
   // sendUpdatePackagePolicy resolves with { error } on HTTP failure rather than rejecting.
   // Throw explicitly so Promise.allSettled callers can detect the failure.
-  const updateResult = await sendUpdatePackagePolicy(policyId, {
-    name: policyName,
-    namespace: policyNamespace,
-    package: { name: packageName, version: pkgVersion },
-    ...(vars ? { vars } : {}),
-    inputs,
-    // A non-empty selectedAgentPolicyIds is an explicit override (policy-selection drift);
-    // otherwise keep the policy's current policy_ids so agent policies attached outside the
-    // wizard are not detached.
-    policy_ids:
-      selectedAgentPolicyIds.length > 0 ? selectedAgentPolicyIds : existingPolicyIds ?? [],
-  } as unknown as Parameters<typeof sendUpdatePackagePolicy>[1]);
+  const updateResult = await sendUpdatePackagePolicy(
+    policyId,
+    {
+      name: policyName,
+      namespace: policyNamespace,
+      // A setting set back to empty is sent as null, which clears what the policy had.
+      ...getPolicySettingsUpdate(policySettings, 'agent_based'),
+      package: { name: packageName, version: pkgVersion },
+      ...(vars ? { vars } : {}),
+      inputs,
+      // A non-empty selectedAgentPolicyIds is an explicit override (policy-selection drift);
+      // otherwise keep the policy's current policy_ids so agent policies attached outside the
+      // wizard are not detached.
+      policy_ids:
+        selectedAgentPolicyIds.length > 0 ? selectedAgentPolicyIds : existingPolicyIds ?? [],
+    } as unknown as Parameters<typeof sendUpdatePackagePolicy>[1],
+    { query: toOnboardingDeploymentQuery(opts.onboardingDeploymentId) }
+  );
   if (updateResult.error) {
     throw updateResult.error;
   }

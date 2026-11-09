@@ -12,7 +12,19 @@
     "server": true,
     "requiredPlugins": ["agentBuilder", "agentBuilderPlatform", "features", "workflowsExtensions"],
     "requiredBundles": ["kibanaReact", "proposals"],
-    "optionalPlugins": ["security", "spaces", "proposals", "workflowsManagement", "entityStore"],
+    "optionalPlugins": [
+      "security",
+      "spaces",
+      "proposals",
+      "workflowsManagement",
+      "entityStore",
+      "share",
+      "data",
+      "dataViews",
+      "expressions",
+      "unifiedDocViewer",
+      "charts"
+    ],
     "extraPublicDirs": ["common"]
   }
 }

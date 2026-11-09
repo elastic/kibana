@@ -11,6 +11,7 @@ import type {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
+import { MAX_RUN_WORKFLOW_DOCS } from '@kbn/workflows';
 import type { WorkflowListItemDto } from '@kbn/workflows';
 import {
   RunWorkflowPanel,
@@ -26,6 +27,12 @@ import {
 import { RUN_DOCUMENT_WORKFLOW_ACTION_ID } from '../../../../common/constants/action_ids';
 import * as i18n from '../translations';
 import { getRunWorkflowTelemetry } from '../../../../common/lib/telemetry/run_workflow_telemetry';
+import type { RunWorkflowSelectionScope } from './use_run_workflow_selection';
+import {
+  RunWorkflowSelectionStatus,
+  useResolvedRunWorkflowSelection,
+  useRunWorkflowSelectionSearch,
+} from './use_run_workflow_selection';
 
 // Sort manual-trigger workflows to the top. Module-scoped so the reference is stable across renders.
 const sortManualWorkflow = (a: WorkflowListItemDto, b: WorkflowListItemDto) =>
@@ -34,9 +41,14 @@ const sortManualWorkflow = (a: WorkflowListItemDto, b: WorkflowListItemDto) =>
 
 export type DocumentTableContextMenuItem = EuiContextMenuPanelItemDescriptor;
 
+export interface DocumentSelection {
+  _id: string;
+  _index: string;
+}
+
 export interface DocumentWorkflowsPanelProps {
-  /** Full documents including _id, _index, and all source fields */
-  documents: Array<{ _id: string; _index: string } & Record<string, unknown>>;
+  /** The selected documents; the server fetches each one's fields. */
+  documentIds: DocumentSelection[];
   onClose: () => void;
   /** Optional callback invoked when workflow execution is triggered. */
   onExecute?: () => void;
@@ -53,7 +65,7 @@ export interface DocumentWorkflowsPanelProps {
 
 /** A panel that lets users select and execute a workflow against one or more documents. **/
 export const DocumentWorkflowsPanel = ({
-  documents,
+  documentIds,
   onClose,
   onExecute,
   originEventId,
@@ -63,12 +75,12 @@ export const DocumentWorkflowsPanel = ({
     (): CaseAttachmentWorkflowTarget =>
       originEventId !== undefined
         ? { attachmentId: originEventId }
-        : { attachmentIds: documents.map(({ _id }) => _id) },
-    [documents, originEventId]
+        : { attachmentIds: documentIds.map(({ _id }) => _id) },
+    [documentIds, originEventId]
   );
   const fallbackTelemetry = useMemo(
-    () => getRunWorkflowTelemetry({ surface: 'document', isBulk, itemCount: documents.length }),
-    [documents.length, isBulk]
+    () => getRunWorkflowTelemetry({ surface: 'document', isBulk, itemCount: documentIds.length }),
+    [documentIds.length, isBulk]
   );
   const { runWorkflow, showSuccessToast, telemetry } = useCaseAttachmentWorkflowRun({
     attachmentType: SECURITY_EVENT_ATTACHMENT_TYPE,
@@ -80,10 +92,10 @@ export const DocumentWorkflowsPanel = ({
     () => ({
       event: {
         triggerType: 'document' as const,
-        documents,
+        documentIds,
       },
     }),
-    [documents]
+    [documentIds]
   );
 
   return (
@@ -102,18 +114,87 @@ export const DocumentWorkflowsPanel = ({
 export const RUN_DOCUMENT_WORKFLOW_PANEL_ID = 'RUN_DOCUMENT_WORKFLOW_PANEL_ID';
 export const RUN_DOCUMENT_WORKFLOWS_PANEL_WIDTH = 400;
 export interface UseRunDocumentWorkflowPanelProps {
-  /** Full documents including _id, _index, and all source fields */
-  documents: Array<{ _id: string; _index: string } & Record<string, unknown>>;
+  documentIds: DocumentSelection[];
   closePopover: () => void;
   /**
    * Pass `ecsRowData._id` from a row action so a run inside a case uses a `cases.attachment`
-   * origin. Omit for bulk actions. Outside a case the value is ignored. Inside a case, the menu
-   * item is hidden when Cases runs are unavailable or there is no document to target.
+   * origin. Omit for bulk actions. Outside a case the value is ignored. The menu item is hidden
+   * when there is no document to run on, or inside a case when Cases runs are unavailable.
    */
   originEventId?: string;
   /** Reports the run as a bulk run outside a case. Bulk actions set it. */
   isBulk?: boolean;
+  /**
+   * True when the user chose "select all N". A table only hands over its loaded rows, so the
+   * rest of the selection has to be resolved from `selectionScope` before the run payload can
+   * be built. Without `selectionScope`, the menu item is disabled unless `totalItems` shows the
+   * loaded rows already cover the whole selection.
+   */
+  isAllSelected?: boolean;
+  /**
+   * Query context used to resolve a select-all beyond the loaded rows. Callers that cannot
+   * describe their selection as a query omit it.
+   */
+  selectionScope?: RunWorkflowSelectionScope;
+  /**
+   * Number of hits a select-all covers. Past `MAX_RUN_WORKFLOW_DOCS` the menu item is disabled
+   * with a tooltip explaining why. Only read during a select-all.
+   */
+  totalItems?: number;
 }
+
+const getRunWorkflowDisabledReason = ({
+  isSelectAllUnresolvable,
+  selectionSize,
+}: {
+  isSelectAllUnresolvable: boolean;
+  selectionSize: number;
+}): string | undefined => {
+  if (isSelectAllUnresolvable) {
+    return i18n.RUN_WORKFLOW_SELECT_ALL_UNSUPPORTED;
+  }
+  if (selectionSize > MAX_RUN_WORKFLOW_DOCS) {
+    return i18n.RUN_WORKFLOW_SELECTION_TOO_LARGE(MAX_RUN_WORKFLOW_DOCS);
+  }
+  return undefined;
+};
+
+/**
+ * Resolves a select-all into concrete ids, then renders the run panel against them.
+ *
+ * Split out as a component so the search only runs once the context menu actually opens this
+ * panel, rather than on every render of the hook that declares it.
+ */
+const ResolvingDocumentWorkflowsPanel = ({
+  pageSelections,
+  selectionScope,
+  onClose,
+  isBulk,
+}: {
+  pageSelections: DocumentSelection[];
+  selectionScope: RunWorkflowSelectionScope;
+  onClose: () => void;
+  isBulk?: boolean;
+}) => {
+  const searchDocumentIds = useRunWorkflowSelectionSearch(selectionScope);
+  const selection = useResolvedRunWorkflowSelection({
+    isAllSelected: true,
+    pageSelections,
+    searchSelectionIds: searchDocumentIds,
+  });
+
+  return (
+    <RunWorkflowSelectionStatus selection={selection}>
+      {selection.status === 'ready' && (
+        <DocumentWorkflowsPanel
+          documentIds={selection.selections}
+          onClose={onClose}
+          isBulk={isBulk}
+        />
+      )}
+    </RunWorkflowSelectionStatus>
+  );
+};
 
 export interface UseRunDocumentWorkflowPanelResult {
   /** Context menu action that opens the run workflow panel. */
@@ -124,21 +205,56 @@ export interface UseRunDocumentWorkflowPanelResult {
 
 export const useRunDocumentWorkflowPanel = ({
   closePopover,
-  documents,
+  documentIds,
   originEventId,
   isBulk,
+  isAllSelected = false,
+  selectionScope,
+  totalItems,
 }: UseRunDocumentWorkflowPanelProps): UseRunDocumentWorkflowPanelResult => {
   const { canExecuteWorkflow } = useWorkflowsCapabilities();
   const workflowUIEnabled = useWorkflowsUIEnabledSetting();
   // Inside a case, only offer the action when the run can be recorded on the case.
   const caseRouting = useCaseAttachmentWorkflowRouting();
-  const hasCaseTarget = originEventId !== undefined || documents.length > 0;
-  const canRunInCase = caseRouting === 'outside' || (caseRouting === 'available' && hasCaseTarget);
+  const hasDocuments = documentIds.length > 0;
+  const canRunInCase = caseRouting !== 'unavailable';
 
   const canRunWorkflow = useMemo(
-    () => workflowUIEnabled && canExecuteWorkflow && canRunInCase,
-    [workflowUIEnabled, canExecuteWorkflow, canRunInCase]
+    () => workflowUIEnabled && canExecuteWorkflow && hasDocuments && canRunInCase,
+    [workflowUIEnabled, canExecuteWorkflow, hasDocuments, canRunInCase]
   );
+
+  // Only resolve a select-all when the caller described its selection as a query.
+  const selectAllScope = isAllSelected ? selectionScope : undefined;
+  // Without a query, a select-all reaching past the loaded rows can't run on what was selected.
+  const isSelectAllUnresolvable =
+    isAllSelected &&
+    selectAllScope === undefined &&
+    (totalItems === undefined || totalItems > documentIds.length);
+
+  const panelContent = useMemo(
+    () =>
+      selectAllScope !== undefined ? (
+        <ResolvingDocumentWorkflowsPanel
+          pageSelections={documentIds}
+          selectionScope={selectAllScope}
+          onClose={closePopover}
+          isBulk={isBulk}
+        />
+      ) : (
+        <DocumentWorkflowsPanel
+          documentIds={documentIds}
+          onClose={closePopover}
+          originEventId={originEventId}
+          isBulk={isBulk}
+        />
+      ),
+    [selectAllScope, documentIds, closePopover, originEventId, isBulk]
+  );
+
+  const selectionSize =
+    selectAllScope !== undefined && totalItems !== undefined ? totalItems : documentIds.length;
+  const disabledReason = getRunWorkflowDisabledReason({ isSelectAllUnresolvable, selectionSize });
 
   const runWorkflowMenuItem: DocumentTableContextMenuItem[] = useMemo(
     () => [
@@ -149,9 +265,13 @@ export const useRunDocumentWorkflowPanel = ({
         key: RUN_DOCUMENT_WORKFLOW_ACTION_ID,
         name: i18n.CONTEXT_MENU_RUN_WORKFLOW,
         panel: RUN_DOCUMENT_WORKFLOW_PANEL_ID,
+        ...(disabledReason !== undefined && {
+          disabled: true,
+          toolTipContent: disabledReason,
+        }),
       },
     ],
-    []
+    [disabledReason]
   );
 
   const runDocumentWorkflowPanel: EuiContextMenuPanelDescriptor[] = useMemo(
@@ -161,17 +281,10 @@ export const useRunDocumentWorkflowPanel = ({
         title: i18n.SELECT_WORKFLOW_PANEL_TITLE,
         'data-test-subj': 'document-workflow-context-menu-panel',
         width: RUN_DOCUMENT_WORKFLOWS_PANEL_WIDTH,
-        content: (
-          <DocumentWorkflowsPanel
-            documents={documents}
-            onClose={closePopover}
-            originEventId={originEventId}
-            isBulk={isBulk}
-          />
-        ),
+        content: panelContent,
       },
     ],
-    [closePopover, documents, isBulk, originEventId]
+    [panelContent]
   );
 
   return useMemo(

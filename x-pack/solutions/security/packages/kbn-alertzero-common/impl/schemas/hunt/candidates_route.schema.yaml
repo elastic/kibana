@@ -34,6 +34,16 @@ paths:
                   type: integer
                   minimum: 1
                   maximum: 10
+                lookback_days:
+                  type: integer
+                  minimum: 1
+                  maximum: 3650
+                  default: 30
+                  description: >-
+                    Maximum age in days of a report eligible on a request without
+                    report_ids, measured on content.published_at, or on @timestamp
+                    for a report that has no content.published_at. Ignored when
+                    report_ids is supplied.
       responses:
         '200':
           description: Successful response

@@ -1,0 +1,87 @@
+requestBody:
+  content:
+    application/json:
+      examples: {}
+responses:
+  '200':
+    description: Successful request
+    content:
+      application/json:
+        schema:
+          $ref: ../oas_schemas.yaml#/find_slo_definitions_response
+        examples:
+          findSloDefinitionsResponse:
+            summary: A paginated list of SLO definitions
+            value:
+              page: 1
+              perPage: 25
+              total: 1
+              results:
+                - id: 8853df00-ae2e-11ed-90af-09bb6422b258
+                  name: My Service Availability
+                  description: Availability of my web service
+                  indicator:
+                    type: sli.kql.custom
+                    params:
+                      index: logs-*
+                      good: 'request.status_code : "2xx"'
+                      total: 'request.status_code : *'
+                      filter: 'field.environment : "production" and service.name : "my-service"'
+                      timestampField: '@timestamp'
+                  timeWindow:
+                    duration: 30d
+                    type: rolling
+                  budgetingMethod: occurrences
+                  objective:
+                    target: 0.99
+                  settings:
+                    syncDelay: 5m
+                    frequency: 5m
+                    preventInitialBackfill: false
+                  revision: 1
+                  enabled: true
+                  groupBy: '*'
+                  tags:
+                    - production
+                  createdAt: '2025-01-12T10:03:19.000Z'
+                  updatedAt: '2025-01-12T10:03:19.000Z'
+                  version: 2
+  '400':
+    description: Bad request
+    content:
+      application/json:
+        schema:
+          $ref: ../oas_schemas.yaml#/400_response
+        examples:
+          badRequestExample:
+            summary: Bad request
+            value:
+              statusCode: 400
+              error: Bad Request
+              message: 'Invalid value ''foo'' supplied to: includeOutdatedOnly'
+  '401':
+    description: Unauthorized response
+    content:
+      application/json:
+        schema:
+          $ref: ../oas_schemas.yaml#/401_response
+        examples:
+          unauthorizedExample:
+            summary: Unauthorized
+            value:
+              statusCode: 401
+              error: Unauthorized
+              message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos/_definitions]'
+  '403':
+    description: Forbidden response
+    content:
+      application/json:
+        schema:
+          $ref: ../oas_schemas.yaml#/403_response
+        examples:
+          forbiddenExample:
+            summary: Forbidden
+            value:
+              statusCode: 403
+              error: Forbidden
+              message: 'security_exception: action [slo_read] is unauthorized for user'

@@ -64,3 +64,40 @@ describe('expandWithImplicitConsumers — workflow trigger catalog', () => {
     expect(expanded.has('@kbn/alerting-v2-plugin')).toBe(true);
   });
 });
+
+describe('expandWithImplicitConsumers — ignored files', () => {
+  it('adds no consumers for a Jest-only change under an embeddables path', () => {
+    const expanded = expandWithImplicitConsumers(
+      new Set(),
+      ['x-pack/platform/plugins/shared/ml/public/embeddables/anomaly_charts.test.ts'],
+      createMockLog()
+    );
+
+    expect(expanded).toEqual(new Set());
+  });
+
+  it('adds no consumers for a Jest-only change under a workflow triggers path', () => {
+    const expanded = expandWithImplicitConsumers(
+      new Set(),
+      [
+        'x-pack/platform/plugins/shared/alerting/common/workflows/triggers/alert_status_changed.test.ts',
+      ],
+      createMockLog()
+    );
+
+    expect(expanded).toEqual(new Set());
+  });
+
+  it('still adds consumers for a source change mixed with Jest-only changes', () => {
+    const expanded = expandWithImplicitConsumers(
+      new Set(),
+      [
+        'x-pack/platform/plugins/shared/ml/public/embeddables/anomaly_charts.test.ts',
+        'x-pack/platform/plugins/shared/ml/public/embeddables/anomaly_charts.ts',
+      ],
+      createMockLog()
+    );
+
+    expect(expanded.has('@kbn/dashboard-plugin')).toBe(true);
+  });
+});

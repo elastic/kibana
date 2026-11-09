@@ -19,6 +19,11 @@ export interface CandidateQueryParams {
   spaceId: string;
   /** 1-10, default 10. */
   limit?: number;
+  /**
+   * Default 30; applies only when no report ids are named. Not clamped here: the route schema
+   * (1 to 3650) is the only caller's gate.
+   */
+  lookbackDays?: number;
 }
 
 export interface CandidateQueryResult {
@@ -34,6 +39,9 @@ export interface CandidateQueryResult {
 /** Injected rather than imported so the route owns the proposals-service wiring and tests can stub it. */
 export type OpenProposalConversationIdsReader = (spaceId: string) => Promise<Set<string>>;
 
+/** The route schema owns the bounds and default; this only covers callers that bypass it. */
+const DEFAULT_CANDIDATE_LOOKBACK_DAYS = 30;
+
 const DEFAULT_LIMIT = 10;
 const MAX_LIMIT = 10;
 
@@ -48,6 +56,19 @@ const OVERFETCH_MULTIPLIER = 3;
  * this and every later sweep alike.
  */
 const MAX_SELECTION_PAGES = 5;
+
+/** Whether the report's evidence element for this space says an earlier hunt left it partly unsearched. */
+const hasPendingCoverage = (source: unknown, spaceId: string): boolean => {
+  const evidence = (source as { evidence?: unknown } | undefined)?.evidence;
+  const elements = Array.isArray(evidence) ? evidence : [evidence];
+  return elements.some(
+    (element) =>
+      typeof element === 'object' &&
+      element !== null &&
+      (element as { space_id?: unknown }).space_id === spaceId &&
+      (element as { coverage_pending?: unknown }).coverage_pending === true
+  );
+};
 
 /**
  * Both callers below must fail closed: an empty result would read as "nothing
@@ -94,6 +115,7 @@ export const buildCandidateQuery = async (
 ): Promise<CandidateQueryResult> => {
   const { trigger, report_ids, spaceId, limit: rawLimit } = params;
   const limit = Math.min(rawLimit ?? DEFAULT_LIMIT, MAX_LIMIT);
+  const lookbackDays = params.lookbackDays ?? DEFAULT_CANDIDATE_LOOKBACK_DAYS;
 
   const namedIds =
     trigger === 'manual' && report_ids && report_ids.length > 0 ? report_ids : undefined;
@@ -118,6 +140,13 @@ export const buildCandidateQuery = async (
     // on `feedback.last_hunted_at` matches nothing and the `must_not` would
     // always pass, letting every sweep re-hunt the whole pool. The nested form
     // below is the only one that actually gates.
+    //
+    // A hunted report is retired unless it is flagged `coverage_pending`: an earlier run searched
+    // only part of it (techniques past the generation budget, or a transient gap) and recorded the
+    // rest as still to do. A report without the flag, including every one hunted before the flag
+    // existed, stays retired. A pending report is still subject to the publish-date lookback below,
+    // on purpose: with no attempt counter, the window is what stops a report whose gap never clears
+    // from being retried forever. The hunt narrative says so.
     filterClauses.push({
       bool: {
         must_not: [
@@ -130,6 +159,7 @@ export const buildCandidateQuery = async (
                     { term: { 'evidence.space_id': spaceId } },
                     { exists: { field: 'evidence.last_hunted_at' } },
                   ],
+                  must_not: [{ term: { 'evidence.coverage_pending': true } }],
                 },
               },
             },
@@ -137,12 +167,50 @@ export const buildCandidateQuery = async (
         ],
       },
     });
+
+    // Publish-date lookback. `should` with `minimum_should_match: 1` lets a report with
+    // `content.published_at` be judged on it alone, while a report without one falls back
+    // to ingest time. The fallback is permanent, not a migration shim: it covers documents
+    // ingested before the field existed and RSS entries whose feed gave no date, which
+    // never get the field. Named ids skip this clause so an analyst can replay an old report.
+    const lookbackRange = { gte: `now-${lookbackDays}d` };
+    filterClauses.push({
+      bool: {
+        minimum_should_match: 1,
+        should: [
+          { range: { 'content.published_at': lookbackRange } },
+          {
+            bool: {
+              filter: [{ range: { '@timestamp': lookbackRange } }],
+              must_not: [{ exists: { field: 'content.published_at' } }],
+            },
+          },
+        ],
+      },
+    });
   }
 
+  // A report that ended retryable keeps its rank, so ranking alone would hand it the same
+  // top slot every sweep and a handful of stuck reports would crowd out every new one.
+  // Fewer retries sorts first: a retry only takes a slot no unhunted report wants. The
+  // `unmapped_type` keeps an index the mapping migration has not reached yet sortable,
+  // rather than failing the whole sweep.
+  //
   // `corroborated_rank_score` is nested under `evidence` too, so it needs a nested
   // sort bound to this space's element. Sorting it as a top-level field silently
   // does nothing. `rank_score` is genuinely top level and sorts as written.
   const sort: estypes.SortCombinations[] = [
+    {
+      'evidence.hunt_retry_count': {
+        order: 'asc',
+        missing: 0,
+        unmapped_type: 'integer',
+        nested: {
+          path: 'evidence',
+          filter: { term: { 'evidence.space_id': spaceId } },
+        },
+      },
+    },
     {
       'evidence.corroborated_rank_score': {
         order: 'desc',
@@ -176,7 +244,8 @@ export const buildCandidateQuery = async (
         // is.
         ignore_unavailable: false,
         track_total_hits: true,
-        _source: false,
+        // Only the per-space ledger flag, which decides whether an open Proposal parks the report.
+        _source: ['evidence.space_id', 'evidence.coverage_pending'],
         sort,
         query: {
           bool: {
@@ -250,6 +319,11 @@ export const buildCandidateQuery = async (
     const pageIds = (response.hits.hits ?? [])
       .map((h) => h._id)
       .filter((id): id is string => typeof id === 'string');
+    const coveragePendingIds = new Set(
+      (response.hits.hits ?? [])
+        .filter((h) => hasPendingCoverage(h._source, spaceId))
+        .map((h) => h._id)
+    );
 
     if (page === 0) {
       // Read before any id exclusion narrows it, so `total` keeps meaning every report
@@ -262,8 +336,12 @@ export const buildCandidateQuery = async (
 
     for (const id of pageIds) {
       examined.push(id);
+      // A report an earlier run left partly unsearched is resumed even with a Proposal open:
+      // the Investigation is one per (space, report), and a finding on a subject that already has
+      // a live Proposal converges onto it rather than minting a second.
       if (
         openProposalConversationIds &&
+        !coveragePendingIds.has(id) &&
         openProposalConversationIds.has(
           buildHuntInvestigationConversationId({ spaceId, reportId: id })
         )

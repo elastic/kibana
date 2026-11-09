@@ -19,6 +19,7 @@ import {
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { previewText } from './log_format';
 import { stepsFromRound, stepsFromToolCalls, type TranscriptStep } from './transcript';
+import { loadInvestigationRound } from '../investigation_round';
 import { materializeMemory, type MaterializeMemoryResult } from './materialize';
 import {
   createLlmProposeMemoryExtractions,
@@ -91,62 +92,51 @@ export const hydrateMemoryWorkspace = async ({
   return materializeMemory({ session, store, logger, query });
 };
 
-/** Agent Builder fires the hook before saving the round, so wait briefly, then fall back. */
-const ROUND_READ_RETRY_DELAYS_MS = [1_000, 2_000];
-
-const sleep = (ms: number, signal?: AbortSignal): Promise<void> =>
-  new Promise((resolve) => {
-    if (signal?.aborted) return resolve();
-    const timer = setTimeout(resolve, ms);
-    signal?.addEventListener('abort', () => {
-      clearTimeout(timer);
-      resolve();
-    });
-  });
-
 export const loadRoundSteps = async ({
   agentBuilder,
   request,
   conversationId,
   roundId,
+  roundIndex,
   logger,
   signal,
-  retryDelaysMs = ROUND_READ_RETRY_DELAYS_MS,
+  retryDelaysMs,
 }: {
   agentBuilder: AgentBuilderPluginStart | undefined;
   request: KibanaRequest;
   conversationId?: string;
   roundId?: string;
+  roundIndex?: number;
   logger: Logger;
   signal?: AbortSignal;
   retryDelaysMs?: readonly number[];
-}): Promise<TranscriptStep[] | undefined> => {
-  if (!agentBuilder || !conversationId || !roundId) {
-    return undefined;
-  }
-  let lastProblem = '';
-  for (let attempt = 0; attempt <= retryDelaysMs.length; attempt++) {
-    if (attempt > 0) {
-      await sleep(retryDelaysMs[attempt - 1], signal);
-      if (signal?.aborted) break;
-    }
-    try {
-      const client = await agentBuilder.conversations.getScopedClient({ request });
-      const conversation = await client.get(conversationId);
-      const round = conversation.rounds.find(({ id }) => id === roundId);
-      if (round) {
-        logger.debug(`Memory optimize read the round on attempt ${attempt + 1}`);
-        return stepsFromRound(round.steps as Parameters<typeof stepsFromRound>[0]);
-      }
-      lastProblem = 'round not saved yet';
-    } catch (error) {
-      lastProblem = (error as Error).message;
-    }
-  }
-  logger.warn('Memory optimize could not read the round; using the hook tool calls');
-  logger.debug(`Memory optimize round read gave up: ${lastProblem}`);
-  return undefined;
+}): Promise<{ steps?: TranscriptStep[]; unreadable: boolean }> => {
+  const loaded = await loadInvestigationRound({
+    agentBuilder,
+    request,
+    conversationId,
+    roundId,
+    roundIndex,
+    logger,
+    signal,
+    retryDelaysMs,
+  });
+  return {
+    unreadable: loaded.source === 'conversation_unreadable',
+    ...(loaded.source === 'persisted_round'
+      ? { steps: stepsFromRound(loaded.rawSteps as Parameters<typeof stepsFromRound>[0]) }
+      : {}),
+  };
 };
+
+/** `runMemoryOptimize` left the round alone on purpose, which is not a failure. */
+export interface MemoryOptimizeSkipped {
+  skipped: 'conversation_unreadable';
+}
+
+export const isMemoryOptimizeSkipped = (
+  result: MemoryOptimizeSummary | MemoryOptimizeSkipped | undefined
+): result is MemoryOptimizeSkipped => result !== undefined && 'skipped' in result;
 
 export const runMemoryOptimize = async ({
   request,
@@ -156,6 +146,7 @@ export const runMemoryOptimize = async ({
   toolCalls,
   conversationId,
   roundId,
+  roundIndex,
   recalledIds,
   esClient,
   spaceId,
@@ -176,6 +167,7 @@ export const runMemoryOptimize = async ({
   toolCalls: InvestigationToolCall[];
   conversationId?: string;
   roundId?: string;
+  roundIndex?: number;
   recalledIds: string[];
   esClient: ElasticsearchClient;
   spaceId: string;
@@ -188,7 +180,7 @@ export const runMemoryOptimize = async ({
   requestedConnectorId?: string;
   roundConnectorId?: string;
   interactionId: string;
-}): Promise<MemoryOptimizeSummary | undefined> => {
+}): Promise<MemoryOptimizeSummary | MemoryOptimizeSkipped | undefined> => {
   logger.debug(
     `Memory optimize wiring space=${spaceId} agent=${agentId} ` +
       `connector=${requestedConnectorId ?? '(none)'} round=${roundConnectorId ?? '(none)'} ` +
@@ -211,15 +203,28 @@ export const runMemoryOptimize = async ({
     return undefined;
   }
 
+  const loaded = await loadInvestigationRound({
+    agentBuilder: getAgentBuilder(),
+    request,
+    conversationId,
+    roundId,
+    roundIndex,
+    logger,
+    signal,
+  });
+  // Learning from a conversation this caller cannot read would mean learning from the hook's
+  // partial view of it, so the round is left alone instead.
+  if (loaded.source === 'conversation_unreadable') {
+    logger.info(
+      `Memory optimize skipped — conversation ${conversationId} is not readable by this caller`
+    );
+    return { skipped: 'conversation_unreadable' };
+  }
   const investigation =
-    (await loadRoundSteps({
-      agentBuilder: getAgentBuilder(),
-      request,
-      conversationId,
-      roundId,
-      logger,
-      signal,
-    })) ?? stepsFromToolCalls(toolCalls);
+    loaded.source === 'persisted_round'
+      ? stepsFromRound(loaded.rawSteps as Parameters<typeof stepsFromRound>[0])
+      : stepsFromToolCalls(toolCalls);
+  const resolvedRoundId = loaded.roundId || roundId;
 
   const store = createMemoryStore({ esClient, logger, spaceId, signal });
   return optimizeMemory({
@@ -241,6 +246,8 @@ export const runMemoryOptimize = async ({
     investigation,
     agentId,
     conversationId,
+    roundId: resolvedRoundId,
+    workflowExecutionId: interactionId,
     logger,
     signal,
   });

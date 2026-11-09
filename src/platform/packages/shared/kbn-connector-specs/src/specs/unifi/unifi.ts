@@ -180,7 +180,7 @@ export const Unifi: ConnectorSpec = {
   metadata: {
     id: '.unifi',
     displayName: 'UniFi',
-    description: i18n.translate('core.kibanaConnectorSpecs.unifi.metadata.description', {
+    description: i18n.translate('connectorSpecs.unifi.metadata.description', {
       defaultMessage:
         'List UniFi sites, devices, clients and networks, inspect Protect cameras and sensors, and restart devices',
     }),
@@ -202,10 +202,10 @@ export const Unifi: ConnectorSpec = {
         overrides: {
           meta: {
             'X-API-KEY': {
-              label: i18n.translate('core.kibanaConnectorSpecs.unifi.auth.apiKey.label', {
+              label: i18n.translate('connectorSpecs.unifi.auth.apiKey.label', {
                 defaultMessage: 'API key',
               }),
-              helpText: i18n.translate('core.kibanaConnectorSpecs.unifi.auth.apiKey.helpText', {
+              helpText: i18n.translate('connectorSpecs.unifi.auth.apiKey.helpText', {
                 defaultMessage:
                   'A UniFi API key, sent as the X-API-KEY header. For a local console, create it in the UniFi OS UI under Settings > Control Plane > Integrations > Create API Key. For the Site Manager Cloud Connector, create it at unifi.ui.com under Settings > API Keys. The key is shown only once. The key inherits the permissions of the account that created it, so use an account with access to both the Network and Protect applications; an Admin (not Viewer) role is required for restartDevice, powerCyclePort, the guest authorization actions, and movePtzCameraToPreset.',
               }),
@@ -222,11 +222,11 @@ export const Unifi: ConnectorSpec = {
         .describe('UniFi console base URL, without the /proxy/... application prefix.')
         .meta({
           widget: 'text',
-          label: i18n.translate('core.kibanaConnectorSpecs.unifi.config.consoleUrl.label', {
+          label: i18n.translate('connectorSpecs.unifi.config.consoleUrl.label', {
             defaultMessage: 'Console URL',
           }),
           placeholder: 'https://192.168.1.1',
-          helpText: i18n.translate('core.kibanaConnectorSpecs.unifi.config.consoleUrl.helpText', {
+          helpText: i18n.translate('connectorSpecs.unifi.config.consoleUrl.helpText', {
             defaultMessage:
               'The base URL of the UniFi console (Dream Machine, Cloud Gateway or UNVR), e.g. https://192.168.1.1 — do not include /proxy/network/integration or /proxy/protect/integration. To reach a console through the Site Manager Cloud Connector instead of over the LAN, use https://api.ui.com/v1/connector/consoles/your-console-id. A local console must be network-reachable from Kibana and usually presents a self-signed certificate, so add its host to xpack.actions.customHostSettings or use the cloud connector form.',
           }),
@@ -598,7 +598,7 @@ export const Unifi: ConnectorSpec = {
 
   test: {
     enabled: true,
-    description: i18n.translate('core.kibanaConnectorSpecs.unifi.test.description', {
+    description: i18n.translate('connectorSpecs.unifi.test.description', {
       defaultMessage: 'Verifies the connection by reading the UniFi Network application info',
     }),
     handler: async (ctx) => {

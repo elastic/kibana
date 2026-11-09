@@ -11,7 +11,7 @@ import type { CaseCustomField } from '../../../common/types/domain/custom_field/
 import { CustomFieldTypes } from '../../../common/types/domain/custom_field/v1';
 import type { CaseConnector } from '../../../common/types/domain/connector/v1';
 import { ConnectorTypes } from '../../../common/types/domain/connector/v1';
-import type { CaseAssignees } from '../../../common/types/domain_zod/user/v1';
+import type { CaseAssignees } from '../../../common/types/domain/user/v1';
 
 interface LegacyCaseFields {
   title?: string;

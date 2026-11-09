@@ -16,7 +16,11 @@ import { ListKiFilterButton, type ListKiFilterOption } from './list_ki_filter_bu
 const STATUS_FILTER_MIN_WIDTH = '12rem';
 const STATUS_FILTER_BUTTON_MIN_WIDTH = '7.25rem';
 
-const LIST_KI_STATUS_FILTER_OPTIONS: KiLifecycleStatus[] = ['active', 'deleted'];
+const LIST_KI_STATUS_FILTER_OPTIONS: KiLifecycleStatus[] = [
+  'active',
+  'deleted',
+  'verification_failed',
+];
 
 interface ListKiStatusFilterProps {
   statusFilter: KiLifecycleStatus;

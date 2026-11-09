@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleChangedEventOrigin } from '../event_origin/origin_schemas';
+import type { EventOrigin } from '../event_origin/origin_schemas';
 import { createRuleResponse } from '../test_utils';
 import {
   buildRuleChangedEventData,
@@ -14,7 +14,7 @@ import {
   ruleChangeTelemetryEvents,
 } from './rule_ebt_event';
 
-const apiUserOrigin: RuleChangedEventOrigin = { actor: 'user', channel: 'api' };
+const apiUserOrigin: EventOrigin = { actor: 'user', channel: 'api' };
 
 describe('rule change EBT events', () => {
   it('registers one event type per lifecycle operation', () => {
@@ -101,9 +101,9 @@ describe('buildRuleChangedEventData', () => {
 
   it('includes template_id and builder_type when present', () => {
     const rule = createRuleResponse({
-      metadata: { template: { id: 'template-1' }, builder: { type: 'threshold' } },
+      metadata: { builder: { type: 'threshold' } },
     });
-    const data = buildRuleChangedEventData(rule, apiUserOrigin, rule.id);
+    const data = buildRuleChangedEventData(rule, apiUserOrigin, rule.id, 'template-1');
 
     expect(data).toEqual(
       expect.objectContaining({ template_id: 'template-1', builder_type: 'threshold' })

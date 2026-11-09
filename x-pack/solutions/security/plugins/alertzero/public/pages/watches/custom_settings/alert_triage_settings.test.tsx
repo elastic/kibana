@@ -107,7 +107,9 @@ describe('AlertTriageSettings', () => {
       'combobox'
     );
 
-    await userEvent.type(input, `${'a'.repeat(EXCLUDED_RULE_TAG_MAX_LENGTH + 1)}{enter}`);
+    await userEvent.click(input);
+    await userEvent.paste('a'.repeat(EXCLUDED_RULE_TAG_MAX_LENGTH + 1));
+    await userEvent.keyboard('{enter}');
 
     expect(onExtrasChange).not.toHaveBeenCalled();
     expect(screen.getByTestId('alertZeroExcludedRuleTagsError')).toBeInTheDocument();

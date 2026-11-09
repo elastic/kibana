@@ -99,7 +99,10 @@ export const buildAlertDocument = (
     },
     host: hostDocument(scenario.host, scenario.os, runMarker),
     user: { name: scenario.user, domain: 'CONTOSO' },
-    message: step.message,
+    // The AD default retrieval query searches `message`, not `tags`, for the
+    // marker (see `fixtures.ts`). Appended to signal and noise alike, so it
+    // scopes the run without becoming a token that separates them.
+    message: `${step.message} [${runMarker}]`,
     rule: {
       name: step.ruleName,
       id: ruleId,

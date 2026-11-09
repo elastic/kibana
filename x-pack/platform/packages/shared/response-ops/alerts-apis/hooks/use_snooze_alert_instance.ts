@@ -14,7 +14,7 @@ import { mutationKeys } from '../mutation_keys';
 import type { ServerError, SnoozeCondition } from '../types';
 import { snoozeAlertInstance } from '../apis/snooze_alert_instance';
 
-const ERROR_TITLE = i18n.translate('alertsApis.snoozeAlert.error', {
+const ERROR_TITLE = i18n.translate('xpack.responseOpsAlertsApis.snoozeAlert.error', {
   defaultMessage: 'Error snoozing alert',
 });
 

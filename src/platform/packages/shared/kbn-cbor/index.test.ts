@@ -38,4 +38,12 @@ describe('KbnCbor', () => {
 
     expect(decoded).toEqual(data);
   });
+
+  it('should encode file chunks as standard CBOR with binary data as a byte string', () => {
+    const encoded = encode({ bid: 'abc-123', data: Buffer.from('hi'), last: true });
+
+    // map(3) { "bid": "abc-123", "data": bytes(2) "hi", "last": true }
+    expect(encoded.toString('hex')).toBe('a363626964676162632d3132336464617461426869646c617374f5');
+    expect(Buffer.isBuffer((decode(encoded) as { data: unknown }).data)).toBe(true);
+  });
 });

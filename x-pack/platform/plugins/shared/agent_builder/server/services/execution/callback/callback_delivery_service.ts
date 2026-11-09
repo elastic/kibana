@@ -6,8 +6,13 @@
  */
 
 import pRetry, { AbortError } from 'p-retry';
+import type { Logger } from '@kbn/core/server';
 import type { PluginSetupContract as ActionsPluginSetup } from '@kbn/actions-plugin/server';
+import { isConversationNotFoundError } from '@kbn/agent-builder-common';
 import type {
+  OnBeforeNewConversationHook,
+  OnBeforeNewConversationContext,
+  OnBeforeNewConversationRelease,
   CallbackConversationResolver,
   CallbackConversationResolverContext,
   CallbacksSetup,
@@ -16,6 +21,12 @@ import type {
 import { isCallbackDeliveryError, throwIfNotDelivered } from '@kbn/agent-builder-server';
 import type { ChatCallbackResponse } from '../../../../common/http_api/chat_callback';
 import type { ConversationClient } from '../../conversation';
+
+/** The conversation a turn continues, and the agent it runs on when the conversation decides it. */
+export interface ConversationResolution {
+  conversationId: string;
+  agentId?: string;
+}
 
 const callbackRetryOptions = {
   retries: 2,
@@ -26,11 +37,14 @@ const callbackRetryOptions = {
 
 export class CallbackDeliveryService {
   private readonly actions: ActionsPluginSetup;
+  private readonly logger: Logger;
   private readonly transports: CallbackTransportDefinition[];
   private readonly conversationResolvers: CallbackConversationResolver[] = [];
+  private readonly onBeforeNewConversationHooks: OnBeforeNewConversationHook[] = [];
 
-  constructor({ actions }: { actions: ActionsPluginSetup }) {
+  constructor({ actions, logger }: { actions: ActionsPluginSetup; logger: Logger }) {
     this.actions = actions;
+    this.logger = logger;
     this.transports = [this.createRelayTransport()];
   }
 
@@ -39,6 +53,9 @@ export class CallbackDeliveryService {
       registerConversationResolver: (resolver) => {
         this.conversationResolvers.push(resolver);
       },
+      registerOnBeforeNewConversation: (hook) => {
+        this.onBeforeNewConversationHooks.push(hook);
+      },
       registerTransport: (transport) => {
         this.transports.push(transport);
       },
@@ -46,18 +63,33 @@ export class CallbackDeliveryService {
   }
 
   /**
-   * The conversation an external conversation continues: the first registered resolver's answer,
-   * else the conversation that has the origin. An error from a registered resolver propagates.
+   * The conversation an external conversation continues: the first registered resolver's answer the
+   * caller can converse in, on its own agent, else the conversation that has the origin. An error
+   * from a registered resolver propagates.
    */
   async resolveConversation(
     context: CallbackConversationResolverContext,
     conversationClient: ConversationClient
-  ): Promise<string | undefined> {
+  ): Promise<ConversationResolution | undefined> {
     for (const resolver of this.conversationResolvers) {
       const resolved = await resolver(context);
 
-      if (resolved) {
-        return resolved.conversationId;
+      if (!resolved) {
+        continue;
+      }
+
+      try {
+        const conversation = await conversationClient.get(resolved.conversationId);
+
+        return { conversationId: conversation.id, agentId: conversation.agent_id };
+      } catch (error) {
+        if (!isConversationNotFoundError(error)) {
+          throw error;
+        }
+
+        this.logger.debug(
+          `Resolved conversation [${resolved.conversationId}] is missing or not available to the caller; skipping it`
+        );
       }
     }
 
@@ -65,7 +97,44 @@ export class CallbackDeliveryService {
       external_conversation_id: context.origin.external_conversation_id,
     });
 
-    return conversation?.id;
+    return conversation ? { conversationId: conversation.id } : undefined;
+  }
+
+  /**
+   * Runs the registered on-before-new-conversation hooks in order; the first that throws refuses the
+   * execution and gives back what the hooks before it took. Resolves to the release of everything
+   * the hooks took, which never throws.
+   */
+  async runOnBeforeNewConversation(
+    context: OnBeforeNewConversationContext
+  ): Promise<OnBeforeNewConversationRelease> {
+    const releases: OnBeforeNewConversationRelease[] = [];
+    const releaseAll = async () => {
+      for (const release of releases.splice(0).reverse()) {
+        try {
+          await release();
+        } catch (error) {
+          this.logger.warn(
+            `Could not release an on-before-new-conversation hook: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+        }
+      }
+    };
+
+    try {
+      for (const hook of this.onBeforeNewConversationHooks) {
+        const release = await hook(context);
+        if (release) {
+          releases.push(release);
+        }
+      }
+    } catch (error) {
+      await releaseAll();
+      throw error;
+    }
+    return releaseAll;
   }
 
   validateCallbackUrl(callbackUrl: string): void {

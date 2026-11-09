@@ -11,7 +11,8 @@ import type { ActionPolicyClient } from '../action_policy_client/action_policy_c
 import type { RulesClient } from '../rules_client';
 import type { EventLogServiceContract } from '../services/event_log_service/event_log_service';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
-import type { AlertingServerStartDependencies } from '../../types';
+import type { SpaceId } from '@kbn/core-spaces-common';
+import { createSpacesServiceMock } from '../services/spaces_service/spaces_service.mock';
 import { ACTION_POLICY_EVENT_ACTIONS } from '../dispatcher/steps/constants';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { ActionPolicyExecutionHistoryClient } from './action_policy_execution_history_client';
@@ -79,11 +80,8 @@ const createMocks = () => {
     getWorkflowsByIds,
     getClient: jest.fn(() => ({ getWorkflowsByIds })),
   };
-  const spaces = {
-    spacesService: {
-      getSpaceId: jest.fn().mockReturnValue('default'),
-    },
-  } as unknown as AlertingServerStartDependencies['spaces'];
+  const { spacesService, spaces } = createSpacesServiceMock();
+  spaces.spacesService.getSpaceId.mockReturnValue('default' as SpaceId);
   const { loggerService, mockLogger } = createLoggerService();
 
   const client = new ActionPolicyExecutionHistoryClient(
@@ -91,7 +89,7 @@ const createMocks = () => {
     actionPolicyClient,
     rulesClient,
     workflowsManagement as any,
-    spaces,
+    spacesService,
     loggerService
   );
 
@@ -128,6 +126,18 @@ describe('ActionPolicyExecutionHistoryClient', () => {
       });
 
       jest.useRealTimers();
+    });
+
+    it('defaults startDate to 24 hours before `to` when `from` is omitted', async () => {
+      const { client, eventLogService } = createMocks();
+      const request = httpServerMock.createKibanaRequest();
+      const to = '2026-05-06T10:00:00.000Z';
+
+      await client.listExecutionHistory({ request, to });
+
+      expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith(
+        expect.objectContaining({ startDate: '2026-05-05T10:00:00.000Z', endDate: to })
+      );
     });
 
     it('uses the provided `from` as the startDate lower bound', async () => {
@@ -465,7 +475,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
           page: 1,
           perPage: EXECUTION_HISTORY_DEFAULT_PER_PAGE,
           total: 0,
-          searchMatches: { policies: 0, rules: 0, is_truncated: false },
+          searchMatches: { policy_count: 0, rule_count: 0, is_truncated: false },
         });
       });
 
@@ -481,7 +491,11 @@ describe('ActionPolicyExecutionHistoryClient', () => {
 
         const result = await client.listExecutionHistory({ request, search: 'something' });
 
-        expect(result.searchMatches).toEqual({ policies: 823, rules: 0, is_truncated: true });
+        expect(result.searchMatches).toEqual({
+          policy_count: 823,
+          rule_count: 0,
+          is_truncated: true,
+        });
       });
 
       it('flags truncation and reports the rule total when matches exceed the cap', async () => {
@@ -496,7 +510,11 @@ describe('ActionPolicyExecutionHistoryClient', () => {
 
         const result = await client.listExecutionHistory({ request, search: 'something' });
 
-        expect(result.searchMatches).toEqual({ policies: 0, rules: 612, is_truncated: true });
+        expect(result.searchMatches).toEqual({
+          policy_count: 0,
+          rule_count: 612,
+          is_truncated: true,
+        });
       });
 
       it('reports counts within the cap without flagging truncation', async () => {
@@ -517,7 +535,11 @@ describe('ActionPolicyExecutionHistoryClient', () => {
 
         const result = await client.listExecutionHistory({ request, search: 'something' });
 
-        expect(result.searchMatches).toEqual({ policies: 1, rules: 500, is_truncated: false });
+        expect(result.searchMatches).toEqual({
+          policy_count: 1,
+          rule_count: 500,
+          is_truncated: false,
+        });
       });
 
       it('returns searchMatches=null when no search is provided', async () => {

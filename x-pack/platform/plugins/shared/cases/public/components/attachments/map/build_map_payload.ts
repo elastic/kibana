@@ -10,7 +10,7 @@ import { MAP_ATTACHMENT_TYPE, MAP_SO_TYPE } from '../../../../common/constants';
 import type {
   MapAttributesSnapshot,
   MapAttachmentPayload,
-} from '../../../../common/types/domain_zod/attachment/map/v2';
+} from '../../../../common/types/domain/attachment/map/v2';
 import { fitsSnapshotBudget } from '../common/saved_object/helpers';
 
 export type MapPayload = Omit<MapAttachmentPayload, 'owner'>;
