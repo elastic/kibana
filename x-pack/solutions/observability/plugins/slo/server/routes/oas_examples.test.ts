@@ -104,7 +104,7 @@ const EXPECTED_QUERY_PARAM_EXAMPLES: Record<string, string[]> = {
 };
 
 // 4xx and 5xx codes documented per route, from `handleSLOError` and the handlers:
-// 400 request validation or SLOError, 401/403 security, 404 SLONotFound (`findById`, `findAllByIds`),
+// 400 request validation or SLOError, 401/403 security, 404 SLONotFound (`findById`, `SnapshotService`),
 // 409 SLOIdConflict (create), 503 SLOOperationTimeout (`withDeadline`: create, update and reset).
 const EXPECTED_ERROR_STATUS_CODES: Record<string, string[]> = {
   'POST /api/observability/slos 2023-10-31': ['400', '401', '403', '409', '503'],
@@ -171,7 +171,7 @@ describe('SLO routes OpenAPI examples', () => {
     it('has query parameter examples that parse with the route query schema', () => {
       const query = getQueryObject(params?.shape.query);
       const examples = getQueryParamExamples(params);
-      if (examples && Object.keys(EXPECTED_QUERY_PARAM_EXAMPLES[endpoint] ?? []).length > 0) {
+      if ((EXPECTED_QUERY_PARAM_EXAMPLES[endpoint] ?? []).length > 0) {
         expect(query).toBeDefined();
       }
       expect(Object.keys(examples).sort()).toEqual(
