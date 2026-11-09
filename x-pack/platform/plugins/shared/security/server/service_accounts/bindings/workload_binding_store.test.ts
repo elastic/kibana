@@ -366,14 +366,19 @@ describe('WorkloadBindingStore', () => {
     it('reads keyed bindings made before the cutoff, in binding key order, across all spaces', async () => {
       client.find.mockResolvedValue(findResponse([{ bindingKey: 'a' }, { bindingKey: 'b' }]));
 
-      const page = await store.findPageForSweep({ cutoff: '2026-10-25T00:00:00.000Z', size: 100 });
+      const { bindings, nextAfterKey } = await store.findPageForSweep({
+        cutoff: '2026-10-25T00:00:00.000Z',
+        size: 100,
+      });
 
-      expect(page).toEqual([
-        expect.objectContaining({ ...COORDINATES, bindingKey: 'a' }),
-        expect.objectContaining({ ...COORDINATES, bindingKey: 'b' }),
+      expect(bindings).toEqual([
+        expect.objectContaining(COORDINATES),
+        expect.objectContaining(COORDINATES),
       ]);
-      // The canary never leaves the store.
-      expect(page[0]).not.toHaveProperty('canary');
+      expect(nextAfterKey).toBe('b');
+      // Neither the canary nor the key leaves the store on a binding.
+      expect(bindings[0]).not.toHaveProperty('canary');
+      expect(bindings[0]).not.toHaveProperty('bindingKey');
       expect(client.find).toHaveBeenCalledWith(
         expect.objectContaining({
           type: SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
@@ -391,11 +396,13 @@ describe('WorkloadBindingStore', () => {
     it('starts after the given binding key', async () => {
       client.find.mockResolvedValue(findResponse([]));
 
-      await store.findPageForSweep({
-        cutoff: '2026-10-25T00:00:00.000Z',
-        afterKey: 'abc',
-        size: 10,
-      });
+      await expect(
+        store.findPageForSweep({
+          cutoff: '2026-10-25T00:00:00.000Z',
+          afterKey: 'abc',
+          size: 10,
+        })
+      ).resolves.toEqual({ bindings: [], nextAfterKey: undefined });
 
       expect(filterOf()).toContain('service-account-workload-binding.attributes.bindingKey > abc');
     });

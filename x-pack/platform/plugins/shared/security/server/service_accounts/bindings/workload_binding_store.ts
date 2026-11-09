@@ -28,8 +28,12 @@ const FIND_PAGE_SIZE = 100;
 const BOUND_AT_FIELD = `${SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE}.attributes.boundAt`;
 const BINDING_KEY_FIELD = `${SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE}.attributes.bindingKey`;
 
-/** A binding as the stale binding sweep reads it, unverified. */
-export type SweptWorkloadBinding = ServiceAccountWorkloadBinding & { bindingKey?: string };
+/** One page of the stale binding sweep, unverified. */
+export interface WorkloadBindingSweepPage {
+  bindings: ServiceAccountWorkloadBinding[];
+  /** The binding key of the last binding on the page, to resume after. Absent when it is empty. */
+  nextAfterKey?: string;
+}
 
 /**
  * What re-reading a binding just before acting on it found.
@@ -271,7 +275,7 @@ export class WorkloadBindingStore {
     cutoff: string;
     afterKey?: string;
     size: number;
-  }): Promise<SweptWorkloadBinding[]> {
+  }): Promise<WorkloadBindingSweepPage> {
     // Bindings without a key would sort last and end the pass without a key to resume from.
     // `findUnkeyedPage` reads those instead.
     const filter = nodeBuilder.and([
@@ -280,7 +284,14 @@ export class WorkloadBindingStore {
       ...(afterKey !== undefined ? [nodeBuilder.range(BINDING_KEY_FIELD, 'gt', afterKey)] : []),
     ]);
 
-    return await this.findForSweep({ filter, size, sortField: 'bindingKey' });
+    const found = await this.findForSweep({ filter, size, sortField: 'bindingKey' });
+
+    // The stored key, not one derived from the coordinates: it is what the page was sorted on, so
+    // resuming after it always moves forward.
+    return {
+      bindings: found.map(toBinding),
+      nextAfterKey: found.at(-1)?.bindingKey,
+    };
   }
 
   /**
@@ -293,12 +304,13 @@ export class WorkloadBindingStore {
   }: {
     cutoff: string;
     size: number;
-  }): Promise<SweptWorkloadBinding[]> {
+  }): Promise<ServiceAccountWorkloadBinding[]> {
     const filter = nodeBuilder.and([
       nodeBuilder.range(BOUND_AT_FIELD, 'lt', cutoff),
       fromKueryExpression(`not ${BINDING_KEY_FIELD}: *`),
     ]);
-    return await this.findForSweep({ filter, size, sortField: 'boundAt' });
+    const found = await this.findForSweep({ filter, size, sortField: 'boundAt' });
+    return found.map(toBinding);
   }
 
   /**
@@ -363,7 +375,7 @@ export class WorkloadBindingStore {
     filter: SavedObjectsFindOptions['filter'];
     size: number;
     sortField: string;
-  }): Promise<SweptWorkloadBinding[]> {
+  }): Promise<WorkloadBindingAttributes[]> {
     const { saved_objects: savedObjects } = await this.client.find<WorkloadBindingAttributes>({
       type: SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
       perPage: size,
@@ -373,9 +385,6 @@ export class WorkloadBindingStore {
       sortOrder: 'asc',
     });
 
-    return savedObjects.map(({ attributes }) => ({
-      ...toBinding(attributes),
-      ...(attributes.bindingKey !== undefined && { bindingKey: attributes.bindingKey }),
-    }));
+    return savedObjects.map(({ attributes }) => attributes);
   }
 }

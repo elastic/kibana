@@ -166,8 +166,6 @@ export const registerWorkloadBindingSavedObjectType = (
           },
           {
             type: 'data_backfill',
-            // Derived from the coordinates rather than read from the document ID, so it is the same
-            // value `getWorkloadBindingId` gives everywhere else.
             backfillFn: ({ attributes }) => ({
               attributes: { bindingKey: getWorkloadBindingId(attributes) },
             }),
