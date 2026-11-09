@@ -335,12 +335,12 @@ const getProgressBarSchema = <Shape extends z.ZodRawShape, Config extends z.core
   const progressBarSchema = columnSchema.extend({
     apply_color_to: z.literal('progress_bar').meta({
       description:
-        'Draws a horizontal bar beside the value, filled in proportion to where the value falls within `value_range`.',
+        "Renders a horizontal bar adjacent to the value label. The bar length is scaled proportionally to the value's position within `value_range`.",
     }),
     value_range: progressBarValueRangeSchema.default({ type: 'auto' }),
     alignment: leftRightAlignmentSchema
       .default('right')
-      .meta({ description: 'Alignment of the value beside the bar.' }),
+      .meta({ description: 'Label alignment relative to the progress bar.' }),
   });
 
   const paletteColorSchema = z
@@ -369,17 +369,18 @@ const getProgressBarSchema = <Shape extends z.ZodRawShape, Config extends z.core
       progressBarSchema
         .extend({
           fill_mode: z.literal('solid').meta({
-            description: 'Fills the bar with the palette color of the band the value falls in.',
+            description:
+              "Fills the bar using the palette color corresponding to the value's position within the palette scale.",
           }),
           color: paletteColorSchema,
         })
         .meta({ id: `${id}Solid`, title: `${title} (solid fill)` }),
       progressBarSchema
         .extend({
-          fill_mode: z
-            .literal('gradient')
-            .default('gradient')
-            .meta({ description: 'Reveals the palette along the bar.' }),
+          fill_mode: z.literal('gradient').default('gradient').meta({
+            description:
+              "Displays the palette across the bar's full range. Shorter bars reveal only the portion of the palette up to their length, rather than stretching the gradient to fit the bar.",
+          }),
           color: paletteColorSchema,
         })
         .meta({ id: `${id}Gradient`, title: `${title} (gradient fill)` }),
