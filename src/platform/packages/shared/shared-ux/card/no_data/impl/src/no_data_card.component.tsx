@@ -62,6 +62,9 @@ export const NoDataCard = ({
   return (
     <EuiPageTemplate.EmptyPrompt
       data-test-subj={dataTestSubj}
+      // POC: lifts the prompt off the recessed glass empty-state surface; shadow requires no border.
+      hasShadow
+      hasBorder={false}
       css={css`
         && {
           max-width: ${NO_DATA_CARD_MAX_WIDTH}px;
