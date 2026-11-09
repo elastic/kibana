@@ -62,13 +62,10 @@ for suite_id in "${SUITE_ARRAY[@]}"; do
 
   _suite_key_safe="$(printf '%s' "$suite_id" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_-]+/-/g; s/-+/-/g; s/^-|-$//g')"
 
-  # Raw p-values until the evals UI and compare route apply the same Holm correction, so the PR
-  # comment and the UI agree on which rows are significant.
   BASE_COMPARE_ARGS=(
     --suite "$suite_id"
     --format markdown
     --output "$MARKDOWN_FILE"
-    --no-multiplicity-correction
   )
   if [[ -n "$KIBANA_URL" ]]; then
     BASE_COMPARE_ARGS+=(--kibana-url "$KIBANA_URL")

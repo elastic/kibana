@@ -7,6 +7,7 @@
 
 import { isImproved } from '@kbn/evals-common';
 import type { ComparisonResult, PairedScore } from '@kbn/evals-common';
+import { groupDifferences, sliceKey } from './wilcoxon_ties';
 
 export type EffectSign = -1 | 0 | 1;
 
@@ -18,12 +19,10 @@ export type WithEffectSign<T extends ComparisonResult> = T & {
 /** How a row moved: `mixed` when the test and the mean disagree on the direction. */
 export type EffectDirection = 'improved' | 'worse' | 'unchanged' | 'mixed';
 
-const sliceKey = (datasetId: string, evaluatorName: string): string =>
-  `${datasetId}|${evaluatorName}`;
-
 /**
  * `W+ - W-` of the Wilcoxon signed-rank test: zero differences dropped (the `wilcox` zero method
- * used by `compareScores`), ties given their average rank.
+ * used by `compareScores`), ties given their average rank. Ties are exact equality, so pass
+ * differences rounded with `roundDifference`.
  */
 export const signedRankSum = (differences: readonly number[]): number => {
   const nonZero = differences.filter((difference) => difference !== 0);
@@ -56,13 +55,7 @@ export const attachEffectSigns = <T extends ComparisonResult>(
   results: readonly T[],
   pairs: readonly PairedScore[]
 ): Array<WithEffectSign<T>> => {
-  const differencesBySlice = new Map<string, number[]>();
-  for (const pair of pairs) {
-    const key = sliceKey(pair.datasetId, pair.evaluatorName);
-    const differences = differencesBySlice.get(key) ?? [];
-    differences.push(pair.scoreTarget - pair.scoreBaseline);
-    differencesBySlice.set(key, differences);
-  }
+  const differencesBySlice = groupDifferences(pairs);
 
   return results.map((result) => {
     if (result.hypothesisTest.id !== 'wilcoxon_signed_rank') return result;

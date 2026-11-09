@@ -82,10 +82,11 @@ const stubScores = (target: EvaluationScoreDocument[], baseline: EvaluationScore
 type Outcome = { exitCode: 0 } | { exitCode: number | undefined; error: Error };
 
 const runCompare = async (argv: string[]): Promise<Outcome> => {
-  const flagsReader = new FlagsReader(getFlags(argv, compareCmd.flags));
+  const flags = getFlags(argv, compareCmd.flags);
+  const flagsReader = new FlagsReader(flags);
   const log = new ToolingLog({ level: 'silent', writeTo: { write: () => {} } });
   try {
-    await compareCmd.run({ log, flagsReader } as RunContext);
+    await compareCmd.run({ log, flags, flagsReader } as RunContext);
     return { exitCode: 0 };
   } catch (error) {
     if (!(error instanceof Error)) throw error;
@@ -174,7 +175,8 @@ describe('compareCmd exit codes', () => {
 
   it('judges the gate on raw p-values with --no-multiplicity-correction', async () => {
     // Six drops: exact Wilcoxon p = 2 / 2^6 ~ 0.031, which Holm doubles past 0.05 next to a
-    // second, unchanged evaluator.
+    // second, unchanged evaluator. 2 / 2^6 is also the floor at six pairs, so under Holm neither
+    // row could reach significance: inconclusive, not passed.
     const sixPairs = (
       experimentId: string,
       evaluatorName: string,
@@ -199,7 +201,9 @@ describe('compareCmd exit codes', () => {
     );
     const argv = [...GATE, '--min-pairs', '5'];
 
-    expect(await runCompare(argv)).toEqual({ exitCode: 0 });
+    const corrected = await runCompare(argv);
+    expect(corrected.exitCode).toBe(GATE_INCONCLUSIVE_EXIT_CODE);
+    expect('error' in corrected && corrected.error.message).toContain('underpowered (n=6');
     expect((await runCompare([...argv, '--no-multiplicity-correction'])).exitCode).toBe(
       GATE_REGRESSION_EXIT_CODE
     );
@@ -243,6 +247,23 @@ describe('compareCmd exit codes', () => {
     expect(outcome).toEqual({ exitCode: 0 });
   });
 
+  it('ranks averaged repetitions with exact ties, as the pass counts they came from', async () => {
+    // Pass counts out of 3 repetitions per example. Averaged into thirds, roundoff splits tied
+    // differences and Wilcoxon gives p ~ 0.031; the counts themselves give p ~ 0.055.
+    const passCounts = (experimentId: string, digits: string) =>
+      [...digits].flatMap((count, example) =>
+        [0, 1, 2].map((repetition) =>
+          scoreDoc(experimentId, example, repetition < Number(count) ? 1 : 0, {
+            repetition,
+            totalRepetitions: 3,
+          })
+        )
+      );
+    stubScores(passCounts(TARGET, '012102111210221'), passCounts(BASELINE, '112231133313310'));
+
+    expect(await runCompare(GATE)).toEqual({ exitCode: 0 });
+  });
+
   it('keeps pairing per repetition without --fail-on-regression', async () => {
     const repeated = (experimentId: string, score: number) =>
       [0, 1, 2].flatMap((example) =>
@@ -260,6 +281,33 @@ describe('compareCmd exit codes', () => {
     } finally {
       write.mockRestore();
     }
+  });
+
+  describe('multiplicity correction default', () => {
+    const markdownFor = async (argv: string[]) => {
+      stubScores(regressedScores, baselineScores);
+      const write = jest.spyOn(process.stdout, 'write').mockImplementation(() => true);
+      try {
+        const outcome = await runCompare([...argv, '--format', 'markdown']);
+        return { outcome, markdown: write.mock.calls.map(([chunk]) => String(chunk)).join('') };
+      } finally {
+        write.mockRestore();
+      }
+    };
+
+    it.each([
+      ['off without the gate, matching the evals UI', [TARGET, BASELINE], false],
+      ['on when asked for without the gate', [TARGET, BASELINE, '--multiplicity-correction'], true],
+      ['on by default under the gate', GATE, true],
+      [
+        'off under the gate with --no-multiplicity-correction',
+        [...GATE, '--no-multiplicity-correction'],
+        false,
+      ],
+    ])('is %s', async (_label, argv, adjusted) => {
+      const { markdown } = await markdownFor(argv);
+      expect(markdown.includes('Adj. p-value')).toBe(adjusted);
+    });
   });
 
   describe('nothing to compare', () => {
@@ -324,6 +372,17 @@ describe('compareCmd exit codes', () => {
 
       expect(outcome.exitCode).toBe(1);
       expect('error' in outcome && outcome.error.message).toContain(flag);
+      expect(mockEvalsClient.assertPluginEnabled).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['--min-pairs', '5'],
+      ['--regression-evaluators', 'correctness'],
+    ])('rejects %s without --fail-on-regression', async (flag, value) => {
+      const outcome = await runCompare([TARGET, BASELINE, flag, value]);
+
+      expect(outcome.exitCode).toBe(1);
+      expect('error' in outcome && outcome.error.message).toContain('--fail-on-regression');
       expect(mockEvalsClient.assertPluginEnabled).not.toHaveBeenCalled();
     });
 

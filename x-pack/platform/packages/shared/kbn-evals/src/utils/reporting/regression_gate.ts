@@ -8,8 +8,9 @@
 import type { ComparisonResult } from '@kbn/evals-common';
 import { getEffectDirection } from './effect_direction';
 import type { WithEffectSign } from './effect_direction';
-import { getEffectivePValue } from './holm_correction';
+import { getEffectivePValue, holmBonferroniAdjust } from './holm_correction';
 import type { CorrectableComparisonResult } from './holm_correction';
+import { minimumReachablePValue } from './reachable_p_value';
 import { getTestLabel } from './test_label';
 
 export const DEFAULT_REGRESSION_SIGNIFICANCE_THRESHOLD = 0.05;
@@ -46,18 +47,37 @@ export interface DirectionConflictFinding {
   sampleSize: number;
 }
 
+export interface UnderpoweredFinding {
+  datasetName: string;
+  evaluatorName: string;
+  sampleSize: number;
+  /** Smallest effective p-value the row could reach in this run, even if every pair got worse. */
+  bestReachablePValue: number;
+}
+
 export type RegressionGateStatus = 'passed' | 'tripped' | 'inconclusive';
 
 export interface RegressionGateDecision {
   /** `tripped` when a regression was found, `inconclusive` when no row could be checked at all. */
   status: RegressionGateStatus;
   tripped: boolean;
-  /** Rows that were actually tested: in scope, directional, enough pairs and a usable p-value. */
+  /**
+   * Rows that were actually tested: in scope, directional, enough pairs, a usable p-value, and
+   * able to reach significance.
+   */
   checked: number;
+  /** In-scope directional rows the gate considered: checked plus every row it had to skip. */
+  inScope: number;
   regressions: RegressionFinding[];
   insufficientPairs: InsufficientPairsFinding[];
   /** Rows with enough pairs but a null or non-finite p-value, so no test result to judge. */
   untestable: UntestableFinding[];
+  /**
+   * Non-significant rows that could not have been significant whatever the scores: their test's
+   * smallest possible p-value, after the Holm adjustment over this run's family, is not below the
+   * threshold. Rank and count tests on few pairs hit this with large families.
+   */
+  underpowered: UnderpoweredFinding[];
   /** Significant rows whose rank-based test and mean difference point in opposite directions. */
   directionConflicts: DirectionConflictFinding[];
   /** In-scope rows of neutral evaluators, which have no worse direction to check. */
@@ -68,11 +88,29 @@ const toFinite = (value: number | null | undefined): number | null =>
   value !== null && value !== undefined && Number.isFinite(value) ? value : null;
 
 /**
+ * The effective p-value the row would get if its test returned its smallest possible p-value and
+ * every other row kept its result. Without a correction that is just the floor.
+ */
+const bestReachableEffectivePValue = (
+  result: CorrectableComparisonResult,
+  results: readonly CorrectableComparisonResult[]
+): number => {
+  const floor = minimumReachablePValue(result.hypothesisTest.id, result.sampleSize);
+  if (result.adjustedPValue === undefined) return floor;
+
+  const family = results.filter((row) => toFinite(row.pValue) !== null);
+  const index = family.indexOf(result);
+  const pValues = family.map((row, i) => (i === index ? floor : (row.pValue as number)));
+  return holmBonferroniAdjust(pValues)[index];
+};
+
+/**
  * A row trips the gate when it is in scope, directional, has at least `minPairs` pairs, its test
  * measured a change in the worse direction, and its effective (Holm-adjusted when applied)
  * p-value is below `significanceThreshold`. Significant rows where the test and the mean
- * disagree on the direction cannot trip and are not counted as checked. With no checked row the
- * status is `inconclusive`, never `passed`.
+ * disagree on the direction cannot trip and are not counted as checked, and neither are rows that
+ * could not have reached significance at all. With no checked row the status is `inconclusive`,
+ * never `passed`.
  */
 export const evaluateRegressionGate = ({
   results,
@@ -90,7 +128,9 @@ export const evaluateRegressionGate = ({
   const insufficientPairs: InsufficientPairsFinding[] = [];
   const untestable: UntestableFinding[] = [];
   const directionConflicts: DirectionConflictFinding[] = [];
+  const underpowered: UnderpoweredFinding[] = [];
   let checked = 0;
+  let inScope = 0;
   let neutralSkipped = 0;
 
   for (const result of results) {
@@ -99,6 +139,7 @@ export const evaluateRegressionGate = ({
       neutralSkipped += 1;
       continue;
     }
+    inScope += 1;
 
     if (result.sampleSize < minPairs) {
       insufficientPairs.push({
@@ -134,6 +175,19 @@ export const evaluateRegressionGate = ({
       continue;
     }
 
+    if (!isSignificant) {
+      const bestReachablePValue = bestReachableEffectivePValue(result, results);
+      if (bestReachablePValue >= significanceThreshold) {
+        underpowered.push({
+          datasetName: result.datasetName,
+          evaluatorName: result.evaluatorName,
+          sampleSize: result.sampleSize,
+          bestReachablePValue,
+        });
+        continue;
+      }
+    }
+
     checked += 1;
     if (!isSignificant || effect !== 'worse') continue;
 
@@ -160,9 +214,11 @@ export const evaluateRegressionGate = ({
     status,
     tripped,
     checked,
+    inScope,
     regressions,
     insufficientPairs,
     untestable,
+    underpowered,
     directionConflicts,
     neutralSkipped,
   };
@@ -211,7 +267,7 @@ export const formatRegressionGateReport = ({
     }
   } else {
     lines.push(
-      `Regression gate passed: no evaluator got significantly worse (${decision.checked} evaluator comparison(s) checked).`
+      `Regression gate passed: no evaluator got significantly worse (${decision.checked} of ${decision.inScope} evaluator comparison(s) checked).`
     );
   }
 
@@ -233,6 +289,19 @@ export const formatRegressionGateReport = ({
     for (const finding of decision.untestable) {
       lines.push(
         `  - ${finding.datasetName} / ${finding.evaluatorName}: no usable p-value (n=${finding.sampleSize})`
+      );
+    }
+  }
+
+  if (decision.underpowered.length > 0) {
+    lines.push(
+      `Warning: ${decision.underpowered.length} evaluator(s) could not reach p < ${significanceThreshold} even if every pair got worse (too few pairs for this many comparisons) and were NOT checked for regressions:`
+    );
+    for (const finding of decision.underpowered) {
+      lines.push(
+        `  - ${finding.datasetName} / ${finding.evaluatorName}: underpowered (n=${
+          finding.sampleSize
+        }, best reachable p=${formatP(finding.bestReachablePValue)})`
       );
     }
   }

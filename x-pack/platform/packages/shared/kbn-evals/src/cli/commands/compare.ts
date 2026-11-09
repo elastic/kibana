@@ -21,6 +21,7 @@ import { formatMarkdownCompareReport } from '../../utils/reporting/compare_markd
 import { averageMatchedRepetitions } from '../../utils/reporting/average_repetitions';
 import { attachEffectSigns } from '../../utils/reporting/effect_direction';
 import { applyHolmCorrection } from '../../utils/reporting/holm_correction';
+import { retestWilcoxonWithExactTies } from '../../utils/reporting/wilcoxon_ties';
 import {
   DEFAULT_REGRESSION_MIN_PAIRS,
   evaluateRegressionGate,
@@ -67,12 +68,15 @@ export const compareCmd = {
     --regression-evaluators         Comma-separated evaluator names that can trip the gate
                                     (default: all). Names absent from the
                                     comparison warn; if none match, the run fails.
+                                    Requires --fail-on-regression.
     --min-pairs                     Minimum paired examples for an evaluator to be gated
                                     (default: ${DEFAULT_REGRESSION_MIN_PAIRS}). Fewer pairs are reported as
                                     "insufficient pairs" and cannot trip the gate.
-    --no-multiplicity-correction    Judge significance on raw p-values. By default p-values are
-                                    Holm-Bonferroni adjusted across all comparisons in the run
-                                    and both raw and adjusted values are shown.
+                                    Requires --fail-on-regression.
+    --multiplicity-correction       Holm-Bonferroni adjust p-values across all comparisons in the
+                                    run and show both raw and adjusted values. On by default with
+                                    --fail-on-regression; off otherwise, to match the evals UI.
+    --no-multiplicity-correction    Judge significance on raw p-values, also under the gate.
 
   Environment:
     EVAL_KBN_URL      Target Kibana URL (defaults to localhost)
@@ -92,7 +96,9 @@ export const compareCmd = {
       'min-pairs',
     ],
     boolean: ['fail-on-regression', 'multiplicity-correction'],
-    default: { 'fail-on-regression': false, 'multiplicity-correction': true },
+    // null survives getopts' boolean defaulting, so an absent flag stays distinguishable from
+    // --no-multiplicity-correction.
+    default: { 'fail-on-regression': false, 'multiplicity-correction': null },
     help: `
       --baseline-branch  Branch to find the latest baseline experiment on
       --suite            Suite ID filter for baseline lookup and score filtering
@@ -104,10 +110,11 @@ export const compareCmd = {
       --fail-on-regression            Exit 3 if any evaluator got significantly worse, 2 if the gate was inconclusive or not evaluated
       --regression-evaluators         Comma-separated evaluator names that can trip the gate (default: all)
       --min-pairs                     Minimum paired examples for an evaluator to be gated (default: ${DEFAULT_REGRESSION_MIN_PAIRS})
-      --no-multiplicity-correction    Use raw p-values instead of Holm-Bonferroni adjusted ones
+      --multiplicity-correction       Holm-Bonferroni adjust p-values (default with --fail-on-regression)
+      --no-multiplicity-correction    Use raw p-values, also under --fail-on-regression
     `,
   },
-  run: async ({ log, flagsReader }: RunContext) => {
+  run: async ({ log, flags, flagsReader }: RunContext) => {
     const positionals = flagsReader.getPositionals();
     const baselineBranch = flagsReader.string('baseline-branch');
     const suiteId = flagsReader.string('suite');
@@ -116,7 +123,9 @@ export const compareCmd = {
     const outputPath = flagsReader.string('output');
     const refreshUrl = flagsReader.string('refresh-url');
     const failOnRegression = flagsReader.boolean('fail-on-regression');
-    const multiplicityCorrection = flagsReader.boolean('multiplicity-correction');
+    const rawMultiplicityCorrection = flags['multiplicity-correction'];
+    const multiplicityCorrection =
+      typeof rawMultiplicityCorrection === 'boolean' ? rawMultiplicityCorrection : failOnRegression;
     const rawRegressionEvaluators = flagsReader.string('regression-evaluators');
     const regressionEvaluators = rawRegressionEvaluators
       ?.split(',')
@@ -138,6 +147,13 @@ export const compareCmd = {
 
     if (format !== 'terminal' && format !== 'markdown') {
       throw createFlagError('--format must be "terminal" or "markdown".');
+    }
+
+    // Both only shape the gate; accepting them without it would look like a gated run that is not.
+    if (!failOnRegression && (rawMinPairs !== undefined || rawRegressionEvaluators !== undefined)) {
+      throw createFlagError(
+        '--min-pairs and --regression-evaluators only apply with --fail-on-regression.'
+      );
     }
 
     // FlagsReader.number uses parseFloat, which would accept "10abc".
@@ -372,7 +388,11 @@ export const compareCmd = {
       );
     }
 
-    const comparisonResults = compareScores(pairs);
+    // Averaged repetitions are fractions like 1/3 whose differences tie only up to roundoff, so the
+    // gated Wilcoxon rows are re-run with exact ties. The un-gated report keeps the shared result.
+    const comparisonResults = averaged
+      ? retestWilcoxonWithExactTies(compareScores(pairs), pairs)
+      : compareScores(pairs);
     if (comparisonResults.length === 0) {
       if (failOnRegression) throw nothingToCompare('No comparison results returned.');
       log.warning('No comparison results returned.');

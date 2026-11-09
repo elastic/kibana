@@ -264,9 +264,64 @@ describe('evaluateRegressionGate inconclusive outcomes', () => {
     expect(decision.checked).toBe(1);
     const report = formatRegressionGateReport({ decision });
     expect(report).toContain('Regression gate passed');
-    expect(report).toContain('1 evaluator comparison(s) checked');
+    expect(decision.inScope).toBe(3);
+    expect(report).toContain('1 of 3 evaluator comparison(s) checked');
     expect(report).toContain('NoP: no usable p-value');
     expect(report).toContain('Skipped: insufficient pairs');
+  });
+
+  it('is inconclusive when Holm puts significance out of reach for every row', () => {
+    // 40 comparisons of 10 pairs: the Wilcoxon floor 2/2^10 times 40 is above 0.05, so even
+    // rows where every pair got worse cannot be significant.
+    const results = Array.from({ length: 40 }, (_, i) =>
+      makeResult({ evaluatorName: `E${i}`, sampleSize: 10, pValue: 2 / 2 ** 10 })
+    );
+
+    const decision = evaluateRegressionGate({ results: applyHolmCorrection(results) });
+
+    expect(decision.status).toBe('inconclusive');
+    expect(decision.checked).toBe(0);
+    expect(decision.inScope).toBe(40);
+    expect(decision.underpowered).toHaveLength(40);
+    expect(decision.underpowered[0]).toEqual({
+      datasetName: 'Dataset One',
+      evaluatorName: 'E0',
+      sampleSize: 10,
+      bestReachablePValue: expect.closeTo(0.078125, 10),
+    });
+    expect(formatRegressionGateReport({ decision })).toContain(
+      '40 evaluator(s) could not reach p < 0.05 even if every pair got worse'
+    );
+
+    // The same rows without a correction can reach significance, and do.
+    expect(evaluateRegressionGate({ results }).status).toBe('tripped');
+  });
+
+  it('checks rows that could reach significance and reports the rest as underpowered', () => {
+    const results = applyHolmCorrection([
+      ...Array.from({ length: 39 }, (_, i) =>
+        makeResult({ evaluatorName: `E${i}`, sampleSize: 30, pValue: 0.5 })
+      ),
+      makeResult({ evaluatorName: 'Small', sampleSize: 10, pValue: 0.5 }),
+    ]);
+
+    const decision = evaluateRegressionGate({ results });
+
+    expect(decision.status).toBe('passed');
+    expect(decision.checked).toBe(39);
+    expect(decision.underpowered.map(({ evaluatorName }) => evaluatorName)).toEqual(['Small']);
+    const report = formatRegressionGateReport({ decision });
+    expect(report).toContain('39 of 40 evaluator comparison(s) checked');
+    expect(report).toContain('Dataset One / Small: underpowered (n=10, best reachable p=0.078)');
+  });
+
+  it('never calls a significant row underpowered', () => {
+    const decision = evaluateRegressionGate({
+      results: [makeResult({ sampleSize: 10, pValue: 0.002 })],
+    });
+
+    expect(decision.underpowered).toEqual([]);
+    expect(decision.status).toBe('tripped');
   });
 
   it('reports a tripped status alongside untestable rows', () => {
