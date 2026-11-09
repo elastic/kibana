@@ -111,7 +111,7 @@ dependsOn:
   - '@kbn/embeddable-plugin'
   - '@kbn/setup-node-env'
   - '@kbn/react-query'
-  - '@kbn/fs'
+  - '@kbn/content-sanitization'
   - '@kbn/yaml-loader'
 tags:
   - plugin

@@ -1058,6 +1058,7 @@ packages:
   - 'x-pack/platform/packages/shared/kbn-apm-types'
   - 'x-pack/platform/packages/shared/kbn-cloud-security-posture/common'
   - 'x-pack/platform/packages/shared/kbn-content-packs-schema'
+  - 'x-pack/platform/packages/shared/kbn-content-sanitization'
   - 'x-pack/platform/packages/shared/kbn-data-forge'
   - 'x-pack/platform/packages/shared/kbn-elastic-assistant'
   - 'x-pack/platform/packages/shared/kbn-elastic-assistant-common'

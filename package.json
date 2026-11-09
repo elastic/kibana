@@ -280,6 +280,7 @@
     "@kbn/content-management-user-profiles": "workspace:*",
     "@kbn/content-management-utils": "workspace:*",
     "@kbn/content-packs-schema": "workspace:*",
+    "@kbn/content-sanitization": "workspace:*",
     "@kbn/controls-example-plugin": "workspace:*",
     "@kbn/controls-plugin": "workspace:*",
     "@kbn/core": "workspace:*",
