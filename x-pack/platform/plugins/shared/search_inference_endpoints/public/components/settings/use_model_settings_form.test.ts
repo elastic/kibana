@@ -10,15 +10,11 @@ import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { useModelSettingsForm } from './use_model_settings_form';
 import { useRegisteredFeatures } from '../../hooks/use_registered_features';
 import { useInferenceSettings, useSaveInferenceSettings } from '../../hooks/use_inference_settings';
-import { useSupportedEffortLevels } from '../../hooks/use_supported_effort_levels';
 import type { InferenceFeatureResponse as InferenceFeatureConfig } from '../../../common/types';
 
 jest.mock('../../hooks/use_registered_features');
 jest.mock('../../hooks/use_inference_settings');
-jest.mock('../../hooks/use_supported_effort_levels');
-
 const mockUseRegisteredFeatures = useRegisteredFeatures as jest.Mock;
-const mockUseSupportedEffortLevels = useSupportedEffortLevels as jest.Mock;
 const mockUseInferenceSettings = useInferenceSettings as jest.Mock;
 const mockUseSaveInferenceSettings = useSaveInferenceSettings as jest.Mock;
 const mockSaveSettings = jest.fn().mockResolvedValue(undefined);
@@ -56,7 +52,6 @@ describe('useModelSettingsForm', () => {
     jest.clearAllMocks();
     mockUseRegisteredFeatures.mockReturnValue({ features: allFeatures, isLoading: false });
     mockUseInferenceSettings.mockReturnValue({ data: undefined, isLoading: false });
-    mockUseSupportedEffortLevels.mockReturnValue(new Map());
     mockUseSaveInferenceSettings.mockReturnValue({
       mutateAsync: mockSaveSettings,
       isLoading: false,
@@ -350,19 +345,16 @@ describe('useModelSettingsForm', () => {
         features: featuresWithRecommendedEffort,
         isLoading: false,
       });
-      mockUseSupportedEffortLevels.mockReturnValue(
-        new Map([
-          ['endpoint-a', ['low', 'medium']],
-          ['endpoint-b', ['low']],
-        ])
-      );
     });
 
-    it('keeps only recommended efforts the endpoint supports', () => {
+    it('starts from the recommended efforts', () => {
       const { result } = renderHook(() => useModelSettingsForm());
 
-      expect(result.current.effectiveRecommendedEfforts.child_1).toEqual({ 'endpoint-a': 'low' });
-      expect(result.current.efforts.child_1).toEqual({ 'endpoint-a': 'low' });
+      expect(result.current.effectiveRecommendedEfforts.child_1).toEqual({
+        'endpoint-a': 'low',
+        'endpoint-b': 'high',
+      });
+      expect(result.current.efforts.child_1).toEqual({ 'endpoint-a': 'low', 'endpoint-b': 'high' });
       expect(result.current.isDirty).toBe(false);
     });
 
@@ -378,6 +370,46 @@ describe('useModelSettingsForm', () => {
 
       expect(mockSaveSettings).toHaveBeenCalledWith({
         features: [{ feature_id: 'child_2', endpoints: [{ id: 'ep-1' }] }],
+      });
+    });
+
+    it('keeps a saved override that removes a recommended effort when another feature is saved', () => {
+      mockUseInferenceSettings.mockReturnValue({
+        data: {
+          data: {
+            features: [
+              {
+                feature_id: 'child_1',
+                endpoints: [
+                  { id: 'endpoint-a', parameters: { reasoning: { effort: 'low' } } },
+                  { id: 'endpoint-b' },
+                ],
+              },
+            ],
+          },
+        },
+        isLoading: false,
+      });
+      const { result } = renderHook(() => useModelSettingsForm());
+
+      act(() => {
+        result.current.updateEndpoints('child_2', ['ep-1']);
+      });
+      act(() => {
+        result.current.save();
+      });
+
+      expect(mockSaveSettings).toHaveBeenCalledWith({
+        features: [
+          {
+            feature_id: 'child_1',
+            endpoints: [
+              { id: 'endpoint-a', parameters: { reasoning: { effort: 'low' } } },
+              { id: 'endpoint-b' },
+            ],
+          },
+          { feature_id: 'child_2', endpoints: [{ id: 'ep-1' }] },
+        ],
       });
     });
 

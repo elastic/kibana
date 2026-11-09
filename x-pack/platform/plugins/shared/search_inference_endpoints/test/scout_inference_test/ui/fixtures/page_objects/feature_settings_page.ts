@@ -53,6 +53,8 @@ export class FeatureSettingsPage {
   readonly deprecatedModelsCallout: Locator;
   readonly eolModelsCallout: Locator;
 
+  readonly toastList: Locator;
+
   constructor(private readonly page: ScoutPage) {
     // Header
     this.pageHeader = this.page.testSubj.locator('appHeaderTitle');
@@ -104,6 +106,8 @@ export class FeatureSettingsPage {
     // Deprecation / EOL callouts
     this.deprecatedModelsCallout = this.page.testSubj.locator('deprecatedModelsCallout');
     this.eolModelsCallout = this.page.testSubj.locator('eolModelsCallout');
+
+    this.toastList = this.page.testSubj.locator('globalToastList');
   }
 
   // --- Navigation ---

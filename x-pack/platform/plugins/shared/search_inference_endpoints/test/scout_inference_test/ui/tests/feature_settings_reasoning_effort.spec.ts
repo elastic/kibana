@@ -6,6 +6,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import type { InferenceFeatureSetting, InferenceSettingsResponse } from '../../../../common/types';
 import { INFERENCE_LOCAL_TAGS } from '../../scout_test_tags';
 import { test } from '../fixtures';
 import { mockInferenceEndpoints as mockEndpointsData } from '../fixtures/mock_data/inference_endpoints';
@@ -17,8 +18,21 @@ import {
 
 const FEATURE_ID = 'test_feature_alpha';
 const ENDPOINT_ID = '.mock-anthropic-claude-3.7-sonnet-chat_completion-a3f1';
+const SETTINGS_PATH = '/internal/search_inference_endpoints/settings';
+const SETTINGS_HEADERS = { 'x-elastic-internal-origin': 'kibana', 'elastic-api-version': '1' };
 
 test.describe('Feature Settings reasoning effort', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
+  let originalFeatures: InferenceFeatureSetting[] = [];
+
+  test.beforeAll(async ({ kbnClient }) => {
+    const { data } = await kbnClient.request<InferenceSettingsResponse>({
+      method: 'GET',
+      path: SETTINGS_PATH,
+      headers: SETTINGS_HEADERS,
+    });
+    originalFeatures = data.data.features;
+  });
+
   test.beforeEach(async ({ browserAuth, page, pageObjects }) => {
     await mockInferenceEndpoints(page, mockEndpointsData);
     await browserAuth.loginAsPrivilegedUser();
@@ -30,9 +44,9 @@ test.describe('Feature Settings reasoning effort', { tag: [...INFERENCE_LOCAL_TA
     await unmockInferenceEndpoints(page);
     await kbnClient.request({
       method: 'PUT',
-      path: '/internal/search_inference_endpoints/settings',
-      headers: { 'x-elastic-internal-origin': 'kibana', 'elastic-api-version': '1' },
-      body: { features: [] },
+      path: SETTINGS_PATH,
+      headers: SETTINGS_HEADERS,
+      body: { features: originalFeatures },
     });
   });
 
@@ -56,7 +70,7 @@ test.describe('Feature Settings reasoning effort', { tag: [...INFERENCE_LOCAL_TA
 
     await test.step('save and reload', async () => {
       await featureSettings.saveButton.click();
-      await expect(featureSettings.saveButton).toBeDisabled();
+      await expect(featureSettings.toastList).toContainText('Changes saved');
       await featureSettings.goto();
     });
 

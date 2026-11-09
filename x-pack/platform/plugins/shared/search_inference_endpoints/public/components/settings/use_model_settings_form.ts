@@ -10,7 +10,6 @@ import { isEqual, pick } from 'lodash';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { useInferenceSettings, useSaveInferenceSettings } from '../../hooks/use_inference_settings';
 import { useRegisteredFeatures } from '../../hooks/use_registered_features';
-import { useSupportedEffortLevels } from '../../hooks/use_supported_effort_levels';
 import type {
   InferenceEndpointSetting,
   InferenceFeatureResponse,
@@ -70,8 +69,7 @@ const getEffectiveEndpoints = (
 
 const getEffectiveRecommendedEfforts = (
   feature: InferenceFeatureResponse,
-  featureById: Map<string, InferenceFeatureResponse>,
-  supportedEffortLevels: Map<string, ReasoningEffortLevel[]>
+  featureById: Map<string, InferenceFeatureResponse>
 ): EndpointEfforts => {
   const parentFeature =
     feature.recommendedEndpoints.length === 0 && feature.parentFeatureId !== undefined
@@ -82,9 +80,7 @@ const getEffectiveRecommendedEfforts = (
     Object.entries(recommendedEndpointParameters).flatMap(
       ([endpointId, { reasoning }]): Array<[string, ReasoningEffortLevel]> => {
         const effort = reasoning?.effort;
-        return effort !== undefined && supportedEffortLevels.get(endpointId)?.includes(effort)
-          ? [[endpointId, effort]]
-          : [];
+        return effort !== undefined ? [[endpointId, effort]] : [];
       }
     )
   );
@@ -135,8 +131,6 @@ export const useModelSettingsForm = (): ModelSettingsForm => {
   const { features: registeredFeatures, isLoading: isFeaturesLoading } = useRegisteredFeatures();
   const { data: settingsData, isLoading: isSettingsLoading } = useInferenceSettings();
   const { mutateAsync: saveSettings, isLoading: isSaving } = useSaveInferenceSettings();
-  const supportedEffortLevels = useSupportedEffortLevels();
-
   const isLoading = isFeaturesLoading || isSettingsLoading;
 
   const sections = useMemo((): FeatureSection[] => {
@@ -189,11 +183,11 @@ export const useModelSettingsForm = (): ModelSettingsForm => {
       sections.flatMap(({ children }) =>
         children.map((f): [string, EndpointEfforts] => [
           f.featureId,
-          getEffectiveRecommendedEfforts(f, featureById, supportedEffortLevels),
+          getEffectiveRecommendedEfforts(f, featureById),
         ])
       )
     );
-  }, [sections, registeredFeatures, supportedEffortLevels]);
+  }, [sections, registeredFeatures]);
 
   const savedEndpoints = useMemo<SavedEndpoints>(
     () =>
