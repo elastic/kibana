@@ -14,12 +14,21 @@ import type { BlockStatsSnapshot } from './block_stats';
 /** Startup is noisier than steady state, so blocks are counted per phase. */
 export type Phase = 'starting' | 'running';
 
+export interface WatchdogProfilingData {
+  startAfterMs: Readonly<Record<Phase, number>>;
+  maxDurationMs: Readonly<Record<Phase, number>>;
+  cooldownMs: Readonly<Record<Phase, number>>;
+  /** Where profiles are written. Unset when Node has no diagnostic directory. */
+  diagnosticDir?: string;
+}
+
 /** Passed to the worker as `workerData.data`. */
 export interface WatchdogWorkerData {
   shared: SharedArrayBuffer;
   thresholdsMs: Readonly<Record<Phase, number>>;
   statsIntervalMs: number;
   logging: WorkerLoggingConfig;
+  profiling: WatchdogProfilingData;
 }
 
 export interface BlockLogMeta extends LogMeta {

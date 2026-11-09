@@ -7,12 +7,18 @@
 
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import type { ScreenContextAttachmentData } from '@kbn/agent-builder-common/attachments';
+import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import type {
   ControlsGold,
   DashboardDatasetExample,
   DashboardRoute,
   DashboardStructureGold,
   EnhanceMode,
+  LayoutEditGold,
+  PanelEditGold,
+  ReplaceConfirmationGold,
+  UnavailableRequestGold,
+  VisualizationAttachment,
 } from '../../../src/types';
 import { getDefectScope } from '../../../src/evaluators/seed_defects';
 import { GENERATE_DASHBOARD_TOOL_ID } from '../../../src/extract_dashboard';
@@ -22,10 +28,17 @@ import {
   MESSY_LOGS_DASHBOARD_DEFECTS,
 } from '../../../src/fixtures/messy_logs_dashboard';
 import { SAMPLE_LOGS_MAPPED_FIELDS } from '../../../src/fixtures/sample_logs_fields';
+import { SECTIONED_LOGS_DASHBOARD } from '../../../src/fixtures/sectioned_logs_dashboard';
 
 /** Slicing keys stored on every example so golden-cluster results can be split by behaviour. */
 export interface ExampleMetadata {
-  behaviour: 'creation' | 'routing' | 'enhance' | 'discover_results';
+  behaviour:
+    | 'creation'
+    | 'routing'
+    | 'enhance'
+    | 'discover_results'
+    | 'layout_edit'
+    | 'edit_scenario';
   /** `logs_dissect` is the sample logs index read through a `DISSECT` query attached from Discover. */
   dataSource: 'logs' | 'logs_dissect';
   enhanceMode?: EnhanceMode;
@@ -81,6 +94,22 @@ export const routingExample = ({
   input: { question },
   metadata: { behaviour: 'routing', dataSource: 'logs' } satisfies ExampleMetadata,
   output: { route },
+});
+
+/**
+ * A dashboard request nothing of which the data can back. The dashboard skill
+ * loads, but no dashboard may be written, and the reply names each request.
+ */
+export const unavailableDashboardExample = ({
+  question,
+  unavailableRequests,
+}: {
+  question: string;
+  unavailableRequests: readonly UnavailableRequestGold[];
+}): DashboardDatasetExample => ({
+  input: { question },
+  metadata: { behaviour: 'routing', dataSource: 'logs' } satisfies ExampleMetadata,
+  output: { route: 'dashboard', noDashboard: true, unavailableRequests },
 });
 
 /**
@@ -145,5 +174,45 @@ export const discoverResultsExample = ({
     ...(structure ? { structure } : {}),
     controls: { mappedFields: SAMPLE_LOGS_MAPPED_FIELDS, ...controls },
     goldenToolPath: ['load_skill', GENERATE_DASHBOARD_TOOL_ID],
+  },
+});
+
+/**
+ * A request that adds, removes, moves or edits panels of the seeded sectioned
+ * logs dashboard. `layoutEdit` names the containers the edit may rearrange
+ * and where the prompt puts things; the other gold covers what else the
+ * prompt asks of the edit. `visualizations` are charts the agent created
+ * earlier in the conversation. `edit_scenario` tags the edits beyond moving
+ * ES|QL panels.
+ */
+export const layoutEditExample = ({
+  question,
+  controls,
+  visualizations,
+  dashboard = SECTIONED_LOGS_DASHBOARD,
+  behaviour = 'layout_edit',
+  ...gold
+}: {
+  question: string;
+  layoutEdit?: LayoutEditGold;
+  panelEdits?: readonly PanelEditGold[];
+  structure?: DashboardStructureGold;
+  controls?: Omit<ControlsGold, 'mappedFields'>;
+  replaceConfirmation?: ReplaceConfirmationGold;
+  unavailableRequests?: readonly UnavailableRequestGold[];
+  visualizations?: readonly VisualizationAttachment[];
+  dashboard?: DashboardAttachmentData;
+  behaviour?: 'layout_edit' | 'edit_scenario';
+}): DashboardDatasetExample => ({
+  input: { question, dashboard, ...(visualizations ? { visualizations } : {}) },
+  metadata: { behaviour, dataSource: 'logs' } satisfies ExampleMetadata,
+  output: {
+    route: 'dashboard',
+    ...gold,
+    ...(controls ? { controls: { mappedFields: SAMPLE_LOGS_MAPPED_FIELDS, ...controls } } : {}),
+    // A replace confirmation ends without a write, and Trajectory skips it.
+    ...(gold.replaceConfirmation
+      ? {}
+      : { goldenToolPath: ['load_skill', GENERATE_DASHBOARD_TOOL_ID] }),
   },
 });

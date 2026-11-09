@@ -68,20 +68,20 @@ import { classifyOnlineEvalsRoundStepDefinition } from './step_definitions/class
 import { scoreOnlineEvalsRoundStepDefinition } from './step_definitions/score_online_evals_round';
 import { createIsOnlineEvalsPaused } from './online_evals/is_online_evals_paused';
 import { createShouldIncludeExplanations } from './online_evals/should_include_explanations';
-import { alertOutcomeJudges, cortexJudges, referenceFreeJudges } from './online_evals/judges';
+import { alertOutcomeJudges, wikiJudges, referenceFreeJudges } from './online_evals/judges';
 import { obtainSandboxStepDefinition } from './step_definitions/obtain_sandbox';
 import { composeHydrateNotificationsStepDefinition } from './step_definitions/compose_hydrate_notifications';
 import { resolveModelStepDefinition } from './step_definitions/resolve_model';
-import { cortexHydrateStepDefinition } from './step_definitions/cortex_hydrate';
+import { wikiHydrateStepDefinition } from './step_definitions/wiki_hydrate';
 import { memoryMaterializeToSandboxStepDefinition } from './step_definitions/memory_materialize_to_sandbox';
-import { cortexOptimizeStepDefinition } from './step_definitions/cortex_optimize';
+import { wikiOptimizeStepDefinition } from './step_definitions/wiki_optimize';
 import { decisionTreeHydrateStepDefinition } from './step_definitions/decision_tree_hydrate';
 import { decisionTreePrepareStepDefinition } from './step_definitions/decision_tree_prepare';
 import { decisionTreeReinforceStepDefinition } from './step_definitions/decision_tree_reinforce';
 import { memoryOptimizeStepDefinition } from './step_definitions/memory_optimize';
-import { createCortexStore, registerCortexAiIndex } from './cortex/register_cortex';
+import { createWikiStore, registerWikiAiIndex } from './wiki/register_wiki';
 import { registerMemoryAiIndex } from './memory/register_memory';
-import { registerCortexTelemetryEvents } from './telemetry';
+import { registerWikiTelemetryEvents } from './telemetry';
 import { createMemoryPageStore } from './memory/page_store';
 import { createDecisionTreeStore } from './decision_trees/store';
 import { createKnowledgePurgeClient } from './purge/purge_client';
@@ -180,7 +180,7 @@ export class NightshiftInvestigationsPlugin
   private managedWorkflowsClient?: Promise<ManagedWorkflowsClient>;
   private notificationRoutingService?: InvestigationAttachmentDocService<StoredNotificationRouting>;
   private investigationAvailability?: AvailabilityConfig;
-  private cortexEnabled = false;
+  private wikiEnabled = false;
   private memoryEnabled = false;
   private investigationQuotaCallback?: InvestigationQuotaCallback;
   private telemetry?: NightshiftTelemetryClient;
@@ -230,15 +230,15 @@ export class NightshiftInvestigationsPlugin
       logger: this.logger.get('telemetry'),
     });
     this.telemetry = telemetry;
-    for (const judge of [...referenceFreeJudges, ...alertOutcomeJudges, ...cortexJudges]) {
+    for (const judge of [...referenceFreeJudges, ...alertOutcomeJudges, ...wikiJudges]) {
       plugins.evals?.registerEvaluator(judge);
     }
 
-    this.cortexEnabled = this.ctx.config.get().cortex.enabled;
+    this.wikiEnabled = this.ctx.config.get().wiki.enabled;
     this.memoryEnabled = this.ctx.config.get().memory.enabled;
-    if (this.cortexEnabled) {
-      registerCortexAiIndex(plugins.contextEngine, this.logger.get('cortex'));
-      registerCortexTelemetryEvents(core.analytics);
+    if (this.wikiEnabled) {
+      registerWikiAiIndex(plugins.contextEngine, this.logger.get('wiki'));
+      registerWikiTelemetryEvents(core.analytics);
     }
     if (this.memoryEnabled) {
       registerMemoryAiIndex(plugins.contextEngine, this.logger.get('memory'));
@@ -246,7 +246,7 @@ export class NightshiftInvestigationsPlugin
 
     this.decisionTreesEnabled =
       this.ctx.config.get().decision_trees.enabled &&
-      this.cortexEnabled &&
+      this.wikiEnabled &&
       Boolean(plugins.sandbox?.isAvailable);
     if (this.decisionTreesEnabled) {
       registerDecisionTreeAiIndex(plugins.contextEngine, this.logger.get('decision_trees'));
@@ -337,8 +337,9 @@ export class NightshiftInvestigationsPlugin
       const config = this.ctx.config.get();
       const nightshiftAgentOptions: NightshiftAgentTypeOptions = {
         sandboxEnabled: plugins.sandbox?.isAvailable ?? false,
-        cortexEnabled: this.cortexEnabled,
+        wikiEnabled: this.wikiEnabled,
         memoryEnabled: this.memoryEnabled,
+        learningEnabled: config.learning.enabled,
         investigationToolsEnabled: Boolean(plugins.agenticInvestigations),
         proposalsEnabled: Boolean(plugins.proposals),
         getCustomContextInstructions: ({ request, spaceId }) =>
@@ -383,13 +384,14 @@ export class NightshiftInvestigationsPlugin
               if (!sandboxStart) return undefined;
               // The same per-request check the investigator's sandbox tools pass: a user who may
               // not use the sandbox must not have its files read on their behalf either.
+              const spaceId = this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
               const access = await checkSandboxAccess({
                 request,
+                spaceId,
                 featureFlags: this.featureFlags,
                 security: this.securityStart,
               });
               if (access.status !== 'available') return undefined;
-              const spaceId = this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
               const redactor = await getRecorderOutputRedactor({
                 request,
                 allowedConnectorIds,
@@ -608,13 +610,13 @@ export class NightshiftInvestigationsPlugin
           })
         );
         plugins.workflowsExtensions.registerStepDefinition(
-          cortexHydrateStepDefinition({
+          wikiHydrateStepDefinition({
             getSandboxStart: getGatedSandboxStart,
             getSavedObjects: () => this.savedObjects,
             getUiSettings: () => this.uiSettings,
             analytics: core.analytics,
-            logger: this.logger.get('cortex'),
-            isEnabled: () => this.cortexEnabled,
+            logger: this.logger.get('wiki'),
+            isEnabled: () => this.wikiEnabled,
           })
         );
         plugins.workflowsExtensions.registerStepDefinition(
@@ -633,9 +635,9 @@ export class NightshiftInvestigationsPlugin
             getUiSettings: () => this.uiSettings,
           })
         );
-        // Registered unconditionally: the combined materialize workflow installs with Cortex
+        // Registered unconditionally: the combined materialize workflow installs with Wiki
         // or Memory, so a trees-off install would otherwise reference an unknown step type.
-        // The handler no-ops on the flag instead, matching cortex/memory above.
+        // The handler no-ops on the flag instead, matching wiki/memory above.
         plugins.workflowsExtensions.registerStepDefinition(
           decisionTreeHydrateStepDefinition({
             getSandboxStart: getGatedSandboxStart,
@@ -646,14 +648,14 @@ export class NightshiftInvestigationsPlugin
           })
         );
         plugins.workflowsExtensions.registerStepDefinition(
-          cortexOptimizeStepDefinition({
+          wikiOptimizeStepDefinition({
             getAgentBuilder: () => this.agentBuilder,
             getInference: () => this.inference,
             getSavedObjects: () => this.savedObjects,
             getUiSettings: () => this.uiSettings,
             analytics: core.analytics,
-            logger: this.logger.get('cortex'),
-            isEnabled: () => this.cortexEnabled,
+            logger: this.logger.get('wiki'),
+            isEnabled: () => this.wikiEnabled,
           })
         );
         plugins.workflowsExtensions.registerStepDefinition(
@@ -668,7 +670,7 @@ export class NightshiftInvestigationsPlugin
           })
         );
         // Registered unconditionally for the same reason as the tree hydrate above: the
-        // combined optimize workflow installs with Cortex or Memory and now runs the
+        // combined optimize workflow installs with Wiki or Memory and now runs the
         // reinforcement phase too. The handler no-ops on the flag.
         plugins.workflowsExtensions.registerStepDefinition(
           decisionTreePrepareStepDefinition({
@@ -700,21 +702,21 @@ export class NightshiftInvestigationsPlugin
           getAutomationsSoClient: this.getAutomationsSoClient,
           getWorkflowsManagement: () => this.workflowsManagement,
           isUniversalAlertingAvailable: () => this.alertingVTwo !== undefined,
-          isCortexEnabled: () => this.cortexEnabled,
+          isWikiEnabled: () => this.wikiEnabled,
           listSandboxConnectors,
           listSandboxConnectorTypes,
           sandboxAllowlistClient,
           customContextClient,
           onboardingClient,
-          getCortexPageStore: (request: KibanaRequest) => {
+          getWikiPageStore: (request: KibanaRequest) => {
             if (!this.elasticsearch) {
               throw new Error(
                 'elasticsearch is not available — plugin start() has not been called'
               );
             }
-            return createCortexStore({
+            return createWikiStore({
               esClient: this.elasticsearch.client.asScoped(request).asCurrentUser,
-              logger: this.logger.get('cortex'),
+              logger: this.logger.get('wiki'),
               spaceId: this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
             });
           },
@@ -977,6 +979,7 @@ export class NightshiftInvestigationsPlugin
       spaces: this.spaces,
       getAgentBuilder: () => this.agentBuilder,
       getAgentAvailability: () => this.getInvestigationAvailability(),
+      isAssistantEnabled: () => this.assistantEnabled,
       getAutomationsSoClient: this.getAutomationsSoClient,
       isUniversalAlertingAvailable: () => this.alertingVTwo !== undefined,
       isServerless: this.ctx.env.packageInfo.buildFlavor === 'serverless',
@@ -1067,7 +1070,7 @@ export class NightshiftInvestigationsPlugin
     await client.install(NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID, {
       spaceId: GLOBAL_WORKFLOW_SPACE_ID,
     });
-    if (this.cortexEnabled || this.memoryEnabled) {
+    if (this.wikiEnabled || this.memoryEnabled) {
       await installSandboxMaterializeWorkspaceWorkflow({ client });
       await installAgentOptimizationsWorkflow({ client });
     }

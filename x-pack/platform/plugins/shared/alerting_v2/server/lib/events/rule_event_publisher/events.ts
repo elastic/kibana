@@ -39,6 +39,11 @@ export interface RuleEventPayload {
    * for bulk emits.
    */
   readonly correlationId?: string;
+  /**
+   * Rule as it was stored before the operation. Present only for `rule.updated`,
+   * and only when the pre-update state is available.
+   */
+  readonly prevRule?: RuleResponse;
 }
 
 /**
