@@ -92,6 +92,7 @@ export function useInspector({ inspector }: { inspector: InspectorPublicPluginSt
 
       const snapshot: InspectorSnapshotOptions = {
         appId: DISCOVER_SNAPSHOT_APP_ID,
+        replay: tabRuntimeState.replay$.getValue()?.meta,
         getAppState: async () =>
           getDiscoverSnapshotAppState({
             data: services.data,

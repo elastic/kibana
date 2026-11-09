@@ -23,12 +23,25 @@ type_check and code reading only. **It has not been run in a browser against two
   - JSON by default. Optional gzip uses the native `CompressionStream`/`DecompressionStream` (no
     new dependency); gzip is detected on import by its magic bytes. Downloads use `file-saver`.
 - `public/snapshot/snapshot_controls.tsx`, `ui/inspector_panel.tsx`
-  - Export / Import buttons next to the view chooser.
-  - Export opens a popover that warns about sensitive data and has a gzip switch.
-  - Import shows the snapshot read-only in the Requests view, with a callout
-    "Snapshot from …, Kibana x". The callout has "Restore in app" (only when `app.id` matches
-    `InspectorOptions.snapshot.appId`) and "Back to live requests".
-- `InspectorOptions.snapshot = { appId, getAppState, restore? }` (`public/types.ts`).
+  - "Import / Export" is an entry in the **View** menu (next to Requests, Profiles, …). It is
+    only listed when the Inspector has a `requests` adapter.
+  - The Export section warns about sensitive data, has a gzip switch and a "Download snapshot"
+    button. Export errors are shown in a callout.
+  - Import shows the snapshot read-only in the Requests view (the Requests view is selected), with
+    a callout "Snapshot from …, Kibana x". The callout has "Restore in app" (only when `app.id`
+    matches `InspectorOptions.snapshot.appId`) and "Back to live requests". Selecting another view
+    leaves the imported snapshot. Only the latest of overlapping imports is shown.
+  - While the app replays a snapshot (`InspectorOptions.snapshot.replay`), live views show a
+    "Restored data" callout, and an export records `meta.restoredFrom`.
+- `public/snapshot/environment.ts`
+  - `meta` also records the Kibana build (version, build number, sha, branch, date, flavor),
+    origin, space, time zone, Kibana locale and browser info (name/version and OS parsed from the
+    user agent, languages, screen, window, pixel ratio).
+  - The fields are optional and validated leniently: invalid values are dropped instead of
+    rejecting the snapshot.
+  - The import callout shows them in an "Environment details" accordion and badges values that
+    differ from the current session.
+- `InspectorOptions.snapshot = { appId, getAppState, restore?, replay? }` (`public/types.ts`).
 - `RequestParams.replayKey` plus a `RequestResponder.replayKey()` setter, needed because
   `SearchSource` only knows the final params after `adapter.start()`.
 
@@ -40,8 +53,11 @@ type_check and code reading only. **It has not been run in a browser against two
   `getReplayKind()` returns `esql` / `aggs` / `hits`.
 - The `replayKey` is recorded in `SearchSource.fetch$` (from the exact `params` passed to
   `search()`) and in `SearchMethodsService.esql/dsl`.
-- `public/search/replay/replay_registry.ts` (~100 lines):
-  - `activate(requests, { passthrough }) => dispose`, `isActive()`, `isActive$`, `match()`.
+- `public/search/replay/replay_registry.ts` (~130 lines):
+  - `activate(requests, { passthrough }) => { addSessionId, dispose }`, `isActive()`, `isActive$`,
+    `match(request, sessionId)`.
+  - Several activations can be active at once. A search is only replayed when its search session
+    id was added to an activation; all other searches go live.
   - Matching order:
     1. exact `replayKey`
     2. same ES|QL query text (added, see Risk 2)
@@ -60,16 +76,18 @@ type_check and code reading only. **It has not been run in a browser against two
 - `redux/actions/tabs.ts`
   - New `openLocatorParamsInNewTab({ params, label, uiState, visContext, replay })`.
     `openSearchSessionInNewTab` now delegates to it.
-  - The replay is activated before the tab is created, so the first fetch is served from the
-    snapshot.
-  - The dispose function is stored in the tab runtime state (`replay$`) and called in
-    `disconnectTab`, which runs on tab close and on app unmount.
-  - `openInNewTab` now also accepts `uiState` and `visContext`.
-- `use_inspector.ts` passes `snapshot: { appId: 'discover', getAppState, restore }`, and names the
-  aggregated adapters.
+  - The replay session is passed through `openInNewTab` → `updateTabs` → `setTabs` into the new
+    tab's runtime state (`replay$`) when it is created, so it is there before the first fetch.
+  - Each fetch of that tab adds its search session id to the replay session
+    (`discover_data_state_container.ts`), so only the tab's documents, histogram and hit count
+    requests are replayed.
+  - The replay session is disposed in `disconnectTab`, which runs on tab close and on app unmount.
+  - `openInNewTab` now also accepts `uiState`, `visContext` and `replay`.
+- `use_inspector.ts` passes `snapshot: { appId: 'discover', getAppState, restore, replay }`, and
+  names the aggregated adapters.
 - `resolve_data_view.ts` and `tab_state_data_view.ts` call `dataViews.create(spec, skipFetchFields)`
-  with `skipFetchFields = data.search.replay.isActive()`.
-- `components/snapshot_replay_callout`: a callout at the top of the layout with the snapshot date,
+  with `skipFetchFields` set only when the tab itself replays a snapshot.
+- `components/snapshot_replay_callout`: a callout above the query editor with the snapshot date,
   Kibana version, time zone and a "Go live" button. "Go live" disposes the replay and refetches.
 
 ## Risk findings
@@ -108,17 +126,20 @@ Possible fix: store the `EsqlSource` schema (time field, result columns) in the 
 
 ### 4. Field existence
 `load_field_existing` uses `data.search.search` without an inspector adapter, so it is not
-recorded but *is* intercepted. With `fieldListExistingFieldsInfo` restored and a matching
+recorded. It is only intercepted when it runs with the replaying tab's search session id. With `fieldListExistingFieldsInfo` restored and a matching
 `dataViewHash`, `useExistingFieldsFetcher` skips the request. If the hash doesn't match (for
 example a different field order in the spec), the request goes through the replay as kind `hits`.
 It could then consume the documents entry, or fail with "Not in snapshot". The data view hash
 match was not verified end to end.
 
-### 5. The replay is global, not per tab
-`data.search.replay` is global to the interceptor. While a replay is active, searches from other
-apps or tabs, Discover's background requests, and other embeddables can be matched or rejected.
-A per-tab scope (e.g. tag requests with the tab's `executionContext` or sessionId) would be
-needed beyond the prototype. The replay ends on "Go live", tab close, or app unmount.
+### 5. The replay is scoped to the replaying tab (fixed)
+The replay used to be global to the interceptor, so other tabs, apps and auxiliary searches could
+be matched or rejected, and restoring a second snapshot silently replaced the first replay.
+Now each replay only serves searches whose search session id the replaying tab registered, and
+several replays can run at once. Remaining caveat: searches that reuse the tab's session id but
+were not recorded (e.g. "other bucket" post-flight requests) still go through the replay. The
+replay ends on "Go live", tab close, or app unmount. Each recorded response is used once, so a
+refresh in a replayed tab fails with "Not in snapshot" unless passthrough is on.
 
 ### 6. Other gaps found
 - `esqlControls` in the locator state are not carried into `openInNewTab` (same as the existing
@@ -133,6 +154,18 @@ needed beyond the prototype. The replay ends on "Go live", tab close, or app unm
   "Go live" is the only way out.
 
 ## Test and type-check results
+
+Latest run (Import / Export view, environment details, per-tab replay, restored-data notice):
+- `node scripts/jest src/platform/plugins/shared/inspector/public`: 89 passed.
+- `node scripts/jest src/platform/plugins/shared/data/public/search/replay`: 10 passed (adds
+  session scoping, concurrent replays, no session after dispose).
+- `node scripts/jest src/platform/plugins/shared/data/public/search/search_interceptor`: 118 passed.
+- `node scripts/jest` on discover `state_management`, `components/snapshot_replay_callout` and
+  `hooks`: 597 passed.
+- `node scripts/type_check --project src/platform/plugins/shared/{inspector,data,discover}/tsconfig.json`:
+  all three pass. ESLint: no errors.
+
+Earlier runs:
 - `node scripts/jest src/platform/plugins/shared/data/public/search/replay/replay_registry.test.ts`
   — 7 passed (exact hit, ES|QL query-text tier, kind fallback in order, each entry once, miss
   without passthrough → `NotInSnapshotError`, miss with passthrough → live, dispose).

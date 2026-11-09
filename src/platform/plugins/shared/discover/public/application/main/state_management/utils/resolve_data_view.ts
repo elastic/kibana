@@ -35,9 +35,10 @@ export async function loadDataView({
   dataViewId,
   locationDataViewSpec,
   initialAdHocDataViewSpec,
-  services: { dataViews, data },
+  services: { dataViews },
   savedDataViews,
   adHocDataViews,
+  skipFetchFields = false,
 }: {
   dataViewId?: string;
   locationDataViewSpec?: DataViewSpec;
@@ -45,10 +46,10 @@ export async function loadDataView({
   services: DiscoverServices;
   savedDataViews: DataViewListItem[];
   adHocDataViews: DataView[];
+  /** Set when replaying an Inspector snapshot: its data view spec carries the full field list and the indices may not exist here */
+  skipFetchFields?: boolean;
 }): Promise<DataViewData> {
   let fetchId: string | undefined = dataViewId;
-  // A replayed Inspector snapshot carries the full field list; the indices may not exist here
-  const skipFetchFields = data.search.replay.isActive();
 
   // Handle redirect with data view spec provided via history location state
   if (locationDataViewSpec) {
@@ -192,12 +193,14 @@ export const loadAndResolveDataView = async ({
   savedDataViews,
   runtimeStateManager,
   services,
+  skipFetchFields,
 }: {
   dataViewId?: string;
   locationDataViewSpec?: DataViewSpec;
   initialAdHocDataViewSpec?: DataViewSpec;
   currentDataView?: DataView;
   isEsqlMode?: boolean;
+  skipFetchFields?: boolean;
   savedDataViews: DataViewListItem[];
   runtimeStateManager: RuntimeStateManager;
   services: DiscoverServices;
@@ -220,6 +223,7 @@ export const loadAndResolveDataView = async ({
       services,
       savedDataViews,
       adHocDataViews,
+      skipFetchFields,
     });
 
     fallback = !dataViewData.requestedDataViewFound;

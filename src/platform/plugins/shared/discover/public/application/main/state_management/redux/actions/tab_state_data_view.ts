@@ -353,10 +353,14 @@ export const createAndAppendAdHocDataView: InternalStateThunkActionCreator<
   [TabActionPayload<{ dataViewSpec: DataViewSpec }>],
   Promise<DataView>
 > = ({ tabId, dataViewSpec }) =>
-  async function createAndAppendAdHocDataViewThunkFn(dispatch, _, { services }) {
+  async function createAndAppendAdHocDataViewThunkFn(
+    dispatch,
+    _,
+    { services, runtimeStateManager }
+  ) {
     const newDataView = await services.dataViews.create(
       dataViewSpec,
-      services.data.search.replay.isActive()
+      Boolean(selectTabRuntimeState(runtimeStateManager, tabId)?.replay$.getValue())
     );
     if (newDataView.fields.getByName('@timestamp')?.type === 'date') {
       newDataView.timeFieldName = '@timestamp';

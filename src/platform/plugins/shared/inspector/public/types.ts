@@ -9,7 +9,7 @@
 
 import type { OverlayFlyoutOpenOptions, OverlayRef } from '@kbn/core/public';
 import type { Adapters } from '../common';
-import type { InspectorSnapshot } from './snapshot/snapshot';
+import type { InspectorSnapshot, InspectorSnapshotMeta } from './snapshot/snapshot';
 
 /**
  * The props interface that a custom inspector view component, that will be passed
@@ -66,6 +66,8 @@ export interface InspectorSnapshotOptions {
   getAppState: () => Promise<unknown>;
   /** Restores an imported snapshot (app state and recorded requests) in the app. */
   restore?: (snapshot: InspectorSnapshot) => Promise<void>;
+  /** Meta of the snapshot the app currently replays; the Inspector then marks its requests as restored data. */
+  replay?: InspectorSnapshotMeta;
 }
 
 export interface InspectorOptions {

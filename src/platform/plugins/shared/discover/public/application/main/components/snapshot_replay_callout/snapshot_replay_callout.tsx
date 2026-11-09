@@ -18,6 +18,11 @@ import {
   useRuntimeStateManager,
 } from '../../state_management/redux';
 
+const formatDate = (value: string) => {
+  const date = new Date(value);
+  return isNaN(date.getTime()) ? '' : ` from ${date.toLocaleString()}`;
+};
+
 /** Shown while the current tab replays an imported Inspector snapshot. */
 export const SnapshotReplayCallout = () => {
   const replay = useCurrentTabRuntimeState((tab) => tab.replay$);
@@ -31,7 +36,7 @@ export const SnapshotReplayCallout = () => {
 
   const { createdAt, kibanaVersion, timezone } = replay.meta;
   const goLive = () => {
-    replay.dispose();
+    replay.session.dispose();
     selectTabRuntimeState(runtimeStateManager, tabId)?.replay$.next(undefined);
     dispatch(internalStateActions.fetchData({ tabId }));
   };
@@ -41,9 +46,12 @@ export const SnapshotReplayCallout = () => {
       size="s"
       color="warning"
       iconType="upload"
-      title={`Replaying Inspector snapshot from ${new Date(
-        createdAt
-      ).toLocaleString()}, Kibana ${kibanaVersion}`}
+      title={[
+        `Replaying Inspector snapshot${formatDate(createdAt)}`,
+        kibanaVersion ? `Kibana ${kibanaVersion}` : undefined,
+      ]
+        .filter(Boolean)
+        .join(', ')}
       data-test-subj="discoverSnapshotReplayCallout"
     >
       <p>

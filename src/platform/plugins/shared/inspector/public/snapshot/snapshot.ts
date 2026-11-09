@@ -7,16 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { saveAs } from 'file-saver';
 import type { Adapters, Request } from '../../common';
 import { RequestAdapter, RequestStatus } from '../../common';
+import type { SnapshotEnvironment } from './environment';
+import { snapshotEnvironmentSchema } from './environment';
 
 export const SNAPSHOT_VERSION = 1;
 /** Upper bound of the (decompressed) snapshot text that is accepted on import. */
 export const MAX_SNAPSHOT_SIZE = 50 * 1024 * 1024;
 
-export interface InspectorSnapshotMeta {
+export interface InspectorSnapshotMeta extends SnapshotEnvironment {
   kibanaVersion: string;
   createdAt: string;
   appId?: string;
@@ -39,34 +41,39 @@ interface RequestsBySourceAdapter {
 const hasRequestsBySource = (adapter: unknown): adapter is RequestsBySourceAdapter =>
   typeof (adapter as Partial<RequestsBySourceAdapter>)?.getRequestsBySource === 'function';
 
-const requestSchema = z.looseObject({
-  id: z.string(),
-  name: z.string(),
-  startTime: z.number(),
-  status: z.enum(RequestStatus),
-  time: z.number().optional(),
-  description: z.string().optional(),
-  searchSessionId: z.string().optional(),
-  replayKey: z.string().optional(),
-  json: z.looseObject({}).optional(),
-  stats: z.record(z.string(), z.looseObject({ label: z.string() })).optional(),
-  response: z
-    .looseObject({ json: z.looseObject({}).optional(), time: z.number().optional() })
-    .optional(),
-});
+const requestSchema = lazySchema(() =>
+  z.looseObject({
+    id: z.string(),
+    name: z.string(),
+    startTime: z.number(),
+    status: z.enum(RequestStatus),
+    time: z.number().optional(),
+    description: z.string().optional(),
+    searchSessionId: z.string().optional(),
+    replayKey: z.string().optional(),
+    json: z.looseObject({}).optional(),
+    stats: z.record(z.string(), z.looseObject({ label: z.string() })).optional(),
+    response: z
+      .looseObject({ json: z.looseObject({}).optional(), time: z.number().optional() })
+      .optional(),
+  })
+);
 
-const snapshotSchema = z.object({
-  version: z.literal(SNAPSHOT_VERSION),
-  meta: z.looseObject({
-    kibanaVersion: z.string(),
-    createdAt: z.string(),
-    appId: z.string().optional(),
-    title: z.string().optional(),
-    timezone: z.string().optional(),
-  }),
-  requests: z.record(z.string(), z.array(requestSchema)),
-  app: z.object({ id: z.string(), state: z.unknown() }).optional(),
-});
+const snapshotSchema = lazySchema(() =>
+  z.object({
+    version: z.literal(SNAPSHOT_VERSION),
+    meta: z.looseObject({
+      kibanaVersion: z.string(),
+      createdAt: z.string(),
+      appId: z.string().optional(),
+      title: z.string().optional(),
+      timezone: z.string().optional(),
+      ...snapshotEnvironmentSchema,
+    }),
+    requests: z.record(z.string(), z.array(requestSchema)),
+    app: z.object({ id: z.string(), state: z.unknown() }).optional(),
+  })
+);
 
 const toPlainJson = <T>(value: T): T => JSON.parse(JSON.stringify(value));
 

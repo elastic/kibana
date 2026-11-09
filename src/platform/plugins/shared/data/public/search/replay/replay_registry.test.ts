@@ -34,17 +34,25 @@ const recorded = (
   response: { json: { rawResponse: { id }, isRunning: true } },
 });
 
-const respond = (registry: ReplayRegistry, params: object) =>
-  lastValueFrom(registry.match({ params })!);
+const SESSION = 'session-1';
+
+const respond = (registry: ReplayRegistry, params: object, sessionId = SESSION) =>
+  lastValueFrom(registry.match({ params }, sessionId)!);
+
+const activate = (registry: ReplayRegistry, ...args: Parameters<ReplayRegistry['activate']>) => {
+  const session = registry.activate(...args);
+  session.addSessionId(SESSION);
+  return session;
+};
 
 describe('ReplayRegistry', () => {
   it('does nothing when not active', () => {
-    expect(new ReplayRegistry().match({ params: hitsParams })).toBeUndefined();
+    expect(new ReplayRegistry().match({ params: hitsParams }, SESSION)).toBeUndefined();
   });
 
   it('serves an exact key hit and ignores preference', async () => {
     const registry = new ReplayRegistry();
-    registry.activate([recorded('aggs', aggsParams, 1), recorded('hits', hitsParams, 2)]);
+    activate(registry, [recorded('aggs', aggsParams, 1), recorded('hits', hitsParams, 2)]);
 
     const response = await respond(registry, { ...hitsParams, preference: 123 });
     expect(response.rawResponse).toEqual({ id: 'hits' });
@@ -54,7 +62,7 @@ describe('ReplayRegistry', () => {
 
   it('falls back to the request kind in order of arrival when the key differs', async () => {
     const registry = new ReplayRegistry();
-    registry.activate([recorded('aggs-1', aggsParams, 1), recorded('aggs-2', aggsParams, 2)]);
+    activate(registry, [recorded('aggs-1', aggsParams, 1), recorded('aggs-2', aggsParams, 2)]);
     const otherTz = {
       ...aggsParams,
       body: { size: 0, aggs: { histo: { date_histogram: { time_zone: 'Europe/Vienna' } } } },
@@ -68,7 +76,7 @@ describe('ReplayRegistry', () => {
     const registry = new ReplayRegistry();
     const table = { query: 'FROM logs | LIMIT 500', time_zone: 'UTC' };
     const histogram = { query: 'FROM logs | STATS count = COUNT(*) BY BUCKET(@timestamp, 1h)' };
-    registry.activate([
+    activate(registry, [
       recorded('table', { body: table }, 1),
       recorded('histogram', { body: { ...histogram, time_zone: 'UTC' } }, 2),
     ]);
@@ -84,7 +92,7 @@ describe('ReplayRegistry', () => {
 
   it('uses each entry only once and fails a miss without passthrough', async () => {
     const registry = new ReplayRegistry();
-    registry.activate([recorded('hits', hitsParams, 1)]);
+    activate(registry, [recorded('hits', hitsParams, 1)]);
 
     await respond(registry, hitsParams);
     await expect(respond(registry, hitsParams)).rejects.toMatchObject({
@@ -94,20 +102,55 @@ describe('ReplayRegistry', () => {
 
   it('lets a miss go live with passthrough', () => {
     const registry = new ReplayRegistry();
-    registry.activate([recorded('hits', hitsParams, 1)], { passthrough: true });
+    activate(registry, [recorded('hits', hitsParams, 1)], { passthrough: true });
 
-    expect(registry.match({ params: { query: 'FROM logs' } })).toBeUndefined();
+    expect(registry.match({ params: { query: 'FROM logs' } }, SESSION)).toBeUndefined();
   });
 
   it('matches ES|QL by kind and stops after dispose', async () => {
     const registry = new ReplayRegistry();
     const esql = { query: 'FROM logs | LIMIT 10' };
-    const dispose = registry.activate([recorded('esql', { body: esql }, 1, false)]);
+    const session = activate(registry, [recorded('esql', { body: esql }, 1, false)]);
 
     expect(registry.isActive()).toBe(true);
     expect((await respond(registry, esql)).rawResponse).toEqual({ id: 'esql' });
-    dispose();
+    session.dispose();
     expect(registry.isActive()).toBe(false);
-    expect(registry.match({ params: esql })).toBeUndefined();
+    expect(registry.match({ params: esql }, SESSION)).toBeUndefined();
+  });
+
+  it('only replays searches of the added search sessions', async () => {
+    const registry = new ReplayRegistry();
+    activate(registry, [recorded('hits', hitsParams, 1)]);
+
+    expect(registry.match({ params: hitsParams })).toBeUndefined();
+    expect(registry.match({ params: hitsParams }, 'other-session')).toBeUndefined();
+    expect((await respond(registry, hitsParams)).rawResponse).toEqual({ id: 'hits' });
+  });
+
+  it('keeps concurrent replays separate', async () => {
+    const registry = new ReplayRegistry();
+    const first = registry.activate([recorded('first', hitsParams, 1)]);
+    first.addSessionId('tab-1');
+    const second = registry.activate([recorded('second', hitsParams, 1)]);
+    second.addSessionId('tab-2');
+
+    expect((await respond(registry, hitsParams, 'tab-1')).rawResponse).toEqual({ id: 'first' });
+    expect((await respond(registry, hitsParams, 'tab-2')).rawResponse).toEqual({ id: 'second' });
+
+    second.dispose();
+    expect(registry.isActive()).toBe(true);
+    expect(registry.match({ params: hitsParams }, 'tab-2')).toBeUndefined();
+    first.dispose();
+    expect(registry.isActive()).toBe(false);
+  });
+
+  it('ignores session ids added after dispose', () => {
+    const registry = new ReplayRegistry();
+    const session = registry.activate([recorded('hits', hitsParams, 1)]);
+    session.dispose();
+    session.addSessionId(SESSION);
+
+    expect(registry.match({ params: hitsParams }, SESSION)).toBeUndefined();
   });
 });

@@ -17,6 +17,7 @@ import { InspectorViewRegistry } from './view_registry';
 import type { InspectorOptions, InspectorSession } from './types';
 import type { Adapters } from '../common';
 import { getRequestsViewDescription } from './views';
+import type { SnapshotKibanaInfo } from './snapshot/environment';
 
 export interface InspectorPluginStartDeps {
   share: SharePluginStart;
@@ -61,10 +62,20 @@ const closeButtonLabel = i18n.translate('inspector.closeButton', {
 export class InspectorPublicPlugin implements Plugin<Setup, Start> {
   views: InspectorViewRegistry | undefined;
 
-  private readonly kibanaVersion: string;
+  private readonly kibanaBuild: SnapshotKibanaInfo;
 
   constructor(initializerContext: PluginInitializerContext) {
-    this.kibanaVersion = initializerContext.env.packageInfo.version;
+    const { version, branch, buildNum, buildSha, buildDate, buildFlavor } =
+      initializerContext.env.packageInfo;
+    const date = new Date(buildDate);
+    this.kibanaBuild = {
+      version,
+      branch,
+      buildNum,
+      buildSha,
+      buildDate: isNaN(date.getTime()) ? undefined : date.toISOString(),
+      buildFlavor,
+    };
   }
 
   public setup(_core: CoreSetup) {
@@ -103,7 +114,7 @@ export class InspectorPublicPlugin implements Plugin<Setup, Start> {
               title={options.title}
               options={options.options}
               snapshot={options.snapshot}
-              kibanaVersion={this.kibanaVersion}
+              kibanaBuild={this.kibanaBuild}
               dependencies={{
                 application: core.application,
                 http: core.http,

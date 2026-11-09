@@ -736,7 +736,7 @@ export class SearchInterceptor {
 
     const { sessionId, abortSignal } = searchOptions;
 
-    const replayed$ = this.deps.replay?.match(request);
+    const replayed$ = this.deps.replay?.match(request, sessionId);
     if (replayed$) {
       return replayed$;
     }

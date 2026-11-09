@@ -14,6 +14,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
 import type { UnifiedHistogramPartialLayoutProps } from '@kbn/unified-histogram';
 import type { InspectorSnapshotMeta } from '@kbn/inspector-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { useCurrentTabContext } from './hooks';
 import type { DiscoverDataStateContainer } from '../discover_data_state_container';
 import type { ConnectedCustomizationService } from '../../../../customizations';
@@ -32,7 +33,8 @@ import { createSearchSource } from '../utils/create_search_source';
 
 /** An active Inspector snapshot replay for a tab. */
 export interface TabReplayState {
-  dispose: () => void;
+  /** Replays the recorded responses for the search sessions of this tab */
+  session: ReturnType<DataPublicPluginStart['search']['replay']['activate']>;
   meta: InspectorSnapshotMeta;
 }
 
@@ -104,6 +106,7 @@ export const createTabRuntimeState = ({
   cascadedDocumentsStateManager: CascadedDocumentsStateManager;
   initialValues?: {
     unifiedHistogramLayoutPropsMap?: InitialUnifiedHistogramLayoutPropsMap;
+    replay?: TabReplayState;
   };
 }): ReactiveTabRuntimeState => {
   const scopedEbtManager = services.ebtManager.createScopedEBTManager();
@@ -136,7 +139,7 @@ export const createTabRuntimeState = ({
     currentDataSource$,
     cascadedLeafDataSource$,
     unsubscribeFn$: new BehaviorSubject<TabRuntimeState['unsubscribeFn']>(undefined),
-    replay$: new BehaviorSubject<TabReplayState | undefined>(undefined),
+    replay$: new BehaviorSubject<TabReplayState | undefined>(initialValues?.replay),
   };
 };
 

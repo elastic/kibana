@@ -428,6 +428,7 @@ export function DiscoverLayout() {
         `,
       ]}
     >
+      <SnapshotReplayCallout />
       <TopNavMemoized
         savedQuery={savedQuery}
         esqlModeErrors={esqlModeErrors}
@@ -442,7 +443,6 @@ export function DiscoverLayout() {
           spaces={spaces}
           history={history}
         />
-        <SnapshotReplayCallout />
         <div css={styles.sidebarContainer}>
           {dataViewLoading && (
             <EuiDelayRender delay={300}>

@@ -61,7 +61,7 @@ function createStartContract(
     sessionsClient: getSessionsClientMock(),
     searchSource: searchSourceMock.createStartContract(),
     replay: {
-      activate: jest.fn(() => jest.fn()),
+      activate: jest.fn(() => ({ addSessionId: jest.fn(), dispose: jest.fn() })),
       isActive: jest.fn(() => false),
       isActive$: new BehaviorSubject(false),
     },

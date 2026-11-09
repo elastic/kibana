@@ -35,6 +35,14 @@ interface ReplayEntry {
 interface Activation {
   entries: ReplayEntry[];
   passthrough: boolean;
+  sessionIds: Set<string>;
+}
+
+/** A replay of recorded responses, limited to the search sessions added to it. */
+export interface ReplaySession {
+  /** Replays the searches of this search session, e.g. each fetch of the replaying Discover tab. */
+  addSessionId: (sessionId: string) => void;
+  dispose: () => void;
 }
 
 export const NOT_IN_SNAPSHOT_ERROR = 'NotInSnapshotError';
@@ -64,35 +72,51 @@ const toEntries = (requests: Request[]): ReplayEntry[] =>
 
 /**
  * Serves recorded Inspector responses instead of sending searches to Elasticsearch.
+ * Only searches of the search sessions added to an activation are replayed; all others go live.
  * Matches by exact replay key, then by ES|QL query text, then by request kind in order of arrival.
  * Each entry is used once.
  */
 export class ReplayRegistry {
-  private activation?: Activation;
+  private readonly activations = new Set<Activation>();
   public readonly isActive$ = new BehaviorSubject(false);
 
-  public activate(requests: Request[], { passthrough = false }: ReplayOptions = {}): () => void {
-    const activation: Activation = { entries: toEntries(requests), passthrough };
-    this.activation = activation;
+  public activate(requests: Request[], { passthrough = false }: ReplayOptions = {}): ReplaySession {
+    const activation: Activation = {
+      entries: toEntries(requests),
+      passthrough,
+      sessionIds: new Set(),
+    };
+    this.activations.add(activation);
     this.isActive$.next(true);
-    return () => {
-      if (this.activation === activation) {
-        this.activation = undefined;
-        this.isActive$.next(false);
-      }
+    return {
+      addSessionId: (sessionId) => {
+        if (this.activations.has(activation)) {
+          activation.sessionIds.add(sessionId);
+        }
+      },
+      dispose: () => {
+        this.activations.delete(activation);
+        this.isActive$.next(this.activations.size > 0);
+      },
     };
   }
 
   public isActive(): boolean {
-    return Boolean(this.activation);
+    return this.activations.size > 0;
   }
 
   /** Returns the replayed response, an error, or undefined when the request should go live. */
-  public match(request: IKibanaSearchRequest): Observable<IKibanaSearchResponse> | undefined {
-    if (!this.activation) {
+  public match(
+    request: IKibanaSearchRequest,
+    sessionId?: string
+  ): Observable<IKibanaSearchResponse> | undefined {
+    const activation = sessionId
+      ? [...this.activations].find(({ sessionIds }) => sessionIds.has(sessionId))
+      : undefined;
+    if (!activation) {
       return undefined;
     }
-    const { entries, passthrough } = this.activation;
+    const { entries, passthrough } = activation;
     const replayKey = createReplayKey(request.params);
     const esqlQuery = getEsqlQuery(request.params);
     const kind = getReplayKind(request.params);

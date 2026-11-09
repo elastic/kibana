@@ -114,8 +114,20 @@ describe('Discover inspector snapshot', () => {
     expect(services.data.search.replay.activate).toHaveBeenCalledWith([recordedRequest], {
       passthrough: false,
     });
+    const restoredReplay = selectTabRuntimeState(
+      runtimeStateManager,
+      restoredTab.id
+    )?.replay$.getValue();
+    expect(restoredReplay?.meta).toEqual(snapshot.meta);
+
+    // The replay belongs to the restored tab only
+    const replaySession = jest.mocked(services.data.search.replay.activate).mock.results[0].value;
+    expect(restoredReplay?.session).toBe(replaySession);
     expect(
-      selectTabRuntimeState(runtimeStateManager, restoredTab.id)?.replay$.getValue()?.meta
-    ).toEqual(snapshot.meta);
+      selectTabRuntimeState(runtimeStateManager, sourceTab.id)?.replay$.getValue()
+    ).toBeUndefined();
+
+    internalState.dispatch(internalStateActions.disconnectTab({ tabId: restoredTab.id }));
+    expect(replaySession.dispose).toHaveBeenCalled();
   });
 });
