@@ -40,9 +40,19 @@ interface ResolvedAgent {
   agent_id: string | null;
   status: string | null;
   osquery_capable: boolean;
+  /** True when no exact match was found but the candidate search hit the page cap. */
+  inconclusive?: boolean;
 }
 
 const MAX_AGENT_PAGES_PER_HOSTNAME = 10;
+
+const buildExactHostKuery = (hostname: string): string =>
+  [...new Set([hostname, hostname.toUpperCase(), hostname.toLowerCase()])]
+    .flatMap((value) => [
+      `local_metadata.host.hostname.keyword:"${escapeKueryValue(value)}"`,
+      `local_metadata.host.name.keyword:"${escapeKueryValue(value)}"`,
+    ])
+    .join(' or ');
 
 interface FleetAgentLike {
   id: string;
@@ -179,13 +189,13 @@ export const resolveAgentIdsTool = (
       const policyKuery = buildOsqueryPolicyKuery(agentPolicyIds);
       const scopedAgentClient = agentService.asInternalScopedUser(spaceId);
 
-      const listAllMatchingAgents = async (kuery: string): Promise<FleetAgentLike[]> => {
+      const listAllMatchingAgents = async (
+        kuery: string
+      ): Promise<{ agents: FleetAgentLike[]; truncated: boolean }> => {
         const perPage = 50;
         const agents: FleetAgentLike[] = [];
 
-        // Bounded: the host kuery is a substring match, so a short hostname can
-        // match a large share of the fleet. Enrollment history for one host is
-        // far smaller than this cap.
+        // Bounded: a substring kuery can match a large share of the fleet.
         for (let page = 1; page <= MAX_AGENT_PAGES_PER_HOSTNAME; page++) {
           const response = await scopedAgentClient.listAgents({
             kuery,
@@ -197,28 +207,38 @@ export const resolveAgentIdsTool = (
           agents.push(...pageAgents);
 
           if (pageAgents.length < perPage) {
-            break;
+            return { agents, truncated: false };
           }
         }
 
-        return agents;
+        return { agents, truncated: true };
       };
 
       const resolveHostname = async (hostname: string): Promise<ResolvedAgent> => {
-        // Same case-insensitive host.name / host.hostname search the Osquery
-        // agent picker uses: alert `host.name` casing often differs from the
-        // Fleet agent's hostname. The kuery is a hostname-only candidate filter
-        // (not agent id / policy / platform); the exact match is applied below.
-        const hostKuery = buildHostSearchKuery(hostname);
         const wanted = hostname.toLowerCase();
+        const isExactHost = (agent: FleetAgentLike): boolean =>
+          agent.local_metadata?.host?.hostname?.toLowerCase() === wanted ||
+          agent.local_metadata?.host?.name?.toLowerCase() === wanted;
 
-        const agents = await listAllMatchingAgents(`(${hostKuery}) and (${policyKuery})`);
-
-        const matches = (agents as FleetAgentLike[]).filter(
-          (agent) =>
-            agent.local_metadata?.host?.hostname?.toLowerCase() === wanted ||
-            agent.local_metadata?.host?.name?.toLowerCase() === wanted
+        // Exact keyword match first. A substring search for `SRV-1` also matches
+        // every `SRV-10...` host, and the page cap could drop the real host before
+        // the exact filter below runs.
+        const exact = await listAllMatchingAgents(
+          `(${buildExactHostKuery(hostname)}) and (${policyKuery})`
         );
+        let matches = exact.agents.filter(isExactHost);
+        let inconclusive = false;
+
+        if (matches.length === 0) {
+          // Fall back to the case-insensitive substring search the Osquery agent
+          // picker uses: alert `host.name` casing often differs from the Fleet
+          // agent's hostname. Hostname-only (not agent id / policy / platform).
+          const candidates = await listAllMatchingAgents(
+            `(${buildHostSearchKuery(hostname)}) and (${policyKuery})`
+          );
+          matches = candidates.agents.filter(isExactHost);
+          inconclusive = matches.length === 0 && candidates.truncated;
+        }
 
         const best = [...matches].sort((a, b) => {
           const rank = (status?: string) =>
@@ -234,11 +254,15 @@ export const resolveAgentIdsTool = (
           agent_id: best?.id ?? null,
           status: best?.status ?? null,
           osquery_capable: Boolean(best),
+          ...(inconclusive && { inconclusive: true }),
         };
       };
 
       const resolved = await Promise.all(hostnames.map(resolveHostname));
-      const unresolved = resolved.filter((r) => !r.agent_id).map((r) => r.hostname);
+      const inconclusiveHosts = resolved.filter((r) => r.inconclusive).map((r) => r.hostname);
+      const unresolved = resolved
+        .filter((r) => !r.agent_id && !r.inconclusive)
+        .map((r) => r.hostname);
 
       return {
         results: [
@@ -247,10 +271,19 @@ export const resolveAgentIdsTool = (
             type: ToolResultType.other,
             data: {
               resolved,
-              ...(unresolved.length > 0 && {
-                guidance: `No enrolled Osquery-capable agent found for: ${unresolved.join(
-                  ', '
-                )}. Confirm the host is enrolled in Fleet and its agent policy includes the Osquery integration before retrying.`,
+              ...((unresolved.length > 0 || inconclusiveHosts.length > 0) && {
+                guidance: [
+                  unresolved.length > 0 &&
+                    `No enrolled Osquery-capable agent found for: ${unresolved.join(
+                      ', '
+                    )}. Confirm the host is enrolled in Fleet and its agent policy includes the Osquery integration before retrying.`,
+                  inconclusiveHosts.length > 0 &&
+                    `Could not determine an agent for: ${inconclusiveHosts.join(
+                      ', '
+                    )}. The hostname matches too many agents to search exhaustively; retry with the full, exact hostname or an agent id.`,
+                ]
+                  .filter(Boolean)
+                  .join(' '),
               }),
             },
           },

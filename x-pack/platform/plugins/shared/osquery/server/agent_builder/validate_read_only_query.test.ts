@@ -241,7 +241,57 @@ describe('validateReadOnlyQuery', () => {
         'SELECT * FROM (SELECT count(*) FROM processes) c, curl',
       ],
     ])('rejects a table listed after a sub-select: %s', (_label, query) => {
-      expect(validateReadOnlyQuery(query, ALLOWED)).toMatch(/unsupported table reference/i);
+      expect(validateReadOnlyQuery(query, ALLOWED)).toMatch(/curl/i);
+    });
+
+    it.each([
+      [
+        'sub-select join with ON then comma',
+        'SELECT * FROM (SELECT pid FROM processes) a JOIN processes q ON a.pid = q.pid, curl',
+      ],
+      ['plain join with ON then comma', 'SELECT * FROM processes p JOIN users u ON 1=1, curl'],
+      ['USING then comma', 'SELECT * FROM processes JOIN users USING (uid), curl'],
+      [
+        'ON with function call then comma',
+        'SELECT * FROM processes p JOIN users u ON coalesce(p.uid, 0) = u.uid, curl',
+      ],
+      [
+        'comma after a second ON',
+        'SELECT * FROM processes a JOIN users b ON 1=1 JOIN users c ON 1=1, curl',
+      ],
+    ])('rejects a table listed after a join constraint: %s', (_label, query) => {
+      expect(validateReadOnlyQuery(query, ALLOWED)).toMatch(/curl/i);
+    });
+
+    it('rejects a table named after IN', () => {
+      expect(
+        validateReadOnlyQuery('SELECT pid FROM processes WHERE name IN curl', ALLOWED)
+      ).toMatch(/curl/i);
+    });
+
+    it('still accepts commas that are not table lists', () => {
+      expect(
+        validateReadOnlyQuery(
+          'SELECT p.pid, u.uid FROM processes p JOIN users u ON coalesce(p.uid, 0) = u.uid WHERE p.pid IN (1, 2) ORDER BY p.pid, u.uid LIMIT 5, 10',
+          ALLOWED
+        )
+      ).toBeNull();
+      expect(
+        validateReadOnlyQuery(
+          'SELECT * FROM processes JOIN users USING (uid) GROUP BY uid, pid',
+          ALLOWED
+        )
+      ).toBeNull();
+    });
+
+    it('validates a deeply nested query in linear time and rejects an oversized one', () => {
+      const depth = 2000;
+      const nested =
+        'SELECT 1 FROM ' + '(SELECT 1 FROM '.repeat(depth) + 'processes' + ')'.repeat(depth);
+      const started = Date.now();
+      validateReadOnlyQuery(nested, ALLOWED);
+      expect(Date.now() - started).toBeLessThan(500);
+      expect(validateReadOnlyQuery(nested + ' '.repeat(30000), ALLOWED)).toMatch(/too long/i);
     });
 
     it('still accepts a sub-select followed by a JOIN, WHERE or ORDER BY', () => {

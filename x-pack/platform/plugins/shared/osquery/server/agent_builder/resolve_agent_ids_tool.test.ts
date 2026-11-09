@@ -125,6 +125,16 @@ describe('resolveAgentIdsTool', () => {
       }),
     ]);
 
+    const mixedCase = buildAgent({
+      id: 'mixed-case',
+      local_metadata: { host: { hostname: 'srv-dc01.corp.local', name: 'Srv-Dc01' } },
+    });
+    // Keyword equality is case-sensitive, so the exact query finds nothing and
+    // the case-insensitive substring fallback has to resolve the host.
+    listAgents.mockImplementation(async ({ kuery }) => ({
+      agents: kuery.includes('.keyword:*') ? [mixedCase] : [],
+    }));
+
     const tool = resolveAgentIdsTool(context, loggerMock.create());
     const result = await tool.handler({ hostnames: ['SRV-DC01'] }, {
       request: {},
@@ -132,7 +142,7 @@ describe('resolveAgentIdsTool', () => {
     } as any);
 
     expect(getResultData(result).resolved[0].agent_id).toBe('mixed-case');
-    const { kuery } = listAgents.mock.calls[0][0];
+    const { kuery } = listAgents.mock.calls[1][0];
     expect(kuery).toContain('local_metadata.host.hostname.keyword:*SRV-DC01*');
     expect(kuery).toContain('local_metadata.host.name.keyword:*srv-dc01*');
   });
@@ -230,5 +240,69 @@ describe('resolveAgentIdsTool', () => {
 
     expect(listAgents.mock.calls.length).toBeLessThanOrEqual(10);
     expect(listAgents.mock.calls.length).toBeGreaterThan(1);
+  });
+
+  describe('hostnames that are a prefix of many other hosts', () => {
+    const noisyPage = Array.from({ length: 50 }, (_, index) =>
+      buildAgent({
+        id: `noisy-${index}`,
+        local_metadata: { host: { hostname: 'SRV-10000' } },
+      })
+    );
+
+    it('finds the exact host even when newer substring matches fill the page cap', async () => {
+      const { context, listAgents } = buildContext([]);
+      listAgents.mockImplementation(async ({ kuery, page = 1 }) => {
+        if (kuery.includes('hostname.keyword:"SRV-1"')) {
+          return {
+            agents:
+              page === 1
+                ? [
+                    buildAgent({
+                      id: 'srv-1-agent',
+                      local_metadata: { host: { hostname: 'SRV-1' } },
+                    }),
+                  ]
+                : [],
+          };
+        }
+
+        return { agents: noisyPage };
+      });
+
+      const tool = resolveAgentIdsTool(context, loggerMock.create());
+      const result = await tool.handler({ hostnames: ['SRV-1'] }, {
+        request: {},
+        spaceId: 'default',
+      } as any);
+
+      expect(getResultData(result).resolved[0]).toMatchObject({
+        hostname: 'SRV-1',
+        agent_id: 'srv-1-agent',
+        osquery_capable: true,
+      });
+    });
+
+    it('reports an inconclusive result instead of a missing agent when candidates were truncated', async () => {
+      const { context, listAgents } = buildContext([]);
+      listAgents.mockImplementation(async ({ kuery }) => ({
+        agents: kuery.includes('.keyword:"SRV-1"') ? [] : noisyPage,
+      }));
+
+      const tool = resolveAgentIdsTool(context, loggerMock.create());
+      const result = await tool.handler({ hostnames: ['SRV-1'] }, {
+        request: {},
+        spaceId: 'default',
+      } as any);
+
+      const data = getResultData(result);
+      expect(data.resolved[0]).toMatchObject({
+        agent_id: null,
+        osquery_capable: false,
+        inconclusive: true,
+      });
+      expect(data.guidance).toContain('Could not determine an agent for: SRV-1');
+      expect(data.guidance).not.toContain('No enrolled Osquery-capable agent found');
+    });
   });
 });
