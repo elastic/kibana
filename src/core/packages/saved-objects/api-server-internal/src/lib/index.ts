@@ -10,4 +10,5 @@
 export { SavedObjectsRepository } from './repository';
 export { SavedObjectsClientProvider } from './scoped_client_provider';
 export { PointInTimeFinder } from './point_in_time_finder';
+export { AGGREGATION_CONTAINER_KEYS, FIELD_PATH_VALUE_KEYS, FIELD_PATH_MAP_KEYS } from './search';
 export type { ISavedObjectsClientProvider } from './scoped_client_provider';

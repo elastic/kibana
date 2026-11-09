@@ -8,13 +8,15 @@
  */
 
 import { isPlainObject, isString, last } from 'lodash';
+import {
+  AGGREGATION_CONTAINER_KEYS,
+  FIELD_PATH_VALUE_KEYS,
+  FIELD_PATH_MAP_KEYS,
+} from '@kbn/core-saved-objects-api-server-internal';
 
-const NESTED_AGGREGATION_KEYS = ['aggs', 'aggregations'];
 const NAMESPACE_FIELDS = ['namespace', 'namespaces'];
-// keys whose string value is a field path, e.g. `terms: { field: 'dashboard.namespaces' }`
-const FIELD_VALUE_KEYS = ['field', 'path'];
-// keys whose own keys are field paths, e.g. `range: { 'dashboard.namespaces': { gte: 'a' } }`
-const FIELD_MAP_KEYS = ['term', 'range'];
+// the repository does not rewrite `range` keys, so they are only checked here
+const FIELD_MAP_KEYS = [...FIELD_PATH_MAP_KEYS, 'range'];
 
 type JsonRecord = Record<string, unknown>;
 
@@ -33,7 +35,7 @@ const collectAggBodies = (aggs: unknown): JsonRecord[] =>
         .filter(isRecord)
         .flatMap((body) => [
           body,
-          ...NESTED_AGGREGATION_KEYS.flatMap((key) => collectAggBodies(body[key])),
+          ...AGGREGATION_CONTAINER_KEYS.flatMap((key) => collectAggBodies(body[key])),
         ])
     : [];
 
@@ -52,7 +54,7 @@ const collectEntries = (value: unknown, parentKey?: string): Entry[] => {
 };
 
 const isFieldValueEntry = ({ key, value }: Entry): boolean =>
-  FIELD_VALUE_KEYS.includes(key) && isString(value);
+  FIELD_PATH_VALUE_KEYS.includes(key) && isString(value);
 
 const isFieldMapEntry = ({ parentKey }: Entry): boolean =>
   parentKey !== undefined && FIELD_MAP_KEYS.includes(parentKey);
