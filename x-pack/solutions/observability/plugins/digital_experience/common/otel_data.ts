@@ -39,6 +39,20 @@ export const EVENT_DOCUMENT_LOAD = 'documentLoad';
 export const EVENT_NAVIGATION = 'browser.navigation';
 export const EVENT_CLICK = 'click';
 export const EVENT_USER_ACTION_CLICK = 'browser.user_action.click';
+export const EVENT_RESOURCE_TIMING = 'browser.resource_timing';
+
+/** Fields of the browser events, not in `@kbn/apm-types`. */
+export const EXCEPTION_STACKTRACE = 'exception.stacktrace';
+export const RESOURCE_TIMING_DURATION = 'browser.resource_timing.duration';
+export const RESOURCE_TIMING_INITIATOR_TYPE = 'browser.resource_timing.initiator_type';
+export const RESOURCE_TIMING_RENDER_BLOCKING_STATUS =
+  'browser.resource_timing.render_blocking_status';
+export const RESOURCE_TIMING_TRANSFER_SIZE = 'browser.resource_timing.transfer_size';
+export const RENDER_BLOCKING_STATUS_BLOCKING = 'blocking';
+export const BROWSER_CSS_SELECTOR = 'browser.css_selector';
+export const BROWSER_TAG_NAME = 'browser.tag_name';
+
+/** Resource attributes describing the browser, as stored in the OTel indices. */
 
 export const SPAN_KIND_CLIENT = 'Client';
 export const SPAN_STATUS_ERROR = 'Error';

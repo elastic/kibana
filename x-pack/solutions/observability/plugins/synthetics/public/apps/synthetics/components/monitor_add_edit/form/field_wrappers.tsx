@@ -53,6 +53,8 @@ import type { HeaderFieldProps as DefaultHeaderFieldProps } from '../fields/head
 import { HeaderField as DefaultHeaderField } from '../fields/header_field';
 import type { KeyValuePairsFieldProps as DefaultKeyValuePairsFieldProps } from '../fields/key_value_field';
 import { KeyValuePairsField as DefaultKeyValuePairsField } from '../fields/key_value_field';
+import type { ParameterValuesEditorProps } from '../fields/parameter_values';
+import { ParameterValuesEditor as DefaultParameterValuesEditor } from '../fields/parameter_values';
 import type { RequestBodyFieldProps as DefaultRequestBodyFieldProps } from '../fields/request_body_field';
 import { RequestBodyField as DefaultRequestBodyField } from '../fields/request_body_field';
 import type { ResponseBodyIndexFieldProps as DefaultResponseBodyIndexFieldProps } from '../fields/index_response_body_field';
@@ -171,6 +173,10 @@ export const HeaderField = React.forwardRef<unknown, DefaultHeaderFieldProps>((p
 
 export const KeyValuePairsField = React.forwardRef<unknown, DefaultKeyValuePairsFieldProps>(
   (props, _ref) => <DefaultKeyValuePairsField {...props} />
+);
+
+export const ParameterValuesEditor = React.forwardRef<unknown, ParameterValuesEditorProps>(
+  (props, _ref) => <DefaultParameterValuesEditor {...props} />
 );
 
 export const RequestBodyField = React.forwardRef<unknown, DefaultRequestBodyFieldProps>(

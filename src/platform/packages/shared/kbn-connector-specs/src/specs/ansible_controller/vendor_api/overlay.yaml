@@ -1,0 +1,79 @@
+overlay: 1.0.0
+info:
+  title: AWX / Automation Controller API corrections
+  version: 1.0.0
+actions:
+  - target: $.paths['/api/v2/jobs/{id}/stdout/'].get.parameters
+    description: >-
+      The operation's own description in the AWX swagger.json ("Use the `format` query string
+      parameter to specify the output format": api, html, txt, ansi, json, txt_download,
+      ansi_download) documents `format`, but its parameters omit it.
+    update:
+      - in: query
+        name: format
+        required: false
+        schema:
+          type: string
+          enum: [api, html, txt, ansi, json, txt_download, ansi_download]
+
+  - target: $.paths['/api/v2/job_templates/'].get.parameters
+    description: >-
+      Collections accept any model field as a filter and `order_by` for sorting, which the spec
+      doesn't declare: https://ansible.readthedocs.io/projects/awx/en/latest/rest_api/filtering.html
+      ("Any additional query string parameters may be used to filter the list of results") and
+      https://ansible.readthedocs.io/projects/awx/en/latest/rest_api/sorting.html (`order_by`).
+    update:
+      - { in: query, name: name, required: false, schema: { type: string } }
+      - { in: query, name: organization, required: false, schema: { type: string } }
+      - { in: query, name: inventory, required: false, schema: { type: string } }
+      - { in: query, name: project, required: false, schema: { type: string } }
+      - { in: query, name: playbook, required: false, schema: { type: string } }
+      - { in: query, name: order_by, required: false, schema: { type: string } }
+
+  - target: $.paths['/api/v2/jobs/'].get.parameters
+    description: >-
+      Field filters, field lookups such as `created__gt` and `order_by`, as documented in
+      https://ansible.readthedocs.io/projects/awx/en/latest/rest_api/filtering.html and
+      https://ansible.readthedocs.io/projects/awx/en/latest/rest_api/sorting.html.
+    update:
+      - { in: query, name: status, required: false, schema: { type: string } }
+      - { in: query, name: job_template, required: false, schema: { type: string } }
+      - { in: query, name: inventory, required: false, schema: { type: string } }
+      - { in: query, name: failed, required: false, schema: { type: boolean } }
+      - { in: query, name: order_by, required: false, schema: { type: string } }
+      - { in: query, name: created__gt, required: false, schema: { type: string } }
+
+  - target: $.paths['/api/v2/jobs/{id}/job_events/'].get.parameters
+    description: >-
+      Field filter on `failed`, as documented in
+      https://ansible.readthedocs.io/projects/awx/en/latest/rest_api/filtering.html.
+    update:
+      - { in: query, name: failed, required: false, schema: { type: boolean } }
+
+  - target: $.paths['/api/v2/inventories/'].get.parameters
+    description: >-
+      Field filter on `organization`, as documented in
+      https://ansible.readthedocs.io/projects/awx/en/latest/rest_api/filtering.html.
+    update:
+      - { in: query, name: organization, required: false, schema: { type: string } }
+
+  - target: $.paths['/api/v2/projects/'].get.parameters
+    description: >-
+      Field filter on `organization`, as documented in
+      https://ansible.readthedocs.io/projects/awx/en/latest/rest_api/filtering.html.
+    update:
+      - { in: query, name: organization, required: false, schema: { type: string } }
+
+  - target: $.paths['/api/v2/hosts/'].get.parameters
+    description: >-
+      Field filter on `enabled`, as documented in
+      https://ansible.readthedocs.io/projects/awx/en/latest/rest_api/filtering.html.
+    update:
+      - { in: query, name: enabled, required: false, schema: { type: boolean } }
+
+  - target: $.paths['/api/v2/inventories/{id}/hosts/'].get.parameters
+    description: >-
+      Field filter on `enabled`, as documented in
+      https://ansible.readthedocs.io/projects/awx/en/latest/rest_api/filtering.html.
+    update:
+      - { in: query, name: enabled, required: false, schema: { type: boolean } }

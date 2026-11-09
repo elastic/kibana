@@ -1,0 +1,17 @@
+format_version: 1.0.0
+name: breaking_changes_upgrade
+title: Tests breaking changes upgrades
+description: This is a test package for testing that upgrades with breaking changes require an acknowledgement
+version: 2.0.0
+categories: []
+release: beta
+type: integration
+license: basic
+owner:
+  github: elastic/fleet
+
+requirement:
+  elasticsearch:
+    versions: '>7.7.0'
+  kibana:
+    versions: '>7.7.0'

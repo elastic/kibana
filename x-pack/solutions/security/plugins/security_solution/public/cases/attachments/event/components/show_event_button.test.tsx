@@ -12,7 +12,6 @@ import { useCaseViewNavigation, useCaseViewParams } from '@kbn/cases-plugin/publ
 import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../../../flyout_v2/use_flyout_api.mock';
 import { casesCellActionRenderer } from '../../../../flyout_v2/shared/components/cell_actions';
-import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
 import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 
 const props = {
@@ -21,12 +20,7 @@ const props = {
   index: 'event-index',
 };
 
-const mockOpenFlyout = jest.fn();
 const mockReportEvent = jest.fn();
-
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: () => ({ openFlyout: mockOpenFlyout }),
-}));
 
 jest.mock('../../../../common/lib/kibana', () => ({
   useKibana: () => ({
@@ -40,7 +34,6 @@ jest.mock('@kbn/cases-plugin/public', () => ({
 }));
 
 jest.mock('../../../../flyout_v2/use_flyout_api');
-jest.mock('../../../../common/hooks/use_is_new_flyout_enabled');
 
 const useCaseViewParamsMock = useCaseViewParams as jest.Mock;
 const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
@@ -55,7 +48,6 @@ describe('ShowEventButton', () => {
     useCaseViewNavigationMock.mockReturnValue({ navigateToCaseView });
     flyoutApi = createFlyoutApiMock();
     jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
   });
 
   it('renders the show event button', () => {
@@ -63,28 +55,7 @@ describe('ShowEventButton', () => {
     expect(screen.getByTestId('comment-action-show-event-action-id')).toBeInTheDocument();
   });
 
-  it('opens the legacy expandable flyout when the new flyout is disabled', () => {
-    render(<ShowEventButton {...props} />);
-    const button = screen.getByTestId('comment-action-show-event-action-id');
-    fireEvent.click(button);
-    expect(mockOpenFlyout).toHaveBeenCalledWith({
-      right: {
-        id: 'document-details-right',
-        params: {
-          id: 'event-id',
-          indexName: 'event-index',
-          scopeId: 'timeline-case',
-        },
-      },
-    });
-    expect(flyoutApi.openDocumentFlyoutFromIndex).not.toHaveBeenCalled();
-    expect(mockReportEvent).toHaveBeenCalled();
-    expect(navigateToCaseView).not.toHaveBeenCalled();
-  });
-
-  it('opens the new document flyout (from index) when the new flyout is enabled', () => {
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
-
+  it('opens the document flyout (from index)', () => {
     render(<ShowEventButton {...props} />);
     const button = screen.getByTestId('comment-action-show-event-action-id');
     fireEvent.click(button);
@@ -96,7 +67,6 @@ describe('ShowEventButton', () => {
       origin: FLYOUT_ORIGIN.CASE_ATTACHMENT,
       title: 'Event',
     });
-    expect(mockOpenFlyout).not.toHaveBeenCalled();
     expect(mockReportEvent).toHaveBeenCalled();
     expect(navigateToCaseView).not.toHaveBeenCalled();
   });

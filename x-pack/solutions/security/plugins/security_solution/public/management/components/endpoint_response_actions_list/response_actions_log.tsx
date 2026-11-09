@@ -35,7 +35,6 @@ export const ResponseActionsLog = memo<
   Pick<EndpointActionListRequestQuery, 'agentIds'> & {
     showHostNames?: boolean;
     isFlyout?: boolean;
-    setIsDataInResponse?: (isData: boolean) => void;
     'data-test-subj'?: string;
     'data-test-height'?: number;
   }
@@ -44,7 +43,6 @@ export const ResponseActionsLog = memo<
     agentIds,
     showHostNames = false,
     isFlyout = true,
-    setIsDataInResponse,
     'data-test-subj': dataTestSubj = 'response-actions-list',
     'data-test-height': dataTestHeight,
   }) => {
@@ -136,25 +134,13 @@ export const ResponseActionsLog = memo<
     // table items
     const tableItems = useMemo(() => actionList?.data ?? [], [actionList?.data]);
 
-    // Hide page header when there is no actions index calling the setIsDataInResponse with false value.
-    // Otherwise, it shows the page header calling the setIsDataInResponse with true value and it also keeps track
-    // if the API request was done for the first time.
+    // Keeps track of whether the API request was done for the first time, to distinguish the
+    // initial loading state from a subsequent refetch (e.g. on filter/pagination change).
     useEffect(() => {
-      if (
-        !isFetching &&
-        error?.body?.statusCode === 404 &&
-        error?.body?.message === 'index_not_found_exception'
-      ) {
-        if (setIsDataInResponse) {
-          setIsDataInResponse(false);
-        }
-      } else if (!isFetching && actionList) {
+      if (!isFetching && actionList) {
         setIsFirstAttempt(false);
-        if (setIsDataInResponse) {
-          setIsDataInResponse(true);
-        }
       }
-    }, [actionList, error, isFetching, setIsDataInResponse]);
+    }, [actionList, isFetching]);
 
     // handle auto refresh data
     const onRefresh = useCallback(() => {
