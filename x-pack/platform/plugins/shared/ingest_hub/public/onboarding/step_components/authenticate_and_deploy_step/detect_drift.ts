@@ -8,6 +8,7 @@
 import { isEqual } from 'lodash';
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import { getDefaultEnabledDataStreams } from '../../aws_service_matrix';
 import { getBaseServiceId } from '../service_settings_step/instances';
 import type { ServiceVars } from '../service_settings_step/use_service_settings';
 import { toSOServiceVars } from './package_inputs';
@@ -72,7 +73,12 @@ export function detectServiceVarsDrift(
         const service = servicesMap.get(getBaseServiceId(instanceId));
         const deployedDefault = service
           ? toSOServiceVars(
-              { [instanceId]: { enabledDataStreams: service.dataStreams, varsByDataStream: {} } },
+              {
+                [instanceId]: {
+                  enabledDataStreams: getDefaultEnabledDataStreams(service),
+                  varsByDataStream: {},
+                },
+              },
               servicesMap
             )[instanceId] ?? {}
           : {};
@@ -102,7 +108,7 @@ export function detectServiceVarsDrift(
         ? toSOServiceVars(
             {
               [instanceId]: {
-                enabledDataStreams: service.dataStreams,
+                enabledDataStreams: getDefaultEnabledDataStreams(service),
                 varsByDataStream: {},
               },
             },

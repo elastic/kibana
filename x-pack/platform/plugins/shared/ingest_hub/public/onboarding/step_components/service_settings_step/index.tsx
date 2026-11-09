@@ -30,6 +30,8 @@ import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { supportsNamespace } from './instance_namespace_field';
+import { followsGlobalNamespace } from '../../common/effective_namespace';
+import { ecfFamilySupportsNamespace } from '../../ecf_cloudformation';
 import { getRegionFieldName, hasConfigurableFlyoutFields } from './field_config';
 import type { ServiceInstance } from './use_service_settings';
 import { useServiceSettings } from './use_service_settings';
@@ -111,6 +113,13 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
       (s) => s !== 'error' && s !== 'timeout'
     );
 
+  // Only the unified stack takes the namespace, so only its launch changes what a new value means.
+  const hasLaunchedEcfStack =
+    detectAndReviewStep.ecfStacks?.some((s) => ecfFamilySupportsNamespace(s.family)) ?? false;
+  const hasServicesIgnoringNamespace = selectedServiceIds.some((id) => {
+    const entry = awsServicesMap?.get(id);
+    return entry !== undefined && !followsGlobalNamespace(entry, deploymentMethod);
+  });
   // Input types of the selected services, which decide the output types their policies accept.
   const outputInputTypes = useMemo(
     () => [
@@ -467,6 +476,8 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
         onNamespaceChange={setNamespace}
         namespaceError={namespaceError}
         hasDeployedServices={isRegionDisabled}
+        hasLaunchedEcfStack={hasLaunchedEcfStack}
+        hasServicesIgnoringNamespace={hasServicesIgnoringNamespace}
         output={
           supportsPolicySetting('output_id', deploymentMethod)
             ? {

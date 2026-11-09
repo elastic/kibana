@@ -114,6 +114,40 @@ describe('instances are optional', () => {
   });
 });
 
+describe('ecfStacks namespace', () => {
+  const stack = { family: 'unified', stackName: 'edot-cloud-forwarder', templateVersion: '1.10.0' };
+  const validateStacks = (ecfStacks: unknown) =>
+    UpdateCloudOnboardingDeploymentRequestSchema.body.validate({ ecfStacks });
+
+  it('accepts a stack with a namespace', () => {
+    expect(validateStacks([{ ...stack, namespace: 'prod' }])).toEqual({
+      ecfStacks: [expect.objectContaining({ namespace: 'prod' })],
+    });
+  });
+
+  it('accepts a stack without a namespace', () => {
+    expect(() => validateStacks([stack])).not.toThrow();
+  });
+
+  it('rejects an empty namespace or one over 100 characters', () => {
+    expect(() => validateStacks([{ ...stack, namespace: '' }])).toThrow();
+    expect(() => validateStacks([{ ...stack, namespace: 'a'.repeat(101) }])).toThrow();
+  });
+
+  it('is stored by the saved object model', () => {
+    expect(
+      CloudOnboardingDeploymentSchemaV5.validate({
+        provider: 'aws',
+        mechanisms: ['ecf'],
+        services: ['cloudtrail'],
+        status: 'succeeded',
+        attemptCount: 1,
+        ecfStacks: [{ ...stack, namespace: 'prod' }],
+      })
+    ).toEqual(expect.objectContaining({ ecfStacks: [{ ...stack, namespace: 'prod' }] }));
+  });
+});
+
 describe('saved object model versions', () => {
   const record = {
     provider: 'aws',

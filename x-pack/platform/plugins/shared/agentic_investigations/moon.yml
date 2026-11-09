@@ -20,6 +20,7 @@ dependsOn:
   - '@kbn/dev-cli-runner'
   - '@kbn/tooling-log'
   - '@kbn/core'
+  - '@kbn/significant-events-schema'
   - '@kbn/config-schema'
   - '@kbn/core-security-server'
   - '@kbn/features-plugin'

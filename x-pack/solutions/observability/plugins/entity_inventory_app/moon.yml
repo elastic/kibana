@@ -36,6 +36,8 @@ dependsOn:
   - '@kbn/share-plugin'
   - '@kbn/ebt-click'
   - '@kbn/i18n-react'
+  - '@kbn/react-hooks'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod
