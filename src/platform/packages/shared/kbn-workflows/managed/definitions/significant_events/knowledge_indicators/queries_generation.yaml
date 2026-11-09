@@ -80,7 +80,6 @@ steps:
     aggregate-by: "nightshift"
     product-solution: "observability"
     product-feature: "nightshift"
-    timeout: "5m"
     on-failure:
       retry:
         max-attempts: 3
