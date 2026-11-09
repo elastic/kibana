@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { specFromEditor, specToEditorValue } from './editor_spec';
+import { parseSpec, specFromEditor, specToEditorValue } from './editor_spec';
 
 describe('editor spec', () => {
   describe('specToEditorValue', () => {
@@ -39,6 +39,20 @@ describe('editor spec', () => {
 
     it('falls back to an HJSON spec while the JSON text does not parse', () => {
       expect(specFromEditor('{"mark":', 'json')).toEqual({ format: 'hjson', value: '{"mark":' });
+    });
+  });
+
+  describe('parseSpec', () => {
+    it('returns a JSON spec as is', () => {
+      expect(parseSpec({ format: 'json', value: { mark: 'bar' } })).toEqual({ mark: 'bar' });
+    });
+
+    it('parses an HJSON spec', () => {
+      expect(parseSpec({ format: 'hjson', value: '{\n  mark: bar\n}' })).toEqual({ mark: 'bar' });
+    });
+
+    it('returns undefined for HJSON that does not parse', () => {
+      expect(parseSpec({ format: 'hjson', value: '{ mark: ' })).toBeUndefined();
     });
   });
 });

@@ -30,7 +30,6 @@ import type {
 } from '@kbn/presentation-publishing';
 import { EmbeddableEditorPreview, ManagedEditorFooter } from '@kbn/presentation-util-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import { parse } from 'hjson';
 import { BehaviorSubject } from 'rxjs';
 import { VEGA_EMBEDDABLE_TYPE } from '../../common/constants';
 import type { VegaByValueState } from '../../server';
@@ -40,6 +39,7 @@ import {
   hasTooManyFilters,
   vegaEditorFlyoutBodyCss,
 } from '../components/vega_editor_body';
+import { parseSpec } from '../lib/editor_spec';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
 import { fromDraft, isSameDraft, toDraft } from '../lib/library_draft';
 import type { VegaDraft, VegaEditableState } from '../lib/library_draft';
@@ -85,12 +85,13 @@ interface VegaLibraryEditorProps {
 }
 
 const getSpecDataViews = async (specText: string): Promise<DataView[]> => {
+  // The editor text is HJSON or JSON, which HJSON also parses.
+  const spec = parseSpec({ format: 'hjson', value: specText });
+  // A spec that doesn't parse names no data views.
+  if (!spec) return [];
   try {
-    return await extractIndexPatternsFromSpec(
-      parse(specText, { legacyRoot: false, keepWsc: true })
-    );
+    return await extractIndexPatternsFromSpec(spec);
   } catch {
-    // A spec that doesn't parse names no data views.
     return [];
   }
 };

@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { parse } from 'hjson';
 import type { VegaByValueState } from '../../server';
+import type { VegaSpec as ParsedVegaSpec } from '../data_model/types';
 
 type VegaSpec = VegaByValueState['spec'];
 
@@ -25,4 +27,14 @@ export const specFromEditor = (text: string, format: VegaSpec['format']): VegaSp
     }
   }
   return { format: 'hjson', value: text };
+};
+
+/** The spec as an object, or `undefined` when its HJSON doesn't parse. */
+export const parseSpec = (spec: VegaSpec): ParsedVegaSpec | undefined => {
+  if (spec.format === 'json') return spec.value;
+  try {
+    return parse(spec.value, { legacyRoot: false, keepWsc: true });
+  } catch {
+    return undefined;
+  }
 };

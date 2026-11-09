@@ -35,7 +35,6 @@ import {
   tap,
 } from 'rxjs';
 import { isOfQueryType, type AggregateQuery, type Filter, type Query } from '@kbn/es-query';
-import { parse } from 'hjson';
 import { isEqual } from 'lodash';
 import { ON_APPLY_FILTER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import {
@@ -76,6 +75,7 @@ import { VEGA_EVENT_APPLY_FILTER } from '../constants';
 import type { VegaEvent } from '../types';
 import type { VegaPluginStartDependencies, VegaVisualizationDependencies } from '../plugin';
 import type { VegaRenderDescriptor } from '../data_model/types';
+import { parseSpec } from '../lib/editor_spec';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
 import { isVegaByReferenceState } from '../../common/embeddable/type_guards';
 import { toPanelFilters, type VegaEditableState } from '../lib/library_draft';
@@ -230,14 +230,7 @@ export const vegaEmbeddableFactory = (
         map(({ spec }) => spec),
         // Query and filter previews keep the spec, so it isn't parsed again.
         distinctUntilChanged(isEqual),
-        map((spec) => {
-          if (spec.format === 'json') return spec.value;
-          try {
-            return parse(spec.value, { legacyRoot: false, keepWsc: true });
-          } catch {
-            return undefined;
-          }
-        }),
+        map(parseSpec),
         tap((spec) => {
           esql$.next(spec ? getEsqlQueriesFromSpec(spec).map((esql) => ({ esql })) : []);
           projectRoutingOverrides$.next(spec ? extractProjectRoutingOverrides(spec) : undefined);
