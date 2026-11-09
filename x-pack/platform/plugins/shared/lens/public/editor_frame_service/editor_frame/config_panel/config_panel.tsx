@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, memo, useCallback } from 'react';
+import React, { useEffect, useMemo, memo, useCallback, useRef } from 'react';
 import { EuiForm, euiBreakpoint, useEuiTheme } from '@elastic/eui';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { UPDATE_FILTER_REFERENCES_ACTION } from '@kbn/unified-search-plugin/public';
@@ -114,13 +114,22 @@ export function ConfigPanel(
     }, 0);
   };
 
+  // Refocus the layer content when the chart type or the selected layer changes, but not on the
+  // initial render, so focus (and the screen reader announcement) stays on the page on open.
+  const previousFocusKey = useRef<string | null>(null);
   useEffect(() => {
+    // A chart switch can briefly leave no selected layer: wait for it to settle.
+    if (!selectedLayerId) {
+      return;
+    }
+    const focusKey = `${activeVisualization.id}:${selectedLayerId}`;
+    const previous = previousFocusKey.current;
+    previousFocusKey.current = focusKey;
     // Do not trigger in ES|QL mode, as the focus should remain in the editor.
-    if (selectedLayerId && !canEditTextBasedQuery) {
+    if (previous && previous !== focusKey && !canEditTextBasedQuery) {
       focusLayerTabsContent();
     }
-    // Needs layerIds to refocus when layers are removed
-  }, [canEditTextBasedQuery, selectedLayerId, layerIds.length]);
+  }, [activeVisualization.id, canEditTextBasedQuery, selectedLayerId]);
 
   const setVisualizationState = useMemo(
     () => (newState: unknown) => {
