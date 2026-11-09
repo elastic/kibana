@@ -19,6 +19,7 @@ import {
   EuiLoadingSpinner,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   useEuiTheme,
   keys,
 } from '@elastic/eui';
@@ -27,7 +28,11 @@ import { i18n } from '@kbn/i18n';
 import type { CommandMenuHandle } from '../../types';
 
 const MENU_WIDTH = 280;
-const MENU_MAX_HEIGHT = 240;
+const MENU_ROW_HEIGHT = 32;
+const MAX_VISIBLE_ROWS = 7;
+
+// The list is virtualized, so only a window of rows is in the DOM: find a row by its list position
+const getRowSelector = (index: number) => `[role="option"][aria-posinset="${index + 1}"]`;
 
 const loadingLabel = i18n.translate(
   'xpack.agentBuilder.conversationInput.commandMenu.list.loading',
@@ -38,6 +43,18 @@ const noMatchesLabel = i18n.translate(
   'xpack.agentBuilder.conversationInput.commandMenu.list.noMatches',
   { defaultMessage: 'No matching results' }
 );
+
+// Long labels end with "…" instead of pushing the Enter icon out of the row
+const labelStyles = css`
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
+const enterIconStyles = css`
+  flex-shrink: 0;
+`;
 
 export interface CommandMenuListOption {
   readonly key: string;
@@ -60,6 +77,8 @@ interface CommandMenuListProps {
   readonly 'data-test-subj'?: string;
   /** When true, Space also selects the highlighted option, like Enter. */
   readonly spaceSelection?: boolean;
+  /** Handles Tab instead of selecting the highlighted option. Returns false to select it as usual. */
+  readonly onTab?: () => boolean;
 }
 
 export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProps>(
@@ -71,6 +90,7 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
       width: menuWidth = MENU_WIDTH,
       'data-test-subj': dataTestSubj = 'commandMenuList',
       spaceSelection,
+      onTab,
     },
     ref
   ) => {
@@ -90,8 +110,7 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
     }, [optionKeysSignature]);
 
     const scrollIndexIntoView = (index: number) => {
-      const items = containerRef.current?.querySelectorAll('.euiSelectableListItem');
-      const item = items?.[index];
+      const item = containerRef.current?.querySelector(getRowSelector(index));
       item?.scrollIntoView?.({ block: 'nearest' });
     };
     const handleSetActive = (next: (index: number) => number) => {
@@ -124,8 +143,7 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
           keys.ARROW_UP,
           // Ctrl+n and Ctrl+p
           ...(event.ctrlKey ? ['n', 'p'] : []),
-          keys.ENTER,
-          keys.TAB,
+          ...(options.length > 0 ? [keys.ENTER, keys.TAB] : []),
         ];
         // Always claim Space, even with zero options: results can lag a
         // keystroke behind, and a leaked space would type as plain text.
@@ -139,6 +157,8 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
           handleSetActive((prev) => Math.min(prev + 1, options.length - 1));
         } else if (event.key === keys.ARROW_UP || (event.ctrlKey && event.key === 'p')) {
           handleSetActive((prev) => Math.max(prev - 1, 0));
+        } else if (event.key === keys.TAB && onTab?.()) {
+          // Handled by the menu: it completed the typed text rather than selecting an option.
         } else if (event.key === keys.ENTER || event.key === keys.TAB) {
           handleSelectOption();
         } else if (event.key === keys.SPACE && spaceSelection) {
@@ -151,9 +171,25 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
       width: ${menuWidth}px;
     `;
 
+    // EuiSelectable caps its own height at 6.5 rows, so a fixed height is needed to show more
+    const listHeight =
+      options.length > MAX_VISIBLE_ROWS ? MAX_VISIBLE_ROWS * MENU_ROW_HEIGHT : undefined;
+    const activeKey = options[activeIndex]?.key;
+
+    const rowStyles = useMemo(
+      () => css`
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: ${euiTheme.size.s};
+      `,
+      [euiTheme]
+    );
+
     const activeHighlightStyles = css`
-      .euiSelectableListItem:nth-child(${activeIndex + 1}) {
-        background-color: ${euiTheme.focus.backgroundColor};
+      ${getRowSelector(activeIndex)} {
+        background-color: ${euiTheme.components.buttons.backgroundEmptyTextHover};
+        border-radius: ${euiTheme.border.radius.control};
       }
     `;
 
@@ -188,15 +224,27 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
         <EuiSelectable
           options={selectableOptions}
           singleSelection
-          renderOption={(option: CommandMenuListSelectableRow) =>
-            option.renderLabel ?? option.label
-          }
+          height={listHeight}
+          renderOption={(option: CommandMenuListSelectableRow) => {
+            return (
+              <span css={rowStyles}>
+                <span css={labelStyles}>{option.renderLabel ?? option.label}</span>
+                {option.key === activeKey && (
+                  <EuiIcon
+                    type="return"
+                    size="s"
+                    color="subdued"
+                    aria-hidden={true}
+                    css={enterIconStyles}
+                  />
+                )}
+              </span>
+            );
+          }}
           listProps={{
             showIcons: false,
             bordered: false,
-            css: css`
-              max-height: ${MENU_MAX_HEIGHT}px;
-            `,
+            paddingSize: 's',
           }}
           onChange={(_newOptions, _event, changedOption) => {
             if (changedOption) {

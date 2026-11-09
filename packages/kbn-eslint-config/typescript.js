@@ -30,6 +30,8 @@ module.exports = {
       files: ['**/*.{ts,tsx}'],
       parser: '@typescript-eslint/parser',
 
+      // `ban/*` and `@eslint-community/eslint-comments/*` rules run in oxlint (.oxlint/ban.mts,
+      // .oxlint/eslint_comments.mts); registered so `eslint-disable` directives naming them resolve.
       plugins: ['@typescript-eslint', 'ban', 'import', '@eslint-community/eslint-comments'],
 
       env: {
@@ -72,168 +74,13 @@ module.exports = {
           // ##
           // Replacing old @typescript-eslint/ban-types
           '@typescript-eslint/no-unsafe-function-type': 'off',
-          '@typescript-eslint/no-wrapper-object-types': 'off',
           '@typescript-eslint/no-empty-object-type': 'off',
           // ##
-          camelcase: 'off',
-          "@typescript-eslint/consistent-type-imports": [
-            "error",
-            {
-              "prefer": "type-imports",
-              "disallowTypeAnnotations": false,
-              "fixStyle": "separate-type-imports"
-            }
-          ],
-          '@typescript-eslint/naming-convention': [
-            'error',
-            {
-              selector: 'default',
-              format: ['camelCase', 'PascalCase', 'UPPER_CASE', 'snake_case'],
-              leadingUnderscore: 'allowSingleOrDouble',
-              trailingUnderscore: 'allowSingleOrDouble',
-            },
-            {
-              selector: 'classMethod',
-              filter: {
-                regex: '^UNSAFE_',
-                match: true,
-              },
-              prefix: ['UNSAFE_'],
-              format: ['camelCase'],
-            },
-            {
-              selector: 'variable',
-              format: [
-                'camelCase',
-                'UPPER_CASE', // e.g. const SOMETHING = ...
-                'PascalCase', // e.g. React.FunctionComponent =
-              ],
-              leadingUnderscore: 'allowSingleOrDouble',
-              trailingUnderscore: 'allowSingleOrDouble',
-            },
-            {
-              selector: 'variable',
-              modifiers: ['destructured'],
-              format: [
-                'camelCase',
-                'snake_case', // e.g. properties from ES response objects
-                'UPPER_CASE', // e.g. const SOMETHING = ...
-                'PascalCase', // e.g. React.FunctionComponent =
-              ],
-              leadingUnderscore: 'allowSingleOrDouble',
-              trailingUnderscore: 'allowSingleOrDouble',
-            },
-            {
-              selector: 'parameter',
-              format: ['camelCase', 'PascalCase', 'snake_case'],
-              leadingUnderscore: 'allowSingleOrDouble',
-              trailingUnderscore: 'allowSingleOrDouble',
-            },
-            {
-              selector: 'function',
-              format: [
-                'camelCase',
-                'PascalCase', // React.FunctionComponent =
-              ],
-              leadingUnderscore: 'allowSingleOrDouble',
-              trailingUnderscore: 'allowSingleOrDouble',
-            },
-            {
-              selector: 'typeLike',
-              format: ['PascalCase', 'UPPER_CASE'],
-              leadingUnderscore: 'allow',
-              trailingUnderscore: 'allow',
-            },
-            {
-              selector: 'enum',
-              format: ['PascalCase', 'UPPER_CASE', 'camelCase'],
-            },
-            // https://typescript-eslint.io/rules/naming-convention/#ignore-properties-that-require-quotes
-            // restore check behavior before https://github.com/typescript-eslint/typescript-eslint/pull/4582
-            {
-              selector: [
-                'classProperty',
-                'objectLiteralProperty',
-                'typeProperty',
-                'classMethod',
-                'objectLiteralMethod',
-                'typeMethod',
-                'accessor',
-                'enumMember',
-              ],
-              format: null,
-              modifiers: ['requiresQuotes'],
-            },
-          ],
-          '@typescript-eslint/consistent-type-definitions': ['error', 'interface'],
-          '@typescript-eslint/member-ordering': [
-            'error',
-            {
-              default: ['public-static-field', 'static-field', 'instance-field'],
-            },
-          ],
-          '@typescript-eslint/no-shadow': 'error',
           // rely on typescript
           'no-undef': 'off',
 
-          '@typescript-eslint/triple-slash-reference': [
-            'error',
-            {
-              path: 'never',
-              types: 'never',
-              lib: 'never',
-            },
-          ],
           '@typescript-eslint/no-var-requires': 'error',
-          eqeqeq: ['error', 'always', { null: 'ignore' }],
-          'import/order': [
-            'error',
-            {
-              groups: [['external', 'builtin'], 'internal', ['parent', 'sibling', 'index']],
-            },
-          ],
-          'max-classes-per-file': ['error', 1],
-          'no-bitwise': 'error',
-          'no-console': 'error',
-          'no-throw-literal': 'error',
-          'no-undef-init': 'error',
-          'no-unsafe-finally': 'error',
-          'no-unsanitized/property': 'error',
           'no-unused-expressions': 'off',
-          '@typescript-eslint/no-unused-expressions': ["error", { "allowTaggedTemplates": true }],
-          'no-var': 'error',
-          'object-shorthand': 'error',
-          'one-var': ['error', 'never'],
-          'prefer-const': 'error',
-          'prefer-rest-params': 'error',
-          radix: 'error',
-          'spaced-comment': [
-            'error',
-            'always',
-            {
-              exceptions: ['/'],
-            },
-          ],
-          // Old tslint yml override or defined rules
-          'ban/ban': [
-            2,
-            { name: ['describe', 'only'], message: 'No exclusive suites.' },
-            { name: ['it', 'only'], message: 'No exclusive tests.' },
-            { name: ['test', 'only'], message: 'No exclusive tests.' },
-            { name: ['testSuggestions', 'only'], message: 'No exclusive tests.' },
-            { name: ['testErrorsAndWarnings', 'only'], message: 'No exclusive tests.' },
-          ],
-          // `no-unused-disable` is intentionally not enabled: oxlint (`node scripts/lint`) honors
-          // `eslint-disable` directives for the rules it owns, which ESLint would report as unused
-          // and strip on autofix.
-          '@eslint-community/eslint-comments/no-unused-enable': 'error',
-          'no-restricted-syntax': [
-            'error',
-            {
-              selector: 'TSEnumDeclaration[const=true]',
-              message: 'Do not use `const` with enum declarations',
-            },
-          ],
         },
         eslintConfigPrettierRules
       ),

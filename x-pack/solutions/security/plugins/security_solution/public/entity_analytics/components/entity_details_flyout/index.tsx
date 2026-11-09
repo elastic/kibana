@@ -9,11 +9,16 @@ import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EntityType as EntityStoreEntityType } from '@kbn/entity-store/public';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import type { CloudPostureEntityIdentifier } from '../../../cloud_security_posture/components/entity_insight';
 import type { FieldsTableProps } from '../../../flyout/entity_details/generic_right/components/fields_table';
 import { FieldsTableTab } from '../../../cloud_security_posture/components/csp_details/fields_table_tab';
 import type { EntityType } from '../../../../common/search_strategy';
-import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import {
+  EntityDetailsLeftPanelTab,
+  RiskScoreLeftPanelSubTab,
+} from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import { useStableExpandableFlyoutState } from '../../../flyout/shared/hooks/use_stable_expandable_flyout_state';
 import { PREFIX } from '../../../flyout/shared/test_ids';
 import { ALERT_PREVIEW_BANNER } from '../../../flyout/document_details/preview/constants';
 import { DocumentDetailsPreviewPanelKey } from '../../../flyout/document_details/shared/constants/panel_keys';
@@ -35,14 +40,66 @@ interface RiskInputsTabWithAlertPreviewProps {
   scopeId: string;
 }
 
-/** Wires the legacy expandable-flyout alert preview into {@link RiskInputsTab}. */
+interface RiskScorePanelProps extends FlyoutPanelProps {
+  params: {
+    path: {
+      tab: EntityDetailsLeftPanelTab.RISK_INPUTS;
+      subTab?: RiskScoreLeftPanelSubTab;
+    };
+  };
+}
+
+function isRiskScoreFlyoutPanelProps(
+  panelLeft: FlyoutPanelProps | undefined
+): panelLeft is RiskScorePanelProps {
+  const params = panelLeft?.params;
+  if (!params || typeof params !== 'object' || !('path' in params)) {
+    return false;
+  }
+
+  const path = params.path as { tab?: unknown; subTab?: unknown };
+  if (path?.tab !== EntityDetailsLeftPanelTab.RISK_INPUTS) {
+    return false;
+  }
+
+  return (
+    path.subTab === undefined ||
+    (typeof path.subTab === 'string' &&
+      Object.values(RiskScoreLeftPanelSubTab).includes(path.subTab as RiskScoreLeftPanelSubTab))
+  );
+}
+
+/**
+ * Wires the legacy expandable flyout into {@link RiskInputsTab}: the alert preview, and the
+ * sub-tab, which is read from and written back to the left panel's URL state.
+ */
 const RiskInputsTabWithAlertPreview = ({
   entityType,
   entityName,
   entityId,
   scopeId,
 }: RiskInputsTabWithAlertPreviewProps) => {
-  const { openPreviewPanel } = useExpandableFlyoutApi();
+  const { openPreviewPanel, openLeftPanel } = useExpandableFlyoutApi();
+  const panels = useStableExpandableFlyoutState();
+  const subTab = isRiskScoreFlyoutPanelProps(panels.left)
+    ? panels.left.params.path.subTab
+    : undefined;
+
+  // Keeps the expandable-flyout URL state in sync with the user's manual sub-tab toggle so that
+  // clicking the same right-panel link again produces a URL change, which forces a remount.
+  const onSubTabChange = useCallback(
+    (newSubTab: RiskScoreLeftPanelSubTab) => {
+      if (!isRiskScoreFlyoutPanelProps(panels.left)) return;
+      openLeftPanel({
+        ...panels.left,
+        params: {
+          ...panels.left.params,
+          path: { tab: EntityDetailsLeftPanelTab.RISK_INPUTS, subTab: newSubTab },
+        },
+      });
+    },
+    [openLeftPanel, panels.left]
+  );
 
   const onShowAlert = useCallback(
     (id: string, indexName: string) =>
@@ -65,6 +122,8 @@ const RiskInputsTabWithAlertPreview = ({
       entityName={entityName}
       entityId={entityId}
       onShowAlert={onShowAlert}
+      subTab={subTab}
+      onSubTabChange={onSubTabChange}
     />
   );
 };

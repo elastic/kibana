@@ -13,7 +13,7 @@ import { z } from '@kbn/zod';
 import type { IRouter, RequestHandlerContext } from '@kbn/core/server';
 import { timeRangeSchema } from '@kbn/es-query-server';
 
-import { coreServices } from '../kibana_services';
+import { coreServices, spacesService } from '../kibana_services';
 import { getUserActivityObject } from './user_actions';
 
 export function registerTrackUserActivityRoute(router: IRouter<RequestHandlerContext>) {
@@ -66,17 +66,18 @@ export function registerTrackUserActivityRoute(router: IRouter<RequestHandlerCon
     async (ctx, req, res) => {
       const core = await ctx.core;
       const esClient = core.elasticsearch.client.asCurrentUser;
+      const spaceId = spacesService?.getSpaceId(req) ?? 'default';
       const { has_all_requested: hasAllPrivileges } = await esClient.security.hasPrivileges({
         application: [
           {
             application: `kibana-.kibana`,
-            resources: ['*'],
+            resources: [`space:${spaceId}`],
             privileges: [`feature_dashboard_v2.read`],
           },
         ],
       });
       if (!hasAllPrivileges) {
-        res.forbidden();
+        return res.forbidden();
       }
 
       const user = core.security.authc.getCurrentUser();

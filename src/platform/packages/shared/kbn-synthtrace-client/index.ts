@@ -43,6 +43,7 @@ export {
   setIdGeneratorStrategy,
 } from './src/lib/utils/generate_id';
 export { appendHash, hashKeysOf } from './src/lib/utils/hash';
+export { createSeededRandom } from './src/lib/utils/seeded_random';
 export {
   type ESDocumentWithOperation,
   type SynthtraceESAction,
@@ -53,4 +54,41 @@ export {
 } from './src/types';
 export { log, type LogDocument, LONG_FIELD_NAME } from './src/lib/logs';
 export { otelLog, type OtelLogDocument } from './src/lib/otel_logs';
+export {
+  edotBrowser,
+  type BrowserProfileId,
+  type EdotBrowserClientOptions,
+  type EdotBrowserDocument,
+  type EdotBrowserEvent,
+  type EdotBrowserExceptionTemplate,
+  type EdotBrowserPage,
+  type EdotBrowserResource,
+  type EdotBrowserSite,
+  type EdotBrowserStackFrame,
+  type EdotBrowserSpanDocument,
+  type HealthProfileName,
+} from './src/lib/edot_browser';
+export {
+  edotReactNative,
+  type DeviceProfile,
+  type DeviceProfileId,
+  type EdotAndroidClient,
+  type EdotIosClient,
+  type EdotReactNativeAppModel,
+  type EdotReactNativeClient,
+  type EdotReactNativeClientOptions,
+  type EdotReactNativeDocument,
+  type EdotReactNativeEvent,
+  type EdotReactNativeRequest,
+  type EdotReactNativeScreen,
+  type EdotReactNativeSessionOptions,
+  type EdotReactNativeSpanDocument,
+  type EdotReactNativeWidget,
+  type IosAppState,
+  type ManualSpanOptions,
+  type MobileHealthProfile,
+  type MobilePlatform,
+  type NetworkConnection,
+  type NetworkConnectionType,
+} from './src/lib/edot_react_native';
 export { syntheticsMonitor, type SyntheticsMonitorDocument } from './src/lib/synthetics';

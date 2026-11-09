@@ -193,6 +193,9 @@ describe(
         cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
           cy.contains('Run a set of queries in a pack').click();
           cy.getBySel('comboBoxInput').click().type(`${packName}{downArrow}{enter}`);
+          // The queries table renders the form value that gets saved, so this is
+          // what makes the pack's queries part of the upcoming PUT.
+          cy.contains('select * from uptime;');
         });
 
         cy.intercept('PUT', '/api/detection_engine/rules').as('saveRuleSingleQuery');
@@ -340,7 +343,7 @@ describe(
       // Create the rule and populate alerts ONCE for the whole describe.
       // Calling `loadRuleAlerts` (which toggles the rule off/on) in `beforeEach`
       // caused the rule to hit its max-alert-limit across the 3 tests and the
-      // `ruleSwitch` aria-checked update to stall.
+      // enabled badge update to stall.
       before(() => {
         initializeDataViews();
         // Scope alerts to those carrying `host.os.name` so the `{{host.os.name}}`

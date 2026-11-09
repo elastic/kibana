@@ -22,7 +22,7 @@ import { useSuggestUsers } from '../../user_profiles/use_suggest_users';
 import { ASSIGNEES_APPLY_BUTTON_TEST_ID } from '../../assignees/test_ids';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useLicense } from '../../../hooks/use_license';
-import type { TimelineItem } from '@kbn/timelines-plugin/common';
+import type { TimelineItem } from '@kbn/securitysolution-timeline-common';
 
 jest.mock('./use_set_alert_assignees');
 jest.mock('../../user_profiles/use_get_current_user_profile');

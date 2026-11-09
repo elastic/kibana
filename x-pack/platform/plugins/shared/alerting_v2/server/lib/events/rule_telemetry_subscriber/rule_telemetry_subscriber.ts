@@ -12,13 +12,13 @@ import {
 } from '../../services/logger_service/logger_service';
 import type { EbtServiceContract } from '../../services/ebt_service/ebt_service';
 import { EbtServiceToken } from '../../services/ebt_service/tokens';
-import type { RuleEbtEventType } from '../../telemetry/rule_ebt_schema';
+import type { RuleEbtEventType } from '../../telemetry/rules/rule_ebt_schema';
 import {
   buildRuleChangedEventData,
   RULE_EBT_EVENT_TYPE_BY_OPERATION,
   RULE_OPERATIONS,
   type RuleOperation,
-} from '../../telemetry/rule_ebt_event';
+} from '../../telemetry/rules/rule_ebt_event';
 import {
   AlertingDomainEventBusToken,
   type AlertingDomainEvent,
@@ -85,18 +85,13 @@ export class RuleTelemetrySubscriber {
     this.#subscriptions = [];
   }
 
-  #reportRuleChanged(event: ReportedRuleEvent, { origin: actor }: AlertingPublisherContext): void {
+  #reportRuleChanged(event: ReportedRuleEvent, { origin }: AlertingPublisherContext): void {
     const { type: operation, payload } = event;
     const eventType = eventTypeByOperation[operation];
     if (eventType === undefined) {
       return;
     }
 
-    const { ruleId, rule, origin } = payload;
-
-    this.ebtService.reportEvent(
-      eventType,
-      buildRuleChangedEventData(rule, { ...origin, actor }, ruleId)
-    );
+    this.ebtService.reportEvent(eventType, buildRuleChangedEventData(operation, payload, origin));
   }
 }

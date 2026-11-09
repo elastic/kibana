@@ -12,6 +12,7 @@ import {
   MAX_SUMMARY_BULLETS_CHARS,
   MAX_SUMMARY_PROPOSAL_BULLETS,
 } from '../../../../../common/step_types/package_report';
+import { buildProposalSubjectKey, PROPOSAL_SUBJECT_UUID_NAMESPACE } from '../../../proposals/dedup';
 import {
   buildProposalComment,
   buildProposalTitle,
@@ -43,36 +44,6 @@ const PROCESS_ACTION_LABELS: Record<ProcessActionKind, string> = {
 
 /** Catalog categories packaging may mint from. `configure` entries are never fillable. */
 const PACKAGEABLE_CATEGORIES = ['respond', 'investigate'];
-
-/**
- * Fixed namespace for Proposal subject keys. Frozen: changing it renames every subject, so a
- * later run would stop recognising the Proposal an earlier one raised and raise a second.
- */
-const HUNT_PROPOSAL_SUBJECT_UUID_NAMESPACE = 'a3c7e91f-4b2d-5e68-9c1a-8f0d6b3e5a72';
-
-/**
- * What is being proposed: the action, and the host or process it acts on. Not
- * which Investigation raised it, so two Investigations that reach the same host share a key and
- * their Proposals converge (see `buildHuntProposalId`). Hashing the Investigation in would let
- * only a rerun of the same Investigation collide.
- *
- * `subjectId` is the agent id of the host (the material is unchanged from when this slot was
- * called `endpointId`).
- */
-export const buildProposalSubjectKey = ({
-  subjectId,
-  actionWorkflowId,
-  processKey,
-}: {
-  subjectId: string;
-  actionWorkflowId: string;
-  processKey?: string;
-}): string => {
-  const material = processKey
-    ? `${subjectId}|${actionWorkflowId}|${processKey}`
-    : `${subjectId}|${actionWorkflowId}`;
-  return uuidv5(material, HUNT_PROPOSAL_SUBJECT_UUID_NAMESPACE);
-};
 
 /**
  * Every subject packaging could act on, in a stable order: each host, then its processes.
@@ -117,7 +88,7 @@ const SUPPLIED_KEYS: Record<SubjectKind, readonly string[]> = {
  * with another Investigation, and a rerun of the same report must settle onto the same one.
  */
 const buildRecommendationSubjectKey = (conversationId: string): string =>
-  uuidv5(`${conversationId}|recommendation`, HUNT_PROPOSAL_SUBJECT_UUID_NAMESPACE);
+  uuidv5(`${conversationId}|recommendation`, PROPOSAL_SUBJECT_UUID_NAMESPACE);
 
 const schemaRequiredKeys = (schema: JsonSchema | undefined): string[] => {
   if (!schema || typeof schema !== 'object') {
@@ -314,13 +285,28 @@ const buildRecommendationReasonLines = ({
   if (!hasExecutable) {
     lines.push('No respond action could be filled for this finding.');
   }
-  if (unenrolledHosts.length > 0) {
+  // A remote-only host was never looked up in this deployment's Fleet, so "not enrolled"
+  // would be a claim nothing checked; it gets its own line naming where it was seen.
+  const remoteHosts = unenrolledHosts.filter((h) => h.remoteClusters !== undefined);
+  const localUnenrolled = unenrolledHosts.filter((h) => h.remoteClusters === undefined);
+  if (localUnenrolled.length > 0) {
     lines.push(
-      `${unenrolledHosts.length === 1 ? 'Host' : 'Hosts'} ${unenrolledHosts
+      `${localUnenrolled.length === 1 ? 'Host' : 'Hosts'} ${localUnenrolled
         .map((h) => h.name)
         .join(', ')} ${
-        unenrolledHosts.length === 1 ? 'is' : 'are'
-      } not enrolled, so no Defend action reaches ${unenrolledHosts.length === 1 ? 'it' : 'them'}.`
+        localUnenrolled.length === 1 ? 'is' : 'are'
+      } not enrolled, so no Defend action reaches ${localUnenrolled.length === 1 ? 'it' : 'them'}.`
+    );
+  }
+  if (remoteHosts.length > 0) {
+    lines.push(
+      `${remoteHosts.length === 1 ? 'Host' : 'Hosts'} ${remoteHosts
+        .map((h) => `${h.name} (${(h.remoteClusters ?? []).join(', ')})`)
+        .join(', ')} ${
+        remoteHosts.length === 1 ? 'was' : 'were'
+      } seen only on a remote cluster, so response actions from this deployment can't reach ${
+        remoteHosts.length === 1 ? 'it' : 'them'
+      }.`
     );
   }
   const identityCount = users.length + services.length;

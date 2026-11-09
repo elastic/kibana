@@ -11,7 +11,6 @@ import { getVersion } from '@kbn/agent-builder-common/attachments';
 import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult, getToolResultId } from '@kbn/agent-builder-server';
-import type { AttachmentToolsOptions } from './types';
 
 const attachmentDiffSchema = z.object({
   attachment_id: z.string().describe('ID of the attachment to compare versions'),
@@ -23,9 +22,9 @@ const attachmentDiffSchema = z.object({
  * Creates the attachment_diff tool.
  * Shows differences between two versions of an attachment.
  */
-export const createAttachmentDiffTool = ({
-  attachmentManager,
-}: AttachmentToolsOptions): InternalBuiltinToolDefinition<typeof attachmentDiffSchema> => ({
+export const createAttachmentDiffTool = (): InternalBuiltinToolDefinition<
+  typeof attachmentDiffSchema
+> => ({
   id: attachmentTools.diff,
   type: ToolType.builtin,
   description:
@@ -33,11 +32,10 @@ export const createAttachmentDiffTool = ({
   schema: attachmentDiffSchema,
   tags: ['attachment'],
   excludeFromMcp: true,
-  handler: async ({
-    attachment_id: attachmentId,
-    from_version: fromVersion,
-    to_version: toVersion,
-  }) => {
+  handler: async (
+    { attachment_id: attachmentId, from_version: fromVersion, to_version: toVersion },
+    { attachments: attachmentManager }
+  ) => {
     const attachment = attachmentManager.getAttachmentRecord(attachmentId);
 
     if (!attachment) {

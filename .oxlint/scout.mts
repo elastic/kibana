@@ -20,6 +20,7 @@ export const SCOUT_TEST_FILE_GLOBS = [
   '{examples,x-pack/examples}/**/test/scout{_*,}/**/*.ts',
   'src/core/packages/core/test/scout{_*,}/**/*.ts',
   'packages/**/test/scout{_*,}/**/*.ts',
+  'src/dev/build/test/scout{_*,}/**/*.ts',
 ];
 
 /** Order matters: the API test overrides refine the generic one for their directories. */
@@ -40,6 +41,7 @@ export const scoutOverrides: OxlintOverride[] = [
       '@kbn/eslint/scout_no_at_in_test_titles': 'warn',
       '@kbn/eslint/scout_no_promise_all_with_playwright_apis': 'error',
       '@kbn/eslint/scout_no_locators': ['error', { restricted: ['globalLoadingIndicator'] }],
+      '@kbn/eslint/scout_no_raw_locators': 'warn',
       '@kbn/eslint/require_include_in_check_a11y': 'warn',
     },
   },

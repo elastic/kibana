@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 import type { AggregationsCompositeAggregateKey } from '@elastic/elasticsearch/lib/api/types';
 import type { SLODefinition } from '../../../../domain/models';
 import { Duration, toDurationUnit } from '../../../../domain/models';
@@ -63,7 +62,7 @@ function buildWindowAgg(
   slo: SLODefinition,
   dateRange: { from: Date; to: Date }
 ) {
-  const isTimesliceBudgetingMethod = timeslicesBudgetingMethodSchema.is(slo.budgetingMethod);
+  const isTimesliceBudgetingMethod = slo.budgetingMethod === 'timeslices';
 
   const aggs = isTimesliceBudgetingMethod ? TIMESLICE_AGGS : OCCURRENCE_AGGS;
 

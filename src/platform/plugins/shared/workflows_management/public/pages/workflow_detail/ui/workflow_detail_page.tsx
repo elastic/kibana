@@ -65,10 +65,7 @@ import { useGlobalExecutionsViewEnabled } from '../../../hooks/use_global_execut
 import { useKibana } from '../../../hooks/use_kibana';
 import { useTelemetry } from '../../../hooks/use_telemetry';
 import { useWorkflowsBreadcrumbs } from '../../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
-import {
-  useWorkflowUrlState,
-  type WorkflowUrlUpdateOptions,
-} from '../../../hooks/use_workflow_url_state';
+import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import {
   navigateToWorkflowsList,
   type WorkflowDetailRouteState,
@@ -121,9 +118,9 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   const isExecutionsViewEnabled = useGlobalExecutionsViewEnabled();
   const {
     activeTab,
+    isViewingExecution,
     selectedExecutionId,
     setSelectedExecution,
-    updateUrlState,
     setActiveTab: setUrlTab,
     replayExecutionId,
     replayIsTestRun,
@@ -187,12 +184,14 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     telemetry.reportWorkflowCreateOpened({ editorType: 'yaml' });
   }, [loadWorkflow, id, dispatch, telemetry, initialYaml]);
 
-  // Sync activeTab from URL state to store
+  // The store tab picks what the editor shows: a run snapshot only once a run is selected.
+  // The open execution list alone keeps the editable draft.
+  const editorTab = isViewingExecution ? 'executions' : 'workflow';
   useEffect(() => {
-    if (activeTabInStore !== activeTab) {
-      dispatch(setActiveTab(activeTab));
+    if (activeTabInStore !== editorTab) {
+      dispatch(setActiveTab(editorTab));
     }
-  }, [activeTab, activeTabInStore, dispatch]);
+  }, [editorTab, activeTabInStore, dispatch]);
 
   useEffect(() => {
     if (
@@ -230,54 +229,22 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
 
   // TODO: manage it in a workflow state context
   const [highlightDiff, setHighlightDiff] = useState(false);
-  const [isExecutionListOpen, setIsExecutionListOpen] = useState(false);
+  // Flyout mode keeps the list open while the URL is on the executions tab.
+  const isExecutionListOpen = activeTab === 'executions';
 
-  // If the page loads with an execution already selected (e.g. direct URL), open the list too
-  // so that closing the detail navigates back to the list rather than closing everything.
-  useEffect(() => {
-    if (selectedExecutionId) {
-      setIsExecutionListOpen(true);
-    }
-    // intentionally runs only on mount
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // Closing the list alone pushes, so Back reopens it. Closing a selected run must replace, or
+  // Back reopens the run.
+  const closeExecutionList = useCallback(() => {
+    setUrlTab('workflow', { replace: Boolean(selectedExecutionId) });
+  }, [selectedExecutionId, setUrlTab]);
 
-  // Flyout mode uses the executions tab only while a selected run is shown in the editor.
-  // Clearing the selection returns to the editable draft. The sidebar keeps the executions tab.
-  const clearSelectedExecution = useCallback(
-    (options?: WorkflowUrlUpdateOptions) => {
-      if (isExecutionsViewEnabled) {
-        updateUrlState(
-          {
-            tab: 'workflow',
-            executionId: undefined,
-            stepExecutionId: undefined,
-            stepId: undefined,
-          },
-          options
-        );
-        return;
-      }
-      setSelectedExecution(null, options);
-    },
-    [isExecutionsViewEnabled, setSelectedExecution, updateUrlState]
-  );
-
-  // Both handlers also close the list, which is local state rather than URL state. They must
-  // replace, or Back restores the execution while the list stays shut.
   const onOpenExecutionList = useCallback(() => {
     if (isExecutionListOpen || selectedExecutionId) {
-      setIsExecutionListOpen(false);
-      clearSelectedExecution({ replace: true });
+      closeExecutionList();
       return;
     }
-    setIsExecutionListOpen(true);
-  }, [clearSelectedExecution, isExecutionListOpen, selectedExecutionId]);
-
-  const onCloseExecutionList = useCallback(() => {
-    setIsExecutionListOpen(false);
-    clearSelectedExecution({ replace: true });
-  }, [clearSelectedExecution]);
+    setUrlTab('executions');
+  }, [closeExecutionList, isExecutionListOpen, selectedExecutionId, setUrlTab]);
 
   // `/create` starts on the agentic-first landing. `?startBlank=true` ("Start manually"
   // on the empty list) skips it.
@@ -312,14 +279,13 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   );
 
   const onCloseExecutionDetail = useCallback(() => {
-    // Clear the selected execution but keep the list open so the user goes back to the list.
-    // Push so Back reopens the run.
-    clearSelectedExecution({ replace: false });
-  }, [clearSelectedExecution]);
+    // Clear the selected execution but keep the tab, so a run opened from the list goes back to
+    // the list. Push so Back reopens the run.
+    setSelectedExecution(null);
+  }, [setSelectedExecution]);
 
   // Close the execution flyouts and open the Workflow tab, where the agent's proposal shows.
   const onAgentProposalHeld = useCallback(() => {
-    setIsExecutionListOpen(false);
     setUrlTab('workflow');
   }, [setUrlTab]);
 
@@ -454,7 +420,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
             {/* Unmount while a run is open. A hidden list flyout keeps EUI's focus trap and
                 moves focus to the skip link. Filters and the highlighted row live in the URL. */}
             {canShowExecutionUi && id && isExecutionListOpen && !selectedExecutionId && (
-              <WorkflowExecutionListFlyout workflowId={id} onClose={onCloseExecutionList} />
+              <WorkflowExecutionListFlyout workflowId={id} onClose={closeExecutionList} />
             )}
             {canShowExecutionUi && selectedExecutionId && (
               <WorkflowExecutionFlyout

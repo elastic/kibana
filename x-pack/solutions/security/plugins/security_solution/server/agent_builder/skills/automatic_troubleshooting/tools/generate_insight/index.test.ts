@@ -15,6 +15,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools';
 
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
 import { createMockEndpointAppContextService } from '../../../../../endpoint/mocks';
+import { NotFoundError } from '../../../../../endpoint/errors';
 import { GENERATE_INSIGHT_TOOL_ID } from '../..';
 import { createGenerateInsightGraph } from './graph';
 import { generateInsightTool } from '.';
@@ -325,7 +326,9 @@ describe('automaticTroubleshootingGenerateInsightTool', () => {
     });
 
     it('returns an error and skips graph execution when endpoint space validation fails', async () => {
-      mockEnsureInCurrentSpace.mockRejectedValueOnce(new Error('Agent endpoint-2 not found'));
+      mockEnsureInCurrentSpace.mockRejectedValueOnce(
+        new NotFoundError('Agent endpoint-2 not found')
+      );
       const handlerContext = createHandlerContext();
 
       const result = await tool.handler(
@@ -355,7 +358,87 @@ describe('automaticTroubleshootingGenerateInsightTool', () => {
           {
             type: ToolResultType.error,
             data: {
-              message: 'Error: Agent endpoint-2 not found',
+              message: expect.stringContaining('Error: Agent endpoint-2 not found. '),
+            },
+          },
+        ],
+      });
+    });
+
+    it('tells the model which IDs are accepted and not to retry when an endpoint is not found', async () => {
+      mockEnsureInCurrentSpace.mockRejectedValueOnce(
+        new NotFoundError('Agent my-host-name not found')
+      );
+
+      const result = await tool.handler(
+        {
+          problemDescription: 'configuration issue detected',
+          remediation: 'fix the thing',
+          endpointIds: ['my-host-name'],
+          data: [{ event: { type: 'process' } }],
+        },
+        createHandlerContext()
+      );
+
+      expect(result).toEqual({
+        results: [
+          {
+            type: ToolResultType.error,
+            data: {
+              message: expect.stringMatching(
+                /Elastic Agent IDs \(`agent\.id`\).*host names, policy IDs, and artifact IDs are not accepted.*Do not call this tool again with guessed IDs/
+              ),
+            },
+          },
+        ],
+      });
+    });
+
+    it('returns the plain error when endpoint space validation fails for another reason', async () => {
+      mockEnsureInCurrentSpace.mockRejectedValueOnce(new Error('search_phase_execution_exception'));
+
+      const result = await tool.handler(
+        {
+          problemDescription: 'configuration issue detected',
+          remediation: 'fix the thing',
+          endpointIds: ['endpoint-1'],
+          data: [{ event: { type: 'process' } }],
+        },
+        createHandlerContext()
+      );
+
+      expect(mockCreateGenerateInsightGraph).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        results: [
+          {
+            type: ToolResultType.error,
+            data: {
+              message: 'Error: search_phase_execution_exception',
+            },
+          },
+        ],
+      });
+    });
+
+    it('returns the plain error when insight generation fails after endpoint validation', async () => {
+      mockGraph.invoke.mockRejectedValueOnce(new Error('model failure'));
+
+      const result = await tool.handler(
+        {
+          problemDescription: 'configuration issue detected',
+          remediation: 'fix the thing',
+          endpointIds: ['endpoint-1'],
+          data: [{ event: { type: 'process' } }],
+        },
+        createHandlerContext()
+      );
+
+      expect(result).toEqual({
+        results: [
+          {
+            type: ToolResultType.error,
+            data: {
+              message: 'Error: model failure',
             },
           },
         ],
@@ -535,11 +618,21 @@ describe('automaticTroubleshootingGenerateInsightTool', () => {
 
     it('has appropriate description for when to use the tool', () => {
       expect(tool.description).toContain('When to use:');
-      expect(tool.description).toContain('When a conclusion has been reached');
+      expect(tool.description).toContain(
+        'When a conclusion has been reached about specific endpoints'
+      );
     });
 
-    it('describes that the tool must be called', () => {
-      expect(tool.description).toContain('This tool MUST ALWAYS be called.');
+    it('describes that the tool must be called only when specific endpoints are involved', () => {
+      expect(tool.description).toContain(
+        'This tool MUST be called when the findings concern one or more specific endpoints.'
+      );
+      expect(tool.description).toContain('Do not call it when no specific endpoint is involved');
+      expect(tool.description).toContain(
+        'If it rejects the endpoint IDs, do not call it again with guessed IDs'
+      );
+      expect(tool.description).toContain('after any other error, retry it at most once');
+      expect(tool.description).not.toContain('MUST ALWAYS');
     });
   });
 });
