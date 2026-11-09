@@ -17,23 +17,25 @@ export interface ModelPrice {
 }
 
 /**
- * Approximate list prices per model, USD per million tokens.
+ * List prices per model, USD per million tokens, read from OpenRouter's public model catalogue
+ * (`https://openrouter.ai/api/v1/models`) on 2026-11-09 — refresh with `node scripts/esql_harness_opt.js
+ * refresh-prices`.
  *
  * Token counts stop being comparable the moment the model slot is open — a candidate that halves
  * its tokens on a model that costs five times more is more expensive, not cheaper — so the gate
  * prices tokens instead of counting them.
  *
- * These are *placeholders*, not EIS billing data. Override them with a `prices.json` in the
- * harness directory (same shape, keyed by the same substrings) before trusting a cost-path
- * acceptance.
+ * They are provider list prices, not EIS billing data: good enough to rank candidates against
+ * each other, not a budget forecast. Override with a `prices.json` in the harness directory.
  */
 export const DEFAULT_PRICES: Record<string, ModelPrice> = {
-  'gemini-3.5-flash-lite': { input: 0.1, output: 0.4 },
-  'gemini-3.8-flash': { input: 0.3, output: 2.5 },
-  'gpt-5.4-mini': { input: 0.25, output: 2.0 },
-  'gpt-5.4': { input: 1.25, output: 10.0 },
-  'claude-5.5-haiku': { input: 1.0, output: 5.0 },
-  'claude-5.5-sonnet': { input: 3.0, output: 15.0 },
+  'gemini-3.5-flash-lite': { input: 0.3, output: 2.5 },
+  'gemini-3.8-flash': { input: 0.825, output: 4.125 },
+  'gpt-5.4-nano': { input: 0.2, output: 1.25 },
+  'gpt-5.4-mini': { input: 0.75, output: 4.5 },
+  'gpt-5.4': { input: 2.5, output: 15.0 },
+  'claude-5.5-haiku': { input: 0.1, output: 0.5 },
+  'claude-5.5-sonnet': { input: 2.0, output: 10.0 },
 };
 
 /** Rate used when a run's model is unknown, so an unpriced model is never silently free. */
