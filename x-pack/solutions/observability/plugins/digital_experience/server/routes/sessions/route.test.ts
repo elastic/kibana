@@ -10,7 +10,7 @@ import { errors } from '@elastic/elasticsearch';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { getSession } from '../../sessions/get_session';
 import { listSessions } from '../../sessions/list_sessions';
-import { enableSessionsForUser, withApiKeyStatus } from '../../sessions/sessions_auto_update';
+import { enableSessionsForUser, getApiKeyStatus } from '../../sessions/sessions_auto_update';
 import { getSessionsStatus } from '../../sessions/sessions_setup';
 import { SessionsNewerVersionError } from '../../sessions/sessions_newer_version_error';
 import { SessionsPrivilegesError } from '../../sessions/sessions_privileges_error';
@@ -113,7 +113,7 @@ const querySchemaOf = () =>
 describe('sessions routes', () => {
   beforeEach(() => {
     jest.mocked(getSessionsStatus).mockResolvedValue(status as never);
-    jest.mocked(withApiKeyStatus).mockImplementation(async (s) => s);
+    jest.mocked(getApiKeyStatus).mockImplementation(async (s) => ({ status: s, keyId: null }));
     jest.mocked(enableSessionsForUser).mockResolvedValue(null);
   });
 
@@ -187,7 +187,7 @@ describe('sessions routes', () => {
         expect(await result).toEqual(body);
         // Only users who can grant a new key pay for checking it; the others see what the health
         // task found.
-        expect(withApiKeyStatus).toHaveBeenCalledWith(enabled, sessionsApiKeys, {
+        expect(getApiKeyStatus).toHaveBeenCalledWith(enabled, sessionsApiKeys, {
           checkKey: canManage,
           logger: expect.anything(),
           getAutoUpdateState: getSessionsAutoUpdateState,
@@ -196,9 +196,10 @@ describe('sessions routes', () => {
     );
 
     it('adds what the stored API key means for the status', async () => {
-      jest
-        .mocked(withApiKeyStatus)
-        .mockImplementation(async (s) => ({ ...s, needsUpdate: true, autoUpdate: true }));
+      jest.mocked(getApiKeyStatus).mockImplementation(async (s) => ({
+        status: { ...s, needsUpdate: true, autoUpdate: true },
+        keyId: 'key-1',
+      }));
       const { result } = runHandler(SESSIONS_STATUS_ENDPOINT, {
         authzResult: { manage_digital_experience_sessions: true },
       });

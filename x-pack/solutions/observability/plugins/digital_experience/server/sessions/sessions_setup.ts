@@ -403,35 +403,6 @@ export const installSessions = async ({
   await waitUntilSearchable(user);
 };
 
-/**
- * Checks the user's privileges, then installs or refreshes the sessions transforms with the
- * user's own credentials, so the transforms only read what that user can read.
- */
-export const enableSessions = async ({
-  esClient,
-  logger,
-  settings,
-  enabledBy,
-  isServerless,
-  now = new Date(),
-}: {
-  esClient: IScopedClusterClient;
-  logger: Logger;
-  settings: SessionsSettings;
-  /** Username recorded on the transforms, so status can show whose access they run with. */
-  enabledBy: string | null;
-  isServerless: boolean;
-  now?: Date;
-}): Promise<void> => {
-  await checkSessionsPrivileges(esClient.asCurrentUser, { isServerless });
-  await installSessions({
-    esClient,
-    logger,
-    settings,
-    enabled: { enabledBy, enabledAt: now.toISOString() },
-  });
-};
-
 const createUnlessExists = async (client: ElasticsearchClient, index: string): Promise<void> => {
   try {
     await client.indices.create({ index });

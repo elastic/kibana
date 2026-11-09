@@ -18,8 +18,8 @@ import type { SessionsApiKey, SessionsApiKeys } from './sessions_api_key';
 import { SESSIONS_API_KEY_NAME } from './sessions_api_key';
 import {
   enableSessionsForUser,
+  getApiKeyStatus,
   updateSessionsWithApiKey,
-  withApiKeyStatus,
 } from './sessions_auto_update';
 import { checkSessionsPrivileges, installSessions } from './sessions_setup';
 import { SessionsPrivilegesError } from './sessions_privileges_error';
@@ -270,32 +270,35 @@ describe('sessions auto update', () => {
     });
   });
 
-  describe('withApiKeyStatus', () => {
+  describe('getApiKeyStatus', () => {
+    const statusWithKey = async (...args: Parameters<typeof getApiKeyStatus>) =>
+      (await getApiKeyStatus(...args)).status;
+
     const check = { checkKey: true, logger };
 
     it('leaves the status alone without a stored key', async () => {
       const { typed } = createApiKeys();
 
-      expect(await withApiKeyStatus(status, typed, check)).toBe(status);
+      expect(await statusWithKey(status, typed, check)).toBe(status);
     });
 
     it('leaves the status alone when the transforms run with other credentials', async () => {
       const { typed } = createApiKeys({ stored: keyOf('other') });
 
-      expect(await withApiKeyStatus(asUser, typed, check)).toBe(asUser);
+      expect(await statusWithKey(asUser, typed, check)).toBe(asUser);
     });
 
     it('marks an update as automatic when the transforms run with another sessions key', async () => {
       const { typed } = createApiKeys({ stored: keyOf('other') });
 
-      expect(await withApiKeyStatus(status, typed, check)).toEqual({ ...status, autoUpdate: true });
+      expect(await statusWithKey(status, typed, check)).toEqual({ ...status, autoUpdate: true });
     });
 
     it("doesn't check a key the health task found invalidated again", async () => {
       const { apiKeys, typed } = createApiKeys({ stored: keyOf('old') });
 
       expect(
-        await withApiKeyStatus(status, typed, {
+        await statusWithKey(status, typed, {
           checkKey: true,
           logger,
           getAutoUpdateState: async () => ({ invalidApiKeyId: 'old' }),
@@ -308,7 +311,7 @@ describe('sessions auto update', () => {
       const { apiKeys, typed } = createApiKeys({ stored: keyOf('old') });
 
       expect(
-        await withApiKeyStatus(status, typed, {
+        await statusWithKey(status, typed, {
           checkKey: true,
           logger,
           getAutoUpdateState: async () => ({ invalidApiKeyId: 'older' }),
@@ -321,7 +324,7 @@ describe('sessions auto update', () => {
       const { typed } = createApiKeys();
       const getAutoUpdateState = jest.fn();
 
-      await withApiKeyStatus(status, typed, { checkKey: false, logger, getAutoUpdateState });
+      await statusWithKey(status, typed, { checkKey: false, logger, getAutoUpdateState });
       expect(getAutoUpdateState).not.toHaveBeenCalled();
     });
 
@@ -329,14 +332,17 @@ describe('sessions auto update', () => {
       const { apiKeys, typed } = createApiKeys();
       apiKeys.get.mockRejectedValue(new Error('index unavailable'));
 
-      expect(await withApiKeyStatus(status, typed, check)).toBe(status);
+      expect(await statusWithKey(status, typed, check)).toBe(status);
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('index unavailable'));
     });
 
     it('marks an update as automatic when the transforms run with a working stored key', async () => {
       const { apiKeys, typed } = createApiKeys({ stored: keyOf('old') });
 
-      expect(await withApiKeyStatus(status, typed, check)).toEqual({ ...status, autoUpdate: true });
+      expect(await getApiKeyStatus(status, typed, check)).toEqual({
+        status: { ...status, autoUpdate: true },
+        keyId: 'old',
+      });
       expect(apiKeys.isInvalidated).toHaveBeenCalledWith(keyOf('old'));
     });
 
@@ -344,7 +350,7 @@ describe('sessions auto update', () => {
       const { typed } = createApiKeys({ stored: keyOf('old'), valid: false });
       const healthy = { ...status, health: 'healthy' as const, needsUpdate: false, reason: null };
 
-      expect(await withApiKeyStatus(healthy, typed, check)).toEqual({
+      expect(await statusWithKey(healthy, typed, check)).toEqual({
         ...healthy,
         apiKeyInvalid: true,
       });
@@ -353,7 +359,7 @@ describe('sessions auto update', () => {
     it("explains that a needed update can't apply automatically with a deleted key", async () => {
       const { typed } = createApiKeys({ stored: keyOf('old'), valid: false });
 
-      expect(await withApiKeyStatus(status, typed, check)).toEqual({
+      expect(await statusWithKey(status, typed, check)).toEqual({
         ...status,
         apiKeyInvalid: true,
         reason: expect.stringContaining("so this update can't apply automatically"),
@@ -364,7 +370,7 @@ describe('sessions auto update', () => {
       const { typed } = createApiKeys({ stored: keyOf('old') });
 
       expect(
-        await withApiKeyStatus(status, typed, {
+        await statusWithKey(status, typed, {
           checkKey: true,
           logger,
           getAutoUpdateState: async () => ({
@@ -383,7 +389,7 @@ describe('sessions auto update', () => {
       const current = { ...status, needsUpdate: false };
 
       expect(
-        await withApiKeyStatus(current, typed, {
+        await statusWithKey(current, typed, {
           checkKey: true,
           logger,
           getAutoUpdateState: async () => ({ autoUpdateError: 'boom' }),
@@ -394,7 +400,7 @@ describe('sessions auto update', () => {
     it("doesn't check the key unless asked", async () => {
       const { apiKeys, typed } = createApiKeys({ stored: keyOf('old'), valid: false });
 
-      expect(await withApiKeyStatus(status, typed, { checkKey: false, logger })).toEqual({
+      expect(await statusWithKey(status, typed, { checkKey: false, logger })).toEqual({
         ...status,
         autoUpdate: true,
       });

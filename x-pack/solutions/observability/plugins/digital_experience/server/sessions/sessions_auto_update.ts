@@ -106,16 +106,19 @@ export const enableSessionsForUser = async ({
   const previous = stored?.key ?? null;
   const key = await grantKey({ apiKeys, request, enabledBy, now, logger });
   const enabled = { enabledBy, enabledAt: now.toISOString() };
-
-  if (!key) {
-    await installSessions({ esClient, logger, settings, enabled });
+  // For when the transforms no longer run with the stored key, so the health task can't put it back.
+  const dropStored = async () => {
     if (stored) {
-      // The transforms no longer run with it, so the health task mustn't put it back.
       await apiKeys.delete();
       if (previous) {
         await apiKeys.invalidate(previous);
       }
     }
+  };
+
+  if (!key) {
+    await installSessions({ esClient, logger, settings, enabled });
+    await dropStored();
     return null;
   }
 
@@ -149,13 +152,7 @@ export const enableSessionsForUser = async ({
         error
       )}`
     );
-    if (stored) {
-      // The previous key must not come back either.
-      await apiKeys.delete();
-      if (previous) {
-        await apiKeys.invalidate(previous);
-      }
-    }
+    await dropStored();
     return null;
   }
   if (previous && previous.id !== key.id) {
@@ -215,8 +212,13 @@ const invalidKeyReason = (key: SessionsApiKey) =>
   `The API key [${key.name}] that Kibana updates the sessions transforms with was invalidated or has expired, so this update can't apply automatically; enable sessions again to apply it and grant a new key.`;
 
 /**
- * Adds what the stored API key means for `status`, and returns the stored key's id. See
- * `withApiKeyStatus`.
+ * Adds what the stored API key means for `status`: whether a needed update applies by itself.
+ * Also returns the id of the stored key the transforms run with, if any. A deleted key doesn't
+ * stop the transforms, which keep the identity they were last updated with; it only stops Kibana
+ * from updating them without a user. `checkKey` asks Elasticsearch whether the key still works,
+ * which logs an authentication error in Kibana when it doesn't, so only callers that act on the
+ * answer ask; the others rely on what the health task found. Never throws: if the key can't be
+ * read, updates just don't apply automatically.
  */
 export const getApiKeyStatus = async (
   status: SessionsStatus,
@@ -261,18 +263,6 @@ export const getApiKeyStatus = async (
     return { status, keyId: null };
   }
 };
-
-/**
- * Adds what the stored API key means for `status`: whether a needed update applies by itself. A
- * deleted key doesn't stop the transforms, which keep the identity they were last updated with;
- * it only stops Kibana from updating them without a user. `checkKey` asks Elasticsearch whether
- * the key still works, which logs an authentication error in Kibana when it doesn't, so only
- * callers that act on the answer ask; the others rely on what the health task found. Never
- * throws: if the key can't be read, updates just don't apply automatically.
- */
-export const withApiKeyStatus = async (
-  ...args: Parameters<typeof getApiKeyStatus>
-): Promise<SessionsStatus> => (await getApiKeyStatus(...args)).status;
 
 /**
  * Applies a needed update with the stored key the transforms already run with, so they keep the

@@ -27,7 +27,7 @@ import {
 } from '../../../common/sessions';
 import { getSession } from '../../sessions/get_session';
 import { listSessions } from '../../sessions/list_sessions';
-import { enableSessionsForUser, withApiKeyStatus } from '../../sessions/sessions_auto_update';
+import { enableSessionsForUser, getApiKeyStatus } from '../../sessions/sessions_auto_update';
 import { getSessionsStatus } from '../../sessions/sessions_setup';
 import { SessionsNewerVersionError } from '../../sessions/sessions_newer_version_error';
 import { SessionsPrivilegesError } from '../../sessions/sessions_privileges_error';
@@ -147,7 +147,7 @@ const statusRoute = createDigitalExperienceServerRoute({
     }
     // Only users who can grant a new key act on a deleted one, so only they pay for checking it;
     // the others see what the health task found.
-    const withKey = await withApiKeyStatus(status, sessionsApiKeys, {
+    const { status: withKey } = await getApiKeyStatus(status, sessionsApiKeys, {
       checkKey: canManage,
       logger,
       getAutoUpdateState: getSessionsAutoUpdateState,
@@ -211,13 +211,14 @@ const enableRoute = createDigitalExperienceServerRoute({
       `Sessions enabled by [${enabledBy}]${apiKeyRef ? ` with API key ${apiKeyRef}` : ''}`
     );
     try {
-      return await withApiKeyStatus(
+      const { status } = await getApiKeyStatus(
         await getSessionsStatus(elasticsearch.client.asInternalUser, {
           settings: sessionsSettings,
         }),
         sessionsApiKeys,
         { checkKey: true, logger }
       );
+      return status;
     } catch (error) {
       throw toReadError(error, logger, 'the sessions status');
     }
