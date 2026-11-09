@@ -16,6 +16,7 @@ import type { DataUsageContext, DataUsageRequestHandlerContext } from '../../typ
 import { errorHandler } from '../error_handler';
 import { CustomHttpRequestError } from '../../utils';
 import { DataUsageService } from '../../services';
+import { ES_DATA_STREAM_LOOKUP_CHUNK_SIZE } from '../../../common';
 
 const formatStringParams = <T extends string>(value: T | T[]): T[] | MetricTypes[] =>
   typeof value === 'string' ? [value] : value;
@@ -59,15 +60,14 @@ export const getUsageMetricsHandler = (
       let dataStreamsResponse: Array<{ name: string }>;
 
       try {
-        if (requestDsNames.length <= 50) {
+        if (requestDsNames.length <= ES_DATA_STREAM_LOOKUP_CHUNK_SIZE) {
           logger.debug(`Retrieving usage metrics`);
           const { data_streams: dataStreams } = await getDataStreams(requestDsNames);
           dataStreamsResponse = dataStreams;
         } else {
-          logger.debug(`Retrieving usage metrics in chunks of 50`);
-          // Attempt to fetch data streams in chunks of 50
-          const dataStreamsChunks = Math.ceil(requestDsNames.length / 50);
-          const chunkedDsLists = chunk(dataStreamsChunks, requestDsNames);
+          logger.debug(`Retrieving usage metrics in chunks of ${ES_DATA_STREAM_LOOKUP_CHUNK_SIZE}`);
+          // `chunk` here is lodash/fp's, which takes the chunk SIZE first, not the array.
+          const chunkedDsLists = chunk(ES_DATA_STREAM_LOOKUP_CHUNK_SIZE, requestDsNames);
           const chunkedDataStreams = await Promise.all(
             chunkedDsLists.map((dsList) => getDataStreams(dsList))
           );
