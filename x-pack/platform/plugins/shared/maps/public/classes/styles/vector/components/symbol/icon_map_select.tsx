@@ -26,11 +26,9 @@ const DEFAULT_ICON_STOPS: IconStop[] = [
   { stop: '', icon: PREFERRED_ICONS[1], icon_source: ICON_SOURCE.MAKI },
 ];
 
-export interface StyleOptionChanges {
-  custom_icon_stops?: IconStop[];
-  icon_palette_id?: string | null;
-  use_custom_icon_map: boolean;
-}
+export type StyleOptionChanges = Partial<
+  Pick<IconDynamicOptions, 'icon_palette_id' | 'custom_icon_stops' | 'use_custom_icon_map'>
+>;
 
 interface Props {
   customIconStops?: IconStop[];
