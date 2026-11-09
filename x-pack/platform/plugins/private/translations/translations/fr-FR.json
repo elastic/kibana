@@ -48453,7 +48453,6 @@
     "xpack.securitySolution.siemReadiness.retention.warningPrompt.description": "Examinez et mettez à jour toutes les politiques de conservation non conformes à FedRAMP (ILM ou DSL). Vous pouvez créer un dossier pour suivre cette opération et le terminer plus tard si nécessaire. Pour en savoir plus, consultez notre {docs}.",
     "xpack.securitySolution.siemReadiness.retention.warningPrompt.docsLink": "documents",
     "xpack.securitySolution.siemReadiness.retention.warningPrompt.title": "Certains flux de données ou index présentent des périodes de conservation plus courtes que celles recommandées.",
-    "xpack.securitySolution.siemReadiness.technicalPreviewBadgeLabel": "Préversion technique",
     "xpack.securitySolution.siemReadiness.viewCases": "Afficher les cas",
     "xpack.securitySolution.siemReadiness.visibility.badge.actionsRequired": "Actions requises",
     "xpack.securitySolution.siemReadiness.visibility.badge.healthy": "Sain",

@@ -48839,7 +48839,6 @@
     "xpack.securitySolution.siemReadiness.retention.warningPrompt.description": "审查并更新任何不符合 FedRAMP 规定的保留策略（ILM 或 DSL）。您可以创建一个案例来跟踪这项工作，并在需要时稍后完成。在我们的 {docs} 中了解更多信息。",
     "xpack.securitySolution.siemReadiness.retention.warningPrompt.docsLink": "文档",
     "xpack.securitySolution.siemReadiness.retention.warningPrompt.title": "某些数据流或索引的保留期比建议的时间要短。",
-    "xpack.securitySolution.siemReadiness.technicalPreviewBadgeLabel": "技术预览",
     "xpack.securitySolution.siemReadiness.viewCases": "查看案例",
     "xpack.securitySolution.siemReadiness.visibility.badge.actionsRequired": "需要采取的操作",
     "xpack.securitySolution.siemReadiness.visibility.badge.healthy": "运行正常",

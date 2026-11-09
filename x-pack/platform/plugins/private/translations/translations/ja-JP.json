@@ -48837,7 +48837,6 @@
     "xpack.securitySolution.siemReadiness.retention.warningPrompt.description": "FedRAMPに準拠していないデータ保持ポリシー（ILMまたはDSL）を見直し、更新してください。この作業を追跡するためのケースを作成し、必要に応じて後で完了させることもできます。{docs}で詳細をご覧ください。",
     "xpack.securitySolution.siemReadiness.retention.warningPrompt.docsLink": "ドキュメント",
     "xpack.securitySolution.siemReadiness.retention.warningPrompt.title": "データストリームやインデックスの中には、推奨される保存期間よりも短いものがあります。",
-    "xpack.securitySolution.siemReadiness.technicalPreviewBadgeLabel": "テクニカルプレビュー",
     "xpack.securitySolution.siemReadiness.viewCases": "ケースを表示",
     "xpack.securitySolution.siemReadiness.visibility.badge.actionsRequired": "対応が必要です",
     "xpack.securitySolution.siemReadiness.visibility.badge.healthy": "正常",

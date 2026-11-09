@@ -48809,7 +48809,6 @@
     "xpack.securitySolution.siemReadiness.retention.warningPrompt.description": "Revise e atualize qualquer política de retenção (ILM ou DSL) que não esteja em conformidade com FedRAMP. Você pode criar um caso para acompanhar este trabalho e concluí-lo posteriormente, se necessário. Saiba mais em nosso {docs}.",
     "xpack.securitySolution.siemReadiness.retention.warningPrompt.docsLink": "documentos",
     "xpack.securitySolution.siemReadiness.retention.warningPrompt.title": "Alguns fluxos de dados ou índices têm períodos de retenção mais curtos do que o recomendado.",
-    "xpack.securitySolution.siemReadiness.technicalPreviewBadgeLabel": "Prévia técnica",
     "xpack.securitySolution.siemReadiness.viewCases": "Ver casos",
     "xpack.securitySolution.siemReadiness.visibility.badge.actionsRequired": "Ações necessárias",
     "xpack.securitySolution.siemReadiness.visibility.badge.healthy": "Íntegro",

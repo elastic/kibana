@@ -48673,7 +48673,6 @@
     "xpack.securitySolution.siemReadiness.retention.warningPrompt.description": "Überprüfen und aktualisieren Sie alle nicht konformen Aufbewahrungsrichtlinien von FedRAMP (ILM oder DSL). Sie können ein Ticket erstellen, um diese Arbeit zu verfolgen und sie bei Bedarf später abzuschließen. Mehr dazu erfahren Sie in unseren {docs}.",
     "xpack.securitySolution.siemReadiness.retention.warningPrompt.docsLink": "Dokumente",
     "xpack.securitySolution.siemReadiness.retention.warningPrompt.title": "Einige Datenstreams oder Indizes haben kürzere Aufbewahrungszeiten als empfohlen.",
-    "xpack.securitySolution.siemReadiness.technicalPreviewBadgeLabel": "Technische Vorschau",
     "xpack.securitySolution.siemReadiness.viewCases": "Tickets anzeigen",
     "xpack.securitySolution.siemReadiness.visibility.badge.actionsRequired": "Maßnahmen erforderlich",
     "xpack.securitySolution.siemReadiness.visibility.badge.healthy": "Gesund",
