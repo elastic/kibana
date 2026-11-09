@@ -72,6 +72,8 @@ const deleteByQuerySafe = async ({
       refresh: true,
       ignore_unavailable: true,
       expand_wildcards: ['open', 'hidden'],
+      // Concurrent writers (the route's background run) must not turn a cleanup into a 409 failure.
+      conflicts: 'proceed',
     });
     log?.info(`cleanup ${index}: deleted ${deleted}`);
     return deleted;

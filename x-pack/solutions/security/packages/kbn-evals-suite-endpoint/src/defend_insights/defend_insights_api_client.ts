@@ -30,6 +30,18 @@ export const REQUEST_TIMEOUT_MS = 30_000;
 const MAX_ERROR_LENGTH = 800;
 const ANONYMIZATION_FIELDS_PAGE_SIZE = 1000;
 
+/**
+ * Fields the retriever and the model need. If any is missing or not allowed, or the executable path
+ * is anonymized, events are still counted (so `eventsContextCount` looks healthy) but the model
+ * sees nothing useful, and the negative control would pass vacuously.
+ */
+const REQUIRED_ALLOWED_FIELDS = ['process.executable', 'agent.id', '_id'] as const;
+const REQUIRED_UNANONYMIZED_FIELD = 'process.executable';
+
+/** Creates the abort signal for one request; injectable so tests can drive it with fake timers. */
+export type RequestSignalFactory = (timeoutMs: number) => AbortSignal;
+const defaultSignalFactory: RequestSignalFactory = (timeoutMs) => AbortSignal.timeout(timeoutMs);
+
 type AnonymizationFields = DefendInsightsPostRequestBodyInput['anonymizationFields'];
 
 interface AnonymizationFieldsFindResponse {
@@ -75,13 +87,19 @@ export interface GenerateDefendInsightsOptions {
  * the graph then runs in the background, so the result is read by polling GET by id.
  */
 export class DefendInsightsApiClient {
-  constructor(private readonly fetch: HttpHandler, private readonly log: ToolingLog) {}
+  constructor(
+    private readonly fetch: HttpHandler,
+    private readonly log: ToolingLog,
+    private readonly createSignal: RequestSignalFactory = defaultSignalFactory
+  ) {}
 
   /**
    * Reads the anonymization fields the UI would send. The route does not cap `per_page`, but the
    * response carries `total`, so truncation is detected instead of silently sending a partial list.
-   * An error, an empty list or a truncated list throws (the caller maps it to `request_failed`): without these fields the route sends the
-   * model no events, and the run would "succeed" with empty insights.
+   * Throws (the caller maps it to `request_failed`) on an error, an empty or truncated list, or a
+   * list that does not expose `process.executable`, `agent.id` and `_id` as allowed with
+   * `process.executable` un-anonymized: without them the route sends the model no usable events,
+   * and the run would "succeed" with empty insights.
    */
   async fetchAnonymizationFields(): Promise<AnonymizationFields> {
     let payload: AnonymizationFieldsFindResponse;
@@ -92,7 +110,7 @@ export class DefendInsightsApiClient {
           method: 'GET',
           version: PUBLIC_API_VERSION,
           query: { page: '1', per_page: String(ANONYMIZATION_FIELDS_PAGE_SIZE) },
-          signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+          signal: this.createSignal(REQUEST_TIMEOUT_MS),
         }
       );
     } catch (e) {
@@ -107,6 +125,20 @@ export class DefendInsightsApiClient {
     }
     if (typeof payload.total === 'number' && payload.total > data.length) {
       throw new Error(`anonymization_fields find truncated: ${data.length} of ${payload.total}`);
+    }
+
+    for (const field of REQUIRED_ALLOWED_FIELDS) {
+      const entry = data.find((candidate) => candidate.field === field);
+      if (!entry) {
+        throw new Error(`anonymization field "${field}" is missing`);
+      }
+      if (entry.allowed !== true) {
+        throw new Error(`anonymization field "${field}" is not allowed`);
+      }
+    }
+    const executable = data.find(({ field }) => field === REQUIRED_UNANONYMIZED_FIELD);
+    if (executable?.anonymized) {
+      throw new Error(`anonymization field "${REQUIRED_UNANONYMIZED_FIELD}" is anonymized`);
     }
     return data;
   }
@@ -150,7 +182,7 @@ export class DefendInsightsApiClient {
           'kbn-xsrf': 'true',
           'Content-Type': 'application/json',
         },
-        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+        signal: this.createSignal(REQUEST_TIMEOUT_MS),
       });
       insightId = created.id;
     } catch (e) {
@@ -193,7 +225,9 @@ export class DefendInsightsApiClient {
         const { data } = await this.fetch<GetDefendInsightResponse>(path, {
           method: 'GET',
           headers: { 'elastic-api-version': INTERNAL_API_VERSION },
-          signal: AbortSignal.timeout(Math.min(deadline - Date.now(), REQUEST_TIMEOUT_MS)),
+          signal: this.createSignal(
+            Math.max(1, Math.min(deadline - Date.now(), REQUEST_TIMEOUT_MS))
+          ),
         });
 
         if (data && TERMINAL_STATUSES.has(data.status)) {

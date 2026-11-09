@@ -10,10 +10,21 @@ import { ToolingLog } from '@kbn/tooling-log';
 import {
   DEFEND_INSIGHTS_POLL_MAX_WAIT_MS,
   DefendInsightsApiClient,
+  REQUEST_TIMEOUT_MS,
 } from './defend_insights_api_client';
 
 const OPTIONS = { endpointId: 'agent-1', connectorId: 'c1', actionTypeId: '.inference' };
-const FIELDS = [{ id: '1', field: 'process.executable', allowed: true, anonymized: false }];
+const field = (name: string, overrides: { allowed?: boolean; anonymized?: boolean } = {}) => ({
+  id: name,
+  field: name,
+  allowed: true,
+  anonymized: false,
+  ...overrides,
+});
+const FIELDS = [field('process.executable'), field('agent.id'), field('_id')];
+const without = (name: string) => FIELDS.filter((entry) => entry.field !== name);
+const withOverride = (name: string, overrides: { allowed?: boolean; anonymized?: boolean }) =>
+  FIELDS.map((entry) => (entry.field === name ? field(name, overrides) : entry));
 
 const httpError = (status: number) => Object.assign(new Error(`HTTP ${status}`), { status });
 
@@ -165,6 +176,7 @@ describe('DefendInsightsApiClient', () => {
   });
 
   describe('anonymization fields lookup', () => {
+    type FindCase = [name: string, findBody: () => unknown, message: string];
     const neverPosts =
       (findBody: () => unknown): Route =>
       (url, options) => {
@@ -183,7 +195,24 @@ describe('DefendInsightsApiClient', () => {
       ],
       ['an empty list', () => ({ data: [], total: 0 }), 'returned no fields'],
       ['a missing data array', () => ({}), 'returned no fields'],
-      ['a truncated page', () => ({ data: FIELDS, total: 1500 }), 'truncated: 1 of 1500'],
+      ['a truncated page', () => ({ data: FIELDS, total: 1500 }), 'truncated: 3 of 1500'],
+      ...['process.executable', 'agent.id', '_id'].flatMap<FindCase>((name) => [
+        [
+          `a missing ${name}`,
+          () => ({ data: without(name), total: 2 }),
+          `anonymization field "${name}" is missing`,
+        ],
+        [
+          `${name} not allowed`,
+          () => ({ data: withOverride(name, { allowed: false }), total: 3 }),
+          `anonymization field "${name}" is not allowed`,
+        ],
+      ]),
+      [
+        'process.executable anonymized',
+        () => ({ data: withOverride('process.executable', { anonymized: true }), total: 3 }),
+        'anonymization field "process.executable" is anonymized',
+      ],
     ])('is request_failed on %s and never POSTs', async (_name, findBody, message) => {
       const fetch = createFetch(neverPosts(findBody));
       expect(await run(fetch)).toMatchObject({
@@ -193,6 +222,57 @@ describe('DefendInsightsApiClient', () => {
       });
       expect(fetch).toHaveBeenCalledTimes(1);
     });
+  });
+
+  it('cuts off a single stuck request and ends timed_out within the poll deadline', async () => {
+    const neverSettles = (options: { signal?: AbortSignal }) =>
+      new Promise<never>((_resolve, reject) => {
+        options.signal?.addEventListener('abort', () =>
+          reject(new Error('request failed', { cause: options.signal?.reason }))
+        );
+      });
+    const fetch = createFetch((url, options) => {
+      if (isFind(url)) return { data: FIELDS, total: FIELDS.length };
+      if (isPost(url, options)) return { id: 'insight-1', status: 'running' };
+      return neverSettles(options as { signal?: AbortSignal });
+    });
+    const timeoutSignal = (timeoutMs: number) => {
+      const controller = new AbortController();
+      setTimeout(
+        () => controller.abort(Object.assign(new Error('timeout'), { name: 'TimeoutError' })),
+        timeoutMs
+      );
+      return controller.signal;
+    };
+
+    const pollMaxWaitMs = 100_000;
+    const promise = new DefendInsightsApiClient(
+      fetch,
+      log,
+      timeoutSignal
+    ).generateIncompatibleAntivirus({
+      ...OPTIONS,
+      pollMaxWaitMs,
+    });
+    await jest.advanceTimersByTimeAsync(pollMaxWaitMs + REQUEST_TIMEOUT_MS + 10_000);
+
+    expect(await promise).toMatchObject({ status: 'timed_out', insightId: 'insight-1' });
+    // Several GETs were attempted: each stuck one was cut off at its own timeout, not at the deadline.
+    const gets = fetch.mock.calls.filter(([, options]) => options?.method === 'GET').length;
+    expect(gets).toBeGreaterThan(2);
+  });
+
+  it('never asks for a non-positive request timeout near the poll deadline', async () => {
+    const timeouts: number[] = [];
+    const fetch = createFetch(happyRoute(() => ({ data: { status: 'running' } })));
+    const promise = new DefendInsightsApiClient(fetch, log, (timeoutMs) => {
+      timeouts.push(timeoutMs);
+      return new AbortController().signal;
+    }).generateIncompatibleAntivirus({ ...OPTIONS, pollMaxWaitMs: 10_000 });
+    await jest.advanceTimersByTimeAsync(20_000);
+    await promise;
+    expect(timeouts.length).toBeGreaterThan(2);
+    expect(Math.min(...timeouts)).toBeGreaterThanOrEqual(1);
   });
 
   it('gives every request an abort signal bounded by the per-request timeout', async () => {

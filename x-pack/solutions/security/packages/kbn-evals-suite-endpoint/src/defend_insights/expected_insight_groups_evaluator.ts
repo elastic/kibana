@@ -30,9 +30,8 @@ const GENERIC_GROUP_SUFFIXES = new Set([
 ]);
 
 /**
- * Trims, lowercases, collapses whitespace and drops trailing generic words, so the comparison is an
- * exact match on the vendor/product name instead of a substring (which would let "Avast" match
- * "Not Avast" or any group that merely mentions it).
+ * Trims, lowercases, collapses whitespace and drops trailing generic words, so the comparison is on
+ * the vendor/product name instead of a substring (which would let "Avast" match "Not Avast").
  */
 export const normalizeGroupName = (group: string): string => {
   const words = group.trim().toLowerCase().split(/\s+/).filter(Boolean);
@@ -40,6 +39,17 @@ export const normalizeGroupName = (group: string): string => {
     words.pop();
   }
   return words.join(' ');
+};
+
+/**
+ * A group matches when its normalized name equals the vendor or starts with it followed by a word
+ * boundary, which accepts vendor-suffixed names ("Kaspersky Lab", "Malwarebytes Inc") but not a
+ * longer word ("Avastx") or a name that merely contains the vendor ("Not Avast").
+ */
+export const groupMatchesVendor = (group: string, vendor: string): boolean => {
+  const normalizedGroup = normalizeGroupName(group);
+  const normalizedVendor = normalizeGroupName(vendor);
+  return normalizedGroup === normalizedVendor || normalizedGroup.startsWith(`${normalizedVendor} `);
 };
 
 /**
@@ -83,9 +93,8 @@ export const createExpectedInsightGroupsEvaluator = (): Evaluator<
 
     for (const requirement of requirements) {
       const label = `requirement "${requirement.name}"`;
-      const wanted = normalizeGroupName(requirement.name);
-      const matchIndex = unclaimed.findIndex(
-        (insight) => normalizeGroupName(insight.group) === wanted
+      const matchIndex = unclaimed.findIndex((insight) =>
+        groupMatchesVendor(insight.group, requirement.name)
       );
       const matched = matchIndex === -1 ? undefined : unclaimed.splice(matchIndex, 1)[0];
       totalChecks += 3;

@@ -31,6 +31,30 @@ describe('ExpectedInsightGroups', () => {
     expect(await evaluate(params(out, avExpected))).toMatchObject({ score: 1, label: 'pass' });
   });
 
+  const vendorExpected = (name: string) => ({
+    ...avExpected,
+    results: [{ ...avExpected.results[0], name }],
+  });
+
+  it.each([
+    ['Kaspersky Lab', 'Kaspersky'],
+    ['Malwarebytes Inc', 'Malwarebytes'],
+  ])('accepts the vendor-suffixed group "%s" for "%s"', async (group, vendor) => {
+    const out = output({ insights: [insight(group, [AVAST_SVC, AVAST_UI])] });
+    expect(await evaluate(params(out, vendorExpected(vendor)))).toMatchObject({
+      score: 1,
+      label: 'pass',
+    });
+  });
+
+  it.each([
+    ['Avastx', 'Avast'],
+    ['Avastly Antivirus', 'Avast'],
+  ])('does not match "%s" to "%s"', async (group, vendor) => {
+    const out = output({ insights: [insight(group, [AVAST_SVC, AVAST_UI])] });
+    expect(await evaluate(params(out, vendorExpected(vendor)))).toMatchObject({ label: 'fail' });
+  });
+
   it('does not match a group that only contains the vendor name', async () => {
     const out = output({ insights: [insight('Not Avast related', [AVAST_SVC, AVAST_UI])] });
     expect(await evaluate(params(out, avExpected))).toMatchObject({ label: 'fail' });
