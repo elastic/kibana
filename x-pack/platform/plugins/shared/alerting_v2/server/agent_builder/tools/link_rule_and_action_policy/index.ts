@@ -6,3 +6,4 @@
  */
 
 export { linkRuleAndActionPolicyTool } from './link_rule_and_action_policy';
+export type { LinkRuleAndActionPolicyToolDeps } from './link_rule_and_action_policy';

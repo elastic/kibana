@@ -714,6 +714,11 @@ export const ALERTING_LOG_CODES = {
   AGENT_BUILDER_FIND_ACTION_POLICIES_FAILED: 'AGENT_BUILDER_FIND_ACTION_POLICIES_FAILED',
   /** `manage_action_policy` tool failed; returns an error result. */
   AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED: 'AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED',
+  /** `link_rule_and_action_policy` tool failed; returns an error result. */
+  AGENT_BUILDER_LINK_RULE_AND_ACTION_POLICY_FAILED:
+    'AGENT_BUILDER_LINK_RULE_AND_ACTION_POLICY_FAILED',
+  /** `link_rule_and_action_policy` could not restore the rule attachment after the policy update failed; the rule keeps the new routing tag. */
+  AGENT_BUILDER_LINK_ROLLBACK_FAILED: 'AGENT_BUILDER_LINK_ROLLBACK_FAILED',
   /** Workflow validation service call failed while checking a destination workflow; diagnostics for that destination are skipped. */
   AGENT_BUILDER_ACTION_POLICY_WORKFLOW_VALIDATION_FAILED:
     'AGENT_BUILDER_ACTION_POLICY_WORKFLOW_VALIDATION_FAILED',
