@@ -22,7 +22,7 @@ const createDashboardApi = (attributes: object) =>
 describe('isAttachmentShownInDashboard', () => {
   const data = { title: 'Logs', panels: [], time_range: timeRange } as DashboardAttachmentData;
 
-  it("ignores the dashboard's refresh interval when the attachment sets none", () => {
+  it("ignores the dashboard's refresh interval when the attachment sets none", async () => {
     const api = createDashboardApi({
       title: 'Logs',
       panels: [],
@@ -30,10 +30,10 @@ describe('isAttachmentShownInDashboard', () => {
       refresh_interval: { pause: false, value: 60000 },
     });
 
-    expect(isAttachmentShownInDashboard(api, getDashboardSnapshot(api), data)).toBe(true);
+    expect(await isAttachmentShownInDashboard(api, getDashboardSnapshot(api), data)).toBe(true);
   });
 
-  it('compares the refresh interval the attachment sets', () => {
+  it('compares the refresh interval the attachment sets', async () => {
     const api = createDashboardApi({
       title: 'Logs',
       panels: [],
@@ -42,7 +42,7 @@ describe('isAttachmentShownInDashboard', () => {
     });
 
     expect(
-      isAttachmentShownInDashboard(api, getDashboardSnapshot(api), {
+      await isAttachmentShownInDashboard(api, getDashboardSnapshot(api), {
         ...data,
         refresh_interval: { pause: true, value: 60000 },
       })

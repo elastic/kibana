@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { debounceTime, filter, merge, Observable, tap } from 'rxjs';
+import { debounceTime, filter, merge, Observable, switchMap, tap } from 'rxjs';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { UpdateOriginResponse } from '@kbn/agent-builder-common';
@@ -107,46 +107,66 @@ export const registerDashboardAppIntegration = ({
     }
   };
 
-  let lastShownCheck:
-    | { versionedAttachments: VersionedDashboardAttachment[]; data: DashboardAttachmentData }
-    | undefined;
+  interface ShownCheck {
+    versionedAttachments: VersionedDashboardAttachment[];
+    data: DashboardAttachmentData;
+  }
+  let lastShownCheck: ShownCheck | undefined;
 
-  // marks every attachment version the open dashboard shows; skipped when neither side changed,
-  // since it compares the dashboard with every version
-  const updateShownVersions = (dashboard: DashboardSnapshot) => {
+  // every attachment version the open dashboard shows; undefined when neither side changed since
+  // the last check, since it compares the dashboard with every version
+  const getShownVersions = async (
+    dashboard: DashboardSnapshot
+  ): Promise<{ check: ShownCheck; shownVersions: Set<string> } | undefined> => {
     const { versionedAttachments } = state;
     if (
       lastShownCheck?.versionedAttachments === versionedAttachments &&
       isEqual(lastShownCheck.data, dashboard.data)
     ) {
-      return;
+      return undefined;
     }
-    lastShownCheck = { versionedAttachments, data: dashboard.data };
-    const shownVersions = new Set<string>();
-    for (const { id, versions } of state.versionedAttachments) {
-      for (const { version, data } of versions) {
-        if (isAttachmentShownInDashboard(api, dashboard, data)) {
-          shownVersions.add(toShownVersionKey(id, version));
-        }
-      }
-    }
-    appliedAttachments.setShownVersions(shownVersions);
+    const versions = versionedAttachments.flatMap(({ id, versions: attachmentVersions }) =>
+      attachmentVersions.map(({ version, data }) => ({ key: toShownVersionKey(id, version), data }))
+    );
+    const shownFlags = await Promise.all(
+      versions.map(({ data }) => isAttachmentShownInDashboard(api, dashboard, data))
+    );
+    return {
+      check: { versionedAttachments, data: dashboard.data },
+      shownVersions: new Set(
+        versions.filter((_, index) => shownFlags[index]).map(({ key }) => key)
+      ),
+    };
   };
 
-  // stages the dashboard as a pending version unless it shows the linked attachment's latest version
-  const updatePendingVersion = (dashboard: DashboardSnapshot) => {
-    const linkedAttachment = getLinkedAttachment({
+  // the attachment the dashboard's changes become versions of, and whether it shows its latest version
+  const getPendingVersionTarget = async (dashboard: DashboardSnapshot) => {
+    const linkedAttachment = await getLinkedAttachment({
       api,
       store: appliedAttachments,
       attachments: getAttachments(),
       dashboard,
       draftAttachmentId: draftAttachmentId.current,
     });
+    const isLinkedAttachmentShown =
+      linkedAttachment !== undefined &&
+      (await isAttachmentShownInDashboard(api, dashboard, linkedAttachment.data));
+    return { linkedAttachment, isLinkedAttachmentShown };
+  };
+
+  // stages the dashboard as a pending version unless it shows the linked attachment's latest version
+  const updatePendingVersion = (
+    dashboard: DashboardSnapshot,
+    {
+      linkedAttachment,
+      isLinkedAttachmentShown,
+    }: Awaited<ReturnType<typeof getPendingVersionTarget>>
+  ) => {
     // changes become versions of the linked attachment, otherwise the dashboard is staged as a draft
     const attachmentId = linkedAttachment?.id ?? draftAttachmentId.current;
     appliedAttachments.setLinkedAttachmentId(api, attachmentId);
 
-    if (linkedAttachment && isAttachmentShownInDashboard(api, dashboard, linkedAttachment.data)) {
+    if (isLinkedAttachmentShown) {
       unstage();
       return;
     }
@@ -165,14 +185,29 @@ export const registerDashboardAppIntegration = ({
     });
   };
 
-  const syncWithConversation = () => {
+  // compares the dashboard with the conversation; the comparison is async, so it resolves to the
+  // sync to perform, which is skipped when a newer comparison started meanwhile
+  const compareWithConversation = async (): Promise<(() => void) | undefined> => {
     // the dashboard is still settling after applying an attachment, so its state is not a manual change
     if (appliedAttachments.isApplying()) {
-      return;
+      return undefined;
     }
     const dashboard = getDashboardSnapshot(api);
-    updateShownVersions(dashboard);
-    updatePendingVersion(dashboard);
+    const [shown, pendingVersionTarget] = await Promise.all([
+      getShownVersions(dashboard),
+      getPendingVersionTarget(dashboard),
+    ]);
+    return () => {
+      // an apply started while comparing, so the dashboard compared is already outdated
+      if (appliedAttachments.isApplying()) {
+        return;
+      }
+      if (shown) {
+        lastShownCheck = shown.check;
+        appliedAttachments.setShownVersions(shown.shownVersions);
+      }
+      updatePendingVersion(dashboard, pendingVersionTarget);
+    };
   };
 
   const conversationChanges$ = agentBuilder.events.ui.activeConversation$.pipe(
@@ -210,7 +245,9 @@ export const registerDashboardAppIntegration = ({
     conversationChanges$,
     api.anyStateChange$.pipe(debounceTime(MANUAL_CHANGES_DEBOUNCE_MS)),
     appliedAttachments.applyFinished$
-  ).subscribe(() => syncWithConversation());
+  )
+    .pipe(switchMap(() => compareWithConversation()))
+    .subscribe((sync) => sync?.());
 
   const agentLiveUpdatesSubscription = createAgentLiveUpdatesSubscription({
     agentBuilder,

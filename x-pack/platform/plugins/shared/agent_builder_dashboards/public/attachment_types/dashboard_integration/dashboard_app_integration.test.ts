@@ -233,7 +233,7 @@ describe('registerDashboardAppIntegration', () => {
     });
   };
 
-  it('syncs manual dashboard changes for an existing dashboard attachment', () => {
+  it('syncs manual dashboard changes for an existing dashboard attachment', async () => {
     const attachment = createDashboardAttachment({ origin: 'dashboard-1' });
     mockApi.savedObjectId$.next('dashboard-1');
     register();
@@ -243,7 +243,7 @@ describe('registerDashboardAppIntegration', () => {
     });
 
     simulateDashboardStateChange();
-    jest.advanceTimersByTime(MANUAL_CHANGES_DEBOUNCE_MS);
+    await jest.advanceTimersByTimeAsync(MANUAL_CHANGES_DEBOUNCE_MS);
 
     expect(addAttachment).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -254,7 +254,7 @@ describe('registerDashboardAppIntegration', () => {
     );
   });
 
-  it('selects the matching existing dashboard attachment for manual sync', () => {
+  it('selects the matching existing dashboard attachment for manual sync', async () => {
     mockApi.savedObjectId$.next('dashboard-2');
     register();
     emitConversationChange({
@@ -276,7 +276,7 @@ describe('registerDashboardAppIntegration', () => {
     });
 
     simulateDashboardStateChange();
-    jest.advanceTimersByTime(MANUAL_CHANGES_DEBOUNCE_MS);
+    await jest.advanceTimersByTimeAsync(MANUAL_CHANGES_DEBOUNCE_MS);
 
     expect(addAttachment).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -326,7 +326,7 @@ describe('registerDashboardAppIntegration', () => {
         ),
       ],
     });
-    jest.runOnlyPendingTimers();
+    await jest.runOnlyPendingTimersAsync();
 
     mockApi.onSave$.next({
       previousDashboardId: undefined,
@@ -344,7 +344,7 @@ describe('registerDashboardAppIntegration', () => {
     expect(updateAttachmentOrigin).toHaveBeenCalledTimes(1);
   });
 
-  it('creates a new attachment from the current dashboard state when switching away from a conversation', () => {
+  it('creates a new attachment from the current dashboard state when switching away from a conversation', async () => {
     const attachment = createDashboardAttachment({ origin: 'dashboard-1' });
     mockApi.savedObjectId$.next('dashboard-1');
     register();
@@ -353,16 +353,16 @@ describe('registerDashboardAppIntegration', () => {
       attachments: [createVersionedAttachment(attachment)],
     });
 
-    jest.runOnlyPendingTimers();
+    await jest.runOnlyPendingTimersAsync();
     addAttachment.mockClear();
     simulateDashboardStateChange();
-    jest.advanceTimersByTime(MANUAL_CHANGES_DEBOUNCE_MS);
+    await jest.advanceTimersByTimeAsync(MANUAL_CHANGES_DEBOUNCE_MS);
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
 
     addAttachment.mockClear();
     emitConversationChange({ id: undefined, attachments: undefined });
-    jest.runOnlyPendingTimers();
+    await jest.runOnlyPendingTimersAsync();
 
     expect(addAttachment).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -373,7 +373,7 @@ describe('registerDashboardAppIntegration', () => {
     );
   });
 
-  it('stages a pending version when the dashboard differs from the last attachment', () => {
+  it('stages a pending version when the dashboard differs from the last attachment', async () => {
     // The save button compares the open dashboard with the saved dashboard. A clean save
     // button does not mean the open dashboard matches the chat attachment.
     mockApi.savedObjectId$.next('dashboard-1');
@@ -392,13 +392,13 @@ describe('registerDashboardAppIntegration', () => {
         createVersionedAttachment(createDashboardAttachment({ origin: 'dashboard-1' })),
       ],
     });
-    jest.runOnlyPendingTimers();
+    await jest.runOnlyPendingTimersAsync();
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
     expect(appliedAttachments.shownVersions$.getValue()).toEqual(new Set());
   });
 
-  it('drops the pending version when the dashboard matches the last attachment again', () => {
+  it('drops the pending version when the dashboard matches the last attachment again', async () => {
     const openSection = {
       id: 'section-1',
       title: 'Logs',
@@ -427,7 +427,7 @@ describe('registerDashboardAppIntegration', () => {
       id: 'conversation-1',
       attachments: [createVersionedAttachment(attachment)],
     });
-    jest.runOnlyPendingTimers();
+    await jest.runOnlyPendingTimersAsync();
     expect(addAttachment).not.toHaveBeenCalled();
     expect(appliedAttachments.shownVersions$.getValue()).toEqual(
       new Set([toShownVersionKey('dashboard-attachment-id', 1)])
@@ -441,7 +441,7 @@ describe('registerDashboardAppIntegration', () => {
       },
     });
     emitDashboardStateChange();
-    jest.advanceTimersByTime(MANUAL_CHANGES_DEBOUNCE_MS);
+    await jest.advanceTimersByTimeAsync(MANUAL_CHANGES_DEBOUNCE_MS);
     expect(addAttachment).toHaveBeenCalledTimes(1);
     expect(appliedAttachments.shownVersions$.getValue()).toEqual(new Set());
 
@@ -455,7 +455,7 @@ describe('registerDashboardAppIntegration', () => {
       },
     });
     emitDashboardStateChange();
-    jest.advanceTimersByTime(MANUAL_CHANGES_DEBOUNCE_MS);
+    await jest.advanceTimersByTimeAsync(MANUAL_CHANGES_DEBOUNCE_MS);
 
     expect(removeAttachment).toHaveBeenCalledWith('dashboard-attachment-id');
     expect(addAttachment).not.toHaveBeenCalled();
@@ -512,7 +512,7 @@ describe('registerDashboardAppIntegration', () => {
         id: 'conversation-1',
         attachments: [createVersionedAttachment(agentAttachment)],
       });
-      jest.runOnlyPendingTimers();
+      await jest.runOnlyPendingTimersAsync();
 
       const applied = applyAttachmentToDashboard({
         store: appliedAttachments,
@@ -585,7 +585,7 @@ describe('registerDashboardAppIntegration', () => {
     expect(addAttachment).not.toHaveBeenCalled();
   });
 
-  it('stages the open dashboard in an existing conversation that does not have it', () => {
+  it('stages the open dashboard in an existing conversation that does not have it', async () => {
     mockApi.savedObjectId$.next('dashboard-2');
     register();
     emitConversationChange({
@@ -596,7 +596,7 @@ describe('registerDashboardAppIntegration', () => {
         ),
       ],
     });
-    jest.runOnlyPendingTimers();
+    await jest.runOnlyPendingTimersAsync();
 
     expect(addAttachment).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'draft-attachment-id-1', origin: 'dashboard-2' })
@@ -618,7 +618,7 @@ describe('registerDashboardAppIntegration', () => {
       mockApi.layout$.next({ panels: { 'panel-1': {} }, pinnedPanels: {} });
     });
 
-    const emitAgentUpdate = (conversationId: string, attachment: DashboardAttachment) => {
+    const emitAgentUpdate = async (conversationId: string, attachment: DashboardAttachment) => {
       chatEventsByConversationId.get(conversationId)?.next({
         type: ChatEventType.toolUi,
         data: {
@@ -633,24 +633,25 @@ describe('registerDashboardAppIntegration', () => {
           },
         },
       } as ChatEvent);
+      await jest.advanceTimersByTimeAsync(0);
     };
 
-    it('stays a draft when edited in a conversation with a single unsaved attachment', () => {
+    it('stays a draft when edited in a conversation with a single unsaved attachment', async () => {
       register();
       emitConversationChange({
         id: 'conversation-1',
         attachments: [createVersionedAttachment(linkedAttachment)],
       });
-      jest.runOnlyPendingTimers();
+      await jest.runOnlyPendingTimersAsync();
       emitConversationChange({
         id: 'conversation-2',
         attachments: [createVersionedAttachment(otherAttachment)],
       });
-      jest.runOnlyPendingTimers();
+      await jest.runOnlyPendingTimersAsync();
       addAttachment.mockClear();
 
       simulateDashboardStateChange();
-      jest.advanceTimersByTime(MANUAL_CHANGES_DEBOUNCE_MS);
+      await jest.advanceTimersByTimeAsync(MANUAL_CHANGES_DEBOUNCE_MS);
 
       expect(addAttachment).toHaveBeenCalledTimes(1);
       expect(addAttachment).toHaveBeenCalledWith(
@@ -658,45 +659,45 @@ describe('registerDashboardAppIntegration', () => {
       );
     });
 
-    it('applies agent updates again after visiting another conversation', () => {
+    it('applies agent updates again after visiting another conversation', async () => {
       const conversation1Attachments = [
         createVersionedAttachment(linkedAttachment),
         createVersionedAttachment(otherAttachment),
       ];
       register();
       emitConversationChange({ id: 'conversation-1', attachments: conversation1Attachments });
-      jest.runOnlyPendingTimers();
+      await jest.runOnlyPendingTimersAsync();
       simulateDashboardStateChange();
-      jest.advanceTimersByTime(MANUAL_CHANGES_DEBOUNCE_MS);
+      await jest.advanceTimersByTimeAsync(MANUAL_CHANGES_DEBOUNCE_MS);
 
       emitConversationChange({ id: 'conversation-2', attachments: [] });
-      jest.runOnlyPendingTimers();
+      await jest.runOnlyPendingTimersAsync();
       emitConversationChange({ id: 'conversation-1', attachments: conversation1Attachments });
-      jest.runOnlyPendingTimers();
+      await jest.runOnlyPendingTimersAsync();
 
       expect(addAttachment).toHaveBeenLastCalledWith(
         expect.objectContaining({ id: 'linked-attachment-id' })
       );
 
-      emitAgentUpdate('conversation-1', linkedAttachment);
+      await emitAgentUpdate('conversation-1', linkedAttachment);
 
       expect(notifyOtherDashboardUpdated).not.toHaveBeenCalled();
       expect(mockApi.setState).toHaveBeenCalledTimes(1);
     });
 
-    it('stays linked after sending a draft in another conversation', () => {
+    it('stays linked after sending a draft in another conversation', async () => {
       const conversation1Attachments = [
         createVersionedAttachment(linkedAttachment),
         createVersionedAttachment(otherAttachment),
       ];
       register();
       emitConversationChange({ id: 'conversation-1', attachments: conversation1Attachments });
-      jest.runOnlyPendingTimers();
+      await jest.runOnlyPendingTimersAsync();
       simulateDashboardStateChange();
-      jest.advanceTimersByTime(MANUAL_CHANGES_DEBOUNCE_MS);
+      await jest.advanceTimersByTimeAsync(MANUAL_CHANGES_DEBOUNCE_MS);
 
       emitConversationChange({ id: 'conversation-2', attachments: [] });
-      jest.runOnlyPendingTimers();
+      await jest.runOnlyPendingTimersAsync();
       emitConversationChange({
         id: 'conversation-2',
         attachments: [
@@ -708,42 +709,42 @@ describe('registerDashboardAppIntegration', () => {
           ),
         ],
       });
-      jest.runOnlyPendingTimers();
+      await jest.runOnlyPendingTimersAsync();
       emitConversationChange({ id: 'conversation-1', attachments: conversation1Attachments });
-      jest.runOnlyPendingTimers();
+      await jest.runOnlyPendingTimersAsync();
 
       expect(addAttachment).toHaveBeenLastCalledWith(
         expect.objectContaining({ id: 'linked-attachment-id' })
       );
     });
 
-    it('keeps the link of a new conversation once it gets its id', () => {
+    it('keeps the link of a new conversation once it gets its id', async () => {
       const draftAttachment = createDashboardAttachment({
         id: 'draft-attachment-id-1',
         data: { title: 'Edited Dashboard', description: 'Test Description', panels: [] },
       });
       register();
       emitConversationChange({});
-      jest.runOnlyPendingTimers();
+      await jest.runOnlyPendingTimersAsync();
       simulateDashboardStateChange();
-      jest.advanceTimersByTime(MANUAL_CHANGES_DEBOUNCE_MS);
+      await jest.advanceTimersByTimeAsync(MANUAL_CHANGES_DEBOUNCE_MS);
 
       emitConversationChange({
         id: 'conversation-1',
         attachments: [createVersionedAttachment(draftAttachment)],
       });
-      emitAgentUpdate('conversation-1', draftAttachment);
+      await emitAgentUpdate('conversation-1', draftAttachment);
 
       expect(notifyOtherDashboardUpdated).not.toHaveBeenCalled();
       expect(mockApi.setState).toHaveBeenCalledTimes(1);
     });
   });
 
-  it('regenerates the pending attachment id once the draft attachment is in the conversation', () => {
+  it('regenerates the pending attachment id once the draft attachment is in the conversation', async () => {
     register();
 
     emitConversationChange({ id: undefined, attachments: undefined });
-    jest.runOnlyPendingTimers();
+    await jest.runOnlyPendingTimersAsync();
 
     const firstDraftAttachment = addAttachment.mock.calls[0]?.[0];
     expect(firstDraftAttachment).toEqual(
@@ -763,7 +764,7 @@ describe('registerDashboardAppIntegration', () => {
     });
 
     emitConversationChange({ id: undefined, attachments: undefined });
-    jest.runOnlyPendingTimers();
+    await jest.runOnlyPendingTimersAsync();
 
     expect(addAttachment).toHaveBeenCalledWith(
       expect.objectContaining({

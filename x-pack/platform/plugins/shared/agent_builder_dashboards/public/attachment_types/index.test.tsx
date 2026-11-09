@@ -468,7 +468,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       });
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
       await flushAsyncServices();
-      jest.runOnlyPendingTimers();
+      await jest.runOnlyPendingTimersAsync();
 
       expect(deps.addAttachment).toHaveBeenCalledWith(
         expect.objectContaining({ type: DASHBOARD_ATTACHMENT_TYPE })
@@ -481,7 +481,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       deps.emitConversationChange({ id: undefined });
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
       await flushAsyncServices();
-      jest.runOnlyPendingTimers();
+      await jest.runOnlyPendingTimersAsync();
 
       expect(deps.addAttachment).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -500,7 +500,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
         conversation: createMockConversation('conversation-1', []),
       });
       await flushAsyncServices();
-      jest.runOnlyPendingTimers();
+      await jest.runOnlyPendingTimersAsync();
 
       expect(deps.addAttachment).toHaveBeenCalledWith(
         expect.objectContaining({ type: DASHBOARD_ATTACHMENT_TYPE })
@@ -513,7 +513,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
       deps.emitConversationChange({ id: undefined });
       await flushAsyncServices();
-      jest.runOnlyPendingTimers();
+      await jest.runOnlyPendingTimersAsync();
 
       expect(deps.addAttachment).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -534,7 +534,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
 
       deps.currentAppId$.next('agentBuilder');
       await flushAsyncServices();
-      jest.runOnlyPendingTimers();
+      await jest.runOnlyPendingTimersAsync();
 
       expect(deps.addAttachment).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -564,6 +564,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       });
 
       deps.emitChatEvent('conversation-1', createMockDashboardUpdatedEvent('attachment-1'));
+      await jest.advanceTimersByTimeAsync(0);
 
       expect(mockApi.setState).toHaveBeenCalledWith(
         expect.objectContaining({ title: 'Updated Dashboard' }),
@@ -629,6 +630,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
         'conversation-1',
         createMockDashboardUpdatedEvent('attachment-1', 'original-dashboard-id')
       );
+      await jest.advanceTimersByTimeAsync(0);
       expect(mockApi1.setState).not.toHaveBeenCalled();
       expect(deps.toasts.addInfo).toHaveBeenCalledTimes(1);
       cleanup1?.();
@@ -654,6 +656,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
         'conversation-1',
         createMockDashboardUpdatedEvent('attachment-1', 'same-dashboard-id')
       );
+      await jest.advanceTimersByTimeAsync(0);
       expect(mockApi2.setState).toHaveBeenCalled();
       cleanup2?.();
     });

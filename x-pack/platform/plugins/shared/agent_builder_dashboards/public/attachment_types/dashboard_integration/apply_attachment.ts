@@ -60,13 +60,13 @@ const waitForPanelsToLoad = async (api: DashboardApi): Promise<void> => {
 
 /**
  * Whether the dashboard shows the attachment data, that is whether applying it would change
- * nothing under the dashboard's unsaved-changes comparators, which each panel provides.
+ * nothing under the comparison rules each panel's embeddable definition registers.
  */
-export const isAttachmentShownInDashboard = (
+export const isAttachmentShownInDashboard = async (
   api: DashboardApi,
   { comparableState }: DashboardSnapshot,
   data: DashboardAttachmentData
-): boolean => {
+): Promise<boolean> => {
   const attachmentState = getComparableAttachmentState(data);
   const { refresh_interval: refreshInterval } = comparableState;
   // applying an attachment without a refresh interval keeps the dashboard's own
@@ -74,7 +74,7 @@ export const isAttachmentShownInDashboard = (
     attachmentState.refresh_interval || !refreshInterval
       ? attachmentState
       : { ...attachmentState, refresh_interval: refreshInterval };
-  return isEmpty(api.diffStates(baseline, comparableState));
+  return isEmpty(await api.diffStates(baseline, comparableState));
 };
 
 /**
@@ -93,7 +93,7 @@ export const applyAttachmentToDashboard = ({
 }): Promise<void> =>
   store.queueApply(async () => {
     store.setLinkedAttachmentId(api, attachment.id);
-    if (isAttachmentShownInDashboard(api, getDashboardSnapshot(api), attachment.data)) {
+    if (await isAttachmentShownInDashboard(api, getDashboardSnapshot(api), attachment.data)) {
       return;
     }
 

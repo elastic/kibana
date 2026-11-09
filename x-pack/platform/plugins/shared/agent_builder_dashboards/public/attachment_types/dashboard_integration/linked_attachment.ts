@@ -14,7 +14,7 @@ import type { AppliedAttachmentsStore } from './applied_attachments_store';
  * Finds the conversation attachment that stands for the open dashboard, so its changes become
  * versions of that attachment instead of a new one.
  */
-export const getLinkedAttachment = ({
+export const getLinkedAttachment = async ({
   api,
   store,
   attachments,
@@ -26,7 +26,7 @@ export const getLinkedAttachment = ({
   attachments: DashboardAttachment[];
   dashboard: DashboardSnapshot;
   draftAttachmentId: string;
-}): DashboardAttachment | undefined => {
+}): Promise<DashboardAttachment | undefined> => {
   const dashboardId = api.savedObjectId$.getValue();
   if (dashboardId) {
     const savedAttachment = attachments.find(({ origin }) => origin === dashboardId);
@@ -43,9 +43,11 @@ export const getLinkedAttachment = ({
   }
 
   // a reloaded or newly opened dashboard that shows an attachment not saved to another dashboard
-  const shownAttachment = attachments.find(
-    ({ origin, data }) => !origin && isAttachmentShownInDashboard(api, dashboard, data)
+  const attachmentsWithoutOrigin = attachments.filter(({ origin }) => !origin);
+  const shownFlags = await Promise.all(
+    attachmentsWithoutOrigin.map(({ data }) => isAttachmentShownInDashboard(api, dashboard, data))
   );
+  const shownAttachment = attachmentsWithoutOrigin.find((_, index) => shownFlags[index]);
   if (shownAttachment) {
     return shownAttachment;
   }
@@ -55,8 +57,7 @@ export const getLinkedAttachment = ({
     return undefined;
   }
   // an unsaved dashboard can only stand for an attachment without an origin, when there is one
-  const unsavedAttachments = attachments.filter(({ origin }) => !origin);
-  return unsavedAttachments.length === 1 ? unsavedAttachments[0] : undefined;
+  return attachmentsWithoutOrigin.length === 1 ? attachmentsWithoutOrigin[0] : undefined;
 };
 
 /** Whether the open dashboard is a new one without panels, so applying an attachment loses nothing. */
