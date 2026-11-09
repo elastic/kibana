@@ -108,6 +108,7 @@ export function registerOverrideRoutes(
           ...current,
           [flagKey]: value,
         }));
+        logger.warn(`Feature flag overrides: persisted "${flagKey}" = ${JSON.stringify(value)}`);
         commitRuntimeOverrides(overrides);
         return response.ok({ body: { ok: true as const } });
       } catch (error) {
@@ -138,6 +139,7 @@ export function registerOverrideRoutes(
           delete next[flagKey];
           return next;
         });
+        logger.warn(`Feature flag overrides: removed "${flagKey}"`);
         commitRuntimeOverrides(overrides);
         return response.ok({ body: { ok: true as const } });
       } catch (error) {
@@ -161,6 +163,7 @@ export function registerOverrideRoutes(
 
       try {
         const overrides = await updateStoredOverrides(repository, () => ({}));
+        logger.warn('Feature flag overrides: cleared all runtime overrides');
         commitRuntimeOverrides(overrides);
         return response.ok({ body: { ok: true as const } });
       } catch (error) {

@@ -24,6 +24,7 @@ import {
 } from '@openfeature/server-sdk';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { configServiceMock } from '@kbn/config-mocks';
+import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { FeatureFlagsService, type InternalFeatureFlagsStart } from '..';
 import type { FeatureFlagsConfig } from './feature_flags_config';
 import {
@@ -36,6 +37,7 @@ describe('FeatureFlagsService Server', () => {
   let featureFlagsService: FeatureFlagsService;
   let featureFlagsClient: Client;
   let config$: BehaviorSubject<FeatureFlagsConfig>;
+  let logger: MockedLogger;
 
   beforeEach(() => {
     const getClientSpy = jest.spyOn(OpenFeature, 'getClient');
@@ -48,9 +50,11 @@ describe('FeatureFlagsService Server', () => {
       },
     });
     mockedConfigService.atPath.mockReturnValue(config$);
+    logger = loggerMock.create();
     featureFlagsService = new FeatureFlagsService(
       mockCoreContext.create({
         configService: mockedConfigService,
+        logger,
       })
     );
     featureFlagsClient = getClientSpy.mock.results[0].value;
@@ -812,6 +816,70 @@ describe('FeatureFlagsService Server', () => {
 
       expect(setup.getOverrides()).toEqual(expect.objectContaining({ 'runtime-only': 'pinned' }));
       expect(setup.getOverrides()['runtime-only']).not.toBe('stale');
+    });
+
+    test('warns when a runtime override is persisted and stays quiet when the write fails', async () => {
+      jest.useFakeTimers();
+      const { repository, router } = startWithRepository();
+      repository.get.mockRejectedValue(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(
+          FEATURE_FLAGS_OVERRIDES_SAVED_OBJECT_TYPE,
+          FEATURE_FLAGS_OVERRIDES_SAVED_OBJECT_ID
+        )
+      );
+      repository.create.mockResolvedValue(savedObject({}, 'v1'));
+      repository.create.mockRejectedValueOnce(new Error('disk full'));
+      await jest.advanceTimersByTimeAsync(0);
+
+      const persistedWarnings = () =>
+        loggerMock
+          .collect(logger)
+          .warn.map(([message]) => String(message))
+          .filter((message) => message.startsWith('Feature flag overrides:'));
+
+      const put = findRoute(router, 'put', `${FEATURE_FLAGS_OVERRIDES_API_PATH}/{flagKey}`);
+      const remove = findRoute(router, 'delete', `${FEATURE_FLAGS_OVERRIDES_API_PATH}/{flagKey}`);
+      const clear = findRoute(router, 'delete', FEATURE_FLAGS_OVERRIDES_API_PATH);
+      const failed = mockRouter.createResponseFactory();
+
+      await expect(
+        put.handler(
+          {},
+          mockRouter.createKibanaRequest({
+            method: 'put',
+            params: { flagKey: 'my-flag' },
+            body: { value: 'on' },
+          }),
+          failed
+        )
+      ).rejects.toThrow('disk full');
+      expect(persistedWarnings()).toEqual([]);
+
+      const response = mockRouter.createResponseFactory();
+      await put.handler(
+        {},
+        mockRouter.createKibanaRequest({
+          method: 'put',
+          params: { flagKey: 'my-flag' },
+          body: { value: 'on' },
+        }),
+        response
+      );
+      await remove.handler(
+        {},
+        mockRouter.createKibanaRequest({
+          method: 'delete',
+          params: { flagKey: 'my-flag' },
+        }),
+        response
+      );
+      await clear.handler({}, mockRouter.createKibanaRequest({ method: 'delete' }), response);
+
+      expect(persistedWarnings()).toEqual([
+        'Feature flag overrides: persisted "my-flag" = "on"',
+        'Feature flag overrides: removed "my-flag"',
+        'Feature flag overrides: cleared all runtime overrides',
+      ]);
     });
   });
 });
