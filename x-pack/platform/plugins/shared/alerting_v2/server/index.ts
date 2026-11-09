@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ContainerModule } from 'inversify';
+import { KibanaContainerModule } from '@kbn/core-di';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
 import type { PluginConfig } from './config';
 import { configSchema } from './config';
@@ -28,7 +28,7 @@ export const config: PluginConfigDescriptor<PluginConfig> = {
   },
 };
 
-const pluginModule = new ContainerModule((options) => {
+const pluginModule = new KibanaContainerModule((options) => {
   bindOnSetup(options);
   bindArtifactTypes(options);
   bindAgentBuilder(options);
@@ -56,6 +56,7 @@ export type {
 export type { ArtifactTypeDefinition, ArtifactReferenceDescriptor } from './lib/artifact_types';
 export type { FindRulesArgs, CreateRulesClientOptions } from './lib/rules_client';
 export type { FindActionPoliciesArgs } from './lib/action_policy_client';
+export type { AlertStatusChangedOptIn } from './lib/alert_status_changed';
 
 /**
  * Public catalog of machine-readable error codes emitted by alerting v2 HTTP

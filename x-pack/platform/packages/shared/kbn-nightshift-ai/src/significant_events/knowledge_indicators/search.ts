@@ -5,18 +5,25 @@
  * 2.0.
  */
 
-import { compact, intersection, isString, uniq } from 'lodash';
-import type { Feature, QueryLink } from '@kbn/significant-events-schema';
+import { chunk, compact, intersection, isString, uniq } from 'lodash';
+import {
+  groupFeaturesAcrossSources,
+  type AggregatedFeature,
+  type Feature,
+  type QueryLink,
+} from '@kbn/significant-events-schema';
 import type {
   KnowledgeIndicator,
   KnowledgeIndicatorFeature,
   KnowledgeIndicatorQuery,
   SearchKnowledgeIndicatorsInput,
   SearchKnowledgeIndicatorsOutput,
+  TopologySeedResolution,
 } from './types';
 import { featureToKnowledgeIndicatorFeature, queryLinkToKnowledgeIndicatorQuery } from './mappers';
 
 export const DEFAULT_SEARCH_KNOWLEDGE_INDICATORS_PER_PAGE = 50;
+const FEATURE_ID_FETCH_BATCH_SIZE = 5_000;
 
 interface NormalizedParams {
   searchText: string | undefined;
@@ -34,6 +41,7 @@ const isQueryIndicator = (ki: KnowledgeIndicator): ki is KnowledgeIndicatorQuery
 
 // Collects all source/target endpoints of dependency features that reference any of the seed IDs.
 // Called once per filter pass so entity expansion doesn't re-scan the indicator list per indicator.
+// Copies folded into one row may disagree on endpoints, so every instance is inspected.
 function buildConnectedEndpoints(
   indicators: KnowledgeIndicator[],
   featureIds: Set<string>
@@ -41,21 +49,23 @@ function buildConnectedEndpoints(
   const endpoints = new Set<string>();
   for (const ki of indicators) {
     if (!isFeatureIndicator(ki) || ki.feature.type !== 'dependency') continue;
-    const { source, target } = ki.feature.properties;
-    if (
-      (isString(source) && featureIds.has(source)) ||
-      (isString(target) && featureIds.has(target)) ||
-      featureIds.has(ki.feature.id)
-    ) {
-      if (isString(source)) endpoints.add(source);
-      if (isString(target)) endpoints.add(target);
+    for (const { id, properties } of ki.feature.instances) {
+      const { source, target } = properties;
+      if (
+        (isString(source) && featureIds.has(source)) ||
+        (isString(target) && featureIds.has(target)) ||
+        featureIds.has(id)
+      ) {
+        if (isString(source)) endpoints.add(source);
+        if (isString(target)) endpoints.add(target);
+      }
     }
   }
   return endpoints;
 }
 
-function featureMatchesTopology(
-  { feature }: KnowledgeIndicatorFeature,
+function instanceMatchesTopology(
+  feature: Feature,
   featureIds: Set<string>,
   connectedEndpoints: Set<string>
 ): boolean {
@@ -77,6 +87,15 @@ function featureMatchesTopology(
   return false;
 }
 
+const featureMatchesTopology = (
+  { feature }: KnowledgeIndicatorFeature,
+  featureIds: Set<string>,
+  connectedEndpoints: Set<string>
+): boolean =>
+  feature.instances.some((instance) =>
+    instanceMatchesTopology(instance, featureIds, connectedEndpoints)
+  );
+
 /** Orders sources by slug, which people read, and falls back to the id for unknown sources. */
 type SourceSortKey = (sourceId: string) => string;
 
@@ -88,6 +107,10 @@ const compareFeatures = (
   const byConfidence = (next.feature.confidence ?? 0) - (current.feature.confidence ?? 0);
   if (byConfidence !== 0) {
     return byConfidence;
+  }
+  const bySourceCount = next.feature.sources.length - current.feature.sources.length;
+  if (bySourceCount !== 0) {
+    return bySourceCount;
   }
   const bySource = sourceSortKey(current.feature.source_id).localeCompare(
     sourceSortKey(next.feature.source_id)
@@ -155,6 +178,7 @@ async function fetchFeatureIndicators({
   searchText,
   featureTypes,
   featureIds,
+  selectedFeatureUuids,
   getFeatures,
   onFeatureFetchError,
 }: {
@@ -162,6 +186,7 @@ async function fetchFeatureIndicators({
   searchText: string | undefined;
   featureTypes: SearchKnowledgeIndicatorsInput['feature_types'];
   featureIds: string[] | undefined;
+  selectedFeatureUuids: string[] | undefined;
   getFeatures: (
     sourceId: string,
     options: {
@@ -172,20 +197,38 @@ async function fetchFeatureIndicators({
   ) => Promise<Feature[]>;
   onFeatureFetchError?: (sourceId: string, error: unknown) => void;
 }): Promise<KnowledgeIndicatorFeature[]> {
-  const results = await Promise.allSettled(
-    sourceIds.map((sourceId) => getFeatures(sourceId, { searchText, featureTypes, featureIds }))
+  const featureIdBatches =
+    featureIds === undefined ? [undefined] : chunk(featureIds, FEATURE_ID_FETCH_BATCH_SIZE);
+  const requests = sourceIds.flatMap((sourceId) =>
+    featureIdBatches.map((batch) => ({
+      sourceId,
+      promise: getFeatures(sourceId, {
+        searchText,
+        featureTypes,
+        featureIds: batch,
+      }),
+    }))
   );
+  const results = await Promise.allSettled(requests.map(({ promise }) => promise));
 
-  const indicators: KnowledgeIndicatorFeature[] = [];
+  const features: Feature[] = [];
   results.forEach((result, index) => {
     if (result.status === 'rejected') {
-      onFeatureFetchError?.(sourceIds[index], result.reason);
+      onFeatureFetchError?.(requests[index].sourceId, result.reason);
       return;
     }
-    result.value.forEach((feature) => indicators.push(featureToKnowledgeIndicatorFeature(feature)));
+    features.push(...result.value);
   });
 
-  return indicators;
+  const selected = new Set(selectedFeatureUuids);
+  return groupFeaturesAcrossSources(features)
+    .map((feature): AggregatedFeature => {
+      const selectedInstance = feature.instances.find(({ uuid }) => selected.has(uuid));
+      return selectedInstance
+        ? { ...selectedInstance, sources: feature.sources, instances: feature.instances }
+        : feature;
+    })
+    .map(featureToKnowledgeIndicatorFeature);
 }
 
 async function fetchQueryIndicators(
@@ -212,20 +255,47 @@ async function fetchQueryIndicators(
   return links.map(queryLinkToKnowledgeIndicatorQuery);
 }
 
+type FeatureIdMatcher =
+  | { mode: 'snapshot'; featureIds: Set<string> }
+  | { mode: 'in_memory'; featureIds: Set<string>; connectedEndpoints: Set<string> };
+
+function buildFeatureIdMatcher(
+  indicators: KnowledgeIndicator[],
+  params: SearchKnowledgeIndicatorsInput,
+  expandedFeatureIds: string[] | undefined
+): FeatureIdMatcher | undefined {
+  if (expandedFeatureIds) {
+    return { mode: 'snapshot', featureIds: new Set(expandedFeatureIds) };
+  }
+  if (!params.feature_ids?.length) {
+    return undefined;
+  }
+  const featureIds = new Set(params.feature_ids);
+  return {
+    mode: 'in_memory',
+    featureIds,
+    connectedEndpoints: buildConnectedEndpoints(indicators, featureIds),
+  };
+}
+
+function featureMatchesIds(indicator: KnowledgeIndicatorFeature, matcher: FeatureIdMatcher) {
+  return matcher.mode === 'snapshot'
+    ? matcher.featureIds.has(indicator.feature.id)
+    : featureMatchesTopology(indicator, matcher.featureIds, matcher.connectedEndpoints);
+}
+
 function filterIndicators(
   indicators: KnowledgeIndicator[],
-  params: SearchKnowledgeIndicatorsInput
+  params: SearchKnowledgeIndicatorsInput,
+  expandedFeatureIds: string[] | undefined
 ): KnowledgeIndicator[] {
-  const featureIdSet = params.feature_ids?.length ? new Set(params.feature_ids) : undefined;
-  const connectedEndpoints = featureIdSet
-    ? buildConnectedEndpoints(indicators, featureIdSet)
-    : new Set<string>();
+  const matcher = buildFeatureIdMatcher(indicators, params, expandedFeatureIds);
 
   return indicators.filter((indicator) => {
     if (isFeatureIndicator(indicator)) {
       return (
         (!params.feature_types?.length || params.feature_types.includes(indicator.feature.type)) &&
-        (!featureIdSet || featureMatchesTopology(indicator, featureIdSet, connectedEndpoints))
+        (!matcher || featureMatchesIds(indicator, matcher))
       );
     }
 
@@ -255,12 +325,17 @@ export async function searchKnowledgeIndicators({
   getSourceSlug,
   getFeatures,
   getQueries,
+  resolveTopologySeeds,
   onFeatureFetchError,
   params,
 }: {
   getSourceIds(): Promise<string[]>;
   /** Slug of a source id, used to order results. Ids sort as is when it is omitted. */
   getSourceSlug?(sourceId: string): string | undefined;
+  resolveTopologySeeds(
+    seedIds: string[],
+    sourceIds: string[]
+  ): Promise<TopologySeedResolution | undefined>;
   getFeatures(
     sourceId: string,
     options: {
@@ -301,19 +376,25 @@ export async function searchKnowledgeIndicators({
     };
   }
 
-  // Step 3: Fetch features.
+  const seedIds = params.feature_ids?.length ? uniq(params.feature_ids) : undefined;
+  const topologyResolution =
+    normalized.includeFeatures && seedIds
+      ? await resolveTopologySeeds(seedIds, sourceIds)
+      : undefined;
+  const expandedFeatureIds = topologyResolution?.featureIds;
+
   const features = normalized.includeFeatures
     ? await fetchFeatureIndicators({
         sourceIds,
         searchText: normalized.searchText,
         featureTypes: params.feature_types,
-        featureIds: params.feature_ids,
+        featureIds: expandedFeatureIds ?? (normalized.searchText ? seedIds : undefined),
+        selectedFeatureUuids: topologyResolution?.selectedFeatureUuids,
         getFeatures,
         onFeatureFetchError,
       })
     : [];
 
-  // Step 4: Fetch queries.
   const queries = normalized.includeQueries
     ? await fetchQueryIndicators(
         sourceIds,
@@ -328,9 +409,8 @@ export async function searchKnowledgeIndicators({
       )
     : [];
 
-  // Step 5: Filter defensively, sort deterministically, and paginate.
   const sorted = sortIndicators(
-    filterIndicators([...features, ...queries], params),
+    filterIndicators([...features, ...queries], params, expandedFeatureIds),
     (sourceId) => getSourceSlug?.(sourceId) ?? sourceId
   );
   const offset = (normalized.page - 1) * normalized.perPage;

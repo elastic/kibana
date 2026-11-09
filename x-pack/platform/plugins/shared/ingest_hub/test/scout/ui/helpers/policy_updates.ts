@@ -19,8 +19,8 @@ const template = (name: string) => ({
   deployment_modes: { agentless: { enabled: true } },
   inputs: [{ type: 'aws-s3' }],
 });
-// guardduty has an optional setting, so its settings flyout (where the namespace is set) can be
-// opened; elb has none and stays untouched.
+// guardduty has an optional setting, so its settings flyout can be opened; elb has none and stays
+// untouched.
 const dataStream = (name: string, vars: unknown[] = []) => ({
   path: `${name}_logs`,
   type: 'logs',

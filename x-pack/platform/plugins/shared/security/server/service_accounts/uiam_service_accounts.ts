@@ -6,24 +6,33 @@
  */
 
 import Boom from '@hapi/boom';
+import moment from 'moment';
 
 import type { AuthenticatedUser, KibanaRequest, Logger } from '@kbn/core/server';
 import type { AuthenticatedPrincipal } from '@kbn/core-security-common';
 import { getAuthenticatedPrincipal } from '@kbn/core-security-common';
-import type { CreateServiceAccountServerParams, ServiceAccount } from '@kbn/core-security-server';
-import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
+import type {
+  CreateServiceAccountServerParams,
+  ServiceAccount,
+  ServiceAccountSummary,
+} from '@kbn/core-security-server';
+import { HTTPAuthorizationHeader, UIAM_ERROR_CODES } from '@kbn/core-security-server';
 import type {
   AuditLogger,
   AuditServiceSetup,
   CheckPrivilegesWithRequest,
 } from '@kbn/security-plugin-types-server';
-import { z } from '@kbn/zod';
+import { lazySchema, z } from '@kbn/zod';
 
 import { buildAssumableBy } from './assumable_by';
 import { ensureClusterPrivilege } from './cluster_privilege';
 import { parseCreateServiceAccountParams } from './create_params';
+import { ServiceAccountCredentialRefusedError } from './credential_refused_error';
 import { toDescriptionField } from './description_field';
-import type { CreateServiceAccountFakeRequestParams } from './fake_requests';
+import type {
+  CreateServiceAccountFakeRequestParams,
+  ServiceAccountMintedToken,
+} from './fake_requests';
 import { SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS, ServiceAccountFakeRequests } from './fake_requests';
 import { getPlatformAssumerServiceAccountIds } from './platform_assumers';
 import { buildRoleAssignments, readApplicationRoles } from './role_assignments';
@@ -63,7 +72,7 @@ import {
  * UIAM identifies a user by the numeric id that is also their Kibana username on serverless, so
  * the id maps straight onto the binder's `username`. That id is all the binder can say, which is
  * why the creator's own name comes along as `displayName`: nothing downstream could resolve it
- * from the id.
+ * from the id. UIAM names an API key by its description, and does not say who owns it.
  */
 const toCreatedBy = (creator: UiamServiceAccountCreator): ServiceAccountDirectoryCreator => {
   if (creator.type === 'user') {
@@ -75,7 +84,7 @@ const toCreatedBy = (creator: UiamServiceAccountCreator): ServiceAccountDirector
     type: 'api_key',
     apiKeyId: creator.id,
     variant: 'uiam',
-    ...(creator.description ? { displayName: creator.description } : {}),
+    ...(creator.description ? { apiKeyName: creator.description } : {}),
   };
 };
 
@@ -105,13 +114,30 @@ const toDirectoryEntry = (
  * Validates the token exchange payload UIAM returns, so that a shape change fails loudly here
  * rather than leaking partially-undefined objects to consumers. Verified against image
  * `docker.elastic.co/cloud-ci/uiam:git-a67a2f75a615`, whose exchange response carries `token`
- * plus an `expires_in` ISO-8601 duration (currently `PT5M`) that is intentionally stripped:
- * token freshness is managed locally and nothing should key off the upstream TTL.
+ * plus an `expires_in` ISO-8601 duration (currently `PT5M`). The duration is advisory and read
+ * leniently, so a change to its type or format can never fail an exchange: a token whose lifetime
+ * is unknown falls back to age-based refresh ahead of a self call.
  */
-const exchangeTokenResponseSchema = z.object({
-  // codeql[js/kibana/unbounded-string-in-schema] upstream response — not caller-controlled input
-  token: z.string().min(1).max(SERVICE_ACCOUNT_TOKEN_MAX_LENGTH),
-});
+const exchangeTokenResponseSchema = lazySchema(() =>
+  z.object({
+    // codeql[js/kibana/unbounded-string-in-schema] upstream response — not caller-controlled input
+    token: z.string().min(1).max(SERVICE_ACCOUNT_TOKEN_MAX_LENGTH),
+    expires_in: z.unknown().optional(),
+  })
+);
+
+/**
+ * Reads an ISO-8601 duration such as `PT5M` in milliseconds, or `undefined` for anything else.
+ * Bare numbers are refused rather than guessed at: `moment` reads `"300"` as 300 milliseconds.
+ */
+const parseIsoDurationMs = (value: unknown): number | undefined => {
+  if (typeof value !== 'string' || value.length > 64 || !value.startsWith('P')) {
+    return undefined;
+  }
+
+  const durationMs = moment.duration(value).asMilliseconds();
+  return Number.isFinite(durationMs) && durationMs > 0 ? durationMs : undefined;
+};
 
 const uiamErrorResponseSchema = z.object({
   error: z.object({ code: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH) }),
@@ -127,16 +153,13 @@ const uiamErrorResponseSchema = z.object({
  * gets a 200 and is limited at runtime instead.
  */
 const CREATE_REFUSALS: Record<string, string> = {
-  // CREATE_SA_RESULTS_IN_NO_PRIVS
-  '0x138916':
+  [UIAM_ERROR_CODES.CREATE_SA_RESULTS_IN_NO_PRIVS]:
     'your credential grants no application roles in this organization. An account is limited to ' +
     "the privileges of both its own roles and its creator's, so it would have none",
-  // ALREADY_DOWNSCOPED
-  '0x91249F':
+  [UIAM_ERROR_CODES.ALREADY_DOWNSCOPED]:
     'the credential making this request is itself downscoped, and an account cannot be downscoped ' +
     'twice. Make the request from a user session',
-  // CREATE_SA_SERVICE_ACCOUNT_NOT_SUPPORTED
-  '0x97E147':
+  [UIAM_ERROR_CODES.SA_SERVICE_ACCOUNT_NOT_SUPPORTED]:
     'a service account cannot create service accounts. Make the request from a user session',
 };
 
@@ -182,10 +205,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       logger,
       // `boundAt` is not consulted: UIAM issues a new id on every create, so a binding can never
       // name a later account than the one it was made for.
-      async (serviceAccountId) => {
-        const { token } = await this.exchangeToken(serviceAccountId);
-        return token;
-      },
+      (serviceAccountId) => this.exchangeToken(serviceAccountId),
       requestLifetimeMs
     );
   }
@@ -360,12 +380,16 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
 
     this.logger.debug(`Attempting to get service account ${id}`);
 
-    let account: UiamServiceAccountDetails;
+    let account: UiamServiceAccountDetails | null;
     try {
       account = await this.uiam.getServiceAccount(id);
     } catch (e) {
-      this.logger.error(`Failed to get service account: ${getDetailedErrorMessage(e)}`);
-      throw getNotFound(id, e) ?? e;
+      this.logger.error(`Failed to get service account [${id}]: ${getDetailedErrorMessage(e)}`);
+      throw e;
+    }
+
+    if (!account) {
+      throw Boom.notFound(`Service account [${id}] was not found`);
     }
 
     // UIAM keeps a revoked account around for a while, but it is gone as far as Kibana is
@@ -376,6 +400,38 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     }
 
     return toDirectoryEntry(this.cloudProjectContext, account);
+  }
+
+  /**
+   * UIAM reads are already authorized against Kibana's certificate rather than the user, so this
+   * is {@link get} without the user's privilege check.
+   */
+  async getSummary(id: string): Promise<ServiceAccountSummary | null> {
+    if (!this.license.isEnabled()) {
+      throw Boom.forbidden(
+        'Cannot get a service account: security features are disabled in Elasticsearch'
+      );
+    }
+
+    let account: UiamServiceAccountDetails | null;
+    try {
+      account = await this.uiam.getServiceAccount(id);
+    } catch (e) {
+      this.logger.error(`Failed to get service account [${id}]: ${getDetailedErrorMessage(e)}`);
+      throw e;
+    }
+
+    if (!account) {
+      return null;
+    }
+
+    if (account.revoked) {
+      this.logger.debug(`Service account [${id}] was found, but it was revoked`);
+      return null;
+    }
+
+    const { name, enabled, assumable } = toDirectoryEntry(this.cloudProjectContext, account);
+    return { id: account.id, name, enabled, assumable };
   }
 
   /**
@@ -433,7 +489,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
    * credential. Deliberately private: the raw credential never leaves this backend — consumers
    * get a fake request bound to it instead.
    */
-  private async exchangeToken(serviceAccountId: string): Promise<{ token: string }> {
+  private async exchangeToken(serviceAccountId: string): Promise<ServiceAccountMintedToken> {
     if (!this.license.isEnabled()) {
       throw Boom.forbidden(
         'Cannot exchange a service account token: security features are disabled in Elasticsearch'
@@ -443,7 +499,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     this.logger.debug(
       `Attempting to exchange service account ${serviceAccountId} for an ephemeral token`
     );
-    let result: { token: string };
+    let result: { token: string; expires_in?: string };
     try {
       result = await this.uiam.exchangeServiceAccountToken(serviceAccountId);
     } catch (e) {
@@ -471,7 +527,8 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       throw new ServiceAccountTokenExchangeError(parsed.error, { retryable: false });
     }
 
-    return parsed.data;
+    const { token, expires_in: expiresIn } = parsed.data;
+    return { token, expiresInMs: parseIsoDurationMs(expiresIn) };
   }
 
   async createFakeRequest(params: CreateServiceAccountFakeRequestParams): Promise<KibanaRequest> {
@@ -491,7 +548,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
   async reauthenticateFakeRequest(
     request: KibanaRequest
   ): Promise<{ authorization: string } | null> {
-    if (!this.fakeRequests.isServiceAccountRequest(request)) {
+    if (!this.fakeRequests.carriesIssuedToken(request)) {
       return null;
     }
 
@@ -505,15 +562,31 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       return null;
     }
   }
+
+  async refreshFakeRequestBeforeUse(
+    request: KibanaRequest,
+    validForMs: number
+  ): Promise<{ authorization: string } | null> {
+    if (!this.fakeRequests.carriesIssuedToken(request)) {
+      return null;
+    }
+
+    try {
+      const token = await this.fakeRequests.refreshTokenBeforeUse(request, validForMs);
+      return { authorization: `Bearer ${token}` };
+    } catch (err) {
+      if (err instanceof ServiceAccountCredentialRefusedError) {
+        throw err;
+      }
+      return null;
+    }
+  }
 }
 
-/** `ORGANIZATION_SERVICE_ACCOUNT_NOT_FOUND` */
-const SERVICE_ACCOUNT_NOT_FOUND_CODE = '0xEDF789';
-
-const TERMINAL_EXCHANGE_CODES = new Set([
-  SERVICE_ACCOUNT_NOT_FOUND_CODE,
-  '0x3B8626', // ORGANIZATION_SERVICE_ACCOUNT_REVOKED
-  '0x93B121', // AUTHZ_DENY
+const TERMINAL_EXCHANGE_CODES = new Set<string>([
+  UIAM_ERROR_CODES.ORGANIZATION_SERVICE_ACCOUNT_NOT_FOUND,
+  UIAM_ERROR_CODES.ORGANIZATION_SERVICE_ACCOUNT_REVOKED,
+  UIAM_ERROR_CODES.AUTHZ_DENY,
 ]);
 const RETRYABLE_EXCHANGE_STATUSES = new Set([408, 429, 500, 502, 503, 504]);
 const RETRYABLE_TRANSPORT_CODES = new Set([
@@ -553,7 +626,8 @@ const getNotFound = (id: string, error: unknown): Boom.Boom | null => {
     return null;
   }
   const parsed = uiamErrorResponseSchema.safeParse(error.output.payload);
-  return parsed.success && parsed.data.error.code === SERVICE_ACCOUNT_NOT_FOUND_CODE
+  return parsed.success &&
+    parsed.data.error.code === UIAM_ERROR_CODES.ORGANIZATION_SERVICE_ACCOUNT_NOT_FOUND
     ? Boom.notFound(`Service account [${id}] was not found`)
     : null;
 };

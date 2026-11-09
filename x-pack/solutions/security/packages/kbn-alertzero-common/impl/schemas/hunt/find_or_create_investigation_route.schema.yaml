@@ -14,9 +14,12 @@ paths:
         or verifies an existing one on a 409 rather than trusting the
         create-time race alone. `created` tells the caller which path ran, so
         a rerun's trigger message can say it resumed the Investigation
-        instead of claiming to have opened it again. Best-effort report facts
-        for the trigger message are included when the report can be read;
-        their absence never fails the call.
+        instead of claiming to have opened it again. A report that is not
+        visible in the request space, because it does not exist or exists only
+        in another space, is refused with a 404 and no Investigation is
+        created. For a visible report, best-effort report facts for the
+        trigger message are included when they can be read; a failed read only
+        omits them and never fails the call.
       summary: Find or create a Hunt Watch Investigation
       tags:
         - AlertZero API
@@ -70,8 +73,8 @@ paths:
                     type: object
                     description: >-
                       Descriptive facts about the report for the trigger
-                      message. Absent when the report could not be read in
-                      this space.
+                      message. Absent when the report's facts could not be read
+                      or the read returned nothing.
                     required: [iocCount, techniques]
                     properties:
                       title:
@@ -107,3 +110,6 @@ paths:
                       sourceName: Example Threat Intel Feed
                       iocCount: 12
                       techniques: [T1059, T1055]
+        '404':
+          description: >-
+            The report is not visible in the request space. No Investigation is created.

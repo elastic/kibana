@@ -5,20 +5,17 @@
  * 2.0.
  */
 
-import { PluginStart } from '@kbn/core-di';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { isSavedObjectErrorResult, SavedObjectsUtils } from '@kbn/core/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { inject, injectable } from 'inversify';
 import type {
   ActionPolicySavedObjectAttributes,
   PartiallyUpdateableActionPolicyAttributes,
 } from '../../../saved_objects';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE } from '../../../saved_objects';
-import type { AlertingServerStartDependencies } from '../../../types';
 import { EncryptedSavedObjectsClientToken } from '../../dispatcher/steps/dispatch_step_tokens';
-import { spaceIdToNamespace } from '../../space_id_to_namespace';
+import { SpacesService } from '../spaces_service/spaces_service';
 import { ActionPolicySavedObjectsClientToken } from './tokens';
 import type {
   ActionPolicyRoutingTagSource,
@@ -43,8 +40,7 @@ export class ActionPolicySavedObjectService implements ActionPolicySavedObjectSe
   constructor(
     @inject(ActionPolicySavedObjectsClientToken)
     private readonly client: SavedObjectsClientContract,
-    @inject(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'))
-    private readonly spaces: SpacesPluginStart,
+    @inject(SpacesService) private readonly spacesService: SpacesService,
     @inject(EncryptedSavedObjectsClientToken)
     private readonly encryptedSavedObjectsClient: EncryptedSavedObjectsClient
   ) {}
@@ -77,7 +73,7 @@ export class ActionPolicySavedObjectService implements ActionPolicySavedObjectSe
     attributes: ActionPolicySavedObjectAttributes;
     version?: string;
   }> {
-    const namespace = spaceIdToNamespace(this.spaces, spaceId);
+    const namespace = this.spacesService.spaceIdToNamespace(spaceId);
     const doc = await this.client.get<ActionPolicySavedObjectAttributes>(
       ACTION_POLICY_SAVED_OBJECT_TYPE,
       id,
@@ -165,7 +161,7 @@ export class ActionPolicySavedObjectService implements ActionPolicySavedObjectSe
       return [];
     }
 
-    const namespace = spaceIdToNamespace(this.spaces, spaceId);
+    const namespace = this.spacesService.spaceIdToNamespace(spaceId);
     const result = await this.client.bulkGet<ActionPolicySavedObjectAttributes>(
       ids.map((id) => ({ type: ACTION_POLICY_SAVED_OBJECT_TYPE, id })),
       namespace ? { namespace } : undefined
@@ -186,7 +182,12 @@ export class ActionPolicySavedObjectService implements ActionPolicySavedObjectSe
 
   public async findAllDecrypted(params?: {
     filter?: { enabled: boolean };
+    spaceIds?: readonly string[];
   }): Promise<ActionPolicySavedObjectBulkGetItem[]> {
+    if (params?.spaceIds?.length === 0) {
+      return [];
+    }
+
     const kqlFilter =
       params?.filter?.enabled !== undefined
         ? `${ACTION_POLICY_SAVED_OBJECT_TYPE}.attributes.enabled: ${params.filter.enabled}`
@@ -196,7 +197,8 @@ export class ActionPolicySavedObjectService implements ActionPolicySavedObjectSe
       await this.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<ActionPolicySavedObjectAttributes>(
         {
           type: ACTION_POLICY_SAVED_OBJECT_TYPE,
-          namespaces: ['*'],
+          // A space id is already its SO namespace string, `default` included.
+          namespaces: params?.spaceIds ? [...params.spaceIds] : ['*'],
           perPage: 1000,
           ...(kqlFilter ? { filter: kqlFilter } : {}),
         }

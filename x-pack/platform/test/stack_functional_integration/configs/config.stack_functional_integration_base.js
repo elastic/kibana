@@ -106,7 +106,12 @@ function logAll(log) {
   log.info(`WORKSPACE in config file ${process.env.WORKSPACE}`);
   log.info(`INTEGRATION_TEST_ROOT = ${INTEGRATION_TEST_ROOT}`);
   log.info(`stateFilePath = ${stateFilePath}`);
-  log.info(`servers data: ${JSON.stringify(servers(), null, 2)}`);
+  const { kibana, elasticsearch } = servers();
+  log.info(`Kibana URL = ${serverUrl(kibana)}`);
+  log.info(`Elasticsearch URL = ${serverUrl(elasticsearch)}`);
+}
+function serverUrl({ protocol, hostname, port }) {
+  return `${protocol}://${hostname}:${port}`;
 }
 function servers() {
   return {

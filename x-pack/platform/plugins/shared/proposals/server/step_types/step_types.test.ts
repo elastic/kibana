@@ -595,8 +595,8 @@ describe('proposals.updateProposal step', () => {
       })
     );
 
-    // Post-gate the execution runs as the approver, so the request is the
-    // better attribution.
+    // The gate resolves the answer in a child that runs as the approver, so
+    // the request is the better attribution, and any workflow can pass a name.
     expect(update).toHaveBeenCalledWith(
       expect.objectContaining({ decidedBy: resolvedUser }),
       SPACE_ID
@@ -626,7 +626,7 @@ describe('proposals.updateProposal step', () => {
       request: FAKE_REQUEST,
     });
     expect(update).toHaveBeenCalledWith(
-      expect.objectContaining({ decidedBy: workerUser }),
+      expect.objectContaining({ decidedBy: workerUser, decisionMode: 'auto' }),
       SPACE_ID
     );
   });
@@ -635,7 +635,7 @@ describe('proposals.updateProposal step', () => {
     const update = jest
       .fn()
       .mockResolvedValue({ id: 'proposal-1', status: 'executing', decision: 'approved' });
-    // The gate still runs as the Worker's service account, so its request names no person.
+    // A service account's request names no person.
     resolveUser.mockResolvedValueOnce(undefined);
 
     await updateDefinition(update).handler(
@@ -651,6 +651,7 @@ describe('proposals.updateProposal step', () => {
     expect(update).toHaveBeenCalledWith(
       expect.objectContaining({
         decidedBy: { username: 'analyst', fullName: null, email: null },
+        decisionMode: 'manual',
       }),
       SPACE_ID
     );
@@ -687,7 +688,7 @@ describe('proposals.updateProposal step', () => {
     );
 
     expect(update).toHaveBeenCalledWith(
-      expect.objectContaining({ decidedBy: undefined }),
+      expect.objectContaining({ decidedBy: undefined, decisionMode: undefined }),
       SPACE_ID
     );
     expect(resolveUser).not.toHaveBeenCalled();

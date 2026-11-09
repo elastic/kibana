@@ -55,6 +55,7 @@ export const isolateHostTool = (
               hostName: toolParams.hostName as string | undefined,
               agentId: toolParams.agentId as string | undefined,
             },
+            args: { comment: toolParams.comment as string | undefined },
             context,
             endpointAppContextService,
             requiredPrivilege: 'canIsolateHost',
@@ -82,6 +83,7 @@ export const isolateHostTool = (
         const prepared = await prepareDispatch({
           action: 'isolate',
           params: { hostName: requestedHostName, agentId: requestedAgentId },
+          args: { comment },
           context,
           endpointAppContextService,
           requiredPrivilege: 'canIsolateHost',

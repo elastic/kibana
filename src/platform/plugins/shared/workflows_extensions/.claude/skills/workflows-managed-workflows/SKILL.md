@@ -1,6 +1,6 @@
 ---
 name: workflows-managed-workflows
-description: Register and roll out managed workflows from a Kibana plugin using `@kbn/workflows-extensions` and `@kbn/workflows/managed`. Use when adding or modifying a code-owned workflow definition, `registerManagedWorkflowOwner`, `initManagedWorkflowsClient`, `install` / `uninstall` / `ready`, choosing `lifecycle` / `versionStrategy` / `enablement`, authoring `yaml` vs `yamlTemplate`, space-scoped vs global installs, `getWorkflowStatus`, or `execute`, or reviewing PRs that touch managed workflow definitions or rollout. Always ask for the user's plugin id first to locate the correct plugin and definition file paths.
+description: Register and roll out managed workflows from a Kibana plugin using `@kbn/workflows-extensions` and `@kbn/workflows/managed`. Use when adding or modifying a code-owned workflow definition, `registerManagedWorkflowOwner`, `initManagedWorkflowsClient`, `install` / `uninstall` / `ready` / `disable`, choosing `lifecycle` / `versionStrategy` / `enablement`, authoring `yaml` vs `yamlTemplate`, space-scoped vs global installs, `getWorkflowStatus`, or `execute`, or reviewing PRs that touch managed workflow definitions or rollout. Always ask for the user's plugin id first to locate the correct plugin and definition file paths.
 ---
 
 # Workflows — Managed Workflow Registration
@@ -71,6 +71,7 @@ See [MANAGED_WORKFLOWS.md](../../dev_docs/MANAGED_WORKFLOWS.md) for rationale an
 | Raw request paths       | `kibana.request`, `with.request`, `with.form_data` all skip prefixing. Add `/s/<executing space>/` (usually `{{ workflow.spaceId }}`) |
 | Multi-instance          | Use `workflowIdSuffix` or full `workflowId` — bare id overwrites                        |
 | `execute`               | Real request + requesting user's space in options (not `'*'`)                           |
+| `disable`               | Requestless switch-off of the plugin's own workflow, bound ones included; enabling still needs a `manage_security` user. With `enablement: 'enforced'` the next managed update switches it back on — use `restorable` to keep it off |
 | Templates               | Add representative `values` to `templateRepresentativeValuesById` in registry tests     |
 
 ## Space scoping

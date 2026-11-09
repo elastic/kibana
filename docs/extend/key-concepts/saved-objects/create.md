@@ -13,7 +13,7 @@ Saved object type definitions should live in a `my_plugin/server/saved_objects` 
 The folder should contain one file per type (named after the snake_case type name) and an `index.ts` that exports all types.
 
 ```typescript
-import { SavedObjectsType } from 'src/core/server';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 
 export const dashboardVisualization: SavedObjectsType = {
   name: 'dashboard_visualization', <1>
@@ -67,7 +67,7 @@ Example for the `search` type:
 [search.ts](https://github.com/elastic/kibana/blob/master/src/platform/plugins/shared/saved_search/server/saved_objects/search.ts#L19-L70)
 
 ```typescript
-import { SavedObjectsType } from 'src/core/server';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 // ... other imports
 export const getSavedSearchObjectType: SavedObjectsType = {
   name: 'search',
@@ -143,8 +143,8 @@ export const dashboardVisualization: SavedObjectsType = {
   name: 'dashboard_visualization',
   ...
   mappings: {
+    dynamic: false,
     properties: {
-      dynamic: false,
       metadata: {
         properties: {
           // created_by can be stored but won't be queryable
@@ -261,7 +261,7 @@ You have two options, depending on how much control you need:
 * **Use client, custom HTTP** — Set `hiddenFromHttpApis: true` (and `hidden: false`). The type is available to the Saved Objects client as usual, but not exposed by the global Saved Objects HTTP APIs, so you can implement your own routes.
 
 ```ts
-import { SavedObjectsType } from 'src/core/server';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 
 export const foo: SavedObjectsType = {
   name: 'foo',

@@ -45,7 +45,7 @@ describe('EsqlPreviewSection', () => {
   it('renders the accordion and preview button', () => {
     render(<EsqlPreviewSection {...defaultProps} />);
     expect(screen.getByText('Data source (ES|QL)')).toBeInTheDocument();
-    expect(screen.getByText('Preview data')).toBeInTheDocument();
+    expect(screen.getByText('Search')).toBeInTheDocument();
   });
 
   it('shows the time filter hint on mount when the query has no time field', async () => {
@@ -82,7 +82,7 @@ describe('EsqlPreviewSection', () => {
     mockGetESQLTimeField.mockResolvedValue(undefined);
 
     render(<EsqlPreviewSection {...defaultProps} esqlQuery="FROM logs | LIMIT 10" />);
-    await userEvent.click(screen.getByRole('button', { name: 'Preview data' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Search' }));
     await act(async () => {});
 
     expect(screen.getByText(/connect the query to the dashboard time filter/i)).toBeInTheDocument();

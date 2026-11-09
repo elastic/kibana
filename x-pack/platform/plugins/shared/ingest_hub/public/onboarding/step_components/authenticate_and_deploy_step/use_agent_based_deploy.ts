@@ -6,11 +6,9 @@
  */
 
 import { useCallback, useMemo, useRef, useState } from 'react';
-import useSessionStorage from 'react-use/lib/useSessionStorage';
 
 import { useOnboardingFlow } from '../../onboarding_flow_context';
-import { SERVICE_SETTINGS_SESSION_KEY } from '../service_settings_step/use_service_settings';
-import type { ServiceSettingsPersistedState } from '../service_settings_step/use_service_settings';
+import { useReconciledServiceSettings } from '../service_settings_step/use_reconciled_service_settings';
 import {
   buildAgentBasedTargets,
   deployNewAgentPolicy,
@@ -82,10 +80,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
 
   const { selectedServiceIds } = servicesStep;
 
-  const [serviceSettings] = useSessionStorage<ServiceSettingsPersistedState>(
-    SERVICE_SETTINGS_SESSION_KEY,
-    { globalRegion: '', serviceVars: {} }
-  );
+  const serviceSettings = useReconciledServiceSettings();
 
   const [isDeploying, setIsDeploying] = useState(false);
   // In-memory credential ref — secrets (secret_access_key, session_token) are never persisted.
@@ -103,9 +98,16 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         serviceSettings?.instances ?? [],
         selectedServiceIds,
         servicesMap ?? new Map(),
-        serviceSettings?.serviceVars ?? {}
+        serviceSettings?.serviceVars ?? {},
+        serviceSettings?.namespace
       ),
-    [serviceSettings?.instances, serviceSettings?.serviceVars, selectedServiceIds, servicesMap]
+    [
+      serviceSettings?.instances,
+      serviceSettings?.serviceVars,
+      serviceSettings?.namespace,
+      selectedServiceIds,
+      servicesMap,
+    ]
   );
 
   // true when every target has a package policy and no cleanup is pending. false on pending
@@ -274,6 +276,8 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
 
         const baseOpts = {
           namespace: DEFAULT_NAMESPACE,
+          globalNamespace: serviceSettings?.namespace,
+          policySettings: serviceSettings?.policySettings,
           globalRegion,
           storedServiceVars,
           authenticateAndDeployStep: {
@@ -295,12 +299,15 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         // Clean up package policies for removed services before creating new ones.
         if (hasPendingCleanup) {
           const cleanupOps = await cleanupAgentBasedPolicies({
+            onboardingDeploymentId,
             pendingCleanupPolicyIds: effectivePendingCleanup,
             currentPolicyIdsByInstance: detectAndReviewStep.policyIdsByInstance ?? {},
             instances: serviceSettings?.instances ?? [],
             storedServiceVars,
             globalRegion,
             namespace: DEFAULT_NAMESPACE,
+            globalNamespace: serviceSettings?.namespace,
+            policySettings: serviceSettings?.policySettings,
             authenticateAndDeployStep,
             servicesMap: servicesMap ?? new Map(),
             // Keep the policy's current policy_ids, unless this run also applies a changed agent
@@ -340,10 +347,13 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           shared: ExistingSecretRefs | undefined
         ) =>
           updateAgentBasedPolicy(policyId, ids, {
+            onboardingDeploymentId,
             instances: serviceSettings?.instances ?? [],
             storedServiceVars,
             globalRegion,
             namespace: DEFAULT_NAMESPACE,
+            globalNamespace: serviceSettings?.namespace,
+            policySettings: serviceSettings?.policySettings,
             authenticateAndDeployStep: shared
               ? { ...authenticateAndDeployStep, existingSecretRefs: shared }
               : authenticateAndDeployStep,

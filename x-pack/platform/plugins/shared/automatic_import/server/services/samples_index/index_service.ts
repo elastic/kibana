@@ -12,6 +12,7 @@ import type {
 } from './storage';
 import { automaticImportSamplesIndexName, createIndexAdapter } from './storage';
 import type { OriginalSource } from '../../../common';
+import { UPLOAD_SAMPLES_MAX_LINES } from '../../../common';
 
 export interface AddSamplesToDataStreamParams {
   integrationId: string;
@@ -98,7 +99,7 @@ export class AutomaticImportSamplesIndexService {
           ],
         },
       },
-      size: 500, // TODO: Make this configurable
+      size: UPLOAD_SAMPLES_MAX_LINES,
       track_total_hits: false,
     });
     const samples: string[] = results.hits.hits.map(
