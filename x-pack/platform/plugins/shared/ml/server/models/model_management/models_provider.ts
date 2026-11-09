@@ -55,7 +55,10 @@ import {
   type TrainedModelConfigResponse,
 } from '@kbn/ml-common-types/trained_models';
 import type { MlFeatures } from '../../../common/constants/app';
-import { DEFAULT_TRAINED_MODELS_PAGE_SIZE } from '../../../common/constants/trained_models';
+import {
+  DEFAULT_TRAINED_MODELS_PAGE_SIZE,
+  PIPELINE_SIMULATE_MAX_RESPONSE_BYTES,
+} from '../../../common/constants/trained_models';
 import type { MlClient } from '../../lib/ml_client';
 import type { MLSavedObjectService } from '../../saved_objects';
 import { filterForEnabledFeatureModels } from '../../routes/trained_models';
@@ -460,19 +463,9 @@ export class ModelsProvider {
       docs,
       pipeline: pipelineConfig,
     };
-    let result = {};
-    try {
-      result = await this._client.asCurrentUser.ingest.simulate(simulateRequest);
-    } catch (error) {
-      if (error.statusCode === 404) {
-        // ES returns 404 when there are no pipelines
-        // Instead, we should return an empty response and a 200
-        return result;
-      }
-      throw error;
-    }
-
-    return result;
+    return await this._client.asCurrentUser.ingest.simulate(simulateRequest, {
+      maxResponseSize: PIPELINE_SIMULATE_MAX_RESPONSE_BYTES,
+    });
   }
 
   /**

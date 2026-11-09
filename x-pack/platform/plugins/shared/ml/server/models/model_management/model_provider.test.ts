@@ -461,4 +461,42 @@ describe('modelsProvider', () => {
       expect(mlLog.error).toHaveBeenCalledWith(notFoundError);
     });
   });
+
+  describe('simulatePipeline', () => {
+    const docs = [{ _source: { message: 'hello' } }];
+    const pipeline = { processors: [{ set: { field: 'a', value: 'b' } }] };
+
+    test('passes the 10 MB maxResponseSize option to ingest.simulate', async () => {
+      const simulateResult = {
+        docs: [
+          {
+            doc: {
+              _index: 'idx',
+              _id: '1',
+              _source: { a: 'b' },
+              _ingest: { timestamp: '2026-01-01T00:00:00.000Z' },
+            },
+          },
+        ],
+      };
+      mockClient.asCurrentUser.ingest.simulate.mockResolvedValue(simulateResult);
+
+      const result = await modelService.simulatePipeline(docs, pipeline);
+
+      expect(result).toEqual(simulateResult);
+      expect(mockClient.asCurrentUser.ingest.simulate).toHaveBeenCalledWith(
+        { docs, pipeline },
+        { maxResponseSize: 10 * 1024 * 1024 }
+      );
+    });
+
+    test('rethrows an oversized-response RequestAbortedError', async () => {
+      const abortedError = new errors.RequestAbortedError(
+        'The content length (20000000) is bigger than the maximum allowed string (10485760)'
+      );
+      mockClient.asCurrentUser.ingest.simulate.mockRejectedValue(abortedError);
+
+      await expect(modelService.simulatePipeline(docs, pipeline)).rejects.toThrow(abortedError);
+    });
+  });
 });
