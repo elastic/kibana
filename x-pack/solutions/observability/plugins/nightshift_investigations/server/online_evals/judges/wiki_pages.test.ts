@@ -44,6 +44,7 @@ describe('wiki page judges', () => {
         expect.objectContaining({
           name: 'wiki_pages_read',
           score: 2,
+          explanation: 'Number of distinct pages the agent read',
           metadata: {
             page_ids: ['wiki_service_checkout', 'wiki_runbook_pool-exhaustion'],
           },
