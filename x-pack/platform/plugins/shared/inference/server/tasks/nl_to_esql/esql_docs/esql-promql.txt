@@ -116,21 +116,12 @@ PROMQL index=k8s step=1h result=(sum by (cluster) (network.cost))
 | SORT result
 ```
 
-result:double | step:datetime | cluster:keyword  
-15.875 | 2024-05-10T00:00:00.000Z | staging  
-18.625 | 2024-05-10T00:00:00.000Z | prod  
-26.5 | 2024-05-10T00:00:00.000Z | qa
-
 Filter out the `prod` cluster in the PromQL selector and return a named `cost` column:
 
 ```esql
 PROMQL index=k8s step=1h cost=(max by (cluster) (network.total_bytes_in{cluster!="prod"}))
 | SORT cluster
 ```
-
-cost:double | step:datetime | cluster:keyword  
-10797.0 | 2024-05-10T00:00:00.000Z | qa  
-7403.0 | 2024-05-10T00:00:00.000Z | staging
 
 Post-process PromQL results with aggregation and sorting commands:
 
@@ -139,11 +130,6 @@ PROMQL index=k8s step=1h bytes=(max by (cluster) (network.bytes_in))
 | STATS max_bytes=MAX(bytes) BY cluster
 | SORT cluster
 ```
-
-max_bytes:double | cluster:keyword  
-931.0 | prod  
-972.0 | qa  
-238.0 | staging
 
 Run an ad-hoc query with explicit `start` and `end` times and inferred step:
 

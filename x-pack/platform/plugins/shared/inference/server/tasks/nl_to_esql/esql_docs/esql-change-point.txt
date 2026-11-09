@@ -53,8 +53,6 @@ ROW key=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25]
 | EVAL pvalue = ROUND(pvalue, 6)
 ```
 
-key:integer | value:integer | type:keyword | pvalue:double
-13 | 50 | step_change | 0.0
 
 Detect two step changes in a generated metric and return each point where the value changes:
 
@@ -67,9 +65,6 @@ ROW key=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27
 | EVAL pvalue = ROUND(pvalue, 6)
 ```
 
-key:integer | value:integer | type:keyword | pvalue:double
-13 | 25 | step_change | 0.0
-26 | 50 | step_change | 0.0
 
 Detect a step change independently for each location group and return the change point for each group:
 
@@ -83,11 +78,6 @@ ROW k=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25], locat
 | EVAL pvalue = ROUND(pvalue, 6)
 ```
 
-k:integer | location:integer | value:integer | type:keyword | pvalue:double
-12 | 12 | 50 | step_change | 0.0
-13 | 13 | 50 | step_change | 0.0
-14 | 14 | 50 | step_change | 0.0
-
 Detect two step changes independently for each location group and return all detected change points:
 
 ```esql
@@ -99,14 +89,6 @@ ROW k=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,2
 | WHERE type IS NOT NULL
 | EVAL pvalue = ROUND(pvalue, 6)
 ```
-
-k:integer | location:integer | value:integer | type:keyword | pvalue:double
-12 | 12 | 25 | step_change | 0.0
-25 | 12 | 50 | step_change | 0.0
-13 | 13 | 25 | step_change | 0.0
-26 | 13 | 50 | step_change | 0.0
-14 | 14 | 25 | step_change | 0.0
-27 | 14 | 50 | step_change | 0.0
 
 ## Limitations
 

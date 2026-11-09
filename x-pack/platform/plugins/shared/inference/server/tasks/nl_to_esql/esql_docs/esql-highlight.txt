@@ -115,7 +115,7 @@ ROW content = "The quick brown fox jumps over the lazy dog."
 | KEEP highlight_content
 ```
 
-highlight_content:keyword  
+highlight_content:keyword
 The quick brown <em>fox</em> jumps over the lazy dog.
 
 Filter book titles with `MATCH`, then highlight `return` in `title`.
@@ -128,10 +128,6 @@ FROM books
 | SORT book_no
 ```
 
-book_no:keyword | highlight_title:keyword  
-2714 | <em>Return</em> of the King Being the Third Part of The Lord of the Rings  
-7350 | <em>Return</em> of the Shadow
-
 Reuse the `WHERE MATCH` condition and automatically create `highlight_title`.
 
 ```esql
@@ -141,10 +137,6 @@ FROM books
 | KEEP title, highlight_title
 | SORT title
 ```
-
-title:text | highlight_title:keyword  
-Return of the King Being the Third Part of The Lord of the Rings | <em>Return</em> of the King Being the Third Part of The Lord of the Rings  
-Return of the Shadow | <em>Return</em> of the Shadow
 
 Reuse the `WHERE MATCH` condition while explicitly selecting `title`.
 
@@ -156,19 +148,12 @@ FROM books
 | SORT book_no
 ```
 
-book_no:keyword | highlight_title:keyword  
-2714 | <em>Return</em> of the King Being the Third Part of The Lord of the Rings  
-7350 | <em>Return</em> of the Shadow
-
 Highlight a field-targeted `MATCH` query without an `ON` clause.
 
 ```esql
 ROW title = "Return of the King", body = "An ordinary description."
 | HIGHLIGHT MATCH(title, "king")
 ```
-
-title:keyword | body:keyword | highlight_title:keyword  
-Return of the King | An ordinary description. | Return of the <em>King</em>
 
 Highlight all text and keyword columns for a string-literal query without `ON`.
 
@@ -178,9 +163,6 @@ ROW title = "Return of the King", body = "Tolkien wrote the epic saga."
 | KEEP highlight_title, highlight_body
 ```
 
-highlight_title:keyword | highlight_body:keyword  
-null | <em>Tolkien</em> wrote the epic saga.
-
 Highlight every text and keyword column with `ON *`.
 
 ```esql
@@ -188,9 +170,6 @@ ROW title = "Return of the King", body = "An ordinary description."
 | HIGHLIGHT MATCH(title, "king") ON *
 | KEEP highlight_title, highlight_body
 ```
-
-highlight_title:keyword | highlight_body:keyword  
-Return of the <em>King</em> | null
 
 Highlight an exact phrase in `title` with `MATCH_PHRASE`.
 
@@ -202,10 +181,6 @@ FROM books
 | SORT book_no
 ```
 
-book_no:keyword | highlight_title:keyword  
-2714 | <em>Return of the</em> King Being the Third Part of The Lord of the Rings  
-7350 | <em>Return of the</em> Shadow
-
 Highlight terms from Lucene query syntax with `QSTR`.
 
 ```esql
@@ -213,9 +188,6 @@ ROW title = "The quick fox", body = "A loyal dog"
 | HIGHLIGHT QSTR("title:fox OR body:dog") ON title, body
 | KEEP highlight_title, highlight_body
 ```
-
-highlight_title:keyword | highlight_body:keyword  
-The quick <em>fox</em> | A loyal <em>dog</em>
 
 Highlight terms from Kibana Query Language with `KQL` and `MATCH`.
 
@@ -227,9 +199,6 @@ FROM books
 | SORT book_no
 ```
 
-book_no:keyword | highlight_title:keyword  
-2714 | <em>Return</em> of the <em>King</em> Being the Third Part of The Lord of the Rings  
-7350 | Return of the <em>Shadow</em>
 
 Use a field's mapped `english` analyzer to highlight `Rings` for the query term `ring`.
 
@@ -241,9 +210,6 @@ FROM books_english
 | SORT title
 ```
 
-title:text | highlight_title:keyword  
-Return of the King Being the Third Part of The Lord of the Rings | Return of the King Being the Third Part of The Lord of the <em>Rings</em>
-
 Override the analyzer with `english` for a computed `title` column.
 
 ```esql
@@ -252,8 +218,6 @@ ROW title = "The Lord of the Rings"
 | KEEP highlight_title
 ```
 
-highlight_title:keyword  
-The Lord of the <em>Rings</em>
 
 Highlight multiple columns by listing them in `ON`.
 
@@ -263,8 +227,6 @@ ROW title = "Return of the King", body = "Tolkien wrote the epic saga."
 | KEEP highlight_title, highlight_body
 ```
 
-highlight_title:keyword | highlight_body:keyword  
-Return of the <em>King</em> | <em>Tolkien</em> wrote the epic saga.
 
 Highlight a field extracted earlier in the pipeline with `DISSECT`.
 
@@ -275,9 +237,6 @@ ROW raw = "2024 Sauron Mordor"
 | KEEP name, highlight_name
 ```
 
-name:keyword | highlight_name:keyword  
-Sauron | <em>Sauron</em>
-
 HTML-encode snippet text while preserving highlight tags.
 
 ```esql
@@ -286,8 +245,6 @@ ROW content = "Use <b>bold</b> tags & special chars with the Ring."
 | KEEP highlight_content
 ```
 
-highlight_content:keyword  
-Use bboldb tags  special chars with the <em>Ring</em>.
 
 Return the complete field value without fragmenting snippets.
 
@@ -297,9 +254,6 @@ ROW content = "Elasticsearch is fast. Elasticsearch is scalable. Elasticsearch i
 | KEEP highlight_content
 ```
 
-highlight_content:keyword  
-<em>Elasticsearch</em> is fast. <em>Elasticsearch</em> is scalable. <em>Elasticsearch</em> is open.
-
 Customize wrapping tags with `pre_tags` and `post_tags`.
 
 ```esql
@@ -308,8 +262,6 @@ ROW content = "The quick brown fox jumps over the lazy dog."
 | KEEP highlight_content
 ```
 
-highlight_content:keyword  
-The quick brown <b>fox</b> jumps over the lazy dog.
 
 Change the output column prefix to `hl_`.
 
@@ -319,8 +271,6 @@ ROW content = "The One Ring was forged by Sauron."
 | KEEP content, hl_content
 ```
 
-content:keyword | hl_content:keyword  
-The One Ring was forged by Sauron. | The One <em>Ring</em> was forged by Sauron.
 
 Overwrite the source column with an empty `prefix`.
 
@@ -330,9 +280,6 @@ ROW content = "The quick brown fox jumps over the lazy dog."
 | KEEP content
 ```
 
-content:keyword  
-The quick brown <em>fox</em> jumps over the lazy dog.
-
 Return leading field text for non-matching terms with `no_match_size`.
 
 ```esql
@@ -341,9 +288,6 @@ ROW content = "Gardens and flowers bloom in spring."
 | KEEP highlight_content
 ```
 
-highlight_content:keyword  
-Gardens and flowers bloom in spring.
-
 Sort multivalue snippets by relevance score.
 
 ```esql
@@ -351,9 +295,6 @@ ROW content = ["fast search", "fast and fast results"]
 | HIGHLIGHT "fast" ON content WITH { "order": "score" }
 | KEEP highlight_content
 ```
-
-highlight_content:keyword  
-[<em>fast</em> and <em>fast</em> results, <em>fast</em> search]
 
 ## Limitations
 

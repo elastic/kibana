@@ -54,11 +54,6 @@ FROM books METADATA _score
 | KEEP title, _score
 ```
 
-title:text | _score:double
-Poems from the Hobbit | 0.0015673980815336108
-The Lord of the Rings - Boxed Set | 0.0011135857785120606
-Letters of J R R Tolkien | 0.0024999999441206455
-
 Rerank books using `description` and `author`, then store the reranked score in `rerank_score`.
 
 ```esql
@@ -70,11 +65,6 @@ FROM books METADATA _score
 | SORT rerank_score DESC, book_no DESC
 | LIMIT 3
 ```
-
-title:text | _score:double | rerank_score:double
-The Lord of the Rings Poster Collection: Six Paintings by Alan Lee (No. 1) | 0.7976278066635132 | 0.125
-A Middle English Reader and Vocabulary | 1.043297290802002 | 0.07692307978868484
-FINAL WITNESS | 1.4058171510696411 | 0.07692307978868484
 
 Combine the original `_score` with the `rerank_score`.
 
@@ -88,11 +78,6 @@ FROM books METADATA _score
 | SORT _score
 | LIMIT 3
 ```
-
-title:text | _score:double | rerank_score:double
-The Lord of the Rings Poster Collection: Six Paintings by Alan Lee (No. 1) | 0.7976278 | 0.125
-A Middle English Reader and Vocabulary | 1.043297 | 0.07692308
-FINAL WITNESS | 1.405817 | 0.07692308
 
 Rerank title matches using document snippets from `description`.
 

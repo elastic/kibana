@@ -46,7 +46,7 @@ Cast integer and string values into a version value.
 ROW ver = CONCAT(("0"::INT + 1)::STRING, ".2.3")::VERSION
 ```
 
-ver:version  
+ver:version
 1.2.3
 
 Test whether an expression matches any value in an `IN` list.
@@ -56,9 +56,6 @@ ROW a = 1, b = 4, c = 3
 | WHERE c-a IN (3, b / 2, a)
 ```
 
-a:integer | b:integer | c:integer  
-1 | 4 | 3
-
 Filter employees whose first name matches a `LIKE` wildcard pattern.
 
 ```esql
@@ -66,10 +63,6 @@ FROM employees
 | WHERE first_name LIKE """?b*"""
 | KEEP first_name, last_name
 ```
-
-first_name:keyword | last_name:keyword  
-Ebbe | Callaway  
-Eberhardt | Terkki
 
 Match a literal `*` character in a `LIKE` pattern.
 
@@ -121,9 +114,6 @@ FROM employees
 | KEEP first_name, last_name
 ```
 
-first_name:keyword | last_name:keyword  
-Alejandro | McAlpine
-
 Match a literal `(` character in an `RLIKE` pattern.
 
 ```esql
@@ -166,13 +156,6 @@ FROM books
 | WHERE author:"Faulkner"
 ```
 
-book_no:keyword | author:text  
-2378 | [Carol Faulkner, Holly Byers Ochoa, Lucretia Mott]  
-2713 | William Faulkner  
-2847 | Colleen Faulkner  
-2883 | William Faulkner  
-3293 | Danny Faulkner
-
 Filter multi-valued `keyword` columns with the match operator.
 
 ```esql
@@ -180,11 +163,6 @@ FROM employees
 | WHERE job_positions:"Internship"
 | KEEP emp_no, job_positions
 ```
-
-emp_no:integer | job_positions:keyword  
-10008 | [Internship, Junior Developer, Purchase Manager, Senior Python Developer]  
-10009 | [Internship, Senior Python Developer]  
-10022 | [Data Scientist, Internship, Python Developer, Reporting Analyst]
 
 Run semantic search with the match operator and sort by `_score`.
 
@@ -194,11 +172,6 @@ FROM books METADATA _score
 | SORT _score DESC
 | KEEP _score, semantic_title
 ```
-
-_score:double | semantic_text_field:text  
-9.5770 | Romeo and Juliet  
-9.6850 | Hamlet  
-8.232 | Othello
 
 ## Limitations
 

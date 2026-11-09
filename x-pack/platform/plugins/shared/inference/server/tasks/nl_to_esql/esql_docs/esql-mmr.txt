@@ -43,11 +43,6 @@ FROM mmr_text_vector_keyword
 | DROP text_vector, byte_vector, bit_vector
 ```
 
-keyword_field:keyword | text_body:text
-test1 | first text
-test3 | third text
-test6 | sixth text
-
 Diversify vector rows using a query vector and `lambda`.
 
 ```esql
@@ -57,11 +52,6 @@ FROM mmr_text_vector_keyword
 | MMR [0.1, 0.2, 0.3] ON text_vector LIMIT 3 WITH { "lambda": 0.1 }
 | DROP text_vector, byte_vector, bit_vector
 ```
-
-keyword_field:keyword | text_body:text
-test3 | third text
-test6 | sixth text
-test8 | eighth text
 
 Generate a text embedding query vector, rank with `KNN`, and diversify the top ten rows.
 

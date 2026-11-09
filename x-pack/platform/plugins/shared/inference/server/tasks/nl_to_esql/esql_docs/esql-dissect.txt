@@ -30,8 +30,6 @@ ROW a = "2023-01-23T12:15:00.000Z - some text - 127.0.0.1"
 | KEEP date, msg, ip
 ```
 
-date:keyword | msg:keyword | ip:keyword
-2023-01-23T12:15:00.000Z | some text | 127.0.0.1
 
 Convert a parsed date string to a date value.
 
@@ -41,6 +39,3 @@ ROW a = "2023-01-23T12:15:00.000Z - some text - 127.0.0.1"
 | KEEP date, msg, ip
 | EVAL date = TO_DATETIME(date)
 ```
-
-msg:keyword | ip:keyword | date:date
-some text | 127.0.0.1 | 2023-01-23T12:15:00.000Z

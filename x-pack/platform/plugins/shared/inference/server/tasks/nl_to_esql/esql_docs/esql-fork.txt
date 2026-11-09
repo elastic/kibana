@@ -28,9 +28,6 @@ FROM employees
 | SORT emp_no
 ```
 
-emp_no:integer | _fork:keyword
-10001 | fork1
-10002 | fork2
 
 Return the total row count alongside the top five scored results:
 
@@ -42,14 +39,6 @@ FROM books METADATA _score
        (STATS total = COUNT(*))
 | SORT _fork, score DESC, author
 ```
-
-author:text | score:double | _fork:keyword | total:long
-Colleen Faulkner | 2.18 | fork1 | null
-William Faulkner | 2.18 | fork1 | null
-Danny Faulkner | 2.02 | fork1 | null
-Paul Faulkner | 2.02 | fork1 | null
-William Faulkner | 2.02 | fork1 | null
-null | null | fork2 | 18
 
 ## Limitations
 

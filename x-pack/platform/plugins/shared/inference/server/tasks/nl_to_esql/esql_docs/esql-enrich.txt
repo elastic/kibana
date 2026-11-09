@@ -45,18 +45,12 @@ ROW language_code = "1"
 | ENRICH languages_policy
 ```
 
-language_code:keyword | language_name:keyword
-1 | English
-
 Match on a different input column using `ON`.
 
 ```esql
 ROW a = "1"
 | ENRICH languages_policy ON a
 ```
-
-a:keyword | language_name:keyword
-1 | English
 
 Select a specific enrich field using `WITH`.
 
@@ -65,18 +59,12 @@ ROW a = "1"
 | ENRICH languages_policy ON a WITH language_name
 ```
 
-a:keyword | language_name:keyword
-1 | English
-
 Rename an added enrich field using `WITH new_name = field`.
 
 ```esql
 ROW a = "1"
 | ENRICH languages_policy ON a WITH name = language_name
 ```
-
-a:keyword | name:keyword
-1 | English
 
 ## Limitations
 
