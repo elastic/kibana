@@ -17,8 +17,10 @@ import {
   PIPELINE_ENTRY,
   allocateComponentId,
   intersectSignals,
+  mapRouteAt,
   pipelineForwards,
   readEntryIds,
+  readRouteAt,
   readRoutes,
   pruneUnit,
   replaceUnit,
@@ -56,24 +58,6 @@ export type ProcessingDraftResult =
 const findPipeline = (unit: Unit, pipelineId: string): UnitPipeline | undefined =>
   unit.unit.pipelines.find((pipeline) => pipeline.id === pipelineId);
 
-/** The route at a slot's `routeIndex`, with the selector of the `routes` entry it sits in. */
-const findRoute = (
-  pipeline: UnitPipeline,
-  routeIndex: number
-): { route: RouteRule; entryTelemetry?: UnitSignal[] } | undefined => {
-  let offset = 0;
-  for (const entry of pipeline.config) {
-    if (entry.name !== PIPELINE_ENTRY.routes) {
-      continue;
-    }
-    if (routeIndex < offset + entry.value.length) {
-      return { route: entry.value[routeIndex - offset], entryTelemetry: entry.telemetry };
-    }
-    offset += entry.value.length;
-  }
-  return undefined;
-};
-
 /** Signals the processors of a slot run on. */
 export const getProcessingSlotTelemetry = (unit: Unit, ref: ProcessingNodeRef): UnitSignal[] => {
   const pipeline = findPipeline(unit, ref.pipelineId);
@@ -83,7 +67,7 @@ export const getProcessingSlotTelemetry = (unit: Unit, ref: ProcessingNodeRef): 
   if (ref.kind === PROCESSING_SLOT_KIND.pipeline) {
     return [...pipeline.supported_telemetry];
   }
-  const found = findRoute(pipeline, ref.routeIndex);
+  const found = readRouteAt(pipeline.config, ref.routeIndex);
   if (!found) {
     return [];
   }
@@ -143,7 +127,7 @@ export const isSlotSaved = (saved: Unit, staged: Unit, ref: ProcessingNodeRef): 
   }
   const routeIn = (unit: Unit) => {
     const pipeline = findPipeline(unit, ref.pipelineId);
-    return pipeline ? findRoute(pipeline, ref.routeIndex)?.route : undefined;
+    return pipeline ? readRouteAt(pipeline.config, ref.routeIndex)?.route : undefined;
   };
   const savedRoute = routeIn(saved);
   const stagedRoute = routeIn(staged);
@@ -204,32 +188,6 @@ const setPipelineProcessors = (pipeline: UnitPipeline, ids: readonly string[]): 
   return {
     ...pipeline,
     config: [...others.slice(0, insertAt), entry, ...others.slice(insertAt)],
-  };
-};
-
-/** Rewrites the route at a slot's `routeIndex`, which counts across all `routes` entries. */
-const mapRouteAt = (
-  pipeline: UnitPipeline,
-  routeIndex: number,
-  update: (route: RouteRule) => RouteRule
-): UnitPipeline => {
-  let offset = 0;
-  return {
-    ...pipeline,
-    config: pipeline.config.map((entry): PipelineConfigEntry => {
-      if (entry.name !== PIPELINE_ENTRY.routes) {
-        return entry;
-      }
-      const local = routeIndex - offset;
-      offset += entry.value.length;
-      if (local < 0 || local >= entry.value.length) {
-        return entry;
-      }
-      return {
-        ...entry,
-        value: entry.value.map((route, index) => (index === local ? update(route) : route)),
-      };
-    }),
   };
 };
 

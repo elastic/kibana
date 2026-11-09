@@ -8,7 +8,7 @@
 import type { DecisionTreeDiff, LearningRecord } from '@kbn/nightshift-decision-trees';
 
 /**
- * Client mirrors of the decision-tree route responses. Kept local, like the Cortex types, so the
+ * Client mirrors of the decision-tree route responses. Kept local, like the Wiki types, so the
  * app does not take a dependency on the nightshift_investigations plugin's server-side common.
  */
 

@@ -13,6 +13,7 @@ import {
   SIGNIFICANT_EVENTS_DISCOVERY_AGENT_TYPE_ID,
   discoveryAgentType,
 } from './discovery';
+import { assertNightshiftSpace } from '../../../lib/assert_nightshift_space';
 
 /**
  * Installs the system-owned, user-editable discovery agent profile in the target
@@ -27,6 +28,9 @@ export const installDiscoveryAgents = async ({
   spaceId: string;
   availability?: AgentAvailabilityConfig;
 }): Promise<void> => {
+  // Nightshift runs in the default space only, so the discovery agent must not show up in another
+  // space's Agent Builder.
+  assertNightshiftSpace(spaceId);
   await agentBuilder.agents.ensure({
     spaceId,
     availability,
