@@ -94,6 +94,8 @@ dependsOn:
   - '@kbn/core-elasticsearch-server-mocks'
   - '@kbn/core-test-helpers-kbn-server'
   - '@kbn/workflows-execution-engine'
+  - '@kbn/custom-content-common'
+  - '@kbn/custom-content-renderer'
 tags:
   - plugin
   - prod

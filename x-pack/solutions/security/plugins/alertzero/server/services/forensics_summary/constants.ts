@@ -1,0 +1,68 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/** The context-engine index the Endpoint Analysis indicators live in. */
+export const FORENSICS_AI_INDEX_ID = 'security-investigations' as const;
+
+/** The indicator type the Forensics Watch writes per Investigation it analyzes. */
+export const ANALYZE_ENDPOINT_KI_TYPE = 'security.analyze_endpoint' as const;
+
+/** The fixed id the Attack Discovery review attaches the attack under. */
+export const ATTACK_DISCOVERY_ATTACHMENT_ID = 'attack-discovery' as const;
+
+/** The action whose pending proposal reaches every alert of the attack. */
+export const CLOSE_ATTACK_ACTION_WORKFLOW_ID =
+  'system-alertzero-action-close-attack-discovery-investigation' as const;
+
+export const FORENSICS_SUMMARY_TITLE = 'Forensics summary' as const;
+
+/** The ids the Endpoint Analysis run writes its findings under, and the card's own. */
+export const getForensicsAttachmentIds = (kiId: string) =>
+  ({
+    timeline: `forensic-timeline-${kiId}`,
+    iocs: `forensic-iocs-${kiId}`,
+    summary: `forensic-summary-${kiId}`,
+  } as const);
+
+export const MAX_PROPOSALS = 50;
+export const MAX_TIMELINE_EVENTS = 8;
+export const MAX_ALERTS = 8;
+export const MAX_IOCS_PER_KIND = 3;
+/** Bounds the alert lookup; an attack correlates at most this many alerts in its attachment. */
+export const MAX_ALERT_IDS = 1000;
+
+/** MITRE ATT&CK enterprise tactics in kill-chain order, with a label that fits a chip. */
+export const KILL_CHAIN_TACTICS = [
+  { name: 'Reconnaissance', short: 'Recon' },
+  { name: 'Resource Development', short: 'Resources' },
+  { name: 'Initial Access', short: 'Initial' },
+  { name: 'Execution', short: 'Execution' },
+  { name: 'Persistence', short: 'Persist' },
+  { name: 'Privilege Escalation', short: 'Priv Esc' },
+  { name: 'Defense Evasion', short: 'Evasion' },
+  { name: 'Credential Access', short: 'Creds' },
+  { name: 'Discovery', short: 'Discovery' },
+  { name: 'Lateral Movement', short: 'Lateral' },
+  { name: 'Collection', short: 'Collect' },
+  { name: 'Command and Control', short: 'C2' },
+  { name: 'Exfiltration', short: 'Exfil' },
+  { name: 'Impact', short: 'Impact' },
+] as const;
+
+/** The IoC attachment's categories in reading order, each with its `--cc-vis-*` color index. */
+export const IOC_KINDS = [
+  { key: 'affected_hosts', label: 'Hosts', color: 0 },
+  { key: 'compromised_identities', label: 'Identities', color: 1 },
+  { key: 'ips', label: 'Network', color: 2 },
+  { key: 'shas', label: 'File hashes', color: 3 },
+  { key: 'file_paths', label: 'Files and keys', color: 4 },
+  { key: 'malicious_commands', label: 'Commands', color: 5 },
+  { key: 'ransom_note', label: 'Ransom notes', color: 6 },
+  { key: 'encryption_marker', label: 'Encryption markers', color: 7 },
+] as const;
+
+export type IocKind = (typeof IOC_KINDS)[number]['key'];

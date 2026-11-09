@@ -1,0 +1,112 @@
+<style>{{{css}}}</style>
+<div class="fs">
+  <header class="header">
+    <p class="eyebrow">Forensics summary</p>
+    <h1>{{title}}</h1>
+    <div class="badges">
+      <span class="badge {{verdictClass}}">{{verdictLabel}}</span>
+      <span class="badge hollow">Autonomy: {{autonomy}}</span>
+    </div>
+    <p class="meta">{{#attackTitle}}<span>{{attackTitle}}</span> {{/attackTitle}}{{#analyzedAt}}<span>Analyzed {{analyzedAt}}</span> {{/analyzedAt}}</p>
+  </header>
+  {{#summary}}
+  <section class="section">
+    <h2>What happened</h2>
+    <p class="callout">{{summary}}</p>
+  </section>
+  {{/summary}}
+  <section class="section">
+    <div class="tiles">
+      <div class="tile">
+        <div class="tile-label">Decisions</div>
+        <div class="tile-value">{{openDecisions}}</div>
+        <p class="meta">{{#decisionFacts}}<span>{{count}} {{label}}</span> {{/decisionFacts}}{{^decisionFacts}}<span>none raised</span>{{/decisionFacts}}</p>
+      </div>
+      <div class="tile">
+        <div class="tile-label">Peak risk</div>
+        {{#peakRisk}}
+        <div class="tile-value">{{score}}</div>
+        <p class="meta"><span>{{severity}} severity</span></p>
+        {{/peakRisk}}
+        {{^peakRisk}}
+        <div class="tile-value">–</div>
+        <p class="meta"><span>no alerts read</span></p>
+        {{/peakRisk}}
+      </div>
+      <div class="tile">
+        <div class="tile-label">Scope</div>
+        <div class="tile-value">{{scope.hosts}}</div>
+        <p class="meta">{{#scopeFacts}}<span>{{.}}</span> {{/scopeFacts}}</p>
+      </div>
+    </div>
+  </section>
+  {{#hasKillChain}}
+  <section class="section">
+    <h2>Kill chain <span class="meta">{{detectedTactics}} of {{tacticCount}} tactics</span></h2>
+    <ol class="chain">
+      {{#killChain}}<li class="tactic" data-detected="{{detected}}" title="{{name}}">{{short}}</li>{{/killChain}}
+    </ol>
+  </section>
+  {{/hasKillChain}}
+  {{#hasProposals}}
+  <section class="section">
+    <h2>Decisions <span class="meta">{{proposalCount}} proposed</span></h2>
+    <ul class="proposals">
+      {{#proposals}}
+      <li class="proposal" data-group="{{group}}">
+        <div class="proposal-head">
+          <span class="proposal-title">{{title}}</span>
+          <span class="badge {{statusClass}}">{{status}}</span>
+        </div>
+        <p class="meta"><span>{{category}}</span> {{#impact}}<span>{{impact}} impact</span> {{/impact}}{{#confidence}}<span>{{confidence}} confidence</span> {{/confidence}}{{#expiresAt}}<span>expires {{expiresAt}}</span> {{/expiresAt}}</p>
+      </li>
+      {{/proposals}}
+    </ul>
+  </section>
+  {{/hasProposals}}
+  {{#hasTimeline}}
+  <section class="section">
+    <h2>Timeline <span class="meta">{{timelineMeta}}</span></h2>
+    <ol class="events">
+      {{#timeline.events}}
+      <li class="event"><time>{{timestamp}}</time><p>{{description}}</p></li>
+      {{/timeline.events}}
+    </ol>
+    {{#moreEvents}}<p class="meta">{{moreEvents}} more in the timeline attachment.</p>{{/moreEvents}}
+  </section>
+  {{/hasTimeline}}
+  {{#hasIndicators}}
+  <section class="section">
+    <h2>Indicators <span class="meta">{{indicatorTotal}} extracted</span></h2>
+    <ul class="iocs">
+      {{#indicators}}
+      <li class="ioc">
+        <span class="ioc-label"><span class="swatch" style="background:var(--cc-vis-{{color}})"></span>{{label}}</span>
+        <span class="ioc-count">{{count}}</span>
+        <span class="ioc-values">{{valuesText}}</span>
+      </li>
+      {{/indicators}}
+    </ul>
+  </section>
+  {{/hasIndicators}}
+  {{#hasAlerts}}
+  <section class="section">
+    <details{{#alerts.closePending}} open{{/alerts.closePending}}>
+      <summary><h2>Alerts in this attack <span class="meta">{{alerts.total}} · risk score by alert</span></h2></summary>
+      {{#hasShownAlerts}}
+      <ul class="bars">
+        {{#alerts.shown}}
+        <li class="bar">
+          <span class="bar-label" title="{{ruleName}}">{{ruleName}}</span>
+          <span class="bar-track"><span class="bar-fill sev-{{severity}}" style="width:{{width}}%"></span></span>
+          <span class="bar-value">{{riskScore}}</span>
+        </li>
+        {{/alerts.shown}}
+      </ul>
+      {{/hasShownAlerts}}
+      {{^hasShownAlerts}}<p class="meta">The attack's alerts are no longer in this space's alert index.</p>{{/hasShownAlerts}}
+      {{#alerts.closePending}}<p class="reach">An approved close reaches all {{alerts.total}} alerts and the attack.</p>{{/alerts.closePending}}
+    </details>
+  </section>
+  {{/hasAlerts}}
+</div>

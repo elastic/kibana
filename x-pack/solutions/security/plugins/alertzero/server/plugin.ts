@@ -257,6 +257,7 @@ export class AlertZeroPlugin
       workflowsExtensions,
       getActionsService: () => this.requireActionsService(),
       getConversations: () => this.requireAgentBuilderConversations(),
+      getAgentBuilderAttachments: () => this.requireAgentBuilderAttachments(),
       resolveChatModel: (request) => this.resolveSummaryChatModel(request),
       getProposals: (proposalIds, spaceId, request) =>
         this.readProposals(proposalIds, spaceId, request),
