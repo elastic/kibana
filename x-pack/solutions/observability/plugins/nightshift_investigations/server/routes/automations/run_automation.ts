@@ -13,15 +13,12 @@ import {
   WorkflowsManagementOperationPrivileges,
 } from '@kbn/workflows';
 import {
-  AUTOMATION_RUNTIME_POLICY_KEY,
-  hasAutomationRuntimePolicy,
   isScheduleOnlyAutomation,
   MANUAL_AUTOMATION_TRIGGER_SOURCE,
 } from '../../../common/automation_run';
 import { createNightshiftInvestigationsServerRoute } from '../create_server_route';
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../../saved_objects/automation_saved_object';
 import { validateScheduledAutomation } from '../../lib/automations/validate_scheduled_automation';
-import { generateWorkflowYaml } from '../../lib/automations/generate_workflow_yaml';
 import type { NightshiftAutomationAttributes } from '../../lib/automations/types';
 
 export const runAutomationRoute = createNightshiftInvestigationsServerRoute({
@@ -48,7 +45,6 @@ export const runAutomationRoute = createNightshiftInvestigationsServerRoute({
     getAutomationsSoClient,
     getWorkflowsManagement,
     getInvestigatorServiceAccountService,
-    isUniversalAlertingAvailable,
     context,
   }) => {
     const workflowsManagement = getWorkflowsManagement();
@@ -60,6 +56,9 @@ export const runAutomationRoute = createNightshiftInvestigationsServerRoute({
       request,
       spaceId
     ).get<NightshiftAutomationAttributes>(NIGHTSHIFT_AUTOMATION_SO_TYPE, params.path.id);
+    if (!automation.isEnabled) {
+      throw badRequest('Enable the automation before running it manually.');
+    }
     if (!isScheduleOnlyAutomation(automation)) {
       throw badRequest(
         'Only automations with a schedule trigger and no other triggers can be run manually.'
@@ -73,7 +72,7 @@ export const runAutomationRoute = createNightshiftInvestigationsServerRoute({
     const { workflowId } = automation;
     if (!workflowId)
       throw badRequest('The backing workflow is missing. Save the automation again to repair it.');
-    let workflow = await management.getWorkflow(workflowId, spaceId, request);
+    const workflow = await management.getWorkflow(workflowId, spaceId, request);
     if (!workflow?.definition || !workflow.valid) {
       throw badRequest(
         'The backing workflow is missing or invalid. Save the automation again to repair it.'
@@ -84,36 +83,9 @@ export const runAutomationRoute = createNightshiftInvestigationsServerRoute({
         'The backing workflow is not bound to the Nightshift automations service account. Set up Nightshift service accounts and save the automation again.'
       );
     }
-    if (!hasAutomationRuntimePolicy(workflow.definition)) {
-      if (workflow.definition.consts?.[AUTOMATION_RUNTIME_POLICY_KEY] !== undefined) {
-        throw badRequest(
-          'The backing workflow has an unsupported automation runtime version. Save the automation again to repair it.'
-        );
-      }
-      await management.updateWorkflow(
-        workflowId,
-        {
-          yaml: generateWorkflowYaml({
-            automationId: params.path.id,
-            automation,
-            serviceAccountId,
-            universalAlerts: isUniversalAlertingAvailable(),
-          }),
-        },
-        spaceId,
-        request
-      );
-      workflow = await management.getWorkflow(workflowId, spaceId, request);
-    }
-    if (
-      !workflow?.definition ||
-      !workflow.valid ||
-      !workflow.enabled ||
-      !hasAutomationRuntimePolicy(workflow.definition) ||
-      workflow.definition.settings?.run_as !== serviceAccountId
-    ) {
+    if (!workflow.enabled) {
       throw badRequest(
-        'The backing workflow is disabled or needs repair. Save the automation again before running it.'
+        'The backing workflow is disabled. Save the automation again before running it.'
       );
     }
     const workflowExecutionId = await management.runWorkflow(

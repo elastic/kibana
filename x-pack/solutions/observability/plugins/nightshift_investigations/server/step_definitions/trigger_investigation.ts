@@ -36,7 +36,12 @@ import type {
 } from '../routes/types';
 import { fetchInvestigationAlertSnapshots } from '../lib/alert_snapshot';
 import { MAX_AUTOMATION_INSTRUCTIONS_LENGTH } from '../../common/automation_limits';
-import { admitAutomationRun } from '../lib/automations/admit_automation_run';
+import {
+  isScheduleOnlyAutomation,
+  MANUAL_AUTOMATION_TRIGGER_SOURCE,
+} from '../../common/automation_run';
+import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../saved_objects/automation_saved_object';
+import type { NightshiftAutomationAttributes } from '../lib/automations/types';
 import { createAutomationBudget } from '../lib/automations/automation_budget';
 import { AutomationDailyLimitReachedError, InvestigationQuotaDeniedError } from '../client/errors';
 import type { AutomationBudget } from '../types';
@@ -223,7 +228,7 @@ export const triggerInvestigationStepDefinition = (
         .optional()
         .describe('The investigation (Agent Builder conversation) the start created or continued'),
       skip_reason: z
-        .enum(['daily_limit', 'investigation_limit', 'automation_disabled'])
+        .enum(['daily_limit', 'investigation_limit'])
         .optional()
         .describe('Why the investigation was not dispatched'),
       daily_limit: z
@@ -243,21 +248,26 @@ export const triggerInvestigationStepDefinition = (
       let automationBudget: AutomationBudget | undefined;
       let isManualAutomationRun = false;
       if (input.automation_id) {
-        const admission = await admitAutomationRun({
-          automationId: input.automation_id,
-          workflowId: workflow.id,
-          triggeredBy: execution.triggeredBy,
-          request,
-          spaceId,
-          getAutomationsSoClient,
-        });
-        if (!admission.allowed) return { output: { skip_reason: admission.skipReason } };
-        isManualAutomationRun = admission.isManualRun;
+        const soClient = getAutomationsSoClient(request, spaceId);
+        const { attributes: automation } = await soClient.get<NightshiftAutomationAttributes>(
+          NIGHTSHIFT_AUTOMATION_SO_TYPE,
+          input.automation_id
+        );
+        if (automation.workflowId !== workflow.id) {
+          throw new Error('The automation does not belong to this workflow.');
+        }
+        // Public workflow inputs and metadata cannot grant manual accounting.
+        isManualAutomationRun = execution.triggeredBy === MANUAL_AUTOMATION_TRIGGER_SOURCE;
+        if (isManualAutomationRun && !isScheduleOnlyAutomation(automation)) {
+          throw new Error(
+            'Only automations with a schedule trigger and no other triggers can be run manually.'
+          );
+        }
         if (!isManualAutomationRun) {
           automationBudget = createAutomationBudget(
-            getAutomationsSoClient(request, spaceId),
+            soClient,
             input.automation_id,
-            admission.automation.runtime.dailyDispatchLimit
+            automation.runtime.dailyDispatchLimit
           );
         }
       }

@@ -207,21 +207,20 @@ apiTest.describe('Scheduled Nightshift automations', { tag: tags.stateful.classi
         responseType: 'json',
       });
       expect(disabledRuns).toHaveStatusCode(200);
-      expect(disabledRuns.body).toMatchObject({ runs: [] });
-      expect((disabledRuns.body as { total: number }).total).toBeGreaterThan(0);
+      expect(disabledRuns.body).toMatchObject({ total: 0, runs: [] });
     }
   );
 
   apiTest(
-    'runs a disabled scheduled automation manually and retains its schedule and disabled state',
+    'runs an enabled scheduled automation manually without changing its configuration or schedule',
     async ({ apiClient, kbnClient, samlAuth, esClient }) => {
       const due = new Date(Date.now() + 12 * 60 * 60 * 1000);
       const created = await apiClient.post(AUTOMATIONS_PATH, {
         headers: { ...COMMON_HEADERS, ...cookieHeader },
         responseType: 'json',
         body: {
-          name: uniqueId('scout-manual-disabled'),
-          isEnabled: false,
+          name: uniqueId('scout-manual-enabled'),
+          isEnabled: true,
           trigger: {
             rows: [
               {
@@ -273,32 +272,6 @@ apiTest.describe('Scheduled Nightshift automations', { tag: tags.stateful.classi
       }
       // Custom roles share the worker's role slot, including existing session cookies.
       ({ cookieHeader } = await samlAuth.asInteractiveUser(ROLE));
-      // A direct Workflows run cannot bypass disabled admission, even with forged metadata.
-      const ordinary = await kbnClient.request<{ workflowExecutionId: string }>({
-        method: 'POST',
-        path: `/api/workflows/workflow/${automation.workflowId}/run`,
-        headers: WORKFLOW_HEADERS,
-        body: { inputs: {}, metadata: { triggeredBy: 'nightshift-automation-manual' } },
-      });
-      await expect
-        .poll(
-          async () => {
-            const run = await kbnClient.request<WorkflowExecutionDto>({
-              method: 'GET',
-              path: `/api/workflows/executions/${ordinary.data.workflowExecutionId}`,
-              headers: WORKFLOW_HEADERS,
-              query: { includeOutput: true },
-            });
-            return {
-              status: run.data.status,
-              output: run.data.stepExecutions.find(
-                ({ stepId }) => stepId === 'trigger_investigation'
-              )?.output,
-            };
-          },
-          { timeout: 60_000, intervals: [1_000] }
-        )
-        .toMatchObject({ status: 'completed', output: { skip_reason: 'automation_disabled' } });
       const requested = await apiClient.post(`${AUTOMATIONS_PATH}/${automation.id}/run`, {
         headers: { ...COMMON_HEADERS, ...cookieHeader },
         responseType: 'json',
@@ -331,17 +304,19 @@ apiTest.describe('Scheduled Nightshift automations', { tag: tags.stateful.classi
                 investigationId?: string;
                 triggeredBy?: string;
                 executedBy?: string;
+                executedByDisplayName?: string;
               }>;
               usedToday: number;
             };
             expect(usedToday).toBe(0);
-            expect(runs.some(({ id }) => id === ordinary.data.workflowExecutionId)).toBe(false);
             const run = runs.find(({ id }) => id === workflowExecutionId);
             if (!run?.investigationId) return false;
             expect(run).toMatchObject({
               triggeredBy: 'manual',
               executedBy: execution.data.executedBy,
             });
+            expect(run.executedByDisplayName).toMatch(/.+/);
+            expect(run.executedByDisplayName).not.toMatch(/^u_/);
             investigationId = run.investigationId;
             return true;
           },
@@ -365,20 +340,27 @@ apiTest.describe('Scheduled Nightshift automations', { tag: tags.stateful.classi
           { timeout: 30_000, intervals: [1_000] }
         )
         .toMatchObject([{ type: 'manual', id: createdInvestigationId, trigger_type: 'manual' }]);
-      for (const isEnabled of [true, false]) {
-        const toggled = await apiClient.put(`${AUTOMATIONS_PATH}/${automation.id}`, {
-          headers: { ...COMMON_HEADERS, ...cookieHeader },
-          body: { isEnabled },
-          responseType: 'json',
-        });
-        expect(toggled).toHaveStatusCode(200);
-      }
       const after = (await getWorkflow()).data;
       expect({ yaml: after.yaml, lastUpdatedAt: after.lastUpdatedAt }).toStrictEqual({
         yaml: before.yaml,
         lastUpdatedAt: before.lastUpdatedAt,
       });
       expect(await getScheduledTime()).toBe(scheduledTime);
+      const disabled = await apiClient.put(`${AUTOMATIONS_PATH}/${automation.id}`, {
+        headers: { ...COMMON_HEADERS, ...cookieHeader },
+        body: { isEnabled: false },
+        responseType: 'json',
+      });
+      expect(disabled).toHaveStatusCode(200);
+      expect((await getWorkflow()).data.enabled).toBe(false);
+      const refused = await apiClient.post(`${AUTOMATIONS_PATH}/${automation.id}/run`, {
+        headers: { ...COMMON_HEADERS, ...cookieHeader },
+        responseType: 'json',
+      });
+      expect(refused).toHaveStatusCode(400);
+      expect(refused.body).toMatchObject({
+        message: 'Enable the automation before running it manually.',
+      });
       const saved = await apiClient.get(`${AUTOMATIONS_PATH}/${automation.id}`, {
         headers: { ...COMMON_HEADERS, ...cookieHeader },
         responseType: 'json',

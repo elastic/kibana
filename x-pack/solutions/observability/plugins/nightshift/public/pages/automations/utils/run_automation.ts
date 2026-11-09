@@ -14,6 +14,11 @@ export const RUN_AUTOMATION_LABEL = i18n.translate('xpack.nightshift.automations
 });
 
 export const getRunAutomationDisabledReason = (automation: Automation): string | undefined => {
+  if (!automation.isEnabled) {
+    return i18n.translate('xpack.nightshift.automations.runDisabledAutomationTooltip', {
+      defaultMessage: 'This automation is disabled. Enable it to run on a schedule or manually.',
+    });
+  }
   if (!isScheduleOnlyAutomation(automation)) {
     return i18n.translate('xpack.nightshift.automations.runUnsupportedTriggerTooltip', {
       defaultMessage:

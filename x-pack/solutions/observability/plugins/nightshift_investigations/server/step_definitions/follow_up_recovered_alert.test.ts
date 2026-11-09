@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { GetInvestigationsClient } from '../routes/types';
 import { followUpRecoveredAlertStepDefinition } from './follow_up_recovered_alert';
@@ -20,22 +19,16 @@ const createContext = (input: Record<string, unknown>) =>
     input,
     contextManager: {
       getFakeRequest: jest.fn().mockReturnValue(request),
-      getContext: jest.fn().mockReturnValue({
-        workflow: { id: 'wf-1', spaceId: 'test-space' },
-        execution: { triggeredBy: 'alerting.alertStatusChanged' },
-      }),
+      getContext: jest.fn().mockReturnValue({ workflow: { id: 'wf-1', spaceId: 'test-space' } }),
     },
   } as never);
 
-const createDefinition = (
-  followUpRecoveredAlert: jest.Mock,
-  soClient = savedObjectsClientMock.create()
-) => {
+const createDefinition = (followUpRecoveredAlert: jest.Mock) => {
   const getInvestigationsClient = jest
     .fn()
     .mockReturnValue({ followUpRecoveredAlert }) as unknown as GetInvestigationsClient;
   return {
-    definition: followUpRecoveredAlertStepDefinition(getInvestigationsClient, () => soClient),
+    definition: followUpRecoveredAlertStepDefinition(getInvestigationsClient),
     getInvestigationsClient,
   };
 };
@@ -72,56 +65,6 @@ describe('followUpRecoveredAlertStepDefinition', () => {
       ruleName: 'Latency is too high',
       ruleTypeId: 'apm.transaction_duration',
       ruleTags: ['prod'],
-    });
-  });
-
-  it('does not run a recovery round after the automation is disabled', async () => {
-    const soClient = savedObjectsClientMock.create();
-    soClient.get.mockResolvedValue({
-      id: 'a1',
-      type: 'nightshift-automation',
-      references: [],
-      attributes: { workflowId: 'wf-1', isEnabled: false },
-    });
-    const followUp = jest.fn();
-    const { definition, getInvestigationsClient } = createDefinition(followUp, soClient);
-    expect(await definition.handler(createContext({ ...INPUT, automation_id: 'a1' }))).toEqual({
-      output: { skip_reason: 'automation_disabled' },
-    });
-    expect(getInvestigationsClient).not.toHaveBeenCalled();
-    expect(followUp).not.toHaveBeenCalled();
-  });
-
-  it('fails closed when a recovery automation belongs to another workflow', async () => {
-    const soClient = savedObjectsClientMock.create();
-    soClient.get.mockResolvedValue({
-      id: 'a1',
-      type: 'nightshift-automation',
-      references: [],
-      attributes: { workflowId: 'other-workflow', isEnabled: true },
-    });
-    const followUp = jest.fn();
-    const { definition } = createDefinition(followUp, soClient);
-    await expect(
-      definition.handler(createContext({ ...INPUT, automation_id: 'a1' }))
-    ).rejects.toThrow('does not belong');
-    expect(followUp).not.toHaveBeenCalled();
-  });
-
-  it('admits a recovery round for an enabled automation', async () => {
-    const soClient = savedObjectsClientMock.create();
-    soClient.get.mockResolvedValue({
-      id: 'a1',
-      type: 'nightshift-automation',
-      references: [],
-      attributes: { workflowId: 'wf-1', isEnabled: true },
-    });
-    const followUp = jest
-      .fn()
-      .mockResolvedValue({ investigation_id: 'inv-1', execution_id: 'round-1' });
-    const { definition } = createDefinition(followUp, soClient);
-    expect(await definition.handler(createContext({ ...INPUT, automation_id: 'a1' }))).toEqual({
-      output: { investigation_id: 'inv-1', execution_id: 'round-1' },
     });
   });
 

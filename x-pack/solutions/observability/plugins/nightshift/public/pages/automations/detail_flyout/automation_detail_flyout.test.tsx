@@ -60,6 +60,7 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
   const navigateToUrl = jest.fn();
 
   beforeEach(() => {
+    onRun.mockClear();
     jest.clearAllMocks();
     mutate.mockReset();
     (useKibana as jest.Mock).mockReturnValue({
@@ -118,26 +119,42 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
   const renameTo = (name: string) =>
     fireEvent.change(screen.getByTestId('automationName'), { target: { value: name } });
 
-  it.each([true, false])(
-    'runs from Actions with enabled=%s and keeps the flyout open',
-    async (isEnabled) => {
-      const scheduled: Automation = {
+  it('runs an enabled automation from Actions and keeps the flyout open', async () => {
+    const scheduled: Automation = {
+      ...automation,
+      isEnabled: true,
+      trigger: { rows: [{ kind: 'schedule', schedulePreset: 'hourly' }] },
+      execution: { promptTemplate: 'Review health.' },
+    };
+    const history = renderFlyout({ currentAutomation: scheduled });
+    fireEvent.click(screen.getByTestId('automationActionsButton'));
+    fireEvent.click(screen.getByTestId('automationRunButton'));
+    expect(onRun).toHaveBeenCalledWith(scheduled);
+    expect(onClose).not.toHaveBeenCalled();
+    expect(history.location.pathname).toBe('/automations/automation-1');
+    await waitFor(() =>
+      expect(screen.queryByTestId('automationRunButton')).not.toBeInTheDocument()
+    );
+  });
+
+  it('disables Run in Actions for a disabled automation and explains why', async () => {
+    renderFlyout({
+      currentAutomation: {
         ...automation,
-        isEnabled,
+        isEnabled: false,
         trigger: { rows: [{ kind: 'schedule', schedulePreset: 'hourly' }] },
-        execution: { promptTemplate: 'Review health.' },
-      };
-      const history = renderFlyout({ currentAutomation: scheduled });
-      fireEvent.click(screen.getByTestId('automationActionsButton'));
-      fireEvent.click(screen.getByTestId('automationRunButton'));
-      expect(onRun).toHaveBeenCalledWith(scheduled);
-      expect(onClose).not.toHaveBeenCalled();
-      expect(history.location.pathname).toBe('/automations/automation-1');
-      await waitFor(() =>
-        expect(screen.queryByTestId('automationRunButton')).not.toBeInTheDocument()
-      );
-    }
-  );
+      },
+    });
+    fireEvent.click(screen.getByTestId('automationActionsButton'));
+    const run = screen.getByTestId('automationRunButton');
+    expect(run).toBeDisabled();
+    fireEvent.click(run);
+    expect(onRun).not.toHaveBeenCalled();
+    fireEvent.mouseOver(run);
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(
+      'This automation is disabled. Enable it to run on a schedule or manually.'
+    );
+  });
 
   it('disables Run in Actions for an alert automation', () => {
     renderFlyout();

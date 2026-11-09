@@ -22,7 +22,7 @@ let serviceAccountService = createServiceAccountService();
 const automation = {
   name: 'Health review',
   automationType: 'custom' as const,
-  isEnabled: false,
+  isEnabled: true,
   workflowId: 'wf-1',
   trigger: { rows: [{ kind: 'schedule' as const, schedulePreset: 'hourly' as const }] },
   execution: { promptTemplate: 'Review health.' },
@@ -48,7 +48,6 @@ const call = (spaceId = 'default') => {
     getAutomationsSoClient: jest.fn().mockReturnValue(soClient),
     getWorkflowsManagement,
     getInvestigatorServiceAccountService: () => serviceAccountService,
-    isUniversalAlertingAvailable: () => true,
     context,
   } as never);
 };
@@ -64,43 +63,32 @@ beforeEach(() => {
   });
 });
 
-it.each([true, false])(
-  'runs the saved workflow for an automation with enabled=%s without rewriting it',
-  async (isEnabled) => {
-    soClient.get.mockResolvedValue({ attributes: { ...automation, isEnabled } });
-    expect(await call('operations')).toEqual({ workflowExecutionId: 'exec-1' });
-    const [model, spaceId, inputs, , source] = runWorkflow.mock.calls[0];
-    expect(model.definition).toEqual(workflow.definition);
-    expect({ spaceId, inputs, source }).toEqual({
-      spaceId: 'operations',
-      inputs: {},
-      source: 'nightshift-automation-manual',
-    });
-    expect(getWorkflow).toHaveBeenCalledWith('wf-1', 'operations', expect.anything());
-    expect(updateWorkflow).not.toHaveBeenCalled();
-  }
-);
-
-it('upgrades a disabled legacy workflow once and executes the reloaded saved definition', async () => {
-  getWorkflow.mockResolvedValueOnce({
-    ...workflow,
-    enabled: false,
-    definition: { ...workflow.definition, enabled: false, consts: undefined },
+it('runs the enabled saved workflow without rewriting it', async () => {
+  expect(await call('operations')).toEqual({ workflowExecutionId: 'exec-1' });
+  const [model, spaceId, inputs, , source] = runWorkflow.mock.calls[0];
+  expect(model.definition).toEqual(workflow.definition);
+  expect({ spaceId, inputs, source }).toEqual({
+    spaceId: 'operations',
+    inputs: {},
+    source: 'nightshift-automation-manual',
   });
-  expect(await call()).toEqual({ workflowExecutionId: 'exec-1' });
-  const [id, { yaml: upgradedYaml }] = updateWorkflow.mock.calls[0];
-  const upgraded = parse(upgradedYaml);
-  expect(id).toBe('wf-1');
-  expect(upgraded.enabled).toBe(true);
-  expect(upgraded.triggers).toEqual(workflow.definition.triggers);
-  expect(upgraded.settings).toEqual(workflow.definition.settings);
-  expect(runWorkflow.mock.calls[0][0].definition).toEqual(workflow.definition);
-  expect(automation.isEnabled).toBe(false);
-  expect(getWorkflow).toHaveBeenCalledTimes(2);
+  expect(getWorkflow).toHaveBeenCalledWith('wf-1', 'operations', expect.anything());
+  expect(updateWorkflow).not.toHaveBeenCalled();
+});
+
+it('rejects a disabled automation even if its backing workflow is enabled', async () => {
+  soClient.get.mockResolvedValue({ attributes: { ...automation, isEnabled: false } });
+  await expect(call()).rejects.toMatchObject({
+    output: { statusCode: 400 },
+    message: 'Enable the automation before running it manually.',
+  });
+  expect(getWorkflow).not.toHaveBeenCalled();
+  expect(runWorkflow).not.toHaveBeenCalled();
+  expect(updateWorkflow).not.toHaveBeenCalled();
 });
 
 it.each([[], [{ kind: 'alert' }], [{ kind: 'slack' }], [{ kind: 'schedule' }, { kind: 'alert' }]])(
-  'rejects unsupported triggers without executing or upgrading: %j',
+  'rejects unsupported triggers without executing: %j',
   async (...rows) => {
     soClient.get.mockResolvedValue({ attributes: { ...automation, trigger: { rows } } });
     await expect(call()).rejects.toMatchObject({ output: { statusCode: 400 } });
@@ -120,16 +108,6 @@ it.each([
   await expect(call()).rejects.toMatchObject({ output: { statusCode: 400 } });
   expect(runWorkflow).not.toHaveBeenCalled();
   expect(updateWorkflow).not.toHaveBeenCalled();
-});
-
-it('does not run when the legacy upgrade fails', async () => {
-  getWorkflow.mockResolvedValue({
-    ...workflow,
-    definition: { ...workflow.definition, consts: undefined },
-  });
-  updateWorkflow.mockRejectedValue(new Error('Upgrade failed'));
-  await expect(call()).rejects.toThrow('Upgrade failed');
-  expect(runWorkflow).not.toHaveBeenCalled();
 });
 
 it('preserves a missing automation error from the current space', async () => {
@@ -162,7 +140,7 @@ it('rejects caller-supplied inputs and metadata', () => {
   ).toThrow();
 });
 
-it('rejects a saved schedule without instructions before upgrading or running it', async () => {
+it('rejects a saved schedule without instructions before running it', async () => {
   soClient.get.mockResolvedValue({ attributes: { ...automation, execution: {} } });
   await expect(call()).rejects.toMatchObject({ output: { statusCode: 400 } });
   expect(runWorkflow).not.toHaveBeenCalled();

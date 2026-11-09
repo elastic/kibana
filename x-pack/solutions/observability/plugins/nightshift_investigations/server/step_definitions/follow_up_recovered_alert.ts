@@ -8,14 +8,12 @@
 import { lazySchema, z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { admitAutomationRun } from '../lib/automations/admit_automation_run';
-import type { GetAutomationsSoClient, GetInvestigationsClient } from '../routes/types';
+import type { GetInvestigationsClient } from '../routes/types';
 
 const MAX_ALERT_FIELD_LENGTH = 500;
 
 const inputSchema = lazySchema(() =>
   z.object({
-    automation_id: z.string().min(1).max(512).optional(),
     alert_uuid: z.string().min(1).max(MAX_ALERT_FIELD_LENGTH).describe('The recovered alert UUID'),
     alert_id: z.string().min(1).max(MAX_ALERT_FIELD_LENGTH).describe('The alert instance ID'),
     alert_start: z
@@ -37,8 +35,7 @@ const inputSchema = lazySchema(() =>
 );
 
 export const followUpRecoveredAlertStepDefinition = (
-  getInvestigationsClient: GetInvestigationsClient,
-  getAutomationsSoClient: GetAutomationsSoClient
+  getInvestigationsClient: GetInvestigationsClient
 ) =>
   createServerStepDefinition({
     id: 'nightshift.followUpRecoveredAlert',
@@ -59,7 +56,7 @@ export const followUpRecoveredAlertStepDefinition = (
           'The investigation workflow execution of the recovery round, which records whether it ran'
         ),
       skip_reason: z
-        .enum(['no_open_investigation', 'automation_disabled'])
+        .literal('no_open_investigation')
         .optional()
         .describe('Why no recovery round was queued'),
     }),
@@ -67,19 +64,8 @@ export const followUpRecoveredAlertStepDefinition = (
       const request = context.contextManager.getFakeRequest();
       // getFakeRequest() does not carry space info, so the space ID must be extracted from the
       // workflow context explicitly. See https://github.com/elastic/kibana/issues/284786.
-      const { workflow, execution } = context.contextManager.getContext();
+      const { workflow } = context.contextManager.getContext();
       const input = inputSchema.parse(context.input);
-      if (input.automation_id) {
-        const admission = await admitAutomationRun({
-          automationId: input.automation_id,
-          workflowId: workflow.id,
-          triggeredBy: execution.triggeredBy,
-          request,
-          spaceId: workflow.spaceId,
-          getAutomationsSoClient,
-        });
-        if (!admission.allowed) return { output: { skip_reason: admission.skipReason } };
-      }
       const result = await getInvestigationsClient(
         request,
         workflow.spaceId

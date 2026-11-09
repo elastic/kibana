@@ -485,10 +485,7 @@ export class NightshiftInvestigationsPlugin
           )
         );
         plugins.workflowsExtensions.registerStepDefinition(
-          followUpRecoveredAlertStepDefinition(
-            this.getInvestigationsClient,
-            this.getAutomationsSoClient
-          )
+          followUpRecoveredAlertStepDefinition(this.getInvestigationsClient)
         );
         const isOnlineEvalsPaused = createIsOnlineEvalsPaused(core.getStartServices);
         plugins.workflowsExtensions.registerStepDefinition(

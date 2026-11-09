@@ -133,34 +133,64 @@ describe('AutomationsPage', () => {
     };
   };
 
-  it.each([true, false])(
-    'runs a scheduled automation with enabled=%s immediately from the row menu',
-    async (isEnabled) => {
-      const automation = {
-        id: 'scheduled-1',
-        name: 'Health review',
-        isEnabled,
-        tags: [],
-        trigger: { rows: [{ kind: 'schedule', schedulePreset: 'hourly' }] },
-        execution: { promptTemplate: 'Review health.' },
-        completions: [],
-        runtime: {},
-        author: 'alice',
-      };
-      mockUseFetchAutomations.mockReturnValue({
-        data: { automations: [automation] },
-        isInitialLoading: false,
-      });
-      const mutate = jest.fn();
-      (useRunAutomation as jest.Mock).mockReturnValue({ mutate, isLoading: false });
-      renderPage();
-      fireEvent.click(screen.getByTestId('automationActions-scheduled-1'));
-      fireEvent.click(screen.getByTestId('runAutomation'));
-      expect(mutate).toHaveBeenCalledWith(automation, expect.anything());
-      await waitFor(() => expect(screen.queryByTestId('runAutomation')).not.toBeInTheDocument());
-      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-    }
-  );
+  it('runs an enabled scheduled automation immediately from the row menu', async () => {
+    const automation = {
+      id: 'scheduled-1',
+      name: 'Health review',
+      isEnabled: true,
+      tags: [],
+      trigger: { rows: [{ kind: 'schedule', schedulePreset: 'hourly' }] },
+      execution: { promptTemplate: 'Review health.' },
+      completions: [],
+      runtime: {},
+      author: 'alice',
+    };
+    mockUseFetchAutomations.mockReturnValue({
+      data: { automations: [automation] },
+      isInitialLoading: false,
+    });
+    const mutate = jest.fn();
+    (useRunAutomation as jest.Mock).mockReturnValue({ mutate, isLoading: false });
+    renderPage();
+    fireEvent.click(screen.getByTestId('automationActions-scheduled-1'));
+    fireEvent.click(screen.getByTestId('runAutomation'));
+    expect(mutate).toHaveBeenCalledWith(automation, expect.anything());
+    await waitFor(() => expect(screen.queryByTestId('runAutomation')).not.toBeInTheDocument());
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('disables Run for a disabled automation and explains why', async () => {
+    mockUseFetchAutomations.mockReturnValue({
+      data: {
+        automations: [
+          {
+            id: 'disabled-1',
+            name: 'Health review',
+            isEnabled: false,
+            tags: [],
+            trigger: { rows: [{ kind: 'schedule', schedulePreset: 'hourly' }] },
+            execution: { promptTemplate: 'Review health.' },
+            completions: [],
+            runtime: {},
+            author: 'alice',
+          },
+        ],
+      },
+      isInitialLoading: false,
+    });
+    const mutate = jest.fn();
+    (useRunAutomation as jest.Mock).mockReturnValue({ mutate, isLoading: false });
+    renderPage();
+    fireEvent.click(screen.getByTestId('automationActions-disabled-1'));
+    const run = screen.getByTestId('runAutomation');
+    expect(run).toBeDisabled();
+    fireEvent.click(run);
+    expect(mutate).not.toHaveBeenCalled();
+    fireEvent.mouseOver(run);
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(
+      'This automation is disabled. Enable it to run on a schedule or manually.'
+    );
+  });
 
   it.each([
     [true, [{ kind: 'alert' }], false],

@@ -613,35 +613,7 @@ describe('automation budget enforcement before dispatch', () => {
     }
   );
 
-  it.each([
-    { subject_type: 'manual', subject_id: 'manual', message: 'Review health.' },
-    { subject_type: 'alert', subject_id: 'alert-1' },
-    {
-      subject_type: 'slack_thread',
-      message: 'Review',
-      slack_thread: { workspace: 'T1', channel: 'C1', thread_ts: '1.1' },
-    },
-  ])(
-    'suppresses a disabled automation before resolving evidence or dispatching: %j',
-    async (subject) => {
-      const { definition, soClient, start, getAlertsClient, getInvestigationsClient } = setup(1, 1);
-      soClient.get.mockResolvedValueOnce({
-        id: 'a1',
-        type: 'nightshift-automation',
-        references: [],
-        attributes: { workflowId: 'wf-1', isEnabled: false },
-      });
-      expect(await definition.handler(createContext({ ...input, ...subject }))).toEqual({
-        output: { skip_reason: 'automation_disabled' },
-      });
-      expect(getAlertsClient).not.toHaveBeenCalled();
-      expect(getInvestigationsClient).not.toHaveBeenCalled();
-      expect(start).not.toHaveBeenCalled();
-      expect(soClient.update).not.toHaveBeenCalled();
-    }
-  );
-
-  it('admits a disabled manual automation with a fresh subject and manual accounting', async () => {
+  it('dispatches a manual automation with a fresh subject and manual accounting', async () => {
     const { definition, soClient, start } = setup(1, 1);
     soClient.get.mockResolvedValueOnce({
       id: 'a1',
@@ -649,7 +621,7 @@ describe('automation budget enforcement before dispatch', () => {
       references: [],
       attributes: {
         workflowId: 'wf-1',
-        isEnabled: false,
+        isEnabled: true,
         trigger: { rows: [{ kind: 'schedule' }] },
         runtime: { dailyDispatchLimit: 1 },
       },
@@ -685,23 +657,22 @@ describe('automation budget enforcement before dispatch', () => {
     expect(soClient.update).not.toHaveBeenCalled();
   });
 
-  it('does not grant the exemption to Workflows UI runs or forged metadata', async () => {
-    const { definition, soClient, start } = setup(1, 1);
-    soClient.get.mockResolvedValueOnce({
-      id: 'a1',
-      type: 'nightshift-automation',
-      references: [],
-      attributes: { workflowId: 'wf-1', isEnabled: false },
+  it.each([
+    undefined,
+    { triggeredBy: 'nightshift-automation-manual', nightshiftManualAutomationId: 'a1' },
+  ])('keeps Workflows UI runs on automatic accounting despite metadata: %j', async (metadata) => {
+    const { definition, start } = setup(1, 1);
+    start.mockImplementation(async (_request, { automationBudget }) => {
+      await automationBudget.consume();
+      return { investigation_id: 'inv-1' };
     });
-    expect(
-      await definition.handler(
-        createContext(input, 'manual', {
-          triggeredBy: 'nightshift-automation-manual',
-          nightshiftManualAutomationId: 'a1',
-        })
-      )
-    ).toEqual({ output: { skip_reason: 'automation_disabled' } });
-    expect(start).not.toHaveBeenCalled();
+    expect(await definition.handler(createContext(input, 'manual', metadata))).toEqual({
+      output: { skip_reason: 'daily_limit', daily_limit: 1 },
+    });
+    expect(start).toHaveBeenCalledWith(
+      expect.objectContaining({ trigger_type: 'automatic' }),
+      expect.objectContaining({ automationBudget: expect.anything() })
+    );
   });
 
   it('rejects a manual invocation of a non-scheduled automation', async () => {

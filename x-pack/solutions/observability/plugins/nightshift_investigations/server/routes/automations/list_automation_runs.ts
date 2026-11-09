@@ -15,12 +15,7 @@ import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../../saved_objects/automation_sa
 import type { NightshiftAutomationAttributes } from '../../lib/automations/types';
 import { readAutomationUsage } from '../../lib/automations/automation_budget';
 
-const SKIP_REASONS = [
-  'daily_limit',
-  'investigation_limit',
-  'no_open_investigation',
-  'automation_disabled',
-] as const;
+const SKIP_REASONS = ['daily_limit', 'investigation_limit', 'no_open_investigation'] as const;
 const MAX_ERROR_LENGTH = 200;
 
 const mapRunStatus = (status: ExecutionStatus): 'succeeded' | 'running' | 'failed' | 'skipped' => {
@@ -148,10 +143,8 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
           ? slackSteps.get(exec.id)
           : undefined) ?? defaultSteps.get(exec.id);
       const recoveredStep = recoveredAlertSteps.get(exec.id) ?? recoveredAlertV2Steps.get(exec.id);
-      const isRecoveryFollowUp =
-        recoveredStep !== undefined &&
-        (startedStep === undefined || (!startedStep.output && Boolean(recoveredStep.output)));
-      const step = isRecoveryFollowUp ? recoveredStep : startedStep;
+      const isRecoveryFollowUp = startedStep === undefined && recoveredStep !== undefined;
+      const step = startedStep ?? recoveredStep;
       const input =
         step?.input && !Array.isArray(step.input) && typeof step.input === 'object'
           ? step.input
@@ -162,11 +155,7 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
           : {};
       const getString = (value: unknown) => (typeof value === 'string' ? value : undefined);
 
-      const skipReason = SKIP_REASONS.find(
-        (reason) =>
-          reason === output['skip_reason'] &&
-          (reason !== 'automation_disabled' || exec.status === ExecutionStatus.COMPLETED)
-      );
+      const skipReason = SKIP_REASONS.find((reason) => reason === output['skip_reason']);
       const ruleName = getString(input['rule_name']);
       const recoveredTitle = ruleName ? `Recovered: ${ruleName}` : undefined;
       const title = isRecoveryFollowUp ? recoveredTitle : getString(input['title']);
@@ -191,10 +180,9 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
       };
     });
 
-    const visibleRuns = runs.filter(({ skipReason }) => skipReason !== 'automation_disabled');
-    // Resolve only executors of visible manual runs the caller was authorized to read.
+    // Resolve only executors of manual runs the caller was authorized to read.
     const profileUids = new Set(
-      visibleRuns.flatMap(({ triggeredBy, executedBy }) =>
+      runs.flatMap(({ triggeredBy, executedBy }) =>
         triggeredBy === 'manual' && executedBy?.startsWith('u_') ? [executedBy] : []
       )
     );
@@ -212,7 +200,7 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
     }
 
     return {
-      runs: visibleRuns.map((run) => ({
+      runs: runs.map((run) => ({
         ...run,
         executedByDisplayName:
           run.triggeredBy === 'manual' && run.executedBy
