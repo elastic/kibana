@@ -62,6 +62,9 @@ const sectionResult = ({
 
 const isCritical = ({ severities }: FetchInvestigationsParams) => severities?.[0] === 'critical';
 
+const isRecentFetch = (params: FetchInvestigationsParams) =>
+  params.status === 'open' && !params.inProgress && params.severities == null;
+
 const withInProgress =
   ({
     ids,
@@ -108,22 +111,66 @@ describe('useInvestigationSections', () => {
     );
   });
 
-  it('fetches in progress, then each severity tier, then the investigations without a severity', () => {
+  it('fetches recent, in progress, then each severity tier, then the investigations without a severity', () => {
     const { result } = renderSections('checkout');
 
     expect(
       mockUseFetchInvestigations.mock.calls
-        .slice(0, 6)
-        .map(([{ inProgress, severities, query }]) => ({ inProgress, severities, query }))
+        .slice(0, 7)
+        .map(([{ inProgress, severities, status, perPage, query }]) => ({
+          inProgress,
+          severities,
+          status,
+          perPage,
+          query,
+        }))
     ).toEqual([
-      { inProgress: true, severities: undefined, query: 'checkout' },
-      { inProgress: false, severities: ['critical'], query: 'checkout' },
-      { inProgress: false, severities: ['high'], query: 'checkout' },
-      { inProgress: false, severities: ['medium'], query: 'checkout' },
-      { inProgress: false, severities: ['low'], query: 'checkout' },
-      { inProgress: false, severities: ['none'], query: 'checkout' },
+      {
+        inProgress: false,
+        severities: undefined,
+        status: 'open',
+        perPage: 20,
+        query: 'checkout',
+      },
+      { inProgress: true, severities: undefined, status: undefined, perPage: undefined, query: 'checkout' },
+      {
+        inProgress: false,
+        severities: ['critical'],
+        status: undefined,
+        perPage: undefined,
+        query: 'checkout',
+      },
+      {
+        inProgress: false,
+        severities: ['high'],
+        status: undefined,
+        perPage: undefined,
+        query: 'checkout',
+      },
+      {
+        inProgress: false,
+        severities: ['medium'],
+        status: undefined,
+        perPage: undefined,
+        query: 'checkout',
+      },
+      {
+        inProgress: false,
+        severities: ['low'],
+        status: undefined,
+        perPage: undefined,
+        query: 'checkout',
+      },
+      {
+        inProgress: false,
+        severities: ['none'],
+        status: undefined,
+        perPage: undefined,
+        query: 'checkout',
+      },
     ]);
     expect(result.current.sections.map(({ id }) => id)).toEqual([
+      'recent',
       'in-progress',
       'critical',
       'high',
@@ -177,13 +224,105 @@ describe('useInvestigationSections', () => {
     await waitFor(() => expect(result.current.totalCount).toBe(5));
   });
 
-  it('treats a non-empty in-progress section as active and polls only that section', () => {
+  it('treats a non-empty in-progress section as active and polls recent plus in-progress', () => {
     const { result } = renderSections();
 
     expect(result.current.hasActiveInvestigations).toBe(true);
     expect(
-      mockUseFetchInvestigations.mock.calls.slice(0, 6).map(([params]) => params.refetchInterval)
-    ).toEqual([5_000, undefined, undefined, undefined, undefined, undefined]);
+      mockUseFetchInvestigations.mock.calls.slice(0, 7).map(([params]) => params.refetchInterval)
+    ).toEqual([30_000, 5_000, undefined, undefined, undefined, undefined, undefined]);
+  });
+
+  it('keeps Recent overlapping other sections out of totalCount', async () => {
+    const recentlyOpened = new Date().toISOString();
+    mockUseFetchInvestigations.mockImplementation((params) => {
+      if (isRecentFetch(params)) {
+        return {
+          ...sectionResult({ ids: ['just-opened'] }),
+          investigations: [
+            {
+              ...investigation('just-opened'),
+              in_progress: false,
+              created_at: recentlyOpened,
+              updated_at: recentlyOpened,
+              metadata: { status: 'open', severity: 'high' },
+            },
+          ],
+        };
+      }
+      if (params.inProgress) {
+        return sectionResult({ ids: ['running-a'] });
+      }
+      if (params.severities?.[0] === 'high') {
+        return {
+          ...sectionResult({ ids: ['just-opened'], total: 1 }),
+          investigations: [
+            {
+              ...investigation('just-opened'),
+              in_progress: false,
+              created_at: recentlyOpened,
+              updated_at: recentlyOpened,
+              metadata: { status: 'open', severity: 'high' },
+            },
+          ],
+        };
+      }
+      return sectionResult();
+    });
+
+    const { result } = renderSections();
+
+    await waitFor(() => {
+      expect(result.current.sections.find((section) => section.id === 'recent')?.total).toBe(1);
+      expect(result.current.sections.find((section) => section.id === 'high')?.total).toBe(1);
+    });
+    // Recent overlaps High: count the High item once, plus the running investigation.
+    expect(result.current.totalCount).toBe(2);
+  });
+
+  it('keeps closed and stale openings out of Recently Investigated', async () => {
+    const now = Date.now();
+    const justOpened = new Date(now - 60_000).toISOString();
+    const threeDaysAgo = new Date(now - 3 * 24 * 60 * 60 * 1000).toISOString();
+    mockUseFetchInvestigations.mockImplementation((params) => {
+      if (isRecentFetch(params)) {
+        return {
+          ...sectionResult({ ids: ['fresh-open', 'old-open', 'closed-touch'] }),
+          investigations: [
+            {
+              ...investigation('fresh-open'),
+              in_progress: false,
+              created_at: justOpened,
+              updated_at: justOpened,
+              metadata: { status: 'open', severity: 'high' },
+            },
+            {
+              ...investigation('old-open'),
+              in_progress: false,
+              created_at: threeDaysAgo,
+              updated_at: justOpened,
+              metadata: { status: 'open', severity: 'medium' },
+            },
+            {
+              ...investigation('closed-touch'),
+              in_progress: false,
+              created_at: justOpened,
+              updated_at: justOpened,
+              metadata: { status: 'closed', severity: 'critical' },
+            },
+          ],
+        };
+      }
+      return sectionResult();
+    });
+
+    const { result } = renderSections();
+
+    await waitFor(() => {
+      const recent = result.current.sections.find((section) => section.id === 'recent');
+      expect(recent?.investigations.map(({ id }) => id)).toEqual(['fresh-open']);
+      expect(recent?.total).toBe(1);
+    });
   });
 
   it('refetches the other sections when work leaves the in-progress section', () => {

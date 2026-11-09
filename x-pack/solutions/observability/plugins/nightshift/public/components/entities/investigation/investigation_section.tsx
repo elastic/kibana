@@ -80,6 +80,13 @@ const getSectionPresentation = (id: InvestigationSectionId): SectionPresentation
   const anchors = { id, anchorId, headingId: `${anchorId}-heading` };
 
   switch (id) {
+    case 'recent':
+      return {
+        ...anchors,
+        title: i18n.translate('xpack.nightshift.investigations.recentSectionTitle', {
+          defaultMessage: 'Recently Investigated',
+        }),
+      };
     case 'in-progress':
       return {
         ...anchors,

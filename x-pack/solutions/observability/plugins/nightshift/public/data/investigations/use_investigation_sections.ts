@@ -31,11 +31,23 @@ import {
  */
 const IN_PROGRESS_REFETCH_INTERVAL_MS = 5_000;
 
+/** Recent re-checks the 10-minute window so finished work ages out without a full page reload. */
+const RECENT_REFETCH_INTERVAL_MS = 30_000;
+
+/** How far back "Recently Investigated" looks for open investigations that are not in progress. */
+export const RECENT_INVESTIGATION_WINDOW_MS = 10 * 60 * 1000;
+
+/** Candidate window for Recent: newest-by-created_at, shallow enough to poll with the section. */
+const RECENT_CANDIDATES = 20;
+
 /**
+ * `recent` overlays open investigations opened (`created_at`) in the last
+ * {@link RECENT_INVESTIGATION_WINDOW_MS}. In-progress ones stay in In progress only. Open items
+ * may still also appear in their severity bucket.
  * `not-rated` holds the investigations nothing works on that have no severity: the agent did not
  * record one, for example because its run ended early. There is no failed state.
  */
-export type InvestigationSectionId = 'in-progress' | Severity | 'not-rated';
+export type InvestigationSectionId = 'recent' | 'in-progress' | Severity | 'not-rated';
 
 export interface InvestigationSectionState extends FetchInvestigationsResult {
   id: InvestigationSectionId;
@@ -49,11 +61,32 @@ export interface InvestigationSectionsResult {
   hasActiveInvestigations: boolean;
   isInitialLoading: boolean;
   isFetching: boolean;
-  /** Investigations matching the current filters, each counted once: the sections are disjoint. */
+  /**
+   * Investigations matching the current filters, each counted once across the disjoint home
+   * buckets (excludes Recent, which overlaps the others).
+   */
   totalCount: number;
   loadedCount: number;
   refetchAll: () => void;
 }
+
+/**
+ * Open, not-in-progress investigations opened (`created_at`) within the Recent window.
+ * Closed investigations are never recent, regardless of how recently they were updated.
+ */
+export const isRecentInvestigation = (
+  investigation: InvestigationSummary,
+  now = Date.now()
+): boolean => {
+  if (investigation.in_progress) {
+    return false;
+  }
+  if (investigation.metadata.status === 'closed') {
+    return false;
+  }
+  const opened = Date.parse(investigation.created_at);
+  return Number.isFinite(opened) && now - opened <= RECENT_INVESTIGATION_WINDOW_MS;
+};
 
 const toInvestigationIds = (investigations: InvestigationSummary[]): Set<string> =>
   new Set(investigations.map(({ id }) => id));
@@ -81,12 +114,32 @@ const toSectionState = ({
   ...queryResult,
 });
 
+const toRecentSection = (queryResult: FetchInvestigationsResult): FetchInvestigationsResult => {
+  const investigations = queryResult.investigations.filter((investigation) =>
+    isRecentInvestigation(investigation)
+  );
+  return {
+    ...queryResult,
+    investigations,
+    total: investigations.length,
+    hasMore: false,
+  };
+};
+
 export const useInvestigationSections = ({
   query,
 }: {
   query?: string;
 } = {}): InvestigationSectionsResult => {
   const { http, agenticInvestigations } = useKibana().services;
+
+  const recentCandidates = useFetchInvestigations({
+    inProgress: false,
+    status: 'open',
+    query,
+    perPage: RECENT_CANDIDATES,
+    refetchInterval: RECENT_REFETCH_INTERVAL_MS,
+  });
 
   const inProgress = useFetchInvestigations({
     inProgress: true,
@@ -117,6 +170,7 @@ export const useInvestigationSections = ({
     keepPreviousData: true,
   });
 
+  const { refetch: refetchRecent } = recentCandidates;
   const { refetch: refetchCritical } = critical;
   const { refetch: refetchHigh } = high;
   const { refetch: refetchMedium } = medium;
@@ -155,6 +209,7 @@ export const useInvestigationSections = ({
       return;
     }
 
+    refetchRecent();
     refetchCritical();
     refetchHigh();
     refetchMedium();
@@ -166,6 +221,7 @@ export const useInvestigationSections = ({
     inProgress.total,
     inProgress.isPreviousData,
     inProgressInvestigations,
+    refetchRecent,
     refetchCritical,
     refetchHigh,
     refetchMedium,
@@ -174,8 +230,11 @@ export const useInvestigationSections = ({
     refetchSeverityCounts,
   ]);
 
+  const recent = useMemo(() => toRecentSection(recentCandidates), [recentCandidates]);
+
   const sections = useMemo(
     () => [
+      toSectionState({ id: 'recent', queryResult: recent }),
       toSectionState({ id: 'in-progress', queryResult: inProgress }),
       toSectionState({ id: 'critical', queryResult: critical }),
       toSectionState({ id: 'high', queryResult: high }),
@@ -183,7 +242,7 @@ export const useInvestigationSections = ({
       toSectionState({ id: 'low', queryResult: low }),
       toSectionState({ id: 'not-rated', queryResult: notRated }),
     ],
-    [inProgress, critical, high, medium, low, notRated]
+    [recent, inProgress, critical, high, medium, low, notRated]
   );
 
   const severityCounts = useMemo(
@@ -198,6 +257,11 @@ export const useInvestigationSections = ({
     void refetchSeverityCounts();
   }, [sections, refetchSeverityCounts]);
 
+  const countedSections = useMemo(
+    () => sections.filter((section) => section.id !== 'recent'),
+    [sections]
+  );
+
   return {
     sections,
     severityCounts,
@@ -205,8 +269,11 @@ export const useInvestigationSections = ({
     hasActiveInvestigations,
     isInitialLoading: sections.some((section) => section.isInitialLoading),
     isFetching: sections.some((section) => section.isFetching),
-    totalCount: sections.reduce((sum, section) => sum + section.total, 0),
-    loadedCount: sections.reduce((sum, section) => sum + section.investigations.length, 0),
+    totalCount: countedSections.reduce((sum, section) => sum + section.total, 0),
+    loadedCount: countedSections.reduce(
+      (sum, section) => sum + section.investigations.length,
+      0
+    ),
     refetchAll,
   };
 };
