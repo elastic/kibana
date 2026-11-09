@@ -28,7 +28,7 @@ import {
  *     agent's inferences, so the calls that write memories omit it.
  *
  * With `evidenceOnly`, calls that are not evidence are dropped with their results: reads of the
- * knowledge Nightshift seeded into the sandbox (Cortex, decision trees, environment docs), and
+ * knowledge Nightshift seeded into the sandbox (Wiki, decision trees, environment docs), and
  * calls that only record the agent's own process or findings (recorded findings, todos, skills,
  * file edits).
  * Any other tool is kept, so a new query tool is not silently hidden.
@@ -57,9 +57,9 @@ const MAX_NOTE_CHARS = 400;
 const RESULT_EXCERPT_CHARS = [1_500, 800, 400, 0];
 
 // Memory transcripts keep `/workspace/memories/*` reads so critique can see which recalled
-// memories were opened and followed, while dropping Cortex, decision trees, and environment docs.
+// memories were opened and followed, while dropping Wiki, decision trees, and environment docs.
 const MEMORY_SKIP_SEEDED_ROOTS: readonly SeededWorkspaceKind[] = [
-  'cortex',
+  'wiki',
   'decision_trees',
   'env_docs',
 ];
@@ -160,7 +160,7 @@ export const renderMemoryTranscript = ({
 }: {
   task: string;
   answer?: string;
-  /** Drop seeded Cortex and decision-tree reads and recorded findings, with their results. */
+  /** Drop seeded Wiki and decision-tree reads and recorded findings, with their results. */
   evidenceOnly?: boolean;
   /** The round's steps, in order, when the persisted round could be read. */
   investigation?: TranscriptStep[];
