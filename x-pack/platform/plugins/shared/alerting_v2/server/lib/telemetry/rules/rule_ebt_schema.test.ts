@@ -7,6 +7,8 @@
 
 import {
   RULE_EBT_EVENT_TYPES,
+  UPDATED_FIELD_PATH_MAX_LENGTH,
+  UPDATED_FIELDS_MAX_COUNT,
   ruleEbtEventTypeTelemetrySchema,
   ruleChangedTelemetryDataSchema,
 } from './rule_ebt_schema';
@@ -51,6 +53,46 @@ describe('ruleChangedTelemetryDataSchema', () => {
     expect(
       ruleChangedTelemetryDataSchema.safeParse({ rule_id: 'rule-1', origin: { channel: 'api' } })
         .success
+    ).toBe(false);
+  });
+
+  it('accepts any dotted updated field path', () => {
+    const data = {
+      rule_id: 'rule-1',
+      origin,
+      updated_fields: ['metadata.name', 'schedule.every', 'version'],
+    };
+
+    expect(ruleChangedTelemetryDataSchema.parse(data)).toEqual(data);
+  });
+
+  it('rejects an empty updated field path', () => {
+    expect(
+      ruleChangedTelemetryDataSchema.safeParse({
+        rule_id: 'rule-1',
+        origin,
+        updated_fields: [''],
+      }).success
+    ).toBe(false);
+  });
+
+  it('rejects an updated field path longer than the bound', () => {
+    expect(
+      ruleChangedTelemetryDataSchema.safeParse({
+        rule_id: 'rule-1',
+        origin,
+        updated_fields: ['a'.repeat(UPDATED_FIELD_PATH_MAX_LENGTH + 1)],
+      }).success
+    ).toBe(false);
+  });
+
+  it('rejects an updated_fields list longer than the bound', () => {
+    expect(
+      ruleChangedTelemetryDataSchema.safeParse({
+        rule_id: 'rule-1',
+        origin,
+        updated_fields: Array.from({ length: UPDATED_FIELDS_MAX_COUNT + 1 }, () => 'kind'),
+      }).success
     ).toBe(false);
   });
 });
