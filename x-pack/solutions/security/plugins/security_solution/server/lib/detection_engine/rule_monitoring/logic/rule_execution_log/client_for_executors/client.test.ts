@@ -128,13 +128,19 @@ describe('createRuleExecutionLogClientForExecutors', () => {
       );
     });
 
-    it('does not report a bare ES client request timeout as a user error', async () => {
+    it('reports an ES|QL rule run whose search hit the ES client request timeout as a user error', async () => {
       const client = createClient();
 
+      // performEsqlRequest logs the TimeoutError with its prefix, then the rule type wrapper logs
+      // the bare message returned by the executor.
+      client.error('Error while performing ES|QL search: Request timed out');
       client.error('Request timed out');
       await client.close();
 
-      expect(ruleResultService.addLastRunError).toHaveBeenCalledWith('Request timed out', false);
+      expect(ruleResultService.addLastRunError).toHaveBeenCalledWith(
+        'Error while performing ES|QL search: Request timed out, Request timed out',
+        true
+      );
     });
 
     it('does not report an error to the rule result service when the run succeeded', async () => {

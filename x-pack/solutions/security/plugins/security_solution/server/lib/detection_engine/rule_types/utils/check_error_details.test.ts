@@ -239,17 +239,13 @@ line 1:45: invalid [test_not_lookup] resolution in lookup mode to an index in [s
       expect(checkErrorDetails(new Error(errorMessage))).toHaveProperty('isUserError', true);
     });
 
-    // A bare `Request timed out` can come from any Elasticsearch client used during the run, e.g.
-    // the rule registry client writing alerts with the global `elasticsearch.requestTimeout`.
-    // Those can indicate a platform problem, so they keep their framework error classification.
-    it('should not mark a bare "Request timed out" as user error', () => {
-      expect(checkErrorDetails(new Error('Request timed out'))).toHaveProperty(
+    // The bare text is what the rule type wrapper logs from the executor result, and the run is only
+    // a user error if every logged entry is, so it has to match without a prefix.
+    it('should mark a bare "Request timed out" as user error', () => {
+      expect(checkErrorDetails(new Error('Request timed out'))).toHaveProperty('isUserError', true);
+      expect(checkErrorDetails('TimeoutError: Request timed out')).toHaveProperty(
         'isUserError',
-        false
-      );
-      expect(checkErrorDetails(new Error('TimeoutError: Request timed out'))).toHaveProperty(
-        'isUserError',
-        false
+        true
       );
     });
 

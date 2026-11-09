@@ -29,11 +29,14 @@ const USER_ERRORS_EXCEPTIONS = [
 // They are plain strings there rather than exported constants, so the tests in
 // check_error_details.test.ts pin the exact text and will fail if the framework changes it.
 //
-// `Request timed out` comes from the Elasticsearch client itself and is deliberately NOT matched
-// on its own: clients other than the rule's scoped cluster client (e.g. the rule registry client
-// writing alerts) use the global `elasticsearch.requestTimeout` and a timeout there can indicate a
-// platform problem. It is only matched with the prefixes the rule executors add when logging a
-// failed rule search (esql/esql_request.ts and utils/single_search_after.ts).
+// `Request timed out` is the Elasticsearch client's TimeoutError. The rule's scoped cluster client
+// uses the rule timeout as its request timeout, so this fires when a rule search outlives the rule
+// timeout before Task Manager cancels the run. The executors log it both with a prefix
+// (esql/esql_request.ts, utils/single_search_after.ts) and bare (the message returned to
+// create_security_rule_type_wrapper.ts), and the run is only a user error if every entry is, so the
+// bare text has to match. Other clients used during a run (e.g. the rule registry client writing
+// alerts) can emit the same text on the global `elasticsearch.requestTimeout`; those cases are
+// accepted as user errors here and left to the cross-project user error spike monitoring.
 const TIMEOUT_REASON_SUBSTRINGS = [
   // wrap_scoped_cluster_client.ts, esql / eql / search wrappers
   'ES|QL search has been aborted due to cancelled execution',
@@ -41,9 +44,8 @@ const TIMEOUT_REASON_SUBSTRINGS = [
   'Search has been aborted due to cancelled execution',
   // esql/esql_request.ts, executor noticed the cancellation between two poll requests
   'Rule execution cancelled due to timeout',
-  // ES client request timeout on a rule search
-  'Error while performing ES|QL search: Request timed out',
-  'Error searching events\nError: TimeoutError: Request timed out',
+  // ES client TimeoutError, raised when a rule search outlives the rule timeout
+  'Request timed out',
 ];
 
 // illegal_argument_exception and query_shard_exception are too broad to classify as user
