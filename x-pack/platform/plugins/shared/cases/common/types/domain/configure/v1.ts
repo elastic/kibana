@@ -166,5 +166,5 @@ export type ConfigurationAttributes = z.infer<typeof ConfigurationAttributesSche
 export type Configuration = z.infer<typeof ConfigurationSchema>;
 export type Configurations = z.infer<typeof ConfigurationsSchema>;
 export type ObservableTypesConfiguration = z.infer<typeof ObservableTypesConfigurationSchema>;
-export type ObservableTypeConfiguration = z.infer<typeof CaseObservableTypeSchema>;
+export type ObservableTypeConfiguration = ObservableTypesConfiguration[number];
 export type WorkflowTagsConfiguration = z.infer<typeof WorkflowTagsConfigurationSchema>;

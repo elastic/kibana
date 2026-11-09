@@ -262,6 +262,35 @@ describe('usePersistConfiguration', () => {
     });
   });
 
+  it('sends the overrides of built-in observable types without a label', async () => {
+    const spyPatch = jest.spyOn(api, 'patchCaseConfigure');
+
+    const { result } = renderHook(() => usePersistConfiguration(), {
+      wrapper: TestProviders,
+    });
+
+    const override = {
+      key: 'observable-type-agent-id',
+      paths: [{ path: 'agent.id', enabled: false }],
+    };
+
+    act(() => {
+      result.current.mutate({
+        ...request,
+        observableTypes: [...observableTypesMock, { ...override, label: 'Agent id' }],
+        id: 'test-id',
+        version: 'test-version',
+      });
+    });
+
+    await waitFor(() => {
+      expect(spyPatch).toHaveBeenCalledWith(
+        'test-id',
+        expect.objectContaining({ observableTypes: [...observableTypesMock, override] })
+      );
+    });
+  });
+
   it('sends workflowTags to patchCaseConfigure', async () => {
     const spyPatch = jest.spyOn(api, 'patchCaseConfigure');
 

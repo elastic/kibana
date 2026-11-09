@@ -101,6 +101,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
     ConnectorEditFlyout,
     onEditObservableType,
     onDeleteObservableType,
+    onChangeObservableTypes,
     AddOrEditObservableTypeFlyout,
   } = useConfigureCasesController<LegacyFlyoutType>();
 
@@ -229,6 +230,9 @@ export const ConfigureCases: React.FC = React.memo(() => {
                       }
                       handleDeleteObservableType={onDeleteObservableType}
                       handleEditObservableType={onEditObservableType}
+                      handleChangeObservableTypes={
+                        showExtractObservablesSection ? onChangeObservableTypes : undefined
+                      }
                     />
                   </SettingsSection>
                 )}

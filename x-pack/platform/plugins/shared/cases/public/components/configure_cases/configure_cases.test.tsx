@@ -508,6 +508,49 @@ describe('ConfigureCases', () => {
     });
   });
 
+  describe('observable type fields', () => {
+    it('persists a turned-off default field with the custom types', async () => {
+      useGetCaseConfigurationMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        data: { ...useCaseConfigureResponse.data, observableTypes: observableTypesMock },
+      }));
+
+      renderWithTestingProviders(<ConfigureCases />);
+
+      await userEvent.click(
+        await screen.findByTestId('observable-type-expand-observable-type-agent-id')
+      );
+      await userEvent.click(
+        await screen.findByTestId('observable-type-path-switch-observable-type-agent-id-agent.id')
+      );
+
+      expect(persistCaseConfigure).toHaveBeenCalledWith(
+        expect.objectContaining({
+          observableTypes: [
+            ...observableTypesMock,
+            {
+              key: 'observable-type-agent-id',
+              label: 'Agent id',
+              paths: [{ path: 'agent.id', enabled: false }],
+            },
+          ],
+        })
+      );
+    });
+
+    it('does not show the fields when extraction is off for the owner', async () => {
+      renderWithTestingProviders(<ConfigureCases />, {
+        wrapperProps: { owner: ['cases'] },
+      });
+
+      await screen.findByTestId('cases-settings-panel');
+
+      expect(
+        screen.queryByTestId('observable-type-observable-type-agent-id')
+      ).not.toBeInTheDocument();
+    });
+  });
+
   it('renders observable types as line-separated rows without a subdued panel', async () => {
     useGetCaseConfigurationMock.mockImplementation(() => ({
       ...useCaseConfigureResponse,

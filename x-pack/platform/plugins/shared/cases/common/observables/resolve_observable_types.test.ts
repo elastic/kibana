@@ -6,7 +6,23 @@
  */
 
 import { DEFAULT_OBSERVABLE_TYPES } from './default_observable_types';
-import { resolveObservableTypes } from './resolve_observable_types';
+import {
+  getCustomObservableTypes,
+  resolveObservableTypes,
+  toBuiltinOverride,
+  toStoredObservableTypes,
+} from './resolve_observable_types';
+
+const builtinOverride = {
+  key: 'observable-type-agent-id',
+  label: 'Agent id',
+  paths: [{ path: 'agent.id', enabled: false }],
+};
+const customType = {
+  key: 'employee-id',
+  label: 'Employee ID',
+  paths: [{ path: 'user.employee_id', enabled: true }],
+};
 
 describe('resolveObservableTypes', () => {
   it('returns the defaults when nothing is stored', () => {
@@ -74,5 +90,44 @@ describe('resolveObservableTypes', () => {
     ]);
 
     expect(resolved['ticket-ref'].paths).toEqual([]);
+  });
+});
+
+describe('toBuiltinOverride', () => {
+  const ipv4 = DEFAULT_OBSERVABLE_TYPES['observable-type-ipv4'];
+
+  it('returns no override when the paths match the defaults', () => {
+    expect(toBuiltinOverride(ipv4, ipv4.paths)).toBeUndefined();
+  });
+
+  it('stores only a turned-off default path and the added paths', () => {
+    expect(
+      toBuiltinOverride(ipv4, [
+        { path: 'source.ip', enabled: true },
+        { path: 'destination.ip', enabled: false },
+        { path: 'zscaler.client_ip', enabled: true },
+      ])
+    ).toEqual({
+      key: 'observable-type-ipv4',
+      paths: [
+        { path: 'destination.ip', enabled: false },
+        { path: 'zscaler.client_ip', enabled: true },
+      ],
+    });
+  });
+});
+
+describe('getCustomObservableTypes', () => {
+  it('removes the overrides of built-in types', () => {
+    expect(getCustomObservableTypes([builtinOverride, customType])).toEqual([customType]);
+  });
+});
+
+describe('toStoredObservableTypes', () => {
+  it('removes the label from the overrides of built-in types only', () => {
+    expect(toStoredObservableTypes([builtinOverride, customType])).toEqual([
+      { key: 'observable-type-agent-id', paths: [{ path: 'agent.id', enabled: false }] },
+      customType,
+    ]);
   });
 });

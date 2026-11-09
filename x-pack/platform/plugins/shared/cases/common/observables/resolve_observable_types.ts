@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { OBSERVABLE_TYPES_BUILTIN_KEYS } from '../constants/observables';
 import type { DefaultObservableType, ObservableTypePath } from './default_observable_types';
 
 export interface StoredObservableType {
@@ -46,3 +47,40 @@ export const resolveObservableTypes = (
 
   return resolvedTypes;
 };
+
+/**
+ * Returns the override that stores only the paths that differ from the defaults of a built-in type.
+ */
+export const toBuiltinOverride = (
+  defaultType: DefaultObservableType,
+  paths: readonly ObservableTypePath[]
+): StoredObservableType | undefined => {
+  const defaultEnabledByPath = new Map(
+    defaultType.paths.map(({ path, enabled }) => [path, enabled])
+  );
+  const changedPaths = paths.filter(
+    ({ path, enabled }) => defaultEnabledByPath.get(path) !== enabled
+  );
+
+  return changedPaths.length > 0 ? { key: defaultType.key, paths: changedPaths } : undefined;
+};
+
+const isBuiltinObservableTypeKey = (key: string): boolean =>
+  OBSERVABLE_TYPES_BUILTIN_KEYS.includes(key);
+
+/**
+ * Returns the observable types that are not built in, without the overrides of built-in types.
+ */
+export const getCustomObservableTypes = <T extends StoredObservableType>(
+  observableTypes: readonly T[]
+): T[] => observableTypes.filter(({ key }) => !isBuiltinObservableTypeKey(key));
+
+/**
+ * Removes the label that the read path fills on the overrides of built-in types.
+ */
+export const toStoredObservableTypes = (
+  observableTypes: readonly StoredObservableType[]
+): StoredObservableType[] =>
+  observableTypes.map(({ label, ...observableType }) =>
+    isBuiltinObservableTypeKey(observableType.key) ? observableType : { ...observableType, label }
+  );
