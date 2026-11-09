@@ -14,7 +14,14 @@ import type { HarnessTarget } from './clients';
 import { executeGenerateEsql } from './clients';
 import { executeGold, scoreQuery } from './scorers';
 import type { QueryScore } from './scorers';
-import { activeConfigPath, harnessPaths, writeActiveConfig } from './workspace';
+import {
+  activeConfigPath,
+  harnessPaths,
+  writeActiveConfig,
+  writeLaneAssets,
+  writeLaneConfig,
+} from './workspace';
+import type { Lane } from './workspace';
 import { costUsd } from './pricing';
 
 export interface ExampleRun {
@@ -124,9 +131,15 @@ export const runConfig = async ({
   concurrency = 4,
   goldRows,
   outputDir,
+  lane,
+  assets,
 }: {
   label: string;
   config: Record<string, unknown>;
+  /** Which Kibana process serves this run; omitted for the legacy single-process setup. */
+  lane?: Lane;
+  /** Asset overrides installed for this run (documentation corpus, instruction block). */
+  assets?: Record<string, string>;
   examples: HarnessExample[];
   rollouts: number;
   esClient: EsClient;
@@ -136,8 +149,12 @@ export const runConfig = async ({
   goldRows: Map<string, string[] | null>;
   outputDir: string;
 }): Promise<RunSummary> => {
-  const { tracePath } = harnessPaths();
-  const configHash = writeActiveConfig(config);
+  const { tracePath: sharedTracePath } = harnessPaths();
+  const tracePath = lane ? Path.join(harnessPaths().root, lane, 'trace.jsonl') : sharedTracePath;
+  const configHash = lane ? writeLaneConfig(lane, config) : writeActiveConfig(config);
+  if (lane) {
+    writeLaneAssets(lane, assets ?? {});
+  }
   log.info(
     `[harness-opt] running "${label}" (config ${configHash}) over ${examples.length} examples × ${rollouts} rollouts`
   );

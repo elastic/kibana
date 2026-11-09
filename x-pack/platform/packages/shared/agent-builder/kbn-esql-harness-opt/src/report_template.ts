@@ -82,6 +82,8 @@ const esc = (v) => String(v ?? '').replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'
 const n = (v, d = 3) => (typeof v === 'number' && isFinite(v) ? v.toFixed(d) : '—');
 const usd = (v) => (typeof v === 'number' && isFinite(v) ? '$' + v.toFixed(4) : '—');
 const pct = (v) => (typeof v === 'number' ? Math.round(v * 100) + '%' : '—');
+/** Attribute carrying a route, quoted with entities so no backslash escaping is needed. */
+const goAttr = (route) => 'data-go="' + esc(JSON.stringify(route)) + '"';
 const sign = (v, d = 3) => (typeof v === 'number' ? (v >= 0 ? '+' : '') + v.toFixed(d) : '—');
 const cls = (v) => (v > 0.001 ? 'good' : v < -0.001 ? 'bad' : 'muted');
 
@@ -245,8 +247,7 @@ function lineageGraph() {
     const stroke = colour[node.state];
     const deltaText = node.delta === null ? '' : sign(node.delta) + ' reward' +
       (node.cost ? ' · ' + node.cost.toFixed(2) + '× cost' : '');
-    return '<g class="gnode" ' + (node.round !== null ? 'data-go=\'' +
-      JSON.stringify({ tab: 'rounds', round: node.round }) + '\'' : '') + ' transform="translate(' + p.x + ',' + p.y + ')">' +
+    return '<g class="gnode" ' + (node.round !== null ? goAttr({ tab: 'rounds', round: node.round }) : '') + ' transform="translate(' + p.x + ',' + p.y + ')">' +
       '<rect width="' + W + '" height="' + H + '" rx="9" fill="#141b23" stroke="' + stroke + '" stroke-width="1.5"/>' +
       '<rect width="4" height="' + H + '" rx="2" fill="' + stroke + '"/>' +
       '<text x="14" y="22" fill="#e6edf3" font-size="13" font-weight="600">' + esc(node.label) + '</text>' +
@@ -266,14 +267,7 @@ function viewCampaign() {
   const accepted = DATA.rounds.filter((r) => r.gate && r.gate.accepted).length;
   const sealed = DATA.sealed;
 
-  const timeline = '<div class="timeline">' + DATA.rounds.map((round) =>
-    '<div class="node ' + (round.gate && round.gate.accepted ? 'accepted' : 'rejected') + '" data-go=\\'' +
-    JSON.stringify({ tab: 'rounds', round: round.round }) + '\\'>' +
-    '<b>round ' + round.round + '</b><br>' +
-    '<span class="muted">' + esc((round.slots || []).join(', ') || '—') + '</span><br>' +
-    '<span class="' + cls(round.gate ? round.gate.meanDelta : 0) + '">' +
-    (round.gate ? sign(round.gate.meanDelta) + ' reward' : esc(round.rejectedReason || '')) + '</span>' +
-    '</div>').join('') + '</div>';
+  const timeline = lineageGraph();
 
   const sealedTable = sealed.length
     ? '<table><tr><th>config</th><th>reward</th><th>anchor</th><th>generated</th><th>cost</th><th>$/solved</th></tr>' +
@@ -297,7 +291,7 @@ function viewCampaign() {
     '<table><tr><th>round</th><th>slots</th><th>Δ reward [CI]</th><th>$/solved</th><th>regressions</th><th>verdict</th><th>rationale</th></tr>' +
     DATA.rounds.map((round) => {
       const g = round.gate;
-      return '<tr data-go=\\'' + JSON.stringify({ tab: 'rounds', round: round.round }) + '\\' style="cursor:pointer">' +
+      return '<tr ' + goAttr({ tab: 'rounds', round: round.round }) + ' style="cursor:pointer">' +
         '<td>' + round.round + '</td><td>' + esc((round.slots || []).join(', ')) + '</td>' +
         '<td class="' + cls(g ? g.meanDelta : 0) + '">' + (g ? sign(g.meanDelta) + ' [' + n(g.ciLow) + ', ' + n(g.ciHigh) + ']' : '—') + '</td>' +
         '<td>' + (g ? usd(g.incumbentCostPerSolved) + ' → ' + usd(g.candidateCostPerSolved) : '—') + '</td>' +
@@ -311,7 +305,7 @@ function viewCampaign() {
 function viewRounds() {
   if (route.round === undefined) {
     return '<h2>Rounds</h2>' + DATA.rounds.map((round) =>
-      '<p><a data-go=\\'' + JSON.stringify({ tab: 'rounds', round: round.round }) + '\\'>round ' +
+      '<p><a ' + goAttr({ tab: 'rounds', round: round.round }) + '>round ' +
       round.round + '</a> — ' + verdict(round) + ' ' + esc((round.slots || []).join(', ')) + '</p>').join('');
   }
 
@@ -324,7 +318,7 @@ function viewRounds() {
     '<tr><td class="' + cls(seed.delta) + '">' + sign(seed.delta, 2) + '</td>' +
     '<td>' + n(seed.incumbent, 2) + ' → ' + n(seed.candidate, 2) + '</td>' +
     '<td>' + esc(seed.provenance) + '</td>' +
-    '<td><a data-go=\\'' + JSON.stringify({ tab: 'examples', example: seed.exampleId }) + '\\'>' +
+    '<td><a ' + goAttr({ tab: 'examples', example: seed.exampleId }) + '>' +
     esc(seed.question.slice(0, 110)) + '</a></td></tr>').join('');
 
   const verification = round.verification
@@ -336,7 +330,7 @@ function viewRounds() {
       ' unpredicted</td></tr></table>'
     : '<p class="muted">No manifest to verify.</p>';
 
-  return '<p class="back" data-go=\\'' + JSON.stringify({ tab: 'campaign' }) + '\\'>← campaign</p>' +
+  return '<p class="back" ' + goAttr({ tab: 'campaign' }) + '>← campaign</p>' +
     '<h2>Round ' + round.round + ' ' + verdict(round) + '</h2>' +
     (g ? cards([
       ['Δ reward', sign(g.meanDelta), cls(g.meanDelta)],
@@ -353,18 +347,18 @@ function viewRounds() {
     '<h3>Per-seed effect (' + perSeed.length + ' seeds, worst first)</h3>' +
     '<table><tr><th>Δ</th><th>reward</th><th>source</th><th>question</th></tr>' + seedRows + '</table>' +
     '<h3>Runs in this round</h3>' +
-    (round.runs || []).map((runId) => '<p><a data-go=\\'' + JSON.stringify({ tab: 'runs', run: runId }) +
-      '\\'>' + esc(runId) + '</a></p>').join('');
+    (round.runs || []).map((runId) => '<p><a ' + goAttr({ tab: 'runs', run: runId }) + '>' + esc(runId) + '</a></p>').join('');
 }
 
 /* ----------------------------------------------------------------- runs */
 function viewRuns() {
   if (route.run === undefined) {
     const rows = DATA.runs.map((run) =>
-      '<tr><td><a data-go=\\'' + JSON.stringify({ tab: 'runs', run: run.id }) + '\\'>' + esc(run.label) + '</a></td>' +
+      '<tr><td><a ' + goAttr({ tab: 'runs', run: run.id }) + '>' + esc(run.label) + '</a></td>' +
       '<td class="muted">' + esc(run.group) + '</td><td>' + n(run.meanReward) + '</td>' +
       '<td>' + pct(run.meanExecutes) + '</td><td>' + n(run.meanResultEquivalence) + '</td>' +
-      '<td>' + usd(run.totalCostUsd) + '</td><td>' + run.exampleCount + '</td>' +
+      '<td>' + usd(run.totalCostUsd) + (run.costEstimated ? '<span class="muted"> est</span>' : '') +
+      '</td><td>' + run.exampleCount + '</td>' +
       '<td class="muted">' + esc(run.models.join(', ')) + '</td></tr>').join('');
     return '<h2>Runs</h2><table><tr><th>run</th><th>group</th><th>reward</th><th>executes</th>' +
       '<th>result eq</th><th>cost</th><th>n</th><th>models</th></tr>' + rows + '</table>';
@@ -381,14 +375,14 @@ function viewRuns() {
 
   const provenances = [...new Set(run.results.map((r) => r.provenance))];
 
-  return '<p class="back" data-go=\\'' + JSON.stringify({ tab: 'runs' }) + '\\'>← runs</p>' +
+  return '<p class="back" ' + goAttr({ tab: 'runs' }) + '>← runs</p>' +
     '<h2>' + esc(run.label) + ' <span class="muted">' + esc(run.group) + '</span></h2>' +
     cards([
       ['reward', n(run.meanReward)],
       ['executes', pct(run.meanExecutes)],
       ['result eq', n(run.meanResultEquivalence)],
       ['tries', n(run.meanTries, 2)],
-      ['cost', usd(run.totalCostUsd)],
+      ['cost' + (run.costEstimated ? ' (est.)' : ''), usd(run.totalCostUsd)],
       ['tokens', run.totalInputTokens + ' / ' + run.totalOutputTokens],
     ]) +
     '<h3>By provenance</h3><table><tr><th>source</th><th>reward</th><th>runs</th></tr>' +
@@ -403,7 +397,7 @@ function viewRuns() {
     rows.map((r) =>
       '<tr><td class="' + (r.score.reward >= 0.95 ? 'good' : r.score.reward > 0.4 ? 'warn' : 'bad') + '">' +
       n(r.score.reward, 2) + '</td><td class="muted">' + esc(r.provenance) + '</td>' +
-      '<td><a data-go=\\'' + JSON.stringify({ tab: 'examples', example: r.exampleId }) + '\\'>' +
+      '<td><a ' + goAttr({ tab: 'examples', example: r.exampleId }) + '>' +
       esc(r.question.slice(0, 120)) + '</a></td>' +
       '<td><details><summary>' + (r.score.executes ? 'executes' : 'fails') + ' · eq ' +
       n(r.score.resultEquivalence, 2) + '</summary><div class="split"><div><div class="muted">generated</div><pre>' +
@@ -426,7 +420,7 @@ function viewExamples() {
         n(e.meanReward, 2) + '</td><td><div class="bar"><div style="width:' + Math.round(e.meanReward * 100) +
         '%"></div></div></td><td class="muted">' + esc(e.provenance) + '</td><td class="muted">' +
         esc(e.difficulty || '') + '</td><td>' + e.runs + '</td>' +
-        '<td><a data-go=\\'' + JSON.stringify({ tab: 'examples', example: e.exampleId }) + '\\'>' +
+        '<td><a ' + goAttr({ tab: 'examples', example: e.exampleId }) + '>' +
         esc(e.question.slice(0, 130)) + '</a></td></tr>').join('');
     return '<h2>Examples</h2>' +
       '<div class="toolbar"><input id="filter" type="search" placeholder="filter questions" value="' +
@@ -437,7 +431,7 @@ function viewExamples() {
 
   const example = DATA.examples.find((e) => e.exampleId === route.example);
   if (!example) return '<p>Example not found.</p>';
-  return '<p class="back" data-go=\\'' + JSON.stringify({ tab: 'examples' }) + '\\'>← examples</p>' +
+  return '<p class="back" ' + goAttr({ tab: 'examples' }) + '>← examples</p>' +
     '<h2>' + esc(example.question) + '</h2>' +
     cards([
       ['mean reward', n(example.meanReward)],
@@ -450,7 +444,7 @@ function viewExamples() {
     '<h3>Every attempt, newest run last</h3>' +
     '<table><tr><th>run</th><th>reward</th><th>eq</th><th>tries</th><th>model</th><th>query</th></tr>' +
     example.history.map((h) =>
-      '<tr><td><a data-go=\\'' + JSON.stringify({ tab: 'runs', run: h.runId }) + '\\'>' + esc(h.label) + '</a></td>' +
+      '<tr><td><a ' + goAttr({ tab: 'runs', run: h.runId }) + '>' + esc(h.label) + '</a></td>' +
       '<td class="' + (h.reward >= 0.95 ? 'good' : h.reward > 0.4 ? 'warn' : 'bad') + '">' + n(h.reward, 2) + '</td>' +
       '<td>' + n(h.resultEquivalence, 2) + '</td><td>' + (h.tries ?? '—') + '</td>' +
       '<td class="muted">' + esc((h.connectorId || '').replace('harness-opt-', '')) + '</td>' +

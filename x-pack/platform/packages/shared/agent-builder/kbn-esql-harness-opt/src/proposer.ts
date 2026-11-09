@@ -53,6 +53,8 @@ export interface ProposalManifest {
 
 export interface Proposal {
   config: Record<string, unknown>;
+  /** Replacement content for text assets, keyed by asset path. */
+  assets?: Record<string, string>;
   manifest: ProposalManifest;
 }
 
@@ -152,67 +154,102 @@ export const lintProposal = (config: Record<string, unknown>): string[] => {
   return violations;
 };
 
-const PROPOSER_TASK = (
-  incumbentConfigName: string,
-  modelChoices: Array<{ connectorId: string; inferenceId: string }>
-) => `You are optimizing the configuration of the
-Kibana \`generate_esql\` harness. In this directory you will find:
+const EDITABLE_FILES_TEXT = `You may also edit these files directly in this checkout:
 
-- \`bundle.json\` — failing examples from the latest run against the search split: the question,
-  the query the harness produced, the gold query, the Elasticsearch error the model was shown,
-  how many generation attempts it took, and token spend.
-- \`${incumbentConfigName}\` — the configuration that produced those results.
-- \`history.json\` — every earlier proposal with its gate outcome and the reason it was rejected.
+- tools/generate_esql/documentation/{syntax,examples,ts_queries,promql_queries}.md — the ES|QL
+  documentation corpus injected into every prompt. Rewriting, pruning or re-ordering it is fair
+  game; it is also the biggest block of tokens in the prompt, so pruning is a cost lever.
+- tools/generate_esql/prompts/instructions.md — the instruction block, as plain text.
+- tools/generate_esql/prompts.ts — how prompts are assembled.
+- tools/generate_esql/actions.ts — how past attempts are replayed to the model.
+- tools/generate_esql/graph.ts — the control flow (nodes, retry branches). You may add a node.
+- tools/generate_esql/exemplars.ts, join_errors.ts, promql_keyword.ts — deterministic middleware.
+
+(Paths are relative to x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/.)
+
+Anything you change there must typecheck, pass the tool's existing unit tests and pass eslint —
+all three run automatically before your variant is measured, and a failure wastes the round. Do
+not touch any other file: the dataset, fixtures, scorers and the evaluation runner are off limits
+and edits outside the list are rejected mechanically.`;
+
+const PROPOSER_TASK = ({
+  modelChoices,
+  editableFiles,
+}: {
+  modelChoices: Array<{ connectorId: string; inferenceId: string }>;
+  editableFiles: boolean;
+}) => `You are optimizing the Kibana \`generate_esql\` harness: the prompts, documentation corpus,
+control flow and model choice behind the tool that turns a natural-language question into an
+ES|QL query.
+
+In \`.harness-scratch/\` you will find:
+
+- \`bundle.json\` — failing examples from the latest run on the search split: the question, the
+  query the harness produced, the gold query, the Elasticsearch error shown to the model, the
+  number of attempts and the token spend.
+- \`incumbent.json\` — the typed configuration that produced those results.
+- \`assets.json\` — text assets currently overriding the bundled ones (often empty).
+- \`history.json\` — every earlier proposal, with its gate outcome and rejection reason.
 - \`feedback.md\` — measured facts about this harness and how your last prediction held up.
 
-Your job is to propose ONE new configuration that scores better on the composite reward
-\`0.6·result_equivalence + 0.3·executes + 0.1·ast_valid\` without increasing token cost by more
-than 10%.
+Your goal is a variant that scores better on \`0.6·result_equivalence + 0.3·executes +
+0.1·ast_valid\`, measured on held-out examples, without costing more than 1.1× in USD. A variant
+that holds quality while costing materially less is equally welcome.
 
-The only thing you may change is this typed config object:
+## Channel 1 — the typed config
 
 ${SLOT_SCHEMA}
 
-Rules, which are enforced mechanically after you answer:
-1. Change at most TWO top-level slots. A diffuse edit cannot be attributed to anything.
-2. Never mention a concrete index name, field name, or query from the bundle in the config —
-   the config must generalize to unseen data. Candidates that do are rejected automatically.
-3. Prefer feedback (slot D) and exemplar (slot B) edits over prompt prose (slot G); prose edits
-   regress more often than they help in published ablations.
-3b. The model slot (F) is the strongest cost lever in both directions: a higher tier for the
-   generation step buys quality at a token price, a lower tier for keyword selection buys
-   savings. A candidate can also win by holding quality while spending less.
-4. Base the change on evidence in \`bundle.json\`: name the failures you expect it to fix.
-5. Read \`feedback.md\` first. Do not re-propose an edit that history.json already shows was
-   rejected unless you change it materially and say what is different this time.
-
 ${
   modelChoices.length
-    ? `Connector ids available for the model slot (generateConnectorId / requestDocConnectorId):\n${modelChoices
+    ? `Connector ids available for the model slot:\n${modelChoices
         .map((choice) => `- ${choice.connectorId} → ${choice.inferenceId}`)
-        .join('\n')}\nUse \`null\` to keep the context's own model selection.\n\n`
+        .join('\n')}\nUse \`null\` to keep the context's own model selection.\n`
     : ''
-}Write your answer to a file called \`proposal.json\` in this directory, with exactly this shape:
+}
+## Channel 2 — text assets
+
+Write replacement content for \`documentation/*.md\` or \`prompts/instructions.md\` into the
+\`assets\` field of your proposal (keyed by that exact relative path). These are swapped at
+runtime without touching code.
+
+${editableFiles ? `## Channel 3 — code\n\n${EDITABLE_FILES_TEXT}\n` : ''}
+## Rules, enforced mechanically
+
+1. Change at most TWO areas. A diffuse edit cannot be attributed to anything.
+2. Never mention a concrete index name, field name or query from the bundle. The harness has to
+   generalise to unseen data; candidates that leak the benchmark are rejected automatically.
+3. Prefer evidence-driven edits: name the failures in \`bundle.json\` you expect to fix.
+4. Read \`feedback.md\` first, and do not re-propose something \`history.json\` shows was already
+   rejected unless you change it materially and say what is different.
+
+## Your answer
+
+Write \`.harness-scratch/proposal.json\`:
 
 {
-  "config": { ...the full EsqlHarnessConfig object... },
+  "config": { ...the full typed config, including unchanged slots... },
+  "assets": { "documentation/examples.md": "...new content..." },   // optional
   "manifest": {
-    "slots": ["feedback"],
+    "slots": ["exemplars"],                    // or asset/file names you touched
     "rationale": "one paragraph",
-    "predictedFixes": ["first few words of each question you expect to flip to correct"],
+    "predictedFixes": ["first words of each question you expect to flip to correct"],
     "predictedRegressions": ["questions you expect might regress"]
   }
 }
 
-Do not modify any other file. Do not run the evaluation yourself.`;
+Do not run the evaluation yourself and do not commit anything.`;
 
 /** Run the proposer agent in a scratch directory that holds the bundle and nothing else. */
 export const proposeCandidate = async ({
   summary,
   incumbentConfig,
+  incumbentAssets = {},
   history,
   feedback,
   scratchDir,
+  workingDir,
+  editableFiles = false,
   log,
   modelChoices = [],
   model = process.env.HARNESS_PROPOSER_MODEL ?? 'grok-4.7-low',
@@ -220,10 +257,14 @@ export const proposeCandidate = async ({
 }: {
   summary: RunSummary;
   incumbentConfig: Record<string, unknown>;
+  incumbentAssets?: Record<string, string>;
   history: unknown[];
   /** Measured facts + last round's manifest verification, written to `feedback.md`. */
   feedback: string;
   scratchDir: string;
+  /** Directory the agent runs in; the candidate worktree when code edits are allowed. */
+  workingDir?: string;
+  editableFiles?: boolean;
   log: ToolingLog;
   modelChoices?: Array<{ connectorId: string; inferenceId: string }>;
   model?: string;
@@ -237,6 +278,7 @@ export const proposeCandidate = async ({
   );
   Fs.writeFileSync(Path.join(scratchDir, 'history.json'), JSON.stringify(history, null, 2));
   Fs.writeFileSync(Path.join(scratchDir, 'feedback.md'), feedback);
+  Fs.writeFileSync(Path.join(scratchDir, 'assets.json'), JSON.stringify(incumbentAssets, null, 2));
   const proposalPath = Path.join(scratchDir, 'proposal.json');
   if (Fs.existsSync(proposalPath)) {
     Fs.unlinkSync(proposalPath);
@@ -251,7 +293,12 @@ export const proposeCandidate = async ({
   try {
     const code = await runProposerCommand({
       command,
-      args: [scratchDir, '--model', model, PROPOSER_TASK('incumbent.json', modelChoices)],
+      args: [
+        workingDir ?? scratchDir,
+        '--model',
+        model,
+        PROPOSER_TASK({ modelChoices, editableFiles }),
+      ],
       logPath,
       timeoutMs,
     });

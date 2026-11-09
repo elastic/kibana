@@ -21,13 +21,11 @@ import { createEsClient, executeGenerateEsql, resolveTarget } from './clients';
 import { setupFixtures } from './corpora/setup';
 import { buildGoldRowCache, runConfig } from './runner';
 import { executeGold, scoreQuery } from './scorers';
-import type { RunSummary } from './runner';
-import { gateCandidate } from './gate';
-import { lintProposal, proposeCandidate } from './proposer';
-import { verificationSummary, verifyManifest } from './verification';
-import { harnessPaths, writeActiveConfig } from './workspace';
+import { runCampaign } from './campaign';
+import { setupCandidateWorktree } from './candidate_workspace';
+import { harnessPaths } from './workspace';
 import { serveReport, writeReport } from './report';
-import { readModelChoices, setupModelConnectors } from './models';
+import { setupModelConnectors } from './models';
 import {
   backTranslate,
   balanceCorpus,
@@ -66,7 +64,7 @@ export const cli = () =>
         esUrl: optionalFlag(flags['es-url']),
       });
       const esClient = createEsClient(target);
-      const { runsDir, lineageDir, configPath, tracePath } = harnessPaths();
+      const { runsDir, configPath, tracePath } = harnessPaths();
 
       if (command === 'help') {
         log.info(`Commands:
@@ -78,6 +76,7 @@ export const cli = () =>
   sealed --config path              score a config on the sealed split
   report [--serve] [--port n]       write (or serve) an HTML report of all rounds and runs
   setup-models                      create the inference connectors the model slot can choose
+  setup-candidate                   create + bootstrap the candidate worktree (code-edit lane)
 
 Start Kibana with:
   ESQL_HARNESS_CONFIG=${configPath} ESQL_HARNESS_TRACE_FILE=${tracePath}`);
@@ -248,217 +247,39 @@ Start Kibana with:
         return;
       }
 
+      if (command === 'setup-candidate') {
+        await setupCandidateWorktree({
+          mainWorktree: process.cwd(),
+          candidatePath: optionalFlag(flags['candidate-path']) ?? `${process.cwd()}-candidate`,
+          esUrl: target.esUrl,
+          port: Number(optionalFlag(flags['candidate-port']) ?? 5691),
+          log,
+        });
+        return;
+      }
+
       if (command === 'round' || command === 'campaign') {
-        const roundCount = command === 'campaign' ? Number(optionalFlag(flags.rounds) ?? 3) : 1;
-        const searchExamples = examplesForSplit('search');
-        const gateExamples = examplesForSplit('gate');
-        const searchGold = await buildGoldRowCache({ esClient, examples: searchExamples });
-        const gateGold = await buildGoldRowCache({ esClient, examples: gateExamples });
+        const candidatePath = optionalFlag(flags['candidate-path']);
+        const candidateUrl = optionalFlag(flags['candidate-url']);
 
-        Fs.mkdirSync(lineageDir, { recursive: true });
-        const ledgerPath = Path.join(lineageDir, 'ledger.json');
-        const ledger: unknown[] = Fs.existsSync(ledgerPath)
-          ? (JSON.parse(Fs.readFileSync(ledgerPath, 'utf8')) as unknown[])
-          : [];
-
-        let incumbent = loadConfig(optionalFlag(flags.config));
-        let incumbentGateRun: RunSummary | undefined;
-        let lastFeedback = '';
-
-        for (let round = 0; round < roundCount; round++) {
-          const outputDir = Path.join(runsDir, `round-${Date.now()}`);
-
-          const searchRun = await runConfig({
-            label: `round${round}-incumbent-search`,
-            config: incumbent,
-            examples: searchExamples,
-            rollouts,
-            esClient,
-            target,
-            log,
-            concurrency,
-            goldRows: searchGold,
-            outputDir,
-          });
-
-          const measuredFacts = [
-            '# Measured facts about this harness',
-            '',
-            `- Over ${
-              searchRun.runs.length
-            } runs on the search split the harness needed ${searchRun.meanTries.toFixed(
-              2
-            )} generation attempts on average and ${(searchRun.meanExecutes * 100).toFixed(
-              0
-            )}% of queries executed. Almost nothing fails with an Elasticsearch error.`,
-            '- A matched-compute baseline measured `maxRetries` 1, 3 and 5 as indistinguishable.',
-            '  Retry policy (slot E) and error feedback (slot D) therefore have almost no surface',
-            '  on this dataset: the failures are semantic (wrong rows), not syntactic.',
-            `- Mean result equivalence is ${searchRun.meanResultEquivalence.toFixed(
-              3
-            )} while execution is near-perfect, so the gap is entirely in producing the right rows.`,
-            '- Cost is priced in USD per model, so switching the model slot changes cost even when',
-            '  token counts stay the same.',
-            '',
-            lastFeedback ? `# Your last proposal\n\n${lastFeedback}` : '',
-          ].join('\n');
-
-          let proposal;
-          try {
-            proposal = await proposeCandidate({
-              summary: searchRun,
-              incumbentConfig: incumbent,
-              history: ledger,
-              feedback: measuredFacts,
-              scratchDir: Path.join(outputDir, 'proposer'),
-              log,
-              modelChoices: readModelChoices(),
-            });
-          } catch (e) {
-            // A proposer that times out or answers in the wrong shape costs the round, not the
-            // campaign — the ledger records it so a systematically broken proposer is visible.
-            log.warning(`[harness-opt] round ${round} proposer failed: ${(e as Error).message}`);
-            ledger.push({ round, rejected: 'proposer-failed', error: (e as Error).message });
-            Fs.writeFileSync(ledgerPath, JSON.stringify(ledger, null, 2));
-            continue;
-          }
-
-          const violations = lintProposal(proposal.config);
-          if (violations.length > 0) {
-            log.warning(`[harness-opt] proposal rejected by lint: ${violations.join('; ')}`);
-            ledger.push({ round, rejected: 'lint', violations, manifest: proposal.manifest });
-            Fs.writeFileSync(ledgerPath, JSON.stringify(ledger, null, 2));
-            continue;
-          }
-
-          // Harness fixes are pathology-matched to a model, so a candidate has to clear the gate
-          // on every tier it is evaluated on, not just the one it was diagnosed from.
-          const tiers = (optionalFlag(flags.tiers) ?? '')
+        await runCampaign({
+          rounds: command === 'campaign' ? Number(optionalFlag(flags.rounds) ?? 3) : 1,
+          rollouts,
+          concurrency,
+          tiers: (optionalFlag(flags.tiers) ?? '')
             .split(',')
             .map((tier) => tier.trim())
-            .filter(Boolean);
-          const tierConfigs: Array<{
-            name: string;
-            apply: (config: HarnessConfigObject) => HarnessConfigObject;
-          }> = tiers.length
-            ? tiers.map((connectorId) => ({
-                name: connectorId,
-                apply: (config) => ({
-                  ...config,
-                  model: { ...(config.model as object), generateConnectorId: connectorId },
-                }),
-              }))
-            : [{ name: 'default-tier', apply: (config) => config }];
-
-          const tierResults: Array<{ tier: string; gate: ReturnType<typeof gateCandidate> }> = [];
-          let lastIncumbentGate: RunSummary | undefined;
-          let lastCandidateGate: RunSummary | undefined;
-
-          for (const tier of tierConfigs) {
-            const incumbentTierRun = await runConfig({
-              label: `round${round}-incumbent-gate${
-                tiers.length ? `-${tier.name.slice(0, 8)}` : ''
-              }`,
-              config: tier.apply(incumbent),
-              examples: gateExamples,
-              rollouts: Math.max(rollouts, 2),
-              esClient,
-              target,
-              log,
-              concurrency,
-              goldRows: gateGold,
-              outputDir,
-            });
-
-            const candidateTierRun = await runConfig({
-              label: `round${round}-candidate-gate${
-                tiers.length ? `-${tier.name.slice(0, 8)}` : ''
-              }`,
-              config: tier.apply(proposal.config),
-              examples: gateExamples,
-              rollouts: Math.max(rollouts, 2),
-              esClient,
-              target,
-              log,
-              concurrency,
-              goldRows: gateGold,
-              outputDir,
-            });
-
-            tierResults.push({
-              tier: tier.name,
-              gate: gateCandidate({ incumbent: incumbentTierRun, candidate: candidateTierRun }),
-            });
-            lastIncumbentGate = incumbentTierRun;
-            lastCandidateGate = candidateTierRun;
-          }
-
-          incumbentGateRun = lastIncumbentGate!;
-          const candidateGateRun = lastCandidateGate!;
-          const gateResult = {
-            ...tierResults[0].gate,
-            accepted: tierResults.every(({ gate }) => gate.accepted),
-            reasons: tierResults.flatMap(({ tier, gate }) =>
-              gate.accepted ? [] : gate.reasons.map((reason) => `[${tier}] ${reason}`)
-            ),
-          };
-
-          const incumbentRuns = incumbentGateRun.runs;
-          const seedDeltas = [...new Set(incumbentRuns.map((entry) => entry.exampleId))].map(
-            (exampleId) => {
-              const rewardFor = (entries: typeof incumbentRuns) => {
-                const subset = entries.filter((entry) => entry.exampleId === exampleId);
-                return subset.length
-                  ? subset.reduce((total, entry) => total + entry.score.reward, 0) / subset.length
-                  : 0;
-              };
-              const example = incumbentRuns.find((entry) => entry.exampleId === exampleId);
-              const incumbentReward = rewardFor(incumbentRuns);
-              const candidateReward = rewardFor(candidateGateRun.runs);
-              return {
-                exampleId,
-                question: example?.question ?? exampleId,
-                provenance: example?.provenance ?? '',
-                incumbent: incumbentReward,
-                candidate: candidateReward,
-                delta: candidateReward - incumbentReward,
-              };
-            }
-          );
-
-          const verification = verifyManifest({ manifest: proposal.manifest, seedDeltas });
-          lastFeedback = [
-            verificationSummary(verification),
-            `The edit itself was ${gateResult.accepted ? 'accepted' : 'rejected'}${
-              gateResult.accepted ? '' : ` because: ${gateResult.reasons.join('; ')}`
-            }.`,
-          ].join(' ');
-
-          ledger.push({
-            round,
-            manifest: proposal.manifest,
-            verification,
-            incumbentConfig: incumbent,
-            gate: gateResult,
-            tiers: tierResults,
-            searchReward: searchRun.meanReward,
-            incumbentGateReward: incumbentGateRun.meanReward,
-            candidateGateReward: candidateGateRun.meanReward,
-            config: proposal.config,
-          });
-          Fs.writeFileSync(ledgerPath, JSON.stringify(ledger, null, 2));
-
-          if (gateResult.accepted) {
-            incumbent = proposal.config;
-            Fs.writeFileSync(
-              Path.join(lineageDir, `accepted-${round}-${candidateGateRun.configHash}.json`),
-              JSON.stringify(incumbent, null, 2)
-            );
-          }
-        }
-
-        writeActiveConfig(incumbent);
-        log.info(`[harness-opt] ledger: ${ledgerPath}`);
+            .filter(Boolean),
+          incumbentTarget: target,
+          candidateTarget: candidateUrl ? { ...target, kibanaUrl: candidateUrl } : undefined,
+          candidateWorktree: candidatePath,
+          mainWorktree: process.cwd(),
+          esClient,
+          searchExamples: examplesForSplit('search'),
+          gateExamples: examplesForSplit('gate'),
+          startingConfig: loadConfig(optionalFlag(flags.config)),
+          log,
+        });
         return;
       }
 
@@ -479,6 +300,9 @@ Start Kibana with:
           'port',
           'host',
           'tiers',
+          'candidate-path',
+          'candidate-url',
+          'candidate-port',
         ],
         boolean: ['serve', 'sample-data'],
         help: `
@@ -488,6 +312,8 @@ Start Kibana with:
         --rounds <n>         rounds for the campaign command (default 3)
         --concurrency <n>    parallel tool calls (default 4)
         --tiers <ids>        comma-separated connector ids; candidate must pass the gate on each
+        --candidate-path <p> candidate worktree (enables whole-file edits)
+        --candidate-url <u>  Kibana serving the candidate worktree, e.g. http://localhost:5691
         --kibana-url <url>   default http://localhost:5601
         --es-url <url>       default http://localhost:9200
         `,

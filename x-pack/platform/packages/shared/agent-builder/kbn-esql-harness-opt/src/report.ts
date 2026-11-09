@@ -12,6 +12,7 @@ import Path from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { harnessPaths } from './workspace';
 import { reportTemplate } from './report_template';
+import { costUsd } from './pricing';
 import { verifyManifest } from './verification';
 import type { ExampleRun, RunSummary } from './runner';
 
@@ -80,6 +81,21 @@ const hashConfig = (config: Record<string, unknown> | undefined): string =>
     .digest('hex')
     .slice(0, 8);
 
+/**
+ * Runs recorded before cost was priced carry tokens but no USD. They all ran on the context's
+ * default model, so the report prices them retroactively rather than showing a blank column —
+ * marked as estimated wherever the connector is unknown.
+ */
+const LEGACY_DEFAULT_MODEL = 'gemini-3.5-flash-lite';
+
+const backfillCost = (result: ExampleRun): number =>
+  result.costUsd ??
+  costUsd({
+    modelOrConnectorId: result.connectorId ?? LEGACY_DEFAULT_MODEL,
+    inputTokens: result.inputTokens,
+    outputTokens: result.outputTokens,
+  });
+
 const meanBy = <T>(items: T[], pick: (item: T) => number): number =>
   items.length === 0 ? 0 : items.reduce((total, item) => total + pick(item), 0) / items.length;
 
@@ -106,7 +122,10 @@ export const buildReportPayload = () => {
   const ledger = readJson<LedgerEntry[]>(Path.join(lineageDir, 'ledger.json')) ?? [];
 
   const runViews = runs.map(({ id, group, label, stored }) => {
-    const results = stored.runs ?? [];
+    const results = (stored.runs ?? []).map((result) => ({
+      ...result,
+      costUsd: backfillCost(result),
+    }));
     return {
       id,
       group,
@@ -119,7 +138,10 @@ export const buildReportPayload = () => {
       meanTries: stored.summary.meanTries,
       totalInputTokens: stored.summary.totalInputTokens,
       totalOutputTokens: stored.summary.totalOutputTokens,
-      totalCostUsd: stored.summary.totalCostUsd ?? 0,
+      totalCostUsd:
+        stored.summary.totalCostUsd ??
+        results.reduce((total, result) => total + (result.costUsd ?? 0), 0),
+      costEstimated: stored.summary.totalCostUsd === undefined,
       rewardByProvenance: stored.summary.rewardByProvenance ?? {},
       exampleCount: new Set(results.map((result) => result.exampleId)).size,
       models: [
