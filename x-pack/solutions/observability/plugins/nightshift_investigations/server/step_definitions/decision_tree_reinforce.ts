@@ -84,7 +84,7 @@ export const decisionTreeReinforceStepDefinition = ({
         .describe('Decision tree and learning writes applied during this reinforcement turn.'),
     }),
     handler: async (context) => {
-      // The combined optimize workflow installs with Cortex or Memory, so this step is registered
+      // The combined optimize workflow installs with Wiki or Memory, so this step is registered
       // even when the tree feature is off.
       if (isEnabled && !isEnabled()) {
         context.logger.info('Skipped decision tree reinforcement (flag off)');

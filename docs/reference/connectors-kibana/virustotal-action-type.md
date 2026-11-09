@@ -48,7 +48,9 @@ Submit File
 
 Get IP Report
 :   Get reputation and details about an IP address.
-    - **IP** (required): IPv4 address.
+    - **IP** (required): IPv4 address. For example, `8.8.8.8`.
+    
+      {applies_to}`serverless: preview` {applies_to}`stack: preview 9.7+` You can also use an IPv6 address. For example, `2001:4860:4860::8888`.
 
 ## Workflow examples [virustotal-workflow-examples]
 

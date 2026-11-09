@@ -6,6 +6,7 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
+import { STREAMS_DEFAULT_UNIT_ID } from '@kbn/streams-plugin/common';
 import type { TimeState } from '@kbn/es-query';
 import { Subject, type ObservedValueOf } from 'rxjs';
 import { createActor, waitFor, type Actor, type AnyActorRef } from 'xstate';
@@ -116,6 +117,7 @@ describe('destinationsStateMachine', () => {
           toasts: coreMock.createStart().notifications.toasts,
           apiKeyGenerationDeps: {
             streamsRepositoryClient: { fetch },
+            unitId: STREAMS_DEFAULT_UNIT_ID,
           } as unknown as DestinationApiKeyGenerationDeps,
           timeState,
           timeState$,
@@ -128,6 +130,30 @@ describe('destinationsStateMachine', () => {
 
   afterEach(() => {
     actor.stop();
+  });
+
+  it('resolves indices for the unit in apiKeyGenerationDeps', async () => {
+    const unitActor = createActor(
+      destinationsStateMachine.provide(
+        createDestinationsMachineImplementations({
+          toasts: coreMock.createStart().notifications.toasts,
+          apiKeyGenerationDeps: {
+            streamsRepositoryClient: { fetch },
+            unitId: 'edge',
+          } as unknown as DestinationApiKeyGenerationDeps,
+          timeState,
+          timeState$,
+        })
+      ),
+      { input: { unitDefinition, parentRef: { send: jest.fn() } as unknown as AnyActorRef } }
+    ).start();
+    await waitFor(unitActor, (snapshot) => snapshot.matches({ resolvedIndices: 'ready' }));
+
+    expect(fetch).toHaveBeenCalledWith(
+      'GET /internal/streams/unit/{id}/_resolve_indices',
+      expect.objectContaining({ params: { path: { id: 'edge' } } })
+    );
+    unitActor.stop();
   });
 
   it('ignores an invalid form', () => {
@@ -335,6 +361,7 @@ describe('destinationsStateMachine', () => {
           toasts,
           apiKeyGenerationDeps: {
             streamsRepositoryClient: { fetch },
+            unitId: STREAMS_DEFAULT_UNIT_ID,
           } as unknown as DestinationApiKeyGenerationDeps,
           timeState,
           timeState$,
