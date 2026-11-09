@@ -49,7 +49,7 @@ describe('BuildGroupsStep', () => {
             destinations: [{ type: 'workflow', id: 'w1' }],
             groupKey: { groupHash: 'h1', alertId: 'e1' },
             alerts: [alert],
-            rules: { r1: { name: 'CPU spike' } },
+            rules: { r1: { name: 'CPU spike', grouping_fields: [] } },
           },
         ],
       },
@@ -254,7 +254,10 @@ describe('buildActionGroups', () => {
     const policy = createActionPolicy({ id: 'p1', grouping: { mode: 'all' } });
     const rules = new Map([
       ['r1', createRule({ id: 'r1', name: 'CPU spike' })],
-      ['r2', createRule({ id: 'r2', name: 'Cert expiry' })],
+      [
+        'r2',
+        createRule({ id: 'r2', name: 'Cert expiry', groupingFields: ['host.name', 'cert.cn'] }),
+      ],
     ]);
     const matched = [
       createMatchedPair({
@@ -270,8 +273,8 @@ describe('buildActionGroups', () => {
     const groups = buildActionGroups(matched, RuleCatalog.of(rules));
 
     expect(groups[0].rules).toEqual({
-      r1: { name: 'CPU spike' },
-      r2: { name: 'Cert expiry' },
+      r1: { name: 'CPU spike', grouping_fields: [] },
+      r2: { name: 'Cert expiry', grouping_fields: ['host.name', 'cert.cn'] },
     });
   });
 
@@ -291,7 +294,7 @@ describe('buildActionGroups', () => {
 
     const groups = buildActionGroups(matched, RuleCatalog.of(rules));
 
-    expect(groups[0].rules).toEqual({ r1: { name: 'CPU spike' } });
+    expect(groups[0].rules).toEqual({ r1: { name: 'CPU spike', grouping_fields: [] } });
     expect(groups[1].rules).toEqual({});
   });
 

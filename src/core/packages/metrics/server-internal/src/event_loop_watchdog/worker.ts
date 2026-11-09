@@ -52,13 +52,16 @@ export const runWatchdogWorker = (
   };
 
   const onBlock = (block: DetectedBlock, nowMs: number) => {
-    stats.record(block);
+    // A block counts once, when it ends.
+    if (!block.ongoing) {
+      stats.record(block);
+    }
     if (!block.report) {
       return;
     }
-    const { blockedMs, startedAt, phase, suppressedBlocks } = block;
+    const { blockedMs, startedAt, phase, suppressedBlocks, ongoing } = block;
     logger.warn<BlockLogMeta>(
-      `Event loop blocked for ~${blockedMs}ms${
+      `Event loop blocked for ~${blockedMs}ms${ongoing ? ' so far' : ''}${
         suppressedBlocks ? `; ${blocks(suppressedBlocks)} before it not reported` : ''
       }`,
       {
@@ -70,6 +73,7 @@ export const runWatchdogWorker = (
             startedAt: new Date(Date.now() - (nowMs - startedAt)).toISOString(),
             phase,
             suppressedBlocks,
+            ongoing,
           },
         },
       }

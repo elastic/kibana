@@ -7,6 +7,7 @@
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { parse } from 'yaml';
+import { ALERT_SEVERITY_VALUES } from '@kbn/rule-data-utils';
 import { createAutomationRoute } from './create_automation';
 import { createRouteContext, createServiceAccountService } from './test_helpers';
 
@@ -33,6 +34,7 @@ const call = (overrides: Record<string, unknown> = {}, user?: Record<string, str
     params: params.parse({ body: { ...body, ...overrides } }),
     getAutomationsSoClient,
     getWorkflowsManagement,
+    isUniversalAlertingAvailable: () => true,
     getInvestigatorServiceAccountService: () => serviceAccountService,
     context: createRouteContext(user),
   } as never);
@@ -92,7 +94,7 @@ it('turns the UI channel action into an investigation lifecycle destination', as
   const result = await call({ completions: [completion] });
   expect(result.completions).toEqual([completion]);
   const workflow = parse(createWorkflow.mock.calls[0][0].yaml);
-  expect(workflow.steps[0].with.notificationDestinations).toEqual([
+  expect(workflow.steps[0].steps[0].with.notificationDestinations).toEqual([
     {
       type: 'slack',
       connector_id: 'elastic-apps-slack',
@@ -119,6 +121,15 @@ describe('request validation', () => {
     messageFilter: 'outage',
   };
   const parseRows = (rows: unknown[]) => params.parse({ body: { ...body, trigger: { rows } } });
+
+  it('accepts named alert severities and rejects unknown or oversized selections', () => {
+    const row = { kind: 'alert', severities: [...ALERT_SEVERITY_VALUES] };
+    expect(parseRows([row]).body.trigger.rows).toEqual([row]);
+    expect(() => parseRows([{ kind: 'alert', severities: ['unknown'] }])).toThrow();
+    expect(() =>
+      parseRows([{ kind: 'alert', severities: [...ALERT_SEVERITY_VALUES, 'high'] }])
+    ).toThrow();
+  });
 
   it('accepts Slack trigger rows and keeps their fields', () => {
     expect(parseRows([slackRow]).body.trigger.rows).toEqual([slackRow]);
