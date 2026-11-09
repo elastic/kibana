@@ -58,6 +58,9 @@ export const listHuntHistory = async ({
       outcome: labels['hunt.outcome'] ?? DEFAULT_OUTCOME,
       startedAt: execution.startedAt,
       ...(execution.executedBy ? { startedBy: execution.executedBy } : {}),
+      ...(labels['hunt.investigation_id']
+        ? { investigationId: labels['hunt.investigation_id'] }
+        : {}),
     });
   }
 

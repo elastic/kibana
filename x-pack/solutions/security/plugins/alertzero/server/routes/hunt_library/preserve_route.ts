@@ -14,6 +14,7 @@ import { HUNT_PROFILE_TOKEN_MAX_BYTES } from '../../../common/hunt_library_profi
 import {
   HUNT_SESSION_MAX_FIELDS_PER_ROW,
   HUNT_SESSION_MAX_FILTERS,
+  HUNT_SESSION_MAX_NOTE_LENGTH,
   HUNT_SESSION_MAX_ROWS_PER_PRESERVATION,
 } from '../../../common/hunt_session_attachment_schema';
 import { reportPreservationTelemetry } from '../../hunt_library/hunt_telemetry';
@@ -94,6 +95,7 @@ export const registerHuntPreserveRoute = ({
               }),
               columns: schema.arrayOf(schema.string({ maxLength: 256 }), { maxSize: 30 }),
               data_view_id: schema.string({ maxLength: 256 }),
+              note: schema.maybe(schema.string({ maxLength: HUNT_SESSION_MAX_NOTE_LENGTH })),
               rows: schema.arrayOf(rowSchema, {
                 minSize: 1,
                 maxSize: HUNT_SESSION_MAX_ROWS_PER_PRESERVATION,
@@ -152,6 +154,7 @@ export const registerHuntPreserveRoute = ({
             claims,
             actor: core.security.authc.getCurrentUser()?.username ?? 'unknown',
             preservationId: body.preservation_id,
+            note: body.note,
             context: {
               query: body.query,
               filters: body.filters,

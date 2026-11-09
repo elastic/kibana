@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiBadge,
   EuiBasicTable,
   EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
@@ -17,12 +20,27 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
+import type { CoreStart } from '@kbn/core/public';
 import { FormattedDate, FormattedRelative } from '@kbn/i18n-react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ALERTZERO_APP_ID } from '../../../common/constants';
+import { SELECTED_CONVERSATION_ID_PARAM } from '../conversations/conversations_url_params';
 import type { HuntHistoryEntry } from '../../../common/hunt_library';
 import { useHuntHistory } from '../../hooks/use_hunt_library_api';
 import * as i18n from './translations';
 
-const columns: Array<EuiBasicTableColumn<HuntHistoryEntry>> = [
+const OUTCOME_LABELS: Record<string, string> = {
+  exploratory: i18n.HISTORY_OUTCOME_EXPLORATORY,
+  investigation_created: i18n.HISTORY_OUTCOME_INVESTIGATION_CREATED,
+  pending_handoff: i18n.HISTORY_OUTCOME_SAVING,
+  handoff_failed: i18n.HISTORY_OUTCOME_SAVE_FAILED,
+  handoff_cleanup_required: i18n.HISTORY_OUTCOME_NEEDS_CLEANUP,
+  handoff_cleanup_exhausted: i18n.HISTORY_OUTCOME_NEEDS_CLEANUP,
+};
+
+const getColumns = (
+  getInvestigationUrl: (investigationId: string) => string
+): Array<EuiBasicTableColumn<HuntHistoryEntry>> => [
   {
     field: 'startedAt',
     name: i18n.HISTORY_COLUMN_STARTED,
@@ -45,10 +63,24 @@ const columns: Array<EuiBasicTableColumn<HuntHistoryEntry>> = [
   {
     field: 'outcome',
     name: i18n.HISTORY_COLUMN_OUTCOME,
-    render: (outcome: string) => (
-      <EuiBadge color="hollow">
-        {outcome === 'exploratory' ? i18n.HISTORY_OUTCOME_EXPLORATORY : outcome}
-      </EuiBadge>
+    render: (outcome: string, { investigationId }: HuntHistoryEntry) => (
+      <EuiFlexGroup direction="column" gutterSize="xs" alignItems="flexStart">
+        <EuiFlexItem grow={false}>
+          <EuiBadge color="hollow">{OUTCOME_LABELS[outcome] ?? outcome}</EuiBadge>
+        </EuiFlexItem>
+        {investigationId && (
+          <EuiFlexItem grow={false}>
+            <EuiLink
+              href={getInvestigationUrl(investigationId)}
+              target="_blank"
+              external
+              data-test-subj="alertZeroHuntHistoryInvestigationLink"
+            >
+              {i18n.HISTORY_VIEW_INVESTIGATION}
+            </EuiLink>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
     ),
   },
 ];
@@ -56,6 +88,19 @@ const columns: Array<EuiBasicTableColumn<HuntHistoryEntry>> = [
 /** A hunt's recent manual sessions in this space, one row per session. */
 export const HuntHistorySection: React.FC<{ huntId: string }> = ({ huntId }) => {
   const { data, isLoading, isError, refetch } = useHuntHistory(huntId);
+  const {
+    services: { application },
+  } = useKibana<CoreStart>();
+  const columns = useMemo(
+    () =>
+      getColumns((investigationId) =>
+        application.getUrlForApp(ALERTZERO_APP_ID, {
+          path: `?${SELECTED_CONVERSATION_ID_PARAM}=${encodeURIComponent(investigationId)}`,
+          absolute: true,
+        })
+      ),
+    [application]
+  );
 
   return (
     <div data-test-subj="alertZeroHuntFlyoutHistory">

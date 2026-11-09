@@ -61,6 +61,36 @@ export const TIME_RANGE = (from: string, to: string) =>
     values: { from, to },
   });
 
+export const COUNT_COLUMN = i18n.translate(`${PREFIX}.countColumn`, { defaultMessage: 'Count' });
+
+export const VIEW_IN_HUNT_LIBRARY = i18n.translate(`${PREFIX}.viewInHuntLibrary`, {
+  defaultMessage: 'View hunt in Hunt Library',
+});
+
+export const TIME_RANGE_RELATIVE = (from: string, to: string) =>
+  i18n.translate(`${PREFIX}.timeRangeRelative`, {
+    defaultMessage: '{from} to {to}',
+    values: { from, to },
+  });
+
+export const TIME_RANGE_RESOLVED = ({
+  from,
+  to,
+  relative,
+}: {
+  from: Date;
+  to: Date;
+  relative: string;
+}) =>
+  i18n.translate(`${PREFIX}.timeRangeResolved`, {
+    defaultMessage: 'Time range: {from} to {to} ({relative})',
+    values: {
+      from: from.toLocaleString(),
+      to: to.toLocaleString(),
+      relative,
+    },
+  });
+
 export const CONTINUE_HUNT = i18n.translate(`${PREFIX}.continueHunt`, {
   defaultMessage: 'Continue hunt in Discover',
 });

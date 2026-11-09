@@ -303,6 +303,31 @@ export const HISTORY_TYPE_MANUAL = i18n.translate(
   { defaultMessage: 'Manual session' }
 );
 
+export const HISTORY_OUTCOME_INVESTIGATION_CREATED = i18n.translate(
+  'xpack.alertzero.huntLibrary.history.outcomeInvestigationCreated',
+  { defaultMessage: 'Investigation created' }
+);
+
+export const HISTORY_OUTCOME_SAVING = i18n.translate(
+  'xpack.alertzero.huntLibrary.history.outcomeSaving',
+  { defaultMessage: 'Saving' }
+);
+
+export const HISTORY_OUTCOME_SAVE_FAILED = i18n.translate(
+  'xpack.alertzero.huntLibrary.history.outcomeSaveFailed',
+  { defaultMessage: 'Save failed' }
+);
+
+export const HISTORY_OUTCOME_NEEDS_CLEANUP = i18n.translate(
+  'xpack.alertzero.huntLibrary.history.outcomeNeedsCleanup',
+  { defaultMessage: 'Needs cleanup' }
+);
+
+export const HISTORY_VIEW_INVESTIGATION = i18n.translate(
+  'xpack.alertzero.huntLibrary.history.viewInvestigation',
+  { defaultMessage: 'View Investigation' }
+);
+
 export const HISTORY_OUTCOME_EXPLORATORY = i18n.translate(
   'xpack.alertzero.huntLibrary.history.outcomeExploratory',
   { defaultMessage: 'Exploratory' }

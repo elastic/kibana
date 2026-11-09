@@ -80,6 +80,8 @@ export interface HuntHistoryEntry {
   outcome: string;
   startedAt: string;
   startedBy?: string;
+  /** The Investigation this session preserved evidence to, once it has one. */
+  investigationId?: string;
 }
 
 export interface HuntHistoryResponse {

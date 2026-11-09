@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { HttpStart } from '@kbn/core/public';
+import type { ApplicationStart, HttpStart } from '@kbn/core/public';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { i18n } from '@kbn/i18n';
 import type {
   DiscoverSharedPublicSetup,
@@ -15,6 +16,8 @@ import type {
 import { API_VERSIONS } from '@kbn/alertzero-common';
 import { HUNT_LIBRARY_URL } from '../../common/constants';
 import type { HuntPreserveResponse, HuntSessionVerification } from '../../common/hunt_library';
+
+const AGENT_BUILDER_APP_ID = 'agent_builder';
 
 const PRESERVE_FAILED = i18n.translate('xpack.alertzero.huntLibrary.preserveFailed', {
   defaultMessage: 'The evidence could not be preserved. Try again.',
@@ -35,9 +38,11 @@ const toHuntSessionInfo = (verification: HuntSessionVerification): HuntSessionIn
 export const registerHuntSessionFeature = ({
   discoverShared,
   getHttp,
+  getApplication,
 }: {
   discoverShared: DiscoverSharedPublicSetup;
   getHttp: () => Promise<HttpStart>;
+  getApplication: () => Promise<ApplicationStart>;
 }): void => {
   const feature: HuntSessionFeature = {
     id: 'hunt-session',
@@ -68,12 +73,20 @@ export const registerHuntSessionFeature = ({
               time_range: request.timeRange,
               columns: request.columns,
               data_view_id: request.dataViewId,
+              ...(request.note ? { note: request.note } : {}),
               rows: request.rows,
             }),
           }
         );
+        const application = await getApplication();
         return {
           investigationId: result.investigation_id,
+          investigationUrl: application.getUrlForApp(AGENT_BUILDER_APP_ID, {
+            path: `/agents/${agentBuilderDefaultAgentId}/conversations/${encodeURIComponent(
+              result.investigation_id
+            )}`,
+            absolute: true,
+          }),
           evidenceCount: result.evidence_count,
           addedCount: result.added_count,
           profileToken: result.profile_token,

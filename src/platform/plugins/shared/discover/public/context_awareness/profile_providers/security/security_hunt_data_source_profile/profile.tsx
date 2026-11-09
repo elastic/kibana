@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { EuiLink, EuiText } from '@elastic/eui';
 import { v4 as uuidv4 } from 'uuid';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { toMountPoint } from '@kbn/react-kibana-mount';
@@ -97,7 +98,7 @@ export const createSecurityHuntDataSourceProfileProvider = (
                 const preservationId = uuidv4();
                 const stateAdapter = toolkit.getStateAdapter(HUNT_SESSION_STATE_DEF);
 
-                const preserve = async () => {
+                const preserve = async (note: string) => {
                   const feature = services.discoverShared.features.registry.getById('hunt-session');
                   const rows = selectedDocs.flatMap((record) => {
                     const selection = toEvidenceSelection(record, definition.resultKind);
@@ -116,6 +117,7 @@ export const createSecurityHuntDataSourceProfileProvider = (
                     timeRange: { from: String(from), to: String(to) },
                     columns: params.columns,
                     dataViewId: params.dataView.id ?? '',
+                    ...(note ? { note } : {}),
                     rows,
                   });
 
@@ -123,7 +125,22 @@ export const createSecurityHuntDataSourceProfileProvider = (
                   stateAdapter.setState({ token: result.profileToken });
                   services.core.notifications.toasts.addSuccess({
                     title: i18n.SAVED_TITLE,
-                    text: i18n.SAVED_TEXT(result.addedCount, result.evidenceCount),
+                    text: toMountPoint(
+                      <EuiText size="s">
+                        <p>{i18n.SAVED_TEXT(result.addedCount, result.evidenceCount)}</p>
+                        <p>
+                          <EuiLink
+                            href={result.investigationUrl}
+                            target="_blank"
+                            external
+                            data-test-subj="discoverHuntSavedInvestigationLink"
+                          >
+                            {i18n.VIEW_INVESTIGATION}
+                          </EuiLink>
+                        </p>
+                      </EuiText>,
+                      services.core
+                    ),
                   });
                 };
 
@@ -132,8 +149,8 @@ export const createSecurityHuntDataSourceProfileProvider = (
                     <HuntEvidencePreview
                       title={label}
                       selectedDocs={selectedDocs}
-                      onConfirm={async () => {
-                        await preserve();
+                      onConfirm={async (note) => {
+                        await preserve(note);
                         modal.close();
                       }}
                       onClose={() => modal.close()}

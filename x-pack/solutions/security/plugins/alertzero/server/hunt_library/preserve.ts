@@ -94,6 +94,7 @@ export const preserveHuntEvidence = async ({
   claims,
   actor,
   preservationId,
+  note,
   context,
   columns,
   selection,
@@ -109,6 +110,8 @@ export const preserveHuntEvidence = async ({
   claims: HuntProfileTokenPayload;
   actor: string;
   preservationId: string;
+  /** Context the analyst wrote for this preservation. */
+  note?: string;
   context: PreservationContext;
   columns: string[];
   selection: EvidenceSelection[];
@@ -270,6 +273,7 @@ export const preserveHuntEvidence = async ({
                     preservation_id: preservationId,
                     actor,
                     timestamp: now().toISOString(),
+                    ...(note?.trim() ? { note: note.trim() } : {}),
                     ...resumeSnapshot,
                     evidenceFingerprints: unique.map(({ fingerprint }) => fingerprint),
                     selectedEvidence: unique.map(({ row }) => row),

@@ -126,6 +126,12 @@ describe('hunt preserve route', () => {
       expect(() => schema.validate(body({ space_id: 'other' }))).toThrow();
     });
 
+    it('accepts an optional note', () => {
+      const { validate } = makeDeps();
+
+      expect(() => validate.request.body.validate(body({ note: 'Same rare port' }))).not.toThrow();
+    });
+
     it.each([
       ['no rows', { rows: [] }],
       [
@@ -138,6 +144,7 @@ describe('hunt preserve route', () => {
       ['too many filters', { filters: Array.from({ length: 51 }, () => ({})) }],
       ['an unknown row kind', { rows: [{ kind: 'other' }] }],
       ['an oversized query', { query: 'x'.repeat(20_001) }],
+      ['an oversized note', { note: 'x'.repeat(2001) }],
     ])('rejects %s', (_label, change) => {
       const { validate } = makeDeps();
 

@@ -104,6 +104,7 @@ export class AlertZeroPublicPlugin
       registerHuntSessionFeature({
         discoverShared,
         getHttp: async () => (await coreSetup.getStartServices())[0].http,
+        getApplication: async () => (await coreSetup.getStartServices())[0].application,
       });
     }
 

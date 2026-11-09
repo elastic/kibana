@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import dateMath from '@kbn/datemath';
 import {
   EuiAccordion,
   EuiBadge,
@@ -14,10 +15,13 @@ import {
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { FormattedDate, FormattedTime } from '@kbn/i18n-react';
 import type { HuntSessionAttachment } from '../../../../common/hunt_session_attachment_schema';
 import { huntSessionAttachmentSchema } from '../../../../common/hunt_session_attachment_schema';
@@ -25,6 +29,8 @@ import * as i18n from './translations';
 
 export interface HuntSessionAttachmentInlineContentProps {
   attachment: { data?: unknown };
+  /** The Hunt Library page with this hunt's details open, when it can be linked. */
+  huntLibraryUrl?: string;
 }
 
 /** Most fields one evidence table shows; the stored row keeps every field. */
@@ -34,19 +40,47 @@ type Row = Record<string, string | number | boolean | null>;
 
 const cell = (value: unknown) => (value === null || value === undefined ? '' : String(value));
 
+/** Stored with aggregate rows to say how they were kept; it tells an analyst nothing. */
+const HIDDEN_FIELDS = new Set(['evidenceKind']);
+
+/** Aliases hunt queries use that read poorly as a column title. */
+const FIELD_LABELS: Record<string, string> = { cc: i18n.COUNT_COLUMN };
+
 const EvidenceTable: React.FC<{ rows: Row[] }> = ({ rows }) => {
-  const fields = [...new Set(rows.flatMap((row) => Object.keys(row)))].slice(0, MAX_TABLE_COLUMNS);
+  const fields = [...new Set(rows.flatMap((row) => Object.keys(row)))]
+    .filter((field) => !HIDDEN_FIELDS.has(field))
+    .slice(0, MAX_TABLE_COLUMNS);
   return (
     <EuiBasicTable<Row>
       items={rows}
       tableCaption={i18n.EVIDENCE_TABLE_CAPTION}
       columns={fields.map((field) => ({
         field,
-        name: field,
-        truncateText: true,
+        name: FIELD_LABELS[field] ?? field,
         render: (value: unknown) => cell(value),
       }))}
     />
+  );
+};
+
+/**
+ * The range the analyst searched. Relative ranges such as `now-7d` mean nothing later, so they are
+ * resolved against the time the evidence was preserved.
+ */
+const TimeRange: React.FC<{ from: string; to: string; at: string }> = ({ from, to, at }) => {
+  const forceNow = new Date(at);
+  const start = dateMath.parse(from, { forceNow });
+  const end = dateMath.parse(to, { roundUp: true, forceNow });
+  if (!start?.isValid() || !end?.isValid()) return <>{i18n.TIME_RANGE(from, to)}</>;
+
+  return (
+    <>
+      {i18n.TIME_RANGE_RESOLVED({
+        from: start.toDate(),
+        to: end.toDate(),
+        relative: i18n.TIME_RANGE_RELATIVE(from, to),
+      })}
+    </>
   );
 };
 
@@ -65,8 +99,20 @@ const Preservation: React.FC<{
       </EuiText>
     }
   >
-    <EuiText size="xs" color="subdued">
-      {i18n.TIME_RANGE(preservation.timeRange.from, preservation.timeRange.to)}
+    {preservation.note && (
+      <>
+        <EuiText size="s" data-test-subj="alertZeroHuntPreservationNote">
+          <p>{preservation.note}</p>
+        </EuiText>
+        <EuiSpacer size="s" />
+      </>
+    )}
+    <EuiText size="xs" color="subdued" data-test-subj="alertZeroHuntPreservationTimeRange">
+      <TimeRange
+        from={preservation.timeRange.from}
+        to={preservation.timeRange.to}
+        at={preservation.timestamp}
+      />
     </EuiText>
     <EuiSpacer size="xs" />
     <EuiCodeBlock language="esql" fontSize="s" paddingSize="s" isCopyable overflowHeight={160}>
@@ -80,7 +126,8 @@ const Preservation: React.FC<{
 /** The hunt, how it was run, the evidence preserved from it, and the automated adjudication if any. */
 export const HuntSessionAttachmentInlineContent: React.FC<
   HuntSessionAttachmentInlineContentProps
-> = ({ attachment }) => {
+> = ({ attachment, huntLibraryUrl }) => {
+  const { euiTheme } = useEuiTheme();
   const parsed = huntSessionAttachmentSchema.safeParse(attachment?.data);
   if (!parsed.success) {
     return (
@@ -98,13 +145,13 @@ export const HuntSessionAttachmentInlineContent: React.FC<
   } = parsed.data;
 
   return (
-    <div data-test-subj="alertZeroHuntSession">
+    <div
+      data-test-subj="alertZeroHuntSession"
+      css={css`
+        padding: ${euiTheme.size.base};
+      `}
+    >
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h3>{definition.name}</h3>
-          </EuiTitle>
-        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiBadge color="hollow" data-test-subj="alertZeroHuntTrigger">
             {trigger === 'manual' ? i18n.TRIGGER_MANUAL : i18n.TRIGGER_AUTOMATED}
@@ -115,8 +162,20 @@ export const HuntSessionAttachmentInlineContent: React.FC<
             <EuiBadge color="hollow">{i18n.EXTENDED_BY_ANALYST}</EuiBadge>
           </EuiFlexItem>
         )}
+        {huntLibraryUrl && (
+          <EuiFlexItem grow={false}>
+            <EuiLink
+              href={huntLibraryUrl}
+              target="_blank"
+              external
+              data-test-subj="alertZeroHuntLibraryLink"
+            >
+              {i18n.VIEW_IN_HUNT_LIBRARY}
+            </EuiLink>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
-      <EuiSpacer size="xs" />
+      <EuiSpacer size="s" />
       <EuiText size="s" data-test-subj="alertZeroHuntHypothesis">
         <p>{definition.hypothesis}</p>
       </EuiText>

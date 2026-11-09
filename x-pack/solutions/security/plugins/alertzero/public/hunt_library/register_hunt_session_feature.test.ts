@@ -33,13 +33,18 @@ const verification: HuntSessionVerification = {
 const setup = () => {
   const register = jest.fn();
   const http = httpServiceMock.createStartContract();
+  const getUrlForApp = jest.fn(
+    (_app: string, { path }: { path?: string } = {}) =>
+      `http://kibana/app/agent_builder${path ?? ''}`
+  );
   registerHuntSessionFeature({
     discoverShared: {
       features: { registry: { register } },
     } as unknown as DiscoverSharedPublicSetup,
     getHttp: async () => http,
+    getApplication: async () => ({ getUrlForApp } as never),
   });
-  return { http, feature: register.mock.calls[0][0] as HuntSessionFeature, register };
+  return { http, getUrlForApp, feature: register.mock.calls[0][0] as HuntSessionFeature, register };
 };
 
 describe('registerHuntSessionFeature', () => {
@@ -93,6 +98,7 @@ describe('registerHuntSessionFeature', () => {
       timeRange: { from: 'now-7d', to: 'now' },
       columns: ['@timestamp'],
       dataViewId: 'dv-1',
+      note: 'Same rare port on both hosts',
       rows: [{ kind: 'raw_event' as const, index: 'logs-x', id: 'e1' }],
     };
 
@@ -118,11 +124,14 @@ describe('registerHuntSessionFeature', () => {
           time_range: { from: 'now-7d', to: 'now' },
           columns: ['@timestamp'],
           data_view_id: 'dv-1',
+          note: 'Same rare port on both hosts',
           rows: request.rows,
         }),
       });
       expect(result).toEqual({
         investigationId: 'inv-1',
+        investigationUrl:
+          'http://kibana/app/agent_builder/agents/elastic-ai-agent/conversations/inv-1',
         evidenceCount: 3,
         addedCount: 2,
         profileToken: 'new-token',

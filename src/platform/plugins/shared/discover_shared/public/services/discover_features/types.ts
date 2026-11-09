@@ -385,11 +385,15 @@ export interface HuntPreserveRequest {
   timeRange: { from: string; to: string };
   columns: string[];
   dataViewId: string;
+  /** Context the analyst wrote for this preservation. */
+  note?: string;
   rows: HuntEvidenceSelection[];
 }
 
 export interface HuntPreserveResult {
   investigationId: string;
+  /** Link to the Investigation, for the confirmation. */
+  investigationUrl: string;
   /** Unique evidence rows on the Investigation after this request. */
   evidenceCount: number;
   /** Rows this request added. Zero for a retry or a repeated selection. */

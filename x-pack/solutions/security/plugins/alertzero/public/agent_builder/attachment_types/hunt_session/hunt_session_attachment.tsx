@@ -10,6 +10,8 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
+import { ALERTZERO_APP_ID } from '../../../../common/constants';
+import { HUNT_LIBRARY_PATH } from '../../../pages/hunt_library/paths';
 import { huntSessionAttachmentSchema } from '../../../../common/hunt_session_attachment_schema';
 import type { AttachmentNavigationDeps } from '../navigation';
 import { lazyInlineContent } from '../shared/attachment_definition_helpers';
@@ -60,7 +62,17 @@ export const createHuntSessionAttachmentDefinition = ({
         : {}),
     };
   },
-  renderInlineContent: ({ attachment }) => <LazyHuntSessionInlineContent attachment={attachment} />,
+  renderInlineContent: ({ attachment }) => {
+    const parsed = huntSessionAttachmentSchema.safeParse(attachment?.data);
+    const huntLibraryUrl =
+      parsed.success && navigation.getUrlForApp
+        ? navigation.getUrlForApp(ALERTZERO_APP_ID, {
+            path: `${HUNT_LIBRARY_PATH}?hunt=${encodeURIComponent(parsed.data.definition.id)}`,
+            absolute: true,
+          })
+        : undefined;
+    return <LazyHuntSessionInlineContent attachment={attachment} huntLibraryUrl={huntLibraryUrl} />;
+  },
   getActionButtons: ({ attachment }) => {
     const parsed = huntSessionAttachmentSchema.safeParse(attachment?.data);
     const investigationId = parsed.success ? parsed.data.investigation_id : undefined;

@@ -241,11 +241,12 @@ describe('preserving selected evidence', () => {
   };
 
   const confirmElement = (openModal: jest.SpyInstance) =>
-    openModal.mock.calls[0][0] as { props: { onConfirm: () => Promise<void> } };
+    openModal.mock.calls[0][0] as { props: { onConfirm: (note: string) => Promise<void> } };
 
   it('sends the selection and Discover state to the server only on confirm', async () => {
     const preserveEvidence = jest.fn().mockResolvedValue({
       investigationId: 'inv-1',
+      investigationUrl: 'http://kibana/app/alertzero?selectedConversationId=inv-1',
       evidenceCount: 3,
       addedCount: 2,
       profileToken: 'new-token',
@@ -254,7 +255,7 @@ describe('preserving selected evidence', () => {
 
     hunt.onClick({ selectedDocs: [rawRecord('e1'), rawRecord('e2')] });
     expect(preserveEvidence).not.toHaveBeenCalled();
-    await confirmElement(openModal).props.onConfirm();
+    await confirmElement(openModal).props.onConfirm('Same rare port on both hosts');
 
     expect(preserveEvidence).toHaveBeenCalledWith({
       token: 'old-token',
@@ -264,6 +265,7 @@ describe('preserving selected evidence', () => {
       timeRange: { from: 'now-7d', to: 'now' },
       columns: ['@timestamp'],
       dataViewId: 'dv-1',
+      note: 'Same rare port on both hosts',
       rows: [
         { kind: 'raw_event', index: 'logs-x', id: 'e1' },
         { kind: 'raw_event', index: 'logs-x', id: 'e2' },
@@ -290,8 +292,8 @@ describe('preserving selected evidence', () => {
 
     hunt.onClick({ selectedDocs: [rawRecord('e1')] });
     const { onConfirm } = confirmElement(openModal).props;
-    await expect(onConfirm()).rejects.toThrow('try later');
-    await onConfirm();
+    await expect(onConfirm('')).rejects.toThrow('try later');
+    await onConfirm('');
 
     const [first, second] = preserveEvidence.mock.calls.map(([request]) => request.preservationId);
     expect(second).toBe(first);
@@ -304,7 +306,7 @@ describe('preserving selected evidence', () => {
 
     hunt.onClick({ selectedDocs: [{ id: 'x', raw: {}, flattened: {} } as DataTableRecord] });
 
-    await expect(confirmElement(openModal).props.onConfirm()).rejects.toThrow(
+    await expect(confirmElement(openModal).props.onConfirm('')).rejects.toThrow(
       'cannot be preserved'
     );
     expect(preserveEvidence).not.toHaveBeenCalled();

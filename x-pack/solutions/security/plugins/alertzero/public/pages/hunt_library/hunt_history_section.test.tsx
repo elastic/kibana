@@ -13,6 +13,16 @@ import { useHuntHistory } from '../../hooks/use_hunt_library_api';
 import { HuntHistorySection } from './hunt_history_section';
 
 jest.mock('../../hooks/use_hunt_library_api');
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  useKibana: () => ({
+    services: {
+      application: {
+        getUrlForApp: (_app: string, { path }: { path: string }) =>
+          `http://kibana/app/alertzero${path}`,
+      },
+    },
+  }),
+}));
 
 const mockHistory = (state: Record<string, unknown>) =>
   jest.mocked(useHuntHistory).mockReturnValue(state as never);
@@ -48,6 +58,28 @@ describe('HuntHistorySection', () => {
     expect(table).toHaveTextContent('analyst');
     expect(table).toHaveTextContent('Manual session');
     expect(screen.getAllByText('Exploratory')).toHaveLength(2);
+  });
+
+  it('reads the outcome in words and links a session to its Investigation', () => {
+    mockHistory({
+      data: {
+        history: [
+          entry({ outcome: 'investigation_created', investigationId: 'inv-1' }),
+          entry({ sessionId: 's2' }),
+        ],
+      },
+      isLoading: false,
+      isError: false,
+    });
+    renderSection();
+
+    expect(screen.getByText('Investigation created')).toBeInTheDocument();
+    expect(screen.queryByText('investigation_created')).not.toBeInTheDocument();
+    expect(screen.getAllByTestId('alertZeroHuntHistoryInvestigationLink')).toHaveLength(1);
+    expect(screen.getByTestId('alertZeroHuntHistoryInvestigationLink')).toHaveAttribute(
+      'href',
+      'http://kibana/app/alertzero?selectedConversationId=inv-1'
+    );
   });
 
   it('says so when the hunt has not been run', () => {

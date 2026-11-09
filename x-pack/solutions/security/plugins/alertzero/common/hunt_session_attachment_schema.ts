@@ -16,6 +16,7 @@ export const HUNT_SESSION_MAX_ROWS_PER_PRESERVATION = 50;
 export const HUNT_SESSION_MAX_FINGERPRINTS = 500;
 export const HUNT_SESSION_MAX_FIELDS_PER_ROW = 30;
 export const HUNT_SESSION_MAX_FILTERS = 50;
+export const HUNT_SESSION_MAX_NOTE_LENGTH = 2000;
 export const HUNT_SESSION_MAX_FILTERS_BYTES = 8 * 1024;
 
 const scalar = lazySchema(() => z.union([z.string().max(1024), z.number(), z.boolean(), z.null()]));
@@ -87,6 +88,8 @@ export const huntSessionAttachmentSchema = lazySchema(() =>
             preservation_id: z.string().min(1).max(64),
             actor: z.string().max(256),
             timestamp: z.string().max(64),
+            /** Context the analyst wrote when preserving. */
+            note: z.string().max(HUNT_SESSION_MAX_NOTE_LENGTH).optional(),
             ...sessionState,
             evidenceFingerprints: z.array(z.string().max(256)).max(50),
             selectedEvidence: z.array(evidenceRow).max(HUNT_SESSION_MAX_ROWS_PER_PRESERVATION),

@@ -20,8 +20,9 @@ jest.mock('./continue_hunt', () => ({
   continueHunt: (...args: unknown[]) => mockContinueHunt(...args),
 }));
 
-const navigation = (hasDiscover: boolean) => ({
+const navigation = (hasDiscover: boolean, getUrlForApp?: jest.Mock) => ({
   ...createMockNavigation(),
+  ...(getUrlForApp ? { getUrlForApp: getUrlForApp as never } : {}),
   share: hasDiscover
     ? ({ url: { locators: { get: () => ({ navigate: jest.fn() }) } } } as never)
     : undefined,
@@ -29,12 +30,13 @@ const navigation = (hasDiscover: boolean) => ({
 
 const definitionFor = (
   hasDiscover = true,
-  notifications = { toasts: { addDanger: jest.fn() } }
+  notifications = { toasts: { addDanger: jest.fn() } },
+  getUrlForApp?: jest.Mock
 ) => ({
   notifications,
   definition: createHuntSessionAttachmentDefinition({
     http: httpServiceMock.createStartContract(),
-    navigation: navigation(hasDiscover),
+    navigation: navigation(hasDiscover, getUrlForApp),
     notifications: notifications as never,
   }),
 });
@@ -117,6 +119,18 @@ describe('createHuntSessionAttachmentDefinition', () => {
     expect(button.disabled).toBe(true);
   });
 
+  it('links the inline content to the hunt open in the Hunt Library', () => {
+    const getUrlForApp = jest.fn().mockReturnValue('http://kibana/library');
+    const { definition: linked } = definitionFor(true, undefined, getUrlForApp);
+
+    linked.renderInlineContent!({ attachment: attachment(manualSession) } as never);
+
+    expect(getUrlForApp).toHaveBeenCalledWith('alertzero', {
+      path: '/watches/hunt_library?hunt=okta_failed_oauth_public_client_scope',
+      absolute: true,
+    });
+  });
+
   it('offers no action for data it cannot read', () => {
     const { definition } = definitionFor();
 
@@ -141,17 +155,19 @@ describe('createHuntSessionAttachmentDefinition', () => {
 });
 
 describe('HuntSessionAttachmentInlineContent', () => {
-  const renderContent = (data: unknown) =>
+  const renderContent = (data: unknown, huntLibraryUrl?: string) =>
     render(
       <I18nProvider>
-        <HuntSessionAttachmentInlineContent attachment={attachment(data)} />
+        <HuntSessionAttachmentInlineContent
+          attachment={attachment(data)}
+          huntLibraryUrl={huntLibraryUrl}
+        />
       </I18nProvider>
     );
 
   it('shows the hunt, who ran it, and each preservation with its query and rows', async () => {
     renderContent(manualSession);
 
-    expect(screen.getByText('Failed OAuth public client scope')).toBeInTheDocument();
     expect(screen.getByTestId('alertZeroHuntTrigger')).toHaveTextContent('Analyst hunt');
     expect(screen.getByTestId('alertZeroHuntHypothesis')).toHaveTextContent(
       'An attacker probes OAuth scopes'
@@ -161,6 +177,48 @@ describe('HuntSessionAttachmentInlineContent', () => {
     await waitFor(() => expect(screen.getAllByText('logs-okta').length).toBeGreaterThan(0));
     expect(screen.getByText('FROM logs-okta | WHERE x')).toBeInTheDocument();
     expect(screen.queryByTestId('alertZeroHuntAdjudication')).not.toBeInTheDocument();
+  });
+
+  it('shows the analyst note, and resolves a relative time range against when it was preserved', () => {
+    renderContent({
+      ...manualSession,
+      preservations: [
+        { ...manualSession.preservations[0], note: 'Both hosts talk to the same rare port' },
+      ],
+    });
+
+    expect(screen.getByTestId('alertZeroHuntPreservationNote')).toHaveTextContent(
+      'Both hosts talk to the same rare port'
+    );
+    const range = screen.getByTestId('alertZeroHuntPreservationTimeRange');
+    expect(range).toHaveTextContent('(now-2d to now)');
+    expect(range).not.toHaveTextContent('Time range: now-2d to now');
+  });
+
+  it('shows aggregate rows without the internal evidence kind, and names the count column', async () => {
+    renderContent({
+      ...manualSession,
+      preservations: [
+        {
+          ...manualSession.preservations[0],
+          selectedEvidence: [{ cc: 2, 'process.name': 'pip', evidenceKind: 'analyst_supplied' }],
+        },
+      ],
+    });
+
+    await waitFor(() => expect(screen.getByText('process.name')).toBeInTheDocument());
+    expect(screen.getByText('Count')).toBeInTheDocument();
+    expect(screen.queryByText('evidenceKind')).not.toBeInTheDocument();
+    expect(screen.queryByText('analyst_supplied')).not.toBeInTheDocument();
+  });
+
+  it('links to the hunt in the Hunt Library when it can', () => {
+    renderContent(manualSession, 'http://kibana/app/alertzero/watches/hunt_library?hunt=h');
+
+    expect(screen.getByTestId('alertZeroHuntLibraryLink')).toHaveAttribute(
+      'href',
+      'http://kibana/app/alertzero/watches/hunt_library?hunt=h'
+    );
   });
 
   it('shows the adjudication of an automated session', () => {

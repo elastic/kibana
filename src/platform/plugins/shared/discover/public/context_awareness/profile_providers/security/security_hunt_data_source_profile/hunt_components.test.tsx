@@ -89,6 +89,25 @@ describe('HuntEvidencePreview', () => {
     expect(screen.getByTestId('discoverHuntEvidenceConfirm')).toBeEnabled();
   });
 
+  it('saves the context note the analyst wrote, trimmed', async () => {
+    const onConfirm = jest.fn().mockResolvedValue(undefined);
+    renderWithI18n(
+      <HuntEvidencePreview
+        title="Preserve as Investigation"
+        selectedDocs={docs}
+        onConfirm={onConfirm}
+        onClose={jest.fn()}
+      />
+    );
+
+    fireEvent.change(screen.getByTestId('discoverHuntEvidenceNote'), {
+      target: { value: '  Same rare port on both hosts ' },
+    });
+    fireEvent.click(screen.getByTestId('discoverHuntEvidenceConfirm'));
+
+    await waitFor(() => expect(onConfirm).toHaveBeenCalledWith('Same rare port on both hosts'));
+  });
+
   it('closes without saving on cancel', () => {
     const onConfirm = jest.fn();
     const onClose = jest.fn();

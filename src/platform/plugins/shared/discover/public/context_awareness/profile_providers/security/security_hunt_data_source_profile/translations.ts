@@ -94,6 +94,32 @@ export const SAVED_TEXT = (added: number, total: number) =>
     values: { added, total },
   });
 
+export const VIEW_INVESTIGATION = i18n.translate(
+  'discover.profile.security.hunt.viewInvestigation',
+  {
+    defaultMessage: 'View Investigation',
+  }
+);
+
+export const EVIDENCE_NOTE_LABEL = i18n.translate(
+  'discover.profile.security.hunt.evidenceNoteLabel',
+  {
+    defaultMessage: 'Context note (optional)',
+  }
+);
+
+export const EVIDENCE_NOTE_HELP = i18n.translate(
+  'discover.profile.security.hunt.evidenceNoteHelp',
+  {
+    defaultMessage: 'Saved with this evidence and shown on the Investigation.',
+  }
+);
+
+export const EVIDENCE_NOTE_PLACEHOLDER = i18n.translate(
+  'discover.profile.security.hunt.evidenceNotePlaceholder',
+  { defaultMessage: 'Why these rows matter, what you checked, what to look at next' }
+);
+
 export const NOT_AVAILABLE = i18n.translate('discover.profile.security.hunt.notAvailable', {
   defaultMessage: 'Hunt evidence cannot be preserved right now.',
 });

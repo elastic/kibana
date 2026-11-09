@@ -13,6 +13,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
+  EuiFormRow,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -20,9 +21,13 @@ import {
   EuiModalHeaderTitle,
   EuiSpacer,
   EuiText,
+  EuiTextArea,
 } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import * as i18n from './translations';
+
+/** Matches the longest note the server stores. */
+const HUNT_NOTE_MAX_LENGTH = 2000;
 
 interface EvidenceRow {
   id: string;
@@ -33,7 +38,7 @@ interface HuntEvidencePreviewProps {
   title: string;
   selectedDocs: DataTableRecord[];
   /** Saves the evidence. Rejects with a readable message; resolves once it is durable. */
-  onConfirm: () => Promise<void>;
+  onConfirm: (note: string) => Promise<void>;
   onClose: () => void;
 }
 
@@ -45,18 +50,19 @@ export const HuntEvidencePreview: React.FC<HuntEvidencePreviewProps> = ({
   onClose,
 }) => {
   const [isSaving, setIsSaving] = useState(false);
+  const [note, setNote] = useState('');
   const [error, setError] = useState<string | undefined>();
 
   const confirm = useCallback(async () => {
     setIsSaving(true);
     setError(undefined);
     try {
-      await onConfirm();
+      await onConfirm(note.trim());
     } catch (e) {
       setError(e instanceof Error ? e.message : i18n.SAVE_FAILED);
       setIsSaving(false);
     }
-  }, [onConfirm]);
+  }, [onConfirm, note]);
 
   return (
     <EuiModal
@@ -85,6 +91,19 @@ export const HuntEvidencePreview: React.FC<HuntEvidencePreviewProps> = ({
             { field: 'index', name: i18n.EVIDENCE_INDEX_COLUMN, truncateText: true },
           ]}
         />
+        <EuiSpacer size="m" />
+        <EuiFormRow label={i18n.EVIDENCE_NOTE_LABEL} helpText={i18n.EVIDENCE_NOTE_HELP} fullWidth>
+          <EuiTextArea
+            fullWidth
+            rows={3}
+            maxLength={HUNT_NOTE_MAX_LENGTH}
+            value={note}
+            onChange={(event) => setNote(event.target.value)}
+            disabled={isSaving}
+            placeholder={i18n.EVIDENCE_NOTE_PLACEHOLDER}
+            data-test-subj="discoverHuntEvidenceNote"
+          />
+        </EuiFormRow>
         {error && (
           <>
             <EuiSpacer size="m" />

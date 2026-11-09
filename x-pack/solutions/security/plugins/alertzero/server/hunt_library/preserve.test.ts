@@ -201,6 +201,22 @@ describe('preserveHuntEvidence', () => {
     });
   });
 
+  it('stores the analyst note with the preservation, and omits a blank one', async () => {
+    const { run, attachments } = setup();
+
+    await run({ note: '  Same rare port on both hosts  ' });
+    expect(
+      (attachments.versions.at(-1)!.data as { preservations: Array<{ note?: string }> })
+        .preservations[0].note
+    ).toBe('Same rare port on both hosts');
+
+    const blank = setup();
+    await blank.run({ note: '   ' });
+    expect(
+      (blank.attachments.versions.at(-1)!.data as { preservations: object[] }).preservations[0]
+    ).not.toHaveProperty('note');
+  });
+
   it('appends later evidence to the same Investigation and bumps the revision', async () => {
     const { run, attachments } = setup({ existingInvestigation: false });
     await run();
