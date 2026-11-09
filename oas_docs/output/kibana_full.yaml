@@ -187037,13 +187037,13 @@ components:
         groupBy:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOGroupBy'
         health:
-          additionalProperties: false
+          additionalProperties: true
           type: object
           properties:
             isProblematic:
               type: boolean
             rollup:
-              additionalProperties: false
+              additionalProperties: true
               type: object
               properties:
                 isProblematic:
@@ -187092,7 +187092,7 @@ components:
                 - status
                 - state
             summary:
-              additionalProperties: false
+              additionalProperties: true
               type: object
               properties:
                 isProblematic:
