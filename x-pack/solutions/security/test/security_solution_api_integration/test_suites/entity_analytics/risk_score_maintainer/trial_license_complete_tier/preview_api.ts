@@ -212,5 +212,200 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(score.modifiers).to.have.length(1);
       expect(score.modifiers?.[0].type).to.be('asset_criticality');
     });
+
+    it('returns the next page of scores from after_keys', async () => {
+      const earlierUser = `aaa-${uuidv4().slice(0, 8)}`;
+      const laterUser = `zzz-${uuidv4().slice(0, 8)}`;
+      const { documentIds, testEntities } = await maintainerScenario.seedEntities([
+        riskScoreMaintainerEntityBuilders.idpUser({ userName: earlierUser }),
+        riskScoreMaintainerEntityBuilders.idpUser({ userName: laterUser }),
+      ]);
+      await entityStoreUtils.installEntityStoreV2({
+        entityTypes: ['user'],
+        dataViewPattern: testLogsIndex,
+      });
+      await maintainerScenario.createAlertsForDocumentIds({
+        documentIds,
+        alerts: 2,
+        riskScore: 40,
+      });
+
+      const firstPage = await previewRiskScores({ body: { identifier_type: 'user' } });
+      expect(firstPage.scores.user?.map((score) => score.id_value).sort()).to.eql(
+        testEntities.map((entity) => entity.expectedEuid).sort()
+      );
+
+      const { scores } = await previewRiskScores({
+        body: {
+          identifier_type: 'user',
+          after_keys: { user: { 'entity.id': testEntities[0].expectedEuid } },
+        },
+      });
+      expect(scores.user).to.have.length(1);
+      expect(scores.user?.[0].id_field).to.be('entity.id');
+      expect(scores.user?.[0].id_value).to.be(testEntities[1].expectedEuid);
+    });
+
+    it('applies the request filter to the alerts used for scoring', async () => {
+      const hostName = `filter-${uuidv4().slice(0, 8)}`;
+      const { documentIds, testEntities } = await maintainerScenario.seedEntities([
+        riskScoreMaintainerEntityBuilders.host({
+          hostName,
+          extraFields: { 'event.risk_score': 1 },
+        }),
+        riskScoreMaintainerEntityBuilders.host({
+          hostName,
+          extraFields: { 'event.risk_score': 100 },
+        }),
+      ]);
+      await entityStoreUtils.installEntityStoreV2({
+        entityTypes: ['host'],
+        dataViewPattern: testLogsIndex,
+      });
+      await maintainerScenario.createAlertsForDocumentIds({
+        documentIds,
+        alerts: 2,
+        riskScoreOverride: 'event.risk_score',
+      });
+
+      const unfiltered = await previewRiskScores({ body: { identifier_type: 'host' } });
+      expect(unfiltered.scores.host?.[0].id_value).to.be(testEntities[0].expectedEuid);
+      expect(unfiltered.scores.host?.[0].category_1_count).to.be(2);
+
+      const { scores } = await previewRiskScores({
+        body: {
+          identifier_type: 'host',
+          filter: {
+            bool: {
+              filter: [{ range: { 'kibana.alert.risk_score': { lte: 1 } } }],
+            },
+          },
+        },
+      });
+      expect(scores.host).to.have.length(1);
+      expect(scores.host?.[0].id_field).to.be('entity.id');
+      expect(scores.host?.[0].id_value).to.be(testEntities[0].expectedEuid);
+      expect(scores.host?.[0].category_1_count).to.be(1);
+    });
+
+    it('lowers a host score when a global host weight is set', async () => {
+      const hostName = `weight-${uuidv4().slice(0, 8)}`;
+      const { documentIds, testEntities } = await maintainerScenario.seedEntities([
+        riskScoreMaintainerEntityBuilders.host({ hostName }),
+      ]);
+      await entityStoreUtils.installEntityStoreV2({
+        entityTypes: ['host'],
+        dataViewPattern: testLogsIndex,
+      });
+      await maintainerScenario.createAlertsForDocumentIds({
+        documentIds,
+        alerts: 1,
+        riskScore: 80,
+      });
+
+      const unweighted = await previewRiskScores({ body: { identifier_type: 'host' } });
+      const weighted = await previewRiskScores({
+        body: {
+          identifier_type: 'host',
+          weights: [{ type: 'global_identifier', host: 0.5 }],
+        },
+      });
+
+      const unweightedScore = unweighted.scores.host?.[0];
+      const weightedScore = weighted.scores.host?.[0];
+      expect(unweightedScore?.id_field).to.be('entity.id');
+      expect(weightedScore?.id_field).to.be('entity.id');
+      expect(weightedScore?.id_value).to.be(testEntities[0].expectedEuid);
+      expect(weightedScore?.calculated_score < (unweightedScore?.calculated_score ?? 0)).to.be(
+        true
+      );
+    });
+
+    it('ranks the entity with the higher alert risk above the lower one', async () => {
+      const lowHost = `low-${uuidv4().slice(0, 8)}`;
+      const highHost = `high-${uuidv4().slice(0, 8)}`;
+      const low = await maintainerScenario.seedEntities([
+        riskScoreMaintainerEntityBuilders.host({ hostName: lowHost }),
+      ]);
+      const high = await maintainerScenario.seedEntities([
+        riskScoreMaintainerEntityBuilders.host({ hostName: highHost }),
+      ]);
+      await entityStoreUtils.installEntityStoreV2({
+        entityTypes: ['host'],
+        dataViewPattern: testLogsIndex,
+      });
+      await maintainerScenario.createAlertsForDocumentIds({
+        documentIds: low.documentIds,
+        alerts: 1,
+        riskScore: 20,
+      });
+      await maintainerScenario.createAlertsForDocumentIds({
+        documentIds: high.documentIds,
+        alerts: 1,
+        riskScore: 90,
+      });
+
+      const { scores } = await previewRiskScores({ body: { identifier_type: 'host' } });
+      const lowScore = scores.host?.find(
+        (score) => score.id_value === low.testEntities[0].expectedEuid
+      );
+      const highScore = scores.host?.find(
+        (score) => score.id_value === high.testEntities[0].expectedEuid
+      );
+
+      expect(lowScore?.id_field).to.be('entity.id');
+      expect(highScore?.id_field).to.be('entity.id');
+      expect(lowScore?.calculated_score_norm >= 0 && lowScore?.calculated_score_norm <= 100).to.be(
+        true
+      );
+      expect(
+        highScore?.calculated_score_norm >= 0 && highScore?.calculated_score_norm <= 100
+      ).to.be(true);
+      expect(highScore?.calculated_score_norm > (lowScore?.calculated_score_norm ?? 0)).to.be(true);
+    });
+
+    it('excludes closed alerts by default', async () => {
+      const openHost = `open-${uuidv4().slice(0, 8)}`;
+      const closedHost = `closed-${uuidv4().slice(0, 8)}`;
+      const open = await maintainerScenario.seedEntities([
+        riskScoreMaintainerEntityBuilders.host({ hostName: openHost }),
+      ]);
+      const closed = await maintainerScenario.seedEntities([
+        riskScoreMaintainerEntityBuilders.host({ hostName: closedHost }),
+      ]);
+      await entityStoreUtils.installEntityStoreV2({
+        entityTypes: ['host'],
+        dataViewPattern: testLogsIndex,
+      });
+      await maintainerScenario.createAlertsForDocumentIds({
+        documentIds: [...open.documentIds, ...closed.documentIds],
+        alerts: 2,
+        riskScore: 50,
+      });
+
+      const updated = await es.updateByQuery({
+        index: '.alerts-security.alerts-default',
+        refresh: true,
+        query: { term: { 'host.name': closedHost } },
+        script: {
+          source: "ctx._source['kibana.alert.workflow_status'] = 'closed'",
+          lang: 'painless',
+        },
+      });
+      expect((updated.updated ?? 0) > 0).to.be(true);
+
+      const { scores } = await previewRiskScores({ body: { identifier_type: 'host' } });
+      const scoredIds = scores.host?.map((score) => score.id_value) ?? [];
+      expect(scoredIds).to.contain(open.testEntities[0].expectedEuid);
+      expect(scoredIds).not.to.contain(closed.testEntities[0].expectedEuid);
+      scores.host?.forEach((score) => {
+        expect(score.id_field).to.be('entity.id');
+      });
+    });
+
+    it('returns empty scores when the data view id is not an index', async () => {
+      const { scores } = await previewRiskScores({ body: { data_view_id: 'invalid-index' } });
+      expect(Object.values(scores).every((page) => (page ?? []).length === 0)).to.be(true);
+    });
   });
 };
