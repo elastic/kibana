@@ -7,7 +7,6 @@
 
 import {
   ALERT_ACTION_NO_OP_CODE,
-  ALERT_NOT_LATEST_CODE,
   INVALID_ALERT_STATE_TRANSITION_CODE,
   RULE_NOT_FOUND_CODE,
 } from '@kbn/alerting-v2-schemas';
@@ -169,7 +168,7 @@ export const ALERTING_ERROR_CODES = {
    * The episode exists but is not the latest episode of its series. Lifecycle
    * actions (`activate` / `deactivate`) only accept the latest episode.
    */
-  ALERT_EPISODE_NOT_LATEST: ALERT_NOT_LATEST_CODE,
+  ALERT_EPISODE_NOT_LATEST: 'ALERT_NOT_LATEST',
   /**
    * The requested action is a no-op against the alert's current state machine:
    * `activate` / `deactivate` of an alert already in that lifecycle state,
