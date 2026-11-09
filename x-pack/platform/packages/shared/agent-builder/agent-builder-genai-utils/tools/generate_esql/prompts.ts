@@ -13,6 +13,8 @@ import { formatAction, isRequestDocumentationAction } from './actions';
 import { getEsqlInstructions } from './prompts/instructions_template';
 import type { EsqlLoadedDocumentation } from './documentation';
 import { EsqlDocEntry } from './documentation';
+import { getEsqlHarnessConfig } from './harness_config';
+import { parseExemplars, renderExemplars, selectExemplars } from './exemplars';
 
 // followed by a blank line, so that the prompt is unchanged when there is no additional context
 const formatAdditionalContext = (additionalContext?: string): string =>
@@ -135,11 +137,12 @@ ${getDocumentationSection({
   documentation,
   tsDocRequested,
   promqlDocRequested,
+  nlQuery,
 })}
 
 ## Instructions
 
-${getEsqlInstructions({ defaultLimit: rowLimit, disableNamedParams })}
+${getEsqlInstructions({ defaultLimit: rowLimit, disableNamedParams })}${formatExtraInstructions()}
 
 ${
   additionalInstructions
@@ -177,16 +180,41 @@ Now, based on that information, please generate the ES|QL query.`,
   ];
 };
 
+// Slot G of the harness config: empty unless an optimization round opened prompt prose.
+const formatExtraInstructions = (): string => {
+  const { extraInstructions } = getEsqlHarnessConfig().instructions;
+  return extraInstructions.trim() ? `\n\n${extraInstructions.trim()}` : '';
+};
+
+// Slot B of the harness config: the whole examples corpus by default, or the k most similar
+// exemplars when per-query retrieval is enabled.
+const getExemplarsSection = ({
+  documentation,
+  nlQuery,
+}: {
+  documentation: EsqlLoadedDocumentation;
+  nlQuery?: string;
+}): string => {
+  const content = documentation.getDocContent(EsqlDocEntry.examples);
+  const { selection, k } = getEsqlHarnessConfig().exemplars;
+  if (selection === 'all' || !nlQuery) {
+    return content;
+  }
+  return renderExemplars(selectExemplars(parseExemplars(content), nlQuery, k));
+};
+
 const getDocumentationSection = ({
   resource,
   documentation,
   tsDocRequested = false,
   promqlDocRequested = false,
+  nlQuery,
 }: {
   resource?: ResolvedResourceWithSampling;
   documentation: EsqlLoadedDocumentation;
   tsDocRequested?: boolean;
   promqlDocRequested?: boolean;
+  nlQuery?: string;
 }): string => {
   const isTsdb = resource?.isTsdb || tsDocRequested;
 
@@ -210,6 +238,6 @@ ${documentation.getDocContent(EsqlDocEntry.promqlQueries)}
   }
 
 <esql-examples>
-${documentation.getDocContent(EsqlDocEntry.examples)}
+${getExemplarsSection({ documentation, nlQuery })}
 </esql-examples>`;
 };

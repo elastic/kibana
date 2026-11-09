@@ -22,6 +22,9 @@ import { indexExplorer } from '../index_explorer';
 import { loadDocumentation } from './documentation';
 import { createRequestDocumentationPromptNoResource } from './prompts';
 import { withPromqlKeyword } from './promql_keyword';
+import { getEsqlHarnessConfig } from './harness_config';
+import { writeHarnessTrace, harnessTracingEnabled } from './harness_trace';
+import { isExecuteQueryAction, isGenerateQueryAction, isValidateQueryAction } from './actions';
 
 export const DEFAULT_EXECUTION_TIMEOUT_MS = 30_000;
 
@@ -176,6 +179,13 @@ export const generateEsql = async ({
   logger,
   sessionId,
 }: GenerateEsqlParams): Promise<GenerateEsqlResponse> => {
+  const harnessConfig = getEsqlHarnessConfig();
+  const { retryPolicy } = harnessConfig;
+  const effectiveExecute = retryPolicy.execute ?? execute;
+  const effectiveMaxRetries = retryPolicy.maxRetries ?? maxRetries;
+  const effectiveExecutionTimeoutMs = retryPolicy.executionTimeoutMs ?? executionTimeoutMs;
+  const startedAt = Date.now();
+
   const model = modelProvider
     ? await modelProvider.selectModel({ effortLevel: EffortLevels.low })
     : inputModel!;
@@ -215,7 +225,7 @@ export const generateEsql = async ({
         let selectedTarget = index;
         let precomputedDocAction: RequestDocumentationAction | undefined;
 
-        if (!selectedTarget) {
+        if (!selectedTarget && harnessConfig.docRetrieval.prefetchWithoutResource) {
           // Pre-fetch doc keywords from the NL query alone, in parallel with index discovery.
           // The resource-less prompt is an accepted quality tradeoff for the latency win.
           const requestDocModel = model.chatModel.withStructuredOutput(requestDocumentationSchema, {
@@ -231,7 +241,7 @@ export const generateEsql = async ({
             )
             .then(({ commands = [], functions = [] }) => {
               const requestedKeywords = withPromqlKeyword(
-                [...commands, ...functions],
+                [...commands, ...functions, ...harnessConfig.docRetrieval.alwaysInclude],
                 nlQuery,
                 additionalContext
               );
@@ -268,21 +278,42 @@ export const generateEsql = async ({
           selectedTarget = selectedResource.name;
           logger?.debug(`Discovered target index: ${selectedTarget}`);
           precomputedDocAction = docAction;
+        } else if (!selectedTarget) {
+          // Prefetch disabled by the harness config: discover the index first, then let the graph
+          // request documentation with the resolved resource in context.
+          const {
+            resources: [discoveredResource],
+          } = await indexExplorer({
+            nlQuery: nlQueryWithContext,
+            esClient,
+            limit: 1,
+            includeDatasets,
+            includeViews,
+            includeFrozen,
+            model,
+            logger,
+          });
+          if (!discoveredResource) {
+            throw new GenerateEsqlNoDataError(
+              'Could not discover a suitable index for the query. Please specify an index explicitly.'
+            );
+          }
+          selectedTarget = discoveredResource.name;
         }
 
         const outState = await graph.invoke(
           {
             nlQuery,
             target: selectedTarget,
-            execute,
-            maxRetries,
+            execute: effectiveExecute,
+            maxRetries: effectiveMaxRetries,
             additionalInstructions,
             additionalContext,
             rowLimit,
             disableNamedParams,
             timeRange,
             esqlVariables,
-            executionTimeoutMs,
+            executionTimeoutMs: effectiveExecutionTimeoutMs,
             // Empty when index is known — graph runs request_documentation in-graph with resource context.
             actions: precomputedDocAction ? [precomputedDocAction] : [],
           },
@@ -292,6 +323,39 @@ export const generateEsql = async ({
             metadata: { graphName: 'generate_esql' },
           }
         );
+
+        if (harnessTracingEnabled()) {
+          const generateActions = outState.actions.filter(isGenerateQueryAction);
+          const attempts = outState.actions.filter(
+            (action) => isExecuteQueryAction(action) || isValidateQueryAction(action)
+          );
+          writeHarnessTrace({
+            ts: new Date().toISOString(),
+            nlQuery,
+            target: selectedTarget,
+            requestedKeywords: precomputedDocAction?.requestedKeywords,
+            tries: generateActions.length,
+            generatedQueries: generateActions.map((action) => action.query ?? ''),
+            attempts: attempts.map((action) => ({
+              query: 'query' in action ? action.query : undefined,
+              success: action.success,
+              error: 'error' in action ? action.error : undefined,
+              timedOut: isExecuteQueryAction(action) ? action.timedOut : undefined,
+            })),
+            finalQuery: outState.query,
+            error: outState.error,
+            inputTokens: generateActions.reduce(
+              (total, action) => total + (action.usage?.inputTokens ?? 0),
+              0
+            ),
+            outputTokens: generateActions.reduce(
+              (total, action) => total + (action.usage?.outputTokens ?? 0),
+              0
+            ),
+            llmCalls: generateActions.length,
+            durationMs: Date.now() - startedAt,
+          });
+        }
 
         return {
           error: outState.error,

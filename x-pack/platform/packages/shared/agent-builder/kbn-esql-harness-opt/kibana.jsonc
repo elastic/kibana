@@ -1,0 +1,8 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/esql-harness-opt",
+  "owner": "@elastic/workchat-eng",
+  "group": "platform",
+  "visibility": "private",
+  "devOnly": true
+}

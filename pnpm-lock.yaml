@@ -5536,6 +5536,9 @@ importers:
       '@kbn/eslint-plugin-telemetry':
         specifier: workspace:*
         version: link:packages/kbn-eslint-plugin-telemetry
+      '@kbn/esql-harness-opt':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/agent-builder/kbn-esql-harness-opt
       '@kbn/esql-resource-browser-storybook-config':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-esql-resource-browser-storybook-config
@@ -9033,6 +9036,8 @@ importers:
   x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base: {}
 
   x-pack/platform/packages/shared/agent-builder/agent-builder-workflow-gen: {}
+
+  x-pack/platform/packages/shared/agent-builder/kbn-esql-harness-opt: {}
 
   x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder: {}
 

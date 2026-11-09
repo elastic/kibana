@@ -46,6 +46,7 @@ import {
 } from './actions';
 import type { EsqlLoadedDocumentation } from './documentation';
 import { hasRejectedJoinTarget } from './join_errors';
+import { getEsqlHarnessConfig } from './harness_config';
 import { withPromqlKeyword } from './promql_keyword';
 
 export const requestDocumentationSchema = z
@@ -113,7 +114,7 @@ export const createNlToEsqlGraph = ({
   const resolveTarget = async (state: StateType) => {
     const resolvedResource = await resolveResourceForEsqlWithSamplingStats({
       resourceName: state.target,
-      samplingSize: 100,
+      samplingSize: getEsqlHarnessConfig().resourceContext.samplingSize,
       includeDatasets,
       includeViews,
       includeFrozen,
@@ -148,7 +149,7 @@ export const createNlToEsqlGraph = ({
     );
 
     const requestedKeywords = withPromqlKeyword(
-      [...commands, ...functions],
+      [...commands, ...functions, ...getEsqlHarnessConfig().docRetrieval.alwaysInclude],
       state.nlQuery,
       state.additionalContext
     );
@@ -190,11 +191,23 @@ export const createNlToEsqlGraph = ({
     const queries = extractEsqlQueries(responseText);
     const refusal = extractRefusal(response);
 
+    const usageMetadata = (
+      response as { usage_metadata?: { input_tokens?: number; output_tokens?: number } }
+    ).usage_metadata;
+
     const action: GenerateQueryAction = {
       type: 'generate_query',
       success: queries.length > 0,
       query: queries[0],
       response: responseText,
+      ...(usageMetadata
+        ? {
+            usage: {
+              inputTokens: usageMetadata.input_tokens ?? 0,
+              outputTokens: usageMetadata.output_tokens ?? 0,
+            },
+          }
+        : {}),
       ...(refusal && queries.length === 0 ? { refusal } : {}),
     };
 
@@ -213,7 +226,8 @@ export const createNlToEsqlGraph = ({
    *
    * Decided from the errors already in state; no cluster lookup is involved.
    */
-  const joinTargetRejected = (state: StateType): boolean => hasRejectedJoinTarget(state.actions);
+  const joinTargetRejected = (state: StateType): boolean =>
+    getEsqlHarnessConfig().retryPolicy.stopOnJoinReject && hasRejectedJoinTarget(state.actions);
 
   const branchAfterGenerate = async (state: StateType) => {
     const lastAction = state.actions[state.actions.length - 1];
@@ -371,7 +385,8 @@ export const createNlToEsqlGraph = ({
    * transient slow cluster as well as a genuinely narrower query); a second timeout ends the call.
    */
   const timeoutRetriesExhausted = (state: StateType): boolean =>
-    state.actions.filter((action) => isExecuteQueryAction(action) && action.timedOut).length > 1;
+    state.actions.filter((action) => isExecuteQueryAction(action) && action.timedOut).length >
+    getEsqlHarnessConfig().retryPolicy.timeoutRetryBudget;
 
   const branchAfterQueryExecution = async (state: StateType) => {
     const lastAction = state.actions[state.actions.length - 1];

@@ -1871,6 +1871,7 @@
     "@kbn/eslint-plugin-kbn-monaco": "workspace:*",
     "@kbn/eslint-plugin-kbn-ui": "workspace:*",
     "@kbn/eslint-plugin-telemetry": "workspace:*",
+    "@kbn/esql-harness-opt": "workspace:*",
     "@kbn/esql-resource-browser-storybook-config": "workspace:*",
     "@kbn/esql-scripts": "workspace:*",
     "@kbn/evals": "workspace:*",
