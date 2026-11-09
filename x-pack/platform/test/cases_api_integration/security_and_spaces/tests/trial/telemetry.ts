@@ -173,7 +173,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       // Second case: 50 alerts each with a distinct source.ip so they produce
-      // 50 distinct observables — hitting MAX_OBSERVABLES_PER_CASE exactly.
+      // 50 distinct observables, stored as cases-observables objects.
       const bulkOps: Array<Record<string, unknown>> = [];
       for (let i = 0; i < 50; i++) {
         bulkOps.push({ index: { _index: alertIndex, _id: `alert-telemetry-2-${i}` } });
@@ -228,7 +228,6 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       // 50 auto-extracted observables: one attachment per alert on the second case.
-      // This reaches MAX_OBSERVABLES_PER_CASE (50) making totalWithMaxObservables = 1.
       const secondCaseAttachments = Array.from({ length: 50 }, (_, i) =>
         buildUnifiedAlertReq('securitySolution', {
           alertId: `alert-telemetry-2-${i}`,
@@ -258,8 +257,8 @@ export default ({ getService }: FtrProviderContext): void => {
           // 1 from first case + 50 from second case = 51 auto-extracted
           expect(telemetry.observables.auto.default).toBe(51);
           expect(telemetry.observables.total).toBe(52);
-          // second case has exactly MAX_OBSERVABLES_PER_CASE observables
-          expect(telemetry.totalWithMaxObservables).toBe(1);
+          // no case reaches the limit of MAX_STORED_OBSERVABLES_PER_CASE (10,000) observables
+          expect(telemetry.totalWithMaxObservables).toBe(0);
         }
       });
 

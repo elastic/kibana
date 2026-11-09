@@ -155069,7 +155069,7 @@ components:
           nullable: true
           type: integer
         observables:
-          description: Observables attached to the case.
+          description: Up to 50 observables of the case, the ones stored on the case first and then the oldest of the rest. A case holds up to 10,000 observables, so compare with total_observables to tell whether it holds more.
           items:
             $ref: '#/components/schemas/Cases_case_observable'
           type: array
@@ -155091,7 +155091,7 @@ components:
           example: Case title 1
           type: string
         total_observables:
-          description: The number of observables attached to the case.
+          description: The number of observables of the case, including the ones not listed in observables.
           example: 0
           nullable: true
           type: integer
@@ -155255,7 +155255,7 @@ components:
           nullable: true
           type: integer
         observables:
-          description: Observables attached to the case.
+          description: Up to 50 observables of the case, the ones stored on the case first and then the oldest of the rest. A case holds up to 10,000 observables, so compare with total_observables to tell whether it holds more.
           items:
             $ref: '#/components/schemas/Cases_case_observable'
           type: array
@@ -155277,7 +155277,7 @@ components:
           example: Case title 1
           type: string
         total_observables:
-          description: The number of observables attached to the case.
+          description: The number of observables of the case, including the ones not listed in observables.
           example: 0
           nullable: true
           type: integer

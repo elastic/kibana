@@ -5664,7 +5664,7 @@
           },
           "observables": {
             "type": "array",
-            "description": "Observables attached to the case.",
+            "description": "Up to 50 observables of the case, the ones stored on the case first and then the oldest of the rest. A case holds up to 10,000 observables, so compare with total_observables to tell whether it holds more.",
             "items": {
               "$ref": "#/components/schemas/case_observable"
             }
@@ -5705,7 +5705,7 @@
           "total_observables": {
             "type": "integer",
             "nullable": true,
-            "description": "The number of observables attached to the case.",
+            "description": "The number of observables of the case, including the ones not listed in observables.",
             "example": 0
           },
           "totalEvents": {
@@ -7023,7 +7023,7 @@
           },
           "observables": {
             "type": "array",
-            "description": "Observables attached to the case.",
+            "description": "Up to 50 observables of the case, the ones stored on the case first and then the oldest of the rest. A case holds up to 10,000 observables, so compare with total_observables to tell whether it holds more.",
             "items": {
               "$ref": "#/components/schemas/case_observable"
             }
@@ -7065,7 +7065,7 @@
           "total_observables": {
             "type": "integer",
             "nullable": true,
-            "description": "The number of observables attached to the case.",
+            "description": "The number of observables of the case, including the ones not listed in observables.",
             "example": 0
           },
           "totalEvents": {
