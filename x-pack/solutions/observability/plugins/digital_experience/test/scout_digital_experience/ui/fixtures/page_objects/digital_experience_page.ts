@@ -39,6 +39,7 @@ export class DigitalExperiencePage {
   public readonly networkHttpRequests: Locator;
   public readonly networkSlowestResources: Locator;
   public readonly otelOverviewTopClicks: Locator;
+  public readonly overviewClearFilters: Locator;
   public readonly overviewEmpty: Locator;
   public readonly overviewTab: Locator;
   public readonly sessionsTab: Locator;
@@ -87,6 +88,7 @@ export class DigitalExperiencePage {
     this.networkHttpRequests = page.getByTestId('digitalExperienceNetworkHttpRequests');
     this.networkSlowestResources = page.getByTestId('digitalExperienceNetworkSlowestResources');
     this.otelOverviewTopClicks = page.getByTestId('digitalExperienceOverviewTopClicks');
+    this.overviewClearFilters = page.getByTestId('digitalExperienceOverviewClearFilters');
     this.overviewEmpty = page.getByTestId('digitalExperienceOverviewEmpty');
     this.overviewTab = page.getByTestId('digitalExperienceTab-overview');
     this.sessionsTab = page.getByTestId('digitalExperienceTab-sessions');
@@ -165,6 +167,28 @@ export class DigitalExperiencePage {
   async selectEnvironment(label: string): Promise<void> {
     await this.environmentFilter.click();
     await this.environmentList.selectOption(label);
+  }
+
+  /** The button of an Overview filter, e.g. `browser`; its list opens on click. */
+  overviewFilter(name: 'browser' | 'os' | 'device' | 'country' | 'pageUrl'): Locator {
+    return this.page.getByTestId(`digitalExperienceOverviewFilter-${name}`);
+  }
+
+  /** The option of an Overview filter's list, e.g. `('browser', 'Firefox')`; open the list first. */
+  overviewFilterOption(
+    name: 'browser' | 'os' | 'device' | 'country' | 'pageUrl',
+    value: string
+  ): Locator {
+    return this.page.getByTestId(`digitalExperienceOverviewFilter-${name}Option-${value}`);
+  }
+
+  /** Narrows the Overview to one value of a filter, e.g. `('browser', 'Firefox')`. */
+  async selectOverviewFilter(
+    name: 'browser' | 'os' | 'device' | 'country' | 'pageUrl',
+    value: string
+  ): Promise<void> {
+    await this.overviewFilter(name).click();
+    await this.overviewFilterOption(name, value).click();
   }
 
   /** Shows one source, e.g. `Classic RUM`, or `All sources`. */

@@ -17,19 +17,24 @@ const edge = (id: string, data: ClassicCanvasEdge['data']): ClassicCanvasEdge =>
 
 describe('syncCanvasEdgeData', () => {
   it('keeps the live edges when their data is unchanged', () => {
-    const current = [edge('e1', { unitConnection: true })];
-    expect(syncCanvasEdgeData(current, [edge('e1', { unitConnection: true })])).toBe(current);
+    const current = [edge('e1', { editable: true, forwarding: 'direct' })];
+    expect(
+      syncCanvasEdgeData(current, [edge('e1', { editable: true, forwarding: 'direct' })])
+    ).toBe(current);
   });
 
   it('merges new data onto the live edge with the same id', () => {
-    const live = { ...edge('e1', { unitConnection: true }), selected: true };
+    const live = { ...edge('e1', { editable: true, forwarding: 'direct' }), selected: true };
     const routingLine = { origin: { kind: 'source' as const, id: 'src' }, destinationId: 'es' };
 
     const [synced] = syncCanvasEdgeData(
       [live],
-      [edge('e1', { unitConnection: true, routingLine })]
+      [edge('e1', { editable: true, forwarding: 'direct', routingLine })]
     );
 
-    expect(synced).toEqual({ ...live, data: { unitConnection: true, routingLine } });
+    expect(synced).toEqual({
+      ...live,
+      data: { editable: true, forwarding: 'direct', routingLine },
+    });
   });
 });

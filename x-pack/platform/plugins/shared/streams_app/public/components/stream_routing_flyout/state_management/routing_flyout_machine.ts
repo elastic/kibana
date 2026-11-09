@@ -8,13 +8,15 @@
 import { assign, sendTo, setup, type ActorRefFrom, type AnyActorRef } from 'xstate';
 import type { RouteRule, UnitSignal } from '../../../services/unit_pipeline';
 import type { UnitRoutableLine } from '../../../services/unit_connections';
-import type { RoutingAction } from '../../streams_layout/routing/types';
 import {
   createEmptyCondition,
   parseWhen,
   serializeCondition,
   type RoutingRuleCondition,
 } from '../routing_rule_condition';
+
+/** What a rule does with matching data: `move` it to the targets, or `copy` it and keep evaluating. */
+export type RoutingAction = NonNullable<RouteRule['action']>;
 
 const DEFAULT_ROUTING_ACTION: RoutingAction = 'move';
 

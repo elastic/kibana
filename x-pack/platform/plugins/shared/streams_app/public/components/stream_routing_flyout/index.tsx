@@ -52,7 +52,7 @@ const getRoutingTargetName = (target: RoutingFlyoutTarget): string => {
   }
   const { origin, destinationId } = target.line;
   const from =
-    origin.kind === 'route'
+    origin.kind === 'rule'
       ? `${origin.rule.pipelineId}[${origin.rule.ruleIndex}]`
       : origin.kind === 'source'
       ? origin.id

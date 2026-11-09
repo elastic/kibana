@@ -32,7 +32,6 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { UnitSignal } from '../../services/unit_pipeline';
-import type { RoutingAction } from '../streams_layout/routing/types';
 import { ROUTING_SIGNAL_LABELS } from './signal_labels';
 import {
   createEmptyCondition,
@@ -43,6 +42,7 @@ import {
   type RoutingRuleCondition,
 } from './routing_rule_condition';
 import type {
+  RoutingAction,
   RoutingRuleChanges,
   RoutingRuleDraft,
 } from './state_management/routing_flyout_machine';

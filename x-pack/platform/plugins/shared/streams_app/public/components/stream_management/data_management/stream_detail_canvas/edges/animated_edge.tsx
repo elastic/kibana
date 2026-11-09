@@ -85,7 +85,7 @@ export function AnimatedEdge({
   const { euiTheme } = useEuiTheme();
   const [isHovered, hover] = useBoolean();
   const [showMenu, menu] = useBoolean();
-  const canUnhook = Boolean(data?.unitConnection) && !readOnly;
+  const canUnhook = Boolean(data?.editable) && !readOnly;
   const processingTarget = data?.processingTarget;
   const routingLine = data?.routingLine;
 

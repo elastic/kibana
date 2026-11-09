@@ -18,9 +18,9 @@ import React, {
   useState,
   useSyncExternalStore,
 } from 'react';
-import { type Row } from '@tanstack/react-table';
 import { useVirtualizer, defaultRangeExtractor, type VirtualItem } from '@tanstack/react-virtual';
 import type { GroupNode } from '../../../store_provider';
+import type { CascadeTableRow } from '../table';
 import {
   createChildVirtualizerController,
   type ChildVirtualizerController,
@@ -42,7 +42,7 @@ export interface CascadeVirtualizerProps<G extends GroupNode>
     | 'observeElementOffset'
     | 'observeElementRect'
   > {
-  rows: Row<G>[];
+  rows: Array<CascadeTableRow<G>>;
   /**
    * setting a value of true causes the active group root row
    * to stick right under the header
@@ -98,13 +98,13 @@ export interface VirtualizedCascadeListProps<G extends GroupNode>
     CascadeVirtualizerReturnValue,
     'virtualizedRowComputedTranslateValue' | 'getVirtualItems'
   > {
-  rows: Row<G>[];
+  rows: Array<CascadeTableRow<G>>;
   activeStickyIndex: number | null;
   listItemRenderer: (props: {
     isActiveSticky: boolean;
     virtualItem: VirtualItem;
     virtualRowStyle: React.CSSProperties;
-    row: Row<G>;
+    row: CascadeTableRow<G>;
   }) => React.ReactNode;
 }
 
@@ -116,7 +116,7 @@ export interface VirtualizedCascadeListProps<G extends GroupNode>
  * is always current and never stale due to intermediate memoization.
  */
 export function calculateActiveStickyIndex<G extends GroupNode>(
-  rows: Row<G>[],
+  rows: Array<CascadeTableRow<G>>,
   startIndex: number,
   enableStickyGroupHeader: boolean
 ): number | null {
@@ -198,7 +198,7 @@ interface UseCascadeVirtualizer {
 }
 
 export interface VirtualizerRangeExtractorArgs<G extends GroupNode> {
-  rows: Row<G>[];
+  rows: Array<CascadeTableRow<G>>;
   enableStickyGroupHeader: boolean;
 }
 

@@ -27,9 +27,11 @@ jest.mock('./hooks/url_categories', () => ({
 }));
 
 const mockUseAutomaticImportAuthz = jest.fn();
+const mockUseAuthz = jest.fn();
 jest.mock('../../../../hooks', () => ({
   useStartServices: () => mockUseStartServices(),
   useBreadcrumbs: jest.fn(),
+  useAuthz: () => mockUseAuthz(),
   useAutomaticImportAuthz: () => mockUseAutomaticImportAuthz(),
 }));
 
@@ -50,15 +52,15 @@ jest.mock('./components/responsive_package_grid', () => ({
 }));
 jest.mock('./components/search_and_filters_bar', () => ({ SearchAndFiltersBar: () => null }));
 // Capture the sidebar props so tests can assert which create entry point is offered.
-let capturedSidebarProps: {
+interface CapturedSidebarProps {
   CreateIntegrationCardButton?: unknown;
+  canCreateIntegration?: boolean;
+  canUploadIntegrationPackage?: boolean;
   showCreatedIntegrations?: boolean;
-} = {};
+}
+let capturedSidebarProps: CapturedSidebarProps = {};
 jest.mock('./components/side_bar', () => ({
-  Sidebar: (props: {
-    CreateIntegrationCardButton?: unknown;
-    showCreatedIntegrations?: boolean;
-  }) => {
+  Sidebar: (props: CapturedSidebarProps) => {
     capturedSidebarProps = props;
     return null;
   },
@@ -70,6 +72,7 @@ jest.mock('./components/manage_integrations_table', () => ({
 jest.mock('../../components/no_epr_callout', () => ({ NoEprCallout: () => null }));
 
 import { OBLT_DEFAULT_CATEGORIES } from '../../../../../../../common/constants';
+
 import { BrowseIntegrationsPage } from '.';
 
 const ALL_CATEGORY = { id: '', title: 'All categories', count: 10 };
@@ -133,6 +136,7 @@ describe('BrowseIntegrationsPage', () => {
     capturedFilteredCards = [];
     capturedSidebarProps = {};
     mockUseAutomaticImportAuthz.mockReturnValue(NO_AUTHZ);
+    mockUseAuthz.mockReturnValue({ integrations: { uploadPackages: false } });
     mockUseBrowseIntegrationHook.mockReturnValue(makeDefaultHookReturn());
     mockUseSetUrlDefaultCategories.mockReturnValue(mockSetUrlDefaultCategoriesFn);
     mockUseSetUrlCategory.mockReturnValue(mockSetUrlCategoryFn);
@@ -407,7 +411,7 @@ describe('BrowseIntegrationsPage', () => {
       });
     });
 
-    it('does not offer the Create integration card to a read-only user', async () => {
+    it('does not offer the Create integration card to a read-only user who cannot upload packages', async () => {
       mockUseAutomaticImportAuthz.mockReturnValue({ ...NO_AUTHZ, canView: true });
       renderPage();
 
@@ -415,6 +419,20 @@ describe('BrowseIntegrationsPage', () => {
         expect(capturedSidebarProps).toHaveProperty('CreateIntegrationCardButton');
       });
       expect(capturedSidebarProps.CreateIntegrationCardButton).toBeUndefined();
+    });
+
+    it('offers the card with upload only to a read-only user who can upload packages', async () => {
+      mockUseAutomaticImportAuthz.mockReturnValue({ ...NO_AUTHZ, canView: true });
+      mockUseAuthz.mockReturnValue({ integrations: { uploadPackages: true } });
+      renderPage();
+
+      await waitFor(() => {
+        expect(capturedSidebarProps.CreateIntegrationCardButton).toBe(
+          CreateIntegrationSideCardButton
+        );
+      });
+      expect(capturedSidebarProps.canCreateIntegration).toBe(false);
+      expect(capturedSidebarProps.canUploadIntegrationPackage).toBe(true);
     });
 
     it('still lets a read-only user reach Manage my integrations', async () => {
