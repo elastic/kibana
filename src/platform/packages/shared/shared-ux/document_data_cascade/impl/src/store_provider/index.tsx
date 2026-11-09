@@ -16,12 +16,13 @@ import React, {
   useMemo,
   type PropsWithChildren,
 } from 'react';
+import type { RowSelectionState } from '@tanstack/react-table';
 import { useCreateStore, type ActionsFromReducers } from './store';
 import {
   type GroupNode,
   type LeafNode,
   type IStoreState,
-  type TableState,
+  type CascadeTableState,
   createStoreReducers,
 } from './reducers';
 export type { GroupNode, LeafNode, IStoreState, ColumnGroups } from './reducers';
@@ -103,14 +104,22 @@ export function DataCascadeProvider<G extends GroupNode, L extends LeafNode>({
     return initialGroupColumn.filter((col) => cascadeGroups.includes(col));
   }, [initialGroupColumn, cascadeGroups]);
 
-  const initialTableState = useMemo(
-    () =>
-      ({
-        expanded: initialState?.expanded ?? {},
-        rowSelection: initialState?.rowSelection ?? {},
-      } as TableState),
-    [initialState?.expanded, initialState?.rowSelection]
-  );
+  const initialTableState = useMemo(() => {
+    const rowSelection = Object.entries(initialState?.rowSelection ?? {}).reduce<RowSelectionState>(
+      (selectedRows, [rowId, isSelected]) => {
+        if (isSelected) {
+          selectedRows[rowId] = true;
+        }
+        return selectedRows;
+      },
+      {}
+    );
+
+    return {
+      expanded: initialState?.expanded ?? {},
+      rowSelection,
+    } satisfies CascadeTableState;
+  }, [initialState?.expanded, initialState?.rowSelection]);
 
   const initialStoreState = useMemo<IStoreState<G, L>>(
     () => ({

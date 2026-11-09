@@ -19,7 +19,7 @@ const createPlugin = (memoryEnabled = false) =>
   new NightshiftInvestigationsPlugin(
     coreMock.createPluginInitializerContext({
       enabled: true,
-      cortex: { enabled: false },
+      wiki: { enabled: false },
       decision_trees: { enabled: true },
       memory: { enabled: memoryEnabled },
       findings_recorder: { enabled: true },
@@ -37,7 +37,7 @@ describe('NightshiftInvestigationsPlugin setup', () => {
     const plugin = new NightshiftInvestigationsPlugin(
       coreMock.createPluginInitializerContext({
         enabled: true,
-        cortex: { enabled: false },
+        wiki: { enabled: false },
         decision_trees: { enabled: false },
         memory: { enabled: false },
       })
@@ -120,7 +120,7 @@ describe('NightshiftInvestigationsPlugin setup', () => {
     );
   });
 
-  it('registers the reference-free, alert-outcome and Cortex judges with the evals plugin', () => {
+  it('registers the reference-free, alert-outcome and Wiki judges with the evals plugin', () => {
     const registerEvaluator = jest.fn();
 
     createPlugin().setup(coreMock.createSetup(), {
@@ -134,13 +134,13 @@ describe('NightshiftInvestigationsPlugin setup', () => {
         'nightshift_investigation_process@1.0.0',
         'nightshift_conclusion_quality@1.0.0',
         'nightshift_alert_outcome_rca_accuracy@1.0.0',
-        'nightshift_cortex_pages_read@1.0.0',
-        'nightshift_cortex_page_influence@1.0.0',
+        'nightshift_wiki_pages_read@1.0.0',
+        'nightshift_wiki_page_influence@1.0.0',
       ]
     );
   });
 
-  it('registers investigation steps when Cortex, memory, and decision trees are disabled', () => {
+  it('registers investigation steps when Wiki, memory, and decision trees are disabled', () => {
     const registerStepDefinition = jest.fn();
     const dependencies = {
       ...createSetupDeps(),
@@ -161,10 +161,10 @@ describe('NightshiftInvestigationsPlugin setup', () => {
         'nightshift.onlineEvals.score',
         'nightshift.sendNotifications',
         'nightshift.obtainSandbox',
-        'nightshift.cortexHydrate',
+        'nightshift.wikiHydrate',
         'nightshift.memoryMaterializeToSandbox',
         'nightshift.composeHydrateNotifications',
-        'nightshift.cortexOptimize',
+        'nightshift.wikiOptimize',
         'nightshift.memoryOptimize',
       ])
     );

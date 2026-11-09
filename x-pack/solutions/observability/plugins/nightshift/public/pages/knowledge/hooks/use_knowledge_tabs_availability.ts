@@ -11,21 +11,21 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { toFeatureAvailability, type FeatureAvailability } from '../feature_availability';
 import type { KnowledgeTabsAvailability } from '../knowledge_tabs';
 
-const cortexAvailabilityKey = ['cortex', 'availability'] as const;
+const wikiAvailabilityKey = ['wiki', 'availability'] as const;
 const memoryAvailabilityKey = ['nightshift', 'memory', 'availability'] as const;
 const decisionTreesAvailabilityKey = ['decision_trees', 'availability'] as const;
 
-export const useCortexEnabled = (enabled = true): FeatureAvailability => {
+export const useWikiEnabled = (enabled = true): FeatureAvailability => {
   const client = useKibana().services.nightshiftInvestigations?.investigationsClient;
 
   return toFeatureAvailability(
     useQuery({
-      queryKey: cortexAvailabilityKey,
+      queryKey: wikiAvailabilityKey,
       queryFn: ({ signal }) => {
         if (client === undefined) {
           return { enabled: false };
         }
-        return client.fetch('GET /internal/nightshift/cortex/availability', {
+        return client.fetch('GET /internal/nightshift/wiki/availability', {
           signal: signal ?? null,
         });
       },
@@ -84,7 +84,7 @@ export const useKnowledgeTabsAvailability = ({
   return {
     // KIs are always available; only the optional tabs below have gates.
     knowledge_indicators: { isEnabled: true, isLoading: false },
-    cortex: useCortexEnabled(enabled),
+    wiki: useWikiEnabled(enabled),
     memory: useMemoryEnabled(enabled),
     // A disabled query still returns its cached data, so mask it explicitly.
     decision_trees: isDeveloperMode ? decisionTrees : { isEnabled: false, isLoading: false },

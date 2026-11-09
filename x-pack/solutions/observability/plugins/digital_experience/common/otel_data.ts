@@ -53,9 +53,6 @@ export const BROWSER_CSS_SELECTOR = 'browser.css_selector';
 export const BROWSER_TAG_NAME = 'browser.tag_name';
 
 /** Resource attributes describing the browser, as stored in the OTel indices. */
-export const BROWSER_NAME = resourceAttributeField('browser.name');
-export const BROWSER_PLATFORM = resourceAttributeField('browser.platform');
-export const BROWSER_MOBILE = resourceAttributeField('browser.mobile');
 
 export const SPAN_KIND_CLIENT = 'Client';
 export const SPAN_STATUS_ERROR = 'Error';

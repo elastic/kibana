@@ -69,6 +69,8 @@ describe('Internal Routes', () => {
     [TriggerEventLogSearchCall]
   >();
   const mockRulesFind = jest.fn();
+  const mockSavedObjectsFind = jest.fn();
+  const mockGetSavedObjectsClient = jest.fn().mockReturnValue({ find: mockSavedObjectsFind });
 
   const mockContext = {
     alerting: Promise.resolve({
@@ -95,6 +97,7 @@ describe('Internal Routes', () => {
     core: Promise.resolve({
       elasticsearch: { client: { asInternalUser: {} } },
       uiSettings: { client: {} },
+      savedObjects: { getClient: mockGetSavedObjectsClient },
     }),
   };
 
@@ -684,10 +687,13 @@ describe('Internal Routes', () => {
   });
 
   it('should return the rules that run the given workflows', async () => {
+    const filter =
+      'alert.attributes.actions:{ actionRef: "system_action:system-connector-.workflows" and params.subActionParams.workflowId: ("wf-1" or "wf-\\"2") }';
     mockRulesFind.mockResolvedValue({
       total: 12,
       data: [{ id: 'rule-1', name: 'Rule 1', alertTypeId: 'siem.queryRule' }],
     });
+    mockSavedObjectsFind.mockResolvedValue({ total: 14, saved_objects: [] });
 
     const response = httpServerMock.createResponseFactory();
     const request = httpServerMock.createKibanaRequest({ body: { ids: ['wf-1', 'wf-"2'] } });
@@ -699,18 +705,36 @@ describe('Internal Routes', () => {
     );
 
     expect(mockRulesFind).toHaveBeenCalledWith({
-      options: {
-        filter:
-          'alert.attributes.actions:{ actionRef: "system_action:system-connector-.workflows" and params.subActionParams.workflowId: ("wf-1" or "wf-\\"2") }',
-        page: 1,
-        perPage: 10,
-        sortField: 'name',
-        sortOrder: 'asc',
+      options: { filter, page: 1, perPage: 10, sortField: 'name', sortOrder: 'asc' },
+    });
+    expect(mockGetSavedObjectsClient).toHaveBeenCalledWith({
+      includedHiddenTypes: ['alert'],
+      excludedExtensions: ['security'],
+    });
+    expect(mockSavedObjectsFind).toHaveBeenCalledWith({ type: 'alert', filter, perPage: 0 });
+    expect(response.ok).toHaveBeenCalledWith({
+      body: {
+        total: 12,
+        hiddenTotal: 2,
+        rules: [{ id: 'rule-1', name: 'Rule 1', ruleTypeId: 'siem.queryRule' }],
       },
     });
-    expect(response.ok).toHaveBeenCalledWith({
-      body: { total: 12, rules: [{ id: 'rule-1', name: 'Rule 1', ruleTypeId: 'siem.queryRule' }] },
-    });
+  });
+
+  it('should count linked rules that the user cannot read', async () => {
+    mockRulesFind.mockResolvedValue({ total: 0, data: [] });
+    mockSavedObjectsFind.mockResolvedValue({ total: 2, saved_objects: [] });
+
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest({ body: { ids: ['wf-1'] } });
+
+    await routeHandlers[`POST:/internal/workflows/_linked_rules`].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(response.ok).toHaveBeenCalledWith({ body: { total: 0, hiddenTotal: 2, rules: [] } });
   });
 
   it('should return forbidden when the user cannot read any rule types', async () => {

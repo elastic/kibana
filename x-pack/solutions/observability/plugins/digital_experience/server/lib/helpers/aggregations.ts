@@ -31,7 +31,7 @@ export const getPercentile = ({ values }: PercentilesAggregation): number | null
 
 export const getP75 = getPercentile;
 
-const percentileOf = (field: string, percent: number) => {
+export const percentileOf = (field: string, percent: number) => {
   return {
     percentiles: { field, percents: [percent], keyed: false as const },
   };

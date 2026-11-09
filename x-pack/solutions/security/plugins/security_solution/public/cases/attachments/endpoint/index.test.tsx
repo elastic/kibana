@@ -6,8 +6,11 @@
  */
 
 import type { UnifiedReferenceAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
+import { SECURITY_ENDPOINT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
+import { EndpointAttachmentPayloadSchema } from '../../../../common/cases/attachments/endpoint';
 import type { EndpointMetadata } from './types';
 import { getEndpointUnifiedAttachment } from '.';
+import { ENDPOINT_DISPLAY_NAME } from './translations';
 
 type Props = UnifiedReferenceAttachmentViewProps<EndpointMetadata>;
 
@@ -21,6 +24,12 @@ const propsFor = (command: 'isolate' | 'unisolate'): Props =>
 
 describe('endpoint case attachment icon', () => {
   const attachment = getEndpointUnifiedAttachment();
+
+  it('registers the endpoint attachment', () => {
+    expect(attachment.id).toBe(SECURITY_ENDPOINT_ATTACHMENT_TYPE);
+    expect(attachment.schema).toBe(EndpointAttachmentPayloadSchema);
+    expect(attachment.getLabel()).toBe(ENDPOINT_DISPLAY_NAME);
+  });
 
   it('uses a lock icon when the command is isolate', () => {
     expect(attachment.getIcon(propsFor('isolate'))).toBe('lock');

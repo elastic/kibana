@@ -25,7 +25,7 @@ it('returns the conversation of the investigation the run works on', async () =>
 
   await expect(
     handler({
-      request: {},
+      request: { spaceId: 'default' },
       getInvestigationsClient,
       params: { path: { id: 'inv-1' }, body: { execution_id: 'exec-2' } },
     } as never)
@@ -38,7 +38,7 @@ it('names the run itself when the body carries no execution id', async () => {
 
   await expect(
     handler({
-      request: {},
+      request: { spaceId: 'default' },
       getInvestigationsClient,
       params: { path: { id: 'exec-1' }, body: null },
     } as never)
@@ -51,7 +51,7 @@ it('maps a run that does not name the investigation to 404', async () => {
 
   await expect(
     handler({
-      request: {},
+      request: { spaceId: 'default' },
       getInvestigationsClient,
       params: { path: { id: 'inv-1' }, body: { execution_id: 'exec-2' } },
     } as never)

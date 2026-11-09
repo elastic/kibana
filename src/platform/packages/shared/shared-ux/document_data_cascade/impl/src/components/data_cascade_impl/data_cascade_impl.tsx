@@ -23,7 +23,12 @@ import { CascadeHeaderPrimitive } from './data_cascade_header';
 import { CascadeRowPrimitive, CascadeRowHeaderSlotsScrollSyncProvider } from './data_cascade_row';
 import { CascadeRowCellPrimitive } from './data_cascade_row_cell';
 import { type GroupNode, type LeafNode } from '../../store_provider';
-import { TableHeader, useCascadeTable, type Table, type CellContext } from '../../lib/core/table';
+import {
+  TableHeader,
+  useCascadeTable,
+  type CascadeTable,
+  type CascadeTableCellContext,
+} from '../../lib/core/table';
 import {
   useCascadeVirtualizer,
   VirtualizedCascadeRowList,
@@ -99,7 +104,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
   const styles = useMemo(() => dataCascadeImplStyles(euiTheme), [euiTheme]);
 
   const cascadeHeaderElement = useCallback(
-    ({ table }: { table: Table<G> }) => {
+    ({ table }: { table: CascadeTable<G> }) => {
       return (
         <CascadeHeaderPrimitive<G, L>
           id={headerId}
@@ -114,7 +119,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
   );
 
   const cascadeRowCell = useCallback(
-    (props: CellContext<G, L>) => {
+    (props: CascadeTableCellContext<G, unknown>) => {
       return (
         <CascadeRowCellPrimitive
           {...{

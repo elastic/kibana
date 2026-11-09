@@ -18,7 +18,7 @@ import {
   NIGHTSHIFT_USAGE_PRODUCT_SOLUTION,
 } from '@kbn/nightshift-shared';
 
-/** Attributes Cortex and Semantic Memory optimize LLM calls to Nightshift investigation memory spend. */
+/** Attributes Wiki and Semantic Memory optimize LLM calls to Nightshift investigation memory spend. */
 export const createInvestigationMemoryTelemetry = (
   interactionId: string
 ): ConnectorTelemetryMetadata => ({

@@ -8,8 +8,8 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
-import type { Row } from '@tanstack/react-table';
 import type { GroupNode } from '../../../store_provider';
+import type { CascadeTableRow } from '../table';
 import type {
   ChildConnectionHandle,
   ChildVirtualizerController,
@@ -21,7 +21,7 @@ export interface UseConnectedChildVirtualizerOptions<G extends GroupNode> {
   controller: ChildVirtualizerController;
   cellId: string;
   rowIndex: number;
-  rows: Row<G>[];
+  rows: Array<CascadeTableRow<G>>;
   estimatedRowHeight?: number;
   overscan?: number;
   /**
@@ -38,7 +38,7 @@ export interface UseConnectedChildVirtualizerResult {
   isDetached: boolean;
 }
 
-const EMPTY_ROWS: Row<GroupNode>[] = [];
+const EMPTY_ROWS: Array<CascadeTableRow<GroupNode>> = [];
 const getActivation = (controller: ChildVirtualizerController, rowIndex: number) =>
   controller.shouldActivate(rowIndex);
 
@@ -133,7 +133,7 @@ export const useConnectedChildVirtualizer = <G extends GroupNode>({
     return childConfig.getScrollElement();
   }, [isDetached, privateScrollElement, childConfig]);
 
-  const effectiveRows = isActive ? rows : (EMPTY_ROWS as Row<G>[]);
+  const effectiveRows = isActive ? rows : (EMPTY_ROWS as Array<CascadeTableRow<G>>);
 
   const scrollMargin = isDetached ? 0 : controller.getScrollMarginForRow(rowIndex);
 

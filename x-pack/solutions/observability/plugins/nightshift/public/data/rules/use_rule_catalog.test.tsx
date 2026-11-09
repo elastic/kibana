@@ -50,10 +50,11 @@ describe('useRuleCatalog', () => {
 
     await waitFor(() =>
       expect(result.current.data).toEqual([
-        { name: 'CPU', tags: ['infra'] },
-        { name: 'Disk', tags: [] },
+        { name: 'CPU', tags: ['infra'], family: 'classic' },
+        { name: 'Disk', tags: [], family: 'classic' },
       ])
     );
+    expect(result.current.isComplete).toBe(true);
     expect(post).toHaveBeenCalledWith(
       '/internal/alerting/rules/_find',
       expect.objectContaining({
@@ -72,9 +73,9 @@ describe('useRuleCatalog', () => {
 
     await waitFor(() =>
       expect(result.current.data).toEqual([
-        { name: 'CPU', tags: ['infra'] },
-        { name: 'Disk', tags: [] },
-        { name: 'Checkout errors', tags: ['prod'] },
+        { name: 'CPU', tags: ['infra'], family: 'classic' },
+        { name: 'Disk', tags: [], family: 'classic' },
+        { name: 'Checkout errors', tags: ['prod'], family: 'universal' },
       ])
     );
     expect(get).toHaveBeenCalledWith(
@@ -96,10 +97,10 @@ describe('useRuleCatalog', () => {
 
     await waitFor(() =>
       expect(result.current.data).toEqual([
-        { name: 'CPU', tags: ['infra'] },
-        { name: 'Disk', tags: [] },
-        { name: 'Null tags', tags: [] },
-        { name: 'Missing tags', tags: [] },
+        { name: 'CPU', tags: ['infra'], family: 'classic' },
+        { name: 'Disk', tags: [], family: 'classic' },
+        { name: 'Null tags', tags: [], family: 'universal' },
+        { name: 'Missing tags', tags: [], family: 'universal' },
       ])
     );
   });
@@ -131,6 +132,7 @@ describe('useRuleCatalog', () => {
 
     await waitFor(() => expect(result.current.data).toHaveLength(2));
     expect(result.current.isError).toBe(false);
+    expect(result.current.isComplete).toBe(false);
   });
 
   it('keeps the Observability rules when universal alerting is turned off', async () => {
@@ -140,6 +142,7 @@ describe('useRuleCatalog', () => {
 
     await waitFor(() => expect(result.current.data).toHaveLength(2));
     expect(result.current.isError).toBe(false);
+    expect(result.current.isComplete).toBe(false);
   });
 
   it('keeps the universal rules when the user cannot read classic rules', async () => {
@@ -152,9 +155,19 @@ describe('useRuleCatalog', () => {
     const { result } = renderCatalog();
 
     await waitFor(() =>
-      expect(result.current.data).toEqual([{ name: 'Checkout errors', tags: ['prod'] }])
+      expect(result.current.data).toEqual([
+        { name: 'Checkout errors', tags: ['prod'], family: 'universal' },
+      ])
     );
     expect(result.current.isError).toBe(false);
+    expect(result.current.isComplete).toBe(false);
+  });
+
+  it('marks a truncated catalog incomplete instead of inferring unsupported severities', async () => {
+    post.mockResolvedValue({ data: [{ name: 'CPU', tags: [] }], total: 1001 });
+    const { result } = renderCatalog();
+    await waitFor(() => expect(result.current.data).toHaveLength(1));
+    expect(result.current.isComplete).toBe(false);
   });
 
   it('reports an error when loading universal rules fails for another reason', async () => {

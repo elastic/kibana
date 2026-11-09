@@ -10,6 +10,8 @@ import {
   detectPolicySettingsDrift,
   getPolicySettings,
   getPolicySettingsUpdate,
+  getPolicyVarSettings,
+  getPolicyVarSettingsUpdate,
   supportsPolicySetting,
 } from './policy_settings';
 
@@ -101,6 +103,78 @@ describe('policy settings', () => {
       expect(detectPolicySettingsDrift({ output_id: 'kafka-1' }, {}, 'managed_integration')).toBe(
         false
       );
+    });
+  });
+
+  describe('proxy_url (a package var)', () => {
+    const declared = new Set(['proxy_url', 'default_region']);
+
+    it('applies to agent-based and managed integration deploys, not ECF', () => {
+      expect(supportsPolicySetting('proxy_url', 'agent_based')).toBe(true);
+      expect(supportsPolicySetting('proxy_url', 'managed_integration')).toBe(true);
+      expect(supportsPolicySetting('proxy_url', 'ecf')).toBe(false);
+    });
+
+    it('is not a top-level package policy field', () => {
+      const settings = { output_id: 'logstash-1', proxy_url: 'http://proxy:3128' };
+      expect(getPolicySettings(settings, 'agent_based')).toEqual({ output_id: 'logstash-1' });
+      expect(getPolicySettingsUpdate(settings, 'agent_based')).toEqual({
+        output_id: 'logstash-1',
+      });
+    });
+
+    it('is sent as a var only when the package declares it', () => {
+      const settings = { proxy_url: 'http://proxy:3128' };
+      expect(getPolicyVarSettings(settings, 'agent_based', declared)).toEqual(settings);
+      expect(getPolicyVarSettings(settings, 'managed_integration', declared)).toEqual(settings);
+      expect(getPolicyVarSettings(settings, 'agent_based', new Set(['default_region']))).toEqual(
+        {}
+      );
+      expect(getPolicyVarSettings(settings, 'ecf', declared)).toEqual({});
+      expect(getPolicyVarSettings(settings, 'agent_based')).toEqual(settings);
+    });
+
+    it('leaves out an empty or invalid value on create', () => {
+      expect(getPolicyVarSettings({ proxy_url: '' }, 'agent_based', declared)).toEqual({});
+      expect(getPolicyVarSettings({ proxy_url: 1 }, 'agent_based', declared)).toEqual({});
+    });
+
+    it('clears the var on update with null, and leaves it alone when never set', () => {
+      expect(getPolicyVarSettingsUpdate({ proxy_url: '' }, 'agent_based', declared)).toEqual({
+        proxy_url: null,
+      });
+      expect(getPolicyVarSettingsUpdate({}, 'agent_based', declared)).toEqual({});
+      expect(
+        getPolicyVarSettingsUpdate({ proxy_url: 'http://p:1' }, 'managed_integration', declared)
+      ).toEqual({ proxy_url: 'http://p:1' });
+      expect(
+        getPolicyVarSettingsUpdate({ proxy_url: '' }, 'agent_based', new Set(['default_region']))
+      ).toEqual({});
+    });
+
+    it('trims what was typed, and treats blank as empty', () => {
+      expect(getPolicyVarSettings({ proxy_url: ' http://p:1 ' }, 'agent_based', declared)).toEqual({
+        proxy_url: 'http://p:1',
+      });
+      expect(getPolicyVarSettings({ proxy_url: '  ' }, 'agent_based', declared)).toEqual({});
+      expect(getPolicyVarSettingsUpdate({ proxy_url: '  ' }, 'agent_based', declared)).toEqual({
+        proxy_url: null,
+      });
+      expect(compactPolicySettings({ proxy_url: ' http://p:1 ' })).toEqual({
+        proxy_url: 'http://p:1',
+      });
+    });
+
+    it('marks the deployment dirty when only the proxy changed', () => {
+      expect(detectPolicySettingsDrift({ proxy_url: 'http://p:1' }, {}, 'agent_based')).toBe(true);
+      expect(
+        detectPolicySettingsDrift(
+          { proxy_url: '' },
+          { proxy_url: 'http://p:1' },
+          'managed_integration'
+        )
+      ).toBe(true);
+      expect(detectPolicySettingsDrift({ proxy_url: 'http://p:1' }, {}, 'ecf')).toBe(false);
     });
   });
 });

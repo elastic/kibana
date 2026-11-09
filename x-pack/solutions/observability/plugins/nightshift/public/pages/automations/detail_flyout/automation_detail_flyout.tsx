@@ -38,6 +38,7 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import { NIGHTSHIFT_APP_ROUTE } from '../../../../common/constants';
 import { useKibana } from '../../../hooks/use_kibana';
+import { useRuleCatalog } from '../../../data/rules/use_rule_catalog';
 import { AutomationFormBody } from '../flyouts/form/automation_form_body';
 import {
   toAutomationFormValues,
@@ -178,8 +179,10 @@ export const AutomationDetailFlyout = ({
   const toggleAutomation = useToggleAutomation();
   const isRunsTab = pathname.endsWith('/runs');
   const isDirty = JSON.stringify(values) !== JSON.stringify(originalValues);
-  const blocker = getSaveBlocker(values);
-  const valid = canSaveAutomation(values);
+  const { data: catalog, isComplete } = useRuleCatalog();
+  const completeCatalog = isComplete ? catalog : undefined;
+  const blocker = getSaveBlocker(values, completeCatalog);
+  const valid = canSaveAutomation(values, completeCatalog);
   const runsQuery = useAutomationRunsInRange(
     automation.id,
     runRange.startedAfter,
@@ -293,7 +296,7 @@ export const AutomationDetailFlyout = ({
     padding: ${euiTheme.size.base};
   `;
   const save = () => {
-    if (!values.trigger || !isTriggerValid(values.trigger)) return;
+    if (!values.trigger || !isTriggerValid(values.trigger) || blocker) return;
     setShowValidationErrors(true);
     const isNameMissing = !values.name.trim();
     setIsNameInvalid(isNameMissing);

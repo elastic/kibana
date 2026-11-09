@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export { parseVegaSpec } from './vis';
 export type { VisPanelResolutionRequest } from './vis';
 export type {
   CustomContentPanelAddRequest,

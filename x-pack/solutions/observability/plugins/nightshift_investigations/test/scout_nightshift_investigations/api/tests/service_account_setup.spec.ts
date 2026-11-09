@@ -173,11 +173,12 @@ apiTest.describe(
       }
     );
 
+    // A space other than the default one is refused before anything is installed in it: Nightshift
+    // binds deployment-wide identities, so it runs in the default space only.
     apiTest(
-      'refuses investigations in a space that was never set up',
+      'refuses investigations outside the default space',
       async ({ apiClient, samlAuth, kbnClient }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_WRITE_ROLE);
-        // A space of its own, so the default space the other specs investigate in stays set up.
         const spaceId = uniqueId('nightshift-unset');
         await kbnClient.spaces.create({ id: spaceId, name: spaceId });
 
@@ -186,12 +187,13 @@ apiTest.describe(
             headers: { ...COMMON_HEADERS, ...cookieHeader },
             body: {
               subject: { type: 'manual', id: uniqueId('setup-manual') },
-              message: 'Investigate in a space without the Nightshift service account',
+              message: 'Investigate in a space Nightshift does not run in',
             },
             responseType: 'json',
           });
 
-          expect(response).toHaveStatusCode(503);
+          expect(response).toHaveStatusCode(400);
+          expect(response.body.message).toContain('only available in the "default" space');
         } finally {
           await kbnClient.spaces.delete(spaceId);
         }

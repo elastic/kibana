@@ -56,6 +56,7 @@ export {
   setUpNightshiftServiceAccount,
   SERVICE_ACCOUNT_PATH,
 } from './service_account';
+export { disableInvestigationRunLimits } from './run_quotas';
 export { getCustomContext, putCustomContext, replaceCustomContext } from './custom_context';
 export {
   archiveMemoryPage,

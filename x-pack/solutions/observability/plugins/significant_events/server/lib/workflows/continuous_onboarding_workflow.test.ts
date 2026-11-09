@@ -123,7 +123,7 @@ describe('continuous_onboarding.yaml stays in sync with constants', () => {
 
 describe('createContinuousOnboardingWorkflowService', () => {
   const request = {} as KibanaRequest;
-  const spaceId = 'space-a';
+  const spaceId = 'default';
   const workflowDocumentId = `${SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID}-${spaceId}`;
   const managedWorkflowOptions = { spaceId, workflowIdSuffix: spaceId };
 
@@ -164,6 +164,16 @@ describe('createContinuousOnboardingWorkflowService', () => {
       } as unknown as SignificantEventsKIsOnboardingClient,
       getManagedWorkflowsClient: jest.fn().mockResolvedValue(managedWorkflowsClient),
     });
+
+  // Enabling installs a workflow that then runs, and Nightshift only runs in the default space.
+  it('installs nothing when turned on outside the default space', async () => {
+    getWorkflow.mockResolvedValue({ enabled: false });
+
+    await createService().ensureWorkflow({ enabled: true, request, spaceId: 'marketing' });
+
+    expect(managedWorkflowsClient.install).not.toHaveBeenCalled();
+    expect(managementApi.updateWorkflow).not.toHaveBeenCalled();
+  });
 
   it('installs and enables the space document when turned on', async () => {
     getWorkflow.mockResolvedValue({ enabled: false });

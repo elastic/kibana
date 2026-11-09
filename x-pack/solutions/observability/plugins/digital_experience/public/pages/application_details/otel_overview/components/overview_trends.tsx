@@ -22,6 +22,7 @@ import {
 import type { DomainRange } from '@elastic/charts';
 import {
   EuiButtonGroup,
+  EuiSelect,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -30,13 +31,23 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { EmptyCellValue } from '@kbn/shared-ux-column-presets';
+import {
+  DEFAULT_OVERVIEW_PERCENTILE,
+  OVERVIEW_PERCENTILES,
+} from '../../../../../common/overview_filters';
+import type { OverviewPercentile } from '../../../../../common/overview_filters';
 import type { OverviewTrendPoint } from '../../../../../common/types/overview';
 import { ChartArea } from '../../../../components/chart_area';
+import {
+  APPLICATION_OVERVIEW_EBT_ELEMENTS,
+  DIGITAL_EXPERIENCE_EBT_ACTIONS,
+} from '../../../../ebt_constants';
 import { useFormatters } from '../../../../hooks/use_formatters';
-import { LOAD_TIME_LABEL, PAGE_LOADS_LABEL } from '../../../../labels';
+import { loadTimeLabel, PAGE_LOADS_LABEL } from '../../../../labels';
 import type { TimeRangeSelect } from '../../../../utils/brush_time_range';
 import { onBrushTimeRange } from '../../../../utils/brush_time_range';
 import { formatDurationMs } from '../../../../utils/format_duration';
@@ -75,6 +86,24 @@ const CHART_TYPE_LEGEND = i18n.translate(
   'xpack.digitalExperience.overview.trends.chartTypeLegendLabel',
   { defaultMessage: 'Trend chart type' }
 );
+
+const PERCENTILE_LABEL = i18n.translate('xpack.digitalExperience.overview.trends.percentileLabel', {
+  defaultMessage: 'Load time percentile',
+});
+
+const PERCENTILE_PREPEND = i18n.translate(
+  'xpack.digitalExperience.overview.trends.percentilePrepend',
+  { defaultMessage: 'Percentile' }
+);
+
+const PERCENTILE_OPTIONS = OVERVIEW_PERCENTILES.map((percentile) => ({
+  value: percentile,
+  text: `p${percentile}`,
+}));
+
+const toPercentile = (value: string): OverviewPercentile =>
+  OVERVIEW_PERCENTILES.find((percentile) => String(percentile) === value) ??
+  DEFAULT_OVERVIEW_PERCENTILE;
 
 type TrendChartType = 'area' | 'bar';
 
@@ -117,7 +146,7 @@ function TrendChart({
   onTimeRangeSelect,
 }: {
   points: OverviewTrendPoint[];
-  metric: 'pageLoads' | 'loadTimeP75Ms';
+  metric: 'pageLoads' | 'loadTimePercentileMs';
   name: string;
   color: string;
   formatValue: (value: number) => string;
@@ -141,7 +170,7 @@ function TrendChart({
   };
 
   return (
-    <Chart size={{ height: CHART_HEIGHT }}>
+    <Chart size={{ height: '100%' }}>
       <Settings
         baseTheme={baseTheme}
         showLegend={false}
@@ -192,8 +221,13 @@ function TrendRow({
   'data-test-subj': string;
 }) {
   return (
-    <div data-test-subj={dataTestSubj}>
-      <EuiFlexGroup alignItems="baseline" gutterSize="s" responsive={false}>
+    // A column of its own: the rows share the height of the panel, which is as tall as the panel
+    // of the Core Web Vitals beside it, instead of leaving it empty under the charts.
+    <div
+      data-test-subj={dataTestSubj}
+      css={{ display: 'flex', flexDirection: 'column', flex: '1 1 0' }}
+    >
+      <EuiFlexGroup css={{ flexGrow: 0 }} alignItems="baseline" gutterSize="s" responsive={false}>
         <EuiFlexItem>
           <EuiText size="xs" color="subdued">
             {label}
@@ -208,6 +242,7 @@ function TrendRow({
         )}
       </EuiFlexGroup>
       <ChartArea
+        grow
         height={CHART_HEIGHT}
         isLoading={isLoading}
         hasData={hasData}
@@ -226,7 +261,9 @@ function TrendRow({
 export function OverviewTrends({
   points,
   pageLoads,
-  loadTimeP75Ms,
+  loadTimePercentileMs,
+  percentile,
+  onPercentileChange,
   isLoading,
   onTimeRangeSelect,
 }: {
@@ -234,7 +271,10 @@ export function OverviewTrends({
   /** The page loads of the whole range, the sum of the points. */
   pageLoads: number;
   /** The load time of the whole range, which the points' percentiles do not add up to. */
-  loadTimeP75Ms: number | null;
+  loadTimePercentileMs: number | null;
+  /** The percentile of the load time and its trend. */
+  percentile: OverviewPercentile;
+  onPercentileChange: (percentile: OverviewPercentile) => void;
   isLoading: boolean;
   onTimeRangeSelect: TimeRangeSelect;
 }) {
@@ -243,7 +283,7 @@ export function OverviewTrends({
   const [chartType, setChartType] = useTrendChartType();
 
   const hasPageLoads = points.some((point) => point.pageLoads > 0);
-  const hasLoadTimes = points.some((point) => point.loadTimeP75Ms !== null);
+  const hasLoadTimes = points.some((point) => point.loadTimePercentileMs !== null);
 
   // Both charts span the whole time range, whatever each one has data for.
   const xDomain: DomainRange | undefined =
@@ -254,8 +294,18 @@ export function OverviewTrends({
   const chartProps = { points, chartType, xDomain, onTimeRangeSelect };
 
   return (
-    <EuiPanel hasBorder data-test-subj="digitalExperienceOverviewTrends">
-      <EuiFlexGroup alignItems="flexStart" justifyContent="spaceBetween" gutterSize="s">
+    <EuiPanel
+      hasBorder
+      data-test-subj="digitalExperienceOverviewTrends"
+      css={{ display: 'flex', flexDirection: 'column' }}
+    >
+      {/* A flex group grows by default, which in the panel's column would take room from the charts. */}
+      <EuiFlexGroup
+        css={{ flexGrow: 0 }}
+        alignItems="flexStart"
+        justifyContent="spaceBetween"
+        gutterSize="s"
+      >
         <EuiFlexItem>
           <EuiTitle size="xs">
             <h2>{TRENDS_TITLE}</h2>
@@ -263,6 +313,22 @@ export function OverviewTrends({
           <EuiText size="xs" color="subdued">
             {TRENDS_SUBTITLE}
           </EuiText>
+        </EuiFlexItem>
+        {/* Wide enough for the label of the select, which it would otherwise cut short. */}
+        <EuiFlexItem grow={false} css={{ minInlineSize: '11rem' }}>
+          <EuiSelect
+            compressed
+            prepend={PERCENTILE_PREPEND}
+            aria-label={PERCENTILE_LABEL}
+            options={PERCENTILE_OPTIONS}
+            value={percentile}
+            onChange={(event) => onPercentileChange(toPercentile(event.target.value))}
+            data-test-subj="digitalExperienceOverviewPercentile"
+            {...getEbtProps({
+              action: DIGITAL_EXPERIENCE_EBT_ACTIONS.SET_FILTER,
+              element: APPLICATION_OVERVIEW_EBT_ELEMENTS.PERCENTILE,
+            })}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonGroup
@@ -297,16 +363,22 @@ export function OverviewTrends({
       <EuiSpacer size="s" />
       <TrendRow
         data-test-subj="digitalExperienceOverviewLoadTimeTrend"
-        label={LOAD_TIME_LABEL}
-        value={loadTimeP75Ms === null ? <EmptyCellValue /> : formatDurationMs(loadTimeP75Ms)}
+        label={loadTimeLabel(percentile)}
+        value={
+          loadTimePercentileMs === null ? (
+            <EmptyCellValue />
+          ) : (
+            formatDurationMs(loadTimePercentileMs)
+          )
+        }
         isLoading={isLoading}
         hasData={hasLoadTimes}
         emptyMessage={hasPageLoads ? NO_LOAD_TIMES : NO_PAGE_LOADS}
       >
         <TrendChart
           {...chartProps}
-          metric="loadTimeP75Ms"
-          name={LOAD_TIME_LABEL}
+          metric="loadTimePercentileMs"
+          name={loadTimeLabel(percentile)}
           color={euiTheme.colors.vis.euiColorVis1}
           formatValue={formatDurationMs}
         />

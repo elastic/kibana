@@ -9,7 +9,6 @@
 
 import { act } from 'react-dom/test-utils';
 import { renderHook } from '@testing-library/react';
-import type { Row } from '@tanstack/react-table';
 import {
   createChildVirtualizerController,
   type ChildVirtualizerController,
@@ -17,8 +16,9 @@ import {
 import { useConnectedChildVirtualizer } from './use_connected_child_virtualizer';
 import type { CascadeVirtualizerReturnValue } from '.';
 import type { GroupNode } from '../../../store_provider';
+import type { CascadeTableRow } from '../table';
 
-const createMockRows = (count: number): Row<GroupNode>[] =>
+const createMockRows = (count: number): Array<CascadeTableRow<GroupNode>> =>
   Array.from(
     { length: count },
     (_, index) =>
@@ -28,9 +28,9 @@ const createMockRows = (count: number): Row<GroupNode>[] =>
           index,
           depth: 0,
           getIsExpanded: () => false,
-          getParentRows: () => [] as Row<GroupNode>[],
-          subRows: [] as Row<GroupNode>[],
-        } as Row<GroupNode>,
+          getParentRows: () => [] as Array<CascadeTableRow<GroupNode>>,
+          subRows: [] as Array<CascadeTableRow<GroupNode>>,
+        } as CascadeTableRow<GroupNode>,
         {
           get(target, prop) {
             return Reflect.get(target, prop);

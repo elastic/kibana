@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+// NOTE: No FTR config loads this suite. The stateful Logs UI FTR config that used to load it was
+// removed when the other Logs ML page tests moved to Scout (https://github.com/elastic/kibana/issues/300807).
+// The suite was already skipped pending https://github.com/elastic/kibana/issues/171913 and is kept
+// as a record of the coverage to restore: when that issue is addressed, migrate it to Scout
+// (`x-pack/solutions/observability/plugins/infra/test/scout/ui`) instead of re-enabling it here.
+
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { assertIdFormats } from './assert_id_formats';

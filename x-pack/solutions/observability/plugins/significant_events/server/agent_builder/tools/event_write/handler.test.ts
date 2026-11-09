@@ -127,7 +127,10 @@ const makeAlertEventsClient = (
   overrides: Partial<jest.Mocked<AlertEventsClientApi>> = {}
 ): jest.Mocked<AlertEventsClientApi> =>
   ({
-    createAlertEvent: jest.fn().mockResolvedValue(undefined),
+    createAlertEvent: jest.fn().mockImplementation(async ({ fingerprint }) => ({
+      group_hash: `hash:${fingerprint}`,
+      alert_id: 'alert-1',
+    })),
     ...overrides,
   } as jest.Mocked<AlertEventsClientApi>);
 
@@ -1319,7 +1322,7 @@ describe('eventsWriteBulkHandler — .rule-events writes', () => {
       if (event.fingerprint === 'event-b') {
         throw new Error('rule-events unavailable');
       }
-      return undefined as never;
+      return { group_hash: 'hash-a', alert_id: 'alert-a' };
     });
 
     const results = await eventsWriteBulkHandler({
@@ -1402,6 +1405,32 @@ describe('eventsWriteBulkHandler — how a version is written', () => {
 
     expect(createEvent).toHaveBeenCalledTimes(1);
     expect(updateEvent).not.toHaveBeenCalled();
+  });
+
+  it('marks a first version as created with the group_hash Alerting v2 assigned', async () => {
+    const [result] = await eventsWriteBulkHandler({
+      eventSearchClient: clientWith({ hits: [] }),
+      inputs: [{ ...baseInput, event_id: 'event-a' }],
+    });
+
+    expect(result).toMatchObject({
+      event_id: 'event-a',
+      written: true,
+      created: true,
+      group_hash: 'hash:event-a',
+    });
+  });
+
+  it('marks a continuation of an existing event as not created, without a group_hash', async () => {
+    const prior = stored();
+
+    const [result] = await eventsWriteBulkHandler({
+      eventSearchClient: clientWith({ head: prior, hits: [prior] }),
+      inputs: [{ ...baseInput, event_id: eventId, severity: 'critical' }],
+    });
+
+    expect(result).toMatchObject({ event_id: eventId, written: true, created: false });
+    expect(result).not.toHaveProperty('group_hash');
   });
 
   it('continues an existing event through updateEvent with the version it read', async () => {
@@ -1501,6 +1530,22 @@ describe('eventsWriteBulkHandler — reopening a closed series', () => {
     expect(written.event_id).toBe(closedEventId);
     expect(written.title).toBe('Fresh title');
     expect(written.signals?.map((signal) => signal.metadata?.rule_uuid)).toEqual(['rule-a']);
+  });
+
+  it('preserves the resolved closed series identity when its reopen write fails', async () => {
+    alertEventsClient.createAlertEvent.mockRejectedValue(new Error('rule-events unavailable'));
+
+    const results = await eventsWriteBulkHandler({
+      eventSearchClient: clientWithClosedSeries(),
+      inputs: [reopeningBreachFor('rule-a')],
+    });
+
+    expect(results[0]).toMatchObject({
+      written: false,
+      event_id: closedEventId,
+      existing_event_id: closedEventId,
+      reason: 'bulk_error',
+    });
   });
 
   it('reopens a closed series that holds more rules than the batch', async () => {

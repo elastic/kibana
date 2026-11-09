@@ -17,6 +17,7 @@ import {
   isTriggerValid,
   isValidDailyLimit,
 } from './validation';
+import type { CatalogRule } from '../../../../data/rules/use_rule_catalog';
 
 const everyTrigger = (overrides: Partial<Extract<TriggerFormValues, { kind: 'every' }>> = {}) => ({
   ...(createTriggerFormValues('every') as Extract<TriggerFormValues, { kind: 'every' }>),
@@ -24,6 +25,71 @@ const everyTrigger = (overrides: Partial<Extract<TriggerFormValues, { kind: 'eve
 });
 
 describe('automation validation', () => {
+  const catalog: CatalogRule[] = [
+    { name: 'CPU', tags: ['prod'], family: 'classic' },
+    { name: 'Checkout', tags: ['prod'], family: 'universal' },
+    { name: 'Shared name', tags: [], family: 'classic' },
+    { name: 'Shared name', tags: [], family: 'universal' },
+  ];
+  type AlertTrigger = Extract<TriggerFormValues, { kind: 'alert' }>;
+
+  it.each<{ name: string; selection: Partial<AlertTrigger>; compatible: boolean }>([
+    { name: 'any rule and source', selection: {}, compatible: true },
+    { name: 'universal rule', selection: { ruleNames: ['Checkout'] }, compatible: false },
+    { name: 'classic rule', selection: { ruleNames: ['CPU'] }, compatible: true },
+    { name: 'mixed rules', selection: { ruleNames: ['CPU', 'Checkout'] }, compatible: true },
+    { name: 'ambiguous rule name', selection: { ruleNames: ['Shared name'] }, compatible: true },
+    { name: 'unknown rule', selection: { ruleNames: ['Deleted'] }, compatible: true },
+    { name: 'dynamic tag', selection: { ruleTags: ['prod'] }, compatible: true },
+    { name: 'legacy pattern', selection: { ruleNamePattern: 'Checkout' }, compatible: true },
+    { name: 'universal source', selection: { alertSources: ['internal'] }, compatible: false },
+    { name: 'external source', selection: { alertSources: ['pagerduty'] }, compatible: false },
+    {
+      name: 'mixed sources',
+      selection: { alertSources: ['classic', 'internal'] },
+      compatible: true,
+    },
+    {
+      name: 'excluded classic source',
+      selection: { alertSources: ['classic'], alertSourceMode: 'exclude' },
+      compatible: false,
+    },
+    {
+      name: 'excluded universal source',
+      selection: { alertSources: ['internal'], alertSourceMode: 'exclude' },
+      compatible: true,
+    },
+  ])('validates classic-only severities for $name', ({ selection, compatible }) => {
+    const trigger: AlertTrigger = {
+      kind: 'alert',
+      ruleNames: [],
+      ruleTags: [],
+      ruleNamePattern: '',
+      alertSources: [],
+      alertSourceMode: 'include',
+      severities: ['major', 'warning'],
+      ...selection,
+    };
+    const values = { ...createAutomationFormValues(), trigger };
+    expect(canSaveAutomation(values, catalog)).toBe(compatible);
+    if (!compatible) expect(getSaveBlocker(values, catalog)).toContain('Major and Warning');
+    expect(
+      canSaveAutomation({ ...values, trigger: { ...trigger, severities: ['high'] } }, catalog)
+    ).toBe(true);
+    expect(canSaveAutomation({ ...values, trigger: { ...trigger, severities: [] } }, catalog)).toBe(
+      true
+    );
+  });
+
+  it('retains severity choices when rule metadata is unavailable', () => {
+    const trigger = {
+      ...createTriggerFormValues('alert'),
+      ruleNames: ['Checkout'],
+      severities: ['major'],
+    } as AlertTrigger;
+    expect(canSaveAutomation({ ...createAutomationFormValues(), trigger })).toBe(true);
+  });
+
   it.each([
     ['1', true],
     ['50', true],

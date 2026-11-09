@@ -66,6 +66,8 @@ export const getSelectionColumns = ({
     ),
     width: '70px',
     sortable: false,
+    // The header is the page selection checkbox, so it must not be repeated in each row on mobile
+    mobileOptions: { header: false },
   };
 
   return hasUpdateAIAssistantAnonymization ? [selectionColumn] : [];

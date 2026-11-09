@@ -8,15 +8,12 @@ import React, { useCallback, useMemo } from 'react';
 import { isEmpty } from 'lodash';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { UserActionTitle } from '@kbn/cases-components';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { getRuleInfo, type AlertAttachmentMetadata } from '@kbn/cases-plugin/common';
 import { useFetchAlertData } from '../../../pages/use_fetch_alert_data';
 import { useAlertDataLoading } from './use_alert_data_loading';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import * as i18n from '../translations';
-import { RulePanelKey } from '../../../../flyout/rule_details/right';
-import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
 import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 import {
@@ -56,8 +53,6 @@ export const AlertEvent: React.FC<AlertEventProps> = ({
   rule,
   isRemoteAlert = false,
 }) => {
-  const { openFlyout } = useExpandableFlyoutApi();
-  const enableNewFlyout = useIsNewFlyoutEnabled();
   const { openRuleFlyout } = useFlyoutApi();
   const {
     rulesPrivileges: {
@@ -101,17 +96,13 @@ export const AlertEvent: React.FC<AlertEventProps> = ({
 
   const onRuleClick = useCallback(() => {
     if (resolvedRuleId && canReadRules) {
-      if (enableNewFlyout) {
-        openRuleFlyout({
-          ruleId: resolvedRuleId,
-          origin: FLYOUT_ORIGIN.CASE_ATTACHMENT,
-          title: formatFlyoutTitle(RULE_TITLE, resolvedRuleName),
-        });
-      } else {
-        openFlyout({ right: { id: RulePanelKey, params: { ruleId: resolvedRuleId } } });
-      }
+      openRuleFlyout({
+        ruleId: resolvedRuleId,
+        origin: FLYOUT_ORIGIN.CASE_ATTACHMENT,
+        title: formatFlyoutTitle(RULE_TITLE, resolvedRuleName),
+      });
     }
-  }, [openFlyout, canReadRules, resolvedRuleId, resolvedRuleName, enableNewFlyout, openRuleFlyout]);
+  }, [canReadRules, resolvedRuleId, resolvedRuleName, openRuleFlyout]);
 
   if (isLoadingAlertData) {
     return <EuiLoadingSpinner size="m" />;

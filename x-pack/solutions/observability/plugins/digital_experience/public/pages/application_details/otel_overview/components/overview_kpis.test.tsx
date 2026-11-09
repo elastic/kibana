@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
+import type { OverviewPercentile } from '../../../../../common/overview_filters';
 import type { ApplicationOverview } from '../../../../../common/types/overview';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
 import { createUiSettingsMock } from '../../../../test_utils/ui_settings_mock';
@@ -19,8 +20,9 @@ const NO_VITAL = { p75Ms: null, sampleCount: 0, ratings: null };
 
 const OVERVIEW: ApplicationOverview = {
   serviceName: 'shop',
+  percentile: 75,
   pageLoads: { count: 1533 },
-  loadTime: { p75Ms: 2412.5, sampleCount: 1500 },
+  loadTime: { percentileMs: 2412.5, sampleCount: 1500 },
   jsErrors: { count: 42 },
   httpRequests: { count: 400, failedCount: 50, failedRatio: 0.125 },
   webVitals: {
@@ -33,8 +35,10 @@ const OVERVIEW: ApplicationOverview = {
   trend: [],
 };
 
-const renderKpis = (overview = OVERVIEW, isLoading = false) =>
-  render(<OverviewKpis overview={overview} isLoading={isLoading} />, { wrapper: EuiProvider });
+const renderKpis = (overview = OVERVIEW, isLoading = false, percentile: OverviewPercentile = 75) =>
+  render(<OverviewKpis overview={overview} percentile={percentile} isLoading={isLoading} />, {
+    wrapper: EuiProvider,
+  });
 
 const kpi = (name: string) => screen.getByTestId(`digitalExperienceOverview${name}`);
 
@@ -55,8 +59,14 @@ describe('OverviewKpis', () => {
     expect(kpi('FailedHttp')).toHaveTextContent('12.5%');
   });
 
+  it('names the percentile the load time is at', () => {
+    renderKpis(OVERVIEW, false, 95);
+
+    expect(kpi('LoadTime')).toHaveTextContent('Load time (p95)');
+  });
+
   it('shows a load time under a second in milliseconds', () => {
-    renderKpis({ ...OVERVIEW, loadTime: { p75Ms: 950.25, sampleCount: 1 } });
+    renderKpis({ ...OVERVIEW, loadTime: { percentileMs: 950.25, sampleCount: 1 } });
 
     expect(kpi('LoadTime')).toHaveTextContent('950 ms');
   });
@@ -64,7 +74,7 @@ describe('OverviewKpis', () => {
   it('shows a dash where nothing was measured, not a zero', () => {
     renderKpis({
       ...OVERVIEW,
-      loadTime: { p75Ms: null, sampleCount: 0 },
+      loadTime: { percentileMs: null, sampleCount: 0 },
       httpRequests: { count: 0, failedCount: 0, failedRatio: null },
     });
 

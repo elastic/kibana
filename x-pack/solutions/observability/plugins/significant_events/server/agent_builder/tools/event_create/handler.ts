@@ -32,12 +32,13 @@ export async function createEventToolHandler({
   eventSearchClient: RuleEventsClient;
   eventInput: EventCreateInput;
   logger?: Logger;
-}): Promise<{ event_id: string; acknowledged: true }> {
+}): Promise<{ event_id: string; group_hash: string; acknowledged: true }> {
+  const eventId = uuidv4();
   const result = await eventsWriteHandler({
     eventSearchClient,
     input: {
       ...eventInput,
-      event_id: uuidv4(),
+      event_id: eventId,
       status: eventInput.status ?? 'active',
     },
     logger,
@@ -47,5 +48,11 @@ export async function createEventToolHandler({
       `Event write skipped (${result.reason}): event_id=${result.event_id}`
     );
   }
-  return { event_id: result.event_id, acknowledged: true };
+  // A freshly generated event_id has no stored version, so the write can only have created one.
+  if (!result.created) {
+    throw createBulkWriteOutcomeUnknownError(
+      `Event write updated a stored event for a generated event_id: event_id=${eventId}`
+    );
+  }
+  return { event_id: result.event_id, group_hash: result.group_hash, acknowledged: true };
 }

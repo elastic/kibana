@@ -200,7 +200,7 @@ describe('SlackAppService', () => {
             },
             {
               names: [
-                'ai-index-idx-nightshift-cortex',
+                'ai-index-idx-nightshift-wiki',
                 'ai-index-idx-nightshift-semantic-memory',
                 'ai-index-idx-nightshift-decision-trees',
               ],

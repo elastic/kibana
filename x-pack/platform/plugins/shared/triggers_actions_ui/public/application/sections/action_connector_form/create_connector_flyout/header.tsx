@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, Suspense } from 'react';
 import type { IconType } from '@elastic/eui';
 import {
   EuiBadge,
@@ -53,7 +53,9 @@ const FlyoutHeaderComponent: React.FC<Props> = ({
       <EuiFlexGroup gutterSize="m" alignItems="center">
         {icon ? (
           <EuiFlexItem grow={false} data-test-subj="create-connector-flyout-header-icon">
-            <EuiIcon type={icon} size="xl" aria-hidden={true} />
+            <Suspense fallback={<EuiIcon type="plugs" size="xl" aria-hidden={true} />}>
+              <EuiIcon type={icon} size="xl" aria-hidden={true} />
+            </Suspense>
           </EuiFlexItem>
         ) : null}
         <EuiFlexItem grow={true}>

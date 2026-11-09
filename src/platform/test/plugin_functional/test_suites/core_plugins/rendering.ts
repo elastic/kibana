@@ -232,11 +232,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cloud.deployments_url (string?)',
         'xpack.cloud.is_elastic_staff_owned (boolean?)',
         'xpack.cloud.trial_end_date (string?)',
-        // Commented because it's inside a schema conditional, and the test is not able to resolve it. But it's shared.
-        // Added here for documentation purposes.
-        // 'xpack.cloud_integrations.experiments.launch_darkly.client_id (string)',
-        // 'xpack.cloud_integrations.experiments.launch_darkly.client_log_level (string)',
-        'xpack.cloud_integrations.experiments.metadata_refresh_interval (duration?)',
         'xpack.cloud_integrations.full_story.org_id (string|string?)',
         // No PII. Just the list of event types we want to forward to FullStory.
         'xpack.cloud_integrations.full_story.eventTypesAllowlist (array?)',

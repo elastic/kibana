@@ -15,12 +15,10 @@ import { cloudPosturePages } from '../../common/navigation/constants';
 import { CloudPosturePage } from '../../components/cloud_posture_page';
 import { CspAppHeader } from '../../components/csp_app_header';
 import { useSecuritySolutionContext } from '../../application/security_solution_context';
-import { useCspBenchmarkIntegrationsV2 } from '../benchmarks/use_csp_benchmark_integrations';
 import { getBenchmarkCisName } from '../../../common/utils/helpers';
 import { useKibana } from '../../common/hooks/use_kibana';
 
 export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>) => {
-  const benchmarksInfo = useCspBenchmarkIntegrationsV2();
   const SpyRoute = useSecuritySolutionContext()?.getSpyRouteComponent();
   const { application } = useKibana().services;
 
@@ -45,7 +43,7 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
   );
 
   return (
-    <CloudPosturePage query={benchmarksInfo}>
+    <CloudPosturePage>
       <CspAppHeader title={pageTitle} back={backTarget} />
       <EuiSpacer />
       <RulesContainer />

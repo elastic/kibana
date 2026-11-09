@@ -8,8 +8,8 @@
  */
 
 import { faker } from '@faker-js/faker';
-import { type Row } from '@tanstack/react-table';
 import { type GroupNode } from '../store_provider';
+import type { CascadeTableRow } from './core/table';
 import { getCascadeRowNodePath, getCascadeRowNodePathValueRecord } from './utils';
 
 describe('cascade row utils', () => {
@@ -28,6 +28,9 @@ describe('cascade row utils', () => {
     getParentRows: jest.fn(),
     getToggleSelectedHandler: jest.fn(),
     getToggleExpandedHandler: jest.fn(),
+    getIsSelected: jest.fn(() => false),
+    getIsSomeSelected: jest.fn(() => false),
+    getCanSelect: jest.fn(() => true),
   };
 
   // TODO: implement mock for getParentRows
@@ -37,7 +40,7 @@ describe('cascade row utils', () => {
     it('should return the path of the row node in the group by hierarchy', () => {
       const result = getCascadeRowNodePath(
         currentGroupByColumns,
-        mockedRowInstance as unknown as Row<GroupNode>
+        mockedRowInstance as unknown as CascadeTableRow<GroupNode>
       );
       expect(result).toEqual(['customer_full_name', 'customer_birth_date']);
     });
@@ -47,7 +50,7 @@ describe('cascade row utils', () => {
     it('should return a record of the path values for the provided row node', () => {
       const result = getCascadeRowNodePathValueRecord(
         currentGroupByColumns,
-        mockedRowInstance as unknown as Row<GroupNode>
+        mockedRowInstance as unknown as CascadeTableRow<GroupNode>
       );
       expect(result).toEqual({
         customer_full_name: mockedRowInstance.original.customer_full_name,
