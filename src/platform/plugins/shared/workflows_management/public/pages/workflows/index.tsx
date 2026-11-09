@@ -169,20 +169,29 @@ export function WorkflowsPage() {
     }
 
     return {
-      primaryActionItem: canCreateWorkflow
-        ? {
-            id: 'createWorkflow',
-            label: i18n.translate('workflows.createWorkflowButton', {
-              defaultMessage: 'Create workflow',
-            }),
-            iconType: 'plus',
-            run: navigateToCreateWorkflow,
-            testId: 'createWorkflowButton',
-          }
-        : undefined,
+      // The empty state already offers its own creation entry points, so the header
+      // action would only duplicate them.
+      primaryActionItem:
+        canCreateWorkflow && !shouldShowEmptyState
+          ? {
+              id: 'createWorkflow',
+              label: i18n.translate('workflows.createWorkflowButton', {
+                defaultMessage: 'Create workflow',
+              }),
+              iconType: 'plus',
+              run: navigateToCreateWorkflow,
+              testId: 'createWorkflowButton',
+            }
+          : undefined,
       items,
     };
-  }, [addConnectorsMenuItem, canCreateWorkflow, canImportWorkflows, navigateToCreateWorkflow]);
+  }, [
+    addConnectorsMenuItem,
+    canCreateWorkflow,
+    canImportWorkflows,
+    navigateToCreateWorkflow,
+    shouldShowEmptyState,
+  ]);
 
   return (
     <EuiPageTemplate
