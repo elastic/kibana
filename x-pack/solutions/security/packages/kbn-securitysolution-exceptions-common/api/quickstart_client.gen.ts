@@ -170,8 +170,13 @@ export class Client {
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Delete an exception list using the `id` or `list_id` field.
-   */
+    * Delete an exception list using the `id` or `list_id` field.
+
+Before deleting an exception list that is linked to detection rules, remove or unlink the
+exception list from those rules. Deleting a linked exception list can leave rules referencing
+an exception list that no longer exists.
+
+    */
   async deleteExceptionList(props: DeleteExceptionListProps) {
     this.log.info(`${new Date().toISOString()} Calling API DeleteExceptionList`);
     return this.kbnClient
