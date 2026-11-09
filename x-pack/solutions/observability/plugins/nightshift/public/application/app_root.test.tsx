@@ -19,7 +19,7 @@ import { AppRoot } from './app_root';
 jest.mock('@kbn/ebt-tools', () => ({
   PerformanceContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
-jest.mock('../nightshift_page', () => ({
+jest.mock('./nightshift_page', () => ({
   NightshiftPage: () => <div data-test-subj="nightshiftPageStub" />,
 }));
 
