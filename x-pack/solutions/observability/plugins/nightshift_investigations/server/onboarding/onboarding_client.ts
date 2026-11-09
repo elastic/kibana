@@ -23,7 +23,6 @@ import type {
   StartOnboardingSuggestionsResponse,
 } from '../../common/onboarding';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../common';
-import { assertNightshiftSpace } from '../lib/assert_nightshift_space';
 import { installAssistantAgent } from '../lib/install_assistant_agent';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
 import { OnboardingUnavailableError } from './errors';
@@ -166,8 +165,6 @@ export const createOnboardingClient = ({
       }
 
       const spaceId = getSpaceId(request);
-      // Nightshift runs in the default space only; enabling it elsewhere is refused.
-      assertNightshiftSpace(spaceId);
       await installInvestigationAgent({
         agentBuilder,
         spaceId,
