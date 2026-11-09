@@ -50571,7 +50571,7 @@ paths:
                         policySettings:
                           additionalProperties:
                             default: null
-                            maxLength: 1024
+                            maxLength: 10000
                             nullable: true
                             type: string
                           description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
@@ -50873,7 +50873,7 @@ paths:
                 policySettings:
                   additionalProperties:
                     default: null
-                    maxLength: 1024
+                    maxLength: 10000
                     nullable: true
                     type: string
                   description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
@@ -51183,7 +51183,7 @@ paths:
                       policySettings:
                         additionalProperties:
                           default: null
-                          maxLength: 1024
+                          maxLength: 10000
                           nullable: true
                           type: string
                         description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
@@ -51632,7 +51632,7 @@ paths:
                       policySettings:
                         additionalProperties:
                           default: null
-                          maxLength: 1024
+                          maxLength: 10000
                           nullable: true
                           type: string
                         description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
@@ -51977,7 +51977,7 @@ paths:
                 policySettings:
                   additionalProperties:
                     default: null
-                    maxLength: 1024
+                    maxLength: 10000
                     nullable: true
                     type: string
                   description: Integration policy settings that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`). Replaces the stored settings; omit it to keep them.
@@ -52244,7 +52244,7 @@ paths:
                       policySettings:
                         additionalProperties:
                           default: null
-                          maxLength: 1024
+                          maxLength: 10000
                           nullable: true
                           type: string
                         description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
@@ -52620,7 +52620,7 @@ paths:
                         policySettings:
                           additionalProperties:
                             default: null
-                            maxLength: 1024
+                            maxLength: 10000
                             nullable: true
                             type: string
                           description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
