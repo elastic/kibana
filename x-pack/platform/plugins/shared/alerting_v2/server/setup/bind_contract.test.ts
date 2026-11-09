@@ -36,7 +36,7 @@ describe('bindContract', () => {
   let mockInternalRulesClient: Partial<InternalRulesClient>;
 
   beforeEach(() => {
-    container = new Container();
+    container = new Container({ defaultScope: 'Singleton' });
     scope = new Container();
     mockRulesClient = {
       getRule: jest.fn(),
@@ -53,7 +53,7 @@ describe('bindContract', () => {
       fork,
       getContainer: jest.fn(() => container),
     } as never);
-    container.bind(ArtifactTypeRegistry).toSelf().inSingletonScope();
+    container.bind(ArtifactTypeRegistry).toSelf();
     container
       .bind(AlertStatusChangedOptIns)
       .toConstantValue(new AlertStatusChangedOptIns(createLoggerService().loggerService));

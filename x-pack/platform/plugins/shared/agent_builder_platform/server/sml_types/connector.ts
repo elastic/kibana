@@ -5,11 +5,16 @@
  * 2.0.
  */
 
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
-import { getSmlOriginId, kibanaPermissions } from '@kbn/agent-builder-sml-plugin/server';
+import {
+  SmlSearchFilterType,
+  getSmlOriginId,
+  kibanaPermissions,
+} from '@kbn/agent-builder-sml-plugin/server';
 import type { ConnectorAttachmentData } from '@kbn/agent-builder-common/attachments';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import {
@@ -43,6 +48,7 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
 
   return {
     id: CONNECTOR_KI_TYPE,
+    attachmentType: AttachmentType.connector,
 
     async *list(context) {
       const finder = context.savedObjectsClient.createPointInTimeFinder({
@@ -116,6 +122,35 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
 
     requiredHiddenTypes: ['action'],
 
+    searchByTitle: async ({ title, size, constraints }, { request }) => {
+      const allowedIds = constraints?.[SmlSearchFilterType.connector]?.ids;
+      if (allowedIds?.length === 0) {
+        return [];
+      }
+      const soClient = await getActionSavedObjectsClient(request);
+      const fields = ['name', 'actionTypeId'];
+      // The agent's connectors are known, so read just those instead of listing every connector.
+      const { saved_objects: connectors } = allowedIds
+        ? await soClient.bulkGet<{ name?: string; actionTypeId?: string }>(
+            allowedIds.map((id) => ({ type: 'action', id, fields }))
+          )
+        : await soClient.find<{ name?: string; actionTypeId?: string }>({
+            type: 'action',
+            fields,
+            perPage: 1000,
+          });
+      const lowerTitle = title.toLowerCase();
+
+      return connectors
+        .flatMap((connector) => (isSavedObjectErrorResult(connector) ? [] : [connector]))
+        .filter(
+          ({ id, attributes: { name = id, actionTypeId = '' } }) =>
+            isChatCallableConnectorType(actionTypeId) && name.toLowerCase().includes(lowerTitle)
+        )
+        .slice(0, size)
+        .map(({ id, attributes }) => ({ originId: id, title: attributes.name ?? id }));
+    },
+
     getPermissions: () => kibanaPermissions({ kiType: CONNECTOR_KI_TYPE }),
 
     toAttachment: async (item, context) => {
@@ -144,6 +179,7 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
         return {
           type: AttachmentType.connector,
           data,
+          origin: originId,
         };
       } catch (error) {
         logger.warn(

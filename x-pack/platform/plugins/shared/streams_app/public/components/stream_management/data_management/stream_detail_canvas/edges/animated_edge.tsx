@@ -19,6 +19,7 @@ import {
 import { BaseEdge, EdgeLabelRenderer, getSmoothStepPath, type EdgeProps } from '@xyflow/react';
 import { useBoolean, useDebounceFn } from '@kbn/react-hooks';
 import { useCanvasEvents } from '../state_management';
+import { useCanvasReadOnly } from '../canvas_read_only_context';
 import type { ClassicCanvasEdge } from '../types';
 
 const addProcessingUnavailableLabel = i18n.translate(
@@ -71,11 +72,12 @@ export function AnimatedEdge({
   data,
 }: EdgeProps<ClassicCanvasEdge>) {
   const { openRoutingFlyout, openProcessingFlyout, openLineProcessingFlyout } = useCanvasEvents();
+  const readOnly = useCanvasReadOnly();
   const edgeMenuId = useGeneratedHtmlId();
   const { euiTheme } = useEuiTheme();
   const [isHovered, hover] = useBoolean();
   const [showMenu, menu] = useBoolean();
-  const canUnhook = Boolean(data?.unitConnection);
+  const canUnhook = Boolean(data?.editable) && !readOnly;
   const processingTarget = data?.processingTarget;
 
   // The built-in unhook circles sit on the line just outside each handle and are
@@ -251,7 +253,7 @@ export function AnimatedEdge({
           style={PATH_OPACITY}
         />
       ) : null}
-      {isActive ? (
+      {isActive && !readOnly ? (
         <EdgeLabelRenderer>
           <div className="nopan nodrag" style={labelPositionStyle}>
             <EuiPopover
