@@ -20,3 +20,16 @@ export const getInvestigationState = (
     ? 'in_progress'
     : 'completed';
 };
+
+/** Poll for five minutes beyond the investigation workflow's 60-minute timeout. */
+export const hasInvestigationsToPoll = (
+  events: Array<Pick<SignificantEvent, 'investigations'>>
+): boolean => {
+  const cutoff = Date.now() - 65 * 60 * 1000;
+  return events.some(({ investigations }) =>
+    investigations?.some(
+      ({ completed_at: completedAt, started_at: startedAt }) =>
+        completedAt == null && Date.parse(startedAt) > cutoff
+    )
+  );
+};

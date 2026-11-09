@@ -65,7 +65,7 @@ export const ATTACK_DISCOVERY_GENERATION_WORKFLOW = {
   id: ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID,
   management: MANAGEMENT,
   pluginId: 'discoveries',
-  version: 2,
+  version: 3,
   yaml: GENERATION_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 

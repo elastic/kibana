@@ -46,6 +46,11 @@ export interface AlertEpisode extends BaseAlertEpisode {
    */
   rule_category?: string;
   /**
+   * Human-readable description of why the alert fired, from the alert document.
+   * Only set for source alert rows; v2 episodes never set this.
+   */
+  reason?: string;
+  /**
    * Identifies which `EpisodeDataSource` produced this row. Undefined for rows
    * from the v2 pipeline. Stamped on source rows by the list fetch (and by
    * `fetchEpisodesFromSource`).

@@ -14,10 +14,13 @@
     "optionalPlugins": [
       "actions",
       "alerting",
+      "alertingVTwo",
       "agentBuilder",
       "agenticInvestigations",
+      "cloud",
       "contextEngine",
       "encryptedSavedObjects",
+      "evals",
       "inference",
       "proposals",
       "ruleRegistry",

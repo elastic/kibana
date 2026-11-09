@@ -402,9 +402,16 @@ export class ScoutFlakyTests {
       );
     }
 
-    return new ScoutFlakyTests(
-      FlakyTestReportSchema.parse(JSON.parse(fs.readFileSync(reportPath, 'utf8')))
-    );
+    const report: { schemaVersion?: number } = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+    // An older report would otherwise fail on whichever field changed shape
+    if (report.schemaVersion !== FLAKY_TEST_REPORT_SCHEMA_VERSION) {
+      throw new Error(
+        `Flaky tests file ${reportPath} has schema version ${report.schemaVersion}, expected ` +
+          `${FLAKY_TEST_REPORT_SCHEMA_VERSION}; regenerate it with \`node scripts/scout discover-flaky-tests\``
+      );
+    }
+
+    return new ScoutFlakyTests(FlakyTestReportSchema.parse(report));
   }
 
   static async fromElasticsearch(

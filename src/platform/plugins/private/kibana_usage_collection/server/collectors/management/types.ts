@@ -60,6 +60,7 @@ export interface UsageStats {
   'agentBuilder:experimentalFeatures': boolean;
   'agentBuilder:bashSupport': boolean;
   'agentBuilder:apiDiscovery': boolean;
+  'agentBuilder:includeFrozenByDefault': boolean;
   'agentBuilder:deductiveEnabled': boolean;
   'agentBuilder:deductiveEndpoint': string;
   'agentBuilder:deductiveApiKey': string;
@@ -90,7 +91,6 @@ export interface UsageStats {
   'securitySolution:defaultAnomalyScore': number;
   'securitySolution:refreshIntervalDefaults': string;
   'securitySolution:enableNewsFeed': boolean;
-  'securitySolution:enableNewFlyout': boolean;
   'securitySolution:enableAssetCriticality': boolean;
   'securitySolution:excludeColdAndFrozenTiersInAnalyzer': boolean;
   'securitySolution:excludeColdAndFrozenTiersInPrevalence': boolean;
@@ -101,9 +101,9 @@ export interface UsageStats {
   'securitySolution:defaultValueReportMinutes': string;
   'securitySolution:defaultValueReportRate': string;
   'securitySolution:defaultValueReportTitle': string;
-  'securitySolution:enableAlertsAndAttacksAlignment': boolean;
   'securitySolution:enableAttackDiscoveryWorkflows': boolean;
   'securitySolution:enableRuleChangesHistory': boolean;
+  'securitySolution:enableAlertZero': boolean;
   'search:includeFrozen': boolean;
   'courier:maxConcurrentShardRequests': number;
   'courier:setRequestPreference': string;

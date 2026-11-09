@@ -141,6 +141,7 @@ dependsOn:
   - '@kbn/as-code-data-views-schema'
   - '@kbn/as-code-data-views-transforms'
   - '@kbn/as-code-export-flyout-component'
+  - '@kbn/as-code-filters-schema'
   - '@kbn/as-code-filters-transforms'
   - '@kbn/as-code-shared-schemas'
   - '@kbn/as-code-shared-telemetry'
@@ -185,6 +186,7 @@ tags:
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
@@ -193,6 +195,4 @@ fileGroups:
     - test/**/*
     - .storybook/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

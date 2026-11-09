@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { StreamsUnit } from '@kbn/streams-schema';
+import type {
+  ComponentCatalogue,
+  ComponentValidationRequest,
+  ComponentValidationResult,
+  StreamsUnit,
+} from '@kbn/streams-schema';
 
 /**
  * One credential as the config-distributor `credentials[]` sidecar expects: the name a
@@ -46,6 +51,7 @@ export type PrepareUnitCredentials = (
 export interface ValidateUnitConfigParams {
   unit: StreamsUnit.Configuration;
   credentials: UnitCredential[];
+  signal?: AbortSignal;
 }
 
 export type ValidateUnitConfig = (
@@ -56,12 +62,13 @@ export interface PublishUnitConfigParams {
   unitId: string;
   unit: StreamsUnit.Configuration;
   credentials: UnitCredential[];
+  signal?: AbortSignal;
 }
 
 export type PublishUnitConfig = (params: PublishUnitConfigParams) => Promise<void>;
 
 /**
- * Result of config-distributor `POST /v1/validate` when the unit compiles.
+ * Result of config-distributor `POST /v1/units/validate` when the unit compiles.
  * `compiled_config` is the raw OpenTelemetry collector YAML when the
  * distributor returns it.
  */
@@ -76,7 +83,7 @@ export interface UnitValidationResult {
  */
 export interface UnitConfigHooks {
   /**
-   * Unit validation via config-distributor `POST /v1/validate`, before the
+   * Unit validation via config-distributor `POST /v1/units/validate`, before the
    * configuration saved object is written. Throw to reject the PUT.
    */
   validate?: ValidateUnitConfig;
@@ -91,3 +98,24 @@ export interface UnitConfigHooks {
    */
   prepareCredentials?: PrepareUnitCredentials;
 }
+
+export type ComponentCatalogueFetchResult =
+  | { notModified: true }
+  | { notModified: false; catalogue: ComponentCatalogue; etag?: string };
+
+export type FetchComponentCatalogue = (params: {
+  /** ETag of the catalogue the caller holds, sent as `If-None-Match`. */
+  etag?: string;
+  signal?: AbortSignal;
+}) => Promise<ComponentCatalogueFetchResult>;
+
+export type ValidateComponent = (
+  params: ComponentValidationRequest & { signal?: AbortSignal }
+) => Promise<ComponentValidationResult>;
+
+export type RepublishUnitOutcome =
+  | 'republished'
+  | 'resealed'
+  | 'conflict'
+  | 'aborted'
+  | 'not_found';

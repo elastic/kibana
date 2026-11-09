@@ -52,7 +52,7 @@ export const registerUiSettings = ({
         },
       }),
       schema: schema.boolean(),
-      value: false,
+      value: true,
       requiresPageReload: true,
       technicalPreview: true,
     },

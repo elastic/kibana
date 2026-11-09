@@ -6,7 +6,7 @@
  */
 
 import type { Attachment, AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
-import type { ConversationRoundAuthor } from '@kbn/agent-builder-common';
+import type { AttachmentTimelineEvent, ConversationRoundAuthor } from '@kbn/agent-builder-common';
 import type { AttachmentBoundedTool, AttachmentRepresentation } from './attachments';
 
 /**
@@ -40,10 +40,20 @@ export interface ProcessedAttachmentVersionRef extends AttachmentVersionRef {
 export interface ProcessedRoundInput {
   message: string;
   attachments: ProcessedAttachment[];
-  /** References to versioned conversation-level attachments touched during this round. */
+  /**
+   * References to versioned conversation-level attachments touched during this round.
+   * @deprecated Written before attachment events became the source of truth; read-only, rendered
+   * by the legacy path only.
+   */
   attachment_refs?: ProcessedAttachmentVersionRef[];
-  /** Pre-rendered, immutable attachment prompt context for this round (see RoundInput). */
+  /**
+   * Pre-rendered, immutable attachment prompt context for this round (see RoundInput).
+   * @deprecated Written before attachment events became the source of truth; read-only, rendered
+   * by the legacy path only.
+   */
   attachment_context?: string;
+  /** The `chat_input` attachment events sent with this input, rendered inside the message. */
+  attachment_events?: AttachmentTimelineEvent[];
   /** Author attributed to this input */
   author?: ConversationRoundAuthor;
 }

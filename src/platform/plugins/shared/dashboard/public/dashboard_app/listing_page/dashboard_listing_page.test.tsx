@@ -10,7 +10,7 @@
 import React from 'react';
 import { faker } from '@faker-js/faker';
 import { I18nProvider } from '@kbn/i18n-react';
-import { render, waitFor } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
 import type { DashboardListingPageProps } from './dashboard_listing_page';
@@ -96,7 +96,7 @@ test('When given a title that matches multiple dashboards, filter on the title',
   mockFindByTitle.mockResolvedValue(undefined);
   const redirectTo = jest.fn();
 
-  renderDashboardListingPage({ title: 'search by title', redirectTo });
+  renderDashboardListingPage({ redirectTitle: 'search by title', redirectTo });
 
   await waitFor(() => {
     expect(redirectTo).not.toHaveBeenCalled();
@@ -113,7 +113,7 @@ test('When given a title that matches one dashboard, redirect to dashboard', asy
   });
   const redirectTo = jest.fn();
 
-  renderDashboardListingPage({ title: 'search by title', redirectTo });
+  renderDashboardListingPage({ redirectTitle: 'search by title', redirectTo });
 
   await waitFor(() => {
     expect(redirectTo).toHaveBeenCalledWith({
@@ -122,6 +122,70 @@ test('When given a title that matches one dashboard, redirect to dashboard', asy
       useReplace: true,
     });
   });
+});
+
+test('does not mount the listing while the title lookup is pending', async () => {
+  let resolveFindByTitle: (value: undefined) => void = () => {};
+  mockFindByTitle.mockReturnValue(
+    new Promise((resolve) => {
+      resolveFindByTitle = resolve;
+    })
+  );
+  (DashboardListing as jest.Mock).mockClear();
+  const redirectTo = jest.fn();
+
+  renderDashboardListingPage({ redirectTitle: 'search by title', redirectTo });
+
+  // the no data lookup has settled once its promise resolves, so the title lookup is the only gate left
+  await waitFor(() => {
+    expect(mockFindByTitle).toHaveBeenCalled();
+  });
+  await act(async () => {
+    await Promise.resolve();
+  });
+  expect(DashboardListing).not.toHaveBeenCalled();
+  expect(redirectTo).not.toHaveBeenCalled();
+
+  await act(async () => {
+    resolveFindByTitle(undefined);
+  });
+
+  await waitFor(() => {
+    expect(DashboardListing).toHaveBeenCalledWith(
+      expect.objectContaining({ initialFilter: 'search by title' }),
+      expect.any(Object) // react context
+    );
+  });
+});
+
+test('When the title lookup rejects, filter on the title', async () => {
+  let rejectFindByTitle: (reason: Error) => void = () => {};
+  mockFindByTitle.mockReturnValue(
+    new Promise((_, reject) => {
+      rejectFindByTitle = reject;
+    })
+  );
+  (DashboardListing as jest.Mock).mockClear();
+  const redirectTo = jest.fn();
+
+  renderDashboardListingPage({ redirectTitle: 'search by title', redirectTo });
+
+  await waitFor(() => {
+    expect(mockFindByTitle).toHaveBeenCalled();
+  });
+  expect(DashboardListing).not.toHaveBeenCalled();
+
+  await act(async () => {
+    rejectFindByTitle(new Error('lookup failed'));
+  });
+
+  await waitFor(() => {
+    expect(DashboardListing).toHaveBeenCalledWith(
+      expect.objectContaining({ initialFilter: 'search by title' }),
+      expect.any(Object) // react context
+    );
+  });
+  expect(redirectTo).not.toHaveBeenCalled();
 });
 
 test('sets only "Dashboards" breadcrumb on default tab', async () => {

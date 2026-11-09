@@ -15,6 +15,10 @@ import { getRuleIdFromRuleState, type RuleState } from '../../../types/rule_stat
 import type { RelatedEpisodesScope } from '../../../queries/related_episodes_query';
 import { RELATED_ALERT_EPISODES_PAGE_SIZE } from '../../../constants';
 import { useFetchEpisodeActions } from '../../../hooks/use_fetch_episode_actions';
+import {
+  useFetchEpisodesDataQuery,
+  withEpisodesData,
+} from '../../../hooks/use_fetch_episodes_data_query';
 import { getGroupAction, useFetchGroupActions } from '../../../hooks/use_fetch_group_actions';
 import { useFetchSameRuleEpisodesQuery } from '../../../hooks/use_fetch_same_rule_episodes_query';
 import { AlertEpisodeCardListSkeleton } from '../section_skeletons';
@@ -109,6 +113,17 @@ export function RelatedEpisodesRuleSubsection({
     [otherGroupRows]
   );
 
+  // Loaded on its own, so the rows show up without waiting for it. Without the
+  // data the rows just miss the grouping badges.
+  const { data: otherEpisodesData } = useFetchEpisodesDataQuery({
+    episodeIds: otherEpisodeIds,
+    services: { expressions, spaces },
+  });
+  const otherGroupRowsWithData = useMemo(
+    () => withEpisodesData(otherGroupRows, otherEpisodesData),
+    [otherGroupRows, otherEpisodesData]
+  );
+
   const { data: otherEpisodeActionsMap } = useFetchEpisodeActions({
     episodeIds: otherEpisodeIds,
     services: { expressions, spaces },
@@ -147,7 +162,7 @@ export function RelatedEpisodesRuleSubsection({
         </EuiPanel>
       ) : (
         <RelatedAlertEpisodesList
-          rows={otherGroupRows}
+          rows={otherGroupRowsWithData}
           ruleState={ruleState}
           getEpisodeAction={(id) => otherEpisodeActionsMap?.get(id)}
           getGroupAction={(gh) => getGroupAction(otherGroupActionsMap, ruleId, gh)}

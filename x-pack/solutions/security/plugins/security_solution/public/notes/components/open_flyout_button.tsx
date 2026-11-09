@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useState } from 'react';
 import type { IconType } from '@elastic/eui';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -16,10 +16,13 @@ import { OPEN_FLYOUT_BUTTON_TEST_ID } from './test_ids';
 import { useKibana } from '../../common/lib/kibana';
 import { useIsNewFlyoutEnabled } from '../../common/hooks/use_is_new_flyout_enabled';
 import { DocumentDetailsRightPanelKey } from '../../flyout/document_details/shared/constants/panel_keys';
+import { AttackDetailsRightPanelKey } from '../../flyout/attack_details/constants/panel_keys';
 import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
 import { DocumentEventTypes, FLYOUT_ORIGIN } from '../../common/lib/telemetry';
 import { useSelectedPatterns } from '../../data_view_manager/hooks/use_selected_patterns';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
+import { useSpaceId } from '../../common/hooks/use_space_id';
+import { fetchIsAttack, getAttackIndexPattern } from '../api/fetch_is_attack';
 
 export const OPEN_FLYOUT_BUTTON = i18n.translate(
   'xpack.securitySolution.notes.openFlyoutButtonLabel',
@@ -46,18 +49,24 @@ export interface OpenFlyoutButtonIconProps {
 /**
  * Renders a button to open the alert and event details flyout.
  * This component is meant to be used in timeline and the notes management page, where the cell actions are more basic (no filter in/out).
+ *
+ * A note only stores the `_id` of its document, so on click we first check whether that `_id` is an
+ * attack, to open the attack flyout instead of the document flyout (which would not find it).
  */
 export const OpenFlyoutButtonIcon = memo(
   ({ eventId, timelineId, iconType }: OpenFlyoutButtonIconProps) => {
     const { dataView } = useDataView(PageScope.timeline);
     const selectedPatterns = useSelectedPatterns(dataView);
 
+    const spaceId = useSpaceId();
+    const [isLoading, setIsLoading] = useState(false);
+
     const { telemetry } = useKibana().services;
     const { openFlyout } = useExpandableFlyoutApi();
     const enableNewFlyout = useIsNewFlyoutEnabled();
-    const { openDocumentFlyoutFromPattern } = useFlyoutApi();
+    const { openDocumentFlyoutFromPattern, openAttackFlyout } = useFlyoutApi();
 
-    const handleClick = useCallback(() => {
+    const openDocument = useCallback(() => {
       const indexName = selectedPatterns.join(',');
       if (enableNewFlyout) {
         openDocumentFlyoutFromPattern({
@@ -77,19 +86,51 @@ export const OpenFlyoutButtonIcon = memo(
           },
         });
       }
+    }, [eventId, openFlyout, selectedPatterns, enableNewFlyout, openDocumentFlyoutFromPattern]);
+
+    const openAttack = useCallback(
+      (indexName: string) => {
+        if (enableNewFlyout) {
+          openAttackFlyout({
+            attackId: eventId,
+            indexName,
+            origin: FLYOUT_ORIGIN.NOTE_PREVIEW,
+          });
+        } else {
+          openFlyout({
+            right: {
+              id: AttackDetailsRightPanelKey,
+              params: { attackId: eventId, indexName },
+            },
+          });
+        }
+      },
+      [eventId, openFlyout, enableNewFlyout, openAttackFlyout]
+    );
+
+    const handleClick = useCallback(async () => {
+      let isAttack = false;
+      if (spaceId) {
+        setIsLoading(true);
+        try {
+          isAttack = await fetchIsAttack({ eventId, spaceId });
+        } catch {
+          // If the lookup fails, fall back to the document flyout (previous behavior)
+        } finally {
+          setIsLoading(false);
+        }
+      }
+
+      if (spaceId && isAttack) {
+        openAttack(getAttackIndexPattern(spaceId));
+      } else {
+        openDocument();
+      }
       telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
         location: timelineId,
         panel: 'right',
       });
-    }, [
-      eventId,
-      openFlyout,
-      selectedPatterns,
-      telemetry,
-      timelineId,
-      enableNewFlyout,
-      openDocumentFlyoutFromPattern,
-    ]);
+    }, [eventId, spaceId, openAttack, openDocument, telemetry, timelineId]);
 
     return (
       <EuiToolTip content={OPEN_FLYOUT_BUTTON} disableScreenReaderOutput>
@@ -98,6 +139,7 @@ export const OpenFlyoutButtonIcon = memo(
           aria-label={OPEN_FLYOUT_BUTTON}
           color="text"
           iconType={iconType}
+          isLoading={isLoading}
           onClick={handleClick}
         />
       </EuiToolTip>

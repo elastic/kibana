@@ -158,6 +158,7 @@ export class VisualizePageObject extends FtrService {
   }
 
   public async clickNewVisualization() {
+    await this.waitForListingToSettle();
     await this.appMenu.clickMenuItem('newItemButton');
     await this.waitForGroupsSelectPage();
   }
@@ -221,6 +222,20 @@ export class VisualizePageObject extends FtrService {
         throw new Error('wait for vis groups select step');
       }
     });
+  }
+
+  /**
+   * The listing renders `newItemButton` both while its initial fetch is in flight and in the
+   * empty prompt that then replaces the table, so a click placed in between is dropped.
+   */
+  public async waitForListingToSettle() {
+    const settledState = await this.testSubjects.waitForFirst(
+      ['listingTable-isLoaded', 'emptyListPrompt'],
+      { timeout: this.testSubjects.TRY_TIME }
+    );
+    if (!settledState) {
+      throw new Error('The Visualize listing did not finish its initial fetch');
+    }
   }
 
   /**

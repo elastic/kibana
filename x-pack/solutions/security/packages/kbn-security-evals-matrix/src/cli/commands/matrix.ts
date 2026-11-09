@@ -299,7 +299,7 @@ export const matrixCmd: Command<void> = {
       throw createFlagError(
         [
           error instanceof Error ? error.message : String(error),
-          'Set EVAL_KBN_URL to a Kibana instance with xpack.evals.enabled=true.',
+          'Set EVAL_KBN_URL to a Kibana instance with xpack.evals.enabled=true and xpack.evals.mode=full.',
           'Set EVAL_KBN_API_KEY when authenticating to a non-local target.',
         ].join('\n')
       );

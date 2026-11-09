@@ -443,22 +443,36 @@ skill that owns the relevant task. See [Inline rendering guidance in skills](#in
 
 #### `toSurfaceComposition` — rendering outside Kibana
 
-Response messages of rounds from external systems, such as Slack, are rendered in code from the message: its markdown, plus a node for each `<render_attachment>` tag. An attachment renders there only if its type defines `toSurfaceComposition`, which maps the data of one attachment version to a surface composition: an [Isomer](https://github.com/elastic/isomer) composition of `markdown` nodes, which renders to every surface. Without it, the attachment is left out there.
+Response messages of rounds from external systems, such as Slack, are rendered in code from the message: its markdown, plus a node for each `<render_attachment>` tag. An attachment renders there only if its type defines `toSurfaceComposition`, which maps one attachment version to a surface composition: an [Isomer](https://github.com/elastic/isomer) composition built from the primitives of `@kbn/isomer-components` (`ComponentsNode`), rendered by the `isomer` plugin's runtime to every surface. Without it, the attachment is left out there.
+
+It gets the attachment at the rendered version and `{ request, spaceId }`, and may be async.
 
 ```ts
 const myAttachmentType: AttachmentTypeDefinition<'my_type', MyData> = {
   id: 'my_type',
   validate: ...,
   format: ...,
-  toSurfaceComposition: (data) => ({
+  toSurfaceComposition: ({ data, origin }) => ({
     type: 'view',
     title: data.name,
-    body: [{ type: 'markdown', text: `Status: ${data.status}` }],
+    subtitle: data.kind,
+    body: [
+      { type: 'markdown', text: data.summary },
+      { type: 'fields', items: [{ label: 'Status', value: data.status }] },
+      ...(origin
+        ? [{ type: 'link', label: 'Open in Kibana', app: 'my_app', path: `/items/${origin}` }]
+        : []),
+    ],
   }),
 };
 ```
 
-GitHub-flavored markdown is converted per surface: tables become native Slack tables and code fences become code blocks. A mapping that throws leaves the attachment out. See the `text` type for an example.
+- **Heading.** `title` becomes a `header` and `subtitle` a `context` line, above the body.
+- **Nodes.** `markdown` for prose (GitHub-flavored markdown is converted per surface), `fields` for labeled values, `code` for source shown as written, `table` for rows, `context`, `section`, `quote`, `divider`, `link` and `actions`. Each primitive's schema describes it.
+- **Links back to Kibana.** Use `link` with an app id and a path, not a URL. Slack resolves it against the Kibana URL of the conversation's space, and leaves it out when there's none. `actions` take absolute URLs only: a relative `/app/…` URL would lose the base path and the space. For a button, build one from the context's `kibanaUrl`, the space's public Kibana URL, and leave the button out when it's undefined.
+- **Limits.** Each primitive has limits, such as 12,000 characters of `code` or 10 items in a `fields` node, and plain text can't be blank. A composition that fails validation, or a mapping that throws, leaves the whole attachment out.
+
+See the `agentBuilderPlatform` types, such as `esql`, `skill` and `connector_setup`, for examples.
 
 #### Real example: the built-in image attachment
 
@@ -509,8 +523,8 @@ export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
 
   // Optional: preferred width of the canvas flyout in full-screen context.
   // Accepts any valid CSS width value (e.g. '600px', '40vw').
-  // Defaults to '50vw' when not specified. Has no effect in sidebar context
-  // or on narrow viewports (where the canvas always fills available width).
+  // Defaults to '50vw' when not specified and is capped at '50vw'. Has no effect
+  // in sidebar context or on narrow viewports.
   canvasWidth: '600px',
 
   // Expanded view rendered in the canvas flyout
@@ -521,7 +535,7 @@ export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
   ),
 
   // Customize buttons based on viewport context
-  getActionButtons: ({ attachment, isCanvas, isSidebar, openCanvas, setPreviewBadgeState, openSidebarConversation }) => {
+  getActionButtons: ({ attachment, isCanvas, isSidebar, openCanvas, openSidebarConversation }) => {
     const buttons = [];
 
     if (isSidebar) {
@@ -549,8 +563,8 @@ export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
       });
     }
 
-    // openSidebarConversation is {undefined} when already in the sidebar
-    if (openSidebarConversation) {
+    // Offer this only outside the sidebar, where the conversation is not already open
+    if (openSidebarConversation && !isSidebar) {
       buttons.push({
         label: 'Continue in sidebar',
         icon: 'comment',
@@ -558,15 +572,6 @@ export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
         handler: openSidebarConversation,
       });
     }
-    // Optional: if preview happens outside canvas, keep inline badge state in sync
-    buttons.push({
-      label: 'Preview',
-      icon: 'eye',
-      type: ActionButtonType.SECONDARY,
-      handler: () => {
-        setPreviewBadgeState?.('previewing');
-      },
-    });
 
     return buttons;
   },
@@ -602,7 +607,7 @@ The `getActionButtons` params include flags to customize behavior per viewport:
 - **`isCanvas`** - `true` when rendered in the canvas flyout (expanded view)
 - **`openCanvas`** - Callback to open canvas mode; `undefined` when already in canvas
 - **`closeCanvas`** - Callback to dismiss the canvas; `undefined` when not in canvas
-- **`openSidebarConversation`** - Callback to open the agent builder sidebar with the current conversation loaded; `undefined` when already in the sidebar
+- **`openSidebarConversation`** - Callback to open the agent builder sidebar with the current conversation loaded
 
 #### Canvas flyout width
 
@@ -615,9 +620,9 @@ export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
 };
 ```
 
-- Accepts any valid CSS width string: `'600px'`, `'40vw'`, `'80%'`, etc.
-- Has no effect in sidebar context — the canvas always fills available width there.
-- Has no effect on narrow viewports (below the `l` EUI breakpoint, ~992px) — the canvas switches to overlay mode and fills available width regardless of this setting.
+- Accepts any valid CSS width string: `'600px'`, `'40vw'`, etc.
+- Is capped at `50vw`. Users can resize the canvas between `300px` and `50vw`.
+- Has no effect in sidebar context or on narrow viewports (below the `l` EUI breakpoint, ~992px). There the canvas opens as an overlay at `50vw`, or 90% of the space beside the sidebar when that is narrower, and cannot be resized.
 
 #### Opening the sidebar from attachments
 
@@ -644,9 +649,23 @@ getActionButtons: ({ attachment, openSidebarConversation }) => {
 ```
 
 The callback handles setting the correct conversation context in localStorage before opening the sidebar, ensuring the sidebar loads the same conversation. It is `undefined` when already in the sidebar context.
-- **`setPreviewBadgeState`** - Optional callback to control inline preview badge state when preview is driven outside the canvas
 
-`setPreviewBadgeState` accepts:
+#### Previewing outside the canvas
+
+When the attachment is previewed outside the canvas, for example in the app the user is on, return `previewing` from `getPreviewState$`. The inline card then shows a "You're previewing this" badge instead of its action buttons.
+
+```tsx
+getPreviewState$: (attachment) =>
+  previewedAttachment$.pipe(
+    map((previewed) =>
+      previewed?.id === attachment.id && previewed.version === attachment.versionData?.version
+        ? 'previewing'
+        : 'none'
+    )
+  ),
+```
+
+`getPreviewState$` emits:
 
 - **`none`** - regular inline state
 - **`preview_available`** - show "Preview Only" badge
@@ -1180,6 +1199,19 @@ agentBuilder.conversationTemplates.registerTemplateUIDefinition('investigation',
   },
 }));
 ```
+
+### Conversation details flyout width
+
+Every conversation details flyout — the in-chat one and the ones opened with
+`openConversationDetails` — is resizable and uses the same width rules, so it opens at the same
+width in every consuming app:
+
+- Default width 480px, minimum 400px, maximum 640px.
+- When the user drags the flyout, that width is remembered (in `localStorage`) and used on the
+  next open, wherever the flyout is opened from. The flyout menu's reset action returns it to the
+  default.
+
+The width is not configurable per template or per caller: all surfaces share one setting.
 
 ### Conversation details menu actions
 
@@ -1847,15 +1879,17 @@ The full implementation is ~130 lines and serves as the reference for new types.
 The chat streaming layer lives across two folders:
 
 - `public/application/context/streaming/` — the lifted provider, its context hook, the
-  send and resume mutation hooks, the chat-events subscriber, and shared types.
+  send, resume, and attach mutation hooks, the chat-events subscriber, and shared types.
 - `public/application/hooks/` — the per-conversation convenience hook
-  (`use_conversation_stream.ts`) and the "any stream active?" derived hook
-  (`use_is_any_conversation_streaming.ts`). They live here because they compose
+  (`use_conversation_stream.ts`), the "any stream active?" derived hook
+  (`use_is_any_conversation_streaming.ts`), and the attach decision
+  (`use_attach_to_active_execution.ts`). They live here because they compose
   `useConversation` (a sibling in `hooks/`) with the streaming context.
 
 This section documents how mutations, lifted state, and the React Query cache fit
 together. Read this before touching any of: `streaming_context.tsx`,
 `use_send_message_mutation.ts`, `use_resume_round_mutation.ts`,
+`use_attach_execution_mutation.ts`, `use_attach_to_active_execution.ts`,
 `use_subscribe_to_chat_events.ts`, `use_conversation_stream.ts`,
 `use_is_any_conversation_streaming.ts`.
 
@@ -1869,58 +1903,54 @@ together. Read this before touching any of: `streaming_context.tsx`,
   instance because each instance has its own `QueryClient`.
 
 The sidebar uses `useStreamingContext()` directly. `useIsAnyConversationStreaming()`
-is derived from the same context and is used by the page-leave guard and the
-embeddable welcome-message dismiss — both genuinely care about "is anything in
-flight, anywhere?". Anything inside the conversation tree should use the per-conversation
+is derived from the same context and is used by the embeddable welcome-message
+dismiss. Anything inside the conversation tree should use the per-conversation
 scoped hook, `useConversationStream()` (in `hooks/use_conversation_stream.ts`).
-
 
 ### Lifted state
 
 `StreamingProvider` owns two slices with split lifecycles:
 
-- `activeStreams: Map<conversationId, { type, agentReasoning }>` — one entry per
+- `activeStreams: Map<conversationId, ActiveStream>` — one entry per
   in-flight stream. Set synchronously when each mutation kicks off; deleted in the
   mutation's `finally`. Multiple entries can coexist — concurrent streams are
-  supported, one per conversation. Native `Map` rather than `Record` because the
-  same key shape pairs with the `Map<conversationId, AbortController>` ref each
-  mutation hook holds, and `cancelAllStreams` iterates this map's keys.
+  supported, one per conversation. Each entry has a `type` (`send`, `resume`, or
+  `attach`), a `started` flag once `execution_started` arrives, and a `cancelling`
+  flag after Stop.
 - `byConversationId: Record<string, StreamRecord>` — per-conversation
-  `pendingMessage`, `error`, `errorSteps`. Persists across stream end so a user
-  can hit Retry after a failure. Mutated via immer; lifecycle is unrelated to
-  in-flight streams so it stayed a plain record.
+  `pendingMessage` and `pendingAttachments`, retained until completion handling
+  releases them.
+
+The provider also keeps an `attemptedExecutionIds` ref. `mutateAttach` records an
+execution before attaching, and `cancelStream` records executions stopped here.
+Repeated fetches of the same pointer cannot start another attach during this mount.
 
 ### Mutations: single-scope `mutationFn`
 
-`useSendMessageMutation` and `useResumeRoundMutation` use a **single-scope `mutationFn`
-with `try / catch / finally`**, not React Query's lifecycle methods (`onMutate`,
-`onSuccess`, `onError`, `onSettled`). The shape is:
+`useSendMessageMutation`, `useResumeRoundMutation`, and `useAttachExecutionMutation`
+keep the stream lifecycle inside `mutationFn`, including error handling and a
+`finally` block for cleanup. The shape is:
 
 ```ts
 mutationFn: async (vars) => {
-  // setup phase (sync, before any await): seed the optimistic round, set pending message.
-  // Note: `activeStream` is set by the provider's `mutateSendMessage` wrapper *before*
-  // `mutate()` returns — not here.
+  // The provider registers the active stream before calling the mutation.
   const streamActions = createConversationActions({ conversationId: vars.conversationId, ... });
 
   try {
     await subscribeToChatEvents({ events$, conversationActions: streamActions, ... });
-    // success cleanup
-  } catch (err) {
-    // error cleanup
-    throw err;
+    if (isDetached(handle)) return;
+    await releaseLocalContent({ refetch: streamActions.refetchConversation, ... });
   } finally {
-    // cleanup: invalidate cache (skipped if round paused on HITL),
-    // delete this conversation's `activeStreams` entry, delete its abort controller.
+    // Clear this conversation's active-stream entry and remove this mutation's handle.
   }
 }
 ```
 
-Each mutation hook holds a `Map<conversationId, AbortController>` ref so concurrent
-streams have independent cancel signals. The map is keyed by `vars.conversationId`,
-the cancel helper takes the same key, and the `finally` block deletes only the
-entry it installed (compared by reference so a re-mutate's controller isn't
-clobbered).
+Each mutation hook holds a `Map<conversationId, StreamHandle>` ref with a controller,
+the execution id used by the abort endpoint, and an `abortRequested` flag. The map
+is keyed by `vars.conversationId`, the cancel helper takes the same key, and the
+`finally` block deletes only the entry it installed (compared by reference so a
+re-mutate's controller isn't clobbered).
 
 **Why not lifecycle methods?** Streams aren't typical mutations — the bulk of the work
 happens *during* `mutationFn`, with state mutations flowing for many seconds. Splitting
@@ -1937,22 +1967,59 @@ is closure-bound to the mutation's conversation id. **Stream events target the
 conversation the mutation was started for, regardless of where the user has navigated.**
 
 If the user submits on conversation A and immediately switches to B, the stream events
-keep writing to A's cache. B loads cleanly from the server.
+keep updating A's live timeline. B loads cleanly from the server.
+
+Each view has its own `ConversationStreamService`. Mutations feed their events into
+its `trackStream` operator; saved events take precedence over live copies with the
+same id. After a run ends, `releaseLocalContent` refetches the conversation and
+clears local execution events once their saved terminal event is present.
 
 ### Per-conversation `useConversation` gate
 
-`useConversation` is disabled for a conversation when (a) a stream is currently writing
-to its cache, or (b) the cache shows it's paused on a HITL prompt. The cache is
-authoritative in both cases, so a refetch would race with optimistic chunks (streaming)
-or with the resume mutation about to fire on Approve (HITL). Other conversations stay
-free to refetch — switch to conversation B while A streams and B loads cleanly. See the
-inline comment on the `enabled` predicate for details.
+`useConversation` is disabled while this provider has an active stream for the
+conversation. The saved document lags behind the live events during a run. Other
+conversations remain free to fetch, and shared conversations poll every five seconds
+while they have no local stream. Completion handling explicitly refetches the saved
+conversation even when the query is disabled.
+
+### Attach and detach
+
+`useAttachToActiveExecution` runs in `Conversation`, covering both the full app and
+the embeddable. When a conversation GET carries `active_execution.execution_id`
+and this provider has no stream for that conversation, it calls `mutateAttach`.
+The provider's attempted-id guard permits one attach per execution per mount.
+
+`ChatService.attachToExecution` replays from `/reattach?offset=0` and follows the
+live tail using the existing reconnect helper. Attach events feed the local
+timeline but are not published to `EventsService`, because replaying them could
+repeat other plugins' side effects. A resumed execution gets a synthetic local
+`prompt_response` to link it to the paused turn; the saved response replaces it
+after the completion refetch. Only a send creates a scroll anchor.
+
+Unmounting the provider calls `detachAllStreams`, which aborts local fetch
+controllers without requesting a server abort. Detached mutations skip completion
+refetches and composer cleanup. The server run continues, and a newly mounted view
+can attach through the saved execution pointer. Switching conversations within the
+same provider leaves its streams running.
+
+Attach failures are handled without a toast and followed by a conversation refetch.
+The attempted-id guard prevents another attach to that execution in this mount,
+including after the reconnect helper exhausts its recovery attempt. Reloading or
+remounting the view permits a fresh attempt.
+
+**Browser tools:** attached streams do not execute browser-tool calls, from either
+the replay or the live tail. The view that sent or resumed the run executes them
+while it stays connected. Closing it and reopening the conversation restores the
+timeline, but does not restore browser-tool execution. The server does not wait for browser
+acknowledgement, so the run can finish without applying a browser action. Recovering
+these actions safely requires execution ownership and deduplication across views;
+user-facing handling of missed actions is a follow-up.
 
 ### Concurrent streams
 
 The app supports concurrent per-conversation streams. Submitting on conversation B
-while A is mid-stream starts a second stream alongside A — A keeps writing to its
-cache, B writes to its own. Cancelling one doesn't affect the other.
+while A is mid-stream starts a second stream alongside A. Each updates its own live
+timeline. Cancelling one doesn't affect the other.
 
 What this means in practice:
 
@@ -1960,14 +2027,10 @@ What this means in practice:
   from `useConversationStream()`. The new-conversation route (`/conversations/new`) has
   no `conversationId`, so `isResponseLoading` is `false` and submit is always
   allowed there even while other conversations stream.
-- **HITL Approve / Cancel gate** (`round_layout.tsx`) is per-conversation:
-  `isResponseLoading && !isResuming`. Other in-flight conversations cannot
-  corrupt this conversation's cache because `streamActions` are closure-bound
-  to `vars.conversationId`.
 - **Per-conversation cancel** is wired through `cancelStream(id)` on the context.
-  The mutation hooks hold `Map<conversationId, AbortController>` refs so cancels
-  hit only the targeted controller.
-- **Page-leave guard** is the lone remaining global check. If any stream is in
-  flight when the user navigates away, a confirm dialog appears; on confirm,
-  `cancelAllStreams()` aborts every controller in the map before the platform
-  proceeds.
+  It asks the mutation holding the handle to abort the server execution and records
+  the returned execution id so a lingering pointer cannot cause reattachment.
+  Stop keeps the connection open for the terminal event unless the abort request
+  fails or reports that no terminal event was persisted.
+- **Provider unmount** detaches all of its streams locally. It does not stop the
+  server executions.

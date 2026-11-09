@@ -73,6 +73,37 @@ describe('inferenceEndpointAdapter', () => {
   };
 
   describe('when creating the request', () => {
+    it('sends a template and omits messages', async () => {
+      const source$ = of(
+        createOpenAIChunk({
+          delta: { content: 'ok' },
+        })
+      );
+
+      executorMock.invoke.mockResolvedValue(observableIntoEventSourceStream(source$, logger));
+
+      const response$ = inferenceEndpointAdapter.chatComplete({
+        ...defaultArgs,
+        messages: [{ role: MessageRole.User, content: 'should not be sent' }],
+        template: {
+          id: '.attack-discovery',
+          version: 1,
+          variables: { phase: 'generate', alerts: ['alert text'], partial: '' },
+        },
+      });
+
+      await lastValueFrom(response$.pipe(toArray()));
+
+      const body = executorMock.invoke.mock.calls[0][0].body as Record<string, unknown>;
+      expect(body.template).toEqual({
+        id: '.attack-discovery',
+        version: 1,
+        variables: { phase: 'generate', alerts: ['alert text'], partial: '' },
+      });
+      expect(body).not.toHaveProperty('messages');
+      expect(body).not.toHaveProperty('tools');
+    });
+
     it('emits chunk events', async () => {
       const source$ = of(
         createOpenAIChunk({
@@ -1117,6 +1148,94 @@ describe('inferenceEndpointAdapter', () => {
             }),
           })
         );
+      });
+    });
+  });
+
+  describe('forced tool choice', () => {
+    const tools = { set_title: { description: 'set the title' } };
+
+    beforeEach(() => {
+      executorMock.invoke.mockResolvedValue(
+        observableIntoEventSourceStream(of(createOpenAIChunk({ delta: { content: '' } })), logger)
+      );
+    });
+
+    const getBody = () => executorMock.invoke.mock.calls[0][0].body as Record<string, unknown>;
+
+    it('sends `auto` instead of a named function for a Claude model that rejects forced tool choice', () => {
+      inferenceEndpointAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          endpointModelId: 'eu.anthropic.claude-sonnet-5-5',
+          tools,
+          toolChoice: { function: 'set_title' },
+        })
+        .subscribe(noop);
+
+      expect(getBody().tool_choice).toBe('auto');
+    });
+
+    it('sends `auto` instead of `required` for a Claude model that rejects forced tool choice', () => {
+      inferenceEndpointAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          endpointModelId: 'anthropic-claude-5.5-opus',
+          tools,
+          toolChoice: ToolChoiceType.required,
+        })
+        .subscribe(noop);
+
+      expect(getBody().tool_choice).toBe('auto');
+    });
+
+    it('keeps the named function for a Claude model that accepts forced tool choice', () => {
+      inferenceEndpointAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          endpointModelId: 'anthropic-claude-4.6-sonnet',
+          tools,
+          toolChoice: { function: 'set_title' },
+        })
+        .subscribe(noop);
+
+      expect(getBody().tool_choice).toEqual({
+        type: 'function',
+        function: { name: 'set_title' },
+      });
+    });
+
+    it('falls back to the request model name when endpoint model metadata is missing', () => {
+      inferenceEndpointAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          modelName: 'claude-opus-5-5',
+          tools,
+          toolChoice: { function: 'set_title' },
+        })
+        .subscribe(noop);
+
+      expect(getBody().tool_choice).toBe('auto');
+    });
+
+    it('keeps the named function for a non-Claude model', () => {
+      inferenceEndpointAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          endpointModelId: 'openai-gpt-5.4',
+          tools,
+          toolChoice: { function: 'set_title' },
+        })
+        .subscribe(noop);
+
+      expect(getBody().tool_choice).toEqual({
+        type: 'function',
+        function: { name: 'set_title' },
       });
     });
   });

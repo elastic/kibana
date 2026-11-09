@@ -28,10 +28,11 @@ export interface AttachmentTriggerEvent {
   payload: AttachmentTriggerPayload;
 }
 
+/** Maps an attachment event to its workflow trigger. `attachment_restored` maps to no trigger for now. */
 export const toAttachmentTriggerEvent = (
   conversationId: string,
   event: AttachmentTimelineEvent
-): AttachmentTriggerEvent => {
+): AttachmentTriggerEvent | undefined => {
   switch (event.type) {
     case TimelineEventType.attachmentAdded:
       return {
@@ -67,5 +68,7 @@ export const toAttachmentTriggerEvent = (
           source: event.data.source,
         },
       };
+    case TimelineEventType.attachmentRestored:
+      return undefined;
   }
 };

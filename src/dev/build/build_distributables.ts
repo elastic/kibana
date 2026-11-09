@@ -23,6 +23,7 @@ export interface BuildOptions {
   dockerTag: string | null;
   dockerTagQualifier: string | null;
   downloadFreshNode: boolean;
+  forceNodePointerCompression: boolean;
   downloadCloudDependencies: boolean;
   initialize: boolean;
   createGenericFolders: boolean;
@@ -44,6 +45,7 @@ export interface BuildOptions {
   targetCloudPlatforms: boolean;
   skipFipsProvider: boolean;
   skipServerless: boolean;
+  skipDockerImageArchive: boolean;
   tarZstd: boolean;
   withExamplePlugins: boolean;
   withTestPlugins: boolean;
