@@ -96,6 +96,7 @@ steps:
           machineType: n2-standard-4
           preemptible: true
           diskType: pd-balanced
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
         depends_on: build
         timeout_in_minutes: 60
         parallelism: 3
@@ -114,6 +115,7 @@ steps:
           machineType: n2-standard-4
           preemptible: true
           diskType: pd-balanced
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
         depends_on: build
         timeout_in_minutes: 60
         parallelism: 5
@@ -132,6 +134,7 @@ steps:
           machineType: n2-standard-4
           preemptible: true
           diskType: pd-balanced
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
         depends_on: build
         timeout_in_minutes: 60
         parallelism: 11
@@ -150,6 +153,7 @@ steps:
           machineType: n2-standard-4
           preemptible: true
           diskType: pd-balanced
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
         depends_on: build
         timeout_in_minutes: 60
         parallelism: 6
@@ -168,6 +172,7 @@ steps:
           machineType: n2-standard-4
           preemptible: true
           diskType: pd-balanced
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
         depends_on: build
         timeout_in_minutes: 60
         parallelism: 1
@@ -186,6 +191,7 @@ steps:
           machineType: n2-standard-4
           preemptible: true
           diskType: pd-balanced
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
         depends_on: build
         timeout_in_minutes: 60
         parallelism: 2
@@ -204,6 +210,7 @@ steps:
           machineType: n2-standard-4
           preemptible: true
           diskType: pd-balanced
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
         depends_on: build
         timeout_in_minutes: 60
         parallelism: 1
@@ -222,6 +229,7 @@ steps:
           machineType: n2-standard-4
           preemptible: true
           diskType: pd-balanced
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
         depends_on: build
         timeout_in_minutes: 60
         parallelism: 2
@@ -242,6 +250,7 @@ steps:
           machineType: n2-standard-4
           preemptible: true
           diskType: pd-balanced
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
         depends_on: build
         timeout_in_minutes: 60
         parallelism: 7
@@ -260,6 +269,7 @@ steps:
           machineType: n2-standard-4
           preemptible: true
           diskType: pd-balanced
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
         depends_on: build
         timeout_in_minutes: 60
         parallelism: 4
@@ -278,6 +288,7 @@ steps:
           machineType: n2-standard-4
           preemptible: true
           diskType: pd-balanced
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
         depends_on: build
         timeout_in_minutes: 60
         parallelism: 2
@@ -294,7 +305,7 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           enableNestedVirtualization: true
-          machineType: n2-highmem-4
+          machineType: n2-standard-4
         depends_on: build
         timeout_in_minutes: 75
         parallelism: 12
@@ -310,9 +321,10 @@ steps:
           image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
-          machineType: n2-highmem-4
+          machineType: n2-standard-4
           preemptible: true
           diskType: pd-balanced
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
         depends_on: build
         timeout_in_minutes: 60
         parallelism: 7

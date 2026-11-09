@@ -21,6 +21,7 @@ import { MlPopover } from '../../../common/components/ml_popover/ml_popover';
 import { useKibana } from '../../../common/lib/kibana';
 import {
   isCloudSecurityPosturePath,
+  isCoverageOverviewPath,
   isDashboardViewPath,
   isDetectionsPath,
   isEndpointManagementPath,
@@ -71,6 +72,7 @@ export const GlobalHeader = React.memo(() => {
   const changesHistoryPath = isRuleChangesHistoryPath(pathname);
   const rulesManagementPath = isRulesManagementPath(pathname);
   const rulesAddPath = isRulesAddPath(pathname);
+  const coverageOverviewPath = isCoverageOverviewPath(pathname);
   const exceptionsPath = isExceptionsPath(pathname);
   const onboardingPath = isOnboardingPath(pathname);
   // Cloud Security Posture pages own "Add integrations" in their own app header.
@@ -87,15 +89,16 @@ export const GlobalHeader = React.memo(() => {
       return;
     }
 
-    // The Rules, Add Elastic rules, Shared Exception Lists, Exception list details, Cloud Security
-    // Posture, Endpoint management and Manage page app headers render their own actions (ML job
-    // settings, Add integrations), so clear the global header action menu there to avoid
-    // duplicating them.
+    // The Rules, Add Elastic rules, MITRE coverage, Shared Exception Lists, Exception list details,
+    // Cloud Security Posture, Endpoint management and Manage page app headers render their own
+    // actions (ML job settings, Add integrations), so clear the global header action menu there to
+    // avoid duplicating them.
     // Onboarding is a page without the global header action menu
     if (
       changesHistoryPath ||
       rulesManagementPath ||
       rulesAddPath ||
+      coverageOverviewPath ||
       exceptionsPath ||
       onboardingPath ||
       cloudSecurityPosturePath ||
@@ -131,6 +134,7 @@ export const GlobalHeader = React.memo(() => {
     changesHistoryPath,
     rulesManagementPath,
     rulesAddPath,
+    coverageOverviewPath,
     exceptionsPath,
     onboardingPath,
     cloudSecurityPosturePath,
