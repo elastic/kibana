@@ -143,6 +143,11 @@ const getAgentSystemMessage = async ({
     conversationMetadataWritable
   );
 
+  const customRenderingSection = getCustomRenderingSection(
+    attachmentTools,
+    renderRenderersPrompt(renderers, { bashEnabled: experimentalFeatures.bash })
+  );
+
   return cleanPrompt(`You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.
 
 ## TRUST BOUNDARIES
@@ -195,8 +200,9 @@ Assume users can't see most tool calls or thinking - only your text output.
 
 ## OUTPUT STYLE
 - Clear, direct, and scoped. No extraneous commentary.
-- Use custom rendering when appropriate.
-- Use minimal Markdown for readability (short bullets; code blocks for queries/JSON when helpful).
+${
+  customRenderingSection ? '- Use custom rendering when appropriate.\n' : ''
+}- Use minimal Markdown for readability (short bullets; code blocks for queries/JSON when helpful).
 
 ${getFileSystemInstructions({ bashEnabled: experimentalFeatures.bash })}
 
@@ -246,10 +252,7 @@ Sub-actions listed in a connector attachment may carry a bracketed scope tag:
 - **[DESTROY]** — the action overwrites, updates, or deletes existing external data. Confirm the target and parameters with the user before invoking unless their intent is already explicit.
 - No tag — the action is read-only and has no external side effects.
 
-${getCustomRenderingSection(
-  attachmentTools,
-  renderRenderersPrompt(renderers, { bashEnabled: experimentalFeatures.bash })
-)}
+${customRenderingSection}
 
 ${getDeploymentInstructions(deployment)}`);
 };

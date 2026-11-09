@@ -444,10 +444,11 @@ describe('getResearchAgentPrompt', () => {
       expect(prompt).not.toContain('### INLINE ATTACHMENT RENDERING');
     });
 
-    it('omits the CUSTOM RENDERING heading when off and there are no renderers', async () => {
+    it('omits the CUSTOM RENDERING heading and its OUTPUT STYLE line when off and there are no renderers', async () => {
       const prompt = await systemPrompt({ configuration: off });
 
       expect(prompt).not.toContain('## CUSTOM RENDERING');
+      expect(prompt).not.toContain('Use custom rendering when appropriate');
     });
 
     it('keeps the CUSTOM RENDERING heading for renderers when off', async () => {
@@ -458,6 +459,7 @@ describe('getResearchAgentPrompt', () => {
       });
 
       expect(prompt).toContain('## CUSTOM RENDERING');
+      expect(prompt).toContain('Use custom rendering when appropriate');
       expect(prompt).toContain('#### type: "table"');
       expect(prompt).not.toContain('### INLINE ATTACHMENT RENDERING');
     });
@@ -467,6 +469,7 @@ describe('getResearchAgentPrompt', () => {
 
       expect(prompt).toContain('MUST use the attachment tools');
       expect(prompt).toContain('## CUSTOM RENDERING');
+      expect(prompt).toContain('Use custom rendering when appropriate');
       expect(prompt).toContain('### INLINE ATTACHMENT RENDERING');
     });
 
