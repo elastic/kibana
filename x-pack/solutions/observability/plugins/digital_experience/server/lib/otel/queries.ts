@@ -50,17 +50,26 @@ export const browserDocuments = (start: number, end: number) => [
 /** The documents of one application, by its exact name. */
 export const serviceDocuments = (serviceName: string) => termQuery(SERVICE_NAME, serviceName);
 
-/** The browser SDK documents of one application in the time range. */
+/**
+ * The browser SDK documents of one application in the time range, and only those `kuery` (the
+ * Overview's KQL, as a query) matches when it is given.
+ */
 export const applicationDocuments = ({
   serviceName,
   start,
   end,
+  kuery,
 }: {
   serviceName: string;
   start: number;
   end: number;
+  kuery?: estypes.QueryDslQueryContainer;
 }) => {
-  return [...browserDocuments(start, end), ...serviceDocuments(serviceName)];
+  return [
+    ...browserDocuments(start, end),
+    ...serviceDocuments(serviceName),
+    ...(kuery ? [kuery] : []),
+  ];
 };
 
 /** A filter aggregation counting the documents of one event, e.g. the page loads. */

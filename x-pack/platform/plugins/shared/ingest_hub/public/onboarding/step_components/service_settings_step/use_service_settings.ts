@@ -38,10 +38,11 @@ import {
   isMainPackageName,
 } from '../authenticate_and_deploy_step/deploy_group_helpers';
 import { getNamespaceError } from './instance_namespace_field';
-import type { PolicySettings } from '../../common/policy_settings';
+import { supportsPolicySetting, type PolicySettings } from '../../common/policy_settings';
 import {
   getDescriptionError,
   getIntegrationNameError,
+  getProxyUrlError,
   supportsIntegrationSettings,
 } from './integration_settings';
 
@@ -604,14 +605,41 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
   const descriptionError = getDescriptionError(description);
   const namespaceError = getNamespaceError(namespace);
 
+  // The proxy URL reaches only the policies of services whose package declares the var, and only
+  // for the deployment methods that send it. Elsewhere the field is hidden, so a value left over
+  // from another method or selection must not block Continue.
+  const isProxyUrlSupported = useMemo(
+    () =>
+      supportsPolicySetting('proxy_url', deploymentMethod) &&
+      instances.some((inst) => {
+        const service = awsServicesMap?.get(inst.serviceId);
+        return (
+          !!service &&
+          supportsIntegrationSettings(service, deploymentMethod) &&
+          !!service.declaresProxyUrl
+        );
+      }),
+    [instances, awsServicesMap, deploymentMethod]
+  );
+  const proxyUrl = policySettings.proxy_url ?? '';
+  const proxyUrlError = isProxyUrlSupported ? getProxyUrlError(proxyUrl) : undefined;
+
   const isReady = useMemo(
     () =>
       !!globalRegion.trim() &&
       incompleteInstances.length === 0 &&
       !integrationNameError &&
       !descriptionError &&
-      !namespaceError,
-    [globalRegion, incompleteInstances, integrationNameError, descriptionError, namespaceError]
+      !namespaceError &&
+      !proxyUrlError,
+    [
+      globalRegion,
+      incompleteInstances,
+      integrationNameError,
+      descriptionError,
+      namespaceError,
+      proxyUrlError,
+    ]
   );
 
   const [globalRegionTouched, setGlobalRegionTouched] = useState(false);
@@ -655,6 +683,8 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     setDedicatedNamespaceTemplates,
     policySettings,
     setPolicySetting,
+    isProxyUrlSupported,
+    proxyUrlError,
     bareNamePackage,
     instances,
     filteredInstances,

@@ -14,6 +14,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import { getNamespaceError, InstanceNamespaceField } from './instance_namespace_field';
 import { OutputField, type OutputFieldProps } from './output_field';
+import { ProxyUrlField, type ProxyUrlFieldProps } from './proxy_url_field';
 
 interface SharedAdvancedSettingsProps {
   namespace: string;
@@ -30,6 +31,8 @@ interface SharedAdvancedSettingsProps {
   hasServicesIgnoringNamespace?: boolean;
   /** The output field. It applies to agent-based deploys only, so managed and ECF leave it out. */
   output?: OutputFieldProps;
+  /** The proxy URL field. It applies to agent-based and managed integration deploys, not ECF. */
+  proxyUrl?: ProxyUrlFieldProps;
 }
 
 /**
@@ -46,6 +49,7 @@ export function SharedAdvancedSettings({
   hasLaunchedEcfStack = false,
   hasServicesIgnoringNamespace = false,
   output,
+  proxyUrl,
 }: SharedAdvancedSettingsProps) {
   const { services } = useKibana<CoreStart>();
   // Like Fleet's switch, it needs a valid namespace to act on.
@@ -125,6 +129,11 @@ export function SharedAdvancedSettings({
       {output && (
         <EuiFlexItem>
           <OutputField {...output} />
+        </EuiFlexItem>
+      )}
+      {proxyUrl && (
+        <EuiFlexItem>
+          <ProxyUrlField {...proxyUrl} />
         </EuiFlexItem>
       )}
     </EuiFlexGrid>
