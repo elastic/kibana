@@ -17,7 +17,7 @@ export async function unenrollForAgentPolicyId(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   policyId: string,
-  options?: { revoke?: boolean }
+  options?: { revoke?: boolean; unenrolledReason?: string }
 ) {
   const revoke = options?.revoke ?? false;
   let hasMore = true;
@@ -41,6 +41,7 @@ export async function unenrollForAgentPolicyId(
       await unenrollAgent(soClient, esClient, agent.id, {
         force: revoke,
         revoke,
+        unenrolledReason: options?.unenrolledReason,
         skipAgentlessValidation: true,
       });
     }

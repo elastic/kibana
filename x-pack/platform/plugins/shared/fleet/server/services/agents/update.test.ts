@@ -55,6 +55,21 @@ describe('unenrollForAgentPolicyId', () => {
     expect(unenrollAgent).toHaveBeenCalledWith(soClient, esClient, 'agent-1', {
       force: true,
       revoke: true,
+      unenrolledReason: undefined,
+      skipAgentlessValidation: true,
+    });
+  });
+
+  it('passes the unenrolled reason to the unenrolled agents', async () => {
+    await unenrollForAgentPolicyId(soClient, esClient, 'policy-1', {
+      revoke: true,
+      unenrolledReason: 'agentless',
+    });
+
+    expect(unenrollAgent).toHaveBeenCalledWith(soClient, esClient, 'agent-1', {
+      force: true,
+      revoke: true,
+      unenrolledReason: 'agentless',
       skipAgentlessValidation: true,
     });
   });

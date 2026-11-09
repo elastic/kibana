@@ -1293,7 +1293,7 @@ describe('Agent policy', () => {
           agentlessSoClient,
           esClient,
           'mocked',
-          { revoke: true }
+          { revoke: true, unenrolledReason: 'agentless' }
         );
       } finally {
         deleteAgentlessAgentSpy.mockRestore();
