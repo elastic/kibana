@@ -149,6 +149,7 @@ const httpRequestSchema = lazySchema(() =>
       query: z.record(z.string(), z.unknown()).optional(),
       headers: z.record(z.string(), z.unknown()).optional(),
       body: z.unknown().optional(),
+      bodyType: z.enum(['json', 'form', 'text']).optional(),
     })
     .strict()
     .superRefine((request, context) => {

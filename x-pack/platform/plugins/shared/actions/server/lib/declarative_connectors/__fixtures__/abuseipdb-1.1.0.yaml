@@ -101,6 +101,7 @@ actions:
       method: POST
       baseUrl: "{{ config.baseUrl }}"
       path: /api/v2/report
+      bodyType: form
       body:
         ip: "{{ input.ip }}"
         categories: "{{ input.categories }}"

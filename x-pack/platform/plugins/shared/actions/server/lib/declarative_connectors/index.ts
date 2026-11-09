@@ -6,5 +6,7 @@
  */
 
 export { parseDeclarativeConnectorSpec } from './parse_declarative_connector_spec';
+export { executeDeclarativeRequest } from './execute_declarative_request';
+export { TemplateRenderError } from './render_template';
 export { DeclarativeConnectorSpecError } from './types';
 export type { DeclarativeAction, DeclarativeConnectorSpec, DeclarativeRequest } from './types';
