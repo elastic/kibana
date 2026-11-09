@@ -71,9 +71,6 @@ ROW input = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (
 | KEEP ua.*
 ```
 
-ua.name:keyword | ua.version:keyword | ua.os.name:keyword | ua.os.version:keyword | ua.os.full:keyword | ua.device.name:keyword | ua.device.type:keyword
-Chrome | 33.0.1750.149 | Mac OS X | 10.9.2 | Mac OS X 10.9.2 | Mac | Desktop
-
 Limit output to name, version, and device properties, and include device type:
 
 ```esql

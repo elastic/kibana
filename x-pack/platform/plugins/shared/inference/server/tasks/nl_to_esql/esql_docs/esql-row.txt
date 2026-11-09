@@ -24,9 +24,6 @@ Create a row with literal integer, keyword, and null values.
 ROW a = 1, b = "two", c = null
 ```
 
-a:integer | b:keyword | c:null
-1 | "two" | null
-
 Create a row with a multivalued column using square brackets.
 
 ```esql

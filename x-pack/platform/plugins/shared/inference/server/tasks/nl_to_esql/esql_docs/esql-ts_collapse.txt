@@ -21,9 +21,6 @@ PROMQL index=k8s step=1m start="2024-05-10T00:11:00.000Z" end="2024-05-10T00:14:
 | TS_COLLAPSE
 ```
 
-cost:double | step:datetime
-[13.25, 36.375, 37.9375, 39.5417] | [2024-05-10T00:11:00.000Z, 2024-05-10T00:12:00.000Z, 2024-05-10T00:13:00.000Z, 2024-05-10T00:14:00.000Z]
-
 Collapse a per-dimension result into one row per unique `cluster` value.
 
 ```esql
@@ -31,11 +28,6 @@ PROMQL index=k8s step=1m start="2024-05-10T00:02:00.000Z" end="2024-05-10T00:04:
 | TS_COLLAPSE
 | SORT cluster
 ```
-
-clients:double | step:datetime | cluster:keyword
-[396.5, 632.5, 742.0] | [2024-05-10T00:02:00.000Z, 2024-05-10T00:03:00.000Z, 2024-05-10T00:04:00.000Z] | prod
-[440.0, 565.0, 454.0] | [2024-05-10T00:02:00.000Z, 2024-05-10T00:03:00.000Z, 2024-05-10T00:04:00.000Z] | qa
-[205.0, 357.0] | [2024-05-10T00:03:00.000Z, 2024-05-10T00:04:00.000Z] | staging
 
 Calculate per-series average clients from collapsed multi-valued arrays.
 
@@ -46,11 +38,6 @@ PROMQL index=k8s step=1m start="2024-05-10T00:02:00.000Z" end="2024-05-10T00:04:
 | SORT avg_clients DESC
 | LIMIT 10
 ```
-
-clients:double | step:datetime | cluster:keyword | avg_clients:double
-[396.5, 632.5, 742.0] | [2024-05-10T00:02:00.000Z, 2024-05-10T00:03:00.000Z, 2024-05-10T00:04:00.000Z] | prod | 590.3333333333334
-[440.0, 565.0, 454.0] | [2024-05-10T00:02:00.000Z, 2024-05-10T00:03:00.000Z, 2024-05-10T00:04:00.000Z] | qa | 486.3333333333333
-[205.0, 357.0] | [2024-05-10T00:03:00.000Z, 2024-05-10T00:04:00.000Z] | staging | 281.0
 
 ## Limitations
 

@@ -71,12 +71,6 @@ TS k8s
 | SORT metric_name
 ```
 
-series_count:long | metric_name:keyword
-9 | network.eth0.rx
-9 | network.eth0.tx
-9 | network.total_bytes_in
-9 | network.total_cost
-
 Count distinct metrics reported by each time series:
 
 ```esql
@@ -85,17 +79,6 @@ TS k8s
 | STATS metric_count = COUNT_DISTINCT(metric_name) BY dimensions
 | SORT dimensions
 ```
-
-metric_count:long | dimensions:keyword
-4 | {"cluster":"prod","pod":"one","region":"[eu, us]"}
-4 | {"cluster":"prod","pod":"three","region":"[eu, us]"}
-4 | {"cluster":"prod","pod":"two","region":"[eu, us]"}
-4 | {"cluster":"qa","pod":"one"}
-4 | {"cluster":"qa","pod":"three"}
-4 | {"cluster":"qa","pod":"two"}
-4 | {"cluster":"staging","pod":"one","region":"us"}
-4 | {"cluster":"staging","pod":"three","region":"us"}
-4 | {"cluster":"staging","pod":"two","region":"us"}
 
 ## Limitations
 

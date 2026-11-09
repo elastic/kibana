@@ -41,9 +41,6 @@ ROW uri = "http://myusername:mypassword@www.example.com:80/foo.gif?key1=val1&key
 | KEEP parts.*
 ```
 
-parts.domain:keyword | parts.fragment:keyword | parts.path:keyword | parts.extension:keyword | parts.port:integer | parts.query:keyword | parts.scheme:keyword | parts.user_info:keyword | parts.username:keyword | parts.password:keyword
-www.example.com | fragment | /foo.gif | gif | 80 | key1=val1&key2=val2 | http | myusername:mypassword | myusername | mypassword
-
 Filter web logs to requests for `www.example.com` and count the number of entries for each path:
 
 ```esql
