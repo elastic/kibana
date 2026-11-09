@@ -20,7 +20,7 @@ const toSurfaceText = async (content: string) => {
     }
   );
 
-  return composition?.body.map((node) => (node.type === 'markdown' ? node.text : undefined));
+  return composition?.body.map((node) => (node.type === 'markdown' ? node.text : node.type));
 };
 
 describe('text attachment type', () => {
