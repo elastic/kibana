@@ -10,7 +10,16 @@ import type { DynamicAttribute } from '@kbn/entity-store/common';
 /** The ES|QL source command a plan runs under. */
 export type QueryEngine = 'TS' | 'FROM';
 
-/** The unit the generator queries: one per source for now, each with its own filter and attributes. */
+/** What the probe found behind one source's pattern. */
+export interface SourceProbe {
+  /** Whether a readable time-series index exists behind the source's pattern. */
+  hasTimeSeries: boolean;
+}
+
+/**
+ * The unit the generator queries: one source under one engine, with the source's filter and
+ * attributes. Both plans of a source name the pattern exactly as the author wrote it.
+ */
 export interface QueryPlan {
   /** Position in plan order, 0-based; the stable key for provenance. */
   index: number;
@@ -21,6 +30,7 @@ export interface QueryPlan {
   filter?: string;
   /** The source's attributes; every plan of a source carries them. */
   attributes: DynamicAttribute[];
+  /** `TS` reads the pattern's time-series indices, `FROM` every other index behind it. */
   engine: QueryEngine;
 }
 

@@ -73,6 +73,102 @@ export type ExecutionStatsResults = Pick<
   | 'dispatcher_executions_count_24hr'
 >;
 
+export interface ValueAggregation {
+  value: number | null;
+}
+export interface PercentilesAggregation {
+  values: Record<string, number | null>;
+}
+
+/** Flat aggregations over dispatcher events. */
+export interface DispatcherActionBucket extends TermsBucket {
+  alert_count: ValueAggregation;
+  action_group_count: ValueAggregation;
+}
+export interface DispatcherEventStatsAggregations {
+  by_action: { buckets: DispatcherActionBucket[] };
+  dispatched: {
+    doc_count: number;
+    unique_alerts: ValueAggregation;
+    workflow_executions: ValueAggregation;
+    unique_workflows: ValueAggregation;
+    executions: ValueAggregation;
+    spaces: ValueAggregation;
+  };
+  dispatch_failed: {
+    doc_count: number;
+    by_reason: { buckets: TermsBucket[] };
+  };
+}
+
+/**
+ * Per-policy aggregations through the nested `kibana.saved_objects` refs, plus the distinct rules
+ * referenced by `unmatched` events.
+ */
+export interface DispatcherPolicyActivityBucket extends TermsBucket {
+  events: {
+    doc_count: number;
+    dispatched: { doc_count: number; action_groups: ValueAggregation };
+    throttled: { doc_count: number; action_groups: ValueAggregation };
+    dispatch_failed: { doc_count: number };
+  };
+  /** Absent when the policy has neither dispatched nor throttled groups. */
+  throttle_ratio?: ValueAggregation;
+}
+export interface DispatcherPolicyDispatchBucket extends TermsBucket {
+  events: {
+    doc_count: number;
+    action_groups: ValueAggregation;
+    alerts: ValueAggregation;
+    workflow_executions: ValueAggregation;
+  };
+}
+export interface DispatcherPolicyStatsAggregations {
+  policy_refs: {
+    policies: {
+      by_policy: { buckets: DispatcherPolicyActivityBucket[] };
+      throttle_ratio_percentiles: PercentilesAggregation;
+      throttle_ratio_avg: ValueAggregation;
+    };
+  };
+  dispatched_events: {
+    doc_count: number;
+    policy_refs: {
+      policies: {
+        by_policy: { buckets: DispatcherPolicyDispatchBucket[] };
+        action_groups_percentiles: PercentilesAggregation;
+        action_groups_avg: ValueAggregation;
+        alerts_percentiles: PercentilesAggregation;
+        alerts_avg: ValueAggregation;
+        workflow_executions_percentiles: PercentilesAggregation;
+        workflow_executions_avg: ValueAggregation;
+      };
+    };
+  };
+  unmatched_events: {
+    doc_count: number;
+    rule_refs: { rules: { uncovered_rules: ValueAggregation } };
+  };
+}
+
+export type DispatcherStatsResults = Pick<
+  LatestTaskStateSchema,
+  | 'dispatcher_alerts_count_by_outcome_24hr'
+  | 'dispatcher_action_groups_count_by_outcome_24hr'
+  | 'dispatcher_unique_alerts_dispatched_count_24hr'
+  | 'dispatcher_workflow_executions_count_24hr'
+  | 'dispatcher_unique_workflows_triggered_count_24hr'
+  | 'dispatcher_notifying_executions_count_24hr'
+  | 'dispatcher_notifying_spaces_count_24hr'
+  | 'dispatcher_policies_count_by_activity_24hr'
+  | 'dispatcher_action_groups_dispatched_per_policy_24hr'
+  | 'dispatcher_alerts_dispatched_per_policy_24hr'
+  | 'dispatcher_workflow_executions_per_policy_24hr'
+  | 'dispatcher_throttle_ratio_per_policy_24hr'
+  | 'dispatcher_uncovered_rules_count_24hr'
+  | 'dispatcher_dispatch_failures_count_by_reason_24hr'
+>;
+
 export interface RuleStatsAggregations {
   count_enabled: { doc_count: number };
   count_by_kind: { buckets: TermsBucket[] };

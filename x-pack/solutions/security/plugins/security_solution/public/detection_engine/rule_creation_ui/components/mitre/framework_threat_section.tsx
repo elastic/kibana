@@ -21,7 +21,10 @@ import React, { useCallback } from 'react';
 import { isEqual } from 'lodash';
 import type { Threat, Threats } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { MitreFramework } from '@kbn/security-mitre-attack-common';
-import { THREAT_FRAMEWORK_NAME } from '@kbn/security-mitre-attack-common';
+import {
+  THREAT_FRAMEWORK_DISPLAY_NAME,
+  THREAT_FRAMEWORK_NAME,
+} from '@kbn/security-mitre-attack-common';
 import type { FieldHook } from '../../../../shared_imports';
 import { threatDefault } from '../step_about_rule/default_value';
 import { MyAddItemButton } from '../add_item_form';
@@ -56,18 +59,19 @@ export const MitreFrameworkThreatSection: React.FC<MitreFrameworkThreatSectionPr
   const { tactics, techniques, subtechniques, isLoading, isError } = useMitreConfiguration({
     framework,
   });
-  const frameworkLabel = THREAT_FRAMEWORK_NAME[framework];
+  const threatFrameworkName = THREAT_FRAMEWORK_NAME[framework];
+  const frameworkLabel = THREAT_FRAMEWORK_DISPLAY_NAME[framework];
 
   const addTactic = useCallback(() => {
     field.setValue([
       ...(field.value as Threats),
       {
-        framework: frameworkLabel,
+        framework: threatFrameworkName,
         tactic: { id: 'none', name: 'none', reference: 'none' },
         technique: [],
       },
     ]);
-  }, [field, frameworkLabel]);
+  }, [field, threatFrameworkName]);
 
   const updateTactic = useCallback(
     (threat: Threat, value: string) => {
@@ -84,13 +88,13 @@ export const MitreFrameworkThreatSection: React.FC<MitreFrameworkThreatSectionPr
       values.splice(index, 1, {
         ...values[index],
         // The options are this section's dataset, so the row's framework must follow the section.
-        framework: frameworkLabel,
+        framework: threatFrameworkName,
         tactic: { id, reference, name },
         technique: [],
       });
       field.setValue([...values]);
     },
-    [field, frameworkLabel, tactics]
+    [field, threatFrameworkName, tactics]
   );
 
   const handleTacticChange = useCallback(

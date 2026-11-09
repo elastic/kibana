@@ -13,7 +13,6 @@ import {
   investigationNotificationDestinationsSchema,
   MAX_ALERTS_PER_INVESTIGATION,
 } from '../../common';
-import { telemetryTargetNameSchema } from '../../common/telemetry_targets';
 import { DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID, MAX_KEYWORD_LENGTH } from '../../common';
 import { fetchInvestigationAlertSnapshots } from '../lib/alert_snapshot';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
@@ -24,7 +23,6 @@ const startInvestigationMessage = {
 };
 
 const startInvestigationModel = {
-  telemetry_target: telemetryTargetNameSchema.optional(),
   connector_id: z.string().min(1).max(MAX_KEYWORD_LENGTH).optional(),
 };
 
@@ -126,20 +124,22 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
           alertIds: body.subject.ids,
           ...lookup,
         });
-        return await client.start({
-          subject: { type: 'alert', id: primaryId, summary: body.subject.summary },
-          title: body.title,
-          context: { alerts },
-          trigger_type: 'manual',
-          message: body.message,
-          ...(body.telemetry_target ? { telemetry_target: body.telemetry_target } : {}),
-          ...(body.connector_id ? { connector_id: body.connector_id } : {}),
-          ...(body.notificationDestinations
-            ? { notificationDestinations: body.notificationDestinations }
-            : {}),
-        });
+        return await client.start(
+          {
+            subject: { type: 'alert', id: primaryId, summary: body.subject.summary },
+            title: body.title,
+            context: { alerts },
+            trigger_type: 'manual',
+            message: body.message,
+            ...(body.connector_id ? { connector_id: body.connector_id } : {}),
+            ...(body.notificationDestinations
+              ? { notificationDestinations: body.notificationDestinations }
+              : {}),
+          },
+          { entryPoint: 'start_api' }
+        );
       }
-      return await client.start({ ...body, trigger_type: 'manual' });
+      return await client.start({ ...body, trigger_type: 'manual' }, { entryPoint: 'start_api' });
     } catch (error) {
       rethrowInvestigationClientError(error);
     }

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { useState } from 'react';
 import { storageKeys } from '../application/storage_keys';
 
 /**
- * Width rules for the conversation details flyout, applied wherever it opens — the in-chat flyout
- * and the ones consumers open through `openConversationDetails` — so it always opens at the same
- * width.
+ * Width rules for the chat's flyouts (Summary, Sharing, Chat details and Activity log), including
+ * the Summary flyout consumers open through `openConversationDetails`, so they all open at the same
+ * width and share one remembered width.
  */
 export const CONVERSATION_DETAILS_FLYOUT_DEFAULT_WIDTH = 480;
 export const CONVERSATION_DETAILS_FLYOUT_MIN_WIDTH = 400;
@@ -52,3 +53,12 @@ export const getConversationDetailsFlyoutWidthProps = (): ConversationDetailsFly
   resizable: true,
   onResize: persistConversationDetailsFlyoutWidth,
 });
+
+/**
+ * The same width props, read once when the flyout opens. EUI resets the flyout's width whenever
+ * `size` changes, so reading the remembered width again on later renders would fight the user's drag.
+ */
+export const useConversationFlyoutWidthProps = (): ConversationDetailsFlyoutWidthProps => {
+  const [widthPropsAtOpen] = useState(getConversationDetailsFlyoutWidthProps);
+  return widthPropsAtOpen;
+};

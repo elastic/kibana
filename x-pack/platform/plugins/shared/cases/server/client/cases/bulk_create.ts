@@ -44,7 +44,7 @@ import { applyProfilesToAssignees, getUserProfilesSafe, normalizeCreateCaseReque
 import { ensureTemplateVersionIsPinned } from './expand_template_defaults';
 import type { BulkCreateCasesArgs } from '../../services/cases/types';
 import type { NotifyAssigneesArgs } from '../../services/notifications/types';
-import type { CaseTransformedAttributes } from '../../common/types/case';
+import type { CaseTransformedAttributes, ExtractObservablesSource } from '../../common/types/case';
 import type { InlineField } from '../../../common/types/domain/template/fields';
 import type { TemplatesService } from '../../services/templates';
 import type { FieldDefinitionsService } from '../../services/field_definitions';
@@ -81,6 +81,14 @@ export interface BulkCreateCasesClientOptions {
    * space silently breaks every automated case creation in it.
    */
   relaxRequiredFields?: boolean;
+  /**
+   * Where each case's `settings.extractObservables` value came from, keyed by the case id the
+   * caller put in the request. Stored as the server-owned `extract_observables_source`
+   * attribute. Only an automated writer knows the source (the cases connector knows a rule
+   * override from a template value). A case without an entry gets no source. The source is
+   * always `explicit`, `rule`, `template`, or `space_default`.
+   */
+  extractObservablesSourceByCaseId?: ReadonlyMap<string, ExtractObservablesSource>;
 }
 
 /**
@@ -192,6 +200,7 @@ export const bulkCreate = async (
         templatesEnabled: clientArgs.config.templates.enabled,
         relaxRequiredFields: options.relaxRequiredFields === true,
         spaceExtractObservables: extractObservablesMap.get(theCase.owner),
+        extractObservablesSourceByCaseId: options.extractObservablesSourceByCaseId,
       });
       bulkCreateRequest.push(request);
     }
@@ -501,6 +510,7 @@ const createBulkCreateCaseRequest = async ({
   templatesEnabled,
   relaxRequiredFields,
   spaceExtractObservables,
+  extractObservablesSourceByCaseId,
 }: {
   theCase: { id: string } & BulkCreateCasesRequest['cases'][number];
   customFieldsConfiguration?: CustomFieldsConfiguration;
@@ -518,6 +528,8 @@ const createBulkCreateCaseRequest = async ({
   relaxRequiredFields: boolean;
   /** Space-level extractObservables default from the configuration saved object. */
   spaceExtractObservables?: boolean;
+  /** See {@link BulkCreateCasesClientOptions.extractObservablesSourceByCaseId}. */
+  extractObservablesSourceByCaseId?: ReadonlyMap<string, ExtractObservablesSource>;
 }): Promise<{
   request: BulkCreateCasesArgs['cases'][number];
 }> => {
@@ -549,17 +561,23 @@ const createBulkCreateCaseRequest = async ({
   // fields, one supplied via customFields and the other via extended_fields — a pre-pair check
   // only sees the latter and rejects the former as missing.
 
-  // Default extractObservables when the caller omitted it.
+  const extractObservablesSource = extractObservablesSourceByCaseId?.get(id);
+
+  // Resolve the final extractObservables value.
   // Precedence: caller-explicit > space config > owner default > false.
-  if (caseWithoutId.settings.extractObservables === undefined) {
-    caseWithoutId = {
-      ...caseWithoutId,
-      settings: {
-        ...caseWithoutId.settings,
-        extractObservables: resolveExtractObservables(caseWithoutId.owner, spaceExtractObservables),
-      },
-    };
-  }
+  // bulkCreate has no HTTP route and its only caller (the cases connector) inherits every value
+  // from a template, the space configuration or the owner default. So a value for an owner that
+  // cannot store true is coerced to false, not rejected: stored data must not fail the rule.
+  caseWithoutId = {
+    ...caseWithoutId,
+    settings: {
+      ...caseWithoutId.settings,
+      extractObservables: resolveExtractObservables(
+        caseWithoutId.owner,
+        caseWithoutId.settings.extractObservables ?? spaceExtractObservables
+      ),
+    },
+  };
 
   const normalizedCase = normalizeCreateCaseRequest(caseWithoutId, customFieldsConfiguration);
 
@@ -660,6 +678,9 @@ const createBulkCreateCaseRequest = async ({
         user,
         newCase: normalizedCase,
       }),
+      ...(extractObservablesSource !== undefined
+        ? { extract_observables_source: extractObservablesSource }
+        : {}),
     },
   };
 };

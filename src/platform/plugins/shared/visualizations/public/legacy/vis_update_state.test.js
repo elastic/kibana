@@ -10,7 +10,7 @@
 import _ from 'lodash';
 import { updateOldState } from './vis_update_state';
 
-// eslint-disable-next-line camelcase
+// eslint-disable-next-line @kbn/compat/eslint-camelcase
 import { pre_6_1, since_6_1 } from './vis_update_state.stub';
 
 function watchForChanges(obj) {

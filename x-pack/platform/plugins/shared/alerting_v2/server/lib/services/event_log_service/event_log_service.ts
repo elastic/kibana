@@ -14,7 +14,7 @@ import type {
   IEventLogService,
   IValidatedEvent,
 } from '@kbn/event-log-plugin/server';
-import type { ActionPolicyEventAction } from '../../dispatcher/steps/constants';
+import type { ActionPolicyEventAction } from './constants';
 import type { AlertingServerSetupDependencies } from '../../../types';
 import { EsServiceInternalToken } from '../es_service/tokens';
 import { LoggerServiceToken, type LoggerServiceContract } from '../logger_service/logger_service';

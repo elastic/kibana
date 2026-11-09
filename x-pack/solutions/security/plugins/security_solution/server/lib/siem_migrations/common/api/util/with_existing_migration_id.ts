@@ -10,6 +10,7 @@ import type { SecuritySolutionRequestHandlerContext } from '../../../../../types
 import { MIGRATION_ID_NOT_FOUND } from '../../translations';
 import type { SiemRuleMigrationsClient } from '../../../rules/siem_rule_migrations_service';
 import type { SiemDashboardMigrationsClient } from '../../../dashboards/siem_dashboard_migration_service';
+import type { SiemWorkflowMigrationsClient } from '../../../workflows/siem_workflow_migrations_service';
 
 /**
  * Checks the existence of a valid migration before proceeding with the request.
@@ -30,10 +31,14 @@ export const withExistingMigration = <
     const { migration_id: migrationId } = req.params;
     const pathParts = req.route.path.split('/');
     const ctx = await context.resolve(['securitySolution']);
-    const migrationsClient: SiemRuleMigrationsClient | SiemDashboardMigrationsClient =
-      pathParts.includes('rules')
-        ? ctx.securitySolution.siemMigrations.getRulesClient()
-        : ctx.securitySolution.siemMigrations.getDashboardsClient();
+    const migrationsClient:
+      | SiemRuleMigrationsClient
+      | SiemDashboardMigrationsClient
+      | SiemWorkflowMigrationsClient = pathParts.includes('workflows')
+      ? ctx.securitySolution.siemMigrations.getWorkflowsClient()
+      : pathParts.includes('rules')
+      ? ctx.securitySolution.siemMigrations.getRulesClient()
+      : ctx.securitySolution.siemMigrations.getDashboardsClient();
     const storedMigration = await migrationsClient.data.migrations.get(migrationId);
 
     if (!storedMigration) {

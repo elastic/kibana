@@ -80,9 +80,19 @@ const createAttachment = async (
 
     emitAttachmentsAddedEvent(clientArgs, { id: caseId, owner }, [savedObjectID], query.type);
     // This call never throws — failures are logged and do not abort the attachment creation.
-    await extractAndAddObservables(caseId, [query], { settings }, clientArgs);
+    const caseWithObservables = await extractAndAddObservables(
+      caseId,
+      [query],
+      { settings },
+      clientArgs
+    );
 
-    return { model: updatedModel, createdAttachment };
+    return {
+      model: caseWithObservables
+        ? updatedModel.newObjectWithInfo(caseWithObservables)
+        : updatedModel,
+      createdAttachment,
+    };
   } catch (error) {
     throw createCaseError({
       message: `Failed while adding a comment to case id: ${caseId} error: ${error}`,

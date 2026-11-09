@@ -102,7 +102,7 @@ function convertDataLayerToAPI(
       throw new Error('X axis must be a bucket operation');
     }
 
-    // eslint-disable-next-line @typescript-eslint/naming-convention
+    // eslint-disable-next-line @kbn/compat/typescript-naming-convention
     const breakdown_by =
       visualization.splitAccessors && visualization.splitAccessors.length > 0
         ? operationFromColumn(visualization.splitAccessors[0], layer) // TODO temp fix for this PR until XY API will be upgraded to support multiple splits
@@ -135,7 +135,7 @@ function convertDataLayerToAPI(
           };
         })
         .filter(nonNullable) ?? [];
-    // eslint-disable-next-line @typescript-eslint/naming-convention
+    // eslint-disable-next-line @kbn/compat/typescript-naming-convention
     const aggregate_first =
       visualization.splitAccessors &&
       visualization.splitAccessors.length > 0 &&
@@ -163,7 +163,7 @@ function convertDataLayerToAPI(
   }
 
   const x = visualization.xAccessor ? getValueApiColumn(visualization.xAccessor, layer) : undefined;
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+  // eslint-disable-next-line @kbn/compat/typescript-naming-convention
   const breakdown_by =
     visualization.splitAccessors && visualization.splitAccessors.length > 0
       ? getValueApiColumn(visualization.splitAccessors[0], layer) // TODO temp fix for this PR until XY API will be upgraded to support multiple splits

@@ -213,6 +213,20 @@ export const EpisodeSuppressedCell = ({ row }: CellRendererProps) => {
   );
 };
 
+/**
+ * Renders the source alert reason as inline text so the grid's line clamp truncates it; the
+ * full value is reachable through the cell popover, the row height setting and the flyout.
+ */
+export const EpisodeReasonCell = ({ row }: CellRendererProps) => {
+  const reason = row.flattened.reason;
+
+  if (typeof reason !== 'string' || reason.length === 0) {
+    return <>{EMPTY_VALUE}</>;
+  }
+
+  return <span data-test-subj="episodeReasonCell">{reason}</span>;
+};
+
 export const EpisodeSeverityCell = ({ row }: CellRendererProps) => {
   const severity = row.flattened.severity as EpisodeSeverity | undefined | null;
 

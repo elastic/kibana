@@ -1100,4 +1100,85 @@ describe('AiIndexDetailPage', () => {
     ).not.toBeInTheDocument();
     expect(screen.getByTestId('contextSelectedSource-esql-0')).toBeInTheDocument();
   });
+
+  describe('onboarding panel', () => {
+    const withEmptyKi = () =>
+      mockUseListKi.mockImplementation(() => ({
+        ...defaultListKiMock,
+        total: 0,
+        summary: { total: 0, countsByType: [] },
+      }));
+
+    beforeAll(() => {
+      document.execCommand = jest.fn(() => true);
+    });
+
+    it('shows the onboarding panel when there are no sources, automations, or KIs', async () => {
+      withEmptyKi();
+      const services = createServices();
+      services.http.get.mockResolvedValue({ ...aiIndex, sources: [], automations: [] });
+
+      renderWithProviders(services);
+
+      await waitForAiIndexDetailLoaded();
+
+      expect(screen.getByTestId('contextOnboardingConnectAgentPanel')).toBeInTheDocument();
+    });
+
+    it('keeps the onboarding panel visible when sources exist but no knowledge indicators', async () => {
+      withEmptyKi();
+      const services = createServices();
+      services.http.get.mockResolvedValue(aiIndex);
+
+      renderWithProviders(services);
+
+      await waitForAiIndexDetailLoaded();
+
+      expect(screen.getByTestId('contextOnboardingConnectAgentPanel')).toBeInTheDocument();
+    });
+
+    it('hides the onboarding panel once a knowledge indicator exists', async () => {
+      const services = createServices();
+      services.http.get.mockResolvedValue({ ...aiIndex, sources: [], automations: [] });
+
+      renderWithProviders(services);
+
+      await waitForAiIndexDetailLoaded();
+
+      expect(screen.queryByTestId('contextOnboardingConnectAgentPanel')).not.toBeInTheDocument();
+    });
+
+    it('templates the onboarding prompt with the AI index id and dest', async () => {
+      withEmptyKi();
+      const services = createServices();
+      services.http.get.mockResolvedValue({ ...aiIndex, sources: [], automations: [] });
+
+      renderWithProviders(services);
+
+      await waitForAiIndexDetailLoaded();
+
+      const codeBlock = screen.getByTestId('contextOnboardingPromptCodeBlock');
+      expect(codeBlock).toHaveTextContent(`"${aiIndex.id}" AI index`);
+      expect(codeBlock).toHaveTextContent(aiIndex.dest.value);
+      expect(codeBlock).toHaveTextContent(
+        `GET /api/context_engine/ai_index/${aiIndex.id}/_describe`
+      );
+    });
+
+    it('copies the prompt and shows EuiCopy feedback when the copy button is clicked', async () => {
+      withEmptyKi();
+      const services = createServices();
+      services.http.get.mockResolvedValue({ ...aiIndex, sources: [], automations: [] });
+
+      renderWithProviders(services);
+
+      await waitForAiIndexDetailLoaded();
+      fireEvent.click(screen.getByTestId('contextOnboardingCopyPromptButton'));
+
+      expect(document.querySelector('[aria-live="assertive"]')).toHaveTextContent(
+        'Prompt copied to clipboard'
+      );
+      expect(services.notifications.toasts.addSuccess).not.toHaveBeenCalled();
+    });
+  });
 });

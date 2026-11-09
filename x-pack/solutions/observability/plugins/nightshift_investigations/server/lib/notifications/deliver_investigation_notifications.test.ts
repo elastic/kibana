@@ -57,8 +57,63 @@ const setup = (spaceId = 'default') => {
 };
 
 describe('investigation notification lifecycle', () => {
-  it.each(['completed', 'failed'] as const)(
-    'posts a started root and a %s reply',
+  it.each(['started', 'failed'] as const)(
+    'does not deliver %s over a terminal phase written by a newer version',
+    async (phase) => {
+      const { client, storage, send, execute, getExecute } = setup();
+      const routing = await client.initialize('exec-1', 'system-nightshift-investigation', [
+        destination,
+      ]);
+      storage.put(client.id, {
+        ...routing,
+        executions: routing.executions.map((entry) => ({
+          ...entry,
+          terminal_phase: 'cancelled',
+          lifecycle_claim_id: 'newer-claim',
+        })),
+      });
+
+      expect(await send(phase)).toEqual({ sent: 0, failed: 0, unconfirmed: 0 });
+      expect(execute).not.toHaveBeenCalled();
+      expect(getExecute).not.toHaveBeenCalled();
+      expect((await client.get())?.executions[0]).toMatchObject({
+        terminal_phase: 'cancelled',
+        lifecycle_claim_id: 'newer-claim',
+      });
+    }
+  );
+
+  it.each(['started', 'paused'])(
+    'preserves unfamiliar root outcomes for %s and blocks duplicate roots',
+    async (phase) => {
+      const { client, storage, send, execute } = setup();
+      const routing = await client.initialize('exec-1', 'system-nightshift-investigation', [
+        destination,
+      ]);
+      const attempt = {
+        execution_id: 'exec-1',
+        destination_id: routing.destinations[0].id,
+        phase,
+        attempt_id: 'newer-attempt',
+        status: 'pending_confirmation',
+        attempted_at: '2026-11-04T10:00:00.000Z',
+        creates_root: true,
+      };
+      storage.put(client.id, { ...routing, attempts: [attempt] });
+
+      expect(await send('started')).toEqual({
+        sent: 0,
+        failed: phase === 'started' ? 0 : 1,
+        unconfirmed: phase === 'started' ? 1 : 0,
+      });
+      expect(await send('started', 'exec-2')).toEqual({ sent: 0, failed: 1, unconfirmed: 0 });
+      expect(execute).not.toHaveBeenCalled();
+      expect((await client.get())?.attempts).toContainEqual(attempt);
+    }
+  );
+
+  it.each(['completed', 'failed', 'timed_out'] as const)(
+    'posts a started root and edits it for %s',
     async (terminalPhase) => {
       const { send, execute, client } = setup();
       expect(await send('started')).toEqual({ sent: 1, failed: 0, unconfirmed: 0 });
@@ -69,7 +124,10 @@ describe('investigation notification lifecycle', () => {
       expect(execute.mock.calls[0][0].params.subActionParams).not.toHaveProperty('threadTs');
       expect(await send(terminalPhase)).toEqual({ sent: 1, failed: 0, unconfirmed: 0 });
       expect(execute.mock.calls[1][0]).toMatchObject({
-        params: { subActionParams: { channel: 'C123', threadTs: '1.000001' } },
+        params: {
+          subAction: 'updateMessage',
+          subActionParams: { channel: 'C123', messageTs: '1.000001' },
+        },
       });
       const routing = await client.get();
       expect(routing?.destinations[0].params).toEqual({ channel: '#alerts' });
@@ -79,6 +137,29 @@ describe('investigation notification lifecycle', () => {
     }
   );
 
+  it('creates one early timeout root and suppresses replay', async () => {
+    const { send, execute, client } = setup();
+    await send('timed_out');
+    await send('timed_out');
+    expect(execute).toHaveBeenCalledTimes(1);
+    expect(execute.mock.calls[0][0].params).toMatchObject({
+      subAction: 'sendMessage',
+      subActionParams: { text: expect.stringContaining('Investigation timed out') },
+    });
+    expect((await client.get())?.executions[0].terminal_phase).toBe('timed_out');
+  });
+
+  it('claims lifecycle emission once under concurrent reconciliation', async () => {
+    const { client } = setup();
+    await client.initialize('exec-1', 'system-nightshift-investigation', []);
+    await client.selectTerminalPhase('exec-1', 'timed_out');
+    const claims = await Promise.all([
+      client.claimTerminalLifecycle('exec-1', 'timed_out', 'claim-a'),
+      client.claimTerminalLifecycle('exec-1', 'timed_out', 'claim-b'),
+    ]);
+    expect(claims.filter(Boolean)).toHaveLength(1);
+  });
+
   it('later executions reuse the retained thread even without new destination inputs', async () => {
     const { send, execute } = setup();
     await send('started');
@@ -86,11 +167,16 @@ describe('investigation notification lifecycle', () => {
     await send('started', 'exec-2', []);
     await send('completed', 'exec-2', []);
     expect(execute).toHaveBeenCalledTimes(4);
-    for (const [call] of execute.mock.calls.slice(1)) {
-      expect(call.params).toMatchObject({
-        subActionParams: { channel: 'C123', threadTs: '1.000001' },
+    // The later execution's started message replies in the thread, and its terminal phase edits it.
+    expect(execute.mock.calls[2][0].params).toMatchObject({
+      subAction: 'sendMessage',
+      subActionParams: { channel: 'C123', threadTs: '1.000001' },
+    });
+    for (const index of [1, 3])
+      expect(execute.mock.calls[index][0].params).toMatchObject({
+        subAction: 'updateMessage',
+        subActionParams: { channel: 'C123', messageTs: '1.000001' },
       });
-    }
   });
 
   describe('under a caller-named parent message', () => {
@@ -376,14 +462,17 @@ describe('investigation notification lifecycle', () => {
     expect((await client.get())?.attempts).toHaveLength(2);
   });
 
-  it('does not recreate an uncertain early failure root', async () => {
-    const { send, execute, client } = setup();
-    execute.mockRejectedValueOnce(new Error('Connection lost'));
-    expect(await send('failed')).toEqual({ sent: 0, failed: 0, unconfirmed: 1 });
-    expect(await send('failed', 'exec-2', [])).toEqual({ sent: 0, failed: 1, unconfirmed: 0 });
-    expect(execute).toHaveBeenCalledTimes(1);
-    expect((await client.get())?.attempts[1].error).toContain('unconfirmed');
-  });
+  it.each(['failed', 'timed_out'] as const)(
+    'does not recreate an uncertain early %s root',
+    async (phase) => {
+      const { send, execute, client } = setup();
+      execute.mockRejectedValueOnce(new Error('Connection lost'));
+      expect(await send(phase)).toEqual({ sent: 0, failed: 0, unconfirmed: 1 });
+      expect(await send(phase, 'exec-2', [])).toEqual({ sent: 0, failed: 1, unconfirmed: 0 });
+      expect(execute).toHaveBeenCalledTimes(1);
+      expect((await client.get())?.attempts[1].error).toContain('unconfirmed');
+    }
+  );
 
   it('can report a failure after a definitely rejected started root', async () => {
     const { send, execute } = setup();
