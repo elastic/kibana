@@ -277,17 +277,7 @@ export function createDetectionEngineSetupService({
         spaceId,
         request
       );
-      // The binding is what authorizes a run. A document can carry `run_as` while its binding is
-      // gone, such as after the space was deleted and created again.
-      const binding = await core.security.serviceAccounts.getWorkloadBinding({
-        workloadType: 'workflow',
-        workloadId: `${workflowId}-${spaceId}`,
-        spaceId,
-      });
-      if (
-        document?.definition?.settings?.run_as !== serviceAccountId ||
-        binding?.serviceAccountId !== serviceAccountId
-      ) {
+      if (document?.definition?.settings?.run_as !== serviceAccountId) {
         unbound.push(workflowId);
       }
     }

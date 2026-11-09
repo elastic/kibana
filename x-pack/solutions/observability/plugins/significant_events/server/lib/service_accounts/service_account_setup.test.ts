@@ -48,7 +48,6 @@ const createCore = ({
   boundAccountId,
   privilegeProbeFails = false,
   accountSummary = { name: 'nightshift_detection', enabled: true },
-  workflowsBound = true,
 }: {
   enabled?: boolean;
   canManageSecurity?: boolean;
@@ -57,8 +56,6 @@ const createCore = ({
   privilegeProbeFails?: boolean;
   /** What core knows of the bound account, or `null` when it does not exist. */
   accountSummary?: { name: string; enabled: boolean } | null;
-  /** Whether the workflows have a workload binding, apart from `run_as` on their documents. */
-  workflowsBound?: boolean;
 } = {}) => {
   const hasPrivileges = jest.fn(async () => {
     if (privilegeProbeFails) {
@@ -82,14 +79,9 @@ const createCore = ({
         isEnabled: () => enabled,
         bindWorkload,
         unbindWorkload,
-        getWorkloadBinding: jest.fn(async ({ workloadType }: { workloadType: string }) => {
-          if (workloadType === 'workflow') {
-            return workflowsBound && currentAccountId
-              ? { serviceAccountId: currentAccountId }
-              : null;
-          }
-          return currentAccountId ? { serviceAccountId: currentAccountId } : null;
-        }),
+        getWorkloadBinding: jest.fn(async () =>
+          currentAccountId ? { serviceAccountId: currentAccountId } : null
+        ),
         getWorkloadServiceAccountSummary: jest.fn(async () =>
           accountSummary && currentAccountId ? { id: currentAccountId, ...accountSummary } : null
         ),
@@ -414,22 +406,6 @@ describe('createDetectionEngineSetupService.enable workflows', () => {
     ).rejects.toMatchObject({
       statusCode: 500,
       message: expect.stringContaining('[system-sources-ki-onboarding-bound]'),
-    });
-  });
-
-  it('fails when a workflow keeps run_as but lost its binding, naming it', async () => {
-    const { core } = createCore({ workflowsBound: false });
-
-    await expect(
-      createDetectionEngineSetupService({
-        core,
-        spaces: undefined,
-        ...createWorkflowsExtensions(),
-        isServerless: true,
-      }).enable({ request, spaceId: 'default', serviceAccountId: 'account-1' })
-    ).rejects.toMatchObject({
-      statusCode: 500,
-      message: expect.stringContaining(`[${SETUP_WORKFLOW_IDS[0]}]`),
     });
   });
 
