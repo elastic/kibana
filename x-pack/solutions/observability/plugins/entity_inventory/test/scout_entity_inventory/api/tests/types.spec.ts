@@ -14,14 +14,7 @@ import { apiTest, INTERNAL_HEADERS, TYPES_PATH } from '../fixtures';
 const SPACE_ID = `entity-inventory-types-${randomUUID()}`;
 // Every registered type with a `dynamic` block: the entity store's built-in `host` and this plugin's own.
 const INVENTORY_TYPES = ['host', 'k8s.deployment'];
-const K8S_DEPLOYMENT_IDENTITY_FIELDS = [
-  'k8s.cluster.name',
-  'k8s.namespace.name',
-  'k8s.deployment.name',
-  'orchestrator.cluster.name',
-  'kubernetes.namespace',
-  'kubernetes.deployment.name',
-];
+const K8S_DEPLOYMENT_IDENTITY_FIELDS = ['kubernetes.namespace', 'kubernetes.deployment.name'];
 
 interface InventoryTypeResponse {
   type: string;
