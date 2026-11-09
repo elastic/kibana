@@ -44,7 +44,7 @@ const setup = ({
     upsert: jest.fn().mockResolvedValue(page),
   };
   const context = {
-    request: {},
+    request: { spaceId: 'default' },
     params: { body: { ...body, ...overrides } },
     isWikiEnabled: () => enabled,
     getWikiPageStore: () => store,

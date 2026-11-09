@@ -18,7 +18,8 @@ import { BOUND_WORKFLOW_IDS } from './bound_workflows';
 import { createInvestigatorServiceAccountService } from './investigator_service_account';
 
 const request = {} as KibanaRequest;
-const SPACE_ID = 'obs';
+// Nightshift only sets up the default space; every other space is refused.
+const SPACE_ID = 'default';
 // Serverless (UIAM) assigns opaque ids; nothing may derive them from the account names.
 const AGENT_ACCOUNT = 'uiam-sa-7f3c2a';
 const AUTOMATIONS_ACCOUNT = 'uiam-sa-91be04';
@@ -205,6 +206,16 @@ describe('createInvestigatorServiceAccountService', () => {
     ]);
     expect(status.boundWorkflows).toHaveLength(BOUND_WORKFLOW_IDS.length);
     expect(status.boundWorkflows.every(({ bound }) => bound)).toBe(true);
+  });
+
+  it('refuses to set up a space other than the default one', async () => {
+    const { service, managedWorkflows, setServiceAccount } = setup();
+
+    await expect(service.enable(request, 'marketing', IDS)).rejects.toThrow(
+      /only available in the "default" space/
+    );
+    expect(setServiceAccount).not.toHaveBeenCalled();
+    expect(managedWorkflows.install).not.toHaveBeenCalled();
   });
 
   it('installs the entry point last, so a failed setup leaves the space reading as not set up', () => {

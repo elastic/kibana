@@ -131,6 +131,11 @@ export interface AwsServiceMatrixEntry {
   showInUI: boolean;
   /** True when the package manifest for this entry was fetched successfully. */
   isManifestLoaded: boolean;
+  /**
+   * True when the package declares a `proxy_url` var, at package level or on one of the service's
+   * streams. Decides whether the shared Proxy URL setting reaches this service.
+   */
+  declaresProxyUrl?: boolean;
   /** True when the package manifest query has failed. The entry will have static/fallback metadata only. */
   isManifestError: boolean;
   /** True when the static routing table explicitly declares only agent_based deployment methods.
@@ -1107,6 +1112,9 @@ export function buildAwsServiceMatrix(
       inputTitles: Object.keys(inputTitles).length > 0 ? inputTitles : undefined,
       showInUI,
       isManifestLoaded: packageInfo !== undefined,
+      declaresProxyUrl:
+        !!packageInfo?.vars?.some((v) => v.name === 'proxy_url') ||
+        Object.values(varDefsByInput).some((byName) => 'proxy_url' in byName),
       isManifestError: packageInfo === undefined && erroredPackageNames.has(entry.packageName),
       isStaticAgentBasedOnly:
         (staticMethods ?? []).length > 0 &&
