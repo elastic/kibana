@@ -8,7 +8,6 @@
 import { act, render } from '@testing-library/react';
 import React from 'react';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { ServiceDashboards } from '.';
 
 let capturedOnApiAvailable: ((api: unknown) => void) | undefined;
