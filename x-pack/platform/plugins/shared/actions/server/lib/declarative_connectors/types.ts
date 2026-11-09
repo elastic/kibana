@@ -16,6 +16,14 @@ export type DeclarativeConnectorMetadata = Omit<ConnectorMetadata, 'id' | 'icon'
   icon?: DeclarativeConnectorIcon;
 };
 
+export interface DeclarativeFieldUi {
+  label?: string;
+  placeholder?: string;
+  helpText?: string;
+  hidden?: boolean;
+  validate?: { allowedHosts?: boolean };
+}
+
 export interface DeclarativeJsonSchema {
   type: 'object' | 'string' | 'number' | 'integer' | 'boolean' | 'array';
   properties?: Record<string, DeclarativeJsonSchema>;
@@ -30,7 +38,10 @@ export interface DeclarativeJsonSchema {
   maxLength?: number;
   enum?: Array<string | number | boolean>;
   additionalProperties?: boolean;
+  xUi?: DeclarativeFieldUi;
 }
+
+export type DeclarativeTemplateRoot = 'input' | 'config';
 
 export type DeclarativeHttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 

@@ -7,9 +7,20 @@
 
 import { parse as parseYaml } from 'yaml';
 import type { AuthTypeDef } from '@kbn/connector-specs';
+import { getAuthModeForAuthTypeId } from '@kbn/connector-specs';
+import { authTypeSpecs } from '@kbn/connector-specs/server';
 import { z, ZodError, lazySchema } from '@kbn/zod/v4';
-import type { DeclarativeConnectorSpec, DeclarativeJsonSchema } from './types';
+import type {
+  DeclarativeConnectorSpec,
+  DeclarativeJsonSchema,
+  DeclarativeRequest,
+  DeclarativeTemplateRoot,
+} from './types';
 import { DeclarativeConnectorSpecError } from './types';
+
+const TEMPLATE_PATTERN = /\{\{\s*([a-zA-Z0-9_.]+)\s*\}\}/g;
+const UNSAFE_PATH_SEGMENTS = new Set(['__proto__', 'prototype', 'constructor']);
+const TEMPLATE_ROOTS = new Set<DeclarativeTemplateRoot>(['input', 'config']);
 
 const featureIdSchema = lazySchema(() => z.enum(['workflows', 'agentBuilder']));
 
@@ -55,6 +66,21 @@ const jsonSchema: z.ZodType<DeclarativeJsonSchema> = z.lazy(() =>
         .min(1)
         .optional(),
       additionalProperties: z.boolean().optional(),
+      xUi: z
+        .object({
+          label: z.string().optional(),
+          placeholder: z.string().optional(),
+          helpText: z.string().optional(),
+          hidden: z.boolean().optional(),
+          validate: z
+            .object({
+              allowedHosts: z.boolean().optional(),
+            })
+            .strict()
+            .optional(),
+        })
+        .strict()
+        .optional(),
     })
     .strict()
     .superRefine((definition, context) => {
@@ -172,8 +198,47 @@ const authTypeDefinitionSchema = lazySchema(() =>
         })
         .strict()
         .optional(),
+      prefix: z.string().max(128).optional(),
     })
     .strict()
+    .superRefine((authType, context) => {
+      if (authType.prefix !== undefined) {
+        context.addIssue({
+          code: 'custom',
+          path: ['prefix'],
+          message:
+            'auth.prefix is not supported. Auth values are applied by the auth type, not a prefix.',
+        });
+      }
+    })
+);
+
+const legacyAuthSchema = lazySchema(() =>
+  z
+    .object({
+      type: authTypeIdSchema,
+      header: z.string().min(1).max(256).optional(),
+      prefix: z.string().max(128).optional(),
+      label: z.string().max(256).optional(),
+      placeholder: z.string().max(256).optional(),
+    })
+    .strict()
+    .superRefine((auth, context) => {
+      if (auth.prefix !== undefined) {
+        context.addIssue({
+          code: 'custom',
+          path: ['prefix'],
+          message:
+            'auth.prefix is not supported. Auth values are applied by the auth type, not a prefix.',
+        });
+      }
+      if (auth.type === 'api_key_header' && !auth.header) {
+        context.addIssue({
+          code: 'custom',
+          message: 'api_key_header requires a header.',
+        });
+      }
+    })
 );
 
 const connectorSpecAuthSchema = lazySchema(() =>
@@ -187,8 +252,161 @@ const connectorSpecAuthSchema = lazySchema(() =>
     .strict()
 );
 
-const normalizeAuthType = (authType: string | AuthTypeDef): AuthTypeDef =>
-  typeof authType === 'string' ? { type: authType, defaults: {} } : authType;
+interface ParsedAuthTypeDef {
+  type: string;
+  isRecommended?: boolean;
+  isLegacy?: boolean;
+  isExperimental?: boolean;
+  supportsSandbox?: boolean;
+  defaults: Record<string, unknown>;
+  overrides?: AuthTypeDef['overrides'];
+  prefix?: string;
+}
+
+interface ParsedLegacyAuth {
+  type: string;
+  header?: string;
+  prefix?: string;
+  label?: string;
+  placeholder?: string;
+}
+
+const assertSupportedAuthType = (typeId: string): void => {
+  const spec = Object.values(authTypeSpecs).find((candidate) => candidate.id === typeId);
+  if (!spec) {
+    throw new DeclarativeConnectorSpecError(
+      `Auth type "${typeId}" is not registered in this Kibana version.`
+    );
+  }
+  if (getAuthModeForAuthTypeId(typeId) !== 'shared') {
+    throw new DeclarativeConnectorSpecError(
+      `Auth type "${typeId}" is not supported. Declarative connectors only accept shared auth types.`
+    );
+  }
+  if (spec.usesRelayTransport) {
+    throw new DeclarativeConnectorSpecError(
+      `Auth type "${typeId}" is not supported. Declarative connectors cannot use relay transport.`
+    );
+  }
+};
+
+const toAuthTypeDef = (authType: string | ParsedAuthTypeDef): AuthTypeDef => {
+  if (typeof authType === 'string') {
+    return { type: authType, defaults: {} };
+  }
+  return {
+    type: authType.type,
+    defaults: authType.defaults,
+    ...(authType.isRecommended !== undefined ? { isRecommended: authType.isRecommended } : {}),
+    ...(authType.isLegacy !== undefined ? { isLegacy: authType.isLegacy } : {}),
+    ...(authType.isExperimental !== undefined ? { isExperimental: authType.isExperimental } : {}),
+    ...(authType.supportsSandbox !== undefined
+      ? { supportsSandbox: authType.supportsSandbox }
+      : {}),
+    ...(authType.overrides !== undefined ? { overrides: authType.overrides } : {}),
+  };
+};
+
+const normalizeLegacyAuth = (auth: ParsedLegacyAuth): AuthTypeDef[] => {
+  if (auth.prefix !== undefined) {
+    throw new DeclarativeConnectorSpecError(
+      'auth.prefix is not supported. Auth values are applied by the auth type, not a prefix.'
+    );
+  }
+  if (auth.type === 'api_key_header') {
+    return [
+      {
+        type: 'api_key_header',
+        defaults: { headerField: auth.header },
+        ...(auth.label || auth.placeholder
+          ? {
+              overrides: {
+                meta: {
+                  [auth.header ?? '']: {
+                    ...(auth.label ? { label: auth.label } : {}),
+                    ...(auth.placeholder ? { placeholder: auth.placeholder } : {}),
+                  },
+                },
+              },
+            }
+          : {}),
+      },
+    ];
+  }
+  return [{ type: auth.type, defaults: {} }];
+};
+
+const normalizeAuth = (
+  auth: { types: Array<string | ParsedAuthTypeDef> } | ParsedLegacyAuth
+): AuthTypeDef[] => {
+  if ('types' in auth) {
+    return auth.types.map((authType) => {
+      if (typeof authType !== 'string' && authType.prefix !== undefined) {
+        throw new DeclarativeConnectorSpecError(
+          'auth.prefix is not supported. Auth values are applied by the auth type, not a prefix.'
+        );
+      }
+      return toAuthTypeDef(authType);
+    });
+  }
+  return normalizeLegacyAuth(auth);
+};
+
+const collectTemplatePaths = (value: unknown, found: string[] = []): string[] => {
+  if (typeof value === 'string') {
+    for (const match of value.matchAll(TEMPLATE_PATTERN)) {
+      found.push(match[1]);
+    }
+    return found;
+  }
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      collectTemplatePaths(item, found);
+    }
+    return found;
+  }
+  if (value !== null && typeof value === 'object') {
+    for (const nested of Object.values(value)) {
+      collectTemplatePaths(nested, found);
+    }
+  }
+  return found;
+};
+
+const requestTemplateValue = (request: DeclarativeRequest): unknown => ({
+  url: request.url,
+  baseUrl: request.baseUrl,
+  path: request.path,
+  query: request.query,
+  headers: request.headers,
+  body: request.body,
+});
+
+const collectTemplateRoots = (request: DeclarativeRequest): string[] =>
+  collectTemplatePaths(requestTemplateValue(request)).map(
+    (templatePath) => templatePath.split('.')[0]
+  );
+
+const assertTemplateRoots = (actionName: string, request: DeclarativeRequest): void => {
+  const templatePaths = collectTemplatePaths(requestTemplateValue(request));
+  const roots = collectTemplateRoots(request);
+  for (const [index, templatePath] of templatePaths.entries()) {
+    const root = roots[index];
+    const segments = templatePath.split('.').slice(1);
+    if (!TEMPLATE_ROOTS.has(root as DeclarativeTemplateRoot)) {
+      throw new DeclarativeConnectorSpecError(
+        `Action "${actionName}" template "{{ ${templatePath} }}" may only read from input or config.`
+      );
+    }
+    for (const segment of segments) {
+      if (UNSAFE_PATH_SEGMENTS.has(segment)) {
+        throw new DeclarativeConnectorSpecError(
+          `Action "${actionName}" template "{{ ${templatePath} }}" contains unsafe path segment "${segment}".`
+        );
+      }
+    }
+  }
+};
 
 const connectorSpecSchema = lazySchema(() =>
   z
@@ -214,7 +432,7 @@ const connectorSpecSchema = lazySchema(() =>
         })
         .strict(),
       config: jsonSchema,
-      auth: connectorSpecAuthSchema,
+      auth: z.union([connectorSpecAuthSchema, legacyAuthSchema]),
       actions: z
         .record(
           z.string(),
@@ -258,10 +476,18 @@ export const parseDeclarativeConnectorSpec = (raw: string): DeclarativeConnector
 
   try {
     const connector = connectorSpecSchema.parse(parsed);
+    const authTypes = normalizeAuth(connector.auth);
+    for (const authType of authTypes) {
+      assertSupportedAuthType(authType.type);
+    }
+    for (const [actionName, action] of Object.entries(connector.actions)) {
+      assertTemplateRoots(actionName, action.request);
+    }
+    assertTemplateRoots('test', connector.test.request);
     return {
       ...connector,
       auth: {
-        types: connector.auth.types.map(normalizeAuthType),
+        types: authTypes,
       },
     };
   } catch (error) {
