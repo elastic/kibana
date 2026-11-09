@@ -6,6 +6,7 @@
  */
 
 import queryString from 'query-string';
+import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { APP_UI_ID } from '../../../../common';
 
 export const RETURN_APP_ID = 'returnAppId';
@@ -31,3 +32,11 @@ export const addPathParamToUrl = (
     }
   );
 };
+
+/**
+ * Drops content-only packages (dashboards and assets without a data collection input), like the
+ * Fleet Integrations page does by default. Collection cards have no `type` and are kept; their
+ * members stay available in the chooser.
+ */
+export const excludeContentCards = (cards: IntegrationCardItem[]): IntegrationCardItem[] =>
+  cards.filter((card) => card.type !== 'content');

@@ -128,4 +128,39 @@ describe('useIntegrationCardList', () => {
 
     expect(mockReportLinkClick).toHaveBeenCalledWith('card_epr:endpoint');
   });
+
+  it('marks a collection card as active when one of its members is active', () => {
+    const [endpoint, auditbeat] = mockIntegrationsList;
+    const collection = {
+      ...endpoint,
+      id: 'collection:security',
+      name: 'security',
+      isCollectionCard: true,
+      groupMembers: [endpoint, auditbeat],
+    };
+    const inactiveCollection = {
+      ...collection,
+      id: 'collection:other',
+      name: 'other',
+      groupMembers: [auditbeat],
+    };
+
+    const { result } = renderHook(() =>
+      useIntegrationCardList({
+        integrationsList: [collection, inactiveCollection],
+        activeIntegrations: mockActiveIntegrations,
+        selectedTab,
+      })
+    );
+
+    expect(result.current).toEqual([
+      // 2 lines, so the variant-count badge stays inside the max card height
+      expect.objectContaining({
+        id: 'collection:security',
+        hasDataStreams: true,
+        descriptionLineClamp: 2,
+      }),
+      expect.objectContaining({ id: 'collection:other', hasDataStreams: false }),
+    ]);
+  });
 });

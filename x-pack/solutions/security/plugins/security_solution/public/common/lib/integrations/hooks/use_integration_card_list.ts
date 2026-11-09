@@ -13,6 +13,7 @@ import { APP_INTEGRATIONS_PATH, ONBOARDING_PATH } from '../../../../../common/co
 import {
   CARD_DESCRIPTION_LINE_CLAMP,
   CARD_TITLE_LINE_CLAMP,
+  COLLECTION_CARD_DESCRIPTION_LINE_CLAMP,
   INTEGRATION_APP_ID,
   MAX_CARD_HEIGHT_IN_PX,
   TELEMETRY_INTEGRATION_CARD,
@@ -35,12 +36,19 @@ const useAddSecurityProps = (activeIntegrations: GetInstalledPackagesResponse['i
       const url = card.url.includes(APP_INTEGRATIONS_PATH)
         ? addPathParamToUrl(card.url, ONBOARDING_PATH)
         : card.url;
-      const isActive = activeIntegrations.some((integration) => integration.name === card.name);
+      // A collection card's `name` is its group id, so it is active when any of its members is.
+      const isActive = activeIntegrations.some(
+        (integration) =>
+          integration.name === card.name ||
+          card.groupMembers?.some((member) => member.name === integration.name)
+      );
 
       return {
         ...card,
         titleLineClamp: CARD_TITLE_LINE_CLAMP,
-        descriptionLineClamp: CARD_DESCRIPTION_LINE_CLAMP,
+        descriptionLineClamp: card.isCollectionCard
+          ? COLLECTION_CARD_DESCRIPTION_LINE_CLAMP
+          : CARD_DESCRIPTION_LINE_CLAMP,
         maxCardHeight: MAX_CARD_HEIGHT_IN_PX,
         showInstallationStatus: true,
         url,

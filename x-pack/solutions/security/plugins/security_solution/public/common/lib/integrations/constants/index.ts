@@ -12,6 +12,9 @@ export const MAX_CARD_HEIGHT_IN_PX = 127; // px
 export const INTEGRATION_APP_ID = `integrations`;
 export const CARD_TITLE_LINE_CLAMP = 1; // 1 line of text
 export const CARD_DESCRIPTION_LINE_CLAMP = 3; // 3 lines of text
+// Collection cards show a variant-count badge under the description. With 3 description lines the
+// badge falls outside MAX_CARD_HEIGHT_IN_PX and is clipped.
+export const COLLECTION_CARD_DESCRIPTION_LINE_CLAMP = 2; // 2 lines of text
 export const LOADING_SKELETON_TEXT_LINES = 10; // 10 lines of text
 export const SCROLL_ELEMENT_ID = 'integrations-scroll-container';
 export const SEARCH_FILTER_CATEGORIES: CategoryFacet[] = [];

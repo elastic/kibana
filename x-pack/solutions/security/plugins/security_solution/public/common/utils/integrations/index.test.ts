@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { addPathParamToUrl, RETURN_APP_ID, RETURN_PATH } from '.';
+import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
+import { addPathParamToUrl, excludeContentCards, RETURN_APP_ID, RETURN_PATH } from '.';
 import { APP_UI_ID } from '../../../../common';
 
 describe('addPathParamToUrl', () => {
@@ -39,5 +40,24 @@ describe('addPathParamToUrl', () => {
     expect(result).toBe(
       `https://example.com?${RETURN_APP_ID}=${APP_UI_ID}&${RETURN_PATH}=${customEncodedOnboardingLink}`
     );
+  });
+});
+
+describe('excludeContentCards', () => {
+  const card = (id: string, type?: string) => ({ id, type } as IntegrationCardItem);
+
+  it('removes content-only packages and keeps everything else', () => {
+    const cards = [
+      card('integration', 'integration'),
+      card('input', 'input'),
+      card('content', 'content'),
+      card('collection'), // collection cards have no type
+    ];
+
+    expect(excludeContentCards(cards).map(({ id }) => id)).toEqual([
+      'integration',
+      'input',
+      'collection',
+    ]);
   });
 });

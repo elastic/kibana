@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiSkeletonText } from '@elastic/eui';
 import type { AvailablePackagesHookType } from '@kbn/fleet-plugin/public';
 import { withLazyHook } from '../../../components/with_lazy_hook';
+import { excludeContentCards } from '../../../utils/integrations';
 import { LOADING_SKELETON_TEXT_LINES } from '../constants';
 
 export type AvailablePackages = ReturnType<AvailablePackagesHookType>;
@@ -31,8 +32,19 @@ export const withAvailablePackages = <T extends { availablePackages: AvailablePa
       }) {
         const availablePackages = useAvailablePackages({
           prereleaseIntegrationsEnabled,
+          // Collection tiles are chosen via the chooser flyout of `PackageListGrid`
+          // (see `collectionReturnLocation` in `SecurityIntegrationsGridTabs`).
+          enableCollectionGrouping: true,
         });
-        return <Component {...({ ...props, availablePackages } as T)} />;
+        // Match the Fleet Integrations page, which hides content-only packages by default.
+        const visiblePackages = useMemo(
+          () => ({
+            ...availablePackages,
+            filteredCards: excludeContentCards(availablePackages.filteredCards),
+          }),
+          [availablePackages]
+        );
+        return <Component {...({ ...props, availablePackages: visiblePackages } as T)} />;
       }
     ),
     () => import('@kbn/fleet-plugin/public').then((module) => module.AvailablePackagesHook()),
