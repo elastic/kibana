@@ -74,6 +74,8 @@ interface ClientOptions {
   baseUrl?: string;
   /** What GET on the stub connector id returns after a 409. `'error'` makes the GET throw. */
   existingConnector?: { connector_type_id: string; config?: { url?: string } } | 'error';
+  /** Makes the stub connector POST fail with this status (not "already exists"). */
+  stubCreateStatus?: number;
 }
 
 const alreadyExists = (status: number) =>
@@ -88,6 +90,7 @@ const createClient = ({
   existingWorkflowYaml,
   baseUrl = 'http://elastic:changeme@localhost:5620',
   existingConnector = { connector_type_id: '.http', config: { url: 'http://127.0.0.1:38465' } },
+  stubCreateStatus,
 }: ClientOptions = {}): MockClient => ({
   // Real KbnClient keeps `user:pass@` in resolveUrl().
   resolveUrl: jest.fn((relative: string) => `${baseUrl}${relative}`),
@@ -128,6 +131,11 @@ const createClient = ({
       };
     }
     if (method === 'POST') {
+      if (path === STUB_PATH && stubCreateStatus !== undefined) {
+        throw Object.assign(new Error('Bad Request: url not in allowedHosts'), {
+          status: stubCreateStatus,
+        });
+      }
       if (postBehavior === 'conflict') {
         // Agent create answers a duplicate id with 400, tools/workflows with 409.
         throw alreadyExists(path === '/api/agent_builder/agents' ? 400 : 409);
@@ -317,6 +325,25 @@ describe('persona_matrix_tools_seed', () => {
       expect(mod.isStubConnectorVerified()).toBe(false);
       expect(log.warning).toHaveBeenCalledWith(expect.stringContaining('not trusting'));
     });
+
+    it.each([400, 403, 500])(
+      'keeps seeding when the stub connector create fails with %s, leaving it unverified',
+      async (status) => {
+        const mod = await load();
+        const client = createClient({ stubCreateStatus: status });
+
+        await expect(
+          mod.seedPersonaMatrixTools({ kbnClient: asKbn(client), log })
+        ).resolves.toBeUndefined();
+
+        expect(mod.isStubConnectorVerified()).toBe(false);
+        expect(log.warning).toHaveBeenCalledWith(
+          expect.stringContaining('could not create stub connector')
+        );
+        expect(posts(client, '/api/agent_builder/tools').length).toBeGreaterThan(0);
+        expect(agentPuts(client)).toHaveLength(1);
+      }
+    );
 
     it('never deletes the stub connector on cleanup, whether created or pre-existing', async () => {
       for (const postBehavior of ['ok', 'conflict'] as const) {

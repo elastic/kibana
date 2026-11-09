@@ -286,8 +286,13 @@ async function createStubConnectorIfMissing({ kbnClient, log }: SeedToolsOptions
     stubConnectorVerified = true;
     log.info(`[persona-matrix] created stub connector '${STUB_CONNECTOR_ID}'`);
   } catch (error) {
+    // Only WorkflowValidity needs the stub, so a stack that rejects it (allowedHosts,
+    // license, missing actions privileges) still runs every other evaluator.
     if (!isAlreadyExists(error)) {
-      throw error;
+      log.warning(
+        `[persona-matrix] could not create stub connector '${STUB_CONNECTOR_ID}', WorkflowValidity will skip runs: ${error}`
+      );
+      return;
     }
     stubConnectorVerified = await isExistingStubTrustworthy({ kbnClient, log });
     if (stubConnectorVerified) {
