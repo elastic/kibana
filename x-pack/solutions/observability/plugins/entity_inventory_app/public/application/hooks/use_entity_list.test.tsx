@@ -91,4 +91,45 @@ describe('useEntityList', () => {
 
     await waitFor(() => expect(inventoryApi.getEntities).toHaveBeenCalledTimes(2));
   });
+
+  it('sends no document filter when nothing narrows the list', async () => {
+    const inventoryApi = createClientMock();
+    const { result } = renderUseEntityList(inventoryApi);
+
+    await waitFor(() => expect(result.current.result.loading).toBe(false));
+
+    const [[, request]] = inventoryApi.getEntities.mock.calls;
+    expect(request).not.toHaveProperty('documentFilter');
+  });
+
+  it('lists again with the dropdown selections as a document filter', async () => {
+    const inventoryApi = createClientMock();
+    const { result } = renderUseEntityList(inventoryApi);
+    await waitFor(() => expect(result.current.result.loading).toBe(false));
+
+    act(() => {
+      result.current.search.setFilterControls({ attributes: { 'os.type': ['linux'] } });
+    });
+
+    await waitFor(() => expect(inventoryApi.getEntities).toHaveBeenCalledTimes(2));
+    const [, request] = inventoryApi.getEntities.mock.calls[1];
+    expect(request.documentFilter?.bool.filter).toEqual([{ terms: { 'os.type': ['linux'] } }]);
+  });
+
+  it('lists again with the submitted query in the document filter', async () => {
+    const inventoryApi = createClientMock();
+    const { result } = renderUseEntityList(inventoryApi);
+    await waitFor(() => expect(result.current.result.loading).toBe(false));
+
+    act(() => {
+      result.current.search.submit({
+        dateRange: { from: 'now-15m', to: 'now' },
+        query: { language: 'kuery', query: 'host.name: web-1' },
+      });
+    });
+
+    await waitFor(() => expect(inventoryApi.getEntities).toHaveBeenCalledTimes(2));
+    const [, request] = inventoryApi.getEntities.mock.calls[1];
+    expect(JSON.stringify(request.documentFilter)).toContain('web-1');
+  });
 });

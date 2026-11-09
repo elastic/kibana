@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
+import { getEsQueryConfig } from '@kbn/data-service';
 import { useAbortableAsync } from '@kbn/react-hooks';
 import { ENTITY_INVENTORY_LIST_LIMIT } from '../../inventory_api/client';
 import type { InventoryEntityType, InventoryListResponse } from '../../inventory_api/types';
 import { useKibana } from '../../hooks/use_kibana';
 import { useEntityInventorySearch } from '../context/search_context';
+import { buildDocumentFilter } from '../filters/build_document_filter';
 import { toAbsoluteTimeRange } from '../utils/to_absolute_time_range';
 
 /** Thrown when the requested entity type is not registered. */
@@ -31,10 +34,20 @@ export interface UseEntityListResult {
 /** Loads the type description and the entities of `entityType` for the committed time range. */
 export const useEntityList = (entityType: string): UseEntityListResult => {
   const {
-    services: { inventoryApi },
+    services: { inventoryApi, uiSettings },
   } = useKibana();
-  // The query and filters are not applied until search lands (#6327).
-  const { dateRange } = useEntityInventorySearch();
+  const { dateRange, query, filters, filterControls } = useEntityInventorySearch();
+
+  const documentFilter = useMemo(
+    () =>
+      buildDocumentFilter({
+        query,
+        filters,
+        attributes: filterControls.attributes,
+        esQueryConfig: getEsQueryConfig(uiSettings),
+      }),
+    [query, filters, filterControls.attributes, uiSettings]
+  );
 
   const { value, loading, error, refresh } = useAbortableAsync(
     async ({ signal }) => {
@@ -50,7 +63,11 @@ export const useEntityList = (entityType: string): UseEntityListResult => {
         inventoryApi.getTypes({ signal }),
         inventoryApi.getEntities(
           entityType,
-          { ...range, limit: ENTITY_INVENTORY_LIST_LIMIT },
+          {
+            ...range,
+            limit: ENTITY_INVENTORY_LIST_LIMIT,
+            ...(documentFilter && { documentFilter }),
+          },
           { signal }
         ),
       ]);
@@ -66,7 +83,7 @@ export const useEntityList = (entityType: string): UseEntityListResult => {
       }
       return { entityType: description, list: listResult.value };
     },
-    [inventoryApi, entityType, dateRange],
+    [inventoryApi, entityType, dateRange, documentFilter],
     { clearValueOnNext: false }
   );
 
