@@ -16,7 +16,7 @@ export const fleetCypressSteps = (): readonly Step[] => [
     command: '.buildkite/scripts/steps/functional/fleet_cypress.sh',
     label: 'Fleet Cypress Tests',
     key: 'fleet-cypress',
-    agents: { ...spotAgent('n2-standard-4', spotZones.centralFCA), ...pdBalanced },
+    agents: { ...spotAgent('n2-standard-4', spotZones.n2), ...pdBalanced },
     depends_on: ['build'],
     timeout_in_minutes: 50,
     parallelism: 6,

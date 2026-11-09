@@ -28,7 +28,10 @@ import type {
   OnboardingSuggestionsExecution,
 } from '@kbn/nightshift-investigations-plugin/common';
 import { useStartInvestigation } from '../../../data/investigations/use_start_investigation';
-import { ConnectSourcesGrid } from '../../../components/entities/sandbox_connector/connect_sources_grid';
+import {
+  ConnectSourcesGrid,
+  isAdditionalType,
+} from '../../../components/entities/sandbox_connector/connect_sources_grid';
 import { useStartOnboardingSuggestions } from './use_onboarding';
 
 /** Generic prompts offered when the suggestion run failed; they work on any cluster. */
@@ -150,7 +153,7 @@ export function OnboardingFirstInvestigationStep({
             </h4>
           </EuiTitle>
           <EuiSpacer size="m" />
-          <ConnectSourcesGrid group="additional" />
+          <ConnectSourcesGrid filter={isAdditionalType} />
         </section>
       </div>
     );
