@@ -23,6 +23,7 @@ import {
   APP_UI_ID,
   CASES_FEATURE_ID,
   CASES_PATH,
+  CONFIGURATIONS_PATH,
   COVERAGE_OVERVIEW_PATH,
   DASHBOARDS_PATH,
   EXCEPTIONS_PATH,
@@ -254,6 +255,15 @@ export const isCloudSecurityPosturePath = (pathname: string): boolean =>
   });
 
 /**
+ * Matches the Configurations page, whose app header owns the page actions.
+ */
+export const isConfigurationsPath = (pathname: string): boolean =>
+  !!matchPath(pathname, {
+    path: CONFIGURATIONS_PATH,
+    strict: false,
+  });
+
+/**
  * Matches the Shared Exception Lists and Exception list details pages, whose app headers own the page actions.
  */
 export const isExceptionsPath = (pathname: string): boolean =>
@@ -303,6 +313,7 @@ export const isPageWithAppHeaderPath = (pathname: string): boolean =>
     isCoverageOverviewPath,
     isExceptionsPath,
     isCloudSecurityPosturePath,
+    isConfigurationsPath,
     isEndpointManagementPath,
     isManageLandingPath,
   ].some((matchesPath) => matchesPath(pathname));

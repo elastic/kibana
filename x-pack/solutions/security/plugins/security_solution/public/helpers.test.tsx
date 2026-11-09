@@ -319,6 +319,8 @@ describe('isPageWithAppHeaderPath', () => {
     ['a cloud security posture page', '/cloud_security_posture/findings'],
     ['the cloud security posture base path', '/cloud_security_posture'],
     ['the Manage landing page', '/manage'],
+    ['the Configurations page', '/configurations'],
+    ['a Configurations sub-route', '/configurations/integrations/browse'],
     ['an endpoint management page', '/administration/endpoints'],
     ['a rules tab with a trailing slash', '/rules/management/'],
     ['a rule details tab with a trailing slash', '/rules/id/rule-id/overview/'],
