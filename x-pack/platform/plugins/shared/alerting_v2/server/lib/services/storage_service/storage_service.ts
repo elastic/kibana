@@ -7,13 +7,14 @@
 
 import type { BulkRequest, BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { inject, injectable } from 'inversify';
+import { injectable } from 'inversify';
 import type { LoggerServiceContract } from '../logger_service/logger_service';
-import { LoggerServiceToken } from '../logger_service/logger_service';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 
 /** Parameters for {@link StorageServiceContract.bulkIndexDocs}. */
 export interface BulkIndexDocsParams<TDocument extends Record<string, unknown>> {
+  /** The caller's logger, so bulk-write lines carry its subsystem and bound labels. */
+  logger: LoggerServiceContract;
   index: string;
   docs: readonly TDocument[];
   /** When `'wait_for'`, the bulk call blocks until the indexed documents are visible to search. Defaults to `false`. */
@@ -105,6 +106,8 @@ export interface BulkIndexResult<TDocument extends Record<string, unknown>> {
  * the batch from its own typed inputs and the runtime is shape-agnostic.
  */
 export interface BulkIndexDocsAcrossIndicesParams {
+  /** The caller's logger, so bulk-write lines carry its subsystem and bound labels. */
+  logger: LoggerServiceContract;
   docs: ReadonlyArray<{ index: string; doc: Record<string, unknown> }>;
   /** When `'wait_for'`, the bulk call blocks until the indexed documents are visible to search. Defaults to `false`. */
   refresh?: boolean | 'wait_for';
@@ -139,27 +142,29 @@ export interface StorageServiceContract {
 
 @injectable()
 export class StorageService implements StorageServiceContract {
-  constructor(
-    private readonly esClient: ElasticsearchClient,
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
-  ) {}
+  constructor(private readonly esClient: ElasticsearchClient) {}
 
   public async bulkIndexDocs<TDocument extends Record<string, unknown>>(
     params: BulkIndexDocsParams<TDocument>
   ): Promise<BulkIndexResult<TDocument>> {
     const entries = params.docs.map((doc) => ({ index: params.index, doc }));
-    return this.writeBulk<TDocument>(entries, params.refresh ?? false);
+    return this.writeBulk<TDocument>(entries, params.refresh ?? false, params.logger);
   }
 
   public async bulkIndexDocsAcrossIndices(
     params: BulkIndexDocsAcrossIndicesParams
   ): Promise<BulkIndexResult<Record<string, unknown>>> {
-    return this.writeBulk<Record<string, unknown>>(params.docs, params.refresh ?? false);
+    return this.writeBulk<Record<string, unknown>>(
+      params.docs,
+      params.refresh ?? false,
+      params.logger
+    );
   }
 
   private async writeBulk<TDocument extends Record<string, unknown>>(
     entries: ReadonlyArray<{ index: string; doc: TDocument }>,
-    refresh: boolean | 'wait_for'
+    refresh: boolean | 'wait_for',
+    logger: LoggerServiceContract
   ): Promise<BulkIndexResult<TDocument>> {
     if (entries.length === 0) {
       return { attempted: 0, docs: [], errors: [] };
@@ -177,11 +182,11 @@ export class StorageService implements StorageServiceContract {
         refresh,
       });
 
-      this.logBulkIndexResponse({ index: indexLabel, docsCount: entries.length, response });
+      this.logBulkIndexResponse({ index: indexLabel, docsCount: entries.length, response, logger });
 
       return this.summarizeBulkResponse<TDocument>({ entries, response });
     } catch (error) {
-      this.logger.error({
+      logger.error({
         error,
         code: ALERTING_LOG_CODES.STORAGE_BULK_INDEX_FAILED,
       });
@@ -235,17 +240,18 @@ export class StorageService implements StorageServiceContract {
     index,
     docsCount,
     response,
+    logger,
   }: {
     index: string;
     docsCount: number;
     response: BulkResponse;
+    logger: LoggerServiceContract;
   }): void {
-    this.logFirstBulkIndexItemError(response);
-    const message = this.getBulkIndexDebugMessage({ index, docsCount, response });
-    this.logger.debug({ message });
+    this.logFirstBulkIndexItemError(response, logger);
+    logger.debug({ message: () => this.getBulkIndexDebugMessage({ index, docsCount, response }) });
   }
 
-  private logFirstBulkIndexItemError(response: BulkResponse): void {
+  private logFirstBulkIndexItemError(response: BulkResponse, logger: LoggerServiceContract): void {
     if (!response.errors) {
       return;
     }
@@ -256,7 +262,7 @@ export class StorageService implements StorageServiceContract {
     }
 
     const error = firstErrorItem.create?.error;
-    this.logger.error({
+    logger.error({
       error: new Error(`[${error?.type ?? 'UNKNOWN_ERROR'}] ${error?.reason ?? 'UNKNOWN_REASON'}`),
       code: ALERTING_LOG_CODES.STORAGE_BULK_INDEX_FAILED,
     });
@@ -274,10 +280,10 @@ export class StorageService implements StorageServiceContract {
     const failedItemCount = response.items.filter((item) => item.create?.error).length;
 
     if (!response.errors) {
-      return `StorageService: Successfully bulk created ${docsCount} documents to index: ${index}`;
+      return `Bulk created ${docsCount} documents in ${index}`;
     }
 
     const successItemCount = docsCount - failedItemCount;
-    return `StorageService: Bulk create completed with errors for index: ${index} (successful: ${successItemCount}, failed: ${failedItemCount}, total: ${docsCount})`;
+    return `Bulk create completed with errors in ${index} (successful: ${successItemCount}, failed: ${failedItemCount}, total: ${docsCount})`;
   }
 }

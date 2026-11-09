@@ -10,7 +10,6 @@ import type { MaintenanceWindowAttributes } from '@kbn/maintenance-windows-plugi
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/maintenance-windows-plugin/common';
 import { inject, injectable } from 'inversify';
 import type { LoggerServiceContract } from '../logger_service/logger_service';
-import { LoggerServiceToken } from '../logger_service/logger_service';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import { savedObjectNamespacesToSpaceId } from '../../saved_object_namespaces_to_space_id';
 import { MaintenanceWindowSavedObjectsClientToken } from './tokens';
@@ -25,19 +24,24 @@ export interface MaintenanceWindowServiceContract {
    * that has since closed must still be suppressed when its timestamp falls
    * inside the window.
    */
-  getEnabledMaintenanceWindows(): Promise<ActiveMaintenanceWindow[]>;
+  getEnabledMaintenanceWindows(params: {
+    /** The caller's logger, so lookup failures carry its subsystem and bound labels. */
+    logger: LoggerServiceContract;
+  }): Promise<ActiveMaintenanceWindow[]>;
 }
 
 @injectable()
 export class MaintenanceWindowService implements MaintenanceWindowServiceContract {
   constructor(
     @inject(MaintenanceWindowSavedObjectsClientToken)
-    private readonly client: SavedObjectsClientContract,
-    @inject(LoggerServiceToken)
-    private readonly logger: LoggerServiceContract
+    private readonly client: SavedObjectsClientContract
   ) {}
 
-  public async getEnabledMaintenanceWindows(): Promise<ActiveMaintenanceWindow[]> {
+  public async getEnabledMaintenanceWindows({
+    logger,
+  }: {
+    logger: LoggerServiceContract;
+  }): Promise<ActiveMaintenanceWindow[]> {
     const windows: ActiveMaintenanceWindow[] = [];
     const finder = this.client.createPointInTimeFinder<MaintenanceWindowAttributes>({
       type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
@@ -52,7 +56,7 @@ export class MaintenanceWindowService implements MaintenanceWindowServiceContrac
           if ('error' in doc && doc.error) continue;
 
           if (!Array.isArray(doc.attributes.events)) {
-            this.logger.warn({
+            logger.warn({
               message: () =>
                 `Skipping maintenance window "${doc.id}": missing or invalid events array`,
               code: ALERTING_LOG_CODES.MAINTENANCE_WINDOW_DOCUMENT_INVALID,
@@ -72,7 +76,7 @@ export class MaintenanceWindowService implements MaintenanceWindowServiceContrac
         }
       }
     } catch (error) {
-      this.logger.error({
+      logger.error({
         error,
         code: ALERTING_LOG_CODES.MAINTENANCE_WINDOW_FETCH_FAILED,
       });
@@ -81,7 +85,7 @@ export class MaintenanceWindowService implements MaintenanceWindowServiceContrac
       try {
         await finder.close();
       } catch (closeError) {
-        this.logger.warn({
+        logger.warn({
           message: () => `Failed to close maintenance window PIT finder: ${closeError.message}`,
           code: ALERTING_LOG_CODES.MAINTENANCE_WINDOW_PIT_CLOSE_FAILED,
         });

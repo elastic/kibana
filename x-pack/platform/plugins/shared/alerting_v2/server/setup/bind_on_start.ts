@@ -42,11 +42,15 @@ export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
       ) =>
       async (container) => {
         const tasksLogger = loggerService.forSubsystem('tasks');
+        const resourcesLogger = loggerService.forSubsystem('resources');
 
         initializeResources({
           resourceManager,
           esClient,
-          coreLogger,
+          logger: resourcesLogger,
+          // `@kbn/data-streams` takes a core Logger. The child keeps its lines
+          // under the same `log.logger` as the resources subsystem.
+          coreLogger: coreLogger.get('resources'),
           changeHistoryClient,
           retention: configService.get('retention'),
           userProfileService,
@@ -57,7 +61,11 @@ export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
         try {
           await installAlertingV2ManagedWorkflows(workflowsExtensions);
         } catch (error) {
-          coreLogger.warn('Failed to install alerting v2 managed workflows', { error });
+          resourcesLogger.warn({
+            message: 'Failed to install managed workflows',
+            code: ALERTING_LOG_CODES.RESOURCES_MANAGED_WORKFLOWS_INSTALL_FAILED,
+            error,
+          });
         }
 
         if (configService.get('dispatcher.paused')) {

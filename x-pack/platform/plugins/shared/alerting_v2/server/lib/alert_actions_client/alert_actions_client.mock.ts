@@ -13,6 +13,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { createAlertActionEventPublisher } from '../events/alert_action_event_publisher/alert_action_event_publisher.mock';
 import type { AlertActionEventPublisher } from '../events/alert_action_event_publisher/alert_action_event_publisher';
 import { createQueryService } from '../services/query_service/query_service.mock';
+import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { createStorageService } from '../services/storage_service/storage_service.mock';
 import { createUserService } from '../services/user_service/user_service.mock';
 import { createMockResourceManager } from '../services/resource_service/resource_manager.mock';
@@ -42,7 +43,8 @@ export function createAlertActionsClient(): {
     request,
     'default',
     alertActionEventPublisher,
-    resourceManager
+    resourceManager,
+    createLoggerService().loggerService
   );
 
   return {

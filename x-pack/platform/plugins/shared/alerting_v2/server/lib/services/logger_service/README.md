@@ -137,14 +137,18 @@ on, so it must identify a bounded slice of behaviour, not a file.
   `setup/bind_*.ts` function that builds it. Do not call `forSubsystem` per
   log line, and do not log from the root service.
 - Never repeat the subsystem name in message text.
+- When a dependency's API requires a core `Logger` (`@kbn/data-streams`,
+  `@kbn/change-history`, Task Manager's `runInvalidate`), hand it a child of
+  the core logger named after the owning subsystem: `coreLogger.get('resources')`.
+  Its lines then share that subsystem's `log.logger`. Never invent a name
+  outside the union for a dependency.
 
 | Subsystem            | Covers                                                                                                                                            | Bound in                                                                                                          |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | `routes`             | HTTP route handlers.                                                                                                                              | `routes/alerting_route_context.ts`                                                                                |
 | `rulesClient`        | Rule CRUD, filter parsing, bulk operations, internal rules client.                                                                                | `lib/rules_client/`, `lib/internal_rules_client/`                                                                 |
 | `ruleTemplateClient` | Rule template read path.                                                                                                                          | `lib/rule_templates_client/`                                                                                      |
-| `actionPolicyClient` | Action policy CRUD and API key handling.                                                                                                          | `lib/action_policy_client/`                                                                                       |
-| `actionPolicyTest`   | Test-notification preview and send for action policies.                                                                                           | `lib/action_policy_test/action_policy_test_service.ts`                                                            |
+| `actionPolicyClient` | Action policy CRUD, API key handling and test notifications.                                                                                      | `lib/action_policy_client/`, `lib/action_policy_test/`                                                            |
 | `alertsClient`       | Alert actions and episode read / write clients.                                                                                                   | `lib/alert_actions_client/`, `lib/episodes_client/`                                                               |
 | `ruleExecutor`       | Rule task runner, pipeline steps, middlewares.                                                                                                    | `lib/rule_executor/task_runner.ts`                                                                                |
 | `director`           | Episode state transitions. Runs inside the executor but is its own domain.                                                                        | `lib/director/director.ts`                                                                                        |
@@ -154,11 +158,11 @@ on, so it must identify a bounded slice of behaviour, not a file.
 | `tasks`              | Background tasks other than the two engine tasks. Boot-time scheduling.                                                                           | `lib/tasks/`, `lib/usage/`, `setup/bind_on_start.ts`                                                              |
 | `savedObjects`       | Saved object type registration and model-version migrations.                                                                                      | `setup/bind_on_setup.ts`                                                                                          |
 | `agentBuilder`       | Agent Builder tools, skills and attachments.                                                                                                      | `setup/bind_agent_builder.ts`                                                                                     |
-| `events`             | Internal domain event bus, publishers, subscribers and workflow emission.                                                                         | `lib/events/`, `lib/services/workflow_service/`                                                                   |
+| `events`             | Internal domain event bus, publishers, subscribers, workflow emission and the rule changes history store the subscriber writes.                   | `lib/events/`, `lib/services/workflow_service/`, `setup/bind_clients.ts`                                          |
 | `telemetry`          | Event-based telemetry (EBT) reporting.                                                                                                            | `lib/services/ebt_service/ebt_service.ts`                                                                         |
 
 The tree is split along **failure-domain** boundaries, not directory
-boundaries: 16 loggers an operator can remember, not 100+ file names. The
+boundaries: 15 loggers an operator can remember, not 100+ file names. The
 `director` runs inside the executor pipeline but gets its own logger because it
 is reasoned about independently. The `events` bus is one logger even though
 publishers and subscribers live in several directories.

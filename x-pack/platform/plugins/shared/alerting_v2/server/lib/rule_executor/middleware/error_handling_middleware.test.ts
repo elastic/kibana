@@ -69,7 +69,7 @@ describe('ErrorHandlingMiddleware', () => {
     );
   });
 
-  it('overrides the message for ES|QL user errors so the query fragment is not logged', async () => {
+  it('replaces ES|QL user errors so the query fragment reaches neither the message nor the error meta', async () => {
     const error = createTaskRunError(
       new errors.ResponseError({
         statusCode: 400,
@@ -106,8 +106,9 @@ describe('ErrorHandlingMiddleware', () => {
         }),
       })
     );
-    const loggedMessage = (logger.error as jest.Mock).mock.calls[0][0] as string;
+    const [loggedMessage, meta] = (logger.error as jest.Mock).mock.calls[0];
     expect(loggedMessage).not.toContain('secret_field');
+    expect(JSON.stringify(meta)).not.toContain('secret_field');
   });
 
   it('labels a failure as framework when no step tagged it as a user error', async () => {

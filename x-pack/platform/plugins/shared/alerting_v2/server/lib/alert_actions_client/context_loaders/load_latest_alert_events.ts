@@ -15,6 +15,7 @@ import { ALERTING_ERROR_CODES } from '../../errors/error_codes';
 import { getAlertEpisodeNotFoundMessage } from '../../errors/alert_error_messages';
 import { queryResponseToRecords } from '../../services/query_service/query_response_to_records';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
+import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import type { AlertEventRecord, RawAlertEventRow } from '../types';
 import { parseDataJson } from '../utils/parse_data_json';
 import { getSeriesNotFoundError } from '../utils/series_id';
@@ -38,6 +39,7 @@ type RawSeriesEventRow = RawAlertEventRow & { series_id: string };
 
 interface LoadLatestAlertEventsBySeriesParams {
   queryService: QueryServiceContract;
+  logger: LoggerServiceContract;
   spaceId: string;
   series: readonly DecodedSeriesId[];
 }
@@ -63,6 +65,7 @@ const buildSeriesCondition = (series: DecodedSeriesId) =>
  */
 export const loadLatestAlertEventsBySeries = async ({
   queryService,
+  logger,
   spaceId,
   series,
 }: LoadLatestAlertEventsBySeriesParams): Promise<Map<string, AlertEventRecord>> => {
@@ -110,7 +113,7 @@ export const loadLatestAlertEventsBySeries = async ({
     .toRequest();
 
   const rows = queryResponseToRecords<RawSeriesEventRow>(
-    await queryService.executeQuery({ query: query.query })
+    await queryService.executeQuery({ logger, query: query.query })
   );
 
   return new Map(
@@ -123,6 +126,7 @@ export const loadLatestAlertEventsBySeries = async ({
 
 interface LoadLatestAlertEventsByEpisodeIdParams {
   queryService: QueryServiceContract;
+  logger: LoggerServiceContract;
   spaceId: string;
   episodeIds: readonly string[];
 }
@@ -143,6 +147,7 @@ interface LoadLatestAlertEventsByEpisodeIdParams {
  */
 export const loadLatestAlertEventsByEpisodeId = async ({
   queryService,
+  logger,
   spaceId,
   episodeIds,
 }: LoadLatestAlertEventsByEpisodeIdParams): Promise<AlertEventRecord[]> => {
@@ -172,11 +177,12 @@ export const loadLatestAlertEventsByEpisodeId = async ({
     | KEEP @timestamp, group_hash, episode_id, episode_status, episode_status_count, rule_id, rule_version, space_id, status, source, data_json, severity
   `.toRequest();
 
-  return toAlertEventRecords(await queryService.executeQuery({ query: query.query }));
+  return toAlertEventRecords(await queryService.executeQuery({ logger, query: query.query }));
 };
 
 interface LoadLastSeriesAlertEventParams {
   queryService: QueryServiceContract;
+  logger: LoggerServiceContract;
   spaceId: string;
   /** The id the caller sent, echoed back in the not-found error. */
   seriesId: string;
@@ -191,11 +197,17 @@ interface LoadLastSeriesAlertEventParams {
  */
 export const loadLastSeriesAlertEventOrThrow = async ({
   queryService,
+  logger,
   spaceId,
   seriesId,
   series,
 }: LoadLastSeriesAlertEventParams): Promise<AlertEventRecord> => {
-  const events = await loadLatestAlertEventsBySeries({ queryService, spaceId, series: [series] });
+  const events = await loadLatestAlertEventsBySeries({
+    queryService,
+    logger,
+    spaceId,
+    series: [series],
+  });
   // The owner and hash filter can also match events of another series (the same rule id with
   // an external source), which ES|QL groups apart, so the requested series is picked by its id.
   const requestedSeriesId = encodeSeriesId(series);
@@ -210,6 +222,7 @@ export const loadLastSeriesAlertEventOrThrow = async ({
 
 interface LoadLastEpisodeAlertEventParams {
   queryService: QueryServiceContract;
+  logger: LoggerServiceContract;
   spaceId: string;
   episodeId: string;
 }
@@ -222,11 +235,13 @@ interface LoadLastEpisodeAlertEventParams {
  */
 export const loadLastEpisodeAlertEventOrThrow = async ({
   queryService,
+  logger,
   spaceId,
   episodeId,
 }: LoadLastEpisodeAlertEventParams): Promise<AlertEventRecord> => {
   const events = await loadLatestAlertEventsByEpisodeId({
     queryService,
+    logger,
     spaceId,
     episodeIds: [episodeId],
   });

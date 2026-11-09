@@ -7,17 +7,15 @@
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { API_KEY_PENDING_INVALIDATION_TYPE } from '../../../saved_objects';
-import { ALERTING_ERROR_CODES } from '../../errors/error_codes';
 import { ApiKeyService } from './api_key_service';
+import { CloudApiKeyNotSupportedError } from './cloud_api_key_not_supported_error';
 
 const createMockInvalidationDeps = () => ({
   invalidationSavedObjectsClient: savedObjectsClientMock.create(),
-  logger: loggingSystemMock.create().get(),
 });
 
 const createMockSecurityService = (
@@ -77,10 +75,10 @@ describe('ApiKeyService', () => {
     it('grants an ES API key when UIAM is not available', async () => {
       const request = httpServerMock.createKibanaRequest();
       const security = createMockSecurityService();
-      const { invalidationSavedObjectsClient, logger } = createMockInvalidationDeps();
-      const service = new ApiKeyService(request, security, invalidationSavedObjectsClient, logger);
+      const { invalidationSavedObjectsClient } = createMockInvalidationDeps();
+      const service = new ApiKeyService(request, security, invalidationSavedObjectsClient);
 
-      const result = await service.create('My Policy');
+      const result = await service.create({ name: 'My Policy', type: 'action_policy' });
 
       expect(security.authc.apiKeys.grantAsInternalUser).toHaveBeenCalledWith(request, {
         name: 'My Policy',
@@ -96,10 +94,10 @@ describe('ApiKeyService', () => {
     it('grants only a UIAM API key when UIAM is available', async () => {
       const request = httpServerMock.createKibanaRequest();
       const security = createMockSecurityService({ uiam: true });
-      const { invalidationSavedObjectsClient, logger } = createMockInvalidationDeps();
-      const service = new ApiKeyService(request, security, invalidationSavedObjectsClient, logger);
+      const { invalidationSavedObjectsClient } = createMockInvalidationDeps();
+      const service = new ApiKeyService(request, security, invalidationSavedObjectsClient);
 
-      const result = await service.create('My Policy');
+      const result = await service.create({ name: 'My Policy', type: 'action_policy' });
 
       expect(security.authc.apiKeys.uiam!.grant).toHaveBeenCalledWith(request, {
         name: 'uiam-My Policy',
@@ -115,11 +113,11 @@ describe('ApiKeyService', () => {
       const request = httpServerMock.createKibanaRequest();
       const security = createMockSecurityService({ username: undefined });
       security.authc.getCurrentUser = jest.fn().mockReturnValue(null);
-      const { invalidationSavedObjectsClient, logger } = createMockInvalidationDeps();
-      const service = new ApiKeyService(request, security, invalidationSavedObjectsClient, logger);
+      const { invalidationSavedObjectsClient } = createMockInvalidationDeps();
+      const service = new ApiKeyService(request, security, invalidationSavedObjectsClient);
 
-      await expect(service.create('My Policy')).rejects.toThrow(
-        'Failed to create API key for action policy: My Policy - unable to determine current user'
+      await expect(service.create({ name: 'My Policy', type: 'action_policy' })).rejects.toThrow(
+        'Failed to create API key "My Policy": unable to determine current user'
       );
     });
 
@@ -127,11 +125,11 @@ describe('ApiKeyService', () => {
       const request = httpServerMock.createKibanaRequest();
       const security = createMockSecurityService();
       security.authc.apiKeys.grantAsInternalUser = jest.fn().mockResolvedValue(null);
-      const { invalidationSavedObjectsClient, logger } = createMockInvalidationDeps();
-      const service = new ApiKeyService(request, security, invalidationSavedObjectsClient, logger);
+      const { invalidationSavedObjectsClient } = createMockInvalidationDeps();
+      const service = new ApiKeyService(request, security, invalidationSavedObjectsClient);
 
-      await expect(service.create('My Policy')).rejects.toThrow(
-        'Failed to create ES API key for action policy: My Policy'
+      await expect(service.create({ name: 'My Policy', type: 'action_policy' })).rejects.toThrow(
+        'Failed to create ES API key "My Policy"'
       );
     });
 
@@ -139,11 +137,11 @@ describe('ApiKeyService', () => {
       const request = httpServerMock.createKibanaRequest();
       const security = createMockSecurityService({ uiam: true });
       (security.authc.apiKeys.uiam!.grant as jest.Mock).mockResolvedValue(null);
-      const { invalidationSavedObjectsClient, logger } = createMockInvalidationDeps();
-      const service = new ApiKeyService(request, security, invalidationSavedObjectsClient, logger);
+      const { invalidationSavedObjectsClient } = createMockInvalidationDeps();
+      const service = new ApiKeyService(request, security, invalidationSavedObjectsClient);
 
-      await expect(service.create('My Policy')).rejects.toThrow(
-        'Failed to create UIAM API key for action policy: My Policy'
+      await expect(service.create({ name: 'My Policy', type: 'action_policy' })).rejects.toThrow(
+        'Failed to create UIAM API key "My Policy"'
       );
     });
   });
@@ -152,10 +150,10 @@ describe('ApiKeyService', () => {
     it('extracts ES API key from authorization header', async () => {
       const request = createRequestWithApiKey('my-key-id', 'my-key-secret');
       const security = createMockSecurityService({ authenticationType: 'api_key' });
-      const { invalidationSavedObjectsClient, logger } = createMockInvalidationDeps();
-      const service = new ApiKeyService(request, security, invalidationSavedObjectsClient, logger);
+      const { invalidationSavedObjectsClient } = createMockInvalidationDeps();
+      const service = new ApiKeyService(request, security, invalidationSavedObjectsClient);
 
-      const result = await service.create('My Policy');
+      const result = await service.create({ name: 'My Policy', type: 'action_policy' });
 
       expect(security.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
       expect(result.apiKey).toBe(Buffer.from('my-key-id:my-key-secret').toString('base64'));
@@ -170,10 +168,10 @@ describe('ApiKeyService', () => {
         authenticationType: 'api_key',
         uiam: true,
       });
-      const { invalidationSavedObjectsClient, logger } = createMockInvalidationDeps();
-      const service = new ApiKeyService(request, security, invalidationSavedObjectsClient, logger);
+      const { invalidationSavedObjectsClient } = createMockInvalidationDeps();
+      const service = new ApiKeyService(request, security, invalidationSavedObjectsClient);
 
-      const result = await service.create('My Policy');
+      const result = await service.create({ name: 'My Policy', type: 'action_policy' });
 
       const expectedEncoded = Buffer.from(`uiam-id:${uiamKey}`).toString('base64');
       expect(result.apiKey).toBe(expectedEncoded);
@@ -187,37 +185,36 @@ describe('ApiKeyService', () => {
         authenticationType: 'api_key',
         uiam: false,
       });
-      const { invalidationSavedObjectsClient, logger } = createMockInvalidationDeps();
-      const service = new ApiKeyService(request, security, invalidationSavedObjectsClient, logger);
+      const { invalidationSavedObjectsClient } = createMockInvalidationDeps();
+      const service = new ApiKeyService(request, security, invalidationSavedObjectsClient);
 
-      await expect(service.create('My Policy')).rejects.toThrow(
+      await expect(service.create({ name: 'My Policy', type: 'action_policy' })).rejects.toThrow(
         'UIAM API keys should only be used in serverless environments'
       );
     });
 
-    it('rejects a raw Cloud API key with a bad request', async () => {
+    it('throws CloudApiKeyNotSupportedError for a raw Cloud API key', async () => {
       const request = httpServerMock.createKibanaRequest({
         headers: { authorization: 'ApiKey essu_raw-cloud-secret' },
       });
       const security = createMockSecurityService({ authenticationType: 'api_key', uiam: true });
-      const { invalidationSavedObjectsClient, logger } = createMockInvalidationDeps();
-      const service = new ApiKeyService(request, security, invalidationSavedObjectsClient, logger);
+      const { invalidationSavedObjectsClient } = createMockInvalidationDeps();
+      const service = new ApiKeyService(request, security, invalidationSavedObjectsClient);
 
-      await expect(service.create('My Policy')).rejects.toMatchObject({
-        output: { statusCode: 400 },
-        data: { code: ALERTING_ERROR_CODES.ACTION_POLICY_CLOUD_API_KEY_NOT_SUPPORTED },
-      });
+      await expect(
+        service.create({ name: 'My Policy', type: 'action_policy' })
+      ).rejects.toBeInstanceOf(CloudApiKeyNotSupportedError);
       expect(security.authc.apiKeys.uiam!.grant).not.toHaveBeenCalled();
     });
 
     it('throws when authorization header has no credentials', async () => {
       const request = httpServerMock.createKibanaRequest({ headers: {} });
       const security = createMockSecurityService({ authenticationType: 'api_key' });
-      const { invalidationSavedObjectsClient, logger } = createMockInvalidationDeps();
-      const service = new ApiKeyService(request, security, invalidationSavedObjectsClient, logger);
+      const { invalidationSavedObjectsClient } = createMockInvalidationDeps();
+      const service = new ApiKeyService(request, security, invalidationSavedObjectsClient);
 
-      await expect(service.create('My Policy')).rejects.toThrow(
-        'Failed to extract API key from authorization header for action policy: My Policy'
+      await expect(service.create({ name: 'My Policy', type: 'action_policy' })).rejects.toThrow(
+        'Failed to extract API key "My Policy" from the authorization header'
       );
     });
   });
@@ -225,7 +222,6 @@ describe('ApiKeyService', () => {
   describe('markApiKeysForInvalidation', () => {
     const request = httpServerMock.createKibanaRequest();
     const security = createMockSecurityService();
-    const logger = loggingSystemMock.create().get();
     let invalidationSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
 
     beforeEach(() => {
@@ -246,7 +242,7 @@ describe('ApiKeyService', () => {
     });
 
     it('does not call bulkCreate when apiKeys is empty', async () => {
-      const service = new ApiKeyService(request, security, invalidationSavedObjectsClient, logger);
+      const service = new ApiKeyService(request, security, invalidationSavedObjectsClient);
 
       await expect(service.markApiKeysForInvalidation([])).resolves.toEqual([]);
 
@@ -254,7 +250,7 @@ describe('ApiKeyService', () => {
     });
 
     it('calls bulkCreate with decoded apiKeyId and createdAt for each key', async () => {
-      const service = new ApiKeyService(request, security, invalidationSavedObjectsClient, logger);
+      const service = new ApiKeyService(request, security, invalidationSavedObjectsClient);
       const apiKeys = [
         Buffer.from('123').toString('base64'),
         Buffer.from('id123:essu_uiam_value').toString('base64'),
@@ -286,7 +282,7 @@ describe('ApiKeyService', () => {
     });
 
     it('includes uiamApiKey for UIAM credentials', async () => {
-      const service = new ApiKeyService(request, security, invalidationSavedObjectsClient, logger);
+      const service = new ApiKeyService(request, security, invalidationSavedObjectsClient);
       const apiKeys = [Buffer.from('id123:essu_uiam_value').toString('base64')];
       invalidationSavedObjectsClient.bulkCreate = jest
         .fn()
@@ -302,20 +298,15 @@ describe('ApiKeyService', () => {
       });
     });
 
-    it('reports every key as failed and logs when bulkCreate throws', async () => {
+    it('reports every key as failed when bulkCreate throws', async () => {
       const err = new Error('bulkCreate failed');
       invalidationSavedObjectsClient.bulkCreate = jest.fn().mockRejectedValue(err);
-      const service = new ApiKeyService(request, security, invalidationSavedObjectsClient, logger);
+      const service = new ApiKeyService(request, security, invalidationSavedObjectsClient);
       const apiKeys = [Buffer.from('123:secret').toString('base64')];
 
       await expect(service.markApiKeysForInvalidation(apiKeys)).resolves.toEqual([
         { success: false, message: 'bulkCreate failed' },
       ]);
-
-      expect(logger.error).toHaveBeenCalledWith(
-        'Failed to bulk mark list of API keys ["123"] for invalidation: bulkCreate failed',
-        { error: { stack_trace: err.stack } }
-      );
     });
 
     it('reports per-key failures that bulkCreate resolves with rather than throws', async () => {
@@ -340,16 +331,12 @@ describe('ApiKeyService', () => {
           },
         ],
       });
-      const service = new ApiKeyService(request, security, invalidationSavedObjectsClient, logger);
+      const service = new ApiKeyService(request, security, invalidationSavedObjectsClient);
 
       await expect(service.markApiKeysForInvalidation(apiKeys)).resolves.toEqual([
         { success: true },
         { success: false, message: 'version conflict' },
       ]);
-
-      expect(logger.error).toHaveBeenCalledWith(
-        'Failed to mark API key "bad-id" for invalidation: version conflict'
-      );
     });
 
     it('reports a key as failed when bulkCreate returns no entry for it', async () => {
@@ -357,7 +344,7 @@ describe('ApiKeyService', () => {
       invalidationSavedObjectsClient.bulkCreate = jest
         .fn()
         .mockResolvedValue({ saved_objects: [] });
-      const service = new ApiKeyService(request, security, invalidationSavedObjectsClient, logger);
+      const service = new ApiKeyService(request, security, invalidationSavedObjectsClient);
 
       await expect(service.markApiKeysForInvalidation(apiKeys)).resolves.toEqual([
         { success: false, message: 'Saved object was not returned by bulkCreate' },

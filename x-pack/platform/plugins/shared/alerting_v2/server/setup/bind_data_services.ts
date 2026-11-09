@@ -14,7 +14,6 @@ import {
 } from '../lib/services/es_service/tokens';
 import { EsqlResponseFormatService } from '../lib/services/esql_response_format_service/esql_response_format_service';
 import { EsqlResponseFormatServiceToken } from '../lib/services/esql_response_format_service/tokens';
-import { LoggerServiceToken } from '../lib/services/logger_service/logger_service';
 import { QueryService } from '../lib/services/query_service/query_service';
 import {
   QueryServiceInternalToken,
@@ -61,33 +60,30 @@ export function bindDataServices({ bind }: ContainerModuleLoadOptions) {
 
   bind(QueryServiceScopedToken)
     .toResolvedValue(
-      (loggerService, esClient, format) => new QueryService(esClient, loggerService, format),
-      [LoggerServiceToken, EsServiceScopedToken, EsqlResponseFormatServiceToken]
+      (esClient, format) => new QueryService(esClient, format),
+      [EsServiceScopedToken, EsqlResponseFormatServiceToken]
     )
     .inRequestScope();
 
   // Rule-execution queries run against user data and must respect the space project routing.
   bind(QueryServiceScopedSpaceRoutingToken)
     .toResolvedValue(
-      (loggerService, esClient, format) => new QueryService(esClient, loggerService, format),
-      [LoggerServiceToken, EsServiceScopedSpaceRoutingToken, EsqlResponseFormatServiceToken]
+      (esClient, format) => new QueryService(esClient, format),
+      [EsServiceScopedSpaceRoutingToken, EsqlResponseFormatServiceToken]
     )
     .inRequestScope();
 
   bind(QueryServiceInternalToken).toResolvedValue(
-    (loggerService, esClient, format) => new QueryService(esClient, loggerService, format),
-    [LoggerServiceToken, EsServiceInternalToken, EsqlResponseFormatServiceToken]
+    (esClient, format) => new QueryService(esClient, format),
+    [EsServiceInternalToken, EsqlResponseFormatServiceToken]
   );
 
   bind(StorageServiceScopedToken)
-    .toResolvedValue(
-      (loggerService, esClient) => new StorageService(esClient, loggerService),
-      [LoggerServiceToken, EsServiceScopedToken]
-    )
+    .toResolvedValue((esClient) => new StorageService(esClient), [EsServiceScopedToken])
     .inRequestScope();
 
   bind(StorageServiceInternalToken).toResolvedValue(
-    (loggerService, esClient) => new StorageService(esClient, loggerService),
-    [LoggerServiceToken, EsServiceInternalToken]
+    (esClient) => new StorageService(esClient),
+    [EsServiceInternalToken]
   );
 }

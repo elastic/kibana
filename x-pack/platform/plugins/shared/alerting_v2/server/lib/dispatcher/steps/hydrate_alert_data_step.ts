@@ -52,6 +52,7 @@ export class HydrateAlertDataStep implements DispatcherStep {
     const responses = await Promise.all(
       getAlertDataQueries(alertIds, { gte, lte }).map((request) =>
         this.queryService.executeQueryRows<RawAlertData>({
+          logger,
           query: request.query,
           abortSignal: signal,
         })

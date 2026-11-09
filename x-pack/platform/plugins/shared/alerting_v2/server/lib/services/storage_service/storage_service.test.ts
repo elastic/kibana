@@ -21,7 +21,7 @@ describe('StorageService', () => {
     mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
     mockLogger = loggerMock.create();
     mockLoggerService = new LoggerService(mockLogger);
-    storageService = new StorageService(mockEsClient, mockLoggerService);
+    storageService = new StorageService(mockEsClient);
   });
 
   afterEach(() => {
@@ -44,7 +44,11 @@ describe('StorageService', () => {
     ];
 
     it('should return early when docs array is empty', async () => {
-      const result = await storageService.bulkIndexDocs({ index, docs: [] });
+      const result = await storageService.bulkIndexDocs({
+        logger: mockLoggerService,
+        index,
+        docs: [],
+      });
 
       expect(mockEsClient.bulk).not.toHaveBeenCalled();
       expect(result).toEqual({ attempted: 0, docs: [], errors: [] });
@@ -59,7 +63,11 @@ describe('StorageService', () => {
       // @ts-expect-error - not all fields are used
       mockEsClient.bulk.mockResolvedValue(mockBulkResponse);
 
-      const result = await storageService.bulkIndexDocs({ index, docs: mockDocs });
+      const result = await storageService.bulkIndexDocs({
+        logger: mockLoggerService,
+        index,
+        docs: mockDocs,
+      });
 
       expect(mockEsClient.bulk).toHaveBeenCalledTimes(1);
       expect(mockEsClient.bulk).toHaveBeenCalledWith({
@@ -85,7 +93,12 @@ describe('StorageService', () => {
       // @ts-expect-error - not all fields are used
       mockEsClient.bulk.mockResolvedValue(mockBulkResponse);
 
-      await storageService.bulkIndexDocs({ index, docs: [mockDocs[0]], refresh: 'wait_for' });
+      await storageService.bulkIndexDocs({
+        logger: mockLoggerService,
+        index,
+        docs: [mockDocs[0]],
+        refresh: 'wait_for',
+      });
 
       expect(mockEsClient.bulk).toHaveBeenCalledWith({
         operations: [{ create: { _index: index } }, mockDocs[0]],
@@ -103,7 +116,7 @@ describe('StorageService', () => {
       mockEsClient.bulk.mockResolvedValue(mockBulkResponse);
 
       const docs = [mockDocs[0]];
-      await storageService.bulkIndexDocs({ index, docs });
+      await storageService.bulkIndexDocs({ logger: mockLoggerService, index, docs });
 
       expect(mockEsClient.bulk).toHaveBeenCalledWith({
         operations: [{ create: { _index: index } }, docs[0]],
@@ -133,7 +146,11 @@ describe('StorageService', () => {
       // @ts-expect-error - not all fields are used
       mockEsClient.bulk.mockResolvedValue(mockBulkResponse);
 
-      const result = await storageService.bulkIndexDocs({ index, docs: mockDocs });
+      const result = await storageService.bulkIndexDocs({
+        logger: mockLoggerService,
+        index,
+        docs: mockDocs,
+      });
 
       expect(mockLogger.error).toHaveBeenCalled();
       expect(result).toEqual({
@@ -163,7 +180,11 @@ describe('StorageService', () => {
       // @ts-expect-error - not all fields are used
       mockEsClient.bulk.mockResolvedValue(mockBulkResponse);
 
-      const result = await storageService.bulkIndexDocs({ index, docs: [mockDocs[0]] });
+      const result = await storageService.bulkIndexDocs({
+        logger: mockLoggerService,
+        index,
+        docs: [mockDocs[0]],
+      });
 
       expect(mockLogger.error).not.toHaveBeenCalled();
       expect(result).toEqual({ attempted: 1, docs: [mockDocs[0]], errors: [] });
@@ -173,9 +194,9 @@ describe('StorageService', () => {
       const error = new Error('Elasticsearch connection failed');
       mockEsClient.bulk.mockRejectedValue(error);
 
-      await expect(storageService.bulkIndexDocs({ index, docs: mockDocs })).rejects.toThrow(
-        'Elasticsearch connection failed'
-      );
+      await expect(
+        storageService.bulkIndexDocs({ logger: mockLoggerService, index, docs: mockDocs })
+      ).rejects.toThrow('Elasticsearch connection failed');
 
       expect(mockLogger.error).toHaveBeenCalled();
     });
@@ -205,6 +226,7 @@ describe('StorageService', () => {
       mockEsClient.bulk.mockResolvedValue(mockBulkResponse);
 
       const result = await storageService.bulkIndexDocsAcrossIndices({
+        logger: mockLoggerService,
         docs: [
           { index: '.rule-events', doc: mockDocs[0] },
           { index: '.alert-actions', doc: mockDocs[1] },
@@ -244,6 +266,7 @@ describe('StorageService', () => {
       mockEsClient.bulk.mockResolvedValue(mockBulkResponse);
 
       const result = await storageService.bulkIndexDocsAcrossIndices({
+        logger: mockLoggerService,
         docs: [
           { index: '.rule-events', doc: mockDocs[0] },
           { index: '.alert-actions', doc: mockDocs[1] },
@@ -277,6 +300,7 @@ describe('StorageService', () => {
       mockEsClient.bulk.mockResolvedValue(mockBulkResponse);
 
       await storageService.bulkIndexDocsAcrossIndices({
+        logger: mockLoggerService,
         docs: [{ index: '.rule-events', doc: mockDocs[0] }],
       });
 
@@ -287,7 +311,10 @@ describe('StorageService', () => {
     });
 
     it('returns early when the docs array is empty', async () => {
-      const result = await storageService.bulkIndexDocsAcrossIndices({ docs: [] });
+      const result = await storageService.bulkIndexDocsAcrossIndices({
+        logger: mockLoggerService,
+        docs: [],
+      });
 
       expect(mockEsClient.bulk).not.toHaveBeenCalled();
       expect(result).toEqual({ attempted: 0, docs: [], errors: [] });
@@ -299,6 +326,7 @@ describe('StorageService', () => {
 
       await expect(
         storageService.bulkIndexDocsAcrossIndices({
+          logger: mockLoggerService,
           docs: [{ index: '.rule-events', doc: mockDocs[0] }],
         })
       ).rejects.toThrow('Elasticsearch connection failed');

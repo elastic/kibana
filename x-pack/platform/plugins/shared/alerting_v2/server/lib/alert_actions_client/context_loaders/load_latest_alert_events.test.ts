@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { createQueryService } from '../../services/query_service/query_service.mock';
+import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { ALERTING_ERROR_CODES } from '../../errors/error_codes';
 import { encodeSeriesId, type DecodedSeriesId } from '@kbn/alerting-v2-utils';
 import {
@@ -47,6 +48,7 @@ const seriesIdOf = (series: DecodedSeriesId): string => {
 };
 
 describe('loadLatestAlertEventsBySeries', () => {
+  const logger = createLoggerService().loggerService;
   const SPACE_ID = 'default';
 
   const setup = () => createQueryService();
@@ -56,6 +58,7 @@ describe('loadLatestAlertEventsBySeries', () => {
 
     const events = await loadLatestAlertEventsBySeries({
       queryService,
+      logger,
       spaceId: SPACE_ID,
       series: [],
     });
@@ -70,6 +73,7 @@ describe('loadLatestAlertEventsBySeries', () => {
 
     await loadLatestAlertEventsBySeries({
       queryService,
+      logger,
       spaceId: SPACE_ID,
       series: [
         ruleSeries('rule-a'),
@@ -104,6 +108,7 @@ describe('loadLatestAlertEventsBySeries', () => {
 
     const events = await loadLatestAlertEventsBySeries({
       queryService,
+      logger,
       spaceId: SPACE_ID,
       series: [ruleSeries('rule-a'), ruleSeries('rule-b')],
     });
@@ -129,6 +134,7 @@ describe('loadLatestAlertEventsBySeries', () => {
 
     const events = await loadLatestAlertEventsBySeries({
       queryService,
+      logger,
       spaceId: SPACE_ID,
       series: [ruleSeries('test-rule-id')],
     });
@@ -150,6 +156,7 @@ describe('loadLatestAlertEventsBySeries', () => {
 
     const events = await loadLatestAlertEventsBySeries({
       queryService,
+      logger,
       spaceId: SPACE_ID,
       series: [ruleSeries('rule-a'), ruleSeries('rule-without-events')],
     });
@@ -159,6 +166,7 @@ describe('loadLatestAlertEventsBySeries', () => {
 });
 
 describe('loadLatestAlertEventsByEpisodeId', () => {
+  const logger = createLoggerService().loggerService;
   const SPACE_ID = 'default';
 
   const setup = () => createQueryService();
@@ -168,6 +176,7 @@ describe('loadLatestAlertEventsByEpisodeId', () => {
 
     const events = await loadLatestAlertEventsByEpisodeId({
       queryService,
+      logger,
       spaceId: SPACE_ID,
       episodeIds: [],
     });
@@ -184,6 +193,7 @@ describe('loadLatestAlertEventsByEpisodeId', () => {
 
     await loadLatestAlertEventsByEpisodeId({
       queryService,
+      logger,
       spaceId: SPACE_ID,
       episodeIds: ['ep-1', 'ep-2', 'ep-1'],
     });
@@ -208,6 +218,7 @@ describe('loadLatestAlertEventsByEpisodeId', () => {
 
     const events = await loadLatestAlertEventsByEpisodeId({
       queryService,
+      logger,
       spaceId: SPACE_ID,
       episodeIds: ['ep-1'],
     });
@@ -222,6 +233,7 @@ describe('loadLatestAlertEventsByEpisodeId', () => {
 });
 
 describe('loadLastSeriesAlertEventOrThrow', () => {
+  const logger = createLoggerService().loggerService;
   const SPACE_ID = 'default';
 
   const setup = () => createQueryService();
@@ -235,6 +247,7 @@ describe('loadLastSeriesAlertEventOrThrow', () => {
 
     const record = await loadLastSeriesAlertEventOrThrow({
       queryService,
+      logger,
       spaceId: SPACE_ID,
       seriesId: seriesIdOf(series),
       series,
@@ -256,6 +269,7 @@ describe('loadLastSeriesAlertEventOrThrow', () => {
 
     const record = await loadLastSeriesAlertEventOrThrow({
       queryService,
+      logger,
       spaceId: SPACE_ID,
       seriesId: seriesIdOf(series),
       series,
@@ -275,7 +289,7 @@ describe('loadLastSeriesAlertEventOrThrow', () => {
     const seriesId = seriesIdOf(series);
 
     await expect(
-      loadLastSeriesAlertEventOrThrow({ queryService, spaceId: SPACE_ID, seriesId, series })
+      loadLastSeriesAlertEventOrThrow({ queryService, logger, spaceId: SPACE_ID, seriesId, series })
     ).rejects.toMatchObject({
       output: { statusCode: 404 },
       data: {
@@ -293,6 +307,7 @@ describe('loadLastSeriesAlertEventOrThrow', () => {
 
     const promise = loadLastSeriesAlertEventOrThrow({
       queryService,
+      logger,
       spaceId: SPACE_ID,
       seriesId,
       series,
@@ -310,6 +325,7 @@ describe('loadLastSeriesAlertEventOrThrow', () => {
 });
 
 describe('loadLastEpisodeAlertEventOrThrow', () => {
+  const logger = createLoggerService().loggerService;
   const SPACE_ID = 'default';
 
   const setup = () => createQueryService();
@@ -322,6 +338,7 @@ describe('loadLastEpisodeAlertEventOrThrow', () => {
 
     const record = await loadLastEpisodeAlertEventOrThrow({
       queryService,
+      logger,
       spaceId: SPACE_ID,
       episodeId: 'ep-1',
     });
@@ -335,6 +352,7 @@ describe('loadLastEpisodeAlertEventOrThrow', () => {
 
     const promise = loadLastEpisodeAlertEventOrThrow({
       queryService,
+      logger,
       spaceId: SPACE_ID,
       episodeId: 'unknown-episode',
     });

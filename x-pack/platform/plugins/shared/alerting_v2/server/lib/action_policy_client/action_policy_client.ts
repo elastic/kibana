@@ -37,6 +37,7 @@ import { ALERTING_ERROR_CODES, ALERTING_LOG_CODES } from '../errors/error_codes'
 import {
   getActionPolicyAlreadyExistsMessage,
   getActionPolicyNotFoundMessage,
+  getActionPolicyCloudApiKeyNotSupportedMessage,
   getActionPolicyVersionConflictMessage,
   getInvalidActionPolicyDataMessage,
 } from '../errors/action_policy_error_messages';
@@ -46,8 +47,12 @@ import type { EventOriginActor } from '../event_origin/origin_schemas';
 import { PolicyMatcher } from '../dispatcher/state';
 import { ActionPolicySavedObjectServiceScopedToken } from '../services/action_policy_saved_object_service/tokens';
 import type { ActionPolicySavedObjectServiceContract } from '../services/action_policy_saved_object_service/types';
-import type { ApiKeyServiceContract } from '../services/api_key_service/api_key_service';
+import type {
+  ApiKeyAttributes,
+  ApiKeyServiceContract,
+} from '../services/api_key_service/api_key_service';
 import { ApiKeyService } from '../services/api_key_service/api_key_service';
+import { CloudApiKeyNotSupportedError } from '../services/api_key_service/cloud_api_key_not_supported_error';
 import type { LicenseServiceContract } from '../services/license_service/license_service';
 import { LicenseServiceToken } from '../services/license_service/tokens';
 import {
@@ -95,6 +100,9 @@ const DEFAULT_PER_PAGE = 20;
 
 /** Most policies read to build the routing tag suggestions. */
 const ROUTING_TAGS_MAX_POLICIES = 10_000;
+
+/** Stored as `kibana.type` in the metadata of every action policy API key. */
+const ACTION_POLICY_API_KEY_TYPE = 'action_policy';
 
 const getActionPolicyApiKeyName = (policyName: string): string =>
   `Action Policy: ${policyName.trim()}`;
@@ -312,7 +320,7 @@ export class ActionPolicyClient {
     const actor = await this.userService.getCurrentActor();
     const now = new Date().toISOString();
 
-    const apiKeyAttrs = await this.apiKeyService.create(getActionPolicyApiKeyName(parsed.name));
+    const apiKeyAttrs = await this.createApiKey(parsed.name);
 
     const attributes = buildCreateActionPolicyAttributes({
       data: parsed,
@@ -409,7 +417,7 @@ export class ActionPolicyClient {
     );
     const mergedData = this.parseActionPolicyData(createActionPolicyDataSchema, merged, 'update');
 
-    const apiKeyAttrs = await this.apiKeyService.create(getActionPolicyApiKeyName(mergedData.name));
+    const apiKeyAttrs = await this.createApiKey(mergedData.name);
 
     const nextAttrs = buildUpdateActionPolicyAttributes({
       existing: existingPolicy,
@@ -569,9 +577,7 @@ export class ActionPolicyClient {
     const oldAuth = await this.getDecryptedAuth(id);
     const actor = await this.userService.getCurrentActor();
     const now = new Date().toISOString();
-    const apiKeyAttrs = await this.apiKeyService.create(
-      getActionPolicyApiKeyName(existingPolicy.name)
-    );
+    const apiKeyAttrs = await this.createApiKey(existingPolicy.name);
 
     try {
       await this.writeActionPolicyAttrs({
@@ -889,6 +895,31 @@ export class ActionPolicyClient {
     });
   }
 
+  /**
+   * Creates the policy's API key. A Cloud API key cannot back a policy, so the
+   * service's typed rejection becomes the policy-specific bad request here.
+   */
+  private async createApiKey(policyName: string): Promise<ApiKeyAttributes> {
+    try {
+      return await this.apiKeyService.create({
+        name: getActionPolicyApiKeyName(policyName),
+        type: ACTION_POLICY_API_KEY_TYPE,
+      });
+    } catch (error) {
+      if (error instanceof CloudApiKeyNotSupportedError) {
+        throw Boom.badRequest(getActionPolicyCloudApiKeyNotSupportedMessage(policyName), {
+          code: ALERTING_ERROR_CODES.ACTION_POLICY_CLOUD_API_KEY_NOT_SUPPORTED,
+        });
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Best-effort: the policy write already committed, so a key that could not
+   * be queued is reported once here and stays valid until an operator revokes
+   * it. The service reports per-key failures as results, not rejections.
+   */
   private markApiKeysForInvalidation(
     apiKey?: string,
     createdByUser?: boolean,
@@ -898,14 +929,24 @@ export class ActionPolicyClient {
       return;
     }
 
-    this.apiKeyService.markApiKeysForInvalidation([apiKey]).catch((error) => {
+    const reportFailure = (error: unknown) => {
       this.logger.warn({
         message: 'Failed to mark superseded API key for invalidation',
         code: ALERTING_LOG_CODES.POLICY_API_KEY_INVALIDATION_FAILED,
         labels: policyId != null ? { policy_id: policyId } : undefined,
         error,
       });
-    });
+    };
+
+    this.apiKeyService
+      .markApiKeysForInvalidation([apiKey])
+      .then(([result]) => {
+        if (result?.success) {
+          return;
+        }
+        reportFailure(new Error(result ? result.message : 'No result returned for the API key'));
+      })
+      .catch(reportFailure);
   }
 
   private async getDecryptedAuth(id: string): Promise<ActionPolicyAuth | null> {
@@ -1036,7 +1077,7 @@ export class ActionPolicyClient {
     // only after the SO write succeeds, so a failed replace doesn't leave
     // the policy with a key that has already been invalidated.
     const oldAuth = await this.getDecryptedAuth(id);
-    const apiKeyAttrs = await this.apiKeyService.create(getActionPolicyApiKeyName(parsed.name));
+    const apiKeyAttrs = await this.createApiKey(parsed.name);
 
     const replacementAttrs = buildUpdateActionPolicyAttributes({
       existing: existingAttrs,

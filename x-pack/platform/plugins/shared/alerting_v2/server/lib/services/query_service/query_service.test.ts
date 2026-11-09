@@ -10,6 +10,7 @@ import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { errors } from '@elastic/elasticsearch';
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { QueryService } from './query_service';
+import type { LoggerService } from '../logger_service/logger_service';
 import { JSON_STREAM_BATCH_SIZE } from './formats';
 import { RuleExecutionCancellationError } from '../../execution_context';
 import { createQueryService } from './query_service.mock';
@@ -23,12 +24,14 @@ import {
 describe('QueryService', () => {
   let mockEsClient: DeeplyMockedApi<ElasticsearchClient>;
   let mockLogger: jest.Mocked<Logger>;
+  let logger: LoggerService;
   let queryService: QueryService;
 
   beforeEach(() => {
     const mocks = createQueryService();
     mockEsClient = mocks.mockEsClient;
     mockLogger = mocks.mockLogger;
+    logger = mocks.loggerService;
     queryService = mocks.queryService;
   });
 
@@ -68,6 +71,7 @@ describe('QueryService', () => {
       mockEsClient.esql.query.mockResolvedValue(mockResponse);
 
       const result = await queryService.executeQuery({
+        logger,
         query: mockQuery,
         filter: mockFilter,
       });
@@ -92,6 +96,7 @@ describe('QueryService', () => {
       const abortController = new AbortController();
 
       await queryService.executeQuery({
+        logger,
         query: mockQuery,
         abortSignal: abortController.signal,
       });
@@ -105,7 +110,7 @@ describe('QueryService', () => {
       const error = new Error('ES|QL syntax error');
       mockEsClient.esql.query.mockRejectedValue(error);
 
-      await expect(queryService.executeQuery({ query: mockQuery })).rejects.toThrow(
+      await expect(queryService.executeQuery({ logger, query: mockQuery })).rejects.toThrow(
         'ES|QL syntax error'
       );
 
@@ -131,6 +136,7 @@ describe('QueryService', () => {
       mockEsClient.esql.query.mockResolvedValue(mockResponse);
 
       const result = await queryService.executeQueryRows<{ host: string; count: number }>({
+        logger,
         query: mockQuery,
       });
 
@@ -150,6 +156,7 @@ describe('QueryService', () => {
       } as unknown as EsqlQueryResponse);
 
       const result = await queryService.executeQueryRows<{ host: string; cpu: number }>({
+        logger,
         query: mockQuery,
       });
 
@@ -163,7 +170,7 @@ describe('QueryService', () => {
         values: [],
       });
 
-      const result = await queryService.executeQueryRows({ query: mockQuery });
+      const result = await queryService.executeQueryRows({ logger, query: mockQuery });
 
       expect(result).toEqual([]);
     });
@@ -174,6 +181,7 @@ describe('QueryService', () => {
       const filter = { bool: { filter: [] } };
 
       await queryService.executeQueryRows({
+        logger,
         query: mockQuery,
         filter,
         abortSignal: abortController.signal,
@@ -193,7 +201,7 @@ describe('QueryService', () => {
     it('should throw an error when query fails', async () => {
       mockEsClient.esql.query.mockRejectedValue(new Error('Query failed'));
 
-      await expect(queryService.executeQueryRows({ query: mockQuery })).rejects.toThrow(
+      await expect(queryService.executeQueryRows({ logger, query: mockQuery })).rejects.toThrow(
         'Query failed'
       );
     });
@@ -206,6 +214,7 @@ describe('QueryService', () => {
       const mocks = createQueryService('arrow');
       mockEsClient = mocks.mockEsClient;
       mockLogger = mocks.mockLogger;
+      logger = mocks.loggerService;
       queryService = mocks.queryService;
     });
 
@@ -221,7 +230,7 @@ describe('QueryService', () => {
       ]);
 
       const batches: Array<Record<string, unknown>[]> = [];
-      for await (const batch of queryService.executeQueryStream({ query: mockQuery })) {
+      for await (const batch of queryService.executeQueryStream({ logger, query: mockQuery })) {
         batches.push(batch);
       }
 
@@ -239,7 +248,7 @@ describe('QueryService', () => {
       ]);
 
       const batches: Array<Record<string, unknown>[]> = [];
-      for await (const batch of queryService.executeQueryStream({ query: mockQuery })) {
+      for await (const batch of queryService.executeQueryStream({ logger, query: mockQuery })) {
         batches.push(batch);
       }
 
@@ -253,7 +262,7 @@ describe('QueryService', () => {
       ]);
 
       const batches: Array<Record<string, unknown>[]> = [];
-      for await (const batch of queryService.executeQueryStream({ query: mockQuery })) {
+      for await (const batch of queryService.executeQueryStream({ logger, query: mockQuery })) {
         batches.push(batch);
       }
 
@@ -272,7 +281,7 @@ describe('QueryService', () => {
       ]);
 
       const batches: Array<Record<string, unknown>[]> = [];
-      for await (const batch of queryService.executeQueryStream({ query: mockQuery })) {
+      for await (const batch of queryService.executeQueryStream({ logger, query: mockQuery })) {
         batches.push(batch);
       }
 
@@ -297,7 +306,7 @@ describe('QueryService', () => {
       ]);
 
       const batches: Array<Record<string, unknown>[]> = [];
-      for await (const batch of queryService.executeQueryStream({ query: mockQuery })) {
+      for await (const batch of queryService.executeQueryStream({ logger, query: mockQuery })) {
         batches.push(batch);
       }
 
@@ -318,7 +327,7 @@ describe('QueryService', () => {
       ]);
 
       const batches: Array<Record<string, unknown>[]> = [];
-      for await (const batch of queryService.executeQueryStream({ query: mockQuery })) {
+      for await (const batch of queryService.executeQueryStream({ logger, query: mockQuery })) {
         batches.push(batch);
       }
 
@@ -336,7 +345,7 @@ describe('QueryService', () => {
       ]);
 
       const batches: Array<Record<string, unknown>[]> = [];
-      for await (const batch of queryService.executeQueryStream({ query: mockQuery })) {
+      for await (const batch of queryService.executeQueryStream({ logger, query: mockQuery })) {
         batches.push(batch);
       }
 
@@ -347,7 +356,7 @@ describe('QueryService', () => {
       mockHelpersEsqlArrowBatches(mockEsClient, [{ numRows: 1, rows: [{ ratio: 12.75 }] }]);
 
       const batches: Array<Record<string, unknown>[]> = [];
-      for await (const batch of queryService.executeQueryStream({ query: mockQuery })) {
+      for await (const batch of queryService.executeQueryStream({ logger, query: mockQuery })) {
         batches.push(batch);
       }
 
@@ -364,6 +373,7 @@ describe('QueryService', () => {
 
       const batches: Array<Record<string, unknown>[]> = [];
       for await (const batch of queryService.executeQueryStream({
+        logger,
         query: mockQuery,
         filter,
         abortSignal: abortController.signal,
@@ -390,7 +400,7 @@ describe('QueryService', () => {
       );
 
       await expect(async () => {
-        for await (const _batch of queryService.executeQueryStream({ query: mockQuery })) {
+        for await (const _batch of queryService.executeQueryStream({ logger, query: mockQuery })) {
           // consume
         }
       }).rejects.toThrow('ES query failed');
@@ -421,7 +431,7 @@ describe('QueryService', () => {
       mockHelpersEsqlToArrowReader(mockEsClient, jest.fn().mockRejectedValue(responseError));
 
       await expect(async () => {
-        for await (const _batch of queryService.executeQueryStream({ query: mockQuery })) {
+        for await (const _batch of queryService.executeQueryStream({ logger, query: mockQuery })) {
           // consume
         }
       }).rejects.toBe(responseError);
@@ -440,7 +450,7 @@ describe('QueryService', () => {
       mockHelpersEsqlToArrowReader(mockEsClient, jest.fn().mockResolvedValue(reader));
 
       await expect(async () => {
-        for await (const _batch of queryService.executeQueryStream({ query: mockQuery })) {
+        for await (const _batch of queryService.executeQueryStream({ logger, query: mockQuery })) {
           // consume
         }
       }).rejects.toThrow(/Failed to parse ES\|QL response/);
@@ -455,7 +465,7 @@ describe('QueryService', () => {
       );
 
       await expect(async () => {
-        for await (const _batch of queryService.executeQueryStream({ query: mockQuery })) {
+        for await (const _batch of queryService.executeQueryStream({ logger, query: mockQuery })) {
           // consume
         }
       }).rejects.toThrow(/aborted/i);
@@ -469,7 +479,7 @@ describe('QueryService', () => {
         { numRows: 1, rows: [{ host: 'host-a' }] },
       ]);
 
-      for await (const _batch of queryService.executeQueryStream({ query: mockQuery })) {
+      for await (const _batch of queryService.executeQueryStream({ logger, query: mockQuery })) {
         // consume
       }
 
@@ -490,7 +500,7 @@ describe('QueryService', () => {
       mockHelpersEsqlToArrowReader(mockEsClient, jest.fn().mockResolvedValue(reader));
 
       await expect(async () => {
-        for await (const _batch of queryService.executeQueryStream({ query: mockQuery })) {
+        for await (const _batch of queryService.executeQueryStream({ logger, query: mockQuery })) {
           // consume
         }
       }).rejects.toThrow();
@@ -515,7 +525,7 @@ describe('QueryService', () => {
       });
 
       const batches: Array<Record<string, unknown>[]> = [];
-      for await (const batch of queryService.executeQueryStream({ query: mockQuery })) {
+      for await (const batch of queryService.executeQueryStream({ logger, query: mockQuery })) {
         batches.push(batch);
       }
 
@@ -539,7 +549,7 @@ describe('QueryService', () => {
       });
 
       const batches: Array<Record<string, unknown>[]> = [];
-      for await (const batch of queryService.executeQueryStream({ query: mockQuery })) {
+      for await (const batch of queryService.executeQueryStream({ logger, query: mockQuery })) {
         batches.push(batch);
       }
 
@@ -560,7 +570,7 @@ describe('QueryService', () => {
       });
 
       const batches: Array<Record<string, unknown>[]> = [];
-      for await (const batch of queryService.executeQueryStream({ query: mockQuery })) {
+      for await (const batch of queryService.executeQueryStream({ logger, query: mockQuery })) {
         batches.push(batch);
       }
 
@@ -577,7 +587,7 @@ describe('QueryService', () => {
       } as unknown as EsqlQueryResponse);
 
       const batches: Array<Record<string, unknown>[]> = [];
-      for await (const batch of queryService.executeQueryStream({ query: mockQuery })) {
+      for await (const batch of queryService.executeQueryStream({ logger, query: mockQuery })) {
         batches.push(batch);
       }
 
@@ -595,6 +605,7 @@ describe('QueryService', () => {
       const filter = { bool: { filter: [] } };
 
       for await (const _batch of queryService.executeQueryStream({
+        logger,
         query: mockQuery,
         filter,
         abortSignal: abortController.signal,
@@ -622,6 +633,7 @@ describe('QueryService', () => {
       const maxResponseSize = 1024;
 
       for await (const _batch of queryService.executeQueryStream({
+        logger,
         query: mockQuery,
         maxResponseSize,
       })) {
@@ -643,7 +655,7 @@ describe('QueryService', () => {
       mockEsClient.esql.query.mockRejectedValue(new Error('ES query failed'));
 
       await expect(async () => {
-        for await (const _batch of queryService.executeQueryStream({ query: mockQuery })) {
+        for await (const _batch of queryService.executeQueryStream({ logger, query: mockQuery })) {
           // consume
         }
       }).rejects.toThrow('ES query failed');
@@ -658,7 +670,7 @@ describe('QueryService', () => {
       } as unknown as EsqlQueryResponse);
 
       await expect(async () => {
-        for await (const _batch of queryService.executeQueryStream({ query: mockQuery })) {
+        for await (const _batch of queryService.executeQueryStream({ logger, query: mockQuery })) {
           // consume
         }
       }).rejects.toThrow(/Failed to parse ES\|QL response/);
@@ -672,7 +684,7 @@ describe('QueryService', () => {
       );
 
       await expect(async () => {
-        for await (const _batch of queryService.executeQueryStream({ query: mockQuery })) {
+        for await (const _batch of queryService.executeQueryStream({ logger, query: mockQuery })) {
           // consume
         }
       }).rejects.toThrow(/aborted/i);
@@ -694,6 +706,7 @@ describe('QueryService', () => {
       await expect(async () => {
         try {
           for await (const _batch of queryService.executeQueryStream({
+            logger,
             query: mockQuery,
             abortSignal: abortController.signal,
           })) {
@@ -721,7 +734,7 @@ describe('QueryService', () => {
       });
 
       const batches: Array<Record<string, unknown>[]> = [];
-      for await (const batch of queryService.executeQueryStream({ query: mockQuery })) {
+      for await (const batch of queryService.executeQueryStream({ logger, query: mockQuery })) {
         batches.push(batch);
       }
 
@@ -737,7 +750,7 @@ describe('QueryService', () => {
       });
 
       const batches: Array<Record<string, unknown>[]> = [];
-      for await (const batch of queryService.executeQueryStream({ query: mockQuery })) {
+      for await (const batch of queryService.executeQueryStream({ logger, query: mockQuery })) {
         batches.push(batch);
       }
 
@@ -754,7 +767,7 @@ describe('QueryService', () => {
       } as unknown as EsqlQueryResponse);
 
       const batches: Array<Record<string, unknown>[]> = [];
-      for await (const batch of queryService.executeQueryStream({ query: mockQuery })) {
+      for await (const batch of queryService.executeQueryStream({ logger, query: mockQuery })) {
         batches.push(batch);
       }
 
@@ -773,7 +786,7 @@ describe('QueryService', () => {
       });
 
       const batches: Array<Record<string, unknown>[]> = [];
-      for await (const batch of queryService.executeQueryStream({ query: mockQuery })) {
+      for await (const batch of queryService.executeQueryStream({ logger, query: mockQuery })) {
         batches.push(batch);
       }
 
@@ -790,6 +803,7 @@ describe('QueryService', () => {
       const mocks = createQueryService('arrow');
       mockEsClient = mocks.mockEsClient;
       mockLogger = mocks.mockLogger;
+      logger = mocks.loggerService;
       queryService = mocks.queryService;
     });
 
@@ -805,6 +819,7 @@ describe('QueryService', () => {
 
       await expect(async () => {
         for await (const batch of queryService.executeQueryStream({
+          logger,
           query: mockQuery,
           abortSignal: abortController.signal,
         })) {
@@ -814,9 +829,7 @@ describe('QueryService', () => {
       }).rejects.toThrow(RuleExecutionCancellationError);
 
       expect(batches).toEqual([[{ host: 'host-a' }]]);
-      expect(mockLogger.debug).toHaveBeenCalledWith(
-        'QueryService: Streaming query aborted (arrow)'
-      );
+      expect(mockLogger.debug).toHaveBeenCalledWith(expect.any(Function));
       expect(mockLogger.error).not.toHaveBeenCalled();
     });
 
@@ -832,6 +845,7 @@ describe('QueryService', () => {
 
       await expect(async () => {
         for await (const batch of queryService.executeQueryStream({
+          logger,
           query: mockQuery,
           abortSignal: abortController.signal,
         })) {
@@ -841,9 +855,7 @@ describe('QueryService', () => {
       }).rejects.toThrow(RuleExecutionCancellationError);
 
       expect(batches).toEqual([[{ host: 'host-a' }]]);
-      expect(mockLogger.debug).toHaveBeenCalledWith(
-        'QueryService: Streaming query aborted (arrow)'
-      );
+      expect(mockLogger.debug).toHaveBeenCalledWith(expect.any(Function));
       expect(mockLogger.error).not.toHaveBeenCalled();
     });
 
@@ -858,7 +870,7 @@ describe('QueryService', () => {
       mockHelpersEsqlToArrowReader(mockEsClient, jest.fn().mockResolvedValue(reader));
 
       await expect(async () => {
-        for await (const _batch of queryService.executeQueryStream({ query: mockQuery })) {
+        for await (const _batch of queryService.executeQueryStream({ logger, query: mockQuery })) {
           // consume
         }
       }).rejects.toThrow(/Failed to parse ES\|QL response\. Error: mid-stream failure/);

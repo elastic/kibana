@@ -6,17 +6,28 @@
  */
 
 import type { QueryServiceContract } from '../services/query_service/query_service';
+import type { LoggerServiceContract } from '../services/logger_service/logger_service';
 import type { ExecutionContext } from '../execution_context';
 import { getActiveAlertGroupHashesQuery, type ActiveAlertGroupHash } from './queries';
 
-export async function fetchActiveAlertGroupHashes(
-  internalQueryService: QueryServiceContract,
-  ruleId: string,
-  executionContext: ExecutionContext,
-  limit: number
-): Promise<ActiveAlertGroupHash[]> {
+export interface FetchActiveAlertGroupHashesParams {
+  queryService: QueryServiceContract;
+  ruleId: string;
+  executionContext: ExecutionContext;
+  limit: number;
+  logger: LoggerServiceContract;
+}
+
+export async function fetchActiveAlertGroupHashes({
+  queryService,
+  ruleId,
+  executionContext,
+  limit,
+  logger,
+}: FetchActiveAlertGroupHashesParams): Promise<ActiveAlertGroupHash[]> {
   const request = getActiveAlertGroupHashesQuery({ ruleId, limit }).toRequest();
-  return internalQueryService.executeQueryRows<ActiveAlertGroupHash>({
+  return queryService.executeQueryRows<ActiveAlertGroupHash>({
+    logger,
     query: request.query,
     // @ts-expect-error - the types of the composer query are not compatible with the types of the esql client
     params: request.params,

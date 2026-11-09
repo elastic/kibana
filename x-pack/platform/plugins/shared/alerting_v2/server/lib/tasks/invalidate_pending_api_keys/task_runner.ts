@@ -33,9 +33,11 @@ type TaskRunParams = Pick<RunContext, 'taskInstance' | 'signal'>;
 export class ApiKeyInvalidationTaskRunner {
   private readonly taskConfig: PluginConfig['invalidateApiKeysTask'];
   private readonly logger: LoggerServiceContract;
+  /** `runInvalidate` requires a core `Logger`. Scoped to the `tasks` subsystem. */
+  private readonly coreLogger: Logger;
 
   constructor(
-    @inject(BaseLogger) private readonly coreLogger: Logger,
+    @inject(BaseLogger) coreLogger: Logger,
     @inject(LoggerServiceToken) loggerService: LoggerServiceContract,
     @inject(ApiKeyServiceSavedObjectsClientToken)
     private readonly savedObjectsClient: SavedObjectsClientContract,
@@ -46,6 +48,7 @@ export class ApiKeyInvalidationTaskRunner {
   ) {
     this.taskConfig = configService.get('invalidateApiKeysTask');
     this.logger = loggerService.forSubsystem('tasks');
+    this.coreLogger = coreLogger.get('tasks');
   }
 
   public async run({ taskInstance }: TaskRunParams): Promise<RunResult> {

@@ -15,12 +15,17 @@ import type { ResourceDefinition } from '../../../resources/datastreams/types';
 import { EsConcurrentModificationError } from '../retry_service/es_concurrent_modification_error';
 import { EsUnacknowledgedError } from '../retry_service/es_unacknowledged_error';
 import { DatastreamInitializer } from './datastream_initializer';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
+import type { LoggerService } from '../logger_service/logger_service';
+import { createLoggerService } from '../logger_service/logger_service.mock';
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
 describe('DatastreamInitializer', () => {
   let esClient: DeeplyMockedApi<ElasticsearchClient>;
   let mockLogger: jest.Mocked<Logger>;
+  let loggerService: LoggerService;
+  let coreLogger: jest.Mocked<Logger>;
 
   const resourceDefinition: ResourceDefinition = {
     key: 'data_stream:.alerting-test',
@@ -45,7 +50,8 @@ describe('DatastreamInitializer', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockLogger = loggerMock.create();
+    ({ loggerService, mockLogger } = createLoggerService());
+    coreLogger = loggerMock.create();
     // data streams uses the esClient internally
     esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.indices.getDataStream.mockResolvedValue({ data_streams: [] });
@@ -62,7 +68,12 @@ describe('DatastreamInitializer', () => {
     const managedDefinition: ResourceDefinition = { ...resourceDefinition, manageLifecycle: true };
 
     it('does not touch the lifecycle of a data stream that does not manage it', async () => {
-      const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
+      const initializer = new DatastreamInitializer(
+        loggerService,
+        coreLogger,
+        esClient,
+        resourceDefinition
+      );
 
       await initializer.initialize();
 
@@ -70,7 +81,7 @@ describe('DatastreamInitializer', () => {
     });
 
     it('applies the retention to the data stream', async () => {
-      const initializer = new DatastreamInitializer(mockLogger, esClient, {
+      const initializer = new DatastreamInitializer(loggerService, coreLogger, esClient, {
         ...managedDefinition,
         lifecycle: { data_retention: '90d' },
       });
@@ -85,7 +96,12 @@ describe('DatastreamInitializer', () => {
     });
 
     it('applies a lifecycle without retention, removing a previously applied one', async () => {
-      const initializer = new DatastreamInitializer(mockLogger, esClient, managedDefinition);
+      const initializer = new DatastreamInitializer(
+        loggerService,
+        coreLogger,
+        esClient,
+        managedDefinition
+      );
 
       await initializer.initialize();
 
@@ -100,7 +116,7 @@ describe('DatastreamInitializer', () => {
         new errors.ResponseError({ statusCode: 409 } as DiagnosticResult)
       );
 
-      const initializer = new DatastreamInitializer(mockLogger, esClient, {
+      const initializer = new DatastreamInitializer(loggerService, coreLogger, esClient, {
         ...managedDefinition,
         lifecycle: { data_retention: '30d' },
       });
@@ -118,7 +134,12 @@ describe('DatastreamInitializer', () => {
         new errors.ResponseError({ statusCode: 500 } as DiagnosticResult)
       );
 
-      const initializer = new DatastreamInitializer(mockLogger, esClient, managedDefinition);
+      const initializer = new DatastreamInitializer(
+        loggerService,
+        coreLogger,
+        esClient,
+        managedDefinition
+      );
 
       await expect(initializer.initialize()).rejects.toMatchObject({ statusCode: 500 });
     });
@@ -126,7 +147,12 @@ describe('DatastreamInitializer', () => {
     it('fails initialization with a retryable error when applying the lifecycle is not acknowledged', async () => {
       esClient.indices.putDataLifecycle.mockResolvedValue({ acknowledged: false });
 
-      const initializer = new DatastreamInitializer(mockLogger, esClient, managedDefinition);
+      const initializer = new DatastreamInitializer(
+        loggerService,
+        coreLogger,
+        esClient,
+        managedDefinition
+      );
 
       await expect(initializer.initialize()).rejects.toBeInstanceOf(EsUnacknowledgedError);
     });
@@ -136,7 +162,12 @@ describe('DatastreamInitializer', () => {
         new errors.ResponseError({ statusCode: 404, body: {} } as DiagnosticResult)
       );
 
-      const initializer = new DatastreamInitializer(mockLogger, esClient, managedDefinition);
+      const initializer = new DatastreamInitializer(
+        loggerService,
+        coreLogger,
+        esClient,
+        managedDefinition
+      );
 
       await expect(initializer.initialize()).rejects.toBeInstanceOf(EsConcurrentModificationError);
     });
@@ -144,7 +175,12 @@ describe('DatastreamInitializer', () => {
 
   describe('ingest pipeline', () => {
     it('installs the pipeline before the index template', async () => {
-      const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
+      const initializer = new DatastreamInitializer(
+        loggerService,
+        coreLogger,
+        esClient,
+        resourceDefinition
+      );
 
       await initializer.initialize();
 
@@ -160,7 +196,12 @@ describe('DatastreamInitializer', () => {
     });
 
     it('wires the pipeline as index.final_pipeline on the index template', async () => {
-      const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
+      const initializer = new DatastreamInitializer(
+        loggerService,
+        coreLogger,
+        esClient,
+        resourceDefinition
+      );
 
       await initializer.initialize();
 
@@ -180,7 +221,12 @@ describe('DatastreamInitializer', () => {
         [resourceDefinition.finalPipeline.id]: { version: 2, processors: [] },
       });
 
-      const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
+      const initializer = new DatastreamInitializer(
+        loggerService,
+        coreLogger,
+        esClient,
+        resourceDefinition
+      );
       await initializer.initialize();
 
       expect(esClient.ingest.putPipeline).not.toHaveBeenCalled();
@@ -191,7 +237,12 @@ describe('DatastreamInitializer', () => {
         [resourceDefinition.finalPipeline.id]: { version: 1, processors: [] },
       });
 
-      const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
+      const initializer = new DatastreamInitializer(
+        loggerService,
+        coreLogger,
+        esClient,
+        resourceDefinition
+      );
       await initializer.initialize();
 
       expect(esClient.ingest.putPipeline).toHaveBeenCalledTimes(1);
@@ -200,7 +251,12 @@ describe('DatastreamInitializer', () => {
     it('fails initialization with a retryable error when the pipeline install is not acknowledged', async () => {
       esClient.ingest.putPipeline.mockResolvedValue({ acknowledged: false });
 
-      const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
+      const initializer = new DatastreamInitializer(
+        loggerService,
+        coreLogger,
+        esClient,
+        resourceDefinition
+      );
       await expect(initializer.initialize()).rejects.toBeInstanceOf(EsUnacknowledgedError);
       expect(esClient.indices.putIndexTemplate).not.toHaveBeenCalled();
     });
@@ -210,13 +266,23 @@ describe('DatastreamInitializer', () => {
         new errors.ResponseError({ statusCode: 500 } as DiagnosticResult)
       );
 
-      const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
+      const initializer = new DatastreamInitializer(
+        loggerService,
+        coreLogger,
+        esClient,
+        resourceDefinition
+      );
       await expect(initializer.initialize()).rejects.toThrow();
       expect(esClient.indices.putIndexTemplate).not.toHaveBeenCalled();
     });
 
     it('applies index.final_pipeline to existing backing indices', async () => {
-      const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
+      const initializer = new DatastreamInitializer(
+        loggerService,
+        coreLogger,
+        esClient,
+        resourceDefinition
+      );
 
       await initializer.initialize();
 
@@ -234,7 +300,12 @@ describe('DatastreamInitializer', () => {
         return { acknowledged: true };
       });
 
-      const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
+      const initializer = new DatastreamInitializer(
+        loggerService,
+        coreLogger,
+        esClient,
+        resourceDefinition
+      );
       await expect(initializer.initialize()).rejects.toThrow();
     });
 
@@ -243,13 +314,23 @@ describe('DatastreamInitializer', () => {
         acknowledged: !(settings && 'index.final_pipeline' in settings),
       }));
 
-      const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
+      const initializer = new DatastreamInitializer(
+        loggerService,
+        coreLogger,
+        esClient,
+        resourceDefinition
+      );
       await expect(initializer.initialize()).rejects.toBeInstanceOf(EsUnacknowledgedError);
     });
   });
 
   it('installs the index template with DSL lifecycle, then creates the data stream', async () => {
-    const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
+    const initializer = new DatastreamInitializer(
+      loggerService,
+      coreLogger,
+      esClient,
+      resourceDefinition
+    );
 
     await initializer.initialize();
 
@@ -268,7 +349,12 @@ describe('DatastreamInitializer', () => {
   });
 
   it('installs the expected index template settings', async () => {
-    const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
+    const initializer = new DatastreamInitializer(
+      loggerService,
+      coreLogger,
+      esClient,
+      resourceDefinition
+    );
 
     await initializer.initialize();
 
@@ -291,7 +377,12 @@ describe('DatastreamInitializer', () => {
       new errors.ResponseError({ statusCode: 409 } as DiagnosticResult)
     );
 
-    const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
+    const initializer = new DatastreamInitializer(
+      loggerService,
+      coreLogger,
+      esClient,
+      resourceDefinition
+    );
     await expect(initializer.initialize()).resolves.toBeUndefined();
   });
 
@@ -303,7 +394,12 @@ describe('DatastreamInitializer', () => {
       } as DiagnosticResult)
     );
 
-    const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
+    const initializer = new DatastreamInitializer(
+      loggerService,
+      coreLogger,
+      esClient,
+      resourceDefinition
+    );
     await expect(initializer.initialize()).resolves.toBeUndefined();
   });
 
@@ -314,7 +410,12 @@ describe('DatastreamInitializer', () => {
       } as DiagnosticResult)
     );
 
-    const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
+    const initializer = new DatastreamInitializer(
+      loggerService,
+      coreLogger,
+      esClient,
+      resourceDefinition
+    );
     await expect(initializer.initialize()).rejects.toThrow();
   });
 
@@ -325,12 +426,22 @@ describe('DatastreamInitializer', () => {
       } as DiagnosticResult)
     );
 
-    const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
+    const initializer = new DatastreamInitializer(
+      loggerService,
+      coreLogger,
+      esClient,
+      resourceDefinition
+    );
     await expect(initializer.initialize()).rejects.toThrow();
   });
 
   it('applies auto_expand_replicas to existing backing indices', async () => {
-    const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
+    const initializer = new DatastreamInitializer(
+      loggerService,
+      coreLogger,
+      esClient,
+      resourceDefinition
+    );
 
     await initializer.initialize();
 
@@ -345,7 +456,12 @@ describe('DatastreamInitializer', () => {
       new errors.ResponseError({ statusCode: 409 } as DiagnosticResult)
     );
 
-    const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
+    const initializer = new DatastreamInitializer(
+      loggerService,
+      coreLogger,
+      esClient,
+      resourceDefinition
+    );
     await initializer.initialize();
 
     expect(esClient.indices.putSettings).toHaveBeenCalledWith({
@@ -362,16 +478,32 @@ describe('DatastreamInitializer', () => {
       return { acknowledged: true };
     });
 
-    const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
+    const initializer = new DatastreamInitializer(
+      loggerService,
+      coreLogger,
+      esClient,
+      resourceDefinition
+    );
 
     await expect(initializer.initialize()).resolves.toBeUndefined();
     expect(mockLogger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('Failed to update auto_expand_replicas')
+      expect.any(String),
+      expect.objectContaining({
+        labels: expect.objectContaining({
+          code: ALERTING_LOG_CODES.RESOURCES_REPLICA_SETTINGS_UPDATE_FAILED,
+          resource: resourceDefinition.dataStreamName,
+        }),
+      })
     );
   });
 
   it('installs the index template with the max priority so it wins over overlapping user templates', async () => {
-    const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
+    const initializer = new DatastreamInitializer(
+      loggerService,
+      coreLogger,
+      esClient,
+      resourceDefinition
+    );
 
     await initializer.initialize();
 
@@ -430,7 +562,7 @@ describe('DatastreamInitializer', () => {
       (_description, forceResetVersion) => {
         expect(
           () =>
-            new DatastreamInitializer(mockLogger, esClient, {
+            new DatastreamInitializer(loggerService, coreLogger, esClient, {
               ...forceResetDefinition,
               forceReset: { version: forceResetVersion },
             })
@@ -441,7 +573,12 @@ describe('DatastreamInitializer', () => {
     );
 
     it('does not read the data stream ahead of DataStreamClient when forceReset is not set', async () => {
-      const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
+      const initializer = new DatastreamInitializer(
+        loggerService,
+        coreLogger,
+        esClient,
+        resourceDefinition
+      );
 
       await initializer.initialize();
 
@@ -450,7 +587,12 @@ describe('DatastreamInitializer', () => {
     });
 
     it('does not delete anything when the data stream does not exist', async () => {
-      const initializer = new DatastreamInitializer(mockLogger, esClient, forceResetDefinition);
+      const initializer = new DatastreamInitializer(
+        loggerService,
+        coreLogger,
+        esClient,
+        forceResetDefinition
+      );
 
       await initializer.initialize();
 
@@ -463,7 +605,12 @@ describe('DatastreamInitializer', () => {
     it('does not delete anything when reading the data stream returns 404', async () => {
       esClient.indices.getDataStream.mockRejectedValueOnce(notFound());
 
-      const initializer = new DatastreamInitializer(mockLogger, esClient, forceResetDefinition);
+      const initializer = new DatastreamInitializer(
+        loggerService,
+        coreLogger,
+        esClient,
+        forceResetDefinition
+      );
 
       await initializer.initialize();
 
@@ -475,7 +622,12 @@ describe('DatastreamInitializer', () => {
       async (createdFromVersion) => {
         mockExistingDataStream({ version: createdFromVersion, managed: true });
 
-        const initializer = new DatastreamInitializer(mockLogger, esClient, forceResetDefinition);
+        const initializer = new DatastreamInitializer(
+          loggerService,
+          coreLogger,
+          esClient,
+          forceResetDefinition
+        );
 
         await initializer.initialize();
 
@@ -493,10 +645,11 @@ describe('DatastreamInitializer', () => {
         const [createOrder] = esClient.indices.createDataStream.mock.invocationCallOrder;
         expect(installOrder).toBeLessThan(deleteOrder);
         expect(deleteOrder).toBeLessThan(createOrder);
-        expect(mockLogger.warn).toHaveBeenCalledWith(
-          expect.stringContaining(
-            `Deleting data stream ${forceResetDefinition.dataStreamName} created from index template v${createdFromVersion}`
-          )
+        expect(mockLogger.info).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({
+            labels: expect.objectContaining({ resource: forceResetDefinition.dataStreamName }),
+          })
         );
       }
     );
@@ -507,7 +660,12 @@ describe('DatastreamInitializer', () => {
     ])('deletes a data stream with %s', async (_description, meta) => {
       mockExistingDataStream(meta);
 
-      const initializer = new DatastreamInitializer(mockLogger, esClient, forceResetDefinition);
+      const initializer = new DatastreamInitializer(
+        loggerService,
+        coreLogger,
+        esClient,
+        forceResetDefinition
+      );
 
       await initializer.initialize();
 
@@ -519,19 +677,29 @@ describe('DatastreamInitializer', () => {
     it('keeps a data stream created from a version above forceReset.version', async () => {
       mockExistingDataStream({ version: 8, managed: true });
 
-      const initializer = new DatastreamInitializer(mockLogger, esClient, forceResetDefinition);
+      const initializer = new DatastreamInitializer(
+        loggerService,
+        coreLogger,
+        esClient,
+        forceResetDefinition
+      );
 
       await initializer.initialize();
 
       expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
-      expect(mockLogger.warn).not.toHaveBeenCalled();
+      expect(mockLogger.info).not.toHaveBeenCalled();
     });
 
     it('tolerates a 404 when the data stream is deleted concurrently', async () => {
       mockExistingDataStream({ version: 7, managed: true });
       esClient.indices.deleteDataStream.mockRejectedValueOnce(notFound());
 
-      const initializer = new DatastreamInitializer(mockLogger, esClient, forceResetDefinition);
+      const initializer = new DatastreamInitializer(
+        loggerService,
+        coreLogger,
+        esClient,
+        forceResetDefinition
+      );
 
       await expect(initializer.initialize()).resolves.toBeUndefined();
       expect(esClient.indices.createDataStream).toHaveBeenCalledWith({
@@ -543,7 +711,12 @@ describe('DatastreamInitializer', () => {
       mockExistingDataStream({ version: 7, managed: true });
       esClient.indices.deleteDataStream.mockResolvedValueOnce({ acknowledged: false });
 
-      const initializer = new DatastreamInitializer(mockLogger, esClient, forceResetDefinition);
+      const initializer = new DatastreamInitializer(
+        loggerService,
+        coreLogger,
+        esClient,
+        forceResetDefinition
+      );
 
       await expect(initializer.initialize()).rejects.toBeInstanceOf(EsUnacknowledgedError);
       expect(esClient.indices.createDataStream).not.toHaveBeenCalled();
@@ -565,11 +738,24 @@ describe('DatastreamInitializer', () => {
           } as DiagnosticResult)
         );
 
-        const initializer = new DatastreamInitializer(mockLogger, esClient, forceResetDefinition);
+        const initializer = new DatastreamInitializer(
+          loggerService,
+          coreLogger,
+          esClient,
+          forceResetDefinition
+        );
 
         await expect(initializer.initialize()).resolves.toBeUndefined();
         expect(esClient.indices.putMapping).toHaveBeenCalledTimes(1);
-        expect(mockLogger.warn).toHaveBeenCalled();
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          expect.any(String),
+          expect.objectContaining({
+            labels: expect.objectContaining({
+              code: ALERTING_LOG_CODES.RESOURCES_DATASTREAM_UPDATE_FAILED,
+              resource: forceResetDefinition.dataStreamName,
+            }),
+          })
+        );
 
         expect(esClient.indices.deleteDataStream).toHaveBeenCalledWith({
           name: forceResetDefinition.dataStreamName,
@@ -590,7 +776,12 @@ describe('DatastreamInitializer', () => {
         return { acknowledged: true };
       });
 
-      const initializer = new DatastreamInitializer(mockLogger, esClient, forceResetDefinition);
+      const initializer = new DatastreamInitializer(
+        loggerService,
+        coreLogger,
+        esClient,
+        forceResetDefinition
+      );
 
       await expect(initializer.initialize()).rejects.toThrow(EsConcurrentModificationError);
       await expect(initializer.initialize()).rejects.toThrow(forceResetDefinition.dataStreamName);
@@ -605,7 +796,12 @@ describe('DatastreamInitializer', () => {
       });
       esClient.indices.putMapping.mockRejectedValueOnce(notFound());
 
-      const initializer = new DatastreamInitializer(mockLogger, esClient, forceResetDefinition);
+      const initializer = new DatastreamInitializer(
+        loggerService,
+        coreLogger,
+        esClient,
+        forceResetDefinition
+      );
 
       await expect(initializer.initialize()).rejects.toThrow(EsConcurrentModificationError);
       expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
@@ -617,12 +813,17 @@ describe('DatastreamInitializer', () => {
         new errors.ResponseError({ statusCode: 500, body: {} } as DiagnosticResult)
       );
 
-      const initializer = new DatastreamInitializer(mockLogger, esClient, forceResetDefinition);
+      const initializer = new DatastreamInitializer(
+        loggerService,
+        coreLogger,
+        esClient,
+        forceResetDefinition
+      );
 
       await expect(initializer.initialize()).rejects.toMatchObject({ statusCode: 500 });
       expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
       expect(esClient.indices.createDataStream).not.toHaveBeenCalled();
-      expect(mockLogger.warn).not.toHaveBeenCalled();
+      expect(mockLogger.info).not.toHaveBeenCalled();
     });
 
     it('fails initialization without recreating the data stream when the delete fails', async () => {
@@ -631,7 +832,12 @@ describe('DatastreamInitializer', () => {
         new errors.ResponseError({ statusCode: 500 } as DiagnosticResult)
       );
 
-      const initializer = new DatastreamInitializer(mockLogger, esClient, forceResetDefinition);
+      const initializer = new DatastreamInitializer(
+        loggerService,
+        coreLogger,
+        esClient,
+        forceResetDefinition
+      );
 
       await expect(initializer.initialize()).rejects.toThrow();
       expect(esClient.indices.createDataStream).not.toHaveBeenCalled();
@@ -642,7 +848,12 @@ describe('DatastreamInitializer', () => {
         new errors.ResponseError({ statusCode: 500 } as DiagnosticResult)
       );
 
-      const initializer = new DatastreamInitializer(mockLogger, esClient, forceResetDefinition);
+      const initializer = new DatastreamInitializer(
+        loggerService,
+        coreLogger,
+        esClient,
+        forceResetDefinition
+      );
 
       await expect(initializer.initialize()).rejects.toThrow();
       expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();

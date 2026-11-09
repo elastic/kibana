@@ -54,7 +54,7 @@ export type AlertingSubsystemName =
   | 'rulesClient'
   | 'ruleTemplateClient'
   | 'actionPolicyClient'
-  | 'actionPolicyTest'
+  | 'alertsClient'
   | 'ruleExecutor'
   | 'director'
   | 'dispatcher'

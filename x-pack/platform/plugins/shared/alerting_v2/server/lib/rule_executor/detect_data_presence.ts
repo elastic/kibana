@@ -61,6 +61,7 @@ export const detectDataPresence = async ({
 
   try {
     const rows = await queryService.executeQueryRows({
+      logger,
       query: noDataQuery,
       filter: queryPayload.filter,
       params: queryPayload.params,

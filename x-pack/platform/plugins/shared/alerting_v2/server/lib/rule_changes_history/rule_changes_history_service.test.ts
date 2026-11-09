@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ChangeHistoryClient } from '@kbn/change-history';
 import { RULE_CHANGES_HISTORY_OBJECT_TYPE } from './constants';
 import { RuleChangesHistoryService } from './rule_changes_history_service';
@@ -20,7 +19,6 @@ const createMockClient = () => ({
 const snapshot = createRuleResponse({ id: 'rule-1', metadata: { name: 'my rule' } });
 
 describe('RuleChangesHistoryService', () => {
-  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let clientMock: ReturnType<typeof createMockClient>;
   let service: RuleChangesHistoryService;
 
@@ -34,8 +32,7 @@ describe('RuleChangesHistoryService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     clientMock = createMockClient();
-    logger = loggingSystemMock.createLogger();
-    service = new RuleChangesHistoryService(logger, clientMock as unknown as ChangeHistoryClient);
+    service = new RuleChangesHistoryService(clientMock as unknown as ChangeHistoryClient);
   });
 
   describe('logRuleChanges', () => {
@@ -133,10 +130,10 @@ describe('RuleChangesHistoryService', () => {
       expect(changesFromNumber[0].timestamp).toBe('2024-06-01T12:00:00.000Z');
     });
 
-    it('logs a warning and does not throw when logBulk rejects', async () => {
+    it('rethrows when logBulk rejects', async () => {
       clientMock.logBulk.mockRejectedValueOnce(new Error('es unreachable'));
 
-      await expect(service.logRuleChanges(baseParams)).resolves.toBeUndefined();
+      await expect(service.logRuleChanges(baseParams)).rejects.toThrow('es unreachable');
     });
   });
 });
