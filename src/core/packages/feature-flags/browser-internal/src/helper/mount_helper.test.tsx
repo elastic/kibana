@@ -49,17 +49,13 @@ describe('mountFeatureFlagsHelper', () => {
       helper?.open();
     });
     expect(overlays.openFlyout).toHaveBeenCalledTimes(1);
-
-    act(() => {
-      helper?.close();
-    });
-    expect(close).toHaveBeenCalledTimes(1);
+    expect(close).not.toHaveBeenCalled();
 
     act(() => {
       helper?.unmount();
     });
-    resolveClose();
     expect(close).toHaveBeenCalledTimes(1);
+    resolveClose();
   });
 
   test('shows the corner button when asked, including while the flyout is already open', () => {
