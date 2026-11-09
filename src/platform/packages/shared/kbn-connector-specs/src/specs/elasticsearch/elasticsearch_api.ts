@@ -29,10 +29,7 @@ export const toEsApiKeyHeader = (value: string): string => {
  * pasted without the prefix work, including keys of connectors saved before this change.
  */
 export const esApiKeyHeaderSchema = lazySchema(() =>
-  z.preprocess(
-    (value) => (typeof value === 'string' ? toEsApiKeyHeader(value) : value),
-    z.string().min(1, { message: API_KEY_AUTH_REQUIRED_MESSAGE })
-  )
+  z.string().trim().min(1, { message: API_KEY_AUTH_REQUIRED_MESSAGE }).overwrite(toEsApiKeyHeader)
 );
 
 export function getBaseUrl(ctx: ActionContext): string {

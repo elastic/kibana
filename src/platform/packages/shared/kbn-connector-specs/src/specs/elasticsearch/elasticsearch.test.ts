@@ -109,6 +109,12 @@ describe('Elasticsearch connector', () => {
         expect(parseApiKey('   ').success).toBe(false);
       });
 
+      it('rejects a non-string key', () => {
+        expect(
+          getApiKeySchema().safeParse({ authType: 'api_key_header', Authorization: 123 }).success
+        ).toBe(false);
+      });
+
       it('shows the label and help text on the stored field', () => {
         const { properties } = z.toJSONSchema(getApiKeySchema()) as {
           properties: Record<string, Record<string, unknown>>;
