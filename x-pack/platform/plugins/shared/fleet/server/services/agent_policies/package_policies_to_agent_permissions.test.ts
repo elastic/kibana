@@ -25,6 +25,7 @@ import {
   UNIVERSAL_PROFILING_PERMISSIONS,
   UNIVERSAL_PROFILING_QUEUE_PERMISSIONS,
 } from './package_policies_to_agent_permissions';
+import { getRoleDescriptorNames } from './role_descriptor_name';
 
 const packageInfoCache = new Map();
 packageInfoCache.set('test_package-0.0.0', {
@@ -527,7 +528,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
   });
 
   describe('role descriptor names', () => {
-    const buildPackagePolicy = (id: string): PackagePolicy => ({
+    const buildPackagePolicy = (id: string, dataset = 'some-logs'): PackagePolicy => ({
       id,
       name: 'test-policy',
       namespace: 'test',
@@ -541,7 +542,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
             {
               id: 'test-logs',
               enabled: true,
-              data_stream: { type: 'logs', dataset: 'some-logs' },
+              data_stream: { type: 'logs', dataset },
             },
           ],
         },
@@ -585,13 +586,32 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
       });
     });
 
+    it('keeps the permissions of both policies when a valid ID equals the name generated for a rejected ID', () => {
+      const rejectedId = 'monitor-é-loc';
+      const [generatedName] = getRoleDescriptorNames([rejectedId]);
+
+      const permissions = storedPackagePoliciesToAgentPermissions(packageInfoCache, 'test', [
+        buildPackagePolicy(rejectedId, 'rejected-id-logs'),
+        buildPackagePolicy(generatedName, 'valid-id-logs'),
+      ]);
+
+      expect(Object.keys(permissions!)).toHaveLength(2);
+      expect(permissions![generatedName]).toMatchObject({
+        indices: [{ names: ['logs-valid-id-logs-test'] }],
+      });
+      const [otherName] = Object.keys(permissions!).filter((name) => name !== generatedName);
+      expect(permissions![otherName]).toMatchObject({
+        indices: [{ names: ['logs-rejected-id-logs-test'] }],
+      });
+    });
+
     it('keeps the permissions of every package policy when only some IDs are rejected', () => {
       const validId = 'package-policy-uuid-test-123';
       const invalidIds = ['monitor-é-loc', 'monitor-ü-loc'];
 
       const permissions = storedPackagePoliciesToAgentPermissions(packageInfoCache, 'test', [
         buildPackagePolicy(validId),
-        ...invalidIds.map(buildPackagePolicy),
+        ...invalidIds.map((id) => buildPackagePolicy(id)),
       ]);
 
       const names = Object.keys(permissions!);

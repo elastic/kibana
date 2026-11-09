@@ -42,7 +42,7 @@ import { packagePolicyInputAllowsUndefinedDataStreamType } from '../../../common
 
 import { extractSignalTypesFromPipelines } from './otel_collector';
 import { getEffectiveOtelStreamDataset } from './get_effective_otel_stream_dataset';
-import { toRoleDescriptorName } from './role_descriptor_name';
+import { getRoleDescriptorNames } from './role_descriptor_name';
 
 export const DEFAULT_CLUSTER_PERMISSIONS = ['monitor'];
 
@@ -364,11 +364,12 @@ export function storedPackagePoliciesToAgentPermissions(
 
   // The package policy ID becomes the role descriptor name of the output API key. It can be set
   // by API callers, so make sure one ID that ES rejects cannot block the whole agent policy.
+  const roleDescriptorNames = getRoleDescriptorNames(
+    permissionEntries.map(([packagePolicyId]) => packagePolicyId)
+  );
+
   return Object.fromEntries(
-    permissionEntries.map(([packagePolicyId, descriptor]) => [
-      toRoleDescriptorName(packagePolicyId),
-      descriptor,
-    ])
+    permissionEntries.map(([, descriptor], index) => [roleDescriptorNames[index], descriptor])
   );
 }
 
