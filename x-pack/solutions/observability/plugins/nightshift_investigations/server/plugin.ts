@@ -124,12 +124,15 @@ import {
   NIGHTSHIFT_AUTOMATION_SO_TYPE,
 } from './saved_objects';
 import { createOnboardingClient } from './onboarding/onboarding_client';
+import { createLocalElasticsearchConnectorLifecycleListener } from './onboarding/local_elasticsearch_connector';
 import {
   createListSandboxConnectors,
   createListSandboxConnectorTypes,
 } from './lib/list_sandbox_connectors';
 import { createCustomContextClient } from './custom_context';
 import { createSandboxAllowlistClient } from './sandbox_allowlist';
+import { createSlackTurnAdmissionCheck } from './lib/slack_turn_admission';
+import { getNightshiftSettingsUrl } from './lib/notifications/notify_investigation_quota_reached';
 import type {
   InvestigationQuotaCallback,
   NightshiftInvestigationsServerSetup,
@@ -169,6 +172,8 @@ export class NightshiftInvestigationsPlugin
   private featureFlags?: CoreStart['featureFlags'];
   private actionsStart?: ActionsPluginStart;
   private nightshiftSources?: NightshiftInvestigationsStartDeps['nightshiftSources'];
+  private cloudSetup?: NightshiftInvestigationsSetupDeps['cloud'];
+  private esHosts: string[] = [];
   private securityStart?: NightshiftInvestigationsStartDeps['security'];
   private security?: CoreStart['security'];
   private coreStart?: CoreStart;
@@ -202,6 +207,15 @@ export class NightshiftInvestigationsPlugin
       new NightshiftSettingsLocatorDefinition()
     );
     registerInvestigationsWorkflowTriggers(plugins.workflowsExtensions);
+    plugins.actions?.registerConnectorLifecycleListener(
+      createLocalElasticsearchConnectorLifecycleListener({
+        getInternalEsClient: async () => {
+          const [coreStart] = await core.getStartServices();
+          return coreStart.elasticsearch.client.asInternalUser;
+        },
+        logger: this.logger.get('local-elasticsearch-connector'),
+      })
+    );
     const isNightshiftEnabledSync = createIsNightshiftEnabledSync(core.getStartServices);
     plugins.alerting?.enableAlertStatusChanged({
       isEnabled: async () => isNightshiftEnabledSync(),
@@ -261,6 +275,10 @@ export class NightshiftInvestigationsPlugin
       }),
     });
 
+    this.cloudSetup = plugins.cloud;
+    core.elasticsearch.legacy.config$.subscribe((config) => {
+      this.esHosts = config.hosts;
+    });
     const onboardingClient = createOnboardingClient({
       getDeps: () => ({
         workflowsManagement: this.workflowsManagement,
@@ -268,6 +286,10 @@ export class NightshiftInvestigationsPlugin
         agentBuilder: this.agentBuilder,
         agentAvailability: this.getInvestigationAvailability(),
         assistantEnabled: this.assistantEnabled,
+        actions: this.actionsStart,
+        elasticsearch: this.elasticsearch,
+        cloud: this.cloudSetup,
+        esHosts: this.esHosts,
       }),
       logger: this.logger.get('onboarding'),
       ensureFailureSweep: this.ensureFailureSweep,
@@ -304,6 +326,18 @@ export class NightshiftInvestigationsPlugin
         },
         logger: this.logger,
       });
+      plugins.agentBuilder.callbacks.registerOnBeforeNewConversation(
+        createSlackTurnAdmissionCheck({
+          getQuotaCallback: () => this.investigationQuotaCallback,
+          getSettingsUrl: (spaceId) =>
+            getNightshiftSettingsUrl({
+              locator: settingsLocator,
+              spaceId,
+              kibanaUrl: core.http.basePath.publicBaseUrl,
+            }),
+          logger: this.logger,
+        })
+      );
       const config = this.ctx.config.get();
       const nightshiftAgentOptions: NightshiftAgentTypeOptions = {
         sandboxEnabled: plugins.sandbox?.isAvailable ?? false,
@@ -643,6 +677,7 @@ export class NightshiftInvestigationsPlugin
         plugins.workflowsExtensions.registerStepDefinition(
           decisionTreePrepareStepDefinition({
             getAgentBuilder: () => this.agentBuilder,
+            getInference: () => this.inference,
             getSavedObjects: () => this.savedObjects,
             getUiSettings: () => this.uiSettings,
             logger: this.logger.get('decision_trees'),

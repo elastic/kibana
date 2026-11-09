@@ -167,6 +167,14 @@ describe('proposalToInvestigation', () => {
       ).toBe(false);
     });
 
+    it('marks whether the data of the proposal shows a decision', () => {
+      expect(proposalToInvestigation({ ...baseProposal }).isDecisionShown).toBe(false);
+      expect(
+        proposalToInvestigation({ ...baseProposal, decision: 'approved', status: 'executing' })
+          .isDecisionShown
+      ).toBe(true);
+    });
+
     it.each(['succeeded', 'failed', 'expired', 'no_action'] as const)(
       'moves a %s proposal to closed',
       (status) => {
