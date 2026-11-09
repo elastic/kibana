@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Case, CaseCustomField, User } from '../../../common/types/domain';
+import type { Case, CaseCustomField, Observable, User } from '../../../common/types/domain';
 import type {
   CasePostRequest,
   CasesFindResponse,
@@ -73,7 +73,7 @@ import {
   deleteObservable,
   updateObservable,
 } from './observables';
-import { findObservables } from './find_observables';
+import { findObservables, getObservablesByIds } from './find_observables';
 import type { GetApplicableFieldsParams } from './applicable_fields';
 import { getApplicableFields } from './applicable_fields';
 import type { ApplicableFieldsResponse } from '../../../common/types/domain/template/applicable_field';
@@ -196,6 +196,10 @@ export interface CasesSubClient {
    */
   findObservables(caseId: string, params: FindObservablesRequest): Promise<FindObservablesResponse>;
   /**
+   * Returns the observables of the case with the given ids, in either store
+   */
+  getObservablesByIds(caseId: string, ids: string[]): Promise<Observable[]>;
+  /**
    * Bulk deletes observables from the case
    */
   bulkDeleteObservables(params: BulkDeleteObservablesRequest): Promise<Case>;
@@ -232,6 +236,7 @@ const usageCounterByMethod = {
   bulkAddObservables: 'bulk_add_observables',
   bulkCreateObservables: 'bulk_create_observables',
   findObservables: null,
+  getObservablesByIds: null,
   bulkDeleteObservables: 'bulk_delete_observables',
   getApplicableFields: null,
 } as const satisfies Record<keyof CasesSubClient, string | null>;
@@ -316,6 +321,8 @@ export const createCasesSubClient = (
     ),
     findObservables: (caseId: string, params: FindObservablesRequest) =>
       findObservables(caseId, params, clientArgs),
+    getObservablesByIds: (caseId: string, ids: string[]) =>
+      getObservablesByIds(caseId, ids, clientArgs),
     bulkDeleteObservables: withUsageCounter(
       usageCounterByMethod.bulkDeleteObservables,
       clientArgs,

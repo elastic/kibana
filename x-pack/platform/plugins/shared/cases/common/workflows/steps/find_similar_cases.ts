@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { CaseResponseProperties as CaseResponsePropertiesSchema } from '../../bundled-types.gen';
@@ -20,11 +20,14 @@ const SimilaritySchema = z.object({
   value: z.string(),
 });
 
-const SimilarCaseSchema = CaseResponsePropertiesSchema.extend({
-  similarities: z.object({
-    observables: z.array(SimilaritySchema),
-  }),
-});
+const SimilarCaseSchema = lazySchema(() =>
+  CaseResponsePropertiesSchema.extend({
+    similarities: z.object({
+      observables: z.array(SimilaritySchema),
+      total_observables: z.number().optional(),
+    }),
+  })
+);
 
 const InputSchema = z.object({
   case_id: z.string().min(1, 'case_id is required'),

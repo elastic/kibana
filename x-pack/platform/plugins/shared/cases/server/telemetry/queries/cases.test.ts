@@ -13,7 +13,7 @@ import type { CaseAggregationResult, FileAttachmentAggregationResults } from '..
 import { getCasesTelemetryData } from './cases';
 import { getOnlyConnectorsFilter } from './utils';
 import { TelemetrySavedObjectsClient } from '../telemetry_saved_objects_client';
-import { OBSERVABLE_TYPE_IPV4 } from '../../../common/constants';
+import { MAX_STORED_OBSERVABLES_PER_CASE, OBSERVABLE_TYPE_IPV4 } from '../../../common/constants';
 import { AUTO_EXTRACT_OBSERVABLE_DESCRIPTION } from '../../../common/constants/observables';
 
 const MOCK_FIND_TOTAL = 5;
@@ -105,7 +105,7 @@ describe('getCasesTelemetryData', () => {
         totalWithMaxObservables: {
           buckets: [
             {
-              key: 50,
+              key: MAX_STORED_OBSERVABLES_PER_CASE,
               doc_count: 1,
             },
             {
@@ -315,6 +315,28 @@ describe('getCasesTelemetryData', () => {
         closed_at: '2022-03-08T12:24:11.429Z',
       }); // find[6]
       mockFind(filesRes); // find[7]
+      mockFind({
+        byDescription: {
+          buckets: [
+            {
+              key: AUTO_EXTRACT_OBSERVABLE_DESCRIPTION,
+              doc_count: 2,
+              byType: { buckets: [{ key: OBSERVABLE_TYPE_IPV4.key, doc_count: 2 }] },
+            },
+          ],
+        },
+        securitySolution: {
+          byDescription: {
+            buckets: [
+              {
+                key: AUTO_EXTRACT_OBSERVABLE_DESCRIPTION,
+                doc_count: 2,
+                byType: { buckets: [{ key: OBSERVABLE_TYPE_IPV4.key, doc_count: 2 }] },
+              },
+            ],
+          },
+        },
+      }); // find[8] cases-observables
 
       mockSearch(casesWithAlertsResult); // search[0] cases with alerts
       mockSearch({ participants: { value: 7 } }); // search[1] participants
@@ -394,9 +416,9 @@ describe('getCasesTelemetryData', () => {
           extractObservablesSourceSpaceDefault: 2,
           extractObservablesSourceRule: 1,
           observables: {
-            auto: { default: 1, custom: 0 },
+            auto: { default: 3, custom: 0 },
             manual: { default: 0, custom: 0 },
-            total: 1,
+            total: 3,
           },
           totalWithMaxObservables: 1,
           totalParticipants: 7,
@@ -466,9 +488,9 @@ describe('getCasesTelemetryData', () => {
             totalWithAtLeastOne: 0,
           },
           observables: {
-            auto: { default: 1, custom: 0 },
+            auto: { default: 3, custom: 0 },
             manual: { default: 0, custom: 0 },
-            total: 1,
+            total: 3,
           },
           totalWithMaxObservables: 1,
           ...solutionAttachmentFrameworkStats,
@@ -571,11 +593,14 @@ describe('getCasesTelemetryData', () => {
                         "byType": Object {
                           "terms": Object {
                             "field": "cases.attributes.observables.typeKey",
+                            "size": 100,
                           },
                         },
                       },
                       "terms": Object {
                         "field": "cases.attributes.observables.description",
+                        "missing": "",
+                        "size": 100,
                       },
                     },
                   },
@@ -692,11 +717,14 @@ describe('getCasesTelemetryData', () => {
                         "byType": Object {
                           "terms": Object {
                             "field": "cases.attributes.observables.typeKey",
+                            "size": 100,
                           },
                         },
                       },
                       "terms": Object {
                         "field": "cases.attributes.observables.description",
+                        "missing": "",
+                        "size": 100,
                       },
                     },
                   },
@@ -737,11 +765,14 @@ describe('getCasesTelemetryData', () => {
                     "byType": Object {
                       "terms": Object {
                         "field": "cases.attributes.observables.typeKey",
+                        "size": 100,
                       },
                     },
                   },
                   "terms": Object {
                     "field": "cases.attributes.observables.description",
+                    "missing": "",
+                    "size": 100,
                   },
                 },
               },
@@ -802,11 +833,14 @@ describe('getCasesTelemetryData', () => {
                         "byType": Object {
                           "terms": Object {
                             "field": "cases.attributes.observables.typeKey",
+                            "size": 100,
                           },
                         },
                       },
                       "terms": Object {
                         "field": "cases.attributes.observables.description",
+                        "missing": "",
+                        "size": 100,
                       },
                     },
                   },

@@ -25,10 +25,15 @@ export const DEFAULT_CASE_SEARCH_FIELDS = [
   `${CASE_SAVED_OBJECT}.incremental_id.text`,
 ];
 
+export const CASE_OBSERVABLE_VALUE_SEARCH_FIELD = `${CASE_SAVED_OBJECT}.observables.value`;
+
 export const DEFAULT_CASE_NESTED_FIELDS = [
-  `${CASE_SAVED_OBJECT}.observables.value`,
+  CASE_OBSERVABLE_VALUE_SEARCH_FIELD,
   `${CASE_SAVED_OBJECT}.customFields.value`,
 ];
+
+/** Most cases a search by observable value takes from `cases-observables`. */
+export const MAX_CASES_BY_OBSERVABLE_VALUE = 1_000;
 
 export const DEFAULT_CASE_RUNTIME_FIELDS = [EF_ALL_VALUES_FIELD];
 
@@ -138,12 +143,15 @@ export const constructSearchQuery = ({
       nestedFields.forEach((field) => {
         const path = field.split('.').slice(0, -1).join('.');
         if (searchFields?.includes(field) && path) {
+          // Observable values match the start of the value, ignoring case, as the search of
+          // `cases-observables` does; other nested fields match the whole value.
           shouldClauses.push({
             nested: {
               path,
-              query: {
-                term: { [field]: { value: search, case_insensitive: true } },
-              },
+              query:
+                field === CASE_OBSERVABLE_VALUE_SEARCH_FIELD
+                  ? { prefix: { [field]: { value: search, case_insensitive: true } } }
+                  : { term: { [field]: { value: search, case_insensitive: true } } },
             },
           });
         }

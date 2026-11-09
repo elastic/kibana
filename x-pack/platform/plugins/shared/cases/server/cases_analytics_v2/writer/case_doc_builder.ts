@@ -10,6 +10,7 @@ import type { Observable } from '../../../common/types/domain';
 import type { CasePersistedAttributes } from '../../common/types/case';
 import { CasePersistedSeverity, CasePersistedStatus } from '../../common/types/case';
 import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
+import { MAX_OBSERVABLES_PER_CASE } from '../../../common/constants';
 
 /**
  * Shape of a single document indexed into `.cases`. Mirrors
@@ -152,7 +153,11 @@ const SEVERITY_TO_STRING: Record<CasePersistedSeverity, CaseSeverityString> = {
  * `created_at`) so a Discover/Lens time-picker filter reads as "show me
  * cases active in the last 24h".
  */
-export function buildCaseDoc(so: SavedObject<CasePersistedAttributes>): CaseAnalyticsDoc {
+export function buildCaseDoc(
+  so: SavedObject<CasePersistedAttributes>,
+  /** The case's oldest `cases-observables` objects; they follow the field's, up to 50. */
+  typeObservables: Observable[] = []
+): CaseAnalyticsDoc {
   const a = so.attributes;
   const timestamp = a.updated_at ?? a.created_at;
   // The connector id is stored in so.references (under CONNECTOR_ID_REFERENCE_NAME),
@@ -206,7 +211,12 @@ export function buildCaseDoc(so: SavedObject<CasePersistedAttributes>): CaseAnal
       // is the SO's nested array. Both pass through.
       settings: a.settings,
       customFields: a.customFields,
-      observables: buildObservables(a.observables),
+      observables: buildObservables(
+        [...(a.observables ?? []), ...typeObservables].slice(
+          0,
+          Math.max(MAX_OBSERVABLES_PER_CASE, (a.observables ?? []).length)
+        )
+      ),
       extended_fields: a.extended_fields ?? undefined,
     },
   };

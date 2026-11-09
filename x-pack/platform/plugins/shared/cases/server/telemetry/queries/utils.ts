@@ -13,7 +13,7 @@ import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
-  MAX_OBSERVABLES_PER_CASE,
+  MAX_STORED_OBSERVABLES_PER_CASE,
   OBSERVABILITY_ALERT_ATTACHMENT_TYPE,
   OWNERS,
   SECURITY_ALERT_ATTACHMENT_TYPE,
@@ -31,6 +31,7 @@ import type {
   FileAttachmentAggregationResults,
   CustomFieldsTelemetry,
   AlertBuckets,
+  ObservableObjectsAggregationResult,
   ObservablesAggregationResult,
   ObservablesTelemetry,
   TotalWithMaxObservablesAggregationResult,
@@ -187,8 +188,22 @@ export const bucketsToOwnerRecord = <T extends { key: string }>(
   return record;
 };
 
+/** Adds up the observables telemetry of the case field and of `cases-observables`. */
+export const sumObservablesTelemetry = (
+  a: ObservablesTelemetry,
+  b: ObservablesTelemetry
+): ObservablesTelemetry => ({
+  manual: {
+    default: a.manual.default + b.manual.default,
+    custom: a.manual.custom + b.manual.custom,
+  },
+  auto: { default: a.auto.default + b.auto.default, custom: a.auto.custom + b.auto.custom },
+  total: a.total + b.total,
+});
+
 export const getObservablesTotalsByType = (
-  observablesAggs?: ObservablesAggregationResult
+  observablesAggs?: Pick<ObservablesAggregationResult, 'byDescription'> &
+    Partial<Pick<ObservablesAggregationResult, 'doc_count'>>
 ): ObservablesTelemetry => {
   const result: ObservablesTelemetry = {
     manual: { default: 0, custom: 0 },
@@ -225,10 +240,10 @@ export const getTotalWithMaxObservables = (
     return 0;
   }
 
-  // Sum doc_count for all buckets where key (total_observables value) >= 50
+  // Sum doc_count for all buckets where key (total_observables value) is at the cap
   return totalWithMaxObservablesAgg.reduce((sum, bucket) => {
     const key = typeof bucket.key === 'number' ? bucket.key : Number(bucket.key);
-    return key >= MAX_OBSERVABLES_PER_CASE ? sum + (bucket.doc_count ?? 0) : sum;
+    return key >= MAX_STORED_OBSERVABLES_PER_CASE ? sum + (bucket.doc_count ?? 0) : sum;
   }, 0);
 };
 
@@ -363,12 +378,14 @@ export const getBucketFromAggregation = ({
 
 export const getSolutionValues = ({
   caseAggregations,
+  observableAggregations,
   attachmentsByType,
   filesAggregations,
   totalWithAlertsByOwner,
   owner,
 }: {
   caseAggregations?: CaseAggregationResult;
+  observableAggregations?: ObservableObjectsAggregationResult;
   attachmentsByType?: AttachmentsByTypeRaw;
   filesAggregations?: FileAttachmentAggregationResults;
   totalWithAlertsByOwner?: Record<Owner, number>;
@@ -405,7 +422,10 @@ export const getSolutionValues = ({
       filesAggregations: fileAttachmentsForOwner,
       totalCasesForOwner,
     }),
-    observables: getObservablesTotalsByType(caseAggregations?.[owner]?.observables),
+    observables: sumObservablesTelemetry(
+      getObservablesTotalsByType(caseAggregations?.[owner]?.observables),
+      getObservablesTotalsByType(observableAggregations?.[owner])
+    ),
     totalWithMaxObservables: getTotalWithMaxObservables(
       caseAggregations?.[owner]?.totalWithMaxObservables?.buckets ?? []
     ),

@@ -440,9 +440,12 @@ export class CasesService {
     extendedFieldFilters,
     fieldLabelFilters,
     statsOptions,
+    caseIdsByObservableValue = [],
   }: {
     caseOptions: SavedObjectFindOptionsKueryNode;
     namespaces: string[];
+    /** Cases whose `cases-observables` objects match the search; they join like comment matches. */
+    caseIdsByObservableValue?: string[];
     extendedFieldFilters?: ResolvedExtendedFieldFilter[][];
     fieldLabelFilters?: ResolvedFieldLabelFilter[];
     /**
@@ -461,7 +464,7 @@ export class CasesService {
     const searchQuery = constructSearchQuery({
       search: caseOptions.search,
       searchFields: caseOptions.searchFields,
-      caseIds: caseIdsByAttachmentSearch,
+      caseIds: [...new Set([...caseIdsByAttachmentSearch, ...caseIdsByObservableValue])],
       extendedFieldFilters,
       fieldLabelFilters,
     });
@@ -877,6 +880,46 @@ export class CasesService {
       this.log.error(`Error on find cases: ${error}`);
       throw error;
     }
+  }
+
+  /**
+   * Runs a raw query over cases, sorted and paged like a find, and returns the matching cases as
+   * case responses without attachment stats.
+   */
+  public async searchCasesPage({
+    namespaces,
+    query,
+    caseOptions,
+  }: {
+    namespaces: string[];
+    query: estypes.QueryDslQueryContainer;
+    caseOptions: Pick<
+      SavedObjectFindOptionsKueryNode,
+      'sortField' | 'sortOrder' | 'page' | 'perPage'
+    >;
+  }): Promise<{ cases: Case[]; total: number }> {
+    const response = await this.searchCases({
+      type: [CASE_SAVED_OBJECT],
+      namespaces,
+      query,
+      track_total_hits: true,
+      ...convertFindQueryParams(caseOptions),
+    });
+
+    const cases = (response.hits?.hits ?? []).flatMap((hit) => {
+      const caseData = (hit._source as { cases?: CasePersistedAttributes } | undefined)?.cases;
+      if (!hit._id?.startsWith(`${CASE_SAVED_OBJECT}:`) || !caseData) {
+        return [];
+      }
+      return [transformESModelToCase(hit._id.slice(CASE_SAVED_OBJECT.length + 1), caseData, hit)];
+    });
+
+    const total =
+      typeof response.hits.total === 'object'
+        ? response.hits.total.value ?? 0
+        : response.hits.total ?? 0;
+
+    return { cases, total };
   }
 
   public async searchCases({

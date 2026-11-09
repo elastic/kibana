@@ -82,6 +82,34 @@ const resolveObservableEventFields = (
   return undefined;
 };
 
+/**
+ * A case response lists at most 50 observables, so an observable origin can name one that is not
+ * in it. Adds the origin's other observables, from either store, to the case the origin checks,
+ * the event fields and the activity record read. Ids the case does not hold stay missing and fail
+ * the origin check.
+ */
+const withOriginObservables = async (
+  theCase: Awaited<ReturnType<CasesClient['cases']['get']>>,
+  origin: RunCaseWorkflowRequest['origin'],
+  casesClient: CasesClient
+): Promise<Awaited<ReturnType<CasesClient['cases']['get']>>> => {
+  const originIds =
+    origin?.type === OBSERVABLE_WORKFLOW_ORIGIN_TYPE
+      ? [origin.observableId]
+      : origin?.type === OBSERVABLES_WORKFLOW_ORIGIN_TYPE
+      ? origin.observableIds
+      : [];
+  const listedIds = new Set(theCase.observables.map(({ id }) => id));
+  const missingIds = [...new Set(originIds)].filter((id) => !listedIds.has(id));
+
+  if (missingIds.length === 0) {
+    return theCase;
+  }
+
+  const found = await casesClient.cases.getObservablesByIds(theCase.id, missingIds);
+  return { ...theCase, observables: [...theCase.observables, ...found] };
+};
+
 interface RunWorkflowParams {
   workflowId: string;
   body: RunCaseWorkflowRequest;
@@ -224,7 +252,11 @@ export class CasesWorkflowRunService {
       const needsComments =
         body.origin.type === ATTACHMENT_WORKFLOW_ORIGIN_TYPE ||
         body.origin.type === ATTACHMENTS_WORKFLOW_ORIGIN_TYPE;
-      theCase = await casesClient.cases.get({ id: caseIds[0], includeComments: needsComments });
+      theCase = await withOriginObservables(
+        await casesClient.cases.get({ id: caseIds[0], includeComments: needsComments }),
+        body.origin,
+        casesClient
+      );
       // Fetch alert and event attachments in parallel, each only when their inputs are present.
       // Separate fetches (instead of a combined [alert, event] call) prevent cross-type false matches
       // — an event attachment should never satisfy an alert membership check, and vice versa.

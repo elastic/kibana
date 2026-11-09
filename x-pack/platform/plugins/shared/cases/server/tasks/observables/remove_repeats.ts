@@ -54,6 +54,7 @@ interface RepeatsAggs {
 }
 
 interface CaseSource {
+  type: string;
   namespaces?: string[];
   cases?: { observables?: Observable[] | null; total_observables?: number | null };
 }

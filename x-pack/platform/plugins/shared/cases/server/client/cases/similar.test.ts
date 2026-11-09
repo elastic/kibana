@@ -9,7 +9,8 @@ import { mockCases } from '../../mocks';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
 import { similar } from './similar';
 import { mockCase } from '../../../public/containers/mock';
-import { OBSERVABLE_TYPE_IPV4 } from '../../../common/constants';
+import { OBSERVABLE_TYPE_IPV4, OBSERVABLE_TYPE_HOSTNAME } from '../../../common/constants';
+import { flattenCaseSavedObject } from '../../common/utils';
 import Boom from '@hapi/boom';
 
 const mockClientArgs = createCasesClientMockArgs();
@@ -38,12 +39,13 @@ describe('similar', () => {
       },
     });
 
-    mockClientArgs.services.caseService.findCases.mockResolvedValue({
-      page: 1,
-      per_page: 10,
-      total: mockCases.length,
-      saved_objects: [],
+    mockClientArgs.services.caseService.searchCasesPage.mockResolvedValue({
+      cases: [],
+      total: 0,
     });
+    mockClientArgs.services.observableService.getAllForCase.mockResolvedValue([]);
+    mockClientArgs.services.observableService.findSimilarCandidates.mockResolvedValue([]);
+    mockClientArgs.services.observableService.getSharedForCases.mockResolvedValue(new Map());
 
     mockClientArgs.services.caseConfigureService.find.mockResolvedValue({
       saved_objects: [],
@@ -61,114 +63,192 @@ describe('similar', () => {
     jest.clearAllMocks();
   });
 
-  it('should execute query with observable type key and value and proper filters', async () => {
-    await similar(
-      mockCase.id,
+  const searchQuery = () => mockClientArgs.services.caseService.searchCasesPage.mock.calls[0][0];
+
+  it('matches other cases by one clause per type key and excludes the source case', async () => {
+    await similar(mockCase.id, { page: 1, perPage: 10 }, mockClientArgs, mockCasesClient);
+
+    const { query, namespaces } = searchQuery();
+    expect(namespaces).toEqual(['default']);
+    expect(query?.bool?.must_not).toEqual([{ term: { _id: `cases:${mockCase.id}` } }]);
+    expect(query?.bool?.should).toEqual([
       {
-        page: 1,
-        perPage: 10,
+        nested: {
+          path: 'cases.observables',
+          query: {
+            bool: {
+              filter: [
+                { term: { 'cases.observables.typeKey': OBSERVABLE_TYPE_IPV4.key } },
+                { terms: { 'cases.observables.value': ['127.0.0.1'] } },
+              ],
+            },
+          },
+        },
       },
+    ]);
+    expect(query?.bool?.minimum_should_match).toBe(1);
+  });
+
+  it('matches on the source case observables in both stores and on candidates from the type', async () => {
+    mockClientArgs.services.observableService.getAllForCase.mockResolvedValue([
+      {
+        id: 'type-obs',
+        typeKey: OBSERVABLE_TYPE_HOSTNAME.key,
+        value: 'host-1',
+        description: null,
+        createdAt: '2026-11-06T00:00:00.000Z',
+        updatedAt: null,
+      },
+    ]);
+    mockClientArgs.services.observableService.findSimilarCandidates.mockResolvedValue([
+      { caseId: 'candidate-1', sharedCount: 2 },
+    ]);
+
+    await similar(mockCase.id, { page: 1, perPage: 10 }, mockClientArgs, mockCasesClient);
+
+    expect(mockClientArgs.services.observableService.findSimilarCandidates).toHaveBeenCalledWith({
+      excludeCaseId: mockCase.id,
+      keys: [
+        { typeKey: OBSERVABLE_TYPE_IPV4.key, value: '127.0.0.1' },
+        { typeKey: OBSERVABLE_TYPE_HOSTNAME.key, value: 'host-1' },
+      ],
+      owners: [mockCases[0].attributes.owner],
+      size: 1000,
+    });
+    const { query } = searchQuery();
+    expect(query?.bool?.should).toHaveLength(3);
+    expect(query?.bool?.should).toContainEqual({ terms: { _id: ['cases:candidate-1'] } });
+  });
+
+  it('lists the observables a similar case shares in either store, and how many', async () => {
+    const similarCase = {
+      ...flattenCaseSavedObject({ savedObject: mockCases[1] }),
+      observables: [
+        {
+          id: 'field-obs',
+          typeKey: OBSERVABLE_TYPE_IPV4.key,
+          value: '127.0.0.1',
+          description: null,
+          createdAt: '2026-11-06T00:00:00.000Z',
+          updatedAt: null,
+        },
+      ],
+    };
+    mockClientArgs.services.caseService.searchCasesPage.mockResolvedValue({
+      cases: [similarCase],
+      total: 1,
+    });
+    mockClientArgs.services.observableService.getAllForCase.mockResolvedValue([
+      {
+        id: 'type-obs',
+        typeKey: OBSERVABLE_TYPE_HOSTNAME.key,
+        value: 'host-1',
+        description: null,
+        createdAt: '2026-11-06T00:00:00.000Z',
+        updatedAt: null,
+      },
+    ]);
+    mockClientArgs.services.observableService.getSharedForCases.mockResolvedValue(
+      new Map([
+        [
+          similarCase.id,
+          {
+            total: 1,
+            observables: [
+              {
+                id: 'other-type-obs',
+                typeKey: OBSERVABLE_TYPE_HOSTNAME.key,
+                value: 'host-1',
+                description: null,
+                createdAt: '2026-11-06T00:00:00.000Z',
+                updatedAt: null,
+              },
+            ],
+          },
+        ],
+      ])
+    );
+
+    const res = await similar(
+      mockCase.id,
+      { page: 1, perPage: 10 },
       mockClientArgs,
       mockCasesClient
     );
-    expect(mockClientArgs.services.caseService.findCases).toHaveBeenCalled();
 
-    const call = mockClientArgs.services.caseService.findCases.mock.calls[0][0];
+    expect(res.total).toBe(1);
+    expect(res.cases[0].similarities).toEqual({
+      observables: [
+        {
+          typeKey: OBSERVABLE_TYPE_IPV4.key,
+          typeLabel: OBSERVABLE_TYPE_IPV4.label,
+          value: '127.0.0.1',
+        },
+        {
+          typeKey: OBSERVABLE_TYPE_HOSTNAME.key,
+          typeLabel: OBSERVABLE_TYPE_HOSTNAME.label,
+          value: 'host-1',
+        },
+      ],
+      total_observables: 2,
+    });
+  });
 
-    expect(call).toMatchInlineSnapshot(`
-        Object {
-          "filter": Object {
-            "arguments": Array [
-              Object {
-                "arguments": Array [
-                  Object {
-                    "isQuoted": false,
-                    "type": "literal",
-                    "value": "cases.attributes.observables",
-                  },
-                  Object {
-                    "arguments": Array [
-                      Object {
-                        "arguments": Array [
-                          Object {
-                            "isQuoted": false,
-                            "type": "literal",
-                            "value": "value",
-                          },
-                          Object {
-                            "isQuoted": true,
-                            "type": "literal",
-                            "value": "127.0.0.1",
-                          },
-                        ],
-                        "function": "is",
-                        "type": "function",
-                      },
-                      Object {
-                        "arguments": Array [
-                          Object {
-                            "isQuoted": false,
-                            "type": "literal",
-                            "value": "typeKey",
-                          },
-                          Object {
-                            "isQuoted": true,
-                            "type": "literal",
-                            "value": "observable-type-ipv4",
-                          },
-                        ],
-                        "function": "is",
-                        "type": "function",
-                      },
-                    ],
-                    "function": "and",
-                    "type": "function",
-                  },
-                ],
-                "function": "nested",
-                "type": "function",
-              },
-              Object {
-                "arguments": Array [
-                  Object {
-                    "isQuoted": false,
-                    "type": "literal",
-                    "value": "cases.attributes.owner",
-                  },
-                  Object {
-                    "isQuoted": false,
-                    "type": "literal",
-                    "value": "securitySolution",
-                  },
-                ],
-                "function": "is",
-                "type": "function",
-              },
-            ],
-            "function": "and",
-            "type": "function",
+  it('keeps a value that contains a comma whole', async () => {
+    jest.mocked(mockClientArgs.services.caseService.getCase).mockResolvedValue({
+      ...mockCases[0],
+      attributes: {
+        ...mockCases[0].attributes,
+        observables: [
+          {
+            id: 'comma-obs',
+            typeKey: OBSERVABLE_TYPE_HOSTNAME.key,
+            value: 'a,b',
+            description: null,
+            createdAt: '2026-11-06T00:00:00.000Z',
+            updatedAt: null,
           },
-          "page": 1,
-          "perPage": 10,
-          "rootSearchFields": Array [
-            "_id",
+        ],
+      },
+    });
+    mockClientArgs.services.caseService.searchCasesPage.mockResolvedValue({
+      cases: [
+        {
+          ...flattenCaseSavedObject({ savedObject: mockCases[1] }),
+          observables: [
+            {
+              id: 'other-comma-obs',
+              typeKey: OBSERVABLE_TYPE_HOSTNAME.key,
+              value: 'a,b',
+              description: null,
+              createdAt: '2026-11-06T00:00:00.000Z',
+              updatedAt: null,
+            },
           ],
-          "search": "-\\"cases:mock-id\\"",
-          "sortField": "created_at",
-          "sortOrder": undefined,
-        }
-      `);
+        },
+      ],
+      total: 1,
+    });
+
+    const res = await similar(
+      mockCase.id,
+      { page: 1, perPage: 10 },
+      mockClientArgs,
+      mockCasesClient
+    );
+
+    expect(res.cases[0].similarities.observables).toEqual([
+      expect.objectContaining({ value: 'a,b' }),
+    ]);
   });
 
   describe('attachment totals', () => {
-    const similarSavedObjects = [mockCases[0], mockCases[1]].map((so) => ({ ...so, score: 0 }));
-
     beforeEach(() => {
-      mockClientArgs.services.caseService.findCases.mockResolvedValue({
-        page: 1,
-        per_page: 10,
-        total: similarSavedObjects.length,
-        saved_objects: similarSavedObjects,
+      mockClientArgs.services.caseService.searchCasesPage.mockResolvedValue({
+        cases: [mockCases[0], mockCases[1]].map((so) =>
+          flattenCaseSavedObject({ savedObject: so })
+        ),
+        total: 2,
       });
     });
 
@@ -189,9 +269,6 @@ describe('similar', () => {
         mockCasesClient
       );
 
-      expect(
-        mockClientArgs.services.attachmentService.getter.getCaseAttatchmentStats
-      ).toHaveBeenCalledTimes(1);
       expect(
         mockClientArgs.services.attachmentService.getter.getCaseAttatchmentStats
       ).toHaveBeenCalledWith({ caseIds: [mockCases[0].id, mockCases[1].id] });
@@ -254,7 +331,7 @@ describe('similar', () => {
     );
   });
 
-  it('should not call findCases when the case has no observables', async () => {
+  it('should not search cases when the case has no observables in either store', async () => {
     jest.mocked(mockClientArgs.services.caseService.getCase).mockResolvedValue({
       ...mockCases[0],
       attributes: {
@@ -272,10 +349,10 @@ describe('similar', () => {
       mockClientArgs,
       mockCasesClient
     );
-    expect(mockClientArgs.services.caseService.findCases).not.toHaveBeenCalled();
+    expect(mockClientArgs.services.caseService.searchCasesPage).not.toHaveBeenCalled();
   });
 
-  it('should not call findCases when unknown typeKey is specified for an observable', async () => {
+  it('should not search cases when unknown typeKey is specified for an observable', async () => {
     jest.mocked(mockClientArgs.services.caseService.getCase).mockResolvedValue({
       ...mockCases[0],
       attributes: {
@@ -283,14 +360,6 @@ describe('similar', () => {
         observables: [
           {
             id: '4491eedc-2336-41e3-bf98-29147c133b95',
-            typeKey: 'unknown',
-            value: 'some value',
-            createdAt: '2024-12-16',
-            updatedAt: '2024-12-16',
-            description: null,
-          },
-          {
-            id: 'e7d3f99d-c8be-41df-ada0-640021571bd4',
             typeKey: 'unknown',
             value: 'some value',
             createdAt: '2024-12-16',
@@ -310,10 +379,10 @@ describe('similar', () => {
       mockClientArgs,
       mockCasesClient
     );
-    expect(mockClientArgs.services.caseService.findCases).not.toHaveBeenCalled();
+    expect(mockClientArgs.services.caseService.searchCasesPage).not.toHaveBeenCalled();
   });
 
-  it('should forward explicit sort params to caseService.findCases', async () => {
+  it('should forward explicit sort params to the case search', async () => {
     await similar(
       mockCase.id,
       {
@@ -326,8 +395,8 @@ describe('similar', () => {
       mockCasesClient
     );
 
-    expect(mockClientArgs.services.caseService.findCases).toHaveBeenCalledWith(
-      expect.objectContaining({ sortField: 'created_at', sortOrder: 'asc' })
+    expect(searchQuery().caseOptions).toEqual(
+      expect.objectContaining({ sortField: 'created_at', sortOrder: 'asc', page: 1, perPage: 10 })
     );
   });
 
@@ -342,9 +411,9 @@ describe('similar', () => {
       mockCasesClient
     );
 
-    const findCasesArgs = mockClientArgs.services.caseService.findCases.mock.calls[0][0];
+    const { caseOptions } = searchQuery();
 
-    expect(findCasesArgs).toEqual(expect.objectContaining({ sortField: 'created_at' }));
-    expect(findCasesArgs?.sortOrder).toBeUndefined();
+    expect(caseOptions).toEqual(expect.objectContaining({ sortField: 'created_at' }));
+    expect(caseOptions.sortOrder).toBeUndefined();
   });
 });

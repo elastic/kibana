@@ -20,7 +20,7 @@ import type {
   ObservableSortOrder,
   ObservableSortValues,
 } from '../../services/observables';
-import { getObservableSortFields } from '../../services/observables';
+import { getObservableSortFields, toObservable } from '../../services/observables';
 import type { CasesClientArgs } from '../types';
 
 const SORT_VALUE_GETTERS: Readonly<
@@ -164,6 +164,47 @@ export const findObservables = async (
   } catch (error) {
     throw createCaseError({
       message: `Failed to find observables of case id: ${caseId}: ${error}`,
+      error,
+      logger,
+    });
+  }
+};
+
+/**
+ * The observables of a case with the given ids, in either store. Ids that the case does not hold
+ * are left out.
+ */
+export const getObservablesByIds = async (
+  caseId: string,
+  ids: string[],
+  clientArgs: CasesClientArgs
+): Promise<Observable[]> => {
+  const {
+    services: { caseService, observableService },
+    authorization,
+    logger,
+  } = clientArgs;
+
+  try {
+    const theCase = await caseService.getCase({ id: caseId });
+
+    await authorization.ensureAuthorized({
+      operation: Operations.findObservables,
+      entities: [{ id: theCase.id, owner: theCase.attributes.owner }],
+    });
+
+    const idSet = new Set(ids);
+    const inField = (theCase.attributes.observables ?? []).filter(({ id }) => idSet.has(id));
+    const inFieldIds = new Set(inField.map(({ id }) => id));
+    const { found } = await observableService.getForCase(
+      theCase.id,
+      ids.filter((id) => !inFieldIds.has(id))
+    );
+
+    return [...inField, ...found.map(toObservable)];
+  } catch (error) {
+    throw createCaseError({
+      message: `Failed to get observables of case id: ${caseId}: ${error}`,
       error,
       logger,
     });
