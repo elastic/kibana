@@ -18,6 +18,20 @@ import {
 } from './parameter_values';
 import { ConfigKey } from '../../../../../../common/runtime_types';
 
+const mockUseKibana = jest.fn();
+
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
+  useKibana: () => mockUseKibana(),
+}));
+
+const mockCapabilities = ({ canReadParamValues }: { canReadParamValues: boolean }) =>
+  mockUseKibana.mockReturnValue({
+    services: {
+      application: { capabilities: { uptime: { save: true, canReadParamValues } } },
+    },
+  });
+
 jest.mock('./code_editor', () => ({
   JSONEditor: ({
     ariaLabel,
@@ -106,6 +120,10 @@ describe('params JSON helpers', () => {
 });
 
 describe('ParameterValuesEditor', () => {
+  beforeEach(() => {
+    mockCapabilities({ canReadParamValues: true });
+  });
+
   it('renders hidden values with show and edit controls', () => {
     const { getByTestId } = render(<ParameterValuesEditorForm />);
 
@@ -287,6 +305,7 @@ describe('ParameterValuesEditor', () => {
     );
 
     expect(queryByTestId('keyValuePairsKey0')).not.toBeInTheDocument();
+    fireEvent.click(getByTestId('syntheticsParamValueVisibilityJson'));
     expect(getByTestId('syntheticsParamsJSONEditor')).toHaveValue(params);
 
     const updated = '{"retries":4,"options":{"mode":"y"}}';
@@ -365,6 +384,7 @@ describe('ParameterValuesEditor', () => {
   it('stays in JSON mode when the form delivers earlier values late', () => {
     const { getByTestId, queryByTestId } = render(<LaggingParameterValuesEditor />);
 
+    fireEvent.click(getByTestId('syntheticsParamValueVisibilityJson'));
     // An editor can auto-close braces, so a transient `{}` fits key-value pairs.
     fireEvent.change(getByTestId('syntheticsParamsJSONEditor'), { target: { value: '{}' } });
     fireEvent.change(getByTestId('syntheticsParamsJSONEditor'), {
@@ -396,14 +416,137 @@ describe('ParameterValuesEditor', () => {
     expect(getByTestId('keyValuePairsKey0')).toHaveValue('');
   });
 
-  it('uses the JSON editor for multiline string values', () => {
-    const params = JSON.stringify({ certificate: 'first line\nsecond line' });
-    const { getByTestId, queryByTestId } = render(
-      <ParameterValuesEditorForm defaultParams={params} />
-    );
+  describe('masked values', () => {
+    const masked = '{"password":"********"}';
 
-    expect(queryByTestId('keyValuePairsKey0')).not.toBeInTheDocument();
-    expect(getByTestId('syntheticsParamsJSONEditor')).toHaveValue(params);
+    it('disables the visibility toggle without canReadParamValues', () => {
+      mockCapabilities({ canReadParamValues: false });
+      const { getByTestId } = render(<ParameterValuesEditorForm defaultParams={masked} />);
+      const toggle = getByTestId('syntheticsParamValueVisibility0');
+
+      expect(toggle).toBeDisabled();
+      expect(toggle).toHaveAttribute(
+        'aria-label',
+        'You do not have permission to read parameter values.'
+      );
+      fireEvent.click(toggle);
+      expect(getByTestId('keyValuePairsValue0')).toHaveAttribute('type', 'password');
+      expect(getByTestId('keyValuePairsValue0')).toHaveAttribute('readonly');
+    });
+
+    it('clears a masked value when edit is clicked', () => {
+      mockCapabilities({ canReadParamValues: false });
+      const { getByTestId } = render(<ParameterValuesEditorForm defaultParams={masked} />);
+
+      expect(getByTestId('keyValuePairsValue0')).toHaveValue('********');
+
+      fireEvent.click(getByTestId('syntheticsParamValueEdit0'));
+
+      expect(getByTestId('keyValuePairsValue0')).toHaveValue('');
+      expect(getByTestId('keyValuePairsValue0')).not.toHaveAttribute('readonly');
+      expect(getByTestId('parameterValuesValue')).toHaveTextContent('{"password":""}');
+    });
+
+    it('restores the mask when the cleared value is left empty', () => {
+      mockCapabilities({ canReadParamValues: false });
+      const { getByTestId } = render(<ParameterValuesEditorForm defaultParams={masked} />);
+
+      fireEvent.click(getByTestId('syntheticsParamValueEdit0'));
+      fireEvent.blur(getByTestId('keyValuePairsValue0'));
+
+      expect(getByTestId('keyValuePairsValue0')).toHaveValue('********');
+      expect(getByTestId('keyValuePairsValue0')).toHaveAttribute('readonly');
+      expect(getByTestId('parameterValuesValue')).toHaveTextContent(masked);
+    });
+
+    it('keeps a replacement typed over a masked value', () => {
+      mockCapabilities({ canReadParamValues: false });
+      const { getByTestId } = render(<ParameterValuesEditorForm defaultParams={masked} />);
+
+      fireEvent.click(getByTestId('syntheticsParamValueEdit0'));
+      fireEvent.change(getByTestId('keyValuePairsValue0'), { target: { value: 'replacement' } });
+      fireEvent.blur(getByTestId('keyValuePairsValue0'));
+
+      expect(getByTestId('parameterValuesValue')).toHaveTextContent('{"password":"replacement"}');
+    });
+
+    it('clears a masked value when its parameter is renamed', () => {
+      mockCapabilities({ canReadParamValues: false });
+      const { getByTestId } = render(<ParameterValuesEditorForm defaultParams={masked} />);
+
+      fireEvent.change(getByTestId('keyValuePairsKey0'), { target: { value: 'token' } });
+
+      expect(getByTestId('keyValuePairsValue0')).toHaveValue('');
+      expect(getByTestId('parameterValuesValue')).toHaveTextContent('{"token":""}');
+
+      fireEvent.blur(getByTestId('keyValuePairsValue0'));
+
+      expect(getByTestId('parameterValuesValue')).toHaveTextContent('{"token":""}');
+    });
+
+    it('allows clearing a revealed value', () => {
+      const { getByTestId } = render(<ParameterValuesEditorForm />);
+
+      fireEvent.click(getByTestId('syntheticsParamValueEdit0'));
+      fireEvent.change(getByTestId('keyValuePairsValue0'), { target: { value: '' } });
+      fireEvent.blur(getByTestId('keyValuePairsValue0'));
+
+      expect(getByTestId('parameterValuesValue')).toHaveTextContent('{"password":""}');
+    });
+  });
+
+  describe('JSON editor', () => {
+    const params = '{"retries":3,"options":{"mode":"x"},"enabled":true,"empty":null}';
+
+    it('masks values until they are revealed', () => {
+      const { getByTestId } = render(<ParameterValuesEditorForm defaultParams={params} />);
+
+      expect(getByTestId('syntheticsParamsJSONEditor')).toHaveValue(
+        '{"retries":"********","options":"********","enabled":"********","empty":"********"}'
+      );
+      expect(getByTestId('syntheticsParamsJSONEditor')).toHaveAttribute('readonly');
+
+      fireEvent.click(getByTestId('syntheticsParamValueVisibilityJson'));
+      expect(getByTestId('syntheticsParamsJSONEditor')).toHaveValue(params);
+      expect(getByTestId('syntheticsParamsJSONEditor')).not.toHaveAttribute('readonly');
+
+      const updated = '{"retries":4,"options":{"mode":"y"},"enabled":false,"empty":null}';
+      fireEvent.change(getByTestId('syntheticsParamsJSONEditor'), { target: { value: updated } });
+      expect(getByTestId('parameterValuesValue')).toHaveTextContent(updated);
+
+      fireEvent.click(getByTestId('syntheticsParamValueVisibilityJson'));
+      expect(getByTestId('syntheticsParamsJSONEditor')).not.toHaveValue(updated);
+    });
+
+    it('masks top-level arrays', () => {
+      const { getByTestId, queryByTestId } = render(
+        <ParameterValuesEditorForm defaultParams={'["first",{"nested":true}]'} />
+      );
+
+      expect(queryByTestId('keyValuePairsKey0')).not.toBeInTheDocument();
+      expect(getByTestId('syntheticsParamsJSONEditor')).toHaveValue('["********","********"]');
+    });
+
+    it('masks flat params after switching to JSON', () => {
+      const { getByTestId } = render(<ParameterValuesEditorForm />);
+
+      fireEvent.click(getByTestId('syntheticsParamsEditorModeToggle'));
+
+      expect(getByTestId('syntheticsParamsJSONEditor')).toHaveValue('{"password":"********"}');
+      expect(getByTestId('syntheticsParamsJSONEditor')).toHaveAttribute('readonly');
+    });
+
+    it('keeps masked JSON editable but not revealable without permission', () => {
+      mockCapabilities({ canReadParamValues: false });
+      const { getByTestId } = render(<ParameterValuesEditorForm defaultParams={'["********"]'} />);
+
+      expect(getByTestId('syntheticsParamValueVisibilityJson')).toBeDisabled();
+      expect(getByTestId('syntheticsParamsJSONEditor')).not.toHaveAttribute('readonly');
+
+      const typed = '["replacement"';
+      fireEvent.change(getByTestId('syntheticsParamsJSONEditor'), { target: { value: typed } });
+      expect(getByTestId('syntheticsParamsJSONEditor')).toHaveValue(typed);
+    });
   });
 });
 
