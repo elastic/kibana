@@ -120,27 +120,31 @@ describe('evals.suites.json Scout arch/domain', () => {
   });
 });
 
-interface PipelineStep {
+interface WeeklyStep {
   env?: Record<string, string | undefined>;
-  steps?: PipelineStep[];
+  steps?: WeeklyStep[];
 }
 
-// The env of every suite step in a pipeline file, including steps nested in groups.
-const pipelineSuiteSteps = (steps: PipelineStep[]): Array<Record<string, string | undefined>> =>
+// `[suiteId, requested model groups]` for every suite step in llm_evals.yml, including those
+// nested in groups.
+const weeklySuiteModelGroups = (steps: WeeklyStep[]): Array<[string, Set<string>]> =>
   steps.flatMap(({ env = {}, steps: nested = [] }) => [
-    ...(env.EVAL_SUITE_ID ? [env] : []),
-    ...pipelineSuiteSteps(nested),
+    ...(env.EVAL_SUITE_ID
+      ? [
+          [
+            env.EVAL_SUITE_ID,
+            new Set((env.EVAL_MODEL_GROUPS ?? '').split(',').filter(Boolean)),
+          ] as [string, Set<string>],
+        ]
+      : []),
+    ...weeklySuiteModelGroups(nested),
   ]);
 
-// `[suiteId, requested model groups]` for every suite step in llm_evals.yml.
 const weeklyModelGroupsBySuite = new Map(
-  pipelineSuiteSteps(
-    (parseYaml(Fs.readFileSync(Path.join(__dirname, 'llm_evals.yml'), 'utf-8')) as PipelineStep)
+  weeklySuiteModelGroups(
+    (parseYaml(Fs.readFileSync(Path.join(__dirname, 'llm_evals.yml'), 'utf-8')) as WeeklyStep)
       .steps ?? []
-  ).map(({ EVAL_SUITE_ID: suiteId = '', EVAL_MODEL_GROUPS: modelGroups = '' }) => [
-    suiteId,
-    new Set(modelGroups.split(',').filter(Boolean)),
-  ])
+  )
 );
 
 describe('evals.suites.json weeklyEisModelGroups', () => {
@@ -163,55 +167,20 @@ describe('evals.suites.json weeklyEisModelGroups', () => {
   });
 });
 
-describe('evals.suites.json opt-in shards', () => {
-  it('only uses a boolean optIn', () => {
-    const problems = shardedSuites.flatMap(({ id: suiteId, shards = [] }) =>
-      shards
-        .filter(({ optIn }) => optIn !== undefined && typeof optIn !== 'boolean')
-        .map((shard) => `${suiteId}: shard "${shard.id}" has a non-boolean optIn`)
-    );
-
-    expect(problems).toEqual([]);
-  });
-
-  it('names only real shards in the daily pipeline EVAL_SHARD_IDS', () => {
-    // `get_fanout_matrix.js` would throw at run time; catch the typo on the PR instead.
-    const daily = parseYaml(
-      Fs.readFileSync(Path.join(__dirname, 'daily_evals.yml'), 'utf-8')
-    ) as PipelineStep;
-    const problems = pipelineSuiteSteps(daily.steps ?? []).flatMap(
-      ({ EVAL_SUITE_ID: suiteId, EVAL_SHARD_IDS: shardIds = '' }) => {
-        const shards = suites.find(({ id }) => id === suiteId)?.shards ?? [];
-        return shardIds
-          .split(',')
-          .map((shardId) => shardId.trim())
-          .filter((shardId) => shardId && !shards.some(({ id }) => id === shardId))
-          .map((shardId) => `${suiteId}: daily_evals.yml names unknown shard "${shardId}"`);
-      }
-    );
-
-    expect(problems).toEqual([]);
-  });
-});
-
 describe('Nightshift CI coverage', () => {
-  it('keeps the existing label and Customer-0 specs alongside an isolated ORCA spec', () => {
+  it('runs the Customer-0 stored datasets alongside an isolated ORCA spec', () => {
     const suite = suites.find(({ id }) => id === 'nightshift-investigations');
     expect(suite?.ciLabels).toEqual(['evals:nightshift-investigations']);
-    expect(suite?.shards?.map(({ id, optIn = false }) => [id, optIn])).toEqual([
-      ['customer0', false],
-      ['orcabench', false],
-      // Only the daily pipeline names these, so the weekly and PR runs are unchanged.
-      ['stored-investigations', true],
-      ['stored-connector-probes', true],
+    expect(suite?.shards?.map(({ id }) => id)).toEqual([
+      'customer0-golden',
+      'customer0-connector-probes',
+      'orcabench',
     ]);
     const files = suite?.shards?.flatMap(({ specFiles }) => specFiles) ?? [];
     expect(files).toEqual([
-      'evals/smoke/smoke.spec.ts',
-      'evals/investigation/investigation.spec.ts',
-      'evals/investigation/orcabench.spec.ts',
       'evals/investigation/stored.spec.ts',
       'evals/connector_probe/stored.spec.ts',
+      'evals/investigation/orcabench.spec.ts',
     ]);
     const configPath = suite?.configPath;
     expect(configPath).toBeDefined();

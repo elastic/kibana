@@ -39,7 +39,7 @@ export const registerConnectorProbeEvaluation = ({
 }: {
   name: string;
   loadDataset: (
-    client: Pick<EvalsClient, 'getDatasetByName' | 'listDatasets'>
+    client: Pick<EvalsClient, 'getDatasetByName'>
   ) => Promise<EvaluationDataset<ConnectorProbeExample>>;
   trustUpstreamDataset?: boolean;
   experimentName?: string;

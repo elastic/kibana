@@ -276,16 +276,6 @@ to the suite's team Slack channel, so build from a branch name in `elastic/kiban
 `refs/pull/<N>/head`) and leave `EVAL_SLACK_NOTIFICATION_CHANNEL` unset. Then no notify step is
 created.
 
-#### Opt-in shards
-
-A shard marked `"optIn": true` in `evals.suites.json` only runs when a build names it in
-`EVAL_SHARD_IDS` (comma-separated). Setting `EVAL_SHARD_IDS` runs only the named shards, opt-in or
-not. The fanout fails on an unknown id, and on `EVAL_SHARD_IDS` combined with `EVAL_GREP` or
-`EVAL_GREP_INVERT`, since a grep run ignores shards. Without it, weekly, PR and on-demand runs skip
-opt-in shards. The [daily pipeline](https://buildkite.com/elastic/kibana-evals-daily-llm-evals)
-([`daily_evals.yml`](../../../../../.buildkite/pipelines/evals/daily_evals.yml)) uses this to run
-`nightshift-investigations` shards that the weekly run leaves out.
-
 ---
 
 ### 1.3 On-demand evals (Buildkite)
@@ -306,7 +296,6 @@ Run a suite on any branch without a PR:
 | `EVAL_SCOUT_ARCH` / `EVAL_SCOUT_DOMAIN` | some suites  | From `scoutArch` / `scoutDomain` in `evals.suites.json` (default `stateful` / `classic`)                     |
 | `KIBANA_BUILD_ID`                 | no                 | Reuse a Kibana build from another job (skips build step)                                                     |
 | `EVAL_GREP`                       | no                 | Playwright test name filter (same as `node scripts/evals run --grep`)                                        |
-| `EVAL_SHARD_IDS`                  | no                 | Run only these shards, including [opt-in](#opt-in-shards) ones. Requires exactly one suite in `EVAL_SUITE_ID`. Not with `EVAL_GREP` |
 | `EVAL_REPETITIONS`                | no                 | Repeat each example N times (same as `--repetitions`)                                                        |
 | `EVAL_CONCURRENCY`                | no                 | Examples each experiment runs at once (same as `--concurrency`)                                              |
 | `EVAL_SPACE_IDS`                  | no                 | Comma-separated spaces to assign datasets and scores to (same as `--space-ids`)                              |

@@ -12,32 +12,17 @@ import { selectStoredDatasets } from './src/datasets/stored_datasets';
 
 // The suite's scout hook exports SANDBOX_API_KEY together with SANDBOX_KIBANA_CONFIG, which is what
 // makes the `evals_nightshift_investigations` config set start the investigation server.
-const {
-  runSmoke,
-  runInvestigations,
-  runOrca,
-  runConnectorProbes,
-  runWikiOptimize,
-  storedDatasetIds,
-  fellBackToSmoke,
-} = resolveEvalSelection();
+const { runInvestigations, runOrca, runConnectorProbes, runWikiOptimize, storedDatasetIds } =
+  resolveEvalSelection();
 const runStoredInvestigations = selectStoredDatasets('investigation', storedDatasetIds).length > 0;
 const runStoredConnectorProbes =
   selectStoredDatasets('connector-probe', storedDatasetIds).length > 0;
-// Workers re-evaluate this config; only the main process (no TEST_WORKER_INDEX) warns.
-if (fellBackToSmoke && process.env.TEST_WORKER_INDEX === undefined) {
-  process.stderr.write(
-    '[nightshift-investigations] No sandbox credentials (SANDBOX_API_KEY); running only the smoke eval. ' +
-      'Use --profile dev-vault or set NIGHTSHIFT_DATASETS to choose explicitly.\n'
-  );
-}
 
 export default createPlaywrightEvalsConfig({
   testDir: Path.resolve(__dirname, './evals'),
   timeout: runInvestigations || runStoredInvestigations ? 45 * 60_000 : 10 * 60_000,
   concurrency: 16,
   testIgnore: [
-    ...(runSmoke ? [] : ['**/smoke/**']),
     ...(runInvestigations ? [] : ['**/investigation/investigation.spec.ts']),
     ...(runOrca ? [] : ['**/investigation/orcabench.spec.ts']),
     ...(runStoredInvestigations ? [] : ['**/investigation/stored.spec.ts']),

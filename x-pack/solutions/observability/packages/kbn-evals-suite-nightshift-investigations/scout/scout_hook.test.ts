@@ -187,7 +187,7 @@ describe('nightshift-investigations scout hook', () => {
     expect(runHook({ sandbox: { apiKey: 'REPLACE_ME', url: 'REPLACE_ME' } }).output).toEqual({});
   });
 
-  it('rejects sandbox settings without an API key instead of silently running only smoke', () => {
+  it('rejects sandbox settings without an API key instead of silently dropping them', () => {
     const { status, stderr } = runHook({ sandbox: { url: 'https://sandbox.example.com' } });
     expect(status).toBe(1);
     expect(stderr).toContain('sandbox host port set without an API key');
@@ -256,7 +256,7 @@ describe('nightshift-investigations scout hook', () => {
     );
   });
 
-  it('leaves dataset validation to Playwright, including smoke-only startup', () => {
+  it('leaves dataset validation to Playwright, including startup without a sandbox', () => {
     const result = runHook(
       {},
       { NIGHTSHIFT_DATASET_NAME: 'stored', NIGHTSHIFT_EXAMPLES_FILE: 'examples.json' }

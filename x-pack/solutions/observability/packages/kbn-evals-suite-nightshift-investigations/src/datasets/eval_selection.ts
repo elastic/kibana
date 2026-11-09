@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { parseRequestedIds } from './select_datasets';
-import { STORED_DATASETS, STORED_DATASET_SHARDS } from './stored_datasets';
+import { STORED_DATASETS, storedDatasetIdsForShard } from './stored_datasets';
 
-/** `NIGHTSHIFT_DATASETS` id for the file-driven investigation eval; every other id is a smoke dataset. */
+/** `NIGHTSHIFT_DATASETS` id for the file-driven investigation eval, the one unset and `all` run. */
 export const INVESTIGATION_DATASET_ID = 'trace-only';
 /**
  * `NIGHTSHIFT_DATASETS` id for the Nightshift assistant connector probes. Opt-in only: it needs an
@@ -22,6 +21,7 @@ export const CONNECTOR_PROBE_DATASET_ID = 'connector-probe';
  */
 export const WIKI_OPTIMIZE_DATASET_ID = 'wiki-optimize';
 
+const ALL_DATASETS = 'all';
 const EVAL_IDS: readonly string[] = [
   INVESTIGATION_DATASET_ID,
   CONNECTOR_PROBE_DATASET_ID,
@@ -31,18 +31,37 @@ const EVAL_IDS: readonly string[] = [
 const STORED_DATASET_IDS: readonly string[] = STORED_DATASETS.map(({ id }) => id);
 
 export interface EvalSelection {
-  runSmoke: boolean;
   runInvestigations: boolean;
   runOrca: boolean;
   runConnectorProbes: boolean;
   runWikiOptimize: boolean;
-  /** Ids from `STORED_DATASETS` to run; their CI shard selects every entry of its eval. */
+  /** Ids from `STORED_DATASETS` to run; a CI shard selects the entries that name it. */
   storedDatasetIds: string[];
-  /** Smoke dataset ids for `selectDatasets`; `undefined` runs them all. Unused when `runSmoke` is false. */
-  smokeDatasetsRequest: string | undefined;
-  /** True when an unset selection fell back to smoke because no sandbox credentials were found. */
-  fellBackToSmoke: boolean;
 }
+
+/** Parses `NIGHTSHIFT_DATASETS`; returns `undefined` when it is unset or selects `all`. */
+const parseRequestedIds = (requested: string | undefined): string[] | undefined => {
+  const normalized = requested?.trim();
+  if (!normalized || normalized === ALL_DATASETS) return undefined;
+
+  const ids = [...new Set(normalized.split(',').map((id) => id.trim()))];
+  if (ids.some((id) => id.length === 0)) {
+    throw new Error(
+      'NIGHTSHIFT_DATASETS contains an empty item; expected a comma-separated list of dataset ids.'
+    );
+  }
+  if (ids.includes(ALL_DATASETS)) return undefined;
+
+  const availableIds = [...EVAL_IDS, ...STORED_DATASET_IDS];
+  const unknownIds = ids.filter((id) => !availableIds.includes(id));
+  if (unknownIds.length > 0) {
+    throw new Error(
+      `Unknown dataset(s) in NIGHTSHIFT_DATASETS: ${unknownIds.join(', ')}. ` +
+        `Available: ${availableIds.join(', ')}, orcabench on its own, or "${ALL_DATASETS}".`
+    );
+  }
+  return ids;
+};
 
 /**
  * Stored datasets query Customer-0 live. Without the `default` connector set the investigator has no
@@ -60,7 +79,7 @@ const assertDefaultConnectorSet = (
   }
 };
 
-/** Resolves which evals run from `NIGHTSHIFT_DATASETS` and the presence of sandbox credentials. */
+/** Resolves which evals run from the CI shard, `NIGHTSHIFT_DATASETS` and sandbox credentials. */
 export const resolveEvalSelection = (
   env: Record<string, string | undefined> = process.env
 ): EvalSelection => {
@@ -73,33 +92,25 @@ export const resolveEvalSelection = (
       );
     }
     return {
-      runSmoke: false,
       runInvestigations: false,
       runOrca: true,
       runConnectorProbes: false,
       runWikiOptimize: false,
       storedDatasetIds: [],
-      smokeDatasetsRequest: undefined,
-      fellBackToSmoke: false,
     };
   }
-  const storedShardEval = STORED_DATASET_SHARDS.get(env.EVAL_SHARD_ID ?? '');
-  if (storedShardEval) {
+  const shardDatasetIds = storedDatasetIdsForShard(env.EVAL_SHARD_ID);
+  if (shardDatasetIds.length > 0) {
     if (!env.SANDBOX_API_KEY) {
       throw new Error(`The ${env.EVAL_SHARD_ID} shard requires SANDBOX_API_KEY`);
     }
     assertDefaultConnectorSet(env, `The ${env.EVAL_SHARD_ID} shard`);
     return {
-      runSmoke: false,
       runInvestigations: false,
       runOrca: false,
       runConnectorProbes: false,
       runWikiOptimize: false,
-      storedDatasetIds: STORED_DATASETS.filter((dataset) => dataset.eval === storedShardEval).map(
-        ({ id }) => id
-      ),
-      smokeDatasetsRequest: undefined,
-      fellBackToSmoke: false,
+      storedDatasetIds: shardDatasetIds,
     };
   }
   if (env.NIGHTSHIFT_DATASETS?.split(',').some((id) => id.trim() === 'orcabench')) {
@@ -109,33 +120,29 @@ export const resolveEvalSelection = (
     env.NIGHTSHIFT_DATASETS?.trim() ||
     (env.NIGHTSHIFT_DATASET_NAME ? INVESTIGATION_DATASET_ID : undefined);
   const ids = parseRequestedIds(requested);
-  const hasSandbox = Boolean(env.SANDBOX_API_KEY);
   const requiresSandbox = (selected: string) => {
     // Playwright resolves this on every run; a reused Scout server never reloads its config.
-    if (!hasSandbox) {
+    if (!env.SANDBOX_API_KEY) {
       throw new Error(
-        `NIGHTSHIFT_DATASETS=${requested} selects ${selected}, which runs investigation evals, but ` +
-          'SANDBOX_API_KEY is required; use --profile dev-vault, export SANDBOX_*, or select only smoke datasets.'
+        `NIGHTSHIFT_DATASETS=${
+          requested ?? ALL_DATASETS
+        } selects ${selected}, which runs investigation evals, ` +
+          `but SANDBOX_API_KEY is required; use --profile dev-vault, export SANDBOX_*, or select only ${WIKI_OPTIMIZE_DATASET_ID}.`
       );
     }
   };
 
   if (!ids) {
-    // Only a genuinely unset value falls back; an explicit `all` asked for investigations too.
-    if (requested) requiresSandbox('all');
+    requiresSandbox(ALL_DATASETS);
     return {
       runOrca: false,
-      runSmoke: true,
-      runInvestigations: hasSandbox,
+      runInvestigations: true,
       runConnectorProbes: false,
       runWikiOptimize: false,
       storedDatasetIds: [],
-      smokeDatasetsRequest: undefined,
-      fellBackToSmoke: !hasSandbox,
     };
   }
 
-  const smokeIds = ids.filter((id) => !EVAL_IDS.includes(id) && !STORED_DATASET_IDS.includes(id));
   const runInvestigations = ids.includes(INVESTIGATION_DATASET_ID);
   if (runInvestigations) requiresSandbox(INVESTIGATION_DATASET_ID);
   const runConnectorProbes = ids.includes(CONNECTOR_PROBE_DATASET_ID);
@@ -148,12 +155,9 @@ export const resolveEvalSelection = (
 
   return {
     runOrca: false,
-    runSmoke: smokeIds.length > 0,
     runInvestigations,
     runConnectorProbes,
     runWikiOptimize: ids.includes(WIKI_OPTIMIZE_DATASET_ID),
     storedDatasetIds,
-    smokeDatasetsRequest: smokeIds.length > 0 ? smokeIds.join(',') : undefined,
-    fellBackToSmoke: false,
   };
 };

@@ -38,9 +38,6 @@ steps:
           # Sonnet 5.5 only, the production investigation model; the weekly run compares models.
           EVAL_MODEL_GROUPS: 'eis/anthropic-claude-5.5-sonnet'
           EVAL_SERVER_CONFIG_SET: 'evals_nightshift_investigations'
-          # The stored-* shards are opt-in, so only this pipeline runs them. Their datasets are
-          # listed in the suite's src/datasets/stored_datasets.ts.
-          EVAL_SHARD_IDS: 'orcabench,stored-investigations,stored-connector-probes'
           # Labels the triage message "Daily LLM evals" instead of an on-demand run.
           KBN_EVALS_DAILY: '1'
           # Not a weekly run, so the notify step posts here instead of the suite's channel.

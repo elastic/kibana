@@ -19,10 +19,6 @@
 //
 // Otherwise (PR, on-demand, grep, or no `specModelGroups` overrides): every requested connector runs
 // every spec, batched by `shards` when present, else the whole suite.
-//
-// `EVAL_SHARD_IDS` (comma-separated) runs only the named shards. Without it, shards marked `optIn`
-// are skipped, so a pipeline that names them (e.g. the daily one) can add shards the weekly, PR and
-// on-demand runs never pick up.
 
 const { parseMaybeBase64Json } = require('./ai_connectors');
 const {
@@ -94,39 +90,6 @@ const assertListedModelsHaveConnectors = (connectors, groups) => {
   }
 };
 
-const parseShardIds = (value) => [
-  ...new Set(
-    String(value || '')
-      .split(',')
-      .map((id) => id.trim())
-      .filter(Boolean)
-  ),
-];
-
-// The shards a run uses: the requested ones, else every shard that is not `optIn`. Unknown ids
-// throw rather than silently running fewer shards than asked for.
-const selectShards = (shards, requestedShardIds) => {
-  if (requestedShardIds.length === 0) {
-    const eligibleShards = shards.filter((shard) => shard?.optIn !== true);
-    // No shards means a whole-suite run, which would include the opt-in specs.
-    if (shards.length > 0 && eligibleShards.length === 0) {
-      throw new Error(
-        'Every shard of this suite is optIn; name the shards to run in EVAL_SHARD_IDS'
-      );
-    }
-    return eligibleShards;
-  }
-  const availableIds = shards.map((shard) => shard?.id);
-  const unknownIds = requestedShardIds.filter((id) => !availableIds.includes(id));
-  if (unknownIds.length > 0) {
-    throw new Error(
-      `Unknown shard id(s) in EVAL_SHARD_IDS: ${unknownIds.join(',')}. ` +
-        `Available: ${availableIds.join(',') || '<none, the suite has no shards>'}`
-    );
-  }
-  return shards.filter((shard) => requestedShardIds.includes(shard.id));
-};
-
 // A shard's `judge` pins the evaluation connector of its steps; otherwise the suite-wide judge applies.
 const shardJudge = (shard) => (typeof shard?.judge === 'string' ? shard.judge.trim() : '');
 
@@ -156,7 +119,6 @@ function buildConnectorShardMatrix({ connectors, shards, requestedModelGroups })
  * @param {string[]} params.requestedModelGroups  EVAL_MODEL_GROUPS (the provisioned universe)
  * @param {boolean} params.perSpec            weekly run (`KBN_EVALS_WEEKLY`); apply `specModelGroups` overrides
  * @param {boolean} params.grepOverride       whether EVAL_GREP / EVAL_GREP_INVERT is set
- * @param {string[]} [params.requestedShardIds] EVAL_SHARD_IDS; empty runs every shard that is not `optIn`
  * @returns {Array<{connectorId: string, shardId: string, specFiles: string[], judge?: string}>}
  */
 function buildFanoutMatrix({
@@ -165,32 +127,19 @@ function buildFanoutMatrix({
   requestedModelGroups,
   perSpec: perSpecFlag,
   grepOverride,
-  requestedShardIds = [],
 }) {
-  // A grep run is one whole-suite step with no shard, so the requested shards would never run.
-  if (grepOverride && requestedShardIds.length > 0) {
-    throw new Error(
-      'EVAL_SHARD_IDS cannot be combined with EVAL_GREP / EVAL_GREP_INVERT: a grep run ignores shards'
-    );
-  }
   const specModelGroups = Array.isArray(suiteInfo.specModelGroups) ? suiteInfo.specModelGroups : [];
   const suiteWeeklyModelGroups = Array.isArray(suiteInfo.weeklyEisModelGroups)
     ? suiteInfo.weeklyEisModelGroups
     : [];
-  // A grep run is one whole-suite step filtered by the pattern, so it uses no shard.
-  const configuredShards = grepOverride
-    ? []
-    : selectShards(Array.isArray(suiteInfo.shards) ? suiteInfo.shards : [], requestedShardIds);
+  const configuredShards = Array.isArray(suiteInfo.shards) ? suiteInfo.shards : [];
 
   const overrides = modelsByFileFromSpecs(specModelGroups);
   const perSpec = perSpecFlag && !grepOverride && overrides.size > 0;
 
   if (!perSpec) {
-    return buildConnectorShardMatrix({
-      connectors,
-      shards: configuredShards,
-      requestedModelGroups,
-    });
+    const shards = grepOverride ? [] : configuredShards;
+    return buildConnectorShardMatrix({ connectors, shards, requestedModelGroups });
   }
 
   const connectorIds = assertRequestedConnectors(connectors, requestedModelGroups);
@@ -277,7 +226,6 @@ function main() {
       grepOverride: Boolean(
         (process.env.EVAL_GREP || '').trim() || (process.env.EVAL_GREP_INVERT || '').trim()
       ),
-      requestedShardIds: parseShardIds(process.env.EVAL_SHARD_IDS),
     });
     process.stdout.write(formatFanoutMatrix(rows));
   } catch (error) {
@@ -290,4 +238,4 @@ if (require.main === module) {
   main();
 }
 
-module.exports = { buildFanoutMatrix, formatFanoutMatrix, parseShardIds };
+module.exports = { buildFanoutMatrix, formatFanoutMatrix };

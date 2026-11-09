@@ -6,8 +6,8 @@
  */
 
 import {
+  assertStoredDatasetTags,
   resolveEvalSelection,
-  resolveStoredDatasetName,
   selectStoredDatasets,
 } from '../../src/datasets';
 import { loadStoredInvestigationDataset } from '../investigation/datasets';
@@ -22,8 +22,11 @@ for (const storedDataset of selectStoredDatasets(
   registerConnectorProbeEvaluation({
     name: storedDataset.id,
     experimentName: `Nightshift assistant stored connector probes: ${storedDataset.id}`,
-    loadDataset: async (client) =>
-      loadStoredInvestigationDataset(client, await resolveStoredDatasetName(client, storedDataset)),
+    loadDataset: async (client) => {
+      const dataset = await loadStoredInvestigationDataset(client, storedDataset.name);
+      assertStoredDatasetTags(storedDataset, dataset.tags);
+      return dataset;
+    },
     // Like NIGHTSHIFT_DATASET_NAME: run the upstream copy, keeping its example ids and labels.
     trustUpstreamDataset: true,
   });

@@ -8,7 +8,6 @@
 import type { KbnClient } from '@kbn/kbn-client';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import {
-  EVALS_DATASETS_URL,
   EVALS_DATASET_RESOLVE_URL,
   EVALS_DATASET_UPSERT_URL,
   EVALS_DATASET_URL,
@@ -538,46 +537,6 @@ describe('EvalsClient', () => {
     const client = new EvalsClient(kbnClient, log);
 
     await expect(client.getDatasetByName('Some Dataset')).rejects.toThrow('Internal Server Error');
-  });
-
-  it('listDatasets forwards the query and returns the parsed page', async () => {
-    const kbnClient = createMockKbnClient();
-    const summary = {
-      id: 'ds-uuid',
-      name: 'ns-investigation-golden-2710',
-      description: 'Golden cut',
-      tags: ['nightshift'],
-      maturity: 'raw',
-      examples_count: 15,
-      created_at: '2026-10-27T11:09:16.074Z',
-      updated_at: '2026-10-27T11:09:16.074Z',
-    };
-    kbnClient.request.mockResolvedValue(asKbnResponse({ datasets: [summary], total: 1 }));
-    const client = new EvalsClient(kbnClient, createLog());
-
-    const result = await client.listDatasets({
-      search: 'ns-investigation-golden',
-      sort_field: 'created_at',
-      sort_order: 'desc',
-    });
-
-    expect(kbnClient.request).toHaveBeenCalledWith(
-      expect.objectContaining({
-        path: EVALS_DATASETS_URL,
-        method: 'GET',
-        query: { search: 'ns-investigation-golden', sort_field: 'created_at', sort_order: 'desc' },
-        retries: 0,
-      })
-    );
-    expect(result).toEqual({ datasets: [summary], total: 1 });
-  });
-
-  it('listDatasets rejects a response that is not a dataset page', async () => {
-    const kbnClient = createMockKbnClient();
-    kbnClient.request.mockResolvedValue(asKbnResponse({ datasets: [{ id: 'ds-uuid' }] }));
-    const client = new EvalsClient(kbnClient, createLog());
-
-    await expect(client.listDatasets()).rejects.toThrow();
   });
 
   it('assertPluginEnabled throws an error when plugin is disabled', async () => {

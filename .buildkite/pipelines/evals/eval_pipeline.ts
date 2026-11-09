@@ -15,11 +15,10 @@ const EVALS_SUITES_METADATA_RELATIVE_PATH = '.buildkite/pipelines/evals/evals.su
 
 // Consumed by `run_suite.sh` (via jq) rather than here, but declared so this type describes the
 // whole file. Each shard becomes its own fanout step running the spec files it lists, resolved
-// relative to the suite root. An `optIn` shard only runs when `EVAL_SHARD_IDS` names it.
+// relative to the suite root.
 export interface EvalsSuiteShard {
   id: string;
   specFiles: string[];
-  optIn?: boolean;
   /** Evaluation connector for this shard's steps, overriding the suite-wide judge. */
   judge?: string;
 }

@@ -6,8 +6,8 @@
  */
 
 import {
+  assertStoredDatasetTags,
   resolveEvalSelection,
-  resolveStoredDatasetName,
   selectStoredDatasets,
 } from '../../src/datasets';
 import { loadStoredInvestigationDataset } from './datasets';
@@ -21,8 +21,11 @@ for (const storedDataset of selectStoredDatasets(
   registerInvestigationEvaluation({
     name: storedDataset.id,
     experimentName: `Nightshift stored investigation traces: ${storedDataset.id}`,
-    loadDataset: async (client) =>
-      loadStoredInvestigationDataset(client, await resolveStoredDatasetName(client, storedDataset)),
+    loadDataset: async (client) => {
+      const dataset = await loadStoredInvestigationDataset(client, storedDataset.name);
+      assertStoredDatasetTags(storedDataset, dataset.tags);
+      return dataset;
+    },
     // Like NIGHTSHIFT_DATASET_NAME: run the upstream copy, keeping its example ids and labels.
     trustUpstreamDataset: true,
     // Live investigations: they get the stack's connectors and need no sandbox calculation.

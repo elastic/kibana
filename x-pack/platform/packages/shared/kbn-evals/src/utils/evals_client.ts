@@ -22,7 +22,6 @@ import {
   EVALS_EXPERIMENTS_URL,
   EVALS_SCORES_URL,
   GetEvaluationDatasetResponse,
-  GetEvaluationDatasetsResponse,
   GetEvaluationExperimentResponse,
   GetEvaluationExperimentDatasetExamplesResponse,
   GetEvaluationExperimentExampleDetailsResponse,
@@ -37,7 +36,6 @@ import {
   getDatasetId,
   type DatasetMaturity,
   type EvaluationScoreDocument,
-  type GetEvaluationDatasetsRequestQueryInput,
   type IngestScoresRequestBodyInput,
   type Model as EvalsModel,
 } from '@kbn/evals-common';
@@ -440,24 +438,6 @@ export class EvalsClient {
       }
       throw error;
     }
-  }
-
-  /**
-   * Lists one page of dataset summaries (no examples) in the run's space. `search` matches names
-   * and descriptions loosely, so callers that need an exact name filter the page themselves.
-   */
-  async listDatasets(
-    query: GetEvaluationDatasetsRequestQueryInput = {}
-  ): Promise<GetEvaluationDatasetsResponse> {
-    const response = await this.kbnClient.request({
-      path: this.path(EVALS_DATASETS_URL),
-      method: 'GET',
-      query,
-      headers: VERSIONED_HEADERS,
-      retries: 0,
-    });
-
-    return GetEvaluationDatasetsResponse.parse(getResponseData(response));
   }
 
   /**

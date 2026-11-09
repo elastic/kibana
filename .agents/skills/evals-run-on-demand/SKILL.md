@@ -37,12 +37,6 @@ From `$ARGUMENTS` and the conversation, extract:
 | Judge    | no       | `EVAL_CONNECTOR_ID`                             | CI default judge                   |
 | Branch   | no       | `--branch` (branch or `refs/pull/<N>/head`)     | current branch (Step 3)            |
 | Grep     | no       | `EVAL_GREP`                                     | none                               |
-| Shard(s) | no       | `EVAL_SHARD_IDS` (comma-separated)              | none                               |
-
-Shard ids come from the suite's `shards` in `evals.suites.json`. Naming shards runs only those,
-including `"optIn": true` shards that no run includes otherwise. `EVAL_SHARD_IDS` applies to every
-requested suite and cannot be combined with `EVAL_GREP`, so with shards, request exactly one suite
-and no grep.
 
 ## Step 1: Check `bk` authentication
 
@@ -183,7 +177,6 @@ bk build create \
   -e "EVAL_INCLUDE_EIS_MODELS=1"    # only for "all models" or any eis/... model
   -e "EVAL_CONNECTOR_ID=<judge>"    # only when a judge was requested
   -e "EVAL_GREP=<pattern>"          # only when a grep was requested
-  -e "EVAL_SHARD_IDS=<shard ids>"   # only when shards were requested
   --web
 ```
 

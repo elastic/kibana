@@ -50,7 +50,7 @@ export const registerInvestigationEvaluation = ({
 }: {
   name: string;
   loadDataset?: (
-    client: Pick<EvalsClient, 'getDatasetByName' | 'listDatasets' | 'upsertDataset'>
+    client: Pick<EvalsClient, 'getDatasetByName' | 'upsertDataset'>
   ) => Promise<EvaluationDataset<InvestigationExample>>;
   trustUpstreamDataset?: boolean;
   orca?: boolean;

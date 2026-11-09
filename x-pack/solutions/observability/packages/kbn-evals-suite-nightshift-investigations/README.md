@@ -2,11 +2,11 @@
 
 Evaluation suite for [Nightshift investigations](../../plugins/nightshift_investigations).
 
-The smoke and trace-only evals run by default, locally and in CI, when sandbox credentials are
-available. Set `NIGHTSHIFT_DATASETS` to run just one. The smoke eval checks seed data loading and
-score ingestion. The trace-only eval runs the real manual investigation workflow on file-based or
-stored questions and persists its report, conversation and full agent trace. The
-[ORCA benchmark](#orca-benchmark) runs the same investigation and judges on its own Scout server.
+Locally, the trace-only eval runs by default when sandbox credentials are available. It runs the
+real manual investigation workflow on file-based or stored questions and persists its report,
+conversation and full agent trace. `NIGHTSHIFT_DATASETS` selects the other evals. CI runs the
+[Customer-0 stored datasets](#customer-0-stored-datasets) and the
+[ORCA benchmark](#orca-benchmark), each on its own Scout server.
 
 Investigation evals grade each run with five RCA judges and an `execution_success` score. A run
 that ends without a conclusion scores 0 there but doesn't fail the eval on its own; the eval fails
@@ -33,7 +33,7 @@ Kibana starts with `--serverless=oblt` on `5620`. To run on stateful instead:
 node scripts/evals start --suite nightshift-investigations --scout-arch stateful
 ```
 
-Switching arch restarts Scout. Both arches run the smoke eval's snapshot seeding: serverless Elasticsearch has no keystore, so `kbn-es` passes `GCS_CREDENTIALS` to it as a file secret instead.
+Switching arch restarts Scout.
 
 Serverless Elasticsearch always binds transport ports `9300`–`9302`. A development Elasticsearch started with `yarn es snapshot` (as the `local` profile below needs) also takes `9300`, so give it another transport port: `yarn es snapshot --license trial -E transport.port=9400`.
 
@@ -60,9 +60,7 @@ yarn start                         # Kibana on localhost:5601
 
 `start` will not launch them for you. It brings up a separate Scout cluster on `9220` and `5620` for the suite to run against, and leaves your development instance alone. Omitting `--profile` prompts for a destination instead.
 
-Either way the profile also supplies this suite's `GCS_CREDENTIALS`, read from `gcsDatasetAccessCredentials` in the profile's config — from Vault for `dev-vault`, from `config.<profile>.json` otherwise, and `node scripts/evals init` can fill it in. Export the variable by hand only when running outside a profile, as [publishing](#publishing-the-synthetic-snapshot) does.
-
-For model and judge selection, `--grep` and repetitions, see [running evals locally](../../../../platform/packages/shared/kbn-evals/README.md#11-getting-started-locally). In CI, the judge of Customer-0 and of the daily golden run (`stored-investigations`) is pinned to `eis-openai-gpt-6-sol`, the model the online evals judges use; a `models:judge:` label doesn't change it. A run filtered with `EVAL_GREP` drops the shards, so pass `EVAL_CONNECTOR_ID=eis-openai-gpt-6-sol` with it. Pass it locally with `--judge`. The suite overrides no other flags.
+For model and judge selection, `--grep` and repetitions, see [running evals locally](../../../../platform/packages/shared/kbn-evals/README.md#11-getting-started-locally). In CI, the judge of both Customer-0 shards (`customer0-golden` and `customer0-connector-probes`) is pinned to `eis-openai-gpt-6-sol`, the model the online evals judges use; a `models:judge:` label doesn't change it. A run filtered with `EVAL_GREP` drops the shards, so pass `EVAL_CONNECTOR_ID=eis-openai-gpt-6-sol` with it. Pass it locally with `--judge`. The suite overrides no other flags.
 
 ## Trace-only investigations
 
@@ -70,7 +68,7 @@ This selection runs code in the shared sandbox-api on GCP. Its credentials are a
 Vault, so run with `--profile dev-vault` and there is nothing to configure:
 
 ```bash
-# Every eval (smoke + trace-only); prefix NIGHTSHIFT_DATASETS=trace-only to run only this one
+# Unset NIGHTSHIFT_DATASETS runs this eval
 node scripts/evals start \
   --suite nightshift-investigations --profile dev-vault \
   --model eis-anthropic-claude-5-5-sonnet \
@@ -179,8 +177,8 @@ Independently, error text above 10,000 characters keeps that prefix plus a trunc
 remains an execution failure. Ordinary reports are preserved unchanged.
 
 The `evals_nightshift_investigations` server config extends `evals_tracing` whenever the hook
-exports sandbox credentials. Otherwise it is plain `evals_tracing`, so the smoke eval needs no
-sandbox credentials. It enables the investigation engine, its `nightshift.enabled` feature flag
+exports sandbox credentials. Otherwise it is plain `evals_tracing`, which only the Wiki optimizer
+replay can run on. It enables the investigation engine, its `nightshift.enabled` feature flag
 and sandbox, pauses online evals (`nightshift.onlineEvals.paused`) so investigations are judged
 only by the suite, disables Wiki, and exports full Agent Builder payloads (user messages, system
 instructions, responses, tool arguments/results and conversation IDs) to the profile's configured
@@ -230,13 +228,13 @@ Historical full-grader runs are not acceptance evidence for this runner. Graders
 metrics, automatic provisioning and generalized CI defaults are deferred.
 
 `evals start` restarts Scout automatically when connectors, the server config set,
-`TRACING_EXPORTERS`, `GCS_CREDENTIALS` or any variable the hook exports changes. Switching
-`NIGHTSHIFT_DATASETS` needs no restart: whenever sandbox credentials are present, Scout starts with
-the investigation engine and sandbox, and the smoke eval runs on that server too.
+`TRACING_EXPORTERS` or any variable the hook exports changes. Switching `NIGHTSHIFT_DATASETS` needs
+no restart: whenever sandbox credentials are present, Scout starts with the investigation engine
+and sandbox.
 
 Use `evals run` to repeat a run with unchanged startup settings. Without sandbox credentials (for
-example a profile that has no `sandbox` block), an unset `NIGHTSHIFT_DATASETS` runs only the smoke
-eval and prints a warning.
+example a profile that has no `sandbox` block), an unset `NIGHTSHIFT_DATASETS` fails before any
+test runs.
 
 ## Stored investigation datasets and concurrency
 
@@ -270,36 +268,49 @@ selection alone does not restart Scout. `run` and `start --skip-server` use your
 whose Task Manager capacity you must configure yourself. Wait for any active eval to finish before
 restarting a shared local stack.
 
-## Daily stored datasets
+## Customer-0 stored datasets
 
-[`src/datasets/stored_datasets.ts`](src/datasets/stored_datasets.ts) lists the stored datasets the
-[daily pipeline](#ci) runs. Each entry names a dataset on the evaluations cluster, either exactly
-(`name`) or as the newest match of a pattern (`latest`), and the eval that scores it:
+[`src/datasets/stored_datasets.ts`](src/datasets/stored_datasets.ts) lists the stored datasets
+[CI](#ci) runs. Each entry names a dataset on the evaluations cluster by its exact `name`, the eval
+that scores it and the CI shard that runs it:
 
-| Id                  | Eval            | Dataset                                                                       |
-| ------------------- | --------------- | ----------------------------------------------------------------------------- |
-| `golden`            | investigation   | newest `ns-investigation-golden-DDMM` tagged `customer0`, at most 90 days old |
-| `connector-elastic` | connector-probe | `nightshift/ns-connector-elastic`                                             |
+| Id                  | Shard                        | Eval            | Dataset                           |
+| ------------------- | ---------------------------- | --------------- | --------------------------------- |
+| `golden`            | `customer0-golden`           | investigation   | `ns-investigation-golden-2710`    |
+| `connector-elastic` | `customer0-connector-probes` | connector-probe | `nightshift/ns-connector-elastic` |
 
-The suffix is the cut date as DDMM: `2710` is 27 October.
+Golden cuts are named `ns-investigation-golden-DDMM`, after the cut date: `2710` is 27 October.
+CI runs one pinned cut, so PR, weekly and daily scores share a baseline, and a newer cut on the
+evaluations cluster changes nothing until the entry is updated. Scores are attributed to the
+dataset name, so each cut is its own series in the dashboards.
 
-`latest` picks the most recently created dataset whose name matches, so a new cut runs from the
-next build without a code change, and the date in its name is never parsed. The run fails when
-nothing matches, or when the newest match is older than `maxAgeDays` or lacks one of
-`requiredTags`. Golden cuts need the `customer0` tag, which applies the Customer-0 custom context
-and the retrospective guardrail; an untagged new cut fails the run rather than being skipped for
-an older one. Scores stay attributed to the resolved name, so each cut is its own series in the
-dashboards.
+Golden cuts must carry the `customer0` tag (`requiredTags`), which applies the Customer-0 custom
+context and the retrospective guardrail. A dataset without it fails the run before any
+investigation starts.
 
-To add a dataset to the daily run, add an entry. Its eval's CI shard (`stored-investigations` or
-`stored-connector-probes`) runs every entry of that eval. Each id is also a `NIGHTSHIFT_DATASETS`
-selector, opt-in like `connector-probe`:
+### Running a new golden cut in CI
 
-```bash
-NIGHTSHIFT_DATASETS=golden \
-  node scripts/evals start --suite nightshift-investigations --profile dev-vault --repetitions 1 \
-  --model eis-anthropic-claude-5-5-sonnet --judge eis-openai-gpt-6-sol
-```
+1. Check the cut on the evaluations cluster: its name, its `customer0` tag, and that its examples
+   are investigation questions with distinct `metadata.case_id` values.
+2. Change the `golden` entry's `name` in
+   [`src/datasets/stored_datasets.ts`](src/datasets/stored_datasets.ts), and the table above.
+3. Run it locally the way CI does. `NIGHTSHIFT_DATASETS` takes the entry's id, so this loads the
+   new name and checks its tag:
+
+   ```bash
+   NIGHTSHIFT_DATASETS=golden \
+     node scripts/evals start --suite nightshift-investigations --profile dev-vault --repetitions 1 \
+     --model eis-anthropic-claude-5-5-sonnet --judge eis-openai-gpt-6-sol
+   ```
+
+4. Open a PR with the `evals:nightshift-investigations` and
+   `models:eis/anthropic-claude-5.5-sonnet` labels, so CI scores the new cut on the PR too.
+5. After the merge, the next daily and weekly builds run the new cut. Its scores start a new
+   series, so compare runs within one cut, not across cuts.
+
+To run a different stored dataset in CI as well, add an entry naming its shard, and add that shard
+to `evals.suites.json` if it is new. Each entry's id is also a `NIGHTSHIFT_DATASETS` selector,
+opt-in like `connector-probe`.
 
 Both datasets query the Customer-0 cluster live, so they run with the `default`
 [connector set](#connector-sets). Selecting them without it fails before any test runs, since
@@ -464,62 +475,37 @@ Until then, use a conversation only within one trusted authorization context. Th
 [review finding](https://github.com/elastic/kibana/pull/291603#discussion_r4097938707) records this
 explicitly deferred scope.
 
-## Two kinds of dataset
-
-The word "dataset" means two different things in evals, and this suite keeps them apart deliberately. It is worth reading once.
-
-| Term             | What it is                                                                                                                                  | Where it lives                    |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
-| **Eval dataset** | The examples a run is scored on: an input, the expected output, and metadata. Scores are recorded against it.                               | [`src/datasets/`](src/datasets)   |
-| **Seed data**    | The Elasticsearch documents an eval dataset is evaluated _against_ — logs, metrics, traces, alerts. Restored into the cluster before a run. | [`src/seed_data/`](src/seed_data) |
-
-An eval dataset names its seed data through `seedSource`, but the two are otherwise independent: several eval datasets can sit on top of the same seed data, and swapping the target under test changes neither. That is what lets one eval dataset and its evaluators be reused against a different target.
-
 ## Layout
 
 One eval is one folder under `evals/`, holding everything specific to it. `src/` holds only what
 every eval shares.
 
-| Path              | Holds                                                                    |
-| ----------------- | ------------------------------------------------------------------------ |
-| `evals/<name>/`   | One eval: its datasets, task, evaluators, types and spec                 |
-| `src/datasets/`   | The eval dataset contract, selection, and conversion to framework shape  |
-| `src/seed_data/`  | Seed sources, plus seeding, publishing and clearing them                 |
-| `src/evaluate.ts` | The suite's Playwright fixture                                           |
-| `scripts/lib/`    | Code shared between the CLIs, such as connecting to a cluster from flags |
-| `scripts/<name>/` | One developer CLI each, run via a launcher in Kibana's root `scripts/`   |
+| Path              | Holds                                                         |
+| ----------------- | ------------------------------------------------------------- |
+| `evals/<name>/`   | One eval: its datasets, task, evaluators, types and spec      |
+| `src/datasets/`   | Eval selection and the stored datasets CI runs                |
+| `src/evaluate.ts` | The suite's Playwright fixture                                |
 
-Inside an eval folder the files always mean the same thing, so `evals/smoke/` reads as a template:
+Inside an eval folder the files always mean the same thing, so
+[`evals/connector_probe/`](evals/connector_probe) reads as a template:
 
-| File            | Holds                                                              |
-| --------------- | ------------------------------------------------------------------ |
-| `types.ts`      | The example shape, its expected output, and the evaluator type     |
-| `datasets.ts`   | The eval datasets and a `get<Name>Datasets()` that applies filters |
-| `task.ts`       | What runs under test, and the shape of its output                  |
-| `evaluators.ts` | The evaluators, and the array the spec passes to the runner        |
-| `*.spec.ts`     | Wiring: iterate datasets, seed, run, score                         |
+| File            | Holds                                                          |
+| --------------- | -------------------------------------------------------------- |
+| `types.ts`      | The example shape, its expected output, and the evaluator type |
+| `datasets.ts`   | Loading and validating the eval's examples                     |
+| `task.ts`       | What runs under test, and the shape of its output              |
+| `evaluators.ts` | The evaluators, and the array the spec passes to the runner    |
+| `*.spec.ts`     | Wiring: load the dataset, run, score                           |
 
 Playwright only collects `*.spec.ts`, so the neighbouring files are invisible to it while Jest
 still picks up `*.test.ts`.
 
-Specs stay thin because [`withSeedData`](src/seed_data/with_seed_data.ts) registers both the `beforeAll` that seeds and the `afterAll` that clears, so no spec carries its own copy and none can forget cleanup:
-
-```ts
-evaluate.describe(dataset.id, () => {
-  const seedData = withSeedData(dataset);
-
-  evaluate('...', async ({ esClient }) => {
-    // seedData().indices — the data streams seeding actually wrote
-  });
-});
-```
-
 ## Adding a new eval
 
-For seeded evals, follow [`evals/smoke/`](evals/smoke). For file-driven investigations, follow
-[`evals/investigation/`](evals/investigation). Which folders run is decided by
+Follow [`evals/connector_probe/`](evals/connector_probe) for a quick agent call, or
+[`evals/investigation/`](evals/investigation) for full investigations. Which specs run is decided by
 [`resolveEvalSelection`](src/datasets/eval_selection.ts) and applied as `testIgnore` in
-`playwright.config.ts`; a new seeded eval is covered by adding its datasets to `selectDatasets`.
+`playwright.config.ts`, so a new eval needs a `NIGHTSHIFT_DATASETS` id there.
 
 1. **`types.ts`** — describe an example: its input, the expected output your evaluators will read,
    and an evaluator type bound to your task's output.
@@ -527,103 +513,21 @@ For seeded evals, follow [`evals/smoke/`](evals/smoke). For file-driven investig
    engine that means `POST /internal/nightshift/investigations` through the `fetch` fixture, passing
    the eval model as `connector_id`, then polling the shared investigations API until the
    investigation is no longer in progress.
-3. **`datasets.ts`** — declare `Dataset` objects with an `id`, a `name` that scores are recorded
-   against, a `seedSource`, and an `examples()` call returning ground truth. Export a
-   `get<Name>Datasets()` that passes them through `selectDatasets`, which is what makes
-   `NIGHTSHIFT_DATASETS` work for your eval too.
+3. **`datasets.ts`** — load the examples from a file or the evaluations cluster and validate them.
 4. **`evaluators.ts`** — write CODE evaluators as plain objects, and reach for the `evaluators`
    fixture for LLM-as-judge scoring (`evaluators.criteria([...])`). Export them as one array.
-5. **`<name>.spec.ts`** — iterate your datasets, call `withSeedData(dataset)` once per describe
-   block, and hand the task and evaluators to `executorClient.runExperiment`.
-
-Two details worth knowing before you start:
-
-- **Seed data belongs in [`src/seed_data/sources.ts`](src/seed_data/sources.ts), not in your eval
-  folder.** Several evals can share one snapshot, and the CLI that publishes it has to agree with
-  the eval that reads it, so each source is declared once and referenced by both.
-- **`examples` is a function, not an array.** It is called when Playwright collects the describe
-  tree, which is what a dataset reading ground truth from files downloaded during global setup
-  needs.
-
-If your eval needs data from somewhere other than a GCS snapshot, add a member to `SeedSource` in
-[`src/seed_data/types.ts`](src/seed_data/types.ts) and a branch to `seedDataset` in
-[`src/seed_data/seed.ts`](src/seed_data/seed.ts). That switch is the only place seeding fans out.
-
-## Seed data
-
-Seed data comes from snapshots in the `nightshift-datasets` GCS bucket, laid out engine-first so a
-suite can scope to a whole engine or narrow to one source:
-
-```
-nightshift-datasets/
-└── investigation-engine/
-    ├── synthetic/            # the smoke eval's snapshot and any other synthetic datasets
-    └── customer0/            # labelled incidents
-```
-
-`detection-engine/` is reserved at the same level for later capabilities. Elasticsearch reads the
-bucket through its own keystore rather than the eval process, which is why the credential has to
-be present before the cluster starts; the `evals_tracing` Scout config (the default for eval
-suites) handles the wiring.
-
-### Publishing the synthetic snapshot
-
-The smoke eval restores `synthetic-smoke` from `investigation-engine/synthetic`. To create or
-refresh it:
-
-```bash
-export GCS_CREDENTIALS="$(cat service-account.json)"
-node scripts/scout start-server --serverConfigSet evals_tracing
-node scripts/publish_nightshift_eval_snapshot.js
-```
-
-The script seeds throwaway documents into a data stream, snapshots them to GCS and removes the
-local copy. See `--help` for its flags.
-
-Publishing refuses to overwrite a snapshot that already exists, since a snapshot is found by name
-and the data it would replace is gone for good. Add `--replace` to refresh one deliberately:
-
-```bash
-node scripts/publish_nightshift_eval_snapshot.js --replace
-```
-
-Only the document generation in that script is specific to the synthetic dataset. Publishing goes
-through [`publishEsSnapshot`](src/seed_data/publish_es_snapshot.ts), which takes an eval dataset's
-own `seedSource` and so writes to exactly the location
-[`replayEsSnapshot`](src/seed_data/es_snapshot.ts) will read from — the write side cannot drift
-away from the read side. A CLI that captures real data should reuse it, along with
-[`createEsClient`](scripts/lib/es_client.ts) for reaching a remote cluster:
-
-```ts
-await publishEsSnapshot({
-  source: myDataset.seedSource,
-  indices: ['logs-*', 'metrics-*', 'traces-*'],
-  esClient,
-  log,
-});
-```
-
-This needs a service account with **write** access; the credential CI restores with is read-only.
-Raising `--document-count` also means raising `SYNTHETIC_SMOKE_DOCUMENT_COUNT` in
-[`sources.ts`](src/seed_data/sources.ts), since that constant is the ground truth the eval scores
-against.
+5. **`<name>.spec.ts`** — load the dataset and hand the task and evaluators to
+   `executorClient.runExperiment`.
 
 ## Environment variables
 
 | Variable                         | Effect                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `NIGHTSHIFT_DATASETS`            | Comma-separated dataset ids (whitespace trimmed). Smoke dataset ids such as `synthetic-smoke` select seeded evals; `trace-only` selects the file-driven investigations; they can be combined, e.g. `synthetic-smoke,trace-only`. Unset or `all` runs every eval when sandbox credentials are present, except that a stored `NIGHTSHIFT_DATASET_NAME` defaults to trace-only when selection is unset. Without them, unset runs only smoke with a warning, while an explicit `all` or `trace-only` fails before any test runs, even when Scout is reused. `connector-probe` selects the [connector probes](#connector-probes), which unset and `all` never include; neither do the ids of the [daily stored datasets](#daily-stored-datasets). `wiki-optimize` selects the [Wiki optimizer replay](#wiki-optimizer-replay), which unset and `all` never include and which needs no sandbox credentials. `orcabench` selects the isolated ORCA dataset and cannot be combined with other ids; it requires an ORCA-configured Scout server. Unknown ids fail early. |
+| `NIGHTSHIFT_DATASETS`            | Comma-separated dataset ids (whitespace trimmed), which can be combined, e.g. `trace-only,wiki-optimize`. `trace-only` selects the file-driven investigations; unset or `all` runs them too, and so does a stored `NIGHTSHIFT_DATASET_NAME` when selection is unset. Without sandbox credentials, unset, `all` and `trace-only` fail before any test runs, even when Scout is reused. `connector-probe` selects the [connector probes](#connector-probes), which unset and `all` never include; neither do the ids of the [Customer-0 stored datasets](#customer-0-stored-datasets). `wiki-optimize` selects the [Wiki optimizer replay](#wiki-optimizer-replay), which unset and `all` never include and which needs no sandbox credentials. `orcabench` selects the isolated ORCA dataset and cannot be combined with other ids; it requires an ORCA-configured Scout server. Unknown ids fail early. |
 | `NIGHTSHIFT_PROBE_EXAMPLES_FILE` | Examples file for `connector-probe`; required when it is selected. See [connector probes](#connector-probes).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | `NIGHTSHIFT_WIKI_REPLAY_FILE` | Replay file for `wiki-optimize`; the bundled synthetic examples when unset. Same `nightshift/` dataset-file format as the investigation examples, with the round and expectation fields in [Wiki optimizer replay](#wiki-optimizer-replay). |
 | `NIGHTSHIFT_PROBE_TIME_BUDGET_S` | Seconds a probe may take before `within_time_budget` scores 0 (default 30).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `SELECTED_EVALUATORS`            | Standard `@kbn/evals` filter, by evaluator name (`documents_restored`, `timestamps_replayed`).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| `GCS_CREDENTIALS`                | Service account JSON Elasticsearch uses to reach the seed-data bucket. Read access is enough to run the suite.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-
-Because every eval dataset gets its own `describe` block, Playwright's `--grep` filters by dataset id as well.
-
-```bash
-NIGHTSHIFT_DATASETS=synthetic-smoke node scripts/evals run --suite nightshift-investigations
-```
+| `SELECTED_EVALUATORS`            | Standard `@kbn/evals` filter, by evaluator name (for example `execution_success`).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 
 ## ORCA benchmark
 
@@ -631,8 +535,8 @@ NIGHTSHIFT_DATASETS=synthetic-smoke node scripts/evals run --suite nightshift-in
 against the ORCA telemetry cluster: 40 incident tasks over 28 incidents and 10 no-incident
 controls. Each question uses ORCA's own wording: a stated current time, a vague or offset report
 time and the user-facing symptom, without the incident onset or an analysis window. CI runs it as
-its own shard under the `evals:nightshift-investigations` label, next to the `customer0` shard that
-runs the smoke and trace-only evals, so each Scout server runs one [connector set](#connector-sets).
+its own shard, next to the [Customer-0 shards](#customer-0-stored-datasets), so each Scout server
+runs one [connector set](#connector-sets).
 The ORCA shard runs the `orcabench` set: one Elasticsearch connector, `orcabench-es`, and no index
 hint, so the agent discovers the ORCA indices the way it would on any cluster. The Golden release `nightshift/orca-ech-full-20261019` is an alert-triggered eval
 of 42 questions and is not this ORCA benchmark; CI does not run it. Quote that 42-question set
@@ -823,9 +727,16 @@ as `nightshift-investigations`.
 
 - **Where it runs:** a serverless observability Scout cluster; `run_suite.sh` reads `scoutArch` /
   `scoutDomain` from the suite entry.
-- **What runs:** a `customer0` shard with the smoke and trace-only evals, and an `orcabench`
-  shard with the ORCA benchmark (plus the opt-in stored shards in the daily run). The suite's ci-prod secret,
-  `kv/ci-shared/kbn-evals/nightshift`, must hold the `sandbox` block;
+- **What runs:** the same three shards on PRs, weekly and daily, each on its own Scout server:
+
+  | Shard                        | Dataset                                                      | Judge                  |
+  | ---------------------------- | ------------------------------------------------------------ | ---------------------- |
+  | `customer0-golden`           | `ns-investigation-golden-2710` ([how to change it](#running-a-new-golden-cut-in-ci)) | `eis-openai-gpt-6-sol` |
+  | `customer0-connector-probes` | `nightshift/ns-connector-elastic`                            | `eis-openai-gpt-6-sol` |
+  | `orcabench`                  | [ORCA sampled 50](#orca-benchmark)                           | `eis-openai-gpt-5-4`   |
+
+  The suite's ci-prod secret,
+  `kv/ci-shared/kbn-evals/nightshift`, must hold the `sandbox` block, and `nightshift.telemetry` for the Customer-0 shards;
   `.buildkite/scripts/steps/evals/run_suite.sh` reads it and runs the suite's `scoutHook` on it
   before starting Scout (failing the step if it cannot be read), and Buildkite agents must be able
   to reach the sandbox-api host.
@@ -837,10 +748,8 @@ as `nightshift-investigations`.
   `weeklyEisModelGroups` in the suite entry.
 - **Daily:** [`daily_evals.yml`](../../../../../.buildkite/pipelines/evals/daily_evals.yml)
   ([`kibana-evals-daily-llm-evals`](https://buildkite.com/elastic/kibana-evals-daily-llm-evals))
-  runs the `orcabench` shard and the opt-in `stored-investigations` and `stored-connector-probes`
-  shards against Sonnet 5.5 at 02:00 UTC on weekdays. The stored shards run the
-  [daily stored datasets](#daily-stored-datasets); only pipelines that name them in
-  `EVAL_SHARD_IDS` run them, so the weekly and PR runs are unchanged.
+  runs every shard against Sonnet 5.5, the production investigation model, at 02:00 UTC on
+  weekdays.
 - **Failures** are posted to `#nightshift-alerts`, resolved from `slackChannel` in the suite entry
   (weekly) or `EVAL_SLACK_NOTIFICATION_CHANNEL` (daily).
 - **Scores** reach the golden cluster automatically, through `EVAL_KBN_URL` in CI.

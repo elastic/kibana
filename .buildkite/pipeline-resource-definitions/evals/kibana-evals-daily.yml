@@ -3,7 +3,7 @@ apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
   name: bk-kibana-evals-daily-llm-evals
-  description: 'Runs the Nightshift investigations evals on stored datasets every weekday'
+  description: 'Runs the Nightshift investigations evals every weekday'
   links:
     - url: 'https://buildkite.com/elastic/kibana-evals-daily-llm-evals'
       title: Pipeline link
@@ -51,7 +51,7 @@ spec:
       schedules:
         Daily build:
           cronline: 0 2 * * 1-5 GMT
-          message: Daily LLM Evals (Nightshift stored datasets)
+          message: Daily LLM Evals (Nightshift investigations)
           branch: main
       tags:
         - kibana
