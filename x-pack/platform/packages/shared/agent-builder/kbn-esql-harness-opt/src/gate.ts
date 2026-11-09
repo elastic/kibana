@@ -30,22 +30,28 @@ export interface GateResult {
 interface SeedAggregate {
   reward: number;
   cost: number;
+  /** Per-rollout rewards, so a regression can be required to hold across all of them. */
+  rewards: number[];
 }
 
 const aggregateBySeed = (runs: ExampleRun[]): Map<string, SeedAggregate> => {
-  const totals = new Map<string, { reward: number; cost: number; count: number }>();
+  const totals = new Map<string, { reward: number; cost: number; rewards: number[] }>();
   for (const run of runs) {
-    const current = totals.get(run.seedId) ?? { reward: 0, cost: 0, count: 0 };
+    const current = totals.get(run.seedId) ?? { reward: 0, cost: 0, rewards: [] };
     totals.set(run.seedId, {
       reward: current.reward + run.score.reward,
       cost: current.cost + (run.costUsd ?? 0),
-      count: current.count + 1,
+      rewards: [...current.rewards, run.score.reward],
     });
   }
   return new Map(
-    [...totals].map(([seedId, { reward, cost, count }]) => [
+    [...totals].map(([seedId, { reward, cost, rewards }]) => [
       seedId,
-      { reward: count === 0 ? 0 : reward / count, cost: count === 0 ? 0 : cost / count },
+      {
+        reward: rewards.length === 0 ? 0 : reward / rewards.length,
+        cost: rewards.length === 0 ? 0 : cost / rewards.length,
+        rewards,
+      },
     ])
   );
 };
@@ -145,7 +151,24 @@ export const gateCandidate = ({
   const costPerSolvedCiHigh = percentile(costDeltas, 0.975);
 
   const improvements = seeds.filter((seedId) => rewardDelta(seedId) > regressionEpsilon);
-  const regressions = seeds.filter((seedId) => rewardDelta(seedId) < -regressionEpsilon);
+
+  /**
+   * A seed counts as regressed only when *every* rollout got worse.
+   *
+   * Most generated examples score 0 or 1 with nothing in between, so with two rollouts a single
+   * flaky generation moves a seed's mean by 0.5 and looked like a regression. Requiring the drop
+   * to hold across all rollouts keeps the property worth guarding — examples that used to work
+   * and now do not — without punishing a coin flip.
+   */
+  const regressions = seeds.filter((seedId) => {
+    const before = incumbentBySeed.get(seedId)?.rewards ?? [];
+    const after = candidateBySeed.get(seedId)?.rewards ?? [];
+    if (before.length === 0 || after.length === 0) return false;
+    if (rewardDelta(seedId) >= -regressionEpsilon) return false;
+    const worstBefore = Math.min(...before);
+    const bestAfter = Math.max(...after);
+    return bestAfter < worstBefore - regressionEpsilon;
+  });
 
   const costRatio = candidate.totalCostUsd / (incumbent.totalCostUsd || Number.EPSILON);
 
