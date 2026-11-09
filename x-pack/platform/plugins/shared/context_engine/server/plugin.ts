@@ -43,6 +43,8 @@ import { AiIndexService } from './ai_indices/service';
 import { AiIndexRegistry } from './ai_indices/registry';
 import { ImprovementsService } from './improvements/service';
 import { installImprovementsIndexTemplate } from './improvements/storage';
+import { registerSessionMemoryDataStreams } from './session_memory/data_streams';
+import { getSessionMemoryService } from './session_memory/service';
 import { SignalsService } from './signals/service';
 import type { SignalsServiceApi } from './signals/service';
 import { registerSignalGeneratorTaskDefinition, scheduleSignalGenerator } from './tasks';
@@ -95,6 +97,7 @@ export class ContextEnginePlugin
     setupDeps: ContextEngineSetupDependencies
   ): ContextEnginePluginSetup {
     registerFeatures({ features: setupDeps.features });
+    registerSessionMemoryDataStreams(coreSetup.dataStreams);
     this.setupWorkflowsManagement(coreSetup);
 
     this.workflowsManagement = setupDeps.workflowsManagement?.management;
@@ -453,6 +456,7 @@ export class ContextEnginePlugin
       getAiIndexDataReadService: (params) => createAiIndexDataReadService(params),
       getSignalsService: () => signalsService,
       getImprovementsService: (esClient, spaceId) => createImprovementsService(esClient, spaceId),
+      getSessionMemoryService: () => getSessionMemoryService(coreStart),
     };
   }
 

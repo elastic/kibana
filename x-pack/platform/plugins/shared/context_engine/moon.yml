@@ -89,12 +89,17 @@ dependsOn:
   - '@kbn/usage-collection-plugin'
   - '@kbn/unsaved-changes-prompt'
   - '@kbn/cloud-plugin'
+  - '@kbn/core-data-streams-server'
+  - '@kbn/data-streams'
+  - '@kbn/es-mappings'
+  - '@kbn/core-test-helpers-kbn-server'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
   - jest-unit-tests
+  - jest-integration-tests
   - scout-tests
 fileGroups:
   src:
