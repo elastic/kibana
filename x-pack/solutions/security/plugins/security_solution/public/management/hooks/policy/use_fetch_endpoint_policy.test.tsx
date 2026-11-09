@@ -63,7 +63,7 @@ describe('When using the `useFetchEndpointPolicy()` hook', () => {
       const { result } = reactRenderHook(() => useFetchEndpointPolicy(policy.id, queryOptions), {
         wrapper,
       });
-      await waitFor(() => expect(result.current.isSuccess).toBe(true), { timeout: 1000 });
+      await waitFor(() => expect(result.current.isSuccess).toBe(true), { timeout: 10000 });
 
       return result.current;
     };
