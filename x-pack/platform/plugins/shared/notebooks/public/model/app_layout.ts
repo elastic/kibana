@@ -52,7 +52,7 @@ interface PanelSize {
 const getBasePanelSize = (cell: AppCellDefinition): PanelSize => {
   switch (cell.type) {
     case 'input':
-      return { width: 4, height: 3 };
+      return { width: 4, height: 2 };
     case 'markdown':
       return { width: DEFAULT_GRID_COLUMNS, height: 5 };
     case 'chart':

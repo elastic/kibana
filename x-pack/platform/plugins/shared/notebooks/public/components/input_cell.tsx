@@ -8,11 +8,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiComboBox,
   EuiDualRange,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSuperDatePicker,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
@@ -35,7 +37,13 @@ const useInputCell = (cell: InputCellDefinition) => {
   };
 };
 
-const DropdownControl = ({ cell }: { cell: InputCellDefinition }) => {
+interface ControlProps {
+  cell: InputCellDefinition;
+  /** Fills an app panel and shows the cell's label in front of the field, like a dashboard control. */
+  isPanel: boolean;
+}
+
+const DropdownControl = ({ cell, isPanel }: ControlProps) => {
   const { store } = useNotebook();
   const runtime = useStateFromPublishingSubject(store.getRuntime$(cell.id));
   const { value, setValue } = useInputCell(cell);
@@ -45,6 +53,8 @@ const DropdownControl = ({ cell }: { cell: InputCellDefinition }) => {
   return (
     <EuiComboBox
       compressed
+      fullWidth={isPanel}
+      prepend={isPanel ? getCellDisplayName(cell) : undefined}
       singleSelection={{ asPlainText: true }}
       placeholder={i18n.translate('xpack.notebook.inputCell.dropdownPlaceholder', {
         defaultMessage: 'Any',
@@ -54,19 +64,19 @@ const DropdownControl = ({ cell }: { cell: InputCellDefinition }) => {
       selectedOptions={selected === null ? [] : [{ label: selected }]}
       onChange={([choice]) => setValue({ kind: 'dropdown', value: choice?.label ?? null })}
       aria-label={getCellDisplayName(cell)}
-      css={{ maxWidth: 400 }}
+      css={isPanel ? undefined : { maxWidth: 400 }}
       data-test-subj={`notebookDropdown-${cell.name}`}
     />
   );
 };
 
+const CLEAR_LABEL = i18n.translate('xpack.notebook.inputCell.clear', { defaultMessage: 'Clear' });
+
 const RangeControl = ({
   cell,
   input,
-}: {
-  cell: InputCellDefinition;
-  input: Extract<InputDefinition, { kind: 'range' }>;
-}) => {
+  isPanel,
+}: ControlProps & { input: Extract<InputDefinition, { kind: 'range' }> }) => {
   const { store } = useNotebook();
   const { value, setValue } = useInputCell(cell);
   const committed = value?.kind === 'range' ? value.value : null;
@@ -82,36 +92,56 @@ const RangeControl = ({
 
   useEffect(() => () => commit.cancel(), [commit]);
 
+  const clear = () => {
+    commit.cancel();
+    setLocal([input.min, input.max]);
+    setValue({ kind: 'range', value: null });
+  };
+  const rangeProps = {
+    compressed: true,
+    min: input.min,
+    max: input.max,
+    step: input.step ?? 1,
+    value: local,
+    onChange: ([min, max]: [number | string, number | string]) => {
+      const next: [number, number] = [Number(min), Number(max)];
+      setLocal(next);
+      commit(next);
+    },
+    'aria-label': getCellDisplayName(cell),
+    'data-test-subj': `notebookRange-${cell.name}`,
+  };
+
+  if (isPanel) {
+    return (
+      <EuiDualRange
+        {...rangeProps}
+        fullWidth
+        showInput="inputWithPopover"
+        prepend={getCellDisplayName(cell)}
+        append={
+          <EuiToolTip content={CLEAR_LABEL} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="cross"
+              color="text"
+              isDisabled={committed === null}
+              aria-label={CLEAR_LABEL}
+              onClick={clear}
+            />
+          </EuiToolTip>
+        }
+      />
+    );
+  }
+
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       <EuiFlexItem css={{ maxWidth: 480 }}>
-        <EuiDualRange
-          compressed
-          showInput
-          min={input.min}
-          max={input.max}
-          step={input.step ?? 1}
-          value={local}
-          onChange={([min, max]) => {
-            const next: [number, number] = [Number(min), Number(max)];
-            setLocal(next);
-            commit(next);
-          }}
-          aria-label={getCellDisplayName(cell)}
-          data-test-subj={`notebookRange-${cell.name}`}
-        />
+        <EuiDualRange {...rangeProps} showInput />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          size="xs"
-          isDisabled={committed === null}
-          onClick={() => {
-            commit.cancel();
-            setLocal([input.min, input.max]);
-            setValue({ kind: 'range', value: null });
-          }}
-        >
-          {i18n.translate('xpack.notebook.inputCell.clear', { defaultMessage: 'Clear' })}
+        <EuiButtonEmpty size="xs" isDisabled={committed === null} onClick={clear}>
+          {CLEAR_LABEL}
         </EuiButtonEmpty>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -122,14 +152,14 @@ const TIME_REFRESH_TOOLTIP = i18n.translate('xpack.notebook.inputCell.timeRefres
   defaultMessage: 'Run cells that use this time range',
 });
 
-const TimeControl = ({ cell }: { cell: InputCellDefinition }) => {
+const TimeControl = ({ cell, isPanel }: ControlProps) => {
   const { scheduler } = useNotebook();
   const { value, setValue } = useInputCell(cell);
   if (value?.kind !== 'time') return null;
   return (
     <EuiSuperDatePicker
       compressed
-      width="auto"
+      width={isPanel ? 'full' : 'auto'}
       start={value.range.from}
       end={value.range.to}
       onTimeChange={({ start, end }) => setValue({ kind: 'time', range: { from: start, to: end } })}
@@ -141,15 +171,21 @@ const TimeControl = ({ cell }: { cell: InputCellDefinition }) => {
 };
 
 /** The control a user sets an input's value with. */
-export const InputControl = ({ cell }: { cell: InputCellDefinition }) => {
+export const InputControl = ({
+  cell,
+  isPanel = false,
+}: {
+  cell: InputCellDefinition;
+  isPanel?: boolean;
+}) => {
   const { input } = cell;
   switch (input.kind) {
     case 'dropdown':
-      return <DropdownControl cell={cell} />;
+      return <DropdownControl cell={cell} isPanel={isPanel} />;
     case 'range':
-      return <RangeControl cell={cell} input={input} />;
+      return <RangeControl cell={cell} input={input} isPanel={isPanel} />;
     case 'time':
-      return <TimeControl cell={cell} />;
+      return <TimeControl cell={cell} isPanel={isPanel} />;
   }
 };
 

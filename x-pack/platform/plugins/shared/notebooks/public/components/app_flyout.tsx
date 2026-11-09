@@ -105,6 +105,16 @@ const EsqlPanelContent = ({ cell }: { cell: CellDefinition }) => {
 const vegaPanelStyles = ({ euiTheme }: UseEuiTheme) =>
   css({ height: '100%', boxSizing: 'border-box', padding: euiTheme.size.s });
 
+const inputPanelStyles = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    height: '100%',
+    boxSizing: 'border-box',
+    padding: `0 ${euiTheme.size.s}`,
+  });
+
 const PanelContent = ({ panelId, cell }: { panelId: string; cell: AppCellDefinition }) => {
   switch (cell.type) {
     case 'chart':
@@ -120,7 +130,11 @@ const PanelContent = ({ panelId, cell }: { panelId: string; cell: AppCellDefinit
     case 'esql':
       return <EsqlPanelContent cell={cell} />;
     case 'input':
-      return <InputControl cell={cell} />;
+      return (
+        <div css={inputPanelStyles}>
+          <InputControl cell={cell} isPanel />
+        </div>
+      );
     case 'markdown':
       return <MarkdownView content={cell.content} isPanel />;
   }
