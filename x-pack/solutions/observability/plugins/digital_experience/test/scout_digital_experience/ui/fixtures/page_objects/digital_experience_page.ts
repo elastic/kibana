@@ -44,6 +44,8 @@ export class DigitalExperiencePage {
   public readonly otelOverviewBreakdowns: Locator;
   public readonly errorsTab: Locator;
   public readonly errorsPanel: Locator;
+  /** The errors panel once it has loaded and has no error to list; not while it is loading. */
+  public readonly errorsPanelEmpty: Locator;
   public readonly errorFlyout: Locator;
   public readonly errorsViewAll: Locator;
   public readonly networkTab: Locator;
@@ -105,6 +107,7 @@ export class DigitalExperiencePage {
     this.otelOverviewBreakdowns = page.getByTestId('digitalExperienceOverviewBreakdowns');
     this.errorsTab = page.getByTestId('digitalExperienceTab-errors');
     this.errorsPanel = page.getByTestId('digitalExperienceErrorsPanel');
+    this.errorsPanelEmpty = page.getByTestId('digitalExperienceErrorsPanelEmpty');
     this.errorFlyout = page.getByTestId('digitalExperienceErrorFlyout');
     this.errorsViewAll = page.getByTestId('digitalExperienceErrorsViewAll');
     this.networkTab = page.getByTestId('digitalExperienceTab-network');
@@ -283,7 +286,10 @@ export class DigitalExperiencePage {
     // Clicking moves the pointer onto the bar, off the suggestions that open under it: a hovered
     // suggestion is the one Enter would pick.
     await this.overviewKuery.click();
-    await this.overviewKuery.fill(kuery);
+    // The bar submits the query it holds as a prop, which a fill() that Enter follows at once can
+    // race with: type it, as the shared query bar helper does.
+    await this.overviewKuery.clear();
+    await this.overviewKuery.pressSequentially(kuery);
     await this.overviewKuery.press('Enter');
   }
 

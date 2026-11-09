@@ -159,6 +159,9 @@ test.describe(
         await expect(digitalExperience.otelOverviewBreakdowns).toContainText('Safari');
         await expect(digitalExperience.otelOverviewBreakdowns).not.toContainText('Chrome');
         await expect(digitalExperience.otelOverviewTopPages).not.toContainText('/products');
+        // Its empty state shows once the errors have loaded; a panel still loading has no error
+        // text either, so only this proves the error is gone.
+        await expect(digitalExperience.errorsPanelEmpty).toBeVisible();
         await expect(digitalExperience.errorsPanel).not.toContainText('x is undefined');
       });
 
@@ -197,6 +200,8 @@ test.describe(
         await expect
           .poll(() => filtersParam(page))
           .toMatch(filtersWith('browser', '\\(query:Safari\\)'));
+        // Wait for the loaded empty state: the panel shows no error text while it loads either.
+        await expect(digitalExperience.errorsPanelEmpty).toBeVisible();
         await expect(digitalExperience.errorsPanel).not.toContainText('x is undefined');
 
         await digitalExperience.overviewTab.click();
@@ -498,9 +503,19 @@ test.describe(
       });
 
       await test.step('says where a query does not parse, and keeps the Overview as it was', async () => {
-        await digitalExperience.submitOverviewKuery('browser.name : (Chrome');
+        // No bracket: the bar closes one as it is typed, which would make the query valid.
+        await digitalExperience.submitOverviewKuery('browser.name :');
 
         await expect(digitalExperience.overviewKueryError).toBeVisible();
+        await expect(page).toHaveURL(/kuery=browser\.name/);
+      });
+
+      await test.step('refuses a field named by a pattern, which no field has the name of', async () => {
+        await digitalExperience.submitOverviewKuery('browser.*: "Chrome"');
+
+        await expect(digitalExperience.overviewKueryError).toContainText(
+          'browser.* has a wildcard'
+        );
         await expect(page).toHaveURL(/kuery=browser\.name/);
       });
 
