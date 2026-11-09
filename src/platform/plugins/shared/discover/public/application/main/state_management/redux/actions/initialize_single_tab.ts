@@ -8,13 +8,13 @@
  */
 
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
-import type { EsqlSource } from '@kbn/data-source';
 import { isEmptyEsqlQuery, isOfAggregateQueryType } from '@kbn/es-query';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { cloneDeep, isEqual, pick } from 'lodash';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
+import type { EsqlSource } from '@kbn/data-source';
 import { internalStateSlice, type TabActionPayload } from '../internal_state';
 import {
   getConfiguredDefaultEsqlQuery,
@@ -146,16 +146,8 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       stateTypes: [ProfileStateType.Persistent],
     });
 
-    const discoverTabLoadTracker = scopedEbtManager$
-      .getValue()
-      .trackPerformanceEvent('discoverLoadSavedSearch');
-
     const { persistedDiscoverSession, defaultProfileEsqlQuery } = getState();
     const persistedTab = persistedDiscoverSession?.tabs.find((tab) => tab.id === tabId);
-    const persistedTabSearchSource = persistedTab
-      ? await fromSavedObjectTabToSearchSource({ tab: persistedTab, services })
-      : undefined;
-
     const hasGlobalState = Object.keys(urlGlobalState || {}).length > 0;
     const locationStateHasDataViewSpec = Boolean(dataViewSpec);
     const restoredQuery = urlAppState?.query ?? persistedTab?.serializedSearchSource.query;
@@ -167,7 +159,6 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       defaultProfileEsqlQuery,
       locationStateHasDataViewSpec,
     });
-
     const initialQuery = restoredQuery ?? configuredEsqlQuery;
     const isEsqlMode = isOfAggregateQueryType(initialQuery);
     const needsDataView = !isNonEmptyEsqlQuery(initialQuery);
@@ -178,6 +169,14 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       return { showNoDataPage: true };
     }
 
+    // Started after the shared availability checks so the duration only covers loading this tab.
+    const discoverTabLoadTracker = scopedEbtManager$
+      .getValue()
+      .trackPerformanceEvent('discoverLoadSavedSearch');
+
+    const persistedTabSearchSource = persistedTab
+      ? await fromSavedObjectTabToSearchSource({ tab: persistedTab, services })
+      : undefined;
     const currentDataView = persistedTabSearchSource?.getField('index');
     const { dataViewId, initialAdHocDataViewSpec } = getInitialDataViewTarget({
       dataSource: urlAppState?.dataSource,
@@ -201,7 +200,11 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       return { showNoDataPage: true };
     }
 
-    const resolveOpeningEsqlSource = (esql: string) =>
+    /**
+     * Tab initialization
+     */
+
+    const resolveEsqlQuerySource = (esql: string) =>
       resolveEsqlSource({
         esql,
         services,
@@ -212,17 +215,21 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
           services.data.query.timefilter.timefilter.getTime(),
       });
 
+    // Decide the query the tab opens with, then resolve its data source once from it.
     const resolveOpeningState = async (): Promise<{
       query: Query | AggregateQuery | undefined;
       dataView: DataView;
       esqlSource?: EsqlSource;
     }> => {
       if (isNonEmptyEsqlQuery(initialQuery)) {
-        return { query: initialQuery, ...(await resolveOpeningEsqlSource(initialQuery.esql)) };
+        return { query: initialQuery, ...(await resolveEsqlQuerySource(initialQuery.esql)) };
       }
 
       await dispatch(loadDataViewListOnce());
 
+      // Classic and empty ES|QL tabs use this data view; a new tab otherwise derives its
+      // default query from it, which can be ES|QL. For empty ES|QL, updateTabs stores the
+      // previous tab's view on initialInternalState so dataViewId above is set.
       const { dataView } = await loadAndResolveDataView({
         dataViewId,
         locationDataViewSpec: dataViewSpec,
@@ -246,9 +253,8 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
         });
 
       if (isNonEmptyEsqlQuery(query)) {
-        return { query, ...(await resolveOpeningEsqlSource(query.esql)) };
+        return { query, ...(await resolveEsqlQuerySource(query.esql)) };
       }
-
       return { query, dataView };
     };
 

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { waitFor } from '@testing-library/react';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
 import {
   DEFAULT_TAB_STATE,
@@ -57,8 +58,7 @@ const SECONDARY_PROFILE_STATE_DEF: ProfileStateDefinition<SecondaryProfileState>
   },
 };
 
-const setup = async () => {
-  const services = createDiscoverServicesMock();
+const setup = async ({ services = createDiscoverServicesMock() } = {}) => {
   services.profileStateRegistry.registerDefinition(TEST_PROFILE_STATE_DEF);
   services.profileStateRegistry.registerDefinition(SECONDARY_PROFILE_STATE_DEF);
   const toolkit = getDiscoverInternalStateMock({
@@ -922,16 +922,18 @@ describe('tab_state actions', () => {
   });
 
   describe('transitionFromESQLToDataView', () => {
-    it('waits for the catalog without waiting for the pending data availability check', async () => {
-      const { internalState, tabId, services, getCurrentTab } = await setup();
+    it('waits for the catalog without waiting for the pending data view availability check', async () => {
+      const services = createDiscoverServicesMock();
       const availability = Promise.withResolvers<boolean>();
+      jest.mocked(services.dataViews.hasData.hasDataView).mockReturnValueOnce(availability.promise);
+      const { internalState, tabId, getCurrentTab } = await setup({ services });
       const catalog =
         Promise.withResolvers<Awaited<ReturnType<typeof services.dataViews.getIdsWithTitle>>>();
-      jest.mocked(services.dataViews.hasData.hasDataView).mockReturnValueOnce(availability.promise);
       jest.mocked(services.dataViews.getIdsWithTitle).mockReturnValueOnce(catalog.promise);
-      const availabilityRequest = internalState.dispatch(
-        internalStateActions.loadDataViewAvailabilityOnce()
-      );
+      const onAvailabilityLoaded = jest.fn();
+      const availabilityRequest = internalState
+        .dispatch(internalStateActions.loadDataViewAvailabilityOnce())
+        .then(onAvailabilityLoaded);
 
       const transition = internalState.dispatch(
         internalStateActions.transitionFromESQLToDataView({
@@ -950,10 +952,13 @@ describe('tab_state actions', () => {
 
       expect(getCurrentTab().isDataViewLoading).toBe(false);
       expect(getCurrentTab().appState.query).toEqual({ language: 'kuery', query: '' });
+      expect(onAvailabilityLoaded).not.toHaveBeenCalled();
       expect(services.dataViews.hasData.hasDataView).toHaveBeenCalledTimes(1);
 
       availability.resolve(true);
       await availabilityRequest;
+
+      expect(onAvailabilityLoaded).toHaveBeenCalledWith(true);
     });
 
     it('should transition from ES|QL mode to Data View mode', async () => {
@@ -1487,5 +1492,47 @@ describe('tab_state actions', () => {
     ).toBe(resolved.esqlSource);
     resolveSpy.mockRestore();
     loadDataViewSpy.mockRestore();
+  });
+
+  it('starts tracking the tab load after the data availability checks', async () => {
+    const services = createDiscoverServicesMock();
+    const availability = Promise.withResolvers<boolean>();
+    jest.mocked(services.dataViews.hasData.hasDataView).mockReturnValueOnce(availability.promise);
+    const toolkit = getDiscoverInternalStateMock({
+      services,
+      persistedDataViews: [dataViewMockWithTimeField],
+    });
+    const persistedTab = getPersistedTabMock({
+      dataView: dataViewMockWithTimeField,
+      services,
+      appStateOverrides: { query: { language: 'kuery', query: '' } },
+    });
+
+    await toolkit.initializeTabs({
+      persistedDiscoverSession: createDiscoverSessionMock({
+        id: 'test-session',
+        tabs: [persistedTab],
+      }),
+    });
+    const trackPerformanceEventSpy = jest.spyOn(
+      selectTabRuntimeState(
+        toolkit.runtimeStateManager,
+        persistedTab.id
+      ).scopedEbtManager$.getValue(),
+      'trackPerformanceEvent'
+    );
+    const tabInitialization = toolkit.initializeSingleTab({
+      tabId: persistedTab.id,
+      skipWaitForDataFetching: true,
+    });
+
+    await waitFor(() => expect(services.dataViews.hasData.hasDataView).toHaveBeenCalled());
+    expect(trackPerformanceEventSpy).not.toHaveBeenCalled();
+
+    availability.resolve(true);
+    await tabInitialization;
+
+    expect(trackPerformanceEventSpy).toHaveBeenCalledTimes(1);
+    expect(trackPerformanceEventSpy).toHaveBeenCalledWith('discoverLoadSavedSearch');
   });
 });

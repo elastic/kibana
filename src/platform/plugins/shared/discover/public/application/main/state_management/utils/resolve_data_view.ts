@@ -253,21 +253,15 @@ export const getInitialDataViewTarget = ({
   initialDataViewIdOrSpec: string | DataViewSpec | undefined;
   currentDataView: DataView | undefined;
 }): { dataViewId: string | undefined; initialAdHocDataViewSpec: DataViewSpec | undefined } => {
-  let dataViewId: string | undefined;
-  let initialAdHocDataViewSpec: DataViewSpec | undefined;
-
-  if (typeof initialDataViewIdOrSpec === 'string') {
-    dataViewId = initialDataViewIdOrSpec;
-  } else {
-    initialAdHocDataViewSpec = initialDataViewIdOrSpec;
-    dataViewId = initialAdHocDataViewSpec?.id;
-  }
-
-  dataViewId = currentDataView?.id ?? dataViewId;
-
-  if (isDataViewSource(dataSource)) {
-    dataViewId = dataSource.dataViewId;
-  }
+  const initialAdHocDataViewSpec =
+    typeof initialDataViewIdOrSpec === 'string' ? undefined : initialDataViewIdOrSpec;
+  const initialDataViewId =
+    typeof initialDataViewIdOrSpec === 'string'
+      ? initialDataViewIdOrSpec
+      : initialAdHocDataViewSpec?.id;
+  const dataViewId = isDataViewSource(dataSource)
+    ? dataSource.dataViewId
+    : currentDataView?.id ?? initialDataViewId;
 
   return { dataViewId, initialAdHocDataViewSpec };
 };

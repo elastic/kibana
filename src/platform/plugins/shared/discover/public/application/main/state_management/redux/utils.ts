@@ -176,11 +176,7 @@ export const extractEsqlVariables = (
   return variables;
 };
 
-/**
- * Starts a request once per Discover instance so the route and tabs share the same request.
- * For example, the route starts loadDataAvailabilityOnce, and a tab calling it during
- * initialization waits for those same requests instead of starting other availability checks.
- */
+/** Starts a request once per Discover instance and returns the same promise to later callers. */
 export const getMemoizedRequest = <T>(
   requests: WeakMap<RuntimeStateManager, Promise<T>>,
   runtimeStateManager: RuntimeStateManager,

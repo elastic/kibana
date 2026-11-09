@@ -28,16 +28,14 @@ export const loadDataAvailabilityOnce: InternalStateThunkActionCreator<
   async function loadDataAvailabilityOnceThunkFn(dispatch, getState) {
     const esDataRequest = dispatch(loadESDataAvailabilityOnce());
     const dataViewRequest = dispatch(loadDataViewAvailabilityOnce());
-
-    // Otherwise the race can resolve on ES data first, before hasDataView is known.
-    if (needsDataView) {
-      await dataViewRequest;
-    }
-
     const availabilityRequests = [esDataRequest, dataViewRequest];
-    const firstAvailabilityResult = await Promise.race(availabilityRequests);
 
-    if (!firstAvailabilityResult) {
+    // ES data alone can't decide whether a tab that needs a data view can open.
+    const isAvailable = await (needsDataView
+      ? dataViewRequest
+      : Promise.race(availabilityRequests));
+
+    if (!isAvailable) {
       await Promise.all(availabilityRequests);
     }
 
