@@ -99,6 +99,25 @@ describe('manualInvestigationStarts', () => {
     getItem.mockRestore();
   });
 
+  it('keeps pending memory when only setItem throws so severity remembers do not loop', () => {
+    registerManualInvestigationStart('inv-1', spaceA);
+
+    const setItem = jest.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new Error('quota');
+    });
+
+    expect(() => rememberManualInvestigationSeverity('inv-1', 'critical', spaceA)).not.toThrow();
+    expect(getManualInvestigationFreshCounts(spaceA).critical).toBe(1);
+    // Second remember with the same severity is a no-op (no write / notify loop).
+    const listener = jest.fn();
+    const unsubscribe = subscribeManualInvestigationFresh(listener);
+    rememberManualInvestigationSeverity('inv-1', 'critical', spaceA);
+    expect(listener).not.toHaveBeenCalled();
+    unsubscribe();
+
+    setItem.mockRestore();
+  });
+
   it('re-reads localStorage before each write so another tab is not overwritten', () => {
     registerManualInvestigationStart('inv-1', spaceA);
     // Simulate another tab writing inv-2 into storage.

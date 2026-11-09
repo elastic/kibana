@@ -23,10 +23,11 @@ interface FreshEntry {
 
 const listeners = new Set<() => void>();
 /**
- * Fallback when localStorage is blocked/unavailable. Not a write-through cache of
- * successful reads — mutations always re-read storage first when it works.
+ * Session state used when localStorage cannot be read, or when a write failed while
+ * reads still succeed (quota). Pending writes take precedence until a write succeeds.
  */
-const memoryFallbackBySpace = new Map<string, FreshEntry[]>();
+const memoryBySpace = new Map<string, FreshEntry[]>();
+const writeFailedBySpace = new Set<string>();
 
 const storageKey = (spaceBasePath: string): string =>
   `${STORAGE_PREFIX}${spaceBasePath || 'default'}`;
@@ -66,14 +67,20 @@ const parseEntries = (raw: string): FreshEntry[] => {
 const copyEntries = (entries: FreshEntry[]): FreshEntry[] =>
   entries.map((entry) => ({ ...entry }));
 
-/** Prefer live localStorage; memory only when storage cannot be read. */
+/**
+ * Prefer live localStorage for multi-tab correctness. If a write previously failed while
+ * getItem still works, keep serving the pending in-memory list until a write succeeds.
+ */
 const readEntries = (spaceBasePath: string): FreshEntry[] => {
   const key = storageKey(spaceBasePath);
+  if (writeFailedBySpace.has(key)) {
+    return copyEntries(memoryBySpace.get(key) ?? []);
+  }
   try {
     const raw = window.localStorage.getItem(key);
     return raw ? parseEntries(raw) : [];
   } catch {
-    return copyEntries(memoryFallbackBySpace.get(key) ?? []);
+    return copyEntries(memoryBySpace.get(key) ?? []);
   }
 };
 
@@ -86,11 +93,13 @@ const notify = (): void => {
 const writeEntries = (spaceBasePath: string, entries: FreshEntry[]): void => {
   const key = storageKey(spaceBasePath);
   const next = copyEntries(entries);
-  memoryFallbackBySpace.set(key, next);
+  memoryBySpace.set(key, next);
   try {
     window.localStorage.setItem(key, JSON.stringify(next));
+    writeFailedBySpace.delete(key);
   } catch {
-    // Best-effort: investigation start already succeeded; keep the session fallback.
+    // Keep pending memory so later reads / severity remembers do not loop on stale storage.
+    writeFailedBySpace.add(key);
   }
   notify();
 };
@@ -99,8 +108,9 @@ const onStorageEvent = (event: StorageEvent): void => {
   if (!event.key || !event.key.startsWith(STORAGE_PREFIX)) {
     return;
   }
-  // Drop stale fallback for that space; next read comes from storage.
-  memoryFallbackBySpace.delete(event.key);
+  // Another tab wrote successfully — drop this tab's pending/fallback for that space.
+  memoryBySpace.delete(event.key);
+  writeFailedBySpace.delete(event.key);
   notify();
 };
 
@@ -153,6 +163,20 @@ export const rememberManualInvestigationSeverity = (
   writeEntries(spaceBasePath, entries);
 };
 
+/** Drop a remembered severity when the investigation is observed running again. */
+export const clearManualInvestigationSeverity = (
+  investigationId: string,
+  spaceBasePath: string
+): void => {
+  const entries = readEntries(spaceBasePath);
+  const entry = entries.find(({ id }) => id === investigationId);
+  if (!entry?.severity) {
+    return;
+  }
+  delete entry.severity;
+  writeEntries(spaceBasePath, entries);
+};
+
 export const dismissManualInvestigationFresh = (
   investigationId: string,
   spaceBasePath: string
@@ -187,7 +211,8 @@ export const getManualInvestigationFreshCounts = (spaceBasePath: string): Severi
   return counts;
 };
 
-/** Clears the session fallback between unit tests. */
+/** Clears session fallback between unit tests. */
 export const resetManualInvestigationFreshForTests = (): void => {
-  memoryFallbackBySpace.clear();
+  memoryBySpace.clear();
+  writeFailedBySpace.clear();
 };

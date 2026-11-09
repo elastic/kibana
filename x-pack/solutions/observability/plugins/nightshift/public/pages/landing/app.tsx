@@ -20,6 +20,7 @@ import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import { usePageReady } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import { useDebouncedValue } from '@kbn/react-hooks';
+import { useQuery } from '@kbn/react-query';
 import type { Severity, SeverityCounts } from '@kbn/nightshift-investigations-plugin/common';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import { SEVERITY_OPTIONS } from '@kbn/significant-events-schema';
@@ -34,13 +35,17 @@ import {
 } from '../../common/ebt_events';
 import { RETRY_BUTTON_LABEL } from '../../common/messages';
 import {
+  clearManualInvestigationSeverity,
   dismissManualInvestigationFresh,
   getManualInvestigationFreshCounts,
-  getManualInvestigationFreshSeverity,
   isManualInvestigationFresh,
   rememberManualInvestigationSeverity,
   subscribeManualInvestigationFresh,
 } from '../../data/investigations/manual_investigation_starts';
+import {
+  SHARED_INVESTIGATION_BY_ID_URL,
+  SHARED_INVESTIGATIONS_API_VERSION,
+} from '../../data/investigations/shared_investigations_api';
 import { useInvestigationSections } from '../../data/investigations/use_investigation_sections';
 import {
   InvestigationList,
@@ -125,9 +130,18 @@ export function NightshiftApp({
     (investigationId: string) => isManualInvestigationFresh(investigationId, spaceBasePath),
     [freshRevision, spaceBasePath]
   );
-  // Remember severity when an unread finish lands in a loaded bucket so `+N` survives pagination.
+  // Remember severity when an unread finish lands in a loaded bucket so `+N` survives pagination;
+  // clear it again if that investigation is later seen running.
   useEffect(() => {
     for (const section of sections) {
+      if (section.id === 'in-progress') {
+        for (const { id } of section.investigations) {
+          if (isManualInvestigationFresh(id, spaceBasePath)) {
+            clearManualInvestigationSeverity(id, spaceBasePath);
+          }
+        }
+        continue;
+      }
       if (!isSeverity(section.id)) {
         continue;
       }
@@ -181,6 +195,24 @@ export function NightshiftApp({
     [search]
   );
 
+  const selectedIsFresh =
+    selectedInvestigationId != null &&
+    isManualInvestigationFresh(selectedInvestigationId, spaceBasePath);
+
+  // Resolve live in_progress for a selected unread id (deep link / off-page / search-hidden).
+  const { data: selectedFreshInvestigation } = useQuery({
+    queryKey: ['nightshift.manualInvestigationFresh.selected', selectedInvestigationId],
+    enabled: selectedIsFresh,
+    queryFn: ({ signal }) =>
+      http.get<{ in_progress: boolean }>(
+        SHARED_INVESTIGATION_BY_ID_URL.replace(
+          '{id}',
+          encodeURIComponent(selectedInvestigationId!)
+        ),
+        { version: SHARED_INVESTIGATIONS_API_VERSION, signal }
+      ),
+  });
+
   // The detection setup banner's "Configure detection" button; the header's "Show all events"
   // link is gone, the detections page stays reachable from here and from the header's Detections.
   const detectionsHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, {
@@ -200,30 +232,36 @@ export function NightshiftApp({
     [history]
   );
 
-  // Clear New / `+N` only when we positively know the opened investigation has finished —
-  // either it is in a finished section page, or we previously remembered its severity.
-  // Do not infer "finished" from absence in In progress (search / page cap / failed fetch).
+  // Clear New / `+N` only from live finished state — never from a remembered severity alone
+  // (the investigation may have resumed), and never from absence in the In progress page.
   useEffect(() => {
-    if (
-      !selectedInvestigationId ||
-      !isManualInvestigationFresh(selectedInvestigationId, spaceBasePath)
-    ) {
+    if (!selectedInvestigationId || !selectedIsFresh) {
       return;
     }
-    const rememberedSeverity = getManualInvestigationFreshSeverity(
-      selectedInvestigationId,
-      spaceBasePath
+    const seenInProgress = sections.some(
+      (section) =>
+        section.id === 'in-progress' &&
+        section.investigations.some(({ id }) => id === selectedInvestigationId)
     );
+    if (seenInProgress || selectedFreshInvestigation?.in_progress === true) {
+      return;
+    }
     const seenFinishedInList = sections.some(
       (section) =>
         (isSeverity(section.id) || section.id === 'not-rated') &&
         section.investigations.some(({ id }) => id === selectedInvestigationId)
     );
-    if (!rememberedSeverity && !seenFinishedInList) {
+    if (!seenFinishedInList && selectedFreshInvestigation?.in_progress !== false) {
       return;
     }
     dismissManualInvestigationFresh(selectedInvestigationId, spaceBasePath);
-  }, [sections, selectedInvestigationId, spaceBasePath]);
+  }, [
+    sections,
+    selectedFreshInvestigation?.in_progress,
+    selectedInvestigationId,
+    selectedIsFresh,
+    spaceBasePath,
+  ]);
 
   const handleFlyoutClose = useCallback(() => {
     const params = new URLSearchParams(history.location.search);

@@ -10,6 +10,7 @@ import { usePageReady } from '@kbn/ebt-tools';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import { NIGHTSHIFT_UI_PRIVILEGES } from '@kbn/nightshift-shared';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
 import { MemoryRouter, useLocation } from 'react-router-dom';
 import { NightshiftApp } from './app';
@@ -165,15 +166,30 @@ function LocationProbe(): React.ReactElement {
   return <span data-test-subj="locationProbe">{useLocation().search}</span>;
 }
 
-function renderApp({ initialEntries = ['/'] }: { initialEntries?: string[] } = {}) {
-  return render(
-    <I18nProvider>
-      <MemoryRouter initialEntries={initialEntries}>
-        <NightshiftApp />
-        <LocationProbe />
-      </MemoryRouter>
-    </I18nProvider>
+function renderAppTree({
+  initialEntries = ['/'],
+  includeLocationProbe = true,
+}: {
+  initialEntries?: string[];
+  includeLocationProbe?: boolean;
+} = {}) {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  return (
+    <QueryClientProvider client={queryClient}>
+      <I18nProvider>
+        <MemoryRouter initialEntries={initialEntries}>
+          <NightshiftApp />
+          {includeLocationProbe ? <LocationProbe /> : null}
+        </MemoryRouter>
+      </I18nProvider>
+    </QueryClientProvider>
   );
+}
+
+function renderApp({ initialEntries = ['/'] }: { initialEntries?: string[] } = {}) {
+  return render(renderAppTree({ initialEntries }));
 }
 
 describe('NightshiftApp', () => {
@@ -190,7 +206,10 @@ describe('NightshiftApp', () => {
     mockUseKibana.mockReturnValue({
       services: {
         analytics,
-        http: { basePath: { get: () => '' } },
+        http: {
+          basePath: { get: () => '' },
+          get: jest.fn().mockResolvedValue({ in_progress: false }),
+        },
         application: {
           capabilities: { nightshift: manageCapabilities },
           getUrlForApp: (appId: string, { path }: { path?: string } = {}) =>
@@ -254,7 +273,10 @@ describe('NightshiftApp', () => {
     mockUseKibana.mockReturnValue({
       services: {
         analytics,
-        http: { basePath: { get: () => '' } },
+        http: {
+          basePath: { get: () => '' },
+          get: jest.fn().mockResolvedValue({ in_progress: false }),
+        },
         application: {
           capabilities: { nightshift: manageCapabilities },
           getUrlForApp: (appId: string, { path }: { path?: string } = {}) =>
@@ -502,13 +524,7 @@ describe('NightshiftApp', () => {
       unrated_count: 1,
     });
 
-    rerender(
-      <I18nProvider>
-        <MemoryRouter>
-          <NightshiftApp />
-        </MemoryRouter>
-      </I18nProvider>
-    );
+    rerender(renderAppTree({ includeLocationProbe: false }));
 
     expect(
       reportEvent.mock.calls.filter(([eventType]) => eventType === 'nightshift_homepage_viewed')
@@ -526,13 +542,7 @@ describe('NightshiftApp', () => {
     expect(reportEvent).not.toHaveBeenCalledWith('nightshift_homepage_viewed', expect.anything());
 
     setSections({ sections });
-    rerender(
-      <I18nProvider>
-        <MemoryRouter>
-          <NightshiftApp />
-        </MemoryRouter>
-      </I18nProvider>
-    );
+    rerender(renderAppTree({ includeLocationProbe: false }));
 
     expect(reportEvent).toHaveBeenCalledWith(
       'nightshift_homepage_viewed',
