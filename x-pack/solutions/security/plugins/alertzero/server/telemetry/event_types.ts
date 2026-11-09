@@ -597,7 +597,7 @@ export const ALERTZERO_ALERT_TRIAGE_BATCH_GROUPED_EVENT: EventTypeOpts<AlertZero
         'Whether the batch created a conversation: one for each new proposal, and one for a failure that does not end the run (no verdicts, or some alerts without one). A batch that only joins proposals, or has no false positive to propose, creates none'
       ),
       fp_candidates_on_fallback: countField(
-        'False positives at or above the confidence floor that have no strict key, so they group by rule and detection only'
+        'False positives at or above the confidence floor whose wide key has no condition, so they group by rule and detection only'
       ),
       grouping: vocabularyField(
         'Whether the batch was grouped, or why not: supervised autonomy, the kill switch, a proposal lookup that returned fewer proposals than it matched, or nothing to propose',
