@@ -8,7 +8,7 @@
  */
 
 import { commandStep } from '../helpers.ts';
-import { preemptibleAgent, retry } from '../presets.ts';
+import { retry, spotAgent, spotZones } from '../presets.ts';
 import type { Step } from '../types.ts';
 
 export const verifyFipsEnabled = (): readonly Step[] => [
@@ -19,6 +19,6 @@ export const verifyFipsEnabled = (): readonly Step[] => [
     depends_on: 'build',
     timeout_in_minutes: 10,
     retry: retry.agentLoss,
-    agents: preemptibleAgent('n2-standard-2'),
+    agents: spotAgent('n2-standard-2', spotZones.n2),
   }),
 ];

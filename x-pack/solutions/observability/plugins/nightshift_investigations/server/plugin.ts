@@ -68,7 +68,7 @@ import { classifyOnlineEvalsRoundStepDefinition } from './step_definitions/class
 import { scoreOnlineEvalsRoundStepDefinition } from './step_definitions/score_online_evals_round';
 import { createIsOnlineEvalsPaused } from './online_evals/is_online_evals_paused';
 import { createShouldIncludeExplanations } from './online_evals/should_include_explanations';
-import { referenceFreeJudges } from './online_evals/judges';
+import { alertOutcomeJudges, cortexJudges, referenceFreeJudges } from './online_evals/judges';
 import { obtainSandboxStepDefinition } from './step_definitions/obtain_sandbox';
 import { composeHydrateNotificationsStepDefinition } from './step_definitions/compose_hydrate_notifications';
 import { resolveModelStepDefinition } from './step_definitions/resolve_model';
@@ -86,7 +86,7 @@ import { createMemoryPageStore } from './memory/page_store';
 import { createDecisionTreeStore } from './decision_trees/store';
 import { createKnowledgePurgeClient } from './purge/purge_client';
 import { registerDecisionTreeAiIndex } from './decision_trees/register_decision_trees';
-import { setupNightshiftTelemetry } from './telemetry';
+import { setupNightshiftTelemetry, type NightshiftTelemetryClient } from './telemetry';
 import { createTriggerEmitter, type TriggerEmitter } from './workflows/triggers/emit';
 import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/register_triggers';
 import type { NightshiftAgentTypeOptions } from './agents/investigation';
@@ -123,12 +123,15 @@ import {
   NIGHTSHIFT_AUTOMATION_SO_TYPE,
 } from './saved_objects';
 import { createOnboardingClient } from './onboarding/onboarding_client';
+import { createLocalElasticsearchConnectorLifecycleListener } from './onboarding/local_elasticsearch_connector';
 import {
   createListSandboxConnectors,
   createListSandboxConnectorTypes,
 } from './lib/list_sandbox_connectors';
 import { createCustomContextClient } from './custom_context';
 import { createSandboxAllowlistClient } from './sandbox_allowlist';
+import { createSlackTurnAdmissionCheck } from './lib/slack_turn_admission';
+import { getNightshiftSettingsUrl } from './lib/notifications/notify_investigation_quota_reached';
 import type {
   InvestigationQuotaCallback,
   NightshiftInvestigationsServerSetup,
@@ -167,6 +170,8 @@ export class NightshiftInvestigationsPlugin
   private uiSettings?: CoreStart['uiSettings'];
   private featureFlags?: CoreStart['featureFlags'];
   private actionsStart?: ActionsPluginStart;
+  private cloudSetup?: NightshiftInvestigationsSetupDeps['cloud'];
+  private esHosts: string[] = [];
   private securityStart?: NightshiftInvestigationsStartDeps['security'];
   private security?: CoreStart['security'];
   private coreStart?: CoreStart;
@@ -178,6 +183,7 @@ export class NightshiftInvestigationsPlugin
   private cortexEnabled = false;
   private memoryEnabled = false;
   private investigationQuotaCallback?: InvestigationQuotaCallback;
+  private telemetry?: NightshiftTelemetryClient;
   private decisionTreesEnabled = false;
   private assistantEnabled = false;
 
@@ -197,8 +203,20 @@ export class NightshiftInvestigationsPlugin
       new NightshiftSettingsLocatorDefinition()
     );
     registerInvestigationsWorkflowTriggers(plugins.workflowsExtensions);
+    plugins.actions?.registerConnectorLifecycleListener(
+      createLocalElasticsearchConnectorLifecycleListener({
+        getInternalEsClient: async () => {
+          const [coreStart] = await core.getStartServices();
+          return coreStart.elasticsearch.client.asInternalUser;
+        },
+        logger: this.logger.get('local-elasticsearch-connector'),
+      })
+    );
     const isNightshiftEnabledSync = createIsNightshiftEnabledSync(core.getStartServices);
     plugins.alerting?.enableAlertStatusChanged({
+      isEnabled: async () => isNightshiftEnabledSync(),
+    });
+    plugins.alertingVTwo?.enableAlertStatusChanged({
       isEnabled: async () => isNightshiftEnabledSync(),
     });
     // Single choke point for sandbox access: tools and workflow steps resolve the sandbox through
@@ -211,7 +229,8 @@ export class NightshiftInvestigationsPlugin
       analytics: core.analytics,
       logger: this.logger.get('telemetry'),
     });
-    for (const judge of referenceFreeJudges) {
+    this.telemetry = telemetry;
+    for (const judge of [...referenceFreeJudges, ...alertOutcomeJudges, ...cortexJudges]) {
       plugins.evals?.registerEvaluator(judge);
     }
 
@@ -252,6 +271,10 @@ export class NightshiftInvestigationsPlugin
       }),
     });
 
+    this.cloudSetup = plugins.cloud;
+    core.elasticsearch.legacy.config$.subscribe((config) => {
+      this.esHosts = config.hosts;
+    });
     const onboardingClient = createOnboardingClient({
       getDeps: () => ({
         workflowsManagement: this.workflowsManagement,
@@ -259,6 +282,10 @@ export class NightshiftInvestigationsPlugin
         agentBuilder: this.agentBuilder,
         agentAvailability: this.getInvestigationAvailability(),
         assistantEnabled: this.assistantEnabled,
+        actions: this.actionsStart,
+        elasticsearch: this.elasticsearch,
+        cloud: this.cloudSetup,
+        esHosts: this.esHosts,
       }),
       logger: this.logger.get('onboarding'),
       ensureFailureSweep: this.ensureFailureSweep,
@@ -295,6 +322,18 @@ export class NightshiftInvestigationsPlugin
         },
         logger: this.logger,
       });
+      plugins.agentBuilder.callbacks.registerOnBeforeNewConversation(
+        createSlackTurnAdmissionCheck({
+          getQuotaCallback: () => this.investigationQuotaCallback,
+          getSettingsUrl: (spaceId) =>
+            getNightshiftSettingsUrl({
+              locator: settingsLocator,
+              spaceId,
+              kibanaUrl: core.http.basePath.publicBaseUrl,
+            }),
+          logger: this.logger,
+        })
+      );
       const config = this.ctx.config.get();
       const nightshiftAgentOptions: NightshiftAgentTypeOptions = {
         sandboxEnabled: plugins.sandbox?.isAvailable ?? false,
@@ -475,7 +514,8 @@ export class NightshiftInvestigationsPlugin
             this.getAlertsClient,
             this.getEpisodeLookup,
             () => this.actionsStart,
-            settingsLocator
+            settingsLocator,
+            telemetry
           )
         );
         plugins.workflowsExtensions.registerStepDefinition(
@@ -633,6 +673,7 @@ export class NightshiftInvestigationsPlugin
         plugins.workflowsExtensions.registerStepDefinition(
           decisionTreePrepareStepDefinition({
             getAgentBuilder: () => this.agentBuilder,
+            getInference: () => this.inference,
             getSavedObjects: () => this.savedObjects,
             getUiSettings: () => this.uiSettings,
             logger: this.logger.get('decision_trees'),
@@ -658,6 +699,7 @@ export class NightshiftInvestigationsPlugin
           getEpisodeLookup: this.getEpisodeLookup,
           getAutomationsSoClient: this.getAutomationsSoClient,
           getWorkflowsManagement: () => this.workflowsManagement,
+          isUniversalAlertingAvailable: () => this.alertingVTwo !== undefined,
           isCortexEnabled: () => this.cortexEnabled,
           listSandboxConnectors,
           listSandboxConnectorTypes,
@@ -874,6 +916,7 @@ export class NightshiftInvestigationsPlugin
       agentAvailability: this.getInvestigationAvailability(),
       assistantEnabled: this.assistantEnabled,
       investigationQuotaCallback: this.investigationQuotaCallback,
+      telemetry: this.telemetry,
       inference: this.inference,
       savedObjects: this.savedObjects,
       uiSettings: this.uiSettings,
@@ -935,6 +978,7 @@ export class NightshiftInvestigationsPlugin
       getAgentBuilder: () => this.agentBuilder,
       getAgentAvailability: () => this.getInvestigationAvailability(),
       getAutomationsSoClient: this.getAutomationsSoClient,
+      isUniversalAlertingAvailable: () => this.alertingVTwo !== undefined,
       isServerless: this.ctx.env.packageInfo.buildFlavor === 'serverless',
       logger: this.logger.get('service_account'),
     });

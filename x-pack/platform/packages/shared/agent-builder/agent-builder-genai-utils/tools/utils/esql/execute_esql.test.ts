@@ -8,7 +8,11 @@
 import { errors } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { MAX_ES_RESPONSE_SIZE_BYTES } from '../../constants';
-import { executeEsql } from './execute_esql';
+import {
+  executeEsql,
+  EsqlExecutionTimeoutError,
+  isEsqlExecutionTimeoutError,
+} from './execute_esql';
 
 describe('executeEsql', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
@@ -150,13 +154,12 @@ describe('executeEsql', () => {
       expect(timeoutSpy).not.toHaveBeenCalled();
     });
 
-    it('sets a wall-clock deadline through a signal and disables retries', async () => {
+    it('sets a wall-clock deadline through a signal and keeps client retries enabled', async () => {
       await executeEsql({ query: 'FROM idx', timeoutMs: 5000, esClient });
 
       expect(timeoutSpy).toHaveBeenCalledWith(5000);
       expect(requestOptions()).toStrictEqual({
         maxResponseSize: MAX_ES_RESPONSE_SIZE_BYTES,
-        maxRetries: 0,
         signal: controller.signal,
       });
     });
@@ -171,7 +174,8 @@ describe('executeEsql', () => {
         (e: Error) => e
       );
 
-      expect(error).toBeInstanceOf(Error);
+      expect(error).toBeInstanceOf(EsqlExecutionTimeoutError);
+      expect(isEsqlExecutionTimeoutError(error)).toBe(true);
       expect((error as Error).message).toContain('Stopped waiting for the ES|QL query after 5s');
       expect((error as Error).message).toContain('Do not re-run');
       expect((error as Error).message).toContain('narrow the time range');
@@ -186,6 +190,7 @@ describe('executeEsql', () => {
         (e: Error) => e
       );
 
+      expect(error).toBeInstanceOf(EsqlExecutionTimeoutError);
       expect((error as Error).message).toContain('Stopped waiting for the ES|QL query.');
       expect((error as Error).message).not.toContain(' after ');
       expect((error as Error).message).toContain('Do not re-run');
@@ -197,6 +202,7 @@ describe('executeEsql', () => {
       esClient.esql.query.mockRejectedValue(error);
 
       await expect(executeEsql({ query: 'FROM idx', esClient })).rejects.toBe(error);
+      expect(isEsqlExecutionTimeoutError(error)).toBe(false);
     });
 
     it('keeps a maximum-response-size abort a size error even when the deadline has aborted', async () => {

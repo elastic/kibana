@@ -9,7 +9,7 @@
 // Source of truth for deployment mechanism, signal types, auth, and required config per AWS service.
 // Drives the Services UI badges and Deployment UI stack composition in the AWS onboarding flow.
 
-import type { PackageInfo, RegistryVarsEntry } from '@kbn/fleet-plugin/common';
+import type { PackageInfo, RegistryVarGroup, RegistryVarsEntry } from '@kbn/fleet-plugin/common';
 import { DATA_STREAM_DATASET_VAR, DATA_STREAM_TYPE_VAR } from '@kbn/fleet-plugin/common';
 import type { DeploymentMethod } from '@kbn/fleet-plugin/public';
 
@@ -74,6 +74,12 @@ export interface DataStreamInfo {
   dataset?: string;
   /** Manifest var definitions keyed by input type, then var name. */
   varDefsByInput: Record<string, Record<string, RegistryVarsEntry>>;
+  /**
+   * Stream-level `var_groups` from the manifest, keyed by input type (package-spec ≥ 3.6.0).
+   * Each group offers mutually exclusive options; when the group is `required`, the selected
+   * option's vars are mandatory. Only present for inputs whose stream declares groups.
+   */
+  varGroupsByInput?: Record<string, RegistryVarGroup[]>;
   /** Var names the user must configure to activate this data stream. */
   requiredConfig?: string[];
   /** Var names that are optional and surfaced in the UI. */
@@ -104,6 +110,8 @@ export interface AwsServiceMatrixEntry {
    * Mirrors Fleet's positional scoping. Used by resolveFieldMeta and ECF config builders.
    */
   varDefsByInput?: Record<string, Record<string, RegistryVarsEntry>>;
+  /** Stream-level `var_groups` keyed by input type (first-wins union across data streams). */
+  varGroupsByInput?: Record<string, RegistryVarGroup[]>;
   /**
    * Per-data-stream var metadata. Keys are data stream ids.
    * Used by the settings flyout to render per-data-stream sections with their own input toggles.
@@ -579,8 +587,12 @@ function computeDataStreamInfo(
   ds: any,
   dsId: string
 ): DataStreamInfo {
-  const dsStreams: Array<{ input?: string; enabled?: boolean; vars?: RegistryVarsEntry[] }> =
-    ds?.streams ?? [];
+  const dsStreams: Array<{
+    input?: string;
+    enabled?: boolean;
+    vars?: RegistryVarsEntry[];
+    var_groups?: RegistryVarGroup[];
+  }> = ds?.streams ?? [];
   const dsManifestInputs = [...new Set(dsStreams.map((s) => s.input as string).filter(Boolean))];
 
   // Static entry inputs act as an allowlist — restrict per-DS inputs when set (e.g. WAF → S3 only).
@@ -606,6 +618,17 @@ function computeDataStreamInfo(
     }
   }
 
+  // Stream-level var_groups per input (first-wins per input, like the var defs above). The
+  // registry's JSON drops them, but Fleet parses the archive for `full` package info, which is
+  // what the wizard requests.
+  const dsVarGroupsByInput: Record<string, RegistryVarGroup[]> = {};
+  for (const s of dsStreams) {
+    if (!s.input || !dsEffectiveInputs.includes(s.input)) continue;
+    if (s.var_groups?.length && !dsVarGroupsByInput[s.input]) {
+      dsVarGroupsByInput[s.input] = s.var_groups;
+    }
+  }
+
   const dsAllVars = Object.values(dsVarDefsByInput).flatMap((byName) => Object.values(byName));
   const dsReqVars = [
     ...new Set(dsAllVars.filter((v: any) => v.required).map((v: any) => v.name as string)),
@@ -626,6 +649,7 @@ function computeDataStreamInfo(
     inputs: dsEffectiveInputs,
     defaultEnabledInputs: dsDefaultEnabledInputs,
     varDefsByInput: dsVarDefsByInput,
+    ...(Object.keys(dsVarGroupsByInput).length > 0 && { varGroupsByInput: dsVarGroupsByInput }),
     requiredConfig: dsReqVars.length > 0 ? dsReqVars : undefined,
     optionalConfig: dsOptVars.length > 0 ? dsOptVars : undefined,
   };
@@ -834,6 +858,7 @@ export function buildAwsServiceMatrix(
     const inputTitles: Record<string, string> = {};
     let managedIntegrations = false;
     const varDefsByInput: Record<string, Record<string, RegistryVarsEntry>> = {};
+    const varGroupsByInput: Record<string, RegistryVarGroup[]> = {};
     const varDefsByDataStream: Record<string, DataStreamInfo> = {};
     const signalTypesSet = new Set<SignalType>();
     const dataStreams: string[] = [];
@@ -919,6 +944,11 @@ export function buildAwsServiceMatrix(
             for (const [varName, varDef] of Object.entries(byName)) {
               bucket[varName] ??= varDef;
             }
+          }
+
+          // Merge stream-level var_groups into the union (first-wins per input).
+          for (const [input, groups] of Object.entries(dsInfo.varGroupsByInput ?? {})) {
+            varGroupsByInput[input] ??= groups;
           }
 
           // Track all input types used by this DS (regardless of whether they carry vars).
@@ -1069,6 +1099,7 @@ export function buildAwsServiceMatrix(
       requiredConfig,
       optionalConfig,
       varDefsByInput: Object.keys(varDefsByInput).length > 0 ? varDefsByInput : undefined,
+      varGroupsByInput: Object.keys(varGroupsByInput).length > 0 ? varGroupsByInput : undefined,
       varDefsByDataStream:
         Object.keys(varDefsByDataStream).length > 0 ? varDefsByDataStream : undefined,
       defaultEnabled,
@@ -1112,8 +1143,27 @@ export function makeDsView(service: AwsServiceMatrixEntry, dsId: string): AwsSer
     requiredConfig: isEcfOnly ? service.requiredConfig : dsInfo.requiredConfig,
     optionalConfig: isEcfOnly ? service.optionalConfig : dsInfo.optionalConfig,
     varDefsByInput: dsInfo.varDefsByInput,
+    varGroupsByInput: dsInfo.varGroupsByInput,
     varDefsByDataStream: { [dsId]: dsInfo },
   };
+}
+
+/**
+ * Data streams a never-configured instance collects from: every stream of a single-stream service,
+ * else only those the manifest enables by default, which is what the flyout shows switched on. In
+ * the ECF view the entry's `defaultEnabledInputs` is narrowed to the inputs ECF can route while the
+ * per-stream defaults stay at their agent-based values, so a stream counts only when one of its
+ * defaults survives that narrowing (as in `makeDsView`).
+ */
+export function getDefaultEnabledDataStreams(service: AwsServiceMatrixEntry): string[] {
+  if (service.dataStreams.length <= 1) return service.dataStreams;
+  const ecfDefaults = service.settingsScope === 'ecf' ? service.defaultEnabledInputs : undefined;
+  return service.dataStreams.filter((dsId) => {
+    const defaults = service.varDefsByDataStream?.[dsId]?.defaultEnabledInputs ?? [];
+    return ecfDefaults
+      ? defaults.some((input) => ecfDefaults.includes(input))
+      : defaults.length > 0;
+  });
 }
 
 /** Internal static entries — exported for use by buildAwsServiceMatrix in the hook. */
