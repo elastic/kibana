@@ -69,7 +69,7 @@ export function readKIQueryGenerationResult({
   queries: GeneratedSignificantEventQuery[];
   tokensUsed: ChatCompletionTokenCount;
   durationMs: number;
-} {
+} | null {
   const round = conversation.rounds.at(-1);
   const validationStep = round?.steps
     .filter(isToolCallStep)
@@ -80,7 +80,8 @@ export function readKIQueryGenerationResult({
     .find(isFinalizedValidationData);
 
   if (!finalizedData) {
-    throw new Error('KI query generation agent did not finalize validate_queries');
+    logger.warn(`KI query generation agent did not finalize validate_queries for "${source.slug}"`);
+    return null;
   }
   if (finalizedData.slug !== source.slug) {
     throw new Error(

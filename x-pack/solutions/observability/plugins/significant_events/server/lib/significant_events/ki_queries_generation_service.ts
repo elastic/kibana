@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import { EMPTY_TOKENS } from '@kbn/nightshift-ai';
 import type { Conversation } from '@kbn/agent-builder-common';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import type { SignificantEventsQueriesGenerationResult } from '@kbn/significant-events-schema';
@@ -75,12 +76,17 @@ export interface CollectGeneratedKIQueriesDependencies {
 export function collectGeneratedKIQueries(
   { source, connectorId, agentConversation }: CollectGeneratedKIQueriesParams,
   { logger, telemetry }: CollectGeneratedKIQueriesDependencies
-): SignificantEventsQueriesGenerationResult & { connectorId: string } {
-  const { queries, tokensUsed, durationMs } = readKIQueryGenerationResult({
+): SignificantEventsQueriesGenerationResult & { connectorId: string; finalized: boolean } {
+  const result = readKIQueryGenerationResult({
     conversation: agentConversation,
     source,
     logger,
   });
+  // The workflow runs the agent again when it never finalized, so this is not an error here.
+  if (!result) {
+    return { queries: [], tokensUsed: { ...EMPTY_TOKENS }, connectorId, finalized: false };
+  }
+  const { queries, tokensUsed, durationMs } = result;
 
   telemetry.trackSignificantEventsQueriesGenerated({
     count: queries.length,
@@ -92,5 +98,5 @@ export function collectGeneratedKIQueries(
     duration_ms: durationMs,
   });
 
-  return { queries, tokensUsed, connectorId };
+  return { queries, tokensUsed, connectorId, finalized: true };
 }

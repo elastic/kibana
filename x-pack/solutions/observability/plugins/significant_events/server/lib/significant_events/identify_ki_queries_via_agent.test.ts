@@ -90,13 +90,13 @@ describe('readKIQueryGenerationResult', () => {
     ).toThrow('KI query generation agent finalized for unexpected source "logs.other"');
   });
 
-  it('throws when the agent never finalized', () => {
-    expect(() =>
+  it('returns null when the agent never finalized, so the workflow can run it again', () => {
+    expect(
       readKIQueryGenerationResult({
         conversation: conversationOf([]),
         source,
         logger: loggerMock.create(),
       })
-    ).toThrow('KI query generation agent did not finalize validate_queries');
+    ).toBeNull();
   });
 });

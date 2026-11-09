@@ -124,4 +124,22 @@ describe('collectGeneratedKIQueries', () => {
       })
     );
   });
+
+  it('reports an agent run that never finalized without telemetry, so the workflow can retry', () => {
+    const telemetry = {
+      trackSignificantEventsQueriesGenerated: jest.fn(),
+    } as unknown as EbtTelemetryClient;
+
+    const result = collectGeneratedKIQueries(
+      {
+        source,
+        connectorId: 'test-connector',
+        agentConversation: { rounds: [{ steps: [] }] } as unknown as Pick<Conversation, 'rounds'>,
+      },
+      { logger: loggerMock.create(), telemetry }
+    );
+
+    expect(result).toMatchObject({ finalized: false, queries: [], connectorId: 'test-connector' });
+    expect(telemetry.trackSignificantEventsQueriesGenerated).not.toHaveBeenCalled();
+  });
 });

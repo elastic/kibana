@@ -632,7 +632,9 @@ const generateQueriesRoute = createServerRoute({
     maintenanceService,
     logger,
     telemetry,
-  }): Promise<SignificantEventsQueriesGenerationResult & { connectorId: string }> => {
+  }): Promise<
+    SignificantEventsQueriesGenerationResult & { connectorId: string; finalized: boolean }
+  > => {
     const scopedClients = await getScopedClients({ request });
     const { sourcesClient, licensing } = scopedClients;
 
