@@ -16,7 +16,7 @@ export const workflowsOomTestingSteps = (): readonly Step[] => [
     command: '.buildkite/scripts/steps/test/scout/workflows_oom_testing.sh',
     label: 'Workflow Schema OOM Prevention',
     key: 'workflows-oom-testing',
-    agents: { ...spotAgent('n2-standard-4', spotZones.centralFCA), ...pdBalanced },
+    agents: { ...spotAgent('n2-standard-4', spotZones.n2), ...pdBalanced },
     depends_on: ['build'],
     timeout_in_minutes: 30,
     retry: retry.agentLossOrAnyOnce,
