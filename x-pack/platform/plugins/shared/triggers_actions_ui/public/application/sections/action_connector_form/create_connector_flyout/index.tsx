@@ -278,37 +278,38 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
 
   const onSubmit = useCallback(async () => {
     const createdConnector = await validateAndCreateConnector();
-    if (!createdConnector) {
-      setSelectedTab(EditConnectorTabs.Configuration);
-      return;
-    }
-    if (onConnectorCreated) {
-      onConnectorCreated(createdConnector);
-    }
-
-    if (shouldRotateInboundAfterSave(createdConnector, isClusterInboundEventsEnabled)) {
-      let connectorForEdit = createdConnector;
-      try {
-        const rotated = await rotateIngress(createdConnector.id);
-        connectorForEdit = {
-          ...createdConnector,
-          secrets: { ingestToken: rotated.ingestToken },
-        } as ActionConnector;
-      } catch {
-        // Danger toast is shown by the rotate hook. Edit the connector that was created.
+    if (createdConnector) {
+      if (onConnectorCreated) {
+        onConnectorCreated(createdConnector);
       }
-      setEditTab(EditConnectorTabs.Configuration);
-      setConnectorToTest(connectorForEdit);
-      return;
-    }
 
-    if (connectorTypePublishesKeys(createdConnector.actionTypeId)) {
-      setEditTab(EditConnectorTabs.Configuration);
-      setConnectorToTest(createdConnector);
-      return;
-    }
+      if (shouldRotateInboundAfterSave(createdConnector, isClusterInboundEventsEnabled)) {
+        let connectorForEdit = createdConnector;
+        try {
+          const rotated = await rotateIngress(createdConnector.id);
+          connectorForEdit = {
+            ...createdConnector,
+            secrets: { ingestToken: rotated.ingestToken },
+          } as ActionConnector;
+        } catch {
+          // Danger toast is shown by the rotate hook. Edit the connector that was created.
+        }
+        setEditTab(EditConnectorTabs.Configuration);
+        setConnectorToTest(connectorForEdit);
+        return;
+      }
 
-    onClose();
+      if (connectorTypePublishesKeys(createdConnector.actionTypeId)) {
+        setEditTab(EditConnectorTabs.Configuration);
+        setConnectorToTest(createdConnector);
+        return;
+      }
+
+      onClose();
+    } else {
+      // Field and API errors show on the Configuration tab.
+      setSelectedTab(EditConnectorTabs.Configuration);
+    }
   }, [
     validateAndCreateConnector,
     onClose,

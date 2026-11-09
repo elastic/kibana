@@ -65,6 +65,10 @@ export const ObjectAccessPanel = ({
     () => (policy.data && state?.acl ? toAccessDraft(policy.data, state.acl) : undefined),
     [policy.data, state?.acl]
   );
+  const profilesByUid = useMemo(
+    () => new Map(state?.profiles?.map((profile) => [profile.uid, profile])),
+    [state?.profiles]
+  );
   const [draft, setDraft] = useState<AccessDraft>();
   const [warnings, setWarnings] = useState<AclWarning[]>([]);
   const [saveError, setSaveError] = useState<OlsError>();
@@ -240,7 +244,7 @@ export const ObjectAccessPanel = ({
                 <OwnerRow
                   owner={owner}
                   isOwnerSelf={state.is_owner}
-                  profiles={new Map(state.profiles?.map((profile) => [profile.uid, profile]))}
+                  profiles={profilesByUid}
                   onTransfer={canTransfer ? () => setIsTransferOpen(true) : undefined}
                   isDisabled={isSaving}
                 />

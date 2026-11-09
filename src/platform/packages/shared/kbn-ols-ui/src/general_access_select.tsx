@@ -75,8 +75,8 @@ export const GeneralAccessSelect = ({
   return (
     <EuiFormRow
       fullWidth
-      label={i18n.translate('olsUi.generalAccess.accessScopeLabel', {
-        defaultMessage: 'Access scope',
+      label={i18n.translate('olsUi.generalAccess.label', {
+        defaultMessage: 'General access',
       })}
       helpText={getGeneralAccessCopy(copy, value).description}
     >

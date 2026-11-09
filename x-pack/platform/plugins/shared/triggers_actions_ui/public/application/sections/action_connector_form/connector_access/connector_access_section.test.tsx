@@ -50,7 +50,7 @@ describe('ConnectorAccessSection', () => {
     expect(screen.getByTestId('accessPanelGeneralAccess')).toHaveTextContent(
       'Only people with access'
     );
-    expect(screen.getByText('Access scope')).toBeInTheDocument();
+    expect(screen.getByText('General access')).toBeInTheDocument();
     expect(screen.getByTestId('accessPanelEntryLevel-u_alice')).toHaveTextContent('Can run');
   });
 
