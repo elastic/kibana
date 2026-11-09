@@ -21,5 +21,5 @@ export const escapeJqlSpecialCharacters = (str: string) => {
 };
 
 export function isUserError(error: unknown): boolean {
-  return isAxiosError(error) && error.response?.status === 400;
+  return isAxiosError(error) && (error.response?.status === 400 || error.response?.status === 503);
 }

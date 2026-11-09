@@ -57,6 +57,20 @@ const jiraAxios400Error = new AxiosError(
   }
 );
 
+const jiraAxios503Error = new AxiosError(
+  'Request failed with status code 503',
+  'ERR_BAD_RESPONSE',
+  minimalAxiosRequestConfig,
+  undefined,
+  {
+    status: 503,
+    statusText: 'Service Unavailable',
+    data: {},
+    headers: {},
+    config: minimalAxiosRequestConfig,
+  }
+);
+
 describe('Jira connector executor', () => {
   const config: JiraPublicConfigurationType = {
     apiUrl: 'https://coolsite.net/',
@@ -120,8 +134,11 @@ describe('Jira connector executor', () => {
     });
   });
 
-  test('issueTypes sub-action maps Axios 400 to TaskErrorSource.USER', async () => {
-    (api.issueTypes as jest.Mock).mockRejectedValueOnce(jiraAxios400Error);
+  test.each([
+    [400, jiraAxios400Error],
+    [503, jiraAxios503Error],
+  ])('issueTypes sub-action maps Axios %s to TaskErrorSource.USER', async (_status, axiosError) => {
+    (api.issueTypes as jest.Mock).mockRejectedValueOnce(axiosError);
 
     const executorOptions = {
       actionId: 'some-action-id',

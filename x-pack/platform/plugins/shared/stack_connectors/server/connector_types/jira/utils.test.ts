@@ -26,12 +26,30 @@ const jiraAxios400Error = new AxiosError(
   }
 );
 
+const jiraAxios503Error = new AxiosError(
+  'Request failed with status code 503',
+  'ERR_BAD_RESPONSE',
+  minimalAxiosRequestConfig,
+  undefined,
+  {
+    status: 503,
+    statusText: 'Service Unavailable',
+    data: {},
+    headers: {},
+    config: minimalAxiosRequestConfig,
+  }
+);
+
 describe('isUserError', () => {
   test('returns true for AxiosError with HTTP 400 response', () => {
     expect(isUserError(jiraAxios400Error)).toBe(true);
   });
 
-  test('returns false for AxiosError with non-400 response', () => {
+  test('returns true for AxiosError with HTTP 503 response', () => {
+    expect(isUserError(jiraAxios503Error)).toBe(true);
+  });
+
+  test('returns false for AxiosError with HTTP 500 response', () => {
     const error = new AxiosError(
       'Request failed with status code 500',
       'ERR_BAD_RESPONSE',
