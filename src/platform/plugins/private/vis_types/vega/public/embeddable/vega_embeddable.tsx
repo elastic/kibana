@@ -77,6 +77,7 @@ import type { VegaEvent } from '../types';
 import type { VegaPluginStartDependencies, VegaVisualizationDependencies } from '../plugin';
 import type { VegaRenderDescriptor } from '../data_model/types';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
+import { isVegaByReferenceState } from '../../common/embeddable/type_guards';
 import { toPanelFilters, type VegaEditableState } from '../lib/library_draft';
 import {
   createVegaLibraryClient,
@@ -147,7 +148,7 @@ export type VegaEmbeddableApi = DefaultEmbeddableApi<VegaEmbeddableState> &
 const getPanelSearch = (
   state: VegaEmbeddableState
 ): { query?: Query | AggregateQuery; filters?: Filter[] } =>
-  'ref_id' in state
+  isVegaByReferenceState(state)
     ? {}
     : { query: toStoredQuery(state.query), filters: toPanelFilters(state.filters) };
 
@@ -178,7 +179,7 @@ export const vegaEmbeddableFactory = (
   }) => {
     const libraryClient = createVegaLibraryClient(core.http);
     // Linking and unlinking replace the panel, so a panel stays by value or by reference.
-    const libraryId = 'ref_id' in initialState ? initialState.ref_id : undefined;
+    const libraryId = isVegaByReferenceState(initialState) ? initialState.ref_id : undefined;
     const isByReference = libraryId !== undefined;
     // Throws `SavedObjectNotFound` for a missing item, which the panel shows as an error.
     const libraryItem$ = new BehaviorSubject(
