@@ -864,7 +864,10 @@ describe('NightshiftInvestigationsClient.start()', () => {
   it('reports nothing for a manual start, which skips the quota', async () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-1');
-    const telemetry = { reportInvestigationSkipped: jest.fn() };
+    const telemetry = {
+      reportInvestigationSkipped: jest.fn(),
+      reportInvestigationStarted: jest.fn(),
+    };
 
     await startFromApi(makeClient({ telemetry: telemetry as never }), {
       subject: { type: 'manual', id: 'question' },
@@ -872,6 +875,30 @@ describe('NightshiftInvestigationsClient.start()', () => {
     });
 
     expect(telemetry.reportInvestigationSkipped).not.toHaveBeenCalled();
+  });
+
+  it('reports the started run with the discovery run that triggered it', async () => {
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+    mockManagement.runWorkflow.mockResolvedValue('exec-1');
+    const telemetry = { reportInvestigationStarted: jest.fn() };
+
+    await makeClient({ telemetry: telemetry as never }).start(
+      {
+        subject: { type: 'significant_event', id: 'event-1' },
+        trigger_type: 'automatic',
+        context: { event_id: 'event-1', source_workflow_execution_id: 'discovery-exec' },
+      },
+      { entryPoint: 'automation', automationId: 'a1' }
+    );
+
+    expect(telemetry.reportInvestigationStarted).toHaveBeenCalledWith(
+      expect.objectContaining({
+        workflow_execution_id: 'exec-1',
+        automation_id: 'a1',
+        event_id: 'event-1',
+        source_workflow_execution_id: 'discovery-exec',
+      })
+    );
   });
 
   it('persists the subject summary into the workflow context', async () => {

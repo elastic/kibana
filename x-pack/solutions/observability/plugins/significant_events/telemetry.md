@@ -3,9 +3,12 @@
 ## Workflow execution identity
 
 `workflow_execution_id` is the canonical run field on Significant Events EBT events. It is the
-Workflow Engine execution ID of the workflow whose stage emitted the event. The value comes from
-Workflow Engine request headers or Agent Builder execution context; route and tool input cannot set
-it.
+Workflow Engine execution ID of the workflow whose stage emitted the event. The value comes from the
+`x-kibana-workflow-execution-id` header that a `kibana.request` step injects, or from the Agent
+Builder execution context that an `ai.agent` step sets; route bodies and tool parameters cannot set
+it. The header is trusted only on internal-origin requests, and `x-elastic-internal-origin` is not
+an authenticated boundary: an authorized caller of these routes who sets both headers by hand can
+choose the value. Treat the field as provenance for analytics, not as an audit trail.
 
 Events carry the field when a managed workflow produced them and omit it for interactive or direct
 invocations. Standalone operations continue to emit telemetry. `execution_id` on
@@ -15,64 +18,86 @@ operation.
 
 On `agent-tool-event-investigation-attach`, `workflow_execution_id` identifies the workflow that
 invoked the tool and `investigation_workflow_execution_id` identifies the attached investigation.
+Before this release, `workflow_execution_id` on that event held the investigation's ID. The meaning
+changed rather than gaining an alias, so split historical rows on the release that shipped
+`investigation_workflow_execution_id`.
 
-## Joining a pipeline
+## How the pipeline connects
 
-`features-identified` and `queries-generated` also carry `parent_workflow_execution_id`: the
-onboarding execution that started their child workflow, taken from the engine-provided
-`parent.executionId` template context. An onboarding run and its children join on
-`onboarding-scheduled.workflow_execution_id = parent_workflow_execution_id` with Nightshift events
-alone. The field is absent when a child workflow runs on its own.
+The pipeline is not one execution tree. Its stages run as independent root workflows and hand work
+to each other through stored data, so a run does not flow end to end:
 
-For the orchestrator tree, join a Significant Events row's `workflow_execution_id` to the Workflow
-Engine terminal event's `workflowExecutionId`. For child workflows, the terminal event's
-`executionChain` contains every ancestor execution ID, root first and direct parent last. This
-reconstructs an orchestrator run and its detection/discovery children without a
-stream-and-time-window join.
+- KI onboarding (started by the onboarding API or by continuous onboarding) writes KIs and rules
+  that every later detection run uses.
+- Scheduled detection is its own root. It stores detections stamped with its execution ID.
+- Scheduled review runs discovery as another root. One discovery run processes the unprocessed
+  detections of any number of earlier detection runs.
+- Discovery triggers investigations, which run as their own workflow executions.
 
-Onboarding and the orchestrator are independent root runs, not one execution tree. Link the exact
-artifacts between them by `source_id`/`source_ids`: onboarding produces source-scoped KIs and
-detection/discovery consume those source-scoped KIs. Link discovery to a triggered investigation by
-the event's stable `event_id`. An automatic trigger from discovery also puts the discovery
-execution ID in the investigation context as `source_workflow_execution_id`. A manual trigger
-sends none. Attaching an investigation stamps the new alert version with the attaching workflow's
-execution ID; the investigation's own ID lives only in `investigations[]`.
+The manual orchestrator runs detection and discovery as children of one execution, but it is not
+the scheduled path. Reconstruct lineage backwards from an artifact, not forwards from a run.
 
-`detection-scan` belongs to the detection workflow. Detection and discovery can share an
-orchestrator ancestor through `executionChain`, but their immediate execution IDs remain distinct.
-Each alert version stores the execution ID of the workflow that wrote that version. A standalone
-status update clears the prior producer ID; a workflow-driven status update replaces it with the
-current workflow execution ID.
+## Joins
 
-In the warehouse, validate a run after exposing both fields in the Nightshift silver model:
+Significant Events event types below drop their `significant-events-` prefix.
+
+| From | To | Join |
+| --- | --- | --- |
+| Any Significant Events row | Workflow Engine terminal event | `workflow_execution_id = workflowExecutionId` |
+| Child workflow | Its ancestors | Terminal event `executionChain`, root first and direct parent last |
+| `features-identified`, `queries-generated` | Onboarding run | `parent_workflow_execution_id` (absent when the child runs on its own) |
+| `events-write` (discovery) | Detection runs it consumed | `detection_workflow_execution_ids` contains the detection run's `workflow_execution_id` |
+| `nightshift-investigation-started` | Discovery run that triggered it | `source_workflow_execution_id` = discovery `workflow_execution_id` |
+| `nightshift-investigation-started` | Significant event | `event_id` |
+| Detection or discovery | Onboarding | `source_id` / `source_ids` only; KIs are shared across onboarding runs |
+
+`parent_workflow_execution_id` joins to `onboarding-scheduled.workflow_execution_id` only for
+onboarding started through the API. Continuous onboarding starts onboarding with
+`workflow.executeAsync` and emits no `onboarding-scheduled` event, so join those children to the
+onboarding run's terminal event instead.
+
+`detection-scan` belongs to the detection workflow, not to discovery. In the scheduled path the two
+share no ancestor, and `detection_workflow_execution_ids` is the only link between them.
+
+A manual investigation trigger sends no `source_workflow_execution_id`. The investigation lifecycle
+workflow triggers (`nightshift-investigations.started`, `.completed`, `.failed`) carry the same
+`event_id` and `source_workflow_execution_id` for workflow subscribers, but trigger payloads are not
+exported as EBT; use `nightshift-investigation-started` in the warehouse.
+
+## Alert versions
+
+Each `.rule-events` version stores, in `workflow_execution_id`, the execution of the workflow that
+wrote it. A standalone write (UI, interactive agent) clears the prior producer ID; a
+workflow-driven write, including stale-event cleanup, replaces it. Attaching an investigation
+stamps the attaching workflow's execution; the investigation's own ID lives only in
+`investigations[]`.
+
+## Tracing an investigation back to its detections
 
 ```sql
-WITH workflow_runs AS (
-  SELECT workflowExecutionId, workflowId, executionChain
-  FROM workflow_terminal_events
-),
-nightshift_events AS (
-  SELECT event_type, workflow_execution_id
+WITH investigation AS (
+  SELECT investigation_id, event_id, source_workflow_execution_id
   FROM nightshift_ebt_events
-  WHERE workflow_execution_id IS NOT NULL
+  WHERE event_type = 'nightshift-investigation-started'
+    AND investigation_id = :investigation_id
+),
+discovery_writes AS (
+  SELECT w.workflow_execution_id, w.event_id, w.detection_workflow_execution_ids
+  FROM nightshift_ebt_events AS w
+  JOIN investigation AS i
+    ON w.workflow_execution_id = i.source_workflow_execution_id
+   AND w.event_id = i.event_id
+  WHERE w.event_type = 'significant-events-agent-tool-event-write'
 )
-SELECT n.event_type, n.workflow_execution_id, w.workflowId, w.executionChain
-FROM nightshift_events AS n
-JOIN workflow_runs AS w
-  ON w.workflowExecutionId = n.workflow_execution_id
-WHERE w.workflowExecutionId = :run_id
-   OR EXISTS (
-     SELECT 1
-     FROM UNNEST(w.executionChain) AS ancestor
-     WHERE ancestor.executionId = :run_id
-   );
+SELECT d.workflow_execution_id AS discovery_run,
+       detection_run,
+       t.workflowId,
+       t.executionChain
+FROM discovery_writes AS d,
+     UNNEST(d.detection_workflow_execution_ids) AS detection_run
+JOIN workflow_terminal_events AS t
+  ON t.workflowExecutionId = detection_run;
 ```
 
 Use the warehouse's concrete terminal-event and Nightshift silver table names. Preserve the legacy
 `execution_id` and `run_id` columns while consumers migrate.
-
-An alert-triggered investigation joins to its originating pipeline through
-`source_workflow_execution_id` and to its alert through `event_id` on the investigation lifecycle
-trigger payloads. Their `workflow_execution_id` is the investigation workflow's own execution ID;
-`execution_id` remains its deprecated alias. The correlation fields are copied from the
-investigation's persisted context rather than supplied by lifecycle route input.

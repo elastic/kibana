@@ -228,11 +228,7 @@ const significantEventUuidSchema = z
   .max(500)
   .regex(/^[A-Za-z0-9_-]+$/, 'event_uuid must be an id: letters, digits, underscore or hyphen');
 
-/**
- * Deliberately open apart from fields this plugin consumes. The significant events plugin owns the
- * rest of the payload, so enumerating every field here would be a hand-kept copy of another
- * plugin's contract. The bounds on key count and key length keep an open context bounded.
- */
+/** Open apart from the fields this plugin reads: the significant events plugin owns the rest. */
 export const freeFormContextSchema = lazySchema(() =>
   z
     .looseObject({

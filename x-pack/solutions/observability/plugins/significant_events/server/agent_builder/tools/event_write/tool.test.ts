@@ -64,13 +64,14 @@ const getFeatures = jest.fn().mockResolvedValue({ hits: [] });
 
 const createTool = (
   telemetry: { trackAgentToolEventsWrite: jest.Mock },
-  logger = loggingSystemMock.createLogger()
+  logger = loggingSystemMock.createLogger(),
+  storedDetections: Array<SignalEntry['metadata'] & { workflow_execution_id?: string }> = []
 ) => {
   const getScopedClients = jest.fn().mockResolvedValue({
     getEventSearchClient: jest.fn().mockReturnValue({}),
     getDetectionClient: jest
       .fn()
-      .mockResolvedValue({ findByIds: jest.fn().mockResolvedValue({ hits: [] }) }),
+      .mockResolvedValue({ findByIds: jest.fn().mockResolvedValue({ hits: storedDetections }) }),
     getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ getFeatures }),
     getAlertEventsClient: jest.fn().mockResolvedValue(undefined),
     sourcesClient: mockSourcesClient(['logs.test', 'logs.batch', 'logs.web']),
@@ -816,6 +817,42 @@ describe('events_write tool', () => {
     );
     expect(telemetry.trackAgentToolEventsWrite).toHaveBeenCalledWith(
       expect.objectContaining({ workflow_execution_id: 'workflow-run-1' })
+    );
+  });
+
+  it('reports the distinct detection runs behind the signals', async () => {
+    (eventsWriteBulkHandler as jest.Mock).mockResolvedValue([
+      { index: 0, event_id: 'event-1', status: 'active', written: true, severity: 'high' },
+    ]);
+    const telemetry = { trackAgentToolEventsWrite: jest.fn() };
+    const detection = (rule: string, run?: string) => ({
+      ...confirmingSignal.metadata,
+      rule_uuid: rule,
+      detection_id: `detection-${rule}`,
+      ...(run ? { workflow_execution_id: run } : {}),
+    });
+    const signalFor = (rule: string): SignalEntry => ({
+      ...confirmingSignal,
+      metadata: {
+        ...confirmingSignal.metadata,
+        rule_uuid: rule,
+        detection_id: `detection-${rule}`,
+      },
+    });
+
+    await invokeHandler(
+      createTool(telemetry, undefined, [
+        detection('a', 'run-1'),
+        detection('b', 'run-1'),
+        detection('c', 'run-2'),
+        detection('d'),
+      ]) as never,
+      { items: [{ ...input, signals: ['a', 'b', 'c', 'd'].map(signalFor) }] },
+      createMockToolContext()
+    );
+
+    expect(telemetry.trackAgentToolEventsWrite).toHaveBeenCalledWith(
+      expect.objectContaining({ detection_workflow_execution_ids: ['run-1', 'run-2'] })
     );
   });
 

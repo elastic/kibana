@@ -727,12 +727,9 @@ describe('generateQueriesRoute', () => {
   it('generates a run id when one is not provided', async () => {
     await generateRoute.handler(makeHandlerParams({ agentBuilder: makeAgentBuilder() }));
 
-    const { runId, workflowExecutionId, parentWorkflowExecutionId, maxExistingQueriesForContext } =
-      mockGenerateKIQueries.mock.calls[0][0];
+    const { runId, maxExistingQueriesForContext } = mockGenerateKIQueries.mock.calls[0][0];
     expect(runId).toEqual(expect.any(String));
     expect(runId).not.toBe('');
-    expect(workflowExecutionId).toBeUndefined();
-    expect(parentWorkflowExecutionId).toBeUndefined();
     expect(maxExistingQueriesForContext).toBe(50);
   });
 

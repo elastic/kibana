@@ -32,7 +32,6 @@ describe('EbtTelemetryClient', () => {
   describe('trackSignificantEventsQueriesGenerated', () => {
     it('tracks significant events queries generated events', () => {
       client.trackSignificantEventsQueriesGenerated({
-        workflow_execution_id: 'query-run-1',
         count: 5,
         connector_id: 'test-connector',
         input_tokens_used: 300,
@@ -58,7 +57,6 @@ describe('EbtTelemetryClient', () => {
       expect(analyticsService.reportEvent).toHaveBeenCalledWith(
         SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_QUERIES_GENERATED_EVENT_TYPE,
         {
-          workflow_execution_id: 'query-run-1',
           count: 5,
           connector_id: 'test-connector',
           input_tokens_used: 300,
@@ -87,7 +85,6 @@ describe('EbtTelemetryClient', () => {
   describe('trackSignificantEventsDetectionScan', () => {
     it('tracks a detection change-point scan event', () => {
       client.trackSignificantEventsDetectionScan({
-        workflow_execution_id: 'detection-run-1',
         took_ms: 42,
         duration_ms: 120,
         rules_requested: 24,
@@ -106,7 +103,6 @@ describe('EbtTelemetryClient', () => {
       expect(analyticsService.reportEvent).toHaveBeenCalledWith(
         SIGNIFICANT_EVENTS_DETECTION_SCAN_EVENT_TYPE,
         {
-          workflow_execution_id: 'detection-run-1',
           took_ms: 42,
           duration_ms: 120,
           rules_requested: 24,

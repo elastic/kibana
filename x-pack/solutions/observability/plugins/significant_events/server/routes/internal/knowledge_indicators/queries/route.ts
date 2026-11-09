@@ -330,6 +330,7 @@ const bulkDeleteQueriesRoute = createServerRoute({
           eventSearchClient: await scopedClients.getEventSearchClient(),
           rulesClient,
           candidateRuleIds: [...candidateRuleIds],
+          workflowExecutionId: getWorkflowExecutionIdFromRequest(request),
         });
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);

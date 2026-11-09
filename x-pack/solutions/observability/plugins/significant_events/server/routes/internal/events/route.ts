@@ -519,6 +519,7 @@ const cleanupStaleEventsRoute = createServerRoute({
       eventSearchClient: await getEventSearchClient(),
       rulesClient,
       candidateRuleIds: params?.body?.candidateRuleIds,
+      workflowExecutionId: getWorkflowExecutionIdFromRequest(request),
     });
   },
 });

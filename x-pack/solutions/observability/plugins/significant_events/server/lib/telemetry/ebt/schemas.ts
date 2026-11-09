@@ -638,6 +638,20 @@ const agentToolEventWriteSchema: RootSchema<AgentToolEventWriteProps> = {
       description: 'The Nightshift source ids associated with the event',
     },
   },
+  detection_workflow_execution_ids: {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: {
+        description: 'A detection workflow execution ID',
+      },
+    },
+    _meta: {
+      description:
+        'Distinct workflow_execution_id values of the stored detections behind the signals; joins discovery to the detection runs it consumed. Absent when no signal names a stored detection',
+      optional: true,
+    },
+  },
   error_message: {
     type: 'text',
     _meta: {

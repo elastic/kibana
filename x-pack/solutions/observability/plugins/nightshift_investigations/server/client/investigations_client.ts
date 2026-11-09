@@ -120,6 +120,18 @@ function asLifecycleCorrelationId(v: unknown): string | undefined {
   return value && value.length <= 500 ? value : undefined;
 }
 
+const correlationFromContext = (context: unknown): LifecycleCorrelation => {
+  if (!isPlainObject(context)) return {};
+  const eventId = asLifecycleCorrelationId(context.event_id);
+  const sourceWorkflowExecutionId = asLifecycleCorrelationId(context.source_workflow_execution_id);
+  return {
+    ...(eventId ? { event_id: eventId } : {}),
+    ...(sourceWorkflowExecutionId
+      ? { source_workflow_execution_id: sourceWorkflowExecutionId }
+      : {}),
+  };
+};
+
 /** `inputs.context.follow_up` of the investigation runs `followUpRecoveredAlert` starts. */
 export const ALERT_RECOVERED_FOLLOW_UP = 'alert_recovered';
 
@@ -670,6 +682,17 @@ export class NightshiftInvestigationsClient {
       await this.createAcceptedInvestigation({ conversations, investigationId, executionId });
     }
 
+    this.telemetry?.reportInvestigationStarted({
+      investigation_id: investigationId,
+      workflow_execution_id: executionId,
+      trigger_type,
+      entry_point: entryPoint,
+      subject_type: resolvedSubject.type,
+      is_follow_up: isFollowUp,
+      ...(automationId ? { automation_id: automationId } : {}),
+      ...correlationFromContext(prepared.context),
+    });
+
     this.logger.info(
       `${isFollowUp ? 'Continued' : 'Started'} investigation "${investigationId}" for ${
         subject.type
@@ -1214,18 +1237,7 @@ export class NightshiftInvestigationsClient {
       );
       return {};
     }
-    const context = isPlainObject(inputs?.context) ? inputs.context : undefined;
-    const eventId = asLifecycleCorrelationId(context?.event_id);
-    const sourceWorkflowExecutionId = asLifecycleCorrelationId(
-      context?.source_workflow_execution_id
-    );
-
-    return {
-      ...(eventId ? { event_id: eventId } : {}),
-      ...(sourceWorkflowExecutionId
-        ? { source_workflow_execution_id: sourceWorkflowExecutionId }
-        : {}),
-    };
+    return correlationFromContext(inputs?.context);
   }
 
   /**

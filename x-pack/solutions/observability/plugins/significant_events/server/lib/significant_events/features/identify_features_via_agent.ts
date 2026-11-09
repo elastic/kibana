@@ -37,6 +37,7 @@ import {
 import { FEATURE_IDENTIFICATION_AGENT_ID } from '../../../agent_builder/agents/feature_identification';
 import { FINALIZE_FEATURES_TOOL_ID } from '../../../agent_builder/skills/feature_identification';
 import { chatTokenCountFromModelUsage } from './chat_token_count';
+import { getWorkflowExecutionIdFromRequest } from '../../telemetry/ebt/workflow_execution_id';
 
 export interface ExecuteFeatureIdentificationAgentOptions {
   agentBuilder: AgentBuilderPluginStart;
@@ -105,6 +106,7 @@ export async function executeFeatureIdentificationAgent({
         productFeature: NIGHTSHIFT_USAGE_PRODUCT_FEATURE,
         interactionId,
       },
+      workflowExecutionId: getWorkflowExecutionIdFromRequest(request),
     },
   });
 

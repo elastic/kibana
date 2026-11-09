@@ -159,6 +159,7 @@ interface AgentToolEventWriteProps extends OptionalWorkflowExecutionTelemetryPro
   status?: SignificantEventStatus;
   written: boolean;
   source_ids: string[];
+  detection_workflow_execution_ids?: string[];
   error_message?: string;
   /** Tier actually stored. Present only when written is true. */
   severity?: Severity;

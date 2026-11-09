@@ -418,6 +418,18 @@ export function createEventsWriteTool({
     handler: async (toolParams, context) => {
       const { request } = context;
       let storedItems: EventsWriteInput[] | undefined;
+      const runByDetectionId = new Map<string, string>();
+      const detectionRunsOf = ({ signals }: { signals?: EventsWriteInput['signals'] }) => {
+        const ids = [
+          ...new Set(
+            (signals ?? []).flatMap(({ metadata }) => {
+              const run = runByDetectionId.get(metadata.detection_id);
+              return run ? [run] : [];
+            })
+          ),
+        ];
+        return ids.length > 0 ? { detection_workflow_execution_ids: ids } : {};
+      };
       try {
         const {
           getEventSearchClient,
@@ -434,7 +446,13 @@ export function createEventsWriteTool({
         const detectionClient = await getDetectionClient();
         const identifiedItems = await fillDetectionMetadata({
           items: toolParams.items,
-          findDetections: (detectionIds) => detectionClient.findByIds(detectionIds),
+          findDetections: async (detectionIds) => {
+            const found = await detectionClient.findByIds(detectionIds);
+            found.hits.forEach(({ detection_id: detectionId, workflow_execution_id: run }) => {
+              if (run) runByDetectionId.set(detectionId, run);
+            });
+            return found;
+          },
         });
         const resolvedItems = identifiedItems.map((item) => ({
           ...assignStoredSourceIds(catalog, item),
@@ -477,6 +495,7 @@ export function createEventsWriteTool({
                 status: result.status,
                 written: result.written,
                 source_ids: input.source_ids,
+                ...detectionRunsOf(input),
                 error_message: isBulkError ? result.error.reason : undefined,
                 ...(result.written ? { severity: result.severity } : {}),
               }),
@@ -522,6 +541,7 @@ export function createEventsWriteTool({
                 event_id: input.event_id ?? 'unknown',
                 written: false,
                 source_ids: 'source_ids' in input ? input.source_ids : [],
+                ...('source_ids' in input ? detectionRunsOf(input) : {}),
                 error_message: message,
               }),
           });

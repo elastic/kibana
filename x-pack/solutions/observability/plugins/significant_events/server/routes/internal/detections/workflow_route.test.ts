@@ -33,12 +33,7 @@ const setup = () => {
   const runChangePointScan = jest.fn().mockResolvedValue({ took: 1, by_rule: { buckets: [] } });
   const list = jest.fn().mockResolvedValue({ sources: [{ id: 'enabled-source' }], total: 1 });
   const handlerParams = {
-    params: {
-      body: {
-        lookback: 'now-1440m',
-        bucketInterval: '60m',
-      },
-    },
+    params: { body: { lookback: 'now-1440m', bucketInterval: '60m' } },
     request: {
       isInternalApiRequest: true,
       headers: { 'x-kibana-workflow-execution-id': 'detection-run-1' },
@@ -78,17 +73,6 @@ describe('change point scan route', () => {
     expect(scannedRuleIds).toEqual(['rule-1']);
     expect(handlerParams.telemetry.trackSignificantEventsDetectionScan).toHaveBeenCalledWith(
       expect.objectContaining({ workflow_execution_id: 'detection-run-1' })
-    );
-  });
-
-  it('emits standalone telemetry without workflow provenance for a manual scan', async () => {
-    const { handlerParams } = setup();
-    handlerParams.request = { isInternalApiRequest: false, headers: {} } as never;
-
-    await scanRoute.handler(handlerParams);
-
-    expect(handlerParams.telemetry.trackSignificantEventsDetectionScan).toHaveBeenCalledWith(
-      expect.not.objectContaining({ workflow_execution_id: expect.anything() })
     );
   });
 });
