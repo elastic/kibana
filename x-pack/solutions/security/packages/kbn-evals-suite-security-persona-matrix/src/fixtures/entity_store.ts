@@ -23,6 +23,7 @@ const INSTALL_HEADERS = {
 };
 
 const INSTALL_URL = '/api/security/entity_store/install';
+const START_URL = '/api/security/entity_store/start';
 const STATUS_URL = '/api/security/entity_store/status';
 
 const DEFAULT_POLL_INTERVAL_MS = 2_000;
@@ -30,24 +31,70 @@ const DEFAULT_TIMEOUT_MS = 120_000;
 
 const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 
-const getEntityStoreStatus = async (kbnClient: KbnClient): Promise<string | undefined> => {
-  const response = await kbnClient.request<{ status?: string }>({
+interface EntityStoreStatusBody {
+  status?: string;
+  engines?: Array<{
+    type?: string;
+    status?: string | null;
+    nonPriority?: { status?: string | null } | null;
+  }>;
+}
+
+const getEntityStoreStatus = async (kbnClient: KbnClient): Promise<EntityStoreStatusBody> => {
+  const response = await kbnClient.request<EntityStoreStatusBody>({
     path: STATUS_URL,
     method: 'GET',
     headers: COMMON_HEADERS,
   });
-  return response.data.status;
+  return response.data;
 };
 
 /**
- * Ensures the Entity Store V2 engine is installed and running. The entity
+ * The aggregate status is `running` as soon as ANY engine is started, so it
+ * cannot tell a fully running store from one with a stopped host/user engine.
+ * Readiness therefore also requires that no engine (or its non-priority
+ * process) reports `stopped`.
+ */
+const getStoppedEngineTypes = ({ engines = [] }: EntityStoreStatusBody): string[] =>
+  engines
+    .filter(({ status, nonPriority }) => status === 'stopped' || nonPriority?.status === 'stopped')
+    .map(({ type }) => type ?? 'unknown');
+
+const requestOrWarn = async (
+  kbnClient: KbnClient,
+  log: ToolingLog,
+  {
+    path,
+    method,
+    headers,
+    label,
+  }: { path: string; method: 'POST' | 'PUT'; headers: Record<string, string>; label: string }
+): Promise<void> => {
+  try {
+    await kbnClient.request({ path, method, headers, body: {} });
+  } catch (err) {
+    // The real signal is the status poll below; a failed request surfaces there
+    // as a timeout naming the engines that never started.
+    log.warning(
+      `[persona-matrix] Entity Store ${label} request failed, polling status anyway: ${
+        (err as Error).message
+      }`
+    );
+  }
+};
+
+/**
+ * Ensures the Entity Store V2 engines are installed and started. The entity
  * analytics examples expect `security.get_entity` / `security.get_entity_*`
  * built-in tools, which are availability-gated on the store being installed;
- * nothing installs it on a fresh stack, so the suite does it itself. Idempotent
- * and safe to call when the store is already installed (the endpoint answers
- * 200 with the existing state).
+ * nothing installs it on a fresh stack, so the suite does it itself.
  *
- * The install deliberately sends an empty body, so the route installs ALL
+ * Install is a no-op (200) when every engine type already exists and does not
+ * restart engines a previous run left stopped, so the start endpoint is always
+ * called afterwards. Start only acts on stopped engines, which keeps the whole
+ * sequence idempotent on an already running store.
+ *
+ * Both requests deliberately send an empty body, so the routes cover ALL
  * entity types rather than the lead-generation sibling's ['user','host','service']
  * subset: the matrix expects the full availability surface across future
  * examples, and installing extra engine types is idempotent and harmless.
@@ -63,51 +110,49 @@ export const ensureEntityStoreRunning = async ({
   timeoutMs?: number;
   pollIntervalMs?: number;
 }): Promise<void> => {
-  const currentStatus = await getEntityStoreStatus(kbnClient).catch(() => undefined);
-  if (currentStatus === 'running') {
-    log.debug('[persona-matrix] Entity Store is already running');
-    return;
-  }
-
-  log.info('[persona-matrix] installing Entity Store');
-  try {
-    await kbnClient.request({
-      path: INSTALL_URL,
-      method: 'POST',
-      headers: INSTALL_HEADERS,
-      body: {},
-    });
-  } catch (err) {
-    // The engine may already exist from a previous run; the real signal is the
-    // status, so fall through to polling instead of failing outright.
-    log.warning(
-      `[persona-matrix] Entity Store install request failed, polling status anyway: ${
-        (err as Error).message
-      }`
-    );
-  }
+  log.info('[persona-matrix] installing and starting Entity Store');
+  await requestOrWarn(kbnClient, log, {
+    path: INSTALL_URL,
+    method: 'POST',
+    headers: INSTALL_HEADERS,
+    label: 'install',
+  });
+  await requestOrWarn(kbnClient, log, {
+    path: START_URL,
+    method: 'PUT',
+    headers: MUTATING_HEADERS,
+    label: 'start',
+  });
 
   const deadline = Date.now() + timeoutMs;
   // Failed status polls are not fatal (Kibana can briefly 503 mid-install), but
   // the timeout message keeps the last failure so a dead endpoint is diagnosable.
   let lastStatusError: string | undefined;
+  let lastStatus: string | undefined;
+  let stoppedEngines: string[] = [];
   while (Date.now() < deadline) {
-    const status = await getEntityStoreStatus(kbnClient).catch((err: Error) => {
+    const body = await getEntityStoreStatus(kbnClient).catch((err: Error) => {
       lastStatusError = err.message;
       return undefined;
     });
-    if (status === 'error') {
-      throw new Error('[persona-matrix] Entity Store is in error state');
-    }
-    if (status === 'running') {
-      log.info('[persona-matrix] Entity Store is running');
-      return;
+    if (body) {
+      lastStatus = body.status;
+      stoppedEngines = getStoppedEngineTypes(body);
+      if (body.status === 'error') {
+        throw new Error('[persona-matrix] Entity Store is in error state');
+      }
+      if (body.status === 'running' && stoppedEngines.length === 0) {
+        log.info('[persona-matrix] Entity Store is running');
+        return;
+      }
     }
     await sleep(pollIntervalMs);
   }
 
   throw new Error(
     `[persona-matrix] timed out after ${timeoutMs}ms waiting for Entity Store status=running` +
-      ` (last status error: ${lastStatusError ?? 'none'})`
+      ` with all engines started (last status: ${lastStatus ?? 'none'}; stopped engines: ${
+        stoppedEngines.join(', ') || 'none'
+      }; last status error: ${lastStatusError ?? 'none'})`
   );
 };

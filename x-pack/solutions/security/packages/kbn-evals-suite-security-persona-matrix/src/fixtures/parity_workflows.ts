@@ -140,7 +140,9 @@ steps:
     type: elasticsearch.esql.query
     with:
       query: >-
-        FROM logs-ti_chrysalis_sim-default | WHERE threat.indicator.file.hash.sha256 == "{{ inputs.hash }}" | KEEP threat.indicator.file.hash.sha256, threat.indicator.file.name, threat.indicator.description, threat.indicator.confidence | LIMIT 10
+        FROM logs-ti_chrysalis_sim-default | WHERE threat.indicator.file.hash.sha256 == ?1 | KEEP threat.indicator.file.hash.sha256, threat.indicator.file.name, threat.indicator.description, threat.indicator.confidence | LIMIT 10
+      params:
+        - "{{ inputs.hash }}"
       format: json
 `;
 

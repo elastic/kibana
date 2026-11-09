@@ -305,7 +305,7 @@ export class PersonaMatrixChatClient {
     }
     try {
       const conversation = await this.fetch<ConversationApiResponse>({
-        path: `/api/agent_builder/conversations/${conversationId}`,
+        path: `/api/agent_builder/conversations/${encodeURIComponent(conversationId)}`,
         method: 'GET',
         version: '2023-10-31',
       });

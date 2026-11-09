@@ -73,7 +73,7 @@ run(
         })
       ).count;
     const groups = [...new Set(PARITY_DOCS.map(({ index }) => index))];
-    const queries: Record<string, string> = {};
+    const queries: Record<string, { query: string; params?: string[] }> = {};
     const kbnClient = {
       request: async ({
         method,
@@ -83,21 +83,26 @@ run(
         body?: { id: string; configuration?: { query?: string } };
       }) => {
         const query = body?.configuration?.query;
-        if (method === 'POST' && body && query) queries[body.id] = query;
+        if (method === 'POST' && body && query) queries[body.id] = { query };
         return { data: {} };
       },
     } as unknown as Parameters<typeof seedPersonaMatrixTools>[0]['kbnClient'];
     // vt.hash.lookup is a workflow tool: run its workflow's ES|QL step with the
-    // EICAR hash bound, the way the workflow engine renders it.
+    // EICAR hash rendered into `params`, the way the workflow engine sends it.
     const vtStep = (
       parse(PARITY_WORKFLOWS.find(({ id }) => id === VT_HASH_LOOKUP_WORKFLOW_ID)?.yaml ?? '') as {
-        steps: Array<{ with: { query: string } }>;
+        steps: Array<{ with: { query: string; params: string[] } }>;
       }
     ).steps[0];
-    queries['vt.hash.lookup'] = vtStep.with.query.replace(
-      '{{ inputs.hash }}',
-      '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f'
-    );
+    queries['vt.hash.lookup'] = {
+      query: vtStep.with.query,
+      params: vtStep.with.params.map((param) =>
+        param.replace(
+          '{{ inputs.hash }}',
+          '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f'
+        )
+      ),
+    };
     try {
       await esClient.index({
         index: foreignIndex,
@@ -133,7 +138,7 @@ run(
       await seedPersonaMatrixTools({ kbnClient, log });
       await chrysalisSeed.assertParityDataGate({ esClient, log });
       for (const id of ['vt.hash.lookup', 'check.on.call.schedule']) {
-        const response = await esClient.esql.query({ query: queries[id] });
+        const response = await esClient.esql.query(queries[id]);
         console.log(`shim ${id} rows=${response.values.length}`);
         expect(response.values.length).toBeGreaterThan(0);
       }

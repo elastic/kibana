@@ -129,6 +129,14 @@ describe('findUnattachedToolIds', () => {
     );
   });
 
+  it('encodes the agent id as a single path segment', async () => {
+    const kbnClient = makeAgentClient([]);
+    await findUnattachedToolIds(kbnClient, ['create.case'], 'team/agent?x=1');
+    expect(kbnClient.request).toHaveBeenCalledWith(
+      expect.objectContaining({ path: '/api/agent_builder/agents/team%2Fagent%3Fx%3D1' })
+    );
+  });
+
   it('flattens tool_ids across multiple selection entries', async () => {
     const kbnClient = makeAgentClient([
       { tool_ids: ['virustotal_lookup'] },

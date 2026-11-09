@@ -184,7 +184,7 @@ export async function findUnattachedToolIds(
     configuration?: { tools?: Array<{ tool_ids?: string[] }> };
   }>({
     method: 'GET',
-    path: `/api/agent_builder/agents/${agentId}`,
+    path: `/api/agent_builder/agents/${encodeURIComponent(agentId)}`,
     headers: {
       'kbn-xsrf': 'persona-matrix-tool-check',
       'elastic-api-version': '2023-10-31',

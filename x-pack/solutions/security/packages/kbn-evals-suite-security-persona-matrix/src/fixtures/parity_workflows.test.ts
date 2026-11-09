@@ -57,13 +57,29 @@ describe('parity workflows', () => {
     }
   });
 
+  it('no ES|QL step splices a template value into the query text', () => {
+    // Workflow inputs come from the model; inside a quoted literal a `"` would end
+    // the string and turn the rest of the input into query syntax. Values must be
+    // bound through `params` instead.
+    for (const { id } of PARITY_WORKFLOWS) {
+      for (const step of parsed(id).steps.filter(
+        ({ type }) => type === 'elasticsearch.esql.query'
+      )) {
+        expect({ id, query: step.with.query }).not.toEqual({
+          id,
+          query: expect.stringContaining('{{'),
+        });
+      }
+    }
+  });
+
   it('vt-hash-lookup queries the seeded TI index by sha256 and resolves the EICAR hash', () => {
     const [step] = parsed('vt-hash-lookup').steps;
     expect(step.type).toBe('elasticsearch.esql.query');
     const query = String(step.with.query);
-    const [, index, field] =
-      /^FROM (\S+) \| WHERE ([\w.]+) == "\{\{ inputs\.hash \}\}"/.exec(query) ?? [];
+    const [, index, field] = /^FROM (\S+) \| WHERE ([\w.]+) == \?1 /.exec(query) ?? [];
     expect(index).toBeDefined();
+    expect(step.with.params).toEqual(['{{ inputs.hash }}']);
 
     const eicar = '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f';
     const hits = PARITY_DOCS.filter((d) => d.index === index && getDeep(d.doc, field) === eicar);

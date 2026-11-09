@@ -47,7 +47,7 @@ Only the judge-facing copy is trimmed; all three judges (correctness, groundedne
 
 ### Prerequisites for `SEED_PROFILE=parity`
 
-Entity-analytics examples call `security_search_entities` / `security.get_entity`, which are only available when the **Security entity store is installed**. The suite installs it automatically in `evaluate.beforeAll` (idempotent; skipped when already running), so no manual step is needed. The store auto-starts after install (`.entities.v2.latest.security_default`). Without it, those examples hard-fail on tool-availability checks.
+Entity-analytics examples call `security_search_entities` / `security.get_entity`, which are only available when the **Security entity store is installed**. The suite installs it automatically in `evaluate.beforeAll`, then calls the start endpoint so engines a previous run left stopped come back up, and waits until every engine reports `started` (idempotent on a running store), so no manual step is needed (`.entities.v2.latest.security_default`). Without it, those examples hard-fail on tool-availability checks.
 
 The parity tools are backed by Elastic Workflows, so the **workflows plugin must be enabled** on the stack.
 

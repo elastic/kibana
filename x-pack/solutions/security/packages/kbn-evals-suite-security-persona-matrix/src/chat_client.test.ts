@@ -164,6 +164,24 @@ describe('PersonaMatrixChatClient provenance', () => {
       expect(res.workflowAttachments).toEqual([{ id: 'wf-1', version: 2, yaml: 'new: yaml' }]);
     });
 
+    it('encodes the conversation id as a single path segment', async () => {
+      const fetch = jest
+        .fn()
+        .mockResolvedValueOnce({
+          conversation_id: '../agents/x',
+          response: { message: 'ok' },
+          steps: [generateStep],
+        })
+        .mockResolvedValueOnce(conversation);
+      const client = new PersonaMatrixChatClient(fetch, { warning: jest.fn() } as never, 'c');
+
+      await client.query('q');
+
+      expect(fetch).toHaveBeenLastCalledWith(
+        expect.objectContaining({ path: '/api/agent_builder/conversations/..%2Fagents%2Fx' })
+      );
+    });
+
     it('does not fetch the conversation when no workflow-authoring tool ran', async () => {
       const fetch = jest.fn().mockResolvedValue({
         conversation_id: 'conv-1',

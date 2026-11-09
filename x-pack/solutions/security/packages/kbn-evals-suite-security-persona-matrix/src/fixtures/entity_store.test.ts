@@ -14,72 +14,178 @@ interface Req {
   path: string;
 }
 
+interface Engine {
+  type: string;
+  status: string;
+  nonPriority?: { status: string } | null;
+}
+
+const INSTALL = { method: 'POST', path: '/api/security/entity_store/install' };
+const START = { method: 'PUT', path: '/api/security/entity_store/start' };
+const STATUS = { method: 'GET', path: '/api/security/entity_store/status' };
+
 const log = {
   info: jest.fn(),
   warning: jest.fn(),
   debug: jest.fn(),
 } as unknown as ToolingLog;
 
+/** Mirrors the server's aggregate: running when any engine is started, stopped only when all are. */
+const aggregate = (engines: Engine[]): string => {
+  if (engines.length === 0) return 'not_installed';
+  if (engines.some(({ status }) => status === 'error')) return 'error';
+  if (engines.some(({ status }) => status === 'installing')) return 'installing';
+  if (engines.some(({ status }) => status === 'started')) return 'running';
+  return 'stopped';
+};
+
+/**
+ * Stateful Entity Store double. Install is a no-op once engines exist (like the
+ * real route, it neither fails nor restarts stopped engines); start flips every
+ * stopped engine and non-priority process to started.
+ */
 const createClient = ({
+  engines: initialEngines = [],
   installBehavior = 'ok',
-  statuses = [],
+  startBehavior = 'ok',
+  startLagPolls = 0,
+  statusOverrides = [],
 }: {
+  engines?: Engine[];
   installBehavior?: 'ok' | 'conflict';
-  /** Consecutive GET /status answers, replayed in order; further polls repeat the last. */
-  statuses?: Array<string | Error>;
-} = {}): { client: jest.Mock; requests: Req[] } => {
+  startBehavior?: 'ok' | 'fail';
+  /** Status polls after start before stopped processes report started (start is asynchronous). */
+  startLagPolls?: number;
+  /** Consecutive GET /status answers that replace the derived body, in order. */
+  statusOverrides?: Array<string | Error>;
+} = {}): { client: unknown; requests: Req[] } => {
   const requests: Req[] = [];
+  let engines: Engine[] = initialEngines.map((engine) => ({ ...engine }));
+  let statusCalls = 0;
+  let pendingStartPolls: number | undefined;
+  const applyStart = () => {
+    engines = engines.map((engine) => ({
+      ...engine,
+      status: engine.status === 'stopped' ? 'started' : engine.status,
+      nonPriority:
+        engine.nonPriority?.status === 'stopped' ? { status: 'started' } : engine.nonPriority,
+    }));
+  };
   const client = {
     request: jest.fn(async ({ method, path }: Req) => {
       requests.push({ method, path });
-      if (method === 'POST' && path === '/api/security/entity_store/install') {
+      if (method === INSTALL.method && path === INSTALL.path) {
         if (installBehavior === 'conflict') {
           throw Object.assign(new Error('Conflict: engine already exists'), { status: 409 });
         }
-        return { data: {} };
+        if (engines.length === 0) {
+          engines = [
+            { type: 'host', status: 'started' },
+            { type: 'user', status: 'started' },
+          ];
+        }
+        return { data: { ok: true } };
       }
-      if (method === 'GET' && path === '/api/security/entity_store/status') {
-        const index = requests.filter((req) => req.method === 'GET').length - 1;
-        const answer = statuses[Math.min(index, statuses.length - 1)];
-        if (answer instanceof Error) throw answer;
-        return { data: { status: answer } };
+      if (method === START.method && path === START.path) {
+        if (startBehavior === 'fail') {
+          throw new Error('Forbidden');
+        }
+        pendingStartPolls = startLagPolls;
+        if (pendingStartPolls === 0) applyStart();
+        return { data: { ok: true } };
+      }
+      if (method === STATUS.method && path === STATUS.path) {
+        if (pendingStartPolls !== undefined && pendingStartPolls-- === 0) applyStart();
+        const override = statusOverrides[statusCalls++];
+        if (override instanceof Error) throw override;
+        if (override !== undefined) return { data: { status: override, engines: [] } };
+        return { data: { status: aggregate(engines), engines } };
       }
       return { data: {} };
     }),
   };
-  return { client: client as unknown as jest.Mock, requests };
+  return { client, requests };
 };
 
-const asKbn = (client: unknown): KbnClient => client as KbnClient;
+const run = (client: unknown, timeoutMs = 1_000): Promise<void> =>
+  ensureEntityStoreRunning({
+    kbnClient: client as KbnClient,
+    log,
+    timeoutMs,
+    pollIntervalMs: 1,
+  });
 
 describe('entity_store', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('short-circuits without installing when the store already reports running', async () => {
-    const { client, requests } = createClient({ statuses: ['running'] });
-    await ensureEntityStoreRunning({
-      kbnClient: asKbn(client),
-      log,
-      timeoutMs: 100,
-      pollIntervalMs: 1,
+  it('installs, then starts, then confirms a fresh store is running', async () => {
+    const { client, requests } = createClient();
+    await run(client);
+    expect(requests.slice(0, 3)).toEqual([INSTALL, START, STATUS]);
+    expect(log.info).toHaveBeenCalledWith('[persona-matrix] Entity Store is running');
+  });
+
+  it('restarts a fully stopped store that install leaves untouched', async () => {
+    const { client, requests } = createClient({
+      engines: [
+        { type: 'host', status: 'stopped' },
+        { type: 'user', status: 'stopped' },
+      ],
     });
-    expect(requests).toEqual([{ method: 'GET', path: '/api/security/entity_store/status' }]);
-    expect(log.debug).toHaveBeenCalledWith('[persona-matrix] Entity Store is already running');
+    await run(client);
+    expect(requests).toContainEqual(START);
+    expect(log.info).toHaveBeenCalledWith('[persona-matrix] Entity Store is running');
+  });
+
+  const statusPolls = (requests: Req[]) => requests.filter((req) => req.method === 'GET').length;
+
+  it('waits for a stopped engine even when the aggregate status already reads running', async () => {
+    const { client, requests } = createClient({
+      engines: [
+        { type: 'host', status: 'stopped' },
+        { type: 'user', status: 'started' },
+      ],
+      startLagPolls: 2,
+    });
+    await run(client);
+    expect(requests.slice(0, 2)).toEqual([INSTALL, START]);
+    // Two polls still see host stopped under an aggregate `running`; only the third is ready.
+    expect(statusPolls(requests)).toBe(3);
+  });
+
+  it('waits for a stopped non-priority process behind a started engine', async () => {
+    const { client, requests } = createClient({
+      engines: [{ type: 'user', status: 'started', nonPriority: { status: 'stopped' } }],
+      startLagPolls: 2,
+    });
+    await run(client);
+    expect(requests).toContainEqual(START);
+    expect(statusPolls(requests)).toBe(3);
+  });
+
+  it('times out naming the stopped engines when start fails', async () => {
+    const { client } = createClient({
+      engines: [
+        { type: 'host', status: 'stopped' },
+        { type: 'user', status: 'started' },
+      ],
+      startBehavior: 'fail',
+    });
+    await expect(run(client, 20)).rejects.toThrow('stopped engines: host');
+    expect(log.warning).toHaveBeenCalledWith(
+      expect.stringContaining('Entity Store start request failed')
+    );
   });
 
   it('tolerates a 409 install and succeeds once status reaches running', async () => {
     const { client } = createClient({
+      engines: [{ type: 'host', status: 'started' }],
       installBehavior: 'conflict',
-      statuses: ['installing', 'running'],
+      statusOverrides: ['installing'],
     });
-    await ensureEntityStoreRunning({
-      kbnClient: asKbn(client),
-      log,
-      timeoutMs: 1_000,
-      pollIntervalMs: 1,
-    });
+    await run(client);
     expect(log.warning).toHaveBeenCalledWith(
       expect.stringContaining('Entity Store install request failed')
     );
@@ -87,34 +193,18 @@ describe('entity_store', () => {
   });
 
   it('throws when the store reports the error state', async () => {
-    const { client } = createClient({ statuses: ['installing', 'error'] });
-    await expect(
-      ensureEntityStoreRunning({
-        kbnClient: asKbn(client),
-        log,
-        timeoutMs: 1_000,
-        pollIntervalMs: 1,
-      })
-    ).rejects.toThrow('Entity Store is in error state');
+    const { client } = createClient({ statusOverrides: ['installing', 'error'] });
+    await expect(run(client)).rejects.toThrow('Entity Store is in error state');
   });
 
   it('throws on timeout and names the last status-request failure', async () => {
-    const { client } = createClient({ statuses: [new Error('socket hang up')] });
-    await expect(
-      ensureEntityStoreRunning({
-        kbnClient: asKbn(client),
-        log,
-        timeoutMs: 10,
-        pollIntervalMs: 1,
-      })
-    ).rejects.toThrow('timed out after 10ms waiting for Entity Store status=running');
-    await expect(
-      ensureEntityStoreRunning({
-        kbnClient: asKbn(client),
-        log,
-        timeoutMs: 10,
-        pollIntervalMs: 1,
-      })
-    ).rejects.toThrow('last status error: socket hang up');
+    const failures = Array.from({ length: 10_000 }, () => new Error('socket hang up'));
+    const { client } = createClient({ statusOverrides: failures });
+    const error = await run(client, 10).catch((err: Error) => err);
+    expect(error).toBeInstanceOf(Error);
+    expect((error as Error).message).toContain(
+      'timed out after 10ms waiting for Entity Store status=running'
+    );
+    expect((error as Error).message).toContain('last status error: socket hang up');
   });
 });
