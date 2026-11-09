@@ -75,9 +75,10 @@ export const buildEsqlTheme = ({
     // ---------------------------------------------------------------- commands
 
     // All commands. (Below is an override for *source* commands).
+    // POC: pipe commands → Borealis Teal 70 (not colors.accent / Teal 40 fill)
     {
       token: 'keyword.command',
-      foreground: colors.accent,
+      foreground: '#00A58B',
       fontStyle: 'bold',
     },
 
