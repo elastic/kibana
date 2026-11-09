@@ -8,6 +8,11 @@
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiLoadingSpinner, EuiPageTemplate, useEuiTheme } from '@elastic/eui';
+import {
+  KBN_RECESSED_GLASS_CLASS,
+  kbnRecessedGlassCss,
+} from '@kbn/css-utils/public/recessed_glass_css';
+import { useChromeStyle } from '@kbn/core-chrome-browser-hooks';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { Redirect, useHistory, useLocation, useParams } from 'react-router-dom';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
@@ -93,7 +98,8 @@ export const DetectionRoute = ({
 };
 
 export function NightshiftPage(): React.ReactElement | null {
-  const { euiTheme } = useEuiTheme();
+  const euiThemeContext = useEuiTheme();
+  const isClassicChrome = useChromeStyle() === 'classic';
   const {
     application,
     executionContext,
@@ -256,11 +262,22 @@ export function NightshiftPage(): React.ReactElement | null {
     !canUseAutomationsPage &&
     !isOnboarding &&
     !onboarding.isLoading;
+  const isGlassLanding =
+    !isClassicChrome &&
+    !isSettingsPage &&
+    !isKnowledgePage &&
+    !isSourcesPage &&
+    !isDetectionPage &&
+    !canUseAutomationsPage;
 
   return (
     <ObservabilityPageTemplate
       data-test-subj="nightshiftPage"
       restrictWidth={false}
+      // POC: outside classic chrome, the landing route (home, onboarding) sits on the recessed glass surface.
+      className={isGlassLanding ? KBN_RECESSED_GLASS_CLASS : undefined}
+      panelled={isGlassLanding ? false : undefined}
+      minHeight={isGlassLanding ? 'var(--kbn-application--content-height, 0)' : undefined}
       css={
         isDetectionPage
           ? css`
@@ -268,6 +285,8 @@ export function NightshiftPage(): React.ReactElement | null {
               min-height: 0;
               overflow: hidden;
             `
+          : isGlassLanding
+          ? css(kbnRecessedGlassCss(euiThemeContext))
           : undefined
       }
       pageSectionProps={{
@@ -289,13 +308,13 @@ export function NightshiftPage(): React.ReactElement | null {
               },
             }
           : {}),
-        ...(isHomePage
+        ...(isHomePage && !isGlassLanding
           ? {
               css: css`
                 background: linear-gradient(
-                  ${euiTheme.colors.backgroundBasePlain},
-                  ${euiTheme.colors.backgroundBaseSubdued},
-                  ${euiTheme.colors.backgroundBasePlain}
+                  ${euiThemeContext.euiTheme.colors.backgroundBasePlain},
+                  ${euiThemeContext.euiTheme.colors.backgroundBaseSubdued},
+                  ${euiThemeContext.euiTheme.colors.backgroundBasePlain}
                 );
               `,
             }
