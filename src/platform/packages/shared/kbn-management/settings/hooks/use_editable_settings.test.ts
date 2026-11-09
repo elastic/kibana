@@ -308,6 +308,42 @@ describe('useEditableSettings', () => {
     expect(result.current.isSaving).toBe(false);
   });
 
+  it('reports a request error once when several keys fail with the same error', async () => {
+    const { result, settingsClient, updateErrors$ } = await setup();
+    const requestError = new Error('Request failed with status code: 500');
+    settingsClient.set.mockImplementation(async () => {
+      updateErrors$.next(requestError);
+      return false;
+    });
+
+    act(() => {
+      result.current.handleFieldChange(STRING_SETTING, { type: 'string', unsavedValue: 'a' });
+      result.current.handleFieldChange(RELOAD_SETTING, { type: 'boolean', unsavedValue: true });
+    });
+
+    await act(async () => {
+      await expect(result.current.saveAll()).rejects.toThrow(
+        new Error('Request failed with status code: 500')
+      );
+    });
+  });
+
+  it('names the settings that failed to save when the client reports no error', async () => {
+    const { result, settingsClient } = await setup();
+    settingsClient.set.mockResolvedValue(false);
+
+    act(() => {
+      result.current.handleFieldChange(STRING_SETTING, { type: 'string', unsavedValue: 'a' });
+      result.current.handleFieldChange(RELOAD_SETTING, { type: 'boolean', unsavedValue: true });
+    });
+
+    await act(async () => {
+      await expect(result.current.saveAll()).rejects.toThrow(
+        new Error('Unable to save "String setting"; Unable to save "Reload setting"')
+      );
+    });
+  });
+
   it('keeps failed changes unsaved and clears the ones that saved', async () => {
     const { result, settingsClient, updateErrors$ } = await setup();
     settingsClient.set.mockImplementation(async (key: string) => {
@@ -328,6 +364,33 @@ describe('useEditableSettings', () => {
     });
     expect(result.current.unsavedChanges).toEqual({
       [STRING_SETTING]: { type: 'string', unsavedValue: 'a' },
+    });
+  });
+
+  it('reports a reload on the retry when a reload-required change saved in a failed save', async () => {
+    const { result, settingsClient, updateErrors$ } = await setup();
+    settingsClient.set.mockImplementation(async (key: string) => {
+      if (key === STRING_SETTING) {
+        updateErrors$.next(new Error('Bad request'));
+        return false;
+      }
+      return true;
+    });
+
+    act(() => {
+      result.current.handleFieldChange(STRING_SETTING, { type: 'string', unsavedValue: 'a' });
+      result.current.handleFieldChange(RELOAD_SETTING, { type: 'boolean', unsavedValue: true });
+    });
+    await act(async () => {
+      await expect(result.current.saveAll()).rejects.toThrow('Bad request');
+    });
+
+    settingsClient.set.mockResolvedValue(true);
+    await act(async () => {
+      await expect(result.current.saveAll()).resolves.toEqual({ requiresReload: true });
+    });
+    await act(async () => {
+      await expect(result.current.saveAll()).resolves.toEqual({ requiresReload: false });
     });
   });
 

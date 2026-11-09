@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { isEmpty, pickBy } from 'lodash';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { isEmpty, keyBy, pick, pickBy } from 'lodash';
 import type {
   IUiSettingsClient,
   IUiSettingsMetadataClient,
   UiSettingsMetadataState,
 } from '@kbn/core-ui-settings-browser';
 import type { UiSettingsScope } from '@kbn/core-ui-settings-common';
-import { getFieldDefinition } from '@kbn/management-settings-field-definition';
+import { i18n } from '@kbn/i18n';
+import { getFieldDefinitions } from '@kbn/management-settings-field-definition';
 import type {
   FieldDefinition,
   OnFieldChangeFn,
@@ -35,7 +36,10 @@ export interface UseEditableSettingsParams {
 }
 
 export interface SaveAllResult {
-  /** True if any saved setting requires a page reload to take effect. */
+  /**
+   * True if a setting saved by this call, or by an earlier call that rejected, requires a page
+   * reload.
+   */
   requiresReload: boolean;
 }
 
@@ -69,24 +73,9 @@ const getSettingsFields = (
     return {};
   }
 
-  const normalizedSettings = normalizeSettings(
-    mergeSettingDefinitions(definitions, settingsClient.getAll())
-  );
+  const settings = normalizeSettings(mergeSettingDefinitions(definitions, settingsClient.getAll()));
 
-  return settingsKeys.reduce<Record<string, FieldDefinition>>((fields, id) => {
-    const setting = normalizedSettings[id];
-    if (setting) {
-      fields[id] = getFieldDefinition({
-        id,
-        setting,
-        params: {
-          isCustom: settingsClient.isCustom(id),
-          isOverridden: settingsClient.isOverridden(id),
-        },
-      });
-    }
-    return fields;
-  }, {});
+  return keyBy(getFieldDefinitions(pick(settings, settingsKeys), settingsClient), 'id');
 };
 
 /**
@@ -167,14 +156,19 @@ export const useEditableSettings = ({
 
   const cleanUnsavedChanges = useCallback(() => setUnsavedChanges({}), []);
 
+  // A reload-required change can save in a call that then rejects, so the reload is reported by
+  // the next call that resolves.
+  const pendingReloadRef = useRef(false);
+  const takePendingReload = useCallback(() => {
+    const requiresReload = pendingReloadRef.current;
+    pendingReloadRef.current = false;
+    return requiresReload;
+  }, []);
+
   const saveAll = useCallback(async (): Promise<SaveAllResult> => {
     if (isEmpty(unsavedChanges)) {
-      return { requiresReload: false };
+      return { requiresReload: takePendingReload() };
     }
-
-    const requiresReload = Object.keys(unsavedChanges).some(
-      (id) => fields[id]?.requiresPageReload === true
-    );
 
     // A request failure resolves `set` to false and puts the server's message on this stream.
     // The stream is client-wide, so it only supplies messages; the return values decide what failed.
@@ -207,6 +201,9 @@ export const useEditableSettings = ({
         unconfirmedIds.push(id);
       } else {
         savedChanges.set(id, change);
+        if (fields[id]?.requiresPageReload) {
+          pendingReloadRef.current = true;
+        }
       }
     });
 
@@ -226,15 +223,23 @@ export const useEditableSettings = ({
       if (updateErrors.length > 0) {
         failureMessages.push(...updateErrors.map(({ message }) => message));
       } else {
-        failureMessages.push(...unconfirmedIds.map((id) => `Unable to save "${id}"`));
+        failureMessages.push(
+          ...unconfirmedIds.map((id) =>
+            i18n.translate('management.settings.hooks.saveFailed', {
+              defaultMessage: 'Unable to save "{name}"',
+              values: { name: fields[id]?.name ?? id },
+            })
+          )
+        );
       }
     }
     if (failureMessages.length > 0) {
-      throw new Error(failureMessages.join('; '));
+      // The client batches queued updates, and every key in a failed batch reports the same error.
+      throw new Error([...new Set(failureMessages)].join('; '));
     }
 
-    return { requiresReload };
-  }, [fields, settingsClient, unsavedChanges]);
+    return { requiresReload: takePendingReload() };
+  }, [fields, settingsClient, unsavedChanges, takePendingReload]);
 
   return {
     fields,

@@ -20,6 +20,7 @@ dependsOn:
   - '@kbn/core-ui-settings-browser'
   - '@kbn/core-ui-settings-browser-mocks'
   - '@kbn/core-ui-settings-common'
+  - '@kbn/i18n'
   - '@kbn/management-settings-field-definition'
   - '@kbn/management-settings-types'
   - '@kbn/management-settings-utilities'
