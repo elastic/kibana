@@ -250,6 +250,35 @@ describe('transformToReactFlow', () => {
       expect(result.nodes).toHaveLength(2);
       result.nodes.forEach(({ data }) => expect(data).not.toHaveProperty('stats'));
     });
+
+    it('marks services far below the map median throughput as idle', () => {
+      const rawResponse = createMockRawResponse({
+        servicesData: [
+          withStats(createServiceData('busy-a', 'java'), {
+            ...javaStats,
+            throughput: 20,
+            requestCount: 300,
+          }),
+          withStats(createServiceData('busy-b', 'java'), {
+            ...javaStats,
+            throughput: 18,
+            requestCount: 270,
+          }),
+          withStats(createServiceData('quiet', 'python'), {
+            ...pythonStats,
+            throughput: 0.5,
+            requestCount: 8,
+          }),
+        ],
+      });
+
+      const result = transformToReactFlow(rawResponse);
+      const idleById = Object.fromEntries(
+        result.nodes.map(({ id, data }) => [id, Boolean(data.isIdle)])
+      );
+
+      expect(idleById).toEqual({ 'busy-a': false, 'busy-b': false, quiet: true });
+    });
   });
 
   describe('when transforming dependency nodes', () => {

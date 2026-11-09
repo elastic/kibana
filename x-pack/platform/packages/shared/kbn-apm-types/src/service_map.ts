@@ -197,6 +197,11 @@ export interface ServiceNodeData extends BaseNodeData {
   alertsByStatus?: Partial<Record<AlertStatus, number>>;
   sloStatus?: SloStatus | 'noSLOs';
   sloCount?: number;
+  /**
+   * Set when the service's throughput is far below the map's median (idle). The map draws it
+   * faded so busy and failing services stand out.
+   */
+  isIdle?: boolean;
   /** Only set when service map grouping is enabled and the service has transactions */
   stats?: ServiceMapServiceStats;
 }
