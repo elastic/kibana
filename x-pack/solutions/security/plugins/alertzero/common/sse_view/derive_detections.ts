@@ -89,9 +89,9 @@ const uniqueIds = (detections: SseDetection[]): SseDetection[] => {
 
 /**
  * Id of an IOC detection: `ioc:{type}:{value}` when that fits the schema's 256-char
- * cap, else `ioc:{type}:{fnv1a(value)}` so a long URL IOC (values run to 2048) still
- * gets a valid, stable id. Readers take the value from `matched_on[0].value`, never by
- * parsing the id, so the hashed form loses nothing.
+ * cap, else `ioc:{type}:{shortHash(value)}` (two polynomial hashes, 16 hex chars) so a
+ * long URL IOC (values run to 2048) still gets a valid, stable id. Readers take the value
+ * from `matched_on[0].value`, never by parsing the id, so the hashed form loses nothing.
  */
 export const buildIocDetectionId = (type: string, value: string): string => {
   const plain = `ioc:${type}:${value}`;

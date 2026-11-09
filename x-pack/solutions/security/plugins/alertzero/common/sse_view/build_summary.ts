@@ -16,28 +16,32 @@ export interface BuildSummaryOptions {
   techniqueId?: string;
 }
 
-const hostsClause = (hostCount: number | undefined): string =>
-  hostCount === undefined
-    ? ''
-    : i18n.translate('xpack.alertzero.sseView.summary.onHosts', {
-        defaultMessage: ' on {count, plural, one {# host} other {# hosts}}',
-        values: { count: hostCount },
-      });
-
-/** `{technique_id} {technique_name}: {total} event(s) on {host_count} host(s)`, or just the id when the name is absent. */
+/**
+ * `{technique_id} {technique_name}: {total} event(s) on {host_count} host(s)`, or just the
+ * id when the name is absent. The with-hosts and without-hosts variants are whole messages,
+ * so a translator can place the host clause anywhere in the sentence.
+ */
 const summarizeBehavior = (detection: SseDetection): string => {
   const techniqueId = detection.technique_id ?? '';
   if (!detection.technique_name) {
     return techniqueId;
   }
-  return i18n.translate('xpack.alertzero.sseView.summary.behavior', {
+  // Inline `values` literals: the i18n checker reads them statically.
+  if (detection.host_count === undefined) {
+    return i18n.translate('xpack.alertzero.sseView.summary.behavior', {
+      defaultMessage:
+        '{techniqueId} {techniqueName}: {count, plural, one {# event} other {# events}}',
+      values: { techniqueId, techniqueName: detection.technique_name, count: detection.total },
+    });
+  }
+  return i18n.translate('xpack.alertzero.sseView.summary.behaviorOnHosts', {
     defaultMessage:
-      '{techniqueId} {techniqueName}: {count, plural, one {# event} other {# events}}{hosts}',
+      '{techniqueId} {techniqueName}: {count, plural, one {# event} other {# events}} on {hostCount, plural, one {# host} other {# hosts}}',
     values: {
       techniqueId,
       techniqueName: detection.technique_name,
       count: detection.total,
-      hosts: hostsClause(detection.host_count),
+      hostCount: detection.host_count,
     },
   });
 };
@@ -50,9 +54,16 @@ const summarizeIoc = (detection: SseDetection): string => {
   const parsed = iocOfDetection(detection);
   const type = parsed?.type ?? detection.field ?? 'indicator';
   const value = parsed?.value ?? detection.matched_on[0]?.value ?? '';
-  return i18n.translate('xpack.alertzero.sseView.summary.ioc', {
-    defaultMessage: '{type} {value} seen {count}x{hosts}',
-    values: { type, value, count: detection.total, hosts: hostsClause(detection.host_count) },
+  if (detection.host_count === undefined) {
+    return i18n.translate('xpack.alertzero.sseView.summary.ioc', {
+      defaultMessage: '{type} {value} seen {count}x',
+      values: { type, value, count: detection.total },
+    });
+  }
+  return i18n.translate('xpack.alertzero.sseView.summary.iocOnHosts', {
+    defaultMessage:
+      '{type} {value} seen {count}x on {hostCount, plural, one {# host} other {# hosts}}',
+    values: { type, value, count: detection.total, hostCount: detection.host_count },
   });
 };
 
