@@ -14,8 +14,25 @@
  * removing the clause again has no shared helper, so it lives here.
  */
 
+import { appendToESQLQuery } from '@kbn/esql-utils';
+
 const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 /** Remove one `| WHERE <clause>`, wherever it sits in the query. */
 export const removeWhere = (query: string, clause: string) =>
   query.replace(new RegExp(`\\s*\\|\\s*WHERE\\s+${escapeRegExp(clause)}`, 'i'), '');
+
+const UNMAPPED_FIELDS_SET = /\bSET\s+unmapped_fields\b/i;
+
+/**
+ * Append a WHERE clause the map writes. It names fields of every trace family (`duration` of
+ * OTel, `span.duration.us` of classic APM, `status.code`), and a source that maps only some of
+ * them would fail with an unknown column, so the query gets `SET unmapped_fields="NULLIFY"`, as
+ * the map's own queries have, unless it already sets it.
+ */
+export const appendMapClause = (query: string, clause: string) => {
+  const appended = appendToESQLQuery(query, `| WHERE ${clause}`);
+  return UNMAPPED_FIELDS_SET.test(appended)
+    ? appended
+    : `SET unmapped_fields="NULLIFY";\n${appended}`;
+};
