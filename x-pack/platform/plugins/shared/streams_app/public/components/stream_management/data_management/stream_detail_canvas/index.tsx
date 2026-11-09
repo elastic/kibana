@@ -997,6 +997,7 @@ const buildConfiguredSourceNode = (source: SourceViewModel): SourceNode => {
           }),
     data: {
       sourceId: source.id,
+      sourceType: source.type,
       title: name,
       subtitle: SOURCE_TYPE_CONFIG_BY_TYPE[source.type].shortLabel,
       iconType: SOURCE_TYPE_ICONS[source.type],

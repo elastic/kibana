@@ -36,6 +36,7 @@ import type { NightshiftInvestigationsStartDeps } from '../../types';
 import { NIGHTSHIFT_ASSISTANT_AGENT_ID, NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../../common';
 import { installAssistantAgent } from '../install_assistant_agent';
 import { installInvestigationAgent } from '../install_investigation_agent';
+import { assertNightshiftSpace } from '../assert_nightshift_space';
 import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from '../managed_workflows/constants';
 import { BOUND_WORKFLOW_IDS, type BoundWorkflowId } from './bound_workflows';
 import {
@@ -516,6 +517,8 @@ export const createInvestigatorServiceAccountService = ({
         'Service accounts are disabled. Set xpack.security.serviceAccounts.enabled: true.'
       );
     }
+    // Nightshift runs in the default space only, so no other space can be set up.
+    assertNightshiftSpace(spaceId);
     if (!(await canManageSecurity(request))) {
       throw Boom.forbidden(
         'Setting up the Nightshift service accounts requires the manage_security cluster privilege.'

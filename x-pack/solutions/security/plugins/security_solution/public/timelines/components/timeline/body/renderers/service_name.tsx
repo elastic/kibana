@@ -10,14 +10,11 @@ import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { isString } from 'lodash/fp';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/public';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useEntityFromStore } from '../../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import { EntityType } from '../../../../../../common/search_strategy';
 import { EntityDetailsLink } from '../../../../../common/components/links';
-import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
-import { ServicePanelKey } from '../../../../../flyout/entity_details/shared/constants';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
@@ -45,8 +42,6 @@ const ServiceNameComponent: React.FC<Props> = ({
   const eventContext = useContext(StatefulEventContext);
   const serviceName = `${value}`;
   const isInTimelineContext = serviceName && eventContext?.timelineID;
-  const enableNewFlyout = useIsNewFlyoutEnabled();
-  const { openFlyout } = useExpandableFlyoutApi();
   const { openServiceFlyout } = useFlyoutApi();
 
   const isInSecurityApp = useIsInSecurityApp();
@@ -75,35 +70,18 @@ const ServiceNameComponent: React.FC<Props> = ({
 
       const { timelineID } = eventContext;
 
-      if (enableNewFlyout) {
-        openServiceFlyout({
-          serviceName,
-          entityId: resolvedEntityId,
-          contextID: contextId,
-          scopeId: timelineID,
-          origin: FLYOUT_ORIGIN.TABLE_FIELD_LINK,
-        });
-        return;
-      }
-
-      openFlyout({
-        right: {
-          id: ServicePanelKey,
-          params: {
-            serviceName,
-            entityId: resolvedEntityId,
-            contextID: contextId,
-            scopeId: timelineID,
-          },
-        },
+      openServiceFlyout({
+        serviceName,
+        entityId: resolvedEntityId,
+        contextID: contextId,
+        scopeId: timelineID,
+        origin: FLYOUT_ORIGIN.TABLE_FIELD_LINK,
       });
     },
     [
       onClick,
       eventContext,
       isInTimelineContext,
-      enableNewFlyout,
-      openFlyout,
       openServiceFlyout,
       serviceName,
       resolvedEntityId,

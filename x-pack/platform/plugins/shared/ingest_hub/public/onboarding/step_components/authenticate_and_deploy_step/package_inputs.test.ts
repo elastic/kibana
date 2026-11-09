@@ -743,4 +743,56 @@ describe('buildPackageVars — stored secret refs', () => {
   it('returns undefined when nothing is sent', () => {
     expect(buildPackageVars('', undefined, PKG_VARS)).toBeUndefined();
   });
+
+  it('adds the package vars set from the shared settings, and null to clear one', () => {
+    expect(
+      buildPackageVars('', undefined, PKG_VARS, undefined, undefined, {
+        proxy_url: 'http://proxy:3128',
+      })
+    ).toEqual({ proxy_url: 'http://proxy:3128' });
+    expect(
+      buildPackageVars('', undefined, PKG_VARS, undefined, undefined, { proxy_url: null })
+    ).toEqual({ proxy_url: null });
+  });
+});
+
+describe('buildStreamVars — package vars from the shared settings', () => {
+  const def = (name: string, extra: object = {}) =>
+    ({ name, type: 'text', title: name, show_user: false, ...extra } as any);
+  const dsVars = (vars: Record<string, string | string[]> = {}) => ({
+    enabledInputs: ['aws-s3'],
+    varsByInput: { 'aws-s3': vars },
+  });
+  const declaring = makeService({
+    inputs: ['aws-s3'],
+    varDefsByInput: { 'aws-s3': { proxy_url: def('proxy_url') } },
+  });
+  const notDeclaring = makeService({
+    inputs: ['aws-s3'],
+    varDefsByInput: { 'aws-s3': { bucket_arn: def('bucket_arn') } },
+  });
+  const policyVars = { proxy_url: 'http://proxy:3128' };
+
+  it('fills a stream var the stream declares', () => {
+    expect(buildStreamVars(declaring, dsVars(), '', 'aws-s3', policyVars).proxy_url).toBe(
+      'http://proxy:3128'
+    );
+  });
+
+  it('keeps a value set for the service', () => {
+    const out = buildStreamVars(
+      declaring,
+      dsVars({ proxy_url: 'http://own:1' }),
+      '',
+      'aws-s3',
+      policyVars
+    );
+    expect(out.proxy_url).toBe('http://own:1');
+  });
+
+  it('does not send a var the stream does not declare', () => {
+    expect(buildStreamVars(notDeclaring, dsVars(), '', 'aws-s3', policyVars)).not.toHaveProperty(
+      'proxy_url'
+    );
+  });
 });

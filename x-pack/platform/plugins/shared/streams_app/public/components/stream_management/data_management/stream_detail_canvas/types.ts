@@ -18,6 +18,7 @@ import type {
   DestinationViewModel,
 } from '../../../streams_layout/destinations/types';
 import type { UnitRoutableLine } from '../../../../services/unit_connections';
+import type { SourceType } from '../../../streams_layout/sources/types';
 
 export const SOURCE_NODE_TYPE = 'source';
 export const DESTINATION_NODE_TYPE = 'destination';
@@ -27,6 +28,8 @@ export const ANIMATED_EDGE_TYPE = 'animated';
 
 export interface SourceNodeData extends Record<string, unknown> {
   sourceId?: string;
+  /** Decides whether the node shows stats. A node without it shows none. */
+  sourceType?: SourceType;
   unconfiguredNodeId?: string;
   configurationLabel?: string;
   title: string;
