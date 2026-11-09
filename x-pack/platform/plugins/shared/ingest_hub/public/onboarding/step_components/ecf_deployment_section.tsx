@@ -11,6 +11,7 @@ import {
   EuiBadge,
   EuiButton,
   EuiCallOut,
+  EuiCode,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -40,13 +41,15 @@ import {
   isEcfStackArnValid,
   normaliseLogGroupArn,
   ECF_UNIFIED_STACK_NAME,
+  ECF_DEFAULT_NAMESPACE,
   ECF_OTEL_STACK_NAME,
   ECF_CROWDSTRIKE_STACK_NAME,
   ECF_UNIFIED_TEMPLATE_FILE,
   ECF_OTEL_TEMPLATE_FILE,
   ECF_CROWDSTRIKE_TEMPLATE_FILE,
+  getEcfTemplateFamily,
 } from '../ecf_cloudformation';
-import type { EcfServiceConfig } from '../ecf_cloudformation';
+import type { EcfServiceConfig, EcfTemplateFamily } from '../ecf_cloudformation';
 import { getOnboardingSessionKey } from '../core/onboarding_session_storage';
 import type { ServiceInstance, ServiceVars } from './service_settings_step/use_service_settings';
 import { useEcfTemplateVersion } from '../use_ecf_template_version';
@@ -64,9 +67,12 @@ export const ECF_LAUNCH_STEP_SESSION_KEY = 'ecfLaunchStep' as const;
  */
 const STACK_NAME_REGEX = new RegExp(`^[a-zA-Z][-a-zA-Z0-9]{0,${ECF_STACK_NAME_MAX_LENGTH - 1}}$`);
 
-// ── Types ──────────────────────────────────────────────────────────────────────
+const getServiceEcfTemplateFamily = (serviceId: string): EcfTemplateFamily | undefined => {
+  const entry = AWS_SERVICES_MAP.get(serviceId);
+  return entry ? getEcfTemplateFamily(entry) : undefined;
+};
 
-type EcfTemplateFamily = 'unified' | 'otel' | 'crowdstrike';
+// ── Types ──────────────────────────────────────────────────────────────────────
 
 /** Why a launched family's stack no longer matches the current wizard state. */
 type EcfStaleReason = 'services' | 'settings';
@@ -114,6 +120,11 @@ export interface PersistedEcfLaunchStep {
    */
   launchedConfigs?: Partial<Record<EcfTemplateFamily, EcfConfigSnapshot>>;
   /**
+   * `DataStreamNamespace` the stack was last launched or updated with, for the families that take
+   * one (unified only). Compared against the global namespace to detect drift.
+   */
+  launchedNamespaces?: Partial<Record<EcfTemplateFamily, string>>;
+  /**
    * CloudFormation stack ARN (StackId) per family, pasted by the user after launch.
    * Used to build the AWS Console view/update link. Written to the onboarding SO on Next.
    */
@@ -128,6 +139,8 @@ interface UseEcfDeploymentOpts {
   globalRegion: string;
   otlpEndpoint: string | undefined;
   dataFormat: DataFormat;
+  /** Global data stream namespace, which the unified stack takes as `DataStreamNamespace`. */
+  namespace?: string;
 }
 
 interface UseEcfDeploymentResult {
@@ -147,6 +160,8 @@ interface UseEcfDeploymentResult {
   currentServiceIdsByFamily: Record<EcfTemplateFamily, string[]>;
   /** Current stack-relevant settings per family — used by the parent to write the settings snapshot to the SO on Next. */
   currentConfigsByFamily: Record<EcfTemplateFamily, EcfConfigSnapshot>;
+  /** The `DataStreamNamespace` each family's stack gets now (or keeps while it has no services), for the families that take one. */
+  currentNamespaceByFamily: Partial<Record<EcfTemplateFamily, string>>;
   /** Advances the launchedServiceIds snapshot to the current selection for all stale families. Call on Next before persisting. */
   advanceStaleSnapshots: () => void;
 }
@@ -158,6 +173,7 @@ export const useEcfDeployment = ({
   globalRegion,
   otlpEndpoint,
   dataFormat,
+  namespace,
 }: UseEcfDeploymentOpts): UseEcfDeploymentResult => {
   const [persistedLaunchStep, setPersistedLaunchStep] = useSessionStorage<PersistedEcfLaunchStep>(
     getOnboardingSessionKey('aws', ECF_LAUNCH_STEP_SESSION_KEY),
@@ -181,6 +197,11 @@ export const useEcfDeployment = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [persistedLaunchStep?.launchedConfigs]
   );
+  const launchedNamespaces = useMemo(
+    () => persistedLaunchStep?.launchedNamespaces ?? {},
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [persistedLaunchStep?.launchedNamespaces]
+  );
   const [isUpdateOpenedByFamily, setIsUpdateOpenedByFamily] = useState<
     Partial<Record<EcfTemplateFamily, boolean>>
   >({});
@@ -202,24 +223,17 @@ export const useEcfDeployment = ({
   );
 
   const ecfUnifiedConfigs = useMemo(
-    () =>
-      allEcfConfigs.filter((c) => AWS_SERVICES_MAP.get(c.serviceId)?.ecfDedicatedTemplate == null),
+    () => allEcfConfigs.filter((c) => getServiceEcfTemplateFamily(c.serviceId) === 'unified'),
     [allEcfConfigs]
   );
 
   const ecfOtelConfigs = useMemo(
-    () =>
-      allEcfConfigs.filter(
-        (c) => AWS_SERVICES_MAP.get(c.serviceId)?.ecfDedicatedTemplate === 'otel'
-      ),
+    () => allEcfConfigs.filter((c) => getServiceEcfTemplateFamily(c.serviceId) === 'otel'),
     [allEcfConfigs]
   );
 
   const ecfCrowdstrikeServices = useMemo(
-    () =>
-      selectedServiceIds.filter(
-        (id) => AWS_SERVICES_MAP.get(id)?.ecfDedicatedTemplate === 'crowdstrike_fdr'
-      ),
+    () => selectedServiceIds.filter((id) => getServiceEcfTemplateFamily(id) === 'crowdstrike'),
     [selectedServiceIds]
   );
 
@@ -255,6 +269,37 @@ export const useEcfDeployment = ({
     [ecfUnifiedConfigs, ecfOtelConfigs]
   );
 
+  // The stack's namespace is the global one, or the template default when none is set. Only the
+  // unified template takes the parameter. While none of its services is selected the stack is not
+  // being updated, so it keeps the namespace it was launched with.
+  const currentNamespaceByFamily = useMemo(
+    (): Partial<Record<EcfTemplateFamily, string>> => ({
+      unified:
+        currentServiceIdsByFamily.unified.length > 0
+          ? namespace || ECF_DEFAULT_NAMESPACE
+          : launchedNamespaces.unified,
+    }),
+    [namespace, currentServiceIdsByFamily, launchedNamespaces]
+  );
+
+  // The namespace a launched stack has to be updated to, per family, when it differs from the one
+  // the stack was launched with. A stack launched without a snapshot took the template default.
+  const staleNamespaceByFamily = useMemo(() => {
+    const result: Partial<Record<EcfTemplateFamily, string>> = {};
+    for (const family of launchedFamilies) {
+      const launched = launchedNamespaces[family] ?? ECF_DEFAULT_NAMESPACE;
+      const current = currentNamespaceByFamily[family];
+      if (
+        current !== undefined &&
+        launched !== current &&
+        currentServiceIdsByFamily[family].length > 0
+      ) {
+        result[family] = current;
+      }
+    }
+    return result;
+  }, [launchedFamilies, launchedNamespaces, currentNamespaceByFamily, currentServiceIdsByFamily]);
+
   const staleReasonByFamily = useMemo(() => {
     const check = (family: EcfTemplateFamily): EcfStaleReason | undefined => {
       if (!launchedFamilies.includes(family)) return undefined;
@@ -273,6 +318,7 @@ export const useEcfDeployment = ({
       ) {
         return 'settings';
       }
+      if (staleNamespaceByFamily[family] !== undefined) return 'settings';
       return undefined;
     };
     return { unified: check('unified'), otel: check('otel'), crowdstrike: check('crowdstrike') };
@@ -282,6 +328,7 @@ export const useEcfDeployment = ({
     launchedConfigs,
     currentServiceIdsByFamily,
     currentConfigsByFamily,
+    staleNamespaceByFamily,
   ]);
 
   const isStaleByFamily = useMemo(
@@ -331,6 +378,7 @@ export const useEcfDeployment = ({
             version: stackVersions.unified ?? templateVersion,
             // || (not ??) so an empty string (user cleared the field) falls back to default.
             stackName: stackNames.unified || ECF_UNIFIED_STACK_NAME,
+            namespace,
           })
         : undefined,
 
@@ -339,6 +387,7 @@ export const useEcfDeployment = ({
       ecfUnifiedConfigs,
       globalRegion,
       otlpEndpoint,
+      namespace,
       templateVersion,
       stackVersions.unified,
       stackNames.unified,
@@ -402,6 +451,12 @@ export const useEcfDeployment = ({
         ...launchedConfigs,
         [family]: currentConfigsByFamily[family],
       },
+      launchedNamespaces: {
+        ...launchedNamespaces,
+        ...(currentNamespaceByFamily[family] !== undefined
+          ? { [family]: currentNamespaceByFamily[family] }
+          : {}),
+      },
     });
   };
 
@@ -430,14 +485,18 @@ export const useEcfDeployment = ({
     const updatedConfigs: Partial<Record<EcfTemplateFamily, EcfConfigSnapshot>> = {
       ...launchedConfigs,
     };
+    const updatedNamespaces: Partial<Record<EcfTemplateFamily, string>> = { ...launchedNamespaces };
     for (const family of familiesToAdvance) {
       updatedIds[family] = currentServiceIdsByFamily[family];
       updatedConfigs[family] = currentConfigsByFamily[family];
+      const currentNamespace = currentNamespaceByFamily[family];
+      if (currentNamespace !== undefined) updatedNamespaces[family] = currentNamespace;
     }
     const advanced: PersistedEcfLaunchStep = {
       ...persistedLaunchStep,
       launchedServiceIds: updatedIds,
       launchedConfigs: updatedConfigs,
+      launchedNamespaces: updatedNamespaces,
     };
     setPersistedLaunchStep(advanced);
     // useSessionStorage persists in an effect after the next render, and the caller navigates
@@ -505,6 +564,7 @@ export const useEcfDeployment = ({
     stackArns,
     currentServiceIdsByFamily,
     currentConfigsByFamily,
+    currentNamespaceByFamily,
     advanceStaleSnapshots,
     sectionProps: {
       ecfUnifiedConfigs,
@@ -523,6 +583,7 @@ export const useEcfDeployment = ({
       stackArns,
       isStaleByFamily,
       staleReasonByFamily,
+      staleNamespaceByFamily,
       isUpdateOpenedByFamily,
       onLaunch,
       onUpdateOpened,
@@ -554,6 +615,8 @@ interface EcfFamilyPanelProps {
   isStale: boolean;
   /** What changed since the last launch; selects the stale callout wording. */
   staleReason: EcfStaleReason | undefined;
+  /** The namespace the stack has to be updated to, when the namespace changed since the launch. */
+  staleNamespace?: string;
   /** True when the user has clicked "Update stack" for this family. */
   isUpdateOpened: boolean;
   /** Called whenever the user edits the stack ARN field. */
@@ -573,6 +636,7 @@ interface EcfFamilyPanelPostLaunchProps {
   stackArn: string;
   isStale: boolean;
   staleReason: EcfStaleReason | undefined;
+  staleNamespace?: string;
   /** True when the user has clicked "Update stack" and the update wizard was opened. */
   isUpdateOpened: boolean;
   onStackArnChange: (arn: string) => void;
@@ -592,6 +656,7 @@ const EcfFamilyPanelPostLaunch = ({
   stackArn,
   isStale,
   staleReason,
+  staleNamespace,
   isUpdateOpened,
   onStackArnChange,
   updateUrl,
@@ -682,6 +747,18 @@ const EcfFamilyPanelPostLaunch = ({
                   />
                 )}
               </p>
+              {staleNamespace !== undefined && (
+                <p data-test-subj={`${testSubjPrefix}-staleNamespace`}>
+                  <FormattedMessage
+                    id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.staleCallout.namespace"
+                    defaultMessage="The namespace changed. In the update wizard, set the {parameter} parameter to {namespace}."
+                    values={{
+                      parameter: <EuiCode>DataStreamNamespace</EuiCode>,
+                      namespace: <EuiCode>{staleNamespace}</EuiCode>,
+                    }}
+                  />
+                </p>
+              )}
               <EuiButton
                 href={updateUrl}
                 target="_blank"
@@ -819,6 +896,7 @@ const EcfFamilyPanel = ({
   stackArn,
   isStale,
   staleReason,
+  staleNamespace,
   isUpdateOpened,
   onStackArnChange,
   updateUrl,
@@ -870,6 +948,7 @@ const EcfFamilyPanel = ({
             stackArn={stackArn}
             isStale={isStale}
             staleReason={staleReason}
+            staleNamespace={staleNamespace}
             isUpdateOpened={isUpdateOpened}
             onStackArnChange={onStackArnChange}
             updateUrl={updateUrl}
@@ -903,6 +982,8 @@ interface EcfDeploymentSectionProps {
   stackArns: Partial<Record<EcfTemplateFamily, string>>;
   isStaleByFamily: Record<EcfTemplateFamily, boolean>;
   staleReasonByFamily: Record<EcfTemplateFamily, EcfStaleReason | undefined>;
+  /** The namespace a stale stack has to be updated to, per family; absent when it did not change. */
+  staleNamespaceByFamily?: Partial<Record<EcfTemplateFamily, string>>;
   isUpdateOpenedByFamily: Partial<Record<EcfTemplateFamily, boolean>>;
   onLaunch: (family: EcfTemplateFamily) => void;
   onUpdateOpened: (family: EcfTemplateFamily) => void;
@@ -927,6 +1008,7 @@ export const EcfDeploymentSection = ({
   stackArns,
   isStaleByFamily,
   staleReasonByFamily,
+  staleNamespaceByFamily,
   isUpdateOpenedByFamily,
   onLaunch,
   onUpdateOpened,
@@ -1083,6 +1165,7 @@ export const EcfDeploymentSection = ({
                 stackArn={stackArns.unified ?? ''}
                 isStale={isStaleByFamily.unified}
                 staleReason={staleReasonByFamily.unified}
+                staleNamespace={staleNamespaceByFamily?.unified}
                 isUpdateOpened={isUpdateOpenedByFamily.unified ?? false}
                 onStackArnChange={(arn) => onStackArnChange('unified', arn)}
                 updateUrl={unifiedUpdateUrl}

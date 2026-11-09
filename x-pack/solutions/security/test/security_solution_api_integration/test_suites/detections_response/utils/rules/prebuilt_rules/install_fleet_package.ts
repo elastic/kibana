@@ -20,6 +20,8 @@ import { retryFleetRequest } from './retry_fleet_request';
 const TOTAL_TIMEOUT = 6 * 60_000;
 // Fleet rate limits package uploads
 const FLEET_UPLOAD_RATE_LIMIT_DELAY = 10_000;
+// A hanging upload only fails once Kibana's 30s Elasticsearch request timeout fires, so the budget must fit two of them
+const FLEET_UPLOAD_TOTAL_TIMEOUT = 90_000;
 
 interface InstallFleetPackageParams {
   getService: FtrProviderContext['getService'];
@@ -104,7 +106,7 @@ export const installFleetPackageByUpload = async ({
         .send(packageBuffer),
     {
       description: installFleetPackageByUpload.name,
-      timeout: 20_000,
+      timeout: FLEET_UPLOAD_TOTAL_TIMEOUT,
       retryDelay: FLEET_UPLOAD_RATE_LIMIT_DELAY,
     }
   );

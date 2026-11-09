@@ -22,6 +22,7 @@ import { ManagedWorkflowExecutionReadForbiddenError } from './managed_workflow_e
 import { ManagedWorkflowReadForbiddenError } from './managed_workflow_read_error';
 import { WorkflowForbiddenError } from './workflow_forbidden_error';
 import { WorkflowRequiresDelegatedIdentityError } from './workflow_requires_delegated_identity_error';
+import { WorkflowTriggerForbiddenError } from './workflow_trigger_forbidden_error';
 import { WorkflowAccessDeniedError } from '../services/workflow_access_denied_error';
 
 /**
@@ -40,6 +41,7 @@ describe('WorkflowForbiddenError HTTP contract', () => {
     ['ManagedWorkflowUpdateForbiddenError', ManagedWorkflowUpdateForbiddenError],
     ['ManagedWorkflowDeleteForbiddenError', ManagedWorkflowDeleteForbiddenError],
     ['ManagedWorkflowExecutionReadForbiddenError', ManagedWorkflowExecutionReadForbiddenError],
+    ['WorkflowTriggerForbiddenError', WorkflowTriggerForbiddenError],
   ] as const;
 
   it.each(subclasses)('%s carries statusCode 403 and isUserError', (name, Ctor) => {
