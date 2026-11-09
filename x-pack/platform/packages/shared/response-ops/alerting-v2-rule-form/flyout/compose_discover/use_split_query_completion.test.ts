@@ -9,6 +9,8 @@ import { act, renderHook } from '@testing-library/react';
 import { suggest } from '@kbn/esql-language';
 import { getEsqlColumns } from '@kbn/esql-utils';
 import { ESQL_LANG_ID, monaco } from '@kbn/code-editor';
+import type { CPSPluginStart } from '@kbn/cps/public';
+import { cpsPluginMock } from '@kbn/cps/public/mocks';
 import { useSplitQueryCompletion } from './use_split_query_completion';
 
 const mockDispose = jest.fn();
@@ -34,6 +36,7 @@ jest.mock('@kbn/esql-language', () => ({
 
 jest.mock('@kbn/esql-utils', () => ({
   getEsqlColumns: jest.fn(),
+  getProjectRoutingFromEsqlQuery: jest.fn(),
 }));
 
 describe('useSplitQueryCompletion', () => {
@@ -77,8 +80,8 @@ describe('useSplitQueryCompletion', () => {
     ]);
   });
 
-  const mountProvider = (query = baseQuery) => {
-    const hook = renderHook(() => useSplitQueryCompletion({ baseQuery: query, search }));
+  const mountProvider = (query = baseQuery, cps?: CPSPluginStart) => {
+    const hook = renderHook(() => useSplitQueryCompletion({ baseQuery: query, search, cps }));
     act(() => {
       hook.result.current.onEditorMount(editor);
     });
@@ -141,6 +144,20 @@ describe('useSplitQueryCompletion', () => {
       search,
     });
     expect(result).toEqual(columns);
+  });
+
+  it('runs the column lookup with the rule project routing', async () => {
+    jest.mocked(getEsqlColumns).mockResolvedValue([]);
+    const mockCps = cpsPluginMock.createStartContract();
+    const { provider } = mountProvider(baseQuery, mockCps);
+
+    await getCompletionItems(provider);
+    const callbacks = jest.mocked(suggest).mock.calls[0][2]!;
+    await callbacks.getColumnsFor?.({ query: `${baseQuery} | WHERE co` });
+
+    expect(getEsqlColumns).toHaveBeenCalledWith(
+      expect.objectContaining({ projectRouting: '_alias:*' })
+    );
   });
 
   it('returns no suggestions when there is no base query context', async () => {

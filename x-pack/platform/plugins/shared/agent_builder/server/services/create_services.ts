@@ -89,7 +89,10 @@ export class ServiceManager {
         logger: logger.get('metering'),
       }),
       consumption: createConsumptionService(),
-      callbackDelivery: new CallbackDeliveryService({ actions }),
+      callbackDelivery: new CallbackDeliveryService({
+        actions,
+        logger: logger.get('callbacks'),
+      }),
       conversationTemplates: new ConversationTemplatesService(),
     };
 
@@ -135,6 +138,9 @@ export class ServiceManager {
     licensing,
     deploymentInfo,
     deductiveRegister,
+    isomer,
+    getSmlTypeDefinition,
+    cloud,
     conversationEventBus,
   }: ServicesStartDeps & { conversationEventBus?: ConversationEventBus }): InternalStartServices {
     if (!this.services) {
@@ -266,6 +272,9 @@ export class ServiceManager {
 
     const surfaces = new SurfacesServiceImpl({
       attachmentsService: attachments,
+      isomer,
+      basePath: http.basePath,
+      cloud,
       logger: logger.get('surfaces'),
     });
 
@@ -299,6 +308,7 @@ export class ServiceManager {
       agentService: agents,
       runAgent: runner.runAgent,
       attachmentsService: attachments,
+      getSmlTypeDefinition,
       uiSettings,
       savedObjects,
       trackingService,
@@ -306,6 +316,7 @@ export class ServiceManager {
       meteringService: this.services.metering,
       searchInferenceEndpoints,
       callbackDeliveryService: this.services.callbackDelivery,
+      securityPlugin,
     });
 
     const consumption = this.services.consumption.start({ elasticsearch, spaces });

@@ -118,7 +118,12 @@ describe('groupStepCycles', () => {
       call('c2', 'g1'),
       reasoning('second', 'g2'),
       call('c3', 'g2'),
-      { type: ConversationRoundStepType.updateTodos, todos: [] },
+      {
+        type: ConversationRoundStepType.compaction,
+        summarized_cycle_count: 1,
+        token_count_before: 10,
+        token_count_after: 5,
+      },
     ];
     expect(groupStepCycles(steps)).toEqual([
       { start: 0, end: 2 },
@@ -276,7 +281,7 @@ describe('listVisibleUnits', () => {
   const describeUnit = (unit: ContextUnit) =>
     unit.kind === 'message'
       ? 'message'
-      : unit.kind === 'custom_event'
+      : unit.kind === 'standalone_event'
       ? `event:${unit.entry.event.id}`
       : unit.kind === 'round_cycle'
       ? `${unit.round.id}:${unit.range?.start ?? '-'}:${unit.first ? 'first' : ''}${

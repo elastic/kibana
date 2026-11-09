@@ -57,7 +57,7 @@ export const useChangeHistoryList = ({
     hasNextPage,
     refetch: refetchQuery,
   } = useInfiniteQuery<ListChangeHistoryResult, Error>(
-    changeHistoryListQueryKey({ objectId, pageSize, scope }),
+    changeHistoryListQueryKey({ objectId, pageSize, scope, supports }),
     ({ signal, pageParam = 0 }) =>
       adapter.listChanges({
         objectId,

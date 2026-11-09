@@ -249,6 +249,8 @@ describe('ConnectedEscalationModal', () => {
           {
             id: 'esc-1',
             title: 'Existing escalation',
+            user: { id: 'user-1', username: 'alice' },
+            can_link: true,
             metadata: { linked_investigations: ['conv-1'] },
             permissions: { rename: true, delete: true, update_access_control: true },
           },
@@ -266,18 +268,30 @@ describe('ConnectedEscalationModal', () => {
     expect(radio).toBeDisabled();
   });
 
-  it('disables non-owner escalations (canManage: false)', () => {
+  it('shows a participant escalation as selectable and hides one the user does not participate in', () => {
     mockUseListEscalations.mockReturnValue({
       data: {
         results: [
           {
-            id: 'esc-2',
+            id: 'esc-member',
             title: 'Participant escalation',
+            user: { id: 'someone-else', username: 'owner' },
+            can_link: true,
+            access_control: { entries: [{ type: 'user', id: 'user-1' }] },
+            metadata: { linked_investigations: [] },
+            permissions: { rename: false, delete: false, update_access_control: false },
+          },
+          {
+            id: 'esc-public',
+            title: 'Public escalation',
+            user: { id: 'someone-else', username: 'owner' },
+            can_link: false,
+            access_control: { entries: [] },
             metadata: { linked_investigations: [] },
             permissions: { rename: false, delete: false, update_access_control: false },
           },
         ],
-        pagination: { total: 1, page: 1, per_page: 20 },
+        pagination: { total: 2, page: 1, per_page: 20 },
       },
       isLoading: false,
       isError: false,
@@ -286,8 +300,9 @@ describe('ConnectedEscalationModal', () => {
 
     renderModal({ mode: 'addToExisting' });
 
-    const radio = document.getElementById('escalation-esc-2') as HTMLInputElement;
-    expect(radio).toBeDisabled();
+    const radio = document.getElementById('escalation-esc-member') as HTMLInputElement;
+    expect(radio).toBeEnabled();
+    expect(screen.queryByText('Public escalation')).not.toBeInTheDocument();
   });
 
   it('shows a loading spinner in create mode while the user profile is loading', () => {
@@ -379,6 +394,8 @@ describe('ConnectedEscalationModal', () => {
           {
             id: 'esc-3',
             title: 'Open escalation',
+            user: { id: 'user-1', username: 'alice' },
+            can_link: true,
             metadata: { linked_investigations: [] },
             permissions: { rename: true, delete: true, update_access_control: true },
           },

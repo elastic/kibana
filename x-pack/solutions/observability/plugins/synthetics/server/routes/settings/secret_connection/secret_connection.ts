@@ -9,13 +9,17 @@ import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import type {
+  AffectedMonitorsResult,
+  SecretConnectionAffectedMonitors,
+  SecretConnectionStatus,
+  SecretConnectionTestResult,
   SecretProviderType,
   SyntheticsSecretConnection,
-  SecretConnectionStatus,
 } from '../../../../common/runtime_types';
 import { SECRET_PROVIDER_HASHICORP_VAULT } from '../../../../common/runtime_types';
 import { syntheticsSecretConnectionType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
+import { normalizeAllowedMonitorHosts } from '../../../../common/lib/allowed_monitor_hosts';
 import { SECRET_CONNECTION_WRITE_API } from '../../../feature';
 import {
   getSecretConnectionEncryptedClient,
@@ -29,10 +33,18 @@ import {
   toStatus,
   whenSecretConnectionsEnabled,
 } from './connection_utils';
+import { findAffectedMonitors } from './affected_monitors';
 import { isCredentialSensitiveChange, SECRET_REENTRY_REQUIRED_MESSAGE } from './credential_guard';
-import { getAllowedHosts, hostNotAllowedMessage, isAddressHostAllowed } from './address_guard';
-import type { SaveBody } from './schemas';
-import { SaveBodySchema } from './schemas';
+import {
+  getAllowedHosts,
+  hostNotAllowedMessage,
+  isAddressHostAllowed,
+  isLoopbackHost,
+  LOOPBACK_NOT_TESTABLE_MESSAGE,
+} from './address_guard';
+import type { AffectedMonitorsBody, SaveBody, TestBody } from './schemas';
+import { AffectedMonitorsBodySchema, SaveBodySchema, TestBodySchema } from './schemas';
+import { testHashiCorpVault } from './vault_client';
 
 /** GET: list all Vault connections (secret-free). */
 export const getSecretConnectionsRoute: SyntheticsRestApiRouteFactory<
@@ -42,6 +54,44 @@ export const getSecretConnectionsRoute: SyntheticsRestApiRouteFactory<
   path: SYNTHETICS_API_URLS.SECRET_CONNECTION,
   validate: {},
   handler: whenSecretConnectionsEnabled(async (routeContext) => listConnections(routeContext)),
+});
+
+/**
+ * GET /_affected_monitors: for each saved connection with allowed monitor hosts, the monitors
+ * Heartbeat refuses to run with it. Advisory: nothing is scanned unless a connection has a
+ * restriction, and one pass answers for all of them.
+ */
+export const getAffectedMonitorsRoute: SyntheticsRestApiRouteFactory<
+  SecretConnectionAffectedMonitors
+> = () => ({
+  method: 'GET',
+  path: SYNTHETICS_API_URLS.SECRET_CONNECTION + '/_affected_monitors',
+  validate: {},
+  // It decrypts every monitor of the space, like the other routes that scan them.
+  requiredPrivileges: [SECRET_CONNECTION_WRITE_API],
+  handler: whenSecretConnectionsEnabled(async (routeContext) => {
+    const restricted = (await listConnections(routeContext)).flatMap(({ name, config }) =>
+      name && config?.allowedMonitorHosts?.length
+        ? [{ name, allowedMonitorHosts: config.allowedMonitorHosts }]
+        : []
+    );
+    return restricted.length ? findAffectedMonitors(routeContext, restricted) : {};
+  }),
+});
+
+/** POST /_affected_monitors: the same for hosts that are being edited. Never persists anything. */
+export const previewAffectedMonitorsRoute: SyntheticsRestApiRouteFactory<
+  AffectedMonitorsResult
+> = () => ({
+  method: 'POST',
+  path: SYNTHETICS_API_URLS.SECRET_CONNECTION + '/_affected_monitors',
+  validate: { body: AffectedMonitorsBodySchema },
+  requiredPrivileges: [SECRET_CONNECTION_WRITE_API],
+  handler: whenSecretConnectionsEnabled(async (routeContext) => {
+    const { name, allowedMonitorHosts } = routeContext.request.body as AffectedMonitorsBody;
+    const results = await findAffectedMonitors(routeContext, [{ name, allowedMonitorHosts }]);
+    return results[name];
+  }),
 });
 
 /** PUT: create or update a connection (keyed by name). Blank secrets are kept. */
@@ -55,6 +105,12 @@ export const saveSecretConnectionRoute: SyntheticsRestApiRouteFactory<
   handler: whenSecretConnectionsEnabled(
     async ({ request, response, savedObjectsClient, server, spaceId }) => {
       const body = request.body as SaveBody;
+      // Stored as Heartbeat compares them: lowercase, without a trailing dot or duplicates.
+      const { allowedMonitorHosts: submittedHosts, ...baseConfig } = body.config;
+      const allowedMonitorHosts = normalizeAllowedMonitorHosts(submittedHosts);
+      const config = allowedMonitorHosts.length
+        ? { ...baseConfig, allowedMonitorHosts }
+        : baseConfig;
       if (!isAddressHostAllowed(body.config.address, getAllowedHosts(server.config))) {
         return response.badRequest({
           body: { message: hostNotAllowedMessage(body.config.address) },
@@ -93,7 +149,7 @@ export const saveSecretConnectionRoute: SyntheticsRestApiRouteFactory<
       const providedSecret =
         body.config.authMethod === 'token' ? body.secrets?.token : body.secrets?.secretId;
       const credentialSensitiveChange =
-        !!existing && isCredentialSensitiveChange(existing.config, body.config);
+        !!existing && isCredentialSensitiveChange(existing.config, config);
       if (credentialSensitiveChange && !providedSecret) {
         return response.badRequest({ body: { message: SECRET_REENTRY_REQUIRED_MESSAGE } });
       }
@@ -126,7 +182,7 @@ export const saveSecretConnectionRoute: SyntheticsRestApiRouteFactory<
       const attributes: SyntheticsSecretConnection = {
         name: body.name,
         type,
-        config: body.config,
+        config,
         refreshedAt: new Date().toISOString(),
         secrets,
         hasSecret,
@@ -138,6 +194,7 @@ export const saveSecretConnectionRoute: SyntheticsRestApiRouteFactory<
         { id, overwrite: true, initialNamespaces: [spaceId] }
       );
       await propagate(server, spaceId);
+
       return toStatus(attributes);
     }
   ),
@@ -165,5 +222,56 @@ export const deleteSecretConnectionRoute: SyntheticsRestApiRouteFactory<
     );
     await propagate(server, spaceId);
     return { deleted: true };
+  }),
+});
+
+/** POST /_test: check reachability + auth from Kibana. Never persists anything. */
+export const testSecretConnectionRoute: SyntheticsRestApiRouteFactory<
+  SecretConnectionTestResult
+> = () => ({
+  method: 'POST',
+  path: SYNTHETICS_API_URLS.SECRET_CONNECTION + '/_test',
+  validate: { body: TestBodySchema },
+  requiredPrivileges: [SECRET_CONNECTION_WRITE_API],
+  handler: whenSecretConnectionsEnabled(async ({ request, server, spaceId }) => {
+    const body = request.body as TestBody;
+    const { address, authMethod, namespace, tlsSkipVerify, roleId } = body.config;
+    if (!isAddressHostAllowed(address, getAllowedHosts(server.config))) {
+      return { ok: false, message: hostNotAllowedMessage(address) };
+    }
+    // Kibana would test its own host, not the agent's, and could send a stored credential to a
+    // service on that host.
+    if (isLoopbackHost(new URL(address).hostname)) {
+      return { ok: false, message: LOOPBACK_NOT_TESTABLE_MESSAGE };
+    }
+
+    // Fall back to the stored secret when the client submits a blank (editing), but never
+    // for a changed endpoint: that would send the stored credential to a new address.
+    let token = body.secrets?.token;
+    let secretId = body.secrets?.secretId;
+    const missingSecret = authMethod === 'token' ? !token : !secretId;
+    if (missingSecret && body.name) {
+      try {
+        const decrypted = await getSecretConnectionEncryptedClient(
+          server.encryptedSavedObjects
+        ).getDecryptedAsInternalUser<SyntheticsSecretConnection>(
+          syntheticsSecretConnectionType,
+          secretConnectionId(body.name, spaceId),
+          { namespace: spaceId }
+        );
+        if (isCredentialSensitiveChange(decrypted.attributes.config, body.config)) {
+          return { ok: false, message: SECRET_REENTRY_REQUIRED_MESSAGE };
+        }
+        token = token || decrypted.attributes.secrets?.token;
+        secretId = secretId || decrypted.attributes.secrets?.secretId;
+      } catch (e) {
+        // No stored connection; testHashiCorpVault reports the missing secret.
+      }
+    }
+
+    return testHashiCorpVault(
+      { address, authMethod, namespace, tlsSkipVerify, roleId, token, secretId },
+      server.logger
+    );
   }),
 });

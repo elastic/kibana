@@ -34,6 +34,10 @@ const entityRefSchema = lazySchema(() =>
   z.object({
     field: z.enum(ATTACHMENT_ENTITY_FIELDS),
     value: z.string().min(1).max(2048),
+    // Where the hunt saw this entity. Absent means unknown (an older attachment, or a
+    // source breakdown that was cut off), not local.
+    local: z.boolean().optional(),
+    remote_clusters: z.array(z.string().min(1).max(255)).max(20).optional(),
   })
 );
 

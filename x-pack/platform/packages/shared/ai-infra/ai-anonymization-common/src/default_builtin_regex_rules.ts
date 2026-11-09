@@ -48,6 +48,29 @@ const IPV4_OCTET = '(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)';
 // masked whole instead of leaving `.5` behind.
 const IPV4_PATTERN = `\\b(?:${IPV4_OCTET}\\.){3}${IPV4_OCTET}(?:\\.[0-9]{1,3}){0,4}\\b`;
 
+// IPv6 in full, `::`-compressed (`fe80::1`, `2001:db8::`, `::1`) and IPv4-mapped (`::ffff:1.2.3.4`)
+// form. Every alternative needs either eight groups or a `::`, so clock times (`12:30:45`), MAC
+// addresses and `host:port` are not matched. Alternatives list the longest tail first because the
+// first one that matches wins. Words that merely end in hex digits before `::` (`std::`, `a::int`)
+// are rejected by `refineBuiltInMatch`.
+const IPV6_GROUP = '[0-9A-Fa-f]{1,4}';
+const IPV6_PATTERN = [
+  `::(?:${IPV6_GROUP}:){0,5}(?:${IPV4_OCTET}\\.){3}${IPV4_OCTET}`,
+  `(?:${IPV6_GROUP}:){1,6}:(?:${IPV6_GROUP}:){0,5}(?:${IPV4_OCTET}\\.){3}${IPV4_OCTET}`,
+  `(?:${IPV6_GROUP}:){6}(?:${IPV4_OCTET}\\.){3}${IPV4_OCTET}`,
+  `(?:${IPV6_GROUP}:){7}${IPV6_GROUP}`,
+  `${IPV6_GROUP}:(?::${IPV6_GROUP}){1,6}`,
+  `(?:${IPV6_GROUP}:){1,2}(?::${IPV6_GROUP}){1,5}`,
+  `(?:${IPV6_GROUP}:){1,3}(?::${IPV6_GROUP}){1,4}`,
+  `(?:${IPV6_GROUP}:){1,4}(?::${IPV6_GROUP}){1,3}`,
+  `(?:${IPV6_GROUP}:){1,5}(?::${IPV6_GROUP}){1,2}`,
+  `(?:${IPV6_GROUP}:){1,6}:${IPV6_GROUP}`,
+  `(?:${IPV6_GROUP}:){1,7}:`,
+  `:(?::${IPV6_GROUP}){1,7}`,
+]
+  .map((alternative) => `(?:${alternative})`)
+  .join('|');
+
 const HOST_LABEL = '[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?';
 
 // Suffixes that are safe to match after a single label (`github.io`, `docs.elastic.co`).
@@ -159,8 +182,19 @@ const HOST_PATTERN =
   `|\\b(?:${HOST_LABEL}\\.){2,10}${QUALIFIED_SUFFIX}\\b`;
 
 // `DOMAIN\account` with an upper-case NetBIOS-style domain of at least two characters, so drive
-// letters (`C:\`), lower-case path segments and escape sequences (`\n`, `\d`) are not matched.
-const ACCOUNT_LOGIN_PATTERN = '\\b[A-Z][A-Z0-9-]{1,14}\\\\[A-Za-z0-9][A-Za-z0-9._$-]{0,63}';
+// letters (`C:\`) and lower-case path segments are not matched. The separator is one backslash
+// (plain text) or a run of them: every JSON or string layer doubles the count, and tool results
+// nest several layers (an alert read by a tool arrives with eight). After the backslashes an
+// escape letter (`n r t b f u v 0`) only starts an account when a lower-case letter or digit
+// follows, so `DESC\n| LIMIT` and `DAYS\nFROM` (at any depth) are left alone while `CORP\nancy`
+// still matches. Path segments (`C:\WINDOWS\System32`) are rejected by `refineBuiltInMatch`,
+// which needs the character before the match and so cannot be a lookbehind in a pattern that
+// must also run on RE2.
+const ACCOUNT_NAME = String.raw`[A-Za-z0-9._$-]`;
+const ACCOUNT_LOGIN_PATTERN =
+  String.raw`\b[A-Z][A-Z0-9-]{1,14}\\{1,16}(?:` +
+  String.raw`[A-Zac-eg-mo-qsw-z1-9]${ACCOUNT_NAME}{0,63}` +
+  String.raw`|[nrtbfuv0][a-z0-9]${ACCOUNT_NAME}{0,62})`;
 
 /**
  * Canonical, currently-shipped definitions of every built-in regex anonymization rule.
@@ -187,9 +221,18 @@ export const DEFAULT_BUILTIN_REGEX_RULES: RegexAnonymizationRule[] = [
     name: 'IPv4 addresses',
     entityClass: 'IP',
     type: 'RegExp',
-    // IPv6 is not covered. Four-part version numbers (e.g. `3.11.4.2`) are indistinguishable from
-    // addresses and are masked.
+    // Four-part version numbers (e.g. `3.11.4.2`) are indistinguishable from addresses and are
+    // masked.
     pattern: IPV4_PATTERN,
+    enabled: true,
+    builtIn: true,
+  },
+  {
+    id: 'builtin-ipv6',
+    name: 'IPv6 addresses',
+    entityClass: 'IP',
+    type: 'RegExp',
+    pattern: IPV6_PATTERN,
     enabled: true,
     builtIn: true,
   },
@@ -215,8 +258,8 @@ export const DEFAULT_BUILTIN_REGEX_RULES: RegexAnonymizationRule[] = [
     name: 'Account and login names',
     entityClass: 'USER_NAME',
     type: 'RegExp',
-    // Windows `DOMAIN\account` form only. Off by default because an all-caps path segment
-    // followed by a backslash (`C:\WINDOWS\System32`) is indistinguishable from an account.
+    // Windows `DOMAIN\account` form only. Off by default: an all-caps path segment followed by a
+    // backslash is only rejected for paths with a preceding separator (see `refineBuiltInMatch`).
     pattern: ACCOUNT_LOGIN_PATTERN,
     enabled: false,
     builtIn: true,

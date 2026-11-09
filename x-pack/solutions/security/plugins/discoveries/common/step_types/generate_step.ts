@@ -36,6 +36,16 @@ export const GenerateStepInputSchema = lazySchema(() =>
      */
     api_config: ApiConfigSchema,
     /**
+     * Parent feature id the model calls' token usage also aggregates under.
+     * Only meaningful with `plugin_id`.
+     */
+    aggregate_by: z.string().max(256).optional(),
+    /**
+     * Token-usage attribution (`feature_id` in the token-usage index) for the
+     * model calls. Unset leaves them untagged.
+     */
+    plugin_id: z.string().max(256).optional(),
+    /**
      * Anonymization replacements map
      */
     replacements: z.record(z.string(), z.string()).optional(),

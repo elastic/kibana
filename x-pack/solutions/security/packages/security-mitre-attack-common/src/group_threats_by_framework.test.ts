@@ -6,7 +6,11 @@
  */
 
 import { groupThreatsByFramework } from './group_threats_by_framework';
-import { MITRE_ATLAS_FRAMEWORK, MITRE_ATTACK_FRAMEWORK } from './threat_framework';
+import {
+  MITRE_ATLAS_FRAMEWORK,
+  MITRE_ATTACK_FRAMEWORK,
+  THREAT_FRAMEWORK_DISPLAY_NAME,
+} from './threat_framework';
 
 const buildThreat = (framework?: string) => ({
   framework,
@@ -28,7 +32,7 @@ describe('groupThreatsByFramework', () => {
     expect(groupThreatsByFramework([first, second])).toEqual([
       {
         framework: 'enterprise',
-        label: MITRE_ATTACK_FRAMEWORK,
+        label: THREAT_FRAMEWORK_DISPLAY_NAME.enterprise,
         threats: [first, second],
       },
     ]);
@@ -56,7 +60,7 @@ describe('groupThreatsByFramework', () => {
     const groups = groupThreatsByFramework([unknownB, attack, unknownA, unknownB2]);
 
     expect(groups.map(({ framework, label }) => ({ framework, label }))).toEqual([
-      { framework: 'enterprise', label: MITRE_ATTACK_FRAMEWORK },
+      { framework: 'enterprise', label: THREAT_FRAMEWORK_DISPLAY_NAME.enterprise },
       { framework: undefined, label: 'Custom B' },
       { framework: undefined, label: 'Custom A' },
     ]);
@@ -82,7 +86,11 @@ describe('groupThreatsByFramework', () => {
     const threat = buildThreat(undefined);
 
     expect(groupThreatsByFramework([threat])).toEqual([
-      { framework: 'enterprise', label: MITRE_ATTACK_FRAMEWORK, threats: [threat] },
+      {
+        framework: 'enterprise',
+        label: THREAT_FRAMEWORK_DISPLAY_NAME.enterprise,
+        threats: [threat],
+      },
     ]);
   });
 
@@ -91,7 +99,11 @@ describe('groupThreatsByFramework', () => {
     const blank = buildThreat('  ');
 
     expect(groupThreatsByFramework([empty, blank])).toEqual([
-      { framework: 'enterprise', label: MITRE_ATTACK_FRAMEWORK, threats: [empty, blank] },
+      {
+        framework: 'enterprise',
+        label: THREAT_FRAMEWORK_DISPLAY_NAME.enterprise,
+        threats: [empty, blank],
+      },
     ]);
   });
 

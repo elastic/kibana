@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { REPO_ROOT } from '@kbn/repo-info';
 import type { OxlintOverride } from 'oxlint';
 
 import { RESTRICTED_GLOBALS } from './javascript.mts';
@@ -22,6 +23,23 @@ export const teamOverrides: OxlintOverride[] = [
   {
     files: ['scripts/**/*.js', 'src/setup_node_env/**/*.js'],
     rules: {
+      '@kbn/compat/eslint-no-restricted-syntax': [
+        'error',
+        'ImportDeclaration',
+        'ExportNamedDeclaration',
+        'ExportDefaultDeclaration',
+        'ExportAllDeclaration',
+        'ArrowFunctionExpression',
+        'AwaitExpression',
+        'ClassDeclaration',
+        'RestElement',
+        'SpreadElement',
+        'YieldExpression',
+        'VariableDeclaration[kind="const"]',
+        'VariableDeclaration[kind="let"]',
+        'VariableDeclarator[id.type="ArrayPattern"]',
+        'VariableDeclarator[id.type="ObjectPattern"]',
+      ],
       'prefer-object-spread': 'off',
       'no-var': 'off',
       'prefer-const': 'off',
@@ -37,6 +55,20 @@ export const teamOverrides: OxlintOverride[] = [
       '**/browser_exec_scripts/**/*.js',
     ],
     rules: {
+      '@kbn/compat/eslint-no-restricted-syntax': [
+        'error',
+        'ArrowFunctionExpression',
+        'AwaitExpression',
+        'ClassDeclaration',
+        'ImportDeclaration',
+        'RestElement',
+        'SpreadElement',
+        'YieldExpression',
+        'VariableDeclaration[kind="const"]',
+        'VariableDeclaration[kind="let"]',
+        'VariableDeclarator[id.type="ArrayPattern"]',
+        'VariableDeclarator[id.type="ObjectPattern"]',
+      ],
       'prefer-object-spread': 'off',
       'no-var': 'off',
       'prefer-const': 'off',
@@ -56,7 +88,59 @@ export const teamOverrides: OxlintOverride[] = [
       '**/jest.config.js',
     ],
     excludeFiles: ['**/integration_tests/**/*'],
-    rules: { 'prefer-object-spread': 'off' },
+    rules: {
+      'prefer-object-spread': 'off',
+      '@kbn/compat/eslint-no-restricted-syntax': [
+        'error',
+        'ImportDeclaration',
+        'ExportNamedDeclaration',
+        'ExportDefaultDeclaration',
+        'ExportAllDeclaration',
+      ],
+    },
+  },
+  /**
+   * Harden specific rules
+   */
+  {
+    files: ['**/*.{js,mjs,ts,tsx}'],
+    rules: {
+      '@kbn/compat/eslint-no-restricted-modules': [
+        'error',
+        { name: 'lodash.set', message: 'Please use @kbn/safer-lodash-set instead' },
+        { name: 'lodash.setwith', message: 'Please use @kbn/safer-lodash-set instead' },
+        {
+          name: 'lodash.template',
+          message: 'lodash.template is unsafe, and not compatible with our content security policy.',
+        },
+        { name: 'lodash/set', message: 'Please use @kbn/safer-lodash-set/set instead' },
+        { name: 'lodash/setWith', message: 'Please use @kbn/safer-lodash-set/setWith instead' },
+        { name: 'lodash/fp/set', message: 'Please use @kbn/safer-lodash-set/fp/set instead' },
+        {
+          name: 'lodash/fp/setWith',
+          message: 'Please use @kbn/safer-lodash-set/fp/setWith instead',
+        },
+        { name: 'lodash/fp/assoc', message: 'Please use @kbn/safer-lodash-set/fp/assoc instead' },
+        {
+          name: 'lodash/fp/assocPath',
+          message: 'Please use @kbn/safer-lodash-set/fp/assocPath instead',
+        },
+        {
+          name: 'lodash/fp/template',
+          message: 'lodash.template is unsafe, and not compatible with our content security policy.',
+        },
+        {
+          name: 'lodash/template',
+          message: 'lodash.template is unsafe, and not compatible with our content security policy.',
+        },
+      ],
+    },
+  },
+  {
+    // This file is the security control that hardens lodash.template, so it must load the
+    // otherwise-restricted lodash template modules in order to wrap them with safe proxies.
+    files: ['src/setup_node_env/harden/index.js'],
+    rules: { '@kbn/compat/eslint-no-restricted-modules': 'off' },
   },
   /**
    * Jest specific rules
@@ -124,6 +208,21 @@ export const teamOverrides: OxlintOverride[] = [
       '@typescript-eslint/explicit-function-return-type': [
         'error',
         { allowTypedFunctionExpressions: false },
+      ],
+    },
+  },
+  /**
+   * Fleet overrides
+   */
+  {
+    files: ['x-pack/platform/plugins/shared/fleet/**/*.{js,mjs,ts,tsx}'],
+    rules: {
+      '@kbn/compat/import-order': [
+        'warn',
+        {
+          groups: ['builtin', 'external', 'internal', 'parent'],
+          'newlines-between': 'always-and-inside-groups',
+        },
       ],
     },
   },
@@ -208,6 +307,7 @@ export const teamOverrides: OxlintOverride[] = [
       'src/platform/packages/shared/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
     ],
     rules: {
+      '@kbn/compat/eslint-require-atomic-updates': 'error',
       'accessor-pairs': 'error',
       'array-callback-return': 'error',
       'no-array-constructor': 'error',
@@ -253,6 +353,13 @@ export const teamOverrides: OxlintOverride[] = [
       'vars-on-top': 'error',
     },
   },
+  {
+    // Was an inline `/* eslint require-atomic-updates: ... */` comment, which oxlint doesn't support.
+    files: [
+      'x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/ml/ml.ts',
+    ],
+    rules: { '@kbn/compat/eslint-require-atomic-updates': ['error', { allowProperties: true }] },
+  },
   // Scout tests
   {
     files: [
@@ -294,11 +401,23 @@ export const teamOverrides: OxlintOverride[] = [
     // ESLint matched `public/**/!(*.test).{js,mjs,ts,tsx}`; oxlint globs have no extglobs.
     files: ['x-pack/solutions/security/plugins/lists/public/**/*.{js,mjs,ts,tsx}'],
     excludeFiles: ['x-pack/solutions/security/plugins/lists/public/**/*.test.{js,mjs,ts,tsx}'],
-    rules: { 'react-perf/jsx-no-new-function-as-prop': 'error' },
+    rules: {
+      'react-perf/jsx-no-new-function-as-prop': 'error',
+      '@kbn/compat/react-jsx-no-bind': 'error',
+    },
   },
   {
     files: ['x-pack/solutions/security/plugins/lists/**/*.{js,mjs,ts,tsx}'],
     rules: {
+      '@kbn/compat/eslint-consistent-return': 'error',
+      '@kbn/compat/import-order': [
+        'error',
+        {
+          groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
+          'newlines-between': 'always',
+        },
+      ],
+      '@kbn/compat/eslint-require-atomic-updates': 'error',
       'accessor-pairs': 'error',
       'array-callback-return': 'error',
       'no-array-constructor': 'error',
@@ -476,6 +595,31 @@ export const teamOverrides: OxlintOverride[] = [
    */
   {
     files: ['x-pack/solutions/search/plugins/enterprise_search/**/*.{ts,tsx}'],
+    rules: {
+      '@kbn/compat/typescript-member-ordering': ['warn', { default: { order: 'alphabetically' } }],
+      '@kbn/compat/import-order': [
+        'error',
+        {
+          groups: ['unknown', ['builtin', 'external'], 'internal', 'parent', 'sibling', 'index'],
+          pathGroups: [
+            {
+              pattern:
+                '{../../../../../../,../../../../../,../../../../,../../../,../../,../,./}{common/,*}__mocks__{*,/**}',
+              group: 'unknown',
+            },
+            { pattern: '{**,.}/*.mock', group: 'unknown' },
+            { pattern: 'react*', group: 'external', position: 'before' },
+            { pattern: '{@elastic/**,@kbn/**,src/**}', group: 'internal' },
+          ],
+          pathGroupsExcludedImportTypes: [],
+          alphabetize: { order: 'asc', caseInsensitive: true },
+          'newlines-between': 'always-and-inside-groups',
+        },
+      ],
+    },
+  },
+  {
+    files: ['x-pack/solutions/search/plugins/enterprise_search/**/*.{ts,tsx}'],
     excludeFiles: [
       'x-pack/solutions/search/plugins/enterprise_search/**/*.{test,mock,test_helper}.{ts,tsx}',
     ],
@@ -488,6 +632,26 @@ export const teamOverrides: OxlintOverride[] = [
     files: ['x-pack/platform/plugins/private/canvas/**/*.js'],
     rules: {
       radix: 'error',
+      '@kbn/compat/import-order': [
+        'error',
+        { groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'] },
+      ],
+    },
+  },
+  {
+    files: [
+      'x-pack/platform/plugins/private/canvas/gulpfile.js',
+      'x-pack/platform/plugins/private/canvas/scripts/*.js',
+      'x-pack/platform/plugins/private/canvas/tasks/*.js',
+      'x-pack/platform/plugins/private/canvas/tasks/**/*.js',
+      'x-pack/platform/plugins/private/canvas/__tests__/**/*.js',
+      'x-pack/platform/plugins/private/canvas/**/{__tests__,__test__,__jest__,__fixtures__,__mocks__}/**/*.js',
+    ],
+    rules: {
+      '@kbn/compat/import-no-extraneous-dependencies': [
+        'error',
+        { devDependencies: true, peerDependencies: true, packageDir: REPO_ROOT },
+      ],
     },
   },
   {
@@ -516,6 +680,11 @@ export const teamOverrides: OxlintOverride[] = [
   {
     files: ['x-pack/platform/plugins/shared/osquery/**/*.{js,mjs,ts,tsx}'],
     rules: {
+      '@kbn/compat/eslint-padding-line-between-statements': [
+        'error',
+        { blankLine: 'always', prev: ['block-like'], next: ['*'] },
+        { blankLine: 'always', prev: ['*'], next: ['return'] },
+      ],
       'for-direction': 'error',
       'getter-return': 'error',
       'no-async-promise-executor': 'error',
@@ -613,7 +782,10 @@ export const teamOverrides: OxlintOverride[] = [
     // ESLint matched `public/**/!(*.test).{js,mjs,ts,tsx}`; oxlint globs have no extglobs.
     files: ['x-pack/platform/plugins/shared/osquery/public/**/*.{js,mjs,ts,tsx}'],
     excludeFiles: ['x-pack/platform/plugins/shared/osquery/public/**/*.test.{js,mjs,ts,tsx}'],
-    rules: { 'react-perf/jsx-no-new-function-as-prop': 'error' },
+    rules: {
+      'react-perf/jsx-no-new-function-as-prop': 'error',
+      '@kbn/compat/react-jsx-no-bind': 'error',
+    },
   },
   /**
    * Platform Security Team overrides
@@ -636,6 +808,20 @@ export const teamOverrides: OxlintOverride[] = [
       'x-pack/platform/test/spaces_api_integration/**/*.{js,mjs,ts,tsx}',
     ],
     rules: {
+      '@kbn/compat/import-order': [
+        // This rule sorts import declarations
+        'error',
+        {
+          groups: ['unknown', ['builtin', 'external'], 'internal', ['parent', 'sibling', 'index']],
+          pathGroups: [
+            { pattern: '{**,.}/*.test.mocks', group: 'unknown' },
+            { pattern: '{@kbn/**,src/**,kibana{,/**}}', group: 'internal' },
+          ],
+          pathGroupsExcludedImportTypes: [],
+          alphabetize: { order: 'asc', caseInsensitive: true },
+          'newlines-between': 'always',
+        },
+      ],
       'sort-imports': [
         'error',
         {
@@ -699,6 +885,20 @@ export const teamOverrides: OxlintOverride[] = [
       'src/platform/packages/shared/kbn-workflows-ui/**/*.{js,mjs,ts,tsx}',
     ],
     rules: {
+      '@kbn/compat/eslint-require-atomic-updates': 'error',
+      '@kbn/compat/import-order': [
+        // This rule sorts import declarations
+        'error',
+        {
+          groups: ['unknown', ['builtin', 'external'], 'internal', ['parent', 'sibling', 'index']],
+          pathGroups: [
+            { pattern: '{**,.}/*.test.mocks', group: 'unknown' },
+            { pattern: '{@kbn/**,src/**,kibana{,/**}}', group: 'internal' },
+          ],
+          pathGroupsExcludedImportTypes: [],
+          alphabetize: { order: 'asc', caseInsensitive: true },
+        },
+      ],
       'accessor-pairs': 'error',
       'array-callback-return': 'error',
       'no-array-constructor': 'error',
@@ -811,6 +1011,15 @@ export const teamOverrides: OxlintOverride[] = [
     ],
     rules: { 'prefer-const': 'off' },
   },
+  {
+    // Oxlint's code path analysis throws on shorthand ambient modules (`declare module '*.css';`),
+    // which fails every rule in the file. Declaration files have no code for these rules to check.
+    files: ['**/*.d.ts'],
+    rules: {
+      '@kbn/compat/eslint-consistent-return': 'off',
+      '@kbn/compat/eslint-require-atomic-updates': 'off',
+    },
+  },
 ];
 
 /**
@@ -845,6 +1054,25 @@ export const nestedConfigOverrides: OxlintOverride[] = [
       'x-pack/platform/plugins/shared/inference/scripts/evaluation/**/*.spec.ts',
       'x-pack/solutions/observability/plugins/observability_ai_assistant_app/scripts/evaluation/**/*.spec.ts',
     ],
-    rules: { '@typescript-eslint/triple-slash-reference': 'off' },
+    rules: {
+      '@typescript-eslint/triple-slash-reference': 'off',
+      '@kbn/compat/eslint-spaced-comment': 'off',
+    },
+  },
+  {
+    // Generated by `kbn-workflows/scripts/generate_{es,kibana}_connectors`
+    files: [
+      'src/platform/packages/shared/kbn-workflows/spec/elasticsearch/generated/**/*',
+      'src/platform/packages/shared/kbn-workflows/spec/kibana/generated/**/*',
+    ],
+    rules: { '@kbn/compat/typescript-naming-convention': 'off' },
+  },
+  {
+    files: [
+      'packages/kbn-plugin-check/**/*',
+      'x-pack/solutions/security/plugins/security_solution/public/management/cypress/**/*',
+      'x-pack/solutions/security/test/security_solution_cypress/cypress/**/*',
+    ],
+    rules: { '@kbn/compat/import-no-extraneous-dependencies': 'off' },
   },
 ];

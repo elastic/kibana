@@ -30,6 +30,7 @@ const INDIVIDUAL_ROWS_TOTAL_TITLE = i18n.translate(
 interface EntityGridToolbarTotalProps {
   total?: number;
   shown?: number;
+  limitNote?: string;
   isIndividualRows: boolean;
   visibleColumns: string[];
   onAddColumn: (columnId: string) => void;

@@ -49,7 +49,6 @@ describe('ServiceFieldsForm — multi-DS flat input-toggle rendering', () => {
   const MULTI_DS_SERVICE: AwsServiceMatrixEntry = {
     id: 'test_multi',
     name: 'Test Multi DS',
-    category: 'security_identity_compliance',
     signalTypes: ['logs'],
     dataStreams: ['ds_a', 'ds_b'],
     packageName: 'aws',
@@ -142,11 +141,11 @@ describe('ServiceFieldsForm — ECF single-DS multi-input trigger vars', () => {
   const ECF_SERVICE: AwsServiceMatrixEntry = {
     id: 'cloudtrail',
     name: 'AWS CloudTrail',
-    category: 'management_governance',
     signalTypes: ['logs'],
     dataStreams: ['cloudtrail'],
     packageName: 'aws',
     deploymentMethods: [{ method: 'ecf', preferred: true }],
+    settingsScope: 'ecf',
     inputs: ['aws-s3', 'aws-cloudwatch'],
     requiredConfig: ['bucket_arn', 'log_group_arn'],
     defaultEnabled: true,
@@ -247,7 +246,6 @@ describe('ServiceFieldsForm — agent-based "at least one source" hint', () => {
   const AGENT_VIEW: AwsServiceMatrixEntry = {
     id: 'waf',
     name: 'AWS WAF',
-    category: 'security_identity_compliance',
     signalTypes: ['logs'],
     dataStreams: ['waf'],
     packageName: 'aws',
@@ -295,6 +293,51 @@ describe('ServiceFieldsForm — agent-based "at least one source" hint', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('names the source fields for a service without an ECF route', () => {
+    renderForm(
+      {
+        ...AGENT_VIEW,
+        deploymentMethods: [{ method: 'managed_integration', preferred: true }],
+        ecfSettings: undefined,
+      },
+      { varsByDataStream: withBucket('') }
+    );
+    expect(screen.getByTestId('serviceSettingsFlyout-sourceRequiredHint')).toHaveTextContent(
+      'Provide at least one of: Bucket ARN, Queue URL.'
+    );
+  });
+
+  it('keeps the manifest help text and single-value field for trigger vars', () => {
+    (LazyPackagePolicyInputVarField as unknown as jest.Mock).mockClear();
+    const description = "Mandatory if the 'Collect logs via S3 Bucket' switch is on.";
+    const withDescription = {
+      'aws-s3': {
+        ...varDefsByInput['aws-s3'],
+        bucket_arn: { ...varDefsByInput['aws-s3'].bucket_arn, description },
+      },
+    };
+    renderForm(
+      {
+        ...AGENT_VIEW,
+        varDefsByInput: withDescription,
+        varDefsByDataStream: {
+          waf: {
+            ...AGENT_VIEW.varDefsByDataStream!.waf,
+            optionalConfig: ['bucket_arn', 'queue_url'],
+            varDefsByInput: withDescription,
+          },
+        },
+      },
+      { varsByDataStream: withBucket('') }
+    );
+    const bucketVar = (LazyPackagePolicyInputVarField as unknown as jest.Mock).mock.calls
+      .map(([props]) => props.varDef)
+      .find((v: { name?: string }) => v.name === 'bucket_arn');
+
+    expect(bucketVar).toMatchObject({ description, required: false });
+    expect(bucketVar.multi).not.toBe(true);
+  });
+
   it('shows no hint in the ECF view, which enforces the ARN as required instead', () => {
     renderForm(
       { ...AGENT_VIEW, settingsScope: 'ecf', requiredConfig: ['bucket_arn'] },
@@ -305,6 +348,132 @@ describe('ServiceFieldsForm — agent-based "at least one source" hint', () => {
     expect(
       screen.queryByTestId('serviceSettingsFlyout-sourceRequiredHint')
     ).not.toBeInTheDocument();
+  });
+});
+
+describe('ServiceFieldsForm — stream-level var_groups', () => {
+  const text = (name: string, title: string, show_user = true) => ({
+    name,
+    type: 'text' as const,
+    title,
+    required: false,
+    show_user,
+  });
+  const varDefsByInput = {
+    'aws-cloudwatch': {
+      log_group_arn: text('log_group_arn', 'Log Group ARN'),
+      log_group_name: text('log_group_name', 'Log Group Name', false),
+      log_group_name_prefix: text('log_group_name_prefix', 'Log Group Name Prefix', false),
+      region_name: text('region_name', 'Region Name', false),
+    },
+  };
+  const varGroupsByInput = {
+    'aws-cloudwatch': [
+      {
+        name: 'log_group_source',
+        title: 'Log group',
+        selector_title: 'Identify the log group by',
+        required: true,
+        options: [
+          { name: 'log_group_arn', title: 'Log Group ARN', vars: ['log_group_arn'] },
+          {
+            name: 'log_group_name',
+            title: 'Log Group Name',
+            vars: ['log_group_name', 'region_name'],
+          },
+          {
+            name: 'log_group_name_prefix',
+            title: 'Log Group Name Prefix',
+            vars: ['log_group_name_prefix', 'region_name'],
+          },
+        ],
+      },
+    ],
+  };
+  const MQ_VIEW: AwsServiceMatrixEntry = {
+    id: 'amazon_mq',
+    name: 'Amazon MQ',
+    signalTypes: ['logs'],
+    dataStreams: ['activemq_audit_logs'],
+    packageName: 'aws_mq',
+    deploymentMethods: [{ method: 'managed_integration', preferred: true }],
+    inputs: ['aws-cloudwatch'],
+    optionalConfig: ['log_group_arn', 'log_group_name', 'log_group_name_prefix', 'region_name'],
+    defaultEnabled: true,
+    defaultEnabledInputs: ['aws-cloudwatch'],
+    showInUI: true,
+    isManifestLoaded: true,
+    isManifestError: false,
+    isStaticAgentBasedOnly: false,
+    varDefsByInput,
+    varGroupsByInput,
+    varDefsByDataStream: {
+      activemq_audit_logs: {
+        type: 'logs',
+        inputs: ['aws-cloudwatch'],
+        defaultEnabledInputs: ['aws-cloudwatch'],
+        optionalConfig: ['log_group_arn', 'log_group_name', 'log_group_name_prefix', 'region_name'],
+        varDefsByInput,
+        varGroupsByInput,
+      },
+    },
+  };
+  const selector = () =>
+    screen.getByTestId(
+      'serviceSettingsFlyout-aws-cloudwatch-varGroup-log_group_source'
+    ) as HTMLSelectElement;
+  const renderedVarNames = () => [
+    ...new Set(
+      (LazyPackagePolicyInputVarField as unknown as jest.Mock).mock.calls.map(
+        ([props]) => props.varDef.name
+      )
+    ),
+  ];
+
+  beforeEach(() => {
+    (LazyPackagePolicyInputVarField as unknown as jest.Mock).mockClear();
+  });
+
+  it("renders the selector on the first option with only that option's var", () => {
+    renderForm(MQ_VIEW);
+    expect(selector().value).toBe('log_group_arn');
+    expect(renderedVarNames()).toEqual(['log_group_arn']);
+    // The manifest group governs the source: no hard-coded "at least one of" hint.
+    expect(
+      screen.queryByTestId('serviceSettingsFlyout-sourceRequiredHint')
+    ).not.toBeInTheDocument();
+  });
+
+  it("follows the stored option and requires that option's var", () => {
+    renderForm(MQ_VIEW, {
+      varsByDataStream: {
+        activemq_audit_logs: {
+          enabledInputs: ['aws-cloudwatch'],
+          varsByInput: {},
+          varGroupSelectionsByInput: { 'aws-cloudwatch': { log_group_source: 'log_group_name' } },
+        },
+      },
+    });
+    expect(selector().value).toBe('log_group_name');
+    expect(renderedVarNames()).toEqual(['log_group_name']);
+    expect(screen.getByTestId('serviceSettingsFlyout-requiredHint')).toBeInTheDocument();
+    const [props] = (LazyPackagePolicyInputVarField as unknown as jest.Mock).mock.calls[0];
+    expect(props.errors).toEqual(['This field is required.']);
+    // Fleet's field drops its "Optional" label for this flag; the manifest still says optional.
+    expect(props.isRequiredByVarGroup).toBe(true);
+    expect(props.varDef.required).toBe(false);
+  });
+
+  it('reports a selection change to the parent', () => {
+    const onVarGroupSelectionChange = jest.fn();
+    renderForm(MQ_VIEW, { onVarGroupSelectionChange });
+    fireEvent.change(selector(), { target: { value: 'log_group_name_prefix' } });
+    expect(onVarGroupSelectionChange).toHaveBeenCalledWith(
+      'activemq_audit_logs',
+      'aws-cloudwatch',
+      'log_group_source',
+      'log_group_name_prefix'
+    );
   });
 });
 

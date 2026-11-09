@@ -14,6 +14,8 @@ import {
 } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import type { IBasePath } from '@kbn/core/server';
+import { isomerPluginMock } from '@kbn/isomer-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { AttachmentServiceStart } from '../attachments';
 import { SurfacesServiceImpl } from './surfaces_service';
@@ -63,16 +65,26 @@ const unmappedAttachmentsService = {
   getTypeDefinition: () => undefined,
 } as unknown as AttachmentServiceStart;
 
-const context = { request: httpServerMock.createKibanaRequest(), spaceId: 'space-1' };
+const context = {
+  request: httpServerMock.createKibanaRequest(),
+  spaceId: 'space-1',
+  agentId: 'agent-1',
+};
+
+const basePath = { publicBaseUrl: 'https://kibana.example.com' } as IBasePath;
 
 const renderPayload = (
   event: RoundCompleteEvent,
-  attachmentsService: AttachmentServiceStart = unmappedAttachmentsService
+  attachmentsService: AttachmentServiceStart = unmappedAttachmentsService,
+  kibanaBasePath: IBasePath = basePath
 ) =>
-  new SurfacesServiceImpl({ attachmentsService, logger: loggerMock.create() }).renderPayload(
-    event,
-    { originType: ConversationOriginType.Slack, ...context }
-  );
+  new SurfacesServiceImpl({
+    attachmentsService,
+    logger: loggerMock.create(),
+    isomer: isomerPluginMock.createStartContract(),
+    basePath: kibanaBasePath,
+    cloud: undefined,
+  }).renderPayload(event, { originType: ConversationOriginType.Slack, ...context });
 
 describe('renderPayload', () => {
   it('renders the payload of the round surface', async () => {
@@ -98,7 +110,35 @@ describe('renderPayload', () => {
 
     expect(slack).toContain('FROM logs | LIMIT 10');
     expect(slack).not.toContain('render_attachment');
-    expect(toSurfaceComposition).toHaveBeenCalledWith(expect.anything(), context);
+    expect(toSurfaceComposition).toHaveBeenCalledWith(expect.anything(), {
+      ...context,
+      kibanaUrl: 'https://kibana.example.com/s/space-1',
+    });
+  });
+
+  describe('Kibana app links', () => {
+    const event = createRoundCompleteEvent('See: <render_attachment id="a1" />', [esqlAttachment]);
+    const attachmentsService = {
+      getTypeDefinition: () => ({
+        toSurfaceComposition: () => ({
+          type: 'view',
+          body: [{ type: 'link', label: 'Open in Discover', app: 'discover', path: '#/' }],
+        }),
+      }),
+    } as unknown as AttachmentServiceStart;
+
+    it("resolve against the Kibana URL of the round's space", async () => {
+      const slack = JSON.stringify(await renderPayload(event, attachmentsService));
+
+      expect(slack).toContain('https://kibana.example.com/s/space-1/app/discover#/');
+    });
+
+    it('are left out when no Kibana URL resolves', async () => {
+      const slack = JSON.stringify(await renderPayload(event, attachmentsService, {} as IBasePath));
+
+      expect(slack).toContain('See:');
+      expect(slack).not.toContain('Open in Discover');
+    });
   });
 
   it('leaves out unmapped attachments', async () => {
@@ -116,30 +156,58 @@ describe('renderPayload', () => {
       throw new Error('boom');
     });
 
-    expect(await renderPayload(createRoundCompleteEvent('Hello'))).toBeUndefined();
+    await expect(renderPayload(createRoundCompleteEvent('Hello'))).resolves.toBeUndefined();
+  });
+
+  it('renders a later round after the runtime fails to load', async () => {
+    const isomer = isomerPluginMock.createStartContract();
+    const logger = loggerMock.create();
+    isomer.getRuntime.mockRejectedValueOnce(new Error('runtime unavailable'));
+    const service = new SurfacesServiceImpl({
+      attachmentsService: unmappedAttachmentsService,
+      logger,
+      isomer,
+      basePath,
+      cloud: undefined,
+    });
+    const event = createRoundCompleteEvent('Hello');
+    const options = { originType: ConversationOriginType.Slack, ...context };
+
+    await expect(service.renderPayload(event, options)).resolves.toBeUndefined();
+    expect(logger.error).toHaveBeenCalledWith(
+      'Failed to render the slack surface payload: runtime unavailable'
+    );
+    await expect(service.renderPayload(event, options)).resolves.toEqual(
+      expect.objectContaining({ text: 'Hello' })
+    );
   });
 
   it('renders nothing when the message is empty', async () => {
-    expect(await renderPayload(createRoundCompleteEvent(''))).toBeUndefined();
+    await expect(renderPayload(createRoundCompleteEvent(''))).resolves.toBeUndefined();
   });
 
   it('renders nothing when none of the message can be rendered', async () => {
     const event = createRoundCompleteEvent('<render_attachment id="a1" />', [esqlAttachment]);
 
-    expect(await renderPayload(event)).toBeUndefined();
+    await expect(renderPayload(event)).resolves.toBeUndefined();
   });
 
-  it('renders nothing for rounds without an origin', async () => {
+  it('renders nothing for rounds without an origin, without building the runtime', async () => {
+    const isomer = isomerPluginMock.createStartContract();
     const surfacesService = new SurfacesServiceImpl({
       attachmentsService: unmappedAttachmentsService,
       logger: loggerMock.create(),
+      isomer,
+      basePath,
+      cloud: undefined,
     });
 
-    expect(
-      await surfacesService.renderPayload(createRoundCompleteEvent('Hello'), {
+    await expect(
+      surfacesService.renderPayload(createRoundCompleteEvent('Hello'), {
         originType: undefined,
         ...context,
       })
-    ).toBeUndefined();
+    ).resolves.toBeUndefined();
+    expect(isomer.getRuntime).not.toHaveBeenCalled();
   });
 });

@@ -29,9 +29,10 @@ import { ID, KI_TYPE_FEATURE, SOURCE_ID, TYPE } from '../fields';
 
 export const REVISION_SIZE_LIMIT = 10_000;
 
-export interface LatestKnowledgeIndicatorRevision {
-  esId: string;
-  doc: StoredKnowledgeIndicator;
+export interface LatestRevisionCursor {
+  sourceId: string;
+  type: string;
+  id: string;
 }
 
 /**
@@ -53,9 +54,11 @@ export class RevisionReader {
     private readonly space: string
   ) {}
 
+  /** Counts latest revisions, or the distinct values of `distinctColumn` among them. */
   async countLatestRevisions(
     where?: LatestSourceWhereCondition,
-    postGroupingWhere?: LatestSourceWhereCondition
+    postGroupingWhere?: LatestSourceWhereCondition,
+    distinctColumn?: string
   ): Promise<number> {
     let query = esql.from([KNOWLEDGE_INDICATORS_DATA_STREAM], ['_id']).where`${inSpace(
       this.space
@@ -63,7 +66,13 @@ export class RevisionReader {
     query = withWhere(query, where);
     query = pickLatestPerGroup(query, REVISION_GROUP_KEY);
     query = withWhere(query, postGroupingWhere);
-    query = query.pipe`STATS total = COUNT(*)`.keep('total').limit(1);
+    query = (
+      distinctColumn
+        ? query.pipe`STATS total = COUNT_DISTINCT(${esql.col(distinctColumn)})`
+        : query.pipe`STATS total = COUNT(*)`
+    )
+      .keep('total')
+      .limit(1);
 
     return executeCountQuery({ esClient: this.esClient, query });
   }
@@ -74,36 +83,6 @@ export class RevisionReader {
     sort?: ComposerSortShorthand[],
     limit: number = REVISION_SIZE_LIMIT
   ): Promise<StoredKnowledgeIndicator[]> {
-    const { hits } = await this.fetchLatestRevisionData(where, postGroupingWhere, sort, limit);
-    return hits;
-  }
-
-  async fetchLatestRevisionEntries(
-    where?: LatestSourceWhereCondition,
-    postGroupingWhere?: LatestSourceWhereCondition,
-    sort?: ComposerSortShorthand[],
-    limit: number = REVISION_SIZE_LIMIT
-  ): Promise<LatestKnowledgeIndicatorRevision[]> {
-    const { hits, esIds } = await this.fetchLatestRevisionData(
-      where,
-      postGroupingWhere,
-      sort,
-      limit
-    );
-    if (hits.length !== esIds.length) {
-      throw new Error(
-        'Latest knowledge indicator revision query did not return an _id for every hit'
-      );
-    }
-    return hits.map((doc, index) => ({ esId: esIds[index], doc }));
-  }
-
-  private async fetchLatestRevisionData(
-    where?: LatestSourceWhereCondition,
-    postGroupingWhere?: LatestSourceWhereCondition,
-    sort?: ComposerSortShorthand[],
-    limit: number = REVISION_SIZE_LIMIT
-  ): Promise<{ hits: StoredKnowledgeIndicator[]; esIds: string[] }> {
     let query = esql.from([KNOWLEDGE_INDICATORS_DATA_STREAM], ['_id', '_source']).where`${inSpace(
       this.space
     )}`;
@@ -118,9 +97,64 @@ export class RevisionReader {
         `Requested revision limit ${limit} exceeds REVISION_SIZE_LIMIT ${REVISION_SIZE_LIMIT}; capping at ${REVISION_SIZE_LIMIT}.`
       );
     }
-    query = query.keep('_id', '_source').limit(Math.min(limit, REVISION_SIZE_LIMIT));
+    query = query.keep('_source').limit(Math.min(limit, REVISION_SIZE_LIMIT));
 
-    return executeAndDecodeSource<StoredKnowledgeIndicator>(this.esClient, query);
+    const { hits } = await executeAndDecodeSource<StoredKnowledgeIndicator>(this.esClient, query);
+    return hits;
+  }
+
+  async fetchLatestRevisionsPage({
+    where,
+    postGroupingWhere,
+    asOf,
+    after,
+    size,
+  }: {
+    where?: LatestSourceWhereCondition;
+    postGroupingWhere?: LatestSourceWhereCondition;
+    asOf: string;
+    after?: LatestRevisionCursor;
+    size: number;
+  }): Promise<{ hits: StoredKnowledgeIndicator[]; nextCursor?: LatestRevisionCursor }> {
+    if (size < 1 || size >= REVISION_SIZE_LIMIT) {
+      throw new Error(`Revision page size must be between 1 and ${REVISION_SIZE_LIMIT - 1}.`);
+    }
+
+    const atOrBefore = esql.exp`${esql.col('@timestamp')} <= TO_DATETIME(${esql.str(asOf)})`;
+    const afterCursor = after
+      ? esql.exp`${esql.col(SOURCE_ID)} > ${esql.str(after.sourceId)}
+        OR (${esql.col(SOURCE_ID)} == ${esql.str(after.sourceId)}
+          AND ${esql.col(TYPE)} > ${esql.str(after.type)})
+        OR (${esql.col(SOURCE_ID)} == ${esql.str(after.sourceId)}
+          AND ${esql.col(TYPE)} == ${esql.str(after.type)}
+          AND ${esql.col(ID)} > ${esql.str(after.id)})`
+      : undefined;
+    let query = esql.from([KNOWLEDGE_INDICATORS_DATA_STREAM], ['_id', '_source']).where`${inSpace(
+      this.space
+    )}`;
+    query = withWhere(query, combineWhere(where, atOrBefore, afterCursor));
+    query = pickLatestPerGroup(query, REVISION_GROUP_KEY);
+    query = withWhere(query, postGroupingWhere);
+    query = query
+      .sort([SOURCE_ID, 'ASC'], [TYPE, 'ASC'], [ID, 'ASC'])
+      .keep('_source')
+      .limit(size + 1);
+
+    const { hits } = await executeAndDecodeSource<StoredKnowledgeIndicator>(this.esClient, query);
+    if (hits.length <= size) {
+      return { hits };
+    }
+
+    const page = hits.slice(0, size);
+    const last = page[page.length - 1];
+    return {
+      hits: page,
+      nextCursor: {
+        sourceId: last['source.id'],
+        type: last.type,
+        id: last.id,
+      },
+    };
   }
 
   /**

@@ -140,6 +140,7 @@ export default function createSingleFileConnectorTest({ getService }: FtrProvide
         expect(response.body.actionTypeId).to.eql('test.single_file_connector');
         expect(response.body.config.apiUrl).to.eql(apiUrl);
         expect(response.body.headers.Authorization).to.eql(`Basic ${encoded}`);
+        expect(response.body.hosts).to.eql([new URL(apiUrl).hostname]);
         expect(response.body).to.not.have.property('secrets');
         expect(JSON.stringify(response.body)).to.not.contain(password);
       });

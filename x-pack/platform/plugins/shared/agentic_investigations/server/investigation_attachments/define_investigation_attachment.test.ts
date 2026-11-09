@@ -784,7 +784,7 @@ describe('writeFromTool', () => {
     expect(updated?.versions[1].data).toEqual({ id: noteId(), ...body({ count: 2 }) });
   });
 
-  it('adds a hidden attachment that records no change events when the definition hides it', async () => {
+  it('adds a hidden attachment whose changes are flagged hidden when the definition hides it', async () => {
     const { attachments, write } = setupTool(hiddenNote);
 
     await write(1);
@@ -794,7 +794,10 @@ describe('writeFromTool', () => {
       hidden: true,
       current_version: 2,
     });
-    expect(attachments.drainChanges()).toEqual([]);
+    expect(attachments.drainChanges()).toEqual([
+      expect.objectContaining({ kind: 'added', attachment_id: noteId(), hidden: true }),
+      expect.objectContaining({ kind: 'updated', attachment_id: noteId(), hidden: true }),
+    ]);
   });
 
   it('keeps an attachment the user removed removed, but still writes the index', async () => {

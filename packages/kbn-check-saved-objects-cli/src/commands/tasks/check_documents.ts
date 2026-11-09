@@ -159,7 +159,6 @@ export function checkDocuments({
           message: `${summary}\n${coloredDiff}`,
           details: plainDiff,
           fixHint: `Update the fixture at '${relativePath}' to match the actual document structure.`,
-          docsAnchor: '#defining-model-versions',
         });
       }
     });

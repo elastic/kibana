@@ -81,6 +81,7 @@ import { BulkSnoozeModalWithApi as BulkSnoozeModal } from './bulk_snooze_modal';
 import { BulkSnoozeScheduleModalWithApi as BulkSnoozeScheduleModal } from './bulk_snooze_schedule_modal';
 import { ManageLicenseModal } from './manage_license_modal';
 import { RulesListClearRuleFilterBanner } from './rules_list_clear_rule_filter_banner';
+import { RulesListLoadErrorsBanner } from './rules_list_load_errors_banner';
 import { RulesListUiamApiKeyBanner } from './rules_list_uiam_api_key_banner';
 import { RulesListPrompts } from './rules_list_prompts';
 import { RulesListTable, convertRulesToTableItems } from './rules_list_table';
@@ -784,6 +785,9 @@ export const RulesList = ({
       {showSearchBar && !isEmpty(filters.ruleParams) ? (
         <RulesListClearRuleFilterBanner onClickClearFilter={handleClearRuleParamFilter} />
       ) : null}
+      {rulesState.errors.length > 0 ? (
+        <RulesListLoadErrorsBanner errors={rulesState.errors} />
+      ) : null}
       <MaintenanceWindowCallout kibanaServices={kibanaServices} categories={allRuleCategories} />
       <EuiSpacer size="s" />
       <RulesListPrompts
@@ -1069,6 +1073,7 @@ export const RulesList = ({
             registeredRuleTypes={ruleTypeRegistry.list()}
             filteredRuleTypes={filteredRuleTypes}
             cps={cps}
+            showClassicBadge={kibanaServices.showClassicBadge}
           />
         )}
       </EuiPageTemplate.Section>
