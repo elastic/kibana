@@ -24,16 +24,15 @@ type PolicySettingKey = keyof PolicySettings;
 /** The settings as Step 2 holds them, or as the saved object stores them (an open record). */
 type PolicySettingsSource = PolicySettings | Record<string, unknown> | undefined;
 
+const isString = (value: unknown): boolean => typeof value === 'string';
+
 /**
  * The deployment methods each setting applies to, and what a value must look like. Managed
  * integrations go through Fleet's agentless policy API, which accepts fewer fields than a package
  * policy (no `output_id` or `condition`), so a setting may list it only when that API takes the
  * field. The saved object is an open record, so a value read back from it is checked here before it
  * reaches a Fleet request body, where a wrong type would fail with a generic validation error.
- */
-const isString = (value: unknown): boolean => typeof value === 'string';
-
-/**
+ *
  * `target` is where the value goes in the request: a top-level field of the package policy
  * (`field`), or a package-level var of the package that declares it (`var`).
  */
