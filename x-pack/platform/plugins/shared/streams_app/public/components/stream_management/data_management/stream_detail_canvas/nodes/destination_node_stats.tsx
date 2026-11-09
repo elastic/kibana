@@ -23,17 +23,20 @@ interface DestinationNodeStatsProps {
 
 /**
  * The footer of a destination node: the rate and the latency, for example `8.1k/s | 175ms`. A value
- * that is missing shows a dash, so a destination with no data shows `- | -`, and a rate of exactly 0
- * shows `0/s`. It is its own component, so a stats update re-renders only this row, and never the
- * node or the graph. It always reserves its row, so the card does not change size when the first
- * result arrives. Until then, and when the stats could not be loaded, it shows no numbers, so a
- * load or a failure never looks like a measured value.
+ * that is missing shows a dash, and a rate of exactly 0 shows `0/s`. A destination with neither a
+ * rate nor a latency shows `Waiting for data...` instead. It is its own component, so a stats
+ * update re-renders only this row, and never the node or the graph. It always reserves its row, so
+ * the card does not change size when the first result arrives. Until then, and when the stats could
+ * not be loaded, it shows no numbers, so a load or a failure never looks like a measured value.
  */
 export function DestinationNodeStats({ destinationId, indexCount }: DestinationNodeStatsProps) {
   const { euiTheme } = useEuiTheme();
   const entry = useDestinationStats(destinationId);
   const hasValues =
     entry?.status === 'ready' || entry?.status === 'noData' || entry?.status === 'stale';
+  const eventsRate = entry?.stats?.eventsRate ?? null;
+  const latencyAverage = entry?.stats?.latencyAverage ?? null;
+  const isWaiting = hasValues && eventsRate === null && latencyAverage === null;
 
   return (
     <div
@@ -47,10 +50,17 @@ export function DestinationNodeStats({ destinationId, indexCount }: DestinationN
         min-height: ${euiTheme.size.l};
       `}
     >
-      {hasValues && (
+      {isWaiting && (
+        <EuiText size="xs" color="subdued" data-test-subj="streamsCanvasDestinationWaiting">
+          {i18n.translate('xpack.streams.canvas.destinationNode.waitingStatus', {
+            defaultMessage: 'Waiting for data...',
+          })}
+        </EuiText>
+      )}
+      {hasValues && !isWaiting && (
         <>
           <EuiText size="xs" data-test-subj="streamsCanvasDestinationRate">
-            {formatEventsRate(entry.stats?.eventsRate ?? null)}
+            {formatEventsRate(eventsRate)}
           </EuiText>
           <EuiText
             size="xs"
@@ -63,7 +73,7 @@ export function DestinationNodeStats({ destinationId, indexCount }: DestinationN
                 ${euiTheme.colors.borderBaseSubdued};
             `}
           >
-            {formatDuration(entry.stats?.latencyAverage ?? null)}
+            {formatDuration(latencyAverage)}
           </EuiText>
         </>
       )}
