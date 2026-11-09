@@ -91,18 +91,20 @@ const makeRule = (name: string) =>
 
 type ContainerProps = React.ComponentProps<typeof RuleSummaryFlyoutContainer>;
 
+const containerElement = (overrides: Partial<ContainerProps> = {}) => (
+  <I18nProvider>
+    <RuleSummaryFlyoutContainer
+      ruleId="rule-1"
+      onClose={jest.fn()}
+      onEdit={jest.fn()}
+      onClone={jest.fn()}
+      {...overrides}
+    />
+  </I18nProvider>
+);
+
 const renderContainer = (overrides: Partial<ContainerProps> = {}) =>
-  render(
-    <I18nProvider>
-      <RuleSummaryFlyoutContainer
-        ruleId="rule-1"
-        onClose={jest.fn()}
-        onEdit={jest.fn()}
-        onClone={jest.fn()}
-        {...overrides}
-      />
-    </I18nProvider>
-  );
+  render(containerElement(overrides));
 
 const mockFetchRuleResult = (
   result: Partial<ReturnType<typeof useFetchRule>>
@@ -182,6 +184,20 @@ describe('RuleSummaryFlyoutContainer', () => {
       expect(flyout).toHaveAttribute('data-has-rule', 'false');
     });
 
+    it('keeps the same flyout mounted when the rule finishes loading', () => {
+      mockUseFetchRule.mockReturnValue(mockFetchRuleResult({ isLoading: true }));
+      const { rerender } = renderContainer();
+      const loadingFlyout = screen.getByTestId('mockRuleSummaryFlyout');
+
+      mockUseFetchRule.mockReturnValue(mockFetchRuleResult({ data: makeRule('Loaded rule') }));
+      rerender(containerElement());
+
+      const loadedFlyout = screen.getByTestId('mockRuleSummaryFlyout');
+      expect(loadedFlyout).toBe(loadingFlyout);
+      expect(loadedFlyout).toHaveAttribute('data-loading', 'false');
+      expect(loadedFlyout).toHaveTextContent('Loaded rule');
+    });
+
     it('does not call useFetchRule with undefined when sourceRuleInfo is absent', () => {
       mockUseFetchRule.mockReturnValue(mockFetchRuleResult({ data: makeRule('My Rule') }));
 
@@ -224,6 +240,24 @@ describe('RuleSummaryFlyoutContainer', () => {
       expect(flyout).toHaveAttribute('data-loading', 'true');
       expect(flyout).toHaveAttribute('data-has-rule', 'false');
       expect(screen.queryByTestId('mockRuleSummaryFlyout')).not.toBeInTheDocument();
+    });
+
+    it('keeps the same source flyout mounted when the source rule finishes loading', () => {
+      mockUseFetchRule.mockReturnValue(mockFetchRuleResult({}));
+      mockUseFetchSourceRule.mockReturnValue({ ...noSourceRule, isLoading: true });
+      const { rerender } = renderContainer({ sourceRuleInfo: {} });
+      const loadingFlyout = screen.getByTestId('mockSourceRuleSummaryFlyout');
+
+      mockUseFetchSourceRule.mockReturnValue({
+        ...noSourceRule,
+        rule: { id: 'rule-1', metadata: { name: 'Loaded classic' } } as unknown as RuleResponse,
+      });
+      rerender(containerElement({ sourceRuleInfo: {} }));
+
+      const loadedFlyout = screen.getByTestId('mockSourceRuleSummaryFlyout');
+      expect(loadedFlyout).toBe(loadingFlyout);
+      expect(loadedFlyout).toHaveAttribute('data-loading', 'false');
+      expect(loadedFlyout).toHaveTextContent('Loaded classic');
     });
 
     it('renders the source flyout without a rule when the source cannot resolve the rule', () => {
