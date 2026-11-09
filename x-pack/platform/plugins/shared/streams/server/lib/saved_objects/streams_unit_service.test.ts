@@ -970,6 +970,16 @@ describe('StreamsUnitService', () => {
       expect(JSON.stringify({ message: error?.message, ...error })).not.toContain(REMOTE_KEY);
       expect(JSON.stringify(loggerMock.collect(logger))).not.toContain(REMOTE_KEY);
     });
+
+    it('republishUnit never checks', async () => {
+      const probe = probeReturning({ outcome: 'ok' });
+      const soClient = soClientWith(storedWith(remoteUnit, remoteSecrets));
+      const service = createService({ soClient, probeRemoteDestination: probe });
+
+      await service.republishUnit('default');
+
+      expect(probe).not.toHaveBeenCalled();
+    });
   });
 
   describe('sealed credential cache', () => {

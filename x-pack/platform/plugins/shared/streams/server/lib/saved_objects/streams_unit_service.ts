@@ -118,7 +118,6 @@ const mergeUnitSecrets = (
   };
 };
 
-// A config entry references a credential only when its value is exactly `{ credential: <name> }`.
 // Only top-level config entries of sources, processors, and destinations are scanned.
 const collectCredentialReferenceNames = (unit: StreamsUnit.Configuration): Set<string> => {
   const components = [unit.sources, unit.processors, unit.destinations].flatMap((list) =>
