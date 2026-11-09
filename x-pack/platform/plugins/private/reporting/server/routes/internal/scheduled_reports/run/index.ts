@@ -39,7 +39,7 @@ export const registerInternalRunScheduledReportRoute = ({
       },
       validate: {
         params: schema.object({
-          id: schema.string(),
+          id: schema.string({ minLength: 1, maxLength: 1000 }),
         }),
       },
       options: { access: 'internal' },

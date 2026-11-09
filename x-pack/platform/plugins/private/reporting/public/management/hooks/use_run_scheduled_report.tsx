@@ -5,20 +5,18 @@
  * 2.0.
  */
 
-import { useMutation, useQueryClient } from '@kbn/react-query';
+import { useMutation } from '@kbn/react-query';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/reporting-public';
 import { runScheduledReport } from '../apis/run_scheduled_report';
 import { mutationKeys } from '../mutation_keys';
-import { queryKeys } from '../query_keys';
 
 export type ServerError = IHttpFetchError<ResponseErrorBody>;
 
 const getKey = mutationKeys.runScheduledReport;
 
 export const useRunScheduledReport = () => {
-  const queryClient = useQueryClient();
   const {
     http,
     notifications: { toasts },
@@ -39,15 +37,12 @@ export const useRunScheduledReport = () => {
       });
     },
     onSuccess: () => {
+      // The schedule itself does not change, and the Exports tab polls for the new export on its own.
       toasts.addSuccess(
         i18n.translate('xpack.reporting.schedules.reports.runNow', {
-          defaultMessage: 'Report scheduled to run now',
+          defaultMessage: 'Report scheduled to run now. The export appears in the Exports tab.',
         })
       );
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.allSchedules(),
-        refetchType: 'active',
-      });
     },
   });
 };

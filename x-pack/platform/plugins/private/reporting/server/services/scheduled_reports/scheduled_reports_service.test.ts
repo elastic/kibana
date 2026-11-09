@@ -16,6 +16,7 @@ import type {
 } from '@kbn/core/server';
 import type { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { createMockReportingCore } from '../../test_helpers';
@@ -2944,6 +2945,7 @@ describe('ScheduledReportsService', () => {
     const reportId = savedObjects[0].id;
 
     beforeEach(() => {
+      taskManager.get = jest.fn().mockResolvedValue({ id: reportId, enabled: true });
       taskManager.runSoon = jest.fn().mockResolvedValue({ id: reportId });
     });
 
@@ -3061,6 +3063,72 @@ describe('ScheduledReportsService', () => {
           }),
         })
       );
+    });
+
+    it('returns 404 when the schedule does not exist', async () => {
+      soClient.get = jest
+        .fn()
+        .mockRejectedValue(
+          SavedObjectsErrorHelpers.createGenericNotFoundError('scheduled_report', reportId)
+        );
+
+      await expect(
+        scheduledReportsService.runNow({
+          user: { username: 'elastic' } as ReportingUser,
+          id: reportId,
+        })
+      ).rejects.toEqual({ statusCode: 404, body: 'Not found.' });
+
+      expect(taskManager.runSoon).not.toHaveBeenCalled();
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'scheduled_report_run',
+            outcome: 'failure',
+          }),
+        })
+      );
+    });
+
+    it('returns 404 when the schedule task does not exist', async () => {
+      taskManager.get = jest
+        .fn()
+        .mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError('task', reportId));
+
+      await expect(
+        scheduledReportsService.runNow({
+          user: { username: 'elastic' } as ReportingUser,
+          id: reportId,
+        })
+      ).rejects.toEqual({ statusCode: 404, body: 'Not found.' });
+
+      expect(taskManager.runSoon).not.toHaveBeenCalled();
+    });
+
+    it('rejects a schedule whose task is disabled', async () => {
+      taskManager.get = jest.fn().mockResolvedValue({ id: reportId, enabled: false });
+
+      await expect(
+        scheduledReportsService.runNow({
+          user: { username: 'elastic' } as ReportingUser,
+          id: reportId,
+        })
+      ).rejects.toEqual({
+        body: 'The task for this scheduled report is disabled. Disable and enable the schedule, then retry.',
+      });
+
+      expect(taskManager.runSoon).not.toHaveBeenCalled();
+    });
+
+    it('returns 500 when task manager fails unexpectedly', async () => {
+      taskManager.runSoon = jest.fn().mockRejectedValue(new Error('boom'));
+
+      await expect(
+        scheduledReportsService.runNow({
+          user: { username: 'elastic' } as ReportingUser,
+          id: reportId,
+        })
+      ).rejects.toEqual({ statusCode: 500, body: 'Error running scheduled report: boom' });
     });
 
     it('returns 409 when the task is already running', async () => {

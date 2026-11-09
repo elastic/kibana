@@ -405,6 +405,33 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     return body;
   };
 
+  // Waits until the given number of exports from a schedule reach a terminal status.
+  const waitForScheduledReportRuns = async (scheduledReportId: string, expectedCount = 1) => {
+    return await retry.tryForTime(120000, async () => {
+      const { body } = await esSupertest
+        .post(`/${REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY}/_search`)
+        .send({
+          query: {
+            bool: {
+              filter: [
+                { term: { scheduled_report_id: scheduledReportId } },
+                { terms: { status: ['completed', 'completed_with_warnings', 'failed'] } },
+              ],
+            },
+          },
+        })
+        .expect(200);
+
+      const hits = body.hits.hits as Array<{ _id: string; _source: { status: string } }>;
+      if (hits.length !== expectedCount) {
+        throw new Error(
+          `Expected ${expectedCount} finished exports for schedule ${scheduledReportId}, found ${hits.length}`
+        );
+      }
+      return hits;
+    });
+  };
+
   const deleteReportSchedules = async (
     ids: string[],
     username = 'elastic',
@@ -626,6 +653,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     disableReportSchedules,
     enableReportSchedules,
     runScheduledReport,
+    waitForScheduledReportRuns,
     deleteReportSchedules,
     runTelemetryTask,
     updateScheduledReport,

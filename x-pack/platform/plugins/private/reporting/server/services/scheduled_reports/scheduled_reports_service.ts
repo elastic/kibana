@@ -18,7 +18,7 @@ import type {
   SavedObjectsBulkUpdateResponse,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { isSavedObjectErrorResult } from '@kbn/core/server';
+import { isSavedObjectErrorResult, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY } from '@kbn/reporting-server';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
@@ -300,77 +300,67 @@ export class ScheduledReportsService {
    * Disabled schedules are rejected because Task Manager will not claim a disabled task.
    */
   public async runNow({ user, id }: { user: ReportingUser; id: string }): Promise<{ id: string }> {
-    const { authorized } = await this._canUpdateReport({ id, user });
+    const action = ScheduledReportAuditAction.RUN;
+
+    const scheduledReport = await this.savedObjectsClient
+      .get<ScheduledReportType>(SCHEDULED_REPORT_SAVED_OBJECT_TYPE, id)
+      .catch((error) => {
+        this._auditLog({ action, id, error });
+        throw this._buildRunErrorResponse(error);
+      });
+
+    const authorized =
+      this.userCanManageReporting ||
+      isScheduledReportOwner({
+        report: scheduledReport.attributes,
+        currentUser: await this._getIdentity(user),
+      });
     if (!authorized) {
-      throw await this._buildNotFoundError({
-        user,
-        id,
-        action: ScheduledReportAuditAction.RUN,
-        operation: 'run',
-      });
+      throw await this._buildNotFoundError({ user, id, action, operation: 'run' });
     }
 
-    const scheduledReport = await this.savedObjectsClient.get<ScheduledReportType>(
-      SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
-      id
-    );
+    const { title: name, enabled } = scheduledReport.attributes;
+    const reject = (error: Error, response: IKibanaResponse): IKibanaResponse => {
+      this._auditLog({ action, id, name, error });
+      return response;
+    };
+    const rejectDisabled = (message: string): IKibanaResponse => {
+      const error = new Error(message);
+      return reject(error, this.responseFactory.badRequest({ body: error.message }));
+    };
 
-    if (!scheduledReport.attributes.enabled) {
-      const error = new Error('Scheduled report is disabled.');
-      this._auditLog({
-        action: ScheduledReportAuditAction.RUN,
-        id,
-        name: scheduledReport.attributes.title,
-        error,
-      });
-      throw this.responseFactory.badRequest({ body: error.message });
+    if (!enabled) {
+      throw rejectDisabled('Scheduled report is disabled.');
     }
 
-    let result;
-    try {
-      result = await this.taskManager.runSoon(id, { requestImmediateClaim: true });
-    } catch (error) {
-      this._auditLog({
-        action: ScheduledReportAuditAction.RUN,
-        id,
-        name: scheduledReport.attributes.title,
-        error,
-      });
+    const task = await this.taskManager.get(id).catch((error) => {
+      throw reject(error, this._buildRunErrorResponse(error));
+    });
 
-      if (error instanceof TaskAlreadyRunningError) {
-        throw this.responseFactory.customError({
-          statusCode: 409,
-          body: 'Scheduled report is already running.',
-        });
-      }
-
-      throw this.responseFactory.customError({
-        statusCode: 500,
-        body: `Error running scheduled report: ${error.message}`,
-      });
+    // The saved object and its task can disagree, for example after a partially failed bulk enable.
+    if (task.enabled === false) {
+      throw rejectDisabled(
+        'The task for this scheduled report is disabled. Disable and enable the schedule, then retry.'
+      );
     }
+
+    const result = await this.taskManager
+      .runSoon(id, { requestImmediateClaim: true })
+      .catch((error) => {
+        throw reject(error, this._buildRunErrorResponse(error));
+      });
 
     if (result.conflict) {
       const error = new Error(
         'Scheduled report could not be run because it was updated at the same time. Retry the request.'
       );
-      this._auditLog({
-        action: ScheduledReportAuditAction.RUN,
-        id,
-        name: scheduledReport.attributes.title,
+      throw reject(
         error,
-      });
-      throw this.responseFactory.customError({
-        statusCode: 409,
-        body: error.message,
-      });
+        this.responseFactory.customError({ statusCode: 409, body: error.message })
+      );
     }
 
-    this._auditLog({
-      action: ScheduledReportAuditAction.RUN,
-      id,
-      name: scheduledReport.attributes.title,
-    });
+    this._auditLog({ action, id, name });
 
     return { id };
   }
@@ -844,6 +834,24 @@ export class ScheduledReportsService {
       errors: bulkErrors,
       total: updatedScheduledReportIds.size + bulkErrors.length,
     };
+  }
+
+  private _buildRunErrorResponse(error: Error): IKibanaResponse {
+    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+      return this.responseFactory.customError({ statusCode: 404, body: 'Not found.' });
+    }
+
+    if (error instanceof TaskAlreadyRunningError) {
+      return this.responseFactory.customError({
+        statusCode: 409,
+        body: 'Scheduled report is already running.',
+      });
+    }
+
+    return this.responseFactory.customError({
+      statusCode: 500,
+      body: `Error running scheduled report: ${error.message}`,
+    });
   }
 
   private async _buildNotFoundError({

@@ -105,7 +105,11 @@ export const ReportSchedulesTable = () => {
   const { mutateAsync: bulkDisableScheduledReports } = useBulkDisable();
   const { mutateAsync: bulkDeleteScheduledReports } = useBulkDelete();
   const { mutateAsync: bulkEnableScheduledReports } = useBulkEnable();
-  const { mutate: runScheduledReportNow } = useRunScheduledReport();
+  const {
+    mutate: runScheduledReportNow,
+    isLoading: isRunningScheduledReport,
+    variables: runScheduledReportVariables,
+  } = useRunScheduledReport();
 
   const sortedList = orderBy(scheduledList?.data || [], ['created_at'], ['desc']);
 
@@ -305,6 +309,8 @@ export const ReportSchedulesTable = () => {
           }),
           'data-test-subj': (item) => `reportRunSchedule-${item.id}`,
           available: (item) => item.enabled && canManageSchedule(item),
+          enabled: (item) =>
+            !(isRunningScheduledReport && runScheduledReportVariables?.id === item.id),
           type: 'icon',
           icon: 'play',
           onClick: (item) => {

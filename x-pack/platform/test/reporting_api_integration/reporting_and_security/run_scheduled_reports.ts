@@ -6,13 +6,45 @@
  */
 
 import expect from '@kbn/expect';
+import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import type { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const reportingAPI = getService('reportingAPI');
 
+  const csvJob = (title: string): JobParamsCSV => ({
+    browserTimezone: 'UTC',
+    title,
+    objectType: 'search',
+    searchSource: {
+      version: true,
+      fields: [{ field: '*', include_unmapped: true }],
+      index: '5193f870-d861-11e9-a311-0fa548c5f953',
+    } as unknown as SerializedSearchSourceFields,
+    columns: [],
+    version: '7.13.0',
+  });
+
   describe('Run Scheduled Reports', () => {
     const scheduledReportIds: string[] = [];
+
+    // Start the schedules tomorrow so the only export a test sees is the one Run now creates.
+    const startedAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
+    const scheduleCsv = async (title: string, username: string, password: string) => {
+      const report = await reportingAPI.scheduleCsv(
+        csvJob(title),
+        username,
+        password,
+        undefined,
+        startedAt
+      );
+      expect(report.status).to.eql(200);
+      const reportId: string = report.body.job.id;
+      scheduledReportIds.push(reportId);
+      return reportId;
+    };
 
     before(async () => {
       await reportingAPI.initEcommerce();
@@ -26,52 +58,36 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should allow a reporting user to run their own scheduled report', async () => {
-      const report = await reportingAPI.schedulePdf(
+      const reportId = await scheduleCsv(
+        'test CSV run now',
         reportingAPI.REPORTING_USER_USERNAME,
-        reportingAPI.REPORTING_USER_PASSWORD,
-        {
-          browserTimezone: 'UTC',
-          title: 'test PDF run now',
-          layout: { id: 'preserve_layout' },
-          locatorParams: [{ id: 'canvas', version: '7.14.0', params: {} }],
-          objectType: 'dashboard',
-          version: '7.14.0',
-        }
+        reportingAPI.REPORTING_USER_PASSWORD
       );
-
-      expect(report.status).to.eql(200);
-      const reportId = report.body.job.id;
-      scheduledReportIds.push(reportId);
 
       const res = await reportingAPI.runScheduledReport(
         reportId,
         reportingAPI.REPORTING_USER_USERNAME,
         reportingAPI.REPORTING_USER_PASSWORD
       );
-
       expect(res).to.eql({ id: reportId });
+
+      const [finishedExport] = await reportingAPI.waitForScheduledReportRuns(reportId);
+      expect(['completed', 'completed_with_warnings']).to.contain(finishedExport._source.status);
 
       const soResult = await reportingAPI.getScheduledReports(reportId);
       expect(soResult.body._source.scheduled_report.enabled).to.eql(true);
+
+      // The recurring schedule is unchanged: the next run is still the first occurrence.
+      const task = await reportingAPI.getTask(reportId);
+      expect(new Date(task.body._source.task.runAt).getTime()).to.be.greaterThan(Date.now());
     });
 
     it('should not run a disabled schedule', async () => {
-      const report = await reportingAPI.schedulePdf(
+      const reportId = await scheduleCsv(
+        'test CSV disabled',
         reportingAPI.REPORTING_USER_USERNAME,
-        reportingAPI.REPORTING_USER_PASSWORD,
-        {
-          browserTimezone: 'UTC',
-          title: 'test PDF disabled',
-          layout: { id: 'preserve_layout' },
-          locatorParams: [{ id: 'canvas', version: '7.14.0', params: {} }],
-          objectType: 'dashboard',
-          version: '7.14.0',
-        }
+        reportingAPI.REPORTING_USER_PASSWORD
       );
-
-      expect(report.status).to.eql(200);
-      const reportId = report.body.job.id;
-      scheduledReportIds.push(reportId);
 
       await reportingAPI.disableReportSchedules(
         [reportId],
@@ -89,23 +105,23 @@ export default function ({ getService }: FtrProviderContext) {
       expect(res.message).to.eql('Scheduled report is disabled.');
     });
 
-    it('should not allow a user to run another users report without Manage Reporting', async () => {
-      const report = await reportingAPI.schedulePdf(
+    it('should return 404 for a schedule that does not exist', async () => {
+      const res = await reportingAPI.runScheduledReport(
+        'does-not-exist',
         reportingAPI.MANAGE_REPORTING_USER_USERNAME,
         reportingAPI.MANAGE_REPORTING_USER_PASSWORD,
-        {
-          browserTimezone: 'UTC',
-          title: 'test PDF not allowed',
-          layout: { id: 'preserve_layout' },
-          locatorParams: [{ id: 'canvas', version: '7.14.0', params: {} }],
-          objectType: 'visualization',
-          version: '7.14.0',
-        }
+        404
       );
 
-      expect(report.status).to.eql(200);
-      const reportId = report.body.job.id;
-      scheduledReportIds.push(reportId);
+      expect(res.message).to.eql('Not found.');
+    });
+
+    it('should not allow a user to run another users report without Manage Reporting', async () => {
+      const reportId = await scheduleCsv(
+        'test CSV not allowed',
+        reportingAPI.MANAGE_REPORTING_USER_USERNAME,
+        reportingAPI.MANAGE_REPORTING_USER_PASSWORD
+      );
 
       const res = await reportingAPI.runScheduledReport(
         reportId,
@@ -118,30 +134,20 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should allow a user with Manage Reporting to run another users report', async () => {
-      const report = await reportingAPI.schedulePdf(
+      const reportId = await scheduleCsv(
+        'test CSV managed',
         reportingAPI.REPORTING_USER_USERNAME,
-        reportingAPI.REPORTING_USER_PASSWORD,
-        {
-          browserTimezone: 'UTC',
-          title: 'test PDF managed',
-          layout: { id: 'preserve_layout' },
-          locatorParams: [{ id: 'canvas', version: '7.14.0', params: {} }],
-          objectType: 'dashboard',
-          version: '7.14.0',
-        }
+        reportingAPI.REPORTING_USER_PASSWORD
       );
-
-      expect(report.status).to.eql(200);
-      const reportId = report.body.job.id;
-      scheduledReportIds.push(reportId);
 
       const res = await reportingAPI.runScheduledReport(
         reportId,
         reportingAPI.MANAGE_REPORTING_USER_USERNAME,
         reportingAPI.MANAGE_REPORTING_USER_PASSWORD
       );
-
       expect(res).to.eql({ id: reportId });
+
+      await reportingAPI.waitForScheduledReportRuns(reportId);
     });
   });
 }

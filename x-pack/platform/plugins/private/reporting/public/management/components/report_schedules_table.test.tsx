@@ -617,6 +617,34 @@ describe('ReportSchedulesTable', () => {
       });
     });
 
+    it('disables run now for a schedule while its run request is pending', async () => {
+      mockRunScheduledReport.mockReturnValue(new Promise(() => {}));
+
+      render(
+        <IntlProvider locale="en">
+          <QueryClientProvider client={queryClient}>
+            <ReportSchedulesTable />
+          </QueryClientProvider>
+        </IntlProvider>
+      );
+
+      expect(await screen.findAllByTestId('scheduledReportRow')).toHaveLength(3);
+
+      await user.click((await screen.findAllByTestId('euiCollapsedItemActionsButton'))[0]);
+      await user.click(
+        await screen.findByTestId(`reportRunSchedule-${mockScheduledReports[0].id}`)
+      );
+
+      await user.click((await screen.findAllByTestId('euiCollapsedItemActionsButton'))[0]);
+
+      await waitFor(() => {
+        expect(
+          screen.getByTestId(`reportRunSchedule-${mockScheduledReports[0].id}`)
+        ).toBeDisabled();
+      });
+      expect(mockRunScheduledReport).toHaveBeenCalledTimes(1);
+    });
+
     it('hides run now when the schedule is disabled', async () => {
       mockGetScheduledReports.mockResolvedValue({
         page: 1,
