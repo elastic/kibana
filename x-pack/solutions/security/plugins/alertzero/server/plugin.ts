@@ -105,7 +105,7 @@ export class AlertZeroPlugin
     >
 {
   private readonly logger: Logger;
-  /** Settles once start has checked retention and the fingerprint key; Phase 3 gates the worker on it. */
+  /** Settles once start has checked execution retention, which the Library Hunt worker is gated on. */
   private huntLibraryPreflight?: Promise<HuntLibraryPreflight | undefined>;
   private readonly config: AlertZeroConfig;
   private readonly isServerless: boolean;
@@ -476,7 +476,6 @@ export class AlertZeroPlugin
     const workflowsManagementApi = this.workflowsManagementApi;
     if (workflowsManagementApi) {
       this.huntLibraryPreflight = runHuntLibraryPreflight({
-        config: this.config.huntLibrary,
         getExecutionRetention: () => workflowsManagementApi.getExecutionRetention(),
         logger: this.logger,
       }).catch((error) => {

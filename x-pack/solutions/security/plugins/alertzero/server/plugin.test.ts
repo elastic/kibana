@@ -49,7 +49,6 @@ jest.mock('./routes/register_routes', () => ({
 
 const createConfig = (overrides: Partial<AlertZeroConfig> = {}): AlertZeroConfig => ({
   enabled: false,
-  huntLibrary: { fingerprintKeyVersion: 'v1' },
   ...overrides,
 });
 
