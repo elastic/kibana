@@ -31,6 +31,8 @@ dependsOn:
   - '@kbn/streams-schema'
   - '@kbn/task-manager-plugin'
   - '@kbn/zod'
+  - '@kbn/server-route-repository-utils'
+  - '@kbn/core-spaces-common'
 tags:
   - plugin
   - prod

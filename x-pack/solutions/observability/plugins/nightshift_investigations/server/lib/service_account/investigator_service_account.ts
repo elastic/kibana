@@ -34,8 +34,10 @@ import type {
   NightshiftUnboundAutomation,
 } from '../../../common';
 import type { NightshiftInvestigationsStartDeps } from '../../types';
-import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../../common';
+import { NIGHTSHIFT_ASSISTANT_AGENT_ID, NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../../common';
+import { installAssistantAgent } from '../install_assistant_agent';
 import { installInvestigationAgent } from '../install_investigation_agent';
+import { assertNightshiftSpace } from '../assert_nightshift_space';
 import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from '../managed_workflows/constants';
 import { BOUND_WORKFLOW_IDS, type BoundWorkflowId } from './bound_workflows';
 import {
@@ -62,6 +64,8 @@ interface Deps {
   getAgentBuilder?: () => NightshiftInvestigationsStartDeps['agentBuilder'] | undefined;
   /** Where the investigation agent is available when setup has to install it. */
   getAgentAvailability: () => AgentAvailabilityConfig;
+  /** Whether the assistant agent exists in this deployment, so setup binds it too. */
+  isAssistantEnabled: () => boolean;
   /** Automations are hidden saved objects; this client can read and write them. */
   getAutomationsSoClient?: (request: KibanaRequest, spaceId: string) => SavedObjectsClientContract;
   lockManager: LockManagerService;
@@ -118,6 +122,7 @@ export const createInvestigatorServiceAccountService = ({
   spaces,
   getAgentBuilder,
   getAgentAvailability,
+  isAssistantEnabled,
   getAutomationsSoClient,
   lockManager,
   listInstalledWorkflowStates,
@@ -440,9 +445,13 @@ export const createInvestigatorServiceAccountService = ({
   };
 
   /**
-   * Pins the investigation agent to the space's agent account, so every run of it - a workflow's,
+   * Pins the Nightshift agents to the space's agent account, so every run of them - a workflow's,
    * a hook's or a user's chat - executes as that account. Core only binds for an authenticated
    * caller with `manage_security`, which `runEnable` has already checked.
+   *
+   * Both the investigator and the assistant are bound: they share the investigator's tools,
+   * connectors and sandbox, and the assistant is the one users pick in the Agent Builder UI, so
+   * leaving it unbound would run that same surface as the caller.
    *
    * The decision-tree reinforcement agent stays unbound: only `nightshift.decisionTreeReinforce`
    * runs it, through `agents.runAgent`, which runs it as that step's workflow and never consults a
@@ -459,28 +468,36 @@ export const createInvestigatorServiceAccountService = ({
       throw Boom.serverUnavailable('Agent Builder is not available; cannot bind the agent.');
     }
     const registry = await agentBuilder.agents.getRegistry({ request });
-    // The agent is installed lazily, by the onboarding and by the workflows that need it, so a
-    // space being set up for the first time may not have it yet.
-    await installInvestigationAgent({
-      agentBuilder,
-      spaceId,
-      availability: getAgentAvailability(),
-    });
-    // A just-installed agent is found by a search that may not see it until the next refresh.
-    await pRetry(async () => {
-      try {
-        await registry.setServiceAccount(NIGHTSHIFT_INVESTIGATION_AGENT_ID, agentServiceAccountId);
-      } catch (error) {
-        throw isAgentNotFoundError(error) ? error : new AbortError(error);
-      }
-    }, AGENT_VISIBILITY_RETRY_OPTIONS);
-    logger.info(
-      `Nightshift agent in space [${spaceId}] runs as service account [${agentServiceAccountId}]`
-    );
+    const availability = getAgentAvailability();
+    // The agents are installed lazily, by the onboarding and by the workflows that need them, so a
+    // space being set up for the first time may not have them yet.
+    await installInvestigationAgent({ agentBuilder, spaceId, availability });
+    if (isAssistantEnabled()) {
+      await installAssistantAgent({ agentBuilder, spaceId, availability });
+    }
+    for (const agentId of getBoundAgentIds()) {
+      // A just-installed agent is found by a search that may not see it until the next refresh.
+      await pRetry(async () => {
+        try {
+          await registry.setServiceAccount(agentId, agentServiceAccountId);
+        } catch (error) {
+          throw isAgentNotFoundError(error) ? error : new AbortError(error);
+        }
+      }, AGENT_VISIBILITY_RETRY_OPTIONS);
+      logger.info(
+        `Nightshift agent [${agentId}] in space [${spaceId}] runs as service account [${agentServiceAccountId}]`
+      );
+    }
   };
 
+  /** The agents a space binds, in install order; the assistant only exists when it is enabled. */
+  const getBoundAgentIds = (): string[] =>
+    isAssistantEnabled()
+      ? [NIGHTSHIFT_INVESTIGATION_AGENT_ID, NIGHTSHIFT_ASSISTANT_AGENT_ID]
+      : [NIGHTSHIFT_INVESTIGATION_AGENT_ID];
+
   /**
-   * Lets the investigation agent run as its callers again; an agent that is not installed is done.
+   * Lets the Nightshift agents run as their callers again; an agent that is not installed is done.
    *
    * `has` and `setServiceAccount` resolve the agent without checking that it is runnable, unlike
    * `get`: the agent reports itself unavailable while the space's entry point is disabled, and a
@@ -499,14 +516,20 @@ export const createInvestigatorServiceAccountService = ({
       throw Boom.serverUnavailable('Agent Builder is not available; cannot unbind the agent.');
     }
     const registry = await agentBuilder.agents.getRegistry({ request });
-    if (!(await registry.has(NIGHTSHIFT_INVESTIGATION_AGENT_ID))) return;
+    const installed: string[] = [];
+    for (const agentId of getBoundAgentIds()) {
+      if (await registry.has(agentId)) installed.push(agentId);
+    }
+    if (installed.length === 0) return;
     if (!core.security.serviceAccounts.isEnabled()) {
       throw Boom.badRequest(
-        'Service accounts are disabled, so the Nightshift agent cannot be unbound. Set xpack.security.serviceAccounts.enabled: true, then remove the setup.'
+        'Service accounts are disabled, so the Nightshift agents cannot be unbound. Set xpack.security.serviceAccounts.enabled: true, then remove the setup.'
       );
     }
-    await registry.setServiceAccount(NIGHTSHIFT_INVESTIGATION_AGENT_ID, null);
-    logger.info(`Nightshift agent in space [${spaceId}] runs as its callers again`);
+    for (const agentId of installed) {
+      await registry.setServiceAccount(agentId, null);
+      logger.info(`Nightshift agent [${agentId}] in space [${spaceId}] runs as its callers again`);
+    }
   };
 
   // The shared task retains the last enabling admin's credentials.
@@ -535,6 +558,8 @@ export const createInvestigatorServiceAccountService = ({
         'Service accounts are disabled. Set xpack.security.serviceAccounts.enabled: true.'
       );
     }
+    // Nightshift runs in the default space only, so no other space can be set up.
+    assertNightshiftSpace(spaceId);
     if (!(await canManageSecurity(request))) {
       throw Boom.forbidden(
         'Setting up the Nightshift service accounts requires the manage_security cluster privilege.'

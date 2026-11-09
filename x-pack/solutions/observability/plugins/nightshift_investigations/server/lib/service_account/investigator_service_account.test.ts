@@ -20,7 +20,8 @@ import { getBoundInvestigationWorkflowId } from './constants';
 import { createInvestigatorServiceAccountService } from './investigator_service_account';
 
 const request = {} as KibanaRequest;
-const SPACE_ID = 'obs';
+// Nightshift only sets up the default space; every other space is refused.
+const SPACE_ID = 'default';
 // Serverless (UIAM) assigns opaque ids; nothing may derive them from the account names.
 const AGENT_ACCOUNT = 'uiam-sa-7f3c2a';
 const AUTOMATIONS_ACCOUNT = 'uiam-sa-91be04';
@@ -40,6 +41,7 @@ const setup = ({
   enabled = true,
   installError,
   agentRunAs = AGENT_ACCOUNT,
+  assistantEnabled = false,
   automations,
 }: {
   serviceAccountsEnabled?: boolean;
@@ -51,6 +53,8 @@ const setup = ({
   installError?: Error;
   /** The account the installed investigation agent runs as; null for an unbound agent. */
   agentRunAs?: string | null;
+  /** Whether the deployment has the assistant agent, which setup binds alongside the investigator. */
+  assistantEnabled?: boolean;
   /** Automation saved objects in the space; omit to run without automations. */
   automations?: Array<{ id: string; attributes: Record<string, unknown> }>;
 } = {}) => {
@@ -155,6 +159,7 @@ const setup = ({
     spaces,
     getAgentBuilder: () => agentBuilder,
     getAgentAvailability: () => AVAILABILITY,
+    isAssistantEnabled: () => assistantEnabled,
     getAutomationsSoClient: automations ? () => automationsSoClient as never : undefined,
     lockManager,
     listInstalledWorkflowStates,
@@ -228,6 +233,16 @@ describe('createInvestigatorServiceAccountService', () => {
     expect(status.boundWorkflows.every(({ bound }) => bound)).toBe(true);
   });
 
+  it('refuses to set up a space other than the default one', async () => {
+    const { service, managedWorkflows, setServiceAccount } = setup();
+
+    await expect(service.enable(request, 'marketing', IDS)).rejects.toThrow(
+      /only available in the "default" space/
+    );
+    expect(setServiceAccount).not.toHaveBeenCalled();
+    expect(managedWorkflows.install).not.toHaveBeenCalled();
+  });
+
   it('installs the entry point last, so a failed setup leaves the space reading as not set up', () => {
     expect(BOUND_WORKFLOW_IDS[BOUND_WORKFLOW_IDS.length - 1]).toBe(
       NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID
@@ -244,13 +259,26 @@ describe('createInvestigatorServiceAccountService', () => {
     ]);
   });
 
-  it('pins only the investigation agent to the space agent account', async () => {
+  it('pins only the investigation agent to the space agent account when the assistant is off', async () => {
     const { service, setServiceAccount } = setup();
+
+    // The reinforcement agent runs as the agent optimize workflow that starts it, so it stays unbound.
+    await service.enable(request, SPACE_ID, IDS);
+
+    expect(setServiceAccount.mock.calls).toEqual([['nightshift.investigation', AGENT_ACCOUNT]]);
+  });
+
+  // The assistant is the agent users pick in the UI and it runs the investigator's tools,
+  // connectors and sandbox, so an unbound one would run that surface as the caller.
+  it('pins the assistant agent too when it is enabled', async () => {
+    const { service, setServiceAccount } = setup({ assistantEnabled: true });
 
     await service.enable(request, SPACE_ID, IDS);
 
-    // The reinforcement agent runs as the agent optimize workflow that starts it, so it stays unbound.
-    expect(setServiceAccount.mock.calls).toEqual([['nightshift.investigation', AGENT_ACCOUNT]]);
+    expect(setServiceAccount.mock.calls).toEqual([
+      ['nightshift.investigation', AGENT_ACCOUNT],
+      ['nightshift.assistant', AGENT_ACCOUNT],
+    ]);
   });
 
   it('installs the investigation agent in the space before pinning it', async () => {
@@ -262,6 +290,20 @@ describe('createInvestigatorServiceAccountService', () => {
       [SPACE_ID, 'nightshift.investigation'],
     ]);
     expect(ensureAgent.mock.invocationCallOrder[0]).toBeLessThan(
+      setServiceAccount.mock.invocationCallOrder[0]
+    );
+  });
+
+  it('installs the assistant agent in the space before pinning it', async () => {
+    const { service, ensureAgent, setServiceAccount } = setup({ assistantEnabled: true });
+
+    await service.enable(request, SPACE_ID, IDS);
+
+    expect(ensureAgent.mock.calls.map(([{ spaceId, agent }]) => [spaceId, agent.id])).toEqual([
+      [SPACE_ID, 'nightshift.investigation'],
+      [SPACE_ID, 'nightshift.assistant'],
+    ]);
+    expect(ensureAgent.mock.invocationCallOrder[1]).toBeLessThan(
       setServiceAccount.mock.invocationCallOrder[0]
     );
   });
@@ -394,6 +436,17 @@ describe('createInvestigatorServiceAccountService', () => {
     expect(setServiceAccount.mock.invocationCallOrder[0]).toBeLessThan(
       managedWorkflows.uninstall.mock.invocationCallOrder[0]
     );
+  });
+
+  it('unbinds the assistant agent too on disable when it is enabled', async () => {
+    const { service, setServiceAccount } = setup({ assistantEnabled: true });
+
+    await service.disable(request, SPACE_ID);
+
+    expect(setServiceAccount.mock.calls).toEqual([
+      ['nightshift.investigation', null],
+      ['nightshift.assistant', null],
+    ]);
   });
 
   it('keeps the workflows when unbinding the agent fails on disable', async () => {

@@ -78,6 +78,7 @@
     "@kbn/inference-tracing",
     "@kbn/lock-manager",
     "@kbn/cloud-plugin",
-    "@kbn/connector-specs"
+    "@kbn/connector-specs",
+    "@kbn/server-route-repository-utils"
   ]
 }

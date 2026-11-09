@@ -29,7 +29,7 @@ import { buildReinforcementPrompt } from './turn';
 /**
  * Registers the dedicated decision-tree AI index with the Context Engine so it is a managed,
  * discoverable index. The backing Elasticsearch index is auto-created from the `ai-index-idx`
- * template on first write, the same path Cortex uses.
+ * template on first write, the same path Wiki uses.
  */
 export const registerDecisionTreeAiIndex = (
   contextEngine: ContextEnginePluginSetup | undefined,
