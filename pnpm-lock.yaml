@@ -998,6 +998,9 @@ importers:
       '@kbn/content-packs-schema':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-content-packs-schema
+      '@kbn/content-sanitization':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/kbn-content-sanitization
       '@kbn/context-switcher-components':
         specifier: workspace:*
         version: link:src/platform/packages/shared/context-switcher-components
@@ -8767,6 +8770,8 @@ importers:
   x-pack/platform/packages/shared/kbn-classic-stream-flyout: {}
 
   x-pack/platform/packages/shared/kbn-content-packs-schema: {}
+
+  x-pack/platform/packages/shared/kbn-content-sanitization: {}
 
   x-pack/platform/packages/shared/kbn-data-forge: {}
 

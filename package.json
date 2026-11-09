@@ -356,6 +356,7 @@
     "@kbn/content-management-user-profiles": "workspace:*",
     "@kbn/content-management-utils": "workspace:*",
     "@kbn/content-packs-schema": "workspace:*",
+    "@kbn/content-sanitization": "workspace:*",
     "@kbn/context-switcher-components": "workspace:*",
     "@kbn/control-group-renderer": "workspace:*",
     "@kbn/controls-constants": "workspace:*",
