@@ -1027,14 +1027,16 @@ describe('Agent actions', () => {
       } as any);
 
       await expect(
-        getAgentsWithoutActionResults(esClientMock, 'action1', ['agent1', 'agent2'])
+        getAgentsWithoutActionResults(esClientMock, ['action1'], ['agent1', 'agent2'])
       ).resolves.toEqual(['agent1']);
     });
 
     it('does not search without an agent to look for', async () => {
       const esClientMock = elasticsearchServiceMock.createInternalClient();
 
-      await expect(getAgentsWithoutActionResults(esClientMock, 'action1', [])).resolves.toEqual([]);
+      await expect(getAgentsWithoutActionResults(esClientMock, ['action1'], [])).resolves.toEqual(
+        []
+      );
       expect(esClientMock.search).not.toHaveBeenCalled();
     });
 
@@ -1043,7 +1045,7 @@ describe('Agent actions', () => {
       esClientMock.search.mockRejectedValue({ statusCode: 404 });
 
       await expect(
-        getAgentsWithoutActionResults(esClientMock, 'action1', ['agent1'])
+        getAgentsWithoutActionResults(esClientMock, ['action1'], ['agent1'])
       ).resolves.toEqual(['agent1']);
     });
 
@@ -1052,7 +1054,7 @@ describe('Agent actions', () => {
       esClientMock.search.mockRejectedValue(new Error('Request timed out'));
 
       await expect(
-        getAgentsWithoutActionResults(esClientMock, 'action1', ['agent1'])
+        getAgentsWithoutActionResults(esClientMock, ['action1'], ['agent1'])
       ).rejects.toThrow('Request timed out');
     });
   });

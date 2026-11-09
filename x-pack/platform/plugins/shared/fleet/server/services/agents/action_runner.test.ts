@@ -16,6 +16,7 @@ import {
   ACTION_SORT_FIELD,
   ACTION_SORT_ORDER,
   ActionRunner,
+  MAX_ACTIONED_AGENT_IDS,
   PIT_KEEP_ALIVE,
 } from './action_runner';
 import { BulkActionTaskType } from './bulk_action_types';
@@ -71,6 +72,8 @@ class TestActionRunner extends ActionRunner {
   public taskType: string = TASK_TYPE;
   /** Action ids a batch writes its documents under, as rollback's version groups do. */
   public childActionIdsPerBatch?: string[];
+  /** Makes the runner read error results too, as rollback's does. */
+  public agentsHandledOutsideActionDocuments = false;
 
   protected getActionType() {
     return 'test-action';
@@ -82,6 +85,10 @@ class TestActionRunner extends ActionRunner {
 
   protected isBatchWithoutActionableAgents(): boolean {
     return this.batchWithoutActionableAgents;
+  }
+
+  protected hasAgentsHandledOutsideActionDocuments(): boolean {
+    return this.agentsHandledOutsideActionDocuments;
   }
 
   protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
@@ -721,6 +728,77 @@ describe('ActionRunner', () => {
       );
     });
 
+    it('stops growing and reading the dedupe set once it reaches its ceiling', async () => {
+      mockAgentPages(3, 2);
+      // the set is one entry per agent actioned, so it is bounded by the size of the action rather
+      // than by anything this code controls
+      mockedGetAgentIdsFromActions.mockResolvedValue(
+        new Set(Array.from({ length: MAX_ACTIONED_AGENT_IDS }, (_, i) => `other-${i}`))
+      );
+
+      await createRunner({ total: 6 }).runActionAsyncWithRetry();
+
+      expect(mockedGetAgentIdsFromActions).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(`actioned more than ${MAX_ACTIONED_AGENT_IDS} agents`)
+      );
+    });
+
+    it('persists a child action id as soon as it is recorded, not at the end of the batch', async () => {
+      mockAgentPages(1, 2);
+      const runner = createRunner({ total: 2 });
+      runner.childActionIdsPerBatch = ['child-1'];
+
+      await runner.runActionAsyncWithRetry();
+
+      // a runner that dies mid-batch would otherwise take them with it, and they are what a resume
+      // deduplicates against
+      expect(resolver.updateCheckTaskState).toHaveBeenCalledWith(CHECK_TASK_ID, {
+        childActionIds: ['child-1'],
+      });
+    });
+
+    it('warns once per genuinely new child action id past the ceiling, not once per batch', async () => {
+      mockAgentPages(3, 2);
+      const runner = createRunner({ total: 6 });
+      runner.childActionIdsPerBatch = ['child-1'];
+
+      await runner.runActionAsyncWithRetry();
+
+      // the same id recorded by every batch must not log the ceiling warning each time
+      expect(logger.warn).not.toHaveBeenCalledWith(expect.stringContaining('child actions'));
+    });
+
+    it('treats an agent with an error result as handled when the action type needs it', async () => {
+      mockAgentPages(1, 2);
+      // rollback rejects an agent by writing it an error result under a child action id while
+      // leaving it out of that action's `agents`, so the documents alone show it as untouched
+      mockedGetAgentIdsFromActions.mockResolvedValue(new Set());
+      mockedGetAgentsWithoutActionResults.mockResolvedValue(['agent-1']);
+
+      const runner = createRunner({ total: 2 });
+      runner.agentsHandledOutsideActionDocuments = true;
+      runner.childActionIdsPerBatch = ['child-1'];
+
+      await runner.runActionAsyncWithRetry();
+
+      expect(runner.processedBatches).toEqual([['agent-1']]);
+      expect(mockedGetAgentsWithoutActionResults).toHaveBeenCalledWith(
+        esClient,
+        [ACTION_ID],
+        ['agent-0', 'agent-1']
+      );
+    });
+
+    it('does not read error results for an action type that names every agent it handles', async () => {
+      mockAgentPages(1, 2);
+      mockedGetAgentIdsFromActions.mockResolvedValue(new Set(['agent-0']));
+
+      await createRunner({ total: 2 }).runActionAsyncWithRetry();
+
+      expect(mockedGetAgentsWithoutActionResults).not.toHaveBeenCalled();
+    });
+
     it('does not dedupe update tags, whose retries re-action agents whose write did not land', async () => {
       mockAgentPages(1, 2);
       mockedGetAgentIdsFromActions.mockResolvedValue(new Set(['agent-0', 'agent-1']));
@@ -853,6 +931,14 @@ describe('ActionRunner', () => {
         expect.anything(),
         TASK_TYPE,
         RETRY_TASK_ID
+      );
+      // the retry names the reason the batch has to run again, not the failure to write results
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('failed: No agents to reassign')
+      );
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Could not write the missing error results'),
+        expect.anything()
       );
     });
 

@@ -727,6 +727,56 @@ describe('createRetryTask', () => {
       );
     });
 
+    it('does not hand back the claimed state after a failed run, which would undo a checkpoint', async () => {
+      // Task Manager replaces the stored state with whatever the run returns, so the state as of
+      // the claim would roll the cursor, point in time, count and child action ids back to where
+      // they stood when the check task woke up
+      esClient.search.mockRejectedValue(new EsErrors.TimeoutError('Request timed out'));
+      resolver.getCheckTaskState.mockResolvedValue({
+        searchAfter: ['newerAgent'],
+        childActionIds: ['child-1'],
+        nbAgentsProcessed: 30000,
+        runCount: 4,
+      });
+
+      const result = await createRetryTask(
+        createTaskInstance({ state: { searchAfter: ['olderAgent'], runCount: 4 } }),
+        getDeps,
+        jest.fn()
+      ).run();
+
+      expect(result).toEqual({
+        state: {
+          searchAfter: ['newerAgent'],
+          childActionIds: ['child-1'],
+          nbAgentsProcessed: 30000,
+          runCount: 5,
+        },
+        schedule: CHECK_TASK_SCHEDULE,
+      });
+    });
+
+    it('falls back to the claimed state when the state cannot be read after a failed run', async () => {
+      esClient.search.mockRejectedValue(new EsErrors.TimeoutError('Request timed out'));
+      resolver.getCheckTaskState.mockRejectedValue(new EsErrors.TimeoutError('Request timed out'));
+
+      const result = await createRetryTask(
+        createTaskInstance({ state: { searchAfter: ['olderAgent'], runCount: 4 } }),
+        getDeps,
+        jest.fn()
+      ).run();
+
+      // the run still has to count towards the ceiling, and Task Manager offers no way to leave
+      // the state field alone
+      expect(result).toEqual({
+        state: { searchAfter: ['olderAgent'], runCount: 5 },
+        schedule: CHECK_TASK_SCHEDULE,
+      });
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('falling back to the one it claimed')
+      );
+    });
+
     it('reads the check task document once per run', async () => {
       resolver.getCheckTaskState.mockResolvedValue({
         searchAfter: ['lastAgent'],

@@ -426,6 +426,9 @@ const runCheckTask = async (
   }
 
   if (!resolver) {
+    // The claimed state is the only one available here — reading the current one needs the resolver
+    // that is missing — so this run can roll a checkpoint back. It only happens when the plugin's
+    // context is not started, in which case no runner is checkpointing either.
     logger.warn(`Cannot resume bulk action ${actionId}, the bulk actions resolver is unavailable`);
     return withWatcherFields({});
   }
@@ -567,6 +570,37 @@ const runCheckTask = async (
   );
 };
 
+/**
+ * The state a failed check task run hands back.
+ *
+ * Task Manager replaces the stored state with whatever `run()` returns — on the error path too,
+ * where it reuses the state as of the claim — so returning the state this run claimed would roll
+ * the cursor, the point in time, the count and the child action ids back to where they stood when
+ * the check task woke up, discarding every checkpoint the runner has written since. A run that
+ * failed has by definition observed nothing worth recording, so it reads the current state back and
+ * adds only its own `runCount` to it.
+ *
+ * When even that read fails — likely, when the read is what failed in the first place — the claimed
+ * state is all there is, and Task Manager offers no way to leave the field alone.
+ */
+const getStateForFailedCheckTaskRun = async (
+  taskInstance: ConcreteTaskInstance
+): Promise<BulkActionCheckTaskState> => {
+  const claimedState: BulkActionCheckTaskState = taskInstance.state ?? {};
+  let currentState = claimedState;
+  try {
+    const resolver = await appContextService.getBulkActionsResolver();
+    currentState = (await resolver?.getCheckTaskState(taskInstance.id)) ?? claimedState;
+  } catch (error) {
+    appContextService
+      .getLogger()
+      .warn(
+        `Could not read the state of check task ${taskInstance.id} after a failed run, falling back to the one it claimed: ${error.message}`
+      );
+  }
+  return { ...currentState, runCount: (currentState.runCount ?? 0) + 1 };
+};
+
 export function createRetryTask(
   taskInstance: ConcreteTaskInstance,
   getDeps: () => Promise<{ esClient: ElasticsearchClient; soClient: SavedObjectsClientContract }>,
@@ -587,11 +621,10 @@ export function createRetryTask(
           logger.error(`Bulk action check task ${taskInstance.id} failed: ${error.message}`, {
             error,
           });
-          const state: BulkActionCheckTaskState = taskInstance.state ?? {};
           return {
             // The run still counts towards MAX_CHECK_TASK_RUNS, or a check task whose every run
             // throws would never reach the ceiling that is meant to be unconditional.
-            state: { ...state, runCount: (state.runCount ?? 0) + 1 },
+            state: await getStateForFailedCheckTaskRun(taskInstance),
             schedule: { interval: `${CHECK_TASK_INTERVAL_MINUTES}m` },
           };
         }

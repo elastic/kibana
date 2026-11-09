@@ -41,20 +41,33 @@ export class RollbackActionRunner extends ActionRunner {
         // actionId is for tracking the bulk operation task, not individual rollback actions
         // Don't pass total - each action should use the count for its version group, not the total across all batches
         spaceIds: this.actionParams?.spaceId ? [this.actionParams.spaceId] : undefined,
+        // Rollback writes its documents under one generated action id per rollback version rather
+        // than under the action's own id, so per-agent deduplication has nothing to read unless
+        // those ids are recorded. They are recorded as each document lands rather than from the
+        // returned list: the writes that follow one can fail, and the batch that failed partway is
+        // precisely the one a retry replays — without its id the replay re-sends a rollback to
+        // every agent the interrupted batch already actioned.
+        onActionCreated: (actionId: string) => {
+          this.allActionIds.push(actionId);
+          this.recordChildActionIds([actionId]);
+        },
       },
       this.actionParams?.spaceId ? [this.actionParams.spaceId] : undefined
     );
-    // Track all action IDs created across batches
-    this.allActionIds.push(...result.actionIds);
-    // Rollback writes its documents under one generated action id per rollback version rather than
-    // under the action's own id, so per-agent deduplication has nothing to read unless those ids
-    // are checkpointed. Without them a restart re-sends a rollback to every agent already handled.
-    this.recordChildActionIds(result.actionIds);
     // Return the first actionId for compatibility with ActionRunner interface
     // If no actions were created, return empty string
     return {
       actionId: result.actionIds.length > 0 ? result.actionIds[0] : '',
     };
+  }
+
+  /**
+   * Rollback rejects agents — hosted, agentless, expired or missing a rollback — by writing them
+   * an error result under a child action id while leaving them out of that action's `agents`, so
+   * the action documents alone do not show that they were dealt with.
+   */
+  protected hasAgentsHandledOutsideActionDocuments(): boolean {
+    return true;
   }
 
   async processAgentsInBatches(): Promise<{ actionId: string }> {
@@ -89,6 +102,8 @@ export async function rollbackBatch(
     actionId?: string;
     total?: number;
     spaceIds?: string[];
+    /** Called with each action id as its document is created, before the writes that follow it. */
+    onActionCreated?: (actionId: string) => void;
   },
   spaceIds?: string[]
 ): Promise<{ actionIds: string[] }> {
@@ -182,6 +197,7 @@ export async function rollbackBatch(
     });
 
     actionIds.push(actionId);
+    options.onActionCreated?.(actionId);
     errorsByActionId[actionId] = {};
 
     // Assign version-specific errors (expired rollbacks, hosted agents) to this action
@@ -231,6 +247,7 @@ export async function rollbackBatch(
     });
 
     actionIds.push(actionId);
+    options.onActionCreated?.(actionId);
     errorsByActionId[actionId] = { ...versionErrors };
   }
 
@@ -261,6 +278,7 @@ export async function rollbackBatch(
         namespaces,
       });
       actionIds.push(errorOnlyActionId);
+      options.onActionCreated?.(errorOnlyActionId);
       errorsByActionId[errorOnlyActionId] = preActionErrors;
     }
   }

@@ -215,7 +215,7 @@ export async function updateActionsForForceUnenroll(
       // filtering out agents with action results
       const agentsToUpdate = await getAgentsWithoutActionResults(
         esClient,
-        action.action_id!,
+        [action.action_id!],
         commonAgents
       );
       if (agentsToUpdate.length > 0) {

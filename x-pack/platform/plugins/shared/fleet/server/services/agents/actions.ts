@@ -357,8 +357,17 @@ export async function getAgentActions(esClient: ElasticsearchClient, actionId: s
  */
 const ACTION_DOCS_PAGE_SIZE = 1000;
 
-/** Keep alive for the point in time {@link getAgentIdsFromActions} pages with, when it needs one. */
-const ACTION_DOCS_PIT_KEEP_ALIVE = '1m';
+/**
+ * Keep alive for the point in time {@link getAgentIdsFromActions} pages with, when it needs one.
+ *
+ * Deliberately shorter than the runner's `PIT_KEEP_ALIVE`, and for a different reason: the runner
+ * actions a whole batch of agents between two of its searches, so its point in time has to survive
+ * work of unbounded duration, which is exactly what the 1m default broke. Nothing happens between
+ * two pages of this read but collecting ids into a set, so what it has to survive is one search
+ * round trip. If it does expire the next page 404s, which fails the batch and is retried — it
+ * cannot hang the action the way the runner's expiring did.
+ */
+const ACTION_DOCS_PIT_KEEP_ALIVE = '2m';
 
 const collectAgentIds = (
   hits: Array<SearchHit<Pick<FleetServerAgentAction, 'agents'>>>,
@@ -424,6 +433,11 @@ export async function getAgentIdsFromActions(
   // A full page may have more behind it. Page through it all again under a point in time, which is
   // what makes `search_after` a complete read: it pins the index and gives the non-unique
   // `@timestamp` sort a `_shard_doc` tiebreaker, so no document is skipped at a page boundary.
+  //
+  // Nothing here is wrapped in `retryTransientEsErrors`, unlike `crud.ts`'s `openPointInTime`: a
+  // caller of this is deduplicating a batch it is about to action, and failing that batch hands the
+  // retry to the runner's own retry loop, which is a better place to wait than inside a read that
+  // the batch is blocked on.
   agentIds.clear();
   let pitId = (
     await esClient.openPointInTime({
@@ -459,15 +473,16 @@ export async function getAgentIdsFromActions(
 }
 
 /**
- * Which of the given agents have no result yet for an action, so that results are not written
- * twice for an agent that already has one.
+ * Which of the given agents have no result yet under any of the given action ids, so that results
+ * are not written twice for an agent that already has one, and so that an agent an action has
+ * already dealt with is recognised even when no action document names it.
  */
 export async function getAgentsWithoutActionResults(
   esClient: ElasticsearchClient,
-  actionId: string,
+  actionIds: string[],
   agentIds: string[]
 ): Promise<string[]> {
-  if (agentIds.length === 0) {
+  if (agentIds.length === 0 || actionIds.length === 0) {
     return [];
   }
   try {
@@ -475,7 +490,7 @@ export async function getAgentsWithoutActionResults(
       index: AGENT_ACTIONS_RESULTS_INDEX,
       query: {
         bool: {
-          must: [{ term: { action_id: actionId } }, { terms: { agent_id: agentIds } }],
+          must: [{ terms: { action_id: actionIds } }, { terms: { agent_id: agentIds } }],
         },
       },
       _source: ['agent_id'],

@@ -170,10 +170,11 @@ describe('ReassignActionRunner', () => {
 
     await createRunner().runActionAsyncWithRetry();
 
-    expect(mockedGetAgentsWithoutActionResults).toHaveBeenCalledWith(esClient, ACTION_ID, [
-      'agent-0',
-      'agent-1',
-    ]);
+    expect(mockedGetAgentsWithoutActionResults).toHaveBeenCalledWith(
+      esClient,
+      [ACTION_ID],
+      ['agent-0', 'agent-1']
+    );
     expect(createErrorActionResults).toHaveBeenCalledWith(
       esClient,
       ACTION_ID,

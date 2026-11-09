@@ -81,6 +81,16 @@ const DEDUPE_REFRESH_OVERLAP_MINUTES = 1;
  */
 const MAX_CHILD_ACTION_IDS = 1000;
 
+/**
+ * Ceiling on the agent ids held for deduplication. The set is one entry per agent this action has
+ * actioned, so it is bounded by the action's size rather than by anything this code controls: at
+ * the 100k agents the issue measures it is a few megabytes, at ten times that it is tens of
+ * megabytes of heap on one node for the lifetime of the run. Past the ceiling the set stops
+ * growing and stops being read, so the batches it covers are still deduplicated and the rest are
+ * re-actioned on a replay exactly as they were before any deduplication existed.
+ */
+export const MAX_ACTIONED_AGENT_IDS = 200_000;
+
 export interface ActionParams {
   kuery: string;
   showInactive?: boolean;
@@ -137,7 +147,17 @@ export abstract class ActionRunner {
    * back and deduplicate against the agents they cover.
    */
   protected recordChildActionIds(actionIds: string[]) {
+    let recordedNewId = false;
     for (const actionId of actionIds) {
+      if (
+        !actionId ||
+        actionId === this.actionParams.actionId ||
+        this.childActionIds.includes(actionId)
+      ) {
+        continue;
+      }
+      // Checked only for an id that is actually new, or an action sitting at the ceiling would log
+      // this again for every batch, including for ids it has already recorded.
       if (this.childActionIds.length >= MAX_CHILD_ACTION_IDS) {
         appContextService
           .getLogger()
@@ -146,13 +166,16 @@ export abstract class ActionRunner {
           );
         return;
       }
-      if (
-        actionId &&
-        actionId !== this.actionParams.actionId &&
-        !this.childActionIds.includes(actionId)
-      ) {
-        this.childActionIds.push(actionId);
-      }
+      this.childActionIds.push(actionId);
+      recordedNewId = true;
+    }
+
+    // Persisted as soon as it is recorded rather than waiting for the end of the batch: these ids
+    // are what a resume deduplicates against, and a runner that dies mid-batch would otherwise take
+    // them with it. Writing only this field is safe mid-batch for the same reason the heartbeat is
+    // — the list only ever grows, while the cursor and the count are valid between batches only.
+    if (recordedNewId) {
+      void this.writeCheckTaskState({ childActionIds: [...this.childActionIds] });
     }
   }
 
@@ -460,6 +483,10 @@ export abstract class ActionRunner {
    * and retrying. A missing `.fleet-actions` is not a failure and comes back as an empty set.
    */
   private async getActionedAgentIds(): Promise<Set<string>> {
+    if (this.actionedAgentIds && this.actionedAgentIds.size >= MAX_ACTIONED_AGENT_IDS) {
+      return this.actionedAgentIds;
+    }
+
     const readStartedAt = moment()
       .subtract(DEDUPE_REFRESH_OVERLAP_MINUTES, 'm')
       .toDate()
@@ -476,7 +503,54 @@ export abstract class ActionRunner {
     }
     this.actionedAgentIdsReadAt = readStartedAt;
 
+    if (this.actionedAgentIds.size >= MAX_ACTIONED_AGENT_IDS) {
+      appContextService
+        .getLogger()
+        .warn(
+          `Action ${this.actionParams.actionId} has actioned more than ${MAX_ACTIONED_AGENT_IDS} agents, the rest will not be deduplicated if it restarts`
+        );
+    }
+
     return this.actionedAgentIds;
+  }
+
+  /**
+   * Whether this action can finish with an agent that none of its action documents name.
+   *
+   * False for every action type but rollback, which rejects an agent — hosted, agentless, expired
+   * or without a rollback to make — by writing it an error result under a child action id while
+   * leaving it out of that action's `agents`. Reading the documents alone would therefore show
+   * such an agent as untouched, and a replay would reject it a second time, duplicating its error
+   * result and recreating the action that carries it.
+   */
+  protected hasAgentsHandledOutsideActionDocuments(): boolean {
+    return false;
+  }
+
+  /**
+   * The agents of a batch that no earlier run of this action has already dealt with.
+   */
+  private async getUnhandledAgents(agents: Agent[]): Promise<Agent[]> {
+    const actionedAgentIds = await this.getActionedAgentIds();
+    const remainingAgents = actionedAgentIds.size
+      ? agents.filter(({ id }) => !actionedAgentIds.has(id))
+      : agents;
+
+    if (!this.hasAgentsHandledOutsideActionDocuments() || remainingAgents.length === 0) {
+      return remainingAgents;
+    }
+
+    // Checked against this batch's own agents rather than read in full like the action documents
+    // are: there is one result per agent rather than one per batch, so a complete read would page
+    // through as many documents as the action has agents.
+    const unhandledAgentIds = new Set(
+      await getAgentsWithoutActionResults(
+        this.esClient,
+        [this.actionParams.actionId!, ...this.childActionIds],
+        remainingAgents.map(({ id }) => id)
+      )
+    );
+    return remainingAgents.filter(({ id }) => unhandledAgentIds.has(id));
   }
 
   /**
@@ -514,7 +588,7 @@ export abstract class ActionRunner {
     const actionId = this.actionParams.actionId!;
     const agentIdsWithoutResults = await getAgentsWithoutActionResults(
       this.esClient,
-      actionId,
+      [actionId],
       agents.map(({ id }) => id)
     );
     if (agentIdsWithoutResults.length === 0) {
@@ -566,12 +640,7 @@ export abstract class ActionRunner {
       return await this.processAgents(agents);
     }
 
-    const actionedAgentIds = await this.getActionedAgentIds();
-    if (actionedAgentIds.size === 0) {
-      return await this.processAgents(agents);
-    }
-
-    const remainingAgents = agents.filter(({ id }) => !actionedAgentIds.has(id));
+    const remainingAgents = await this.getUnhandledAgents(agents);
     if (remainingAgents.length === 0) {
       appContextService
         .getLogger()
@@ -605,8 +674,20 @@ export abstract class ActionRunner {
         throw error;
       }
       // Recover the results the earlier run may not have written for them before moving past the
-      // batch, or the action can end with results outstanding and never complete.
-      await this.writeMissingErrorActionResults(remainingAgents, error);
+      // batch, or the action can end with results outstanding and never complete. A failure here
+      // still fails the batch, but the error it raised is logged rather than thrown: the batch has
+      // to be retried for the reason `processAgents` gave, and that is what the retry should name.
+      try {
+        await this.writeMissingErrorActionResults(remainingAgents, error);
+      } catch (resultsError) {
+        appContextService
+          .getLogger()
+          .error(
+            `Could not write the missing error results of a replayed batch of action ${this.actionParams.actionId}: ${resultsError.message}`,
+            { error: resultsError }
+          );
+        throw error;
+      }
       appContextService
         .getLogger()
         .debug(
