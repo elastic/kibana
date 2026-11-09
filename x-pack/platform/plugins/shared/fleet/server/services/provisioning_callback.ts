@@ -111,6 +111,20 @@ const toItem = (
 const isClaimStale = (updatedAt: string | undefined): boolean =>
   !updatedAt || Date.now() - new Date(updatedAt).getTime() > PROVISIONING_CALLBACK_CLAIM_STALE_MS;
 
+/**
+ * A live record holding a report nobody is applying: a claim gone stale, or a report released
+ * back to pending because its connector could not be made. Both keep the reported values.
+ */
+const hasUnappliedReport = ({
+  attributes,
+  updated_at: updatedAt,
+}: SavedObject<ProvisioningCallbackSOAttributes>): boolean =>
+  (attributes.status === 'receiving' || attributes.status === 'pending') &&
+  !!attributes.role_arn &&
+  !!attributes.stack_arn &&
+  new Date(attributes.expires_at).getTime() > Date.now() &&
+  isClaimStale(updatedAt);
+
 const isSamePayload = (
   stored: ProvisioningCallbackSOAttributes,
   payload: CloudConnectorCallbackReceivedValues
@@ -201,38 +215,43 @@ class ProvisioningCallbackService {
     }
   }
 
-  /**
-   * The record as stored. A report whose claim went stale is applied on the way, from the values
-   * the claim stored: the browser polls this while it waits, so a Kibana that died mid-report
-   * does not leave the record stuck.
-   */
+  /** The record as stored, with the token hash stripped. Never writes. */
   public async get(
     soClient: SavedObjectsClientContract,
     id: string
   ): Promise<CloudConnectorCallback | undefined> {
     const so = await this.getSavedObject(soClient, id);
-    if (!so) {
-      return undefined;
-    }
-    if (so.attributes.status === 'receiving' && isClaimStale(so.updated_at)) {
-      return this.recover(soClient, so);
-    }
-    return toItem(so.id, so.attributes);
+    return so ? toItem(so.id, so.attributes) : undefined;
   }
 
   /**
-   * Takes over a stale claim and applies the report it stored. When the connector cannot be made
-   * the claim is released, as a failed report would be, and the record is handed back pending.
+   * What the browser polls while it waits for the stack: the record, limited to the space the
+   * launch happened in. A report the record holds but nobody is applying is applied on the way,
+   * so a Kibana that died mid-report, or a creation that failed once, does not strand it. The
+   * caller must hold the privileges that creating the identity needs, since this can create it.
+   */
+  public async poll(
+    soClient: SavedObjectsClientContract,
+    id: string,
+    spaceId: string
+  ): Promise<CloudConnectorCallback | undefined> {
+    const so = await this.getSavedObject(soClient, id);
+    if (!so || so.attributes.space_id !== spaceId) {
+      return undefined;
+    }
+    return hasUnappliedReport(so) ? this.recover(soClient, so) : toItem(so.id, so.attributes);
+  }
+
+  /**
+   * Takes over the report a record holds and applies it. When the connector cannot be made the
+   * claim is released, as a failed report would be, and the record is handed back pending with
+   * its values kept, so a later poll tries again.
    */
   private async recover(
     soClient: SavedObjectsClientContract,
     so: SavedObject<ProvisioningCallbackSOAttributes>
   ): Promise<CloudConnectorCallback> {
-    const { role_arn: roleArn, stack_arn: stackArn } = so.attributes;
-    if (!roleArn || !stackArn) {
-      return toItem(so.id, so.attributes);
-    }
-    const payload = { role_arn: roleArn, stack_arn: stackArn };
+    const payload = { role_arn: so.attributes.role_arn!, stack_arn: so.attributes.stack_arn! };
     const taken = await this.claim(soClient, so, payload);
     if (!taken) {
       return toItem(so.id, so.attributes);

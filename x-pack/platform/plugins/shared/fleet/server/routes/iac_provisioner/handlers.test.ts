@@ -50,6 +50,7 @@ jest.mock('../../services/provisioning_callback', () => ({
   provisioningCallbackService: {
     create: jest.fn(),
     get: jest.fn(),
+    poll: jest.fn(),
     cancel: jest.fn(),
     receive: jest.fn(),
   },
@@ -674,27 +675,19 @@ describe('Provisioning callback handlers', () => {
   });
 
   describe('getProvisioningCallbackHandler', () => {
-    it('returns the item without any key material', async () => {
-      mockedService.get.mockResolvedValue(ITEM);
-      const request = httpServerMock.createKibanaRequest({ params: { callbackId: 'cb-1' } });
-
-      await getProvisioningCallbackHandler(buildCallbackContext(), request, response);
-
-      expect(mockedService.get).toHaveBeenCalledWith(soClient, 'cb-1');
-      expect(response.ok).toHaveBeenCalledWith({ body: { item: ITEM } });
-    });
-
-    it('returns 404 for a record created in another space', async () => {
-      mockedService.get.mockResolvedValue({ ...ITEM, space_id: 'marketing' });
+    it('polls the record in the request space and returns it without any key material', async () => {
+      mockedService.poll.mockResolvedValue(ITEM);
       const request = httpServerMock.createKibanaRequest({ params: { callbackId: 'cb-1' } });
 
       await getProvisioningCallbackHandler(buildCallbackContext('default'), request, response);
 
-      expect(response.notFound).toHaveBeenCalledWith({ body: { message: 'Callback not found' } });
+      // The space goes to the service, which checks it before anything the poll may apply.
+      expect(mockedService.poll).toHaveBeenCalledWith(soClient, 'cb-1', 'default');
+      expect(response.ok).toHaveBeenCalledWith({ body: { item: ITEM } });
     });
 
-    it('returns 404 for an unknown record', async () => {
-      mockedService.get.mockResolvedValue(undefined);
+    it('returns 404 for a record the poll does not hand back, such as one from another space', async () => {
+      mockedService.poll.mockResolvedValue(undefined);
       const request = httpServerMock.createKibanaRequest({ params: { callbackId: 'nope' } });
 
       await getProvisioningCallbackHandler(buildCallbackContext(), request, response);

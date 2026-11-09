@@ -290,14 +290,59 @@ describe('provisioningCallbackService', () => {
       });
     });
 
-    it('leaves a fresh claim to the request holding it', async () => {
-      soClient.get.mockResolvedValue(soWith(CLAIMED, FRESH) as any);
+    it('never writes, even for a stale claim', async () => {
+      soClient.get.mockResolvedValue(soWith(CLAIMED));
 
       const item = await provisioningCallbackService.get(soClient, 'cb-1');
 
       expect(item).toMatchObject({ status: 'receiving', ...PAYLOAD });
       expect(soClient.update).not.toHaveBeenCalled();
       expect(cloudConnectorService.create).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('poll', () => {
+    const poll = (spaceId = 'default') =>
+      provisioningCallbackService.poll(soClient, 'cb-1', spaceId);
+
+    it('returns undefined for an unknown id', async () => {
+      soClient.get.mockRejectedValue(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(
+          PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE,
+          'cb-1'
+        )
+      );
+      expect(await poll()).toBeUndefined();
+    });
+
+    it('returns undefined for a record of another space, without applying anything it holds', async () => {
+      soClient.get.mockResolvedValue(soWith(CLAIMED));
+
+      expect(await poll('marketing')).toBeUndefined();
+      expect(soClient.update).not.toHaveBeenCalled();
+      expect(cloudConnectorService.create).not.toHaveBeenCalled();
+    });
+
+    it('returns a pending record as is', async () => {
+      soClient.get.mockResolvedValue(soWith(pendingAttrs()));
+
+      expect(await poll()).toMatchObject({ status: 'pending' });
+      expect(soClient.update).not.toHaveBeenCalled();
+    });
+
+    it('leaves a fresh claim to the request holding it', async () => {
+      soClient.get.mockResolvedValue(soWith(CLAIMED, FRESH) as any);
+
+      expect(await poll()).toMatchObject({ status: 'receiving', ...PAYLOAD });
+      expect(soClient.update).not.toHaveBeenCalled();
+      expect(cloudConnectorService.create).not.toHaveBeenCalled();
+    });
+
+    it('leaves an expired record alone', async () => {
+      soClient.get.mockResolvedValue(soWith(pendingAttrs({ expires_at: PAST, ...PAYLOAD })));
+
+      expect(await poll()).toMatchObject({ status: 'pending' });
+      expect(soClient.update).not.toHaveBeenCalled();
     });
 
     it('applies the stored report of a stale claim, so the browser poll recovers a dead request', async () => {
@@ -309,7 +354,7 @@ describe('provisioningCallbackService', () => {
       });
       soClient.update.mockResolvedValue({ version: 'v2' } as any);
 
-      const item = await provisioningCallbackService.get(soClient, 'cb-1');
+      const item = await poll();
 
       // Taken over with a guarded write of its own, applied, and finished under that version.
       expect(soClient.update).toHaveBeenNthCalledWith(
@@ -346,7 +391,7 @@ describe('provisioningCallbackService', () => {
         .mocked(cloudConnectorService.create)
         .mockRejectedValue(new CloudConnectorCreateError('boom'));
 
-      const item = await provisioningCallbackService.get(soClient, 'cb-1');
+      const item = await poll();
 
       expect(soClient.update).toHaveBeenLastCalledWith(
         PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE,
@@ -354,7 +399,7 @@ describe('provisioningCallbackService', () => {
         { status: 'pending' },
         { version: 'v2' }
       );
-      expect(item).toMatchObject({ status: 'pending' });
+      expect(item).toMatchObject({ status: 'pending', ...PAYLOAD });
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringMatching(
           /^Could not apply the stored report of provisioning callback \[id=cb-1\]: .*boom$/
@@ -373,9 +418,32 @@ describe('provisioningCallbackService', () => {
         )
       );
 
-      const item = await provisioningCallbackService.get(soClient, 'cb-1');
+      const item = await poll();
 
       expect(item).toMatchObject({ status: 'receiving' });
+      expect(cloudConnectorService.create).not.toHaveBeenCalled();
+    });
+
+    it('retries a report that was released back to pending once it is stale', async () => {
+      // A failed creation hands the record back pending with its values kept.
+      soClient.get.mockImplementation(async (type) => {
+        if (type === PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE) {
+          return soWith(pendingAttrs(PAYLOAD));
+        }
+        throw CONNECTOR_NOT_FOUND;
+      });
+      soClient.update.mockResolvedValue({ version: 'v2' } as any);
+
+      const item = await poll();
+
+      expect(cloudConnectorService.create).toHaveBeenCalledTimes(1);
+      expect(item).toMatchObject({ status: 'received', cloud_connector_id: 'cc-1' });
+    });
+
+    it('does not retry a released report that was just released', async () => {
+      soClient.get.mockResolvedValue(soWith(pendingAttrs(PAYLOAD), FRESH) as any);
+
+      expect(await poll()).toMatchObject({ status: 'pending' });
       expect(cloudConnectorService.create).not.toHaveBeenCalled();
     });
   });

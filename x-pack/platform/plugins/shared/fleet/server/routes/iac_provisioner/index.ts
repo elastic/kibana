@@ -162,9 +162,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .get({
       path: IAC_PROVISIONER_API_ROUTES.CALLBACK_INFO_PATTERN,
       summary: 'Get a provisioning callback',
-      description: 'Get the state of a callback record. Never returns the token.',
+      description:
+        'Get the state of a callback record. Never returns the token. A report the record holds but nobody is applying is applied on the way, so the route needs the privileges creating an identity does.',
       access: 'internal',
-      security: IAC_PROVISIONER_ROUTE_SECURITY,
+      security: PROVISIONING_CALLBACK_WRITE_SECURITY,
     })
     .addVersion(
       {

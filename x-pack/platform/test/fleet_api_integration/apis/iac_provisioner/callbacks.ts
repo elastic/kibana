@@ -298,7 +298,7 @@ export default function (providerContext: FtrProviderContext) {
       );
       expectUnsupported(
         await supertest
-          .post('/api/saved_objects/_bulk_update')
+          .put('/api/saved_objects/_bulk_update')
           .set('kbn-xsrf', 'xxxx')
           .send([{ type, id: item.id, attributes: { space_id: 'another-space' } }])
           .expect(400)

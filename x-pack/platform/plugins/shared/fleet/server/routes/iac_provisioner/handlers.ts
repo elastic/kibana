@@ -267,7 +267,13 @@ export const getProvisioningCallbackHandler: FleetRequestHandler<
   TypeOf<typeof GetProvisioningCallbackRequestSchema.params>
 > = async (context, request, response) => {
   const { spaceId } = await context.fleet;
-  const item = await getCallbackInSpace(request.params.callbackId, spaceId);
+  // The poll may apply a report the record holds, which creates the identity; the route
+  // therefore requires the privileges identity creation does.
+  const item = await provisioningCallbackService.poll(
+    appContextService.getInternalUserSOClientWithoutSpaceExtension(),
+    request.params.callbackId,
+    spaceId
+  );
   if (!item) {
     return response.notFound(CALLBACK_NOT_FOUND);
   }
