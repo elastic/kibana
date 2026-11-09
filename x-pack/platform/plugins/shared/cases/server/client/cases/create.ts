@@ -21,6 +21,7 @@ import { getConnectorSyncSettings } from '../configure/get_connector_sync_settin
 import { decodeWithExcessOrThrowZod, decodeOrThrowZod } from '../../common/runtime_types';
 
 import { Operations } from '../../authorization';
+import { assertCanStoreExtractObservables } from '../../common/assert_can_store_extract_observables';
 import { createCaseError } from '../../common/error';
 import { flattenCaseSavedObject, isCaseRestricted, transformNewCase } from '../../common/utils';
 import type { CasesClient, CasesClientArgs } from '..';
@@ -144,6 +145,14 @@ export const create = async (
       });
     }
 
+    // Only a value the caller sent is rejected. Values from a template, the space configuration
+    // or the owner default are coerced to false below, so stored data never causes a 400.
+    // Runs after authorization and before any template read or write.
+    assertCanStoreExtractObservables({
+      owner: query.owner,
+      extractObservables: query.settings.extractObservables,
+    });
+
     // Expand the template's case defaults and extended_fields defaults into the request
     // (caller-wins), and pin the resolved template version. Runs AFTER the createCase
     // authorization so the unsecured template read never becomes an existence oracle for
@@ -218,17 +227,20 @@ export const create = async (
       defaultValue: defaultExtractObservables,
     });
 
-    // Default extractObservables when the caller omitted it and template expansion did not fill it.
+    // Resolve the final extractObservables value.
     // Precedence: caller-explicit > template definition > space config > owner default > false.
-    if (query.settings.extractObservables === undefined) {
-      query = {
-        ...query,
-        settings: {
-          ...query.settings,
-          extractObservables: defaultExtractObservables,
-        },
-      };
-    }
+    // An owner that cannot store true always gets false, so an inherited true never reaches the
+    // write (a caller-sent true was already rejected above).
+    query = {
+      ...query,
+      settings: {
+        ...query.settings,
+        extractObservables: resolveExtractObservables(
+          query.owner,
+          query.settings.extractObservables ?? configurations[0]?.extractObservables
+        ),
+      },
+    };
 
     // Precedence: caller > template > the connector's sync defaults.
     if (query.settings.externalSync === undefined && query.connector.type !== ConnectorTypes.none) {

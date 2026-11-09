@@ -13,8 +13,8 @@ import type { ActionConnector } from '../../../common/types/domain';
 import { CaseAccessMode } from '../../../common/types/domain';
 import { getInitialCaseValue } from '../../../common/utils/get_initial_case_value';
 import {
+  canStoreExtractObservablesTrue,
   getCaseSettings,
-  isObservablesExtractionBlocked,
 } from '../../../common/utils/case_settings';
 import { getNoneConnector } from '../../../common/utils/connectors';
 import type { CasesConfigurationUI } from '../../containers/types';
@@ -38,9 +38,9 @@ export const getInitialCreateCaseSettings = (
   const { syncAlerts } = getCaseSettings(owner);
   return {
     syncAlerts,
-    extractObservables: isObservablesExtractionBlocked(owner)
-      ? false
-      : getSpaceExtractObservables(configuration),
+    extractObservables: canStoreExtractObservablesTrue(owner)
+      ? getSpaceExtractObservables(configuration)
+      : false,
   };
 };
 
@@ -152,9 +152,9 @@ export const createFormSerializer = (
     connector: connectorToUpdate,
     settings: {
       syncAlerts: syncAlerts ?? false,
-      extractObservables: isObservablesExtractionBlocked(currentConfiguration.owner)
-        ? false
-        : extractObservables ?? getSpaceExtractObservables(currentConfiguration),
+      extractObservables: canStoreExtractObservablesTrue(currentConfiguration.owner)
+        ? extractObservables ?? getSpaceExtractObservables(currentConfiguration)
+        : false,
     },
     owner: currentConfiguration.owner,
     customFields: transformedCustomFields,
