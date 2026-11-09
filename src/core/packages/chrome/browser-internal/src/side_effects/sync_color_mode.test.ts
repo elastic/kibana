@@ -11,10 +11,7 @@ import { BehaviorSubject, ReplaySubject, Subject } from 'rxjs';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import {
-  settingsServiceMock,
-  uiSettingsServiceMock,
-} from '@kbn/core-ui-settings-browser-mocks';
+import { settingsServiceMock, uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { UserProfileData } from '@kbn/core-user-profile-common';
