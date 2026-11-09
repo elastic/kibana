@@ -16,6 +16,16 @@ const createNotFoundError = (): Error =>
     body: { statusCode: 404, message: 'Streams unit [default] not found.', error: 'Not Found' },
   });
 
+const createRepository = (
+  fetch: jest.Mock,
+  overrides: Partial<Parameters<typeof createUnitRepository>[0]> = {}
+) =>
+  createUnitRepository({
+    streamsRepositoryClient: { fetch } as never,
+    unitId: STREAMS_DEFAULT_UNIT_ID,
+    ...overrides,
+  });
+
 const storedUnit: StreamsUnit.GetResponse = {
   unit: {
     sources: [
@@ -51,9 +61,7 @@ const storedUnit: StreamsUnit.GetResponse = {
 describe('unit repository', () => {
   it('loads a default unit when none is stored', async () => {
     const fetch = jest.fn().mockRejectedValue(createNotFoundError());
-    const repository = createUnitRepository({
-      streamsRepositoryClient: { fetch } as never,
-    });
+    const repository = createRepository(fetch);
 
     await expect(repository.load()).resolves.toEqual(createDefaultUnit());
     expect(fetch).toHaveBeenCalledWith('GET /internal/streams/unit/{id}', {
@@ -62,11 +70,21 @@ describe('unit repository', () => {
     });
   });
 
+  it('surfaces a 404 for a unit other than default', async () => {
+    const notFound = createNotFoundError();
+    const fetch = jest.fn().mockRejectedValue(notFound);
+    const repository = createRepository(fetch, { unitId: 'edge' });
+
+    await expect(repository.load()).rejects.toBe(notFound);
+    expect(fetch).toHaveBeenCalledWith('GET /internal/streams/unit/{id}', {
+      params: { path: { id: 'edge' } },
+      signal: null,
+    });
+  });
+
   it('puts the unit as the request body', async () => {
     const fetch = jest.fn().mockResolvedValue({ acknowledged: true });
-    const repository = createUnitRepository({
-      streamsRepositoryClient: { fetch } as never,
-    });
+    const repository = createRepository(fetch);
 
     await expect(repository.persist(storedUnit)).resolves.toEqual(storedUnit);
 
@@ -82,7 +100,7 @@ describe('unit repository', () => {
 
   it('drops unconnected routing rules before saving', async () => {
     const fetch = jest.fn().mockResolvedValue({ acknowledged: true });
-    const repository = createUnitRepository({ streamsRepositoryClient: { fetch } as never });
+    const repository = createRepository(fetch);
     const routedUnit: StreamsUnit.GetResponse = {
       ...storedUnit,
       unit: {
@@ -128,7 +146,7 @@ describe('unit repository', () => {
 
   it('narrows a routing pipeline to the signals of its remaining routes when a disconnected rule is saved', async () => {
     const fetch = jest.fn().mockResolvedValue({ acknowledged: true });
-    const repository = createUnitRepository({ streamsRepositoryClient: { fetch } as never });
+    const repository = createRepository(fetch);
     const routedUnit: StreamsUnit.GetResponse = {
       ...storedUnit,
       unit: {
@@ -186,10 +204,7 @@ describe('unit repository', () => {
       .fn()
       .mockResolvedValueOnce({ acknowledged: true })
       .mockResolvedValueOnce({ acknowledged: true, api_keys_may_remain: true });
-    const repository = createUnitRepository({
-      streamsRepositoryClient: { fetch } as never,
-      toasts: { addWarning } as never,
-    });
+    const repository = createRepository(fetch, { toasts: { addWarning } as never });
 
     await repository.persist(storedUnit);
     expect(addWarning).not.toHaveBeenCalled();
@@ -200,7 +215,7 @@ describe('unit repository', () => {
 
   it('sends secrets in the PUT envelope when given', async () => {
     const fetch = jest.fn().mockResolvedValue({ acknowledged: true });
-    const repository = createUnitRepository({ streamsRepositoryClient: { fetch } as never });
+    const repository = createRepository(fetch);
     const secrets = { 'es-prod-api-key': 'plaintext' };
 
     await expect(repository.persist(storedUnit, secrets)).resolves.toEqual(storedUnit);

@@ -17,7 +17,6 @@ import {
 } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { STREAMS_DEFAULT_UNIT_ID } from '@kbn/streams-plugin/common';
 import { useSelector } from '@xstate/react';
 import {
   useEdgesState,
@@ -34,6 +33,7 @@ import type { ResolvedDestinationIndex } from '@kbn/streams-plugin/common';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
+import { useUnitId } from '../../../../hooks/use_unit_id';
 import {
   buildUnitCanvasGraph,
   configuredDestinationNodeId,
@@ -182,12 +182,14 @@ export function StreamsCanvas() {
     },
   } = useKibana();
   const { timeState, timeState$ } = useTimefilter();
+  const unitId = useUnitId();
   const urlStateStorageContainer = useKbnUrlStateStorageFromRouterContext();
   const apiKeyGenerationDeps = useSourceApiKeyGenerationDeps();
   const loadSourceEnvironment = useSourceEnvironmentLoader();
   const unitDefinitionRepository = useMemo(
-    () => createUnitRepository({ streamsRepositoryClient, toasts: core.notifications.toasts }),
-    [core.notifications.toasts, streamsRepositoryClient]
+    () =>
+      createUnitRepository({ streamsRepositoryClient, unitId, toasts: core.notifications.toasts }),
+    [core.notifications.toasts, streamsRepositoryClient, unitId]
   );
 
   return (
@@ -201,10 +203,7 @@ export function StreamsCanvas() {
       loadUnitDefinition={unitDefinitionRepository.load}
       persistUnitDefinition={unitDefinitionRepository.persist}
     >
-      <StatsManagerProvider
-        unitId={STREAMS_DEFAULT_UNIT_ID}
-        pollIntervalMs={STATS_POLL_INTERVAL_MS}
-      >
+      <StatsManagerProvider unitId={unitId} pollIntervalMs={STATS_POLL_INTERVAL_MS}>
         <StreamsCanvasInner />
       </StatsManagerProvider>
     </CanvasStateContextProvider>

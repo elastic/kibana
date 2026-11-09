@@ -210,7 +210,7 @@ non-interactive.
 
 ## 7. Use it
 
-- Map: http://localhost:5601/app/streams/new-experience/map
+- Map: http://localhost:5601/app/streams/v2/unit/default/map
 - Discover / ES|QL as `elastic_serverless`:
 
 ```esql
