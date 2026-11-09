@@ -26,7 +26,7 @@ export const MAX_ALERTS_PER_INVESTIGATION = 20;
 // A rule type writes one evaluation entry per metric or criterion, so this bounds a hostile
 // array rather than a realistic rule.
 const MAX_EVALUATION_ENTRIES = 20;
-const MAX_V2_ALERT_DATA_LENGTH = 32_000;
+export const MAX_V2_ALERT_DATA_LENGTH = 32_000;
 
 export const investigationSubjectTypeSchema = z.enum(INVESTIGATION_SUBJECT_TYPES);
 
