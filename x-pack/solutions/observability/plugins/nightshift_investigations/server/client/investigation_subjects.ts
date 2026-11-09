@@ -6,7 +6,6 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { SIGNIFICANT_EVENTS_ALERT_SOURCE } from '@kbn/significant-events-schema';
 import {
   INVESTIGATION_SUBJECT_TRIGGER_TYPES,
   INVESTIGATION_SUBJECT_TYPES,
@@ -94,14 +93,6 @@ const withSlackThread = ({
   return { primary, thread: [{ type: 'slack_thread', id, triggerType, slack }] };
 };
 
-const getSignificantEventId = (snapshot: InvestigationAlertSnapshot): string | undefined => {
-  if (snapshot.alert_version !== 'v2' || snapshot.source !== SIGNIFICANT_EVENTS_ALERT_SOURCE) {
-    return undefined;
-  }
-  const eventId = snapshot.data?.event_id;
-  return typeof eventId === 'string' && eventId.length > 0 ? eventId : undefined;
-};
-
 /**
  * The subjects one start records: the named subject and, for an alert investigation, one subject
  * per alert snapshot, each carrying its snapshot. A manual investigation without a subject id is
@@ -147,19 +138,8 @@ export const toStartSubjects = ({
       ...(snapshot.id === subject.id && summary ? { summary } : {}),
     })
   );
-  const significantEventIds = new Set(
-    alerts.flatMap((snapshot) => getSignificantEventId(snapshot) ?? [])
-  );
-  const significantEvents = [...significantEventIds].map(
-    (id): WorkflowSubjectInput => ({
-      type: 'significant_event',
-      id,
-      triggerType,
-    })
-  );
   return [
     ...(fromAlerts.some(({ id }) => id === subject.id) ? fromAlerts : [primary, ...fromAlerts]),
-    ...significantEvents,
     ...thread,
   ];
 };
