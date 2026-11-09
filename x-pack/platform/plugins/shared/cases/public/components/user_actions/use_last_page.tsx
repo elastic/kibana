@@ -35,20 +35,20 @@ export const useLastPage = ({
     }
 
     const perPage = userActivityQueryParams.perPage;
+    // The feed hides comment edits (`hideCommentEdits`), so they don't count toward any page.
+    const visibleTotal = userActionsStats.total - userActionsStats.totalCommentUpdates;
     let lastPageType = 1;
 
     switch (userActivityQueryParams.type) {
       case 'action':
         // Must match the server `buildActionFilter`.
-        lastPageType = Math.ceil(
-          (userActionsStats.total - userActionsStats.totalCommentCreations) / perPage
-        );
+        lastPageType = Math.ceil((visibleTotal - userActionsStats.totalCommentCreations) / perPage);
         break;
       case 'user':
         lastPageType = Math.ceil(userActionsStats.totalCommentCreations / perPage || 1);
         break;
       case 'all':
-        lastPageType = Math.ceil(userActionsStats.total / perPage);
+        lastPageType = Math.ceil(visibleTotal / perPage);
         break;
       default:
         return assertNever(userActivityQueryParams.type);

@@ -298,6 +298,15 @@ export interface UserActionsStatsAggsResult {
       }>;
     };
   };
+  updates: {
+    doc_count: number;
+    updates: {
+      buckets: Array<{
+        key: string;
+        doc_count: number;
+      }>;
+    };
+  };
   nonDeletedCommentUpdates: {
     doc_count: number;
     comments: {

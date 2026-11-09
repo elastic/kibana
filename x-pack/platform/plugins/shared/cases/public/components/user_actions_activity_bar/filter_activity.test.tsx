@@ -24,6 +24,7 @@ describe('FilterActivity ', () => {
     totalCommentCreations: 2,
     totalCommentDeletions: 0,
     totalHiddenCommentUpdates: 0,
+    totalCommentUpdates: 0,
     totalOtherActions: 9,
     totalOtherActionDeletions: 0,
   };
@@ -35,6 +36,7 @@ describe('FilterActivity ', () => {
     totalCommentDeletions: 3,
     totalCommentCreations: 5,
     totalHiddenCommentUpdates: 1,
+    totalCommentUpdates: 0,
     totalOtherActions: 9,
     totalOtherActionDeletions: 4,
   };

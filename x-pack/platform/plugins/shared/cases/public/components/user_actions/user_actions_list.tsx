@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiCommentProps, EuiThemeComputed } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiCommentList,
@@ -24,6 +24,7 @@ import type { CaseUI } from '../../containers/types';
 import type { AddCommentRefObject } from '../add_comment';
 import type { UserActionMarkdownRefObject } from './markdown_form';
 import type { UseUserActionsHandler } from './use_user_actions_handler';
+import type { UserActionComment } from './types';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { CommentRenderingProvider } from './comment/comment_rendering_context';
 import { useHighlightLinkedComment } from './hooks/use_highlight_linked_comment';
@@ -84,7 +85,7 @@ const getCommentListCss = (euiTheme: EuiThemeComputed<{}>) => css`
 `;
 
 export interface UserActionListProps {
-  comments: EuiCommentProps[];
+  comments: UserActionComment[];
   commentRefs: React.MutableRefObject<
     Record<string, AddCommentRefObject | UserActionMarkdownRefObject | null | undefined>
   >;
@@ -152,10 +153,26 @@ export const UserActionsList = React.memo(
 
     const collapsibleComments = useMemo(
       () =>
-        comments.map((comment, index) => {
+        comments.map(({ actionsPrefix, ...comment }, index) => {
           const commentId = `activity-${index}`;
+          const prefixItem = actionsPrefix ? (
+            <EuiFlexItem grow={false}>{actionsPrefix}</EuiFlexItem>
+          ) : null;
+
           if (!collapsibleCommentIds.has(commentId)) {
-            return comment;
+            return prefixItem
+              ? {
+                  ...comment,
+                  actions: (
+                    <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
+                      {prefixItem}
+                      {comment.actions ? (
+                        <EuiFlexItem grow={false}>{comment.actions}</EuiFlexItem>
+                      ) : null}
+                    </EuiFlexGroup>
+                  ),
+                }
+              : comment;
           }
 
           const isCollapsed = collapsedCommentIds.has(commentId);
@@ -168,6 +185,7 @@ export const UserActionsList = React.memo(
             // and was left stranded next to nothing once the content was hidden.
             actions: (
               <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
+                {prefixItem}
                 <EuiFlexItem grow={false}>
                   <EuiToolTip content={toggleLabel} disableScreenReaderOutput>
                     <EuiButtonIcon

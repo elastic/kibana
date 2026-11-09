@@ -146,6 +146,16 @@ describe('CaseUserActionService', () => {
               ],
             },
           },
+          updates: {
+            doc_count: 4,
+            updates: {
+              buckets: [
+                { key: 'user', doc_count: 1 },
+                { key: 'comment', doc_count: 2 },
+                { key: 'lens', doc_count: 1 },
+              ],
+            },
+          },
           nonDeletedCommentUpdates: {
             doc_count: 2,
             comments: {
@@ -214,6 +224,7 @@ describe('CaseUserActionService', () => {
           total_comment_deletions: 3,
           total_comment_creations: 5,
           total_hidden_comment_updates: 6,
+          total_comment_updates: 3,
           total_other_actions: 10,
           total_other_action_deletions: 1,
         });

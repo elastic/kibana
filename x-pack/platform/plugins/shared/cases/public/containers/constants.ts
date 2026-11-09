@@ -60,6 +60,13 @@ export const casesQueriesKeys = {
     ...casesQueriesKeys.userActions,
     'stats',
   ],
+  attachmentHistory: (caseId: string, attachmentId: string) =>
+    [
+      ...casesQueriesKeys.case(caseId),
+      ...casesQueriesKeys.userActions,
+      'history',
+      attachmentId,
+    ] as const,
   userProfiles: () => [...casesQueriesKeys.users, 'user-profiles'] as const,
   userProfilesList: (ids: string[]) => [...casesQueriesKeys.userProfiles(), ids] as const,
   currentUser: () => [...casesQueriesKeys.users, 'current-user'] as const,

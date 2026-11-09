@@ -15,6 +15,36 @@ export const ADDED_COMMENT = i18n.translate('xpack.cases.attachments.comment.add
   defaultMessage: 'added a comment',
 });
 
+export const LAST_EDITED = i18n.translate('xpack.cases.attachments.comment.lastEdited', {
+  defaultMessage: 'Last edited',
+});
+
+export const getLastEditedBy = (user: string) =>
+  i18n.translate('xpack.cases.attachments.comment.lastEditedBy', {
+    defaultMessage: 'Last edited by {user}',
+    values: { user },
+  });
+
+export const EDIT_HISTORY_TITLE = i18n.translate(
+  'xpack.cases.attachments.comment.editHistoryTitle',
+  {
+    defaultMessage: 'Edit history',
+  }
+);
+
+export const EDIT_HISTORY_ARIA_LABEL = i18n.translate(
+  'xpack.cases.attachments.comment.editHistoryAriaLabel',
+  { defaultMessage: 'Show edit history' }
+);
+
+export const ORIGINAL_VERSION = i18n.translate('xpack.cases.attachments.comment.originalVersion', {
+  defaultMessage: 'Original',
+});
+
+export const CURRENT_VERSION = i18n.translate('xpack.cases.attachments.comment.currentVersion', {
+  defaultMessage: 'Current',
+});
+
 export const DELETE_COMMENT_SUCCESS_TOAST = i18n.translate(
   'xpack.cases.attachments.comment.deleteSuccessToasterTitle',
   { defaultMessage: 'Deleted comment' }

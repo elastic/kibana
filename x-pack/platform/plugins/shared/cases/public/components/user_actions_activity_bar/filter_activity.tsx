@@ -30,6 +30,12 @@ export const FilterActivity = React.memo<FilterActivityProps>(
       [onFilterChange, type]
     );
 
+    // The feed hides comment edits, so they're left out of the All and History counts.
+    const visibleTotal = Math.max(
+      (userActionsStats?.total ?? 0) - (userActionsStats?.totalCommentUpdates ?? 0),
+      0
+    );
+
     return (
       <EuiFilterGroup data-test-subj="user-actions-filter-activity-group">
         <EuiFilterButton
@@ -39,7 +45,7 @@ export const FilterActivity = React.memo<FilterActivityProps>(
           isToggle
           isSelected={type === 'all'}
           hasActiveFilters={type === 'all'}
-          numFilters={userActionsStats?.total ?? 0}
+          numFilters={visibleTotal}
           isLoading={isLoading}
           isDisabled={isLoading}
           data-test-subj="user-actions-filter-activity-button-all"
@@ -65,10 +71,7 @@ export const FilterActivity = React.memo<FilterActivityProps>(
           isToggle
           isSelected={type === 'action'}
           hasActiveFilters={type === 'action'}
-          numFilters={Math.max(
-            (userActionsStats?.total ?? 0) - (userActionsStats?.totalCommentCreations ?? 0),
-            0
-          )}
+          numFilters={Math.max(visibleTotal - (userActionsStats?.totalCommentCreations ?? 0), 0)}
           onClick={() => handleFilterChange('action')}
           isLoading={isLoading}
           isDisabled={isLoading}

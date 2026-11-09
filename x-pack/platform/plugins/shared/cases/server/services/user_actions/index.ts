@@ -718,9 +718,16 @@ export class CaseUserActionService {
       total_comment_deletions: 0,
       total_comment_creations: 0,
       total_hidden_comment_updates: 0,
+      total_comment_updates: 0,
       total_other_actions: 0,
       total_other_action_deletions: 0,
     };
+
+    response.aggregations?.updates?.updates.buckets.forEach(({ key, doc_count: docCount }) => {
+      if (isCommentAttachmentType(key)) {
+        result.total_comment_updates += docCount;
+      }
+    });
 
     response.aggregations?.totals.buckets.forEach(({ key, doc_count: docCount }) => {
       if (isCommentAttachmentType(key)) {
@@ -801,6 +808,21 @@ export class CaseUserActionService {
         },
         aggs: {
           creations: {
+            terms: {
+              field: `${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.type`,
+              size: 100,
+            },
+          },
+        },
+      },
+      updates: {
+        filter: {
+          term: {
+            [`${CASE_USER_ACTION_SAVED_OBJECT}.attributes.action`]: UserActionActions.update,
+          },
+        },
+        aggs: {
+          updates: {
             terms: {
               field: `${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.type`,
               size: 100,

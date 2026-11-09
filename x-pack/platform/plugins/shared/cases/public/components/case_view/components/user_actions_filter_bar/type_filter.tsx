@@ -38,8 +38,11 @@ export const TypeFilter = React.memo<TypeFilterProps>(
     const togglePopover = useCallback(() => setIsPopoverOpen((prevValue) => !prevValue), []);
     const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
-    // Every row renders, so All = Comments + History with nothing subtracted.
-    const total = userActionsStats?.total ?? 0;
+    // Comment edits are hidden from the feed, so All = Comments + History once they're subtracted.
+    const total = Math.max(
+      (userActionsStats?.total ?? 0) - (userActionsStats?.totalCommentUpdates ?? 0),
+      0
+    );
     const commentsCount = userActionsStats?.totalCommentCreations ?? 0;
     const allCount = total;
     const historyCount = Math.max(total - commentsCount, 0);

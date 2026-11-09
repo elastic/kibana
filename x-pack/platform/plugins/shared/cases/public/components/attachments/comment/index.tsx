@@ -59,6 +59,28 @@ const CommentActionsLazy = React.lazy(() =>
   }))
 );
 
+const CommentEditHistoryLazy = React.lazy(() =>
+  import('./comment_edit_history').then(({ CommentEditHistory }) => ({
+    default: CommentEditHistory,
+  }))
+);
+
+const getEditHistory = ({ updatedAt, updatedBy, savedObjectId, caseData }: CommentViewProps) => {
+  if (updatedAt == null) {
+    return undefined;
+  }
+
+  return (
+    <React.Suspense fallback={null}>
+      <CommentEditHistoryLazy
+        caseId={caseData.id}
+        commentId={savedObjectId}
+        editedBy={updatedBy?.fullName || updatedBy?.username || ''}
+      />
+    </React.Suspense>
+  );
+};
+
 const getCommentClassName = (props: CommentViewProps): string | undefined => {
   if (!props.rowContext) return undefined;
 
@@ -85,6 +107,7 @@ const getCommentCreationActivity = (props: CommentViewProps) => {
 
   return {
     event: ADDED_COMMENT,
+    actionsPrefix: getEditHistory(props),
     children: CommentAttachmentChildrenLazy,
     hideDefaultActions: true,
     getActions: (viewProps: CommentViewProps) => [

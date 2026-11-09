@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import type { EuiCommentProps, EuiThemeComputed } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 
 import type {
@@ -22,6 +22,7 @@ import type { RelatedRemovalOptions } from '../../../client/attachment_framework
 import type { CasesPermissions } from '../../../../common/ui/types';
 import { isUserActionTypeSupported } from '../helpers';
 import { builderMap } from '../builder';
+import type { UserActionComment } from '../types';
 
 interface UseBuildUserActionsArgs {
   caseUserActions: UserActionUI[];
@@ -63,13 +64,13 @@ export const useBuildUserActions = ({
   euiTheme,
   handleOutlineComment,
   handleDeleteComment,
-}: UseBuildUserActionsArgs): EuiCommentProps[] => {
+}: UseBuildUserActionsArgs): UserActionComment[] => {
   return useMemo(() => {
     if (!caseUserActions) {
       return [];
     }
 
-    return caseUserActions.reduce<EuiCommentProps[]>((userActions, userAction, index) => {
+    return caseUserActions.reduce<UserActionComment[]>((userActions, userAction, index) => {
       if (!isUserActionTypeSupported(userAction.type)) {
         return userActions;
       }

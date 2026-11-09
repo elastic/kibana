@@ -174,26 +174,29 @@ export const createRegisteredAttachmentUserActionBuilder = <
     const visiblePrimaryActions = primaryActions.slice(0, 2);
     const nonVisiblePrimaryActions = primaryActions.slice(2, primaryActions.length);
 
+    const toolbar = (
+      <UserActionContentToolbar id={attachment.id}>
+        {visiblePrimaryActions.map((action) =>
+          renderAttachmentAction(action, `attachment-${attachmentTypeId}-${attachment.id}`)
+        )}
+        <RegisteredAttachmentsPropertyActions
+          isLoading={isLoading}
+          onDelete={(options) => handleDeleteComment(attachment.id, deleteSuccessToast, options)}
+          registeredAttachmentActions={[...nonVisiblePrimaryActions, ...nonPrimaryActions]}
+          hideDefaultActions={!!creationActivity.hideDefaultActions}
+          relatedRemoval={attachmentType.getRelatedRemoval?.({ count: 1 })}
+        />
+      </UserActionContentToolbar>
+    );
+
     return [
       {
         ...row,
         children: renderer(creationActivity, props),
-        actions: (
-          <UserActionContentToolbar id={attachment.id}>
-            {visiblePrimaryActions.map((action) =>
-              renderAttachmentAction(action, `attachment-${attachmentTypeId}-${attachment.id}`)
-            )}
-            <RegisteredAttachmentsPropertyActions
-              isLoading={isLoading}
-              onDelete={(options) =>
-                handleDeleteComment(attachment.id, deleteSuccessToast, options)
-              }
-              registeredAttachmentActions={[...nonVisiblePrimaryActions, ...nonPrimaryActions]}
-              hideDefaultActions={!!creationActivity.hideDefaultActions}
-              relatedRemoval={attachmentType.getRelatedRemoval?.({ count: 1 })}
-            />
-          </UserActionContentToolbar>
-        ),
+        actions: toolbar,
+        ...(creationActivity.actionsPrefix
+          ? { actionsPrefix: creationActivity.actionsPrefix }
+          : {}),
       },
     ];
   },

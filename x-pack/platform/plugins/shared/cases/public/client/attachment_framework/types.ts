@@ -44,6 +44,8 @@ export interface AttachmentCreationActivity<Props = {}> {
   getActions?: (props: Props) => AttachmentAction[];
   event?: EuiCommentProps['event'];
   eventColor?: EuiCommentProps['eventColor'];
+  /** Rendered in the row header, before the collapse toggle and action icons. */
+  actionsPrefix?: React.ReactNode;
   children?: React.LazyExoticComponent<React.FC<Props>>;
   hideDefaultActions?: boolean;
   deleteSuccessToast?: string;
@@ -102,6 +104,9 @@ type HybridData = ValueData | ReferenceData;
 
 interface UnifiedAttachmentViewPropsBase extends CommonAttachmentViewProps {
   createdBy: CaseUser;
+  /** Set once the attachment has been edited. */
+  updatedAt?: string | null;
+  updatedBy?: CaseUser | null;
   version: string;
   rowContext: RowContext;
   isDeleted?: boolean;

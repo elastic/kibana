@@ -23,6 +23,7 @@ import type {
   AddObservableRequest,
   UpdateObservableRequest,
   UserActionInternalFindResponse,
+  AttachmentHistoryResponse,
   UserActionFindRequestSources,
   FindCasesContainingAllAlertsResponse,
   FindCasesContainingAllDocumentsRequest,
@@ -54,6 +55,7 @@ import {
   getCaseDetailsMetricsUrl,
   getCasePushUrl,
   getCaseFindUserActionsUrl,
+  getAttachmentHistoryUrl,
   getCaseConnectorsUrl,
   getCaseUsersUrl,
   getCaseUserActionStatsUrl,
@@ -246,6 +248,7 @@ export const findCaseUserActions = async (
     ...(params.search ? { search: params.search } : {}),
     ...(params.authors?.length ? { authors: params.authors } : {}),
     ...(params.sources?.length ? { sources: params.sources } : {}),
+    hideCommentEdits: true,
   };
 
   const response = await KibanaServices.get().http.fetch<UserActionInternalFindResponse>(
@@ -264,6 +267,24 @@ export const findCaseUserActions = async (
     ) as UserActionUI[],
     latestAttachments: convertAttachmentsToCamelCase(response.latestAttachments),
   };
+};
+
+export const getAttachmentHistory = async (
+  caseId: string,
+  attachmentId: string,
+  signal?: AbortSignal
+): Promise<UserActionUI[]> => {
+  const response = await KibanaServices.get().http.fetch<AttachmentHistoryResponse>(
+    getAttachmentHistoryUrl(caseId, attachmentId),
+    {
+      method: 'GET',
+      signal,
+    }
+  );
+
+  return convertUserActionsToCamelCase(
+    decodeCaseUserActionsResponse(response.userActions)
+  ) as UserActionUI[];
 };
 
 export const getCaseUserActionsStats = async (

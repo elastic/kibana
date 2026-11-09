@@ -29,11 +29,13 @@ import { asArray } from '../../common/utils';
 import type { CasesClient } from '../client';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
 import { MAX_USER_ACTIONS_FOR_SEARCH } from '../../../common/constants';
+import { combineFilters } from '../utils';
+import { UserActionFinder } from '../../services/user_actions/operations/find';
 
 interface FindWithSearchParams {
   caseId: string;
   search: string;
-  queryParams: Omit<UserActionInternalFindRequest, 'search'>;
+  queryParams: Omit<UserActionInternalFindRequest, 'search' | 'hideCommentEdits'>;
   authorizationFilter?: KueryNode;
   ensureSavedObjectsAreAuthorized: (entities: Array<{ owner: string; id: string }>) => void;
   userActionService: CasesClientArgs['services']['userActionService'];
@@ -68,10 +70,15 @@ export const find = async (
       casesClient.cases.resolve({ id: caseId, includeComments: false }),
     ]);
 
-    const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } = authorizationFilterRes;
+    const { hideCommentEdits, ...findParams } = queryParams;
+    const { ensureSavedObjectsAreAuthorized } = authorizationFilterRes;
+    const authorizationFilter = combineFilters([
+      authorizationFilterRes.filter,
+      hideCommentEdits ? UserActionFinder.buildHideCommentEditsFilter() : undefined,
+    ]);
 
-    if (queryParams.search) {
-      const { search, ...rest } = queryParams;
+    if (findParams.search) {
+      const { search, ...rest } = findParams;
       return findWithSearch({
         caseId,
         search,
@@ -84,7 +91,7 @@ export const find = async (
 
     const userActions = await userActionService.finder.find({
       caseId,
-      ...queryParams,
+      ...findParams,
       filter: authorizationFilter,
     });
 
