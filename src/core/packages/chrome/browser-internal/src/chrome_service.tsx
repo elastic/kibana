@@ -21,7 +21,7 @@ import { RecentlyAccessedService } from '@kbn/recently-accessed';
 import type { Logger } from '@kbn/logging';
 import type { InternalThemeServiceStart } from '@kbn/core-theme-browser-internal-types';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
-import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { IUiSettingsClient, SettingsStart } from '@kbn/core-ui-settings-browser';
 import { SidebarService } from '@kbn/core-chrome-sidebar-internal';
 
 import { DocTitleService } from './services/doc_title';
@@ -60,6 +60,7 @@ export interface StartDeps {
   theme: InternalThemeServiceStart;
   userProfile: UserProfileService;
   uiSettings: IUiSettingsClient;
+  settings: SettingsStart;
 }
 
 /** @internal */
@@ -101,6 +102,7 @@ export class ChromeService {
     theme,
     userProfile,
     uiSettings,
+    settings,
   }: StartDeps): Promise<InternalChromeStart> {
     // 1. Create all chrome state
     const state = createChromeState({
@@ -125,6 +127,7 @@ export class ChromeService {
       injectedMetadata,
       userProfile,
       uiSettings,
+      settings,
       http,
       stop$: this.stop$,
       logger: this.logger,

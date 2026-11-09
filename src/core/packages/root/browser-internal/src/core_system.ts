@@ -390,6 +390,7 @@ export class CoreSystem {
         theme,
         userProfile,
         uiSettings,
+        settings,
       });
       const deprecations = this.deprecations.start({ http });
 

@@ -20,7 +20,10 @@ import { coreContextMock } from '@kbn/core-base-browser-mocks';
 import type { App, PublicAppInfo } from '@kbn/core-application-browser';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
-import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+import {
+  settingsServiceMock,
+  uiSettingsServiceMock,
+} from '@kbn/core-ui-settings-browser-mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
@@ -83,6 +86,7 @@ function defaultStartDeps(availableApps?: App[], currentAppId?: string) {
     getNotifications: () => Promise.resolve(notifications),
     notifications, // Keep for test assertions
     uiSettings: uiSettingsServiceMock.createStartContract(),
+    settings: settingsServiceMock.createStartContract(),
     customBranding: customBrandingServiceMock.createStartContract(),
   };
 
@@ -224,6 +228,7 @@ describe('start', () => {
       'http',
       'injectedMetadata',
       'logger',
+      'settings',
       'stop$',
       'theme',
       'uiSettings',
@@ -235,6 +240,7 @@ describe('start', () => {
       injectedMetadata: startDeps.injectedMetadata,
       userProfile: startDeps.userProfile,
       uiSettings: startDeps.uiSettings,
+      settings: startDeps.settings,
       http: startDeps.http,
       stop$: expect.any(Object),
       logger: expect.any(Object),

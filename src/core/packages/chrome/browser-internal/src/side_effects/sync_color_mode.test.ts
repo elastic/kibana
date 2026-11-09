@@ -11,7 +11,10 @@ import { BehaviorSubject, ReplaySubject, Subject } from 'rxjs';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+import {
+  settingsServiceMock,
+  uiSettingsServiceMock,
+} from '@kbn/core-ui-settings-browser-mocks';
 import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { UserProfileData } from '@kbn/core-user-profile-common';
@@ -92,10 +95,15 @@ describe('syncColorMode', () => {
     } as any);
 
     const uiSettings = uiSettingsServiceMock.createStartContract();
-    const spaceDarkMode$ = new BehaviorSubject<string>(spaceDarkMode);
-    uiSettings.get.mockImplementation(() => spaceDarkMode$.getValue());
-    uiSettings.get$.mockReturnValue(spaceDarkMode$);
+    const uiSettingsDarkMode$ = new BehaviorSubject<string>(spaceDarkMode);
+    uiSettings.get.mockImplementation(() => uiSettingsDarkMode$.getValue());
+    uiSettings.get$.mockReturnValue(uiSettingsDarkMode$);
     uiSettings.isOverridden.mockReturnValue(isOverridden);
+
+    // Advanced Settings writes through `settings.client`, a separate client from `uiSettings`.
+    const settings = settingsServiceMock.createStartContract();
+    const spaceDarkMode$ = new BehaviorSubject<string>(spaceDarkMode);
+    settings.client.get$.mockReturnValue(spaceDarkMode$);
 
     const http = httpServiceMock.createStartContract();
     http.anonymousPaths.isAnonymous.mockReturnValue(isAnonymous);
@@ -103,9 +111,18 @@ describe('syncColorMode', () => {
     const stop$ = new ReplaySubject<void>(1);
     const logger = loggerMock.create();
 
-    syncColorMode({ theme, injectedMetadata, userProfile, uiSettings, http, stop$, logger });
+    syncColorMode({
+      theme,
+      injectedMetadata,
+      userProfile,
+      uiSettings,
+      settings,
+      http,
+      stop$,
+      logger,
+    });
 
-    return { theme, dataUpdates$, spaceDarkMode$, userProfile, stop$, logger };
+    return { theme, dataUpdates$, spaceDarkMode$, uiSettingsDarkMode$, userProfile, stop$, logger };
   };
 
   it('keeps the server-resolved color mode on start', () => {
@@ -179,6 +196,27 @@ describe('syncColorMode', () => {
 
       spaceDarkMode$.next('enabled');
       await flushPromises();
+
+      expect(theme.setDarkMode).toHaveBeenLastCalledWith(true);
+    });
+
+    it('applies a space setting change made through uiSettings', async () => {
+      const { theme, uiSettingsDarkMode$ } = setup({ userDarkMode: 'space_default' });
+
+      uiSettingsDarkMode$.next('enabled');
+      await flushPromises();
+
+      expect(theme.setDarkMode).toHaveBeenLastCalledWith(true);
+    });
+
+    it('uses the latest space setting when the user switches to "space_default"', async () => {
+      const { theme, spaceDarkMode$, dataUpdates$ } = setup({ userDarkMode: 'light' });
+
+      spaceDarkMode$.next('enabled');
+      await flushPromises();
+      expect(theme.setDarkMode).toHaveBeenLastCalledWith(false);
+
+      dataUpdates$.next({ userSettings: { darkMode: 'space_default' } });
 
       expect(theme.setDarkMode).toHaveBeenLastCalledWith(true);
     });

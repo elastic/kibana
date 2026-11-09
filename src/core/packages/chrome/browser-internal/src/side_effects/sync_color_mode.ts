@@ -8,6 +8,7 @@
  */
 
 import {
+  BehaviorSubject,
   catchError,
   filter,
   from,
@@ -26,7 +27,7 @@ import type { InternalThemeServiceStart } from '@kbn/core-theme-browser-internal
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { UserProfileData } from '@kbn/core-user-profile-common';
 import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
-import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { IUiSettingsClient, SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { InternalInjectedMetadataStart } from '@kbn/core-injected-metadata-browser-internal';
 import { browsersSupportsSystemTheme } from '@kbn/core-theme-browser-internal';
 import type { Logger } from '@kbn/logging';
@@ -83,6 +84,7 @@ export function syncColorMode({
   injectedMetadata,
   userProfile,
   uiSettings,
+  settings,
   http,
   stop$,
   logger,
@@ -91,6 +93,7 @@ export function syncColorMode({
   injectedMetadata: InternalInjectedMetadataStart;
   userProfile: UserProfileService;
   uiSettings: IUiSettingsClient;
+  settings: SettingsStart;
   http: InternalHttpStart;
   stop$: Observable<void>;
   logger: Logger;
@@ -100,18 +103,28 @@ export function syncColorMode({
   }
 
   const isOverridden = uiSettings.isOverridden(DARK_MODE_SETTING);
-  const getSpaceDarkMode = () => parseDarkModeValue(uiSettings.get(DARK_MODE_SETTING));
+
+  // `uiSettings` and `settings.client` are separate clients with separate caches, and Advanced
+  // Settings writes through `settings.client`, so a change can surface on either one.
+  const spaceDarkMode$ = new BehaviorSubject<DarkModeValue>(
+    parseDarkModeValue(uiSettings.get(DARK_MODE_SETTING))
+  );
+  merge(
+    uiSettings.get$(DARK_MODE_SETTING).pipe(skip(1)),
+    settings.client.get$(DARK_MODE_SETTING).pipe(skip(1))
+  )
+    .pipe(map(parseDarkModeValue), takeUntil(stop$))
+    .subscribe(spaceDarkMode$);
 
   const userChange$: Observable<DarkModeValue> = isOverridden
     ? of()
     : userProfile.getDataUpdates$().pipe(
         filter(hasDarkModeUpdate),
-        map((data) => getUserDarkModeValue(data) ?? getSpaceDarkMode())
+        map((data) => getUserDarkModeValue(data) ?? spaceDarkMode$.getValue())
       );
 
-  const spaceChange$: Observable<DarkModeValue> = uiSettings.get$(DARK_MODE_SETTING).pipe(
+  const spaceChange$: Observable<DarkModeValue> = spaceDarkMode$.pipe(
     skip(1),
-    map(parseDarkModeValue),
     switchMap((spaceDarkMode) => {
       if (isOverridden) {
         return of(spaceDarkMode);
