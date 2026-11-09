@@ -167,6 +167,7 @@ export const isManualInvestigationFresh = (
 /**
  * One pass over loaded home sections: attach severity for finished unread rows, clear it
  * again if that row is back under In progress. Batched into a single write.
+ * In-progress wins when an id is temporarily in both (stale severity page vs live running).
  */
 export const syncManualInvestigationFreshFromSections = (
   spaceBasePath: string,
@@ -177,22 +178,29 @@ export const syncManualInvestigationFreshFromSections = (
     return;
   }
 
+  const inProgressIds = new Set(
+    sections
+      .find((section) => section.id === 'in-progress')
+      ?.investigations.map(({ id }) => id) ?? []
+  );
+
   let changed = false;
-  for (const section of sections) {
-    if (section.id === 'in-progress') {
-      for (const { id } of section.investigations) {
-        const entry = entries.find((candidate) => candidate.id === id);
-        if (entry?.severity) {
-          delete entry.severity;
-          changed = true;
-        }
-      }
-      continue;
+  for (const id of inProgressIds) {
+    const entry = entries.find((candidate) => candidate.id === id);
+    if (entry?.severity) {
+      delete entry.severity;
+      changed = true;
     }
+  }
+
+  for (const section of sections) {
     if (!isSeverity(section.id)) {
       continue;
     }
     for (const { id } of section.investigations) {
+      if (inProgressIds.has(id)) {
+        continue;
+      }
       const entry = entries.find((candidate) => candidate.id === id);
       if (entry && entry.severity !== section.id) {
         entry.severity = section.id;
@@ -237,8 +245,9 @@ export const getManualInvestigationFreshCountsFromSections = (
 };
 
 /**
- * Whether opening this unread id should clear New / `+N`. Uses live list membership and/or a
- * by-id `in_progress` fetch — never “missing from In progress” alone, never remembered severity.
+ * Whether opening this unread id should clear New / `+N`. Live list membership wins over a
+ * one-shot by-id fetch (which can go stale while the flyout stays open). Never dismiss from
+ * “missing from In progress” alone or from remembered severity.
  */
 export const shouldDismissManualInvestigationFresh = ({
   investigationId,
@@ -254,7 +263,7 @@ export const shouldDismissManualInvestigationFresh = ({
       section.id === 'in-progress' &&
       section.investigations.some(({ id }) => id === investigationId)
   );
-  if (seenInProgress || fetchedInProgress === true) {
+  if (seenInProgress) {
     return false;
   }
   const seenFinished = sections.some(
@@ -262,7 +271,11 @@ export const shouldDismissManualInvestigationFresh = ({
       (isSeverity(section.id) || section.id === 'not-rated') &&
       section.investigations.some(({ id }) => id === investigationId)
   );
-  return seenFinished || fetchedInProgress === false;
+  if (seenFinished) {
+    return true;
+  }
+  // Off-page / search-hidden: trust the by-id fetch only when the list has no signal.
+  return fetchedInProgress === false;
 };
 
 /** Clears session fallback between unit tests. */

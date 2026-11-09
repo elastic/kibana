@@ -89,6 +89,14 @@ describe('manualInvestigationStarts', () => {
         sections: finishedSections,
       })
     ).toBe(true);
+    // Finished in the live list wins over a stale by-id `in_progress: true`.
+    expect(
+      shouldDismissManualInvestigationFresh({
+        investigationId: 'inv-1',
+        sections: finishedSections,
+        fetchedInProgress: true,
+      })
+    ).toBe(true);
     expect(
       shouldDismissManualInvestigationFresh({
         investigationId: 'inv-1',
@@ -116,6 +124,31 @@ describe('manualInvestigationStarts', () => {
         sections: [],
       })
     ).toBe(false);
+  });
+
+  it('lets in-progress win when an id is in both running and a stale severity page', () => {
+    registerManualInvestigationStart('inv-1', spaceA);
+    syncManualInvestigationFreshFromSections(spaceA, [
+      { id: 'critical', investigations: [{ id: 'inv-1' }] },
+    ]);
+    expect(getManualInvestigationFreshCounts(spaceA).critical).toBe(1);
+
+    const listener = jest.fn();
+    const unsubscribe = subscribeManualInvestigationFresh(listener);
+    syncManualInvestigationFreshFromSections(spaceA, [
+      { id: 'in-progress', investigations: [{ id: 'inv-1' }] },
+      { id: 'critical', investigations: [{ id: 'inv-1' }] },
+    ]);
+    expect(getManualInvestigationFreshCounts(spaceA).critical).toBe(0);
+    expect(isManualInvestigationFresh('inv-1', spaceA)).toBe(true);
+
+    listener.mockClear();
+    syncManualInvestigationFreshFromSections(spaceA, [
+      { id: 'in-progress', investigations: [{ id: 'inv-1' }] },
+      { id: 'critical', investigations: [{ id: 'inv-1' }] },
+    ]);
+    expect(listener).not.toHaveBeenCalled();
+    unsubscribe();
   });
 
   it('notifies subscribers on register and dismiss', () => {
