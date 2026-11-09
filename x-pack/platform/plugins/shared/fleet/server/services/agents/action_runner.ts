@@ -681,17 +681,14 @@ export abstract class ActionRunner {
   async processAgentsInBatches(): Promise<{ actionId: string }> {
     const start = Date.now();
 
-    // The point in time is only missing once it has expired and the 404 handler cleared it (or
-    // for an action type that restarts from scratch). Open a fresh one rather than paging without
-    // one: a checkpoint saved under a point in time carries Elasticsearch's implicit `_shard_doc`
-    // tiebreaker, so it has one more value than the plain sort has clauses, and a non-PIT search
-    // would reject it with a 400.
-    if (!this.retryParams.pitId) {
-      this.retryParams.pitId = await openPointInTime(this.esClient, PIT_KEEP_ALIVE);
-      appContextService
-        .getLogger()
-        .debug(`Opened a new point in time to resume action ${this.actionParams.actionId}`);
-    }
+    // Stamped before anything that can fail or block, and the heartbeat started with it, so the
+    // watchdog has a liveness signal from the moment the runner starts and the attempt this run is
+    // on is recorded before it can be lost. Opening a point in time is an Elasticsearch round trip
+    // like any other: a run that failed there and then failed to schedule its retry would
+    // otherwise be resumed on the attempt count of the run before it, and handed back the attempts
+    // it had already spent.
+    await this.updateCheckpoint();
+    this.startHeartbeat();
 
     const perPage = this.actionParams.batchSize ?? SO_SEARCH_LIMIT;
 
@@ -721,14 +718,6 @@ export abstract class ActionRunner {
       return res;
     };
 
-    // Stamp the checkpoint before the first batch, and keep stamping it on a timer, so the
-    // watchdog has a liveness signal from the moment the runner starts. Without it, a batch
-    // slower than CHECK_TASK_INTERVAL_MINUTES looks identical to a dead runner: no checkpoint has
-    // moved and no action document has been written yet, so the watchdog would start a second
-    // runner alongside this one. This first write also persists a freshly opened point in time.
-    await this.updateCheckpoint();
-    this.startHeartbeat();
-
     // Only the first search of a run can be the one Elasticsearch rejects the resumed cursor on,
     // so it is the only one wrapped: every later page searches with a cursor Elasticsearch has
     // just handed back, and a failure from a batch's own writes has to stay an ordinary retryable
@@ -750,6 +739,20 @@ export abstract class ActionRunner {
     };
 
     try {
+      // The point in time is only missing once it has expired and the 404 handler cleared it (or
+      // for an action type that restarts from scratch). Open a fresh one rather than paging
+      // without one: a checkpoint saved under a point in time carries Elasticsearch's implicit
+      // `_shard_doc` tiebreaker, so it has one more value than the plain sort has clauses, and a
+      // non-PIT search would reject it with a 400. Inside the try so the heartbeat above is always
+      // stopped, and checkpointed once opened so a resume gets the new one.
+      if (!this.retryParams.pitId) {
+        this.retryParams.pitId = await openPointInTime(this.esClient, PIT_KEEP_ALIVE);
+        appContextService
+          .getLogger()
+          .debug(`Opened a new point in time to resume action ${this.actionParams.actionId}`);
+        await this.updateCheckpoint();
+      }
+
       let allAgentsProcessed = 0;
       let total = 0;
       // One loop for every page, so the point in time is closed on the no-hits exit too rather

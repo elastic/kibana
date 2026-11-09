@@ -8,6 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 import { v4 as uuidv4 } from 'uuid';
+import { errors as EsErrors } from '@elastic/elasticsearch';
 
 import { appContextService } from '../app_context';
 import type { Agent } from '../../types';
@@ -20,7 +21,7 @@ import { AgentRollbackError } from '../../errors';
 import { ActionRunner } from './action_runner';
 import { BulkActionTaskType } from './bulk_action_types';
 import { getAgentPolicyRestrictions, isAgentlessAgent, isHostedAgent } from './hosted_agent';
-import { createErrorActionResults, createAgentAction, hasAgentAction } from './actions';
+import { createErrorActionResults, createAgentAction } from './actions';
 import { bulkUpdateAgents } from './crud';
 import {
   EXPIRED_ROLLBACK_ERROR_MESSAGE,
@@ -107,25 +108,24 @@ const createChildActionId = (childActionIdPrefix?: string) =>
   `${childActionIdPrefix ?? ''}${uuidv4()}`;
 
 /**
+ * Whether an error leaves it unknowable whether the write it came from reached Elasticsearch. A
+ * response — even a rejection — means Elasticsearch processed the request and did not index the
+ * document; a timeout or a dropped connection means nothing of the sort.
+ */
+const isIndeterminateWriteError = (error: Error): boolean =>
+  error instanceof EsErrors.TimeoutError ||
+  error instanceof EsErrors.ConnectionError ||
+  error instanceof EsErrors.NoLivingConnectionsError;
+
+/**
  * Put back the upgrade fields `rollbackBatch` cleared, from the agent documents it read before
  * clearing them, for when the action those agents were marked for never made it to Elasticsearch.
- * A document under that id means it did land and these agents really are rolling back, so they are
- * left as they are.
  */
-const restoreUpgradeStateIfNotDispatched = async (
+const restoreUpgradeState = async (
   esClient: ElasticsearchClient,
   actionId: string,
   agents: Agent[]
 ) => {
-  if (await hasAgentAction(esClient, actionId)) {
-    appContextService
-      .getLogger()
-      .info(
-        `Rollback action ${actionId} was written after all, leaving the upgrade state of its ${agents.length} agents alone`
-      );
-    return;
-  }
-
   // bulkUpdateAgents reports per agent failures in this map rather than throwing, so a restore
   // that only partly landed would otherwise be silent.
   const errors: Record<Agent['id'], Error> = {};
@@ -233,6 +233,30 @@ export async function rollbackBatch(
   const actionIds: string[] = [];
 
   const errorsByActionId: Record<string, Record<Agent['id'], Error>> = {};
+  // Which agents already have an error result under each action, so that writing early and writing
+  // again at the end cannot produce two results for one agent.
+  const agentsWithErrorResults: Record<string, Set<string>> = {};
+
+  const writeErrorActionResults = async (actionId: string) => {
+    const actionErrors = errorsByActionId[actionId];
+    if (!actionErrors) {
+      return;
+    }
+    const written = (agentsWithErrorResults[actionId] ??= new Set());
+    const pending = Object.entries(actionErrors).filter(([agentId]) => !written.has(agentId));
+    if (pending.length === 0) {
+      return;
+    }
+    await createErrorActionResults(
+      esClient,
+      actionId,
+      Object.fromEntries(pending),
+      'no valid rollback available for agent'
+    );
+    for (const [agentId] of pending) {
+      written.add(agentId);
+    }
+  };
 
   const now = new Date().toISOString();
   const namespaces = spaceIds ?? options.spaceIds ?? [];
@@ -271,6 +295,13 @@ export async function rollbackBatch(
       errorsByActionId[actionId]
     );
 
+    // Written before the action document, which is what deduplication keys on. This action lists
+    // every agent of the version group, including any whose bookkeeping update just failed, so a
+    // replay filters all of them out and never returns to the batch — leaving an action that can
+    // never complete if the results it owes were still unwritten. Writing first means a failure
+    // here leaves no action document at all, and the retry redoes the whole group.
+    await writeErrorActionResults(actionId);
+
     try {
       await createAgentAction(esClient, soClient, {
         id: actionId,
@@ -283,26 +314,39 @@ export async function rollbackBatch(
         namespaces,
       });
     } catch (error) {
-      // The agents are marked as rolling back but, as far as this knows, nothing was dispatched. A
-      // bulk action retries and both writes are idempotent, but `sendRollbackAgentsActions` also
-      // calls this directly for an id list or a small query, and that path has no retry — the
-      // agents would be left looking like they are upgrading, which blocks a single-agent rollback
-      // of them until the upgrade times out.
+      // The agents are marked as rolling back and nothing was dispatched. A bulk action retries
+      // and both writes are idempotent, but `sendRollbackAgentsActions` also calls this directly
+      // for an id list or a small query, and that path has no retry — the agents would be left
+      // looking like they are upgrading, which blocks a single-agent rollback of them until the
+      // upgrade times out.
       //
-      // "As far as this knows" is why the document is looked for first. `createAgentAction` writes
-      // with `refresh: 'wait_for'`, so a timeout on the way back is a realistic way in here with
-      // the action already indexed and about to be dispatched. Unmarking those agents would show
-      // them as idle while they roll back, and let someone start a second rollback on them.
+      // Only when Elasticsearch answered, though. `createAgentAction` writes with
+      // `refresh: 'wait_for'`, so a timeout is a realistic way in here with the document already
+      // indexed and about to be dispatched, and no read settles it: a search of `.fleet-actions`
+      // cannot see a document that has not refreshed yet, and the document's `_id` is a generated
+      // uuid rather than the action id, so there is nothing to `get` either. Unmarking agents
+      // whose rollback is live would show them as idle while they roll back and let someone start
+      // a second rollback on them, which is worse than leaving a mark that the upgrade timeout
+      // clears. So an indeterminate failure leaves them marked and only a definite rejection,
+      // which cannot have indexed anything, is compensated for.
       //
       // Putting the values back is best effort either way: it runs on a path that is already
       // failing, and if it fails too the caller is no worse off than before it was tried.
-      await restoreUpgradeStateIfNotDispatched(esClient, actionId, agents).catch((restoreError) =>
+      if (isIndeterminateWriteError(error)) {
         appContextService
           .getLogger()
           .warn(
-            `Could not restore the upgrade state of ${agents.length} agents after a rollback action failed to be created: ${restoreError.message}`
-          )
-      );
+            `Rollback action ${actionId} may or may not have been created, leaving the upgrade state of its ${agents.length} agents as it is: ${error.message}`
+          );
+      } else {
+        await restoreUpgradeState(esClient, actionId, agents).catch((restoreError) =>
+          appContextService
+            .getLogger()
+            .warn(
+              `Could not restore the upgrade state of ${agents.length} agents after a rollback action failed to be created: ${restoreError.message}`
+            )
+        );
+      }
       throw error;
     }
 
@@ -372,17 +416,10 @@ export async function rollbackBatch(
     }
   }
 
-  // Errors for agents with rollback data are assigned to their version-specific action.
+  // Whatever is left: the pre-action errors assigned above, and the error-only actions. Anything
+  // already written per version group is skipped rather than written twice.
   for (const actionId of actionIds) {
-    const actionErrors = errorsByActionId[actionId];
-    if (actionErrors && Object.keys(actionErrors).length > 0) {
-      await createErrorActionResults(
-        esClient,
-        actionId,
-        actionErrors,
-        'no valid rollback available for agent'
-      );
-    }
+    await writeErrorActionResults(actionId);
   }
 
   return {

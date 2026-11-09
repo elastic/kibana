@@ -729,18 +729,18 @@ describe('createRetryTask', () => {
 
     it('does not hand back the claimed state after a failed run, which would undo a checkpoint', async () => {
       // Task Manager replaces the stored state with whatever the run returns, so the state as of
-      // the claim would roll the cursor, point in time, count and child action ids back to where
-      // they stood when the check task woke up
+      // the claim would roll the cursor, the point in time, the count and the attempt the action
+      // is on back to where they stood when the check task woke up
       esClient.search.mockRejectedValue(new EsErrors.TimeoutError('Request timed out'));
       resolver.getCheckTaskState.mockResolvedValue({
         searchAfter: ['newerAgent'],
-        childActionIds: ['child-1'],
+        retryCount: 7,
         nbAgentsProcessed: 30000,
         runCount: 4,
       });
 
       const result = await createRetryTask(
-        createTaskInstance({ state: { searchAfter: ['olderAgent'], runCount: 4 } }),
+        createTaskInstance({ state: { searchAfter: ['olderAgent'], retryCount: 3, runCount: 4 } }),
         getDeps,
         jest.fn()
       ).run();
@@ -748,7 +748,7 @@ describe('createRetryTask', () => {
       expect(result).toEqual({
         state: {
           searchAfter: ['newerAgent'],
-          childActionIds: ['child-1'],
+          retryCount: 7,
           nbAgentsProcessed: 30000,
           runCount: 5,
         },

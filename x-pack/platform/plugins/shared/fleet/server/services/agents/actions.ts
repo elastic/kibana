@@ -374,9 +374,12 @@ const ACTION_DOCS_PIT_KEEP_ALIVE = '2m';
 
 /**
  * Matches an action's own documents and, when it writes some under generated ids of its own, those
- * too. `.fleet-actions` already carries composite action ids elsewhere — scheduled unenroll
- * prefixes its own and queries them back the same way — so this is an established shape for the
- * index rather than a new assumption about it.
+ * too.
+ *
+ * Composite action ids and the prefix query that reads them back are established in
+ * `.fleet-actions`, where scheduled unenroll already does both. `.fleet-actions-results` has no
+ * such precedent, but the requirement is the same one its sibling `action_id` already meets there:
+ * a keyword mapping, which `action_status.ts` depends on to aggregate the field.
  */
 const actionIdQuery = (actionIds: string[], actionIdPrefix?: string): QueryDslQueryContainer => {
   const should: QueryDslQueryContainer[] = [];
@@ -388,26 +391,6 @@ const actionIdQuery = (actionIds: string[], actionIdPrefix?: string): QueryDslQu
   }
   return { bool: { should, minimum_should_match: 1 } };
 };
-
-/**
- * Whether an action document exists, for a caller that has to tell a write which never landed from
- * one which landed and then timed out on the way back.
- */
-export async function hasAgentAction(
-  esClient: ElasticsearchClient,
-  actionId: string
-): Promise<boolean> {
-  const res = await esClient.search({
-    index: AGENT_ACTIONS_INDEX,
-    ignore_unavailable: true,
-    size: 0,
-    terminate_after: 1,
-    track_total_hits: 1,
-    query: { bool: { filter: [{ term: { action_id: actionId } }] } },
-  });
-  const total = res.hits.total;
-  return (typeof total === 'number' ? total : total?.value ?? 0) > 0;
-}
 
 /** Collects a page's agent ids, stopping at `limit`. Returns whether the limit has been reached. */
 const collectAgentIds = (

@@ -660,6 +660,44 @@ describe('ActionRunner', () => {
       );
     });
 
+    it('records the attempt before opening a point in time, not after', async () => {
+      // opening one is an Elasticsearch round trip like any other: a run that failed there and then
+      // failed to schedule its retry would be resumed on the count of the run before it
+      mockAgentPages(1, 2);
+      mockedOpenPointInTime.mockRejectedValue(new EsErrors.TimeoutError('Request timed out'));
+
+      await createRunner(
+        { total: 2 },
+        { pitId: undefined, retryCount: 4 }
+      ).runActionAsyncWithRetry();
+
+      expect(resolver.updateCheckTaskState).toHaveBeenCalledWith(
+        CHECK_TASK_ID,
+        expect.objectContaining({ retryCount: 4 })
+      );
+    });
+
+    it('checkpoints a freshly opened point in time', async () => {
+      mockAgentPages(1, 2);
+
+      await createRunner({ total: 2 }, { pitId: undefined }).runActionAsyncWithRetry();
+
+      expect(resolver.updateCheckTaskState).toHaveBeenCalledWith(
+        CHECK_TASK_ID,
+        expect.objectContaining({ pitId: 'fresh-pit' })
+      );
+    });
+
+    it('stops the heartbeat when opening a point in time fails', async () => {
+      mockAgentPages(1, 2);
+      mockedOpenPointInTime.mockRejectedValue(new EsErrors.TimeoutError('Request timed out'));
+
+      await createRunner({ total: 2 }, { pitId: undefined }).runActionAsyncWithRetry();
+
+      // the timer must not outlive the run, whichever way the run ends
+      expect(jest.getTimerCount()).toBe(0);
+    });
+
     it('does not open a point in time when it already has one', async () => {
       mockAgentPages(1, 2);
 
