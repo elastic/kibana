@@ -159,5 +159,58 @@ export const caseConfigureSavedObjectType: SavedObjectsType = {
         ),
       },
     },
+    '4': {
+      // observableTypes entries gain paths and a valuePattern, and the label becomes optional
+      // (an entry without a label overrides a built-in type). Not indexed, so no mapping change.
+      changes: [],
+      schemas: {
+        forwardCompatibility: schema.object(
+          {
+            extractObservables: schema.maybe(schema.boolean()),
+            observableTypes: schema.maybe(
+              schema.arrayOf(
+                schema.object(
+                  {
+                    key: schema.string(),
+                    label: schema.maybe(schema.string()),
+                    paths: schema.maybe(
+                      schema.arrayOf(
+                        schema.object({ path: schema.string(), enabled: schema.boolean() })
+                      )
+                    ),
+                    valuePattern: schema.maybe(schema.string()),
+                  },
+                  { unknowns: 'allow' }
+                )
+              )
+            ),
+          },
+          { unknowns: 'allow' }
+        ),
+        create: schema.object(
+          {
+            extractObservables: schema.maybe(schema.boolean()),
+            observableTypes: schema.maybe(
+              schema.arrayOf(
+                schema.object(
+                  {
+                    key: schema.string(),
+                    label: schema.maybe(schema.string()),
+                    paths: schema.maybe(
+                      schema.arrayOf(
+                        schema.object({ path: schema.string(), enabled: schema.boolean() })
+                      )
+                    ),
+                    valuePattern: schema.maybe(schema.string()),
+                  },
+                  { unknowns: 'allow' }
+                )
+              )
+            ),
+          },
+          { unknowns: 'allow' }
+        ),
+      },
+    },
   },
 };
