@@ -22,4 +22,13 @@ export const globalMonacoStyleOverrides = css`
   .monaco-hover.workbench-hover.compact .hover-contents {
     white-space: nowrap !important;
   }
+
+  /*
+   * Monaco pins the close button at top: 5px. The other find icons sit in a
+   * 25px row that starts 3px down, so they start at 7.5px. Margin keeps the
+   * button on that row when the widget grows for replace.
+   */
+  .monaco-editor .find-widget > .button.codicon-widget-close {
+    margin-top: 2.5px;
+  }
 `;
