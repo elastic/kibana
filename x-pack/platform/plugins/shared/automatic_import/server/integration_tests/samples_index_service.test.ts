@@ -14,6 +14,7 @@ import type {
 } from '@kbn/core-test-helpers-kbn-server';
 import { AutomaticImportSamplesIndexService, AutomaticImportSamplesIndexName } from '../services';
 import type { AddSamplesToDataStreamParams } from '../services/samples_index/index_service';
+import { UPLOAD_SAMPLES_MAX_LINES } from '../../common';
 
 interface SamplesIndexHitSource {
   integration_id?: string;
@@ -430,9 +431,12 @@ describe('AutomaticImportSamplesIndexService Integration Tests', () => {
       expect(samples2).not.toContain('Log 1 for DS1');
     });
 
-    it('should respect 500 sample size limit', async () => {
-      // Create a data stream with more than 500 log entries
-      const rawSamples = Array.from({ length: 600 }, (_, i) => `Log line ${i}`);
+    it('should return no more samples than an upload can hold', async () => {
+      // Create a data stream with more log entries than the upload limit
+      const rawSamples = Array.from(
+        { length: UPLOAD_SAMPLES_MAX_LINES + 100 },
+        (_, i) => `Log line ${i}`
+      );
       const params: AddSamplesToDataStreamParams = {
         integrationId: 'integration-large',
         dataStreamId: 'data-stream-large',
@@ -444,13 +448,13 @@ describe('AutomaticImportSamplesIndexService Integration Tests', () => {
       await samplesIndexService.addSamplesToDataStream(params);
       await esClient.indices.refresh({ index: `${AutomaticImportSamplesIndexName}*` });
 
-      // Retrieve samples - should be limited to 500
+      // Retrieve samples - should be limited to the upload limit
       const samples = await samplesIndexService.getSamplesForDataStream(
         'integration-large',
         'data-stream-large'
       );
 
-      expect(samples).toHaveLength(500);
+      expect(samples).toHaveLength(UPLOAD_SAMPLES_MAX_LINES);
       expect(samples.every((log) => log.startsWith('Log line'))).toBe(true);
     });
   });
