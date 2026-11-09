@@ -53,7 +53,6 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
     notifications: { toasts },
     ruleTypeRegistry,
     application: { navigateToApp },
-    cps,
     setBreadcrumbs,
     showClassicBadge,
   } = useKibana().services;
@@ -176,7 +175,6 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
           }}
           http={http}
           toasts={toasts}
-          cps={cps}
           registeredRuleTypes={ruleTypeRegistry.list()}
           filteredRuleTypes={[]}
           showClassicBadge={showClassicBadge}
