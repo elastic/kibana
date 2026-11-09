@@ -424,3 +424,66 @@ describe('ObservableService', () => {
     });
   });
 });
+
+describe('ObservableService.deleteForCases', () => {
+  const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
+  const log = loggingSystemMock.createLogger();
+  const emptySearch = {
+    took: 1,
+    timed_out: false,
+    _shards: { total: 1, successful: 1, failed: 0, skipped: 0 },
+    hits: { hits: [] },
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    unsecuredSavedObjectsClient.search.mockResolvedValue(emptySearch);
+  });
+
+  it('schedules the background deletion in the request namespace', async () => {
+    const scheduleCaseObservablesDeletion = jest.fn().mockResolvedValue(undefined);
+    const service = new ObservableService({
+      log,
+      unsecuredSavedObjectsClient,
+      savedObjectsSerializer: {} as ISavedObjectsSerializer,
+      namespace: 'space-1',
+      scheduleCaseObservablesDeletion,
+    });
+
+    await service.deleteForCases(['case-1']);
+
+    expect(scheduleCaseObservablesDeletion).toHaveBeenCalledWith({
+      caseIds: ['case-1'],
+      namespace: 'space-1',
+    });
+    expect(unsecuredSavedObjectsClient.search).not.toHaveBeenCalled();
+  });
+
+  it('deletes before returning when scheduling fails', async () => {
+    const service = new ObservableService({
+      log,
+      unsecuredSavedObjectsClient,
+      savedObjectsSerializer: {} as ISavedObjectsSerializer,
+      namespace: 'default',
+      scheduleCaseObservablesDeletion: jest.fn().mockRejectedValue(new Error('no task manager')),
+    });
+
+    await service.deleteForCases(['case-1']);
+
+    expect(log.warn).toHaveBeenCalledWith(expect.stringContaining('deleting them now'));
+    expect(unsecuredSavedObjectsClient.search).toHaveBeenCalledTimes(1);
+  });
+
+  it('deletes before returning without Task Manager', async () => {
+    const service = new ObservableService({
+      log,
+      unsecuredSavedObjectsClient,
+      savedObjectsSerializer: {} as ISavedObjectsSerializer,
+      namespace: 'default',
+    });
+
+    await service.deleteForCases(['case-1']);
+
+    expect(unsecuredSavedObjectsClient.search).toHaveBeenCalledTimes(1);
+  });
+});

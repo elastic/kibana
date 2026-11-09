@@ -301,6 +301,7 @@ export const createObservableServiceMock = (): ObservableServiceMock => {
     })),
     update: jest.fn().mockResolvedValue(undefined),
     bulkDelete: jest.fn().mockResolvedValue(undefined),
+    deleteForCases: jest.fn().mockResolvedValue(undefined),
     countForCase: jest.fn().mockResolvedValue(0),
     findExisting: jest.fn().mockResolvedValue([]),
     findPage: jest.fn().mockResolvedValue({ items: [], total: 0 }),

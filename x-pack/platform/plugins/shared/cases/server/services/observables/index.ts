@@ -26,6 +26,7 @@ import type { Observable } from '../../../common/types/domain';
 import { CASE_REF_NAME } from '../../common/constants';
 import type { ObservablePersistedAttributes } from '../../common/types/observable';
 import type { User } from '../../common/types/user';
+import { deleteObservablesOfCases } from './delete_for_cases';
 
 /** Largest page a single search reads when it walks every observable of a case. */
 const SCAN_PAGE_SIZE = 5_000;
@@ -78,6 +79,11 @@ interface ObservableServiceContext {
   savedObjectsSerializer: ISavedObjectsSerializer;
   /** The namespace of the request's space; every search runs in it. */
   namespace: string;
+  /** Schedules the background deletion of deleted cases' observables, when Task Manager runs. */
+  scheduleCaseObservablesDeletion?: (params: {
+    caseIds: string[];
+    namespace: string;
+  }) => Promise<void>;
 }
 
 interface CaseIdBucket {
@@ -399,6 +405,39 @@ export class ObservableService {
           .join('; ')}`
       );
     }
+  }
+
+  /**
+   * Deletes the observables of deleted cases. A background task deletes them a page at a time;
+   * without Task Manager, or when scheduling fails, they are deleted before the call returns.
+   */
+  public async deleteForCases(caseIds: string[]): Promise<void> {
+    if (caseIds.length === 0) {
+      return;
+    }
+
+    const { log, namespace, scheduleCaseObservablesDeletion, unsecuredSavedObjectsClient } =
+      this.context;
+
+    if (scheduleCaseObservablesDeletion) {
+      try {
+        await scheduleCaseObservablesDeletion({ caseIds, namespace });
+        return;
+      } catch (error) {
+        log.warn(
+          `Failed to schedule the deletion of the observables of cases [${caseIds.join(
+            ', '
+          )}], deleting them now: ${error instanceof Error ? error.message : String(error)}`
+        );
+      }
+    }
+
+    await deleteObservablesOfCases({
+      savedObjectsClient: unsecuredSavedObjectsClient,
+      caseIds,
+      namespace,
+      logger: log,
+    });
   }
 
   public async countForCase(caseId: string): Promise<number> {

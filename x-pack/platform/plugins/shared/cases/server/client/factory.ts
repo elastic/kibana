@@ -72,6 +72,7 @@ import type {
   CasesAnalyticsV2WriterContract,
   CasesAttachmentsV2WriterContract,
 } from '../cases_analytics_v2';
+import type { CaseObservablesDeletionParams } from '../tasks/observables/observables_task_manager';
 
 interface CasesClientFactoryArgs {
   securityPluginSetup: SecurityPluginSetup;
@@ -121,6 +122,8 @@ interface CasesClientFactoryArgs {
    * unconditionally.
    */
   analyticsV2DataViewRefresher: CasesAnalyticsV2DataViewRefresher;
+  /** Schedules the background deletion of deleted cases' observables; absent without Task Manager. */
+  scheduleCaseObservablesDeletion?: (params: CaseObservablesDeletionParams) => Promise<void>;
 }
 
 interface CreateCasesClientParams {
@@ -404,6 +407,7 @@ export class CasesClientFactory {
         unsecuredSavedObjectsClient,
         savedObjectsSerializer,
         namespace,
+        scheduleCaseObservablesDeletion: this.options.scheduleCaseObservablesDeletion,
       }),
     };
   }

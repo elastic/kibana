@@ -63,6 +63,7 @@ import type { ServerlessProjectType } from '../common/constants/types';
 import { SERVERLESS_PROJECT_TYPES } from '../common/constants/owners';
 
 import { IncrementalIdTaskManager } from './tasks/incremental_id/incremental_id_task_manager';
+import { ObservablesTaskManager } from './tasks/observables/observables_task_manager';
 import { TemplatesMigrationTaskManager } from './tasks/templates_migration/templates_migration_task_manager';
 import { createCasesAnalyticsIndexes, registerCasesAnalyticsIndexesTasks } from './cases_analytics';
 import { scheduleCAISchedulerTask } from './cases_analytics/tasks/scheduler_task';
@@ -99,6 +100,7 @@ export class CasePlugin
   private unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
   private userProfileService: UserProfileService;
   private incrementalIdTaskManager?: IncrementalIdTaskManager;
+  private observablesTaskManager?: ObservablesTaskManager;
   private templatesMigrationTaskManager?: TemplatesMigrationTaskManager;
   private usageCounter?: IUsageCounter;
   private readonly isServerless: boolean;
@@ -198,6 +200,12 @@ export class CasePlugin
           templatesConfig: this.caseConfig.templates,
         });
       }
+
+      this.observablesTaskManager = new ObservablesTaskManager(
+        plugins.taskManager,
+        this.logger,
+        plugins.usageCollection
+      );
 
       if (this.caseConfig.incrementalId.enabled) {
         this.incrementalIdTaskManager = new IncrementalIdTaskManager(
@@ -362,6 +370,7 @@ export class CasePlugin
 
     if (plugins.taskManager) {
       scheduleCasesTelemetryTask(plugins.taskManager, this.logger);
+      this.observablesTaskManager?.start(plugins.taskManager, core);
 
       if (this.caseConfig.incrementalId.enabled) {
         void this.incrementalIdTaskManager?.setupIncrementIdTask(plugins.taskManager, core);
@@ -485,7 +494,12 @@ export class CasePlugin
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     registerCasesWorkflowEventBridge(this.casesEventBus!, plugins.workflowsExtensions, this.logger);
 
+    const { observablesTaskManager } = this;
+
     this.clientFactory.initialize({
+      scheduleCaseObservablesDeletion: observablesTaskManager
+        ? (params) => observablesTaskManager.scheduleCaseObservablesDeletion(params)
+        : undefined,
       // securityPluginSetup will be set to a defined value in the setup() function
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       securityPluginSetup: this.securityPluginSetup!,
