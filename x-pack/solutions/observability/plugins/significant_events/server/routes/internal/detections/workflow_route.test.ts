@@ -35,6 +35,7 @@ const setup = () => {
   const handlerParams = {
     params: { body: { lookback: 'now-1440m', bucketInterval: '60m' } },
     request: {
+      spaceId: 'default',
       isInternalApiRequest: true,
       headers: { 'x-kibana-workflow-execution-id': 'detection-run-1' },
     },

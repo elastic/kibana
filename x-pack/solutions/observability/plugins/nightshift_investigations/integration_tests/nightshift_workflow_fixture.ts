@@ -24,6 +24,7 @@
  */
 
 import { coreMock } from '@kbn/core/server/mocks';
+import { NIGHTSHIFT_SUPPORTED_SPACE_ID } from '@kbn/nightshift-shared';
 import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
 import { loggerMock } from '@kbn/logging-mocks';
 import { ExecutionStatus, StepCategory } from '@kbn/workflows';
@@ -213,7 +214,9 @@ export const createNightshiftWorkflowFixture = ({
 }: NightshiftWorkflowFixtureOptions = {}): NightshiftWorkflowFixture => {
   setHealthyBoundary();
 
-  const engine = new WorkflowRunFixture();
+  // Nightshift runs in the default space only, and its step definitions and client now refuse
+  // any other one, so the harness has to drive its executions there as production does.
+  const engine = new WorkflowRunFixture({ spaceId: NIGHTSHIFT_SUPPORTED_SPACE_ID });
   const logger = loggerMock.create();
   const analytics: AnalyticsServiceSetup = coreMock.createSetup().analytics;
 
