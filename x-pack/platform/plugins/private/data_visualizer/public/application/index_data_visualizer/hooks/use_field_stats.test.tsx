@@ -54,14 +54,13 @@ const samplingOption: SamplingOption = { mode: 'no_sampling', seed: '1' };
 const searchStrategyParams = {
   earliest: 0,
   latest: 10,
-  aggInterval: { asMilliseconds: () => 1000 },
   searchQuery: { match_all: {} },
   index: 'test-index',
   browserSessionSeed: 1,
   samplingOption,
   aggregatableFields: [],
   nonAggregatableFields: [],
-} as OverallStatsSearchStrategyParams;
+} as unknown as OverallStatsSearchStrategyParams;
 
 const keywordField: FieldRequestConfig = {
   fieldName: 'message',
