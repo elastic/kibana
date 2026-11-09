@@ -59,11 +59,12 @@ export async function setUpDetectionEngineAccount({
       version?: string;
     }
   ): Promise<T> => {
-    const call = method === 'GET' ? supertest.get(path) : supertest.post(path);
-    call.set('kbn-xsrf', 'foo').set('x-elastic-internal-origin', 'kibana');
-    if (version) call.set('elastic-api-version', version);
-    if (query) call.query(query);
-    if (body) call.set('content-type', 'application/json').send(body);
+    let call = (method === 'GET' ? supertest.get(path) : supertest.post(path))
+      .set('kbn-xsrf', 'foo')
+      .set('x-elastic-internal-origin', 'kibana');
+    if (version) call = call.set('elastic-api-version', version);
+    if (query) call = call.query(query);
+    if (body) call = call.set('content-type', 'application/json').send(body);
     const response = await call;
     if (response.status >= 400) {
       throw new RequestError(
