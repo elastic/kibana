@@ -522,6 +522,7 @@ export function getDataStateContainer({
           }
 
           abortController = new AbortController();
+          const { signal: fetchAbortSignal } = abortController;
 
           const query = getCurrentTab().appState.query;
           const isEsqlQuery = isOfAggregateQueryType(query);
@@ -610,20 +611,20 @@ export function getDataStateContainer({
             },
           });
 
-          if (!abortController.signal.aborted) {
+          if (!fetchAbortSignal.aborted) {
             internalState.dispatch(
               injectCurrentTab(internalStateActions.setIsWarningCalloutDismissed)({
                 isWarningCalloutDismissed: false,
               })
             );
-          }
 
-          // A replay doesn't query Elasticsearch, so its timing would skew the metrics
-          if (!isReplayedLoad({ replayCacheLastFetched })) {
-            fetchAllTracker.reportEvent({
-              requestAdapter: inspectorAdapters.requests,
-              approximationApplied: dataSubjects.documents$.getValue().approximationApplied,
-            });
+            // A replay doesn't query Elasticsearch, so its timing would skew the metrics
+            if (!isReplayedLoad({ replayCacheLastFetched })) {
+              fetchAllTracker.reportEvent({
+                requestAdapter: inspectorAdapters.requests,
+                approximationApplied: dataSubjects.documents$.getValue().approximationApplied,
+              });
+            }
           }
 
           // If the autoRefreshCallback is still the same as when we started i.e. there was no newer call

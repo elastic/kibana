@@ -245,7 +245,13 @@ export function fetchAll(
       race(
         combineLatest([
           isComplete(dataSubjects.documents$).pipe(
-            switchMap(async () => onFetchRecordsComplete?.())
+            switchMap(async () => {
+              if (abortController.signal.aborted) {
+                return;
+              }
+
+              return onFetchRecordsComplete?.();
+            })
           ),
           isComplete(dataSubjects.totalHits$),
         ]),

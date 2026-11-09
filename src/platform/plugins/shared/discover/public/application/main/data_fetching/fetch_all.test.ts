@@ -297,8 +297,9 @@ describe('test fetchAll', () => {
       })
     );
     mockfetchEsql.mockRejectedValue(new Error('The query was canceled'));
+    const onFetchRecordsComplete = jest.fn();
 
-    const fetching = fetchAll(deps);
+    const fetching = fetchAll({ ...deps, onFetchRecordsComplete });
     deps.abortController.abort(AbortReason.CANCELED);
     await fetching;
 
@@ -311,6 +312,7 @@ describe('test fetchAll', () => {
       result: undefined,
     });
     expect(subjects.main$.getValue().fetchStatus).toBe(FetchStatus.COMPLETE);
+    expect(onFetchRecordsComplete).not.toHaveBeenCalled();
   });
 
   test('does not finish loading when the ES|QL search is replaced', async () => {

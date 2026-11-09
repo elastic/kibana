@@ -279,7 +279,10 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
       }),
       {
         isDisabled: () => {
-          if (isReplayedLoad(getCurrentTab().dataRequestParams)) {
+          // The config outlives the tab until the next tab enables storage, e.g. after "New"
+          const dataRequestParams = getCurrentTab()?.dataRequestParams;
+
+          if (dataRequestParams && isReplayedLoad(dataRequestParams)) {
             return {
               disabled: true,
               reasonText: i18n.translate(
