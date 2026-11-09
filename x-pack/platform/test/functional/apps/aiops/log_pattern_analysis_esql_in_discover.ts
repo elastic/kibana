@@ -78,6 +78,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
       await testSubjects.click('querySubmitButton');
       const columns = ['Count', 'Pattern'];
+      await discover.waitUntilTabIsLoaded();
+      await unifiedFieldList.waitUntilFieldlistHasCountOfFields(columns.length);
       await unifiedFieldList.clickFieldListItemAdd('Count');
       await unifiedFieldList.clickFieldListItemAdd('Pattern');
       await header.waitUntilLoadingHasFinished();
