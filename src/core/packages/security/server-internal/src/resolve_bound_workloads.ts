@@ -307,7 +307,7 @@ export const createBoundWorkloadResolver = ({
             : null;
 
         // One malformed entry discards the whole result: a resolver that gets the shape wrong
-        // cannot be trusted to have the statuses right, and `missing` deletes bindings.
+        // cannot be trusted to have the statuses right, and callers may act on `missing`.
         if (resolved === null || !isComplete(resolved)) {
           recordFailure('invalid_result');
           logger.warn(
