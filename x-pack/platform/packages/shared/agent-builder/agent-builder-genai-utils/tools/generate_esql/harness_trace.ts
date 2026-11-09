@@ -20,6 +20,10 @@ export interface EsqlHarnessTraceRecord {
   nlQuery: string;
   target?: string;
   requestedKeywords?: string[];
+  /** Which connector/model actually served the call — the model slot is part of the search space. */
+  generateConnectorId?: string;
+  generateModel?: string;
+  requestDocConnectorId?: string;
   tries: number;
   generatedQueries: string[];
   attempts: Array<{ query?: string; success: boolean; error?: string; timedOut?: boolean }>;

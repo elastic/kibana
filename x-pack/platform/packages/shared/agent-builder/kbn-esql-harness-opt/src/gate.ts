@@ -15,7 +15,7 @@ export interface GateResult {
   meanDelta: number;
   ciLow: number;
   ciHigh: number;
-  /** Δ(tokens per solved example), candidate − incumbent. Negative is cheaper. */
+  /** Δ(USD per solved example), candidate − incumbent. Negative is cheaper. */
   costPerSolvedDelta: number;
   costPerSolvedCiLow: number;
   costPerSolvedCiHigh: number;
@@ -29,43 +29,43 @@ export interface GateResult {
 
 interface SeedAggregate {
   reward: number;
-  tokens: number;
+  cost: number;
 }
 
 const aggregateBySeed = (runs: ExampleRun[]): Map<string, SeedAggregate> => {
-  const totals = new Map<string, { reward: number; tokens: number; count: number }>();
+  const totals = new Map<string, { reward: number; cost: number; count: number }>();
   for (const run of runs) {
-    const current = totals.get(run.seedId) ?? { reward: 0, tokens: 0, count: 0 };
+    const current = totals.get(run.seedId) ?? { reward: 0, cost: 0, count: 0 };
     totals.set(run.seedId, {
       reward: current.reward + run.score.reward,
-      tokens: current.tokens + (run.inputTokens ?? 0) + (run.outputTokens ?? 0),
+      cost: current.cost + (run.costUsd ?? 0),
       count: current.count + 1,
     });
   }
   return new Map(
-    [...totals].map(([seedId, { reward, tokens, count }]) => [
+    [...totals].map(([seedId, { reward, cost, count }]) => [
       seedId,
-      { reward: count === 0 ? 0 : reward / count, tokens: count === 0 ? 0 : tokens / count },
+      { reward: count === 0 ? 0 : reward / count, cost: count === 0 ? 0 : cost / count },
     ])
   );
 };
 
 /**
- * Tokens spent per unit of reward earned, over a set of seeds.
+ * USD spent per unit of reward earned, over a set of seeds.
  *
  * Ratio-of-sums rather than mean-of-ratios: a seed the harness never solves would otherwise
  * contribute an infinite per-seed ratio and dominate the statistic.
  */
 const costPerSolved = (seeds: string[], aggregates: Map<string, SeedAggregate>): number => {
-  let tokens = 0;
+  let cost = 0;
   let reward = 0;
   for (const seedId of seeds) {
     const aggregate = aggregates.get(seedId);
     if (!aggregate) continue;
-    tokens += aggregate.tokens;
+    cost += aggregate.cost;
     reward += aggregate.reward;
   }
-  return reward === 0 ? Number.POSITIVE_INFINITY : tokens / reward;
+  return reward === 0 ? Number.POSITIVE_INFINITY : cost / reward;
 };
 
 const percentile = (sorted: number[], fraction: number): number =>
@@ -146,8 +146,7 @@ export const gateCandidate = ({
   const improvements = seeds.filter((seedId) => rewardDelta(seedId) > regressionEpsilon);
   const regressions = seeds.filter((seedId) => rewardDelta(seedId) < -regressionEpsilon);
 
-  const incumbentTokens = incumbent.totalInputTokens + incumbent.totalOutputTokens || 1;
-  const costRatio = (candidate.totalInputTokens + candidate.totalOutputTokens) / incumbentTokens;
+  const costRatio = candidate.totalCostUsd / (incumbent.totalCostUsd || Number.EPSILON);
 
   const qualityWin = ciLow > 0 && costRatio <= maxCostRatio;
   const costWin = ciLow > -nonInferiorityMargin && costPerSolvedCiHigh < 0;

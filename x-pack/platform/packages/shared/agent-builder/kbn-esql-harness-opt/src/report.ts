@@ -6,7 +6,9 @@
  */
 
 import Fs from 'fs';
+import Http from 'http';
 import Path from 'path';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { harnessPaths } from './workspace';
 
 interface StoredRun {
@@ -48,6 +50,8 @@ const collectRuns = (runsDir: string): ReportPayload['runs'] => {
             inputTokens: run.inputTokens,
             outputTokens: run.outputTokens,
             latencyMs: run.latencyMs,
+            connectorId: run.connectorId,
+            costUsd: run.costUsd,
           })),
         });
       } catch (e) {
@@ -141,7 +145,7 @@ const renderRound = ({ entry }) => {
   const cards = gate ? [
     ['Δ reward', n(gate.meanDelta)],
     ['95% CI', '[' + n(gate.ciLow) + ', ' + n(gate.ciHigh) + ']'],
-    ['tokens / solved', n(gate.incumbentCostPerSolved, 0) + ' → ' + n(gate.candidateCostPerSolved, 0)],
+    ['$ / solved', n(gate.incumbentCostPerSolved, 4) + ' → ' + n(gate.candidateCostPerSolved, 4)],
     ['regressions', (gate.regressions ?? []).length],
     ['improvements', (gate.improvements ?? []).length],
     ['cost ratio', n(gate.costRatio, 2) + '×'],
@@ -179,16 +183,18 @@ const renderRun = ({ run }) => {
       '<div class="muted">gold</div><pre>' + esc(item.goldQuery) + '</pre>' +
       (item.score?.error ? '<div class="muted">error</div><pre>' + esc(item.score.error).slice(0, 800) + '</pre>' : '') +
       '</details></td>' +
-      '<td>' + (item.tries ?? '—') + '</td><td>' + ((item.inputTokens ?? 0) + (item.outputTokens ?? 0)) + '</td></tr>').join('');
+      '<td>' + (item.tries ?? '—') + '</td><td>' + ((item.inputTokens ?? 0) + (item.outputTokens ?? 0)) +
+      '</td><td>' + esc((item.connectorId ?? '').replace('harness-opt-', '')) + '</td></tr>').join('');
 
   return '<h2>' + esc(run.id) + '</h2>' +
     '<div class="grid">' +
     [['reward', n(summary.meanReward)], ['executes', n(summary.meanExecutes, 2)], ['result eq', n(summary.meanResultEquivalence)],
      ['tries', n(summary.meanTries, 2)], ['tokens', (summary.totalInputTokens ?? 0) + (summary.totalOutputTokens ?? 0)],
+     ['cost USD', n(summary.totalCostUsd, 3)],
      ['config', esc(summary.configHash ?? '')]]
       .map(([k, v]) => '<div class="card"><div class="k">' + k + '</div><div class="v">' + v + '</div></div>').join('') + '</div>' +
     (byProvenance ? '<h3>By provenance</h3><table><tr><th>source</th><th>reward</th><th>runs</th></tr>' + byProvenance + '</table>' : '') +
-    '<h3>Examples (worst first)</h3><table><tr><th>reward</th><th>source</th><th>question</th><th>result</th><th>tries</th><th>tokens</th></tr>' + rows + '</table>';
+    '<h3>Examples (worst first)</h3><table><tr><th>reward</th><th>source</th><th>question</th><th>result</th><th>tries</th><th>tokens</th><th>model</th></tr>' + rows + '</table>';
 };
 
 function select(index) {
@@ -208,7 +214,8 @@ select(0);
  * campaign and audit what each round proposed, what it was measured at, and why it was accepted
  * or rejected — without the repo, a server, or the runner's state.
  */
-export const writeReport = (): string => {
+/** Render the report HTML from whatever is on disk right now. */
+export const renderReport = (): string => {
   const { runsDir, lineageDir, root } = harnessPaths();
   const ledgerPath = Path.join(lineageDir, 'ledger.json');
   const payload: ReportPayload = {
@@ -219,7 +226,58 @@ export const writeReport = (): string => {
     runs: collectRuns(runsDir),
   };
 
-  const outputPath = Path.join(root, 'report.html');
-  Fs.writeFileSync(outputPath, TEMPLATE(JSON.stringify(payload).replace(/</g, '\\u003c')));
+  void root;
+  return TEMPLATE(JSON.stringify(payload).replace(/</g, '\\u003c'));
+};
+
+export const writeReport = (): string => {
+  const outputPath = Path.join(harnessPaths().root, 'report.html');
+  Fs.writeFileSync(outputPath, renderReport());
   return outputPath;
 };
+
+/**
+ * Serve the report over HTTP, re-rendering on every request.
+ *
+ * Rendering is a pure function of the run directory and the ledger, so a reload always shows the
+ * current state of a campaign — including one that is still running — and the same URL can be
+ * opened from another machine on the network.
+ */
+export const serveReport = ({
+  host,
+  port,
+  log,
+}: {
+  host: string;
+  port: number;
+  log: ToolingLog;
+}): Promise<void> =>
+  new Promise((resolve, reject) => {
+    const server = Http.createServer((request, response) => {
+      if (request.url === '/health') {
+        response.writeHead(200, { 'content-type': 'text/plain' });
+        response.end('ok');
+        return;
+      }
+      try {
+        const html = renderReport();
+        response.writeHead(200, {
+          'content-type': 'text/html; charset=utf-8',
+          'cache-control': 'no-store',
+        });
+        response.end(html);
+      } catch (e) {
+        response.writeHead(500, { 'content-type': 'text/plain' });
+        response.end(String((e as Error).message));
+      }
+    });
+
+    server.on('error', reject);
+    server.listen(port, host, () => {
+      log.info(`[harness-opt] report served on http://${host}:${port} (re-rendered per request)`);
+    });
+    process.on('SIGINT', () => {
+      server.close();
+      resolve();
+    });
+  });

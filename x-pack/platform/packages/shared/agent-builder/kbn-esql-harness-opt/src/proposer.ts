@@ -152,7 +152,10 @@ export const lintProposal = (config: Record<string, unknown>): string[] => {
   return violations;
 };
 
-const PROPOSER_TASK = (incumbentConfigName: string) => `You are optimizing the configuration of the
+const PROPOSER_TASK = (
+  incumbentConfigName: string,
+  modelChoices: Array<{ connectorId: string; inferenceId: string }>
+) => `You are optimizing the configuration of the
 Kibana \`generate_esql\` harness. In this directory you will find:
 
 - \`bundle.json\` — failing examples from the latest run against the search split: the question,
@@ -180,7 +183,13 @@ Rules, which are enforced mechanically after you answer:
    savings. A candidate can also win by holding quality while spending less.
 4. Base the change on evidence in \`bundle.json\`: name the failures you expect it to fix.
 
-Write your answer to a file called \`proposal.json\` in this directory, with exactly this shape:
+${
+  modelChoices.length
+    ? `Connector ids available for the model slot (generateConnectorId / requestDocConnectorId):\n${modelChoices
+        .map((choice) => `- ${choice.connectorId} → ${choice.inferenceId}`)
+        .join('\n')}\nUse \`null\` to keep the context's own model selection.\n\n`
+    : ''
+}Write your answer to a file called \`proposal.json\` in this directory, with exactly this shape:
 
 {
   "config": { ...the full EsqlHarnessConfig object... },
@@ -201,6 +210,7 @@ export const proposeCandidate = async ({
   history,
   scratchDir,
   log,
+  modelChoices = [],
   model = process.env.HARNESS_PROPOSER_MODEL ?? 'grok-4.7-low',
   timeoutMs = Number(process.env.HARNESS_PROPOSER_TIMEOUT_MS ?? 900_000),
 }: {
@@ -209,6 +219,7 @@ export const proposeCandidate = async ({
   history: unknown[];
   scratchDir: string;
   log: ToolingLog;
+  modelChoices?: Array<{ connectorId: string; inferenceId: string }>;
   model?: string;
   timeoutMs?: number;
 }): Promise<Proposal> => {
@@ -233,7 +244,7 @@ export const proposeCandidate = async ({
   try {
     const code = await runProposerCommand({
       command,
-      args: [scratchDir, '--model', model, PROPOSER_TASK('incumbent.json')],
+      args: [scratchDir, '--model', model, PROPOSER_TASK('incumbent.json', modelChoices)],
       logPath,
       timeoutMs,
     });

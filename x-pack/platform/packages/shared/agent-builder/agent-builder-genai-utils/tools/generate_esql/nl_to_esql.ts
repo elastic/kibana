@@ -188,16 +188,29 @@ export const generateEsql = async ({
 
   // Slot F: the model tier is part of the search space, so it is resolved from the harness
   // config rather than hardcoded. Defaults to `low` for both steps, i.e. today's behaviour.
-  const model = modelProvider
-    ? await modelProvider.selectModel({
-        effortLevel: EffortLevels[harnessConfig.model.generateEffort],
-      })
-    : inputModel!;
+  const selectHarnessModel = async (
+    connectorId: string | null,
+    effort: 'low' | 'medium' | 'high'
+  ) => {
+    if (!modelProvider) {
+      return inputModel!;
+    }
+    return connectorId
+      ? modelProvider.getModelById({ connectorId })
+      : modelProvider.selectModel({ effortLevel: EffortLevels[effort] });
+  };
+
+  const model = await selectHarnessModel(
+    harnessConfig.model.generateConnectorId,
+    harnessConfig.model.generateEffort
+  );
   const requestDocModel =
-    modelProvider && harnessConfig.model.requestDocEffort !== harnessConfig.model.generateEffort
-      ? await modelProvider.selectModel({
-          effortLevel: EffortLevels[harnessConfig.model.requestDocEffort],
-        })
+    harnessConfig.model.requestDocConnectorId ||
+    harnessConfig.model.requestDocEffort !== harnessConfig.model.generateEffort
+      ? await selectHarnessModel(
+          harnessConfig.model.requestDocConnectorId ?? harnessConfig.model.generateConnectorId,
+          harnessConfig.model.requestDocEffort
+        )
       : model;
   const timeRange = inputTimeRange ?? { from: 'now-24h', to: 'now' };
   const docBase = await EsqlDocumentBase.load();
@@ -346,6 +359,9 @@ export const generateEsql = async ({
             nlQuery,
             target: selectedTarget,
             requestedKeywords: precomputedDocAction?.requestedKeywords,
+            generateConnectorId: model.connector?.connectorId,
+            generateModel: model.connector?.config?.defaultModel,
+            requestDocConnectorId: requestDocModel.connector?.connectorId,
             tries: generateActions.length,
             generatedQueries: generateActions.map((action) => action.query ?? ''),
             attempts: attempts.map((action) => ({

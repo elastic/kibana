@@ -25,7 +25,8 @@ import type { RunSummary } from './runner';
 import { gateCandidate } from './gate';
 import { lintProposal, proposeCandidate } from './proposer';
 import { harnessPaths, writeActiveConfig } from './workspace';
-import { writeReport } from './report';
+import { serveReport, writeReport } from './report';
+import { readModelChoices, setupModelConnectors } from './models';
 import {
   backTranslate,
   balanceCorpus,
@@ -74,7 +75,8 @@ export const cli = () =>
   round [--config path]             one propose → gate round against the current incumbent
   campaign --rounds n               repeat rounds, promoting accepted candidates
   sealed --config path              score a config on the sealed split
-  report                            write a self-contained HTML report of all rounds and runs
+  report [--serve] [--port n]       write (or serve) an HTML report of all rounds and runs
+  setup-models                      create the inference connectors the model slot can choose
 
 Start Kibana with:
   ESQL_HARNESS_CONFIG=${configPath} ESQL_HARNESS_TRACE_FILE=${tracePath}`);
@@ -82,7 +84,20 @@ Start Kibana with:
       }
 
       if (command === 'report') {
+        if (flags.serve) {
+          await serveReport({
+            host: optionalFlag(flags.host) ?? '0.0.0.0',
+            port: Number(optionalFlag(flags.port) ?? 7711),
+            log,
+          });
+          return;
+        }
         log.info(`[harness-opt] report written to ${writeReport()}`);
+        return;
+      }
+
+      if (command === 'setup-models') {
+        await setupModelConnectors({ target, log });
         return;
       }
 
@@ -269,6 +284,7 @@ Start Kibana with:
               history: ledger,
               scratchDir: Path.join(outputDir, 'proposer'),
               log,
+              modelChoices: readModelChoices(),
             });
           } catch (e) {
             // A proposer that times out or answers in the wrong shape costs the round, not the
@@ -377,7 +393,10 @@ Start Kibana with:
           'rounds',
           'concurrency',
           'probes',
+          'port',
+          'host',
         ],
+        boolean: ['serve'],
         help: `
         --config <path>      incumbent config to start from (default: shipped defaults)
         --split <name>       search | gate | sealed (baseline only)

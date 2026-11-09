@@ -64,6 +64,14 @@ export interface EsqlHarnessConfig {
   model: {
     generateEffort: 'low' | 'medium' | 'high';
     requestDocEffort: 'low' | 'medium' | 'high';
+    /**
+     * Connector to run the generation step on. `null` keeps the context's own model selection
+     * (today's behaviour); a connector id pins a specific model, which is the only way to search
+     * across model families rather than only across effort levels.
+     */
+    generateConnectorId: string | null;
+    /** Connector for the keyword-selection step; `null` reuses the generation model. */
+    requestDocConnectorId: string | null;
   };
   /** Slot G — prompt prose. Appended to the instruction block; opened last on purpose. */
   instructions: {
@@ -112,6 +120,8 @@ Can you fix the query?`,
   model: {
     generateEffort: 'low',
     requestDocEffort: 'low',
+    generateConnectorId: null,
+    requestDocConnectorId: null,
   },
   instructions: {
     extraInstructions: '',

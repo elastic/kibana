@@ -15,6 +15,7 @@ import { executeGenerateEsql } from './clients';
 import { executeGold, scoreQuery } from './scorers';
 import type { QueryScore } from './scorers';
 import { activeConfigPath, harnessPaths, writeActiveConfig } from './workspace';
+import { costUsd } from './pricing';
 
 export interface ExampleRun {
   exampleId: string;
@@ -36,6 +37,9 @@ export interface ExampleRun {
   attemptErrors?: string[];
   requestedKeywords?: string[];
   resolvedTarget?: string;
+  /** Connector that served the call, which is what the run is priced against. */
+  connectorId?: string;
+  costUsd?: number;
 }
 
 export interface RunSummary {
@@ -48,6 +52,8 @@ export interface RunSummary {
   meanTries: number;
   totalInputTokens: number;
   totalOutputTokens: number;
+  /** Priced cost of the run; the gate compares money, not tokens. */
+  totalCostUsd: number;
   meanLatencyMs: number;
   /** Mean reward split by provenance — the anchor set is reported separately on purpose. */
   rewardByProvenance: Record<string, { reward: number; count: number }>;
@@ -187,6 +193,12 @@ export const runConfig = async ({
     run.inputTokens = record.inputTokens as number;
     run.outputTokens = record.outputTokens as number;
     run.requestedKeywords = record.requestedKeywords as string[];
+    run.connectorId = record.generateConnectorId as string;
+    run.costUsd = costUsd({
+      modelOrConnectorId: (record.generateModel ?? record.generateConnectorId) as string,
+      inputTokens: run.inputTokens,
+      outputTokens: run.outputTokens,
+    });
     run.resolvedTarget = record.target as string;
     run.attemptErrors = ((record.attempts as Array<{ error?: string }>) ?? [])
       .map((attempt) => attempt.error)
@@ -207,6 +219,7 @@ export const runConfig = async ({
     meanTries: mean(runs.map((run) => run.tries ?? 0)),
     totalInputTokens: runs.reduce((total, run) => total + (run.inputTokens ?? 0), 0),
     totalOutputTokens: runs.reduce((total, run) => total + (run.outputTokens ?? 0), 0),
+    totalCostUsd: runs.reduce((total, run) => total + (run.costUsd ?? 0), 0),
     meanLatencyMs: mean(runs.map((run) => run.latencyMs)),
     rewardByProvenance: Object.fromEntries(
       [...new Set(runs.map((run) => run.provenance))].map((provenance) => {
