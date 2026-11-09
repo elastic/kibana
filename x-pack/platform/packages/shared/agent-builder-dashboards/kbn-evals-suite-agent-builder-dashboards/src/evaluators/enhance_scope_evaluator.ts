@@ -16,7 +16,8 @@ import {
 } from '../dashboard_panels';
 import type { DashboardAgentEvaluator } from '../types';
 import { skippedResult } from '../evaluator_utils';
-import { findAskUserQuestionPrompt, getLastWrittenDashboardId } from '../extract_dashboard';
+import { getLastWrittenDashboardId } from '../extract_dashboard';
+import { findModeQuestionFailures } from './enhance_evaluators';
 
 export const ENHANCE_SCOPE_EVALUATOR_NAME = 'Enhance Scope';
 
@@ -91,10 +92,8 @@ export const enhanceScopeEvaluator: DashboardAgentEvaluator = {
           getPanelQueryKey(getPanelQueries(panelAfter))
       );
     });
-    const askedQuestion = findAskUserQuestionPrompt(output.openingPrompts ?? []) !== undefined;
-
     const failures = [
-      !askedQuestion && 'did not ask which mode to apply',
+      ...findModeQuestionFailures(output).failures,
       changedOutsideScope.length > 0 &&
         `changed panels outside the request: ${changedOutsideScope.join(', ')}`,
       addedPanels.length > 0 && `added panels: ${addedPanels.join(', ')}`,

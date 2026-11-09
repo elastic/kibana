@@ -31,6 +31,7 @@ import {
   dashboardCompositionOrderEvaluator,
   dashboardControlsEvaluator,
   dashboardLayoutRulesEvaluator,
+  dashboardPanelTitlesEvaluator,
   dashboardTitlesEvaluator,
 } from './evaluators/dashboard_rule_evaluators';
 import { dashboardRoutingEvaluator } from './evaluators/dashboard_routing';
@@ -253,8 +254,12 @@ export function createEvaluateDataset({
       'Scoped enhance example; this evaluator scores the whole dashboard.'
     );
 
-  // On a scoped enhance, chart presentation is scored on the named panels only.
-  const namedPanelsWhenScoped = (evaluator: DashboardAgentEvaluator): DashboardAgentEvaluator =>
+  // On a scoped enhance, chart presentation is scored on the named panels only,
+  // by `scopedEvaluator` when the dashboard-level rules must not apply.
+  const namedPanelsWhenScoped = (
+    evaluator: DashboardAgentEvaluator,
+    scopedEvaluator: DashboardAgentEvaluator = evaluator
+  ): DashboardAgentEvaluator =>
     positiveOnly({
       ...evaluator,
       evaluate: async (params) => {
@@ -270,7 +275,7 @@ export function createEvaluateDataset({
           }
           return named.has(widget.id) ? [widget] : [];
         });
-        return evaluator.evaluate({
+        return scopedEvaluator.evaluate({
           ...params,
           output: { ...params.output, dashboard: { ...dashboard, panels } },
         });
@@ -285,7 +290,7 @@ export function createEvaluateDataset({
     wholeDashboardOnly(dashboardTimeRangeEvaluator),
     wholeDashboardOnly(dashboardLayoutRulesEvaluator),
     wholeDashboardOnly(dashboardCompositionOrderEvaluator),
-    wholeDashboardOnly(dashboardTitlesEvaluator),
+    namedPanelsWhenScoped(dashboardTitlesEvaluator, dashboardPanelTitlesEvaluator),
     namedPanelsWhenScoped(dashboardChartStylingEvaluator),
     namedPanelsWhenScoped(dashboardColorFormatEvaluator),
     wholeDashboardOnly(dashboardControlsEvaluator),
