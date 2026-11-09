@@ -25,7 +25,7 @@ export const letCommand = {
     }),
     declaration: `LET <name> = (<subquery>)`,
     examples: ['LET errors = (FROM logs | WHERE level == "error");'],
-    hidden: true,
+    hidden: process.env.NODE_ENV !== 'test',
     name: 'let',
   },
 };
