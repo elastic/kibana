@@ -1756,11 +1756,10 @@ steps:
           status: processed
           forensic_verdict: "{{ steps.resolve_verdict.output.value }}"
 
-  # The first forensics summary card. Rendered here, not from a conversation event: this
-  # run's last write to the investigation lands before `mark_processed`, so an event-started
-  # render could search before the indicator reads processed and nothing would start
-  # another. The proposal and close gates re-render it after each decision. A failed render
-  # costs the card until then, not the run.
+  # The forensics summary card, once the analysis is done. After `mark_processed`, whose
+  # `refresh` makes the verdict searchable, so the card shows it rather than "in progress".
+  # The proposal and close gates re-render it after each decision. A failed render costs
+  # the card until then, not the run.
   - name: render_forensics_summary
     type: alertzero.forensics.renderSummary
     if: >-

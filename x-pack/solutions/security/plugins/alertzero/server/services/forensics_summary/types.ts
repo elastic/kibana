@@ -37,7 +37,9 @@ export interface ForensicsAlert {
 
 /** Everything the card is built from, as read from the Investigation and the indices. */
 export interface ForensicsSummaryInputs {
-  /** The indicator's `forensic_verdict`; blank when no analysis ran. */
+  /** The indicator's `status`: `pending` while the analysis runs. */
+  analysisStatus?: string;
+  /** The indicator's `forensic_verdict`; blank until the analysis records one, or when none ran. */
   verdict?: string;
   autonomy?: string;
   /** When the indicator was retired with its verdict. */
