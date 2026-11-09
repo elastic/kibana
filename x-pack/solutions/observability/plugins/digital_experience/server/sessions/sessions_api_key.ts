@@ -47,6 +47,12 @@ export interface SessionsApiKey {
   grantedAt: string;
 }
 
+/** What is stored: the key, or null if this Kibana can't decrypt it, and the object's version. */
+export interface StoredSessionsApiKey {
+  key: SessionsApiKey | null;
+  version: string | undefined;
+}
+
 const sessionsApiKeySchemaV1 = schema.object({
   id: schema.string(),
   name: schema.string(),
@@ -75,8 +81,9 @@ export const sessionsApiKeySavedObjectType: SavedObjectsType = {
 export const sessionsApiKeyEncryptionParams: EncryptedSavedObjectTypeRegistration = {
   type: SESSIONS_API_KEY_SO_TYPE,
   attributesToEncrypt: new Set(['apiKey']),
-  // The key's id never changes for a stored key: rotating it replaces the whole object.
-  attributesToIncludeInAAD: new Set(['id']),
+  // None of these change for a stored key, as rotating it replaces the whole object, and
+  // `grantedBy` ends up in audit events.
+  attributesToIncludeInAAD: new Set(['id', 'name', 'grantedBy', 'grantedAt']),
 };
 
 /**
@@ -127,7 +134,7 @@ export class SessionsApiKeys {
 
   /**
    * Grants a key on behalf of the user behind `request`, scoped to what the transforms need.
-   * Returns null when API keys are disabled in Elasticsearch.
+   * Returns null when security is disabled, so Kibana grants no keys.
    */
   public async grant(
     request: KibanaRequest,
@@ -156,6 +163,11 @@ export class SessionsApiKeys {
 
   /** The stored key, or null when there is none or this Kibana can't decrypt it. */
   public async get(): Promise<SessionsApiKey | null> {
+    return (await this.getStored())?.key ?? null;
+  }
+
+  /** What is stored, or null when nothing is. */
+  public async getStored(): Promise<StoredSessionsApiKey | null> {
     if (!this.available) {
       return null;
     }
@@ -164,13 +176,13 @@ export class SessionsApiKeys {
       return null;
     }
     try {
-      const { attributes } = await encryptedSavedObjects
+      const { attributes, version } = await encryptedSavedObjects
         .getClient({ includedHiddenTypes: [SESSIONS_API_KEY_SO_TYPE] })
         .getDecryptedAsInternalUser<SessionsApiKey>(
           SESSIONS_API_KEY_SO_TYPE,
           SESSIONS_API_KEY_SO_ID
         );
-      return attributes;
+      return { key: attributes, version };
     } catch (error) {
       if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
         return null;
@@ -179,19 +191,29 @@ export class SessionsApiKeys {
         this.deps.logger.warn(
           `Could not decrypt the sessions API key, so sessions need a manual update: ${error.message}`
         );
-        return null;
+        return { key: null, version: undefined };
       }
       throw error;
     }
   }
 
-  public async save(key: SessionsApiKey): Promise<void> {
+  /**
+   * Stores `key` in place of `replacing`, what `getStored` returned before. Throws a conflict
+   * error when something else was stored since, such as by an enable that ran at the same time.
+   */
+  public async save(key: SessionsApiKey, replacing: StoredSessionsApiKey | null): Promise<void> {
+    const { id, name, apiKey, grantedBy, grantedAt } = key;
     await (
       await this.soClient()
-    ).create(SESSIONS_API_KEY_SO_TYPE, key, {
-      id: SESSIONS_API_KEY_SO_ID,
-      overwrite: true,
-    });
+    ).create(
+      SESSIONS_API_KEY_SO_TYPE,
+      { id, name, apiKey, grantedBy, grantedAt },
+      {
+        id: SESSIONS_API_KEY_SO_ID,
+        overwrite: replacing !== null,
+        version: replacing?.version,
+      }
+    );
   }
 
   /** Deletes the stored key, if any. Doesn't invalidate it. */
@@ -205,14 +227,19 @@ export class SessionsApiKeys {
     }
   }
 
-  /** Invalidates a key, logging rather than throwing, as a leftover key only grants reads. */
-  public async invalidate(key: Pick<SessionsApiKey, 'id' | 'name'>): Promise<void> {
+  /** Invalidates keys, logging rather than throwing, as a leftover key only grants reads. */
+  public async invalidate(...keys: Array<Pick<SessionsApiKey, 'id' | 'name'>>): Promise<void> {
+    if (keys.length === 0) {
+      return;
+    }
     const { core } = await this.deps.getStartServices();
     try {
-      await core.security.authc.apiKeys.invalidateAsInternalUser({ ids: [key.id] });
+      await core.security.authc.apiKeys.invalidateAsInternalUser({ ids: keys.map(({ id }) => id) });
     } catch (error) {
       this.deps.logger.warn(
-        `Could not invalidate sessions API key [${key.name}] (${key.id}): ${error.message}`
+        `Could not invalidate sessions API keys ${keys
+          .map(({ id, name }) => `[${name}] (${id})`)
+          .join(', ')}: ${error.message}`
       );
     }
   }
@@ -222,8 +249,8 @@ export class SessionsApiKeys {
    * timeout, say nothing about the key, so they don't count.
    */
   public async isInvalidated(key: SessionsApiKey): Promise<boolean> {
-    const client = await this.clusterClientFor(key);
     try {
+      const client = await this.clusterClientFor(key);
       await client.asCurrentUser.security.authenticate();
       return false;
     } catch (error) {

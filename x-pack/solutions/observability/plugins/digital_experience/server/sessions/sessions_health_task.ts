@@ -14,8 +14,10 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { SessionsSettings, SessionsStatus } from '../../common/sessions';
+import { describeError } from '../lib/helpers/errors';
 import type { SessionsApiKeys } from './sessions_api_key';
-import { updateSessionsWithApiKey, withApiKeyStatus } from './sessions_auto_update';
+import type { SessionsAutoUpdateState } from './sessions_auto_update';
+import { getApiKeyStatus, updateSessionsWithApiKey } from './sessions_auto_update';
 import { getSessionsStatus } from './sessions_setup';
 
 export const SESSIONS_HEALTH_TASK_TYPE = 'digital_experience:sessions-health';
@@ -28,10 +30,13 @@ const stateSchemaV1 = schema.object({
   needsUpdate: schema.maybe(schema.boolean()),
   newerVersion: schema.maybe(schema.boolean()),
 });
-/** Adds the last automatic update failure, so a run only logs a new one. */
+/**
+ * Adds the last automatic update failure, so a run only logs a new one, and the stored key found
+ * invalidated, so it isn't authenticated with again and users who can't check it see it too.
+ */
 const stateSchemaV2 = stateSchemaV1.extends({
   autoUpdateError: schema.maybe(schema.string()),
-  apiKeyInvalid: schema.maybe(schema.boolean()),
+  invalidApiKeyId: schema.maybe(schema.string()),
 });
 type SessionsHealthTaskState = TypeOf<typeof stateSchemaV2>;
 
@@ -42,8 +47,10 @@ const isProblem = (health: string | undefined): boolean =>
 const logHealthChanges = (
   logger: Logger,
   status: SessionsStatus,
+  keyId: string | null,
   previous: SessionsHealthTaskState
 ): SessionsHealthTaskState => {
+  const invalidApiKeyId = status.apiKeyInvalid && keyId ? keyId : undefined;
   const newerVersion =
     status.installedVersion != null && status.installedVersion > status.currentVersion;
   if (isProblem(status.health) && status.health !== previous.health) {
@@ -55,7 +62,7 @@ const logHealthChanges = (
   } else if (isProblem(previous.health) && !isProblem(status.health)) {
     logger.info(`Sessions transforms are no longer ${previous.health}.`);
   }
-  if (status.apiKeyInvalid && previous.apiKeyInvalid !== true) {
+  if (invalidApiKeyId && invalidApiKeyId !== previous.invalidApiKeyId) {
     logger.warn(
       'The stored API key Kibana updates the sessions transforms with was invalidated or has expired. Sessions keep updating, but upgrades and settings changes no longer apply automatically until a user with the Digital Experience "Set up and update session summaries" privilege opens the Sessions tab, which grants a new key.'
     );
@@ -72,12 +79,9 @@ const logHealthChanges = (
     health: status.health,
     needsUpdate: status.needsUpdate,
     newerVersion,
-    apiKeyInvalid: status.apiKeyInvalid,
+    invalidApiKeyId,
   };
 };
-
-const messageOf = (error: unknown): string =>
-  error instanceof Error ? error.message : String(error);
 
 /**
  * Registers a task that reports sessions transform health, version and lag, and applies a needed
@@ -116,34 +120,42 @@ export const registerSessionsHealthTask = ({
       createTaskRunner: ({ taskInstance, signal }) => ({
         run: async () => {
           const [coreStart] = await core.getStartServices();
+          const previous = taskInstance.state as SessionsHealthTaskState;
           const readStatus = async () =>
-            withApiKeyStatus(
+            getApiKeyStatus(
               await getSessionsStatus(coreStart.elasticsearch.client.asInternalUser, {
                 settings,
                 signal,
               }),
               apiKeys,
-              { checkKey: true }
+              {
+                checkKey: true,
+                logger,
+                getAutoUpdateState: async () => ({ invalidApiKeyId: previous.invalidApiKeyId }),
+              }
             );
-          const previous = taskInstance.state as SessionsHealthTaskState;
 
-          let status = await readStatus();
+          let { status, keyId } = await readStatus();
           let autoUpdateError: string | undefined;
-          if (status.needsUpdate && status.autoUpdate) {
+          if (status.autoUpdate) {
             try {
-              await updateSessionsWithApiKey({
+              const updated = await updateSessionsWithApiKey({
                 status,
                 apiKeys,
                 logger,
                 audit: coreStart.security.audit.withoutRequest,
                 settings,
               });
-              logger.info(
-                `Updated the sessions transforms to version ${status.currentVersion} and the configured settings with their stored API key.`
-              );
-              status = await readStatus();
+              if (updated) {
+                logger.info(
+                  status.needsUpdate
+                    ? `Updated the sessions transforms to version ${status.currentVersion} and the configured settings with their stored API key.`
+                    : 'Moved the sessions transforms to their stored API key.'
+                );
+                ({ status, keyId } = await readStatus());
+              }
             } catch (error) {
-              autoUpdateError = messageOf(error);
+              autoUpdateError = describeError(error);
               if (autoUpdateError !== previous.autoUpdateError) {
                 logger.error(
                   `Could not update the sessions transforms with their stored API key: ${autoUpdateError}`
@@ -152,7 +164,7 @@ export const registerSessionsHealthTask = ({
             }
           }
           return {
-            state: { ...logHealthChanges(logger, status, previous), autoUpdateError },
+            state: { ...logHealthChanges(logger, status, keyId, previous), autoUpdateError },
           };
         },
       }),
@@ -160,19 +172,24 @@ export const registerSessionsHealthTask = ({
   });
 };
 
-/** The error of the health task's last automatic update, if its last run had one. */
-export const getLastAutoUpdateError = async (
-  taskManager: TaskManagerStartContract
-): Promise<string | undefined> => {
+/**
+ * What the health task's last run found about automatic updates. Empty when it can't be read, as
+ * that only affects what the status shows.
+ */
+export const getLastAutoUpdateState = async (
+  taskManager: TaskManagerStartContract,
+  logger: Logger
+): Promise<SessionsAutoUpdateState> => {
   try {
     const { state } = await taskManager.get(SESSIONS_HEALTH_TASK_ID);
-    return (state as SessionsHealthTaskState).autoUpdateError;
+    const { autoUpdateError, invalidApiKeyId } = state as SessionsHealthTaskState;
+    return { autoUpdateError, invalidApiKeyId };
   } catch (error) {
-    // Not scheduled yet, so it hasn't failed either.
-    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
-      return undefined;
+    // Not scheduled yet, so it hasn't found anything either.
+    if (!SavedObjectsErrorHelpers.isNotFoundError(error)) {
+      logger.warn(`Could not read the sessions health task: ${describeError(error)}`);
     }
-    throw error;
+    return {};
   }
 };
 

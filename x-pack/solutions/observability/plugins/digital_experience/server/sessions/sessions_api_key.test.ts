@@ -59,11 +59,11 @@ const setup = ({
 };
 
 describe('SessionsApiKeys', () => {
-  it('encrypts the key, bound to its id', () => {
+  it('encrypts the key, bound to every other attribute', () => {
     expect(sessionsApiKeyEncryptionParams).toEqual({
       type: SESSIONS_API_KEY_SO_TYPE,
       attributesToEncrypt: new Set(['apiKey']),
-      attributesToIncludeInAAD: new Set(['id']),
+      attributesToIncludeInAAD: new Set(['id', 'name', 'grantedBy', 'grantedAt']),
     });
   });
 
@@ -126,9 +126,13 @@ describe('SessionsApiKeys', () => {
 
   it('decrypts the stored key', async () => {
     const { apiKeys, esoStart, esoClient } = setup();
-    esoClient.getDecryptedAsInternalUser.mockResolvedValue({ attributes: key } as never);
+    esoClient.getDecryptedAsInternalUser.mockResolvedValue({
+      attributes: key,
+      version: 'v1',
+    } as never);
 
     expect(await apiKeys.get()).toEqual(key);
+    expect(await apiKeys.getStored()).toEqual({ key, version: 'v1' });
     expect(esoStart.getClient).toHaveBeenCalledWith({
       includedHiddenTypes: [SESSIONS_API_KEY_SO_TYPE],
     });
@@ -153,17 +157,26 @@ describe('SessionsApiKeys', () => {
     undecryptable.esoClient.getDecryptedAsInternalUser.mockRejectedValue(new Error('bad key'));
     undecryptable.esoStart.isEncryptionError.mockReturnValue(true);
     expect(await undecryptable.apiKeys.get()).toBeNull();
+    // Still stored, so an enable overwrites it.
+    expect(await undecryptable.apiKeys.getStored()).toEqual({ key: null, version: undefined });
     expect(undecryptable.logger.warn).toHaveBeenCalledWith(expect.stringContaining('bad key'));
   });
 
-  it('stores one key per cluster, replacing the previous one', async () => {
+  it('stores one key per cluster, replacing the previous one only if nothing replaced it since', async () => {
     const { apiKeys, soClient } = setup();
 
-    await apiKeys.save(key);
-
+    await apiKeys.save(key, { key: { ...key, id: 'key-0' }, version: 'v1' });
     expect(soClient.create).toHaveBeenCalledWith(SESSIONS_API_KEY_SO_TYPE, key, {
       id: SESSIONS_API_KEY_SO_ID,
       overwrite: true,
+      version: 'v1',
+    });
+
+    await apiKeys.save(key, null);
+    expect(soClient.create).toHaveBeenLastCalledWith(SESSIONS_API_KEY_SO_TYPE, key, {
+      id: SESSIONS_API_KEY_SO_ID,
+      overwrite: false,
+      version: undefined,
     });
   });
 

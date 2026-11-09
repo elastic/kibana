@@ -32,6 +32,7 @@ import { getSessionsStatus } from '../../sessions/sessions_setup';
 import { SessionsNewerVersionError } from '../../sessions/sessions_newer_version_error';
 import { SessionsPrivilegesError } from '../../sessions/sessions_privileges_error';
 import { SessionsRestrictedReadError } from '../../sessions/sessions_restricted_read_error';
+import { describeError } from '../../lib/helpers/errors';
 import { createDigitalExperienceServerRoute } from '../create_digital_experience_server_route';
 
 export const SESSIONS_STATUS_ENDPOINT = 'GET /internal/digital_experience/sessions/status';
@@ -66,9 +67,6 @@ const sessionNotFoundMessage = (sessionId: string) =>
     values: { sessionId },
   });
 
-const messageOf = (error: unknown): string =>
-  error instanceof Error ? error.message : String(error);
-
 /**
  * Maps a read failure to a client error: an Elasticsearch 403 names the index privileges the
  * reads need; anything else is logged and hidden, as Elasticsearch details name users and indices.
@@ -77,7 +75,7 @@ const toReadError = (error: unknown, logger: Logger, what: string) => {
   if (isResponseError(error) && error.statusCode === 403) {
     return forbidden(NO_ACCESS_MESSAGE);
   }
-  logger.error(`Could not load ${what}: ${messageOf(error)}`);
+  logger.error(`Could not load ${what}: ${describeError(error)}`);
   return internal(LOAD_FAILED_MESSAGE);
 };
 
@@ -98,7 +96,7 @@ const toEnableError = (error: unknown, logger: Logger) => {
       currentVersion: error.currentVersion,
     });
   }
-  logger.error(`Could not enable sessions: ${messageOf(error)}`);
+  logger.error(`Could not enable sessions: ${describeError(error)}`);
   return internal(ENABLE_FAILED_MESSAGE);
 };
 
@@ -131,27 +129,30 @@ const statusRoute = createDigitalExperienceServerRoute({
     request,
     sessionsSettings,
     sessionsApiKeys,
-    getSessionsAutoUpdateError,
+    getSessionsAutoUpdateState,
     logger,
   }): Promise<SessionsStatus> => {
     const { elasticsearch } = await context.core;
     const canManage =
       request.authzResult?.[DIGITAL_EXPERIENCE_API_PRIVILEGES.manageSessions] === true;
+    let status: SessionsStatus;
     try {
-      // Transform metadata only; no session data is read with the internal user. Only users who
-      // can grant a new key act on a deleted one, so only they pay for checking it.
-      const status = await withApiKeyStatus(
-        await getSessionsStatus(elasticsearch.client.asInternalUser, {
-          settings: sessionsSettings,
-        }),
-        sessionsApiKeys,
-        { checkKey: canManage, lastAutoUpdateError: await getSessionsAutoUpdateError() }
-      );
-      return canManage ? status : withoutEnabler(status);
+      // Transform metadata only; no session data is read with the internal user.
+      status = await getSessionsStatus(elasticsearch.client.asInternalUser, {
+        settings: sessionsSettings,
+      });
     } catch (error) {
-      logger.error(`Could not read the sessions status: ${messageOf(error)}`);
+      logger.error(`Could not read the sessions status: ${describeError(error)}`);
       throw internal(LOAD_FAILED_MESSAGE);
     }
+    // Only users who can grant a new key act on a deleted one, so only they pay for checking it;
+    // the others see what the health task found.
+    const withKey = await withApiKeyStatus(status, sessionsApiKeys, {
+      checkKey: canManage,
+      logger,
+      getAutoUpdateState: getSessionsAutoUpdateState,
+    });
+    return canManage ? withKey : withoutEnabler(withKey);
   },
 });
 
@@ -170,12 +171,12 @@ const enableRoute = createDigitalExperienceServerRoute({
   }): Promise<SessionsStatus> => {
     const { elasticsearch, security } = await context.core;
     const enabledBy = security.authc.getCurrentUser()?.username ?? null;
-    const audit = (outcome: 'success' | 'failure', error?: Error, apiKeyName?: string) =>
+    const audit = (outcome: 'success' | 'failure', error?: Error, apiKeyRef?: string) =>
       security.audit.logger.log({
         message:
           outcome === 'success'
             ? `User [${enabledBy}] enabled Digital Experience sessions${
-                apiKeyName ? ` with a new API key [${apiKeyName}]` : ''
+                apiKeyRef ? ` with a new API key ${apiKeyRef}` : ''
               }`
             : `Failed attempt by user [${enabledBy}] to enable Digital Experience sessions`,
         event: {
@@ -187,7 +188,7 @@ const enableRoute = createDigitalExperienceServerRoute({
         ...(error ? { error: { code: error.name, message: error.message } } : {}),
       });
 
-    let apiKeyName: string | undefined;
+    let apiKeyRef: string | undefined;
     try {
       const apiKey = await enableSessionsForUser({
         esClient: elasticsearch.client,
@@ -197,14 +198,15 @@ const enableRoute = createDigitalExperienceServerRoute({
         settings: sessionsSettings,
         enabledBy,
       });
-      apiKeyName = apiKey?.name;
+      // Every key has the same name, so the id tells them apart.
+      apiKeyRef = apiKey ? `[${apiKey.name}] (${apiKey.id})` : undefined;
     } catch (error) {
       audit('failure', error);
       throw toEnableError(error, logger);
     }
-    audit('success', undefined, apiKeyName);
+    audit('success', undefined, apiKeyRef);
     logger.info(
-      `Sessions enabled by [${enabledBy}]${apiKeyName ? ` with API key [${apiKeyName}]` : ''}`
+      `Sessions enabled by [${enabledBy}]${apiKeyRef ? ` with API key ${apiKeyRef}` : ''}`
     );
     try {
       return await withApiKeyStatus(
@@ -212,7 +214,7 @@ const enableRoute = createDigitalExperienceServerRoute({
           settings: sessionsSettings,
         }),
         sessionsApiKeys,
-        { checkKey: true }
+        { checkKey: true, logger }
       );
     } catch (error) {
       throw toReadError(error, logger, 'the sessions status');

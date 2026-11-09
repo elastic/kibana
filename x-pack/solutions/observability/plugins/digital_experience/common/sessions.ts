@@ -107,7 +107,8 @@ export interface SessionsStatus {
   autoUpdate: boolean;
   /**
    * True when the stored API key was invalidated or expired. The transforms keep running, but
-   * updates no longer apply automatically. Only checked for users who can manage sessions.
+   * updates no longer apply automatically. Checked live only for users who can manage sessions;
+   * others see what the health task last found.
    */
   apiKeyInvalid: boolean;
   /**

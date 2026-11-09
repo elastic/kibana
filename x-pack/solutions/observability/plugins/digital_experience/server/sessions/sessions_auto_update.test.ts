@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import type { AuditLogger } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
   httpServerMock,
@@ -13,6 +15,7 @@ import {
 } from '@kbn/core/server/mocks';
 import type { SessionsStatus } from '../../common/sessions';
 import type { SessionsApiKey, SessionsApiKeys } from './sessions_api_key';
+import { SESSIONS_API_KEY_NAME } from './sessions_api_key';
 import {
   enableSessionsForUser,
   updateSessionsWithApiKey,
@@ -28,7 +31,7 @@ const NOW = new Date('2026-11-04T10:00:00.000Z');
 
 const keyOf = (id: string): SessionsApiKey => ({
   id,
-  name: 'Digital Experience sessions',
+  name: SESSIONS_API_KEY_NAME,
   apiKey: `secret-${id}`,
   grantedBy: 'ana',
   grantedAt: '2026-10-27T11:00:00.000Z',
@@ -53,11 +56,39 @@ const status: SessionsStatus = {
   authorization: {
     roles: null,
     apiKeyId: 'old',
-    apiKeyName: 'Digital Experience sessions',
+    apiKeyName: SESSIONS_API_KEY_NAME,
     serviceAccount: null,
   },
   transforms: [],
 };
+
+const asUser = {
+  ...status,
+  authorization: { roles: ['admin'], apiKeyId: null, apiKeyName: null, serviceAccount: null },
+};
+
+const transformOn = (apiKeyId: string) => ({
+  id: `transform-${apiKeyId}`,
+  partition: 0,
+  version: 1,
+  frequency: '1m',
+  state: 'started',
+  health: 'healthy' as const,
+  lagSeconds: 30,
+  reason: null,
+  enabledBy: 'ana',
+  enabledAt: '2026-10-27T11:00:00.000Z',
+  authorization: { roles: null, apiKeyId, apiKeyName: SESSIONS_API_KEY_NAME, serviceAccount: null },
+});
+
+const responseError = (statusCode: number) =>
+  new errors.ResponseError({
+    statusCode,
+    body: { error: { type: 'error' } },
+    headers: {},
+    warnings: [],
+    meta: {} as errors.ResponseError['meta']['meta'],
+  });
 
 const createAuditLogger = () => ({
   log: jest.fn() as jest.MockedFunction<AuditLogger['log']>,
@@ -80,6 +111,7 @@ const createApiKeys = ({
   const apiKeys = {
     available,
     get: jest.fn().mockResolvedValue(stored),
+    getStored: jest.fn().mockResolvedValue(stored ? { key: stored, version: 'v1' } : null),
     grant: jest.fn(() =>
       granted instanceof Error ? Promise.reject(granted) : Promise.resolve(granted)
     ),
@@ -129,7 +161,7 @@ describe('sessions auto update', () => {
         settings,
         enabled: { enabledBy: 'ana', enabledAt: NOW.toISOString() },
       });
-      expect(apiKeys.save).toHaveBeenCalledWith(keyOf('new'));
+      expect(apiKeys.save).toHaveBeenCalledWith(keyOf('new'), { key: keyOf('old'), version: 'v1' });
       expect(apiKeys.invalidate).toHaveBeenCalledTimes(1);
       expect(apiKeys.invalidate).toHaveBeenCalledWith(keyOf('old'));
     });
@@ -155,15 +187,29 @@ describe('sessions auto update', () => {
       expect(apiKeys.save).not.toHaveBeenCalled();
     });
 
-    it('keeps the new key in use, and drops the old one, when storing it fails', async () => {
+    it('drops both keys when storing the new one fails, as nothing would track it', async () => {
       const { apiKeys, typed } = createApiKeys({ stored: keyOf('old') });
       apiKeys.save.mockRejectedValue(new Error('Bad Request'));
 
-      expect(await run(typed).result).toEqual(keyOf('new'));
-      expect(apiKeys.invalidate).not.toHaveBeenCalledWith(keyOf('new'));
+      expect(await run(typed).result).toBeNull();
+      expect(installSessions).toHaveBeenCalled();
+      expect(apiKeys.invalidate).toHaveBeenCalledWith(keyOf('new'));
       expect(apiKeys.delete).toHaveBeenCalled();
       expect(apiKeys.invalidate).toHaveBeenCalledWith(keyOf('old'));
       expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Bad Request'));
+    });
+
+    it('keeps the key an enable at the same time stored, and drops its own', async () => {
+      const { apiKeys, typed } = createApiKeys({ stored: keyOf('old') });
+      apiKeys.save.mockRejectedValue(
+        SavedObjectsErrorHelpers.createConflictError('digital-experience-sessions-api-key', 'id')
+      );
+
+      expect(await run(typed).result).toBeNull();
+      expect(apiKeys.invalidate).toHaveBeenCalledTimes(1);
+      expect(apiKeys.invalidate).toHaveBeenCalledWith(keyOf('new'));
+      expect(apiKeys.delete).not.toHaveBeenCalled();
+      expect(logger.error).not.toHaveBeenCalled();
     });
 
     it("installs with the user's credentials when keys can't be stored", async () => {
@@ -176,10 +222,10 @@ describe('sessions auto update', () => {
       expect(apiKeys.save).not.toHaveBeenCalled();
     });
 
-    it("falls back to the user's credentials, and drops the stored key, when granting fails", async () => {
+    it("falls back to the user's credentials, and drops the stored key, when the user can't grant keys", async () => {
       const { apiKeys, typed } = createApiKeys({
         stored: keyOf('old'),
-        granted: new Error('Unsupported scheme'),
+        granted: new Error('Unsupported scheme "ApiKey" for granting API Key'),
       });
       const { esClient, result } = run(typed);
 
@@ -190,7 +236,28 @@ describe('sessions auto update', () => {
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Unsupported scheme'));
     });
 
-    it("falls back to the user's credentials when API keys are disabled", async () => {
+    it("falls back to the user's credentials when Elasticsearch refuses to grant keys", async () => {
+      const { apiKeys, typed } = createApiKeys({ granted: responseError(400) });
+      const { esClient, result } = run(typed);
+
+      expect(await result).toBeNull();
+      expect(installSessions).toHaveBeenCalledWith(expect.objectContaining({ esClient }));
+      expect(apiKeys.save).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['Elasticsearch fails', responseError(503)],
+      ['Elasticsearch is unreachable', new errors.ConnectionError('connect ECONNREFUSED')],
+    ])('fails without changing anything when granting fails because %s', async (_, error) => {
+      const { apiKeys, typed } = createApiKeys({ stored: keyOf('old'), granted: error });
+
+      await expect(run(typed).result).rejects.toBe(error);
+      expect(installSessions).not.toHaveBeenCalled();
+      expect(apiKeys.delete).not.toHaveBeenCalled();
+      expect(apiKeys.invalidate).not.toHaveBeenCalled();
+    });
+
+    it("falls back to the user's credentials when security is disabled", async () => {
       const { apiKeys, typed } = createApiKeys({ granted: null });
       const { esClient, result } = run(typed);
 
@@ -201,7 +268,7 @@ describe('sessions auto update', () => {
   });
 
   describe('withApiKeyStatus', () => {
-    const check = { checkKey: true };
+    const check = { checkKey: true, logger };
 
     it('leaves the status alone without a stored key', async () => {
       const { typed } = createApiKeys();
@@ -212,7 +279,55 @@ describe('sessions auto update', () => {
     it('leaves the status alone when the transforms run with other credentials', async () => {
       const { typed } = createApiKeys({ stored: keyOf('other') });
 
+      expect(await withApiKeyStatus(asUser, typed, check)).toBe(asUser);
+    });
+
+    it('marks an update as automatic when the transforms run with another sessions key', async () => {
+      const { typed } = createApiKeys({ stored: keyOf('other') });
+
+      expect(await withApiKeyStatus(status, typed, check)).toEqual({ ...status, autoUpdate: true });
+    });
+
+    it("doesn't check a key the health task found invalidated again", async () => {
+      const { apiKeys, typed } = createApiKeys({ stored: keyOf('old') });
+
+      expect(
+        await withApiKeyStatus(status, typed, {
+          checkKey: true,
+          logger,
+          getAutoUpdateState: async () => ({ invalidApiKeyId: 'old' }),
+        })
+      ).toEqual({ ...status, apiKeyInvalid: true, reason: expect.stringContaining('invalidated') });
+      expect(apiKeys.isInvalidated).not.toHaveBeenCalled();
+    });
+
+    it('checks a newer key than the one the health task found invalidated', async () => {
+      const { apiKeys, typed } = createApiKeys({ stored: keyOf('old') });
+
+      expect(
+        await withApiKeyStatus(status, typed, {
+          checkKey: true,
+          logger,
+          getAutoUpdateState: async () => ({ invalidApiKeyId: 'older' }),
+        })
+      ).toEqual({ ...status, autoUpdate: true });
+      expect(apiKeys.isInvalidated).toHaveBeenCalled();
+    });
+
+    it('reads what the health task found only when the transforms run with the stored key', async () => {
+      const { typed } = createApiKeys();
+      const getAutoUpdateState = jest.fn();
+
+      await withApiKeyStatus(status, typed, { checkKey: false, logger, getAutoUpdateState });
+      expect(getAutoUpdateState).not.toHaveBeenCalled();
+    });
+
+    it("leaves the status alone, and logs, when the key can't be read", async () => {
+      const { apiKeys, typed } = createApiKeys();
+      apiKeys.get.mockRejectedValue(new Error('index unavailable'));
+
       expect(await withApiKeyStatus(status, typed, check)).toBe(status);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('index unavailable'));
     });
 
     it('marks an update as automatic when the transforms run with a working stored key', async () => {
@@ -248,7 +363,10 @@ describe('sessions auto update', () => {
       expect(
         await withApiKeyStatus(status, typed, {
           checkKey: true,
-          lastAutoUpdateError: 'security_exception: user [ana] lacks [manage_transform]',
+          logger,
+          getAutoUpdateState: async () => ({
+            autoUpdateError: 'security_exception: user [ana] lacks [manage_transform]',
+          }),
         })
       ).toEqual({
         ...status,
@@ -262,14 +380,18 @@ describe('sessions auto update', () => {
       const current = { ...status, needsUpdate: false };
 
       expect(
-        await withApiKeyStatus(current, typed, { checkKey: true, lastAutoUpdateError: 'boom' })
+        await withApiKeyStatus(current, typed, {
+          checkKey: true,
+          logger,
+          getAutoUpdateState: async () => ({ autoUpdateError: 'boom' }),
+        })
       ).toEqual({ ...current, autoUpdate: true });
     });
 
     it("doesn't check the key unless asked", async () => {
       const { apiKeys, typed } = createApiKeys({ stored: keyOf('old'), valid: false });
 
-      expect(await withApiKeyStatus(status, typed, { checkKey: false })).toEqual({
+      expect(await withApiKeyStatus(status, typed, { checkKey: false, logger })).toEqual({
         ...status,
         autoUpdate: true,
       });
@@ -296,8 +418,7 @@ describe('sessions auto update', () => {
       expect(apiKeys.grant).not.toHaveBeenCalled();
       expect(audit.log).toHaveBeenCalledWith(
         expect.objectContaining({
-          message:
-            'Updated Digital Experience sessions with API key [Digital Experience sessions] granted by user [ana]',
+          message: `Updated Digital Experience sessions with API key [${SESSIONS_API_KEY_NAME}] (old) granted by user [ana]`,
           event: expect.objectContaining({
             action: 'digital_experience_sessions_auto_update',
             outcome: 'success',
@@ -306,12 +427,56 @@ describe('sessions auto update', () => {
       );
     });
 
+    it('moves transforms left on another sessions key to the stored one', async () => {
+      const { apiKeys, typed, keyClient } = createApiKeys({ stored: keyOf('new') });
+      const current = {
+        ...status,
+        needsUpdate: false,
+        authorization: transformOn('new').authorization,
+        transforms: [transformOn('new'), transformOn('stray')],
+      };
+
+      expect(
+        await updateSessionsWithApiKey({
+          status: current,
+          apiKeys: typed,
+          logger,
+          audit: createAuditLogger(),
+          settings,
+        })
+      ).toBe(true);
+      expect(installSessions).toHaveBeenCalledWith(
+        expect.objectContaining({ esClient: keyClient })
+      );
+      expect(apiKeys.invalidate).toHaveBeenCalledWith({ id: 'stray', name: SESSIONS_API_KEY_NAME });
+    });
+
+    it('does nothing when no update is needed and every transform runs with the stored key', async () => {
+      const { typed } = createApiKeys({ stored: keyOf('new') });
+
+      expect(
+        await updateSessionsWithApiKey({
+          status: {
+            ...status,
+            needsUpdate: false,
+            authorization: transformOn('new').authorization,
+            transforms: [transformOn('new')],
+          },
+          apiKeys: typed,
+          logger,
+          audit: createAuditLogger(),
+          settings,
+        })
+      ).toBe(false);
+      expect(installSessions).not.toHaveBeenCalled();
+    });
+
     it('does nothing without a stored key the transforms run with', async () => {
       const { typed } = createApiKeys({ stored: keyOf('other') });
 
       expect(
         await updateSessionsWithApiKey({
-          status,
+          status: asUser,
           apiKeys: typed,
           logger,
           audit: createAuditLogger(),

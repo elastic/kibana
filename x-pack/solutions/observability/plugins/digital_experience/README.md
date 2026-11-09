@@ -138,12 +138,17 @@ When `xpack.encryptedSavedObjects.encryptionKey` is set and Task Manager is avai
 health task that uses the key), enabling also grants an API key on the user's behalf and the transforms run with that key instead of the user's own credentials. Its role
 descriptors only allow what transform secondary credentials need: `read` and `view_index_metadata`
 on `traces-*.otel-*` and `logs-*.otel-*`, and the `digital-experience-sessions-*` privileges above.
-Like any granted key, it keeps the access the user had when it was granted. The key is stored in an
-encrypted saved object (`digital-experience-sessions-api-key`, one per cluster). Enabling again
-grants a new key, applies it, and invalidates the previous one. Without an encryption key, when API
-keys are disabled, or when granting fails (for example with an unsupported authentication scheme),
-the transforms run with the user's credentials as before, and any stored key is deleted and
-invalidated, so it can't be put back.
+Like any granted key, it keeps the access the user had when it was granted, and it has no
+expiration: an expiring key would stop automatic updates on a fixed date. The key is stored in an
+encrypted saved object (`digital-experience-sessions-api-key`, one per cluster), with its name, id
+and who granted it bound to the encrypted key. Enabling again grants a new key, applies it, and
+invalidates the previous one. The saved object is replaced only if nothing replaced it since it was
+read, so when two enables run at the same time, the key stored first is kept and the other is
+invalidated; the health task moves any transform left on it to the stored key. Without an
+encryption key, when security or API keys are disabled, or when the user can't grant a key (for
+example when authenticated with an API key), the transforms run with the user's credentials as
+before, and any stored key is deleted and invalidated, so it can't be put back. A grant that fails
+because Elasticsearch is unavailable fails the enable instead, and changes nothing.
 
 Enabling again is safe. It refreshes the transforms' stored credentials to the enabling user,
 restarts failed transforms, replaces transforms left over from an older version, and applies a
@@ -202,9 +207,11 @@ named "Digital Experience sessions (used by the sessions transforms)" and marked
 keys page warns before deleting it. A deleted key doesn't stop the transforms: they keep the
 identity they were last created or updated with, and keep summarizing sessions. It only stops
 Kibana from updating them without a user, so an upgrade or settings change then needs **Update
-sessions**. The health task checks the key on every run and logs a deleted one once, as a warning.
-Status checks it for users with the manage sessions privilege, and when one of them opens the
-Sessions tab, it grants a new key automatically, as the **Update sessions** button would. If
+sessions**. The health task checks the key until it finds it deleted, then logs it once, as a
+warning, and doesn't authenticate with that key again. Status checks it for users with the manage
+sessions privilege, and shows the others what the health task found. When one of those users opens
+the Sessions tab, it grants a new key automatically, as the **Update sessions** button would. If the
+key or the health task's state can't be read, status still loads, without automatic updates. If
 transforms fall behind under peak traffic, they lag and then catch up; no data is lost.
 
 There is no disable action yet. One must invalidate the stored API key and delete its saved object.

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { useAbortableAsync } from '@kbn/react-hooks';
 import type { SessionsStatus } from '../../../../common/sessions';
 import { useApiClient } from '../../../hooks/use_api_client';
@@ -21,20 +21,35 @@ export interface SessionsStatusState {
   enableError: Error | undefined;
 }
 
+/** A status, and how many enables had finished when it was requested. */
+interface Versioned {
+  status: SessionsStatus;
+  enables: number;
+}
+
 /** Whether sessions are set up and healthy, and a way to set them up. */
 export const useSessionsStatus = (): SessionsStatusState => {
   const apiClient = useApiClient();
-  const [enabledStatus, setEnabledStatus] = useState<SessionsStatus>();
+  const finishedEnables = useRef(0);
+  const [enabled, setEnabled] = useState<Versioned>();
   const [enabling, setEnabling] = useState(false);
   const [enableError, setEnableError] = useState<Error>();
 
   const {
-    value: fetchedStatus,
+    value: fetched,
     loading,
     error,
     refresh,
   } = useAbortableAsync(
-    ({ signal }) => apiClient.fetch('GET /internal/digital_experience/sessions/status', { signal }),
+    async ({ signal }): Promise<Versioned> => {
+      const enables = finishedEnables.current;
+      return {
+        status: await apiClient.fetch('GET /internal/digital_experience/sessions/status', {
+          signal,
+        }),
+        enables,
+      };
+    },
     [apiClient]
   );
 
@@ -42,9 +57,9 @@ export const useSessionsStatus = (): SessionsStatusState => {
     setEnabling(true);
     setEnableError(undefined);
     try {
-      setEnabledStatus(
-        await apiClient.fetch('POST /internal/digital_experience/sessions/enable', {})
-      );
+      const status = await apiClient.fetch('POST /internal/digital_experience/sessions/enable', {});
+      finishedEnables.current += 1;
+      setEnabled({ status, enables: finishedEnables.current });
     } catch (e) {
       setEnableError(e);
     } finally {
@@ -52,16 +67,15 @@ export const useSessionsStatus = (): SessionsStatusState => {
     }
   }, [apiClient]);
 
-  // A status fetched after enabling is newer than the one enabling answered with. Kept until then,
-  // so a refresh doesn't flash the status from before enabling.
-  useEffect(() => {
-    setEnabledStatus(undefined);
-  }, [fetchedStatus]);
+  // What enabling answered with stays until a status requested after it arrives, so a poll or
+  // refresh that started before enabling finished doesn't bring back the status from before.
+  const status =
+    enabled && (!fetched || fetched.enables < enabled.enables) ? enabled.status : fetched?.status;
 
   return {
-    status: enabledStatus ?? fetchedStatus,
+    status,
     // Nothing has been fetched before the first request starts.
-    loading: loading || (!enabledStatus && !fetchedStatus && !error),
+    loading: loading || (!status && !error),
     error,
     refresh,
     enable,

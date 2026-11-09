@@ -32,7 +32,7 @@ import {
   sessionsApiKeySavedObjectType,
 } from './sessions/sessions_api_key';
 import {
-  getLastAutoUpdateError,
+  getLastAutoUpdateState,
   registerSessionsHealthTask,
   scheduleSessionsHealthTask,
 } from './sessions/sessions_health_task';
@@ -91,9 +91,9 @@ export class Plugin
         isUxEnabled: plugins.ux !== undefined,
         sessionsSettings: settings,
         sessionsApiKeys,
-        getSessionsAutoUpdateError: async () => {
+        getSessionsAutoUpdateState: async () => {
           const [, { taskManager }] = await core.getStartServices();
-          return taskManager ? getLastAutoUpdateError(taskManager) : undefined;
+          return taskManager ? getLastAutoUpdateState(taskManager, this.logger) : {};
         },
       },
       runDevModeChecks: this.initializerContext.env.mode.dev,

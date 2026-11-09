@@ -14,12 +14,12 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
   SESSIONS_HEALTH_TASK_ID,
   SESSIONS_HEALTH_TASK_TYPE,
-  getLastAutoUpdateError,
+  getLastAutoUpdateState,
   registerSessionsHealthTask,
   scheduleSessionsHealthTask,
 } from './sessions_health_task';
 import type { SessionsApiKeys } from './sessions_api_key';
-import { updateSessionsWithApiKey, withApiKeyStatus } from './sessions_auto_update';
+import { getApiKeyStatus, updateSessionsWithApiKey } from './sessions_auto_update';
 import { getSessionsStatus } from './sessions_setup';
 
 jest.mock('./sessions_setup');
@@ -73,7 +73,10 @@ const setup = (state: Record<string, unknown> = {}) => {
 
 describe('sessions health task', () => {
   beforeEach(() => {
-    jest.mocked(withApiKeyStatus).mockImplementation(async (status) => status);
+    jest.mocked(getApiKeyStatus).mockImplementation(async (status) => ({
+      status,
+      keyId: status.apiKeyInvalid ? 'key-1' : null,
+    }));
   });
 
   afterEach(() => {
@@ -98,14 +101,18 @@ describe('sessions health task', () => {
     const [coreStart] = await core.getStartServices();
 
     expect(await run()).toEqual({
-      state: { health: 'healthy', needsUpdate: false, newerVersion: false, apiKeyInvalid: false },
+      state: { health: 'healthy', needsUpdate: false, newerVersion: false },
     });
 
     expect(getSessionsStatus).toHaveBeenCalledWith(coreStart.elasticsearch.client.asInternalUser, {
       settings,
       signal,
     });
-    expect(withApiKeyStatus).toHaveBeenCalledWith(healthyStatus, apiKeys, { checkKey: true });
+    expect(getApiKeyStatus).toHaveBeenCalledWith(healthyStatus, apiKeys, {
+      checkKey: true,
+      logger,
+      getAutoUpdateState: expect.any(Function),
+    });
     expect(updateSessionsWithApiKey).not.toHaveBeenCalled();
     expect(logger.warn).not.toHaveBeenCalled();
   });
@@ -120,7 +127,7 @@ describe('sessions health task', () => {
     const [coreStart] = await core.getStartServices();
 
     expect(await run()).toEqual({
-      state: { health: 'healthy', needsUpdate: false, newerVersion: false, apiKeyInvalid: false },
+      state: { health: 'healthy', needsUpdate: false, newerVersion: false },
     });
     expect(updateSessionsWithApiKey).toHaveBeenCalledWith({
       status: outdatedStatus,
@@ -157,7 +164,6 @@ describe('sessions health task', () => {
         health: 'outdated',
         needsUpdate: true,
         newerVersion: false,
-        apiKeyInvalid: false,
         autoUpdateError: 'unable to authenticate',
       },
     });
@@ -213,9 +219,13 @@ describe('sessions health task', () => {
     const first = setup();
 
     expect(await first.run()).toEqual({
-      state: { health: 'healthy', needsUpdate: false, newerVersion: false, apiKeyInvalid: true },
+      state: {
+        health: 'healthy',
+        needsUpdate: false,
+        newerVersion: false,
+        invalidApiKeyId: 'key-1',
+      },
     });
-    expect(withApiKeyStatus).toHaveBeenCalledWith(invalid, apiKeys, { checkKey: true });
     expect(updateSessionsWithApiKey).not.toHaveBeenCalled();
     expect(first.logger.warn).toHaveBeenCalledWith(
       expect.stringContaining(
@@ -228,10 +238,37 @@ describe('sessions health task', () => {
       health: 'healthy',
       needsUpdate: false,
       newerVersion: false,
-      apiKeyInvalid: true,
+      invalidApiKeyId: 'key-1',
     });
     await second.run();
     expect(second.logger.warn).not.toHaveBeenCalled();
+    // So the key isn't authenticated with again.
+    const [, , { getAutoUpdateState }] = jest.mocked(getApiKeyStatus).mock.calls[1];
+    expect(await getAutoUpdateState?.()).toEqual({ invalidApiKeyId: 'key-1' });
+  });
+
+  it('moves transforms left on another sessions key to the stored one', async () => {
+    jest.mocked(getSessionsStatus).mockResolvedValue({ ...healthyStatus, autoUpdate: true });
+    jest.mocked(updateSessionsWithApiKey).mockResolvedValue(true);
+    const { logger, run } = setup();
+
+    await run();
+
+    expect(updateSessionsWithApiKey).toHaveBeenCalled();
+    expect(logger.info).toHaveBeenCalledWith(
+      'Moved the sessions transforms to their stored API key.'
+    );
+  });
+
+  it('logs nothing when the stored key has nothing to update', async () => {
+    jest.mocked(getSessionsStatus).mockResolvedValue({ ...healthyStatus, autoUpdate: true });
+    jest.mocked(updateSessionsWithApiKey).mockResolvedValue(false);
+    const { logger, run } = setup();
+
+    await run();
+
+    expect(getSessionsStatus).toHaveBeenCalledTimes(1);
+    expect(logger.info).not.toHaveBeenCalled();
   });
 
   it('logs a problem once, not on every run while it lasts', async () => {
@@ -248,7 +285,7 @@ describe('sessions health task', () => {
     const { logger, run } = setup({ health: 'degraded', needsUpdate: false, newerVersion: false });
 
     expect(await run()).toEqual({
-      state: { health: 'healthy', needsUpdate: false, newerVersion: false, apiKeyInvalid: false },
+      state: { health: 'healthy', needsUpdate: false, newerVersion: false },
     });
     expect(logger.info).toHaveBeenCalledWith('Sessions transforms are no longer degraded.');
     expect(logger.warn).not.toHaveBeenCalled();
@@ -264,7 +301,7 @@ describe('sessions health task', () => {
     const first = setup();
 
     expect(await first.run()).toEqual({
-      state: { health: 'healthy', needsUpdate: false, newerVersion: true, apiKeyInvalid: false },
+      state: { health: 'healthy', needsUpdate: false, newerVersion: true },
     });
     expect(first.logger.warn).toHaveBeenCalledWith(newer.reason);
 
@@ -287,24 +324,42 @@ describe('sessions health task', () => {
   });
 });
 
-describe('getLastAutoUpdateError', () => {
-  it("reads the last automatic update error from the task's state", async () => {
+describe('getLastAutoUpdateState', () => {
+  const logger = loggingSystemMock.createLogger();
+
+  it("reads what the last run found about automatic updates from the task's state", async () => {
     const taskManager = taskManagerMock.createStart();
     taskManager.get.mockResolvedValue({
-      state: { health: 'outdated', autoUpdateError: 'unable to authenticate' },
+      state: {
+        health: 'outdated',
+        autoUpdateError: 'unable to authenticate',
+        invalidApiKeyId: 'key-1',
+      },
     } as never);
 
-    expect(await getLastAutoUpdateError(taskManager)).toBe('unable to authenticate');
+    expect(await getLastAutoUpdateState(taskManager, logger)).toEqual({
+      autoUpdateError: 'unable to authenticate',
+      invalidApiKeyId: 'key-1',
+    });
     expect(taskManager.get).toHaveBeenCalledWith(SESSIONS_HEALTH_TASK_ID);
   });
 
-  it('has none before the task is scheduled', async () => {
+  it('has nothing before the task is scheduled', async () => {
     const taskManager = taskManagerMock.createStart();
     taskManager.get.mockRejectedValue(
       SavedObjectsErrorHelpers.createGenericNotFoundError('task', SESSIONS_HEALTH_TASK_ID)
     );
 
-    expect(await getLastAutoUpdateError(taskManager)).toBeUndefined();
+    expect(await getLastAutoUpdateState(taskManager, logger)).toEqual({});
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it("logs, and has nothing, when the task can't be read", async () => {
+    const taskManager = taskManagerMock.createStart();
+    taskManager.get.mockRejectedValue(new Error('no shards available'));
+
+    expect(await getLastAutoUpdateState(taskManager, logger)).toEqual({});
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('no shards available'));
   });
 });
 

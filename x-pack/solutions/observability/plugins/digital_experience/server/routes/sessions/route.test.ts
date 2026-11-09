@@ -46,7 +46,7 @@ const status = {
 };
 
 const sessionsApiKeys = { available: true };
-const lastAutoUpdateError = 'unable to authenticate';
+const getSessionsAutoUpdateState = async () => ({ autoUpdateError: 'unable to authenticate' });
 
 const START = '2026-10-27T10:00:00.000Z';
 const END = '2026-10-28T10:00:00.000Z';
@@ -80,7 +80,7 @@ const runHandler = (
     logger,
     sessionsSettings: settings,
     sessionsApiKeys,
-    getSessionsAutoUpdateError: async () => lastAutoUpdateError,
+    getSessionsAutoUpdateState,
   });
   return { result, coreContext, logger, request };
 };
@@ -184,10 +184,12 @@ describe('sessions routes', () => {
         });
 
         expect(await result).toEqual(body);
-        // Only users who can grant a new key pay for checking it.
+        // Only users who can grant a new key pay for checking it; the others see what the health
+        // task found.
         expect(withApiKeyStatus).toHaveBeenCalledWith(enabled, sessionsApiKeys, {
           checkKey: canManage,
-          lastAutoUpdateError: 'unable to authenticate',
+          logger: expect.anything(),
+          getAutoUpdateState: getSessionsAutoUpdateState,
         });
       }
     );
@@ -249,7 +251,7 @@ describe('sessions routes', () => {
     it('names the new API key in the audit event', async () => {
       jest
         .mocked(enableSessionsForUser)
-        .mockResolvedValue({ name: 'Digital Experience sessions' } as never);
+        .mockResolvedValue({ id: 'key-1', name: 'Digital Experience sessions' } as never);
       const { result, coreContext } = runHandler(SESSIONS_ENABLE_ENDPOINT);
       coreContext.security.authc.getCurrentUser.mockReturnValue({ username: 'ana' } as never);
 
@@ -258,7 +260,7 @@ describe('sessions routes', () => {
       expect(coreContext.security.audit.logger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           message:
-            'User [ana] enabled Digital Experience sessions with a new API key [Digital Experience sessions]',
+            'User [ana] enabled Digital Experience sessions with a new API key [Digital Experience sessions] (key-1)',
         })
       );
     });
