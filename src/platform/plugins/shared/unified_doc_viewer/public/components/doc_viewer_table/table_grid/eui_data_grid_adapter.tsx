@@ -93,23 +93,37 @@ export interface EuiDataGridAdapterProps<TRow> {
   model: TableGridModel<TRow>;
 }
 
+interface PendingFocus {
+  address: TableGridCellAddress;
+  fallbackRowIndex: number;
+}
+
 export function EuiDataGridAdapter<TRow>({ model }: EuiDataGridAdapterProps<TRow>) {
   const styles = useMemoCss(componentStyles);
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
-  const pendingFocusRef = useRef<TableGridCellAddress | null>(null);
+  const pendingFocusRef = useRef<PendingFocus | null>(null);
   const { columns, getRowId, leadingControlColumns: modelLeadingControlColumns, rows } = model;
 
-  const requestFocus = useCallback((address: TableGridCellAddress) => {
-    pendingFocusRef.current = address;
-  }, []);
+  const requestFocus = useCallback(
+    (address: TableGridCellAddress) => {
+      pendingFocusRef.current = {
+        address,
+        fallbackRowIndex: rows.findIndex((row) => getRowId(row) === address.rowId),
+      };
+    },
+    [getRowId, rows]
+  );
 
   useEffect(() => {
-    const address = pendingFocusRef.current;
-    if (!address) {
+    const pendingFocus = pendingFocusRef.current;
+    if (!pendingFocus) {
       return;
     }
 
-    const rowIndex = rows.findIndex((row) => getRowId(row) === address.rowId);
+    const { address, fallbackRowIndex } = pendingFocus;
+    const requestedRowIndex = rows.findIndex((row) => getRowId(row) === address.rowId);
+    const rowIndex =
+      requestedRowIndex >= 0 ? requestedRowIndex : Math.min(fallbackRowIndex, rows.length - 1);
     const columnIds = [
       ...modelLeadingControlColumns.map(({ id }) => id),
       ...columns.map(({ id }) => id),
