@@ -1,5 +1,5 @@
 {
-  "sha1": "6fee57a78945a15dba81c09ae9d6a753e4d01e65",
+  "sha1": "2ccfa0d8392f2914035362b75dabe9f22a653eaf",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -381,7 +381,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/platform/api/tests/sml_api.spec.ts",
         "line": 180,
-        "column": 41
+        "column": 51
       }
     },
     {
@@ -464,8 +464,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/platform/api/tests/sml_api.spec.ts",
-        "line": 243,
-        "column": 4
+        "line": 247,
+        "column": 14
       }
     },
     {
@@ -478,8 +478,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/platform/api/tests/sml_api.spec.ts",
-        "line": 251,
-        "column": 4
+        "line": 255,
+        "column": 14
       }
     },
     {
@@ -492,8 +492,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/platform/api/tests/sml_api.spec.ts",
-        "line": 268,
-        "column": 14
+        "line": 269,
+        "column": 7
       }
     },
     {
@@ -506,7 +506,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/platform/api/tests/sml_api.spec.ts",
-        "line": 286,
+        "line": 288,
         "column": 14
       }
     },

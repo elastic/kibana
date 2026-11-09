@@ -24,16 +24,39 @@ interface OpsConfigCGroupOverridesOps {
 }
 
 /** @internal */
+export interface OpsConfigEventLoopWatchdog {
+  enabled: boolean;
+  blockThreshold: Duration;
+  startup: { blockThreshold?: Duration };
+  statsInterval: Duration;
+}
+
+/** @internal */
 export interface OpsConfigType {
   interval: Duration;
   cGroupOverrides: OpsConfigCGroupOverridesOps;
+  eventLoopWatchdog: OpsConfigEventLoopWatchdog;
 }
+
+const blockThresholdBounds = { min: '200ms', max: '60s' } as const;
 
 const configSchema = schema.object({
   interval: schema.duration({ defaultValue: OPS_METRICS_INTERVAL }),
   cGroupOverrides: schema.object({
     cpuPath: schema.maybe(schema.string()),
     cpuAcctPath: schema.maybe(schema.string()),
+  }),
+  eventLoopWatchdog: schema.object({
+    // Fallback value of the `core.eventLoopWatchdog.enabled` feature flag, read at startup.
+    // It has no effect where a flag provider or a `feature_flags.overrides` entry sets the flag.
+    enabled: schema.boolean({ defaultValue: false }),
+    // Minimum block length to report, for blocks that start in the `running` phase.
+    blockThreshold: schema.duration({ defaultValue: '200ms', ...blockThresholdBounds }),
+    startup: schema.object({
+      // Same for blocks that start in the `starting` phase; falls back to `blockThreshold`.
+      blockThreshold: schema.maybe(schema.duration(blockThresholdBounds)),
+    }),
+    statsInterval: schema.duration({ defaultValue: '10m', min: '1m', max: '24h' }),
   }),
 });
 

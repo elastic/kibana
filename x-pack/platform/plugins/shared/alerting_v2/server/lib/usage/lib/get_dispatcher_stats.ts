@@ -17,10 +17,11 @@ import {
   ACTION_POLICY_EVENT_PROVIDER,
 } from '../../dispatcher/steps/constants';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
-import { TERMS_SIZE, bucketsToRecord } from './constants';
+import { EVENT_LOG_INDEX, TERMS_SIZE, bucketsToRecord } from './constants';
 import type {
-  DispatcherEventStatsAggregations,
   DispatcherGroupingModeBucket,
+  DispatcherActionBucket,
+  DispatcherEventStatsAggregations,
   DispatcherPolicyActivityBucket,
   DispatcherPolicyStatsAggregations,
   DispatcherStatsResults,
@@ -30,7 +31,6 @@ import type {
 } from './types';
 import type { DispatcherPolicyActivity, Distribution } from '../types';
 
-const EVENT_LOG_INDEX = '.kibana-event-log-*';
 const DISPATCHER_FIELDS = 'kibana.alerting_v2.dispatcher';
 const WINDOW = 'now-24h';
 const ACTIONS_TERMS_SIZE = 10;

@@ -10,6 +10,9 @@ import type { Logger } from '@kbn/core/server';
 import type { PluginSetupContract as ActionsPluginSetup } from '@kbn/actions-plugin/server';
 import { isConversationNotFoundError } from '@kbn/agent-builder-common';
 import type {
+  OnBeforeNewConversationHook,
+  OnBeforeNewConversationContext,
+  OnBeforeNewConversationRelease,
   CallbackConversationResolver,
   CallbackConversationResolverContext,
   CallbacksSetup,
@@ -37,6 +40,7 @@ export class CallbackDeliveryService {
   private readonly logger: Logger;
   private readonly transports: CallbackTransportDefinition[];
   private readonly conversationResolvers: CallbackConversationResolver[] = [];
+  private readonly onBeforeNewConversationHooks: OnBeforeNewConversationHook[] = [];
 
   constructor({ actions, logger }: { actions: ActionsPluginSetup; logger: Logger }) {
     this.actions = actions;
@@ -48,6 +52,9 @@ export class CallbackDeliveryService {
     return {
       registerConversationResolver: (resolver) => {
         this.conversationResolvers.push(resolver);
+      },
+      registerOnBeforeNewConversation: (hook) => {
+        this.onBeforeNewConversationHooks.push(hook);
       },
       registerTransport: (transport) => {
         this.transports.push(transport);
@@ -91,6 +98,43 @@ export class CallbackDeliveryService {
     });
 
     return conversation ? { conversationId: conversation.id } : undefined;
+  }
+
+  /**
+   * Runs the registered on-before-new-conversation hooks in order; the first that throws refuses the
+   * execution and gives back what the hooks before it took. Resolves to the release of everything
+   * the hooks took, which never throws.
+   */
+  async runOnBeforeNewConversation(
+    context: OnBeforeNewConversationContext
+  ): Promise<OnBeforeNewConversationRelease> {
+    const releases: OnBeforeNewConversationRelease[] = [];
+    const releaseAll = async () => {
+      for (const release of releases.splice(0).reverse()) {
+        try {
+          await release();
+        } catch (error) {
+          this.logger.warn(
+            `Could not release an on-before-new-conversation hook: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+        }
+      }
+    };
+
+    try {
+      for (const hook of this.onBeforeNewConversationHooks) {
+        const release = await hook(context);
+        if (release) {
+          releases.push(release);
+        }
+      }
+    } catch (error) {
+      await releaseAll();
+      throw error;
+    }
+    return releaseAll;
   }
 
   validateCallbackUrl(callbackUrl: string): void {

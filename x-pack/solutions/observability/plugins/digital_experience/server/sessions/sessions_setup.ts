@@ -7,6 +7,7 @@
 
 import type {
   SecurityFieldSecurity,
+  SecurityIndicesPrivileges,
   SecurityUserIndicesPrivileges,
   TransformGetTransformStatsTransformStats,
   TransformGetTransformTransformSummary,
@@ -14,8 +15,10 @@ import type {
 import type { ElasticsearchClient, IScopedClusterClient, Logger } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
 import { escapeRegExp } from 'lodash';
+import { setTimeout as sleep } from 'timers/promises';
 import {
   SESSIONS_DEFAULT_FREQUENCY,
+  SESSIONS_INDEX,
   SESSIONS_INDEX_PATTERN,
   SESSIONS_MANAGED_BY,
   SESSIONS_SOURCE_INDICES,
@@ -52,10 +55,13 @@ export const REQUIRED_DEST_INDEX_PRIVILEGES = [
 ] as const;
 
 export const getMissingSessionsPrivileges = async (
-  client: ElasticsearchClient
+  client: ElasticsearchClient,
+  { isServerless }: { isServerless: boolean }
 ): Promise<string[]> => {
   const response = await client.security.hasPrivileges({
-    cluster: [...REQUIRED_CLUSTER_PRIVILEGES],
+    // On Serverless, checking the source read for document- and field-level security reads the
+    // user's roles, which needs `read_security`.
+    cluster: [...REQUIRED_CLUSTER_PRIVILEGES, ...(isServerless ? ['read_security'] : [])],
     index: [
       { names: [...SESSIONS_SOURCE_INDICES], privileges: [...REQUIRED_SOURCE_INDEX_PRIVILEGES] },
       { names: [SESSIONS_INDEX_PATTERN], privileges: [...REQUIRED_DEST_INDEX_PRIVILEGES] },
@@ -76,6 +82,22 @@ export const getMissingSessionsPrivileges = async (
 };
 
 const READ_PRIVILEGES = new Set(['read', 'all']);
+/** Index privileges known not to read documents. Any other, such as an action pattern, may. */
+const NON_READ_PRIVILEGES = new Set([
+  'view_index_metadata',
+  'read_view_metadata',
+  'monitor',
+  'manage',
+  'maintenance',
+  'auto_configure',
+  'create_index',
+  'delete_index',
+  'create',
+  'create_doc',
+  'index',
+  'delete',
+  'write',
+]);
 
 const asArray = <T>(value: T | T[] | undefined): T[] =>
   value === undefined ? [] : Array.isArray(value) ? value : [value];
@@ -96,42 +118,138 @@ export const indexPatternCovers = (rolePattern: string, pattern: string): boolea
   return new RegExp(`^${regex}$`).test(pattern);
 };
 
-const grantsAllFields = (fieldSecurity: SecurityFieldSecurity[] | undefined): boolean =>
-  fieldSecurity === undefined ||
-  fieldSecurity.length === 0 ||
-  fieldSecurity.some(
-    ({ grant, except }) => asArray(grant).includes('*') && asArray(except).length === 0
-  );
+/**
+ * Whether some index name could match both an index pattern from a role and `pattern`. Regular
+ * expression names (`/.../`) always could, as proving otherwise isn't practical.
+ */
+export const indexPatternsOverlap = (rolePattern: string, pattern: string): boolean => {
+  if (rolePattern.startsWith('/')) {
+    return true;
+  }
+  const memo = new Map<number, boolean>();
+  const overlap = (i: number, j: number): boolean => {
+    const key = i * (pattern.length + 1) + j;
+    const cached = memo.get(key);
+    if (cached !== undefined) {
+      return cached;
+    }
+    const result = overlapFrom(i, j);
+    memo.set(key, result);
+    return result;
+  };
+  // A `*` matches nothing, or one more character of the other pattern (which may be its `*`).
+  const overlapFrom = (i: number, j: number): boolean => {
+    if (rolePattern[i] === '*') {
+      return overlap(i + 1, j) || (j < pattern.length && overlap(i, j + 1));
+    }
+    if (pattern[j] === '*') {
+      return overlap(i, j + 1) || (i < rolePattern.length && overlap(i + 1, j));
+    }
+    if (i === rolePattern.length || j === pattern.length) {
+      return i === rolePattern.length && j === pattern.length;
+    }
+    const [roleChar, char] = [rolePattern[i], pattern[j]];
+    return (roleChar === char || roleChar === '?' || char === '?') && overlap(i + 1, j + 1);
+  };
+  return overlap(0, 0);
+};
 
-const isUnrestrictedReadOf = (entry: SecurityUserIndicesPrivileges, pattern: string): boolean =>
-  entry.privileges.some((privilege) => READ_PRIVILEGES.has(privilege)) &&
-  asArray(entry.query).length === 0 &&
-  grantsAllFields(entry.field_security) &&
+/** Index privileges as the user privileges API reports them, or as a role defines them. */
+type IndexPrivileges = SecurityUserIndicesPrivileges | SecurityIndicesPrivileges;
+
+const grantsAllFields = (
+  fieldSecurity: SecurityFieldSecurity | SecurityFieldSecurity[] | undefined
+): boolean => {
+  const grants = asArray(fieldSecurity);
+  return (
+    grants.length === 0 ||
+    grants.some(({ grant, except }) => asArray(grant).includes('*') && asArray(except).length === 0)
+  );
+};
+
+const grantsRead = (entry: IndexPrivileges): boolean =>
+  entry.privileges.some((privilege) => READ_PRIVILEGES.has(privilege));
+
+const isFiltered = (entry: IndexPrivileges): boolean =>
+  asArray(entry.query).length > 0 || !grantsAllFields(entry.field_security);
+
+const isUnrestrictedReadOf = (entry: IndexPrivileges, pattern: string): boolean =>
+  grantsRead(entry) &&
+  !isFiltered(entry) &&
   asArray(entry.names).some((name) => indexPatternCovers(name, pattern));
 
+const mayGrantRead = (entry: IndexPrivileges): boolean =>
+  entry.privileges.some((privilege) => !NON_READ_PRIVILEGES.has(privilege));
+
+const mayFilterReadOf = (entry: IndexPrivileges, pattern: string): boolean =>
+  mayGrantRead(entry) &&
+  isFiltered(entry) &&
+  asArray(entry.names).some((name) => indexPatternsOverlap(name, pattern));
+
 /**
- * Source index patterns the user can't read in full. Elasticsearch merges the user's roles per
- * index pattern, so one role with unrestricted read on a pattern lifts another role's
- * document- or field-level security there.
+ * Index privileges of the user's roles, or `undefined` for an API key, whose own role descriptors
+ * no role holds. Uses the Query Role API, which unlike the Get Role API also returns predefined
+ * roles on Serverless. Needs `read_security`, which enabling checks first on Serverless.
+ */
+const getRoleIndexPrivileges = async (
+  client: ElasticsearchClient
+): Promise<IndexPrivileges[] | undefined> => {
+  const { roles, authentication_type: authenticationType } = await client.security.authenticate();
+  if (authenticationType === 'api_key') {
+    return undefined;
+  }
+  if (roles.length === 0) {
+    return [];
+  }
+  const { roles: descriptors } = await client.security.queryRole({
+    query: { terms: { name: roles } },
+    size: roles.length,
+  });
+  return descriptors.flatMap(({ indices }) => indices ?? []);
+};
+
+/** The user's index privileges, or `undefined` when Elasticsearch can't report them. */
+const getIndexPrivileges = async (
+  client: ElasticsearchClient
+): Promise<IndexPrivileges[] | undefined> => {
+  try {
+    const { indices } = await client.security.getUserPrivileges();
+    return indices;
+  } catch (error) {
+    // API keys with their own role descriptors: Elasticsearch answers 400 instead of privileges.
+    if (isResponseError(error) && error.statusCode === 400) {
+      return undefined;
+    }
+    // Serverless only lets operator users call it (410), so read the user's roles instead.
+    if (isResponseError(error) && error.statusCode === 410) {
+      return getRoleIndexPrivileges(client);
+    }
+    throw error;
+  }
+};
+
+/**
+ * Source index patterns the user may not read in full: some role's read that could apply there is
+ * filtered by document- or field-level security, and no role provably reads all of it.
+ * Elasticsearch merges the user's roles per index pattern, so one role with unrestricted read on a
+ * pattern lifts another role's filter there. `has_privileges` checks the read itself, which also
+ * covers regular expression names; those can't prove unrestricted read here.
  */
 export const getRestrictedSourceIndices = async (
   client: ElasticsearchClient
 ): Promise<{ indices: string[]; reason: 'filtered' | 'unverifiable' }> => {
-  try {
-    const { indices: entries } = await client.security.getUserPrivileges();
-    return {
-      indices: SESSIONS_SOURCE_INDICES.filter(
-        (pattern) => !entries.some((entry) => isUnrestrictedReadOf(entry, pattern))
-      ),
-      reason: 'filtered',
-    };
-  } catch (error) {
-    // API keys with their own role descriptors: Elasticsearch answers 400 instead of privileges.
-    if (isResponseError(error) && error.statusCode === 400) {
-      return { indices: [...SESSIONS_SOURCE_INDICES], reason: 'unverifiable' };
-    }
-    throw error;
+  const entries = await getIndexPrivileges(client);
+  if (entries === undefined) {
+    return { indices: [...SESSIONS_SOURCE_INDICES], reason: 'unverifiable' };
   }
+  return {
+    indices: SESSIONS_SOURCE_INDICES.filter(
+      (pattern) =>
+        entries.some((entry) => mayFilterReadOf(entry, pattern)) &&
+        !entries.some((entry) => isUnrestrictedReadOf(entry, pattern))
+    ),
+    reason: 'filtered',
+  };
 };
 
 const managedTransforms = async (
@@ -171,6 +289,7 @@ export const enableSessions = async ({
   logger,
   settings,
   enabledBy,
+  isServerless,
   now = new Date(),
 }: {
   esClient: IScopedClusterClient;
@@ -178,9 +297,12 @@ export const enableSessions = async ({
   settings: SessionsSettings;
   /** Username recorded on the transforms, so status can show whose access they run with. */
   enabledBy: string | null;
+  isServerless: boolean;
   now?: Date;
 }): Promise<void> => {
-  const missingPrivileges = await getMissingSessionsPrivileges(esClient.asCurrentUser);
+  const missingPrivileges = await getMissingSessionsPrivileges(esClient.asCurrentUser, {
+    isServerless,
+  });
   if (missingPrivileges.length > 0) {
     throw new SessionsPrivilegesError(missingPrivileges);
   }
@@ -252,11 +374,58 @@ export const enableSessions = async ({
     }
   }
 
+  // Created here rather than by the transform once it starts, so the index exists when enabling
+  // returns and the list can read it; the index template gives it its mappings. As the current
+  // user, checked above for `create_index`: Elasticsearch ignores secondary authorization here.
+  // Created without checking first, as `indices.exists` needs `view_index_metadata`.
+  const user = esClient.asCurrentUser;
+  await createUnlessExists(user, SESSIONS_INDEX);
+
   await Promise.all(
     desired.map(({ transform_id: transformId }) =>
       client.transform.startTransform({ transform_id: transformId }, { ignore: [409] })
     )
   );
+
+  await waitUntilSearchable(user);
+};
+
+const createUnlessExists = async (client: ElasticsearchClient, index: string): Promise<void> => {
+  try {
+    await client.indices.create({ index });
+  } catch (error) {
+    const exists =
+      isResponseError(error) && error.body?.error?.type === 'resource_already_exists_exception';
+    if (!exists) {
+      throw error;
+    }
+  }
+};
+
+/** How long, and how often, enabling checks that the sessions dest index accepts searches. */
+const SEARCHABLE_TIMEOUT_MS = 30_000;
+const SEARCHABLE_RETRY_MS = 250;
+
+/**
+ * The UI lists sessions as soon as enabling returns, but a just-created dest index answers
+ * searches with a 503 (no shard available) for a moment, even once its health is yellow. Waits
+ * until a count stops answering 503, or gives up after the timeout, as the first list read can
+ * still be retried.
+ */
+const waitUntilSearchable = async (client: ElasticsearchClient): Promise<void> => {
+  const deadline = Date.now() + SEARCHABLE_TIMEOUT_MS;
+  while (true) {
+    try {
+      await client.count({ index: SESSIONS_INDEX, ignore_unavailable: true });
+      return;
+    } catch (error) {
+      const unavailable = isResponseError(error) && error.statusCode === 503;
+      if (!unavailable || Date.now() >= deadline) {
+        return;
+      }
+    }
+    await sleep(SEARCHABLE_RETRY_MS);
+  }
 };
 
 const HEALTH_RANK: Record<SessionsTransformHealth, number> = {

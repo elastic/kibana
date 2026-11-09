@@ -6,10 +6,15 @@
  */
 
 import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
-import { getSmlOriginId, kibanaPermissions } from '@kbn/agent-builder-sml-plugin/server';
+import {
+  getSmlOriginId,
+  kibanaPermissions,
+  searchSavedObjectsByTitle,
+} from '@kbn/agent-builder-sml-plugin/server';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 import { VISUALIZATION_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
+import { VISUALIZATION_ATTACHMENT_TYPE } from '@kbn/agent-builder-visualizations-common';
 import {
   withLensReferences,
   toLensApiConfig,
@@ -23,6 +28,7 @@ const getChartType = (attributes: LensAttributes): string => {
 
 export const visualizationSmlType: SmlTypeDefinition = {
   id: VISUALIZATION_KI_TYPE,
+  attachmentType: VISUALIZATION_ATTACHMENT_TYPE,
   fetchFrequency: () => '1h',
 
   async *list(context) {
@@ -71,6 +77,9 @@ export const visualizationSmlType: SmlTypeDefinition = {
   },
 
   getPermissions: () => kibanaPermissions({ kiType: VISUALIZATION_KI_TYPE }),
+
+  searchByTitle: ({ title, size }, { savedObjectsClient }) =>
+    searchSavedObjectsByTitle({ type: 'lens', title, size, savedObjectsClient }),
 
   toAttachment: async (item, context) => {
     const originId = getSmlOriginId(item);

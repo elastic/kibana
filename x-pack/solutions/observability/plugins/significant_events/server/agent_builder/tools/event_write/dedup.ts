@@ -320,8 +320,8 @@ export const competingInactiveHeads = (
  * Turns each dedup candidate that a closed series covers into a continuation of that series: it
  * keeps the series' `event_id`, so the write opens a new episode under it. A candidate with a rule
  * the series does not hold, or with no shared source, stays a new event. When several closed series
- * cover it, the closest fit wins (fewest extra rules); among equals the one an operator deactivated
- * is reopened, so the hold applies to it, otherwise the newest.
+ * cover it, the closest fit wins (fewest extra rules); among equals the one with an Alerting v2
+ * `deactivate` action is reopened, so the hold has a reason to return, otherwise the newest.
  */
 export const reopenMatchingInactiveSeries = ({
   candidates,
@@ -346,7 +346,12 @@ export const reopenMatchingInactiveSeries = ({
       index: candidate.index,
       input: { ...candidate.input, event_id: chosen.event.event_id },
       eventId: chosen.event.event_id,
-      reopensSeries: { groupHash: chosen.head.groupHash, episodeId: chosen.head.episodeId },
+      reopensSeries: {
+        groupHash: chosen.head.groupHash,
+        episodeId: chosen.head.episodeId,
+        closedAt: chosen.event['@timestamp'],
+        closingNote: chosen.event.assessment_note,
+      },
     };
   });
 };

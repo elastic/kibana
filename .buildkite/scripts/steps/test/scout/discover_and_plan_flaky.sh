@@ -9,9 +9,6 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
-# Only runs Node scripts (never serves the UI), so skip the dev-mode shared webpack bundles.
-export KBN_BOOTSTRAP_NO_PREBUILT=true
-
 .buildkite/scripts/bootstrap.sh
 
 # Injected as step env by the pipeline generator; require it so a missing value fails loudly.

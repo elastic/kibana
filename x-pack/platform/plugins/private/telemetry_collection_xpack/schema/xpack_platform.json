@@ -1341,19 +1341,19 @@
             "dispatched": {
               "type": "long",
               "_meta": {
-                "description": "Sum of alerts in dispatched events over the last 24 hours."
+                "description": "Sum of alerts in dispatched events over the last 24 hours. Summed per policy and per dispatcher tick, so an alert is counted again on every tick and for every policy it is dispatched to."
               }
             },
             "throttled": {
               "type": "long",
               "_meta": {
-                "description": "Sum of alerts in throttled events over the last 24 hours."
+                "description": "Sum of alerts in throttled events over the last 24 hours. Summed per policy and per dispatcher tick, so an alert is counted again on every tick and for every policy that throttles it."
               }
             },
             "unmatched": {
               "type": "long",
               "_meta": {
-                "description": "Sum of alerts that matched no action policy (unmatched events) over the last 24 hours."
+                "description": "Sum of alerts that matched no action policy (unmatched events) over the last 24 hours. Summed per dispatcher tick, so an alert is counted again on every tick it stays unmatched."
               }
             }
           }
@@ -1363,13 +1363,13 @@
             "dispatched": {
               "type": "long",
               "_meta": {
-                "description": "Sum of action groups in dispatched events over the last 24 hours."
+                "description": "Sum of action groups in dispatched events over the last 24 hours. Summed per policy and per dispatcher tick, so a group is counted again on every tick it is dispatched."
               }
             },
             "throttled": {
               "type": "long",
               "_meta": {
-                "description": "Sum of action groups in throttled events over the last 24 hours."
+                "description": "Sum of action groups in throttled events over the last 24 hours. Summed per policy and per dispatcher tick, so a group is counted again on every tick it is throttled."
               }
             }
           }
@@ -8673,6 +8673,30 @@
                     "description": "Automatically extract observables setting disabled"
                   }
                 },
+                "extractObservablesSourceExplicit": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Cases where the caller set extractObservables to a value that differs from the template or space default. A value from a legacy (configuration-level) template that differs from the space default is counted here, because only a template that the request references is known as a template. Cases created before this attribute existed are not counted in any source bucket"
+                  }
+                },
+                "extractObservablesSourceTemplate": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Cases where extractObservables comes from the case template, unless a caller or a rule changed the value. Legacy (configuration-level) templates count here only for cases that a rule creates"
+                  }
+                },
+                "extractObservablesSourceSpaceDefault": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Cases where extractObservables comes from the space or owner default, unless a caller or a rule changed the value"
+                  }
+                },
+                "extractObservablesSourceRule": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Cases where a detection rule set extractObservables to a value that differs from the template or space default"
+                  }
+                },
                 "observables": {
                   "properties": {
                     "auto": {
@@ -9591,6 +9615,18 @@
                     "automatic": {
                       "type": "long"
                     }
+                  }
+                },
+                "extractObservablesDefaultOn": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of configuration saved objects with the extractObservables default enabled"
+                  }
+                },
+                "extractObservablesDefaultOff": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of configuration saved objects with the extractObservables default disabled"
                   }
                 },
                 "customFields": {

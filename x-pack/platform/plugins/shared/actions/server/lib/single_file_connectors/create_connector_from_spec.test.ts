@@ -147,6 +147,21 @@ describe('createConnectorTypeFromSpec', () => {
     expect(connectorType.sandboxSupportedAuthTypes).toEqual(['bearer', 'oauth_authorization_code']);
   });
 
+  it('derives getSandboxHosts from the spec fixed hosts and configured URL hosts', () => {
+    const spec = createMockSpec({
+      sandbox: { hosts: ['api.example.com'], hostsFromConfig: ['url'] },
+    });
+    const connectorType = createConnectorTypeFromSpec(spec, mockActionsPlugin);
+    expect(
+      connectorType.getSandboxHosts?.({ config: { url: 'https://cluster.example.com:9243' } })
+    ).toEqual(['api.example.com', 'cluster.example.com']);
+  });
+
+  it('returns no sandbox hosts when the spec declares none', () => {
+    const connectorType = createConnectorTypeFromSpec(createMockSpec(), mockActionsPlugin);
+    expect(connectorType.getSandboxHosts?.({ config: {} })).toEqual([]);
+  });
+
   it('registers the shipped External Elasticsearch spec as sandbox capable for both auth types', () => {
     const connectorType = createConnectorTypeFromSpec(
       connectorsSpecs.Elasticsearch,
@@ -158,6 +173,11 @@ describe('createConnectorTypeFromSpec', () => {
   it('registers the shipped New Relic spec as sandbox capable for the API key header auth type', () => {
     const connectorType = createConnectorTypeFromSpec(connectorsSpecs.NewRelic, mockActionsPlugin);
     expect(connectorType.sandboxSupportedAuthTypes).toEqual(['api_key_header']);
+  });
+
+  it('registers the shipped Rootly spec as sandbox capable for the bearer auth type', () => {
+    const connectorType = createConnectorTypeFromSpec(connectorsSpecs.Rootly, mockActionsPlugin);
+    expect(connectorType.sandboxSupportedAuthTypes).toEqual(['bearer']);
   });
 
   it('sets description from metadata.description', () => {

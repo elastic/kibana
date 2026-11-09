@@ -124,6 +124,7 @@ export interface AlertingV2Usage {
     schedule_error?: number;
     license_not_supported?: number;
   };
+
   dispatcher_action_groups_dispatched_per_policy_by_grouping_mode_24hr?: {
     per_alert?: Distribution;
     per_field?: Distribution;

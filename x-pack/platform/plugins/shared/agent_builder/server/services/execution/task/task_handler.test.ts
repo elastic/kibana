@@ -394,3 +394,145 @@ describe('TaskHandler event streaming and finalization', () => {
     });
   });
 });
+
+describe('TaskHandler running as a bound service account', () => {
+  const boundExecution = {
+    executionId: 'execution-1',
+    '@timestamp': '2026-01-01T00:00:00.000Z',
+    status: ExecutionStatus.scheduled,
+    agentId: 'agent-1',
+    spaceId: 'default',
+    eventCount: 0,
+    events: [],
+    executionMode: AgentExecutionMode.conversation,
+    runAs: { type: 'service_account', serviceAccountId: 'sa-1' },
+    agentParams: { conversationId: 'conversation-1', nextInput: { message: 'hello' } },
+  } as const;
+  let executionClient: { get: jest.Mock; updateStatus: jest.Mock; updateHeartbeat: jest.Mock };
+  const scopedRequest = httpServerMock.createKibanaRequest();
+  const boundConversationClient = createConversationClientMock();
+  const boundConversationService = {
+    getScopedClientAsUser: jest.fn().mockResolvedValue(boundConversationClient),
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    deliverCallbackEventsMock.mockResolvedValue(undefined);
+    executionClient = {
+      get: jest.fn().mockResolvedValue(boundExecution),
+      updateStatus: jest.fn().mockResolvedValue(undefined),
+      updateHeartbeat: jest.fn().mockResolvedValue(undefined),
+    };
+    createAgentExecutionClientMock.mockReturnValue(executionClient as never);
+    handleAgentExecutionMock.mockResolvedValue(of());
+    collectAndWriteEventsMock.mockImplementation(async ({ events$ }) => {
+      await firstValueFrom(events$.pipe(toArray()));
+    });
+    serializeExecutionErrorMock.mockImplementation((error: unknown) => ({
+      code: 'internal_error' as never,
+      message: error instanceof Error ? error.message : String(error),
+    }));
+  });
+
+  const createHandler = () =>
+    createTaskHandler({
+      logger: loggingSystemMock.createLogger(),
+      elasticsearch: { client: { asInternalUser: {} } },
+      callbackDeliveryService: {} as never,
+      surfacesService: {},
+      conversationService: boundConversationService,
+    } as never);
+
+  it('releases an execution aborted before it started through the account credential', async () => {
+    const owner = { id: 'user-1', username: 'elastic' };
+    executionClient.get.mockResolvedValue({
+      ...boundExecution,
+      status: ExecutionStatus.aborted,
+      owner,
+    });
+    const withScopedRequest = jest.fn(async (fn: (request: unknown) => Promise<unknown>) =>
+      fn(scopedRequest)
+    );
+
+    await createHandler().run({
+      executionId: 'execution-1',
+      runAs: { withScopedRequest } as never,
+    });
+
+    expect(handleAgentExecutionMock).not.toHaveBeenCalled();
+    expect(withScopedRequest).toHaveBeenCalledWith(expect.any(Function), {
+      expectedServiceAccountId: 'sa-1',
+    });
+    expect(boundConversationService.getScopedClientAsUser).toHaveBeenCalledWith({
+      request: scopedRequest,
+      user: { ...owner, isAdmin: false },
+      runAs: 'sa-1',
+    });
+    expect(boundConversationClient.update).toHaveBeenCalledWith(
+      { id: 'conversation-1' },
+      expect.objectContaining({
+        activeExecution: { action: 'release', executionId: 'execution-1' },
+      })
+    );
+  });
+
+  it('runs the whole execution inside the service account credential, pinned to the account', async () => {
+    const withScopedRequest = jest.fn(async (fn: (request: unknown) => Promise<unknown>) =>
+      fn(scopedRequest)
+    );
+
+    await createHandler().run({
+      executionId: 'execution-1',
+      runAs: { withScopedRequest } as never,
+    });
+
+    expect(withScopedRequest).toHaveBeenCalledWith(expect.any(Function), {
+      expectedServiceAccountId: 'sa-1',
+    });
+    expect(handleAgentExecutionMock).toHaveBeenCalledWith(
+      expect.objectContaining({ request: scopedRequest, execution: boundExecution })
+    );
+    expect(executionClient.updateStatus).toHaveBeenLastCalledWith(
+      'execution-1',
+      ExecutionStatus.completed
+    );
+  });
+
+  it('records a credential failure that names the agent and the account', async () => {
+    const withScopedRequest = jest
+      .fn()
+      .mockRejectedValue(new Error('No service account is bound to workload [agent/agent-1]'));
+
+    await createHandler().run({
+      executionId: 'execution-1',
+      runAs: { withScopedRequest } as never,
+    });
+
+    expect(handleAgentExecutionMock).not.toHaveBeenCalled();
+    expect(executionClient.updateStatus).toHaveBeenLastCalledWith(
+      'execution-1',
+      ExecutionStatus.failed,
+      {
+        error: {
+          code: 'internal_error',
+          message:
+            'Agent "agent-1" cannot run as service account "sa-1": No service account is bound to workload [agent/agent-1]',
+        },
+      }
+    );
+  });
+
+  it('fails a bound execution whose task carries no service account credential', async () => {
+    await createHandler().run({
+      executionId: 'execution-1',
+      fakeRequest: httpServerMock.createKibanaRequest(),
+    });
+
+    expect(handleAgentExecutionMock).not.toHaveBeenCalled();
+    expect(executionClient.updateStatus).toHaveBeenCalledWith(
+      'execution-1',
+      ExecutionStatus.failed,
+      { error: expect.objectContaining({ message: expect.stringContaining('sa-1') }) }
+    );
+  });
+});
