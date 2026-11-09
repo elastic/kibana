@@ -8,7 +8,7 @@
 import { copyToClipboard } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
-import { buildAgentInstructions } from '../../../common';
+import { buildAgentInstructions, type AgentInstructionsOptions } from '../../../common';
 
 /** The URL people reach this Kibana at: the public one when set, else the page's own origin. */
 export const getKibanaUrl = (http: CoreStart['http']): string =>
@@ -20,10 +20,11 @@ export const getKibanaUrl = (http: CoreStart['http']): string =>
  */
 export const copyAgentInstructions = (
   { http, notifications }: Pick<CoreStart, 'http' | 'notifications'>,
-  investigationId: string
+  investigationId: string,
+  proposedAction?: AgentInstructionsOptions['proposedAction']
 ): boolean => {
   const copied = copyToClipboard(
-    buildAgentInstructions({ investigationId, kibanaUrl: getKibanaUrl(http) })
+    buildAgentInstructions({ investigationId, kibanaUrl: getKibanaUrl(http), proposedAction })
   );
   if (copied) {
     notifications.toasts.addSuccess(

@@ -95,9 +95,11 @@ const CustomerImpact: React.FC<{
     <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="investigationCustomerImpact">
       {summary?.trim() && <EventMarkdown text={summary} />}
       {impactMap &&
-        events.map((event) => (
+        events.map((event, index) => (
           <EventCard
             key={event.id}
+            // Only the first is unfolded; the rest are one line each until opened.
+            defaultOpen={index === 0}
             event={event}
             impactMap={impactMap}
             onOpen={() => links?.openEvent(event.id)}

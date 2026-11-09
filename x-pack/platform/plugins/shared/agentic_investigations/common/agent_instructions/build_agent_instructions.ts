@@ -17,7 +17,35 @@ export interface AgentInstructionsOptions {
   investigationId: string;
   /** The Kibana the investigation lives in, with any base path, and no trailing slash. */
   kibanaUrl: string;
+  /**
+   * A proposed action to also have the agent weigh up, in addition to reading the investigation.
+   * Its text is the proposal's own title and body, as the person sees them.
+   */
+  proposedAction?: { title: string; details?: string };
 }
+
+const buildEvaluationSection = ({
+  title,
+  details,
+}: NonNullable<AgentInstructionsOptions['proposedAction']>): string[] => [
+  '',
+  `5. Then evaluate this proposed action from the investigation: "${title}"`,
+  ...(details?.trim()
+    ? [
+        '   What it says:',
+        ...details
+          .trim()
+          .split('\n')
+          .map((line) => `   > ${line}`),
+      ]
+    : []),
+  '   Tell me:',
+  '   - whether the evidence supports it: which events and hypotheses back it, and which cut against it',
+  '   - what could go wrong if it is applied, and what it would not fix',
+  '   - anything to check first, and a safer or better alternative if there is one',
+  '   - your recommendation: apply, apply with changes, or do not apply',
+  '   Evaluate only. Do not apply the action or run any command that changes anything.',
+];
 
 /**
  * Plain-text instructions a person pastes into a local coding agent so it can read an
@@ -27,6 +55,7 @@ export interface AgentInstructionsOptions {
 export const buildAgentInstructions = ({
   investigationId,
   kibanaUrl,
+  proposedAction,
 }: AgentInstructionsOptions): string => {
   const url = kibanaUrl.replace(/\/+$/, '');
   return [
@@ -51,5 +80,6 @@ export const buildAgentInstructions = ({
     "   - the agent's final message in the last round",
     '',
     'Read only. Do not change, close or delete the investigation.',
+    ...(proposedAction ? buildEvaluationSection(proposedAction) : []),
   ].join('\n');
 };

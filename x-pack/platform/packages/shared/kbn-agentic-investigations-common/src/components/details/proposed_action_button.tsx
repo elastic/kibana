@@ -22,6 +22,7 @@ import {
   ProposalCaption,
   getProposalDecision,
   ProposedActionStatusBadge,
+  type ApprovalAction,
   type ApprovalPhase,
   type ApprovalProposal,
   type DeclineParams,
@@ -58,6 +59,8 @@ export interface ProposedActionButtonProps {
    * `KibanaContextProvider`, so this package cannot read `core.http` itself.
    */
   basePath?: IBasePath;
+  /** Extra buttons in the modal's footer, beside Decline. */
+  secondaryActions?: ApprovalAction[];
   'data-test-subj'?: string;
 }
 
@@ -156,6 +159,7 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
     onReopen,
     isReopening,
     basePath,
+    secondaryActions,
     'data-test-subj': dataTestSubj,
   }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -278,6 +282,7 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
             onReopen={onReopen}
             isReopening={isReopening}
             basePath={basePath}
+            secondaryActions={secondaryActions}
             data-test-subj={dataTestSubj ? `${dataTestSubj}-modal` : undefined}
           />
         )}

@@ -32,6 +32,8 @@ export interface InvestigationCardProps {
   subtitle?: string;
   /** Opens what the card stands for, from an explicit Open button. Without it the card is plain. */
   onClick?: () => void;
+  /** Whether the body starts unfolded. Unfolded when absent. */
+  defaultOpen?: boolean;
   'data-test-subj'?: string;
   children?: React.ReactNode;
 }
@@ -52,13 +54,14 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
   badges,
   subtitle,
   onClick,
+  defaultOpen = true,
   children,
   'data-test-subj': dataTestSubj,
 }) => {
   const { euiTheme } = useEuiTheme();
   const subj = dataTestSubj ?? 'agenticInvestigationsCard';
   const accordionId = useGeneratedHtmlId({ prefix: 'investigationCard' });
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(defaultOpen);
   const heading = (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>

@@ -257,8 +257,11 @@ export const EventCard: React.FC<{
   >;
   onOpen: () => void;
   onOpenEntity: (entityId: string) => void;
-}> = ({ event, impactMap, onOpen, onOpenEntity }) => (
+  /** Whether the card starts unfolded; a list of cards unfolds only its first. */
+  defaultOpen?: boolean;
+}> = ({ event, impactMap, onOpen, onOpenEntity, defaultOpen }) => (
   <InvestigationCard
+    defaultOpen={defaultOpen}
     title={event.title}
     icon={getEventGroup(event.kind).icon}
     iconColor={getEventGroup(event.kind).color}
@@ -429,9 +432,11 @@ export const createImpactMapCards = (
               />
             </EuiFlexItem>
           )}
-          {impactEvents.map((event) => (
+          {impactEvents.map((event, index) => (
             <EuiFlexItem key={event.id}>
               <EventCard
+                // Only the first is unfolded; the rest are one line each until opened.
+                defaultOpen={index === 0}
                 event={event}
                 impactMap={impactMap}
                 onOpen={() => open({ kind: 'event', id: event.id })}

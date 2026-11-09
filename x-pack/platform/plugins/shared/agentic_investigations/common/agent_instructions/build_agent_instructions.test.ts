@@ -27,4 +27,19 @@ describe('buildAgentInstructions', () => {
     expect(text).toContain('ask me for an API key');
     expect(text).toContain('Read only.');
   });
+
+  it('asks the agent to evaluate a proposed action, without applying it', () => {
+    const withAction = buildAgentInstructions({
+      investigationId: 'abc-123',
+      kibanaUrl: 'https://kibana.example.com',
+      proposedAction: { title: 'Restore cart to 1 replica', details: 'Cart is at 0/0.\nScale it.' },
+    });
+
+    expect(withAction).toContain('evaluate this proposed action');
+    expect(withAction).toContain('"Restore cart to 1 replica"');
+    expect(withAction).toContain('> Cart is at 0/0.');
+    expect(withAction).toContain('> Scale it.');
+    expect(withAction).toContain('Do not apply the action');
+    expect(text).not.toContain('evaluate this proposed action');
+  });
 });

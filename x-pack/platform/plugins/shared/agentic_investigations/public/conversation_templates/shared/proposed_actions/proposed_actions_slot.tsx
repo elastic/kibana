@@ -19,6 +19,7 @@ import type { ProposalWithMetadata } from '@kbn/proposals-common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { ProposedActionButton, ProposedActionsList } from '@kbn/agentic-investigations-common';
+import { createCopyInstructionsAction } from './copy_instructions_action';
 import { decisionErrorMessage } from './decision_errors';
 import { useProposalDecision } from './use_proposal_decision';
 import {
@@ -32,6 +33,7 @@ export interface ProposedActionsSlotProps {
 }
 
 interface ProposedActionRowProps {
+  conversationId: string;
   proposal: ProposalWithMetadata;
   onDecisionError: (err: unknown) => void;
   basePath: CoreStart['http']['basePath'];
@@ -42,7 +44,15 @@ interface ProposedActionRowProps {
  * own proposal id — are called a fixed number of times per render, rather than a variable number
  * inside the list's `.map`.
  */
-const ProposedActionRow = ({ proposal, onDecisionError, basePath }: ProposedActionRowProps) => {
+const ProposedActionRow = ({
+  conversationId,
+  proposal,
+  onDecisionError,
+  basePath,
+}: ProposedActionRowProps) => {
+  const {
+    services: { http, notifications },
+  } = useKibana<CoreStart>();
   const { readOnly, isSubmitting, currentActorName, approve, dismiss, reopen, isReopening } =
     useProposalDecision(proposal.id, proposal);
 
@@ -78,6 +88,9 @@ const ProposedActionRow = ({ proposal, onDecisionError, basePath }: ProposedActi
       isReopening={isReopening}
       currentActorName={currentActorName}
       basePath={basePath}
+      secondaryActions={[
+        createCopyInstructionsAction({ http, notifications }, conversationId, proposal),
+      ]}
       data-test-subj={`investigationFlyoutProposedAction-${proposal.id}`}
     />
   );
@@ -135,6 +148,7 @@ export const ProposedActionsSlot = ({ conversationId }: ProposedActionsSlotProps
         <ProposedActionsList data-test-subj="investigationFlyoutProposedActionsList">
           {proposals.map((proposal) => (
             <ProposedActionRow
+              conversationId={conversationId}
               // A retry gets a new id but keeps the root id, so its row and open modal stay mounted.
               key={proposal.rootProposalId ?? proposal.id}
               proposal={proposal}
