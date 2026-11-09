@@ -19,9 +19,12 @@ const filtersWith = (key: string, params: string, negate = false) =>
   new RegExp(`key:${key},negate:!${negate ? 't' : 'f'},params:${params}`);
 
 const WIDE_VIEWPORT = { width: 1800, height: 900 };
-// Narrower than the room the whole row of filters takes, but wide enough for the query bar, the
-// date picker and a button or two.
-const NARROW_VIEWPORT = { width: 1400, height: 760 };
+// The room the row has depends on the navigation beside the page, which is wider on serverless, so
+// the narrow window is sized by the width of the page's content. Narrower than the room the whole
+// row of filters takes, but wide enough for the query bar, the date picker, the Views menu and a
+// button or two.
+const NARROW_CONTENT_WIDTH = 1220;
+const NARROW_HEIGHT = 760;
 
 // EDOT Browser applications need no ux plugin, so these run on serverless too.
 test.describe(
@@ -640,7 +643,11 @@ test.describe(
       });
 
       await test.step('gives way to All filters when narrow, and the date picker stays on the row', async () => {
-        await page.setViewportSize(NARROW_VIEWPORT);
+        const wideContent = await digitalExperience.otelOverviewKpis.boundingBox();
+        await page.setViewportSize({
+          width: Math.round(WIDE_VIEWPORT.width - (wideContent?.width ?? 0) + NARROW_CONTENT_WIDTH),
+          height: NARROW_HEIGHT,
+        });
 
         await expect(digitalExperience.overviewFilter('browser')).toBeHidden();
         await expect

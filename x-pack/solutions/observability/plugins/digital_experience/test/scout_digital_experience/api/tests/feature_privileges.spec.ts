@@ -14,29 +14,80 @@ const { COMMON_HEADERS, createRole } = testData;
 
 interface CapabilitiesResponse {
   navLinks: Record<string, boolean>;
-  digital_experience: { show: boolean; save: boolean; manageSessions: boolean };
+  digital_experience: {
+    show: boolean;
+    save: boolean;
+    manageSessions: boolean;
+    createShortUrl: boolean;
+  };
 }
 
 const CAPABILITY_CASES = [
   {
-    title: 'resolves show and save, but not managing sessions, for the all privilege',
+    title: 'resolves show, save and short URLs, but not managing sessions, for the all privilege',
     role: createRole({ digital_experience: ['all'] }),
-    expected: { navLink: true, show: true, save: true, manageSessions: false },
+    expected: {
+      navLink: true,
+      show: true,
+      save: true,
+      manageSessions: false,
+      createShortUrl: true,
+    },
+  },
+  {
+    title: 'resolves show and save, but no short URLs, for all without the Short URLs sub-feature',
+    role: createRole({ digital_experience: ['minimal_all'] }),
+    expected: {
+      navLink: true,
+      show: true,
+      save: true,
+      manageSessions: false,
+      createShortUrl: false,
+    },
+  },
+  {
+    title: 'resolves short URLs with the url_create sub-feature privilege',
+    role: createRole({ digital_experience: ['minimal_all', 'url_create'] }),
+    expected: {
+      navLink: true,
+      show: true,
+      save: true,
+      manageSessions: false,
+      createShortUrl: true,
+    },
   },
   {
     title: 'resolves show only for the read privilege',
     role: createRole({ digital_experience: ['read'] }),
-    expected: { navLink: true, show: true, save: false, manageSessions: false },
+    expected: {
+      navLink: true,
+      show: true,
+      save: false,
+      manageSessions: false,
+      createShortUrl: false,
+    },
   },
   {
     title: 'resolves managing sessions only with the manage_sessions sub-feature privilege',
     role: createRole({ digital_experience: ['read', 'manage_sessions'] }),
-    expected: { navLink: true, show: true, save: false, manageSessions: true },
+    expected: {
+      navLink: true,
+      show: true,
+      save: false,
+      manageSessions: true,
+      createShortUrl: false,
+    },
   },
   {
     title: 'resolves no access without the digital_experience privilege',
     role: createRole({ apm: ['read'] }),
-    expected: { navLink: false, show: false, save: false, manageSessions: false },
+    expected: {
+      navLink: false,
+      show: false,
+      save: false,
+      manageSessions: false,
+      createShortUrl: false,
+    },
   },
 ] as const;
 
@@ -58,11 +109,17 @@ apiTest.describe('Digital Experience feature privileges', { tag: DIGITAL_EXPERIE
           app: ['digital_experience', 'kibana'],
           api: ['read_digital_experience', 'manage_digital_experience'],
           ui: ['show', 'save'],
+          // Kibana adds the saved object types every app shares, so only ours is checked.
+          savedObject: {
+            all: expect.arrayContaining(['digital-experience-view']),
+            read: expect.arrayContaining(['digital-experience-view']),
+          },
         },
         read: {
           app: ['digital_experience', 'kibana'],
           api: ['read_digital_experience'],
           ui: ['show'],
+          savedObject: { read: expect.arrayContaining(['digital-experience-view']) },
         },
       },
       subFeatures: [
@@ -77,6 +134,21 @@ apiTest.describe('Digital Experience feature privileges', { tag: DIGITAL_EXPERIE
                   includeIn: 'none',
                   api: ['manage_digital_experience_sessions'],
                   ui: ['manageSessions'],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  id: 'url_create',
+                  includeIn: 'all',
+                  ui: ['createShortUrl'],
+                  savedObject: { all: ['url'], read: [] },
                 },
               ],
             },
@@ -103,6 +175,7 @@ apiTest.describe('Digital Experience feature privileges', { tag: DIGITAL_EXPERIE
         show: expected.show,
         save: expected.save,
         manageSessions: expected.manageSessions,
+        createShortUrl: expected.createShortUrl,
       });
     });
   }
