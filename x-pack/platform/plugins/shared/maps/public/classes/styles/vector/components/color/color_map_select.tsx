@@ -32,7 +32,7 @@ const CUSTOM_COLOR_MAP = 'CUSTOM_COLOR_MAP';
 
 interface Props {
   colorMapType: COLOR_MAP_TYPE;
-  colorPaletteId?: string | null;
+  colorPaletteId?: string;
   customColorMap?: OrdinalColorStop[] | CategoryColorStop[];
   invert: boolean;
   isCustomOnly: boolean;
@@ -218,9 +218,7 @@ export class ColorMapSelect extends Component<Props, State> {
               palettes={palettesWithCustom as EuiColorPalettePickerPaletteProps[]}
               onChange={this._onColorPaletteSelect}
               valueOfSelected={
-                this.props.useCustomColorMap
-                  ? CUSTOM_COLOR_MAP
-                  : this.props.colorPaletteId ?? undefined
+                this.props.useCustomColorMap ? CUSTOM_COLOR_MAP : this.props.colorPaletteId
               }
               compressed
               data-test-subj={`colorMapSelect_${this.props.styleProperty.getStyleName()}`}
