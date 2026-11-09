@@ -22,6 +22,7 @@ import type { DashboardReadResponseBody } from '../../server';
 import { initializeAccessControlManager } from './access_control_manager';
 import { initializeApproximationManager } from './approximation_manager';
 import { initializeChangeSourceTracker, type LatestChangeBySource } from './change_source_tracker';
+import { diffDashboardStates } from './compare_dashboard_state';
 import { initializeDataLoadingManager } from './data_loading_manager';
 import { initializeDataViewsManager } from './data_views_manager';
 import { initializeESQLVariablesManager } from './esql_variables_manager';
@@ -41,7 +42,7 @@ import { initializeTrackContentfulRender } from './track_contentful_render';
 import { initializeTrackOverlay } from './track_overlay';
 import { initializeTrackPanel } from './track_panel';
 import type { DashboardRedirect } from '../dashboard_app/types';
-import { coreServices } from '../services/kibana_services';
+import { coreServices, embeddableService } from '../services/kibana_services';
 import type {
   DashboardApi,
   DashboardCreationOptions,
@@ -315,6 +316,12 @@ export function getDashboardApi({
     getSerializedState: () => ({
       attributes: getState(),
     }),
+    diffStates: (baseline: DashboardState, current: DashboardState) =>
+      diffDashboardStates(
+        baseline,
+        current,
+        async (type) => (await embeddableService.getEmbeddableDefinition(type))?.stateComparison
+      ),
     setState,
     runInteractiveSave: (redirectTo?: DashboardRedirect) => {
       trackOverlayApi.clearOverlays();
