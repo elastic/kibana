@@ -15,5 +15,6 @@
     "@kbn/controls-constants",
     "@kbn/i18n",
     "@kbn/controls-schemas",
+    "@kbn/grid-layout",
   ]
 }

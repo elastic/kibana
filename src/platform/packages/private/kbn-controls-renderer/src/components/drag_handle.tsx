@@ -16,6 +16,7 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 interface DragHandleProps {
   isEditable: boolean;
   controlTitle?: string;
+  dragHandleRef?: React.Ref<HTMLDivElement>;
   highContrast?: boolean; // If true, set the icon color to higher contrast instead of subdued
   [key: string]: any; // Allows passing additional props (like drag info)
 }
@@ -32,7 +33,7 @@ const dragHandleStyles = {
         color: euiTheme.colors.textDisabled,
       },
       '&:hover > .euiIcon:first-of-type': {
-        color: euiTheme.colors.textParagraph,
+        color: euiTheme.colors.vis.euiColorVis0,
       },
       '.euiFormLabel': {
         pointerEvents: 'none', // Prevent label from blocking drag events
@@ -43,6 +44,9 @@ const dragHandleStyles = {
       '.euiIcon': {
         color: euiTheme.colors.textParagraph,
       },
+      '&:hover > .euiIcon:first-of-type': {
+        color: euiTheme.colors.primary,
+      },
     }),
 };
 
@@ -51,6 +55,7 @@ export const DragHandle = ({
   controlTitle = '',
   children,
   highContrast,
+  dragHandleRef,
   ...rest
 }: DragHandleProps) => {
   const styles = useMemoCss(dragHandleStyles);
@@ -60,6 +65,7 @@ export const DragHandle = ({
   return (
     <div
       {...rest}
+      ref={dragHandleRef}
       aria-label={i18n.translate('controls.controlGroup.ariaActions.moveControlButtonAction', {
         defaultMessage: 'Move control {controlTitle}',
         values: { controlTitle },

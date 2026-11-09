@@ -72,49 +72,8 @@ const parentApi = {
   registerChildApi: jest.fn(),
 } as unknown as ControlsRendererParentApi;
 
-describe('render', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  describe('control width', () => {
-    test('should use default medium class + default no flex grow', () => {
-      const controlPanel = render(
-        <ControlPanel
-          control={{
-            ...DEFAULT_PINNED_CONTROL_STATE,
-            id: 'control1',
-            type: 'options_list_control',
-            order: 0,
-          }}
-          parentApi={parentApi}
-          setControlPanelRef={jest.fn()}
-        />
-      );
-      const controlFrame = controlPanel.getByTestId('control-frame');
-      expect(controlFrame.getAttribute('class')).toContain('controlFrameWrapper--medium');
-      expect(controlFrame.getAttribute('class')).toContain('euiFlexItem-growZero');
-    });
-
-    test('should use small class + flex grow', () => {
-      const controlPanel = render(
-        <ControlPanel
-          control={{
-            id: 'control1',
-            type: 'options_list_control',
-            order: 0,
-            width: 'small',
-            grow: true,
-          }}
-          parentApi={parentApi}
-          setControlPanelRef={jest.fn()}
-        />
-      );
-      const controlFrame = controlPanel.getByTestId('control-frame');
-      expect(controlFrame.getAttribute('class')).toContain('controlFrameWrapper--small');
-      expect(controlFrame.getAttribute('class')).toContain('euiFlexItem-grow');
-    });
-  });
+beforeEach(() => {
+  jest.clearAllMocks();
 });
 
 /**
@@ -141,7 +100,6 @@ const renderControlPanel = () =>
         order: 0,
       }}
       parentApi={parentApi}
-      setControlPanelRef={jest.fn()}
     />
   );
 
