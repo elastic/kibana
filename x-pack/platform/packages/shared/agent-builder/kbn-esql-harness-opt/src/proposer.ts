@@ -97,54 +97,57 @@ export const buildTraceBundle = (summary: RunSummary): string => {
   );
 };
 
-const PROPOSER_TASK = ({
-  modelChoices,
-}: {
-  modelChoices: Array<{ connectorId: string; inferenceId: string }>;
-}) => `You are optimizing the Kibana \`generate_esql\` harness: the prompts, documentation corpus,
-control flow and model choice behind the tool that turns a natural-language question into an
-ES|QL query. You improve it by editing its files in this checkout.
+const PROPOSER_TASK = () => `You are improving the Kibana \`generate_esql\` tool: the thing that
+turns a natural-language question into an ES|QL query. You improve it by editing its source in
+this checkout, the way a Kibana engineer would. It is then measured on held-out examples.
 
-In \`.harness-scratch/\` you will find:
+## Start here
 
-- \`bundle.json\` — failing examples from the latest run on the search split: the question, the
-  query the harness produced, the gold query, the Elasticsearch error shown to the model, the
-  number of attempts and the token spend.
-- \`history.json\` — every earlier proposal, with its gate outcome and rejection reason.
-- \`feedback.md\` — measured facts about this harness and how your last prediction held up.
+\`.harness-scratch/\` contains:
 
-Your goal is a variant that scores better on \`0.6·result_equivalence + 0.3·executes +
-0.1·ast_valid\` on held-out examples, without costing more than 1.1× in USD. A variant that holds
-quality while costing materially less is equally welcome.
+- \`bundle.json\` — failures from the latest measurement: the question, the query the tool
+  produced, the gold query, the Elasticsearch error the model saw, attempts and token spend.
+- \`history.json\` — every previous proposal, what it changed, and why it was accepted or not.
+- \`feedback.md\` — measured facts about the tool, and how your last attempt turned out.
 
-## What you may edit
+Read \`feedback.md\` and \`bundle.json\` first. Look at several failures and find the pattern
+that explains the most of them. One well-aimed change beats three speculative ones.
 
-All paths below are relative to
+## The code you may change
+
+All paths relative to
 \`x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/generate_esql/\`:
 
-- \`documentation/syntax.md\`, \`documentation/examples.md\`, \`documentation/ts_queries.md\`,
-  \`documentation/promql_queries.md\` — the corpus injected into every prompt. Rewriting, pruning
-  or re-ordering it is fair game, and it is the biggest block of tokens in the prompt.
-- \`prompts/instructions.md\` — the instruction block, as prose.
-- \`prompts.ts\` — how prompts are assembled (what is included, in what order).
-- \`actions.ts\` — how previous attempts are replayed to the model.
-- \`graph.ts\` — the control flow: nodes, retry branches, when generation stops. You may add a node.
-- \`nl_to_esql.ts\` — entry point: defaults, index discovery, which model tier is selected.
-- \`join_errors.ts\`, \`promql_keyword.ts\` — deterministic middleware.
+| file | what it decides | typical change |
+|---|---|---|
+| \`prompts/instructions.md\` | the rules the model is given | add, sharpen or remove a rule |
+| \`documentation/examples.md\` | the worked examples injected into every prompt | add an example of a shape that keeps failing; drop ones that mislead |
+| \`documentation/syntax.md\`, \`ts_queries.md\`, \`promql_queries.md\` | reference material | correct or prune it; it is the biggest block of tokens in the prompt |
+| \`prompts.ts\` | what goes into each prompt, in what order, and when | include the TS/PROMQL sections differently, restructure the context |
+| \`actions.ts\` | how a failed attempt is replayed to the model | change what the model is told after an error |
+| \`graph.ts\` | control flow: generate → autocorrect → execute/validate → finalize | change a branch, add a node (e.g. a check before returning) |
+| \`nl_to_esql.ts\` | entry point: defaults, index discovery, model selection | change a default, change how the target index is resolved |
+| \`join_errors.ts\`, \`promql_keyword.ts\` | deterministic middleware | sharpen a heuristic |
 
-${
-  modelChoices.length
-    ? `If you change which model the tool uses, these connector ids exist:\n${modelChoices
-        .map((choice) => `- ${choice.connectorId} → ${choice.inferenceId}`)
-        .join('\n')}\n`
-    : ''
-}
-Nothing else may change. The dataset, fixtures, scorers and the evaluation runner are off limits,
-and edits outside the list are rejected mechanically before anything is measured.
+Read the file before you change it, and keep the style of the code around you.
 
-## Check your own work before you finish
+## How to make specific kinds of change correctly
 
-You have a shell. Use it — a round that fails these wastes 15 minutes of measurement:
+- **Change the model.** Use the effort level, which every deployment resolves for itself:
+  \`modelProvider.selectModel({ effortLevel: EffortLevels.medium })\`. Never write a connector
+  id into the code — those are UUIDs that exist only in one deployment, so that change would
+  break every other installation and will be rejected.
+- **Change retry or execution behaviour.** Edit the defaults in \`nl_to_esql.ts\` or the branch
+  conditions in \`graph.ts\`. Do not special-case anything about the data being queried.
+- **Add guidance.** Put rules in \`prompts/instructions.md\` and worked examples in
+  \`documentation/examples.md\`. Write them for a user you will never meet, with placeholder
+  index and field names, never the ones in \`bundle.json\`.
+- **Add a processing step.** Add it to \`graph.ts\` as a node, or to the middleware files, with
+  the same error handling as the code around it.
+
+## Verify before you finish
+
+You have a shell. Run these from the repo root; a round that fails them is wasted:
 
 \`\`\`
 node scripts/type_check --project x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tsconfig.json
@@ -152,37 +155,34 @@ node scripts/jest x-pack/platform/packages/shared/agent-builder/agent-builder-ge
 node scripts/eslint x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/generate_esql
 \`\`\`
 
-You can also read the tool's unit tests to understand expected behaviour — but you may not
-change them, and you may not change the harness trace writer. Both are how your work is scored.
+The tool's unit tests describe its expected behaviour — read them. You may not change them, and
+you may not change \`harness_trace.ts\`; both are how your work is measured.
 
-## Rules
+## What gets your change thrown out
 
-1. Your edit must typecheck, pass the tool's unit tests and pass eslint; all three are re-run
-   before measurement.
-2. Keep the change coherent: one idea, however many files it naturally touches. The manifest has
-   to name the failures you expect it to fix, and a scattered edit cannot be attributed to
-   anything when the gate comes back.
-3. A reviewer agent reads your diff before it is measured and blocks changes that encode the
-   benchmark, detect the evaluation, tamper with measurement, escape the tool, or fake success.
-   Write the change you would defend in review: something that helps any user of this tool, not
-   something that helps on these examples.
-4. Read \`feedback.md\` first, and do not repeat something \`history.json\` shows was rejected
-   unless you change it materially and say what is different.
+A reviewer reads your diff before it is measured and blocks anything that improves the score
+without improving the tool: values from the benchmark written into the code, behaviour that
+depends on detecting the evaluation, edits to the measurement, filesystem or network access the
+tool did not already have, or shortcuts that make a failure look like a success.
 
-## Your answer
+The test is simple: would you defend this change in a Kibana code review to someone who has
+never seen the benchmark?
 
-Edit the files, then write \`.harness-scratch/proposal.json\`:
+## Finish
+
+Write \`.harness-scratch/proposal.json\`:
 
 {
   "manifest": {
-    "slots": ["documentation/examples.md"],     // the files you touched
-    "rationale": "one paragraph: what in bundle.json made you do this",
+    "slots": ["documentation/examples.md"],
+    "rationale": "what in bundle.json made you do this, in a paragraph",
     "predictedFixes": ["first words of each question you expect to flip to correct"],
-    "predictedRegressions": ["questions you expect might regress"]
+    "predictedRegressions": ["questions you expect might regress, if any"]
   }
 }
 
-Do not run the evaluation yourself and do not commit anything.`;
+Be honest in \`predictedFixes\`: it is checked against what actually changed, and a proposal that
+cannot predict its own effect is treated as guesswork next round.`;
 
 /** Run the proposer agent in a scratch directory that holds the bundle and nothing else. */
 export const proposeCandidate = async ({
@@ -192,7 +192,6 @@ export const proposeCandidate = async ({
   scratchDir,
   workingDir,
   log,
-  modelChoices = [],
   model = process.env.HARNESS_PROPOSER_MODEL ?? 'grok-4.7-low',
   timeoutMs = Number(process.env.HARNESS_PROPOSER_TIMEOUT_MS ?? 900_000),
 }: {
@@ -204,7 +203,6 @@ export const proposeCandidate = async ({
   /** Directory the agent runs in: the candidate worktree. */
   workingDir: string;
   log: ToolingLog;
-  modelChoices?: Array<{ connectorId: string; inferenceId: string }>;
   model?: string;
   timeoutMs?: number;
 }): Promise<Proposal> => {
@@ -226,7 +224,7 @@ export const proposeCandidate = async ({
   try {
     const code = await runProposerCommand({
       command,
-      args: [workingDir ?? scratchDir, '--model', model, PROPOSER_TASK({ modelChoices })],
+      args: [workingDir ?? scratchDir, '--model', model, PROPOSER_TASK()],
       logPath,
       timeoutMs,
     });

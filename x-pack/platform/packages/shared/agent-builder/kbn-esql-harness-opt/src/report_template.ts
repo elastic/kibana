@@ -346,6 +346,7 @@ function viewRounds() {
     '>full history for this example →</a></p></details></td></tr>'
   ).join('');
 
+  const reachedGate = Boolean(round.gate);
   const verification = round.verification
     ? '<table><tr><th>predicted</th><th>claimed</th><th>actually happened</th></tr>' +
       '<tr><td>fixes</td><td>' + (round.verification.predictedFixes || 0) + '</td><td class="' +
@@ -376,9 +377,14 @@ function viewRounds() {
     (g && !g.accepted ? '<p class="bad">' + esc((g.reasons || []).join(' · ')) + '</p>' : '') +
     '<h3>What changed</h3>' + renderDiff(round.diff, round.filesChanged) +
     '<h3>Why (proposer rationale)</h3><pre>' + esc(round.rationale || '—') + '</pre>' +
-    '<h3>Manifest verification</h3>' + verification +
-    '<h3>Per-seed effect (' + perSeed.length + ' seeds, worst first) — expand a row to see both sides</h3>' +
-    '<table><tr><th>Δ</th><th>reward</th><th>source</th><th>question</th></tr>' + seedRows + '</table>' +
+    (reachedGate
+      ? '<h3>Manifest verification</h3>' + verification +
+        '<h3>Per-seed effect (' + perSeed.length +
+        ' seeds, worst first) — expand a row to see both sides</h3>' +
+        '<table><tr><th>Δ</th><th>reward</th><th>source</th><th>question</th></tr>' + seedRows +
+        '</table>'
+      : '<p class="muted">This round was stopped before measurement, so there are no per-seed ' +
+        'results and nothing to verify the manifest against.</p>') +
     '<h3>Runs in this round</h3>' +
     (round.runs || []).map((runId) => '<p><a ' + goAttr({ tab: 'runs', run: runId }) + '>' + esc(runId) + '</a></p>').join('');
 }

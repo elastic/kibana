@@ -19,7 +19,6 @@ import { proposeCandidate } from './proposer';
 import { reviewEdits } from './review';
 import { verificationSummary, verifyManifest } from './verification';
 import { harnessPaths } from './workspace';
-import { readModelChoices } from './models';
 import {
   applyAndValidateEdits,
   candidateDiff,
@@ -168,7 +167,6 @@ export const runCampaign = async ({
         feedback: measuredFacts(searchRun, lastFeedback),
         scratchDir: Path.join(workspace.path, '.harness-scratch'),
         workingDir: workspace.path,
-        modelChoices: readModelChoices(),
         log,
       });
     } catch (e) {
