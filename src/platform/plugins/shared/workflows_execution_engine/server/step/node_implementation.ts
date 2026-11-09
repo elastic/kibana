@@ -153,6 +153,15 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
     return {};
   }
 
+  /** Input recorded on the first entry of this step execution. */
+  private recordedInput(): Record<string, unknown> {
+    const stored = this.stepExecutionRuntime.getCurrentStepResult()?.input;
+    if (stored != null && typeof stored === 'object' && !Array.isArray(stored)) {
+      return stored as Record<string, unknown>;
+    }
+    return {};
+  }
+
   public async run(): Promise<void> {
     // If the execution is already aborted, do not start the step, navigate to make the execution finish properly
     if (this.stepExecutionRuntime.abortController.signal.aborted) {
@@ -176,7 +185,9 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
 
     let suspended = false;
     try {
-      if (!this.stepExecutionRuntime.isInputSet) {
+      if (this.stepExecutionRuntime.isInputRecorded) {
+        input = this.recordedInput();
+      } else {
         input = await this.getInput();
         this.stepExecutionRuntime.setInput(input);
       }

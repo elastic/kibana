@@ -15,7 +15,7 @@ import { ExecutionError } from '@kbn/workflows/server';
 import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 import { createMockWorkflowEventLogger } from '../../workflow_event_logger/mocks';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/types';
-import { StepExecutionRuntime } from '../step_execution_runtime';
+import { INPUT_RECORDED_STATE_KEY, StepExecutionRuntime } from '../step_execution_runtime';
 import type { StepIoService } from '../step_io_service';
 import type { WorkflowContextManager } from '../workflow_context_manager';
 import type { WorkflowExecutionState } from '../workflow_execution_state';
@@ -177,26 +177,60 @@ describe('StepExecutionRuntime', () => {
     });
   });
 
-  describe('isInputSet', () => {
-    it('is false when the step execution has no input', () => {
-      (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue({ stepId: 'node1' });
+  describe('input recorded flag', () => {
+    const installState = (initial?: Record<string, unknown>) => {
+      let state = initial;
+      (workflowExecutionState.getStepExecution as jest.Mock).mockImplementation(() =>
+        state === undefined ? undefined : { stepId: 'node1', state }
+      );
+      (workflowExecutionState.upsertStep as jest.Mock).mockImplementation(
+        (partial: { state?: Record<string, unknown> }) => {
+          if (partial && 'state' in partial) {
+            state = partial.state;
+          }
+        }
+      );
+    };
 
-      expect(underTest.isInputSet).toBe(false);
+    it('is false before input is recorded', () => {
+      installState();
+
+      expect(underTest.isInputRecorded).toBe(false);
     });
 
-    it('is false when the step execution is missing', () => {
-      (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue(undefined);
+    it('sets the flag on step state and keeps fields already stored there', () => {
+      installState({ dynamicTimeout: '72h' });
 
-      expect(underTest.isInputSet).toBe(false);
-    });
+      underTest.setInput({ message: 'hi' });
 
-    it('is true when the step execution document has an input', () => {
-      (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue({
-        stepId: 'node1',
-        input: { message: 'hi' },
+      expect(stepIoService.getStepInput(fakeStepExecutionId)).toEqual({ message: 'hi' });
+      expect(underTest.isInputRecorded).toBe(true);
+      expect(underTest.getCurrentStepState()).toEqual({
+        dynamicTimeout: '72h',
+        [INPUT_RECORDED_STATE_KEY]: true,
       });
+    });
 
-      expect(underTest.isInputSet).toBe(true);
+    it('keeps the flag when a later write replaces step state', () => {
+      installState({ [INPUT_RECORDED_STATE_KEY]: true, dynamicTimeout: '72h' });
+
+      underTest.setCurrentStepState({ __durableStepState: { attempt: 2 } });
+
+      expect(underTest.getCurrentStepState()).toEqual({
+        __durableStepState: { attempt: 2 },
+        [INPUT_RECORDED_STATE_KEY]: true,
+      });
+    });
+
+    it('drops the flag when step state is cleared', () => {
+      installState({ [INPUT_RECORDED_STATE_KEY]: true });
+
+      underTest.setCurrentStepState(undefined);
+
+      expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
+        expect.objectContaining({ state: undefined })
+      );
+      expect(underTest.isInputRecorded).toBe(false);
     });
   });
 
