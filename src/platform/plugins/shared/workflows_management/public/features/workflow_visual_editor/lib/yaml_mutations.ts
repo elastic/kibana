@@ -10,7 +10,7 @@
 import { Document, isMap, isPair, isScalar, isSeq, parseDocument } from 'yaml';
 import type { Node, Scalar, YAMLMap, YAMLSeq } from 'yaml';
 import type { BranchSlot } from '@kbn/workflows';
-import { isNestedStepKey } from '@kbn/workflows-yaml';
+import { STEP_CHILD_CONTAINER_KEYS } from '@kbn/workflows';
 
 /**
  * Canvas edit-mode mutations. Every function takes the full workflow YAML,
@@ -74,6 +74,20 @@ const parseStepFragment = (fragment: string): { node?: YAMLMap; error?: string }
   return { node: doc.contents };
 };
 
+const STEP_CHILD_CONTAINER_KEY_SET: ReadonlySet<string> = new Set(STEP_CHILD_CONTAINER_KEYS);
+
+/**
+ * The step sequences held under a child-container key. `cases` / `branches`
+ * hold wrapper maps (`{ match, steps }` / `{ name, steps }`), so only each
+ * wrapper's `steps` list is returned and a wrapper's own `name` is never read
+ * as a step name. Every other container key is itself a step sequence.
+ */
+const stepListsUnder = (key: string, value: unknown): unknown[] => {
+  if (key !== 'cases' && key !== 'branches') return [value];
+  if (!isSeq(value)) return [];
+  return value.items.filter(isMap).map((wrapper) => wrapper.get('steps'));
+};
+
 interface StepLocation {
   readonly seq: YAMLSeq;
   readonly index: number;
@@ -100,16 +114,21 @@ const findStepInNode = (
   }
   if (isMap(node)) {
     const nestedPairs = node.items.filter(
-      (pair) => isPair(pair) && isScalar(pair.key) && isNestedStepKey(pair.key.value)
+      (pair) =>
+        isPair(pair) &&
+        isScalar(pair.key) &&
+        STEP_CHILD_CONTAINER_KEY_SET.has(pair.key.value as string)
     );
     for (const pair of nestedPairs) {
       const key = (pair.key as Scalar).value as string;
       const isFailureBlock = key === 'on-failure' || key === 'iteration-on-failure';
       const owner = isFailureBlock && isMap(pair.value) ? pair.value : undefined;
-      const found = isFailureBlock
-        ? findStepInNode(owner?.get('fallback'), stepName, owner)
-        : findStepInNode(pair.value, stepName, key === 'fallback' ? node : undefined);
-      if (found) return found;
+      const lists = isFailureBlock ? [owner?.get('fallback')] : stepListsUnder(key, pair.value);
+      const fallbackOwner = isFailureBlock ? owner : key === 'fallback' ? node : undefined;
+      for (const list of lists) {
+        const found = findStepInNode(list, stepName, fallbackOwner);
+        if (found) return found;
+      }
     }
   }
   return null;
@@ -133,7 +152,9 @@ export const collectStepNames = (yaml: string): Set<string> => {
     const name = node.get('name');
     if (typeof name === 'string') names.add(name);
     for (const pair of node.items) {
-      if (isPair(pair) && isScalar(pair.key) && isNestedStepKey(pair.key.value)) walk(pair.value);
+      const key = isPair(pair) && isScalar(pair.key) ? (pair.key.value as string) : undefined;
+      if (key && STEP_CHILD_CONTAINER_KEY_SET.has(key))
+        stepListsUnder(key, pair.value).forEach(walk);
     }
   };
   if (isMap(doc.contents)) walk(doc.contents.get('steps'));

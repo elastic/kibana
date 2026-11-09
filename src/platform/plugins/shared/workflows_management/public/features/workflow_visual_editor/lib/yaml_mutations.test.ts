@@ -18,6 +18,7 @@ import {
   getStepFragment,
   getStepSourceRange,
   getTriggerFragment,
+  insertStepAfterName,
   insertStepAtIndex,
   insertStepAtPath,
   insertStepIntoBranch,
@@ -387,6 +388,88 @@ steps:
       expect(r.success).toBe(true);
       expect(r.yaml).not.toMatch(/else: \[/);
       expect(r.yaml).toMatch(/else:\n\s+- name: no/);
+    });
+  });
+
+  describe('steps under switch cases, default and parallel branches', () => {
+    const branching = `name: demo
+triggers:
+  - type: manual
+steps:
+  - name: route
+    type: switch
+    expression: x
+    cases:
+      - match: a
+        steps: []
+    default: []
+  - name: fan_out
+    type: parallel
+    branches:
+      - name: left
+        steps: []
+`;
+    const child = 'name: child\ntype: console\n';
+    const withMessage = 'name: child\ntype: console\nwith:\n  message: hi\n';
+    const slots = [
+      {
+        label: 'default',
+        owner: 'route',
+        slot: { kind: 'default' } as const,
+        path: ['steps', 0, 'default', 0],
+      },
+      {
+        label: 'case',
+        owner: 'route',
+        slot: { kind: 'case', index: 0, match: 'a' } as const,
+        path: ['steps', 0, 'cases', 0, 'steps', 0],
+      },
+      {
+        label: 'branch',
+        owner: 'fan_out',
+        slot: { kind: 'branch', index: 0 } as const,
+        path: ['steps', 1, 'branches', 0, 'steps', 0],
+      },
+    ];
+    const getAt = (value: unknown, path: ReadonlyArray<string | number>): any =>
+      path.reduce<any>((acc, key) => acc?.[key], value);
+
+    it.each(slots)('replaceStepFragment edits a step inserted into the $label slot', (s) => {
+      const inserted = insertStepIntoBranch(branching, child, s.owner, s.slot).yaml;
+      const r = replaceStepFragment(inserted, 'child', withMessage);
+      expect(r.error).toBeUndefined();
+      expect(r.success).toBe(true);
+      expect(getAt(parse(r.yaml), s.path).with).toEqual({ message: 'hi' });
+    });
+
+    it.each(slots)('getStepFragment finds a step in the $label slot', (s) => {
+      const inserted = insertStepIntoBranch(branching, child, s.owner, s.slot).yaml;
+      expect(getStepFragment(inserted, 'child')).toContain('name: child');
+    });
+
+    it.each(slots)('deleteStepByName removes a step from the $label slot', (s) => {
+      const inserted = insertStepIntoBranch(branching, child, s.owner, s.slot).yaml;
+      const r = deleteStepByName(inserted, 'child');
+      expect(r.success).toBe(true);
+      expect(collectStepNames(r.yaml).has('child')).toBe(false);
+    });
+
+    it('insertStepAfterName appends in the same default sequence as its anchor', () => {
+      const inserted = insertStepIntoBranch(branching, child, 'route', { kind: 'default' }).yaml;
+      const r = insertStepAfterName(inserted, 'name: sibling\ntype: console\n', 'child');
+      expect(r.success).toBe(true);
+      expect(parse(r.yaml).steps[0].default.map((s: { name: string }) => s.name)).toEqual([
+        'child',
+        'sibling',
+      ]);
+    });
+
+    it('collectStepNames includes nested steps but not a parallel branch name', () => {
+      const inserted = insertStepIntoBranch(branching, child, 'fan_out', {
+        kind: 'branch',
+        index: 0,
+      }).yaml;
+      expect([...collectStepNames(inserted)].sort()).toEqual(['child', 'fan_out', 'route']);
     });
   });
 });

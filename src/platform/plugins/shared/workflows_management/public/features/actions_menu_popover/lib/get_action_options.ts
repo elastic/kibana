@@ -286,6 +286,17 @@ export function getActionOptions(
         iconColor: euiTheme.colors.textAccentSecondary,
       },
       {
+        id: 'loop.continue',
+        label: i18n.translate('workflows.actionsMenu.loopContinue', {
+          defaultMessage: 'Continue',
+        }),
+        description: i18n.translate('workflows.actionsMenu.loopContinueDescription', {
+          defaultMessage: 'Skip the rest of the current iteration and move on to the next one',
+        }),
+        iconType: 'controls',
+        iconColor: euiTheme.colors.textAccentSecondary,
+      },
+      {
         id: 'parallel',
         label: i18n.translate('workflows.actionsMenu.parallel', {
           defaultMessage: 'Parallel',
