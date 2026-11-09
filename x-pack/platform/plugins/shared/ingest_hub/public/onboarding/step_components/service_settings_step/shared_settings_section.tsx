@@ -30,6 +30,7 @@ import { i18n } from '@kbn/i18n';
 import { GlobalRegionField } from './global_region_field';
 import { SharedAdvancedSettings } from './shared_advanced_settings';
 import type { OutputFieldProps } from './output_field';
+import type { ProxyUrlFieldProps } from './proxy_url_field';
 import type { ConditionFieldProps } from './condition_field';
 import { MAX_DESCRIPTION_LENGTH, MAX_INTEGRATION_NAME_LENGTH } from './integration_settings';
 
@@ -60,6 +61,8 @@ interface SharedSettingsSectionProps {
   hasServicesIgnoringNamespace?: boolean;
   /** The output field, offered only where an agent-based deploy can set it. */
   output?: OutputFieldProps;
+  /** The proxy URL field, offered for agent-based and managed integration deploys. */
+  proxyUrl?: ProxyUrlFieldProps;
   /**
    * The condition field, offered only where an agent-based deploy can set it. The advanced section
    * stays open while it has an error.
@@ -91,6 +94,7 @@ export function SharedSettingsSection({
   hasLaunchedEcfStack = false,
   hasServicesIgnoringNamespace = false,
   output,
+  proxyUrl,
   condition,
 }: SharedSettingsSectionProps) {
   // Show errors once the field was edited, so the prefilled form does not open with errors.
@@ -98,7 +102,8 @@ export function SharedSettingsSection({
   const [descriptionTouched, setDescriptionTouched] = useState(false);
   // Collapsed by default. It cannot be collapsed over an error, which would hide why Next is off.
   const [advancedToggled, setAdvancedToggled] = useState(false);
-  const isAdvancedOpen = advancedToggled || !!namespaceError || !!condition?.errors?.length;
+  const isAdvancedOpen =
+    advancedToggled || !!namespaceError || !!proxyUrl?.error || !!condition?.errors?.length;
   const advancedId = useGeneratedHtmlId({ prefix: 'sharedAdvancedSettings' });
   const { euiTheme } = useEuiTheme();
 
@@ -274,6 +279,7 @@ export function SharedSettingsSection({
             hasLaunchedEcfStack={hasLaunchedEcfStack}
             hasServicesIgnoringNamespace={hasServicesIgnoringNamespace}
             output={output}
+            proxyUrl={proxyUrl}
             condition={condition}
           />
         </div>

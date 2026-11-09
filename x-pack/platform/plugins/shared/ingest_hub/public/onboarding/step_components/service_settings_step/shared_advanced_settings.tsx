@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import { InstanceNamespaceField } from './instance_namespace_field';
 import { OutputField, type OutputFieldProps } from './output_field';
+import { ProxyUrlField, type ProxyUrlFieldProps } from './proxy_url_field';
 import { ConditionField, type ConditionFieldProps } from './condition_field';
 
 interface SharedAdvancedSettingsProps {
@@ -24,6 +25,8 @@ interface SharedAdvancedSettingsProps {
   hasServicesIgnoringNamespace?: boolean;
   /** The output field. It applies to agent-based deploys only, so managed and ECF leave it out. */
   output?: OutputFieldProps;
+  /** The proxy URL field. It applies to agent-based and managed integration deploys, not ECF. */
+  proxyUrl?: ProxyUrlFieldProps;
   /** The condition field. Like the output, agent-based deploys only. */
   condition?: ConditionFieldProps;
 }
@@ -39,6 +42,7 @@ export function SharedAdvancedSettings({
   hasLaunchedEcfStack = false,
   hasServicesIgnoringNamespace = false,
   output,
+  proxyUrl,
   condition,
 }: SharedAdvancedSettingsProps) {
   const notes = [
@@ -74,6 +78,11 @@ export function SharedAdvancedSettings({
       {output && (
         <EuiFlexItem>
           <OutputField {...output} />
+        </EuiFlexItem>
+      )}
+      {proxyUrl && (
+        <EuiFlexItem>
+          <ProxyUrlField {...proxyUrl} />
         </EuiFlexItem>
       )}
       {condition && (

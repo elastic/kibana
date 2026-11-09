@@ -7,7 +7,7 @@
 
 import type { DeploymentMethod } from '@kbn/fleet-plugin/public';
 import type { ServiceInstance } from '../service_settings_step/use_service_settings';
-import { getPolicySettings, type PolicySettings } from '../../common/policy_settings';
+import { getSavedPolicySettings, type PolicySettings } from '../../common/policy_settings';
 
 interface SOSettingsSource {
   integrationName?: string;
@@ -58,7 +58,7 @@ export const toSOSettings = (
   policySettings?: Record<string, unknown>;
 } => {
   const policySettings: Record<string, unknown> = {
-    ...getPolicySettings(serviceSettings?.policySettings, deploymentMethod),
+    ...getSavedPolicySettings(serviceSettings?.policySettings, deploymentMethod),
   };
   const integrationName = serviceSettings?.integrationName?.trim();
   const description = serviceSettings?.description?.trim();

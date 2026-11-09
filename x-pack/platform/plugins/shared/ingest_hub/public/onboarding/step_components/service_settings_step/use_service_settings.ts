@@ -43,6 +43,7 @@ import {
   getConditionErrors,
   getDescriptionError,
   getIntegrationNameError,
+  getProxyUrlError,
   supportsIntegrationSettings,
 } from './integration_settings';
 
@@ -589,6 +590,25 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     [condition, deploymentMethod]
   );
 
+  // The proxy URL reaches only the policies of services whose package declares the var, and only
+  // for the deployment methods that send it. Elsewhere the field is hidden, so a value left over
+  // from another method or selection must not block Continue.
+  const isProxyUrlSupported = useMemo(
+    () =>
+      supportsPolicySetting('proxy_url', deploymentMethod) &&
+      instances.some((inst) => {
+        const service = awsServicesMap?.get(inst.serviceId);
+        return (
+          !!service &&
+          supportsIntegrationSettings(service, deploymentMethod) &&
+          !!service.declaresProxyUrl
+        );
+      }),
+    [instances, awsServicesMap, deploymentMethod]
+  );
+  const proxyUrl = policySettings.proxy_url ?? '';
+  const proxyUrlError = isProxyUrlSupported ? getProxyUrlError(proxyUrl) : undefined;
+
   const isReady = useMemo(
     () =>
       !!globalRegion.trim() &&
@@ -596,6 +616,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       !integrationNameError &&
       !descriptionError &&
       !namespaceError &&
+      !proxyUrlError &&
       !conditionErrors,
     [
       globalRegion,
@@ -603,6 +624,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       integrationNameError,
       descriptionError,
       namespaceError,
+      proxyUrlError,
       conditionErrors,
     ]
   );
@@ -646,6 +668,8 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     namespaceError,
     policySettings,
     setPolicySetting,
+    isProxyUrlSupported,
+    proxyUrlError,
     conditionErrors,
     bareNamePackage,
     instances,

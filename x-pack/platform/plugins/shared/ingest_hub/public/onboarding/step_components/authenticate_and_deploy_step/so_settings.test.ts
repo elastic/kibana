@@ -70,6 +70,14 @@ describe('toSOSettings', () => {
     expect(toSOSettings({ policySettings }, 'ecf')).toEqual({});
   });
 
+  it('keeps package var settings, such as the proxy URL, along with the fields', () => {
+    const policySettings = { output_id: 'logstash-1', proxy_url: 'http://proxy:3128' };
+    expect(toSOSettings({ policySettings }, 'agent_based')).toEqual({ policySettings });
+    expect(toSOSettings({ policySettings }, 'managed_integration')).toEqual({
+      policySettings: { proxy_url: 'http://proxy:3128' },
+    });
+  });
+
   it('leaves out the instances when there are none, so a stored list is never cleared by an empty one', () => {
     expect(toSOSettings({ instances: [] }, 'agent_based')).toEqual({});
     expect(toSOSettings({ integrationName: 'my-aws' }, 'agent_based')).toEqual({

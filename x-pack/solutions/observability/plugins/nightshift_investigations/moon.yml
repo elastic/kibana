@@ -78,9 +78,9 @@ dependsOn:
   - '@kbn/core-security-common'
   - '@kbn/eval-kql'
   - '@kbn/rrule'
-  - '@kbn/cloud-plugin'
-  - '@kbn/connector-specs'
   - '@kbn/inference-tracing'
+  - '@kbn/server-route-repository-utils'
+  - '@kbn/cloud-plugin'
 tags:
   - plugin
   - prod

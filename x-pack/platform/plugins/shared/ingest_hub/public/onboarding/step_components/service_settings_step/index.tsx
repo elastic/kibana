@@ -64,6 +64,8 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     setNamespace,
     namespaceError,
     policySettings,
+    isProxyUrlSupported,
+    proxyUrlError,
     setPolicySetting,
     conditionErrors,
     bareNamePackage,
@@ -127,6 +129,11 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
       ...new Set(instances.flatMap((inst) => awsServicesMap?.get(inst.serviceId)?.inputs ?? [])),
     ],
     [instances, awsServicesMap]
+  );
+
+  const setProxyUrl = useCallback(
+    (proxyUrl: string) => setPolicySetting('proxy_url', proxyUrl),
+    [setPolicySetting]
   );
 
   const setOutputId = useCallback(
@@ -202,7 +209,13 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
         })
       );
     }
-    if (integrationNameError || descriptionError || namespaceError || conditionErrors) {
+    if (
+      integrationNameError ||
+      descriptionError ||
+      namespaceError ||
+      proxyUrlError ||
+      conditionErrors
+    ) {
       reasons.push(
         i18n.translate('xpack.ingestHub.serviceSettingsStep.continueTooltip.integrationSettings', {
           defaultMessage: 'Fix the integration settings',
@@ -227,6 +240,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     integrationNameError,
     descriptionError,
     namespaceError,
+    proxyUrlError,
     conditionErrors,
     incompleteInstances,
   ]);
@@ -497,6 +511,15 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
                   !hasUnloadedSelectedManifests &&
                   !hasErroredSelectedManifests,
                 isInheritedOutputDefault: agentBasedDeployment.agentHostsMode === 'new',
+              }
+            : undefined
+        }
+        proxyUrl={
+          isProxyUrlSupported
+            ? {
+                value: policySettings.proxy_url ?? '',
+                onChange: setProxyUrl,
+                error: proxyUrlError,
               }
             : undefined
         }
