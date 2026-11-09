@@ -624,10 +624,15 @@ const formatErrorPipelines = (byPipeline: Map<string, Set<string>>): string => {
 };
 
 /**
- * One error, collapsed under its share of the suite's failed builds and its first line; inside,
- * the full message, then where it was seen.
+ * One error, under its share of the suite's failed builds and its first line, collapsed unless
+ * `open`; inside, the full message, then where it was seen.
  */
-const errorSection = (suite: FlakySuite, error: SuiteError, failedBuilds: number): string => {
+const errorSection = (
+  suite: FlakySuite,
+  error: SuiteError,
+  failedBuilds: number,
+  open: boolean
+): string => {
   const builds = errorBuilds(error);
   const share = formatPercent(failedBuilds > 0 ? builds / failedBuilds : 0);
   const summary =
@@ -660,7 +665,8 @@ const errorSection = (suite: FlakySuite, error: SuiteError, failedBuilds: number
     summary,
     [codeBlock(formatFullFailureMessage(error.message)), table(['Field', 'Value'], rows)].join(
       '\n\n'
-    )
+    ),
+    { open }
   );
 };
 
@@ -673,8 +679,9 @@ const isPullRequestOnly = (error: SuiteError): boolean =>
 
 /**
  * The suite's distinct errors over the window, most builds first, at most `MAX_ERRORS` shown.
- * Errors seen only on pull request builds are left out, and the section says so, so that it
- * describes what the suite does on real branches.
+ * The first is open, so the likely cause shows without a click. Errors seen only on pull request
+ * builds are left out, and the section says so, so that it describes what the suite does on real
+ * branches.
  */
 const failuresByErrorMessage = (suite: FlakySuite): string => {
   const all = suiteErrors(suite);
@@ -695,7 +702,7 @@ const failuresByErrorMessage = (suite: FlakySuite): string => {
   ).size;
   const shown = errors
     .slice(0, MAX_ERRORS)
-    .map((error) => errorSection(suite, error, failedBuilds));
+    .map((error, index) => errorSection(suite, error, failedBuilds, index === 0));
   const rest = errors.length - shown.length;
   return [
     '#### Failures by Error Message',

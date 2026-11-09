@@ -1,5 +1,5 @@
 {
-  "sha1": "46c6acc9418c7ae8f2919b4cebb50b86928079d8",
+  "sha1": "0a48759c52038bdd13bb3b8bc7d528cbea18799f",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -679,7 +679,7 @@
     {
       "id": "8375c8e613b4771-d87f7202078fcbd",
       "title": "Bulk update rule API key by IDs API update: rotates the API key for rules and stamps audit metadata",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -688,14 +688,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/bulk_update_api_key.spec.ts",
-        "line": 32,
-        "column": 73
+        "line": 28,
+        "column": 86
       }
     },
     {
       "id": "8375c8e613b4771-b8a5a5950df1a02",
       "title": "Bulk update rule API key by IDs API state: preserves all rule attributes other than the audit metadata",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -704,14 +704,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/bulk_update_api_key.spec.ts",
-        "line": 63,
-        "column": 9
+        "line": 60,
+        "column": 7
       }
     },
     {
       "id": "8375c8e613b4771-e9762e41c699fbc",
       "title": "Bulk update rule API key by IDs API update: reports unknown ids in the errors array with RULE_NOT_FOUND while rotating the valid ones",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -720,14 +720,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/bulk_update_api_key.spec.ts",
-        "line": 92,
-        "column": 16
+        "line": 89,
+        "column": 19
       }
     },
     {
       "id": "8375c8e613b4771-5a1c53041242cdd",
       "title": "Bulk update rule API key by IDs API validation: should reject an empty ids array",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -736,14 +736,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/bulk_update_api_key.spec.ts",
-        "line": 118,
-        "column": 16
+        "line": 113,
+        "column": 14
       }
     },
     {
       "id": "8375c8e613b4771-0540db98ed6dc67",
       "title": "Bulk update rule API key by IDs API validation: should reject a body with no ids field",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -752,14 +752,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/bulk_update_api_key.spec.ts",
-        "line": 126,
-        "column": 86
+        "line": 121,
+        "column": 22
       }
     },
     {
       "id": "8375c8e613b4771-adf437ca1c87227",
       "title": "Bulk update rule API key by IDs API validation: should reject unknown fields (strict schema)",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -768,14 +768,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/bulk_update_api_key.spec.ts",
-        "line": 132,
-        "column": 14
+        "line": 127,
+        "column": 5
       }
     },
     {
       "id": "8375c8e613b4771-b41f87cc4ae909a",
       "title": "Bulk update rule API key by IDs API validation: should reject ids longer than ID_MAX_LENGTH",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -784,14 +784,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/bulk_update_api_key.spec.ts",
-        "line": 144,
-        "column": 82
+        "line": 138,
+        "column": 96
       }
     },
     {
       "id": "8375c8e613b4771-b6dda7c43e7b1a5",
       "title": "Bulk update rule API key by IDs API validation: should reject ids arrays longer than MAX_BULK_ITEMS",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -800,14 +800,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/bulk_update_api_key.spec.ts",
-        "line": 153,
-        "column": 81
+        "line": 147,
+        "column": 95
       }
     },
     {
       "id": "8375c8e613b4771-cc930ca75eb15be",
       "title": "Bulk update rule API key by IDs API authorization: should return 200 for a user with full alerting_v2 privileges",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -816,14 +816,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/bulk_update_api_key.spec.ts",
-        "line": 165,
-        "column": 16
+        "line": 159,
+        "column": 30
       }
     },
     {
       "id": "8375c8e613b4771-f9a731cedda79b4",
       "title": "Bulk update rule API key by IDs API authorization: should return 403 for a user with read-only alerting_v2 privileges",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -832,14 +832,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/bulk_update_api_key.spec.ts",
-        "line": 180,
-        "column": 51
+        "line": 174,
+        "column": 69
       }
     },
     {
       "id": "8375c8e613b4771-56304c833a0e45c",
       "title": "Bulk update rule API key by IDs API authorization: should return 403 for a user without alerting_v2 privileges",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -848,8 +848,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/bulk_update_api_key.spec.ts",
-        "line": 195,
-        "column": 74
+        "line": 190,
+        "column": 8
       }
     },
     {

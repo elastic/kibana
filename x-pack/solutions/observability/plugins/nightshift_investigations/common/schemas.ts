@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z, isoDateTime } from '@kbn/zod/v4';
+import { z, isoDateTime, lazySchema } from '@kbn/zod/v4';
 import type { JsonValue } from '@kbn/utility-types';
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import { INVESTIGATION_SUBJECT_TYPES } from './workflows/triggers';
@@ -175,26 +175,28 @@ export const alertSnapshotSchema = z.object({
  * classic alert it has no rule type, category or reason, and the alert's own fields live in
  * `data`.
  */
-export const v2AlertSnapshotSchema = z.object({
-  alert_version: z.literal('v2'),
-  /** `episode.id` */
-  id: z.string().min(1).max(500),
-  rule_id: z.string().min(1).max(500),
-  rule_name: z.string().min(1).max(500).optional(),
-  group_hash: z.string().min(1).max(500),
-  /** `episode.status` */
-  status: z.string().min(1).max(100),
-  /** Timestamp of the episode's first event. */
-  start: isoDateTime({ offset: true }).max(100),
-  last_event_timestamp: isoDateTime({ offset: true }).max(100).optional(),
-  severity: z.string().min(1).max(100).optional(),
-  source: z.string().min(1).max(500).optional(),
-  /** The `data` of the latest event that carried any. */
-  data: z
-    .record(z.string().max(128), z.unknown())
-    .refine((data) => JSON.stringify(data).length <= MAX_V2_ALERT_DATA_LENGTH)
-    .optional(),
-});
+export const v2AlertSnapshotSchema = lazySchema(() =>
+  z.object({
+    alert_version: z.literal('v2'),
+    /** `episode.id` */
+    id: z.string().min(1).max(500),
+    rule_id: z.string().min(1).max(500).optional(),
+    rule_name: z.string().min(1).max(500).optional(),
+    group_hash: z.string().min(1).max(500),
+    /** `episode.status` */
+    status: z.string().min(1).max(100),
+    /** Timestamp of the episode's first event. */
+    start: isoDateTime({ offset: true }).max(100),
+    last_event_timestamp: isoDateTime({ offset: true }).max(100).optional(),
+    severity: z.string().min(1).max(100).optional(),
+    source: z.string().min(1).max(500).optional(),
+    /** The `data` of the latest event that carried any. */
+    data: z
+      .record(z.string().max(128), z.unknown())
+      .refine((data) => JSON.stringify(data).length <= MAX_V2_ALERT_DATA_LENGTH)
+      .optional(),
+  })
+);
 
 export const investigationAlertSnapshotSchema = z.discriminatedUnion('alert_version', [
   alertSnapshotSchema.extend({ alert_version: z.literal('v1').optional() }),

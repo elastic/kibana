@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { CUSTOM_CONTENT_LIQUID_OPTIONS } from '@kbn/custom-content-common';
 import type { ESQLColumn } from '@kbn/es-types';
 
 /**
@@ -14,16 +15,7 @@ import type { ESQLColumn } from '@kbn/es-types';
  */
 const getEngine = async () => {
   const { Liquid } = await import('liquidjs');
-  return new Liquid({
-    strictFilters: false,
-    strictVariables: false,
-    dynamicPartials: false,
-    relativeReference: false,
-    outputEscape: 'escape',
-    renderLimit: 1_000,
-    memoryLimit: 100_000_000,
-    parseLimit: 1_000_000,
-  });
+  return new Liquid(CUSTOM_CONTENT_LIQUID_OPTIONS);
 };
 
 function isFiniteNumber(value: unknown): value is number {

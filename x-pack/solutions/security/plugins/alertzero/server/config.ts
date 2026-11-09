@@ -6,7 +6,7 @@
  */
 
 import type { PluginConfigDescriptor } from '@kbn/core/server';
-import { schema, type TypeOf } from '@kbn/config-schema';
+import { offeringBasedSchema, schema, type TypeOf } from '@kbn/config-schema';
 
 export const configSchema = schema.object({
   /**
@@ -14,8 +14,12 @@ export const configSchema = schema.object({
    * the global managed workflows, inference features, the default-space agent, and the Kibana
    * feature privileges. Turning it off and restarting is what triggers orphan cleanup. The
    * user-facing per-space gate is the `securitySolution:enableAlertZero` advanced setting.
+   * On by default in traditional deployments; still off by default in serverless.
    */
-  enabled: schema.boolean({ defaultValue: false }),
+  enabled: offeringBasedSchema({
+    serverless: schema.boolean({ defaultValue: false }),
+    traditional: schema.boolean({ defaultValue: true }),
+  }),
 });
 
 export type AlertZeroConfig = TypeOf<typeof configSchema>;

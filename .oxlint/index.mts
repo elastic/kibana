@@ -13,6 +13,7 @@
 // A rule whose ESLint options are stricter than oxlint's implementation must stay in ESLint.
 // Exception: the generated `test-api-clients` bundles keep `@kbn/imports/no_unused_imports` and
 // `import/no-duplicates` in ESLint, because the OpenAPI generator relies on both fixing its output in one pass.
+// The `@kbn/kbn-monaco` rules also run in ESLint to support editors using its extension.
 //
 // oxlint loads this through the repo-root `oxlint.config.mjs` and resolves `files`,
 // `ignorePatterns`, and `jsPlugins` paths relative to that root entry. Rule sets are spread
@@ -49,13 +50,16 @@ import { playwrightOverrides, playwrightSettings } from './playwright.mts';
 import { testingLibraryOverrides } from './testing_library.mts';
 import { unusedVarsOverrides } from './unused_vars.mts';
 import { importPluginOverrides } from './import_plugin.mts';
+import { importExtraneousDependenciesOverrides } from './import_compat.mts';
 import { restrictedImportsOverrides } from './restricted_imports.mts';
+import { monacoRules } from './monaco.mts';
 import { nestedConfigOverrides, teamOverrides } from './team_overrides.mts';
 
 const movedFromEslintOverrides: OxlintOverride[] = [
   ...javascriptOverrides,
   ...typescriptOverrides,
   ...jestOverrides,
+  ...importExtraneousDependenciesOverrides,
   ...teamOverrides,
   ...restrictedImportsOverrides,
   ...formatjsOverrides,
@@ -103,6 +107,10 @@ export default defineConfig<OxlintConfig>({
       name: '@kbn/compat',
       specifier: './packages/kbn-eslint-plugin-compat/oxlint_plugin.js',
     },
+    {
+      name: '@kbn/kbn-monaco',
+      specifier: './packages/kbn-eslint-plugin-kbn-monaco/oxlint_plugin.js',
+    },
     'eslint-plugin-ban',
     'eslint-plugin-cypress',
     'eslint-plugin-depend',
@@ -119,7 +127,12 @@ export default defineConfig<OxlintConfig>({
   categories: {
     correctness: 'off',
   },
-  settings: playwrightSettings,
+  settings: {
+    ...playwrightSettings,
+    // `@kbn/compat/import-*` resolve imports through eslint-plugin-import, which forgets resolutions
+    // after 30s by default. Files don't appear or disappear during a run.
+    'import/cache': { lifetime: 'Infinity' },
+  },
   rules: {
     ...javascriptRules,
     ...kbnConfigRules,
@@ -130,6 +143,7 @@ export default defineConfig<OxlintConfig>({
     ...kbnUiRules,
     ...dependRules,
     ...euiRules,
+    ...monacoRules,
   },
   overrides: [
     ...importPluginOverrides,

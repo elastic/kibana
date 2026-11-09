@@ -4,16 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
 import { sloIdSchema } from '../../schema/slo';
 import { allOrAnyString, dateType, statusSchema } from '../../schema/common';
 import { MAX_DATE_STRING_LENGTH } from '../../schema/limits';
 
-const bulkSnapshotRequestItemSchema = z.object({
-  id: sloIdSchema,
-  instanceId: allOrAnyString.optional(),
-});
+const bulkSnapshotRequestItemSchema = lazySchema(() =>
+  z.object({
+    id: sloIdSchema,
+    instanceId: allOrAnyString
+      .optional()
+      .describe(
+        "The SLO instance ID. Omit this parameter or set it to `'*'` to return all instances for the SLO (up to 1000). Set a specific value to return that instance only."
+      ),
+  })
+);
 
 const snapshotErrorBudgetSchema = z.object({
   initial: z.number(),
@@ -40,12 +46,18 @@ const snapshotResultSchema = z.intersection(
   ])
 );
 
-const bulkSnapshotParamsSchema = z.object({
-  body: z.object({
-    at: dateType,
-    requests: z.array(bulkSnapshotRequestItemSchema),
-  }),
-});
+const bulkSnapshotParamsSchema = lazySchema(() =>
+  z.object({
+    body: z.object({
+      at: dateType.describe(
+        'The point in time at which to compute the SLO instance summaries, for example 2025-01-12T10:00:00.000Z'
+      ),
+      requests: z
+        .array(bulkSnapshotRequestItemSchema)
+        .describe('The list of SLO instances to compute. Limited to 100 entries.'),
+    }),
+  })
+);
 
 const snapshotResponseSchema = z.object({
   at: z.string(),
@@ -54,21 +66,31 @@ const snapshotResponseSchema = z.object({
 
 // Query params cannot use the `dateType` codec: the OAS query converter rejects
 // codecs whose output is a class instance. The handler converts it to a Date.
-const dateStringQuerySchema = z
-  .string()
-  .max(MAX_DATE_STRING_LENGTH)
-  .refine((value) => !isNaN(new Date(value).getTime()), { message: 'Invalid date' })
-  .describe('A date string, for example 2023-01-12T10:03:19.000Z');
+const dateStringQuerySchema = lazySchema(() =>
+  z
+    .string()
+    .max(MAX_DATE_STRING_LENGTH)
+    .refine((value) => !isNaN(new Date(value).getTime()), { message: 'Invalid date' })
+    .describe(
+      'The point in time at which to compute the SLO instance summary (ISO 8601 date-time), for example 2023-01-12T10:03:19.000Z'
+    )
+);
 
-const getSnapshotParamsSchema = z.object({
-  path: z.object({
-    id: sloIdSchema,
-  }),
-  query: z.object({
-    at: dateStringQuerySchema,
-    instanceId: allOrAnyString.optional(),
-  }),
-});
+const getSnapshotParamsSchema = lazySchema(() =>
+  z.object({
+    path: z.object({
+      id: sloIdSchema,
+    }),
+    query: z.object({
+      at: dateStringQuerySchema,
+      instanceId: allOrAnyString
+        .optional()
+        .describe(
+          "The SLO instance ID. Omit this parameter or set it to `'*'` to return all instances for the SLO (up to 1000). Set a specific value (for example `host.name:web-01`) to return that instance only."
+        ),
+    }),
+  })
+);
 
 type BulkSnapshotRequestItem = z.output<typeof bulkSnapshotRequestItemSchema>;
 type SnapshotSummary = z.output<typeof snapshotSummarySchema>;

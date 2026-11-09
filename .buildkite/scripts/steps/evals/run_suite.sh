@@ -48,6 +48,10 @@ if [[ -z "${EVAL_SCOUT_DOMAIN:-}" && "${EVAL_SCOUT_ARCH:-stateful}" == "$_suite_
   EVAL_SCOUT_DOMAIN="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.scoutDomain // empty' 2>/dev/null || true)"
 fi
 unset _suite_scout_arch
+# Resolve the Scout serverConfigSet: explicit override, else the suite's own (the on-demand pipeline
+# doesn't forward it, and the default evals_tracing stack disables suite plugins), else evals_tracing.
+source .buildkite/scripts/steps/evals/resolve_server_config_set.sh
+EVAL_SERVER_CONFIG_SET="$(resolve_server_config_set "${EVAL_SUITE_INFO}")"
 
 cleanup() {
   if [[ -n "${SCOUT_PID:-}" ]]; then
@@ -174,7 +178,7 @@ if [[ "${EVAL_FANOUT:-}" == "1" ]] && [[ -z "${EVAL_PROJECT:-}" ]]; then
   if ! command -v buildkite-agent >/dev/null 2>&1; then
     echo "EVAL_FANOUT=1 requires buildkite-agent; falling back to running all projects in-process"
   else
-    # One JSON object per line: { connectorId, shardId, specFiles }. Read below with `jq`.
+    # One JSON object per line: { connectorId, shardId, specFiles, judge? }. Read below with `jq`.
     # Weekly runs apply specModelGroups[] so a connector only gets the specs in a shard that asked for it.
     FANOUT_MATRIX="$(
       EVAL_SUITE_INFO="${EVAL_SUITE_INFO}" \
@@ -261,6 +265,11 @@ EOF
         fi
         fanout_step_keys+=("$step_key")
 
+        # A shard's `judge` in evals.suites.json pins its evaluation connector. The agent model
+        # stays EVAL_PROJECT, and shards without one keep the suite-wide judge.
+        row_judge="$(jq -r '.judge // ""' <<<"$row")"
+        step_judge_connector="${row_judge:-${EVAL_CONNECTOR_ID:-}}"
+
         cat >>"$FANOUT_PIPELINE_FILE" <<EOF
       - label: "${step_label}"
         key: "${step_key}"
@@ -271,7 +280,7 @@ EOF
           FTR_EIS_CCM: "${FTR_EIS_CCM:-}"
           EVAL_INCLUDE_EIS_MODELS: "${EVAL_INCLUDE_EIS_MODELS:-}"
           EVAL_MODEL_GROUPS: "${EVAL_MODEL_GROUPS:-}"
-          EVAL_CONNECTOR_ID: "${EVAL_CONNECTOR_ID:-}"
+          EVAL_CONNECTOR_ID: "${step_judge_connector}"
           EVAL_SUITE_ID: "${EVAL_SUITE_ID}"
           EVAL_SUITE_NAME: "${EVAL_SUITE_NAME:-}"
           EVAL_SUITE_SLACK_CHANNEL: "${EVAL_SUITE_SLACK_CHANNEL:-}"
@@ -306,6 +315,7 @@ EOF
         if [[ "$fanout_preemptible" == "true" ]]; then
           cat >>"$FANOUT_PIPELINE_FILE" <<EOF
           preemptible: true
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
         retry:
           automatic:
             - exit_status: "-1"
@@ -372,6 +382,7 @@ EOF
           provider: gcp
           machineType: n2-standard-2
           preemptible: true
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
 EOF
       fi
 
@@ -404,6 +415,7 @@ EOF
           provider: gcp
           machineType: n2-standard-2
           preemptible: true
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
 EOF
         # Refresh baseline block + trigger (top-level — 2-space indent).
         # The trigger fires a fresh main eval run so the PR comment is updated
@@ -464,6 +476,7 @@ EOF
           provider: gcp
           machineType: n2-standard-2
           preemptible: true
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
 EOF
       fi
 
@@ -541,11 +554,7 @@ es_curl() {
 
 # Start Scout server in background (run Kibana from the distributable)
 SCOUT_SERVER_ARGS=(start-server --location local --arch "$SCOUT_ARCH" --domain "$SCOUT_DOMAIN" --kibanaInstallDir "${KIBANA_BUILD_LOCATION:?}")
-if [[ -n "${EVAL_SERVER_CONFIG_SET:-}" ]]; then
-  SCOUT_SERVER_ARGS+=(--serverConfigSet "$EVAL_SERVER_CONFIG_SET")
-else
-  SCOUT_SERVER_ARGS+=(--serverConfigSet evals_tracing)
-fi
+SCOUT_SERVER_ARGS+=(--serverConfigSet "$EVAL_SERVER_CONFIG_SET")
 
 node scripts/scout "${SCOUT_SERVER_ARGS[@]}" &
 SCOUT_PID=$!
@@ -680,18 +689,19 @@ if [[ -n "${EVAL_SPEC_FILES:-}" ]]; then
   EVAL_RUN_ARGS+=(${EVAL_SPEC_FILE_LIST[@]+"${EVAL_SPEC_FILE_LIST[@]}"})
 fi
 
+# stdin is detached so the CLI never prompts for a profile on agents that attach a terminal.
 run_eval_suite() {
   if [[ -n "${EVAL_PROJECT:-}" ]]; then
     KBN_EVALS_RUN_LOG="$(mktemp -t kbn-evals-run.XXXXXX.log)"
     export KBN_EVALS_RUN_LOG
     set +e
-    node scripts/evals run --suite "$EVAL_SUITE_ID" --project "$EVAL_PROJECT" "${EVAL_RUN_ARGS[@]}" 2>&1 | tee "$KBN_EVALS_RUN_LOG"
+    node scripts/evals run --suite "$EVAL_SUITE_ID" --project "$EVAL_PROJECT" "${EVAL_RUN_ARGS[@]}" </dev/null 2>&1 | tee "$KBN_EVALS_RUN_LOG"
     local eval_exit="${PIPESTATUS[0]}"
     set -e
     return "${eval_exit}"
   fi
 
-  node scripts/evals run --suite "$EVAL_SUITE_ID" "${EVAL_RUN_ARGS[@]}"
+  node scripts/evals run --suite "$EVAL_SUITE_ID" "${EVAL_RUN_ARGS[@]}" </dev/null
 }
 
 run_eval_suite

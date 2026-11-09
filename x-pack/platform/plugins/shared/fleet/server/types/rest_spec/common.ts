@@ -23,7 +23,7 @@ export const ListWithKuerySchema = schema.object({
 });
 
 export const BulkRequestBodySchema = schema.object({
-  ids: schema.arrayOf(schema.string(), {
+  ids: schema.arrayOf(schema.savedObjectId.warn({ minLength: 0, label: 'fleet.bulk_get.ids' }), {
     // minSize: 1, // TODO, called with 0 ids sometimes
     meta: { description: 'list of package policy ids' },
     maxSize: 1000,

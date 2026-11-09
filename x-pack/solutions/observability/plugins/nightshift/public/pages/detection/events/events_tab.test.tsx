@@ -8,7 +8,7 @@
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { SignificantEvent, SignificantEventResponse } from '@kbn/significant-events-schema';
-import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 import { Router } from '@kbn/shared-ux-router';
@@ -20,14 +20,17 @@ const mockRefreshEvents = jest.fn();
 const mockTimeRangeChange = jest.fn();
 const mockAddWarning = jest.fn();
 
-jest.mock('../../../common/format_timestamp', () => ({
-  ...jest.requireActual('../../../common/format_timestamp'),
+jest.mock('../../../hooks/use_format_timestamp', () => ({
+  ...jest.requireActual('../../../hooks/use_format_timestamp'),
   useFormatTimestamp: () => (timestamp: string) => timestamp,
 }));
 jest.mock('../../../components/entities/significant_event/event_flyout', () => ({
   EventFlyout: ({ event }: { event: SignificantEvent }) => (
     <div data-test-subj="eventFlyoutStub">{event.title}</div>
   ),
+}));
+jest.mock('../../../components/ui/time_range_picker', () => ({
+  NightshiftTimeRangePicker: () => <div data-test-subj="detectionTimeRangePickerStub" />,
 }));
 jest.mock('../../../data/significant_events/use_fetch_event_by_id');
 jest.mock('../../../data/significant_events/use_significant_events_list');
@@ -134,20 +137,32 @@ describe('EventsTab', () => {
     expect(screen.getByTestId('eventFlyoutStub')).toHaveTextContent('Payment errors');
   });
 
-  it('sorts by a column header and keeps the choice in the URL', async () => {
+  it('sorts by a column header and keeps the choice in the URL', () => {
+    // EUI's sticky header renders an aria-hidden clone of every header cell; click the real one.
+    const sortButton = (field: string) => {
+      const [header] = screen
+        .getAllByTestId(new RegExp(`^tableHeaderCell_${field}_`))
+        .filter((cell) => !cell.closest('[aria-hidden="true"]'));
+      return within(header).getByTestId('tableHeaderSortButton');
+    };
     const history = renderTab();
 
     expect(mockUseSignificantEventsList).toHaveBeenLastCalledWith(
-      expect.objectContaining({ sortField: 'severity', sortOrder: 'desc' })
+      expect.objectContaining({ sortField: 'updated_at', sortOrder: 'desc' })
     );
-    fireEvent.click(screen.getByRole('button', { name: /^Time/ }));
+    fireEvent.click(sortButton('created_at'));
 
-    await waitFor(() =>
-      expect(mockUseSignificantEventsList).toHaveBeenLastCalledWith(
-        expect.objectContaining({ sortField: 'created_at', page: 1 })
-      )
+    expect(mockUseSignificantEventsList).toHaveBeenLastCalledWith(
+      expect.objectContaining({ sortField: 'created_at', page: 1 })
     );
     expect(new URLSearchParams(history.location.search).get('sortField')).toBe('created_at');
+
+    fireEvent.click(sortButton('@timestamp'));
+
+    expect(mockUseSignificantEventsList).toHaveBeenLastCalledWith(
+      expect.objectContaining({ sortField: 'updated_at', page: 1 })
+    );
+    expect(new URLSearchParams(history.location.search).get('sortField')).toBe('updated_at');
   });
 
   it('sends search and filter query params and resets the page', async () => {

@@ -99,7 +99,6 @@ const EMPTY_ARRAY: PackQueryStatusItem[] = [];
 export enum ViewResultsActionButtonType {
   icon = 'icon',
   button = 'button',
-  menuItem = 'menuItem',
 }
 
 interface DocsColumnResultsProps {

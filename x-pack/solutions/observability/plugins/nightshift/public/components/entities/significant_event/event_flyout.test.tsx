@@ -52,13 +52,13 @@ const investigationDetails = {
 const mockOpenConversationDetails = jest.fn();
 const mockReportEvent = jest.fn();
 
-jest.mock('../../../hooks/use_fetch_investigation_statuses', () => ({
+jest.mock('../../../data/investigations/use_fetch_investigation_statuses', () => ({
   useFetchInvestigationStatuses: () => ({ data: mockInvestigationRunStatuses }),
 }));
 
 let mockInvestigationRunStatuses: Record<string, InvestigationRunStatus> | undefined;
 
-jest.mock('../../../hooks/use_fetch_source_features', () => ({
+jest.mock('../../../data/knowledge_indicators/use_fetch_source_features', () => ({
   useFetchSourceFeatures: () => ({
     features: [],
     failedSourceIds: [],
@@ -73,7 +73,7 @@ jest.mock('../detection/change_point_lens_chart', () => ({
   ChangePointLensChart: () => <div data-test-subj="nightshiftDetectionLensChart" />,
 }));
 
-jest.mock('../../../hooks/use_fetch_detection_occurrences', () => ({
+jest.mock('../../../data/detections/use_fetch_detection_occurrences', () => ({
   useFetchDetectionOccurrences: () => ({
     data: new Map([
       [
@@ -90,7 +90,7 @@ jest.mock('../../../hooks/use_fetch_detection_occurrences', () => ({
   }),
 }));
 
-jest.mock('../../../hooks/use_fetch_event_lifecycle', () => ({
+jest.mock('../../../data/significant_events/use_fetch_event_lifecycle', () => ({
   useFetchEventLifecycle: () => ({
     data: {
       detections: [
@@ -269,6 +269,58 @@ describe('EventFlyout', () => {
     expect(mockOpenChat.mock.invocationCallOrder[0]).toBeLessThan(
       Math.max(...mockFocusedSignificantEventService.setFocusedEvent.mock.invocationCallOrder)
     );
+  });
+
+  it('clears the focused event after New chat closes an overlay flyout', async () => {
+    const { unmount } = renderFlyout({
+      type: 'overlay',
+      event: {
+        ...mockEvent,
+        investigations: [
+          {
+            workflow_execution_id: 'exec-1',
+            started_at: '2026-07-10T12:00:00Z',
+            completed_at: '2026-07-10T12:05:00Z',
+          },
+        ],
+      },
+    });
+
+    await userEvent.click(screen.getByRole('button', { name: 'Actions' }));
+    await userEvent.click(screen.getByTestId('nightshiftEventFlyoutStartNewChatItem'));
+    unmount();
+
+    expect(mockFocusedSignificantEventService.clearFocusedEvent).toHaveBeenCalledWith('evt-001');
+  });
+
+  it('keeps a staged overlay event when it refetches after New chat', async () => {
+    const { rerender, unmount } = renderFlyout({
+      type: 'overlay',
+      event: {
+        ...mockEvent,
+        investigations: [
+          {
+            workflow_execution_id: 'exec-1',
+            started_at: '2026-07-10T12:00:00Z',
+            completed_at: '2026-07-10T12:05:00Z',
+          },
+        ],
+      },
+    });
+
+    await userEvent.click(screen.getByRole('button', { name: 'Actions' }));
+    await userEvent.click(screen.getByTestId('nightshiftEventFlyoutStartNewChatItem'));
+    rerender(
+      <EventFlyout
+        event={{ ...mockEvent, summary: 'Updated after refetch' }}
+        onClose={jest.fn()}
+        type="overlay"
+      />
+    );
+
+    expect(mockFocusedSignificantEventService.clearFocusedEvent).not.toHaveBeenCalled();
+    unmount();
+    expect(mockFocusedSignificantEventService.clearFocusedEvent).toHaveBeenCalledWith('evt-001');
   });
 
   it('offers a new chat instead of the investigation chat while it is running', async () => {
