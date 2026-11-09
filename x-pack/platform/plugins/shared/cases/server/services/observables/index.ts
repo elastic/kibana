@@ -157,6 +157,10 @@ export const toObservable = ({
   updatedAt: attributes.updated_at ?? null,
 });
 
+/** Repeat key of an observable. JSON keeps type keys that contain a dash from colliding. */
+export const observableKey = ({ typeKey, value }: ObservableKey): string =>
+  JSON.stringify([typeKey, value]);
+
 /** Groups observable values by type key, dropping repeats. */
 export const groupValuesByTypeKey = (keys: ObservableKey[]): Map<string, string[]> => {
   const byType = new Map<string, Set<string>>();
@@ -185,15 +189,19 @@ export const caseReferenceQuery = (caseIds: string[]): estypes.QueryDslQueryCont
 
 /**
  * One clause per type key holding its values as a set, so the clause count follows the number of
- * types, not the number of observables, and stays far below Elasticsearch's clause limit.
+ * types, not the number of observables, and stays far below Elasticsearch's clause limit. `field`
+ * names the raw fields of the type the query runs on.
  */
-export const keysQuery = (keys: ObservableKey[]): estypes.QueryDslQueryContainer => ({
+export const keysQuery = (
+  keys: ObservableKey[],
+  field: (name: string) => string = observableField
+): estypes.QueryDslQueryContainer => ({
   bool: {
     should: [...groupValuesByTypeKey(keys)].map(([typeKey, values]) => ({
       bool: {
         filter: [
-          { term: { [observableField('type_key')]: typeKey } },
-          { terms: { [observableField('value')]: values } },
+          { term: { [field('type_key')]: typeKey } },
+          { terms: { [field('value')]: values } },
         ],
       },
     })),

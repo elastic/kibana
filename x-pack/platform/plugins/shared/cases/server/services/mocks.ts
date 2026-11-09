@@ -17,6 +17,7 @@ import type {
   TemplatesService,
   FieldDefinitionsService,
   ObservableService,
+  ObservableSharedService,
 } from '.';
 import type { AttachmentGetter } from './attachments/operations/get';
 import type { DeleteAttachmentArgs } from './attachments/types';
@@ -51,6 +52,7 @@ export type NotificationServiceMock = jest.Mocked<EmailNotificationService>;
 export type TemplatesServiceMock = jest.Mocked<TemplatesService>;
 export type FieldDefinitionsServiceMock = jest.Mocked<FieldDefinitionsService>;
 export type ObservableServiceMock = jest.Mocked<ObservableService>;
+export type ObservableSharedServiceMock = jest.Mocked<ObservableSharedService>;
 
 export const createCaseServiceMock = (): CaseServiceMock => {
   const service: PublicMethodsOf<CaseServiceMock> = lazyObject({
@@ -315,4 +317,15 @@ export const createObservableServiceMock = (): ObservableServiceMock => {
 
   // the cast here is required because jest.Mocked tries to include private members and would throw an error
   return service as unknown as ObservableServiceMock;
+};
+
+export const createObservableSharedServiceMock = (): ObservableSharedServiceMock => {
+  const service: PublicMethodsOf<ObservableSharedService> = lazyObject({
+    findByKeys: jest.fn().mockResolvedValue(new Map()),
+    writeMetadata: jest.fn().mockResolvedValue(undefined),
+    findKeysByMetadata: jest.fn().mockResolvedValue([]),
+  });
+
+  // the cast here is required because jest.Mocked tries to include private members and would throw an error
+  return service as unknown as ObservableSharedServiceMock;
 };

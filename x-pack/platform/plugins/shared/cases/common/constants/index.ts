@@ -48,6 +48,7 @@ export const CASE_ID_INCREMENTER_SAVED_OBJECT = 'cases-incrementing-id' as const
 export const CASE_TEMPLATE_SAVED_OBJECT = 'cases-templates' as const;
 export const CASE_FIELD_DEFINITION_SAVED_OBJECT = 'cases-field-definition' as const;
 export const CASE_OBSERVABLE_SAVED_OBJECT = 'cases-observables' as const;
+export const CASE_OBSERVABLE_SHARED_SAVED_OBJECT = 'cases-observable-shared' as const;
 
 /**
  * If more values are added here please also add them here: x-pack/test/cases_api_integration/common/plugins
@@ -435,6 +436,16 @@ export const MAX_OBSERVABLES_PER_PAGE = 100;
 export const DEFAULT_OBSERVABLES_PER_PAGE = 20;
 /** Longest cursor the observables list route accepts. */
 export const MAX_OBSERVABLES_CURSOR_LENGTH = 4096;
+/** Most metadata pairs one observable value holds. */
+export const MAX_OBSERVABLE_METADATA_PAIRS = 20;
+/** Longest metadata key. */
+export const MAX_OBSERVABLE_METADATA_KEY_LENGTH = 256;
+/** Longest metadata value; it matches the indexed length so every value can be filtered. */
+export const MAX_OBSERVABLE_METADATA_VALUE_LENGTH = 1024;
+/** Most metadata filters one observables list request combines. */
+export const MAX_OBSERVABLE_METADATA_FILTERS = 5;
+/** Most observable values one metadata filter matches before it stops. */
+export const MAX_METADATA_FILTER_VALUES = 10_000;
 
 /**
  * Delays
