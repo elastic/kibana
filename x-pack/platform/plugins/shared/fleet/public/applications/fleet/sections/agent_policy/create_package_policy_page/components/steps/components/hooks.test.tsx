@@ -495,7 +495,7 @@ describe('useVarGroupSelections', () => {
       expect(mockOnSelectionsChange).toHaveBeenCalledWith({
         var_group_selections: { log_group_source: 'log_group_name' },
         vars: {
-          log_group_arn: { value: '' },
+          log_group_arn: { value: undefined },
           log_group_name: { value: '' },
         },
       });

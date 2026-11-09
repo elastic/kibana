@@ -485,10 +485,38 @@ describe('var_group_policy_effects', () => {
       );
 
       expect(result).toEqual({
-        log_group_arn: { value: '' },
+        log_group_arn: { value: undefined },
         log_group_name: { value: 'my-group' },
         other_var: { value: 'keep' },
       });
+    });
+
+    it('should unset deselected vars so a later switch-back still requires them', () => {
+      // Regression for #303689 follow-up (juliaElastic 2026-11-09): clearing to ''
+      // made validation treat the var as filled, so switching back to Log Group ARN
+      // showed the form as valid with an empty ARN. Unsetting the value keeps the
+      // entry (type and other metadata) while validation treats it as missing.
+      const varGroup = createMockStreamVarGroups()[0];
+      const streamVars = {
+        log_group_arn: {
+          value: 'arn:aws:logs:us-east-1:123456789012:log-group:my-group',
+          type: 'text',
+        },
+        log_group_name: { value: '' },
+      };
+
+      const result = buildStreamVarGroupVarsUpdate(
+        streamVars,
+        varGroup,
+        'log_group_arn',
+        'log_group_name'
+      );
+
+      expect(result).toEqual({
+        log_group_arn: { value: undefined, type: 'text' },
+        log_group_name: { value: '' },
+      });
+      expect(result?.log_group_arn.value).toBeUndefined();
     });
 
     it('should keep vars shared by the deselected and selected options', () => {
@@ -515,7 +543,7 @@ describe('var_group_policy_effects', () => {
       );
 
       expect(result).toEqual({
-        log_group_arn: { value: '' },
+        log_group_arn: { value: undefined },
         log_group_name: { value: '' },
         region: { value: 'us-east-1' },
       });
@@ -572,7 +600,7 @@ describe('var_group_policy_effects', () => {
       );
 
       expect(result).toEqual({
-        log_group_arn: { value: '', type: 'password' },
+        log_group_arn: { value: undefined, type: 'password' },
         log_group_name: { value: '' },
       });
     });
@@ -605,7 +633,7 @@ describe('var_group_policy_effects', () => {
       );
 
       expect(result).toEqual({
-        log_group_arn: { value: '' },
+        log_group_arn: { value: undefined },
         log_group_name: { value: '' },
         use_tls: { value: true, type: 'bool' },
       });
@@ -640,8 +668,8 @@ describe('var_group_policy_effects', () => {
       );
 
       expect(result).toEqual({
-        log_group_arn: { value: '' },
-        log_group_name: { value: '' },
+        log_group_arn: { value: undefined },
+        log_group_name: { value: undefined },
         log_group_name_prefix: { value: '' },
       });
     });

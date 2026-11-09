@@ -2941,3 +2941,209 @@ describe('Fleet - validatePackagePolicy with var_groups', () => {
     expect(validationHasErrors(result)).toBe(false);
   });
 });
+
+describe('Fleet - validatePackagePolicy with stream-level var_groups', () => {
+  // Mirrors the aws_mq@2.3.0 log-group selector (elastic/integrations#22304):
+  // stream-level var_group `log_group_source`, required, first option Log Group ARN.
+  const logGroupSourceGroup = {
+    name: 'log_group_source',
+    required: true,
+    title: 'Log group',
+    selector_title: 'Identify the log group by',
+    options: [
+      { name: 'log_group_arn', title: 'Log Group ARN', vars: ['log_group_arn'] },
+      {
+        name: 'log_group_name',
+        title: 'Log Group Name',
+        vars: ['log_group_name', 'region_name'],
+      },
+      {
+        name: 'log_group_name_prefix',
+        title: 'Log Group Name Prefix',
+        vars: ['log_group_name_prefix', 'region_name'],
+      },
+    ],
+  };
+
+  const streamVarDefs = [
+    { name: 'log_group_arn', type: 'text', title: 'Log Group ARN' },
+    { name: 'log_group_name', type: 'text', title: 'Log Group Name' },
+    {
+      name: 'log_group_name_prefix',
+      type: 'text',
+      title: 'Log Group Name Prefix',
+    },
+    { name: 'region_name', type: 'text', title: 'Region Name' },
+  ];
+
+  const awsMqStream = {
+    input: 'aws-cloudwatch',
+    title: 'ActiveMQ general logs',
+    enabled: true,
+    vars: streamVarDefs,
+    var_groups: [logGroupSourceGroup],
+  };
+
+  const packageInfoWithStreamVarGroups: PackageInfo = {
+    name: 'aws_mq',
+    version: '2.3.0',
+    title: 'Amazon MQ',
+    description: 'Test package with stream-level var_groups',
+    type: 'integration',
+    format_version: '3.6.0',
+    owner: { github: 'elastic/integrations', type: 'elastic' },
+    categories: ['aws'],
+    status: installationStatuses.NotInstalled,
+    assets: { kibana: {} },
+    data_streams: [
+      {
+        dataset: 'aws_mq.activemq_general_logs',
+        type: 'logs',
+        streams: [awsMqStream],
+      },
+    ],
+    policy_templates: [
+      {
+        name: 'aws_mq',
+        title: 'Amazon MQ',
+        inputs: [{ type: 'aws-cloudwatch', title: 'AWS CloudWatch', vars: [] }],
+      },
+    ],
+    vars: [],
+  } as unknown as PackageInfo;
+
+  const emptyStreamVars = () => ({
+    log_group_arn: { type: 'text', value: undefined },
+    log_group_name: { type: 'text', value: undefined },
+    log_group_name_prefix: { type: 'text', value: undefined },
+    region_name: { type: 'text', value: undefined },
+  });
+
+  const makePolicy = (
+    streamVars: Record<string, { type: string; value: unknown }>,
+    streamSelections?: Record<string, string>
+  ): NewPackagePolicy =>
+    ({
+      name: 'aws-mq-1',
+      namespace: 'default',
+      description: '',
+      policy_ids: ['policy-1'],
+      enabled: true,
+      inputs: [
+        {
+          type: 'aws-cloudwatch',
+          policy_template: 'aws_mq',
+          enabled: true,
+          streams: [
+            {
+              data_stream: { dataset: 'aws_mq.activemq_general_logs', type: 'logs' },
+              enabled: true,
+              vars: streamVars,
+              ...(streamSelections ? { var_group_selections: streamSelections } : {}),
+            },
+          ],
+        },
+      ],
+      vars: {},
+    } as unknown as NewPackagePolicy);
+
+  const streamVarsOf = (result: ReturnType<typeof validatePackagePolicy>) =>
+    result.inputs?.['aws-cloudwatch']?.streams?.['aws_mq.activemq_general_logs']?.vars;
+
+  it('should require the default option var when no stream selection is stored', () => {
+    // Regression for #303689 follow-up (juliaElastic 2026-11-09): a fresh policy
+    // whose stream section was never expanded has no stored var_group_selections,
+    // yet the form displays the default (Log Group ARN) selection — validation
+    // must require the ARN instead of treating nothing as required.
+    const result = validatePackagePolicy(
+      makePolicy(emptyStreamVars()),
+      packageInfoWithStreamVarGroups,
+      deps
+    );
+
+    expect(streamVarsOf(result)?.log_group_arn).toEqual([expect.stringContaining('is required')]);
+    expect(validationHasErrors(result)).toBe(true);
+  });
+
+  it('should require the selected option var when the selection is stored', () => {
+    const result = validatePackagePolicy(
+      makePolicy(emptyStreamVars(), { log_group_source: 'log_group_arn' }),
+      packageInfoWithStreamVarGroups,
+      deps
+    );
+
+    expect(streamVarsOf(result)?.log_group_arn).toEqual([expect.stringContaining('is required')]);
+    expect(validationHasErrors(result)).toBe(true);
+  });
+
+  it('should allow empty strings for stream var_group required vars (same as package-level)', () => {
+    // Empty strings still pass required validation by design; the #303689
+    // follow-up fixes the switch-back case at the clear layer instead, by
+    // unsetting deselected vars rather than empty-stringing them.
+    const vars = emptyStreamVars();
+    vars.log_group_arn = { type: 'text', value: '' };
+    const result = validatePackagePolicy(
+      makePolicy(vars, { log_group_source: 'log_group_arn' }),
+      packageInfoWithStreamVarGroups,
+      deps
+    );
+
+    expect(streamVarsOf(result)?.log_group_arn).toBeNull();
+  });
+
+  it('should require both vars of the Name option and skip the ARN var', () => {
+    const result = validatePackagePolicy(
+      makePolicy(emptyStreamVars(), { log_group_source: 'log_group_name' }),
+      packageInfoWithStreamVarGroups,
+      deps
+    );
+
+    const vars = streamVarsOf(result);
+    expect(vars?.log_group_name).toEqual([expect.stringContaining('is required')]);
+    expect(vars?.region_name).toEqual([expect.stringContaining('is required')]);
+    expect(vars?.log_group_arn).toBeNull();
+    expect(validationHasErrors(result)).toBe(true);
+  });
+
+  it('should pass validation when the selected option vars have values', () => {
+    const vars = emptyStreamVars();
+    vars.log_group_name = { type: 'text', value: 'my-group' };
+    vars.region_name = { type: 'text', value: 'us-east-1' };
+    const result = validatePackagePolicy(
+      makePolicy(vars, { log_group_source: 'log_group_name' }),
+      packageInfoWithStreamVarGroups,
+      deps
+    );
+
+    expect(streamVarsOf(result)?.log_group_name).toBeNull();
+    expect(streamVarsOf(result)?.region_name).toBeNull();
+    expect(validationHasErrors(result)).toBe(false);
+  });
+
+  it('should not invent requiredness for a non-required var_group without selections', () => {
+    const packageInfoWithOptionalGroup: PackageInfo = {
+      ...packageInfoWithStreamVarGroups,
+      data_streams: [
+        {
+          dataset: 'aws_mq.activemq_general_logs',
+          type: 'logs',
+          streams: [
+            {
+              ...awsMqStream,
+              var_groups: [{ ...logGroupSourceGroup, required: false }],
+            },
+          ],
+        },
+      ],
+    } as unknown as PackageInfo;
+
+    const result = validatePackagePolicy(
+      makePolicy(emptyStreamVars()),
+      packageInfoWithOptionalGroup,
+      deps
+    );
+
+    expect(streamVarsOf(result)?.log_group_arn).toBeNull();
+    expect(validationHasErrors(result)).toBe(false);
+  });
+});

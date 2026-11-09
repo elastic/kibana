@@ -295,6 +295,35 @@ const isVarRequiredByVarGroup = (
   return false;
 };
 
+/**
+ * Effective var_group selections for validation: a var_group with no stored
+ * selection falls back to its first option — the same default the form
+ * displays. Without this, a fresh policy whose stream section was never
+ * expanded (so the form's default-selection effect never ran) validates as
+ * if the required group had no selection at all, and its vars are never
+ * treated as required.
+ */
+const getEffectiveVarGroupSelections = (
+  varGroups: RegistryVarGroup[] | undefined,
+  varGroupSelections: Record<string, string> | undefined
+): Record<string, string> | undefined => {
+  if (!varGroups || varGroups.length === 0) {
+    return varGroupSelections;
+  }
+
+  let effective: Record<string, string> | undefined;
+  for (const group of varGroups) {
+    if (varGroupSelections?.[group.name]) continue;
+    const firstOption = group.options[0];
+    if (!firstOption) continue;
+    if (!effective) {
+      effective = { ...(varGroupSelections ?? {}) };
+    }
+    effective[group.name] = firstOption.name;
+  }
+  return effective ?? varGroupSelections;
+};
+
 const VALIDATE_DATASTREAMS_PERMISSION_REGEX = /^(logs|metrics|traces|synthetics|profiles)-(.+)$/;
 
 /*
@@ -362,11 +391,15 @@ export const validatePackagePolicy = (
   const packageVars = Object.entries(packagePolicy.vars || {});
   const packageVarGroups = packageInfo.var_groups;
   const packageVarGroupSelections = packagePolicy.var_group_selections;
+  const effectivePackageVarGroupSelections = getEffectiveVarGroupSelections(
+    packageVarGroups,
+    packageVarGroupSelections
+  );
 
   if (packageVars.length) {
     validationResults.vars = packageVars.reduce((results, [name, varEntry]) => {
       // Skip validation for vars that are controlled by var_groups but not currently visible
-      if (!shouldValidateVar(name, packageVarGroups, packageVarGroupSelections)) {
+      if (!shouldValidateVar(name, packageVarGroups, effectivePackageVarGroupSelections)) {
         results[name] = null;
         return results;
       }
@@ -375,7 +408,7 @@ export const validatePackagePolicy = (
       const requiredByVarGroup = isVarRequiredByVarGroup(
         name,
         packageVarGroups,
-        packageVarGroupSelections
+        effectivePackageVarGroupSelections
       );
 
       results[name] = validatePackagePolicyConfig(
@@ -521,13 +554,17 @@ export const validatePackagePolicy = (
         const streamVarDefs = streamVarDefsByDatasetAndInput[streamKey];
         const streamVarGroups = streamVarGroupsByDatasetAndInput[streamKey];
         const streamVarGroupSelections = stream.var_group_selections;
+        const effectiveStreamVarGroupSelections = getEffectiveVarGroupSelections(
+          streamVarGroups,
+          streamVarGroupSelections
+        );
 
         if (streamVarDefs && Object.keys(streamVarDefs).length) {
           streamValidationResults.vars = Object.keys(streamVarDefs).reduce((results, name) => {
             const configEntry = stream?.vars?.[name];
 
             // Skip validation for vars not visible due to var_group selections
-            if (!shouldValidateVar(name, streamVarGroups, streamVarGroupSelections)) {
+            if (!shouldValidateVar(name, streamVarGroups, effectiveStreamVarGroupSelections)) {
               results[name] = null;
               return results;
             }
@@ -536,7 +573,7 @@ export const validatePackagePolicy = (
             const requiredByVarGroup = isVarRequiredByVarGroup(
               name,
               streamVarGroups,
-              streamVarGroupSelections
+              effectiveStreamVarGroupSelections
             );
 
             results[name] =

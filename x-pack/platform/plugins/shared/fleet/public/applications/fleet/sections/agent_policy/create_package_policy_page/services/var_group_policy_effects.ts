@@ -257,8 +257,11 @@ export function registerPolicyUpdateHandler(handler: PolicyUpdateHandler): void 
  *
  * Vars shared with the newly selected option are kept. Vars holding secret references
  * are cleared too — they must never leak into the agent template. Non-string values
- * (booleans, numbers, arrays) are left untouched. Returns undefined when nothing
- * needs clearing.
+ * (booleans, numbers, arrays) are left untouched. Cleared vars are unset (value
+ * `undefined`, the same state a fresh var has) rather than emptied to `''`, so a
+ * required var in the newly selected option is still treated as missing by
+ * validation when the user switches back without filling it in. Returns undefined
+ * when nothing needs clearing.
  */
 export function buildStreamVarGroupVarsUpdate(
   streamVars: PackagePolicyConfigRecord | undefined,
@@ -289,7 +292,7 @@ export function buildStreamVarGroupVarsUpdate(
     const entry = updated[name];
     if (!entry) continue;
     if ((typeof entry.value === 'string' && entry.value !== '') || isSecretRef(entry.value)) {
-      updated[name] = { ...entry, value: '' };
+      updated[name] = { ...entry, value: undefined };
       changed = true;
     }
   }
