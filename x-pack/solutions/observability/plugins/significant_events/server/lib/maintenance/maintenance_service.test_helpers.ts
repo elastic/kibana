@@ -229,7 +229,11 @@ export function makeV2RulesClient(options?: {
     affected_count: ids.length - (options?.deleteErrors?.length ?? 0),
     errors: options?.deleteErrors ?? [],
   }));
-  return { bulkDisableRules, bulkEnableRules, bulkDeleteRules };
+  const bulkUpdateApiKey = jest.fn(async ({ ids }: { ids: string[] }) => ({
+    affected_count: ids.length,
+    errors: [] as BulkError[],
+  }));
+  return { bulkDisableRules, bulkEnableRules, bulkDeleteRules, bulkUpdateApiKey };
 }
 
 export function makeUiSettingsClient(
@@ -258,6 +262,8 @@ export function makeService(params?: {
   /** Rule ids whose owning source is disabled in the catalog; the others belong to an enabled one. */
   disabledSourceRuleIds?: string[];
   v2RulesClient?: ReturnType<typeof makeV2RulesClient> | null;
+  /** Make the space set up: the detection engine has an account, and Resume enables rules as it. */
+  accountV2RulesClient?: ReturnType<typeof makeV2RulesClient>;
   spacesGetAllThrows?: boolean;
   /** Space ids returned by SpacesClient.getAll (default: default only). */
   spaceIds?: string[];
@@ -427,6 +433,13 @@ export function makeService(params?: {
     asScopedToNamespace: jest.fn((spaceId: string) => soClient.forSpace(spaceId)),
   };
 
+  const getWorkloadBinding = jest.fn(async () =>
+    params?.accountV2RulesClient ? { serviceAccountId: 'account-1' } : undefined
+  );
+  const withAccountAlertingV2RulesClient = jest.fn(
+    async (fn: (client: unknown) => Promise<unknown>) => fn(params?.accountV2RulesClient)
+  );
+
   const savedObjects = {
     // Only the spaces finder goes through a repository. The maintenance document is a
     // space-isolated type, so an unscoped read of it would silently mean the default space.
@@ -445,6 +458,7 @@ export function makeService(params?: {
   const server = {
     core: {
       savedObjects,
+      security: { serviceAccounts: { isEnabled: () => true, getWorkloadBinding } },
       dataStreams: { initializeClient },
       elasticsearch: {
         client: {
@@ -482,7 +496,10 @@ export function makeService(params?: {
       getSourceToQueryLinksMap,
       findOwnedRuleIds,
     }),
-    getSignificantEventsAlertingContext: async () => ({ alertingV2RulesClient: v2RulesClient }),
+    getSignificantEventsAlertingContext: async () => ({
+      alertingV2RulesClient: v2RulesClient,
+      withAccountAlertingV2RulesClient,
+    }),
     uiSettingsClient: spaceUiSettingsClient,
     sourcesClient,
   }));
@@ -501,6 +518,7 @@ export function makeService(params?: {
     internalClient,
     getScopedClients,
     v2RulesClient,
+    withAccountAlertingV2RulesClient,
     getRuleBackedQueryLinks,
     internalRuleBackedRules,
     getSourceIdsWithKnowledgeIndicators,

@@ -35,6 +35,7 @@ function makeRulesClientMock() {
     ruleExists: jest.fn(),
     findRules: jest.fn().mockResolvedValue({ items: [], total: 0, page: 1, perPage: 500 }),
     getTags: jest.fn().mockResolvedValue([]),
+    bulkUpdateApiKey: jest.fn().mockResolvedValue({ affected_count: 0, errors: [] }),
   };
 }
 
@@ -703,6 +704,64 @@ describe('RulesAdapterV2', () => {
 
       await expect(adapter.updateRule('rule-1', updateDefinition)).resolves.toBeUndefined();
       expect(mock.createRule).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('rotateRulesApiKey', () => {
+    it('ignores missing and disabled rules and fails on any other error', async () => {
+      const mock = makeRulesClientMock();
+      const adapter = makeAdapter(mock);
+      const error = (code: string) => ({ id: code, error: { code, message: code } });
+
+      mock.bulkUpdateApiKey.mockResolvedValueOnce({
+        affected_count: 0,
+        errors: [error('RULE_NOT_FOUND'), error('RULE_DISABLED')],
+      });
+      await expect(adapter.rotateRulesApiKey(['a', 'b'])).resolves.toBeUndefined();
+
+      mock.bulkUpdateApiKey.mockResolvedValueOnce({ affected_count: 0, errors: [error('BOOM')] });
+      await expect(adapter.rotateRulesApiKey(['c'])).rejects.toThrow('BOOM');
+    });
+
+    it('retries only the rules whose task was mid-run, and fails if they stay busy', async () => {
+      const mock = makeRulesClientMock();
+      const adapter = makeAdapter(mock);
+      const error = (id: string, code: string) => ({ id, error: { code, message: code } });
+
+      mock.bulkUpdateApiKey
+        .mockResolvedValueOnce({
+          affected_count: 1,
+          errors: [error('busy', 'RULE_ALREADY_RUNNING')],
+        })
+        .mockResolvedValueOnce({ affected_count: 1, errors: [] });
+      await expect(adapter.rotateRulesApiKey(['ok', 'busy'])).resolves.toBeUndefined();
+      expect(mock.bulkUpdateApiKey).toHaveBeenLastCalledWith({ ids: ['busy'] });
+
+      mock.bulkUpdateApiKey.mockClear();
+      mock.bulkUpdateApiKey.mockResolvedValue({
+        affected_count: 0,
+        errors: [error('busy', 'RULE_ALREADY_RUNNING')],
+      });
+      await expect(adapter.rotateRulesApiKey(['busy'])).rejects.toThrow('busy');
+      expect(mock.bulkUpdateApiKey).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('rotateRulesApiKey with mixed errors', () => {
+    it('keeps a permanent failure from the first pass when the busy rule then succeeds', async () => {
+      const mock = makeRulesClientMock();
+      const adapter = makeAdapter(mock);
+      const error = (id: string, code: string) => ({ id, error: { code, message: code } });
+
+      mock.bulkUpdateApiKey
+        .mockResolvedValueOnce({
+          affected_count: 0,
+          errors: [error('broken', 'INTERNAL_SERVER_ERROR'), error('busy', 'RULE_ALREADY_RUNNING')],
+        })
+        .mockResolvedValueOnce({ affected_count: 1, errors: [] });
+
+      await expect(adapter.rotateRulesApiKey(['broken', 'busy'])).rejects.toThrow('broken');
+      expect(mock.bulkUpdateApiKey).toHaveBeenLastCalledWith({ ids: ['busy'] });
     });
   });
 

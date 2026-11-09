@@ -16,6 +16,8 @@ export default createServerlessFeatureFlagTestConfig<typeof services>({
   kbnServerArgs: [
     `--feature_flags.overrides.${NIGHTSHIFT_ENABLED_FLAG}=true`,
     '--xpack.alerting_v2.enabled=true',
+    // Rules run as the space's detection service account, which is off by default on Serverless.
+    '--xpack.security.serviceAccounts.enabled=true',
     '--uiSettings.globalOverrides.alerting:v2:enabled=true',
   ],
   junit: {

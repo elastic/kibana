@@ -18,6 +18,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { getNightshiftServiceAccountName } from '@kbn/nightshift-shared';
+import { useDetectionEngineServiceAccount } from '../../data/service_accounts/use_detection_engine_service_account';
 import {
   isNightshiftSetUp,
   useInvestigatorServiceAccount,
@@ -28,6 +30,7 @@ import { SettingsSectionRow } from './settings_section';
 /** Shows whether this space is set up with the Nightshift service account, read-only. */
 export const InvestigationIdentitySection = () => {
   const status = useInvestigatorServiceAccount();
+  const detection = useDetectionEngineServiceAccount();
   const { isDeveloperMode } = useDeveloperMode();
   const isSetUp = isNightshiftSetUp(status.data);
 
@@ -105,7 +108,20 @@ export const InvestigationIdentitySection = () => {
                 id="xpack.nightshift.settings.serviceAccount.otherAccounts"
                 defaultMessage="Other Nightshift accounts: {accounts}"
                 values={{
-                  accounts: otherAccounts.map((account, index) => (
+                  accounts: [
+                    ...otherAccounts,
+                    // The detection engine reports its own account: it is bound separately.
+                    ...(detection.data
+                      ? [
+                          {
+                            kind: 'detection',
+                            name: getNightshiftServiceAccountName('detection'),
+                            id: detection.data.serviceAccountId,
+                            role: detection.data.role,
+                          },
+                        ]
+                      : []),
+                  ].map((account, index) => (
                     <React.Fragment key={account.kind}>
                       {index > 0 && ', '}
                       {renderAccount(account)} · <EuiCode>{account.role}</EuiCode>

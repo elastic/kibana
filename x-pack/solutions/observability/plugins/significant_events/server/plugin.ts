@@ -129,6 +129,7 @@ import { SIGNIFICANT_EVENT_TIERED_FEATURES } from '../common/constants';
 import { isSignificantEventsAvailable } from './routes/utils/assert_significant_events_access';
 import { SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER } from './lib/workflows/managed_workflow_owner';
 import {
+  asDetectionEngineAccount,
   assertServiceAccountActsForSpace,
   registerDetectionEngineWorkloadType,
 } from './lib/service_accounts/detection_engine_account';
@@ -271,14 +272,21 @@ export class SignificantEventsPlugin
         }),
       });
 
-      const getAlertingV2RulesClient = async () =>
-        pluginsStart.alertingVTwo.getRulesClientWithRequestInSpace(request, space, {
+      const getRulesClientFor = async (rulesRequest: KibanaRequest) =>
+        pluginsStart.alertingVTwo.getRulesClientWithRequestInSpace(rulesRequest, space, {
           app: RULE_CREATION_APP,
         });
 
       const resolveSignificantEventsAlertingContext =
         createSignificantEventsAlertingContextResolver({
-          getAlertingV2RulesClient,
+          getAlertingV2RulesClient: () => getRulesClientFor(request),
+          withAccountRulesClient: (fn) =>
+            asDetectionEngineAccount({
+              core: coreStart,
+              request,
+              spaceId: space,
+              fn: async (accountRequest) => fn(await getRulesClientFor(accountRequest)),
+            }),
           cpsEnabled,
         });
 
