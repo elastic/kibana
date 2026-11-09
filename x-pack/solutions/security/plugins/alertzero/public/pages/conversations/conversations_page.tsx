@@ -159,7 +159,7 @@ const ConversationsPageContent: React.FC = () => {
   });
 
   const dropDecided = useDropDecidedProposal(effectiveEntityFilter);
-  useAlertZeroDocTitle(QUEUE_PAGE_INFO.pageTitle);
+  useAlertZeroDocTitle();
   useAppHeadingTitle(QUEUE_PAGE_INFO.pageTitle);
   const { reportEvent } = useAlertZeroTelemetry();
 
@@ -312,8 +312,12 @@ const ConversationsPageContent: React.FC = () => {
   const assignInvestigation = useAssignInvestigation();
 
   const renderInFlightStatus = useCallback(
-    ({ id, isProposalSettling }: Investigation) => (
-      <InFlightProposalBadge proposalId={id} isProposalSettling={isProposalSettling} />
+    ({ id, isProposalSettling, isDecisionShown }: Investigation) => (
+      <InFlightProposalBadge
+        proposalId={id}
+        isProposalSettling={isProposalSettling}
+        isDecisionShown={isDecisionShown}
+      />
     ),
     []
   );

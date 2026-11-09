@@ -18,7 +18,7 @@ import type { ManifestSource, MarkdownSourceFormat, VendorApiManifest } from './
 import { isMarkdownFormat, parseManifest, serializeManifest } from './manifest';
 import { parseSpecText } from './parse_spec_text';
 import type { VendorApiLog } from './load_vendor_specs';
-import { applyOverlayToSources, readOptional } from './load_vendor_specs';
+import { applyOverlayToSources, readOptional, SILENT_LOG } from './load_vendor_specs';
 
 /** Operations listed per source before the list is cut short. */
 export const LIST_LIMIT = 200;
@@ -55,7 +55,6 @@ export interface InspectVendorApiResult {
 }
 
 const MANIFEST = 'manifest.json';
-const SILENT_LOG: VendorApiLog = { info: () => {}, warning: () => {} };
 
 const titleOf = ({ info }: OpenApiDocument): string => {
   const { title, version } = isJsonObject(info) ? info : {};

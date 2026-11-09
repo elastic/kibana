@@ -81,7 +81,7 @@ test.describe('Digital Experience sessions', { tag: DIGITAL_EXPERIENCE_TAGS }, (
     });
   });
 
-  test('opens a session with its waterfall, then goes back to the same list', async ({
+  test('opens a session with its waterfall and journey, then goes back to the same list', async ({
     page,
     pageObjects: { digitalExperience },
   }) => {
@@ -90,7 +90,9 @@ test.describe('Digital Experience sessions', { tag: DIGITAL_EXPERIENCE_TAGS }, (
 
     await test.step('summarizes the session', async () => {
       await expect(digitalExperience.sessionSummary).toContainText(DETAILED_SESSION.user);
-      await expect(page.getByTestId('digitalExperienceSessionId')).toHaveText(DETAILED_SESSION.id);
+      await expect(page.getByTestId('digitalExperienceSessionId')).toContainText(
+        DETAILED_SESSION.id
+      );
     });
 
     await test.step('draws a segment per page visit and marks the error', async () => {
@@ -100,9 +102,20 @@ test.describe('Digital Experience sessions', { tag: DIGITAL_EXPERIENCE_TAGS }, (
       await expect(digitalExperience.sessionWaterfallErrors).toHaveCount(1);
     });
 
+    await test.step('lists what happened on each page', async () => {
+      await expect(digitalExperience.sessionPageVisits).toHaveCount(DETAILED_SESSION.pages.length);
+      const cart = digitalExperience.sessionPageVisits.filter({
+        hasText: DETAILED_SESSION.pages[2],
+      });
+      await expect(cart).toHaveCount(1);
+      await expect(cart.getByTestId('digitalExperienceSessionEvent-error')).toContainText(
+        DETAILED_SESSION.errorMessage
+      );
+    });
+
     await test.step('goes back to the list with its filters and time range', async () => {
-      // The button, not the breadcrumb: serverless renders breadcrumbs in its project header.
-      // Both lead back to the same list; unit tests cover the breadcrumb's link.
+      // The header's back, not the breadcrumb: serverless renders breadcrumbs in its project
+      // header. Both lead back to the same list; unit tests cover the breadcrumb's link.
       await digitalExperience.sessionBack.click();
 
       await expect(page).toHaveURL(/hasErrors=true/);

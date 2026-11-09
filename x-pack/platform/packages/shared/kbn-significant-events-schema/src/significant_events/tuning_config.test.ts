@@ -51,14 +51,12 @@ describe('validateSignificantEventsTuningConfig', () => {
 
   it('reports NaN values', () => {
     const errors = validateSignificantEventsTuningConfig({
-      entity_filtered_ratio: NaN,
-      diverse_ratio: NaN,
       semantic_min_score: NaN,
+      rrf_rank_constant: NaN,
     });
     expect(errors).toEqual([
-      '"entity_filtered_ratio" must be a number, got NaN',
-      '"diverse_ratio" must be a number, got NaN',
       '"semantic_min_score" must be a number, got NaN',
+      '"rrf_rank_constant" must be a number, got NaN',
     ]);
   });
 
@@ -75,16 +73,6 @@ describe('validateSignificantEventsTuningConfig', () => {
   it('reports out-of-bounds values', () => {
     const errors = validateSignificantEventsTuningConfig({ [INTEGER_FIELD]: FIELD_MAX + 1 });
     expect(errors).toEqual([`"${INTEGER_FIELD}" must be between ${FIELD_MIN} and ${FIELD_MAX}`]);
-  });
-
-  it('reports cross-field ratio violation', () => {
-    const errors = validateSignificantEventsTuningConfig({
-      entity_filtered_ratio: 0.7,
-      diverse_ratio: 0.5,
-    });
-    expect(errors).toContainEqual(
-      expect.stringContaining('entity_filtered_ratio (0.7) + diverse_ratio (0.5) must be <= 1.0')
-    );
   });
 });
 
