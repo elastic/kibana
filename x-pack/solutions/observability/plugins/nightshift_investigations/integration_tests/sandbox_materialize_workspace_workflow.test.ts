@@ -54,7 +54,7 @@ const FIRST_EXECUTION_INPUTS = {
 };
 
 /** The sandbox the fixture's execution runs in, as `scopeConversationId` builds it. */
-const SCOPED_SANDBOX_ID = 'fake_space_id__conv-1';
+const SCOPED_SANDBOX_ID = 'default__conv-1';
 
 describe('sandbox materialize workspace workflow, first execution', () => {
   let fixture: NightshiftWorkflowFixture;
@@ -78,14 +78,14 @@ describe('sandbox materialize workspace workflow, first execution', () => {
   it('hands the same obtained sandbox_id to all three writers', () => {
     // Every writer resolves the session from the unscoped conversation id in the workflow's own
     // Space, so no branch can address a different workspace than obtain allocated.
-    expect(fixture.sandboxStart.getSessionForSpace).toHaveBeenCalledWith('fake_space_id', 'conv-1');
+    expect(fixture.sandboxStart.getSessionForSpace).toHaveBeenCalledWith('default', 'conv-1');
     for (const writer of [
       hydrateWikiWorkspace,
       hydrateMemoryWorkspace,
       hydrateDecisionTreeWorkspace,
     ]) {
       expect(writer).toHaveBeenCalledWith(
-        expect.objectContaining({ session: expect.anything(), spaceId: 'fake_space_id' })
+        expect.objectContaining({ session: expect.anything(), spaceId: 'default' })
       );
     }
     expect(hydrateMemoryWorkspace).toHaveBeenCalledWith(

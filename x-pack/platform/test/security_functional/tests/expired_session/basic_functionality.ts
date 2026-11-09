@@ -18,7 +18,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const deployment = getService('deployment');
   const PageObjects = getPageObjects(['security', 'common']);
 
-  describe('Basic functionality', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/304115
+  describe.skip('Basic functionality', function () {
     this.tags('includeFirefox');
 
     before(async () => {

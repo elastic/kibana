@@ -115,7 +115,7 @@ describe('agent optimize workflow, an eligible investigator round', () => {
   it('installs the reinforcement agent before running it', () => {
     expect(fixture.agentBuilder.ensure).toHaveBeenCalledWith(
       expect.objectContaining({
-        spaceId: 'fake_space_id',
+        spaceId: 'default',
         agent: expect.objectContaining({
           id: NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID,
         }),

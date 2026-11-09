@@ -7,11 +7,7 @@
 
 import { platformSignificantEventsTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type {
-  BuiltinToolDefinition,
-  StaticToolRegistration,
-  ToolAvailabilityResult,
-} from '@kbn/agent-builder-server';
+import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import { nightshiftSourceSlugField } from '@kbn/nightshift-shared';
 import { lazySchema, isoDateTime } from '@kbn/zod/v4';
@@ -21,6 +17,7 @@ import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
+import { createSignificantEventsAvailability } from '../significant_events_availability';
 import { getSourceWriteConflictMetadata } from '../../../lib/errors/source_write_conflict_error';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import {
@@ -96,31 +93,7 @@ export function createFeatureKnowledgeIndicatorTool({
         };
       },
     },
-    availability: {
-      cacheMode: 'space',
-      handler: async (): Promise<ToolAvailabilityResult> => {
-        try {
-          await assertSignificantEventsAccess({
-            server,
-            licensing: server.licensing,
-          });
-          return { status: 'available' };
-        } catch (error) {
-          if (error instanceof Error) {
-            logger.debug(error.stack ?? error.message);
-          } else {
-            logger.debug(String(error));
-          }
-          return {
-            status: 'unavailable',
-            reason:
-              error instanceof Error
-                ? error.message
-                : 'Significant events access is not available in the current context',
-          };
-        }
-      },
-    },
+    availability: createSignificantEventsAvailability({ server, logger }),
     handler: async ({ slug, expires_at, ...featureInput }, context) => {
       const { request } = context;
       let sourceId = '';
