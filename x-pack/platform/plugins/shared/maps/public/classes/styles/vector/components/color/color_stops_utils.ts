@@ -7,13 +7,7 @@
 
 import { isValidHex, euiPaletteColorBlind } from '@elastic/eui';
 import _ from 'lodash';
-
-export type StopValue = number | string | null;
-
-export interface ColorStop {
-  stop: StopValue;
-  color: string;
-}
+import type { ColorStop, StopValue } from '../../../../../../common/descriptor_types';
 
 const DEFAULT_CUSTOM_PALETTE = euiPaletteColorBlind({ rotations: 3 });
 
@@ -58,7 +52,7 @@ function addRow(colorStops: ColorStop[], index: number, nextValue: StopValue): C
   const newRow = {
     stop: nextValue,
     color: DEFAULT_CUSTOM_PALETTE[nextColorIndex],
-  };
+  } as ColorStop;
   return [...colorStops.slice(0, index + 1), newRow, ...colorStops.slice(index + 1)];
 }
 

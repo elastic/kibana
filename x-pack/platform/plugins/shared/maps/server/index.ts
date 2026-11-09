@@ -61,6 +61,7 @@ export type {
   //
   Category,
   CategoryColorStop,
+  ColorStop,
   ColorDynamicOptions,
   ColorStaticOptions,
   ColorDynamicStylePropertyDescriptor,
@@ -82,6 +83,7 @@ export type {
   LabelStylePropertyDescriptor,
   LabelZoomRangeStylePropertyDescriptor,
   OrdinalColorStop,
+  StopValue,
   OrientationDynamicOptions,
   OrientationStaticOptions,
   OrientationStylePropertyDescriptor,

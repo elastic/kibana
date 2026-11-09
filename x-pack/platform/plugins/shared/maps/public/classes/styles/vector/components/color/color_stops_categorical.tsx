@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import type { ColorStop, StopValue } from './color_stops_utils';
+import type { ColorStop, StopValue } from '../../../../../../common/descriptor_types';
 import {
   addCategoricalRow,
   isCategoricalStopsInvalid,

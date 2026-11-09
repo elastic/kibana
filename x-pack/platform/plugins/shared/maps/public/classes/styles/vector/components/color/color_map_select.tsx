@@ -23,7 +23,7 @@ import type {
   OrdinalColorStop,
 } from '../../../../../../common/descriptor_types';
 import type { DynamicColorProperty } from '../../properties/dynamic_color_property';
-import type { ColorStop } from './color_stops_utils';
+import type { ColorStop } from '../../../../../../common/descriptor_types';
 import { ColorStopsCategorical } from './color_stops_categorical';
 import { CATEGORICAL_COLOR_PALETTES, NUMERICAL_COLOR_PALETTES } from '../../../color_palettes';
 import { i18n } from '@kbn/i18n';

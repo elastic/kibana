@@ -16,7 +16,7 @@ import {
   EuiFormRow,
   EuiToolTip,
 } from '@elastic/eui';
-import type { ColorStop, StopValue } from './color_stops_utils';
+import type { ColorStop, StopValue } from '../../../../../../common/descriptor_types';
 import { removeRow, isColorInvalid } from './color_stops_utils';
 import { i18n } from '@kbn/i18n';
 import { MbValidatedColorPicker } from './mb_validated_color_picker';
