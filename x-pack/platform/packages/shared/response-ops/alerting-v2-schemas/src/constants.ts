@@ -113,6 +113,9 @@ export const MAX_ARTIFACT_DATA_LENGTH = MAX_ARTIFACT_DATA_BYTES;
 /** Maximum number of destinations per action policy. */
 export const ACTION_POLICY_MAX_DESTINATIONS = 10;
 
+/** Maximum number of alerts in a test notification payload. */
+export const ACTION_POLICY_TEST_MAX_ALERTS = 100;
+
 /** Maximum number of items any list endpoint returns per page. */
 export const MAX_PER_PAGE = 100;
 

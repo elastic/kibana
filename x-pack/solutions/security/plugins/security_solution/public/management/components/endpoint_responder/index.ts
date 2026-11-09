@@ -6,7 +6,7 @@
  */
 
 export { getEndpointConsoleCommands } from './lib/console_commands_definition';
-export { ActionLogButton } from './components/action_log_button';
+export { ResponseActionsHistoryAppMenu } from './components/response_actions_history_app_menu';
 export { HeaderEndpointInfo } from './components/header_info/endpoint/header_endpoint_info';
 export { AgentInfo } from './components/header_info/agent_info/agent_info';
 export { OfflineCallout } from './components/offline_callout';

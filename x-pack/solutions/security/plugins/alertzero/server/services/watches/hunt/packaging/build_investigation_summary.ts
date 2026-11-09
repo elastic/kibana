@@ -6,6 +6,7 @@
  */
 
 import { techniqueLabel } from './coverage_text';
+import { describeGaps, gapCountPhrase, type DedupedCoverageGaps } from './dedupe_coverage_gaps';
 import type { ReportHuntContext } from './load_report_hunt_context';
 import { toCoverageBehaviors } from './select_coverage_behavior';
 import type { CoordinatorInputs, CurrentRunState, DecidePackageReportResult } from './types';
@@ -216,14 +217,27 @@ export const buildCleanInvestigationSummary = ({
   inputs,
   reportContext,
   dismissHold = 'none',
+  retired = false,
+  unsearched,
 }: {
   inputs: CoordinatorInputs;
   reportContext?: ReportHuntContext;
   dismissHold?: 'none' | 'open_proposal' | 'check_failed';
+  /** The hunt retired the report after a gap no rerun can close, so "nothing matched" is not the whole story. */
+  retired?: boolean;
+  unsearched?: DedupedCoverageGaps;
 }): string => {
   const executed = toCoverageBehaviors(inputs.behaviors ?? []);
+  const notSearched = unsearched ? describeGaps(unsearched) : undefined;
+  const outcome = retired
+    ? `Outcome: no confirmed hits, but ${
+        unsearched && unsearched.gaps.length > 0
+          ? `${gapCountPhrase(unsearched)} left part of the report unsearched`
+          : 'part of the report could not be searched'
+      }; the report is retired without a full search.`
+    : 'Outcome: no confirmed hits. Nothing in this environment matched the report at the confirming-index bar.';
   const sections = [
-    'Outcome: no confirmed hits. Nothing in this environment matched the report at the confirming-index bar.',
+    outcome,
     ...(reportContext?.title ? [`Report: ${reportContext.title}`] : []),
     ...(executed.length > 0
       ? [
@@ -239,6 +253,7 @@ export const buildCleanInvestigationSummary = ({
             .join(', ')}`,
         ]
       : []),
+    ...(retired && notSearched ? [`Not searched: ${notSearched}`] : []),
     packagingLine({
       decided: { dismiss: true, proposals: [] },
       mintSuppression: 'none',

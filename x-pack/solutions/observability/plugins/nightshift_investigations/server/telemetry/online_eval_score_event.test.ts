@@ -21,6 +21,32 @@ const results: EvaluateResult[] = [
       { name: 'accuracy', score: 0.75, label: 'MOSTLY_CORRECT', explanation: 'x'.repeat(4000) },
       { name: 'evidence', score: null },
     ],
+    usage: {
+      input_tokens: 1200,
+      cached_input_tokens: 800,
+      output_tokens: 300,
+      reasoning_tokens: 200,
+      llm_calls: 2,
+      llm_calls_without_usage: 0,
+      calls: [
+        {
+          status: 'ok',
+          model: 'gpt-5',
+          input_tokens: 600,
+          cached_input_tokens: 400,
+          output_tokens: 150,
+          reasoning_tokens: 100,
+        },
+        {
+          status: 'ok',
+          model: 'gpt-5',
+          input_tokens: 600,
+          cached_input_tokens: 400,
+          output_tokens: 150,
+          reasoning_tokens: 100,
+        },
+      ],
+    },
   },
   {
     status: 'error',
@@ -52,6 +78,18 @@ describe('onlineEvalScoreEvent schema', () => {
   it.each([true, false])('accepts a built event with explanations included: %s', (include) => {
     const analytics = createRegisteredAnalytics();
     const event = buildOnlineEvalScoreEvent({ metadata, results, includeExplanations: include });
+
+    expect(() => analytics.reportEvent(NIGHTSHIFT_ONLINE_EVAL_SCORE_EVENT, event)).not.toThrow();
+  });
+
+  it('accepts the event of a failed evaluation, whose errors carry no evaluator version', () => {
+    const analytics = createRegisteredAnalytics();
+    const event = buildOnlineEvalScoreEvent({
+      metadata,
+      results: [],
+      failedEvaluators: [{ name: 'rca_quality' }],
+      includeExplanations: false,
+    });
 
     expect(() => analytics.reportEvent(NIGHTSHIFT_ONLINE_EVAL_SCORE_EVENT, event)).not.toThrow();
   });

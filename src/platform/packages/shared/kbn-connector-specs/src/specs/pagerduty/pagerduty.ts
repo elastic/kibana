@@ -289,7 +289,7 @@ export const PagerdutyConnector: ConnectorSpec = {
         const response = await ctx.client.get(`${PAGERDUTY_REST_API_BASE_URL}/services`, {
           params,
           headers: { Accept: PD_ACCEPT_HEADER },
-          paramsSerializer: { indexes: null },
+          paramsSerializer: { indexes: false },
         });
         return response.data;
       },

@@ -13,12 +13,12 @@ apiTest.describe(
   'Get SLOs',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    apiTest.beforeAll(async ({ sloHostsDataForge }) => {
-      await sloHostsDataForge.setup();
+    apiTest.beforeAll(async ({ apiServices }) => {
+      await apiServices.slo.deleteAllSLOs();
     });
 
-    apiTest.afterAll(async ({ sloHostsDataForge }) => {
-      await sloHostsDataForge.teardown();
+    apiTest.afterAll(async ({ apiServices }) => {
+      await apiServices.slo.deleteAllSLOs();
     });
 
     apiTest('get SLO by id', async ({ apiClient, requestAuth }) => {

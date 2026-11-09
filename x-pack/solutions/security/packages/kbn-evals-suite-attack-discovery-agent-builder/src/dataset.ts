@@ -136,8 +136,13 @@ export const goldenPathExamples: AttackDiscoveryAgentBuilderExample[] = [
         'platform.core.execute_esql',
       ],
       expectedWorkflowStages: [],
+      // No alerts are seeded, so the product short-circuits before generation
+      // and reports `alerts_context_count: 0`; an agent that skips the AD tool
+      // reports null. Both are correct, so the passed count is left unscored
+      // (key ABSENT, not `null`) and a run that pushed alerts through the
+      // pipeline is caught by the forbidden stages instead.
+      forbiddenWorkflowStages: ['generation', 'validation'],
       expectedRetrievedAlertCount: null,
-      expectedPassedAlertCount: null,
     },
     metadata: {
       alertCount: missingAlertRetrievalFixture.alertCount,

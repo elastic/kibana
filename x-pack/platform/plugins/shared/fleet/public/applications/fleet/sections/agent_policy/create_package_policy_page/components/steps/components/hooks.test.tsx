@@ -119,6 +119,7 @@ describe('useOutputs', () => {
     const testRenderer = createFleetTestRendererMock();
     mockedUseLicence.mockReturnValue({
       hasAtLeast: () => true,
+      getLicenseInformation: () => ({ isAvailable: true }),
     } as unknown as LicenseService);
     mockApiCallsWithOutputs(testRenderer.startServices.http);
 
@@ -137,6 +138,7 @@ describe('useOutputs', () => {
     const testRenderer = createFleetTestRendererMock();
     mockedUseLicence.mockReturnValue({
       hasAtLeast: () => true,
+      getLicenseInformation: () => ({ isAvailable: true }),
     } as unknown as LicenseService);
     mockApiCallsWithOnlyInternalOutputs(testRenderer.startServices.http);
 
@@ -149,11 +151,51 @@ describe('useOutputs', () => {
     expect(result.current.allowedOutputs).toHaveLength(0);
   });
 
+  describe('isLicenseKnown', () => {
+    const renderWithLicense = (license: Partial<LicenseService>) => {
+      const testRenderer = createFleetTestRendererMock();
+      mockedUseLicence.mockReturnValue(license as unknown as LicenseService);
+      mockApiCallsWithOutputs(testRenderer.startServices.http);
+
+      return testRenderer.renderHook(() => useOutputs(packagePolicy, 'test-package'));
+    };
+
+    it('is true when the license is below the one required', () => {
+      const { result } = renderWithLicense({
+        hasAtLeast: () => false,
+        getLicenseInformation: () => ({ isAvailable: true } as any),
+      });
+
+      expect(result.current.canUseOutputPerIntegration).toBe(false);
+      expect(result.current.isLicenseKnown).toBe(true);
+    });
+
+    it('is false before the license is received', () => {
+      const { result } = renderWithLicense({
+        hasAtLeast: () => undefined as any,
+        getLicenseInformation: () => null,
+      });
+
+      expect(result.current.canUseOutputPerIntegration).toBeFalsy();
+      expect(result.current.isLicenseKnown).toBe(false);
+    });
+
+    it('is false when the license is unavailable', () => {
+      const { result } = renderWithLicense({
+        hasAtLeast: () => false,
+        getLicenseInformation: () => ({ isAvailable: false } as any),
+      });
+
+      expect(result.current.isLicenseKnown).toBe(false);
+    });
+  });
+
   describe('inheritedOutputName', () => {
     const renderUseOutputs = (agentPolicies?: Array<{ data_output_id?: string | null }>) => {
       const testRenderer = createFleetTestRendererMock();
       mockedUseLicence.mockReturnValue({
         hasAtLeast: () => true,
+        getLicenseInformation: () => ({ isAvailable: true }),
       } as unknown as LicenseService);
       mockApiCallsWithOutputs(testRenderer.startServices.http);
 
@@ -347,6 +389,58 @@ describe('useVarGroupSelections', () => {
       expect(mockOnSelectionsChange).toHaveBeenCalledWith({
         var_group_selections: { auth_method: 'api_key' },
       });
+    });
+
+    it('should apply policy effects for the default selection on mount when packagePolicy is provided', () => {
+      // Agentless default is the provider option; its support-flag var starts undefined
+      // on a new policy and must be set by the same effects a user selection applies.
+      const providerVarGroups: RegistryVarGroup[] = [
+        {
+          name: 'credential_type',
+          title: 'Setup Access',
+          selector_title: 'Preferred method',
+          required: true,
+          options: [
+            {
+              name: 'identity_federation',
+              title: 'Identity Federation',
+              vars: ['role_arn', 'supports_identity_federation'],
+              provider: 'aws',
+              hide_in_deployment_modes: ['default'],
+            },
+            {
+              name: 'direct_access_key',
+              title: 'Direct Access Keys',
+              vars: ['access_key_id', 'secret_access_key'],
+            },
+          ],
+        },
+      ];
+
+      renderHook(() =>
+        useVarGroupSelections({
+          varGroups: providerVarGroups,
+          savedSelections: undefined,
+          isAgentlessEnabled: true,
+          onSelectionsChange: mockOnSelectionsChange,
+          packagePolicy: {
+            vars: {
+              role_arn: { type: 'text', value: undefined },
+              supports_identity_federation: { type: 'bool', value: undefined },
+            },
+          } as any,
+        })
+      );
+
+      expect(mockOnSelectionsChange).toHaveBeenCalledWith(
+        expect.objectContaining({
+          var_group_selections: { credential_type: 'identity_federation' },
+          supports_cloud_connector: true,
+          vars: expect.objectContaining({
+            supports_identity_federation: { type: 'bool', value: true },
+          }),
+        })
+      );
     });
 
     it('should not call onSelectionsChange when savedSelections is already set', () => {

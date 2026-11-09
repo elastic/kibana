@@ -12,7 +12,6 @@ export { createCertificateAuthority } from './src/server/certificate_authority';
 export type { CertificateAuthority, CertificateKeyPair } from './src/server/certificate_authority';
 export { createEmulatorProxy } from './src/server/create_emulator_proxy';
 export type { EmulatorProxy, EmulatorProxyOptions } from './src/server/create_emulator_proxy';
-export { sampleBoundaryResponse, sampleResponse } from './src/engine/sample_response';
 export { sampleJsonSchema } from './src/engine/sample_schema';
 export type { SampleJsonSchemaOptions } from './src/engine/sample_schema';
 export type {
@@ -53,6 +52,7 @@ export type {
   NamedOperationRef,
   ProtocolExchange,
   Responder,
+  ResponderContext,
   Violation,
 } from './src/contract/types';
 export {
@@ -68,8 +68,14 @@ export type {
 } from './src/markdown';
 export { applyOverlay, InvalidOverlayError, JsonPathError } from './src/overlay';
 export type { OverlayAction, OverlayDocument, OverlayFinding, OverlayResult } from './src/overlay';
-export { convertSmithy, isSmithyModel } from './src/smithy';
-export type { ConvertSmithyOptions, SmithyModel } from './src/smithy';
+export {
+  AWS_JSON_EXTENSION,
+  convertSmithy,
+  isAwsJsonDocument,
+  isSmithyModel,
+  toAwsJsonDocument,
+} from './src/smithy';
+export type { AwsJsonServiceInfo, ConvertSmithyOptions, SmithyModel } from './src/smithy';
 export {
   convertDiscovery,
   convertSwagger2,
