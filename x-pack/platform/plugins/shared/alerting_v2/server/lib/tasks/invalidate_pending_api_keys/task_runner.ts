@@ -8,10 +8,8 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { Logger as BaseLogger } from '@kbn/core-di';
 import { CoreStart } from '@kbn/core-di-server';
-import { PluginStart } from '@kbn/core-di';
 import type { Logger } from '@kbn/core/server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { RunContext, RunResult } from '@kbn/task-manager-plugin/server/task';
 import { runInvalidate } from '@kbn/task-manager-plugin/server';
 import { inject, injectable } from 'inversify';
@@ -24,7 +22,6 @@ import { ConfigService } from '../../services/config_service/config_service';
 import { ApiKeyServiceSavedObjectsClientToken } from '../../services/api_key_service/tokens';
 import { API_KEY_PENDING_INVALIDATION_TYPE } from '../../../saved_objects';
 import type { PluginConfig } from '../../../config';
-import type { AlertingServerStartDependencies } from '../../../types';
 import type { LatestTaskStateSchema } from './task_state';
 
 type TaskRunParams = Pick<RunContext, 'taskInstance' | 'signal'>;
@@ -40,8 +37,6 @@ export class ApiKeyInvalidationTaskRunner {
     @inject(ApiKeyServiceSavedObjectsClientToken)
     private readonly savedObjectsClient: SavedObjectsClientContract,
     @inject(CoreStart('security')) private readonly securityCore: SecurityServiceStart,
-    @inject(PluginStart<AlertingServerStartDependencies['security']>('security'))
-    private readonly security: SecurityPluginStart,
     @inject(ConfigService) configService: ConfigService
   ) {
     this.taskConfig = configService.get('invalidateApiKeysTask');
@@ -57,7 +52,7 @@ export class ApiKeyInvalidationTaskRunner {
 
     try {
       const result = await runInvalidate({
-        invalidateApiKeyFn: this.security?.authc.apiKeys.invalidateAsInternalUser,
+        invalidateApiKeyFn: this.securityCore.authc.apiKeys.invalidateAsInternalUser,
         invalidateUiamApiKeyFn: this.securityCore.authc.apiKeys.uiam?.invalidate,
         logger: this.coreLogger,
         missingApiKeyRetries,

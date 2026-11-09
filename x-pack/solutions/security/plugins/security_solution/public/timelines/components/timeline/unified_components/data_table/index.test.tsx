@@ -22,16 +22,12 @@ import {
 import * as timelineActions from '../../../../store/actions';
 import { defaultUdtHeaders } from '../../body/column_headers/default_headers';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
-import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../../../../flyout_v2/use_flyout_api.mock';
 import { PageScope } from '../../../../../data_view_manager/constants';
 import { SECURITY_CELL_ACTIONS_DETAILS_FLYOUT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { useOpenFlyout } from '../../../../../flyout_v2/shared/hooks/use_open_flyout';
 
-jest.mock('../../../../../common/hooks/use_is_new_flyout_enabled', () => ({
-  useIsNewFlyoutEnabled: jest.fn().mockReturnValue(false),
-}));
 jest.mock('../../../../../flyout_v2/use_flyout_api');
 jest.mock('../../../../../flyout_v2/shared/hooks/use_open_flyout');
 jest.mock('react-router-dom', () => ({
@@ -46,7 +42,6 @@ const onFieldEditedMock = jest.fn();
 const refetchMock = jest.fn();
 const onFetchMoreRecordsMock = jest.fn();
 
-const openFlyoutMock = jest.fn();
 const mockOpenSystemFlyout = jest.fn();
 const mockUiSettingsGet = jest.fn().mockReturnValue(false);
 const mockPaginatedDocumentFlyout = jest.fn((_props?: unknown) => (
@@ -158,11 +153,9 @@ describe('unified data table', () => {
 
   beforeEach(() => {
     (useExpandableFlyoutApi as jest.Mock).mockReturnValue({
-      openFlyout: openFlyoutMock,
       closeFlyout: jest.fn(),
     });
     mockUiSettingsGet.mockReturnValue(false);
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
     flyoutApi = createFlyoutApiMock();
     jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
     jest
@@ -184,33 +177,8 @@ describe('unified data table', () => {
   );
 
   it(
-    'opens attack flyout when expanded row is an attack discovery alert',
+    'opens the paginated timeline document flyout when row is not an attack',
     async () => {
-      render(<TestComponent events={mockAttackTimelineData} />);
-      expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
-
-      fireEvent.click(screen.getByTestId('docTableExpandToggleColumn'));
-
-      await waitFor(() => {
-        expect(openFlyoutMock).toHaveBeenCalledWith({
-          right: {
-            id: 'attack-details-right',
-            params: {
-              attackId: 'attack-1',
-              indexName: 'attack-index',
-            },
-          },
-        });
-      });
-    },
-    SPECIAL_TEST_TIMEOUT
-  );
-
-  it(
-    'opens the paginated timeline document flyout when enableNewFlyout setting is enabled and row is not an attack',
-    async () => {
-      jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
-
       render(<TestComponent />);
       expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
 
@@ -240,8 +208,6 @@ describe('unified data table', () => {
   it(
     'resolves the paginated document index from the row rather than its ECS fields',
     async () => {
-      jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
-
       // The row carries a concrete `_index`, while ECS — which is optional and often
       // absent — does not. `DocumentFlyoutWrapper` skips the search on a null index, so
       // resolving from ECS would leave the flyout stuck on its loading state.
@@ -274,8 +240,6 @@ describe('unified data table', () => {
   it(
     'updates the expanded row icon when the document flyout paginates',
     async () => {
-      jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
-
       render(<TestComponent />);
       expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
 
@@ -303,8 +267,6 @@ describe('unified data table', () => {
   it(
     'routes to the attack flyout instead of reopening a document flyout when pagination lands on an attack row',
     async () => {
-      jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
-
       render(<TestComponent events={[mockTimelineData[0], mockAttackTimelineData[0]]} />);
       expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
 
@@ -336,10 +298,8 @@ describe('unified data table', () => {
   );
 
   it(
-    'opens the new document flyout with a cell-action renderer bound to the timeline scope',
+    'opens the document flyout with a cell-action renderer bound to the timeline scope',
     async () => {
-      jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
-
       render(<TestComponent />);
       expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
 
@@ -373,10 +333,8 @@ describe('unified data table', () => {
   );
 
   it(
-    'opens the new attack flyout when enableNewFlyout setting is enabled and row is an attack discovery alert',
+    'opens the attack flyout when row is an attack discovery alert',
     async () => {
-      jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
-
       render(<TestComponent events={mockAttackTimelineData} />);
       expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
 

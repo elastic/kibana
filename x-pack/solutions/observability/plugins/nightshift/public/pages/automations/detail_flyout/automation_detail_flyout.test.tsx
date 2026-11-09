@@ -85,13 +85,13 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
     canManage = true,
     usedToday = 0,
     editDisabledReason,
-    currentAutomation = automation,
+    selectedAutomation = automation,
     isRunPending = false,
   }: {
     canManage?: boolean;
     usedToday?: number;
     editDisabledReason?: string;
-    currentAutomation?: Automation;
+    selectedAutomation?: Automation;
     isRunPending?: boolean;
   } = {}) => {
     const history = createMemoryHistory({ initialEntries: ['/automations/automation-1'] });
@@ -99,8 +99,8 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
       <I18nProvider>
         <Router history={history}>
           <AutomationDetailFlyout
-            automations={[automation]}
-            automation={currentAutomation}
+            automations={[selectedAutomation]}
+            automation={selectedAutomation}
             canManage={canManage}
             editDisabledReason={editDisabledReason}
             usedToday={usedToday}
@@ -129,7 +129,7 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
       trigger: { rows: [{ kind: 'schedule', schedulePreset: 'hourly' }] },
       execution: { promptTemplate: 'Review health.' },
     };
-    const history = renderFlyout({ currentAutomation: scheduled });
+    const history = renderFlyout({ selectedAutomation: scheduled });
     fireEvent.click(screen.getByTestId('automationActionsButton'));
     fireEvent.click(screen.getByTestId('automationRunButton'));
     expect(onRun).toHaveBeenCalledWith(scheduled);
@@ -142,7 +142,7 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
 
   it('disables Run in Actions for a disabled automation and explains why', async () => {
     renderFlyout({
-      currentAutomation: {
+      selectedAutomation: {
         ...automation,
         isEnabled: false,
         trigger: { rows: [{ kind: 'schedule', schedulePreset: 'hourly' }] },
@@ -163,6 +163,49 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
     renderFlyout();
     fireEvent.click(screen.getByTestId('automationActionsButton'));
     expect(screen.getByTestId('automationRunButton')).toBeDisabled();
+  });
+
+  it('preserves a saved severity and blocks edits while its source becomes incompatible', async () => {
+    renderFlyout({
+      selectedAutomation: {
+        ...automation,
+        trigger: { rows: [{ kind: 'alert', alertSources: ['classic'], severities: ['major'] }] },
+      },
+    });
+    startEditing();
+    renameTo('Renamed triage');
+    const sources = screen.getByTestId('automationAlertSources');
+    fireEvent.click(sources);
+    fireEvent.click(await screen.findByText('All except these'));
+    fireEvent.click(sources);
+    expect(screen.getByTestId('automationAlertSeverity')).toHaveTextContent('Major');
+    expect(screen.getByRole('alert')).toHaveTextContent('Major cannot match');
+    expect(screen.getByTestId('automationSaveButton')).toBeDisabled();
+    fireEvent.click(screen.getByTestId('automationSaveButton'));
+    expect(mutate).not.toHaveBeenCalled();
+
+    fireEvent.click(sources);
+    fireEvent.click(await screen.findByText('Only these sources'));
+    fireEvent.click(sources);
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(screen.getByTestId('automationSaveButton')).toBeEnabled();
+    fireEvent.click(screen.getByTestId('automationSaveButton'));
+    expect(mutate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: expect.objectContaining({
+          trigger: {
+            rows: [
+              {
+                kind: 'alert',
+                alertSources: ['classic'],
+                severities: ['major'],
+              },
+            ],
+          },
+        }),
+      }),
+      expect.any(Object)
+    );
   });
 
   it('hides the unsaved limit callout when a limited automation is switched to unlimited', () => {

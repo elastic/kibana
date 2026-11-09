@@ -7,12 +7,10 @@
 
 import { lazySchema, z } from '@kbn/zod/v4';
 import { errorResponseSchema, suggestUserProfilesResponseSchema } from '@kbn/alerting-v2-schemas';
-import { PluginStart } from '@kbn/core-di';
 import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
-import type { UserProfile } from '@kbn/core-user-profile-common';
-import type { AlertingServerStartDependencies } from '../../types';
+import { UserService } from '../../lib/services/user_service/user_service';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
@@ -42,30 +40,6 @@ const suggestUserProfilesBodySchema = lazySchema(() =>
 type SuggestUserProfilesBody = z.infer<typeof suggestUserProfilesBodySchema>;
 
 /**
- * Maps security user profiles to the alerting v2 suggestion response: picks the
- * safe user fields and, when present, the avatar — renaming the security
- * service's `imageUrl` to the API contract's `image_url`.
- */
-export const toSuggestUserProfilesResponse = (
-  profiles: UserProfile[]
-): z.infer<typeof suggestUserProfilesResponseSchema> =>
-  profiles.map(({ uid, user, data }) => ({
-    uid,
-    user: {
-      username: user.username,
-      full_name: user.full_name,
-      email: user.email,
-    },
-    ...(data?.avatar && {
-      avatar: {
-        initials: data.avatar.initials,
-        color: data.avatar.color,
-        image_url: data.avatar.imageUrl,
-      },
-    }),
-  }));
-
-/**
  *
  * There is no generic platform/browser endpoint for “suggest user profiles” that we can safely call directly.
  *
@@ -79,10 +53,10 @@ export const toSuggestUserProfilesResponse = (
  *
  * So we need an app route that:
  * - accepts only safe inputs (name, size, dataPath — same shape as browser suggest params)
- * - calls security.userProfiles.suggest(...)
+ * - calls Core's userProfile.suggest(...)
  * - enforces authz (read alert episodes) and internal access
  *
- * So the new route is basically the secure “adapter” between UI search and the security suggest service.
+ * So the new route is basically the secure “adapter” between UI search and Core's user-profile suggest service.
  **/
 @injectable()
 export class SuggestUserProfilesRoute extends BaseAlertingRoute {
@@ -120,15 +94,15 @@ export class SuggestUserProfilesRoute extends BaseAlertingRoute {
     @inject(AlertingRouteContext) ctx: AlertingRouteContext,
     @inject(Request)
     private readonly request: KibanaRequest<unknown, unknown, SuggestUserProfilesBody>,
-    @inject(PluginStart<AlertingServerStartDependencies['security']>('security'))
-    private readonly securityStart: AlertingServerStartDependencies['security']
+    @inject(UserService)
+    private readonly userService: UserService
   ) {
     super(ctx);
   }
 
   protected async execute() {
     const { name, size } = this.request.body;
-    const profiles: UserProfile[] = await this.securityStart.userProfiles.suggest({
+    const body = await this.userService.suggestUsers({
       // An empty name must reach Elasticsearch as "no filter" so the picker can
       // show an initial list of profiles before the user types anything.
       name: name || undefined,
@@ -136,6 +110,6 @@ export class SuggestUserProfilesRoute extends BaseAlertingRoute {
       dataPath: 'avatar',
     });
 
-    return this.ctx.response.ok({ body: toSuggestUserProfilesResponse(profiles) });
+    return this.ctx.response.ok({ body });
   }
 }
