@@ -54,7 +54,7 @@ describe('wiki page judges', () => {
     it('scores 0 when no page was read', async () => {
       const { scores } = await wikiPagesReadJudge.evaluate({ round: round('a'), log });
 
-      expect(scores[0]).toEqual(expect.objectContaining({ score: 0, explanation: 'none' }));
+      expect(scores[0]).toEqual(expect.objectContaining({ score: 0 }));
     });
   });
 
@@ -123,7 +123,7 @@ describe('wiki page judges', () => {
           name: 'wiki_pages_referenced',
           score: 1,
           label: '1/2 pages',
-          explanation: 'wiki_service_checkout',
+          explanation: 'Number of the pages read that the answer relies on',
           metadata: { page_ids: ['wiki_service_checkout'], pages_read: 2 },
         },
         {

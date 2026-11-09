@@ -19,4 +19,3 @@ For rca_temporal_proximity: omit root_cause_timestamp_minutes_before_onset when 
 were identified in the investigation.
 
 Write every reasoning field as one short sentence in your own words. Summarise what you found; do not quote log lines, query results, or messages from the investigation.
-Refer to hosts and people by their role (for example "a host", "an operator"), not by name. You may name the affected services. Never write host names, IP addresses, user or person names, email addresses, URLs, file paths, account, resource or request IDs, API keys or tokens, even when they appear in the investigation.

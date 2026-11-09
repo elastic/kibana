@@ -51,4 +51,3 @@ materially_wrong_claim=true without naming the offending claim.
 First decide ground_truth_has_verified_cause: true only when the confirmed root cause text states a specific verified cause. Set it false when it says the cause is unresolved, unknown, not confirmed, or only contradicts the report without naming a cause. When it is false, answer every other field with false, 0 or an empty string.
 
 Write every reasoning field as one short sentence in your own words. Summarise what you found; do not quote log lines, query results, or messages from the investigation.
-Refer to hosts and people by their role (for example "a host", "an operator"), not by name. You may name the affected services. Never write host names, IP addresses, user or person names, email addresses, URLs, file paths, account, resource or request IDs, API keys or tokens, even when they appear in the investigation.
