@@ -9,13 +9,17 @@
 
 import React from 'react';
 import { createPortal } from 'react-dom';
-import { render, screen } from '@testing-library/react';
-import { createTable, getCoreRowModel } from '@tanstack/react-table';
+import { render, renderHook, screen } from '@testing-library/react';
+import { useTable } from '@tanstack/react-table';
 import { CascadeRowPrimitive } from './cascade_row';
 import type { CascadeRowPrimitiveProps } from '../types';
 import { DataCascadeProvider } from '../../../store_provider';
 import type { MockGroupData } from '../../../__fixtures__/types';
 import { useStickyHeaderExtensionPoint } from './components/cascade_row_header_extension_point';
+import {
+  cascadeTableFeatures,
+  type CascadeTableFeatures,
+} from '../../../lib/core/table/table_features';
 
 jest.mock('./components/cascade_row_header', () => ({
   CascadeRowHeaderPrimitive: () => <div>Group heading</div>,
@@ -32,15 +36,17 @@ const ExtensionContent = () => {
 type RowProps = CascadeRowPrimitiveProps<MockGroupData, MockGroupData>;
 
 const createRowProps = (): RowProps => {
-  const table = createTable<MockGroupData>({
-    data: [{ id: 'friday', count: 2, group: 'Friday' }],
-    columns: [{ accessorKey: 'group', cell: ExtensionContent }],
-    getCoreRowModel: getCoreRowModel(),
-    state: { expanded: true, columnPinning: { left: [], right: [] } },
-    onStateChange: jest.fn(),
-    renderFallbackValue: null,
-  });
-  const rowInstance = table.getRowModel().rows[0];
+  const { result } = renderHook(() =>
+    useTable<CascadeTableFeatures, MockGroupData>({
+      features: cascadeTableFeatures,
+      data: [{ id: 'friday', count: 2, group: 'Friday' }],
+      columns: [{ accessorKey: 'group', cell: ExtensionContent }],
+      state: { expanded: true },
+      renderFallbackValue: null,
+    })
+  );
+
+  const rowInstance = result.current.getRowModel().rows[0];
   return {
     rowInstance,
     size: 's',
