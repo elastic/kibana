@@ -647,7 +647,7 @@ function StreamsCanvasInner() {
       }
       if (node.type === ROUTING_NODE_TYPE && !event.shiftKey) {
         event.preventDefault();
-        openRoutingFlyout({ kind: 'pipeline', pipelineId: node.data.pipelineId });
+        openRoutingFlyout({ kind: 'pipeline', pipelineId: node.data.pipelineId }, readOnly);
         return;
       }
       if (node.type === SOURCE_NODE_TYPE && node.data.sourceId && !event.shiftKey) {
@@ -660,7 +660,7 @@ function StreamsCanvasInner() {
         openDestinationFlyout(node.data.destinationId);
       }
     },
-    [openDestinationFlyout, openProcessingFlyout, openRoutingFlyout, openSourceFlyout]
+    [openDestinationFlyout, openProcessingFlyout, openRoutingFlyout, openSourceFlyout, readOnly]
   );
 
   const reopenContextMenu = useCallback(
@@ -728,7 +728,7 @@ function StreamsCanvasInner() {
         openProcessingFlyout(selectedNode.data.ref);
       }
       if (selectedNode.type === ROUTING_NODE_TYPE) {
-        openRoutingFlyout({ kind: 'pipeline', pipelineId: selectedNode.data.pipelineId });
+        openRoutingFlyout({ kind: 'pipeline', pipelineId: selectedNode.data.pipelineId }, readOnly);
       }
       if (selectedNode.type === SOURCE_NODE_TYPE && selectedNode.data.sourceId) {
         openSourceFlyout(selectedNode.data.sourceId);
@@ -737,7 +737,14 @@ function StreamsCanvasInner() {
         openDestinationFlyout(selectedNode.data.destinationId);
       }
     }
-  }, [nodes, openDestinationFlyout, openProcessingFlyout, openRoutingFlyout, openSourceFlyout]);
+  }, [
+    nodes,
+    openDestinationFlyout,
+    openProcessingFlyout,
+    openRoutingFlyout,
+    openSourceFlyout,
+    readOnly,
+  ]);
 
   useCanvasKeyboardShortcuts({
     onUndo: readOnly ? noop : handleUndo,

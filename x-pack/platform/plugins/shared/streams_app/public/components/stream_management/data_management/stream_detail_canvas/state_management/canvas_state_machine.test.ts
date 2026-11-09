@@ -339,6 +339,26 @@ describe('canvas routing flyout', () => {
     ]);
   });
 
+  it('opens the rules read-only for a user who cannot manage the stream, staging nothing', async () => {
+    const { canvas } = startCanvas(async (unit) => unit);
+    await waitForUnitReady(canvas);
+    const ref = openRouting(canvas);
+    ref.send({ type: 'flyout.save' });
+    const staged = canvas.getSnapshot().context.nextUnit;
+
+    canvas.send({
+      type: 'routing.open',
+      target: { kind: 'pipeline', pipelineId: 'p-src' },
+      readOnly: true,
+    });
+    const viewRef = canvas.getSnapshot().context.routingFlyout?.ref;
+    expect(viewRef?.getSnapshot().context).toMatchObject({ editable: false, readOnly: true });
+    viewRef?.send({ type: 'rule.update', key: 'rule-0', changes: { action: 'copy' } });
+    viewRef?.send({ type: 'flyout.save' });
+
+    expect(canvas.getSnapshot().context.nextUnit).toBe(staged);
+  });
+
   it('puts a routing node on a rule line through a new child pipeline', async () => {
     const routed = loadedUnit();
     routed.unit.pipelines[0].config = [

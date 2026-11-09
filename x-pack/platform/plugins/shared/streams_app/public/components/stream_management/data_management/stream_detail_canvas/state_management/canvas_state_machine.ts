@@ -399,8 +399,8 @@ export const canvasStateMachine = setup({
       if (event.type !== 'routing.open') {
         return {};
       }
-      const { target } = event;
-      const input = getRoutingFlyoutInput(context.nextUnit, target, self);
+      const { target, readOnly = false } = event;
+      const input = getRoutingFlyoutInput(context.nextUnit, target, self, readOnly);
       if (!input) {
         return { routingFlyout: { target } };
       }

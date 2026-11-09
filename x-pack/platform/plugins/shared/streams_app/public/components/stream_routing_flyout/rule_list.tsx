@@ -143,6 +143,7 @@ export function RoutingRuleList({
                 usePortal
                 customDragHandle={true}
                 hasInteractiveChildren={true}
+                isDragDisabled={!editable}
               >
                 {(provided, state) => (
                   <EuiFlexItem>

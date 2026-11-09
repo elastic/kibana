@@ -146,7 +146,7 @@ export type CanvasUrlEvent =
   | { type: 'flyout.tab'; flyoutTab: string }
   | { type: 'flyout.close' }
   | { type: 'search.change'; query: string }
-  | { type: 'routing.open'; target: RoutingFlyoutTarget }
+  | { type: 'routing.open'; target: RoutingFlyoutTarget; readOnly?: boolean }
   | { type: 'routing.close' }
   | RoutingSaveRequest
   | {

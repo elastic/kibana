@@ -159,14 +159,16 @@ function RoutingFlyoutForm({
   const rules = useSelector(flyoutRef, (state) => state.context.rules);
   const availableSignals = useSelector(flyoutRef, (state) => state.context.availableSignals);
   const isNew = useSelector(flyoutRef, (state) => state.context.target.kind === 'line');
+  // Viewers see the rules without editing them; nothing they do is staged.
+  const isReadOnly = useSelector(flyoutRef, (state) => state.context.readOnly) || readOnly;
+  const editable = useSelector(flyoutRef, (state) => state.context.editable) && !isReadOnly;
   // A routing node with telemetry-scoped rule lists cannot be edited here.
-  const isSupported = useSelector(flyoutRef, (state) => state.context.editable);
-  const editable = isSupported && !readOnly;
+  const isUnsupported = !editable && !isReadOnly;
   const hasChanges = useSelector(flyoutRef, (state) => state.context.hasChanges);
   const saveError = useSelector(flyoutRef, (state) => state.context.saveError);
   const isSaving = useSelector(flyoutRef, (state) => state.matches('saving'));
   const canSave =
-    useSelector(flyoutRef, (state) => state.can({ type: 'flyout.save' })) && !readOnly;
+    useSelector(flyoutRef, (state) => state.can({ type: 'flyout.save' })) && !isReadOnly;
 
   const addRule = useCallback(() => flyoutRef.send({ type: 'rule.add' }), [flyoutRef]);
   const updateRule = useCallback(
@@ -183,12 +185,12 @@ function RoutingFlyoutForm({
     [flyoutRef]
   );
   const save = useCallback(() => {
-    if (readOnly) {
+    if (isReadOnly) {
       return;
     }
     onBeforeSave?.();
     flyoutRef.send({ type: 'flyout.save' });
-  }, [flyoutRef, onBeforeSave, readOnly]);
+  }, [flyoutRef, onBeforeSave, isReadOnly]);
 
   const confirmClose = useDiscardConfirm(onClose, {
     enabled: hasChanges,
@@ -212,7 +214,7 @@ function RoutingFlyoutForm({
             padding: ${euiTheme.size.l};
           `}
         >
-          {!isSupported ? (
+          {isUnsupported ? (
             <>
               <KbnInfoCallout
                 announceOnMount

@@ -45,7 +45,8 @@ interface CanvasActionArgs {
 export const getRoutingFlyoutInput = (
   unit: Unit,
   target: RoutingFlyoutTarget,
-  parentRef: AnyActorRef
+  parentRef: AnyActorRef,
+  readOnly = false
 ): RoutingFlyoutInput | undefined => {
   if (target.kind === 'pipeline') {
     const rules = getPipelineRoutes(unit, target.pipelineId);
@@ -57,6 +58,7 @@ export const getRoutingFlyoutInput = (
           signals: current,
           availableSignals: available,
           editable: canEditPipelineRoutes(unit, target.pipelineId),
+          readOnly,
           parentRef,
         }
       : undefined;
@@ -71,6 +73,7 @@ export const getRoutingFlyoutInput = (
     signals: current,
     availableSignals: available,
     editable: true,
+    readOnly,
     parentRef,
   };
 };

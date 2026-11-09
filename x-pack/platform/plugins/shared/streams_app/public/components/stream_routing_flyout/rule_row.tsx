@@ -448,7 +448,7 @@ export function RoutingRuleRow({
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-            {rule.condition && (
+            {editable && rule.condition && (
               <EuiFlexItem grow={false}>
                 <EuiPanel
                   color="transparent"

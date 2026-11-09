@@ -44,7 +44,10 @@ export interface RoutingFlyoutInput {
   signals: UnitSignal[];
   /** Signals that flow into the routing node, which its rules can choose from. */
   availableSignals: UnitSignal[];
+  /** Whether the flyout can edit these rules; telemetry-scoped rule lists cannot be. */
   editable: boolean;
+  /** Whether the user cannot manage the stream, so nothing can be edited or saved. */
+  readOnly?: boolean;
   parentRef: AnyActorRef;
 }
 
@@ -53,7 +56,9 @@ export interface RoutingFlyoutContext {
   rules: RoutingRuleDraft[];
   signals: UnitSignal[];
   availableSignals: UnitSignal[];
+  /** False when the rules cannot be edited here, or the user cannot manage the stream. */
   editable: boolean;
+  readOnly: boolean;
   hasChanges: boolean;
   saveError?: string;
   nextKey: number;
@@ -285,7 +290,8 @@ export const routingFlyoutMachine = setup({
     rules: input.rules.map(toDraft(input.signals)),
     signals: input.signals,
     availableSignals: input.availableSignals,
-    editable: input.editable,
+    editable: input.editable && !input.readOnly,
+    readOnly: input.readOnly ?? false,
     hasChanges: false,
     saveError: undefined,
     nextKey: input.rules.length,

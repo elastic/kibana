@@ -319,6 +319,23 @@ describe('routingFlyoutMachine', () => {
     ]);
   });
 
+  it('ignores every edit and cannot save for a user who cannot manage the stream', () => {
+    const { flyout, requests } = startFlyout({ readOnly: true });
+    expect(flyout.getSnapshot().context).toMatchObject({ editable: false, readOnly: true });
+    const keys = () => flyout.getSnapshot().context.rules.map(({ key }) => key);
+
+    flyout.send({ type: 'rule.add' });
+    flyout.send({ type: 'rule.update', key: 'rule-0', changes: { action: 'copy' } });
+    flyout.send({ type: 'rule.delete', key: 'rule-0' });
+    expect(keys()).toEqual(['rule-0']);
+    expect(flyout.getSnapshot().context.rules[0].action).toBe('move');
+    expect(flyout.getSnapshot().context.hasChanges).toBe(false);
+
+    expect(flyout.getSnapshot().can({ type: 'flyout.save' })).toBe(false);
+    flyout.send({ type: 'flyout.save' });
+    expect(requests).toEqual([]);
+  });
+
   it('cannot save without rules, or when read-only', () => {
     const { flyout } = startFlyout();
     flyout.send({ type: 'rule.delete', key: 'rule-0' });

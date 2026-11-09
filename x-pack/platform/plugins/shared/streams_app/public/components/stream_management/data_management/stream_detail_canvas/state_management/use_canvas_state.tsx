@@ -140,8 +140,9 @@ export const useCanvasEvents = () => {
       changeUnitConnection: (unitDefinition: Unit) => {
         service.send({ type: 'unit.stage', unitDefinition });
       },
-      openRoutingFlyout: (target: RoutingFlyoutTarget) => {
-        service.send({ type: 'routing.open', target });
+      /** `readOnly` opens the rules without editing, for users who cannot manage the stream. */
+      openRoutingFlyout: (target: RoutingFlyoutTarget, readOnly = false) => {
+        service.send({ type: 'routing.open', target, readOnly });
       },
       closeRoutingFlyout: () => {
         service.send({ type: 'routing.close' });
