@@ -151,7 +151,7 @@ describe('createLayerDescriptor', () => {
         type: 'ES_GEO_GRID',
       },
       style: {
-        colorRampName: 'theclassic',
+        color_ramp_name: 'theclassic',
         type: 'HEATMAP',
       },
       type: 'HEATMAP',

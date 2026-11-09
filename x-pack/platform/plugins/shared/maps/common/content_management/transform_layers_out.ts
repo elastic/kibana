@@ -13,7 +13,7 @@ import type { ESQLSourceDescriptor, LayerDescriptor } from '../descriptor_types'
 /** Pre 9.4 vector style keys were stored in camelCase; convert them to snake_case */
 function transformVectorStyleKeysOut(layer: Writable<Partial<LayerDescriptor>>) {
   const style = layer.style as { type?: string; __styleMeta?: unknown } | undefined;
-  if (!style || typeof style !== 'object' || style.type !== 'VECTOR') return layer;
+  if (!style || typeof style !== 'object' || (style.type !== 'VECTOR' && style.type !== 'HEATMAP')) return layer;
   // style meta is keyed by user field names and is not part of the renamed schema
   const { __styleMeta, ...rest } = style;
   return {

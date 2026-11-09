@@ -21,7 +21,7 @@ export const EMSVectorTileStyleSchema = z
 
 export const heatmapStyleSchema = z
   .object({
-    colorRampName: z
+    color_ramp_name: z
       .union([
         z.literal('Blues'),
         z.literal('Greens'),

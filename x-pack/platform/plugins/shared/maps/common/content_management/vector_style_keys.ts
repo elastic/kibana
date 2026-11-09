@@ -14,6 +14,7 @@ import { VECTOR_STYLES } from '../constants';
  * below are renamed, and only inside `style`.
  */
 const NESTED_STYLE_KEYS = [
+  'colorRampName',
   'isTimeAware',
   'customColorRamp',
   'useCustomColorRamp',
@@ -57,7 +58,7 @@ function renameKeysDeep(value: unknown, keyMap: Map<string, string>): unknown {
 
 function renameStyleKeys(layer: any, keyMap: Map<string, string>) {
   const style = layer?.style;
-  if (!style || typeof style !== 'object' || style.type !== 'VECTOR') return layer;
+  if (!style || typeof style !== 'object' || (style.type !== 'VECTOR' && style.type !== 'HEATMAP')) return layer;
   const { __styleMeta, ...rest } = style;
   return {
     ...layer,
