@@ -14,10 +14,14 @@ import { alertSeverityLabels, alertSeverityOptions } from '../translations';
 
 export const AlertSeverityPicker = ({
   values,
+  supportedValues,
+  isInvalid,
   onChange,
   readOnly,
 }: {
   values: AlertSeverity[];
+  supportedValues: readonly AlertSeverity[];
+  isInvalid: boolean;
   onChange: (values: AlertSeverity[]) => void;
   readOnly: boolean;
 }) => {
@@ -35,11 +39,14 @@ export const AlertSeverityPicker = ({
       ariaLabel={alertSeverityLabels.title}
       label={label}
       testSubject="automationAlertSeverity"
+      isInvalid={isInvalid}
     >
       {() => (
         <EuiSelectable<{ value: AlertSeverity }>
           aria-label={alertSeverityLabels.title}
-          options={ALERT_SEVERITY_VALUES.map((value) => ({
+          options={ALERT_SEVERITY_VALUES.filter(
+            (value) => supportedValues.includes(value) || values.includes(value)
+          ).map((value) => ({
             key: value,
             value,
             label: alertSeverityOptions[value],

@@ -14,11 +14,12 @@ import { toPresetSchedule } from '../automation_form_values';
 
 const defaultCatalog = {
   data: [
-    { name: 'CPU usage high', tags: ['infra', 'prod'] },
-    { name: 'Disk full', tags: ['storage', 'prod'] },
-    { name: 'Memory pressure', tags: ['infra'] },
+    { name: 'CPU usage high', tags: ['infra', 'prod'], family: 'classic' },
+    { name: 'Disk full', tags: ['storage', 'prod'], family: 'classic' },
+    { name: 'Memory pressure', tags: ['infra'], family: 'classic' },
   ],
   isError: false,
+  isComplete: true,
 };
 jest.mock('../../../hooks/use_global_limit', () => ({
   useGlobalLimit: () => ({ isReached: false }),
@@ -189,9 +190,9 @@ describe('AutomationTriggerSection', () => {
 
   it('selects and clears named severities without changing the rule filter', async () => {
     render(
-      <TriggerSection initialTrigger={{ ...legacyPatternTrigger, alertSources: ['internal'] }} />
+      <TriggerSection initialTrigger={{ ...legacyPatternTrigger, alertSources: ['classic'] }} />
     );
-    expect(screen.getByTestId('automationAlertSources')).toHaveTextContent('Universal rules');
+    expect(screen.getByTestId('automationAlertSources')).toHaveTextContent('Classic');
     expect(screen.getByTestId('automationAlertSeverity')).toHaveTextContent('Any severity');
     expect(
       screen.getByText(
@@ -205,7 +206,7 @@ describe('AutomationTriggerSection', () => {
     expect(lastTrigger()).toMatchObject({
       ruleNamePattern: 'cpu',
       severities: ['major', 'high', 'warning'],
-      alertSources: ['internal'],
+      alertSources: ['classic'],
     });
     fireEvent.click(screen.getByRole('option', { name: 'High' }));
     fireEvent.click(screen.getByRole('option', { name: 'Major' }));

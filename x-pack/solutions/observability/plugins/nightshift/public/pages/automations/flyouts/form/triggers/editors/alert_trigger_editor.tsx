@@ -16,6 +16,8 @@ import { RulePicker } from './rule_picker';
 import { rulePillLabel } from './rule_selection';
 import { AlertSeverityPicker } from './alert_severity_picker';
 import { AlertSourcePicker, alertSourcePillLabel } from './alert_source_picker';
+import { getSupportedAlertSeverities } from '../../alert_severity';
+import { getAlertSeverityError } from '../../validation';
 
 export const AlertTriggerEditor = ({
   trigger,
@@ -26,7 +28,10 @@ export const AlertTriggerEditor = ({
   onChange: (trigger: TriggerFormValues) => void;
   readOnly?: boolean;
 }) => {
-  const { data: catalog = [] } = useRuleCatalog();
+  const { data: catalog = [], isComplete } = useRuleCatalog();
+  const completeCatalog = isComplete ? catalog : undefined;
+  const supportedSeverities = getSupportedAlertSeverities(trigger, completeCatalog);
+  const severityError = getAlertSeverityError(trigger, completeCatalog);
   const { ruleNamePattern, ruleNames, ruleTags } = trigger;
   const showSeverity = !readOnly || trigger.severities.length > 0;
   const rulesLabel =
@@ -75,6 +80,8 @@ export const AlertTriggerEditor = ({
             <EuiFlexItem grow={false}>
               <AlertSeverityPicker
                 values={trigger.severities}
+                supportedValues={supportedSeverities}
+                isInvalid={severityError !== undefined}
                 onChange={(severities) => onChange({ ...trigger, severities })}
                 readOnly={readOnly}
               />
@@ -82,6 +89,14 @@ export const AlertTriggerEditor = ({
           </EuiFlexGroup>
         )}
       </Sentence>
+      {severityError && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiText size="xs" color="danger" role="alert">
+            {severityError}
+          </EuiText>
+        </>
+      )}
       {showSeverity && (
         <>
           <EuiSpacer size="s" />
