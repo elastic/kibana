@@ -62,7 +62,7 @@ const layerList = [
             value: 'marker',
           },
         },
-        fill_color: {
+        fillColor: {
           type: 'DYNAMIC',
           options: {
             field: {
@@ -70,68 +70,68 @@ const layerList = [
               origin: 'source',
             },
             color: 'Yellow to Red',
-            field_meta_options: {
+            fieldMetaOptions: {
               isEnabled: false,
               sigma: 3,
             },
             type: 'ORDINAL',
-            use_custom_color_ramp: false,
+            useCustomColorRamp: false,
           },
         },
-        line_color: {
+        lineColor: {
           type: 'STATIC',
           options: {
             color: '#000',
           },
         },
-        line_width: {
+        lineWidth: {
           type: 'STATIC',
           options: {
             size: 1,
           },
         },
-        icon_size: {
+        iconSize: {
           type: 'STATIC',
           options: {
             size: 6,
           },
         },
-        icon_orientation: {
+        iconOrientation: {
           type: 'STATIC',
           options: {
             orientation: 0,
           },
         },
-        label_text: {
+        labelText: {
           type: 'STATIC',
           options: {
             value: '',
           },
         },
-        label_color: {
+        labelColor: {
           type: 'STATIC',
           options: {
             color: '#000000',
           },
         },
-        label_size: {
+        labelSize: {
           type: 'STATIC',
           options: {
             size: 14,
           },
         },
-        label_border_color: {
+        labelBorderColor: {
           type: 'STATIC',
           options: {
             color: '#FFFFFF',
           },
         },
-        symbolize_as: {
+        symbolizeAs: {
           options: {
             value: 'circle',
           },
         },
-        label_border_size: {
+        labelBorderSize: {
           options: {
             size: 'SMALL',
           },
@@ -176,85 +176,85 @@ const layerList = [
             value: 'marker',
           },
         },
-        fill_color: {
+        fillColor: {
           type: 'DYNAMIC',
           options: {
             color: 'Yellow to Red',
-            field_meta_options: {
+            fieldMetaOptions: {
               isEnabled: false,
               sigma: 3,
             },
             type: 'ORDINAL',
-            use_custom_color_ramp: false,
+            useCustomColorRamp: false,
             field: {
               name: 'sum_of_FlightDelayMin',
               origin: 'source',
             },
           },
         },
-        line_color: {
+        lineColor: {
           type: 'STATIC',
           options: {
             color: '#110081',
           },
         },
-        line_width: {
+        lineWidth: {
           type: 'STATIC',
           options: {
             size: 1,
           },
         },
-        icon_size: {
+        iconSize: {
           type: 'DYNAMIC',
           options: {
             field: {
               origin: 'source',
               name: 'doc_count',
             },
-            min_size: 4,
-            max_size: 32,
-            field_meta_options: {
+            minSize: 4,
+            maxSize: 32,
+            fieldMetaOptions: {
               isEnabled: false,
               sigma: 3,
             },
           },
         },
-        icon_orientation: {
+        iconOrientation: {
           type: 'STATIC',
           options: {
             orientation: 0,
           },
         },
-        label_text: {
+        labelText: {
           type: 'STATIC',
           options: {
             value: '',
           },
         },
-        label_color: {
+        labelColor: {
           type: 'STATIC',
           options: {
             color: '#000000',
           },
         },
-        label_size: {
+        labelSize: {
           type: 'STATIC',
           options: {
             size: 14,
           },
         },
-        label_border_color: {
+        labelBorderColor: {
           type: 'STATIC',
           options: {
             color: '#FFFFFF',
           },
         },
-        symbolize_as: {
+        symbolizeAs: {
           options: {
             value: 'circle',
           },
         },
-        label_border_size: {
+        labelBorderSize: {
           options: {
             size: 'SMALL',
           },

@@ -39,7 +39,7 @@ const layerList = [
     style: {
       type: 'VECTOR',
       properties: {
-        fill_color: {
+        fillColor: {
           type: 'DYNAMIC',
           options: {
             field: {
@@ -49,19 +49,19 @@ const layerList = [
             color: 'Greys',
           },
         },
-        line_color: {
+        lineColor: {
           type: 'STATIC',
           options: {
             color: '#FFFFFF',
           },
         },
-        line_width: {
+        lineWidth: {
           type: 'STATIC',
           options: {
             size: 1,
           },
         },
-        icon_size: {
+        iconSize: {
           type: 'STATIC',
           options: {
             size: 10,
@@ -117,33 +117,33 @@ const layerList = [
     style: {
       type: 'VECTOR',
       properties: {
-        fill_color: {
+        fillColor: {
           type: 'STATIC',
           options: {
             color: '#2200ff',
           },
         },
-        line_color: {
+        lineColor: {
           type: 'STATIC',
           options: {
             color: '#FFFFFF',
           },
         },
-        line_width: {
+        lineWidth: {
           type: 'STATIC',
           options: {
             size: 2,
           },
         },
-        icon_size: {
+        iconSize: {
           type: 'DYNAMIC',
           options: {
             field: {
               name: 'bytes',
               origin: 'source',
             },
-            min_size: 1,
-            max_size: 23,
+            minSize: 1,
+            maxSize: 23,
           },
         },
       },
@@ -178,7 +178,7 @@ const layerList = [
     style: {
       type: 'VECTOR',
       properties: {
-        fill_color: {
+        fillColor: {
           type: 'DYNAMIC',
           options: {
             field: {
@@ -188,30 +188,30 @@ const layerList = [
             color: 'Blues',
           },
         },
-        line_color: {
+        lineColor: {
           type: 'STATIC',
           options: {
             color: '#cccccc',
           },
         },
-        line_width: {
+        lineWidth: {
           type: 'STATIC',
           options: {
             size: 1,
           },
         },
-        icon_size: {
+        iconSize: {
           type: 'DYNAMIC',
           options: {
             field: {
               name: 'sum_of_bytes',
               origin: 'source',
             },
-            min_size: 7,
-            max_size: 25,
+            minSize: 7,
+            maxSize: 25,
           },
         },
-        label_text: {
+        labelText: {
           type: 'DYNAMIC',
           options: {
             field: {
@@ -220,15 +220,15 @@ const layerList = [
             },
           },
         },
-        label_size: {
+        labelSize: {
           type: 'DYNAMIC',
           options: {
             field: {
               name: 'doc_count',
               origin: 'source',
             },
-            min_size: 12,
-            max_size: 24,
+            minSize: 12,
+            maxSize: 24,
           },
         },
       },
