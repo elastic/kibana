@@ -93,9 +93,9 @@ describe('manualInvestigationStarts', () => {
         fetchedInProgress: false,
       })
     ).toBe(true);
-    expect(
-      shouldDismissManualInvestigationFresh({ investigationId: 'inv-1', sections: [] })
-    ).toBe(false);
+    expect(shouldDismissManualInvestigationFresh({ investigationId: 'inv-1', sections: [] })).toBe(
+      false
+    );
   });
 
   it('lets in-progress win when an id is in both running and a stale severity page', () => {

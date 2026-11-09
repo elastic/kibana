@@ -93,10 +93,7 @@ const notify = (): void => {
   }
 };
 
-const writeEntries = (
-  spaceBasePath: string,
-  entries: ManualInvestigationFreshEntry[]
-): void => {
+const writeEntries = (spaceBasePath: string, entries: ManualInvestigationFreshEntry[]): void => {
   const key = storageKey(spaceBasePath);
   const next = copyEntries(entries);
   memoryBySpace.set(key, next);
@@ -179,9 +176,8 @@ export const syncManualInvestigationFreshFromSections = (
   }
 
   const inProgressIds = new Set(
-    sections
-      .find((section) => section.id === 'in-progress')
-      ?.investigations.map(({ id }) => id) ?? []
+    sections.find((section) => section.id === 'in-progress')?.investigations.map(({ id }) => id) ??
+      []
   );
 
   let changed = false;
