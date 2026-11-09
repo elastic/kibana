@@ -24,8 +24,8 @@ const LOADING_LABEL = i18n.translate('xpack.alertzero.workersRunningPanel.loadin
 });
 
 export const WorkersRunningPanel: React.FC = () => {
-  // EuiShimmeringText sets the `m` size inline. EuiText `s` is `m` scaled by `s` (14px).
-  const titleFont = useEuiFontSize('m', { customScale: 's' });
+  // EuiShimmeringText sets the `m` size inline. EuiText `xs` is `m` scaled by `xs` (12px).
+  const titleFont = useEuiFontSize('m', { customScale: 'xs' });
 
   return (
     <EuiPanel

@@ -6,12 +6,20 @@
  */
 
 import React, { useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { css } from '@emotion/react';
+import {
+  EuiAccordion,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  useEuiTheme,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { isErrorResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { ToolCallStep as ToolCallStepData } from '@kbn/agent-builder-common/chat/conversation';
-import { StepLayout } from '../step_layout';
 import { ToolCallStep } from './tool_call_step';
 
 interface ToolCallGroupProps {
@@ -20,15 +28,21 @@ interface ToolCallGroupProps {
 }
 
 export const ToolCallGroup: React.FC<ToolCallGroupProps> = ({ steps, isAborted = false }) => {
+  const { euiTheme } = useEuiTheme();
+  const accordionId = useGeneratedHtmlId({ prefix: 'agentBuilderToolCallGroup' });
   const [isExpanded, setIsExpanded] = useState(false);
-  const onToggle = () => setIsExpanded((v) => !v);
 
   const allRan = steps.every((s) => s.results.length > 0);
   const hasError = steps.some((s) => s.results.some(isErrorResult));
+  const labelColor = hasError
+    ? euiTheme.colors.danger
+    : isExpanded
+      ? euiTheme.colors.textParagraph
+      : euiTheme.colors.textDisabled;
 
   const label = (
-    <EuiText size="s" color={hasError ? 'danger' : 'inherit'}>
-      <p role="status">
+    <EuiText size="s" component="span" color={hasError ? 'danger' : 'inherit'}>
+      <span role="status">
         {allRan ? (
           <FormattedMessage
             id="xpack.agentBuilder.eventSteps.toolCallGroup.ran"
@@ -48,27 +62,56 @@ export const ToolCallGroup: React.FC<ToolCallGroupProps> = ({ steps, isAborted =
             values={{ count: steps.length }}
           />
         )}
-      </p>
+      </span>
     </EuiText>
   );
 
   return (
     <div data-test-subj="agentBuilderToolCallGroup">
-      <StepLayout
-        label={label}
-        onClick={onToggle}
-        isExpanded={isExpanded}
-        expansion={
-          <EuiFlexGroup direction="column" gutterSize="s">
-            {steps.map((step) => (
-              <EuiFlexItem grow={false} key={step.tool_call_id}>
-                <ToolCallStep step={step} isAborted={isAborted} />
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
-        }
-        ebtAction={AGENT_BUILDER_UI_EBT.action.conversation.EXPAND_TOOL_CALL_GROUP}
-      />
+      <EuiAccordion
+        id={accordionId}
+        arrowDisplay="right"
+        paddingSize="none"
+        forceState={isExpanded ? 'open' : 'closed'}
+        onToggle={setIsExpanded}
+        buttonContent={label}
+        buttonProps={{
+          // POC: keep the arrow beside the label, and the quiet step color.
+          css: css`
+            &&,
+            &&:hover,
+            &&:focus {
+              flex-grow: 0;
+              width: auto;
+              text-decoration: none;
+              color: ${labelColor};
+            }
+            &&:hover,
+            &&:focus {
+              color: ${hasError ? euiTheme.colors.danger : euiTheme.colors.textParagraph};
+            }
+          `,
+          ...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.pageContent,
+            action: AGENT_BUILDER_UI_EBT.action.conversation.EXPAND_TOOL_CALL_GROUP,
+            detail: 'conversation',
+          }),
+        }}
+      >
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="s"
+          css={css`
+            padding-block-start: ${euiTheme.size.s};
+          `}
+        >
+          {steps.map((step) => (
+            <EuiFlexItem grow={false} key={step.tool_call_id}>
+              <ToolCallStep step={step} isAborted={isAborted} />
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      </EuiAccordion>
     </div>
   );
 };
