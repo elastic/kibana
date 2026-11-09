@@ -11,6 +11,10 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { AuditEvent } from '@kbn/security-plugin-types-server';
 import type { WorkflowPageAccess } from '../../../pages/page_saved_object';
+import {
+  getWorkflowPageSavedObjectId,
+  WORKFLOW_PAGE_SAVED_OBJECT_TYPE,
+} from '../../../pages/page_saved_object';
 import type { WorkflowPageAuditLog, WorkflowPageAuditParams } from '../../../pages/types';
 import type { WorkflowsService } from '../../workflows_management_service';
 
@@ -599,6 +603,14 @@ export class WorkflowManagementAuditLog implements WorkflowPageAuditLog {
       error !== undefined
         ? `User failed to run "${verb}" on workflow page ${fields}`
         : `User ${verb} workflow page ${fields}`;
-    this.log(request, createEvent(action, eventType, message, error));
+    this.log(request, {
+      ...createEvent(action, eventType, message, error),
+      kibana: {
+        saved_object: {
+          type: WORKFLOW_PAGE_SAVED_OBJECT_TYPE,
+          id: getWorkflowPageSavedObjectId({ workflowId, pageId }),
+        },
+      },
+    });
   }
 }

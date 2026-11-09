@@ -12,6 +12,10 @@ import {
   WorkflowManagementAuditActions,
   WorkflowManagementAuditLog,
 } from './workflow_audit_logging';
+import {
+  getWorkflowPageSavedObjectId,
+  WORKFLOW_PAGE_SAVED_OBJECT_TYPE,
+} from '../../../pages/page_saved_object';
 import type { WorkflowsService } from '../../workflows_management_service';
 
 async function createAuditHarness() {
@@ -470,6 +474,49 @@ describe('WorkflowManagementAuditLog', () => {
       });
       expect(l2.mock.calls[0][0].event.action).toBe(WorkflowManagementAuditActions.HITL_TIMED_OUT);
       expect(l2.mock.calls[0][0].message).toContain('System timed out HITL wait');
+    });
+  });
+
+  describe('page events', () => {
+    const ref = { workflowId: 'w-1', pageId: 'default', spaceId: 'default' };
+    const savedObject = {
+      type: WORKFLOW_PAGE_SAVED_OBJECT_TYPE,
+      id: getWorkflowPageSavedObjectId(ref),
+    };
+
+    it.each([
+      ['logPageLinkRead', WorkflowManagementAuditActions.PAGE_LINK_READ, {}],
+      ['logPageSecretRotated', WorkflowManagementAuditActions.PAGE_SECRET_ROTATE, {}],
+      [
+        'logPageAccessChanged',
+        WorkflowManagementAuditActions.PAGE_ACCESS_CHANGE,
+        { access: { level: 'secret_link' } },
+      ],
+      [
+        'logPageEnabledChanged',
+        WorkflowManagementAuditActions.PAGE_ENABLED_CHANGE,
+        { enabled: false },
+      ],
+    ] as const)('%s records the page saved object', async (method, action, extra) => {
+      const { audit, request, log } = await createAuditHarness();
+      audit[method](request, { ...ref, ...extra } as never);
+      expect(log.mock.calls[0][0]).toEqual(
+        expect.objectContaining({
+          event: expect.objectContaining({ action, outcome: 'success' }),
+          kibana: { saved_object: savedObject },
+        })
+      );
+    });
+
+    it('records the page saved object on a failure', async () => {
+      const { audit, request, log } = await createAuditHarness();
+      audit.logPageLinkRead(request, { ...ref, error: new Error('denied') });
+      expect(log.mock.calls[0][0]).toEqual(
+        expect.objectContaining({
+          event: expect.objectContaining({ outcome: 'failure' }),
+          kibana: { saved_object: savedObject },
+        })
+      );
     });
   });
 
