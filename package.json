@@ -924,6 +924,7 @@
     "@kbn/management-settings-components-field-row": "workspace:*",
     "@kbn/management-settings-components-form": "workspace:*",
     "@kbn/management-settings-field-definition": "workspace:*",
+    "@kbn/management-settings-hooks": "workspace:*",
     "@kbn/management-settings-ids": "workspace:*",
     "@kbn/management-settings-section-registry": "workspace:*",
     "@kbn/management-settings-types": "workspace:*",
