@@ -368,4 +368,32 @@ describe('ObjectAccessPanel', () => {
       expect(screen.queryByTestId('accessPanelTransferModal')).not.toBeInTheDocument()
     );
   });
+
+  it('warns owners that they lose access management before they pick a new owner', async () => {
+    renderPanel();
+    await userEvent.click(await screen.findByTestId('accessPanelTransfer'));
+    const modal = await screen.findByTestId('accessPanelTransferModal');
+
+    const warning = within(modal).getByTestId('accessPanelTransferSelfWarning');
+    expect(warning).toHaveTextContent(
+      "You won't be able to manage access to this connector anymore."
+    );
+    // The warning comes first, so people read the consequence before they choose.
+    expect(
+      warning.compareDocumentPosition(within(modal).getByTestId('accessPanelTransferPicker'))
+    ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+
+  it('does not warn a recovery administrator who is not the owner', async () => {
+    objectState = {
+      ...MANAGER_STATE,
+      is_owner: false,
+      permissions_via_recovery: ['manage_access', 'transfer'],
+    };
+    renderPanel();
+    await userEvent.click(await screen.findByTestId('accessPanelTransfer'));
+    const modal = await screen.findByTestId('accessPanelTransferModal');
+
+    expect(within(modal).queryByTestId('accessPanelTransferSelfWarning')).not.toBeInTheDocument();
+  });
 });

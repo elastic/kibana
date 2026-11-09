@@ -80,6 +80,7 @@ export const TransferModal = ({
             <KbnWarningCallout
               announceOnMount
               size="s"
+              data-test-subj="accessPanelTransferSelfWarning"
               title={i18n.translate('olsUi.transfer.selfWarning', {
                 defaultMessage: "You won't be able to manage access to this {objectNoun} anymore.",
                 values: { objectNoun: copy.objectNoun },

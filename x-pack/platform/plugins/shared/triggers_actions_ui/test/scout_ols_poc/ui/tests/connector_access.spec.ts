@@ -230,6 +230,36 @@ test.describe.serial('Connector access', { tag: '@local-stateful-classic' }, () 
     ).toBe(false);
   });
 
+  test('the owner hands a connector over and can no longer manage its access', async ({
+    page,
+    browserAuth,
+    kbnUrl,
+    apiClient,
+  }) => {
+    const name = `${prefix}-handover`;
+    const created = await apiClient.post('api/actions/connector', {
+      headers: ownerHeaders,
+      body: { name, connector_type_id: '.server-log', config: {}, secrets: {} },
+      responseType: 'json',
+    });
+    expect(created.statusCode).toBe(200);
+
+    await browserAuth.loginAsPrivilegedUser();
+    await openConnector(page, kbnUrl, name);
+    await openAccessTab(page);
+
+    await page.testSubj.click('accessPanelTransfer');
+    await expect(page.testSubj.locator('accessPanelTransferSelfWarning')).toBeVisible();
+    await pickPerson(page, 'accessPanelTransferPicker', grantee);
+    await page.testSubj.click('accessPanelTransferConfirm');
+    await expect(page.getByText('Ownership transferred.')).toBeVisible();
+
+    // The connector is public, so the previous owner can still edit it, but not its access.
+    await expect(page.testSubj.locator('accessPanelReadOnly')).toBeVisible();
+    await expect(page.testSubj.locator('accessPanelPermission-edit')).toContainText('Edit');
+    await expect(page.testSubj.locator('accessPanelTransfer')).toHaveCount(0);
+  });
+
   test('a recovery administrator manages access to a connector it cannot edit', async ({
     page,
     browserAuth,
