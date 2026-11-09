@@ -12,7 +12,6 @@ import { EuiButton, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
-import type { SerializedStyles } from '@emotion/serialize';
 import dfaImage from './analysis_monitors.svg';
 import { mlNodesAvailable } from '../../../../../ml_nodes_check';
 import { useMlKibana, useMlManagementLocator } from '../../../../../contexts/kibana';
@@ -33,10 +32,10 @@ export const TrainedAnalysisTitle = () => (
 export const AnalyticsEmptyPrompt: FC<{
   showDocsLink?: boolean;
   centered?: boolean;
-  customCss?: SerializedStyles;
   iconSize?: 'fullWidth' | 'original' | 's' | 'm' | 'l' | 'xl';
   titleSize?: EuiEmptyPromptProps['titleSize'];
-}> = ({ showDocsLink = false, centered = false, customCss, iconSize, titleSize }) => {
+  grow?: boolean;
+}> = ({ showDocsLink = false, centered = false, iconSize, titleSize, grow }) => {
   const {
     services: { docLinks },
   } = useMlKibana();
@@ -62,12 +61,12 @@ export const AnalyticsEmptyPrompt: FC<{
 
   return (
     <MLEmptyPromptCard
-      customCss={customCss}
       iconSrc={dfaImage}
       iconAlt={i18n.translate('xpack.ml.dataFrame.analyticsList.emptyPromptTitle', {
         defaultMessage: 'Tailored predictive models',
       })}
       iconSize={iconSize}
+      grow={grow}
       titleSize={titleSize}
       title={i18n.translate('xpack.ml.dataFrame.analyticsList.emptyPromptTitle', {
         defaultMessage: 'Tailored predictive models',

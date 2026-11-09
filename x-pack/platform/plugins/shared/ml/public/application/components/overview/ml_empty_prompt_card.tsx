@@ -15,8 +15,6 @@ import {
   EuiLink,
   EuiTitle,
 } from '@elastic/eui';
-import type { SerializedStyles } from '@emotion/react';
-import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export const MLEmptyPromptCard = ({
@@ -25,8 +23,7 @@ export const MLEmptyPromptCard = ({
   actions,
   iconSrc,
   iconAlt,
-  customCss,
-  iconSize = 'm',
+  iconSize,
   docsLink,
   docsLinkDataTestSubj,
   footer,
@@ -38,16 +35,17 @@ export const MLEmptyPromptCard = ({
   titleSize,
   paddingSize,
   centered = false,
+  grow = false,
   'data-test-subj': dataTestSubj,
 }: Omit<EuiEmptyPromptProps, 'title' | 'icon'> & {
   title: string;
   iconSrc: string;
   iconAlt: string;
   iconSize?: 'fullWidth' | 'original' | 's' | 'm' | 'l' | 'xl';
-  customCss?: SerializedStyles;
   docsLink?: string;
   docsLinkDataTestSubj?: string;
   centered?: boolean;
+  grow?: boolean;
 }) => {
   const titleElement = titleSize === 's' || titleSize === 'xs' ? 'h3' : 'h2';
   const TitleTag = titleElement;
@@ -73,12 +71,8 @@ export const MLEmptyPromptCard = ({
 
   const prompt = (
     <EuiEmptyPrompt
-      css={css`
-        .euiEmptyPrompt__icon {
-          min-inline-size: 32px !important;
-        }
-        ${customCss ?? ''}
-      `}
+      // POC: EuiEmptyPrompt omits EuiPanel's `grow`; fills the parent flex item so side-by-side cards match height.
+      css={grow ? { flexGrow: 1 } : undefined}
       layout={layout}
       color={color}
       hasBorder={hasBorder}

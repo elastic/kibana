@@ -12,7 +12,6 @@ import type { EuiEmptyPromptProps } from '@elastic/eui';
 import { EuiButton, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
-import type { SerializedStyles } from '@emotion/serialize';
 import adImage from './machine_learning_cog.svg';
 import { useMlKibana } from '../../../../contexts/kibana';
 import { useCreateAndNavigateToManagementMlLink } from '../../../../contexts/kibana/use_create_url';
@@ -23,10 +22,10 @@ import { MLEmptyPromptCard } from '../../../../components/overview/ml_empty_prom
 export const AnomalyDetectionEmptyState: FC<{
   showDocsLink?: boolean;
   centered?: boolean;
-  customCss?: SerializedStyles;
   iconSize?: 'fullWidth' | 'original' | 's' | 'm' | 'l' | 'xl';
   titleSize?: EuiEmptyPromptProps['titleSize'];
-}> = ({ showDocsLink = false, centered = false, customCss, iconSize, titleSize }) => {
+  grow?: boolean;
+}> = ({ showDocsLink = false, centered = false, iconSize, titleSize, grow }) => {
   const canCreateJob = usePermissionCheck('canCreateJob');
   const disableCreateAnomalyDetectionJob = !canCreateJob || !mlNodesAvailable();
 
@@ -41,12 +40,12 @@ export const AnomalyDetectionEmptyState: FC<{
 
   return (
     <MLEmptyPromptCard
-      customCss={customCss}
       iconSrc={adImage}
       iconAlt={i18n.translate('xpack.ml.overview.anomalyDetection.title', {
         defaultMessage: 'Anomaly detection',
       })}
       iconSize={iconSize}
+      grow={grow}
       titleSize={titleSize}
       title={i18n.translate('xpack.ml.overview.anomalyDetection.createFirstJobMessage', {
         defaultMessage: 'Anomaly detection',

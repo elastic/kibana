@@ -16,7 +16,6 @@ import { usePermissionCheck } from '../../capabilities/check_capabilities';
 import { useMlApi, useMlLocator, useMlManagementLocator } from '../../contexts/kibana';
 import { MLEmptyPromptCard } from '../../components/overview/ml_empty_prompt_card';
 import { AnalyticsEmptyPrompt } from '../../data_frame_analytics/pages/analytics_management/components/empty_prompt/empty_prompt';
-import { useOverviewPageCustomCss } from '../overview_ml_page';
 
 export const DataFrameAnalyticsOverviewCard: FC = () => {
   const mlLocator = useMlLocator();
@@ -24,7 +23,6 @@ export const DataFrameAnalyticsOverviewCard: FC = () => {
 
   const [hasDFAs, setHasDFAs] = useState(false);
   const canGetDataFrameAnalytics = usePermissionCheck('canGetDataFrameAnalytics');
-  const overviewPageCardCustomCss = useOverviewPageCustomCss();
 
   const navigateToResultsExplorer = useCallback(async () => {
     if (!mlLocator) return;
@@ -90,16 +88,15 @@ export const DataFrameAnalyticsOverviewCard: FC = () => {
   }, [mlApi]);
 
   return !hasDFAs ? (
-    <AnalyticsEmptyPrompt customCss={overviewPageCardCustomCss} iconSize="m" titleSize="xs" />
+    <AnalyticsEmptyPrompt titleSize="xs" grow />
   ) : (
     <MLEmptyPromptCard
-      customCss={overviewPageCardCustomCss}
+      grow
       hasBorder
       hasShadow={false}
       titleSize="xs"
       paddingSize="m"
       iconSrc={dfaImage}
-      iconSize="m"
       iconAlt={i18n.translate('xpack.ml.dataFrame.analyticsList.emptyPromptTitle', {
         defaultMessage: 'Tailored predictive models',
       })}

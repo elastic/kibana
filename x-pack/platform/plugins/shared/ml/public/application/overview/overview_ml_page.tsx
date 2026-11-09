@@ -22,12 +22,10 @@ import {
   EuiTitle,
   EuiHorizontalRule,
   EuiIcon,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
-import { css } from '@emotion/react';
 import { UpgradeWarning } from '../components/upgrade';
 import { HelpMenu } from '../components/help_menu';
 import { useMlKibana, useNavigateToPath } from '../contexts/kibana';
@@ -43,25 +41,6 @@ import { DataVisualizerGrid } from './data_visualizer_grid';
 import { OverviewFooterItem } from './components/overview_ml_footer_item';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
 import { DatePicker } from '../components/ml_page/date_picker';
-
-export const useOverviewPageCustomCss = () => {
-  const {
-    euiTheme: { colors, size },
-  } = useEuiTheme();
-
-  return useMemo(
-    () => css`
-      .euiEmptyPrompt__content {
-        padding-top: ${size.xxs};
-        padding-bottom: ${size.xxs};
-      }
-      .euiText {
-        color: ${colors.textHeading};
-      }
-    `,
-    [colors?.textHeading, size?.xxs]
-  );
-};
 
 export const overviewPanelDefaultState = Object.freeze({
   nodes: true,

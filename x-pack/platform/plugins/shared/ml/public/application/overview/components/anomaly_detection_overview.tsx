@@ -17,7 +17,6 @@ import { usePermissionCheck } from '../../capabilities/check_capabilities';
 import { useMlApi, useMlLocator, useMlManagementLocator } from '../../contexts/kibana';
 import { AnomalyDetectionEmptyState } from '../../jobs/jobs_list/components/anomaly_detection_empty_state/anomaly_detection_empty_state';
 import { MLEmptyPromptCard } from '../../components/overview/ml_empty_prompt_card';
-import { useOverviewPageCustomCss } from '../overview_ml_page';
 
 export const AnomalyDetectionOverviewCard: FC = () => {
   const canGetJobs = usePermissionCheck('canGetJobs');
@@ -27,7 +26,6 @@ export const AnomalyDetectionOverviewCard: FC = () => {
   const mlApi = useMlApi();
   const mlLocator = useMlLocator();
   const mlManagementLocator = useMlManagementLocator();
-  const overviewPageCardCustomCss = useOverviewPageCustomCss();
 
   const loadJobs = useCallback(async () => {
     setIsLoading(true);
@@ -103,16 +101,15 @@ export const AnomalyDetectionOverviewCard: FC = () => {
   }, [hasADJobs, canGetJobs, redirectToMultiMetricExplorer, redirectToManageJobs]);
 
   return showEmptyState ? (
-    <AnomalyDetectionEmptyState customCss={overviewPageCardCustomCss} iconSize="m" titleSize="xs" />
+    <AnomalyDetectionEmptyState titleSize="xs" grow />
   ) : (
     <MLEmptyPromptCard
-      customCss={overviewPageCardCustomCss}
+      grow
       hasBorder
       hasShadow={false}
       titleSize="xs"
       paddingSize="m"
       iconSrc={adImage}
-      iconSize="m"
       iconAlt={i18n.translate('xpack.ml.overview.anomalyDetection.title', {
         defaultMessage: 'Anomaly detection',
       })}
