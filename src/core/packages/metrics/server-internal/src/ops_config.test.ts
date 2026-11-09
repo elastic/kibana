@@ -32,7 +32,7 @@ describe('ops.eventLoopWatchdog config', () => {
       profiling: { startAfter: '20s', maxDuration: '5s', cooldown: '5m' },
       startup: {
         blockThreshold: '1s',
-        profiling: { startAfter: '45s', maxDuration: '15s', cooldown: '2m' },
+        profiling: { startAfter: '45s', maxDuration: '8s', cooldown: '2m' },
       },
       statsInterval: '1h',
     });
@@ -44,7 +44,7 @@ describe('ops.eventLoopWatchdog config', () => {
     expect(config.profiling.maxDuration.asSeconds()).toBe(5);
     expect(config.profiling.cooldown.asMinutes()).toBe(5);
     expect(config.startup.profiling.startAfter?.asSeconds()).toBe(45);
-    expect(config.startup.profiling.maxDuration?.asSeconds()).toBe(15);
+    expect(config.startup.profiling.maxDuration?.asSeconds()).toBe(8);
     expect(config.startup.profiling.cooldown?.asMinutes()).toBe(2);
   });
 
@@ -66,7 +66,7 @@ describe('ops.eventLoopWatchdog config', () => {
 
   describe.each([
     ['startAfter', '2s', '4m', '1999ms', '241s', 'PT2S', 'PT4M'],
-    ['maxDuration', '1s', '30s', '999ms', '31s', 'PT1S', 'PT30S'],
+    ['maxDuration', '1s', '10s', '999ms', '11s', 'PT1S', 'PT10S'],
     ['cooldown', '10s', '24h', '9s', '25h', 'PT10S', 'PT24H'],
   ])('profiling.%s', (setting, min, max, belowMin, aboveMax, minIso, maxIso) => {
     describe.each([
