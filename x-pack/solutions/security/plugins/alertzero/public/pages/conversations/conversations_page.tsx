@@ -581,6 +581,7 @@ const ConversationsPageContent: React.FC = () => {
               greeting: IDLE_HEADER.greeting,
               title: IDLE_HEADER.title,
               subtitle: IDLE_HEADER.subtitle(runningSummary),
+              showAgentLoader: true,
             })}
           />
         </EuiFlexItem>

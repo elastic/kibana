@@ -8,6 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
+  EuiAgentLoader,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -115,6 +116,8 @@ export interface AlertZeroPageHeaderProps {
   title?: string;
   /** Supporting line under the heading. */
   subtitle?: string;
+  /** Workers are running and the queue is empty: the circle shows the agent loader. */
+  showAgentLoader?: boolean;
 }
 /**
  * Page header for AlertZero routes.
@@ -132,6 +135,7 @@ export const AlertZeroPageHeader: React.FC<AlertZeroPageHeaderProps> = ({
   greeting,
   title: titleOverride,
   subtitle,
+  showAgentLoader = false,
 }) => {
   const { euiTheme } = useEuiTheme();
   const timeZone = useKibanaTimeZone();
@@ -161,10 +165,14 @@ export const AlertZeroPageHeader: React.FC<AlertZeroPageHeaderProps> = ({
         >
           <EuiFlexItem grow={false}>
             <div
-              aria-label={i18n.translate('xpack.alertzero.hero.alertZeroIconAriaLabel', {
-                defaultMessage: 'AlertZero',
-              })}
-              role="img"
+              {...(showAgentLoader
+                ? {}
+                : {
+                    role: 'img' as const,
+                    'aria-label': i18n.translate('xpack.alertzero.hero.alertZeroIconAriaLabel', {
+                      defaultMessage: 'AlertZero',
+                    }),
+                  })}
               css={css`
                 align-items: center;
                 border: 1px solid ${euiTheme.colors.lightShade};
@@ -179,7 +187,17 @@ export const AlertZeroPageHeader: React.FC<AlertZeroPageHeaderProps> = ({
                   border-color ${euiTheme.animation.slow} ease;
               `}
             >
-              <EuiIcon type="sun" size="m" aria-hidden={true} />
+              {showAgentLoader ? (
+                // POC: same 16px loader as the workers panel, in the sun's place.
+                <EuiAgentLoader
+                  size="m"
+                  aria-label={i18n.translate('xpack.alertzero.hero.agentLoadingAriaLabel', {
+                    defaultMessage: 'Workers are running',
+                  })}
+                />
+              ) : (
+                <EuiIcon type="sun" size="m" aria-hidden={true} />
+              )}
               <span
                 style={{
                   display: 'inline-block',
