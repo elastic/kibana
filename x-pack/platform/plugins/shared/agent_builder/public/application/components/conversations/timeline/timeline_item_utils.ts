@@ -99,6 +99,8 @@ export const accumulatorToItem = (
     item.response = response;
   } else if (streaming?.message) {
     item.response = { message: streaming.message };
+  } else if (streaming?.thinking) {
+    item.thinking = streaming.thinking;
   }
 
   if (

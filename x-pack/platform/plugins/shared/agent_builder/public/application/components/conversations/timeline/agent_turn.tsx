@@ -6,7 +6,14 @@
  */
 
 import React from 'react';
-import { EuiAgentLoader, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import {
+  EuiAgentLoader,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiShimmeringText,
+  useEuiFontSize,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { AgentDefinition } from '@kbn/agent-builder-common';
@@ -30,6 +37,10 @@ import {
 
 const loadingLabel = i18n.translate('xpack.agentBuilder.timeline.agentLoading', {
   defaultMessage: 'Agent is generating a response',
+});
+
+const thinkingFallback = i18n.translate('xpack.agentBuilder.timeline.agentThinkingLabel', {
+  defaultMessage: 'Thinking...',
 });
 
 interface AgentTurnProps {
@@ -122,6 +133,8 @@ const AgentTurnComponent: React.FC<AgentTurnProps> = ({
   isResuming = false,
 }) => {
   const { euiTheme } = useEuiTheme();
+  // EuiShimmeringText sets the `m` size inline. EuiText `s` is `m` scaled by `s`.
+  const thinkingFont = useEuiFontSize('m', { customScale: 's' });
   const conversationId = useConversationId();
   const { status, startedAt, origin } = item;
   const isLoading = status === 'running' || isResuming;
@@ -167,6 +180,14 @@ const AgentTurnComponent: React.FC<AgentTurnProps> = ({
                 origin={origin}
                 startedAt={startedAt ?? new Date().toISOString()}
               />
+            </EuiFlexItem>
+          )}
+          {isLoading && !item.response?.message && (
+            <EuiFlexItem grow={false}>
+              {/* POC: shimmer the thinking line until the answer text starts. */}
+              <EuiShimmeringText data-test-subj="agentBuilderThinkingText" style={thinkingFont}>
+                {item.thinking || thinkingFallback}
+              </EuiShimmeringText>
             </EuiFlexItem>
           )}
           {content && <EuiFlexItem grow={false}>{content}</EuiFlexItem>}

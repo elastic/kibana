@@ -56,3 +56,22 @@ declare module '@elastic/eui/src/components/loading' {
   export type { EuiAgentLoaderProps } from '@elastic/eui/src/components/loading/loading_agent';
   export { EuiAgentLoader } from '@elastic/eui/src/components/loading/loading_agent';
 }
+
+// POC: EuiShimmeringText ships in local EUI optimize/es before eui.d.ts regenerates.
+declare module '@elastic/eui/src/components/loading/loading_shimmer_text' {
+  import type { FunctionComponent, HTMLAttributes } from 'react';
+
+  export interface EuiShimmeringTextProps {
+    children?: string;
+    texts?: string[];
+    isLoading?: boolean;
+  }
+  export const EuiShimmeringText: FunctionComponent<
+    Omit<HTMLAttributes<HTMLSpanElement>, 'children' | 'color'> & EuiShimmeringTextProps
+  >;
+}
+
+declare module '@elastic/eui/src/components/loading' {
+  export type { EuiShimmeringTextProps } from '@elastic/eui/src/components/loading/loading_shimmer_text';
+  export { EuiShimmeringText } from '@elastic/eui/src/components/loading/loading_shimmer_text';
+}
