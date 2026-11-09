@@ -17,8 +17,8 @@ import {
   SESSIONS_TRANSFORM_ID,
   SESSIONS_VERSION,
 } from '../../common/sessions';
+import { SESSION_ATTRIBUTE_FIELDS } from '../../common/session_attribute_fields';
 import {
-  SESSION_ATTRIBUTE_FIELDS,
   SESSION_ATTRIBUTE_GROUPS,
   buildSessionsTransform,
   sessionsDestPipeline,

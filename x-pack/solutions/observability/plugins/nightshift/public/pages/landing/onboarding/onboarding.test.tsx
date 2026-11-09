@@ -37,7 +37,9 @@ jest.mock('../../../data/sandbox_connectors/use_connectors_by_type', () => ({
   useConnectorsByType: jest.fn(),
 }));
 jest.mock('../header', () => ({ NightshiftHeader: () => null }));
-jest.mock('./intro_banner', () => ({ OnboardingIntroBanner: () => null }));
+jest.mock('./intro_banner', () => ({
+  OnboardingIntroBanner: () => <div data-test-subj="introBannerStub" />,
+}));
 jest.mock('./nightshift_setup_prompt', () => ({ NightshiftSetupPrompt: () => null }));
 jest.mock('./add_data_step', () => ({
   ...jest.requireActual('./add_data_step'),
@@ -205,6 +207,24 @@ describe('NightshiftOnboarding', () => {
     });
   });
 
+  describe('while suggestions are shown, before any investigation', () => {
+    beforeEach(() => {
+      mockOnboarding({ explored: true });
+      mockConnectors({ '.new_relic': 1, '.github': 0 });
+    });
+
+    it('does not let the user jump ahead to a step not done yet', () => {
+      renderOnboarding();
+
+      expect(currentStep()).toBe('investigate');
+      expect(linkedSteps()).toEqual(['addData', 'connectSources']);
+
+      fireEvent.click(screen.getByTestId('nightshiftOnboardingStepLink-connectSources'));
+      expect(currentStep()).toBe('connectSources');
+      expect(linkedSteps()).toEqual(['addData']);
+    });
+  });
+
   describe('after the first investigation', () => {
     const investigation = { id: 'inv-1' } as InvestigationSummary;
 
@@ -222,12 +242,24 @@ describe('NightshiftOnboarding', () => {
       expect(screen.queryByText('Back to suggestions')).not.toBeInTheDocument();
     });
 
+    it('keeps the intro banner on Add data and Connect other sources, not on later steps', () => {
+      renderOnboarding(investigation);
+
+      expect(screen.queryByTestId('introBannerStub')).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('nightshiftOnboardingStepLink-connectSources'));
+      expect(screen.getByTestId('introBannerStub')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('nightshiftOnboardingStepLink-addData'));
+      expect(screen.getByTestId('introBannerStub')).toBeInTheDocument();
+    });
+
     it('returns to a completed step and forward again through the card, not by rerunning', () => {
       renderOnboarding(investigation);
 
       fireEvent.click(screen.getByTestId('nightshiftOnboardingStepLink-connectSources'));
       expect(currentStep()).toBe('connectSources');
-      expect(linkedSteps()).toEqual(['addData', 'investigate', 'automate']);
+      expect(linkedSteps()).toEqual(['addData', 'investigate']);
       expect(screen.queryByText('Back to suggestions')).not.toBeInTheDocument();
 
       fireEvent.click(screen.getByTestId('nightshiftOnboardingConnectSourcesProceedButton'));

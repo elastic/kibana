@@ -82,10 +82,6 @@ const SKIP_LABEL = i18n.translate('xpack.nightshift.onboarding.skipStepButton', 
   defaultMessage: 'Skip this step',
 });
 
-const DONE_LABEL = i18n.translate('xpack.nightshift.onboarding.doneButton', {
-  defaultMessage: 'Done',
-});
-
 const OPTIONAL_HINT = i18n.translate('xpack.nightshift.onboarding.steps.optionalHint', {
   defaultMessage: 'Optional',
 });
@@ -101,8 +97,9 @@ const ENABLE_SECTION_TITLE = i18n.translate('xpack.nightshift.onboarding.enable.
 
 /**
  * First-run Nightshift: enable the space, add telemetry data, connect other sources, try a first
- * investigation, create a first automation. Creating an automation keeps you on the last step so
- * you can add more; Skip/Done dismisses. Completed steps other than Enable link back to themselves.
+ * investigation, create a first automation. The steps follow from the latest onboarding workflow
+ * execution, the space's latest investigation and (in the page) whether an automation exists.
+ * Completed steps other than Enable link back to themselves.
  */
 export function NightshiftOnboarding({
   latestInvestigation,
@@ -229,21 +226,29 @@ export function NightshiftOnboarding({
     const index = ONBOARDING_STEP_IDS.indexOf(id);
     return index < currentIndex ? 'complete' : index > currentIndex ? 'disabled' : 'current';
   };
-  const backTo = (id: 'addData' | 'connectSources') =>
-    statusOf(id) === 'complete' ? () => setStepOverride(id) : undefined;
+  // Links follow what the user has done, not position: a passed step stays reachable from a
+  // detour to an earlier one, and a step not done yet cannot be jumped to. Enable never links.
+  const isDone: Record<OnboardingStepId, boolean> = {
+    enable: isEnabled,
+    addData: isEnabled && (isConnected || hasTelemetrySource),
+    connectSources: isConnected,
+    investigate: latestInvestigation != null,
+    automate: false,
+  };
+  const linkTo = (id: 'addData' | 'connectSources' | 'investigate') =>
+    isDone[id] && step !== id ? () => setStepOverride(id) : undefined;
 
   const steps: Record<OnboardingStepId, OnboardingStepState> = {
     enable: { status: statusOf('enable') },
-    addData: { status: statusOf('addData'), onClick: backTo('addData') },
+    addData: { status: statusOf('addData'), onClick: linkTo('addData') },
     connectSources: {
       status: statusOf('connectSources'),
-      onClick: backTo('connectSources'),
+      onClick: linkTo('connectSources'),
       hint: step === 'connectSources' ? OPTIONAL_HINT : undefined,
     },
     investigate: {
       status: statusOf('investigate'),
-      onClick:
-        isConnected && step !== 'investigate' ? () => setStepOverride('investigate') : undefined,
+      onClick: linkTo('investigate'),
       hint:
         step === 'investigate' && execution?.status === 'running'
           ? i18n.translate('xpack.nightshift.onboarding.steps.analyzingHint', {
@@ -251,13 +256,7 @@ export function NightshiftOnboarding({
             })
           : undefined,
     },
-    automate: {
-      status: statusOf('automate'),
-      onClick:
-        latestInvestigation && isConnected && step !== 'automate'
-          ? () => setStepOverride(undefined)
-          : undefined,
-    },
+    automate: { status: statusOf('automate') },
   };
 
   const stepAction =
@@ -304,15 +303,16 @@ export function NightshiftOnboarding({
       )
     ) : step === 'automate' ? (
       <EuiButton
-        fill={hasAutomation}
         fullWidth
         size="s"
-        iconType={hasAutomation ? 'check' : 'sortRight'}
-        iconSide={hasAutomation ? 'left' : 'right'}
+        iconType="sortRight"
+        iconSide="right"
         onClick={onFinish}
         data-test-subj="nightshiftOnboardingFinishButton"
       >
-        {hasAutomation ? DONE_LABEL : SKIP_LABEL}
+        {i18n.translate('xpack.nightshift.onboarding.doItLaterButton', {
+          defaultMessage: "I'll do it later",
+        })}
       </EuiButton>
     ) : undefined;
 
@@ -340,8 +340,7 @@ export function NightshiftOnboarding({
     >
       <NightshiftHeader title={HERO_TITLES[step]} isGreetingInline greetingName={greetingName} />
       <EuiSpacer size="l" />
-      {(step === 'enable' ||
-        ((step === 'addData' || step === 'connectSources') && !isConnected)) && (
+      {(step === 'enable' || step === 'addData' || step === 'connectSources') && (
         <>
           <OnboardingIntroBanner />
           <EuiSpacer size="xl" />

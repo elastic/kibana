@@ -16,7 +16,7 @@ export const kbnHandlebars = (): readonly Step[] => [
     command: '.buildkite/scripts/steps/test/kbn_handlebars.sh',
     label: 'Check @kbn/handlebars for upstream differences',
     key: 'kbn_handlebars',
-    agents: spotAgent('n2-standard-2', spotZones.centralFCA),
+    agents: spotAgent('n2-standard-2', spotZones.n2),
     depends_on: ['build'],
     timeout_in_minutes: 5,
     retry: retry.agentLossOrAnyOnce,

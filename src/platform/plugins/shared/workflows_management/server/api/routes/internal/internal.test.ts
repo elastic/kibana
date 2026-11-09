@@ -28,6 +28,7 @@ import {
 } from '../../../lib/workflow_history_pagination_error';
 import { ManagedWorkflowUpdateForbiddenError } from '../../managed_workflow_errors';
 import type { RouteDependencies } from '../types';
+import { WORKFLOW_READ_WITH_MANAGED_SECURITY } from '../utils/route_security';
 
 describe('Internal Routes', () => {
   type MockRouteHandler = (
@@ -47,6 +48,7 @@ describe('Internal Routes', () => {
   }
 
   let routeHandlers: Record<string, { handler: MockRouteHandler }>;
+  let routeSecurity: Record<string, unknown>;
   let mockApi: {
     disableAllWorkflows: jest.MockedFunction<
       (spaceId: string, request: unknown) => Promise<unknown>
@@ -99,6 +101,7 @@ describe('Internal Routes', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     routeHandlers = {};
+    routeSecurity = {};
     mockTriggerEventsIsEnabled = true;
     mockSearchTriggerEventLog.mockResolvedValue({
       hits: [],
@@ -148,11 +151,10 @@ describe('Internal Routes', () => {
 
     const mockRouter = {
       versioned: {
-        get: jest
-          .fn()
-          .mockImplementation((config: { path: string }) =>
-            createVersionedRoute('GET', config.path)
-          ),
+        get: jest.fn().mockImplementation((config: { path: string; security?: unknown }) => {
+          routeSecurity[`GET:${config.path}`] = config.security;
+          return createVersionedRoute('GET', config.path);
+        }),
         post: jest
           .fn()
           .mockImplementation((config: { path: string }) =>
@@ -268,18 +270,29 @@ describe('Internal Routes', () => {
     expect(routeHandlers[`GET:/internal/workflows/workflow/{id}/history`]).toBeDefined();
   });
 
+  it('should surface managed workflow read on the workflow history route security', () => {
+    expect(routeSecurity[`GET:/internal/workflows/workflow/{id}/history`]).toEqual(
+      WORKFLOW_READ_WITH_MANAGED_SECURITY
+    );
+  });
+
   it('should register the workflow restore route handler', () => {
     expect(
       routeHandlers[`POST:/internal/workflows/workflow/{id}/history/{eventId}/restore`]
     ).toBeDefined();
   });
 
+  const createHistoryRequest = (
+    options: Parameters<typeof httpServerMock.createKibanaRequest>[0],
+    authzResult: Record<string, boolean> = { [WorkflowsManagementApiActions.read]: true }
+  ) => Object.assign(httpServerMock.createKibanaRequest(options), { authzResult });
+
   it('should call api.getHistoryForWorkflow with page/per_page defaults', async () => {
     const history = { page: 1, perPage: 20, total: 1, items: [{ id: 'event-1' }] };
     mockApi.getHistoryForWorkflow.mockResolvedValue(history);
 
     const response = httpServerMock.createResponseFactory();
-    const request = httpServerMock.createKibanaRequest({ params: { id: 'wf-1' } });
+    const request = createHistoryRequest({ params: { id: 'wf-1' } });
 
     await routeHandlers[`GET:/internal/workflows/workflow/{id}/history`].handler(
       mockContext,
@@ -291,6 +304,7 @@ describe('Internal Routes', () => {
       page: 1,
       perPage: 20,
       request,
+      allowManagedWorkflowRead: false,
     });
     expect(response.ok).toHaveBeenCalledWith({ body: history });
   });
@@ -299,7 +313,7 @@ describe('Internal Routes', () => {
     mockApi.getHistoryForWorkflow.mockResolvedValue({ page: 2, perPage: 5, total: 0, items: [] });
 
     const response = httpServerMock.createResponseFactory();
-    const request = httpServerMock.createKibanaRequest({
+    const request = createHistoryRequest({
       params: { id: 'wf-1' },
       query: { page: 2, per_page: 5 },
     });
@@ -314,14 +328,58 @@ describe('Internal Routes', () => {
       page: 2,
       perPage: 5,
       request,
+      allowManagedWorkflowRead: false,
     });
+  });
+
+  it('allows managed workflow history for callers who can read managed workflows', async () => {
+    mockApi.getHistoryForWorkflow.mockResolvedValue({ page: 1, perPage: 20, total: 0, items: [] });
+
+    const response = httpServerMock.createResponseFactory();
+    const request = createHistoryRequest(
+      { params: { id: 'wf-1' } },
+      {
+        [WorkflowsManagementApiActions.read]: true,
+        [WorkflowsManagementApiActions.readManaged]: true,
+      }
+    );
+
+    await routeHandlers[`GET:/internal/workflows/workflow/{id}/history`].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(mockApi.getHistoryForWorkflow).toHaveBeenCalledWith('wf-1', 'default', {
+      page: 1,
+      perPage: 20,
+      request,
+      allowManagedWorkflowRead: true,
+    });
+  });
+
+  it('returns forbidden for workflow history without workflow read privilege', async () => {
+    const response = httpServerMock.createResponseFactory();
+    const request = createHistoryRequest(
+      { params: { id: 'wf-1' } },
+      { [WorkflowsManagementApiActions.readManaged]: true }
+    );
+
+    await routeHandlers[`GET:/internal/workflows/workflow/{id}/history`].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(response.forbidden).toHaveBeenCalled();
+    expect(mockApi.getHistoryForWorkflow).not.toHaveBeenCalled();
   });
 
   it('returns bad request when change history is not initialized', async () => {
     mockApi.getHistoryForWorkflow.mockRejectedValue(new WorkflowChangeHistoryDisabledError());
 
     const response = httpServerMock.createResponseFactory();
-    const request = httpServerMock.createKibanaRequest({ params: { id: 'wf-1' } });
+    const request = createHistoryRequest({ params: { id: 'wf-1' } });
 
     await routeHandlers[`GET:/internal/workflows/workflow/{id}/history`].handler(
       mockContext,
@@ -347,7 +405,7 @@ describe('Internal Routes', () => {
     mockApi.getHistoryForWorkflow.mockRejectedValue(new WorkflowHistoryPaginationError());
 
     const response = httpServerMock.createResponseFactory();
-    const request = httpServerMock.createKibanaRequest({
+    const request = createHistoryRequest({
       params: { id: 'wf-1' },
       query: { page: 101, per_page: 100 },
     });
@@ -362,6 +420,7 @@ describe('Internal Routes', () => {
       page: 101,
       perPage: 100,
       request,
+      allowManagedWorkflowRead: false,
     });
     expect(response.badRequest).toHaveBeenCalledWith({
       body: {
