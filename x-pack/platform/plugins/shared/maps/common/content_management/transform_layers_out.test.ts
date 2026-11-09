@@ -19,7 +19,7 @@ describe('transformLayersOut', () => {
             dataViewId: '1234',
             esql: 'from kibana_sample_data_logs | keep geo.coordinates',
           } as any,
-        },
+        } as any,
       ])
     ).toMatchInlineSnapshot(`
       Array [

@@ -58,15 +58,11 @@ function renameKeysDeep(value: unknown, keyMap: Map<string, string>): unknown {
 
 function renameStyleKeys(layer: any, keyMap: Map<string, string>) {
   const style = layer?.style;
-  if (!style || typeof style !== 'object' || (style.type !== 'VECTOR' && style.type !== 'HEATMAP')) return layer;
-  const { __styleMeta, ...rest } = style;
+  if (!style || typeof style !== 'object' || (style.type !== 'VECTOR' && style.type !== 'HEATMAP'))
+    return layer;
   return {
     ...layer,
-    style: {
-      ...(renameKeysDeep(rest, keyMap) as object),
-      // style meta is keyed by user field names and is not part of the renamed schema
-      ...(__styleMeta ? { __styleMeta } : {}),
-    },
+    style: renameKeysDeep(style, keyMap),
   };
 }
 

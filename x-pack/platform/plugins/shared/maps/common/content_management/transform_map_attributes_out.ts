@@ -7,9 +7,8 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 import type { TimeRange } from '@kbn/es-query';
-import type { MapAttributes, StoredMapAttributes } from '../../server';
+import type { MapAttributes, StoredLayer, StoredMapAttributes } from '../../server';
 import { injectReferences } from '../migrations/references';
-import type { LayerDescriptor } from '../descriptor_types';
 import { mapStateKeys, uiStateKeys } from './stored_map_attributes';
 import type { StoredRefreshInterval } from '../../server/saved_objects/types';
 import { transformLayersOut } from './transform_layers_out';
@@ -34,7 +33,7 @@ export function transformMapAttributesOut(
 function parseLayerListJSON(layerListJSON?: string) {
   if (!layerListJSON) return {};
 
-  const layers = parseJSON<Partial<LayerDescriptor[]>>([], layerListJSON);
+  const layers = parseJSON<unknown[]>([], layerListJSON) as StoredLayer[];
   return { layers: transformLayersOut(layers) };
 }
 

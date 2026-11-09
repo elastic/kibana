@@ -23,7 +23,6 @@ const storedLayer = {
       labelZoomRange: { options: { useLayerZoomRange: false, minZoom: 1, maxZoom: 5 } },
     },
     isTimeAware: true,
-    __styleMeta: { fieldMeta: { isEnabled: { range: { min: 0 } } } },
   },
 };
 const layer = {
@@ -42,7 +41,6 @@ const layer = {
       label_zoom_range: { options: { use_layer_zoom_range: false, min_zoom: 1, max_zoom: 5 } },
     },
     is_time_aware: true,
-    __styleMeta: { fieldMeta: { isEnabled: { range: { min: 0 } } } },
   },
 };
 
