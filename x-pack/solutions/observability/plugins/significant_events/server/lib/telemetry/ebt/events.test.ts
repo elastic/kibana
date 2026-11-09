@@ -6,6 +6,7 @@
  */
 
 import {
+  agentBuilderKnowledgeIndicatorCreatedEventType,
   agentToolEventCreateEventType,
   agentToolEventInvestigationAttachEventType,
   agentToolEventStatusUpdateEventType,
@@ -38,4 +39,12 @@ describe('EBT event types', () => {
       [fingerprint, groupHash].forEach((field) => expect(isOptional(field)).toBe(true));
     }
   );
+
+  it('lets a failed knowledge indicator create omit the id but not the space', () => {
+    const { space_id: spaceId, knowledge_indicator_id: id } =
+      agentBuilderKnowledgeIndicatorCreatedEventType.schema;
+
+    expect(isOptional(spaceId)).toBe(false);
+    expect(isOptional(id)).toBe(true);
+  });
 });

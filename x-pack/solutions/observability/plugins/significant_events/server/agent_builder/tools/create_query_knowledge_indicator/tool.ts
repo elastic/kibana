@@ -17,12 +17,14 @@ import type {
 import type { Logger } from '@kbn/core/server';
 import { MAX_ID_LENGTH, upsertStreamQueryRequestSchema } from '@kbn/significant-events-schema';
 import dedent from 'dedent';
+import { v4 as uuidv4 } from 'uuid';
 import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { getSourceWriteConflictMetadata } from '../../../lib/errors/source_write_conflict_error';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
+import { trackTelemetryBestEffort } from '../bulk_write';
 import { createQueryKnowledgeIndicatorToolHandler } from './handler';
 import {
   loadSourceCatalog,
@@ -130,6 +132,7 @@ export function createQueryKnowledgeIndicatorTool({
     handler: async ({ slug, ...queryInput }, context) => {
       const { request } = context;
       let sourceId = '';
+      const queryId = queryInput.id ?? uuidv4();
 
       try {
         const scopedClients = await getScopedClients({
@@ -151,15 +154,22 @@ export function createQueryKnowledgeIndicatorTool({
         const { id } = await createQueryKnowledgeIndicatorToolHandler({
           kiClient,
           source,
-          queryInput,
+          queryInput: { ...queryInput, id: queryId },
           logger,
         });
 
-        telemetry.trackAgentBuilderKnowledgeIndicatorCreated({
-          ki_kind: 'query',
-          tool_id: 'ki_query_create',
-          success: true,
-          source_id: source.id,
+        trackTelemetryBestEffort({
+          logger,
+          description: 'ki_query_create telemetry',
+          track: () =>
+            telemetry.trackAgentBuilderKnowledgeIndicatorCreated({
+              ki_kind: 'query',
+              tool_id: 'ki_query_create',
+              success: true,
+              source_id: source.id,
+              space_id: request.spaceId,
+              knowledge_indicator_id: id,
+            }),
         });
 
         return {
@@ -185,12 +195,20 @@ export function createQueryKnowledgeIndicatorTool({
           logger.debug(String(error));
         }
 
-        telemetry.trackAgentBuilderKnowledgeIndicatorCreated({
-          ki_kind: 'query',
-          tool_id: 'ki_query_create',
-          success: false,
-          source_id: sourceId,
-          error_message: message,
+        // Only a caller-named id survives a failed write.
+        trackTelemetryBestEffort({
+          logger,
+          description: 'failed ki_query_create telemetry',
+          track: () =>
+            telemetry.trackAgentBuilderKnowledgeIndicatorCreated({
+              ki_kind: 'query',
+              tool_id: 'ki_query_create',
+              success: false,
+              source_id: sourceId,
+              space_id: request.spaceId,
+              ...(queryInput.id !== undefined ? { knowledge_indicator_id: queryInput.id } : {}),
+              error_message: message,
+            }),
         });
 
         return {

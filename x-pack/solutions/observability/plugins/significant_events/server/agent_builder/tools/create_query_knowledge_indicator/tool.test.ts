@@ -6,6 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
@@ -165,15 +166,42 @@ describe('ki_query_create tool', () => {
     });
 
     const context = createMockToolContext();
+    context.request = httpServerMock.createKibanaRequest({ spaceId: 'space-a' });
     await invokeHandler(tool as never, queryParams, context);
 
-    expect(telemetry.trackAgentBuilderKnowledgeIndicatorCreated).toHaveBeenCalledWith(
+    const [[reported]] = jest.mocked(telemetry.trackAgentBuilderKnowledgeIndicatorCreated).mock
+      .calls;
+    expect(reported).toEqual(
       expect.objectContaining({
         ki_kind: 'query',
         tool_id: 'ki_query_create',
         success: true,
         source_id: 'logs.test',
+        space_id: 'space-a',
+        knowledge_indicator_id: expect.any(String),
       })
+    );
+    expect(queryClient.upsertQuery).toHaveBeenCalledWith(
+      'logs.test',
+      expect.objectContaining({ id: reported.knowledge_indicator_id })
+    );
+  });
+
+  it('reports the caller-named id when the write fails', async () => {
+    (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
+    const tool = createQueryKnowledgeIndicatorTool({
+      getScopedClients: createScopedClients({
+        upsertQuery: jest.fn().mockRejectedValue(new Error('upsert failed')),
+      }),
+      server,
+      logger,
+      telemetry,
+    });
+
+    await invokeHandler(tool as never, { ...queryParams, id: 'query-1' }, createMockToolContext());
+
+    expect(telemetry.trackAgentBuilderKnowledgeIndicatorCreated).toHaveBeenCalledWith(
+      expect.objectContaining({ success: false, knowledge_indicator_id: 'query-1' })
     );
   });
 
@@ -194,17 +222,22 @@ describe('ki_query_create tool', () => {
     });
 
     const context = createMockToolContext();
+    context.request = httpServerMock.createKibanaRequest({ spaceId: 'space-a' });
     await invokeHandler(tool as never, queryParams, context);
 
-    expect(telemetry.trackAgentBuilderKnowledgeIndicatorCreated).toHaveBeenCalledWith(
+    const [[reported]] = jest.mocked(telemetry.trackAgentBuilderKnowledgeIndicatorCreated).mock
+      .calls;
+    expect(reported).toEqual(
       expect.objectContaining({
         ki_kind: 'query',
         tool_id: 'ki_query_create',
         success: false,
         source_id: 'logs.test',
+        space_id: 'space-a',
         error_message: 'upsert failed',
       })
     );
+    expect(reported).not.toHaveProperty('knowledge_indicator_id');
   });
 
   it('does not let a Nightshift reader create a query KI', async () => {

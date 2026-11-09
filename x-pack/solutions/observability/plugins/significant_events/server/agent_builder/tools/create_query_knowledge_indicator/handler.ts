@@ -15,7 +15,6 @@ import {
 } from '@kbn/streams-schema';
 import { type StreamQuery } from '@kbn/significant-events-schema';
 import type { Logger } from '@kbn/core/server';
-import { v4 as uuidv4 } from 'uuid';
 import type { KnowledgeIndicatorClient } from '../../../lib/knowledge_indicators';
 import {
   EsqlQueryValidationError,
@@ -23,7 +22,7 @@ import {
 } from '../../../lib/significant_events/validate_esql_query';
 
 export interface QueryInput {
-  id?: string;
+  id: string;
   title: string;
   description: string;
   esql: StreamQuery['esql'];
@@ -64,7 +63,7 @@ export async function createQueryKnowledgeIndicatorToolHandler({
   }
 
   const query: StreamQuery = {
-    id: queryInput.id ?? uuidv4(),
+    id: queryInput.id,
     type: deriveQueryType(queryInput.esql.query),
     title: queryInput.title,
     description: queryInput.description,
