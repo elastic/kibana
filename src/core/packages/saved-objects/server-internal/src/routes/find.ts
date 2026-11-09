@@ -26,6 +26,7 @@ import type { Logger } from '@kbn/logging';
 import type { InternalSavedObjectRouter } from '../internal_types';
 import { catchAndReturnBoomErrors, throwOnHttpHiddenTypes } from './utils';
 import { logWarnOnExternalRequest } from './utils';
+import { getUnsupportedFindAggsReason } from './validate_find_aggs';
 
 interface RouteDependencies {
   config: SavedObjectConfig;
@@ -223,6 +224,10 @@ For transferring or backing up saved objects, prefer the export API (\`POST /api
             },
           });
         }
+      }
+      const unsupportedAggsReason = getUnsupportedFindAggsReason(aggs);
+      if (unsupportedAggsReason) {
+        return response.badRequest({ body: { message: unsupportedAggsReason } });
       }
       const { savedObjects } = await context.core;
 
