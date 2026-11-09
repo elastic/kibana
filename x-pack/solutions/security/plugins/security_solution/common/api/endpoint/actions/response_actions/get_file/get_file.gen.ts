@@ -32,7 +32,19 @@ export const GetFileRouteRequestBody = lazySchema(() =>
           .string()
           .min(1)
           .max(4096)
+          .optional()
           .describe('The full file path to retrieve from the endpoint.'),
+        /**
+         * The list of file paths to retrieve from the endpoint. Cannot be used together with `path`. Valid for the Elastic Defend Endpoint agent type only, and requires an Endpoint that supports the `get_file_multi_path` capability.
+         */
+        paths: z
+          .array(z.string().min(1).max(4096))
+          .min(1)
+          .max(100)
+          .optional()
+          .describe(
+            'The list of file paths to retrieve from the endpoint. Cannot be used together with `path`. Valid for the Elastic Defend Endpoint agent type only, and requires an Endpoint that supports the `get_file_multi_path` capability.'
+          ),
       }),
     })
   )

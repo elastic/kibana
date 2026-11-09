@@ -224,6 +224,35 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       }
     }
 
+    // Get File: `paths` (retrieve multiple files in one action) requires that the Endpoint supports
+    // it (via the `get_file_multi_path` capability).
+    if (actionRequest.command === 'get-file' && actionRequest.parameters?.paths !== undefined) {
+      const endpointMetadata = await this.options.endpointService
+        .getEndpointMetadataService(this.options.spaceId)
+        .findHostMetadataForFleetAgents(actionRequest.endpoint_ids);
+
+      const unsupportedAgents = endpointMetadata
+        .filter(
+          (endpointMeta) => !endpointMeta.Endpoint.capabilities?.includes('get_file_multi_path')
+        )
+        .map(
+          (endpointMeta) =>
+            `${endpointMeta.agent.id} / ${endpointMeta.host.hostname} (Agent v.${endpointMeta.agent.version})`
+        );
+
+      if (unsupportedAgents.length > 0) {
+        return {
+          isValid: false,
+          error: new ResponseActionsClientError(
+            `The following agent IDs do not support the get-file \`paths\` parameter: ${unsupportedAgents.join(
+              ', '
+            )}`,
+            400
+          ),
+        };
+      }
+    }
+
     if (actionRequest.command === 'runscript') {
       let scriptDetails: EndpointScript;
 

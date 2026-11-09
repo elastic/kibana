@@ -177,6 +177,11 @@ export class EndpointMetadataGenerator extends BaseDataGenerator {
       capabilities.push('memdump_raw');
     }
 
+    // v9.7.0 introduced `get-file` support for multiple paths (`parameters.paths`)
+    if (gte(agentVersion, '9.7.0')) {
+      capabilities.push('get_file_multi_path');
+    }
+
     const hostMetadataDoc: HostMetadataInterface = {
       '@timestamp': ts,
       event: {

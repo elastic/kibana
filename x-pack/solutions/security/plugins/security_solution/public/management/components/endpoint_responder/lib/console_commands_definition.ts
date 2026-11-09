@@ -38,6 +38,7 @@ import type {
   ResponseActionAgentType,
 } from '../../../../../common/endpoint/service/response_actions/constants';
 import {
+  GET_FILE_MAX_PATHS,
   RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY,
   RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP,
 } from '../../../../../common/endpoint/service/response_actions/constants';
@@ -83,6 +84,23 @@ const emptyArgumentValidator = (argData: ParsedArgData): true | string => {
       defaultMessage: 'Argument cannot be empty',
     });
   }
+};
+
+/** Ensures that every value entered for an argument that allows multiples is not empty */
+const everyArgumentValueNotEmptyValidator = (argData: ParsedArgData): true | string => {
+  if (argData.length === 0) {
+    return emptyArgumentValidator(argData);
+  }
+
+  for (const argValue of argData) {
+    const result = emptyArgumentValidator([argValue]);
+
+    if (result !== true) {
+      return result;
+    }
+  }
+
+  return true;
 };
 
 const pidValidator = (argData: ParsedArgData): true | string => {
@@ -265,6 +283,19 @@ export const getEndpointConsoleCommands = ({
         }
       : {};
 
+  // `get-file` with multiple `--path` arguments applies only to the Elastic Defend Endpoint and
+  // requires that the host's Endpoint supports it (via the `get_file_multi_path` capability).
+  const getFileAllowsMultiplePaths = agentType === 'endpoint';
+  const isGetFileMultiPathSupportedByEndpoint = (
+    endpointCapabilities as EndpointCapabilities[]
+  ).includes('get_file_multi_path');
+  const getFilePathAbout = !getFileAllowsMultiplePaths
+    ? CONSOLE_COMMANDS.getFile.args.path.about
+    : CONSOLE_COMMANDS.getFile.args.path.aboutMultiple +
+      (isGetFileMultiPathSupportedByEndpoint
+        ? ''
+        : ` (${CONSOLE_COMMANDS.getFile.args.path.multipleNotSupported})`);
+
   let consoleCommands: CommandDefinition[] = [
     {
       name: 'isolate',
@@ -425,10 +456,26 @@ export const getEndpointConsoleCommands = ({
       args: {
         path: {
           required: true,
-          allowMultiples: false,
-          about: CONSOLE_COMMANDS.getFile.args.path.about,
+          allowMultiples: getFileAllowsMultiplePaths,
+          about: getFilePathAbout,
           validate: (argData) => {
-            return emptyArgumentValidator(argData);
+            const emptyResult = everyArgumentValueNotEmptyValidator(argData);
+
+            if (emptyResult !== true) {
+              return emptyResult;
+            }
+
+            if (argData.length > 1) {
+              if (!isGetFileMultiPathSupportedByEndpoint) {
+                return CONSOLE_COMMANDS.getFile.args.path.multipleNotSupported;
+              }
+
+              if (argData.length > GET_FILE_MAX_PATHS) {
+                return CONSOLE_COMMANDS.getFile.args.path.tooManyPaths(GET_FILE_MAX_PATHS);
+              }
+            }
+
+            return true;
           },
         },
         ...commandCommentArgument(),
