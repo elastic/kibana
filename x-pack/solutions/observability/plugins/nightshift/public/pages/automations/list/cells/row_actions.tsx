@@ -15,6 +15,7 @@ import {
   EuiToolTip,
   useEuiI18n,
 } from '@elastic/eui';
+import { cloneActionIcon, deleteActionIcon } from '../../action_menu_icons';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../../common/ebt_constants';
 import type { Automation } from '../../../../data/automations/use_automations';
 import { RUN_AUTOMATION_LABEL, getRunAutomationDisabledReason } from '../../utils/run_automation';
@@ -80,7 +81,7 @@ export const AutomationActions = ({
           </EuiContextMenuItem>,
           <EuiContextMenuItem
             key="clone"
-            icon="copy"
+            icon={cloneActionIcon}
             onClick={(event: React.MouseEvent) => {
               setIsOpen(false);
               onClone();
@@ -95,7 +96,7 @@ export const AutomationActions = ({
           </EuiContextMenuItem>,
           <EuiContextMenuItem
             key="delete"
-            icon="trash"
+            icon={deleteActionIcon}
             color="danger"
             onClick={(event: React.MouseEvent) => {
               setIsOpen(false);
