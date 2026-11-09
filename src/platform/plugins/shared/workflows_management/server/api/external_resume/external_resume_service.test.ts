@@ -67,7 +67,12 @@ describe('external resume service', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     workflowsService.getStepExecution.mockResolvedValue(createStepExecution());
-    workflowsService.claimHitlStepForExternalResume.mockResolvedValue(true);
+    workflowsService.claimHitlStepForExternalResume.mockResolvedValue({
+      respondedBy: 'external_resume:step-exec-1',
+      respondedAt: '2026-04-29T10:00:00.000Z',
+      channel: 'external',
+      strippedToken: { hash: TOKEN_HASH, expiresAt: FUTURE_DATE },
+    });
     workflowsService.getWorkflowsExecutionEngine.mockResolvedValue({
       resumeWorkflowExecution: jest.fn().mockResolvedValue({
         resumedBy: 'external_resume:step-exec-1',
@@ -103,6 +108,57 @@ describe('external resume service', () => {
       undefined,
       { resumedBy: 'external_resume:step-exec-1' }
     );
+  });
+
+  it('resumes a waiting waitForApproval step with structured approved input', async () => {
+    workflowsService.getStepExecution.mockResolvedValue(
+      createStepExecution({
+        stepType: 'waitForApproval',
+        input: {
+          [HITL_TOKEN_HASH_INPUT_FIELD]: TOKEN_HASH,
+          [HITL_TOKEN_EXPIRES_AT_INPUT_FIELD]: FUTURE_DATE,
+        },
+      })
+    );
+
+    await resumeWorkflowExecutionExternallyWithInput(workflowsService, {
+      executionId: 'exec-1',
+      stepId: 'step-exec-1',
+      spaceId: 'default',
+      token: TOKEN,
+      input: { approved: true },
+    });
+
+    const engine = await workflowsService.getWorkflowsExecutionEngine();
+    expect(engine.resumeWorkflowExecution).toHaveBeenCalledWith(
+      'exec-1',
+      'default',
+      { approved: true },
+      undefined,
+      { resumedBy: 'external_resume:step-exec-1' }
+    );
+  });
+
+  it('rejects waitForApproval structured resume without approved boolean', async () => {
+    workflowsService.getStepExecution.mockResolvedValue(
+      createStepExecution({
+        stepType: 'waitForApproval',
+        input: {
+          [HITL_TOKEN_HASH_INPUT_FIELD]: TOKEN_HASH,
+          [HITL_TOKEN_EXPIRES_AT_INPUT_FIELD]: FUTURE_DATE,
+        },
+      })
+    );
+
+    await expect(
+      resumeWorkflowExecutionExternallyWithInput(workflowsService, {
+        executionId: 'exec-1',
+        stepId: 'step-exec-1',
+        spaceId: 'default',
+        token: TOKEN,
+        input: {},
+      })
+    ).rejects.toEqual(new ExternalResumeError('approved boolean is required', 400, true));
   });
 
   it('resumes a waiting waitForApproval step via GET', async () => {
@@ -312,7 +368,7 @@ describe('external resume service', () => {
   });
 
   it('rejects when the waiting step was already claimed', async () => {
-    workflowsService.claimHitlStepForExternalResume.mockResolvedValue(false);
+    workflowsService.claimHitlStepForExternalResume.mockResolvedValue(null);
 
     await expect(
       resumeWorkflowExecutionExternallyWithInput(workflowsService, {

@@ -89,4 +89,21 @@ apiTest.describe('Inference settings CRUD', { tag: [...INFERENCE_LOCAL_TAGS] }, 
     expect(response).toHaveStatusCode(200);
     expect(response.body.data.features).toStrictEqual(settings.features);
   });
+
+  apiTest('endpoint parameters persist across GET requests', async ({ apiClient }) => {
+    const settings = { features: [SAMPLE_FEATURES.agentBuilderWithParameters] };
+
+    const putResponse = await apiClient.put(INFERENCE_SETTINGS_API_PATH, {
+      headers: { ...COMMON_HEADERS, ...cookieHeader },
+      body: JSON.stringify(settings),
+    });
+    expect(putResponse).toHaveStatusCode(200);
+
+    const response = await apiClient.get(INFERENCE_SETTINGS_API_PATH, {
+      headers: { ...COMMON_HEADERS, ...cookieHeader },
+    });
+
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.data.features).toStrictEqual(settings.features);
+  });
 });

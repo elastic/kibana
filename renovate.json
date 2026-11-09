@@ -43,7 +43,6 @@
       "matchDepNames": [
         "clean-webpack-plugin",
         "css-loader",
-        "mini-css-extract-plugin",
         "sass-loader",
         "style-loader",
         "val-loader",
@@ -164,7 +163,6 @@
         "playwright",
         "pngjs",
         "rxjs-marbles",
-        "sharp",
         "superagent",
         "supertest"
       ],
@@ -756,8 +754,6 @@
     {
       "groupName": "LaunchDarkly",
       "matchDepNames": [
-        "@openfeature/launchdarkly-client-provider",
-        "@launchdarkly/js-client-sdk",
         "@launchdarkly/node-server-sdk",
         "@launchdarkly/openfeature-node-server"
       ],
@@ -779,7 +775,12 @@
     },
     {
       "groupName": "OpenFeature",
-      "matchDepNames": ["@openfeature/core", "@openfeature/server-sdk", "@openfeature/web-sdk"],
+      "matchDepNames": [
+        "@openfeature/core",
+        "@openfeature/ofrep-web-provider",
+        "@openfeature/server-sdk",
+        "@openfeature/web-sdk"
+      ],
       "reviewers": ["team:kibana-security", "team:kibana-core"],
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "backport:skip", "Team:Security", "Team:Core"],
@@ -1342,15 +1343,6 @@
     {
       "groupName": "yauzl/yazl",
       "matchDepNames": ["yazl", "yauzl", "@types/yazl", "@types/yauzl"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Operations"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
-      "groupName": "package.json/pnpm-lock.yaml utils",
-      "matchDepNames": ["sort-package-json"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
@@ -1973,15 +1965,6 @@
       "enabled": true
     },
     {
-      "groupName": "minify",
-      "matchDepNames": ["terser-webpack-plugin"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Operations"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "@testing-library",
       "matchDepNames": [
         "@testing-library/dom",
@@ -2358,7 +2341,6 @@
       "reviewers": [
         "team:search-ml-ux",
         "team:kibana-core",
-        "team:kibana-security",
         "team:stack-monitoring"
       ],
       "matchBaseBranches": ["main"],
@@ -2367,8 +2349,7 @@
         "backport:skip",
         "Team:AI Infra",
         "Team:Monitoring",
-        "Team:Core",
-        "Team:Security"
+        "Team:Core"
       ],
       "minimumReleaseAge": "14 days",
       "enabled": true

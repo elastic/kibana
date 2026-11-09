@@ -14,6 +14,7 @@ import { buildNewlyHighCriticalCountQuery } from '../queries/tile_newly_high_cri
 import { buildRiskMoversCountQuery } from '../queries/tile_risk_movers_query';
 import { readFirstNumber } from './read_first_number';
 import { isDeltaStillComing, usePreviousPeriod } from './use_previous_period';
+import type { TileDeltaFailure } from '../data';
 
 interface RiskTileDeltaOptions {
   spaceId: string;
@@ -24,6 +25,8 @@ interface RiskTileDeltaOptions {
   isReady: boolean;
   /** The live count, which the previous period is compared with. */
   count: number;
+  /** True when the count came back: a failed, timed-out or skipped count has no change to show. */
+  hasCount: boolean;
 }
 
 interface RiskTileDefinition {
@@ -47,12 +50,17 @@ const useRiskTileDelta = (
     entityFilters = EMPTY_ENTITY_FILTERS,
     isReady,
     count,
+    hasCount,
   }: RiskTileDeltaOptions
 ): {
   delta: number | undefined;
+  /** The count over the previous period, which the sparkline starts from. */
+  previous: number | undefined;
   isDeltaLoading: boolean;
   isHistoryMissing: boolean;
   reachesBack: boolean | undefined;
+  /** Set when the history check or the previous-period query failed. */
+  failure: TileDeltaFailure | undefined;
 } => {
   const {
     data: resolvedIndex,
@@ -67,23 +75,25 @@ const useRiskTileDelta = (
     [buildPrevious, spaceId, index, timeRange, entityFilterClauses]
   );
 
-  const { previous, reachesBack, isHistoryMissing, isError } = usePreviousPeriod({
+  const { previous, reachesBack, isHistoryMissing, isError, failure } = usePreviousPeriod({
     tileKey,
     // Both risk tiles read the same history with the same query: one request.
     guardKey: RISK_HISTORY_GUARD_KEY,
     guardQuery,
     previousQuery,
-    enabled: !skip && isReady && count > 0 && !isIndexLoading && Boolean(index),
+    enabled: !skip && isReady && hasCount && !isIndexLoading && Boolean(index),
     parse: (raw) => readFirstNumber(raw, 'value'),
   });
 
   return {
     delta: previous !== undefined ? count - previous : undefined,
+    previous,
     isHistoryMissing,
     reachesBack,
+    failure,
     isDeltaLoading: isDeltaStillComing({
       skip,
-      count,
+      hasCount,
       // Once the index has loaded, a missing one means the query can never run.
       isUnavailable: !skip && !isIndexLoading && !index,
       isError,

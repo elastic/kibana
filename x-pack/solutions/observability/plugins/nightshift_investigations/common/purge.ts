@@ -8,7 +8,7 @@
 /** The stores a purge touches; every scope is space-scoped. */
 export const KNOWLEDGE_PURGE_SCOPES = [
   'memory_pages',
-  'cortex_pages',
+  'wiki_pages',
   'decision_trees',
   'investigations',
 ] as const;
@@ -47,7 +47,7 @@ export const KNOWLEDGE_PURGE_CONFIRMATION = 'PURGE';
 
 export const emptyPurgeCounts = (): KnowledgePurgeCounts => ({
   memory_pages: 0,
-  cortex_pages: 0,
+  wiki_pages: 0,
   decision_trees: 0,
   investigations: 0,
 });

@@ -6,6 +6,7 @@
  */
 
 import { randomUUID } from 'crypto';
+import moment from 'moment';
 import { type Interval, intervalFromDate } from '@kbn/task-manager-plugin/server/lib/intervals';
 import {
   Action,
@@ -15,6 +16,17 @@ import {
 import { unflatten } from '../helpers';
 import type { AnyObject, Nullable } from '../types';
 import { generateDEK, encryptDEKWithRSA, encryptField, encryptDocumentAsJson } from './encryption';
+
+const DATE_ONLY_FORMAT = 'YYYY-MM-DD';
+
+/**
+ * Formats a value as a `YYYY-MM-DD` date. Strings keep the date as written (offset ignored),
+ * `Date` instances use their UTC date. Fixed-width dates compare correctly as strings.
+ */
+export const toDateOnly = (value: string | Date): string =>
+  (typeof value === 'string' ? moment.parseZone(value) : moment.utc(value)).format(
+    DATE_ONLY_FORMAT
+  );
 
 export function shouldExecute(startDate: Date, endDate: Date, interval: Interval): boolean {
   const nextDate = intervalFromDate(startDate, interval);

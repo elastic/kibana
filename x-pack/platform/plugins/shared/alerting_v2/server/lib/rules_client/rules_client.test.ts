@@ -10,7 +10,7 @@ import { ByteSizeValue } from '@kbn/config-schema';
 import { BULK_FILTER_MAX_RESOURCES, BULK_QUERY_SAMPLE_SIZE } from '@kbn/alerting-v2-schemas';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { coreMock } from '@kbn/core/server/mocks';
+import { createConfigServiceMock } from '../services/config_service/config_service.mock';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { TaskAlreadyRunningError } from '@kbn/task-manager-plugin/server/lib/errors';
@@ -155,6 +155,7 @@ describe('RulesClient', () => {
         ruleEvents: { enabled: false, dataRetention: '90d' },
         alertActions: { dispatcher: { enabled: false, dataRetention: '90d' } },
       },
+      dispatcher: { paused: false, run: { timeout: '1m', alerts: { max: 10000 } } },
       rules: {
         minimumScheduleInterval: '1m',
         maxScheduledPerMinute: 400,
@@ -167,22 +168,18 @@ describe('RulesClient', () => {
       },
     };
 
-    const pluginConfigAccessor =
-      coreMock.createPluginInitializerContext<PluginConfig>(config).config;
-
     return new RulesClient(
       clientRequest,
       rulesSavedObjectService,
       taskManager,
       userService,
       'space-1',
-      pluginConfigAccessor,
+      createConfigServiceMock(config),
       rulesSavedObjectService,
       ruleEventPublisher,
       loggerService,
       artifactTypeRegistry,
-      'user',
-      rulesClientOptions
+      { actor: 'user', options: rulesClientOptions }
     );
   }
 
@@ -656,6 +653,12 @@ describe('RulesClient', () => {
       ]);
       expect(rulesSavedObjectService.bulkDelete).toHaveBeenCalledWith(['rule-on']);
       expect(taskManager.bulkRemove).toHaveBeenCalledWith(['task:rule-on']);
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          labels: { code: ALERTING_LOG_CODES.RULE_TASK_SCHEDULE_FAILED },
+        })
+      );
       expect(res.items).toHaveLength(1);
       expect(res.items[0].id).toBe('rule-off');
       expect(res.errors).toEqual([
@@ -2851,6 +2854,12 @@ describe('RulesClient', () => {
         { id: 'rule-2', error: expect.objectContaining({ code: 'TASK_MANAGER_DRIFT' }) },
       ]);
       expect(mockLogger.error).toHaveBeenCalledTimes(1);
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          labels: { code: ALERTING_LOG_CODES.RULE_TASK_MANAGER_DRIFT },
+        })
+      );
     });
 
     it('surfaces TASK_MANAGER_DRIFT for per-task failures in the bulkRemove statuses (no throw)', async () => {
@@ -3039,6 +3048,12 @@ describe('RulesClient', () => {
 
       expect(rulesSavedObjectService.bulkUpdate).not.toHaveBeenCalled();
       expect(taskManager.bulkRemove).toHaveBeenCalledWith(['task:rule-1', 'task:rule-2']);
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          labels: { code: ALERTING_LOG_CODES.RULE_TASK_SCHEDULE_FAILED },
+        })
+      );
       expect(res.affected_count).toBe(0);
       expect(res.errors).toEqual([
         { id: 'rule-1', error: expect.objectContaining({ code: 'TASK_MANAGER_DRIFT' }) },
@@ -3298,10 +3313,17 @@ describe('RulesClient', () => {
 
       // Rotation updates the existing task in place (preserving its schedule
       // interval) and regenerates the key while invalidating the old one.
+      // `includeRunningTasks` keeps the rotation independent of the rule's run
+      // cadence: a task that is mid-run rotates instead of being skipped.
       expect(taskManager.bulkUpdateSchedules).toHaveBeenCalledWith(
         ['task:fallback'],
         { interval: '5m' },
-        expect.objectContaining({ request, regenerateApiKey: true, cloneApiKey: true })
+        expect.objectContaining({
+          request,
+          regenerateApiKey: true,
+          cloneApiKey: true,
+          includeRunningTasks: true,
+        })
       );
 
       // Only audit metadata is stamped — no rule state is changed.
@@ -3395,8 +3417,10 @@ describe('RulesClient', () => {
       rulesSavedObjectService.bulkGetByIds.mockResolvedValueOnce([
         { id: 'rule-1', attributes: baseSoAttrs, version: 'v1' },
       ]);
-      // A running task is skipped by bulkUpdateSchedules — absent from both
-      // `tasks` and `errors`. Its real status is then observed via bulkGet.
+      // `includeRunningTasks` means a mid-run task is normally rotated, but it can
+      // still be skipped if it moved into `running` after the update read it.
+      // A skipped task is absent from both `tasks` and `errors`, so its real
+      // status is then observed via bulkGet.
       taskManager.bulkUpdateSchedules.mockResolvedValueOnce(rotationResult([]));
       taskManager.bulkGet.mockResolvedValueOnce(
         taskStatusResult([{ id: 'task:fallback', status: 'running' }])

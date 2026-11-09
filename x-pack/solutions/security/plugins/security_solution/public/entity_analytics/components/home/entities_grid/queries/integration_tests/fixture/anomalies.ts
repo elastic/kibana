@@ -18,22 +18,23 @@ import type { FixtureIndex } from './fixture_index';
 
 export const ANOMALY_JOB_ID = 'test_security_job';
 
-/**
- * Identity fields of the records. Alice's EUID comes from `user.name` with `event.module`,
- * web-2's from `host.id`, as on their entity docs.
- */
-const ANOMALY_IDENTITIES: ReadonlyArray<Record<string, string>> = [
+type Identity = Record<string, string>;
+
+/** Alice's EUID comes from `user.name` with `event.module`, web-2's from `host.id`, as on their entity docs. */
+const SHARED_INDEX_IDENTITIES: readonly Identity[] = [
   { 'user.name': 'alice', 'event.module': 'okta' },
   { 'user.name': 'alice', 'event.module': 'okta' },
   { 'host.id': 'h2', 'host.name': 'web-2' },
-  // Records of an alias of host:h1 and of an alias of user:bob@okta.
+];
+
+/** Records of an alias of host:h1 and of an alias of user:bob@okta. */
+const CUSTOM_INDEX_IDENTITIES: readonly Identity[] = [
   { 'host.id': 'h4', 'host.name': 'web-4' },
   { 'user.name': 'carol', 'event.module': 'okta' },
 ];
 
-/** Final records of an installed security job; matches the queries' `.ml-anomalies-shared*`. */
-export const anomaliesIndex: FixtureIndex = {
-  index: '.ml-anomalies-shared',
+const buildAnomalyIndex = (index: string, identities: readonly Identity[]): FixtureIndex => ({
+  index,
   fields: {
     ...keywordsOf(EUID_SOURCE_FIELDS),
     '@timestamp': DATE,
@@ -43,7 +44,7 @@ export const anomaliesIndex: FixtureIndex = {
     record_score: FLOAT,
   },
   buildDocs: (now) =>
-    ANOMALY_IDENTITIES.map((identity) => ({
+    identities.map((identity) => ({
       '@timestamp': toIsoAgo(now, 2 * HOUR_MS),
       job_id: ANOMALY_JOB_ID,
       result_type: 'record',
@@ -51,4 +52,13 @@ export const anomaliesIndex: FixtureIndex = {
       record_score: 50,
       ...identity,
     })),
-};
+});
+
+/** Final records of an installed security job, in the shared results index. */
+export const anomaliesIndex = buildAnomalyIndex('.ml-anomalies-shared', SHARED_INDEX_IDENTITIES);
+
+/** Records of the same job in its own results index: only `.ml-anomalies-*` reaches them, not `.ml-anomalies-shared*`. */
+export const customAnomaliesIndex = buildAnomalyIndex(
+  `.ml-anomalies-custom-${ANOMALY_JOB_ID}`,
+  CUSTOM_INDEX_IDENTITIES
+);

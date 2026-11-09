@@ -14,11 +14,12 @@ import FLOOR_ALERT_TRIAGE_YAML from './floor_alert_triage.yaml';
 import FLOOR_ATTACK_DISCOVERY_YAML from './floor_attack_discovery.yaml';
 import FORENSICS_ENDPOINT_ANALYSIS_YAML from './forensics_endpoint_analysis.yaml';
 import {
+  attackDiscoveryMaxAlerts,
   renderAlertTriageWorkerYaml,
+  renderAttackDiscoveryWorkerYaml,
   renderCommonWorkerYaml,
   renderRuleCoverageWorkerYaml,
   renderRuleTuningWorkerYaml,
-  renderScheduledWorkerYaml,
 } from './worker_template_values';
 
 const HOSTILE_ID = 'we"ird: id\n#x/kibana';
@@ -46,7 +47,7 @@ const workers: Array<[string, (serviceAccountId?: string) => string]> = [
   [
     'Attack Discovery',
     (serviceAccountId) =>
-      renderScheduledWorkerYaml(FLOOR_ATTACK_DISCOVERY_YAML, {
+      renderAttackDiscoveryWorkerYaml(FLOOR_ATTACK_DISCOVERY_YAML, {
         ...shared,
         scheduleInterval: '24h',
         serviceAccountId,
@@ -102,6 +103,35 @@ describe('renderRunAs', () => {
     const settings = settingsOf(render(HOSTILE_ID)) as { run_as?: string };
 
     expect(settings.run_as).toBe(HOSTILE_ID);
+  });
+});
+
+describe('Attack Discovery alert cap', () => {
+  it.each([
+    ['1m', 100],
+    ['15m', 104],
+    ['1h', 416],
+    ['2h', 833],
+    ['143m', 993],
+    ['24h', 10000],
+    ['1d', 10000],
+    ['2d', 10000],
+  ])('prorates %s to %i alerts', (interval, alerts) => {
+    expect(attackDiscoveryMaxAlerts(interval)).toBe(alerts);
+  });
+
+  it('renders the cap into the floor worker and leaves no placeholder behind', () => {
+    const rendered = renderAttackDiscoveryWorkerYaml(FLOOR_ATTACK_DISCOVERY_YAML, {
+      ...shared,
+      scheduleInterval: '1h',
+    });
+
+    expect(rendered).not.toMatch(/__WORKER_[A-Z0-9_]+__/);
+    expect(
+      (parse(rendered) as { consts: { worker_settings: { maxAlerts: number } } }).consts
+        .worker_settings.maxAlerts
+    ).toBe(416);
+    expect((parse(rendered) as { settings: { timeout: string } }).settings.timeout).toBe('12h');
   });
 });
 

@@ -86,6 +86,14 @@ const attackSearchHit = {
   flattened: {},
 };
 
+const attackSearchHitWithAlerts = {
+  ...attackSearchHit,
+  flattened: {
+    'kibana.alert.attack_discovery.alert_ids': ['uuid-1', 'alert-2', 'alert-2'],
+    'kibana.alert.attack_discovery.replacements': { 'uuid-1': 'original-alert-1' },
+  },
+};
+
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
@@ -642,6 +650,22 @@ describe('useFlyoutV2RestoreFromUrl', () => {
     });
   });
 
+  it('opens the restored flyout with the API of the latest render', () => {
+    const firstRenderFlyoutApi = createFlyoutApiMock();
+    (useFlyoutApi as jest.Mock).mockReturnValueOnce(firstRenderFlyoutApi);
+    const { rerender } = renderRestore(
+      buildUrl([{ kind: 'document', documentId: 'doc-1', indexName: 'logs-*' }])
+    );
+
+    rerender();
+    act(() => {
+      jest.runAllTimers();
+    });
+
+    expect(firstRenderFlyoutApi.openDocumentFlyoutFromIndex).not.toHaveBeenCalled();
+    expect(mockFlyoutApi.openDocumentFlyoutFromIndex).toHaveBeenCalledTimes(1);
+  });
+
   it('opens a documentFromPattern flyout', () => {
     renderRestore(
       buildUrl([{ kind: 'documentFromPattern', documentId: 'doc-1', indexName: '.siem-signals-*' }])
@@ -797,6 +821,26 @@ describe('useFlyoutV2RestoreFromUrl', () => {
         entityId: 'user:alice',
         subTab: 'resolution',
       })
+    );
+  });
+
+  it('opens entityRiskInputs with the scopeId when present on the descriptor', () => {
+    renderRestore(
+      buildUrl([
+        {
+          kind: 'entityRiskInputs',
+          entityType: 'host',
+          entityName: 'h',
+          entityId: 'eid',
+          scopeId: 'entity-analytics-new-entities-table-7d',
+        },
+      ])
+    );
+    act(() => {
+      jest.runAllTimers();
+    });
+    expect(mockFlyoutApi.openEntityRiskInputs).toHaveBeenCalledWith(
+      expect.objectContaining({ scopeId: 'entity-analytics-new-entities-table-7d' })
     );
   });
 
@@ -1088,12 +1132,10 @@ describe('useFlyoutV2RestoreFromUrl', () => {
   // Attack tools (need attack hit fetch)
   // -----------------------------------------------------------------------
 
-  it('opens attackCorrelations with the resolved attack hit', () => {
-    withHit(attackSearchHit);
+  it('opens attackCorrelations with the alert ids derived from the resolved attack hit', () => {
+    withHit(attackSearchHitWithAlerts);
     renderRestore(
-      buildUrl([
-        { kind: 'attackCorrelations', attackId: 'atk-1', indexName: '.alerts-*', alertIds: ['a1'] },
-      ])
+      buildUrl([{ kind: 'attackCorrelations', attackId: 'atk-1', indexName: '.alerts-*' }])
     );
     act(() => {
       jest.runAllTimers();
@@ -1101,7 +1143,23 @@ describe('useFlyoutV2RestoreFromUrl', () => {
     expect(mockFlyoutApi.openAttackCorrelations).toHaveBeenCalledWith(
       expect.objectContaining({
         hit: expect.objectContaining({ id: 'attack-1' }),
-        alertIds: ['a1'],
+        alertIds: ['original-alert-1', 'alert-2'],
+      })
+    );
+  });
+
+  it('opens attackEntities with the alert ids derived from the resolved attack hit', () => {
+    withHit(attackSearchHitWithAlerts);
+    renderRestore(
+      buildUrl([{ kind: 'attackEntities', attackId: 'atk-1', indexName: '.alerts-*' }])
+    );
+    act(() => {
+      jest.runAllTimers();
+    });
+    expect(mockFlyoutApi.openAttackEntities).toHaveBeenCalledWith(
+      expect.objectContaining({
+        hit: expect.objectContaining({ id: 'attack-1' }),
+        alertIds: ['original-alert-1', 'alert-2'],
       })
     );
   });
@@ -1109,9 +1167,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
   it('falls back to attack flyout after the fetch settles with no hit', () => {
     loadingHit();
     const { rerender } = renderRestore(
-      buildUrl([
-        { kind: 'attackCorrelations', attackId: 'atk-1', indexName: '.alerts-*', alertIds: [] },
-      ])
+      buildUrl([{ kind: 'attackCorrelations', attackId: 'atk-1', indexName: '.alerts-*' }])
     );
     act(() => {
       jest.runAllTimers();
@@ -1147,9 +1203,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
     );
     withHit(attackSearchHit);
     renderRestore(
-      buildUrl([
-        { kind: 'attackCorrelations', attackId: 'atk-1', indexName: '.alerts-*', alertIds: ['a1'] },
-      ])
+      buildUrl([{ kind: 'attackCorrelations', attackId: 'atk-1', indexName: '.alerts-*' }])
     );
     act(() => {
       jest.runAllTimers();
@@ -1173,9 +1227,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
         : { dataView: mockDataView, status: 'ready' }
     );
     renderRestore(
-      buildUrl([
-        { kind: 'attackCorrelations', attackId: 'atk-1', indexName: '.alerts-*', alertIds: ['a1'] },
-      ])
+      buildUrl([{ kind: 'attackCorrelations', attackId: 'atk-1', indexName: '.alerts-*' }])
     );
     act(() => {
       jest.runAllTimers();

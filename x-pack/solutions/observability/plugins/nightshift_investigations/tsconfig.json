@@ -8,13 +8,16 @@
     "server/**/*",
     "public/**/*",
     "integration_tests/**/*",
+    "scripts/**/*",
     "test/scout*/**/*"
   ],
   "exclude": ["target/**/*"],
   "kbn_references": [
+    "@kbn/dev-cli-runner",
     "@kbn/share-plugin",
     "@kbn/deeplinks-observability",
     "@kbn/nightshift-decision-trees",
+    "@kbn/config",
     "@kbn/config-schema",
     "@kbn/core",
     "@kbn/core-http-server",
@@ -39,6 +42,7 @@
     "@kbn/nightshift-shared",
     "@kbn/agent-builder-server",
     "@kbn/agentic-investigations-plugin",
+    "@kbn/evals-plugin",
     "@kbn/storage-adapter",
     "@kbn/agent-builder-genai-utils",
     "@kbn/i18n",
@@ -50,6 +54,8 @@
     "@kbn/es-types",
     "@kbn/rule-registry-plugin",
     "@kbn/actions-plugin",
+    "@kbn/actions-types",
+    "@kbn/connector-specs",
     "@kbn/alerting-plugin",
     "@kbn/sandbox-plugin",
     "@kbn/context-engine-plugin",
@@ -67,6 +73,9 @@
     "@kbn/proposals-common",
     "@kbn/core-security-common",
     "@kbn/eval-kql",
-    "@kbn/rrule"
+    "@kbn/rrule",
+    "@kbn/inference-tracing",
+    "@kbn/server-route-repository-utils",
+    "@kbn/cloud-plugin"
   ]
 }

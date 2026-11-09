@@ -17,6 +17,7 @@ const HOOK_FORM_LIB_DEPRECATION =
 
 export const kibanaRules: DummyRuleMap = {
   '@kbn/eslint/no_async_promise_body': 'error',
+  '@kbn/eslint/no_uncleared_race_timeout': 'error',
   '@kbn/eslint/no_async_foreach': 'error',
   '@kbn/eslint/require_kibana_feature_privileges_naming': 'warn',
   '@kbn/eslint/no_trailing_import_slash': 'error',
@@ -179,7 +180,7 @@ export const kibanaOverrides: OxlintOverride[] = [
       'src/platform/packages/shared/kbn-zod/**',
     ],
     rules: {
-      '@kbn/eslint/require_lazy_zod_schema': 'warn',
+      '@kbn/eslint/require_lazy_zod_schema': 'error',
     },
   },
   {
