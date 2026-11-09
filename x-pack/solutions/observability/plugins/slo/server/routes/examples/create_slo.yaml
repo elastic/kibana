@@ -342,7 +342,7 @@ responses:
                   }
                 ]
           badRequestObjectiveExample:
-            summary: Objective target out of range
+            summary: Objective target out of range (domain validation, for example a target of 1.5)
             value:
               statusCode: 400
               error: Bad Request

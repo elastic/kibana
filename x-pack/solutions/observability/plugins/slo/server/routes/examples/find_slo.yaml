@@ -149,16 +149,16 @@ responses:
                   artifacts:
                     dashboards: []
                   summary:
-                    status: DEGRADING
+                    status: VIOLATED
                     sliValue: 0.9812
                     errorBudget:
                       initial: 0.01
                       consumed: 1.88
                       remaining: -0.88
                       isEstimated: false
-                    fiveMinuteBurnRate: 0
-                    oneHourBurnRate: 0
-                    oneDayBurnRate: 0
+                    fiveMinuteBurnRate: 2.1
+                    oneHourBurnRate: 1.9
+                    oneDayBurnRate: 1.88
                     summaryUpdatedAt: '2025-01-12T10:05:00.000Z'
                   groupings:
                     host.name: web-02
@@ -171,10 +171,10 @@ responses:
               total: 2
               searchAfter:
                 - 0
-                - HEALTHY
+                - VIOLATED
                 - 1620783d-cacd-4c40-a56e-8f25fd9ecda1
-                - web-01
-              size: 1
+                - web-02
+              size: 25
               results:
                 - id: 1620783d-cacd-4c40-a56e-8f25fd9ecda1
                   name: Host Availability
@@ -223,6 +223,53 @@ responses:
                   groupings:
                     host.name: web-01
                   instanceId: web-01
+                - id: 1620783d-cacd-4c40-a56e-8f25fd9ecda1
+                  name: Host Availability
+                  description: Availability of each host, reported as one SLO instance per host.name
+                  indicator:
+                    type: sli.kql.custom
+                    params:
+                      index: logs-*
+                      good: 'event.outcome : "success"'
+                      total: 'event.outcome : *'
+                      timestampField: '@timestamp'
+                  timeWindow:
+                    duration: 30d
+                    type: rolling
+                  budgetingMethod: occurrences
+                  objective:
+                    target: 0.99
+                  settings:
+                    syncDelay: 1m
+                    frequency: 1m
+                    preventInitialBackfill: false
+                  revision: 1
+                  enabled: true
+                  tags: []
+                  createdAt: '2025-01-12T10:03:19.000Z'
+                  updatedAt: '2025-01-12T10:03:19.000Z'
+                  groupBy:
+                    - host.name
+                  version: 2
+                  createdBy: elastic
+                  updatedBy: elastic
+                  artifacts:
+                    dashboards: []
+                  summary:
+                    status: VIOLATED
+                    sliValue: 0.9812
+                    errorBudget:
+                      initial: 0.01
+                      consumed: 1.88
+                      remaining: -0.88
+                      isEstimated: false
+                    fiveMinuteBurnRate: 2.1
+                    oneHourBurnRate: 1.9
+                    oneDayBurnRate: 1.88
+                    summaryUpdatedAt: '2025-01-12T10:05:00.000Z'
+                  groupings:
+                    host.name: web-02
+                  instanceId: web-02
   '400':
     description: Bad request
     content:

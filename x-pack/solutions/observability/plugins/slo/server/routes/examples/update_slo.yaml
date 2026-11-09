@@ -182,7 +182,7 @@ responses:
                 - web-service
               createdAt: '2025-01-12T10:03:19.000Z'
               updatedAt: '2025-03-26T14:30:00.000Z'
-              groupBy: 
+              groupBy:
                 - service.name
                 - host.name
               version: 2

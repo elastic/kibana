@@ -6,6 +6,7 @@
  */
 
 import fs from 'fs';
+import { STATUS_CODES } from 'http';
 import path from 'path';
 import { parse } from 'yaml';
 import { z } from '@kbn/zod';
@@ -170,6 +171,9 @@ describe('SLO routes OpenAPI examples', () => {
     it('has query parameter examples that parse with the route query schema', () => {
       const query = getQueryObject(params?.shape.query);
       const examples = getQueryParamExamples(params);
+      if (examples && Object.keys(EXPECTED_QUERY_PARAM_EXAMPLES[endpoint] ?? []).length > 0) {
+        expect(query).toBeDefined();
+      }
       expect(Object.keys(examples).sort()).toEqual(
         [...(EXPECTED_QUERY_PARAM_EXAMPLES[endpoint] ?? [])].sort()
       );
@@ -227,7 +231,9 @@ describe('SLO routes OpenAPI examples', () => {
             name,
             violations: [],
           });
-          expect(value).toEqual(expect.objectContaining({ statusCode: Number(status) }));
+          expect(value).toEqual(
+            expect.objectContaining({ statusCode: Number(status), error: STATUS_CODES[status] })
+          );
           expect({
             name,
             ioTs: IO_TS_MESSAGE.test(String(Reflect.get(value ?? {}, 'message'))),
