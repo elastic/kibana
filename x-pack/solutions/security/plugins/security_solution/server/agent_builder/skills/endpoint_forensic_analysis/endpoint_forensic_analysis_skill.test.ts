@@ -283,13 +283,28 @@ describe('endpointForensicAnalysisSkill', () => {
     // The unconditional "call it first" phrasing is what made Process §1 and
     // Phase 0 contradict each other; it must be gone.
     expect(endpointForensicAnalysisSkill.content).not.toMatch(
-      /^Call `[^`]+` first with host names/m
+      /^Call `[^`]+` first with (?:the )?host names/m
+    );
+    expect(endpointForensicAnalysisSkill.content).toMatch(
+      /\*\*On the ES\|QL \/ Defend telemetry path only\*\*, call `[^`]+` first with the host names/
     );
   });
 
   it('requires resolve_agent_ids before dispatching a live query (review finding 16)', () => {
     expect(endpointForensicAnalysisSkill.content).toContain(
       '**Always** call `osquery.resolve_agent_ids` before `osquery.run_live_query`'
+    );
+  });
+
+  it('falls back to ES|QL when check_integration is not available', () => {
+    expect(endpointForensicAnalysisSkill.content).toContain(
+      'If `osquery.check_integration` is available, call it'
+    );
+    expect(endpointForensicAnalysisSkill.content).toContain(
+      'go straight to the ES|QL / Defend telemetry path'
+    );
+    expect(endpointForensicAnalysisSkill.content).not.toContain(
+      '1. Call `osquery.check_integration` to see'
     );
   });
 });

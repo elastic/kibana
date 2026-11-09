@@ -144,7 +144,7 @@ Only fall back to \`time_window_hours\` (a lookback from now) when no incident t
 
 Before selecting a query path, determine what data sources are available:
 
-1. Call \`osquery.check_integration\` to see if the Osquery integration is installed and agents are enrolled.
+1. If \`osquery.check_integration\` is available, call it to see if the Osquery integration is installed and agents are enrolled. If it is **not** available (the Osquery tools are not enabled in this deployment), skip Osquery entirely and go straight to the ES|QL / Defend telemetry path.
 2. **If Osquery IS installed and agents are enrolled**: for **live-state** questions (current processes, open sockets, loaded DLLs, registry keys as of now), route to the Osquery path (steps 2b–6b below). For **historical** questions (what happened in the past), use ES|QL on Defend telemetry.
 3. **If Osquery IS installed but NO agents are enrolled** (\`installed: true\`, \`agents_enrolled: false\`): live interrogation is impossible even though the integration exists. Route all questions to the ES|QL / Defend telemetry path and tell the analyst live host interrogation needs an agent enrolled in an Osquery-capable agent policy. Do **not** call \`osquery.run_live_query\` — it has no agent to run on.
 4. **If Osquery is NOT installed**: route all questions to the ES|QL / Defend telemetry path. Inform the analyst that live host interrogation requires the Osquery integration.
@@ -158,9 +158,7 @@ Both paths can be combined in a single investigation when both integrations are 
 ## Process
 
 ### 1. Discover telemetry scope
-Call \`${ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID}\` first with the host names and either the incident
-\`start\`/\`end\` or the \`time_window_hours\` from the question.
-**On the ES|QL / Defend telemetry path only**, call \`${ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID}\` first with host names and time window from the question. It resolves Defend telemetry indices and has no bearing on the Osquery live-state path — do not call it before \`osquery.run_live_query\`.
+**On the ES|QL / Defend telemetry path only**, call \`${ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID}\` first with the host names and either the incident \`start\`/\`end\` or the \`time_window_hours\` from the question. It resolves Defend telemetry indices and has no bearing on the Osquery live-state path — do not call it before \`osquery.run_live_query\`.
 
 ### 2a. Query with ES|QL (historical / Defend telemetry)
 Use \`platform.core.generate_esql\` then \`platform.core.execute_esql\` against the recommended Defend indices.
@@ -263,7 +261,7 @@ When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`s
 
 ## Tool Selection Guardrails
 
-- **Always** call \`osquery.check_integration\` before using any other \`osquery.*\` tool.
+- When \`osquery.check_integration\` is available, **always** call it before using any other \`osquery.*\` tool. When it is not available, do not use Osquery.
 - **Always** call \`${ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID}\` before ES|QL.
 - **Always** call \`${ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID}\` after reconstructing an attack on a host, to produce the structured indicators for downstream hunts.
 - **Always** use \`platform.core.generate_esql\` and \`platform.core.execute_esql\` for historical forensic answers.

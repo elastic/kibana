@@ -117,6 +117,26 @@ describe('resolveAgentIdsTool', () => {
     expect(data.guidance).toBeUndefined();
   });
 
+  it('matches the hostname case-insensitively and builds a case-insensitive kuery', async () => {
+    const { context, listAgents } = buildContext([
+      buildAgent({
+        id: 'mixed-case',
+        local_metadata: { host: { hostname: 'srv-dc01.corp.local', name: 'Srv-Dc01' } },
+      }),
+    ]);
+
+    const tool = resolveAgentIdsTool(context, loggerMock.create());
+    const result = await tool.handler({ hostnames: ['SRV-DC01'] }, {
+      request: {},
+      spaceId: 'default',
+    } as any);
+
+    expect(getResultData(result).resolved[0].agent_id).toBe('mixed-case');
+    const { kuery } = listAgents.mock.calls[0][0];
+    expect(kuery).toContain('local_metadata.host.hostname.keyword:*SRV-DC01*');
+    expect(kuery).toContain('local_metadata.host.name.keyword:*srv-dc01*');
+  });
+
   it('falls back to the most recently enrolled agent when none are online', async () => {
     const { context } = buildContext([
       buildAgent({ id: 'older', status: 'offline', enrolled_at: '2026-07-17T10:00:00.000Z' }),
