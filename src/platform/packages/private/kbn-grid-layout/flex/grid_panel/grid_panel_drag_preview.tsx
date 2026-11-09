@@ -37,7 +37,9 @@ export const GridPanelDragPreview = React.memo(() => {
             dragPreviewRef.current.style.display = 'none';
           } else {
             dragPreviewRef.current.style.display = 'block';
+            // mirror the sizing of a real panel so the preview matches the dragged control
             dragPreviewRef.current.style.width = `${panel.width}px`;
+            dragPreviewRef.current.style.flexGrow = panel.grow ? '1' : '0';
             dragPreviewRef.current.style.order = `${panel.order + 1}`;
           }
         });
