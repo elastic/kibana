@@ -65,6 +65,8 @@ const resolvePackIdByName = async (
 
   const phrase = `"${name.replace(/["\\]/g, '\\$&')}"`;
   const ids: string[] = [];
+  // True when the page cap ended the search while the route still had more hits to give.
+  let truncated = false;
   try {
     for (let page = 1; page <= FIND_MAX_PAGES; page++) {
       const { body } = await contextManager.callKibanaApi<FindPacksResponse>({
@@ -79,9 +81,19 @@ const resolvePackIdByName = async (
       }
 
       if (data.length < FIND_PAGE_SIZE || page * FIND_PAGE_SIZE >= (body.total ?? 0)) break;
+      if (page === FIND_MAX_PAGES) truncated = true;
     }
   } catch (error) {
     throw toPreDispatchReadError(`Finding the pack "${name}"`, error);
+  }
+
+  // An incomplete search can neither prove the name is missing nor that it is unique: a
+  // duplicate (or the match itself) may sit past the cap, so refuse instead of guessing.
+  if (truncated) {
+    throw stepError(
+      PreDispatchErrorCode.PACK_AMBIGUOUS,
+      `Too many packs match the name "${name}" to tell which one to run. Use a more specific name.`
+    );
   }
 
   if (ids.length === 0) {

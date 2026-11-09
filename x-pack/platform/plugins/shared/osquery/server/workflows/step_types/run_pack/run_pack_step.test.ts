@@ -44,7 +44,7 @@ const dispatchBody = {
     action_id: 'action-1',
     agents: ['agent-1'],
     queries: [
-      { id: 'cron', action_id: 'qa-cron' },
+      { id: 'cron', action_id: 'qa-cron', ecs_mapping: { 'cron.command': { field: 'command' } } },
       { id: 'launchd', action_id: 'qa-launchd' },
     ],
   },
@@ -169,6 +169,28 @@ describe('osquery.runPack step', () => {
       expect(state.queries).toEqual([
         { query_id: 'cron', action_id: 'qa-cron', ecs_keys: ['process.name'] },
         { query_id: 'launchd', action_id: 'qa-launchd', ecs_keys: ['host.name'] },
+      ]);
+    });
+
+    it('drops ecs_keys the pack had at read time when the route dispatched no mapping', async () => {
+      // The mapping was removed between the read and the POST: the route omits an empty mapping.
+      const { result } = start({
+        [POST]: () => ({
+          data: {
+            ...dispatchBody.data,
+            queries: [
+              { id: 'cron', action_id: 'qa-cron' },
+              { id: 'launchd', action_id: 'qa-launchd' },
+            ],
+          },
+        }),
+      });
+
+      const { state } = (await result) as { state: { queries: unknown[] } };
+
+      expect(state.queries).toEqual([
+        { query_id: 'cron', action_id: 'qa-cron', ecs_keys: [] },
+        { query_id: 'launchd', action_id: 'qa-launchd', ecs_keys: [] },
       ]);
     });
 

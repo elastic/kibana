@@ -280,6 +280,21 @@ describe('resolvePack', () => {
       });
     });
 
+    it('fails with PACK_AMBIGUOUS instead of guessing when the page cap ends the search early', async () => {
+      const fullPage = Array.from({ length: 100 }, (_, i) => ({
+        saved_object_id: `so-${i}`,
+        name: i === 0 ? 'My pack' : `My pack ${i}`,
+      }));
+      const find = jest.fn(() => ({ total: 5000, data: fullPage }));
+      const contextManager = createContextManager({ [FIND_PACKS]: find });
+
+      await expect(resolvePack(contextManager, { pack: 'My pack' })).rejects.toMatchObject({
+        details: { code: 'PACK_AMBIGUOUS' },
+        message: expect.stringContaining('Too many packs match'),
+      });
+      expect(find).toHaveBeenCalledTimes(10);
+    });
+
     it('fails with PACK_AMBIGUOUS when more than one pack has the name', async () => {
       const contextManager = createContextManager({
         [FIND_PACKS]: () => ({

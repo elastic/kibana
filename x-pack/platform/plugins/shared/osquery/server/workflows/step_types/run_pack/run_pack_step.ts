@@ -95,6 +95,8 @@ export const runPackStepDefinition = createPollServerStepDefinition({
       return { output: failedOutput(OutputErrorCode.DISPATCH_UNCONFIRMED) };
     }
 
+    // Known gap: the pack is validated above, then the route rebuilds its queries from `pack_id`.
+    // An edit to the pack in between is dispatched as saved, not as validated.
     return {
       state: {
         action_id: dispatched.actionId,
@@ -110,8 +112,10 @@ export const runPackStepDefinition = createPollServerStepDefinition({
         queries: dispatched.queries.map((query) => ({
           query_id: query.id || query.action_id,
           action_id: query.action_id,
-          // What the route dispatched wins over the pre-dispatch read of the pack.
-          ecs_keys: ecsKeysOf(query.ecs_mapping) ?? pack.ecsKeysByQuery[query.id ?? ''] ?? [],
+          // What the route dispatched is authoritative, over the pre-dispatch read of the pack: the
+          // route drops an empty `ecs_mapping`, so a query without one has no keys, even when the
+          // pack had a mapping at read time and lost it before dispatch.
+          ecs_keys: ecsKeysOf(query.ecs_mapping) ?? [],
         })),
       },
     };

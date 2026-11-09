@@ -74,10 +74,11 @@ export const createPrebuiltPackSelection = (http: HttpSetup): PropertySelectionH
 
   return {
     search: async (input) => {
-      const search = input.trim().toLowerCase();
+      const key = input.trim();
+      const search = key.toLowerCase();
       try {
         const packs = await listPacks();
-        lookupErrors.delete(search);
+        lookupErrors.delete(key);
 
         return packs.flatMap((pack) => {
           const value = storedValue(pack);
@@ -92,7 +93,7 @@ export const createPrebuiltPackSelection = (http: HttpSetup): PropertySelectionH
         });
       } catch (error) {
         lookupErrors.set(
-          search,
+          key,
           failureReason(
             error,
             i18n.translate('xpack.osquery.workflows.selection.prebuiltPack.requestFailed', {

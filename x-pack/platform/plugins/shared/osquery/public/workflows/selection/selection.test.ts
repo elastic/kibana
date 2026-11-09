@@ -249,6 +249,16 @@ describe('osquery workflow step pickers', () => {
       expect(details.message).toBe('No pack named "My pack" in this space.');
     });
 
+    it('resolves to null and says so when more packs match than one page holds', async () => {
+      const selection = createPackSelection(http);
+      http.get.mockResolvedValue({ data: [pack], total: 250 });
+
+      expect(await selection.resolve('My pack', context('pack'))).toBeNull();
+      const details = await selection.getDetails('My pack', context('pack'), null);
+
+      expect(details.message).toContain('Too many packs match this name');
+    });
+
     it('resolves to null for duplicates and says the name is ambiguous', async () => {
       const selection = createPackSelection(http);
       http.get.mockResolvedValue({
@@ -535,6 +545,16 @@ describe('osquery workflow step pickers', () => {
       );
 
       expect(details.message).toMatch(/more than one/i);
+      expect(details.message).not.toMatch(/not loaded/);
+    });
+
+    it('reports a failed search for a mixed-case value in getDetails', async () => {
+      const selection = createPrebuiltPackSelection(http);
+      http.get.mockRejectedValue({ status: 403, body: { message: 'Forbidden' } });
+
+      expect(await selection.search('PERSIST', context('prebuilt_pack'))).toEqual([]);
+      const details = await selection.getDetails('PERSIST', context('prebuilt_pack'), null);
+
       expect(details.message).not.toMatch(/not loaded/);
     });
 

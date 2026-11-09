@@ -82,16 +82,32 @@ export const createPackSelection = (http: HttpSetup): PropertySelectionHandler<s
 
       try {
         // The route has no exact-name filter: search the quoted name, keep exact matches only.
-        const { data } = await http.get<{ data?: PackItem[] }>('/api/osquery/packs', {
-          version: API_VERSIONS.public.v1,
-          query: {
-            page: 1,
-            pageSize: RESOLVE_PAGE_SIZE,
-            search: `"${name.replace(/["\\]/g, '\\$&')}"`,
-          },
-        });
+        const { data, total } = await http.get<{ data?: PackItem[]; total?: number }>(
+          '/api/osquery/packs',
+          {
+            version: API_VERSIONS.public.v1,
+            query: {
+              page: 1,
+              pageSize: RESOLVE_PAGE_SIZE,
+              search: `"${name.replace(/["\\]/g, '\\$&')}"`,
+            },
+          }
+        );
         const matches = (data ?? []).filter((pack) => pack.name === name);
         lookupErrors.delete(name);
+        if ((total ?? 0) > RESOLVE_PAGE_SIZE) {
+          // Only the first page was read: a duplicate or the match itself may be on a later one.
+          lookupErrors.set(
+            name,
+            i18n.translate('xpack.osquery.workflows.selection.pack.tooManyMatches', {
+              defaultMessage:
+                'Too many packs match this name to tell which one the step runs. Use a more specific name.',
+            })
+          );
+
+          return null;
+        }
+
         if (matches.length > 1) {
           lookupErrors.set(
             name,
