@@ -98,7 +98,7 @@ export function SharedSettingsSection({
   const [descriptionTouched, setDescriptionTouched] = useState(false);
   // Collapsed by default. It cannot be collapsed over an error, which would hide why Next is off.
   const [advancedToggled, setAdvancedToggled] = useState(false);
-  const isAdvancedOpen = advancedToggled || !!namespaceError || !!condition?.error;
+  const isAdvancedOpen = advancedToggled || !!namespaceError || !!condition?.errors?.length;
   const advancedId = useGeneratedHtmlId({ prefix: 'sharedAdvancedSettings' });
   const { euiTheme } = useEuiTheme();
 

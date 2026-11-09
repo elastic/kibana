@@ -10,7 +10,11 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({ services: { docLinks: undefined } }),
+  useKibana: () => ({
+    services: {
+      docLinks: { links: { fleet: { elasticAgentInputConditions: 'https://conditions' } } },
+    },
+  }),
 }));
 const mockUseOutputs = jest.fn();
 jest.mock('@kbn/fleet-plugin/public', () => ({
@@ -18,6 +22,9 @@ jest.mock('@kbn/fleet-plugin/public', () => ({
   PackagePolicyOutputSelect: jest.requireActual(
     '@kbn/fleet-plugin/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_output_select'
   ).PackagePolicyOutputSelect,
+  PackagePolicyConditionField: jest.requireActual(
+    '@kbn/fleet-plugin/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_condition_field'
+  ).PackagePolicyConditionField,
   NamespaceComboBox: ({
     namespace,
     onNamespaceChange,
@@ -395,7 +402,7 @@ describe('SharedSettingsSection', () => {
         condition: {
           value: '${host.platform} ==',
           onChange: jest.fn(),
-          error: 'Line 1, column 20: syntax error',
+          errors: ['Line 1, column 20: syntax error'],
         },
       });
 

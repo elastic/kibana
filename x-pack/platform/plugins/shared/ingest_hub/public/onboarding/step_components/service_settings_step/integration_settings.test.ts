@@ -10,7 +10,7 @@ import {
   MAX_CONDITION_LENGTH,
   MAX_DESCRIPTION_LENGTH,
   MAX_INTEGRATION_NAME_LENGTH,
-  getConditionError,
+  getConditionErrors,
   getDescriptionError,
   getIntegrationNameError,
   supportsIntegrationSettings,
@@ -31,23 +31,27 @@ describe('getIntegrationNameError', () => {
   });
 });
 
-describe('getConditionError', () => {
+describe('getConditionErrors', () => {
   it('allows no condition', () => {
-    expect(getConditionError('')).toBeUndefined();
-    expect(getConditionError('   ')).toBeUndefined();
+    expect(getConditionErrors('')).toBeUndefined();
+    expect(getConditionErrors('   ')).toBeUndefined();
   });
 
   it('accepts a valid condition', () => {
-    expect(getConditionError('${host.platform} == "linux"')).toBeUndefined();
+    expect(getConditionErrors('${host.platform} == "linux"')).toBeUndefined();
   });
 
   it('reports where the syntax is wrong', () => {
-    expect(getConditionError('${host.platform} ==')).toMatch(/^Line 1, column \d+: /);
+    expect(getConditionErrors('${host.platform} ==')).toEqual(
+      expect.arrayContaining([expect.stringMatching(/^Line 1, column \d+: /)])
+    );
   });
 
   it('rejects a condition over the Fleet limit', () => {
     const tooLong = `"${'a'.repeat(MAX_CONDITION_LENGTH)}"`;
-    expect(getConditionError(tooLong)).toBe('The condition must be 10000 characters or less.');
+    expect(getConditionErrors(tooLong)).toEqual([
+      'The condition must be 10000 characters or less.',
+    ]);
   });
 });
 

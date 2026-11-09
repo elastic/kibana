@@ -65,7 +65,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     namespaceError,
     policySettings,
     setPolicySetting,
-    conditionError,
+    conditionErrors,
     bareNamePackage,
     instances,
     filteredInstances,
@@ -202,7 +202,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
         })
       );
     }
-    if (integrationNameError || descriptionError || namespaceError || conditionError) {
+    if (integrationNameError || descriptionError || namespaceError || conditionErrors) {
       reasons.push(
         i18n.translate('xpack.ingestHub.serviceSettingsStep.continueTooltip.integrationSettings', {
           defaultMessage: 'Fix the integration settings',
@@ -227,7 +227,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     integrationNameError,
     descriptionError,
     namespaceError,
-    conditionError,
+    conditionErrors,
     incompleteInstances,
   ]);
 
@@ -505,7 +505,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
             ? {
                 value: policySettings.condition ?? '',
                 onChange: setCondition,
-                error: conditionError,
+                errors: conditionErrors,
               }
             : undefined
         }

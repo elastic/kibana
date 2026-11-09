@@ -1115,11 +1115,11 @@ describe('useServiceSettings — integration name and description', () => {
     act(() => result.current.setGlobalRegion('us-east-1'));
 
     act(() => result.current.setPolicySetting('condition', '${host.platform} =='));
-    expect(result.current.conditionError).toBeDefined();
+    expect(result.current.conditionErrors).toBeDefined();
     expect(result.current.isReady).toBe(false);
 
     act(() => result.current.setPolicySetting('condition', '${host.platform} == "linux"'));
-    expect(result.current.conditionError).toBeUndefined();
+    expect(result.current.conditionErrors).toBeUndefined();
     expect(result.current.isReady).toBe(true);
   });
 
@@ -1131,7 +1131,7 @@ describe('useServiceSettings — integration name and description', () => {
 
     act(() => result.current.setPolicySetting('condition', '${host.platform} =='));
 
-    expect(result.current.conditionError).toBeUndefined();
+    expect(result.current.conditionErrors).toBeUndefined();
     expect(result.current.isReady).toBe(true);
   });
 

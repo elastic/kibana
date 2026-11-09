@@ -40,7 +40,7 @@ import {
 import { getNamespaceError } from './instance_namespace_field';
 import { supportsPolicySetting, type PolicySettings } from '../../common/policy_settings';
 import {
-  getConditionError,
+  getConditionErrors,
   getDescriptionError,
   getIntegrationNameError,
   supportsIntegrationSettings,
@@ -581,10 +581,10 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
   // Only where the condition is offered: one kept from another deployment method is never sent,
   // and could not be fixed from a hidden field.
   const condition = policySettings.condition ?? '';
-  const conditionError = useMemo(
+  const conditionErrors = useMemo(
     () =>
       supportsPolicySetting('condition', deploymentMethod)
-        ? getConditionError(condition)
+        ? getConditionErrors(condition)
         : undefined,
     [condition, deploymentMethod]
   );
@@ -596,14 +596,14 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       !integrationNameError &&
       !descriptionError &&
       !namespaceError &&
-      !conditionError,
+      !conditionErrors,
     [
       globalRegion,
       incompleteInstances,
       integrationNameError,
       descriptionError,
       namespaceError,
-      conditionError,
+      conditionErrors,
     ]
   );
 
@@ -646,7 +646,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     namespaceError,
     policySettings,
     setPolicySetting,
-    conditionError,
+    conditionErrors,
     bareNamePackage,
     instances,
     filteredInstances,

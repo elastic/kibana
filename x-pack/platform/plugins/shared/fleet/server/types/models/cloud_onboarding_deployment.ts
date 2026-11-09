@@ -7,7 +7,10 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { CLOUD_ONBOARDING_INTEGRATION_NAME_MAX_LENGTH } from '../../../common/constants';
+import {
+  CLOUD_ONBOARDING_INTEGRATION_NAME_MAX_LENGTH,
+  PACKAGE_POLICY_CONDITION_MAX_LENGTH,
+} from '../../../common/constants';
 
 // ── Shared schema primitives reused across V1 and V2 ─────────────────────────
 
@@ -180,7 +183,7 @@ export const CloudOnboardingDeploymentSchemaV7 = CloudOnboardingDeploymentSchema
 // ── V8: longer policySettings values ─────────────────────────────────────────
 // A value may be as long as the longest package policy field kept here: the condition, which Fleet
 // allows up to 10000 characters.
-const POLICY_SETTINGS_MAX_VALUE_LENGTH = 10000;
+const POLICY_SETTINGS_MAX_VALUE_LENGTH = PACKAGE_POLICY_CONDITION_MAX_LENGTH;
 
 export const PolicySettingsRecordSchema = (meta?: { description: string; availability: object }) =>
   policySettingsRecordSchema(POLICY_SETTINGS_MAX_VALUE_LENGTH, meta);
