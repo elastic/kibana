@@ -121,7 +121,7 @@ export const useFetchInvestigations = ({
       http.get<ListInvestigationsResponse>(SHARED_INVESTIGATIONS_URL, {
         version: SHARED_INVESTIGATIONS_API_VERSION,
         query: {
-          sort_field: 'created_at',
+          sort_field: 'updated_at',
           sort_order: 'desc',
           in_progress: inProgress,
           ...(inProgress

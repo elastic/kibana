@@ -34,6 +34,14 @@ describe('ConversationMetaInfo', () => {
     expect(screen.getByText('2 days ago')).toBeInTheDocument();
   });
 
+  it('wraps the age in the host label when one is given', () => {
+    renderWithKibanaRenderContext(
+      <ConversationMetaInfo timestamp={agedBy(90 * 1000)} renderAge={(age) => <>Updated {age}</>} />
+    );
+
+    expect(screen.getByText(/Updated/)).toHaveTextContent('Updated 1 minute ago');
+  });
+
   it('shows the in-flight status beside the age', () => {
     renderWithKibanaRenderContext(
       <ConversationMetaInfo timestamp={agedBy(90 * 1000)} inFlightStatus={<span>Applying</span>} />

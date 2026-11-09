@@ -357,6 +357,8 @@ const SectionRows = ({
             {InvestigationCard && (
               <InvestigationCard
                 investigation={investigation}
+                // Newest activity first, so the age shown is when it last changed.
+                timestamp="updated"
                 isSelected={investigation.id === selectedInvestigationId}
                 onClick={onInvestigationClick}
                 actions={
