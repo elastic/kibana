@@ -230,7 +230,7 @@ export const AddParamFlyout = ({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
-                  data-test-subj="syntheticsAddParamFlyoutButton"
+                  data-test-subj="syntheticsAddParamSaveButton"
                   onClick={handleSubmit(onSubmit)}
                   fill
                   isLoading={isSaving}
