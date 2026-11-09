@@ -54,7 +54,7 @@ describe('Nightshift investigation agent type', () => {
     );
   });
 
-  it('carries a standalone sandbox prompt and no Elastic tools', async () => {
+  it('carries a standalone sandbox prompt and no Elastic data tools beyond event search', async () => {
     const base = await baseFor(
       getInvestigationAgentType({ sandboxEnabled: true, cortexEnabled: true })
     );
