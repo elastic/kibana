@@ -24,12 +24,21 @@ const DEPLOYMENT_IDS = [
 const STATE_PATTERN = 'metrics-kubernetes.state_deployment-*';
 const OTEL_PATTERN = 'metrics-k8sclusterreceiver.otel-*';
 
-const OTEL_IDENTITY_EXCLUSION = {
+// No index maps `k8s.deployment.uid`, so each of the OpenTelemetry source's two plans (`TS` and
+// `FROM`) reports it: the response carries the same entry twice.
+const UID_UNAVAILABLE = {
+  column: 'k8s.deployment.uid',
   indexPattern: OTEL_PATTERN,
-  status: null,
-  reason: `no index behind "${OTEL_PATTERN}" maps every field of an identity composition (kubernetes.namespace + kubernetes.deployment.name)`,
+  field: 'k8s.deployment.uid',
 };
-const OTEL_SOURCE_ERRORS = [OTEL_IDENTITY_EXCLUSION, OTEL_IDENTITY_EXCLUSION];
+const UID_UNAVAILABLE_PER_OTEL_PLAN = [UID_UNAVAILABLE, UID_UNAVAILABLE];
+
+type QueryDiagnostic = ListResponse['queries'][number];
+
+const summarizeQueries = (
+  queries: QueryDiagnostic[]
+): Array<Pick<QueryDiagnostic, 'indexPattern' | 'engine' | 'rowCount'>> =>
+  queries.map(({ indexPattern, engine, rowCount }) => ({ indexPattern, engine, rowCount }));
 
 interface ListResponse {
   columns: Array<{ name: string; kind: string; type: string | null }>;
@@ -74,7 +83,7 @@ apiTest.describe(
       });
 
     apiTest(
-      'returns one row per deployment from the Agent source, the only one that identifies them',
+      'returns one row per deployment, merged from the Agent and OpenTelemetry sources',
       async ({ apiClient }) => {
         const response = await postList(apiClient, WINDOW);
 
@@ -91,14 +100,14 @@ apiTest.describe(
           'k8s.deployment.desired': 3,
           'k8s.deployment.paused': false,
           'k8s.deployment.label.app': 'cart-api',
-          // Only the excluded OpenTelemetry source maps it.
+          // Mapped in no index, so no plan reads a value for it.
           'k8s.deployment.uid': null,
           last_seen: '2026-11-01T10:01:00.000Z',
         });
         expect(body.total).toBe(3);
         expect(body.truncated).toBe(false);
-        expect(body.errors).toStrictEqual(OTEL_SOURCE_ERRORS);
-        expect(body.unavailableColumns).toStrictEqual([]);
+        expect(body.errors).toStrictEqual([]);
+        expect(body.unavailableColumns).toStrictEqual(UID_UNAVAILABLE_PER_OTEL_PLAN);
       }
     );
 
@@ -111,11 +120,15 @@ apiTest.describe(
         const body: ListResponse = response.body;
 
         expect(Object.keys(body.provenance).sort()).toStrictEqual(DEPLOYMENT_IDS);
-        expect(body.provenance[CART_API_ID]).toMatchObject({
+        // Both sources report cart-api with last_seen 10:01:00; on that tie every attribute comes from
+        // the Agent source, whose plan is listed first.
+        expect(body.provenance[CART_API_ID]).toStrictEqual({
+          'k8s.cluster.name': STATE_PATTERN,
+          'k8s.deployment.available': STATE_PATTERN,
+          'k8s.deployment.desired': STATE_PATTERN,
           'k8s.deployment.paused': STATE_PATTERN,
           'k8s.deployment.label.app': STATE_PATTERN,
         });
-        expect(Object.values(body.provenance[CART_API_ID])).not.toContain(OTEL_PATTERN);
         expect(
           body.queries.map(({ indexPattern, engine }) => ({ indexPattern, engine }))
         ).toStrictEqual([
@@ -128,7 +141,8 @@ apiTest.describe(
           expect(query.params).toStrictEqual([{ from: WINDOW.from }, { to: WINDOW.to }]);
           expect(typeof query.took).toBe('number');
         });
-        expect(body.queries.map(({ rowCount }) => rowCount)).toStrictEqual([3, 0, 0]);
+        // The OpenTelemetry time-series index holds no 2026-11-01 documents, so its `TS` plan reads none.
+        expect(body.queries.map(({ rowCount }) => rowCount)).toStrictEqual([3, 0, 3]);
         expect(typeof body.took).toBe('number');
         expect('unsupportedMetrics' in body).toBe(false);
         expect('documentFilterWarnings' in body).toBe(false);
@@ -136,16 +150,26 @@ apiTest.describe(
     );
 
     apiTest(
-      'reports the OpenTelemetry source once per plan when no index maps the identity composition',
+      'reports an attribute mapped in no index as an unavailable column of each plan of its source',
       async ({ apiClient }) => {
-        const response = await postList(apiClient, WINDOW);
+        const response = await postList(
+          apiClient,
+          { from: '2026-11-01T09:00:00.000Z', to: '2026-11-01T11:00:00.000Z' },
+          'internal/entity_inventory/entities/k8s.deployment/_list'
+        );
 
         expect(response).toHaveStatusCode(200);
-        const { errors, unavailableColumns }: ListResponse = response.body;
+        const { columns, rows, errors, unavailableColumns }: ListResponse = response.body;
 
-        expect(errors).toStrictEqual(OTEL_SOURCE_ERRORS);
-        // A dropped source is reported in `errors`, not as an unavailable column.
-        expect(unavailableColumns).toStrictEqual([]);
+        expect(unavailableColumns).toStrictEqual(UID_UNAVAILABLE_PER_OTEL_PLAN);
+        expect(columns.find(({ name }) => name === 'k8s.deployment.uid')).toStrictEqual({
+          name: 'k8s.deployment.uid',
+          kind: 'attribute',
+          type: null,
+        });
+        expect(rows.map((row) => row['k8s.deployment.uid'])).toStrictEqual([null, null, null]);
+        // An unmapped attribute leaves its plans usable, so nothing is reported in `errors`.
+        expect(errors).toStrictEqual([]);
       }
     );
 
@@ -164,7 +188,7 @@ apiTest.describe(
         { name: 'k8s.deployment.desired', kind: 'attribute', type: 'long' },
         { name: 'k8s.deployment.paused', kind: 'attribute', type: 'boolean' },
         { name: 'k8s.deployment.label.app', kind: 'attribute', type: 'keyword' },
-        // No type: only the excluded OpenTelemetry source maps it, so no index settles one.
+        // No type: no index maps it, so no plan settles one.
         { name: 'k8s.deployment.uid', kind: 'attribute', type: null },
         { name: 'last_seen', kind: 'last_seen', type: 'date' },
       ]);
@@ -227,27 +251,143 @@ apiTest.describe(
     });
 
     apiTest(
-      'returns nothing for a window whose deployments live only behind the excluded source',
+      'gives a source with no time-series index a FROM plan only and lists its rows',
       async ({ apiClient }) => {
-        const response = await postList(apiClient, {
-          from: '2026-11-05T09:00:00.000Z',
-          to: '2026-11-05T11:00:00.000Z',
-        });
+        // The Agent source's pattern holds only the state_deployment data stream.
+        const response = await postList(
+          apiClient,
+          { from: '2026-11-01T09:00:00.000Z', to: '2026-11-01T11:00:00.000Z' },
+          'internal/entity_inventory/entities/k8s.deployment/_list'
+        );
+
+        expect(response).toHaveStatusCode(200);
+        const { queries, rows, provenance }: ListResponse = response.body;
+
+        expect(
+          summarizeQueries(queries).filter(({ indexPattern }) => indexPattern === STATE_PATTERN)
+        ).toStrictEqual([{ indexPattern: STATE_PATTERN, engine: 'FROM', rowCount: 3 }]);
+        expect(rows.map((row) => row['entity.id']).sort()).toStrictEqual(DEPLOYMENT_IDS);
+        expect(provenance[CART_API_ID]['k8s.deployment.label.app']).toBe(STATE_PATTERN);
+      }
+    );
+
+    apiTest(
+      'lists deployments whose documents live only in the time-series index, through the TS plan',
+      async ({ apiClient }) => {
+        // 13:00 to 15:00 on 2026-11-05 holds only the time-series index's `timeseries/ts-window`
+        // documents (14:00:00 and 14:01:00).
+        const response = await postList(
+          apiClient,
+          { from: '2026-11-05T13:00:00.000Z', to: '2026-11-05T15:00:00.000Z' },
+          'internal/entity_inventory/entities/k8s.deployment/_list'
+        );
+
+        expect(response).toHaveStatusCode(200);
+        const { rows, total, errors, queries }: ListResponse = response.body;
+
+        expect(rows).toStrictEqual([
+          {
+            'entity.id': 'k8s.deployment:timeseries/ts-window',
+            'kubernetes.namespace': 'timeseries',
+            'kubernetes.deployment.name': 'ts-window',
+            'k8s.cluster.name': 'scout-cluster',
+            'k8s.deployment.available': 2,
+            'k8s.deployment.desired': 2,
+            'k8s.deployment.paused': null,
+            'k8s.deployment.label.app': null,
+            'k8s.deployment.uid': null,
+            last_seen: '2026-11-05T14:01:00.000Z',
+          },
+        ]);
+        expect(total).toBe(1);
+        expect(errors).toStrictEqual([]);
+        expect(summarizeQueries(queries)).toStrictEqual([
+          { indexPattern: STATE_PATTERN, engine: 'FROM', rowCount: 0 },
+          { indexPattern: OTEL_PATTERN, engine: 'TS', rowCount: 1 },
+          { indexPattern: OTEL_PATTERN, engine: 'FROM', rowCount: 0 },
+        ]);
+      }
+    );
+
+    apiTest(
+      'lists a source with standard and time-series indices from both plans, reading each index once',
+      async ({ apiClient }) => {
+        // `streaming/tsds-shared` is in both OpenTelemetry indices, `tsds-only` in the time-series
+        // index and `standard-only` in the data stream.
+        const response = await postList(
+          apiClient,
+          { from: '2026-11-05T09:00:00.000Z', to: '2026-11-05T11:00:00.000Z' },
+          'internal/entity_inventory/entities/k8s.deployment/_list'
+        );
 
         expect(response).toHaveStatusCode(200);
         const { rows, total, truncated, errors, queries }: ListResponse = response.body;
 
-        expect(rows).toStrictEqual([]);
-        expect(total).toBe(0);
+        expect(
+          rows.map(
+            ({
+              'entity.id': entityId,
+              'k8s.deployment.available': available,
+              last_seen: lastSeen,
+            }) => ({ entityId, available, lastSeen })
+          )
+        ).toStrictEqual([
+          // The time-series value (5, at 10:01:00) is newer than the data stream's (4, at 10:00:00).
+          {
+            entityId: 'k8s.deployment:streaming/tsds-shared',
+            available: 5,
+            lastSeen: '2026-11-05T10:01:00.000Z',
+          },
+          {
+            entityId: 'k8s.deployment:streaming/standard-only',
+            available: 1,
+            lastSeen: '2026-11-05T10:00:00.000Z',
+          },
+          {
+            entityId: 'k8s.deployment:streaming/tsds-only',
+            available: 2,
+            lastSeen: '2026-11-05T10:00:00.000Z',
+          },
+        ]);
+        expect(total).toBe(3);
         expect(truncated).toBe(false);
-        expect(errors).toStrictEqual(OTEL_SOURCE_ERRORS);
-        expect(queries.map(({ indexPattern, engine }) => ({ indexPattern, engine }))).toStrictEqual(
-          [
-            { indexPattern: STATE_PATTERN, engine: 'FROM' },
-            { indexPattern: OTEL_PATTERN, engine: 'TS' },
-            { indexPattern: OTEL_PATTERN, engine: 'FROM' },
-          ]
+        expect(errors).toStrictEqual([]);
+        // Two rows per plan: `FROM` leaves out the time-series index (it would return tsds-only as
+        // a third row) and `TS` reads only it (it would return standard-only).
+        expect(summarizeQueries(queries)).toStrictEqual([
+          { indexPattern: STATE_PATTERN, engine: 'FROM', rowCount: 0 },
+          { indexPattern: OTEL_PATTERN, engine: 'TS', rowCount: 2 },
+          { indexPattern: OTEL_PATTERN, engine: 'FROM', rowCount: 2 },
+        ]);
+      }
+    );
+
+    apiTest(
+      'returns only the rows a filtered alias lets through, under both the TS and FROM plans',
+      async ({ apiClient }) => {
+        // `metrics-k8sclusterreceiver.otel-filtered` matches the OpenTelemetry pattern and points at
+        // a standard and a time-series index whose own names do not; its filter keeps `kept-standard`
+        // and `kept-tsds` and drops `dropped-standard` and `dropped-tsds`, all on 2026-11-07.
+        const response = await postList(
+          apiClient,
+          { from: '2026-11-07T09:00:00.000Z', to: '2026-11-07T11:00:00.000Z' },
+          'internal/entity_inventory/entities/k8s.deployment/_list'
         );
+
+        expect(response).toHaveStatusCode(200);
+        const { rows, total, errors, queries }: ListResponse = response.body;
+
+        expect(rows.map((row) => row['entity.id'])).toStrictEqual([
+          'k8s.deployment:aliased/kept-standard',
+          'k8s.deployment:aliased/kept-tsds',
+        ]);
+        expect(total).toBe(2);
+        expect(errors).toStrictEqual([]);
+        expect(summarizeQueries(queries)).toStrictEqual([
+          { indexPattern: STATE_PATTERN, engine: 'FROM', rowCount: 0 },
+          { indexPattern: OTEL_PATTERN, engine: 'TS', rowCount: 1 },
+          { indexPattern: OTEL_PATTERN, engine: 'FROM', rowCount: 1 },
+        ]);
       }
     );
 
@@ -375,7 +515,7 @@ apiTest.describe(
         expect(response).toHaveStatusCode(200);
         const { rows, errors }: ListResponse = response.body;
         expect(rows.map((row) => row['entity.id']).sort()).toStrictEqual(DEPLOYMENT_IDS);
-        expect(errors).toStrictEqual(OTEL_SOURCE_ERRORS);
+        expect(errors).toStrictEqual([]);
       }
     );
 

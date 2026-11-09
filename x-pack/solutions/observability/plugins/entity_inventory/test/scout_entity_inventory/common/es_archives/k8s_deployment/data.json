@@ -443,3 +443,147 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "index": "metrics-k8sclusterreceiver.otel-tsds",
+    "source": {
+      "@timestamp": "2026-11-05T14:00:00.000Z",
+      "k8s": {
+        "cluster": {
+          "name": "scout-cluster"
+        },
+        "namespace": {
+          "name": "timeseries"
+        },
+        "deployment": {
+          "name": "ts-window",
+          "uid": "uid-timeseries-ts-window",
+          "available": 1,
+          "desired": 2
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "metrics-k8sclusterreceiver.otel-tsds",
+    "source": {
+      "@timestamp": "2026-11-05T14:01:00.000Z",
+      "k8s": {
+        "cluster": {
+          "name": "scout-cluster"
+        },
+        "namespace": {
+          "name": "timeseries"
+        },
+        "deployment": {
+          "name": "ts-window",
+          "uid": "uid-timeseries-ts-window",
+          "available": 2,
+          "desired": 2
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "entity-inventory-scout-aliased-standard",
+    "source": {
+      "@timestamp": "2026-11-07T10:00:00.000Z",
+      "k8s": {
+        "cluster": {
+          "name": "scout-cluster"
+        },
+        "namespace": {
+          "name": "aliased"
+        },
+        "deployment": {
+          "name": "kept-standard",
+          "uid": "uid-aliased-kept-standard",
+          "available": 1,
+          "desired": 1
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "entity-inventory-scout-aliased-standard",
+    "source": {
+      "@timestamp": "2026-11-07T10:00:00.000Z",
+      "k8s": {
+        "cluster": {
+          "name": "scout-cluster"
+        },
+        "namespace": {
+          "name": "aliased"
+        },
+        "deployment": {
+          "name": "dropped-standard",
+          "uid": "uid-aliased-dropped-standard",
+          "available": 1,
+          "desired": 1
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "entity-inventory-scout-aliased-tsds",
+    "source": {
+      "@timestamp": "2026-11-07T10:00:00.000Z",
+      "k8s": {
+        "cluster": {
+          "name": "scout-cluster"
+        },
+        "namespace": {
+          "name": "aliased"
+        },
+        "deployment": {
+          "name": "kept-tsds",
+          "uid": "uid-aliased-kept-tsds",
+          "available": 2,
+          "desired": 2
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "entity-inventory-scout-aliased-tsds",
+    "source": {
+      "@timestamp": "2026-11-07T10:00:00.000Z",
+      "k8s": {
+        "cluster": {
+          "name": "scout-cluster"
+        },
+        "namespace": {
+          "name": "aliased"
+        },
+        "deployment": {
+          "name": "dropped-tsds",
+          "uid": "uid-aliased-dropped-tsds",
+          "available": 2,
+          "desired": 2
+        }
+      }
+    }
+  }
+}
