@@ -143,4 +143,28 @@ describe('FlagsFlyout', () => {
     expect(screen.queryByTestId('featureFlagsHelperSave-from.provider')).not.toBeInTheDocument();
     expect(screen.queryByTestId('featureFlagsHelperClearAll')).not.toBeInTheDocument();
   });
+
+  test('shows a retryable error when runtime overrides fail to load', async () => {
+    const http = createHttp();
+    http.post.mockResolvedValue({ flags: [{ key: 'from.provider', value: true }] });
+    http.get
+      .mockRejectedValueOnce(Object.assign(new Error('unavailable'), { response: { status: 500 } }))
+      .mockResolvedValue({ runtimeOverrides: {}, configOverrides: {} });
+
+    renderFlyout(http);
+
+    expect(
+      await screen.findByText('Runtime overrides could not be loaded. Refresh to try again.')
+    ).toBeInTheDocument();
+    expect(screen.queryByText('from.provider')).not.toBeInTheDocument();
+    expect(screen.queryByText('Provider')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('featureFlagsHelperClearAll')).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByTestId('featureFlagsHelperRefresh'));
+
+    expect(await screen.findByText('from.provider')).toBeInTheDocument();
+    expect(
+      screen.queryByText('Runtime overrides could not be loaded. Refresh to try again.')
+    ).not.toBeInTheDocument();
+  });
 });

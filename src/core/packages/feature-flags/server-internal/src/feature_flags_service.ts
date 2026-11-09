@@ -467,6 +467,9 @@ export class FeatureFlagsService {
     this.runtimeOverrides$.next(overrides);
     this.publishMergedOverrides();
     this.runtimeOverrideWriteCount++;
+    // This write's saved-object version is not known here. A poll may already have
+    // recorded a newer version, and keeping that version would skip it forever.
+    this.latestOverrideVersion = undefined;
   }
 
   private pollRuntimeOverrides(repository: ISavedObjectsRepository): void {
@@ -490,6 +493,23 @@ export class FeatureFlagsService {
             this.publishMergedOverrides();
           } catch (error) {
             if (error instanceof Error && SavedObjectsErrorHelpers.isNotFoundError(error)) {
+              // The document is the source of truth. Absence means no runtime overrides,
+              // including after one this node already applied. Skip when a local write
+              // landed during this read, and when there was nothing to clear: most
+              // deployments never create the document, and publishing every poll would
+              // wake every flag subscriber.
+              if (this.stopped || writeCountAtRead !== this.runtimeOverrideWriteCount) {
+                return;
+              }
+              if (
+                this.latestOverrideVersion === undefined &&
+                Object.keys(this.runtimeOverrides$.value).length === 0
+              ) {
+                return;
+              }
+              this.latestOverrideVersion = undefined;
+              this.runtimeOverrides$.next({});
+              this.publishMergedOverrides();
               return;
             }
             const message = error instanceof Error ? error.message : String(error);

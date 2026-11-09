@@ -766,6 +766,85 @@ describe('FeatureFlagsService Server', () => {
       expect(setup.getOverrides()).toEqual(expect.objectContaining({ 'runtime-only': 'on' }));
     });
 
+    test('clears runtime overrides when the saved object disappears', async () => {
+      jest.useFakeTimers();
+      const { repository, setup } = startWithRepository();
+      repository.get.mockResolvedValue(savedObject({ 'runtime-only': 'on' }, 'v1'));
+      await jest.advanceTimersByTimeAsync(0);
+      expect(setup.getOverrides()['runtime-only']).toBe('on');
+
+      repository.get.mockRejectedValue(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(
+          FEATURE_FLAGS_OVERRIDES_SAVED_OBJECT_TYPE,
+          FEATURE_FLAGS_OVERRIDES_SAVED_OBJECT_ID
+        )
+      );
+      await jest.advanceTimersByTimeAsync(10_000);
+
+      expect(setup.getOverrides()).not.toHaveProperty('runtime-only');
+      expect(setup.getOverrides()['my-overridden-flag']).toBe(true);
+
+      repository.get.mockResolvedValue(savedObject({ 'runtime-only': 'on' }, 'v1'));
+      await jest.advanceTimersByTimeAsync(10_000);
+      expect(setup.getOverrides()['runtime-only']).toBe('on');
+    });
+
+    test('does not clear a local write when an earlier poll finds no document', async () => {
+      jest.useFakeTimers();
+      const { repository, router, setup } = startWithRepository();
+      const pending: Array<{
+        resolve: (value: unknown) => void;
+        reject: (error: unknown) => void;
+      }> = [];
+      repository.get.mockImplementation(
+        () =>
+          new Promise((resolve, reject) => {
+            pending.push({
+              resolve: (value) => {
+                resolve(value as never);
+              },
+              reject,
+            });
+          })
+      );
+      repository.create.mockResolvedValue(savedObject({ 'runtime-only': 'pinned' }, 'v2'));
+
+      await jest.advanceTimersByTimeAsync(0);
+      expect(pending).toHaveLength(1);
+
+      const { handler } = findRoute(router, 'put', `${FEATURE_FLAGS_OVERRIDES_API_PATH}/{flagKey}`);
+      const response = mockRouter.createResponseFactory();
+      const write = handler(
+        {},
+        mockRouter.createKibanaRequest({
+          method: 'put',
+          params: { flagKey: 'runtime-only' },
+          body: { value: 'pinned' },
+        }),
+        response
+      );
+      await Promise.resolve();
+      expect(pending).toHaveLength(2);
+      pending[1].reject(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(
+          FEATURE_FLAGS_OVERRIDES_SAVED_OBJECT_TYPE,
+          FEATURE_FLAGS_OVERRIDES_SAVED_OBJECT_ID
+        )
+      );
+      await write;
+      expect(setup.getOverrides()['runtime-only']).toBe('pinned');
+
+      pending[0].reject(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(
+          FEATURE_FLAGS_OVERRIDES_SAVED_OBJECT_TYPE,
+          FEATURE_FLAGS_OVERRIDES_SAVED_OBJECT_ID
+        )
+      );
+      await Promise.resolve();
+
+      expect(setup.getOverrides()['runtime-only']).toBe('pinned');
+    });
+
     test('does not apply a stale poll that finishes after a local write', async () => {
       jest.useFakeTimers();
       const { repository, router, setup } = startWithRepository();
@@ -816,6 +895,62 @@ describe('FeatureFlagsService Server', () => {
 
       expect(setup.getOverrides()).toEqual(expect.objectContaining({ 'runtime-only': 'pinned' }));
       expect(setup.getOverrides()['runtime-only']).not.toBe('stale');
+    });
+
+    test('re-reads a newer document after a local write commits an older map', async () => {
+      jest.useFakeTimers();
+      const { repository, router, setup } = startWithRepository();
+      const pending: Array<{
+        resolve: (value: unknown) => void;
+        reject: (error: unknown) => void;
+      }> = [];
+      repository.get.mockImplementation(
+        () =>
+          new Promise((resolve, reject) => {
+            pending.push({
+              resolve: (value) => {
+                resolve(value as never);
+              },
+              reject,
+            });
+          })
+      );
+      repository.create.mockResolvedValue(savedObject({ 'runtime-only': 'local' }, 'v2'));
+
+      await jest.advanceTimersByTimeAsync(0);
+      expect(pending).toHaveLength(1);
+
+      const { handler } = findRoute(router, 'put', `${FEATURE_FLAGS_OVERRIDES_API_PATH}/{flagKey}`);
+      const response = mockRouter.createResponseFactory();
+      const write = handler(
+        {},
+        mockRouter.createKibanaRequest({
+          method: 'put',
+          params: { flagKey: 'runtime-only' },
+          body: { value: 'local' },
+        }),
+        response
+      );
+      await Promise.resolve();
+      expect(pending).toHaveLength(2);
+
+      pending[0].resolve(savedObject({ 'runtime-only': 'remote' }, 'v3'));
+      await Promise.resolve();
+      expect(setup.getOverrides()['runtime-only']).toBe('remote');
+
+      pending[1].reject(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(
+          FEATURE_FLAGS_OVERRIDES_SAVED_OBJECT_TYPE,
+          FEATURE_FLAGS_OVERRIDES_SAVED_OBJECT_ID
+        )
+      );
+      await write;
+      expect(setup.getOverrides()['runtime-only']).toBe('local');
+
+      repository.get.mockResolvedValue(savedObject({ 'runtime-only': 'remote' }, 'v3'));
+      await jest.advanceTimersByTimeAsync(10_000);
+
+      expect(setup.getOverrides()['runtime-only']).toBe('remote');
     });
 
     test('warns when a runtime override is persisted and stays quiet when the write fails', async () => {

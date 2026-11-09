@@ -115,6 +115,7 @@ export function FlagsFlyout({
   const [rows, setRows] = useState<FlagRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [forbidden, setForbidden] = useState(false);
+  const [overridesUnavailable, setOverridesUnavailable] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
   const [busyKey, setBusyKey] = useState<string | undefined>();
 
@@ -130,10 +131,23 @@ export function FlagsFlyout({
       snapshotResult.status === 'fulfilled' ? snapshotValues(snapshotResult.value) : {};
     const overridesForbidden =
       overridesResult.status === 'rejected' && isForbidden(overridesResult.reason);
-    const overrides =
-      overridesResult.status === 'fulfilled'
-        ? overridesResult.value
-        : { runtimeOverrides: {}, configOverrides: {} };
+
+    if (overridesResult.status === 'rejected' && !overridesForbidden) {
+      setOverridesUnavailable(true);
+      setForbidden(false);
+      setRows([]);
+      setErrorMessage(
+        i18n.translate('core.featureFlags.helper.overridesLoadFailedErrorMessage', {
+          defaultMessage: 'Runtime overrides could not be loaded. Refresh to try again.',
+        })
+      );
+      setLoading(false);
+      return;
+    }
+
+    const overrides: Partial<OverridesResponse> =
+      overridesResult.status === 'fulfilled' ? overridesResult.value : {};
+    setOverridesUnavailable(false);
 
     if (snapshotResult.status === 'rejected' && !overridesForbidden) {
       setErrorMessage(
@@ -332,7 +346,7 @@ export function FlagsFlyout({
         )}
         {loading ? (
           <EuiLoadingSpinner size="l" />
-        ) : (
+        ) : overridesUnavailable ? null : (
           <EuiInMemoryTable<FlagRow>
             items={rows}
             columns={columns}
@@ -370,7 +384,7 @@ export function FlagsFlyout({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s" responsive={false}>
-              {!forbidden && (
+              {!forbidden && !overridesUnavailable && (
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     color="danger"

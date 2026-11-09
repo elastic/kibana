@@ -80,6 +80,13 @@ function FeatureFlagsHelper({
     return () => window.removeEventListener(FEATURE_FLAGS_HELPER_TOOLBAR_CHANGE, sync);
   }, []);
 
+  useEffect(() => {
+    return () => {
+      flyoutRef.current?.close();
+      flyoutRef.current = undefined;
+    };
+  }, []);
+
   const toggleFlyout = () => {
     if (flyoutRef.current) {
       flyoutRef.current.close();
