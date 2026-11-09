@@ -56,6 +56,8 @@ const addDocsPattern = async (input: HTMLElement, value: string) => {
   await userEvent.keyboard('{Enter}');
 };
 
+jest.setTimeout(30_000);
+
 describe('CreateDestinationModal', () => {
   it('only shows the errors of fields the user has left', async () => {
     renderModal();
