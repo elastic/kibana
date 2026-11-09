@@ -238,4 +238,93 @@ describe('projectSpec', () => {
     expect(projected.components).toEqual({ schemas: { Thing: { type: 'object' } } });
     expect(loadContractOperations(projected)).toHaveLength(1);
   });
+
+  it('keeps operations under x-ms-paths, with what they reference', () => {
+    const azure = {
+      openapi: '3.0.3',
+      info: { title: 'Blobs', version: '1' },
+      paths: {},
+      'x-ms-paths': {
+        '/?comp=list': {
+          get: {
+            'x-ms-pageable': { nextLinkName: 'NextMarker' },
+            responses: { '200': ok({ $ref: '#/components/schemas/List' }) },
+          },
+        },
+        '/?comp=properties': { get: { responses: { '200': ok({ type: 'object' }) } } },
+      },
+      components: { schemas: { List: { type: 'object' } } },
+    };
+
+    const projected = projectSpec(azure, [{ method: 'get', path: '/?comp=list' }]);
+
+    expect(projected.paths).toEqual({});
+    expect(projected['x-ms-paths']).toEqual({
+      '/?comp=list': {
+        get: {
+          'x-ms-pageable': { nextLinkName: 'NextMarker' },
+          responses: { '200': okProjected({ $ref: '#/components/schemas/List' }) },
+        },
+      },
+    });
+    expect(projected.components).toEqual({ schemas: { List: { type: 'object' } } });
+    expect(loadContractOperations(projected)).toHaveLength(1);
+  });
+
+  it('leaves out x-ms-paths when no operation is under it', () => {
+    expect(projectSpec(document, operations)).not.toHaveProperty(['x-ms-paths']);
+  });
+
+  it('keeps the routing extensions of converted Smithy models', () => {
+    const bucket = { default: 'bucket', 'x-path-parameter': true };
+    const s3 = {
+      openapi: '3.0.3',
+      info: { title: 'S3', version: '1' },
+      servers: [
+        { url: 'https://{Bucket}.s3.amazonaws.com', variables: { Bucket: bucket } },
+        { url: 'https://s3.amazonaws.com' },
+      ],
+      paths: {},
+      'x-ms-paths': {
+        '/?x-id=ListBuckets': {
+          get: {
+            'x-optional-fixed-query': ['x-id'],
+            responses: { '200': ok({ type: 'object' }) },
+          },
+        },
+      },
+    };
+
+    const projected = projectSpec(s3, [{ method: 'get', path: '/?x-id=ListBuckets' }]);
+
+    expect(projected.servers).toEqual(s3.servers);
+    expect(projected['x-ms-paths']).toEqual({
+      '/?x-id=ListBuckets': {
+        get: {
+          'x-optional-fixed-query': ['x-id'],
+          responses: { '200': okProjected({ type: 'object' }) },
+        },
+      },
+    });
+    expect(loadContractOperations(projected)).toHaveLength(1);
+  });
+
+  it('keeps the marker of converted awsJson services, which the mock serves by X-Amz-Target', () => {
+    const awsJson = {
+      openapi: '3.0.3',
+      info: { title: 'Metrics', version: '1' },
+      servers: [{ url: 'https://monitoring.us-east-1.amazonaws.com' }],
+      paths: {
+        '/GetMetricData': { post: { responses: { '200': ok({ type: 'object' }) } } },
+        '/ListMetrics': { post: { responses: { '200': ok({ type: 'object' }) } } },
+      },
+      'x-amz-json': { version: '1.0', targetPrefix: 'Metrics', endpointPrefix: 'monitoring' },
+    };
+
+    const projected = projectSpec(awsJson, [{ method: 'post', path: '/GetMetricData' }]);
+
+    expect(projected['x-amz-json']).toEqual(awsJson['x-amz-json']);
+    expect(Object.keys(projected.paths as object)).toEqual(['/GetMetricData']);
+    expect(loadContractOperations(projected)).toHaveLength(1);
+  });
 });

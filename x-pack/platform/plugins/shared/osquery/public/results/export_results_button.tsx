@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React from 'react';
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';
 
-import { useIsExperimentalFeatureEnabled } from '../common/experimental_features_context';
-import { useExportResults } from './use_export_results';
+import { useExportResultsAction } from './use_export_results_action';
 import { ExportResultsModal } from './export_results_modal';
 import { EXPORT_NO_DATA_TOOLTIP } from './translations';
-import type { ExportFormat } from './use_export_results';
 
 interface ExportResultsButtonProps {
   actionId: string;
@@ -41,41 +39,31 @@ const ExportResultsButtonComponent: React.FC<ExportResultsButtonProps> = ({
   filteredTotal,
   total,
 }) => {
-  const isExportEnabled = useIsExperimentalFeatureEnabled('exportResults');
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const hasActiveFilters = !!(kuery || (activeFilters && activeFilters.length > 0));
-
-  const esFilters = useMemo(
-    () => (activeFilters && activeFilters.length > 0 ? activeFilters : undefined),
-    [activeFilters]
-  );
-
-  const { exportResults, isExporting } = useExportResults({
+  const {
+    isExportEnabled,
+    isEmpty,
+    isInitialLoading,
+    isExporting,
+    hasActiveFilters,
+    isModalOpen,
+    openModal,
+    closeModal,
+    handleExport,
+  } = useExportResultsAction({
     actionId,
     isLive,
     liveQueryId,
     scheduleId,
     executionCount,
+    kuery,
+    activeFilters,
+    filteredTotal,
+    total,
   });
-
-  const openModal = useCallback(() => setIsModalOpen(true), []);
-  const closeModal = useCallback(() => setIsModalOpen(false), []);
-
-  const handleExport = useCallback(
-    (format: ExportFormat, options: { filtered: boolean }) => {
-      closeModal();
-      exportResults(format, options.filtered ? { kuery, esFilters } : undefined);
-    },
-    [closeModal, exportResults, kuery, esFilters]
-  );
 
   if (!isExportEnabled) {
     return null;
   }
-
-  const isEmpty = total === 0;
-  const isInitialLoading = total === undefined;
 
   const button = (
     <EuiButtonEmpty
