@@ -14,6 +14,8 @@ import {
   getField,
   getSubPluginRoutesByCapabilities,
   isDashboardViewPath,
+  isRuleCreationPath,
+  isRuleEditPath,
   isPageWithAppHeaderPath,
   isEndpointManagementPath,
   isSubPluginAvailable,
@@ -301,6 +303,32 @@ describe('isDashboardViewPath', () => {
   });
 });
 
+describe('isRuleCreationPath', () => {
+  it('returns true for the rule creation path', () => {
+    expect(isRuleCreationPath('/rules/create')).toEqual(true);
+  });
+
+  it.each(['/rules', '/rules/management', '/rules/id/123/edit'])(
+    'returns false for %s',
+    (pathname) => {
+      expect(isRuleCreationPath(pathname)).toEqual(false);
+    }
+  );
+});
+
+describe('isRuleEditPath', () => {
+  it('returns true for the rule editing path', () => {
+    expect(isRuleEditPath('/rules/id/123/edit')).toEqual(true);
+  });
+
+  it.each(['/rules/id/123', '/rules/id/123/alerts', '/rules/create'])(
+    'returns false for %s',
+    (pathname) => {
+      expect(isRuleEditPath(pathname)).toEqual(false);
+    }
+  );
+});
+
 describe('isPageWithAppHeaderPath', () => {
   it.each([
     ['the rule changes history page', '/rules/id/rule-id/changes-history'],
@@ -308,6 +336,8 @@ describe('isPageWithAppHeaderPath', () => {
     ['the rule monitoring tab', '/rules/monitoring'],
     ['the rule updates tab', '/rules/updates'],
     ['the add Elastic rules page', '/rules/add_rules'],
+    ['the rule creation page', '/rules/create'],
+    ['the rule editing page', '/rules/id/rule-id/edit'],
     ['the MITRE coverage page', '/rules_coverage_overview'],
     ['the rule details overview tab', '/rules/id/rule-id/overview'],
     ['the rule details alerts tab', '/rules/id/rule-id/alerts'],
@@ -330,10 +360,8 @@ describe('isPageWithAppHeaderPath', () => {
   });
 
   it.each([
-    ['the rule editing page', '/rules/id/rule-id/edit'],
     ['a rule details path without a tab', '/rules/id/rule-id'],
     ['a rule details path with an unknown tab', '/rules/id/rule-id/unknown_tab'],
-    ['the rule creation page', '/rules/create'],
     ['the alerts page', '/alerts'],
     ['the hosts page', '/hosts'],
     ['the dashboards page', '/dashboards'],

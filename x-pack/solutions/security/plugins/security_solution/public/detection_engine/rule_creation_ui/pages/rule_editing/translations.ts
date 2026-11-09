@@ -35,13 +35,6 @@ export const SORRY_ERRORS = i18n.translate(
   }
 );
 
-export const BACK_TO = i18n.translate(
-  'xpack.securitySolution.detectionEngine.editRule.backToDescription',
-  {
-    defaultMessage: 'Back to',
-  }
-);
-
 export const SUCCESSFULLY_SAVED_RULE = (ruleName: string) =>
   i18n.translate('xpack.securitySolution.detectionEngine.rules.update.successfullySavedRuleTitle', {
     values: { ruleName },
