@@ -79,6 +79,8 @@ interface ItemsEntry {
 const PINNED_FIELDS_KEY = 'discover:pinnedFields';
 export const HIDE_NULL_VALUES = 'unifiedDocViewer:hideNullValues';
 export const SHOW_ONLY_SELECTED_FIELDS = 'unifiedDocViewer:showOnlySelectedFields';
+// Minimum height of the whole table tab (filters + grid), so the grid stays usable on short viewports
+const MIN_TABLE_HEIGHT = 400;
 
 // we keep writing to localStorage for pinned fields custom here (instead of useRestorableLocalStorage)
 // to keep backward compatibility
@@ -317,8 +319,16 @@ const InternalDocViewerTable = ({
     [setShowOnlySelectedFields]
   );
 
+  // Keep a usable minimum so the grid doesn't collapse on short viewports (e.g. 400% zoom);
+  // the flyout body scrolls when the content exceeds the available height.
   const containerHeight = containerRef
-    ? getTabContentAvailableHeight(containerRef, decreaseAvailableHeightBy ?? DEFAULT_MARGIN_BOTTOM)
+    ? Math.max(
+        getTabContentAvailableHeight(
+          containerRef,
+          decreaseAvailableHeightBy ?? DEFAULT_MARGIN_BOTTOM
+        ),
+        MIN_TABLE_HEIGHT
+      )
     : 0;
 
   return (
