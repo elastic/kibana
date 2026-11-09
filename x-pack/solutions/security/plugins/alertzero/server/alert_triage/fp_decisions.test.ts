@@ -281,37 +281,14 @@ describe('readActiveDecision', () => {
     });
   });
 
-  it('ignores an expired decision', () => {
-    expect(
-      readActiveDecision({
-        id: 'd',
-        source: source({ expires_at: '2026-10-27T11:59:59.000Z' }),
-        now,
-      })
-    ).toBeUndefined();
-  });
-
-  it('ignores a decision with no expiry, which is not one of ours', () => {
-    expect(
-      readActiveDecision({ id: 'd', source: source({ expires_at: undefined }), now })
-    ).toBeUndefined();
-  });
-
-  it('ignores a decision that was revoked', () => {
-    expect(
-      readActiveDecision({
-        id: 'd',
-        source: source({ governance: { lifecycle: { status: 'deleted' } } }),
-        now,
-      })
-    ).toBeUndefined();
-  });
-
-  it('ignores another type of item and a missing document', () => {
-    expect(
-      readActiveDecision({ id: 'd', source: source({ type: 'security.coverage' }), now })
-    ).toBe(undefined);
-    expect(readActiveDecision({ id: 'd', source: undefined, now })).toBeUndefined();
+  it.each([
+    ['an expired decision', source({ expires_at: '2026-10-27T11:59:59.000Z' })],
+    ['a decision with no expiry, which is not one of ours', source({ expires_at: undefined })],
+    ['a decision that was revoked', source({ governance: { lifecycle: { status: 'deleted' } } })],
+    ['another type of item', source({ type: 'security.coverage' })],
+    ['a missing document', undefined],
+  ])('ignores %s', (_name, doc) => {
+    expect(readActiveDecision({ id: 'd', source: doc, now })).toBeUndefined();
   });
 });
 
