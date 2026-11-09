@@ -7,7 +7,9 @@
 
 import { createReducer } from 'redux-toolkit-v1';
 import { CLIENT_DEFAULTS_SYNTHETICS } from '../../../../../common/constants/synthetics/client_defaults';
+import { OVERVIEW_PAGINATION_DEFAULTS } from '../../../../../common/constants/monitor_management';
 import type { MonitorOverviewState } from './models';
+import type { OverviewView } from './models';
 import { overviewViews } from './models';
 import { isPageStateSlotEqual } from '../utils/page_state_equality';
 import { getInitialShowFromAllSpaces } from '../utils/get_initial_show_from_all_spaces';
@@ -25,12 +27,21 @@ import {
 } from './actions';
 
 export const DEFAULT_OVERVIEW_VIEW = overviewViews[0];
+export const DEFAULT_OVERVIEW_PER_PAGE = OVERVIEW_PAGINATION_DEFAULTS.perPage;
+// Compact table rows are far shorter than cards, but a page of 20 still runs
+// well past the fold on common viewport heights — 10 keeps a page scannable
+// without scrolling.
+export const DEFAULT_COMPACT_VIEW_PER_PAGE = 10;
+
+const getDefaultPerPageForView = (view: OverviewView): number =>
+  view === 'compactView' ? DEFAULT_COMPACT_VIEW_PER_PAGE : DEFAULT_OVERVIEW_PER_PAGE;
 
 const initialState: MonitorOverviewState = {
   pageState: {
-    perPage: 16,
-    sortOrder: 'asc',
-    sortField: 'status',
+    page: OVERVIEW_PAGINATION_DEFAULTS.page,
+    perPage: getDefaultPerPageForView(DEFAULT_OVERVIEW_VIEW),
+    sortOrder: OVERVIEW_PAGINATION_DEFAULTS.sortOrder,
+    sortField: OVERVIEW_PAGINATION_DEFAULTS.sortField,
     showFromAllSpaces: getInitialShowFromAllSpaces(),
     includeHeartbeatMonitors: getInitialIncludeHeartbeatMonitors(),
     // Seed the date-range window so the very first overview fetch is already
@@ -55,11 +66,23 @@ export const monitorOverviewReducer = createReducer(initialState, (builder) => {
       // ShowAllSpaces re-sending the same value, or [] filter arrays from
       // mount effects) don't create a new pageState reference and re-trigger
       // the useDebounce fetch in useOverviewStatus.
+      const paginationKeys = new Set(['page', 'perPage']);
+      let hasNonPaginationChange = false;
+
       for (const key of Object.keys(action.payload) as Array<keyof typeof action.payload>) {
         const value = action.payload[key];
         if (!isPageStateSlotEqual((state.pageState as Record<string, unknown>)[key], value)) {
           (state.pageState as Record<string, unknown>)[key] = value;
+          if (!paginationKeys.has(key)) {
+            hasNonPaginationChange = true;
+          }
         }
+      }
+
+      // Reset to first page when any non-pagination field changes (e.g.
+      // filters, sort, query) unless the caller already set page explicitly.
+      if (hasNonPaginationChange && !('page' in action.payload)) {
+        state.pageState.page = 1;
       }
     })
     .addCase(setOverviewGroupByAction, (state, action) => {
@@ -118,6 +141,17 @@ export const monitorOverviewReducer = createReducer(initialState, (builder) => {
       }
     })
     .addCase(setOverviewViewAction, (state, action) => {
+      // Reset pagination on a real view switch so neither view inherits the
+      // other's window. Always assign a new `pageState` object: card infinite
+      // scroll never writes page/perPage, so Immer would keep the same
+      // reference and `useOverviewStatus` would not refetch.
+      if (state.view !== action.payload) {
+        state.pageState = {
+          ...state.pageState,
+          page: 1,
+          perPage: getDefaultPerPageForView(action.payload),
+        };
+      }
       state.view = action.payload;
     })
     .addCase(setOverviewShowLastRunAction, (state, action) => {

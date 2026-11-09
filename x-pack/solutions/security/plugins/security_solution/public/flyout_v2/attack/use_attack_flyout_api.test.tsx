@@ -43,10 +43,12 @@ jest.mock('../shared/hooks/use_default_flyout_properties', () => ({
 
 const mockWriteOnOpen = jest.fn();
 const mockBuildOnClose = jest.fn(() => jest.fn());
+const mockReadRootDescriptor = jest.fn((): unknown => null);
 jest.mock('../shared/url_state/flyout_v2_url_writer', () => ({
   useFlyoutV2UrlWriter: jest.fn(() => ({
     writeOnOpen: mockWriteOnOpen,
     buildOnClose: mockBuildOnClose,
+    readRootDescriptor: mockReadRootDescriptor,
   })),
 }));
 
@@ -66,6 +68,7 @@ describe('useAttackFlyoutApi', () => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         overlays: { openSystemFlyout: mockOpenSystemFlyout },
+        storage: { get: jest.fn(), set: jest.fn(), remove: jest.fn() },
         telemetry: { reportEvent: mockReportEvent },
       },
     });
@@ -172,6 +175,7 @@ describe('useAttackFlyoutApi', () => {
     expect(children.props.value).toEqual({
       session: 'inherit',
       historyKey: documentFlyoutHistoryKey,
+      isChildFlyout: false,
     });
   });
 
@@ -183,7 +187,6 @@ describe('useAttackFlyoutApi', () => {
       kind: FLYOUT_DESCRIPTOR_KIND.attackCorrelations,
       attackId: 'attack-id',
       indexName: 'attack-index',
-      alertIds: ['alert-1', 'alert-2'],
     });
     // A tool is a session:'start' root; closing it clears the param (no parent to revert to).
     expect(mockBuildOnClose).toHaveBeenCalledWith(null);
@@ -208,6 +211,7 @@ describe('useAttackFlyoutApi', () => {
     expect(children.props.value).toEqual({
       session: 'inherit',
       historyKey: documentFlyoutHistoryKey,
+      isChildFlyout: false,
     });
   });
 
@@ -219,7 +223,6 @@ describe('useAttackFlyoutApi', () => {
       kind: FLYOUT_DESCRIPTOR_KIND.attackEntities,
       attackId: 'attack-id',
       indexName: 'attack-index',
-      alertIds: ['alert-1', 'alert-2'],
     });
     // A tool is a session:'start' root; closing it clears the param (no parent to revert to).
     expect(mockBuildOnClose).toHaveBeenCalledWith(null);

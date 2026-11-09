@@ -13,7 +13,10 @@ import {
   isInlineField,
   isRefField,
 } from '../../../../common/types/domain/template/fields';
-import { applyRefFieldOverride } from '../../../../common/utils/template_fields';
+import {
+  applyRefFieldOverride,
+  normalizeFieldDefinitionName,
+} from '../../../../common/utils/template_fields';
 import { useGetFieldDefinitions } from './use_get_field_definitions';
 
 /**
@@ -33,7 +36,9 @@ export const useResolvedFields = (
     return fields.flatMap((field): InlineField[] => {
       if (isInlineField(field)) return [field];
 
-      const fd = fieldDefs.find((d) => d.name === field.$ref);
+      // Case-insensitive, matching resolveTemplateFields on the server.
+      const normalizedRef = normalizeFieldDefinitionName(field.$ref);
+      const fd = fieldDefs.find((d) => normalizeFieldDefinitionName(d.name) === normalizedRef);
       if (!fd) return [];
 
       try {

@@ -26,11 +26,12 @@ import { i18n } from '@kbn/i18n';
 import type { FC, PropsWithChildren, ReactNode } from 'react';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { DataSource } from '@kbn/data-source';
 import type { DocumentDiffMode } from './types';
 import { styles as toolbarStyles } from '../custom_toolbar/render_custom_toolbar';
 
 export interface ComparisonControlsProps {
-  isPlainRecord?: boolean;
+  dataSource: DataSource | undefined;
   selectedDocIds: string[];
   showDiff: boolean | undefined;
   diffMode: DocumentDiffMode | undefined;
@@ -47,7 +48,7 @@ export interface ComparisonControlsProps {
 }
 
 export const ComparisonControls = ({
-  isPlainRecord,
+  dataSource,
   selectedDocIds,
   showDiff,
   diffMode,
@@ -69,7 +70,7 @@ export const ComparisonControls = ({
       <EuiFlexItem grow={false} css={{ marginRight: euiTheme.size.s }}>
         <EuiText size="s">
           <strong data-test-subj="unifiedDataTableComparisonDisplay">
-            {isPlainRecord ? (
+            {dataSource?.kind === 'esql' ? (
               <FormattedMessage
                 id="unifiedDataTable.comparingResults"
                 defaultMessage="Comparing {documentCount} results"

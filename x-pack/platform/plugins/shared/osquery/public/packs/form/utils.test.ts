@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { convertSOQueriesToPack, convertPackQueriesToSO } from './utils';
+import { convertSOQueriesToPack, convertPackQueriesToSO, storedQueryVersion } from './utils';
 import type { PackQueryFormData } from '../queries/use_pack_query_form';
 
 const makeQuery = (overrides: Partial<PackQueryFormData>): PackQueryFormData =>
@@ -59,7 +59,7 @@ describe('pack form serializer (public) — convertSOQueriesToPack', () => {
   it('deserializer captures originalId; a rename then round-trips the original claim', () => {
     // GET delivers queries keyed by stored id; a rename must still round-trip that id.
     const stored = { processes: { query: 'SELECT 1;', interval: 3600, ecs_mapping: {} } };
-    const asArray = convertPackQueriesToSO(stored as never);
+    const asArray = convertPackQueriesToSO(stored);
     expect(asArray[0].id).toBe('processes');
     expect(asArray[0].originalId).toBe('processes');
 
@@ -68,5 +68,38 @@ describe('pack form serializer (public) — convertSOQueriesToPack', () => {
     const backToRecord = convertSOQueriesToPack(renamed, { includeId: true });
     expect(Object.keys(backToRecord)).toEqual(['renamed']);
     expect(backToRecord.renamed).toMatchObject({ id: 'processes' });
+  });
+
+  it('serializes a form version array as a wire string', () => {
+    const result = convertSOQueriesToPack([makeQuery({ id: 'processes', version: ['5.10.0'] })]);
+
+    expect(result.processes.version).toBe('5.10.0');
+  });
+
+  it('deserializes a wire string version without treating it as a character array', () => {
+    const stored = {
+      processes: { query: 'SELECT 1;', interval: 3600, version: '5.10.0', ecs_mapping: {} },
+    };
+    const asArray = convertPackQueriesToSO(stored);
+    expect(storedQueryVersion(asArray[0].version)).toBe('5.10.0');
+  });
+});
+
+describe('storedQueryVersion', () => {
+  it('returns a wire string unchanged', () => {
+    expect(storedQueryVersion('5.10.0')).toBe('5.10.0');
+  });
+
+  it('returns the first form-array entry', () => {
+    expect(storedQueryVersion(['5.12.0'])).toBe('5.12.0');
+  });
+
+  it('does not treat a string as a character array', () => {
+    expect(storedQueryVersion('5.10.0')).not.toBe('5');
+  });
+
+  it('returns empty for missing values', () => {
+    expect(storedQueryVersion(undefined)).toBe('');
+    expect(storedQueryVersion([])).toBe('');
   });
 });

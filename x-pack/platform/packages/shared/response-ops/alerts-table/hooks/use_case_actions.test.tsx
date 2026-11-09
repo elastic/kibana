@@ -7,11 +7,7 @@
 
 import { renderHook, act } from '@testing-library/react';
 import type { Alert } from '@kbn/alerting-types';
-import {
-  createCasesServiceMock,
-  openAddToExistingCaseModalMock,
-  openAddToNewCaseFlyoutMock,
-} from '../mocks/cases.mock';
+import { createCasesServiceMock, openAddToExistingCaseModalMock } from '../mocks/cases.mock';
 import { useCaseActions } from './use_case_actions';
 
 const casesServiceMock = createCasesServiceMock();
@@ -23,49 +19,31 @@ const mockAlert: Alert = {
   'kibana.alert.rule.name': ['Test rule'],
 };
 
+const mockAttachments = [
+  {
+    type: 'stack.alert',
+    attachmentId: ['alert-id-1'],
+    metadata: { index: ['.alerts-default-000001'], rule: { id: 'rule-id', name: 'Test rule' } },
+  },
+];
+
 describe('useCaseActions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    casesServiceMock.helpers.getRuleIdFromEvent.mockReturnValue({
-      id: 'rule-id',
-      name: 'Test rule',
-    });
+    casesServiceMock.helpers.groupAlertsByRule.mockReturnValue(mockAttachments);
   });
 
-  it('opens the new case flyout with alert attachments', () => {
+  it('opens the case modal with attachments for the selected case owner', () => {
     const { result } = renderHook(() =>
       useCaseActions({
         alerts: [mockAlert],
         cases: casesServiceMock,
+        owner: ['cases'],
       })
     );
 
     act(() => {
-      result.current.handleAddToNewCaseClick();
-    });
-
-    expect(openAddToNewCaseFlyoutMock).toHaveBeenCalledWith({
-      attachments: [
-        expect.objectContaining({
-          alertId: 'alert-id-1',
-          index: '.alerts-default-000001',
-          type: 'alert',
-          rule: { id: 'rule-id', name: 'Test rule' },
-        }),
-      ],
-    });
-  });
-
-  it('opens the existing case modal with alert attachments', () => {
-    const { result } = renderHook(() =>
-      useCaseActions({
-        alerts: [mockAlert],
-        cases: casesServiceMock,
-      })
-    );
-
-    act(() => {
-      result.current.handleAddToExistingCaseClick();
+      result.current.handleAddToCaseClick();
     });
 
     expect(openAddToExistingCaseModalMock).toHaveBeenCalledWith({
@@ -73,44 +51,49 @@ describe('useCaseActions', () => {
     });
 
     const { getAttachments } = openAddToExistingCaseModalMock.mock.calls[0][0];
-    expect(getAttachments()).toEqual([
-      expect.objectContaining({
-        alertId: 'alert-id-1',
-        index: '.alerts-default-000001',
-        type: 'alert',
-        rule: { id: 'rule-id', name: 'Test rule' },
-      }),
-    ]);
+    expect(getAttachments({ theCase: { id: 'case-id', owner: 'observability' } })).toEqual(
+      mockAttachments
+    );
+    expect(casesServiceMock.helpers.groupAlertsByRule).toHaveBeenCalledWith(
+      [
+        {
+          ecs: { _id: 'alert-id-1', _index: '.alerts-default-000001' },
+          data: expect.arrayContaining([{ field: 'kibana.alert.rule.name', value: ['Test rule'] }]),
+        },
+      ],
+      'observability'
+    );
   });
 
-  it('calls onAddToCase with { isNewCase: true } when adding to new case', () => {
-    const onAddToCase = jest.fn();
-
-    renderHook(() =>
+  it('falls back to the first configured owner when no case is selected', () => {
+    const { result } = renderHook(() =>
       useCaseActions({
         alerts: [mockAlert],
         cases: casesServiceMock,
-        onAddToCase,
+        owner: ['securitySolution'],
       })
     );
 
-    const onSuccessCallback =
-      casesServiceMock.hooks.useCasesAddToNewCaseFlyout.mock.calls[0]?.[0]?.onSuccess;
-    expect(onSuccessCallback).toBeDefined();
     act(() => {
-      onSuccessCallback!();
+      result.current.handleAddToCaseClick();
     });
 
-    expect(onAddToCase).toHaveBeenCalledWith({ isNewCase: true });
+    const { getAttachments } = openAddToExistingCaseModalMock.mock.calls[0][0];
+    getAttachments({});
+    expect(casesServiceMock.helpers.groupAlertsByRule).toHaveBeenCalledWith(
+      expect.any(Array),
+      'securitySolution'
+    );
   });
 
-  it('calls onAddToCase with { isNewCase: false } when adding to existing case', () => {
+  it.each([true, false])('reports the modal case path: isNewCase=%s', (isNewCase) => {
     const onAddToCase = jest.fn();
 
     renderHook(() =>
       useCaseActions({
         alerts: [mockAlert],
         cases: casesServiceMock,
+        owner: ['cases'],
         onAddToCase,
       })
     );
@@ -119,10 +102,10 @@ describe('useCaseActions', () => {
       casesServiceMock.hooks.useCasesAddToExistingCaseModal.mock.calls[0]?.[0]?.onSuccess;
     expect(onSuccessCallback).toBeDefined();
     act(() => {
-      onSuccessCallback!();
+      onSuccessCallback?.({ id: 'case-id', owner: 'cases' }, isNewCase);
     });
 
-    expect(onAddToCase).toHaveBeenCalledWith({ isNewCase: false });
+    expect(onAddToCase).toHaveBeenCalledWith({ isNewCase });
   });
 
   it('returns no-op handlers when cases service is undefined', () => {
@@ -130,19 +113,18 @@ describe('useCaseActions', () => {
       useCaseActions({
         alerts: [mockAlert],
         cases: undefined,
+        owner: ['cases'],
       })
     );
 
     act(() => {
-      result.current.handleAddToNewCaseClick();
-      result.current.handleAddToExistingCaseClick();
+      result.current.handleAddToCaseClick();
     });
 
-    expect(openAddToNewCaseFlyoutMock).not.toHaveBeenCalled();
     expect(openAddToExistingCaseModalMock).not.toHaveBeenCalled();
   });
 
-  it('builds attachments for multiple alerts', () => {
+  it('groups multiple alerts in a single call', () => {
     const secondAlert: Alert = {
       _id: 'alert-id-2',
       _index: '.alerts-default-000002',
@@ -153,16 +135,24 @@ describe('useCaseActions', () => {
       useCaseActions({
         alerts: [mockAlert, secondAlert],
         cases: casesServiceMock,
+        owner: ['cases'],
       })
     );
 
     act(() => {
-      result.current.handleAddToNewCaseClick();
+      result.current.handleAddToCaseClick();
     });
 
-    const { attachments } = openAddToNewCaseFlyoutMock.mock.calls[0][0];
-    expect(attachments).toHaveLength(2);
-    expect(attachments[0].alertId).toBe('alert-id-1');
-    expect(attachments[1].alertId).toBe('alert-id-2');
+    const { getAttachments } = openAddToExistingCaseModalMock.mock.calls[0][0];
+    getAttachments({ theCase: { id: 'case-id', owner: 'cases' } });
+
+    expect(casesServiceMock.helpers.groupAlertsByRule).toHaveBeenCalledTimes(1);
+    expect(casesServiceMock.helpers.groupAlertsByRule).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({ ecs: { _id: 'alert-id-1', _index: '.alerts-default-000001' } }),
+        expect.objectContaining({ ecs: { _id: 'alert-id-2', _index: '.alerts-default-000002' } }),
+      ],
+      'cases'
+    );
   });
 });

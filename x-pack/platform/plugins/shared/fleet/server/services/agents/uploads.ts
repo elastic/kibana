@@ -27,7 +27,7 @@ import {
   SO_SEARCH_LIMIT,
 } from '../../constants';
 import { updateFilesStatus } from '../files';
-import { FleetError } from '../../errors';
+import { FleetError, FleetNotFoundError } from '../../errors';
 
 export async function getAgentUploads(
   esClient: ElasticsearchClient,
@@ -282,6 +282,23 @@ export async function deleteAgentUploadFile(
     appContextService.getLogger().error(error);
     throw error;
   }
+}
+
+export async function getAgentIdForUploadFile(
+  esClient: ElasticsearchClient,
+  fileId: string
+): Promise<string> {
+  const result = await esClient.search<{ agent_id: string }>({
+    index: FILE_STORAGE_METADATA_AGENT_INDEX,
+    query: { ids: { values: [fileId] } },
+    _source: ['agent_id'],
+    size: 1,
+  });
+  const hit = result.hits.hits[0];
+  if (!hit?._source?.agent_id) {
+    throw new FleetNotFoundError(`File ${fileId} not found`);
+  }
+  return hit._source.agent_id;
 }
 
 export function getDownloadHeadersForFile(fileName: string): ResponseHeaders {

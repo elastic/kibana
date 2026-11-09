@@ -158,9 +158,10 @@ export const requestEventAnnotations = (
     const allQueryAnnotationsConfigs = queryGroups.flatMap((group) => group.annotations);
 
     const esaggsResponses = await Promise.all(
-      esaggsGroups.map(async ({ esaggsParams, fieldsColIdMap }) => ({
+      esaggsGroups.map(async ({ esaggsParams, fieldsColIdMap, fieldDisplayNames }) => ({
         response: await createEsaggsSingleRequest(esaggsParams),
         fieldsColIdMap,
+        fieldDisplayNames,
       }))
     );
 
@@ -301,6 +302,11 @@ const prepareEsaggsForQueryGroups = (
           }),
           {}
         ) || {},
+      fieldDisplayNames:
+        group.allFields?.reduce<Record<string, string>>((acc, fieldName) => {
+          acc[fieldName] = group.dataView?.getFieldByName?.(fieldName)?.customLabel || fieldName;
+          return acc;
+        }, {}) ?? {},
     };
   });
 };

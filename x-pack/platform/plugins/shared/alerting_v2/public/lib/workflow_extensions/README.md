@@ -22,7 +22,7 @@ export function registerTriggerDefinitions(
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup
 ): void {
   workflowsExtensions.registerTriggerDefinition(() =>
-    import('./triggers/episode_assigned').then((m) => m.episodeAssignedTriggerPublicDefinition)
+    import('./triggers/alert_assigned').then((m) => m.alertAssignedTriggerPublicDefinition)
   );
   // Add more trigger loaders here.
 }

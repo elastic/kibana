@@ -57,6 +57,24 @@ describe('useNetworkUsers', () => {
     expect(mockSearch).toHaveBeenCalled();
   });
 
+  it('labels the search with the network page execution context', () => {
+    renderHook(() => useNetworkUsers(props), {
+      wrapper: TestProviders,
+    });
+
+    expect(mockUseSearchStrategy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        executionContext: {
+          child: {
+            type: 'security_solution',
+            name: 'entity_analytics:explore-network_page',
+            id: 'network_users',
+          },
+        },
+      })
+    );
+  });
+
   it('does not run search when skip = true', () => {
     const localProps = {
       ...props,

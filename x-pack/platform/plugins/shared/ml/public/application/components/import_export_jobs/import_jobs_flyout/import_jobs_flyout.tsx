@@ -13,7 +13,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
-  EuiCallOut,
   EuiFieldText,
   EuiFilePicker,
   EuiFlexGroup,
@@ -32,6 +31,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { type ErrorType, extractErrorProperties } from '@kbn/ml-error-utils';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 
@@ -44,6 +44,10 @@ import { JobImportService } from './jobs_import_service';
 import { useValidateIds } from './validate';
 import type { ImportedAdJob, JobIdObject, SkippedJobs } from './jobs_import_service';
 import { useEnabledFeatures } from '../../../contexts/ml';
+
+const SELECT_FILE_LABEL = i18n.translate('xpack.ml.importExport.importFlyout.fileSelect', {
+  defaultMessage: 'Select or drag and drop a file',
+});
 
 export interface Props {
   isDisabled: boolean;
@@ -427,12 +431,8 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete, isOp
                   disabled={importing}
                   fullWidth
                   id="filePicker"
-                  initialPromptText={i18n.translate(
-                    'xpack.ml.importExport.importFlyout.fileSelect',
-                    {
-                      defaultMessage: 'Select or drag and drop a file',
-                    }
-                  )}
+                  aria-label={SELECT_FILE_LABEL}
+                  initialPromptText={SELECT_FILE_LABEL}
                   onChange={onFilePickerChange}
                   className="file-datavisualizer-file-picker"
                 />
@@ -538,7 +538,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete, isOp
                               jobId.datafeedInvalid === true &&
                               jobId.datafeedWarningMessage && (
                                 <EuiFormRow>
-                                  <EuiCallOut
+                                  <KbnWarningCallout
                                     data-test-subj="mlJobImportJobDatafeedWarning"
                                     title={i18n.translate(
                                       'xpack.ml.importExport.importFlyout.datafeedWarning.title',
@@ -546,14 +546,10 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete, isOp
                                         defaultMessage: 'Datafeed Warning',
                                       }
                                     )}
-                                    color="warning"
                                     size="s"
                                     announceOnMount
-                                  >
-                                    <EuiText size="xs" className="eui-textBreakWord">
-                                      {jobId.datafeedWarningMessage}
-                                    </EuiText>
-                                  </EuiCallOut>
+                                    text={jobId.datafeedWarningMessage}
+                                  />
                                 </EuiFormRow>
                               )}
                           </EuiFlexItem>

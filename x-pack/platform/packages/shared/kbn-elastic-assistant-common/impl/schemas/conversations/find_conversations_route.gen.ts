@@ -35,31 +35,60 @@ export const FindConversationsRequestQuery = lazySchema(() =>
     /**
      * A list of fields to include in the response. If omitted, all fields are returned.
      */
-    fields: ArrayFromString(z.string()).optional(),
+    fields: ArrayFromString(z.string())
+      .optional()
+      .describe(
+        'A list of fields to include in the response. If omitted, all fields are returned.'
+      ),
     /**
      * A search query to filter the conversations. Can match against titles, messages, or other conversation attributes.
      */
-    filter: z.string().optional(),
+    filter: z
+      .string()
+      .optional()
+      .describe(
+        'A search query to filter the conversations. Can match against titles, messages, or other conversation attributes.'
+      ),
     /**
      * The field by which to sort the results. Valid fields are `created_at`, `title`, and `updated_at`.
      */
-    sort_field: FindConversationsSortField.optional(),
+    sort_field: FindConversationsSortField.optional().describe(
+      'The field by which to sort the results. Valid fields are `created_at`, `title`, and `updated_at`.'
+    ),
     /**
      * The order in which to sort the results. Can be either `asc` for ascending or `desc` for descending.
      */
-    sort_order: SortOrder.optional(),
+    sort_order: SortOrder.optional().describe(
+      'The order in which to sort the results. Can be either `asc` for ascending or `desc` for descending.'
+    ),
     /**
      * The page number of the results to retrieve. Default is 1.
      */
-    page: z.coerce.number().int().min(1).optional().default(1),
+    page: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .optional()
+      .default(1)
+      .describe('The page number of the results to retrieve. Default is 1.'),
     /**
      * The number of conversations to return per page. Default is 20.
      */
-    per_page: z.coerce.number().int().min(0).optional().default(20),
+    per_page: z.coerce
+      .number()
+      .int()
+      .min(0)
+      .optional()
+      .default(20)
+      .describe('The number of conversations to return per page. Default is 20.'),
     /**
      * Whether to return conversations that the current user owns. If true, only conversations owned by the user are returned.
      */
-    is_owner: BooleanFromString.optional().default(false),
+    is_owner: BooleanFromString.optional()
+      .default(false)
+      .describe(
+        'Whether to return conversations that the current user owns. If true, only conversations owned by the user are returned.'
+      ),
   })
 );
 export type FindConversationsRequestQuery = z.infer<typeof FindConversationsRequestQuery>;
@@ -70,19 +99,22 @@ export const FindConversationsResponse = lazySchema(() =>
     /**
      * The current page of the results.
      */
-    page: z.number().int(),
+    page: z.number().int().describe('The current page of the results.'),
     /**
      * The number of results returned per page.
      */
-    perPage: z.number().int(),
+    perPage: z.number().int().describe('The number of results returned per page.'),
     /**
      * The total number of conversations matching the filter criteria.
      */
-    total: z.number().int(),
+    total: z
+      .number()
+      .int()
+      .describe('The total number of conversations matching the filter criteria.'),
     /**
      * A list of conversations.
      */
-    data: z.array(ConversationResponse),
+    data: z.array(ConversationResponse).describe('A list of conversations.'),
   })
 );
 export type FindConversationsResponse = z.infer<typeof FindConversationsResponse>;

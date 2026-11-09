@@ -11,17 +11,13 @@
 
 import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
-import { test, CUSTOM_ROLES } from '../fixtures';
+import { CUSTOM_ROLES, test } from '../fixtures';
 
-// Failing: See https://github.com/elastic/kibana/issues/272033
-test.describe.skip(
-  'Stack Management — ingest, security, and stack sections',
-  { tag: tags.stateful.classic },
-  () => {
-    test('logstash_read_user sees only the ingest section with pipelines', async ({
-      browserAuth,
-      pageObjects,
-    }) => {
+test.describe('Stack Management — ingest, security, and stack sections', () => {
+  test(
+    'logstash_read_user sees only the ingest section with pipelines',
+    { tag: tags.stateful.classic },
+    async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginWithCustomRole(CUSTOM_ROLES.dashboard_read_and_logstash);
 
       await test.step('navigate to management and assert nav link + sidebar', async () => {
@@ -41,13 +37,14 @@ test.describe.skip(
           sectionLinks: ['settings'],
         });
       });
-    });
+    }
+  );
 
-    // Pre-migration tag 'skipFIPS'
-    test('manage_security sees only the security section with all four links', async ({
-      browserAuth,
-      pageObjects,
-    }) => {
+  // Pre-migration tag 'skipFIPS'
+  test(
+    'manage_security sees only the security section with all five links',
+    { tag: tags.stateful.classic },
+    async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginWithCustomRole(CUSTOM_ROLES.dashboard_read_and_manage_security);
 
       await test.step('navigate to management and assert nav link + sidebar', async () => {
@@ -60,19 +57,20 @@ test.describe.skip(
         expect(sections).toHaveLength(2);
         expect(sections[0]).toStrictEqual({
           sectionId: 'security',
-          sectionLinks: ['users', 'roles', 'api_keys', 'role_mappings'],
+          sectionLinks: ['users', 'roles', 'api_keys', 'service_accounts', 'role_mappings'],
         });
         expect(sections[1]).toStrictEqual({
           sectionId: 'kibana',
           sectionLinks: ['settings'],
         });
       });
-    });
+    }
+  );
 
-    test('cluster:manage surfaces ingest, data (incl. remote_clusters) and stack (license_management) sections', async ({
-      browserAuth,
-      pageObjects,
-    }) => {
+  test(
+    'cluster:manage surfaces ingest, data (incl. remote_clusters) and stack (license_management) sections',
+    { tag: '@local-stateful-classic' },
+    async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginWithCustomRole(CUSTOM_ROLES.dashboard_read_and_license_management);
 
       await test.step('navigate to management and assert nav link + sidebar', async () => {
@@ -80,35 +78,29 @@ test.describe.skip(
         const navLinks = await pageObjects.collapsibleNav.getNavLinks();
         expect(navLinks).toContain('Stack Management');
 
-        const sections = await pageObjects.management.readSidebarSections();
         // cluster:manage surfaces ingest (ingest_pipelines + logstash pipelines), data (incl. remote_clusters),
         // kibana (settings, from advancedSettings:read) and stack (license_management).
-        expect(sections).toHaveLength(4);
-        expect(sections[0]).toStrictEqual({
-          sectionId: 'ingest',
-          sectionLinks: ['ingest_pipelines', 'pipelines'],
-        });
-        expect(sections[1]).toStrictEqual({
-          sectionId: 'data',
-          sectionLinks: [
-            'index_management',
-            'index_lifecycle_management',
-            'data_federation',
-            'snapshot_restore',
-            'rollup_jobs',
-            'transform',
-            'remote_clusters',
-          ],
-        });
-        expect(sections[2]).toStrictEqual({
-          sectionId: 'kibana',
-          sectionLinks: ['settings'],
-        });
-        expect(sections[3]).toStrictEqual({
-          sectionId: 'stack',
-          sectionLinks: ['license_management'],
-        });
+        // Polled because data_federation is enabled asynchronously once the license is fetched.
+        await expect
+          .poll(() => pageObjects.management.readSidebarSections())
+          .toStrictEqual([
+            { sectionId: 'ingest', sectionLinks: ['ingest_pipelines', 'pipelines'] },
+            {
+              sectionId: 'data',
+              sectionLinks: [
+                'index_management',
+                'data_federation',
+                'index_lifecycle_management',
+                'snapshot_restore',
+                'rollup_jobs',
+                'transform',
+                'remote_clusters',
+              ],
+            },
+            { sectionId: 'kibana', sectionLinks: ['settings'] },
+            { sectionId: 'stack', sectionLinks: ['license_management'] },
+          ]);
       });
-    });
-  }
-);
+    }
+  );
+});

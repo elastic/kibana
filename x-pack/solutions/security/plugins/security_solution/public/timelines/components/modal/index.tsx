@@ -16,10 +16,16 @@ import { CustomEuiPortal } from './custom_portal';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { inputsSelectors } from '../../../common/store/selectors';
 import { usePaneStyles, OverflowHiddenGlobalStyles } from './index.styles';
-import { useTimelinePortalZIndex } from './use_timeline_portal_z_index';
+import { useUnmanagedFlyoutZIndex } from '../../../common/hooks/use_unmanaged_flyout_z_index';
 import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
 import { FlyoutSessionContextProvider } from '../../../flyout_v2/session_context';
 import { timelineFlyoutHistoryKey } from '../../../flyout_v2/shared/constants/flyout_history';
+
+/**
+ * Id used to register the Timeline portal with EUI's flyout manager. Timeline is a singleton, so
+ * this only needs to be stable.
+ */
+const TIMELINE_UNMANAGED_FLYOUT_ID = 'security-solution-timeline';
 
 const TIMELINE_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.timeline.modal.timelinePropertiesAriaLabel',
@@ -54,9 +60,12 @@ export const TimelineModal = React.memo<TimelineModalProps>(
 
     // Only returns a value when the new flyout system is enabled, undefined otherwise (in which
     // case usePaneStyles falls back to its static default)
-    const dynamicZIndex = useTimelinePortalZIndex(visible);
+    const dynamicZIndex = useUnmanagedFlyoutZIndex({
+      id: TIMELINE_UNMANAGED_FLYOUT_ID,
+      active: visible,
+    });
     const styles = usePaneStyles(dynamicZIndex);
-    // Gates on the same flag as `useTimelinePortalZIndex` above. Gives flyouts opened from within
+    // Gates on the same flag as `useUnmanagedFlyoutZIndex` above. Gives flyouts opened from within
     // Timeline (host/user/rule/network/document/notes/...) their own history group, isolated from
     // whatever flyout was already open before Timeline, see `session_context.tsx`.
     const isNewFlyoutEnabled = useIsNewFlyoutEnabled();

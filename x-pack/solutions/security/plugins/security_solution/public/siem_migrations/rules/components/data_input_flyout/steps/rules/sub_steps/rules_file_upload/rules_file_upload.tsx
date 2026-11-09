@@ -8,10 +8,7 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { isPlainObject } from 'lodash';
 import { EuiFilePicker, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiText } from '@elastic/eui';
-import type {
-  EuiFilePickerClass,
-  EuiFilePickerProps,
-} from '@elastic/eui/src/components/form/file_picker/file_picker';
+import type { EuiFilePickerRef } from '@elastic/eui';
 import { UploadFileButton } from '../../../../../../../common/components';
 import { FILE_UPLOAD_ERROR } from '../../../../../../../common/translations/file_upload_error';
 import {
@@ -22,7 +19,6 @@ import {
 import type { CreateMigration } from '../../../../../../service/hooks/use_create_migration';
 import type { CreateRuleMigrationRulesRequestBody } from '../../../../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { OriginalRule } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
-import * as i18n from './translations';
 import type { SPLUNK_RULES_COLUMNS } from '../../../../constants';
 import { MigrationSource } from '../../../../../../../common/types';
 import { useRuleMigrationVendorCopy } from '../../../../../../hooks/use_rule_migration_vendor_copy';
@@ -41,8 +37,8 @@ export interface RulesFileUploadProps {
 export const RulesFileUpload = React.memo<RulesFileUploadProps>(
   ({ createMigration, migrationName, apiError, isLoading, isCreated, onRulesFileChanged }) => {
     const [rulesToUpload, setRulesToUpload] = useState<CreateRuleMigrationRulesRequestBody>([]);
-    const filePickerRef = useRef<EuiFilePickerClass>(null);
-    const { checkResources } = useRuleMigrationVendorCopy(MigrationSource.SPLUNK);
+    const filePickerRef = useRef<EuiFilePickerRef>(null);
+    const { rulesFileUpload } = useRuleMigrationVendorCopy(MigrationSource.SPLUNK);
 
     const createRules = useCallback(() => {
       if (migrationName) {
@@ -85,18 +81,18 @@ export const RulesFileUpload = React.memo<RulesFileUploadProps>(
     return (
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
-          <EuiText size="s">{checkResources.description}</EuiText>
+          <EuiText size="s">{rulesFileUpload.description}</EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow isInvalid={error != null} fullWidth error={error}>
             <EuiFilePicker
               isInvalid={error != null}
               id="rulesFilePicker"
-              ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
+              ref={filePickerRef}
               fullWidth
               initialPromptText={
                 <EuiText size="s" textAlign="center">
-                  {i18n.RULES_DATA_INPUT_FILE_UPLOAD_PROMPT_SPLUNK}
+                  {rulesFileUpload.prompt}
                 </EuiText>
               }
               accept={'application/json, application/x-ndjson'}

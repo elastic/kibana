@@ -57,6 +57,21 @@ describe('schema validation', () => {
           is_default: true,
           is_internal: true,
           proxy_id: 'proxy1',
+          ssl: {
+            certificate: 'certificate',
+            key: 'fleet-private-key',
+            es_certificate: 'es-certificate',
+            es_key: 'es-private-key',
+            agent_certificate: 'agent-certificate',
+            agent_key: 'agent-private-key',
+          },
+          secrets: {
+            ssl: {
+              key: { id: 'secret-key' },
+              es_key: { id: 'secret-es-key' },
+              agent_key: { id: 'secret-agent-key' },
+            },
+          },
         },
       ],
       total: 1,
@@ -64,6 +79,71 @@ describe('schema validation', () => {
       perPage: 20,
     };
     (fleetServerHostService.list as jest.Mock).mockResolvedValue(expectedResponse);
+    await getAllFleetServerHostsHandler(context, {} as any, response);
+
+    expect(response.ok).toHaveBeenCalledWith({
+      body: expectedResponse,
+    });
+    const validationResp = ListResponseSchema(FleetServerHostSchema).validate(expectedResponse);
+    expect(validationResp).toEqual(expectedResponse);
+  });
+
+  it('list fleet server hosts should redact key material for users without settings read access', async () => {
+    const listResponse = {
+      items: [
+        {
+          id: 'host1',
+          name: 'host1',
+          host_urls: ['http://host1:8080'],
+          is_preconfigured: true,
+          is_default: true,
+          is_internal: true,
+          proxy_id: 'proxy1',
+          ssl: {
+            certificate: 'certificate',
+            key: 'fleet-private-key',
+            es_certificate: 'es-certificate',
+            es_key: 'es-private-key',
+            agent_certificate: 'agent-certificate',
+            agent_key: 'agent-private-key',
+          },
+          secrets: {
+            ssl: {
+              key: { id: 'secret-key' },
+              es_key: { id: 'secret-es-key' },
+              agent_key: { id: 'secret-agent-key' },
+            },
+          },
+        },
+      ],
+      total: 1,
+      page: 1,
+      perPage: 20,
+    };
+    const expectedResponse = {
+      items: [
+        {
+          id: 'host1',
+          name: 'host1',
+          host_urls: ['http://host1:8080'],
+          is_preconfigured: true,
+          is_default: true,
+          is_internal: true,
+          proxy_id: 'proxy1',
+          ssl: {
+            certificate: 'certificate',
+            es_certificate: 'es-certificate',
+            agent_certificate: 'agent-certificate',
+          },
+        },
+      ],
+      total: 1,
+      page: 1,
+      perPage: 20,
+    };
+    (fleetServerHostService.list as jest.Mock).mockResolvedValue(listResponse);
+    (await context.fleet).authz.fleet.readSettings = false;
+
     await getAllFleetServerHostsHandler(context, {} as any, response);
 
     expect(response.ok).toHaveBeenCalledWith({

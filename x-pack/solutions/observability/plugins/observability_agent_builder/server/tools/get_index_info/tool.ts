@@ -80,6 +80,13 @@ export function createGetIndexInfoTool({
   const toolDefinition: BuiltinToolDefinition<typeof getIndexInfoSchema> = {
     id: OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
     type: ToolType.builtin,
+    annotations: {
+      title: 'Get Index Info',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     description: dedent(`
       Discovers observability index patterns, fields, and field values in the user's Elasticsearch cluster.
 

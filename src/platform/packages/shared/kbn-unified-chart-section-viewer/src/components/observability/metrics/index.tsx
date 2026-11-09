@@ -12,6 +12,7 @@ import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { MetricsExperienceGrid } from './metrics_experience_grid';
 import { withRestorableState } from '../../../restorable_state';
 import { MetricsExperienceStateProvider } from './context/metrics_experience_state_provider';
+import { ExemplarsAvailabilityProvider } from './context/exemplars_availability_provider';
 import { EventBasedTelemetryProvider } from '../../../context/ebt_telemetry_context';
 import { ChartSectionInspectorProvider } from '../../../context/chart_section_inspector';
 import { ExternalServicesProvider } from '../../../context/external_services';
@@ -22,9 +23,9 @@ const InternalUnifiedMetricsExperienceGrid = (props: UnifiedMetricsGridProps) =>
     <PerformanceContextProvider>
       <EventBasedTelemetryProvider analytics={props.services.analytics}>
         <ChartSectionInspectorProvider setLensRequestAdapter={props.setLensRequestAdapter}>
-          <ExternalServicesProvider externalServices={props.externalServices}>
+          <ExemplarsAvailabilityProvider>
             <MetricsExperienceGrid {...props} />
-          </ExternalServicesProvider>
+          </ExemplarsAvailabilityProvider>
         </ChartSectionInspectorProvider>
       </EventBasedTelemetryProvider>
     </PerformanceContextProvider>
@@ -33,16 +34,20 @@ const InternalUnifiedMetricsExperienceGrid = (props: UnifiedMetricsGridProps) =>
 
 const InternalUnifiedMetricsExperienceGridWithState = (props: UnifiedMetricsGridProps) => {
   return (
-    <MetricsExperienceStateProvider
-      profileId={props.profileId}
-      gridSettings={props.gridSettings}
-      onGridSettingsChange={props.onGridSettingsChange}
-      getRecentlyExploredMetrics={props.getRecentlyExploredMetrics}
-      discoverFetch$={props.fetch$}
-      onMetricExplored={props.onMetricExplored}
-    >
-      <InternalUnifiedMetricsExperienceGrid {...props} />
-    </MetricsExperienceStateProvider>
+    <ExternalServicesProvider externalServices={props.externalServices}>
+      <MetricsExperienceStateProvider
+        profileId={props.profileId}
+        gridSettings={props.gridSettings}
+        onGridSettingsChange={props.onGridSettingsChange}
+        metricsSort={props.metricsSort}
+        onMetricsSortChange={props.onMetricsSortChange}
+        getRecentlyExploredMetrics={props.getRecentlyExploredMetrics}
+        discoverFetch$={props.fetch$}
+        onMetricExplored={props.onMetricExplored}
+      >
+        <InternalUnifiedMetricsExperienceGrid {...props} />
+      </MetricsExperienceStateProvider>
+    </ExternalServicesProvider>
   );
 };
 

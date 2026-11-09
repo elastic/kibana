@@ -2,7 +2,7 @@
   "type": "shared-browser",
   "id": "@kbn/event-annotation-components",
   "owner": [
-    "@elastic/kibana-visualizations"
+    "@elastic/kibana-dashboards"
   ],
   "group": "platform",
   "visibility": "shared"

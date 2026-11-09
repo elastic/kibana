@@ -45,6 +45,8 @@ An `Error` status in any section will cause the whole system to display as `Erro
 A `Warning` status in any section will cause the whole system to display as `Warning`.
 An `OK` status will only be displayed when all sections are marked as `OK`.
 
+While Task Manager is applying Elasticsearch-driven backpressure (`es_backpressure_active` is `1` in the utilization stats), stale "Hot" or "Cold" stats do not cause an `Error` status, as Task Manager slows its own polling on purpose. The root `status` stays `OK` and its `reason` explains that backpressure is active. "Unhealthy" capacity estimation messages are also logged at `debug` instead of `warn` during this time. Once backpressure clears, the normal freshness checks apply again.
+
 The root `timestamp` is the time in which the summary was exposed (either to the DEBUG logger or the http api) and the `last_update` is the last time any one of the sections was updated.
 
 Follow this step-by-step guide to make sense of the stats: https://www.elastic.co/guide/en/kibana/master/task-manager-troubleshooting.html#task-manager-diagnosing-root-cause
@@ -74,3 +76,10 @@ These include:
   - The `Success | Retry | Failure ratio` by task type. This is different than the workload stats which tell you what's in the queue, but ca't keep track of retries and of non recurring tasks as they're wiped off the index when completed.
 
 These are "Hot" stats which are updated reactively as Tasks are executed and interacted with.
+
+## Background Task Utilization
+
+`GET /api/task_manager/_background_task_utilization` exposes the stats used by the serverless background-task autoscaler. The public route returns only the fields the autoscaler needs; `GET /internal/task_manager/_background_task_utilization` additionally includes `adhoc` and `recurring` service-time counters.
+
+- `stats.value.load` - Running average of the percentage of task pool capacity in use at the end of each polling cycle (window configured by `worker_utilization_running_average_window`).
+- `stats.value.es_backpressure_active` - `1` while Task Manager is throttling itself (reduced capacity or increased poll interval) because Elasticsearch is returning errors, `0` otherwise. This mirrors `task_backpressure.value.active` on `/api/task_manager/metrics` and is numeric so it can be read as an autoscaling metric. Kibana reports the raw state; any thresholds or hold durations are applied by the autoscaler. When this is `1`, a high `load` is a symptom of Elasticsearch being unhealthy rather than of demand for more Kibana capacity.

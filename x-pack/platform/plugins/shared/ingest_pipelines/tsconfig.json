@@ -12,6 +12,7 @@
     "../../../../../typings/**/*"
   ],
   "kbn_references": [
+    "@kbn/app-header",
     "@kbn/core",
     "@kbn/licensing-plugin",
     "@kbn/features-plugin",
@@ -45,7 +46,8 @@
     "@kbn/licensing-types",
     "@kbn/core-chrome-layout-constants",
     "@kbn/code-editor-mock",
-    "@kbn/scout"
+    "@kbn/scout",
+    "@kbn/ui-callout"
   ],
   "exclude": [
     "target/**/*",

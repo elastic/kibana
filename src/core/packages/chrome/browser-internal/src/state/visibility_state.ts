@@ -13,11 +13,11 @@ import {
   fromEvent,
   map,
   merge,
-  mergeMap,
   type Observable,
   of,
   shareReplay,
   startWith,
+  switchMap,
 } from 'rxjs';
 import { parse } from 'url';
 
@@ -49,19 +49,24 @@ export const createVisibilityState = ({ application }: VisibilityStateDeps): Vis
     // in the sense that the chrome UI should not be displayed until a non-chromeless app is mounting or mounted
     of(true),
     application.currentAppId$.pipe(
-      mergeMap((appId) =>
+      switchMap((appId) =>
         application.applications$.pipe(
           map((applications) => {
-            return !!appId && applications.has(appId) && !!applications.get(appId)!.chromeless;
+            const app = appId ? applications.get(appId) : undefined;
+            return !!app && (!!app.chromeless || !!app.hideChrome);
           })
         )
       )
     )
   );
 
-  const isVisible$ = combineLatest([appHidden$, forceHidden.$, isPrinting$]).pipe(
-    map(([appHidden, forceHiddenValue, isPrinting]) => {
-      return !appHidden && !forceHiddenValue && !isPrinting;
+  // App Not Found leaves currentAppId$ unset; keep chrome visible so capability-pruned
+  // navigation remains a recovery surface. Embed, print, and forced-hidden still win.
+  const appNotFound$ = application.appNotFound$.pipe(startWith(false), distinctUntilChanged());
+
+  const isVisible$ = combineLatest([appHidden$, appNotFound$, forceHidden.$, isPrinting$]).pipe(
+    map(([appHidden, appNotFound, forceHiddenValue, isPrinting]) => {
+      return (!appHidden || appNotFound) && !forceHiddenValue && !isPrinting;
     }),
     distinctUntilChanged(),
     shareReplay(1)

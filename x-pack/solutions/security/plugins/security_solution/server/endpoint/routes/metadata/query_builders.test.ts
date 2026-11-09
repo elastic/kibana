@@ -13,6 +13,7 @@ import {
   metadataCurrentIndexPattern,
   METADATA_UNITED_INDEX,
 } from '../../../../common/endpoint/constants';
+import { buildBaseEndpointMetadataFilter } from '../../../../common/endpoint/utils/endpoint_metadata_filter';
 import { get } from 'lodash';
 import { expectedCompleteUnitedIndexQuery } from './query_builders.fixtures';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
@@ -168,6 +169,67 @@ describe('query builder', () => {
       expect(query.index).toEqual(`${METADATA_UNITED_INDEX},*:${METADATA_UNITED_INDEX}`);
     });
 
+    describe('and a CPS space id is provided', () => {
+      it('should use the plain policy-id filter when no cpsSpaceId is given (regression guard)', async () => {
+        const policyIds = ['test-policy-id'];
+        const query = await buildUnitedIndexQuery(
+          soClient,
+          { page: 0, pageSize: 10, hostStatuses: [], kuery: '' },
+          policyIds
+        );
+        expect(query.query).toEqual(buildBaseEndpointMetadataFilter(policyIds));
+      });
+
+      it('should emit a bool.should with two branches and minimum_should_match: 1 when a cpsSpaceId is given', async () => {
+        const policyIds = ['test-policy-id'];
+        const spaceId = 'test-space';
+        const query = await buildUnitedIndexQuery(
+          soClient,
+          { page: 0, pageSize: 10, hostStatuses: [], kuery: '' },
+          policyIds,
+          false,
+          spaceId
+        );
+        expect(query.query).toEqual({
+          bool: {
+            should: [
+              buildBaseEndpointMetadataFilter(policyIds),
+              {
+                bool: {
+                  must: [
+                    buildBaseEndpointMetadataFilter(),
+                    { term: { 'united.agent.namespaces': spaceId } },
+                  ],
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
+        });
+      });
+
+      it('should NOT apply a CCS prefix to the index when cpsSpaceId is set, even if ccsEnabled is true', async () => {
+        const query = await buildUnitedIndexQuery(
+          soClient,
+          { page: 0, pageSize: 10, hostStatuses: [], kuery: '' },
+          [],
+          true,
+          'test-space'
+        );
+        expect(query.index).toEqual(METADATA_UNITED_INDEX);
+      });
+
+      it('should still apply the CCS prefix when ccsEnabled is true and no cpsSpaceId is given (flag-off twin)', async () => {
+        const query = await buildUnitedIndexQuery(
+          soClient,
+          { page: 0, pageSize: 10, hostStatuses: [], kuery: '' },
+          [],
+          true
+        );
+        expect(query.index).toEqual(`${METADATA_UNITED_INDEX},*:${METADATA_UNITED_INDEX}`);
+      });
+    });
+
     describe('sorting', () => {
       it('uses default sort field if none passed', async () => {
         const query = await buildUnitedIndexQuery(soClient, {
@@ -177,6 +239,7 @@ describe('query builder', () => {
 
         expect(query.sort).toEqual([
           { 'united.agent.enrolled_at': { order: 'desc', unmapped_type: 'date' } },
+          { 'united.agent.agent.id': 'asc' },
         ]);
       });
 
@@ -193,7 +256,7 @@ describe('query builder', () => {
           sortDirection: 'asc',
         });
 
-        expect(query.sort).toEqual([{ [mappedField]: 'asc' }]);
+        expect(query.sort).toEqual([{ [mappedField]: 'asc' }, { 'united.agent.agent.id': 'asc' }]);
       });
 
       it.each`
@@ -208,7 +271,22 @@ describe('query builder', () => {
           sortDirection: 'asc',
         });
 
-        expect(query.sort).toEqual([{ [mappedField]: { order: 'asc', unmapped_type: 'date' } }]);
+        expect(query.sort).toEqual([
+          { [mappedField]: { order: 'asc', unmapped_type: 'date' } },
+          { 'united.agent.agent.id': 'asc' },
+        ]);
+      });
+
+      it('appends the unique agent id as the final sort key so offset pages never tie', async () => {
+        // `enrolled_at` ties across agents enrolled in the same instant; without a unique
+        // tiebreaker ES may order tied hits differently per page request and skip/repeat hosts.
+        const [first, ...rest] = (await buildUnitedIndexQuery(soClient, { page: 3, pageSize: 50 }))
+          .sort as unknown[];
+
+        expect(first).toEqual({
+          'united.agent.enrolled_at': { order: 'desc', unmapped_type: 'date' },
+        });
+        expect(rest).toEqual([{ 'united.agent.agent.id': 'asc' }]);
       });
     });
   });

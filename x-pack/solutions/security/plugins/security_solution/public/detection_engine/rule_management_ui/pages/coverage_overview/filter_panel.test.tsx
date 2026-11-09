@@ -8,6 +8,7 @@
 import { fireEvent, render, within } from '@testing-library/react';
 import React from 'react';
 import userEvent from '@testing-library/user-event';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 import { TestProviders } from '../../../../common/mock';
 import { CoverageOverviewFiltersPanel } from './filters_panel';
@@ -56,6 +57,7 @@ describe('CoverageOverviewFiltersPanel', () => {
     const wrapper = renderFiltersPanel();
 
     await userEvent.click(wrapper.getByTestId('coverageOverviewRuleActivityFilterButton'));
+    await waitForEuiPopoverOpen();
 
     await userEvent.click(
       within(wrapper.getByTestId('coverageOverviewFilterList')).getByText(
@@ -69,6 +71,7 @@ describe('CoverageOverviewFiltersPanel', () => {
     const wrapper = renderFiltersPanel();
 
     await userEvent.click(wrapper.getByTestId('coverageOverviewRuleSourceFilterButton'));
+    await waitForEuiPopoverOpen();
 
     await userEvent.click(
       within(wrapper.getByTestId('coverageOverviewFilterList')).getByText(

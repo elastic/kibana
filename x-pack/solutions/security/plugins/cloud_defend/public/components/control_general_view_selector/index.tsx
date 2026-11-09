@@ -424,7 +424,7 @@ export const ControlGeneralViewSelector = ({
               button={
                 <EuiToolTip content="Selector options" disableScreenReaderOutput>
                   <EuiButtonIcon
-                    iconType="boxesHorizontal"
+                    iconType="boxesVertical"
                     onClick={onTogglePopover}
                     aria-label="Selector options"
                     data-test-subj="cloud-defend-btnselectorpopover"
@@ -522,7 +522,7 @@ export const ControlGeneralViewSelector = ({
         button={
           <EuiButtonEmpty
             onClick={onToggleAddCondition}
-            iconType="plusInCircle"
+            iconType="plusCircle"
             data-test-subj="cloud-defend-btnaddselectorcondition"
           >
             {i18n.addSelectorCondition}

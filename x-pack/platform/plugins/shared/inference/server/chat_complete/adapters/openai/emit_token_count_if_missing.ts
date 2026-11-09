@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/logging';
 import type { OperatorFunction } from 'rxjs';
 import { Observable } from 'rxjs';
 import type {
@@ -27,11 +28,14 @@ import { manuallyCountPromptTokens, manuallyCountCompletionTokens } from './manu
  * providers that don't support sending token counts for the stream API.
  *
  * @param request the OpenAI request that was sent to the connector.
+ * @param logger optional logger for warnings when token counting fails.
  */
 export function emitTokenCountEstimateIfMissing({
   request,
+  logger,
 }: {
   request: OpenAIRequest;
+  logger?: Logger;
 }): OperatorFunction<
   ChatCompletionChunkEvent | ChatCompletionTokenCountEvent,
   ChatCompletionChunkEvent | ChatCompletionTokenCountEvent
@@ -56,7 +60,14 @@ export function emitTokenCountEstimateIfMissing({
           },
           complete: () => {
             if (!tokenCountEmitted) {
-              subscriber.next(manuallyCountTokens(request, chunks));
+              try {
+                subscriber.next(manuallyCountTokens(request, chunks));
+              } catch (err) {
+                // Intentionally broad: token counting must never crash the chat stream.
+                logger?.warn('Failed to manually count tokens, skipping token count event', {
+                  error: err,
+                });
+              }
             }
             subscriber.complete();
           },

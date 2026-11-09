@@ -30,7 +30,9 @@ export const waitForSuccessfulEventLogEntry = async (
         return body.data.some((entry) => entry.status === 'success');
       },
       {
-        timeout: 30_000,
+        // ~covers Cloud/MKI task-claim + event-log write latency; restores the budget from #273036
+        // that regressed to 30s when this helper was rewritten to expect.poll in #273804.
+        timeout: 120_000,
         intervals: [2_000],
         message: `Rule ${ruleId} did not execute successfully`,
       }

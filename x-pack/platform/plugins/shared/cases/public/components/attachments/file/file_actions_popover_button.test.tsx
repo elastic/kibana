@@ -314,7 +314,7 @@ describe('FileActionsPopoverButton', () => {
       expect(await screen.findByTestId('cases-files-download-button')).toBeInTheDocument();
 
       await waitFor(() => {
-        expect(filesClient.getDownloadHref).toBeCalled();
+        expect(filesClient.getDownloadHref).toHaveBeenCalled();
       });
 
       expect(filesClient.getDownloadHref).toHaveBeenCalledWith({

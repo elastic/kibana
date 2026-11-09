@@ -1,0 +1,249 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { act, fireEvent, screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { APP_MENU_TEST_SUBJECTS } from '@kbn/app-menu';
+
+import { CaseDetailsAppHeader } from './case_details_app_header';
+import { CaseSettingsPopover } from './case_settings_popover';
+import { renderWithTestingProviders } from '../../../../common/mock';
+import { basicCase } from '../../../../containers/mock';
+import { useGetCaseConnectors } from '../../../../containers/use_get_case_connectors';
+import { useDeleteCases } from '../../../../containers/use_delete_cases';
+import { useShouldDisableStatus } from '../../../actions/status/use_should_disable_status';
+import { useStatusAction } from '../../../actions/status/use_status_action';
+import { useAddCaseToChat } from '../../../../agent_builder/use_add_case_to_chat';
+
+jest.mock('../../../../containers/use_get_case_connectors');
+jest.mock('../../../../containers/use_delete_cases');
+jest.mock('../../../actions/status/use_should_disable_status');
+jest.mock('../../../actions/status/use_status_action');
+jest.mock('../../../../common/navigation/hooks');
+jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../../agent_builder/use_add_case_to_chat');
+jest.mock('../../use_on_refresh_case_view_page');
+
+jest.mock('../../../confirm_delete_case', () => ({
+  ConfirmDeleteCaseModal: () => <div data-test-subj="confirm-delete-modal" />,
+}));
+
+jest.mock('./case_settings_popover', () => {
+  const actual = jest.requireActual('./case_settings_popover');
+  return { CaseSettingsPopover: jest.fn(actual.CaseSettingsPopover) };
+});
+
+(useGetCaseConnectors as jest.Mock).mockReturnValue({ data: {} });
+(useDeleteCases as jest.Mock).mockReturnValue({ mutate: jest.fn() });
+(useShouldDisableStatus as jest.Mock).mockReturnValue(() => false);
+(useStatusAction as jest.Mock).mockReturnValue({ handleUpdateCaseStatus: jest.fn() });
+(useAddCaseToChat as jest.Mock).mockReturnValue({
+  addToChat: jest.fn(),
+  summarizeCase: jest.fn(),
+  isAddToChatAvailable: false,
+});
+
+describe('CaseDetailsAppHeader', () => {
+  const onUpdateField = jest.fn();
+  const onShowMetricsChange = jest.fn();
+
+  const defaultProps = {
+    caseData: basicCase,
+    onUpdateField,
+    showMetrics: true,
+    onShowMetricsChange,
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useGetCaseConnectors as jest.Mock).mockReturnValue({ data: {} });
+    (useDeleteCases as jest.Mock).mockReturnValue({ mutate: jest.fn() });
+    (useShouldDisableStatus as jest.Mock).mockReturnValue(() => false);
+    (useStatusAction as jest.Mock).mockReturnValue({ handleUpdateCaseStatus: jest.fn() });
+    (useAddCaseToChat as jest.Mock).mockReturnValue({
+      addToChat: jest.fn(),
+      summarizeCase: jest.fn(),
+      isAddToChatAvailable: false,
+    });
+  });
+
+  it('renders the app header with case title', async () => {
+    renderWithTestingProviders(<CaseDetailsAppHeader {...defaultProps} />);
+
+    expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.root)).toBeInTheDocument();
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(basicCase.title);
+  });
+
+  it('renders metadata with reporter name', async () => {
+    renderWithTestingProviders(<CaseDetailsAppHeader {...defaultProps} />);
+
+    const metadata = await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.metadata);
+    expect(metadata.textContent).toContain('Reported by');
+    expect(metadata.textContent).toContain(basicCase.createdBy.fullName!);
+  });
+
+  it('renders badges in the header', async () => {
+    renderWithTestingProviders(<CaseDetailsAppHeader {...defaultProps} />);
+
+    expect(await screen.findByTestId('case-view-severity-badge')).toBeInTheDocument();
+    expect(screen.getByTestId('case-view-status-badge')).toBeInTheDocument();
+  });
+
+  it('gives the severity and status badges accessible names with their context', async () => {
+    renderWithTestingProviders(<CaseDetailsAppHeader {...defaultProps} />);
+
+    expect(await screen.findByTestId('case-view-severity-badge')).toHaveAttribute(
+      'aria-label',
+      'Severity: Low'
+    );
+    expect(screen.getByTestId('case-view-status-badge')).toHaveAttribute(
+      'aria-label',
+      'Status: Open'
+    );
+  });
+
+  it('does not render delete modal by default', async () => {
+    renderWithTestingProviders(<CaseDetailsAppHeader {...defaultProps} />);
+
+    await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.root);
+
+    expect(screen.queryByTestId('confirm-delete-modal')).not.toBeInTheDocument();
+  });
+
+  it('does not render settings popover by default', async () => {
+    renderWithTestingProviders(<CaseDetailsAppHeader {...defaultProps} />);
+
+    await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.root);
+
+    expect(screen.queryByTestId('case-settings-popover')).not.toBeInTheDocument();
+  });
+
+  it('does not render settings popover when user lacks update permissions', async () => {
+    renderWithTestingProviders(<CaseDetailsAppHeader {...defaultProps} />, {
+      wrapperProps: {
+        permissions: {
+          all: false,
+          create: true,
+          read: true,
+          update: false,
+          delete: true,
+          push: true,
+          connectors: true,
+          settings: true,
+          reopenCase: true,
+          createComment: true,
+          assign: true,
+          manageTemplates: true,
+        },
+      },
+    });
+
+    await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.root);
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('case-settings-popover')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('settings popover opened from the overflow menu', () => {
+    const { innerWidth: initialInnerWidth } = window;
+
+    const resizeWindow = (width: number) => {
+      act(() => {
+        window.innerWidth = width;
+        window.dispatchEvent(new Event('resize'));
+      });
+    };
+
+    const openSettingsFromOverflowMenu = async () => {
+      await userEvent.click(await screen.findByTestId(APP_MENU_TEST_SUBJECTS.overflowButton));
+      fireEvent.click(
+        within(await screen.findByTestId(APP_MENU_TEST_SUBJECTS.popover)).getByTestId(
+          'case-settings-button'
+        )
+      );
+
+      await waitFor(() =>
+        expect(screen.queryByTestId(APP_MENU_TEST_SUBJECTS.popover)).not.toBeInTheDocument()
+      );
+      expect(await screen.findByTestId('case-settings-popover')).toBeInTheDocument();
+    };
+
+    afterEach(() => {
+      window.innerWidth = initialInnerWidth;
+    });
+
+    it('keeps the settings popover anchored to the overflow button after the overflow menu closes', async () => {
+      renderWithTestingProviders(<CaseDetailsAppHeader {...defaultProps} />);
+
+      await openSettingsFromOverflowMenu();
+
+      // The menu item that triggered the action is gone by now; the anchor must still be mounted so the
+      // popover does not jump to the top-left corner when it repositions (e.g. after toggling a setting).
+      const anchorElement = jest.mocked(CaseSettingsPopover).mock.lastCall?.[0].anchorElement;
+      expect(anchorElement).toHaveAttribute(
+        'data-test-subj',
+        APP_MENU_TEST_SUBJECTS.overflowButton
+      );
+      expect(anchorElement?.isConnected).toBe(true);
+    });
+
+    it('keeps the overflow button on the page when settings are reopened after the app menu layout changes', async () => {
+      renderWithTestingProviders(<CaseDetailsAppHeader {...defaultProps} />);
+
+      const initialOverflowButton = await screen.findByTestId(
+        APP_MENU_TEST_SUBJECTS.overflowButton
+      );
+      await openSettingsFromOverflowMenu();
+
+      // Switching to the collapsed layout remounts the "More" button, which closes the settings popover.
+      resizeWindow(400);
+      await waitFor(() => expect(initialOverflowButton.isConnected).toBe(false));
+      await waitFor(() =>
+        expect(screen.queryByTestId('case-settings-popover')).not.toBeInTheDocument()
+      );
+
+      const remountedOverflowButton = screen.getByTestId(APP_MENU_TEST_SUBJECTS.overflowButton);
+      await openSettingsFromOverflowMenu();
+
+      expect(remountedOverflowButton.isConnected).toBe(true);
+    });
+  });
+
+  it('adds the case to chat from the chat actions dropdown', async () => {
+    const addToChat = jest.fn();
+    (useAddCaseToChat as jest.Mock).mockReturnValue({
+      addToChat,
+      summarizeCase: jest.fn(),
+      isAddToChatAvailable: true,
+    });
+
+    renderWithTestingProviders(<CaseDetailsAppHeader {...defaultProps} />);
+
+    await userEvent.click(await screen.findByTestId('case-chat-actions'));
+    fireEvent.click(await screen.findByTestId('case-chat-action-add-to-chat'));
+
+    expect(addToChat).toHaveBeenCalled();
+  });
+
+  it('renders summarize case in the chat actions dropdown', async () => {
+    (useAddCaseToChat as jest.Mock).mockReturnValue({
+      addToChat: jest.fn(),
+      summarizeCase: jest.fn(),
+      isAddToChatAvailable: true,
+    });
+
+    renderWithTestingProviders(<CaseDetailsAppHeader {...defaultProps} />);
+
+    await userEvent.click(await screen.findByTestId('case-chat-actions'));
+
+    expect(await screen.findByTestId('case-chat-action-add-to-chat')).toBeInTheDocument();
+    expect(screen.getByTestId('case-chat-action-summarize')).toBeInTheDocument();
+  });
+});

@@ -11,13 +11,22 @@ import {
   buildDatasetExampleScoresQuery,
   buildSpaceFilter,
   buildStatsAggregation,
+  buildExperimentEvaluatorsAggregation,
+  parseExperimentEvaluatorsAggregation,
   parseStatsAggregationResponse,
+  buildEvaluatorModelsAggregation,
+  parseEvaluatorModelsAggregation,
   SCORES_SORT_ORDER,
   buildExperimentsListingFilterQuery,
   buildExperimentsListingAggregation,
   parseExperimentsListingResponse,
   buildModelDisplayId,
   escapeWildcard,
+  buildExperimentRunsAggregation,
+  parseExperimentRunsAggregation,
+  buildExperimentRunsFetchQuery,
+  buildExperimentTracesAggregation,
+  parseExperimentTracesAggregation,
 } from './query_builders';
 
 describe('query_builders', () => {
@@ -33,11 +42,11 @@ describe('query_builders', () => {
   });
 
   describe('buildSpaceFilter', () => {
-    it('matches the space or all-spaces, plus legacy (missing) docs in the default space', () => {
+    it('matches the space, plus docs predating space-awareness in the default space', () => {
       expect(buildSpaceFilter('default')).toEqual({
         bool: {
           should: [
-            { terms: { space_ids: ['default', '*'] } },
+            { terms: { space_ids: ['default'] } },
             { bool: { must_not: { exists: { field: 'space_ids' } } } },
           ],
           minimum_should_match: 1,
@@ -45,10 +54,10 @@ describe('query_builders', () => {
       });
     });
 
-    it('matches only the space or all-spaces for a non-default space (no legacy fallback)', () => {
+    it('matches only the space itself elsewhere, with no legacy fallback', () => {
       expect(buildSpaceFilter('marketing')).toEqual({
         bool: {
-          should: [{ terms: { space_ids: ['marketing', '*'] } }],
+          should: [{ terms: { space_ids: ['marketing'] } }],
           minimum_should_match: 1,
         },
       });
@@ -61,6 +70,18 @@ describe('query_builders', () => {
       expect(query).toEqual({
         bool: { must: [{ term: { 'example.id': 'example-123' } }] },
       });
+    });
+
+    it('adds a dataset filter when datasetId is provided', () => {
+      const query = buildExampleScoresQuery('example-123', { datasetId: 'dataset-abc' });
+      expect(query.bool.must).toHaveLength(2);
+      expect(query.bool.must[1]).toEqual({ term: { 'example.dataset.id': 'dataset-abc' } });
+    });
+
+    it('omits the dataset filter when datasetId is absent', () => {
+      const query = buildExampleScoresQuery('example-123', {});
+      expect(query.bool.must).toHaveLength(1);
+      expect(query.bool.must[0]).toEqual({ term: { 'example.id': 'example-123' } });
     });
 
     it('adds a space filter when spaceId is provided', () => {
@@ -151,6 +172,12 @@ describe('query_builders', () => {
       expect(query.bool.must).toHaveLength(2);
       expect(query.bool.must[1]).toEqual(buildSpaceFilter('marketing'));
     });
+
+    it('adds an evaluator name filter when evaluatorName is provided', () => {
+      const query = buildExperimentFilterQuery('experiment-123', { evaluatorName: 'correctness' });
+      expect(query.bool.must).toHaveLength(2);
+      expect(query.bool.must[1]).toEqual({ term: { 'evaluator.name': 'correctness' } });
+    });
   });
 
   describe('buildStatsAggregation', () => {
@@ -167,6 +194,146 @@ describe('query_builders', () => {
       expect(agg.by_dataset.aggs.by_evaluator.aggs.score_median).toEqual({
         percentiles: { field: 'evaluator.score', percents: [50] },
       });
+    });
+
+    it('aggregates the evaluator kind so code evaluators are never attributed a model', () => {
+      const { aggs } = buildStatsAggregation().by_dataset.aggs.by_evaluator;
+
+      expect(aggs.evaluator_kind).toEqual({ terms: { field: 'evaluator.kind', size: 1 } });
+    });
+
+    it('aggregates the judge model within each evaluator bucket, family and provider nested under the id', () => {
+      const { aggs } = buildStatsAggregation().by_dataset.aggs.by_evaluator;
+
+      expect(aggs.evaluator_model_id).toEqual({
+        terms: { field: 'evaluator.model.id', size: 1 },
+        aggs: {
+          family: { terms: { field: 'evaluator.model.family', size: 1 } },
+          provider: { terms: { field: 'evaluator.model.provider', size: 1 } },
+        },
+      });
+    });
+  });
+
+  describe('buildExperimentEvaluatorsAggregation', () => {
+    it('collects every evaluator with its version, kind, and judge model nested under the id', () => {
+      expect(buildExperimentEvaluatorsAggregation()).toEqual({
+        terms: { field: 'evaluator.name', size: 1000 },
+        aggs: {
+          version: { terms: { field: 'evaluator.version', size: 1 } },
+          kind: { terms: { field: 'evaluator.kind', size: 1 } },
+          model_id: {
+            terms: { field: 'evaluator.model.id', size: 1 },
+            aggs: {
+              family: { terms: { field: 'evaluator.model.family', size: 1 } },
+              provider: { terms: { field: 'evaluator.model.provider', size: 1 } },
+            },
+          },
+        },
+      });
+    });
+  });
+
+  describe('parseExperimentEvaluatorsAggregation', () => {
+    const llmBucket = {
+      key: 'correctness',
+      doc_count: 12,
+      version: { buckets: [{ key: '3' }] },
+      kind: { buckets: [{ key: 'llm' }] },
+      model_id: {
+        buckets: [
+          {
+            key: 'claude-3',
+            family: { buckets: [{ key: 'Claude' }] },
+            provider: { buckets: [{ key: 'Anthropic' }] },
+          },
+        ],
+      },
+    };
+
+    it('reports name, version, kind, judge model, and score count per evaluator', () => {
+      expect(
+        parseExperimentEvaluatorsAggregation({ evaluators: { buckets: [llmBucket] } })
+      ).toEqual([
+        {
+          name: 'correctness',
+          version: '3',
+          kind: 'llm',
+          model: { id: 'claude-3', family: 'Claude', provider: 'Anthropic' },
+          score_count: 12,
+        },
+      ]);
+    });
+
+    it('never attributes a model to a code evaluator, even when a model bucket exists', () => {
+      const codeBucket = {
+        key: 'latency',
+        doc_count: 4,
+        version: { buckets: [] },
+        kind: { buckets: [{ key: 'code' }] },
+        model_id: { buckets: [{ key: 'claude-3' }] },
+      };
+
+      expect(
+        parseExperimentEvaluatorsAggregation({ evaluators: { buckets: [codeBucket] } })
+      ).toEqual([{ name: 'latency', kind: 'code', score_count: 4 }]);
+    });
+
+    it('keeps the model for evaluators predating kind attribution when their documents carry one', () => {
+      const legacyBucket = { ...llmBucket, version: { buckets: [] }, kind: { buckets: [] } };
+
+      expect(
+        parseExperimentEvaluatorsAggregation({ evaluators: { buckets: [legacyBucket] } })
+      ).toEqual([
+        {
+          name: 'correctness',
+          model: { id: 'claude-3', family: 'Claude', provider: 'Anthropic' },
+          score_count: 12,
+        },
+      ]);
+    });
+
+    it('handles a missing aggregation response', () => {
+      expect(parseExperimentEvaluatorsAggregation(undefined)).toEqual([]);
+    });
+  });
+
+  describe('buildEvaluatorModelsAggregation', () => {
+    it('collects up to twenty judges, family and provider nested under the id', () => {
+      expect(buildEvaluatorModelsAggregation()).toEqual({
+        terms: { field: 'evaluator.model.id', size: 20 },
+        aggs: {
+          family: { terms: { field: 'evaluator.model.family', size: 1 } },
+          provider: { terms: { field: 'evaluator.model.provider', size: 1 } },
+        },
+      });
+    });
+  });
+
+  describe('parseEvaluatorModelsAggregation', () => {
+    it('keeps the order the aggregation returned, so the first judge is the most used', () => {
+      expect(
+        parseEvaluatorModelsAggregation({
+          evaluator_models: {
+            buckets: [
+              {
+                key: 'gpt-4o',
+                family: { buckets: [{ key: 'GPT' }] },
+                provider: { buckets: [{ key: 'OpenAI' }] },
+              },
+              { key: 'claude-3', family: { buckets: [] }, provider: { buckets: [] } },
+            ],
+          },
+        })
+      ).toEqual([
+        { id: 'gpt-4o', family: 'GPT', provider: 'OpenAI' },
+        { id: 'claude-3', family: undefined, provider: undefined },
+      ]);
+    });
+
+    it('reports no judges for an experiment scored only by code evaluators', () => {
+      expect(parseEvaluatorModelsAggregation({ evaluator_models: { buckets: [] } })).toEqual([]);
+      expect(parseEvaluatorModelsAggregation(undefined)).toEqual([]);
     });
   });
 
@@ -372,9 +539,7 @@ describe('query_builders', () => {
           'task_model_id',
           'task_model_family',
           'task_model_provider',
-          'evaluator_model_id',
-          'evaluator_model_family',
-          'evaluator_model_provider',
+          'evaluator_models',
           'git_branch',
           'git_commit_sha',
           'total_repetitions',
@@ -382,6 +547,18 @@ describe('query_builders', () => {
           'pull_request',
         ])
       );
+    });
+
+    it('collects several judge models with their own family and provider', () => {
+      const agg = buildExperimentsListingAggregation({ page: 1, perPage: 10 });
+
+      expect(agg.experiments.aggs.evaluator_models).toEqual({
+        terms: { field: 'evaluator.model.id', size: 20 },
+        aggs: {
+          family: { terms: { field: 'evaluator.model.family', size: 1 } },
+          provider: { terms: { field: 'evaluator.model.provider', size: 1 } },
+        },
+      });
     });
   });
 
@@ -398,9 +575,15 @@ describe('query_builders', () => {
       task_model_id: { buckets: [{ key: 'gpt-4' }] },
       task_model_family: { buckets: [{ key: 'gpt-4' }] },
       task_model_provider: { buckets: [{ key: 'openai' }] },
-      evaluator_model_id: { buckets: [{ key: 'claude-3' }] },
-      evaluator_model_family: { buckets: [{ key: 'claude-3' }] },
-      evaluator_model_provider: { buckets: [{ key: 'anthropic' }] },
+      evaluator_models: {
+        buckets: [
+          {
+            key: 'claude-3',
+            family: { buckets: [{ key: 'claude-3' }] },
+            provider: { buckets: [{ key: 'anthropic' }] },
+          },
+        ],
+      },
       git_branch: { buckets: [{ key: 'main' }] },
       git_commit_sha: { buckets: [{ key: 'abc123' }] },
       total_repetitions: { value: 3 },
@@ -442,11 +625,76 @@ describe('query_builders', () => {
         dataset_names: ['Dataset One'],
         task_model: { id: 'gpt-4', family: 'gpt-4', provider: 'openai' },
         evaluator_model: { id: 'claude-3', family: 'claude-3', provider: 'anthropic' },
+        evaluator_models: [{ id: 'claude-3', family: 'claude-3', provider: 'anthropic' }],
         git_branch: 'main',
         git_commit_sha: 'abc123',
         total_repetitions: 3,
         ci: { build_url: 'https://buildkite.com/build/1', pull_request: '12345' },
       });
+    });
+
+    it('returns every distinct judge model when an experiment evaluators differ', () => {
+      const aggs = {
+        total_experiments: { value: 1 },
+        experiments: {
+          buckets: [
+            makeBucket({
+              evaluator_models: {
+                buckets: [
+                  {
+                    key: 'claude-3',
+                    family: { buckets: [{ key: 'Claude' }] },
+                    provider: { buckets: [{ key: 'Anthropic' }] },
+                  },
+                  {
+                    key: 'gpt-4o',
+                    family: { buckets: [{ key: 'GPT' }] },
+                    provider: { buckets: [{ key: 'OpenAI' }] },
+                  },
+                ],
+              },
+            }),
+          ],
+        },
+      };
+
+      const result = parseExperimentsListingResponse(aggs, { page: 1, perPage: 25 });
+
+      expect(result.experiments[0].evaluator_models).toEqual([
+        { id: 'claude-3', family: 'Claude', provider: 'Anthropic' },
+        { id: 'gpt-4o', family: 'GPT', provider: 'OpenAI' },
+      ]);
+      // The singular reports the most used judge, which is the bucket ES ordered first.
+      expect(result.experiments[0].evaluator_model).toEqual({
+        id: 'claude-3',
+        family: 'Claude',
+        provider: 'Anthropic',
+      });
+    });
+
+    it('omits the evaluator model for an experiment judged only by code evaluators', () => {
+      const result = parseExperimentsListingResponse(
+        {
+          total_experiments: { value: 1 },
+          experiments: { buckets: [makeBucket({ evaluator_models: { buckets: [] } })] },
+        },
+        { page: 1, perPage: 25 }
+      );
+
+      expect(result.experiments[0].evaluator_models).toEqual([]);
+      expect(result.experiments[0].evaluator_model).toBeUndefined();
+      expect(result.experiments[0].task_model).toBeDefined();
+    });
+
+    it('omits the evaluator model when the evaluator_models agg is absent', () => {
+      const { evaluator_models: _omitted, ...bucketWithoutModels } = makeBucket();
+      const result = parseExperimentsListingResponse(
+        { total_experiments: { value: 1 }, experiments: { buckets: [bucketWithoutModels] } },
+        { page: 1, perPage: 25 }
+      );
+
+      expect(result.experiments[0].evaluator_models).toEqual([]);
+      expect(result.experiments[0].evaluator_model).toBeUndefined();
     });
 
     it('slices to the correct page window', () => {
@@ -566,6 +814,114 @@ describe('query_builders', () => {
       });
     });
 
+    it('attributes each evaluator to its own judge model, and none to code evaluators', () => {
+      const aggs = {
+        by_dataset: {
+          buckets: [
+            {
+              key: 'ds-1',
+              dataset_name: { buckets: [{ key: 'Dataset One' }] },
+              example_count: { value: 5 },
+              by_evaluator: {
+                buckets: [
+                  {
+                    key: 'correctness',
+                    score_stats: {},
+                    score_median: { values: {} },
+                    evaluator_model_id: {
+                      buckets: [
+                        {
+                          key: 'gpt-4o',
+                          family: { buckets: [{ key: 'GPT' }] },
+                          provider: { buckets: [{ key: 'OpenAI' }] },
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    key: 'groundedness',
+                    score_stats: {},
+                    score_median: { values: {} },
+                    evaluator_model_id: {
+                      buckets: [
+                        {
+                          key: 'claude-sonnet-4',
+                          family: { buckets: [{ key: 'Claude' }] },
+                          provider: { buckets: [{ key: 'Anthropic' }] },
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    key: 'latency',
+                    score_stats: {},
+                    score_median: { values: {} },
+                    evaluator_model_id: { buckets: [] },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      };
+
+      const result = parseStatsAggregationResponse(aggs);
+      expect(
+        result.map(({ evaluator_name: name, evaluator_model: model }) => [name, model])
+      ).toEqual([
+        ['correctness', { id: 'gpt-4o', family: 'GPT', provider: 'OpenAI' }],
+        ['groundedness', { id: 'claude-sonnet-4', family: 'Claude', provider: 'Anthropic' }],
+        ['latency', undefined],
+      ]);
+    });
+
+    it('never attributes a model to a code evaluator, even when its bucket carries one', () => {
+      const aggs = {
+        by_dataset: {
+          buckets: [
+            {
+              key: 'ds-1',
+              dataset_name: { buckets: [{ key: 'Dataset One' }] },
+              example_count: { value: 2 },
+              by_evaluator: {
+                buckets: [
+                  {
+                    key: 'latency',
+                    score_stats: {},
+                    score_median: { values: {} },
+                    evaluator_kind: { buckets: [{ key: 'code' }] },
+                    // A stray model (e.g. from legacy documents) must not be attributed.
+                    evaluator_model_id: { buckets: [{ key: 'claude-3' }] },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      };
+
+      expect(parseStatsAggregationResponse(aggs)[0].evaluator_model).toBeUndefined();
+    });
+
+    it('omits the judge model when the evaluator bucket carries no model sub-aggregation', () => {
+      const aggs = {
+        by_dataset: {
+          buckets: [
+            {
+              key: 'ds-1',
+              dataset_name: { buckets: [{ key: 'Dataset One' }] },
+              example_count: { value: 5 },
+              by_evaluator: {
+                buckets: [{ key: 'correctness', score_stats: {}, score_median: { values: {} } }],
+              },
+            },
+          ],
+        },
+      };
+
+      expect(parseStatsAggregationResponse(aggs)[0].evaluator_model).toBeUndefined();
+    });
+
     it('falls back to dataset key when dataset_name bucket is empty', () => {
       const aggs = {
         by_dataset: {
@@ -671,6 +1027,198 @@ describe('query_builders', () => {
         min: 0,
         max: 0,
         count: 0,
+      });
+    });
+  });
+
+  describe('buildExperimentRunsAggregation', () => {
+    it('enumerates runs grouped by dataset, then by example index and repetition', () => {
+      expect(buildExperimentRunsAggregation()).toEqual({
+        runs: {
+          composite: {
+            size: 10000,
+            sources: [
+              { dataset_name: { terms: { field: 'example.dataset.name' } } },
+              { dataset_id: { terms: { field: 'example.dataset.id' } } },
+              { example_index: { terms: { field: 'example.index' } } },
+              { example_id: { terms: { field: 'example.id' } } },
+              { repetition_index: { terms: { field: 'task.repetition_index' } } },
+            ],
+          },
+        },
+      });
+    });
+  });
+
+  describe('parseExperimentRunsAggregation', () => {
+    const bucket = (exampleIndex: number, repetition: number, docCount = 2) => ({
+      key: {
+        dataset_name: 'Dataset One',
+        dataset_id: 'ds-1',
+        example_index: exampleIndex,
+        example_id: `ex-${exampleIndex}`,
+        repetition_index: repetition,
+      },
+      doc_count: docCount,
+    });
+
+    const aggs = {
+      runs: {
+        buckets: [bucket(0, 0), bucket(0, 1), bucket(1, 0), bucket(1, 1), bucket(2, 0)],
+      },
+    };
+
+    it('reports the exact total and slices the requested page window', () => {
+      const { total, runs } = parseExperimentRunsAggregation(aggs, { page: 2, perPage: 2 });
+
+      expect(total).toBe(5);
+      expect(runs).toEqual([
+        {
+          dataset_id: 'ds-1',
+          dataset_name: 'Dataset One',
+          example_id: 'ex-1',
+          example_index: 1,
+          repetition_index: 0,
+          score_count: 2,
+        },
+        {
+          dataset_id: 'ds-1',
+          dataset_name: 'Dataset One',
+          example_id: 'ex-1',
+          example_index: 1,
+          repetition_index: 1,
+          score_count: 2,
+        },
+      ]);
+    });
+
+    it('returns an empty window past the last page, keeping the total', () => {
+      const { total, runs } = parseExperimentRunsAggregation(aggs, { page: 4, perPage: 2 });
+
+      expect(total).toBe(5);
+      expect(runs).toEqual([]);
+    });
+
+    it('handles a missing aggregation response', () => {
+      expect(parseExperimentRunsAggregation(undefined, { page: 1, perPage: 20 })).toEqual({
+        total: 0,
+        runs: [],
+      });
+    });
+  });
+
+  describe('buildExperimentRunsFetchQuery', () => {
+    it('narrows the experiment filter to the given run keys', () => {
+      const experimentQuery = buildExperimentFilterQuery('experiment-1');
+      const runs = [
+        {
+          dataset_id: 'ds-1',
+          dataset_name: 'Dataset One',
+          example_id: 'ex-1',
+          example_index: 1,
+          repetition_index: 0,
+          score_count: 2,
+        },
+      ];
+
+      expect(buildExperimentRunsFetchQuery(experimentQuery, runs)).toEqual({
+        bool: {
+          must: [experimentQuery],
+          should: [
+            {
+              bool: {
+                filter: [
+                  { term: { 'example.dataset.id': 'ds-1' } },
+                  { term: { 'example.id': 'ex-1' } },
+                  { term: { 'task.repetition_index': 0 } },
+                ],
+              },
+            },
+          ],
+          minimum_should_match: 1,
+        },
+      });
+    });
+  });
+
+  describe('buildExperimentTracesAggregation', () => {
+    it('enumerates both roles when no role is given', () => {
+      expect(buildExperimentTracesAggregation()).toEqual({
+        task_traces: {
+          composite: {
+            size: 10000,
+            sources: [{ trace_id: { terms: { field: 'task.trace_id' } } }],
+          },
+        },
+        evaluator_traces: {
+          composite: {
+            size: 10000,
+            sources: [
+              { evaluator_name: { terms: { field: 'evaluator.name' } } },
+              { trace_id: { terms: { field: 'evaluator.trace_id' } } },
+            ],
+          },
+        },
+      });
+    });
+
+    it('only enumerates task traces for role=task', () => {
+      const aggs = buildExperimentTracesAggregation('task');
+      expect(Object.keys(aggs)).toEqual(['task_traces']);
+    });
+
+    it('only enumerates evaluator traces for role=evaluator', () => {
+      const aggs = buildExperimentTracesAggregation('evaluator');
+      expect(Object.keys(aggs)).toEqual(['evaluator_traces']);
+    });
+  });
+
+  describe('parseExperimentTracesAggregation', () => {
+    const aggs = {
+      task_traces: {
+        buckets: [{ key: { trace_id: 'task-1' } }, { key: { trace_id: 'task-2' } }],
+      },
+      evaluator_traces: {
+        buckets: [
+          { key: { evaluator_name: 'correctness', trace_id: 'eval-1' } },
+          { key: { evaluator_name: 'latency', trace_id: 'eval-2' } },
+        ],
+      },
+    };
+
+    it('concatenates task traces before evaluator traces and reports the exact total', () => {
+      const { total, traces } = parseExperimentTracesAggregation(aggs, { page: 1, perPage: 10 });
+
+      expect(total).toBe(4);
+      expect(traces).toEqual([
+        { trace_id: 'task-1', role: 'task' },
+        { trace_id: 'task-2', role: 'task' },
+        { trace_id: 'eval-1', role: 'evaluator', evaluator_name: 'correctness' },
+        { trace_id: 'eval-2', role: 'evaluator', evaluator_name: 'latency' },
+      ]);
+    });
+
+    it('slices the requested page window across the role boundary', () => {
+      const { total, traces } = parseExperimentTracesAggregation(aggs, { page: 2, perPage: 2 });
+
+      expect(total).toBe(4);
+      expect(traces).toEqual([
+        { trace_id: 'eval-1', role: 'evaluator', evaluator_name: 'correctness' },
+        { trace_id: 'eval-2', role: 'evaluator', evaluator_name: 'latency' },
+      ]);
+    });
+
+    it('returns an empty window past the last page, keeping the total', () => {
+      const { total, traces } = parseExperimentTracesAggregation(aggs, { page: 5, perPage: 2 });
+
+      expect(total).toBe(4);
+      expect(traces).toEqual([]);
+    });
+
+    it('handles a missing aggregation response', () => {
+      expect(parseExperimentTracesAggregation(undefined, { page: 1, perPage: 10 })).toEqual({
+        total: 0,
+        traces: [],
       });
     });
   });

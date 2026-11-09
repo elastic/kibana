@@ -56,9 +56,12 @@ export function LayerHeader({
     return <StaticHeader label={description.label} icon={description.icon} />;
   }
 
-  const SubtypeSwitch = activeVisualization.getSubtypeSwitch?.(layerConfigProps);
+  // `getSubtypeSwitch` returns an element, not a component. Rendering it in place keeps the
+  // `SubtypeSwitch` component type stable across header re-renders (e.g. when new chart data
+  // arrives), so React reconciles instead of remounting and an open popover stays open.
+  const subtypeSwitch = activeVisualization.getSubtypeSwitch?.(layerConfigProps);
 
-  return SubtypeSwitch ? (
+  return subtypeSwitch ? (
     <EuiFlexGroup gutterSize="s">
       <EuiFlexItem>
         <ChartSwitchPopover
@@ -67,9 +70,7 @@ export function LayerHeader({
           layerId={layerConfigProps.layerId}
         />
       </EuiFlexItem>
-      <EuiFlexItem>
-        <SubtypeSwitch />
-      </EuiFlexItem>
+      <EuiFlexItem>{subtypeSwitch}</EuiFlexItem>
     </EuiFlexGroup>
   ) : (
     <ChartSwitchPopover

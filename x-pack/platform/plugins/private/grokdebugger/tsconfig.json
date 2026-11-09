@@ -24,6 +24,7 @@
     "@kbn/scout",
     "@kbn/licensing-plugin",
     "@kbn/licensing-types",
+    "@kbn/ui-callout"
   ],
   "exclude": [
     "target/**/*",

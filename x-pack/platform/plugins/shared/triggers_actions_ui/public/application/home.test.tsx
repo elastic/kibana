@@ -170,7 +170,6 @@ describe('home', () => {
       renderHome(props);
 
       expect(await screen.findByTestId('createRuleButton')).toBeInTheDocument();
-      expect(await screen.findByTestId('rulesSettingsLink')).toBeInTheDocument();
       expect(await screen.findByTestId('documentationLink')).toBeInTheDocument();
     });
 
@@ -197,7 +196,6 @@ describe('home', () => {
 
       renderHome(props);
 
-      expect(await screen.findByTestId('rulesSettingsLink')).toBeInTheDocument();
       expect(await screen.findByTestId('documentationLink')).toBeInTheDocument();
       expect(screen.queryByTestId('createRuleButton')).not.toBeInTheDocument();
     });

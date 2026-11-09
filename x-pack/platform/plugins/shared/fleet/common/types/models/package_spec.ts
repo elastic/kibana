@@ -84,6 +84,8 @@ export interface PackageSpecManifest {
   deprecated?: DeprecationInfo;
   /** Package-level cloud provider permissions (package-spec 3.7.0+). */
   provider_permissions?: RegistryProviderPermissions[];
+  /** Groups related packages (e.g. nginx, nginx_otel) under a shared technology tile. */
+  group?: string;
 }
 export interface DiscoveryDataset {
   name: string;

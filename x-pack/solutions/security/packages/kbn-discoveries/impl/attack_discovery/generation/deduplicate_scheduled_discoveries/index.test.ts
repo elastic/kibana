@@ -46,6 +46,12 @@ const baseParams = {
   spaceId: 'default',
 };
 
+/**
+ * An arbitrary producer identity. Not a real producer: the AD Worker passes `watch_floor_ad_worker`.
+ * This only exercises the opt-in mechanism.
+ */
+const TEST_GENERATION_SOURCE = 'test-producer';
+
 describe('deduplicateScheduledDiscoveries', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -129,6 +135,29 @@ describe('deduplicateScheduledDiscoveries', () => {
 
     expect(mockDeduplicateAttackDiscoveries).toHaveBeenCalledWith(
       expect.objectContaining({ computeSha256Hash })
+    );
+  });
+
+  it('forwards undefined generationSource when the caller does not provide one', async () => {
+    // Kibana Attack Discovery schedules must keep the hashes they already
+    // persisted, which means omitting the generation source on the lookup too
+    await deduplicateScheduledDiscoveries(baseParams);
+
+    expect(mockDeduplicateAttackDiscoveries).toHaveBeenCalledWith(
+      expect.objectContaining({ generationSource: undefined })
+    );
+  });
+
+  it('forwards the generationSource to the shared dedup helper', async () => {
+    await deduplicateScheduledDiscoveries({
+      ...baseParams,
+      generationSource: TEST_GENERATION_SOURCE,
+    });
+
+    expect(mockDeduplicateAttackDiscoveries).toHaveBeenCalledWith(
+      expect.objectContaining({
+        generationSource: TEST_GENERATION_SOURCE,
+      })
     );
   });
 

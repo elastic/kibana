@@ -7,50 +7,41 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Request } from '@playwright/test';
 import type { ScoutPage } from '../scout_page';
 
-interface CountMatchingRequestsOptions {
+interface MatchOptions {
+  endpoint: string;
   method?: string;
   exactPathname?: boolean;
-}
-
-interface NetworkRequest {
-  url: () => string;
-  method: () => string;
 }
 
 export class Network {
   constructor(private readonly page: ScoutPage) {}
 
-  private matchesEndpoint(
-    request: NetworkRequest,
-    endpoint: string,
-    options: CountMatchingRequestsOptions
-  ) {
+  matchesEndpoint(request: Request, options: MatchOptions) {
     if (options.method && request.method() !== options.method) {
       return false;
     }
 
     if (!options.exactPathname) {
-      return request.url().includes(endpoint);
+      return request.url().includes(options.endpoint);
     }
 
     try {
-      return new URL(request.url()).pathname.endsWith(endpoint);
+      return new URL(request.url()).pathname.endsWith(options.endpoint);
     } catch {
       return false;
     }
   }
 
   async trackMatchingRequests(
-    endpoint: string,
-
-    action: (getCount: () => number) => Promise<void>,
-    options: CountMatchingRequestsOptions = {}
+    options: MatchOptions,
+    action: (getCount: () => number) => Promise<void>
   ): Promise<number> {
     let count = 0;
-    const listener = (request: NetworkRequest) => {
-      if (this.matchesEndpoint(request, endpoint, options)) {
+    const listener = (request: Request) => {
+      if (this.matchesEndpoint(request, options)) {
         count++;
       }
     };
@@ -65,16 +56,11 @@ export class Network {
   }
 
   async countMatchingRequests(
-    endpoint: string,
-    action: () => Promise<void>,
-    options: CountMatchingRequestsOptions = {}
+    matchOptions: MatchOptions,
+    action: () => Promise<void>
   ): Promise<number> {
-    return this.trackMatchingRequests(
-      endpoint,
-      async () => {
-        await action();
-      },
-      options
-    );
+    return this.trackMatchingRequests(matchOptions, async () => {
+      await action();
+    });
   }
 }

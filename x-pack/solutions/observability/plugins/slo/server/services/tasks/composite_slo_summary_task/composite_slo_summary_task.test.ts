@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { of } from 'rxjs';
 import { addTransactionLabels } from '@kbn/apm-utils';
 import type { CoreSetup, LoggerFactory } from '@kbn/core/server';
 import {
@@ -95,7 +96,7 @@ describe('CompositeSloSummaryTask', () => {
           createInternalRepository: jest.fn().mockReturnValue(savedObjectsRepositoryMock.create()),
         },
         featureFlags: {
-          getBooleanValue: jest.fn().mockResolvedValue(options?.compositeSloEnabled ?? true),
+          getBooleanValue$: jest.fn().mockReturnValue(of(options?.compositeSloEnabled ?? true)),
         },
       } as never,
       {} as never,

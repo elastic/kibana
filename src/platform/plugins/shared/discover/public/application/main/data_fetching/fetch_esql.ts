@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { pluck } from 'rxjs';
-import { lastValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import {
   type Query,
@@ -18,14 +16,12 @@ import {
   type ProjectRouting,
   isOfAggregateQueryType,
 } from '@kbn/es-query';
-import type { Adapters } from '@kbn/inspector-plugin/common';
+import { RequestAdapter, type Adapters } from '@kbn/inspector-plugin/common';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import type { Datatable } from '@kbn/expressions-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
+import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 import { getDocId, type DataTableRecord } from '@kbn/discover-utils';
+import type { EsqlSource } from '@kbn/data-source';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import moment from 'moment';
 import type { ESQLColumnsWithHighlights } from '@kbn/esql-utils';
@@ -33,180 +29,142 @@ import { getColumnsWithHighlights } from '@kbn/esql-utils';
 import type { RecordsFetchResponse } from '../../types';
 import type { ScopedProfilesManager } from '../../../context_awareness';
 
-interface EsqlErrorResponse {
-  error: {
-    message: string;
-  };
-  type: 'error';
-}
-
 export interface FetchEsqlParams {
   query: Query | AggregateQuery;
   inputQuery?: Query;
   filters?: Filter[];
   timeRange?: TimeRange;
-  dataView: DataView;
+  /** Time field comes from this source. Table columns, including `isNull`, are written onto it. */
+  esqlSource?: EsqlSource;
   abortSignal?: AbortSignal;
   inspectorAdapters: Adapters;
   data: DataPublicPluginStart;
-  expressions: ExpressionsStart;
   scopedProfilesManager: ScopedProfilesManager;
   esqlVariables?: ESQLControlVariable[];
   searchSessionId?: string;
   projectRouting?: ProjectRouting;
-  isApproximate: boolean;
+  esqlApproximation: boolean;
   inspectorConfig?: {
     title: string;
     description: string;
   };
 }
 
-export function fetchEsql({
+export async function fetchEsql({
   query,
   inputQuery,
   filters,
   timeRange,
-  dataView,
+  esqlSource,
   abortSignal,
   inspectorAdapters,
   data,
-  expressions,
   scopedProfilesManager,
   esqlVariables,
   searchSessionId,
   projectRouting,
-  isApproximate,
+  esqlApproximation,
   inspectorConfig,
 }: FetchEsqlParams): Promise<RecordsFetchResponse> {
-  const props = getTextBasedQueryStateToAstProps({
-    query,
-    inputQuery,
-    filters,
-    timeRange,
-    dataView,
-    data,
-    inspectorConfig,
-  });
-  return textBasedQueryStateToAstWithValidation(props)
-    .then((ast) => {
-      if (ast) {
-        const contract = expressions.execute(ast, null, {
-          inspectorAdapters,
-          searchContext: {
-            timeRange,
-            esqlVariables,
-            projectRouting,
-            isApproximate,
-          },
-          searchSessionId,
-        });
-        abortSignal?.addEventListener('abort', (e) => {
-          contract.cancel((e.target as AbortSignal)?.reason);
-        });
-        const execution = contract.getData();
-        let finalData: DataTableRecord[] = [];
-        let esqlQueryColumns: Datatable['columns'] | undefined;
-        let error: string | undefined;
-        let esqlHeaderWarning: string | undefined;
-        execution.pipe(pluck('result')).subscribe((resp) => {
-          const response = resp as Datatable | EsqlErrorResponse;
-          if (response.type === 'error') {
-            error = response.error.message;
-          } else {
-            const table = response as Datatable;
-            const rows = table?.rows ?? [];
-            const responseTime = moment().format('YYYY-MM-DD_HH_mm_ss');
-            esqlQueryColumns = table?.columns ?? undefined;
-            esqlHeaderWarning = table.warning ?? undefined;
-            let inlineHighlights: ESQLColumnsWithHighlights | undefined;
-            if (isOfAggregateQueryType(query)) {
-              try {
-                inlineHighlights = getColumnsWithHighlights(query.esql);
-              } catch (_e) {
-                inlineHighlights = undefined;
-              }
-            }
-            finalData = rows.map((row, idx) => {
-              const raw = Object.keys(inlineHighlights ?? {}).length
-                ? { ...row, inline_highlights: inlineHighlights }
-                : row;
-              const record: DataTableRecord = {
-                id: row._index && row._id ? getDocId(row) : `${idx + 1}@${responseTime}`,
-                raw,
-                flattened: row,
-              };
+  if (!isOfAggregateQueryType(query)) {
+    return {
+      records: [],
+      dataSource: esqlSource,
+      interceptedWarnings: [],
+      esqlHeaderWarning: undefined,
+      approximationApplied: undefined,
+    };
+  }
 
-              return scopedProfilesManager.resolveDocumentProfile({ record });
-            });
-          }
-        });
-        return lastValueFrom(execution).then(() => {
-          if (error) {
-            throw new Error(error);
-          } else {
-            const adapter = inspectorAdapters.requests;
-            const interceptedWarnings: SearchResponseWarning[] = [];
-            if (adapter) {
-              data.search.showWarnings(adapter, (warning) => {
-                interceptedWarnings.push(warning);
-                return true; // suppress the default behaviour
-              });
-            }
-            return {
-              records: finalData || [],
-              interceptedWarnings,
-              esqlQueryColumns,
-              esqlHeaderWarning,
-            };
-          }
-        });
+  try {
+    const { datatable } = await data.search.esql(
+      {
+        query: query.esql,
+        locale: i18n.getLocale(),
+        kibanaQueryContext: {
+          timeRange: timeRange ?? data.query.timefilter.timefilter.getAbsoluteTime(),
+          timeField: esqlSource?.timeFieldName,
+          kibanaFilters: filters,
+          kqlQuery: inputQuery,
+          esqlVariables,
+        },
+        approximation: esqlApproximation,
+        projectRouting,
+        dropNullColumns: true,
+        includeExecutionMetadata: true,
+        columnMetadata: true,
+      },
+      {
+        abortSignal,
+        sessionId: searchSessionId,
+        includeDataTable: true,
+        inspector: {
+          adapter: inspectorAdapters.requests ?? new RequestAdapter(),
+          title:
+            inspectorConfig?.title ??
+            i18n.translate('discover.inspectorEsqlRequestTitle', {
+              defaultMessage: 'Table',
+            }),
+          description:
+            inspectorConfig?.description ??
+            i18n.translate('discover.inspectorEsqlRequestDescription', {
+              defaultMessage: 'This request queries Elasticsearch to fetch results for the table.',
+            }),
+        },
       }
-      return {
-        records: [],
-        interceptedWarnings: [],
-        esqlQueryColumns: [],
-        esqlHeaderWarning: undefined,
+    );
+
+    const finalColumns = datatable?.columns ?? [];
+    const rows = datatable?.rows ?? [];
+    const responseTime = moment().format('YYYY-MM-DD_HH_mm_ss');
+    let inlineHighlights: ESQLColumnsWithHighlights | undefined;
+    try {
+      inlineHighlights = getColumnsWithHighlights(
+        query.esql,
+        finalColumns.map(({ name }) => name)
+      );
+    } catch (_e) {
+      inlineHighlights = undefined;
+    }
+    const hasInlineHighlights = Object.keys(inlineHighlights ?? {}).length > 0;
+    const records = rows.map((row, idx) => {
+      const raw = hasInlineHighlights ? { ...row, inline_highlights: inlineHighlights } : row;
+      const record: DataTableRecord = {
+        id: row._index && row._id ? getDocId(row) : `${idx + 1}@${responseTime}`,
+        raw,
+        flattened: row,
       };
-    })
-    .catch((err) => {
-      throw new Error(err.message);
+
+      return scopedProfilesManager.resolveDocumentProfile({ record });
     });
+
+    const adapter = inspectorAdapters.requests;
+    const interceptedWarnings: SearchResponseWarning[] = [];
+    if (adapter) {
+      data.search.showWarnings(adapter, (warning) => {
+        interceptedWarnings.push(warning);
+        return true; // suppress the default behaviour
+      });
+    }
+    return {
+      records,
+      dataSource: esqlSourceWithColumns(esqlSource, finalColumns),
+      interceptedWarnings,
+      esqlHeaderWarning: datatable?.warning ?? undefined,
+      approximationApplied: datatable?.meta?.approximationApplied,
+    };
+  } catch (err) {
+    throw new Error(err.message);
+  }
 }
-export function getTextBasedQueryStateToAstProps({
-  query,
-  inputQuery,
-  filters,
-  timeRange,
-  dataView,
-  data,
-  inspectorConfig,
-}: {
-  query: Query | AggregateQuery;
-  inputQuery?: Query;
-  filters?: Filter[];
-  timeRange?: TimeRange;
-  dataView: DataView;
-  data: DataPublicPluginStart;
-  inspectorConfig?: {
-    title: string;
-    description: string;
-  };
-}) {
-  return {
-    filters,
-    query,
-    time: timeRange ?? data.query.timefilter.timefilter.getAbsoluteTime(),
-    timeFieldName: dataView.timeFieldName,
-    inputQuery,
-    titleForInspector:
-      inspectorConfig?.title ??
-      i18n.translate('discover.inspectorEsqlRequestTitle', {
-        defaultMessage: 'Table',
-      }),
-    descriptionForInspector:
-      inspectorConfig?.description ??
-      i18n.translate('discover.inspectorEsqlRequestDescription', {
-        defaultMessage: 'This request queries Elasticsearch to fetch results for the table.',
-      }),
-  };
+
+/** Copies table nullability onto the LIMIT 0 source. An empty table keeps the original source. */
+function esqlSourceWithColumns(
+  esqlSource: EsqlSource | undefined,
+  columns: DatatableColumn[]
+): EsqlSource | undefined {
+  if (!esqlSource || columns.length === 0) {
+    return esqlSource;
+  }
+  return esqlSource.withColumns(columns);
 }

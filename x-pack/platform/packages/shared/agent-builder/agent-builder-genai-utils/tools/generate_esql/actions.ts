@@ -26,6 +26,12 @@ export interface GenerateQueryAction {
   success: boolean;
   query?: string;
   response: string;
+  /**
+   * Set when the model refused to answer (the provider ended the response with a content
+   * filter) instead of writing a query. The same prompt will be refused again, so this ends
+   * generation rather than spending the retries on it.
+   */
+  refusal?: string;
 }
 
 export interface AutocorrectQueryAction {
@@ -41,6 +47,7 @@ export interface ExecuteQueryAction {
   success: boolean;
   results?: EsqlResponse;
   error?: string;
+  timedOut?: boolean;
 }
 
 export interface ValidateQueryAction {
@@ -81,11 +88,10 @@ export function isValidateQueryAction(action: Action): action is ValidateQueryAc
  * Format an action into a couple of [ai, user] messages to be used in prompts.
  */
 export const formatAction = (action: Action, withoutToolCalls = true): BaseMessageLike[] => {
-  // Important notice: Claude is *very* stupid with tool configuration
-  // and will be fine calling tools that are not available, just based on previous tool calls
-  // which means we can't represent the action history as a tool call list
-  // and are forced to similar a conversation instead.
-  // yes, this is sub-optimal, but this is how Claude behaves.
+  // Important notice: models will happily call tools that are not available, just based on
+  // previous tool calls, which means we can't represent the action history as a tool call list
+  // and are forced to simulate a conversation instead.
+  // yes, this is sub-optimal, but this is how models behave.
 
   const toolCallId = generateFakeToolCallId();
   switch (action.type) {
@@ -136,7 +142,9 @@ export const formatAction = (action: Action, withoutToolCalls = true): BaseMessa
         ? [
             createAIMessage('Now you can execute the query'),
             createUserMessage(
-              `I tried executing the query and got the following error:
+              action.timedOut
+                ? formatTimedOutExecution(action)
+                : `I tried executing the query and got the following error:
 
 \`\`\`
 ${action.error}
@@ -156,6 +164,7 @@ Can you fix the query?`
               content: {
                 success: action.success,
                 error: action.error,
+                ...(action.timedOut ? { timedOut: true } : {}),
               },
               wrapToolResult: false,
             }),
@@ -192,22 +201,62 @@ Can you fix the query?`
               wrapToolResult: false,
             }),
           ];
-    case 'request_documentation':
-      // always use tool call format for this action, to stay closer to the original flow
-      // also Claude doesn't seem to care about requesting more doc.
-      return [
-        createToolCallMessage({
-          toolCallId,
-          toolName: 'request_documentation',
-          args: { keywords: action.requestedKeywords },
-        }),
-        createToolResultMessage({
-          toolCallId,
-          content: {
-            documentation: action.fetchedDoc,
-          },
-          wrapToolResult: false,
-        }),
-      ];
+    case 'request_documentation': {
+      const documentedKeywords = Object.keys(action.fetchedDoc);
+      if (documentedKeywords.length === 0) {
+        return [];
+      }
+      // Used to be replayed as a tool call, back when the generation step still exposed this tool.
+      // It no longer does, and a tool call for an unavailable tool makes models call it anyway and
+      // triggers `doNotCallThisTool` injection, so simulate a conversation like the other actions.
+      const requestedKeywords =
+        action.requestedKeywords.length > 0 ? action.requestedKeywords : documentedKeywords;
+      return withoutToolCalls
+        ? [
+            createAIMessage(
+              `I need the ES|QL documentation for the following keywords: ${requestedKeywords.join(
+                ', '
+              )}`
+            ),
+            createUserMessage(
+              `Here is the documentation you requested:\n\n${JSON.stringify({
+                documentation: action.fetchedDoc,
+              })}`
+            ),
+          ]
+        : [
+            createToolCallMessage({
+              toolCallId,
+              toolName: 'request_documentation',
+              args: { keywords: action.requestedKeywords },
+            }),
+            createToolResultMessage({
+              toolCallId,
+              content: {
+                documentation: action.fetchedDoc,
+              },
+              wrapToolResult: false,
+            }),
+          ];
+    }
   }
 };
+
+/**
+ * A timed-out query is not broken, it is too expensive: "fix the query" would get the same query
+ * back. Ask for a cheaper one instead, naming what actually narrows an ES|QL scan.
+ */
+const formatTimedOutExecution = (action: ExecuteQueryAction): string =>
+  `I tried executing the query and it timed out:
+
+\`\`\`
+${action.error}
+\`\`\`
+
+The query is valid but too expensive to run as written, so do not resubmit it unchanged or with cosmetic changes. Write a cheaper query:
+- restrict the time range on the timestamp field as described in the instructions, if the query does not already,
+- filter as early as possible on selective, indexed fields,
+- avoid matching on metadata fields such as \`_id\` without another selective condition,
+- keep only the fields that are needed and use a small LIMIT.
+
+If the request cannot be made cheaper, write the most selective query that still answers it.`;

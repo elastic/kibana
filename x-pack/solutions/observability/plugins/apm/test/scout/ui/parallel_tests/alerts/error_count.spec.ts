@@ -76,7 +76,7 @@ function createAlertDisplayTest(alertIndex: string) {
 
     await test.step('verify alert is visible', async () => {
       const ruleCell = serviceDetailsPage.alertsTab.alertsTable
-        .getAllCellLocatorByColId('kibana.alert.rule.name')
+        .cells('kibana.alert.rule.name')
         .filter({ hasText: RULE_NAME });
       await expect(ruleCell).toBeVisible();
     });

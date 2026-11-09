@@ -168,6 +168,7 @@ perfLighthouseTest.describe(
       // Warm-up: navigate to the page to populate server-side caches
       try {
         await page.goto(kbnUrl.get('/app/home'));
+        // eslint-disable-next-line playwright/no-networkidle -- warm-up, not synchronization: the audit needs every lazy chunk fetched once, and no app-readiness signal expresses that
         await page.waitForLoadState('networkidle', { timeout: 15000 });
       } catch {
         // Warm-up may timeout with dev bundles; that is acceptable
@@ -190,6 +191,7 @@ perfLighthouseTest.describe(
               '/app/dashboards#/view/722b74f0-b882-11e8-a6d9-e546fe2bba5f?_g=(filters:!())'
             )
           );
+          // eslint-disable-next-line playwright/no-networkidle -- warm-up, not synchronization: the audit needs every lazy chunk fetched once, and no app-readiness signal expresses that
           await page.waitForLoadState('networkidle', { timeout: 15000 });
         } catch {
           // Warm-up

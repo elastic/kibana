@@ -17,11 +17,13 @@ export const useESQLVariables = ({
   parentApi,
   attributes,
   panelId,
+  layerId,
   closeFlyout,
 }: {
   parentApi: unknown;
   attributes?: TypedLensSerializedState['attributes'];
   panelId?: string;
+  layerId: string;
   closeFlyout?: () => void;
 }) => {
   const dashboardPanels = useStateFromPublishingSubject(
@@ -61,11 +63,32 @@ export const useESQLVariables = ({
         }
       );
       if (panel && updatedQuery && attributes) {
+        // ES|QL lives exclusively on the text-based layers; update only the
+        // layer being edited — sibling layers keep their own queries
+        const textBasedState = attributes.state.datasourceStates.textBased;
+        const editedLayer = textBasedState?.layers?.[layerId];
+        const updatedTextBasedState =
+          textBasedState && editedLayer
+            ? {
+                ...textBasedState,
+                layers: {
+                  ...textBasedState.layers,
+                  [layerId]: { ...editedLayer, query: { esql: updatedQuery } },
+                },
+              }
+            : undefined;
         panel.updateAttributes({
           ...attributes,
           state: {
             ...attributes.state,
-            query: { esql: updatedQuery },
+            ...(updatedTextBasedState
+              ? {
+                  datasourceStates: {
+                    ...attributes.state.datasourceStates,
+                    textBased: updatedTextBasedState,
+                  },
+                }
+              : {}),
             needsRefresh: true,
           },
         });
@@ -73,7 +96,7 @@ export const useESQLVariables = ({
         await panel.onEdit();
       }
     },
-    [attributes, parentApi, panel, panelId]
+    [attributes, parentApi, panel, panelId, layerId]
   );
 
   const onCancelControl = useCallback(() => {

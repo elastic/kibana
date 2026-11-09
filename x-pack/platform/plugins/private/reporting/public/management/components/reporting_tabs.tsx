@@ -5,24 +5,27 @@
  * 2.0.
  */
 
-import React, { Suspense, useMemo } from 'react';
-import { EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
+import React, { Suspense, useMemo, useRef, type RefObject } from 'react';
+import { EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
+import { AppHeader } from '@kbn/app-header';
+import type { AppHeaderMenu, AppHeaderTab } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { useHistory, useParams } from 'react-router-dom';
 import type { ILicense } from '@kbn/licensing-types';
 import type { ClientConfigType } from '@kbn/reporting-public';
 import { useInternalApiClient, useKibana } from '@kbn/reporting-public';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { ILM_POLICY_NAME, SCHEDULED_REPORT_VALID_LICENSES } from '@kbn/reporting-common';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
-import { SCHEDULED_REPORT_VALID_LICENSES } from '@kbn/reporting-common';
 import type { Section } from '../../constants';
 import { REPORTING_EXPORTS_PATH, REPORTING_SCHEDULES_PATH } from '../../constants';
+import { useIlmPolicyStatus } from '../../lib/ilm_policy_status_context';
 import ReportExportsTable from './report_exports_table';
 import ReportSchedulesTable from './report_schedules_table';
 import { LicensePrompt } from './license_prompt';
 import IlmPolicyWrapper from './ilm_policy_wrapper';
+import type { ReportDiagnosticHandle } from './report_diagnostic';
 
 export interface MatchParams {
   section: Section;
@@ -32,11 +35,144 @@ export interface ReportingTabsProps {
   config: ClientConfigType;
 }
 
+const reportingTitle = i18n.translate('xpack.reporting.reports.titleStateful', {
+  defaultMessage: 'Reporting',
+});
+
+const reportingDescription = i18n.translate('xpack.reporting.reports.subtitleStateful', {
+  defaultMessage: 'Get reports generated in Kibana applications.',
+});
+
+const exportsTabLabel = i18n.translate('xpack.reporting.tabs.exports', {
+  defaultMessage: 'Exports',
+});
+
+const schedulesTabLabel = i18n.translate('xpack.reporting.tabs.schedules', {
+  defaultMessage: 'Schedules',
+});
+
+const ilmPolicyLinkLabel = i18n.translate('xpack.reporting.listing.reports.ilmPolicyLinkText', {
+  defaultMessage: 'Edit ILM policy',
+});
+
+const runDiagnosisLabel = i18n.translate('xpack.reporting.listing.diagnosticButton', {
+  defaultMessage: 'Run diagnosis',
+});
+
+const ReportingPageHeader = ({
+  config,
+  tabs,
+  diagnosticRef,
+}: {
+  config: ClientConfigType;
+  tabs: AppHeaderTab[];
+  diagnosticRef: RefObject<ReportDiagnosticHandle | null>;
+}) => {
+  if (!config.statefulSettings.enabled) {
+    return (
+      <AppHeader
+        title={reportingTitle}
+        description={reportingDescription}
+        tabs={tabs}
+        spacing="bleed"
+      />
+    );
+  }
+
+  return <StatefulReportingPageHeader config={config} tabs={tabs} diagnosticRef={diagnosticRef} />;
+};
+
+const StatefulReportingPageHeader = ({
+  config,
+  tabs,
+  diagnosticRef,
+}: {
+  config: ClientConfigType;
+  tabs: AppHeaderTab[];
+  diagnosticRef: RefObject<ReportDiagnosticHandle | null>;
+}) => {
+  const {
+    services: {
+      application: { capabilities },
+      share: { url: urlService },
+    },
+  } = useKibana();
+  const ilmPolicyContextValue = useIlmPolicyStatus();
+  const ilmLocator = urlService.locators.get('ILM_LOCATOR_ID');
+  const hasIlmPolicy = ilmPolicyContextValue?.status !== 'policy-not-found';
+  const showIlmPolicyLink = Boolean(
+    capabilities?.management?.data?.index_lifecycle_management && ilmLocator && hasIlmPolicy
+  );
+  const configAllowsImageReports =
+    config.export_types.pdf.enabled || config.export_types.png.enabled;
+
+  const menu = useMemo<AppHeaderMenu | undefined>(() => {
+    const items: NonNullable<AppHeaderMenu['items']> = [];
+
+    if (showIlmPolicyLink && ilmLocator) {
+      items.push({
+        id: 'editIlmPolicy',
+        label: ilmPolicyLinkLabel,
+        iconType: 'external',
+        testId: 'ilmPolicyLink',
+        isLoading: ilmPolicyContextValue?.isLoading,
+        disableButton: ilmPolicyContextValue?.isLoading,
+        run: () => {
+          const url = ilmLocator.getRedirectUrl({
+            page: 'policy_edit',
+            policyName: ILM_POLICY_NAME,
+          });
+          window.open(url, '_blank');
+          window.focus();
+        },
+      });
+    }
+
+    const primaryActionItem = configAllowsImageReports
+      ? {
+          id: 'runDiagnosis',
+          label: runDiagnosisLabel,
+          iconType: 'inspect',
+          testId: 'screenshotDiagnosticLink',
+          run: () => {
+            diagnosticRef.current?.open();
+          },
+        }
+      : undefined;
+
+    if (!items.length && !primaryActionItem) {
+      return undefined;
+    }
+
+    return {
+      ...(items.length ? { items } : {}),
+      ...(primaryActionItem ? { primaryActionItem } : {}),
+    };
+  }, [
+    configAllowsImageReports,
+    diagnosticRef,
+    ilmLocator,
+    ilmPolicyContextValue?.isLoading,
+    showIlmPolicyLink,
+  ]);
+
+  return (
+    <AppHeader
+      title={reportingTitle}
+      description={reportingDescription}
+      tabs={tabs}
+      menu={menu}
+      spacing="bleed"
+    />
+  );
+};
+
 export const ReportingTabs: React.FunctionComponent<{ config: ClientConfigType }> = ({
   config,
 }) => {
   const { section } = useParams<MatchParams>();
   const history = useHistory();
+  const diagnosticRef = useRef<ReportDiagnosticHandle>(null);
 
   const { apiClient } = useInternalApiClient();
   const {
@@ -86,56 +222,34 @@ export const ReportingTabs: React.FunctionComponent<{ config: ClientConfigType }
     };
   }, [license]);
 
-  const tabs = [
+  const { enableLinks, showLinks } = licensingInfo;
+
+  const tabs: AppHeaderTab[] = [
     {
       id: 'exports',
-      name: i18n.translate('xpack.reporting.tabs.exports', {
-        defaultMessage: 'Exports',
-      }),
+      label: exportsTabLabel,
+      href: history.createHref({ pathname: '/exports' }),
+      onClick: () => history.push('/exports'),
+      isSelected: section === 'exports',
+      'data-test-subj': 'reportingTabs-exports',
     },
     {
       id: 'schedules',
-      name: i18n.translate('xpack.reporting.tabs.schedules', {
-        defaultMessage: 'Schedules',
-      }),
-      isBeta: true,
+      label: schedulesTabLabel,
+      href: history.createHref({ pathname: '/schedules' }),
+      onClick: () => history.push('/schedules'),
+      isSelected: section === 'schedules',
+      'data-test-subj': 'reportingTabs-schedules',
     },
   ];
 
-  const { enableLinks, showLinks } = licensingInfo;
-
-  const onSectionChange = (newSection: Section) => {
-    history.push(`/${newSection}`);
-  };
-
   return (
     <>
-      <EuiPageTemplate.Header
-        paddingSize="none"
-        bottomBorder
-        rightSideItems={
-          config.statefulSettings.enabled
-            ? [<IlmPolicyWrapper config={config} apiClient={apiClient} />]
-            : []
-        }
-        data-test-subj="reportingPageHeader"
-        pageTitle={
-          <FormattedMessage id="xpack.reporting.reports.titleStateful" defaultMessage="Reporting" />
-        }
-        description={
-          <FormattedMessage
-            id="xpack.reporting.reports.subtitleStateful"
-            defaultMessage="Get reports generated in Kibana applications."
-          />
-        }
-        tabs={tabs.map(({ id, name, isBeta = false }) => ({
-          label: !isBeta ? name : <>{name}</>,
-          onClick: () => onSectionChange(id as Section),
-          isSelected: id === section,
-          key: id,
-          'data-test-subj': `reportingTabs-${id}`,
-        }))}
-      />
+      <ReportingPageHeader config={config} tabs={tabs} diagnosticRef={diagnosticRef} />
+      <EuiSpacer size="l" />
+      {config.statefulSettings.enabled ? (
+        <IlmPolicyWrapper ref={diagnosticRef} config={config} apiClient={apiClient} />
+      ) : null}
 
       <Routes>
         <Route

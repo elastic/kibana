@@ -89,7 +89,7 @@ const getValidationTooltipContent = (
   }
 
   if (hasTemplateNameError) {
-    return i18n.PROVIDE_TEMPLATE_NAME_IN_CONFIGURATION;
+    return i18n.PROVIDE_TEMPLATE_NAME;
   }
 
   if (hasOtherConfigurationErrors) {

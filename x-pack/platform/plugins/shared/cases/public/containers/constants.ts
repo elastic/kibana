@@ -36,7 +36,6 @@ export const casesQueriesKeys = {
     [...casesQueriesKeys.fieldDefinitions, 'list', params] as const,
   connectorsList: () => [...casesQueriesKeys.connectors, 'list'] as const,
   casesList: () => [...casesQueriesKeys.all, 'list'] as const,
-  casesMetrics: () => [...casesQueriesKeys.casesList(), 'metrics'] as const,
   casesStatuses: () => [...casesQueriesKeys.casesList(), 'statuses'] as const,
   cases: (params: unknown) => [...casesQueriesKeys.casesList(), 'all-cases', params] as const,
   similarCases: (id: string, params: unknown) =>
@@ -52,6 +51,8 @@ export const casesQueriesKeys = {
     [...casesQueriesKeys.case(id), 'metrics', features] as const,
   caseConnectors: (id: string) => [...casesQueriesKeys.case(id), 'connectors'],
   caseUsers: (id: string) => [...casesQueriesKeys.case(id), 'users'],
+  conversationAccess: (conversationId: string) =>
+    [...casesQueriesKeys.userActions, 'conversation-access', conversationId] as const,
   caseUserActions: (id: string, params: unknown) =>
     [...casesQueriesKeys.case(id), ...casesQueriesKeys.userActions, params] as const,
   caseUserActionsStats: (id: string) => [
@@ -70,6 +71,7 @@ export const casesQueriesKeys = {
   alertFeatureIds: (alertIds: string[]) =>
     [...casesQueriesKeys.alerts, 'features', alertIds] as const,
   configuration: (params: unknown) => [...casesQueriesKeys.all, 'configuration', params] as const,
+  workflowTagAggs: () => [...casesQueriesKeys.all, 'workflow-tag-aggs'] as const,
 };
 
 export const casesMutationsKeys = {
@@ -81,12 +83,14 @@ export const casesMutationsKeys = {
   updateComment: ['update-comment'] as const,
   deleteComment: ['delete-comment'] as const,
   deleteFileAttachment: ['delete-file-attachment'] as const,
+  bulkDeleteAttachments: ['bulk-delete-attachments'] as const,
   bulkCreateAttachments: ['bulk-create-attachments'] as const,
   persistCaseConfiguration: ['persist-case-configuration'] as const,
   replaceCustomField: ['replace-custom-field'] as const,
   postObservable: ['post-observable'] as const,
   patchObservable: ['patch-observable'] as const,
   deleteObservable: ['delete-observable'] as const,
+  bulkDeleteObservables: ['bulk-delete-observables'] as const,
   createTemplate: ['create-template'] as const,
   updateTemplate: ['update-template'] as const,
   deleteTemplate: ['delete-template'] as const,
@@ -117,6 +121,7 @@ const DEFAULT_SEARCH_FIELDS = [
 
 export const DEFAULT_FROM_DATE = 'now-30d';
 export const DEFAULT_TO_DATE = 'now';
+export const ALL_CASES_FROM_DATE = '1970-01-01T00:00:00.000Z';
 
 // TODO: Remove reporters. Move searchFields to API.
 export const DEFAULT_FILTER_OPTIONS: FilterOptions = {

@@ -14,7 +14,7 @@ import React from 'react';
 import { css } from '@emotion/react';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
+import type { TimelineNonEcsData } from '@kbn/securitysolution-timeline-common';
 import { EntityTypeToIdentifierField } from '../../../../../../common/entity_analytics/types';
 import { getAgentTypeForAgentIdField } from '../../../../../common/lib/endpoint/utils/get_agent_type_for_agent_id_field';
 import {
@@ -144,7 +144,12 @@ const FormattedFieldValueComponent: React.FC<{
     return <Duration fieldName={fieldName} value={`${value}`} />;
   } else if (fieldName === EntityTypeToIdentifierField.host) {
     const entityId =
-      data && euidApi?.euid ? euidApi.euid.getEuidFromTimelineNonEcsData('host', data) : undefined;
+      data && euidApi?.euid
+        ? euidApi.euid.getEuidFromTimelineNonEcsData(
+            euidApi.getBuiltInEntityDefinition('host'),
+            data
+          )
+        : undefined;
     return (
       <HostName
         Component={Component}
@@ -158,7 +163,12 @@ const FormattedFieldValueComponent: React.FC<{
     );
   } else if (fieldName === EntityTypeToIdentifierField.user) {
     const entityId =
-      data && euidApi?.euid ? euidApi.euid.getEuidFromTimelineNonEcsData('user', data) : undefined;
+      data && euidApi?.euid
+        ? euidApi.euid.getEuidFromTimelineNonEcsData(
+            euidApi.getBuiltInEntityDefinition('user'),
+            data
+          )
+        : undefined;
     return (
       <UserName
         Component={Component}
@@ -173,7 +183,10 @@ const FormattedFieldValueComponent: React.FC<{
   } else if (fieldName === EntityTypeToIdentifierField.service) {
     const entityId =
       data && euidApi?.euid
-        ? euidApi.euid.getEuidFromTimelineNonEcsData('service', data)
+        ? euidApi.euid.getEuidFromTimelineNonEcsData(
+            euidApi.getBuiltInEntityDefinition('service'),
+            data
+          )
         : undefined;
     return (
       <ServiceName

@@ -1,0 +1,268 @@
+version: "1"
+name: Detection rule preview
+description: >
+  Preview a detection rule and return its generated alert count. Optionally previews a
+  second body (e.g. a proposed tuned query) in the same run, so a caller comparing two
+  queries needs only one child execution.
+enabled: true
+tags:
+  - security
+  - detection-rule-preview
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        preview_body:
+          type: object
+          additionalProperties: true
+          description: Detection Engine rule preview request body.
+        proposed_body:
+          type: object
+          additionalProperties: true
+          description: Optional second preview body, compared against the first.
+        space_id:
+          type: string
+          description: Space in which to run the preview.
+        indices:
+          type: array
+          items:
+            type: string
+          description: >-
+            Source indices the bodies read. Checked for `read` as the running identity
+            before any preview; an unreadable one skips both previews. Exclusion
+            patterns (`-name`), cross-cluster patterns (`cluster:name`) and date math
+            names (`<name-{now/d}>`) are ignored; a `::selector` suffix is dropped.
+      required:
+        - preview_body
+        - space_id
+      additionalProperties: false
+outputs:
+  - name: succeeded
+    type: boolean
+  - name: alert_count
+    type: number
+  - name: preview_id
+    type: string
+  - name: is_aborted
+    type: boolean
+  - name: error_text
+    type: string
+  - name: proposed_succeeded
+    type: boolean
+  - name: proposed_alert_count
+    type: number
+  - name: proposed_preview_id
+    type: string
+  - name: proposed_is_aborted
+    type: boolean
+  - name: proposed_error_text
+    type: string
+  - name: unreadable_indices
+    type: string
+  - name: no_matching_indices
+    type: boolean
+  - name: proposed_no_matching_indices
+    type: boolean
+  - name: alert_limit_reached
+    type: boolean
+  - name: proposed_alert_limit_reached
+    type: boolean
+steps:
+  # The preview runs as the caller's identity, usually a worker's service account
+  # whose role reads a fixed set of index patterns. An index it cannot read is
+  # invisible to the preview, which then reports zero alerts as if the rule matched
+  # nothing. Asked up front so the caller can say which indices are the problem.
+  #
+  # Keeps only the indices `_has_privileges` can check:
+  # - drops `-name` exclusion patterns (not a name to hold a privilege on)
+  # - drops `cluster:name` remote patterns (the API checks local grants only, so a
+  #   remote pattern the role holds through `remote_indices` would come back false)
+  # - drops `<name-{now/d}>` date math names (the API matches the literal name, so
+  #   one under a granted pattern would come back false)
+  # - strips `::failures` / `::data` selectors (the API rejects a request with one)
+  # Rendered as a JSON array body, since Liquid cannot filter an array otherwise.
+  - name: checkable_indices
+    type: data.set
+    with:
+      csv: >-
+        {%- for name in inputs.indices -%}
+        {%- assign base = name | split: '::' | first -%}
+        {%- assign first = base | slice: 0, 1 -%}
+        {%- if first == '-' or first == '<' or base contains ':' -%}{%- else -%},{{ base | json }}{%- endif -%}
+        {%- endfor -%}
+
+  - name: probe_privileges
+    type: elasticsearch.request
+    if: "${{ steps.checkable_indices.output.csv != blank }}"
+    with:
+      method: POST
+      path: /_security/user/_has_privileges
+      body:
+        index:
+          - names: "${{ steps.checkable_indices.output.csv | remove_first: ',' | prepend: '[' | append: ']' | json_parse }}"
+            privileges:
+              - read
+    on-failure:
+      continue: true
+
+  # Comma-separated names the identity cannot read; empty when every one is
+  # readable, when no indices were given, or when the probe itself failed.
+  - name: collect_unreadable_indices
+    type: data.set
+    with:
+      unreadable_indices: >-
+        {%- for entry in steps.probe_privileges.output.index -%}
+        {%- if entry[1].read != true -%}, {{ entry[0] }}{%- endif -%}
+        {%- endfor -%}
+
+  - name: preview_rule
+    type: kibana.request
+    if: "${{ steps.collect_unreadable_indices.output.unreadable_indices == blank }}"
+    with:
+      method: POST
+      path: "/s/{{ inputs.space_id }}/api/detection_engine/rules/preview"
+      headers:
+        kbn-xsrf: string
+        elastic-api-version: "2023-10-31"
+        Content-Type: application/json
+      body: "${{ inputs.preview_body }}"
+    on-failure:
+      continue: true
+
+  # EQL sequence members are left out, as in the tuning sweep: a sequence writes one
+  # building-block alert per matched event next to the sequence alert, so counting them
+  # would show a two-event sequence as three alerts. Building-block rule alerts count.
+  - name: count_preview_alerts
+    type: elasticsearch.search
+    if: "${{ steps.preview_rule.error == null and steps.preview_rule.output.previewId != null }}"
+    with:
+      index: ".preview.alerts-security.alerts-{{ inputs.space_id }}"
+      size: 0
+      track_total_hits: true
+      allow_partial_search_results: false
+      query:
+        bool:
+          filter:
+            - term:
+                kibana.alert.rule.uuid: "{{ steps.preview_rule.output.previewId }}"
+          must_not:
+            - exists:
+                field: kibana.alert.group.index
+    on-failure:
+      continue: true
+
+  # The preview API answers 200 even when the rule errored mid-execution, and such a run
+  # reports zero alerts. Flattening the per-invocation errors to text lets `succeeded`
+  # tell that apart from a query that genuinely matched nothing. A rule whose index
+  # patterns match nothing visible to the identity is only a warning to the API, yet
+  # it skips execution the same way, so that warning counts as an error here too.
+  - name: collect_errors
+    type: data.set
+    with:
+      error_text: |-
+        {%- for log in steps.preview_rule.output.logs -%}
+        {%- for err in log.errors -%}{{ err }}; {% endfor -%}
+        {%- for warn in log.warnings -%}
+        {%- if warn contains 'Unable to find matching' -%}{{ warn }}; {% endif -%}
+        {%- endfor -%}
+        {%- endfor -%}
+      # 'true' when an invocation stopped at the rule's max_signals: the count is
+      # then a floor, not the number of alerts the rule would have produced.
+      limit_reached: |-
+        {%- assign hit = false -%}
+        {%- for log in steps.preview_rule.output.logs -%}
+        {%- for warn in log.warnings -%}
+        {%- if warn contains 'reached the maximum alert limit' -%}{%- assign hit = true -%}{%- endif -%}
+        {%- endfor -%}
+        {%- endfor -%}
+        {{ hit }}
+
+  # The second body runs inside this same execution on purpose: two consecutive
+  # synchronous child workflows in a caller share one immediate-resume slot, and a
+  # lost resume strands the caller in waiting_for_child.
+  - name: preview_proposed
+    type: kibana.request
+    if: "${{ inputs.proposed_body != null and steps.collect_unreadable_indices.output.unreadable_indices == blank }}"
+    with:
+      method: POST
+      path: "/s/{{ inputs.space_id }}/api/detection_engine/rules/preview"
+      headers:
+        kbn-xsrf: string
+        elastic-api-version: "2023-10-31"
+        Content-Type: application/json
+      body: "${{ inputs.proposed_body }}"
+    on-failure:
+      continue: true
+
+  - name: count_proposed_alerts
+    type: elasticsearch.search
+    if: "${{ steps.preview_proposed.error == null and steps.preview_proposed.output.previewId != null }}"
+    with:
+      index: ".preview.alerts-security.alerts-{{ inputs.space_id }}"
+      size: 0
+      track_total_hits: true
+      allow_partial_search_results: false
+      query:
+        bool:
+          filter:
+            - term:
+                kibana.alert.rule.uuid: "{{ steps.preview_proposed.output.previewId }}"
+          must_not:
+            - exists:
+                field: kibana.alert.group.index
+    on-failure:
+      continue: true
+
+  - name: collect_proposed_errors
+    type: data.set
+    with:
+      error_text: |-
+        {%- for log in steps.preview_proposed.output.logs -%}
+        {%- for err in log.errors -%}{{ err }}; {% endfor -%}
+        {%- for warn in log.warnings -%}
+        {%- if warn contains 'Unable to find matching' -%}{{ warn }}; {% endif -%}
+        {%- endfor -%}
+        {%- endfor -%}
+      limit_reached: |-
+        {%- assign hit = false -%}
+        {%- for log in steps.preview_proposed.output.logs -%}
+        {%- for warn in log.warnings -%}
+        {%- if warn contains 'reached the maximum alert limit' -%}{%- assign hit = true -%}{%- endif -%}
+        {%- endfor -%}
+        {%- endfor -%}
+        {{ hit }}
+
+  # A partial or timed-out count could report fewer alerts than the preview produced,
+  # so it fails the verdict rather than understating a backtest.
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      succeeded: >-
+        ${{ steps.collect_unreadable_indices.output.unreadable_indices == blank
+          and steps.preview_rule.error == null
+          and steps.count_preview_alerts.error == null
+          and steps.count_preview_alerts.output.timed_out == false
+          and steps.count_preview_alerts.output._shards.failed == 0
+          and steps.collect_errors.output.error_text == '' }}
+      alert_count: "${{ steps.count_preview_alerts.output.hits.total.value | default: -1 }}"
+      preview_id: "{{ steps.preview_rule.output.previewId }}"
+      is_aborted: "${{ steps.preview_rule.output.isAborted | default: false }}"
+      error_text: "{{ steps.collect_errors.output.error_text }}"
+      proposed_succeeded: >-
+        ${{ inputs.proposed_body != null
+          and steps.collect_unreadable_indices.output.unreadable_indices == blank
+          and steps.preview_proposed.error == null
+          and steps.count_proposed_alerts.error == null
+          and steps.count_proposed_alerts.output.timed_out == false
+          and steps.count_proposed_alerts.output._shards.failed == 0
+          and steps.collect_proposed_errors.output.error_text == '' }}
+      proposed_alert_count: "${{ steps.count_proposed_alerts.output.hits.total.value | default: -1 }}"
+      proposed_preview_id: "{{ steps.preview_proposed.output.previewId }}"
+      proposed_is_aborted: "${{ steps.preview_proposed.output.isAborted | default: false }}"
+      proposed_error_text: "{{ steps.collect_proposed_errors.output.error_text }}"
+      unreadable_indices: "{{ steps.collect_unreadable_indices.output.unreadable_indices | remove_first: ', ' }}"
+      no_matching_indices: "${{ steps.collect_errors.output.error_text contains 'Unable to find matching' }}"
+      proposed_no_matching_indices: "${{ steps.collect_proposed_errors.output.error_text contains 'Unable to find matching' }}"
+      alert_limit_reached: "${{ steps.collect_errors.output.limit_reached == 'true' }}"
+      proposed_alert_limit_reached: "${{ steps.collect_proposed_errors.output.limit_reached == 'true' }}"

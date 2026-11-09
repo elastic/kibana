@@ -1,21 +1,9 @@
 {
-  "sha1": "6fc06005199124ee154b845b49f6e9bb155f2328",
+  "sha1": "045b9efb12e5ab17c4ce2dbaa19f9e250c6d1dfc",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "52c78078719bb17-1ee8b379c33773f",
-      "title": "Teardown metrics experience tests data",
-      "expectedStatus": "passed",
-      "tags": [],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/global.teardown.ts",
-        "line": 7,
-        "column": 1
-      }
-    },
     {
       "id": "0f64951867b1265-04ed931b557bf1b",
       "title": "Setup metrics experience tests data",
@@ -131,8 +119,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/dimensions_wipe.spec.ts",
-        "line": 50,
-        "column": 24
+        "line": 49,
+        "column": 26
       }
     },
     {
@@ -311,8 +299,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid_settings.spec.ts",
-        "line": 25,
-        "column": 61
+        "line": 28,
+        "column": 52
       }
     },
     {
@@ -329,8 +317,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid_settings.spec.ts",
-        "line": 46,
-        "column": 30
+        "line": 48,
+        "column": 15
       }
     },
     {
@@ -347,8 +335,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid_settings.spec.ts",
-        "line": 67,
-        "column": 46
+        "line": 70,
+        "column": 17
       }
     },
     {
@@ -365,8 +353,98 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid_settings.spec.ts",
-        "line": 99,
-        "column": 30
+        "line": 101,
+        "column": 24
+      }
+    },
+    {
+      "id": "8556b3250071fcb-fbcaedd1b77b0da",
+      "title": "Metrics in Discover - Grid Settings reflects a non-default grid setting in the URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid_settings.spec.ts",
+        "line": 159,
+        "column": 17
+      }
+    },
+    {
+      "id": "8556b3250071fcb-f6d4c458c4c09ba",
+      "title": "Metrics in Discover - Grid Settings applies a grid setting supplied by the URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid_settings.spec.ts",
+        "line": 185,
+        "column": 11
+      }
+    },
+    {
+      "id": "8556b3250071fcb-53fabb119f6524c",
+      "title": "Metrics in Discover - Grid Settings never shows the configuration and insights flyouts at the same time",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid_settings.spec.ts",
+        "line": 213,
+        "column": 17
+      }
+    },
+    {
+      "id": "8556b3250071fcb-da9fbb7ce26fe76",
+      "title": "Metrics in Discover - Grid Settings leaves no gap after closing the configuration opened from the inspector",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid_settings.spec.ts",
+        "line": 244,
+        "column": 9
+      }
+    },
+    {
+      "id": "8556b3250071fcb-4b23fb6ca974774",
+      "title": "Metrics in Discover - Grid Settings leaves no gap after closing the insights flyout opened from the inspector",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid_settings.spec.ts",
+        "line": 261,
+        "column": 69
       }
     },
     {
@@ -419,8 +497,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid.navigation.spec.ts",
-        "line": 105,
-        "column": 22
+        "line": 112,
+        "column": 9
       }
     },
     {
@@ -437,8 +515,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid.navigation.spec.ts",
-        "line": 115,
-        "column": 15
+        "line": 121,
+        "column": 22
       }
     },
     {
@@ -460,8 +538,8 @@
       }
     },
     {
-      "id": "e97c0a4fb3ba0dc-f2ef49ddfad8ddc",
-      "title": "Metrics in Discover - Grid should render grid with WHERE filter",
+      "id": "e97c0a4fb3ba0dc-d23f59e78ada169",
+      "title": "Metrics in Discover - Grid should render metrics grid with wildcard",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -478,6 +556,24 @@
       }
     },
     {
+      "id": "e97c0a4fb3ba0dc-f2ef49ddfad8ddc",
+      "title": "Metrics in Discover - Grid should render grid with WHERE filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid.spec.ts",
+        "line": 54,
+        "column": 15
+      }
+    },
+    {
       "id": "e97c0a4fb3ba0dc-67aeead5ce34d63",
       "title": "Metrics in Discover - Grid should render grid with LIMIT",
       "expectedStatus": "passed",
@@ -491,8 +587,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid.spec.ts",
-        "line": 52,
-        "column": 9
+        "line": 56,
+        "column": 21
       }
     },
     {
@@ -509,8 +605,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid.spec.ts",
-        "line": 54,
-        "column": 43
+        "line": 60,
+        "column": 7
       }
     },
     {
@@ -527,8 +623,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid.spec.ts",
-        "line": 58,
-        "column": 16
+        "line": 63,
+        "column": 25
       }
     },
     {
@@ -545,8 +641,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid.spec.ts",
-        "line": 62,
-        "column": 64
+        "line": 67,
+        "column": 20
       }
     },
     {
@@ -563,8 +659,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid.spec.ts",
-        "line": 67,
-        "column": 7
+        "line": 71,
+        "column": 64
       }
     },
     {
@@ -581,8 +677,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid.spec.ts",
-        "line": 75,
-        "column": 25
+        "line": 81,
+        "column": 7
       }
     },
     {
@@ -816,6 +912,24 @@
       }
     },
     {
+      "id": "ec44ac173cf4694-ea41d7610c8defe",
+      "title": "Metrics in Discover - Save Session Recency orders a reopened recency session by the opener's own history",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/save_session_recency.spec.ts",
+        "line": 46,
+        "column": 46
+      }
+    },
+    {
       "id": "722fb5fc48cd135-af3779e74d07e98",
       "title": "Metrics in Discover - Save Session should save and restore a metrics session",
       "expectedStatus": "passed",
@@ -829,8 +943,62 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/save_session.spec.ts",
-        "line": 34,
-        "column": 66
+        "line": 59,
+        "column": 24
+      }
+    },
+    {
+      "id": "722fb5fc48cd135-f76afb10c9ecd91",
+      "title": "Metrics in Discover - Save Session should flag a sort change as unsaved and revert to the saved sort",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/save_session.spec.ts",
+        "line": 181,
+        "column": 22
+      }
+    },
+    {
+      "id": "722fb5fc48cd135-4d3fb4cbe6e55bc",
+      "title": "Metrics in Discover - Save Session should reopen a session saved with the recency sort",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/save_session.spec.ts",
+        "line": 216,
+        "column": 9
+      }
+    },
+    {
+      "id": "722fb5fc48cd135-5c723f1b2b091b9",
+      "title": "Metrics in Discover - Save Session should open a session saved before sort was persisted with the default sort",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/save_session.spec.ts",
+        "line": 244,
+        "column": 24
       }
     },
     {
@@ -847,8 +1015,26 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/share_session.spec.ts",
-        "line": 33,
-        "column": 66
+        "line": 59,
+        "column": 24
+      }
+    },
+    {
+      "id": "9901fdc737200ac-40cc0c2f674cc38",
+      "title": "Metrics in Discover - Share Session should share the recency sort but order by the recipient's own history",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/share_session.spec.ts",
+        "line": 151,
+        "column": 20
       }
     },
     {
@@ -885,6 +1071,60 @@
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/sort.spec.ts",
         "line": 46,
         "column": 24
+      }
+    },
+    {
+      "id": "8932175b6997324-46c474ef37c0901",
+      "title": "Metrics in Discover - Sorting restores a non-default sort after a page reload",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/sort.spec.ts",
+        "line": 62,
+        "column": 74
+      }
+    },
+    {
+      "id": "8932175b6997324-fdfb836f616907a",
+      "title": "Metrics in Discover - Sorting reflects a non-default sort in the URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/sort.spec.ts",
+        "line": 86,
+        "column": 22
+      }
+    },
+    {
+      "id": "8932175b6997324-7bc7c0246d70eb9",
+      "title": "Metrics in Discover - Sorting applies a sort supplied by the URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/sort.spec.ts",
+        "line": 110,
+        "column": 9
       }
     },
     {
@@ -957,6 +1197,17 @@
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/tab_duplication_state.spec.ts",
         "line": 96,
         "column": 50
+      }
+    },
+    {
+      "id": "52c78078719bb17-1ee8b379c33773f",
+      "title": "Teardown metrics experience tests data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/global.teardown.ts",
+        "line": 7,
+        "column": 1
       }
     }
   ]

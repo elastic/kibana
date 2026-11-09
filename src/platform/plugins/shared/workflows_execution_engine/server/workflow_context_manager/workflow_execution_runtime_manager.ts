@@ -16,15 +16,22 @@ import {
   isEventDrivenWorkflowTriggerSource,
   isTerminalStatus,
 } from '@kbn/workflows';
-import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
+import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
-import { getAlertingRuleId, getTraceId, setCurrentTransaction } from './apm_internal';
+import {
+  getActiveOtelSpanId,
+  getActiveOtelTraceId,
+  getAlertingRuleId,
+  getTraceId,
+  setCurrentTransaction,
+} from './apm_internal';
 import { buildWorkflowContext } from './build_workflow_context';
 import type { StepExecutionRuntimeFactory } from './step_execution_runtime_factory';
 import type { StepIoService } from './step_io_service';
 import type { ContextDependencies } from './types';
 import type { WorkflowExecutionCursor } from './workflow_execution_cursor';
 import type { WorkflowExecutionState } from './workflow_execution_state';
+import type { WorkflowRuntimeGraph } from './workflow_runtime_graph';
 import type { ScopeData } from './workflow_scope_stack';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
@@ -34,7 +41,7 @@ interface WorkflowExecutionRuntimeManagerInit {
   workflowExecutionState: WorkflowExecutionState;
   stepIoService: StepIoService;
   workflowExecution: EsWorkflowExecution;
-  workflowExecutionGraph: WorkflowGraph;
+  workflowExecutionGraph: WorkflowRuntimeGraph;
   workflowExecutionCursor: WorkflowExecutionCursor;
   workflowLogger: IWorkflowEventLogger;
   coreStart?: CoreStart;
@@ -70,11 +77,11 @@ export class WorkflowExecutionRuntimeManager {
   private stepIoService: StepIoService;
   private entryTransactionId?: string;
   private workflowTransaction?: agent.Transaction; // APM transaction instance
-  private workflowGraph: WorkflowGraph;
+  private workflowGraph: WorkflowRuntimeGraph;
   private coreStart?: CoreStart;
   private dependencies?: ContextDependencies;
   private telemetryClient?: WorkflowExecutionTelemetryClient;
-  private telemetryReported: boolean = false;
+  private terminalStateFinalized: boolean = false;
 
   constructor(workflowExecutionRuntimeManagerInit: WorkflowExecutionRuntimeManagerInit) {
     this.workflowGraph = workflowExecutionRuntimeManagerInit.workflowExecutionGraph;
@@ -129,6 +136,10 @@ export class WorkflowExecutionRuntimeManager {
 
   public navigateToAfterNode(nodeId: string): void {
     this.workflowExecutionCursor.navigateToAfterNode(nodeId);
+  }
+
+  public navigateToSynthetic(params: { stepId: string; stepType: string }): void {
+    this.workflowExecutionCursor.navigateToSynthetic(params);
   }
 
   public getCurrentNodeScope(): StackFrame[] {
@@ -340,8 +351,9 @@ export class WorkflowExecutionRuntimeManager {
           this.workflowLogger?.logDebug('Workflow transaction ID stored in workflow execution');
         }
 
-        // Capture trace ID from the workflow transaction
-        const realTraceId = getTraceId(workflowTransaction);
+        // Capture trace ID from the workflow transaction, falling back to the
+        // active OTEL span context under EDOT-only instrumentation.
+        const realTraceId = getTraceId(workflowTransaction) ?? getActiveOtelTraceId();
 
         if (realTraceId) {
           this.workflowLogger?.logDebug('Captured APM trace ID from workflow transaction', {
@@ -366,7 +378,7 @@ export class WorkflowExecutionRuntimeManager {
         };
 
         const { triggeredBy } = this.workflowExecution;
-        if (isEventDrivenWorkflowTriggerSource(triggeredBy)) {
+        if (triggeredBy && isEventDrivenWorkflowTriggerSource(this.workflowExecution)) {
           taskManagerLabels.event_trigger_id = triggeredBy;
         }
 
@@ -386,8 +398,9 @@ export class WorkflowExecutionRuntimeManager {
           this.workflowLogger?.logDebug('Task transaction ID stored in workflow execution');
         }
 
-        // Capture trace ID from the task transaction
-        const realTraceId = getTraceId(existingTransaction);
+        // Capture trace ID from the task transaction, falling back to the
+        // active OTEL span context under EDOT-only instrumentation.
+        const realTraceId = getTraceId(existingTransaction) ?? getActiveOtelTraceId();
 
         if (realTraceId) {
           this.workflowLogger?.logDebug('Captured APM trace ID from task transaction', {
@@ -403,10 +416,49 @@ export class WorkflowExecutionRuntimeManager {
       // It will be overridden if the workflow fails
       existingTransaction.outcome = 'success';
     } else {
-      // Fallback if no task transaction exists - proceed without tracing
-      this.workflowLogger?.logWarn(
-        'No active Task Manager transaction found, proceeding without APM tracing'
-      );
+      // No APM transaction. Under EDOT-only instrumentation this is the normal path rather
+      // than an error: spans are exported by OTEL, there is just no APM agent to read them
+      // from. Read the trace id from the active OTEL span context so the execution stays
+      // linkable to its own trace.
+      const otelTraceId = getActiveOtelTraceId();
+
+      if (otelTraceId) {
+        this.workflowLogger?.logDebug('Captured OTEL trace ID (no APM transaction)', {
+          trace: { trace_id: otelTraceId },
+        });
+        this.workflowExecutionState.updateWorkflowExecution({
+          traceId: otelTraceId,
+          entryTransactionId: getActiveOtelSpanId(),
+        });
+
+        // Mirror the APM branches: addTransactionLabels also writes to the
+        // active OTEL span, keeping trace -> execution lookup searchable.
+        // Under EDOT-only instrumentation there is no APM transaction, so
+        // alert-triggered executions land here too; attribute them via the
+        // execution's `triggeredBy` instead of mislabeling them as task manager.
+        const { triggeredBy } = this.workflowExecution;
+        const isTriggeredByAlerting = triggeredBy === 'alert';
+
+        const otelLabels: Record<string, string | number | boolean> = {
+          workflow_execution_id: this.workflowExecution.id,
+          workflow_id: this.workflowExecution.workflowId,
+          service_name: 'kibana',
+          transaction_hierarchy: isTriggeredByAlerting
+            ? 'alerting->workflow->steps'
+            : 'task->steps',
+          triggered_by: isTriggeredByAlerting ? 'alerting' : 'task_manager',
+        };
+
+        if (triggeredBy && isEventDrivenWorkflowTriggerSource(this.workflowExecution)) {
+          otelLabels.event_trigger_id = triggeredBy;
+        }
+
+        addTransactionLabels(otelLabels);
+      } else {
+        this.workflowLogger?.logWarn(
+          'No active Task Manager transaction or OTEL span found, proceeding without tracing'
+        );
+      }
     }
 
     const updatedWorkflowExecution: Partial<EsWorkflowExecution> = {
@@ -463,17 +515,30 @@ export class WorkflowExecutionRuntimeManager {
         this.workflowExecutionCursor.error
       ).toSerializableObject();
     } else if (!this.workflowExecutionCursor.currentNode) {
-      workflowExecutionUpdate.status = ExecutionStatus.COMPLETED;
+      // Parked waits must stay WAITING*; COMPLETED here races TM resume.
+      const isParkedWait =
+        workflowExecution.status === ExecutionStatus.WAITING ||
+        workflowExecution.status === ExecutionStatus.WAITING_FOR_INPUT ||
+        workflowExecution.status === ExecutionStatus.WAITING_FOR_CHILD;
+      if (!isParkedWait) {
+        workflowExecutionUpdate.status = ExecutionStatus.COMPLETED;
+      }
     }
 
+    // Terminal finalization runs once per run; later saves must not re-stamp finishedAt/duration,
+    // re-log completion or re-report telemetry.
     if (
-      (workflowExecutionUpdate.status && isTerminalStatus(workflowExecutionUpdate.status)) ||
-      isTerminalStatus(workflowExecution.status)
+      !this.terminalStateFinalized &&
+      ((workflowExecutionUpdate.status && isTerminalStatus(workflowExecutionUpdate.status)) ||
+        isTerminalStatus(workflowExecution.status))
     ) {
       const startedAt = new Date(workflowExecution.startedAt);
       const finishDate = new Date();
       workflowExecutionUpdate.finishedAt = finishDate.toISOString();
       workflowExecutionUpdate.duration = finishDate.getTime() - startedAt.getTime();
+      // Persist the stored context, not the Liquid render alias. Minting a
+      // typeless `event` here makes the execution tree label the trigger
+      // `document` instead of `manual`.
       workflowExecutionUpdate.context = buildWorkflowContext(
         this.workflowExecution,
         this.coreStart,
@@ -504,8 +569,8 @@ export class WorkflowExecutionRuntimeManager {
         }
       }
 
-      // Report telemetry for terminal status (only once)
       this.reportTelemetryIfTerminal(workflowExecution, workflowExecutionUpdate);
+      this.terminalStateFinalized = true;
     }
 
     this.workflowExecutionState.updateWorkflowExecution(workflowExecutionUpdate);
@@ -534,22 +599,23 @@ export class WorkflowExecutionRuntimeManager {
 
   /**
    * Reports telemetry for workflow execution when it reaches a terminal status.
-   * Only reports once per execution to avoid duplicate events.
+   * Called only from the once-per-run terminal block in saveState.
    */
   private reportTelemetryIfTerminal(
     workflowExecution: EsWorkflowExecution,
     workflowExecutionUpdate: Partial<EsWorkflowExecution>
   ): void {
     const finalStatus = workflowExecutionUpdate.status || workflowExecution.status;
-    if (!this.telemetryClient || this.telemetryReported || !isTerminalStatus(finalStatus)) {
+    if (!this.telemetryClient || !isTerminalStatus(finalStatus)) {
       return;
     }
 
-    this.telemetryReported = true;
     const stepExecutions = this.workflowExecutionState.getAllStepExecutions();
     const finalWorkflowExecution = {
       ...workflowExecution,
       ...workflowExecutionUpdate,
+      // The update's context is rebuilt without the raw parent* keys, so keep the stored ones.
+      context: { ...workflowExecution.context, ...workflowExecutionUpdate.context },
       status: finalStatus,
     } as EsWorkflowExecution;
 

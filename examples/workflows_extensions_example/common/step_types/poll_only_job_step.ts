@@ -55,7 +55,7 @@ export const pollOnlyJobStepCommonDefinition: CommonStepDefinition<
   documentation: {
     details: i18n.translate('workflowsExtensionsExample.pollOnlyJobStep.documentation.details', {
       defaultMessage:
-        'Demonstrates the **poll-only** pattern: no `start` — the job id is already in `input` (from a connector, trigger payload, or an earlier step). `poll` runs immediately and on `policy` until `{ output }`. In production, each poll would call something like `GET /_transform/{jobId}/_stats` or your vendor export status API. Contrast with `example.durablePollDemo`, which uses `start` + `poll` when this step must submit work itself. Authoring guide: `src/platform/plugins/shared/workflows_extensions/dev_docs/STEPS.md` — **Poll-only variant**.',
+        "Demonstrates the **poll-only** pattern: no `start` — the job id is already in `input` (from a connector, trigger payload, or an earlier step). `poll` runs immediately and on `policy` until `'{' output '}'`. In production, each poll would call something like `GET /_transform/'{jobId}'/_stats` or your vendor export status API. Contrast with `example.durablePollDemo`, which uses `start` + `poll` when this step must submit work itself. Authoring guide: `src/platform/plugins/shared/workflows_extensions/dev_docs/STEPS.md` — **Poll-only variant**.",
     }),
     examples: [
       `## Wait for transform started elsewhere

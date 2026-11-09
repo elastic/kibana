@@ -156,7 +156,7 @@ describe('response processing', () => {
 
     http.get.mockRejectedValue(new Error());
 
-    await expect(loadStatus({ http, notifications })).rejects.toThrowError();
+    await expect(loadStatus({ http, notifications })).rejects.toThrow();
     expect(notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
   });
 
@@ -168,7 +168,7 @@ describe('response processing', () => {
     http.get.mockReset();
     http.get.mockRejectedValue(error);
 
-    await expect(loadStatus({ http, notifications })).rejects.toThrowError();
+    await expect(loadStatus({ http, notifications })).rejects.toThrow();
     expect(notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
   });
 
@@ -192,7 +192,7 @@ describe('response processing', () => {
     http.get.mockReset();
     http.get.mockRejectedValue(error);
 
-    await expect(loadStatus({ http, notifications })).rejects.toThrowError();
+    await expect(loadStatus({ http, notifications })).rejects.toThrow();
     expect(notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
   });
 

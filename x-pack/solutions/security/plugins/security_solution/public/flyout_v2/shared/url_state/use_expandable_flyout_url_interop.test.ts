@@ -7,10 +7,8 @@
 
 import { act, renderHook } from '@testing-library/react';
 import { encode } from '@kbn/rison';
-import {
-  translateLegacyStateToDescriptors,
-  useLegacyFlyoutUrlInterop,
-} from './use_expandable_flyout_url_interop';
+import { translateLegacyStateToDescriptors } from '../../../../common/flyout_v2';
+import { useLegacyFlyoutUrlInterop } from './use_expandable_flyout_url_interop';
 import { useFlyoutApi } from '../../use_flyout_api';
 import { createFlyoutApiMock } from '../../use_flyout_api.mock';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
@@ -342,7 +340,7 @@ describe('translateLegacyStateToDescriptors', () => {
         left: { id: 'attack-details-left', path: { tab: 'insights', subTab: 'entity' } },
       });
       expect(result).toEqual([
-        { kind: 'attackEntities', attackId: 'atk-2', indexName: 'idx', alertIds: [] },
+        { kind: 'attackEntities', attackId: 'atk-2', indexName: 'idx' },
         { kind: 'attack', attackId: 'atk-2', indexName: 'idx' },
       ]);
     });
@@ -353,7 +351,7 @@ describe('translateLegacyStateToDescriptors', () => {
         left: { id: 'attack-details-left', path: { tab: 'insights', subTab: 'correlation' } },
       });
       expect(result).toEqual([
-        { kind: 'attackCorrelations', attackId: 'atk-3', indexName: 'idx', alertIds: [] },
+        { kind: 'attackCorrelations', attackId: 'atk-3', indexName: 'idx' },
         { kind: 'attack', attackId: 'atk-3', indexName: 'idx' },
       ]);
     });

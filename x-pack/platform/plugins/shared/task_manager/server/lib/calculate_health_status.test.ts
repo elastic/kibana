@@ -21,6 +21,9 @@ const config = {
     active_nodes_lookback: '30s',
     interval: 10000,
   },
+  execution_control: {
+    poll_interval: 5000,
+  },
   kibanas_per_partition: 2,
   enabled: true,
   index: 'foo',
@@ -65,6 +68,9 @@ const config = {
   auto_calculate_default_ech_capacity: false,
   api_key_type: ApiKeyType.ES,
   grant_uiam_api_keys: false,
+  claim_nudge: {
+    enabled: true,
+  },
 };
 
 const getStatsWithTimestamp = ({
@@ -95,6 +101,10 @@ const getStatsWithTimestamp = ({
             },
           },
           poll_interval: 3000,
+          execution_control: {
+            paused: false,
+            paused_task_types: [],
+          },
         },
         status: HealthStatus.OK,
       },
@@ -367,6 +377,55 @@ describe('calculateHealthStatus', () => {
     ).toEqual({
       status: HealthStatus.Error,
       reason: 'setting HealthStatus.Error because of expired hot timestamps',
+    });
+  });
+
+  describe('when Elasticsearch-driven backpressure is active', () => {
+    const backpressureReason = expect.stringContaining('Elasticsearch-driven backpressure');
+
+    test('should return ok if hot timestamps are expired', () => {
+      expect(
+        calculateHealthStatus(
+          getStatsWithTimestamp({ hotTimestamp: '2023-05-08T12:59:57.000Z' }),
+          config,
+          true,
+          logger,
+          true
+        )
+      ).toEqual({ status: HealthStatus.OK, reason: backpressureReason });
+    });
+
+    test('should return ok if cold timestamps are expired', () => {
+      expect(
+        calculateHealthStatus(
+          getStatsWithTimestamp({ timestamp: '2023-05-08T12:59:57.000Z' }),
+          config,
+          true,
+          logger,
+          true
+        )
+      ).toEqual({ status: HealthStatus.OK, reason: backpressureReason });
+    });
+
+    test('should return ok with the backpressure reason if stats are fresh', () => {
+      expect(calculateHealthStatus(getStatsWithTimestamp(), config, true, logger, true)).toEqual({
+        status: HealthStatus.OK,
+        reason: backpressureReason,
+      });
+    });
+
+    test('should still return error if any stat has status error', () => {
+      const stats = set(getStatsWithTimestamp(), 'stats.runtime.status', HealthStatus.Error);
+      expect(calculateHealthStatus(stats, config, true, logger, true).status).toBe(
+        HealthStatus.Error
+      );
+    });
+
+    test('should still return warning if any stat has status warning', () => {
+      const stats = set(getStatsWithTimestamp(), 'stats.runtime.status', HealthStatus.Warning);
+      expect(calculateHealthStatus(stats, config, true, logger, true).status).toBe(
+        HealthStatus.Warning
+      );
     });
   });
 });

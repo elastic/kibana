@@ -12,7 +12,7 @@ import { renderAlertNarrativeStepCommonDefinition } from '../../../../common/wor
 export const renderAlertNarrativeStepDefinition: PublicStepDefinition = {
   ...renderAlertNarrativeStepCommonDefinition,
   icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/timeslider')
+    import('@elastic/eui/es/components/icon/assets/clock_control')
       .then(({ icon }) => ({ default: icon }))
       .catch(() =>
         import('@elastic/eui/es/components/icon/assets/documents').then(({ icon }) => ({

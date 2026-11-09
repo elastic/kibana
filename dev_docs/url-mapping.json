@@ -17,7 +17,7 @@
   "/kibana-dev-docs/key-concepts/anatomy-of-a-plugin": "key-concepts/platform-architecture/anatomy-of-a-plugin",
   "/kibana-dev-docs/key-concepts/security-api-authorization": "key-concepts/security/api-authorization",
   "/kibana-dev-docs/key-concepts/audit-logging": "key-concepts/security/audit-logging",
-  "/kibana-dev-docs/key-concepts/building-blocks": "key-concepts/ui/building-blocks",
+  "/kibana-dev-docs/key-concepts/building-blocks": "key-concepts",
   "/kibana-dev-docs/key-concepts/data-view-intro": "key-concepts/data/data-views",
   "/kibana-dev-docs/key-concepts/embeddables": "key-concepts/ui/embeddables",
   "/kibana-dev-docs/key-concepts/encrypted-saved-objects-intro": "key-concepts/security/encrypted-saved-objects",

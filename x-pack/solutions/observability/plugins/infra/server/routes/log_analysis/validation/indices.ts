@@ -81,7 +81,7 @@ export const initValidateLogAnalysisIndicesRoute = ({ framework }: InfraBackendL
       },
       async (requestContext, request, response) => {
         const {
-          data: { fields, indices, runtimeMappings },
+          data: { fields, indices, runtimeMappings, projectRouting },
         } = request.body;
 
         // Deduplicate the user-provided indices and fields to avoid redundant queries.
@@ -115,6 +115,7 @@ export const initValidateLogAnalysisIndicesRoute = ({ framework }: InfraBackendL
               ignore_unavailable: true,
               index,
               runtime_mappings: runtimeMappings,
+              ...(projectRouting !== undefined ? { project_routing: projectRouting } : {}),
             });
 
             if (fieldCaps.indices.length === 0) {

@@ -16,9 +16,9 @@ import { waitForPluginInitialized, EsIndexDataProvider } from '../utils';
 
 const FINDINGS_INDEX = 'security_solution-cloud_security_posture.misconfiguration_latest';
 
-// Concrete entity-store latest index (matches the `.entities.v2.latest.security_*` pattern
+// Concrete entity-store latest index (matches the `.entities.v2.latest.*` pattern
 // queried by the asset inventory telemetry collectors).
-const ENTITY_STORE_LATEST_INDEX = '.entities.v2.latest.security_default-00001';
+const ENTITY_STORE_LATEST_INDEX = '.entities.v2.latest.default-00001';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {

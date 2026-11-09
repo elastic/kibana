@@ -6,12 +6,15 @@
  */
 
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import '@kbn/react-query/mock';
 import { QueryClient, QueryClientProvider, type UseQueryResult } from '@kbn/react-query';
 import * as ReactQuery from '@kbn/react-query';
 
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+
+import { getInitialTransformCapabilities } from '../../../../../../common/types/capabilities';
+import { useAppDependencies } from '../../../../app_dependencies';
 
 import { TransformList } from './transform_list';
 
@@ -27,29 +30,53 @@ const useQueryMock = jest.spyOn(ReactQuery, 'useQuery').mockImplementation((quer
 const queryClient = new QueryClient();
 
 jest.mock('../../../../app_dependencies');
+jest.mock('../../../../hooks/use_get_transform_cps_enabled', () => ({
+  useGetTransformCpsEnabled: () => ({ data: true }),
+}));
+
+const renderEmptyList = () =>
+  render(
+    <IntlProvider locale="en">
+      <QueryClientProvider client={queryClient}>
+        <TransformList
+          isLoading={false}
+          onCreateTransform={jest.fn()}
+          transformNodes={1}
+          transforms={[]}
+          transformsLoading={false}
+          transformsStatsLoading={false}
+          pageState={{ pageSize: 10, pageIndex: 0, sortField: 'id', sortDirection: 'asc' }}
+          updatePageState={jest.fn()}
+        />
+      </QueryClientProvider>
+    </IntlProvider>
+  );
 
 describe('Transform: Transform List <TransformList />', () => {
+  afterEach(() => {
+    Object.assign(useAppDependencies().application.capabilities, { transform: undefined });
+  });
+
   test('Minimal initialization', async () => {
-    const { container } = render(
-      <IntlProvider locale="en">
-        <QueryClientProvider client={queryClient}>
-          <TransformList
-            isLoading={false}
-            onCreateTransform={jest.fn()}
-            transformNodes={1}
-            transforms={[]}
-            transformsLoading={false}
-            transformsStatsLoading={false}
-            pageState={{ pageSize: 10, pageIndex: 0, sortField: 'id', sortDirection: 'asc' }}
-            updatePageState={jest.fn()}
-          />
-        </QueryClientProvider>
-      </IntlProvider>
-    );
+    const { container } = renderEmptyList();
 
     await waitFor(() => {
       expect(useQueryMock).toHaveBeenCalledTimes(5);
       expect(container.textContent).toContain('Create your first transform');
     });
+  });
+
+  test.each([
+    ['enables', true],
+    ['disables', false],
+  ])('%s the empty-state create button by transform capabilities', async (_, canManage) => {
+    Object.assign(useAppDependencies().application.capabilities, {
+      transform: getInitialTransformCapabilities(canManage),
+    });
+
+    renderEmptyList();
+
+    expect(await screen.findByTestId('transformNoTransformsFound')).toBeInTheDocument();
+    expect(screen.getByTestId('transformButtonCreate')).toHaveProperty('disabled', !canManage);
   });
 });

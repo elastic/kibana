@@ -5,17 +5,17 @@ set -euo pipefail
 #
 # Usage:
 #   ./scripts/create_models_labels.sh models:all \
-#     models:llm-gateway/gpt-5.1 \
-#     models:llm-gateway/gpt-5.1-chat
+#     models:openrouter/openai-gpt-5.4 \
+#     models:openrouter/anthropic-claude-sonnet-4.6
 #
 # Or pass raw model group names (it will prefix `models:` automatically):
-#   ./scripts/create_models_labels.sh llm-gateway/gpt-5.1 llm-gateway/gpt-5.1-chat ...
+#   ./scripts/create_models_labels.sh openrouter/openai-gpt-5.4 openrouter/anthropic-claude-sonnet-4.6 ...
 #
 # Generate labels from discovery artifacts:
 #   ./scripts/create_models_labels.sh --repo elastic/kibana \
-#     --from-litellm-connectors-json /tmp/litellm_connectors.json \
+#     --from-openrouter-connectors-json /tmp/openrouter_connectors.json \
 #     --from-eis-models-json target/eis_models.json \
-#     --judge litellm-llm-gateway-gpt-4o
+#     --judge openrouter-openai-gpt-5-4
 
 usage() {
   cat >&2 <<'EOF'
@@ -23,26 +23,28 @@ Usage:
   ./scripts/create_models_labels.sh [--repo <owner/repo>] [--judge <connector-id> ...] [labels...]
 
 Options:
-  --update-all-labels                   Update all model + judge labels (LiteLLM + EIS) using default discovery sources
+  --update-all-labels                   Update all model + judge labels (OpenRouter + EIS) using default discovery sources
   --repo <owner/repo>                   Target repo for gh commands (default: current)
-  --from-litellm-connectors-json <path> Create labels from a LiteLLM connectors JSON map
-  --from-litellm-vault-config [path]    Create LiteLLM model labels via LiteLLM discovery using kbn-evals vault config
+  --from-openrouter-connectors-json <path> Create labels from an OpenRouter connectors JSON map
+  --from-openrouter-vault-config [path] Create OpenRouter model labels via OpenRouter discovery using kbn-evals vault config
                                       (default: x-pack/platform/packages/shared/kbn-evals/scripts/vault/config.json)
   --from-eis-models-json [path]         Create labels from target/eis_models.json (default: target/eis_models.json)
   --judge-from-eis-models-json [path]   Create judge labels for all EIS models in eis_models.json (as models:judge:eis/<modelId>)
                                       (default: target/eis_models.json)
-  --judge-from-litellm-vault-config [path]
-                                      Create judge labels for all LiteLLM models via LiteLLM discovery using kbn-evals vault config
-                                      (as models:judge:<model-group>, e.g. models:judge:llm-gateway/gpt-5.1)
+  --judge-from-openrouter-vault-config [path]
+                                      Create judge labels for all OpenRouter models via OpenRouter discovery using kbn-evals vault config
+                                      (as models:judge:<model-group>, e.g. models:judge:openrouter/openai-gpt-5.4)
                                       (default: x-pack/platform/packages/shared/kbn-evals/scripts/vault/config.json)
   --judge <connector-id>                Create models:judge:<connector-id> (repeatable)
   --prune                                Mark stale models:* labels as deprecated (renamed to "deprecated:<name>")
+  --dry-run                             Print labels that would be created/updated; do not call gh
   -h, --help                            Show help
 
 Notes:
   - You can pass raw model groups (script will prefix models: automatically).
   - EIS model labels are created as: models:eis/<modelId>
   - Use --prune with discovery flags to deprecate labels for models no longer available.
+  - --dry-run prints the labels that would be written and does not call gh (including --prune).
 EOF
 }
 
@@ -52,13 +54,14 @@ DESC_PREFIX="${MODELS_LABEL_DESCRIPTION_PREFIX:-Run LLM evals against model: }"
 JUDGE_DESC_PREFIX="${MODELS_JUDGE_LABEL_DESCRIPTION_PREFIX:-Override LLM-as-a-judge connector for evals: }"
 
 REPO=""
-FROM_LITELLM_CONNECTORS_JSON=""
-FROM_LITELLM_VAULT_CONFIG=""
+FROM_OPENROUTER_CONNECTORS_JSON=""
+FROM_OPENROUTER_VAULT_CONFIG=""
 FROM_EIS_MODELS_JSON=""
 JUDGE_FROM_EIS_MODELS_JSON=""
-JUDGE_FROM_LITELLM_VAULT_CONFIG=""
+JUDGE_FROM_OPENROUTER_VAULT_CONFIG=""
 UPDATE_ALL_LABELS="false"
 PRUNE="false"
+DRY_RUN="false"
 declare -a JUDGE_CONNECTOR_IDS=()
 declare -a POSITIONAL=()
 
@@ -67,11 +70,6 @@ CREATED_COUNT=0
 UPDATED_COUNT=0
 DEPRECATED_COUNT=0
 SKIPPED_COUNT=0
-
-if ! command -v gh >/dev/null 2>&1; then
-  echo "Error: 'gh' CLI is required." >&2
-  exit 1
-fi
 
 if ! command -v node >/dev/null 2>&1; then
   echo "Error: 'node' is required." >&2
@@ -88,21 +86,25 @@ while [[ $# -gt 0 ]]; do
       PRUNE="true"
       shift 1
       ;;
+    --dry-run)
+      DRY_RUN="true"
+      shift 1
+      ;;
     --repo)
       REPO="${2:-}"
       shift 2
       ;;
-    --from-litellm-connectors-json)
-      FROM_LITELLM_CONNECTORS_JSON="${2:-}"
+    --from-openrouter-connectors-json)
+      FROM_OPENROUTER_CONNECTORS_JSON="${2:-}"
       shift 2
       ;;
-    --from-litellm-vault-config)
+    --from-openrouter-vault-config)
       # Optional path argument. If the next token is absent or looks like another flag, use default.
       if [[ -n "${2:-}" && "${2:-}" != --* ]]; then
-        FROM_LITELLM_VAULT_CONFIG="${2}"
+        FROM_OPENROUTER_VAULT_CONFIG="${2}"
         shift 2
       else
-        FROM_LITELLM_VAULT_CONFIG="x-pack/platform/packages/shared/kbn-evals/scripts/vault/config.json"
+        FROM_OPENROUTER_VAULT_CONFIG="x-pack/platform/packages/shared/kbn-evals/scripts/vault/config.json"
         shift 1
       fi
       ;;
@@ -130,13 +132,13 @@ while [[ $# -gt 0 ]]; do
         shift 1
       fi
       ;;
-    --judge-from-litellm-vault-config)
+    --judge-from-openrouter-vault-config)
       # Optional path argument. If the next token is absent or looks like another flag, use default.
       if [[ -n "${2:-}" && "${2:-}" != --* ]]; then
-        JUDGE_FROM_LITELLM_VAULT_CONFIG="${2}"
+        JUDGE_FROM_OPENROUTER_VAULT_CONFIG="${2}"
         shift 2
       else
-        JUDGE_FROM_LITELLM_VAULT_CONFIG="x-pack/platform/packages/shared/kbn-evals/scripts/vault/config.json"
+        JUDGE_FROM_OPENROUTER_VAULT_CONFIG="x-pack/platform/packages/shared/kbn-evals/scripts/vault/config.json"
         shift 1
       fi
       ;;
@@ -156,10 +158,15 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+if [[ "${DRY_RUN}" != "true" ]] && ! command -v gh >/dev/null 2>&1; then
+  echo "Error: 'gh' CLI is required (or pass --dry-run)." >&2
+  exit 1
+fi
+
 if [[ "${UPDATE_ALL_LABELS}" == "true" ]]; then
-  # LiteLLM (from vault config)
-  [[ -z "${FROM_LITELLM_VAULT_CONFIG}" ]] && FROM_LITELLM_VAULT_CONFIG="x-pack/platform/packages/shared/kbn-evals/scripts/vault/config.json"
-  [[ -z "${JUDGE_FROM_LITELLM_VAULT_CONFIG}" ]] && JUDGE_FROM_LITELLM_VAULT_CONFIG="x-pack/platform/packages/shared/kbn-evals/scripts/vault/config.json"
+  # OpenRouter (from vault config)
+  [[ -z "${FROM_OPENROUTER_VAULT_CONFIG}" ]] && FROM_OPENROUTER_VAULT_CONFIG="x-pack/platform/packages/shared/kbn-evals/scripts/vault/config.json"
+  [[ -z "${JUDGE_FROM_OPENROUTER_VAULT_CONFIG}" ]] && JUDGE_FROM_OPENROUTER_VAULT_CONFIG="x-pack/platform/packages/shared/kbn-evals/scripts/vault/config.json"
 
   # EIS (from discovery artifact)
   [[ -z "${FROM_EIS_MODELS_JSON}" ]] && FROM_EIS_MODELS_JSON="target/eis_models.json"
@@ -173,7 +180,7 @@ fi
 
 # When --prune is active, track all labels created/updated so we can deprecate stale ones.
 CREATED_LABELS_FILE=""
-if [[ "${PRUNE}" == "true" ]]; then
+if [[ "${PRUNE}" == "true" && "${DRY_RUN}" != "true" ]]; then
   CREATED_LABELS_FILE="$(mktemp)"
   trap 'rm -f "${CREATED_LABELS_FILE:-}"' EXIT
 fi
@@ -192,6 +199,12 @@ create_or_update_label() {
   if [[ "${#name}" -gt 50 ]]; then
     echo "skipped: $name (${#name} chars exceeds GitHub's 50-char limit)" >&2
     SKIPPED_COUNT=$((SKIPPED_COUNT + 1))
+    return 0
+  fi
+
+  if [[ "${DRY_RUN}" == "true" ]]; then
+    echo "would create/update: $name"
+    CREATED_COUNT=$((CREATED_COUNT + 1))
     return 0
   fi
 
@@ -215,7 +228,7 @@ create_or_update_label() {
 }
 
 HAS_INPUTS="false"
-if [[ -n "${FROM_LITELLM_CONNECTORS_JSON:-}" ]] || [[ -n "${FROM_LITELLM_VAULT_CONFIG:-}" ]] || [[ -n "${FROM_EIS_MODELS_JSON:-}" ]] || [[ -n "${JUDGE_FROM_EIS_MODELS_JSON:-}" ]] || [[ -n "${JUDGE_FROM_LITELLM_VAULT_CONFIG:-}" ]]; then
+if [[ -n "${FROM_OPENROUTER_CONNECTORS_JSON:-}" ]] || [[ -n "${FROM_OPENROUTER_VAULT_CONFIG:-}" ]] || [[ -n "${FROM_EIS_MODELS_JSON:-}" ]] || [[ -n "${JUDGE_FROM_EIS_MODELS_JSON:-}" ]] || [[ -n "${JUDGE_FROM_OPENROUTER_VAULT_CONFIG:-}" ]]; then
   HAS_INPUTS="true"
 fi
 if [[ "${#JUDGE_CONNECTOR_IDS[@]}" -gt 0 ]] || [[ "${#POSITIONAL[@]}" -gt 0 ]]; then
@@ -231,7 +244,7 @@ fi
 # Keep in sync with MODEL_GROUP_ALIASES in .buildkite/pipelines/evals/eval_pipeline.ts.
 create_or_update_label "models:weekly-eis-models" "Run evals against the weekly EIS model set (see eval_pipeline.ts)" "$MODELS_COLOR"
 
-generate_litellm_connectors_json_from_vault_config() {
+generate_openrouter_connectors_json_from_vault_config() {
   local cfg_path="$1"
 
   if [[ ! -f "${cfg_path}" ]]; then
@@ -241,45 +254,38 @@ generate_litellm_connectors_json_from_vault_config() {
 
   # Read required fields from the config using Node (no jq dependency).
   # Print them as tab-separated values to avoid re-parsing JSON multiple times in bash.
-  local litellm_tsv
-  litellm_tsv="$(
+  local openrouter_tsv
+  openrouter_tsv="$(
     node - <<'NODE' "${cfg_path}"
 const { readFileSync } = require('fs');
 const { resolve } = require('path');
 const cfgPath = process.argv[2];
 const cfg = JSON.parse(readFileSync(resolve(cfgPath), 'utf8'));
-const litellm = cfg && cfg.litellm ? cfg.litellm : {};
-const baseUrl = litellm.baseUrl || '';
-const teamId = litellm.teamId || '';
-const virtualKey = litellm.virtualKey || '';
-process.stdout.write([baseUrl, teamId, virtualKey].join('\t'));
+const openrouter = cfg && cfg.openrouter ? cfg.openrouter : {};
+const baseUrl = openrouter.baseUrl || '';
+const apiKey = openrouter.apiKey || '';
+process.stdout.write([baseUrl, apiKey].join('\t'));
 NODE
   )"
 
-  local base_url team_id virtual_key
-  IFS=$'\t' read -r base_url team_id virtual_key <<<"${litellm_tsv}"
+  local base_url api_key
+  IFS=$'\t' read -r base_url api_key <<<"${openrouter_tsv}"
 
-  if [[ -z "${base_url}" || -z "${virtual_key}" ]]; then
-    echo "Error: missing litellm.baseUrl or litellm.virtualKey in ${cfg_path}" >&2
+  if [[ -z "${base_url}" || -z "${api_key}" ]]; then
+    echo "Error: missing openrouter.baseUrl or openrouter.apiKey in ${cfg_path}" >&2
     exit 1
   fi
 
   # Do not echo the key. Pass it directly to the generator script.
-  local team_args=()
-  if [[ -n "${team_id}" ]]; then
-    team_args+=(--team-id "${team_id}")
-  fi
-
-  node x-pack/platform/packages/shared/kbn-evals/scripts/ci/generate_litellm_connectors.js \
+  EVAL_MODEL_GROUPS= node x-pack/platform/packages/shared/kbn-evals/scripts/ci/generate_openrouter_connectors.js \
     --base-url "${base_url}" \
-    "${team_args[@]}" \
-    --api-key "${virtual_key}" \
+    --api-key "${api_key}" \
     --format json
 }
 
-if [[ -n "${FROM_LITELLM_CONNECTORS_JSON:-}" ]]; then
-  if [[ ! -f "${FROM_LITELLM_CONNECTORS_JSON}" ]]; then
-    echo "Error: missing file: ${FROM_LITELLM_CONNECTORS_JSON}" >&2
+if [[ -n "${FROM_OPENROUTER_CONNECTORS_JSON:-}" ]]; then
+  if [[ ! -f "${FROM_OPENROUTER_CONNECTORS_JSON}" ]]; then
+    echo "Error: missing file: ${FROM_OPENROUTER_CONNECTORS_JSON}" >&2
     exit 1
   fi
 
@@ -287,7 +293,7 @@ if [[ -n "${FROM_LITELLM_CONNECTORS_JSON:-}" ]]; then
     [[ -z "$model_group" ]] && continue
     create_or_update_label "models:${model_group}" "${DESC_PREFIX}${model_group}" "$MODELS_COLOR"
   done < <(
-    node - <<'NODE' "${FROM_LITELLM_CONNECTORS_JSON}"
+    node - <<'NODE' "${FROM_OPENROUTER_CONNECTORS_JSON}"
 const fs = require('fs');
 const filePath = process.argv[2];
 const raw = fs.readFileSync(filePath, 'utf8');
@@ -295,22 +301,27 @@ const obj = JSON.parse(raw);
 const models = new Set();
 for (const connector of Object.values(obj)) {
   const m = connector && connector.config && connector.config.defaultModel;
-  if (typeof m === 'string' && m.trim()) models.add(m.trim());
+  if (typeof m !== 'string' || !m.trim()) continue;
+  const id = m.trim();
+  models.add(id.startsWith('openrouter/') ? id : 'openrouter/' + id.replaceAll('/', '-'));
 }
 process.stdout.write([...models].sort().join('\n'));
 NODE
   )
 fi
 
-if [[ -n "${FROM_LITELLM_VAULT_CONFIG:-}" ]]; then
-  litellm_model_groups="$(
-    generate_litellm_connectors_json_from_vault_config "${FROM_LITELLM_VAULT_CONFIG}" | node -e "
+if [[ -n "${FROM_OPENROUTER_VAULT_CONFIG:-}" ]]; then
+  echo "--- OpenRouter model discovery (${FROM_OPENROUTER_VAULT_CONFIG})" >&2
+  openrouter_model_groups="$(
+    generate_openrouter_connectors_json_from_vault_config "${FROM_OPENROUTER_VAULT_CONFIG}" | node -e "
 const fs = require('fs');
 const obj = JSON.parse(fs.readFileSync(0, 'utf8'));
 const models = new Set();
 for (const connector of Object.values(obj)) {
   const m = connector && connector.config && connector.config.defaultModel;
-  if (typeof m === 'string' && m.trim()) models.add(m.trim());
+  if (typeof m !== 'string' || !m.trim()) continue;
+  const id = m.trim();
+  models.add(id.startsWith('openrouter/') ? id : 'openrouter/' + id.replaceAll('/', '-'));
 }
 process.stdout.write([...models].sort().join('\\n'));
 "
@@ -319,7 +330,7 @@ process.stdout.write([...models].sort().join('\\n'));
   while IFS= read -r model_group; do
     [[ -z "$model_group" ]] && continue
     create_or_update_label "models:${model_group}" "${DESC_PREFIX}${model_group}" "$MODELS_COLOR"
-  done <<<"${litellm_model_groups}"
+  done <<<"${openrouter_model_groups}"
 fi
 
 if [[ -n "${FROM_EIS_MODELS_JSON:-}" ]]; then
@@ -348,25 +359,18 @@ NODE
   )
 fi
 
-if [[ -n "${JUDGE_FROM_LITELLM_VAULT_CONFIG:-}" ]]; then
-  litellm_connector_ids="$(
-    generate_litellm_connectors_json_from_vault_config "${JUDGE_FROM_LITELLM_VAULT_CONFIG}" | node -e "
+if [[ -n "${JUDGE_FROM_OPENROUTER_VAULT_CONFIG:-}" ]]; then
+  echo "--- OpenRouter judge discovery (${JUDGE_FROM_OPENROUTER_VAULT_CONFIG})" >&2
+  openrouter_connector_ids="$(
+    generate_openrouter_connectors_json_from_vault_config "${JUDGE_FROM_OPENROUTER_VAULT_CONFIG}" | node -e "
 const fs = require('fs');
 const obj = JSON.parse(fs.readFileSync(0, 'utf8'));
 const models = new Set();
 for (const connector of Object.values(obj)) {
-  // Prefer the original model group from the connector name (e.g. 'LiteLLM llm-gateway/gpt-5.1-chat (via ...)').
-  const name = connector && connector.name;
-  if (typeof name === 'string' && name.startsWith('LiteLLM ')) {
-    const raw = name.slice('LiteLLM '.length);
-    const group = raw.replace(/ \\(via .*\\)$/, '').trim();
-    if (group) models.add(group);
-    continue;
-  }
-
-  // Fallback: use the request model (defaultModel).
   const m = connector && connector.config && connector.config.defaultModel;
-  if (typeof m === 'string' && m.trim()) models.add(m.trim());
+  if (typeof m !== 'string' || !m.trim()) continue;
+  const id = m.trim();
+  models.add(id.startsWith('openrouter/') ? id : 'openrouter/' + id.replaceAll('/', '-'));
 }
 process.stdout.write([...models].sort().join('\\n'));
 "
@@ -375,7 +379,7 @@ process.stdout.write([...models].sort().join('\\n'));
   while IFS= read -r connector_id; do
     [[ -z "$connector_id" ]] && continue
     create_or_update_label "models:judge:${connector_id}" "${JUDGE_DESC_PREFIX}${connector_id}" "$JUDGE_COLOR"
-  done <<<"${litellm_connector_ids}"
+  done <<<"${openrouter_connector_ids}"
 fi
 
 if [[ -n "${JUDGE_FROM_EIS_MODELS_JSON:-}" ]]; then
@@ -431,7 +435,10 @@ done
 # --- Deprecation of stale labels ---
 DEPRECATED_COLOR="CCCCCC"
 
-if [[ "${PRUNE}" == "true" && -n "${CREATED_LABELS_FILE:-}" ]]; then
+if [[ "${PRUNE}" == "true" && "${DRY_RUN}" == "true" ]]; then
+  echo ""
+  echo "Skipping --prune (requires GitHub label list/edit; omitted in --dry-run)." >&2
+elif [[ "${PRUNE}" == "true" && -n "${CREATED_LABELS_FILE:-}" ]]; then
   if [[ ! -s "${CREATED_LABELS_FILE}" ]]; then
     echo ""
     echo "Warning: --prune was set but no labels were created/updated; skipping deprecation to avoid marking all labels stale." >&2

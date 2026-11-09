@@ -12,6 +12,7 @@ import { createAppContextStartContractMock } from '../../mocks';
 import { appContextService } from '../../services';
 import { packagePolicyService } from '../../services/package_policy';
 import { installPackage } from '../../services/epm/packages';
+import { PackageBreakingChangesNotAcknowledgedError } from '../../errors';
 
 import { _runBulkUpgradeTask } from './run_bulk_upgrade';
 
@@ -24,6 +25,7 @@ describe('Bulk upgrade task', () => {
     appContextService.start(mockContract);
 
     jest.mocked(installPackage).mockReset();
+    jest.mocked(packagePolicyService.listIds).mockReset();
     jest.mocked(installPackage).mockImplementation(async (params) => {
       if (!('pkgkey' in params)) {
         throw new Error('Invalid call to installPackage');
@@ -62,7 +64,7 @@ describe('Bulk upgrade task', () => {
         request: {} as KibanaRequest,
       });
 
-      expect(installPackage).toBeCalled();
+      expect(installPackage).toHaveBeenCalled();
 
       expect(res).toEqual([{ name: 'test_valid', success: true }]);
     });
@@ -83,7 +85,7 @@ describe('Bulk upgrade task', () => {
         request: {} as KibanaRequest,
       });
 
-      expect(installPackage).toBeCalledTimes(4);
+      expect(installPackage).toHaveBeenCalledTimes(4);
       expect(res).toEqual([
         { name: 'test_valid_1', success: true },
         {
@@ -114,8 +116,59 @@ describe('Bulk upgrade task', () => {
 
       expect(res).toEqual([{ name: 'test_valid', success: true }]);
 
-      expect(installPackage).toBeCalled();
-      expect(packagePolicyService.bulkUpgrade).toBeCalled();
+      expect(installPackage).toHaveBeenCalled();
+      expect(packagePolicyService.bulkUpgrade).toHaveBeenCalled();
+    });
+
+    it('should check breaking changes and pass the acknowledgement to installPackage', async () => {
+      await _runBulkUpgradeTask({
+        signal: new AbortController().signal,
+        logger: loggingSystemMock.createLogger(),
+        taskParams: {
+          type: 'bulk_upgrade',
+          packages: [{ name: 'test_valid' }],
+          acknowledgeBreakingChanges: true,
+        },
+        request: {} as KibanaRequest,
+      });
+
+      expect(installPackage).toHaveBeenCalledWith(
+        expect.objectContaining({ checkBreakingChanges: true, acknowledgeBreakingChanges: true })
+      );
+    });
+
+    it('should not upgrade package policies of a package rejected for breaking changes', async () => {
+      jest.mocked(installPackage).mockResolvedValueOnce({
+        error: new PackageBreakingChangesNotAcknowledgedError(
+          'Upgrading test_breaking includes breaking changes',
+          []
+        ),
+      } as any);
+
+      const res = await _runBulkUpgradeTask({
+        signal: new AbortController().signal,
+        logger: loggingSystemMock.createLogger(),
+        taskParams: {
+          type: 'bulk_upgrade',
+          packages: [{ name: 'test_breaking' }, { name: 'test_valid' }],
+          upgradePackagePolicies: true,
+        },
+        request: {} as KibanaRequest,
+      });
+
+      expect(res).toEqual([
+        {
+          name: 'test_breaking',
+          success: false,
+          error: { message: 'Upgrading test_breaking includes breaking changes' },
+        },
+        { name: 'test_valid', success: true },
+      ]);
+      expect(packagePolicyService.listIds).toHaveBeenCalledTimes(1);
+      expect(packagePolicyService.listIds).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ kuery: expect.stringContaining('test_valid') })
+      );
     });
 
     it('should not continue to upgrade packages when task is cancelled', async () => {
@@ -138,7 +191,7 @@ describe('Bulk upgrade task', () => {
         })
       ).rejects.toThrow(/Task was aborted/);
 
-      expect(installPackage).toBeCalledTimes(0);
+      expect(installPackage).toHaveBeenCalledTimes(0);
     });
   });
 });

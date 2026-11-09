@@ -18,11 +18,11 @@ import { REPORTING_MANAGEMENT_HOME } from '@kbn/reporting-common';
 import { createCsvReport, type CreateCsvReportParams } from '../apis/create_csv_report';
 import { mutationKeys } from '../constants';
 
-const CSV_EXPORT_SUCCESS = i18n.translate('responseOpsAlertsTable.csvExport.successTitle', {
+const CSV_EXPORT_SUCCESS = i18n.translate('xpack.responseOpsAlertsTable.csvExport.successTitle', {
   defaultMessage: 'CSV report queued for generation',
 });
 
-const CSV_EXPORT_ERROR = i18n.translate('responseOpsAlertsTable.csvExport.errorTitle', {
+const CSV_EXPORT_ERROR = i18n.translate('xpack.responseOpsAlertsTable.csvExport.errorTitle', {
   defaultMessage: 'Failed to generate CSV report',
 });
 
@@ -50,13 +50,13 @@ export const useCreateCsvReport = ({
           title: CSV_EXPORT_SUCCESS,
           text: toMountPoint(
             <FormattedMessage
-              id="responseOpsAlertsTable.csvExport.successBody"
+              id="xpack.responseOpsAlertsTable.csvExport.successBody"
               defaultMessage="Track its progress in {link}."
               values={{
                 link: (
                   <EuiLink href={reportingUrl} target="_blank">
                     <FormattedMessage
-                      id="responseOpsAlertsTable.csvExport.reportingLink"
+                      id="xpack.responseOpsAlertsTable.csvExport.reportingLink"
                       defaultMessage="Stack Management > Reporting"
                     />
                   </EuiLink>

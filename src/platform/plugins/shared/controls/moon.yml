@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/controls-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/kibana-presentation'
+  defaultOwner: '@elastic/kibana-dashboards'
 toolchains:
   default: node
 language: typescript
@@ -14,9 +14,10 @@ project:
   title: '@kbn/controls-plugin'
   description: Moon project for @kbn/controls-plugin
   channel: ''
-  owner: '@elastic/kibana-presentation'
+  owner: '@elastic/kibana-dashboards'
   sourceRoot: src/platform/plugins/shared/controls
 dependsOn:
+  - '@kbn/data-source'
   - '@kbn/core'
   - '@kbn/embeddable-plugin'
   - '@kbn/dashboard-plugin'
@@ -37,6 +38,8 @@ dependsOn:
   - '@kbn/esql-types'
   - '@kbn/css-utils'
   - '@kbn/esql-utils'
+  - '@kbn/esql-controls-utils'
+  - '@kbn/esql-browser'
   - '@kbn/search-types'
   - '@kbn/controls-constants'
   - '@kbn/controls-schemas'
@@ -49,7 +52,6 @@ dependsOn:
   - '@kbn/esql'
   - '@kbn/presentation-publishing-schemas'
   - '@kbn/controls-renderer'
-  - '@kbn/field-formats-common'
   - '@kbn/ui-callout'
 tags:
   - plugin
@@ -65,6 +67,4 @@ fileGroups:
     - server/**/*
     - ./jest_setup.ts
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

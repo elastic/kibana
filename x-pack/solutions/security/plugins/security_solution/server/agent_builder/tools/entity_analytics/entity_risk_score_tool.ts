@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
@@ -21,24 +21,26 @@ import { getRiskIndex } from '../../../../common/search_strategy/security_soluti
 import { securityTool } from '../constants';
 import { getAlertsById } from '../get_alerts_by_id';
 
-const entityRiskScoreSchema = z.object({
-  identifierType: z
-    .enum(['host', 'user', 'service', 'generic'])
-    .describe('The type of entity: host, user, service, or generic'),
-  identifier: z
-    .string()
-    .min(1)
-    .describe(
-      'The value that identifies the entity (e.g., hostname, username). Use "*" to get all entities of the specified type, sorted by risk score (highest first).'
-    ),
-  limit: z
-    .number()
-    .int()
-    .min(1)
-    .max(100)
-    .optional()
-    .describe('Maximum number of results to return when using wildcard queries (default: 10)'),
-});
+const entityRiskScoreSchema = lazySchema(() =>
+  z.object({
+    identifierType: z
+      .enum(['host', 'user', 'service', 'generic'])
+      .describe('The type of entity: host, user, service, or generic'),
+    identifier: z
+      .string()
+      .min(1)
+      .describe(
+        'The value that identifies the entity (e.g., hostname, username). Use "*" to get all entities of the specified type, sorted by risk score (highest first).'
+      ),
+    limit: z
+      .number()
+      .int()
+      .min(1)
+      .max(100)
+      .optional()
+      .describe('Maximum number of results to return when using wildcard queries (default: 10)'),
+  })
+);
 
 export const SECURITY_ENTITY_RISK_SCORE_TOOL_ID = securityTool('entity_risk_score');
 
@@ -300,5 +302,12 @@ export const entityRiskScoreTool = (
       }
     },
     tags: ['security', 'entity-risk-score', 'entities'],
+    annotations: {
+      title: 'Get Entity Risk Score',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
   };
 };

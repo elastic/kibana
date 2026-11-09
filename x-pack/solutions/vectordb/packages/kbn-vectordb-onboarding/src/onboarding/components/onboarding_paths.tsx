@@ -25,7 +25,7 @@ export const OnboardingPaths = () => {
       <EuiTitle size="xs">
         <h2>
           {i18n.translate('vectordbOnboarding.pathSelection.sectionHeader', {
-            defaultMessage: 'Follow these guides to add embeddings:',
+            defaultMessage: 'Add embeddings to your database:',
           })}
         </h2>
       </EuiTitle>

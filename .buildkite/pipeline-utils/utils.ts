@@ -7,22 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
-
-const getKibanaDir = (() => {
-  let kibanaDir: string | undefined;
-  return () => {
-    if (!kibanaDir) {
-      kibanaDir = execSync('git rev-parse --show-toplevel', { encoding: 'utf-8' })
-        .toString()
-        .trim();
-    }
-
-    return kibanaDir;
-  };
-})();
+import { getKibanaDir } from './get_kibana_dir.ts';
 
 export interface Version {
   branch: string;

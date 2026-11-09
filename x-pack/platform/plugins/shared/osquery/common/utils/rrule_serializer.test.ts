@@ -108,57 +108,55 @@ describe('serializeRRule', () => {
 
   describe('validation', () => {
     it('throws on invalid frequency', () => {
-      expect(() => serializeRRule({ freq: 999 as unknown as Frequency })).toThrowError(
+      expect(() => serializeRRule({ freq: 999 as unknown as Frequency })).toThrow(
         /Invalid RRULE frequency/
       );
     });
 
     it('throws on non-integer INTERVAL', () => {
-      expect(() => serializeRRule({ freq: Frequency.HOURLY, interval: 1.5 })).toThrowError(
+      expect(() => serializeRRule({ freq: Frequency.HOURLY, interval: 1.5 })).toThrow(
         /INTERVAL must be a positive integer/
       );
     });
 
     it('throws on zero INTERVAL', () => {
-      expect(() => serializeRRule({ freq: Frequency.HOURLY, interval: 0 })).toThrowError(
+      expect(() => serializeRRule({ freq: Frequency.HOURLY, interval: 0 })).toThrow(
         /INTERVAL must be a positive integer/
       );
     });
 
     it('throws on negative INTERVAL', () => {
-      expect(() => serializeRRule({ freq: Frequency.DAILY, interval: -2 })).toThrowError(
+      expect(() => serializeRRule({ freq: Frequency.DAILY, interval: -2 })).toThrow(
         /INTERVAL must be a positive integer/
       );
     });
 
     it('throws on SECONDLY frequency (not in the supported subset)', () => {
-      expect(() => serializeRRule({ freq: Frequency.SECONDLY })).toThrowError(
-        /Invalid RRULE frequency/
-      );
+      expect(() => serializeRRule({ freq: Frequency.SECONDLY })).toThrow(/Invalid RRULE frequency/);
     });
 
     it('throws when _unknown value contains ";"', () => {
       expect(() =>
         serializeRRule({ freq: Frequency.DAILY, _unknown: { WKST: 'MO;FOO=BAR' } })
-      ).toThrowError(/forbidden delimiter/);
+      ).toThrow(/forbidden delimiter/);
     });
 
     it('throws when _unknown value contains "="', () => {
-      expect(() =>
-        serializeRRule({ freq: Frequency.DAILY, _unknown: { WKST: 'A=B' } })
-      ).toThrowError(/forbidden delimiter/);
+      expect(() => serializeRRule({ freq: Frequency.DAILY, _unknown: { WKST: 'A=B' } })).toThrow(
+        /forbidden delimiter/
+      );
     });
 
     it('throws when _unknown value contains "\\n"', () => {
-      expect(() =>
-        serializeRRule({ freq: Frequency.DAILY, _unknown: { WKST: 'A\nB' } })
-      ).toThrowError(/forbidden delimiter/);
+      expect(() => serializeRRule({ freq: Frequency.DAILY, _unknown: { WKST: 'A\nB' } })).toThrow(
+        /forbidden delimiter/
+      );
     });
 
     it('throws when _unknown value contains "\\r"', () => {
-      expect(() =>
-        serializeRRule({ freq: Frequency.DAILY, _unknown: { WKST: 'A\rB' } })
-      ).toThrowError(/forbidden delimiter/);
+      expect(() => serializeRRule({ freq: Frequency.DAILY, _unknown: { WKST: 'A\rB' } })).toThrow(
+        /forbidden delimiter/
+      );
     });
   });
 

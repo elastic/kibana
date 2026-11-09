@@ -44,7 +44,8 @@ describe('applyIlmPolicyChange', () => {
       'my-policy',
       buildPackageInfo(),
       notifications as any,
-      'Nginx'
+      'Nginx',
+      true
     );
     expect(mockSendUpdatePackage).not.toHaveBeenCalled();
   });
@@ -58,7 +59,8 @@ describe('applyIlmPolicyChange', () => {
       'my-policy',
       buildPackageInfo('my-policy'),
       notifications as any,
-      'Nginx'
+      'Nginx',
+      true
     );
     expect(mockSendUpdatePackage).not.toHaveBeenCalled();
   });
@@ -72,7 +74,8 @@ describe('applyIlmPolicyChange', () => {
       'new-policy',
       buildPackageInfo('old-policy'),
       notifications as any,
-      'Nginx'
+      'Nginx',
+      true
     );
     expect(mockSendUpdatePackage).toHaveBeenCalledWith('nginx', '1.0.0', {
       namespace_customization_settings: { production: { ilm_policy: 'new-policy' } },
@@ -80,7 +83,7 @@ describe('applyIlmPolicyChange', () => {
     expect(notifications.toasts.addSuccess).toHaveBeenCalled();
   });
 
-  it('sends an empty settings object to clear the policy', async () => {
+  it('sends an empty settings object to clear the policy when namespace customization remains enabled', async () => {
     const notifications = buildNotifications();
     await applyIlmPolicyChange(
       'nginx',
@@ -89,11 +92,27 @@ describe('applyIlmPolicyChange', () => {
       undefined,
       buildPackageInfo('old-policy'),
       notifications as any,
-      'Nginx'
+      'Nginx',
+      true
     );
     expect(mockSendUpdatePackage).toHaveBeenCalledWith('nginx', '1.0.0', {
       namespace_customization_settings: { production: {} },
     });
+  });
+
+  it('is a no-op when namespace customization is disabled (server handles ILM cleanup on opt-out)', async () => {
+    const notifications = buildNotifications();
+    await applyIlmPolicyChange(
+      'nginx',
+      '1.0.0',
+      'production',
+      undefined,
+      buildPackageInfo('old-policy'),
+      notifications as any,
+      'Nginx',
+      false
+    );
+    expect(mockSendUpdatePackage).not.toHaveBeenCalled();
   });
 
   it('shows an error toast when sendUpdatePackage fails', async () => {
@@ -106,7 +125,8 @@ describe('applyIlmPolicyChange', () => {
       'new-policy',
       buildPackageInfo(),
       notifications as any,
-      'Nginx'
+      'Nginx',
+      true
     );
     expect(notifications.toasts.addError).toHaveBeenCalled();
     expect(notifications.toasts.addSuccess).not.toHaveBeenCalled();

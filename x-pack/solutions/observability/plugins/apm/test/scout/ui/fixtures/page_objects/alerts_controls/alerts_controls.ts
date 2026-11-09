@@ -21,7 +21,7 @@ export class AlertsControls {
     this.addRuleFlyout = new AddRuleFlyout(this.page);
 
     this.button = this.page.getByTestId('apmAlertAndRulesHeaderLink');
-    this.contextMenu = this.page.getByRole('dialog');
+    this.contextMenu = this.page.getByRole('menu');
 
     this.errorCountItem = this.contextMenu.getByTestId('apmAlertsMenuItemErrorCount');
     this.manageRulesItem = this.contextMenu.getByTestId('apmAlertsMenuItemManageRules');
@@ -29,7 +29,7 @@ export class AlertsControls {
 
   public async openContextMenu() {
     await this.button.click();
-    await this.contextMenu.getByTestId('contextMenuPanelTitle').getByText('Alerts').waitFor();
+    await this.errorCountItem.waitFor({ state: 'visible' });
   }
 
   public async openErrorCountFlyout() {

@@ -33,6 +33,25 @@ export const actionResponsesMapping: MappingTypeMapping = {
           type: 'keyword',
           ignore_above: 1024,
         },
+        // Kibana's top-level `space_id` on the Fleet action never reaches the
+        // agent, so it is also written inside the action's opaque `data` blob,
+        // which osquerybeat copies onto this document as `action_data`. Reads
+        // fall back to it via `matchActionDataSpaceId` (see buildSpaceIdFilter),
+        // so it gates a space-isolation boundary and must not depend on dynamic
+        // mapping staying enabled.
+        //
+        // This mapping only covers the Kibana-managed
+        // `.logs-osquery_manager.action.responses-default` index. The results
+        // index the live-query table reads (`logs-osquery_manager.result*`, see
+        // query.all_results.dsl.ts) is package-managed, so there the field still
+        // resolves through dynamic mapping until elastic/integrations#21368
+        // lands. If that package ever sets `dynamic: false` on `action_data`,
+        // the term silently matches nothing — hence the api_integration coverage
+        // in action_results_space_scoping.ts.
+        space_id: {
+          type: 'keyword',
+          ignore_above: 1024,
+        },
         version: {
           type: 'keyword',
           ignore_above: 1024,

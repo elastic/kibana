@@ -24,6 +24,13 @@ export function registerGetTriggerDefinitionsTool(
   agentBuilder.tools.register({
     id: workflowTools.getTriggerDefinitions,
     type: ToolType.builtin,
+    annotations: {
+      title: 'Get Trigger Definitions',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     description: `Get available workflow trigger types with schemas and YAML examples.
 
 **When to use:** To learn how to configure the \`triggers\` section of a workflow, or to understand what \`{{ event.* }}\` variables are available at runtime for a given trigger type.

@@ -447,39 +447,49 @@ export const transformStepDefinition = createPublicStepDefinition({
 
 ## 4. Conditional / feature-flagged registration
 
-Public side:
+`registerStepDefinition` loaders run **once**. Returning `undefined` from a loader is for a decision that cannot change for the rest of the process (a missing dependency, for example). A feature flag can change after startup, and the loader will not run again.
+
+Do not snapshot the flag with `firstValueFrom(getBooleanValue$)` (or any other one-shot read) and reuse that promise. Subscribe in `start()`, keep the latest value, and gate the **handler** so later changes take effect on the next execution. Unsubscribe in `stop()`.
 
 ```ts
-workflowsExtensions.registerStepDefinition(async () => {
-  if (!(await deps.featureFlags.get('myPlugin.enableProcessMessage'))) {
-    return undefined; // skip silently — no error, no entry in the registry
-  }
-  return (await import('./process_message')).processMessageDefinition;
-});
-```
-
-Server side (resolving a `CoreSetup`-derived feature flag once and reusing it):
-
-```ts
-import type { CoreSetup } from '@kbn/core/server';
+import type { Subscription } from 'rxjs';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
+import { processMessageDefinition } from './step_types/process_message';
 
-export const registerStepDefinitions = (
-  workflowsExtensions: WorkflowsExtensionsServerPluginSetup,
-  core: CoreSetup
-) => {
-  const isEnabled = core
-    .getStartServices()
-    .then(([coreStart]) =>
-      coreStart.featureFlags.getBooleanValue('myPlugin.enableProcessMessage', false)
+export class MyPlugin implements Plugin {
+  private processMessageEnabled = false;
+  private readonly subscriptions: Subscription[] = [];
+
+  public setup(_core: CoreSetup, plugins: { workflowsExtensions: WorkflowsExtensionsServerPluginSetup }) {
+    plugins.workflowsExtensions.registerStepDefinition({
+      ...processMessageDefinition,
+      handler: async (context) => {
+        if (!this.processMessageEnabled) {
+          throw new Error('Process message is disabled');
+        }
+        return processMessageDefinition.handler(context);
+      },
+    });
+  }
+
+  public start(core: CoreStart) {
+    this.subscriptions.push(
+      core.featureFlags
+        .getBooleanValue$('myPlugin.enableProcessMessage', false)
+        .subscribe((enabled) => {
+          this.processMessageEnabled = enabled;
+        })
     );
+  }
 
-  workflowsExtensions.registerStepDefinition(async () => {
-    if (!(await isEnabled)) return undefined;
-    return (await import('./process_message')).processMessageDefinition;
-  });
-};
+  public stop() {
+    this.subscriptions.forEach((subscription) => subscription.unsubscribe());
+  }
+}
 ```
+
+The public registry has the same one-shot loader. Register the editor definition unconditionally. The server handler is what follows the flag. Returning `undefined` from the public loader hides the step until the next process start, even if the flag turns on later.
 
 Loaders that throw are caught by the registry and logged via the plugin logger; a single broken loader cannot prevent other steps (or workflow execution as a whole) from working. If a step seems "missing" at runtime, check the Kibana log for a registration failure before suspecting the schema.
 

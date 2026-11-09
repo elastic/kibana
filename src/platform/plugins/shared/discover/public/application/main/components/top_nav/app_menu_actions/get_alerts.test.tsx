@@ -276,7 +276,15 @@ describe('getAlertsAppMenuItem', () => {
     it('should render CreateRuleOptionsFlyout with the current ES|QL query and subscribe handler', async () => {
       const createRuleOptionsFlyoutMock = jest.fn(() => null);
       const services = createDiscoverServicesMock();
-      services.alertingVTwo = { CreateRuleOptionsFlyout: createRuleOptionsFlyoutMock };
+      services.alertingVTwo = {
+        CreateRuleOptionsFlyout: createRuleOptionsFlyoutMock,
+        RulesPage: jest.fn(() => null),
+        RuleLibraryPage: jest.fn(() => null),
+        EpisodesPage: jest.fn(() => null),
+        ActionPoliciesPage: jest.fn(() => null),
+        ExecutionHistoryPage: jest.fn(() => null),
+        createAlertingV2HostApp: jest.fn(),
+      };
       const { createRuleOptionsAppMenuItem } = await setupCreateRuleOptionsMenuItem({
         services,
         isEsqlMode: true,

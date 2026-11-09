@@ -11,7 +11,8 @@ import React from 'react';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { stubLogstashDataView as dataView } from '@kbn/data-plugin/common/stubs';
 import { FieldName } from './field_name';
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 describe('FieldName', () => {
   test('renders a string field by providing fieldType and fieldName', () => {
@@ -51,11 +52,28 @@ describe('FieldName', () => {
   });
 
   test('renders with a search highlight', () => {
-    render(<FieldName fieldName={'test.test.test'} fieldType={'number'} highlight="te" />);
+    const { container } = render(
+      <FieldName fieldName={'test.test.test'} fieldType={'number'} highlight="te" />
+    );
 
-    expect(screen.getByText('te').closest('mark')).toBeVisible();
-    expect(screen.getByText('st.test.test')).toBeVisible();
+    expect(
+      Array.from(container.querySelectorAll('mark')).map(({ textContent }) => textContent)
+    ).toEqual(['te', 'te', 'te']);
     expect(screen.getByText('Number')).toBeVisible();
+  });
+
+  test('renders with multiple search highlights', () => {
+    const { container } = render(
+      <FieldName
+        fieldName={'system.memory.usage'}
+        fieldType={'number'}
+        highlight={['memory', 'usage']}
+      />
+    );
+
+    expect(
+      Array.from(container.querySelectorAll('mark')).map(({ textContent }) => textContent)
+    ).toEqual(['memory', 'usage']);
   });
 
   test('renders when mapping is provided', () => {
@@ -96,5 +114,41 @@ describe('FieldName', () => {
     expect(screen.getByText('String')).toBeVisible();
     expect(screen.getByText(FIELD_DISPLAY_NAME)).toBeVisible();
     expect(screen.queryByText(FIELD_NAME)).not.toBeInTheDocument();
+  });
+
+  describe('tooltip', () => {
+    const hoverFieldName = async (name: string) => {
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      await user.hover(screen.getByText(name));
+      act(() => {
+        jest.advanceTimersByTime(1000);
+      });
+    };
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    test('shows the field name in a tooltip when the display name differs from it', async () => {
+      render(
+        <FieldName fieldName="test" displayNameOverride="Test display name" fieldType="string" />
+      );
+
+      await hoverFieldName('Test display name');
+
+      expect(screen.getByRole('tooltip')).toHaveTextContent('Test display name (test)');
+    });
+
+    test('does not show a tooltip when the display name matches the field name', async () => {
+      render(<FieldName fieldName="test" fieldType="string" />);
+
+      await hoverFieldName('test');
+
+      expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+    });
   });
 });

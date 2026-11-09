@@ -8,7 +8,7 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../../fixtures';
-import { waitForApmSettingsHeaderLink } from '../../fixtures/page_helpers';
+import { waitForApmAppMenuReady } from '../../fixtures/page_helpers';
 import { PRODUCTION_ENVIRONMENT } from '../../fixtures/constants';
 
 const timeRange = {
@@ -95,7 +95,7 @@ test.describe('Storage Explorer - Admin User', { tag: tags.stateful.classic }, (
       });
 
       await page.goto(`${baseUrl}?${urlParams.toString()}`);
-      await waitForApmSettingsHeaderLink(page);
+      await waitForApmAppMenuReady(page);
 
       await expect(page).toHaveURL(new RegExp(`.*environment=${PRODUCTION_ENVIRONMENT}.*`));
       await expect(storageExplorerPage.pageTitle).toBeVisible();

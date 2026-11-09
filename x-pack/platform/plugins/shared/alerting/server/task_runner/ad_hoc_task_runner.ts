@@ -6,6 +6,7 @@
  */
 
 import apm from 'elastic-apm-node';
+import { isExternalUiamCredential } from '@kbn/core-security-server';
 import type { ISavedObjectsRepository, KibanaRequest, Logger, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
@@ -15,10 +16,14 @@ import { nanosToMillis } from '@kbn/event-log-plugin/common';
 import type { CancellableTask, RunResult } from '@kbn/task-manager-plugin/server/task';
 import { TaskPriority } from '@kbn/task-manager-plugin/server/task';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
-import { brandSpaceId } from '@kbn/core-spaces-common';
 import type { AdHocRunStatus } from '../../common/constants';
 import { adHocRunStatus } from '../../common/constants';
-import type { RuleRunnerErrorStackTraceLog, RunRuleResult, TaskRunnerContext } from './types';
+import type {
+  RuleRunnerErrorStackTraceLog,
+  RuleTaskInstance,
+  RunRuleResult,
+  TaskRunnerContext,
+} from './types';
 import { getExecutorServices } from './get_executor_services';
 import { ErrorWithReason, validateRuleTypeParams } from '../lib';
 import type {
@@ -36,6 +41,7 @@ import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import { AdHocTaskRunningHandler } from './ad_hoc_task_running_handler';
 import { getFakeKibanaRequest } from './rule_loader';
+import type { CredentialType } from '../otel/uiam_telemetry';
 import { RuleResultService } from '../monitoring/rule_result_service';
 import { RuleTypeRunner } from './rule_type_runner';
 import { initializeAlertsClient } from '../alerts_client';
@@ -64,6 +70,7 @@ export interface AdHocTaskRunnerConstructorParams {
 interface RunParams {
   adHocRunData: AdHocRun;
   effectiveApiKey: string | null;
+  credentialType: CredentialType;
   fakeRequest: KibanaRequest;
   scheduleToRun: AdHocRunSchedule | null;
   validatedParams: RuleTypeParams;
@@ -168,13 +175,22 @@ export class AdHocTaskRunner implements CancellableTask {
         }
       );
     } catch (err) {
-      this.logger.error(`error updating ad hoc run ${adHocRunParamsId} ${err.message}`);
+      this.logger.error(`error updating ad hoc run ${adHocRunParamsId} ${err.message}`, {
+        labels: {
+          spaceId: this.taskInstance.params.spaceId,
+          executionId: this.executionId,
+          ruleId: this.ruleId,
+          ruleType: this.ruleTypeId,
+          taskInstanceId: this.taskInstance.id,
+        },
+      });
     }
   }
 
   private async runRule({
     adHocRunData,
     effectiveApiKey,
+    credentialType,
     fakeRequest,
     scheduleToRun,
     validatedParams: params,
@@ -184,11 +200,19 @@ export class AdHocTaskRunner implements CancellableTask {
       return ruleRunMetricsStore.getMetrics();
     }
 
-    const { rule, apiKeyId } = adHocRunData;
+    const { rule, apiKeyId, uiamApiKeyId } = adHocRunData;
     const ruleType = this.ruleTypeRegistry.get(rule.alertTypeId);
-    // spaceId is persisted on the ad-hoc run saved object, written by validated
-    // request handlers. Brand it once here at the SO load boundary.
-    const spaceId = brandSpaceId(adHocRunData.spaceId);
+    // Already branded on SO → AdHocRun transform (transformAdHocRunToAdHocRunData).
+    const { spaceId } = adHocRunData;
+    // The shared alerts client / action scheduler read `params.spaceId` as a
+    // branded SpaceId, so carry it on the task instance passed to them
+    // (ad-hoc params otherwise only carry an unbranded, optional spaceId).
+    // `alertId` is not on ad-hoc task params; use the rule id so the shared
+    // RuleTaskInstance shape stays consistent with scheduled rule runs.
+    const taskInstance: RuleTaskInstance = {
+      ...this.taskInstance,
+      params: { ...this.taskInstance.params, alertId: rule.id, spaceId },
+    };
 
     const ruleLabel = `${ruleType.id}:${rule.id}: '${rule.name}'`;
     const ruleTypeRunnerContext = {
@@ -229,7 +253,7 @@ export class AdHocTaskRunner implements CancellableTask {
       ruleType,
       runTimestamp: this.runDate,
       startedAt: new Date(scheduleToRun.runAt),
-      taskInstance: this.taskInstance,
+      taskInstance,
     });
 
     const executorServices = getExecutorServices({
@@ -292,10 +316,19 @@ export class AdHocTaskRunner implements CancellableTask {
       ruleType,
       logger: this.logger,
       taskRunnerContext: this.context,
-      taskInstance: this.taskInstance,
+      taskInstance,
       ruleRunMetricsStore,
       apiKey: effectiveApiKey,
       apiKeyId,
+      // Carry the UIAM key id so the connector tasks are visible to the API key invalidation
+      // task's in-use guard, which cannot see the encrypted key material itself. Only when the
+      // run actually authenticates with the UIAM key: the fallbacks in `getFakeKibanaRequest`
+      // can pick the ES key even though the ad hoc run snapshotted a UIAM one, and recording an
+      // id for a credential the connector tasks do not present would keep an unused key alive.
+      uiamApiKeyId: credentialType === 'uiam_api_key' ? uiamApiKeyId : undefined,
+      // Mirror the backfill run's own credential treatment onto the connector tasks: the request
+      // is marked by getFakeKibanaRequest from the ad hoc run's snapshotted `uiamApiKeyExternal`.
+      uiamApiKeyExternal: isExternalUiamCredential(fakeRequest),
       ruleConsumer: rule.consumer,
       executionId: this.executionId,
       ruleLabel,
@@ -303,7 +336,7 @@ export class AdHocTaskRunner implements CancellableTask {
       alertingEventLogger: this.alertingEventLogger,
       actionsClient,
       alertsClient,
-      priority: TaskPriority.Low,
+      priority: TaskPriority.Maintenance,
     });
 
     if (this.shouldLogAndScheduleActionsForAlerts(ruleType)) {
@@ -313,7 +346,16 @@ export class AdHocTaskRunner implements CancellableTask {
       });
     } else {
       this.logger.debug(
-        `no scheduling of actions for rule ${ruleLabel}: rule execution has been cancelled.`
+        `no scheduling of actions for rule ${ruleLabel}: rule execution has been cancelled.`,
+        {
+          labels: {
+            spaceId,
+            executionId: this.executionId,
+            ruleId: rule.id,
+            ruleType: this.ruleTypeId,
+            taskInstanceId: this.taskInstance.id,
+          },
+        }
       );
     }
 
@@ -324,7 +366,16 @@ export class AdHocTaskRunner implements CancellableTask {
       });
     } else {
       this.logger.debug(
-        `skipping updating alerts for rule ${ruleTypeRunnerContext.ruleLogPrefix}: rule execution has been cancelled.`
+        `skipping updating alerts for rule ${ruleTypeRunnerContext.ruleLogPrefix}: rule execution has been cancelled.`,
+        {
+          labels: {
+            spaceId,
+            executionId: this.executionId,
+            ruleId: rule.id,
+            ruleType: this.ruleTypeId,
+            taskInstanceId: this.taskInstance.id,
+          },
+        }
       );
     }
 
@@ -389,7 +440,8 @@ export class AdHocTaskRunner implements CancellableTask {
         );
       }
 
-      const { rule, apiKeyToUse, uiamApiKey, schedule, start, end } = adHocRunData;
+      const { rule, apiKeyToUse, uiamApiKey, uiamApiKeyExternal, schedule, start, end } =
+        adHocRunData;
       this.adHocRunData = adHocRunData;
 
       let ruleType: UntypedNormalizedRuleType;
@@ -414,6 +466,7 @@ export class AdHocTaskRunner implements CancellableTask {
         name: rule.name,
         consumer: rule.consumer,
         revision: rule.revision,
+        tags: rule.tags,
       });
 
       try {
@@ -468,7 +521,16 @@ export class AdHocTaskRunner implements CancellableTask {
         this.logger.debug(
           `Executing ad hoc run for rule ${ruleType.id}:${rule.id} for runAt ${
             this.adHocRunSchedule[this.scheduleToRunIndex].runAt
-          }`
+          }`,
+          {
+            labels: {
+              spaceId,
+              executionId: this.executionId,
+              ruleId: rule.id,
+              ruleType: ruleType.id,
+              taskInstanceId: this.taskInstance.id,
+            },
+          }
         );
         this.adHocRunSchedule[this.scheduleToRunIndex].status = adHocRunStatus.RUNNING;
         this.taskRunning.start(
@@ -481,12 +543,13 @@ export class AdHocTaskRunner implements CancellableTask {
       // Generate fake request with API key. Threading the UIAM key (and owner
       // metadata) mirrors the regular rule runner so backfills authenticate with
       // the UIAM key in UIAM deployments instead of falling back to the ES key.
-      const { fakeRequest, effectiveApiKey } = getFakeKibanaRequest(
+      const { fakeRequest, effectiveApiKey, credentialType } = getFakeKibanaRequest(
         this.context,
         spaceId,
         apiKeyToUse,
         {
           uiamApiKey,
+          uiamApiKeyExternal,
           apiKeyCreatedByUser: rule.apiKeyCreatedByUser,
           apiKeyOwner: rule.apiKeyOwner,
           ruleId: rule.id,
@@ -499,6 +562,7 @@ export class AdHocTaskRunner implements CancellableTask {
       return {
         adHocRunData,
         effectiveApiKey,
+        credentialType,
         fakeRequest,
         scheduleToRun:
           this.scheduleToRunIndex > -1 ? this.adHocRunSchedule[this.scheduleToRunIndex] : null,
@@ -529,14 +593,18 @@ export class AdHocTaskRunner implements CancellableTask {
         const message = `Executing ad hoc run with id "${adHocRunParamsId}" has resulted in Error: ${getEsErrorMessage(
           error
         )} - ${stack ?? ''}`;
-        const tags = [adHocRunParamsId, 'rule-ad-hoc-run-failed'];
-        if (this.ruleTypeId.length > 0) {
-          tags.push(this.ruleTypeId);
-        }
-        if (this.ruleId.length > 0) {
-          tags.push(this.ruleId);
-        }
-        this.logger.error(message, { tags, error: { stack_trace: stack } });
+
+        this.logger.error(message, {
+          labels: {
+            spaceId,
+            executionId: this.executionId,
+            ...(this.ruleId.length > 0 && { ruleId: this.ruleId }),
+            ...(this.ruleTypeId.length > 0 && { ruleType: this.ruleTypeId }),
+            taskInstanceId: this.taskInstance.id,
+          },
+          tags: [adHocRunParamsId, 'rule-ad-hoc-run-failed'],
+          error: { stack_trace: stack },
+        });
       }
 
       if (apm.currentTransaction) {
@@ -670,10 +738,26 @@ export class AdHocTaskRunner implements CancellableTask {
     } = this.taskInstance;
 
     this.logger.debug(
-      `Cancelling execution for ad hoc run with id ${adHocRunParamsId} for rule type ${this.ruleTypeId} with id ${this.ruleId} - execution exceeded rule type timeout of ${timeoutOverride}`
+      `Cancelling execution for ad hoc run with id ${adHocRunParamsId} for rule type ${this.ruleTypeId} with id ${this.ruleId} - execution exceeded rule type timeout of ${timeoutOverride}`,
+      {
+        labels: {
+          executionId: this.executionId,
+          ruleId: this.ruleId,
+          ruleType: this.ruleTypeId,
+          taskInstanceId: this.taskInstance.id,
+        },
+      }
     );
     this.logger.debug(
-      `Aborting any in-progress ES searches for rule type ${this.ruleTypeId} with id ${this.ruleId}`
+      `Aborting any in-progress ES searches for rule type ${this.ruleTypeId} with id ${this.ruleId}`,
+      {
+        labels: {
+          executionId: this.executionId,
+          ruleId: this.ruleId,
+          ruleType: this.ruleTypeId,
+          taskInstanceId: this.taskInstance.id,
+        },
+      }
     );
     this.alertingEventLogger.logTimeout({
       backfill: {
@@ -711,7 +795,15 @@ export class AdHocTaskRunner implements CancellableTask {
     } catch (e) {
       // Log error only, we shouldn't fail the task because of an error here (if ever there's retry logic)
       this.logger.error(
-        `Failed to cleanup ${AD_HOC_RUN_SAVED_OBJECT_TYPE} object [id="${this.taskInstance.params.adHocRunParamsId}"]: ${e.message}`
+        `Failed to cleanup ${AD_HOC_RUN_SAVED_OBJECT_TYPE} object [id="${this.taskInstance.params.adHocRunParamsId}"]: ${e.message}`,
+        {
+          labels: {
+            executionId: this.executionId,
+            ruleId: this.ruleId,
+            ruleType: this.ruleTypeId,
+            taskInstanceId: this.taskInstance.id,
+          },
+        }
       );
     }
   }

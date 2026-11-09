@@ -7,10 +7,13 @@
 
 import type { EsClient, KbnClient, ScoutLogger, ScoutParallelWorkerFixtures } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
+import { INTERNAL_API_HEADERS, PUBLIC_API_HEADERS } from '../../../constants/api_headers';
 import type {
   RiskEngineStatusResponse,
   GetEntityStoreStatusResponse,
   StoreStatus,
+  CreateWatchlistRequest,
+  CreateWatchlistResponse,
 } from '../../../constants/entity_analytics';
 
 const ENTITY_STORE_INSTALL_URL = '/api/security/entity_store/install';
@@ -20,20 +23,35 @@ const SAVED_OBJECTS_FIND_URL = '/api/saved_objects/_find';
 const RISK_ENGINE_CONFIGURATION_TYPE = 'risk-engine-configuration';
 const RISK_ENGINE_STATUS_URL = '/internal/risk_score/engine/status';
 const RISK_ENGINE_INIT_URL = '/internal/risk_score/engine/init';
+const WATCHLISTS_URL = '/api/entity_analytics/watchlists';
 
-const API_VERSIONS = {
-  public: {
-    v1: '2023-10-31',
-  },
-  internal: {
-    v1: '1',
-  },
+export interface EntityStoreEntryRisk {
+  score: number;
+  level: 'Low' | 'Moderate' | 'High' | 'Critical';
+}
+
+export type IndexEntityStoreEntryOptions = (
+  | { entityType?: 'host' }
+  | {
+      entityType: 'user';
+      hostId: string;
+      namespace: 'local';
+    }
+) & {
+  /** Writes a risk score and a first seen time of now, as risk scoring and extraction would. */
+  risk?: EntityStoreEntryRisk;
 };
 
 export interface EntityAnalyticsApiService {
   installEntityStoreV2: (entityTypes?: string[]) => Promise<void>;
   uninstallEntityStoreV2: (entityTypes?: string[]) => Promise<void>;
-  indexEntityStoreEntry: (entityId: string, hostName: string) => Promise<void>;
+  indexEntityStoreEntry: (
+    entityId: string,
+    entityName: string,
+    options?: IndexEntityStoreEntryOptions
+  ) => Promise<void>;
+  /** Removes entries from the space's latest entities index, by entity id. */
+  deleteEntityStoreEntries: (entityIds: string[]) => Promise<void>;
   deleteEntityStoreEngines: () => Promise<void>;
   deleteRiskEngineConfiguration: () => Promise<void>;
   initRiskEngine: () => Promise<void>;
@@ -46,6 +64,10 @@ export interface EntityAnalyticsApiService {
   waitForEntityStoreStatusToChange: (timeoutMs?: number) => Promise<GetEntityStoreStatusResponse>;
   waitForEntityStoreCleanup: (timeoutMs?: number) => Promise<GetEntityStoreStatusResponse>;
   waitForRiskEngineCleanup: (timeoutMs?: number) => Promise<RiskEngineStatusResponse>;
+  /** Creates a watchlist in the space, with its entity sources when `entitySources` is set. */
+  createWatchlist: (body: CreateWatchlistRequest) => Promise<CreateWatchlistResponse>;
+  /** Deletes a watchlist; the server also deletes its entity sources and their API keys. */
+  deleteWatchlist: (id: string) => Promise<void>;
 }
 
 export const getEntityAnalyticsApiService = ({
@@ -79,14 +101,14 @@ export const getEntityAnalyticsApiService = ({
           const existingDataView = await kbnClient.request<{ data_view?: unknown }>({
             method: 'GET',
             path: `${basePath}/api/data_views/data_view/${dataViewId}`,
-            headers: { 'elastic-api-version': API_VERSIONS.public.v1 },
+            headers: PUBLIC_API_HEADERS,
             ignoreErrors: [404],
           });
           if (!existingDataView?.data?.data_view) {
             await kbnClient.request({
               method: 'POST',
               path: `${basePath}/api/data_views/data_view`,
-              headers: { 'elastic-api-version': API_VERSIONS.public.v1 },
+              headers: PUBLIC_API_HEADERS,
               body: {
                 data_view: {
                   id: dataViewId,
@@ -100,9 +122,7 @@ export const getEntityAnalyticsApiService = ({
           await kbnClient.request({
             method: 'POST',
             path: `${basePath}${ENTITY_STORE_INSTALL_URL}`,
-            headers: {
-              'elastic-api-version': API_VERSIONS.public.v1,
-            },
+            headers: PUBLIC_API_HEADERS,
             body: { entityTypes },
           });
           await service.waitForEntityStoreStatus('running');
@@ -118,7 +138,7 @@ export const getEntityAnalyticsApiService = ({
           await kbnClient.request({
             method: 'POST',
             path: `${basePath}${ENTITY_STORE_UNINSTALL_URL}`,
-            headers: { 'elastic-api-version': API_VERSIONS.public.v1 },
+            headers: PUBLIC_API_HEADERS,
             body: { entityTypes },
             ignoreErrors: [404],
           });
@@ -127,7 +147,11 @@ export const getEntityAnalyticsApiService = ({
       );
     },
 
-    indexEntityStoreEntry: async (entityId: string, hostName: string) => {
+    indexEntityStoreEntry: async (
+      entityId: string,
+      entityName: string,
+      options: IndexEntityStoreEntryOptions = {}
+    ) => {
       if (!esClient) {
         throw new Error('esClient is required to index entity store entries');
       }
@@ -136,17 +160,53 @@ export const getEntityAnalyticsApiService = ({
         'security.entityAnalytics.indexEntityStoreEntry',
         async () => {
           const alias = `entities-latest-${spaceId}`;
+          const entityType = options.entityType ?? 'host';
+          const entityFields =
+            options.entityType === 'user'
+              ? { user: { name: entityName }, host: { id: options.hostId } }
+              : { host: { name: entityName } };
+          const entityNamespace =
+            options.entityType === 'user' ? { namespace: options.namespace } : {};
+          const now = new Date().toISOString();
+          const { risk } = options;
+          const entityRisk = risk
+            ? {
+                lifecycle: { first_seen: now },
+                risk: {
+                  calculated_score: risk.score,
+                  calculated_score_norm: risk.score,
+                  calculated_level: risk.level,
+                },
+              }
+            : {};
           await esClient.index({
             index: alias,
             document: {
-              '@timestamp': new Date().toISOString(),
-              entity: { id: entityId, EngineMetadata: { Type: 'host' } },
-              host: { name: hostName },
+              '@timestamp': now,
+              entity: {
+                id: entityId,
+                name: entityName,
+                ...entityNamespace,
+                ...entityRisk,
+                EngineMetadata: { Type: entityType },
+              },
+              ...entityFields,
             },
             refresh: true,
           });
         }
       );
+    },
+
+    deleteEntityStoreEntries: async (entityIds: string[]) => {
+      if (!esClient) {
+        throw new Error('esClient is required to delete entity store entries');
+      }
+      await esClient.deleteByQuery({
+        index: `entities-latest-${spaceId}`,
+        query: { terms: { 'entity.id': entityIds } },
+        refresh: true,
+      });
     },
 
     deleteEntityStoreEngines: async () => {
@@ -162,7 +222,7 @@ export const getEntityAnalyticsApiService = ({
           const statusProbe = await kbnClient.request<GetEntityStoreStatusResponse>({
             method: 'GET',
             path: `${basePath}${ENTITY_STORE_STATUS_URL}`,
-            headers: { 'elastic-api-version': API_VERSIONS.public.v1 },
+            headers: PUBLIC_API_HEADERS,
             ignoreErrors: [403],
           });
           if (statusProbe.status === 403) {
@@ -172,9 +232,7 @@ export const getEntityAnalyticsApiService = ({
           await kbnClient.request({
             method: 'POST',
             path: `${basePath}${ENTITY_STORE_UNINSTALL_URL}`,
-            headers: {
-              'elastic-api-version': API_VERSIONS.public.v1,
-            },
+            headers: PUBLIC_API_HEADERS,
             body: {},
             ignoreErrors: [403, 404, 500],
           });
@@ -226,9 +284,7 @@ export const getEntityAnalyticsApiService = ({
         await kbnClient.request({
           method: 'POST',
           path: `${basePath}${RISK_ENGINE_INIT_URL}`,
-          headers: {
-            'elastic-api-version': API_VERSIONS.internal.v1,
-          },
+          headers: INTERNAL_API_HEADERS,
           body: {},
         });
       });
@@ -242,9 +298,7 @@ export const getEntityAnalyticsApiService = ({
           const response = await kbnClient.request<RiskEngineStatusResponse>({
             method: 'GET',
             path: `${basePath}${RISK_ENGINE_STATUS_URL}`,
-            headers: {
-              'elastic-api-version': API_VERSIONS.internal.v1,
-            },
+            headers: INTERNAL_API_HEADERS,
           });
           return response.data;
         }
@@ -259,9 +313,7 @@ export const getEntityAnalyticsApiService = ({
           const response = await kbnClient.request<GetEntityStoreStatusResponse>({
             method: 'GET',
             path: `${basePath}${ENTITY_STORE_STATUS_URL}`,
-            headers: {
-              'elastic-api-version': API_VERSIONS.public.v1,
-            },
+            headers: PUBLIC_API_HEADERS,
           });
           return response.data;
         }
@@ -409,6 +461,29 @@ export const getEntityAnalyticsApiService = ({
           );
         }
       );
+    },
+
+    createWatchlist: async (body: CreateWatchlistRequest) => {
+      return measurePerformanceAsync(log, 'security.entityAnalytics.createWatchlist', async () => {
+        const response = await kbnClient.request<CreateWatchlistResponse>({
+          method: 'POST',
+          path: `${basePath}${WATCHLISTS_URL}`,
+          headers: PUBLIC_API_HEADERS,
+          body,
+        });
+        return response.data;
+      });
+    },
+
+    deleteWatchlist: async (id: string) => {
+      await measurePerformanceAsync(log, 'security.entityAnalytics.deleteWatchlist', async () => {
+        await kbnClient.request({
+          method: 'DELETE',
+          path: `${basePath}${WATCHLISTS_URL}/${id}`,
+          headers: PUBLIC_API_HEADERS,
+          ignoreErrors: [404],
+        });
+      });
     },
   };
 

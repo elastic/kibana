@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { EuiDataGridControlColumn } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -15,7 +14,8 @@ import deepEqual from 'fast-deep-equal';
 import { InPortal } from 'react-reverse-portal';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import type { RunTimeMappings, TimelineItem } from '@kbn/timelines-plugin/common/search_strategy';
+import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import type { TimelineItem } from '@kbn/securitysolution-timeline-common';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { PageScope } from '../../../../../data_view_manager/constants';
 import { useFetchNotes } from '../../../../../notes/hooks/use_fetch_notes';
@@ -40,6 +40,7 @@ import { isTimerangeSame, TIMELINE_NO_SORTING } from '../shared/utils';
 import type { TimelineTabCommonProps } from '../shared/types';
 import { UnifiedTimelineBody } from '../../body/unified_timeline_body';
 import { EqlTabHeader } from './header';
+import { PartialResultsCallout } from './partial_results_callout';
 import { useTimelineColumns } from '../shared/use_timeline_columns';
 import { useTimelineControlColumn } from '../shared/use_timeline_control_columns';
 import { LeftPanelNotesTab } from '../../../../../flyout/document_details/left';
@@ -122,7 +123,18 @@ export const EqlTabContentComponent: React.FC<Props> = ({
 
   const [
     dataLoadingState,
-    { events, rawEvents, inspect, totalCount, loadNextBatch, refreshedAt, refetch },
+    {
+      events,
+      rawEvents,
+      inspect,
+      totalCount,
+      loadNextBatch,
+      refreshedAt,
+      refetch,
+      isPartial = false,
+      shardFailures = [],
+      timedOut = false,
+    },
   ] = useTimelineEvents({
     dataViewId,
     endDate: end,
@@ -228,7 +240,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     [enableNewFlyout, openNotes, openFlyout, selectedPatterns, telemetry, timelineId]
   );
 
-  const leadingControlColumns = useTimelineControlColumn({
+  const rowAdditionalLeadingControls = useTimelineControlColumn({
     timelineId,
     refetch,
     events,
@@ -247,6 +259,9 @@ export const EqlTabContentComponent: React.FC<Props> = ({
   const unifiedHeader = useMemo(
     () => (
       <EuiFlexGroup gutterSize="s" direction="column">
+        {isPartial && !isBlankTimeline ? (
+          <PartialResultsCallout shardFailures={shardFailures} timedOut={timedOut} />
+        ) : null}
         <EqlTabHeader
           activeTab={activeTab}
           setTimelineFullScreen={setTimelineFullScreen}
@@ -255,7 +270,16 @@ export const EqlTabContentComponent: React.FC<Props> = ({
         />
       </EuiFlexGroup>
     ),
-    [activeTab, setTimelineFullScreen, timelineFullScreen, timelineId]
+    [
+      activeTab,
+      isBlankTimeline,
+      isPartial,
+      setTimelineFullScreen,
+      shardFailures,
+      timedOut,
+      timelineFullScreen,
+      timelineId,
+    ]
   );
 
   return (
@@ -291,7 +315,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
           activeTab={activeTab}
           updatedAt={refreshedAt}
           isTextBasedQuery={false}
-          leadingControlColumns={leadingControlColumns as EuiDataGridControlColumn[]}
+          rowAdditionalLeadingControls={rowAdditionalLeadingControls}
           onUpdatePageIndex={onUpdatePageIndex}
         />
       </FullWidthFlexGroup>

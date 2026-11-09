@@ -29,6 +29,7 @@ import type {
   RuntimeFields,
   SubType,
   SemanticTextField,
+  SemanticField,
 } from '../types';
 
 import {
@@ -693,6 +694,10 @@ export const getAllFieldTypesFromState = (allFields: Fields): DataType[] => {
 
 export function isSemanticTextField(field: Partial<Field>): field is SemanticTextField {
   return field.type === 'semantic_text';
+}
+
+export function isSemanticField(field: Partial<Field>): field is SemanticField {
+  return field.type === 'semantic';
 }
 
 /**

@@ -16,12 +16,12 @@ import {
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiCallOut,
   EuiDatePicker,
   EuiFieldText,
   EuiLink,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnInfoCallout, KbnWarningCallout, KbnDangerCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
@@ -563,9 +563,8 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
       </p>
       {isSelectedVersionIAR ? (
         <>
-          <EuiCallOut
+          <KbnInfoCallout
             announceOnMount
-            iconType="info"
             title={
               <FormattedMessage
                 id="xpack.fleet.settings.editOutputFlyout.iarVersionSelectedCalloutTitle"
@@ -573,26 +572,27 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
               />
             }
             data-test-subj="iarVersionSelectedCallout"
-          >
-            <FormattedMessage
-              id="xpack.fleet.settings.iarVersionSelected.description"
-              defaultMessage="For more information, refer to {documentationLink}."
-              values={{
-                documentationLink: (
-                  <EuiLink
-                    external={true}
-                    target="_blank"
-                    href={docLinks.links.fleet.agentReleaseProcess}
-                  >
-                    <FormattedMessage
-                      id="xpack.fleet.settings.iarVersionSelected.documentationLink"
-                      defaultMessage="Elastic Agent release process"
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
-          </EuiCallOut>
+            text={
+              <FormattedMessage
+                id="xpack.fleet.settings.iarVersionSelected.description"
+                defaultMessage="For more information, refer to {documentationLink}."
+                values={{
+                  documentationLink: (
+                    <EuiLink
+                      external={true}
+                      target="_blank"
+                      href={docLinks.links.fleet.agentReleaseProcess}
+                    >
+                      <FormattedMessage
+                        id="xpack.fleet.settings.iarVersionSelected.documentationLink"
+                        defaultMessage="Elastic Agent release process"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            }
+          />
           <EuiSpacer size="m" />
         </>
       ) : null}
@@ -658,9 +658,8 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
       ) ? (
         <>
           <EuiSpacer size="m" />
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount
-            color="warning"
             title={
               <FormattedMessage
                 id="xpack.fleet.upgradeAgents.warningCallout"
@@ -738,33 +737,33 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
       {errors ? (
         <>
           <EuiSpacer size="s" />
-          <EuiCallOut
+          <KbnDangerCallout
             announceOnMount
-            color="danger"
             title={i18n.translate('xpack.fleet.upgradeAgents.warningCalloutErrors', {
               defaultMessage:
                 'Error upgrading the selected {count, plural, one {agent} other {{count} agents}}',
               values: { count: isSingleAgent },
             })}
-          >
-            <FormattedMessage
-              id="xpack.fleet.upgradeAgents.warningCalloutErrorMessage"
-              defaultMessage="{originalMessage}. {learnMore}"
-              values={{
-                originalMessage: errors,
-                learnMore: (
-                  <div>
-                    <EuiLink href={docLinks.links.fleet.upgradeElasticAgent} target="_blank">
-                      <FormattedMessage
-                        id="xpack.fleet.agentHealth.upgradeAgentsDocLink"
-                        defaultMessage="Learn more"
-                      />
-                    </EuiLink>
-                  </div>
-                ),
-              }}
-            />
-          </EuiCallOut>
+            text={
+              <FormattedMessage
+                id="xpack.fleet.upgradeAgents.warningCalloutErrorMessage"
+                defaultMessage="{originalMessage}. {learnMore}"
+                values={{
+                  originalMessage: errors,
+                  learnMore: (
+                    <div>
+                      <EuiLink href={docLinks.links.fleet.upgradeElasticAgent} target="_blank">
+                        <FormattedMessage
+                          id="xpack.fleet.agentHealth.upgradeAgentsDocLink"
+                          defaultMessage="Learn more"
+                        />
+                      </EuiLink>
+                    </div>
+                  ),
+                }}
+              />
+            }
+          />
         </>
       ) : null}
     </EuiConfirmModal>
@@ -776,31 +775,30 @@ export const UpgradeModalWarningCallout: React.FunctionComponent<{ warningMessag
 }) => {
   const { docLinks } = useStartServices();
   return (
-    <EuiCallOut
+    <KbnWarningCallout
       data-test-subj="agentUpgradeModal.notUpgradeableCallout"
-      color="warning"
-      iconType="warning"
       title={
         <FormattedMessage id="xpack.fleet.upgradeAgents.notUpgradeable" defaultMessage="Warning" />
       }
-    >
-      <FormattedMessage
-        id="xpack.fleet.upgradeAgents.notUpgradeableMsg"
-        defaultMessage="{reason} {learnMore}"
-        values={{
-          reason: warningMessage,
-          learnMore: (
-            <div>
-              <EuiLink href={docLinks.links.fleet.upgradeElasticAgent} target="_blank">
-                <FormattedMessage
-                  id="xpack.fleet.agentHealth.upgradeAgentsDocLink"
-                  defaultMessage="Learn more"
-                />
-              </EuiLink>
-            </div>
-          ),
-        }}
-      />
-    </EuiCallOut>
+      text={
+        <FormattedMessage
+          id="xpack.fleet.upgradeAgents.notUpgradeableMsg"
+          defaultMessage="{reason} {learnMore}"
+          values={{
+            reason: warningMessage,
+            learnMore: (
+              <div>
+                <EuiLink href={docLinks.links.fleet.upgradeElasticAgent} target="_blank">
+                  <FormattedMessage
+                    id="xpack.fleet.agentHealth.upgradeAgentsDocLink"
+                    defaultMessage="Learn more"
+                  />
+                </EuiLink>
+              </div>
+            ),
+          }}
+        />
+      }
+    />
   );
 };

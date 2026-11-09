@@ -13,19 +13,15 @@ import type { Writable } from 'utility-types';
 
 import type { Reference } from '@kbn/content-management-utils';
 import type { LegacyStoredPinnedControlState } from '@kbn/controls-schemas';
-import { AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT } from '@kbn/as-code-shared-schemas';
-
-import { type DashboardState, prefixReferencesFromPanel } from '../../../../common';
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
+import { prefixReferencesFromPanel } from '../../../../common';
 import { embeddableService } from '../../../kibana_services';
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object/schema';
 import { TransformPanelInError, TransformPanelsInError } from './transform_panels_in_error';
 
 type PinnedPanelsState = Required<DashboardState>['pinned_panels'];
 
-export function transformPinnedPanelsIn(
-  pinnedPanels: PinnedPanelsState,
-  useGASchemas: boolean = AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT
-): {
+export function transformPinnedPanelsIn(pinnedPanels: PinnedPanelsState): {
   pinnedPanels: Required<DashboardSavedObjectAttributes>['pinned_panels']['panels'];
   references: Reference[];
 } {
@@ -43,7 +39,7 @@ export function transformPinnedPanelsIn(
 
       try {
         if (transforms?.transformIn) {
-          const transformed = transforms.transformIn(controlState.config, useGASchemas);
+          const transformed = transforms.transformIn(controlState.config);
           // prefix all the reference names with their IDs so that they are unique
           references = [
             ...references,

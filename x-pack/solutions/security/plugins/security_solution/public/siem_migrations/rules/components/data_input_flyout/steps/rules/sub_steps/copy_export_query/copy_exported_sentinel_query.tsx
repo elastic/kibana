@@ -7,45 +7,20 @@
 
 import React from 'react';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { MigrationSource } from '../../../../../../../common/types';
+import { useRuleMigrationVendorCopy } from '../../../../../../hooks/use_rule_migration_vendor_copy';
 
 export const CopyExportedSentinelQuery = React.memo(() => {
+  const { copyExportQuery } = useRuleMigrationVendorCopy(MigrationSource.SENTINEL);
+
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem>
-        <EuiText>
-          <FormattedMessage
-            id="xpack.securitySolution.siemMigrations.copyExportedSentinelQuery.description"
-            defaultMessage="In the Microsoft Azure portal, navigate to Microsoft Sentinel and open your workspace. Go to {analyticsRules}, select the rules you want to migrate, and click {export}. The downloaded JSON file contains your Analytics Rules and can be uploaded here."
-            values={{
-              analyticsRules: (
-                <b>
-                  <FormattedMessage
-                    id="xpack.securitySolution.siemMigrations.copyExportedSentinelQuery.analyticsRules"
-                    defaultMessage="Analytics"
-                  />
-                </b>
-              ),
-              export: (
-                <b>
-                  <FormattedMessage
-                    id="xpack.securitySolution.siemMigrations.copyExportedSentinelQuery.export"
-                    defaultMessage="Export"
-                  />
-                </b>
-              ),
-            }}
-          />
-        </EuiText>
+        <EuiText>{copyExportQuery.description}</EuiText>
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiCallOut
-          title={
-            <FormattedMessage
-              id="xpack.securitySolution.siemMigrations.copyExportedSentinelQuery.rulesTypesupport"
-              defaultMessage="As of now only Scheduled & Near Real Time(NRT) rules are supported for migration. Please make sure your export file contains only these types of rules."
-            />
-          }
+          title={copyExportQuery.details?.rulesTypeSupportCallout}
           size="s"
           iconType="pin"
         />

@@ -23,7 +23,7 @@ const restorableDefaults = getDefaultDataVisualizerListState();
 const EmbeddableFieldStatsTableWrapper = (
   props: Required<FieldStatisticTableEmbeddableProps, 'dataView'>
 ) => {
-  const { onTableUpdate, onAddFilter, onRenderComplete } = props;
+  const { onTableUpdate, onAddFilter, onRenderComplete, onFieldsCountChange } = props;
 
   const [dataVisualizerListState, setDataVisualizerListState] =
     useState<Required<DataVisualizerIndexBasedAppState>>(restorableDefaults);
@@ -40,6 +40,7 @@ const EmbeddableFieldStatsTableWrapper = (
 
   const {
     configs,
+    fieldsCount,
     searchQueryLanguage,
     searchString,
     extendedColumns,
@@ -47,13 +48,22 @@ const EmbeddableFieldStatsTableWrapper = (
     overallStats,
     overallStatsProgress,
     setLastRefresh,
-  } = useDataVisualizerGridData(props, dataVisualizerListState);
+  } = useDataVisualizerGridData({
+    input: props,
+    dataVisualizerListState,
+    isInteractive: props.isInteractive,
+  });
 
   const totalCount = overallStats?.totalCount;
 
   useEffect(() => {
     setLastRefresh(Date.now());
   }, [props?.lastReloadRequestTime, setLastRefresh]);
+
+  useEffect(() => {
+    // undefined while (re)loading, so a stale or empty count isn't reported
+    onFieldsCountChange?.(progress === 100 ? fieldsCount : undefined);
+  }, [progress, fieldsCount, onFieldsCountChange]);
 
   const getItemIdToExpandedRowMap = useCallback(
     function (itemIds: string[], items: FieldVisConfig[]): ItemIdToExpandedRowMap {
@@ -65,7 +75,7 @@ const EmbeddableFieldStatsTableWrapper = (
               item={item}
               dataView={props.dataView}
               combinedQuery={{ searchQueryLanguage, searchString }}
-              onAddFilter={onAddFilter}
+              onAddFilter={props.isInteractive ?? true ? onAddFilter : undefined}
               totalDocuments={props.totalDocuments}
             />
           );
@@ -73,7 +83,14 @@ const EmbeddableFieldStatsTableWrapper = (
         return m;
       }, {} as ItemIdToExpandedRowMap);
     },
-    [props.dataView, searchQueryLanguage, searchString, props.totalDocuments, onAddFilter]
+    [
+      props.dataView,
+      searchQueryLanguage,
+      searchString,
+      props.totalDocuments,
+      onAddFilter,
+      props.isInteractive,
+    ]
   );
 
   useEffect(() => {
@@ -98,6 +115,7 @@ const EmbeddableFieldStatsTableWrapper = (
       overallStatsRunning={overallStatsProgress.isRunning}
       totalCount={totalCount}
       renderFieldName={props.renderFieldName}
+      isInteractive={props.isInteractive}
     />
   );
 };

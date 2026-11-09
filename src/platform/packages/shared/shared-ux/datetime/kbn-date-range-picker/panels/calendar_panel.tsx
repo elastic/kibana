@@ -22,13 +22,22 @@ import {
 } from '../date_range_picker_panel_ui';
 import { calendarPanelTexts, mainPanelTexts } from '../translations';
 import { timeRangeToDisplayText } from '../format';
-import { getEndDate, getStartDate, formatDateRange } from '../utils';
+import { getEndDate, getStartDate, formatDateRange, formatInputDateRange } from '../utils';
 import { useDateRangePickerContext } from '../date_range_picker_context';
 
 /** Calendar-based date selection panel. */
 export function CalendarPanel() {
-  const { applyRange, onPresetSave, setText, text, timeRange, calendarOptions, transformOptions } =
-    useDateRangePickerContext();
+  const {
+    applyRange,
+    onPresetSave,
+    setText,
+    text,
+    timeRange,
+    calendarOptions,
+    transformOptions,
+    timeZone,
+  } = useDateRangePickerContext();
+  const calendarTimeZone = timeZone === 'Browser' ? undefined : timeZone;
   const timePrecision = transformOptions.timePrecision ?? 's';
   const saveAsPresetCheckboxId = useGeneratedHtmlId({ prefix: 'saveAsPreset' });
 
@@ -56,35 +65,32 @@ export function CalendarPanel() {
   // On mount: convert to absolute format so user sees resolved dates
   useEffect(() => {
     if (timeSourceRef.current.startDate && timeSourceRef.current.endDate) {
-      setText(
-        formatDateRange(
-          timeSourceRef.current.startDate,
-          timeSourceRef.current.endDate,
-          timePrecision
-        )
-      );
+      setText(formatInputDateRange(timeSourceRef.current.startDate, timeSourceRef.current.endDate));
     }
-  }, [setText, timePrecision]);
+  }, [setText]);
 
   const restoreOriginalText = useCallback(() => {
     setText(originalTextRef.current);
   }, [setText]);
 
-  const getOrderedDates = useCallback((from: Date, to: Date): { start: Date; end: Date } => {
-    const startDate = getStartDate(from);
-    const endDate = getEndDate(to);
+  const getOrderedDates = useCallback(
+    (from: Date, to: Date): { start: Date; end: Date } => {
+      const startDate = getStartDate(from, calendarTimeZone);
+      const endDate = getEndDate(to, calendarTimeZone);
 
-    return startDate <= endDate
-      ? { start: startDate, end: endDate }
-      : { start: endDate, end: startDate };
-  }, []);
+      return startDate <= endDate
+        ? { start: startDate, end: endDate }
+        : { start: endDate, end: startDate };
+    },
+    [calendarTimeZone]
+  );
 
   const formatRangeText = useCallback(
     (from: Date, to: Date): string => {
       const { start, end } = getOrderedDates(from, to);
-      return formatDateRange(start, end, timePrecision);
+      return formatInputDateRange(start, end);
     },
-    [getOrderedDates, timePrecision]
+    [getOrderedDates]
   );
 
   const handleRangeChange = useCallback(
@@ -181,6 +187,7 @@ export function CalendarPanel() {
           range={calendarRange}
           onRangeChange={handleRangeChange}
           firstDayOfWeek={calendarOptions?.firstDayOfWeek}
+          timeZone={calendarTimeZone}
         />
       </PanelBody>
       <PanelFooter primaryAction={applyButton}>

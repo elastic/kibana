@@ -165,7 +165,7 @@ export const CertificateList: React.FC<Props> = ({ page, certificates, sort, onC
               data-test-subj="certExpandDetailsButton"
               onClick={() => toggleDetails(item)}
               aria-label={isExpanded ? labels.COLLAPSE_CERT_DETAILS : labels.EXPAND_CERT_DETAILS}
-              iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+              iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
             />
           </EuiToolTip>
         );

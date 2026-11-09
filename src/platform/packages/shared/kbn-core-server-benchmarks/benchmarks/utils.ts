@@ -11,6 +11,7 @@ import Path from 'path';
 import Fs from 'fs/promises';
 import execa, { type ExecaChildProcess } from 'execa';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { withTimeout } from '@kbn/std';
 import { getBuildDir } from './get_build_dir';
 
 async function waitForStdout({
@@ -48,10 +49,12 @@ async function startEs({
   cwd,
   log: parentLog,
   args = [],
+  basePath,
 }: {
   cwd: string;
   log: ToolingLog;
   args?: string[];
+  basePath?: string;
 }): Promise<{ proc: ExecaChildProcess; port: number }> {
   const log = parentLog.withContext('es-start');
 
@@ -60,7 +63,10 @@ async function startEs({
   const [file, ...cmdArgs] = ['node', 'scripts/es.js', 'snapshot', ...args];
   log.debug(`Spawning "${file} ${cmdArgs.join(' ')}"`);
 
-  const proc: ExecaChildProcess = execa(file, cmdArgs, { cwd });
+  const proc: ExecaChildProcess = execa(file, cmdArgs, {
+    cwd,
+    env: basePath ? { ...process.env, KBN_ES_BASE_PATH: basePath } : undefined,
+  });
 
   const regex = /AbstractHttpServerTransport.*publish_address .*:(\d+)/;
 
@@ -190,12 +196,8 @@ export async function stopGracefully(
       () => true // ignore error rejection caused by signal
     );
 
-    const exited = await Promise.race([
-      waitForProc,
-      new Promise<boolean>((r) => setTimeout(() => r(false), timeout)),
-    ]);
-
-    return exited;
+    const outcome = await withTimeout({ promise: waitForProc, timeoutMs: timeout });
+    return outcome.timedout ? false : outcome.value;
   }
 
   // Already exited?

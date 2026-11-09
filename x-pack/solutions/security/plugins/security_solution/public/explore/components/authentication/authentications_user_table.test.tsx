@@ -66,6 +66,25 @@ describe('Authentication User Table Component', () => {
     });
   });
 
+  it('labels the authentications query with the users page execution context', () => {
+    render(
+      <TestProviders>
+        <AuthenticationsUserTable {...defaultProps} />
+      </TestProviders>
+    );
+    expect(mockUseAuthentications).toHaveBeenCalledWith(
+      expect.objectContaining({
+        executionContext: {
+          child: {
+            type: 'security_solution',
+            name: 'entity_analytics:explore-users_page',
+            id: 'authentications',
+          },
+        },
+      })
+    );
+  });
+
   it('toggleStatus=true, do not skip', () => {
     render(
       <TestProviders>

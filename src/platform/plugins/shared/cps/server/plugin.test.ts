@@ -45,6 +45,10 @@ describe('CPSServerPlugin', () => {
       expect(start).toBeDefined();
       expect(start?.createNpreClient).toBeDefined();
       expect(typeof start?.createNpreClient).toBe('function');
+      expect(start?.getLinkedProjects).toBeDefined();
+      expect(typeof start?.getLinkedProjects).toBe('function');
+      expect(start?.isCpsActive).toBeDefined();
+      expect(typeof start?.isCpsActive).toBe('function');
     });
   });
 

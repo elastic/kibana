@@ -11,7 +11,7 @@ module.exports = {
   collectCoverageFrom: [
     '<rootDir>/x-pack/platform/packages/private/security/authorization_core/**/*.{ts,tsx}',
   ],
-  preset: '@kbn/test',
+  preset: '@kbn/jest',
   rootDir: '../../../../../..',
   roots: ['<rootDir>/x-pack/platform/packages/private/security/authorization_core'],
 };

@@ -1166,14 +1166,6 @@ const HTTP_ENDPOINT_VARS: DataStreamManifestVar[] = [
     show_user: true,
   },
   {
-    name: 'prefix',
-    type: 'text',
-    title: 'Prefix',
-    description: 'This option specifies which prefix field the incoming request will be mapped to.',
-    required: false,
-    show_user: false,
-  },
-  {
     name: 'basic_auth',
     type: 'bool',
     title: 'Basic Auth',
@@ -1601,6 +1593,16 @@ const TCP_VARS: DataStreamManifestVar[] = [
     title: 'Keep Null Values',
     description:
       'If this option is set to true, fields with null values will be published in the output document. By default, keep_null is set to false.',
+    required: false,
+    show_user: false,
+  },
+  {
+    name: 'ssl',
+    type: 'yaml',
+    title: 'SSL Configuration',
+    description:
+      'SSL configuration options. See [documentation](https://www.elastic.co/guide/en/beats/filebeat/current/configuration-ssl.html#ssl-common-config) for details.',
+    multi: false,
     required: false,
     show_user: false,
   },

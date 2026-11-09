@@ -33,6 +33,8 @@ dependsOn:
   - '@kbn/elastic-agent-utils'
   - '@kbn/core-chrome-layout-constants'
   - '@kbn/apm-common'
+  - '@kbn/shared-ux-markdown'
+  - '@kbn/genai-common'
 tags:
   - shared-browser
   - package
@@ -45,6 +47,4 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

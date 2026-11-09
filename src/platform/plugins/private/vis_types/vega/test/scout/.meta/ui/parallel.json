@@ -1,0 +1,45 @@
+{
+  "sha1": "2b8133c24019be81704bf97ed099b8f8d575391d",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "fb6a28fdbf970dc-91c1b7602a9ab49",
+      "title": "Setup Vega tests data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/global.setup.ts",
+        "line": 8,
+        "column": 1
+      }
+    },
+    {
+      "id": "a2234e6ff13f1bf-414f0f2d64936d2",
+      "title": "Vega visualization embedded in dashboard - request cancellation cancels async search when navigating away from the dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/embedded_vega_search_cancellation.spec.ts",
+        "line": 31,
+        "column": 35
+      }
+    },
+    {
+      "id": "a2234e6ff13f1bf-ca06972d1602777",
+      "title": "Vega visualization embedded in dashboard - request cancellation cancels async search when clicking the cancel button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/embedded_vega_search_cancellation.spec.ts",
+        "line": 46,
+        "column": 9
+      }
+    }
+  ]
+}

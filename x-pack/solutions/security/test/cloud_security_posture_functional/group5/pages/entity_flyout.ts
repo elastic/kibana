@@ -21,6 +21,7 @@ const {
   VISUALIZATIONS_SECTION_CONTENT_TEST_ID,
   GRAPH_PREVIEW_CONTENT_TEST_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID,
+  GROUPED_ITEM_ACTIONS_POPOVER_PANEL_TEST_ID,
 } = testSubjectIds;
 
 // eslint-disable-next-line import/no-default-export
@@ -32,8 +33,15 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
-  const pageObjects = getPageObjects(['common', 'header', 'expandedFlyoutGraph']);
+  const pageObjects = getPageObjects([
+    'common',
+    'header',
+    'expandedFlyoutGraph',
+    'entityFlyout',
+    'timePicker',
+  ]);
   const expandedFlyoutGraph = pageObjects.expandedFlyoutGraph;
+  const entityFlyout = pageObjects.entityFlyout;
 
   describe('Security Entity Analytics - Entity Flyout Graph', function () {
     this.tags(['cloud_security_posture_graph_viz']);
@@ -44,11 +52,6 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await kibanaServer.uiSettings.update({
         'securitySolution:enableAssetInventory': true,
         'securitySolution:entityStoreEnableV2': true,
-        // This suite drives the legacy expandable flyout via `flyout` URL params (host-panel /
-        // user-panel) and asserts on legacy test subjects (`rightSection`). Disable the new flyout
-        // so those legacy panels render instead of being consumed by the flyout v2 legacy-URL
-        // interop, which translates the `flyout` param into the new (EUI) flyout.
-        'securitySolution:enableNewFlyout': false,
       });
 
       // Initialize security-solution-default data-view (required by entity store)
@@ -66,7 +69,6 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         'securitySolution:enableAssetInventory': false,
         'securitySolution:entityStoreEnableV2': false,
       });
-      await kibanaServer.uiSettings.unset('securitySolution:enableNewFlyout');
     });
 
     describe('entity relationships', () => {
@@ -79,8 +81,8 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           es,
           logger,
           retry,
-          entitiesIndex: '.entities.v2.latest.security_*',
-          expectedCount: 46,
+          entitiesIndex: '.entities.v2.latest.*',
+          expectedCount: 51,
         });
       });
 
@@ -116,8 +118,9 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         //   Relationship nodes (4): one per distinct actor group/relationship type
 
         // Navigate directly to the entity analytics home page with the entity flyout
-        // open for origin-pinned-server (host type). The flyout URL parameter opens
-        // the flyout without needing to interact with the datagrid.
+        // open for origin-pinned-server (host type). The legacy `flyout` URL parameter is
+        // translated by the flyout v2 legacy-URL interop into the new (EUI) host flyout, so it
+        // opens without needing to interact with the datagrid.
         await pageObjects.common.navigateToUrlWithBrowserHistory(
           'securitySolution',
           '/entity_analytics_home_page',
@@ -126,8 +129,8 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         );
         await pageObjects.header.waitUntilLoadingHasFinished();
 
-        // Wait for the host entity flyout right panel to open
-        await testSubjects.existOrFail('rightSection', { timeout: 15000 });
+        // Wait for the host entity flyout to open
+        await entityFlyout.assertEntityPanelIsOpen('host');
 
         // Expand the Visualizations section in the flyout if it is collapsed
         // (same pattern as NetworkEventsPageObject.flyout.expandVisualizations)
@@ -202,7 +205,14 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           'GraphGroupedNodePreviewPanelGroupedItemActionsButton'
         );
         await actionsBtn.click();
-        await testSubjects.click(GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID);
+        // Scope within the open popover panel to avoid matching NodeToolbar buttons in the graph
+        // (which share the same data-test-subj but are always in the DOM with isVisible={true}).
+        const showRelPanel1 = await testSubjects.find(GROUPED_ITEM_ACTIONS_POPOVER_PANEL_TEST_ID);
+        await (
+          await showRelPanel1.findByTestSubject(
+            GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID
+          )
+        ).click();
         await pageObjects.header.waitUntilLoadingHasFinished();
         await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
 
@@ -211,11 +221,17 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         // and select "Hide entity relationships" — this unpins the entity and it
         // merges back into the group.
         await actionsBtn.click();
-        await testSubjects.click(GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID);
+        // Scope within the open popover panel to avoid cross-node toolbar mis-clicks.
+        const hideRelPanel1 = await testSubjects.find(GROUPED_ITEM_ACTIONS_POPOVER_PANEL_TEST_ID);
+        await (
+          await hideRelPanel1.findByTestSubject(
+            GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID
+          )
+        ).click();
         await pageObjects.header.waitUntilLoadingHasFinished();
 
-        // Close the grouped preview panel and fit the graph into view
-        await expandedFlyoutGraph.closePreviewSection();
+        // Close the grouped node panel to return to the graph and fit the graph into view
+        await expandedFlyoutGraph.closeChildFlyout();
         await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
 
         // --- Phase 3+4 combined assertion ---
@@ -261,8 +277,8 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         );
         await pageObjects.header.waitUntilLoadingHasFinished();
 
-        // Wait for the user entity flyout right panel to open
-        await testSubjects.existOrFail('rightSection', { timeout: 15000 });
+        // Wait for the user entity flyout to open
+        await entityFlyout.assertEntityPanelIsOpen('user');
 
         // Expand the Visualizations section in the flyout if it is collapsed
         const vizContent = await testSubjects.find(VISUALIZATIONS_SECTION_CONTENT_TEST_ID);
@@ -305,9 +321,16 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           'GraphGroupedNodePreviewPanelGroupedItemActionsButton'
         );
         await actionsBtn.click();
-        await testSubjects.click(GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID);
+        // Scope within the open popover panel to avoid matching NodeToolbar buttons in the graph
+        // (which share the same data-test-subj but are always in the DOM with isVisible={true}).
+        const showRelPanel2 = await testSubjects.find(GROUPED_ITEM_ACTIONS_POPOVER_PANEL_TEST_ID);
+        await (
+          await showRelPanel2.findByTestSubject(
+            GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID
+          )
+        ).click();
         await pageObjects.header.waitUntilLoadingHasFinished();
-        await expandedFlyoutGraph.closePreviewSection();
+        await expandedFlyoutGraph.closeChildFlyout();
         await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
 
         // Phase 2 assertions:
@@ -350,9 +373,16 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           'GraphGroupedNodePreviewPanelGroupedItemActionsButton'
         );
         await hideActionsBtn.click();
-        await testSubjects.click(GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID);
+        // Scope within the open popover panel to avoid matching NodeToolbar buttons in the graph
+        // (which share the same data-test-subj but are always in the DOM with isVisible={true}).
+        const hideRelPanel3 = await testSubjects.find(GROUPED_ITEM_ACTIONS_POPOVER_PANEL_TEST_ID);
+        await (
+          await hideRelPanel3.findByTestSubject(
+            GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID
+          )
+        ).click();
         await pageObjects.header.waitUntilLoadingHasFinished();
-        await expandedFlyoutGraph.closePreviewSection();
+        await expandedFlyoutGraph.closeChildFlyout();
         await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
 
         // Back to the original 3 nodes:
@@ -362,6 +392,113 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         await expandedFlyoutGraph.assertNodeExists('user:platform-admin-role');
         await expandedFlyoutGraph.assertNodeExists(mergedTargetGroupNodeId);
         await expandedFlyoutGraph.assertNodeExists('rel(user:platform-admin-role-supervises)');
+      });
+
+      describe('entity actions across EUID ranking arms', () => {
+        // Three Okta events all target the same host (see es_archives/logs_okta_system):
+        //   doc A  user.email alice@example.com  -> user:alice@example.com@okta  (ranking pos 0)
+        //   doc B  user.name  alice@example.com  -> user:alice@example.com@okta  (ranking pos 3)
+        //   doc C  user.email bob@example.com    -> user:bob@example.com@okta
+        //
+        // A and B are the same entity reached through different ranking arms, and C is a
+        // look-alike that shares B's login-shaped `user.name`. Pivoting from the shared host
+        // therefore surfaces all three, which is what makes this a useful counterpart to the
+        // events-flyout tests: those assert the filter text, this asserts what the filter finds.
+        // The entity store archive is already loaded by the enclosing `entity relationships`
+        // block; only the Okta events are specific to this test.
+        before(async () => {
+          await esArchiver.load(
+            'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/logs_okta_system'
+          );
+        });
+
+        after(async () => {
+          await esArchiver.unload(
+            'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/logs_okta_system'
+          );
+        });
+
+        it('expands from an entity to its events and then to the other actors on the same target', async () => {
+          const ALICE = 'user:alice@example.com@okta';
+          const HOST = 'host:okta-demo-host-1';
+
+          await pageObjects.common.navigateToUrlWithBrowserHistory(
+            'securitySolution',
+            '/entity_analytics_home_page',
+            // `userName` and `entityId` both contain `@` and `.`, which RISON requires to be quoted
+            // (%27) — an unquoted value silently fails to parse and the flyout never opens.
+            `?cspq=(filters:!(),groupBy:!(none),pageFilters:!(),pageIndex:0,query:(language:kuery,query:%27%27),sort:!(!(%27@timestamp%27,desc)))&flyout=(preview:!(),right:(id:user-panel,params:(contextID:entity-analytics-home-table,scopeId:entity-analytics-home-table,userName:%27alice@example.com%27,entityId:%27${ALICE}%27)))`,
+            { ensureCurrentUrl: false }
+          );
+          await pageObjects.header.waitUntilLoadingHasFinished();
+
+          await entityFlyout.assertEntityPanelIsOpen('user');
+
+          const vizContent = await testSubjects.find(VISUALIZATIONS_SECTION_CONTENT_TEST_ID);
+          const isVizVisible = (await vizContent.getSize()).height > 0;
+          if (!isVizVisible) {
+            await testSubjects.click(VISUALIZATIONS_SECTION_HEADER_TEST_ID);
+          }
+
+          await testSubjects.existOrFail(GRAPH_PREVIEW_CONTENT_TEST_ID, { timeout: 10000 });
+          await expandedFlyoutGraph.expandGraph();
+          await expandedFlyoutGraph.waitGraphIsLoaded();
+
+          // The entity graph hardcodes a `now-30d` range (see graph_visualization.tsx) and ignores
+          // the `timerange` URL param, so the fixtures' absolute timestamps fall outside it. Widen
+          // the range through the picker the graph actually reads — it lives inside the graph's
+          // search bar, which is collapsed by default and must be opened first.
+          await expandedFlyoutGraph.showSearchBar();
+          await pageObjects.timePicker.setAbsoluteRange(
+            'Jan 1, 2022 @ 00:00:00.000',
+            'Dec 31, 2026 @ 23:59:59.999'
+          );
+          await expandedFlyoutGraph.waitGraphIsLoaded();
+
+          // The entity flyout graph opens on the entity alone — no events until an action is taken.
+          await expandedFlyoutGraph.assertGraphNodesNumber(1);
+          await expandedFlyoutGraph.assertNodeExists(ALICE);
+
+          // "Show this entity's actions" filters on the arm that resolved this entity in the store
+          // (user.email, ranking position 0), so it finds doc A only — not doc B, which resolves to
+          // the same entity through user.name. That cross-arm gap is the known limitation tracked in
+          // https://github.com/elastic/kibana/issues/262882.
+          await expandedFlyoutGraph.showActionsByEntity(ALICE);
+          await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
+
+          // 3 nodes: the doc A label, alice (actor), and the host it targeted.
+          await expandedFlyoutGraph.assertGraphNodesNumber(3);
+          await expandedFlyoutGraph.assertNodeExists(ALICE);
+          await expandedFlyoutGraph.assertNodeExists(HOST);
+          await expandedFlyoutGraph.assertNodeExists(
+            'label(device.user.add)ln(euid-okta-doc-a)oe(0)oa(0)'
+          );
+
+          // Pivoting on the host pulls in every event that targeted it, which reaches the two docs
+          // alice's own filter could not: doc B (same entity, different arm) and doc C (the
+          // look-alike sharing her login-shaped user.name but resolving to bob).
+          await expandedFlyoutGraph.showActionsOnEntity(HOST);
+          await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
+
+          // 7 rendered nodes — react-flow renders the stacking container as a node too:
+          //   3 label nodes (docs A, B, C), 3 entity nodes (alice, bob, host), 1 group container.
+          // Docs A and B stack together because they share the same actor→target pair.
+          await expandedFlyoutGraph.assertGraphNodesNumber(7);
+
+          // bob is now present as his own node: doc C shares alice's `user.name` but carries
+          // `user.email: bob@example.com`, so the EUID ranking resolves it to a different entity.
+          await expandedFlyoutGraph.assertNodeExists('user:bob@example.com@okta');
+          await expandedFlyoutGraph.assertNodeExists(ALICE);
+          await expandedFlyoutGraph.assertNodeExists(HOST);
+
+          // doc B is reachable from the host even though alice's own actions filter missed it.
+          await expandedFlyoutGraph.assertNodeExists(
+            'label(user.lifecycle.activate)ln(euid-okta-doc-b)oe(0)oa(0)'
+          );
+          await expandedFlyoutGraph.assertNodeExists(
+            'label(device.user.add)ln(euid-okta-doc-c)oe(0)oa(0)'
+          );
+        });
       });
     });
   });

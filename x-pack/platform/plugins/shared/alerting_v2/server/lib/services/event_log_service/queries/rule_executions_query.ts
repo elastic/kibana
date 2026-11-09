@@ -18,7 +18,7 @@ import type { FindRuleExecutionsQuery, RuleExecutionSortField } from '../types';
  * schema so the four layers — TM source, ES filter, normalizer, public
  * schema — move in lock-step: widening any one of them without the
  * others triggers the
- * `EXECUTION_HISTORY_NORMALIZER_REJECTED_EVENTS` drop log.
+ * `EXECUTION_HISTORY_NORMALIZER_DEGRADED` drop log.
  */
 const STRUCTURALLY_VALID_OUTCOMES: string[] = [...ruleExecutionOutcomeSchema.options];
 
@@ -62,7 +62,7 @@ const SORT_FIELD_TO_ES: Record<RuleExecutionSortField, string> = {
  *     `isRuleExecutionOutcome` check, and the public
  *     `ruleExecutionOutcomeSchema`. Widening any one of them without
  *     the others surfaces immediately via the
- *     `EXECUTION_HISTORY_NORMALIZER_REJECTED_EVENTS` drop log — which
+ *     `EXECUTION_HISTORY_NORMALIZER_DEGRADED` drop log — which
  *     therefore should not fire in steady state. The caller-supplied
  *     outcome filter, when present, is a subset of the structurally
  *     valid set (enforced by the public schema) and is forwarded
@@ -85,7 +85,7 @@ export const buildRuleExecutionsQuery = (query: FindRuleExecutionsQuery): Search
     outcomes,
     from,
     to,
-    sort = 'startedAt',
+    sortField = 'startedAt',
     sortOrder = 'desc',
     page,
     perPage,
@@ -127,7 +127,7 @@ export const buildRuleExecutionsQuery = (query: FindRuleExecutionsQuery): Search
 
   return {
     query: { bool: { filter: filters } },
-    sort: [{ [SORT_FIELD_TO_ES[sort]]: { order: sortOrder } }],
+    sort: [{ [SORT_FIELD_TO_ES[sortField]]: { order: sortOrder } }],
     from: (page - 1) * perPage,
     size: perPage,
   };

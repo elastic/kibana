@@ -37,7 +37,7 @@ describe('getSearchDsl', () => {
           type: undefined as any,
           sortField: 'title',
         });
-      }).toThrowError(/type must be specified/);
+      }).toThrow(/type must be specified/);
     });
     it('throws when sortOrder without sortField', () => {
       expect(() => {
@@ -45,7 +45,16 @@ describe('getSearchDsl', () => {
           type: 'foo',
           sortOrder: 'desc',
         });
-      }).toThrowError(/sortOrder requires a sortField/);
+      }).toThrow(/sortOrder requires a sortField/);
+    });
+    it('throws when sort is combined with sortField', () => {
+      expect(() => {
+        getSearchDsl(mappings, registry, {
+          type: 'foo',
+          sortField: 'title',
+          sort: [{ field: 'updated_at', order: 'asc' }],
+        });
+      }).toThrow(/sort cannot be combined with sortField or sortOrder/);
     });
   });
 
@@ -106,7 +115,26 @@ describe('getSearchDsl', () => {
         opts.type,
         opts.sortField,
         opts.sortOrder,
-        opts.pit
+        opts.pit,
+        undefined
+      );
+    });
+
+    it('passes a sort list through to getSortingParams', () => {
+      getSortingParams.mockReturnValue({});
+      const sort = [
+        { field: 'updated_at', order: 'desc' as const },
+        { field: '_shard_doc', order: 'asc' as const },
+      ];
+
+      getSearchDsl(mappings, registry, { type: 'foo', sort });
+      expect(getSortingParams).toHaveBeenCalledWith(
+        mappings,
+        'foo',
+        undefined,
+        undefined,
+        undefined,
+        sort
       );
     });
 

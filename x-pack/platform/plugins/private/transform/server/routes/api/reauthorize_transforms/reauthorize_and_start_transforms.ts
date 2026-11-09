@@ -14,7 +14,7 @@ import type {
 } from '../../api_schemas/reauthorize_transforms';
 import { TRANSFORM_ACTIONS } from '../../../../common/types/transform';
 
-import { isRequestTimeout, fillResultsWithTimeouts } from '../../utils/error_utils';
+import { isRequestTimeout, fillResultsWithTimeouts, getErrorBody } from '../../utils/error_utils';
 
 export async function reauthorizeAndStartTransforms(
   transformsInfo: ReauthorizeTransformsRequestSchema,
@@ -51,7 +51,7 @@ export async function reauthorizeAndStartTransforms(
           action: TRANSFORM_ACTIONS.REAUTHORIZE,
         });
       }
-      results[transformId] = { success: false, error: e.meta.body.error };
+      results[transformId] = { success: false, error: getErrorBody(e) };
     }
   }
   return results;

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ESQLCommand, ESQLCommandOption, ESQLSource } from '@elastic/esql/types';
 import { Parser, Walker } from '@elastic/esql';
 import { useMemo } from 'react';
 import { extractFilters } from '../utils/extract_filters';
@@ -29,7 +30,10 @@ export const useEsqlQueryInfo = ({ query }: { query: string }): EsqlQueryInfo =>
     const metadataFields = new Set<string>();
 
     // Extract stats fields
-    const statsNodes = Walker.matchAll(ast.root, { type: 'command', name: 'stats' });
+    const statsNodes = Walker.matchAll(ast.root, {
+      type: 'command',
+      name: 'stats',
+    }) as ESQLCommand[];
     Walker.walk(statsNodes, {
       visitColumn: (ctx, parent) => {
         const key = parent?.name === 'by' ? 'dimensions' : 'metricField';
@@ -38,7 +42,7 @@ export const useEsqlQueryInfo = ({ query }: { query: string }): EsqlQueryInfo =>
     });
 
     // Extract indices
-    const sourceNodes = Walker.matchAll(ast.root, { type: 'source' });
+    const sourceNodes = Walker.matchAll(ast.root, { type: 'source' }) as ESQLSource[];
     Walker.walk(sourceNodes, {
       visitSource: (node) => {
         if (node.sourceType === 'index' && node.index?.value != null) {
@@ -48,7 +52,10 @@ export const useEsqlQueryInfo = ({ query }: { query: string }): EsqlQueryInfo =>
     });
 
     // Extract fields requested via FROM ... METADATA ...
-    const metadataOptions = Walker.matchAll(ast.root, { type: 'option', name: 'metadata' });
+    const metadataOptions = Walker.matchAll(ast.root, {
+      type: 'option',
+      name: 'metadata',
+    }) as ESQLCommandOption[];
     Walker.walk(metadataOptions, {
       visitColumn: (ctx) => {
         metadataFields.add(ctx.name);

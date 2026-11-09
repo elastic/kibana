@@ -12,4 +12,6 @@ export { ConnectorField, type ConnectorFieldProps } from './connector_field';
 export {
   TemplateInstallSection,
   type TemplateInstallSectionProps,
+  type TemplateInstallStep,
 } from './template_install_section';
+export { TemplateRequirements, type TemplateRequirementsProps } from './template_requirements';

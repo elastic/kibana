@@ -39,16 +39,30 @@ export const CreateWatchlistEntitySourceRequestBody = lazySchema(() =>
       /**
        * Required when type is entity_analytics_integration. One of entityanalytics_okta, entityanalytics_ad.
        */
-      integrationName: z.string().max(256).optional(),
+      integrationName: z
+        .string()
+        .max(256)
+        .optional()
+        .describe(
+          'Required when type is entity_analytics_integration. One of entityanalytics_okta, entityanalytics_ad.'
+        ),
       enabled: z.boolean().optional(),
       /**
        * Field used to query the entity store for index-type sources
        */
-      identifierField: z.string().max(256).optional(),
+      identifierField: z
+        .string()
+        .max(256)
+        .optional()
+        .describe('Field used to query the entity store for index-type sources'),
       /**
        * KQL query used to filter data from the provided index patterns
        */
-      queryRule: z.string().max(4096).optional(),
+      queryRule: z
+        .string()
+        .max(4096)
+        .optional()
+        .describe('KQL query used to filter data from the provided index patterns'),
       matchers: z.array(Matcher).max(100).optional(),
       filter: Filter.optional(),
       range: DateRange.optional(),

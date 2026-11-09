@@ -19,6 +19,8 @@ interface CaseViewObservablesProps {
   searchTerm?: string;
   isLoading: boolean;
   onUpdateField: (args: OnUpdateFields) => void;
+  isOpen?: boolean;
+  onToggle?: (isOpen: boolean) => void;
 }
 
 export const CaseViewObservables = ({
@@ -27,6 +29,8 @@ export const CaseViewObservables = ({
   searchTerm,
   isLoading,
   onUpdateField,
+  isOpen,
+  onToggle,
 }: CaseViewObservablesProps) => {
   const caseDataWithFilteredObservables: CaseUI = useMemo(
     () => ({ ...caseData, observables }),
@@ -48,7 +52,13 @@ export const CaseViewObservables = ({
   }
 
   return (
-    <AttachmentAccordion id="observables" title={OBSERVABLES_TAB} count={observables.length}>
+    <AttachmentAccordion
+      id="observables"
+      title={OBSERVABLES_TAB}
+      count={observables.length}
+      isOpen={isOpen}
+      onToggle={onToggle}
+    >
       <ObservablesTable
         caseData={caseDataWithFilteredObservables}
         isLoading={isLoading}

@@ -53,6 +53,7 @@ export const UploadYamlStep = React.memo<UploadYamlStepProps>(
       >
         <EuiFlexItem grow={validatedFiles.length === 0}>
           <EuiFilePicker
+            aria-label={i18n.FILE_PICKER_PROMPT}
             css={
               validatedFiles.length === 0
                 ? css`

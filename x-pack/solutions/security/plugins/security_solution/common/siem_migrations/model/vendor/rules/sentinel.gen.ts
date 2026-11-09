@@ -24,39 +24,47 @@ export const SentinelRuleProperties = lazySchema(() =>
     /**
      * The rule display name
      */
-    displayName: z.string(),
+    displayName: z.string().describe('The rule display name'),
     /**
      * The rule description
      */
-    description: z.string().optional(),
+    description: z.string().optional().describe('The rule description'),
     /**
      * The KQL query for the rule
      */
-    query: z.string(),
+    query: z.string().describe('The KQL query for the rule'),
     /**
      * The frequency in ISO 8601 duration format for this alert rule to run.
      */
-    queryFrequency: z.string().max(16).optional(),
+    queryFrequency: z
+      .string()
+      .max(16)
+      .optional()
+      .describe('The frequency in ISO 8601 duration format for this alert rule to run.'),
     /**
      * The period in ISO 8601 duration format that this alert rule looks at.
      */
-    queryPeriod: z.string().max(16).optional(),
+    queryPeriod: z
+      .string()
+      .max(16)
+      .optional()
+      .describe('The period in ISO 8601 duration format that this alert rule looks at.'),
     /**
      * The rule severity
      */
-    severity: z.string().optional(),
+    severity: z.string().optional().describe('The rule severity'),
     /**
      * MITRE ATT&CK tactic names
      */
-    tactics: z.array(z.string()).optional(),
+    tactics: z.array(z.string()).optional().describe('MITRE ATT&CK tactic names'),
     /**
      * MITRE ATT&CK technique IDs
      */
-    techniques: z.array(z.string()).optional(),
+    techniques: z.array(z.string()).optional().describe('MITRE ATT&CK technique IDs'),
     /**
      * Whether the rule is enabled
      */
-    enabled: z.boolean().optional(),
+    enabled: z.boolean().optional().describe('Whether the rule is enabled'),
   })
 );
 export type SentinelRuleProperties = z.infer<typeof SentinelRuleProperties>;
@@ -69,23 +77,23 @@ export const SentinelArmResource = lazySchema(() =>
     /**
      * The ARM resource identifier
      */
-    id: z.string().optional(),
+    id: z.string().optional().describe('The ARM resource identifier'),
     /**
      * The ARM resource name
      */
-    name: z.string().optional(),
+    name: z.string().optional().describe('The ARM resource name'),
     /**
      * The rule kind (e.g. Scheduled or NRT)
      */
-    kind: z.string().optional(),
+    kind: z.string().optional().describe('The rule kind (e.g. Scheduled or NRT)'),
     /**
      * The ARM resource type
      */
-    type: z.string().optional(),
+    type: z.string().optional().describe('The ARM resource type'),
     /**
      * The rule properties
      */
-    properties: SentinelRuleProperties.optional(),
+    properties: SentinelRuleProperties.optional().describe('The rule properties'),
   })
 );
 export type SentinelArmResource = z.infer<typeof SentinelArmResource>;
@@ -98,7 +106,10 @@ export const CreateSentinelRulesBody = lazySchema(() =>
     /**
      * The ARM template resources array containing Sentinel analytics rules
      */
-    resources: z.array(SentinelArmResource).min(1),
+    resources: z
+      .array(SentinelArmResource)
+      .min(1)
+      .describe('The ARM template resources array containing Sentinel analytics rules'),
   })
 );
 export type CreateSentinelRulesBody = z.infer<typeof CreateSentinelRulesBody>;

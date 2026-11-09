@@ -1,5 +1,8 @@
 {
-  "sha1": "d3bef4f3c9918b96dbd4c8b05da89cbb95a2f1b5",
+  "sha1": "ae5f195b84dc529ef5ff5fd9cf8afd3245963331",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "8fe9df63e0d68b2-2d457382a48710c",
@@ -8,8 +11,8 @@
       "tags": [],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/ui/tests/global.setup.ts",
-        "line": 13,
-        "column": 16
+        "line": 7,
+        "column": 1
       }
     },
     {
@@ -17,12 +20,41 @@
       "title": "Date range picker presets persistence persists save and delete across reloads",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/ui/tests/date_range_picker_presets_persistence.spec.ts",
-        "line": 29,
-        "column": 12
+        "line": 20,
+        "column": 50
+      }
+    },
+    {
+      "id": "7a42b236e507511-25901aabcbb1c0f",
+      "title": "Date range picker presets persistence does not offer deletion of quick ranges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/ui/tests/date_range_picker_presets_persistence.spec.ts",
+        "line": 43,
+        "column": 22
+      }
+    },
+    {
+      "id": "2057e9a561582c9-a23d254e469faac",
+      "title": "Date range picker UI settings honors the configured week start and time zone when selecting a calendar day",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/ui/tests/date_range_picker_ui_settings.spec.ts",
+        "line": 38,
+        "column": 13
       }
     },
     {
@@ -30,12 +62,13 @@
       "title": "Saved query menu — CRUD (Discover) save, load, update, save-as-new, delete via the popover",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/ui/tests/saved_query_menu_crud.spec.ts",
-        "line": 35,
-        "column": 12
+        "line": 24,
+        "column": 64
       }
     },
     {
@@ -43,12 +76,13 @@
       "title": "Saved query menu — capabilities matrix (Discover v2) discover_v2:all + sqm:all renders the saved-query section",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/ui/tests/saved_query_menu_privileges_matrix.spec.ts",
-        "line": 41,
-        "column": 16
+        "line": 33,
+        "column": 24
       }
     },
     {
@@ -56,12 +90,13 @@
       "title": "Saved query menu — capabilities matrix (Discover v2) discover_v2:all + sqm:read renders the section with save disabled",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/ui/tests/saved_query_menu_privileges_matrix.spec.ts",
-        "line": 41,
-        "column": 16
+        "line": 33,
+        "column": 24
       }
     },
     {
@@ -69,12 +104,13 @@
       "title": "Saved query menu — capabilities matrix (Discover v2) discover_v2:all + sqm:none hides the entire saved-query section",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/ui/tests/saved_query_menu_privileges_matrix.spec.ts",
-        "line": 41,
-        "column": 16
+        "line": 33,
+        "column": 24
       }
     },
     {
@@ -82,12 +118,13 @@
       "title": "Saved query menu — read-only (Discover) hides save/update/delete and allows load/clear",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/ui/tests/saved_query_menu_readonly.spec.ts",
-        "line": 35,
-        "column": 12
+        "line": 24,
+        "column": 64
       }
     },
     {
@@ -95,12 +132,13 @@
       "title": "Saved query menu — cross-app smoke popover renders in dashboard, maps and visualize",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/unified_search/test/scout/ui/tests/saved_query_menu_smoke.spec.ts",
-        "line": 34,
-        "column": 12
+        "line": 24,
+        "column": 13
       }
     }
   ]

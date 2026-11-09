@@ -100,6 +100,15 @@ export const setupModuleBodySchema = schema.object({
   applyToAllSpaces: schema.maybe(
     schema.boolean({ meta: { description: 'Add each job created to the * space (optional)' } })
   ),
+  projectRouting: schema.maybe(
+    schema.string({
+      maxLength: 10000,
+      meta: {
+        description:
+          'Project routing value. This will be added to the datafeed configuration for each datafeed created by the module (optional).',
+      },
+    })
+  ),
 });
 
 export const optionalModuleIdParamSchema = schema.object({
@@ -178,8 +187,8 @@ export const jobExistsResponse = () =>
       schema.arrayOf(
         schema.object({
           id: schema.string({ maxLength: 10000 }),
-          earliestTimestampMs: schema.number(),
-          latestTimestampMs: schema.number(),
+          earliestTimestampMs: schema.maybe(schema.number()),
+          latestTimestampMs: schema.maybe(schema.number()),
           latestResultsTimestampMs: schema.maybe(schema.number()),
         }),
         { maxSize: 10000 }

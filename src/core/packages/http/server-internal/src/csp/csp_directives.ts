@@ -64,6 +64,14 @@ export const defaultRules: Partial<Record<CspDirectiveName, string[]>> = {
   'style-src': [`'report-sample'`, `'self'`, `'unsafe-inline'`],
   'object-src': [`'report-sample'`, `'none'`],
   'form-action': [`'report-sample'`, `'self'`],
+  'frame-src': [
+    `'report-sample'`,
+    `'self'`,
+    'kibana.estccdn.com',
+    'play.vidyard.com',
+    'videos.elastic.co',
+    'ela.st',
+  ],
 };
 
 /**
@@ -76,7 +84,6 @@ export const additionalRules: Partial<Record<CspDirectiveName, string[]>> = {
   'font-src': [`'self'`],
   'img-src': [`'self'`],
   'frame-ancestors': [`'self'`],
-  'frame-src': [`'self'`],
 };
 
 /**

@@ -75,14 +75,18 @@ jest.mock('@kbn/response-ops-rule-form/src/common/apis/fetch_ui_config', () => (
     .fn()
     .mockResolvedValue({ minimumScheduleInterval: { value: '1m', enforce: false } }),
 }));
-jest.mock('react-router-dom', () => ({
-  useHistory: () => ({
+jest.mock('react-router-dom', () => {
+  const history = {
     push: jest.fn(),
-  }),
-  useLocation: () => ({
-    pathname: '/triggersActions/rules/',
-  }),
-}));
+    createHref: jest.fn(({ pathname }: { pathname: string }) => pathname),
+  };
+  return {
+    useHistory: () => history,
+    useLocation: () => ({
+      pathname: '/triggersActions/rules/',
+    }),
+  };
+});
 
 jest.mock('@kbn/kibana-utils-plugin/public', () => {
   const originalModule = jest.requireActual('@kbn/kibana-utils-plugin/public');
@@ -220,7 +224,7 @@ describe('Rules list Bulk Delete', () => {
     await act(async () => {
       fireEvent.click(screen.getByTestId('confirmModalCancelButton'));
     });
-    expect(bulkDeleteRules).not.toBeCalled();
+    expect(bulkDeleteRules).not.toHaveBeenCalled();
   });
 
   it('should have warning toast message after Bulk Delete', async () => {

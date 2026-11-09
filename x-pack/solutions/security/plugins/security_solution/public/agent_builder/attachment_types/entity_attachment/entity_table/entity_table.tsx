@@ -302,6 +302,7 @@ export const EntityTable: React.FC<EntityTableProps> = ({ entities }) => {
         identifierType: row.identifier.identifierType,
         identifier: displayName,
         entityStoreId,
+        mode: row.identifier.mode,
       });
       if (rightPanel) {
         navigateWithFlyout({ preview: [], right: rightPanel });
@@ -478,7 +479,7 @@ export const EntityTable: React.FC<EntityTableProps> = ({ entities }) => {
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             size="xs"
-            iconType="popout"
+            iconType="external"
             onClick={handleOpenEntityAnalytics}
             data-test-subj="entityAttachmentTableOpenEntityAnalytics"
             aria-label={OPEN_ENTITY_ANALYTICS_LABEL}

@@ -12,8 +12,8 @@ import { dashboardMigrationRouteFactory } from '../../../utils/dashboards';
 import {
   DASHBOARD_MIGRATIONS_RESOURCES_INDEX_PATTERN,
   deleteAllDashboardMigrations,
+  getDashboardResourcesPerMigrationFromES,
 } from '../../../utils/es_queries_dashboards';
-import { getResoucesPerMigrationFromES } from '../../../utils/es_queries';
 import { createMacrosForMigrationId, executeTaskInBatches } from '../../../utils';
 export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
@@ -63,7 +63,7 @@ export default ({ getService }: FtrProviderContext) => {
         expectStatusCode: 404,
       });
 
-      const resourcesFromES = await getResoucesPerMigrationFromES({
+      const resourcesFromES = await getDashboardResourcesPerMigrationFromES({
         es,
         migrationId,
       });

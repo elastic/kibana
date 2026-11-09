@@ -14,7 +14,7 @@ import type { KibanaServerProvider } from './services/kibana_server';
 export { KibanaServerProvider } from './services/kibana_server';
 export type KibanaServer = ProvidedType<typeof KibanaServerProvider>;
 
-export { RetryService, type TryWithRetriesOptions } from './services/retry';
+export { RetryService, type RetryOptions } from './services/retry';
 
 import type { EsArchiverProvider } from './services/es_archiver';
 export type EsArchiver = ProvidedType<typeof EsArchiverProvider>;

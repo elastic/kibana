@@ -10,7 +10,7 @@ exports[`EventsTable Renders events table with no search bar 1`] = `
     data-test-subj="mlCalendarEventsTable"
   >
     <div
-      class="emotion-euiContainerCSS"
+      class="euiTable__wrapper emotion-euiContainerCSS"
     >
       <table
         class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
@@ -373,13 +373,15 @@ exports[`EventsTable Renders events table with search bar 1`] = `
       >
         <div
           class="euiFilterGroup emotion-euiFilterGroup-uncompressed"
+          data-display="regular"
+          data-dividers="true"
         />
       </div>
       <div
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <button
-          class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-base-primary"
+          class="euiButton emotion-euiButtonDisplay-s-base-primary"
           data-test-subj="mlCalendarNewEventButton"
           type="button"
         >
@@ -398,7 +400,7 @@ exports[`EventsTable Renders events table with search bar 1`] = `
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <button
-          class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-base-primary"
+          class="euiButton emotion-euiButtonDisplay-s-base-primary"
           data-test-subj="mlCalendarImportEventsButton"
           type="button"
         >
@@ -422,7 +424,7 @@ exports[`EventsTable Renders events table with search bar 1`] = `
       data-test-subj="mlCalendarEventsTable"
     >
       <div
-        class="emotion-euiContainerCSS"
+        class="euiTable__wrapper emotion-euiContainerCSS"
       >
         <table
           class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"

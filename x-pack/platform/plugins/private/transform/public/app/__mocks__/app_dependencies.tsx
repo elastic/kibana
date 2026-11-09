@@ -73,6 +73,10 @@ coreSetup.http.post = jest.fn().mockImplementation((endpoint) => {
       preview: [],
     });
   }
+
+  if (endpoint.startsWith('/internal/transform/field_histograms/')) {
+    return Promise.resolve([]);
+  }
 });
 
 const appDependencies: AppDependencies = {

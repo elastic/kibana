@@ -40,7 +40,6 @@ export const RULES_TABLE_HEADER_TEST_SUBJ = {
 
 export const RULES_TABLE = {
   RULES_ROWS_ENABLE_SWITCH_BUTTON: 'rules-row-enable-switch-button',
-  RULES_ROW_SELECT_ALL_CURRENT_PAGE: 'cloud-security-fields-selector-item-all',
 };
 
 export const getCspBenchmarkRuleTableRowItemTestId = (id: string) =>

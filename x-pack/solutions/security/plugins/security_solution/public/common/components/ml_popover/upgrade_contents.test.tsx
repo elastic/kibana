@@ -11,9 +11,16 @@ import { UpgradeContentsComponent } from './upgrade_contents';
 
 jest.mock('../../lib/kibana');
 
-describe('JobsTableFilters', () => {
+describe('UpgradeContentsComponent', () => {
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(<UpgradeContentsComponent />);
     expect(wrapper).toMatchSnapshot();
+  });
+
+  test('drops the popover title and fixed width when popover is false', () => {
+    const wrapper = shallow(<UpgradeContentsComponent popover={false} />);
+
+    expect(wrapper.is('div')).toBe(true);
+    expect(wrapper.find('EuiPopoverTitle').exists()).toBe(false);
   });
 });

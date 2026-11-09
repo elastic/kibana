@@ -10,6 +10,7 @@
 import type { RangeSliderControlState } from '@kbn/controls-schemas';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type {
+  CanCancelRequests,
   PublishesRelatedPanels,
   PublishesUnsavedChanges,
   PublishingSubject,
@@ -18,6 +19,7 @@ import type {
 import type { DataControlApi } from '../types';
 
 export type RangeSliderControlApi = DefaultEmbeddableApi<RangeSliderControlState> &
+  CanCancelRequests &
   DataControlApi &
   PublishesUnsavedChanges &
   PublishesRelatedPanels & {

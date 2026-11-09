@@ -46,7 +46,7 @@ const MyStory = () => (
 To view the content management stories:
 
 ```bash
-yarn storybook content_management
+pnpm storybook content_management
 ```
 
 ## Usage

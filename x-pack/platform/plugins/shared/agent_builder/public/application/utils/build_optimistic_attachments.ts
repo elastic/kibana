@@ -18,13 +18,22 @@ import {
   getContentKey,
 } from '@kbn/agent-builder-common/attachments';
 
+export interface OptimisticAttachments {
+  fallbackAttachments: Attachment[];
+  attachmentRefs: AttachmentVersionRef[];
+}
+
+/**
+ * What the user's message shows for its attachments before the server has saved them: new
+ * attachments as fallback data at version 1, re-sent existing ones as a ref to the next version.
+ */
 export const buildOptimisticAttachments = ({
   attachments,
   conversationAttachments,
 }: {
   attachments?: AttachmentInput[];
   conversationAttachments?: VersionedAttachment[];
-}): { fallbackAttachments: Attachment[]; attachmentRefs: AttachmentVersionRef[] } => {
+}): OptimisticAttachments => {
   if (!attachments?.length) {
     return { fallbackAttachments: [], attachmentRefs: [] };
   }

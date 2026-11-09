@@ -1,6 +1,93 @@
 {
-  "sha1": "e4e838d0e803e7be4051845fa83b6c724ac4cd12",
+  "sha1": "0d147fef96dc6629f43c55d55ac37526955a9eb4",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
+    {
+      "id": "e2c048a8bafe4ea-bf0430867774bc4",
+      "title": "Task Manager execution control routes _status: returns not paused by default",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/execution_control_routes.spec.ts",
+        "line": 33,
+        "column": 15
+      }
+    },
+    {
+      "id": "e2c048a8bafe4ea-a01e08e805f7288",
+      "title": "Task Manager execution control routes _pause / _resume: toggles the global pause",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/execution_control_routes.spec.ts",
+        "line": 41,
+        "column": 47
+      }
+    },
+    {
+      "id": "e2c048a8bafe4ea-439b9c317b4f48d",
+      "title": "Task Manager execution control routes _pause / _resume: toggles a specific task type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/execution_control_routes.spec.ts",
+        "line": 59,
+        "column": 27
+      }
+    },
+    {
+      "id": "e2c048a8bafe4ea-cb775ef29b8a65a",
+      "title": "Task Manager execution control routes _pause: returns 400 for an unknown task type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/execution_control_routes.spec.ts",
+        "line": 77,
+        "column": 16
+      }
+    },
+    {
+      "id": "e2c048a8bafe4ea-c08f9aa562ba86b",
+      "title": "Task Manager execution control routes _pause: returns 403 when called by a viewer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/execution_control_routes.spec.ts",
+        "line": 95,
+        "column": 7
+      }
+    },
+    {
+      "id": "e2c048a8bafe4ea-09bed95a7ddbfdf",
+      "title": "Task Manager execution control routes _status: returns 403 when called by a viewer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/execution_control_routes.spec.ts",
+        "line": 101,
+        "column": 42
+      }
+    },
     {
       "id": "eb284a668bfb2df-2953aa4df2b67e6",
       "title": "Task Manager internal routes schedule: creates a task and returns it",
@@ -11,8 +98,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/internal_routes.spec.ts",
-        "line": 31,
-        "column": 12
+        "line": 24,
+        "column": 59
       }
     },
     {
@@ -25,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/internal_routes.spec.ts",
-        "line": 56,
-        "column": 12
+        "line": 42,
+        "column": 22
       }
     },
     {
@@ -39,8 +126,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/internal_routes.spec.ts",
-        "line": 84,
-        "column": 12
+        "line": 66,
+        "column": 25
       }
     },
     {
@@ -53,8 +140,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/internal_routes.spec.ts",
-        "line": 100,
-        "column": 12
+        "line": 82,
+        "column": 6
       }
     },
     {
@@ -67,8 +154,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/internal_routes.spec.ts",
-        "line": 117,
-        "column": 12
+        "line": 93,
+        "column": 11
       }
     },
     {
@@ -81,8 +168,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/internal_routes.spec.ts",
-        "line": 146,
-        "column": 12
+        "line": 118,
+        "column": 13
       }
     },
     {
@@ -95,8 +182,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/internal_routes.spec.ts",
-        "line": 156,
-        "column": 12
+        "line": 124,
+        "column": 23
       }
     },
     {
@@ -109,8 +196,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/internal_routes.spec.ts",
-        "line": 184,
-        "column": 12
+        "line": 150,
+        "column": 18
       }
     },
     {
@@ -123,8 +210,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/internal_routes.spec.ts",
-        "line": 194,
-        "column": 12
+        "line": 156,
+        "column": 84
       }
     }
   ]

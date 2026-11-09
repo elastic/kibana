@@ -16,7 +16,7 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-import { DatasetTags, DatasetMaturity } from '../common_attributes.gen';
+import { DatasetTags, DatasetMaturity, SpaceIds } from '../common_attributes.gen';
 
 export const CreateEvaluationDatasetRequestBody = lazySchema(() =>
   z.object({
@@ -24,6 +24,7 @@ export const CreateEvaluationDatasetRequestBody = lazySchema(() =>
     description: z.string().max(2048),
     tags: DatasetTags.optional(),
     maturity: DatasetMaturity.optional(),
+    space_ids: SpaceIds.optional(),
   })
 );
 export type CreateEvaluationDatasetRequestBody = z.infer<typeof CreateEvaluationDatasetRequestBody>;

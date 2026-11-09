@@ -149,7 +149,7 @@ describe('NewVisModal', () => {
       renderNewVisModal();
       waitFor(async () => {
         await userEvent.click(screen.getByText('Vis Type 1'));
-        expect(window.location.assign).toBeCalledWith(
+        expect(window.location.assign).toHaveBeenCalledWith(
           'testbasepath/app/visualize#/create?type=vis'
         );
       });
@@ -161,7 +161,7 @@ describe('NewVisModal', () => {
       });
       waitFor(async () => {
         await userEvent.click(screen.getByText('Vis Type 1'));
-        expect(window.location.assign).toBeCalledWith(
+        expect(window.location.assign).toHaveBeenCalledWith(
           'testbasepath/app/visualize#/create?type=vis&foo=true&bar=42'
         );
       });
@@ -175,12 +175,12 @@ describe('NewVisModal', () => {
         editorParams: ['foo=true', 'bar=42'],
         onClose,
         application: { navigateToApp } as unknown as ApplicationStart,
-        originatingApp: 'coolJestTestApp',
+        embeddableState: { originatingApp: 'coolJestTestApp' },
         stateTransfer,
       });
       waitFor(async () => {
         await userEvent.click(screen.getByText('Vis with alias Url'));
-        expect(stateTransfer.navigateToEditor).toBeCalledWith('otherApp', {
+        expect(stateTransfer.navigateToEditor).toHaveBeenCalledWith('otherApp', {
           path: '#/aliasUrl',
           state: { originatingApp: 'coolJestTestApp' },
         });
@@ -199,7 +199,7 @@ describe('NewVisModal', () => {
       });
       waitFor(async () => {
         await userEvent.click(screen.getByText('Vis with alias Url'));
-        expect(navigateToApp).toBeCalledWith('otherApp', { path: '#/aliasUrl' });
+        expect(navigateToApp).toHaveBeenCalledWith('otherApp', { path: '#/aliasUrl' });
         expect(onClose).toHaveBeenCalled();
       });
     });

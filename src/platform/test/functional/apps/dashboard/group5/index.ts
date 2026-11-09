@@ -27,7 +27,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     before(loadCurrentData);
 
     loadTestFile(require.resolve('./dashboard_settings'));
-    loadTestFile(require.resolve('./data_shared_attributes'));
 
     // Note: This one must be last because it unloads some data for one of its tests!
     // No, this isn't ideal, but loading/unloading takes so much time and these are all bunched

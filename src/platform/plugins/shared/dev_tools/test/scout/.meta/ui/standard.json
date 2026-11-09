@@ -1,5 +1,8 @@
 {
   "sha1": "274f7422b9058c52fa818c9a6bdff23e4f78ae22",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "3bed0bb91cd183e-e5db1d53fa33f8a",
@@ -11,8 +14,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dev_tools/test/scout/ui/tests/breadcrumbs.spec.ts",
-        "line": 20,
-        "column": 9
+        "line": 15,
+        "column": 28
       }
     },
     {
@@ -25,8 +28,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dev_tools/test/scout/ui/tests/breadcrumbs.spec.ts",
-        "line": 20,
-        "column": 9
+        "line": 15,
+        "column": 28
       }
     },
     {
@@ -39,8 +42,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dev_tools/test/scout/ui/tests/breadcrumbs.spec.ts",
-        "line": 20,
-        "column": 9
+        "line": 15,
+        "column": 28
       }
     },
     {
@@ -53,8 +56,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dev_tools/test/scout/ui/tests/breadcrumbs.spec.ts",
-        "line": 20,
-        "column": 9
+        "line": 15,
+        "column": 28
       }
     },
     {
@@ -67,8 +70,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dev_tools/test/scout/ui/tests/feature_controls.spec.ts",
-        "line": 20,
-        "column": 7
+        "line": 15,
+        "column": 26
       }
     },
     {
@@ -81,8 +84,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dev_tools/test/scout/ui/tests/feature_controls.spec.ts",
-        "line": 30,
-        "column": 7
+        "line": 20,
+        "column": 93
       }
     },
     {
@@ -95,8 +98,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dev_tools/test/scout/ui/tests/feature_controls.spec.ts",
-        "line": 44,
-        "column": 7
+        "line": 27,
+        "column": 11
       }
     },
     {
@@ -109,8 +112,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dev_tools/test/scout/ui/tests/feature_controls.spec.ts",
-        "line": 66,
-        "column": 7
+        "line": 45,
+        "column": 16
       }
     },
     {
@@ -123,8 +126,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dev_tools/test/scout/ui/tests/feature_controls.spec.ts",
-        "line": 88,
-        "column": 7
+        "line": 57,
+        "column": 28
       }
     }
   ]

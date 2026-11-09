@@ -462,10 +462,11 @@ export const EntitiesDataTable = ({
                     <EuiFlexItem grow={false}>{formattedValue}</EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiIconTip
+                        aria-label={TARGET_ENTITY_TOOLTIP}
                         content={TARGET_ENTITY_TOOLTIP}
                         type="aggregate"
                         size="s"
-                        data-test-subj="target-entity-icon"
+                        iconProps={{ 'data-test-subj': 'target-entity-icon' }}
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>
@@ -593,8 +594,11 @@ export const EntitiesDataTable = ({
                   {groupSelectorComponent}
                 </EuiFlexItem>
               )}
-              {gridProps.inTableSearchControl && (
-                <EuiFlexItem grow={false}>{gridProps.inTableSearchControl}</EuiFlexItem>
+              {gridProps.inTableSearchInput && (
+                <EuiFlexItem grow={false}>{gridProps.inTableSearchInput}</EuiFlexItem>
+              )}
+              {gridProps.inTableSearchButton && (
+                <EuiFlexItem grow={false}>{gridProps.inTableSearchButton}</EuiFlexItem>
               )}
               {hasRoomForGridControls && keyboardShortcutsControl && (
                 <EuiFlexItem grow={false}>{keyboardShortcutsControl}</EuiFlexItem>

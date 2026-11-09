@@ -27,6 +27,7 @@ export const TableRowActions: React.FunctionComponent<{
   onViewAgentJsonClick: () => void;
   onViewAgentPolicyClick: () => void;
   onRollbackClick: () => void;
+  onRestartClick: () => void;
   onRemoveCollectorClick?: () => void;
 }> = ({
   agent,
@@ -42,6 +43,7 @@ export const TableRowActions: React.FunctionComponent<{
   onViewAgentJsonClick,
   onViewAgentPolicyClick,
   onRollbackClick,
+  onRestartClick,
   onRemoveCollectorClick,
 }) => {
   const { getHref } = useLink();
@@ -64,6 +66,7 @@ export const TableRowActions: React.FunctionComponent<{
       onUnenrollClick,
       onUninstallClick: onGetUninstallCommandClick,
       onRollbackClick,
+      onRestartClick,
       onRemoveCollectorClick,
     }),
     [
@@ -80,6 +83,7 @@ export const TableRowActions: React.FunctionComponent<{
       onUnenrollClick,
       onGetUninstallCommandClick,
       onRollbackClick,
+      onRestartClick,
       onRemoveCollectorClick,
     ]
   );

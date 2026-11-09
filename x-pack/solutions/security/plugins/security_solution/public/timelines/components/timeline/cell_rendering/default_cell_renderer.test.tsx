@@ -16,7 +16,7 @@ import { DroppableWrapper } from '../../../../common/components/drag_and_drop/dr
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { defaultHeaders, mockTimelineData, TestProviders } from '../../../../common/mock';
 import { DefaultCellRenderer } from './default_cell_renderer';
-import type { BrowserFields } from '@kbn/timelines-plugin/common/search_strategy';
+import type { BrowserFields } from '@kbn/securitysolution-timeline-common';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 
 jest.mock('../../../../common/lib/kibana');
@@ -75,7 +75,7 @@ describe('DefaultCellRenderer', () => {
       </TestProviders>
     );
 
-    expect(getColumnRenderer).toBeCalledWith(header.id, columnRenderers, data, undefined);
+    expect(getColumnRenderer).toHaveBeenCalledWith(header.id, columnRenderers, data, undefined);
   });
 
   test('if in tgrid expanded value, it invokes `renderColumn` with the expected arguments', () => {
@@ -110,7 +110,7 @@ describe('DefaultCellRenderer', () => {
       </TestProviders>
     );
 
-    expect(mockImplementation.renderColumn).toBeCalledWith(
+    expect(mockImplementation.renderColumn).toHaveBeenCalledWith(
       expect.objectContaining({
         asPlainText: false,
         columnName: header.id,

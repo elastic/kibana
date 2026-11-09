@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiLoadingChart, EuiCallOut } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiLoadingChart } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect } from 'react';
@@ -85,7 +86,7 @@ export const WaterfallChartContainer: React.FC<Props> = ({ checkGroup, stepIndex
         />
       )}
       {waterfallLoaded && hasEvents && !isWaterfallSupported && (
-        <EuiCallOut
+        <KbnWarningCallout
           announceOnMount
           title={
             <FormattedMessage
@@ -93,14 +94,13 @@ export const WaterfallChartContainer: React.FC<Props> = ({ checkGroup, stepIndex
               defaultMessage="Waterfall chart unavailable"
             />
           }
-          color="warning"
-          iconType="question"
-        >
-          <FormattedMessage
-            id="xpack.uptime.synthetics.stepDetail.waterfallUnsupported.description"
-            defaultMessage="The waterfall chart cannot be shown. You may be using an older version of the Synthetic Agent. Please check the version and consider upgrading."
-          />
-        </EuiCallOut>
+          text={
+            <FormattedMessage
+              id="xpack.uptime.synthetics.stepDetail.waterfallUnsupported.description"
+              defaultMessage="The waterfall chart cannot be shown. You may be using an older version of the Synthetic Agent. Please check the version and consider upgrading."
+            />
+          }
+        />
       )}
     </>
   );

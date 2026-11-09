@@ -12,11 +12,13 @@
     "scripts/**/*.json",
     "server/**/*",
     "test/scout/**/*",
+    "test/scout_osquery_workflows/**/*",
     "../../../../../typings/**/*",
     // ECS and Osquery schema files (JSON not matched by **/* globs)
     "common/schemas/*/*.json"
   ],
   "kbn_references": [
+    "@kbn/app-header",
     "@kbn/core",
     // add references to other TypeScript projects the plugin depends on
 
@@ -76,6 +78,10 @@
     "@kbn/openapi-bundler",
     "@kbn/repo-info",
     "@kbn/zod",
+    "@kbn/workflows",
+    "@kbn/workflows-extensions",
+    "@kbn/crypto",
+    "@kbn/test-es-server",
     "@kbn/core-lifecycle-server",
     "@kbn/core-saved-objects-api-server-internal",
     "@kbn/core-http-server-utils",
@@ -99,6 +105,10 @@
     "@kbn/core-logging-server-mocks",
     "@kbn/core-http-request-handler-context-server",
     "@kbn/core-security-server",
-    "@kbn/rrule"
+    "@kbn/rrule",
+    "@kbn/cps-utils",
+    "@kbn/cps",
+    "@kbn/core-chrome-browser-mocks",
+    "@kbn/app-menu"
   ]
 }

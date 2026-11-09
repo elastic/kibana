@@ -566,6 +566,7 @@
                   "__one_of": [
                     "disabled",
                     "stored",
+                    "columnar_stored",
                     "synthetic"
                   ]
                 }
@@ -1006,6 +1007,7 @@
                   "__one_of": [
                     "disabled",
                     "stored",
+                    "columnar_stored",
                     "synthetic"
                   ]
                 }
@@ -1734,6 +1736,7 @@
             "__one_of": [
               "disabled",
               "stored",
+              "columnar_stored",
               "synthetic"
             ]
           }

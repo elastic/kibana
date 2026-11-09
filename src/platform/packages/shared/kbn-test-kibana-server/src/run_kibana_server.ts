@@ -53,6 +53,8 @@ export async function runKibanaServer(options: RunKibanaServerOptions) {
     ...process.env,
     ...(options.config.get('kbnTestServer.env') as Record<string, string | undefined>),
   };
+  env.KBN_HMR ??= 'false';
+
   if (env.NO_COLOR !== undefined) {
     delete env.FORCE_COLOR;
   } else if (env.FORCE_COLOR === undefined) {

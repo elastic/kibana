@@ -20,9 +20,9 @@ import {
   EuiLink,
   EuiSpacer,
   EuiText,
-  EuiCallOut,
   EuiCode,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import type { Repository } from '../../../../../common/types';
@@ -526,7 +526,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
       {showRepositoryNotFoundWarning && (
         <>
           <EuiSpacer size="m" />
-          <EuiCallOut
+          <KbnDangerCallout
             announceOnMount
             data-test-subj="repositoryNotFoundWarning"
             title={
@@ -536,15 +536,14 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
               />
             }
             role="alert"
-            color="danger"
-            iconType="warning"
-          >
-            <FormattedMessage
-              id="xpack.snapshotRestore.policyForm.stepLogistics.selectRepository.policyRepositoryNotFoundDescription"
-              defaultMessage="Repository {repo} does not exist. Please select an existing repository."
-              values={{ repo: <EuiCode>{policy.repository}</EuiCode> }}
-            />
-          </EuiCallOut>
+            text={
+              <FormattedMessage
+                id="xpack.snapshotRestore.policyForm.stepLogistics.selectRepository.policyRepositoryNotFoundDescription"
+                defaultMessage="Repository {repo} does not exist. Please select an existing repository."
+                values={{ repo: <EuiCode>{policy.repository}</EuiCode> }}
+              />
+            }
+          />
         </>
       )}
 

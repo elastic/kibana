@@ -33,6 +33,7 @@ export const esqlToolFormRegistryEntry: ToolTypeRegistryEntry<EsqlToolFormData> 
     ...commonToolFormDefaultValues,
     esql: '',
     params: ESQL_DEFAULT_PARAMS,
+    includeFrozen: false,
     type: ToolType.esql,
   },
   toolToFormData: (tool: ToolDefinitionWithSchema) => {

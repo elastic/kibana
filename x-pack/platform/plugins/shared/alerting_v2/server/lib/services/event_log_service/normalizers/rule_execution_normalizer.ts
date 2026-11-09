@@ -61,7 +61,7 @@ const isRuleExecutionOutcome = (value: unknown): value is RuleExecutionOutcome =
  *    structurally-valid set, so this branch is defence-in-depth —
  *    it should not fire in steady state. If it does, the
  *    `EventLogService` drop counter emits
- *    `EXECUTION_HISTORY_NORMALIZER_REJECTED_EVENTS`, signalling that
+ *    `EXECUTION_HISTORY_NORMALIZER_DEGRADED`, signalling that
  *    the ES filter, this check, the public schema, and Task Manager's
  *    source enum have fallen out of lock-step.
  */

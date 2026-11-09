@@ -19,7 +19,10 @@ import type {
 import { FIELD_REQUIRED } from '../../translations';
 import { getFieldRequirementLabel } from '../../../optional_field_label';
 
-type CheckboxGroupProps = z.infer<typeof CheckboxGroupFieldSchema> & ConditionRenderProps;
+type CheckboxGroupProps = z.infer<typeof CheckboxGroupFieldSchema> &
+  ConditionRenderProps & {
+    onEditCancel?: () => void;
+  };
 
 const toStringArray = (value: unknown): string[] =>
   Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
@@ -47,6 +50,7 @@ export const CheckboxGroup: React.FC<CheckboxGroupProps> = ({
   onConfirm,
   isSaving,
   isSaveDisabled,
+  onEditCancel,
 }) => {
   const { control, resetField } = useFormContext();
   const path = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`;
@@ -69,7 +73,8 @@ export const CheckboxGroup: React.FC<CheckboxGroupProps> = ({
 
   const handleCancel = useCallback(() => {
     resetField(path);
-  }, [path, resetField]);
+    onEditCancel?.();
+  }, [onEditCancel, path, resetField]);
 
   return (
     <Controller

@@ -9,6 +9,7 @@ import type { EsqlEsqlColumnInfo, FieldValue } from '@elastic/elasticsearch/lib/
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import pRetry from 'p-retry';
 import { apiTest } from '@kbn/scout';
+import { namespaceIndex } from './index_namespace';
 
 export interface EsqlFixtureOptions {
   esqlDropNullColumns: boolean;
@@ -132,7 +133,7 @@ export const esqlFixture = apiTest.extend<{}, EsqlFixture & EsqlFixtureOptions>(
             'queryOnIndex should not receive a query that already contains a "from" clause.'
           );
         }
-        const fullQuery = `from ${indexName} ${queryStr}`;
+        const fullQuery = `from ${namespaceIndex(indexName)} ${queryStr}`;
         return await executeEsqlQuery(fullQuery);
       };
 

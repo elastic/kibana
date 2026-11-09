@@ -32,7 +32,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted renders Bread
         <span
           aria-hidden="true"
           class="css-15ro776"
-          data-euiicon-type="arrowRight"
+          data-euiicon-type="chevronSingleRight"
         />
         <span
           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
@@ -55,7 +55,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted renders Bread
         <span
           aria-hidden="true"
           class="css-15ro776"
-          data-euiicon-type="arrowRight"
+          data-euiicon-type="chevronSingleRight"
         />
         <span
           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
@@ -78,7 +78,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted renders Bread
         <span
           aria-hidden="true"
           class="css-15ro776"
-          data-euiicon-type="arrowRight"
+          data-euiicon-type="chevronSingleRight"
         />
         <span
           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
@@ -155,7 +155,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should displa
         <span
           aria-hidden="true"
           class="css-15ro776"
-          data-euiicon-type="arrowRight"
+          data-euiicon-type="chevronSingleRight"
         />
         <span
           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
@@ -178,7 +178,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should displa
         <span
           aria-hidden="true"
           class="css-15ro776"
-          data-euiicon-type="arrowRight"
+          data-euiicon-type="chevronSingleRight"
         />
         <span
           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
@@ -201,7 +201,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should displa
         <span
           aria-hidden="true"
           class="css-15ro776"
-          data-euiicon-type="arrowRight"
+          data-euiicon-type="chevronSingleRight"
         />
         <span
           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
@@ -278,7 +278,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render
         <span
           aria-hidden="true"
           class="css-15ro776"
-          data-euiicon-type="arrowRight"
+          data-euiicon-type="chevronSingleRight"
         />
         <span
           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
@@ -301,7 +301,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render
         <span
           aria-hidden="true"
           class="css-15ro776"
-          data-euiicon-type="arrowRight"
+          data-euiicon-type="chevronSingleRight"
         />
         <span
           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
@@ -324,7 +324,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render
         <span
           aria-hidden="true"
           class="css-15ro776"
-          data-euiicon-type="arrowRight"
+          data-euiicon-type="chevronSingleRight"
         />
         <span
           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
@@ -347,7 +347,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render
         <span
           aria-hidden="true"
           class="css-15ro776"
-          data-euiicon-type="arrowRight"
+          data-euiicon-type="chevronSingleRight"
         />
         <span
           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
@@ -424,7 +424,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render
         <span
           aria-hidden="true"
           class="css-15ro776"
-          data-euiicon-type="arrowRight"
+          data-euiicon-type="chevronSingleRight"
         />
         <span
           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
@@ -447,7 +447,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render
         <span
           aria-hidden="true"
           class="css-15ro776"
-          data-euiicon-type="arrowRight"
+          data-euiicon-type="chevronSingleRight"
         />
         <span
           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"

@@ -23,7 +23,7 @@ const BASE_COMPOSE_VALUES: FormValues = {
   metadata: { name: 'Test rule', enabled: true },
   timeField: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
-  query: { format: 'standalone', breach: { query: '' } },
+  query: { base: '', breach: { segment: '' } },
   stateTransitionAlertDelayMode: 'immediate',
   stateTransitionRecoveryDelayMode: 'immediate',
   artifacts: [],
@@ -120,8 +120,14 @@ describe('RelatedDashboardSelector', () => {
     fireEvent.click(screen.getByRole('option', { name: DASHBOARD_TITLE }));
 
     await waitFor(() => {
-      expect(screen.getByTestId('artifactValueSpy').textContent).toContain(DASHBOARD_ARTIFACT_TYPE);
-      expect(screen.getByTestId('artifactValueSpy').textContent).toContain(DASHBOARD_ID);
+      const artifacts = JSON.parse(screen.getByTestId('artifactValueSpy').textContent ?? '[]');
+      expect(artifacts).toEqual([
+        expect.objectContaining({
+          id: expect.stringMatching(/^dashboard-/),
+          type: DASHBOARD_ARTIFACT_TYPE,
+          data: { dashboard_id: DASHBOARD_ID },
+        }),
+      ]);
     });
   });
 
@@ -156,7 +162,11 @@ describe('RelatedDashboardSelector', () => {
         wrapper: createComposeFormWrapper({
           ...BASE_COMPOSE_VALUES,
           dashboardArtifacts: [
-            { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, value: DASHBOARD_ID },
+            {
+              id: 'dashboard-id',
+              type: DASHBOARD_ARTIFACT_TYPE,
+              data: { dashboard_id: DASHBOARD_ID },
+            },
           ],
         }),
       }
@@ -184,11 +194,15 @@ describe('RelatedDashboardSelector', () => {
         wrapper: createComposeFormWrapper({
           ...BASE_COMPOSE_VALUES,
           dashboardArtifacts: [
-            { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, value: DASHBOARD_ID },
+            {
+              id: 'dashboard-id',
+              type: DASHBOARD_ARTIFACT_TYPE,
+              data: { dashboard_id: DASHBOARD_ID },
+            },
             {
               id: 'missing-dashboard-id',
               type: DASHBOARD_ARTIFACT_TYPE,
-              value: MISSING_DASHBOARD_ID,
+              data: { dashboard_id: MISSING_DASHBOARD_ID },
             },
           ],
         }),
@@ -219,11 +233,15 @@ describe('RelatedDashboardSelector', () => {
         wrapper: createComposeFormWrapper({
           ...BASE_COMPOSE_VALUES,
           dashboardArtifacts: [
-            { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, value: DASHBOARD_ID },
+            {
+              id: 'dashboard-id',
+              type: DASHBOARD_ARTIFACT_TYPE,
+              data: { dashboard_id: DASHBOARD_ID },
+            },
             {
               id: 'missing-dashboard-id',
               type: DASHBOARD_ARTIFACT_TYPE,
-              value: MISSING_DASHBOARD_ID,
+              data: { dashboard_id: MISSING_DASHBOARD_ID },
             },
           ],
         }),

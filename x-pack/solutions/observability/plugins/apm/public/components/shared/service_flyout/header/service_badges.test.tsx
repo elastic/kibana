@@ -6,11 +6,15 @@
  */
 
 import type { ServiceAnomalyScoreResponse } from '@kbn/apm-api-shared';
+import { FlyoutTemplate } from '@kbn/flyout-template';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, render, renderHook, screen, waitFor } from '@testing-library/react';
+import type { ReactElement } from 'react';
 import React from 'react';
 import type { ServiceFlyoutService } from '..';
-import { ServiceBadges } from './service_badges';
+import { useServiceBadges } from './service_badges';
+
+jest.mock('@elastic/apm-rum');
 
 const mockNavigateToUrl = jest.fn();
 const mockUseServiceFlyoutContext = jest.fn();
@@ -71,15 +75,12 @@ function setupContext({
   });
 }
 
-function setupLinks({
-  alertsHref = '/app/apm/services/opbeans-java/alerts',
-  slosHref = '/app/slos/slos-href',
-}: { alertsHref?: string; slosHref?: string } = {}) {
+function setupLinks({ slosHref = '/app/slos/slos-href' }: { slosHref?: string } = {}) {
   mockUseServiceFlyoutLinks.mockReturnValue({
-    apm: { overview: '/app/apm/services/opbeans-java/overview', alertsTab: alertsHref },
+    apm: { overviewTab: '/app/apm/services/opbeans-java/overview' },
     alerts: undefined,
     slos: slosHref,
-    discover: { traces: undefined, logs: undefined },
+    discover: { traces: { href: undefined }, logs: { href: undefined } },
   });
 }
 
@@ -96,14 +97,14 @@ function setupBadgesData({
 }
 
 function renderBadges() {
-  return render(
-    <IntlProvider locale="en">
-      <ServiceBadges />
-    </IntlProvider>
-  );
+  return renderHook(() => useServiceBadges());
 }
 
-describe('ServiceBadges', () => {
+function findBadge(badges: ReactElement[], dataTestSubj: string): ReactElement | undefined {
+  return badges.find((badge) => badge.props['data-test-subj'] === dataTestSubj);
+}
+
+describe('useServiceBadges', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     setupLinks();
@@ -112,8 +113,8 @@ describe('ServiceBadges', () => {
   it('always renders the service badge', () => {
     setupContext();
     setupBadgesData();
-    renderBadges();
-    expect(screen.getByTestId('serviceFlyoutServiceBadge')).toBeInTheDocument();
+    const { result } = renderBadges();
+    expect(findBadge(result.current, 'serviceFlyoutServiceBadge')).toBeDefined();
   });
 
   describe('alerts badge', () => {
@@ -123,12 +124,13 @@ describe('ServiceBadges', () => {
         locators: { get: jest.fn().mockReturnValue({ getRedirectUrl: mockGetRedirectUrl }) },
       });
       setupBadgesData({ alertsCount: 3 });
-      renderBadges();
+      const { result } = renderBadges();
 
-      const badge = screen.getByTestId('serviceFlyoutAlertsBadge');
-      expect(badge).toHaveTextContent('3');
-      expect(badge).toHaveAttribute('data-ebt-action', 'viewAlerts');
-      expect(badge).toHaveAttribute('data-ebt-element', 'serviceFlyoutAlertsBadge');
+      const badge = findBadge(result.current, 'serviceFlyoutAlertsBadge');
+      expect(badge?.props.children).toBe(3);
+      expect(badge?.props.href).toBe('/app/apm/services/opbeans-java/alerts');
+      expect(badge?.props['data-ebt-action']).toBe('viewAlerts');
+      expect(badge?.props['data-ebt-element']).toBe('serviceFlyoutAlertsBadge');
       expect(mockGetRedirectUrl).toHaveBeenCalledWith(
         expect.objectContaining({ serviceOverviewTab: 'alerts' })
       );
@@ -137,9 +139,9 @@ describe('ServiceBadges', () => {
     it('hides the alerts badge when the hook returns no count', () => {
       setupContext();
       setupBadgesData({ alertsCount: undefined });
-      renderBadges();
+      const { result } = renderBadges();
 
-      expect(screen.queryByTestId('serviceFlyoutAlertsBadge')).not.toBeInTheDocument();
+      expect(findBadge(result.current, 'serviceFlyoutAlertsBadge')).toBeUndefined();
     });
   });
 
@@ -147,33 +149,33 @@ describe('ServiceBadges', () => {
     it('shows the SLO badge and navigates to the SLO list on click', () => {
       setupContext();
       setupBadgesData({ sloData: { sloStatus: 'violated', sloCount: 2 } });
-      renderBadges();
+      const { result } = renderBadges();
 
-      const badge = screen.getByTestId('apmSloBadge');
-      expect(badge).toHaveAttribute('data-slo-status', 'violated');
-      expect(badge).toHaveAttribute('data-ebt-action', 'viewSlos');
-      expect(badge).toHaveAttribute('data-ebt-element', 'serviceFlyoutSloBadge');
+      const badge = findBadge(result.current, 'serviceFlyoutSloBadge');
+      expect(badge?.props['data-slo-status']).toBe('violated');
+      expect(badge?.props['data-ebt-action']).toBe('viewSlos');
+      expect(badge?.props['data-ebt-element']).toBe('serviceFlyoutSloBadge');
 
-      fireEvent.click(badge);
+      badge?.props.onClick({ preventDefault: jest.fn() });
       expect(mockNavigateToUrl).toHaveBeenCalledWith('/app/slos/slos-href');
     });
 
     it('shows the "No SLOs" badge when the hook resolves with no SLOs', () => {
       setupContext();
       setupBadgesData({ sloData: { sloStatus: 'noSLOs', sloCount: 0 } });
-      renderBadges();
+      const { result } = renderBadges();
 
-      const badge = screen.getByTestId('apmSloBadge');
-      expect(badge).toBeInTheDocument();
-      expect(badge).toHaveAttribute('data-slo-status', 'noSLOs');
+      const badge = findBadge(result.current, 'serviceFlyoutSloBadge');
+      expect(badge).toBeDefined();
+      expect(badge?.props['data-slo-status']).toBe('noSLOs');
     });
 
     it('hides the SLO badge when the hook returns no sloData', () => {
       setupContext();
       setupBadgesData({ sloData: undefined });
-      renderBadges();
+      const { result } = renderBadges();
 
-      expect(screen.queryByTestId('apmSloBadge')).not.toBeInTheDocument();
+      expect(findBadge(result.current, 'serviceFlyoutSloBadge')).toBeUndefined();
     });
   });
 
@@ -181,35 +183,88 @@ describe('ServiceBadges', () => {
     it('shows the anomaly badge when the hook returns a score', () => {
       setupContext();
       setupBadgesData({ anomalyData: { anomalyScore: 75, anomalyEnvironment: 'production' } });
-      renderBadges();
+      const { result } = renderBadges();
 
-      expect(screen.getByTestId('serviceFlyoutAnomaliesBadge')).toBeInTheDocument();
+      expect(findBadge(result.current, 'serviceFlyoutAnomaliesBadge')).toBeDefined();
     });
 
     it('hides the anomaly badge when the hook returns no score', () => {
       setupContext();
       setupBadgesData({ anomalyData: undefined });
-      renderBadges();
+      const { result } = renderBadges();
 
-      expect(screen.queryByTestId('serviceFlyoutAnomaliesBadge')).not.toBeInTheDocument();
+      expect(findBadge(result.current, 'serviceFlyoutAnomaliesBadge')).toBeUndefined();
     });
 
-    it('passes transactionType from context to the anomaly badge navigation link', () => {
+    it('passes transactionType from context to the anomaly badge navigation link', async () => {
+      const mockGetUrl = jest.fn().mockResolvedValue('/app/apm/services/opbeans-java/overview');
       const mockGetRedirectUrl = jest
         .fn()
-        .mockReturnValue('/app/apm/services/opbeans-java/overview');
+        .mockReturnValue('/app/r?l=APM_LOCATOR&lz=compressed-payload');
       setupContext({
         transactionType: 'request',
-        locators: { get: jest.fn().mockReturnValue({ getRedirectUrl: mockGetRedirectUrl }) },
+        locators: {
+          get: jest.fn().mockReturnValue({
+            getUrl: mockGetUrl,
+            getRedirectUrl: mockGetRedirectUrl,
+          }),
+        },
       });
       setupBadgesData({ anomalyData: { anomalyScore: 75, anomalyEnvironment: 'production' } });
       renderBadges();
 
-      expect(mockGetRedirectUrl).toHaveBeenCalledWith(
-        expect.objectContaining({
-          query: expect.objectContaining({ transactionType: 'request' }),
-        })
-      );
+      await waitFor(() => {
+        expect(mockGetUrl).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: expect.objectContaining({ transactionType: 'request' }),
+          }),
+          undefined
+        );
+      });
+      expect(mockGetRedirectUrl).not.toHaveBeenCalled();
     });
+  });
+});
+
+function BadgesInTemplate() {
+  const badges = useServiceBadges();
+  return (
+    <FlyoutTemplate onClose={jest.fn()} session="never">
+      <FlyoutTemplate.Header title="opbeans-java">{badges}</FlyoutTemplate.Header>
+      <FlyoutTemplate.Body>content</FlyoutTemplate.Body>
+    </FlyoutTemplate>
+  );
+}
+
+describe('useServiceBadges in FlyoutTemplate', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    setupLinks();
+  });
+
+  it('renders display-only badges as labelled, focusable tooltip anchors', async () => {
+    setupContext();
+    setupBadgesData({
+      alertsCount: 3,
+      anomalyData: { anomalyScore: 0, anomalyEnvironment: 'production' },
+    });
+    render(
+      <IntlProvider locale="en">
+        <BadgesInTemplate />
+      </IntlProvider>
+    );
+
+    const alertsBadge = screen.getByTestId('serviceFlyoutAlertsBadge');
+    expect(alertsBadge).toHaveAttribute('role', 'img');
+    expect(alertsBadge).toHaveAttribute('tabindex', '0');
+    expect(alertsBadge).toHaveAttribute('aria-label', expect.stringContaining('opbeans-java'));
+
+    const anomalyBadge = screen.getByTestId('serviceFlyoutAnomaliesBadge');
+    expect(anomalyBadge).toHaveAttribute('role', 'img');
+    expect(anomalyBadge).toHaveAttribute('tabindex', '0');
+
+    act(() => anomalyBadge.focus());
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('No anomalies detected.');
   });
 });

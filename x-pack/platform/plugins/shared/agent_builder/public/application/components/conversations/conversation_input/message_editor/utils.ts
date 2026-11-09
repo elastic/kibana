@@ -53,11 +53,15 @@ export const createCommandRange = (
 };
 
 /**
+ * NBSP used instead of a regular space.
+ */
+export const NON_BREAKING_SPACE = '\u00A0';
+
+/**
  * Inserts a non-breaking space text node immediately after `node` within `container`.
- * Uses NBSP (\u00A0) because browsers collapse trailing regular spaces in contenteditable.
  */
 export const insertSpaceAfter = (node: Node, container: HTMLElement): Text => {
-  const space = document.createTextNode('\u00A0');
+  const space = document.createTextNode(NON_BREAKING_SPACE);
   container.insertBefore(space, node.nextSibling);
   return space;
 };
@@ -84,16 +88,14 @@ export const placeCursorAfter = (node: Node, sel: Selection): void => {
 
 export const placeCursorAtEnd = (editorElement: HTMLDivElement) => {
   const selection = window.getSelection();
-  if (selection && editorElement.childNodes.length > 0) {
-    const lastChild = editorElement.lastChild;
-    if (lastChild) {
-      const newRange = document.createRange();
-      newRange.setStartAfter(lastChild);
-      newRange.collapse(true);
-      selection.removeAllRanges();
-      selection.addRange(newRange);
-    }
+  if (!selection) {
+    return;
   }
+  const newRange = document.createRange();
+  newRange.selectNodeContents(editorElement);
+  newRange.collapse(false);
+  selection.removeAllRanges();
+  selection.addRange(newRange);
 };
 
 /**

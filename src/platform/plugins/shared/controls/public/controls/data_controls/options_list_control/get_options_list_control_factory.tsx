@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
   BehaviorSubject,
   Subject,
@@ -35,6 +35,9 @@ import {
   initializeRelatedPanels,
   initializeStateApi,
   type PublishingSubject,
+  getViewModeSubject,
+  type ViewMode,
+  useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 
 import type { OptionsListSuccessResponse } from '../../../../common/options_list';
@@ -67,26 +70,6 @@ import {
 } from './utils/selection_utils';
 import { getPlacementHints, LAYOUT_CONSTRAINTS } from '../../constants';
 
-// TODO Remove when we're able to get accurate document counts for ES|QL-source controls and can reenable doc-count sorting on them
-const normalizeEsqlSort = (
-  controlState: OptionsListDSLControlState
-): OptionsListDSLControlState => {
-  if (
-    controlState.values_source !== ControlValuesSource.ESQL ||
-    (controlState.sort?.by ?? DEFAULT_DSL_OPTIONS_LIST_STATE.sort.by) !== '_count'
-  ) {
-    return controlState;
-  }
-
-  return {
-    ...controlState,
-    sort: {
-      by: '_key',
-      direction: controlState.sort?.direction ?? DEFAULT_DSL_OPTIONS_LIST_STATE.sort.direction,
-    },
-  };
-};
-
 export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
   OptionsListDSLControlState,
   OptionsListControlApi
@@ -95,9 +78,7 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
     type: OPTIONS_LIST_CONTROL,
     getPlacementHints,
     layoutConstraints: LAYOUT_CONSTRAINTS,
-    buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
-      const state = normalizeEsqlSort(initialState);
-
+    buildEmbeddable: async ({ initialState: state, finalizeApi, uuid, parentApi }) => {
       const editorStateManager = initializeEditorStateManager(state);
       const temporaryStateManager = initializeTemporayStateManager<OptionsListSelection>();
       const selectionsManager = initializeSelectionsManager(state);
@@ -175,7 +156,7 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
       /** Fetch the suggestions and perform validation */
       const suggestionLoadError$ = new BehaviorSubject<Error | undefined>(undefined);
       const loadMoreSubject = new Subject<void>();
-      const fetchSubscription = fetchAndValidate$({
+      const { suggestions$, cancelRequests } = fetchAndValidate$({
         api: {
           ...dataControlManager.api,
           loadMoreSubject,
@@ -189,7 +170,8 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
         selectedOptions$: selectionsManager.api.selectedOptions$,
         searchTechnique$: editorStateManager.api.searchTechnique$,
         sort$: selectionsManager.api.sort$,
-      }).subscribe((result) => {
+      });
+      const fetchSubscription = suggestions$.subscribe((result) => {
         // if there was an error during fetch, set suggestion load error and return early
         if (Object.hasOwn(result, 'error')) {
           suggestionLoadError$.next((result as { error: Error }).error);
@@ -206,6 +188,7 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
         temporaryStateManager.api.setInvalidSelections(
           new Set(successResponse.invalidSelections ?? [])
         );
+        temporaryStateManager.api.setIsPartial(successResponse.isPartial);
 
         // reset the request size back to the minimum (if it's not already)
         if (temporaryStateManager.api.requestSize$.getValue() !== MIN_OPTIONS_LIST_REQUEST_SIZE) {
@@ -243,7 +226,7 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
       const sectionId$ = apiHasSections(parentApi) ? parentApi.panelSection$(uuid) : of(undefined);
 
       const outputFilterSubscription = combineLatest([
-        dataControlManager.api.dataViews$,
+        dataControlManager.api.dataSources$,
         dataControlManager.api.fieldName$,
         selectionsManager.api.selectedOptions$,
         selectionsManager.api.existsSelected$,
@@ -298,10 +281,9 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
           exists_selected: false,
         },
         applySerializedState: (nextState) => {
-          const normalizedState = normalizeEsqlSort(nextState);
-          dataControlManager.reinitializeState(normalizedState);
-          selectionsManager.reinitializeState(normalizedState);
-          editorStateManager.reinitializeState(normalizedState);
+          dataControlManager.reinitializeState(nextState);
+          selectionsManager.reinitializeState(nextState);
+          editorStateManager.reinitializeState(nextState);
         },
       });
 
@@ -324,6 +306,7 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
         .subscribe((error) => blockingError$.next(error));
 
       const api = finalizeApi({
+        cancelRequests,
         ...stateApi,
         ...dataControlManager.api,
         ...relatedPanelsApi,
@@ -353,6 +336,7 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
             key,
             showOnlySelected,
           }),
+        viewMode$: getViewModeSubject(parentApi) ?? new BehaviorSubject('view' as ViewMode),
         selectAll: (keys: string[]) => selectAll({ api, keys, selectionsManager }),
         deselectAll: (keys: string[]) => deselectAll({ api, keys, selectionsManager }),
       };
@@ -362,6 +346,8 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
       return {
         api,
         Component: () => {
+          const viewMode = useStateFromPublishingSubject(componentApi.viewMode$);
+
           useEffect(() => {
             return () => {
               // on unmount, clean up all subscriptions
@@ -379,13 +365,16 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
             };
           }, []);
 
+          const displaySettings = useMemo(
+            () => ({
+              ...(state.display_settings ?? {}),
+              isInteractive: viewMode !== 'non-interactive',
+            }),
+            [viewMode]
+          );
+
           return (
-            <OptionsListControlContext.Provider
-              value={{
-                componentApi,
-                displaySettings: state.display_settings ?? {},
-              }}
-            >
+            <OptionsListControlContext.Provider value={{ componentApi, displaySettings }}>
               <OptionsListControl isPinned={isPinned} />
             </OptionsListControlContext.Provider>
           );

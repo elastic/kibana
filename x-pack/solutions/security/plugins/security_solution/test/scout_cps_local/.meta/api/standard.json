@@ -1,6 +1,23 @@
 {
-  "sha1": "b9be8887d46ea75917ae6df49074317371b5a6b7",
+  "sha1": "ebfcddd7fd9273f98cf0f9cedabe37fa6f23c97f",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
+    {
+      "id": "9bce89873e5159b-49a387e65cecf33",
+      "title": "Analyzer resolver entity to tree for linked-cluster events entity lookup finds a linked-cluster process and tree returns parent and child",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/cps/analyzer_resolver_linked_events.spec.ts",
+        "line": 190,
+        "column": 7
+      }
+    },
     {
       "id": "db410a9fb4d7600-bff7379b6ed22e0",
       "title": "CPS routing with a non-existent NPRE `_alias:_origin` resolves the origin project only",
@@ -11,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/cps/missing_npre_routing.spec.ts",
-        "line": 154,
-        "column": 12
+        "line": 145,
+        "column": 41
       }
     },
     {
@@ -25,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/cps/missing_npre_routing.spec.ts",
-        "line": 160,
-        "column": 12
+        "line": 146,
+        "column": 75
       }
     },
     {
@@ -39,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/cps/missing_npre_routing.spec.ts",
-        "line": 171,
-        "column": 12
+        "line": 151,
+        "column": 5
       }
     },
     {
@@ -53,8 +70,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/maintainers/accesses.spec.ts",
-        "line": 92,
-        "column": 12
+        "line": 83,
+        "column": 68
       }
     },
     {
@@ -67,8 +84,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/maintainers/communicates_with.spec.ts",
-        "line": 94,
-        "column": 12
+        "line": 85,
+        "column": 65
       }
     }
   ]

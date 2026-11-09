@@ -69,7 +69,7 @@ describe('<AnalyzerPreview />', () => {
 
     expect(mockUseAlertPrevalenceFromProcessTree).toHaveBeenCalledWith({
       documentId: 'eventId',
-      indices: 'rule-indices',
+      indices: ['rule-indices'],
     });
 
     await waitFor(() => {
@@ -134,7 +134,71 @@ describe('<AnalyzerPreview />', () => {
 
     expect(mockUseAlertPrevalenceFromProcessTree).toHaveBeenCalledWith({
       documentId: 'ancestors-id',
-      indices: 'rule-indices',
+      indices: ['rule-indices'],
+    });
+
+    await waitFor(() => {
+      expect(wrapper.getByTestId(ANALYZER_PREVIEW_TEST_ID)).toBeInTheDocument();
+    });
+  });
+
+  it('prepends the project-qualified ancestor index when shouldUseAncestor is true', async () => {
+    const hit = createMockHit({
+      'kibana.alert.rule.parameters': { index: ['rule-index-1', 'rule-index-2'] },
+      'kibana.alert.ancestors.id': ['ancestors-id'],
+      'kibana.alert.ancestors.index': ['linked-project:.ds-logs-endpoint.events-default'],
+    });
+    const wrapper = renderAnalyzerPreview(hit, { shouldUseAncestor: true });
+
+    expect(mockUseAlertPrevalenceFromProcessTree).toHaveBeenCalledWith({
+      documentId: 'ancestors-id',
+      indices: ['linked-project:.ds-logs-endpoint.events-default', 'rule-index-1', 'rule-index-2'],
+    });
+
+    await waitFor(() => {
+      expect(wrapper.getByTestId(ANALYZER_PREVIEW_TEST_ID)).toBeInTheDocument();
+    });
+  });
+
+  it('qualifies a bare ancestor index with the preview document cluster prefix', async () => {
+    const hit = createMockHit({
+      'kibana.alert.rule.parameters': { index: ['rule-index-1', 'rule-index-2'] },
+      'kibana.alert.ancestors.id': ['ancestors-id'],
+      'kibana.alert.ancestors.index': ['.ds-logs-endpoint.events-default'],
+    });
+    // createMockHit only wires raw._id, so set raw._index explicitly for this case
+    hit.raw._index = 'linked-project:.internal.alerts-security.alerts-default';
+
+    const wrapper = renderAnalyzerPreview(hit, { shouldUseAncestor: true });
+
+    expect(mockUseAlertPrevalenceFromProcessTree).toHaveBeenCalledWith({
+      documentId: 'ancestors-id',
+      indices: ['linked-project:.ds-logs-endpoint.events-default', 'rule-index-1', 'rule-index-2'],
+    });
+
+    await waitFor(() => {
+      expect(wrapper.getByTestId(ANALYZER_PREVIEW_TEST_ID)).toBeInTheDocument();
+    });
+  });
+
+  it('does not split a single rule index into characters when prepending a qualified ancestor index', async () => {
+    // Regression: a single-element rule index is unwrapped to a scalar string by getFieldValue.
+    // Prepending a non-local ancestor index must not spread that scalar into single characters.
+    const hit = createMockHit({
+      'kibana.alert.rule.indices': ['apm-*-transaction*'],
+      'kibana.alert.ancestors.id': ['ancestors-id'],
+      'kibana.alert.ancestors.index': [
+        'linked_local_project:.ds-logs-endpoint.alerts-default-2026.08.19-000001',
+      ],
+    });
+    const wrapper = renderAnalyzerPreview(hit, { shouldUseAncestor: true });
+
+    expect(mockUseAlertPrevalenceFromProcessTree).toHaveBeenCalledWith({
+      documentId: 'ancestors-id',
+      indices: [
+        'linked_local_project:.ds-logs-endpoint.alerts-default-2026.08.19-000001',
+        'apm-*-transaction*',
+      ],
     });
 
     await waitFor(() => {

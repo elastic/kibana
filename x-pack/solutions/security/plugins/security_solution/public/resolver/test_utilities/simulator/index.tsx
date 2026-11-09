@@ -112,16 +112,6 @@ export class Simulator {
     this.store = createMockStore(
       {
         ...mockGlobalState,
-        sourcerer: {
-          ...mockGlobalState.sourcerer,
-          sourcererScopes: {
-            ...mockGlobalState.sourcerer.sourcererScopes,
-            analyzer: {
-              ...mockGlobalState.sourcerer.sourcererScopes.default,
-              selectedPatterns: indices,
-            },
-          },
-        },
         analyzer: {
           [resolverComponentInstanceID]: EMPTY_RESOLVER,
         },

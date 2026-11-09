@@ -57,11 +57,7 @@ export function ActionsMenu({ actions, id, dataTestSubjPrefix = 'actionsMenu' }:
       aria-label={ariaLabel}
       button={
         <EuiToolTip content={ariaLabel} disableScreenReaderOutput>
-          <EuiButtonIcon
-            iconType="boxesHorizontal"
-            aria-label={ariaLabel}
-            onClick={togglePopover}
-          />
+          <EuiButtonIcon iconType="boxesVertical" aria-label={ariaLabel} onClick={togglePopover} />
         </EuiToolTip>
       }
       isOpen={isPopoverOpen}

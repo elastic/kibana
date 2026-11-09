@@ -8,6 +8,7 @@
 import React, { memo, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from '@emotion/styled';
+import { useConsoleApi } from '../../../hooks/state_selectors/use_console_api';
 import { useInputCommand } from '../../../hooks/state_selectors/use_input_command';
 import { useConsoleStateDispatch } from '../../../hooks/state_selectors/use_console_state_dispatch';
 import { useWithCommandArgumentState } from '../../../hooks/state_selectors/use_with_command_argument_state';
@@ -62,6 +63,7 @@ export const ArgumentSelectorWrapper = memo<ArgumentSelectorWrapperProps>(
     const dispatch = useConsoleStateDispatch();
     const command = useInputCommand();
     const { valueText, value, store } = useWithCommandArgumentState(argName, argIndex);
+    const consoleApi = useConsoleApi();
 
     if (!command) {
       // FIXME: PT we should not throw here as that would likely crash the UI.
@@ -113,6 +115,7 @@ export const ArgumentSelectorWrapper = memo<ArgumentSelectorWrapperProps>(
                 store={store}
                 command={command}
                 requestFocus={requestFocus}
+                consoleApi={consoleApi}
                 onChange={handleSelectorComponentOnChange}
               />
             </div>

@@ -11,18 +11,19 @@ import { EuiPanel, EuiProvider } from '@elastic/eui';
 import { PerformanceContext } from '@kbn/ebt-tools';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { NIGHTSHIFT_UI_PRIVILEGES } from '@kbn/nightshift-shared';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { MemoryRouter } from 'react-router-dom';
 import type { StartServices } from '../hooks/use_kibana';
 import {
   NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY,
   type NightshiftSignificantEventsQueryData,
-} from '../hooks/use_fetch_significant_events';
+} from '../data/significant_events/use_fetch_significant_events';
 import {
   checkoutFeature,
   checkoutLifecycle,
   checkoutOccurrences,
-  dismissedShippingEvent,
+  inactiveShippingEvent,
   nightshiftEvents,
   inventoryEvent,
   checkoutEvent,
@@ -36,12 +37,20 @@ export type NightshiftStorybookScenario =
   | 'populated'
   | 'allClear'
   | 'openOnly'
-  | 'dismissed'
+  | 'inactive'
   | 'cachedError'
   | 'error';
 
 export type NightshiftLifecycleScenario = 'populated' | 'loading' | 'empty' | 'error';
-export type NightshiftStreamFeaturesScenario = 'populated' | 'loading' | 'empty' | 'error';
+export type NightshiftStreamFeaturesScenario =
+  | 'populated'
+  | 'loading'
+  | 'empty'
+  | 'error'
+  | 'partialError';
+
+/** The one source `partialError` refuses to serve, so the others still resolve their services. */
+const UNREACHABLE_SOURCE_ID = 'logs.inventory-service';
 
 const performanceApi = {
   onPageReady: () => undefined,
@@ -88,8 +97,8 @@ const getEventsResponse = (
       ? [resolvedPaymentEvent]
       : scenario === 'openOnly'
       ? [checkoutEvent, inventoryEvent]
-      : scenario === 'dismissed'
-      ? [...nightshiftEvents, dismissedShippingEvent]
+      : scenario === 'inactive'
+      ? [...nightshiftEvents, inactiveShippingEvent]
       : nightshiftEvents;
 
   return {
@@ -109,13 +118,19 @@ const createServices = ({
   scenario: NightshiftStorybookScenario;
   streamFeaturesScenario: NightshiftStreamFeaturesScenario;
 }) => {
-  const closedEventUuids = new Set<string>();
-  const http = {
-    basePath: {
-      prepend: (path: string) => path,
-    },
-    get: async (path: string) => {
-      if (path === '/internal/significant_events/events') {
+  const inactiveEventIds = new Set<string>();
+  const significantEventsRepositoryClient = {
+    fetch: async (
+      route: string,
+      options?: {
+        params?: { path?: { id?: string; sourceId?: string }; query?: { event_id?: string } };
+      }
+    ) => {
+      if (route === 'GET /internal/significant_events/availability') {
+        return { available: true };
+      }
+
+      if (route === 'GET /internal/significant_events/events') {
         if (scenario === 'loading') {
           return neverResolve();
         }
@@ -126,15 +141,16 @@ const createServices = ({
           throw new Error('The significant events request failed');
         }
         const response = getEventsResponse(scenario);
-        return {
-          ...response,
-          hits: response.hits.map((event) =>
-            closedEventUuids.has(event.event_uuid) ? { ...event, status: 'closed' as const } : event
-          ),
-        };
+        const requestedEventId = options?.params?.query?.event_id;
+        const hits = response.hits
+          .filter((event) => !requestedEventId || event.event_id === requestedEventId)
+          .map((event) =>
+            inactiveEventIds.has(event.event_id) ? { ...event, status: 'inactive' as const } : event
+          );
+        return { ...response, hits, total: hits.length };
       }
 
-      if (path.includes('/lifecycle')) {
+      if (route === 'GET /internal/significant_events/events/{id}/lifecycle') {
         if (lifecycleScenario === 'loading') {
           return neverResolve();
         }
@@ -147,7 +163,40 @@ const createServices = ({
         return checkoutLifecycle;
       }
 
-      return {};
+      const eventId = options?.params?.path?.id;
+      if (route === 'POST /internal/significant_events/events/{id}/update' && eventId) {
+        inactiveEventIds.add(eventId);
+        return {
+          event_id: eventId,
+          updated: 1,
+          ignored: 0,
+          status: 'inactive',
+        };
+      }
+
+      if (route === 'GET /internal/streams/_query_occurrences') {
+        return checkoutOccurrences;
+      }
+
+      if (route === 'GET /internal/streams/{sourceId}/features') {
+        if (streamFeaturesScenario === 'loading') {
+          return neverResolve();
+        }
+        if (streamFeaturesScenario === 'error') {
+          throw new Error('The source features request failed');
+        }
+        if (streamFeaturesScenario === 'empty') {
+          return { features: [] };
+        }
+        if (
+          streamFeaturesScenario === 'partialError' &&
+          options?.params?.path?.sourceId === UNREACHABLE_SOURCE_ID
+        ) {
+          throw new Error(`The ${UNREACHABLE_SOURCE_ID} features request failed`);
+        }
+      }
+
+      return { features: [checkoutFeature] };
     },
   };
 
@@ -156,6 +205,13 @@ const createServices = ({
       openChat: () => undefined,
     },
     application: {
+      capabilities: {
+        nightshift: {
+          [NIGHTSHIFT_UI_PRIVILEGES.show]: true,
+          [NIGHTSHIFT_UI_PRIVILEGES.manage]: true,
+          [NIGHTSHIFT_UI_PRIVILEGES.configure]: true,
+        },
+      },
       getUrlForApp: (appId: string, options?: { deepLinkId?: string; path?: string }): string =>
         `/app/${appId}${options?.path ?? ''}`,
     },
@@ -181,7 +237,12 @@ const createServices = ({
         toSpec: () => ({ id, timeFieldName, title }),
       }),
     },
-    http,
+    http: {
+      basePath: {
+        get: () => '',
+        prepend: (path: string) => path,
+      },
+    },
     lens: {
       EmbeddableComponent: StorybookLensEmbeddable,
     },
@@ -191,6 +252,11 @@ const createServices = ({
         addSuccess: () => undefined,
       },
     },
+    nightshiftSources: {
+      getClient: async () => ({
+        fetch: async () => ({ sources: [], total: 0 }),
+      }),
+    },
     share: {
       url: {
         locators: {
@@ -199,6 +265,9 @@ const createServices = ({
           }),
         },
       },
+    },
+    significantEvents: {
+      significantEventsRepositoryClient,
     },
     settings: {
       client: {
@@ -212,37 +281,6 @@ const createServices = ({
         name: 'Default',
         disabledFeatures: [],
       }),
-    },
-    streams: {
-      streamsRepositoryClient: {
-        fetch: async (route: string, options?: { params?: { path?: { id?: string } } }) => {
-          const eventUuid = options?.params?.path?.id;
-          if (route === 'POST /internal/significant_events/events/{id}/update' && eventUuid) {
-            closedEventUuids.add(eventUuid);
-            return {
-              event_uuid: eventUuid,
-              updated: 1,
-              ignored: 0,
-              status: 'closed',
-            };
-          }
-          if (route === 'GET /internal/streams/_query_occurrences') {
-            return checkoutOccurrences;
-          }
-          if (route === 'GET /internal/streams/{name}/features') {
-            if (streamFeaturesScenario === 'loading') {
-              return neverResolve();
-            }
-            if (streamFeaturesScenario === 'error') {
-              throw new Error('The stream features request failed');
-            }
-            if (streamFeaturesScenario === 'empty') {
-              return { features: [] };
-            }
-          }
-          return { features: [checkoutFeature] };
-        },
-      },
     },
   };
 };

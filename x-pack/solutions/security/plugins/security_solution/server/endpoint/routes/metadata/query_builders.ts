@@ -51,6 +51,9 @@ export const MetadataSortMethod: estypes.SortCombinations[] = [
   },
 ];
 
+/** Unique per united document; appended to every united-index sort as the tiebreaker. */
+export const UNITED_METADATA_SORT_TIEBREAKER_FIELD = 'united.agent.agent.id';
+
 const getUnitedMetadataSortMethod = (
   sortField: EndpointSortableField,
   sortDirection: 'asc' | 'desc'
@@ -64,11 +67,14 @@ const getUnitedMetadataSortMethod = (
       ? 'united.agent.enrolled_at'
       : sortField.replace('metadata.', 'united.endpoint.');
 
-  if (DATE_FIELDS.includes(sortField)) {
-    return [{ [mappedUnitedMetadataSortField]: { order: sortDirection, unmapped_type: 'date' } }];
-  } else {
-    return [{ [mappedUnitedMetadataSortField]: sortDirection }];
-  }
+  const primarySort: estypes.SortCombinations = DATE_FIELDS.includes(sortField)
+    ? { [mappedUnitedMetadataSortField]: { order: sortDirection, unmapped_type: 'date' } }
+    : { [mappedUnitedMetadataSortField]: sortDirection };
+
+  // Offset pagination needs a total order: sort keys such as `enrolled_at` tie across agents, and
+  // ES may order tied hits differently between page requests, skipping or repeating hosts.
+  // The Fleet agent id is unique per united document, so it breaks every tie.
+  return [primarySort, { [UNITED_METADATA_SORT_TIEBREAKER_FIELD]: 'asc' }];
 };
 
 export function getESQueryHostMetadataByID(
@@ -162,11 +168,47 @@ interface BuildUnitedIndexQueryResponse extends estypes.SearchRequest {
   index: string;
 }
 
+/**
+ * Space filter for a fanned-out endpoint list read.
+ *
+ * The local branch is today's filter, unchanged: integration policy ids resolved from local Fleet
+ * saved objects. Saved objects do not fan out, so a linked project's agent carries a policy id this
+ * project has never seen and can only be matched on a field the document carries. That field is
+ * `united.agent.namespaces`, and it is required to match explicitly: Fleet leaves it empty on agents
+ * enrolled before space awareness and nothing backfills `.fleet-agents`, so a missing value proves
+ * nothing once a read fans out.
+ *
+ * Deliberately not keyed on `_index`. The provenance of a *hit* is readable that way and the policy
+ * response path uses it, but whether a *query* on `_index` sees the project prefix is unverified, and
+ * a filter that silently matched nothing would drop every linked project's row.
+ */
+const buildCpsMetadataFilter = (
+  fleetAgentPolicyIds: string[],
+  spaceId: string
+): estypes.QueryDslQueryContainer => ({
+  bool: {
+    should: [
+      buildBaseEndpointMetadataFilter(fleetAgentPolicyIds),
+      {
+        bool: {
+          must: [
+            buildBaseEndpointMetadataFilter(),
+            { term: { 'united.agent.namespaces': spaceId } },
+          ],
+        },
+      },
+    ],
+    minimum_should_match: 1,
+  },
+});
+
 export async function buildUnitedIndexQuery(
   soClient: SavedObjectsClientContract,
   queryOptions: GetMetadataListRequestQuery,
   fleetAgentPolicyIds: string[] = [],
-  ccsEnabled: boolean = false
+  ccsEnabled: boolean = false,
+  /** Set only when the read fans out, and carries the space it must be bounded to */
+  cpsSpaceId?: string
 ): Promise<BuildUnitedIndexQueryResponse> {
   const {
     page = ENDPOINT_DEFAULT_PAGE,
@@ -178,7 +220,9 @@ export async function buildUnitedIndexQuery(
   } = queryOptions || {};
 
   const statusesKuery = buildStatusesKuery(hostStatuses);
-  const idFilter = buildBaseEndpointMetadataFilter(fleetAgentPolicyIds);
+  const idFilter = cpsSpaceId
+    ? buildCpsMetadataFilter(fleetAgentPolicyIds, cpsSpaceId)
+    : buildBaseEndpointMetadataFilter(fleetAgentPolicyIds);
 
   let query: BuildUnitedIndexQueryResponse['query'] = idFilter;
 
@@ -207,6 +251,8 @@ export async function buildUnitedIndexQuery(
     runtime_mappings: runtimeMappings,
     from: page * pageSize,
     size: pageSize,
-    index: prefixIndexPatternsWithCcs(METADATA_UNITED_INDEX, ccsEnabled),
+    // CPS routes the read across projects on its own, and the two are not meant to be enabled
+    // together, so a fanned-out read does not also search CCS remote outputs
+    index: prefixIndexPatternsWithCcs(METADATA_UNITED_INDEX, ccsEnabled && !cpsSpaceId),
   };
 }

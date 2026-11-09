@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, isoDateTime } from '@kbn/zod';
 import { isInternalURL } from '@kbn/std';
 import {
   NOTIFICATION_NAMESPACES,
@@ -42,7 +42,7 @@ export const SEVERITIES = [
 
 /**
  * Severities grouped by TTL window (days). Used for queries against the notifications
- * index and the cleanup task. Query will build one clause per time window.
+ * data stream and the cleanup task. Query will build one clause per time window.
  * e.g. 'error' and 'critical' both have a TTL of 180 days
  */
 export const SEVERITY_TTL_GROUPS: ReadonlyMap<number, Severity[]> = SEVERITIES.reduce(
@@ -72,16 +72,18 @@ export const ctaSchema = z
   })
   .strict();
 
+/** Idempotency key; see notification_id.ts for the ID conventions. */
+export const notificationIdSchema = z.string().min(1).max(512);
+
 /**
  * Field shape shared by the write and read schemas. `namespace` and `type` are
  * both drawn from the notification registry
  */
 const notificationObject = z
   .object({
-    /** Idempotency key; see notification_id.ts for the ID conventions. */
-    notification_id: z.string().min(1).max(512),
+    notification_id: notificationIdSchema,
     /** Occurrence time, set by NC for `timeseries` notification kind */
-    event_timestamp: z.iso.datetime().optional(),
+    event_timestamp: isoDateTime().optional(),
     /** Registry namespace that owns this notification, e.g. `inference`. */
     namespace: z.enum(NOTIFICATION_NAMESPACES),
     /** Registry type within `namespace`, e.g. `modelStatus` */
@@ -90,6 +92,10 @@ const notificationObject = z
     description: z.string().min(1).max(2000),
     severity: z.enum(SEVERITIES).default('info'),
     cta: ctaSchema.optional(),
+    /** Target user; absent means every user sees it. */
+    profile_uid: z.string().min(1).max(256).optional(),
+    /** Target spaces; absent means the notification is not space-scoped. */
+    space_ids: z.array(z.string().min(1).max(1024)).min(1).max(100).optional(),
   })
   .strict();
 
@@ -108,13 +114,13 @@ export const notificationWriteSchema = notificationObject.superRefine((value, ct
 });
 
 /**
- * Shape of a notification stored in the NC index.
+ * Shape of a notification stored in the NC data stream.
  * `loose()` ensures reads don't fail for outdated documents.
  */
 export const notificationReadSchema = notificationObject
   .extend({
     /** Ingest time, stamped on write by NC — never producer-supplied. */
-    '@timestamp': z.iso.datetime(),
+    '@timestamp': isoDateTime(),
     namespace: z.string().min(1).max(64),
     type: z.string().min(1).max(64),
     // Catch unknown severity tiers that may be added in the future
@@ -124,14 +130,13 @@ export const notificationReadSchema = notificationObject
 
 /**
  * Read-path query params. Used primarily at the HTTP GET route boundary.
- *`queryNotifications` re-parses it for extra validation..
+ *`queryNotifications` re-parses it for extra validation.
  */
 export const notificationQueryParamsSchema = z
   .object({
     namespace: z.string().min(1).max(64).optional(),
     type: z.string().min(1).max(64).optional(),
-    severity: z.array(z.enum(SEVERITIES)).max(SEVERITIES.length).optional(),
-    from: z.iso.datetime().optional(),
-    to: z.iso.datetime().optional(),
+    from: isoDateTime().optional(),
+    to: isoDateTime().optional(),
   })
   .strict();

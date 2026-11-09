@@ -12,6 +12,7 @@ import {
   INTERNAL_API_ACCESS,
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import {
   ENCRYPTION_NOT_CONFIGURED_MESSAGE,
@@ -19,6 +20,7 @@ import {
   getDestinationFromRequest,
   RemoteDecryptionError,
 } from '../../remote_kibana/forward_to_remote_kibana';
+import { redactSpaceIds } from '../shared/resolve_dataset_spaces';
 import type { RouteDependencies } from '../register_routes';
 
 export const registerListDatasetsRoute = ({
@@ -26,6 +28,8 @@ export const registerListDatasetsRoute = ({
   logger,
   canEncrypt,
   getEncryptedSavedObjectsStart,
+  getSpaceId,
+  getAccessibleSpaceIds,
 }: RouteDependencies) => {
   router.versioned
     .get({
@@ -85,9 +89,10 @@ export const registerListDatasetsRoute = ({
             sort_field: sortField,
             sort_order: sortOrder,
           } = request.query;
+          const activeSpaceId = getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID;
           const evalsContext = await context.evals;
-          const datasetClient = evalsContext.datasetService.getClient();
-          const datasets = await datasetClient.list({
+          const datasetClient = evalsContext.datasetService.getClient({ spaceId: activeSpaceId });
+          const result = await datasetClient.list({
             page,
             perPage,
             search,
@@ -97,8 +102,18 @@ export const registerListDatasetsRoute = ({
             sortOrder,
           });
 
+          const accessibleSpaceIds = getAccessibleSpaceIds
+            ? await getAccessibleSpaceIds(request)
+            : undefined;
+
           return response.ok({
-            body: datasets,
+            body: {
+              ...result,
+              datasets: result.datasets.map((dataset) => ({
+                ...dataset,
+                space_ids: redactSpaceIds(dataset.space_ids, accessibleSpaceIds),
+              })),
+            },
           });
         } catch (error) {
           if (error instanceof RemoteDecryptionError) {

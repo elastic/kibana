@@ -10,7 +10,6 @@ import {
   EuiBasicTable,
   type EuiBasicTableColumn,
   EuiButton,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
@@ -20,6 +19,7 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
+import { KbnDangerCallout, KbnSuccessCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { ALL_VALUE, type HealthScanResultResponse } from '@kbn/slo-schema';
 import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
@@ -201,20 +201,15 @@ export function ScanResultsPanel({ scanId }: Props) {
 
   if (isError) {
     return (
-      <EuiCallOut
+      <KbnDangerCallout
         announceOnMount
         title={i18n.translate('xpack.slo.healthScanFlyout.scanResults.errorTitle', {
           defaultMessage: 'Error loading scan results',
         })}
-        color="danger"
-        iconType="error"
-      >
-        <p>
-          {i18n.translate('xpack.slo.healthScanFlyout.scanResults.errorBody', {
-            defaultMessage: 'Unable to load the results for this scan. Please try again.',
-          })}
-        </p>
-      </EuiCallOut>
+        text={i18n.translate('xpack.slo.healthScanFlyout.scanResults.errorBody', {
+          defaultMessage: 'Unable to load the results for this scan. Please try again.',
+        })}
+      />
     );
   }
 
@@ -267,56 +262,41 @@ export function ScanResultsPanel({ scanId }: Props) {
 
       <EuiFlexGroup direction="column" gutterSize="m">
         {isPending && (
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount
             title={i18n.translate('xpack.slo.healthScanFlyout.scanResults.pendingTitle', {
               defaultMessage: 'Scan in progress',
             })}
-            color="warning"
-            iconType="clock"
-          >
-            <p>
-              {i18n.translate('xpack.slo.healthScanFlyout.scanResults.pendingBody', {
-                defaultMessage:
-                  'The health scan is still running. Results will update automatically as they become available.',
-              })}
-            </p>
-          </EuiCallOut>
+            text={i18n.translate('xpack.slo.healthScanFlyout.scanResults.pendingBody', {
+              defaultMessage:
+                'The health scan is still running. Results will update automatically as they become available.',
+            })}
+          />
         )}
 
         {!isPending && noIssues && (
-          <EuiCallOut
+          <KbnSuccessCallout
             announceOnMount
             title={i18n.translate('xpack.slo.healthScanFlyout.scanResults.noIssuesTitle', {
               defaultMessage: 'All SLOs are healthy',
             })}
-            color="success"
-            iconType="check"
-          >
-            <p>
-              {i18n.translate('xpack.slo.healthScanFlyout.scanResults.noIssuesBody', {
-                defaultMessage: 'No operational issues were found during this scan.',
-              })}
-            </p>
-          </EuiCallOut>
+            text={i18n.translate('xpack.slo.healthScanFlyout.scanResults.noIssuesBody', {
+              defaultMessage: 'No operational issues were found during this scan.',
+            })}
+          />
         )}
 
         {!isPending && hasIssues && (
-          <EuiCallOut
+          <KbnDangerCallout
             announceOnMount
             title={i18n.translate('xpack.slo.healthScanFlyout.scanResults.issuesTitle', {
               defaultMessage: 'Some SLOs have issues',
             })}
-            color="danger"
-            iconType="alert"
-          >
-            <p>
-              {i18n.translate('xpack.slo.healthScanFlyout.scanResults.issuesBody', {
-                defaultMessage:
-                  'Review the problematic SLOs listed below to resolve operational issues.',
-              })}
-            </p>
-          </EuiCallOut>
+            text={i18n.translate('xpack.slo.healthScanFlyout.scanResults.issuesBody', {
+              defaultMessage:
+                'Review the problematic SLOs listed below to resolve operational issues.',
+            })}
+          />
         )}
 
         {hasIssues && (

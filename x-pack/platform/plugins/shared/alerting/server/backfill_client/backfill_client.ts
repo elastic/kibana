@@ -27,6 +27,7 @@ import type { IEventLogger, IEventLogClient } from '@kbn/event-log-plugin/server
 import { isNumber, chunk } from 'lodash';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { withSpan } from '@kbn/apm-utils';
+import { TaskTypeGroup } from '@kbn/task-manager-plugin/server/task';
 import type {
   ScheduleBackfillError,
   ScheduleBackfillParams,
@@ -107,7 +108,8 @@ export class BackfillClient {
     opts.taskManagerSetup.registerTaskDefinitions({
       [BACKFILL_TASK_TYPE]: {
         title: 'Alerting Backfill Rule Run',
-        priority: TaskPriority.Low,
+        priority: TaskPriority.Maintenance,
+        taskTypeGroup: TaskTypeGroup.Alerting,
         createTaskRunner: (context: RunContext) => opts.taskRunnerFactory.createAdHoc(context),
       },
     });
@@ -527,29 +529,32 @@ export class BackfillClient {
     namespace,
     unsecuredSavedObjectsClient,
   }: DeleteBackfillForRulesOpts) {
-    try {
-      // query for all ad hoc runs that reference this ruleId
-      const adHocRunFinder = await unsecuredSavedObjectsClient.createPointInTimeFinder<AdHocRunSO>({
-        type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
-        perPage: 100,
-        hasReference: ruleIds.map((ruleId) => ({ id: ruleId, type: RULE_SAVED_OBJECT_TYPE })),
-        ...(namespace ? { namespaces: [namespace] } : undefined),
-      });
+    await withSpan({ name: 'backfillClient.deleteBackfillForRules', type: 'rule' }, async () => {
+      try {
+        // query for all ad hoc runs that reference this ruleId
+        const adHocRunFinder =
+          await unsecuredSavedObjectsClient.createPointInTimeFinder<AdHocRunSO>({
+            type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+            perPage: 100,
+            hasReference: ruleIds.map((ruleId) => ({ id: ruleId, type: RULE_SAVED_OBJECT_TYPE })),
+            ...(namespace ? { namespaces: [namespace] } : undefined),
+          });
 
-      const adHocRuns: Array<SavedObjectsFindResult<AdHocRunSO>> = [];
-      for await (const response of adHocRunFinder.find()) {
-        adHocRuns.push(...response.saved_objects);
+        const adHocRuns: Array<SavedObjectsFindResult<AdHocRunSO>> = [];
+        for await (const response of adHocRunFinder.find()) {
+          adHocRuns.push(...response.saved_objects);
+        }
+        await adHocRunFinder.close();
+        await this.deleteAdHocRunsAndTasks({
+          unsecuredSavedObjectsClient,
+          adHocRuns,
+        });
+      } catch (error) {
+        this.logger.warn(
+          `Error deleting backfill jobs for rule IDs: ${ruleIds.join(',')} - ${error.message}`
+        );
       }
-      await adHocRunFinder.close();
-      await this.deleteAdHocRunsAndTasks({
-        unsecuredSavedObjectsClient,
-        adHocRuns,
-      });
-    } catch (error) {
-      this.logger.warn(
-        `Error deleting backfill jobs for rule IDs: ${ruleIds.join(',')} - ${error.message}`
-      );
-    }
+    });
   }
 
   public async deleteBackfillsByInitiatorId({
@@ -675,8 +680,8 @@ function getRuleOrError({ ruleId, rules, ruleTypeRegistry }: GetRuleOrErrorOpts)
     };
   }
 
-  // check that the API key is not null
-  if (!rule.apiKey) {
+  // check that the rule has a credential. A UIAM-only rule has no Elasticsearch key.
+  if (!rule.apiKey && !rule.uiamApiKey) {
     return {
       error: createBackfillError(`Rule ${ruleId} has no API key`, ruleId, rule.name),
     };

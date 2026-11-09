@@ -12,6 +12,7 @@ import { EXTENDED_TIMEOUT } from '../fixtures/constants';
 
 const ONE_HOUR = 60 * 60 * 1000;
 const TRACE_ID = '433b4651687e18be2c6c8e3b11f53d09';
+const TIMESTAMP = Date.parse('2024-05-01T12:00:00.000Z');
 
 /**
  * The classic Logs `/link-to` routes are redirect-only: they resolve the `time`
@@ -31,12 +32,11 @@ test.describe(
       page,
       kbnUrl,
     }) => {
-      const timestamp = Date.now();
-      const startDate = new Date(timestamp - ONE_HOUR).toISOString();
-      const endDate = new Date(timestamp + ONE_HOUR).toISOString();
+      const startDate = new Date(TIMESTAMP - ONE_HOUR).toISOString();
+      const endDate = new Date(TIMESTAMP + ONE_HOUR).toISOString();
 
       await page.goto(
-        `${kbnUrl.app('logs')}/link-to?time=${timestamp}&filter=trace.id:${TRACE_ID}`
+        `${kbnUrl.app('logs')}/link-to?time=${TIMESTAMP}&filter=trace.id:${TRACE_ID}`
       );
       await page.waitForURL('**/app/discover**', { timeout: EXTENDED_TIMEOUT });
 
@@ -53,16 +53,15 @@ test.describe(
       kbnUrl,
     }) => {
       const nodeId = 1234;
-      const timestamp = Date.now();
-      const startDate = new Date(timestamp - ONE_HOUR).toISOString();
-      const endDate = new Date(timestamp + ONE_HOUR).toISOString();
+      const startDate = new Date(TIMESTAMP - ONE_HOUR).toISOString();
+      const endDate = new Date(TIMESTAMP + ONE_HOUR).toISOString();
 
       // `testView` is the (arbitrary) log-view id path param; the redirect derives
       // the query from `filter`/nodeId, not from the view id.
       await page.goto(
         `${kbnUrl.app(
           'logs'
-        )}/link-to/testView/pod-logs/${nodeId}?time=${timestamp}&filter=trace.id:${TRACE_ID}`
+        )}/link-to/testView/pod-logs/${nodeId}?time=${TIMESTAMP}&filter=trace.id:${TRACE_ID}`
       );
       await page.waitForURL('**/app/discover**', { timeout: EXTENDED_TIMEOUT });
 

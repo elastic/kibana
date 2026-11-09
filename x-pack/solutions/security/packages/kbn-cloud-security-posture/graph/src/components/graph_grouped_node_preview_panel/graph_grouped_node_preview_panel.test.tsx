@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { GraphGroupedNodePreviewPanel } from './graph_grouped_node_preview_panel';
 import type { AlertItem, EntityItem, EventItem } from './components/grouped_item/types';
@@ -21,6 +21,9 @@ import {
   ICON_TEST_ID,
   GROUPED_ITEMS_TYPE_TEST_ID,
   GROUPED_ITEM_TEST_ID,
+  GROUPED_ITEM_ACTOR_TEST_ID,
+  GROUPED_ITEM_TARGET_TEST_ID,
+  GROUPED_ITEM_TARGET_OVERFLOW_TEST_ID,
   PAGINATION_BUTTON_NEXT_TEST_ID,
 } from './test_ids';
 import { DOCUMENT_TYPE_EVENT } from '@kbn/cloud-security-posture-common/schema/graph/v1';
@@ -619,6 +622,120 @@ describe('GraphGroupedNodePreviewPanel', () => {
         render(<GraphGroupedNodePreviewPanel {...defaultProps} docMode="grouped-events" />);
 
         expect(screen.getByTestId(GROUPED_ITEMS_TYPE_TEST_ID)).toHaveTextContent('Events');
+      });
+
+      it('should render each row with its actor, first target and a +N badge for extra targets', async () => {
+        mockUseFetchDocumentDetails.mockReturnValue(
+          createMockHookResult({
+            data: {
+              page: [
+                {
+                  id: 'event-1',
+                  itemType: DOCUMENT_TYPE_EVENT,
+                  action: 'google.iam.admin.v1.CreateRole',
+                  actor: { id: 'user:admin@example.com@gcp' },
+                  target: { ids: ['projects/acme-prod/roles/customRole'] },
+                },
+                {
+                  id: 'event-2',
+                  itemType: DOCUMENT_TYPE_EVENT,
+                  action: 'AssumeRole',
+                  actor: { id: 'user:alice@acme.com@aws' },
+                  target: {
+                    ids: [
+                      'service:sts.amazonaws.com',
+                      'arn:aws:iam::123456789012:role/DataPipelineRole',
+                      'arn:aws:iam::123456789012:role/AuditRole',
+                    ],
+                  },
+                },
+              ],
+              total: 2,
+            },
+          })
+        );
+
+        render(<GraphGroupedNodePreviewPanel {...defaultProps} docMode="grouped-events" />);
+
+        const [singleTargetRow, multiTargetRow] = screen.getAllByTestId(GROUPED_ITEM_TEST_ID);
+
+        expect(within(singleTargetRow).getByTestId(GROUPED_ITEM_ACTOR_TEST_ID)).toHaveTextContent(
+          'user:admin@example.com@gcp'
+        );
+        expect(within(singleTargetRow).getByTestId(GROUPED_ITEM_TARGET_TEST_ID)).toHaveTextContent(
+          'projects/acme-prod/roles/customRole'
+        );
+        expect(
+          within(singleTargetRow).queryByTestId(GROUPED_ITEM_TARGET_OVERFLOW_TEST_ID)
+        ).not.toBeInTheDocument();
+
+        expect(within(multiTargetRow).getByTestId(GROUPED_ITEM_TARGET_TEST_ID)).toHaveTextContent(
+          'service:sts.amazonaws.com'
+        );
+        const overflowBadge = within(multiTargetRow).getByTestId(
+          GROUPED_ITEM_TARGET_OVERFLOW_TEST_ID
+        );
+        expect(overflowBadge).toHaveTextContent('+2');
+
+        await userEvent.hover(overflowBadge);
+
+        expect(
+          await screen.findByText(
+            'arn:aws:iam::123456789012:role/DataPipelineRole, arn:aws:iam::123456789012:role/AuditRole'
+          )
+        ).toBeInTheDocument();
+      });
+
+      it('should render a dash for the side that could not be resolved and hide rows with neither', () => {
+        mockUseFetchDocumentDetails.mockReturnValue(
+          createMockHookResult({
+            data: {
+              page: [
+                {
+                  id: 'event-actor-only',
+                  itemType: DOCUMENT_TYPE_EVENT,
+                  actor: { id: 'user:admin@example.com@gcp' },
+                },
+                {
+                  id: 'event-target-only',
+                  itemType: DOCUMENT_TYPE_EVENT,
+                  target: { ids: ['host:web-01', 'host:web-02'] },
+                },
+                { id: 'event-no-identity', itemType: DOCUMENT_TYPE_EVENT },
+              ],
+              total: 3,
+            },
+          })
+        );
+
+        render(<GraphGroupedNodePreviewPanel {...defaultProps} docMode="grouped-events" />);
+
+        const [actorOnlyRow, targetOnlyRow, noIdentityRow] =
+          screen.getAllByTestId(GROUPED_ITEM_TEST_ID);
+
+        expect(within(actorOnlyRow).getByTestId(GROUPED_ITEM_ACTOR_TEST_ID)).toHaveTextContent(
+          'user:admin@example.com@gcp'
+        );
+        expect(within(actorOnlyRow).getByTestId(GROUPED_ITEM_TARGET_TEST_ID)).toHaveTextContent(
+          '-'
+        );
+
+        expect(within(targetOnlyRow).getByTestId(GROUPED_ITEM_ACTOR_TEST_ID)).toHaveTextContent(
+          '-'
+        );
+        expect(within(targetOnlyRow).getByTestId(GROUPED_ITEM_TARGET_TEST_ID)).toHaveTextContent(
+          'host:web-01'
+        );
+        expect(
+          within(targetOnlyRow).getByTestId(GROUPED_ITEM_TARGET_OVERFLOW_TEST_ID)
+        ).toHaveTextContent('+1');
+
+        expect(
+          within(noIdentityRow).queryByTestId(GROUPED_ITEM_ACTOR_TEST_ID)
+        ).not.toBeInTheDocument();
+        expect(
+          within(noIdentityRow).queryByTestId(GROUPED_ITEM_TARGET_TEST_ID)
+        ).not.toBeInTheDocument();
       });
 
       it('should use server-side pagination (fetch only current page)', async () => {

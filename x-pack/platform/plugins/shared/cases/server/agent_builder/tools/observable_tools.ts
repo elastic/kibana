@@ -48,8 +48,16 @@ export const observablesTool = (
     id: platformCoreCasesTools.observables,
     type: ToolType.builtin,
     description: `Case observables — IOCs/indicators (IPs, domains, file hashes, URLs, emails, registry keys). Modes: \`add\`, \`update\`, \`delete\`. See \`mode\` field for required inputs.\n\n${CASES_SOLUTION_CONTEXT_INSTRUCTION}${CASES_TOOL_TEXT_INSTRUCTION}`,
+    annotations: {
+      title: 'Case Observables',
+      readOnlyHint: false,
+      destructiveHint: true,
+      idempotentHint: false,
+      openWorldHint: false,
+    },
     schema: observablesSchema,
     tags: ['cases'],
+    excludeFromMcp: true,
     handler: async (args, toolContext) => {
       const { mode, case_id, ...rest } = args;
 
@@ -84,7 +92,7 @@ export const observablesTool = (
       const result = await runStep();
       // delete returns { case_id, observable_id } — no full case to emit.
       if (mode !== 'delete') {
-        const attachmentIds = await emitFromStepResult(toolContext.attachments, result);
+        const attachmentIds = await emitFromStepResult(toolContext, result);
         return injectAttachmentIds(result, attachmentIds);
       }
       return result;

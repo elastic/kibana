@@ -43,15 +43,15 @@ export const CustomFieldsDeprecationCallout: React.FC<CustomFieldsDeprecationCal
     >
       {permissions.settings ? (
         <FormattedMessage
-          id="xpack.cases.caseFormFields.legacyCustomFieldsDeprecationBody"
-          defaultMessage='These custom fields are deprecated and have already been migrated to the new system, so you may see the same fields in both places. Manage them in {customFieldsLink}. To stop showing them here, disable "{switchLabel}" in {settingsLink}.'
+          id="xpack.cases.caseFormFields.legacyCustomFieldsMigratedBody"
+          defaultMessage='These custom fields are deprecated and have been migrated to the {fieldLibraryLink}. Their values stay in sync with the migrated fields. To stop showing them here, disable "{switchLabel}" in {settingsLink}.'
           values={{
-            customFieldsLink: (
+            fieldLibraryLink: (
               <EuiLink
                 href={getCasesFieldLibraryUrl()}
                 data-test-subj="legacy-custom-fields-view-new-link"
               >
-                {i18n.LEGACY_CUSTOM_FIELDS_VIEW_CUSTOM_FIELDS}
+                {i18n.LEGACY_CUSTOM_FIELDS_VIEW_FIELD_LIBRARY}
               </EuiLink>
             ),
             switchLabel: configureCasesI18n.SHOW_LEGACY_CUSTOM_FIELDS_AND_TEMPLATES,
@@ -67,8 +67,8 @@ export const CustomFieldsDeprecationCallout: React.FC<CustomFieldsDeprecationCal
         />
       ) : (
         <FormattedMessage
-          id="xpack.cases.caseFormFields.legacyCustomFieldsDeprecationBodyNoSettings"
-          defaultMessage="These custom fields are deprecated and have already been migrated to the new system, so you may see the same fields in both places. Contact your administrator to confirm the fields have been migrated, so that the legacy custom fields can be safely removed."
+          id="xpack.cases.caseFormFields.legacyCustomFieldsMigratedBodyNoSettings"
+          defaultMessage="These custom fields are deprecated and have been migrated to the Field library. Their values stay in sync with the migrated fields. Contact your administrator to remove the deprecated fields."
         />
       )}
     </EuiCallOut>

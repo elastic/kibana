@@ -55,24 +55,41 @@ connector's PR (Task 12) — every row will read `⚠️ Not validated — needs
 testing happens, but the table itself is not optional; see
 `create-connector/reference/pr-validation-table.md`.
 
+Building several connectors in one session also leaks entries between them. Shared files (`toc.yml`,
+the connector-list snippet, `all_specs.ts`, `connector_icons_map.ts`, `CODEOWNERS`) are edited for every
+connector, and an entry for one can end up on another's branch: the AKS PR shipped a dangling Azure
+DevOps entry in two docs files. Before committing each connector, diff those files and confirm every
+added line belongs to that connector.
+
 ---
 
 ## Task 1: Create the Connector Code
 
 Mark task 1 as `in_progress`.
 
-Before generating code, research the vendor's real API docs for the actions you plan to implement —
-specifically update semantics (partial vs. full-replace), array query-param encoding, per-action auth
-scopes, and regional/self-hosted domain variants. See "Research the Vendor API Before Writing Any Code"
-in `create-connector/reference/custom-connector-setup.md`. Bugs that trace back to skipping this (wrong
+After scaffolding and before writing actions, find the vendor's machine-readable spec and describe the
+operations the planned actions call with `node scripts/connector_vendor_api --inspect --connector <id>`
+(see "Start from the vendor's
+spec" in `create-connector/reference/custom-connector-setup.md`): methods, parameter locations, array
+encoding, bounds and scopes come from it. Then research the vendor's real API docs for what the spec
+doesn't settle — specifically update semantics (partial vs. full-replace), per-action auth scopes, and
+regional/self-hosted domain variants. See "Research the Vendor API Before Writing Any Code" in the same
+file. Bugs that trace back to skipping this (wrong
 auth scope, 400s on partial updates, 404s on regional domains) are far cheaper to avoid up front than to
 find during Task 7's live chat test or after the PR is open.
 
-Invoke the `create-connector` skill with `$ARGUMENTS` as the argument:
+`create-connector` runs in a forked context and can't ask the user anything, so agree on the actions
+first. Unless the user already named them, propose a set as "Choose the actions" in `create-connector`
+describes, one line per action (name, vendor operation, scope, the question it answers) with the notable
+operations left out, and confirm it with `AskUserQuestion`. When building a batch, confirm every
+connector's set in one round rather than stopping before each. If the user asked not to be interrupted,
+go ahead with the proposals; the PR's `## Actions` section then says they are unconfirmed.
+
+Invoke the `create-connector` skill with `$ARGUMENTS` and the agreed actions:
 
 ```
 Skill: create-connector
-Args: $ARGUMENTS
+Args: $ARGUMENTS actions: <action names, each with its vendor operation>
 ```
 
 This runs in a forked context and will generate:
@@ -116,8 +133,8 @@ Use `AskUserQuestion` to ask the user to start Elasticsearch and Kibana:
 > To test the connector, I need Elasticsearch and Kibana running. Please start them if they aren't already:
 >
 > ```
-> yarn es snapshot          # in one terminal
-> yarn start                # in another terminal
+> pnpm es snapshot          # in one terminal
+> pnpm start                # in another terminal
 > ```
 >
 > Let me know when both are ready.
@@ -145,13 +162,13 @@ Skill: activate-connector
 Args: $ARGUMENTS
 ```
 
-This will list available types, ask the user for credentials, and create the connector instance via the Actions API. When `agentBuilder:experimentalFeatures` is true, the connector's sub-actions become available to agents.
+This will list available types, ask the user for credentials, and create the connector instance via the Actions API. Creating the connector does not by itself grant any agent access to it — its ID must be added to an agent's assigned connectors before that agent can call its sub-actions.
 
-**If the user reports `Error: No widget found for schema type: ZodNumberFormat...`** when opening the
-connector creation form in the Kibana UI, a `z.number()` field was used in the connector's config
-`schema` — the form-generator has no numeric widget. Fix it per "There is no widget for `z.number()`
-config fields" in `create-connector/reference/connector-patterns.md` (regex-validated string + `text`
-widget, coerced to a number in the handler), then ask the user to retry.
+**If the user reports `Error: No widget found for schema type: ...`** when opening the connector
+creation form in the Kibana UI, a config field in the connector's `schema` uses a Zod type the
+form-generator has no widget for (a boolean, array, or record — numbers are supported). Fix it per
+"Config fields must use a type the form-generator has a widget for" in
+`create-connector/reference/connector-patterns.md`, then ask the user to retry.
 
 Mark task 5 as `completed`.
 
@@ -188,6 +205,29 @@ Args: <agent-id-from-task-6>
 ```
 
 Capture and analyze the full output (reasoning, tool calls, tool results, response).
+
+This prompt only exercises reads. The bugs that most often ship are in mutating actions (a wrong HTTP
+method, a wrong body envelope, a nested object that loses a field), and a read-only chat never reaches
+them. After the chat test, call **every mutating action once directly** through
+`POST /api/actions/connector/<id>/_execute` against a disposable resource, then read the resource back
+to confirm the change took effect. Where the vendor documents resource variants (e.g. a DNS-only
+cluster, a System node pool), run at least one action against each variant you can create. If a
+mutation cannot be tested safely, record it as `⚠️ Not validated` in Task 12 rather than skipping it
+silently.
+
+A chat test also only reads the first page. For **every list action that pages**, fetch page 2
+explicitly through `_execute`: take the cursor, next link or page number from the first response and pass
+it back, with a small page size so a second page exists. Then compare what the vendor did with the
+operation's `pagination` descriptor in `vendor_api/manifest.json`: the parameter that selects the page,
+the page size parameter, where the next cursor sits in the response and what marks the last page. The
+contract test only checks that a descriptor is declared and doesn't page with it, so a wrong one passes
+while the real API pages differently; Tier A will rely on it (#295693). Correct the descriptor, rerun
+`node scripts/connector_vendor_api --connector <id>`, and note the page-2 call in the action's row in
+Task 12.
+
+A spec defect found while testing (a parameter the API takes but the spec lacks, a wrong type, a
+documented limit the spec doesn't encode) goes into `vendor_api/overlay.yaml`, with what the real API did
+as the action's `description`; see "Record the vendor API contract" in the `create-connector` skill.
 
 Mark task 7 as `completed`.
 
@@ -235,6 +275,10 @@ If tools failed (tool results contain `"status":"failed"`):
      specific param belongs, fix the handler, and check any sibling action (e.g. the corresponding
      mute/unmute or enable/disable pair) for the same mistake — don't assume the sibling is correct just
      because it wasn't the one that failed.
+   - An error that names the wrong cause on a **mutating** call — e.g. Azure ARM's `InvalidAPIVersion`
+     for a method the route does not support, or `UnmarshalError: unknown field "properties"` for a body
+     wrapped in an envelope the route does not use. Before changing API versions or field names, check
+     the route's method and body shape in the vendor's OpenAPI/swagger entry for that exact route.
 3. If the error is a **sub-action issue** (wrong name, invalid parameters) — this needs code fixes.
 4. If the error is a **connector issue** (wrong auth config, wrong server URL) — this needs code fixes.
 
@@ -272,7 +316,7 @@ Mark task 9 as `completed`.
 
 Mark task 10 as `in_progress`.
 
-Do one final review using the **review-connector** skill. Verify no TODOs/placeholders, consistent naming, no debug artifacts. The review skill will also run docs quality checks (`docs-check-style`, `crosslink-validator`, `frontmatter-audit`, `content-type-checker`, `applies-to-tagging`) on any connector docs. Make any final minor fixes if needed.
+Do one final review using the **review-connector** skill. Verify no TODOs/placeholders, consistent naming, no debug artifacts. Rerun the vendor API contract test (`node scripts/jest src/platform/packages/shared/kbn-connector-specs/src/connector_spec_vendor_api_contract.test.ts`) and, if the connector has a `vendor_api/manifest.json`, `node scripts/connector_vendor_api --connector <id> --check`, as fixes made since Task 1 often leave the artifacts out of date. An exempt connector has no manifest, and `--check` fails without one. The review skill will also run docs quality checks (`docs-check-style`, `crosslink-validator`, `frontmatter-audit`, `content-type-checker`, `applies-to-tagging`) on any connector docs. Make any final minor fixes if needed.
 
 Mark task 10 as `completed`.
 
@@ -320,6 +364,11 @@ Read `create-connector/reference/pr-validation-table.md` for the full format and
   test data/credentials, or because live testing (Tasks 4-11) was deferred entirely for this connector —
   mark `⚠️ Not validated — needs manual verification` rather than leaving the row out.
 - For any action that failed and remains unresolved, mark `❌ Fail` with a short description.
+- Above the table, report the vendor API contract result from Task 10: the sources and API versions
+  recorded against, whether the contract test passes, and the overlay actions and `unmatched` entries,
+  each with its evidence.
+- Put the `## Actions` section from Task 1 before it, updated with any action added or dropped in
+  Tasks 3-9.
 
 Keep this table's markdown handy (in the task output or scratch notes) — it must be included verbatim
 under a `## Validated` heading in the PR description when this connector's PR is opened, whether that

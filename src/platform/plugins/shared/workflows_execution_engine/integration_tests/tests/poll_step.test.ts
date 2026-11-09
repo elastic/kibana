@@ -116,7 +116,7 @@ steps:
 
     describe('after resume', () => {
       beforeAll(async () => {
-        await workflowRunFixture.resumeWorkflow();
+        await workflowRunFixture.resumeWorkflowAtScheduledTime();
       });
 
       it('completes the workflow', async () => {
@@ -176,8 +176,8 @@ steps:
       beforeAll(async () => {
         // First resume: first poll invocation (after `start` hand-off). Second
         // resume: second poll returns output and the workflow continues.
-        await workflowRunFixture.resumeWorkflow();
-        await workflowRunFixture.resumeWorkflow();
+        await workflowRunFixture.resumeWorkflowAtScheduledTime();
+        await workflowRunFixture.resumeWorkflowAtScheduledTime();
       });
 
       it('completes the workflow', async () => {

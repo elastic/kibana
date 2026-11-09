@@ -19,12 +19,15 @@ export type {
   DashboardInitializationState,
 } from './dashboard_api/types';
 export { DASHBOARD_API_TYPE } from './dashboard_api/types';
+export type { DashboardChangeSource } from '../common/change_sources';
 export type { DashboardRendererProps } from './dashboard_renderer/dashboard_renderer';
 export { LazyDashboardRenderer as DashboardRenderer } from './dashboard_renderer/lazy_dashboard_renderer';
 export type { DashboardStart, DashboardSetup } from './plugin';
 export type { DashboardListingTab } from './dashboard_listing/types';
 export { OPEN_DASHBOARD_CHAT_ACTION_ID } from './dashboard_renderer/viewport/empty_screen/dashboard_empty_screen_chat_action';
 export type { OpenDashboardChatActionContext } from './dashboard_renderer/viewport/empty_screen/dashboard_empty_screen_chat_action';
+export { ENHANCE_DASHBOARD_ACTION_ID } from './dashboard_app/enhance/enhance_dashboard_action';
+export type { EnhanceDashboardActionContext } from './dashboard_app/enhance/enhance_dashboard_action';
 
 export { DashboardListingTable } from './dashboard_listing';
 export { DashboardTopNav } from './dashboard_top_nav';

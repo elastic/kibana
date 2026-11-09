@@ -9,7 +9,6 @@ import React, { useCallback, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFieldText,
   EuiFormRow,
   EuiModal,
@@ -24,6 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { useRevokeOAuthClient } from '../../hooks/oauth_clients/use_revoke_oauth_client';
 import { useToasts } from '../../hooks/use_toasts';
 import { labels } from '../../utils/i18n';
@@ -75,22 +75,25 @@ export const RevokeMcpClientModal = ({
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <EuiCallOut
-          color="warning"
-          iconType="warning"
-          title={labels.tools.mcpClients.revoke.warningTitle}
-        >
-          <FormattedMessage
-            id="xpack.agentBuilder.mcpClients.revoke.warningDescription"
-            defaultMessage="The {name} MCP client has <bold>{count} application {count, plural, one {connection} other {connections}}</bold> detected."
-            values={{
-              name: clientName,
-              count: connectionCount,
-              bold: (chunks) => <strong>{chunks}</strong>,
-            }}
-          />
-        </EuiCallOut>
-        <EuiSpacer size="l" />
+        {connectionCount > 0 && (
+          <>
+            <KbnWarningCallout
+              title={labels.tools.mcpClients.revoke.warningTitle}
+              text={
+                <FormattedMessage
+                  id="xpack.agentBuilder.mcpClients.revoke.warningDescription"
+                  defaultMessage="The {name} MCP client has <bold>{count} application {count, plural, one {connection} other {connections}}</bold> detected."
+                  values={{
+                    name: clientName,
+                    count: connectionCount,
+                    bold: (chunks) => <strong>{chunks}</strong>,
+                  }}
+                />
+              }
+            />
+            <EuiSpacer size="l" />
+          </>
+        )}
         <EuiFormRow label={labels.tools.mcpClients.revoke.confirmLabel(clientName)} fullWidth>
           <EuiFieldText
             value={confirmationInput}

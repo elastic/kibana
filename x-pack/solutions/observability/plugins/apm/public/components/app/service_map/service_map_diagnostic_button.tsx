@@ -12,10 +12,10 @@ import { i18n } from '@kbn/i18n';
 import { enableDiagnosticMode } from '@kbn/observability-plugin/common';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { DiagnosticFlyout } from './diagnostic_tool/diagnostic_flyout';
-import type { ServiceMapSelection } from './popover/popover_content';
+import type { ServiceMapNode } from '../../../../common/service_map';
 
 interface ServiceMapDiagnosticButtonProps {
-  selection?: ServiceMapSelection;
+  selection?: ServiceMapNode;
 }
 
 export function ServiceMapDiagnosticButton({ selection }: ServiceMapDiagnosticButtonProps) {
@@ -36,7 +36,7 @@ export function ServiceMapDiagnosticButton({ selection }: ServiceMapDiagnosticBu
           >
             <EuiButtonEmpty
               size="s"
-              iconType="unlink"
+              iconType="linkSlash"
               onClick={() => setIsOpen(true)}
               data-test-subj="serviceMapOpenDiagnosticButton"
               data-ebt-action="openDiagnosticTool"

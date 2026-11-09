@@ -155,6 +155,18 @@ describe('MigrationDataInputFlyout', () => {
     expect(getByTestId('uploadRulesFlyout')).toBeInTheDocument();
   });
 
+  it('exposes the visible title as the accessible name of the flyout title element', () => {
+    const { getByRole } = render(
+      <TestProviders>
+        <MigrationDataInputFlyout onClose={() => {}} migrationStats={undefined} />
+      </TestProviders>
+    );
+
+    // the flyout references this heading via `aria-labelledby`, so its accessible
+    // name must be the visible title and not an internal identifier
+    expect(getByRole('heading', { name: 'Upload SIEM rules' })).toBeInTheDocument();
+  });
+
   it('calls onClose when the close button is clicked', () => {
     const { getByText } = render(
       <TestProviders>

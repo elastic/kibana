@@ -26,7 +26,7 @@ module.exports = {
     schema: [],
   },
 
-  create(context) {
+  createOnce(context) {
     const isCheckA11yCall = (node) => {
       const callee = node && node.callee;
       if (!callee || callee.type !== 'MemberExpression') return false;

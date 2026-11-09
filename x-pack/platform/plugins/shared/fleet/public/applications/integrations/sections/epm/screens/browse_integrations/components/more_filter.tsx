@@ -77,7 +77,7 @@ export const MoreFilter: React.FC<
       button={
         <EuiFilterButton
           data-test-subj="browseIntegrations.searchBar.moreBtn"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           onClick={togglePopover}
           isSelected={isOpen}
           numFilters={activeCount}

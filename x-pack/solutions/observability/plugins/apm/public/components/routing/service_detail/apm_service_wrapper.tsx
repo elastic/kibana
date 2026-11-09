@@ -25,12 +25,10 @@ export function ApmServiceWrapper() {
         title: ServiceInventoryTitle,
         href: router.link('/services', { query }),
       },
+      // No href on the current entity — Chrome Next Back uses linked crumbs except the last
+      // and would otherwise offer a self-navigation target
       {
         title: serviceName,
-        href: router.link('/services/{serviceName}', {
-          query,
-          path: { serviceName },
-        }),
       },
     ],
     [query, router, serviceName],

@@ -8,7 +8,47 @@
  */
 
 import Path from 'path';
+import { x as tarExtract } from 'tar';
 import { REPO_ROOT } from '@kbn/repo-info';
+import type { SomeDevLog } from '@kbn/some-dev-log';
+
+/** Restorable entries mirror CACHE_MATCH_GLOBS: declaration outputs under target/types and type_check configs. */
+const RESTORABLE_ENTRY_PATTERNS = [
+  /^(?:[^/]+\/)*target\/types\/(?:[^/]+\/)*[^/]+\.(?:d\.[cm]?ts|d\.ts\.map|tsbuildinfo)$/,
+  /^(?:[^/]+\/)*tsconfig[^/]*\.type_check\.json$/,
+];
+const RESTORABLE_ENTRY_TYPES = new Set(['File', 'OldFile']);
+const UNRESTORABLE_PATH_SEGMENTS = new Set(['', '.', '..', 'node_modules', '.git']);
+
+/**
+ * Whether a TypeScript cache archive entry is a type-check artifact that may be written into the repo.
+ */
+export function isRestorableArchiveEntry(entryPath: string, entryType: string): boolean {
+  const relativePath = entryPath.replace(/^\.\//, '');
+  return (
+    RESTORABLE_ENTRY_TYPES.has(entryType) &&
+    !relativePath.split('/').some((segment) => UNRESTORABLE_PATH_SEGMENTS.has(segment)) &&
+    RESTORABLE_ENTRY_PATTERNS.some((pattern) => pattern.test(relativePath))
+  );
+}
+
+/**
+ * Creates a tar extraction stream into REPO_ROOT that only writes restorable entries.
+ */
+export function createArchiveExtractor(log: SomeDevLog) {
+  return tarExtract({
+    cwd: REPO_ROOT,
+    preserveOwner: false,
+    filter: (entryPath, entry) => {
+      const entryType = 'type' in entry ? entry.type : '';
+      const restorable = isRestorableArchiveEntry(entryPath, entryType);
+      if (!restorable && entryType !== 'Directory') {
+        log.warning(`Skipping unexpected entry in TypeScript cache archive: ${entryPath}`);
+      }
+      return restorable;
+    },
+  });
+}
 
 export function parseSerializedContent<T>(rawContent: string): T | undefined {
   try {

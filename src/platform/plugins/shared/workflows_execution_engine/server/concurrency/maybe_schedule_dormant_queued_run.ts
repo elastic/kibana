@@ -11,7 +11,9 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 
 import { resumeSyncParentIfNeeded } from '../execution_functions/resume_sync_parent_if_needed';
+import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import type { WorkflowTaskRunAs } from '../service_account_execution';
 import type { InternalResumeWorkflowExecution } from '../types';
 import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
@@ -23,6 +25,7 @@ export async function maybeScheduleDormantQueuedRunIfNeeded({
   workflowExecutionId,
   spaceId,
   request,
+  runAs,
   workflowExecutionRepository,
   workflowTaskManager,
   logger,
@@ -30,6 +33,7 @@ export async function maybeScheduleDormantQueuedRunIfNeeded({
   workflowExecutionId: string;
   spaceId: string;
   request: KibanaRequest;
+  runAs?: WorkflowTaskRunAs;
   workflowExecutionRepository: WorkflowExecutionRepository;
   workflowTaskManager: WorkflowTaskManager;
   logger: Logger;
@@ -52,6 +56,7 @@ export async function maybeScheduleDormantQueuedRunIfNeeded({
     await workflowTaskManager.scheduleDormantQueuedRunTask({
       workflowExecution: execution,
       request,
+      runAs,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
@@ -74,7 +79,9 @@ export async function handleConcurrencyBlockedExecution({
   workflowExecutionId,
   spaceId,
   request,
+  runAs,
   workflowExecutionRepository,
+  stepExecutionRepository,
   workflowTaskManager,
   internalResumeWorkflowExecution,
   logger,
@@ -82,7 +89,9 @@ export async function handleConcurrencyBlockedExecution({
   workflowExecutionId: string;
   spaceId: string;
   request: KibanaRequest;
+  runAs?: WorkflowTaskRunAs;
   workflowExecutionRepository: WorkflowExecutionRepository;
+  stepExecutionRepository?: StepExecutionRepository;
   workflowTaskManager: WorkflowTaskManager;
   internalResumeWorkflowExecution?: InternalResumeWorkflowExecution;
   logger: Logger;
@@ -101,6 +110,7 @@ export async function handleConcurrencyBlockedExecution({
       workflowExecutionId,
       spaceId,
       request,
+      runAs,
       workflowExecutionRepository,
       workflowTaskManager,
       logger,
@@ -112,8 +122,9 @@ export async function handleConcurrencyBlockedExecution({
     await resumeSyncParentIfNeeded({
       childExecution: execution,
       spaceId,
-      fakeRequest: request,
       internalResumeWorkflowExecution,
+      workflowExecutionRepository,
+      stepExecutionRepository,
       workflowTaskManager,
       logger,
     });

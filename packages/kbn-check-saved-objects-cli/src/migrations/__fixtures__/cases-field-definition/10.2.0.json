@@ -1,0 +1,34 @@
+{
+  "10.1.0": [
+    {
+      "fieldDefinitionId": "priority",
+      "name": "priority",
+      "definition": "name: priority\nlabel: Priority\ncontrol: INPUT_TEXT\ntype: keyword\n",
+      "owner": "cases"
+    },
+    {
+      "fieldDefinitionId": "environment",
+      "name": "environment",
+      "definition": "name: environment\nlabel: Environment\ncontrol: INPUT_TEXT\ntype: keyword\n",
+      "owner": "securitySolution",
+      "description": "The environment the case relates to",
+      "isGlobal": true
+    }
+  ],
+  "10.2.0": [
+    {
+      "fieldDefinitionId": "priority",
+      "name": "priority",
+      "definition": "name: priority\nlabel: Priority\ncontrol: INPUT_TEXT\ntype: keyword\n",
+      "owner": "cases"
+    },
+    {
+      "fieldDefinitionId": "environment",
+      "name": "environment",
+      "definition": "name: environment\nlabel: Environment\ncontrol: INPUT_TEXT\ntype: keyword\n",
+      "owner": "securitySolution",
+      "description": "The environment the case relates to",
+      "isGlobal": true
+    }
+  ]
+}

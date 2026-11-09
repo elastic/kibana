@@ -14,6 +14,7 @@ import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { CombinedJobWithStats } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import type { JobsHealthRuleTestsConfig, JobsHealthTests } from '@kbn/ml-common-types/alerts';
+import { DELAYED_DATA_THRESHOLD_TYPE } from '@kbn/ml-common-types/alerts';
 import { resolveMaxTimeInterval } from './job_utils';
 
 const narrowBucketLength = 60;
@@ -76,6 +77,8 @@ export function getResultJobsHealthRuleConfig(config: JobsHealthRuleTestsConfig)
       enabled: config?.delayedData?.enabled ?? true,
       docsCount: config?.delayedData?.docsCount ?? 1,
       timeInterval: config?.delayedData?.timeInterval ?? null,
+      thresholdType: config?.delayedData?.thresholdType ?? DELAYED_DATA_THRESHOLD_TYPE.COUNT,
+      docsCountPercentage: config?.delayedData?.docsCountPercentage ?? 20,
     },
     behindRealtime: {
       enabled: config?.behindRealtime?.enabled ?? true,

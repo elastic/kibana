@@ -15,18 +15,24 @@ import { WorkflowYamlPreviewFlyout } from './workflow_yaml_preview_flyout';
 const mockUseWorkflow = jest.fn();
 
 jest.mock('../../hooks/use_workflow', () => ({
+  ...jest.requireActual('../../hooks/use_workflow'),
   useWorkflow: (...args: unknown[]) => mockUseWorkflow(...args),
 }));
 
-jest.mock('@kbn/code-editor', () => ({
-  CodeEditor: ({
-    value,
-    'data-test-subj': dataTestSubj,
-  }: {
-    value: string;
-    'data-test-subj'?: string;
-  }) => <pre data-test-subj={dataTestSubj}>{value}</pre>,
-}));
+jest.mock('@kbn/code-editor', () => {
+  const actual = jest.requireActual('@kbn/code-editor');
+
+  return {
+    ...actual,
+    CodeEditor: ({
+      value,
+      'data-test-subj': dataTestSubj,
+    }: {
+      value: string;
+      'data-test-subj'?: string;
+    }) => <pre data-test-subj={dataTestSubj}>{value}</pre>,
+  };
+});
 
 const renderFlyout = (onClose = jest.fn()) => {
   const queryClient = new QueryClient({
@@ -47,6 +53,13 @@ const renderFlyout = (onClose = jest.fn()) => {
     </I18nProvider>
   );
 };
+
+const createNotFoundError = () =>
+  Object.assign(new Error('Not Found'), {
+    name: 'HttpFetchError',
+    request: { url: '/api/workflows/workflow/wf-1' },
+    response: { status: 404 },
+  });
 
 describe('WorkflowYamlPreviewFlyout', () => {
   beforeEach(() => {
@@ -77,6 +90,21 @@ describe('WorkflowYamlPreviewFlyout', () => {
     expect(screen.getByText('Workflow preview: My workflow')).toBeInTheDocument();
     expect(screen.getByTestId('contextWorkflowYamlPreview')).toHaveTextContent('name: preview');
     expect(mockUseWorkflow).toHaveBeenCalledWith('wf-1');
+  });
+
+  it('shows a not-found message when the workflow was deleted', () => {
+    mockUseWorkflow.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: createNotFoundError(),
+    });
+
+    renderFlyout();
+
+    expect(screen.getByTestId('contextWorkflowYamlPreviewNotFound')).toBeInTheDocument();
+    expect(screen.getByText(/no longer exists/i)).toBeInTheDocument();
+    expect(screen.getByText(/wf-1/)).toBeInTheDocument();
+    expect(screen.queryByTestId('contextWorkflowYamlPreviewError')).not.toBeInTheDocument();
   });
 
   it('shows an error when loading fails', () => {

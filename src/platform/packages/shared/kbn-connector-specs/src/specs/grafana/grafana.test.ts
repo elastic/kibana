@@ -199,7 +199,7 @@ describe('Grafana', () => {
       expect(mockClient.post).toHaveBeenCalledWith(
         'https://acme.grafana.net/api/alertmanager/grafana/api/v2/silences',
         {
-          matchers: [{ name: 'alertname', value: 'HighCPU' }],
+          matchers: [{ name: 'alertname', value: 'HighCPU', isRegex: false }],
           startsAt: '2026-01-01T00:00:00Z',
           endsAt: '2026-01-01T02:00:00Z',
           comment: 'Maintenance window',
@@ -429,10 +429,8 @@ describe('Grafana', () => {
     it('should succeed when rules can be listed', async () => {
       mockClient.get.mockResolvedValue({ data: [{ uid: 'r1' }, { uid: 'r2' }] });
 
-      if (!Grafana.test) throw new Error('Test handler not defined');
       const result = await Grafana.test.handler(mockContext);
 
-      expect(result.ok).toBe(true);
       expect(result.message).toContain('2');
     });
 

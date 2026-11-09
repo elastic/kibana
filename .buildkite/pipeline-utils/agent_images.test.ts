@@ -16,13 +16,13 @@ import {
   FIPS_140_3_IMAGE,
   FIPS_140_2_IMAGE,
   USE_QA_IMAGE_GH_LABEL,
-} from './agent_images';
-import { FIPS_GH_LABELS, FIPS_VERSION } from './pr_labels';
+} from './agent_images.ts';
+import { FIPS_GH_LABELS, FIPS_VERSION } from './pr_labels.ts';
 
 const mockSetAnnotation = jest.fn();
 
-jest.mock('./buildkite', () => {
-  const actual = jest.requireActual('./buildkite');
+jest.mock('./buildkite/index.ts', () => {
+  const actual = jest.requireActual('./buildkite/index.ts');
   return {
     ...actual,
     BuildkiteClient: jest.fn().mockImplementation(() => ({
@@ -141,6 +141,20 @@ describe('agent_images', () => {
       );
     });
 
+    it('limits the spot queues to the asia-south2 and northamerica-northeast2 zones', () => {
+      const spotZones = [
+        'asia-south2-a',
+        'asia-south2-b',
+        'asia-south2-c',
+        'northamerica-northeast2-a',
+        'northamerica-northeast2-b',
+        'northamerica-northeast2-c',
+      ].join(',');
+
+      expect(expandAgentQueue('n2-4-spot')).toEqual(expect.objectContaining({ spotZones }));
+      expect(expandAgentQueue('n2-8-spot')).toEqual(expect.objectContaining({ spotZones }));
+    });
+
     it('returns virt config for virt queue', () => {
       const config = expandAgentQueue('n2-4-virt');
 
@@ -156,6 +170,12 @@ describe('agent_images', () => {
       const config = expandAgentQueue('n2-4-spot', 200);
 
       expect(config.diskSizeGb).toBe(200);
+    });
+
+    it('falls back to the default disk size when not provided', () => {
+      expect(expandAgentQueue('n2-4-spot', undefined).diskSizeGb).toBe(
+        DEFAULT_AGENT_IMAGE_CONFIG.diskSizeGb
+      );
     });
 
     it('returns base config for queue without spot or virt suffix', () => {

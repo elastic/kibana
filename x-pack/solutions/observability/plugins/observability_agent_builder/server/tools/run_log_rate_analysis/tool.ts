@@ -56,6 +56,13 @@ export function createRunLogRateAnalysisTool({
   const toolDefinition: BuiltinToolDefinition<typeof logRateAnalysisSchema> = {
     id: OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID,
     type: ToolType.builtin,
+    annotations: {
+      title: 'Run Log Rate Analysis',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     description: `Analyzes which log fields or message patterns correlate with changes in log throughput (spikes or drops).
 
 When to use:

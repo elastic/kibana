@@ -41,21 +41,28 @@ export class InspectComponentPluginPublic implements Plugin<void, PluginStartDep
   public start(core: CoreStart, plugins: PluginStartDeps) {
     if (!this.isEnabled || !this.isDev) return {};
 
-    const inspectButton = (location: 'developerToolbar' | 'header') => (
-      <Suspense fallback={null}>
-        <LazyInspectButton core={core} branch={this.branch} buttonLocation={location} />
-      </Suspense>
-    );
-
     if (plugins.developerToolbar) {
       plugins.developerToolbar.registerItem({
         id: 'Inspect Component',
-        children: inspectButton('developerToolbar'),
+        children: (
+          <Suspense fallback={null}>
+            <LazyInspectButton core={core} branch={this.branch} buttonLocation="developerToolbar" />
+          </Suspense>
+        ),
       });
-    } else {
-      core.chrome.navControls.registerRight({
-        order: 1002,
-        content: inspectButton('header'),
+
+      plugins.developerToolbar.registerItem({
+        id: 'Grab Component',
+        children: (
+          <Suspense fallback={null}>
+            <LazyInspectButton
+              core={core}
+              branch={this.branch}
+              buttonLocation="developerToolbar"
+              mode="grab"
+            />
+          </Suspense>
+        ),
       });
     }
 

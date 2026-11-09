@@ -32,9 +32,8 @@ export const storageExplorer = {
       >
         <ApmMainTemplate
           searchBar={<SearchBar />}
-          pageHeader={{
-            alignItems: 'center',
-            pageTitle: i18n.translate('xpack.apm.views.storageExplorer.title', {
+          header={{
+            title: i18n.translate('xpack.apm.views.storageExplorer.title', {
               defaultMessage: 'Storage explorer',
             }),
           }}

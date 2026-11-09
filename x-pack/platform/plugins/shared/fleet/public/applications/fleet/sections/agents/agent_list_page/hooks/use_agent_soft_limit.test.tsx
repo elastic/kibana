@@ -27,7 +27,7 @@ describe('useAgentSoftLimit', () => {
 
     expect(result.current.shouldDisplayAgentSoftLimit).toEqual(false);
 
-    expect(mockedSendGetAgents).not.toBeCalled();
+    expect(mockedSendGetAgents).not.toHaveBeenCalled();
   });
 
   it('should return shouldDisplayAgentSoftLimit:false if soft limit is enabled in config and there is less online agents than the limit', async () => {
@@ -39,7 +39,7 @@ describe('useAgentSoftLimit', () => {
       },
     } as any);
     const { result, rerender } = renderer.renderHook(() => useAgentSoftLimit());
-    await renderer.waitFor(() => expect(mockedSendGetAgents).toBeCalled());
+    await renderer.waitFor(() => expect(mockedSendGetAgents).toHaveBeenCalled());
 
     // re-render so cache is updated to value from most recent call
     rerender();
@@ -56,7 +56,7 @@ describe('useAgentSoftLimit', () => {
       },
     } as any);
     const { result, rerender } = renderer.renderHook(() => useAgentSoftLimit());
-    await renderer.waitFor(() => expect(mockedSendGetAgents).toBeCalled());
+    await renderer.waitFor(() => expect(mockedSendGetAgents).toHaveBeenCalled());
 
     // re-render so cache is updated to value from most recent call
     rerender();

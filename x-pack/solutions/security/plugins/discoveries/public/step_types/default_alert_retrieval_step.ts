@@ -17,7 +17,7 @@ export const defaultAlertRetrievalStepPublicDefinition: PublicStepDefinition = {
   ...DefaultAlertRetrievalStepCommonDefinition,
 
   icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/search').then(({ icon }) => ({
+    import('@elastic/eui/es/components/icon/assets/magnify').then(({ icon }) => ({
       default: icon,
     }))
   ),

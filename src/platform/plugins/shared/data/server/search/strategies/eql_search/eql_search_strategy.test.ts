@@ -154,9 +154,9 @@ describe('EQL search strategy', () => {
         err = e;
       }
 
-      expect(mockEqlSearch).toBeCalled();
+      expect(mockEqlSearch).toHaveBeenCalled();
       expect(err).not.toBeUndefined();
-      expect(mockEqlDelete).toBeCalled();
+      expect(mockEqlDelete).toHaveBeenCalled();
     });
 
     describe('arguments', () => {

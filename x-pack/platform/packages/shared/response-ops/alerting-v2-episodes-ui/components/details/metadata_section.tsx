@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { EuiPanel, EuiSkeletonRectangle, EuiSkeletonText, EuiSpacer, EuiText } from '@elastic/eui';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { getRootEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { useFetchEpisodeQuery } from '../../hooks/use_fetch_episode_query';
@@ -15,6 +15,7 @@ import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { isRuleLoaded, isRuleLoading } from '../../types/rule_state';
 import { useAlertingEpisodeSourceDataView } from '../../hooks/use_alerting_episode_source_data_view';
 import { AlertEpisodeMetadataTable } from './metadata_table';
+import { createDataContainerDataView } from './prefix_data_view_fields';
 import type { AlertEpisodeMetadataTableProps } from './metadata_table';
 import type { AlertEpisodeDetailsServices } from './types';
 import * as i18n from './translations';
@@ -41,12 +42,16 @@ export interface AlertEpisodeMetadataSectionProps {
    * `DEFAULT_MARGIN_BOTTOM` (16px).
    */
   decreaseAvailableHeightBy?: number;
+  calloutMarginSize?: AlertEpisodeMetadataTableProps['calloutMarginSize'];
+  controlsPaddingSize?: AlertEpisodeMetadataTableProps['controlsPaddingSize'];
 }
 
 export const AlertEpisodeMetadataSection = ({
   episodeId,
   services,
   decreaseAvailableHeightBy,
+  calloutMarginSize,
+  controlsPaddingSize,
 }: AlertEpisodeMetadataSectionProps) => {
   const { data: episode, isLoading: isLoadingEpisode } = useFetchEpisodeQuery({
     episodeId,
@@ -65,11 +70,19 @@ export const AlertEpisodeMetadataSection = ({
     services,
   });
 
-  const { value: dataView, loading: isDataViewLoading } = useAlertingEpisodeSourceDataView({
-    query: isRuleLoaded(ruleState) ? getRootEsqlQuery(ruleState.rule.query) : undefined,
-    dataViews: services.dataViews,
-    http: services.http,
-  });
+  const { value: sourceDataView, loading: isSourceDataViewLoading } =
+    useAlertingEpisodeSourceDataView({
+      query: isRuleLoaded(ruleState) ? getRootEsqlQuery(ruleState.rule.query) : undefined,
+      dataViews: services.dataViews,
+      http: services.http,
+    });
+  const dataView = useMemo(
+    () =>
+      sourceDataView
+        ? createDataContainerDataView(sourceDataView, services.data.fieldFormats)
+        : undefined,
+    [services.data.fieldFormats, sourceDataView]
+  );
 
   const tableDocView = useMemo(
     () => services.unifiedDocViewer.registry.getAll().find((dv) => dv.id === 'doc_view_table'),
@@ -78,7 +91,7 @@ export const AlertEpisodeMetadataSection = ({
 
   const hit = useMemo(() => {
     if (!eventData || !dataView) return undefined;
-    const record = buildDataTableRecord({ _source: eventData.data }, dataView);
+    const record = buildDataTableRecord({ _source: { data: eventData.data } }, dataView);
     // The record is synthesized from the episode's stored `data`, not a real search hit, so it
     // has no real ES metadata. The data view's `metaFields` (`_id`, `_index`, `_score`, `_ignored`)
     // still get merged into `flattened` as `undefined`, rendering as empty rows in the metadata
@@ -109,9 +122,22 @@ export const AlertEpisodeMetadataSection = ({
     isLoadingEpisode ||
     isEventDataLoading ||
     (ruleId && isRuleLoading(ruleState)) ||
-    isDataViewLoading
+    isSourceDataViewLoading
   ) {
-    return <EuiLoadingSpinner size="m" data-test-subj="alertingV2EpisodeMetadataSectionLoading" />;
+    // Shaped like the doc-viewer table: a search input row, then field rows. The panel
+    // provides padding because this section renders edge-to-edge in the flyout.
+    return (
+      <EuiPanel
+        hasShadow={false}
+        color="transparent"
+        paddingSize="m"
+        data-test-subj="alertingV2EpisodeMetadataSectionLoading"
+      >
+        <EuiSkeletonRectangle width="100%" height={32} />
+        <EuiSpacer size="m" />
+        <EuiSkeletonText lines={8} size="s" />
+      </EuiPanel>
+    );
   }
 
   if (!isRuleLoaded(ruleState)) {
@@ -134,6 +160,8 @@ export const AlertEpisodeMetadataSection = ({
       isStale={Boolean(eventData.isStale)}
       dataTimestamp={eventData.dataTimestamp}
       dateFormat={services.uiSettings.get('dateFormat') ?? undefined}
+      calloutMarginSize={calloutMarginSize}
+      controlsPaddingSize={controlsPaddingSize}
     />
   );
 };

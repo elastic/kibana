@@ -39,6 +39,7 @@ export const createWorkflowsClientMock = (
 ): WorkflowsClient => ({
   isWorkflowsAvailable: true,
   emitEvent: jest.fn(),
+  resumeExternalHitl: jest.fn(),
   managedWorkflows: createManagedWorkflowsMock(),
   ...overrides,
 });
@@ -64,6 +65,7 @@ const createStartMock: () => jest.Mocked<WorkflowsExtensionsServerPluginStart> =
     initManagedWorkflowsClient: jest.fn().mockResolvedValue({
       install: jest.fn().mockResolvedValue(undefined),
       uninstall: jest.fn().mockResolvedValue(undefined),
+      disable: jest.fn().mockResolvedValue(true),
       ready: jest.fn().mockResolvedValue(undefined),
       getWorkflowStatus: jest.fn().mockResolvedValue({
         status: 'intact',
@@ -79,6 +81,8 @@ const createStartMock: () => jest.Mocked<WorkflowsExtensionsServerPluginStart> =
         storedHash: 'mock-hash',
         registryHash: 'mock-hash',
       }),
+      getInstalledWorkflowState: jest.fn().mockResolvedValue(null),
+      listInstalledWorkflowStates: jest.fn().mockResolvedValue([]),
       execute: jest.fn().mockResolvedValue('mock-execution-id'),
     }),
     getManagedWorkflowPluginIds: jest.fn().mockReturnValue([]),

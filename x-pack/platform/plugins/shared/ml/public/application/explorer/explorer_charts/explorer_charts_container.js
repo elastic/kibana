@@ -97,6 +97,7 @@ function ExplorerChartContainer({
   timefilter,
   timeRange,
   onSelectEntity,
+  isInteractive,
   tooManyBucketsCalloutMsg,
   showSelectedInterval,
   chartsService,
@@ -104,6 +105,7 @@ function ExplorerChartContainer({
 }) {
   const [explorerSeriesLink, setExplorerSeriesLink] = useState('');
   const [mapsLink, setMapsLink] = useState('');
+  const { euiTheme } = useEuiTheme();
 
   const {
     services: {
@@ -117,7 +119,7 @@ function ExplorerChartContainer({
 
   const getMapsLink = useCallback(async () => {
     const { queryString, query } = getEntitiesQuery(series);
-    const initialLayers = getInitialAnomaliesLayers(series.jobId);
+    const initialLayers = getInitialAnomaliesLayers(series.jobId, euiTheme);
 
     const locator = share.url.locators.get(MAPS_APP_LOCATOR);
     const location = await locator.getLocation({
@@ -128,7 +130,7 @@ function ExplorerChartContainer({
 
     return location;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [series?.jobId, timeRange]);
+  }, [series?.jobId, timeRange, euiTheme]);
 
   useEffect(() => {
     let isCancelled = false;
@@ -191,7 +193,6 @@ function ExplorerChartContainer({
 
   const chartRef = useRef(null);
 
-  const { euiTheme } = useEuiTheme();
   const chartTheme = chartsService.theme.useChartsBaseTheme();
 
   const handleCursorUpdate = useActiveCursor(chartsService.activeCursor, chartRef, {
@@ -260,9 +261,10 @@ function ExplorerChartContainer({
             infoTooltip={{ ...series.infoTooltip, chartType }}
             wrapLabel={wrapLabel}
             onSelectEntity={onSelectEntity}
-            showFilterIcons={showFilterIcons}
+            showFilterIcons={isInteractive && showFilterIcons}
           />
         </EuiFlexItem>
+
         <EuiFlexItem grow={false}>
           <div
             css={css`
@@ -278,7 +280,7 @@ function ExplorerChartContainer({
                 color="warning"
               />
             )}
-            {explorerSeriesLink && (
+            {isInteractive && explorerSeriesLink && (
               <EuiToolTip position="top" content={textViewButton}>
                 {/* href needs to be full link with base path while ChromeRecentlyAccessed requires only relative path */}
                 {/* disabling because we need button to behave as link and to have a callback */}
@@ -327,7 +329,6 @@ function ExplorerChartContainer({
             </MlTooltipComponent>
           );
         }
-
         if (
           chartType === CHART_TYPE.EVENT_DISTRIBUTION ||
           chartType === CHART_TYPE.POPULATION_DISTRIBUTION
@@ -349,6 +350,7 @@ function ExplorerChartContainer({
                   chartTheme={chartTheme}
                   cursor$={chartsService.activeCursor.activeCursor$}
                   euiTheme={euiTheme}
+                  isInteractive={isInteractive}
                 />
               )}
             </MlTooltipComponent>
@@ -372,6 +374,7 @@ function ExplorerChartContainer({
                   chartTheme={chartTheme}
                   cursor$={chartsService.activeCursor.activeCursor$}
                   euiTheme={euiTheme}
+                  isInteractive={isInteractive}
                 />
               )}
             </MlTooltipComponent>
@@ -398,6 +401,7 @@ export const ExplorerChartsContainerUI = ({
   timefilter,
   timeRange,
   onSelectEntity,
+  isInteractive = true,
   tooManyBucketsCalloutMsg,
   showSelectedInterval,
   chartsService,
@@ -467,6 +471,7 @@ export const ExplorerChartsContainerUI = ({
                   timefilter={timefilter}
                   timeRange={timeRange}
                   onSelectEntity={onSelectEntity}
+                  isInteractive={isInteractive}
                   tooManyBucketsCalloutMsg={tooManyBucketsCalloutMsg}
                   showSelectedInterval={showSelectedInterval}
                   chartsService={chartsService}

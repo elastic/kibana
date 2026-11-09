@@ -12,9 +12,8 @@ import type { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/comm
 import type { TextContextTypeConvert } from '@kbn/field-formats-plugin/common';
 import { getColumnByAccessor } from '@kbn/chart-expressions-common';
 
-import type { DimensionsVisParam, MetricVisParam } from '../../common';
-import type { FormatOverrides } from './helpers';
-import { getMetricFormatter } from './helpers';
+import type { DimensionsVisParam } from '../../common';
+import { getMetricFormatter, type FormatOverrides } from './helpers';
 
 const TREND_UPWARD = '\u{2191}'; // ↑
 const TREND_DOWNWARD = '\u{2193}'; // ↓
@@ -34,7 +33,8 @@ export interface SecondaryMetricInfoArgs {
   row: DatatableRow;
   columns: DatatableColumn[];
   secondaryMetric: NonNullable<DimensionsVisParam['secondaryMetric']>;
-  secondaryLabel: MetricVisParam['secondaryLabel'];
+  secondaryLabel?: string;
+  showLabel: boolean;
   trendConfig?: TrendConfig;
   staticColor?: string;
 }
@@ -186,7 +186,7 @@ function getDynamicColorInfo(
     : undefined;
 
   if (trendConfig.showIcon && !trendConfig.showValue && !icon) {
-    return { value: '', label: '', badgeColor: '', description: trendDescription };
+    return { value: '', label, badgeColor: '', description: trendDescription };
   }
 
   return {
@@ -205,6 +205,7 @@ export function getSecondaryMetricInfo({
   columns,
   secondaryMetric,
   secondaryLabel,
+  showLabel,
   trendConfig,
   staticColor,
 }: SecondaryMetricInfoArgs): SecondaryMetricInfo {
@@ -215,7 +216,7 @@ export function getSecondaryMetricInfo({
     getEnhancedNumberSignFormatter(trendConfig)
   );
 
-  const label = secondaryLabel ?? secondaryMetricColumn?.name ?? '';
+  const label = showLabel ? secondaryLabel ?? secondaryMetricColumn?.name ?? '' : '';
 
   const rawValue = secondaryMetricColumn ? row[secondaryMetricColumn.id] : undefined;
   const formattedValue = secondaryMetricFormatter(rawValue);

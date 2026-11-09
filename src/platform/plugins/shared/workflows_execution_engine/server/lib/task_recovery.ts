@@ -11,6 +11,10 @@ import type { Logger } from '@kbn/core/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 
+import {
+  MISSING_EXECUTION_IDENTITY_ERROR_TYPE,
+  MISSING_EXECUTION_IDENTITY_MESSAGE,
+} from './execution_identity';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 
@@ -38,8 +42,8 @@ export function buildTaskAttemptsExhaustedMessage(lastError: string): string {
  * Discriminated result for `workflow:run` interrupt recovery.
  * - `run_workflow`: continue into `runWorkflow`
  * - `task_complete` + `interrupted`: prior claim abandoned; execution marked FAILED
- * - `task_complete` + `noop`: already terminal / waiting_for_input / queued — do not re-run;
- *   stamp from execution status when terminal, otherwise omit semantic stamp
+ * - `task_complete` + `noop`: already terminal / waiting_for_input / waiting_for_child / queued — do
+ *   not re-run; stamp from execution status when terminal, otherwise omit semantic stamp
  */
 export type InterruptedWorkflowRunTaskResult =
   | { action: 'run_workflow' }
@@ -53,7 +57,8 @@ export type InterruptedWorkflowRunTaskResult =
  * When Task Manager retries `workflow:run` (`attempts > 1`), the prior claim did not finish successfully.
  * Fail the persisted execution (same fault-tolerance model as scheduled stale recovery) so operators
  * see a terminal FAILED state instead of a stuck RUNNING execution. `waiting_for_input` is excluded
- * because resumption is human-driven via the resume API.
+ * because resumption is human-driven via the resume API, and `waiting_for_child` because the retained
+ * wake task armed before the park owns the continuation.
  */
 export async function resolveInterruptedWorkflowRunTask({
   workflowExecutionRepository,
@@ -87,9 +92,12 @@ export async function resolveInterruptedWorkflowRunTask({
   }
 
   if (!shouldFailOnWorkflowRunRetry(execution)) {
-    if (execution.status === ExecutionStatus.WAITING_FOR_INPUT) {
+    if (
+      execution.status === ExecutionStatus.WAITING_FOR_INPUT ||
+      execution.status === ExecutionStatus.WAITING_FOR_CHILD
+    ) {
       logger.warn(
-        `workflow:run retry for execution ${workflowRunId} while status is waiting_for_input; leaving execution unchanged (human resume only)`
+        `workflow:run retry for execution ${workflowRunId} while status is ${execution.status}; leaving execution unchanged (resumed out of band)`
       );
     }
     return { action: 'task_complete', reason: 'noop', execution };
@@ -138,8 +146,9 @@ export type InterruptedWorkflowResumeTaskResult =
 
 /**
  * When Task Manager retries `workflow:resume` (`attempts > 1`), the prior claim did not finish successfully.
- * Fail non-terminal executions that are no longer waiting for input (stuck RUNNING / WAITING, etc.).
- * If still `waiting_for_input`, invoke the resume handler again - the first attempt never completed.
+ * Fail non-terminal executions that are no longer waiting for input or a child (stuck RUNNING / WAITING, etc.).
+ * If still `waiting_for_input` or `waiting_for_child`, invoke the resume handler again - the first attempt never completed.
+ * For example, that handler re-parks a running child and applies a finished child, so the parent does not stay waiting.
  */
 export async function resolveInterruptedWorkflowResumeTask({
   workflowExecutionRepository,
@@ -176,9 +185,12 @@ export async function resolveInterruptedWorkflowResumeTask({
     return { action: 'task_complete', reason: 'noop', execution };
   }
 
-  if (execution.status === ExecutionStatus.WAITING_FOR_INPUT) {
+  if (
+    execution.status === ExecutionStatus.WAITING_FOR_INPUT ||
+    execution.status === ExecutionStatus.WAITING_FOR_CHILD
+  ) {
     logger.warn(
-      `workflow:resume retry for execution ${workflowRunId} still waiting_for_input - invoking resume handler again`
+      `workflow:resume retry (attempts=${taskAttempts}) for execution ${workflowRunId} still ${execution.status} - invoking resume handler again`
     );
     return { action: 'resume_workflow' };
   }
@@ -219,7 +231,10 @@ export async function markExecutionFailedTaskRecovery(
     type = TASK_RECOVERY_ERROR_TYPE,
   }: {
     message: string;
-    type?: typeof TASK_RECOVERY_ERROR_TYPE | 'TaskAttemptsExhaustedError';
+    type?:
+      | typeof TASK_RECOVERY_ERROR_TYPE
+      | 'TaskAttemptsExhaustedError'
+      | typeof MISSING_EXECUTION_IDENTITY_ERROR_TYPE;
   },
   options: { refresh?: boolean | 'wait_for' } = {}
 ): Promise<void> {
@@ -306,6 +321,7 @@ export function shouldFailOnWorkflowRunRetry(execution: EsWorkflowExecution): bo
   }
   if (
     execution.status === ExecutionStatus.WAITING_FOR_INPUT ||
+    execution.status === ExecutionStatus.WAITING_FOR_CHILD ||
     execution.status === ExecutionStatus.QUEUED
   ) {
     return false;
@@ -356,6 +372,51 @@ export async function markScheduledExecutionFailedAfterTaskError(params: {
   } catch (markFailedErr) {
     logger.error(
       `Failed to mark scheduled workflow execution ${workflowRunId} as FAILED after task error: ${
+        markFailedErr instanceof Error ? markFailedErr.message : String(markFailedErr)
+      }`
+    );
+  }
+}
+
+/**
+ * Persist a terminal FAILED state when a workflow task is claimed without a
+ * Task Manager identity (`fakeRequest` / API key). Completing the task after
+ * this write avoids leaving the execution pending forever.
+ */
+export async function failExecutionMissingIdentity(params: {
+  workflowExecutionRepository: WorkflowExecutionRepository;
+  stepExecutionRepository: StepExecutionRepository;
+  workflowRunId: string;
+  spaceId: string;
+  logger: Logger;
+}): Promise<void> {
+  const { workflowExecutionRepository, stepExecutionRepository, workflowRunId, spaceId, logger } =
+    params;
+
+  try {
+    const execution = await workflowExecutionRepository.getWorkflowExecutionById(
+      workflowRunId,
+      spaceId
+    );
+    if (!execution || isTerminalStatus(execution.status)) {
+      return;
+    }
+
+    await markExecutionFailedTaskRecovery(
+      workflowExecutionRepository,
+      stepExecutionRepository,
+      workflowRunId,
+      {
+        type: MISSING_EXECUTION_IDENTITY_ERROR_TYPE,
+        message: MISSING_EXECUTION_IDENTITY_MESSAGE,
+      }
+    );
+    logger.warn(
+      `Marked workflow execution ${workflowRunId} FAILED: ${MISSING_EXECUTION_IDENTITY_MESSAGE}`
+    );
+  } catch (markFailedErr) {
+    logger.error(
+      `Failed to mark workflow execution ${workflowRunId} as FAILED (missing identity): ${
         markFailedErr instanceof Error ? markFailedErr.message : String(markFailedErr)
       }`
     );

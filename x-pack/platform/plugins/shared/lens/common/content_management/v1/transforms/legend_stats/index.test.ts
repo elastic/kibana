@@ -50,7 +50,7 @@ describe('Legend stat transforms', () => {
     } as LensAttributes;
     const result = convertToLegendStats(attributes);
 
-    expect(convertXYToLegendStats).toBeCalledWith('xyVisState');
+    expect(convertXYToLegendStats).toHaveBeenCalledWith('xyVisState');
     expect(result.state).toMatchObject({
       visualization: 'new xyVisState',
     });
@@ -65,7 +65,7 @@ describe('Legend stat transforms', () => {
     } as LensAttributes;
     const result = convertToLegendStats(attributes);
 
-    expect(convertPartitionToLegendStats).toBeCalledWith('partitionVisState');
+    expect(convertPartitionToLegendStats).toHaveBeenCalledWith('partitionVisState');
     expect(result.state).toMatchObject({
       visualization: 'new partitionVisState',
     });

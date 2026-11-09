@@ -158,7 +158,7 @@ export const WorkflowExecuteEventForm = ({
           }
         )}
         color="warning"
-        iconType="alert"
+        iconType="warning"
         size="s"
       >
         <EuiText size="s">
@@ -222,7 +222,6 @@ export const WorkflowExecuteEventForm = ({
         dataView={dataView}
         getNoCellActions={tableConfig.getNoCellActions}
         visibleTableColumns={tableConfig.visibleTableColumns}
-        columnsMeta={tableConfig.columnsMeta}
         dataTableRows={tableConfig.dataTableRows}
         rowsLength={rows.length}
         unifiedDataTableServices={tableConfig.unifiedDataTableServices}

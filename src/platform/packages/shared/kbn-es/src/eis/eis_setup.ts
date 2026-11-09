@@ -18,8 +18,8 @@
  *  - `eisHttpRequest`, a minimal HTTP helper used by both this module and the
  *    connector discovery orchestrator in kbn-cli-dev-mode.
  *
- * Used by `yarn es snapshot --eis` (sets the key) and `yarn start --eis`
- * (discovers connectors).
+ * Used by `pnpm es snapshot --eis` / `pnpm es serverless --eis` (sets the key)
+ * and `pnpm start --eis` / `pnpm serverless-* --eis` (discovers connectors).
  */
 
 import http from 'http';
@@ -38,6 +38,30 @@ export const EIS_QA_URL = 'https://inference.eu-west-1.aws.svc.qa.elastic.cloud'
 
 /** Elasticsearch `-E` argument that points the inference plugin at the QA EIS. */
 export const EIS_ES_ARG = `xpack.inference.elastic.url=${EIS_QA_URL}`;
+
+/**
+ * Prepends `EIS_ES_ARG` to a user-provided `esArgs` option, which getopts may
+ * hand back as a string, an array, or undefined depending on how many `-E`
+ * flags were passed.
+ */
+export const mergeEisEsArgs = (esArgs: string | string[] | undefined): string[] => {
+  const userEsArgs = esArgs ? (Array.isArray(esArgs) ? esArgs : [esArgs]) : [];
+  return [EIS_ES_ARG, ...userEsArgs];
+};
+
+/**
+ * Returns the CCM API key resolved by `resolveCcmApiKey`, throwing if it's
+ * missing — which would only happen if resolution was skipped before this
+ * point, indicating a bug in the calling `--eis` flow.
+ */
+export const assertCcmApiKeyResolved = (apiKey: string | undefined): string => {
+  if (!apiKey) {
+    throw new Error(
+      'EIS: CCM API key was not resolved before starting Elasticsearch. This is a bug in the --eis flow.'
+    );
+  }
+  return apiKey;
+};
 
 const VAULT_SECRET_PATH = 'secret/kibana-issues/dev/inference/kibana-eis-ccm';
 

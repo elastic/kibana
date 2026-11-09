@@ -6,13 +6,13 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/jest',
   rootDir: '../../../../..',
   roots: ['<rootDir>/x-pack/platform/plugins/shared/ingest_hub'],
   coverageDirectory:
     '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/shared/ingest_hub',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/platform/plugins/shared/ingest_hub/{common,public}/**/*.{ts,tsx}',
+    '<rootDir>/x-pack/platform/plugins/shared/ingest_hub/{common,public,server}/**/*.{ts,tsx}',
   ],
 };

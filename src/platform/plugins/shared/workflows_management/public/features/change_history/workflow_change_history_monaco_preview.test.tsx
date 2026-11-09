@@ -10,15 +10,16 @@
 import '@testing-library/jest-dom';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import { monaco } from '@kbn/code-editor';
+import {
+  applyKbnCodeEditorChromeOverrides,
+  CODE_EDITOR_DEFAULT_THEME_ID,
+  initializeRegisteredLanguagesTheme,
+  monaco,
+} from '@kbn/code-editor';
 import { I18nProvider } from '@kbn/i18n-react';
+import { workflowsEditorChromeOverrides } from '@kbn/workflows-ui';
+import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import { WorkflowChangeHistoryMonacoPreview } from './workflow_change_history_monaco_preview';
-import type { YamlValidationResult } from '../validate_workflow_yaml/model/types';
-
-jest.mock('@kbn/workflows-ui', () => ({
-  ...jest.requireActual('@kbn/workflows-ui'),
-  useDefineWorkflowsMonacoTheme: jest.fn(),
-}));
 
 let mockValidationResults: YamlValidationResult[] = [];
 let mockIsValidationLoading = false;
@@ -28,6 +29,7 @@ jest.mock('./use_workflow_change_history_preview_validation', () => ({
   useWorkflowChangeHistoryPreviewValidation: jest.fn(() => ({
     validationResults: mockValidationResults,
     isValidationLoading: mockIsValidationLoading,
+    validationError: null,
     handleValidationErrorClick: mockHandleValidationErrorClick,
   })),
 }));
@@ -71,6 +73,9 @@ const mockYamlModel = {
   uri: { toString: () => 'inmemory://model/current.yaml' },
 };
 
+const mockEditorDomNode = document.createElement('div');
+const mockDiffEditorDomNode = document.createElement('div');
+const mockDisposeChrome = jest.fn();
 const mockRevealLineInCenter = jest.fn();
 const mockRevealLinesInCenter = jest.fn();
 const mockSetPosition = jest.fn();
@@ -92,53 +97,69 @@ let mockLineChanges: Array<{
   },
 ];
 
-jest.mock('@kbn/code-editor', () => ({
-  monaco: {
-    MarkerSeverity: { Error: 8 },
-    editor: {
-      createModel: jest.fn((value: string) => ({ value, dispose: jest.fn() })),
-      create: jest.fn(() => ({
-        dispose: jest.fn(),
-        layout: jest.fn(),
-        getModel: jest.fn(() => mockYamlModel),
-        updateOptions: jest.fn(),
-        createDecorationsCollection: jest.fn(() => ({ clear: jest.fn() })),
-      })),
-      createDiffEditor: jest.fn(() => ({
-        setModel: jest.fn(),
-        dispose: jest.fn(),
-        layout: jest.fn(),
-        updateOptions: mockDiffUpdateOptions,
-        getLineChanges: jest.fn(() => mockLineChanges),
-        onDidUpdateDiff: jest.fn((listener: () => void) => {
-          onDidUpdateDiffCallbacks.push(listener);
-          return { dispose: jest.fn() };
-        }),
-        setPosition: mockSetPosition,
-        revealLineInCenter: mockRevealLineInCenter,
-        revealLinesInCenter: mockRevealLinesInCenter,
-        getOriginalEditor: jest.fn(() => ({ updateOptions: mockOriginalUpdateOptions })),
-        getModifiedEditor: jest.fn(() => ({
-          updateOptions: mockModifiedUpdateOptions,
-          revealLineInCenter: jest.fn(),
+jest.mock('@kbn/code-editor', () => {
+  const actual = jest.requireActual('@kbn/code-editor');
+
+  return {
+    ...actual,
+    initializeRegisteredLanguagesTheme: jest.fn(),
+    applyKbnCodeEditorChromeOverrides: jest.fn(() => ({ dispose: mockDisposeChrome })),
+    monaco: {
+      ...actual.monaco,
+      MarkerSeverity: { Error: 8 },
+      editor: {
+        ...actual.monaco.editor,
+        createModel: jest.fn((value: string) => ({ value, dispose: jest.fn() })),
+        create: jest.fn(() => ({
+          dispose: jest.fn(),
+          layout: jest.fn(),
+          getDomNode: jest.fn(() => mockEditorDomNode),
           getModel: jest.fn(() => mockYamlModel),
+          updateOptions: jest.fn(),
           createDecorationsCollection: jest.fn(() => ({ clear: jest.fn() })),
         })),
-      })),
-      setModelMarkers: jest.fn(),
-      onDidChangeMarkers: jest.fn(() => ({ dispose: jest.fn() })),
+        createDiffEditor: jest.fn(() => ({
+          setModel: jest.fn(),
+          dispose: jest.fn(),
+          layout: jest.fn(),
+          getContainerDomNode: jest.fn(() => mockDiffEditorDomNode),
+          updateOptions: mockDiffUpdateOptions,
+          getLineChanges: jest.fn(() => mockLineChanges),
+          onDidUpdateDiff: jest.fn((listener: () => void) => {
+            onDidUpdateDiffCallbacks.push(listener);
+            return { dispose: jest.fn() };
+          }),
+          setPosition: mockSetPosition,
+          revealLineInCenter: mockRevealLineInCenter,
+          revealLinesInCenter: mockRevealLinesInCenter,
+          getOriginalEditor: jest.fn(() => ({ updateOptions: mockOriginalUpdateOptions })),
+          getModifiedEditor: jest.fn(() => ({
+            updateOptions: mockModifiedUpdateOptions,
+            revealLineInCenter: jest.fn(),
+            getModel: jest.fn(() => mockYamlModel),
+            createDecorationsCollection: jest.fn(() => ({ clear: jest.fn() })),
+          })),
+        })),
+        setModelMarkers: jest.fn(),
+        onDidChangeMarkers: jest.fn(() => ({ dispose: jest.fn() })),
+      },
     },
-  },
-}));
+  };
+});
 
 const mockCreateEditor = monaco.editor.create as jest.Mock;
 const mockCreateDiffEditor = monaco.editor.createDiffEditor as jest.Mock;
+// The real initializer carries a `reset` helper, so it does not overlap `jest.Mock` directly.
+const mockInitializeRegisteredLanguagesTheme =
+  initializeRegisteredLanguagesTheme as unknown as jest.Mock;
+const mockApplyChromeOverrides = applyKbnCodeEditorChromeOverrides as jest.Mock;
 
 const sampleValidationError: YamlValidationResult = {
   id: 'preview-validation-error',
   severity: 'error',
   message: 'Invalid workflow step',
   owner: 'step-name-validation',
+  ruleId: 'duplicateStepName',
   startLineNumber: 3,
   startColumn: 5,
   endLineNumber: 3,
@@ -185,6 +206,46 @@ describe('WorkflowChangeHistoryMonacoPreview', () => {
     expect(mockCreateDiffEditor).not.toHaveBeenCalled();
     expect(screen.queryByText('No validation errors')).not.toBeInTheDocument();
     expect(screen.getByTestId('workflowChangeHistoryPreviewSettingsButton')).toBeInTheDocument();
+  });
+
+  it('registers the global theme and applies workflows chrome to the single editor', () => {
+    jest.useFakeTimers();
+    const { unmount } = renderPreview({ targetYaml: 'name: current\n' });
+
+    expect(mockInitializeRegisteredLanguagesTheme).toHaveBeenCalled();
+    expect(mockInitializeRegisteredLanguagesTheme.mock.invocationCallOrder[0]).toBeLessThan(
+      mockCreateEditor.mock.invocationCallOrder[0]
+    );
+    expect(mockCreateEditor).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ theme: CODE_EDITOR_DEFAULT_THEME_ID })
+    );
+    expect(mockApplyChromeOverrides).toHaveBeenCalledWith(
+      [mockEditorDomNode],
+      workflowsEditorChromeOverrides,
+      expect.objectContaining({ euiTheme: expect.anything() })
+    );
+
+    unmount();
+    expect(mockDisposeChrome).toHaveBeenCalled();
+  });
+
+  it('applies workflows chrome to the diff editor container', () => {
+    jest.useFakeTimers();
+    renderPreview({
+      targetYaml: 'name: current\n',
+      baselineYaml: 'name: original\n',
+    });
+
+    expect(mockCreateDiffEditor).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ theme: CODE_EDITOR_DEFAULT_THEME_ID })
+    );
+    expect(mockApplyChromeOverrides).toHaveBeenCalledWith(
+      [mockDiffEditorDomNode],
+      workflowsEditorChromeOverrides,
+      expect.objectContaining({ euiTheme: expect.anything() })
+    );
   });
 
   it('renders a diff editor when compare yaml is identical', () => {

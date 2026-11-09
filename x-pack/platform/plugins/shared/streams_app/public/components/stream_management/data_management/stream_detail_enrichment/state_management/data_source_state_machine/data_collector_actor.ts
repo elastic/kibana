@@ -244,6 +244,7 @@ async function collectDraftAncestorProcessing(
     if (
       Streams.WiredStream.GetResponse.is(ancestor) &&
       isDraftStream(ancestor.stream) &&
+      'steps' in ancestor.stream.ingest.processing &&
       ancestor.stream.ingest.processing.steps.length > 0
     ) {
       allSteps.push(...ancestor.stream.ingest.processing.steps);

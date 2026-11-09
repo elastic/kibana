@@ -14,25 +14,22 @@ export const LIST_RULE_EXECUTIONS_RESPONSE: ListRuleExecutionsResponse = {
     {
       id: 'execution-1',
       rule: { id: 'rule-1', version: 3 },
-      spaceId: 'default',
-      startedAt: '2026-01-15T12:00:00.000Z',
-      endedAt: '2026-01-15T12:00:01.250Z',
-      timings: { duration: 1250, scheduledDelay: 40 },
+      started_at: '2026-01-15T12:00:00.000Z',
+      ended_at: '2026-01-15T12:00:01.250Z',
+      timings: { duration_ms: 1250, scheduled_delay_ms: 40 },
       outcome: 'success',
-      reason: null,
-      error: null,
     },
   ],
   total: 1,
   page: 1,
-  perPage: 20,
+  per_page: 20,
 };
 
-// Mirrors the page * perPage refinement message in listRuleExecutionsQuerySchema.
+// Mirrors the page * per_page refinement message in listRuleExecutionsQuerySchema.
 const INVALID_RULE_EXECUTIONS_QUERY_RESPONSE = invalidResponseExample({
   summary: 'Exceeds the max result window',
-  message: 'page * perPage cannot exceed 10000.',
-  details: { errors: { page: ['page * perPage cannot exceed 10000.'] } },
+  message: 'page * per_page cannot exceed 10000.',
+  details: { errors: { page: ['page * per_page cannot exceed 10000.'] } },
 });
 
 export const listRuleExecutionsOasExamples = (): AlertingOasOperationObject =>

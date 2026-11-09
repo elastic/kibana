@@ -7,7 +7,7 @@
 
 import { useCallback } from 'react';
 import { PageScope } from '../constants';
-import { type SourcererUrlState } from '../../sourcerer/store/model';
+import { type DataViewManagerUrlState } from '../redux/types';
 import { useInitializeUrlParam } from '../../common/utils/global_query_string';
 import { URL_PARAM_KEY } from '../../common/hooks/constants';
 import { type SelectDataViewAsyncPayload } from '../redux/actions';
@@ -26,7 +26,7 @@ export const useRestoreDataViewManagerStateFromURL = (
     | PageScope.alerts = PageScope.default
 ) => {
   const onInitializeUrlParam = useCallback(
-    (initialState: SourcererUrlState | null) => {
+    (initialState: DataViewManagerUrlState | null) => {
       if (initialState === null) {
         return initDataViewPickerWithSelection([]);
       }
@@ -53,5 +53,5 @@ export const useRestoreDataViewManagerStateFromURL = (
     [initDataViewPickerWithSelection, scopeId]
   );
 
-  useInitializeUrlParam<SourcererUrlState>(URL_PARAM_KEY.sourcerer, onInitializeUrlParam);
+  useInitializeUrlParam<DataViewManagerUrlState>(URL_PARAM_KEY.sourcerer, onInitializeUrlParam);
 };

@@ -17,10 +17,12 @@ import { BetaBadge } from '../beta_badge';
 import { SecondaryMenuItemComponent } from './item';
 import { SecondaryMenuSectionComponent } from './section';
 import { useMenuHeaderStyle } from '../../hooks/use_menu_header_style';
+import { scrollLayoutStyles, useScroll } from '../../hooks/use_scroll';
 
 export interface SecondaryMenuProps {
   badgeType?: BadgeType;
   children: ReactNode;
+  footer?: ReactNode;
   isNew?: boolean;
   isPanel?: boolean;
   title: string;
@@ -33,9 +35,10 @@ interface SecondaryMenuComponent
 }
 
 const SecondaryMenuBase = forwardRef<HTMLDivElement, SecondaryMenuProps>(
-  ({ badgeType, children, title, isNew = false }, ref) => {
+  ({ badgeType, children, footer, title, isNew = false, isPanel = false }, ref) => {
     const { euiTheme } = useEuiTheme();
-    const headerStyle = useMenuHeaderStyle();
+    const headerStyle = useMenuHeaderStyle(isPanel);
+    const scrollStyles = useScroll(true);
 
     const titleWithBadgeStyles = css`
       display: flex;
@@ -43,15 +46,9 @@ const SecondaryMenuBase = forwardRef<HTMLDivElement, SecondaryMenuProps>(
       gap: ${euiTheme.size.xs};
     `;
 
-    const titleStyles = css`
-      ${headerStyle}
-      background: ${euiTheme.colors.backgroundBasePlain};
-      border-radius: ${euiTheme.border.radius.medium};
-    `;
-
     return (
-      <div ref={ref}>
-        <EuiTitle css={titleStyles} size="xs">
+      <div ref={ref} css={scrollLayoutStyles}>
+        <EuiTitle css={headerStyle} size="xs">
           <div css={titleWithBadgeStyles}>
             <h4>{title}</h4>
             {/* Always show non-new badges, only show new ones if isNew check allows it */}
@@ -60,7 +57,8 @@ const SecondaryMenuBase = forwardRef<HTMLDivElement, SecondaryMenuProps>(
             )}
           </div>
         </EuiTitle>
-        {children}
+        <div css={scrollStyles}>{children}</div>
+        {footer}
       </div>
     );
   }

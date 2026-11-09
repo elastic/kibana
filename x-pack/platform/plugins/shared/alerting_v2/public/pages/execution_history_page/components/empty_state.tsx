@@ -17,7 +17,7 @@ export const PoliciesEmptyState = () => (
       <h2>
         <FormattedMessage
           id="xpack.alertingV2.executionHistory.emptyTitle"
-          defaultMessage="No policy execution activity in the last 24 hours."
+          defaultMessage="No action policy execution activity in the last 24 hours."
         />
       </h2>
     }
@@ -25,7 +25,7 @@ export const PoliciesEmptyState = () => (
       <p>
         <FormattedMessage
           id="xpack.alertingV2.executionHistory.emptyBody"
-          defaultMessage="Summary events appear here after the dispatcher evaluates episodes against a policy."
+          defaultMessage="Summary events appear here after the dispatcher evaluates episodes against an action policy."
         />
       </p>
     }
@@ -35,7 +35,7 @@ export const PoliciesEmptyState = () => (
 export const FilteredEmptyState = () => (
   <EuiEmptyPrompt
     data-test-subj="executionHistoryFilteredEmptyPrompt"
-    iconType="search"
+    iconType="magnify"
     title={
       <h2>
         <FormattedMessage

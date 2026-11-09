@@ -11,7 +11,11 @@ import semverValid from 'semver/functions/valid';
 import { FleetError, FleetNotFoundError, PackagePolicyRequestError } from '../../errors';
 import { appContextService, packagePolicyService } from '../../services';
 import { getPackageInfo } from '../../services/epm/packages/get';
-import type { DeletePackageDatastreamAssetsRequestSchema, FleetRequestHandler } from '../../types';
+import type {
+  DeletePackageDatastreamAssetsRequestSchema,
+  FleetRequestHandler,
+  PackagePolicy,
+} from '../../types';
 import {
   checkExistingDataStreamsAreFromDifferentPackage,
   findDataStreamsFromDifferentPackages,
@@ -46,15 +50,24 @@ export const deletePackageDatastreamAssetsHandler: FleetRequestHandler<
     if (!packageInfo || packageInfo.version !== pkgVersion) {
       throw new FleetNotFoundError('Version is not installed');
     }
-    const allSpacesSoClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
-    const { items: allPackagePolicies } = await packagePolicyService.list(allSpacesSoClient, {
-      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
-      spaceId: '*',
-    });
-
-    const packagePolicy = allPackagePolicies.find((policy) => policy.id === packagePolicyId);
-    if (!packagePolicy) {
+    // Resolve the target policy using the request-space scoped client first to enforce the
+    // authorization boundary.
+    const packagePolicy = await packagePolicyService.get(savedObjectsClient, packagePolicyId);
+    if (
+      !packagePolicy ||
+      packagePolicy.package?.name !== pkgName ||
+      packagePolicy.package?.version !== pkgVersion
+    ) {
       throw new FleetNotFoundError(`Package policy with id ${packagePolicyId} not found`);
+    }
+
+    const allSpacesSoClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
+    const allPackagePolicies: PackagePolicy[] = [];
+    for await (const page of await packagePolicyService.fetchAllItems(allSpacesSoClient, {
+      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
+      spaceIds: ['*'],
+    })) {
+      allPackagePolicies.push(...page);
     }
 
     const customDatasetStreams = getCustomDatasetStreams(packagePolicy, packageInfo);
@@ -68,9 +81,10 @@ export const deletePackageDatastreamAssetsHandler: FleetRequestHandler<
       );
 
       if (datasetNameUsedByMultiplePolicies) {
-        throw new FleetError(
-          `Datastreams matching ${datasetName} are in use by other package policies and cannot be removed`
+        logger.info(
+          `Datastreams matching ${datasetName} are in use by other package policies, skipping removal`
         );
+        continue;
       }
 
       const { existingDataStreams } = await findDataStreamsFromDifferentPackages(

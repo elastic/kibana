@@ -10,11 +10,12 @@
 import { getMeta } from '@kbn/as-code-shared-schemas';
 import type { RequestTiming } from '@kbn/core-http-server';
 import type { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core-saved-objects-api-server';
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
 import type { getDashboardStateSchema } from './dashboard_state_schemas';
 import { stripUnmappedKeys } from './scope_tooling';
 import { transformDashboardOut } from './transforms';
-import type { DashboardState, Operation, Warnings } from './types';
+import type { Operation, Warnings } from './types';
 
 // CRU is Create, Read, Update
 export function getDashboardCRUResponseBody(
@@ -24,8 +25,7 @@ export function getDashboardCRUResponseBody(
   operation: Operation,
   strictValidationSchema: ReturnType<typeof getDashboardStateSchema>,
   isDashboardAppRequest: boolean = false,
-  serverTiming?: RequestTiming,
-  useGASchemas?: boolean
+  serverTiming?: RequestTiming
 ) {
   const timer = serverTiming?.start('transform-dashboard-out');
 
@@ -37,8 +37,7 @@ export function getDashboardCRUResponseBody(
       savedObject.attributes,
       savedObject.references,
       isDashboardAppRequest,
-      strictValidationSchema,
-      useGASchemas
+      strictValidationSchema
     ));
     warnings.push(...dashboardStateWarnings);
     if (!isDashboardAppRequest && operation === 'read') {

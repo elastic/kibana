@@ -8,68 +8,37 @@
  */
 
 import {
-  getAllowedRegressionDeltaBytes,
-  isMemoryRegression,
-  MAX_RSS_REGRESSION_THRESHOLD_POLICY,
-  TAIL_HEAP_USED_REGRESSION_THRESHOLD_POLICY,
-  MIN_MAX_RSS_REGRESSION_DELTA_BYTES,
-  MIN_TAIL_HEAP_USED_REGRESSION_DELTA_BYTES,
-  MIN_TAIL_RSS_REGRESSION_DELTA_BYTES,
-} from './memory_regression_threshold';
+  evaluatePairedMemoryRule,
+  MIN_VALID_WARM_START_MEMORY_PAIRS,
+  WARM_START_MEMORY_THRESHOLD_BYTES,
+} from './paired_memory_rule';
 
-describe('getAllowedRegressionDeltaBytes', () => {
-  it('uses the fixed 50 MiB floor for small baselines', () => {
-    const baselineMedianRssBytes = 500 * 1024 * 1024;
-
-    expect(getAllowedRegressionDeltaBytes(baselineMedianRssBytes)).toBe(
-      MIN_TAIL_RSS_REGRESSION_DELTA_BYTES
-    );
+describe('evaluatePairedMemoryRule', () => {
+  it('is inconclusive below the minimum pair count', () => {
+    const result = evaluatePairedMemoryRule({
+      deltas: Array(MIN_VALID_WARM_START_MEMORY_PAIRS - 1).fill(30 * 1024 * 1024),
+    });
+    expect(result).toEqual({
+      pairCount: MIN_VALID_WARM_START_MEMORY_PAIRS - 1,
+      thresholdBytes: WARM_START_MEMORY_THRESHOLD_BYTES,
+    });
   });
 
-  it('uses 5% of the baseline median when that exceeds 50 MiB', () => {
-    const baselineMedianRssBytes = 200 * 1024 * 1024 * 1024;
+  it('reports the paired mean and spread at the minimum pair count', () => {
+    const result = evaluatePairedMemoryRule({
+      deltas: Array(MIN_VALID_WARM_START_MEMORY_PAIRS).fill(WARM_START_MEMORY_THRESHOLD_BYTES),
+    });
 
-    expect(getAllowedRegressionDeltaBytes(baselineMedianRssBytes)).toBe(
-      baselineMedianRssBytes * 0.05
-    );
+    expect(result.meanBytes).toBe(WARM_START_MEMORY_THRESHOLD_BYTES);
+    expect(result.sampleStandardDeviationBytes).toBe(0);
+    expect(result.standardErrorBytes).toBe(0);
   });
 
-  it('supports the Max RSS threshold policy', () => {
-    const baselineMedianRssBytes = 500 * 1024 * 1024;
-
-    expect(
-      getAllowedRegressionDeltaBytes(baselineMedianRssBytes, MAX_RSS_REGRESSION_THRESHOLD_POLICY)
-    ).toBe(MIN_MAX_RSS_REGRESSION_DELTA_BYTES);
-  });
-
-  it('supports the Tail heap used threshold policy', () => {
-    const baselineMedianHeapUsedBytes = 500 * 1024 * 1024;
-
-    expect(
-      getAllowedRegressionDeltaBytes(
-        baselineMedianHeapUsedBytes,
-        TAIL_HEAP_USED_REGRESSION_THRESHOLD_POLICY
-      )
-    ).toBe(MIN_TAIL_HEAP_USED_REGRESSION_DELTA_BYTES);
-  });
-});
-
-describe('isMemoryRegression', () => {
-  it('returns false when the target delta is within the allowed threshold', () => {
-    const baselineMedianRssBytes = 2 * 1024 * 1024 * 1024;
-    const allowedDeltaBytes = getAllowedRegressionDeltaBytes(baselineMedianRssBytes);
-
-    expect(
-      isMemoryRegression(baselineMedianRssBytes, baselineMedianRssBytes + allowedDeltaBytes - 1)
-    ).toBe(false);
-  });
-
-  it('returns true when the target delta exceeds the allowed threshold', () => {
-    const baselineMedianRssBytes = 2 * 1024 * 1024 * 1024;
-    const allowedDeltaBytes = getAllowedRegressionDeltaBytes(baselineMedianRssBytes);
-
-    expect(
-      isMemoryRegression(baselineMedianRssBytes, baselineMedianRssBytes + allowedDeltaBytes + 1)
-    ).toBe(true);
+  it('reports spread for a noisy sample', () => {
+    const result = evaluatePairedMemoryRule({
+      deltas: [70, -30, 70, -30, 70, -30].map((value) => value * 1024 * 1024),
+    });
+    expect(result.meanBytes).toBe(20 * 1024 * 1024);
+    expect(result.sampleStandardDeviationBytes).toBeGreaterThan(0);
   });
 });

@@ -105,6 +105,40 @@ describe('FeedbackContainer', () => {
     });
   });
 
+  it('should include context from getAppDetails in the submitted payload', async () => {
+    mockProps.getAppDetails.mockReturnValue({
+      title: 'Analytics - Discover ES|QL',
+      id: 'discover',
+      url: '/app/discover',
+      context: { isEsql: true },
+    });
+
+    renderWithI18n(<FeedbackContainer {...mockProps} />);
+
+    const emailConsentCheckbox = await screen.findByTestId('feedbackEmailConsentCheckbox');
+    await userEvent.click(emailConsentCheckbox);
+
+    const csatButtons = screen.getAllByRole('button', { name: /^\d$/ });
+    await userEvent.click(csatButtons[3]);
+
+    const sendButton = screen.getByTestId('feedbackFooterSendFeedbackButton');
+
+    await waitFor(() => {
+      expect(sendButton).not.toBeDisabled();
+    });
+
+    await userEvent.click(sendButton);
+
+    await waitFor(() => {
+      expect(mockProps.sendFeedback).toHaveBeenCalledWith(
+        expect.objectContaining({
+          app_id: 'discover',
+          context: { isEsql: true },
+        })
+      );
+    });
+  });
+
   it('should show success toast and hide container on successful submit', async () => {
     renderWithI18n(<FeedbackContainer {...mockProps} />);
 

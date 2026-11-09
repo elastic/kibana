@@ -21,7 +21,7 @@ import { useConnectors, useInvalidateConnectors } from '../../hooks/use_connecto
  */
 const CREATE_NEW_VALUE = '__workflows-library-create-connector__';
 
-const LABEL = i18n.translate('workflows.library.installForm.connectorAriaLabel', {
+const LABEL = i18n.translate('workflowsUi.library.installForm.connectorAriaLabel', {
   defaultMessage: 'Select a connector',
 });
 
@@ -66,7 +66,7 @@ export const ConnectorField = React.memo<ConnectorFieldProps>(function Connector
         inputDisplay: createNewLabel,
         dropdownDisplay: (
           <EuiTextColor color="accent">
-            <EuiIcon type="plusInCircle" size="s" aria-hidden={true} />
+            <EuiIcon type="plusCircle" size="s" aria-hidden={true} />
             &nbsp;
             {createNewLabel}
           </EuiTextColor>
@@ -122,6 +122,6 @@ export const ConnectorField = React.memo<ConnectorFieldProps>(function Connector
 });
 ConnectorField.displayName = 'ConnectorField';
 
-const createNewLabel = i18n.translate('workflows.library.installForm.createNewConnector', {
+const createNewLabel = i18n.translate('workflowsUi.library.installForm.createNewConnector', {
   defaultMessage: 'Create a new connector',
 });

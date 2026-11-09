@@ -5,24 +5,46 @@
  * 2.0.
  */
 import React, { useContext } from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { getAbbreviatedNumber } from '@kbn/cloud-security-posture-common';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiToolTip } from '@elastic/eui';
+import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
+import numeral from '@elastic/numeral';
 import { FieldsSelectorModal } from './fields_selector_modal';
 import { useFieldsModal } from './hooks/use_fields_modal';
 import { DataViewContext } from '.';
 
 const ENTITY_ANALYTICS_FIELDS_SELECTOR_OPEN_BUTTON = 'entityAnalyticsFieldsSelectorOpenButton';
 
+/** 1k, 6k, 6.5k: whole thousands drop the ".0". */
+const getShortCount = (count: number): string =>
+  count < 1000 ? String(count) : numeral(count).format('0.[0]a');
+
+/** The short count, with the exact one on hover. */
+const TotalCount = ({ total }: { total: number }) => (
+  <EuiToolTip content={<FormattedNumber value={total} />}>
+    <span tabIndex={0} data-test-subj="entityAnalyticsEntitiesTotal">
+      {getShortCount(total)}
+    </span>
+  </EuiToolTip>
+);
+
 export const AdditionalControls = ({
   total,
+  shown,
+  limitNote,
   title,
   columns,
   onAddColumn,
   onRemoveColumn,
   onResetColumns,
 }: {
-  total: number;
+  /** Undefined while it loads; shows a placeholder styled by the parent. */
+  total?: number;
+  shown?: number;
+  /**
+   * Set when the table is cut to a limit set elsewhere (a tile's entities): the numbers are then
+   * exact, and an info icon explains the limit.
+   */
+  limitNote?: string;
   title: string;
   columns: string[];
   onAddColumn: (column: string) => void;
@@ -48,9 +70,34 @@ export const AdditionalControls = ({
       )}
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
-          <span className="entityAnalyticsDataTableTotal">{`${getAbbreviatedNumber(
-            total
-          )} ${title}`}</span>
+          <span className="entityAnalyticsDataTableTotal">
+            {total == null ? (
+              <span className="entityAnalyticsDataTableTotalLoading" />
+            ) : shown != null && shown < total && limitNote ? (
+              <>
+                <FormattedMessage
+                  id="xpack.securitySolution.entityAnalytics.entitiesTable.shownOfTotalLimited"
+                  defaultMessage="Showing {shown} of {total} {title}"
+                  values={{
+                    shown: <strong>{shown.toLocaleString()}</strong>,
+                    total: <strong>{total.toLocaleString()}</strong>,
+                    title,
+                  }}
+                />{' '}
+                <EuiIconTip type="info" color="subdued" size="s" content={limitNote} />
+              </>
+            ) : shown != null && shown < total ? (
+              <FormattedMessage
+                id="xpack.securitySolution.entityAnalytics.entitiesTable.shownOfTotal"
+                defaultMessage="Showing {shown} of {total} {title}"
+                values={{ shown: getShortCount(shown), total: <TotalCount total={total} />, title }}
+              />
+            ) : (
+              <>
+                <TotalCount total={total} /> {title}
+              </>
+            )}
+          </span>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty

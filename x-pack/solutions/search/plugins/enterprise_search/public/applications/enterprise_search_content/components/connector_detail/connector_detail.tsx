@@ -5,31 +5,30 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 
-import type { EuiTabProps } from '@elastic/eui';
-
+import { AppHeader, type AppHeaderTab, type AppHeaderTitle } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 
 import { generateEncodedPath } from '../../../shared/encode_path_params';
+import { flashSuccessToast } from '../../../shared/flash_messages';
 import { KibanaLogic } from '../../../shared/kibana';
-import { CONNECTOR_DETAIL_TAB_PATH } from '../../routes';
+import { putConnectorNameAndDescription } from '../../api/connector/update_connector_name_and_description_api_logic';
+import { CONNECTOR_DETAIL_TAB_PATH, CONNECTORS_PATH } from '../../routes';
+import { getEnterpriseSearchContentUrl } from '../../utils/get_enterprise_search_content_url';
 import { connectorsBreadcrumbs } from '../connectors/connectors';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
-
 import { ConnectorScheduling } from '../search_index/connector/connector_scheduling';
 import { ConnectorSyncRules } from '../search_index/connector/sync_rules/connector_rules';
 import { SearchIndexDocuments } from '../search_index/documents';
 import { SearchIndexIndexMappings } from '../search_index/index_mappings';
 import { SearchIndexPipelines } from '../search_index/pipelines/pipelines';
-import { getHeaderActions } from '../shared/header_actions/header_actions';
+import { useSyncsAppHeaderMenu } from '../shared/header_actions/use_syncs_app_header_menu';
 
 import { ConnectorConfiguration } from './connector_configuration';
-import { ConnectorDescription } from './connector_description';
-import { ConnectorName } from './connector_name';
 import { ConnectorViewLogic } from './connector_view_logic';
 import { ConnectorDetailOverview } from './overview';
 
@@ -48,7 +47,7 @@ export enum ConnectorDetailTabId {
 export const ConnectorDetail: React.FC = () => {
   const connectorId = decodeURIComponent(useParams<{ connectorId: string }>().connectorId);
   const { hasFilteringFeature, isLoading, index, connector } = useValues(ConnectorViewLogic);
-  const { fetchConnectorApiReset, startConnectorPoll, stopConnectorPoll } =
+  const { fetchConnectorApiReset, startConnectorPoll, stopConnectorPoll, updateConnectorData } =
     useActions(ConnectorViewLogic);
   useEffect(() => {
     stopConnectorPoll();
@@ -64,188 +63,221 @@ export const ConnectorDetail: React.FC = () => {
     productFeatures: { hasDefaultIngestPipeline },
   } = useValues(KibanaLogic);
 
-  const ALL_INDICES_TABS = [
-    {
-      content: <ConnectorDetailOverview />,
-      id: ConnectorDetailTabId.OVERVIEW,
-      isSelected: tabId === ConnectorDetailTabId.OVERVIEW,
-      label: i18n.translate(
-        'xpack.enterpriseSearch.content.connectors.connectorDetail.overviewTabLabel',
-        {
-          defaultMessage: 'Overview',
-        }
-      ),
-      onClick: () =>
-        KibanaLogic.values.navigateToUrl(
-          generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
-            connectorId,
-            tabId: ConnectorDetailTabId.OVERVIEW,
-          })
-        ),
-    },
-    {
-      content: <SearchIndexDocuments />,
-      disabled: !index || connector?.is_native,
-      id: ConnectorDetailTabId.DOCUMENTS,
-      isSelected: tabId === ConnectorDetailTabId.DOCUMENTS,
-      label: i18n.translate(
-        'xpack.enterpriseSearch.content.connectors.connectorDetail.documentsTabLabel',
-        {
-          defaultMessage: 'Documents',
-        }
-      ),
-      onClick: () =>
-        KibanaLogic.values.navigateToUrl(
-          generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
-            connectorId,
-            tabId: ConnectorDetailTabId.DOCUMENTS,
-          })
-        ),
-    },
-    {
-      content: <SearchIndexIndexMappings />,
-      disabled: !index || connector?.is_native,
-      id: ConnectorDetailTabId.INDEX_MAPPINGS,
-      isSelected: tabId === ConnectorDetailTabId.INDEX_MAPPINGS,
-      label: i18n.translate(
-        'xpack.enterpriseSearch.content.connectors.connectorDetail.indexMappingsTabLabel',
-        {
-          defaultMessage: 'Mappings',
-        }
-      ),
-      onClick: () =>
-        KibanaLogic.values.navigateToUrl(
-          generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
-            connectorId,
-            tabId: ConnectorDetailTabId.INDEX_MAPPINGS,
-          })
-        ),
-    },
-  ];
+  const syncsMenu = useSyncsAppHeaderMenu();
 
-  const CONNECTOR_TABS = [
-    ...(hasFilteringFeature
-      ? [
-          {
-            content: <ConnectorSyncRules />,
-            disabled: !index || connector?.is_native,
-            id: ConnectorDetailTabId.SYNC_RULES,
-            isSelected: tabId === ConnectorDetailTabId.SYNC_RULES,
-            label: i18n.translate(
-              'xpack.enterpriseSearch.content.connectors.connectorDetail.syncRulesTabLabel',
-              {
-                defaultMessage: 'Sync rules',
-              }
-            ),
-            onClick: () =>
-              KibanaLogic.values.navigateToUrl(
-                generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
-                  connectorId,
-                  tabId: ConnectorDetailTabId.SYNC_RULES,
-                })
-              ),
-          },
-        ]
-      : []),
-    {
-      content: <ConnectorScheduling />,
-      disabled: !connector?.index_name || connector?.is_native,
-      id: ConnectorDetailTabId.SCHEDULING,
-      isSelected: tabId === ConnectorDetailTabId.SCHEDULING,
-      label: i18n.translate(
-        'xpack.enterpriseSearch.content.connectors.connectorDetail.schedulingTabLabel',
-        {
-          defaultMessage: 'Scheduling',
-        }
-      ),
-      onClick: () =>
-        KibanaLogic.values.navigateToUrl(
-          generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
-            connectorId,
-            tabId: ConnectorDetailTabId.SCHEDULING,
-          })
-        ),
-    },
-  ];
-
-  const CONFIG_TAB = [
-    {
-      content: <ConnectorConfiguration />,
-      disabled: connector?.is_native,
-      id: ConnectorDetailTabId.CONFIGURATION,
-      isSelected: tabId === ConnectorDetailTabId.CONFIGURATION,
-      label: i18n.translate(
-        'xpack.enterpriseSearch.content.connectors.connectorDetail.configurationTabLabel',
-        {
-          defaultMessage: 'Configuration',
-        }
-      ),
-      onClick: () =>
-        KibanaLogic.values.navigateToUrl(
-          generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
-            connectorId,
-            tabId: ConnectorDetailTabId.CONFIGURATION,
-          })
-        ),
-    },
-  ];
-
-  const PIPELINES_TAB = {
-    content: <SearchIndexPipelines />,
-    disabled: !index || connector?.is_native,
-    id: ConnectorDetailTabId.PIPELINES,
-    isSelected: tabId === ConnectorDetailTabId.PIPELINES,
-    label: i18n.translate(
-      'xpack.enterpriseSearch.content.connectors.connectorDetail.pipelinesTabLabel',
-      {
-        defaultMessage: 'Pipelines',
-      }
-    ),
-    onClick: () =>
-      KibanaLogic.values.navigateToUrl(
+  const tabs = useMemo(() => {
+    const getTabHref = (nextTabId: ConnectorDetailTabId) =>
+      getEnterpriseSearchContentUrl(
         generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
           connectorId,
-          tabId: ConnectorDetailTabId.PIPELINES,
+          tabId: nextTabId,
         })
-      ),
-  };
+      );
 
-  interface TabMenuItem {
-    content: JSX.Element;
-    disabled?: boolean;
-    id: string;
-    label: string;
-    onClick?: () => void;
-    prepend?: React.ReactNode;
-    route?: string;
-    testSubj?: string;
-  }
+    return [
+      {
+        content: <ConnectorDetailOverview />,
+        disabled: false,
+        href: getTabHref(ConnectorDetailTabId.OVERVIEW),
+        id: ConnectorDetailTabId.OVERVIEW,
+        isSelected: tabId === ConnectorDetailTabId.OVERVIEW,
+        label: i18n.translate(
+          'xpack.enterpriseSearch.content.connectors.connectorDetail.overviewTabLabel',
+          {
+            defaultMessage: 'Overview',
+          }
+        ),
+      },
+      {
+        content: <SearchIndexDocuments />,
+        disabled: !index || Boolean(connector?.is_native),
+        href: getTabHref(ConnectorDetailTabId.DOCUMENTS),
+        id: ConnectorDetailTabId.DOCUMENTS,
+        isSelected: tabId === ConnectorDetailTabId.DOCUMENTS,
+        label: i18n.translate(
+          'xpack.enterpriseSearch.content.connectors.connectorDetail.documentsTabLabel',
+          {
+            defaultMessage: 'Documents',
+          }
+        ),
+      },
+      {
+        content: <SearchIndexIndexMappings />,
+        disabled: !index || Boolean(connector?.is_native),
+        href: getTabHref(ConnectorDetailTabId.INDEX_MAPPINGS),
+        id: ConnectorDetailTabId.INDEX_MAPPINGS,
+        isSelected: tabId === ConnectorDetailTabId.INDEX_MAPPINGS,
+        label: i18n.translate(
+          'xpack.enterpriseSearch.content.connectors.connectorDetail.indexMappingsTabLabel',
+          {
+            defaultMessage: 'Mappings',
+          }
+        ),
+      },
+      ...(hasFilteringFeature
+        ? [
+            {
+              content: <ConnectorSyncRules />,
+              disabled: !index || Boolean(connector?.is_native),
+              href: getTabHref(ConnectorDetailTabId.SYNC_RULES),
+              id: ConnectorDetailTabId.SYNC_RULES,
+              isSelected: tabId === ConnectorDetailTabId.SYNC_RULES,
+              label: i18n.translate(
+                'xpack.enterpriseSearch.content.connectors.connectorDetail.syncRulesTabLabel',
+                {
+                  defaultMessage: 'Sync rules',
+                }
+              ),
+            },
+          ]
+        : []),
+      {
+        content: <ConnectorScheduling />,
+        disabled: !connector?.index_name || Boolean(connector?.is_native),
+        href: getTabHref(ConnectorDetailTabId.SCHEDULING),
+        id: ConnectorDetailTabId.SCHEDULING,
+        isSelected: tabId === ConnectorDetailTabId.SCHEDULING,
+        label: i18n.translate(
+          'xpack.enterpriseSearch.content.connectors.connectorDetail.schedulingTabLabel',
+          {
+            defaultMessage: 'Scheduling',
+          }
+        ),
+      },
+      ...(hasDefaultIngestPipeline
+        ? [
+            {
+              content: <SearchIndexPipelines />,
+              disabled: !index || Boolean(connector?.is_native),
+              href: getTabHref(ConnectorDetailTabId.PIPELINES),
+              id: ConnectorDetailTabId.PIPELINES,
+              isSelected: tabId === ConnectorDetailTabId.PIPELINES,
+              label: i18n.translate(
+                'xpack.enterpriseSearch.content.connectors.connectorDetail.pipelinesTabLabel',
+                {
+                  defaultMessage: 'Pipelines',
+                }
+              ),
+            },
+          ]
+        : []),
+      {
+        content: <ConnectorConfiguration />,
+        disabled: Boolean(connector?.is_native),
+        href: getTabHref(ConnectorDetailTabId.CONFIGURATION),
+        id: ConnectorDetailTabId.CONFIGURATION,
+        isSelected: tabId === ConnectorDetailTabId.CONFIGURATION,
+        label: i18n.translate(
+          'xpack.enterpriseSearch.content.connectors.connectorDetail.configurationTabLabel',
+          {
+            defaultMessage: 'Configuration',
+          }
+        ),
+      },
+    ];
+  }, [
+    connector?.index_name,
+    connector?.is_native,
+    connectorId,
+    hasDefaultIngestPipeline,
+    hasFilteringFeature,
+    index,
+    tabId,
+  ]);
 
-  const tabs: TabMenuItem[] = [
-    ...ALL_INDICES_TABS,
-    ...CONNECTOR_TABS,
-    ...(hasDefaultIngestPipeline ? [PIPELINES_TAB] : []),
-    ...CONFIG_TAB,
-  ];
+  const selectedTab = useMemo(() => tabs.find((tab) => tab.id === tabId), [tabId, tabs]);
 
-  const selectedTab = useMemo(() => tabs.find((tab) => tab.id === tabId), [tabId]);
+  const onSaveTitle = useCallback(
+    async (nextTitle: string) => {
+      if (!connector) {
+        return;
+      }
+
+      const name = nextTitle.trim();
+      if (!name) {
+        return i18n.translate(
+          'xpack.enterpriseSearch.content.nameAndDescription.name.error.empty',
+          {
+            defaultMessage: 'Connector name cannot be empty',
+          }
+        );
+      }
+
+      try {
+        await putConnectorNameAndDescription({
+          connectorId: connector.id,
+          description: connector.description,
+          name,
+        });
+        updateConnectorData({ name });
+        flashSuccessToast(
+          i18n.translate(
+            'xpack.enterpriseSearch.content.indices.configurationConnector.nameAndDescription.successToast.title',
+            { defaultMessage: 'Connector name and description updated' }
+          )
+        );
+      } catch {
+        return i18n.translate(
+          'xpack.enterpriseSearch.connectors.nameAndDescription.name.error.saveFailed',
+          { defaultMessage: 'Unable to update connector name' }
+        );
+      }
+    },
+    [connector, updateConnectorData]
+  );
+
+  const headerTitle = useMemo<AppHeaderTitle>(
+    () =>
+      connector
+        ? {
+            ariaLabel: i18n.translate(
+              'xpack.enterpriseSearch.content.connectors.nameAndDescription.name.ariaLabel',
+              {
+                defaultMessage: 'Edit connector name',
+              }
+            ),
+            onSave: onSaveTitle,
+            placeholder: i18n.translate(
+              'xpack.enterpriseSearch.content.connectors.nameAndDescription.name.placeholder',
+              { defaultMessage: 'Add a name to your connector' }
+            ),
+            text: connector.name,
+          }
+        : '...',
+    [connector, onSaveTitle]
+  );
+
+  const headerTabs = useMemo<AppHeaderTab[]>(
+    () =>
+      tabs.map((tab) => ({
+        'data-test-subj': `enterpriseSearchConnectorDetail-${tab.id}Tab`,
+        disabled: tab.disabled,
+        href: tab.href,
+        id: tab.id,
+        isSelected: tab.isSelected,
+        label: tab.label,
+      })),
+    [tabs]
+  );
 
   return (
     <EnterpriseSearchContentPageTemplate
       pageChrome={[...connectorsBreadcrumbs, connector?.name ?? '...']}
       pageViewTelemetry={tabId}
       isLoading={isLoading}
-      pageHeader={{
-        description: connector ? <ConnectorDescription connector={connector} /> : '...',
-        pageTitle: connector ? <ConnectorName connector={connector} /> : '...',
-        rightSideGroupProps: {
-          gutterSize: 's',
-          responsive: false,
-          wrap: false,
-        },
-        rightSideItems: getHeaderActions(index, connector),
-        tabs: tabs as Array<EuiTabProps & { label: React.ReactNode }>,
-      }}
+      appHeader={
+        <AppHeader
+          title={headerTitle}
+          back={{
+            href: getEnterpriseSearchContentUrl(CONNECTORS_PATH),
+            label: i18n.translate('xpack.enterpriseSearch.content.connectors.breadcrumb', {
+              defaultMessage: 'Connectors',
+            }),
+          }}
+          tabs={headerTabs}
+          menu={syncsMenu}
+        />
+      }
     >
       {selectedTab?.content || null}
     </EnterpriseSearchContentPageTemplate>

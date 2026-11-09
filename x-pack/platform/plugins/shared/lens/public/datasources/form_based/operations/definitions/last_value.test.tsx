@@ -8,6 +8,8 @@
 import React from 'react';
 import type { ShallowWrapper } from 'enzyme';
 import { shallow } from 'enzyme';
+import { screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import type { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
@@ -18,6 +20,7 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createMockedIndexPattern } from '../../mocks';
 import type {
   LastValueIndexPatternColumn,
+  LastValueOrderAggColumn,
   FormBasedLayer,
   TermsIndexPatternColumn,
 } from '@kbn/lens-common';
@@ -26,6 +29,7 @@ import type { EuiSwitchEvent } from '@elastic/eui';
 import { EuiSwitch } from '@elastic/eui';
 import { buildExpression, parseExpression } from '@kbn/expressions-plugin/common';
 import { FormRow } from './shared_components';
+import { renderWithProviders } from '../../../../test_utils/test_utils';
 
 const uiSettingsMock = {} as IUiSettingsClient;
 
@@ -571,7 +575,7 @@ describe('last_value', () => {
           layer: localLayer,
           field: scriptedField!,
         }).params.showArrayValues
-      ).toBeTruthy();
+      ).toBe(true);
 
       expect(
         lastValueOperation.buildColumn({
@@ -579,7 +583,7 @@ describe('last_value', () => {
           layer: localLayer,
           field: runtimeKeywordField!,
         }).params.showArrayValues
-      ).toBeTruthy();
+      ).toBe(true);
 
       expect(
         lastValueOperation.buildColumn({
@@ -587,7 +591,7 @@ describe('last_value', () => {
           layer: localLayer,
           field: runtimeNumericField!,
         }).params.showArrayValues
-      ).toBeFalsy();
+      ).toBe(false);
 
       expect(
         lastValueOperation.buildColumn(
@@ -598,7 +602,7 @@ describe('last_value', () => {
           },
           { showArrayValues: true }
         ).params.showArrayValues
-      ).toBeTruthy();
+      ).toBe(true);
 
       expect(
         lastValueOperation.buildColumn({
@@ -606,7 +610,25 @@ describe('last_value', () => {
           layer: localLayer,
           field: nonScriptedField!,
         }).params.showArrayValues
-      ).toBeFalsy();
+      ).toBe(false);
+    });
+
+    it('should set showArrayValues to false for a new regular-field column with no prior params', () => {
+      const indexPattern = createMockedIndexPattern();
+      const regularField = indexPattern.fields.find((field) => !field.scripted && !field.runtime)!;
+      const localLayer = {
+        columns: {},
+        columnOrder: [],
+        indexPatternId: '',
+      } as FormBasedLayer;
+
+      expect(
+        lastValueOperation.buildColumn({
+          indexPattern,
+          layer: localLayer,
+          field: regularField,
+        }).params.showArrayValues
+      ).toBe(false);
     });
   });
 
@@ -963,6 +985,55 @@ describe('last_value', () => {
         );
 
         expect(instance.find(FormRow).prop('isInvalid')).toBe(true);
+      });
+    });
+
+    // Regression test for the editor crash reported when reopening a terms
+    // visualization whose `last_value` rank-by (order agg) was authored through
+    // the API without a `params` object. The editor must mount and let the user
+    // pick a sort field from that state.
+    describe('params-less order-agg column rendered as a rank-by reference', () => {
+      const orderAggColumn: LastValueOrderAggColumn = {
+        label: 'Last value of a',
+        dataType: 'number',
+        isBucketed: false,
+        sourceField: 'a',
+        operationType: 'last_value',
+      };
+
+      it('should mount and allow selecting a sort field when referenced without params', async () => {
+        const updateLayerSpy = jest.fn();
+
+        renderWithProviders(
+          <InlineOptions
+            {...defaultProps}
+            // A params-less last_value only reaches this editor as a terms
+            // order-agg, which is always rendered through the ReferenceEditor
+            // with `isReferenced={true}`.
+            isReferenced={true}
+            layer={layer}
+            paramEditorUpdater={updateLayerSpy}
+            columnId="col2"
+            currentColumn={orderAggColumn as unknown as LastValueIndexPatternColumn}
+          />
+        );
+
+        // Editor mounts without crashing even though `params` is absent.
+        const sortField = screen.getByTestId('lns-indexPattern-lastValue-sortField');
+        expect(sortField).toBeInTheDocument();
+
+        // Selecting a date field is the interaction that previously crashed.
+        await userEvent.click(
+          within(sortField).getByRole('combobox', { name: 'Sort by date field' })
+        );
+        await userEvent.click(screen.getByRole('option', { name: 'start_date' }));
+
+        expect(updateLayerSpy).toHaveBeenCalledWith({
+          ...orderAggColumn,
+          params: {
+            sortField: 'start_date',
+          },
+        });
       });
     });
   });

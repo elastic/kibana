@@ -33,26 +33,37 @@ const getLabels = (
   invalidLicense: boolean,
   disabled: boolean | undefined,
   isApproximate: boolean,
-  additionalText?: string
+  additionalText?: string,
+  disabledTooltip?: string,
+  additionalDisabledText?: string
 ) => {
   if (invalidLicense || disabled) {
     const ariaLabel = i18n.translate('unifiedSearch.esqlApproximationToggle.unavailable', {
       defaultMessage: 'Fast mode unavailable',
     });
-    const additionalDisabledText = invalidLicense
+    if (disabledTooltip) {
+      return {
+        tooltipContent: disabledTooltip,
+        ariaLabel,
+        switchLabel: i18n.translate('unifiedSearch.esqlApproximationToggle.switch.off', {
+          defaultMessage: 'OFF',
+        }),
+      };
+    }
+    const disabledText = invalidLicense
       ? i18n.translate('unifiedSearch.esqlApproximationToggle.invalidLicenseText', {
           defaultMessage: 'Upgrade to Enterprise license to enable fast mode.',
         })
-      : additionalText;
+      : additionalDisabledText ?? additionalText;
     return {
       tooltipContent: (
         <>
           <strong>{ariaLabel}</strong>
-          {additionalDisabledText && (
+          {disabledText && (
             <>
               <br />
               <br />
-              {additionalDisabledText}
+              {disabledText}
             </>
           )}
         </>
@@ -95,15 +106,24 @@ interface EsqlApproximationToggleProps {
   isApproximate: boolean;
   onChange: (isApproximate: boolean) => void;
   additionalText?: string;
+  /**
+   * Text shown in the tooltip when the toggle is disabled. Falls back to `additionalText`.
+   */
+  additionalDisabledText?: string;
   disabled?: boolean;
+  disabledReason?: string;
 }
 
 export const EsqlApproximationToggle = ({
   isApproximate,
   onChange,
   additionalText,
+  additionalDisabledText,
   disabled,
+  disabledReason,
 }: EsqlApproximationToggleProps) => {
+  const isDisabled = Boolean(disabled) || Boolean(disabledReason);
+  const disabledTooltip = disabledReason;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { euiTheme } = useEuiTheme();
   const {
@@ -131,8 +151,22 @@ export const EsqlApproximationToggle = ({
   }, [licensing]);
 
   const { tooltipContent, ariaLabel, switchLabel } = useMemo(() => {
-    return getLabels(invalidLicense, disabled, isApproximate, additionalText);
-  }, [disabled, isApproximate, additionalText, invalidLicense]);
+    return getLabels(
+      invalidLicense,
+      isDisabled,
+      isApproximate,
+      additionalText,
+      disabledTooltip,
+      additionalDisabledText
+    );
+  }, [
+    isDisabled,
+    disabledTooltip,
+    isApproximate,
+    additionalText,
+    additionalDisabledText,
+    invalidLicense,
+  ]);
 
   return (
     <EuiFlexItem grow={false}>
@@ -145,7 +179,7 @@ export const EsqlApproximationToggle = ({
               size="s"
               color={isApproximate ? 'success' : 'text'}
               display="base"
-              disabled={invalidLicense || disabled}
+              disabled={invalidLicense || isDisabled}
               data-test-subj="esqlApproximationToggleButton"
               onClick={() => setIsPopoverOpen((open) => !open)}
             />

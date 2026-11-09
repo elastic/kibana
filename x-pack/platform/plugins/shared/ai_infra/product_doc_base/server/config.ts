@@ -17,6 +17,9 @@ const configSchema = schema.object({
   elserInferenceId: schema.string({
     defaultValue: internalElserInferenceId,
   }),
+  // Functional tests install explicitly and cannot share the cluster-wide install lock
+  // with the startup task. Production keeps auto-install on.
+  autoInstallEnabled: schema.boolean({ defaultValue: true }),
 });
 
 export const config: PluginConfigDescriptor<ProductDocBaseConfig> = {

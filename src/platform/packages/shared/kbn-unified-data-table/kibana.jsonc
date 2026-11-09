@@ -2,7 +2,7 @@
   "type": "shared-browser",
   "id": "@kbn/unified-data-table",
   "owner": [
-    "@elastic/kibana-data-discovery",
+    "@elastic/kibana-discover",
     "@elastic/security-threat-hunting"
   ],
   "group": "platform",

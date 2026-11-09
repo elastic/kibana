@@ -247,6 +247,59 @@ describe('Bucket Operation Schemas', () => {
         expect(() => bucketTermsOperationSchema.parse(input)).toThrow();
       });
     });
+
+    it('validates rank_by custom last_value with a time_field', () => {
+      const withTimeField = {
+        operation: 'terms',
+        fields: ['category'],
+        rank_by: {
+          type: 'custom',
+          operation: 'last_value',
+          field: 'bytes',
+          direction: 'desc',
+          time_field: 'timestamp',
+        },
+      };
+      const withoutTimeField = {
+        ...withTimeField,
+        rank_by: { type: 'custom', operation: 'last_value', field: 'bytes', direction: 'desc' },
+      };
+
+      expect(bucketTermsOperationSchema.parse(withTimeField).rank_by).toEqual(
+        withTimeField.rank_by
+      );
+      expect(bucketTermsOperationSchema.parse(withoutTimeField).rank_by).toEqual(
+        withoutTimeField.rank_by
+      );
+    });
+
+    it('validates rank_by custom last_value without a time_field', () => {
+      const withoutTimeField = {
+        operation: 'terms',
+        fields: ['category'],
+        rank_by: { type: 'custom', operation: 'last_value', field: 'bytes', direction: 'desc' },
+      };
+
+      expect(bucketTermsOperationSchema.parse(withoutTimeField).rank_by).toEqual(
+        withoutTimeField.rank_by
+      );
+    });
+
+    it('rejects rank_by custom last_value with an empty time_field', () => {
+      const input = {
+        operation: 'terms',
+        fields: ['category'],
+        rank_by: {
+          type: 'custom',
+          operation: 'last_value',
+          field: 'bytes',
+          direction: 'desc',
+          time_field: '',
+        },
+      };
+
+      expect(() => bucketTermsOperationSchema.parse(input)).toThrow();
+    });
   });
 
   describe('filter operation', () => {
@@ -284,7 +337,7 @@ describe('Bucket Operation Schemas', () => {
       });
     });
 
-    it('enforces granularity limits', () => {
+    it('enforces the minimum granularity but leaves the ceiling to the runtime', () => {
       const result1 = bucketHistogramOperationSchema.safeParse({
         operation: 'histogram',
         field: 'price',
@@ -295,15 +348,15 @@ describe('Bucket Operation Schemas', () => {
           → at granularity"
       `);
 
-      const result2 = bucketHistogramOperationSchema.safeParse({
+      // No upper bound is enforced: the real ceiling is the deployment-configurable
+      // `histogram:maxBars` advanced setting, so large values are accepted here and
+      // clamped at render time rather than rejected during validation.
+      const aboveDefaultCeiling = bucketHistogramOperationSchema.safeParse({
         operation: 'histogram',
         field: 'price',
-        granularity: 8,
+        granularity: 5000,
       });
-      expectPrettyError(result2).toMatchInlineSnapshot(`
-        "✖ Too big: expected number to be <=7
-          → at granularity"
-      `);
+      expect(aboveDefaultCeiling.success).toBe(true);
     });
   });
 

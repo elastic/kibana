@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiCode, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { EuiCode, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -66,9 +67,10 @@ export function AggregationNotSupported({ dataStream }: { dataStream: string }) 
       style={{ marginBottom: '24px' }}
     >
       <EuiFlexItem>
-        <EuiCallOut title={aggregationNotSupportedTitle} color="warning" iconType="warning">
-          <p>{aggregationNotSupportedDescription(dataStream)}</p>
-        </EuiCallOut>
+        <KbnWarningCallout
+          title={aggregationNotSupportedTitle}
+          text={aggregationNotSupportedDescription(dataStream)}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -3,6 +3,7 @@
   "id": "@kbn/developer-toolbar-plugin",
   "owner": "@elastic/appex-sharedux",
   "description": "A plugin that provides a developer toolbar for Kibana.",
+  "devOnly": true,
   "plugin": {
     "id": "developerToolbar",
     "server": true,

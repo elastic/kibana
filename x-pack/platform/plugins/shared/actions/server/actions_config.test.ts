@@ -7,6 +7,7 @@
 
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { ActionsConfig } from './config';
+import { defaultInboundEventsLimitConfigs } from './config';
 import {
   DEFAULT_MICROSOFT_EXCHANGE_URL,
   DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
@@ -51,6 +52,13 @@ const defaultActionsConfig: ActionsConfig = {
     },
     ears: { enabled: false, enableExperimental: false },
   },
+  inboundEvents: {
+    enabled: false,
+    maxBodyBytes: new ByteSizeValue(1024 * 1024),
+    maxEmitted: 25,
+    ...defaultInboundEventsLimitConfigs,
+  },
+  connectorSigningKeys: { enabled: false },
 };
 
 describe('ensureUriAllowed', () => {
@@ -184,6 +192,59 @@ describe('isUriAllowed', () => {
       getActionsConfigurationUtilities(config).isUriAllowed('https://github.com/elastic/kibana')
     ).toEqual(true);
   });
+
+  test('returns false when an encoded dot hides the real hostname', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      allowedHosts: ['github.com'],
+    };
+    expect(
+      getActionsConfigurationUtilities(config).isUriAllowed(
+        'http://github.com%2e127.0.0.1.nip.io:18080/internal'
+      )
+    ).toEqual(false);
+  });
+
+  test('uses the decoded hostname for allowlist checks', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      allowedHosts: ['github.com.127.0.0.1.nip.io'],
+    };
+    expect(
+      getActionsConfigurationUtilities(config).isUriAllowed(
+        'http://github.com%2e127.0.0.1.nip.io:18080/internal'
+      )
+    ).toEqual(true);
+  });
+
+  test('uses the normalized IPv4 address for allowlist checks', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      allowedHosts: ['0x7f.1'],
+    };
+    expect(getActionsConfigurationUtilities(config).isUriAllowed('http://0x7f.1/')).toEqual(false);
+  });
+
+  test('returns true for IPv6 hostnames in the allowedHosts', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      allowedHosts: ['::1'],
+    };
+    expect(getActionsConfigurationUtilities(config).isUriAllowed('http://[::1]:8080/foo')).toEqual(
+      true
+    );
+  });
+
+  test('returns true for non-compressed IPv6 hostnames in the allowedHosts', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      allowedHosts: ['2001:DB8:0:0:0:0:0:1'],
+    };
+    const { isUriAllowed } = getActionsConfigurationUtilities(config);
+    expect(isUriAllowed('http://[2001:db8:0:0:0:0:0:1]/')).toEqual(true);
+    expect(isUriAllowed('http://[2001:db8::1]/')).toEqual(true);
+    expect(isUriAllowed('http://[2001:db8::2]/')).toEqual(false);
+  });
 });
 
 describe('isHostnameAllowed', () => {
@@ -208,6 +269,17 @@ describe('isHostnameAllowed', () => {
       enabledActionTypes: [],
     };
     expect(getActionsConfigurationUtilities(config).isHostnameAllowed('github.com')).toEqual(true);
+  });
+
+  test('matches equivalent IPv6 representations', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      allowedHosts: ['2001:db8::1'],
+    };
+    const { isHostnameAllowed } = getActionsConfigurationUtilities(config);
+    expect(isHostnameAllowed('2001:db8:0:0:0:0:0:1')).toEqual(true);
+    expect(isHostnameAllowed('[2001:DB8::1]')).toEqual(true);
+    expect(isHostnameAllowed('2001:db8::2')).toEqual(false);
   });
 });
 
@@ -968,12 +1040,15 @@ describe('getEarsUrl()', () => {
 });
 
 describe('isEarsEnabled()', () => {
-  test('returns false when neither config key is set', () => {
-    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+  test('returns false when ears is not configured at all', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      auth: { ...defaultActionsConfig.auth, ears: undefined },
+    });
     expect(acu.isEarsEnabled()).toBe(false);
   });
 
-  test('returns true when auth.ears.enabled is true', () => {
+  test('returns false when ears.url is not set even if enabled is true', () => {
     const acu = getActionsConfigurationUtilities({
       ...defaultActionsConfig,
       auth: {
@@ -981,7 +1056,29 @@ describe('isEarsEnabled()', () => {
         ears: { enabled: true, enableExperimental: false },
       },
     });
+    expect(acu.isEarsEnabled()).toBe(false);
+  });
+
+  test('returns true when ears.url is set and enabled is not specified', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      auth: {
+        ...defaultActionsConfig.auth,
+        ears: { enabled: true, enableExperimental: false, url: 'https://ears.example.com' },
+      },
+    });
     expect(acu.isEarsEnabled()).toBe(true);
+  });
+
+  test('returns false when ears.url is set but enabled is false', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      auth: {
+        ...defaultActionsConfig.auth,
+        ears: { enabled: false, enableExperimental: false, url: 'https://ears.example.com' },
+      },
+    });
+    expect(acu.isEarsEnabled()).toBe(false);
   });
 });
 
@@ -1000,6 +1097,112 @@ describe('isEarsExperimentalEnabled()', () => {
       },
     });
     expect(acu.isEarsExperimentalEnabled()).toBe(true);
+  });
+});
+
+describe('isInboundEventsEnabled()', () => {
+  test('returns false when inboundEvents.enabled is false', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    expect(acu.isInboundEventsEnabled()).toBe(false);
+  });
+
+  test('returns true when inboundEvents.enabled is true', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      inboundEvents: {
+        ...defaultActionsConfig.inboundEvents,
+        enabled: true,
+      },
+    });
+    expect(acu.isInboundEventsEnabled()).toBe(true);
+  });
+});
+
+describe('isConnectorSigningKeysEnabled()', () => {
+  test('returns false by default', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    expect(acu.isConnectorSigningKeysEnabled()).toBe(false);
+  });
+
+  test('returns true when connectorSigningKeys.enabled is true', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      connectorSigningKeys: { enabled: true },
+    });
+    expect(acu.isConnectorSigningKeysEnabled()).toBe(true);
+  });
+});
+
+describe('getInboundEventsMaxBodyBytes()', () => {
+  test('returns 1mb by default', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    expect(acu.getInboundEventsMaxBodyBytes()).toBe(1024 * 1024);
+  });
+
+  test('returns configured maxBodyBytes in bytes', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      inboundEvents: {
+        ...defaultActionsConfig.inboundEvents,
+        maxBodyBytes: new ByteSizeValue(512 * 1024),
+      },
+    });
+    expect(acu.getInboundEventsMaxBodyBytes()).toBe(512 * 1024);
+  });
+});
+
+describe('getInboundEventsMaxEmitted()', () => {
+  test('returns 25 by default', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    expect(acu.getInboundEventsMaxEmitted()).toBe(25);
+  });
+
+  test('returns configured maxEmitted', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      inboundEvents: {
+        ...defaultActionsConfig.inboundEvents,
+        maxEmitted: 100,
+      },
+    });
+    expect(acu.getInboundEventsMaxEmitted()).toBe(100);
+  });
+});
+
+describe('getInboundEventsAdmission()', () => {
+  test('returns the process and per-connector caps', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    expect(acu.getInboundEventsAdmission()).toEqual({
+      enabled: true,
+      maxInFlight: 50,
+      maxInFlightPerConnector: 10,
+    });
+  });
+});
+
+describe('getInboundEventsRateLimit()', () => {
+  test('parses the default windows to milliseconds', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    expect(acu.getInboundEventsRateLimit()).toEqual({
+      enabled: true,
+      maxKeys: 10000,
+      remoteAddress: { limit: 10, windowMs: 60_000 },
+      connector: { limit: 300, windowMs: 60_000 },
+    });
+  });
+
+  test('parses a custom window once', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      inboundEvents: {
+        ...defaultActionsConfig.inboundEvents,
+        rateLimit: {
+          ...defaultActionsConfig.inboundEvents.rateLimit,
+          remoteAddress: { limit: 10, window: '30s' },
+        },
+      },
+    });
+    expect(acu.getInboundEventsRateLimit().remoteAddress.windowMs).toBe(30_000);
   });
 });
 

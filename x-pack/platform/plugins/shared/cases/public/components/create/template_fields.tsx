@@ -22,10 +22,12 @@ import { useResolvedFields } from '../field_library/hooks/use_resolved_fields';
 import { useGetFieldDefinitions } from '../field_library/hooks/use_get_field_definitions';
 import {
   buildExtendedFieldsDefaults,
+  collectNormalizedRefNames,
+  excludeRefFieldsToDefinitions,
+  normalizeFieldDefinitionName,
   parseFieldDefinitionsToInlineFields,
   getFieldSnakeKey,
 } from '../../../common/utils';
-import { isRefField } from '../../../common/types/domain/template/fields';
 import { TemplateFieldsValidationContext } from './template_fields_validation_context';
 import { CUSTOM_FIELDS } from '../case_form_fields/translations';
 
@@ -37,10 +39,20 @@ interface CreateCaseTemplateFieldsProps {
    * Omit (or false) when a divider already separates this block from content above.
    */
   addTopSpacing?: boolean;
+  /**
+   * `legacyKey`s of the legacy (v1) custom fields currently rendered as inputs elsewhere on
+   * this form (see `CaseFormFields`). A global field definition linked to one of these keys is
+   * excluded below so it isn't shown a second time here — without this, the untouched global
+   * control would submit its default/empty value as an explicit `extended_fields` entry
+   * alongside the legacy `customFields` value for the same linked field, which the write path
+   * treats as a genuine dual-input conflict (`FIELD_REPRESENTATIONS_CONFLICT`).
+   */
+  visibleLegacyCustomFieldKeys?: ReadonlySet<string>;
 }
 
 export const CreateCaseTemplateFields: React.FC<CreateCaseTemplateFieldsProps> = ({
   addTopSpacing = false,
+  visibleLegacyCustomFieldKeys,
 }) => {
   const parentForm = useParentFormContext();
   const [{ templateId }] = useFormData<{ templateId?: string }>({ watch: ['templateId'] });
@@ -62,12 +74,40 @@ export const CreateCaseTemplateFields: React.FC<CreateCaseTemplateFieldsProps> =
   // Resolve global field definitions to inline fields and compute their snake keys.
   // globalFieldKeys tracks ALL global fields for form-state preservation in useTemplateFormSync,
   // even those hidden because the active template already renders them via $ref.
-  const { globalInlineFields, globalFieldKeys } = useMemo(() => {
-    const defs = globalFieldDefsData?.fieldDefinitions ?? [];
-    const inlineFields = parseFieldDefinitionsToInlineFields(defs);
-    const keys = new Set(inlineFields.map((f) => getFieldSnakeKey(f.name, f.type)));
-    return { globalInlineFields: inlineFields, globalFieldKeys: keys };
-  }, [globalFieldDefsData]);
+  //
+  // A definition linked (via legacyKey) to a legacy custom field that is itself visible on this
+  // form is dropped before parsing — it already has an input in the legacy section, and
+  // rendering it here too would let its untouched control submit a conflicting extended_fields
+  // entry (see the prop doc above). The same exclusion must apply to template `$ref`s targeting
+  // those definitions (see excludedLinkedRefNames below): filtering only the global section
+  // would still let a migrated template render and submit a second control for the linked field.
+  const { globalInlineFields, globalFieldKeys, excludedLinkedRefNames, excludedLinkedStorageKeys } =
+    useMemo(() => {
+      const allDefs = globalFieldDefsData?.fieldDefinitions ?? [];
+      const isExcluded = (def: (typeof allDefs)[number]): boolean =>
+        def.legacyKey !== undefined && Boolean(visibleLegacyCustomFieldKeys?.has(def.legacyKey));
+      const excludedDefs = allDefs.filter(isExcluded);
+      const defs = allDefs.filter((def) => !isExcluded(def));
+      const inlineFields = parseFieldDefinitionsToInlineFields(defs);
+      const keys = new Set(inlineFields.map((f) => getFieldSnakeKey(f.name, f.type)));
+      return {
+        globalInlineFields: inlineFields,
+        globalFieldKeys: keys,
+        // Normalized definition names whose template `$ref`s must not render or submit — the
+        // linked legacy custom field already provides this form's single input for them.
+        excludedLinkedRefNames: new Set(
+          excludedDefs.map((d) => normalizeFieldDefinitionName(d.name))
+        ) as ReadonlySet<string>,
+        // Their storage keys, for scrubbing stale values out of form state when legacy
+        // visibility flips on after the form initialized (e.g. the forced-on switch resolves
+        // once the configuration finishes loading).
+        excludedLinkedStorageKeys: new Set(
+          parseFieldDefinitionsToInlineFields(excludedDefs).map((f) =>
+            getFieldSnakeKey(f.name, f.type)
+          )
+        ) as ReadonlySet<string>,
+      };
+    }, [globalFieldDefsData, visibleLegacyCustomFieldKeys]);
 
   const innerForm = useForm<FormShape>({
     defaultValues: { [CASE_EXTENDED_FIELDS]: {} },
@@ -110,17 +150,44 @@ export const CreateCaseTemplateFields: React.FC<CreateCaseTemplateFieldsProps> =
     innerForm.reset({ [CASE_EXTENDED_FIELDS]: { ...defaults, ...preservedCurrent } });
   }, [isLoadingGlobalDefs, globalInlineFields, innerForm]);
 
-  const { template, isLoading } = useTemplateFormSync(innerForm, globalFieldKeys);
+  const { template, isLoading } = useTemplateFormSync(
+    innerForm,
+    globalFieldKeys,
+    excludedLinkedRefNames
+  );
+
+  // Scrub the storage keys of legacy-visible linked definitions out of the inner form whenever
+  // the exclusion set changes. Template-originated values are already handled by the sync hook
+  // (its reset replaces the whole map), but values written by the one-shot global-defaults
+  // effect above would otherwise linger in form state after "show legacy custom fields" turns
+  // on, be mirrored to the parent form, and submit alongside the legacy input — a dual-input
+  // conflict the server rejects. The watch subscription registered above mirrors this reset to
+  // the parent form's extendedFields field.
+  useEffect(() => {
+    if (!excludedLinkedStorageKeys.size) return;
+    const current = (innerForm.getValues()?.[CASE_EXTENDED_FIELDS] ?? {}) as Record<
+      string,
+      unknown
+    >;
+    const staleKeys = Object.keys(current).filter((key) => excludedLinkedStorageKeys.has(key));
+    if (!staleKeys.length) return;
+    innerForm.reset({
+      [CASE_EXTENDED_FIELDS]: Object.fromEntries(
+        Object.entries(current).filter(([key]) => !excludedLinkedStorageKeys.has(key))
+      ),
+    });
+  }, [excludedLinkedStorageKeys, innerForm]);
 
   // Fields referenced by the template via $ref are owned by the template section —
   // exclude them from the global section to avoid duplicate inputs.
   const templateRefNames = useMemo<ReadonlySet<string>>(
-    () => new Set((template?.definition?.fields ?? []).filter(isRefField).map((f) => f.$ref)),
+    () => collectNormalizedRefNames(template?.definition?.fields),
     [template]
   );
 
   const visibleGlobalInlineFields = useMemo(
-    () => globalInlineFields.filter((f) => !templateRefNames.has(f.name)),
+    () =>
+      globalInlineFields.filter((f) => !templateRefNames.has(normalizeFieldDefinitionName(f.name))),
     [globalInlineFields, templateRefNames]
   );
 
@@ -135,27 +202,47 @@ export const CreateCaseTemplateFields: React.FC<CreateCaseTemplateFieldsProps> =
     };
   }, [innerForm, triggerRef]);
 
+  // Drop template `$ref`s to legacy-visible linked definitions BEFORE resolution so the
+  // excluded field neither renders nor participates in defaults. Unrelated inline template
+  // fields pass through even when their names coincide with an excluded definition.
+  const templateDefinitionFields = useMemo(
+    () => excludeRefFieldsToDefinitions(template?.definition?.fields, excludedLinkedRefNames),
+    [template, excludedLinkedRefNames]
+  );
+
   const { resolvedFields: templateFields, isLoading: isLoadingFieldsRaw } = useResolvedFields(
-    template?.definition?.fields ?? [],
+    templateDefinitionFields,
     template?.owner
   );
   // A disabled query (no templateId) can sit in "loading" state indefinitely in react-query v4;
   // treat it as not-loading so the form renders global fields without a template selected.
   const isLoadingFields = Boolean(templateId) && isLoadingFieldsRaw;
 
+  // Pass each section's fields as condition context to the other so that show_when /
+  // required_when conditions can reference fields across the global/template boundary.
+  // Without this, a $ref global field whose show_when references another global field in the
+  // opposite section would receive an "unknown field" fallback (always-show) from the evaluator.
   const globalFieldsFragment = useMemo(
     () =>
       visibleGlobalInlineFields.length ? (
-        <FieldsRenderer resolvedFields={visibleGlobalInlineFields} />
+        <FieldsRenderer
+          resolvedFields={visibleGlobalInlineFields}
+          conditionContextFields={templateFields}
+        />
       ) : null,
-    [visibleGlobalInlineFields]
+    [visibleGlobalInlineFields, templateFields]
   );
 
   const templateFieldsFragment = useMemo(() => {
     if (!templateId || template?.definition?.fields === undefined) return null;
     if (!templateFields.length) return null;
-    return <FieldsRenderer resolvedFields={templateFields} />;
-  }, [templateId, template, templateFields]);
+    return (
+      <FieldsRenderer
+        resolvedFields={templateFields}
+        conditionContextFields={visibleGlobalInlineFields}
+      />
+    );
+  }, [templateId, template, templateFields, visibleGlobalInlineFields]);
 
   if (isLoading || isLoadingFields || isLoadingGlobalDefs) {
     return <UseField path={CASE_EXTENDED_FIELDS} component={HiddenField} />;

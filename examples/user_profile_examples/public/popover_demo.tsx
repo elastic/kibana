@@ -130,7 +130,7 @@ export const PopoverDemo: FunctionComponent = () => {
         <UserProfilesPopover
           button={
             <EuiFilterButton
-              iconType="arrowDown"
+              iconType="chevronSingleDown"
               numFilters={options2.length}
               isSelected={isOpen2}
               hasActiveFilters={selectedOptions2.length > 0}

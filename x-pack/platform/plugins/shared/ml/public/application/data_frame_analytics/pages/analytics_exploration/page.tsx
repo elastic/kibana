@@ -112,7 +112,7 @@ export const Page: FC<{
     }
 
     if (jobsExist === false) {
-      return <AnalyticsEmptyPrompt showDocsLink iconSize="s" />;
+      return <AnalyticsEmptyPrompt showDocsLink centered />;
     }
     return (
       <>
@@ -157,13 +157,13 @@ export const Page: FC<{
         {jobIdToUse && analysisTypeToUse ? (
           <div data-test-subj="mlPageDataFrameAnalyticsExploration">
             {analysisTypeToUse === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION && (
-              <OutlierExploration jobId={jobIdToUse} />
+              <OutlierExploration jobId={jobIdToUse} key={jobIdToUse} />
             )}
             {analysisTypeToUse === ANALYSIS_CONFIG_TYPE.REGRESSION && (
-              <RegressionExploration jobId={jobIdToUse} />
+              <RegressionExploration jobId={jobIdToUse} key={jobIdToUse} />
             )}
             {analysisTypeToUse === ANALYSIS_CONFIG_TYPE.CLASSIFICATION && (
-              <ClassificationExploration jobId={jobIdToUse} />
+              <ClassificationExploration jobId={jobIdToUse} key={jobIdToUse} />
             )}
           </div>
         ) : (

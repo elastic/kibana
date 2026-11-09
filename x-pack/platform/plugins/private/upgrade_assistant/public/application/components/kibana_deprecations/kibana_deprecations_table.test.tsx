@@ -136,7 +136,7 @@ describe('KibanaDeprecationsTable', () => {
       fireEvent.click(screen.getByLabelText('Status Selection'));
       await waitFor(() => {
         const option = document.body.querySelector<HTMLElement>(
-          '.euiSelectableListItem[title="Critical"]'
+          '.euiSelectableListItem span[title="Critical"]'
         );
         expect(option).not.toBeNull();
         option!.click();
@@ -175,7 +175,7 @@ describe('KibanaDeprecationsTable', () => {
       fireEvent.click(screen.getByLabelText('Type Selection'));
       await waitFor(() => {
         const option = document.body.querySelector<HTMLElement>(
-          '.euiSelectableListItem[title="Config"]'
+          '.euiSelectableListItem span[title="Config"]'
         );
         expect(option).not.toBeNull();
         option!.click();

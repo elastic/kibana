@@ -72,6 +72,14 @@ const SavedQueryRowActionsComponent: React.FC<SavedQueryRowActionsProps> = ({ it
     []
   );
 
+  const viewLabel = useMemo(
+    () =>
+      i18n.translate('xpack.osquery.savedQueryList.rowActions.viewLabel', {
+        defaultMessage: 'View query',
+      }),
+    []
+  );
+
   const duplicateLabel = useMemo(
     () =>
       i18n.translate('xpack.osquery.savedQueryList.rowActions.duplicateLabel', {
@@ -93,11 +101,15 @@ const SavedQueryRowActionsComponent: React.FC<SavedQueryRowActionsProps> = ({ it
       itemName={item.id}
       actionsAriaLabel={actionsAriaLabel}
       editLabel={editLabel}
+      viewLabel={viewLabel}
       duplicateLabel={duplicateLabel}
       deleteLabel={deleteLabel}
       deleteModalConfig={DELETE_MODAL_CONFIG}
       canWrite={!!permissions.writeSavedQueries}
-      isReadOnly={!!item.prebuilt}
+      isDeletable={!item.prebuilt}
+      // Mirrors `viewMode` in routes/saved_queries/edit: a prebuilt query opens as a
+      // details page even for a writer, so the kebab must not promise an edit.
+      opensReadOnlyPage={!!item.prebuilt}
       onEdit={handleEdit}
       onDuplicate={handleDuplicate}
       onDelete={handleDelete}

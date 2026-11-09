@@ -78,7 +78,7 @@ const mockGraphResponse = {
       label: '/bin/bash',
       color: 'warning',
       shape: 'rectangle',
-      icon: 'console',
+      icon: 'commandLine',
     },
   ],
   edges: [
@@ -162,14 +162,7 @@ const coreMock = {
       addError: () => ({ id: '' }),
     },
   },
-  timelines: {
-    getHoverActions: () => ({
-      getAddToTimelineButton: () => {},
-      getCopyButton: () => {},
-      getFilterForValueButton: () => {},
-      getFilterOutValueButton: () => {},
-    }),
-  },
+  timelines: {},
   logger: noopLogger,
   http: noopHttp,
   dataViews: {

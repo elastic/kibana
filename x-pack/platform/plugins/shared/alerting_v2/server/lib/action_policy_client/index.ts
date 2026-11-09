@@ -12,6 +12,8 @@ export type {
   CreateActionPolicyParams,
   FindActionPoliciesArgs,
   FindActionPoliciesResponse,
+  FindActionPoliciesSortField,
+  GetRoutingTagsParams,
   SnoozeActionPolicyParams,
   UpdateActionPolicyApiKeyParams,
   UpdateActionPolicyParams,

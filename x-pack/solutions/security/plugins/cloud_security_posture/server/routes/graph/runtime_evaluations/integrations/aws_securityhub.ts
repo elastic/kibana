@@ -6,7 +6,7 @@
  */
 
 /* eslint-disable prettier/prettier */
-/* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable @kbn/compat/typescript-naming-convention */
 
 import type { IntegrationEvaluations } from "../types";
 
@@ -68,6 +68,7 @@ export const aws_securityhubEvaluations = {
       AND resource.type != "AWS::EC2::Instance"
       AND resource.type != "AWS::Lambda::Function"
       AND resource.type != "AWS::IAM::User", resource.id,
+    data_stream.dataset == "aws_securityhub.finding" AND resource.type == "AWS::Lambda::Function" AND resource.id IS NOT NULL, resource.id,
     null
   ),
   entity.target.type = CASE(

@@ -14,9 +14,13 @@ import {
   listPolicyExecutionHistoryRequestSchema,
   listPolicyExecutionHistoryResponseSchema,
   type ListPolicyExecutionHistoryRequest,
+  type ListPolicyExecutionHistoryResponse,
 } from '@kbn/alerting-v2-schemas';
 import { ActionPolicyExecutionHistoryClient } from '../../lib/action_policy_execution_history_client';
-import type { ListExecutionHistoryArgs } from '../../lib/action_policy_execution_history_client';
+import type {
+  ListExecutionHistoryArgs,
+  ListExecutionHistoryResult,
+} from '../../lib/action_policy_execution_history_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { listActionPolicyExecutionsOasExamples } from './list_action_policy_executions_oas_example';
@@ -30,9 +34,12 @@ export const toListExecutionHistoryArgs = ({
   per_page: perPage,
   search,
   rule_ids: ruleIds,
-  outcome,
-  episode_ids: episodeIds,
-  start_date: startDate,
+  outcomes,
+  alert_ids: alertIds,
+  from,
+  to,
+  sort_field: sortField,
+  sort_order: sortOrder,
   ...rest
 }: ListPolicyExecutionHistoryRequest): Complete<Omit<ListExecutionHistoryArgs, 'request'>> => {
   assertAllFieldsMapped(rest);
@@ -41,9 +48,30 @@ export const toListExecutionHistoryArgs = ({
     perPage,
     search,
     ruleIds,
-    outcome,
-    episodeIds,
-    startDate,
+    outcomes,
+    alertIds,
+    from,
+    to,
+    sortField,
+    sortOrder,
+  };
+};
+
+export const toListExecutionHistoryResponse = ({
+  items,
+  page,
+  perPage,
+  total,
+  searchMatches,
+  ...rest
+}: ListExecutionHistoryResult): Complete<ListPolicyExecutionHistoryResponse> => {
+  assertAllFieldsMapped(rest);
+  return {
+    items,
+    page,
+    per_page: perPage,
+    total,
+    search_matches: searchMatches ?? undefined,
   };
 };
 
@@ -57,6 +85,8 @@ export class ListActionPolicyExecutionsRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
+    access: 'public' as const,
+    availability: { stability: 'stable', since: '9.6.0' },
     summary: 'List action policy executions',
     description:
       'Get a paginated list of dispatcher summary events for action policies in the current space.',
@@ -97,9 +127,9 @@ export class ListActionPolicyExecutionsRoute extends BaseAlertingRoute {
   protected async execute() {
     const result = await this.executionHistoryClient.listExecutionHistory({
       request: this.request,
-      ...toListExecutionHistoryArgs(this.request.query ?? {}),
+      ...toListExecutionHistoryArgs(this.request.query),
     });
 
-    return this.ctx.response.ok({ body: result });
+    return this.ctx.response.ok({ body: toListExecutionHistoryResponse(result) });
   }
 }

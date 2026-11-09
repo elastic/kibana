@@ -16,37 +16,58 @@
  *   - `activeStreams`: `Map<conversationId, { type }>`. Each in-flight stream owns one
  *     entry. Set synchronously when each mutation kicks off; deleted in the mutation's
  *     `finally`. Multiple entries can coexist — concurrent streams.
- *   - `byConversationId`: per-conversation pending message, error, and errorSteps.
- *     Persists across stream end so a user can hit Retry after a failure.
+ *   - `byConversationId`: per-conversation pending message, kept until its saved copy is
+ *     fetched or the stream is stopped.
  */
 
-import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import produce from 'immer-v9';
-import type { ConversationRoundStep } from '@kbn/agent-builder-common';
+import type { ConversationStreamService } from '../../../services/events';
 import { useSendMessageMutation } from './use_send_message_mutation';
 import type { SendMessageVars } from './use_send_message_mutation';
 import { useResumeRoundMutation } from './use_resume_round_mutation';
 import type { ResumeRoundVars } from './use_resume_round_mutation';
+import { useAttachExecutionMutation } from './use_attach_execution_mutation';
+import type { AttachExecutionVars } from './use_attach_execution_mutation';
 import type { ActiveStream, StreamRecord } from './types';
+import type { OptimisticAttachments } from '../../utils/build_optimistic_attachments';
 
 export interface StreamingContextValue {
+  conversationStreamService: ConversationStreamService;
   activeStreams: Map<string, ActiveStream>;
   byConversationId: Record<string, StreamRecord>;
   mutateSendMessage: (vars: SendMessageVars) => void;
   mutateResumeRound: (vars: ResumeRoundVars) => void;
+  mutateAttach: (vars: AttachExecutionVars) => void;
   cancelStream: (conversationId: string) => void;
-  cancelAllStreams: () => void;
-  removeError: (conversationId: string) => void;
-  removeAllErrors: () => void;
+  /** Closes this UI's connections locally; the runs keep going on the server. */
+  detachAllStreams: () => void;
 }
 
 const StreamingContext = createContext<StreamingContextValue | null>(null);
 
-const emptyRecord: StreamRecord = { errorSteps: [] };
+const emptyRecord: StreamRecord = {};
 
-export const StreamingProvider = ({ children }: { children: React.ReactNode }) => {
+export const StreamingProvider = ({
+  conversationStreamService,
+  children,
+}: {
+  conversationStreamService: ConversationStreamService;
+  children: React.ReactNode;
+}) => {
   const [activeStreams, setActiveStreams] = useState<Map<string, ActiveStream>>(() => new Map());
   const [byConversationId, setByConversationId] = useState<Record<string, StreamRecord>>({});
+
+  // Executions attached to, or stopped, from this mount
+  const attemptedExecutionIds = useRef<Set<string>>(new Set());
 
   const setActiveStream = useCallback((conversationId: string, value: ActiveStream) => {
     setActiveStreams((prev) => new Map(prev).set(conversationId, value));
@@ -61,72 +82,57 @@ export const StreamingProvider = ({ children }: { children: React.ReactNode }) =
     });
   }, []);
 
-  const setPendingMessage = useCallback((conversationId: string, message: string) => {
-    setByConversationId(
-      produce((draft) => {
-        if (!draft[conversationId]) draft[conversationId] = { errorSteps: [] };
-        draft[conversationId].pendingMessage = message;
-      })
-    );
-  }, []);
-
-  const clearPendingMessage = useCallback((conversationId: string) => {
-    setByConversationId(
-      produce((draft) => {
-        if (draft[conversationId]) {
-          delete draft[conversationId].pendingMessage;
-        }
-      })
-    );
-  }, []);
-
-  const setError = useCallback(
-    (conversationId: string, error: unknown, errorSteps: ConversationRoundStep[]) => {
+  const setPendingMessage = useCallback(
+    (conversationId: string, message: string, attachments?: OptimisticAttachments) => {
       setByConversationId(
         produce((draft) => {
-          if (!draft[conversationId]) draft[conversationId] = { errorSteps: [] };
-          draft[conversationId].error = error;
-          draft[conversationId].errorSteps = errorSteps;
+          draft[conversationId] = {
+            ...draft[conversationId],
+            pendingMessage: message,
+            pendingAttachments: attachments,
+          };
         })
       );
     },
     []
   );
 
-  const removeError = useCallback((conversationId: string) => {
+  const clearPendingMessage = useCallback((conversationId: string) => {
     setByConversationId(
       produce((draft) => {
-        const record = draft[conversationId];
-        if (record) {
-          delete record.error;
-          record.errorSteps = [];
+        if (draft[conversationId]) {
+          delete draft[conversationId].pendingMessage;
+          delete draft[conversationId].pendingAttachments;
         }
       })
     );
   }, []);
 
-  const removeAllErrors = useCallback(() => {
-    setByConversationId(
-      produce((draft) => {
-        for (const id of Object.keys(draft)) {
-          delete draft[id].error;
-          draft[id].errorSteps = [];
-        }
-      })
-    );
+  const markStreamStarted = useCallback((conversationId: string) => {
+    setActiveStreams((prev) => {
+      const current = prev.get(conversationId);
+      return current ? new Map(prev).set(conversationId, { ...current, started: true }) : prev;
+    });
   }, []);
 
   const sendMutation = useSendMessageMutation({
+    conversationStreamService,
     setPendingMessage,
     clearPendingMessage,
-    setError,
-    clearError: removeError,
     clearActiveStream,
+    markStreamStarted,
   });
 
   const resumeMutation = useResumeRoundMutation({
-    setError,
+    conversationStreamService,
     clearActiveStream,
+    markStreamStarted,
+  });
+
+  const attachMutation = useAttachExecutionMutation({
+    conversationStreamService,
+    clearActiveStream,
+    markStreamStarted,
   });
 
   // Pull stable references out of the mutation result objects. The result object itself is
@@ -134,36 +140,49 @@ export const StreamingProvider = ({ children }: { children: React.ReactNode }) =
   // whole object would re-evaluate every render. The individual fields below are stable.
   const sendMutate = sendMutation.mutate;
   const sendCancel = sendMutation.cancel;
-  const sendCancelAll = sendMutation.cancelAll;
+  const sendDetachAll = sendMutation.detachAll;
   const resumeMutate = resumeMutation.mutate;
   const resumeCancel = resumeMutation.cancel;
-  const resumeCancelAll = resumeMutation.cancelAll;
+  const resumeDetachAll = resumeMutation.detachAll;
+  const attachMutate = attachMutation.mutate;
+  const attachCancel = attachMutation.cancel;
+  const attachDetachAll = attachMutation.detachAll;
 
   const cancelStream = useCallback(
     (conversationId: string) => {
-      sendCancel(conversationId);
-      resumeCancel(conversationId);
+      setActiveStreams((prev) => {
+        const current = prev.get(conversationId);
+        return current ? new Map(prev).set(conversationId, { ...current, cancelling: true }) : prev;
+      });
+      // The pointer can outlive a Stop by a few seconds; never re-attach to a run stopped here.
+      for (const cancel of [sendCancel, resumeCancel, attachCancel]) {
+        const stoppedExecutionId = cancel(conversationId);
+        if (stoppedExecutionId) {
+          attemptedExecutionIds.current.add(stoppedExecutionId);
+        }
+      }
     },
-    [sendCancel, resumeCancel]
+    [sendCancel, resumeCancel, attachCancel]
   );
 
-  // Each mutation hook owns its own `Map<conversationId, AbortController>` ref; ask each
-  // to cancel everything it has installed.
-  const cancelAllStreams = useCallback(() => {
-    sendCancelAll();
-    resumeCancelAll();
-  }, [sendCancelAll, resumeCancelAll]);
+  const detachAllStreams = useCallback(() => {
+    sendDetachAll();
+    resumeDetachAll();
+    attachDetachAll();
+  }, [sendDetachAll, resumeDetachAll, attachDetachAll]);
+
+  // Leaving the UI closes its connections; the runs continue on the server and are re-attached
+  // on return through the conversation's `active_execution` pointer.
+  useEffect(() => () => detachAllStreams(), [detachAllStreams]);
 
   // Wrappers around `mutate` that set the per-id `activeStreams` entry SYNCHRONOUSLY before
-  // queueing the mutation. Without this, callers like `useSubmitMessage` (which call
-  // `mutate` and then immediately navigate to `/conversations/<uuid>`) would render the new
-  // URL with no `activeStreams` entry — the `useConversation` gate would open, fire a GET
-  // for the not-yet-persisted conversation, and 404. The mutation's `mutationFn` runs
-  // asynchronously, so setting the entry from inside `mutationFn` is too late.
+  // queueing the mutation, so the conversation reads as streaming (Stop, the scroll anchor) in
+  // the same render as the send. The mutation's `mutationFn` runs asynchronously, so setting the
+  // entry from inside it is too late.
   const mutateSendMessage = useCallback(
     (vars: SendMessageVars) => {
       setActiveStream(vars.conversationId, {
-        type: vars.action === 'regenerate' ? 'regenerate' : 'send',
+        type: 'send',
       });
       sendMutate(vars);
     },
@@ -178,27 +197,40 @@ export const StreamingProvider = ({ children }: { children: React.ReactNode }) =
     },
     [setActiveStream, resumeMutate]
   );
+  const mutateAttach = useCallback(
+    (vars: AttachExecutionVars) => {
+      if (attemptedExecutionIds.current.has(vars.executionId)) {
+        return;
+      }
+      attemptedExecutionIds.current.add(vars.executionId);
+      setActiveStream(vars.conversationId, {
+        type: 'attach',
+      });
+      attachMutate(vars);
+    },
+    [setActiveStream, attachMutate]
+  );
 
   const value = useMemo<StreamingContextValue>(
     () => ({
+      conversationStreamService,
       activeStreams,
       byConversationId,
       mutateSendMessage,
       mutateResumeRound,
+      mutateAttach,
       cancelStream,
-      cancelAllStreams,
-      removeError,
-      removeAllErrors,
+      detachAllStreams,
     }),
     [
+      conversationStreamService,
       activeStreams,
       byConversationId,
       mutateSendMessage,
       mutateResumeRound,
+      mutateAttach,
       cancelStream,
-      cancelAllStreams,
-      removeError,
-      removeAllErrors,
+      detachAllStreams,
     ]
   );
 
@@ -211,6 +243,11 @@ export const useStreamingContext = () => {
     throw new Error('useStreamingContext must be used within a StreamingProvider');
   }
   return context;
+};
+
+export const useConversationStreamService = (): ConversationStreamService => {
+  const { conversationStreamService } = useStreamingContext();
+  return conversationStreamService;
 };
 
 export const useStreamRecord = (conversationId: string | undefined): StreamRecord => {

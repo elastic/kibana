@@ -7,16 +7,13 @@
 
 import type { CasesServerSetup } from '@kbn/cases-plugin/server/types';
 import type { Plugin, CoreSetup } from '@kbn/core/server';
-import { getExternalReferenceAttachment } from './attachments/external_reference';
 
 export interface CasesExamplePublicSetupDeps {
   cases: CasesServerSetup;
 }
 
 export class CasesFixturePlugin implements Plugin<void, void, CasesExamplePublicSetupDeps> {
-  public setup(core: CoreSetup, { cases }: CasesExamplePublicSetupDeps) {
-    cases.attachmentFramework.registerExternalReference(getExternalReferenceAttachment());
-  }
+  public setup(core: CoreSetup, _deps: CasesExamplePublicSetupDeps) {}
 
   public start() {}
   public stop() {}

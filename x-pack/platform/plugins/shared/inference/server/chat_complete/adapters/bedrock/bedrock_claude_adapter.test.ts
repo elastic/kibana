@@ -452,6 +452,66 @@ Human:`,
       ]);
     });
 
+    it('merges a plain user message that follows a tool result into the tool-result turn', () => {
+      // Reproduces the bug in issue #284682: when a plain user message (e.g. the
+      // <system-notice> injected near the cycle limit) immediately follows a tool
+      // result, Bedrock Converse rejects the request with a consecutive-role error
+      // because the two user turns were not merged.
+      bedrockClaudeAdapter
+        .chatComplete({
+          executor: executorMock,
+          logger,
+          messages: [
+            {
+              role: MessageRole.User,
+              content: 'question',
+            },
+            {
+              role: MessageRole.Assistant,
+              content: null,
+              toolCalls: [
+                {
+                  function: {
+                    name: 'my_function',
+                    arguments: { foo: 'bar' },
+                  },
+                  toolCallId: '0',
+                },
+              ],
+            },
+            {
+              name: 'my_function',
+              role: MessageRole.Tool,
+              toolCallId: '0',
+              response: { bar: 'foo' },
+            },
+            {
+              role: MessageRole.User,
+              content: '<system-notice>You have 5 cycles left.</system-notice>',
+            },
+          ],
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+
+      const { messages } = getCallParams();
+      expect(messages).toEqual([
+        { role: 'user', content: [{ text: 'question' }] },
+        {
+          role: 'assistant',
+          content: [{ toolUse: { toolUseId: '0', name: 'my_function', input: { foo: 'bar' } } }],
+        },
+        {
+          role: 'user',
+          content: [
+            { toolResult: { toolUseId: '0', content: [{ json: { bar: 'foo' } }] } },
+            { text: '<system-notice>You have 5 cycles left.</system-notice>' },
+          ],
+        },
+      ]);
+    });
+
     it('correctly format system message', () => {
       bedrockClaudeAdapter
         .chatComplete({
@@ -527,13 +587,13 @@ Human:`,
             {
               image: {
                 format: 'png',
-                source: { bytes: new Uint8Array(Buffer.from('aaaaaa', 'utf-8')) },
+                source: { bytes: Buffer.from('aaaaaa', 'base64') },
               },
             },
             {
               image: {
                 format: 'png',
-                source: { bytes: new Uint8Array(Buffer.from('bbbbbb', 'utf-8')) },
+                source: { bytes: Buffer.from('bbbbbb', 'base64') },
               },
             },
           ],
@@ -783,6 +843,87 @@ Human:`,
       expect(executorMock.invoke).toHaveBeenCalledWith(
         expect.objectContaining({ subAction: 'converse' })
       );
+    });
+  });
+
+  describe('forced tool choice', () => {
+    const tools = { set_title: { description: 'set the title' } };
+
+    const mockConnectorModel = (defaultModel: string) => {
+      executorMock.getConnector.mockReturnValue({
+        type: InferenceConnectorType.Bedrock,
+        name: 'bedrock-connector',
+        connectorId: 'test-connector-id',
+        config: { defaultModel },
+        capabilities: {},
+        isInferenceEndpoint: false,
+        isPreconfigured: false,
+      });
+    };
+
+    it('sends `auto` instead of a named tool for a Claude model that rejects forced tool choice', () => {
+      mockConnectorModel('eu.anthropic.claude-sonnet-5-5');
+
+      bedrockClaudeAdapter
+        .chatComplete({
+          executor: executorMock,
+          logger,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          tools,
+          toolChoice: { function: 'set_title' },
+        })
+        .subscribe(noop);
+
+      expect(getCallParams().toolChoice).toEqual({ auto: {} });
+    });
+
+    it('sends `auto` instead of `any` for a Claude model that rejects forced tool choice', () => {
+      mockConnectorModel('eu.anthropic.claude-opus-5-5');
+
+      bedrockClaudeAdapter
+        .chatComplete({
+          executor: executorMock,
+          logger,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          tools,
+          toolChoice: ToolChoiceType.required,
+        })
+        .subscribe(noop);
+
+      expect(getCallParams().toolChoice).toEqual({ auto: {} });
+    });
+
+    it('keeps the named tool for a Claude model that accepts forced tool choice', () => {
+      mockConnectorModel('us.anthropic.claude-sonnet-4-6');
+
+      bedrockClaudeAdapter
+        .chatComplete({
+          executor: executorMock,
+          logger,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          tools,
+          toolChoice: { function: 'set_title' },
+        })
+        .subscribe(noop);
+
+      expect(getCallParams().toolChoice).toEqual({ tool: { name: 'set_title' } });
+    });
+
+    it('prefers the request model name over the connector default model', () => {
+      mockConnectorModel('us.anthropic.claude-sonnet-4-6');
+
+      bedrockClaudeAdapter
+        .chatComplete({
+          executor: executorMock,
+          logger,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          modelName: 'eu.anthropic.claude-sonnet-5-5',
+          tools,
+          toolChoice: { function: 'set_title' },
+        })
+        .subscribe(noop);
+
+      expect(getCallParams().toolChoice).toEqual({ auto: {} });
     });
   });
 });

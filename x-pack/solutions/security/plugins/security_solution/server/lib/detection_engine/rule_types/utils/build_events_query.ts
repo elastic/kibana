@@ -26,7 +26,19 @@ interface BuildEventsSearchQuery<
   trackTotalHits?: boolean;
   additionalFilters?: estypes.QueryDslQueryContainer[];
   overrideBody?: OverrideBodyQuery;
+  dateNanosTimestampFields?: string[];
+  mixedTimestampFields?: string[];
 }
+
+// Raw date_nanos sort values (~1.8e18) don't survive JS number precision, breaking
+// search_after cursors. When a timestamp field is date_nanos anywhere in the pattern,
+// sort values are formatted as ISO strings instead, which round-trip exactly.
+// `missing` must be numeric (epoch): the default _last sentinel (Long.MAX_VALUE)
+// formats to null, so pin an explicit in-range value keeping missing docs sorted last.
+// asc: max date_nanos minus 1; desc: epoch 0 (resolution-invariant).
+const NANOS_SORT_FORMAT = 'strict_date_optional_time_nanos';
+const NANOS_SORT_MISSING_ASC = '9223372036854775806';
+const NANOS_SORT_MISSING_DESC = '0';
 
 export const buildTimeRangeFilter = ({
   to,
@@ -118,6 +130,8 @@ export const buildEventsSearchQuery = <
   trackTotalHits,
   additionalFilters,
   overrideBody,
+  dateNanosTimestampFields,
+  mixedTimestampFields,
 }: BuildEventsSearchQuery<TAggs>) => {
   const timestamps = secondaryTimestamp
     ? [primaryTimestamp, secondaryTimestamp]
@@ -140,20 +154,31 @@ export const buildEventsSearchQuery = <
     ...(additionalFilters ? additionalFilters : []),
   ];
 
+  // sort options are decided per field: a field mapped as date elsewhere in the pattern must
+  // keep millisecond semantics, otherwise its `missing` sentinel lands outside the nanos range
+  const getSortOptions = (field: string) => {
+    const order = sortOrder ?? 'asc';
+    if (!dateNanosTimestampFields?.includes(field)) {
+      return { order, unmapped_type: 'date' as const };
+    }
+
+    return {
+      order,
+      // indices where the field is absent have to resolve as nanos too, or the nanos `missing`
+      // sentinel is read as milliseconds and yields a cursor millions of years in the future
+      unmapped_type: 'date_nanos' as const,
+      format: NANOS_SORT_FORMAT,
+      missing: sortOrder === 'desc' ? NANOS_SORT_MISSING_DESC : NANOS_SORT_MISSING_ASC,
+      ...(mixedTimestampFields?.includes(field)
+        ? { numeric_type: 'date_nanos' as const }
+        : undefined),
+    };
+  };
+
   const sort: estypes.Sort = [];
-  sort.push({
-    [primaryTimestamp]: {
-      order: sortOrder ?? 'asc',
-      unmapped_type: 'date',
-    },
-  });
+  sort.push({ [primaryTimestamp]: getSortOptions(primaryTimestamp) });
   if (secondaryTimestamp) {
-    sort.push({
-      [secondaryTimestamp]: {
-        order: sortOrder ?? 'asc',
-        unmapped_type: 'date',
-      },
-    });
+    sort.push({ [secondaryTimestamp]: getSortOptions(secondaryTimestamp) });
   }
 
   const searchQuery = {

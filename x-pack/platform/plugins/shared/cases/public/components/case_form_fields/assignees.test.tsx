@@ -218,7 +218,7 @@ describe('Assignees', () => {
     });
 
     await waitFor(() => {
-      expect(spyOnBulkGetUserProfiles).toBeCalledTimes(1);
+      expect(spyOnBulkGetUserProfiles).toHaveBeenCalledTimes(1);
     });
 
     expect(spyOnBulkGetUserProfiles).toHaveBeenCalledWith({

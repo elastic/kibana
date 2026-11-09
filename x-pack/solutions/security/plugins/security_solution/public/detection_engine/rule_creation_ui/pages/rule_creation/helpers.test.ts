@@ -866,6 +866,80 @@ describe('helpers', () => {
       expect(result).toEqual(expected);
     });
 
+    test('preserves a non-ATT&CK framework on threat entries', () => {
+      const mockStepData: AboutStepRule = {
+        ...mockData,
+        threat: [
+          {
+            framework: 'MITRE ATLAS',
+            tactic: {
+              id: 'AML.TA0000',
+              name: 'ML Model Access',
+              reference: 'https://atlas.mitre.org/tactics/AML.TA0000/',
+            },
+            technique: [],
+          },
+        ],
+      };
+      const result = formatAboutStepData(mockStepData);
+      expect(result.threat).toEqual([
+        {
+          framework: 'MITRE ATLAS',
+          tactic: {
+            id: 'AML.TA0000',
+            name: 'ML Model Access',
+            reference: 'https://atlas.mitre.org/tactics/AML.TA0000/',
+          },
+          technique: [],
+        },
+      ]);
+    });
+
+    test('defaults threat entries with an empty framework to MITRE ATT&CK', () => {
+      const threatWithEmptyFramework = {
+        framework: '',
+        tactic: {
+          id: 'TA0005',
+          name: 'Defense Evasion',
+          reference: 'https://attack.mitre.org/tactics/TA0005/',
+        },
+        technique: [],
+      } as Threats[number];
+      const mockStepData: AboutStepRule = {
+        ...mockData,
+        threat: [threatWithEmptyFramework],
+      };
+      const result = formatAboutStepData(mockStepData);
+      expect(result.threat?.[0].framework).toBe('MITRE ATT&CK');
+    });
+
+    test('defaults threat entries without a framework to MITRE ATT&CK', () => {
+      const threatWithoutFramework = {
+        tactic: {
+          id: 'TA0005',
+          name: 'Defense Evasion',
+          reference: 'https://attack.mitre.org/tactics/TA0005/',
+        },
+        technique: [],
+      } as unknown as Threats[number];
+      const mockStepData: AboutStepRule = {
+        ...mockData,
+        threat: [threatWithoutFramework],
+      };
+      const result = formatAboutStepData(mockStepData);
+      expect(result.threat).toEqual([
+        {
+          framework: 'MITRE ATT&CK',
+          tactic: {
+            id: 'TA0005',
+            name: 'Defense Evasion',
+            reference: 'https://attack.mitre.org/tactics/TA0005/',
+          },
+          technique: [],
+        },
+      ]);
+    });
+
     test('returns formatted object with threats that contains no subtechniques', () => {
       const mockStepData: AboutStepRule = {
         ...mockData,
@@ -906,7 +980,7 @@ describe('helpers', () => {
         threat: [
           ...getThreatMock(),
           {
-            framework: 'MITRE ATT&CK',
+            framework: 'mockFramework',
             tactic: { id: '1234', name: 'tactic1', reference: 'reference1' },
             technique: [
               { id: '456', name: 'technique1', reference: 'technique reference', subtechnique: [] },

@@ -108,7 +108,7 @@ const ResolutionGroupPanel = ({
             <EuiButtonIcon
               aria-label={openEntityFlyoutLabel}
               data-test-subj={TEST_SUBJ_RESOLUTION_GROUP_OPEN_FLYOUT}
-              iconType="expand"
+              iconType="maximize"
               size="xs"
               onClick={handleOpenFlyout}
             />
@@ -208,7 +208,6 @@ export const createGroupStatsRenderer = (targetMetadata: TargetMetadataMap) => {
         title: entitiesStatLabel,
         badge: {
           value: bucket.doc_count,
-          width: 50,
         },
       });
     }

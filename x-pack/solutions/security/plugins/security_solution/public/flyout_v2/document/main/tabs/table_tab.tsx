@@ -12,7 +12,8 @@ import { css } from '@emotion/react';
 import { EuiInMemoryTable, useEuiFontSize, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { dataTableSelectors, tableDefaults } from '@kbn/securitysolution-data-table';
-import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { BrowserFields } from '@kbn/securitysolution-timeline-common';
+import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import { getCategory } from '@kbn/response-ops-alerts-fields-browser/helpers';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -60,6 +61,11 @@ const PIN_ACTION_CSS = css`
     .flyout_table__pinAction {
       opacity: 1;
     }
+  }
+  /* the pin action is hidden with opacity, which keeps it in the tab order:
+     reveal it on keyboard focus so it has a visible focus indicator */
+  .flyout_table__pinAction:focus-visible {
+    opacity: 1;
   }
 `;
 
@@ -176,21 +182,31 @@ export const TableTab = memo(
 
     const euidApi = useEntityStoreEuidApi();
     const hostDocumentIdentityFields = useMemo(
-      () => euidApi?.euid.getEntityIdentifiersFromDocument('host', hit.flattened) ?? null,
-      [euidApi?.euid, hit.flattened]
+      () =>
+        euidApi?.euid.getEntityIdentifiersFromDocument(
+          euidApi.getBuiltInEntityDefinition('host'),
+          hit.flattened
+        ) ?? null,
+      [euidApi, hit.flattened]
     );
     const userDocumentIdentityFields = useMemo(
-      () => euidApi?.euid.getEntityIdentifiersFromDocument('user', hit.flattened) ?? null,
-      [euidApi?.euid, hit.flattened]
+      () =>
+        euidApi?.euid.getEntityIdentifiersFromDocument(
+          euidApi.getBuiltInEntityDefinition('user'),
+          hit.flattened
+        ) ?? null,
+      [euidApi, hit.flattened]
     );
     const isHostEntity = hostDocumentIdentityFields != null;
     const hostEuidFromDocument = useMemo(
-      () => euidApi?.euid.getEuidFromObject('host', hit.flattened),
-      [euidApi?.euid, hit.flattened]
+      () =>
+        euidApi?.euid.getEuidFromObject(euidApi.getBuiltInEntityDefinition('host'), hit.flattened),
+      [euidApi, hit.flattened]
     );
     const userEuidFromDocument = useMemo(
-      () => euidApi?.euid.getEuidFromObject('user', hit.flattened),
-      [euidApi?.euid, hit.flattened]
+      () =>
+        euidApi?.euid.getEuidFromObject(euidApi.getBuiltInEntityDefinition('user'), hit.flattened),
+      [euidApi, hit.flattened]
     );
     const hostEntityFromStore = useEntityFromStore({
       entityId: hostEuidFromDocument,

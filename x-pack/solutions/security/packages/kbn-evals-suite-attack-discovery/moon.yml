@@ -25,12 +25,16 @@ dependsOn:
   - '@kbn/inference-prompt-utils'
   - '@kbn/zod'
   - '@kbn/security-evals-alerts-snapshot'
+  - '@kbn/core'
+  - '@kbn/discoveries'
+  - '@kbn/kbn-client'
 tags:
   - functional-tests
   - package
   - prod
   - group-security
   - private
+  - jest-unit-tests
 fileGroups:
   src:
     - '**/*.ts'

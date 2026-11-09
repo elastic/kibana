@@ -12,6 +12,7 @@ import { useContext, useEffect, useMemo } from 'react';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useGlobalFilterQuery } from '../../../../../common/hooks/use_global_filter_query';
 import { DataViewContext } from '..';
+import { hasActiveTopLevelBoolClauses } from '../utils';
 import type { EntitiesBaseURLQuery } from './use_entity_url_state';
 
 interface EntitiesBaseESQueryConfig {
@@ -62,7 +63,8 @@ export const useBaseEsQuery = ({ filters = [], query, pageFilters = [] }: Entiti
       query,
       config,
     });
-    if (result.query && globalFilterQuery) {
+    // Only append when the global filter bar contributes active clauses.
+    if (result.query && hasActiveTopLevelBoolClauses(globalFilterQuery)) {
       result.query.bool.filter = [...(result.query.bool.filter ?? []), globalFilterQuery];
     }
     return result;

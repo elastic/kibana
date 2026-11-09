@@ -10,6 +10,7 @@
     "public/**/*",
     "server/**/*",
     "test/scout/**/*",
+    "test/scout_upgrade_assistant/**/*",
     "test/scout_upgrade_assistant_integration/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "public/**/*.json",
@@ -17,6 +18,7 @@
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/app-header",
     "@kbn/management-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/features-plugin",
@@ -46,7 +48,8 @@
     "@kbn/upgrade-assistant-pkg-common",
     "@kbn/reindex-service-plugin",
     "@kbn/core-doc-links-browser-mocks",
-    "@kbn/scout"
+    "@kbn/scout",
+    "@kbn/ui-callout"
   ],
   "exclude": [
     "target/**/*",

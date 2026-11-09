@@ -2,7 +2,7 @@
   "groups": [
     "apm"
   ],
-  "description": "Detects anomalies in transaction latency, throughput and error percentage for metric data.",
+  "description": "Detects anomalies in transaction latency, throughput, error percentage and low transaction count for metric data.",
   "analysis_config": {
     "bucket_span": "15m",
     "summary_count_field_name" : "doc_count",
@@ -25,6 +25,12 @@
         "detector_description" : "failed transaction rate for an APM service",
         "function" : "high_mean",
         "field_name" : "failed_transaction_rate",
+        "by_field_name" : "transaction.type",
+        "partition_field_name" : "service.name"
+      },
+      {
+        "detector_description" : "low count of transactions for an APM service",
+        "function" : "low_count",
         "by_field_name" : "transaction.type",
         "partition_field_name" : "service.name"
       }

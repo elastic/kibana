@@ -32,7 +32,6 @@ import { buildCustomImages } from './util/build_custom_images';
 import { resolveEdotCollectorVersion } from './util/resolve_edot_collector_version';
 import type { DemoType, FailureScenario } from './types';
 import { applyCodeScenario, buildCodeScenarioImages } from './apply_code_scenario';
-import { seedCodeSearch } from './seed_code_search';
 import {
   getDemoConfig,
   getDemoManifests,
@@ -43,6 +42,8 @@ import {
 } from './demo_registry';
 
 const DATA_DIR = Path.join(REPO_ROOT, 'data', 'demo_environments');
+/** Where the Elasticsearch exporter writes logs that carry no explicit index. */
+const DEFAULT_LOGS_DATA_STREAM = 'logs-generic.otel-default';
 
 /**
  * Stops and removes a demo environment from Kubernetes.
@@ -83,7 +84,7 @@ export interface DeployResult {
   namespace: string;
   kibanaUrl: string;
   elasticsearchHost: string;
-  logsIndex: string;
+  logsIndex?: string;
 }
 
 /**
@@ -94,7 +95,7 @@ export interface DeployResult {
  * @param log - Tooling logger for output
  * @param demoType - Type of demo to deploy (default: 'otel-demo')
  * @param configPath - Optional path to Kibana config file
- * @param logsIndex - Index name for logs (defaults to "logs.otel")
+ * @param logsIndex - Index for container logs; unset routes them to the default logs-generic.otel-default data stream
  * @param version - Demo version (defaults to demo's defaultVersion)
  * @param scenarioIds - Optional list of failure scenario IDs to apply
  * @param forceRebuildImages - If true, rebuilds the custom images
@@ -105,7 +106,7 @@ export async function deployDemo({
   log,
   demoType = 'otel-demo',
   configPath,
-  logsIndex = 'logs',
+  logsIndex,
   version,
   scenarioIds = [],
   codeScenarioId,
@@ -193,25 +194,29 @@ export async function deployDemo({
   const kibanaHostname = `http://${serverConfig.host}:${serverConfig.port}${serverConfig.basePath}`;
 
   // Resolve the actual Kibana URL by detecting any dev mode base path
-  // When running `yarn start` without `--no-base-path`, Kibana uses a random 3-letter prefix
+  // When running `pnpm start` without `--no-base-path`, Kibana uses a random 3-letter prefix
   const kibanaUrl = await resolveKibanaUrl(kibanaHostname, log);
 
   log.info(`Kibana: ${kibanaUrl}`);
   log.info(`Elasticsearch: ${elasticsearchHost}`);
-  log.info(`Logs index: ${logsIndex}`);
+  log.info(`Logs index: ${logsIndex ?? DEFAULT_LOGS_DATA_STREAM}`);
 
-  await enableStreams({
-    kibanaUrl,
-    username: kibanaCredentials.username,
-    password: kibanaCredentials.password,
-    log,
-  });
+  // A custom logs index is a wired stream (e.g. logs.otel), so Streams must be on for it.
+  if (logsIndex) {
+    await enableStreams({
+      kibanaUrl,
+      username: kibanaCredentials.username,
+      password: kibanaCredentials.password,
+      log,
+    });
+  }
 
   await createDataView({
     kibanaUrl,
     username: kibanaCredentials.username,
     password: kibanaCredentials.password,
     log,
+    ...(logsIndex ? {} : { title: 'logs-*' }),
   });
 
   // Process failure scenarios
@@ -246,12 +251,11 @@ export async function deployDemo({
     log.write('');
   }
 
-  let codeScenarioRepoDir: string | undefined;
   let imageOverrides: Record<string, string> | undefined;
   if (activeCodeScenario) {
     log.info(`Applying code scenario: ${chalk.yellow(activeCodeScenario.name)}`);
     log.info(`  ${chalk.dim(activeCodeScenario.description)}`);
-    codeScenarioRepoDir = await applyCodeScenario({
+    const codeScenarioRepoDir = await applyCodeScenario({
       version: demoVersion,
       scenario: activeCodeScenario,
       log,
@@ -365,7 +369,7 @@ export async function deployDemo({
         );
       }
 
-      log.write(`  ${chalk.bold('Logs Index:')}       ${logsIndex}`);
+      log.write(`  ${chalk.bold('Logs Index:')}       ${logsIndex ?? DEFAULT_LOGS_DATA_STREAM}`);
 
       if (activeScenarios.length > 0) {
         log.write(
@@ -403,18 +407,6 @@ export async function deployDemo({
   };
 
   await waitAndReport();
-
-  if (activeCodeScenario && codeScenarioRepoDir) {
-    await seedCodeSearch({
-      elasticsearch: elasticsearchConfig,
-      kibanaCredentials,
-      kibanaUrl,
-      version: demoVersion,
-      codeScenarioId: activeCodeScenario.id,
-      codeScenarioRepoDir,
-      log,
-    });
-  }
 
   return { namespace, kibanaUrl, elasticsearchHost, logsIndex };
 }
@@ -481,7 +473,7 @@ export async function teardownDemo({
  * @param signal - Abort signal for cleanup
  * @param demoType - Type of demo to deploy (default: 'otel-demo')
  * @param configPath - Optional path to Kibana config file
- * @param logsIndex - Index name for logs (defaults to "logs.otel")
+ * @param logsIndex - Index for container logs; unset routes them to the default logs-generic.otel-default data stream
  * @param version - Demo version (defaults to demo's defaultVersion)
  * @param teardown - If true, stops and removes the deployment
  * @param scenarioIds - Optional list of failure scenario IDs to apply
@@ -494,7 +486,7 @@ export async function ensureOtelDemo({
   signal,
   demoType = 'otel-demo',
   configPath,
-  logsIndex = 'logs',
+  logsIndex,
   version,
   teardown = false,
   scenarioIds = [],
@@ -548,7 +540,6 @@ export async function patchScenarios({
   demoType = 'otel-demo',
   scenarioIds = [],
   codeScenarioId,
-  configPath,
   version,
   reset = false,
 }: {
@@ -556,7 +547,6 @@ export async function patchScenarios({
   demoType?: DemoType;
   scenarioIds?: string[];
   codeScenarioId?: string;
-  configPath?: string | undefined;
   version?: string;
   reset?: boolean;
 }) {
@@ -734,19 +724,6 @@ export async function patchScenarios({
         '--timeout=600s',
       ]);
     }
-
-    const { elasticsearch, server, kibanaCredentials } = readKibanaConfig(log, configPath);
-    const kibanaHostname = `http://${server.host}:${server.port}${server.basePath}`;
-    const kibanaUrl = await resolveKibanaUrl(kibanaHostname, log);
-    await seedCodeSearch({
-      elasticsearch,
-      kibanaCredentials,
-      kibanaUrl,
-      version: demoVersion,
-      codeScenarioId: activeCodeScenario.id,
-      codeScenarioRepoDir,
-      log,
-    });
 
     if (scenarioIds.length === 0) {
       log.write('');

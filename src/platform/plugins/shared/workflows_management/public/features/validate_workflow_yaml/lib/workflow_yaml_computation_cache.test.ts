@@ -14,8 +14,13 @@ import {
 } from './workflow_yaml_computation_cache';
 
 describe('workflow_yaml_computation_cache', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
   afterEach(() => {
     clearWorkflowYamlComputationCache();
+    jest.useRealTimers();
   });
 
   it('keeps recently accessed entries when evicting beyond the max cache size', async () => {
@@ -36,9 +41,9 @@ describe('workflow_yaml_computation_cache', () => {
     ).resolves.toMatchObject({
       yamlDocument: expect.anything(),
     });
-    await expect(
-      getCachedWorkflowYamlComputationAsync('name: evictable-0\n')
-    ).resolves.toMatchObject({
+    const recomputedEntry = getCachedWorkflowYamlComputationAsync('name: evictable-0\n');
+    await jest.runAllTimersAsync();
+    await expect(recomputedEntry).resolves.toMatchObject({
       yamlDocument: expect.anything(),
     });
   });

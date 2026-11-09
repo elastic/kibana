@@ -14,6 +14,17 @@
     "data_autocomplete_rules": {
       "dest": {
         "index": "",
+        "aliases": [
+          {
+            "alias": "",
+            "move_on_creation": {
+              "__one_of": [
+                true,
+                false
+              ]
+            }
+          }
+        ],
         "pipeline": ""
       },
       "description": "",

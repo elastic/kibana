@@ -11,9 +11,10 @@ import {
   extractSource,
   getQueryType,
   capitalise,
-  isIncludedTask,
+  isQueryTaskCandidate,
   parseDslDescription,
   parseEsqlDescription,
+  transformTaskSummaries,
   transformTasks,
 } from './transform_tasks';
 
@@ -149,84 +150,127 @@ describe('parseEsqlDescription', () => {
   });
 });
 
-describe('isIncludedTask', () => {
-  it('includes a qualifying top-level search task', () => {
-    expect(isIncludedTask(baseTask, DEFAULT_THRESHOLD_NANOS)).toBe(true);
-  });
-
-  it('includes esql tasks', () => {
+describe('isQueryTaskCandidate', () => {
+  it('includes a qualifying task without detailed fields', () => {
     expect(
-      isIncludedTask({ ...baseTask, action: 'indices:data/read/esql[a]' }, DEFAULT_THRESHOLD_NANOS)
-    ).toBe(true);
-  });
-
-  it('includes eql tasks', () => {
-    expect(
-      isIncludedTask(
-        { ...baseTask, action: 'indices:data/read/eql/search' },
-        DEFAULT_THRESHOLD_NANOS
-      )
-    ).toBe(true);
-  });
-
-  it('includes sql tasks', () => {
-    expect(
-      isIncludedTask({ ...baseTask, action: 'indices:data/read/sql' }, DEFAULT_THRESHOLD_NANOS)
-    ).toBe(true);
-  });
-
-  it('includes msearch tasks', () => {
-    expect(
-      isIncludedTask({ ...baseTask, action: 'indices:data/read/msearch' }, DEFAULT_THRESHOLD_NANOS)
-    ).toBe(true);
-  });
-
-  it('includes async_search tasks', () => {
-    expect(
-      isIncludedTask(
-        { ...baseTask, action: 'indices:data/read/async_search/submit' },
-        DEFAULT_THRESHOLD_NANOS
-      )
-    ).toBe(true);
-  });
-
-  it('excludes child tasks with parent_task_id', () => {
-    expect(
-      isIncludedTask({ ...baseTask, parent_task_id: 'node1:99' }, DEFAULT_THRESHOLD_NANOS)
-    ).toBe(false);
-  });
-
-  it('excludes tasks below the runtime threshold', () => {
-    expect(
-      isIncludedTask(
-        { ...baseTask, running_time_in_nanos: DEFAULT_THRESHOLD_NANOS - 1 },
-        DEFAULT_THRESHOLD_NANOS
-      )
-    ).toBe(false);
-  });
-
-  it('excludes non-search actions', () => {
-    expect(
-      isIncludedTask({ ...baseTask, action: 'indices:data/write/bulk' }, DEFAULT_THRESHOLD_NANOS)
-    ).toBe(false);
-  });
-
-  it('excludes non-cancellable tasks with no description (background async tasks)', () => {
-    expect(
-      isIncludedTask(
+      isQueryTaskCandidate(
         { ...baseTask, cancellable: false, description: undefined },
         DEFAULT_THRESHOLD_NANOS
       )
+    ).toBe(true);
+  });
+
+  it('includes verified root action variants', () => {
+    const actions = [
+      'indices:data/read/esql[a]',
+      'indices:data/read/eql[a]',
+      'indices:data/read/eql/search',
+      'indices:data/read/eql/search[a]',
+      'indices:data/read/sql[a]',
+      'indices:data/read/async_search/submit',
+    ];
+
+    for (const action of actions) {
+      expect(isQueryTaskCandidate({ ...baseTask, action }, DEFAULT_THRESHOLD_NANOS)).toBe(true);
+    }
+  });
+
+  it('excludes internal child action variants even without a parent task id', () => {
+    expect(
+      isQueryTaskCandidate(
+        { ...baseTask, action: 'indices:data/read/search[phase/query]' },
+        DEFAULT_THRESHOLD_NANOS
+      )
+    ).toBe(false);
+    expect(
+      isQueryTaskCandidate(
+        { ...baseTask, action: 'indices:data/read/esql/compute' },
+        DEFAULT_THRESHOLD_NANOS
+      )
     ).toBe(false);
   });
 
-  it('includes non-cancellable tasks that have a description', () => {
+  it('excludes non-cancellable template wrapper tasks hidden by the original implementation', () => {
     expect(
-      isIncludedTask(
-        { ...baseTask, cancellable: false, description: 'FROM logs-* | LIMIT 10' },
+      isQueryTaskCandidate(
+        { ...baseTask, action: 'indices:data/read/search/template', cancellable: false },
         DEFAULT_THRESHOLD_NANOS
       )
+    ).toBe(false);
+    expect(
+      isQueryTaskCandidate(
+        { ...baseTask, action: 'indices:data/read/msearch/template', cancellable: false },
+        DEFAULT_THRESHOLD_NANOS
+      )
+    ).toBe(false);
+  });
+
+  it('excludes child tasks when their parent is still in the task list', () => {
+    expect(
+      isQueryTaskCandidate(
+        { ...baseTask, parent_task_id: 'node1:99' },
+        DEFAULT_THRESHOLD_NANOS,
+        new Set(['node1:99'])
+      )
+    ).toBe(false);
+  });
+
+  it('includes orphaned child tasks when their parent is no longer in the task list', () => {
+    expect(
+      isQueryTaskCandidate(
+        { ...baseTask, parent_task_id: 'node1:99' },
+        DEFAULT_THRESHOLD_NANOS,
+        new Set(['node1:100'])
+      )
     ).toBe(true);
+  });
+
+  it('includes orphaned child tasks when the active task set is empty', () => {
+    expect(
+      isQueryTaskCandidate(
+        { ...baseTask, parent_task_id: 'node1:99' },
+        DEFAULT_THRESHOLD_NANOS,
+        new Set()
+      )
+    ).toBe(true);
+  });
+});
+
+describe('transformTaskSummaries', () => {
+  it('transforms lightweight task metadata without a description', () => {
+    const results = transformTaskSummaries(
+      [
+        {
+          ...baseTask,
+          description: undefined,
+          headers: {
+            'X-Opaque-Id': 'req1;kibana:application:discover:new',
+          },
+        },
+      ],
+      DEFAULT_THRESHOLD_NANOS
+    );
+
+    expect(results).toEqual([
+      {
+        taskId: 'node1:100',
+        queryType: 'DSL',
+        source: 'Discover',
+        startTime: 1000000,
+        runningTimeMs: QUERY_ACTIVITY_MIN_RUNNING_TIME_DEFAULT_MS,
+        cancellable: true,
+        cancelled: false,
+      },
+    ]);
+  });
+
+  it('omits tasks without a start time', () => {
+    expect(
+      transformTaskSummaries(
+        [{ ...baseTask, start_time_in_millis: undefined } as unknown as TasksTaskInfo],
+        DEFAULT_THRESHOLD_NANOS
+      )
+    ).toEqual([]);
   });
 });
 
@@ -253,9 +297,54 @@ describe('transformTasks', () => {
     });
   });
 
-  it('filters out child tasks', () => {
-    const child: TasksTaskInfo = { ...baseTask, parent_task_id: 'node1:50' };
-    expect(transformTasks([child], DEFAULT_THRESHOLD_NANOS)).toHaveLength(0);
+  it('filters out child tasks while their parent is still present', () => {
+    const parent: TasksTaskInfo = {
+      ...baseTask,
+      id: 50,
+      description:
+        'indices[test], search_type[QUERY_THEN_FETCH], source[{"query":{"match_all":{}}}]',
+    };
+    const child: TasksTaskInfo = {
+      ...baseTask,
+      id: 100,
+      parent_task_id: 'node1:50',
+      description:
+        'async_search{indices[logs-*], search_type[QUERY_THEN_FETCH], source[{"query":{"term":{"status":"ok"}}}]}',
+    };
+
+    const results = transformTasks([parent, child], DEFAULT_THRESHOLD_NANOS);
+    expect(results).toHaveLength(1);
+    expect(results[0].taskId).toBe('node1:50');
+  });
+
+  it('includes orphaned child tasks after their parent has finished', () => {
+    const orphanedChild: TasksTaskInfo = {
+      ...baseTask,
+      id: 100,
+      parent_task_id: 'node1:50',
+      description:
+        'async_search{indices[logs-*], search_type[QUERY_THEN_FETCH], source[{"query":{"term":{"status":"ok"}}}]}',
+      headers: {
+        'X-Opaque-Id':
+          'req;kibana:application:dashboards:system_otel;application:dashboards:system_otel',
+      },
+    };
+    const shardChild: TasksTaskInfo = {
+      ...baseTask,
+      id: 101,
+      parent_task_id: 'node1:100',
+      action: 'indices:data/read/search[phase/query]',
+      description: 'shardId[[logs-000001][0]]',
+    };
+
+    const results = transformTasks([orphanedChild, shardChild], DEFAULT_THRESHOLD_NANOS);
+    expect(results).toHaveLength(1);
+    expect(results[0]).toMatchObject({
+      taskId: 'node1:100',
+      queryType: 'DSL',
+      source: 'Dashboards',
+      query: '{"query":{"term":{"status":"ok"}}}',
+    });
   });
 
   it('handles an empty tasks array', () => {

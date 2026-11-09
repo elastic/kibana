@@ -7,14 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { render, act, screen, waitFor, fireEvent } from '@testing-library/react';
+import { act, screen, waitFor, fireEvent, within } from '@testing-library/react';
 import React from 'react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
 import { DataViewField } from '@kbn/data-views-plugin/common';
+import { DataViewSource, EsqlSource } from '@kbn/data-source';
 import type { UnifiedHistogramBreakdownContext } from '../../types';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { BreakdownFieldSelector } from './breakdown_field_selector';
+
+const dataSource = new DataViewSource(dataViewWithTimefieldMock);
 
 const mapOptionValues = (option: HTMLElement) => ({
   label: option.getAttribute('title'),
@@ -32,15 +36,19 @@ describe('BreakdownFieldSelector', () => {
     jest.useRealTimers();
   });
 
+  afterEach(() => {
+    EsqlSource.clearCache();
+  });
+
   it('should render correctly for dataview fields', () => {
     const onBreakdownFieldChange = jest.fn();
     const breakdown: UnifiedHistogramBreakdownContext = {
       field: undefined,
     };
 
-    render(
+    renderWithI18n(
       <BreakdownFieldSelector
-        dataView={dataViewWithTimefieldMock}
+        dataSource={dataSource}
         breakdown={breakdown}
         onBreakdownFieldChange={onBreakdownFieldChange}
       />
@@ -78,15 +86,59 @@ describe('BreakdownFieldSelector', () => {
     `);
   });
 
+  it('uses result columns from an ES|QL source', async () => {
+    const esqlSource = await EsqlSource.create({
+      query: 'FROM logs',
+      resultColumns: [
+        { name: 'bytes', meta: { type: 'number' }, id: 'bytes' },
+        { name: 'extension', meta: { type: 'string' }, id: 'extension' },
+      ],
+    });
+
+    renderWithI18n(
+      <BreakdownFieldSelector
+        dataSource={esqlSource}
+        breakdown={{ field: undefined }}
+        onBreakdownFieldChange={jest.fn()}
+      />
+    );
+
+    act(() => {
+      screen.getByTestId('unifiedHistogramBreakdownSelectorButton').click();
+    });
+
+    const options = screen.getAllByRole('option');
+    expect(options.map(mapOptionValues)).toEqual([
+      {
+        checked: null,
+        label: null,
+        selected: 'true',
+        value: '__EMPTY_SELECTOR_OPTION__',
+      },
+      {
+        checked: null,
+        label: null,
+        selected: 'false',
+        value: 'bytes',
+      },
+      {
+        checked: null,
+        label: null,
+        selected: 'false',
+        value: 'extension',
+      },
+    ]);
+  });
+
   it('should render correctly for ES|QL columns', () => {
     const onBreakdownFieldChange = jest.fn();
     const breakdown: UnifiedHistogramBreakdownContext = {
       field: undefined,
     };
 
-    render(
+    renderWithI18n(
       <BreakdownFieldSelector
-        dataView={dataViewWithTimefieldMock}
+        dataSource={dataSource}
         breakdown={breakdown}
         onBreakdownFieldChange={onBreakdownFieldChange}
         esqlColumns={[
@@ -141,9 +193,9 @@ describe('BreakdownFieldSelector', () => {
     const field = dataViewWithTimefieldMock.fields.find((f) => f.name === 'extension')!;
     const breakdown: UnifiedHistogramBreakdownContext = { field };
 
-    render(
+    renderWithI18n(
       <BreakdownFieldSelector
-        dataView={dataViewWithTimefieldMock}
+        dataSource={dataSource}
         breakdown={breakdown}
         onBreakdownFieldChange={onBreakdownFieldChange}
       />
@@ -181,15 +233,56 @@ describe('BreakdownFieldSelector', () => {
     `);
   });
 
+  it('renders the button label with the field name slotted into the message and passed to EuiTextTruncate', () => {
+    const onBreakdownFieldChange = jest.fn();
+    const field = dataViewWithTimefieldMock.fields.find((f) => f.name === 'extension')!;
+    const breakdown: UnifiedHistogramBreakdownContext = { field };
+
+    renderWithI18n(
+      <BreakdownFieldSelector
+        dataSource={dataSource}
+        breakdown={breakdown}
+        onBreakdownFieldChange={onBreakdownFieldChange}
+      />
+    );
+
+    const button = screen.getByTestId('unifiedHistogramBreakdownSelectorButton');
+
+    // "Breakdown by" is part of the same translatable message as the field
+    // name (not a separately positioned element), so translators can reorder
+    // it per locale
+    expect(button).toHaveTextContent('Breakdown by');
+
+    // the field name is passed through to EuiTextTruncate rather than being
+    // rendered as plain, unconstrained text — its full, untruncated value is
+    // always present in the DOM (for accessibility/selection), regardless of
+    // whatever pixel-based truncation math EUI applies to the visible copy
+    expect(within(button).getByTestId('fullText')).toHaveTextContent(field.displayName);
+  });
+
+  it('should render "No breakdown" as plain text when no field is selected', () => {
+    renderWithI18n(
+      <BreakdownFieldSelector
+        dataSource={dataSource}
+        breakdown={{ field: undefined }}
+        onBreakdownFieldChange={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId('unifiedHistogramBreakdownSelectorButton')).toHaveTextContent(
+      'No breakdown'
+    );
+  });
+
   it('should filter options based on the search input', async () => {
     const onBreakdownFieldChange = jest.fn();
     const breakdown: UnifiedHistogramBreakdownContext = {
       field: undefined,
     };
 
-    render(
+    renderWithI18n(
       <BreakdownFieldSelector
-        dataView={dataViewWithTimefieldMock}
+        dataSource={dataSource}
         breakdown={breakdown}
         onBreakdownFieldChange={onBreakdownFieldChange}
       />
@@ -254,9 +347,9 @@ describe('BreakdownFieldSelector', () => {
     const breakdown: UnifiedHistogramBreakdownContext = {
       field: undefined,
     };
-    render(
+    renderWithI18n(
       <BreakdownFieldSelector
-        dataView={dataViewWithTimefieldMock}
+        dataSource={dataSource}
         breakdown={breakdown}
         onBreakdownFieldChange={onBreakdownFieldChange}
       />
@@ -274,9 +367,9 @@ describe('BreakdownFieldSelector', () => {
   });
 
   it('renders recommended group in hardcoded order and all-fields group for the rest', () => {
-    render(
+    renderWithI18n(
       <BreakdownFieldSelector
-        dataView={dataViewWithTimefieldMock}
+        dataSource={dataSource}
         breakdown={{ field: undefined }}
         onBreakdownFieldChange={jest.fn()}
         recommendedFields={['extension', 'bytes']}
@@ -297,9 +390,9 @@ describe('BreakdownFieldSelector', () => {
   });
 
   it('falls back to flat list when no recommendedFields match available fields', () => {
-    render(
+    renderWithI18n(
       <BreakdownFieldSelector
-        dataView={dataViewWithTimefieldMock}
+        dataSource={dataSource}
         breakdown={{ field: undefined }}
         onBreakdownFieldChange={jest.fn()}
         recommendedFields={['service.name', 'host.name']}
@@ -335,9 +428,9 @@ describe('BreakdownFieldSelector', () => {
     const breakdown: UnifiedHistogramBreakdownContext = {
       field: undefined,
     };
-    render(
+    renderWithI18n(
       <BreakdownFieldSelector
-        dataView={dataViewWithTimefieldMock}
+        dataSource={dataSource}
         breakdown={breakdown}
         onBreakdownFieldChange={onBreakdownFieldChange}
         esqlColumns={esqlColumns}

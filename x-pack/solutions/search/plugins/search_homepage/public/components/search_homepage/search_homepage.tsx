@@ -6,26 +6,14 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiShowFor, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { KibanaVersionBadge } from '@kbn/search-shared-ui';
-import { TrialUsageBadge, CloudLinks } from '@kbn/shared-components';
-import { useAuthenticatedUser } from '../../hooks/use_authenticated_user';
 import { useKibana } from '../../hooks/use_kibana';
-import { BasicMetricBadges } from './basic_metric_badges';
-import { ConnectToElasticsearch } from './connect_to_elasticsearch';
-import { SearchHomepageBody } from './search_homepage_body';
-import { LicenseBadge } from './license_badge';
-import { docLinks } from '../../../common/doc_links';
-import { verticalSeparatorStyle } from './search_homepage_styles';
+import { getSearchHomeConfig } from '../../home_config';
 
 export const SearchHomepagePage = () => {
   const {
-    services: { console: consolePlugin, history, searchNavigation, cloud, kibanaVersion },
+    services: { application, console: consolePlugin, elasticsearchHome, history, searchNavigation },
   } = useKibana();
-
-  const { user } = useAuthenticatedUser();
 
   useEffect(() => {
     if (searchNavigation) {
@@ -42,84 +30,13 @@ export const SearchHomepagePage = () => {
     [consolePlugin]
   );
 
-  return (
-    <KibanaPageTemplate
-      offset={0}
-      restrictWidth={true}
-      data-test-subj="search-homepage"
-      grow={false}
-      solutionNav={searchNavigation?.useClassicNavigation(history)}
-    >
-      <KibanaPageTemplate.Section restrictWidth={true} grow={false}>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-          <EuiFlexItem>
-            <EuiFlexGroup
-              responsive={false}
-              alignItems="center"
-              gutterSize="s"
-              data-test-subj="searchHomepageHeaderLeftsideGroup"
-            >
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="s">
-                  <h3>
-                    {user?.full_name
-                      ? i18n.translate('xpack.searchHomepage.welcome.title', {
-                          defaultMessage: 'Welcome, {username}',
-                          values: { username: user.full_name },
-                        })
-                      : i18n.translate('xpack.searchHomepage.welcome.title.default', {
-                          defaultMessage: 'Welcome',
-                        })}
-                  </h3>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                {cloud?.isInTrial() ? (
-                  <TrialUsageBadge cloud={cloud} />
-                ) : !cloud?.isCloudEnabled ? (
-                  <LicenseBadge />
-                ) : null}
-              </EuiFlexItem>
-              <EuiShowFor sizes={['m', 'l', 'xl']}>
-                <EuiFlexItem grow={false}>
-                  <span css={verticalSeparatorStyle} />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <CloudLinks cloud={cloud} />
-                </EuiFlexItem>
-              </EuiShowFor>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <ConnectToElasticsearch />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+  const config = useMemo(() => getSearchHomeConfig({ application }), [application]);
+  const { HomePage } = elasticsearchHome;
 
-        <EuiHorizontalRule margin="s" />
-        <EuiFlexGroup>
-          <BasicMetricBadges />
-          <EuiFlexItem grow={false}>
-            <KibanaVersionBadge
-              docLink={
-                cloud?.isServerlessEnabled
-                  ? docLinks.serverlessReleaseNotes
-                  : cloud?.isCloudEnabled
-                  ? docLinks.hostedCloudReleaseNotes
-                  : docLinks.releaseNotes
-              }
-              kibanaVersion={
-                !cloud?.isServerlessEnabled
-                  ? `v${kibanaVersion}`
-                  : i18n.translate('xpack.searchHomepage.versionLabel.changelog', {
-                      defaultMessage: 'Changelog',
-                    })
-              }
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </KibanaPageTemplate.Section>
-      <SearchHomepageBody />
+  return (
+    <>
+      <HomePage {...config} solutionNav={searchNavigation?.useClassicNavigation(history)} />
       {embeddableConsole}
-    </KibanaPageTemplate>
+    </>
   );
 };

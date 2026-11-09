@@ -5,10 +5,17 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiImage, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIllustration,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
+import { taskAutomation } from '@elastic/eui-illustrations';
 import type { RuleSystemAction } from '@kbn/alerting-types';
-import React, { useCallback, useMemo, useState } from 'react';
-import useEffectOnce from 'react-use/lib/useEffectOnce';
+import React, { useCallback, useMemo } from 'react';
 import type { RuleAction } from '../common/types';
 import { MULTI_CONSUMER_RULE_TYPE_IDS } from '../constants';
 import { useRuleFormState, useRuleFormScreenContext } from '../hooks';
@@ -21,20 +28,7 @@ import {
 import { RuleActionsItem } from './rule_actions_item';
 import { RuleActionsSystemActionsItem } from './rule_actions_system_actions_item';
 
-const useRuleActionsIllustration = () => {
-  const [imageData, setImageData] = useState('');
-  useEffectOnce(() => {
-    const fetchImage = async () => {
-      const image = await import('./rule_actions_illustration.svg');
-      setImageData(image.default);
-    };
-    fetchImage();
-  });
-  return imageData;
-};
-
 export const RuleActions = () => {
-  const ruleActionsIllustration = useRuleActionsIllustration();
   const { setIsConnectorsScreenVisible } = useRuleFormScreenContext();
 
   const {
@@ -93,11 +87,10 @@ export const RuleActions = () => {
             gutterSize="m"
             style={{ maxWidth: 356 }}
           >
-            <EuiImage
+            <EuiIllustration
+              type={taskAutomation}
               alt="Rule actions illustration"
-              width={198}
-              height={180}
-              url={ruleActionsIllustration}
+              style={{ maxInlineSize: 180, marginInline: 'auto' }}
             />
             <EuiFlexItem>
               <EuiText textAlign="center">

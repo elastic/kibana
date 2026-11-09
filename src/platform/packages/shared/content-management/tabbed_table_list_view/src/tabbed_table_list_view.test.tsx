@@ -52,6 +52,7 @@ describe('TabbedTableListView', () => {
       />
     );
     expect(wrapper.exists()).toBe(true);
+    expect(wrapper.find(KibanaPageTemplate).prop('restrictWidth')).toBe(false);
   });
 
   it('should render the correct title and description', () => {

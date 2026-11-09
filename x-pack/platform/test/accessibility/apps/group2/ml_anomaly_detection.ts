@@ -22,8 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
   const a11y = getService('a11y');
   const ml = getService('ml');
 
-  // Failing: See https://github.com/elastic/kibana/issues/276938
-  describe.skip('machine learning anomaly detection Accessibility', function () {
+  describe('machine learning anomaly detection Accessibility', function () {
     const esArchiver = getService('esArchiver');
 
     before(async () => {

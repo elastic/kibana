@@ -9,7 +9,9 @@
 
 import React from 'react';
 import { Global, css } from '@emotion/react';
-import { layoutVarName } from '@kbn/ui-chrome-layout-constants';
+import { useEuiTheme } from '@elastic/eui';
+import { layoutVarName } from './constants';
+import { useLayoutConfig } from './layout_config_context';
 import { useLayoutState } from './layout_state_context';
 
 /**
@@ -18,6 +20,8 @@ import { useLayoutState } from './layout_state_context';
  * @returns The rendered GlobalCSS component.
  */
 export const LayoutGlobalCSS = () => {
+  const { appearance } = useLayoutConfig();
+  const { euiTheme } = useEuiTheme();
   const {
     bannerHeight,
     footerHeight,
@@ -83,6 +87,9 @@ export const LayoutGlobalCSS = () => {
     ${layoutVarName('sidebar.left')}: calc(100vw - ${sidebarWidth}px);
     ${layoutVarName('sidebar.height')}: calc(100vh - ${headerAndBannerHeight + footerHeight}px);
     ${layoutVarName('sidebar.width')}: ${sidebarWidth}px;
+    ${layoutVarName('sidebar.borderRadius')}: ${appearance === 'framed'
+      ? euiTheme.border.radius.frame
+      : '0px'};
   `;
 
   const application = css`

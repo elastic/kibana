@@ -8,6 +8,11 @@
 import { i18n } from '@kbn/i18n';
 
 export const i18nStrings = {
+  alertZero: {
+    title: i18n.translate('securitySolutionPackages.navLinks.alertZero', {
+      defaultMessage: 'AlertZero',
+    }),
+  },
   alertDetections: {
     title: i18n.translate('securitySolutionPackages.navLinks.alertDetections', {
       defaultMessage: 'Detections',

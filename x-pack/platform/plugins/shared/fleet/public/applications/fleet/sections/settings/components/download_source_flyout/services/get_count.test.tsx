@@ -8,6 +8,8 @@
 import type { DownloadSource } from '../../../../../types';
 import { sendGetAgents, sendGetAgentPolicies } from '../../../../../hooks';
 
+import { buildPolicyBaseIdsWithFallbackKuery } from '../../../../../../../../common/services/version_specific_policies_utils';
+
 import { getCountsForDownloadSource } from './get_count';
 
 jest.mock('../../../../../hooks', () => ({
@@ -47,6 +49,7 @@ describe('getCountsForDownloadSource', () => {
       data: {
         items: [
           {
+            id: 'policy1',
             name: 'Agent policy 1',
             namespace: 'default',
             description: '',
@@ -54,6 +57,7 @@ describe('getCountsForDownloadSource', () => {
             download_source_id: 'test-ds-1',
           },
           {
+            id: 'policy2',
             name: 'Agent policy 2',
             namespace: 'default',
             description: '',
@@ -70,5 +74,15 @@ describe('getCountsForDownloadSource', () => {
       agentCount: 6,
       agentPolicyCount: 2,
     });
+  });
+
+  it('counts the agents by their base policy id, so agents on #sentinel are included', async () => {
+    await getCountsForDownloadSource(downloadSource);
+
+    expect(mockedSendGetAgents).toHaveBeenCalledWith(
+      expect.objectContaining({
+        kuery: buildPolicyBaseIdsWithFallbackKuery(['policy1', 'policy2']),
+      })
+    );
   });
 });

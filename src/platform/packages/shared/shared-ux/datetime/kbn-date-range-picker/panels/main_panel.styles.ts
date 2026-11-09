@@ -34,6 +34,10 @@ export const mainPanelStyles = (euiThemeContext: UseEuiTheme) => {
     overflow-block: auto;
     ${euiOverflowScroll(euiThemeContext, { direction: 'y', mask: true })};
   `;
+  const roundedSuffix = css`
+    color: ${euiTheme.colors.textSubdued};
+    margin-inline-end: auto;
+  `;
   const bottomSection = css`
     margin-block-start: auto;
     flex-shrink: 0;
@@ -44,5 +48,14 @@ export const mainPanelStyles = (euiThemeContext: UseEuiTheme) => {
     flex-shrink: 0;
   `;
 
-  return { root, presetsArea, tabs, list, scroller, bottomSection, documentationButtonWrapper };
+  return {
+    root,
+    presetsArea,
+    tabs,
+    list,
+    scroller,
+    roundedSuffix,
+    bottomSection,
+    documentationButtonWrapper,
+  };
 };

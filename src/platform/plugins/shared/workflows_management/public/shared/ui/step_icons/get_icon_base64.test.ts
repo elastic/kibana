@@ -251,7 +251,7 @@ describe('getIconBase64', () => {
     it('prefers hardcoded icon for email over EUI name string', async () => {
       const result = await getIconBase64({
         actionTypeId: '.email',
-        icon: 'email',
+        icon: 'mail',
         kind: 'step',
       });
 
@@ -455,6 +455,7 @@ describe('getIconBase64 – error handling', () => {
 describe('getStepIconType and getIconBase64 consistency', () => {
   const stepTypesInBothPaths = [
     'console',
+    'http',
     'data.set',
     'foreach',
     'while',
@@ -496,13 +497,12 @@ describe('getStepIconType and getIconBase64 consistency', () => {
     }
   );
 
-  it('http resolves in getStepIconType but falls back in getIconBase64 (no hardcoded entry)', async () => {
-    const euiIcon = getStepIconType('http');
-    expect(euiIcon).toBe('globe');
-
-    expect(HardcodedIcons.http).toBeUndefined();
-
-    const dataUrl = await getIconBase64({ actionTypeId: 'http', kind: 'step' });
-    expect(dataUrl).toBe(HardcodedIconDataUrls.default);
+  // `globe` is an EUI icon name, which renders nothing in a CSS `url()` — so the CSS
+  // path needs the SVG data URL, the same override `console` / `if` / `foreach` use.
+  it('http maps to the globe glyph as a name for EuiIcon and as a data URL for CSS', () => {
+    expect(getStepIconType('http')).toBe('globe');
+    expect(HardcodedIcons.http).toBe('globe');
+    expect(HardcodedIconDataUrls.http).not.toBe('globe');
+    expect(HardcodedIconDataUrls.http).toBeDefined();
   });
 });

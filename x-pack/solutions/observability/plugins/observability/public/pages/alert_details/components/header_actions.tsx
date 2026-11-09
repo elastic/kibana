@@ -9,6 +9,7 @@ import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { noop } from 'lodash';
+import { AiButton } from '@kbn/shared-ux-ai-components';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -35,6 +36,7 @@ import type { AlertSnoozePayload } from '@kbn/response-ops-alert-snooze';
 import { useAlertFieldNames } from '@kbn/alerts-ui-shared/src/common/hooks/use_alert_field_names';
 
 import { useKibana } from '../../../utils/kibana_react';
+import { useInvestigateAlert } from '../../../hooks/use_investigate_alert';
 import type { TopAlert } from '../../../typings/alerts';
 import { useAuthorizedToReadRuleType } from '../../../hooks/use_authorized_to_read_rule_type';
 import { observabilityFeatureId } from '../../../../common';
@@ -51,6 +53,7 @@ import { useDiscoverUrl } from '../hooks/use_discover_url/use_discover_url';
 import { ALERT_DETAILS_EBT_ELEMENTS } from '../ebt_constants';
 
 export interface HeaderActionsProps extends AlertDetailsRuleFormFlyoutBaseProps {
+  addToChatButton?: React.ReactNode;
   alert: TopAlert | null;
   alertIndex?: string;
   alertStatus?: AlertStatus;
@@ -86,6 +89,7 @@ function AlertSnoozeForm({
 }
 
 export function HeaderActions({
+  addToChatButton,
   alert,
   alertIndex,
   alertStatus,
@@ -101,6 +105,7 @@ export function HeaderActions({
     http,
     notifications,
   } = services;
+  const alertId = alert?.fields[ALERT_UUID];
 
   const { authorizedToReadRuleType } = useAuthorizedToReadRuleType();
 
@@ -170,6 +175,30 @@ export function HeaderActions({
     }
   }, [alert, alertIndex, untrackAlerts, onUntrackAlert]);
 
+  const {
+    showInvestigateAction,
+    showInvestigateButton,
+    hasInvestigation,
+    handleInvestigate,
+    isStarting,
+    investigateActionLabel,
+    investigateEbtProps,
+    viewInvestigationUrl,
+    viewInvestigationActionLabel,
+    viewInvestigationEbtProps,
+    markInvestigationViewed,
+  } = useInvestigateAlert({
+    alertId,
+    ebtElement: 'alertDetailsPageActions',
+    onInvestigate: () => setIsPopoverOpen(false),
+  });
+
+  const showViewButton = Boolean(viewInvestigationUrl) && !isStarting;
+  const showHeaderButton =
+    alertId &&
+    showInvestigateAction &&
+    (isStarting || viewInvestigationUrl || (showInvestigateButton && !hasInvestigation));
+
   const [alertDetailsRuleFormFlyoutOpen, setAlertDetailsRuleFormFlyoutOpen] = useState(false);
 
   const handleTogglePopover = () => setIsPopoverOpen(!isPopoverOpen);
@@ -184,51 +213,29 @@ export function HeaderActions({
   };
 
   return (
-    <>
+    <ObsCasesContext>
       <EuiFlexGroup direction="row" gutterSize="s" justifyContent="flexEnd">
-        {alert?.fields[ALERT_RULE_UUID] && alert?.fields[ALERT_RULE_TYPE_ID] && (
+        {showHeaderButton && (
           <EuiFlexItem grow={false}>
-            <RuleQueryInspector
-              ruleId={alert.fields[ALERT_RULE_UUID]}
-              ruleTypeId={alert.fields[ALERT_RULE_TYPE_ID]}
-              alertId={alert.fields[ALERT_UUID]}
-            />
-          </EuiFlexItem>
-        )}
-        {discoverUrl && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              href={discoverUrl}
-              iconType="discoverApp"
-              target="_blank"
-              data-test-subj={`alertDetailsPage_viewInDiscover${rule ? `_${rule.ruleTypeId}` : ''}`}
-              {...getEbtProps({
-                action: EBT_CLICK_ACTIONS.OPEN_IN_DISCOVER,
-                element: ALERT_DETAILS_EBT_ELEMENTS.HEADER,
-                detail: rule?.ruleTypeId,
-              })}
+            <AiButton
+              variant="outlined"
+              size="m"
+              iconType="inspect"
+              isLoading={isStarting}
+              disabled={isStarting}
+              aria-busy={isStarting}
+              href={showViewButton ? viewInvestigationUrl : undefined}
+              onClick={showViewButton ? markInvestigationViewed : handleInvestigate}
+              data-test-subj={
+                showViewButton ? 'alertDetailsViewInvestigation' : 'alertDetailsInvestigate'
+              }
+              {...(showViewButton ? viewInvestigationEbtProps : investigateEbtProps)}
             >
-              <EuiText size="s">
-                {i18n.translate('xpack.observability.alertDetails.viewInDiscover', {
-                  defaultMessage: 'View in Discover',
-                })}
-              </EuiText>
-            </EuiButtonEmpty>
+              {showViewButton ? viewInvestigationActionLabel : investigateActionLabel}
+            </AiButton>
           </EuiFlexItem>
         )}
-
-        {cases && canAddToCase && (
-          <EuiFlexItem grow={false}>
-            <ObsCasesContext>
-              <AddToCaseButton
-                alert={alert}
-                alertIndex={alertIndex}
-                rule={rule}
-                setIsPopoverOpen={setIsPopoverOpen}
-              />
-            </ObsCasesContext>
-          </EuiFlexItem>
-        )}
+        {addToChatButton && <EuiFlexItem grow={false}>{addToChatButton}</EuiFlexItem>}
         <EuiFlexItem grow={false}>
           <EuiPopover
             panelPaddingSize="none"
@@ -279,6 +286,53 @@ export function HeaderActions({
                 <div style={{ width: '220px' }}>
                   <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="s">
                     <div />
+
+                    {showInvestigateButton && viewInvestigationUrl && (
+                      <EuiButtonEmpty
+                        size="s"
+                        color="text"
+                        iconType="inspect"
+                        onClick={handleInvestigate}
+                        data-test-subj="alertDetailsReinvestigate"
+                        {...investigateEbtProps}
+                      >
+                        <EuiText size="s">{investigateActionLabel}</EuiText>
+                      </EuiButtonEmpty>
+                    )}
+
+                    {cases && canAddToCase && (
+                      <AddToCaseButton
+                        alert={alert}
+                        alertIndex={alertIndex}
+                        rule={rule}
+                        setIsPopoverOpen={setIsPopoverOpen}
+                      />
+                    )}
+
+                    {discoverUrl && (
+                      <EuiButtonEmpty
+                        size="s"
+                        color="text"
+                        href={discoverUrl}
+                        iconType="productDiscover"
+                        target="_blank"
+                        onClick={handleClosePopover}
+                        data-test-subj={`alertDetailsPage_viewInDiscover${
+                          rule ? `_${rule.ruleTypeId}` : ''
+                        }`}
+                        {...getEbtProps({
+                          action: EBT_CLICK_ACTIONS.OPEN_IN_DISCOVER,
+                          element: ALERT_DETAILS_EBT_ELEMENTS.HEADER,
+                          detail: rule?.ruleTypeId,
+                        })}
+                      >
+                        <EuiText size="s">
+                          {i18n.translate('xpack.observability.alertDetails.viewInDiscover', {
+                            defaultMessage: 'View in Discover',
+                          })}
+                        </EuiText>
+                      </EuiButtonEmpty>
+                    )}
 
                     <EuiButtonEmpty
                       size="s"
@@ -341,6 +395,16 @@ export function HeaderActions({
                       <>
                         <EuiHorizontalRule margin="none" />
 
+                        {alert?.fields[ALERT_RULE_UUID] && alert?.fields[ALERT_RULE_TYPE_ID] && (
+                          <RuleQueryInspector
+                            ruleId={alert.fields[ALERT_RULE_UUID]}
+                            ruleTypeId={alert.fields[ALERT_RULE_TYPE_ID]}
+                            alertId={alert.fields[ALERT_UUID]}
+                            size="s"
+                            color="text"
+                          />
+                        )}
+
                         <EuiButtonEmpty
                           size="s"
                           color="text"
@@ -391,7 +455,7 @@ export function HeaderActions({
           onLoading={noop}
         />
       ) : null}
-    </>
+    </ObsCasesContext>
   );
 }
 

@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import { SEARCH_PROJECT_SETTINGS } from '@kbn/serverless-search-settings';
-import { isEditorFieldSetting } from '@kbn/test-suites-xpack-platform/serverless/functional/test_suites/management/advanced_settings';
 import {
   AGENT_BUILDER_NAV_ENABLED_SETTING_ID,
   AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS,
@@ -15,22 +14,33 @@ import {
   AGENT_BUILDER_TRACING_LLM_RESPONSES_SETTING_ID,
   AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID,
   AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID,
+  AGENT_BUILDER_TRACING_USER_DATA_SETTING_ID,
   AGENT_BUILDER_TRACING_SYSTEM_PROMPT_SETTING_ID,
   AGENT_BUILDER_TRACING_TOOL_DETAILS_SETTING_ID,
   AGENT_BUILDER_TRACING_USER_PROMPTS_SETTING_ID,
-  AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID,
   AI_CHAT_EXPERIENCE_TYPE,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
+  AI_ANONYMIZATION_SETTINGS,
+  CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID,
+  DATA_FEDERATION_ENABLED_SETTING_ID,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
   GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING,
+  GEN_AI_SETTINGS_INFERENCE_STREAMING,
 } from '@kbn/management-settings-ids';
 import type { FtrProviderContext } from '../ftr_provider_context';
+
+const GLOBAL_SETTINGS: string[] = [
+  DATA_FEDERATION_ENABLED_SETTING_ID,
+  CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID,
+];
+const EDITOR_SETTINGS: string[] = [AI_ANONYMIZATION_SETTINGS];
 
 // readOnly settings with readonlyMode set to ui are not available on the advanced settings page
 const READ_ONLY_SETTINGS: string[] = [
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
   GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING,
+  GEN_AI_SETTINGS_INFERENCE_STREAMING,
   AGENT_BUILDER_NAV_ENABLED_SETTING_ID,
   AI_CHAT_EXPERIENCE_TYPE,
   AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS,
@@ -41,7 +51,7 @@ const READ_ONLY_SETTINGS: string[] = [
   AGENT_BUILDER_TRACING_SYSTEM_PROMPT_SETTING_ID,
   AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID,
   AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID,
-  AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID,
+  AGENT_BUILDER_TRACING_USER_DATA_SETTING_ID,
 ];
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -67,8 +77,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('renders search settings', () => {
       for (const settingId of SEARCH_PROJECT_SETTINGS) {
+        // Global settings render on the Global Settings tab
+        if (GLOBAL_SETTINGS.includes(settingId)) {
+          continue;
+        }
         // Code editors don't have their test subjects rendered
-        if (isEditorFieldSetting(settingId)) {
+        if (EDITOR_SETTINGS.includes(settingId)) {
           continue;
         }
         // readOnly settings won't appear on the advanced settings page
@@ -77,7 +91,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         }
         it('renders ' + settingId + ' edit field', async () => {
           const fieldTestSubj = 'management-settings-editField-' + settingId;
-          expect(await testSubjects.exists(fieldTestSubj)).to.be(true);
+          await testSubjects.existOrFail(fieldTestSubj, { timeout: 5000 });
         });
       }
     });

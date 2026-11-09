@@ -26,11 +26,36 @@ describe('applyLimit', () => {
     );
   });
 
-  it('handles multiline / formatted queries', () => {
+  it('preserves the formatting of multiline queries', () => {
     const query = `FROM idx
 | WHERE x > 1
-| SORT x`;
-    expect(applyLimit(query, 25)).toBe('FROM idx | WHERE x > 1 | SORT x | LIMIT 25');
+| SORT x
+`;
+    expect(applyLimit(query, 25)).toBe(`FROM idx
+| WHERE x > 1
+| SORT x
+| LIMIT 25`);
+  });
+
+  it('narrows a trailing LIMIT without reformatting the rest of the query', () => {
+    const query = `FROM idx
+| WHERE  x > 1
+| LIMIT 100 // keep the comment`;
+    expect(applyLimit(query, 10)).toBe(`FROM idx
+| WHERE  x > 1
+| LIMIT 10 // keep the comment`);
+  });
+
+  it('appends the LIMIT on a new line when the query ends with a line comment', () => {
+    expect(applyLimit('FROM idx | SORT x // newest first', 10)).toBe(
+      'FROM idx | SORT x // newest first\n| LIMIT 10'
+    );
+  });
+
+  it('preserves the text of unaliased PROMQL expressions, which name the value column', () => {
+    const query =
+      'PROMQL index=idx step=1m 100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)';
+    expect(applyLimit(query, 10)).toBe(`${query} | LIMIT 10`);
   });
 
   it('appends rather than overwriting when the trailing LIMIT uses a parameter', () => {

@@ -3,42 +3,17 @@
 exports[`Expanded mode should render the side navigation 1`] = `
 <div>
   <div
-    class="css-y5yq76-navigationWrapperStyles"
+    class="css-1omm6ft-navigationWrapperStyles"
     data-test-subj="kbnChromeNav-root"
     id="kbnChromeNav-root"
   >
     <div
-      class="kbnChromeNav-root css-vka7tb-getNavWrapperStyles"
+      class="kbnChromeNav-root css-wgassg-getNavWrapperStyles"
     >
       <div
-        class="css-1ja8ujo-wrapperStyles"
-        data-test-subj="kbnChromeNav-logoWrapper"
-      >
-        <a
-          aria-label="Solution homepage"
-          class="css-r2tafp-buttonStyles"
-          data-highlighted="false"
-          data-menu-item="true"
-          data-test-subj="kbnChromeNav-logo"
-          href="/"
-          id="home"
-        >
-          <div
-            class="kbnChromeNav-iconWrapper"
-          >
-            <span
-              aria-hidden="true"
-              color="currentColor"
-              data-euiicon-type="logoElastic"
-            />
-          </div>
-          <div
-            class="euiText emotion-euiText-m-euiTextAlign-center-textStyles-labelStyles"
-          >
-            Solution
-          </div>
-        </a>
-      </div>
+        aria-hidden="true"
+        class="css-3a3088-topSeparatorStyles"
+      />
       <p
         class="emotion-euiScreenReaderOnly"
         id="main-navigation-instructions_generated-id"
@@ -47,12 +22,13 @@ exports[`Expanded mode should render the side navigation 1`] = `
       </p>
       <nav
         aria-label="Main"
-        class="css-175v8l8-getPrimaryMenuStyles"
+        class="css-52o7j-getPrimaryMenuStyles"
+        data-overflow-measured="false"
         data-test-subj="kbnChromeNav-primaryNavigation"
         id="kbnChromeNav-primaryNavigation"
       >
         <div
-          class="css-1y7bpvk-wrapperStyles"
+          class="css-1rljz30-wrapperStyles"
         >
           <div
             class="euiPopover emotion-euiPopover-block"
@@ -62,7 +38,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
               aria-haspopup="false"
               aria-posinset="1"
               aria-setsize="3"
-              class="css-r2tafp-buttonStyles"
+              class="css-2yc9mn-buttonStyles"
               data-highlighted="false"
               data-menu-item="true"
               data-test-subj="kbnChromeNav-primaryItem-dashboards"
@@ -81,7 +57,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
                 />
               </div>
               <div
-                class="euiText emotion-euiText-m-euiTextAlign-center-truncatedStyles-textStyles-labelStyles"
+                class="euiText emotion-euiText-s-euiTextAlign-center-truncatedStyles-textStyles-labelStyles"
               >
                 Dashboards
               </div>
@@ -89,7 +65,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
           </div>
         </div>
         <div
-          class="css-1y7bpvk-wrapperStyles"
+          class="css-1rljz30-wrapperStyles"
         >
           <div
             class="euiPopover emotion-euiPopover-block"
@@ -98,7 +74,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
               aria-haspopup="false"
               aria-posinset="2"
               aria-setsize="3"
-              class="css-r2tafp-buttonStyles"
+              class="css-2yc9mn-buttonStyles"
               data-highlighted="false"
               data-menu-item="true"
               data-test-subj="kbnChromeNav-primaryItem-discover"
@@ -117,7 +93,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
                 />
               </div>
               <div
-                class="euiText emotion-euiText-m-euiTextAlign-center-truncatedStyles-textStyles-labelStyles"
+                class="euiText emotion-euiText-s-euiTextAlign-center-truncatedStyles-textStyles-labelStyles"
               >
                 Discover
               </div>
@@ -125,7 +101,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
           </div>
         </div>
         <div
-          class="css-1y7bpvk-wrapperStyles"
+          class="css-1rljz30-wrapperStyles"
         >
           <p
             class="emotion-euiScreenReaderOnly"
@@ -142,7 +118,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
               aria-haspopup="true"
               aria-posinset="3"
               aria-setsize="3"
-              class="css-r2tafp-buttonStyles"
+              class="css-2yc9mn-buttonStyles"
               data-highlighted="false"
               data-menu-item="true"
               data-test-subj="kbnChromeNav-primaryItem-apps_overview"
@@ -161,7 +137,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
                 />
               </div>
               <div
-                class="euiText emotion-euiText-m-euiTextAlign-center-truncatedStyles-textStyles-labelStyles"
+                class="euiText emotion-euiText-s-euiTextAlign-center-truncatedStyles-textStyles-labelStyles"
               >
                 Apps
               </div>
@@ -177,11 +153,11 @@ exports[`Expanded mode should render the side navigation 1`] = `
       </p>
       <footer
         aria-label="Side navigation"
-        class="css-18gcnxt-root"
+        class="css-vzod15-root"
         data-test-subj="kbnChromeNav-footer"
       >
         <div
-          class="css-1y7bpvk-wrapperStyles"
+          class="css-1rljz30-wrapperStyles"
         >
           <div
             class="euiPopover emotion-euiPopover-block"
@@ -191,7 +167,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
               id="generated-id_euiToolTipAnchor"
             >
               <div
-                class="css-1v0cj6t-buttonWrapperStyles"
+                class="css-1j6m7ik-buttonWrapperStyles"
               >
                 <a
                   aria-describedby="footer-navigation-instructions_generated-id"
@@ -217,7 +193,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
           </div>
         </div>
         <div
-          class="css-1y7bpvk-wrapperStyles"
+          class="css-1rljz30-wrapperStyles"
         >
           <div
             class="euiPopover emotion-euiPopover-block"
@@ -227,7 +203,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
               id="generated-id_euiToolTipAnchor"
             >
               <div
-                class="css-1v0cj6t-buttonWrapperStyles"
+                class="css-1j6m7ik-buttonWrapperStyles"
               >
                 <a
                   aria-haspopup="false"
@@ -252,7 +228,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
           </div>
         </div>
         <div
-          class="css-1y7bpvk-wrapperStyles"
+          class="css-1rljz30-wrapperStyles"
         >
           <p
             class="emotion-euiScreenReaderOnly"
@@ -264,10 +240,10 @@ exports[`Expanded mode should render the side navigation 1`] = `
             class="euiPopover emotion-euiPopover-block"
           >
             <div
-              class="css-1g7fa48-wrapperStyles"
+              class="css-xf65hn-wrapperStyles"
             >
               <div
-                class="css-1v0cj6t-buttonWrapperStyles"
+                class="css-1j6m7ik-buttonWrapperStyles"
               >
                 <a
                   aria-describedby="popover-enter-exit-instructions_generated-id"
@@ -294,7 +270,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
           </div>
         </div>
         <div
-          class="css-1y7bpvk-wrapperStyles"
+          class="css-1rljz30-wrapperStyles"
         >
           <div
             class="euiPopover emotion-euiPopover-block"
@@ -304,7 +280,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
               id="generated-id_euiToolTipAnchor"
             >
               <div
-                class="css-1v0cj6t-buttonWrapperStyles"
+                class="css-1j6m7ik-buttonWrapperStyles"
               >
                 <a
                   aria-haspopup="false"
@@ -329,7 +305,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
           </div>
         </div>
         <div
-          class="css-1y7bpvk-wrapperStyles"
+          class="css-1rljz30-wrapperStyles"
         >
           <div
             class="euiPopover emotion-euiPopover-block"
@@ -339,7 +315,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
               id="generated-id_euiToolTipAnchor"
             >
               <div
-                class="css-1v0cj6t-buttonWrapperStyles"
+                class="css-1j6m7ik-buttonWrapperStyles"
               >
                 <a
                   aria-haspopup="false"
@@ -367,7 +343,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
           class="euiHorizontalRule emotion-euiHorizontalRule-full-xs-collapseDivider"
         />
         <div
-          class="sideNavCollapseButtonWrapper css-1y5smli-sideNavCollapseButtonWrapper"
+          class="sideNavCollapseButtonWrapper css-18cxdb1-sideNavCollapseButtonWrapper"
         >
           <span
             class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
@@ -395,5 +371,10 @@ exports[`Expanded mode should render the side navigation 1`] = `
       </footer>
     </div>
   </div>
+  <main
+    tabindex="-1"
+  >
+    Main content
+  </main>
 </div>
 `;

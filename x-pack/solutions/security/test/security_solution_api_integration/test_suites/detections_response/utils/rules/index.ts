@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+export * from './add_tags_to_rule_saved_object';
 export * from './create_legacy_rule_action';
 export * from './create_rule_with_exception_entries';
 export * from './create_rule_saved_object';
@@ -53,5 +54,6 @@ export * from './update_rule';
 export * from './get_simple_rule_as_ndjson';
 export * from './rule_gaps';
 export * from './import_rules';
+export * from './rule_task';
 
 export * from './prebuilt_rules';

@@ -55,7 +55,6 @@ export const FlyoutHeader: React.FC<FlyoutHeaderProps> = ({ item, titleId }) => 
               tooltipProps={{ disableScreenReaderOutput: true }}
             >
               {(copy) => (
-                /* eslint-disable-next-line @elastic/eui/tooltip-button-icon-wrap */
                 <EuiButtonIcon
                   onClick={copy}
                   iconType="copy"

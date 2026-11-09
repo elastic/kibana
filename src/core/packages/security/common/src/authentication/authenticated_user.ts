@@ -44,6 +44,14 @@ export interface ApiKeyDescriptor {
    * Which entity manages this API key
    */
   managed_by: SecurityCredentialManagedBy;
+
+  /**
+   * Whether this API key can only be used by Elastic services, as opposed to an external key that
+   * customers use directly. Internal keys are the ones Elastic services (e.g. Kibana) grant, and
+   * they are only accepted when accompanied by the service's own client authentication. Only
+   * reported for UIAM API keys, and absent for keys managed by Elasticsearch itself.
+   */
+  internal?: boolean;
 }
 
 /**

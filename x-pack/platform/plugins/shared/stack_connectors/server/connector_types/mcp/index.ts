@@ -7,12 +7,11 @@
 
 import {
   GenerativeAIForObservabilityConnectorFeatureId,
-  GenerativeAIForSearchPlaygroundConnectorFeatureId,
   GenerativeAIForSecurityConnectorFeatureId,
   WorkflowsConnectorFeatureId,
-  AgentBuilderConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
+import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
 import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import {
   ValidatorType,
@@ -28,13 +27,16 @@ import {
 } from '@kbn/connector-schemas/mcp';
 import { McpConnector } from './mcp';
 
-export const getMcpConnectorType = (): SubActionConnectorType<
-  MCPConnectorConfig,
-  MCPConnectorSecrets
-> => ({
+export interface McpConnectorTypeDeps {
+  getClientLeasePool: ActionsPluginSetupContract['getClientLeasePool'];
+}
+
+export const getMcpConnectorType = ({
+  getClientLeasePool,
+}: McpConnectorTypeDeps): SubActionConnectorType<MCPConnectorConfig, MCPConnectorSecrets> => ({
   id: CONNECTOR_ID,
   name: CONNECTOR_NAME,
-  getService: (params) => new McpConnector(params),
+  getService: (params) => new McpConnector(params, getClientLeasePool()),
   schema: {
     config: MCPConnectorConfigSchema,
     secrets: MCPConnectorSecretsSchema,
@@ -43,12 +45,12 @@ export const getMcpConnectorType = (): SubActionConnectorType<
     { type: ValidatorType.CONFIG, validator: configValidator },
     { type: ValidatorType.SECRETS, validator: secretsValidator },
   ],
+  // Deliberately omits AgentBuilderConnectorFeatureId: the MCP v1 connector can't be used
+  // as an agent tool, so it shouldn't be offered in Agent Builder's connector pickers.
   supportedFeatureIds: [
     GenerativeAIForSecurityConnectorFeatureId,
-    GenerativeAIForSearchPlaygroundConnectorFeatureId,
     GenerativeAIForObservabilityConnectorFeatureId,
     WorkflowsConnectorFeatureId,
-    AgentBuilderConnectorFeatureId,
   ],
   minimumLicenseRequired: 'enterprise' as const,
 });

@@ -749,9 +749,9 @@ describe('<UseField />', () => {
         );
       }
 
-      expect(deserializer).toBeCalled();
-      expect(serializer).not.toBeCalled();
-      expect(formatter).not.toBeCalled();
+      expect(deserializer).toHaveBeenCalled();
+      expect(serializer).not.toHaveBeenCalled();
+      expect(formatter).not.toHaveBeenCalled();
 
       const internalFormData = formHook.__getFormData$().value;
       expect(internalFormData.name).toEqual('John-deserialized');
@@ -760,11 +760,11 @@ describe('<UseField />', () => {
       await user.clear(myField);
       await user.type(myField, 'Mike');
 
-      expect(formatter).toBeCalled(); // Formatters are executed on each value change
-      expect(serializer).not.toBeCalled(); // Serializer are executed *only** when outputting the form data
+      expect(formatter).toHaveBeenCalled(); // Formatters are executed on each value change
+      expect(serializer).not.toHaveBeenCalled(); // Serializer are executed *only** when outputting the form data
 
       const outputtedFormData = formHook.getFormData();
-      expect(serializer).toBeCalled();
+      expect(serializer).toHaveBeenCalled();
       expect(outputtedFormData.name).toEqual('MIKE-serialized');
 
       // Make sure that when we reset the form values, we don't serialize the fields
@@ -779,7 +779,7 @@ describe('<UseField />', () => {
         await jest.runAllTimersAsync();
       });
 
-      expect(serializer).not.toBeCalled();
+      expect(serializer).not.toHaveBeenCalled();
     });
   });
 
@@ -884,7 +884,7 @@ describe('<UseField />', () => {
         form: { setInputValue },
       } = setup();
 
-      expect(onChange).toBeCalledTimes(0);
+      expect(onChange).toHaveBeenCalledTimes(0);
 
       await act(async () => {
         const setInputValuePromise = setInputValue('myField', 'foo');
@@ -908,7 +908,7 @@ describe('<UseField />', () => {
         ],
       });
 
-      expect(onError).toBeCalledTimes(0);
+      expect(onError).toHaveBeenCalledTimes(0);
       await setInputValue('myField', '0');
       // Trigger validation
       let field = screen.getByTestId('myField');

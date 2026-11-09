@@ -18,18 +18,21 @@ paths:
           required: false
           schema:
             type: string
+            maxLength: 64
           description: Start of time range (ISO 8601)
         - name: to
           in: query
           required: false
           schema:
             type: string
+            maxLength: 64
           description: End of time range (ISO 8601)
         - name: name
           in: query
           required: false
           schema:
             type: string
+            maxLength: 256
           description: Filter projects by name (case-insensitive substring match)
         - name: page
           in: query

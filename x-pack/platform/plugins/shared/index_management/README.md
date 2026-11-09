@@ -195,7 +195,7 @@ This plugin uses Storybook to develop and showcase stateless UI components in an
 To start the Storybook, run the following command:
 
 ```
-yarn storybook index_management
+pnpm storybook index_management
 ```
 
 This will launch the Storybook instance for this plugin, allowing you to view and interact with the components in your browser.

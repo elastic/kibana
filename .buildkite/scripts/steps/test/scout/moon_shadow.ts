@@ -8,15 +8,14 @@
  */
 
 /**
- * Computes Moon's affected-modules result for comparison against git —
- * observational only, never influences the actual selective-testing
- * decision. Swallows Moon failures and returns `null` instead of throwing.
+ * Computes Moon's affected modules and config selection for comparison only.
+ * Swallows Moon failures and returns `null` without changing CI selection.
  * See `affected-packages/README.md`.
  */
 
-import type { ToolingLog } from '@kbn/tooling-log';
-import { expandWithImplicitConsumers } from './scout_implicit_consumers';
-import { getAffectedProjectsMoon } from '#pipeline-utils';
+import { expandWithImplicitConsumers } from './scout_implicit_consumers.ts';
+import type { ScoutLog } from './scout_log.ts';
+import { getAffectedProjectsMoon, queryMoonTestSelection } from '#pipeline-utils';
 
 export interface MoonShadowResult {
   mergeBase: string;
@@ -24,6 +23,10 @@ export interface MoonShadowResult {
   diffFromGit: {
     onlyInGit: string[];
     onlyInMoon: string[];
+  };
+  scoutTasks: {
+    modeledConfigs: string[];
+    affectedConfigs: string[];
   };
 }
 
@@ -36,7 +39,7 @@ export function computeMoonShadow({
   mergeBase: string;
   gitChangedFiles: readonly string[];
   gitAffectedModules: ReadonlySet<string>;
-  log: ToolingLog;
+  log: ScoutLog;
 }): MoonShadowResult | null {
   try {
     const moonAffectedModules = expandWithImplicitConsumers(
@@ -44,6 +47,7 @@ export function computeMoonShadow({
       gitChangedFiles,
       log
     );
+    const scoutTaskSelection = queryMoonTestSelection([...gitChangedFiles], 'scout-tests');
 
     const onlyInGit = [...gitAffectedModules].filter((m) => !moonAffectedModules.has(m)).sort();
     const onlyInMoon = [...moonAffectedModules].filter((m) => !gitAffectedModules.has(m)).sort();
@@ -61,6 +65,10 @@ export function computeMoonShadow({
       mergeBase,
       affectedModules: [...moonAffectedModules].sort(),
       diffFromGit: { onlyInGit, onlyInMoon },
+      scoutTasks: {
+        modeledConfigs: [...scoutTaskSelection.modeledConfigs].sort(),
+        affectedConfigs: [...scoutTaskSelection.affectedConfigs].sort(),
+      },
     };
   } catch (error) {
     log.warning(

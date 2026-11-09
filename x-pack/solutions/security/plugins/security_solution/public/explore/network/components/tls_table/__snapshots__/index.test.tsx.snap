@@ -97,7 +97,7 @@ exports[`Tls Table Component Rendering it renders the default Domains table 1`] 
     data-test-subj="table-tls-loading-false"
   >
     <header
-      class="toggle-expand siemHeaderSection css-125xqyz-header"
+      class="toggle-expand siemHeaderSection css-qibzrl-header"
       data-test-subj="header-section"
     >
       <div
@@ -131,6 +131,7 @@ exports[`Tls Table Component Rendering it renders the default Domains table 1`] 
                         id="generated-id_euiToolTipAnchor"
                       >
                         <button
+                          aria-expanded="true"
                           aria-label="Open"
                           class="euiButtonIcon emotion-euiButtonIcon-s-empty-text"
                           data-test-subj="query-toggle-header"
@@ -210,7 +211,7 @@ exports[`Tls Table Component Rendering it renders the default Domains table 1`] 
       data-test-subj="paginated-basic-table"
     >
       <div
-        class="emotion-euiContainerCSS"
+        class="euiTable__wrapper emotion-euiContainerCSS"
       >
         <table
           class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"

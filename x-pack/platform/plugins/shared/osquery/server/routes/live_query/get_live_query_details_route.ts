@@ -19,6 +19,7 @@ import { buildRouteValidation } from '../../utils/build_validation/route_validat
 import { API_VERSIONS, OSQUERY_INTEGRATION_NAME } from '../../../common/constants';
 import { PLUGIN_ID } from '../../../common';
 import { OSQUERY_SEARCH_STRATEGY } from '../../search_strategy/constants';
+import { getScopedSearch } from '../../utils/get_scoped_search';
 import { getActionResponses } from './utils';
 
 import type {
@@ -73,6 +74,7 @@ export const getLiveQueryDetailsRoute = (
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 
         try {
+          const cpsActive = await osqueryContext.isCpsActive(request);
           const spaceId = osqueryContext?.service?.getActiveSpace
             ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
             : DEFAULT_SPACE_ID;
@@ -101,7 +103,12 @@ export const getLiveQueryDetailsRoute = (
           const namespacesOrUndefined =
             osqueryNamespaces && osqueryNamespaces.length > 0 ? osqueryNamespaces : undefined;
 
-          const search = await context.search;
+          const search = await getScopedSearch(
+            context,
+            request,
+            cpsActive,
+            osqueryContext.getStartServices
+          );
           const { actionDetails } = await lastValueFrom(
             search.search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(
               {
@@ -113,24 +120,33 @@ export const getLiveQueryDetailsRoute = (
             )
           );
 
-          const queries = actionDetails?._source?.queries;
+          if (!actionDetails?._source) {
+            return response.notFound({ body: { message: 'Action not found' } });
+          }
+
+          const queries = actionDetails._source.queries;
           const expirationDate = actionDetails?.fields?.expiration?.[0];
 
           const expired = !expirationDate ? true : new Date(expirationDate) < new Date();
 
-          const responseData = await lastValueFrom(
-            zip(
-              ...map(queries, (query) =>
-                getActionResponses(
-                  search,
-                  query.action_id,
-                  query.agents?.length ?? 0,
-                  namespacesOrUndefined,
-                  spaceId
+          // `zip()` with no sources completes empty and `lastValueFrom` rejects, so an
+          // action without queries (a `.fleet-actions` document, or a pack with every
+          // query disabled) must skip the read.
+          const responseData = queries?.length
+            ? await lastValueFrom(
+                zip(
+                  ...map(queries, (query) =>
+                    getActionResponses(
+                      search,
+                      query.action_id,
+                      query.agents?.length ?? 0,
+                      namespacesOrUndefined,
+                      spaceId
+                    )
+                  )
                 )
               )
-            )
-          );
+            : [];
 
           const isCompleted = expired || (responseData && every(responseData, ['pending', 0]));
           const agentByActionIdStatusMap = mapKeys(responseData, 'action_id');

@@ -13,6 +13,7 @@ import type { RunToolReturn } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
 import { isArray } from 'lodash';
 import { cleanPrompt } from '../prompts';
+import { sanitizeToolId, INTENT_PARAM } from './tools';
 
 /**
  * Extract the text content from a langchain message or chunk.
@@ -31,14 +32,28 @@ export const extractTextContent = (message: BaseMessage): string => {
   }
 };
 
+/**
+ * Extract the refusal the inference layer attached to a message, if any.
+ *
+ * `@kbn/inference-langchain` carries a chat completion's `refusal` (the provider's refusal text,
+ * or the inference plugin's placeholder for a `content_filter` finish reason) in
+ * `additional_kwargs.refusal`. A refused response otherwise looks like an empty one: no text,
+ * no tool calls.
+ */
+export const extractRefusal = (message: BaseMessage): string | undefined => {
+  const refusal = message.additional_kwargs?.refusal;
+  return typeof refusal === 'string' && refusal.length > 0 ? refusal : undefined;
+};
+
 export interface ToolCall {
   toolCallId: string;
   toolName: string;
   args: Record<string, any>;
 }
 
-export interface ToolCallWithReasoning extends ToolCall {
-  reasoning?: string;
+export interface ToolCallWithIntent extends ToolCall {
+  /** what the model is doing with this call, from the `_intent` param */
+  intent?: string;
 }
 
 /**
@@ -62,13 +77,16 @@ export const extractToolCalls = (message: BaseMessage): ToolCall[] => {
   return [];
 };
 
-export const extractToolCallsWithReasoning = (message: BaseMessage): ToolCallWithReasoning[] => {
+/**
+ * Extracts the tool calls from a message, moving the `_intent` param out of the args into `intent`.
+ */
+export const extractToolCallsWithIntent = (message: BaseMessage): ToolCallWithIntent[] => {
   return extractToolCalls(message).map((toolCall) => {
-    const { _reasoning, ...toolCallArgs } = toolCall.args ?? {};
+    const { [INTENT_PARAM]: intent, ...toolCallArgs } = toolCall.args ?? {};
     return {
       ...toolCall,
       args: toolCallArgs,
-      reasoning: typeof _reasoning === 'string' ? _reasoning : undefined,
+      intent: typeof intent === 'string' && intent.trim().length > 0 ? intent : undefined,
     };
   });
 };
@@ -108,9 +126,24 @@ export const generateFakeToolCallId = () => {
 
 export const createUserMessage = (
   content: string,
-  { clean = false }: { clean?: boolean } = {}
+  {
+    clean = false,
+    images,
+  }: { clean?: boolean; images?: Array<{ base64: string; mimeType: string }> } = {}
 ): HumanMessage => {
-  return new HumanMessage({ content: clean ? cleanPrompt(content) : content });
+  const text = clean ? cleanPrompt(content) : content;
+  if (images && images.length > 0) {
+    return new HumanMessage({
+      content: [
+        { type: 'text', text },
+        ...images.map((i) => ({
+          type: 'image_url' as const,
+          image_url: { url: `data:${i.mimeType};base64,${i.base64}` },
+        })),
+      ],
+    });
+  }
+  return new HumanMessage({ content: text });
 };
 
 export const createAIMessage = (
@@ -144,7 +177,7 @@ export const createToolResultMessage = ({
 };
 
 export const createToolCallMessage = (
-  toolCallOrCalls: ToolCallWithReasoning | ToolCallWithReasoning[],
+  toolCallOrCalls: ToolCallWithIntent | ToolCallWithIntent[],
   message?: string
 ): AIMessage => {
   const toolCalls = isArray(toolCallOrCalls) ? toolCallOrCalls : [toolCallOrCalls];
@@ -153,9 +186,9 @@ export const createToolCallMessage = (
     tool_calls: toolCalls.map((toolCall) => {
       return {
         id: toolCall.toolCallId,
-        name: toolCall.toolName,
-        args: toolCall.reasoning
-          ? { _reasoning: toolCall.reasoning, ...toolCall.args }
+        name: sanitizeToolId(toolCall.toolName),
+        args: toolCall.intent
+          ? { [INTENT_PARAM]: toolCall.intent, ...toolCall.args }
           : toolCall.args,
       };
     }),

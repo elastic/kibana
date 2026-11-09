@@ -9,7 +9,8 @@ import type { Pagination } from '@elastic/eui';
 import { EuiButton, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Connector } from '@kbn/search-connectors';
-import { ConnectorStatus, pageToPagination, SyncJobsTable } from '@kbn/search-connectors';
+import { ConnectorStatus, pageToPagination } from '@kbn/search-connectors';
+import { SyncJobsTable } from '@kbn/search-connectors/components';
 import { useQueryClient, useMutation } from '@kbn/react-query';
 import React, { useState } from 'react';
 import { useConnector } from '../../../hooks/api/use_connector';
@@ -31,7 +32,9 @@ export const ConnectorOverview: React.FC<ConnectorOverviewProps> = ({
   const { queryKey } = useConnector(connector.id);
   const { data, isLoading, isSuccess, mutate } = useMutation({
     mutationFn: async () => {
-      await http.post(`/internal/serverless_search/connectors/${connector.id}/sync`);
+      await http.post(
+        `/internal/serverless_search/connectors/${encodeURIComponent(connector.id)}/sync`
+      );
     },
     onSuccess: () => {
       queryClient.setQueryData(queryKey, { connector: { ...connector, index_name: data } });

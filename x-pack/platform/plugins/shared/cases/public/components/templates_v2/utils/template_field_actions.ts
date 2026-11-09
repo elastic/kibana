@@ -7,6 +7,7 @@
 
 import { parseDocument, isMap, isSeq } from 'yaml';
 import type { YAMLMap, YAMLSeq } from 'yaml';
+import { normalizeFieldDefinitionName } from '../../../../common/utils';
 import { FIELD_DEFAULT_SNIPPETS } from './template_field_snippets';
 import { createOffsetToPosition, getEffectiveFieldName } from './template_yaml_ast';
 
@@ -229,8 +230,14 @@ export const insertTemplateField = (
   const isRef = typeof field.$ref === 'string';
 
   if (isRef) {
-    // A library reference is identified by its $ref name; adding it twice is a no-op.
-    if (existingNames.has(field.$ref as string)) {
+    // A library reference is identified by its $ref name, compared case-insensitively so a
+    // re-cased $ref (e.g. after a case-only rename of the definition) is still recognized as
+    // already linked instead of creating a second reference to the same field.
+    const normalizedRef = normalizeFieldDefinitionName(field.$ref as string);
+    const alreadyLinked = Array.from(existingNames, normalizeFieldDefinitionName).includes(
+      normalizedRef
+    );
+    if (alreadyLinked) {
       return { yaml, changed: false, reason: 'exists' };
     }
   } else if (typeof field.name === 'string') {

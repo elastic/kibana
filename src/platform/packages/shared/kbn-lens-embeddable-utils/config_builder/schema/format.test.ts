@@ -142,27 +142,25 @@ describe('Format Schemas', () => {
     });
   });
 
-  describe('durationFormat — legacy unit names (accepted at HTTP layer)', () => {
-    it('accepts legacy `m` for minutes', () => {
+  describe('durationFormat — legacy unit names are rejected', () => {
+    it('rejects legacy `m` for minutes', () => {
       const input = {
         type: 'duration' as const,
         from: 'm',
         to: 'humanize',
       };
 
-      const validated = formatTypeSchema.parse(input);
-      expect(validated).toEqual(input);
+      expect(() => formatTypeSchema.parse(input)).toThrow();
     });
 
-    it('accepts legacy `humanizePrecise` output name', () => {
+    it('rejects legacy `humanizePrecise` output name', () => {
       const input = {
         type: 'duration' as const,
         from: 'ms',
         to: 'humanizePrecise',
       };
 
-      const validated = formatTypeSchema.parse(input);
-      expect(validated).toEqual(input);
+      expect(() => formatTypeSchema.parse(input)).toThrow();
     });
 
     it('rejects verbose long-form unit names in the GA duration schema', () => {

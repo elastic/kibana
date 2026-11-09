@@ -108,7 +108,7 @@ const OriginalStory = () => {
         <KibanaContentListPage.Header
           title="Maps"
           actions={
-            <EuiButton fill iconType="plusInCircle">
+            <EuiButton fill iconType="plusCircle">
               Create map
             </EuiButton>
           }
@@ -193,7 +193,7 @@ const ProposalStory = () => {
         <KibanaContentListPage.Header
           title="Maps"
           actions={
-            <EuiButton fill iconType="plusInCircle">
+            <EuiButton fill iconType="plusCircle">
               Create map
             </EuiButton>
           }

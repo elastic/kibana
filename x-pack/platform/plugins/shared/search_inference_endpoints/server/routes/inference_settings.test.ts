@@ -14,6 +14,7 @@ import {
   ROUTE_VERSIONS,
 } from '../../common/constants';
 import { APIRoutes } from '../../common/types';
+import { createEisConnector } from '../../__mocks__/inference_connector.mock';
 import { MockRouter } from '../../__mocks__/router.mock';
 import { defineInferenceSettingsRoutes } from './inference_settings';
 
@@ -138,7 +139,7 @@ describe('Inference Settings API', () => {
       const error = new Error('Unexpected error');
       mockSOClient.get.mockRejectedValue(error);
 
-      await expect(mockRouter.callRoute({})).rejects.toThrowError(error);
+      await expect(mockRouter.callRoute({})).rejects.toThrow(error);
     });
 
     it('should use hidden types client', async () => {
@@ -304,6 +305,111 @@ describe('Inference Settings API', () => {
           },
         });
       });
+
+      it('should accept endpoint parameters', () => {
+        mockRouter.shouldValidate({
+          body: {
+            features: [
+              {
+                feature_id: 'agent_builder',
+                endpoints: [
+                  {
+                    id: 'openai-gpt-5.4',
+                    parameters: { reasoning: { effort: 'high' } },
+                  },
+                ],
+              },
+            ],
+          },
+        });
+      });
+
+      it('should reject an unknown reasoning effort', () => {
+        mockRouter.shouldThrow({
+          body: {
+            features: [
+              {
+                feature_id: 'agent_builder',
+                endpoints: [{ id: 'openai-gpt-5.4', parameters: { reasoning: { effort: 'max' } } }],
+              },
+            ],
+          },
+        });
+      });
+    });
+
+    describe('endpoint parameters', () => {
+      const settingsWithEffort = {
+        features: [
+          {
+            feature_id: 'agent_builder',
+            endpoints: [{ id: 'openai-gpt-5.4', parameters: { reasoning: { effort: 'high' } } }],
+          },
+        ],
+      };
+      it('should store parameters the endpoint supports', async () => {
+        getConnectorById.mockResolvedValue(createEisConnector('openai-gpt-5.4', ['low', 'high']));
+        mockSOClient.create.mockResolvedValue({
+          id: INFERENCE_SETTINGS_ID,
+          type: INFERENCE_SETTINGS_SO_TYPE,
+          attributes: settingsWithEffort,
+          references: [],
+        });
+
+        await mockRouter.callRoute({ body: settingsWithEffort });
+
+        expect(getConnectorById).toHaveBeenCalledWith('openai-gpt-5.4', expect.anything());
+        expect(mockSOClient.create).toHaveBeenCalledWith(
+          INFERENCE_SETTINGS_SO_TYPE,
+          settingsWithEffort,
+          { id: INFERENCE_SETTINGS_ID, overwrite: true }
+        );
+        expect(mockRouter.response.ok).toHaveBeenCalledWith({
+          body: { _meta: { id: INFERENCE_SETTINGS_ID }, data: settingsWithEffort },
+          headers: { 'content-type': 'application/json' },
+        });
+      });
+
+      it('should not load endpoints when the settings have structural errors', async () => {
+        await mockRouter.callRoute({
+          body: { features: [settingsWithEffort.features[0], settingsWithEffort.features[0]] },
+        });
+
+        expect(getConnectorById).not.toHaveBeenCalled();
+        expect(mockRouter.response.badRequest).toHaveBeenCalledWith({
+          body: {
+            message: 'Invalid inference settings',
+            attributes: {
+              errors: [expect.stringContaining('Duplicate feature_id values: agent_builder')],
+            },
+          },
+        });
+      });
+
+      it('should re-throw connector lookup failures other than not found', async () => {
+        getConnectorById.mockRejectedValue(new Error('Elasticsearch unavailable'));
+
+        await expect(mockRouter.callRoute({ body: settingsWithEffort })).rejects.toThrow(
+          'Elasticsearch unavailable'
+        );
+        expect(mockSOClient.create).not.toHaveBeenCalled();
+      });
+
+      it('should reject a reasoning effort the endpoint does not support', async () => {
+        getConnectorById.mockResolvedValue(createEisConnector('openai-gpt-5.4', ['low']));
+
+        await mockRouter.callRoute({ body: settingsWithEffort });
+
+        expect(mockSOClient.create).not.toHaveBeenCalled();
+        expect(mockRouter.response.badRequest).toHaveBeenCalledWith({
+          body: {
+            message: 'Invalid inference settings',
+            attributes: {
+              errors: [expect.stringContaining('Reasoning level "high" is not supported')],
+            },
+          },
+        });
+      });
     });
 
     it('should reject duplicate feature_id values', async () => {
@@ -408,7 +514,7 @@ describe('Inference Settings API', () => {
             ],
           },
         })
-      ).rejects.toThrowError(error);
+      ).rejects.toThrow(error);
     });
   });
 });

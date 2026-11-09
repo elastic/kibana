@@ -36,6 +36,7 @@ export interface SloBurnRateWindowColumnHeaderProps {
   buttonTestSubj: string;
   popoverAriaLabel: string;
   burnRateLabel: string;
+  isInteractive?: boolean;
 }
 
 export function SloBurnRateWindowColumnHeader({
@@ -46,15 +47,17 @@ export function SloBurnRateWindowColumnHeader({
   buttonTestSubj,
   popoverAriaLabel,
   burnRateLabel,
+  isInteractive = true,
 }: SloBurnRateWindowColumnHeaderProps) {
   return (
     <EuiPopover
       aria-label={popoverAriaLabel}
       button={
         <EuiButtonEmpty
+          disabled={!isInteractive}
           data-test-subj={buttonTestSubj}
           size="xs"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           onClick={() => setIsPopoverOpen((open) => !open)}
           css={{ fontWeight: 700 }}

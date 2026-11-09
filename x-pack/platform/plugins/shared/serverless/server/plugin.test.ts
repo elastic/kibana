@@ -24,7 +24,7 @@ describe('Serverless Plugin', () => {
   describe('start()', () => {
     it('throws if project settings are not set up', () => {
       plugin.setup(mockCoreSetup);
-      expect(() => plugin.start(mockCoreStart)).toThrowError(
+      expect(() => plugin.start(mockCoreStart)).toThrow(
         "The uiSettings allowlist for serverless hasn't been set up. Make sure to set up your serverless project settings with setupProjectSettings()"
       );
     });

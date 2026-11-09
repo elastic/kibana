@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import type { Logger, RequestHandler } from '@kbn/core/server';
-import { isAgentBuilderError } from '@kbn/agent-builder-common';
+import { isAgentBuilderError, isConversationBusyError } from '@kbn/agent-builder-common';
 import { isInferenceError } from '@kbn/inference-common';
 import { isValidLicense } from '../../common/license';
 import type { AgentBuilderHandlerContext } from '../request_handler_context';
@@ -72,15 +73,32 @@ export const getHandlerWrapper =
           }
         }
         if (isAgentBuilderError(e)) {
-          logger.error(e);
+          // A busy conversation is an expected refusal the caller retries, not a failure.
+          if (isConversationBusyError(e)) {
+            logger.debug(`Request refused: ${e.message}`);
+          } else {
+            logger.error(e);
+          }
+
           return res.customError({
             body: {
               message: e.message,
               attributes: {
                 trace_id: e.meta?.traceId,
+                active_execution_id: e.meta?.activeExecutionId,
               },
             },
             statusCode: e.meta?.statusCode ?? 500,
+          });
+        }
+        // A 4xx Boom is a refusal the caller can act on, for example a service account that
+        // can't be granted the API key a scheduled task needs.
+        if (Boom.isBoom(e) && e.output.statusCode < 500) {
+          logger.warn(`Request refused: ${e.message}`);
+          return res.customError({
+            body: { message: e.message },
+            statusCode: e.output.statusCode,
+            headers: e.output.headers as { [key: string]: string },
           });
         }
         logger.error(`Unexpected error in handler: ${e.stack ?? e.message}`);

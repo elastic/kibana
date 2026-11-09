@@ -65,6 +65,7 @@ export const inspectBrowserMonitorFixture: Record<string, unknown> = {
   'filter_journeys.match': 'check if title is present',
   'filter_journeys.tags': [],
   ignore_https_errors: false,
+  certificate_error_spki_allowlist: [],
   throttling: {
     value: {
       download: '5',

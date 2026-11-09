@@ -1,0 +1,382 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+jest.mock('node:https', () => {
+  const actual = jest.requireActual('node:https');
+  return { ...actual, request: jest.fn() };
+});
+
+import type { ClientRequest } from 'node:http';
+import * as https from 'node:https';
+import { actionsMock } from '@kbn/actions-plugin/server/mocks';
+import type { ConnectorEventEmitParams, ConnectorEventEmitter } from '@kbn/actions-plugin/server';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { HITL_SLACK_ACTION_EVENT_ID } from '@kbn/workflows';
+import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
+
+import {
+  getConnectorEventEmitFailureCount,
+  registerWorkflowsConnectorEventEmitter,
+  resetConnectorEventEmitFailureCountForTests,
+} from './register_workflows_connector_event_emitter';
+
+const createEmitParams = (
+  overrides: Partial<ConnectorEventEmitParams> = {}
+): ConnectorEventEmitParams => ({
+  eventId: 'inboundWebhook.received',
+  payload: { body: {} },
+  spaceId: DEFAULT_SPACE_ID,
+  connectorId: 'c1',
+  connectorTypeId: '.inboundWebhook',
+  request: httpServerMock.createKibanaRequest({
+    headers: { authorization: 'ApiKey encoded-key' },
+  }),
+  ...overrides,
+});
+
+describe('registerWorkflowsConnectorEventEmitter', () => {
+  const logger = loggingSystemMock.createLogger();
+  let end: jest.Mock;
+  let requestMock: jest.Mock;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    resetConnectorEventEmitFailureCountForTests();
+    ({ end, requestMock } = mockHttpsRequest());
+  });
+
+  const registerAndGetEmitter = ({
+    getClient,
+    getWorkflowsExtensionsStart,
+  }: {
+    getClient?: jest.Mock;
+    getWorkflowsExtensionsStart?: () => Promise<WorkflowsExtensionsServerPluginStart | undefined>;
+  } = {}): {
+    emitter: ConnectorEventEmitter;
+    emitEvent: jest.Mock;
+    resumeExternalHitl: jest.Mock;
+    getClient: jest.Mock;
+    actions: ReturnType<typeof actionsMock.createSetup>;
+  } => {
+    const actions = actionsMock.createSetup();
+    const emitEvent = jest.fn().mockResolvedValue(undefined);
+    const resumeExternalHitl = jest.fn().mockResolvedValue(undefined);
+    const resolvedGetClient =
+      getClient ?? jest.fn().mockResolvedValue({ emitEvent, resumeExternalHitl });
+
+    registerWorkflowsConnectorEventEmitter({
+      actions,
+      logger,
+      getWorkflowsExtensionsStart:
+        getWorkflowsExtensionsStart ??
+        (async () =>
+          ({ getClient: resolvedGetClient } as unknown as WorkflowsExtensionsServerPluginStart)),
+    });
+
+    expect(actions.registerConnectorEventEmitter).toHaveBeenCalledTimes(1);
+    const emitter = actions.registerConnectorEventEmitter.mock.calls[0][0] as ConnectorEventEmitter;
+    return { emitter, emitEvent, resumeExternalHitl, getClient: resolvedGetClient, actions };
+  };
+
+  it('registers an emitter that forwards to workflows emitEvent with enriched payload', async () => {
+    const { emitter, emitEvent, getClient } = registerAndGetEmitter();
+
+    const params = createEmitParams({
+      payload: { body: { hello: 'world' } },
+      correlationKey: 'corr-1',
+    });
+    await emitter.emit(params);
+
+    expect(getClient).toHaveBeenCalledTimes(1);
+    expect(getClient).toHaveBeenCalledWith(params.request);
+    expect(params.request.headers.authorization).toBe('ApiKey encoded-key');
+    expect(emitEvent).toHaveBeenCalledWith('inboundWebhook.received', {
+      body: { hello: 'world' },
+      connectorId: 'c1',
+      connectorTypeId: '.inboundWebhook',
+      spaceId: 'default',
+      correlationKey: 'corr-1',
+    });
+  });
+
+  it('enriches emit payload even when spoke payload omits connectorId', async () => {
+    const { emitter, emitEvent } = registerAndGetEmitter();
+
+    await emitter.emit(
+      createEmitParams({
+        eventId: 'myConnector.received',
+        spaceId: asSpaceId('space-a'),
+        connectorId: 'connector-99',
+        connectorTypeId: '.myConnector',
+      })
+    );
+
+    expect(emitEvent).toHaveBeenCalledWith('myConnector.received', {
+      body: {},
+      connectorId: 'connector-99',
+      connectorTypeId: '.myConnector',
+      spaceId: 'space-a',
+    });
+  });
+
+  it('omits correlationKey from enriched payload when undefined', async () => {
+    const { emitter, emitEvent } = registerAndGetEmitter();
+
+    await emitter.emit(
+      createEmitParams({
+        eventId: 'myConnector.received',
+        connectorTypeId: '.myConnector',
+      })
+    );
+
+    expect(emitEvent.mock.calls[0][1]).not.toHaveProperty('correlationKey');
+  });
+
+  it('throws when workflowsExtensions is missing so the hub logs emit_partial', async () => {
+    const { emitter, emitEvent, getClient } = registerAndGetEmitter({
+      getWorkflowsExtensionsStart: async () => undefined,
+    });
+
+    await expect(emitter.emit(createEmitParams())).rejects.toThrow(
+      'Workflows extensions unavailable'
+    );
+
+    expect(getClient).not.toHaveBeenCalled();
+    expect(emitEvent).not.toHaveBeenCalled();
+    expect(getConnectorEventEmitFailureCount()).toBe(1);
+  });
+
+  it('increments failure counter and rethrows when emitEvent fails', async () => {
+    const emitEvent = jest.fn().mockRejectedValue(new Error('emit boom'));
+    const getClient = jest.fn().mockResolvedValue({ emitEvent });
+    const { emitter } = registerAndGetEmitter({ getClient });
+
+    await expect(emitter.emit(createEmitParams())).rejects.toThrow('emit boom');
+
+    expect(getConnectorEventEmitFailureCount()).toBe(1);
+  });
+
+  it('increments failure counter when getClient throws', async () => {
+    const getClient = jest.fn().mockRejectedValue(new Error('client boom'));
+    const { emitter } = registerAndGetEmitter({ getClient });
+
+    await expect(emitter.emit(createEmitParams())).rejects.toThrow('client boom');
+
+    expect(getConnectorEventEmitFailureCount()).toBe(1);
+  });
+
+  it('throws when the emit request has no Authorization header', async () => {
+    const { emitter, getClient, emitEvent } = registerAndGetEmitter();
+
+    await expect(
+      emitter.emit(
+        createEmitParams({
+          request: httpServerMock.createKibanaRequest({ headers: {} }),
+        })
+      )
+    ).rejects.toThrow('authenticated request');
+
+    expect(getClient).not.toHaveBeenCalled();
+    expect(emitEvent).not.toHaveBeenCalled();
+    expect(getConnectorEventEmitFailureCount()).toBe(1);
+  });
+
+  it('resumes HITL instead of starting a workflow for slack2.hitl_action', async () => {
+    const { emitter, emitEvent, resumeExternalHitl } = registerAndGetEmitter();
+
+    await emitter.emit(
+      createEmitParams({
+        eventId: HITL_SLACK_ACTION_EVENT_ID,
+        connectorTypeId: '.slack2',
+        payload: {
+          executionId: 'exec-1',
+          stepId: 'step-1',
+          token: 'token-1',
+          spaceId: 'default',
+          kind: 'approval',
+          approved: true,
+        },
+      })
+    );
+
+    expect(emitEvent).not.toHaveBeenCalled();
+    expect(resumeExternalHitl).toHaveBeenCalledWith({
+      token: 'token-1',
+      executionId: 'exec-1',
+      stepId: 'step-1',
+      spaceId: 'default',
+      input: { approved: true },
+    });
+  });
+
+  it('replaces the Slack message after a successful HITL resume', async () => {
+    const { emitter, resumeExternalHitl } = registerAndGetEmitter();
+
+    await emitter.emit(
+      createEmitParams({
+        eventId: HITL_SLACK_ACTION_EVENT_ID,
+        connectorTypeId: '.slack2',
+        payload: {
+          executionId: 'exec-1',
+          stepId: 'step-1',
+          token: 'token-1',
+          spaceId: 'default',
+          kind: 'approval',
+          approved: true,
+          responseUrl: 'https://hooks.slack.com/actions/T/B/mamba',
+          slackUserId: 'U123',
+        },
+      })
+    );
+
+    expect(resumeExternalHitl).toHaveBeenCalled();
+    expect(requestMock).toHaveBeenCalledWith(
+      'https://hooks.slack.com/actions/T/B/mamba',
+      expect.objectContaining({ method: 'POST' }),
+      expect.any(Function)
+    );
+    expect(end).toHaveBeenCalledWith(
+      JSON.stringify({
+        replace_original: true,
+        text: 'Approved by <@U123>.',
+      })
+    );
+  });
+
+  it('replaces the Slack message and swallows already-claimed HITL resumes', async () => {
+    const alreadyClaimed = Object.assign(
+      new Error('This workflow response link is no longer valid'),
+      {
+        name: 'ExternalResumeError',
+        statusCode: 409,
+      }
+    );
+    const resumeExternalHitl = jest.fn().mockRejectedValue(alreadyClaimed);
+    const getClient = jest.fn().mockResolvedValue({ emitEvent: jest.fn(), resumeExternalHitl });
+    const { emitter } = registerAndGetEmitter({ getClient });
+
+    await expect(
+      emitter.emit(
+        createEmitParams({
+          eventId: HITL_SLACK_ACTION_EVENT_ID,
+          connectorTypeId: '.slack2',
+          payload: {
+            executionId: 'exec-1',
+            stepId: 'step-1',
+            token: 'token-1',
+            spaceId: 'default',
+            kind: 'approval',
+            approved: false,
+            responseUrl: 'https://hooks.slack.com/actions/T/B/mamba',
+          },
+        })
+      )
+    ).resolves.toBeUndefined();
+
+    expect(getConnectorEventEmitFailureCount()).toBe(0);
+    expect(end).toHaveBeenCalledWith(
+      JSON.stringify({
+        replace_original: true,
+        text: 'This request was already responded to.',
+      })
+    );
+  });
+
+  it('sends an exposed validation failure back to the clicker and still fails the emit', async () => {
+    const validationError = Object.assign(new Error('Number must be greater than or equal to 1'), {
+      name: 'ExternalResumeError',
+      statusCode: 400,
+      expose: true,
+    });
+    const resumeExternalHitl = jest.fn().mockRejectedValue(validationError);
+    const getClient = jest.fn().mockResolvedValue({ emitEvent: jest.fn(), resumeExternalHitl });
+    const { emitter } = registerAndGetEmitter({ getClient });
+
+    await expect(
+      emitter.emit(
+        createEmitParams({
+          eventId: HITL_SLACK_ACTION_EVENT_ID,
+          connectorTypeId: '.slack2',
+          payload: {
+            executionId: 'exec-1',
+            stepId: 'step-1',
+            token: 'token-1',
+            spaceId: 'default',
+            kind: 'input',
+            inputJson: JSON.stringify({ count: 0 }),
+            responseUrl: 'https://hooks.slack.com/actions/T/B/mamba',
+          },
+        })
+      )
+    ).rejects.toBe(validationError);
+
+    expect(getConnectorEventEmitFailureCount()).toBe(1);
+    expect(end).toHaveBeenCalledWith(
+      JSON.stringify({
+        response_type: 'ephemeral',
+        replace_original: false,
+        text: 'Number must be greater than or equal to 1',
+      })
+    );
+  });
+
+  it('does not post a Slack message for a validation error that is not exposed', async () => {
+    const hiddenError = Object.assign(new Error('internal'), {
+      name: 'ExternalResumeError',
+      statusCode: 400,
+      expose: false,
+    });
+    const resumeExternalHitl = jest.fn().mockRejectedValue(hiddenError);
+    const getClient = jest.fn().mockResolvedValue({ emitEvent: jest.fn(), resumeExternalHitl });
+    const { emitter } = registerAndGetEmitter({ getClient });
+
+    await expect(
+      emitter.emit(
+        createEmitParams({
+          eventId: HITL_SLACK_ACTION_EVENT_ID,
+          connectorTypeId: '.slack2',
+          payload: {
+            executionId: 'exec-1',
+            stepId: 'step-1',
+            token: 'token-1',
+            spaceId: 'default',
+            kind: 'input',
+            inputJson: '{}',
+            responseUrl: 'https://hooks.slack.com/actions/T/B/mamba',
+          },
+        })
+      )
+    ).rejects.toBe(hiddenError);
+
+    expect(requestMock).not.toHaveBeenCalled();
+    expect(getConnectorEventEmitFailureCount()).toBe(1);
+  });
+});
+
+function mockHttpsRequest(): { end: jest.Mock; requestMock: jest.Mock } {
+  const end = jest.fn();
+  const requestMock = https.request as unknown as jest.Mock;
+  requestMock.mockImplementation((...args: unknown[]) => {
+    const callback = args[2] as (res: {
+      resume: () => void;
+      on: (event: string, handler: () => void) => void;
+    }) => void;
+    const res = {
+      resume: jest.fn(),
+      on: (event: string, handler: () => void) => {
+        if (event === 'end') {
+          handler();
+        }
+      },
+    };
+    callback(res);
+    return { on: jest.fn().mockReturnThis(), end } as unknown as ClientRequest;
+  });
+  return { end, requestMock };
+}

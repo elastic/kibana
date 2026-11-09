@@ -15,6 +15,31 @@ const DEFAULT_INPUT_FORMAT = {
   }),
   kind: 'seconds',
 };
+const durationUnitSeconds = {
+  picoseconds: 0.000000000001,
+  nanoseconds: 0.000000001,
+  microseconds: 0.000001,
+  milliseconds: 0.001,
+  seconds: 1,
+  minutes: 60,
+  hours: 3600,
+  days: 86400,
+  weeks: 604800,
+  months: 2592000,
+  years: 31536000,
+} as const;
+const durationOutputUnits = {
+  humanize: 'seconds',
+  humanizePrecise: 'seconds',
+  asMilliseconds: 'milliseconds',
+  asSeconds: 'seconds',
+  asMinutes: 'minutes',
+  asHours: 'hours',
+  asDays: 'days',
+  asWeeks: 'weeks',
+  asMonths: 'months',
+  asYears: 'years',
+} as const;
 const inputFormats = [
   {
     text: i18n.translate('fieldFormats.duration.inputFormats.picoseconds', {
@@ -170,3 +195,9 @@ export const DEFAULT_DURATION_INPUT_FORMAT = DEFAULT_INPUT_FORMAT;
 export const DEFAULT_DURATION_OUTPUT_FORMAT = DEFAULT_OUTPUT_FORMAT;
 export const DURATION_INPUT_FORMATS = inputFormats;
 export const DURATION_OUTPUT_FORMATS = outputFormats;
+
+export const getDurationUnitInSeconds = (inputFormat: string): number | undefined =>
+  durationUnitSeconds[inputFormat as keyof typeof durationUnitSeconds];
+
+export const getDurationUnitFromOutputFormat = (outputFormat: string): string | undefined =>
+  durationOutputUnits[outputFormat as keyof typeof durationOutputUnits];

@@ -139,7 +139,7 @@ const invokeSingleCustomWorkflow = async ({
 
   try {
     // Step 1: Get and validate the workflow
-    const rawWorkflow = await workflowsManagementApi.getWorkflow(workflowId, spaceId);
+    const rawWorkflow = await workflowsManagementApi.getWorkflow(workflowId, spaceId, request);
     workflowName = rawWorkflow?.name;
     logger.debug(
       () =>
@@ -213,6 +213,7 @@ const invokeSingleCustomWorkflow = async ({
     // array and silently drop the retrieved alerts. Custom workflows have arbitrary
     // step types, so readiness is "at least one step executed".
     const execution = await pollForWorkflowCompletion({
+      request,
       executionId: workflowRunId,
       isReady: (exec) => exec.stepExecutions.length > 0,
       logger,

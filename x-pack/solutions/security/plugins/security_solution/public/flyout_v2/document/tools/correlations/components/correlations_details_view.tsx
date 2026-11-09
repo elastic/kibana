@@ -71,7 +71,11 @@ export const CorrelationsDetailsView = memo(
       [hit]
     );
 
-    const { show: showAlertsByAncestry, ancestryDocumentId } = useShowRelatedAlertsByAncestry({
+    const {
+      show: showAlertsByAncestry,
+      ancestryDocumentId,
+      ancestryDocumentIndex,
+    } = useShowRelatedAlertsByAncestry({
       hit,
     });
     const { show: showSameSourceAlerts, originalEventId } = useShowRelatedAlertsBySameSourceEvent({
@@ -137,6 +141,7 @@ export const CorrelationsDetailsView = memo(
                 <RelatedAlertsByAncestry
                   scopeId={scopeId}
                   documentId={ancestryDocumentId}
+                  documentIndex={ancestryDocumentIndex}
                   onShowAlert={onShowAlert}
                   useLegacyExpandableFlyout={useLegacyExpandableFlyout}
                 />

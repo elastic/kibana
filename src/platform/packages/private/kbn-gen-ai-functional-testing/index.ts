@@ -27,3 +27,12 @@ export {
   enableCcm,
   type DiscoveredModel,
 } from './src/eis_helpers';
+export {
+  MAX_LLM_SMOKE_JUDGES,
+  discoverEisJudgeInferenceIds,
+  judgeLlmSmokeFailure,
+  recordLlmSmokeJudgement,
+  type LlmSmokeFailureEvidence,
+  type LlmSmokeFailureJudgement,
+  type LlmSmokeFailureVerdict,
+} from './src/llm_failure_judge';

@@ -28,9 +28,9 @@ Implemented using the new OpenAPI codegen and bundle packages:
 To run codegen/bundling locally, cd to `x-pack/platform/packages/shared/kbn-elastic-assistant-common/` and run any of the following commands:
 
 ```bash
-yarn openapi:generate
-yarn openapi:generate:debug
-yarn openapi:bundle
+pnpm openapi:generate
+pnpm openapi:generate:debug
+pnpm openapi:bundle
 ```
 
 Codegen is configured to run on CI by means of the `.buildkite/scripts/steps/code_generation/elastic_assistant_codegen.sh` script, which is run as part of the `checks` pipeline, and is registered in `.buildkite/scripts/steps/checks.sh`.

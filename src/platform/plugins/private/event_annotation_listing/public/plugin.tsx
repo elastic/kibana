@@ -9,7 +9,6 @@
 
 import React from 'react';
 import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
-import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
@@ -23,6 +22,7 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { KqlPluginStart } from '@kbn/kql/public';
 import type { TableListTabParentProps } from '@kbn/content-management-tabbed-table-list-view';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { i18n } from '@kbn/i18n';
 import type { EventAnnotationListingPageServices } from './components/annotation_listing_page';
 import { ANNOTATION_GROUPS_TAB_TITLE, CREATE_ANNOTATION_GROUP_ERROR_TITLE } from './constants';
 
@@ -31,7 +31,6 @@ export interface EventAnnotationListingStartDependencies {
   eventAnnotation: EventAnnotationPluginStart;
   data: DataPublicPluginStart;
   savedObjectsTagging: SavedObjectTaggingPluginStart;
-  presentationUtil: PresentationUtilPluginStart;
   dataViews: DataViewsPublicPluginStart;
   embeddable: EmbeddableStart;
   kql: KqlPluginStart;
@@ -101,23 +100,30 @@ export class EventAnnotationListingPlugin
     dependencies.visualizations.listingViewRegistry.add(annotationGroupsTabConfig);
     dependencies.dashboard.registerListingPageTab({
       ...annotationGroupsTabConfig,
-      createAction: async () => {
-        let coreStart: CoreStart | undefined;
-        try {
-          const [resolvedCoreStart, pluginsStart] = await core.getStartServices();
-          coreStart = resolvedCoreStart;
-          const { navigateToLensForAnnotationGroup } = await import(
-            './components/use_navigate_to_lens'
-          );
-          await navigateToLensForAnnotationGroup({
-            core: coreStart,
-            embeddable: pluginsStart.embeddable,
-          });
-        } catch (error) {
-          coreStart?.notifications.toasts.addError(error, {
-            title: CREATE_ANNOTATION_GROUP_ERROR_TITLE,
-          });
-        }
+      createAction: {
+        order: 2,
+        label: i18n.translate('eventAnnotationListing.createAnnotationButtonLabel', {
+          defaultMessage: 'Create annotation',
+        }),
+        iconType: 'flag',
+        create: async (_path: string) => {
+          let coreStart: CoreStart | undefined;
+          try {
+            const [resolvedCoreStart, pluginsStart] = await core.getStartServices();
+            coreStart = resolvedCoreStart;
+            const { navigateToLensForAnnotationGroup } = await import(
+              './components/use_navigate_to_lens'
+            );
+            await navigateToLensForAnnotationGroup({
+              core: coreStart,
+              embeddable: pluginsStart.embeddable,
+            });
+          } catch (error) {
+            coreStart?.notifications.toasts.addError(error, {
+              title: CREATE_ANNOTATION_GROUP_ERROR_TITLE,
+            });
+          }
+        },
       },
     });
   }

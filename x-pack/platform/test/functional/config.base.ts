@@ -65,6 +65,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       defaults: {
         'accessibility:disableAnimations': true,
         'dateFormat:tz': 'UTC',
+        'histogram:barTarget': 50,
       },
       globalDefaults: {
         // Disable tours globally for all tests
@@ -97,14 +98,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       },
       graph: {
         pathname: '/app/graph',
-      },
-      grokDebugger: {
-        pathname: '/app/dev_tools',
-        hash: '/grokdebugger',
-      },
-      searchProfiler: {
-        pathname: '/app/dev_tools',
-        hash: '/searchprofiler',
       },
       painlessLab: {
         pathname: '/app/dev_tools',
@@ -146,15 +139,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       },
       indexManagement: {
         pathname: '/app/management/data/index_management',
-      },
-      indexLifecycleManagement: {
-        pathname: '/app/management/data/index_lifecycle_management',
-      },
-      ingestPipelines: {
-        pathname: '/app/management/ingest/ingest_pipelines',
-      },
-      snapshotRestore: {
-        pathname: '/app/management/data/snapshot_restore',
       },
       spacesManagement: {
         pathname: '/app/management/kibana/spaces',
@@ -206,9 +190,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       },
       obsAIAssistantManagement: {
         pathname: '/app/management/ai/observabilityAiAssistantManagement',
-      },
-      searchPlayground: {
-        pathname: '/app/search_playground',
       },
       agentBuilder: {
         pathname: '/app/agent_builder',
@@ -644,36 +625,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
             },
           ],
         },
-        // https://www.elastic.co/guide/en/elasticsearch/reference/master/snapshots-register-repository.html#snapshot-repo-prereqs
-        snapshot_restore_user: {
-          elasticsearch: {
-            cluster: [
-              'monitor',
-              'manage_slm',
-              'cluster:admin/snapshot',
-              'cluster:admin/repository',
-              'manage_index_templates',
-            ],
-            indices: [
-              {
-                names: ['*'],
-                privileges: ['all'],
-              },
-            ],
-          },
-          kibana: [
-            {
-              feature: {
-                advancedSettings: ['read'],
-              },
-              spaces: ['*'],
-            },
-          ],
-        },
 
         ingest_pipelines_user: {
           elasticsearch: {
-            cluster: ['manage_pipeline', 'cluster:monitor/nodes/info'],
+            cluster: ['manage_pipeline'],
           },
           kibana: [
             {
@@ -697,12 +652,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
               spaces: ['*'],
             },
           ],
-        },
-
-        license_management_user: {
-          elasticsearch: {
-            cluster: ['manage'],
-          },
         },
 
         logstash_read_user: {

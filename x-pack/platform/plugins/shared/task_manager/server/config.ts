@@ -44,6 +44,10 @@ const FIVE_MIN_IN_MS = 5 * 60 * 1000;
 
 export const DEFAULT_KIBANAS_PER_PARTITION = 2;
 
+export const DEFAULT_EXECUTION_CONTROL_POLL_INTERVAL_MS = 5000; // 5 seconds
+const MIN_EXECUTION_CONTROL_POLL_INTERVAL_MS = 1000; // 1 second
+const MAX_EXECUTION_CONTROL_POLL_INTERVAL_MS = 1000 * 60; // 1 minute
+
 export enum ApiKeyType {
   ES = 'es',
   UIAM = 'uiam',
@@ -100,6 +104,10 @@ export const configSchema = schema.object(
     grant_uiam_api_keys: schema.boolean({ defaultValue: false }),
     /* The number of normal cost tasks that this Kibana instance will run simultaneously */
     capacity: schema.maybe(schema.number({ min: MIN_CAPACITY, max: MAX_CAPACITY })),
+    /* Lets `runSoon(..., { requestImmediateClaim: true })` request an extra claim cycle. */
+    claim_nudge: schema.object({
+      enabled: schema.boolean({ defaultValue: true }),
+    }),
     discovery: schema.object({
       active_nodes_lookback: schema.string({
         defaultValue: DEFAULT_ACTIVE_NODES_LOOK_BACK_DURATION,
@@ -118,6 +126,14 @@ export const configSchema = schema.object(
         defaultValue: DEFAULT_DISCOVERY_INTERVAL_MS,
         min: MIN_DISCOVERY_INTERVAL_MS,
         max: MAX_DISCOVERY_INTERVAL_MS,
+      }),
+    }),
+    /* How often each node polls the runtime task execution control (pause/resume) state. */
+    execution_control: schema.object({
+      poll_interval: schema.number({
+        defaultValue: DEFAULT_EXECUTION_CONTROL_POLL_INTERVAL_MS,
+        min: MIN_EXECUTION_CONTROL_POLL_INTERVAL_MS,
+        max: MAX_EXECUTION_CONTROL_POLL_INTERVAL_MS,
       }),
     }),
     /* Allows for old kibana config to start kibana without crashing since ephemeral tasks are deprecated*/

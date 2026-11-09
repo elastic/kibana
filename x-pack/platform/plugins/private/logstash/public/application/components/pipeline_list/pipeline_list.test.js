@@ -8,6 +8,7 @@
 import React from 'react';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { PipelineList } from './pipeline_list';
+import { PipelineAppHeader, createPipelineButtonLabel } from '../pipeline_app_header';
 
 describe('PipelineList component', () => {
   let props;
@@ -35,6 +36,11 @@ describe('PipelineList component', () => {
         isClusterInfoAvailable: getIsClusterInfoAvailable(true),
         deleteSelectedPipelines: getDeleteSelectedPipelines(true),
       },
+      history: {
+        createHref: ({ pathname }) => pathname,
+        push: jest.fn(),
+      },
+      createPipeline: jest.fn(),
       isServerless: false,
       isReadOnly: false,
       licenseService: {
@@ -64,12 +70,12 @@ describe('PipelineList component', () => {
   it('notifies the user if readonly after pipeline load', async () => {
     props.isReadOnly = true;
     await renderWithProps();
-    expect(addWarning).toBeCalledWith('the license service message');
+    expect(addWarning).toHaveBeenCalledWith('the license service message');
   });
 
   it('does not notify if not readonly', async () => {
     await renderWithProps();
-    expect(addWarning).not.toBeCalled();
+    expect(addWarning).not.toHaveBeenCalled();
   });
 
   it('renders empty prompt for no pipelines', async () => {
@@ -86,7 +92,7 @@ describe('PipelineList component', () => {
     });
     props.isReadOnly = false;
     await renderWithProps();
-    expect(addDanger).toBeCalledWith(`Couldn't load pipeline. Error: "Unauthorized access".`);
+    expect(addDanger).toHaveBeenCalledWith(`Couldn't load pipeline. Error: "Unauthorized access".`);
   });
 
   it('sets state to forbidden if 403 error and not readonly', async () => {
@@ -109,5 +115,59 @@ describe('PipelineList component', () => {
     const component = wrapper.instance();
     expect(component.state.isLoading).toBe(false);
     expect(component.state.isForbidden).toBe(false);
+  });
+
+  describe('create pipeline header action', () => {
+    const getCreateAction = (wrapper) =>
+      wrapper.find(PipelineAppHeader).prop('menu')?.primaryActionItem;
+
+    it('renders create pipeline in the header after pipelines load', async () => {
+      const wrapper = await renderWithProps();
+      wrapper.setState({ isLoading: false, isForbidden: false, pipelines });
+
+      const createAction = getCreateAction(wrapper);
+      expect(createAction).toEqual(
+        expect.objectContaining({
+          id: 'createPipeline',
+          label: createPipelineButtonLabel,
+          testId: 'btnAdd',
+          href: '/pipeline/new-pipeline',
+          disableButton: false,
+        })
+      );
+
+      createAction.run();
+      expect(props.createPipeline).toHaveBeenCalledTimes(1);
+    });
+
+    it('disables the header create pipeline action when read only', async () => {
+      props.isReadOnly = true;
+      const wrapper = await renderWithProps();
+      wrapper.setState({ isLoading: false, isForbidden: false, pipelines });
+
+      expect(getCreateAction(wrapper).disableButton).toBe(true);
+    });
+
+    it('does not put create pipeline in the header while loading', () => {
+      const wrapper = shallowWithIntl(<PipelineList.WrappedComponent {...props} />);
+      wrapper.setState({ isLoading: true, pipelines: [] });
+
+      expect(getCreateAction(wrapper)).toBeUndefined();
+    });
+
+    it('does not put create pipeline in the header when the list is empty', async () => {
+      props.pipelinesService.getPipelineList = getGetPipelineList(true, []);
+      const wrapper = await renderWithProps();
+      wrapper.setState({ isLoading: false, isForbidden: false, pipelines: [] });
+
+      expect(getCreateAction(wrapper)).toBeUndefined();
+    });
+
+    it('does not put create pipeline in the header when access is forbidden', async () => {
+      const wrapper = await renderWithProps();
+      wrapper.setState({ isLoading: false, isForbidden: true, pipelines });
+
+      expect(getCreateAction(wrapper)).toBeUndefined();
+    });
   });
 });

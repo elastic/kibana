@@ -16,12 +16,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { UseWiredStreamsStatusResult } from '../../../../hooks/use_wired_streams_status';
 import { buildInstallCommand } from '../build_install_command';
-import {
-  WiredStreamsIngestionSelector,
-  type IngestionMode,
-} from '../../shared/wired_streams_ingestion_selector';
 
 export type OtelOs = 'linux' | 'mac' | 'windows';
 
@@ -36,15 +31,8 @@ export interface OtelLogsSetupData {
 interface OtelLogsInstallStepProps {
   os: OtelOs;
   setupData?: OtelLogsSetupData;
-  ingestionMode: IngestionMode;
-  onIngestionModeChange: (mode: IngestionMode) => void;
   isMetricsOnboardingEnabled: boolean;
   isManagedOtlpServiceAvailable: boolean;
-  wiredStreamsStatus: Pick<
-    UseWiredStreamsStatusResult,
-    'isEnabled' | 'isLoading' | 'isEnabling' | 'enableWiredStreams'
-  >;
-  streamsDocLink?: string;
   useInlineCopyOnly?: boolean;
   useColoredSyntax?: boolean;
 }
@@ -60,18 +48,11 @@ const COMMAND_TITLE = i18n.translate(
 export const OtelLogsInstallStep: React.FC<OtelLogsInstallStepProps> = ({
   os,
   setupData,
-  ingestionMode,
-  onIngestionModeChange,
   isMetricsOnboardingEnabled,
   isManagedOtlpServiceAvailable,
-  wiredStreamsStatus,
-  streamsDocLink,
   useInlineCopyOnly = false,
   useColoredSyntax = false,
 }) => {
-  const { isEnabled, isLoading, isEnabling, enableWiredStreams } = wiredStreamsStatus;
-  const useWiredStreams = ingestionMode === 'wired';
-
   const command = setupData
     ? buildInstallCommand({
         platform: os,
@@ -81,7 +62,6 @@ export const OtelLogsInstallStep: React.FC<OtelLogsInstallStepProps> = ({
         elasticsearchUrl: setupData.elasticsearchUrl,
         apiKeyEncoded: setupData.apiKeyEncoded,
         agentVersion: setupData.elasticAgentVersionInfo.agentVersion,
-        useWiredStreams,
       })
     : '';
 
@@ -89,20 +69,6 @@ export const OtelLogsInstallStep: React.FC<OtelLogsInstallStepProps> = ({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
-      {!isLoading && (
-        <EuiFlexItem grow={false}>
-          <WiredStreamsIngestionSelector
-            ingestionMode={ingestionMode}
-            onChange={onIngestionModeChange}
-            streamsDocLink={streamsDocLink}
-            isWiredStreamsEnabled={isEnabled}
-            isEnabling={isEnabling}
-            flowType="otel_host"
-            onEnableWiredStreams={enableWiredStreams}
-          />
-        </EuiFlexItem>
-      )}
-
       {!setupData && <EuiSkeletonText lines={6} />}
 
       {setupData && (

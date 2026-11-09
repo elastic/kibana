@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 
 import { SETTINGS, SETTINGS_TOOLTIP } from './translations';
@@ -28,14 +28,12 @@ describe('Settings', () => {
     expect(screen.getByTestId('settings')).toHaveAttribute('aria-label', SETTINGS);
   });
 
-  it('renders the tooltip on hover with the expected text', async () => {
+  it('renders the tooltip on hover with the expected text', () => {
     render(<Settings {...defaultProps} />);
 
     fireEvent.mouseOver(screen.getByTestId('settings'));
 
-    await waitFor(() => {
-      expect(screen.getByTestId('settingsTooltip')).toHaveTextContent(SETTINGS_TOOLTIP);
-    });
+    expect(screen.getByTestId('settingsTooltip')).toHaveTextContent(SETTINGS_TOOLTIP);
   });
 
   it('disables the button when isLoading is true', () => {

@@ -14,6 +14,7 @@ import type {
   ToolAvailabilityResult,
   ToolReturnSummarizerFn,
   BuiltInToolConfirmationPolicy,
+  McpToolAnnotations,
 } from './builtin';
 import type { LlmDescriptionHandler } from '../runner';
 
@@ -62,6 +63,15 @@ export interface InternalToolDefinition<
    * Tool call policy to control tool call confirmation behavior
    */
   confirmation?: BuiltInToolConfirmationPolicy;
+  /**
+   * MCP annotations surfaced to MCP clients. Propagated from BuiltinToolDefinition.
+   */
+  annotations?: McpToolAnnotations;
+  /**
+   * When true, this tool is excluded from the MCP server's tool list but
+   * remains available to 1P Agent Builder chat via the builtin tool registry.
+   */
+  excludeFromMcp?: boolean;
 }
 
 export type InternalToolAvailabilityHandler = (

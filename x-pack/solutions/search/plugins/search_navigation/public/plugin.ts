@@ -28,6 +28,7 @@ import type {
   ClassicNavItem,
   SearchNavigationSetBreadcrumbsOptions,
   AppPluginStartDependencies,
+  AppPluginSetupDependencies,
 } from './types';
 import { classicNavigationFactory } from './classic_navigation';
 import { SearchIndexManagementLocatorDefinition } from './locator';
@@ -36,6 +37,7 @@ export class SearchNavigationPlugin
   implements Plugin<SearchNavigationPluginSetup, SearchNavigationPluginStart>
 {
   private readonly logger: Logger;
+  private contextEngineSetup: AppPluginSetupDependencies['contextEngine'] = undefined;
   private currentChromeStyle: ChromeStyle | undefined = undefined;
   private coreStart: CoreStart | undefined = undefined;
   private pluginsStart: AppPluginStartDependencies | undefined = undefined;
@@ -47,7 +49,8 @@ export class SearchNavigationPlugin
     this.logger = this.initializerContext.logger.get();
   }
 
-  public setup(_core: CoreSetup): SearchNavigationPluginSetup {
+  public setup(_core: CoreSetup, plugins: AppPluginSetupDependencies): SearchNavigationPluginSetup {
+    this.contextEngineSetup = plugins.contextEngine;
     return {};
   }
 
@@ -74,7 +77,7 @@ export class SearchNavigationPlugin
       );
     }
 
-    return {
+    const startContract: SearchNavigationPluginStart = {
       handleOnAppMount: this.handleOnAppMount.bind(this),
       registerOnAppMountHandler: this.registerOnAppMountHandler.bind(this),
       getBaseClassicNavItems: this.getBaseClassicNavItems.bind(this),
@@ -84,6 +87,17 @@ export class SearchNavigationPlugin
         clearBreadcrumbs: this.clearBreadcrumbs.bind(this),
       },
     };
+
+    this.contextEngineSetup?.registerAppChromeAdapter({
+      handleOnAppMount: startContract.handleOnAppMount,
+      getClassicNavigation: startContract.useClassicNavigation,
+      breadcrumbs: {
+        setAppBreadcrumbs: startContract.breadcrumbs.setSearchBreadCrumbs,
+        clearBreadcrumbs: startContract.breadcrumbs.clearBreadcrumbs,
+      },
+    });
+
+    return startContract;
   }
 
   public stop() {
@@ -97,7 +111,7 @@ export class SearchNavigationPlugin
     if (this.onAppMountHandlers.length === 0) return;
 
     try {
-      await Promise.all(this.onAppMountHandlers);
+      await Promise.all(this.onAppMountHandlers.map((handler) => handler()));
     } catch (e) {
       this.logger.warn('Error handling app mount functions for search navigation');
       this.logger.warn(e);
