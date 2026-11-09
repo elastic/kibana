@@ -30,7 +30,7 @@ const formatPropertyValue = (value: unknown): string =>
 export const useProvenanceDetails = (
   provenance: TopologyProvenance[],
   sourceTitles: Map<string, string>
-): EuiDescriptionListProps['listItems'] => {
+): NonNullable<EuiDescriptionListProps['listItems']> => {
   const { data, isLoading } = useTopologyFeatures(provenance);
   const featuresByUuid = useMemo(
     () => new Map((data?.features ?? []).map((feature) => [feature.uuid, feature])),

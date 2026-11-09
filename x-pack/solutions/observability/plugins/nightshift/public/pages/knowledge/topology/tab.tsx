@@ -191,7 +191,7 @@ export function TopologyTab(): React.ReactElement {
     [snapshot?.nodes]
   );
   const selectedEntityOptions = entityOptions.flatMap(({ value }) =>
-    value?.nodeId === focusedNodeId ? [{ label: value.displayLabel, value }] : []
+    value && value.nodeId === focusedNodeId ? [{ label: value.displayLabel, value }] : []
   );
   const isFullView = viewMode === 'full';
   const showGraph = isFullView || focusedNodeId !== undefined;
