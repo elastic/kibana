@@ -25,6 +25,16 @@ import { useSpaceId } from './use_space_id';
 
 export interface UseFetchEpisodeActionsHistoryQueryOptions {
   episodeId: string | undefined;
+  /**
+   * Series of the episode. `undefined` while it is still being resolved (nothing is fetched yet),
+   * `null` when the episode has no series identity (only its own actions are fetched).
+   */
+  seriesId: string | null | undefined;
+  /**
+   * `group_hash` of the episode. It narrows the series-level actions on an indexed field before
+   * the series id is compared, so nothing is fetched while it is `undefined` and `seriesId` is a
+   * string.
+   */
   groupHash: string | undefined;
   services: { data: DataPublicPluginStart; spaces: SpacesPluginStart };
   /** Page size for each keyset fetch. Defaults to {@link DEFAULT_ACTIONS_HISTORY_PAGE_SIZE}. */
@@ -38,17 +48,22 @@ export interface UseFetchEpisodeActionsHistoryQueryOptions {
  */
 export const useFetchEpisodeActionsHistoryQuery = ({
   episodeId,
+  seriesId,
   groupHash,
   services,
   pageSize = DEFAULT_ACTIONS_HISTORY_PAGE_SIZE,
 }: UseFetchEpisodeActionsHistoryQueryOptions) => {
   const { data } = services;
   const spaceId = useSpaceId(services.spaces);
+  // `null` means the episode has no series, so its own actions are all there is to fetch. A
+  // series needs its group hash as well, or the series-level actions would silently be skipped.
+  const isSeriesResolved = seriesId === null || (seriesId !== undefined && groupHash !== undefined);
 
   const query = useInfiniteQuery({
-    queryKey: [...queryKeys.actionsHistory(spaceId, episodeId ?? '', groupHash ?? ''), pageSize],
+    queryKey: [...queryKeys.actionsHistory(spaceId, episodeId ?? '', seriesId ?? ''), pageSize],
     queryFn: async ({ signal, pageParam }: { signal?: AbortSignal; pageParam?: string }) => {
-      const esqlQuery = buildEpisodeActionsHistoryQuery(spaceId, episodeId!, groupHash!, {
+      const series = seriesId && groupHash ? { seriesId, groupHash } : null;
+      const esqlQuery = buildEpisodeActionsHistoryQuery(spaceId, episodeId!, series, {
         before: pageParam,
         limit: pageSize,
       });
@@ -64,7 +79,7 @@ export const useFetchEpisodeActionsHistoryQuery = ({
     },
     getNextPageParam: (lastPage) =>
       lastPage.length === pageSize ? lastPage[lastPage.length - 1]['@timestamp'] : undefined,
-    enabled: Boolean(episodeId) && Boolean(groupHash),
+    enabled: Boolean(episodeId) && isSeriesResolved,
   });
 
   const entries = useMemo(() => {
@@ -88,7 +103,7 @@ export const useFetchEpisodeActionsHistoryQuery = ({
 
   return {
     entries,
-    // isLoading stays true forever for a disabled query in React Query v4 (e.g. no groupHash
+    // isLoading stays true forever for a disabled query in React Query v4 (e.g. no seriesId
     // yet); isInitialLoading is false in that case, only true while actually fetching.
     isLoading: query.isInitialLoading,
     isError: query.isError,

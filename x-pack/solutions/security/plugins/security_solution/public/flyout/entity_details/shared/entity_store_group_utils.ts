@@ -24,10 +24,19 @@ export const isEntityGroupView = <T>(
  * aliases were loaded — the header then falls back to the plain "Entity Store" badge. Aliases are
  * only loaded in the resolution-group view, which the flyout panels gate on the new entity
  * analytics page, so no feature-flag check is needed here.
+ *
+ * `aliasCount` is the store's total number of aliases; pass it so the count stays correct when
+ * `aliasRecords` was truncated to the member cap. Falls back to the loaded records otherwise.
  */
 export const getResolvedFromRecordCount = (
-  aliasRecords: readonly unknown[] | undefined
-): number | undefined => (isEntityGroupView(aliasRecords) ? aliasRecords.length + 1 : undefined);
+  aliasRecords: readonly unknown[] | undefined,
+  aliasCount?: number
+): number | undefined => {
+  if (!isEntityGroupView(aliasRecords)) {
+    return undefined;
+  }
+  return Math.max(aliasCount ?? 0, aliasRecords.length) + 1;
+};
 
 /**
  * Most severe assigned asset criticality across the records, or `undefined` when none is assigned
@@ -47,9 +56,9 @@ export const getWatchlistIds = (record: Pick<Entity, 'entity'>): string[] => {
     | Record<string, unknown>
     | undefined;
   const watchlists = attributes?.watchlists;
-  return Array.isArray(watchlists)
-    ? watchlists.filter((id): id is string => typeof id === 'string' && id !== '')
-    : [];
+  // A single watchlist membership is serialized as a bare string rather than a one-element array.
+  const ids = Array.isArray(watchlists) ? watchlists : [watchlists];
+  return ids.filter((id): id is string => typeof id === 'string' && id !== '');
 };
 
 /** De-duplicated watchlist ids across the records, preserving first-seen order. */

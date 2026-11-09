@@ -18,11 +18,12 @@
  *   space
  * - repeated runs of the same producer still de-duplicate, because the suffix is
  *   stable for a given `generationSource`
- * - every current caller omits it and therefore reproduces the hashes already
- *   persisted, byte for byte — there is no duplicate wave on upgrade
+ * - a caller that omits it, such as Kibana Attack Discovery, reproduces the hashes
+ *   already persisted, byte for byte — there is no duplicate wave on upgrade
  *
- * No caller passes a `generationSource` today: this is the opt-in mechanism for
- * future producers that write to the same Attack Discovery index.
+ * The AD Worker passes `watch_floor_ad_worker`, which is what keeps its attacks
+ * apart from a manual run by the same user. Other producers that write to the
+ * same index can opt in too.
  *
  * IMPORTANT: there are two independent implementations of
  * `generateAttackDiscoveryAlertHash` (one in this package, one in the

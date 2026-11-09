@@ -1135,6 +1135,40 @@ describe('policy_config and licenses', () => {
     });
   });
 
+  describe('macOS ransomware', () => {
+    it.each([
+      ['Platinum', Platinum],
+      ['Enterprise', Enterprise],
+    ])('allows absent macOS ransomware settings with a %s license', (_, license) => {
+      const policy = policyFactoryWithoutPaidEnterpriseFeatures();
+      Reflect.deleteProperty(policy.mac, 'ransomware');
+      Reflect.deleteProperty(policy.mac.popup, 'ransomware');
+
+      expect(isEndpointPolicyValidForLicense(policy, license)).toBe(true);
+    });
+
+    it.each([
+      ['Gold', Gold],
+      ['Basic', Basic],
+    ])('allows absent macOS ransomware settings with a %s license', (_, license) => {
+      const policy = policyFactoryWithoutPaidFeatures();
+      Reflect.deleteProperty(policy.mac, 'ransomware');
+      Reflect.deleteProperty(policy.mac.popup, 'ransomware');
+
+      expect(isEndpointPolicyValidForLicense(policy, license)).toBe(true);
+    });
+
+    it.each([
+      ['Platinum', Platinum, policyFactoryWithoutPaidEnterpriseFeatures],
+      ['Gold', Gold, policyFactoryWithoutPaidFeatures],
+    ])('blocks null macOS ransomware with a %s license', (_, license, createPolicy) => {
+      const policy = createPolicy();
+      Reflect.set(policy.mac, 'ransomware', null);
+
+      expect(isEndpointPolicyValidForLicense(policy, license)).toBe(false);
+    });
+  });
+
   describe('Linux ransomware', () => {
     const omitLinuxRansomware = (policy: PolicyConfig) => {
       delete policy.linux.ransomware;

@@ -7,7 +7,7 @@
 
 import type { Locator, ScoutPage } from '@kbn/scout';
 
-const ATTACK_DETAILS_FLYOUT_BODY_TEST_ID = 'attack-details-flyout-body';
+const ATTACK_DETAILS_FLYOUT_BODY_TEST_ID = 'attack-flyout-body';
 const ATTACK_DETAILS_INSIGHTS_SECTION_HEADER_TEST_ID =
   'attack-flyout-v2-overview-insights-sectionHeader';
 const ATTACK_DETAILS_INSIGHTS_SECTION_CONTENT_TEST_ID =

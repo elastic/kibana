@@ -97,7 +97,7 @@ describe('SearchBarComponent', () => {
 
     render(
       <TestProviders store={store}>
-        <SearchBarComponent {...props} additionalDataViews={[panelDataView]} />
+        <SearchBarComponent {...props} additionalSources={[panelDataView]} />
       </TestProviders>
     );
 
@@ -129,7 +129,7 @@ describe('SearchBarComponent', () => {
         <SearchBarComponent
           {...props}
           dataView={pageDataView}
-          additionalDataViews={[duplicatePageDataView, panelDataView, repeatedPanelDataView]}
+          additionalSources={[duplicatePageDataView, panelDataView, repeatedPanelDataView]}
         />
       </TestProviders>
     );
@@ -138,6 +138,22 @@ describe('SearchBarComponent', () => {
       expect.objectContaining({
         indexPatterns: [pageDataView, panelDataView],
       }),
+      expect.anything()
+    );
+  });
+
+  it('forwards the query input append to the search bar', () => {
+    const renderQueryInputAppend = jest.fn(() => null);
+    const store = createMockStore();
+
+    render(
+      <TestProviders store={store}>
+        <SearchBarComponent {...props} renderQueryInputAppend={renderQueryInputAppend} />
+      </TestProviders>
+    );
+
+    expect(useKibanaMock.services.unifiedSearch.ui.SearchBar).toHaveBeenCalledWith(
+      expect.objectContaining({ renderQueryInputAppend }),
       expect.anything()
     );
   });

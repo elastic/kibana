@@ -16,6 +16,7 @@ jest.mock('./use_digital_experience_params');
 jest.mock('./use_kibana_services');
 
 const setTime = jest.fn();
+let timefilterRange = { from: 'now-15m', to: 'now' };
 const push = jest.fn();
 const replace = jest.fn();
 
@@ -23,7 +24,13 @@ const mockRoute = (query: Record<string, string>, search = '') => {
   jest.mocked(useKibanaServices).mockReturnValue({
     data: {
       query: {
-        timefilter: { timefilter: { getTime: () => ({ from: 'now-15m', to: 'now' }), setTime } },
+        timefilter: {
+          timefilter: {
+            getTime: () => timefilterRange,
+            getTimeDefaults: () => ({ from: 'now-15m', to: 'now' }),
+            setTime,
+          },
+        },
       },
     },
   } as unknown as ReturnType<typeof useKibanaServices>);
@@ -42,7 +49,10 @@ const mockRoute = (query: Record<string, string>, search = '') => {
     >);
 };
 
-beforeEach(() => jest.clearAllMocks());
+beforeEach(() => {
+  jest.clearAllMocks();
+  timefilterRange = { from: 'now-15m', to: 'now' };
+});
 
 describe('useTimeRange', () => {
   it('reads the time range from the route query params', () => {
@@ -84,26 +94,62 @@ describe('useSyncTimeRange', () => {
   it('writes the timefilter range into a URL that has none', () => {
     mockRoute({}, '?percentile=75');
 
-    renderHook(() => useSyncTimeRange());
+    const { result } = renderHook(() => useSyncTimeRange());
 
     expect(replace).toHaveBeenCalledWith({
       pathname: '/my-app',
       search: 'percentile=75&rangeFrom=now-15m&rangeTo=now',
       hash: '#panel',
     });
+    expect(result.current).toBe(false);
   });
 
-  it('leaves a URL that already has a range and mirrors it into the timefilter', () => {
+  it('replaces an invalid range with the timefilter range', () => {
+    mockRoute({ rangeFrom: 'foo', rangeTo: 'now' }, '?rangeFrom=foo&rangeTo=now');
+
+    const { result } = renderHook(() => useSyncTimeRange());
+
+    expect(replace).toHaveBeenCalledWith(
+      expect.objectContaining({ search: 'rangeFrom=now-15m&rangeTo=now' })
+    );
+    expect(setTime).not.toHaveBeenCalled();
+    expect(result.current).toBe(false);
+  });
+
+  it('falls back to the timefilter defaults when the timefilter range is invalid too', () => {
+    timefilterRange = { from: 'now', to: 'now-1d' };
+    mockRoute({}, '');
+
+    renderHook(() => useSyncTimeRange());
+
+    expect(replace).toHaveBeenCalledWith(
+      expect.objectContaining({ search: 'rangeFrom=now-15m&rangeTo=now' })
+    );
+  });
+
+  it('leaves a URL with a valid range as it is, whatever its form', () => {
+    const rangeFrom = '2021-01-18T12:00:00.000Z';
+    mockRoute(
+      { rangeFrom, rangeTo: 'now', sourceFilter: 'otel' },
+      `?sourceFilter=otel&rangeFrom=${rangeFrom}&rangeTo=now`
+    );
+
+    const { result } = renderHook(() => useSyncTimeRange());
+
+    expect(replace).not.toHaveBeenCalled();
+    expect(result.current).toBe(true);
+  });
+
+  it('mirrors the URL range into the timefilter when it differs', () => {
     mockRoute({ rangeFrom: 'now-7d', rangeTo: 'now' }, '?rangeFrom=now-7d&rangeTo=now');
 
     renderHook(() => useSyncTimeRange());
 
-    expect(replace).not.toHaveBeenCalled();
     expect(setTime).toHaveBeenCalledWith({ from: 'now-7d', to: 'now' });
   });
 
-  it('keeps an invalid range out of the timefilter', () => {
-    mockRoute({ rangeFrom: 'foo', rangeTo: 'now' }, '?rangeFrom=foo&rangeTo=now');
+  it('leaves the timefilter alone when it already has the URL range', () => {
+    mockRoute({ rangeFrom: 'now-15m', rangeTo: 'now' }, '?rangeFrom=now-15m&rangeTo=now');
 
     renderHook(() => useSyncTimeRange());
 
@@ -124,5 +170,9 @@ describe('isValidTimeRange', () => {
 
   it('rejects a bound that does not parse', () => {
     expect(isValidTimeRange({ rangeFrom: 'foo', rangeTo: 'now' })).toBe(false);
+  });
+
+  it('rejects a range that ends before it starts', () => {
+    expect(isValidTimeRange({ rangeFrom: 'now', rangeTo: 'now-15m' })).toBe(false);
   });
 });

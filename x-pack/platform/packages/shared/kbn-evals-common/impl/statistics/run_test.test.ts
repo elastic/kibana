@@ -13,13 +13,13 @@ const PRECISION = 9;
 
 describe('runPairedTest', () => {
   describe('paired_t', () => {
-    it('pins the p-value for differences 1..5 (population-SD variant of the t statistic)', () => {
+    it('pins the t statistic and p-value for differences 1..5', () => {
       const outcome = runPairedTest('paired_t', [1, 2, 3, 4, 5], [0, 0, 0, 0, 0]);
 
       expect(outcome.id).toBe('paired_t');
       expect(outcome.method).toBeUndefined();
-      expect(outcome.statistic).toBeCloseTo(4.743416490252569, PRECISION);
-      expect(outcome.pValue).toBeCloseTo(0.009014481314230329, PRECISION);
+      expect(outcome.statistic).toBeCloseTo(4.242640687119285, PRECISION);
+      expect(outcome.pValue).toBeCloseTo(0.01323559956368269, PRECISION);
     });
 
     it('returns null statistic and p-value with a single pair', () => {

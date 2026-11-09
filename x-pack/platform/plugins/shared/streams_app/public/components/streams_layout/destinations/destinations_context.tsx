@@ -8,58 +8,60 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import { useActorRef, useSelector } from '@xstate/react';
 import { i18n } from '@kbn/i18n';
+import type { ResolvedDestinationIndex } from '@kbn/streams-plugin/common';
 import { useKibana } from '../../../hooks/use_kibana';
-import { createUnitRepository } from '../../../services/unit_repository';
-import { canSubmitDestinationForm } from './destination_form';
-import type { DestinationNameValidationError } from './destination_helpers';
+import { useTimefilter } from '../../../hooks/use_timefilter';
+import { useUnitId } from '../../../hooks/use_unit_id';
+import { createUnitRepository, type Unit } from '../../../services/unit_repository';
 import {
   getDestinationViewModels,
   type DestinationsActorRef,
+  type ResolvedIndicesError,
+  type ResolvedIndicesStatus,
 } from './state_machines/destinations_state_machine';
+import type { DestinationIndexStats } from './destination_index_stats';
+import {
+  selectIndexStats,
+  selectIndexStatsStatus,
+  type DestinationDetailActorRef,
+  type DestinationIndexStatsStatus,
+} from './state_machines/destination_detail_state_machine';
 import {
   destinationsTableStateMachine,
   type DestinationsTablePagination,
   type DestinationsTableSortingColumn,
 } from './state_machines/destinations_table_state_machine';
-import {
-  EMPTY_ELASTICSEARCH_DESTINATION_FORM,
-  type DestinationStorageKind,
-  type DestinationType,
-  type DestinationViewModel,
-} from './types';
+import type { DestinationCreationFormData, DestinationType, DestinationViewModel } from './types';
 
 export interface DestinationsController {
   destinations: DestinationViewModel[];
+  resolvedIndicesByDestination: ReadonlyMap<string, ResolvedDestinationIndex[]>;
+  resolvedIndicesStatus: ResolvedIndicesStatus;
+  resolvedIndicesError?: ResolvedIndicesError;
+  /** Only destinations whose details were shown. */
+  destinationDetailRefs: ReadonlyMap<string, DestinationDetailActorRef>;
+  showDestinationDetail: (destinationId: string, viewerId: string) => void;
+  hideDestinationDetail: (destinationId: string, viewerId: string) => void;
   query: string;
   selectedDestination?: DestinationViewModel;
   isCreateModalOpen: boolean;
   isRefreshingUnit: boolean;
-  storageKind: DestinationStorageKind;
-  destinationName: string;
-  destinationNameError?: DestinationNameValidationError;
-  elasticsearchIndex: string;
-  elasticsearchIndexPatterns: string;
-  indexError?: 'required';
-  indexPatternsError?: 'required' | 'invalid';
-  canCreateDestination: boolean;
+  /** The unit new destinations are validated against. */
+  unitDefinition: Unit;
   isUnitSaving: boolean;
-  unconfiguredNodeIds: string[];
   persistenceError?: string;
+  apiKeyError?: string;
   isCreatingDestination: boolean;
   isCreateFailed: boolean;
   refreshUnit: () => void;
-  createDestination: () => void;
-  setStorageKind: (storageKind: DestinationStorageKind) => void;
-  setCreateDestinationName: (destinationName: string) => void;
-  setElasticsearchIndex: (index: string) => void;
-  setElasticsearchIndexPatterns: (indexPatterns: string) => void;
-  validateCreationForm: () => void;
+  createDestination: (formData: DestinationCreationFormData) => void;
   deleteDestination: (destinationId: string) => void;
   setQuery: (query: string) => void;
-  openCreateModal: (associatedUnconfiguredNodeId?: string) => void;
+  openCreateModal: () => void;
   closeCreateModal: () => void;
   openDestinationFlyout: (destinationId: string) => void;
   closeDestinationFlyout: () => void;
+  reloadResolvedIndices: () => void;
 }
 
 export interface DestinationsTableController extends DestinationsController {
@@ -91,16 +93,26 @@ export const useDestinationsTable = (): DestinationsTableController => {
       start: { streams },
     },
   } = useKibana();
+  const { timeState, timeState$ } = useTimefilter();
+  const unitId = useUnitId();
   const unitDefinitionRepository = useMemo(
     () =>
       createUnitRepository({
         streamsRepositoryClient: streams.streamsRepositoryClient,
+        unitId,
+        toasts,
       }),
-    [streams.streamsRepositoryClient]
+    [streams.streamsRepositoryClient, toasts, unitId]
   );
   const tableActorRef = useActorRef(destinationsTableStateMachine, {
     input: {
       toasts,
+      apiKeyGenerationDeps: {
+        streamsRepositoryClient: streams.streamsRepositoryClient,
+        unitId,
+      },
+      timeState,
+      timeState$,
       loadUnitDefinition: unitDefinitionRepository.load,
       persistUnitDefinition: unitDefinitionRepository.persist,
     },
@@ -182,26 +194,13 @@ export const useDestinations = ({
     destinationsActorRef,
     (state) => state.context.persistenceError
   );
-  const creationContext = useSelector(
+  const unitDefinition = useSelector(destinationsActorRef, (state) => state.context.unitDefinition);
+  const apiKeyError = useSelector(destinationsActorRef, (state) => state.context.apiKeyError);
+  const isCreatingDestination = useSelector(
     destinationsActorRef,
-    (state) => state.context.creationContext
-  );
-  const unconfiguredNodeIds = useSelector(
-    destinationsActorRef,
-    (state) => state.context.unconfiguredNodeIds
-  );
-  const storageKind = creationContext?.formData.storageKind ?? 'local_elasticsearch';
-  const destinationName = creationContext?.formData.destinationName ?? '';
-  const destinationNameError = creationContext?.formErrors.destinationName;
-  const elasticsearchIndex =
-    creationContext?.formData.elasticsearch.index ?? EMPTY_ELASTICSEARCH_DESTINATION_FORM.index;
-  const elasticsearchIndexPatterns =
-    creationContext?.formData.elasticsearch.indexPatterns ??
-    EMPTY_ELASTICSEARCH_DESTINATION_FORM.indexPatterns;
-  const indexError = creationContext?.formErrors.index;
-  const indexPatternsError = creationContext?.formErrors.indexPatterns;
-  const isCreatingDestination = useSelector(destinationsActorRef, (state) =>
-    state.matches({ configuring: 'persisting' })
+    (state) =>
+      state.matches({ configuring: 'persisting' }) ||
+      state.matches({ configuring: 'mintingApiKey' })
   );
   const isCreateFailed = useSelector(destinationsActorRef, (state) =>
     state.matches({ configuring: 'failed' })
@@ -210,16 +209,6 @@ export const useDestinations = ({
     destinationsActorRef,
     (state) => !state.matches({ configuring: 'idle' })
   );
-  const canCreateDestination = useSelector(destinationsActorRef, (state) => {
-    const creation = state.context.creationContext;
-    return Boolean(
-      creation &&
-        canSubmitDestinationForm({
-          formData: creation.formData,
-          unitDefinition: state.context.unitDefinition,
-        })
-    );
-  });
   const isUnitSaving = useSelector(destinationsActorRef, (state) =>
     state.matches({ unitSave: 'saving' })
   );
@@ -228,40 +217,49 @@ export const useDestinations = ({
   const destinationViews = useSelector(destinationsActorRef, (state) =>
     getDestinationViewModels(state.context)
   );
+  const resolvedIndicesByDestination = useSelector(
+    destinationsActorRef,
+    (state) => state.context.resolvedIndicesByDestination
+  );
+  const resolvedIndicesError = useSelector(
+    destinationsActorRef,
+    (state) => state.context.resolvedIndicesError
+  );
+  const resolvedIndicesStatus = useSelector(
+    destinationsActorRef,
+    (state): ResolvedIndicesStatus => {
+      if (state.matches({ resolvedIndices: 'loading' })) {
+        return 'loading';
+      }
+      if (state.matches({ resolvedIndices: 'unavailable' })) {
+        return 'unavailable';
+      }
+      return 'ready';
+    }
+  );
+
+  const destinationDetailRefs = useSelector(
+    destinationsActorRef,
+    (state) => state.context.destinationDetailRefs
+  );
+  const showDestinationDetail = useCallback(
+    (destinationId: string, viewerId: string) =>
+      destinationsActorRef.send({ type: 'destinationDetail.show', destinationId, viewerId }),
+    [destinationsActorRef]
+  );
+  const hideDestinationDetail = useCallback(
+    (destinationId: string, viewerId: string) =>
+      destinationsActorRef.send({ type: 'destinationDetail.hide', destinationId, viewerId }),
+    [destinationsActorRef]
+  );
 
   const createDestination = useCallback(
-    () => destinationsActorRef.send({ type: 'destination.create' }),
-    [destinationsActorRef]
-  );
-  const setStorageKind = useCallback(
-    (nextStorageKind: DestinationStorageKind) =>
-      destinationsActorRef.send({ type: 'storageKind.select', storageKind: nextStorageKind }),
-    [destinationsActorRef]
-  );
-  const setCreateDestinationName = useCallback(
-    (nextDestinationName: string) =>
-      destinationsActorRef.send({
-        type: 'destinationName.change',
-        destinationName: nextDestinationName,
-      }),
-    [destinationsActorRef]
-  );
-  const setElasticsearchIndex = useCallback(
-    (index: string) => destinationsActorRef.send({ type: 'elasticsearch.change', index }),
-    [destinationsActorRef]
-  );
-  const setElasticsearchIndexPatterns = useCallback(
-    (indexPatterns: string) =>
-      destinationsActorRef.send({ type: 'elasticsearch.change', indexPatterns }),
-    [destinationsActorRef]
-  );
-  const validateCreationForm = useCallback(
-    () => destinationsActorRef.send({ type: 'creationForm.blur' }),
+    (formData: DestinationCreationFormData) =>
+      destinationsActorRef.send({ type: 'destination.create', formData }),
     [destinationsActorRef]
   );
   const openCreateModal = useCallback(
-    (associatedUnconfiguredNodeId?: string) =>
-      destinationsActorRef.send({ type: 'modal.openCreate', associatedUnconfiguredNodeId }),
+    () => destinationsActorRef.send({ type: 'modal.openCreate' }),
     [destinationsActorRef]
   );
   const deleteDestination = useCallback(
@@ -269,36 +267,38 @@ export const useDestinations = ({
       destinationsActorRef.send({ type: 'destination.delete', destinationId }),
     [destinationsActorRef]
   );
+  const reloadResolvedIndices = useCallback(
+    () => destinationsActorRef.send({ type: 'resolvedIndices.reload' }),
+    [destinationsActorRef]
+  );
 
   return useMemo(
     () => ({
       destinations: destinationViews,
+      resolvedIndicesByDestination,
+      resolvedIndicesStatus,
+      resolvedIndicesError,
+      destinationDetailRefs,
+      showDestinationDetail,
+      hideDestinationDetail,
       query,
       selectedDestination: destinationViews.find(({ id }) => id === selectedDestinationId),
       isCreateModalOpen,
       isRefreshingUnit,
-      storageKind,
-      destinationName,
-      destinationNameError,
-      elasticsearchIndex,
-      elasticsearchIndexPatterns,
-      indexError,
-      indexPatternsError,
-      canCreateDestination: canCreateDestination && !isUnitSaving,
+      unitDefinition,
       isUnitSaving,
-      unconfiguredNodeIds,
       persistenceError,
+      apiKeyError,
       isCreatingDestination,
       isCreateFailed,
       refreshUnit: () => {
-        tableState?.refreshUnit();
+        if (tableState) {
+          tableState.refreshUnit();
+        } else {
+          destinationsActorRef.send({ type: 'resolvedIndices.reload' });
+        }
       },
       createDestination,
-      setStorageKind,
-      setCreateDestinationName,
-      setElasticsearchIndex,
-      setElasticsearchIndexPatterns,
-      validateCreationForm,
       deleteDestination,
       setQuery: (nextQuery: string) => {
         tableState?.setQuery(nextQuery);
@@ -308,19 +308,20 @@ export const useDestinations = ({
       openDestinationFlyout: (destinationId: string) =>
         destinationsActorRef.send({ type: 'destination.view', destinationId }),
       closeDestinationFlyout: () => destinationsActorRef.send({ type: 'flyout.close' }),
+      reloadResolvedIndices,
     }),
     [
-      canCreateDestination,
+      destinationDetailRefs,
+      showDestinationDetail,
+      hideDestinationDetail,
+      resolvedIndicesByDestination,
+      resolvedIndicesError,
+      resolvedIndicesStatus,
       isUnitSaving,
       createDestination,
       deleteDestination,
-      destinationName,
-      destinationNameError,
       destinationViews,
-      elasticsearchIndex,
-      elasticsearchIndexPatterns,
-      indexError,
-      indexPatternsError,
+      reloadResolvedIndices,
       destinationsActorRef,
       isCreateFailed,
       isCreateModalOpen,
@@ -330,14 +331,17 @@ export const useDestinations = ({
       persistenceError,
       query,
       selectedDestinationId,
-      setCreateDestinationName,
-      setElasticsearchIndex,
-      setElasticsearchIndexPatterns,
-      setStorageKind,
-      storageKind,
+      apiKeyError,
       tableState,
-      unconfiguredNodeIds,
-      validateCreationForm,
+      unitDefinition,
     ]
   );
 };
+
+/** Index stats of one destination; loading until its detail actor exists. */
+export const useDestinationIndexStats = (
+  destinationDetailRef: DestinationDetailActorRef | undefined
+): { stats?: DestinationIndexStats; status: DestinationIndexStatsStatus } => ({
+  stats: useSelector(destinationDetailRef, selectIndexStats),
+  status: useSelector(destinationDetailRef, selectIndexStatsStatus),
+});

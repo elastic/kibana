@@ -31,6 +31,12 @@ interface RiskTilesSeriesOptions {
   /** The live counts, which replace the newest dot so each line ends on the number shown. */
   riskMoversCount: number;
   newlyHighCriticalCount: number;
+  /** True when each tile's count came back: a failed, timed-out or skipped count has no line to draw. */
+  riskMoversHasCount: boolean;
+  newlyHighCriticalHasCount: boolean;
+  /** From each tile's delta hook (its `previous`): the delta's baseline, which starts the line. */
+  riskMoversBaseline: number | undefined;
+  newlyHighCriticalBaseline: number | undefined;
 }
 
 /**
@@ -52,6 +58,10 @@ export const useRiskTilesSeries = ({
   newlyHighCriticalReachesBack,
   riskMoversCount,
   newlyHighCriticalCount,
+  riskMoversHasCount,
+  newlyHighCriticalHasCount,
+  riskMoversBaseline,
+  newlyHighCriticalBaseline,
 }: RiskTilesSeriesOptions): {
   riskMoversTrend: number[] | undefined;
   newlyHighCriticalTrend: number[] | undefined;
@@ -73,12 +83,12 @@ export const useRiskTilesSeries = ({
   const moversGate = getSeriesGate({
     isReady,
     reachesBack: riskMoversReachesBack,
-    count: riskMoversCount,
+    hasCount: riskMoversHasCount,
   });
   const newlyHighGate = getSeriesGate({
     isReady,
     reachesBack: newlyHighCriticalReachesBack,
-    count: newlyHighCriticalCount,
+    hasCount: newlyHighCriticalHasCount,
   });
   const { series, isFetching, isError } = useTileSeriesQuery({
     tileKey: 'riskTilesSeries',
@@ -101,12 +111,14 @@ export const useRiskTilesSeries = ({
     ...state,
     dots: series?.riskMovers,
     liveCount: riskMoversCount,
+    deltaBaseline: riskMoversBaseline,
     isHidden: moversGate.isHidden,
   });
   const newlyHighCritical = getTileTrend({
     ...state,
     dots: series?.newlyHighCritical,
     liveCount: newlyHighCriticalCount,
+    deltaBaseline: newlyHighCriticalBaseline,
     isHidden: newlyHighGate.isHidden,
   });
 

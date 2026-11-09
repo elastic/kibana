@@ -12,10 +12,10 @@ process.env.KBN_UNSAFE_DISABLE_PROTOTYPE_HARDENING = 'true';
 
 require('@kbn/setup-node-env');
 const _ = require('lodash');
-// eslint-disable-next-line no-restricted-modules
+// eslint-disable-next-line @kbn/compat/eslint-no-restricted-modules
 const template = require('lodash/template');
 const fp = require('lodash/fp');
-// eslint-disable-next-line no-restricted-modules
+// eslint-disable-next-line @kbn/compat/eslint-no-restricted-modules
 const fpTemplate = require('lodash/fp/template');
 const test = require('node:test');
 const { after } = require('node:test');

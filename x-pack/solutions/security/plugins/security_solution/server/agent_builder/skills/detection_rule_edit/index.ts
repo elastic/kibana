@@ -23,7 +23,7 @@ export const getDetectionRuleEditSkill = ({
     name: 'detection-rule-edit',
     basePath: 'skills/security/rules',
     description:
-      'Creates and edits ES|QL security detection rules as persistent rule attachments, including query logic, MITRE ATT&CK mappings, severity, and schedule. Use when the user supplies the rule logic or explicitly asks to author or modify a rule ("create a rule that...", "update the severity", "add MITRE mappings"), or asks how to write one ("how would I detect this?"). NOT for gap statements that supply no rule logic ("I need detection for X", "we need to detect X", "can we catch lateral movement?", "I want an alert for privilege escalation"): those belong to detection-coverage, which checks installed and installable rules first and hands back here to author. Not for alert triage or investigation (use alert analysis skill), proactive threat hunting without a rule-creation goal (use threat hunting skill), or general security questions with no authoring intent.',
+      'Creates and edits ES|QL security detection rules as persistent rule attachments, including query logic, MITRE mappings, severity, and schedule. Use when the user supplies the rule logic or explicitly asks to author or modify a rule ("create a rule that...", "update the severity", "add MITRE mappings"), or asks how to write one ("how would I detect this?"). NOT for gap statements that supply no rule logic ("I need detection for X", "we need to detect X", "can we catch lateral movement?", "I want an alert for privilege escalation"): those belong to detection-coverage, which checks installed and installable rules first and hands back here to author. Not for alert triage or investigation (use alert analysis skill), proactive threat hunting without a rule-creation goal (use threat hunting skill), or general security questions with no authoring intent.',
     content: buildSkillContent({ rulePreviewEnabled }),
     getRegistryTools: () => [
       SECURITY_CREATE_DETECTION_RULE_TOOL_ID,
@@ -45,7 +45,7 @@ const buildSkillContent = ({
 Use this skill when the user asks to:
 - Create a detection rule (e.g., "create a rule that detects ...", "build a SIEM rule for ...", "create a security detection rule to find ...", "create a security detection rule that ...")
 - Edit an existing rule's fields (e.g., "change the severity to high", "update the query", "set the interval to 10m", "add tags to the rule")
-- Modify rule logic or metadata (e.g., "add MITRE ATT&CK mappings", "update the description", "update the query")
+- Modify rule logic or metadata (e.g., "add MITRE ATT&CK or ATLAS mappings", "update the description", "update the query")
 
 Do NOT use this skill when the user:
 - Asks about alerts or alert triage (use the alert analysis skill instead)
@@ -104,7 +104,7 @@ Before creating or editing a rule, use the available research tools to ensure ac
 This is especially important when:
 - Creating a new rule from scratch (search for similar detections or threat context).
 - Editing queries or detection logic (verify correct ES|QL syntax).
-- Adding MITRE ATT&CK mappings (confirm correct tactic/technique IDs and names).
+- Adding MITRE ATT&CK or ATLAS mappings (confirm correct tactic/technique IDs and names).
 
 ### Step 3: Create or Modify the Rule
 
@@ -247,6 +247,8 @@ Use the following fields to update the rule, modify or add only fields that expl
 2. Set \`tags\`: \`["Network", "Threat Detection", "T1059"]\`
 3. Stringify full rule and call \`attachment_update\`.
 
+To add an ATLAS mapping, append a separate entry with \`"framework": "MITRE ATLAS"\`.
+
 Before:
 \`\`\`json
 { "name": "My Rule", "tags": ["Old Tag"], "severity": "high", ... }
@@ -273,9 +275,9 @@ Common mappings:
 { "severity": "critical", "risk_score": 99, ... }
 \`\`\`
 
-### MITRE ATT&CK (threat field)
+### MITRE threat mappings (threat field)
 
-\`threat\` (array): MITRE ATT&CK framework mappings. Each entry has a tactic and optional techniques/subtechniques.
+\`threat\` (array): MITRE ATT&CK or MITRE ATLAS mappings. Each entry has a \`framework\`, a tactic and optional techniques/subtechniques. Never mix frameworks inside one entry: an ATLAS technique belongs under an ATLAS tactic in an entry with \`"framework": "MITRE ATLAS"\`.
 
 **Structure**:
 \`\`\`json
@@ -300,6 +302,22 @@ Common mappings:
               "reference": "https://attack.mitre.org/techniques/T1566/001"
             }
           ]
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATLAS",
+      "tactic": {
+        "id": "AML.TA0000",
+        "name": "AI Model Access",
+        "reference": "https://atlas.mitre.org/tactics/AML.TA0000/"
+      },
+      "technique": [
+        {
+          "id": "AML.T0044",
+          "name": "Full AI Model Access",
+          "reference": "https://atlas.mitre.org/techniques/AML.T0044/",
+          "subtechnique": []
         }
       ]
     }

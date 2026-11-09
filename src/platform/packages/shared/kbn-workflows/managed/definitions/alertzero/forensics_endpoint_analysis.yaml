@@ -121,7 +121,7 @@ steps:
   # `workflow.executeAsync` looks for the child in this worker's space first,
   # falling back to the global space where the analysis is actually installed
   # so it still runs with this space's id. Async because a forensic run takes
-  # up to 15m, and a synchronous call would hold this worker's only concurrency
+  # up to 30m, and a synchronous call would hold this worker's only concurrency
   # slot that whole time, queuing every later tick behind it.
   #
   # An indicator stays pending until the child retires it, so the next tick
@@ -162,6 +162,43 @@ steps:
             ki_id: "{{ foreach.item._source.id | default: foreach.item._id }}"
             ai_index_id: "{{ inputs.ai_index_id | default: consts.ai_index_id }}"
 
+  # Telemetry: the analyses this poll started. An indicator stays pending while its analysis
+  # runs, so every poll re-dispatches it, and the engine drops that duplicate as `skipped`.
+  - name: resolve_reported_starts
+    type: data.set
+    on-failure:
+      continue: true
+    with:
+      started: "${{ steps.start_runs.output.results | where: 'status', 'completed' | map: 'output' | compact | reject: 'status', 'skipped' | size }}"
+
+  # Telemetry: the sweep's outcome. A poll that started nothing new, had nothing refused and read
+  # its source cleanly sends nothing.
+  - name: report_worker_run_completed
+    type: alertzero.reportWorkerOutcome
+    if: "${{ steps.resolve_reported_starts.output.started > 0 or steps.start_runs.output.failed > 0 or steps.search_pending_indicators.error != null }}"
+    on-failure:
+      continue: true
+    with:
+      event: worker_run_completed
+      candidates_found: "${{ steps.search_pending_indicators.output.hits.total.value | default: 0 }}"
+      items_dispatched: "${{ steps.resolve_reported_starts.output.started | default: 0 }}"
+      items_failed: "${{ steps.start_runs.output.failed | default: 0 }}"
+      items_in_flight: "${{ steps.resolve_reported_starts.output.started | default: 0 }}"
+      source_read_failed: "${{ steps.search_pending_indicators.error != null }}"
+      degraded_reason: "{% if steps.start_runs.output.failed > 0 or steps.search_pending_indicators.error != null %}dependency_unavailable{% else %}none{% endif %}"
+      run_outcome: |-
+        {%- assign started = steps.resolve_reported_starts.output.started | default: 0 -%}
+        {%- assign refused = steps.start_runs.output.failed | default: 0 -%}
+        {%- if steps.search_pending_indicators.error != null -%}
+        failed_source_unavailable
+        {%- elsif refused > 0 and started == 0 -%}
+        failed_all_items
+        {%- elsif refused > 0 -%}
+        degraded_partial
+        {%- else -%}
+        produced
+        {%- endif -%}
+
   - name: emit_result
     type: workflow.output
     status: completed
@@ -170,7 +207,7 @@ steps:
       # Dispatches accepted, not analyses begun: a dropped duplicate still marks
       # the child SKIPPED and returns normally, so `executeAsync` succeeds and
       # counts here too. That means the same indicator gets counted again on
-      # every tick while its 15m analysis holds the slot. Read this as
+      # every tick while its 30m analysis holds the slot. Read this as
       # hand-off attempts that weren't outright rejected, and look at the
       # child's own execution records for the actual analyses. An empty
       # batch just reports 0 here, with no special-casing needed.

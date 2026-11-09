@@ -8,6 +8,7 @@
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 
+import { buildPath } from '@kbn/core-http-browser';
 import { API_VERSIONS } from '../../common/constants';
 import { useKibana } from '../common/lib/kibana';
 import { PLUGIN_ID } from '../../common';
@@ -42,7 +43,7 @@ export const useCopySavedQuery = ({ savedQueryId }: UseCopySavedQueryProps) => {
   return useMutation(
     () =>
       http.post<{ data: { saved_object_id: string; id: string } }>(
-        `/api/osquery/saved_queries/${savedQueryId}/copy`,
+        buildPath('/api/osquery/saved_queries/{savedQueryId}/copy', { savedQueryId }),
         {
           version: API_VERSIONS.public.v1,
         }

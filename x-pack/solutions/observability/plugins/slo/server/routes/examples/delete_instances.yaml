@@ -1,0 +1,54 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        deleteInstancesExample:
+          summary: Delete specific SLO instances
+          value:
+            list:
+              - sloId: 8853df00-ae2e-11ed-90af-09bb6422b258
+                instanceId: host-abc123
+              - sloId: 8853df00-ae2e-11ed-90af-09bb6422b258
+                instanceId: host-def456
+responses:
+  '204':
+    description: Successful request
+  '400':
+    description: Bad request
+    content:
+      application/json:
+        schema:
+          $ref: ../oas_schemas.yaml#/400_response
+        examples:
+          badRequestExample:
+            summary: Bad request
+            value:
+              statusCode: 400
+              error: Bad Request
+              message: 'Invalid value ''foo'' supplied to: list/0/sloId'
+  '401':
+    description: Unauthorized response
+    content:
+      application/json:
+        schema:
+          $ref: ../oas_schemas.yaml#/401_response
+        examples:
+          unauthorizedExample:
+            summary: Unauthorized
+            value:
+              statusCode: 401
+              error: Unauthorized
+              message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+  '403':
+    description: Forbidden response
+    content:
+      application/json:
+        schema:
+          $ref: ../oas_schemas.yaml#/403_response
+        examples:
+          forbiddenExample:
+            summary: Forbidden
+            value:
+              statusCode: 403
+              error: Forbidden
+              message: 'security_exception: action [slo_write] is unauthorized for user'

@@ -20,6 +20,7 @@ export {
   SYSTEM_SECURITY_WATCH_IDS,
   HUNT_INTERNAL_ROUTE_BASE,
   HUNT_INDEX_SCOPE_URL,
+  HUNT_WORKER_INDEX_COVERAGE_URL,
   CANDIDATES_URL,
   HUNT_COORDINATOR_URL,
   FIND_OR_CREATE_INVESTIGATION_URL,
@@ -63,7 +64,7 @@ export const buildHuntCoordinatorResultAttachmentId = (runId: string): string =>
 /** Reports index the hunt services read candidates from and write feedback to. */
 export const HUNT_REPORTS_INDEX = '.kibana-threat-reports' as const;
 
-/** Investigation conversation id namespace: the id is `uuidv5(${HUNT_INVESTIGATION_ID_NAMESPACE}${reportId})` within the originating space. */
+/** Investigation conversation id namespace: the id is `uuidv5(${HUNT_INVESTIGATION_ID_NAMESPACE}${spaceId}|${reportId})`. */
 export const HUNT_INVESTIGATION_ID_NAMESPACE = 'hunt:report:' as const;
 
 /**

@@ -145,6 +145,9 @@ export const AlertAnalysisWorkflowOutputFields = lazySchema(() =>
     // Alert ids from the analyzed set with no matching agent verdict. Empty when
     // every alert was reconciled; non-empty means a partial (still completed) result.
     missing_alert_ids: z.array(z.string().max(512)).max(1000),
+    // Agent Builder conversations the run created, one per batch. Empty on the prompt path
+    // and when Create conversation is off.
+    conversation_ids: z.array(z.string().max(512)).max(1000),
   })
 );
 

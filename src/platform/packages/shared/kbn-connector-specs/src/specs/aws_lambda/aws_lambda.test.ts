@@ -229,7 +229,7 @@ describe('AwsLambdaConnector', () => {
       };
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        expect.stringContaining('lambda.us-east-1.amazonaws.com/2015-03-31/functions/'),
+        expect.stringMatching(/lambda\.us-east-1\.amazonaws\.com\/2015-03-31\/functions(\?|$)/),
         expect.any(Object)
       );
 
@@ -430,7 +430,7 @@ describe('AwsLambdaConnector', () => {
       const result = await testSpec.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        expect.stringContaining('/2015-03-31/functions/'),
+        expect.stringMatching(/\/2015-03-31\/functions(\?|$)/),
         expect.any(Object)
       );
       expect(result).toEqual({});
@@ -440,6 +440,17 @@ describe('AwsLambdaConnector', () => {
       mockClient.get.mockRejectedValue(new Error('Invalid credentials'));
 
       await expect(testSpec.handler(mockContext)).rejects.toThrow();
+    });
+  });
+
+  describe('listFunctions input bounds', () => {
+    it.each([
+      [10_000, true],
+      [10_001, false],
+    ])('maxItems %d valid=%s', (maxItems, expected) => {
+      expect(AwsLambdaConnector.actions.listFunctions.input.safeParse({ maxItems }).success).toBe(
+        expected
+      );
     });
   });
 });

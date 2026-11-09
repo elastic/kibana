@@ -7,7 +7,8 @@
 
 // Snapshot of the original benchmark simulator output
 // (chrysalis-sim/chrysalis_simulator.py _build_all_docs, default args).
-// 97 docs: attack_chain 21, noise 25, supporting 35, threat_intel 15, on_call 1.
+// 98 docs: attack_chain 21, noise 25, supporting 35, threat_intel 16, on_call 1.
+// threat_intel includes one appended EICAR indicator (see the comment above it).
 // Timestamps are re-stamped relative to seed time at runtime.
 
 export interface ParityDoc {
@@ -8643,6 +8644,56 @@ export const PARITY_DOCS: ParityDoc[] = [
           },
           provider: 'Rapid7 Labs',
           type: 'ipv4-addr',
+        },
+      },
+    },
+    group: 'threat_intel',
+    index: 'logs-ti_chrysalis_sim-default',
+  },
+  // Not emitted by the simulator: the benchmark's live VirusTotal lookups were
+  // also asked about the EICAR test file. vt.hash.lookup reads this corpus
+  // instead of VirusTotal, so the verdict those runs saw is pinned here.
+  {
+    doc: {
+      '@timestamp': '2026-10-02T19:17:03.000Z',
+      data_stream: {
+        dataset: 'ti_chrysalis_sim',
+        namespace: 'default',
+        type: 'logs',
+      },
+      ecs: {
+        version: '8.11.0',
+      },
+      event: {
+        category: ['threat'],
+        dataset: 'ti_chrysalis_sim.indicator',
+        kind: 'enrichment',
+        module: 'ti_chrysalis_sim',
+        provider: 'VirusTotal (synthetic ingest)',
+        type: ['indicator'],
+      },
+      labels: {
+        simulation: 'chrysalis-sim',
+      },
+      tags: ['chrysalis-sim'],
+      threat: {
+        indicator: {
+          confidence: 'High',
+          description:
+            'EICAR anti-malware test file. VirusTotal verdict: 65/76 malicious (popular threat label: virus.eicar/test).',
+          file: {
+            hash: {
+              sha256: '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f',
+            },
+            name: 'eicar.com',
+          },
+          first_seen: '2026-06-04T19:17:03.000Z',
+          last_seen: '2026-10-02T19:17:03.000Z',
+          marking: {
+            tlp: 'WHITE',
+          },
+          provider: 'VirusTotal',
+          type: 'file',
         },
       },
     },

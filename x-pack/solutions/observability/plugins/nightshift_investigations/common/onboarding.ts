@@ -45,7 +45,12 @@ export interface OnboardingSuggestionsExecution {
 }
 
 export interface GetOnboardingResponse {
+  agent_installed: boolean;
   execution?: OnboardingSuggestionsExecution;
+}
+
+export interface EnableOnboardingResponse {
+  agent_installed: true;
 }
 
 export interface StartOnboardingSuggestionsResponse {

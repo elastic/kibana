@@ -85,8 +85,3 @@ export interface CaptureHostVmAgentDiagnosticsOptions {
   hostname: string;
   fileNamePrefix?: string;
 }
-
-export interface ExecuteCommandOnHostOptions {
-  hostname: string;
-  command: string;
-}

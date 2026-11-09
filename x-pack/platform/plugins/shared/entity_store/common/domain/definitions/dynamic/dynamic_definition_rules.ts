@@ -22,6 +22,9 @@ export const NO_IDENTITY_ATTRIBUTE_RULE = 'attributes are not identity fields';
 /** Name of the rule restricting `identityField` to what the inventory can group by. */
 export const SERVABLE_IDENTITY_RULE = 'servable identity';
 
+/** Column the inventory writes the last-seen timestamp to, so no identity field may take its name. */
+export const RESERVED_LAST_SEEN_FIELD = 'last_seen';
+
 /** Most distinct identity fields a definition with `dynamic` may group by. */
 export const MAX_DYNAMIC_IDENTITY_FIELDS = 8;
 
@@ -34,11 +37,19 @@ const rankingCompositionFields = (ranking: EuidRanking): string[][] =>
     )
   );
 
-/** Every field an identity reads: the single field, or every field of every ranking composition. */
-export const getIdentityFields = (identityField: EntityIdentity): string[] =>
+/**
+ * The fields of each identity composition, in ranking order: `[[field]]` for a single field, one
+ * list per ranking composition otherwise (a servable ranking has exactly one, unconditional branch).
+ */
+export const getIdentityCompositions = (identityField: EntityIdentity): string[][] =>
   'singleField' in identityField
-    ? [identityField.singleField]
-    : [...new Set(rankingCompositionFields(identityField.euidRanking).flat())];
+    ? [[identityField.singleField]]
+    : rankingCompositionFields(identityField.euidRanking);
+
+/** Every field an identity reads: the single field, or every field of every ranking composition. */
+export const getIdentityFields = (identityField: EntityIdentity): string[] => [
+  ...new Set(getIdentityCompositions(identityField).flat()),
+];
 
 const compositionPresenceFilter = (fields: readonly string[]): Condition =>
   fields.length === 1
@@ -56,6 +67,8 @@ export const getPresenceFilter = (compositions: ReadonlyArray<readonly string[]>
 
 const literalFieldMessage = (field: string): string =>
   `${SERVABLE_IDENTITY_RULE}: "${field}" must be a literal field path (no wildcards, expressions, quoting or whitespace), the inventory groups on raw mapped fields`;
+
+const reservedFieldMessage = `${SERVABLE_IDENTITY_RULE}: "${RESERVED_LAST_SEEN_FIELD}" is the inventory's own output column and cannot be an identity field`;
 
 const checkCalculatedIdentity = (
   identityField: CalculatedEntityIdentity,
@@ -89,12 +102,16 @@ const checkCalculatedIdentity = (
     }
     branch.ranking.forEach((composition, compositionIndex) => {
       composition.forEach((part, partIndex) => {
-        if ('field' in part && !isLiteralFieldPath(part.field)) {
+        if (!('field' in part)) {
+          return;
+        }
+        const fieldPath = [...branchPath, 'ranking', compositionIndex, partIndex, 'field'];
+        if (!isLiteralFieldPath(part.field)) {
           rankingIsServable = false;
-          addIssue(
-            [...branchPath, 'ranking', compositionIndex, partIndex, 'field'],
-            literalFieldMessage(part.field)
-          );
+          addIssue(fieldPath, literalFieldMessage(part.field));
+        }
+        if (part.field === RESERVED_LAST_SEEN_FIELD) {
+          addIssue(fieldPath, reservedFieldMessage);
         }
       });
     });
@@ -148,6 +165,9 @@ export const assertDynamicDefinitionRules = (
   if ('singleField' in identityField) {
     if (!isLiteralFieldPath(identityField.singleField)) {
       addIssue(['identityField', 'singleField'], literalFieldMessage(identityField.singleField));
+    }
+    if (identityField.singleField === RESERVED_LAST_SEEN_FIELD) {
+      addIssue(['identityField', 'singleField'], reservedFieldMessage);
     }
   } else {
     checkCalculatedIdentity(identityField, addIssue);

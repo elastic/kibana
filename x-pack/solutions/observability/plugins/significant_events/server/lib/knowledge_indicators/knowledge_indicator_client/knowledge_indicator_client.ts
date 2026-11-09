@@ -24,7 +24,7 @@ import {
 } from './types';
 import { RevisionReader } from './revision_reader';
 import { IndicatorWriter } from './indicator_writer';
-import { IndicatorReader } from './indicator_reader';
+import { IndicatorReader, type TopologyFeaturePageCursor } from './indicator_reader';
 import { IndicatorSearcher } from './indicator_searcher';
 import { QueryRuleOrchestrator, type PromoteQueriesResult } from './query_rule_orchestrator';
 import { computeExpiresAt } from './serializers';
@@ -80,7 +80,8 @@ export class KnowledgeIndicatorClient {
       deps.logger,
       config,
       revisionReader,
-      deps.space
+      deps.space,
+      deps.searchEmbeddingModelResolver
     );
     this.orchestrator = new QueryRuleOrchestrator(
       alertingContext.rulesClient,
@@ -115,6 +116,10 @@ export class KnowledgeIndicatorClient {
     return this.reader.countFeatures(sourceIds);
   }
 
+  countEntities(sourceIds: string[]): Promise<number> {
+    return this.reader.countEntities(sourceIds);
+  }
+
   countUnbackedQueries(sourceIds: string[]): Promise<number> {
     return this.reader.countUnbackedQueries(sourceIds);
   }
@@ -127,7 +132,11 @@ export class KnowledgeIndicatorClient {
     sourceId: string,
     options: { lastRefreshedBefore: string }
   ): Promise<{ refreshed: number }> {
-    return this.withSourceWrite(sourceId, () => this.writer.keepAlivePersistent(sourceId, options));
+    return this.withSourceWrite(
+      sourceId,
+      () => this.writer.keepAlivePersistent(sourceId, options),
+      { waitForLease: false }
+    );
   }
 
   deleteIndicators(sourceId: string) {
@@ -149,6 +158,16 @@ export class KnowledgeIndicatorClient {
     }
   ): Promise<{ hits: Feature[] }> {
     return this.reader.getFeatures(sources, options);
+  }
+
+  getTopologyFeaturesPage(options: {
+    sourceIds: string[];
+    featureTypes: string[];
+    asOf: string;
+    after?: TopologyFeaturePageCursor;
+    size: number;
+  }): Promise<{ hits: Feature[]; nextCursor?: TopologyFeaturePageCursor }> {
+    return this.reader.getTopologyFeaturesPage(options);
   }
 
   getExcludedFeatures(sourceId: string): Promise<{ hits: Feature[] }> {
@@ -267,6 +286,22 @@ export class KnowledgeIndicatorClient {
     return this.searcher.findFeatures(sources, query, options);
   }
 
+  findFeaturesAcrossSources(
+    sourceIds: string[],
+    query: string,
+    options: { featureType: string; searchMode?: SearchMode; limit?: number }
+  ): Promise<{ hits: Feature[] }> {
+    return this.searcher.findFeaturesAcrossSources(sourceIds, query, options);
+  }
+
+  getFeatureSourcesBySlug(
+    sourceIds: string[],
+    featureType: string,
+    slugs: string[]
+  ): Promise<Map<string, string[]>> {
+    return this.reader.getFeatureSourcesBySlug(sourceIds, featureType, slugs);
+  }
+
   findQueries(
     sources: string | string[],
     query: string,
@@ -347,6 +382,8 @@ export class KnowledgeIndicatorClient {
   }
 
   reconcileSource(sourceId: string): Promise<{ tombstoned: number; orphanRulesDeleted: number }> {
-    return this.withSourceWrite(sourceId, () => this.orchestrator.reconcileSource(sourceId));
+    return this.withSourceWrite(sourceId, () => this.orchestrator.reconcileSource(sourceId), {
+      waitForLease: false,
+    });
   }
 }
