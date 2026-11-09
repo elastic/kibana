@@ -57,25 +57,39 @@ const dedupeDefined = (values: ReadonlyArray<string | undefined>): string[] => [
   ),
 ];
 
-/** Matched IOC entries on one event that name `value` (prefer `matched.iocs`). */
-const matchedIocsForValue = (
-  event: SseEventRef,
-  value: string
-): Array<{ type: string; value: string; field: string }> => {
-  if (event.matched?.iocs && event.matched.iocs.length > 0) {
-    return event.matched.iocs.filter((ioc) => ioc.value === value && Boolean(ioc.field));
+interface MatchedIoc {
+  type: string;
+  value: string;
+  field: string;
+}
+
+/** Shared matched shape on Tier 1 hits and cited SSE events. */
+interface MatchedRecord {
+  ioc?: { type?: string; value?: string };
+  iocs?: ReadonlyArray<{ type: string; value: string; field: string }>;
+  field?: string;
+}
+
+/** Every IOC named on a hit/event (`matched.iocs`, else legacy `matched.ioc` + `field`). */
+const matchedIocsFromRecord = (matched: MatchedRecord | undefined): MatchedIoc[] => {
+  if (matched?.iocs && matched.iocs.length > 0) {
+    return [...matched.iocs];
   }
-  if (event.matched?.ioc?.value === value && event.matched.field) {
+  if (matched?.ioc?.type && matched.ioc.value) {
     return [
       {
-        type: event.matched.ioc.type,
-        value: event.matched.ioc.value,
-        field: event.matched.field,
+        type: matched.ioc.type,
+        value: matched.ioc.value,
+        field: matched.field ?? '',
       },
     ];
   }
   return [];
 };
+
+/** Matched IOC entries on one event that name `value` (prefer `matched.iocs`). */
+const matchedIocsForValue = (event: SseEventRef, value: string): MatchedIoc[] =>
+  matchedIocsFromRecord(event.matched).filter((ioc) => ioc.value === value && Boolean(ioc.field));
 
 /** Every event whose `matched.ioc`/`matched.iocs` names `value`, for borrowing host/user names. */
 const hostsAndUsersForIocValue = (
@@ -159,40 +173,35 @@ export const reconcileIocDetectionFields = (
   });
 };
 
-interface IocHitGroup {
+interface IocGroup<T> {
   type: string;
   value: string;
   field: string;
-  hits: HuntForThreatHit[];
+  items: T[];
 }
 
 /**
- * Groups Tier 1 hits by every IOC each one matched (`matched.iocs`, falling
- * back to the single `matched.ioc`/`matched.field` pair for older hits). One
- * hit can land in more than one group when it matched several IOCs.
+ * Groups records by every IOC each one matched. One record can land in more than
+ * one group when it matched several IOCs.
  */
-const groupHitsByIoc = (hits: readonly HuntForThreatHit[]): IocHitGroup[] => {
-  const groups = new Map<string, IocHitGroup>();
-  for (const hit of hits) {
-    const matchedIocs =
-      hit.matched?.iocs && hit.matched.iocs.length > 0
-        ? hit.matched.iocs
-        : hit.matched?.ioc?.type && hit.matched.ioc.value
-        ? [
-            {
-              type: hit.matched.ioc.type,
-              value: hit.matched.ioc.value,
-              field: hit.matched.field ?? '',
-            },
-          ]
-        : [];
-    for (const ioc of matchedIocs) {
+const groupByMatchedIoc = <T>(
+  records: readonly T[],
+  getMatched: (record: T) => MatchedRecord | undefined
+): Array<IocGroup<T>> => {
+  const groups = new Map<string, IocGroup<T>>();
+  for (const record of records) {
+    for (const ioc of matchedIocsFromRecord(getMatched(record))) {
       const key = `${ioc.type}:${ioc.value}`;
       const group = groups.get(key);
       if (group) {
-        group.hits.push(hit);
+        group.items.push(record);
       } else {
-        groups.set(key, { type: ioc.type, value: ioc.value, field: ioc.field, hits: [hit] });
+        groups.set(key, {
+          type: ioc.type,
+          value: ioc.value,
+          field: ioc.field,
+          items: [record],
+        });
       }
     }
   }
@@ -200,12 +209,10 @@ const groupHitsByIoc = (hits: readonly HuntForThreatHit[]): IocHitGroup[] => {
 };
 
 const firstAndLastTimestamp = (
-  hits: readonly HuntForThreatHit[]
+  timestamps: ReadonlyArray<string | undefined>
 ): { first?: string; last?: string } => {
-  const timestamps = dedupeDefined(hits.map((hit) => hit.timestamp)).sort();
-  return timestamps.length > 0
-    ? { first: timestamps[0], last: timestamps[timestamps.length - 1] }
-    : {};
+  const sorted = dedupeDefined(timestamps).sort();
+  return sorted.length > 0 ? { first: sorted[0], last: sorted[sorted.length - 1] } : {};
 };
 
 /** IOC detections built from Tier 1's aggregated `per_ioc` buckets, when present. */
@@ -237,65 +244,14 @@ const detectionsFromPerIoc = (
     };
   });
 
-interface IocEventGroup {
-  type: string;
-  value: string;
-  field: string;
-  events: SseEventRef[];
-}
-
-/**
- * Groups cited SSE events by every IOC each one matched (`matched.iocs`, else
- * the single `matched.ioc`/`matched.field` pair). Used for old stored SSEs that
- * carry neither `per_ioc` nor Tier 1 `hits` on the persisted hunt_result (D13).
- */
-const groupEventsByIoc = (events: readonly SseEventRef[]): IocEventGroup[] => {
-  const groups = new Map<string, IocEventGroup>();
-  for (const event of events) {
-    const matchedIocs =
-      event.matched?.iocs && event.matched.iocs.length > 0
-        ? event.matched.iocs
-        : event.matched?.ioc?.type && event.matched.ioc.value
-        ? [
-            {
-              type: event.matched.ioc.type,
-              value: event.matched.ioc.value,
-              field: event.matched.field ?? '',
-            },
-          ]
-        : [];
-    for (const ioc of matchedIocs) {
-      const key = `${ioc.type}:${ioc.value}`;
-      const group = groups.get(key);
-      if (group) {
-        group.events.push(event);
-      } else {
-        groups.set(key, {
-          type: ioc.type,
-          value: ioc.value,
-          field: ioc.field,
-          events: [event],
-        });
-      }
-    }
-  }
-  return [...groups.values()];
-};
-
-const firstAndLastEventTimestamp = (
-  events: readonly SseEventRef[]
-): { first?: string; last?: string } => {
-  const timestamps = dedupeDefined(events.map((event) => event.timestamp)).sort();
-  return timestamps.length > 0
-    ? { first: timestamps[0], last: timestamps[timestamps.length - 1] }
-    : {};
-};
-
-/** One IOC detection built from a group of sampled Tier 1 hits sharing an IOC. */
-const detectionFromHitGroup = (group: IocHitGroup, hasBehaviorHit: boolean): SseDetection => {
-  const { first, last } = firstAndLastTimestamp(group.hits);
-  const hosts = dedupeDefined(group.hits.map((hit) => hit.host)).slice(0, MAX_NAMES);
-  const users = dedupeDefined(group.hits.map((hit) => hit.user)).slice(0, MAX_NAMES);
+/** One sample-based IOC detection from a hit or cited-event group. */
+const detectionFromIocGroup = <T extends { host?: string; user?: string; timestamp?: string }>(
+  group: IocGroup<T>,
+  hasBehaviorHit: boolean
+): SseDetection => {
+  const { first, last } = firstAndLastTimestamp(group.items.map((item) => item.timestamp));
+  const hosts = dedupeDefined(group.items.map((item) => item.host)).slice(0, MAX_NAMES);
+  const users = dedupeDefined(group.items.map((item) => item.user)).slice(0, MAX_NAMES);
   return {
     id: `ioc:${group.type}:${group.value}`,
     kind: 'ioc',
@@ -304,27 +260,7 @@ const detectionFromHitGroup = (group: IocHitGroup, hasBehaviorHit: boolean): Sse
     matched_on: [{ field: group.field, value: group.value }],
     ...(hosts.length > 0 ? { hosts, host_count: hosts.length } : {}),
     ...(users.length > 0 ? { users, user_count: users.length } : {}),
-    total: group.hits.length,
-    ...(first ? { first_seen: first } : {}),
-    ...(last ? { last_seen: last } : {}),
-    from_sample: true,
-  };
-};
-
-/** One IOC detection built from cited SSE events sharing an IOC (old-payload path). */
-const detectionFromEventGroup = (group: IocEventGroup, hasBehaviorHit: boolean): SseDetection => {
-  const { first, last } = firstAndLastEventTimestamp(group.events);
-  const hosts = dedupeDefined(group.events.map((event) => event.host)).slice(0, MAX_NAMES);
-  const users = dedupeDefined(group.events.map((event) => event.user)).slice(0, MAX_NAMES);
-  return {
-    id: `ioc:${group.type}:${group.value}`,
-    kind: 'ioc',
-    field: group.field,
-    basis: classifyBasis([{ type: group.type, value: group.value }], hasBehaviorHit),
-    matched_on: [{ field: group.field, value: group.value }],
-    ...(hosts.length > 0 ? { hosts, host_count: hosts.length } : {}),
-    ...(users.length > 0 ? { users, user_count: users.length } : {}),
-    total: group.events.length,
+    total: group.items.length,
     ...(first ? { first_seen: first } : {}),
     ...(last ? { last_seen: last } : {}),
     from_sample: true,
@@ -359,15 +295,15 @@ const buildIocDetections = (
   }
   const hits = huntResult.tier1.hits ?? [];
   if (hits.length > 0) {
-    const groups = groupHitsByIoc(hits);
+    const groups = groupByMatchedIoc(hits, (hit) => hit.matched);
     return {
-      detections: groups.map((group) => detectionFromHitGroup(group, hasBehaviorHit)),
+      detections: groups.map((group) => detectionFromIocGroup(group, hasBehaviorHit)),
       iocPairs: groups.map((group) => ({ type: group.type, value: group.value })),
     };
   }
-  const eventGroups = groupEventsByIoc(events);
+  const eventGroups = groupByMatchedIoc(events, (event) => event.matched);
   return {
-    detections: eventGroups.map((group) => detectionFromEventGroup(group, hasBehaviorHit)),
+    detections: eventGroups.map((group) => detectionFromIocGroup(group, hasBehaviorHit)),
     iocPairs: eventGroups.map((group) => ({ type: group.type, value: group.value })),
   };
 };

@@ -139,9 +139,9 @@ export const buildEntityLookupEsql = ({
 };
 
 /**
- * Discover exit for an IOC detection (plan D10): every Tier 1 index the hunt
- * searched, filtered to the ECS field and value that matched. Absent when the
- * detection has no field or the hunt carried no per-index rows (old payloads).
+ * Discover exit for an IOC detection (plan D10): the caller-supplied indices
+ * (cited-event sources first, else Tier 1 per_index), filtered to the ECS field
+ * and value that matched. Absent when field/value/indices are empty.
  */
 export const buildIocMatchEsql = ({
   indices,

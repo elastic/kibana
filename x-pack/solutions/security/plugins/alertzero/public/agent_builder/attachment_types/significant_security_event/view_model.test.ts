@@ -297,7 +297,7 @@ describe('toSseViewModel', () => {
 });
 
 describe('buildSignificantSecurityEventHeadline', () => {
-  it('uses summary as the title and appends the basis badge', () => {
+  it('uses summary as the title and exposes the basis badge', () => {
     const parsed = parseOrThrow({
       ...baseParsed,
       summary: 'ip 127.0.0.1 seen 4912x on 8 hosts',
@@ -307,9 +307,7 @@ describe('buildSignificantSecurityEventHeadline', () => {
 
     const headline = buildSignificantSecurityEventHeadline(parsed, undefined);
     expect(headline.title).toBe('ip 127.0.0.1 seen 4912x on 8 hosts');
-    expect(headline.badges.map((badge) => badge.label)).toEqual(
-      expect.arrayContaining(['Hunt finding', 'Weak IOC', 'high', 'open', '80%'])
-    );
+    expect(headline.basisBadge).toEqual({ label: 'Weak IOC', color: 'hollow' });
     expect(headline.subtitle).toContain('ti-report-1');
   });
 
@@ -332,6 +330,6 @@ describe('buildSignificantSecurityEventHeadline', () => {
     const headline = buildSignificantSecurityEventHeadline(parsed, undefined);
     const viewModel = toSseViewModel(parsed);
     expect(headline.title).toBe(viewModel.summary);
-    expect(headline.badges.map((badge) => badge.label)).toContain('Weak IOC');
+    expect(headline.basisBadge?.label).toBe('Weak IOC');
   });
 });

@@ -58,8 +58,8 @@ import {
 import { LabeledBadgeTable, type LabeledBadgeTableRow } from '../shared/labeled_badge_table';
 import { formatPercent } from '../shared/severity';
 import {
+  basisHeaderBadge,
   buildSignificantSecurityEventActionButtons,
-  buildSignificantSecurityEventHeadline,
   parseSignificantSecurityEventData,
   toSseViewModel,
 } from './view_model';
@@ -722,6 +722,28 @@ const behaviorDisplayName = (
   )?.title;
 };
 
+const DETECTION_OPEN_IN_DISCOVER_ARIA = i18n.translate(
+  'xpack.alertzero.agentBuilder.attachments.sse.detectionOpenInDiscover',
+  { defaultMessage: 'Open in Discover' }
+);
+
+const DetectionDiscoverPivot: React.FC<{ href: string; testSubj?: string }> = ({
+  href,
+  testSubj,
+}) => (
+  <EuiFlexItem grow={false}>
+    <EuiButtonIcon
+      size="xs"
+      iconType="discoverApp"
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      {...(testSubj ? { 'data-test-subj': testSubj } : {})}
+      aria-label={DETECTION_OPEN_IN_DISCOVER_ARIA}
+    />
+  </EuiFlexItem>
+);
+
 /**
  * The IOCs and behaviors that matched (D10). IOC rows pivot to Discover over the indices
  * cited events came from (else every Tier 1 index) for the exact field and value; behavior
@@ -813,20 +835,10 @@ const WhatMatched: React.FC<{
                 ) : null}
               </EuiFlexItem>
               {href ? (
-                <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    size="xs"
-                    iconType="discoverApp"
-                    href={href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    data-test-subj={`alertzeroSignificantSecurityEventDetectionPivot-${detection.id}`}
-                    aria-label={i18n.translate(
-                      'xpack.alertzero.agentBuilder.attachments.sse.detectionOpenInDiscover',
-                      { defaultMessage: 'Open in Discover' }
-                    )}
-                  />
-                </EuiFlexItem>
+                <DetectionDiscoverPivot
+                  href={href}
+                  testSubj={`alertzeroSignificantSecurityEventDetectionPivot-${detection.id}`}
+                />
               ) : null}
             </EuiFlexGroup>
           );
@@ -850,21 +862,7 @@ const WhatMatched: React.FC<{
                 </EuiText>
               ) : null}
             </EuiFlexItem>
-            {href ? (
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  size="xs"
-                  iconType="discoverApp"
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={i18n.translate(
-                    'xpack.alertzero.agentBuilder.attachments.sse.detectionOpenInDiscover',
-                    { defaultMessage: 'Open in Discover' }
-                  )}
-                />
-              </EuiFlexItem>
-            ) : null}
+            {href ? <DetectionDiscoverPivot href={href} /> : null}
           </EuiFlexGroup>
         );
       },
@@ -1286,8 +1284,8 @@ const DetailAccordion: React.FC<{
 );
 
 /**
- * Per-index hit breakdown for the audit footer. Operational (which indices answered), not
- * the attack story, so it sits after What matched and the collapsed dig-in.
+ * Per-index hit breakdown. Operational (which indices answered), not the attack story;
+ * rendered above cited Events and Queries run.
  */
 const IndexHits: React.FC<{ huntResult?: HuntResult }> = ({ huntResult }) => {
   const perIndex = huntResult?.tier1.per_index ?? [];
@@ -1675,15 +1673,8 @@ export const SignificantSecurityEventInlineContent: React.FC<
   const tier2 = huntResult?.tier2;
 
   const viewModel = toSseViewModel(parsed);
-  const { basis, detections, eventGroups, hypothesisDisplay, entityLine } = viewModel;
-  const headline = buildSignificantSecurityEventHeadline(parsed, {
-    source_watch: parsed.source_watch,
-    capability: parsed.capability,
-  });
-  // The basis badge is `badges[1]` whenever the view model graded a basis (Hunt finding is
-  // always first). Same convention the attachment chrome header uses, so both surfaces show
-  // the one label.
-  const basisBadge = basis ? headline.badges[1] : undefined;
+  const { basis, detections, eventGroups, hypothesisDisplay, entityLine, summary } = viewModel;
+  const basisBadge = basis ? basisHeaderBadge(basis) : undefined;
 
   const hasChromeHeader =
     buildSignificantSecurityEventActionButtons({ parsed, navigation }).length > 0;
@@ -1789,7 +1780,7 @@ export const SignificantSecurityEventInlineContent: React.FC<
         ) : (
           <div data-test-subj={SSE_ATTACHMENT_HEADLINE_TEST_ID}>
             <EuiTitle size="xs">
-              <h3 css={cellStyles}>{headline.title}</h3>
+              <h3 css={cellStyles}>{summary}</h3>
             </EuiTitle>
             <EuiSpacer size="xs" />
             {statusRow}

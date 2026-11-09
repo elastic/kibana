@@ -15,7 +15,6 @@ import {
   buildSignificantSecurityEventActionButtons,
   buildSignificantSecurityEventHeadline,
   parseSignificantSecurityEventData,
-  toSseViewModel,
 } from './view_model';
 import type { SignificantSecurityEventAttachment } from './view_model';
 import type { SignificantSecurityEventInlineContentProps } from './significant_security_event_inline_content';
@@ -47,16 +46,13 @@ export const createSignificantSecurityEventAttachmentDefinition = ({
 }: {
   navigation: AttachmentNavigationDeps;
 }): AttachmentUIDefinition<SignificantSecurityEventAttachment> => ({
-  // Hit-centric `summary` is the chrome title when present (or derived for old
-  // payloads), so the header and the inline card show the same headline. Fall
-  // back to captured label/title fields for a payload this build cannot parse.
   getLabel: (attachment) => {
     const data = attachment?.data;
     const parsed = parseSignificantSecurityEventData(data);
     if (parsed) {
-      const { summary } = toSseViewModel(parsed);
-      if (summary) {
-        return summary;
+      const { title } = buildSignificantSecurityEventHeadline(parsed, data);
+      if (title) {
+        return title;
       }
     }
     // Narrowed for the same reason the threat attachment narrows them: a persisted payload
@@ -67,20 +63,15 @@ export const createSignificantSecurityEventAttachmentDefinition = ({
     return asString(data?.attachmentLabel) ?? asString(data?.title) ?? DEFAULT_LABEL;
   },
   getIcon: () => 'securitySignalDetected',
-  // Basis badge rides with the headline so chrome matches the inline card; severity /
-  // status / confidence stay in the card body.
   getHeader: ({ attachment }) => {
     const data = attachment?.data;
     const parsed = parseSignificantSecurityEventData(data);
-    const { subtitle, badges } = buildSignificantSecurityEventHeadline(parsed, data);
-    // Hunt finding / severity / status / confidence live in the card body; the chrome
-    // header only carries the basis so it stays aligned with the inline headline.
-    const basisBadge = badges[1];
+    const { subtitle, basisBadge } = buildSignificantSecurityEventHeadline(parsed, data);
 
     return {
       icon: 'securitySignalDetected',
       ...(subtitle ? { subtitle } : {}),
-      ...(parsed && toSseViewModel(parsed).basis && basisBadge ? { badges: [basisBadge] } : {}),
+      ...(basisBadge ? { badges: [basisBadge] } : {}),
     };
   },
   renderInlineContent: (props) => (
