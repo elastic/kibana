@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import { useFetchAutomations } from '../../../data/automations/use_automations';
@@ -30,8 +30,12 @@ export interface OnboardingVisibility {
 }
 
 /**
- * Onboarding is done once the space has an automation; there is no state of its own. Without
- * automations (feature flag off) it falls back to "the space has an investigation".
+ * Onboarding is normally done once the space has an automation; there is no state of its own.
+ * Without automations (feature flag off) it falls back to "the space has an investigation".
+ *
+ * An active session stays open after the first automation is created so the saved card and Done
+ * button can appear; Done / "I'll do it later" call `dismiss`. Return visits with an automation
+ * still skip onboarding.
  */
 export const useOnboardingVisibility = ({
   isEnabled,
@@ -68,11 +72,25 @@ export const useOnboardingVisibility = ({
     ? automations.isError || hasAutomation
     : investigations.error != null || latestInvestigation != null;
 
+  // Latch once the empty-automation onboarding UI is shown, so creating the first automation
+  // does not tear the page down before Done.
+  const [sessionOpen, setSessionOpen] = useState(false);
+  useEffect(() => {
+    if (forceOnboarding || (!isDismissed && !isLoading && canUseAutomations && !hasAutomation)) {
+      setSessionOpen(true);
+    }
+  }, [forceOnboarding, isDismissed, isLoading, canUseAutomations, hasAutomation]);
+  useEffect(() => {
+    if (isDismissed) setSessionOpen(false);
+  }, [isDismissed]);
+
   const dismiss = useCallback(() => setIsDismissed(true), [setIsDismissed]);
 
   return {
     isLoading,
-    showOnboarding: isEnabled && (forceOnboarding || (!isDismissed && !isLoading && !isDone)),
+    showOnboarding:
+      isEnabled &&
+      (forceOnboarding || (sessionOpen && !isDismissed) || (!isDismissed && !isLoading && !isDone)),
     latestInvestigation,
     dismiss,
   };

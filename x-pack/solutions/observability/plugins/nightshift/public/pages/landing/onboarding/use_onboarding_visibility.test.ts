@@ -63,6 +63,22 @@ describe('useOnboardingVisibility', () => {
     expect(result.current.showOnboarding).toBe(false);
   });
 
+  it('keeps an active session open after the first automation is created', () => {
+    const { result, rerender } = setup();
+    expect(result.current.showOnboarding).toBe(true);
+
+    mockUseFetchAutomations.mockReturnValue({
+      data: { automations: [{ id: 'a-1' }] },
+      isInitialLoading: false,
+      isError: false,
+    });
+    rerender();
+
+    expect(result.current.showOnboarding).toBe(true);
+    act(() => result.current.dismiss());
+    expect(result.current.showOnboarding).toBe(false);
+  });
+
   it('forces onboarding with an automation', () => {
     const { result } = setup({ automations: [{ id: 'a-1' }], forceOnboarding: true });
     expect(result.current.showOnboarding).toBe(true);

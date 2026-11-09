@@ -9,11 +9,22 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
-import { useDeleteAutomation, type Automation } from '../../../data/automations/use_automations';
+import {
+  useCreateAutomation,
+  useDeleteAutomation,
+  type Automation,
+} from '../../../data/automations/use_automations';
 import { OnboardingAutomationStep } from './automation_step';
 
 jest.mock('../../../data/automations/use_automations', () => ({
   useDeleteAutomation: jest.fn(),
+  useCreateAutomation: jest.fn(),
+}));
+
+jest.mock('../../../data/service_accounts/use_investigator_service_account', () => ({
+  useInvestigatorServiceAccount: () => ({
+    data: { serviceAccountsEnabled: false, canModifyBoundWorkflows: true },
+  }),
 }));
 
 jest.mock('../../../hooks/use_kibana', () => ({
@@ -85,6 +96,7 @@ const automation = {
 } as Automation;
 
 const mockUseDeleteAutomation = useDeleteAutomation as jest.Mock;
+const mockUseCreateAutomation = useCreateAutomation as jest.Mock;
 
 const renderStep = (automations: Automation[] = [], onInvestigationClick = jest.fn()) =>
   render(
@@ -101,6 +113,7 @@ const renderStep = (automations: Automation[] = [], onInvestigationClick = jest.
 describe('OnboardingAutomationStep', () => {
   beforeEach(() => {
     mockUseDeleteAutomation.mockReturnValue({ mutate: jest.fn(), isLoading: false });
+    mockUseCreateAutomation.mockReturnValue({ mutate: jest.fn(), isLoading: false });
   });
 
   it('keeps the trial result banner, and offers one first-automation card', () => {

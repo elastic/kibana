@@ -259,10 +259,8 @@ export function NightshiftOnboarding({
     },
     automate: {
       status: hasAutomation ? 'complete' : step === 'automate' ? 'current' : 'disabled',
-      onClick:
-        latestInvestigation && isConnected && step !== 'automate'
-          ? () => setStepOverride(undefined)
-          : undefined,
+      // Only a completed automate step links back; an unfinished one stays unlinked.
+      onClick: hasAutomation && step !== 'automate' ? () => setStepOverride(undefined) : undefined,
     },
   };
 

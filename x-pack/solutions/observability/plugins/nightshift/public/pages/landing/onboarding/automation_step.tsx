@@ -21,6 +21,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { connectedPowerPlug } from '@elastic/eui-illustrations';
@@ -30,12 +31,19 @@ import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/co
 import { NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import { InvestigationCardActions } from '../../../components/entities/investigation/investigation_card_actions';
 import { useInvestigationAssignees } from '../../../components/entities/investigation/use_investigation_assignees';
-import { useDeleteAutomation, type Automation } from '../../../data/automations/use_automations';
+import {
+  useCreateAutomation,
+  useDeleteAutomation,
+  type Automation,
+} from '../../../data/automations/use_automations';
+import { useInvestigatorServiceAccount } from '../../../data/service_accounts/use_investigator_service_account';
 import { useKibana } from '../../../hooks/use_kibana';
 import { AutomationDetailFlyout } from '../../automations/detail_flyout/automation_detail_flyout';
 import { CreateAutomationFlyout } from '../../automations/flyouts/create_flyout/create_automation_flyout';
 import { useAutomationUsage } from '../../automations/hooks/use_automation_usage';
 import { getDeleteConfirmTitle, listLabels } from '../../automations/list/translations';
+import { toCloneRequestBody } from '../../automations/utils/clone_automation';
+import { MANAGE_SECURITY_REQUIRED_REASON } from '../../automations/utils/edit_permission';
 import { statusLabels } from '../../automations/utils/filter_automations';
 
 const CREATE_AUTOMATION = i18n.translate(
@@ -89,8 +97,14 @@ export function OnboardingAutomationStep({
   onInvestigationClick: (investigation: InvestigationSummary) => void;
 }): React.ReactElement {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [editing, setEditing] = useState<Automation>();
-  const openCreate = () => setIsCreateOpen(true);
+  const [editingId, setEditingId] = useState<string>();
+  // Resolve from the latest list so a save that refreshes automations updates the flyout.
+  const editing = automations.find((automation) => automation.id === editingId);
+  const { canManage, editDisabledReason } = useOnboardingAutomationPermissions();
+  const openCreate = () => {
+    if (!canManage) return;
+    setIsCreateOpen(true);
+  };
   const hasAutomation = automations.length > 0;
 
   return (
@@ -112,9 +126,19 @@ export function OnboardingAutomationStep({
       <EuiSpacer size="m" />
       {automationsAvailable ? (
         hasAutomation ? (
-          <AutomationCards automations={automations} onCreate={openCreate} onEdit={setEditing} />
+          <AutomationCards
+            automations={automations}
+            onCreate={openCreate}
+            onEdit={(automation) => setEditingId(automation.id)}
+            canManage={canManage}
+            editDisabledReason={editDisabledReason}
+          />
         ) : (
-          <FirstAutomationCard onCreate={openCreate} />
+          <FirstAutomationCard
+            onCreate={openCreate}
+            canManage={canManage}
+            editDisabledReason={editDisabledReason}
+          />
         )
       ) : (
         <EuiCallOut
@@ -126,7 +150,7 @@ export function OnboardingAutomationStep({
           })}
         />
       )}
-      {isCreateOpen && (
+      {isCreateOpen && canManage && (
         <CreateAutomationFlyout
           onClose={() => setIsCreateOpen(false)}
           onCreated={() => setIsCreateOpen(false)}
@@ -134,13 +158,39 @@ export function OnboardingAutomationStep({
       )}
       {editing && (
         <EditAutomationFlyout
+          key={editing.id}
           automation={editing}
           automations={automations}
-          onClose={() => setEditing(undefined)}
+          canManage={canManage}
+          editDisabledReason={editDisabledReason}
+          onSelectAutomation={(automation) => setEditingId(automation.id)}
+          onClose={() => setEditingId(undefined)}
         />
       )}
     </div>
   );
+}
+
+/** Same manage_security gate as AutomationsPage: writes bind to the space service account. */
+function useOnboardingAutomationPermissions(): {
+  canManage: boolean;
+  editDisabledReason?: string;
+} {
+  const { application } = useKibana().services;
+  const hasManagePrivilege = getNightshiftCapabilities(
+    application.capabilities.nightshift
+  ).canManage;
+  const { data: serviceAccount } = useInvestigatorServiceAccount();
+  const needsManageSecurity = serviceAccount?.serviceAccountsEnabled === true;
+  const canManage =
+    hasManagePrivilege &&
+    serviceAccount !== undefined &&
+    (!needsManageSecurity || serviceAccount.canModifyBoundWorkflows === true);
+  const editDisabledReason =
+    hasManagePrivilege && needsManageSecurity && !canManage
+      ? MANAGE_SECURITY_REQUIRED_REASON
+      : undefined;
+  return { canManage, editDisabledReason };
 }
 
 function TrialInvestigationCard({
@@ -181,15 +231,10 @@ function TrialInvestigationCard({
         <div
           css={css`
             background: ${euiTheme.colors.emptyShade};
-
-            /* Drop the card's own borders so the AI ring is the only perimeter. */
-            > * {
-              border: none !important;
-              box-shadow: none !important;
-            }
           `}
         >
           <InvestigationCard
+            borderless
             investigation={investigation}
             onClick={onOpenInvestigation}
             actions={
@@ -259,7 +304,15 @@ function TrialInvestigationCard({
   );
 }
 
-function FirstAutomationCard({ onCreate }: { onCreate: () => void }): React.ReactElement {
+function FirstAutomationCard({
+  onCreate,
+  canManage,
+  editDisabledReason,
+}: {
+  onCreate: () => void;
+  canManage: boolean;
+  editDisabledReason?: string;
+}): React.ReactElement {
   const { euiTheme } = useEuiTheme();
   return (
     <EuiPanel hasBorder paddingSize="l" data-test-subj="nightshiftOnboardingFirstAutomation">
@@ -293,15 +346,18 @@ function FirstAutomationCard({ onCreate }: { onCreate: () => void }): React.Reac
           </EuiText>
           <EuiSpacer size="m" />
           <div>
-            <EuiButton
-              size="s"
-              fill
-              iconType="plus"
-              onClick={onCreate}
-              data-test-subj="nightshiftOnboardingCreateAutomation"
-            >
-              {CREATE_AUTOMATION}
-            </EuiButton>
+            <EuiToolTip content={editDisabledReason}>
+              <EuiButton
+                size="s"
+                fill
+                iconType="plus"
+                onClick={onCreate}
+                isDisabled={!canManage}
+                data-test-subj="nightshiftOnboardingCreateAutomation"
+              >
+                {CREATE_AUTOMATION}
+              </EuiButton>
+            </EuiToolTip>
           </div>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -313,10 +369,14 @@ function AutomationCards({
   automations,
   onCreate,
   onEdit,
+  canManage,
+  editDisabledReason,
 }: {
   automations: Automation[];
   onCreate: () => void;
   onEdit: (automation: Automation) => void;
+  canManage: boolean;
+  editDisabledReason?: string;
 }): React.ReactElement {
   const { euiTheme } = useEuiTheme();
   return (
@@ -386,14 +446,17 @@ function AutomationCards({
           </p>
         </EuiText>
         <EuiSpacer size="m" />
-        <EuiButton
-          size="s"
-          iconType="plus"
-          onClick={onCreate}
-          data-test-subj="nightshiftOnboardingCreateAutomation"
-        >
-          {CREATE_AUTOMATION}
-        </EuiButton>
+        <EuiToolTip content={editDisabledReason}>
+          <EuiButton
+            size="s"
+            iconType="plus"
+            onClick={onCreate}
+            isDisabled={!canManage}
+            data-test-subj="nightshiftOnboardingCreateAutomation"
+          >
+            {CREATE_AUTOMATION}
+          </EuiButton>
+        </EuiToolTip>
       </EuiPanel>
     </div>
   );
@@ -424,15 +487,20 @@ function IconTile({ icon }: { icon: string }): React.ReactElement {
 function EditAutomationFlyout({
   automation,
   automations,
+  canManage,
+  editDisabledReason,
+  onSelectAutomation,
   onClose,
 }: {
   automation: Automation;
   automations: Automation[];
+  canManage: boolean;
+  editDisabledReason?: string;
+  onSelectAutomation: (automation: Automation) => void;
   onClose: () => void;
 }): React.ReactElement {
-  const { application } = useKibana().services;
-  const canManage = getNightshiftCapabilities(application.capabilities.nightshift).canManage;
   const deleteAutomation = useDeleteAutomation();
+  const cloneAutomation = useCreateAutomation(true);
   const [automationToDelete, setAutomationToDelete] = useState<Automation>();
   const [refreshedAt] = useState(() => Date.now());
   const { runRange, usedToday } = useAutomationUsage(
@@ -440,18 +508,32 @@ function EditAutomationFlyout({
     { start: 'now-48h', end: 'now' },
     refreshedAt
   );
+  const cloneNames = automations.map(({ name }) => name);
 
   return (
     <>
       <AutomationDetailFlyout
+        embedded
         automations={automations}
         automation={automation}
         canManage={canManage}
+        editDisabledReason={editDisabledReason}
         usedToday={usedToday.get(automation.id) ?? 0}
         runRange={runRange}
         rangeLabel={listLabels.last48Hours}
         onClose={onClose}
-        onClone={() => undefined}
+        onSelectAutomation={onSelectAutomation}
+        onClone={
+          canManage
+            ? (source) =>
+                cloneAutomation.mutate(toCloneRequestBody(source, cloneNames), {
+                  onSuccess: ({ id: copyId }) => {
+                    // List refresh from the mutation picks up the copy; select it by id.
+                    onSelectAutomation({ ...source, id: copyId });
+                  },
+                })
+            : undefined
+        }
         onDelete={setAutomationToDelete}
       />
       {automationToDelete && (
