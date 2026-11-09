@@ -107,6 +107,8 @@ export const INTERNAL_BULK_CREATE_ATTACHMENTS_URL =
   `${CASES_INTERNAL_URL}/{case_id}/attachments/_bulk_create` as const;
 export const INTERNAL_BULK_GET_ATTACHMENTS_URL =
   `${CASES_INTERNAL_URL}/{case_id}/attachments/_bulk_get` as const;
+export const INTERNAL_GET_ATTACHMENT_HISTORY_URL =
+  `${CASES_INTERNAL_URL}/{case_id}/attachments/{attachment_id}/_history` as const;
 export const INTERNAL_BULK_DELETE_ATTACHMENTS_URL =
   `${CASES_INTERNAL_URL}/{case_id}/attachments/_bulk_delete` as const;
 export const INTERNAL_SUGGEST_USER_PROFILES_URL =
@@ -209,6 +211,7 @@ export const MAX_SUFFIX_LENGTH = 60 as const;
 export const MAX_CATEGORY_LENGTH = 50 as const;
 export const MAX_DESCRIPTION_LENGTH = 30000 as const;
 export const MAX_COMMENT_LENGTH = 30000 as const;
+export const MAX_MENTIONS_PER_ATTACHMENT = 100 as const;
 export const MAX_LENGTH_PER_TAG = 256 as const;
 export const MAX_TAGS_PER_CASE = 200 as const;
 export const MAX_DELETE_IDS_LENGTH = 100 as const;

@@ -9,6 +9,7 @@ import type { SavedObjectsType } from '@kbn/core/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { CASE_ATTACHMENT_SAVED_OBJECT } from '../../../common/constants';
 import { modelVersion1 } from './model_versions/model_version_1';
+import { modelVersion2 } from './model_versions/model_version_2';
 
 /**
  * Saved object type for unified attachments
@@ -115,11 +116,23 @@ export const createCaseAttachmentSavedObjectType = (): SavedObjectsType => ({
         },
       },
        */
+      parent_id: {
+        type: 'keyword',
+        ignore_above: 1024,
+      },
+      mentions: {
+        type: 'keyword',
+        ignore_above: 1024,
+      },
+      deleted: {
+        type: 'boolean',
+      },
     },
   },
   migrations: () => ({}),
   modelVersions: {
     1: modelVersion1,
+    2: modelVersion2,
   },
   management: {
     importableAndExportable: true,
