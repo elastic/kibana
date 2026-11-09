@@ -14,8 +14,8 @@ import { DEFAULT_TIME_RANGE, ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS } from '../con
 import { useKibana } from '../../hooks/use_kibana';
 import { INVALID_QUERY_TOAST_TITLE, TIME_RANGE_CLAMPED_TOAST_TITLE } from '../translations';
 import { clampTimeRange } from '../utils/clamp_time_range';
-import { EMPTY_SELECTION } from '../filters/selection';
-import type { FilterControlsSelection } from '../filters/selection';
+import { EMPTY_SELECTION } from '../filters/utils/selection';
+import type { FilterControlsSelection } from '../filters/utils/selection';
 
 export interface EntityInventorySearchSubmitPayload {
   dateRange: TimeRange;

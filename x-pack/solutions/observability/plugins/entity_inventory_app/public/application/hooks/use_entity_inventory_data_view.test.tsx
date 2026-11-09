@@ -36,7 +36,7 @@ const TYPES = [
 
 let mockTypes: EntityInventoryTypeDefinition[] = TYPES;
 
-jest.mock('../filters/use_entity_inventory_types', () => ({
+jest.mock('./use_entity_inventory_types', () => ({
   useEntityInventoryTypes: () => ({ types: mockTypes, isLoading: false }),
 }));
 

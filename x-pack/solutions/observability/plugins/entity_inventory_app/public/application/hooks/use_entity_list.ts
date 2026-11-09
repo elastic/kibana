@@ -12,7 +12,7 @@ import { ENTITY_INVENTORY_LIST_LIMIT } from '../../inventory_api/client';
 import type { InventoryEntityType, InventoryListResponse } from '../../inventory_api/types';
 import { useKibana } from '../../hooks/use_kibana';
 import { useEntityInventorySearch } from '../context/search_context';
-import { buildDocumentFilter } from '../filters/build_document_filter';
+import { buildDocumentFilter } from '../utils/build_document_filter';
 import { toAbsoluteTimeRange } from '../utils/to_absolute_time_range';
 
 /** Thrown when the requested entity type is not registered. */

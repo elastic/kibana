@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EntityInventoryTypeDefinition } from '../../inventory_api_types';
+import type { EntityInventoryTypeDefinition } from '../../../inventory_api_types';
 import { getAttributeLabel, getCategoryLabel } from './labels';
 
 export interface FilterControlsParams {

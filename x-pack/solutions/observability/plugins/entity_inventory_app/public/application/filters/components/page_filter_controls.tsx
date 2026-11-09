@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { useEntityInventorySearch } from '../context/search_context';
+import { useEntityInventorySearch } from '../../context/search_context';
 import { EntityInventoryFilterControls } from './entity_inventory_filter_controls';
-import { useEntityInventoryTypes } from './use_entity_inventory_types';
+import { useEntityInventoryTypes } from '../../hooks/use_entity_inventory_types';
 
 export function EntityInventoryPageFilterControls() {
   const { entityCategory, dateRange, filterControls, setFilterControls } =
