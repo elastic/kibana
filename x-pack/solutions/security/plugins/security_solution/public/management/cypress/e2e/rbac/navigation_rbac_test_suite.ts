@@ -113,7 +113,7 @@ export const createNavigationEssSuite = (siemVersion: SiemVersion) => {
         loadPage('/app/security/manage');
 
         for (const name of uniqueLandingNames) {
-          cy.getByTestSubj('LandingItem').should('not.contain.text', name);
+          cy.getByTestSubj('~LandingItem').should('not.contain.text', name);
         }
       });
     });
@@ -144,7 +144,7 @@ export const createNavigationEssSuite = (siemVersion: SiemVersion) => {
             pages
               .filter((iterator) => iterator.name !== page.name)
               .forEach((otherPage) =>
-                cy.getByTestSubj('LandingItem').should('not.contain.text', otherPage.name)
+                cy.getByTestSubj('~LandingItem').should('not.contain.text', otherPage.name)
               );
           });
         });

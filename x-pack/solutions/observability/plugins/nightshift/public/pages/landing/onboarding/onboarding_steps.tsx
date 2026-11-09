@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiIcon, EuiLink, EuiPanel, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export type OnboardingStepId = 'enable' | 'connect' | 'investigate' | 'automate';
+export type OnboardingStepId = 'enable' | 'addData' | 'connectSources' | 'investigate' | 'automate';
 
 export type OnboardingStepStatus = 'complete' | 'current' | 'disabled';
 
@@ -26,8 +26,11 @@ const STEP_TITLES: Record<OnboardingStepId, string> = {
   enable: i18n.translate('xpack.nightshift.onboarding.steps.enable', {
     defaultMessage: 'Enable Elastic nightshift',
   }),
-  connect: i18n.translate('xpack.nightshift.onboarding.steps.connect', {
+  addData: i18n.translate('xpack.nightshift.onboarding.steps.addData', {
     defaultMessage: 'Add data',
+  }),
+  connectSources: i18n.translate('xpack.nightshift.onboarding.steps.connectSources', {
+    defaultMessage: 'Connect other sources',
   }),
   investigate: i18n.translate('xpack.nightshift.onboarding.steps.investigate', {
     defaultMessage: 'Try first investigation',
@@ -37,7 +40,13 @@ const STEP_TITLES: Record<OnboardingStepId, string> = {
   }),
 };
 
-const STEP_IDS: OnboardingStepId[] = ['enable', 'connect', 'investigate', 'automate'];
+export const ONBOARDING_STEP_IDS: OnboardingStepId[] = [
+  'enable',
+  'addData',
+  'connectSources',
+  'investigate',
+  'automate',
+];
 
 /** The "Get started" card: a vertical stepper, then the current step's action. */
 export function OnboardingStepsCard({
@@ -72,11 +81,11 @@ export function OnboardingStepsCard({
           padding: 0;
         `}
       >
-        {STEP_IDS.map((stepId, index) => {
+        {ONBOARDING_STEP_IDS.map((stepId, index) => {
           const { status, onClick, hint } = steps[stepId];
           const isComplete = status === 'complete';
           const isCurrent = status === 'current';
-          const isLast = index === STEP_IDS.length - 1;
+          const isLast = index === ONBOARDING_STEP_IDS.length - 1;
           const title = STEP_TITLES[stepId];
           return (
             <li
