@@ -43,12 +43,14 @@ const buildCostQuery = (traceId: string, { withCachedTokens }: { withCachedToken
     ? 'cached_tokens = SUM(TO_LONG(attributes.gen_ai.usage.cache_read.input_tokens)),'
     : '';
 
-  // TO_LONG resolves union types (integer vs long across trace index generations). The tracer
-  // writes "unknown" as the request model when it has no model id, so that falls back too.
+  // TO_LONG resolves union types (integer vs long across trace index generations); the null
+  // filter must run on the converted column, since a union-typed field can't be referenced
+  // directly. The tracer writes "unknown" as the request model when it has no model id, so that
+  // falls back too.
   return `FROM traces-*
         | WHERE trace.id == "${traceId}"
-          AND attributes.gen_ai.usage.input_tokens IS NOT NULL
         | EVAL prompt_tokens = TO_LONG(attributes.gen_ai.usage.input_tokens)
+        | WHERE prompt_tokens IS NOT NULL
         | STATS
         input_tokens = SUM(prompt_tokens),
         ${cachedTokensStat}
