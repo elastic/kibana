@@ -48,6 +48,107 @@ time, JS errors and failed HTTP requests, its Core Web Vitals, and page loads an
 time, from `GET /internal/digital_experience/applications/{serviceName}/overview`. Without `source`,
 the page shows the Classic RUM application.
 
+The EDOT Browser Overview can be narrowed by environment, by **Browser**, **OS**, **Device**,
+**Country** and **Page**, and by a KQL query, and shows its load time at a chosen percentile. All of
+it is kept in the URL (`browser`, `os`, `device`, `country`, `pageUrl`, `percentile`, `kuery`).
+
+- **Layout:** the KQL bar, the filter buttons and the date picker share one row. What the filters
+  select shows as pills in the row below, each with a cross that removes its value, next to the
+  button that clears them all.
+- **Panel heights:** the Core Web Vitals and Trends panels are as tall as each other, and the two
+  trend charts share the height of the Trends panel (at least 128px each), so it has no empty space
+  under them.
+- **The KQL bar expands:** while it has the focus it takes the whole row, over the filters and the
+  date picker beside it (the row keeps its space for the bar, so nothing moves), and goes back to
+  its place when the focus leaves.
+- **A narrow window:** the row never wraps while it can help it. It measures where its items are
+  (`useFittingCount`) and, when they do not fit, takes filter buttons away one at a time, the ones
+  without a selection and the least important first (browser, OS, country, page), down to none.
+  A filter without a button is still in its pill, the count of **All filters** and the flyout, and
+  its button is back when the window grows. The KQL bar is never narrower than 300px and the date
+  picker takes the width of its label, which a range changes, so below roughly 1350px of window
+  width the date picker still moves down. When it does, or when it wraps with no filter button
+  left, every button comes back, as taking them away does not help.
+- **Filters:** browser, OS, app version, country and page have a button in the row, which counts the
+  values it selects; **All filters** opens a flyout with every filter, device included, whose picks
+  apply together. Each filter lists its ten most
+  used values with their page loads in the time range, environment and the other selected filters,
+  but not its own selection, so its other values stay selectable. A pinned filter without values,
+  e.g. the country when the collector does no GeoIP processing, is hidden unless it is selected.
+  A click on a row of the breakdowns or the top pages filters the Overview by it, or takes the
+  filter off when it is selected already; the arrow of a browser or system opens its sessions
+  instead.
+- **App version and URL contains:** the version is `service.version` of the resource (or of the
+  event). **URL contains** has no list: the text is written in the flyout and matches part of the
+  page URL, whatever its case (`*` and `?` in it are the text itself). Like the page, it narrows the
+  page loads only, and the errors route rejects both.
+- **Several values, and exclusions:** a filter takes up to ten values, each included or excluded,
+  and the other values are disabled once it has ten. The included values keep the documents with any
+  of them and the excluded values leave out those with any of them. The filters are one `filters`
+  param: Kibana filters (`Filter[]` from `@kbn/es-query`), as rison, a `phrase` or `phrases` filter
+  per field with `meta.negate` for the values to leave out, e.g.
+  `filters=!((meta:(key:browser,negate:!f,params:!(Chrome,Safari),type:phrases)),(meta:(key:browser,negate:!t,params:(query:Firefox),type:phrase)))`
+  (`common/overview_filters_param.ts`). The routes read `meta` only, never a query a client wrote,
+  and answer a param they would have to repair, e.g. one with more than ten values or a repeated
+  one, with a 400, so a request gets the filters it asked for.
+- **Sessions tab:** `browser`, `os` and `country` are the Sessions tab's own params, which take one
+  value, so the tab links carry a filter over only when it is exactly one included value. The
+  Sessions list's **Entry page** facet is its page filter; it is a different question from the
+  Overview's page (a session's first page against the URL of a page load), so it stays separate.
+- **Fields:** the raw documents have no field per dimension, so browser, OS, device and country read
+  the alternatives the sessions transform reads (`SESSION_ATTRIBUTE_FIELDS` in
+  `common/session_attribute_fields.ts`, shared by both) and take the first non-empty one, with a
+  runtime field. The page is `attributes.url.full`.
+- **Scope:** browser, OS, device, country, app version and the KQL query narrow every panel of the Overview: the
+  KPIs, Core Web Vitals and trends (`/overview`), the pages, breakdowns and clicks (`/usage`) and the
+  top errors (`/errors`). The Errors tab reads the same URL params, so **View all** lists the errors
+  the Overview counted; the page is left out there. The breakdowns aggregate the same fields the
+  filters do, so each row is a value a filter takes. Web vitals, errors and clicks carry no page URL
+  yet, and an HTTP request's `url.full` is the URL requested, so the page narrows the page loads,
+  with their load time, trend, pages and breakdowns only; the page says so while a page is selected.
+- **Percentile:** the load time (its KPI and its trend) is the 50th, 75th (default), 90th, 95th or
+  99th percentile, picked above the trends. The Core Web Vitals stay at the 75th percentile, which
+  is how their good, needs improvement and poor ratings are defined.
+- **KQL:** the bar before the filters takes a KQL query, sent as `kuery` and translated on the server
+  to a query on the stored fields of the OTel logs and traces; it narrows every search of the
+  Overview and of the Errors tab, and the HTTP requests of the Overview, so a clause on a field only
+  one of them has leaves nothing of the other. The bar suggests fields and values through an ad hoc
+  data view over `logs-*.otel-*,traces-*.otel-*`, which is never saved. A query that does not parse
+  is shown as an error and not applied; the routes answer one with a 400. The Sessions index has
+  other fields, so the query does not carry over to the Sessions tab.
+
+### Sessions (`/{serviceName}/sessions?source=otel`)
+
+A tab of EDOT Browser applications only, as sessions are built from EDOT Browser data (see
+[Sessions](#sessions)).
+
+- **Status:** before sessions are set up, the tab shows a **Set up sessions** button to users with the
+  manage sessions privilege and tells everyone else whom to ask. Once set up, a callout flags sessions
+  that need an update (with an **Update sessions** button for those users), a failing transform, or
+  one that is behind.
+- **KPIs:** sessions, sessions with errors, median duration, pages per session and bounce rate, over
+  the listed sessions, so they follow the search and filters.
+- **Filters:** a debounced search (session ID, user, pages, browser, OS, location), **Has errors**,
+  duration ranges, and browser, OS, country and entry page facets with their counts.
+- **Table:** start time, user with browser and OS, journey (entry → number of pages in between →
+  exit), duration, pages, clicks and errors; sortable and paged on the server. A column selector,
+  kept in local storage, adds location, entry and exit page, device, session ID, last activity,
+  events, bounced, and LCP / INP / CLS colored by rating. The search, filters, sort and page are
+  kept in the URL, and links to a session carry them so its **Sessions** breadcrumb leads back to
+  the same list.
+- **Empty states:** with no sessions, how they get there; with none matching, a button to clear the
+  filters. A callout counts sessions the transform could not summarize.
+
+### Session (`/{serviceName}/sessions/{sessionId}`)
+
+- **Summary:** duration, page views, clicks and errors; when, who, browser and OS, location, entry and
+  exit pages; and the session's Core Web Vitals.
+- **Timeline:** one bar for the session, with a segment per page visit as wide as the time spent on
+  the page and a marker per error. Selecting a segment scrolls to that visit.
+- **Page journey:** a card per page visit with its time, share of the session, clicks, errors and web
+  vitals, and its page views, clicks, errors and web vitals in order. Spans and logs are left out.
+- **States:** a 404 leads back to the list; a timeline cut at the event limit is flagged.
+
 ## Sessions
 
 An Elasticsearch continuous transform summarizes EDOT Browser sessions from
@@ -81,7 +182,8 @@ user's credentials**
 needs these Elasticsearch privileges; when any is missing the request fails with a 403 listing them,
 before anything is written:
 
-- Cluster: `manage_transform`, `manage_ingest_pipelines`, `manage_index_templates`
+- Cluster: `manage_transform`, `manage_ingest_pipelines`, `manage_index_templates`, and on
+  serverless also `read_security` (the predefined `admin` role has it; custom roles may not)
 - `traces-*.otel-*`, `logs-*.otel-*`: `read`, `view_index_metadata`
 - `digital-experience-sessions-*`: `read`, `index`, `create_index`, `delete`, `delete_index`
 
@@ -89,11 +191,16 @@ The read on `traces-*.otel-*` and `logs-*.otel-*` must also be unrestricted: no 
 field-level security. Otherwise the transforms would only see that user's slice of the data, so
 every other application's sessions (or fields) would silently stop updating for everyone, and
 retention would then delete them. `has_privileges` doesn't report these restrictions, so enabling
-also reads the user's roles (`GET _security/user/_privileges`) and fails with a 403 naming the
-affected patterns. One role with unrestricted read on a pattern is enough, even if another role
-filters it. Elasticsearch can't report the privileges of an API key with its own role descriptors,
-so such keys are refused too; enable sessions as a user, or with an API key without role
-descriptors.
+also reads the user's index privileges and fails with a 403 naming the affected patterns. It reads
+them with `GET _security/user/_privileges`, which serverless only allows operator users; for
+everyone else there it reads the user's roles with `_security/_authenticate` and the Query Role
+API, hence `read_security`. A pattern is refused when a role's read that could apply to it has a
+`query` or field restriction, unless another role provably reads all of it: one role with
+unrestricted read on a pattern is enough, even if another role filters it. Roles that grant read
+through a regular expression, like serverless `editor`, pass when unfiltered, as `has_privileges`
+already checked the read, but never lift another role's filter. Elasticsearch can't report the
+privileges of an API key with its own role descriptors, nor of any API key on serverless, so such
+keys are refused too; enable sessions as a user.
 
 Each enable records the username and time on the transforms (`_meta.enabled_by`,
 `_meta.enabled_at`) and writes a `digital_experience_sessions_enable` audit event, successful or
@@ -157,8 +264,10 @@ session detail timeline). Without it they answer 403 naming those privileges; ot
 logged and answer 500 without Elasticsearch details:
 
 - `GET /internal/digital_experience/sessions/status`
-- `GET /internal/digital_experience/applications/{serviceName}/sessions`: search, facets, sorting,
-  pagination, and KPIs
+- `GET /internal/digital_experience/applications/{serviceName}/sessions`: search, facets (browser,
+  OS, country, entry page), the `hasErrors` and `minDurationMs` / `maxDurationMs` filters, sorting,
+  pagination, and KPIs. Facets count their values without their own selection; the other filters
+  narrow every count.
 - `GET /internal/digital_experience/applications/{serviceName}/sessions/{sessionId}`: summary,
   event timeline, per-page journey, and web vitals
 
@@ -170,6 +279,6 @@ logged and answer 500 without Elasticsearch details:
   features are in `server/lib/` (`helpers/`, and `otel/` for the OTel queries).
 - `server/sessions/`: the sessions transform spec, setup, status and health task, with its routes in
   `server/routes/sessions/`.
-- `public/pages/`: one folder per page (`applications_list/`, `application_details/`) with its own
-  components, hooks and utils; what several pages share is in `public/components/`, `public/hooks/`
-  and `public/utils/`. `public/application/` is the app shell.
+- `public/pages/`: one folder per page (`applications_list/`, `application_details/`, `sessions/`,
+  `session_detail/`) with its own components, hooks and utils; what several pages share is in
+  `public/components/`, `public/hooks/` and `public/utils/`. `public/application/` is the app shell.

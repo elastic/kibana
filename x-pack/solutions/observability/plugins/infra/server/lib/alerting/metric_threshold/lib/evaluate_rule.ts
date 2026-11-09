@@ -48,7 +48,8 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
   dataView?: DataViewBase,
   lastPeriodEnd?: number,
   timeframe?: { start?: number; end: number },
-  missingGroups: MissingGroupsRecord[] = []
+  missingGroups: MissingGroupsRecord[] = [],
+  scheduleInterval?: number
 ): Promise<Array<Record<string, Evaluation>>> => {
   const { criteria, groupBy, filterQuery } = params;
 
@@ -61,7 +62,8 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
         intervalAsMS,
         criterion.aggType,
         timeframe,
-        lastPeriodEnd
+        lastPeriodEnd,
+        scheduleInterval
       );
 
       const currentValues = await getData(

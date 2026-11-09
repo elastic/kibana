@@ -6,6 +6,7 @@
  */
 
 import { expectParseError, expectParseSuccess } from '@kbn/zod-helpers/v4';
+import { ApmDocumentType, RollupInterval } from '@kbn/apm-types';
 import { MAX_CONNECTION_RESOURCES } from './connection_params';
 import { serviceMapRoute } from './service_map';
 import { serviceMapDependencyNodeRoute } from './dependency_node';
@@ -58,6 +59,58 @@ describe('serviceMapRoute params', () => {
     expectParseError(
       serviceMapRoute.params!.safeParse({
         query: { start: '2021-01-01', end: '2021-01-02' },
+      })
+    );
+  });
+
+  it('accepts a data source and parses useDurationSummary', () => {
+    const result = serviceMapRoute.params!.safeParse({
+      query: {
+        environment: 'production',
+        start: '2021-01-01',
+        end: '2021-01-02',
+        documentType: ApmDocumentType.ServiceTransactionMetric,
+        rollupInterval: RollupInterval.TenMinutes,
+        useDurationSummary: 'true',
+      },
+    });
+
+    expectParseSuccess(result);
+    if (result.success) {
+      expect(result.data.query).toEqual(
+        expect.objectContaining({
+          documentType: ApmDocumentType.ServiceTransactionMetric,
+          rollupInterval: RollupInterval.TenMinutes,
+          useDurationSummary: true,
+        })
+      );
+    }
+  });
+
+  it('rejects a document type that has no transaction data', () => {
+    expectParseError(
+      serviceMapRoute.params!.safeParse({
+        query: {
+          environment: 'production',
+          start: '2021-01-01',
+          end: '2021-01-02',
+          documentType: ApmDocumentType.ErrorEvent,
+          rollupInterval: RollupInterval.None,
+        },
+      })
+    );
+  });
+
+  it('rejects an unknown rollup interval', () => {
+    expectParseError(
+      serviceMapRoute.params!.safeParse({
+        query: {
+          environment: 'production',
+          start: '2021-01-01',
+          end: '2021-01-02',
+          documentType: ApmDocumentType.ServiceTransactionMetric,
+          rollupInterval: '5m',
+        },
       })
     );
   });

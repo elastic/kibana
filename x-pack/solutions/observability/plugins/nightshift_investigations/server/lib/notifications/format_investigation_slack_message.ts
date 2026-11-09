@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { JsonObject } from '@kbn/utility-types';
 import type { Severity } from '@kbn/significant-events-schema';
 import type { NotificationPhase } from './notification_routing';
@@ -58,12 +59,15 @@ export const formatInvestigationSlackMessage = ({
     return render([`*${title}* — Investigation started`, automation]);
   }
 
-  if (phase === 'failed') {
-    const failureReason = reason || investigation.error || 'Investigation failed';
-    return render([
-      `*${title}* — Investigation failed: ${escapeMrkdwn(oneLine(failureReason))}`,
-      automation,
-    ]);
+  if (phase === 'failed' || phase === 'timed_out') {
+    const outcome =
+      phase === 'timed_out'
+        ? i18n.translate('xpack.nightshiftInvestigations.notifications.timedOutLabel', {
+            defaultMessage: 'Investigation timed out',
+          })
+        : 'Investigation failed';
+    const failureReason = reason || investigation.error || outcome;
+    return render([`*${title}* — ${outcome}: ${escapeMrkdwn(oneLine(failureReason))}`, automation]);
   }
 
   const severity = investigation.severity
@@ -149,8 +153,8 @@ const quote = (value: string): string =>
     .join('\n');
 
 /**
- * Lays the same outcome out as Block Kit: the impact, then the conclusion quoted, the hypotheses,
- * and a button back to Kibana.
+ * Lays the same outcome out as Block Kit: what happened and the impact, then the conclusion quoted,
+ * the hypotheses, and a button back to Kibana.
  */
 export const buildInvestigationSlackBlocks = ({
   investigation,
@@ -176,17 +180,30 @@ export const buildInvestigationSlackBlocks = ({
     ];
   }
 
-  if (phase === 'failed') {
-    const failureReason = reason?.trim() || investigation.error?.trim() || 'Investigation failed';
+  if (phase === 'failed' || phase === 'timed_out') {
+    const outcome =
+      phase === 'timed_out'
+        ? i18n.translate('xpack.nightshiftInvestigations.notifications.timedOutLabel', {
+            defaultMessage: 'Investigation timed out',
+          })
+        : 'Investigation failed';
+    const failureReason = reason?.trim() || investigation.error?.trim() || outcome;
     return [
       header(title),
-      context([':warning: Investigation failed', automation]),
+      context([`:warning: ${outcome}`, automation]),
       ...section('What went wrong', escapeMrkdwn(truncate(failureReason, MAX_SUMMARY_LENGTH))),
       linkButton(url),
     ];
   }
 
   const blocks: SlackBlock[] = [];
+
+  const whatHappened = investigation.summary?.trim();
+  if (whatHappened) {
+    blocks.push(
+      ...section("What's happened", escapeMrkdwn(truncate(whatHappened, MAX_SUMMARY_LENGTH)))
+    );
+  }
 
   const entityNames = (investigation.impact?.entities ?? [])
     .map(({ name }) => oneLine(name))
@@ -195,8 +212,7 @@ export const buildInvestigationSlackBlocks = ({
     .slice(0, MAX_IMPACT_ENTITIES)
     .map((name) => `\`${escapeMrkdwn(name)}\``);
   const hiddenEntities = entityNames.length - shownEntities.length;
-  // Without an impact summary, what happened stands in for it.
-  const impactText = investigation.impact?.summary?.trim() || investigation.summary?.trim();
+  const impactText = investigation.impact?.summary?.trim();
   const impactLines = [
     impactText ? escapeMrkdwn(truncate(impactText, MAX_SUMMARY_LENGTH)) : '',
     shownEntities.length > 0
@@ -204,7 +220,10 @@ export const buildInvestigationSlackBlocks = ({
       : '',
   ].filter(Boolean);
   if (impactLines.length > 0) {
-    blocks.push(...section('Impact', impactLines.join('\n')), { type: 'divider' });
+    blocks.push(...section('Impact', impactLines.join('\n')));
+  }
+  if (blocks.length > 0) {
+    blocks.push({ type: 'divider' });
   }
 
   if (investigation.verdict?.trim()) {

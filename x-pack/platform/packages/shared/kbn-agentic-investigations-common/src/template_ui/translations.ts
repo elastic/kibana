@@ -9,70 +9,79 @@ import { i18n } from '@kbn/i18n';
 
 export const TEMPLATE_UI_LABELS = Object.freeze({
   /** Names the content for `EuiSkeletonLoading`, which composes it into "Loading/Loaded {label}". */
-  contentLabel: i18n.translate('xpack.alertzero.templateUi.contentLabel', {
+  contentLabel: i18n.translate('xpack.agenticInvestigations.templateUi.contentLabel', {
     defaultMessage: 'Investigation',
   }),
-  loadErrorTitle: i18n.translate('xpack.alertzero.templateUi.loadErrorTitle', {
+  loadErrorTitle: i18n.translate('xpack.agenticInvestigations.templateUi.loadErrorTitle', {
     defaultMessage: 'Unable to load this investigation',
   }),
-  notFoundTitle: i18n.translate('xpack.alertzero.templateUi.notFoundTitle', {
+  notFoundTitle: i18n.translate('xpack.agenticInvestigations.templateUi.notFoundTitle', {
     defaultMessage: 'No investigation for this conversation',
   }),
-  status: i18n.translate('xpack.alertzero.templateUi.status', {
+  status: i18n.translate('xpack.agenticInvestigations.templateUi.status', {
     defaultMessage: 'Status',
   }),
-  severity: i18n.translate('xpack.alertzero.templateUi.severity', {
+  severity: i18n.translate('xpack.agenticInvestigations.templateUi.severity', {
     defaultMessage: 'Severity',
   }),
-  assignees: i18n.translate('xpack.alertzero.templateUi.assignees', {
+  assignees: i18n.translate('xpack.agenticInvestigations.templateUi.assignees', {
     defaultMessage: 'Assignees',
   }),
-  unassigned: i18n.translate('xpack.alertzero.templateUi.unassigned', {
+  unassigned: i18n.translate('xpack.agenticInvestigations.templateUi.unassigned', {
     defaultMessage: 'Unassigned',
   }),
 });
 
 /** One-line summaries for the conversation events the timeline surfaces. */
 export const TIMELINE_EVENT_LABELS = Object.freeze({
-  promptResponse: i18n.translate('xpack.alertzero.templateUi.timeline.promptResponse', {
+  promptResponse: i18n.translate('xpack.agenticInvestigations.templateUi.timeline.promptResponse', {
     defaultMessage: 'Answered a question from the agent',
   }),
   executionStarted: (trigger: string) =>
-    i18n.translate('xpack.alertzero.templateUi.timeline.executionStarted', {
+    i18n.translate('xpack.agenticInvestigations.templateUi.timeline.executionStarted', {
       defaultMessage: 'Agent run started ({trigger})',
       values: { trigger },
     }),
-  executionCompleted: i18n.translate('xpack.alertzero.templateUi.timeline.executionCompleted', {
-    defaultMessage: 'Agent run finished',
-  }),
-  promptRequested: i18n.translate('xpack.alertzero.templateUi.timeline.promptRequested', {
-    defaultMessage: 'Agent asked for input',
-  }),
+  executionCompleted: i18n.translate(
+    'xpack.agenticInvestigations.templateUi.timeline.executionCompleted',
+    {
+      defaultMessage: 'Agent run finished',
+    }
+  ),
+  promptRequested: i18n.translate(
+    'xpack.agenticInvestigations.templateUi.timeline.promptRequested',
+    {
+      defaultMessage: 'Agent asked for input',
+    }
+  ),
   executionFailed: (reason: string) =>
-    i18n.translate('xpack.alertzero.templateUi.timeline.executionFailed', {
+    i18n.translate('xpack.agenticInvestigations.templateUi.timeline.executionFailed', {
       defaultMessage: 'Agent run failed: {reason}',
       values: { reason },
     }),
-  executionAborted: i18n.translate('xpack.alertzero.templateUi.timeline.executionAborted', {
-    defaultMessage: 'Agent run stopped',
-  }),
+  executionAborted: i18n.translate(
+    'xpack.agenticInvestigations.templateUi.timeline.executionAborted',
+    {
+      defaultMessage: 'Agent run stopped',
+    }
+  ),
   attachmentAdded: (type: string) =>
-    i18n.translate('xpack.alertzero.templateUi.timeline.attachmentAdded', {
+    i18n.translate('xpack.agenticInvestigations.templateUi.timeline.attachmentAdded', {
       defaultMessage: 'Added a {type} attachment',
       values: { type },
     }),
   attachmentUpdated: (type: string) =>
-    i18n.translate('xpack.alertzero.templateUi.timeline.attachmentUpdated', {
+    i18n.translate('xpack.agenticInvestigations.templateUi.timeline.attachmentUpdated', {
       defaultMessage: 'Updated a {type} attachment',
       values: { type },
     }),
   attachmentDeleted: (type: string) =>
-    i18n.translate('xpack.alertzero.templateUi.timeline.attachmentDeleted', {
+    i18n.translate('xpack.agenticInvestigations.templateUi.timeline.attachmentDeleted', {
       defaultMessage: 'Removed a {type} attachment',
       values: { type },
     }),
   attachmentRestored: (type: string) =>
-    i18n.translate('xpack.alertzero.templateUi.timeline.attachmentRestored', {
+    i18n.translate('xpack.agenticInvestigations.templateUi.timeline.attachmentRestored', {
       defaultMessage: 'Restored a {type} attachment',
       values: { type },
     }),

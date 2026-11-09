@@ -9,6 +9,7 @@ import { OTEL_COLLECTOR_INPUT_TYPE } from '../constants';
 import type { RegistryPolicyTemplate } from '../types';
 
 import {
+  canAddToAgentPolicy,
   getRootIntegrations,
   getRootPrivilegedDataStreams,
   hasInstallServersInputs,
@@ -17,6 +18,8 @@ import {
   getNonFipsIntegrations,
   isRootPrivilegeRequired,
   hasDataStreamsOrPolicyTemplates,
+  hasInstallableAssets,
+  isAssetOnlyIntegrationPackage,
   shouldAddIntegrationFromCatalog,
 } from './package_helpers';
 
@@ -439,5 +442,183 @@ describe('shouldAddIntegrationFromCatalog', () => {
     expect(
       shouldAddIntegrationFromCatalog({ name: 'my_uploaded_assets', type: 'integration' })
     ).toBe(false);
+  });
+});
+
+describe('hasInstallableAssets', () => {
+  it('should return true for Kibana assets', () => {
+    expect(hasInstallableAssets({ assets: { kibana: { dashboard: [{}] } } } as any)).toBe(true);
+  });
+
+  it('should return true for Elasticsearch assets', () => {
+    expect(
+      hasInstallableAssets({ assets: { elasticsearch: { ingest_pipeline: [{}] } } } as any)
+    ).toBe(true);
+  });
+
+  it('should return false without assets', () => {
+    expect(hasInstallableAssets({} as any)).toBe(false);
+    expect(hasInstallableAssets({ assets: {} } as any)).toBe(false);
+    expect(
+      hasInstallableAssets({
+        assets: { kibana: undefined, elasticsearch: { index_template: [] } },
+      } as any)
+    ).toBe(false);
+  });
+
+  it('should ignore knowledge base assets, which every package with a docs folder has', () => {
+    expect(
+      hasInstallableAssets({ assets: { elasticsearch: { knowledge_base: [{}] } } } as any)
+    ).toBe(false);
+  });
+});
+
+describe('isAssetOnlyIntegrationPackage', () => {
+  const assets = { kibana: { dashboard: [{}] } };
+
+  it('should return true for integration packages with assets and no data streams or policy templates', () => {
+    expect(
+      isAssetOnlyIntegrationPackage({ name: 'corelight', type: 'integration', assets } as any)
+    ).toBe(true);
+  });
+
+  it('should return true for packages shaped like the registry ones', () => {
+    expect(
+      isAssetOnlyIntegrationPackage({
+        name: 'beat',
+        type: 'integration',
+        data_streams: [],
+        policy_templates: [],
+        assets: { kibana: { dashboard: [{}, {}], index_pattern: [{}] } },
+      } as any)
+    ).toBe(true);
+    expect(
+      isAssetOnlyIntegrationPackage({
+        name: 'dga',
+        type: 'integration',
+        assets: {
+          kibana: { ml_module: [{}] },
+          elasticsearch: { ingest_pipeline: [{}, {}], ml_model: [{}] },
+        },
+      } as any)
+    ).toBe(true);
+    expect(
+      isAssetOnlyIntegrationPackage({
+        name: 'security_detection_engine',
+        type: 'integration',
+        assets: { kibana: { security_rule: [{}] } },
+      } as any)
+    ).toBe(true);
+  });
+
+  it('should return false for docs-only packages, which only have knowledge base assets', () => {
+    expect(
+      isAssetOnlyIntegrationPackage({
+        name: 'vercel',
+        type: 'integration',
+        assets: { elasticsearch: { knowledge_base: [{}] } },
+      } as any)
+    ).toBe(false);
+    expect(isAssetOnlyIntegrationPackage({ name: 'vercel', type: 'integration' } as any)).toBe(
+      false
+    );
+  });
+
+  it('should return false for integration packages with data streams', () => {
+    expect(
+      isAssetOnlyIntegrationPackage({
+        name: 'okta',
+        type: 'integration',
+        data_streams: [{ name: 'system' }],
+        assets,
+      } as any)
+    ).toBe(false);
+  });
+
+  it('should return false for integration packages with policy templates and no data streams', () => {
+    expect(
+      isAssetOnlyIntegrationPackage({
+        name: 'apm',
+        type: 'integration',
+        policy_templates: [{ name: 'apmserver' }],
+        assets,
+      } as any)
+    ).toBe(false);
+  });
+
+  it.each(['content', 'input', undefined])('should return false for type %s', (type) => {
+    expect(isAssetOnlyIntegrationPackage({ name: 'some_package', type, assets } as any)).toBe(
+      false
+    );
+  });
+
+  // packages that declare data streams but define no inputs, see ADD_INTEGRATION_EXCLUDED_PACKAGES
+  it.each(['awsfirehose', 'contrast_security', 'elastic_agent', 'elastic_govcloud', 'keeper'])(
+    'should return true for %s even if it has data streams, as long as it has installable assets',
+    (name) => {
+      expect(
+        isAssetOnlyIntegrationPackage({
+          name,
+          type: 'integration',
+          data_streams: [{ name: 'logs' }],
+          assets: { elasticsearch: { ingest_pipeline: [{}] } },
+        } as any)
+      ).toBe(true);
+    }
+  );
+
+  it.each(['awsfirehose', 'supabase'])(
+    'should return false for excluded package %s without installable assets',
+    (name) => {
+      expect(
+        isAssetOnlyIntegrationPackage({
+          name,
+          type: 'integration',
+          data_streams: [{ name: 'logs' }],
+          assets: { elasticsearch: { knowledge_base: [{}] } },
+        } as any)
+      ).toBe(false);
+    }
+  );
+
+  it.each([
+    ['corelight', {}],
+    ['awsfirehose', { data_streams: [{ name: 'logs' }] }],
+    ['contrast_security', { data_streams: [{ name: 'logs' }] }],
+  ])('should never be classified as add integration from the catalog: %s', (name, extra) => {
+    const pkg = { name, type: 'integration', assets, ...extra } as any;
+    expect(isAssetOnlyIntegrationPackage(pkg)).toBe(true);
+    expect(shouldAddIntegrationFromCatalog(pkg)).toBe(false);
+  });
+});
+
+describe('canAddToAgentPolicy', () => {
+  it('should return true for packages with something to configure on an agent', () => {
+    expect(canAddToAgentPolicy({ name: 'nginx', addIntegrationFromCatalog: true })).toBe(true);
+  });
+
+  it.each(['corelight', 'ded', 'vercel', 'awsfirehose', 'elastic_agent', 'keeper'])(
+    'should return false for %s, which has nothing to configure on an agent',
+    (name) => {
+      expect(canAddToAgentPolicy({ name, addIntegrationFromCatalog: false })).toBe(false);
+    }
+  );
+
+  it.each(['cribl', 'supabase'])(
+    'should return true for %s even though it is on the add integration exclusion list',
+    (name) => {
+      expect(canAddToAgentPolicy({ name, addIntegrationFromCatalog: false })).toBe(true);
+    }
+  );
+
+  it('should return true when the classification is not available', () => {
+    expect(canAddToAgentPolicy({ name: 'my_custom_integration' })).toBe(true);
+    expect(canAddToAgentPolicy({})).toBe(true);
+  });
+
+  it('should keep the configurable packages on the exclusion list used for tile navigation', () => {
+    ['cribl', 'supabase'].forEach((name) => {
+      expect(shouldAddIntegrationFromCatalog({ name, type: 'integration' })).toBe(false);
+    });
   });
 });

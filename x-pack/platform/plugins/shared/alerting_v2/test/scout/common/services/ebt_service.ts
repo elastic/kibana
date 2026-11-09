@@ -14,7 +14,7 @@ import type {
 import type {
   RuleChangedEbtData,
   RuleEbtEventType,
-} from '../../../../server/lib/telemetry/rule_ebt_schema';
+} from '../../../../server/lib/telemetry/rules/rule_ebt_schema';
 import { COMMON_HEADERS } from '../constants';
 
 const EBT_HELPERS_PATH = '/internal/analytics_ftr_helpers';

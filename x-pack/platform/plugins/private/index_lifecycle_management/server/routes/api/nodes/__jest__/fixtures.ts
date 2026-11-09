@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable @kbn/compat/typescript-naming-convention */
 
 /**
  * The fixtures below are from the "_nodes/settings" endpoint on a 7.9.2 Cloud-created cluster.

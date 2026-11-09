@@ -7,6 +7,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { sendGetCloudOnboardingDeployment } from '@kbn/fleet-plugin/public';
+import type { DeploymentMethod } from '@kbn/fleet-plugin/public';
 
 import {
   toSOAuthMethod,
@@ -21,12 +22,13 @@ import {
   detectAuthDrift,
   detectAgentPoliciesDrift,
 } from './detect_drift';
+import { detectPolicySettingsDrift } from '../../common/policy_settings';
 
 interface UseOnboardingDriftDetectionParams {
   onboardingDeploymentId: string | undefined;
   policyIdsByInstance: Record<string, string> | null | undefined;
   awsServicesMap: Map<string, AwsServiceMatrixEntry> | undefined;
-  deploymentMethod: string;
+  deploymentMethod: DeploymentMethod;
   connectorId: string | undefined;
   agentBasedDeployment: {
     agentCredentialMethod: AgentCredentialMethod | undefined;
@@ -165,7 +167,21 @@ export function useOnboardingDriftDetection({
           namespaceDeployedIds,
           serviceSettings?.serviceVars
         );
-        const dirty = dirtyVarIds.length > 0 || namespaceDirty || authDirty || agentPoliciesDirty;
+        // Every deployed policy carries the package policy settings, so any deployed instance
+        // follows them.
+        const policySettingsDirty =
+          [...namespaceDeployedIds].length > 0 &&
+          detectPolicySettingsDrift(
+            serviceSettings?.policySettings,
+            item.policySettings,
+            deploymentMethod
+          );
+        const dirty =
+          dirtyVarIds.length > 0 ||
+          namespaceDirty ||
+          policySettingsDirty ||
+          authDirty ||
+          agentPoliciesDirty;
         driftDirtyRef.current = dirty;
         // Merge with replace-form dirty: a clean SO result still clears isDirty when the form
         // hasn't been touched.
@@ -186,10 +202,11 @@ export function useOnboardingDriftDetection({
       cancelled = true;
     };
     // awsServicesMap is captured from the closure, standing in the deps as comparedManifestsSettled.
-    // serviceSettings.serviceVars, namespace and globalRegion are intentionally captured from the closure:
-    // service-var, namespace and region changes come from Step 2 navigation (full remount), not same-step
-    // edits. Auth mutations (MI: connector swap; agent-based: credential method) and agent-based
-    // mode changes (agentHostsMode, policy selection) happen in this component's lifetime.
+    // serviceSettings.serviceVars, namespace, policySettings and globalRegion are intentionally
+    // captured from the closure: service-var, namespace, policy-setting and region changes come from
+    // Step 2 navigation (full remount), not same-step edits. Auth mutations (MI: connector swap;
+    // agent-based: credential method) and agent-based mode changes (agentHostsMode, policy
+    // selection) happen in this component's lifetime.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     onboardingDeploymentId,

@@ -10,7 +10,7 @@
 import { fieldList } from '@kbn/data-views-plugin/common';
 import { buildDataViewMock } from './data_view';
 import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
-import * as formatValueModule from '../utils/format_value';
+import * as formatValueModule from '../utils/format_value_react';
 
 /**
  * Creates a data view with a bytes field typed as number.

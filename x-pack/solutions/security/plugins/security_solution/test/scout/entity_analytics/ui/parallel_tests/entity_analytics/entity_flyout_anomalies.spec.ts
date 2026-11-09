@@ -23,18 +23,12 @@ import { expect } from '@kbn/scout-security/ui';
 const ANOMALY_OVERVIEW_ROUTE = `**/internal/entity_analytics/entities/host/${HOST_FLYOUT_ENTITY_ID}/anomaly_overview`;
 const ANOMALY_SUMMARY_ROUTE = `**/internal/entity_analytics/entities/host/${HOST_FLYOUT_ENTITY_ID}/anomaly_summary`;
 const ANOMALY_PRIVILEGES_ROUTE = '**/internal/entity_analytics/anomalies/privileges';
-const ENABLE_NEW_FLYOUT_SETTING = 'securitySolution:enableNewFlyout';
 
 spaceTest.describe(
   'Entity flyout anomalies',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
-    spaceTest.beforeAll(async ({ apiServices, scoutSpace }) => {
-      // This suite drives the legacy expandable flyout via `flyout` URL params (host-panel /
-      // host_details / securitySolutionFlyoutAnomaliesTab). Disable the new flyout so those legacy
-      // panels render instead of being consumed by the flyout v2 legacy-URL interop, which drops
-      // the entity details left panel (and its anomalies tab) when translating the URL.
-      await scoutSpace.uiSettings.set({ [ENABLE_NEW_FLYOUT_SETTING]: false });
+    spaceTest.beforeAll(async ({ apiServices }) => {
       await apiServices.entityAnalytics.installEntityStoreV2(['host']);
       await apiServices.entityAnalytics.indexEntityStoreEntry(
         HOST_FLYOUT_ENTITY_ID,
@@ -79,7 +73,7 @@ spaceTest.describe(
           ]),
         });
       });
-      // The entity risk contributions section (above the anomalies section in the right panel)
+      // The entity risk contributions section (above the anomalies section in the host flyout)
       // calls the security solution search strategy for risk scores. Without this mock the call
       // takes several seconds, keeping the section in a loading state that continuously shifts
       // the anomalies section's Y position — preventing Playwright's stability check from
@@ -112,13 +106,12 @@ spaceTest.describe(
       });
     });
 
-    spaceTest.afterAll(async ({ apiServices, scoutSpace }) => {
+    spaceTest.afterAll(async ({ apiServices }) => {
       await apiServices.entityAnalytics.uninstallEntityStoreV2(['host']);
-      await scoutSpace.uiSettings.unset(ENABLE_NEW_FLYOUT_SETTING);
     });
 
     spaceTest(
-      'host right panel shows anomalies section when the entity has anomalies',
+      'host flyout shows anomalies section when the entity has anomalies',
       async ({ page, pageObjects }) => {
         await page.route(ANOMALY_OVERVIEW_ROUTE, async (route) => {
           await route.fulfill({
@@ -128,7 +121,7 @@ spaceTest.describe(
           });
         });
 
-        await pageObjects.entityFlyoutAnomaliesPage.navigateToHostRightPanel();
+        await pageObjects.entityFlyoutAnomaliesPage.navigateToHostFlyout();
 
         await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesSection).toBeVisible();
         await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesExpandablePanel).toBeVisible();
@@ -137,7 +130,7 @@ spaceTest.describe(
     );
 
     spaceTest(
-      'host right panel shows anomalies section with an empty state when the entity has no anomalies',
+      'host flyout shows anomalies section with an empty state when the entity has no anomalies',
       async ({ page, pageObjects }) => {
         await page.route(ANOMALY_OVERVIEW_ROUTE, async (route) => {
           await route.fulfill({
@@ -147,7 +140,7 @@ spaceTest.describe(
           });
         });
 
-        await pageObjects.entityFlyoutAnomaliesPage.navigateToHostRightPanel();
+        await pageObjects.entityFlyoutAnomaliesPage.navigateToHostFlyout();
 
         await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesSection).toBeVisible();
         await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesRecentTable).toContainText(
@@ -157,7 +150,7 @@ spaceTest.describe(
     );
 
     spaceTest(
-      'host entity details left panel shows anomalies tab and tab content when the entity has anomalies',
+      'host anomalies tool shows its content when the entity has anomalies',
       async ({ page, pageObjects }) => {
         await page.route(ANOMALY_OVERVIEW_ROUTE, async (route) => {
           await route.fulfill({
@@ -174,11 +167,9 @@ spaceTest.describe(
           });
         });
 
-        await pageObjects.entityFlyoutAnomaliesPage.navigateToHostBothPanels();
+        await pageObjects.entityFlyoutAnomaliesPage.navigateToHostAnomaliesTool();
 
-        await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesTab).toBeVisible();
-
-        await pageObjects.entityFlyoutAnomaliesPage.clickAnomaliesTab();
+        await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesTool).toBeVisible();
 
         await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesTabAttackChain).toBeVisible();
         await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesTabTimeline).toBeVisible();
@@ -191,7 +182,7 @@ spaceTest.describe(
     );
 
     spaceTest(
-      'host right panel shows an error state in the anomalies section when the anomaly overview API returns an error',
+      'host flyout shows an error state in the anomalies section when the anomaly overview API returns an error',
       async ({ page, pageObjects }) => {
         // 400 is the only status useAnomalyOverview's retry predicate refuses to retry, so the
         // query fails on the first response. Any retried status (e.g. 500) puts the section into
@@ -213,7 +204,7 @@ spaceTest.describe(
           })
         );
 
-        await pageObjects.entityFlyoutAnomaliesPage.navigateToHostRightPanel();
+        await pageObjects.entityFlyoutAnomaliesPage.navigateToHostFlyout();
 
         await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesSection).toBeVisible();
         await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesExpandablePanel).toContainText(
@@ -223,7 +214,7 @@ spaceTest.describe(
     );
 
     spaceTest(
-      'host entity details left panel shows anomalies tab with an empty state when the entity has no anomalies',
+      'host anomalies tool shows an empty state when the entity has no anomalies',
       async ({ page, pageObjects }) => {
         await page.route(ANOMALY_OVERVIEW_ROUTE, async (route) => {
           await route.fulfill({
@@ -247,11 +238,9 @@ spaceTest.describe(
           });
         });
 
-        await pageObjects.entityFlyoutAnomaliesPage.navigateToHostBothPanels();
+        await pageObjects.entityFlyoutAnomaliesPage.navigateToHostAnomaliesTool();
 
-        await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesTab).toBeVisible();
-
-        await pageObjects.entityFlyoutAnomaliesPage.clickAnomaliesTab();
+        await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesTool).toBeVisible();
 
         await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesTabAttackChain).toBeHidden();
         await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesTabTableGrid).toContainText(
@@ -261,7 +250,7 @@ spaceTest.describe(
     );
 
     spaceTest(
-      'host entity details left panel anomalies tab shows table but not attack chain when entity has no tactic associations',
+      'host anomalies tool shows table but not attack chain when entity has no tactic associations',
       async ({ page, pageObjects }) => {
         await page.route(ANOMALY_OVERVIEW_ROUTE, async (route) => {
           await route.fulfill({
@@ -278,8 +267,7 @@ spaceTest.describe(
           });
         });
 
-        await pageObjects.entityFlyoutAnomaliesPage.navigateToHostBothPanels();
-        await pageObjects.entityFlyoutAnomaliesPage.clickAnomaliesTab();
+        await pageObjects.entityFlyoutAnomaliesPage.navigateToHostAnomaliesTool();
 
         await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesTabAttackChain).toBeHidden();
         await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesTabTable).toBeVisible();
@@ -287,7 +275,7 @@ spaceTest.describe(
     );
 
     spaceTest(
-      'clicking the anomalies count link in the right panel opens the entity details left panel on the anomalies tab',
+      'clicking the anomalies count link in the host flyout opens the anomalies tool',
       async ({ page, pageObjects }) => {
         await page.route(ANOMALY_OVERVIEW_ROUTE, async (route) => {
           await route.fulfill({
@@ -304,10 +292,10 @@ spaceTest.describe(
           });
         });
 
-        await pageObjects.entityFlyoutAnomaliesPage.navigateToHostRightPanel();
+        await pageObjects.entityFlyoutAnomaliesPage.navigateToHostFlyout();
         await pageObjects.entityFlyoutAnomaliesPage.clickAnomaliesCountLink();
 
-        await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesTab).toBeVisible();
+        await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesTool).toBeVisible();
       }
     );
 
@@ -374,8 +362,7 @@ spaceTest.describe(
           });
         });
 
-        await pageObjects.entityFlyoutAnomaliesPage.navigateToHostBothPanels();
-        await pageObjects.entityFlyoutAnomaliesPage.clickAnomaliesTab();
+        await pageObjects.entityFlyoutAnomaliesPage.navigateToHostAnomaliesTool();
         await pageObjects.entityFlyoutAnomaliesPage.openRowActionsMenu();
         await pageObjects.entityFlyoutAnomaliesPage.clickRowAction('add-to-timeline');
 
@@ -389,7 +376,7 @@ spaceTest.describe(
     );
 
     spaceTest(
-      'selecting and clearing a MITRE tactic on the Anomalies tab filters and restores anomaly results',
+      'selecting and clearing a MITRE tactic in the anomalies tool filters and restores anomaly results',
       async ({ page, pageObjects }) => {
         await page.route(ANOMALY_OVERVIEW_ROUTE, async (route) => {
           const body = route.request().postDataJSON() as { threat_tactics?: string[] } | null;
@@ -418,8 +405,7 @@ spaceTest.describe(
           });
         });
 
-        await pageObjects.entityFlyoutAnomaliesPage.navigateToHostBothPanels();
-        await pageObjects.entityFlyoutAnomaliesPage.clickAnomaliesTab();
+        await pageObjects.entityFlyoutAnomaliesPage.navigateToHostAnomaliesTool();
 
         await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesTabTableGrid).toContainText(
           'Unusual Process For a Linux Host'
