@@ -17,6 +17,10 @@ import { LoadingFlyout } from './loading_flyout';
 
 const htmlId = htmlIdGenerator('systemFlyoutTitleId');
 
+const unableToLoadTitle = i18n.translate('presentationUtils.openLazyFlyout.unableToLoad', {
+  defaultMessage: 'Unable to load edit flyout content',
+});
+
 interface LoadContentArgs {
   closeFlyout: () => void;
   ariaLabelledBy: string;
@@ -90,21 +94,23 @@ const LazySystemFlyout = ({
 
   useEffect(() => {
     let isMounted = true;
-    loadContent({ closeFlyout, ariaLabelledBy })
-      .catch(() => null)
-      .then((content) => {
+    loadContent({ closeFlyout, ariaLabelledBy }).then(
+      (content) => {
         if (!isMounted) return;
         if (content) {
           setLoadedContent(content);
           return;
         }
         closeFlyout();
-        core.notifications.toasts.addWarning(
-          i18n.translate('presentationUtils.openLazyFlyout.unableToLoad', {
-            defaultMessage: 'Unable to load edit flyout content',
-          })
-        );
-      });
+        core.notifications.toasts.addWarning(unableToLoadTitle);
+      },
+      (error) => {
+        if (!isMounted) return;
+        closeFlyout();
+        // Shows why, e.g. that the saved object no longer exists.
+        core.notifications.toasts.addError(error, { title: unableToLoadTitle });
+      }
+    );
     return () => {
       isMounted = false;
     };

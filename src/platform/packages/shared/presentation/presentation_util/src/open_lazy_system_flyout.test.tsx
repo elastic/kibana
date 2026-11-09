@@ -21,7 +21,7 @@ const openSystemFlyout = jest.fn<ReturnType<OpenSystemFlyout>, Parameters<OpenSy
 const core = {
   overlays: { openSystemFlyout },
   application: { currentAppId$: { pipe: () => ({ subscribe: () => undefined }) } },
-  notifications: { toasts: { addWarning: jest.fn() } },
+  notifications: { toasts: { addWarning: jest.fn(), addError: jest.fn() } },
 } as unknown as CoreStart;
 
 describe('openLazySystemFlyout', () => {
@@ -47,13 +47,26 @@ describe('openLazySystemFlyout', () => {
     );
   });
 
-  it('closes and notifies when loading fails', async () => {
+  it('closes and shows the error when loading fails', async () => {
+    const error = new Error('Failed');
     openLazySystemFlyout({
       core,
       loadContent: async () => {
-        throw new Error('Failed');
+        throw error;
       },
     });
+    render(openSystemFlyout.mock.calls[0][0]);
+
+    await waitFor(() =>
+      expect(core.notifications.toasts.addError).toHaveBeenCalledWith(error, {
+        title: 'Unable to load edit flyout content',
+      })
+    );
+    expect(overlayRef.close).toHaveBeenCalledTimes(1);
+  });
+
+  it('closes and warns when there is no content', async () => {
+    openLazySystemFlyout({ core, loadContent: async () => null });
     render(openSystemFlyout.mock.calls[0][0]);
 
     await waitFor(() => expect(core.notifications.toasts.addWarning).toHaveBeenCalledTimes(1));
@@ -96,6 +109,7 @@ describe('openLazySystemFlyout', () => {
     });
     expect(screen.queryByText('Late content')).not.toBeInTheDocument();
     expect(core.notifications.toasts.addWarning).not.toHaveBeenCalled();
+    expect(core.notifications.toasts.addError).not.toHaveBeenCalled();
     expect(overlayRef.close).toHaveBeenCalledTimes(1);
   });
 });
