@@ -193431,13 +193431,13 @@ components:
       properties:
         alignment:
           default: right
-          description: Alignment of the value beside the bar.
+          description: Label alignment relative to the progress bar.
           enum:
             - left
             - right
           type: string
         apply_color_to:
-          description: Draws a horizontal bar beside the value, filled in proportion to where the value falls within `value_range`.
+          description: Renders a horizontal bar adjacent to the value label. The bar length is scaled proportionally to the value's position within `value_range`.
           enum:
             - progress_bar
           type: string
@@ -193455,7 +193455,7 @@ components:
           type: string
         fill_mode:
           default: gradient
-          description: Reveals the palette along the bar.
+          description: Displays the palette across the bar's full range. Shorter bars reveal only the portion of the palette up to their length, rather than stretching the gradient to fit the bar.
           enum:
             - gradient
           type: string
@@ -193514,13 +193514,13 @@ components:
       properties:
         alignment:
           default: right
-          description: Alignment of the value beside the bar.
+          description: Label alignment relative to the progress bar.
           enum:
             - left
             - right
           type: string
         apply_color_to:
-          description: Draws a horizontal bar beside the value, filled in proportion to where the value falls within `value_range`.
+          description: Renders a horizontal bar adjacent to the value label. The bar length is scaled proportionally to the value's position within `value_range`.
           enum:
             - progress_bar
           type: string
@@ -193595,13 +193595,13 @@ components:
       properties:
         alignment:
           default: right
-          description: Alignment of the value beside the bar.
+          description: Label alignment relative to the progress bar.
           enum:
             - left
             - right
           type: string
         apply_color_to:
-          description: Draws a horizontal bar beside the value, filled in proportion to where the value falls within `value_range`.
+          description: Renders a horizontal bar adjacent to the value label. The bar length is scaled proportionally to the value's position within `value_range`.
           enum:
             - progress_bar
           type: string
@@ -193618,7 +193618,7 @@ components:
           description: Column to use
           type: string
         fill_mode:
-          description: Fills the bar with the palette color of the band the value falls in.
+          description: Fills the bar using the palette color corresponding to the value's position within the palette scale.
           enum:
             - solid
           type: string
@@ -193689,13 +193689,13 @@ components:
       properties:
         alignment:
           default: right
-          description: Alignment of the value beside the bar.
+          description: Label alignment relative to the progress bar.
           enum:
             - left
             - right
           type: string
         apply_color_to:
-          description: Draws a horizontal bar beside the value, filled in proportion to where the value falls within `value_range`.
+          description: Renders a horizontal bar adjacent to the value label. The bar length is scaled proportionally to the value's position within `value_range`.
           enum:
             - progress_bar
           type: string
@@ -193719,7 +193719,7 @@ components:
           type: string
         fill_mode:
           default: gradient
-          description: Reveals the palette along the bar.
+          description: Displays the palette across the bar's full range. Shorter bars reveal only the portion of the palette up to their length, rather than stretching the gradient to fit the bar.
           enum:
             - gradient
           type: string
@@ -193750,13 +193750,13 @@ components:
       properties:
         alignment:
           default: right
-          description: Alignment of the value beside the bar.
+          description: Label alignment relative to the progress bar.
           enum:
             - left
             - right
           type: string
         apply_color_to:
-          description: Draws a horizontal bar beside the value, filled in proportion to where the value falls within `value_range`.
+          description: Renders a horizontal bar adjacent to the value label. The bar length is scaled proportionally to the value's position within `value_range`.
           enum:
             - progress_bar
           type: string
@@ -193809,13 +193809,13 @@ components:
       properties:
         alignment:
           default: right
-          description: Alignment of the value beside the bar.
+          description: Label alignment relative to the progress bar.
           enum:
             - left
             - right
           type: string
         apply_color_to:
-          description: Draws a horizontal bar beside the value, filled in proportion to where the value falls within `value_range`.
+          description: Renders a horizontal bar adjacent to the value label. The bar length is scaled proportionally to the value's position within `value_range`.
           enum:
             - progress_bar
           type: string
@@ -193838,7 +193838,7 @@ components:
           description: Column to use
           type: string
         fill_mode:
-          description: Fills the bar with the palette color of the band the value falls in.
+          description: Fills the bar using the palette color corresponding to the value's position within the palette scale.
           enum:
             - solid
           type: string
@@ -194111,13 +194111,13 @@ components:
       properties:
         alignment:
           default: right
-          description: Alignment of the value beside the bar.
+          description: Label alignment relative to the progress bar.
           enum:
             - left
             - right
           type: string
         apply_color_to:
-          description: Draws a horizontal bar beside the value, filled in proportion to where the value falls within `value_range`.
+          description: Renders a horizontal bar adjacent to the value label. The bar length is scaled proportionally to the value's position within `value_range`.
           enum:
             - progress_bar
           type: string
@@ -194132,7 +194132,7 @@ components:
           description: Palette the bar takes its colors from.
         fill_mode:
           default: gradient
-          description: Reveals the palette along the bar.
+          description: Displays the palette across the bar's full range. Shorter bars reveal only the portion of the palette up to their length, rather than stretching the gradient to fit the bar.
           enum:
             - gradient
           type: string
@@ -194185,13 +194185,13 @@ components:
       properties:
         alignment:
           default: right
-          description: Alignment of the value beside the bar.
+          description: Label alignment relative to the progress bar.
           enum:
             - left
             - right
           type: string
         apply_color_to:
-          description: Draws a horizontal bar beside the value, filled in proportion to where the value falls within `value_range`.
+          description: Renders a horizontal bar adjacent to the value label. The bar length is scaled proportionally to the value's position within `value_range`.
           enum:
             - progress_bar
           type: string
@@ -194257,13 +194257,13 @@ components:
       properties:
         alignment:
           default: right
-          description: Alignment of the value beside the bar.
+          description: Label alignment relative to the progress bar.
           enum:
             - left
             - right
           type: string
         apply_color_to:
-          description: Draws a horizontal bar beside the value, filled in proportion to where the value falls within `value_range`.
+          description: Renders a horizontal bar adjacent to the value label. The bar length is scaled proportionally to the value's position within `value_range`.
           enum:
             - progress_bar
           type: string
@@ -194277,7 +194277,7 @@ components:
             type: auto
           description: Palette the bar takes its colors from.
         fill_mode:
-          description: Fills the bar with the palette color of the band the value falls in.
+          description: Fills the bar using the palette color corresponding to the value's position within the palette scale.
           enum:
             - solid
           type: string
