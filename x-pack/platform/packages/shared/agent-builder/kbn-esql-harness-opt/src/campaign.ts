@@ -25,7 +25,7 @@ import {
   collectEdits,
   promoteEdits,
   resetCandidate,
-  waitForKibana,
+  restartLane,
 } from './candidate_workspace';
 import type { CodeEdit } from './candidate_workspace';
 
@@ -40,6 +40,8 @@ export interface CampaignOptions {
   candidateWorktree: string;
   mainWorktree: string;
   esClient: EsClient;
+  /** Shell commands that restart each lane's Kibana so edited files are actually loaded. */
+  restartCommands: { incumbent: string; candidate: string };
   searchExamples: HarnessExample[];
   gateExamples: HarnessExample[];
   log: ToolingLog;
@@ -84,6 +86,7 @@ export const runCampaign = async ({
   candidateWorktree,
   mainWorktree,
   esClient,
+  restartCommands,
   searchExamples,
   gateExamples,
   log,
@@ -171,8 +174,7 @@ export const runCampaign = async ({
 
     const diff = await candidateDiff(workspace);
     const candidateVariant = { hash: variantHash(diff), diff };
-    // The dev server reloads the edited files; measuring before it is back would score old code.
-    await waitForKibana({ url: workspace.kibanaUrl, log });
+    await restartLane({ command: restartCommands.candidate, url: workspace.kibanaUrl, log });
 
     const tierResults: Array<{ tier: string; gate: GateResult }> = [];
     let lastIncumbentGate: RunSummary | undefined;
@@ -288,7 +290,11 @@ export const runCampaign = async ({
       Fs.writeFileSync(Path.join(acceptedDir, 'variant.diff'), diff);
       // Lock it in: the incumbent process runs this code from now on.
       promoteEdits({ edits: codeEdits, targetWorktree: mainWorktree });
-      await waitForKibana({ url: incumbentTarget.kibanaUrl, log });
+      await restartLane({
+        command: restartCommands.incumbent,
+        url: incumbentTarget.kibanaUrl,
+        log,
+      });
       log.info(`[harness-opt] round ${round} promoted to incumbent`);
     } else {
       await resetCandidate(workspace);

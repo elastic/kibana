@@ -265,6 +265,16 @@ Both lanes' Kibana processes must run with ESQL_HARNESS_TRACE_FILE pointing at
           candidateTarget: { ...target, kibanaUrl: candidateUrl ?? 'http://localhost:5691' },
           candidateWorktree: candidatePath ?? `${process.cwd()}-candidate`,
           mainWorktree: process.cwd(),
+          restartCommands: {
+            incumbent:
+              optionalFlag(flags['restart-incumbent']) ??
+              process.env.HARNESS_RESTART_INCUMBENT ??
+              'true',
+            candidate:
+              optionalFlag(flags['restart-candidate']) ??
+              process.env.HARNESS_RESTART_CANDIDATE ??
+              'true',
+          },
           esClient,
           searchExamples: examplesForSplit('search'),
           gateExamples: examplesForSplit('gate'),
@@ -294,6 +304,8 @@ Both lanes' Kibana processes must run with ESQL_HARNESS_TRACE_FILE pointing at
           'candidate-url',
           'candidate-port',
           'label',
+          'restart-incumbent',
+          'restart-candidate',
         ],
         boolean: ['serve', 'sample-data'],
         help: `

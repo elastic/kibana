@@ -271,6 +271,47 @@ export const applyAndValidateEdits = async ({
   return { ok: failures.length === 0, failures };
 };
 
+/**
+ * Restart a lane's Kibana and wait until it answers again.
+ *
+ * A restart rather than relying on the dev server's watcher: the documentation corpus is read
+ * once per process, and `.md` files are not watched at all, so an edit to them is invisible
+ * until the process comes back. Measuring a variant whose files are on disk but not in memory is
+ * the worst possible failure — it looks like a null result.
+ */
+export const restartLane = async ({
+  command,
+  url,
+  log,
+  timeoutMs = 600_000,
+}: {
+  command: string;
+  url: string;
+  log: ToolingLog;
+  timeoutMs?: number;
+}): Promise<boolean> => {
+  log.info(`[lane] restarting via ${command}`);
+  await run('bash', ['-lc', command], process.cwd(), 120_000);
+
+  const deadline = Date.now() + timeoutMs;
+  await new Promise((resolve) => setTimeout(resolve, 10_000));
+  while (Date.now() < deadline) {
+    try {
+      const response = await fetch(`${url}/api/status`);
+      if (response.ok) {
+        log.info(`[lane] ${url} is back`);
+        return true;
+      }
+    } catch (e) {
+      // still starting
+    }
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+  }
+
+  log.warning(`[lane] ${url} did not come back within the timeout`);
+  return false;
+};
+
 /** Wait for the candidate Kibana to come back after its dev server reloads the edited files. */
 export const waitForKibana = async ({
   url,
