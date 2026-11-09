@@ -729,6 +729,35 @@ describe('EndpointActionsClient', () => {
       );
     });
 
+    it('should only look up the host metadata once when `force` is `true`', async () => {
+      const generator = new EndpointMetadataGenerator('seed');
+
+      applyEsClientSearchMock({
+        esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+        index: metadataCurrentIndexPattern,
+        response: generator.toEsSearchResponse([
+          generator.toEsSearchHit(
+            generator.generate({ Endpoint: { capabilities: ['get_file_force'] } })
+          ),
+        ]),
+      });
+
+      await endpointActionsClient.getFile(
+        responseActionsClientMock.createGetFileOptions({
+          ...getCommonResponseActionOptions(),
+          parameters: { path: 'C:\\file.txt', force: true },
+        })
+      );
+
+      // The capability check must not re-query the metadata, since a later (post-dispatch) validation
+      // that disagrees with the first would leave a dispatched action without a request document.
+      expect(
+        (classConstructorOptions.esClient.search as jest.Mock).mock.calls.filter(
+          ([request]) => request?.index === metadataCurrentIndexPattern
+        )
+      ).toHaveLength(1);
+    });
+
     it('should send `force` in the Fleet action parameters when it is `true`', async () => {
       const generator = new EndpointMetadataGenerator('seed');
 
