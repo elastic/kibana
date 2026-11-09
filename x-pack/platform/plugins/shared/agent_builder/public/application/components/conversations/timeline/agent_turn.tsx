@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
+import { EuiAgentLoader, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { AgentDefinition } from '@kbn/agent-builder-common';
@@ -127,7 +127,13 @@ const AgentTurnComponent: React.FC<AgentTurnProps> = ({
   const isLoading = status === 'running' || isResuming;
 
   const avatarColumnStyles = css`
-    min-inline-size: ${euiTheme.size.l};
+    /* Same box as AgentAvatar size "s", so the smaller loader shares its centre. */
+    inline-size: ${euiTheme.size.l};
+    block-size: ${euiTheme.size.l};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
   `;
 
   const contentColumnStyles = css`
@@ -145,7 +151,8 @@ const AgentTurnComponent: React.FC<AgentTurnProps> = ({
         data-test-subj="agentBuilderTimelineAvatar"
       >
         {isLoading ? (
-          <EuiLoadingSpinner size="l" aria-label={loadingLabel} />
+          // POC: EuiAgentLoader stands in for the avatar while the turn is generating or resuming.
+          <EuiAgentLoader size="m" aria-label={loadingLabel} />
         ) : (
           agent && <AgentAvatar agent={agent} size="s" iconSize="l" />
         )}

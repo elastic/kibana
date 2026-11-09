@@ -37,3 +37,22 @@ declare module '@elastic/eui/src/components/loading' {
   export type { EuiLoadingElasticRingProps } from '@elastic/eui/src/components/loading/loading_elastic_ring';
   export { EuiLoadingElasticRing } from '@elastic/eui/src/components/loading/loading_elastic_ring';
 }
+
+// POC: EuiAgentLoader ships in local EUI optimize/es before eui.d.ts regenerates.
+declare module '@elastic/eui/src/components/loading/loading_agent' {
+  import type { FunctionComponent, HTMLAttributes } from 'react';
+
+  export const SIZES: readonly ['s', 'm', 'l'];
+  export type EuiAgentLoaderSize = (typeof SIZES)[number];
+  export interface EuiAgentLoaderProps {
+    size?: EuiAgentLoaderSize;
+  }
+  export const EuiAgentLoader: FunctionComponent<
+    HTMLAttributes<HTMLSpanElement> & EuiAgentLoaderProps
+  >;
+}
+
+declare module '@elastic/eui/src/components/loading' {
+  export type { EuiAgentLoaderProps } from '@elastic/eui/src/components/loading/loading_agent';
+  export { EuiAgentLoader } from '@elastic/eui/src/components/loading/loading_agent';
+}
