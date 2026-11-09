@@ -24,6 +24,12 @@ globalSetupHook(
     });
     // The specs share one deployment, and together they start more investigations than the daily
     // limits allow. None of them asserts on the limits.
-    await disableInvestigationRunLimits({ kbnUrl, samlAuth, log });
+    //
+    // Stateful only: the route is gated on `nightshift.enabled`, which the stateful config set
+    // turns on at boot while the Serverless one leaves it to the specs, so calling it there would
+    // fail the setup with a 403. Only stateful specs start investigations.
+    if (!config.serverless) {
+      await disableInvestigationRunLimits({ kbnUrl, samlAuth, log });
+    }
   }
 );
