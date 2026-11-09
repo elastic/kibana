@@ -32,6 +32,7 @@ describe('ALERTZERO_AI_INDICES', () => {
     ).toEqual([
       { id: 'security-investigations', templateName: undefined },
       { id: 'security-attack-fingerprints', templateName: 'security-attack-fingerprint' },
+      { id: 'security-triage-decisions', templateName: 'security-triage-decisions' },
     ]);
   });
 });

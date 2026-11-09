@@ -14,8 +14,11 @@
  *       A  acme-update.exe   5 low + 1 high alerts   an approved decision      -> would_close (low), kept with a human (high)
  *       B  scan.exe          3 medium alerts         a dismissed decision       -> would_skip
  *       C  unknown.exe       2 low alerts            no decision                -> never matched
- *   - the two decisions (`fp-decision-<hash>`, `fp-dismissal-<hash>`) in the `security-investigations`
+ *   - the two decisions (`fp-decision-<hash>`, `fp-dismissal-<hash>`) in the `security-triage-decisions`
  *     Knowledge Item index, built with the same code the store step uses.
+ *
+ * Start Kibana once first: it installs the index template that maps the space privilege. An index
+ * that exists without it cannot space-scope the decisions until it is deleted.
  *
  * The keys come from the real key code, so a change to the key rules changes the seed with it.
  *
@@ -69,7 +72,7 @@ const {
   buildDecisionDocument,
   groupByStrictKey,
 } = require('../server/alert_triage/fp_decisions');
-const { HUNT_COVERAGE_AI_INDEX_DEST } = require('../common/step_types/package_report');
+const { TRIAGE_DECISIONS_AI_INDEX_DEST } = require('../common/step_types/triage_decisions_index');
 
 const args = process.argv.slice(2);
 const flag = (name, fallback) => {
@@ -87,7 +90,7 @@ const HOT_KEYS = Number(flag('--hot-keys', '3'));
 const PROBE = args.includes('--probe');
 const UI_PHASE = flag('--ui', '');
 const ALERTS_INDEX = `.alerts-security.alerts-${SPACE}`;
-const DECISIONS_INDEX = HUNT_COVERAGE_AI_INDEX_DEST.value;
+const DECISIONS_INDEX = TRIAGE_DECISIONS_AI_INDEX_DEST.value;
 const AUTH = `${process.env.ES_USERNAME ?? 'elastic'}:${process.env.ES_PASSWORD ?? 'changeme'}`;
 const FIXTURE_TAG = 'triage-decisions-fixture';
 // A fixed rule, so a second run adds alerts to the same rule and the keys stay the same.

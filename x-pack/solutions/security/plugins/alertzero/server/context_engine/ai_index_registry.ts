@@ -9,6 +9,7 @@ import {
   ATTACK_FINGERPRINT_AI_INDEX_ID,
   KNOWLEDGE_INDICATOR_AI_INDEX_ID,
 } from '../../common/ai_indices';
+import { TRIAGE_DECISIONS_AI_INDEX_ID } from '../../common/step_types/triage_decisions_index';
 
 /** An AI index AlertZero registers with Context Engine. */
 export interface AlertZeroAiIndex<TId extends string = string> {
@@ -55,10 +56,23 @@ export const ATTACK_FINGERPRINT_AI_INDEX = {
   },
 } as const satisfies AlertZeroAiIndex;
 
+/** Alert triage decisions. The store step writes the backing index once the template is installed. */
+export const TRIAGE_DECISIONS_AI_INDEX = {
+  id: TRIAGE_DECISIONS_AI_INDEX_ID,
+  description:
+    'Internal alert triage decisions: false-positive patterns that triage workers match ' +
+    'against later alerts. Not for analysts to query.',
+  spaceScopedTemplate: {
+    templateName: 'security-triage-decisions',
+    logLabel: 'Triage decisions',
+  },
+} as const satisfies AlertZeroAiIndex;
+
 /** One entry per index. */
 export const ALERTZERO_AI_INDICES = [
   KNOWLEDGE_INDICATOR_AI_INDEX,
   ATTACK_FINGERPRINT_AI_INDEX,
+  TRIAGE_DECISIONS_AI_INDEX,
 ] as const satisfies readonly AlertZeroAiIndex[];
 
 export type AlertZeroAiIndexId = (typeof ALERTZERO_AI_INDICES)[number]['id'];

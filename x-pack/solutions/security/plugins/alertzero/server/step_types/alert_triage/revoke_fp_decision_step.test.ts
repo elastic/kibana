@@ -6,7 +6,7 @@
  */
 
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
-import { HUNT_COVERAGE_AI_INDEX_DEST } from '../../../common/step_types/package_report';
+import { TRIAGE_DECISIONS_AI_INDEX_DEST } from '../../../common/step_types/triage_decisions_index';
 import { MAX_REVOKE_PAGES } from '../../alert_triage/constants';
 import { getTriageRevokeFpDecisionStepDefinition } from './revoke_fp_decision_step';
 
@@ -89,7 +89,7 @@ describe('triage revoke decision step', () => {
 
     expect(update).toHaveBeenCalledWith(
       expect.objectContaining({
-        index: HUNT_COVERAGE_AI_INDEX_DEST.value,
+        index: TRIAGE_DECISIONS_AI_INDEX_DEST.value,
         id: APPROVAL,
         doc: expect.objectContaining({ governance: { lifecycle: { status: 'deleted' } } }),
       })
