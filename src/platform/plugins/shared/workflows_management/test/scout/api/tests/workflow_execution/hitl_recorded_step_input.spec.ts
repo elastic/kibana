@@ -8,7 +8,7 @@
  */
 
 import { createServer, type Server } from 'node:http';
-import { tags } from '@kbn/scout';
+import { getPlaywrightTagsFor } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { WorkflowExecutionDto, WorkflowStepExecutionDto } from '@kbn/workflows/types/latest';
 import { ExecutionStatus } from '@kbn/workflows/types/latest';
@@ -152,7 +152,15 @@ const getExternalLink = async (url: string): Promise<{ status: number; text: str
   return { status: response.status, text: await response.text() };
 };
 
-spaceTest.describe('HITL recorded step input', { tag: tags.deploymentAgnostic }, () => {
+// The resume link is delivered to a listener on this machine. Cloud Kibana cannot reach it.
+const LOCAL_DEPLOYMENTS = [
+  ...getPlaywrightTagsFor('stateful', 'classic', 'local'),
+  ...getPlaywrightTagsFor('serverless', 'search', 'local'),
+  ...getPlaywrightTagsFor('serverless', 'observability_complete', 'local'),
+  ...getPlaywrightTagsFor('serverless', 'security_complete', 'local'),
+];
+
+spaceTest.describe('HITL recorded step input', { tag: LOCAL_DEPLOYMENTS }, () => {
   let server: Server;
   let notifyUrl = '';
   const notificationBodies: string[] = [];
@@ -359,5 +367,3 @@ spaceTest.describe('HITL recorded step input', { tag: tags.deploymentAgnostic },
     }
   );
 });
-
-waw;
