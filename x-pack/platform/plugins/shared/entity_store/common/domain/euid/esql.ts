@@ -227,9 +227,7 @@ function buildFieldMappingEsql(then: FieldEvaluationWhenClauseFieldMappingThen):
   const arms = Object.entries(then.mapping)
     .map(
       ([from, to]) =>
-        `MV_FIRST(TO_STRING(${then.field})) == "${escapeEsqlString(from)}", "${escapeEsqlString(
-          to
-        )}"`
+        `${esqlIdentityValue(then.field)} == "${escapeEsqlString(from)}", "${escapeEsqlString(to)}"`
     )
     .join(', ');
   return `CASE(${arms})`;
@@ -265,7 +263,10 @@ export function buildDestinationFieldEsql(
       condition = `COALESCE(${effectiveSourceName} IN (${inList}), FALSE)`;
     } else {
       const colName = `${destBase}_arm${i}`;
-      conditionPrecomputes.push({ colName, esql: conditionToESQL(clause.condition) });
+      conditionPrecomputes.push({
+        colName,
+        esql: conditionToESQL(clause.condition, { reduceMultiValued: true }),
+      });
       condition = `COALESCE(${colName}, FALSE)`;
     }
     const thenExpr =
@@ -528,7 +529,9 @@ export function getEuidEsqlEvaluation(
       );
       if (branch.when) {
         const condVar = `_euid_branch_${i}_cond`;
-        assignments.push(`${condVar} = (${conditionToESQL(branch.when)})`);
+        assignments.push(
+          `${condVar} = (${conditionToESQL(branch.when, { reduceMultiValued: true })})`
+        );
         caseParts.push(`${condVar}, ${formulaVar}`);
       } else {
         caseParts.push(`TRUE, ${formulaVar}`);

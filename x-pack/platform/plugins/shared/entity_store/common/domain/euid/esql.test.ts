@@ -342,6 +342,24 @@ describe('getFieldEvaluationsEsql', () => {
     const presentPos = result.indexOf('entity_namespace_present =');
     expect(namespacePos).toBeLessThan(presentPos);
   });
+
+  describe('multi-valued fields in the user namespace evaluation', () => {
+    const result = getEuidEsqlEvaluation(getBuiltInEntityDefinition('user'), 'entity.id');
+
+    it('maps the cloud.provider arm by its identity value', () => {
+      expect(result).toContain(`${esqlIdentityValue('cloud.provider')} == "aws"`);
+      expect(result).not.toContain('MV_FIRST(TO_STRING(cloud.provider))');
+    });
+
+    it('excludes service account names by the identity value of user.name', () => {
+      expect(result).toContain(`NOT (${esqlIdentityValue('user.name')} IN ("root"`);
+      expect(result).not.toContain('NOT (TO_STRING(user.name) IN (');
+    });
+
+    it('gates the ranking branches by the identity value of entity.namespace', () => {
+      expect(result).toContain(`${esqlIdentityValue('entity.namespace')} == "local"`);
+    });
+  });
 });
 
 describe('getEuidEsqlEvaluation', () => {
@@ -607,7 +625,7 @@ describe('buildDestinationFieldEsql', () => {
     );
 
     expect(conditionPrecomputes).toEqual([
-      { colName: '_eval_dest_arm0', esql: 'TO_STRING(event.kind) == "asset"' },
+      { colName: '_eval_dest_arm0', esql: `${esqlIdentityValue('event.kind')} == "asset"` },
     ]);
     expect(expression).toBe(
       'COALESCE(' +
@@ -648,9 +666,10 @@ describe('buildDestinationFieldEsql', () => {
       // When condition is true but cloud.provider is absent or not in the mapping,
       // the inner CASE returns NULL → COALESCE falls through to the next arm.
       // The expression structure is stable regardless of the condition shape.
+      const provider = esqlIdentityValue('cloud.provider');
       expect(expression).toBe(
         'COALESCE(' +
-          'CASE(COALESCE(_eval_dest_arm0, FALSE), CASE(MV_FIRST(TO_STRING(cloud.provider)) == "aws", "aws", MV_FIRST(TO_STRING(cloud.provider)) == "gcp", "gcp", MV_FIRST(TO_STRING(cloud.provider)) == "azure", "entra_id")), ' +
+          `CASE(COALESCE(_eval_dest_arm0, FALSE), CASE(${provider} == "aws", "aws", ${provider} == "gcp", "gcp", ${provider} == "azure", "entra_id")), ` +
           'CASE(_src IS NULL OR _src == "", "unknown"), ' +
           '_src' +
           ')'
@@ -724,7 +743,7 @@ describe('buildOneFieldEvaluationEsql', () => {
 
     const result = normalize(buildOneFieldEvaluationEsql(evaluation));
     const precomputePos = result.indexOf(
-      '_eval_entity_namespace_arm0 = (TO_STRING(event.kind) == "asset")'
+      `_eval_entity_namespace_arm0 = (${esqlIdentityValue('event.kind')} == "asset")`
     );
     const destinationPos = result.indexOf('entity.namespace = COALESCE(');
 

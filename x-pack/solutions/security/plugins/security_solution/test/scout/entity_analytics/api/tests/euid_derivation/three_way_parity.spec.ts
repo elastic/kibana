@@ -348,6 +348,38 @@ apiTest.describe('EUID derivation parity', { tag: BACKFILL_TAGS }, () => {
     }
   );
 
+  apiTest(
+    'maps the cloud provider by the lowest non-empty value of a multi-valued field',
+    async ({ esClient }) => {
+      // A leading empty `cloud.provider` must not hide `aws`: ES|QL used to read the first value.
+      await expectAgreementOn(
+        esClient,
+        EntityType.user,
+        {
+          'user.email': 'alice@example.com',
+          'event.kind': 'asset',
+          'event.module': 'asset_discovery',
+          'cloud.provider': ['', 'aws'],
+        },
+        'user:alice@example.com@aws'
+      );
+    }
+  );
+
+  apiTest(
+    'agrees on a local user whose multi-valued user.name passes the service account gate',
+    async ({ esClient }) => {
+      // The gate excludes service account names by `user.name`. It must read the lowest value, as
+      // the other paths do, or ES|QL leaves the local namespace and derives `@unknown`.
+      await expectAgreementOn(
+        esClient,
+        EntityType.user,
+        { 'user.name': ['bob', 'alice'], 'host.id': 'h', 'event.kind': 'asset' },
+        'user:alice@h@local'
+      );
+    }
+  );
+
   apiTest('agrees on a local user with a multi-valued host.id', async ({ esClient }) => {
     await expectAgreementOn(
       esClient,

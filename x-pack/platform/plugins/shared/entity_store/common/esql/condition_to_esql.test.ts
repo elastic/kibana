@@ -211,6 +211,41 @@ describe('entityStoreConditionToESQL', () => {
     });
   });
 
+  describe('reduceMultiValued', () => {
+    const reduced = { reduceMultiValued: true };
+    const identityValue = (field: string) => esqlIdentityValue(field);
+
+    it('compares eq and neq on a string by the identity value', () => {
+      expect(entityStoreConditionToESQL({ field: 'cloud.provider', eq: 'aws' }, reduced)).toBe(
+        `${identityValue('cloud.provider')} == "aws"`
+      );
+      expect(entityStoreConditionToESQL({ field: 'cloud.provider', neq: 'aws' }, reduced)).toBe(
+        `${identityValue('cloud.provider')} != "aws"`
+      );
+    });
+
+    it('compares the IN of an OR-of-EQ by the identity value', () => {
+      const result = entityStoreConditionToESQL(
+        fieldNotOneOfCondition('user.name', ['root', 'bin']),
+        reduced
+      );
+
+      expect(result).toBe(`NOT (${identityValue('user.name')} IN ("root", "bin"))`);
+    });
+
+    it('leaves non-string comparisons on the plain reference', () => {
+      expect(entityStoreConditionToESQL({ field: 'event.code', eq: 4 }, reduced)).toBe(
+        'TO_STRING(event.code) == 4'
+      );
+    });
+
+    it('is off by default, so a WHERE filter keeps the plain reference', () => {
+      expect(entityStoreConditionToESQL({ field: 'cloud.provider', eq: 'aws' })).toBe(
+        'TO_STRING(cloud.provider) == "aws"'
+      );
+    });
+  });
+
   describe('operator precedence', () => {
     it('wraps non-IN OR in parens when it appears inside AND', () => {
       const condition = {
