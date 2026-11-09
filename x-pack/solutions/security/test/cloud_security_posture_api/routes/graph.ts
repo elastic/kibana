@@ -21,7 +21,11 @@ import type {
   EdgeDataModel,
   RelationshipNodeDataModel,
 } from '@kbn/cloud-security-posture-common/types/graph/latest';
-import { isEntityNode, isEventNode } from '@kbn/cloud-security-posture-graph/src/components/utils';
+import {
+  isEntityNode,
+  isEventNode,
+  isRelationshipNode,
+} from '@kbn/cloud-security-posture-graph/src/components/utils';
 import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import {
@@ -34,6 +38,15 @@ import {
   waitForEntityDataIndexed,
 } from '../utils';
 import { CspSecurityCommonProvider } from './helper/user_roles_utilites';
+
+type GraphNode = EntityNodeDataModel | EventNodeDataModel | RelationshipNodeDataModel;
+
+/** Fails when an events-only graph contains a relationship node, narrowing the node type otherwise. */
+const expectNotRelationshipNode: (
+  node: GraphNode
+) => asserts node is EntityNodeDataModel | EventNodeDataModel = (node) => {
+  expect(isRelationshipNode(node)).to.be(false);
+};
 
 // eslint-disable-next-line import/no-default-export
 export default function (providerContext: FtrProviderContext) {
@@ -722,7 +735,8 @@ export default function (providerContext: FtrProviderContext) {
         expect(response.body).to.have.property('edges').length(2);
         expect(response.body).not.to.have.property('messages');
 
-        response.body.nodes.forEach((node: EntityNodeDataModel | EventNodeDataModel) => {
+        response.body.nodes.forEach((node: GraphNode) => {
+          expectNotRelationshipNode(node);
           expect(node).to.have.property('color');
           expect(node.color).equal(
             'primary',
@@ -816,7 +830,8 @@ export default function (providerContext: FtrProviderContext) {
         expect(response.body).to.have.property('edges').length(2);
         expect(response.body).not.to.have.property('messages');
 
-        response.body.nodes.forEach((node: EntityNodeDataModel | EventNodeDataModel) => {
+        response.body.nodes.forEach((node: GraphNode) => {
+          expectNotRelationshipNode(node);
           expect(node).to.have.property('color');
           expect(node.color).equal(
             isEventNode(node) &&
@@ -861,7 +876,8 @@ export default function (providerContext: FtrProviderContext) {
         expect(response.body).to.have.property('edges').length(2);
         expect(response.body).not.to.have.property('messages');
 
-        response.body.nodes.forEach((node: EntityNodeDataModel | EventNodeDataModel) => {
+        response.body.nodes.forEach((node: GraphNode) => {
+          expectNotRelationshipNode(node);
           expect(node).to.have.property('color');
           expect(node.color).equal(
             'primary',
@@ -901,7 +917,8 @@ export default function (providerContext: FtrProviderContext) {
         expect(response.body).to.have.property('edges').length(2);
         expect(response.body).not.to.have.property('messages');
 
-        response.body.nodes.forEach((node: EntityNodeDataModel | EventNodeDataModel) => {
+        response.body.nodes.forEach((node: GraphNode) => {
+          expectNotRelationshipNode(node);
           expect(node).to.have.property('color');
           expect(node.color).equal(
             'primary',
@@ -951,7 +968,8 @@ export default function (providerContext: FtrProviderContext) {
         expect(response.body).to.have.property('edges').length(2);
         expect(response.body).not.to.have.property('messages');
 
-        response.body.nodes.forEach((node: EntityNodeDataModel | EventNodeDataModel) => {
+        response.body.nodes.forEach((node: GraphNode) => {
+          expectNotRelationshipNode(node);
           expect(node).to.have.property('color');
           expect(node.color).equal(
             'primary',
@@ -1220,7 +1238,8 @@ export default function (providerContext: FtrProviderContext) {
         expect(response.body).to.have.property('edges').length(2);
         expect(response.body).not.to.have.property('messages');
 
-        response.body.nodes.forEach((node: EntityNodeDataModel | EventNodeDataModel) => {
+        response.body.nodes.forEach((node: GraphNode) => {
+          expectNotRelationshipNode(node);
           expect(node).to.have.property('color');
           expect(node.color).equal(
             isEventNode(node) &&
@@ -1276,26 +1295,25 @@ export default function (providerContext: FtrProviderContext) {
         expect(response.body).to.have.property('edges').length(4); // Simple connections without group
         expect(response.body).not.to.have.property('messages');
 
-        response.body.nodes.forEach(
-          (node: EntityNodeDataModel | EventNodeDataModel, idx: number) => {
-            expect(node).to.have.property('color');
-            expect(node.color).equal(
-              'primary',
-              `node color mismatched [node: ${node.id}] [actual: ${node.color}]`
-            );
-            if (node.kind === 'event') {
-              // Some nodes may have different document patterns
-              if (node.documentsData && node.documentsData.length === 1) {
-                expect(node.documentsData?.[0]).to.have.property('type', 'event');
-              } else if (node.documentsData && node.documentsData.length === 2) {
-                const hasAlert = node.documentsData.some((doc) => doc.type === 'alert');
-                const hasEvent = node.documentsData.some((doc) => doc.type === 'event');
-                expect(hasAlert).to.be(true);
-                expect(hasEvent).to.be(true);
-              }
+        response.body.nodes.forEach((node: GraphNode, idx: number) => {
+          expectNotRelationshipNode(node);
+          expect(node).to.have.property('color');
+          expect(node.color).equal(
+            'primary',
+            `node color mismatched [node: ${node.id}] [actual: ${node.color}]`
+          );
+          if (node.kind === 'event') {
+            // Some nodes may have different document patterns
+            if (node.documentsData && node.documentsData.length === 1) {
+              expect(node.documentsData?.[0]).to.have.property('type', 'event');
+            } else if (node.documentsData && node.documentsData.length === 2) {
+              const hasAlert = node.documentsData.some((doc) => doc.type === 'alert');
+              const hasEvent = node.documentsData.some((doc) => doc.type === 'event');
+              expect(hasAlert).to.be(true);
+              expect(hasEvent).to.be(true);
             }
           }
-        );
+        });
 
         response.body.edges.forEach((edge: EdgeDataModel, idx: number) => {
           expect(edge).to.have.property('color');
@@ -1417,7 +1435,8 @@ export default function (providerContext: FtrProviderContext) {
         expect(response.body).to.have.property('edges').length(2);
         expect(response.body).not.to.have.property('messages');
 
-        response.body.nodes.forEach((node: EntityNodeDataModel | EventNodeDataModel) => {
+        response.body.nodes.forEach((node: GraphNode) => {
+          expectNotRelationshipNode(node);
           expect(node).to.have.property('color');
           expect(node.color).equal(
             isEventNode(node) &&
@@ -1872,7 +1891,8 @@ export default function (providerContext: FtrProviderContext) {
               expect(actorNode.tag).to.equal('Identity');
 
               // Verify other nodes
-              response.body.nodes.forEach((node: EntityNodeDataModel | EventNodeDataModel) => {
+              response.body.nodes.forEach((node: GraphNode) => {
+                expectNotRelationshipNode(node);
                 expect(node).to.have.property('color');
 
                 if (node.kind === 'event') {
@@ -2936,7 +2956,7 @@ export default function (providerContext: FtrProviderContext) {
 
               // Verify relationship node properties
               relationshipNodes.forEach((node: NodeDataModel) => {
-                expect(node.kind).to.equal('relationship');
+                expect(isRelationshipNode(node)).to.be(true);
                 expect(node.label).to.equal('Owns');
               });
             });
@@ -3126,7 +3146,7 @@ export default function (providerContext: FtrProviderContext) {
                 ) as RelationshipNodeDataModel;
                 expect(ownsNode).not.to.be(undefined);
                 expect(ownsNode.label).to.equal('Owns');
-                expect(ownsNode.kind).to.equal('relationship');
+                expect(isRelationshipNode(ownsNode)).to.be(true);
                 expect(ownsNode.parentId).to.equal(groupNode.id);
 
                 // Verify communicates_with relationship node from data-pipeline (stacked with parentId)
@@ -3137,7 +3157,7 @@ export default function (providerContext: FtrProviderContext) {
                 ) as RelationshipNodeDataModel;
                 expect(dataPipelineCommunicatesWithNode).not.to.be(undefined);
                 expect(dataPipelineCommunicatesWithNode.label).to.equal('Communicates with');
-                expect(dataPipelineCommunicatesWithNode.kind).to.equal('relationship');
+                expect(isRelationshipNode(dataPipelineCommunicatesWithNode)).to.be(true);
                 expect(dataPipelineCommunicatesWithNode.parentId).to.equal(groupNode.id);
 
                 // Verify communicates_with relationship node from database-server (NOT stacked)
@@ -3148,7 +3168,7 @@ export default function (providerContext: FtrProviderContext) {
                 ) as RelationshipNodeDataModel;
                 expect(dbServerCommunicatesWithNode).not.to.be(undefined);
                 expect(dbServerCommunicatesWithNode.label).to.equal('Communicates with');
-                expect(dbServerCommunicatesWithNode.kind).to.equal('relationship');
+                expect(isRelationshipNode(dbServerCommunicatesWithNode)).to.be(true);
                 expect(dbServerCommunicatesWithNode.parentId).to.be(undefined);
 
                 // Check for entity nodes - should have actors and targets
@@ -3364,12 +3384,14 @@ export default function (providerContext: FtrProviderContext) {
                 (n) => n.id === 'rel(host:my-server-1-resolution.resolved_to)'
               ) as RelationshipNodeDataModel;
               expect(resolvedToNode).not.to.be(undefined);
+              expect(isRelationshipNode(resolvedToNode)).to.be(true);
               expect(resolvedToNode.label).to.equal('Resolved to');
 
               const communicatesWithNode = relationshipNodes.find(
                 (n) => n.id === 'rel(host:my-server-3-communicates_with)'
               ) as RelationshipNodeDataModel;
               expect(communicatesWithNode).not.to.be(undefined);
+              expect(isRelationshipNode(communicatesWithNode)).to.be(true);
               expect(communicatesWithNode.label).to.equal('Communicates with');
 
               expect(allNodes.length).to.equal(5);
@@ -3484,6 +3506,7 @@ export default function (providerContext: FtrProviderContext) {
                   (node: NodeDataModel) =>
                     (node as RelationshipNodeDataModel).label === 'Supervises'
                 ) as RelationshipNodeDataModel;
+                expect(isRelationshipNode(supervisesNode)).to.be(true);
                 expect(supervisesNode.parentId).to.equal(groupNode.id);
 
                 const dependsOnNode = relationshipNodes.find(
@@ -3491,6 +3514,7 @@ export default function (providerContext: FtrProviderContext) {
                     (node as RelationshipNodeDataModel).label === 'Depends on'
                 ) as RelationshipNodeDataModel;
                 expect(dependsOnNode).not.to.be(undefined);
+                expect(isRelationshipNode(dependsOnNode)).to.be(true);
                 expect(dependsOnNode.parentId).to.equal(groupNode.id);
 
                 // Total nodes: 9 entity + 7 relationship + 3 label + 1 group = 20
@@ -3681,7 +3705,7 @@ export default function (providerContext: FtrProviderContext) {
                   (node: NodeDataModel) => (node as RelationshipNodeDataModel).label === 'Owns'
                 );
                 expect(ownsNodes.length).to.equal(1);
-                expect(ownsNodes[0].kind).to.equal('relationship');
+                expect(isRelationshipNode(ownsNodes[0])).to.be(true);
 
                 // Verify Communicates_with relationship nodes (4 nodes - 3 from intermediate entities + 1 from external-caller)
                 const communicatesWithNodes = relationshipNodes.filter(
@@ -3690,7 +3714,7 @@ export default function (providerContext: FtrProviderContext) {
                 );
                 expect(communicatesWithNodes.length).to.equal(4);
                 communicatesWithNodes.forEach((node: NodeDataModel) => {
-                  expect(node.kind).to.equal('relationship');
+                  expect(isRelationshipNode(node)).to.be(true);
                 });
 
                 // Verify the external-caller's Communicates_with relationship node (NOT stacked)
@@ -3699,6 +3723,7 @@ export default function (providerContext: FtrProviderContext) {
                     node.id === 'rel(service:Hierarchy External Caller-communicates_with)'
                 ) as RelationshipNodeDataModel;
                 expect(externalCallerRelNode).not.to.be(undefined);
+                expect(isRelationshipNode(externalCallerRelNode)).to.be(true);
                 expect(externalCallerRelNode.parentId).to.be(undefined);
 
                 // Verify Supervises relationship node count (1 node connecting identity-1 to delegate)
@@ -3707,7 +3732,7 @@ export default function (providerContext: FtrProviderContext) {
                     (node as RelationshipNodeDataModel).label === 'Supervises'
                 );
                 expect(supervisesNodes.length).to.equal(1);
-                expect(supervisesNodes[0].kind).to.equal('relationship');
+                expect(isRelationshipNode(supervisesNodes[0])).to.be(true);
 
                 // Verify edges
                 response.body.edges.forEach((edge: EdgeDataModel) => {
@@ -3805,6 +3830,7 @@ export default function (providerContext: FtrProviderContext) {
                 );
                 expect(relationshipNodes.length).to.equal(3);
                 relationshipNodes.forEach((node: RelationshipNodeDataModel) => {
+                  expect(isRelationshipNode(node)).to.be(true);
                   expect(node.label).to.equal('Communicates with');
                 });
               });
@@ -3835,6 +3861,7 @@ export default function (providerContext: FtrProviderContext) {
                   (node: NodeDataModel) => node.kind === 'relationship'
                 );
                 expect(relationshipNodes.length).to.equal(1);
+                expect(isRelationshipNode(relationshipNodes[0])).to.be(true);
                 expect(relationshipNodes[0].label).to.equal('Communicates with');
 
                 // The merged actor node has count=2 (both actors collapsed)
@@ -3900,7 +3927,8 @@ export default function (providerContext: FtrProviderContext) {
           expect(response.body).to.have.property('edges').length(2);
           expect(response.body).not.to.have.property('messages');
 
-          response.body.nodes.forEach((node: EntityNodeDataModel | EventNodeDataModel) => {
+          response.body.nodes.forEach((node: GraphNode) => {
+            expectNotRelationshipNode(node);
             expect(node).to.have.property('color');
             expect(node.color).equal(
               'primary',

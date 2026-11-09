@@ -579,7 +579,11 @@ const sortEdges = (
     const kindB = getConnectorKind(b);
 
     // Priority: relationship > event > other
-    const priority = { relationship: 0, event: 1, other: 2 };
+    const priority: Record<ConnectorNodeType | 'other', number> = {
+      relationship: 0,
+      event: 1,
+      other: 2,
+    };
     const kindDiff = priority[kindA] - priority[kindB];
 
     // If same priority, sort alphabetically by edge ID for deterministic ordering
