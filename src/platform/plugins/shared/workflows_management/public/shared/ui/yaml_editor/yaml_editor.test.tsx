@@ -484,27 +484,7 @@ describe('YamlEditor', () => {
       expect(onChange).toHaveBeenCalledWith(newValue);
     });
 
-    it('should update internal value when prop value changes', () => {
-      const onChange = jest.fn();
-      const initialValue = 'test: initial';
-      const newPropValue = 'test: from-props';
-
-      const { container, rerender } = render(
-        <YamlEditor value={initialValue} onChange={onChange} schemas={null} />
-      );
-
-      // Update the value prop
-      rerender(<YamlEditor value={newPropValue} onChange={onChange} schemas={null} />);
-
-      const textarea = container.querySelector(
-        '[data-testid="code-editor-textarea"]'
-      ) as HTMLTextAreaElement;
-      expect(textarea.value).toBe(newPropValue);
-    });
-
-    it('should hand a new prop value to the editor in the same commit, before parent effects run', () => {
-      // Regression: parent effects (e.g. execution step decorations) paint line ranges derived
-      // from the new value; the editor must already hold that value when they run.
+    it('should hand a new prop value to the editor before parent effects run', () => {
       const valuesSeenByParentEffect: string[] = [];
       const Parent = ({ value }: { value: string }) => {
         React.useEffect(() => {
@@ -516,10 +496,14 @@ describe('YamlEditor', () => {
         return <YamlEditor value={value} onChange={jest.fn()} schemas={null} />;
       };
 
-      const { rerender } = render(<Parent value="test: short" />);
-      rerender(<Parent value="test: long" />);
+      const { container, rerender } = render(<Parent value="test: initial" />);
+      rerender(<Parent value="test: from-props" />);
 
-      expect(valuesSeenByParentEffect).toEqual(['test: short', 'test: long']);
+      const textarea = container.querySelector(
+        '[data-testid="code-editor-textarea"]'
+      ) as HTMLTextAreaElement;
+      expect(textarea.value).toBe('test: from-props');
+      expect(valuesSeenByParentEffect).toEqual(['test: initial', 'test: from-props']);
     });
   });
 

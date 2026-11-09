@@ -36,12 +36,12 @@ export const YamlEditor = React.memo(
     ...props
   }: YamlEditorProps) => {
     const [internalValue, setInternalValue] = useState(value);
-    const [syncedValue, setSyncedValue] = useState(value);
+    const [prevValue, setPrevValue] = useState(value);
 
     // Adopt a new upstream value during render, so Monaco receives it in the same commit
-    // as the data derived from it (line lookups, decorations).
-    if (value !== syncedValue) {
-      setSyncedValue(value);
+    // as the data derived from it.
+    if (value !== prevValue) {
+      setPrevValue(value);
       setInternalValue(value);
     }
 
