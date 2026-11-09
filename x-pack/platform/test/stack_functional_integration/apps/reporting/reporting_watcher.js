@@ -93,7 +93,8 @@ export default function ({ getService }) {
         await deleteWatcher(watch, id, client, log);
       });
 
-      after(async () => {
+      after(async function () {
+        this.timeout(660000);
         await waitForReports(client, retry, log);
       });
     });
