@@ -223,6 +223,20 @@ describe('WorkflowsPage authorization', () => {
     expect(screen.queryByTestId('createWorkflowButton')).not.toBeInTheDocument();
   });
 
+  it('hides the header create button while workflows are loading', async () => {
+    mockCapabilities(true, true);
+    mockUseWorkflows.mockReturnValue({
+      ...emptyWorkflowsResult,
+      data: undefined,
+      isLoading: true,
+    } as any);
+
+    renderPage();
+
+    await screen.findByTestId('appHeader');
+    expect(screen.queryByTestId('createWorkflowButton')).not.toBeInTheDocument();
+  });
+
   it('shows the header create button when filters match no workflows', async () => {
     mockCapabilities(true, true);
 
