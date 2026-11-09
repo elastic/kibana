@@ -162,6 +162,37 @@ apiTest.describe(
     );
 
     apiTest(
+      'a flyout re-check clears an upgrade_available that a keyless connector was flagged with earlier',
+      async ({ apiClient, kbnClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+        // What a keyless connector got before the provisioner was asked: flagged without any
+        // update that could run in this region, so its flyout callout would never clear.
+        await kbnClient.request({
+          method: 'PUT',
+          path: `/api/saved_objects/fleet-cloud-connector/${cloudConnectorId}`,
+          body: { attributes: { iac_upgrade_status: 'upgrade_available' } },
+        });
+
+        const verification = await apiClient.post(
+          `internal/fleet/cloud_connectors/${cloudConnectorId}/verify_iac_key`,
+          {
+            headers: { ...INTERNAL_HEADERS, 'kbn-xsrf': 'scout', ...cookieHeader },
+            body: {},
+            responseType: 'json',
+          }
+        );
+
+        expect(verification).toHaveStatusCode(200);
+        expect(verification.body.outcome).toBe('key_unavailable');
+        const connector = await apiClient.get(`api/fleet/cloud_connectors/${cloudConnectorId}`, {
+          headers: { ...PUBLIC_HEADERS, ...cookieHeader },
+          responseType: 'json',
+        });
+        expect(connector.body.item.iac_upgrade_status).toBe('up_to_date');
+      }
+    );
+
+    apiTest(
       'onboarding a new integration on a keyless identity does not block the deployment',
       async ({ apiClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser('admin');

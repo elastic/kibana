@@ -711,6 +711,39 @@ describe('verifyCloudConnectorIacKey', () => {
       });
     };
 
+    it('clears upgrade_available to up_to_date for a keyless connector the provisioner cannot render for', async () => {
+      // Flagged before IaCP was asked, so its Update could never run here: the flyout callout
+      // would otherwise stay for good.
+      soClient.get.mockResolvedValueOnce(connector({ iac_upgrade_status: 'upgrade_available' }));
+      mockedRender.mockRejectedValueOnce(new IacProvisionerUnavailableError('ENOTFOUND'));
+
+      const result = await verifyCloudConnectorIacKey(soClient, 'cc-1');
+
+      expect(result).toMatchObject({ matches: true, outcome: 'key_unavailable' });
+      expectStatusWritten('up_to_date');
+    });
+
+    it('stores nothing for a keyless connector without a stored status when the provisioner cannot render', async () => {
+      soClient.get.mockResolvedValueOnce(connector({}));
+      mockedRender.mockRejectedValueOnce(new IacProvisionerUnavailableError('ENOTFOUND'));
+
+      await verifyCloudConnectorIacKey(soClient, 'cc-1');
+
+      expect(soClient.update).not.toHaveBeenCalled();
+    });
+
+    it('keeps upgrade_available on a keyed connector when the provisioner errors', async () => {
+      // Its key_mismatch was a real verdict and the error may be transient.
+      soClient.get.mockResolvedValueOnce(
+        connector({ iac_key: 'sha256:stored', iac_upgrade_status: 'upgrade_available' })
+      );
+      mockedRender.mockRejectedValueOnce(new IacProvisionerUnavailableError('down', 503));
+
+      await verifyCloudConnectorIacKey(soClient, 'cc-1');
+
+      expect(soClient.update).not.toHaveBeenCalled();
+    });
+
     it('writes the status only, never the checked-at stamp, which belongs to the daily task', async () => {
       // A re-check that stamped the time would make it look as if the task had just run.
       soClient.get.mockResolvedValueOnce(connector({ iac_key: 'sha256:same' }));

@@ -181,7 +181,10 @@ const checkConnector = async (
   // The IaCP round trip is the slow step; a run cancelled while it was pending must not go on to
   // write a status (and check time) on behalf of a task that has already been given up on.
   throwIfAborted(signal);
-  const status = toUpgradeStatus(outcome);
+  const status = toUpgradeStatus(outcome, {
+    keyless: !attributes.iac_key?.trim(),
+    status: attributes.iac_upgrade_status,
+  });
   if (status === undefined) {
     // getIacKeyOutcome already warned for key_unavailable; the other two are expected states.
     logger.debug(`${IAC_UPGRADE_CHECK_TASK} Connector ${id} not comparable (${outcome}), skipping`);
@@ -204,5 +207,7 @@ const checkConnector = async (
       } → ${status}`
     );
   }
-  return status;
+  // A flag cleared because no update can be offered is not a verdict about the template: count it
+  // as skipped so the run's totals do not report these connectors as up to date.
+  return outcome === 'key_unavailable' ? 'skipped' : status;
 };

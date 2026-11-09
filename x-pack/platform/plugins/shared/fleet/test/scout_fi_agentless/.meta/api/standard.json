@@ -1,5 +1,5 @@
 {
-  "sha1": "9e41c09d6f26a3fe66de470d18e78696d954f994",
+  "sha1": "f18caba31123b670dd1ab6b752fb113838a4f94b",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,8 +14,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_fi_agentless/api/tests/iac_upgrade_status_provisioner_unreachable.spec.ts",
-        "line": 108,
-        "column": 27
+        "line": 111,
+        "column": 10
+      }
+    },
+    {
+      "id": "f25a40a66863788-dde3e475e196596",
+      "title": "Cloud connector IaC upgrade status when the IaC Provisioner is unreachable a flyout re-check clears an upgrade_available that a keyless connector was flagged with earlier",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_fi_agentless/api/tests/iac_upgrade_status_provisioner_unreachable.spec.ts",
+        "line": 142,
+        "column": 22
       }
     },
     {
@@ -28,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_fi_agentless/api/tests/iac_upgrade_status_provisioner_unreachable.spec.ts",
-        "line": 138,
-        "column": 27
+        "line": 169,
+        "column": 9
       }
     }
   ]
