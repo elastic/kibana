@@ -164,7 +164,18 @@ export const buildReportPayload = () => {
 
   const byLabel = new Map(runViews.map((run) => [run.label, run]));
 
+  // Ledger entries written before parents were recorded carry none, and rounds that never
+  // reached the gate used to carry none either. Walking the ledger in order recovers the chain:
+  // a round branches from whatever the incumbent was at the time, which only changes when a
+  // round is accepted.
+  let runningVariant = ledger.find((entry) => entry.parentHash)?.parentHash ?? 'base';
+
   const rounds = ledger.map((entry) => {
+    const parentHash = entry.parentHash ?? runningVariant;
+    if ((entry.gate as { accepted?: boolean } | undefined)?.accepted && entry.variantHash) {
+      runningVariant = entry.variantHash;
+    }
+
     const candidateRun = byLabel.get(`round${entry.round}-candidate-gate`);
     const incumbentRun = byLabel.get(`round${entry.round}-incumbent-gate`);
     const searchRun = byLabel.get(`round${entry.round}-incumbent-search`);
@@ -222,7 +233,7 @@ export const buildReportPayload = () => {
       // Why a round never reached the gate: lint violations, a failing typecheck/test/lint run,
       // or a proposer that did not answer. Without this the report just says "validation".
       failures: entry.failures ?? entry.violations ?? (entry.error ? [entry.error] : []),
-      parentHash: entry.parentHash ?? 'base',
+      parentHash,
       configHash: entry.variantHash ?? `round-${entry.round}`,
       filesChanged: entry.filesChanged ?? [],
       diff: entry.diff ?? '',

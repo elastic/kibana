@@ -22,6 +22,7 @@ import { executeGold, scoreQuery } from './scorers';
 import type { EsqlResult } from './scorers';
 import { runCampaign } from './campaign';
 import { restartLane, setupCandidateWorktree } from './candidate_workspace';
+import { verifySealed } from './verify';
 import { harnessPaths } from './workspace';
 import { serveReport, writeReport } from './report';
 import { setupModelConnectors } from './models';
@@ -60,6 +61,7 @@ export const cli = () =>
   generate-corpus [--probes n]      synthesize, back-translate and difficulty-label a corpus
   baseline [--tiers ids]            measure this worktree's harness, per model tier
   round / campaign --rounds n       propose → validate → gate → promote, repeatedly
+  check [--baseline ref]            held-out check: current harness vs baseline, repeated + paired
   sealed [--tiers id]               score the current worktree on the sealed split
   verify-tiers --tiers a,b          score the current worktree on each model, one lane restart each
   report [--serve] [--port n]       write (or serve) the HTML report
@@ -240,6 +242,25 @@ Both lanes' Kibana processes must run with ESQL_HARNESS_TRACE_FILE pointing at
         return;
       }
 
+      if (command === 'check') {
+        await verifySealed({
+          worktree: process.cwd(),
+          baselineRef: optionalFlag(flags.baseline) ?? 'origin/main',
+          repeats: Number(optionalFlag(flags.repeats) ?? 2),
+          rollouts,
+          concurrency,
+          examples: examplesForSplit((optionalFlag(flags.split) as Split) ?? 'sealed'),
+          esClient,
+          target,
+          restartCommand:
+            optionalFlag(flags['restart-incumbent']) ??
+            process.env.HARNESS_RESTART_INCUMBENT ??
+            'true',
+          log,
+        });
+        return;
+      }
+
       if (command === 'verify-tiers') {
         // Harness fixes are pathology-matched to a model, so before anything is promoted the
         // same variant is scored on each model it might run on. Pinning a model needs a lane
@@ -345,6 +366,8 @@ Both lanes' Kibana processes must run with ESQL_HARNESS_TRACE_FILE pointing at
           'label',
           'restart-incumbent',
           'restart-candidate',
+          'baseline',
+          'repeats',
         ],
         boolean: ['serve', 'sample-data'],
         help: `
@@ -355,6 +378,8 @@ Both lanes' Kibana processes must run with ESQL_HARNESS_TRACE_FILE pointing at
         --tiers <ids>        comma-separated connector ids; candidate must pass the gate on each
         --candidate-path <p> candidate worktree (enables whole-file edits)
         --candidate-url <u>  Kibana serving the candidate worktree, e.g. http://localhost:5691
+        --baseline <ref>     git ref to compare against in check (default origin/main)
+        --repeats <n>        measurements per side in check (default 2)
         --kibana-url <url>   default http://localhost:5601
         --es-url <url>       default http://localhost:9200
         `,
