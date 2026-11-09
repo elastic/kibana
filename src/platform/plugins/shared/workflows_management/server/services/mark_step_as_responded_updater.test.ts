@@ -231,7 +231,7 @@ describe('getStrippedHitlToken', () => {
           [HITL_TOKEN_EXPIRES_AT_INPUT_FIELD]: expiresAt,
         },
       })
-    ).toEqual({ hash: 'hash', expiresAt, source: 'input' });
+    ).toEqual({ hash: 'hash', expiresAt, source: 'input', mirroredOnInput: false });
   });
 
   it('returns a token stored on step state ahead of a legacy input token', () => {
@@ -248,6 +248,18 @@ describe('getStrippedHitlToken', () => {
         },
       })
     ).toEqual({ hash: 'state-hash', expiresAt, source: 'state', mirroredOnInput: true });
+  });
+
+  it('returns a state token with mirroredOnInput false when input has no token', () => {
+    expect(
+      getStrippedHitlToken({
+        state: {
+          [HITL_TOKEN_HASH_INPUT_FIELD]: 'state-hash',
+          [HITL_TOKEN_EXPIRES_AT_INPUT_FIELD]: expiresAt,
+        },
+        input: { foo: 'bar' },
+      })
+    ).toEqual({ hash: 'state-hash', expiresAt, source: 'state', mirroredOnInput: false });
   });
 
   it.each([
@@ -277,7 +289,12 @@ describe('createReleaseHitlStepClaimUpdater', () => {
     respondedAt: '2026-04-29T10:00:00.000Z',
     channel: 'inbox',
   };
-  const strippedToken = { hash: 'hash', expiresAt: '2099-01-01T00:00:00.000Z' };
+  const strippedToken = {
+    hash: 'hash',
+    expiresAt: '2099-01-01T00:00:00.000Z',
+    source: 'input' as const,
+    mirroredOnInput: false,
+  };
   // The step as the claim left it: audit fields written and token fields nulled.
   const claimedStep: MarkStepAsRespondedCurrent = {
     spaceId: 'default',
@@ -324,7 +341,10 @@ describe('createReleaseHitlStepClaimUpdater', () => {
 
   it('restores a token that was stripped from step state', () => {
     const updater = createReleaseHitlStepClaimUpdater(
-      { ...claim, strippedToken: { ...strippedToken, source: 'state' } },
+      {
+        ...claim,
+        strippedToken: { ...strippedToken, source: 'state', mirroredOnInput: false },
+      },
       'default'
     );
 

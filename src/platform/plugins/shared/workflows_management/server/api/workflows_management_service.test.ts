@@ -560,7 +560,12 @@ describe('WorkflowsService (facade)', () => {
     respondedBy: 'alice',
     respondedAt: '2026-04-29T10:00:00.000Z',
     channel: 'inbox',
-    strippedToken: { hash: 'hash', expiresAt: '2099-01-01T00:00:00.000Z' },
+    strippedToken: {
+      hash: 'hash',
+      expiresAt: '2099-01-01T00:00:00.000Z',
+      source: 'input',
+      mirroredOnInput: false,
+    },
   };
 
   describe('markStepAsResponded', () => {

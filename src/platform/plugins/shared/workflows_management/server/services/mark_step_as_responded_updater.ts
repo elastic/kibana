@@ -41,14 +41,15 @@ export interface MarkStepAsRespondedAudit {
 /** A claim won by `markStepAsResponded`, kept so a resume that was not applied can release it. */
 export interface HitlStepClaim extends MarkStepAsRespondedAudit {
   /**
-   * External-resume token the claim removed. `state` is the current location.
-   * `input` is the copy a 9.6 node reads. `mirroredOnInput` means both copies were live.
+   * External-resume token the claim removed. Lives only for this request.
+   * `state` is the current location. `input` is the copy a 9.6 node reads.
+   * `mirroredOnInput` means both copies were live.
    */
   strippedToken?: {
     hash: string;
     expiresAt: string;
-    source?: 'state' | 'input';
-    mirroredOnInput?: boolean;
+    source: 'state' | 'input';
+    mirroredOnInput: boolean;
   };
 }
 
@@ -138,11 +139,11 @@ export const getStrippedHitlToken = (
     return {
       ...stateToken,
       source: 'state',
-      ...(inputToken ? { mirroredOnInput: true } : {}),
+      mirroredOnInput: inputToken != null,
     };
   }
   if (inputToken) {
-    return { ...inputToken, source: 'input' };
+    return { ...inputToken, source: 'input', mirroredOnInput: false };
   }
   return undefined;
 };
@@ -203,7 +204,7 @@ export const createReleaseHitlStepClaimUpdater = (
 
     const { input } = current;
     if (
-      strippedToken &&
+      strippedToken?.source === 'input' &&
       isJsonObject(input) &&
       input[HITL_TOKEN_HASH_INPUT_FIELD] == null &&
       input[HITL_TOKEN_EXPIRES_AT_INPUT_FIELD] == null

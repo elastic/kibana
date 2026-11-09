@@ -477,7 +477,9 @@ describe('WorkflowExecutionQueryService', () => {
 
   describe('getStepExecution', () => {
     it('returns null when no step found', async () => {
-      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } } as any);
+      mockStepDataClient.getByIds.mockResolvedValue(
+        createMockGetExecutionsByIdsResponse([], { missing: ['step-1'] })
+      );
 
       const result = await service.getStepExecution(
         { executionId: 'exec-1', id: 'step-1' },
@@ -485,6 +487,7 @@ describe('WorkflowExecutionQueryService', () => {
       );
 
       expect(result).toBeNull();
+      expect(mockStepDataClient.getByIds).toHaveBeenCalledWith(['step-1']);
     });
 
     it('returns the step execution when found', async () => {
@@ -494,9 +497,9 @@ describe('WorkflowExecutionQueryService', () => {
         status: 'completed',
         spaceId: 'default',
       };
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [{ _source: stepSource }] },
-      } as any);
+      mockStepDataClient.getByIds.mockResolvedValue(
+        createMockGetExecutionsByIdsResponse([stepSource])
+      );
 
       const result = await service.getStepExecution(
         { executionId: 'exec-1', id: 'step-1' },
@@ -506,28 +509,34 @@ describe('WorkflowExecutionQueryService', () => {
       expect(result).toEqual(stepSource);
     });
 
-    it('returns null when hit has undefined _source', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [{ _id: 'some-id' }] },
-      } as any);
-
-      const result = await service.getStepExecution(
-        { executionId: 'exec-1', id: 'step-1' },
-        'default'
+    it('returns null when the document belongs to another execution or space', async () => {
+      mockStepDataClient.getByIds.mockResolvedValue(
+        createMockGetExecutionsByIdsResponse([
+          {
+            id: 'step-1',
+            workflowRunId: 'other-exec',
+            spaceId: 'default',
+          },
+        ])
       );
 
-      expect(result).toBeNull();
-    });
+      await expect(
+        service.getStepExecution({ executionId: 'exec-1', id: 'step-1' }, 'default')
+      ).resolves.toBeNull();
 
-    it('queries by workflowRunId, id, and spaceId', async () => {
-      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } } as any);
+      mockStepDataClient.getByIds.mockResolvedValue(
+        createMockGetExecutionsByIdsResponse([
+          {
+            id: 'step-1',
+            workflowRunId: 'exec-1',
+            spaceId: 'other-space',
+          },
+        ])
+      );
 
-      await service.getStepExecution({ executionId: 'exec-1', id: 'step-1' }, 'my-space');
-
-      const call = mockEsClient.search.mock.calls[0][0] as any;
-      expect(call.query.bool.must).toContainEqual({ term: { workflowRunId: 'exec-1' } });
-      expect(call.query.bool.must).toContainEqual({ term: { id: 'step-1' } });
-      expect(call.query.bool.must).toContainEqual({ term: { spaceId: 'my-space' } });
+      await expect(
+        service.getStepExecution({ executionId: 'exec-1', id: 'step-1' }, 'my-space')
+      ).resolves.toBeNull();
     });
   });
 
@@ -1676,6 +1685,7 @@ describe('WorkflowExecutionQueryService', () => {
           hash: 'fresh-hash',
           expiresAt: '2099-02-01T00:00:00.000Z',
           source: 'input',
+          mirroredOnInput: false,
         },
       });
     });
@@ -1694,7 +1704,12 @@ describe('WorkflowExecutionQueryService', () => {
       respondedBy: 'alice',
       respondedAt: '2026-04-29T10:00:00.000Z',
       channel: 'inbox',
-      strippedToken: { hash: 'secret-token-hash', expiresAt: '2099-01-01T00:00:00.000Z' },
+      strippedToken: {
+        hash: 'secret-token-hash',
+        expiresAt: '2099-01-01T00:00:00.000Z',
+        source: 'input',
+        mirroredOnInput: false,
+      },
     };
 
     it('releases the claim with the release updater and refresh: wait_for', async () => {
