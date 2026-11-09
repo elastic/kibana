@@ -481,6 +481,9 @@ export function createEventsWriteTool({
                 source_ids: input.source_ids,
                 error_message: isBulkError ? result.error.reason : undefined,
                 ...(result.written ? { severity: result.severity } : {}),
+                ...(input.workflow_execution_id !== undefined
+                  ? { workflow_execution_id: input.workflow_execution_id }
+                  : {}),
               }),
           });
         });
@@ -526,6 +529,9 @@ export function createEventsWriteTool({
                 written: false,
                 source_ids: 'source_ids' in input ? input.source_ids : [],
                 error_message: message,
+                ...(input.workflow_execution_id !== undefined
+                  ? { workflow_execution_id: input.workflow_execution_id }
+                  : {}),
               }),
           });
         });

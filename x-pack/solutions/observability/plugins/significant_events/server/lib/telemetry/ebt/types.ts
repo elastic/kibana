@@ -135,6 +135,7 @@ interface DetectionScanProps {
   default_bucket_interval: string;
   /** The Kibana space in which the scan ran. */
   space_id: string;
+  workflow_execution_id?: string;
 }
 
 interface KnowledgeIndicatorOnboardingScheduledProps {
@@ -156,6 +157,7 @@ interface AgentToolEventWriteProps extends AlertCreationAttemptIdentityProps {
   error_message?: string;
   /** Tier actually stored. Present only when written is true. */
   severity?: Severity;
+  workflow_execution_id?: string;
 }
 
 interface AgentToolEventSearchProps {

@@ -69,4 +69,15 @@ describe('change point scan route', () => {
     const scannedRuleIds = runChangePointScan.mock.calls.flatMap(([, { ruleIds }]) => ruleIds);
     expect(scannedRuleIds).toEqual(['rule-1']);
   });
+
+  it('threads the requesting workflow execution into the scan telemetry', async () => {
+    const { handlerParams } = setup();
+    handlerParams.params.body.workflowExecutionId = 'detection-exec-1';
+
+    await scanRoute.handler(handlerParams);
+
+    expect(handlerParams.telemetry.trackSignificantEventsDetectionScan).toHaveBeenCalledWith(
+      expect.objectContaining({ space_id: 'default', workflow_execution_id: 'detection-exec-1' })
+    );
+  });
 });

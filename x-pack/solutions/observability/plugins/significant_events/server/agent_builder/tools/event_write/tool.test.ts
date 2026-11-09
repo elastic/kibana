@@ -869,7 +869,14 @@ describe('events_write tool', () => {
 
     await invokeHandler(
       createTool(telemetry) as never,
-      { items: [input, { ...input, event_id: 'event-2' }, newItem, newItem] },
+      {
+        items: [
+          { ...input, workflow_execution_id: 'exec-1' },
+          { ...input, event_id: 'event-2' },
+          newItem,
+          newItem,
+        ],
+      },
       context
     );
 
@@ -879,9 +886,11 @@ describe('events_write tool', () => {
       ...identity,
       fingerprint: 'event-1',
       group_hash: 'hash-1',
+      workflow_execution_id: 'exec-1',
     });
     expect(payloads[1]).toMatchObject({ ...identity, fingerprint: 'event-2' });
     expect(payloads[1]).not.toHaveProperty('group_hash');
+    expect(payloads[1]).not.toHaveProperty('workflow_execution_id');
     expect(payloads[2]).toMatchObject(identity);
     expect(payloads[2]).not.toHaveProperty('fingerprint');
     expect(payloads[2]).not.toHaveProperty('group_hash');

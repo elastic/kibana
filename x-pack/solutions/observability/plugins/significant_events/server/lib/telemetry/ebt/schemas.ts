@@ -514,6 +514,14 @@ const detectionScanSchema: RootSchema<DetectionScanProps> = {
       description: 'The Kibana space in which the scan ran',
     },
   },
+  workflow_execution_id: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'The detection workflow execution that requested the scan; joins the workflow engine events for that execution. Absent when the route was called outside the workflow',
+      optional: true,
+    },
+  },
 };
 
 const onboardingScheduledSchema: RootSchema<KnowledgeIndicatorOnboardingScheduledProps> = {
@@ -647,6 +655,14 @@ const agentToolEventWriteSchema: RootSchema<AgentToolEventWriteProps> = {
     type: 'keyword',
     _meta: {
       description: 'The severity tier actually stored. Present only when written is true.',
+      optional: true,
+    },
+  },
+  workflow_execution_id: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'The workflow execution stored on the written version (`data.workflow_execution_id`), when a workflow wrote it; joins `discovery-completed`, `event-status-changed` and the workflow engine events',
       optional: true,
     },
   },
