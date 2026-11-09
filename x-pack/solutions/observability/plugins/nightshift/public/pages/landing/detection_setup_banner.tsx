@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiBanner } from '@elastic/eui';
+import { EuiBanner, EuiIllustration } from '@elastic/eui';
+import { detection } from '@elastic/eui-illustrations';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../common/ebt_constants';
-import { DetectionLinePreview } from '../../components/ui/detection_line_preview';
 
 const TITLE = i18n.translate('xpack.nightshift.detectionSetupBanner.title', {
   defaultMessage: 'Let Elastic nightshift discover events that require your attention',
@@ -48,7 +48,7 @@ export const DetectionSetupBanner = ({
       headingElement="h3"
       aria-label={TITLE}
       data-test-subj="nightshiftDetectionSetupBanner"
-      media={<DetectionLinePreview data-test-subj="nightshiftDetectionSetupBannerMedia" />}
+      media={<EuiIllustration type={detection} alt="" />}
       actionProps={{
         primary: {
           children: CONFIGURE_LABEL,
