@@ -15,6 +15,7 @@ const PAGE_TRIGGER_TYPE = 'page';
 const PAGE_TRIGGER_ID_MAX_LENGTH = 64;
 const PAGE_TITLE_MAX_LENGTH = 200;
 const PAGE_DESCRIPTION_MAX_LENGTH = 1000;
+export const DEFAULT_PAGE_TRIGGER_ID = 'default';
 
 export const PAGE_TRIGGER_ID_ERROR =
   'Page id must start with a lowercase letter or digit and contain only lowercase letters, digits, "-" and "_"';
@@ -28,12 +29,12 @@ export const MULTIPLE_PAGE_TRIGGERS_ERROR = 'A workflow can define at most one p
 export const PageTriggerSchema = lazySchema(() =>
   z.object({
     type: z.literal(PAGE_TRIGGER_TYPE),
-    /** Stable page id. Room for several pages per workflow later. Treated as `default` when omitted. */
+    /** Stable page id. Room for several pages per workflow later. Parsing sets `default` when omitted. */
     id: z
       .string()
       .max(PAGE_TRIGGER_ID_MAX_LENGTH)
       .regex(/^[a-z0-9][a-z0-9_-]*$/, PAGE_TRIGGER_ID_ERROR)
-      .optional(),
+      .default(DEFAULT_PAGE_TRIGGER_ID),
     title: z.string().trim().min(1).max(PAGE_TITLE_MAX_LENGTH),
     description: z.string().max(PAGE_DESCRIPTION_MAX_LENGTH).optional(),
     inputs: JsonModelSchema.optional(),

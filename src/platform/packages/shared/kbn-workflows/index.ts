@@ -93,6 +93,7 @@ export {
   SCHEDULED_INTERVAL_ERROR,
   SCHEDULED_INTERVAL_PATTERN,
   ManualTriggerSchema,
+  DEFAULT_PAGE_TRIGGER_ID,
   isPageTrigger,
   PageTriggerSchema,
   type PageTrigger,

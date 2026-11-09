@@ -9,6 +9,7 @@
 
 import { getTriggerSchema } from '.';
 import {
+  DEFAULT_PAGE_TRIGGER_ID,
   MULTIPLE_PAGE_TRIGGERS_ERROR,
   PAGE_TRIGGER_ID_ERROR,
   PageTriggerSchema,
@@ -38,6 +39,15 @@ describe('PageTriggerSchema', () => {
     });
 
     expect(result.success).toBe(true);
+  });
+
+  it('sets the default page id when the id is omitted', () => {
+    expect(PageTriggerSchema.parse({ type: 'page', title: 'Page' }).id).toBe(
+      DEFAULT_PAGE_TRIGGER_ID
+    );
+    expect(PageTriggerSchema.parse({ type: 'page', title: 'Page', id: 'intake' }).id).toBe(
+      'intake'
+    );
   });
 
   it('requires a non-empty title', () => {
