@@ -1,5 +1,5 @@
 {
-  "sha1": "327bb88933ad90f488104b4c935e1ed3672fefbb",
+  "sha1": "bac424bcbd91baa3ba0b374464724e0959f02a96",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -80,21 +80,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/application_overview.spec.ts",
-        "line": 25,
-        "column": 7
-      }
-    },
-    {
-      "id": "1d69dfa1eb90431-7dc05b6717354f5",
-      "title": "Digital Experience application overview keeps the EDOT Browser Overview headings in order",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/application_overview.spec.ts",
-        "line": 32,
-        "column": 13
+        "line": 22,
+        "column": 10
       }
     },
     {
@@ -106,8 +93,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/application_overview.spec.ts",
-        "line": 49,
-        "column": 17
+        "line": 27,
+        "column": 22
       }
     },
     {
@@ -119,8 +106,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/application_overview.spec.ts",
-        "line": 58,
-        "column": 14
+        "line": 37,
+        "column": 10
       }
     },
     {
@@ -160,6 +147,90 @@
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/navigation.spec.ts",
         "line": 13,
         "column": 8
+      }
+    },
+    {
+      "id": "f70ca8205fdee5a-ac29dee84c6caa3",
+      "title": "Digital Experience EDOT Browser application shows the pages, browsers and clicks of the EDOT Browser application",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/otel_application_overview.spec.ts",
+        "line": 20,
+        "column": 7
+      }
+    },
+    {
+      "id": "f70ca8205fdee5a-af2f0e14f2bc0dc",
+      "title": "Digital Experience EDOT Browser application shows the top errors on the Overview, linked to the Errors tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/otel_application_overview.spec.ts",
+        "line": 31,
+        "column": 13
+      }
+    },
+    {
+      "id": "f70ca8205fdee5a-7aad8087fe750f1",
+      "title": "Digital Experience EDOT Browser application shows the error groups on the Errors tab, with the stack trace in a flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/otel_application_overview.spec.ts",
+        "line": 40,
+        "column": 11
+      }
+    },
+    {
+      "id": "f70ca8205fdee5a-26e1b9fb8ddd7d4",
+      "title": "Digital Experience EDOT Browser application shows the requests and the render-blocking resources on the Network tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/otel_application_overview.spec.ts",
+        "line": 54,
+        "column": 22
+      }
+    },
+    {
+      "id": "f70ca8205fdee5a-de88655e0af2823",
+      "title": "Digital Experience EDOT Browser application keeps the EDOT Browser Overview headings in order",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/otel_application_overview.spec.ts",
+        "line": 63,
+        "column": 93
+      }
+    },
+    {
+      "id": "f70ca8205fdee5a-6fb90f4d99eb78b",
+      "title": "Digital Experience EDOT Browser application narrows the EDOT Browser Overview by its filters, and keeps them across the tabs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/otel_application_overview.spec.ts",
+        "line": 82,
+        "column": 7
       }
     },
     {

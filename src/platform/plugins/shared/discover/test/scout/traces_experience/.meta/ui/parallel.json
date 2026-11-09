@@ -1,5 +1,5 @@
 {
-  "sha1": "15200c5d20ed29cc69a46982fd7af100f7701394",
+  "sha1": "de85373347d0baf677e56a4217c5bb49de4e1904",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -75,8 +75,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/explore_from_apm.spec.ts",
-        "line": 65,
-        "column": 7
+        "line": 67,
+        "column": 25
       }
     },
     {
@@ -91,8 +91,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/explore_from_apm.spec.ts",
-        "line": 85,
-        "column": 17
+        "line": 84,
+        "column": 29
       }
     },
     {
@@ -107,8 +107,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/explore_from_apm.spec.ts",
-        "line": 128,
-        "column": 17
+        "line": 130,
+        "column": 15
       }
     },
     {
@@ -123,8 +123,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/explore_from_apm.spec.ts",
-        "line": 175,
-        "column": 13
+        "line": 190,
+        "column": 17
       }
     },
     {
@@ -139,8 +139,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/explore_from_apm.spec.ts",
-        "line": 212,
-        "column": 24
+        "line": 221,
+        "column": 17
       }
     },
     {
@@ -155,8 +155,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/explore_from_apm.spec.ts",
-        "line": 236,
-        "column": 40
+        "line": 245,
+        "column": 7
       }
     },
     {
@@ -171,8 +171,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/explore_from_apm.spec.ts",
-        "line": 257,
-        "column": 11
+        "line": 262,
+        "column": 17
       }
     },
     {
@@ -187,8 +187,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/explore_from_apm.spec.ts",
-        "line": 282,
-        "column": 19
+        "line": 287,
+        "column": 33
       }
     },
     {
@@ -203,8 +203,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/explore_from_apm.spec.ts",
-        "line": 326,
-        "column": 35
+        "line": 329,
+        "column": 30
       }
     },
     {

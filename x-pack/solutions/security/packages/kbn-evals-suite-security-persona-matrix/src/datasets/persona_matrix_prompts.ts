@@ -39,6 +39,23 @@ export interface PersonaMatrixExample {
     expectedSkill?: string;
     expectedTools?: string[];
     /**
+     * Connector id that the authored artifact must actually reference, checked
+     * deterministically by the `ConnectorInvoked` evaluator. Calling the
+     * workflow-generation tool is not evidence that the produced workflow
+     * targets the connector the prompt demanded.
+     */
+    expectedConnectorId?: string;
+    /**
+     * Step type (e.g. `http`) that must appear as a YAML key in the authored
+     * workflow, so prose describing a step cannot score as a built one.
+     */
+    expectedStepType?: string;
+    /**
+     * Whether the declared tool sequence is a rankable contract. "probe" is
+     * intentionally open-ended and returns N/A from the trajectory evaluator.
+     */
+    pathContract?: 'rankable' | 'candidate' | 'probe';
+    /**
      * Additional registered skill ids that also satisfy the skill assertion.
      * Scored as a union with `expectedSkill`: loading any one of them passes.
      */
@@ -89,11 +106,16 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'than dismissal, citing entity risk context and any Security Labs research on the technique.',
     },
     metadata: {
+      pathContract: 'probe',
       expectedSkill: 'alert-analysis',
+      // security.entity_risk_score is force-disabled under
+      // agentBuilder:experimentalFeatures (skills), which this suite always
+      // enables; the entity-risk context for point-in-time triage comes from
+      // security.get_entity's profile instead.
       expectedTools: [
         'attachments.read',
         'security.alerts',
-        'security.entity_risk_score',
+        'security.get_entity',
         'security.security_labs_search',
       ],
       severity: 'high',
@@ -118,8 +140,9 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'using entity risk scoring to justify the disposition rather than treating each alert in isolation.',
     },
     metadata: {
+      pathContract: 'probe',
       expectedSkill: 'alert-analysis',
-      expectedTools: ['security.alerts', 'security.entity_risk_score'],
+      expectedTools: ['security.alerts', 'security.get_entity'],
       severity: 'high',
       tags: ['triage', 'host-queue'],
     },
@@ -141,12 +164,9 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'technique/malware family to ground the false-positive-vs-true-positive call in external evidence.',
     },
     metadata: {
+      pathContract: 'probe',
       expectedSkill: 'alert-analysis',
-      expectedTools: [
-        'security.alerts',
-        'security.security_labs_search',
-        'security.entity_risk_score',
-      ],
+      expectedTools: ['security.alerts', 'security.security_labs_search', 'security.get_entity'],
       severity: 'medium',
       tags: ['triage', 'noise'],
     },
@@ -252,8 +272,11 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'summarizes recent risk-contributing activity for srv-win-defend-01.',
     },
     metadata: {
+      pathContract: 'probe',
       expectedSkill: 'entity-analytics',
-      expectedTools: ['security.get_entity', 'security.entity_risk_score'],
+      // Risk data comes from get_entity (see alert-analysis-a); the history tool
+      // is for risk-over-time questions, not this point-in-time profile.
+      expectedTools: ['security.get_entity'],
       severity: 'medium',
       tags: ['entity', 'host-profile'],
     },
@@ -273,6 +296,7 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'entity, then looks up that entity in detail to produce a profile.',
     },
     metadata: {
+      pathContract: 'probe',
       expectedSkill: 'entity-analytics',
       expectedTools: ['security.search_entities', 'security.get_entity'],
       severity: 'medium',
@@ -296,8 +320,9 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'generic answer.',
     },
     metadata: {
+      pathContract: 'probe',
       expectedSkill: 'entity-analytics',
-      expectedTools: ['security.get_entity', 'security.entity_risk_score'],
+      expectedTools: ['security.get_entity', 'security.get_entity_risk_score_history'],
       severity: 'medium',
       tags: ['entity', 'history'],
     },
@@ -333,6 +358,7 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'would carry, narrating each step.',
     },
     metadata: {
+      pathContract: 'probe',
       expectedSkill: 'alert-analysis',
       // No Slack tool is seeded by this suite, so the Slack step is scored through the
       // reference (correctness) rather than expectedTools.
@@ -364,6 +390,7 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'taken.',
     },
     metadata: {
+      pathContract: 'probe',
       expectedSkill: 'alert-analysis',
       allowSkills: ['cases-management'],
       // No Slack tool is seeded by this suite, so the Slack step is scored through the
@@ -395,6 +422,7 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'not escalate.',
     },
     metadata: {
+      pathContract: 'probe',
       expectedSkill: 'alert-analysis',
       allowSkills: ['threat-hunting'],
       // No Slack tool is seeded by this suite; that step is scored through the reference.
@@ -424,6 +452,7 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'load events across hosts, then reports which hosts/processes show the pattern (or that none do).',
     },
     metadata: {
+      pathContract: 'probe',
       expectedSkill: 'threat-hunting',
       expectedTools: ['platform.core.generate_esql', 'platform.core.execute_esql'],
       severity: 'high',
@@ -446,6 +475,7 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'telemetry for the named IOAs, and narrates each query and its result as it builds the picture.',
     },
     metadata: {
+      pathContract: 'probe',
       expectedSkill: 'threat-hunting',
       expectedTools: ['platform.core.generate_esql', 'platform.core.execute_esql'],
       severity: 'high',
@@ -469,6 +499,7 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'a specific IOC upfront.',
     },
     metadata: {
+      pathContract: 'probe',
       expectedSkill: 'threat-hunting',
       expectedTools: ['platform.core.generate_esql', 'platform.core.execute_esql'],
       severity: 'medium',
@@ -490,13 +521,16 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
     },
     output: {
       reference:
-        'Calls the generate-workflow tool with a natural-language description of the manual trigger, ' +
-        "'message' input, and http step targeting the given Slack connector ID, then validates and renders " +
-        'the resulting workflow attachment — it does not hand-write the YAML directly.',
+        'Shows the complete workflow YAML to the user: version "1", a manual trigger, a \'message\' input, ' +
+        'and a single http step on connector d7306385-cbe6-4541-9726-49afdff59ba5 that sends POST ' +
+        "/chat.postMessage to channel '#general' with the message text taken from the 'message' input. " +
+        'The workflow passes validation (validate_workflow reports it valid).',
     },
     metadata: {
       expectedSkill: 'workflow-authoring',
       expectedTools: ['platform.core.generate_workflow', 'platform.workflows.validate_workflow'],
+      expectedConnectorId: 'd7306385-cbe6-4541-9726-49afdff59ba5',
+      expectedStepType: 'http',
       severity: 'medium',
       tags: ['workflow', 'authoring'],
     },
@@ -516,14 +550,19 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
     },
     output: {
       reference:
-        'Calls generate-workflow with the fixed message text and target Slack channel described in natural ' +
-        'language, and validates the resulting workflow before rendering it inline.',
+        'Shows the complete workflow YAML to the user: version "1", an enabled workflow with a manual trigger ' +
+        'and a single http step on connector d7306385-cbe6-4541-9726-49afdff59ba5 ' +
+        "that sends POST /chat.postMessage to channel '#general' with the fixed text " +
+        "'Chrysalis hunt complete - see case for details'. The workflow passes validation " +
+        '(validate_workflow reports it valid).',
     },
     metadata: {
       // No expectedSkill: the prompt does not ask for the skill, and
       // `workflow-authoring` documents that it is NOT required for creating or
       // editing a workflow — call `platform.core.generate_workflow` directly.
       expectedTools: ['platform.core.generate_workflow', 'platform.workflows.validate_workflow'],
+      expectedConnectorId: 'd7306385-cbe6-4541-9726-49afdff59ba5',
+      expectedStepType: 'http',
       severity: 'low',
       tags: ['workflow', 'authoring-fixed'],
     },
@@ -542,13 +581,17 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
     },
     output: {
       reference:
-        "Calls generate-workflow with the manual trigger, 'summary' string input, and http step against the " +
-        'given connector ID described in natural language, then validates and renders the workflow.',
+        'Shows the final workflow YAML to the user: version "1", a manual trigger, a \'summary\' string input, ' +
+        'and a single http step on connector d7306385-cbe6-4541-9726-49afdff59ba5 that sends POST ' +
+        "/chat.postMessage to channel '#general' with the message text taken from the 'summary' input. " +
+        'The workflow passes validation (validate_workflow reports it valid).',
     },
     metadata: {
       // No expectedSkill: see `workflow-authoring-b` — the prompt does not ask
       // for the skill and generate_workflow is the documented direct path.
       expectedTools: ['platform.core.generate_workflow', 'platform.workflows.validate_workflow'],
+      expectedConnectorId: 'd7306385-cbe6-4541-9726-49afdff59ba5',
+      expectedStepType: 'http',
       severity: 'medium',
       tags: ['workflow', 'authoring-parameterized'],
     },

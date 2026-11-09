@@ -11,6 +11,7 @@ import {
   MAX_ID_LENGTH,
   MAX_TEXT_LENGTH,
   MAX_TITLE_LENGTH,
+  SIGNIFICANT_EVENTS_ALERT_SOURCE,
 } from '@kbn/significant-events-schema';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
@@ -270,6 +271,17 @@ export const triggerInvestigationStepDefinition = (
               getEpisodeLookup,
             })
           : undefined;
+      const alertTitle = alerts?.flatMap((snapshot) => {
+        const dataTitle =
+          snapshot.alert_version === 'v2' && snapshot.source === SIGNIFICANT_EVENTS_ALERT_SOURCE
+            ? snapshot.data?.title
+            : undefined;
+        return typeof dataTitle === 'string' && dataTitle.length > 0
+          ? dataTitle.slice(0, MAX_TITLE_LENGTH)
+          : [];
+      })[0];
+      const title =
+        input.title && input.title !== subjectId ? input.title : alertTitle ?? input.title;
       try {
         const result = await client.start(
           {
@@ -278,7 +290,7 @@ export const triggerInvestigationStepDefinition = (
               id: subjectId,
               summary: input.summary,
             },
-            title: input.title,
+            title,
             trigger_type: input.trigger_type ?? 'automatic',
             message: input.message,
             instructions:
@@ -317,17 +329,19 @@ export const triggerInvestigationStepDefinition = (
         }
         if (error instanceof InvestigationQuotaDeniedError) {
           context.logger.info(
-            `Skipped investigation of ${input.subject_type}/${subjectId}: global investigation limit reached`
+            `Skipped investigation of ${input.subject_type}/${subjectId}: ${error.message}`
           );
           if (input.slack_thread) {
             await notifyInvestigationQuotaReached({
               getSoClient: () => getAutomationsSoClient(request, spaceId),
               getActions,
+              deniedBy: error.deniedBy,
               request,
               spaceId,
               slackThread: input.slack_thread,
               settingsLocator,
               kibanaUrl,
+              limit: error.limit,
               signal: context.abortSignal,
               logger: context.logger,
             });

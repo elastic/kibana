@@ -22,6 +22,7 @@ import {
   ConversationRoundStatus,
   ConversationOriginType,
   EventActorType,
+  LEGACY_TODOS_STEP_TYPE,
   MIN_EVENTS_NATIVE_SCHEMA_VERSION,
   TimelineEventType,
   ToolOrigin,
@@ -795,6 +796,121 @@ describe('conversation model converters', () => {
       expect(deserialized.schema_version).toBeUndefined();
       // Derived from rounds, not the orphan stored event.
       expect(deserialized.events?.[0]?.id).toBe('round-1::user_message');
+    });
+
+    describe('legacy todo steps', () => {
+      const reasoning = { type: ConversationRoundStepType.reasoning, reasoning: 'thinking' };
+      /** A step persisted by the removed todo tool, as found in documents stored before its removal. */
+      const legacyTodos = {
+        type: LEGACY_TODOS_STEP_TYPE,
+        todos: [{ content: 'x', status: 'pending' }],
+      };
+      const stepTypes = (steps: Array<{ type: string }> | undefined) =>
+        (steps ?? []).map((step) => step.type);
+
+      const withLegacyRounds = (document: ConversationDocument): ConversationDocument => {
+        document._source!.conversation_rounds[0].steps = [
+          legacyTodos,
+          reasoning,
+          legacyTodos,
+        ] as never;
+        return document;
+      };
+
+      it('drops them from the rounds of a rounds-only document and from the events derived from it', () => {
+        const deserialized = fromEs(withLegacyRounds(documentBase()), requestingUser);
+
+        expect(stepTypes(deserialized.rounds[0].steps)).toEqual([
+          ConversationRoundStepType.reasoning,
+        ]);
+        const stepEvents = (deserialized.events ?? []).filter(
+          (event) => event.type === TimelineEventType.executionStep
+        );
+        expect(
+          stepEvents.map((event) => (event as { data: { step: { type: string } } }).data.step.type)
+        ).toEqual([ConversationRoundStepType.reasoning]);
+      });
+
+      it('drops them from the step events and terminal snapshots of an events-native document', () => {
+        const serialized = withLegacyRounds(documentBase());
+        const agent = { type: EventActorType.agent, id: 'agent_id' };
+        serialized._source!.schema_version = CONVERSATION_SCHEMA_VERSION;
+        serialized._source!.events = [
+          {
+            id: 'round-1::user_message',
+            type: TimelineEventType.userMessage,
+            created_at: roundCreationDate,
+            actor: { type: EventActorType.user, id: 'user_id' },
+            data: { message: 'some message' },
+          },
+          {
+            id: 'round-1::execution_started',
+            type: TimelineEventType.executionStarted,
+            created_at: roundCreationDate,
+            actor: agent,
+            execution_id: 'round-1::execution',
+            trigger_event_id: 'round-1::user_message',
+            data: { trigger_type: 'user_message' },
+          },
+          {
+            id: 'round-1::execution_step::0',
+            type: TimelineEventType.executionStep,
+            created_at: roundCreationDate,
+            actor: agent,
+            execution_id: 'round-1::execution',
+            trigger_event_id: 'round-1::user_message',
+            data: { step: legacyTodos, sequence: 0 },
+          },
+          {
+            id: 'round-1::execution_step::1',
+            type: TimelineEventType.executionStep,
+            created_at: roundCreationDate,
+            actor: agent,
+            execution_id: 'round-1::execution',
+            trigger_event_id: 'round-1::user_message',
+            data: { step: reasoning, sequence: 1 },
+          },
+          {
+            id: 'round-1::execution_terminated',
+            type: TimelineEventType.executionTerminated,
+            created_at: roundCreationDate,
+            actor: agent,
+            execution_id: 'round-1::execution',
+            trigger_event_id: 'round-1::user_message',
+            data: {
+              steps: [legacyTodos, reasoning],
+              model_usage: {
+                connector_id: 'unknown',
+                llm_calls: 1,
+                input_tokens: 1,
+                output_tokens: 1,
+              },
+              time_to_first_token: 1,
+              time_to_last_token: 2,
+              outcome: { type: 'responded', response: { message: 'some response' } },
+            },
+          },
+        ] as unknown as ConversationEvent[];
+
+        const deserialized = fromEs(serialized, requestingUser);
+        const events = (deserialized.events ?? []) as TimelineEvent[];
+
+        expect(events.map((event) => event.id)).toEqual([
+          'round-1::user_message',
+          'round-1::execution_started',
+          'round-1::execution_step::1',
+          'round-1::execution_terminated',
+        ]);
+        const terminated = events.at(-1) as { data: { steps: Array<{ type: string }> } };
+        expect(stepTypes(terminated.data.steps)).toEqual([ConversationRoundStepType.reasoning]);
+        expect(stepTypes(deserialized.rounds[0].steps)).toEqual([
+          ConversationRoundStepType.reasoning,
+        ]);
+        // readers above the converter fold clean events
+        expect(stepTypes(eventsToRounds(events)[0].steps)).toEqual([
+          ConversationRoundStepType.reasoning,
+        ]);
+      });
     });
   });
 
