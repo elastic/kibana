@@ -45,6 +45,7 @@
     "@kbn/ingest-pipelines-shared",
     "@kbn/licensing-types",
     "@kbn/core-chrome-layout-constants",
+    "@kbn/core-chrome-browser-hooks",
     "@kbn/code-editor-mock",
     "@kbn/scout",
     "@kbn/ui-callout"

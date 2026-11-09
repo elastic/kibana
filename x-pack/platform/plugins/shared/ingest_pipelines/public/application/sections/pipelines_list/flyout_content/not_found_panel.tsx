@@ -8,7 +8,7 @@
 import type { FunctionComponent } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCode, useGeneratedHtmlId, EuiSpacer, EuiSplitPanel } from '@elastic/eui';
+import { EuiCode, useGeneratedHtmlId, EuiSpacer, EuiPanel } from '@elastic/eui';
 import { KbnWarningCallout, KbnDangerCallout } from '@kbn/ui-callout';
 import { EuiTitle } from '@elastic/eui';
 import type { Error } from '../../../../shared_imports';
@@ -81,7 +81,12 @@ export const NotFoundPanel: FunctionComponent<Props> = ({
   const pipelineErrorTitleId = useGeneratedHtmlId();
 
   return (
-    <EuiSplitPanel.Inner data-test-subj="pipelineErrorFlyout">
+    <EuiPanel
+      color="transparent"
+      hasBorder={false}
+      borderRadius="none"
+      data-test-subj="pipelineErrorFlyout"
+    >
       {pipelineName && (
         <EuiTitle id="notFoundFlyoutTitle" data-test-subj="title">
           <h2 id={pipelineErrorTitleId}>{pipelineName}</h2>
@@ -91,6 +96,6 @@ export const NotFoundPanel: FunctionComponent<Props> = ({
       <EuiSpacer size="l" />
 
       {renderErrorCallOut()}
-    </EuiSplitPanel.Inner>
+    </EuiPanel>
   );
 };

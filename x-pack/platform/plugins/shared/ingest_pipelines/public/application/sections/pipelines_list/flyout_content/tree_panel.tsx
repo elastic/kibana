@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiSplitPanel, EuiTitle, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiPanel, EuiSpacer, EuiTitle, EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { PipelineTreeNode } from '@kbn/ingest-pipelines-shared';
 import { PipelineStructureTree } from '@kbn/ingest-pipelines-shared';
@@ -39,8 +39,11 @@ export const TreePanel = React.memo(
     }, [setTreeRootStack]);
 
     return (
-      <EuiSplitPanel.Inner
+      <EuiPanel
         color="subdued"
+        hasBorder={false}
+        hasShadow={false}
+        borderRadius="none"
         data-test-subj="pipelineTreePanel"
         style={{
           overflowY: 'auto',
@@ -77,7 +80,7 @@ export const TreePanel = React.memo(
           clickMorePipelines={(name: string) => pushTreeStack(name)}
           goBack={popTreeStack}
         />
-      </EuiSplitPanel.Inner>
+      </EuiPanel>
     );
   }
 );

@@ -7,7 +7,8 @@
 import type { FunctionComponent } from 'react';
 import React, { useState, useEffect } from 'react';
 
-import { EuiFlyout, EuiSplitPanel, useIsWithinBreakpoints } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlyout, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
+import { useChromeStyle } from '@kbn/core-chrome-browser-hooks';
 import { DetailsPanel, TreePanel, NotFoundPanel } from './flyout_content';
 import type { Pipeline } from '../../../../common/types';
 import { useKibana } from '../../../shared_imports';
@@ -48,6 +49,8 @@ export const PipelineFlyout: FunctionComponent<Props> = ({
   const { data: pipeline, isLoading, error } = api.useLoadPipeline(pipelineName);
   const { data: treeData } = api.useLoadPipelineTree(treeRootStack.at(-1) ?? '');
 
+  const { euiTheme } = useEuiTheme();
+  const isClassicChrome = useChromeStyle() === 'classic';
   const isResponsiveFlyout = useIsWithinBreakpoints(['xs', 's', 'm']);
   const [responsiveFlyoutContent, setResponsiveFlyoutContent] = useState<
     typeof DETAILS_VIEW | typeof TREE_VIEW
@@ -66,12 +69,17 @@ export const PipelineFlyout: FunctionComponent<Props> = ({
       size={isResponsiveFlyout ? 'm' : 'l'}
       maxWidth={pipelineTree && !isResponsiveFlyout ? 1000 : 460}
     >
-      <EuiSplitPanel.Outer
-        direction="row"
-        grow={true}
+      {/* POC: flex layout instead of EuiSplitPanel so no panel corners/borders sit inside the flyout's;
+          the radius clips the subdued tree/footer to the inset flyout's corners in project chrome. */}
+      <EuiFlexGroup
+        gutterSize="none"
         responsive={false}
-        borderRadius="none"
-        hasShadow={false}
+        css={{
+          flexGrow: 1,
+          minBlockSize: 0,
+          overflow: 'hidden',
+          borderRadius: isClassicChrome ? undefined : euiTheme.border.radius.control,
+        }}
       >
         {pipelineTree && (!isResponsiveFlyout || responsiveFlyoutContent === TREE_VIEW) && (
           <TreePanel
@@ -112,7 +120,7 @@ export const PipelineFlyout: FunctionComponent<Props> = ({
               />
             )
           ))}
-      </EuiSplitPanel.Outer>
+      </EuiFlexGroup>
     </EuiFlyout>
   );
 };
