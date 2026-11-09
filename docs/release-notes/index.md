@@ -532,7 +532,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Prevent creating two ad hoc data views with the same custom ID. **Use without saving** is now disabled when you enter a custom data view ID [#292738]({{kib-pull}}292738).
 * Fix the Discover field list showing stale field type icons after an index is recreated with a different mapping type for an existing field [#301198]({{kib-pull}}301198).
 * Fix being unable to exit inline editing of a Discover panel on a dashboard when the panel has a search error, because the **Discard** button didn't appear [#289918]({{kib-pull}}289918).
-* Fix {{esql}} controls that you create while you edit a Discover session panel from the library not appearing on the dashboard when you select **Save and return**. The panel's query then referred to a variable that the dashboard didn't have [#301047]({{kib-pull}}301047).
+* Fix {{esql}} controls that you add while editing a Discover panel not appearing on the dashboard after you select **Save and return** [#301047]({{kib-pull}}301047).
 * Hide filter buttons in the data table for values that {{es}} ignored because they exceed `ignore_above`, since a filter on them can't match a document [#287807]({{kib-pull}}287807).
 * Fix search highlighting showing stray `@kibana-highlighted-field@` tag text when you search a multi-value field for a term such as `field` or `kibana` [#283345]({{kib-pull}}283345).
 * Keep focus on a field when you pin or unpin it in the document viewer **Table** tab, so focus follows the field to its new position [#220097]({{kib-pull}}220097).
