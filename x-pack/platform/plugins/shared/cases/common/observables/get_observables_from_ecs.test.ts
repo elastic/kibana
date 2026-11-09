@@ -210,4 +210,53 @@ describe('getObservablesFromEcsDataArray', () => {
       },
     ]);
   });
+
+  it('should split IPv4 and IPv6 values of one path into their own types, in value order', () => {
+    expect(
+      getObservablesFromEcs([
+        [
+          { field: 'source.ip', value: ['2001:db8::1', '10.0.0.1'] },
+          { field: 'destination.ip', value: ['10.0.0.2'] },
+        ],
+      ])
+    ).toEqual([
+      {
+        typeKey: 'observable-type-ipv6',
+        value: '2001:db8::1',
+        description: 'Auto extracted observable',
+      },
+      {
+        typeKey: 'observable-type-ipv4',
+        value: '10.0.0.1',
+        description: 'Auto extracted observable',
+      },
+      {
+        typeKey: 'observable-type-ipv4',
+        value: '10.0.0.2',
+        description: 'Auto extracted observable',
+      },
+    ]);
+  });
+
+  it('should skip empty values on every path', () => {
+    expect(
+      getObservablesFromEcs([
+        [
+          { field: 'host.name', value: [''] },
+          { field: 'file.path', value: ['', 'path1'] },
+          { field: 'agent.id', value: [''] },
+        ],
+      ])
+    ).toEqual([
+      {
+        typeKey: 'observable-type-file-path',
+        value: 'path1',
+        description: 'Auto extracted observable',
+      },
+    ]);
+  });
+
+  it('should ignore fields that no default type reads', () => {
+    expect(getObservablesFromEcs([[{ field: 'user.name', value: ['alice'] }]])).toEqual([]);
+  });
 });
