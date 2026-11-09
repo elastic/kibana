@@ -26,6 +26,7 @@ import {
 } from '../common';
 import type { QueryArgs, Row, SortDir, SortValue, TimeRange } from '../common';
 import { runEsqlQuery } from '../../queries/run_esql_query';
+import type { EsqlContext } from '../../queries/run_esql_query';
 import type { EsqlRunner } from './types';
 
 export const getEntityAlias = (namespace: string) => getEntitiesAlias(ENTITY_LATEST, namespace);
@@ -206,12 +207,12 @@ const toRows = ({ columns, values }: Pick<ESQLSearchResponse, 'columns' | 'value
 export const createEsqlRunner =
   (
     searchService: DataPublicPluginStart['search'],
-    contextId: string,
+    context: EsqlContext,
     signal?: AbortSignal
   ): EsqlRunner =>
   async (steps) => {
     const query = steps.join('\n');
-    const rawResponse = await runEsqlQuery(searchService, query, contextId, signal);
+    const rawResponse = await runEsqlQuery(searchService, query, context, signal);
     return toRows(rawResponse);
   };
 

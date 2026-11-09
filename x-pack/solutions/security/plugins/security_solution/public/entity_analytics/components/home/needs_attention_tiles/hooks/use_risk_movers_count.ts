@@ -66,7 +66,12 @@ export const useRiskMoversCount = ({
     async ({ signal }) => {
       if (!query) return { count: 0, entityIds: [] };
       const response = await runWithTileTimeout(signal, (tileSignal) =>
-        runEsqlQuery(data.search, query, 'needs_attention_tile_risk_movers_count', tileSignal)
+        runEsqlQuery(
+          data.search,
+          query,
+          { id: 'needs_attention_tile_risk_movers_count', meta: { timeRange } },
+          tileSignal
+        )
       );
       const row = response.values?.[0];
       const valueIndex = response.columns?.findIndex((c) => c.name === 'value') ?? 0;

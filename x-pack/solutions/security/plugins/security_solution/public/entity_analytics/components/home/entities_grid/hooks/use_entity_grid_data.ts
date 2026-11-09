@@ -123,7 +123,19 @@ const fetchRows = async (
   if (!fetchSortPage) throw new Error(`Column ${options.sortField} is not sortable`);
   const args = getQueryArgs(context, options);
   const rowsWithLookahead = await fetchSortPage(args, {
-    runQuery: createEsqlRunner(context.searchService, 'entities_grid_rows', signal),
+    runQuery: createEsqlRunner(
+      context.searchService,
+      {
+        id: 'entities_grid_rows',
+        meta: {
+          rowsMode: options.rowsMode,
+          sortField: options.sortField,
+          sortDirection: options.sortDirection,
+          timeRange: options.timeRange,
+        },
+      },
+      signal
+    ),
   });
   return {
     rows: rowsWithLookahead.slice(0, args.pageSize),

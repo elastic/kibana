@@ -69,7 +69,7 @@ export const useNewlyHighCriticalCount = ({
         runEsqlQuery(
           data.search,
           query,
-          'needs_attention_tile_newly_high_critical_count',
+          { id: 'needs_attention_tile_newly_high_critical_count', meta: { timeRange } },
           tileSignal
         )
       );
