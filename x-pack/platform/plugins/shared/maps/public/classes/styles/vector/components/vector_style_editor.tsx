@@ -486,7 +486,6 @@ export class VectorStyleEditor extends Component<Props, State> {
       <Fragment>
         <VectorStyleSymbolizeAsEditor
           disabled={!hasMarkerOrIcon}
-          disabledBy={VECTOR_STYLES.ICON_SIZE}
           styleProperty={
             this.props.styleProperties[
               VECTOR_STYLES.SYMBOLIZE_AS

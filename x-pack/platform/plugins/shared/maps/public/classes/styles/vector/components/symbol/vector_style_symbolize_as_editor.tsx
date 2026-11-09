@@ -18,7 +18,6 @@ import type { IStyleProperty } from '../../properties/style_property';
 
 interface Props {
   disabled?: boolean;
-  disabledBy?: VECTOR_STYLES;
   styleProperty: IStyleProperty<SymbolizeAsOptions>;
   handlePropertyChange: (propertyName: VECTOR_STYLES, stylePropertyDescriptor: unknown) => void;
 }
@@ -40,7 +39,6 @@ const SYMBOLIZE_AS_OPTIONS = [
 
 export function VectorStyleSymbolizeAsEditor({
   disabled,
-  disabledBy,
   styleProperty,
   handlePropertyChange,
 }: Props) {
@@ -81,6 +79,8 @@ export function VectorStyleSymbolizeAsEditor({
   }
 
   return (
-    <DisabledToolTip content={getDisabledByMessage(disabledBy!)}>{symbolizeAsForm}</DisabledToolTip>
+    <DisabledToolTip content={getDisabledByMessage(VECTOR_STYLES.ICON_SIZE)}>
+      {symbolizeAsForm}
+    </DisabledToolTip>
   );
 }
