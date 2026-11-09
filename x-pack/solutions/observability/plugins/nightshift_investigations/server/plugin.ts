@@ -383,13 +383,14 @@ export class NightshiftInvestigationsPlugin
               if (!sandboxStart) return undefined;
               // The same per-request check the investigator's sandbox tools pass: a user who may
               // not use the sandbox must not have its files read on their behalf either.
+              const spaceId = this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
               const access = await checkSandboxAccess({
                 request,
+                spaceId,
                 featureFlags: this.featureFlags,
                 security: this.securityStart,
               });
               if (access.status !== 'available') return undefined;
-              const spaceId = this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
               const redactor = await getRecorderOutputRedactor({
                 request,
                 allowedConnectorIds,
