@@ -333,26 +333,20 @@ describe('triage match decisions step', () => {
     );
   });
 
-  it('does nothing when the kill switch is off, without any read', async () => {
+  it.each([
+    ['the kill switch is off', { mode: 'off' as const }, 'off'],
+    ['the Context Engine is off in the space', { enabled: false }, 'disabled'],
+  ])('does nothing, without any read, when %s', async (_name, settings, status) => {
     const { run, callKibanaApi, mget } = setup({
       alerts: [['a', source('C:\\x.exe')]],
-      mode: 'off',
+      ...settings,
     });
 
     const { output } = await run();
 
-    expect(output).toEqual(expect.objectContaining({ status: 'off' }));
+    expect(output).toEqual(expect.objectContaining({ status }));
     expect(callKibanaApi).not.toHaveBeenCalled();
     expect(mget).not.toHaveBeenCalled();
-  });
-
-  it('does nothing while the Context Engine is off in the space', async () => {
-    const { run, callKibanaApi } = setup({ alerts: [['a', source('C:\\x.exe')]], enabled: false });
-
-    const { output } = await run();
-
-    expect(output).toEqual(expect.objectContaining({ status: 'disabled' }));
-    expect(callKibanaApi).not.toHaveBeenCalled();
   });
 
   it('treats a missing decisions index as no decisions, not as a failure', async () => {
