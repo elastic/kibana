@@ -10,6 +10,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { isEmpty, pickBy } from 'lodash';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { i18n } from '@kbn/i18n';
 import { getFieldDefinition } from '@kbn/management-settings-field-definition';
 import type {
   FieldDefinition,
@@ -184,7 +185,14 @@ export const useEditableSettings = ({
       if (updateErrors.length > 0) {
         failureMessages.push(...updateErrors.map(({ message }) => message));
       } else {
-        failureMessages.push(...unconfirmedIds.map((id) => `Unable to save "${id}"`));
+        failureMessages.push(
+          ...unconfirmedIds.map((id) =>
+            i18n.translate('management.settings.hooks.saveFailed', {
+              defaultMessage: 'Unable to save "{name}"',
+              values: { name: fields[id]?.name ?? id },
+            })
+          )
+        );
       }
     }
     if (failureMessages.length > 0) {

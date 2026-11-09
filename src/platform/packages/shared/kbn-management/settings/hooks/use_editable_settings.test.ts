@@ -283,6 +283,22 @@ describe('useEditableSettings', () => {
     });
   });
 
+  it('names the settings that failed to save when the client reports no error', async () => {
+    const { result, settingsClient } = setup();
+    settingsClient.set.mockResolvedValue(false);
+
+    act(() => {
+      result.current.handleFieldChange(STRING_SETTING, { type: 'string', unsavedValue: 'a' });
+      result.current.handleFieldChange(RELOAD_SETTING, { type: 'boolean', unsavedValue: true });
+    });
+
+    await act(async () => {
+      await expect(result.current.saveAll()).rejects.toThrow(
+        new Error('Unable to save "String setting"; Unable to save "Reload setting"')
+      );
+    });
+  });
+
   it('keeps failed changes unsaved and clears the ones that saved', async () => {
     const { result, settingsClient, updateErrors$ } = setup();
     settingsClient.set.mockImplementation(async (key: string) => {
