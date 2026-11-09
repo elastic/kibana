@@ -771,6 +771,40 @@ export const canEditPipelineRoutes = (unit: Unit, pipelineId: string): boolean =
 };
 
 /**
+ * Drops the rule targets of a routing pipeline that no longer share a signal
+ * with what the rule carries, then does the same for the routing pipelines it
+ * delegates to, whose incoming signals narrow with it. A rule left without
+ * targets stays, unconnected, so it can be wired again.
+ */
+const withoutUnfitRuleTargets = (unit: Unit, pipelineId: string): Unit =>
+  [...delegatedFrom(unit.unit.pipelines, [pipelineId])].reduce((current, id) => {
+    const pipelineIndex = findPipelineIndex(current, id);
+    const pipeline = current.unit.pipelines[pipelineIndex];
+    if (!pipeline || !pipelineUsesRoutes(pipeline.config) || hasScopedWiring(pipeline.config)) {
+      return current;
+    }
+    let fitted: UnitPipeline = pipeline;
+    readRoutes(pipeline.config).forEach((route, ruleIndex) => {
+      const targets = routeTargets(route);
+      const kept = targets.filter(
+        (target) =>
+          intersectSignals(
+            routeFit(current, pipeline, ruleIndex, target),
+            pipeline.supported_telemetry
+          ).length > 0
+      );
+      const config =
+        kept.length < targets.length ? withRuleTargets(fitted, ruleIndex, kept) : undefined;
+      if (config) {
+        fitted = { ...fitted, config };
+      }
+    });
+    return fitted === pipeline
+      ? current
+      : replacePipelineConfig(current, pipelineIndex, fitted.config);
+  }, unit);
+
+/**
  * Replaces the rules of a routing node. A routed child pipeline with a plain
  * destinations list is turned into routes. Returns `unit` unchanged when the
  * pipeline is missing or scoped, or `routes` is empty.
@@ -786,11 +820,14 @@ export const writePipelineRoutes = (
   if (!pipeline || hasScopedWiring(pipeline.config) || routes.length === 0) {
     return unit;
   }
-  return writePipeline(
-    unit,
-    pipelineIndex,
-    withRoutes(withIdentifiers(pipeline.config, PIPELINE_ENTRY.destinations, []), routes),
-    supportedTelemetry
+  return withoutUnfitRuleTargets(
+    writePipeline(
+      unit,
+      pipelineIndex,
+      withRoutes(withIdentifiers(pipeline.config, PIPELINE_ENTRY.destinations, []), routes),
+      supportedTelemetry
+    ),
+    pipelineId
   );
 };
 
@@ -1609,11 +1646,14 @@ const routePipelineLine = (
   ) {
     return unit;
   }
-  return writePipeline(
-    routable,
-    pipelineIndex,
-    withRoutes(withIdentifiers(pipeline.config, PIPELINE_ENTRY.destinations, []), routes),
-    supportedTelemetry
+  return withoutUnfitRuleTargets(
+    writePipeline(
+      routable,
+      pipelineIndex,
+      withRoutes(withIdentifiers(pipeline.config, PIPELINE_ENTRY.destinations, []), routes),
+      supportedTelemetry
+    ),
+    pipeline.id
   );
 };
 
@@ -1668,7 +1708,7 @@ const routeRuleLine = (
       config: [{ name: PIPELINE_ENTRY.routes, value: [...routes] }],
     },
   ]);
-  return writePipeline(withChild, pipelineIndex, config);
+  return withoutUnfitRuleTargets(writePipeline(withChild, pipelineIndex, config), childId);
 };
 
 /**

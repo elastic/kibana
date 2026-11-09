@@ -2066,6 +2066,84 @@ describe('routing signals', () => {
 });
 
 describe('writePipelineRoutes', () => {
+  const mixedUnit = (): Unit => {
+    const unit = unitWith([
+      {
+        id: 'main',
+        supported_telemetry: ['logs', 'traces'],
+        config: [
+          { name: 'sources', value: ['otlp-input'] },
+          {
+            name: 'routes',
+            value: [
+              { when: 'resource.attributes["team"] == "a"', pipelines: ['child'] },
+              { destinations: ['es-logs', 'es-traces'] },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'child',
+        supported_telemetry: ['logs', 'traces'],
+        config: [{ name: 'routes', value: [{ destinations: ['es-logs', 'es-traces'] }] }],
+      },
+    ]);
+    unit.unit.sources = [
+      { id: 'otlp-input', name: 'OTLP', type: 'otlp', supported_telemetry: ['logs', 'traces'] },
+    ];
+    unit.unit.destinations = [
+      { id: 'es-logs', type: 'elasticsearch', supported_telemetry: ['logs'] },
+      { id: 'es-traces', type: 'elasticsearch', supported_telemetry: ['traces'] },
+    ];
+    return unit;
+  };
+
+  it('drops the targets a rule no longer carries any signal for', () => {
+    const next = writePipelineRoutes(
+      mixedUnit(),
+      'main',
+      [
+        { when: 'resource.attributes["team"] == "a"', pipelines: ['child'] },
+        { telemetry: ['logs'], destinations: ['es-logs', 'es-traces'] },
+      ],
+      ['logs', 'traces']
+    );
+    expect(getPipelineRoutes(next, 'main')[1]).toEqual({
+      telemetry: ['logs'],
+      destinations: ['es-logs'],
+    });
+  });
+
+  it('drops targets once the routing node no longer handles their signals, down to its children', () => {
+    const next = writePipelineRoutes(
+      mixedUnit(),
+      'main',
+      [
+        { when: 'resource.attributes["team"] == "a"', pipelines: ['child'] },
+        { destinations: ['es-logs', 'es-traces'] },
+      ],
+      ['logs']
+    );
+    expect(getPipelineRoutes(next, 'main')[1]).toEqual({ destinations: ['es-logs'] });
+    expect(getPipelineRoutes(next, 'child')).toEqual([{ destinations: ['es-logs'] }]);
+  });
+
+  it('keeps a rule whose targets all stop fitting, without targets', () => {
+    const next = writePipelineRoutes(
+      mixedUnit(),
+      'main',
+      [
+        { when: 'resource.attributes["team"] == "a"', pipelines: ['child'] },
+        { telemetry: ['traces'], destinations: ['es-logs'] },
+      ],
+      ['logs', 'traces']
+    );
+    expect(getPipelineRoutes(next, 'main')[1]).toEqual({
+      telemetry: ['traces'],
+      destinations: [],
+    });
+  });
+
   it('replaces the rules of a routing node and reads them back', () => {
     const unit = routeLine(
       processedUnit(['es-logs']),
