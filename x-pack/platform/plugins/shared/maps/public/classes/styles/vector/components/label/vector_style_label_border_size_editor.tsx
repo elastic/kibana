@@ -9,8 +9,8 @@ import type { ChangeEvent } from 'react';
 import React from 'react';
 
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
-import { getVectorStyleLabel, getDisabledByMessage } from '../get_vector_style_label';
 import { i18n } from '@kbn/i18n';
+import { getVectorStyleLabel, getDisabledByMessage } from '../get_vector_style_label';
 import { LABEL_BORDER_SIZES, VECTOR_STYLES } from '../../../../../../common/constants';
 import { DisabledToolTip } from '../../disabled_tooltip';
 import type { LabelBorderSizeOptions } from '../../../../../../common/descriptor_types';

@@ -7,8 +7,8 @@
 
 import type { ReactElement } from 'react';
 import React from 'react';
-import { DEFAULT_ICON, ICON_SOURCE } from '../../../../../../common/constants';
 import { i18n } from '@kbn/i18n';
+import { DEFAULT_ICON, ICON_SOURCE } from '../../../../../../common/constants';
 import { OTHER_CATEGORY_LABEL } from '../../style_util';
 import {
   EuiButtonIcon,

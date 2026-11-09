@@ -7,8 +7,8 @@
 
 import type { ReactNode } from 'react';
 import React from 'react';
-import { FieldSelect } from '../field_select';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { FieldSelect } from '../field_select';
 import type { VECTOR_STYLES } from '../../../../../../common/constants';
 import type { OrientationDynamicOptions } from '../../../../../../common/descriptor_types';
 import type { StyleField } from '../../style_fields_helper';

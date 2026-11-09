@@ -16,6 +16,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { ColorStopsOrdinal } from './color_stops_ordinal';
 import { COLOR_MAP_TYPE } from '../../../../../../common/constants';
 import type {
@@ -26,7 +27,6 @@ import type { DynamicColorProperty } from '../../properties/dynamic_color_proper
 import type { ColorStop } from '../../../../../../common/descriptor_types';
 import { ColorStopsCategorical } from './color_stops_categorical';
 import { CATEGORICAL_COLOR_PALETTES, NUMERICAL_COLOR_PALETTES } from '../../../color_palettes';
-import { i18n } from '@kbn/i18n';
 
 const CUSTOM_COLOR_MAP = 'CUSTOM_COLOR_MAP';
 

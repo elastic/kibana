@@ -7,8 +7,8 @@
 
 import type { ReactNode } from 'react';
 import React from 'react';
-import { ValidatedRange } from '../../../../../components/validated_range';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { ValidatedRange } from '../../../../../components/validated_range';
 import type { VECTOR_STYLES } from '../../../../../../common/constants';
 import type { OrientationStaticOptions } from '../../../../../../common/descriptor_types';
 import type { StaticOrientationProperty } from '../../properties/static_orientation_property';

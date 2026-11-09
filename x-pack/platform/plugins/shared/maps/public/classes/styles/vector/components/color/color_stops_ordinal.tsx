@@ -7,8 +7,8 @@
 
 import type { ChangeEvent } from 'react';
 import React from 'react';
-import { ColorStops } from './color_stops';
 import { EuiFieldNumber } from '@elastic/eui';
+import { ColorStops } from './color_stops';
 import type { ColorStop, StopValue } from '../../../../../../common/descriptor_types';
 import {
   addOrdinalRow,

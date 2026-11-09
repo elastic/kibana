@@ -7,13 +7,13 @@
 
 import React from 'react';
 
+import { i18n } from '@kbn/i18n';
 import type { ColorStop, StopValue } from '../../../../../../common/descriptor_types';
 import {
   addCategoricalRow,
   isCategoricalStopsInvalid,
   DEFAULT_CUSTOM_COLOR,
 } from './color_stops_utils';
-import { i18n } from '@kbn/i18n';
 import { ColorStops } from './color_stops';
 import { StopInput } from '../stop_input';
 import type { IField } from '../../../../fields/field';
