@@ -36,7 +36,8 @@
       "lens",
       "telemetry",
       "cases",
-      "spaces"
+      "spaces",
+      "workflowsExtensions"
     ],
     "requiredBundles": [
       "esUiShared",
