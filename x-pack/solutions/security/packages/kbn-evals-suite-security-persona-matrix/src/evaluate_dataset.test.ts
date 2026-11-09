@@ -1289,7 +1289,7 @@ describe('reporting identity per agent profile', () => {
       'security: security-persona-matrix (chrysalis-parity)'
     );
     expect(experiment.metadata).toMatchObject({
-      suite: 'security-persona-matrix-chrysalis-parity',
+      suite: 'security-persona-matrix-parity',
       agent_profile: 'chrysalis-parity',
     });
     expect(experiment.datasets[0].examples[0].metadata).toMatchObject({

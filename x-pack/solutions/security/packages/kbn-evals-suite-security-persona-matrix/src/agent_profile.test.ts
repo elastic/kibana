@@ -14,9 +14,11 @@ import { PERSONA_MATRIX_EXAMPLES } from './datasets/persona_matrix_prompts';
 import { CHRYSALIS_PARITY_AGENT } from './fixtures/chrysalis_parity_agent';
 import {
   CHRYSALIS_PARITY_AGENT_ID,
+  PERSONA_MATRIX_SUITE_IDS,
   resolveAgentId,
   resolveAgentProfile,
   resolveExpectedToolId,
+  resolveSuiteProfileEnv,
   withProfileExpectedTools,
 } from './agent_profile';
 
@@ -36,6 +38,67 @@ describe('agent_profile', () => {
 
   it('rejects unknown profiles instead of silently falling back', () => {
     expect(() => resolveAgentProfile('parity')).toThrow(/Unknown AGENT_PROFILE 'parity'/);
+  });
+
+  describe('resolveSuiteProfileEnv', () => {
+    const parityId = PERSONA_MATRIX_SUITE_IDS['chrysalis-parity'];
+
+    it('derives the parity seed and agent from the parity suite id', () => {
+      expect(resolveSuiteProfileEnv(parityId, {})).toEqual({
+        seed: 'parity',
+        agent: 'chrysalis-parity',
+      });
+    });
+
+    it('accepts explicit values that agree with the suite id', () => {
+      expect(
+        resolveSuiteProfileEnv(parityId, { seed: 'parity', agent: 'chrysalis-parity' })
+      ).toEqual({ seed: 'parity', agent: 'chrysalis-parity' });
+    });
+
+    it.each([
+      [{ seed: 'minimal' }, /SEED_PROFILE='minimal'/],
+      [{ agent: 'default' }, /AGENT_PROFILE='default'/],
+    ])('throws when %p conflicts with the parity suite id', (raw, message) => {
+      expect(() => resolveSuiteProfileEnv(parityId, raw)).toThrow(message);
+    });
+
+    it('throws when the default suite id is given a parity profile', () => {
+      expect(() =>
+        resolveSuiteProfileEnv(PERSONA_MATRIX_SUITE_IDS.default, { agent: 'chrysalis-parity' })
+      ).toThrow(/AGENT_PROFILE='chrysalis-parity'/);
+    });
+
+    it.each([{ seed: 'parity' }, { agent: 'chrysalis-parity' }])(
+      'tells the user to run the parity suite when the default suite id gets %p',
+      (raw) => {
+        expect(() => resolveSuiteProfileEnv(PERSONA_MATRIX_SUITE_IDS.default, raw)).toThrow(
+          /use `--suite security-persona-matrix-parity` instead/
+        );
+      }
+    );
+
+    it('does not suggest the parity suite when the parity suite id conflicts', () => {
+      expect(() => resolveSuiteProfileEnv(parityId, { seed: 'minimal' })).toThrow(
+        /Unset it, or run the suite id that matches the profile/
+      );
+    });
+
+    it.each([undefined, 'security-persona-matrix-attack-discovery', 'some-other-suite'])(
+      'leaves env untouched for suite id %p',
+      (suiteId) => {
+        const raw = { seed: 'parity', agent: 'chrysalis-parity' };
+        expect(resolveSuiteProfileEnv(suiteId, raw)).toBe(raw);
+        expect(resolveSuiteProfileEnv(suiteId, {})).toEqual({});
+      }
+    );
+
+    it('keeps the default suite id with no env on the default profiles', () => {
+      expect(resolveSuiteProfileEnv(PERSONA_MATRIX_SUITE_IDS.default, {})).toEqual({
+        seed: 'minimal',
+        agent: 'default',
+      });
+    });
   });
 
   describe('expected tool ids per profile', () => {

@@ -54,6 +54,19 @@ const SUITES = {
       configPath: 'x-pack/pinned-judge/playwright.config.ts',
       defaultJudge: 'eis-abc-1',
     },
+    {
+      id: 'persona-matrix',
+      name: 'Persona Matrix',
+      ciLabels: ['evals:persona-matrix'],
+      configPath: 'x-pack/persona-matrix/playwright.config.ts',
+    },
+    {
+      id: 'persona-matrix-parity',
+      name: 'Persona Matrix (parity)',
+      ciLabels: ['evals:persona-matrix-parity'],
+      excludeFromEvalsAll: true,
+      configPath: 'x-pack/persona-matrix/parity.playwright.config.ts',
+    },
   ],
 };
 
@@ -199,6 +212,25 @@ describe('eval_pipeline', () => {
       expect(getForwardablePrLabels('evals:smoke-tests,evals:skip-smoke-tests')).toBe(
         'evals:smoke-tests,evals:skip-smoke-tests'
       );
+    });
+  });
+
+  describe('`excludeFromEvalsAll`', () => {
+    const MODELS = 'models:eis/openai-gpt-5.4';
+
+    it('keeps the suite out of `evals:all` while the other persona suite still runs', () => {
+      const yaml = getEvalPipeline(`evals:all,${MODELS}`) as string;
+
+      expect(yaml).toContain('EVAL_SUITE_ID: "persona-matrix"');
+      expect(yaml).not.toContain('persona-matrix-parity');
+      expect(yaml).toContain('EVAL_SUITE_ID: "agent-builder"');
+    });
+
+    it('still runs the suite from its own label', () => {
+      const yaml = getEvalPipeline(`evals:persona-matrix-parity,${MODELS}`) as string;
+
+      expect(yaml).toContain('EVAL_SUITE_ID: "persona-matrix-parity"');
+      expect(yaml).not.toContain('EVAL_SUITE_ID: "agent-builder"');
     });
   });
 

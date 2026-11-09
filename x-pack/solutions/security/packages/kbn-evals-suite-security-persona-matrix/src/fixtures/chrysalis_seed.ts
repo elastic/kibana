@@ -7,6 +7,7 @@
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { resolveSuiteProfileEnv } from '../agent_profile';
 import { PARITY_DOCS, type ParityDoc } from './chrysalis_parity_docs';
 
 export const ALERT_INDEX = '.internal.alerts-security.alerts-default-000001';
@@ -18,11 +19,12 @@ export const ALERT_INDEX = '.internal.alerts-security.alerts-default-000001';
  *    matrix runs.
  *  - `parity`: replays the original benchmark simulator dataset from
  *    chrysalis_parity_docs.ts, with timestamps shifted to seed time.
- *    Opt in with SEED_PROFILE=parity under a separate experiment label.
+ *    Selected by the `security-persona-matrix-parity` suite id (or SEED_PROFILE=parity
+ *    for an ad hoc run), so its scores are recorded under a separate suite id.
  */
 export type SeedProfile = 'minimal' | 'parity';
 function resolveSeedProfile(): SeedProfile {
-  const raw = process.env.SEED_PROFILE;
+  const raw = resolveSuiteProfileEnv(process.env.EVAL_SUITE_ID).seed;
   if (raw === undefined || raw === '') return 'minimal';
   if (raw === 'minimal' || raw === 'parity') return raw;
   throw new Error(

@@ -48,6 +48,8 @@ export interface EvalSuiteMetadata {
   configPath: string;
   tags?: string[];
   ciLabels?: string[];
+  /** Keeps the suite out of the `evals:all` label; its own ci label still runs it. */
+  excludeFromEvalsAll?: boolean;
   serverConfigSet?: string;
   /** Scout `--arch` for the suite's stack (`stateful` or `serverless`), stateful by default. */
   scoutArch?: string;

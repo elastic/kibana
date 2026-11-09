@@ -185,3 +185,20 @@ describe('Nightshift CI coverage', () => {
     for (const file of files) expect(Fs.existsSync(Path.join(suiteRoot, file))).toBe(true);
   });
 });
+
+describe('evals.suites.json config paths', () => {
+  it('gives every suite its own configPath', () => {
+    // Suite discovery keys metadata by config path, so two suites on one config leave one of them
+    // reported as an orphan and the other resolving to the wrong metadata.
+    const suiteIdsByConfigPath = new Map<string, string[]>();
+    for (const { id, configPath } of suites) {
+      if (configPath) {
+        suiteIdsByConfigPath.set(configPath, [...(suiteIdsByConfigPath.get(configPath) ?? []), id]);
+      }
+    }
+
+    const shared = [...suiteIdsByConfigPath].filter(([, ids]) => ids.length > 1);
+
+    expect(shared).toEqual([]);
+  });
+});

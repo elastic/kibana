@@ -48,6 +48,7 @@ import {
 import type { PersonaMatrixChatClient } from './chat_client';
 import {
   agentProfile as envAgentProfile,
+  PERSONA_MATRIX_SUITE_IDS,
   withProfileExpectedTools,
   type AgentProfile,
 } from './agent_profile';
@@ -633,8 +634,6 @@ export const createPersonaMatrixSkillInvokedEvaluator = ({
   },
 });
 
-const SUITE_NAME = 'security-persona-matrix';
-
 /**
  * Reporting identity for a profile. A non-default agent is a different system
  * under test, so its dataset and experiment suite name carry the profile and a
@@ -647,8 +646,8 @@ export const reportingIdentity = (
   profile: AgentProfile
 ): { datasetName: string; suite: string } =>
   profile === 'default'
-    ? { datasetName, suite: SUITE_NAME }
-    : { datasetName: `${datasetName} (${profile})`, suite: `${SUITE_NAME}-${profile}` };
+    ? { datasetName, suite: PERSONA_MATRIX_SUITE_IDS.default }
+    : { datasetName: `${datasetName} (${profile})`, suite: PERSONA_MATRIX_SUITE_IDS[profile] };
 
 export function createEvaluatePersonaMatrixDataset({
   chatClient,

@@ -54,8 +54,9 @@ export const PERSONA_MATRIX_TOOL_IDS = ['virustotal_lookup', 'on_call_lookup'] a
 
 /**
  * Original-benchmark tool ids, referenced verbatim by the parity prompts and by
- * the dedicated parity agent. Seeded only when SEED_PROFILE=parity or
- * AGENT_PROFILE=chrysalis-parity — minimal-profile runs keep the two tools
+ * the dedicated parity agent. Seeded only for the `security-persona-matrix-parity`
+ * suite id (SEED_PROFILE=parity / AGENT_PROFILE=chrysalis-parity when running
+ * Playwright directly) — minimal-profile runs keep the two tools
  * above only, matching the published matrix environment.
  */
 export const PERSONA_MATRIX_PARITY_TOOL_IDS = [

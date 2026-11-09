@@ -229,6 +229,21 @@
       "serverConfigSet": "evals_security_persona_matrix"
     },
     {
+      "id": "security-persona-matrix-parity",
+      "name": "Security Persona Matrix — benchmark parity",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix/parity.playwright.config.ts",
+      "tags": [
+        "security",
+        "persona-matrix"
+      ],
+      "ciLabels": [
+        "evals:security-persona-matrix-parity"
+      ],
+      "excludeFromEvalsAll": true,
+      "serverConfigSet": "evals_security_persona_matrix"
+    },
+    {
       "id": "security-persona-matrix-attack-discovery",
       "name": "Security Persona Matrix — Attack Discovery (Chrysalis kill-chains)",
       "slackChannel": "#security-generative-ai-evals",

@@ -39,5 +39,6 @@ fileGroups:
     - '**/*.ts'
     - persona_matrix.config.json
     - persona_matrix.production.config.json
+    - persona_matrix.parity.config.json
     - '!target/**/*'
 tasks: {}
