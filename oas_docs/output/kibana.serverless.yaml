@@ -170703,6 +170703,10 @@ components:
             parameters:
               type: object
               properties:
+                force:
+                  description: Read a file locked by the OS from a volume snapshot. Endpoint on Windows only.
+                  example: true
+                  type: boolean
                 path:
                   description: The full file path to retrieve from the endpoint.
                   type: string
