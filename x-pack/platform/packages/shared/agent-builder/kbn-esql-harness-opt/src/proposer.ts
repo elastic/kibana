@@ -74,6 +74,10 @@ const SLOT_SCHEMA = `interface EsqlHarnessConfig {
     stopOnJoinReject: boolean;
     timeoutRetryBudget: number;
   };
+  model: {                                                                                 // slot F
+    generateEffort: 'low' | 'medium' | 'high';     // tier used to write the query
+    requestDocEffort: 'low' | 'medium' | 'high';   // tier used to pick documentation keywords
+  };
   instructions: { extraInstructions: string };                                             // slot G
 }`;
 
@@ -171,6 +175,9 @@ Rules, which are enforced mechanically after you answer:
    the config must generalize to unseen data. Candidates that do are rejected automatically.
 3. Prefer feedback (slot D) and exemplar (slot B) edits over prompt prose (slot G); prose edits
    regress more often than they help in published ablations.
+3b. The model slot (F) is the strongest cost lever in both directions: a higher tier for the
+   generation step buys quality at a token price, a lower tier for keyword selection buys
+   savings. A candidate can also win by holding quality while spending less.
 4. Base the change on evidence in \`bundle.json\`: name the failures you expect it to fix.
 
 Write your answer to a file called \`proposal.json\` in this directory, with exactly this shape:

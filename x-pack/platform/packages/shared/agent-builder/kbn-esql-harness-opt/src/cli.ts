@@ -25,6 +25,7 @@ import type { RunSummary } from './runner';
 import { gateCandidate } from './gate';
 import { lintProposal, proposeCandidate } from './proposer';
 import { harnessPaths, writeActiveConfig } from './workspace';
+import { writeReport } from './report';
 import {
   backTranslate,
   balanceCorpus,
@@ -73,9 +74,15 @@ export const cli = () =>
   round [--config path]             one propose → gate round against the current incumbent
   campaign --rounds n               repeat rounds, promoting accepted candidates
   sealed --config path              score a config on the sealed split
+  report                            write a self-contained HTML report of all rounds and runs
 
 Start Kibana with:
   ESQL_HARNESS_CONFIG=${configPath} ESQL_HARNESS_TRACE_FILE=${tracePath}`);
+        return;
+      }
+
+      if (command === 'report') {
+        log.info(`[harness-opt] report written to ${writeReport()}`);
         return;
       }
 
