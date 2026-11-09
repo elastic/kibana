@@ -18,6 +18,7 @@ import { buildGoldRowCache, runVariant } from './runner';
 import type { RunSummary } from './runner';
 import { gateCandidate } from './gate';
 import { restartLane, treeHash } from './candidate_workspace';
+import { readModelChoices } from './models';
 import { harnessPaths } from './workspace';
 
 const execFileAsync = promisify(execFile);
@@ -98,6 +99,7 @@ export const verifySealed = async ({
   esClient,
   target,
   restartCommand,
+  modelAlias,
   log,
 }: {
   worktree: string;
@@ -118,10 +120,26 @@ export const verifySealed = async ({
   esClient: EsClient;
   target: HarnessTarget;
   restartCommand: string;
+  /**
+   * Model both sides are measured on.
+   *
+   * Both, or neither: an incumbent pinned to one model compared against a baseline on another
+   * measures the model, not the change — which is exactly how four rounds were wasted.
+   */
+  modelAlias?: string;
   log: ToolingLog;
 }): Promise<void> => {
   const { runsDir, lineageDir } = harnessPaths();
   const outputDir = Path.join(runsDir, `verify-${Date.now()}`);
+  const connectorId = readModelChoices().find(
+    (choice) => choice.inferenceId.replace('harness-opt-', '') === modelAlias
+  )?.connectorId;
+  const laneEnv: Record<string, string> = connectorId
+    ? { ESQL_HARNESS_MODEL_CONNECTOR: connectorId }
+    : {};
+  if (connectorId) {
+    await restartLane({ command: restartCommand, url: target.kibanaUrl, env: laneEnv, log });
+  }
   const goldRows = await buildGoldRowCache({ esClient, examples });
   const currentHash = treeHash(worktree);
 
@@ -160,11 +178,12 @@ export const verifySealed = async ({
     } else {
       await execFileAsync('git', ['checkout', baselineRef, '--', TOOL_DIR], { cwd: worktree });
     }
-    await restartLane({ command: restartCommand, url: target.kibanaUrl, log });
+    await restartLane({ command: restartCommand, url: target.kibanaUrl, env: laneEnv, log });
     log.info(`[verify] measuring the baseline (${baselineRef}, ${treeHash(worktree)})`);
     baselineRuns = await measure('sealed-baseline', treeHash(worktree));
   } finally {
     snapshot.restore();
+    await restartLane({ command: restartCommand, url: target.kibanaUrl, env: laneEnv, log });
     // `git checkout <ref> -- <path>` also stages what it writes, so the index would stay dirty
     // with the baseline's version of files the restore has already put back.
     await execFileAsync('git', ['reset', '--quiet'], { cwd: worktree }).catch(() => undefined);
@@ -182,7 +201,9 @@ export const verifySealed = async ({
     `# Held-out check — ${new Date().toISOString()}`,
     '',
     `Split: ${examples.length} examples · ${repeats} repeat(s) × ${rollouts} rollout(s) per side`,
-    `Current: ${currentHash} · baseline: ${baselineDir ?? baselineRef}`,
+    `Current: ${currentHash} · baseline: ${baselineDir ?? baselineRef} · model: ${
+      modelAlias ?? 'code default'
+    }`,
     '',
     '| metric | baseline | current | Δ |',
     '|---|---|---|---|',

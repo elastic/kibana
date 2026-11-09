@@ -36,6 +36,8 @@ export interface CampaignOptions {
   rounds: number;
   rollouts: number;
   concurrency: number;
+  /** Model the incumbent starts on, as an alias; the campaign pins the lane to it up front. */
+  startingModel?: string;
   /**
    * Model the whole campaign runs on, pinned per lane at restart. Cross-model verification is a
    * separate, slower step (`verify-tiers`): pinning a model costs a restart of both lanes, so
@@ -89,6 +91,7 @@ export const runCampaign = async ({
   rollouts,
   concurrency,
   tier,
+  startingModel,
   incumbentTarget,
   candidateTarget,
   candidateWorktree,
@@ -120,7 +123,7 @@ export const runCampaign = async ({
   const aliasOf = (inferenceId: string) => inferenceId.replace('harness-opt-', '');
   const connectorFor = (alias?: string) =>
     modelChoices.find((choice) => aliasOf(choice.inferenceId) === alias)?.connectorId;
-  let incumbentModel: string | undefined;
+  let incumbentModel: string | undefined = startingModel;
 
   let incumbentEdits: CodeEdit[] = await collectEdits({
     path: mainWorktree,
@@ -138,10 +141,22 @@ export const runCampaign = async ({
     .replace(/[-:.TZ]/g, '')
     .slice(0, 14);
   const priorRounds = ledger.length;
+  // Put the incumbent lane into the state the campaign believes it is in. Relying on however
+  // the lane happened to be left is how the model pin went missing for four rounds.
+  const startingConnector = connectorFor(incumbentModel);
+  if (startingConnector) {
+    await restartLane({
+      command: restartCommands.incumbent,
+      url: incumbentTarget.kibanaUrl,
+      env: { ESQL_HARNESS_MODEL_CONNECTOR: startingConnector },
+      log,
+    });
+  }
+
   log.info(
-    `[harness-opt] campaign ${campaignId} starting from variant ${treeHash(mainWorktree)}${
-      incumbentEdits.length ? ` (${incumbentEdits.length} file(s) already changed)` : ' (clean)'
-    }`
+    `[harness-opt] campaign ${campaignId} starting from variant ${treeHash(mainWorktree)} on ${
+      incumbentModel ?? 'the code default'
+    }${incumbentEdits.length ? ` (${incumbentEdits.length} file(s) already changed)` : ' (clean)'}`
   );
 
   for (let roundInCampaign = 0; roundInCampaign < rounds; roundInCampaign++) {

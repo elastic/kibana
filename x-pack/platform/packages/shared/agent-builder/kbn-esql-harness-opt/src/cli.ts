@@ -323,6 +323,7 @@ Both lanes' Kibana processes must run with ESQL_HARNESS_TRACE_FILE pointing at
             optionalFlag(flags['restart-incumbent']) ??
             process.env.HARNESS_RESTART_INCUMBENT ??
             'true',
+          modelAlias: optionalFlag(flags.model),
           log,
         });
         return;
@@ -388,6 +389,7 @@ Both lanes' Kibana processes must run with ESQL_HARNESS_TRACE_FILE pointing at
           rollouts,
           concurrency,
           tier: optionalFlag(flags.tiers)?.split(',')[0]?.trim(),
+          startingModel: optionalFlag(flags.model),
           incumbentTarget: target,
           candidateTarget: { ...target, kibanaUrl: candidateUrl ?? 'http://localhost:5691' },
           candidateWorktree: candidatePath ?? `${process.cwd()}-candidate`,
@@ -435,6 +437,7 @@ Both lanes' Kibana processes must run with ESQL_HARNESS_TRACE_FILE pointing at
           'restart-candidate',
           'baseline',
           'repeats',
+          'model',
           'es-repo',
           'rules-repo',
           'limit',
@@ -450,6 +453,7 @@ Both lanes' Kibana processes must run with ESQL_HARNESS_TRACE_FILE pointing at
         --candidate-url <u>  Kibana serving the candidate worktree, e.g. http://localhost:5691
         --baseline <ref>     git ref to compare against in check (default origin/main)
         --repeats <n>        measurements per side in check (default 2)
+        --model <alias>      model the incumbent starts on (campaign) or is measured on (check)
         --kibana-url <url>   default http://localhost:5601
         --es-url <url>       default http://localhost:9200
         `,
