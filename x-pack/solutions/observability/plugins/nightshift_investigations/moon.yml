@@ -80,6 +80,8 @@ dependsOn:
   - '@kbn/rrule'
   - '@kbn/inference-tracing'
   - '@kbn/core-logging-server-mocks'
+  - '@kbn/server-route-repository-utils'
+  - '@kbn/cloud-plugin'
 tags:
   - plugin
   - prod

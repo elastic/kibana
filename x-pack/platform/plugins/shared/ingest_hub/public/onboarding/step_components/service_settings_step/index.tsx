@@ -30,6 +30,8 @@ import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { supportsNamespace } from './instance_namespace_field';
+import { followsGlobalNamespace } from '../../common/effective_namespace';
+import { ecfFamilySupportsNamespace } from '../../ecf_cloudformation';
 import { getRegionFieldName, hasConfigurableFlyoutFields } from './field_config';
 import type { ServiceInstance } from './use_service_settings';
 import { useServiceSettings } from './use_service_settings';
@@ -62,6 +64,8 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     setNamespace,
     namespaceError,
     policySettings,
+    isProxyUrlSupported,
+    proxyUrlError,
     setPolicySetting,
     bareNamePackage,
     instances,
@@ -111,12 +115,24 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
       (s) => s !== 'error' && s !== 'timeout'
     );
 
+  // Only the unified stack takes the namespace, so only its launch changes what a new value means.
+  const hasLaunchedEcfStack =
+    detectAndReviewStep.ecfStacks?.some((s) => ecfFamilySupportsNamespace(s.family)) ?? false;
+  const hasServicesIgnoringNamespace = selectedServiceIds.some((id) => {
+    const entry = awsServicesMap?.get(id);
+    return entry !== undefined && !followsGlobalNamespace(entry, deploymentMethod);
+  });
   // Input types of the selected services, which decide the output types their policies accept.
   const outputInputTypes = useMemo(
     () => [
       ...new Set(instances.flatMap((inst) => awsServicesMap?.get(inst.serviceId)?.inputs ?? [])),
     ],
     [instances, awsServicesMap]
+  );
+
+  const setProxyUrl = useCallback(
+    (proxyUrl: string) => setPolicySetting('proxy_url', proxyUrl),
+    [setPolicySetting]
   );
 
   const setOutputId = useCallback(
@@ -188,7 +204,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
         })
       );
     }
-    if (integrationNameError || descriptionError || namespaceError) {
+    if (integrationNameError || descriptionError || namespaceError || proxyUrlError) {
       reasons.push(
         i18n.translate('xpack.ingestHub.serviceSettingsStep.continueTooltip.integrationSettings', {
           defaultMessage: 'Fix the integration settings',
@@ -213,6 +229,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     integrationNameError,
     descriptionError,
     namespaceError,
+    proxyUrlError,
     incompleteInstances,
   ]);
 
@@ -467,6 +484,8 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
         onNamespaceChange={setNamespace}
         namespaceError={namespaceError}
         hasDeployedServices={isRegionDisabled}
+        hasLaunchedEcfStack={hasLaunchedEcfStack}
+        hasServicesIgnoringNamespace={hasServicesIgnoringNamespace}
         output={
           supportsPolicySetting('output_id', deploymentMethod)
             ? {
@@ -480,6 +499,15 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
                   !hasUnloadedSelectedManifests &&
                   !hasErroredSelectedManifests,
                 isInheritedOutputDefault: agentBasedDeployment.agentHostsMode === 'new',
+              }
+            : undefined
+        }
+        proxyUrl={
+          isProxyUrlSupported
+            ? {
+                value: policySettings.proxy_url ?? '',
+                onChange: setProxyUrl,
+                error: proxyUrlError,
               }
             : undefined
         }

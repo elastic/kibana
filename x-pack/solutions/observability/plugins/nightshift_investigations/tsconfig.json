@@ -75,6 +75,8 @@
     "@kbn/eval-kql",
     "@kbn/rrule",
     "@kbn/inference-tracing",
-    "@kbn/core-logging-server-mocks"
+    "@kbn/core-logging-server-mocks",
+    "@kbn/server-route-repository-utils",
+    "@kbn/cloud-plugin"
   ]
 }

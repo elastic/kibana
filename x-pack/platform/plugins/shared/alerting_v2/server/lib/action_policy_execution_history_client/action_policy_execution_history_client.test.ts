@@ -11,7 +11,8 @@ import type { ActionPolicyClient } from '../action_policy_client/action_policy_c
 import type { RulesClient } from '../rules_client';
 import type { EventLogServiceContract } from '../services/event_log_service/event_log_service';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
-import type { AlertingServerStartDependencies } from '../../types';
+import type { SpaceId } from '@kbn/core-spaces-common';
+import { createSpacesServiceMock } from '../services/spaces_service/spaces_service.mock';
 import { ACTION_POLICY_EVENT_ACTIONS } from '../dispatcher/steps/constants';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { ActionPolicyExecutionHistoryClient } from './action_policy_execution_history_client';
@@ -79,11 +80,8 @@ const createMocks = () => {
     getWorkflowsByIds,
     getClient: jest.fn(() => ({ getWorkflowsByIds })),
   };
-  const spaces = {
-    spacesService: {
-      getSpaceId: jest.fn().mockReturnValue('default'),
-    },
-  } as unknown as AlertingServerStartDependencies['spaces'];
+  const { spacesService, spaces } = createSpacesServiceMock();
+  spaces.spacesService.getSpaceId.mockReturnValue('default' as SpaceId);
   const { loggerService, mockLogger } = createLoggerService();
 
   const client = new ActionPolicyExecutionHistoryClient(
@@ -91,7 +89,7 @@ const createMocks = () => {
     actionPolicyClient,
     rulesClient,
     workflowsManagement as any,
-    spaces,
+    spacesService,
     loggerService
   );
 

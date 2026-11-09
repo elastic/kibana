@@ -11,6 +11,7 @@ import {
   AWS_SERVICES_STATIC,
   applyDeploymentMethodView,
   buildAwsServiceMatrix,
+  getDefaultEnabledDataStreams,
   makeDsView,
 } from './aws_service_matrix';
 
@@ -458,6 +459,52 @@ describe('AWS service matrix', () => {
     });
   });
 
+  describe('stream-level var_groups', () => {
+    const LOG_GROUP_SOURCE = {
+      name: 'log_group_source',
+      title: 'Log group',
+      required: true,
+      options: [{ name: 'log_group_arn', title: 'Log Group ARN', vars: ['log_group_arn'] }],
+    };
+    const dsId = MOCK_PACKAGES.aws.data_streams[0].path as string;
+    const packages = {
+      ...MOCK_PACKAGES,
+      aws: {
+        ...MOCK_PACKAGES.aws,
+        data_streams: MOCK_PACKAGES.aws.data_streams.map((ds: any) =>
+          ds.path === dsId
+            ? {
+                ...ds,
+                streams: [
+                  {
+                    input: 'aws-s3',
+                    enabled: true,
+                    vars: [{ name: 'log_group_arn', type: 'text' }],
+                    var_groups: [LOG_GROUP_SOURCE],
+                  },
+                ],
+              }
+            : ds
+        ),
+      },
+    };
+    const entry = buildAwsServiceMatrix(packages, AWS_SERVICES_STATIC).find((e) => e.id === dsId)!;
+
+    it('captures the groups per input on the data stream, the entry union and the DS view', () => {
+      expect(entry.varDefsByDataStream?.[dsId]?.varGroupsByInput).toEqual({
+        'aws-s3': [LOG_GROUP_SOURCE],
+      });
+      expect(entry.varGroupsByInput).toEqual({ 'aws-s3': [LOG_GROUP_SOURCE] });
+      expect(makeDsView(entry, dsId).varGroupsByInput).toEqual({ 'aws-s3': [LOG_GROUP_SOURCE] });
+    });
+
+    it('leaves varGroupsByInput undefined when no stream declares groups', () => {
+      const plain = BUILT_MATRIX.find((e) => e.id === dsId)!;
+      expect(plain.varGroupsByInput).toBeUndefined();
+      expect(plain.varDefsByDataStream?.[dsId]?.varGroupsByInput).toBeUndefined();
+    });
+  });
+
   describe('PT data_streams fallback', () => {
     it('uses all package data_streams when PT omits the data_streams field', () => {
       const pkg = {
@@ -489,6 +536,67 @@ describe('AWS service matrix', () => {
       expect(result.inputs).toContain('cel');
       expect(result.varDefsByDataStream?.finding).toBeDefined();
       expect(result.varDefsByDataStream?.finding?.varDefsByInput?.cel?.proxy_url).toBeDefined();
+    });
+
+    it('flags a service whose stream declares proxy_url', () => {
+      const pkg = {
+        policy_templates: [
+          {
+            name: 'aws_securityhub',
+            inputs: [{ type: 'cel', title: 'Security Hub via API' }],
+            deployment_modes: { agentless: { enabled: true } },
+          },
+        ],
+        data_streams: [
+          {
+            path: 'finding',
+            type: 'logs',
+            streams: [
+              { input: 'cel', vars: [{ name: 'proxy_url', type: 'text', required: false }] },
+            ],
+          },
+        ],
+      };
+      const [result] = buildAwsServiceMatrix({ aws_securityhub: pkg as any }, [
+        { id: 'aws_securityhub', packageName: 'aws_securityhub' },
+      ]);
+      expect(result.declaresProxyUrl).toBe(true);
+    });
+
+    it('flags a service whose package declares proxy_url as a package var', () => {
+      const pkg = {
+        vars: [{ name: 'proxy_url', type: 'text' }],
+        policy_templates: [
+          {
+            name: 'aws_logs',
+            inputs: [{ type: 'aws-s3', title: 'Logs' }],
+            deployment_modes: { agentless: { enabled: true } },
+          },
+        ],
+        data_streams: [{ path: 'generic', type: 'logs', streams: [{ input: 'aws-s3', vars: [] }] }],
+      };
+      const [result] = buildAwsServiceMatrix({ aws_logs: pkg as any }, [
+        { id: 'aws_logs', packageName: 'aws_logs' },
+      ]);
+      expect(result.declaresProxyUrl).toBe(true);
+    });
+
+    it('does not flag a service that declares no proxy_url', () => {
+      const pkg = {
+        vars: [{ name: 'default_region', type: 'text' }],
+        policy_templates: [
+          {
+            name: 'aws_logs',
+            inputs: [{ type: 'aws-s3', title: 'Logs' }],
+            deployment_modes: { agentless: { enabled: true } },
+          },
+        ],
+        data_streams: [{ path: 'generic', type: 'logs', streams: [{ input: 'aws-s3', vars: [] }] }],
+      };
+      const [result] = buildAwsServiceMatrix({ aws_logs: pkg as any }, [
+        { id: 'aws_logs', packageName: 'aws_logs' },
+      ]);
+      expect(result.declaresProxyUrl).toBe(false);
     });
 
     it('uses all package data_streams when PT has an explicit empty data_streams array', () => {
@@ -807,6 +915,49 @@ describe('AWS service matrix', () => {
         AWS_SERVICES_STATIC.filter((e) => e.id === 'waf_otel') as any
       );
       expect(applyDeploymentMethodView(wafOtel, 'agent_based').settingsScope).toBe('ecf');
+    });
+  });
+
+  describe('getDefaultEnabledDataStreams', () => {
+    const multiStream = (overrides: Partial<AwsServiceMatrixEntry> = {}) =>
+      ({
+        id: 'svc',
+        dataStreams: ['metrics_ds', 's3_ds', 'cw_ds'],
+        defaultEnabledInputs: ['aws/metrics', 'aws-s3', 'aws-cloudwatch'],
+        varDefsByDataStream: {
+          metrics_ds: { inputs: ['aws/metrics'], defaultEnabledInputs: ['aws/metrics'] },
+          s3_ds: { inputs: ['aws-s3'], defaultEnabledInputs: ['aws-s3'] },
+          cw_ds: { inputs: ['aws-cloudwatch'], defaultEnabledInputs: [] },
+        },
+        ...overrides,
+      } as unknown as AwsServiceMatrixEntry);
+
+    it('keeps the only data stream of a single-stream service', () => {
+      const single = multiStream({ dataStreams: ['cw_ds'] });
+      expect(getDefaultEnabledDataStreams(single)).toEqual(['cw_ds']);
+    });
+
+    it('keeps only the data streams the manifest enables by default', () => {
+      expect(getDefaultEnabledDataStreams(multiStream())).toEqual(['metrics_ds', 's3_ds']);
+    });
+
+    it('returns none when the manifest disables every data stream, as the flyout shows', () => {
+      const allOff = multiStream({
+        varDefsByDataStream: {
+          s3_ds: { inputs: ['aws-s3'], defaultEnabledInputs: [] },
+          cw_ds: { inputs: ['aws-cloudwatch'], defaultEnabledInputs: [] },
+        } as unknown as AwsServiceMatrixEntry['varDefsByDataStream'],
+        dataStreams: ['s3_ds', 'cw_ds'],
+      });
+      expect(getDefaultEnabledDataStreams(allOff)).toEqual([]);
+    });
+
+    it('drops a stream whose defaults ECF cannot route in the ECF view', () => {
+      const ecfView = multiStream({
+        settingsScope: 'ecf',
+        defaultEnabledInputs: ['aws-s3'],
+      });
+      expect(getDefaultEnabledDataStreams(ecfView)).toEqual(['s3_ds']);
     });
   });
 });

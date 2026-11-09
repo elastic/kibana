@@ -39,6 +39,12 @@ describe('nightshift_conclusion_quality', () => {
       answer: 'The 14:02 deploy of checkout caused the latency.',
     });
     expect(prompt.mock.calls[0][0].toolChoice).toEqual({ function: 'score_conclusion' });
+    expect(prompt.mock.calls[0][0].metadata.connectorTelemetry).toEqual({
+      pluginId: 'nightshift_online_evals',
+      aggregateBy: 'nightshift',
+      productSolution: 'observability',
+      productFeature: 'nightshift',
+    });
     expect(scores).toEqual([
       {
         name: 'rca_conclusion_quality',

@@ -7,9 +7,9 @@
 
 import type { TrajectoryStep } from './types';
 
-export type RecallKind = 'cortex' | 'memories';
+export type RecallKind = 'wiki' | 'memories';
 
-/** A cortex or semantic-memory file the agent opened (or tried to), and the 1-based trajectory step. */
+/** A wiki or semantic-memory file the agent opened (or tried to), and the 1-based trajectory step. */
 export interface RecallRead {
   kind: RecallKind;
   path: string;
@@ -20,10 +20,11 @@ export interface RecallRead {
 const VIEW_FILE_TOOL_ID = 'nightshift_sandbox_view_file';
 const BASH_TOOL_ID = 'nightshift_sandbox_bash';
 
-const RECALL_PATH_RE = /(?:^|[\s'"=/])((cortex|memories)\/[^\s'"|;&<>)]+)/g;
+/** `wiki/` or `memories/` at token start, under `/workspace/`, or after `./`; not `repo/wiki/` URLs or nested dirs. */
+const RECALL_PATH_RE = /(?:^|[\s'"=]|\/workspace\/|\.\/)((wiki|memories)\/[^\s'"|;&<>)]+)/g;
 
-/** A recall directory the bash call ran in, such as `/workspace/memories` or `/workspace/cortex/db`. */
-const RECALL_DIRECTORY_RE = /(?:^|\/)((cortex|memories)(?:\/[^\s'"]*)?)\/?$/;
+/** A recall directory the bash call ran in, such as `/workspace/memories` or `/workspace/wiki/db`. */
+const RECALL_DIRECTORY_RE = /(?:^|\/)((wiki|memories)(?:\/[^\s'"]*)?)\/?$/;
 
 /** A relative file argument such as `checkout.md` or `notes/db.txt`. */
 const RELATIVE_FILE_RE = /^(?![-/~$.])[\w./-]+\.[a-z0-9]+$/i;
@@ -40,7 +41,7 @@ const RESULT_PREFIX_RE = /^exit_code: \d+ \| stdout: ?/;
 const RESULT_FILE_RE = /^(?:\.\/)?((?:[\w.-]+\/)*[\w.-]+\.[a-z][a-z0-9]*)(?::|$)/i;
 
 /**
- * A bash command run from inside `cortex/` or `memories/` reads those files by relative name
+ * A bash command run from inside `wiki/` or `memories/` reads those files by relative name
  * (`grep timeout checkout.md`), so resolve each file argument against the working directory.
  * A command naming no file (`grep -r timeout .`, `find . -name '*.md'`) is read from its output
  * instead, one file per result line, so only files the output actually exposes are credited. A
@@ -90,7 +91,7 @@ const recallPathsOf = ({ tool_id: toolId, params, result }: TrajectoryStep): Rec
 };
 
 /**
- * Cortex (`cortex/`, knowledge past investigations wrote down) and semantic-memory (`memories/`)
+ * Wiki (`wiki/`, knowledge past investigations wrote down) and semantic-memory (`memories/`)
  * files the agent referenced through the sandbox view-file or bash tools, first reference per path.
  * Whether a read succeeded is left to the judge: a missing file's error is in the step's result.
  */

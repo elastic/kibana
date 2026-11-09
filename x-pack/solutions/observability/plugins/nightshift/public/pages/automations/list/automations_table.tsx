@@ -38,6 +38,7 @@ export const AutomationsTable = ({
   usedToday,
   getFacets,
   isRateLimited,
+  isGlobalLimitReached = false,
   pageIndex,
   pageSize,
   onPageChange,
@@ -58,6 +59,7 @@ export const AutomationsTable = ({
   usedToday: Map<string, number>;
   getFacets: (automation: Automation) => AutomationFacets;
   isRateLimited: (automation: Automation) => boolean;
+  isGlobalLimitReached?: boolean;
   pageIndex: number;
   pageSize: number;
   onPageChange: (index: number, size: number) => void;
@@ -133,6 +135,7 @@ export const AutomationsTable = ({
           used={usedToday.get(automation.id)}
           limit={automation.runtime.dailyDispatchLimit}
           isRateLimited={isRateLimited(automation)}
+          isGlobalLimitReached={isGlobalLimitReached}
         />
       ),
     },

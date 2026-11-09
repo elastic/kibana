@@ -20,6 +20,9 @@ const defaultCatalog = {
   ],
   isError: false,
 };
+jest.mock('../../../hooks/use_global_limit', () => ({
+  useGlobalLimit: () => ({ isReached: false }),
+}));
 const mockUseRuleCatalog = jest.fn();
 jest.mock('../../../../../data/rules/use_rule_catalog', () => ({
   useRuleCatalog: () => mockUseRuleCatalog(),
@@ -39,6 +42,8 @@ const legacyPatternTrigger: TriggerFormValues = {
   ruleNamePattern: 'cpu',
   ruleNames: [],
   ruleTags: [],
+  alertSources: [],
+  alertSourceMode: 'include',
 };
 
 const onTriggerChange = jest.fn();
