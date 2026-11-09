@@ -32,8 +32,9 @@ export const MLEmptyPromptCard = ({
   footer,
   layout = 'horizontal',
   color = 'plain',
-  hasBorder,
-  hasShadow,
+  // POC: lifts the prompt off the recessed glass surface; shadow requires no border.
+  hasBorder = false,
+  hasShadow = true,
   titleSize,
   paddingSize,
   centered = false,

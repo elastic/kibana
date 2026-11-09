@@ -9,5 +9,14 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 import React from 'react';
 
 export const TimeseriesexplorerChartDataError = ({ errorMsg }: { errorMsg: string }) => {
-  return <EuiEmptyPrompt iconType="warning" title={<h2>{errorMsg}</h2>} />;
+  return (
+    <EuiEmptyPrompt
+      // POC: lifts the prompt off the recessed glass surface; shadow requires no border.
+      color="plain"
+      hasShadow
+      hasBorder={false}
+      iconType="warning"
+      title={<h2>{errorMsg}</h2>}
+    />
+  );
 };

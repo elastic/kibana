@@ -223,6 +223,10 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
             <>
               {dataSourcePicker}
               <EuiEmptyPrompt
+                // POC: lifts the prompt off the recessed glass surface; shadow requires no border.
+                color="plain"
+                hasShadow
+                hasBorder={false}
                 title={
                   <h2>
                     <FormattedMessage

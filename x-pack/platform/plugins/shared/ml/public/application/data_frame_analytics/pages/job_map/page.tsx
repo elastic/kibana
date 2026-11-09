@@ -88,6 +88,10 @@ export const Page: FC = () => {
     return (
       <>
         <EuiEmptyPrompt
+          // POC: lifts the prompt off the recessed glass surface; shadow requires no border.
+          color="plain"
+          hasShadow
+          hasBorder={false}
           iconType="warning"
           title={
             <h2>

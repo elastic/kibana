@@ -12,6 +12,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 export const NoDataViewPrompt: FC = () => (
   <EuiEmptyPrompt
+    // POC: lifts the prompt off the recessed glass surface; shadow requires no border.
+    color="plain"
+    hasShadow
+    hasBorder={false}
     title={
       <h2>
         <FormattedMessage

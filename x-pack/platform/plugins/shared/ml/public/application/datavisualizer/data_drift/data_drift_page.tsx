@@ -62,6 +62,10 @@ export const DataDriftPage: FC = () => {
         <>
           {dataSourcePicker}
           <EuiEmptyPrompt
+            // POC: lifts the prompt off the recessed glass surface; shadow requires no border.
+            color="plain"
+            hasShadow
+            hasBorder={false}
             title={
               <h2>
                 <FormattedMessage

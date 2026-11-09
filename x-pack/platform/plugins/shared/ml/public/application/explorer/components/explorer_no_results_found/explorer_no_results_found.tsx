@@ -27,6 +27,10 @@ export const ExplorerNoResultsFound: FC<ExplorerNoResultsFoundProps> = ({
   const noResults = hasResults === false;
   return (
     <EuiEmptyPrompt
+      // POC: lifts the prompt off the recessed glass surface; shadow requires no border.
+      color="plain"
+      hasShadow
+      hasBorder={false}
       iconType="info"
       title={
         <h2>

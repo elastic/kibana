@@ -20,6 +20,10 @@ export const TimeseriesexplorerNoChartData: FC<{
   entities?: Entity[];
 }> = ({ dataNotChartable, entities }) => (
   <EuiEmptyPrompt
+    // POC: lifts the prompt off the recessed glass surface; shadow requires no border.
+    color="plain"
+    hasShadow
+    hasBorder={false}
     iconType="info"
     title={
       <h2>

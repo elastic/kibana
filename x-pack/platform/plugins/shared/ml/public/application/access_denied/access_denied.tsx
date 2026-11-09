@@ -31,6 +31,9 @@ export const AccessDeniedCallout: FC<AccessDeniedCalloutProps> = ({ missingCapab
     <>
       <EuiPageTemplate.EmptyPrompt
         data-test-subj="mlAccessDenied"
+        // POC: lifts the prompt off the recessed glass surface; shadow requires no border.
+        hasShadow
+        hasBorder={false}
         color={'danger'}
         alignment={'horizontalCenter'}
         iconType="warning"

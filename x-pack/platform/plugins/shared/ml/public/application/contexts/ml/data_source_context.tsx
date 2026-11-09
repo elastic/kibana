@@ -144,6 +144,9 @@ export const DataSourceContextProvider: FC<PropsWithChildren<unknown>> = ({ chil
   if (error) {
     return (
       <EuiEmptyPrompt
+        // POC: lifts the prompt off the recessed glass surface; shadow requires no border.
+        hasShadow
+        hasBorder={false}
         iconType="error"
         color="danger"
         title={
