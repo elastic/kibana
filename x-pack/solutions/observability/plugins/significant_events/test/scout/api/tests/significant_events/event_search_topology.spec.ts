@@ -8,17 +8,16 @@
 import { v4 as uuidv4 } from 'uuid';
 import { expect } from '@kbn/scout-oblt/api';
 import { tags } from '@kbn/scout-oblt';
-import type { ApiClientResponse, EsClient } from '@kbn/scout-oblt';
-import { SIGNIFICANT_EVENTS_ALERT_SOURCE } from '@kbn/significant-events-schema';
+import type { ApiClientResponse } from '@kbn/scout-oblt';
+import type { BlastRadiusEntry, CausalFeature } from '@kbn/significant-events-schema';
 import { significantEventsApiTest as apiTest } from '../../fixtures';
 import {
   EVENT_SEARCH_TOOL_ID,
   POLL_OPTIONS,
-  RULE_EVENTS_INDEX,
   TOOL_API_HEADERS,
-  deleteSignificantEvent,
   executeTool,
 } from '../../fixtures/built_in_role_access';
+import { deleteSignificantEvent, seedSignificantEvent } from '../../fixtures/rule_events';
 
 const RUN_ID = uuidv4();
 /** The id under test. It is placed on a different topology field in each matching event. */
@@ -32,8 +31,8 @@ interface SeededTopologyEvent {
   eventId: string;
   matchesFeature: boolean;
   data: {
-    causal_features?: Array<{ feature_id: string; name: string }>;
-    blast_radius?: Array<Record<string, string>>;
+    causal_features?: CausalFeature[];
+    blast_radius?: BlastRadiusEntry[];
   };
 }
 
@@ -99,38 +98,6 @@ const MATCHING_EVENT_IDS = SEEDED_EVENTS.filter(({ matchesFeature }) => matchesF
   .map(({ eventId }) => eventId)
   .sort();
 
-const seedTopologyEvent = async (
-  esClient: EsClient,
-  { eventId, data }: SeededTopologyEvent
-): Promise<void> => {
-  const now = new Date().toISOString();
-  await esClient.index({
-    index: RULE_EVENTS_INDEX,
-    op_type: 'create',
-    refresh: true,
-    document: {
-      '@timestamp': now,
-      scheduled_timestamp: now,
-      type: 'alert',
-      source: SIGNIFICANT_EVENTS_ALERT_SOURCE,
-      space_id: 'default',
-      status: 'breached',
-      severity: 'high',
-      group_hash: eventId,
-      rule: { id: eventId, version: 1 },
-      alert: { id: eventId, status: 'active' },
-      data: {
-        event_id: eventId,
-        title: 'Topology filter check',
-        summary: 'Seeded to check topology feature matching.',
-        confidence: 0.5,
-        source_ids: [],
-        ...data,
-      },
-    },
-  });
-};
-
 const searchedEventIds = (response: ApiClientResponse): string[] => {
   const events = response.body.results?.[0]?.data?.events ?? [];
   return events.map(({ event_id: eventId }: { event_id: string }) => eventId).sort();
@@ -146,7 +113,12 @@ apiTest.describe(
       const { apiKeyHeader } = await requestAuth.loginAsStreamsAdmin();
       headers = { ...TOOL_API_HEADERS, ...apiKeyHeader };
       for (const event of SEEDED_EVENTS) {
-        await seedTopologyEvent(esClient, event);
+        await seedSignificantEvent(esClient, event.eventId, {
+          title: 'Topology filter check',
+          summary: 'Seeded to check topology feature matching.',
+          confidence: 0.5,
+          ...event.data,
+        });
       }
     });
 
