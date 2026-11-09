@@ -65,7 +65,7 @@ export const wikiPageInfluenceJudge: RegisteredEvaluatorDefinition = {
           name: 'wiki_pages_referenced',
           score: usedIds.length,
           label: `${usedIds.length}/${pages.length} pages`,
-          explanation: capExplanation(usedIds.join(', ') || 'none'),
+          explanation: 'Number of the pages read that the answer relies on',
           metadata: { page_ids: usedIds, pages_read: pages.length },
         },
         {

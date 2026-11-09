@@ -170,14 +170,14 @@ describe('createConnectorTypeFromSpec', () => {
     expect(connectorType.sandboxSupportedAuthTypes).toEqual(['api_key_header', 'basic']);
   });
 
-  it('registers the shipped New Relic spec as sandbox capable for the API key header auth type', () => {
+  it('registers the shipped New Relic spec with no sandbox supported auth types', () => {
     const connectorType = createConnectorTypeFromSpec(connectorsSpecs.NewRelic, mockActionsPlugin);
-    expect(connectorType.sandboxSupportedAuthTypes).toEqual(['api_key_header']);
+    expect(connectorType.sandboxSupportedAuthTypes).toEqual([]);
   });
 
-  it('registers the shipped Rootly spec as sandbox capable for the bearer auth type', () => {
+  it('registers the shipped Rootly spec with no sandbox supported auth types', () => {
     const connectorType = createConnectorTypeFromSpec(connectorsSpecs.Rootly, mockActionsPlugin);
-    expect(connectorType.sandboxSupportedAuthTypes).toEqual(['bearer']);
+    expect(connectorType.sandboxSupportedAuthTypes).toEqual([]);
   });
 
   it('sets description from metadata.description', () => {
