@@ -9,7 +9,6 @@
 
 import React, { useCallback, useMemo, useState, type ReactNode } from 'react';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/src/services/types';
-import type { EuiDataGridCellPopoverElementProps } from '@elastic/eui';
 import { EuiSpacer, EuiText, useEuiTheme, useResizeObserver } from '@elastic/eui';
 import { getFormattedFields } from '@kbn/discover-utils/src/utils/get_formatted_fields';
 import { getFlattenedFields } from '@kbn/discover-utils/src/utils/get_flattened_fields';
@@ -18,6 +17,7 @@ import useWindowSize from 'react-use/lib/useWindowSize';
 import { getUnifiedDocViewerServices } from '../../../plugin';
 import { FieldRow } from '../../doc_viewer_table/field_row';
 import { TableGrid } from '../../doc_viewer_table/table_grid';
+import type { TableGridCellContext } from '../../doc_viewer_table/table_grid/model';
 import { FormattedValue } from './components/formatted_value';
 import { NamePopoverContent } from './components/name_popover_content';
 import { ValuePopoverContent } from './components/value_popover_content';
@@ -145,8 +145,8 @@ export function ContentFrameworkTable({
   );
 
   const cellValueRenderer = useCallback(
-    ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
-      const fieldName = rows[rowIndex]?.name;
+    ({ row, columnId }: TableGridCellContext<FieldRow>) => {
+      const fieldName = row.name;
       const fieldConfig = fields[fieldName];
 
       if (!fieldConfig) return null;
@@ -170,27 +170,20 @@ export function ContentFrameworkTable({
       }
       return fieldConfig.valueCellContent();
     },
-    [rows, fields, dataTestSubj, euiTheme.font.weight.bold]
+    [fields, dataTestSubj, euiTheme.font.weight.bold]
   );
 
   const cellPopoverRenderer = useCallback(
-    (props: EuiDataGridCellPopoverElementProps) => {
-      const { columnId, cellActions, rowIndex } = props;
-      const fieldName = rows[rowIndex]?.name;
+    ({ row, columnId }: TableGridCellContext<FieldRow>) => {
+      const fieldName = row.name;
       const fieldConfig = enrichedFields[fieldName];
       if (!fieldConfig) return null;
       if (columnId === 'name') {
-        return (
-          <NamePopoverContent
-            fieldName={fieldName}
-            fieldConfig={fieldConfig}
-            cellActions={cellActions}
-          />
-        );
+        return <NamePopoverContent fieldName={fieldName} fieldConfig={fieldConfig} />;
       }
-      return <ValuePopoverContent fieldConfig={fieldConfig} cellActions={cellActions} />;
+      return <ValuePopoverContent fieldConfig={fieldConfig} />;
     },
-    [rows, enrichedFields]
+    [enrichedFields]
   );
 
   if (Object.keys(hit.flattened).length === 0) {
@@ -221,9 +214,9 @@ export function ContentFrameworkTable({
         onAddColumn={onAddColumn}
         onRemoveColumn={onRemoveColumn}
         columns={columns}
-        customRenderCellValue={cellValueRenderer}
-        customRenderCellPopover={cellPopoverRenderer}
-        gridStyle={{ stripes: false, rowHover: 'none', header: 'shade' }}
+        renderCell={cellValueRenderer}
+        renderCellDetails={cellPopoverRenderer}
+        appearance={{ stripes: false, rowHover: 'none', header: 'shade' }}
         headerVisibility={false}
       />
     </div>

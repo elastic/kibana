@@ -15,14 +15,9 @@ import type { TableFieldConfiguration } from '..';
 interface NamePopoverContentProps {
   fieldName: string;
   fieldConfig: TableFieldConfiguration;
-  cellActions: React.ReactNode;
 }
 
-export function NamePopoverContent({
-  fieldName,
-  fieldConfig,
-  cellActions,
-}: NamePopoverContentProps) {
+export function NamePopoverContent({ fieldName, fieldConfig }: NamePopoverContentProps) {
   return (
     <>
       <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -45,7 +40,6 @@ export function NamePopoverContent({
           </EuiText>
         </>
       )}
-      {cellActions}
     </>
   );
 }

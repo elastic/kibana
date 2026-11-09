@@ -100,7 +100,7 @@ interface TableFieldValueProps {
   formattedValue: ReactNode;
   rawValue: unknown;
   ignoreReason?: IgnoredReason;
-  isDetails?: boolean; // true when inside EuiDataGrid cell popover
+  isDetails?: boolean; // true when inside the cell details surface
   isHighlighted?: boolean; // whether it's matching a search term
 }
 
@@ -212,7 +212,7 @@ const componentStyles = {
       lineHeight: euiTheme.font.lineHeightMultiplier,
       verticalAlign: 'top',
 
-      '.euiDataGridRowCell__popover &': {
+      '.kbnDocViewer__fieldsGridDetails &': {
         fontSize,
       },
     });

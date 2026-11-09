@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import type { EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import { copyToClipboard } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
@@ -18,18 +16,13 @@ import {
 } from '@kbn/unified-doc-viewer/utils/should_show_field_filter_actions';
 import type { IToasts } from '@kbn/core/public';
 import type { FieldRow } from './field_row';
+import type { TableGridCellActionDefinition } from './table_grid/model';
 
-interface TableActionsProps {
-  Component: EuiDataGridColumnCellActionProps['Component'];
-  row: FieldRow | undefined; // as we pass `rows[rowIndex]` it's safer to assume that `row` prop can be undefined
-  isEsqlMode: boolean | undefined;
-  columns?: string[];
+interface CheckFilterParams {
+  row: FieldRow | undefined;
+  onFilter: DocViewFilterFn | undefined;
   hideFilteringOnComputedColumns?: boolean;
 }
-
-type CheckFilterParams = Pick<TableActionsProps, 'row' | 'hideFilteringOnComputedColumns'> & {
-  onFilter: DocViewFilterFn | undefined;
-};
 
 function isFilterDisabledDueToIgnoredReason({ row, onFilter }: CheckFilterParams): boolean {
   if (!row) {
@@ -82,153 +75,6 @@ export function getFilterInOutPairDisabledWarning(params: CheckFilterParams): st
     : undefined;
 }
 
-const Copy: React.FC<Omit<TableActionsProps, 'isEsqlMode'> & { toasts: IToasts }> = ({
-  Component,
-  row,
-  toasts,
-}) => {
-  if (!row) {
-    return null;
-  }
-
-  const { name } = row;
-
-  const copyLabel = i18n.translate('unifiedDocViewer.docViews.table.copyValue', {
-    defaultMessage: 'Copy value',
-  });
-
-  return (
-    <Component
-      data-test-subj={`copyValueButton-${name}`}
-      iconType="copy"
-      title={copyLabel}
-      flush="left"
-      onClick={() => {
-        const errorMessage = i18n.translate(
-          'unifiedDocViewer.tableCellActions.copyFailedErrorText',
-          {
-            defaultMessage: 'Unable to copy to clipboard in this browser',
-          }
-        );
-
-        if (!row.formattedAsText) {
-          toasts.addWarning({
-            title: errorMessage,
-          });
-          return;
-        }
-
-        const copied = copyToClipboard(row.formattedAsText);
-        if (!copied) {
-          toasts.addWarning({
-            title: errorMessage,
-          });
-          return;
-        }
-
-        toasts.addInfo({
-          title: i18n.translate(
-            'unifiedDocViewer.tableCellActions.copyValueToClipboard.toastTitle',
-            {
-              defaultMessage: 'Copied to clipboard',
-            }
-          ),
-        });
-      }}
-    >
-      {copyLabel}
-    </Component>
-  );
-};
-
-const FilterIn: React.FC<TableActionsProps & { onFilter: DocViewFilterFn | undefined }> = ({
-  Component,
-  row,
-  isEsqlMode,
-  onFilter,
-  hideFilteringOnComputedColumns,
-}) => {
-  if (!row) {
-    return null;
-  }
-
-  const { dataViewField, name, flattenedValue } = row;
-
-  // Filters pair
-  const filterAddLabel = i18n.translate(
-    'unifiedDocViewer.docViews.table.filterForValueButtonTooltip',
-    {
-      defaultMessage: 'Filter for value',
-    }
-  );
-
-  if (
-    isFilterInOutPairDisabled({
-      row,
-      onFilter,
-      hideFilteringOnComputedColumns,
-    })
-  ) {
-    return null;
-  }
-
-  return (
-    <Component
-      data-test-subj={`addFilterForValueButton-${name}`}
-      iconType="plusCircle"
-      title={filterAddLabel}
-      flush="left"
-      onClick={() => onFilter!(dataViewField, flattenedValue, '+')}
-    >
-      {filterAddLabel}
-    </Component>
-  );
-};
-
-const FilterOut: React.FC<TableActionsProps & { onFilter: DocViewFilterFn | undefined }> = ({
-  Component,
-  row,
-  isEsqlMode,
-  onFilter,
-  hideFilteringOnComputedColumns,
-}) => {
-  if (!row) {
-    return null;
-  }
-
-  const { dataViewField, name, flattenedValue } = row;
-
-  // Filters pair
-  const filterOutLabel = i18n.translate(
-    'unifiedDocViewer.docViews.table.filterOutValueButtonTooltip',
-    {
-      defaultMessage: 'Filter out value',
-    }
-  );
-
-  if (
-    isFilterInOutPairDisabled({
-      row,
-      onFilter,
-      hideFilteringOnComputedColumns,
-    })
-  ) {
-    return null;
-  }
-
-  return (
-    <Component
-      data-test-subj={`addFilterOutValueButton-${name}`}
-      iconType="minusCircle"
-      title={filterOutLabel}
-      flush="left"
-      onClick={() => onFilter!(dataViewField, flattenedValue, '-')}
-    >
-      {filterOutLabel}
-    </Component>
-  );
-};
-
 function isFilterExistsDisabled(params: CheckFilterParams): boolean {
   const { row, onFilter, hideFilteringOnComputedColumns } = params;
   if (!row) {
@@ -247,6 +93,7 @@ export function getFilterExistsDisabledWarning(params: CheckFilterParams): strin
   if (!row || !isFilterExistsDisabled(params)) {
     return undefined;
   }
+
   const { dataViewField } = row;
 
   return dataViewField?.scripted
@@ -259,49 +106,11 @@ export function getFilterExistsDisabledWarning(params: CheckFilterParams): strin
     : undefined;
 }
 
-const FilterExist: React.FC<TableActionsProps & { onFilter: DocViewFilterFn | undefined }> = ({
-  Component,
-  row,
-  isEsqlMode,
-  hideFilteringOnComputedColumns,
-  onFilter,
-}) => {
-  if (!row) {
-    return null;
-  }
+const filterExistsLabel = i18n.translate(
+  'unifiedDocViewer.docViews.table.filterForFieldPresentButtonTooltip',
+  { defaultMessage: 'Filter for field present' }
+);
 
-  const { name } = row;
-
-  // Filter exists
-  const filterExistsLabel = i18n.translate(
-    'unifiedDocViewer.docViews.table.filterForFieldPresentButtonTooltip',
-    { defaultMessage: 'Filter for field present' }
-  );
-
-  if (
-    isFilterExistsDisabled({
-      row,
-      onFilter,
-      hideFilteringOnComputedColumns,
-    })
-  ) {
-    return null;
-  }
-
-  return (
-    <Component
-      data-test-subj={`addExistsFilterButton-${name}`}
-      iconType="filter"
-      title={filterExistsLabel}
-      flush="left"
-      onClick={() => onFilter!('_exists_', name, '+')}
-    >
-      {filterExistsLabel}
-    </Component>
-  );
-};
-
-// Toggle column
 const toggleColumnLabel = i18n.translate(
   'unifiedDocViewer.docViews.table.toggleColumnTableButtonTooltip',
   {
@@ -309,128 +118,165 @@ const toggleColumnLabel = i18n.translate(
   }
 );
 
-const ToggleColumn: React.FC<
-  TableActionsProps & {
-    onToggleColumn: ((field: string) => void) | undefined;
+const filterForValueLabel = i18n.translate(
+  'unifiedDocViewer.docViews.table.filterForValueButtonTooltip',
+  {
+    defaultMessage: 'Filter for value',
   }
-> = ({ Component, columns, row, onToggleColumn }) => {
-  if (!row) {
-    return null;
+);
+
+const filterOutValueLabel = i18n.translate(
+  'unifiedDocViewer.docViews.table.filterOutValueButtonTooltip',
+  {
+    defaultMessage: 'Filter out value',
   }
+);
 
-  const { name } = row;
-
-  if (!onToggleColumn) {
-    return null;
-  }
-
-  const isColumnAdded = columns?.includes(name);
-
-  return (
-    <Component
-      data-test-subj={`toggleColumnButton-${name}`}
-      iconType={isColumnAdded ? 'cross' : 'plusCircle'}
-      title={toggleColumnLabel}
-      flush="left"
-      onClick={() => onToggleColumn(name)}
-    >
-      {toggleColumnLabel}
-    </Component>
-  );
-};
+const copyValueLabel = i18n.translate('unifiedDocViewer.docViews.table.copyValue', {
+  defaultMessage: 'Copy value',
+});
 
 export function getFieldCellActions({
-  rows,
   columns,
-  isEsqlMode,
   hideFilteringOnComputedColumns,
   onFilter,
   onToggleColumn,
 }: {
-  rows: FieldRow[];
   columns?: string[];
-  isEsqlMode: boolean | undefined;
   hideFilteringOnComputedColumns?: boolean;
   onFilter?: DocViewFilterFn;
   onToggleColumn: ((field: string) => void) | undefined;
-}) {
-  return [
-    ...(onFilter
-      ? [
-          ({ Component, rowIndex }: EuiDataGridColumnCellActionProps) => {
-            return (
-              <FilterExist
-                row={rows[rowIndex]}
-                Component={Component}
-                isEsqlMode={isEsqlMode}
-                onFilter={onFilter}
-                hideFilteringOnComputedColumns={hideFilteringOnComputedColumns}
-              />
-            );
-          },
-        ]
-      : []),
-    ...(onToggleColumn
-      ? [
-          ({ Component, rowIndex }: EuiDataGridColumnCellActionProps) => {
-            return (
-              <ToggleColumn
-                row={rows[rowIndex]}
-                columns={columns}
-                Component={Component}
-                isEsqlMode={isEsqlMode}
-                onToggleColumn={onToggleColumn}
-              />
-            );
-          },
-        ]
-      : []),
-  ];
+}): Array<TableGridCellActionDefinition<FieldRow>> {
+  const actions: Array<TableGridCellActionDefinition<FieldRow>> = [];
+
+  if (onFilter) {
+    actions.push({
+      id: 'filter-exists',
+      resolve: ({ row }) => {
+        const { name } = row;
+
+        if (isFilterExistsDisabled({ row, onFilter, hideFilteringOnComputedColumns })) {
+          return undefined;
+        }
+
+        return {
+          id: 'filter-exists',
+          label: filterExistsLabel,
+          icon: 'filter',
+          dataTestSubj: `addExistsFilterButton-${name}`,
+          onExecute: () => onFilter('_exists_', name, '+'),
+        };
+      },
+    });
+  }
+
+  if (onToggleColumn) {
+    actions.push({
+      id: 'toggle-column',
+      resolve: ({ row }) => {
+        const { name } = row;
+
+        return {
+          id: 'toggle-column',
+          label: toggleColumnLabel,
+          icon: columns?.includes(name) ? 'remove' : 'add',
+          dataTestSubj: `toggleColumnButton-${name}`,
+          onExecute: () => onToggleColumn(name),
+        };
+      },
+    });
+  }
+
+  return actions;
 }
 
 export function getFieldValueCellActions({
-  rows,
-  isEsqlMode,
   hideFilteringOnComputedColumns,
   onFilter,
   toasts,
 }: {
-  rows: FieldRow[];
-  isEsqlMode: boolean | undefined;
   hideFilteringOnComputedColumns?: boolean;
   onFilter?: DocViewFilterFn;
   toasts: IToasts;
-}) {
-  const filterActions = onFilter
-    ? [
-        ({ Component, rowIndex }: EuiDataGridColumnCellActionProps) => {
-          return (
-            <FilterIn
-              row={rows[rowIndex]}
-              Component={Component}
-              isEsqlMode={isEsqlMode}
-              onFilter={onFilter}
-              hideFilteringOnComputedColumns={hideFilteringOnComputedColumns}
-            />
-          );
-        },
-        ({ Component, rowIndex }: EuiDataGridColumnCellActionProps) => {
-          return (
-            <FilterOut
-              row={rows[rowIndex]}
-              Component={Component}
-              isEsqlMode={isEsqlMode}
-              onFilter={onFilter}
-              hideFilteringOnComputedColumns={hideFilteringOnComputedColumns}
-            />
-          );
-        },
-      ]
-    : [];
+}): Array<TableGridCellActionDefinition<FieldRow>> {
+  const actions: Array<TableGridCellActionDefinition<FieldRow>> = [];
 
-  const copyAction = ({ Component, rowIndex }: EuiDataGridColumnCellActionProps) => {
-    return <Copy toasts={toasts} row={rows[rowIndex]} Component={Component} />;
-  };
+  if (onFilter) {
+    actions.push(
+      {
+        id: 'filter-for-value',
+        resolve: ({ row }) => {
+          const { dataViewField, flattenedValue, name } = row;
 
-  return [...filterActions, copyAction];
+          if (isFilterInOutPairDisabled({ row, onFilter, hideFilteringOnComputedColumns })) {
+            return undefined;
+          }
+
+          return {
+            id: 'filter-for-value',
+            label: filterForValueLabel,
+            icon: 'add',
+            dataTestSubj: `addFilterForValueButton-${name}`,
+            onExecute: () => onFilter(dataViewField, flattenedValue, '+'),
+          };
+        },
+      },
+      {
+        id: 'filter-out-value',
+        resolve: ({ row }) => {
+          const { dataViewField, flattenedValue, name } = row;
+
+          if (isFilterInOutPairDisabled({ row, onFilter, hideFilteringOnComputedColumns })) {
+            return undefined;
+          }
+
+          return {
+            id: 'filter-out-value',
+            label: filterOutValueLabel,
+            icon: 'subtract',
+            dataTestSubj: `addFilterOutValueButton-${name}`,
+            onExecute: () => onFilter(dataViewField, flattenedValue, '-'),
+          };
+        },
+      }
+    );
+  }
+
+  actions.push({
+    id: 'copy-value',
+    resolve: ({ row }) => {
+      const { formattedAsText, name } = row;
+
+      return {
+        id: 'copy-value',
+        label: copyValueLabel,
+        icon: 'copy',
+        dataTestSubj: `copyValueButton-${name}`,
+        onExecute: () => {
+          const errorMessage = i18n.translate(
+            'unifiedDocViewer.tableCellActions.copyFailedErrorText',
+            {
+              defaultMessage: 'Unable to copy to clipboard in this browser',
+            }
+          );
+
+          if (!formattedAsText || !copyToClipboard(formattedAsText)) {
+            toasts.addWarning({ title: errorMessage });
+            return;
+          }
+
+          toasts.addInfo({
+            title: i18n.translate(
+              'unifiedDocViewer.tableCellActions.copyValueToClipboard.toastTitle',
+              {
+                defaultMessage: 'Copied to clipboard',
+              }
+            ),
+          });
+        },
+      };
+    },
+  });
+
+  return actions;
 }

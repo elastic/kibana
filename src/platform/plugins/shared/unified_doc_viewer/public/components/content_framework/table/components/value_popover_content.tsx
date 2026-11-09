@@ -14,10 +14,9 @@ import type { TableFieldConfiguration } from '..';
 
 interface ValuePopoveContentProps {
   fieldConfig: TableFieldConfiguration;
-  cellActions: React.ReactNode;
 }
 
-export function ValuePopoverContent({ fieldConfig, cellActions }: ValuePopoveContentProps) {
+export function ValuePopoverContent({ fieldConfig }: ValuePopoveContentProps) {
   const { fontSize } = useEuiFontSize('s');
 
   return (
@@ -35,7 +34,6 @@ export function ValuePopoverContent({ fieldConfig, cellActions }: ValuePopoveCon
       >
         {fieldConfig.valueCellContent({ truncate: false })}
       </EuiText>
-      {cellActions}
     </>
   );
 }
