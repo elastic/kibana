@@ -8,11 +8,16 @@ import React from 'react';
 import Chance from 'chance';
 import { render, screen } from '@testing-library/react';
 import type { UseQueryResult } from '@kbn/react-query';
+import type { CoreStart } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { createCloudDefendIntegrationFixture } from '../../test/fixtures/cloud_defend_integration';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { TestProvider } from '../../test/test_provider';
 import { Policies } from '.';
 import * as TEST_SUBJ from './test_subjects';
+import { ADD_INTEGRATIONS_MENU_ITEM_TEST_ID } from '../../components/cloud_defend_app_header/use_add_integrations_menu_item';
 import { useCloudDefendPolicies } from './use_cloud_defend_policies';
 import { useCloudDefendSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
@@ -51,8 +56,17 @@ describe('<Policies />', () => {
   const renderPolicies = (queryResponse: Partial<UseQueryResult> = createReactQueryResponse()) => {
     (useCloudDefendPolicies as jest.Mock).mockImplementation(() => queryResponse);
 
+    const coreStart = coreMock.createStart();
+    const core: CoreStart = {
+      ...coreStart,
+      application: {
+        ...coreStart.application,
+        capabilities: { ...coreStart.application.capabilities, fleet: { read: true } },
+      },
+    };
+
     return render(
-      <TestProvider>
+      <TestProvider core={core}>
         <Policies />
       </TestProvider>
     );
@@ -61,13 +75,24 @@ describe('<Policies />', () => {
   it('renders the page header', () => {
     renderPolicies();
 
-    expect(screen.getByTestId(TEST_SUBJ.POLICIES_PAGE_HEADER)).toBeInTheDocument();
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+      'Defend for containers (D4C)'
+    );
   });
 
-  it('renders the "add integration" button', () => {
+  it('does not render a page-level "Add Integration" action', () => {
     renderPolicies();
 
-    expect(screen.getByTestId(TEST_SUBJ.ADD_INTEGRATION_TEST_SUBJ)).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Add Integration' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Add Integration' })).not.toBeInTheDocument();
+  });
+
+  it('renders "Add integrations" in the app menu overflow', async () => {
+    renderPolicies();
+
+    await openAppMenuOverflow();
+
+    expect(screen.getByTestId(ADD_INTEGRATIONS_MENU_ITEM_TEST_ID)).toBeInTheDocument();
   });
 
   it('renders error state while there is an error', () => {
