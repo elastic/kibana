@@ -60,7 +60,7 @@ export const ResizeGauge = React.memo(({ panelId }: { panelId: string }) => {
     <div css={outerStyles} className="kbnFlexPanel--resizeGauge">
       <div className="kbnFlexPanel--resizeGauge--inner">
         <span className="kbnFlexPanel--resizeGauge--text">
-          {i18n.translate('kbnFlexLayout.resizeGauge.width', {
+          {i18n.translate('kbnGridLayout.flex.resizeGauge.width', {
             defaultMessage: '{width}',
             values: { width },
           })}

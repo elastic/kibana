@@ -389,8 +389,7 @@ describe('FlexLayout', () => {
         getHandle('panel1', 'drag').focus();
 
         await pressKey('[Enter]');
-        // each press moves 150px: 300px sits between panel2 (left 300) and panel3 (left 600)
-        await pressKey('[ArrowRight]');
+        // each press moves 150px: 450px sits between panel2 (left 300) and panel3 (left 600)
         await pressKey('[ArrowRight]');
         await pressKey('[ArrowRight]');
         await pressKey('[ArrowRight]');
@@ -401,6 +400,22 @@ describe('FlexLayout', () => {
         const { panel1, panel2, panel3 } = getLastLayout();
         expect(panel2.order).toBeLessThan(panel1.order);
         expect(panel1.order).toBeLessThan(panel3.order);
+        expect(getPanelIdsInOrder()).toEqual(['panel2', 'panel1', 'panel3']);
+      });
+
+      it('passes a panel it lands exactly on, in the direction of travel', async () => {
+        renderFlexLayout();
+        getHandle('panel1', 'drag').focus();
+
+        await pressKey('[Enter]');
+        // the second press lands on panel2's left (300) and the fourth on panel3's left (600)
+        for (let i = 0; i < 2; i++) await pressKey('[ArrowRight]');
+        expect(getPanelIdsInOrder()).toEqual(['panel2', 'panel1', 'panel3']);
+        for (let i = 0; i < 2; i++) await pressKey('[ArrowRight]');
+        expect(getPanelIdsInOrder()).toEqual(['panel2', 'panel3', 'panel1']);
+
+        // and back the other way
+        for (let i = 0; i < 2; i++) await pressKey('[ArrowLeft]');
         expect(getPanelIdsInOrder()).toEqual(['panel2', 'panel1', 'panel3']);
       });
 
@@ -416,6 +431,58 @@ describe('FlexLayout', () => {
         expect(getPanelIdsInOrder()).toEqual(['panel1', 'panel2', 'panel3']);
         expect(onLayoutChange).not.toHaveBeenCalled();
         expect(getPanel('panel1')).not.toHaveClass('kbnFlexPanel--active');
+      });
+
+      describe('announcements', () => {
+        const getAnnouncement = () => screen.getByTestId('kbnFlexLayout--announcements');
+
+        it('describes the keyboard interaction on the drag handle', () => {
+          renderFlexLayout();
+
+          expect(getHandle('panel1', 'drag').getAttribute('aria-description')).toMatch(
+            /Space or Enter to pick up.*arrow keys.*Escape to cancel/
+          );
+        });
+
+        it('announces the pick up, each move, and the drop', async () => {
+          renderFlexLayout();
+          getHandle('panel1', 'drag').focus();
+
+          await pressKey('[Enter]');
+          expect(getAnnouncement()).toHaveTextContent(
+            /Panel picked up, position 1 of 3.*Escape to cancel/
+          );
+
+          for (let i = 0; i < 2; i++) await pressKey('[ArrowRight]');
+          expect(getAnnouncement()).toHaveTextContent(/Panel moved to position 2 of 3/);
+
+          await pressKey('[Enter]');
+          expect(getAnnouncement()).toHaveTextContent(/Panel dropped at position 2 of 3/);
+        });
+
+        it('announces the original position when the move is cancelled', async () => {
+          renderFlexLayout();
+          getHandle('panel1', 'drag').focus();
+
+          await pressKey('[Enter]');
+          for (let i = 0; i < 4; i++) await pressKey('[ArrowRight]');
+          await pressKey('{Escape}');
+
+          expect(getAnnouncement()).toHaveTextContent(
+            /Move cancelled. Panel returned to position 1 of 3/
+          );
+        });
+
+        it('does not announce resizes', async () => {
+          renderFlexLayout();
+          getHandle('panel1', 'resize').focus();
+
+          await pressKey('[Enter]');
+          await pressKey('[ArrowRight]');
+          await pressKey('[Enter]');
+
+          expect(getAnnouncement()).toBeEmptyDOMElement();
+        });
       });
 
       it('does not emit when dropped back in the original position', async () => {

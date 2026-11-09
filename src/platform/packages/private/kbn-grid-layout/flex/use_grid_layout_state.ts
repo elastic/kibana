@@ -11,13 +11,19 @@ import deepEqual from 'fast-deep-equal';
 import { isEqual } from 'lodash';
 import { useEffect, useMemo, useRef } from 'react';
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, combineLatest, distinctUntilChanged, filter, map } from 'rxjs';
+import { BehaviorSubject, combineLatest, distinctUntilChanged, filter, map, Subject } from 'rxjs';
 import useResizeObserver, { type ObservedSize } from 'use-resize-observer/polyfilled';
 
 import { getScrollContainer } from '@kbn/core-chrome-layout-utils';
 
 import type { ActivePanelEvent } from './grid_panel';
-import type { FlexLayoutData, FlexLayoutStateManager, GridAccessMode, GridSettings } from './types';
+import type {
+  FlexKeyboardInteraction,
+  FlexLayoutData,
+  FlexLayoutStateManager,
+  GridAccessMode,
+  GridSettings,
+} from './types';
 
 export const useGridLayoutState = ({
   layout,
@@ -80,6 +86,7 @@ export const useGridLayoutState = ({
       gridSettings$,
       scrollContainer$,
       layoutUpdated$,
+      keyboardInteraction$: new Subject<FlexKeyboardInteraction>(),
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

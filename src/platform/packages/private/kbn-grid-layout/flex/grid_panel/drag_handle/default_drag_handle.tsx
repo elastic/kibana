@@ -10,18 +10,23 @@ import React from 'react';
 import { EuiIcon, type UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { getKeyboardDragInstructions } from '../../use_keyboard_announcements';
 import type { DragHandleApi } from './use_drag_handle_api';
 
 export const DefaultDragHandle = React.memo(
   ({ dragHandleApi }: { dragHandleApi: DragHandleApi }) => {
+    // `aria-description` is a global ARIA 1.3 attribute, but the jsx-a11y rule only knows the
+    // ARIA 1.2 list and would flag it on a `button`, so it is passed as a props object
+    const descriptionProps = { 'aria-description': getKeyboardDragInstructions() };
     return (
       <button
         onMouseDown={dragHandleApi.startDrag}
         onTouchStart={dragHandleApi.startDrag}
         onKeyDown={dragHandleApi.startDrag}
-        aria-label={i18n.translate('kbnFlexLayout.dragHandle.ariaLabel', {
+        aria-label={i18n.translate('kbnGridLayout.flex.dragHandle.ariaLabel', {
           defaultMessage: 'Drag to move',
         })}
+        {...descriptionProps}
         className="kbnFlexPanel--dragHandle"
         data-test-subj="kbnFlexPanel--dragHandle"
         css={styles}

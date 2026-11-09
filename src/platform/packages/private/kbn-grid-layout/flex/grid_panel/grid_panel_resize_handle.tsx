@@ -55,7 +55,7 @@ export const ResizeHandle = React.memo(({ panelId }: { panelId: string }) => {
       onTouchStart={startDrag}
       onKeyDown={startDrag}
       className="kbnFlexPanel--resizeHandle"
-      aria-label={i18n.translate('kbnFlexLayout.resizeHandle.ariaLabel', {
+      aria-label={i18n.translate('kbnGridLayout.flex.resizeHandle.ariaLabel', {
         defaultMessage: 'Resize panel',
       })}
     />

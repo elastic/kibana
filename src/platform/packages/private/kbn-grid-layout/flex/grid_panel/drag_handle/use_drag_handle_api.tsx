@@ -9,6 +9,7 @@
 
 import { useCallback, useEffect, useRef } from 'react';
 
+import { getKeyboardDragInstructions } from '../../use_keyboard_announcements';
 import { useGridLayoutContext } from '../../use_grid_layout_context';
 import { useGridLayoutPanelEvents } from '../../use_grid_layout_events';
 import type { UserInteractionEvent } from '../../../grid/use_grid_layout_events/types';
@@ -42,6 +43,7 @@ export const useDragHandleApi = ({ panelId }: { panelId: string }): DragHandleAp
         handle.addEventListener('touchstart', startDrag, { passive: true });
         handle.addEventListener('keydown', startDrag);
         handle.classList.add('kbnFlexPanel--dragHandle');
+        handle.setAttribute('aria-description', getKeyboardDragInstructions());
       }
       removeEventListenersRef.current = () => {
         for (const handle of dragHandles) {

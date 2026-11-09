@@ -25,6 +25,7 @@ import {
   isLayoutInteractive,
 } from '../state_manager_selectors';
 import type { UserInteractionEvent } from '../../../grid/use_grid_layout_events/types';
+import type { FlexKeyboardInteraction } from '../../types';
 import { cancelAction, commitAction, moveAction, startAction } from './state_manager_actions';
 import { getNextKeyboardPositionForPanel } from './utils';
 /*
@@ -44,27 +45,44 @@ export const useGridLayoutPanelEvents = ({
 
   const lastRequestedPanelPosition = useRef<FlexPanelData | undefined>(undefined);
 
-  const onStart = useCallback(
-    (ev: UserInteractionEvent) => {
-      startAction(ev, interactionType, gridLayoutStateManager, panelId);
+  // keyboard drags are announced to screen reader users; resizes and pointer drags are not
+  const announce = useCallback(
+    (type: FlexKeyboardInteraction['type']) => {
+      gridLayoutStateManager.keyboardInteraction$.next({ type, panelId });
     },
-    [gridLayoutStateManager, interactionType, panelId]
+    [gridLayoutStateManager, panelId]
   );
 
-  const onEnd = useCallback(() => {
+  const onStart = useCallback(
+    (ev: UserInteractionEvent) => {
+      // a cancelled interaction restores the layout but not this cache, so clear it for each new interaction
+      lastRequestedPanelPosition.current = undefined;
+      startAction(ev, interactionType, gridLayoutStateManager, panelId);
+      if (interactionType === 'drag' && isKeyboardEvent(ev)) announce('start');
+    },
+    [gridLayoutStateManager, interactionType, panelId, announce]
+  );
+
+  const commitAndAnnounce = useCallback(() => {
+    const wasKeyboardDrag =
+      interactionType === 'drag' && hasPanelInteractionStartedWithKeyboard(gridLayoutStateManager);
     commitAction(gridLayoutStateManager);
-  }, [gridLayoutStateManager]);
+    if (wasKeyboardDrag) announce('end');
+  }, [gridLayoutStateManager, interactionType, announce]);
+
+  const onEnd = commitAndAnnounce;
 
   const onBlur = useCallback(() => {
     // make sure the user hasn't started another interaction in the meantime
     if (gridLayoutStateManager.activePanelEvent$.value?.id === panelId) {
-      commitAction(gridLayoutStateManager);
+      commitAndAnnounce();
     }
-  }, [gridLayoutStateManager, panelId]);
+  }, [gridLayoutStateManager, panelId, commitAndAnnounce]);
 
   const onCancel = useCallback(() => {
     cancelAction(gridLayoutStateManager);
-  }, [gridLayoutStateManager]);
+    if (interactionType === 'drag') announce('cancel');
+  }, [gridLayoutStateManager, interactionType, announce]);
 
   const onMove = useCallback(
     (ev: UserInteractionEvent) => {
@@ -84,10 +102,11 @@ export const useGridLayoutPanelEvents = ({
           gridLayoutStateManager,
           getSensorPosition(ev)
         );
-        return moveAction(ev, gridLayoutStateManager, pointerPixel, lastRequestedPanelPosition);
+        moveAction(ev, gridLayoutStateManager, pointerPixel, lastRequestedPanelPosition);
+        if (interactionType === 'drag') announce('move');
       }
     },
-    [gridLayoutStateManager]
+    [gridLayoutStateManager, interactionType, announce]
   );
 
   const startInteraction = useCallback(

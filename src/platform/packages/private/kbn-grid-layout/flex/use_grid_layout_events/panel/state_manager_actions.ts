@@ -129,6 +129,13 @@ export const moveAction = (
       gridLayout$.next(nextLayout);
     }
   } else {
+    const getSortKey = (rect: { top: number; bottom: number; left: number }) =>
+      rect.left + getRow(rect) * (gridLayoutRect?.width ?? 1);
+
+    // Full-width panels can produce identical sort keys; break ties using the drag direction so
+    // the active panel passes over the panel it lands on instead of keeping its original order.
+    const movedForward = getSortKey(previewRect) >= getSortKey(activePanel.position);
+
     const sorted = Object.entries(panelElements)
       .map(([id, panel]) => {
         // the active panel's DOM position isn't updated until `activePanelEvent$.next()` below,
@@ -137,10 +144,15 @@ export const moveAction = (
           id === activePanel.id
             ? previewRect
             : panel?.getBoundingClientRect() ?? { top: 0, bottom: 0, left: 0 };
-        const row = getRow(rect);
-        return { id, sortKey: rect.left + row * (gridLayoutRect?.width ?? 1) };
+        return { id, sortKey: getSortKey(rect) };
       })
-      .sort((a, b) => a.sortKey - b.sortKey);
+      .sort((a, b) => {
+        if (a.sortKey !== b.sortKey) return a.sortKey - b.sortKey;
+        const activeId = activePanel.id;
+        if (a.id === activeId) return movedForward ? 1 : -1;
+        if (b.id === activeId) return movedForward ? -1 : 1;
+        return 0;
+      });
 
     const nextLayout: FlexLayoutData = {};
     sorted.forEach(({ id }, index) => {
