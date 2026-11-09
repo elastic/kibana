@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { z } from '@kbn/zod/v4';
 import type { ActionContext, AuthTypeDef } from '../../connector_spec';
 import { getSandboxHosts } from '../../get_sandbox_hosts';
+import { getSchemaForAuthType } from '../../lib/get_schema_for_auth_type';
 import { Elasticsearch } from './elasticsearch';
 import { EsqlInputSchema, RequestInputSchema, SearchInputSchema } from './types';
 
@@ -72,6 +74,52 @@ describe('Elasticsearch connector', () => {
         expect.objectContaining({ type: 'api_key_header', supportsSandbox: true }),
         expect.objectContaining({ type: 'basic', supportsSandbox: true }),
       ]);
+    });
+
+    describe('API key field', () => {
+      const getApiKeySchema = () => {
+        const apiKeyAuth = (Elasticsearch.auth?.types ?? []).find(
+          (t): t is AuthTypeDef => typeof t === 'object' && t.type === 'api_key_header'
+        );
+        if (!apiKeyAuth) {
+          throw new Error('api_key_header auth type is missing');
+        }
+        return getSchemaForAuthType(apiKeyAuth).schema;
+      };
+
+      const parseApiKey = (value: string) =>
+        getApiKeySchema().safeParse({ authType: 'api_key_header', Authorization: value });
+
+      it('adds the ApiKey prefix to a key pasted without it', () => {
+        const result = parseApiKey('  essu_ZW5jb2RlZA==  ');
+        expect(result.success && result.data.Authorization).toBe('ApiKey essu_ZW5jb2RlZA==');
+      });
+
+      it.each(['ApiKey ZW5jb2RlZA==', 'apikey ZW5jb2RlZA==', 'Bearer token', 'Basic dXNlcjpwYXNz'])(
+        'keeps a value that already has an auth scheme: %s',
+        (value) => {
+          const result = parseApiKey(value);
+          expect(result.success && result.data.Authorization).toBe(value);
+        }
+      );
+
+      it('rejects an empty key', () => {
+        expect(parseApiKey('   ').success).toBe(false);
+      });
+
+      it('shows the label and help text on the stored field', () => {
+        const { properties } = z.toJSONSchema(getApiKeySchema()) as {
+          properties: Record<string, Record<string, unknown>>;
+        };
+        expect(properties.Authorization).toEqual(
+          expect.objectContaining({
+            type: 'string',
+            label: 'API Key',
+            sensitive: true,
+            helpText: expect.stringContaining('The connector adds the "ApiKey" prefix'),
+          })
+        );
+      });
     });
 
     it('declares the host of the configured cluster URL as its only sandbox host', () => {
