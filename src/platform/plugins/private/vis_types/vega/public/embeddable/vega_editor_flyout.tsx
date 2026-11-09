@@ -63,12 +63,6 @@ export const VegaEditorFlyout = ({
     api.filters$,
     api.dataSources$
   );
-  // Like Visualize's search bar, fall back to the default data view when the spec names none.
-  const dataViews = publishedDataViews?.length
-    ? publishedDataViews
-    : defaultDataView
-    ? [defaultDataView]
-    : [];
   const search = useMemo<PanelSearch>(
     () => ({
       query: isOfQueryType(publishedQuery) ? publishedQuery : undefined,
@@ -119,7 +113,8 @@ export const VegaEditorFlyout = ({
       <EuiFlyoutBody data-test-subj="editorFlyoutBody" css={vegaEditorFlyoutBodyCss}>
         <VegaEditorBody
           SearchBar={SearchBar}
-          dataViews={dataViews}
+          specDataViews={publishedDataViews}
+          defaultDataView={defaultDataView}
           query={search.query}
           filters={search.filters}
           onQueryChange={api.setQuery}

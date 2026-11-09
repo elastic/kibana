@@ -66,8 +66,10 @@ export const tooManyFiltersMessage = i18n.translate('visTypeVega.editor.tooManyF
 
 interface VegaEditorBodyProps {
   SearchBar: VegaPluginStartDependencies['unifiedSearch']['ui']['SearchBar'];
-  /** The data views the search bar suggests fields from. */
-  dataViews: DataView[];
+  /** The data views the spec names, which the search bar suggests fields from. */
+  specDataViews?: DataView[];
+  /** Used instead when the spec names no data views, like Visualize's search bar. */
+  defaultDataView?: DataView;
   query?: Query;
   filters?: Filter[];
   /** Called with `undefined` when the query is cleared. */
@@ -84,7 +86,8 @@ interface VegaEditorBodyProps {
 /** The query bar and spec editor shared by the dashboard panel and library item editors. */
 export const VegaEditorBody = ({
   SearchBar,
-  dataViews,
+  specDataViews,
+  defaultDataView,
   query,
   filters,
   onQueryChange,
@@ -94,6 +97,11 @@ export const VegaEditorBody = ({
   onSpecChange,
   onFormatChange,
 }: VegaEditorBodyProps) => {
+  const dataViews = specDataViews?.length
+    ? specDataViews
+    : defaultDataView
+    ? [defaultDataView]
+    : [];
   // Filters on the only ad-hoc data view are stored without its id, because the id isn't a
   // saved object and a reference to it fails import. The search bar gets the id back, because the
   // filter editor opens an empty filter when it can't match one.

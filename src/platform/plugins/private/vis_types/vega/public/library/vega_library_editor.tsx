@@ -126,7 +126,6 @@ export const VegaLibraryEditor = ({
 
   const isDirty = !isSameDraft(draft, savedDraft);
   const canPreview = draft.spec !== previewedSpec.spec;
-  const dataViews = specDataViews.length ? specDataViews : defaultDataView ? [defaultDataView] : [];
 
   // The data views follow the previewed spec, so they don't resolve on every keystroke.
   useEffect(() => {
@@ -266,7 +265,8 @@ export const VegaLibraryEditor = ({
       <EuiFlyoutBody data-test-subj="vegaLibraryEditorBody" css={vegaEditorFlyoutBodyCss}>
         <VegaEditorBody
           SearchBar={SearchBar}
-          dataViews={dataViews}
+          specDataViews={specDataViews}
+          defaultDataView={defaultDataView}
           query={draft.query}
           filters={draft.filters}
           onQueryChange={(query) => {
