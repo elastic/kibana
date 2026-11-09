@@ -104,13 +104,13 @@ export const Page: FC<PageProps> = ({ nextStepPath, extraButtons }) => {
 
   return (
     <div data-test-subj="mlPageSourceSelection">
+      <MlAppHeader
+        title={i18n.translate('xpack.ml.newJob.wizard.selectDataViewOrSavedSearch', {
+          defaultMessage: 'Select data view or saved Discover session',
+        })}
+        back={anomalyDetectionJobsBack}
+      />
       <EuiPageBody restrictWidth={1200}>
-        <MlAppHeader
-          title={i18n.translate('xpack.ml.newJob.wizard.selectDataViewOrSavedSearch', {
-            defaultMessage: 'Select data view or saved Discover session',
-          })}
-          back={anomalyDetectionJobsBack}
-        />
         <EuiPanel hasShadow={false} hasBorder>
           {isMlCpsEnabled && totalProjectCount > 1 ? (
             <>
