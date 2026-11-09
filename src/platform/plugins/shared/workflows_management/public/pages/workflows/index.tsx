@@ -15,6 +15,11 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { useChromeStyle } from '@kbn/core-chrome-browser-hooks';
+import {
+  KBN_RECESSED_GLASS_CLASS,
+  kbnRecessedGlassCss,
+} from '@kbn/css-utils/public/recessed_glass_css';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { AppHeader } from '@kbn/app-header';
@@ -99,7 +104,8 @@ export function WorkflowsPage() {
   const showManagedWorkflowsFilter = Boolean(
     isManagedWorkflowsSettingEnabled && canReadWorkflow && canReadManagedWorkflow
   );
-  const { euiTheme } = useEuiTheme();
+  const euiThemeContext = useEuiTheme();
+  const isClassicChrome = useChromeStyle() === 'classic';
   const location = useLocation();
 
   const search = useMemo<WorkflowsSearchParams>(() => {
@@ -187,7 +193,15 @@ export function WorkflowsPage() {
   return (
     <EuiPageTemplate
       offset={0}
-      css={{ backgroundColor: euiTheme.colors.backgroundBasePlain }}
+      // POC: project chrome puts the listing on the recessed glass surface; classic keeps the plain fill.
+      css={
+        isClassicChrome
+          ? { backgroundColor: euiThemeContext.euiTheme.colors.backgroundBasePlain }
+          : css(kbnRecessedGlassCss(euiThemeContext))
+      }
+      className={isClassicChrome ? undefined : KBN_RECESSED_GLASS_CLASS}
+      panelled={isClassicChrome ? undefined : false}
+      minHeight={isClassicChrome ? undefined : 'var(--kbn-application--content-height, 0)'}
       data-test-subj="workflowsPage"
     >
       <AppHeader

@@ -386,6 +386,8 @@ export const WorkflowListTable = ({
         defaultMessage: 'Workflows',
       })}
       data-test-subj="workflowListTable"
+      // POC: let the recessed glass listing surface show through the table.
+      hasBackground={false}
       css={css`
         container-type: inline-size;
 
