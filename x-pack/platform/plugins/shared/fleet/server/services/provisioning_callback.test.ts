@@ -289,6 +289,95 @@ describe('provisioningCallbackService', () => {
         expires_at: FUTURE,
       });
     });
+
+    it('leaves a fresh claim to the request holding it', async () => {
+      soClient.get.mockResolvedValue(soWith(CLAIMED, FRESH) as any);
+
+      const item = await provisioningCallbackService.get(soClient, 'cb-1');
+
+      expect(item).toMatchObject({ status: 'receiving', ...PAYLOAD });
+      expect(soClient.update).not.toHaveBeenCalled();
+      expect(cloudConnectorService.create).not.toHaveBeenCalled();
+    });
+
+    it('applies the stored report of a stale claim, so the browser poll recovers a dead request', async () => {
+      soClient.get.mockImplementation(async (type) => {
+        if (type === PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE) {
+          return soWith(CLAIMED);
+        }
+        throw CONNECTOR_NOT_FOUND;
+      });
+      soClient.update.mockResolvedValue({ version: 'v2' } as any);
+
+      const item = await provisioningCallbackService.get(soClient, 'cb-1');
+
+      // Taken over with a guarded write of its own, applied, and finished under that version.
+      expect(soClient.update).toHaveBeenNthCalledWith(
+        1,
+        PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE,
+        'cb-1',
+        CLAIM,
+        { version: 'v1' }
+      );
+      expect(cloudConnectorService.create).toHaveBeenCalledWith(
+        soClient,
+        expect.objectContaining({ vars: { role_arn: { type: 'text', value: ROLE_ARN } } }),
+        { id: 'cb-1' }
+      );
+      expect(soClient.update).toHaveBeenNthCalledWith(
+        2,
+        PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE,
+        'cb-1',
+        expect.objectContaining({ status: 'received', cloud_connector_id: 'cc-1' }),
+        { version: 'v2' }
+      );
+      expect(item).toMatchObject({ status: 'received', cloud_connector_id: 'cc-1', ...PAYLOAD });
+    });
+
+    it('hands the record back pending when the stored report cannot be applied', async () => {
+      soClient.get.mockImplementation(async (type) => {
+        if (type === PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE) {
+          return soWith(CLAIMED);
+        }
+        throw CONNECTOR_NOT_FOUND;
+      });
+      soClient.update.mockResolvedValue({ version: 'v2' } as any);
+      jest
+        .mocked(cloudConnectorService.create)
+        .mockRejectedValue(new CloudConnectorCreateError('boom'));
+
+      const item = await provisioningCallbackService.get(soClient, 'cb-1');
+
+      expect(soClient.update).toHaveBeenLastCalledWith(
+        PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE,
+        'cb-1',
+        { status: 'pending' },
+        { version: 'v2' }
+      );
+      expect(item).toMatchObject({ status: 'pending' });
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringMatching(
+          /^Could not apply the stored report of provisioning callback \[id=cb-1\]: .*boom$/
+        )
+      );
+    });
+
+    it('returns what another attempt stored when the takeover loses', async () => {
+      soClient.get
+        .mockResolvedValueOnce(soWith(CLAIMED))
+        .mockResolvedValueOnce(soWith(CLAIMED, FRESH) as any);
+      soClient.update.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createConflictError(
+          PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE,
+          'cb-1'
+        )
+      );
+
+      const item = await provisioningCallbackService.get(soClient, 'cb-1');
+
+      expect(item).toMatchObject({ status: 'receiving' });
+      expect(cloudConnectorService.create).not.toHaveBeenCalled();
+    });
   });
 
   describe('receive', () => {

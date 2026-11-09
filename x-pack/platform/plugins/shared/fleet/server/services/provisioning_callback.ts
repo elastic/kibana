@@ -201,12 +201,53 @@ class ProvisioningCallbackService {
     }
   }
 
+  /**
+   * The record as stored. A report whose claim went stale is applied on the way, from the values
+   * the claim stored: the browser polls this while it waits, so a Kibana that died mid-report
+   * does not leave the record stuck.
+   */
   public async get(
     soClient: SavedObjectsClientContract,
     id: string
   ): Promise<CloudConnectorCallback | undefined> {
     const so = await this.getSavedObject(soClient, id);
-    return so ? toItem(so.id, so.attributes) : undefined;
+    if (!so) {
+      return undefined;
+    }
+    if (so.attributes.status === 'receiving' && isClaimStale(so.updated_at)) {
+      return this.recover(soClient, so);
+    }
+    return toItem(so.id, so.attributes);
+  }
+
+  /**
+   * Takes over a stale claim and applies the report it stored. When the connector cannot be made
+   * the claim is released, as a failed report would be, and the record is handed back pending.
+   */
+  private async recover(
+    soClient: SavedObjectsClientContract,
+    so: SavedObject<ProvisioningCallbackSOAttributes>
+  ): Promise<CloudConnectorCallback> {
+    const { role_arn: roleArn, stack_arn: stackArn } = so.attributes;
+    if (!roleArn || !stackArn) {
+      return toItem(so.id, so.attributes);
+    }
+    const payload = { role_arn: roleArn, stack_arn: stackArn };
+    const taken = await this.claim(soClient, so, payload);
+    if (!taken) {
+      return toItem(so.id, so.attributes);
+    }
+    if (!taken.claimedHere) {
+      return toItem(so.id, taken.attributes);
+    }
+    try {
+      return await this.apply(soClient, so.id, taken.attributes, payload, taken.version);
+    } catch (error) {
+      this.logger.warn(
+        `Could not apply the stored report of provisioning callback [id=${so.id}]: ${error.message}`
+      );
+      return toItem(so.id, { ...taken.attributes, status: 'pending' });
+    }
   }
 
   /**
@@ -288,21 +329,35 @@ class ProvisioningCallbackService {
       ({ attributes, version } = taken);
     }
 
+    const item = await this.apply(soClient, so.id, attributes, payload, version);
+    return { outcome: 'received', item };
+  }
+
+  /**
+   * Makes the connector for a claim this attempt holds and marks the record received. When no
+   * connector could be made the claim is released, so a retry of the report or a cancel from
+   * the browser is not stuck behind a claim nobody is applying, and the error is rethrown.
+   */
+  private async apply(
+    soClient: SavedObjectsClientContract,
+    id: string,
+    attributes: ProvisioningCallbackSOAttributes,
+    payload: CloudConnectorCallbackReceivedValues,
+    version: string | undefined
+  ): Promise<CloudConnectorCallback> {
     let connector: CreatedCloudConnector;
     try {
-      connector = await this.ensureCloudConnector(so.id, attributes, payload);
+      connector = await this.ensureCloudConnector(id, attributes, payload);
     } catch (error) {
-      // No identity was made. Hand the record back so a retry of the report, or a cancel from
-      // the browser, is not stuck behind a claim nobody is applying.
-      await this.releaseClaim(soClient, so.id, version);
+      await this.releaseClaim(soClient, id, version);
       throw error;
     }
 
-    const item = await this.finish(soClient, so.id, attributes, connector, version);
+    const item = await this.finish(soClient, id, attributes, connector, version);
     this.logger.info(
-      `Provisioning callback received [id=${so.id}] [cloud_connector_id=${connector.id}]`
+      `Provisioning callback received [id=${id}] [cloud_connector_id=${connector.id}]`
     );
-    return { outcome: 'received', item };
+    return item;
   }
 
   /**

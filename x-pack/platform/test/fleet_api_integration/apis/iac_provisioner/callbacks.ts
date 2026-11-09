@@ -6,7 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { PROVISIONING_CALLBACK_TOKEN_HEADER } from '@kbn/fleet-plugin/common/constants';
+import {
+  PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE,
+  PROVISIONING_CALLBACK_TOKEN_HEADER,
+} from '@kbn/fleet-plugin/common/constants';
 
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
@@ -253,6 +256,64 @@ export default function (providerContext: FtrProviderContext) {
         .get(`${CALLBACKS_PATH}/does-not-exist`)
         .set(INTERNAL_ROUTE_HEADERS)
         .expect(404);
+    });
+
+    it('cannot be read or written through the generic saved objects APIs', async () => {
+      // A record written there could name any space and carry the hash of a token of the
+      // author's choosing, which the unauthenticated receive route would honour. Only the Fleet
+      // routes may make or change one.
+      const { item } = await createCallback();
+      const type = PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE;
+      const forged = {
+        provider: 'aws',
+        status: 'pending',
+        token_hash: 'a'.repeat(64),
+        created_at: new Date().toISOString(),
+        space_id: 'another-space',
+        expires_at: item.expires_at,
+      };
+      const expectUnsupported = ({ body }: { body: { message: string } }) =>
+        expect(body.message).to.contain('Unsupported saved object type');
+
+      expectUnsupported(
+        await supertest
+          .post(`/api/saved_objects/${type}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ attributes: forged })
+          .expect(400)
+      );
+      expectUnsupported(
+        await supertest
+          .post('/api/saved_objects/_bulk_create')
+          .set('kbn-xsrf', 'xxxx')
+          .send([{ type, attributes: forged }])
+          .expect(400)
+      );
+      expectUnsupported(
+        await supertest
+          .put(`/api/saved_objects/${type}/${item.id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ attributes: { space_id: 'another-space' } })
+          .expect(400)
+      );
+      expectUnsupported(
+        await supertest
+          .post('/api/saved_objects/_bulk_update')
+          .set('kbn-xsrf', 'xxxx')
+          .send([{ type, id: item.id, attributes: { space_id: 'another-space' } }])
+          .expect(400)
+      );
+      expectUnsupported(await supertest.get(`/api/saved_objects/${type}/${item.id}`).expect(400));
+      expectUnsupported(
+        await supertest.get('/api/saved_objects/_find').query({ type }).expect(400)
+      );
+
+      // The Fleet route still reads it.
+      const { body } = await supertest
+        .get(`${CALLBACKS_PATH}/${item.id}`)
+        .set(INTERNAL_ROUTE_HEADERS)
+        .expect(200);
+      expect(body.item.status).to.be('pending');
     });
   });
 }
