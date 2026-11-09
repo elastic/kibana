@@ -10,12 +10,14 @@ import type { InvestigationTriggerType } from './workflows/triggers';
 
 export type { Severity } from '@kbn/significant-events-schema';
 
+export type { AlertSourceMode } from './automation_limits';
+
 export {
   MAX_RULE_NAMES,
   MAX_ALERT_SOURCES,
+  MAX_ALERT_SOURCE_LENGTH,
   CLASSIC_ALERT_SOURCE,
   UNIVERSAL_ALERT_SOURCE,
-  SIGNIFICANT_EVENTS_ALERT_SOURCE,
   EXTERNAL_ALERT_SOURCE,
   MAX_AUTOMATION_INSTRUCTIONS_LENGTH,
 } from './automation_limits';

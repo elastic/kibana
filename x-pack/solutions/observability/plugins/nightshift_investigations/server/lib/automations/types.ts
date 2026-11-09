@@ -6,11 +6,11 @@
  */
 
 import type { PresetSchedule } from '../../../common/automation_schedule';
+import type { AlertSourceMode } from '../../../common/automation_limits';
 
 export type AutomationType = 'custom' | 'managed';
 
 export type RuleNameMatchMode = 'substring' | 'regex';
-export type AlertSourceMode = 'include' | 'exclude';
 export type SlackTriggerEvent = 'message';
 export type OverlapPolicy = 'drop' | 'cancel_in_progress' | 'queue';
 export type ReasoningMode = 'investigate' | 'observe';

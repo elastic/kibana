@@ -10,6 +10,7 @@ import { evaluateKql } from '@kbn/eval-kql';
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import { WorkflowSchemaBase } from '@kbn/workflows';
 import { generateWorkflowYaml, SLACK_MESSAGE_TEXT_LIMIT } from './generate_workflow_yaml';
+import { MAX_ALERT_SOURCE_LENGTH, MAX_ALERT_SOURCES } from '../../../common/automation_limits';
 import { MAX_PROMPT_TEMPLATE_LENGTH } from './schemas';
 import type { NightshiftAutomationAttributes, NightshiftTriggerRow } from './types';
 
@@ -475,6 +476,17 @@ describe('generateWorkflowYaml', () => {
           expect(() =>
             generateWorkflowYaml({ automationId: 'auto-123', automation, universalAlerts: false })
           ).toThrow('no available trigger');
+        });
+
+        it('accepts the largest source filter the request schema allows', () => {
+          const alertSources = Array.from({ length: MAX_ALERT_SOURCES }, (_, i) =>
+            `${i}`.padEnd(MAX_ALERT_SOURCE_LENGTH, 'x')
+          );
+          const automation = baseAutomation();
+          automation.trigger.rows = [{ kind: 'alert', alertSources }];
+          expect(() =>
+            generateWorkflowYaml({ automationId: 'auto-123', automation })
+          ).not.toThrow();
         });
 
         it('rejects source filters longer than a trigger condition allows', () => {

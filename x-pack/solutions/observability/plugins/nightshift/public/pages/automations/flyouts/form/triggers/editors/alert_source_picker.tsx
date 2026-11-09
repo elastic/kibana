@@ -10,9 +10,9 @@ import { EuiButtonGroup, EuiComboBox, EuiPanel, EuiSpacer } from '@elastic/eui';
 import {
   CLASSIC_ALERT_SOURCE,
   EXTERNAL_ALERT_SOURCE,
-  SIGNIFICANT_EVENTS_ALERT_SOURCE,
   UNIVERSAL_ALERT_SOURCE,
 } from '@kbn/nightshift-investigations-plugin/common';
+import { SIGNIFICANT_EVENTS_ALERT_SOURCE } from '@kbn/significant-events-schema';
 import type { TriggerFormValues } from '../../automation_form_values';
 import { alertSourceLabels } from '../translations';
 
