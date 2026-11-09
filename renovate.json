@@ -1368,15 +1368,6 @@
       "enabled": true
     },
     {
-      "groupName": "dnd-kit",
-      "matchDepNames": ["@dnd-kit/core", "@dnd-kit/sortable", "@dnd-kit/utilities"],
-      "reviewers": ["team:kibana-dashboards"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Presentation"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "@elastic/ems client",
       "matchDepNames": ["@elastic/ems-client"],
       "reviewers": ["team:kibana-dashboards"],

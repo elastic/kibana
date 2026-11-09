@@ -14,12 +14,8 @@ import {
 } from '@kbn/controls-constants';
 import type { FlexLayoutData } from '@kbn/grid-layout';
 
-import type {
-  ControlsLayout,
-  ControlWidth,
-  PublishesFocusedPanelId,
-  PublishesLabel,
-} from './types';
+import type { ControlsLayout, PublishesFocusedPanelId, PublishesLabel } from './types';
+import { ControlWidth } from '@kbn/controls-schemas';
 
 export const apiPublishesFocusedPanelId = (api: unknown): api is PublishesFocusedPanelId =>
   Boolean((api as PublishesFocusedPanelId).focusedPanelId$);
@@ -27,14 +23,14 @@ export const apiPublishesFocusedPanelId = (api: unknown): api is PublishesFocuse
 export const apiPublishesLabel = (api: unknown): api is PublishesLabel =>
   Boolean((api as PublishesLabel).label$);
 
-/** The pixel width the flex layout renders for each control width option */
+/** the pixel width the flex layout renders for each control width option */
 export const CONTROL_WIDTH_PIXELS: Readonly<Record<ControlWidth, number>> = {
   [CONTROL_WIDTH_SMALL]: 224,
   [CONTROL_WIDTH_MEDIUM]: 400,
   [CONTROL_WIDTH_LARGE]: 800,
 };
 
-/** Snaps an arbitrary pixel width (e.g. from a resize) to the closest control width option */
+/** snaps an arbitrary pixel width (e.g. from a resize) to the closest control width option */
 export const getClosestControlWidth = (pixels: number): ControlWidth => {
   const widths = Object.keys(CONTROL_WIDTH_PIXELS) as ControlWidth[];
   return widths.reduce((closest, width) =>
@@ -47,6 +43,7 @@ export const getClosestControlWidth = (pixels: number): ControlWidth => {
 
 export const controlsLayoutToFlexLayout = ({ controls }: ControlsLayout): FlexLayoutData =>
   Object.entries(controls).reduce<FlexLayoutData>((flexLayout, [id, { order, width, grow }]) => {
+    console.log('controlsLayoutToFlexLayout', { width });
     flexLayout[id] = {
       type: 'panel',
       id,
@@ -64,6 +61,7 @@ export const flexLayoutToControlsLayout = (
 ): ControlsLayout => ({
   controls: Object.entries(flexLayout).reduce<ControlsLayout['controls']>(
     (nextControls, [id, { order, width, grow }]) => {
+      console.log('flexLayoutToControlsLayout', { width, closest: getClosestControlWidth(width) });
       if (!controls[id]) return nextControls;
       nextControls[id] = { ...controls[id], order, grow, width: getClosestControlWidth(width) };
       return nextControls;

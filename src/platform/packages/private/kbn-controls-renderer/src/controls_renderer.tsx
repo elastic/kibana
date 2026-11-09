@@ -41,7 +41,13 @@ export const ControlsRenderer = ({
   const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
   const [viewMode, setViewMode] = useState(parentApi.viewMode$.getValue());
 
-  const flexLayout = useMemo(() => controlsLayoutToFlexLayout(controlState), [controlState]);
+  const [flexLayout, setFlexLayout] = useState<FlexLayoutData>(() =>
+    controlsLayoutToFlexLayout(controlState)
+  );
+
+  useEffect(() => {
+    setFlexLayout(controlsLayoutToFlexLayout(controlState));
+  }, [controlState]);
 
   const gridSettings = useMemo<GridSettings>(
     () => ({
@@ -74,7 +80,15 @@ export const ControlsRenderer = ({
     (newFlexLayout: FlexLayoutData) => {
       const newControlsLayout = flexLayoutToControlsLayout(newFlexLayout, controlState);
       // the flex layout emits its initial layout, so only propagate real changes
-      if (!isEqual(newControlsLayout, controlState)) onControlsChanged(newControlsLayout);
+      if (!isEqual(newControlsLayout, controlState)) {
+        onControlsChanged(newControlsLayout);
+        return;
+      }
+      // the control state is unchanged (e.g. a small resize that snaps to the same width), but the
+      // flex layout may still hold the unsnapped pixel width - force it to snap back
+      if (!isEqual(newFlexLayout, controlsLayoutToFlexLayout(controlState))) {
+        setFlexLayout(controlsLayoutToFlexLayout(controlState));
+      }
     },
     [controlState, onControlsChanged]
   );
