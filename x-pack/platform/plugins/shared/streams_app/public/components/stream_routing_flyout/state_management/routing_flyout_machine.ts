@@ -153,6 +153,28 @@ export const toRouteRule = (
   return rule;
 };
 
+/** Whether the rule has no condition once saved, so it keeps all remaining data. */
+export const isDefaultRule = ({ condition }: RoutingRuleDraft): boolean =>
+  serializeCondition(condition) === undefined;
+
+/**
+ * Rules with conditions first, then the default rules, each in their current
+ * order. A default rule above a conditional one would take its data.
+ */
+const withDefaultsLast = (rules: readonly RoutingRuleDraft[]): RoutingRuleDraft[] => [
+  ...rules.filter((rule) => !isDefaultRule(rule)),
+  ...rules.filter(isDefaultRule),
+];
+
+/** Where the trailing default rules start; the rules list's length when there are none. */
+const defaultSectionStart = (rules: readonly RoutingRuleDraft[]): number => {
+  let start = rules.length;
+  while (start > 0 && rules[start - 1].condition === undefined) {
+    start -= 1;
+  }
+  return start;
+};
+
 /** A new routing node starts with one rule with no condition that keeps the line's destination. */
 export const getNewRoutingNodeRules = (line: UnitRoutableLine): RouteRule[] => [
   { destinations: [line.destinationId] },
@@ -175,21 +197,29 @@ export const routingFlyoutMachine = setup({
         base: { destinations: [] },
       };
       const rules = [...context.rules];
-      // Insert above a trailing rule with no condition, so it stays last.
-      const endsWithCatchAll = rules.length > 0 && rules[rules.length - 1].condition === undefined;
-      rules.splice(endsWithCatchAll ? rules.length - 1 : rules.length, 0, added);
+      // Insert above the default rules, so they stay last.
+      rules.splice(defaultSectionStart(rules), 0, added);
       return { rules, nextKey: context.nextKey + 1, hasChanges: true };
     }),
-    updateRule: assign(({ context, event }) =>
-      event.type === 'rule.update'
-        ? {
-            rules: context.rules.map((rule) =>
-              rule.key === event.key ? { ...rule, ...event.changes } : rule
-            ),
-            hasChanges: true,
-          }
-        : {}
-    ),
+    updateRule: assign(({ context, event }) => {
+      if (event.type !== 'rule.update') {
+        return {};
+      }
+      const updated = context.rules.find(({ key }) => key === event.key);
+      if (!updated) {
+        return {};
+      }
+      const next: RoutingRuleDraft = { ...updated, ...event.changes };
+      const others = context.rules.filter(({ key }) => key !== event.key);
+      if (isDefaultRule(next)) {
+        // A cleared condition makes the rule a default one, which moves to the end.
+        return { rules: [...others, { ...next, condition: undefined }], hasChanges: true };
+      }
+      return {
+        rules: context.rules.map((rule) => (rule.key === event.key ? next : rule)),
+        hasChanges: true,
+      };
+    }),
     deleteRule: assign(({ context, event }) =>
       event.type === 'rule.delete'
         ? { rules: context.rules.filter(({ key }) => key !== event.key), hasChanges: true }
@@ -215,7 +245,9 @@ export const routingFlyoutMachine = setup({
         return {
           type: 'routing.save',
           target: context.target,
-          rules: context.rules.map((rule) => toRouteRule(rule, supportedTelemetry)),
+          rules: withDefaultsLast(context.rules).map((rule) =>
+            toRouteRule(rule, supportedTelemetry)
+          ),
           supportedTelemetry,
         };
       }
@@ -223,19 +255,17 @@ export const routingFlyoutMachine = setup({
   },
   guards: {
     canEdit: ({ context }) => context.editable,
-    // The rule with no condition stays last, so it keeps whatever the rules above it do not match.
+    // Default rules stay last, so they keep whatever the rules above them do not match.
     canReorder: ({ context, event }) => {
       if (event.type !== 'rule.reorder' || !context.editable) {
         return false;
       }
       const { rules } = context;
       const { from, to } = event;
-      const lastIndex = rules.length - 1;
-      if (from === to || from < 0 || to < 0 || from > lastIndex || to > lastIndex) {
-        return false;
-      }
-      const endsWithCatchAll = rules[lastIndex].condition === undefined;
-      return rules[from].condition !== undefined && !(endsWithCatchAll && to === lastIndex);
+      const conditionalCount = defaultSectionStart(rules);
+      return (
+        from !== to && from >= 0 && to >= 0 && from < conditionalCount && to < conditionalCount
+      );
     },
     // A new routing node can be created as it starts, with its catch-all rule.
     canSave: ({ context }) =>

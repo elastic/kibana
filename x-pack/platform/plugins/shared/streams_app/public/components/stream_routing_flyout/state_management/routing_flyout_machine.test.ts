@@ -209,6 +209,63 @@ describe('routingFlyoutMachine', () => {
     ]);
   });
 
+  it('moves a rule whose condition is cleared into the default rules at the end', () => {
+    const { flyout, requests } = startFlyout({
+      target: { kind: 'pipeline', pipelineId: 'routing' },
+      rules: [
+        { when: 'resource.attributes["team"] == "a"', destinations: ['es-a'] },
+        { when: 'resource.attributes["team"] == "b"', destinations: ['es-b'] },
+        { destinations: ['es-logs'] },
+      ],
+    });
+    flyout.send({
+      type: 'rule.update',
+      key: 'rule-0',
+      changes: { condition: { field: '  ', operator: 'equals', value: 'a' } },
+    });
+    const { rules } = flyout.getSnapshot().context;
+    expect(rules.map(({ key }) => key)).toEqual(['rule-1', 'rule-2', 'rule-0']);
+    expect(rules[2].condition).toBeUndefined();
+
+    // Default rules cannot be dragged above the conditional ones.
+    flyout.send({ type: 'rule.reorder', from: 2, to: 0 });
+    flyout.send({ type: 'rule.reorder', from: 0, to: 1 });
+    expect(flyout.getSnapshot().context.rules.map(({ key }) => key)).toEqual([
+      'rule-1',
+      'rule-2',
+      'rule-0',
+    ]);
+    flyout.send({ type: 'rule.add' });
+    expect(flyout.getSnapshot().context.rules.map(({ key }) => key)).toEqual([
+      'rule-1',
+      'rule-3',
+      'rule-2',
+      'rule-0',
+    ]);
+
+    flyout.send({ type: 'rule.delete', key: 'rule-3' });
+    flyout.send({ type: 'flyout.save' });
+    expect(requests[0].rules).toEqual([
+      { when: 'resource.attributes["team"] == "b"', destinations: ['es-b'] },
+      { destinations: ['es-logs'] },
+      { destinations: ['es-a'] },
+    ]);
+  });
+
+  it('saves rules left without a field after the rules with conditions', () => {
+    const { flyout, requests } = startFlyout({
+      target: { kind: 'pipeline', pipelineId: 'routing' },
+      rules: [{ when: 'resource.attributes["team"] == "a"', destinations: ['es-a'] }],
+    });
+    flyout.send({ type: 'rule.add' });
+    flyout.send({ type: 'rule.reorder', from: 1, to: 0 });
+    flyout.send({ type: 'flyout.save' });
+    expect(requests[0].rules).toEqual([
+      { when: 'resource.attributes["team"] == "a"', destinations: ['es-a'] },
+      { destinations: [] },
+    ]);
+  });
+
   it('appends new rules when there is no catch-all', () => {
     const { flyout } = startFlyout({
       target: { kind: 'pipeline', pipelineId: 'routing' },
