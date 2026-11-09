@@ -7,7 +7,6 @@
 
 import { stringify } from 'yaml';
 import { IF_CONDITION_MAX_LENGTH } from '@kbn/workflows';
-import { DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID } from '../../../common';
 import {
   CLASSIC_ALERT_SOURCE,
   EXTERNAL_ALERT_SOURCE,
@@ -305,7 +304,7 @@ function generateScheduledWorkflow(
         with: {
           automation_id: automationId,
           subject_type: 'manual',
-          subject_id: DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID,
+          subject_id: `scheduled-${automationId}-{{ event.scheduledFor | default: execution.id }}`,
           title: automation.name,
           summary: automation.name,
           trigger_type: 'automatic',

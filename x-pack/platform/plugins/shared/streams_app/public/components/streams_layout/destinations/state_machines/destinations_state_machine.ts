@@ -24,7 +24,6 @@ import type { TimeState } from '@kbn/es-query';
 import { filter, map, startWith } from 'rxjs';
 import type { ActorRefFrom, AnyActorRef, MachineImplementationsFrom } from 'xstate';
 import {
-  STREAMS_DEFAULT_UNIT_ID,
   type ResolveUnitIndicesResponse,
   type ResolvedDestinationIndex,
 } from '@kbn/streams-plugin/common';
@@ -1006,10 +1005,11 @@ function createRevokePendingDestinationApiKeyAction({
 
 function createLoadResolvedIndicesActor({
   streamsRepositoryClient,
+  unitId,
 }: DestinationApiKeyGenerationDeps) {
   return fromPromise(async ({ signal }): Promise<ResolveUnitIndicesResponse> => {
     return streamsRepositoryClient.fetch('GET /internal/streams/unit/{id}/_resolve_indices', {
-      params: { path: { id: STREAMS_DEFAULT_UNIT_ID } },
+      params: { path: { id: unitId } },
       signal,
     });
   });
