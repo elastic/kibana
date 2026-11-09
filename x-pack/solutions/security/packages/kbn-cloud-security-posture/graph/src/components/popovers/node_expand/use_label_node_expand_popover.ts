@@ -77,6 +77,7 @@ export const useLabelNodeExpandPopover = (
             (isSingleAlert || isSingleEvent || isGroupedEvents) && onOpenEventPreview !== undefined,
         },
         isSingleAlert,
+        isGroupedEvents,
       });
     },
     [scopeId, onOpenEventPreview, onTelemetryEvent]
