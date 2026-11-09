@@ -9,6 +9,9 @@ import { schema } from '@kbn/config-schema';
 import {
   INTERNAL_CASE_OBSERVABLES_FIND_URL,
   MAX_CASE_ID_LENGTH,
+  MAX_OBSERVABLE_METADATA_FILTERS,
+  MAX_OBSERVABLE_METADATA_KEY_LENGTH,
+  MAX_OBSERVABLE_METADATA_VALUE_LENGTH,
   MAX_OBSERVABLE_TYPE_KEY_LENGTH,
   MAX_OBSERVABLE_VALUE_LENGTH,
   MAX_OBSERVABLES_CURSOR_LENGTH,
@@ -44,13 +47,27 @@ export const findObservablesRoute = createCasesRoute({
         })
       ),
       search: schema.maybe(schema.string({ maxLength: MAX_OBSERVABLE_VALUE_LENGTH })),
+      metadata: schema.maybe(
+        schema.arrayOf(
+          schema.object({
+            key: schema.string({ minLength: 1, maxLength: MAX_OBSERVABLE_METADATA_KEY_LENGTH }),
+            value: schema.maybe(
+              schema.string({ minLength: 1, maxLength: MAX_OBSERVABLE_METADATA_VALUE_LENGTH })
+            ),
+            prefix: schema.maybe(
+              schema.string({ minLength: 1, maxLength: MAX_OBSERVABLE_METADATA_VALUE_LENGTH })
+            ),
+          }),
+          { maxSize: MAX_OBSERVABLE_METADATA_FILTERS }
+        )
+      ),
     }),
   },
   routerOptions: {
     access: 'internal',
     summary: 'Find the observables of a case',
     description:
-      'Returns a page of the observables of a case, sorted, filtered by type and by the start of the value (ignoring case). Pass the returned cursor back to get the next page.',
+      'Returns a page of the observables of a case with the metadata of their values, sorted, filtered by type, by the start of the value (ignoring case) and by metadata. Pass the returned cursor back to get the next page.',
   },
   handler: async ({ context, request, response }) => {
     try {

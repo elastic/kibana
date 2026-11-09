@@ -20,7 +20,8 @@ import type {
   ObservableSortOrder,
   ObservableSortValues,
 } from '../../services/observables';
-import { getObservableSortFields, toObservable } from '../../services/observables';
+import { getObservableSortFields, observableKey, toObservable } from '../../services/observables';
+import { MAX_METADATA_FILTER_VALUES } from '../../../common/constants';
 import type { CasesClientArgs } from '../types';
 
 const SORT_VALUE_GETTERS: Readonly<
@@ -99,6 +100,10 @@ export const decodeCursor = (
  * 50) is filtered and sorted in memory with the same rules as the search of the case's
  * `cases-observables` objects, and the two are merged under one cursor: the sort values of the
  * last observable returned.
+ *
+ * A metadata filter first finds the values of the case's space and owner whose shared metadata
+ * matches, capped, then keeps the case's observables with those type keys and values. Every
+ * observable of the page carries the metadata its value holds.
  */
 export const findObservables = async (
   caseId: string,
@@ -106,15 +111,21 @@ export const findObservables = async (
   clientArgs: CasesClientArgs
 ): Promise<FindObservablesResponse> => {
   const {
-    services: { caseService, observableService },
+    services: { caseService, observableService, observableSharedService },
     authorization,
     logger,
   } = clientArgs;
 
   try {
-    const { perPage, cursor, sortField, sortOrder, typeKeys, search } = decodeWithExcessOrThrowZod(
-      FindObservablesRequestSchema
-    )(params);
+    const {
+      perPage,
+      cursor,
+      sortField,
+      sortOrder,
+      typeKeys,
+      search,
+      metadata: metadataFilters,
+    } = decodeWithExcessOrThrowZod(FindObservablesRequestSchema)(params);
 
     const theCase = await caseService.getCase({ id: caseId });
 
@@ -123,15 +134,35 @@ export const findObservables = async (
       entities: [{ id: theCase.id, owner: theCase.attributes.owner }],
     });
 
+    const { owner } = theCase.attributes;
+    const metadataKeys =
+      metadataFilters != null && metadataFilters.length > 0
+        ? await observableSharedService.findKeysByMetadata({
+            owner,
+            filters: metadataFilters,
+            cap: MAX_METADATA_FILTER_VALUES,
+          })
+        : undefined;
+
+    // No value of the space and owner matches the metadata filter, so no observable can.
+    if (metadataKeys != null && metadataKeys.length === 0) {
+      return decodeOrThrowZod(FindObservablesResponseSchema)({ observables: [], total: 0 });
+    }
+
     const searchAfter = cursor != null ? decodeCursor(cursor, sortField) : undefined;
     const prefix = search?.toLowerCase();
     const typeKeySet = typeKeys != null && typeKeys.length > 0 ? new Set(typeKeys) : undefined;
+    const metadataKeySet =
+      metadataKeys != null ? new Set(metadataKeys.map(observableKey)) : undefined;
 
     const fieldMatches = (theCase.attributes.observables ?? [])
       .filter(
-        ({ typeKey, value }) =>
-          (typeKeySet == null || typeKeySet.has(typeKey)) &&
-          (prefix == null || prefix.length === 0 || value.toLowerCase().startsWith(prefix))
+        (observable) =>
+          (typeKeySet == null || typeKeySet.has(observable.typeKey)) &&
+          (prefix == null ||
+            prefix.length === 0 ||
+            observable.value.toLowerCase().startsWith(prefix)) &&
+          (metadataKeySet == null || metadataKeySet.has(observableKey(observable)))
       )
       .map((observable) => ({ observable, sort: getSortValues(observable, sortField) }));
 
@@ -143,6 +174,7 @@ export const findObservables = async (
       sortOrder,
       typeKeys,
       search,
+      keys: metadataKeys,
     });
 
     const page = [
@@ -156,8 +188,18 @@ export const findObservables = async (
 
     const last = page[page.length - 1];
 
+    const sharedByKey = await observableSharedService.findByKeys(
+      owner,
+      page.map(({ observable }) => observable)
+    );
+
     return decodeOrThrowZod(FindObservablesResponseSchema)({
-      observables: page.map(({ observable }) => observable),
+      observables: page.map(({ observable }) => {
+        const shared = sharedByKey.get(observableKey(observable));
+        return shared != null && Object.keys(shared.metadata).length > 0
+          ? { ...observable, metadata: shared.metadata }
+          : observable;
+      }),
       total: fieldMatches.length + typePage.total,
       ...(page.length === perPage && last != null && { cursor: encodeCursor(last.sort) }),
     });
