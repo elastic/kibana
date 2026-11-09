@@ -54,6 +54,18 @@ describe('createCustomContentTemplateResolver — system prompt selection', () =
     expect(systemArg).not.toContain('Output ONLY valid HTML');
   });
 
+  it('asks both prompts for a root that fills the frame', async () => {
+    mockChatComplete.mockResolvedValue({ content: '<div>ok</div>' });
+
+    await resolve({ prompt: 'Restyle', hasExistingQuery: true });
+    await resolve({ prompt: 'A banner' });
+
+    for (const [{ system }] of mockChatComplete.mock.calls) {
+      expect(system).toContain('FRAME FILL');
+      expect(system).toContain('flex: 1');
+    }
+  });
+
   it('does not sample ES when hasExistingQuery is true and esqlQuery is omitted', async () => {
     mockChatComplete.mockResolvedValue({ content: '<div>ok</div>' });
 

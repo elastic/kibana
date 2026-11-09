@@ -63,6 +63,8 @@ Size for the data you were actually given. If the schema description or prompt s
 
 Emit nothing before this comment — no markdown fence, no blank line.`;
 
+const FRAME_FILL_GUIDANCE = `FRAME FILL — the dashboard layout decides the final size of the panel, so the frame can be taller than the height you declared. Wrap the whole template in one root container with \`min-height: 100%\`, \`display: flex\` and \`flex-direction: column\`, and let the main surface (the card, or the group of cards, that holds the content) grow with \`flex: 1\`. A card background then reaches the bottom of the frame instead of ending partway down it. Never give the root or the main surface a fixed height.`;
+
 const SANDBOX_GUIDANCE = `ABSOLUTE, NON-NEGOTIABLE RULE: the template renders inside a sandboxed iframe with scripting disabled. ANY JavaScript you write — a <script> tag, an inline event handler (onclick, onmouseover, ...), or building any part of the markup at runtime via document.getElementById/innerHTML/addEventListener/JSON.parse/fetch — will NEVER RUN. It is completely dead code and will render as a BLANK PANEL.
 - Write every element directly as static HTML/SVG — never assemble markup as a string in JavaScript and inject it via innerHTML.
 - If the prompt asks for hover interactivity (e.g. tooltips), this IS possible with CSS :hover alone — do NOT reach for JavaScript. Use a nested element that is invisible by default (\`opacity: 0\`) and reveal it with a \`:hover\` rule.
@@ -149,6 +151,8 @@ ${SANDBOX_GUIDANCE}
 
 ${HEIGHT_DECLARATION_GUIDANCE}
 
+${FRAME_FILL_GUIDANCE}
+
 ${colorSection()}
 
 CONTENT RULES:
@@ -173,6 +177,8 @@ ${SANDBOX_GUIDANCE}
 ${HEIGHT_DECLARATION_GUIDANCE}
 - Aggregation/grouping/sorting cannot happen in the template — it only receives \`rows\` and \`max\` as given. If the data needs grouping that isn't already reflected in \`rows\`, that has to happen upstream in the ES|QL query (STATS ... BY ...).
 - For charts use pure CSS or inline SVG.
+
+${FRAME_FILL_GUIDANCE}
 
 ${colorSection()}
 
