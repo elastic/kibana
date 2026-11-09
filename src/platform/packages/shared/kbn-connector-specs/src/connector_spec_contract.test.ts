@@ -52,6 +52,19 @@ describe('connector spec contracts', () => {
     expect(metadata.supportedFeatureIds.every((id) => typeof id === 'string')).toBe(true);
   });
 
+  it.each(allSpecs.filter(([, spec]) => spec.contentSource))(
+    '%s implements the content source actions',
+    (_exportName, spec) => {
+      const { actions, contentSource } = spec;
+      if (!contentSource) throw new Error('unreachable');
+      for (const name of ['contextList', 'contextGetMetadata', 'contextGetContent']) {
+        expect(actions[name]).toEqual(expect.objectContaining({ isTool: false, scope: 'read' }));
+      }
+      expect(actions[contentSource.read.action]).toBeDefined();
+      expect(contentSource.read.id.length).toBeGreaterThan(0);
+    }
+  );
+
   it.each(allSpecs)('%s has valid authentication configuration', (_exportName, spec) => {
     const authTypes = spec.auth?.types ?? [];
     const authTypeIds = authTypes.map(getAuthTypeId);

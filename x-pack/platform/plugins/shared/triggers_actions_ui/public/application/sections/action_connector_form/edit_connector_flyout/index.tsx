@@ -37,6 +37,10 @@ import type {
   UserConfiguredActionConnector,
 } from '../../../../types';
 import { EditConnectorTabs } from '../../../../types';
+import {
+  useConnectorFlyoutTabs,
+  type ConnectorFlyoutTabChanges,
+} from '../../../lib/connector_flyout_tabs';
 import type { ConnectorFormState } from '../connector_form';
 import { ConnectorForm } from '../connector_form';
 import { useUpdateConnector } from '../../../hooks/use_edit_connector';
@@ -73,6 +77,8 @@ export interface EditConnectorFlyoutProps {
 interface EditConnectorFlyoutContentProps extends EditConnectorFlyoutProps {
   isFormModified: boolean;
   onFormModifiedChange: (isModified: boolean) => void;
+  /** Whether a tab added by another plugin holds unsaved changes. */
+  onTabChangesChange?: (hasChanges: boolean) => void;
   onCloseAttempt: () => void;
   showConfirmModal: boolean;
   onConfirmModalCancel: () => void;
@@ -176,6 +182,7 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
   hideRulesTab = false,
   isFormModified,
   onFormModifiedChange: onFormModifiedChangeProp,
+  onTabChangesChange,
   onCloseAttempt,
   showConfirmModal,
   onConfirmModalCancel,
@@ -214,7 +221,7 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
     preSubmitValidator: null,
   });
 
-  const [selectedTab, setTab] = useState<EditConnectorTabs>(tab);
+  const [selectedTab, setTab] = useState<EditConnectorTabs | string>(tab);
   /**
    * Test connector
    */
@@ -233,11 +240,14 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
     useState<Option<ActionTypeExecutorResult<unknown> | undefined>>(none);
 
   const handleSetTab = useCallback(
-    (nextPage: EditConnectorTabs) => {
+    (nextPage: EditConnectorTabs | string) => {
       if (nextPage === EditConnectorTabs.Configuration && testExecutionResult !== none) {
         setTestExecutionResult(none);
       }
       setShowFormErrors(false);
+      setVisitedTabs((visited) =>
+        visited.has(nextPage) ? visited : new Set(visited).add(nextPage)
+      );
       setTab(nextPage);
     },
     [testExecutionResult, setTestExecutionResult]
@@ -269,6 +279,26 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
     uiSettings,
   });
 
+  const extraTabs = useConnectorFlyoutTabs(connector.actionTypeId);
+  // Unsaved changes held by tabs other plugins added. A tab keeps its state once visited (it stays mounted, hidden), or
+  // switching tabs would lose what was typed.
+  const tabChanges = useRef(new Map<string, ConnectorFlyoutTabChanges>());
+  const [tabsDirty, setTabsDirty] = useState(false);
+  const [tabsValid, setTabsValid] = useState(true);
+  const setChangesFor = useCallback((tabId: string, changes: ConnectorFlyoutTabChanges | null) => {
+    if (changes) {
+      tabChanges.current.set(tabId, changes);
+    } else {
+      tabChanges.current.delete(tabId);
+    }
+    const dirty = [...tabChanges.current.values()].filter((entry) => entry.isDirty);
+    setTabsDirty(dirty.length > 0);
+    setTabsValid(dirty.every((entry) => entry.isValid));
+  }, []);
+  useEffect(() => {
+    onTabChangesChange?.(tabsDirty);
+  }, [tabsDirty, onTabChangesChange]);
+  const [visitedTabs, setVisitedTabs] = useState<Set<string>>(() => new Set([tab]));
   const isSpecConnector = !actionTypeRegistry.has(connector.actionTypeId);
   const isTestable = actionTypeModel?.isTestable ?? actionTypeRegistry.has(connector.actionTypeId);
 
@@ -332,8 +362,9 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
     !isLoadingActionTypeModel &&
     !actionTypeModelError;
   const disabled =
-    !isFormModified ||
-    hasErrors ||
+    (!isFormModified && !tabsDirty) ||
+    (isFormModified && hasErrors) ||
+    (tabsDirty && !tabsValid) ||
     isSaving ||
     isLoadingActionTypeModel ||
     !!actionTypeModelError ||
@@ -526,6 +557,27 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
     };
   }, []);
 
+  /**
+   * The flyout's Save: tabs' changes first, then the connector. A tab that fails to save stops it, so the connector is not
+   * saved half way; and tabs go first because a parent may unmount the flyout as soon as the connector is saved.
+   */
+  const onSaveAll = useCallback(async () => {
+    const pending = [...tabChanges.current.values()].filter((entry) => entry.isDirty);
+    try {
+      for (const entry of pending) {
+        await entry.save();
+      }
+    } catch {
+      // The tab shows why it could not save.
+      return;
+    }
+    if (isFormModified) {
+      await onClickSave();
+    } else if (pending.length > 0) {
+      setIsSaved(true);
+    }
+  }, [isFormModified, onClickSave]);
+
   const renderConfigurationTab = useCallback(() => {
     if (!connector.isPreconfigured && !connector.isSystemAction) {
       return (
@@ -675,11 +727,23 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
         isTestable={isTestable}
         hideRulesTab={hideRulesTab}
         docsUrl={actionTypeModel?.docsUrl}
+        extraTabs={extraTabs.map(({ id, title }) => ({ id, title }))}
       />
       <EuiFlyoutBody>
         {selectedTab === EditConnectorTabs.Configuration && renderConfigurationTab()}
         {selectedTab === EditConnectorTabs.Test && renderTestTab()}
         {selectedTab === EditConnectorTabs.Rules && renderConnectorRulesList()}
+        {extraTabs
+          .filter((extraTab) => visitedTabs.has(extraTab.id))
+          .map((extraTab) => (
+            <div key={extraTab.id} hidden={extraTab.id !== selectedTab}>
+              {extraTab.render({
+                connector: savedConnector,
+                isReadOnly: !canSave || savedConnector.isPreconfigured,
+                onChanges: (changes) => setChangesFor(extraTab.id, changes),
+              })}
+            </div>
+          ))}
       </EuiFlyoutBody>
       <FlyoutFooter
         onClose={onCloseAttempt}
@@ -687,7 +751,7 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
         isSaved={isSaved}
         disabled={disabled}
         showButtons={showButtons}
-        onClickSave={onClickSave}
+        onClickSave={onSaveAll}
       />
       {showConfirmModal && (
         <EuiConfirmModal
@@ -738,17 +802,18 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   hideRulesTab = false,
 }) => {
   const [isFormModified, setIsFormModified] = useState(false);
+  const [hasTabChanges, setHasTabChanges] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const beforeCloseRef = useRef<() => void>(() => undefined);
 
   const onFlyoutClose = useCallback(() => {
-    if (isFormModified) {
+    if (isFormModified || hasTabChanges) {
       setShowConfirmModal(true);
       return;
     }
     beforeCloseRef.current();
     onClose();
-  }, [isFormModified, onClose]);
+  }, [isFormModified, hasTabChanges, onClose]);
 
   return (
     <EuiFlyout
@@ -767,6 +832,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
         hideRulesTab={hideRulesTab}
         isFormModified={isFormModified}
         onFormModifiedChange={setIsFormModified}
+        onTabChangesChange={setHasTabChanges}
         onCloseAttempt={onFlyoutClose}
         showConfirmModal={showConfirmModal}
         onConfirmModalCancel={() => setShowConfirmModal(false)}

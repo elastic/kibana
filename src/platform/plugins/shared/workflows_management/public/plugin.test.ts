@@ -107,7 +107,10 @@ describe('WorkflowsPlugin', () => {
           isEarsEnabled: false,
           isEarsExperimentalEnabled: false,
         },
-        triggersActionsUi: dependencies.triggersActionsUi,
+        triggersActionsUi: {
+          ...dependencies.triggersActionsUi,
+          registerConnectorFlyoutTab: jest.fn(),
+        },
         workflowsExtensions: setupDeps.workflowsExtensions,
       });
       const [application] = coreSetup.application.register.mock.calls[0];

@@ -1,5 +1,45 @@
 {
   "operations": {
+    "contextGetContent": [
+      {
+        "method": "head",
+        "path": "/{Bucket}/{Key}",
+        "source": "s3"
+      },
+      {
+        "method": "get",
+        "path": "/{Bucket}/{Key}?x-id=GetObject",
+        "source": "s3"
+      }
+    ],
+    "contextGetMetadata": [
+      {
+        "method": "head",
+        "path": "/{Bucket}/{Key}",
+        "source": "s3"
+      }
+    ],
+    "contextList": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 1000,
+          "end": "missing",
+          "request": {
+            "cursorParam": "continuation-token",
+            "in": "query",
+            "sizeParam": "max-keys"
+          },
+          "response": {
+            "itemsPath": "Contents",
+            "nextPath": "NextContinuationToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/{Bucket}?list-type=2",
+        "source": "s3"
+      }
+    ],
     "downloadFile": [
       {
         "method": "head",

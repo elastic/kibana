@@ -987,6 +987,9 @@ importers:
       '@kbn/connector-events-bridge-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/connector_events_bridge
+      '@kbn/connector-memory-plugin':
+        specifier: workspace:*
+        version: link:x-pack/platform/plugins/shared/connector_memory
       '@kbn/connector-schemas':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-connector-schemas
@@ -9442,6 +9445,8 @@ importers:
   x-pack/platform/plugins/shared/cloud_connect: {}
 
   x-pack/platform/plugins/shared/connector_events_bridge: {}
+
+  x-pack/platform/plugins/shared/connector_memory: {}
 
   x-pack/platform/plugins/shared/content_connectors: {}
 

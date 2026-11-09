@@ -353,6 +353,7 @@
     "@kbn/config-mocks": "workspace:*",
     "@kbn/config-schema": "workspace:*",
     "@kbn/connector-events-bridge-plugin": "workspace:*",
+    "@kbn/connector-memory-plugin": "workspace:*",
     "@kbn/connector-schemas": "workspace:*",
     "@kbn/connector-specs": "workspace:*",
     "@kbn/console-plugin": "workspace:*",

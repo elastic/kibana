@@ -383,6 +383,46 @@ export interface AuthTypeDef {
     fields?: Record<string, z.ZodType>;
   };
 }
+/**
+ * A file or folder as a content source reports it. Returned by the `contextList` and
+ * `contextGetMetadata` actions of a connector that declares `contentSource`.
+ */
+export interface ContentEntry {
+  /** Stable id, accepted by `contextGetMetadata` and `contextGetContent`. */
+  id: string;
+  name: string;
+  isFolder: boolean;
+  /** The folder that holds this entry, in the same form `contextList` accepts. */
+  folder: string;
+  mimeType?: string;
+  modifiedAt?: string;
+  size?: number;
+  url: string;
+  /** Levels below the listed folder, for sources that list flat. */
+  depth?: number;
+}
+
+/**
+ * Marks a connector as a browsable content source. A connector that declares it also
+ * implements three read-only actions:
+ * - `contextList { folder?, pageToken? } -> { entries: ContentEntry[], nextPageToken? }`
+ * - `contextGetMetadata { id } -> ContentEntry` (throws when the caller cannot see it)
+ * - `contextGetContent { id, maxBytes? } -> { text? }` (no `text` when not text, or too large)
+ */
+export interface ContentSource {
+  /** Shown as the placeholder for the optional starting location. */
+  example: string;
+  /** True when listing needs a starting location (e.g. a bucket). */
+  required?: boolean;
+  /** How a `contextGetContent` id maps onto the connector's own download action's params. */
+  read: { action: string; id: string[]; separator?: string };
+  /**
+   * For each of the connector's own list or search actions, its raw output as entries, so what an agent saw can be
+   * remembered by name. `folder` may be empty where the output does not say.
+   */
+  results?: Record<string, (data: unknown) => ContentEntry[]>;
+}
+
 export interface ConnectorSandbox {
   /** Fixed hostnames the connector calls, e.g. `api.github.com`: lowercase, no scheme or port. */
   hosts?: readonly string[];
@@ -433,6 +473,9 @@ export interface ConnectorSpec {
   // included in the connector's agent attachment representation so the LLM
   // has richer context about how to use the connector's sub-actions.
   skill?: string;
+
+  // Set when the connector can be browsed and read as a content source (see `ContentSource`).
+  contentSource?: ContentSource;
 }
 
 // ============================================================================

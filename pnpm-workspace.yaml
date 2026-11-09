@@ -1475,6 +1475,7 @@ packages:
   - 'x-pack/platform/plugins/shared/cloud'
   - 'x-pack/platform/plugins/shared/cloud_connect'
   - 'x-pack/platform/plugins/shared/connector_events_bridge'
+  - 'x-pack/platform/plugins/shared/connector_memory'
   - 'x-pack/platform/plugins/shared/content_connectors'
   - 'x-pack/platform/plugins/shared/context_engine'
   - 'x-pack/platform/plugins/shared/context_engine_agent_builder'

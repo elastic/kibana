@@ -35,12 +35,14 @@ const FlyoutHeaderComponent: React.FC<{
   isPreconfigured: boolean;
   connectorName: string;
   connectorTypeDesc: string;
-  selectedTab: EditConnectorTabs;
-  setTab: (nextPage: EditConnectorTabs) => void;
+  selectedTab: EditConnectorTabs | string;
+  setTab: (nextPage: EditConnectorTabs | string) => void;
   icon?: IconType | null;
   isTestable?: boolean;
   hideRulesTab?: boolean;
   docsUrl?: string;
+  /** Tabs other plugins have added, shown after the built-in ones. */
+  extraTabs?: Array<{ id: string; title: string }>;
 }> = ({
   icon,
   isExperimental = false,
@@ -53,6 +55,7 @@ const FlyoutHeaderComponent: React.FC<{
   isTestable,
   hideRulesTab = false,
   docsUrl,
+  extraTabs = [],
 }) => {
   const {
     application: { capabilities },
@@ -219,6 +222,16 @@ const FlyoutHeaderComponent: React.FC<{
             })}
           </EuiTab>
         )}
+        {extraTabs.map((extraTab) => (
+          <EuiTab
+            key={extraTab.id}
+            onClick={() => setTab(extraTab.id)}
+            data-test-subj={`connectorFlyoutTab-${extraTab.id}`}
+            isSelected={extraTab.id === selectedTab}
+          >
+            {extraTab.title}
+          </EuiTab>
+        ))}
       </EuiTabs>
     </EuiFlyoutHeader>
   );

@@ -59,6 +59,10 @@ import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
 import { getAddConnectorFormLazy } from './common/get_add_connector_form';
 import type { CreateConnectorFormProps } from './application/sections/action_connector_form';
 import { getEditConnectorFlyoutLazy } from './common/get_edit_connector_flyout';
+import {
+  registerConnectorFlyoutTab,
+  type ConnectorFlyoutTab,
+} from './application/lib/connector_flyout_tabs';
 import { getRuleEventLogListLazy } from './common/get_rule_event_log_list';
 import { getRuleStatusDropdownLazy } from './common/get_rule_status_dropdown';
 import { getRuleStatusFilterLazy } from './common/get_rule_status_filter';
@@ -121,6 +125,11 @@ export type { ClassicRulesPageProps } from './application/classic_rules_page';
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   ruleTypeRegistry: TypeRegistry<RuleTypeModel<any>>;
+  /**
+   * Adds a tab to the Edit connector flyout, shown for the connectors the tab says it supports (for example those whose
+   * type declares a feature). The tab renders its own content.
+   */
+  registerConnectorFlyoutTab: (tab: ConnectorFlyoutTab) => void;
 }
 
 export interface TriggersAndActionsUIPublicPluginStart {
@@ -528,6 +537,7 @@ export class Plugin
     return {
       actionTypeRegistry: this.actionTypeRegistry,
       ruleTypeRegistry: this.ruleTypeRegistry,
+      registerConnectorFlyoutTab,
     };
   }
 
