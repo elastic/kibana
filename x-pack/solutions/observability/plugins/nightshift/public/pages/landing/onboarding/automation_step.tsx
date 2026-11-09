@@ -6,14 +6,16 @@
  */
 
 import { css } from '@emotion/react';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
+  EuiBadge,
   EuiButton,
   EuiCallOut,
-  EuiFlexGrid,
+  EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiIllustration,
   EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
@@ -21,118 +23,99 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
+import { connectedPowerPlug } from '@elastic/eui-illustrations';
 import { i18n } from '@kbn/i18n';
+import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
-import { useKibana } from '../../../hooks/use_kibana';
 import { NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import { InvestigationCardActions } from '../../../components/entities/investigation/investigation_card_actions';
 import { useInvestigationAssignees } from '../../../components/entities/investigation/use_investigation_assignees';
-import { useAgentConnectors } from '../../../data/sandbox_connectors/use_agent_connectors';
-import { useFetchSandboxConnectors } from '../../../data/sandbox_connectors/use_fetch_sandbox_connectors';
+import { useDeleteAutomation, type Automation } from '../../../data/automations/use_automations';
+import { useKibana } from '../../../hooks/use_kibana';
+import { AutomationDetailFlyout } from '../../automations/detail_flyout/automation_detail_flyout';
+import { CreateAutomationFlyout } from '../../automations/flyouts/create_flyout/create_automation_flyout';
+import { useAutomationUsage } from '../../automations/hooks/use_automation_usage';
+import { getDeleteConfirmTitle, listLabels } from '../../automations/list/translations';
+import { statusLabels } from '../../automations/utils/filter_automations';
 
-interface SuggestedAutomation {
-  id: string;
-  icon: string;
-  title: string;
-  description: string;
-  /** Only suggested once a connector is assigned to the agent. */
-  requiresConnector?: boolean;
-}
+const CREATE_AUTOMATION = i18n.translate(
+  'xpack.nightshift.onboarding.automate.createAutomationButton',
+  { defaultMessage: 'Create automation' }
+);
+const TRIGGER_ALERT = i18n.translate('xpack.nightshift.onboarding.automate.triggerAlert', {
+  defaultMessage: 'alert',
+});
+const TRIGGER_SLACK = i18n.translate('xpack.nightshift.onboarding.automate.triggerSlack', {
+  defaultMessage: 'a Slack message',
+});
+const TRIGGER_SCHEDULE = i18n.translate('xpack.nightshift.onboarding.automate.triggerSchedule', {
+  defaultMessage: 'a schedule',
+});
 
-const SUGGESTED_AUTOMATIONS: SuggestedAutomation[] = [
-  {
-    id: 'triage_alerts',
-    icon: 'bell',
-    title: i18n.translate('xpack.nightshift.onboarding.automate.triageAlertsTitle', {
-      defaultMessage: 'Triage incoming alerts',
-    }),
-    description: i18n.translate('xpack.nightshift.onboarding.automate.triageAlertsDescription', {
-      defaultMessage: 'Investigate new alerts from your deployments as soon as they fire.',
-    }),
-  },
-  {
-    id: 'daily_health_check',
-    icon: 'clock',
-    title: i18n.translate('xpack.nightshift.onboarding.automate.dailyCheckTitle', {
-      defaultMessage: 'Daily health check',
-    }),
-    description: i18n.translate('xpack.nightshift.onboarding.automate.dailyCheckDescription', {
-      defaultMessage:
-        'Every morning, look for new errors, latency regressions and violated SLOs from the night.',
-    }),
-  },
-  {
-    id: 'triage_slack',
-    icon: 'logoSlack',
-    title: i18n.translate('xpack.nightshift.onboarding.automate.slackTitle', {
-      defaultMessage: 'Triage alerts posted in Slack',
-    }),
-    description: i18n.translate('xpack.nightshift.onboarding.automate.slackDescription', {
-      defaultMessage:
-        'Start from Slack messages that look like alerts, then reply in the same thread with findings.',
-    }),
-  },
-  {
-    id: 'review_changes',
-    icon: 'logoGithub',
-    title: i18n.translate('xpack.nightshift.onboarding.automate.githubTitle', {
-      defaultMessage: 'Check recent releases',
-    }),
-    description: i18n.translate('xpack.nightshift.onboarding.automate.githubDescription', {
-      defaultMessage:
-        'After a release or merged pull request, check the affected services for new errors.',
-    }),
-    requiresConnector: true,
-  },
-];
+const triggeredByLabel = (automation: Automation): string => {
+  const triggers = [
+    ...new Set(
+      automation.trigger.rows.map((row) => {
+        if (row.kind === 'slack') return TRIGGER_SLACK;
+        if (row.kind === 'schedule') return TRIGGER_SCHEDULE;
+        return TRIGGER_ALERT;
+      })
+    ),
+  ];
+  return i18n.translate('xpack.nightshift.onboarding.automate.triggeredBy', {
+    defaultMessage: 'Triggered by {triggers}',
+    values: { triggers: triggers.join(', ') || TRIGGER_ALERT },
+  });
+};
 
-/** Step 3: the trial investigation keeps running while the user sets up a first automation. */
+const triggerIcon = (automation: Automation): string => {
+  const kind = automation.trigger.rows[0]?.kind;
+  if (kind === 'slack') return 'logoSlack';
+  if (kind === 'schedule') return 'clock';
+  return 'bolt';
+};
+
+/** Step 3: the trial investigation, then the first automation and any that follow. */
 export function OnboardingAutomationStep({
   investigation,
-  automationsHref,
+  automations,
+  automationsAvailable,
   onInvestigationClick,
 }: {
   investigation: InvestigationSummary;
-  /** Unset when automations are unavailable. */
-  automationsHref?: string;
+  automations: Automation[];
+  /** False when automations are unavailable in this deployment. */
+  automationsAvailable: boolean;
   onInvestigationClick: (investigation: InvestigationSummary) => void;
 }): React.ReactElement {
-  const { assignedIds } = useAgentConnectors();
-  const listed = useFetchSandboxConnectors().data?.connectors ?? [];
-  const hasConnector = listed.some(({ id }) => assignedIds.includes(id));
-  const automations = SUGGESTED_AUTOMATIONS.filter(
-    ({ requiresConnector }) => !requiresConnector || hasConnector
-  );
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [editing, setEditing] = useState<Automation>();
+  const openCreate = () => setIsCreateOpen(true);
+  const hasAutomation = automations.length > 0;
 
   return (
     <div data-test-subj="nightshiftOnboardingAutomationStep">
-      <EuiTitle size="xs">
-        <h3>
-          {i18n.translate('xpack.nightshift.onboarding.automate.trialTitle', {
-            defaultMessage: 'Trial investigation',
-          })}
-        </h3>
-      </EuiTitle>
-      <EuiSpacer size="m" />
-      <TrialInvestigationCard investigation={investigation} onClick={onInvestigationClick} />
+      {/* Section title lives above the onboarding grid so Get started lines up with this card. */}
+      <TrialInvestigationCard
+        investigation={investigation}
+        onOpenInvestigation={onInvestigationClick}
+      />
 
       <EuiSpacer size="xl" />
       <EuiTitle size="xs">
         <h3>
-          {i18n.translate('xpack.nightshift.onboarding.automate.suggestedTitle', {
-            defaultMessage: 'Suggested automations',
+          {i18n.translate('xpack.nightshift.onboarding.automate.sectionTitle', {
+            defaultMessage: 'Automations',
           })}
         </h3>
       </EuiTitle>
       <EuiSpacer size="m" />
-      {automationsHref ? (
-        <EuiFlexGrid columns={2} gutterSize="m">
-          {automations.map((automation) => (
-            <EuiFlexItem key={automation.id}>
-              <SuggestedAutomationCard automation={automation} href={automationsHref} />
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGrid>
+      {automationsAvailable ? (
+        hasAutomation ? (
+          <AutomationCards automations={automations} onCreate={openCreate} onEdit={setEditing} />
+        ) : (
+          <FirstAutomationCard onCreate={openCreate} />
+        )
       ) : (
         <EuiCallOut
           announceOnMount
@@ -143,57 +126,88 @@ export function OnboardingAutomationStep({
           })}
         />
       )}
+      {isCreateOpen && (
+        <CreateAutomationFlyout
+          onClose={() => setIsCreateOpen(false)}
+          onCreated={() => setIsCreateOpen(false)}
+        />
+      )}
+      {editing && (
+        <EditAutomationFlyout
+          automation={editing}
+          automations={automations}
+          onClose={() => setEditing(undefined)}
+        />
+      )}
     </div>
   );
 }
 
 function TrialInvestigationCard({
   investigation,
-  onClick,
+  onOpenInvestigation,
 }: {
   investigation: InvestigationSummary;
-  onClick: (investigation: InvestigationSummary) => void;
+  onOpenInvestigation: (investigation: InvestigationSummary) => void;
 }): React.ReactElement {
   const { euiTheme } = useEuiTheme();
   const InvestigationCard = useKibana().services.agenticInvestigations?.InvestigationCard;
   const { in_progress: isActive } = investigation;
   const investigations = useMemo(() => [investigation], [investigation]);
   const renderAssignees = useInvestigationAssignees(investigations);
+  // Figma AI Background Base + AI Border Base (primary → assistance).
+  const aiFill = `linear-gradient(97.76deg, ${euiTheme.colors.backgroundBasePrimary} 17%, ${euiTheme.colors.backgroundBaseAssistance} 83%)`;
+  const aiBorder = `linear-gradient(97.76deg, ${euiTheme.colors.borderBasePrimary} 17%, ${euiTheme.colors.borderBaseAssistance} 83%)`;
+  const borderWidth = euiTheme.border.width.thin;
+
+  // Same radius as EuiPanel (Get started / Automations). Parent overflow clips the
+  // nested card and footer so corners stay round — no negative-margin overlap.
+  const panelRadius = euiTheme.border.radius.panel;
 
   return (
-    <EuiPanel
-      hasBorder
-      paddingSize="none"
+    <div
       data-test-subj="nightshiftOnboardingTrialInvestigation"
       css={css`
+        box-sizing: border-box;
         overflow: hidden;
+        border-radius: ${panelRadius};
+        border: ${borderWidth} solid transparent;
+        background-image: ${aiFill}, ${aiBorder};
+        background-origin: border-box;
+        background-clip: padding-box, border-box;
       `}
     >
       {InvestigationCard && (
-        <InvestigationCard
-          investigation={investigation}
-          onClick={onClick}
-          actions={
-            <InvestigationCardActions
-              investigation={investigation}
-              assignees={renderAssignees(investigation)}
-              ebtElement={NIGHTSHIFT_EBT_ELEMENTS.ONBOARDING_TRIAL_INVESTIGATION}
-            />
-          }
-        />
+        <div
+          css={css`
+            background: ${euiTheme.colors.emptyShade};
+
+            /* Drop the card's own borders so the AI ring is the only perimeter. */
+            > * {
+              border: none !important;
+              box-shadow: none !important;
+            }
+          `}
+        >
+          <InvestigationCard
+            investigation={investigation}
+            onClick={onOpenInvestigation}
+            actions={
+              <InvestigationCardActions
+                investigation={investigation}
+                assignees={renderAssignees(investigation)}
+                ebtElement={NIGHTSHIFT_EBT_ELEMENTS.ONBOARDING_TRIAL_INVESTIGATION}
+              />
+            }
+          />
+        </div>
       )}
       <EuiFlexGroup
         alignItems="center"
         gutterSize="s"
         responsive={false}
         css={css`
-          border-top: ${euiTheme.border.thin};
           padding: ${euiTheme.size.m} ${euiTheme.size.base};
-          background: linear-gradient(
-            99deg,
-            ${euiTheme.colors.backgroundLightPrimary},
-            ${euiTheme.colors.backgroundLightAssistance}
-          );
         `}
       >
         <EuiFlexItem grow={false}>
@@ -231,7 +245,7 @@ function TrialInvestigationCard({
           <EuiFlexItem grow={false}>
             <EuiButton
               size="s"
-              onClick={() => onClick(investigation)}
+              onClick={() => onOpenInvestigation(investigation)}
               data-test-subj="nightshiftOnboardingTrialInvestigationOpen"
             >
               {i18n.translate('xpack.nightshift.onboarding.automate.openButton', {
@@ -241,73 +255,229 @@ function TrialInvestigationCard({
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
+    </div>
+  );
+}
+
+function FirstAutomationCard({ onCreate }: { onCreate: () => void }): React.ReactElement {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <EuiPanel hasBorder paddingSize="l" data-test-subj="nightshiftOnboardingFirstAutomation">
+      <EuiFlexGroup alignItems="center" gutterSize="xl">
+        <EuiFlexItem grow={false}>
+          <EuiIllustration
+            type={connectedPowerPlug}
+            alt=""
+            data-test-subj="nightshiftOnboardingFirstAutomationIllustration"
+            css={css`
+              max-inline-size: ${euiTheme.base * 10}px;
+            `}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiTitle size="xs">
+            <h4>
+              {i18n.translate('xpack.nightshift.onboarding.automate.firstAutomationTitle', {
+                defaultMessage: 'Create first automation',
+              })}
+            </h4>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiText size="s" color="subdued">
+            <p>
+              {i18n.translate('xpack.nightshift.onboarding.automate.firstAutomationDescription', {
+                defaultMessage:
+                  "Let investigations start automatically — and don't do the same work over and over again",
+              })}
+            </p>
+          </EuiText>
+          <EuiSpacer size="m" />
+          <div>
+            <EuiButton
+              size="s"
+              fill
+              iconType="plus"
+              onClick={onCreate}
+              data-test-subj="nightshiftOnboardingCreateAutomation"
+            >
+              {CREATE_AUTOMATION}
+            </EuiButton>
+          </div>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiPanel>
   );
 }
 
-function SuggestedAutomationCard({
-  automation,
-  href,
+function AutomationCards({
+  automations,
+  onCreate,
+  onEdit,
 }: {
-  automation: SuggestedAutomation;
-  href: string;
+  automations: Automation[];
+  onCreate: () => void;
+  onEdit: (automation: Automation) => void;
 }): React.ReactElement {
   const { euiTheme } = useEuiTheme();
-  const { application } = useKibana().services;
   return (
-    <EuiPanel
-      hasBorder
-      paddingSize="m"
-      data-test-subj={`nightshiftOnboardingSuggestedAutomation-${automation.id}`}
+    <div
+      data-test-subj="nightshiftOnboardingAutomationCards"
       css={css`
-        display: flex;
-        flex-direction: column;
-        height: 100%;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: ${euiTheme.size.base};
       `}
     >
-      <div
-        css={css`
-          align-items: center;
-          border: ${euiTheme.border.thin};
-          border-radius: ${euiTheme.border.radius.medium};
-          display: flex;
-          height: ${euiTheme.size.xxl};
-          justify-content: center;
-          width: ${euiTheme.size.xxl};
-        `}
-      >
-        <EuiIcon type={automation.icon} size="m" aria-hidden={true} />
-      </div>
-      <EuiSpacer size="m" />
-      <EuiText size="s">
-        <strong>{automation.title}</strong>
-      </EuiText>
-      <EuiText
-        size="xs"
-        color="subdued"
-        css={css`
-          flex-grow: 1;
-        `}
-      >
-        {automation.description}
-      </EuiText>
-      <EuiSpacer size="m" />
-      <div>
+      {automations.map((automation) => (
+        <EuiPanel
+          key={automation.id}
+          hasBorder
+          paddingSize="l"
+          data-test-subj="nightshiftOnboardingAutomationCard"
+        >
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <IconTile icon={triggerIcon(automation)} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color={automation.isEnabled ? 'success' : 'hollow'}>
+                {automation.isEnabled ? statusLabels.enabled : statusLabels.paused}
+              </EuiBadge>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+          <EuiTitle size="xs">
+            <h4>{automation.name}</h4>
+          </EuiTitle>
+          <EuiSpacer size="xs" />
+          <EuiText size="s" color="subdued">
+            <p>{triggeredByLabel(automation)}</p>
+          </EuiText>
+          <EuiSpacer size="m" />
+          <EuiButton
+            size="s"
+            iconType="pencil"
+            onClick={() => onEdit(automation)}
+            data-test-subj="nightshiftOnboardingEditAutomation"
+          >
+            {i18n.translate('xpack.nightshift.onboarding.automate.editAutomation', {
+              defaultMessage: 'Edit automation',
+            })}
+          </EuiButton>
+        </EuiPanel>
+      ))}
+      <EuiPanel hasBorder paddingSize="l" data-test-subj="nightshiftOnboardingAddAutomation">
+        <IconTile icon="plus" />
+        <EuiSpacer size="m" />
+        <EuiTitle size="xs">
+          <h4>
+            {i18n.translate('xpack.nightshift.onboarding.automate.addAnotherTitle', {
+              defaultMessage: 'Add one more automation',
+            })}
+          </h4>
+        </EuiTitle>
+        <EuiSpacer size="xs" />
+        <EuiText size="s" color="subdued">
+          <p>
+            {i18n.translate('xpack.nightshift.onboarding.automate.addAnotherDescription', {
+              defaultMessage:
+                'Investigate alerts, Slack messages, GitHub pull requests — or run on a schedule',
+            })}
+          </p>
+        </EuiText>
+        <EuiSpacer size="m" />
         <EuiButton
           size="s"
-          color="text"
-          href={href}
-          onClick={(event: React.MouseEvent) => {
-            event.preventDefault();
-            void application.navigateToUrl(href);
-          }}
-          data-test-subj={`nightshiftOnboardingSetUpAutomation-${automation.id}`}
+          iconType="plus"
+          onClick={onCreate}
+          data-test-subj="nightshiftOnboardingCreateAutomation"
         >
-          {i18n.translate('xpack.nightshift.onboarding.automate.setUpButton', {
-            defaultMessage: 'Set up',
-          })}
+          {CREATE_AUTOMATION}
         </EuiButton>
-      </div>
-    </EuiPanel>
+      </EuiPanel>
+    </div>
+  );
+}
+
+/** Same tinted plate as the leading Mark on earlier onboarding steps. */
+function IconTile({ icon }: { icon: string }): React.ReactElement {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <div
+      aria-hidden={true}
+      css={css`
+        width: ${euiTheme.size.xxl};
+        height: ${euiTheme.size.xxl};
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: ${euiTheme.colors.backgroundLightText};
+        border-radius: ${euiTheme.size.s};
+        color: ${euiTheme.colors.textParagraph};
+      `}
+    >
+      <EuiIcon type={icon} size="m" aria-hidden={true} />
+    </div>
+  );
+}
+
+function EditAutomationFlyout({
+  automation,
+  automations,
+  onClose,
+}: {
+  automation: Automation;
+  automations: Automation[];
+  onClose: () => void;
+}): React.ReactElement {
+  const { application } = useKibana().services;
+  const canManage = getNightshiftCapabilities(application.capabilities.nightshift).canManage;
+  const deleteAutomation = useDeleteAutomation();
+  const [automationToDelete, setAutomationToDelete] = useState<Automation>();
+  const [refreshedAt] = useState(() => Date.now());
+  const { runRange, usedToday } = useAutomationUsage(
+    automations,
+    { start: 'now-48h', end: 'now' },
+    refreshedAt
+  );
+
+  return (
+    <>
+      <AutomationDetailFlyout
+        automations={automations}
+        automation={automation}
+        canManage={canManage}
+        usedToday={usedToday.get(automation.id) ?? 0}
+        runRange={runRange}
+        rangeLabel={listLabels.last48Hours}
+        onClose={onClose}
+        onClone={() => undefined}
+        onDelete={setAutomationToDelete}
+      />
+      {automationToDelete && (
+        <EuiConfirmModal
+          title={getDeleteConfirmTitle(automationToDelete.name)}
+          onCancel={() => setAutomationToDelete(undefined)}
+          onConfirm={() => {
+            deleteAutomation.mutate(
+              { id: automationToDelete.id, name: automationToDelete.name },
+              {
+                onSuccess: () => {
+                  setAutomationToDelete(undefined);
+                  onClose();
+                },
+              }
+            );
+          }}
+          cancelButtonText={listLabels.cancel}
+          confirmButtonText={listLabels.delete}
+          buttonColor="danger"
+          isLoading={deleteAutomation.isLoading}
+          aria-label={getDeleteConfirmTitle(automationToDelete.name)}
+        >
+          <p>{listLabels.deleteBody}</p>
+        </EuiConfirmModal>
+      )}
+    </>
   );
 }
