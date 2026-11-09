@@ -140,7 +140,12 @@ this checkout, the way a Kibana engineer would. It is then measured on held-out 
   validation step with its error, and the final state. Each failure in \`bundle.json\` names its
   trace file. Read a few in full before deciding what to change — this is the only place where
   you can see what the model was actually told.
-- \`history.json\` — every previous proposal, what it changed, and why it was accepted or not.
+- \`history.json\` — one line per previous proposal: files changed, rationale, verdict, why,
+  reward delta, cost ratio. Skim this first.
+- \`history_full.json\` — the same rounds in full: the complete diff of each attempt, the
+  per-example deltas it produced on both splits, the gate statistics and the manifest check.
+  Open it when a previous round looks relevant to what you are about to try — particularly
+  before repeating a surface that has already been measured.
 - \`feedback.md\` — measured facts about the tool, and how your last attempt turned out.
 
 Read \`feedback.md\` and \`bundle.json\` first. Look at several failures and find the pattern
@@ -319,6 +324,9 @@ export const proposeCandidate = async ({
     };
   });
   Fs.writeFileSync(Path.join(scratchDir, 'history.json'), JSON.stringify(digest, null, 2));
+  // The digest is for skimming; everything is still here when a round is worth understanding
+  // properly — full diffs, per-seed deltas on both splits, gate statistics, manifest checks.
+  Fs.writeFileSync(Path.join(scratchDir, 'history_full.json'), JSON.stringify(history, null, 2));
   Fs.writeFileSync(Path.join(scratchDir, 'feedback.md'), feedback);
   const proposalPath = Path.join(scratchDir, 'proposal.json');
   if (Fs.existsSync(proposalPath)) {
