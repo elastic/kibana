@@ -9,7 +9,6 @@ import type { Reference } from '@kbn/content-management-utils';
 import type { StoredRefreshInterval } from '../../server/saved_objects/types';
 import type { MapAttributes, StoredMapAttributes } from '../../server';
 import { extractReferences } from '../migrations/references';
-import { transformVectorStyleKeysIn } from './vector_style_keys';
 import { mapStateKeys, uiStateKeys } from './stored_map_attributes';
 
 export function transformMapAttributesIn(mapState: MapAttributes): {
@@ -21,10 +20,7 @@ export function transformMapAttributesIn(mapState: MapAttributes): {
   };
 
   if (mapState.description) storedMapAttributes.description = mapState.description;
-  if (mapState.layers)
-    storedMapAttributes.layerListJSON = JSON.stringify(
-      mapState.layers.map(transformVectorStyleKeysIn)
-    );
+  if (mapState.layers) storedMapAttributes.layerListJSON = JSON.stringify(mapState.layers);
 
   const mapStateJSON = getJSONString(
     {
