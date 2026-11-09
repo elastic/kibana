@@ -36,6 +36,9 @@ export interface FetchInvestigationsParams {
   inProgress: boolean;
   severities?: InvestigationSeverityFilterValue[];
   query?: string;
+  /** Only investigations last modified within this window (ISO 8601). */
+  updatedAfter?: string;
+  updatedBefore?: string;
   /**
    * Poll interval in ms, or `false` to never poll. A refetch re-requests every page this
    * section has loaded, so only sections that stay shallow should poll.
@@ -86,6 +89,8 @@ export const useFetchInvestigations = ({
   inProgress,
   severities,
   query,
+  updatedAfter,
+  updatedBefore,
   refetchInterval = false,
 }: FetchInvestigationsParams): FetchInvestigationsResult => {
   const { http, agenticInvestigations } = useKibana().services;
@@ -101,7 +106,15 @@ export const useFetchInvestigations = ({
     isPreviousData,
     refetch,
   } = useInfiniteQuery<ListInvestigationsResponse, Error>({
-    queryKey: [...NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY, 'section', inProgress, severities, query],
+    queryKey: [
+      ...NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY,
+      'section',
+      inProgress,
+      severities,
+      query,
+      updatedAfter,
+      updatedBefore,
+    ],
     // The list API belongs to agenticInvestigations, an optional dependency.
     enabled: agenticInvestigations != null,
     queryFn: async ({ pageParam, signal }) =>
@@ -119,6 +132,8 @@ export const useFetchInvestigations = ({
               }),
           ...(severities?.length ? { severity: severities } : {}),
           ...(query ? { query } : {}),
+          ...(updatedAfter ? { updated_after: updatedAfter } : {}),
+          ...(updatedBefore ? { updated_before: updatedBefore } : {}),
         },
         signal,
       }),

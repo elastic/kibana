@@ -13,6 +13,7 @@ import {
   EuiCallOut,
   EuiFieldSearch,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
@@ -40,6 +41,7 @@ import {
 } from '../../components/entities/investigation/investigation_list';
 import { isInvestigationSectionVisible } from '../../components/entities/investigation/investigation_section';
 import { InvestigationSeverityTiles } from '../../components/entities/investigation/investigation_severity_tiles';
+import { NightshiftTimeRangePicker } from '../../components/ui/time_range_picker';
 import { useFlyoutShareUrlCustomAction } from '../../components/ui/flyout_share_url_button';
 import {
   buildNightshiftInvestigationFlyoutShareUrl,
@@ -54,6 +56,7 @@ import {
 import { DetectionSetupBanner } from './detection_setup_banner';
 import { NightshiftHeader } from './header';
 import { useDetectionSetupBanner } from './use_detection_setup_banner';
+import { useInvestigationsTimeRange } from './use_investigations_time_range';
 
 function isSeverity(value: string | undefined): value is Severity {
   return SEVERITY_OPTIONS.some((severity) => severity === value);
@@ -89,17 +92,24 @@ export function NightshiftApp({
     [rawSeverity]
   );
 
+  const { timeRange, updatedWindow, setTimeRange, refreshWindow } = useInvestigationsTimeRange();
+
   const {
     sections,
     severityCounts,
     areSeverityCountsLoading,
+    areSeverityCountsStale,
     hasActiveInvestigations,
     isInitialLoading,
     isFetching,
     totalCount,
     loadedCount,
     refetchAll,
-  } = useInvestigationSections({ query: debouncedSearchQuery });
+  } = useInvestigationSections({
+    query: debouncedSearchQuery,
+    updatedAfter: updatedWindow.updatedAfter,
+    updatedBefore: updatedWindow.updatedBefore,
+  });
 
   // A tile scrolls to its section, so it is only actionable while the list is rendering that
   // section — which the list, not the count, decides.
@@ -367,35 +377,58 @@ export function NightshiftApp({
         </>
       )}
 
-      <EuiFieldSearch
-        data-test-subj="nightshiftInvestigationsSearchInput"
-        placeholder={i18n.translate('xpack.nightshift.investigations.searchPlaceholder', {
-          defaultMessage: 'Search',
-        })}
-        value={searchQuery ?? ''}
-        onChange={handleSearchChange}
-        isClearable
-        fullWidth
-        compressed
-      />
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
+        <EuiFlexItem grow>
+          <EuiFieldSearch
+            data-test-subj="nightshiftInvestigationsSearchInput"
+            placeholder={i18n.translate('xpack.nightshift.investigations.searchPlaceholder', {
+              defaultMessage: 'Search',
+            })}
+            value={searchQuery ?? ''}
+            onChange={handleSearchChange}
+            isClearable
+            fullWidth
+            compressed
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <NightshiftTimeRangePicker
+            start={timeRange.from}
+            end={timeRange.to}
+            onChange={({ start, end }) => setTimeRange({ from: start, to: end })}
+            showRefreshButton
+            onRefresh={refreshWindow}
+            data-test-subj="nightshiftInvestigationsTimeRangePicker"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
       <EuiSpacer size="m" />
 
-      <InvestigationSeverityTiles
-        severityCounts={severityCounts}
-        scrollableSeverities={scrollableSeverities}
-        isLoading={isInitialLoading}
-        onSeverityClick={handleSeverityClick}
-      />
+      <div
+        css={css`
+          position: relative;
+        `}
+      >
+        <InvestigationSeverityTiles
+          severityCounts={severityCounts}
+          scrollableSeverities={scrollableSeverities}
+          // The counts are their own query. Until they land (or are replaced after a filter
+          // change) a number would be a default 0 or the previous filter's, contradicting the
+          // rows below, so all four tiles show a skeleton and reveal together.
+          isLoading={isInitialLoading || areSeverityCountsLoading || areSeverityCountsStale}
+          onSeverityClick={handleSeverityClick}
+        />
 
-      <EuiSpacer size="l" />
+        <EuiSpacer size="l" />
 
-      <InvestigationList
-        ref={sectionsRef}
-        sections={sections}
-        selectedInvestigationId={selectedInvestigationId}
-        onInvestigationClick={handleInvestigationClick}
-      />
+        <InvestigationList
+          ref={sectionsRef}
+          sections={sections}
+          selectedInvestigationId={selectedInvestigationId}
+          onInvestigationClick={handleInvestigationClick}
+        />
+      </div>
     </EuiFlexGroup>
   );
 }

@@ -37,6 +37,8 @@ export interface NightshiftTimeRangePickerProps {
   end: string;
   onChange: (range: { start: string; end: string }) => void;
   showRefreshButton?: boolean;
+  /** Called when the refresh button is clicked, before the active queries are refetched. */
+  onRefresh?: () => void;
   'data-test-subj': string;
 }
 
@@ -45,6 +47,7 @@ export const NightshiftTimeRangePicker = ({
   end,
   onChange,
   showRefreshButton = false,
+  onRefresh,
   'data-test-subj': dataTestSubj,
 }: NightshiftTimeRangePickerProps): React.ReactElement => {
   const { application, data, http, notifications, uiSettings } = useKibana().services;
@@ -91,10 +94,11 @@ export const NightshiftTimeRangePicker = ({
   );
 
   const handleRefresh = useCallback(() => {
+    onRefresh?.();
     setResolveEpoch((epoch) => epoch + 1);
     setIsRefreshing(true);
     void queryClient.refetchQueries({ type: 'active' }).finally(() => setIsRefreshing(false));
-  }, [queryClient]);
+  }, [onRefresh, queryClient]);
 
   const picker = (
     <DateRangePicker

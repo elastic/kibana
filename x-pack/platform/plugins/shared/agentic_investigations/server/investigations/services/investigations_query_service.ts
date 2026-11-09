@@ -613,6 +613,14 @@ const buildSearchFilter = (filters: InvestigationFilters): KueryNode => {
       nodeTypes.function.buildNode('range', 'created_at', 'lte', filters.created_before)
     );
   }
+  if (filters.updated_after) {
+    clauses.push(nodeTypes.function.buildNode('range', 'updated_at', 'gte', filters.updated_after));
+  }
+  if (filters.updated_before) {
+    clauses.push(
+      nodeTypes.function.buildNode('range', 'updated_at', 'lte', filters.updated_before)
+    );
+  }
   return nodeBuilder.and(clauses);
 };
 
@@ -638,6 +646,13 @@ const matchesFilters = (
     return false;
   }
   if (filters.created_before && !(createdAt <= Date.parse(filters.created_before))) {
+    return false;
+  }
+  const updatedAt = Date.parse(conversation.updated_at);
+  if (filters.updated_after && !(updatedAt >= Date.parse(filters.updated_after))) {
+    return false;
+  }
+  if (filters.updated_before && !(updatedAt <= Date.parse(filters.updated_before))) {
     return false;
   }
   if (filters.query !== undefined) {

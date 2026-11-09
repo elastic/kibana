@@ -164,6 +164,7 @@ export const InvestigationList = forwardRef<InvestigationListHandle, Investigati
               isOpen={!collapsedSections.includes(section.id)}
               onToggle={(isOpen) => setSectionOpen(section.id, isOpen)}
               isHighlighted={section.id === highlightedSection}
+              isLoadingNewFilters={section.isPreviousData}
             />
           </EuiFlexItem>
         ))}

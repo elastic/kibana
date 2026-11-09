@@ -11,10 +11,12 @@ import {
   EuiAccordion,
   EuiBadge,
   EuiButtonEmpty,
+  EuiDelayRender,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiPanel,
+  EuiProgress,
   EuiScreenReaderOnly,
   EuiSkeletonText,
   EuiTitle,
@@ -57,6 +59,8 @@ export interface InvestigationSectionProps {
   onToggle?: (isOpen: boolean) => void;
   /** Briefly draws the section's border in its severity colour, after a jump lands on it. */
   isHighlighted?: boolean;
+  /** A new search, filter or time range is loading while the previous rows are still shown. */
+  isLoadingNewFilters?: boolean;
 }
 
 /** Set on a section by the list, to the height of the sticky page header that would cover it. */
@@ -145,10 +149,15 @@ export const isInvestigationSectionVisible = (section: InvestigationSectionState
 const SectionCard = ({
   children,
   highlightColor,
+  isLoading = false,
+  loadingTestSubj,
 }: {
   children: React.ReactNode;
   /** Set while the card is highlighted. */
   highlightColor?: SeverityDotColor;
+  /** Draws the blue loading line tables show, once loading has taken a moment. */
+  isLoading?: boolean;
+  loadingTestSubj?: string;
 }): React.ReactElement => {
   const { euiTheme } = useEuiTheme();
   const strongBorderColors: Record<SeverityDotColor, string> = {
@@ -176,6 +185,17 @@ const SectionCard = ({
         }
       `}
     >
+      {isLoading && (
+        // The delay keeps a fast load from flashing the line.
+        <EuiDelayRender delay={300}>
+          <EuiProgress
+            data-test-subj={loadingTestSubj}
+            size="xs"
+            color="primary"
+            position="absolute"
+          />
+        </EuiDelayRender>
+      )}
       {children}
     </EuiPanel>
   );
@@ -404,6 +424,7 @@ export const InvestigationSection = ({
   isOpen = true,
   onToggle,
   isHighlighted = false,
+  isLoadingNewFilters = false,
 }: InvestigationSectionProps): React.ReactElement | null => {
   const { euiTheme } = useEuiTheme();
   const presentation = getSectionPresentation(id);
@@ -494,6 +515,8 @@ export const InvestigationSection = ({
         <h2 id={presentation.headingId}>{presentation.title}</h2>
       </EuiScreenReaderOnly>
       <SectionCard
+        isLoading={isLoadingNewFilters}
+        loadingTestSubj={`nightshiftInvestigationSectionLoading-${id}`}
         highlightColor={
           isHighlighted && presentation.severity != null
             ? SEVERITY_DOT_COLOR[presentation.severity]

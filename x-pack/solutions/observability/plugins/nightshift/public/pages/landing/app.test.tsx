@@ -25,6 +25,22 @@ jest.mock('../../components/entities/investigation/use_investigation_assignees',
   useInvestigationAssignees: () => () => null,
 }));
 jest.mock('./use_detection_setup_banner');
+jest.mock('../../components/ui/time_range_picker', () => ({
+  NightshiftTimeRangePicker: ({
+    start,
+    end,
+    showRefreshButton,
+  }: {
+    start: string;
+    end: string;
+    showRefreshButton?: boolean;
+  }) => (
+    <div data-test-subj="nightshiftInvestigationsTimeRangePicker">
+      {`${start} to ${end}`}
+      {showRefreshButton && <button data-test-subj="stubRefresh" type="button" />}
+    </div>
+  ),
+}));
 
 const mockUseInvestigationSections = useInvestigationSections as jest.Mock;
 const mockUseKibana = useKibana as jest.Mock;
@@ -232,6 +248,42 @@ describe('NightshiftApp', () => {
         }),
       })
     );
+  });
+
+  it('filters investigations to those modified in the last 3 days by default', () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-11-09T12:00:30.000Z'));
+    try {
+      renderApp();
+
+      expect(screen.getByTestId('nightshiftInvestigationsTimeRangePicker')).toHaveTextContent(
+        'now-3d to now'
+      );
+      expect(mockUseInvestigationSections).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          updatedAfter: '2026-11-06T12:00:00.000Z',
+          updatedBefore: undefined,
+        })
+      );
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('offers a refresh button next to the time range', () => {
+    renderApp();
+
+    expect(screen.getByTestId('stubRefresh')).toBeInTheDocument();
+  });
+
+  it('filters by the time range in the URL', () => {
+    renderApp({ initialEntries: ['/?rangeFrom=now-7d&rangeTo=now-1d'] });
+
+    expect(screen.getByTestId('nightshiftInvestigationsTimeRangePicker')).toHaveTextContent(
+      'now-7d to now-1d'
+    );
+    const [{ updatedAfter, updatedBefore }] = mockUseInvestigationSections.mock.calls.at(-1)!;
+    expect(updatedAfter).toBeDefined();
+    expect(updatedBefore).toBeDefined();
   });
 
   it('dismisses the detection setup banner from its dismiss button', () => {
@@ -512,6 +564,17 @@ describe('NightshiftApp', () => {
     expect(
       reportEvent.mock.calls.filter(([eventType]) => eventType === 'nightshift_homepage_viewed')
     ).toHaveLength(1);
+  });
+
+  it('shows no tile counts until the counts query lands, even when the sections have rows', () => {
+    const sections = defaultSections({
+      critical: { investigations: [criticalInvestigation], total: 1 },
+    });
+    setSections({ sections, areSeverityCountsLoading: true });
+
+    renderApp();
+
+    expect(screen.queryByTestId('nightshiftSeverityTileCount-critical')).toBeNull();
   });
 
   it('waits for the severity counts before reporting the landing page view', () => {
