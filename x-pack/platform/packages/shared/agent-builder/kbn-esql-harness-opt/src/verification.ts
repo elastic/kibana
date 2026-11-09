@@ -27,15 +27,29 @@ export interface ManifestVerification {
     predicted: 'fix' | 'regression';
     delta: number;
     confirmed: boolean;
+    /** False when the prediction did not name a real example — a manifest defect, not a miss. */
+    matched: boolean;
   }>;
+  /** Predictions that named no example at all; they cannot be scored either way. */
+  unmatched: number;
 }
 
 const EPSILON = 0.05;
 
-/** Predictions are written as question prefixes, so matching is prefix-and-substring based. */
-const matches = (prediction: string, question: string): boolean => {
-  const needle = prediction.trim().toLowerCase().slice(0, 60);
-  return needle.length > 8 && question.toLowerCase().includes(needle);
+/**
+ * Match a prediction to a seed.
+ *
+ * Predictions are example ids. Earlier rounds wrote prose labels instead ("admins/ops share"),
+ * which matched nothing and made every proposal look unable to predict its own effect, so the
+ * text comparison is kept as a fallback for those older manifests.
+ */
+const matches = (prediction: string, seed: SeedDelta): boolean => {
+  const value = prediction.trim();
+  if (value === seed.exampleId) {
+    return true;
+  }
+  const needle = value.toLowerCase().slice(0, 60);
+  return needle.length > 8 && seed.question.toLowerCase().includes(needle);
 };
 
 /**
@@ -58,7 +72,7 @@ export const verifyManifest = ({
 
   let fixesConfirmed = 0;
   for (const prediction of fixes) {
-    const hit = seedDeltas.find((seed) => matches(prediction, seed.question));
+    const hit = seedDeltas.find((seed) => matches(prediction, seed));
     const confirmed = Boolean(hit && hit.delta > EPSILON);
     if (confirmed) fixesConfirmed++;
     details.push({
@@ -66,12 +80,13 @@ export const verifyManifest = ({
       predicted: 'fix',
       delta: hit?.delta ?? 0,
       confirmed,
+      matched: Boolean(hit),
     });
   }
 
   let regressionsConfirmed = 0;
   for (const prediction of regressions) {
-    const hit = seedDeltas.find((seed) => matches(prediction, seed.question));
+    const hit = seedDeltas.find((seed) => matches(prediction, seed));
     const confirmed = Boolean(hit && hit.delta < -EPSILON);
     if (confirmed) regressionsConfirmed++;
     details.push({
@@ -79,15 +94,19 @@ export const verifyManifest = ({
       predicted: 'regression',
       delta: hit?.delta ?? 0,
       confirmed,
+      matched: Boolean(hit),
     });
   }
 
   const actualRegressions = seedDeltas.filter((seed) => seed.delta < -EPSILON);
   const unpredictedRegressions = actualRegressions.filter(
-    (seed) => !regressions.some((prediction) => matches(prediction, seed.question))
+    (seed) => !regressions.some((prediction) => matches(prediction, seed))
   ).length;
 
+  const unmatched = details.filter((detail) => !detail.matched).length;
+
   return {
+    unmatched,
     predictedFixes: fixes.length,
     fixesConfirmed,
     predictedRegressions: regressions.length,
@@ -103,4 +122,8 @@ export const verificationSummary = (verification: ManifestVerification): string 
   `Last round you predicted ${verification.predictedFixes} fixes; ${verification.fixesConfirmed} ` +
   `actually improved (precision ${(verification.precision * 100).toFixed(0)}%). You predicted ` +
   `${verification.predictedRegressions} regressions, ${verification.regressionsConfirmed} happened, ` +
-  `and ${verification.unpredictedRegressions} regressions you did not predict occurred.`;
+  `and ${verification.unpredictedRegressions} regressions you did not predict occurred.` +
+  (verification.unmatched > 0
+    ? ` ${verification.unmatched} of your predictions named no example in the bundle — use the` +
+      ' `id` field verbatim.'
+    : '');

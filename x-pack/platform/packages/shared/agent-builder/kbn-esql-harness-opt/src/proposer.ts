@@ -67,6 +67,9 @@ export const buildTraceBundle = (summary: RunSummary): string => {
     .sort((a, b) => a.score.reward - b.score.reward)
     .slice(0, 25)
     .map((run) => ({
+      // Stable handle for predictions: prose labels never matched reliably, so a manifest
+      // refers to examples by id and verification becomes exact.
+      id: run.exampleId,
       question: run.question,
       target: run.resolvedTarget ?? run.index,
       requestedKeywords: run.requestedKeywords,
@@ -199,13 +202,18 @@ Write \`.harness-scratch/proposal.json\`:
   "manifest": {
     "slots": ["documentation/examples.md"],
     "rationale": "what in bundle.json made you do this, in a paragraph",
-    "predictedFixes": ["first words of each question you expect to flip to correct"],
-    "predictedRegressions": ["questions you expect might regress, if any"]
+    "predictedFixes": ["<id from bundle.json>", "<id>"],
+    "predictedRegressions": ["<id>", "..."]
   }
 }
 
-Be honest in \`predictedFixes\`: it is checked against what actually changed, and a proposal that
-cannot predict its own effect is treated as guesswork next round.`;
+\`predictedFixes\` and \`predictedRegressions\` must contain **\`id\` values copied from
+\`bundle.json\`**, not prose. They are matched exactly against what changed when the candidate is
+re-measured on the same examples, so a wrong id reads as a failed prediction.
+
+Be honest and specific: predicting ten ids to cover yourself scores worse than predicting the
+three you actually reasoned about. A proposal that cannot predict its own effect is treated as
+guesswork in the next round.`;
 
 /** Run the proposer agent in a scratch directory that holds the bundle and nothing else. */
 /**

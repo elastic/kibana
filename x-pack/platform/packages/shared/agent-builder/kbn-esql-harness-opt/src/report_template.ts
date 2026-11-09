@@ -355,7 +355,19 @@ function viewRounds() {
       cls(round.verification.fixesConfirmed) + '">' + round.verification.fixesConfirmed + ' confirmed</td></tr>' +
       '<tr><td>regressions</td><td>' + (round.verification.predictedRegressions || 0) + '</td><td>' +
       round.verification.regressionsConfirmed + ' confirmed, ' + round.verification.unpredictedRegressions +
-      ' unpredicted</td></tr></table>'
+      ' unpredicted</td></tr>' +
+      (round.verification.unmatched
+        ? '<tr><td class="warn">unmatched</td><td>' + round.verification.unmatched +
+          '</td><td class="warn">named no example in the bundle — cannot be scored</td></tr>'
+        : '') +
+      '</table>' +
+      '<table><tr><th>prediction</th><th>Δ</th><th>outcome</th></tr>' +
+      (round.verification.details || []).map((detail) =>
+        '<tr><td>' + esc(String(detail.question).slice(0, 90)) + '</td><td class="' +
+        cls(detail.delta) + '">' + sign(detail.delta, 2) + '</td><td>' +
+        (!detail.matched ? '<span class="warn">unmatched</span>'
+          : detail.confirmed ? '<span class="good">confirmed</span>'
+          : '<span class="muted">did not happen</span>') + '</td></tr>').join('') + '</table>'
     : '<p class="muted">No manifest to verify.</p>';
 
   const failureBlock = (round.failures || []).length

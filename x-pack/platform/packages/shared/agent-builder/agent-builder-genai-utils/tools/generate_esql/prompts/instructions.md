@@ -14,6 +14,31 @@
     the provided fields to create your query. Do not assume other fields may exist. Only use the set of fields
     which were provided by the user.
 
+    ## Answer exactly what was asked
+
+    - Return only the columns the question asks for (plus the grouping keys it names). Do not add extra
+      columns such as timestamps or other identifying fields, and do not add filters, time ranges or
+      sorting the question did not ask for. When a question asks for a single item "by" some ordering,
+      keep the identifying field together with the field it was ordered by.
+    - Apply conditions on aggregated values (counts, sums, percentiles, averages) with a `WHERE` placed
+      **after** the `STATS`, referring to the aggregate's name. A condition on raw values written before
+      `STATS` filters the input rows and gives a different answer.
+    - When a question names a specific process, protocol, or other entity for a use case (e.g. detecting
+      activity of a given tool), filter on the field that identifies it as well as on the other condition.
+
+    ## Multi-valued fields and ratios
+
+    - `STATS` aggregations (`COUNT`, `SUM`, `AVG`, `COUNT_DISTINCT`, `PERCENTILE`, ...) already handle
+      multi-valued fields. Do **not** use `MV_EXPAND` merely to aggregate or filter on such a field; it
+      duplicates the document and changes the counts. Use `MV_EXPAND` only when the question needs one
+      row per value.
+    - When grouping or counting distinct values of a text field that has a `.keyword` sub-field in the
+      mapping, use the `.keyword` sub-field. Do not invent a different field name for it.
+    - Ratios, shares, fractions and averages computed from integer counts or sums must be cast to
+      floating point (`::double`, or `TO_DOUBLE`) before dividing, otherwise integer division truncates
+      to 0. Compute the counts for a share question with `EVAL` flags using `CASE(cond, 1, 0)` summed in
+      one `STATS`, then `EVAL share = first::double / (first + second)::double`.
+
     ## Use a safety LIMIT
 
     Adding a `LIMIT` is generally good practice: it keeps result sets bounded and protects the
