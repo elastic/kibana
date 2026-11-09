@@ -67,6 +67,14 @@ interface MockCodeEditorProps {
 jest.mock('@kbn/code-editor', () => {
   const MockReact = jest.requireActual('react');
   return {
+    monaco: {
+      languages: {
+        getLanguages: () => [],
+        register: () => undefined,
+        setMonarchTokensProvider: () => undefined,
+        setLanguageConfiguration: () => undefined,
+      },
+    },
     CodeEditor: (props: MockCodeEditorProps) => {
       const textareaRef = MockReact.useRef(null);
       const valueRef = MockReact.useRef(props.value);
@@ -287,6 +295,19 @@ describe('FieldEditorSubFlyout', () => {
       screen.queryByTestId('workflowFieldEditorSubFlyout-containerCallout')
     ).not.toBeInTheDocument();
     expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('edits JSON + Liquid as text and offers a list inside it as JSON text', () => {
+    const { onChange } = renderFlyout({
+      value: '{"tags": {{ consts.tags }}}',
+      catalog: listCatalog,
+      language: 'json-liquid',
+    });
+    expect(document.querySelector('[data-language="workflows-json-liquid"]')).not.toBeNull();
+    expect(screen.getByTestId('workflowFieldEditorSubFlyout-containerCallout')).toBeVisible();
+
+    fireEvent.click(screen.getByTestId('workflowFieldEditorSubFlyout-insertAsJson'));
+    expect(onChange).toHaveBeenLastCalledWith('{"tags": {{ consts.tags | json }}}');
   });
 
   it('does not warn inside a JSON field', () => {

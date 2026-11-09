@@ -9,6 +9,7 @@
 
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import React from 'react';
+import { parseDocument } from 'yaml';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ConnectorContractUnion, WorkflowYaml } from '@kbn/workflows';
 import { SET_ALERTS_STATUS_CONTRACT } from '@kbn/workflows/spec/kibana/overrides/kibana.set_alerts_status';
@@ -19,6 +20,14 @@ import { insertIntoActiveDataReferenceTarget } from '../../../shared/lib/active_
 jest.mock('@kbn/code-editor', () => {
   const MockReact = jest.requireActual('react');
   return {
+    monaco: {
+      languages: {
+        getLanguages: () => [],
+        register: () => undefined,
+        setMonarchTokensProvider: () => undefined,
+        setLanguageConfiguration: () => undefined,
+      },
+    },
     CodeEditor: (props: {
       value: string;
       languageId: string;
@@ -1159,6 +1168,132 @@ with:
     const saved = onFragmentChange.mock.calls[onFragmentChange.mock.calls.length - 1][0] as string;
     expect(saved).toContain('{{ steps.prev.output }}');
     expect(saved).not.toMatch(/Must be valid JSON/);
+  });
+
+  describe('a JSON + Liquid source (data.parseJson)', () => {
+    const parseJsonConnectors: ConnectorContractUnion[] = [
+      {
+        type: 'data.parseJson',
+        hasConnectorId: false,
+        paramsSchema: z.object({}),
+        configSchema: z.object({
+          source: z.unknown().meta({ language: 'json-liquid', advanced: false }),
+        }),
+        outputSchema: z.unknown(),
+        summary: 'Parse JSON',
+        description: null,
+      } as unknown as ConnectorContractUnion,
+    ];
+    const definition = {
+      version: '1',
+      name: 'demo',
+      enabled: true,
+      triggers: [{ type: 'manual' }],
+      consts: { tags: ['a', 'b'] },
+      steps: [{ name: 'parse', type: 'data.parseJson', source: '' }],
+    } as unknown as WorkflowYaml;
+
+    const renderParseJson = (source: string) => {
+      const onFragmentChange = jest.fn();
+      render(
+        <I18nProvider>
+          <StepConfigPanel
+            mode="edit"
+            stepType="data.parseJson"
+            initialFragment={`name: parse\ntype: data.parseJson\nsource: ${JSON.stringify(
+              source
+            )}\n`}
+            connectors={parseJsonConnectors}
+            workflowDefinition={definition}
+            onClose={jest.fn()}
+            onRevert={jest.fn()}
+            onFragmentChange={onFragmentChange}
+          />
+        </I18nProvider>
+      );
+      const lastSource = () =>
+        parseDocument(
+          onFragmentChange.mock.calls[onFragmentChange.mock.calls.length - 1][0] as string
+        ).get('source');
+      return { lastSource };
+    };
+
+    it('is an inline JSON + Liquid editor in Configuration, with a picker and an expand control', () => {
+      renderParseJson('');
+      const field = screen.getByTestId('workflowStepConfigField-source');
+      expect(field).toHaveAttribute('data-language', 'json-liquid');
+      expect(within(field).getByTestId('mocked-code-editor')).toHaveAttribute(
+        'data-language',
+        'workflows-json-liquid'
+      );
+      expect(
+        field.querySelector('[data-test-subj="workflowStepConfigDataReference"]')
+      ).not.toBeNull();
+      expect(
+        field.querySelector('[data-test-subj="workflowStepConfigDataReferenceExpand"]')
+      ).not.toBeNull();
+    });
+
+    it('keeps JSON with Liquid in it as the exact string, without a JSON parse error', () => {
+      const { lastSource } = renderParseJson('');
+      const text = '{"id": {{ inputs.id }}, "name": "{{ steps.build.output.name }}"}';
+      fireEvent.change(
+        within(screen.getByTestId('workflowStepConfigField-source')).getByTestId(
+          'mocked-code-editor'
+        ),
+        { target: { value: text } }
+      );
+      expect(lastSource()).toBe(text);
+      expect(screen.queryByText('Must be valid JSON')).not.toBeInTheDocument();
+    });
+
+    it('reports JSON that is broken once the variables are filled in', () => {
+      renderParseJson('');
+      const editor = within(screen.getByTestId('workflowStepConfigField-source')).getByTestId(
+        'mocked-code-editor'
+      );
+      fireEvent.change(editor, { target: { value: '{"a": }' } });
+      fireEvent.blur(editor);
+      expect(screen.getByText('Must be valid JSON (ignoring variables)')).toBeInTheDocument();
+    });
+
+    it('shows a structured value written as a map in YAML as JSON text', () => {
+      const onFragmentChange = jest.fn();
+      render(
+        <I18nProvider>
+          <StepConfigPanel
+            mode="edit"
+            stepType="data.parseJson"
+            initialFragment={'name: parse\ntype: data.parseJson\nsource:\n  a: 1\n'}
+            connectors={parseJsonConnectors}
+            onClose={jest.fn()}
+            onRevert={jest.fn()}
+            onFragmentChange={onFragmentChange}
+          />
+        </I18nProvider>
+      );
+      expect(
+        (
+          within(screen.getByTestId('workflowStepConfigField-source')).getByTestId(
+            'mocked-code-editor'
+          ) as HTMLTextAreaElement
+        ).value
+      ).toBe(JSON.stringify({ a: 1 }, null, 2));
+    });
+
+    it('offers to insert a list in the middle of the text as JSON text', () => {
+      const { lastSource } = renderParseJson('{"tags": {{ consts.tags }}}');
+      expect(screen.getByTestId('workflowStepConfigField-source-containerCallout')).toBeVisible();
+      fireEvent.click(screen.getByTestId('workflowStepConfigField-source-insertAsJson'));
+      expect(lastSource()).toBe('{"tags": {{ consts.tags | json }}}');
+    });
+
+    it('does not warn about a list that is the whole value', () => {
+      renderParseJson('${{ consts.tags }}');
+      expect(
+        screen.queryByTestId('workflowStepConfigField-source-containerCallout')
+      ).not.toBeInTheDocument();
+    });
   });
 
   it('opens the field-editor sub-flyout from ⤢ and writes through live', () => {

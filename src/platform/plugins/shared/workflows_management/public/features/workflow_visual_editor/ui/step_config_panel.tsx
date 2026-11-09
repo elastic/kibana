@@ -62,9 +62,11 @@ import { isReferenceValue } from '@kbn/workflows-yaml';
 import type { DataReferenceRunControls } from './data_reference_catalog_tree';
 import { FieldEditorSubFlyout } from './field_editor_sub_flyout';
 import { FlyoutMonacoFrame, getFlyoutMonacoEditorOptions } from './flyout_monaco_frame';
+import { ensureJsonLiquidLanguage, JSON_LIQUID_LANG_ID } from './json_liquid_language';
 import { KeyValueField } from './key_value_field';
 import { ListField } from './list_field';
 import { ReferenceCapableField } from './reference_capable_field';
+import { ContainerInSentenceCallout } from './reference_container_callout';
 import { ReferenceTextInput } from './reference_text_input';
 import { ReferenceValueBox } from './reference_value_box';
 import { StepErrorHandlingSection } from './step_error_handling_section';
@@ -87,7 +89,7 @@ import {
   formatValueReferenceToken,
 } from '../lib/build_data_reference_catalog';
 import { fromTags, isTagValue, toTags } from '../lib/list_value';
-import { findReferenceTokens } from '../lib/reference_tokens';
+import { findReferenceTokens, insertTokenAsJsonText } from '../lib/reference_tokens';
 import type { ReferenceForm } from '../lib/reference_value';
 import {
   isContainerReference,
@@ -203,6 +205,9 @@ const monacoLanguageFor = (field: StepFormField): string => {
       return XJSON_LANG_ID;
     case 'esql':
       return ESQL_LANG_ID;
+    case 'json-liquid':
+      ensureJsonLiquidLanguage();
+      return JSON_LIQUID_LANG_ID;
     case 'kuery':
     case 'plaintext':
     default:
@@ -432,7 +437,7 @@ export function StepConfigPanel({
     if (raw === undefined || raw === null) return '';
     if (
       expandedField.kind === 'code' &&
-      expandedField.language === 'json' &&
+      (expandedField.language === 'json' || expandedField.language === 'json-liquid') &&
       typeof raw !== 'string'
     ) {
       return JSON.stringify(raw, null, 2);
@@ -2282,6 +2287,9 @@ function CodeField({
   const { euiTheme, colorMode } = useEuiTheme();
   const isJson = field.language === 'json';
   const isEsql = field.language === 'esql';
+  const isJsonLiquid = field.language === 'json-liquid';
+  // These keep their text exactly as typed, in an inline Monaco editor.
+  const usesInlineMonaco = isEsql || isJsonLiquid;
   const controlPaddingPx = parseInt(String(euiTheme.size.m), 10);
   const shellRef = useRef<HTMLDivElement | null>(null);
   const editorRef = useRef<{
@@ -2291,34 +2299,42 @@ function CodeField({
   } | null>(null);
   const [editorHeight, setEditorHeight] = useState(CODE_EDITOR_HEIGHT);
   const [esqlEditor, setEsqlEditor] = useState<monaco.editor.IStandaloneCodeEditor | null>(null);
+  const [dismissedWarnings, setDismissedWarnings] = useState<ReadonlySet<string>>(() => new Set());
   const iconMasks = useReferenceIconMasks();
 
   const external = useMemo(() => {
     if (value === undefined || value === null) return '';
-    if (isJson && typeof value !== 'string') return JSON.stringify(value, null, 2);
+    if ((isJson || isJsonLiquid) && typeof value !== 'string')
+      return JSON.stringify(value, null, 2);
     return String(value);
-  }, [value, isJson]);
+  }, [value, isJson, isJsonLiquid]);
 
   // Inline Inputs show a whitespace-collapsed string; the document keeps the
   // original until the user edits (or expands and edits in the sub-flyout).
   const [draft, setDraft] = useState(() =>
-    isEsql ? external : collapseWhitespaceForDisplay(external)
+    usesInlineMonaco ? external : collapseWhitespaceForDisplay(external)
   );
 
   useEffect(() => {
-    setDraft(isEsql ? external : collapseWhitespaceForDisplay(external));
+    setDraft(usesInlineMonaco ? external : collapseWhitespaceForDisplay(external));
     onDraftErrorChange(undefined);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- onDraftErrorChange is intentionally omitted
-  }, [external, isEsql]);
+  }, [external, usesInlineMonaco]);
 
   const esqlTokens = useMemo(
-    () => (isEsql ? findReferenceTokens(draft, { catalog }) : []),
-    [catalog, draft, isEsql]
+    () =>
+      usesInlineMonaco
+        ? findReferenceTokens(draft, { catalog, warnContainersInSentence: isJsonLiquid })
+        : [],
+    [catalog, draft, usesInlineMonaco, isJsonLiquid]
   );
   useReferenceDecorations(esqlEditor, draft, esqlTokens);
+  const containerWarning = esqlTokens.find(
+    (token) => token.isContainerInSentence && !dismissedWarnings.has(token.expression)
+  );
 
   useEffect(() => {
-    if (!isEsql) return;
+    if (!usesInlineMonaco) return;
     const shell = shellRef.current;
     if (!shell || typeof ResizeObserver === 'undefined') return;
     const syncHeight = () => {
@@ -2328,7 +2344,7 @@ function CodeField({
     const observer = new ResizeObserver(syncHeight);
     observer.observe(shell);
     return () => observer.disconnect();
-  }, [isEsql]);
+  }, [usesInlineMonaco]);
 
   const jsonParseError = i18n.translate('workflows.stepConfigPanel.validation.mustBeJson', {
     defaultMessage: 'Must be valid JSON',
@@ -2359,120 +2375,143 @@ function CodeField({
   );
 
   // TODO(slice7): ES|QL keeps its specialized editor — no single-line collapse.
-  if (isEsql) {
+  if (usesInlineMonaco) {
     return (
       <ReferenceCapableField
         catalog={catalog}
         value={draft}
         onChange={applyDraft}
         onExpand={onExpand}
+        valueFormWhenWhole={field.valueFormWhenWhole}
       >
         {({ teachingPlaceholder, appendControls, reportChange, registerSelection }) => (
-          <div
-            ref={shellRef}
-            onBlur={onBlur}
-            css={{
-              position: 'relative',
-              height: CODE_EDITOR_HEIGHT,
-              minHeight: CODE_EDITOR_HEIGHT,
-              resize: 'vertical',
-              overflow: 'hidden',
-              border: `${euiTheme.border.width.thin} solid ${
-                isInvalid ? euiTheme.colors.borderStrongDanger : euiTheme.colors.borderBasePlain
-              }`,
-              borderRadius: euiTheme.border.radius.small,
-              background: euiTheme.colors.backgroundBaseSubdued,
-              boxSizing: 'border-box',
-              ...getReferenceChipEditorCss(euiTheme, iconMasks, colorMode),
-            }}
-            data-test-subj={testSubj}
-            data-language={field.language}
-            aria-invalid={isInvalid}
-          >
+          <>
             <div
+              ref={shellRef}
+              onBlur={onBlur}
               css={{
-                position: 'absolute',
-                top: euiTheme.size.m,
-                right: euiTheme.size.m,
-                zIndex: 2,
+                position: 'relative',
+                height: CODE_EDITOR_HEIGHT,
+                minHeight: CODE_EDITOR_HEIGHT,
+                resize: 'vertical',
+                overflow: 'hidden',
+                border: `${euiTheme.border.width.thin} solid ${
+                  isInvalid ? euiTheme.colors.borderStrongDanger : euiTheme.colors.borderBasePlain
+                }`,
+                borderRadius: euiTheme.border.radius.small,
+                background: euiTheme.colors.backgroundBaseSubdued,
+                boxSizing: 'border-box',
+                ...getReferenceChipEditorCss(euiTheme, iconMasks, colorMode),
               }}
+              data-test-subj={testSubj}
+              data-language={field.language}
+              aria-invalid={isInvalid}
             >
-              {appendControls}
-            </div>
-            <CodeEditor
-              languageId={monacoLanguageFor(field)}
-              chromeOverrides={workflowsEditorChromeOverrides}
-              value={draft}
-              onChange={(text, event) => {
-                const last = event?.changes?.[event.changes.length - 1];
-                const caret = last ? last.rangeOffset + last.text.length : text.length;
-                reportChange(text, caret);
-              }}
-              height={editorHeight}
-              aria-label={field.label}
-              placeholder={draft.length === 0 ? teachingPlaceholder : undefined}
-              editorDidMount={(editor) => {
-                const bridge = {
-                  focus: () => editor.focus(),
-                  getCaret: () => {
-                    const model = editor.getModel();
-                    const pos = editor.getPosition();
-                    if (!model || !pos) return editor.getValue().length;
-                    return model.getOffsetAt(pos);
-                  },
-                  setCaret: (offset: number) => {
-                    const model = editor.getModel();
-                    if (!model) return;
-                    const clamped = Math.max(0, Math.min(offset, model.getValueLength()));
-                    const pos = model.getPositionAt(clamped);
-                    editor.setPosition(pos);
-                    editor.revealPosition(pos);
-                    editor.focus();
-                  },
-                  replaceText: (start: number, end: number, text: string) => {
-                    const model = editor.getModel();
-                    if (!model) return false;
-                    const startPos = model.getPositionAt(Math.max(0, start));
-                    const endPos = model.getPositionAt(Math.max(0, end));
-                    editor.focus();
-                    editor.executeEdits('workflow-data-reference', [
-                      {
-                        range: {
-                          startLineNumber: startPos.lineNumber,
-                          startColumn: startPos.column,
-                          endLineNumber: endPos.lineNumber,
-                          endColumn: endPos.column,
+              <div
+                css={{
+                  position: 'absolute',
+                  top: euiTheme.size.m,
+                  right: euiTheme.size.m,
+                  zIndex: 2,
+                }}
+              >
+                {appendControls}
+              </div>
+              <CodeEditor
+                languageId={monacoLanguageFor(field)}
+                chromeOverrides={workflowsEditorChromeOverrides}
+                value={draft}
+                onChange={(text, event) => {
+                  const last = event?.changes?.[event.changes.length - 1];
+                  const caret = last ? last.rangeOffset + last.text.length : text.length;
+                  reportChange(text, caret);
+                }}
+                height={editorHeight}
+                aria-label={field.label}
+                placeholder={draft.length === 0 ? teachingPlaceholder : undefined}
+                editorDidMount={(editor) => {
+                  const bridge = {
+                    focus: () => editor.focus(),
+                    getCaret: () => {
+                      const model = editor.getModel();
+                      const pos = editor.getPosition();
+                      if (!model || !pos) return editor.getValue().length;
+                      return model.getOffsetAt(pos);
+                    },
+                    setCaret: (offset: number) => {
+                      const model = editor.getModel();
+                      if (!model) return;
+                      const clamped = Math.max(0, Math.min(offset, model.getValueLength()));
+                      const pos = model.getPositionAt(clamped);
+                      editor.setPosition(pos);
+                      editor.revealPosition(pos);
+                      editor.focus();
+                    },
+                    replaceText: (start: number, end: number, text: string) => {
+                      const model = editor.getModel();
+                      if (!model) return false;
+                      const startPos = model.getPositionAt(Math.max(0, start));
+                      const endPos = model.getPositionAt(Math.max(0, end));
+                      editor.focus();
+                      editor.executeEdits('workflow-data-reference', [
+                        {
+                          range: {
+                            startLineNumber: startPos.lineNumber,
+                            startColumn: startPos.column,
+                            endLineNumber: endPos.lineNumber,
+                            endColumn: endPos.column,
+                          },
+                          text,
+                          forceMoveMarkers: true,
                         },
-                        text,
-                        forceMoveMarkers: true,
-                      },
-                    ]);
-                    const nextPos = model.getPositionAt(start + text.length);
-                    editor.setPosition(nextPos);
-                    editor.revealPosition(nextPos);
-                    return true;
-                  },
-                };
-                editorRef.current = bridge;
-                registerSelection(bridge);
-                setEsqlEditor((current) => current ?? editor);
-              }}
-              options={{
-                automaticLayout: true,
-                fontSize: 12,
-                minimap: { enabled: false },
-                lineNumbers: 'off',
-                lineNumbersMinChars: 0,
-                glyphMargin: false,
-                folding: false,
-                padding: { top: controlPaddingPx, bottom: controlPaddingPx },
-                lineDecorationsWidth: controlPaddingPx,
-                scrollBeyondLastLine: false,
-                wordWrap: 'on',
-                scrollbar: { vertical: 'auto', horizontal: 'hidden' },
-              }}
-            />
-          </div>
+                      ]);
+                      const nextPos = model.getPositionAt(start + text.length);
+                      editor.setPosition(nextPos);
+                      editor.revealPosition(nextPos);
+                      return true;
+                    },
+                  };
+                  editorRef.current = bridge;
+                  registerSelection(bridge);
+                  setEsqlEditor((current) => current ?? editor);
+                }}
+                options={{
+                  automaticLayout: true,
+                  fontSize: 12,
+                  minimap: { enabled: false },
+                  lineNumbers: 'off',
+                  lineNumbersMinChars: 0,
+                  glyphMargin: false,
+                  folding: false,
+                  padding: { top: controlPaddingPx, bottom: controlPaddingPx },
+                  lineDecorationsWidth: controlPaddingPx,
+                  scrollBeyondLastLine: false,
+                  wordWrap: 'on',
+                  scrollbar: { vertical: 'auto', horizontal: 'hidden' },
+                  // Typed braces are the picker's `{{` trigger: auto-closing would leave a stray `}}`.
+                  ...(isJsonLiquid
+                    ? {
+                        autoClosingBrackets: 'never',
+                        autoClosingQuotes: 'never',
+                        autoSurround: 'never',
+                      }
+                    : {}),
+                }}
+              />
+            </div>
+            {containerWarning ? (
+              <ContainerInSentenceCallout
+                token={containerWarning}
+                onFix={() => applyDraft(insertTokenAsJsonText(draft, containerWarning))}
+                onDismiss={() =>
+                  setDismissedWarnings((current) =>
+                    new Set(current).add(containerWarning.expression)
+                  )
+                }
+                testSubj={testSubj}
+              />
+            ) : null}
+          </>
         )}
       </ReferenceCapableField>
     );

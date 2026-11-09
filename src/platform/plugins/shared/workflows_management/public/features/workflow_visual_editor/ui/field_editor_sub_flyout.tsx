@@ -29,6 +29,7 @@ import { workflowsEditorChromeOverrides } from '@kbn/workflows-ui';
 import { createMonacoSelectionBridge } from './create_monaco_selection_bridge';
 import type { DataReferenceRunControls } from './data_reference_catalog_tree';
 import { DataReferenceCatalogTree } from './data_reference_catalog_tree';
+import { ensureJsonLiquidLanguage, JSON_LIQUID_LANG_ID } from './json_liquid_language';
 import { ReferenceCapableField } from './reference_capable_field';
 import type { ReferenceSelectionBridge } from './reference_capable_field';
 import { ContainerInSentenceCallout } from './reference_container_callout';
@@ -43,6 +44,18 @@ import { tokenForInsert } from '../lib/reference_value';
 
 type Editor = monaco.editor.IStandaloneCodeEditor;
 
+const monacoLanguageFor = (language: FieldEditorSubFlyoutProps['language']): string => {
+  switch (language) {
+    case 'json':
+      return XJSON_LANG_ID;
+    case 'json-liquid':
+      ensureJsonLiquidLanguage();
+      return JSON_LIQUID_LANG_ID;
+    default:
+      return 'plaintext';
+  }
+};
+
 export interface FieldEditorSubFlyoutProps {
   readonly fieldLabel: string;
   readonly value: string;
@@ -51,7 +64,7 @@ export interface FieldEditorSubFlyoutProps {
   /** Run controls and data for the step rows of the reference tree; omit to hide them. */
   readonly runControls?: DataReferenceRunControls;
   /** Monaco language when using the code editor; omit for plain text. */
-  readonly language?: 'json' | 'esql' | 'kuery' | 'plaintext' | 'yaml';
+  readonly language?: 'json' | 'esql' | 'kuery' | 'plaintext' | 'yaml' | 'json-liquid';
   /** A pick that fills the whole editor is inserted as a value (`${{ }}`); see `ReferenceCapableField`. */
   readonly valueFormWhenWhole?: boolean;
   /** Close this panel only (Back / Escape / history pop). */
@@ -130,7 +143,7 @@ export function FieldEditorSubFlyout({
     () =>
       findReferenceTokens(draft, {
         catalog,
-        warnContainersInSentence: isFreeText,
+        warnContainersInSentence: isFreeText || language === 'json-liquid',
         quotedStringsAreValues: language === 'json',
       }),
     [catalog, draft, isFreeText, language]
@@ -490,7 +503,7 @@ export function FieldEditorSubFlyout({
                     </div>
                     <div css={editorBoxCss}>
                       <CodeEditor
-                        languageId={language === 'json' ? XJSON_LANG_ID : 'plaintext'}
+                        languageId={monacoLanguageFor(language)}
                         chromeOverrides={workflowsEditorChromeOverrides}
                         value={draft}
                         onChange={(text, event) => {

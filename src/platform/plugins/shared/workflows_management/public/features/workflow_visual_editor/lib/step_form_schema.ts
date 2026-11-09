@@ -16,7 +16,7 @@ import {
 } from '@kbn/workflows';
 import type { ConnectorContractUnion } from '@kbn/workflows';
 import { unwrapSchema } from '@kbn/workflows/common/utils/zod';
-import { isReferenceValue } from '@kbn/workflows-yaml';
+import { isReferenceValue, parseTemplateString } from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
 import { inferVariant } from './form_variants';
 import { prettifyCatalogKey } from '../../../shared/utils/catalog_display_name';
@@ -36,7 +36,11 @@ export type StepFieldKind =
   | 'variants'
   | 'switch-cases'
   | 'parallel-branches';
-export type StepFieldLanguage = 'json' | 'kuery' | 'plaintext' | 'esql';
+/**
+ * `json-liquid` is JSON text that may hold Liquid (`{{ }}` / `{% %}`): it is stored as a string,
+ * never parsed into an object, because it is only valid JSON once the engine has rendered it.
+ */
+export type StepFieldLanguage = 'json' | 'kuery' | 'plaintext' | 'esql' | 'json-liquid';
 
 /**
  * One way a value can be written, for a field whose schema is a union of scalars and objects
@@ -130,7 +134,11 @@ const STRING_CODE_LANGUAGE_BY_STEP: Readonly<
   'elasticsearch.esql.query': { query: 'esql' },
 };
 
-/** Transport-only params that would only add noise to the form. */
+/**
+ * Transport-only params that would only add noise to the form. They are query parameters of the
+ * Elasticsearch / Kibana APIs, so they only apply under `with`: a step's own root config may
+ * legitimately use the same name (`data.parseJson`'s `source`).
+ */
 const HIDDEN_KEYS = new Set(['pretty', 'human', 'error_trace', 'source', 'filter_path']);
 
 const isRequired = (schema: z.ZodType): boolean => !schema.safeParse(undefined).success;
@@ -347,7 +355,8 @@ const resolveKind = (
     metaLanguage === 'json' ||
     metaLanguage === 'kuery' ||
     metaLanguage === 'plaintext' ||
-    metaLanguage === 'esql'
+    metaLanguage === 'esql' ||
+    metaLanguage === 'json-liquid'
   ) {
     return { kind: 'code', language: metaLanguage };
   }
@@ -597,10 +606,11 @@ const fieldsFromObject = (
   // check to root keys avoids misreading an array-of-union/array-of-object
   // `with.*` field (e.g. `elasticsearch.bulk`'s `operations`) as structural.
   const isRootLevel = basePath.length === 0;
+  const isWithLevel = basePath[0] === 'with';
   return Object.entries(inner.shape as Record<string, z.ZodType>)
     .filter(
       ([key, fieldSchema]) =>
-        !HIDDEN_KEYS.has(key) &&
+        !(isWithLevel && HIDDEN_KEYS.has(key)) &&
         !(isRootLevel && isNestedStepsSchema(fieldSchema)) &&
         !isNeverSchema(fieldSchema)
     )
@@ -651,7 +661,8 @@ const fieldsFromObject = (
         ...(startsOnData ? { preferData: true } : {}),
         defaultValue: getDefault(fieldSchema),
         ...(fixedOnly ? { templatable: false as const } : {}),
-        ...(isRootLevel && key === 'condition' && VALUE_FORM_CONDITION_STEP_TYPES.has(stepType)
+        ...((isRootLevel && key === 'condition' && VALUE_FORM_CONDITION_STEP_TYPES.has(stepType)) ||
+        language === 'json-liquid'
           ? { valueFormWhenWhole: true as const }
           : {}),
       };
@@ -753,6 +764,41 @@ export const findUnclosedTemplateExpression = (value: string): boolean => {
   return false;
 };
 
+/** A `{{ }}` output, with the `$` of its value form (`${{ }}`) when it has one. */
+const LIQUID_OUTPUT_PATTERN = /\$?\{\{[\s\S]*?\}\}/g;
+
+/** Longer text is not checked: this runs on every render and a huge template is slow to parse. */
+const MAX_VALIDATED_JSON_LIQUID_CHARS = 100_000;
+
+/**
+ * JSON text with Liquid in it: the Liquid must parse, and, unless a `{% %}` tag can reshape the
+ * text, the JSON must hold once each `{{ }}` is stood in for by a value (`0` fits as a bare value
+ * and inside a string alike, and a whole `${{ }}` reference is a value too).
+ */
+const validateJsonLiquid = (text: string): string | undefined => {
+  if (text.length > MAX_VALIDATED_JSON_LIQUID_CHARS) return undefined;
+  try {
+    parseTemplateString(text);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : '';
+    return (
+      message.replace(/, line:\d+, col:\d+/g, '') ||
+      i18n.translate('workflows.stepConfigPanel.validation.invalidLiquid', {
+        defaultMessage: 'Invalid Liquid syntax',
+      })
+    );
+  }
+  if (text.includes('{%')) return undefined;
+  try {
+    JSON.parse(text.replace(LIQUID_OUTPUT_PATTERN, '0'));
+  } catch {
+    return i18n.translate('workflows.stepConfigPanel.validation.mustBeJsonIgnoringVariables', {
+      defaultMessage: 'Must be valid JSON (ignoring variables)',
+    });
+  }
+  return undefined;
+};
+
 /**
  * Advisory field validation for the config panel. Returns a specific message, or
  * undefined when the value is acceptable. Empty optionals are always OK.
@@ -801,6 +847,10 @@ export const validateStepField = (field: StepFormField, value: unknown): string 
       defaultMessage: 'Unclosed {open} expression',
       values: { open: '{{' },
     });
+  }
+
+  if (field.language === 'json-liquid' && typeof value === 'string') {
+    return validateJsonLiquid(value);
   }
 
   if (field.kind === 'boolean' && typeof value !== 'boolean' && !isReference) {

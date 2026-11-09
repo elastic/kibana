@@ -73,6 +73,65 @@ describe('step_form_schema', () => {
       expect(items?.templatable).toBeUndefined();
     });
 
+    describe('a root `source` of a data step', () => {
+      const dataStep = (type: string, source: z.ZodType): ConnectorContractUnion =>
+        ({
+          type,
+          paramsSchema: z.object({}),
+          configSchema: z.object({ source }),
+          outputSchema: z.unknown(),
+          summary: null,
+          description: null,
+        } as unknown as ConnectorContractUnion);
+
+      it('is a JSON + Liquid code field that stays a string, promoted out of Advanced', () => {
+        const source = getStepFormSchema('data.parseJson', [
+          dataStep(
+            'data.parseJson',
+            z.unknown().meta({ language: 'json-liquid', advanced: false })
+          ),
+        ])?.fields.find((f) => f.key === 'source');
+        expect(source).toMatchObject({
+          path: ['source'],
+          kind: 'code',
+          language: 'json-liquid',
+          advanced: false,
+          valueFormWhenWhole: true,
+        });
+      });
+
+      it('opens on Data for a plaintext or JSON source that usually holds a reference', () => {
+        const meta = { preferData: true, advanced: false };
+        const [regex, stringify] = [
+          getStepFormSchema('data.regexExtract', [
+            dataStep('data.regexExtract', z.unknown().meta({ ...meta, language: 'plaintext' })),
+          ])?.fields.find((f) => f.key === 'source'),
+          getStepFormSchema('data.stringifyJson', [
+            dataStep('data.stringifyJson', z.unknown().meta(meta)),
+          ])?.fields.find((f) => f.key === 'source'),
+        ];
+        expect(regex).toMatchObject({ kind: 'code', language: 'plaintext', preferData: true });
+        expect(regex?.valueFormWhenWhole).toBeUndefined();
+        expect(stringify).toMatchObject({ kind: 'code', language: 'json', preferData: true });
+      });
+
+      it('still hides the transport-only `with.source` / `with.pretty` of a connector', () => {
+        const esLike = {
+          type: 'elasticsearch.search',
+          paramsSchema: z.object({
+            index: z.string().optional(),
+            source: z.string().optional(),
+            pretty: z.boolean().optional(),
+          }),
+          outputSchema: z.unknown(),
+          summary: null,
+          description: null,
+        } as unknown as ConnectorContractUnion;
+        const keys = getStepFormSchema('elasticsearch.search', [esLike])?.fields.map((f) => f.key);
+        expect(keys).toEqual(['index']);
+      });
+    });
+
     it('gives a map-valued `with` (data.set) one required key-value field', () => {
       const fields = getStepFormSchema('data.set', [])?.fields;
       expect(fields).toHaveLength(1);
@@ -828,6 +887,46 @@ describe('step_form_schema', () => {
       expect(findUnclosedTemplateExpression('Hello {{ inputs.x')).toBe(true);
       expect(findUnclosedTemplateExpression('Hello {{ inputs.x }}')).toBe(false);
       expect(validateStepField(requiredText, 'Hi {{ inputs.user')).toBe('Unclosed {{ expression');
+    });
+
+    describe('JSON + Liquid', () => {
+      const jsonLiquid: StepFormField = {
+        key: 'source',
+        path: ['source'],
+        label: 'Source',
+        required: false,
+        kind: 'code',
+        language: 'json-liquid',
+      };
+
+      it.each([
+        [
+          'variables as bare values and inside strings',
+          '{"id": {{ inputs.id }}, "n": "{{ a.b }}"}',
+        ],
+        ['a variable filtered to JSON text', '{"tags": {{ inputs.tags | json }}}'],
+        ['a Liquid tag, whose output is not predictable', '{% if true %}{"a": 1}{% endif %}'],
+        ['a whole reference', '${{ steps.a.output }}'],
+        ['a whole variable', '{{ steps.a.output | json }}'],
+        ['plain JSON', '{"a": [1, 2, {"b": null}]}'],
+      ])('accepts %s', (_name, text) => {
+        expect(validateStepField(jsonLiquid, text)).toBeUndefined();
+      });
+
+      it('reports an unclosed expression, bad Liquid syntax, and broken JSON', () => {
+        expect(validateStepField(jsonLiquid, '{"a": {{ inputs.id }')).toBe(
+          'Unclosed {{ expression'
+        );
+        expect(validateStepField(jsonLiquid, '{"a": {{ inputs.id | nosuchfilter }}}')).toBe(
+          'undefined filter: nosuchfilter'
+        );
+        expect(validateStepField(jsonLiquid, '{% if x %}{"a": 1}')).toBe(
+          'tag {% if x %} not closed'
+        );
+        expect(validateStepField(jsonLiquid, '{"a": }')).toBe(
+          'Must be valid JSON (ignoring variables)'
+        );
+      });
     });
   });
 });

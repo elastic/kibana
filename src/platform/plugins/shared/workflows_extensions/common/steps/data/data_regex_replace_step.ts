@@ -9,15 +9,17 @@
 
 import { i18n } from '@kbn/i18n';
 import { StepCategory } from '@kbn/workflows';
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../step_registry/types';
 
 export const DataRegexReplaceStepTypeId = 'data.regexReplace' as const;
 
-export const ConfigSchema = z.object({
-  source: z.unknown(),
-  detailed: z.boolean().optional().default(false),
-});
+export const ConfigSchema = lazySchema(() =>
+  z.object({
+    source: z.unknown().meta({ language: 'plaintext', preferData: true, advanced: false }),
+    detailed: z.boolean().optional().default(false),
+  })
+);
 
 export const InputSchema = z.object({
   pattern: z.string().max(10000, 'Pattern exceeds maximum allowed length of 10,000 characters'),
