@@ -64,7 +64,7 @@ jest.mock('./auth_helpers', () => ({
 
 // Mock the build_custom_fetch module
 jest.mock('./build_custom_fetch', () => ({
-  buildCustomFetch: jest.fn().mockReturnValue(jest.fn()),
+  buildCustomFetch: jest.fn(),
 }));
 
 import { buildCustomFetch } from './build_custom_fetch';
@@ -82,6 +82,8 @@ describe('McpConnector', () => {
   let mockMcpClient: jest.Mocked<McpClient>;
   let services: ReturnType<typeof actionsMock.createServices>;
   let connectorUsageCollector: ConnectorUsageCollector;
+  let mockFetch: jest.Mock;
+  let mockCloseFetch: jest.Mock;
 
   const defaultConfig = {
     serverUrl: 'https://example.com/mcp',
@@ -101,6 +103,10 @@ describe('McpConnector', () => {
       logger,
       connectorId: 'test-connector-id',
     });
+
+    mockFetch = jest.fn();
+    mockCloseFetch = jest.fn().mockResolvedValue(undefined);
+    (buildCustomFetch as jest.Mock).mockReturnValue({ fetch: mockFetch, close: mockCloseFetch });
 
     // Create a mock McpClient instance
     mockMcpClient = {
@@ -146,8 +152,6 @@ describe('McpConnector', () => {
         defaultConfig.serverUrl
       );
 
-      const returnedFetch = mockBuildCustomFetch.mock.results[0].value;
-
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const { McpClient } = require('@kbn/mcp-client');
       expect(McpClient).toHaveBeenCalledWith(
@@ -156,7 +160,7 @@ describe('McpConnector', () => {
           url: defaultConfig.serverUrl,
         }),
         expect.objectContaining({
-          fetch: returnedFetch,
+          fetch: mockFetch,
         })
       );
     });
@@ -537,6 +541,89 @@ describe('McpConnector', () => {
         await retryCall[1].onRetry();
         expect(mockMcpClient.disconnect).toHaveBeenCalled();
       }
+    });
+  });
+
+  describe('dispatcher release', () => {
+    const callParams = { name: 'tool1', arguments: {} };
+
+    it('closes the fetch dispatcher after a successful listTools', async () => {
+      mockMcpClient.isConnected.mockReturnValue(true);
+      mockMcpClient.listTools.mockResolvedValue({ tools: [] });
+      mockMcpClient.disconnect.mockResolvedValue(undefined);
+
+      await connector.listTools({}, connectorUsageCollector);
+
+      expect(mockCloseFetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('closes the fetch dispatcher after a successful callTool', async () => {
+      mockMcpClient.isConnected.mockReturnValue(true);
+      mockMcpClient.callTool.mockResolvedValue({ content: [] });
+      mockMcpClient.disconnect.mockResolvedValue(undefined);
+
+      await connector.callTool(callParams, connectorUsageCollector);
+
+      expect(mockCloseFetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('closes the fetch dispatcher after a successful testConnector', async () => {
+      mockMcpClient.connect.mockResolvedValue({ connected: true });
+      mockMcpClient.isConnected.mockReturnValue(true);
+      mockMcpClient.disconnect.mockResolvedValue(undefined);
+
+      await connector.testConnector({}, connectorUsageCollector);
+
+      expect(mockCloseFetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('closes the fetch dispatcher when listTools fails to connect', async () => {
+      mockMcpClient.isConnected.mockReturnValue(false);
+      mockMcpClient.connect.mockRejectedValue(new Error('Error connecting to MCP server: boom'));
+
+      await expect(connector.listTools({}, connectorUsageCollector)).rejects.toThrow('boom');
+
+      expect(mockCloseFetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('closes the fetch dispatcher when callTool fails to connect', async () => {
+      mockMcpClient.isConnected.mockReturnValue(false);
+      mockMcpClient.connect.mockRejectedValue(new Error('Error connecting to MCP server: boom'));
+
+      await expect(connector.callTool(callParams, connectorUsageCollector)).rejects.toThrow('boom');
+
+      expect(mockCloseFetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('closes the fetch dispatcher when testConnector fails to connect', async () => {
+      mockMcpClient.isConnected.mockReturnValue(false);
+      mockMcpClient.connect.mockRejectedValue(new Error('Error connecting to MCP server: boom'));
+
+      await expect(connector.testConnector({}, connectorUsageCollector)).rejects.toThrow('boom');
+
+      expect(mockCloseFetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('logs a close failure at debug level and keeps the original error', async () => {
+      mockCloseFetch.mockRejectedValue(new Error('close failed'));
+      mockMcpClient.isConnected.mockReturnValue(false);
+      mockMcpClient.connect.mockRejectedValue(new Error('Error connecting to MCP server: boom'));
+
+      await expect(connector.listTools({}, connectorUsageCollector)).rejects.toThrow('boom');
+
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('Error closing fetch dispatcher after listTools: close failed')
+      );
+    });
+
+    it('still closes the fetch dispatcher when disconnect throws', async () => {
+      mockMcpClient.isConnected.mockReturnValue(true);
+      mockMcpClient.listTools.mockResolvedValue({ tools: [] });
+      mockMcpClient.disconnect.mockRejectedValue(new Error('disconnect failed'));
+
+      await connector.listTools({}, connectorUsageCollector);
+
+      expect(mockCloseFetch).toHaveBeenCalledTimes(1);
     });
   });
 
