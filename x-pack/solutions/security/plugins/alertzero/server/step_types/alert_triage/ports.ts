@@ -391,7 +391,8 @@ export const closeStillOpenAlertsAsFalsePositive = async (
  * acknowledged, is left alone. The status route cannot check the previous state for ids, so this
  * sends the ids and the state as one query, in the chunks the route takes. Returns how many alerts
  * were reopened, which is less than the given count when some had moved on. Throws when the update
- * reports failures.
+ * timed out or reports failures, because revoke removes the tag after this returns and a rerun
+ * could not find an alert that was missed. A version conflict is a 409, which also throws.
  */
 export const reopenFalsePositiveClosedAlerts = async (
   { callKibanaApi }: KibanaApi,
@@ -402,6 +403,7 @@ export const reopenFalsePositiveClosedAlerts = async (
     const chunk = alertIds.slice(from, from + TAG_CHUNK_SIZE);
     const { body } = await callKibanaApi<{
       updated?: number;
+      timed_out?: boolean;
       version_conflicts?: number;
       failures?: unknown[];
     }>({
@@ -421,11 +423,13 @@ export const reopenFalsePositiveClosedAlerts = async (
       },
     });
     const failureCount = body.failures?.length ?? 0;
-    if (failureCount > 0) {
+    if (body.timed_out === true || failureCount > 0) {
       throw new Error(
         `Reopening ${chunk.length} alert(s) was not fully applied (updated: ${
           body.updated ?? 0
-        }, conflicts: ${body.version_conflicts ?? 0}, failures: ${failureCount})`
+        }, timed_out: ${body.timed_out === true}, conflicts: ${
+          body.version_conflicts ?? 0
+        }, failures: ${failureCount})`
       );
     }
     reopened += body.updated ?? 0;
