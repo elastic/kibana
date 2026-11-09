@@ -146,6 +146,31 @@ describe('deriveDetections', () => {
     });
   });
 
+  it('counts a hit once per IOC even when it matched that IOC on several fields', () => {
+    const hits: HuntForThreatHit[] = [
+      {
+        id: 'h1',
+        index: '.ds-logs-1',
+        host: 'host-a',
+        timestamp: '2026-01-01T00:00:00.000Z',
+        matched: {
+          iocs: [
+            { type: 'ip', value: '203.0.113.5', field: 'source.ip' },
+            { type: 'ip', value: '203.0.113.5', field: 'related.ip' },
+            { type: 'ip', value: '198.51.100.9', field: 'destination.ip' },
+          ],
+        },
+      },
+    ];
+
+    const detections = deriveDetections({ tier1: { hits } }, []);
+
+    expect(detections.map((detection) => [detection.id, detection.total])).toEqual([
+      ['ioc:ip:203.0.113.5', 1],
+      ['ioc:ip:198.51.100.9', 1],
+    ]);
+  });
+
   it('groups sampled hits by matched.iocs when tier1.per_ioc is absent', () => {
     const hits: HuntForThreatHit[] = [
       {

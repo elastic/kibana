@@ -561,6 +561,49 @@ describe('SignificantSecurityEventInlineContent', () => {
       });
     });
 
+    it('adds cited-event indices to a truncated per-index breakdown so the pivot can find the match', () => {
+      const { share, getRedirectUrl } = shareReturning('https://example.test/pivot');
+      const omittedIndex = '.ds-logs-aws.cloudtrail-default-2026.09.22-000001';
+      const expectedEsql = buildIocMatchEsql({
+        indices: [...huntResult.tier1.per_index.map((row) => row.index), omittedIndex],
+        field: 'destination.ip',
+        value: '203.0.113.5',
+        iocType: 'ip',
+      });
+
+      renderWithI18n(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(
+            buildAttachment({
+              ...baseData,
+              detections: [iocDetection()],
+              events: [
+                {
+                  event_id: 'evt-omitted',
+                  source_index: omittedIndex,
+                  matched: {
+                    field: 'destination.ip',
+                    iocs: [{ type: 'ip', value: '203.0.113.5', field: 'destination.ip' }],
+                  },
+                },
+              ],
+              hunt_result: {
+                ...huntResult,
+                tier1: { ...huntResult.tier1, per_index_truncated: true },
+              },
+            }),
+            { ...defaultNavigation, share }
+          )}
+        />
+      );
+
+      expect(getRedirectUrl).toHaveBeenCalledWith({
+        query: { esql: expectedEsql },
+        timeRange: huntResult.time_range,
+        useHash: true,
+      });
+    });
+
     it('falls back to cited-event indices only when the hunt carried no per-index rows', () => {
       const { share, getRedirectUrl } = shareReturning('https://example.test/pivot');
       const eventIndex = '.ds-logs-endpoint.events.process-default-2026.09.22-000001';

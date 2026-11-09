@@ -1140,6 +1140,69 @@ describe('buildSseData holds coordinator output to the SSE schema bounds', () =>
     });
   });
 
+  it('keeps an IOC attributed only to another technique out of a technique entry', () => {
+    const result = withBehaviors(
+      tier1Result({
+        resolved_iocs: [{ type: 'ip', value: '203.0.113.10' }],
+        counts: { total_hits: 1, returned_hits: 1, affected_hosts: 1, affected_users: 0 },
+        // Report-wide aggregation names the IOC; only a T1552.001 alert actually matched it.
+        per_ioc: [{ type: 'ip', value: '203.0.113.10', field: 'source.ip', count: 1 }],
+        hits: [
+          {
+            id: 'evt-other-technique',
+            index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001',
+            timestamp: '2026-07-30T13:05:00.000Z',
+            matched: {
+              ioc: { type: 'ip', value: '203.0.113.10' },
+              field: 'source.ip',
+              iocs: [{ type: 'ip', value: '203.0.113.10', field: 'source.ip' }],
+              technique_id: 'T1552.001',
+            },
+          },
+        ],
+      }),
+      [
+        behaviorFixture({
+          hits: [
+            {
+              id: 't2-a',
+              index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001',
+              timestamp: '2026-07-30T14:00:00.000Z',
+            },
+          ],
+        }),
+        behaviorFixture({
+          technique_id: 'T1552.001',
+          technique_name: 'Credentials In Files',
+          title: 'Credential file read on CI runner',
+          hits: [
+            {
+              id: 't2-b',
+              index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001',
+              timestamp: '2026-07-30T14:10:00.000Z',
+            },
+          ],
+        }),
+      ]
+    );
+
+    const entries = buildSseData(result, 'tr-two', { spaceId: 'default' });
+    const entryA = entries.find((entry) => entry.data.corroborated_technique_id === 'T1078.004');
+    const entryB = entries.find((entry) => entry.data.corroborated_technique_id === 'T1552.001');
+
+    expect(entryA?.data.detections?.map((detection) => detection.id)).toEqual([
+      'behavior:T1078.004',
+    ]);
+    expect(entryA?.data.basis).toBe('behavior_only');
+    expect(entryA?.data.summary).not.toContain('203.0.113.10');
+
+    expect(entryB?.data.detections?.map((detection) => detection.id)).toEqual([
+      'behavior:T1552.001',
+      'ioc:ip:203.0.113.10',
+    ]);
+    expect(entryB?.data.basis).toBe('ioc_and_behavior');
+  });
+
   it('shares the event cap between the tiers instead of letting IOC Hunt fill it', () => {
     // Tier 1 returns up to the coordinator's `size: 100`, and `events` caps at 50, so
     // appending Tier 2 after Tier 1 drops every ref to the behavior that confirmed

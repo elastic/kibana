@@ -736,9 +736,10 @@ const DetectionDiscoverPivot: React.FC<{ href: string; testSubj?: string }> = ({
 
 /**
  * The IOCs and behaviors that matched. IOC rows pivot to Discover over every Tier 1 index
- * (`per_index`, the full set the hunt searched) for the field and value that matched; only
- * an old payload without `per_index` falls back to the indices its cited events came from,
- * which are a sample and can miss hits. Behavior rows reuse the behavior's stored query. A
+ * (`per_index`, the full set the hunt searched) for the field and value that matched, plus
+ * the cited events' indices when `per_index` was truncated; only an old payload without
+ * `per_index` relies on cited-event indices alone, which are a sample and can miss hits.
+ * Behavior rows reuse the behavior's stored query. A
  * pivot is withheld when the detection has no field, or there are no indices to search.
  */
 const WhatMatched: React.FC<{
@@ -759,10 +760,16 @@ const WhatMatched: React.FC<{
     if (!value) {
       return undefined;
     }
+    // `per_index` keeps only the top rows when truncated, so a cited event's index can be
+    // missing from it; union the cited indices back in rather than open a Discover query
+    // that cannot find the match the card shows.
+    const citedIndices = observedIocMatchFromEvents(events, value)?.indices ?? [];
     const indices =
-      huntIndices.length > 0
-        ? huntIndices
-        : observedIocMatchFromEvents(events, value)?.indices ?? [];
+      huntIndices.length === 0
+        ? citedIndices
+        : huntResult?.tier1.per_index_truncated
+        ? [...huntIndices, ...citedIndices]
+        : huntIndices;
     const esql = buildIocMatchEsql({ indices, field: detection.field, value, iocType: ioc?.type });
     if (!esql) {
       return undefined;

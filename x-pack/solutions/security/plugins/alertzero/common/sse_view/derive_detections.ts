@@ -255,7 +255,9 @@ interface IocGroup<T> {
 
 /**
  * Groups records by every IOC each one matched. One record can land in more than
- * one group when it matched several IOCs.
+ * one group when it matched several IOCs, but only once per group: `matched.iocs`
+ * lists one entry per matched field, and a value seen on both `source.ip` and
+ * `related.ip` is still one event for that IOC.
  */
 const groupByMatchedIoc = <T>(
   records: readonly T[],
@@ -263,8 +265,11 @@ const groupByMatchedIoc = <T>(
 ): Array<IocGroup<T>> => {
   const groups = new Map<string, IocGroup<T>>();
   for (const record of records) {
+    const seenKeys = new Set<string>();
     for (const ioc of matchedIocsFromRecord(getMatched(record))) {
       const key = `${ioc.type}:${ioc.value}`;
+      if (seenKeys.has(key)) continue;
+      seenKeys.add(key);
       const group = groups.get(key);
       if (group) {
         group.items.push(record);
