@@ -35,3 +35,13 @@ export type {
   IdentifyComputedFeaturesOptions,
   IdentifyComputedFeaturesResult,
 } from './identify_computed_features';
+
+export {
+  identifyMetricDefinitions,
+  toMetricDefinitionFeatures,
+} from './identify_metric_definitions';
+export type {
+  IdentifyMetricDefinitionsOptions,
+  IdentifyMetricDefinitionsResult,
+  MetricsInfoRow,
+} from './identify_metric_definitions';

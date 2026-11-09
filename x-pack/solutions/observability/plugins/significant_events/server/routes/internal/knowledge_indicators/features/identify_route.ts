@@ -7,6 +7,8 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { z, lazySchema } from '@kbn/zod/v4';
+import type { BoundInferenceClient } from '@kbn/inference-common';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { resolveNightshiftModelForRequest, type InferenceDocument } from '@kbn/nightshift-ai';
 import { MAX_ID_LENGTH } from '@kbn/significant-events-schema';
 import { isInferenceProviderError } from '@kbn/inference-common';
@@ -21,6 +23,7 @@ import {
   buildTelemetry,
   identifyInferredFeatures,
   identifyComputedFeatures,
+  identifyMetricDefinitions,
   MAX_INFERENCE_DOCUMENTS_BYTES,
   MAX_INFERENCE_DOCUMENT_BYTES,
   MAX_INFERENCE_DOCUMENT_FIELDS,
@@ -393,6 +396,92 @@ const identifyComputedFeaturesRoute = createServerRoute({
   },
 });
 
+const identifyMetricDefinitionsRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/{sourceId}/features/_identify/metric_definitions',
+  options: {
+    access: 'internal',
+    summary: 'Catalogue metric definitions for a source and classify their usage',
+    timeout: { idleSocket: 300_000 },
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
+    },
+  },
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
+      body: z
+        .object({
+          start: z.number().optional(),
+          end: z.number().optional(),
+          runId: z.string().max(MAX_ID_LENGTH).optional(),
+          connectorId: z.string().max(MAX_ID_LENGTH).optional(),
+        })
+        .nullable()
+        .optional(),
+    })
+  ),
+  handler: async ({ params, request, getScopedClients, server, logger, maintenanceService }) => {
+    const scopedClients = await getScopedClients({ request });
+    const { streamDataEsClient, sourcesClient, licensing } = scopedClients;
+
+    await assertSignificantEventsAccess({ server, licensing });
+    await assertNotPaused({ maintenanceService, request });
+
+    const { sourceId } = params.path;
+    const routeLogger = logger.get('features_identification', 'metric_definitions', sourceId);
+    const now = Date.now();
+    const {
+      start = now - MS_PER_DAY,
+      end = now,
+      connectorId: connectorIdOverride,
+    } = params.body ?? {};
+
+    const { source } = await sourcesClient.get(sourceId);
+    const kiClient = await scopedClients.getKnowledgeIndicatorClient(source);
+    const indexPattern = getIndexPatternFromESQLQuery(source.esql);
+    const indexPatterns = indexPattern.length > 0 ? indexPattern.split(',') : [source.view_name];
+
+    const errors: Array<{ feature: string; error: string }> = [];
+    let inferenceClient: BoundInferenceClient | undefined;
+    try {
+      const connectorId = await resolveNightshiftModelForRequest({
+        request,
+        inference: server.inference,
+        savedObjects: server.core.savedObjects,
+        uiSettings: server.core.uiSettings,
+        step: 'kiExtraction',
+        requestedId: connectorIdOverride,
+      });
+      inferenceClient = server.inference.getClient({ request, bindTo: { connectorId } });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      routeLogger.warn(`Metric classification model is unavailable: ${message}`);
+      errors.push({ feature: 'metric_definition', error: message });
+    }
+
+    const result = await identifyMetricDefinitions({
+      target: sourceToAnalysisTarget(source),
+      sourceId: source.id,
+      indexPatterns,
+      start,
+      end,
+      esClient: streamDataEsClient,
+      kiClient,
+      inferenceClient,
+      logger: routeLogger,
+      signal: getRequestAbortSignal(request),
+    });
+
+    return {
+      metricDefinitions: result.features,
+      metricDefinitionsCount: result.features.length,
+      errors: [...errors, ...result.errors],
+    };
+  },
+});
+
 const shouldIdentifyRoute = createServerRoute({
   endpoint: 'GET /internal/streams/{sourceId}/features/_should_identify',
   options: {
@@ -437,5 +526,6 @@ export const internalIdentifyKIFeaturesRoutes = {
   ...prepareInferredSamplingRoute,
   ...identifyInferredFeaturesRoute,
   ...identifyComputedFeaturesRoute,
+  ...identifyMetricDefinitionsRoute,
   ...shouldIdentifyRoute,
 };

@@ -60,6 +60,47 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     describe('Exclude and restore', () => {
+      it('lists, excludes, and restores a metric definition', async () => {
+        const metricDefinition: BaseFeature = {
+          id: 'metrics-system-prod:system.cpu.utilization',
+          type: 'metric_definition',
+          title: 'system.cpu.utilization',
+          description: 'CPU utilization on metrics-system-prod',
+          properties: {
+            metric_name: 'system.cpu.utilization',
+            data_stream: 'metrics-system-prod',
+            dimension_fields: ['host.name'],
+          },
+          confidence: 100,
+        };
+
+        const { id, uuid } = await upsertFeature(apiClient, sourceId, metricDefinition);
+
+        const { features } = await listFeatures(apiClient, sourceId);
+        const listed = features.find((feature) => feature.id === id);
+        expect(listed).to.be.ok();
+        expect(listed!.type).to.eql('metric_definition');
+
+        await bulkFeatures(apiClient, sourceId, [{ exclude: { id: uuid } }]);
+
+        const { features: hidden } = await listFeatures(apiClient, sourceId);
+        expect(hidden.find((feature) => feature.id === id)).to.be(undefined);
+
+        const { features: excluded } = await listFeatures(apiClient, sourceId, {
+          includeExcluded: true,
+        });
+        expect(excluded.find((feature) => feature.id === id)!.excluded).to.be(true);
+
+        await bulkFeatures(apiClient, sourceId, [{ restore: { id: uuid } }]);
+
+        const { features: restored } = await listFeatures(apiClient, sourceId);
+        const found = restored.find((feature) => feature.id === id);
+        expect(found).to.be.ok();
+        expect(found!.excluded).to.be(undefined);
+
+        await deleteFeature(apiClient, sourceId, uuid);
+      });
+
       it('creates a feature and lists it', async () => {
         const { id, uuid } = await upsertFeature(apiClient, sourceId, testFeature);
         expect(id).to.be.a('string');
