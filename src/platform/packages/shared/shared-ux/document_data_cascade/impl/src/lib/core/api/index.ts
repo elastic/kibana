@@ -54,6 +54,11 @@ export interface DataCascadeUISnapshot<
    * Empty when no children are connected.
    */
   connectedChildren: Readonly<Record<string, ConnectedChildState>>;
+  /**
+   * Scroll anchors of cells that currently have no connection (e.g. a view that was swapped out),
+   * keyed by connection id.
+   */
+  retainedAnchors: Readonly<Record<string, number>>;
 }
 
 /**
@@ -97,6 +102,7 @@ const createDefaultUISnapshot = <G extends GroupNode, L extends LeafNode>(): Dat
   rowSelection: {},
   scrollAnchorItemIndex: null,
   connectedChildren: {},
+  retainedAnchors: {},
 });
 
 /**
@@ -112,6 +118,11 @@ export interface DataCascadeRestorableState {
     string,
     Pick<ConnectedChildState, 'cellId' | 'scrollAnchorItemIndex'> & { isConnected: boolean }
   >;
+  /**
+   * Scroll anchors of cells that had no connection when the state was captured; restored when
+   * the cells reconnect, without delaying the cascade's own restoration.
+   */
+  retainedAnchors?: Record<string, number>;
 }
 
 /**
@@ -137,6 +148,7 @@ export const toRestorableState = <G extends GroupNode, L extends LeafNode>(
     scrollRect: snapshot.scrollRect,
     scrollAnchorItemIndex: snapshot.scrollAnchorItemIndex,
     connectedChildren,
+    retainedAnchors: snapshot.retainedAnchors,
   };
 };
 
@@ -250,6 +262,7 @@ export function useExposePublicApi<G extends GroupNode, L extends LeafNode>(
       storeRef.current.snapshot = {
         ...storeRef.current.snapshot,
         connectedChildren: Object.fromEntries(childController.getConnectedChildren()),
+        retainedAnchors: Object.fromEntries(childController.getRetainedAnchors()),
       };
       storeRef.current.listeners.forEach((listener) => listener());
     });

@@ -45,7 +45,16 @@ export interface TableProps<G, L>
   > {
   allowMultipleRowToggle: boolean;
   header: FC<{ table: Table<G> }>;
-  rowCell: FC<CellContext<G, L>>;
+  rowCell: FC<CascadeCellContext<G, L>>;
+}
+
+/**
+ * Context the cascade's cell renderer receives: the table cell context, plus the index of the
+ * cell's row in the cascade's root virtualizer (its position in the flattened, expanded row model),
+ * which differs from the within-parent `row.index` for nested rows.
+ */
+export interface CascadeCellContext<G, L> extends CellContext<G, L> {
+  virtualRowIndex: number;
 }
 
 export const useCascadeTable = <G extends GroupNode, L extends LeafNode>({
@@ -256,8 +265,13 @@ export function TableHeader<G extends GroupNode, L extends LeafNode>({
 
 export function TableCellRender<G extends GroupNode, L extends LeafNode>({
   cell,
+  virtualRowIndex,
 }: {
   cell: Cell<G, L>;
+  virtualRowIndex: number;
 }) {
-  return useMemo(() => flexRender(cell.column.columnDef.cell, cell.getContext()), [cell]);
+  return useMemo(
+    () => flexRender(cell.column.columnDef.cell, { ...cell.getContext(), virtualRowIndex }),
+    [cell, virtualRowIndex]
+  );
 }
