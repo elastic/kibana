@@ -163,6 +163,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
       commandMatch={commandMatch}
       editorRef={ref}
       onSelect={messageEditor.handleCommandSelect}
+      onReplaceText={messageEditor.handleCommandReplaceText}
       onContentChange={messageEditor.reportMenuContent}
       commandMenuRef={commandMenuRef}
       data-test-subj={`${dataTestSubj}-container`}
@@ -241,7 +242,12 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
             messageEditor.dismissActionMenu();
             return;
           }
-          if (commandMatch.isActive && commandMenuRef.current?.isKeyDownEventHandled(event)) {
+          // A hidden menu stays mounted, so it must not take keys
+          if (
+            commandMatch.isActive &&
+            commandMatch.hasVisibleContent &&
+            commandMenuRef.current?.isKeyDownEventHandled(event)
+          ) {
             commandMenuRef.current.handleKeyDown(event);
             event.preventDefault();
             return;

@@ -12,7 +12,11 @@ import {
   ConversationAccessControlRole,
 } from '@kbn/agent-builder-common';
 import { EscalationsService } from './escalations_service';
-import { InvalidLinkedInvestigationError, NotAnEscalationError } from './errors';
+import {
+  EscalationLinkForbiddenError,
+  InvalidLinkedInvestigationError,
+  NotAnEscalationError,
+} from './errors';
 import { CloseTargetsChangedError } from '../../investigations/services/close_targets_changed_error';
 import { LinkedInvestigationUnavailableError } from './linked_investigation_unavailable_error';
 import { EscalationCloseIncompleteError } from './escalation_close_incomplete_error';
@@ -98,9 +102,22 @@ const makeClient = (overrides: Record<string, jest.Mock> = {}) => ({
   ...overrides,
 });
 
+const LINK_ACTOR = {
+  username: 'owner',
+  fullName: null,
+  email: null,
+  profileUid: 'owner-uid',
+};
+
+const escalationOwner = { id: 'owner-uid', username: 'owner' };
+
 const makeService = (
   clientOverrides: Record<string, jest.Mock> = {},
-  countPendingProposals: jest.Mock = jest.fn().mockResolvedValue(undefined)
+  countPendingProposals: jest.Mock = jest.fn().mockResolvedValue(undefined),
+  resolveUser: jest.Mock = jest.fn().mockResolvedValue({
+    profileUid: LINK_ACTOR.profileUid,
+    username: LINK_ACTOR.username,
+  })
 ) => {
   const client = makeClient(clientOverrides);
   const getConversationClient = jest.fn().mockResolvedValue(client);
@@ -139,6 +156,7 @@ const makeService = (
     conversationTemplates,
     getInvestigationStatusService: () => investigationStatusService as never,
     countPendingProposals,
+    getLinkActor: resolveUser,
   });
 
   return {
@@ -429,6 +447,7 @@ describe('EscalationsService.link — timeline events', () => {
     jest.fn().mockResolvedValue({
       id: 'escalation-1',
       template_id: ESCALATION_TEMPLATE_ID,
+      user: escalationOwner,
       metadata: { [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: linked },
     });
 
@@ -505,6 +524,7 @@ describe('EscalationsService.link', () => {
       get: jest.fn().mockResolvedValue({
         id: 'escalation-1',
         template_id: ESCALATION_TEMPLATE_ID,
+        user: escalationOwner,
         metadata: { [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: ['inv-1'] },
       }),
     });
@@ -527,6 +547,7 @@ describe('EscalationsService.link', () => {
       get: jest.fn().mockResolvedValue({
         id: 'escalation-1',
         template_id: ESCALATION_TEMPLATE_ID,
+        user: escalationOwner,
         metadata: { [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: ['inv-1', 'inv-2'] },
       }),
     });
@@ -545,6 +566,7 @@ describe('EscalationsService.link', () => {
       get: jest.fn().mockResolvedValue({
         id: 'escalation-1',
         template_id: ESCALATION_TEMPLATE_ID,
+        user: escalationOwner,
         metadata: { [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: [] },
       }),
     });
@@ -554,6 +576,54 @@ describe('EscalationsService.link', () => {
     });
 
     expect(client.update).not.toHaveBeenCalled();
+  });
+
+  it('lets a listed participant link when they are not the owner', async () => {
+    const { service, client } = makeService(
+      {
+        get: jest.fn().mockResolvedValue({
+          id: 'escalation-1',
+          template_id: ESCALATION_TEMPLATE_ID,
+          user: escalationOwner,
+          access_control: {
+            access_mode: 'private',
+            entries: [{ type: 'user', id: 'member-uid' }],
+          },
+          metadata: { [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: [] },
+        }),
+      },
+      jest.fn().mockResolvedValue(undefined),
+      jest.fn().mockResolvedValue({ ...LINK_ACTOR, username: 'member', profileUid: 'member-uid' })
+    );
+
+    await service.link(request, 'escalation-1', { linked_investigations: ['inv-1'] });
+
+    expect(client.patchMetadata).toHaveBeenCalled();
+  });
+
+  it('rejects a caller who can read a public escalation but does not participate', async () => {
+    const { service, client } = makeService(
+      {
+        get: jest.fn().mockResolvedValue({
+          id: 'escalation-1',
+          template_id: ESCALATION_TEMPLATE_ID,
+          user: escalationOwner,
+          access_control: { access_mode: 'public', entries: [] },
+          metadata: { [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: [] },
+        }),
+      },
+      jest.fn().mockResolvedValue(undefined),
+      jest.fn().mockResolvedValue({
+        ...LINK_ACTOR,
+        username: 'outsider',
+        profileUid: 'outsider-uid',
+      })
+    );
+
+    await expect(
+      service.link(request, 'escalation-1', { linked_investigations: ['inv-1'] })
+    ).rejects.toBeInstanceOf(EscalationLinkForbiddenError);
+    expect(client.patchMetadata).not.toHaveBeenCalled();
   });
 });
 
@@ -654,7 +724,7 @@ describe('EscalationsService.list', () => {
 
     expect(result).toEqual({
       pagination: { total: 42, page: 2, per_page: 10 },
-      results: [MOCK_SUMMARY],
+      results: [{ ...MOCK_SUMMARY, can_link: false }],
     });
   });
 
@@ -846,7 +916,7 @@ describe('EscalationsService.list', () => {
 
       const result = await service.list(request, { page: 1, per_page: 50, status: 'open' });
 
-      expect(result.results).toEqual([row]);
+      expect(result.results).toEqual([{ ...row, can_link: false }]);
     });
   });
 

@@ -6,7 +6,10 @@
  */
 
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
-import type { AgenticInvestigationsPublicPluginStart } from '@kbn/agentic-investigations-plugin/public';
+import type {
+  AgenticInvestigationsPublicPluginSetup,
+  AgenticInvestigationsPublicPluginStart,
+} from '@kbn/agentic-investigations-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { InferencePublicStart } from '@kbn/inference-plugin/public';
@@ -21,10 +24,12 @@ import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { SignificantEventsPublicPluginStart } from '@kbn/significant-events-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
 export interface NightshiftSetupDependencies {
   share: SharePluginSetup;
+  agenticInvestigations?: AgenticInvestigationsPublicPluginSetup;
 }
 
 export interface NightshiftStartDependencies {
@@ -46,6 +51,8 @@ export interface NightshiftStartDependencies {
   cps?: CPSPluginStart;
   serverless?: ServerlessPluginStart;
   spaces?: SpacesPluginStart;
+  /** The connector flyout and the connector type registry for the sandbox connectors UI. */
+  triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
 }
 
 /* eslint-disable-next-line @typescript-eslint/no-empty-interface */

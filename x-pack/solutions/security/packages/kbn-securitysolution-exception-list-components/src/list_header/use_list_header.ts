@@ -23,7 +23,7 @@ export const useExceptionListHeader = ({
   const onEdit = () => {
     setIsModalVisible(true);
   };
-  const onSave = (newListDetails: ListDetails) => {
+  const onSave = async (newListDetails: ListDetails) => {
     setListDetails(newListDetails);
     if (typeof onEditListDetails === 'function') onEditListDetails(newListDetails);
     setTimeout(() => {

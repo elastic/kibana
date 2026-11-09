@@ -13,7 +13,6 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/core-feature-flags-server",
     "@kbn/unified-search-plugin",
     "@kbn/es-query",
     "@kbn/i18n-react",

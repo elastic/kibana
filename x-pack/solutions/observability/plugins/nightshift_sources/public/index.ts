@@ -10,6 +10,7 @@ import type { NightshiftSourcesPublicPluginStart } from './plugin';
 import { NightshiftSourcesPublicPlugin } from './plugin';
 
 export type { NightshiftSourcesRepositoryClient } from './api';
+export type { RecommendedSource } from '../common/recommended_sources';
 export type { NightshiftSourcesPublicPluginStart };
 
 export const plugin: PluginInitializer<void, NightshiftSourcesPublicPluginStart> = () =>

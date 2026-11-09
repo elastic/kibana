@@ -25,14 +25,7 @@ if [[ "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/dev/shm"* ]]; then
     echo "Using ~/.cache/kibana/pnpm/.pnpm-store as a starting point"
     mv ~/.cache/kibana/pnpm/.pnpm-store ./.pnpm-store
   fi
-  # Check if there's a cache artifact uploaded from a previous step
-  if [[ -z "${KBN_BOOTSTRAP_NO_PREBUILT:-}" ]]; then
-    if download_tmp_artifact moon-cache.tar.zst "$HOME" "$BUILDKITE_BUILD_ID" false; then
-      echo "Found moon-cache.tar.zst artifact, extracting to ./.moon/cache"
-      extract_moon_cache ~/moon-cache.tar.zst || true
-    fi
-    .buildkite/scripts/common/activate_service_account.sh --unset-impersonation
-  fi
+  .buildkite/scripts/common/activate_service_account.sh --unset-impersonation
 elif [[ "$(pwd)" == "/dev/shm"* ]]; then
   # pnpm store on tmpfs so the install doesn't fill the small root disk
   export npm_config_store_dir=/dev/shm/pnpm-store

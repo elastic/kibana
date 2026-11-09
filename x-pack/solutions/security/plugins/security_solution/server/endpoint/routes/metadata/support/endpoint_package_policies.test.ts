@@ -22,6 +22,28 @@ describe('endpoint_package_policies', () => {
       mockPackagePolicyService = createPackagePolicyServiceMock();
     });
 
+    it.each([true, false])(
+      'stops paging when aborted before the next read (initially aborted: %s)',
+      async (initiallyAborted) => {
+        const controller = new AbortController();
+        if (initiallyAborted) {
+          controller.abort();
+        }
+        mockPackagePolicyService.list.mockImplementation(async () => {
+          controller.abort();
+          return { items: [{ id: '1' } as PackagePolicy], total: 1, perPage: 1000, page: 1 };
+        });
+        await expect(
+          getAllEndpointPackagePolicies(
+            mockPackagePolicyService,
+            mockSavedObjectClient,
+            controller.signal
+          )
+        ).rejects.toThrow();
+        expect(mockPackagePolicyService.list).toHaveBeenCalledTimes(initiallyAborted ? 0 : 1);
+      }
+    );
+
     it('gets all endpoint package policies', async () => {
       const mockPolicy: PackagePolicy = {
         id: '1',

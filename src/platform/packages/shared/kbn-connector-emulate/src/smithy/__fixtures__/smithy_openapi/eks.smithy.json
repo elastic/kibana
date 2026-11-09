@@ -1,0 +1,4622 @@
+{
+ "smithy": "2.0",
+ "shapes": {
+  "com.amazonaws.eks#AMITypes": {
+   "type": "enum",
+   "members": {
+    "AL2_x86_64": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "AL2_x86_64"
+     }
+    },
+    "AL2_x86_64_GPU": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "AL2_x86_64_GPU"
+     }
+    },
+    "AL2_ARM_64": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "AL2_ARM_64"
+     }
+    },
+    "CUSTOM": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "CUSTOM"
+     }
+    },
+    "BOTTLEROCKET_ARM_64": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "BOTTLEROCKET_ARM_64"
+     }
+    },
+    "BOTTLEROCKET_x86_64": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "BOTTLEROCKET_x86_64"
+     }
+    },
+    "BOTTLEROCKET_ARM_64_FIPS": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "BOTTLEROCKET_ARM_64_FIPS"
+     }
+    },
+    "BOTTLEROCKET_x86_64_FIPS": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "BOTTLEROCKET_x86_64_FIPS"
+     }
+    },
+    "BOTTLEROCKET_ARM_64_NVIDIA": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "BOTTLEROCKET_ARM_64_NVIDIA"
+     }
+    },
+    "BOTTLEROCKET_x86_64_NVIDIA": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "BOTTLEROCKET_x86_64_NVIDIA"
+     }
+    },
+    "BOTTLEROCKET_ARM_64_NVIDIA_FIPS": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "BOTTLEROCKET_ARM_64_NVIDIA_FIPS"
+     }
+    },
+    "BOTTLEROCKET_x86_64_NVIDIA_FIPS": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "BOTTLEROCKET_x86_64_NVIDIA_FIPS"
+     }
+    },
+    "WINDOWS_CORE_2019_x86_64": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "WINDOWS_CORE_2019_x86_64"
+     }
+    },
+    "WINDOWS_FULL_2019_x86_64": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "WINDOWS_FULL_2019_x86_64"
+     }
+    },
+    "WINDOWS_CORE_2022_x86_64": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "WINDOWS_CORE_2022_x86_64"
+     }
+    },
+    "WINDOWS_FULL_2022_x86_64": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "WINDOWS_FULL_2022_x86_64"
+     }
+    },
+    "WINDOWS_CORE_2025_x86_64": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "WINDOWS_CORE_2025_x86_64"
+     }
+    },
+    "WINDOWS_FULL_2025_x86_64": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "WINDOWS_FULL_2025_x86_64"
+     }
+    },
+    "AL2023_x86_64_STANDARD": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "AL2023_x86_64_STANDARD"
+     }
+    },
+    "AL2023_ARM_64_STANDARD": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "AL2023_ARM_64_STANDARD"
+     }
+    },
+    "AL2023_x86_64_NEURON": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "AL2023_x86_64_NEURON"
+     }
+    },
+    "AL2023_x86_64_NVIDIA": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "AL2023_x86_64_NVIDIA"
+     }
+    },
+    "AL2023_ARM_64_NVIDIA": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "AL2023_ARM_64_NVIDIA"
+     }
+    }
+   }
+  },
+  "com.amazonaws.eks#AWSWesleyFrontend": {
+   "type": "service",
+   "version": "2017-11-01",
+   "operations": [
+    {
+     "target": "com.amazonaws.eks#AssociateAccessPolicy"
+    },
+    {
+     "target": "com.amazonaws.eks#CreateAccessEntry"
+    },
+    {
+     "target": "com.amazonaws.eks#DeleteAccessEntry"
+    },
+    {
+     "target": "com.amazonaws.eks#DescribeAccessEntry"
+    },
+    {
+     "target": "com.amazonaws.eks#DescribeCluster"
+    },
+    {
+     "target": "com.amazonaws.eks#DescribeNodegroup"
+    },
+    {
+     "target": "com.amazonaws.eks#DescribeUpdate"
+    },
+    {
+     "target": "com.amazonaws.eks#DisassociateAccessPolicy"
+    },
+    {
+     "target": "com.amazonaws.eks#ListAccessEntries"
+    },
+    {
+     "target": "com.amazonaws.eks#ListAccessPolicies"
+    },
+    {
+     "target": "com.amazonaws.eks#ListAssociatedAccessPolicies"
+    },
+    {
+     "target": "com.amazonaws.eks#ListClusters"
+    },
+    {
+     "target": "com.amazonaws.eks#ListNodegroups"
+    },
+    {
+     "target": "com.amazonaws.eks#ListTagsForResource"
+    },
+    {
+     "target": "com.amazonaws.eks#ListUpdates"
+    },
+    {
+     "target": "com.amazonaws.eks#UpdateAccessEntry"
+    },
+    {
+     "target": "com.amazonaws.eks#UpdateClusterConfig"
+    },
+    {
+     "target": "com.amazonaws.eks#UpdateNodegroupConfig"
+    }
+   ],
+   "traits": {
+    "aws.api#service": {
+     "sdkId": "EKS",
+     "arnNamespace": "eks",
+     "cloudFormationName": "EKS",
+     "cloudTrailEventSource": "eks.amazonaws.com",
+     "endpointPrefix": "eks"
+    },
+    "aws.auth#sigv4": {
+     "name": "eks"
+    },
+    "aws.protocols#restJson1": {},
+    "smithy.api#title": "Amazon Elastic Kubernetes Service"
+   }
+  },
+  "com.amazonaws.eks#AccessConfigResponse": {
+   "type": "structure",
+   "members": {
+    "bootstrapClusterCreatorAdminPermissions": {
+     "target": "com.amazonaws.eks#BoxedBoolean"
+    },
+    "authenticationMode": {
+     "target": "com.amazonaws.eks#AuthenticationMode"
+    }
+   }
+  },
+  "com.amazonaws.eks#AccessEntry": {
+   "type": "structure",
+   "members": {
+    "clusterName": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "principalArn": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "kubernetesGroups": {
+     "target": "com.amazonaws.eks#StringList"
+    },
+    "accessEntryArn": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "createdAt": {
+     "target": "com.amazonaws.eks#Timestamp"
+    },
+    "modifiedAt": {
+     "target": "com.amazonaws.eks#Timestamp"
+    },
+    "tags": {
+     "target": "com.amazonaws.eks#TagMap"
+    },
+    "username": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "type": {
+     "target": "com.amazonaws.eks#String"
+    }
+   }
+  },
+  "com.amazonaws.eks#AccessPoliciesList": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.eks#AccessPolicy"
+   }
+  },
+  "com.amazonaws.eks#AccessPolicy": {
+   "type": "structure",
+   "members": {
+    "name": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "arn": {
+     "target": "com.amazonaws.eks#String"
+    }
+   }
+  },
+  "com.amazonaws.eks#AccessScope": {
+   "type": "structure",
+   "members": {
+    "type": {
+     "target": "com.amazonaws.eks#AccessScopeType"
+    },
+    "namespaces": {
+     "target": "com.amazonaws.eks#StringList"
+    }
+   }
+  },
+  "com.amazonaws.eks#AccessScopeType": {
+   "type": "enum",
+   "members": {
+    "cluster": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "cluster"
+     }
+    },
+    "namespace": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "namespace"
+     }
+    }
+   }
+  },
+  "com.amazonaws.eks#ActiveCertificateAuthority": {
+   "type": "structure",
+   "members": {
+    "id": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "activatedBy": {
+     "target": "com.amazonaws.eks#CertificateAuthorityActivatedBy"
+    }
+   }
+  },
+  "com.amazonaws.eks#AssociateAccessPolicy": {
+   "type": "operation",
+   "input": {
+    "target": "com.amazonaws.eks#AssociateAccessPolicyRequest"
+   },
+   "output": {
+    "target": "com.amazonaws.eks#AssociateAccessPolicyResponse"
+   },
+   "errors": [
+    {
+     "target": "com.amazonaws.eks#InvalidParameterException"
+    },
+    {
+     "target": "com.amazonaws.eks#InvalidRequestException"
+    },
+    {
+     "target": "com.amazonaws.eks#ResourceNotFoundException"
+    },
+    {
+     "target": "com.amazonaws.eks#ServerException"
+    }
+   ],
+   "traits": {
+    "smithy.api#http": {
+     "method": "POST",
+     "uri": "/clusters/{clusterName}/access-entries/{principalArn}/access-policies",
+     "code": 200
+    }
+   }
+  },
+  "com.amazonaws.eks#AssociateAccessPolicyRequest": {
+   "type": "structure",
+   "members": {
+    "clusterName": {
+     "target": "com.amazonaws.eks#String",
+     "traits": {
+      "smithy.api#httpLabel": {},
+      "smithy.api#required": {}
+     }
+    },
+    "principalArn": {
+     "target": "com.amazonaws.eks#String",
+     "traits": {
+      "smithy.api#httpLabel": {},
+      "smithy.api#required": {}
+     }
+    },
+    "policyArn": {
+     "target": "com.amazonaws.eks#String",
+     "traits": {
+      "smithy.api#required": {}
+     }
+    },
+    "accessScope": {
+     "target": "com.amazonaws.eks#AccessScope",
+     "traits": {
+      "smithy.api#required": {}
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#input": {}
+   }
+  },
+  "com.amazonaws.eks#AssociateAccessPolicyResponse": {
+   "type": "structure",
+   "members": {
+    "clusterName": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "principalArn": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "associatedAccessPolicy": {
+     "target": "com.amazonaws.eks#AssociatedAccessPolicy"
+    }
+   },
+   "traits": {
+    "smithy.api#output": {}
+   }
+  },
+  "com.amazonaws.eks#AssociatedAccessPoliciesList": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.eks#AssociatedAccessPolicy"
+   }
+  },
+  "com.amazonaws.eks#AssociatedAccessPolicy": {
+   "type": "structure",
+   "members": {
+    "policyArn": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "accessScope": {
+     "target": "com.amazonaws.eks#AccessScope"
+    },
+    "associatedAt": {
+     "target": "com.amazonaws.eks#Timestamp"
+    },
+    "modifiedAt": {
+     "target": "com.amazonaws.eks#Timestamp"
+    }
+   }
+  },
+  "com.amazonaws.eks#AuthenticationMode": {
+   "type": "enum",
+   "members": {
+    "API": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "API"
+     }
+    },
+    "API_AND_CONFIG_MAP": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "API_AND_CONFIG_MAP"
+     }
+    },
+    "CONFIG_MAP": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "CONFIG_MAP"
+     }
+    }
+   }
+  },
+  "com.amazonaws.eks#AutoScalingGroup": {
+   "type": "structure",
+   "members": {
+    "name": {
+     "target": "com.amazonaws.eks#String"
+    }
+   }
+  },
+  "com.amazonaws.eks#AutoScalingGroupList": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.eks#AutoScalingGroup"
+   }
+  },
+  "com.amazonaws.eks#BadRequestException": {
+   "type": "structure",
+   "members": {
+    "message": {
+     "target": "com.amazonaws.eks#String"
+    }
+   },
+   "traits": {
+    "smithy.api#error": "client",
+    "smithy.api#httpError": 400
+   }
+  },
+  "com.amazonaws.eks#BlockStorage": {
+   "type": "structure",
+   "members": {
+    "enabled": {
+     "target": "com.amazonaws.eks#BoxedBoolean"
+    }
+   }
+  },
+  "com.amazonaws.eks#Boolean": {
+   "type": "boolean",
+   "traits": {
+    "smithy.api#default": false
+   }
+  },
+  "com.amazonaws.eks#BoxedBoolean": {
+   "type": "boolean"
+  },
+  "com.amazonaws.eks#BoxedInteger": {
+   "type": "integer"
+  },
+  "com.amazonaws.eks#Cancellation": {
+   "type": "structure",
+   "members": {
+    "status": {
+     "target": "com.amazonaws.eks#CancellationStatus"
+    },
+    "reason": {
+     "target": "com.amazonaws.eks#String"
+    }
+   }
+  },
+  "com.amazonaws.eks#CancellationStatus": {
+   "type": "enum",
+   "members": {
+    "IN_PROGRESS": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "InProgress"
+     }
+    },
+    "FAILED": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Failed"
+     }
+    },
+    "SUCCESSFUL": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Successful"
+     }
+    }
+   }
+  },
+  "com.amazonaws.eks#Capacity": {
+   "type": "integer",
+   "traits": {
+    "smithy.api#range": {
+     "min": 1
+    }
+   }
+  },
+  "com.amazonaws.eks#CapacityTypes": {
+   "type": "enum",
+   "members": {
+    "ON_DEMAND": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "ON_DEMAND"
+     }
+    },
+    "SPOT": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "SPOT"
+     }
+    },
+    "CAPACITY_BLOCK": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "CAPACITY_BLOCK"
+     }
+    }
+   }
+  },
+  "com.amazonaws.eks#Certificate": {
+   "type": "structure",
+   "members": {
+    "data": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "active": {
+     "target": "com.amazonaws.eks#ActiveCertificateAuthority"
+    }
+   }
+  },
+  "com.amazonaws.eks#CertificateAuthorityActivatedBy": {
+   "type": "enum",
+   "members": {
+    "EKS": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "EKS"
+     }
+    },
+    "CUSTOMER": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "CUSTOMER"
+     }
+    }
+   }
+  },
+  "com.amazonaws.eks#ClientException": {
+   "type": "structure",
+   "members": {
+    "clusterName": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "nodegroupName": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "addonName": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "subscriptionId": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "message": {
+     "target": "com.amazonaws.eks#String"
+    }
+   },
+   "traits": {
+    "smithy.api#error": "client",
+    "smithy.api#httpError": 400
+   }
+  },
+  "com.amazonaws.eks#Cluster": {
+   "type": "structure",
+   "members": {
+    "name": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "arn": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "createdAt": {
+     "target": "com.amazonaws.eks#Timestamp"
+    },
+    "version": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "endpoint": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "roleArn": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "resourcesVpcConfig": {
+     "target": "com.amazonaws.eks#VpcConfigResponse"
+    },
+    "kubernetesNetworkConfig": {
+     "target": "com.amazonaws.eks#KubernetesNetworkConfigResponse"
+    },
+    "logging": {
+     "target": "com.amazonaws.eks#Logging"
+    },
+    "identity": {
+     "target": "com.amazonaws.eks#Identity"
+    },
+    "status": {
+     "target": "com.amazonaws.eks#ClusterStatus"
+    },
+    "certificateAuthority": {
+     "target": "com.amazonaws.eks#Certificate"
+    },
+    "clientRequestToken": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "platformVersion": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "tags": {
+     "target": "com.amazonaws.eks#TagMap"
+    },
+    "encryptionConfig": {
+     "target": "com.amazonaws.eks#EncryptionConfigList"
+    },
+    "connectorConfig": {
+     "target": "com.amazonaws.eks#ConnectorConfigResponse"
+    },
+    "id": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "health": {
+     "target": "com.amazonaws.eks#ClusterHealth"
+    },
+    "outpostConfig": {
+     "target": "com.amazonaws.eks#OutpostConfigResponse"
+    },
+    "accessConfig": {
+     "target": "com.amazonaws.eks#AccessConfigResponse"
+    },
+    "upgradePolicy": {
+     "target": "com.amazonaws.eks#UpgradePolicyResponse"
+    },
+    "zonalShiftConfig": {
+     "target": "com.amazonaws.eks#ZonalShiftConfigResponse"
+    },
+    "remoteNetworkConfig": {
+     "target": "com.amazonaws.eks#RemoteNetworkConfigResponse"
+    },
+    "computeConfig": {
+     "target": "com.amazonaws.eks#ComputeConfigResponse"
+    },
+    "storageConfig": {
+     "target": "com.amazonaws.eks#StorageConfigResponse"
+    },
+    "deletionProtection": {
+     "target": "com.amazonaws.eks#BoxedBoolean"
+    },
+    "controlPlaneScalingConfig": {
+     "target": "com.amazonaws.eks#ControlPlaneScalingConfig"
+    },
+    "kubeApiServerConfig": {
+     "target": "com.amazonaws.eks#KubeApiServerConfigResponse"
+    },
+    "kubeSchedulerConfig": {
+     "target": "com.amazonaws.eks#KubeSchedulerConfigResponse"
+    },
+    "kubeControllerManagerConfig": {
+     "target": "com.amazonaws.eks#KubeControllerManagerConfigResponse"
+    }
+   }
+  },
+  "com.amazonaws.eks#ClusterHealth": {
+   "type": "structure",
+   "members": {
+    "issues": {
+     "target": "com.amazonaws.eks#ClusterIssueList"
+    }
+   }
+  },
+  "com.amazonaws.eks#ClusterIssue": {
+   "type": "structure",
+   "members": {
+    "code": {
+     "target": "com.amazonaws.eks#ClusterIssueCode"
+    },
+    "message": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "resourceIds": {
+     "target": "com.amazonaws.eks#StringList"
+    }
+   }
+  },
+  "com.amazonaws.eks#ClusterIssueCode": {
+   "type": "enum",
+   "members": {
+    "ACCESS_DENIED": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "AccessDenied"
+     }
+    },
+    "CLUSTER_UNREACHABLE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "ClusterUnreachable"
+     }
+    },
+    "CONFIGURATION_CONFLICT": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "ConfigurationConflict"
+     }
+    },
+    "INTERNAL_FAILURE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "InternalFailure"
+     }
+    },
+    "RESOURCE_LIMIT_EXCEEDED": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "ResourceLimitExceeded"
+     }
+    },
+    "RESOURCE_NOT_FOUND": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "ResourceNotFound"
+     }
+    },
+    "IAM_ROLE_NOT_FOUND": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "IamRoleNotFound"
+     }
+    },
+    "VPC_NOT_FOUND": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "VpcNotFound"
+     }
+    },
+    "INSUFFICIENT_FREE_ADDRESSES": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "InsufficientFreeAddresses"
+     }
+    },
+    "EC2_SERVICE_NOT_SUBSCRIBED": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Ec2ServiceNotSubscribed"
+     }
+    },
+    "EC2_SUBNET_NOT_FOUND": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Ec2SubnetNotFound"
+     }
+    },
+    "EC2_SECURITY_GROUP_NOT_FOUND": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Ec2SecurityGroupNotFound"
+     }
+    },
+    "KMS_GRANT_REVOKED": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "KmsGrantRevoked"
+     }
+    },
+    "KMS_KEY_NOT_FOUND": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "KmsKeyNotFound"
+     }
+    },
+    "KMS_KEY_MARKED_FOR_DELETION": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "KmsKeyMarkedForDeletion"
+     }
+    },
+    "KMS_KEY_DISABLED": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "KmsKeyDisabled"
+     }
+    },
+    "STS_REGIONAL_ENDPOINT_DISABLED": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "StsRegionalEndpointDisabled"
+     }
+    },
+    "UNSUPPORTED_VERSION": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "UnsupportedVersion"
+     }
+    },
+    "OTHER": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Other"
+     }
+    }
+   }
+  },
+  "com.amazonaws.eks#ClusterIssueList": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.eks#ClusterIssue"
+   }
+  },
+  "com.amazonaws.eks#ClusterStatus": {
+   "type": "enum",
+   "members": {
+    "CREATING": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "CREATING"
+     }
+    },
+    "ACTIVE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "ACTIVE"
+     }
+    },
+    "DELETING": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "DELETING"
+     }
+    },
+    "FAILED": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "FAILED"
+     }
+    },
+    "UPDATING": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "UPDATING"
+     }
+    },
+    "PENDING": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "PENDING"
+     }
+    }
+   }
+  },
+  "com.amazonaws.eks#ComputeConfigRequest": {
+   "type": "structure",
+   "members": {
+    "enabled": {
+     "target": "com.amazonaws.eks#BoxedBoolean"
+    },
+    "nodePools": {
+     "target": "com.amazonaws.eks#StringList"
+    },
+    "nodeRoleArn": {
+     "target": "com.amazonaws.eks#String"
+    }
+   }
+  },
+  "com.amazonaws.eks#ComputeConfigResponse": {
+   "type": "structure",
+   "members": {
+    "enabled": {
+     "target": "com.amazonaws.eks#BoxedBoolean"
+    },
+    "nodePools": {
+     "target": "com.amazonaws.eks#StringList"
+    },
+    "nodeRoleArn": {
+     "target": "com.amazonaws.eks#String"
+    }
+   }
+  },
+  "com.amazonaws.eks#ConnectorConfigResponse": {
+   "type": "structure",
+   "members": {
+    "activationId": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "activationCode": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "activationExpiry": {
+     "target": "com.amazonaws.eks#Timestamp"
+    },
+    "provider": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "roleArn": {
+     "target": "com.amazonaws.eks#String"
+    }
+   }
+  },
+  "com.amazonaws.eks#ControlPlaneEgressModeType": {
+   "type": "enum",
+   "members": {
+    "AWS_MANAGED": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "AWS_MANAGED"
+     }
+    },
+    "CUSTOMER_ROUTED": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "CUSTOMER_ROUTED"
+     }
+    },
+    "CUSTOMER_ISOLATED": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "CUSTOMER_ISOLATED"
+     }
+    }
+   }
+  },
+  "com.amazonaws.eks#ControlPlanePlacementResponse": {
+   "type": "structure",
+   "members": {
+    "groupName": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "spreadLevel": {
+     "target": "com.amazonaws.eks#SpreadLevel"
+    }
+   }
+  },
+  "com.amazonaws.eks#ControlPlaneScalingConfig": {
+   "type": "structure",
+   "members": {
+    "tier": {
+     "target": "com.amazonaws.eks#ProvisionedControlPlaneTier"
+    }
+   }
+  },
+  "com.amazonaws.eks#CreateAccessEntry": {
+   "type": "operation",
+   "input": {
+    "target": "com.amazonaws.eks#CreateAccessEntryRequest"
+   },
+   "output": {
+    "target": "com.amazonaws.eks#CreateAccessEntryResponse"
+   },
+   "errors": [
+    {
+     "target": "com.amazonaws.eks#InvalidParameterException"
+    },
+    {
+     "target": "com.amazonaws.eks#InvalidRequestException"
+    },
+    {
+     "target": "com.amazonaws.eks#ResourceInUseException"
+    },
+    {
+     "target": "com.amazonaws.eks#ResourceLimitExceededException"
+    },
+    {
+     "target": "com.amazonaws.eks#ResourceNotFoundException"
+    },
+    {
+     "target": "com.amazonaws.eks#ServerException"
+    }
+   ],
+   "traits": {
+    "smithy.api#http": {
+     "method": "POST",
+     "uri": "/clusters/{clusterName}/access-entries",
+     "code": 200
+    }
+   }
+  },
+  "com.amazonaws.eks#CreateAccessEntryRequest": {
+   "type": "structure",
+   "members": {
+    "clusterName": {
+     "target": "com.amazonaws.eks#String",
+     "traits": {
+      "smithy.api#httpLabel": {},
+      "smithy.api#required": {}
+     }
+    },
+    "principalArn": {
+     "target": "com.amazonaws.eks#String",
+     "traits": {
+      "smithy.api#required": {}
+     }
+    },
+    "kubernetesGroups": {
+     "target": "com.amazonaws.eks#StringList"
+    },
+    "tags": {
+     "target": "com.amazonaws.eks#TagMap"
+    },
+    "clientRequestToken": {
+     "target": "com.amazonaws.eks#String",
+     "traits": {
+      "smithy.api#idempotencyToken": {}
+     }
+    },
+    "username": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "type": {
+     "target": "com.amazonaws.eks#String"
+    }
+   },
+   "traits": {
+    "smithy.api#input": {}
+   }
+  },
+  "com.amazonaws.eks#CreateAccessEntryResponse": {
+   "type": "structure",
+   "members": {
+    "accessEntry": {
+     "target": "com.amazonaws.eks#AccessEntry"
+    }
+   },
+   "traits": {
+    "smithy.api#output": {}
+   }
+  },
+  "com.amazonaws.eks#DeleteAccessEntry": {
+   "type": "operation",
+   "input": {
+    "target": "com.amazonaws.eks#DeleteAccessEntryRequest"
+   },
+   "output": {
+    "target": "com.amazonaws.eks#DeleteAccessEntryResponse"
+   },
+   "errors": [
+    {
+     "target": "com.amazonaws.eks#InvalidRequestException"
+    },
+    {
+     "target": "com.amazonaws.eks#ResourceNotFoundException"
+    },
+    {
+     "target": "com.amazonaws.eks#ServerException"
+    }
+   ],
+   "traits": {
+    "smithy.api#http": {
+     "method": "DELETE",
+     "uri": "/clusters/{clusterName}/access-entries/{principalArn}",
+     "code": 200
+    }
+   }
+  },
+  "com.amazonaws.eks#DeleteAccessEntryRequest": {
+   "type": "structure",
+   "members": {
+    "clusterName": {
+     "target": "com.amazonaws.eks#String",
+     "traits": {
+      "smithy.api#httpLabel": {},
+      "smithy.api#required": {}
+     }
+    },
+    "principalArn": {
+     "target": "com.amazonaws.eks#String",
+     "traits": {
+      "smithy.api#httpLabel": {},
+      "smithy.api#required": {}
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#input": {}
+   }
+  },
+  "com.amazonaws.eks#DeleteAccessEntryResponse": {
+   "type": "structure",
+   "members": {},
+   "traits": {
+    "smithy.api#output": {}
+   }
+  },
+  "com.amazonaws.eks#DescribeAccessEntry": {
+   "type": "operation",
+   "input": {
+    "target": "com.amazonaws.eks#DescribeAccessEntryRequest"
+   },
+   "output": {
+    "target": "com.amazonaws.eks#DescribeAccessEntryResponse"
+   },
+   "errors": [
+    {
+     "target": "com.amazonaws.eks#InvalidRequestException"
+    },
+    {
+     "target": "com.amazonaws.eks#ResourceNotFoundException"
+    },
+    {
+     "target": "com.amazonaws.eks#ServerException"
+    }
+   ],
+   "traits": {
+    "smithy.api#http": {
+     "method": "GET",
+     "uri": "/clusters/{clusterName}/access-entries/{principalArn}",
+     "code": 200
+    }
+   }
+  },
+  "com.amazonaws.eks#DescribeAccessEntryRequest": {
+   "type": "structure",
+   "members": {
+    "clusterName": {
+     "target": "com.amazonaws.eks#String",
+     "traits": {
+      "smithy.api#httpLabel": {},
+      "smithy.api#required": {}
+     }
+    },
+    "principalArn": {
+     "target": "com.amazonaws.eks#String",
+     "traits": {
+      "smithy.api#httpLabel": {},
+      "smithy.api#required": {}
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#input": {}
+   }
+  },
+  "com.amazonaws.eks#DescribeAccessEntryResponse": {
+   "type": "structure",
+   "members": {
+    "accessEntry": {
+     "target": "com.amazonaws.eks#AccessEntry"
+    }
+   },
+   "traits": {
+    "smithy.api#output": {}
+   }
+  },
+  "com.amazonaws.eks#DescribeCluster": {
+   "type": "operation",
+   "input": {
+    "target": "com.amazonaws.eks#DescribeClusterRequest"
+   },
+   "output": {
+    "target": "com.amazonaws.eks#DescribeClusterResponse"
+   },
+   "errors": [
+    {
+     "target": "com.amazonaws.eks#ClientException"
+    },
+    {
+     "target": "com.amazonaws.eks#ResourceNotFoundException"
+    },
+    {
+     "target": "com.amazonaws.eks#ServerException"
+    },
+    {
+     "target": "com.amazonaws.eks#ServiceUnavailableException"
+    }
+   ],
+   "traits": {
+    "smithy.api#http": {
+     "method": "GET",
+     "uri": "/clusters/{name}",
+     "code": 200
+    }
+   }
+  },
+  "com.amazonaws.eks#DescribeClusterRequest": {
+   "type": "structure",
+   "members": {
+    "name": {
+     "target": "com.amazonaws.eks#String",
+     "traits": {
+      "smithy.api#httpLabel": {},
+      "smithy.api#required": {}
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#input": {}
+   }
+  },
+  "com.amazonaws.eks#DescribeClusterResponse": {
+   "type": "structure",
+   "members": {
+    "cluster": {
+     "target": "com.amazonaws.eks#Cluster"
+    }
+   },
+   "traits": {
+    "smithy.api#output": {}
+   }
+  },
+  "com.amazonaws.eks#DescribeNodegroup": {
+   "type": "operation",
+   "input": {
+    "target": "com.amazonaws.eks#DescribeNodegroupRequest"
+   },
+   "output": {
+    "target": "com.amazonaws.eks#DescribeNodegroupResponse"
+   },
+   "errors": [
+    {
+     "target": "com.amazonaws.eks#ClientException"
+    },
+    {
+     "target": "com.amazonaws.eks#InvalidParameterException"
+    },
+    {
+     "target": "com.amazonaws.eks#ResourceNotFoundException"
+    },
+    {
+     "target": "com.amazonaws.eks#ServerException"
+    },
+    {
+     "target": "com.amazonaws.eks#ServiceUnavailableException"
+    }
+   ],
+   "traits": {
+    "smithy.api#http": {
+     "method": "GET",
+     "uri": "/clusters/{clusterName}/node-groups/{nodegroupName}",
+     "code": 200
+    }
+   }
+  },
+  "com.amazonaws.eks#DescribeNodegroupRequest": {
+   "type": "structure",
+   "members": {
+    "clusterName": {
+     "target": "com.amazonaws.eks#String",
+     "traits": {
+      "smithy.api#httpLabel": {},
+      "smithy.api#required": {}
+     }
+    },
+    "nodegroupName": {
+     "target": "com.amazonaws.eks#String",
+     "traits": {
+      "smithy.api#httpLabel": {},
+      "smithy.api#required": {}
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#input": {}
+   }
+  },
+  "com.amazonaws.eks#DescribeNodegroupResponse": {
+   "type": "structure",
+   "members": {
+    "nodegroup": {
+     "target": "com.amazonaws.eks#Nodegroup"
+    }
+   },
+   "traits": {
+    "smithy.api#output": {}
+   }
+  },
+  "com.amazonaws.eks#DescribeUpdate": {
+   "type": "operation",
+   "input": {
+    "target": "com.amazonaws.eks#DescribeUpdateRequest"
+   },
+   "output": {
+    "target": "com.amazonaws.eks#DescribeUpdateResponse"
+   },
+   "errors": [
+    {
+     "target": "com.amazonaws.eks#ClientException"
+    },
+    {
+     "target": "com.amazonaws.eks#InvalidParameterException"
+    },
+    {
+     "target": "com.amazonaws.eks#ResourceNotFoundException"
+    },
+    {
+     "target": "com.amazonaws.eks#ServerException"
+    }
+   ],
+   "traits": {
+    "smithy.api#http": {
+     "method": "GET",
+     "uri": "/clusters/{name}/updates/{updateId}",
+     "code": 200
+    }
+   }
+  },
+  "com.amazonaws.eks#DescribeUpdateRequest": {
+   "type": "structure",
+   "members": {
+    "name": {
+     "target": "com.amazonaws.eks#String",
+     "traits": {
+      "smithy.api#httpLabel": {},
+      "smithy.api#required": {}
+     }
+    },
+    "updateId": {
+     "target": "com.amazonaws.eks#String",
+     "traits": {
+      "smithy.api#httpLabel": {},
+      "smithy.api#required": {}
+     }
+    },
+    "nodegroupName": {
+     "target": "com.amazonaws.eks#String",
+     "traits": {
+      "smithy.api#httpQuery": "nodegroupName"
+     }
+    },
+    "addonName": {
+     "target": "com.amazonaws.eks#String",
+     "traits": {
+      "smithy.api#httpQuery": "addonName"
+     }
+    },
+    "capabilityName": {
+     "target": "com.amazonaws.eks#String",
+     "traits": {
+      "smithy.api#httpQuery": "capabilityName"
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#input": {}
+   }
+  },
+  "com.amazonaws.eks#DescribeUpdateResponse": {
+   "type": "structure",
+   "members": {
+    "update": {
+     "target": "com.amazonaws.eks#Update"
+    }
+   },
+   "traits": {
+    "smithy.api#output": {}
+   }
+  },
+  "com.amazonaws.eks#DisassociateAccessPolicy": {
+   "type": "operation",
+   "input": {
+    "target": "com.amazonaws.eks#DisassociateAccessPolicyRequest"
+   },
+   "output": {
+    "target": "com.amazonaws.eks#DisassociateAccessPolicyResponse"
+   },
+   "errors": [
+    {
+     "target": "com.amazonaws.eks#InvalidRequestException"
+    },
+    {
+     "target": "com.amazonaws.eks#ResourceNotFoundException"
+    },
+    {
+     "target": "com.amazonaws.eks#ServerException"
+    }
+   ],
+   "traits": {
+    "smithy.api#http": {
+     "method": "DELETE",
+     "uri": "/clusters/{clusterName}/access-entries/{principalArn}/access-policies/{policyArn}",
+     "code": 200
+    }
+   }
+  },
+  "com.amazonaws.eks#DisassociateAccessPolicyRequest": {
+   "type": "structure",
+   "members": {
+    "clusterName": {
+     "target": "com.amazonaws.eks#String",
+     "traits": {
+      "smithy.api#httpLabel": {},
+      "smithy.api#required": {}
+     }
+    },
+    "principalArn": {
+     "target": "com.amazonaws.eks#String",
+     "traits": {
+      "smithy.api#httpLabel": {},
+      "smithy.api#required": {}
+     }
+    },
+    "policyArn": {
+     "target": "com.amazonaws.eks#String",
+     "traits": {
+      "smithy.api#httpLabel": {},
+      "smithy.api#required": {}
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#input": {}
+   }
+  },
+  "com.amazonaws.eks#DisassociateAccessPolicyResponse": {
+   "type": "structure",
+   "members": {},
+   "traits": {
+    "smithy.api#output": {}
+   }
+  },
+  "com.amazonaws.eks#ElasticLoadBalancing": {
+   "type": "structure",
+   "members": {
+    "enabled": {
+     "target": "com.amazonaws.eks#BoxedBoolean"
+    }
+   }
+  },
+  "com.amazonaws.eks#EncryptionConfig": {
+   "type": "structure",
+   "members": {
+    "resources": {
+     "target": "com.amazonaws.eks#StringList",
+     "traits": {
+      "smithy.api#deprecated": {
+       "since": "2025-03-05",
+       "message": "Deprecated. Amazon EKS encrypts all Kubernetes API data by default, so this value no longer determines which resources are encrypted."
+      }
+     }
+    },
+    "provider": {
+     "target": "com.amazonaws.eks#Provider"
+    }
+   }
+  },
+  "com.amazonaws.eks#EncryptionConfigList": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.eks#EncryptionConfig"
+   },
+   "traits": {
+    "smithy.api#length": {
+     "min": 0,
+     "max": 1
+    }
+   }
+  },
+  "com.amazonaws.eks#ErrorCode": {
+   "type": "enum",
+   "members": {
+    "SUBNET_NOT_FOUND": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "SubnetNotFound"
+     }
+    },
+    "SECURITY_GROUP_NOT_FOUND": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "SecurityGroupNotFound"
+     }
+    },
+    "ENI_LIMIT_REACHED": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "EniLimitReached"
+     }
+    },
+    "IP_NOT_AVAILABLE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "IpNotAvailable"
+     }
+    },
+    "ACCESS_DENIED": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "AccessDenied"
+     }
+    },
+    "OPERATION_NOT_PERMITTED": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "OperationNotPermitted"
+     }
+    },
+    "VPC_ID_NOT_FOUND": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "VpcIdNotFound"
+     }
+    },
+    "UNKNOWN": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Unknown"
+     }
+    },
+    "NODE_CREATION_FAILURE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "NodeCreationFailure"
+     }
+    },
+    "POD_EVICTION_FAILURE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "PodEvictionFailure"
+     }
+    },
+    "INSUFFICIENT_FREE_ADDRESSES": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "InsufficientFreeAddresses"
+     }
+    },
+    "CLUSTER_UNREACHABLE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "ClusterUnreachable"
+     }
+    },
+    "INSUFFICIENT_NUMBER_OF_REPLICAS": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "InsufficientNumberOfReplicas"
+     }
+    },
+    "CONFIGURATION_CONFLICT": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "ConfigurationConflict"
+     }
+    },
+    "ADMISSION_REQUEST_DENIED": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "AdmissionRequestDenied"
+     }
+    },
+    "UNSUPPORTED_ADDON_MODIFICATION": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "UnsupportedAddonModification"
+     }
+    },
+    "K8S_RESOURCE_NOT_FOUND": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "K8sResourceNotFound"
+     }
+    }
+   }
+  },
+  "com.amazonaws.eks#ErrorDetail": {
+   "type": "structure",
+   "members": {
+    "errorCode": {
+     "target": "com.amazonaws.eks#ErrorCode"
+    },
+    "errorMessage": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "resourceIds": {
+     "target": "com.amazonaws.eks#StringList"
+    }
+   }
+  },
+  "com.amazonaws.eks#ErrorDetails": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.eks#ErrorDetail"
+   }
+  },
+  "com.amazonaws.eks#EtcdPlacementResponse": {
+   "type": "structure",
+   "members": {
+    "spreadLevel": {
+     "target": "com.amazonaws.eks#SpreadLevel"
+    }
+   }
+  },
+  "com.amazonaws.eks#HorizontalPodAutoscalerControllerConfigRequest": {
+   "type": "structure",
+   "members": {
+    "horizontalPodAutoscalerSyncPeriod": {
+     "target": "com.amazonaws.eks#String"
+    }
+   }
+  },
+  "com.amazonaws.eks#HorizontalPodAutoscalerControllerConfigResponse": {
+   "type": "structure",
+   "members": {
+    "horizontalPodAutoscalerSyncPeriod": {
+     "target": "com.amazonaws.eks#String"
+    }
+   }
+  },
+  "com.amazonaws.eks#Identity": {
+   "type": "structure",
+   "members": {
+    "oidc": {
+     "target": "com.amazonaws.eks#OIDC"
+    }
+   }
+  },
+  "com.amazonaws.eks#IncludeClustersList": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.eks#String"
+   }
+  },
+  "com.amazonaws.eks#Integer": {
+   "type": "integer",
+   "traits": {
+    "smithy.api#default": 0
+   }
+  },
+  "com.amazonaws.eks#InvalidParameterException": {
+   "type": "structure",
+   "members": {
+    "clusterName": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "nodegroupName": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "fargateProfileName": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "addonName": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "subscriptionId": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "message": {
+     "target": "com.amazonaws.eks#String"
+    }
+   },
+   "traits": {
+    "smithy.api#error": "client",
+    "smithy.api#httpError": 400
+   }
+  },
+  "com.amazonaws.eks#InvalidRequestException": {
+   "type": "structure",
+   "members": {
+    "clusterName": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "nodegroupName": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "addonName": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "subscriptionId": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "message": {
+     "target": "com.amazonaws.eks#String"
+    }
+   },
+   "traits": {
+    "smithy.api#error": "client",
+    "smithy.api#httpError": 400
+   }
+  },
+  "com.amazonaws.eks#IpFamily": {
+   "type": "enum",
+   "members": {
+    "IPV4": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "ipv4"
+     }
+    },
+    "IPV6": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "ipv6"
+     }
+    }
+   }
+  },
+  "com.amazonaws.eks#Issue": {
+   "type": "structure",
+   "members": {
+    "code": {
+     "target": "com.amazonaws.eks#NodegroupIssueCode"
+    },
+    "message": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "resourceIds": {
+     "target": "com.amazonaws.eks#StringList"
+    }
+   }
+  },
+  "com.amazonaws.eks#IssueList": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.eks#Issue"
+   }
+  },
+  "com.amazonaws.eks#KubeApiServerConfigRequest": {
+   "type": "structure",
+   "members": {
+    "eventTtl": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "serviceNodePortRange": {
+     "target": "com.amazonaws.eks#ServiceNodePortRange"
+    }
+   }
+  },
+  "com.amazonaws.eks#KubeApiServerConfigResponse": {
+   "type": "structure",
+   "members": {
+    "eventTtl": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "serviceNodePortRange": {
+     "target": "com.amazonaws.eks#ServiceNodePortRange"
+    }
+   }
+  },
+  "com.amazonaws.eks#KubeControllerManagerConfigRequest": {
+   "type": "structure",
+   "members": {
+    "podGcControllerConfig": {
+     "target": "com.amazonaws.eks#PodGcControllerConfigRequest"
+    },
+    "horizontalPodAutoscalerControllerConfig": {
+     "target": "com.amazonaws.eks#HorizontalPodAutoscalerControllerConfigRequest"
+    }
+   }
+  },
+  "com.amazonaws.eks#KubeControllerManagerConfigResponse": {
+   "type": "structure",
+   "members": {
+    "podGcControllerConfig": {
+     "target": "com.amazonaws.eks#PodGcControllerConfigResponse"
+    },
+    "horizontalPodAutoscalerControllerConfig": {
+     "target": "com.amazonaws.eks#HorizontalPodAutoscalerControllerConfigResponse"
+    }
+   }
+  },
+  "com.amazonaws.eks#KubeSchedulerConfigRequest": {
+   "type": "structure",
+   "members": {
+    "nodeResourcesFit": {
+     "target": "com.amazonaws.eks#NodeResourcesFitConfig"
+    }
+   }
+  },
+  "com.amazonaws.eks#KubeSchedulerConfigResponse": {
+   "type": "structure",
+   "members": {
+    "nodeResourcesFit": {
+     "target": "com.amazonaws.eks#NodeResourcesFitConfig"
+    }
+   }
+  },
+  "com.amazonaws.eks#KubernetesNetworkConfigRequest": {
+   "type": "structure",
+   "members": {
+    "serviceIpv4Cidr": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "ipFamily": {
+     "target": "com.amazonaws.eks#IpFamily"
+    },
+    "elasticLoadBalancing": {
+     "target": "com.amazonaws.eks#ElasticLoadBalancing"
+    }
+   }
+  },
+  "com.amazonaws.eks#KubernetesNetworkConfigResponse": {
+   "type": "structure",
+   "members": {
+    "serviceIpv4Cidr": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "serviceIpv6Cidr": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "ipFamily": {
+     "target": "com.amazonaws.eks#IpFamily"
+    },
+    "elasticLoadBalancing": {
+     "target": "com.amazonaws.eks#ElasticLoadBalancing"
+    }
+   }
+  },
+  "com.amazonaws.eks#LaunchTemplateSpecification": {
+   "type": "structure",
+   "members": {
+    "name": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "version": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "id": {
+     "target": "com.amazonaws.eks#String"
+    }
+   }
+  },
+  "com.amazonaws.eks#ListAccessEntries": {
+   "type": "operation",
+   "input": {
+    "target": "com.amazonaws.eks#ListAccessEntriesRequest"
+   },
+   "output": {
+    "target": "com.amazonaws.eks#ListAccessEntriesResponse"
+   },
+   "errors": [
+    {
+     "target": "com.amazonaws.eks#InvalidParameterException"
+    },
+    {
+     "target": "com.amazonaws.eks#InvalidRequestException"
+    },
+    {
+     "target": "com.amazonaws.eks#ResourceNotFoundException"
+    },
+    {
+     "target": "com.amazonaws.eks#ServerException"
+    }
+   ],
+   "traits": {
+    "smithy.api#http": {
+     "method": "GET",
+     "uri": "/clusters/{clusterName}/access-entries",
+     "code": 200
+    },
+    "smithy.api#paginated": {
+     "inputToken": "nextToken",
+     "outputToken": "nextToken",
+     "items": "accessEntries",
+     "pageSize": "maxResults"
+    }
+   }
+  },
+  "com.amazonaws.eks#ListAccessEntriesRequest": {
+   "type": "structure",
+   "members": {
+    "clusterName": {
+     "target": "com.amazonaws.eks#String",
+     "traits": {
+      "smithy.api#httpLabel": {},
+      "smithy.api#required": {}
+     }
+    },
+    "associatedPolicyArn": {
+     "target": "com.amazonaws.eks#String",
+     "traits": {
+      "smithy.api#httpQuery": "associatedPolicyArn"
+     }
+    },
+    "maxResults": {
+     "target": "com.amazonaws.eks#ListAccessEntriesRequestMaxResults",
+     "traits": {
+      "smithy.api#httpQuery": "maxResults"
+     }
+    },
+    "nextToken": {
+     "target": "com.amazonaws.eks#String",
+     "traits": {
+      "smithy.api#httpQuery": "nextToken"
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#input": {}
+   }
+  },
+  "com.amazonaws.eks#ListAccessEntriesRequestMaxResults": {
+   "type": "integer",
+   "traits": {
+    "smithy.api#range": {
+     "min": 1,
+     "max": 100
+    }
+   }
+  },
+  "com.amazonaws.eks#ListAccessEntriesResponse": {
+   "type": "structure",
+   "members": {
+    "accessEntries": {
+     "target": "com.amazonaws.eks#StringList"
+    },
+    "nextToken": {
+     "target": "com.amazonaws.eks#String"
+    }
+   },
+   "traits": {
+    "smithy.api#output": {}
+   }
+  },
+  "com.amazonaws.eks#ListAccessPolicies": {
+   "type": "operation",
+   "input": {
+    "target": "com.amazonaws.eks#ListAccessPoliciesRequest"
+   },
+   "output": {
+    "target": "com.amazonaws.eks#ListAccessPoliciesResponse"
+   },
+   "errors": [
+    {
+     "target": "com.amazonaws.eks#ServerException"
+    }
+   ],
+   "traits": {
+    "smithy.api#http": {
+     "method": "GET",
+     "uri": "/access-policies",
+     "code": 200
+    },
+    "smithy.api#paginated": {
+     "inputToken": "nextToken",
+     "outputToken": "nextToken",
+     "items": "accessPolicies",
+     "pageSize": "maxResults"
+    }
+   }
+  },
+  "com.amazonaws.eks#ListAccessPoliciesRequest": {
+   "type": "structure",
+   "members": {
+    "maxResults": {
+     "target": "com.amazonaws.eks#ListAccessPoliciesRequestMaxResults",
+     "traits": {
+      "smithy.api#httpQuery": "maxResults"
+     }
+    },
+    "nextToken": {
+     "target": "com.amazonaws.eks#String",
+     "traits": {
+      "smithy.api#httpQuery": "nextToken"
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#input": {}
+   }
+  },
+  "com.amazonaws.eks#ListAccessPoliciesRequestMaxResults": {
+   "type": "integer",
+   "traits": {
+    "smithy.api#range": {
+     "min": 1,
+     "max": 100
+    }
+   }
+  },
+  "com.amazonaws.eks#ListAccessPoliciesResponse": {
+   "type": "structure",
+   "members": {
+    "accessPolicies": {
+     "target": "com.amazonaws.eks#AccessPoliciesList"
+    },
+    "nextToken": {
+     "target": "com.amazonaws.eks#String"
+    }
+   },
+   "traits": {
+    "smithy.api#output": {}
+   }
+  },
+  "com.amazonaws.eks#ListAssociatedAccessPolicies": {
+   "type": "operation",
+   "input": {
+    "target": "com.amazonaws.eks#ListAssociatedAccessPoliciesRequest"
+   },
+   "output": {
+    "target": "com.amazonaws.eks#ListAssociatedAccessPoliciesResponse"
+   },
+   "errors": [
+    {
+     "target": "com.amazonaws.eks#InvalidRequestException"
+    },
+    {
+     "target": "com.amazonaws.eks#ResourceNotFoundException"
+    },
+    {
+     "target": "com.amazonaws.eks#ServerException"
+    }
+   ],
+   "traits": {
+    "smithy.api#http": {
+     "method": "GET",
+     "uri": "/clusters/{clusterName}/access-entries/{principalArn}/access-policies",
+     "code": 200
+    },
+    "smithy.api#paginated": {
+     "inputToken": "nextToken",
+     "outputToken": "nextToken",
+     "items": "associatedAccessPolicies",
+     "pageSize": "maxResults"
+    }
+   }
+  },
+  "com.amazonaws.eks#ListAssociatedAccessPoliciesRequest": {
+   "type": "structure",
+   "members": {
+    "clusterName": {
+     "target": "com.amazonaws.eks#String",
+     "traits": {
+      "smithy.api#httpLabel": {},
+      "smithy.api#required": {}
+     }
+    },
+    "principalArn": {
+     "target": "com.amazonaws.eks#String",
+     "traits": {
+      "smithy.api#httpLabel": {},
+      "smithy.api#required": {}
+     }
+    },
+    "maxResults": {
+     "target": "com.amazonaws.eks#ListAssociatedAccessPoliciesRequestMaxResults",
+     "traits": {
+      "smithy.api#httpQuery": "maxResults"
+     }
+    },
+    "nextToken": {
+     "target": "com.amazonaws.eks#String",
+     "traits": {
+      "smithy.api#httpQuery": "nextToken"
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#input": {}
+   }
+  },
+  "com.amazonaws.eks#ListAssociatedAccessPoliciesRequestMaxResults": {
+   "type": "integer",
+   "traits": {
+    "smithy.api#range": {
+     "min": 1,
+     "max": 100
+    }
+   }
+  },
+  "com.amazonaws.eks#ListAssociatedAccessPoliciesResponse": {
+   "type": "structure",
+   "members": {
+    "clusterName": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "principalArn": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "nextToken": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "associatedAccessPolicies": {
+     "target": "com.amazonaws.eks#AssociatedAccessPoliciesList"
+    }
+   },
+   "traits": {
+    "smithy.api#output": {}
+   }
+  },
+  "com.amazonaws.eks#ListClusters": {
+   "type": "operation",
+   "input": {
+    "target": "com.amazonaws.eks#ListClustersRequest"
+   },
+   "output": {
+    "target": "com.amazonaws.eks#ListClustersResponse"
+   },
+   "errors": [
+    {
+     "target": "com.amazonaws.eks#ClientException"
+    },
+    {
+     "target": "com.amazonaws.eks#InvalidParameterException"
+    },
+    {
+     "target": "com.amazonaws.eks#ServerException"
+    },
+    {
+     "target": "com.amazonaws.eks#ServiceUnavailableException"
+    }
+   ],
+   "traits": {
+    "smithy.api#http": {
+     "method": "GET",
+     "uri": "/clusters",
+     "code": 200
+    },
+    "smithy.api#paginated": {
+     "inputToken": "nextToken",
+     "outputToken": "nextToken",
+     "items": "clusters",
+     "pageSize": "maxResults"
+    }
+   }
+  },
+  "com.amazonaws.eks#ListClustersRequest": {
+   "type": "structure",
+   "members": {
+    "maxResults": {
+     "target": "com.amazonaws.eks#ListClustersRequestMaxResults",
+     "traits": {
+      "smithy.api#httpQuery": "maxResults"
+     }
+    },
+    "nextToken": {
+     "target": "com.amazonaws.eks#String",
+     "traits": {
+      "smithy.api#httpQuery": "nextToken"
+     }
+    },
+    "include": {
+     "target": "com.amazonaws.eks#IncludeClustersList",
+     "traits": {
+      "smithy.api#httpQuery": "include"
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#input": {}
+   }
+  },
+  "com.amazonaws.eks#ListClustersRequestMaxResults": {
+   "type": "integer",
+   "traits": {
+    "smithy.api#range": {
+     "min": 1,
+     "max": 100
+    }
+   }
+  },
+  "com.amazonaws.eks#ListClustersResponse": {
+   "type": "structure",
+   "members": {
+    "clusters": {
+     "target": "com.amazonaws.eks#StringList"
+    },
+    "nextToken": {
+     "target": "com.amazonaws.eks#String"
+    }
+   },
+   "traits": {
+    "smithy.api#output": {}
+   }
+  },
+  "com.amazonaws.eks#ListNodegroups": {
+   "type": "operation",
+   "input": {
+    "target": "com.amazonaws.eks#ListNodegroupsRequest"
+   },
+   "output": {
+    "target": "com.amazonaws.eks#ListNodegroupsResponse"
+   },
+   "errors": [
+    {
+     "target": "com.amazonaws.eks#ClientException"
+    },
+    {
+     "target": "com.amazonaws.eks#InvalidParameterException"
+    },
+    {
+     "target": "com.amazonaws.eks#ResourceNotFoundException"
+    },
+    {
+     "target": "com.amazonaws.eks#ServerException"
+    },
+    {
+     "target": "com.amazonaws.eks#ServiceUnavailableException"
+    }
+   ],
+   "traits": {
+    "smithy.api#http": {
+     "method": "GET",
+     "uri": "/clusters/{clusterName}/node-groups",
+     "code": 200
+    },
+    "smithy.api#paginated": {
+     "inputToken": "nextToken",
+     "outputToken": "nextToken",
+     "items": "nodegroups",
+     "pageSize": "maxResults"
+    }
+   }
+  },
+  "com.amazonaws.eks#ListNodegroupsRequest": {
+   "type": "structure",
+   "members": {
+    "clusterName": {
+     "target": "com.amazonaws.eks#String",
+     "traits": {
+      "smithy.api#httpLabel": {},
+      "smithy.api#required": {}
+     }
+    },
+    "maxResults": {
+     "target": "com.amazonaws.eks#ListNodegroupsRequestMaxResults",
+     "traits": {
+      "smithy.api#httpQuery": "maxResults"
+     }
+    },
+    "nextToken": {
+     "target": "com.amazonaws.eks#String",
+     "traits": {
+      "smithy.api#httpQuery": "nextToken"
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#input": {}
+   }
+  },
+  "com.amazonaws.eks#ListNodegroupsRequestMaxResults": {
+   "type": "integer",
+   "traits": {
+    "smithy.api#range": {
+     "min": 1,
+     "max": 100
+    }
+   }
+  },
+  "com.amazonaws.eks#ListNodegroupsResponse": {
+   "type": "structure",
+   "members": {
+    "nodegroups": {
+     "target": "com.amazonaws.eks#StringList"
+    },
+    "nextToken": {
+     "target": "com.amazonaws.eks#String"
+    }
+   },
+   "traits": {
+    "smithy.api#output": {}
+   }
+  },
+  "com.amazonaws.eks#ListTagsForResource": {
+   "type": "operation",
+   "input": {
+    "target": "com.amazonaws.eks#ListTagsForResourceRequest"
+   },
+   "output": {
+    "target": "com.amazonaws.eks#ListTagsForResourceResponse"
+   },
+   "errors": [
+    {
+     "target": "com.amazonaws.eks#BadRequestException"
+    },
+    {
+     "target": "com.amazonaws.eks#NotFoundException"
+    }
+   ],
+   "traits": {
+    "smithy.api#http": {
+     "method": "GET",
+     "uri": "/tags/{resourceArn}",
+     "code": 200
+    }
+   }
+  },
+  "com.amazonaws.eks#ListTagsForResourceRequest": {
+   "type": "structure",
+   "members": {
+    "resourceArn": {
+     "target": "com.amazonaws.eks#String",
+     "traits": {
+      "smithy.api#httpLabel": {},
+      "smithy.api#required": {}
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#input": {}
+   }
+  },
+  "com.amazonaws.eks#ListTagsForResourceResponse": {
+   "type": "structure",
+   "members": {
+    "tags": {
+     "target": "com.amazonaws.eks#TagMap"
+    }
+   },
+   "traits": {
+    "smithy.api#output": {}
+   }
+  },
+  "com.amazonaws.eks#ListUpdates": {
+   "type": "operation",
+   "input": {
+    "target": "com.amazonaws.eks#ListUpdatesRequest"
+   },
+   "output": {
+    "target": "com.amazonaws.eks#ListUpdatesResponse"
+   },
+   "errors": [
+    {
+     "target": "com.amazonaws.eks#ClientException"
+    },
+    {
+     "target": "com.amazonaws.eks#InvalidParameterException"
+    },
+    {
+     "target": "com.amazonaws.eks#ResourceNotFoundException"
+    },
+    {
+     "target": "com.amazonaws.eks#ServerException"
+    }
+   ],
+   "traits": {
+    "smithy.api#http": {
+     "method": "GET",
+     "uri": "/clusters/{name}/updates",
+     "code": 200
+    },
+    "smithy.api#paginated": {
+     "inputToken": "nextToken",
+     "outputToken": "nextToken",
+     "items": "updateIds",
+     "pageSize": "maxResults"
+    }
+   }
+  },
+  "com.amazonaws.eks#ListUpdatesRequest": {
+   "type": "structure",
+   "members": {
+    "name": {
+     "target": "com.amazonaws.eks#String",
+     "traits": {
+      "smithy.api#httpLabel": {},
+      "smithy.api#required": {}
+     }
+    },
+    "nodegroupName": {
+     "target": "com.amazonaws.eks#String",
+     "traits": {
+      "smithy.api#httpQuery": "nodegroupName"
+     }
+    },
+    "addonName": {
+     "target": "com.amazonaws.eks#String",
+     "traits": {
+      "smithy.api#httpQuery": "addonName"
+     }
+    },
+    "capabilityName": {
+     "target": "com.amazonaws.eks#String",
+     "traits": {
+      "smithy.api#httpQuery": "capabilityName"
+     }
+    },
+    "nextToken": {
+     "target": "com.amazonaws.eks#String",
+     "traits": {
+      "smithy.api#httpQuery": "nextToken"
+     }
+    },
+    "maxResults": {
+     "target": "com.amazonaws.eks#ListUpdatesRequestMaxResults",
+     "traits": {
+      "smithy.api#httpQuery": "maxResults"
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#input": {}
+   }
+  },
+  "com.amazonaws.eks#ListUpdatesRequestMaxResults": {
+   "type": "integer",
+   "traits": {
+    "smithy.api#range": {
+     "min": 1,
+     "max": 100
+    }
+   }
+  },
+  "com.amazonaws.eks#ListUpdatesResponse": {
+   "type": "structure",
+   "members": {
+    "updateIds": {
+     "target": "com.amazonaws.eks#StringList"
+    },
+    "nextToken": {
+     "target": "com.amazonaws.eks#String"
+    }
+   },
+   "traits": {
+    "smithy.api#output": {}
+   }
+  },
+  "com.amazonaws.eks#LogSetup": {
+   "type": "structure",
+   "members": {
+    "types": {
+     "target": "com.amazonaws.eks#LogTypes"
+    },
+    "enabled": {
+     "target": "com.amazonaws.eks#BoxedBoolean"
+    }
+   }
+  },
+  "com.amazonaws.eks#LogSetups": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.eks#LogSetup"
+   }
+  },
+  "com.amazonaws.eks#LogType": {
+   "type": "enum",
+   "members": {
+    "API": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "api"
+     }
+    },
+    "AUDIT": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "audit"
+     }
+    },
+    "AUTHENTICATOR": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "authenticator"
+     }
+    },
+    "CONTROLLER_MANAGER": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "controllerManager"
+     }
+    },
+    "SCHEDULER": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "scheduler"
+     }
+    }
+   }
+  },
+  "com.amazonaws.eks#LogTypes": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.eks#LogType"
+   }
+  },
+  "com.amazonaws.eks#Logging": {
+   "type": "structure",
+   "members": {
+    "clusterLogging": {
+     "target": "com.amazonaws.eks#LogSetups"
+    }
+   }
+  },
+  "com.amazonaws.eks#NodeRepairConfig": {
+   "type": "structure",
+   "members": {
+    "enabled": {
+     "target": "com.amazonaws.eks#BoxedBoolean"
+    },
+    "maxUnhealthyNodeThresholdCount": {
+     "target": "com.amazonaws.eks#NonZeroInteger"
+    },
+    "maxUnhealthyNodeThresholdPercentage": {
+     "target": "com.amazonaws.eks#PercentCapacity"
+    },
+    "maxParallelNodesRepairedCount": {
+     "target": "com.amazonaws.eks#NonZeroInteger"
+    },
+    "maxParallelNodesRepairedPercentage": {
+     "target": "com.amazonaws.eks#PercentCapacity"
+    },
+    "nodeRepairConfigOverrides": {
+     "target": "com.amazonaws.eks#NodeRepairConfigOverridesList"
+    }
+   }
+  },
+  "com.amazonaws.eks#NodeRepairConfigOverrides": {
+   "type": "structure",
+   "members": {
+    "nodeMonitoringCondition": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "nodeUnhealthyReason": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "minRepairWaitTimeMins": {
+     "target": "com.amazonaws.eks#NonZeroInteger"
+    },
+    "repairAction": {
+     "target": "com.amazonaws.eks#RepairAction"
+    }
+   }
+  },
+  "com.amazonaws.eks#NodeRepairConfigOverridesList": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.eks#NodeRepairConfigOverrides"
+   }
+  },
+  "com.amazonaws.eks#NodeResourcesFitConfig": {
+   "type": "structure",
+   "members": {
+    "scoringStrategy": {
+     "target": "com.amazonaws.eks#ScoringStrategy"
+    }
+   }
+  },
+  "com.amazonaws.eks#Nodegroup": {
+   "type": "structure",
+   "members": {
+    "nodegroupName": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "nodegroupArn": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "clusterName": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "version": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "releaseVersion": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "createdAt": {
+     "target": "com.amazonaws.eks#Timestamp"
+    },
+    "modifiedAt": {
+     "target": "com.amazonaws.eks#Timestamp"
+    },
+    "status": {
+     "target": "com.amazonaws.eks#NodegroupStatus"
+    },
+    "capacityType": {
+     "target": "com.amazonaws.eks#CapacityTypes"
+    },
+    "scalingConfig": {
+     "target": "com.amazonaws.eks#NodegroupScalingConfig"
+    },
+    "instanceTypes": {
+     "target": "com.amazonaws.eks#StringList"
+    },
+    "subnets": {
+     "target": "com.amazonaws.eks#StringList"
+    },
+    "remoteAccess": {
+     "target": "com.amazonaws.eks#RemoteAccessConfig"
+    },
+    "amiType": {
+     "target": "com.amazonaws.eks#AMITypes"
+    },
+    "nodeRole": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "labels": {
+     "target": "com.amazonaws.eks#labelsMap"
+    },
+    "taints": {
+     "target": "com.amazonaws.eks#taintsList"
+    },
+    "resources": {
+     "target": "com.amazonaws.eks#NodegroupResources"
+    },
+    "diskSize": {
+     "target": "com.amazonaws.eks#BoxedInteger"
+    },
+    "health": {
+     "target": "com.amazonaws.eks#NodegroupHealth"
+    },
+    "updateConfig": {
+     "target": "com.amazonaws.eks#NodegroupUpdateConfig"
+    },
+    "nodeRepairConfig": {
+     "target": "com.amazonaws.eks#NodeRepairConfig"
+    },
+    "launchTemplate": {
+     "target": "com.amazonaws.eks#LaunchTemplateSpecification"
+    },
+    "tags": {
+     "target": "com.amazonaws.eks#TagMap"
+    },
+    "warmPoolConfig": {
+     "target": "com.amazonaws.eks#WarmPoolConfig"
+    }
+   }
+  },
+  "com.amazonaws.eks#NodegroupHealth": {
+   "type": "structure",
+   "members": {
+    "issues": {
+     "target": "com.amazonaws.eks#IssueList"
+    }
+   }
+  },
+  "com.amazonaws.eks#NodegroupIssueCode": {
+   "type": "enum",
+   "members": {
+    "AUTO_SCALING_GROUP_NOT_FOUND": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "AutoScalingGroupNotFound"
+     }
+    },
+    "AUTO_SCALING_GROUP_INVALID_CONFIGURATION": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "AutoScalingGroupInvalidConfiguration"
+     }
+    },
+    "EC2_SECURITY_GROUP_NOT_FOUND": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Ec2SecurityGroupNotFound"
+     }
+    },
+    "EC2_SECURITY_GROUP_DELETION_FAILURE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Ec2SecurityGroupDeletionFailure"
+     }
+    },
+    "EC2_LAUNCH_TEMPLATE_NOT_FOUND": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Ec2LaunchTemplateNotFound"
+     }
+    },
+    "EC2_LAUNCH_TEMPLATE_VERSION_MISMATCH": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Ec2LaunchTemplateVersionMismatch"
+     }
+    },
+    "EC2_SUBNET_NOT_FOUND": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Ec2SubnetNotFound"
+     }
+    },
+    "EC2_SUBNET_INVALID_CONFIGURATION": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Ec2SubnetInvalidConfiguration"
+     }
+    },
+    "IAM_INSTANCE_PROFILE_NOT_FOUND": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "IamInstanceProfileNotFound"
+     }
+    },
+    "EC2_SUBNET_MISSING_IPV6_ASSIGNMENT": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Ec2SubnetMissingIpv6Assignment"
+     }
+    },
+    "IAM_LIMIT_EXCEEDED": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "IamLimitExceeded"
+     }
+    },
+    "IAM_NODE_ROLE_NOT_FOUND": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "IamNodeRoleNotFound"
+     }
+    },
+    "NODE_CREATION_FAILURE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "NodeCreationFailure"
+     }
+    },
+    "ASG_INSTANCE_LAUNCH_FAILURES": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "AsgInstanceLaunchFailures"
+     }
+    },
+    "INSTANCE_LIMIT_EXCEEDED": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "InstanceLimitExceeded"
+     }
+    },
+    "INSUFFICIENT_FREE_ADDRESSES": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "InsufficientFreeAddresses"
+     }
+    },
+    "ACCESS_DENIED": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "AccessDenied"
+     }
+    },
+    "INTERNAL_FAILURE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "InternalFailure"
+     }
+    },
+    "CLUSTER_UNREACHABLE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "ClusterUnreachable"
+     }
+    },
+    "AMI_ID_NOT_FOUND": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "AmiIdNotFound"
+     }
+    },
+    "AUTO_SCALING_GROUP_OPT_IN_REQUIRED": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "AutoScalingGroupOptInRequired"
+     }
+    },
+    "AUTO_SCALING_GROUP_RATE_LIMIT_EXCEEDED": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "AutoScalingGroupRateLimitExceeded"
+     }
+    },
+    "EC2_LAUNCH_TEMPLATE_DELETION_FAILURE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Ec2LaunchTemplateDeletionFailure"
+     }
+    },
+    "EC2_LAUNCH_TEMPLATE_INVALID_CONFIGURATION": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Ec2LaunchTemplateInvalidConfiguration"
+     }
+    },
+    "EC2_LAUNCH_TEMPLATE_MAX_LIMIT_EXCEEDED": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Ec2LaunchTemplateMaxLimitExceeded"
+     }
+    },
+    "EC2_SUBNET_LIST_TOO_LONG": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Ec2SubnetListTooLong"
+     }
+    },
+    "IAM_THROTTLING": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "IamThrottling"
+     }
+    },
+    "NODE_TERMINATION_FAILURE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "NodeTerminationFailure"
+     }
+    },
+    "POD_EVICTION_FAILURE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "PodEvictionFailure"
+     }
+    },
+    "SOURCE_EC2_LAUNCH_TEMPLATE_NOT_FOUND": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "SourceEc2LaunchTemplateNotFound"
+     }
+    },
+    "LIMIT_EXCEEDED": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "LimitExceeded"
+     }
+    },
+    "UNKNOWN": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Unknown"
+     }
+    },
+    "AUTO_SCALING_GROUP_INSTANCE_REFRESH_ACTIVE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "AutoScalingGroupInstanceRefreshActive"
+     }
+    },
+    "KUBERNETES_LABEL_INVALID": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "KubernetesLabelInvalid"
+     }
+    },
+    "EC2_LAUNCH_TEMPLATE_VERSION_MAX_LIMIT_EXCEEDED": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Ec2LaunchTemplateVersionMaxLimitExceeded"
+     }
+    },
+    "EC2_INSTANCE_TYPE_DOES_NOT_EXIST": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Ec2InstanceTypeDoesNotExist"
+     }
+    }
+   }
+  },
+  "com.amazonaws.eks#NodegroupResources": {
+   "type": "structure",
+   "members": {
+    "autoScalingGroups": {
+     "target": "com.amazonaws.eks#AutoScalingGroupList"
+    },
+    "remoteAccessSecurityGroup": {
+     "target": "com.amazonaws.eks#String"
+    }
+   }
+  },
+  "com.amazonaws.eks#NodegroupScalingConfig": {
+   "type": "structure",
+   "members": {
+    "minSize": {
+     "target": "com.amazonaws.eks#ZeroCapacity"
+    },
+    "maxSize": {
+     "target": "com.amazonaws.eks#Capacity"
+    },
+    "desiredSize": {
+     "target": "com.amazonaws.eks#ZeroCapacity"
+    }
+   }
+  },
+  "com.amazonaws.eks#NodegroupStatus": {
+   "type": "enum",
+   "members": {
+    "CREATING": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "CREATING"
+     }
+    },
+    "ACTIVE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "ACTIVE"
+     }
+    },
+    "UPDATING": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "UPDATING"
+     }
+    },
+    "DELETING": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "DELETING"
+     }
+    },
+    "CREATE_FAILED": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "CREATE_FAILED"
+     }
+    },
+    "DELETE_FAILED": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "DELETE_FAILED"
+     }
+    },
+    "DEGRADED": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "DEGRADED"
+     }
+    }
+   }
+  },
+  "com.amazonaws.eks#NodegroupUpdateConfig": {
+   "type": "structure",
+   "members": {
+    "maxUnavailable": {
+     "target": "com.amazonaws.eks#NonZeroInteger"
+    },
+    "maxUnavailablePercentage": {
+     "target": "com.amazonaws.eks#PercentCapacity"
+    },
+    "updateStrategy": {
+     "target": "com.amazonaws.eks#NodegroupUpdateStrategies"
+    }
+   }
+  },
+  "com.amazonaws.eks#NodegroupUpdateStrategies": {
+   "type": "enum",
+   "members": {
+    "DEFAULT": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "DEFAULT"
+     }
+    },
+    "MINIMAL": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "MINIMAL"
+     }
+    }
+   }
+  },
+  "com.amazonaws.eks#NonZeroInteger": {
+   "type": "integer",
+   "traits": {
+    "smithy.api#range": {
+     "min": 1
+    }
+   }
+  },
+  "com.amazonaws.eks#NotFoundException": {
+   "type": "structure",
+   "members": {
+    "message": {
+     "target": "com.amazonaws.eks#String"
+    }
+   },
+   "traits": {
+    "smithy.api#error": "client",
+    "smithy.api#httpError": 404
+   }
+  },
+  "com.amazonaws.eks#OIDC": {
+   "type": "structure",
+   "members": {
+    "issuer": {
+     "target": "com.amazonaws.eks#String"
+    }
+   }
+  },
+  "com.amazonaws.eks#OutpostConfigResponse": {
+   "type": "structure",
+   "members": {
+    "outpostArns": {
+     "target": "com.amazonaws.eks#StringList",
+     "traits": {
+      "smithy.api#required": {}
+     }
+    },
+    "controlPlaneInstanceType": {
+     "target": "com.amazonaws.eks#String",
+     "traits": {
+      "smithy.api#required": {}
+     }
+    },
+    "controlPlanePlacement": {
+     "target": "com.amazonaws.eks#ControlPlanePlacementResponse"
+    },
+    "etcdInstanceType": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "etcdPlacement": {
+     "target": "com.amazonaws.eks#EtcdPlacementResponse"
+    }
+   }
+  },
+  "com.amazonaws.eks#PercentCapacity": {
+   "type": "integer",
+   "traits": {
+    "smithy.api#range": {
+     "min": 1,
+     "max": 100
+    }
+   }
+  },
+  "com.amazonaws.eks#PodGcControllerConfigRequest": {
+   "type": "structure",
+   "members": {
+    "terminatedPodGcThreshold": {
+     "target": "com.amazonaws.eks#TerminatedPodGcThresholdValue"
+    }
+   }
+  },
+  "com.amazonaws.eks#PodGcControllerConfigResponse": {
+   "type": "structure",
+   "members": {
+    "terminatedPodGcThreshold": {
+     "target": "com.amazonaws.eks#TerminatedPodGcThresholdValue"
+    }
+   }
+  },
+  "com.amazonaws.eks#Provider": {
+   "type": "structure",
+   "members": {
+    "keyArn": {
+     "target": "com.amazonaws.eks#String"
+    }
+   }
+  },
+  "com.amazonaws.eks#ProvisionedControlPlaneTier": {
+   "type": "enum",
+   "members": {
+    "STANDARD": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "standard"
+     }
+    },
+    "TIER_XL": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "tier-xl"
+     }
+    },
+    "TIER_2XL": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "tier-2xl"
+     }
+    },
+    "TIER_4XL": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "tier-4xl"
+     }
+    },
+    "TIER_8XL": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "tier-8xl"
+     }
+    }
+   }
+  },
+  "com.amazonaws.eks#RemoteAccessConfig": {
+   "type": "structure",
+   "members": {
+    "ec2SshKey": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "sourceSecurityGroups": {
+     "target": "com.amazonaws.eks#StringList"
+    }
+   }
+  },
+  "com.amazonaws.eks#RemoteNetworkConfigRequest": {
+   "type": "structure",
+   "members": {
+    "remoteNodeNetworks": {
+     "target": "com.amazonaws.eks#RemoteNodeNetworkList"
+    },
+    "remotePodNetworks": {
+     "target": "com.amazonaws.eks#RemotePodNetworkList"
+    }
+   }
+  },
+  "com.amazonaws.eks#RemoteNetworkConfigResponse": {
+   "type": "structure",
+   "members": {
+    "remoteNodeNetworks": {
+     "target": "com.amazonaws.eks#RemoteNodeNetworkList"
+    },
+    "remotePodNetworks": {
+     "target": "com.amazonaws.eks#RemotePodNetworkList"
+    }
+   }
+  },
+  "com.amazonaws.eks#RemoteNodeNetwork": {
+   "type": "structure",
+   "members": {
+    "cidrs": {
+     "target": "com.amazonaws.eks#StringList"
+    }
+   }
+  },
+  "com.amazonaws.eks#RemoteNodeNetworkList": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.eks#RemoteNodeNetwork"
+   },
+   "traits": {
+    "smithy.api#length": {
+     "min": 0,
+     "max": 1
+    }
+   }
+  },
+  "com.amazonaws.eks#RemotePodNetwork": {
+   "type": "structure",
+   "members": {
+    "cidrs": {
+     "target": "com.amazonaws.eks#StringList"
+    }
+   }
+  },
+  "com.amazonaws.eks#RemotePodNetworkList": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.eks#RemotePodNetwork"
+   },
+   "traits": {
+    "smithy.api#length": {
+     "min": 0,
+     "max": 1
+    }
+   }
+  },
+  "com.amazonaws.eks#RepairAction": {
+   "type": "enum",
+   "members": {
+    "Replace": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Replace"
+     }
+    },
+    "Reboot": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Reboot"
+     }
+    },
+    "NoAction": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "NoAction"
+     }
+    }
+   }
+  },
+  "com.amazonaws.eks#ResourceInUseException": {
+   "type": "structure",
+   "members": {
+    "clusterName": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "nodegroupName": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "addonName": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "message": {
+     "target": "com.amazonaws.eks#String"
+    }
+   },
+   "traits": {
+    "smithy.api#error": "client",
+    "smithy.api#httpError": 409
+   }
+  },
+  "com.amazonaws.eks#ResourceLimitExceededException": {
+   "type": "structure",
+   "members": {
+    "clusterName": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "nodegroupName": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "subscriptionId": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "message": {
+     "target": "com.amazonaws.eks#String"
+    }
+   },
+   "traits": {
+    "smithy.api#error": "client",
+    "smithy.api#httpError": 400
+   }
+  },
+  "com.amazonaws.eks#ResourceNotFoundException": {
+   "type": "structure",
+   "members": {
+    "clusterName": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "nodegroupName": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "fargateProfileName": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "addonName": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "subscriptionId": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "message": {
+     "target": "com.amazonaws.eks#String"
+    }
+   },
+   "traits": {
+    "smithy.api#error": "client",
+    "smithy.api#httpError": 404
+   }
+  },
+  "com.amazonaws.eks#ResourceWeight": {
+   "type": "structure",
+   "members": {
+    "name": {
+     "target": "com.amazonaws.eks#ResourceWeightName"
+    },
+    "weight": {
+     "target": "com.amazonaws.eks#ResourceWeightValue"
+    }
+   }
+  },
+  "com.amazonaws.eks#ResourceWeightList": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.eks#ResourceWeight"
+   },
+   "traits": {
+    "smithy.api#length": {
+     "min": 0,
+     "max": 100
+    }
+   }
+  },
+  "com.amazonaws.eks#ResourceWeightName": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 1,
+     "max": 253
+    }
+   }
+  },
+  "com.amazonaws.eks#ResourceWeightValue": {
+   "type": "integer",
+   "traits": {
+    "smithy.api#range": {
+     "min": 1,
+     "max": 100
+    }
+   }
+  },
+  "com.amazonaws.eks#ScoringStrategy": {
+   "type": "structure",
+   "members": {
+    "type": {
+     "target": "com.amazonaws.eks#ScoringStrategyType"
+    },
+    "resources": {
+     "target": "com.amazonaws.eks#ResourceWeightList"
+    }
+   }
+  },
+  "com.amazonaws.eks#ScoringStrategyType": {
+   "type": "enum",
+   "members": {
+    "LEAST_ALLOCATED": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "LeastAllocated"
+     }
+    },
+    "MOST_ALLOCATED": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "MostAllocated"
+     }
+    }
+   }
+  },
+  "com.amazonaws.eks#ServerException": {
+   "type": "structure",
+   "members": {
+    "clusterName": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "nodegroupName": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "addonName": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "subscriptionId": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "message": {
+     "target": "com.amazonaws.eks#String"
+    }
+   },
+   "traits": {
+    "smithy.api#error": "server",
+    "smithy.api#httpError": 500
+   }
+  },
+  "com.amazonaws.eks#ServiceNodePortRange": {
+   "type": "structure",
+   "members": {
+    "minPort": {
+     "target": "com.amazonaws.eks#Integer",
+     "traits": {
+      "smithy.api#default": 0
+     }
+    },
+    "maxPort": {
+     "target": "com.amazonaws.eks#Integer",
+     "traits": {
+      "smithy.api#default": 0
+     }
+    }
+   }
+  },
+  "com.amazonaws.eks#ServiceUnavailableException": {
+   "type": "structure",
+   "members": {
+    "message": {
+     "target": "com.amazonaws.eks#String"
+    }
+   },
+   "traits": {
+    "smithy.api#error": "server",
+    "smithy.api#httpError": 503
+   }
+  },
+  "com.amazonaws.eks#SpreadLevel": {
+   "type": "enum",
+   "members": {
+    "HOST": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "host"
+     }
+    },
+    "RACK": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "rack"
+     }
+    }
+   }
+  },
+  "com.amazonaws.eks#StorageConfigRequest": {
+   "type": "structure",
+   "members": {
+    "blockStorage": {
+     "target": "com.amazonaws.eks#BlockStorage"
+    }
+   }
+  },
+  "com.amazonaws.eks#StorageConfigResponse": {
+   "type": "structure",
+   "members": {
+    "blockStorage": {
+     "target": "com.amazonaws.eks#BlockStorage"
+    }
+   }
+  },
+  "com.amazonaws.eks#String": {
+   "type": "string"
+  },
+  "com.amazonaws.eks#StringList": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.eks#String"
+   }
+  },
+  "com.amazonaws.eks#SupportType": {
+   "type": "enum",
+   "members": {
+    "STANDARD": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "STANDARD"
+     }
+    },
+    "EXTENDED": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "EXTENDED"
+     }
+    }
+   }
+  },
+  "com.amazonaws.eks#TagKey": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 1,
+     "max": 128
+    }
+   }
+  },
+  "com.amazonaws.eks#TagMap": {
+   "type": "map",
+   "key": {
+    "target": "com.amazonaws.eks#TagKey"
+   },
+   "value": {
+    "target": "com.amazonaws.eks#TagValue"
+   },
+   "traits": {
+    "smithy.api#length": {
+     "min": 1,
+     "max": 50
+    }
+   }
+  },
+  "com.amazonaws.eks#TagValue": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 0,
+     "max": 256
+    }
+   }
+  },
+  "com.amazonaws.eks#Taint": {
+   "type": "structure",
+   "members": {
+    "key": {
+     "target": "com.amazonaws.eks#taintKey"
+    },
+    "value": {
+     "target": "com.amazonaws.eks#taintValue"
+    },
+    "effect": {
+     "target": "com.amazonaws.eks#TaintEffect"
+    }
+   }
+  },
+  "com.amazonaws.eks#TaintEffect": {
+   "type": "enum",
+   "members": {
+    "NO_SCHEDULE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "NO_SCHEDULE"
+     }
+    },
+    "NO_EXECUTE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "NO_EXECUTE"
+     }
+    },
+    "PREFER_NO_SCHEDULE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "PREFER_NO_SCHEDULE"
+     }
+    }
+   }
+  },
+  "com.amazonaws.eks#TerminatedPodGcThresholdValue": {
+   "type": "integer",
+   "traits": {
+    "smithy.api#range": {
+     "min": 1,
+     "max": 1000000
+    }
+   }
+  },
+  "com.amazonaws.eks#ThrottlingException": {
+   "type": "structure",
+   "members": {
+    "clusterName": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "message": {
+     "target": "com.amazonaws.eks#String"
+    }
+   },
+   "traits": {
+    "smithy.api#error": "client",
+    "smithy.api#httpError": 429
+   }
+  },
+  "com.amazonaws.eks#Timestamp": {
+   "type": "timestamp"
+  },
+  "com.amazonaws.eks#Update": {
+   "type": "structure",
+   "members": {
+    "id": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "status": {
+     "target": "com.amazonaws.eks#UpdateStatus"
+    },
+    "type": {
+     "target": "com.amazonaws.eks#UpdateType"
+    },
+    "params": {
+     "target": "com.amazonaws.eks#UpdateParams"
+    },
+    "createdAt": {
+     "target": "com.amazonaws.eks#Timestamp"
+    },
+    "errors": {
+     "target": "com.amazonaws.eks#ErrorDetails"
+    },
+    "cancellation": {
+     "target": "com.amazonaws.eks#Cancellation"
+    }
+   }
+  },
+  "com.amazonaws.eks#UpdateAccessConfigRequest": {
+   "type": "structure",
+   "members": {
+    "authenticationMode": {
+     "target": "com.amazonaws.eks#AuthenticationMode"
+    }
+   }
+  },
+  "com.amazonaws.eks#UpdateAccessEntry": {
+   "type": "operation",
+   "input": {
+    "target": "com.amazonaws.eks#UpdateAccessEntryRequest"
+   },
+   "output": {
+    "target": "com.amazonaws.eks#UpdateAccessEntryResponse"
+   },
+   "errors": [
+    {
+     "target": "com.amazonaws.eks#InvalidParameterException"
+    },
+    {
+     "target": "com.amazonaws.eks#InvalidRequestException"
+    },
+    {
+     "target": "com.amazonaws.eks#ResourceNotFoundException"
+    },
+    {
+     "target": "com.amazonaws.eks#ServerException"
+    }
+   ],
+   "traits": {
+    "smithy.api#http": {
+     "method": "POST",
+     "uri": "/clusters/{clusterName}/access-entries/{principalArn}",
+     "code": 200
+    }
+   }
+  },
+  "com.amazonaws.eks#UpdateAccessEntryRequest": {
+   "type": "structure",
+   "members": {
+    "clusterName": {
+     "target": "com.amazonaws.eks#String",
+     "traits": {
+      "smithy.api#httpLabel": {},
+      "smithy.api#required": {}
+     }
+    },
+    "principalArn": {
+     "target": "com.amazonaws.eks#String",
+     "traits": {
+      "smithy.api#httpLabel": {},
+      "smithy.api#required": {}
+     }
+    },
+    "kubernetesGroups": {
+     "target": "com.amazonaws.eks#StringList"
+    },
+    "clientRequestToken": {
+     "target": "com.amazonaws.eks#String",
+     "traits": {
+      "smithy.api#idempotencyToken": {}
+     }
+    },
+    "username": {
+     "target": "com.amazonaws.eks#String"
+    }
+   },
+   "traits": {
+    "smithy.api#input": {}
+   }
+  },
+  "com.amazonaws.eks#UpdateAccessEntryResponse": {
+   "type": "structure",
+   "members": {
+    "accessEntry": {
+     "target": "com.amazonaws.eks#AccessEntry"
+    }
+   },
+   "traits": {
+    "smithy.api#output": {}
+   }
+  },
+  "com.amazonaws.eks#UpdateClusterConfig": {
+   "type": "operation",
+   "input": {
+    "target": "com.amazonaws.eks#UpdateClusterConfigRequest"
+   },
+   "output": {
+    "target": "com.amazonaws.eks#UpdateClusterConfigResponse"
+   },
+   "errors": [
+    {
+     "target": "com.amazonaws.eks#ClientException"
+    },
+    {
+     "target": "com.amazonaws.eks#InvalidParameterException"
+    },
+    {
+     "target": "com.amazonaws.eks#InvalidRequestException"
+    },
+    {
+     "target": "com.amazonaws.eks#ResourceInUseException"
+    },
+    {
+     "target": "com.amazonaws.eks#ResourceNotFoundException"
+    },
+    {
+     "target": "com.amazonaws.eks#ServerException"
+    },
+    {
+     "target": "com.amazonaws.eks#ThrottlingException"
+    }
+   ],
+   "traits": {
+    "smithy.api#http": {
+     "method": "POST",
+     "uri": "/clusters/{name}/update-config",
+     "code": 200
+    }
+   }
+  },
+  "com.amazonaws.eks#UpdateClusterConfigRequest": {
+   "type": "structure",
+   "members": {
+    "name": {
+     "target": "com.amazonaws.eks#String",
+     "traits": {
+      "smithy.api#httpLabel": {},
+      "smithy.api#required": {}
+     }
+    },
+    "resourcesVpcConfig": {
+     "target": "com.amazonaws.eks#VpcConfigRequest"
+    },
+    "logging": {
+     "target": "com.amazonaws.eks#Logging"
+    },
+    "clientRequestToken": {
+     "target": "com.amazonaws.eks#String",
+     "traits": {
+      "smithy.api#idempotencyToken": {}
+     }
+    },
+    "accessConfig": {
+     "target": "com.amazonaws.eks#UpdateAccessConfigRequest"
+    },
+    "upgradePolicy": {
+     "target": "com.amazonaws.eks#UpgradePolicyRequest"
+    },
+    "zonalShiftConfig": {
+     "target": "com.amazonaws.eks#ZonalShiftConfigRequest"
+    },
+    "computeConfig": {
+     "target": "com.amazonaws.eks#ComputeConfigRequest"
+    },
+    "kubernetesNetworkConfig": {
+     "target": "com.amazonaws.eks#KubernetesNetworkConfigRequest"
+    },
+    "storageConfig": {
+     "target": "com.amazonaws.eks#StorageConfigRequest"
+    },
+    "remoteNetworkConfig": {
+     "target": "com.amazonaws.eks#RemoteNetworkConfigRequest"
+    },
+    "deletionProtection": {
+     "target": "com.amazonaws.eks#BoxedBoolean"
+    },
+    "controlPlaneScalingConfig": {
+     "target": "com.amazonaws.eks#ControlPlaneScalingConfig"
+    },
+    "kubeApiServerConfig": {
+     "target": "com.amazonaws.eks#KubeApiServerConfigRequest"
+    },
+    "kubeSchedulerConfig": {
+     "target": "com.amazonaws.eks#KubeSchedulerConfigRequest"
+    },
+    "kubeControllerManagerConfig": {
+     "target": "com.amazonaws.eks#KubeControllerManagerConfigRequest"
+    }
+   },
+   "traits": {
+    "smithy.api#input": {}
+   }
+  },
+  "com.amazonaws.eks#UpdateClusterConfigResponse": {
+   "type": "structure",
+   "members": {
+    "update": {
+     "target": "com.amazonaws.eks#Update"
+    }
+   },
+   "traits": {
+    "smithy.api#output": {}
+   }
+  },
+  "com.amazonaws.eks#UpdateLabelsPayload": {
+   "type": "structure",
+   "members": {
+    "addOrUpdateLabels": {
+     "target": "com.amazonaws.eks#labelsMap"
+    },
+    "removeLabels": {
+     "target": "com.amazonaws.eks#labelsKeyList"
+    }
+   }
+  },
+  "com.amazonaws.eks#UpdateNodegroupConfig": {
+   "type": "operation",
+   "input": {
+    "target": "com.amazonaws.eks#UpdateNodegroupConfigRequest"
+   },
+   "output": {
+    "target": "com.amazonaws.eks#UpdateNodegroupConfigResponse"
+   },
+   "errors": [
+    {
+     "target": "com.amazonaws.eks#ClientException"
+    },
+    {
+     "target": "com.amazonaws.eks#InvalidParameterException"
+    },
+    {
+     "target": "com.amazonaws.eks#InvalidRequestException"
+    },
+    {
+     "target": "com.amazonaws.eks#ResourceInUseException"
+    },
+    {
+     "target": "com.amazonaws.eks#ResourceNotFoundException"
+    },
+    {
+     "target": "com.amazonaws.eks#ServerException"
+    }
+   ],
+   "traits": {
+    "smithy.api#http": {
+     "method": "POST",
+     "uri": "/clusters/{clusterName}/node-groups/{nodegroupName}/update-config",
+     "code": 200
+    }
+   }
+  },
+  "com.amazonaws.eks#UpdateNodegroupConfigRequest": {
+   "type": "structure",
+   "members": {
+    "clusterName": {
+     "target": "com.amazonaws.eks#String",
+     "traits": {
+      "smithy.api#httpLabel": {},
+      "smithy.api#required": {}
+     }
+    },
+    "nodegroupName": {
+     "target": "com.amazonaws.eks#String",
+     "traits": {
+      "smithy.api#httpLabel": {},
+      "smithy.api#required": {}
+     }
+    },
+    "labels": {
+     "target": "com.amazonaws.eks#UpdateLabelsPayload"
+    },
+    "taints": {
+     "target": "com.amazonaws.eks#UpdateTaintsPayload"
+    },
+    "scalingConfig": {
+     "target": "com.amazonaws.eks#NodegroupScalingConfig"
+    },
+    "updateConfig": {
+     "target": "com.amazonaws.eks#NodegroupUpdateConfig"
+    },
+    "nodeRepairConfig": {
+     "target": "com.amazonaws.eks#NodeRepairConfig"
+    },
+    "warmPoolConfig": {
+     "target": "com.amazonaws.eks#WarmPoolConfig"
+    },
+    "clientRequestToken": {
+     "target": "com.amazonaws.eks#String",
+     "traits": {
+      "smithy.api#idempotencyToken": {}
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#input": {}
+   }
+  },
+  "com.amazonaws.eks#UpdateNodegroupConfigResponse": {
+   "type": "structure",
+   "members": {
+    "update": {
+     "target": "com.amazonaws.eks#Update"
+    }
+   },
+   "traits": {
+    "smithy.api#output": {}
+   }
+  },
+  "com.amazonaws.eks#UpdateParam": {
+   "type": "structure",
+   "members": {
+    "type": {
+     "target": "com.amazonaws.eks#UpdateParamType"
+    },
+    "value": {
+     "target": "com.amazonaws.eks#String"
+    }
+   }
+  },
+  "com.amazonaws.eks#UpdateParamType": {
+   "type": "enum",
+   "members": {
+    "VERSION": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Version"
+     }
+    },
+    "PLATFORM_VERSION": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "PlatformVersion"
+     }
+    },
+    "ENDPOINT_PRIVATE_ACCESS": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "EndpointPrivateAccess"
+     }
+    },
+    "ENDPOINT_PUBLIC_ACCESS": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "EndpointPublicAccess"
+     }
+    },
+    "CLUSTER_LOGGING": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "ClusterLogging"
+     }
+    },
+    "DESIRED_SIZE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "DesiredSize"
+     }
+    },
+    "LABELS_TO_ADD": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "LabelsToAdd"
+     }
+    },
+    "LABELS_TO_REMOVE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "LabelsToRemove"
+     }
+    },
+    "TAINTS_TO_ADD": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "TaintsToAdd"
+     }
+    },
+    "TAINTS_TO_REMOVE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "TaintsToRemove"
+     }
+    },
+    "MAX_SIZE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "MaxSize"
+     }
+    },
+    "MIN_SIZE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "MinSize"
+     }
+    },
+    "RELEASE_VERSION": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "ReleaseVersion"
+     }
+    },
+    "PUBLIC_ACCESS_CIDRS": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "PublicAccessCidrs"
+     }
+    },
+    "LAUNCH_TEMPLATE_NAME": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "LaunchTemplateName"
+     }
+    },
+    "LAUNCH_TEMPLATE_VERSION": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "LaunchTemplateVersion"
+     }
+    },
+    "IDENTITY_PROVIDER_CONFIG": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "IdentityProviderConfig"
+     }
+    },
+    "ENCRYPTION_CONFIG": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "EncryptionConfig"
+     }
+    },
+    "ADDON_VERSION": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "AddonVersion"
+     }
+    },
+    "SERVICE_ACCOUNT_ROLE_ARN": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "ServiceAccountRoleArn"
+     }
+    },
+    "RESOLVE_CONFLICTS": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "ResolveConflicts"
+     }
+    },
+    "MAX_UNAVAILABLE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "MaxUnavailable"
+     }
+    },
+    "MAX_UNAVAILABLE_PERCENTAGE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "MaxUnavailablePercentage"
+     }
+    },
+    "NODE_REPAIR_ENABLED": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "NodeRepairEnabled"
+     }
+    },
+    "UPDATE_STRATEGY": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "UpdateStrategy"
+     }
+    },
+    "CONFIGURATION_VALUES": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "ConfigurationValues"
+     }
+    },
+    "SECURITY_GROUPS": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "SecurityGroups"
+     }
+    },
+    "SUBNETS": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Subnets"
+     }
+    },
+    "AUTHENTICATION_MODE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "AuthenticationMode"
+     }
+    },
+    "POD_IDENTITY_ASSOCIATIONS": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "PodIdentityAssociations"
+     }
+    },
+    "UPGRADE_POLICY": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "UpgradePolicy"
+     }
+    },
+    "ZONAL_SHIFT_CONFIG": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "ZonalShiftConfig"
+     }
+    },
+    "COMPUTE_CONFIG": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "ComputeConfig"
+     }
+    },
+    "STORAGE_CONFIG": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "StorageConfig"
+     }
+    },
+    "KUBERNETES_NETWORK_CONFIG": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "KubernetesNetworkConfig"
+     }
+    },
+    "REMOTE_NETWORK_CONFIG": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "RemoteNetworkConfig"
+     }
+    },
+    "DELETION_PROTECTION": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "DeletionProtection"
+     }
+    },
+    "NODE_REPAIR_CONFIG": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "NodeRepairConfig"
+     }
+    },
+    "ROLE_ARN": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "RoleArn"
+     }
+    },
+    "ROLE_MAPPINGS_TO_ADD_OR_UPDATE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "RoleMappingsToAddOrUpdate"
+     }
+    },
+    "ROLE_MAPPINGS_TO_REMOVE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "RoleMappingsToRemove"
+     }
+    },
+    "NETWORK_ACCESS": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "NetworkAccess"
+     }
+    },
+    "VENDED_LOGS": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "VendedLogs"
+     }
+    },
+    "UPDATED_TIER": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "UpdatedTier"
+     }
+    },
+    "PREVIOUS_TIER": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "PreviousTier"
+     }
+    },
+    "ENABLE_CROSS_NAMESPACE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "EnableCrossNamespace"
+     }
+    },
+    "DISABLED_SERVICES": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "DisabledServices"
+     }
+    },
+    "WARM_POOL_ENABLED": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "WarmPoolEnabled"
+     }
+    },
+    "WARM_POOL_MAX_GROUP_PREPARED_CAPACITY": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "WarmPoolMaxGroupPreparedCapacity"
+     }
+    },
+    "WARM_POOL_MIN_SIZE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "WarmPoolMinSize"
+     }
+    },
+    "WARM_POOL_STATE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "WarmPoolState"
+     }
+    },
+    "WARM_POOL_REUSE_ON_SCALE_IN": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "WarmPoolReuseOnScaleIn"
+     }
+    },
+    "CONTROL_PLANE_EGRESS_MODE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "ControlPlaneEgressMode"
+     }
+    },
+    "KUBE_API_SERVER_CONFIG": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "KubeApiServerConfig"
+     }
+    },
+    "KUBE_SCHEDULER_CONFIG": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "KubeSchedulerConfig"
+     }
+    },
+    "KUBE_CONTROLLER_MANAGER_CONFIG": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "KubeControllerManagerConfig"
+     }
+    },
+    "ACTIVE_CERTIFICATE_AUTHORITY": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "ActiveCertificateAuthority"
+     }
+    },
+    "TRUSTED_CERTIFICATE_AUTHORITIES": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "TrustedCertificateAuthorities"
+     }
+    },
+    "CERTIFICATE_AUTHORITY_ID": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "CertificateAuthorityId"
+     }
+    },
+    "SIGNING_STATUS": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "SigningStatus"
+     }
+    }
+   }
+  },
+  "com.amazonaws.eks#UpdateParams": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.eks#UpdateParam"
+   }
+  },
+  "com.amazonaws.eks#UpdateStatus": {
+   "type": "enum",
+   "members": {
+    "IN_PROGRESS": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "InProgress"
+     }
+    },
+    "FAILED": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Failed"
+     }
+    },
+    "CANCELLED": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Cancelled"
+     }
+    },
+    "SUCCESSFUL": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Successful"
+     }
+    }
+   }
+  },
+  "com.amazonaws.eks#UpdateTaintsPayload": {
+   "type": "structure",
+   "members": {
+    "addOrUpdateTaints": {
+     "target": "com.amazonaws.eks#taintsList"
+    },
+    "removeTaints": {
+     "target": "com.amazonaws.eks#taintsList"
+    }
+   }
+  },
+  "com.amazonaws.eks#UpdateType": {
+   "type": "enum",
+   "members": {
+    "VERSION_UPDATE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "VersionUpdate"
+     }
+    },
+    "ENDPOINT_ACCESS_UPDATE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "EndpointAccessUpdate"
+     }
+    },
+    "LOGGING_UPDATE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "LoggingUpdate"
+     }
+    },
+    "CONFIG_UPDATE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "ConfigUpdate"
+     }
+    },
+    "ASSOCIATE_IDENTITY_PROVIDER_CONFIG": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "AssociateIdentityProviderConfig"
+     }
+    },
+    "DISASSOCIATE_IDENTITY_PROVIDER_CONFIG": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "DisassociateIdentityProviderConfig"
+     }
+    },
+    "ASSOCIATE_ENCRYPTION_CONFIG": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "AssociateEncryptionConfig"
+     }
+    },
+    "ADDON_UPDATE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "AddonUpdate"
+     }
+    },
+    "VPC_CONFIG_UPDATE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "VpcConfigUpdate"
+     }
+    },
+    "ACCESS_CONFIG_UPDATE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "AccessConfigUpdate"
+     }
+    },
+    "UPGRADE_POLICY_UPDATE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "UpgradePolicyUpdate"
+     }
+    },
+    "ZONAL_SHIFT_CONFIG_UPDATE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "ZonalShiftConfigUpdate"
+     }
+    },
+    "AUTO_MODE_UPDATE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "AutoModeUpdate"
+     }
+    },
+    "REMOTE_NETWORK_CONFIG_UPDATE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "RemoteNetworkConfigUpdate"
+     }
+    },
+    "DELETION_PROTECTION_UPDATE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "DeletionProtectionUpdate"
+     }
+    },
+    "CAPABILITY_UPDATE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "CapabilityUpdate"
+     }
+    },
+    "CONTROL_PLANE_SCALING_CONFIG_UPDATE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "ControlPlaneScalingConfigUpdate"
+     }
+    },
+    "VENDED_LOGS_UPDATE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "VendedLogsUpdate"
+     }
+    },
+    "CONTROL_PLANE_EGRESS_UPDATE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "ControlPlaneEgressUpdate"
+     }
+    },
+    "VERSION_ROLLBACK": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "VersionRollback"
+     }
+    },
+    "CONTROL_PLANE_COMPONENT_CONFIG_UPDATE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "ControlPlaneComponentConfigUpdate"
+     }
+    },
+    "CERTIFICATE_AUTHORITY_UPDATE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "CertificateAuthorityUpdate"
+     }
+    }
+   }
+  },
+  "com.amazonaws.eks#UpgradePolicyRequest": {
+   "type": "structure",
+   "members": {
+    "supportType": {
+     "target": "com.amazonaws.eks#SupportType"
+    }
+   }
+  },
+  "com.amazonaws.eks#UpgradePolicyResponse": {
+   "type": "structure",
+   "members": {
+    "supportType": {
+     "target": "com.amazonaws.eks#SupportType"
+    }
+   }
+  },
+  "com.amazonaws.eks#VpcConfigRequest": {
+   "type": "structure",
+   "members": {
+    "subnetIds": {
+     "target": "com.amazonaws.eks#StringList"
+    },
+    "securityGroupIds": {
+     "target": "com.amazonaws.eks#StringList"
+    },
+    "endpointPublicAccess": {
+     "target": "com.amazonaws.eks#BoxedBoolean"
+    },
+    "endpointPrivateAccess": {
+     "target": "com.amazonaws.eks#BoxedBoolean"
+    },
+    "publicAccessCidrs": {
+     "target": "com.amazonaws.eks#StringList"
+    },
+    "controlPlaneEgressMode": {
+     "target": "com.amazonaws.eks#ControlPlaneEgressModeType"
+    }
+   }
+  },
+  "com.amazonaws.eks#VpcConfigResponse": {
+   "type": "structure",
+   "members": {
+    "subnetIds": {
+     "target": "com.amazonaws.eks#StringList"
+    },
+    "securityGroupIds": {
+     "target": "com.amazonaws.eks#StringList"
+    },
+    "clusterSecurityGroupId": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "vpcId": {
+     "target": "com.amazonaws.eks#String"
+    },
+    "endpointPublicAccess": {
+     "target": "com.amazonaws.eks#Boolean",
+     "traits": {
+      "smithy.api#default": false
+     }
+    },
+    "endpointPrivateAccess": {
+     "target": "com.amazonaws.eks#Boolean",
+     "traits": {
+      "smithy.api#default": false
+     }
+    },
+    "publicAccessCidrs": {
+     "target": "com.amazonaws.eks#StringList"
+    },
+    "controlPlaneEgressMode": {
+     "target": "com.amazonaws.eks#ControlPlaneEgressModeType"
+    }
+   }
+  },
+  "com.amazonaws.eks#WarmPoolConfig": {
+   "type": "structure",
+   "members": {
+    "enabled": {
+     "target": "com.amazonaws.eks#BoxedBoolean"
+    },
+    "minSize": {
+     "target": "com.amazonaws.eks#ZeroCapacity"
+    },
+    "maxGroupPreparedCapacity": {
+     "target": "com.amazonaws.eks#BoxedInteger"
+    },
+    "poolState": {
+     "target": "com.amazonaws.eks#WarmPoolState"
+    },
+    "reuseOnScaleIn": {
+     "target": "com.amazonaws.eks#BoxedBoolean"
+    }
+   }
+  },
+  "com.amazonaws.eks#WarmPoolState": {
+   "type": "enum",
+   "members": {
+    "STOPPED": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "STOPPED"
+     }
+    },
+    "RUNNING": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "RUNNING"
+     }
+    },
+    "HIBERNATED": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "HIBERNATED"
+     }
+    }
+   }
+  },
+  "com.amazonaws.eks#ZeroCapacity": {
+   "type": "integer",
+   "traits": {
+    "smithy.api#range": {
+     "min": 0
+    }
+   }
+  },
+  "com.amazonaws.eks#ZonalShiftConfigRequest": {
+   "type": "structure",
+   "members": {
+    "enabled": {
+     "target": "com.amazonaws.eks#BoxedBoolean"
+    }
+   }
+  },
+  "com.amazonaws.eks#ZonalShiftConfigResponse": {
+   "type": "structure",
+   "members": {
+    "enabled": {
+     "target": "com.amazonaws.eks#BoxedBoolean"
+    }
+   }
+  },
+  "com.amazonaws.eks#labelKey": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 1,
+     "max": 63
+    }
+   }
+  },
+  "com.amazonaws.eks#labelValue": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 1,
+     "max": 63
+    }
+   }
+  },
+  "com.amazonaws.eks#labelsKeyList": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.eks#String"
+   }
+  },
+  "com.amazonaws.eks#labelsMap": {
+   "type": "map",
+   "key": {
+    "target": "com.amazonaws.eks#labelKey"
+   },
+   "value": {
+    "target": "com.amazonaws.eks#labelValue"
+   }
+  },
+  "com.amazonaws.eks#taintKey": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 1,
+     "max": 63
+    }
+   }
+  },
+  "com.amazonaws.eks#taintValue": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 0,
+     "max": 63
+    }
+   }
+  },
+  "com.amazonaws.eks#taintsList": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.eks#Taint"
+   }
+  }
+ }
+}

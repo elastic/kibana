@@ -24,7 +24,7 @@ import { createAttackDiscoveryCriteriaEvaluator } from './evaluators/attack_disc
 import { createAttackDiscoveryRawLatencyEvaluator } from './evaluators/attack_discovery_raw_latency_evaluator';
 import { skipForGenerateApiMode } from './evaluators/skip_for_generate_api';
 
-const resolveConcurrency = (): number | undefined => {
+export const resolveConcurrency = (): number | undefined => {
   const raw = process.env.ATTACK_DISCOVERY_EVAL_CONCURRENCY;
   if (!raw) return undefined;
   const parsed = Number(raw);

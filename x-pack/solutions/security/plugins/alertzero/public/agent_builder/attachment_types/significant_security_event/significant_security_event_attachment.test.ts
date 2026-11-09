@@ -71,7 +71,7 @@ describe('createSignificantSecurityEventAttachmentDefinition', () => {
     expect(definition.getLabel(withHits)).toBe('3 hits confirm: Suspicious lateral movement');
   });
 
-  it('credits the behavior, not the hit count, when only Tier 2 confirmed the finding', () => {
+  it('credits the behavior, not the hit count, when only Behavior Hunt confirmed the finding', () => {
     const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
     // The entry carries its report's Tier 1 counts, and a clean Tier 1 leaves them at zero.
     const tier2Only = {

@@ -69,6 +69,21 @@ This config will find any import of `@kbn/kitchen-sink` which specifically refer
 
 The auto-fixer here covers the vast majority of import styles in the repository but might not cover everything, including `import * as Namespace from '@kbn/kitchen-sink'`. Imports like this will need to be found and updated manually, though TypeScript should be able to find the vast majority of those.
 
+## Redux store import warnings
+
+`@kbn/imports/restricted_redux_imports` reuses ESLint's built-in `no-restricted-imports` implementation under a separate rule ID so existing import errors remain errors. Kibana configures it at warning severity for `createStore` and `legacy_createStore` imports and re-exports from `redux` and `redux-v4`; prefer `configureStore` from the matching RTK package. Other named Redux imports and valid low-level RTK APIs remain allowed.
+
+As with the built-in rule, namespace imports and wildcard re-exports also warn because they include restricted APIs, even if those APIs are not used. CommonJS calls are not checked. No autofixes are provided.
+
+## Redux Toolkit warnings
+
+The following import-aware rules run at warning severity across JavaScript and TypeScript files. They recognize named imports (including aliases) and namespace imports from both `@reduxjs/toolkit` and `redux-toolkit-v1`. Neither rule requires type-aware parsing or provides autofixes.
+
+- `@kbn/imports/no_redux_toolkit_middleware_spread` flags spreading the result of the default-middleware callback parameter inside an inline `configureStore` middleware callback. Use `.concat()` or `.prepend()` to preserve tuple typing.
+- `@kbn/imports/no_redux_toolkit_state_reassignment` flags standalone assignments to the draft parameter in inline slice reducers, prepared reducers, and builder case/matcher/default reducers. Return replacement state instead. Reducers containing any value return are conservatively skipped, since determining whether an assignment affects the returned value requires control-flow analysis.
+
+These rules skip nested functions and shadowed bindings. Indirect configurations, extracted reducers, CommonJS imports, and RTK's creator-callback slice syntax are not analyzed.
+
 ## `@kbn/imports/no_unused_imports`
 
 This rule finds imports that are unused and provides an auto-fix to remove them. When the linter appears to be running in an editor, as defined by [`helpers/running_in_editor.ts`](src/helpers/running_in_editor.ts), this rule provided suggestions instead of fixes so that the removals are not applied automatically in case you are debugging, returning early, or something else which makes the linter think that the import is unused when it isn't. On CI and in the pre-commit hook though, this fix will be applied automatically.

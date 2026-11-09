@@ -661,12 +661,10 @@ function DiscoverDocumentsComponent({
             maxDocFieldsDisplayed={uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
             externalAdditionalControls={
               approximationApplied ? (
-                <span style={{ marginRight: 4 }}>
-                  <ApproximationBadge
-                    isApproximationApplied
-                    data-test-subj="discoverApproximationApplied"
-                  />
-                </span>
+                <ApproximationBadge
+                  isApproximationApplied
+                  data-test-subj="discoverApproximationApplied"
+                />
               ) : undefined
             }
             renderDocumentView="external"

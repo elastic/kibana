@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG } from '@kbn/significant-events-schema';
+import { KI_FEATURE_DEDUPLICATION_ITERATIONS } from '../../constants';
 import type { DatasetConfig } from '../types';
 
 export const kiFeatureExtraction: DatasetConfig['kiFeatureExtraction'] = [
@@ -445,7 +445,7 @@ export const kiFeatureDeduplication: DatasetConfig['kiFeatureDeduplication'] = [
   {
     input: {
       scenario_id: 'healthy-baseline',
-      iterations: DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG.max_iterations,
+      iterations: KI_FEATURE_DEDUPLICATION_ITERATIONS,
     },
   },
 ];

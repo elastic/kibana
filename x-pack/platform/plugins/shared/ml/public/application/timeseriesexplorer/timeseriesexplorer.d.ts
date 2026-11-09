@@ -33,5 +33,5 @@ interface TimeSeriesExplorerProps {
   }) => void;
 }
 
-// eslint-disable-next-line react/prefer-stateless-function
+// eslint-disable-next-line @kbn/compat/react-prefer-stateless-function
 declare class TimeSeriesExplorer extends React.Component<TimeSeriesExplorerProps> {}

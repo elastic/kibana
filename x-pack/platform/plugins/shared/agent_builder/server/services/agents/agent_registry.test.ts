@@ -59,6 +59,10 @@ const createPersistedProviderMock = (
       configuration: { ...current.configuration, ...update.configuration },
     };
   }),
+  setServiceAccount: jest.fn(
+    async (agentId: string, _serviceAccountId: string | null) =>
+      agents.find((agent) => agent.id === agentId)!
+  ),
   delete: jest.fn(),
   getAccessControl: jest.fn(),
   updateAccessControl: jest.fn(),
@@ -213,6 +217,59 @@ describe('AgentRegistry', () => {
       await registry.update('investigator', update);
 
       expect(persistedProvider.update).toHaveBeenCalledWith('investigator', update);
+    });
+  });
+
+  describe('setServiceAccount', () => {
+    it('hands the binding to the persisted provider', async () => {
+      const agent = createMockedInternalAgent({ id: 'investigator' });
+      const persistedProvider = createPersistedProviderMock([agent]);
+      const registry = createRegistry({ persistedProvider });
+
+      await registry.setServiceAccount('investigator', 'kibana/sa-1');
+
+      expect(persistedProvider.setServiceAccount).toHaveBeenCalledWith(
+        'investigator',
+        'kibana/sa-1'
+      );
+    });
+
+    it('refuses a built-in agent', async () => {
+      const registry = createRegistry({
+        builtinAgents: [createMockedInternalAgent({ id: 'builtin', readonly: true })],
+      });
+
+      await expect(registry.setServiceAccount('builtin', 'kibana/sa-1')).rejects.toThrow(
+        'read-only'
+      );
+    });
+  });
+
+  describe('get for a run as a service account', () => {
+    it('passes the account through to the persisted provider', async () => {
+      const agent = createMockedInternalAgent({ id: 'investigator' });
+      const persistedProvider = createPersistedProviderMock([agent]);
+      const registry = createRegistry({ persistedProvider });
+
+      await registry.get('investigator', { access: 'use', runAs: 'kibana/sa-1' });
+
+      expect(persistedProvider.get).toHaveBeenCalledWith('investigator', {
+        access: 'use',
+        runAs: 'kibana/sa-1',
+      });
+    });
+
+    it('resolves the agent without the access-checked existence lookup', async () => {
+      const agent = createMockedInternalAgent({ id: 'investigator' });
+      const persistedProvider = createPersistedProviderMock([agent]);
+      // A private agent looks absent to the account, which holds no read access to it.
+      persistedProvider.has.mockResolvedValue(false);
+      const registry = createRegistry({ persistedProvider });
+
+      await expect(
+        registry.get('investigator', { access: 'use', runAs: 'kibana/sa-1' })
+      ).resolves.toMatchObject({ id: 'investigator' });
+      expect(persistedProvider.has).not.toHaveBeenCalled();
     });
   });
 });

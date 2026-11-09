@@ -25,6 +25,7 @@ import {
   fetchInChunks,
 } from './esql';
 import type { ColumnQuerySpec, EnrichedFields, SortPageContext } from './types';
+import { isMissingIndexError } from '../../is_missing_index_error';
 
 /** Each column writes its own queries, since each needs a different trick to be fast. */
 export interface ComputedColumn {
@@ -216,17 +217,24 @@ const fetchSearchedPage = async (
   );
 };
 
-export const fetchComputedColumnSortPage = (
+export const fetchComputedColumnSortPage = async (
   column: ComputedColumn,
   args: QueryArgs,
   ctx: SortPageContext
 ): Promise<Row[]> => {
-  // searchExpression is KQL and can't go after STATS or LOOKUP JOIN
-  if (args.searchExpression) return fetchSearchedPage(column, args, ctx);
+  try {
+    // searchExpression is KQL and can't go after STATS or LOOKUP JOIN
+    if (args.searchExpression) return await fetchSearchedPage(column, args, ctx);
 
-  return isEmptyFirst(column, args)
-    ? fetchPageEmptyFirst(column, args, ctx)
-    : fetchPageEmptyLast(column, args, ctx);
+    return await (isEmptyFirst(column, args)
+      ? fetchPageEmptyFirst(column, args, ctx)
+      : fetchPageEmptyLast(column, args, ctx));
+  } catch (error) {
+    // No index for the column yet (a space that has never run a detection rule has no alerts
+    // index): every entity's value is empty, as for Anomalies without ML jobs.
+    if (isMissingIndexError(error)) return fetchEmptyColumnSortPage(column, args, ctx);
+    throw error;
+  }
 };
 
 /** A column without data anywhere: every entity in view is empty, so they come by id. */
