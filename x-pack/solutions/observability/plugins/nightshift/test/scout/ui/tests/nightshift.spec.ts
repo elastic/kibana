@@ -74,7 +74,7 @@ test.describe(
 
       await page.getByTestId('nightshiftSettingsTab-investigations').click();
       await expect(page).toHaveURL(/\/app\/nightshift\/settings\/investigations/);
-      await expect(page.getByTestId('nightshiftRunLimitEnabledSwitch-investigation')).toBeVisible();
+      await expect(page.getByTestId('nightshiftRunLimitsEnabledSwitch')).toBeVisible();
     });
 
     test('opens Detections on Events and hides Signals outside developer mode', async ({

@@ -10,6 +10,7 @@ import { useActorRef, useSelector } from '@xstate/react';
 import { i18n } from '@kbn/i18n';
 import { STREAMS_DEFAULT_UNIT_ID } from '@kbn/streams-plugin/common';
 import { useKibana } from '../../../hooks/use_kibana';
+import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 import type { SourceApiKeyGenerationDeps } from './source_api_keys';
 import { createSourceEnvironmentLoader, type SourceEnvironmentLoader } from './source_environment';
 import type { SourceApiKeyPrivileges } from './source_api_keys';
@@ -181,13 +182,17 @@ export const useSourceApiKeyGenerationDeps = (): SourceApiKeyGenerationDeps => {
       start: { streams },
     },
   } = useKibana();
+  const {
+    v2: { manage: canManage },
+  } = useStreamsPrivileges();
 
   return useMemo(
     () => ({
       streamsRepositoryClient: streams.streamsRepositoryClient,
       unitId: STREAMS_DEFAULT_UNIT_ID,
+      canManage,
     }),
-    [streams.streamsRepositoryClient]
+    [canManage, streams.streamsRepositoryClient]
   );
 };
 
