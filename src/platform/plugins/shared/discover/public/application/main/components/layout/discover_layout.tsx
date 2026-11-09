@@ -38,10 +38,7 @@ import { BehaviorSubject } from 'rxjs';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
-import {
-  KBN_RECESSED_GLASS_CLASS,
-  kbnRecessedGlassCss,
-} from '@kbn/css-utils/public/recessed_glass_css';
+import { kbnRecessedGlassCss } from '@kbn/css-utils/public/recessed_glass_css';
 import { TABS_BAR_HEIGHT } from '@kbn/unified-tabs';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useDiscoverCustomizationContext } from '../../../../customizations';
@@ -423,7 +420,7 @@ export function DiscoverLayout() {
   return (
     <EuiPage
       // class is used in tests and other styles; recessed glass lets panel gutters show through
-      className={`dscPage ${KBN_RECESSED_GLASS_CLASS}`}
+      className="dscPage"
       data-test-subj="dscPage"
       data-fetch-counter={fetchCounter.current}
       direction="column"

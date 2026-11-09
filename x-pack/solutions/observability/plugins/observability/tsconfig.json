@@ -15,8 +15,6 @@
   "kbn_references": [
     "@kbn/entity-inventory-app-plugin",
     "@kbn/rule-data-utils",
-    "@kbn/css-utils",
-    "@kbn/core-chrome-browser-hooks",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/i18n",
     "@kbn/deeplinks-observability",

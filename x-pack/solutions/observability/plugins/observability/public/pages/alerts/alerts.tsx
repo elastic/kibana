@@ -7,14 +7,8 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { BrushEndListener, XYBrushEvent } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiPageSection, EuiSpacer, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiFlexGroup, EuiFlexItem, EuiPageSection, EuiSpacer } from '@elastic/eui';
 import { AppHeader, type AppHeaderBadge } from '@kbn/app-header';
-import { useChromeStyle } from '@kbn/core-chrome-browser-hooks';
-import {
-  KBN_RECESSED_GLASS_CLASS,
-  kbnRecessedGlassCss,
-} from '@kbn/css-utils/public/recessed_glass_css';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import type { BoolQuery, Filter } from '@kbn/es-query';
@@ -106,8 +100,6 @@ function InternalAlertsPage() {
     },
   } = data;
   const { ObservabilityPageTemplate } = usePluginContext();
-  const euiThemeContext = useEuiTheme();
-  const isGlass = useChromeStyle() !== 'classic';
   const [filterControls, setFilterControls] = useState<Filter[]>();
   const [controlApi, setControlApi] = useState<FilterGroupHandler | undefined>();
   const alertSearchBarStateProps = useAlertSearchBarStateContainer(ALERTS_URL_STORAGE_KEY, {
@@ -322,11 +314,6 @@ function InternalAlertsPage() {
       <ObservabilityPageTemplate
         data-test-subj="alertsPageWithData"
         pageSectionProps={{ paddingSize: 'none' }}
-        // POC: outside classic chrome, the alerts page sits on the recessed glass surface.
-        className={isGlass ? KBN_RECESSED_GLASS_CLASS : undefined}
-        panelled={isGlass ? false : undefined}
-        minHeight={isGlass ? 'var(--kbn-application--content-height, 0)' : undefined}
-        css={isGlass ? css(kbnRecessedGlassCss(euiThemeContext)) : undefined}
       >
         <AppHeader
           title={i18n.translate('xpack.observability.alertsTitle', { defaultMessage: 'Alerts' })}

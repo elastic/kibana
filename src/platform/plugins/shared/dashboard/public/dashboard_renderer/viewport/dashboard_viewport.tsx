@@ -14,10 +14,7 @@ import { EuiPortal, type UseEuiTheme } from '@elastic/eui';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import {
-  KBN_RECESSED_GLASS_CLASS,
-  kbnRecessedGlassCss,
-} from '@kbn/css-utils/public/recessed_glass_css';
+import { kbnRecessedGlassCss } from '@kbn/css-utils/public/recessed_glass_css';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
 import { DashboardGrid } from '../grid';
@@ -62,7 +59,7 @@ export const DashboardViewport = () => {
   return (
     <div
       // POC: recessed glass for empty + populated canvas (margins toggle lives on the grid).
-      className={classNames('dshDashboardViewportWrapper', KBN_RECESSED_GLASS_CLASS, {
+      className={classNames('dshDashboardViewportWrapper', {
         'dshDashboardViewportWrapper--isFullscreen': fullScreenMode,
       })}
       css={styles.wrapper}

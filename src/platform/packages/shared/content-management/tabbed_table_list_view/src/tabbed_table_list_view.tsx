@@ -11,10 +11,7 @@ import type { EuiPageHeaderProps } from '@elastic/eui';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import {
-  KBN_RECESSED_GLASS_CLASS,
-  kbnRecessedGlassCss,
-} from '@kbn/css-utils/public/recessed_glass_css';
+import { kbnRecessedGlassCss } from '@kbn/css-utils/public/recessed_glass_css';
 import React, { useCallback, useEffect, useState } from 'react';
 import type { TableListViewTableProps } from '@kbn/content-management-table-list-view-table';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
@@ -108,7 +105,6 @@ export const TabbedTableListView = ({
     <KibanaPageTemplate
       panelled={false}
       restrictWidth={false}
-      className={KBN_RECESSED_GLASS_CLASS}
       css={css(kbnRecessedGlassCss(euiThemeContext))}
       data-test-subj={pageDataTestSubject}
     >

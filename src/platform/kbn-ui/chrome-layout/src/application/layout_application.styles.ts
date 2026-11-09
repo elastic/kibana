@@ -48,6 +48,8 @@ const root = (appearance: LayoutAppearance = 'plain'): EmotionFn => {
       css`
         // POC: the frame is the recessed glass surface; the ambient field shows through it.
         background-color: transparent;
+        // Recessed surfaces inside the frame (kbnRecessedGlassCss in @kbn/css-utils) defer to this glass.
+        --kbn-recessed-surface: transparent;
         border-radius: ${euiTheme.border.radius.frame};
 
         // A pseudo-element carries the backdrop filter so the wrapper doesn't become the
@@ -59,7 +61,7 @@ const root = (appearance: LayoutAppearance = 'plain'): EmotionFn => {
           z-index: -1;
           border-radius: inherit;
           pointer-events: none;
-          // POC: mirrors kbnRecessedGlassCss in @kbn/css-utils; move to an EUI token.
+          // POC: approximates the Figma glass (Frost, Light -45°) at 77% recessed fill; move to an EUI token.
           background-color: ${transparentize(euiTheme.colors.backgroundBaseRecessed, 0.77)};
           backdrop-filter: blur(1px);
 

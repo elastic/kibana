@@ -10,11 +10,8 @@
 import type { UseEuiTheme } from '@elastic/eui';
 import { transparentize } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { kbnRecessedGlassCss } from '@kbn/css-utils/public/recessed_glass_css';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import {
-  kbnRecessedGlassCss,
-  kbnRecessedGlassResetCss,
-} from '@kbn/css-utils/public/recessed_glass_css';
 import { EDITOR_SCROLLBAR_WIDTH_PX, FOCUSED_STEP_DECORATION_INSET_PX } from './constants';
 
 export const EXECUTION_YAML_SNAPSHOT_CLASS = 'execution-yaml-snapshot';
@@ -211,7 +208,6 @@ const editorStyleMap = {
       minHeight: 0,
       ...kbnRecessedGlassCss(euiThemeContext),
       [`&.${EXECUTION_YAML_SNAPSHOT_CLASS}`]: {
-        ...kbnRecessedGlassResetCss,
         backgroundColor: euiThemeContext.euiTheme.colors.backgroundBasePlain,
       },
     }),

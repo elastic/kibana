@@ -15,15 +15,11 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useChromeStyle } from '@kbn/core-chrome-browser-hooks';
-import {
-  KBN_RECESSED_GLASS_CLASS,
-  kbnRecessedGlassCss,
-} from '@kbn/css-utils/public/recessed_glass_css';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { AppHeader } from '@kbn/app-header';
 import type { AppMenuConfig, AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
+import { useChromeStyle } from '@kbn/core-chrome-browser-hooks';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowsSearchParams } from '@kbn/workflows';
 import { WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID } from '@kbn/workflows/common/constants';
@@ -104,7 +100,7 @@ export function WorkflowsPage() {
   const showManagedWorkflowsFilter = Boolean(
     isManagedWorkflowsSettingEnabled && canReadWorkflow && canReadManagedWorkflow
   );
-  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = useEuiTheme();
   const isClassicChrome = useChromeStyle() === 'classic';
   const location = useLocation();
 
@@ -193,15 +189,9 @@ export function WorkflowsPage() {
   return (
     <EuiPageTemplate
       offset={0}
-      // POC: project chrome puts the listing on the recessed glass surface; classic keeps the plain fill.
-      css={
-        isClassicChrome
-          ? { backgroundColor: euiThemeContext.euiTheme.colors.backgroundBasePlain }
-          : css(kbnRecessedGlassCss(euiThemeContext))
-      }
-      className={isClassicChrome ? undefined : KBN_RECESSED_GLASS_CLASS}
+      // POC: project chrome's frame is the recessed glass surface; classic keeps the plain fill.
+      css={isClassicChrome ? { backgroundColor: euiTheme.colors.backgroundBasePlain } : undefined}
       panelled={isClassicChrome ? undefined : false}
-      minHeight={isClassicChrome ? undefined : 'var(--kbn-application--content-height, 0)'}
       data-test-subj="workflowsPage"
     >
       <AppHeader

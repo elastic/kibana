@@ -10,7 +10,6 @@
 import { EuiFlexGroup, useEuiTheme, useResizeObserver } from '@elastic/eui';
 import { css } from '@emotion/react';
 import classnames from 'classnames';
-import { KBN_RECESSED_GLASS_CLASS } from '@kbn/css-utils/public/recessed_glass_css';
 import throttle from 'lodash/throttle';
 import type { SchemasSettings } from 'monaco-yaml';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -987,7 +986,6 @@ export const WorkflowYAMLEditor = ({
           ]}
           className={classnames({
             [EXECUTION_YAML_SNAPSHOT_CLASS]: isExecutionYaml,
-            [KBN_RECESSED_GLASS_CLASS]: !isExecutionYaml,
           })}
         >
           <YamlEditor
