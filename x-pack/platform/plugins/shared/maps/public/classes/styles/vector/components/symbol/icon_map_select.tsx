@@ -47,9 +47,7 @@ interface State {
 
 export class IconMapSelect extends Component<Props, State> {
   state = {
-    customIconStops: this.props.customIconStops
-      ? this.props.customIconStops
-      : DEFAULT_ICON_STOPS,
+    customIconStops: this.props.customIconStops ? this.props.customIconStops : DEFAULT_ICON_STOPS,
   };
 
   _onMapSelect = (selectedValue: string) => {
