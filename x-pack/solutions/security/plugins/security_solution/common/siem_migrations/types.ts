@@ -16,6 +16,11 @@ import type {
   RuleMigrationRule,
 } from './model/rule_migration.gen';
 import type { SiemMigrationStatus } from './constants';
+import type {
+  OriginalWorkflowVendor,
+  WorkflowMigration,
+  WorkflowMigrationWorkflow,
+} from './model/workflow_migration.gen';
 
 export interface SiemMigrationFilters {
   status?: SiemMigrationStatus | SiemMigrationStatus[];
@@ -30,12 +35,22 @@ export interface SiemMigrationFilters {
   isEligibleForTranslation?: boolean;
 }
 
-export type SiemMigrationVendor = OriginalRuleVendor | OriginalDashboardVendor;
+export type SiemMigrationVendor =
+  | OriginalRuleVendor
+  | OriginalDashboardVendor
+  | OriginalWorkflowVendor;
 
-export type MigrationDocument = RuleMigration | DashboardMigration;
-export type ItemDocument = RuleMigrationRule | DashboardMigrationDashboard;
+export type MigrationDocument = RuleMigration | DashboardMigration | WorkflowMigration;
+export type ItemDocument =
+  | RuleMigrationRule
+  | DashboardMigrationDashboard
+  | WorkflowMigrationWorkflow;
 export type OriginalItem<I> = I extends RuleMigrationRule
   ? RuleMigrationRule['original_rule']
+  : I extends DashboardMigrationDashboard
+  ? DashboardMigrationDashboard['original_dashboard']
+  : I extends WorkflowMigrationWorkflow
+  ? WorkflowMigrationWorkflow['original_workflow']
   : DashboardMigrationDashboard['original_dashboard'];
 
-export type MigrationType = 'rule' | 'dashboard';
+export type MigrationType = 'rule' | 'dashboard' | 'workflow';

@@ -18,6 +18,7 @@ import {
   CASE_REPORTERS_URL,
   CASE_SAVED_OBJECT,
   CASE_TAGS_URL,
+  CASE_TEMPLATE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
   CASES_INTERNAL_URL,
   CASES_URL,
@@ -285,6 +286,46 @@ export const seedLegacyCommentAttachment = ({
 }: SeedAttachmentArgs & { attributes: Record<string, unknown> }): Promise<string> =>
   seedAttachmentRow({ ...args, id, soType: CASE_COMMENT_SAVED_OBJECT, attributes });
 
+/** Writes user actions for a case straight to the index, so a test can reach the user action cap quickly. */
+export const seedUserActions = async ({
+  es,
+  caseId,
+  count,
+  owner = 'securitySolutionFixture',
+}: {
+  es: Client;
+  caseId: string;
+  count: number;
+  owner?: string;
+}): Promise<void> => {
+  const operations = Array.from({ length: count }, (_, index) => [
+    {
+      index: {
+        _index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+        _id: `${CASE_USER_ACTION_SAVED_OBJECT}:seeded-${caseId}-${index}`,
+      },
+    },
+    {
+      type: CASE_USER_ACTION_SAVED_OBJECT,
+      [CASE_USER_ACTION_SAVED_OBJECT]: {
+        action: 'update',
+        type: 'tags',
+        payload: { tags: [`seeded-${index}`] },
+        owner,
+        created_at: '2024-01-01T00:00:00.000Z',
+        created_by: { username: 'elastic', full_name: null, email: null },
+      },
+      references: [{ type: CASE_SAVED_OBJECT, id: caseId, name: 'associated-cases' }],
+      namespaces: ['default'],
+      updated_at: '2024-01-01T00:00:00.000Z',
+      coreMigrationVersion: '8.8.0',
+    },
+  ]).flat();
+
+  const response = await es.bulk({ operations, refresh: 'wait_for' });
+  expect(response.errors).to.be(false);
+};
+
 /** Checks the index directly, since the read APIs cannot return a corrupted row. */
 export const unifiedAttachmentExists = async ({
   es,
@@ -317,6 +358,48 @@ export const deleteMappings = async (es: Client): Promise<void> => {
     refresh: true,
     body: {},
     conflicts: 'proceed',
+  });
+};
+
+/**
+ * Replaces the YAML definition of the latest version of a template directly in Elasticsearch.
+ * Use it to set up old data that the API no longer accepts.
+ */
+export const storeTemplateDefinition = async ({
+  es,
+  templateId,
+  definition,
+}: {
+  es: Client;
+  templateId: string;
+  definition: string;
+}): Promise<void> => {
+  await es.indices.refresh({ index: ALERTING_CASES_SAVED_OBJECT_INDEX });
+  const { hits } = await es.search({
+    index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    size: 2,
+    query: {
+      bool: {
+        filter: [
+          { term: { type: CASE_TEMPLATE_SAVED_OBJECT } },
+          { term: { [`${CASE_TEMPLATE_SAVED_OBJECT}.templateId`]: templateId } },
+          { term: { [`${CASE_TEMPLATE_SAVED_OBJECT}.isLatest`]: true } },
+        ],
+      },
+    },
+  });
+
+  if (hits.hits.length !== 1) {
+    throw new Error(
+      `Expected one latest version of template ${templateId}, found ${hits.hits.length}`
+    );
+  }
+
+  await es.update({
+    index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    id: hits.hits[0]._id as string,
+    doc: { [CASE_TEMPLATE_SAVED_OBJECT]: { definition } },
+    refresh: true,
   });
 };
 

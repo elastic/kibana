@@ -11,7 +11,7 @@ import type {
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
+import { isMaximumResponseSizeExceededError, isRequestAbortedError } from '@kbn/es-errors';
 import { MAX_ES_RESPONSE_SIZE_BYTES } from '../../constants';
 import { applyFrozenTierExclusion } from '../data_tiers';
 import { applyLimit } from './apply_limit';
@@ -20,6 +20,31 @@ export interface EsqlResponse {
   columns: EsqlEsqlColumnInfo[];
   values: FieldValue[][];
 }
+
+const buildTimeoutMessage = (timeoutMs: number | undefined): string => {
+  const waited = timeoutMs !== undefined ? ` after ${Math.ceil(timeoutMs / 1000)}s` : '';
+  return (
+    `Stopped waiting for the ES|QL query${waited}. ` +
+    `Do not re-run it or a near variant; narrow the time range or use a more selective filter.`
+  );
+};
+
+/**
+ * Thrown by `executeEsql` when a query is given up on because of its `timeoutMs` deadline or the
+ * client's request timeout. Lets callers tell "too expensive to run" apart from other failures.
+ */
+export class EsqlExecutionTimeoutError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'EsqlExecutionTimeoutError';
+  }
+}
+
+export const isEsqlExecutionTimeoutError = (err: unknown): err is EsqlExecutionTimeoutError =>
+  err instanceof EsqlExecutionTimeoutError;
+
+const isTimeoutError = (err: unknown): boolean =>
+  err instanceof Error && err.name === 'TimeoutError';
 
 /**
  * Execute an ES|QL query and returns the response.
@@ -36,6 +61,13 @@ export interface EsqlResponse {
  * query text.
  *
  * `dropNullColumns` maps to Elasticsearch `drop_null_columns` (default `true`).
+ *
+ * `timeoutMs` sets a wall-clock deadline for this call through an abort signal. The client keeps
+ * retrying transient transport failures (connection errors, 502/503/504) within that deadline; it
+ * never retries its own request timeout. The deadline can only shorten the wait: the deployment's
+ * request timeout still applies. When `timeoutMs` is set, a deadline hit or a client `TimeoutError`
+ * is rethrown as an `EsqlExecutionTimeoutError` that tells the agent not to re-run the query
+ * unchanged; without it, errors are rethrown unchanged.
  */
 export const executeEsql = async ({
   query,
@@ -44,6 +76,7 @@ export const executeEsql = async ({
   filter,
   dropNullColumns = true,
   includeFrozen = false,
+  timeoutMs,
   esClient,
 }: {
   query: string;
@@ -52,10 +85,12 @@ export const executeEsql = async ({
   filter?: QueryDslQueryContainer;
   dropNullColumns?: boolean;
   includeFrozen?: boolean;
+  timeoutMs?: number;
   esClient: ElasticsearchClient;
 }): Promise<EsqlResponse> => {
   const effectiveQuery = limit !== undefined ? applyLimit(query, limit) : query;
   const effectiveFilter = applyFrozenTierExclusion(filter, includeFrozen);
+  const timeoutSignal = timeoutMs !== undefined ? AbortSignal.timeout(timeoutMs) : undefined;
 
   try {
     const response = await esClient.esql.query(
@@ -66,7 +101,10 @@ export const executeEsql = async ({
         ...(params && params.length > 0 ? { params: params as unknown as FieldValue[] } : {}),
         ...(effectiveFilter ? { filter: effectiveFilter } : {}),
       },
-      { maxResponseSize: MAX_ES_RESPONSE_SIZE_BYTES }
+      {
+        maxResponseSize: MAX_ES_RESPONSE_SIZE_BYTES,
+        ...(timeoutSignal ? { signal: timeoutSignal } : {}),
+      }
     );
     return {
       columns: response.columns,
@@ -78,6 +116,14 @@ export const executeEsql = async ({
         `ES|QL query response exceeded the maximum allowed size of 20MB. ` +
           `Try narrowing your query with tighter filters, a LIMIT clause, or fewer fields.`
       );
+    }
+    if (timeoutSignal) {
+      const deadlineHit = timeoutSignal.aborted && isRequestAbortedError(err);
+      if (deadlineHit || isTimeoutError(err)) {
+        throw new EsqlExecutionTimeoutError(
+          buildTimeoutMessage(deadlineHit ? timeoutMs : undefined)
+        );
+      }
     }
     throw err;
   }

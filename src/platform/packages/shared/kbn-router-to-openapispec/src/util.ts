@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// eslint-disable-next-line import/no-extraneous-dependencies
+// eslint-disable-next-line @kbn/compat/import-no-extraneous-dependencies
 import { OpenAPIV3 } from 'openapi-types';
 import {
   getRequestValidation,

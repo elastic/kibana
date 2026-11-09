@@ -11,13 +11,14 @@ import {
   MAX_ID_LENGTH,
   MAX_TEXT_LENGTH,
   MAX_TITLE_LENGTH,
+  SIGNIFICANT_EVENTS_ALERT_SOURCE,
 } from '@kbn/significant-events-schema';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { serverUnavailable } from '@hapi/boom';
+import { isBoom, serverUnavailable } from '@hapi/boom';
+import pRetry, { AbortError } from 'p-retry';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import { telemetryTargetNameSchema } from '../../common/telemetry_targets';
 import type { NightshiftSettingsLocator } from '../../common/locators';
 import { notifyInvestigationQuotaReached } from '../lib/notifications/notify_investigation_quota_reached';
 import {
@@ -37,13 +38,14 @@ import type {
 import { fetchInvestigationAlertSnapshots } from '../lib/alert_snapshot';
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../saved_objects/automation_saved_object';
 import type { NightshiftAutomationAttributes } from '../lib/automations/types';
+import { MAX_AUTOMATION_INSTRUCTIONS_LENGTH } from '../../common/automation_limits';
 import { createAutomationBudget } from '../lib/automations/automation_budget';
 import { AutomationDailyLimitReachedError, InvestigationQuotaDeniedError } from '../client/errors';
 import type { AutomationBudget } from '../types';
+import type { NightshiftTelemetryClient } from '../telemetry';
 
 const inputSchema = lazySchema(() =>
   z.object({
-    telemetry_target: telemetryTargetNameSchema.optional(),
     automation_id: z
       .string()
       .min(1)
@@ -88,6 +90,13 @@ const inputSchema = lazySchema(() =>
       .max(MAX_TEXT_LENGTH)
       .optional()
       .describe('Caller-supplied prompt for the investigation agent'),
+    instructions: z
+      .string()
+      .max(MAX_AUTOMATION_INSTRUCTIONS_LENGTH)
+      .optional()
+      .describe(
+        'Additional operator guidance for this investigation round; empty means no additional guidance'
+      ),
     source_ids: z
       .array(z.string().max(MAX_ID_LENGTH))
       .max(MAX_ARRAY_LENGTH)
@@ -136,6 +145,8 @@ const inputSchema = lazySchema(() =>
   })
 );
 
+const ALERT_VISIBILITY_RETRY_OPTIONS = { retries: 4, factor: 1, minTimeout: 500 } as const;
+
 const resolveAlerts = async ({
   subjectId,
   request,
@@ -153,11 +164,19 @@ const resolveAlerts = async ({
   if (!alertsClient) {
     throw serverUnavailable('Alert lookup is unavailable');
   }
-  return fetchInvestigationAlertSnapshots({
-    alertsClient,
-    alertIds: [subjectId],
-    ...getEpisodeLookup(request, spaceId),
-  });
+  const episodeLookup = getEpisodeLookup(request, spaceId);
+  return pRetry(async () => {
+    try {
+      return await fetchInvestigationAlertSnapshots({
+        alertsClient,
+        alertIds: [subjectId],
+        ...episodeLookup,
+      });
+    } catch (error) {
+      if (isBoom(error, 404)) throw error;
+      throw new AbortError(error instanceof Error ? error : String(error));
+    }
+  }, ALERT_VISIBILITY_RETRY_OPTIONS);
 };
 
 const toSubjectId = ({
@@ -190,7 +209,8 @@ export const triggerInvestigationStepDefinition = (
   getAlertsClient: GetAlertsClient,
   getEpisodeLookup: GetEpisodeLookup,
   getActions: () => ActionsPluginStart | undefined,
-  settingsLocator: NightshiftSettingsLocator
+  settingsLocator: NightshiftSettingsLocator,
+  telemetry: NightshiftTelemetryClient
 ) =>
   createServerStepDefinition({
     id: 'nightshift.triggerInvestigation',
@@ -251,6 +271,17 @@ export const triggerInvestigationStepDefinition = (
               getEpisodeLookup,
             })
           : undefined;
+      const alertTitle = alerts?.flatMap((snapshot) => {
+        const dataTitle =
+          snapshot.alert_version === 'v2' && snapshot.source === SIGNIFICANT_EVENTS_ALERT_SOURCE
+            ? snapshot.data?.title
+            : undefined;
+        return typeof dataTitle === 'string' && dataTitle.length > 0
+          ? dataTitle.slice(0, MAX_TITLE_LENGTH)
+          : [];
+      })[0];
+      const title =
+        input.title && input.title !== subjectId ? input.title : alertTitle ?? input.title;
       try {
         const result = await client.start(
           {
@@ -259,10 +290,12 @@ export const triggerInvestigationStepDefinition = (
               id: subjectId,
               summary: input.summary,
             },
-            title: input.title,
-            ...(input.telemetry_target ? { telemetry_target: input.telemetry_target } : {}),
+            title,
             trigger_type: input.trigger_type ?? 'automatic',
             message: input.message,
+            instructions:
+              input.instructions ??
+              (input.automation_id && input.subject_type === 'alert' ? input.message : undefined),
             source_ids: input.source_ids,
             context: alerts
               ? { alerts }
@@ -273,7 +306,12 @@ export const triggerInvestigationStepDefinition = (
             notificationDestinations: input.notificationDestinations,
             slack_thread: input.slack_thread,
           },
-          { automationBudget }
+          {
+            automationBudget,
+            automationId: input.automation_id,
+            // A Slack thread subject means a Slack message started the run.
+            entryPoint: input.subject_type === 'slack_thread' ? 'slack' : 'automation',
+          }
         );
         return { output: result };
       } catch (error) {
@@ -281,21 +319,29 @@ export const triggerInvestigationStepDefinition = (
           context.logger.info(
             `Skipped investigation of ${input.subject_type}/${subjectId} for automation ${input.automation_id}: daily limit of ${error.limit} reached`
           );
+          telemetry.reportInvestigationSkipped({
+            trigger: 'automation',
+            origin: input.subject_type,
+            automation_id: input.automation_id,
+            skip_reason: 'automation_daily_limit',
+          });
           return { output: { skip_reason: 'daily_limit' as const, daily_limit: error.limit } };
         }
         if (error instanceof InvestigationQuotaDeniedError) {
           context.logger.info(
-            `Skipped investigation of ${input.subject_type}/${subjectId}: global investigation limit reached`
+            `Skipped investigation of ${input.subject_type}/${subjectId}: ${error.message}`
           );
           if (input.slack_thread) {
             await notifyInvestigationQuotaReached({
               getSoClient: () => getAutomationsSoClient(request, spaceId),
               getActions,
+              deniedBy: error.deniedBy,
               request,
               spaceId,
               slackThread: input.slack_thread,
               settingsLocator,
               kibanaUrl,
+              limit: error.limit,
               signal: context.abortSignal,
               logger: context.logger,
             });
