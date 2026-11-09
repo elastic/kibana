@@ -55,6 +55,7 @@ import type {
   UnifiedReferenceAttachmentPayload,
 } from '../../../common/types/domain/attachment/v2';
 import type { AttachmentSavedObjectTransformedV2 } from '../types/attachments_v2';
+import { withCaseObservablesPreview } from '../observables_preview';
 
 type CaseCommentModelParams = Omit<CasesClientArgs, 'authorization'>;
 type CommentRequestWithId = Array<{ id: string } & UnifiedAttachmentPayload>;
@@ -754,12 +755,15 @@ export class CaseCommentModel {
           comments: comments as SavedObjectsFindResponse<AttachmentAttributes>,
         }) ?? 0;
 
-      const caseResponse = {
-        comments: flattenAttachmentSavedObjects(comments.saved_objects),
-        totalAlerts,
-        totalEvents,
-        ...this.formatForEncoding(comments.total),
-      };
+      const caseResponse = await withCaseObservablesPreview(
+        {
+          comments: flattenAttachmentSavedObjects(comments.saved_objects),
+          totalAlerts,
+          totalEvents,
+          ...this.formatForEncoding(comments.total),
+        },
+        this.params.services.observableService
+      );
 
       return decodeOrThrowZod(CaseSchema)(caseResponse);
     } catch (error) {
