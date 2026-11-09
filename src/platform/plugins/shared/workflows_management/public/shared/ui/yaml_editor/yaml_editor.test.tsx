@@ -501,6 +501,26 @@ describe('YamlEditor', () => {
       ) as HTMLTextAreaElement;
       expect(textarea.value).toBe(newPropValue);
     });
+
+    it('should hand a new prop value to the editor in the same commit, before parent effects run', () => {
+      // Regression: parent effects (e.g. execution step decorations) paint line ranges derived
+      // from the new value; the editor must already hold that value when they run.
+      const valuesSeenByParentEffect: string[] = [];
+      const Parent = ({ value }: { value: string }) => {
+        React.useEffect(() => {
+          const textarea = document.querySelector<HTMLTextAreaElement>(
+            '[data-testid="code-editor-textarea"]'
+          );
+          valuesSeenByParentEffect.push(textarea?.value ?? '');
+        }, [value]);
+        return <YamlEditor value={value} onChange={jest.fn()} schemas={null} />;
+      };
+
+      const { rerender } = render(<Parent value="test: short" />);
+      rerender(<Parent value="test: long" />);
+
+      expect(valuesSeenByParentEffect).toEqual(['test: short', 'test: long']);
+    });
   });
 
   describe('onSyncStateChange callback', () => {
