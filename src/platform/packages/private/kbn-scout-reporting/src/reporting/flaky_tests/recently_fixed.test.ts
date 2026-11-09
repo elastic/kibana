@@ -20,12 +20,16 @@ const setupBuilds = (
 ): SetupBuilds => ({
   branch,
   setup,
-  builds: [...pattern].map((outcome, index) => ({
-    buildId: `build-${first + index}`,
-    buildNumber: first + index,
-    failed: outcome === 'x',
-    ranAt: new Date(FIRST_BUILD_AT + (first + index) * HOUR_MS),
-  })),
+  builds: [...pattern].map((outcome, index) => {
+    const ranAt = new Date(FIRST_BUILD_AT + (first + index) * HOUR_MS);
+    return {
+      buildId: `build-${first + index}`,
+      buildNumber: first + index,
+      failed: outcome === 'x',
+      ranAt,
+      failedAt: outcome === 'x' ? ranAt : undefined,
+    };
+  }),
 });
 
 describe('lastFailures', () => {
@@ -41,6 +45,19 @@ describe('lastFailures', () => {
       { branch: 'main', at: new Date(FIRST_BUILD_AT + 5 * HOUR_MS), cleanBuilds: 3 },
       { branch: '9.6', at: new Date(FIRST_BUILD_AT + 100 * HOUR_MS), cleanBuilds: 2 },
     ]);
+  });
+
+  it('times a failure by the run that failed, which a retry can make later than the next builds', () => {
+    const { builds, ...setup } = setupBuilds('x...');
+    const [retried, ...later] = builds;
+    const failedAt = new Date(FIRST_BUILD_AT + 3.5 * HOUR_MS);
+
+    expect(
+      lastFailures([{ ...setup, builds: [{ ...retried, failedAt }, ...later] }], new Set())
+    ).toEqual(
+      // only build 4 ran after the retry
+      [{ branch: 'main', at: failedAt, cleanBuilds: 1 }]
+    );
   });
 
   it('leaves out the given builds, and branches without a failure left', () => {

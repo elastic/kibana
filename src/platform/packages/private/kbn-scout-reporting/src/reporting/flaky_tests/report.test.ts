@@ -111,12 +111,16 @@ const HOUR_MS = 60 * 60 * 1000;
 const setupBuilds = (pattern: string, first = 1, branch = 'main'): SetupBuilds => ({
   branch,
   setup: 'kibana-on-merge a.config.ts stateful-classic local',
-  builds: [...pattern].map((outcome, index) => ({
-    buildId: `build-${first + index}`,
-    buildNumber: first + index,
-    failed: outcome === 'x',
-    ranAt: new Date(FIRST_BUILD_AT + (first + index) * HOUR_MS),
-  })),
+  builds: [...pattern].map((outcome, index) => {
+    const ranAt = new Date(FIRST_BUILD_AT + (first + index) * HOUR_MS);
+    return {
+      buildId: `build-${first + index}`,
+      buildNumber: first + index,
+      failed: outcome === 'x',
+      ranAt,
+      failedAt: outcome === 'x' ? ranAt : undefined,
+    };
+  }),
 });
 
 const branchCounts = (branch: string, builds: number, failedBuilds: number) => ({

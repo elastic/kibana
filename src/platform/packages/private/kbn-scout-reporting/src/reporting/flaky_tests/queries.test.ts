@@ -475,7 +475,8 @@ describe('buildSetupBuildsQuery', () => {
         '" ", COALESCE(test_run.target.mode, "-"), " ", COALESCE(test_run.target.type, "-"))'
     );
     expect(query).toContain(
-      'STATS failed = MAX(failed), ran_at = MIN(@timestamp) ' +
+      'STATS failed = MAX(failed), ran_at = MIN(@timestamp), ' +
+        'failed_at = MAX(CASE(failed == 1, @timestamp, NULL)) ' +
         'BY test.id, buildkite.branch, setup, buildkite.build.id, buildkite.build.number'
     );
   });
@@ -499,6 +500,7 @@ describe('fetchSetupBuilds', () => {
     build_number: buildNumber,
     failed,
     ran_at: `2026-10-01T${String(buildNumber).padStart(2, '0')}:00:00.000Z`,
+    failed_at: failed ? `2026-10-01T${String(buildNumber).padStart(2, '0')}:30:00.000Z` : null,
   });
 
   it('queries a few tests at a time and keys the builds by test and setup, oldest first', async () => {
@@ -550,6 +552,7 @@ describe('fetchSetupBuilds', () => {
             buildNumber: 12,
             failed: true,
             ranAt: new Date('2026-10-01T12:00:00.000Z'),
+            failedAt: new Date('2026-10-01T12:30:00.000Z'),
           },
         ],
       },
@@ -562,6 +565,7 @@ describe('fetchSetupBuilds', () => {
             buildNumber: 11,
             failed: true,
             ranAt: new Date('2026-10-01T11:00:00.000Z'),
+            failedAt: new Date('2026-10-01T11:30:00.000Z'),
           },
         ],
       },

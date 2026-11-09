@@ -25,6 +25,8 @@ export interface LastFailure {
   cleanBuilds: number;
 }
 
+const latest = (a?: Date, b?: Date): Date | undefined => (!a || (b && b > a) ? b : a);
+
 /**
  * Per branch, the test's last failure and the builds that ran it since, leaving out the given
  * builds. Only the setups where the test failed are read, so the clean builds of the others are
@@ -34,28 +36,28 @@ export const lastFailures = (
   setups: readonly SetupBuilds[],
   excludedBuildIds: ReadonlySet<string>
 ): LastFailure[] => {
-  const byBranch = new Map<string, Map<string, { ranAt: Date; failed: boolean }>>();
+  const byBranch = new Map<string, Map<string, { ranAt: Date; failedAt?: Date }>>();
   for (const { branch, builds } of setups) {
     const branchBuilds = byBranch.get(branch) ?? new Map();
-    for (const { buildId, ranAt, failed } of builds) {
+    for (const { buildId, ranAt, failedAt } of builds) {
       if (excludedBuildIds.has(buildId)) continue;
       const existing = branchBuilds.get(buildId);
       branchBuilds.set(buildId, {
         ranAt: existing && existing.ranAt < ranAt ? existing.ranAt : ranAt,
-        failed: (existing?.failed ?? false) || failed,
+        failedAt: latest(existing?.failedAt, failedAt),
       });
     }
     byBranch.set(branch, branchBuilds);
   }
 
   return [...byBranch].flatMap(([branch, builds]) => {
-    const failedAt = [...builds.values()]
-      .filter(({ failed }) => failed)
-      .map(({ ranAt }) => ranAt.getTime());
-    if (failedAt.length === 0) {
+    const failures = [...builds.values()].flatMap(({ failedAt }) =>
+      failedAt ? [failedAt.getTime()] : []
+    );
+    if (failures.length === 0) {
       return [];
     }
-    const at = Math.max(...failedAt);
+    const at = Math.max(...failures);
     const cleanBuilds = [...builds.values()].filter(({ ranAt }) => ranAt.getTime() > at).length;
     return [{ branch, at: new Date(at), cleanBuilds }];
   });
