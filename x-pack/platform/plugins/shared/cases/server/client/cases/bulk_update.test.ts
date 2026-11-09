@@ -31,6 +31,7 @@ import {
 import { mockCaseComments, mockCases } from '../../mocks';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
 import { Operations } from '../../authorization';
+import type { UserActionEvent } from '../../services/user_actions/types';
 import { bulkUpdate, getOperationsToAuthorize } from './bulk_update';
 
 describe('update', () => {
@@ -2624,6 +2625,30 @@ describe('update', () => {
     });
 
     describe('Validate max user actions per page', () => {
+      const createUserAction = (
+        type: string,
+        payload: Record<string, unknown> = {}
+      ): UserActionEvent => ({
+        parameters: {
+          attributes: {
+            action: 'update',
+            type,
+            payload,
+            created_at: '2026-10-28T00:00:00.000Z',
+            created_by: { username: 'elastic', full_name: null, email: null },
+            owner: SECURITY_SOLUTION_OWNER,
+          },
+          references: [],
+        },
+        eventDetails: {
+          getMessage: () => 'message',
+          action: 'update',
+          descriptiveAction: 'case_user_action_update',
+          savedObjectId: mockCases[0].id,
+          savedObjectType: 'cases',
+        },
+      });
+
       beforeEach(() => {
         jest.clearAllMocks();
         clientArgsMock.services.caseService.getCases.mockResolvedValue({
@@ -2644,9 +2669,8 @@ describe('update', () => {
           }
         );
 
-        // @ts-ignore: only the array length matters here
         clientArgsMock.services.userActionService.creator.buildUserActions.mockReturnValue({
-          [mockCases[0].id]: [1],
+          [mockCases[0].id]: [createUserAction('title')],
         });
 
         clientArgsMock.services.caseService.patchCases.mockResolvedValue({
@@ -2677,9 +2701,12 @@ describe('update', () => {
           }
         );
 
-        // @ts-ignore: only the array length matters here
         clientArgsMock.services.userActionService.creator.buildUserActions.mockReturnValue({
-          [mockCases[0].id]: [1, 2, 3],
+          [mockCases[0].id]: [
+            createUserAction('title'),
+            createUserAction('tags'),
+            createUserAction('description'),
+          ],
         });
 
         await expect(
@@ -2709,10 +2736,13 @@ describe('update', () => {
           }
         );
 
-        // @ts-ignore: only the array length matters here
         clientArgsMock.services.userActionService.creator.buildUserActions.mockReturnValue({
-          [mockCases[0].id]: [1, 2, 3],
-          [mockCases[1].id]: [1],
+          [mockCases[0].id]: [
+            createUserAction('title'),
+            createUserAction('tags'),
+            createUserAction('description'),
+          ],
+          [mockCases[1].id]: [createUserAction('title')],
         });
 
         await expect(
@@ -2731,6 +2761,100 @@ describe('update', () => {
                   title: 'This is supposed to pass',
                 },
               ],
+            },
+            clientArgsMock,
+            casesClientMock
+          )
+        ).rejects.toThrow(
+          `Error: The case with case id ${mockCases[0].id} has reached the limit of ${MAX_USER_ACTIONS_PER_CASE} user actions.`
+        );
+      });
+
+      it.each([MAX_USER_ACTIONS_PER_CASE, MAX_USER_ACTIONS_PER_CASE + 5])(
+        'closes a case that has %s user actions',
+        async (totalUserActions) => {
+          clientArgsMock.services.userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue(
+            { [mockCases[0].id]: totalUserActions }
+          );
+
+          clientArgsMock.services.userActionService.creator.buildUserActions.mockReturnValue({
+            [mockCases[0].id]: [
+              createUserAction('status', {
+                status: CaseStatuses.closed,
+                closeReason: 'false_positive',
+              }),
+            ],
+          });
+
+          clientArgsMock.services.caseService.patchCases.mockResolvedValue({
+            saved_objects: [{ ...mockCases[0] }],
+          });
+
+          await expect(
+            bulkUpdate(
+              {
+                cases: [
+                  {
+                    id: mockCases[0].id,
+                    version: mockCases[0].version ?? '',
+                    status: CaseStatuses.closed,
+                  },
+                ],
+              },
+              clientArgsMock,
+              casesClientMock
+            )
+          ).resolves.not.toThrow();
+        }
+      );
+
+      it('throws when closing a case at the limit also changes another field', async () => {
+        clientArgsMock.services.userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue(
+          { [mockCases[0].id]: MAX_USER_ACTIONS_PER_CASE }
+        );
+
+        clientArgsMock.services.userActionService.creator.buildUserActions.mockReturnValue({
+          [mockCases[0].id]: [
+            createUserAction('status', { status: CaseStatuses.closed }),
+            createUserAction('title'),
+          ],
+        });
+
+        await expect(
+          bulkUpdate(
+            {
+              cases: [
+                {
+                  id: mockCases[0].id,
+                  version: mockCases[0].version ?? '',
+                  status: CaseStatuses.closed,
+                  title: 'This is a test case!!',
+                },
+              ],
+            },
+            clientArgsMock,
+            casesClientMock
+          )
+        ).rejects.toThrow(
+          `Error: The case with case id ${mockCases[0].id} has reached the limit of ${MAX_USER_ACTIONS_PER_CASE} user actions.`
+        );
+      });
+
+      it('throws when moving a case at the limit to in progress', async () => {
+        const status = CaseStatuses['in-progress'];
+
+        clientArgsMock.services.userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue(
+          { [mockCases[0].id]: MAX_USER_ACTIONS_PER_CASE }
+        );
+
+        clientArgsMock.services.userActionService.creator.buildUserActions.mockReturnValue({
+          [mockCases[0].id]: [createUserAction('status', { status })],
+        });
+
+        await expect(
+          bulkUpdate(
+            {
+              cases: [{ id: mockCases[0].id, version: mockCases[0].version ?? '', status }],
             },
             clientArgsMock,
             casesClientMock

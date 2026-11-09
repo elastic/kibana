@@ -13,6 +13,7 @@ import { AlertsTablePage } from './alerts_table';
 import { AgentBuilderPage } from './agent_builder';
 import { AlertDetailsRightPanelPage } from './alert_details_right_panel';
 import { EntityAnalyticsManagementPage } from './entity_analytics_management';
+import { EntityAnalyticsHomePage } from './entity_analytics_home_page';
 import { CspmIntegrationPage } from './cspm_integration_page';
 import { TimelinePage } from './timeline';
 import { DetectionsAttackDiscoveryPage } from './detections_attack_discovery';
@@ -50,6 +51,8 @@ export interface SecurityPageObjects extends PageObjects {
   agentBuilderPage: AgentBuilderPage;
   alertDetailsRightPanelPage: AlertDetailsRightPanelPage;
   entityAnalyticsManagementPage: EntityAnalyticsManagementPage;
+  /** New Entity Analytics home page — Needs attention tiles and entities grid (behind the useNewEntityAnalyticsPage flag). */
+  entityAnalyticsHomePage: EntityAnalyticsHomePage;
   cspmIntegrationPage: CspmIntegrationPage;
   timelinePage: TimelinePage;
   detectionsAttackDiscoveryPage: DetectionsAttackDiscoveryPage;
@@ -106,6 +109,7 @@ export function extendPageObjects(
     agentBuilderPage: createLazyPageObject(AgentBuilderPage, page),
     alertDetailsRightPanelPage: createLazyPageObject(AlertDetailsRightPanelPage, page),
     entityAnalyticsManagementPage: createLazyPageObject(EntityAnalyticsManagementPage, page),
+    entityAnalyticsHomePage: createLazyPageObject(EntityAnalyticsHomePage, page),
     cspmIntegrationPage: createLazyPageObject(CspmIntegrationPage, page),
     timelinePage: createLazyPageObject(TimelinePage, page),
     detectionsAttackDiscoveryPage: createLazyPageObject(

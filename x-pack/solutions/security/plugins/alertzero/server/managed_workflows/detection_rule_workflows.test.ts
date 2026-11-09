@@ -352,6 +352,29 @@ describe('detection rule workflows', () => {
       expect(inputs.actionInput).toBe('${{ steps.draft_creation.output.structured_output.rule }}');
     });
 
+    // A failed diagnosis must reach the analyst and still fail the review: the fallback
+    // posts the error to the investigation, and without `continue` the engine re-throws.
+    it('tells the investigation when the diagnosis fails, and still fails the review', () => {
+      const { steps } = parse(
+        getManagedYaml(ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW_ID)
+      ) as WorkflowYaml;
+      const diagnose = flattenSteps(steps as unknown as NestedStep[]).find(
+        ({ name }) => name === 'diagnose_rule'
+      );
+      const { continue: shouldContinue, fallback } = (diagnose?.['on-failure'] ?? {}) as {
+        continue?: boolean;
+        fallback?: NestedStep[];
+      };
+      const [post] = fallback ?? [];
+
+      expect(shouldContinue).toBeUndefined();
+      expect(post?.type).toBe('ai.conversation.add_user_message');
+      expect(post?.with?.conversation_id).toBe(
+        '{{ steps.create_investigation.output.conversation_id }}'
+      );
+      expect(String(post?.with?.message)).toContain('{{ steps.diagnose_rule.error.message }}');
+    });
+
     // Every change type decides at the proposal gate, which runs the action as
     // the approver.
     it('gates the review through the investigation proposal workflow', () => {
@@ -471,8 +494,9 @@ describe('detection rule workflows', () => {
       const exceptionActionInput = exceptionInputs.actionInput as Record<string, string>;
       expect(exceptionActionInput.rule_id).toBe('{{ inputs.rule_uuid }}');
       // `${{ }}` keeps the entries as objects.
+      // The bounded copy, never the raw agent output.
       expect(exceptionActionInput.entries).toBe(
-        '${{ steps.diagnose_rule.output.structured_output.exception_entries }}'
+        '${{ steps.bound_exception_entries.output.entries_json | json_parse }}'
       );
       expect(manualInputs).not.toHaveProperty('actionWorkflowId');
       expect(manualInputs).not.toHaveProperty('actionInput');
@@ -1266,7 +1290,7 @@ describe('detection rule workflows', () => {
         expect(accepts([])).toBe(false);
         // Only `${{ }}` keeps objects; `{{ }}` renders a string.
         expect(
-          accepts('${{ steps.diagnose_rule.output.structured_output.exception_entries }}')
+          accepts('${{ steps.bound_exception_entries.output.entries_json | json_parse }}')
         ).toBe(false);
       });
 
@@ -1411,11 +1435,11 @@ describe('detection rule workflows', () => {
       // action is offered: an inconclusive preview is reported in the proposal text.
       it('reports an inconclusive backtest without withholding the action', () => {
         const action = reviewSteps.find(({ name }) => name === 'propose_query')!;
-        const compose = reviewSteps.find(({ name }) => name === 'compose_proposal')!;
-        const comment = String((compose.with as Record<string, string>).comment);
+        const backtest = reviewSteps.find(({ name }) => name === 'describe_backtest')!;
+        const comment = String((backtest.with as Record<string, string>).text);
 
         expect(String(action.if)).not.toContain('record_preview_outcome');
-        expect(comment).toContain('{% if steps.can_preview_query_change.output.supported %}');
+        expect(comment).toContain('if steps.can_preview_query_change.output.supported');
         expect(comment).toContain('inconclusive');
         // The unbacktested branch must not promise a manual handoff. The query arm
         // carries the edit-rule action whether or not the preview ran, so approving
@@ -1440,8 +1464,8 @@ describe('detection rule workflows', () => {
       ])(
         'explains why a %s rule with a %s change has no backtest',
         async (type, changeType, reason) => {
-          const compose = reviewSteps.find(({ name }) => name === 'compose_proposal')!;
-          const comment = String((compose.with as Record<string, string>).comment);
+          const backtest = reviewSteps.find(({ name }) => name === 'describe_backtest')!;
+          const comment = String((backtest.with as Record<string, string>).text);
 
           const rendered = await createWorkflowLiquidEngine().parseAndRender(comment, {
             inputs: {},
@@ -1785,8 +1809,8 @@ describe('detection rule workflows', () => {
       });
 
       it('marks capped counts as a floor and never claims a reduction from one', async () => {
-        const compose = reviewSteps.find(({ name }) => name === 'compose_proposal')!;
-        const comment = String((compose.with as Record<string, string>).comment);
+        const backtest = reviewSteps.find(({ name }) => name === 'describe_backtest')!;
+        const comment = String((backtest.with as Record<string, string>).text);
         const report = reviewSteps.find(({ name }) => name === 'report_review_completed')!
           .with as Record<string, string>;
         const outcome = (limits: Record<string, boolean>) => ({
@@ -1868,8 +1892,8 @@ describe('detection rule workflows', () => {
           'no index the Rule Tuning worker can read matches the rule',
         ],
       ])('says why the backtest did not run when %s', async (_scenario, outcome, reason) => {
-        const compose = reviewSteps.find(({ name }) => name === 'compose_proposal')!;
-        const comment = String((compose.with as Record<string, string>).comment);
+        const backtest = reviewSteps.find(({ name }) => name === 'describe_backtest')!;
+        const comment = String((backtest.with as Record<string, string>).text);
 
         const rendered = await createWorkflowLiquidEngine().parseAndRender(comment, {
           inputs: {},
@@ -1997,6 +2021,137 @@ describe('detection rule workflows', () => {
         expect(properties.preview_invocation_count).toEqual(
           expect.objectContaining({ minimum: 1, maximum: 10 })
         );
+      });
+
+      describe('diagnosis schema and exception caps', () => {
+        const diagnose = reviewSteps.find(({ name }) => name === 'diagnose_rule')!;
+        const diagnosisSchema = (diagnose.with as Record<string, unknown>).schema as {
+          type?: string;
+          oneOf: Array<{ properties: Record<string, any> }>;
+        };
+        const exceptionBranch = diagnosisSchema.oneOf.find(
+          ({ properties }) => properties.change_type?.const === 'exception'
+        )!;
+        const bound = reviewSteps.find(({ name }) => name === 'bound_exception_entries')!;
+        const consts = review.consts as Record<string, number>;
+
+        const collectKeys = (node: unknown, key: string): unknown[] =>
+          node && typeof node === 'object'
+            ? Object.entries(node).flatMap(([k, v]) => [
+                ...(k === key ? [v] : []),
+                ...collectKeys(v, key),
+              ])
+            : [];
+
+        const runBound = (entries: unknown[]): Array<Record<string, unknown>> => {
+          const rendered = createWorkflowLiquidEngine().parseAndRenderSync(
+            String((bound.with as Record<string, string>).entries_json),
+            {
+              consts,
+              steps: {
+                diagnose_rule: { output: { structured_output: { exception_entries: entries } } },
+              },
+            }
+          );
+          return JSON.parse(rendered);
+        };
+
+        // Gemini answers 400 to the schema when either cap is present, so the caps
+        // live after parsing instead (see the bound_exception_entries tests below).
+        it('sends no maxItems on exception_entries or on any entry values', () => {
+          const { exception_entries: entries } = exceptionBranch.properties;
+          expect(entries.type).toBe('array');
+          expect(entries).not.toHaveProperty('maxItems');
+          expect(entries.minItems).toBe(1);
+          expect(collectKeys(diagnosisSchema, 'maxItems')).toEqual([5]);
+        });
+
+        // Claude rejects an unwrapped root oneOf, so the root must keep its shape for
+        // the ai.agent wrap-and-pick behaviour.
+        it('keeps the schema root a typeless oneOf', () => {
+          expect(diagnosisSchema).not.toHaveProperty('type');
+          expect(Array.isArray(diagnosisSchema.oneOf)).toBe(true);
+          expect(
+            diagnosisSchema.oneOf.map(({ properties }) => properties.change_type.const)
+          ).toEqual(
+            expect.arrayContaining([
+              'exception',
+              'query',
+              'risk_score',
+              'threshold',
+              'schedule',
+              'manual',
+            ])
+          );
+        });
+
+        it('declares the platform caps as consts', () => {
+          expect(consts.max_exception_entries).toBe(100);
+          expect(consts.max_exception_values).toBe(1000);
+        });
+
+        // bound_exception_entries is a backstop: on overflow, reject_oversized_exception
+        // fails the run first, so these truncations are unreachable in a real run.
+        it('backstop bound_exception_entries truncates entries at consts.max_exception_entries', () => {
+          const oversized = Array.from({ length: consts.max_exception_entries + 25 }, (_, i) => ({
+            field: `host.name.${i}`,
+            operator: 'is',
+            value: `v${i}`,
+          }));
+
+          const result = runBound(oversized);
+
+          expect(result).toHaveLength(consts.max_exception_entries);
+          expect(result[0]).toEqual(oversized[0]);
+          expect(result[result.length - 1]).toEqual(oversized[consts.max_exception_entries - 1]);
+        });
+
+        it('backstop bound_exception_entries truncates values at consts.max_exception_values, keeping order', () => {
+          const values = Array.from(
+            { length: consts.max_exception_values + 40 },
+            (_, i) => `v${i}`
+          );
+
+          const [entry] = runBound([{ field: 'host.name', operator: 'is_one_of', values }]);
+
+          expect(entry.field).toBe('host.name');
+          expect(entry.operator).toBe('is_one_of');
+          expect(entry.values).toEqual(values.slice(0, consts.max_exception_values));
+        });
+
+        it('passes in-bound entries of every operator shape through unchanged', () => {
+          const entries = [
+            { field: 'user.name', operator: 'is', value: 'svc "quoted"' },
+            { field: 'host.name', operator: 'is_not_one_of', values: ['a', 'b\\c'] },
+            { field: 'a.b', operator: 'exists' },
+          ];
+
+          expect(runBound(entries)).toEqual(entries);
+        });
+
+        it('feeds only the bounded entries to every consumer', () => {
+          const raw = 'steps.diagnose_rule.output.structured_output.exception_entries';
+          const consumers = reviewSteps.filter(({ with: w }) =>
+            JSON.stringify(w ?? {}).includes('bound_exception_entries')
+          );
+          expect(consumers.map(({ name }) => name)).toEqual(
+            expect.arrayContaining([
+              'build_exception_filter',
+              'attach_exception',
+              'propose_exception',
+              'describe_exception_change',
+            ])
+          );
+          // check_exception_entries is the overflow gate: it reads the raw entries
+          // to fail the run on overflow, before bound_exception_entries normalizes.
+          const rawUsers = reviewSteps.filter(
+            ({ name, with: w }) =>
+              !['bound_exception_entries', 'check_exception_entries'].includes(name) &&
+              JSON.stringify(w ?? {}).includes(raw)
+          );
+          expect(rawUsers.map(({ name }) => name)).toEqual([]);
+          expect(bound.if).toContain("change_type == 'exception'");
+        });
       });
 
       // security.setAlertTags declares its inputs as a zod union, so a whole-array
@@ -2127,6 +2282,8 @@ describe('detection rule workflows', () => {
       it('reports launches and in-flight reviews instead of decisions', () => {
         const emit = tuningSteps.find(({ name }) => name === 'emit_result')!;
         const outputs = emit.with as Record<string, string>;
+        const readFailure = tuningSteps.find(({ name }) => name === 'resolve_read_failure')!;
+        const { failed: readFailed } = readFailure.with as Record<string, string>;
 
         expect(tuningSteps.map(({ name }) => name)).not.toContain('summarize_decisions');
         expect(Object.keys(outputs).sort()).toEqual([
@@ -2138,9 +2295,10 @@ describe('detection rule workflows', () => {
         ]);
         expect(outputs.reviews_requested).toContain('steps.resolve_fanout_rows.output.rows');
         expect(outputs.reviews_in_flight).toContain('steps.collect_active_rules.output.expected');
-        expect(outputs.harvest_failed).toContain('steps.list_enabled_rules.error != null');
-        expect(outputs.harvest_failed).toContain('steps.screen_rule_fp_rates.error != null');
-        expect(outputs.harvest_failed).toContain('steps.harvest_fp_alerts_by_rule.error != null');
+        expect(outputs.harvest_failed).toBe('${{ steps.resolve_read_failure.output.failed }}');
+        expect(readFailed).toContain('steps.list_enabled_rules.error != null');
+        expect(readFailed).toContain('steps.screen_rule_fp_rates.error != null');
+        expect(readFailed).toContain('steps.harvest_fp_alerts_by_rule.error != null');
         expect(outputs.lookup_failed).toContain('steps.list_active_reviews.error != null');
         expect(outputs.rules_truncated).toBe(
           '${{ steps.resolve_enabled_rules.output.truncated | default: false }}'
