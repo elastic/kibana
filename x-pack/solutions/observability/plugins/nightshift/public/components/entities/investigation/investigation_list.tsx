@@ -49,11 +49,12 @@ export interface InvestigationListProps {
   sections: InvestigationSectionState[];
   selectedInvestigationId?: string;
   onInvestigationClick?: (investigation: InvestigationSummary) => void;
+  isFreshInvestigation?: (investigationId: string) => boolean;
 }
 
 export const InvestigationList = forwardRef<InvestigationListHandle, InvestigationListProps>(
   function InvestigationList(
-    { sections, selectedInvestigationId, onInvestigationClick },
+    { sections, selectedInvestigationId, onInvestigationClick, isFreshInvestigation },
     ref
   ): React.ReactElement {
     const { euiTheme } = useEuiTheme();
@@ -161,6 +162,7 @@ export const InvestigationList = forwardRef<InvestigationListHandle, Investigati
               onRetry={section.refetch}
               selectedInvestigationId={selectedInvestigationId}
               onInvestigationClick={onInvestigationClick}
+              isFreshInvestigation={isFreshInvestigation}
               isOpen={!collapsedSections.includes(section.id)}
               onToggle={(isOpen) => setSectionOpen(section.id, isOpen)}
               isHighlighted={section.id === highlightedSection}

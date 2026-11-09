@@ -22,7 +22,7 @@ import { useAiButtonGradientStyles } from '@kbn/shared-ux-ai-components';
 import type { InvestigationSummary } from '../../../../common';
 import { InvestigatingTypingDots } from './investigating_typing_dots';
 import { getInvestigationDisplayTitle } from './to_view_model';
-import { IN_PROGRESS_LABEL, moreEntitiesLabel } from './translations';
+import { IN_PROGRESS_LABEL, NEW_LABEL, moreEntitiesLabel } from './translations';
 
 const MAX_VISIBLE_ENTITIES = 3;
 
@@ -41,6 +41,12 @@ export interface InvestigationCardProps {
    * AI gradient ring) without reaching into the card's DOM.
    */
   borderless?: boolean;
+  /**
+   * Session-fresh finished investigation (e.g. homepage Investigate that just landed in a
+   * severity bucket): primary dot before the age and a primary "New" mark after it.
+   * Ignored while the investigation is still in progress.
+   */
+  isFresh?: boolean;
 }
 
 const EntityChips = ({ investigation }: { investigation: InvestigationSummary }) => {
@@ -85,6 +91,7 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
   isSelected = false,
   actions,
   borderless = false,
+  isFresh = false,
 }) => {
   const { euiTheme } = useEuiTheme();
   const { labelCss: aiLabelCss } = useAiButtonGradientStyles({ variant: 'outlined' });
@@ -103,36 +110,61 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
     }
   };
 
-  // Card-local middot/status. Negative start margin cancels Meta's gutterSize="s" down to xs.
-  const inProgressStatus = inProgress ? (
-    <span
-      data-test-subj="investigationCardRunning"
+  // Fresh marks only after the run finishes and the card sits in a severity bucket.
+  const showFreshMark = isFresh && !inProgress;
+  // Slightly smaller than size.s so the finished "New" cue stays quieter than in-progress chrome.
+  const freshMarkSize = `calc(${euiTheme.size.s} * 0.75)`;
+
+  const newLabel = showFreshMark ? (
+    <EuiText
+      size="xs"
+      component="span"
+      data-test-subj="investigationCardNew"
       css={css`
-        display: inline-flex;
-        align-items: center;
-        gap: ${euiTheme.size.xs};
-        margin-inline-start: calc(${euiTheme.size.xs} - ${euiTheme.size.s});
+        color: ${euiTheme.colors.textPrimary};
+        line-height: 1;
       `}
     >
-      <EuiText size="xs" color="subdued" component="span" aria-hidden>
-        •
-      </EuiText>
-      <EuiText
-        size="xs"
-        component="span"
-        css={[
-          aiLabelCss,
-          css`
-            padding: 0;
-            line-height: 1;
-          `,
-        ]}
+      {NEW_LABEL}
+    </EuiText>
+  ) : null;
+
+  // Card-local middot/status. Negative start margin cancels Meta's gutterSize="s" down to xs.
+  const metaStatus =
+    inProgress || showFreshMark ? (
+      <span
+        data-test-subj={inProgress ? 'investigationCardRunning' : 'investigationCardFresh'}
+        css={css`
+          display: inline-flex;
+          align-items: center;
+          gap: ${euiTheme.size.xs};
+          margin-inline-start: calc(${euiTheme.size.xs} - ${euiTheme.size.s});
+        `}
       >
-        {IN_PROGRESS_LABEL}
-      </EuiText>
-      <InvestigatingTypingDots color={aiDotsFill} />
-    </span>
-  ) : undefined;
+        <EuiText size="xs" color="subdued" component="span" aria-hidden>
+          •
+        </EuiText>
+        {inProgress ? (
+          <>
+            <EuiText
+              size="xs"
+              component="span"
+              css={[
+                aiLabelCss,
+                css`
+                  padding: 0;
+                  line-height: 1;
+                `,
+              ]}
+            >
+              {IN_PROGRESS_LABEL}
+            </EuiText>
+            <InvestigatingTypingDots color={aiDotsFill} />
+          </>
+        ) : null}
+        {newLabel}
+      </span>
+    ) : undefined;
 
   const hasActions = actions != null;
   const [actionsElement, setActionsElement] = useState<HTMLDivElement | null>(null);
@@ -201,7 +233,31 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
               direction="row"
             >
               <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
-                <ConversationMetaInfo timestamp={createdAt} inFlightStatus={inProgressStatus} />
+                <EuiFlexGroup
+                  alignItems="center"
+                  gutterSize="xs"
+                  responsive={false}
+                  direction="row"
+                >
+                  {showFreshMark ? (
+                    <EuiFlexItem grow={false}>
+                      <span
+                        data-test-subj="investigationCardFreshMark"
+                        aria-hidden
+                        css={css`
+                          display: inline-flex;
+                          width: ${freshMarkSize};
+                          height: ${freshMarkSize};
+                          border-radius: 50%;
+                          background-color: ${euiTheme.colors.primary};
+                        `}
+                      />
+                    </EuiFlexItem>
+                  ) : null}
+                  <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
+                    <ConversationMetaInfo timestamp={createdAt} inFlightStatus={metaStatus} />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiFlexItem>
               {hasActions && (
                 <EuiFlexItem

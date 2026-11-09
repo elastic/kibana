@@ -11,11 +11,13 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiNotificationBadge,
   EuiPanel,
   type EuiPanelProps,
   EuiSkeletonTitle,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   euiShadowHover,
   type UseEuiTheme,
   useEuiTheme,
@@ -50,6 +52,8 @@ const getSeverityTileStyles = (
   iconGlyphRotateUp: SerializedStyles;
   label: SerializedStyles;
   count: SerializedStyles;
+  countWithFresh: SerializedStyles;
+  freshBadgeAnchor: SerializedStyles;
   byState: Readonly<Record<SeverityTileState, SeverityTileStateStyles>>;
 } => {
   const { euiTheme } = euiThemeContext;
@@ -94,9 +98,34 @@ const getSeverityTileStyles = (
       font-weight: ${euiTheme.font.weight.medium};
     `,
     // Same stack/weight as Lens metric values (`echMetricText__value` + Elastic UI Numeric).
+    // Passed as EuiTitle's `css` (replaces size styles) — same pattern as before the badge work.
     count: css`
       font-family: 'Elastic UI Numeric', ${euiTheme.font.family};
       font-weight: ${euiTheme.font.weight.medium};
+    `,
+    countWithFresh: css`
+      position: relative;
+      display: inline-flex;
+      align-items: flex-start;
+      min-width: 0;
+    `,
+    // Position only on the wrapper. Never pass `css` to EuiNotificationBadge — its prop
+    // replaces (does not merge) the component styles, which drops EUI's xs/medium type.
+    // Color goes through a descendant selector so badge typography stays EUI-owned.
+    freshBadgeAnchor: css`
+      position: absolute;
+      top: 0;
+      left: 100%;
+      margin-inline-start: ${euiTheme.size.xs};
+      transform: translateY(-15%);
+      flex-shrink: 0;
+      /* Keep the badge on the body stack; the sibling count uses Elastic UI Numeric. */
+      font-family: ${euiTheme.font.family};
+
+      & .euiNotificationBadge {
+        background-color: ${euiTheme.colors.backgroundFilledPrimary};
+        color: ${euiTheme.colors.textInverse};
+      }
     `,
     byState: {
       // Empty tiles: border only, no panel fill; count/icon stay muted.
@@ -122,13 +151,18 @@ const getSeverityTileStyles = (
 
 export interface InvestigationSeverityTilesProps {
   severityCounts: SeverityCounts;
+  /** Unread manually finished investigations per severity — shown as a `+N` badge. */
+  freshCounts?: SeverityCounts;
   scrollableSeverities: ReadonlySet<Severity>;
   isLoading: boolean;
   onSeverityClick: (severity: Severity) => void;
 }
 
+const EMPTY_FRESH_COUNTS: SeverityCounts = { critical: 0, high: 0, medium: 0, low: 0 };
+
 export const InvestigationSeverityTiles = ({
   severityCounts,
+  freshCounts = EMPTY_FRESH_COUNTS,
   scrollableSeverities,
   isLoading,
   onSeverityClick,
@@ -141,8 +175,27 @@ export const InvestigationSeverityTiles = ({
       {SEVERITY_OPTIONS.map((severity) => {
         const count = severityCounts[severity];
         const isMuted = !scrollableSeverities.has(severity);
+        const freshCount = isMuted ? 0 : freshCounts[severity];
+        const showFreshBadge = freshCount > 0;
+        const freshBadgeLabel = `+${freshCount}`;
         const stateStyles = styles.byState[isMuted ? 'muted' : 'interactive'];
         const icon = SEVERITY_TILE_ICON[severity];
+        const countAriaLabel = i18n.translate(
+          'xpack.nightshift.investigations.severityTileCountAriaLabel',
+          {
+            defaultMessage: '{severityLabel} investigation count',
+            values: { severityLabel: getSeverityLabel(severity) },
+          }
+        );
+        const freshBadgeTooltip =
+          freshCount === 1
+            ? i18n.translate('xpack.nightshift.investigations.severityTileFreshBadgeOne', {
+                defaultMessage: '1 new investigation result',
+              })
+            : i18n.translate('xpack.nightshift.investigations.severityTileFreshBadgeMany', {
+                defaultMessage: '{freshCount} new investigation results',
+                values: { freshCount },
+              });
 
         return (
           <EuiFlexItem key={severity}>
@@ -185,23 +238,39 @@ export const InvestigationSeverityTiles = ({
                       </span>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      <EuiSkeletonTitle
-                        size="l"
-                        isLoading={isLoading}
-                        contentAriaLabel={i18n.translate(
-                          'xpack.nightshift.investigations.severityTileCountAriaLabel',
-                          {
-                            defaultMessage: '{severityLabel} investigation count',
-                            values: { severityLabel: getSeverityLabel(severity) },
+                      {/*
+                        Badge stays a sibling of the title (not inside EuiTitle / SkeletonTitle)
+                        so count Numeric styles cannot leak into EuiNotificationBadge type.
+                      */}
+                      <span css={showFreshBadge ? styles.countWithFresh : undefined}>
+                        <EuiSkeletonTitle
+                          size="l"
+                          isLoading={isLoading}
+                          contentAriaLabel={
+                            showFreshBadge
+                              ? `${countAriaLabel}, ${freshBadgeLabel}`
+                              : countAriaLabel
                           }
-                        )}
-                      >
-                        <EuiTitle size="l" css={[styles.count, stateStyles.count]}>
-                          <span data-test-subj={`nightshiftSeverityTileCount-${severity}`}>
-                            {count}
+                        >
+                          <EuiTitle size="l" css={[styles.count, stateStyles.count]}>
+                            <span data-test-subj={`nightshiftSeverityTileCount-${severity}`}>
+                              {count}
+                            </span>
+                          </EuiTitle>
+                        </EuiSkeletonTitle>
+                        {showFreshBadge ? (
+                          <span css={styles.freshBadgeAnchor}>
+                            <EuiToolTip content={freshBadgeTooltip} position="top">
+                              <EuiNotificationBadge
+                                size="s"
+                                data-test-subj={`nightshiftSeverityTileFreshBadge-${severity}`}
+                              >
+                                {freshBadgeLabel}
+                              </EuiNotificationBadge>
+                            </EuiToolTip>
                           </span>
-                        </EuiTitle>
-                      </EuiSkeletonTitle>
+                        ) : null}
+                      </span>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>

@@ -18,6 +18,11 @@ export const IN_PROGRESS_LABEL = i18n.translate(
   { defaultMessage: 'In progress' }
 );
 
+/** List-card mark for a session-fresh investigation (e.g. just started from the homepage). */
+export const NEW_LABEL = i18n.translate('xpack.agenticInvestigations.investigations.newLabel', {
+  defaultMessage: 'New',
+});
+
 export const moreEntitiesLabel = (count: number): string =>
   i18n.translate('xpack.agenticInvestigations.investigations.moreEntities', {
     defaultMessage: '+{count}',

@@ -42,6 +42,8 @@ import { useInvestigationAssignees } from './use_investigation_assignees';
 
 export interface InvestigationSectionProps {
   id: InvestigationSectionId;
+  /** Session-fresh investigations (homepage Investigate) get a New mark on the card. */
+  isFreshInvestigation?: (investigationId: string) => boolean;
   investigations: InvestigationSummary[];
   total: number;
   hasMore: boolean;
@@ -298,9 +300,10 @@ const SectionRows = ({
   investigations,
   selectedInvestigationId,
   onInvestigationClick,
+  isFreshInvestigation,
 }: Pick<
   InvestigationSectionProps,
-  'investigations' | 'selectedInvestigationId' | 'onInvestigationClick'
+  'investigations' | 'selectedInvestigationId' | 'onInvestigationClick' | 'isFreshInvestigation'
 >): React.ReactElement => {
   const { euiTheme } = useEuiTheme();
   const InvestigationCard = useKibana().services.agenticInvestigations?.InvestigationCard;
@@ -338,6 +341,7 @@ const SectionRows = ({
               <InvestigationCard
                 investigation={investigation}
                 isSelected={investigation.id === selectedInvestigationId}
+                isFresh={isFreshInvestigation?.(investigation.id) === true}
                 onClick={onInvestigationClick}
                 actions={
                   <InvestigationCardActions
@@ -401,6 +405,7 @@ export const InvestigationSection = ({
   onRetry,
   selectedInvestigationId,
   onInvestigationClick,
+  isFreshInvestigation,
   isOpen = true,
   onToggle,
   isHighlighted = false,
@@ -439,6 +444,7 @@ export const InvestigationSection = ({
               investigations={investigations}
               selectedInvestigationId={selectedInvestigationId}
               onInvestigationClick={onInvestigationClick}
+              isFreshInvestigation={isFreshInvestigation}
             />
             {hasMore && (
               <SectionBlock>

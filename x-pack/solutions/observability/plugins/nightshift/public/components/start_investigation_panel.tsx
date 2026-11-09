@@ -24,7 +24,9 @@ import { i18n } from '@kbn/i18n';
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import { isMac } from '@kbn/shared-ux-utility';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
+import { registerManualInvestigationStart } from '../data/investigations/manual_investigation_starts';
 import { useStartInvestigation } from '../data/investigations/use_start_investigation';
+import { useKibana } from '../hooks/use_kibana';
 
 export const START_INVESTIGATION_PANEL_ID = 'nightshiftStartInvestigationPanel';
 
@@ -40,9 +42,15 @@ export interface StartInvestigationPanelProps {
 export function StartInvestigationPanel({
   onClose,
 }: StartInvestigationPanelProps): React.ReactElement {
+  const spaceBasePath = useKibana().services.http.basePath.get() || 'default';
   const titleId = useGeneratedHtmlId({ prefix: 'nightshiftStartInvestigationTitle' });
   const [message, setMessage] = useState('');
-  const { startInvestigation, isStarting } = useStartInvestigation({ onStarted: onClose });
+  const { startInvestigation, isStarting } = useStartInvestigation({
+    onStarted: (investigationId) => {
+      registerManualInvestigationStart(investigationId, spaceBasePath);
+      onClose();
+    },
+  });
 
   const trimmedMessage = message.trim();
   const canSubmit = trimmedMessage.length > 0 && !isStarting;

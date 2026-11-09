@@ -6,7 +6,7 @@
  */
 
 import { css } from '@emotion/react';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import {
   EuiButton,
@@ -20,7 +20,7 @@ import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import { usePageReady } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import { useDebouncedValue } from '@kbn/react-hooks';
-import type { Severity } from '@kbn/nightshift-investigations-plugin/common';
+import type { Severity, SeverityCounts } from '@kbn/nightshift-investigations-plugin/common';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import { SEVERITY_OPTIONS } from '@kbn/significant-events-schema';
 import { useKibana } from '../../hooks/use_kibana';
@@ -33,6 +33,11 @@ import {
   type InvestigationViewSource,
 } from '../../common/ebt_events';
 import { RETRY_BUTTON_LABEL } from '../../common/messages';
+import {
+  dismissManualInvestigationFresh,
+  isManualInvestigationFresh,
+  subscribeManualInvestigationFresh,
+} from '../../data/investigations/manual_investigation_starts';
 import { useInvestigationSections } from '../../data/investigations/use_investigation_sections';
 import {
   InvestigationList,
@@ -67,8 +72,15 @@ export function NightshiftApp({
   hideDetectionSetupBanner?: boolean;
 }): React.ReactElement {
   const { euiTheme } = useEuiTheme();
-  const { analytics, application, nightshiftInvestigations, agenticInvestigations, agentBuilder } =
-    useKibana().services;
+  const {
+    analytics,
+    application,
+    http,
+    nightshiftInvestigations,
+    agenticInvestigations,
+    agentBuilder,
+  } = useKibana().services;
+  const spaceBasePath = http.basePath.get() || 'default';
   const history = useHistory();
   const { search } = useLocation();
   const sectionsRef = useRef<InvestigationListHandle>(null);
@@ -100,6 +112,30 @@ export function NightshiftApp({
     loadedCount,
     refetchAll,
   } = useInvestigationSections({ query: debouncedSearchQuery });
+  // Re-render when a manual start is registered or a finished one is opened (localStorage).
+  const [freshRevision, setFreshRevision] = useState(0);
+  useEffect(
+    () => subscribeManualInvestigationFresh(() => setFreshRevision((revision) => revision + 1)),
+    []
+  );
+  const isFreshInvestigation = useCallback(
+    (investigationId: string) => isManualInvestigationFresh(investigationId, spaceBasePath),
+    [freshRevision, spaceBasePath]
+  );
+  const freshCounts = useMemo((): SeverityCounts => {
+    const counts: SeverityCounts = { critical: 0, high: 0, medium: 0, low: 0 };
+    for (const section of sections) {
+      if (!isSeverity(section.id)) {
+        continue;
+      }
+      for (const { id } of section.investigations) {
+        if (isFreshInvestigation(id)) {
+          counts[section.id] += 1;
+        }
+      }
+    }
+    return counts;
+  }, [freshRevision, isFreshInvestigation, sections]);
 
   // A tile scrolls to its section, so it is only actionable while the list is rendering that
   // section — which the list, not the count, decides.
@@ -143,6 +179,22 @@ export function NightshiftApp({
     },
     [history]
   );
+
+  // Clear New / `+N` when the user opens a finished investigation (list click / deep link).
+  useEffect(() => {
+    if (!selectedInvestigationId || !isManualInvestigationFresh(selectedInvestigationId, spaceBasePath)) {
+      return;
+    }
+    const isFinished = sections.some(
+      (section) =>
+        (isSeverity(section.id) || section.id === 'not-rated') &&
+        section.investigations.some(({ id }) => id === selectedInvestigationId)
+    );
+    if (!isFinished) {
+      return;
+    }
+    dismissManualInvestigationFresh(selectedInvestigationId, spaceBasePath);
+  }, [sections, selectedInvestigationId, spaceBasePath]);
 
   const handleFlyoutClose = useCallback(() => {
     const params = new URLSearchParams(history.location.search);
@@ -383,6 +435,7 @@ export function NightshiftApp({
 
       <InvestigationSeverityTiles
         severityCounts={severityCounts}
+        freshCounts={freshCounts}
         scrollableSeverities={scrollableSeverities}
         isLoading={isInitialLoading}
         onSeverityClick={handleSeverityClick}
@@ -395,6 +448,7 @@ export function NightshiftApp({
         sections={sections}
         selectedInvestigationId={selectedInvestigationId}
         onInvestigationClick={handleInvestigationClick}
+        isFreshInvestigation={isFreshInvestigation}
       />
     </EuiFlexGroup>
   );
