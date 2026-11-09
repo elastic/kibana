@@ -320,6 +320,14 @@ describe('SLO public route responses are documented', () => {
     expect(remote).toHaveProperty('additionalProperties', true);
   });
 
+  it('documents the health objects of an SLO definition as open', async () => {
+    const { components } = await generateResponse(findSloDefinitionsResponseSchema);
+    const { health } = components.SLODefinitionResponse.properties ?? {};
+    expect(health).toHaveProperty('additionalProperties', true);
+    expect(health).toHaveProperty('properties.rollup.additionalProperties', true);
+    expect(health).toHaveProperty('properties.summary.additionalProperties', true);
+  });
+
   it('keeps components shared with request bodies closed', async () => {
     const { components } = await generateResponse(getSLOResponseSchema);
     expect(components.SLOObjective).toHaveProperty('additionalProperties', false);
