@@ -16,7 +16,7 @@ import type { ListWatchlistsResponse } from '../../../../../../common/api/entity
 import { WatchlistConfigClient } from '../watchlist_config';
 import { getWatchlistSavedObjectClient } from '../../shared/utils';
 import { ensurePrebuiltWatchlists } from '../../migrations/install_prebuilt_watchlists';
-import { buildNamespacedInternalSavedObjectsClientUnsafe } from '../../../risk_score/tasks/helpers';
+import { buildNamespacedInternalSavedObjectsClientUnsafe } from '../../../utils/internal_saved_objects_client';
 import { watchlistEntitySourceTypeName } from '../../entity_sources/infra';
 
 export const listWatchlistsRoute = (

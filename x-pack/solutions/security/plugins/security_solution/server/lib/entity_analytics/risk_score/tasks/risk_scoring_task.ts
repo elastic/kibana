@@ -31,7 +31,8 @@ import {
   type LatestTaskStateSchema as RiskScoringTaskState,
 } from './state';
 import { INTERVAL, SCOPE, TIMEOUT, TYPE, VERSION } from './constants';
-import { buildNamespacedInternalSavedObjectsClientUnsafe, convertRangeToISO } from './helpers';
+import { buildNamespacedInternalSavedObjectsClientUnsafe } from '../../utils/internal_saved_objects_client';
+import { convertRangeToISO } from './helpers';
 import {
   RISK_SCORE_EXECUTION_SUCCESS_EVENT,
   RISK_SCORE_EXECUTION_ERROR_EVENT,

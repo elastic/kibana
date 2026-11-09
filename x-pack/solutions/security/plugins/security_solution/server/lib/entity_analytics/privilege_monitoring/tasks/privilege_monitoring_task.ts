@@ -21,7 +21,7 @@ import type { ConfigType } from '../../../../config';
 
 import { TYPE, VERSION, TIMEOUT, SCOPE, INTERVAL } from '../constants';
 import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from '../../execution_context';
-import { buildNamespacedInternalSavedObjectsClientUnsafe } from '../../risk_score/tasks/helpers';
+import { buildNamespacedInternalSavedObjectsClientUnsafe } from '../../utils/internal_saved_objects_client';
 import {
   defaultState,
   stateSchemaByVersion,
