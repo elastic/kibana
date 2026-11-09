@@ -36,6 +36,13 @@ jest.mock('../../../data/service_accounts/use_investigator_service_account', () 
 jest.mock('../../../data/sandbox_connectors/use_connectors_by_type', () => ({
   useConnectorsByType: jest.fn(),
 }));
+jest.mock('../../../data/automations/use_automations', () => ({
+  useFetchAutomations: () => ({
+    data: { automations: [] },
+    isInitialLoading: false,
+    isError: false,
+  }),
+}));
 jest.mock('../header', () => ({ NightshiftHeader: () => null }));
 jest.mock('./intro_banner', () => ({
   OnboardingIntroBanner: () => <div data-test-subj="introBannerStub" />,
