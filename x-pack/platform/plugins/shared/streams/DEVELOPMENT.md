@@ -53,7 +53,7 @@ Settings marked UI-readonly can only be turned on through `uiSettings.overrides`
 
 ## Access via URL
 
-With the feature flags enabled you can then access V2 via `/app/streams/new-experience/map`. `/app/streams` redirects there for a user with V2 access (see "Privileges").
+With the feature flags enabled you can then access V2 via `/app/streams/v2/unit/default/map`. `/app/streams` redirects there for a user with V2 access (see "Privileges").
 
 ## Privileges
 
@@ -75,7 +75,7 @@ With the feature flags enabled you can then access V2 via `/app/streams/new-expe
 - Granted per space, but the unit is shared, so V2 `all` in any space can edit it.
 - In Elasticsearch it is the application privilege `{ "application": "kibana-.kibana", "privileges": ["feature_streamsV2.all"], "resources": ["*"] }`. Use `space:<id>` for one space and `feature_streamsV2.read` for read.
 - The data stream stats routes (`/internal/streams/doc_counts/*`, `/internal/streams/storage_stats`) accept `read_stream` or `read_streams_v2`. Other legacy routes need `read_stream` / `manage_stream`.
-- V2 access means `streamsV2.show` plus `observability:streamsEnableCanvas` on in the space. It decides the nav entry and whether `/` redirects to `/new-experience/{tab}`.
+- V2 access means `streamsV2.show` plus `observability:streamsEnableCanvas` on in the space. It decides the nav entry and whether `/` redirects to `/v2/unit/default/map`.
 - Without `streamsV2.manage`, the Map and the Sources and Destinations tables are read-only.
 
 ### What each V2 request needs
@@ -399,7 +399,7 @@ Content-Type: application/json
               {
                 "action": "upsert",
                 "location": "resource",
-                "path": "attributes[\"env\"]",
+                "name": "env",
                 "value": "prod"
               }
             ]

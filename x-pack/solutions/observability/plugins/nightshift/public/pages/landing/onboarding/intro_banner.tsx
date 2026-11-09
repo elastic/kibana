@@ -92,7 +92,7 @@ export function OnboardingIntroBanner(): React.ReactElement | null {
         >
           <p>
             {i18n.translate('xpack.nightshift.onboarding.introDescription', {
-              defaultMessage: 'It helps you detect, investigate and resolve problems faster.',
+              defaultMessage: 'It helps you detect, investigate and resolve problems faster',
             })}
           </p>
         </EuiText>
