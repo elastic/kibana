@@ -1,0 +1,34 @@
+{
+  "sha1": "baff9a479de65e5f4c1474867343b7cd6e7b9985",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "c95d87ddc3dd2fd-62e78b299821a45",
+      "title": "Global setup",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/parallel_tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
+    {
+      "id": "70ab4b5e1abba71-051dfb5a8486e62",
+      "title": "Endpoint details workflow insights shows the insights section with the connector and an enabled Scan button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ui/parallel_tests/endpoint_details_insights.spec.ts",
+        "line": 49,
+        "column": 7
+      }
+    }
+  ]
+}
