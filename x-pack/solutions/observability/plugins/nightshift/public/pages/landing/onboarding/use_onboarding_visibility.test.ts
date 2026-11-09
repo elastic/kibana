@@ -100,6 +100,39 @@ describe('useOnboardingVisibility', () => {
     expect(result.current.showOnboarding).toBe(false);
   });
 
+  it('waits for the investigation lookup before latching an empty-automation session', () => {
+    mockUseFetchAutomations.mockReturnValue({
+      data: { automations: [] },
+      isInitialLoading: false,
+      isError: false,
+    });
+    mockUseFetchLatestInvestigation.mockReturnValue({
+      latestInvestigation: undefined,
+      isInitialLoading: true,
+      error: null,
+    });
+    const { result, rerender } = renderHook(() =>
+      useOnboardingVisibility({
+        isEnabled: true,
+        canUseAutomations: true,
+        forceOnboarding: false,
+      })
+    );
+    expect(result.current.isLoading).toBe(true);
+    expect(result.current.showOnboarding).toBe(false);
+
+    mockUseFetchLatestInvestigation.mockReturnValue({
+      latestInvestigation: investigation,
+      isInitialLoading: false,
+      error: null,
+    });
+    rerender();
+
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.showOnboarding).toBe(true);
+    expect(result.current.latestInvestigation).toBe(investigation);
+  });
+
   it('forces onboarding with an automation', () => {
     const { result } = setup({ automations: [{ id: 'a-1' }], forceOnboarding: true });
     expect(result.current.showOnboarding).toBe(true);
