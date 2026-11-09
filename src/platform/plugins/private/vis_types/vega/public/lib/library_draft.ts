@@ -53,8 +53,14 @@ export const fromDraft = ({ spec, format, query, filters }: VegaDraft): VegaEdit
   filters: filters?.length ? fromStoredFilters(filters) : undefined,
 });
 
-/** Whether two drafts have the same spec text, query and filters. The spec format is ignored. */
-export const isSameDraft = (left: VegaDraft, right: VegaDraft): boolean =>
-  left.spec === right.spec &&
+/** Whether two searches have the same query and filters. */
+export const isSameSearch = (
+  left: Pick<VegaDraft, 'query' | 'filters'>,
+  right: Pick<VegaDraft, 'query' | 'filters'>
+): boolean =>
   isEqual(left.query, right.query) &&
   compareFilters(left.filters ?? [], right.filters ?? [], COMPARE_ALL_OPTIONS);
+
+/** Whether two drafts have the same spec text, query and filters. The spec format is ignored. */
+export const isSameDraft = (left: VegaDraft, right: VegaDraft): boolean =>
+  left.spec === right.spec && isSameSearch(left, right);

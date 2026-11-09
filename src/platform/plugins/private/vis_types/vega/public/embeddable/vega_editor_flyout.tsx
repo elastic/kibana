@@ -11,16 +11,9 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import {
-  COMPARE_ALL_OPTIONS,
-  compareFilters,
-  isOfQueryType,
-  type Filter,
-  type Query,
-} from '@kbn/es-query';
+import { isOfQueryType, type Filter, type Query } from '@kbn/es-query';
 import { ManagedEditorFooter } from '@kbn/presentation-util-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { isEqual } from 'lodash';
 import type { VegaByValueState } from '../../server';
 import type { VegaPluginStartDependencies } from '../plugin';
 import {
@@ -29,6 +22,7 @@ import {
   vegaEditorFlyoutBodyCss,
 } from '../components/vega_editor_body';
 import { specFromEditor, specToEditorValue } from '../lib/editor_spec';
+import { isSameSearch } from '../lib/library_draft';
 import { vegaTitleInWizard } from '../vega_icon';
 import type { VegaEmbeddableApi } from './vega_embeddable';
 
@@ -36,10 +30,6 @@ interface PanelSearch {
   query?: Query;
   filters?: Filter[];
 }
-
-const sameSearch = (left: PanelSearch, right: PanelSearch): boolean =>
-  isEqual(left.query, right.query) &&
-  compareFilters(left.filters ?? [], right.filters ?? [], COMPARE_ALL_OPTIONS);
 
 export const VegaEditorFlyout = ({
   api,
@@ -94,7 +84,7 @@ export const VegaEditorFlyout = ({
     };
   }, [api]);
   const canPreview = spec !== previewedSpec;
-  const canSave = isNewPanel || spec !== initialEditorValue || !sameSearch(search, initialSearch);
+  const canSave = isNewPanel || spec !== initialEditorValue || !isSameSearch(search, initialSearch);
 
   // Revert on unmount unless the user saved. A ref holds the latest callback without re-arming the
   // unmount effect; `saved` suppresses the revert after a successful Save.
