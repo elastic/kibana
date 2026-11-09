@@ -568,7 +568,12 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       siemMigrations: `${ELASTIC_DOCS}solutions/security/get-started/automatic-migration`,
       llmPerformanceMatrix: `${ELASTIC_DOCS}solutions/security/ai/large-language-model-performance-matrix`,
       alertZero: {
-        continuousThreatHunt: `${ELASTIC_DOCS}solutions/security/alertzero/configure-worker-settings#configure-worker-settings-continuous-threat-hunt`,
+        overview: `${ELASTIC_DOCS}solutions/security/alertzero`,
+        setUp: `${ELASTIC_DOCS}solutions/security/alertzero/set-up-alertzero`,
+        proposedActions: `${ELASTIC_DOCS}solutions/security/alertzero/use-alertzero`,
+        escalations: `${ELASTIC_DOCS}solutions/security/alertzero/track-escalations`,
+        watches: `${ELASTIC_DOCS}solutions/security/alertzero/watches-and-workers`,
+        continuousThreatHunt: `${ELASTIC_DOCS}solutions/security/alertzero/watches-and-workers#alertzero-hunt-watch`,
       },
     },
     query: {
