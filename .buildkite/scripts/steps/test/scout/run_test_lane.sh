@@ -6,6 +6,8 @@ source .buildkite/scripts/steps/functional/common.sh
 
 SCOUT_SERVER_LOG=""
 PLAYWRIGHT_BIN="./node_modules/.bin/playwright"
+# Playwright sometimes hangs after a config's tests finish, burning the lane's whole 60m timeout.
+CONFIG_RUN_TIMEOUT="30m"
 
 LOAD_IDS=()
 LOAD_CONFIG_SETS=()
@@ -261,7 +263,7 @@ run_scout_tests() {
   start_time=$(date +%s)
 
   set +e
-  env "${pw_env[@]}" "$PLAYWRIGHT_BIN" "${pw_args[@]}"
+  timeout --kill-after=1m "$CONFIG_RUN_TIMEOUT" env "${pw_env[@]}" "$PLAYWRIGHT_BIN" "${pw_args[@]}"
   local exit_code=$?
   set -e
 
@@ -290,7 +292,11 @@ run_scout_tests() {
       upload_report_events "$config_path"
       snapshot_failed_specs "$idx"
       FAILED+=("$config_path")
-      echo "Exited with code $exit_code for $config_path"
+      if [[ $exit_code -eq 124 || $exit_code -eq 137 ]]; then
+        echo "Timed out after $CONFIG_RUN_TIMEOUT for $config_path"
+      else
+        echo "Exited with code $exit_code for $config_path"
+      fi
       ;;
   esac
 }
