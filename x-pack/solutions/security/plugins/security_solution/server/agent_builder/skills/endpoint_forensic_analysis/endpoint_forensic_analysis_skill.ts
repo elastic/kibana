@@ -255,15 +255,6 @@ Where the indicators go depends on how you were asked to answer:
 
 ### 6. Lateral movement
 
-### 5. IoC extraction
-After reconstructing the attack on a host, call \`${ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID}\` with the host(s) and time window to produce a structured IoC summary. Present the result as a markdown table with one row per indicator type:
-
-| Indicator type | Value | First seen | Source event |
-|---|---|---|---|
-
-Always surface at least the categories the tool returns (file hash, network destination, registry persistence key, renamed extension). If a category has no hits, show "—". Never present IoCs as a prose paragraph — use the table so downstream hunts and response actions can cite specific values.
-
-### 6. Lateral movement
 Trace outbound internal connections from source host; correlate with process creation on destinations.
 
 ### 7. Persistence
