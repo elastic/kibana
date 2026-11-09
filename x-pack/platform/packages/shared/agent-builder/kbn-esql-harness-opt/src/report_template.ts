@@ -84,7 +84,11 @@ const usd = (v) => (typeof v === 'number' && isFinite(v) ? '$' + v.toFixed(4) : 
 const pct = (v) => (typeof v === 'number' ? Math.round(v * 100) + '%' : '—');
 /** Attribute carrying a route, quoted with entities so no backslash escaping is needed. */
 // Show paths relative to the tool directory; the absolute prefix is noise in every row.
+// Built with RegExp() rather than a literal: this file is a template string, and a backslash in
+// a regex literal is eaten before the browser ever sees it.
+const PATH_PREFIX = new RegExp('[^ ]*generate_esql/', 'g');
 const shortPath = (path) => String(path).split('generate_esql/').pop();
+const stripPaths = (text) => String(text).replace(PATH_PREFIX, '');
 const goAttr = (route) => 'data-go="' + esc(JSON.stringify(route)) + '"';
 const sign = (v, d = 3) => (typeof v === 'number' ? (v >= 0 ? '+' : '') + v.toFixed(d) : '—');
 const cls = (v) => (v > 0.001 ? 'good' : v < -0.001 ? 'bad' : 'muted');
@@ -185,7 +189,7 @@ function lineageGraph() {
         sub:
           round.rejectedReason +
           ((round.failures || [])[0]
-            ? ': ' + String((round.failures || [])[0]).replace(/[^ ]*generate_esql\//g, '').slice(0, 40)
+            ? ': ' + stripPaths((round.failures || [])[0]).slice(0, 40)
             : ''), parent: round.parentHash, state: 'failed',
         round: round.round, delta: null, cost: null,
       });
@@ -298,11 +302,7 @@ function viewCampaign() {
         '<td>' + (g ? (g.regressions || []).length : '—') + '</td>' +
         '<td>' + verdict(round) + '</td>' +
         '<td class="muted">' +
-        esc(
-          ((round.failures || [])[0] || round.rationale || '')
-            .replace(/[^ ]*generate_esql\//g, '')
-            .slice(0, 140)
-        ) +
+        esc(stripPaths((round.failures || [])[0] || round.rationale || '').slice(0, 140)) +
         '</td></tr>';
     }).join('') + '</table>';
 }

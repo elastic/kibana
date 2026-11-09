@@ -186,6 +186,7 @@ export const runCampaign = async ({
     }
 
     const incumbentContent = new Map(incumbentEdits.map((edit) => [edit.path, edit.content]));
+    const attemptedDiff = await candidateDiff(workspace);
     const validation = await applyAndValidateEdits({
       workspace,
       edits: codeEdits,
@@ -198,11 +199,19 @@ export const runCampaign = async ({
         round,
         campaignId,
         rejected: 'validation',
-        failures: validation.failures.map((failure) => failure.slice(0, 800)),
+        failures: validation.failures.map((failure) => failure.slice(0, 2000)),
         manifest: proposal.manifest,
         filesChanged: codeEdits.map((edit) => edit.path),
+        diff: attemptedDiff.slice(0, 40_000),
       });
       saveLedger();
+      // Without this the next round proposes the same blocked edit again — twice in a row is
+      // what the ledger showed before the failure was fed back.
+      lastFeedback = `Your last edit (${codeEdits
+        .map((edit) => edit.path.split('generate_esql/').pop())
+        .join(', ')}) never reached the gate: ${validation.failures
+        .join(' ')
+        .slice(0, 400)}. Do not repeat it; either satisfy the rule or change something else.`;
       await resetCandidate(workspace);
       continue;
     }

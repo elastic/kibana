@@ -60,7 +60,12 @@ const FORBIDDEN_PATTERNS: Array<{ pattern: RegExp; reason: string }> = [
     reason: 'filesystem or process access',
   },
   { pattern: /\bfetch\(|axios/i, reason: 'network access' },
-  { pattern: /process\.env(?!\.NODE_ENV)/i, reason: 'environment access' },
+  // Reading configuration from the environment is normal production code and the optimizer has
+  // legitimate reasons to touch it (model selection lives there). What must stay forbidden is
+  // *detecting the evaluation*: a variant that behaves differently when the harness is being
+  // measured is the one failure mode the loop cannot see.
+  { pattern: /ESQL_HARNESS/i, reason: 'detecting the evaluation harness' },
+  { pattern: /process\.env\s*\[/i, reason: 'dynamic environment lookup' },
   { pattern: /eval\(|new Function\(/i, reason: 'dynamic code execution' },
   { pattern: /@kbn\/esql-harness-opt/i, reason: 'reaching into the optimization loop' },
 ];
