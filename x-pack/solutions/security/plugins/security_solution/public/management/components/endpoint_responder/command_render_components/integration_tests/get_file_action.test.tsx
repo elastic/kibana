@@ -6,7 +6,10 @@
  */
 
 import type { EndpointCapabilities } from '../../../../../../common/endpoint/service/response_actions/constants';
-import { ENDPOINT_CAPABILITIES } from '../../../../../../common/endpoint/service/response_actions/constants';
+import {
+  ENDPOINT_CAPABILITIES,
+  GET_FILE_MAX_PATHS,
+} from '../../../../../../common/endpoint/service/response_actions/constants';
 import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
 import { responseActionsHttpMocks } from '../../../../mocks/response_actions_http_mocks';
@@ -136,7 +139,7 @@ describe('When using get-file action from response actions console', () => {
     await enterConsoleCommand(renderResult, user, 'get-file --path=""');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
-      'Invalid argument value: --path. Argument cannot be empty'
+      'Argument --path must have a value'
     );
   });
 
@@ -199,8 +202,26 @@ describe('When using get-file action from response actions console', () => {
       await enterConsoleCommand(renderResult, user, 'get-file --path="one/two" --path=""');
 
       expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
-        'Invalid argument value: --path. Argument cannot be empty'
+        'Argument --path must have a value'
       );
+    });
+
+    it('should error if `--path` is used more than the maximum number of times allowed', async () => {
+      await render();
+      await enterConsoleCommand(
+        renderResult,
+        user,
+        `get-file ${Array.from(
+          { length: GET_FILE_MAX_PATHS + 1 },
+          (_, index) => `--path="path/${index}"`
+        ).join(' ')}`,
+        { paste: true }
+      );
+
+      expect(renderResult.getByTestId('test-badArgument-message')).toHaveTextContent(
+        `Invalid argument value: --path. Argument can be used at most ${GET_FILE_MAX_PATHS} times`
+      );
+      expect(apiMocks.responseProvider.getFile).not.toHaveBeenCalled();
     });
 
     it('should only accept one `--path` for non-endpoint agent types', async () => {

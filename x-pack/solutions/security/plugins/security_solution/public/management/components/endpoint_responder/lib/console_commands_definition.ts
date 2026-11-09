@@ -86,23 +86,6 @@ const emptyArgumentValidator = (argData: ParsedArgData): true | string => {
   }
 };
 
-/** Ensures that every value entered for an argument that allows multiples is not empty */
-const everyArgumentValueNotEmptyValidator = (argData: ParsedArgData): true | string => {
-  if (argData.length === 0) {
-    return emptyArgumentValidator(argData);
-  }
-
-  for (const argValue of argData) {
-    const result = emptyArgumentValidator([argValue]);
-
-    if (result !== true) {
-      return result;
-    }
-  }
-
-  return true;
-};
-
 const pidValidator = (argData: ParsedArgData): true | string => {
   const emptyResult = emptyArgumentValidator(argData);
   if (emptyResult !== true) {
@@ -289,12 +272,11 @@ export const getEndpointConsoleCommands = ({
   const isGetFileMultiPathSupportedByEndpoint = (
     endpointCapabilities as EndpointCapabilities[]
   ).includes('get_file_multi_path');
-  const getFilePathAbout = !getFileAllowsMultiplePaths
-    ? CONSOLE_COMMANDS.getFile.args.path.about
-    : CONSOLE_COMMANDS.getFile.args.path.aboutMultiple +
-      (isGetFileMultiPathSupportedByEndpoint
-        ? ''
-        : ` (${CONSOLE_COMMANDS.getFile.args.path.multipleNotSupported})`);
+  // The "can be used multiple times" help text is only shown when the Endpoint reports support for it
+  const getFilePathAbout =
+    getFileAllowsMultiplePaths && isGetFileMultiPathSupportedByEndpoint
+      ? CONSOLE_COMMANDS.getFile.args.path.aboutMultiple
+      : CONSOLE_COMMANDS.getFile.args.path.about;
 
   let consoleCommands: CommandDefinition[] = [
     {
@@ -457,14 +439,9 @@ export const getEndpointConsoleCommands = ({
         path: {
           required: true,
           allowMultiples: getFileAllowsMultiplePaths,
+          mustHaveValue: 'non-empty-string',
           about: getFilePathAbout,
           validate: (argData) => {
-            const emptyResult = everyArgumentValueNotEmptyValidator(argData);
-
-            if (emptyResult !== true) {
-              return emptyResult;
-            }
-
             if (argData.length > 1) {
               if (!isGetFileMultiPathSupportedByEndpoint) {
                 return CONSOLE_COMMANDS.getFile.args.path.multipleNotSupported;
