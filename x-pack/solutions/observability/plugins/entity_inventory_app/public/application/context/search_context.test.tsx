@@ -44,20 +44,20 @@ describe('EntityInventorySearchProvider', () => {
     expect(result.current.query).toEqual(kuery(''));
     expect(result.current.filters).toEqual([]);
     expect(result.current.dateRange).toEqual(DEFAULT_TIME_RANGE);
-    expect(result.current.filterSelection).toEqual({ attributes: {} });
+    expect(result.current.filterControls).toEqual({ attributes: {} });
   });
 
   it('keeps the filter selection of the page', () => {
     const { result } = renderSearchHook();
 
     act(() => {
-      result.current.setFilterSelection({
+      result.current.setFilterControls({
         type: 'k8s.pod',
         attributes: { 'k8s.pod.phase': ['Running'] },
       });
     });
 
-    expect(result.current.filterSelection).toEqual({
+    expect(result.current.filterControls).toEqual({
       type: 'k8s.pod',
       attributes: { 'k8s.pod.phase': ['Running'] },
     });
@@ -76,19 +76,19 @@ describe('EntityInventorySearchProvider', () => {
     });
 
     act(() => {
-      result.current.setFilterSelection({ attributes: { 'os.type': ['linux'] } });
+      result.current.setFilterControls({ attributes: { 'os.type': ['linux'] } });
     });
-    expect(result.current.filterSelection).toEqual({ attributes: { 'os.type': ['linux'] } });
+    expect(result.current.filterControls).toEqual({ attributes: { 'os.type': ['linux'] } });
 
     category = 'hosts';
     rerender();
 
-    expect(result.current.filterSelection).toEqual({ attributes: {} });
+    expect(result.current.filterControls).toEqual({ attributes: {} });
 
     category = 'kubernetes';
     rerender();
 
-    expect(result.current.filterSelection).toEqual({ attributes: {} });
+    expect(result.current.filterControls).toEqual({ attributes: {} });
   });
 
   it('commits a submission within the maximum time range as-is', () => {

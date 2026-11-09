@@ -11,7 +11,7 @@ import { EntityInventoryFilterControls } from './entity_inventory_filter_control
 import { useEntityInventoryTypes } from './use_entity_inventory_types';
 
 export function EntityInventoryPageFilterControls() {
-  const { entityCategory, dateRange, filterSelection, setFilterSelection } =
+  const { entityCategory, dateRange, filterControls, setFilterControls } =
     useEntityInventorySearch();
   const { types, isLoading, error } = useEntityInventoryTypes();
   const pageCategory = entityCategory === 'all' ? undefined : entityCategory;
@@ -23,8 +23,8 @@ export function EntityInventoryPageFilterControls() {
       error={error}
       pageCategory={pageCategory}
       timeRange={dateRange}
-      selection={filterSelection}
-      onSelectionChange={setFilterSelection}
+      selection={filterControls}
+      onSelectionChange={setFilterControls}
     />
   );
 }

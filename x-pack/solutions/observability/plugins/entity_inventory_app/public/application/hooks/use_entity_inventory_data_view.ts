@@ -20,25 +20,25 @@ export const useEntityInventoryDataView = (): { dataView: DataView | undefined }
   const {
     services: { dataViews },
   } = useKibana();
-  const { entityCategory, filterSelection } = useEntityInventorySearch();
+  const { entityCategory, filterControls } = useEntityInventorySearch();
   const { types } = useEntityInventoryTypes();
 
   const indexPattern = useMemo(() => {
     const pageCategory = entityCategory === 'all' ? undefined : entityCategory;
     const typesInScope =
-      pageCategory || filterSelection.category
+      pageCategory || filterControls.category
         ? getTypesInScope({
             types,
             pageCategory,
-            selectedCategory: filterSelection.category,
-            selectedType: filterSelection.type,
+            selectedCategory: filterControls.category,
+            selectedType: filterControls.type,
           })
         : types;
 
     return uniq(typesInScope.flatMap(({ sources }) => sources.map((source) => source.indexPattern)))
       .sort()
       .join(',');
-  }, [types, entityCategory, filterSelection.category, filterSelection.type]);
+  }, [types, entityCategory, filterControls.category, filterControls.type]);
 
   const { value: dataView } = useAbortableAsync(
     () =>

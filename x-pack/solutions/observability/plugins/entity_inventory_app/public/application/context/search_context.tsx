@@ -28,8 +28,8 @@ export interface EntityInventorySearchContextValue {
   filters: Filter[];
   dateRange: TimeRange;
   setFilters: (filters: Filter[]) => void;
-  filterSelection: FilterControlsSelection;
-  setFilterSelection: (selection: FilterControlsSelection) => void;
+  filterControls: FilterControlsSelection;
+  setFilterControls: (selection: FilterControlsSelection) => void;
   /** Commits a search and returns the effective date range. An invalid query is not committed. */
   submit: (payload: EntityInventorySearchSubmitPayload) => TimeRange;
 }
@@ -59,8 +59,8 @@ export const EntityInventorySearchProvider = ({
   if (selectionState.entityCategory !== entityCategory) {
     setSelectionState({ entityCategory, selection: EMPTY_SELECTION });
   }
-  const filterSelection = selectionState.selection;
-  const setFilterSelection = useCallback(
+  const filterControls = selectionState.selection;
+  const setFilterControls = useCallback(
     (selection: FilterControlsSelection) => setSelectionState({ entityCategory, selection }),
     [entityCategory]
   );
@@ -107,11 +107,11 @@ export const EntityInventorySearchProvider = ({
       filters,
       dateRange,
       setFilters,
-      filterSelection,
-      setFilterSelection,
+      filterControls,
+      setFilterControls,
       submit,
     }),
-    [entityCategory, query, filters, dateRange, filterSelection, setFilterSelection, submit]
+    [entityCategory, query, filters, dateRange, filterControls, setFilterControls, submit]
   );
 
   return (

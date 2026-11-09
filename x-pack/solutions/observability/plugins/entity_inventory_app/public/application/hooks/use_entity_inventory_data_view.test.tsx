@@ -103,11 +103,11 @@ describe('useEntityInventoryDataView', () => {
   it('creates a data view for the new scope when the selection changes', async () => {
     const { dataViews, result } = renderDataViewHook('all');
 
-    act(() => result.current.search.setFilterSelection({ category: 'kubernetes', attributes: {} }));
+    act(() => result.current.search.setFilterControls({ category: 'kubernetes', attributes: {} }));
     await waitFor(() => expect(dataViews.create).toHaveBeenCalledWith(dataViewOf('logs-c-*')));
 
     act(() =>
-      result.current.search.setFilterSelection({ category: 'hosts', type: 'two', attributes: {} })
+      result.current.search.setFilterControls({ category: 'hosts', type: 'two', attributes: {} })
     );
     await waitFor(() => expect(dataViews.create).toHaveBeenCalledWith(dataViewOf('logs-a-*')));
   });
