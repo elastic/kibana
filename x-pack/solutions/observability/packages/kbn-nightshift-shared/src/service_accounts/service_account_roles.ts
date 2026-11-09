@@ -24,7 +24,7 @@ export const NIGHTSHIFT_STATEFUL_SERVICE_ACCOUNT_ROLES: Readonly<Record<string, 
     indices: [
       {
         names: [
-          'ai-index-idx-nightshift-cortex',
+          'ai-index-idx-nightshift-wiki',
           'ai-index-idx-nightshift-semantic-memory',
           'ai-index-idx-nightshift-decision-trees',
         ],

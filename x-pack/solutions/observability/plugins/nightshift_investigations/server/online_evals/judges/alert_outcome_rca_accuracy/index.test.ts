@@ -10,7 +10,8 @@ import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { EvidenceRound } from '@kbn/evals-plugin/server';
 import { MAX_EXPLANATION_LENGTH } from '../run_judge';
 import type { AlertOutcomeRcaAccuracyOutput } from './prompt';
-import { MAX_JUDGE_INPUT_CHARS, alertOutcomeRcaAccuracyPrompt } from './prompt';
+import { MAX_JUDGE_INPUT_CHARS } from '../alert_outcome_shared';
+import { alertOutcomeRcaAccuracyPrompt } from './prompt';
 import { alertOutcomeRcaFixtures } from './fixtures';
 import { alertOutcomeRcaAccuracyJudge, applyPenalty } from '.';
 

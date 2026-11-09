@@ -23,8 +23,8 @@ jest.mock('../../components/app_header', () => ({
     return <div data-test-subj="knowledgeHeader" />;
   },
 }));
-jest.mock('./cortex/tab', () => ({
-  CortexTab: () => <div data-test-subj="cortexTab" />,
+jest.mock('./wiki/tab', () => ({
+  WikiTab: () => <div data-test-subj="wikiTab" />,
 }));
 jest.mock('./memory/tab', () => ({
   MemoryTab: () => <div data-test-subj="memoryTab" />,
@@ -87,7 +87,7 @@ beforeEach(() => {
 it('renders an enabled deep link without waiting for unrelated gates', async () => {
   renderPage('/knowledge/memory', {
     knowledge_indicators: knowledgeIndicatorsEnabled,
-    cortex: { isEnabled: false, isLoading: true },
+    wiki: { isEnabled: false, isLoading: true },
     memory: { isEnabled: true, isLoading: false },
     decision_trees: { isEnabled: false, isLoading: true },
   });
@@ -99,7 +99,7 @@ it('renders an enabled deep link without waiting for unrelated gates', async () 
 it('marks only the Decision Trees tab with the developer mode badge', async () => {
   renderPage('/knowledge/decision_trees', {
     knowledge_indicators: knowledgeIndicatorsEnabled,
-    cortex: settledOff,
+    wiki: settledOff,
     memory: { isEnabled: true, isLoading: false },
     decision_trees: { isEnabled: true, isLoading: false },
   });
@@ -116,7 +116,7 @@ it('marks only the Decision Trees tab with the developer mode badge', async () =
 it('redirects a Decision Trees deep link when the tab is hidden', async () => {
   const { history } = renderPage('/knowledge/decision_trees', {
     knowledge_indicators: knowledgeIndicatorsEnabled,
-    cortex: settledOff,
+    wiki: settledOff,
     memory: settledOff,
     decision_trees: settledOff,
   });
@@ -128,7 +128,7 @@ it('redirects a Decision Trees deep link when the tab is hidden', async () => {
 it('opens Knowledge Indicators immediately for a disabled deep link', async () => {
   const page = renderPage('/knowledge/memory', {
     knowledge_indicators: knowledgeIndicatorsEnabled,
-    cortex: { isEnabled: false, isLoading: true },
+    wiki: { isEnabled: false, isLoading: true },
     memory: settledOff,
     decision_trees: settledOff,
   });
@@ -138,7 +138,7 @@ it('opens Knowledge Indicators immediately for a disabled deep link', async () =
 
   page.setAvailability({
     knowledge_indicators: knowledgeIndicatorsEnabled,
-    cortex: { isEnabled: true, isLoading: false },
+    wiki: { isEnabled: true, isLoading: false },
     memory: settledOff,
     decision_trees: settledOff,
   });
@@ -150,7 +150,7 @@ it('opens Knowledge Indicators immediately for a disabled deep link', async () =
 it('defaults to Knowledge Indicators while optional tabs are loading', async () => {
   const { history } = renderPage('/knowledge', {
     knowledge_indicators: knowledgeIndicatorsEnabled,
-    cortex: { isEnabled: false, isLoading: true },
+    wiki: { isEnabled: false, isLoading: true },
     memory: { isEnabled: false, isLoading: true },
     decision_trees: { isEnabled: false, isLoading: true },
   });
@@ -164,7 +164,7 @@ describe('getDefaultKnowledgeTab', () => {
     expect(
       getDefaultKnowledgeTab({
         knowledge_indicators: knowledgeIndicatorsEnabled,
-        cortex: { isEnabled: false, isLoading: true },
+        wiki: { isEnabled: false, isLoading: true },
         memory: { isEnabled: true, isLoading: false },
         decision_trees: settledOff,
       })
@@ -175,7 +175,7 @@ describe('getDefaultKnowledgeTab', () => {
     expect(
       getDefaultKnowledgeTab({
         knowledge_indicators: settledOff,
-        cortex: { isEnabled: false, isLoading: true },
+        wiki: { isEnabled: false, isLoading: true },
         memory: { isEnabled: true, isLoading: false },
         decision_trees: settledOff,
       })
@@ -186,7 +186,7 @@ describe('getDefaultKnowledgeTab', () => {
     expect(
       getDefaultKnowledgeTab({
         knowledge_indicators: settledOff,
-        cortex: settledOff,
+        wiki: settledOff,
         memory: settledOff,
         decision_trees: settledOff,
       })
