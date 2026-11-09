@@ -26,7 +26,6 @@ import {
   type EntityRiskScore,
   type RiskSeverity,
   type RiskStats,
-  type ServiceItem,
 } from '../../../common/search_strategy';
 import { useKibana } from '../../common/lib/kibana';
 import { Content as HostPanelContent } from '../../flyout_v2/entity/host/main/content';
@@ -72,7 +71,6 @@ import { Header as ServicePanelHeader } from '../../flyout_v2/entity/service/mai
 import { useObservedService } from '../../flyout_v2/entity/service/main/hooks/use_observed_service';
 import { ServiceDetailsPanelKey } from '../../flyout/entity_details/service_details_left';
 import { SERVICE_PANEL_RISK_SCORE_QUERY_ID } from '../../flyout_v2/entity/service/main/constants';
-import type { ESQuery } from '../../../common/typed_json';
 import { FlyoutLoading } from '../../flyout_v2/shared/components/flyout_loading';
 import type {
   EntityAttachmentIdentifier,
