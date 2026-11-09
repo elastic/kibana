@@ -172,6 +172,39 @@ describe('compareCmd exit codes', () => {
     expect(outcome.exitCode).toBe(GATE_INCONCLUSIVE_EXIT_CODE);
   });
 
+  it('judges the gate on raw p-values with --no-multiplicity-correction', async () => {
+    // Six drops: exact Wilcoxon p = 2 / 2^6 ~ 0.031, which Holm doubles past 0.05 next to a
+    // second, unchanged evaluator.
+    const sixPairs = (
+      experimentId: string,
+      evaluatorName: string,
+      scoreAt: (i: number) => number
+    ) =>
+      Array.from({ length: 6 }, (_, index) =>
+        scoreDoc(experimentId, index, scoreAt(index), { evaluatorName })
+      );
+    stubScores(
+      [
+        ...sixPairs(TARGET, 'correctness', (index) => 0.4 - 0.01 * index),
+        ...sixPairs(
+          TARGET,
+          'groundedness',
+          (index) => 0.8 + (index % 2 ? 1 : -1) * 0.01 * (index + 1)
+        ),
+      ],
+      [
+        ...sixPairs(BASELINE, 'correctness', () => 0.8),
+        ...sixPairs(BASELINE, 'groundedness', () => 0.8),
+      ]
+    );
+    const argv = [...GATE, '--min-pairs', '5'];
+
+    expect(await runCompare(argv)).toEqual({ exitCode: 0 });
+    expect((await runCompare([...argv, '--no-multiplicity-correction'])).exitCode).toBe(
+      GATE_REGRESSION_EXIT_CODE
+    );
+  });
+
   describe('nothing to compare', () => {
     it.each([
       ['the target has no scores', () => stubScores([], baselineScores)],
