@@ -24,6 +24,7 @@ import type { ConfigType } from './config';
 import { ALLOWED_MIME_TYPES } from '../common/constants/mime_types';
 import {
   CASE_ATTACHMENT_SAVED_OBJECT,
+  CASE_OBSERVABLE_SAVED_OBJECT,
   CASE_FIELD_DEFINITION_SAVED_OBJECT,
   CASE_TEMPLATE_SAVED_OBJECT,
   INTERNAL_CASE_WORKFLOW_RUN_URL,
@@ -185,6 +186,16 @@ describe('Cases Plugin', () => {
         (call) => call[0]?.name === CASE_ATTACHMENT_SAVED_OBJECT
       );
       expect(attachmentSOCall).toBeDefined();
+    });
+
+    it('should always register cases-observables SO', async () => {
+      plugin.setup(coreSetup, pluginsSetup);
+
+      const registerTypeCalls = coreSetup.savedObjects.registerType.mock.calls;
+      const observableSOCall = registerTypeCalls.find(
+        (call) => call[0]?.name === CASE_OBSERVABLE_SAVED_OBJECT
+      );
+      expect(observableSOCall).toBeDefined();
     });
 
     // Registration must be unconditional so a serverless release has the
