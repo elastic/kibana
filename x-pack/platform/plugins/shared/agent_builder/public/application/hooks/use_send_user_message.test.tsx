@@ -24,9 +24,19 @@ const { useConversationContext } = jest.requireMock('../context/conversation/con
 const conversationId = 'conv-1';
 const updatedConversation = { id: conversationId, events: [{ id: 'evt-1', type: 'user_message' }] };
 
+const sentAttachments = [
+  {
+    type: 'group',
+    id: 'group-1',
+    label: 'Group',
+    items: [{ id: 'a-1', type: AttachmentType.text, data: { content: 'hello' } }],
+  },
+];
+
 describe('useSendUserMessage', () => {
   let queryClient: QueryClient;
   let sendUserMessage: jest.Mock;
+  let removeAttachments: jest.Mock;
   let resetAttachments: jest.Mock;
 
   const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -36,18 +46,13 @@ describe('useSendUserMessage', () => {
   beforeEach(() => {
     queryClient = new QueryClient();
     sendUserMessage = jest.fn().mockResolvedValue(updatedConversation);
+    removeAttachments = jest.fn();
     resetAttachments = jest.fn();
     useAgentBuilderServices.mockReturnValue({ chatService: { sendUserMessage } });
     useConversationId.mockReturnValue(conversationId);
     useConversationContext.mockReturnValue({
-      attachments: [
-        {
-          type: 'group',
-          id: 'group-1',
-          label: 'Group',
-          items: [{ id: 'a-1', type: AttachmentType.text, data: { content: 'hello' } }],
-        },
-      ],
+      attachments: sentAttachments,
+      removeAttachments,
       resetAttachments,
     });
   });
@@ -82,7 +87,8 @@ describe('useSendUserMessage', () => {
         updatedConversation
       )
     );
-    expect(resetAttachments).toHaveBeenCalledTimes(1);
+    expect(removeAttachments).toHaveBeenCalledWith(sentAttachments);
+    expect(resetAttachments).not.toHaveBeenCalled();
   });
 
   it('rejects without a conversation id and leaves the cache alone', async () => {
@@ -92,6 +98,6 @@ describe('useSendUserMessage', () => {
     await expect(result.current.mutateAsync('hello')).rejects.toThrow('conversation id');
 
     expect(sendUserMessage).not.toHaveBeenCalled();
-    expect(resetAttachments).not.toHaveBeenCalled();
+    expect(removeAttachments).not.toHaveBeenCalled();
   });
 });

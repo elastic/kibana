@@ -52,7 +52,7 @@ export interface SendMessageVars {
   connectorId?: string;
   attachments?: ConversationAttachment[];
   conversationAttachments?: VersionedAttachment[];
-  resetAttachments?: () => void;
+  removeAttachments?: (attachments: readonly ConversationAttachment[]) => void;
   browserApiTools?: Array<BrowserApiToolDefinition<any>>;
 }
 
@@ -246,8 +246,9 @@ export const useSendMessageMutation = ({
           return;
         }
 
-        // The message and its attachments are persisted whether the run completed or was stopped, so reset the composer.
-        vars.resetAttachments?.();
+        // The message and its attachments are persisted whether the run completed or was stopped.
+        // Only the sent attachments leave the composer; ones added during the answer stay.
+        vars.removeAttachments?.(vars.attachments ?? []);
         clearActiveStream(vars.conversationId);
         await releaseLocalContent({
           refetch: streamActions.refetchConversation,

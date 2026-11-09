@@ -58,7 +58,7 @@ describe('useConversationStream sendMessage', () => {
     mockConversation = undefined;
     jest.mocked(useConversationContext).mockReturnValue({
       attachments: [documentInput],
-      resetAttachments: jest.fn(),
+      removeAttachments: jest.fn(),
     } as never);
   });
 
