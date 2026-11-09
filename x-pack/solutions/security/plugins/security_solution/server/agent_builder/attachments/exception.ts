@@ -9,12 +9,18 @@ import type { z } from '@kbn/zod/v4';
 import { lazySchema } from '@kbn/zod/v4';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import { ExceptionListItemOsTypeArray } from '@kbn/securitysolution-exceptions-common/api';
 import { exceptionItemBaseSchema } from '@kbn/securitysolution-exceptions-common/workflows';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { securityAttachmentDataSchema } from './security_attachment_data_schema';
 
+// Attachment data is never rendered as a template, so `os_types` keeps the
+// API's OS enum instead of the step schema's template-tolerant union.
 export const exceptionAttachmentDataSchema = lazySchema(() =>
-  securityAttachmentDataSchema.extend(exceptionItemBaseSchema.shape)
+  securityAttachmentDataSchema.extend({
+    ...exceptionItemBaseSchema.shape,
+    os_types: ExceptionListItemOsTypeArray.optional(),
+  })
 );
 
 export type ExceptionAttachmentData = z.infer<typeof exceptionAttachmentDataSchema>;

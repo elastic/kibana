@@ -10,6 +10,7 @@ import { EuiCallOut, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
 import { ExceptionItemCardConditions } from '@kbn/securitysolution-exception-list-components';
+import { toExceptionListOsTypesSafe } from '@kbn/securitysolution-exceptions-common/workflows';
 import type { EntriesArray } from '@kbn/securitysolution-io-ts-list-types';
 import { toApiEntries } from '../../../../common/detection_engine/rule_exceptions/to_api_entries';
 import type { ExceptionAttachment } from './types';
@@ -36,6 +37,10 @@ export const ExceptionInlineContent: React.FC<AttachmentRenderProps<ExceptionAtt
     }
   }, [entries]);
 
+  // The card's `os` prop only accepts the API's OS enum; invalid rendered
+  // values degrade to no OS badges, the same fallback as invalid entries.
+  const osProp = useMemo(() => toExceptionListOsTypesSafe(osTypes), [osTypes]);
+
   return (
     <EuiPanel hasShadow={false} hasBorder={false} paddingSize="s">
       {name ? (
@@ -55,7 +60,7 @@ export const ExceptionInlineContent: React.FC<AttachmentRenderProps<ExceptionAtt
       {entriesProp ? (
         <ExceptionItemCardConditions
           entries={entriesProp}
-          os={osTypes}
+          os={osProp}
           dataTestSubj={CONDITIONS_TEST_SUBJ}
           showValueListModal={ValueListText}
         />

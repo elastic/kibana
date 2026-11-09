@@ -23,6 +23,10 @@ import type {
   ExceptionItemOutcome,
   ExceptionItemOutput,
 } from '@kbn/securitysolution-exceptions-common/workflows';
+import {
+  InvalidExceptionListOsTypesError,
+  toExceptionListOsTypes,
+} from '@kbn/securitysolution-exceptions-common/workflows';
 import { CREATE_RULE_EXCEPTIONS_URL } from '../../../common/api/detection_engine/rule_exceptions';
 import { DETECTION_ENGINE_RULES_URL } from '../../../common/constants';
 import { RuleExceptionList } from '../../../common/api/detection_engine/model/rule_schema';
@@ -66,6 +70,27 @@ export const toApiEntries = (entries: ExceptionEntryInput[]): EntriesArray => {
 };
 
 /**
+ * Narrows rendered `os_types` values to the API's OS enum, rewrapping a
+ * non-enum rendered value (e.g. a template that rendered to something other
+ * than linux/macos/windows) as a step `ValidationError`, the same treatment
+ * {@link toApiEntries} gives a missing operand. Returns `undefined` when the
+ * step carries no OS values, so callers can omit the field.
+ */
+export const toApiOsTypes = (
+  osTypes: ExceptionItemBaseInput['os_types']
+): NonNullable<CreateExceptionItemBody['os_types']> | undefined => {
+  if (osTypes === undefined || osTypes.length === 0) return undefined;
+  try {
+    return toExceptionListOsTypes(osTypes);
+  } catch (error) {
+    if (error instanceof InvalidExceptionListOsTypesError) {
+      throw new ExecutionError({ type: 'ValidationError', message: error.message });
+    }
+    throw error;
+  }
+};
+
+/**
  * Builds the create-item request body shared by the rule exceptions API and
  * the exception list items API from the step's item fields.
  */
@@ -74,13 +99,14 @@ export const toCreateExceptionItemBody = (
 ): CreateExceptionItemBody => {
   const { name, description, entries, os_types: osTypes, tags, expire_time: expireTime } = input;
   const comments = input.comments?.map((comment) => ({ comment }));
+  const apiOsTypes = toApiOsTypes(osTypes);
 
   return {
     name,
     description,
     type: 'simple',
     entries: toApiEntries(entries),
-    ...(osTypes && osTypes.length > 0 ? { os_types: osTypes } : {}),
+    ...(apiOsTypes !== undefined ? { os_types: apiOsTypes } : {}),
     ...(tags && tags.length > 0 ? { tags } : {}),
     ...(expireTime !== undefined ? { expire_time: expireTime } : {}),
     ...(comments && comments.length > 0 ? { comments } : {}),

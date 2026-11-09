@@ -77,6 +77,16 @@ describe('createExceptionAttachmentType', () => {
       });
       expect(result.valid).toBe(false);
     });
+
+    it('rejects os_types outside the API enum, since attachments are never rendered', async () => {
+      const valid = await attachmentType.validate({ ...validData, os_types: ['linux'] });
+      expect(valid.valid).toBe(true);
+
+      for (const osTypes of [['templeos'], ['{{ steps.x.output.os }}']]) {
+        const result = await attachmentType.validate({ ...validData, os_types: osTypes });
+        expect(result.valid).toBe(false);
+      }
+    });
   });
 
   describe('format', () => {

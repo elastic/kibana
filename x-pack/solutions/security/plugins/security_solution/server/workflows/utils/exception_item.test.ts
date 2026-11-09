@@ -170,6 +170,25 @@ describe('toCreateExceptionItemBody', () => {
       comments: [{ comment: 'created by workflow' }],
     });
   });
+
+  it('rewraps a non-enum rendered os_types value as a ValidationError', () => {
+    expect(() =>
+      toCreateExceptionItemBody({
+        name: 'My exception',
+        description: '',
+        entries: [{ field: 'host.name', operator: 'is', value: 'my-host' }],
+        os_types: ['templeos'],
+      })
+    ).toThrow(ExecutionError);
+    expect(() =>
+      toCreateExceptionItemBody({
+        name: 'My exception',
+        description: '',
+        entries: [{ field: 'host.name', operator: 'is', value: 'my-host' }],
+        os_types: ['templeos'],
+      })
+    ).toThrow(/os_types/);
+  });
 });
 
 const itemSummary = {
