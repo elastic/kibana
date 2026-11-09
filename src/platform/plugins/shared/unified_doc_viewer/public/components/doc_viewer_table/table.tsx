@@ -319,17 +319,17 @@ const InternalDocViewerTable = ({
     [setShowOnlySelectedFields]
   );
 
-  // Keep a usable minimum so the grid doesn't collapse on short viewports (e.g. 400% zoom);
-  // the flyout body scrolls when the content exceeds the available height.
-  const containerHeight = containerRef
-    ? Math.max(
-        getTabContentAvailableHeight(
-          containerRef,
-          decreaseAvailableHeightBy ?? DEFAULT_MARGIN_BOTTOM
-        ),
-        MIN_TABLE_HEIGHT
-      )
+  const heightOffset = decreaseAvailableHeightBy ?? DEFAULT_MARGIN_BOTTOM;
+  const availableHeight = containerRef
+    ? getTabContentAvailableHeight(containerRef, heightOffset)
     : 0;
+  // An offset larger than the viewport can't be a real margin: callers use it to opt out of the
+  // fixed height (the resulting negative CSS height is ignored) and let their parent size the table.
+  const fillsParent = heightOffset > window.innerHeight;
+  // Otherwise keep a usable minimum so the grid doesn't collapse on short viewports (e.g. 400% zoom);
+  // the flyout body scrolls when the content exceeds the available height.
+  const containerHeight =
+    containerRef && !fillsParent ? Math.max(availableHeight, MIN_TABLE_HEIGHT) : availableHeight;
 
   return (
     <EuiFlexGroup
