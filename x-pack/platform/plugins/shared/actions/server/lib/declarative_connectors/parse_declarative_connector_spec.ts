@@ -162,10 +162,27 @@ const httpRequestSchema = lazySchema(() =>
       body: z.unknown().optional(),
       bodyType: z.enum(['json', 'form', 'text']).optional(),
       retry: retrySchema.optional(),
+      pagination: z
+        .object({
+          strategy: z.literal('link_header'),
+          header: z.string().optional(),
+          maxPages: z.number().int().min(1).max(100),
+          itemsPath: z.string().optional(),
+          outputKey: z.string().min(1),
+        })
+        .strict()
+        .optional(),
       response: z
         .object({
           dataPath: z.string().optional(),
           outputKey: z.string().optional(),
+          rateLimitHeaders: z
+            .object({
+              remaining: z.string().optional(),
+              reset: z.string().optional(),
+            })
+            .strict()
+            .optional(),
         })
         .strict()
         .optional(),

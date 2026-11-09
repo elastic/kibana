@@ -551,4 +551,127 @@ describe('executeDeclarativeRequest', () => {
       })
     ).rejects.toThrow('Response path "data" not found');
   });
+
+  it('follows same-origin link pagination and stops at maxPages', async () => {
+    const paginated = createRecordingAxiosClient({}, (url) =>
+      url?.includes('page=2')
+        ? { data: [{ id: 2 }], status: 200, headers: {} }
+        : {
+            data: [{ id: 1 }],
+            status: 200,
+            headers: { link: '<https://api.example/items?page=2>; rel="next"' },
+          }
+    );
+    await expect(
+      executeDeclarativeRequest({
+        client: paginated.client,
+        request: {
+          method: 'GET',
+          url: 'https://api.example/items',
+          pagination: { strategy: 'link_header', maxPages: 3, outputKey: 'items' },
+        },
+        input: {},
+        config: {},
+      })
+    ).resolves.toEqual({ items: [{ id: 1 }, { id: 2 }] });
+    expect(paginated.requests).toHaveLength(2);
+
+    const onePage = createRecordingAxiosClient({}, () => ({
+      data: [{ id: 1 }],
+      status: 200,
+      headers: { link: '<https://api.example/items?page=2>; rel="next"' },
+    }));
+    await executeDeclarativeRequest({
+      client: onePage.client,
+      request: {
+        method: 'GET',
+        url: 'https://api.example/items',
+        pagination: { strategy: 'link_header', maxPages: 1, outputKey: 'items' },
+      },
+      input: {},
+      config: {},
+    });
+    expect(onePage.requests).toHaveLength(1);
+
+    const crossOrigin = createRecordingAxiosClient({}, () => ({
+      data: [{ id: 1 }],
+      status: 200,
+      headers: { link: '<https://evil.example/items?page=2>; rel="next"' },
+    }));
+    await expect(
+      executeDeclarativeRequest({
+        client: crossOrigin.client,
+        request: {
+          method: 'GET',
+          url: 'https://api.example/items',
+          pagination: { strategy: 'link_header', maxPages: 3, outputKey: 'items' },
+        },
+        input: {},
+        config: {},
+      })
+    ).rejects.toThrow(/cross-origin/);
+    expect(crossOrigin.requests).toHaveLength(1);
+
+    const noLink = createRecordingAxiosClient({}, () => ({
+      data: [{ id: 1 }],
+      status: 200,
+      headers: {},
+    }));
+    await executeDeclarativeRequest({
+      client: noLink.client,
+      request: {
+        method: 'GET',
+        url: 'https://api.example/items',
+        pagination: { strategy: 'link_header', maxPages: 3, outputKey: 'items' },
+      },
+      input: {},
+      config: {},
+    });
+    expect(noLink.requests).toHaveLength(1);
+  });
+
+  it('attaches rate limit metadata and omits it when headers are missing', async () => {
+    const withHeaders = createRecordingAxiosClient({}, () => ({
+      data: { ok: true },
+      status: 200,
+      headers: { 'x-ratelimit-remaining': '5', 'x-ratelimit-reset': '60' },
+    }));
+    await expect(
+      executeDeclarativeRequest({
+        client: withHeaders.client,
+        request: {
+          method: 'GET',
+          url: 'https://api.example/items',
+          response: {
+            rateLimitHeaders: { remaining: 'x-ratelimit-remaining', reset: 'x-ratelimit-reset' },
+          },
+        },
+        input: {},
+        config: {},
+      })
+    ).resolves.toEqual({
+      ok: true,
+      _meta: { rateLimit: { remaining: 5, reset: 60 } },
+    });
+
+    const withoutHeaders = createRecordingAxiosClient({}, () => ({
+      data: { ok: true },
+      status: 200,
+      headers: {},
+    }));
+    await expect(
+      executeDeclarativeRequest({
+        client: withoutHeaders.client,
+        request: {
+          method: 'GET',
+          url: 'https://api.example/items',
+          response: {
+            rateLimitHeaders: { remaining: 'x-ratelimit-remaining', reset: 'x-ratelimit-reset' },
+          },
+        },
+        input: {},
+        config: {},
+      })
+    ).resolves.toEqual({ ok: true });
+  });
 });

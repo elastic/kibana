@@ -70,6 +70,15 @@ actions:
         maxAttempts: 3
         initialDelayMs: 200
         maxDelayMs: 5000
+      pagination:
+        strategy: link_header
+        header: link
+        maxPages: 3
+        outputKey: users
+      response:
+        rateLimitHeaders:
+          remaining: x-rate-limit-remaining
+          reset: x-rate-limit-reset
   getLogs:
     description: Read recent Okta System Log events with bounded Link-header pagination.
     isTool: true
@@ -113,6 +122,15 @@ actions:
         maxAttempts: 3
         initialDelayMs: 200
         maxDelayMs: 5000
+      pagination:
+        strategy: link_header
+        header: link
+        maxPages: 3
+        outputKey: events
+      response:
+        rateLimitHeaders:
+          remaining: x-rate-limit-remaining
+          reset: x-rate-limit-reset
 test:
   description: Verify connectivity by listing one user.
   request:

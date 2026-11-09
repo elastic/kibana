@@ -59,9 +59,18 @@ export interface DeclarativeRetry {
   maxDelayMs?: number;
 }
 
+export interface DeclarativePagination {
+  strategy: 'link_header';
+  header?: string;
+  maxPages: number;
+  itemsPath?: string;
+  outputKey: string;
+}
+
 export interface DeclarativeResponseMapping {
   dataPath?: string;
   outputKey?: string;
+  rateLimitHeaders?: { remaining?: string; reset?: string };
 }
 
 export interface DeclarativeRequest {
@@ -74,6 +83,7 @@ export interface DeclarativeRequest {
   body?: unknown;
   bodyType?: 'json' | 'form' | 'text';
   retry?: DeclarativeRetry;
+  pagination?: DeclarativePagination;
   response?: DeclarativeResponseMapping;
 }
 

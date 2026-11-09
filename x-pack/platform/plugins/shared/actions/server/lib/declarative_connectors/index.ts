@@ -10,4 +10,5 @@ export { materializeDeclarativeConnectorSpec } from './materialize_declarative_c
 export { executeDeclarativeRequest } from './execute_declarative_request';
 export { TemplateRenderError } from './render_template';
 export { DeclarativeConnectorSpecError } from './types';
+export type { DeclarativeRequestResult } from './execute_declarative_request';
 export type { DeclarativeAction, DeclarativeConnectorSpec, DeclarativeRequest } from './types';

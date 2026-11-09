@@ -23,6 +23,15 @@ interface ClientResponse {
   data: unknown;
 }
 
+interface RateLimitMetadata {
+  remaining?: number;
+  reset?: number;
+}
+
+export interface DeclarativeRequestResult extends Record<string, unknown> {
+  _meta?: { rateLimit?: RateLimitMetadata };
+}
+
 interface RequestConfig {
   method: string;
   url: string;
@@ -255,6 +264,59 @@ const applyResponseMapping = (
   return mapping.outputKey ? { [mapping.outputKey]: selected.value } : selected.value;
 };
 
+const getNextLink = (response: ClientResponse, headerName: string): string | undefined => {
+  const value = getHeader(response.headers, headerName);
+  if (!value) {
+    return undefined;
+  }
+  for (const part of value.split(',')) {
+    const match = part.match(/<([^>]+)>\s*;\s*rel="?next"?/i);
+    if (match) {
+      return match[1];
+    }
+  }
+  return undefined;
+};
+
+const assertSameOrigin = (firstUrl: string, nextUrl: string): void => {
+  if (new URL(nextUrl).origin !== new URL(firstUrl).origin) {
+    throw new Error('Declarative pagination cannot follow a cross-origin next link.');
+  }
+};
+
+const parseHeaderNumber = (
+  response: ClientResponse,
+  headerName: string | undefined
+): number | undefined => {
+  if (!headerName) {
+    return undefined;
+  }
+  const raw = getHeader(response.headers, headerName);
+  if (raw === undefined) {
+    return undefined;
+  }
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) ? parsed : undefined;
+};
+
+const getRateLimitMetadata = (
+  response: ClientResponse,
+  headers: DeclarativeResponseMapping['rateLimitHeaders']
+): RateLimitMetadata | undefined => {
+  if (!headers) {
+    return undefined;
+  }
+  const remaining = parseHeaderNumber(response, headers.remaining);
+  const reset = parseHeaderNumber(response, headers.reset);
+  if (remaining === undefined && reset === undefined) {
+    return undefined;
+  }
+  return {
+    ...(remaining !== undefined ? { remaining } : {}),
+    ...(reset !== undefined ? { reset } : {}),
+  };
+};
+
 const toFormBody = (value: unknown): URLSearchParams => {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) {
     throw new Error('Declarative form request bodies must be objects.');
@@ -303,14 +365,19 @@ const toResult = (data: unknown): Record<string, unknown> => {
   return { data };
 };
 
-/** Runs a declarative HTTP request, including retry and response mapping. */
+const withRateLimit = (
+  result: Record<string, unknown>,
+  rateLimit: RateLimitMetadata | undefined
+): DeclarativeRequestResult => (rateLimit ? { ...result, _meta: { rateLimit } } : result);
+
+/** Runs a declarative HTTP request, including retry, pagination, and response mapping. */
 export const executeDeclarativeRequest = async ({
   client,
   request,
   input,
   config,
   sleep = defaultSleep,
-}: ExecuteDeclarativeRequestOptions): Promise<Record<string, unknown>> => {
+}: ExecuteDeclarativeRequestOptions): Promise<DeclarativeRequestResult> => {
   const context: TemplateContext = { input, config: config ?? {} };
   const firstUrl = buildUrl(request, context);
   const renderedHeaders = toHeaderRecord(renderTemplateValue(request.headers ?? {}, context));
@@ -328,6 +395,51 @@ export const executeDeclarativeRequest = async ({
     ...(data !== undefined ? { data } : {}),
   };
 
-  const response = await requestWithRetry(client, firstConfig, request.retry, sleep);
-  return toResult(applyResponseMapping(response.data, request.response));
+  if (!request.pagination) {
+    const response = await requestWithRetry(client, firstConfig, request.retry, sleep);
+    return withRateLimit(
+      toResult(applyResponseMapping(response.data, request.response)),
+      getRateLimitMetadata(response, request.response?.rateLimitHeaders)
+    );
+  }
+
+  const items: unknown[] = [];
+  let currentUrl = firstUrl;
+  let currentConfig = firstConfig;
+  let response: ClientResponse | undefined;
+  let nextUrl: string | undefined;
+  const maxPages = request.pagination.maxPages;
+
+  for (let page = 0; page < maxPages; page++) {
+    response = await requestWithRetry(client, currentConfig, request.retry, sleep);
+    const pageItems = request.pagination.itemsPath
+      ? getPath(response.data, request.pagination.itemsPath)
+      : { found: true, value: response.data };
+    if (!pageItems.found || !Array.isArray(pageItems.value)) {
+      throw new Error('Declarative paginated responses must resolve to an array.');
+    }
+    items.push(...pageItems.value);
+    nextUrl = getNextLink(response, request.pagination.header ?? 'link');
+    if (!nextUrl || page + 1 >= maxPages) {
+      break;
+    }
+    const resolvedNextUrl = new URL(nextUrl, currentUrl).toString();
+    assertSameOrigin(firstUrl, resolvedNextUrl);
+    currentUrl = resolvedNextUrl;
+    currentConfig = {
+      method: request.method,
+      url: currentUrl,
+      headers,
+      ...(data !== undefined ? { data } : {}),
+    };
+  }
+
+  if (!response) {
+    throw new Error('Declarative request did not produce a response.');
+  }
+
+  return withRateLimit(
+    { [request.pagination.outputKey]: items },
+    getRateLimitMetadata(response, request.response?.rateLimitHeaders)
+  );
 };

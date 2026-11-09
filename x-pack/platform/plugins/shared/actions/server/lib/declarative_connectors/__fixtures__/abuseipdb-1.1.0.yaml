@@ -85,6 +85,9 @@ actions:
         maxDelayMs: 5000
       response:
         dataPath: data
+        rateLimitHeaders:
+          remaining: x-ratelimit-remaining
+          reset: x-ratelimit-reset
   reportIp:
     description: Report an IPv4 address with one or more abuse categories.
     isTool: true
