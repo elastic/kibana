@@ -53,7 +53,6 @@ import { registerUiSettings } from './ui_settings';
 import { registerRoutes } from './routes/register_routes';
 import { registerOwner } from './managed_workflows/register_owner';
 import { ensureFingerprintIndexMapping } from './context_engine/ensure_fingerprint_index';
-import { ensureManagedInvestigationsAiIndex } from './context_engine/ensure_managed_investigations_ai_index';
 import { registerInvestigationsAiIndex } from './context_engine/register_investigations_ai_index';
 import { initializeManagedWorkflows } from './managed_workflows/initialize_managed_workflows';
 import { installRegisteredWorkerForRequest } from './managed_workflows/worker_registry';
@@ -369,24 +368,6 @@ export class AlertZeroPlugin
 
     if (!this.config.enabled) {
       return this.alertZeroStartContract();
-    }
-
-    // createKi can leave duplicate unconfigured rows for this id. Context Engine
-    // will not replace them, so the managed registration never appears until they are gone.
-    if (plugins.contextEngine) {
-      const contextEngine = plugins.contextEngine;
-      void ensureManagedInvestigationsAiIndex({
-        aiIndexService: contextEngine.getAiIndexService(),
-        listSpaceIds: () =>
-          enumerateSpaceIds(core.savedObjects.createInternalRepository(['space'])),
-        logger: this.logger.get('context_engine'),
-      }).catch((error) => {
-        this.logger.warn(
-          `Failed to make the security-investigations AI index managed: ${
-            error instanceof Error ? error.message : String(error)
-          }`
-        );
-      });
     }
 
     // Plugin start cannot return a promise. Writes stay refused until this settles, so a

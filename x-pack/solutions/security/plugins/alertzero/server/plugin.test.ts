@@ -24,7 +24,6 @@ import { ensureAgentSafe, registerAgentType } from './agent';
 import { registerAlertZeroInferenceFeatures } from './inference_features';
 import { ALERTZERO_TELEMETRY_EVENT_TYPES } from './telemetry';
 import { ReportWorkerOutcomeStepId } from '../common/step_types';
-import { ensureManagedInvestigationsAiIndex } from './context_engine/ensure_managed_investigations_ai_index';
 
 jest.mock('./managed_workflows/register_owner', () => ({
   registerOwner: jest.fn(),
@@ -46,10 +45,6 @@ jest.mock('./agent', () => ({
 
 jest.mock('./routes/register_routes', () => ({
   registerRoutes: jest.fn(),
-}));
-
-jest.mock('./context_engine/ensure_managed_investigations_ai_index', () => ({
-  ensureManagedInvestigationsAiIndex: jest.fn().mockResolvedValue(undefined),
 }));
 
 const createConfig = (overrides: Partial<AlertZeroConfig> = {}): AlertZeroConfig => ({
@@ -194,12 +189,10 @@ describe('AlertZeroPlugin feature-flag gating', () => {
       await plugin.start(coreStart, {
         spaces: undefined,
         workflowsExtensions: { initManagedWorkflowsClient: jest.fn() },
-        contextEngine: { getAiIndexService: jest.fn() },
       } as never);
 
       expect(initializeManagedWorkflows).not.toHaveBeenCalled();
       expect(ensureAgentSafe).not.toHaveBeenCalled();
-      expect(ensureManagedInvestigationsAiIndex).not.toHaveBeenCalled();
     });
   });
 
@@ -269,21 +262,6 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         'security-attack-fingerprints',
         expect.objectContaining({
           dest: { type: 'index', value: 'ai-index-idx-security-attack-fingerprints' },
-        })
-      );
-    });
-
-    it('drops duplicate security-investigations rows once Context Engine has started', () => {
-      const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
-      const contextEngine = { getAiIndexService: jest.fn().mockReturnValue({ list: jest.fn() }) };
-
-      plugin.start(coreMock.createStart(), { contextEngine } as never);
-
-      expect(ensureManagedInvestigationsAiIndex).toHaveBeenCalledWith(
-        expect.objectContaining({
-          aiIndexService: expect.objectContaining({ list: expect.any(Function) }),
-          listSpaceIds: expect.any(Function),
-          logger: expect.anything(),
         })
       );
     });
