@@ -67,6 +67,7 @@ import {
   CloudOnboardingDeploymentSchemaV5,
   CloudOnboardingDeploymentSchemaV6,
   CloudOnboardingDeploymentSchemaV7,
+  CloudOnboardingDeploymentSchemaV8,
 } from '../types';
 
 import { downloadSourceSchemaV2 } from '../../common/types/models/download_source_schema';
@@ -2285,6 +2286,17 @@ export const getSavedObjectTypes = (
               { unknowns: 'ignore' }
             ),
             create: CloudOnboardingDeploymentSchemaV7,
+          },
+        },
+        8: {
+          // Raised the policySettings value limit so a condition fits. No mapping change.
+          changes: [],
+          schemas: {
+            forwardCompatibility: CloudOnboardingDeploymentSchemaV8.extends(
+              {},
+              { unknowns: 'ignore' }
+            ),
+            create: CloudOnboardingDeploymentSchemaV8,
           },
         },
       },

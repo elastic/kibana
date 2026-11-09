@@ -10,6 +10,7 @@ import {
   CloudOnboardingDeploymentSchemaV5,
   CloudOnboardingDeploymentSchemaV6,
   CloudOnboardingDeploymentSchemaV7,
+  CloudOnboardingDeploymentSchemaV8,
 } from '../models';
 
 import {
@@ -216,6 +217,28 @@ describe('saved object model versions', () => {
     ).not.toThrow();
   });
 
+  it('V8 stores a package policy setting as long as a condition', () => {
+    const policySettings = { condition: 'x'.repeat(10000) };
+    expect(CloudOnboardingDeploymentSchemaV8.validate({ ...record, policySettings })).toEqual(
+      expect.objectContaining({ policySettings })
+    );
+    expect(() =>
+      CloudOnboardingDeploymentSchemaV8.validate({
+        ...record,
+        policySettings: { condition: 'x'.repeat(10001) },
+      })
+    ).toThrow();
+  });
+
+  it('V7 rejects a setting longer than 1024 characters, which is why the longer limit needs its own model version', () => {
+    expect(() =>
+      CloudOnboardingDeploymentSchemaV7.validate({
+        ...record,
+        policySettings: { condition: 'x'.repeat(1025) },
+      })
+    ).toThrow();
+  });
+
   it('V6 does not know the package policy settings, which is why they need their own model version', () => {
     expect(() =>
       CloudOnboardingDeploymentSchemaV6.validate({
@@ -231,7 +254,12 @@ describe('policySettings in requests', () => {
     const tooMany = Object.fromEntries(
       Array.from({ length: 21 }, (_, i) => [`setting_${i}`, 'value'])
     );
-    for (const policySettings of [{ output_id: { nested: 'object' } }, { output_id: 1 }, tooMany]) {
+    for (const policySettings of [
+      { output_id: { nested: 'object' } },
+      { output_id: 1 },
+      { condition: 'x'.repeat(10001) },
+      tooMany,
+    ]) {
       expect(() =>
         CreateCloudOnboardingDeploymentRequestSchema.body.validate(createBody({ policySettings }))
       ).toThrow();
@@ -242,7 +270,7 @@ describe('policySettings in requests', () => {
   });
 
   it('accepts package policy settings on create and update', () => {
-    const policySettings = { output_id: 'logstash-1' };
+    const policySettings = { output_id: 'logstash-1', condition: 'x'.repeat(10000) };
     expect(
       CreateCloudOnboardingDeploymentRequestSchema.body.validate(createBody({ policySettings }))
     ).toEqual(expect.objectContaining({ policySettings }));
