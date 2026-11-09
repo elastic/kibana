@@ -30,7 +30,6 @@ import type { BulkActionCheckTaskState, RetryParams } from './retry_helper';
 import {
   CHECK_TASK_INTERVAL_MINUTES,
   getRetryParams,
-  MAX_CHILD_ACTION_IDS,
   MAX_RETRY_COUNT,
   RejectedCheckpointError,
   RUNNER_HEARTBEAT_INTERVAL_MINUTES,
@@ -112,11 +111,6 @@ export abstract class ActionRunner {
   private actionedAgentIds?: Set<string>;
   /** When the read that produced {@link actionedAgentIds} started, for topping it up. */
   private actionedAgentIdsReadAt?: string;
-  /**
-   * Action ids this action's documents are written under when they are not the action's own id.
-   * Only rollback has them, and only through them can its agents be deduplicated.
-   */
-  private childActionIds: string[];
 
   constructor(
     esClient: ElasticsearchClient,
@@ -129,57 +123,20 @@ export abstract class ActionRunner {
     this.actionParams = { ...actionParams, actionId: actionParams.actionId ?? uuidv4() };
     this.retryParams = retryParams;
     this.nbAgentsProcessed = retryParams.nbAgentsProcessed ?? 0;
-    this.childActionIds = retryParams.childActionIds ?? [];
   }
 
   /**
-   * Record the action ids a batch wrote its documents under, for subclasses that do not write them
-   * under the action's own id. They are checkpointed with the cursor, so a later run can read them
-   * back and deduplicate against the agents they cover.
+   * Prefix shared by the action ids this action's documents are written under when they are not
+   * the action's own id, or undefined when every document carries the action's own id.
+   *
+   * Only rollback needs it: it writes one action per rollback version, each under an id of its
+   * own, so nothing links them to the action that created them. Deriving those ids from the
+   * action's own id makes the link part of the id itself, which means a resumed run finds them by
+   * reading `.fleet-actions` rather than by trusting that an earlier run managed to record them
+   * somewhere first.
    */
-  protected async recordChildActionIds(actionIds: string[]): Promise<void> {
-    let recordedNewId = false;
-    for (const actionId of actionIds) {
-      if (
-        !actionId ||
-        actionId === this.actionParams.actionId ||
-        this.childActionIds.includes(actionId)
-      ) {
-        continue;
-      }
-      // Checked only for an id that is actually new, or an action sitting at the ceiling would log
-      // this again for every batch, including for ids it has already recorded.
-      if (this.childActionIds.length >= MAX_CHILD_ACTION_IDS) {
-        appContextService
-          .getLogger()
-          .warn(
-            `Action ${this.actionParams.actionId} has more than ${MAX_CHILD_ACTION_IDS} child actions, the rest will not be deduplicated if it restarts`
-          );
-        return;
-      }
-      this.childActionIds.push(actionId);
-      recordedNewId = true;
-    }
-
-    // Persisted as soon as it is recorded rather than waiting for the end of the batch: these ids
-    // are what a resume deduplicates against, and a runner that dies mid-batch would otherwise take
-    // them with it. Writing only this field is safe mid-batch for the same reason the heartbeat is
-    // — the list only ever grows, while the cursor and the count are valid between batches only.
-    //
-    // Awaited so the batch does not run on past an id that has not been recorded anywhere but this
-    // process's heap, and so nothing is left in flight at shutdown. The write itself merges rather
-    // than replaces, so two of these overlapping cannot drop an id either way.
-    if (recordedNewId) {
-      await this.writeCheckTaskState(
-        { childActionIds: [...this.childActionIds] },
-        // The one checkpoint write whose failure is not survivable. Every other one costs a batch
-        // re-read on resume, which deduplication handles; losing a child action id costs a second
-        // rollback dispatched to agents that already have one, and nothing downstream can tell.
-        // Failing the batch sends it back through the retry, which carries the ids in its params
-        // and writes them again.
-        { throwOnFailure: true }
-      );
-    }
+  protected getChildActionIdPrefix(): string | undefined {
+    return undefined;
   }
 
   protected abstract getActionType(): string;
@@ -331,9 +288,6 @@ export abstract class ActionRunner {
                 ...this.retryParams,
                 retryCount: (this.retryParams.retryCount ?? 0) + 1,
                 nbAgentsProcessed: this.nbAgentsProcessed,
-                // Carried whatever else was reset: they are how the next run deduplicates, and a
-                // restart from the beginning needs them more than a resume does.
-                ...(this.childActionIds.length ? { childActionIds: this.childActionIds } : {}),
               },
               this.getTaskType(),
               taskId
@@ -397,7 +351,9 @@ export abstract class ActionRunner {
       // search, and the cursor is only meaningful against the one that produced it.
       pitId: this.retryParams.pitId,
       nbAgentsProcessed: this.nbAgentsProcessed,
-      ...(this.childActionIds.length ? { childActionIds: this.childActionIds } : {}),
+      // Checkpointed so a resume continues this action's retry budget rather than starting a new
+      // one. Without it a watchdog resume hands the action another MAX_RETRY_COUNT attempts.
+      ...(this.retryParams.retryCount ? { retryCount: this.retryParams.retryCount } : {}),
     });
   }
 
@@ -405,10 +361,9 @@ export abstract class ActionRunner {
     checkpoint: Partial<
       Pick<
         BulkActionCheckTaskState,
-        'searchAfter' | 'pitId' | 'nbAgentsProcessed' | 'childActionIds' | 'stoppedAt'
+        'searchAfter' | 'pitId' | 'nbAgentsProcessed' | 'retryCount' | 'stoppedAt'
       >
-    >,
-    options: { throwOnFailure?: boolean } = {}
+    >
   ) {
     // Nothing to write to, and nothing watching this action either: it is already running without
     // a check task, which `runActionAsyncWithRetry` logged when it could not schedule one.
@@ -418,9 +373,6 @@ export abstract class ActionRunner {
     try {
       await this.bulkActionsResolver!.updateCheckTaskState(this.checkTaskId, checkpoint);
     } catch (error) {
-      if (options.throwOnFailure) {
-        throw error;
-      }
       appContextService
         .getLogger()
         .warn(
@@ -520,12 +472,13 @@ export abstract class ActionRunner {
     // what lets a page be sized to the ids still wanted.
     await collectAgentIdsFromActions(
       this.esClient,
-      [this.actionParams.actionId!, ...this.childActionIds],
+      [this.actionParams.actionId!],
       actionedAgentIds,
       {
         since: this.actionedAgentIdsReadAt,
         limit: MAX_ACTIONED_AGENT_IDS,
         agentsPerDocument: this.actionParams.batchSize ?? SO_SEARCH_LIMIT,
+        actionIdPrefix: this.getChildActionIdPrefix(),
       }
     );
     this.actionedAgentIdsReadAt = readStartedAt;
@@ -573,8 +526,9 @@ export abstract class ActionRunner {
     const unhandledAgentIds = new Set(
       await getAgentsWithoutActionResults(
         this.esClient,
-        [this.actionParams.actionId!, ...this.childActionIds],
-        remainingAgents.map(({ id }) => id)
+        [this.actionParams.actionId!],
+        remainingAgents.map(({ id }) => id),
+        { actionIdPrefix: this.getChildActionIdPrefix() }
       )
     );
     return remainingAgents.filter(({ id }) => unhandledAgentIds.has(id));

@@ -31,7 +31,6 @@ import {
   CHECK_TASK_INTERVAL_MINUTES,
   MAX_CHECK_TASK_RESUMES,
   MAX_CHECK_TASK_RUNS,
-  MAX_CHILD_ACTION_IDS,
   getRetryParams,
 } from './retry_helper';
 import { BulkActionTaskType } from './bulk_action_types';
@@ -223,7 +222,7 @@ export class BulkActionsResolver {
     checkpoint: Partial<
       Pick<
         BulkActionCheckTaskState,
-        'searchAfter' | 'pitId' | 'nbAgentsProcessed' | 'childActionIds' | 'stoppedAt'
+        'searchAfter' | 'pitId' | 'nbAgentsProcessed' | 'retryCount' | 'stoppedAt'
       >
     >
   ) {
@@ -239,18 +238,6 @@ export class BulkActionsResolver {
             ...checkpoint,
             checkpointUpdatedAt: new Date().toISOString(),
           };
-          if (checkpoint.childActionIds) {
-            // Merged with what is stored rather than replacing it. These writes are made as each
-            // child action is created, so two of them can be in flight at once, and the map
-            // function runs against whatever the task document held when this attempt fetched it —
-            // including on the refetch that follows a version conflict. Replacing would let a write
-            // carrying one id land after one carrying two and drop the second, taking with it the
-            // only reference that stops a resume dispatching that action's agents again. The list
-            // only ever grows, so a union is always the right answer.
-            nextState.childActionIds = [
-              ...new Set([...(state.childActionIds ?? []), ...checkpoint.childActionIds]),
-            ].slice(0, MAX_CHILD_ACTION_IDS);
-          }
           return nextState;
         }),
       { logger }
@@ -530,12 +517,15 @@ const runCheckTask = async (
   const params = taskInstance.params as BulkActionTaskParams;
   const checkpoint: Pick<
     RetryParams,
-    'searchAfter' | 'nbAgentsProcessed' | 'pitId' | 'childActionIds'
+    'searchAfter' | 'nbAgentsProcessed' | 'pitId' | 'retryCount'
   > = checkpointUpdatedAt
     ? {
         searchAfter: freshState.searchAfter,
         nbAgentsProcessed: freshState.nbAgentsProcessed,
-        childActionIds: freshState.childActionIds,
+        // Continues the action's retry budget rather than restarting it: an action that has
+        // already spent its attempts must not be handed another MAX_RETRY_COUNT just because the
+        // runner that spent them could not remove this task.
+        retryCount: freshState.retryCount,
         // The point in time is taken from the checkpoint, not from the params: Elasticsearch
         // may hand back a new id on any search, and only the latest one is guaranteed to be
         // valid. It is kept rather than cleared because a stall shorter than its keep alive
@@ -546,7 +536,7 @@ const runCheckTask = async (
     : {
         searchAfter: params.retryParams?.searchAfter,
         nbAgentsProcessed: params.retryParams?.nbAgentsProcessed,
-        childActionIds: params.retryParams?.childActionIds,
+        retryCount: params.retryParams?.retryCount,
         pitId: params.retryParams?.pitId,
       };
   const retryParams = getRetryParams(taskInstance.taskType, {
@@ -574,7 +564,7 @@ const runCheckTask = async (
     }
     await resolver.run(
       actionParams,
-      { ...retryParams, retryCount: 1, taskId: retryTaskId },
+      { ...retryParams, retryCount: checkpoint.retryCount ?? 1, taskId: retryTaskId },
       taskInstance.taskType,
       retryTaskId,
       // Scheduling must not retry on its own backoff here. This task is itself the retry loop, so

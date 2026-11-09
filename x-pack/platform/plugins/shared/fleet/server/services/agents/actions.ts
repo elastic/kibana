@@ -351,9 +351,12 @@ export async function getAgentActions(esClient: ElasticsearchClient, actionId: s
 }
 
 /**
- * How many action documents one page of {@link getAgentIdsFromActions} holds. The first page is
- * read without a point in time, so this also decides how often that read has to fall back to
- * paging under one.
+ * Ceiling on how many action documents one page of {@link collectAgentIdsFromActions} asks for. A
+ * page is usually smaller than this: once the caller says how many agents a document is expected to
+ * name, the page is sized to the ids still wanted instead. That makes the read fall back to paging
+ * under a point in time sooner than a flat document count would — an action whose documents name
+ * far fewer agents than the caller expected fills a small page and escalates — which costs round
+ * trips rather than correctness, and is the price of not asking for a response of unbounded size.
  */
 const ACTION_DOCS_PAGE_SIZE = 1000;
 
@@ -368,6 +371,43 @@ const ACTION_DOCS_PAGE_SIZE = 1000;
  * cannot hang the action the way the runner's expiring did.
  */
 const ACTION_DOCS_PIT_KEEP_ALIVE = '2m';
+
+/**
+ * Matches an action's own documents and, when it writes some under generated ids of its own, those
+ * too. `.fleet-actions` already carries composite action ids elsewhere — scheduled unenroll
+ * prefixes its own and queries them back the same way — so this is an established shape for the
+ * index rather than a new assumption about it.
+ */
+const actionIdQuery = (actionIds: string[], actionIdPrefix?: string): QueryDslQueryContainer => {
+  const should: QueryDslQueryContainer[] = [];
+  if (actionIds.length > 0) {
+    should.push({ terms: { action_id: actionIds } });
+  }
+  if (actionIdPrefix) {
+    should.push({ prefix: { action_id: actionIdPrefix } });
+  }
+  return { bool: { should, minimum_should_match: 1 } };
+};
+
+/**
+ * Whether an action document exists, for a caller that has to tell a write which never landed from
+ * one which landed and then timed out on the way back.
+ */
+export async function hasAgentAction(
+  esClient: ElasticsearchClient,
+  actionId: string
+): Promise<boolean> {
+  const res = await esClient.search({
+    index: AGENT_ACTIONS_INDEX,
+    ignore_unavailable: true,
+    size: 0,
+    terminate_after: 1,
+    track_total_hits: 1,
+    query: { bool: { filter: [{ term: { action_id: actionId } }] } },
+  });
+  const total = res.hits.total;
+  return (typeof total === 'number' ? total : total?.value ?? 0) > 0;
+}
 
 /** Collects a page's agent ids, stopping at `limit`. Returns whether the limit has been reached. */
 const collectAgentIds = (
@@ -407,6 +447,10 @@ const collectAgentIds = (
  * is already there, and counting those against a limit of its own would let a nearly full set stop
  * paging before reaching the documents it has never seen.
  *
+ * `actionIdPrefix` additionally matches the action documents whose id starts with it, which is how
+ * an action whose documents are written under generated ids of its own finds them without having
+ * recorded them anywhere.
+ *
  * `limit` stops the read — collecting and paging both — once `agentIds` holds that many. It is the
  * caller's memory bound, so it has to be honoured here rather than applied to the result: an
  * action that has touched a million agents would otherwise be a million ids and the documents
@@ -419,10 +463,15 @@ export async function collectAgentIdsFromActions(
   esClient: ElasticsearchClient,
   actionIds: string[],
   agentIds: Set<string>,
-  options: { since?: string; limit?: number; agentsPerDocument?: number } = {}
+  options: {
+    since?: string;
+    limit?: number;
+    agentsPerDocument?: number;
+    actionIdPrefix?: string;
+  } = {}
 ): Promise<void> {
   const limit = options.limit ?? Infinity;
-  if (actionIds.length === 0 || agentIds.size >= limit) {
+  if ((actionIds.length === 0 && !options.actionIdPrefix) || agentIds.size >= limit) {
     return;
   }
   const agentsPerDocument = Math.max(1, options.agentsPerDocument ?? 1);
@@ -437,7 +486,7 @@ export async function collectAgentIdsFromActions(
       )
     );
 
-  const filter: QueryDslQueryContainer[] = [{ terms: { action_id: actionIds } }];
+  const filter: QueryDslQueryContainer[] = [actionIdQuery(actionIds, options.actionIdPrefix)];
   if (options.since) {
     filter.push({ range: { '@timestamp': { gte: options.since } } });
   }
@@ -519,9 +568,10 @@ interface AgentIdsWithResultsAggregation {
 export async function getAgentsWithoutActionResults(
   esClient: ElasticsearchClient,
   actionIds: string[],
-  agentIds: string[]
+  agentIds: string[],
+  options: { actionIdPrefix?: string } = {}
 ): Promise<string[]> {
-  if (agentIds.length === 0 || actionIds.length === 0) {
+  if (agentIds.length === 0 || (actionIds.length === 0 && !options.actionIdPrefix)) {
     return [];
   }
   try {
@@ -540,7 +590,10 @@ export async function getAgentsWithoutActionResults(
       index: AGENT_ACTIONS_RESULTS_INDEX,
       query: {
         bool: {
-          must: [{ terms: { action_id: actionIds } }, { terms: { agent_id: agentIds } }],
+          must: [
+            actionIdQuery(actionIds, options.actionIdPrefix),
+            { terms: { agent_id: agentIds } },
+          ],
         },
       },
       size: 0,

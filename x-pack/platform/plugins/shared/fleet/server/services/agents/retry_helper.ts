@@ -49,16 +49,6 @@ export const MAX_CHECK_TASK_RESUMES = 20;
  */
 export const MAX_CHECK_TASK_RUNS = (24 * 60) / CHECK_TASK_INTERVAL_MINUTES;
 
-/**
- * Ceiling on the child action ids carried in the checkpoint. Rollback writes one action per
- * rollback version per batch, so a large fleet paged with a small `batchSize` could otherwise grow
- * this list without bound inside a saved object. The earliest ids are the ones kept, since an
- * action restarting from the beginning re-pages their agents first; past the ceiling such an action
- * deduplicates the agents it has ids for and re-actions the rest, as it did before they were
- * recorded at all.
- */
-export const MAX_CHILD_ACTION_IDS = 1000;
-
 export interface RetryParams {
   pitId?: string;
   searchAfter?: SortResults;
@@ -66,12 +56,6 @@ export interface RetryParams {
   taskId?: string;
   /** Agents processed by earlier runs of this action, so the count stays cumulative. */
   nbAgentsProcessed?: number;
-  /**
-   * Action ids earlier runs of this action wrote their documents under, when they are not the
-   * action's own id. Only rollback does this — it creates one action per rollback version — and
-   * without carrying them the per-agent deduplication has nothing to read for that action type.
-   */
-  childActionIds?: string[];
 }
 
 /**
@@ -89,10 +73,10 @@ export interface BulkActionCheckTaskState {
   pitId?: string;
   nbAgentsProcessed?: number;
   /**
-   * Action ids this action's documents were written under when they are not the action's own id,
-   * so a resumed run can still deduplicate against them. See `RetryParams.childActionIds`.
+   * The attempt the runner was on when it last checkpointed, so a watchdog resume continues this
+   * action's retry budget instead of starting it over at 1 and granting another MAX_RETRY_COUNT.
    */
-  childActionIds?: string[];
+  retryCount?: number;
   /**
    * Last time the runner wrote to this state, either by advancing past a batch or by a heartbeat
    * while one was in flight. Its only use is liveness: the check task resumes the action when it

@@ -959,9 +959,58 @@ describe('Agent actions', () => {
       expect(esClientMock.search).toHaveBeenCalledWith(
         expect.objectContaining({
           ignore_unavailable: true,
-          query: { bool: { filter: [{ terms: { action_id: ['action1', 'child1'] } }] } },
+          query: {
+            bool: {
+              filter: [
+                {
+                  bool: {
+                    should: [{ terms: { action_id: ['action1', 'child1'] } }],
+                    minimum_should_match: 1,
+                  },
+                },
+              ],
+            },
+          },
         })
       );
+    });
+
+    it('also matches the documents written under ids derived from the action id', async () => {
+      // rollback writes one action per rollback version under an id of its own; deriving them from
+      // the action's id is what lets a later run find them with no state to rely on
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+      esClientMock.search.mockResolvedValue(mockHits([['agent1']]) as any);
+
+      await collect(esClientMock, ['action1'], { actionIdPrefix: 'action1-rollback-' });
+
+      expect(esClientMock.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: {
+              filter: [
+                {
+                  bool: {
+                    should: [
+                      { terms: { action_id: ['action1'] } },
+                      { prefix: { action_id: 'action1-rollback-' } },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
+              ],
+            },
+          },
+        })
+      );
+    });
+
+    it('reads on a prefix alone, without an action id', async () => {
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+      esClientMock.search.mockResolvedValue(mockHits([['agent1']]) as any);
+
+      await expect(
+        collect(esClientMock, [], { actionIdPrefix: 'action1-rollback-' })
+      ).resolves.toEqual(new Set(['agent1']));
     });
 
     it('adds to the set it is given rather than replacing it', async () => {
@@ -997,7 +1046,12 @@ describe('Agent actions', () => {
           query: {
             bool: {
               filter: [
-                { terms: { action_id: ['action1'] } },
+                {
+                  bool: {
+                    should: [{ terms: { action_id: ['action1'] } }],
+                    minimum_should_match: 1,
+                  },
+                },
                 { range: { '@timestamp': { gte: '2026-11-07T10:00:00.000Z' } } },
               ],
             },

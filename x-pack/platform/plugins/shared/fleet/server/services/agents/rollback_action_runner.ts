@@ -20,7 +20,7 @@ import { AgentRollbackError } from '../../errors';
 import { ActionRunner } from './action_runner';
 import { BulkActionTaskType } from './bulk_action_types';
 import { getAgentPolicyRestrictions, isAgentlessAgent, isHostedAgent } from './hosted_agent';
-import { createErrorActionResults, createAgentAction } from './actions';
+import { createErrorActionResults, createAgentAction, hasAgentAction } from './actions';
 import { bulkUpdateAgents } from './crud';
 import {
   EXPIRED_ROLLBACK_ERROR_MESSAGE,
@@ -41,19 +41,16 @@ export class RollbackActionRunner extends ActionRunner {
         // actionId is for tracking the bulk operation task, not individual rollback actions
         // Don't pass total - each action should use the count for its version group, not the total across all batches
         spaceIds: this.actionParams?.spaceId ? [this.actionParams.spaceId] : undefined,
-        // Rollback writes its documents under one generated action id per rollback version rather
-        // than under the action's own id, so per-agent deduplication has nothing to read unless
-        // those ids are recorded. They are recorded as each document lands rather than from the
-        // returned list: the writes that follow one can fail, and the batch that failed partway is
-        // precisely the one a retry replays — without its id the replay re-sends a rollback to
-        // every agent the interrupted batch already actioned.
-        onActionCreated: async (actionId: string) => {
-          this.allActionIds.push(actionId);
-          await this.recordChildActionIds([actionId]);
-        },
+        // Those per-version ids are derived from this action's id so that they carry the link back
+        // to it. Nothing else does: rollback writes no document under the action's own id, so
+        // without this a resumed run has no way to find what an earlier one already dispatched,
+        // and re-sends a rollback to every agent it handled.
+        childActionIdPrefix: this.getChildActionIdPrefix(),
       },
       this.actionParams?.spaceId ? [this.actionParams.spaceId] : undefined
     );
+    // Track all action IDs created across batches
+    this.allActionIds.push(...result.actionIds);
     // Return the first actionId for compatibility with ActionRunner interface
     // If no actions were created, return empty string
     return {
@@ -61,10 +58,15 @@ export class RollbackActionRunner extends ActionRunner {
     };
   }
 
+  protected getChildActionIdPrefix(): string | undefined {
+    const actionId = this.actionParams?.actionId;
+    return actionId ? `${actionId}${CHILD_ACTION_ID_SEPARATOR}` : undefined;
+  }
+
   /**
-   * Rollback rejects agents — hosted, agentless, expired or missing a rollback — by writing them
-   * an error result under a child action id while leaving them out of that action's `agents`, so
-   * the action documents alone do not show that they were dealt with.
+   * Rollback rejects agents — hosted, agentless, expired or without a rollback to make — by
+   * writing them an error result under a child action id while leaving them out of that action's
+   * `agents`, so the action documents alone do not show that they were dealt with.
    */
   protected hasAgentsHandledOutsideActionDocuments(): boolean {
     return true;
@@ -95,10 +97,38 @@ export class RollbackActionRunner extends ActionRunner {
 }
 
 /**
+ * Separates a rollback action's own id from the id of the action that created it. `.fleet-actions`
+ * already holds composite action ids — scheduled unenroll prefixes its own and reads them back
+ * with the same kind of prefix query — so this is an established shape for the index.
+ */
+export const CHILD_ACTION_ID_SEPARATOR = '-rollback-';
+
+const createChildActionId = (childActionIdPrefix?: string) =>
+  `${childActionIdPrefix ?? ''}${uuidv4()}`;
+
+/**
  * Put back the upgrade fields `rollbackBatch` cleared, from the agent documents it read before
  * clearing them, for when the action those agents were marked for never made it to Elasticsearch.
+ * A document under that id means it did land and these agents really are rolling back, so they are
+ * left as they are.
  */
-const restoreUpgradeState = async (esClient: ElasticsearchClient, agents: Agent[]) => {
+const restoreUpgradeStateIfNotDispatched = async (
+  esClient: ElasticsearchClient,
+  actionId: string,
+  agents: Agent[]
+) => {
+  if (await hasAgentAction(esClient, actionId)) {
+    appContextService
+      .getLogger()
+      .info(
+        `Rollback action ${actionId} was written after all, leaving the upgrade state of its ${agents.length} agents alone`
+      );
+    return;
+  }
+
+  // bulkUpdateAgents reports per agent failures in this map rather than throwing, so a restore
+  // that only partly landed would otherwise be silent.
+  const errors: Record<Agent['id'], Error> = {};
   await bulkUpdateAgents(
     esClient,
     agents.map((agent) => ({
@@ -108,8 +138,20 @@ const restoreUpgradeState = async (esClient: ElasticsearchClient, agents: Agent[
         upgrade_started_at: agent.upgrade_started_at ?? null,
       },
     })),
-    {}
+    errors
   );
+  const failedAgentIds = Object.keys(errors);
+  if (failedAgentIds.length > 0) {
+    appContextService
+      .getLogger()
+      .warn(
+        `Could not restore the upgrade state of ${
+          failedAgentIds.length
+        } agents after rollback action ${actionId} failed to be created: ${failedAgentIds.join(
+          ', '
+        )}`
+      );
+  }
 };
 
 export async function rollbackBatch(
@@ -120,8 +162,8 @@ export async function rollbackBatch(
     actionId?: string;
     total?: number;
     spaceIds?: string[];
-    /** Called with each action id as its document is created, before the writes that follow it. */
-    onActionCreated?: (actionId: string) => Promise<void> | void;
+    /** Prefix that links each generated action id back to the action that created it. */
+    childActionIdPrefix?: string;
   },
   spaceIds?: string[]
 ): Promise<{ actionIds: string[] }> {
@@ -196,7 +238,7 @@ export async function rollbackBatch(
   const namespaces = spaceIds ?? options.spaceIds ?? [];
 
   for (const [version, agents] of Object.entries(agentsByRollbackVersion)) {
-    const actionId = options.actionId ?? uuidv4();
+    const actionId = options.actionId ?? createChildActionId(options.childActionIdPrefix);
     const total = options.total ?? agents.length;
     const data = {
       version,
@@ -241,14 +283,20 @@ export async function rollbackBatch(
         namespaces,
       });
     } catch (error) {
-      // The agents are marked as rolling back but nothing was dispatched. A bulk action retries
-      // and both writes are idempotent, but `sendRollbackAgentsActions` also calls this directly
-      // for an id list or a small query, and that path has no retry — the agents would be left
-      // looking like they are upgrading, which blocks a single-agent rollback of them until the
-      // upgrade times out. Putting the previous values back is best effort: it runs on a path that
-      // is already failing, and if it fails too the caller is no worse off than before it was
-      // tried.
-      await restoreUpgradeState(esClient, agents).catch((restoreError) =>
+      // The agents are marked as rolling back but, as far as this knows, nothing was dispatched. A
+      // bulk action retries and both writes are idempotent, but `sendRollbackAgentsActions` also
+      // calls this directly for an id list or a small query, and that path has no retry — the
+      // agents would be left looking like they are upgrading, which blocks a single-agent rollback
+      // of them until the upgrade times out.
+      //
+      // "As far as this knows" is why the document is looked for first. `createAgentAction` writes
+      // with `refresh: 'wait_for'`, so a timeout on the way back is a realistic way in here with
+      // the action already indexed and about to be dispatched. Unmarking those agents would show
+      // them as idle while they roll back, and let someone start a second rollback on them.
+      //
+      // Putting the values back is best effort either way: it runs on a path that is already
+      // failing, and if it fails too the caller is no worse off than before it was tried.
+      await restoreUpgradeStateIfNotDispatched(esClient, actionId, agents).catch((restoreError) =>
         appContextService
           .getLogger()
           .warn(
@@ -259,7 +307,6 @@ export async function rollbackBatch(
     }
 
     actionIds.push(actionId);
-    await options.onActionCreated?.(actionId);
   }
 
   // Create actions for versions that have errors but no eligible agents
@@ -270,7 +317,7 @@ export async function rollbackBatch(
     }
 
     // Create error-only action for this version
-    const actionId = uuidv4();
+    const actionId = createChildActionId(options.childActionIdPrefix);
     const total = Object.keys(versionErrors).length;
 
     await createAgentAction(esClient, soClient, {
@@ -291,7 +338,6 @@ export async function rollbackBatch(
     });
 
     actionIds.push(actionId);
-    await options.onActionCreated?.(actionId);
     errorsByActionId[actionId] = { ...versionErrors };
   }
 
@@ -306,7 +352,7 @@ export async function rollbackBatch(
       }
       Object.assign(errorsByActionId[actionIds[0]], preActionErrors);
     } else {
-      const errorOnlyActionId = uuidv4();
+      const errorOnlyActionId = createChildActionId(options.childActionIdPrefix);
       await createAgentAction(esClient, soClient, {
         id: errorOnlyActionId,
         created_at: now,
@@ -322,7 +368,6 @@ export async function rollbackBatch(
         namespaces,
       });
       actionIds.push(errorOnlyActionId);
-      await options.onActionCreated?.(errorOnlyActionId);
       errorsByActionId[errorOnlyActionId] = preActionErrors;
     }
   }

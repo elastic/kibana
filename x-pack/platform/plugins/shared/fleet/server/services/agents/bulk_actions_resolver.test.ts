@@ -22,7 +22,6 @@ import { BulkActionsResolver, createRetryTask } from './bulk_actions_resolver';
 import { BulkActionTaskType } from './bulk_action_types';
 import {
   CHECK_TASK_INTERVAL_MINUTES,
-  MAX_CHILD_ACTION_IDS,
   MAX_CHECK_TASK_RESUMES,
   MAX_CHECK_TASK_RUNS,
 } from './retry_helper';
@@ -153,43 +152,6 @@ describe('BulkActionsResolver', () => {
       await expect(
         resolver.updateCheckTaskState('task1:check', { nbAgentsProcessed: 1 })
       ).rejects.toThrow('Could not update the state of task task1:check: Not Found');
-    });
-
-    it('merges child action ids with the stored ones instead of replacing them', async () => {
-      // these writes are made as each child action is created, so two can be in flight at once; a
-      // write carrying one id landing after one carrying two would otherwise drop the second, and
-      // with it the only reference that stops a resume dispatching that action's agents again
-      await resolver.updateCheckTaskState('task1:check', { childActionIds: ['child-1'] });
-
-      const stateMapFn = taskManager.bulkUpdateState.mock.calls[0][1];
-      expect(stateMapFn({ childActionIds: ['child-1', 'child-2'] }, 'task1:check')).toEqual({
-        childActionIds: ['child-1', 'child-2'],
-        checkpointUpdatedAt: expect.any(String),
-      });
-    });
-
-    it('caps the merged child action ids', async () => {
-      await resolver.updateCheckTaskState('task1:check', { childActionIds: ['child-new'] });
-
-      const stateMapFn = taskManager.bulkUpdateState.mock.calls[0][1];
-      const stored = Array.from({ length: MAX_CHILD_ACTION_IDS }, (_, i) => `child-${i}`);
-      const merged = stateMapFn({ childActionIds: stored }, 'task1:check') as {
-        childActionIds: string[];
-      };
-
-      expect(merged.childActionIds).toHaveLength(MAX_CHILD_ACTION_IDS);
-      expect(merged.childActionIds).not.toContain('child-new');
-    });
-
-    it('leaves the stored child action ids alone when a write does not carry any', async () => {
-      await resolver.updateCheckTaskState('task1:check', { nbAgentsProcessed: 10 });
-
-      const stateMapFn = taskManager.bulkUpdateState.mock.calls[0][1];
-      expect(stateMapFn({ childActionIds: ['child-1'] }, 'task1:check')).toEqual({
-        childActionIds: ['child-1'],
-        nbAgentsProcessed: 10,
-        checkpointUpdatedAt: expect.any(String),
-      });
     });
 
     it('bumps only the timestamp for a heartbeat, leaving the checkpoint alone', async () => {
@@ -857,30 +819,6 @@ describe('createRetryTask', () => {
       expect(resolver.getCheckTaskState).toHaveBeenCalledTimes(1);
     });
 
-    it('hands the child action ids back to the resumed runner', async () => {
-      // rollback writes its documents under generated ids, which are the only way its agents can
-      // be deduplicated once the action restarts
-      resolver.getCheckTaskState.mockResolvedValue({
-        searchAfter: ['lastAgent'],
-        childActionIds: ['child-1', 'child-2'],
-        ...STALLED_CHECKPOINT,
-      });
-
-      await createRetryTask(
-        createTaskInstance({ state: { ...STALLED_CHECKPOINT } }),
-        getDeps,
-        jest.fn()
-      ).run();
-
-      expect(resolver.run).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.objectContaining({ childActionIds: ['child-1', 'child-2'] }),
-        BulkActionTaskType.REASSIGN_RETRY,
-        RETRY_TASK_ID,
-        expect.anything()
-      );
-    });
-
     it('removes itself when the runner has given up, rather than granting a second budget', async () => {
       // the runner records this before removing the tasks, and that removal can fail; resuming
       // would restart the action under retryCount: 1 with a whole new MAX_RETRY_COUNT
@@ -894,6 +832,51 @@ describe('createRetryTask', () => {
 
       expect(result).toEqual(expect.objectContaining({ shouldDeleteTask: true }));
       expect(resolver.run).not.toHaveBeenCalled();
+    });
+
+    it('resumes on the retry count the action had reached, not a fresh budget', async () => {
+      // a runner that spent its budget records stoppedAt and removes this task, but that removal
+      // can fail; continuing the count means one more attempt rather than another MAX_RETRY_COUNT
+      resolver.getCheckTaskState.mockResolvedValue({
+        searchAfter: ['lastAgent'],
+        retryCount: 17,
+        ...STALLED_CHECKPOINT,
+      });
+
+      await createRetryTask(
+        createTaskInstance({ state: { ...STALLED_CHECKPOINT } }),
+        getDeps,
+        jest.fn()
+      ).run();
+
+      expect(resolver.run).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ retryCount: 17 }),
+        BulkActionTaskType.REASSIGN_RETRY,
+        RETRY_TASK_ID,
+        expect.anything()
+      );
+    });
+
+    it('starts at the first attempt when the checkpoint holds no retry count', async () => {
+      resolver.getCheckTaskState.mockResolvedValue({
+        searchAfter: ['lastAgent'],
+        ...STALLED_CHECKPOINT,
+      });
+
+      await createRetryTask(
+        createTaskInstance({ state: { ...STALLED_CHECKPOINT } }),
+        getDeps,
+        jest.fn()
+      ).run();
+
+      expect(resolver.run).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ retryCount: 1 }),
+        BulkActionTaskType.REASSIGN_RETRY,
+        RETRY_TASK_ID,
+        expect.anything()
+      );
     });
 
     it('stops watching an action that never completes, however alive it looks', async () => {

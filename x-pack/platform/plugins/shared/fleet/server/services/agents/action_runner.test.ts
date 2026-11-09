@@ -87,8 +87,8 @@ class TestActionRunner extends ActionRunner {
   public batchWithoutActionableAgents = false;
   /** Overridden by the tests that exercise an action type with its own deduplication rules. */
   public taskType: string = TASK_TYPE;
-  /** Action ids a batch writes its documents under, as rollback's version groups do. */
-  public childActionIdsPerBatch?: string[];
+  /** Prefix of the ids a batch writes its documents under, as rollback's version groups do. */
+  public childActionIdPrefix?: string;
   /** Makes the runner read error results too, as rollback's does. */
   public agentsHandledOutsideActionDocuments = false;
 
@@ -108,6 +108,10 @@ class TestActionRunner extends ActionRunner {
     return this.agentsHandledOutsideActionDocuments;
   }
 
+  protected getChildActionIdPrefix(): string | undefined {
+    return this.childActionIdPrefix;
+  }
+
   protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
     if (this.batchInFlight) {
       await this.batchInFlight;
@@ -116,9 +120,6 @@ class TestActionRunner extends ActionRunner {
       throw this.processAgentsError;
     }
     this.processedBatches.push(agents.map(({ id }) => id));
-    if (this.childActionIdsPerBatch) {
-      await this.recordChildActionIds(this.childActionIdsPerBatch);
-    }
     return { actionId: this.actionParams.actionId! };
   }
 }
@@ -214,6 +215,8 @@ describe('ActionRunner', () => {
         searchAfter: ['agent-3'],
         pitId: 'stale-pit',
         nbAgentsProcessed: 4,
+        // so a watchdog resume continues this budget rather than starting a new one
+        retryCount: 1,
       });
       // the start stamp plus one checkpoint per batch
       expect(resolver.updateCheckTaskState).toHaveBeenCalledTimes(3);
@@ -738,44 +741,6 @@ describe('ActionRunner', () => {
       expect(runner.processedBatches).toEqual([['agent-0', 'agent-1']]);
     });
 
-    it('reads the documents of the child action ids a batch recorded, not just the action id', async () => {
-      mockAgentPages(2, 2);
-      const runner = createRunner();
-      // rollback writes one action per rollback version under a generated id, so its agents can
-      // only be deduplicated through those ids
-      runner.childActionIdsPerBatch = ['child-1'];
-
-      await runner.runActionAsyncWithRetry();
-
-      expect(mockedCollectAgentIdsFromActions).toHaveBeenLastCalledWith(
-        esClient,
-        [ACTION_ID, 'child-1'],
-        expect.any(Set),
-        expect.objectContaining({ since: expect.any(String) })
-      );
-      expect(resolver.updateCheckTaskState).toHaveBeenLastCalledWith(
-        CHECK_TASK_ID,
-        expect.objectContaining({ childActionIds: ['child-1'] })
-      );
-    });
-
-    it('carries the child action ids onto a retry, which restarts without a cursor', async () => {
-      mockAgentPages(2, 2);
-      const runner = createRunner();
-      runner.childActionIdsPerBatch = ['child-1'];
-      runner.processAgentsError = new Error('batch failed');
-      runner.failFromBatch = 1;
-
-      await runner.runActionAsyncWithRetry();
-
-      expect(resolver.run).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.objectContaining({ childActionIds: ['child-1'] }),
-        TASK_TYPE,
-        RETRY_TASK_ID
-      );
-    });
-
     it('bounds the dedupe read itself, not just what it keeps', async () => {
       mockAgentPages(3, 2);
       // the set is one entry per agent actioned, so it is bounded by the size of the action rather
@@ -797,26 +762,6 @@ describe('ActionRunner', () => {
       );
     });
 
-    it('fails the batch when a child action id cannot be persisted', async () => {
-      mockAgentPages(1, 2);
-      // every other checkpoint write costs a batch re-read on resume; this one costs a second
-      // rollback dispatched to agents that already have one, which nothing downstream can tell
-      resolver.updateCheckTaskState.mockRejectedValue(
-        new EsErrors.TimeoutError('Request timed out')
-      );
-      const runner = createRunner({ total: 2 });
-      runner.childActionIdsPerBatch = ['child-1'];
-
-      await runner.runActionAsyncWithRetry();
-
-      expect(resolver.run).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.objectContaining({ childActionIds: ['child-1'] }),
-        TASK_TYPE,
-        RETRY_TASK_ID
-      );
-    });
-
     it('does not fail a batch when an ordinary checkpoint cannot be written', async () => {
       mockAgentPages(1, 2);
       resolver.updateCheckTaskState.mockRejectedValue(
@@ -835,31 +780,6 @@ describe('ActionRunner', () => {
       );
     });
 
-    it('persists a child action id as soon as it is recorded, not at the end of the batch', async () => {
-      mockAgentPages(1, 2);
-      const runner = createRunner({ total: 2 });
-      runner.childActionIdsPerBatch = ['child-1'];
-
-      await runner.runActionAsyncWithRetry();
-
-      // a runner that dies mid-batch would otherwise take them with it, and they are what a resume
-      // deduplicates against
-      expect(resolver.updateCheckTaskState).toHaveBeenCalledWith(CHECK_TASK_ID, {
-        childActionIds: ['child-1'],
-      });
-    });
-
-    it('warns once per genuinely new child action id past the ceiling, not once per batch', async () => {
-      mockAgentPages(3, 2);
-      const runner = createRunner({ total: 6 });
-      runner.childActionIdsPerBatch = ['child-1'];
-
-      await runner.runActionAsyncWithRetry();
-
-      // the same id recorded by every batch must not log the ceiling warning each time
-      expect(logger.warn).not.toHaveBeenCalledWith(expect.stringContaining('child actions'));
-    });
-
     it('treats an agent with an error result as handled when the action type needs it', async () => {
       mockAgentPages(1, 2);
       // rollback rejects an agent by writing it an error result under a child action id while
@@ -869,7 +789,7 @@ describe('ActionRunner', () => {
 
       const runner = createRunner({ total: 2 });
       runner.agentsHandledOutsideActionDocuments = true;
-      runner.childActionIdsPerBatch = ['child-1'];
+      runner.childActionIdPrefix = `${ACTION_ID}-rollback-`;
 
       await runner.runActionAsyncWithRetry();
 
@@ -877,7 +797,8 @@ describe('ActionRunner', () => {
       expect(mockedGetAgentsWithoutActionResults).toHaveBeenCalledWith(
         esClient,
         [ACTION_ID],
-        ['agent-0', 'agent-1']
+        ['agent-0', 'agent-1'],
+        { actionIdPrefix: `${ACTION_ID}-rollback-` }
       );
     });
 
@@ -888,6 +809,23 @@ describe('ActionRunner', () => {
       await createRunner({ total: 2 }).runActionAsyncWithRetry();
 
       expect(mockedGetAgentsWithoutActionResults).not.toHaveBeenCalled();
+    });
+
+    it('reads the documents written under child action ids by their prefix', async () => {
+      mockAgentPages(2, 2);
+      const runner = createRunner();
+      // rollback writes one action per rollback version under an id of its own, derived from this
+      // action's id so that nothing has to record it anywhere for a later run to find it
+      runner.childActionIdPrefix = `${ACTION_ID}-rollback-`;
+
+      await runner.runActionAsyncWithRetry();
+
+      expect(mockedCollectAgentIdsFromActions).toHaveBeenLastCalledWith(
+        esClient,
+        [ACTION_ID],
+        expect.any(Set),
+        expect.objectContaining({ actionIdPrefix: `${ACTION_ID}-rollback-` })
+      );
     });
 
     it('does not dedupe update tags, whose retries re-action agents whose write did not land', async () => {

@@ -11,8 +11,8 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { Agent } from '../../types';
 import { appContextService } from '../app_context';
 
-import { rollbackBatch } from './rollback_action_runner';
-import { createAgentAction, createErrorActionResults } from './actions';
+import { CHILD_ACTION_ID_SEPARATOR, rollbackBatch } from './rollback_action_runner';
+import { createAgentAction, createErrorActionResults, hasAgentAction } from './actions';
 import { bulkUpdateAgents } from './crud';
 import { getAgentPolicyRestrictions, isAgentlessAgent, isHostedAgent } from './hosted_agent';
 
@@ -25,6 +25,7 @@ const mockedBulkUpdateAgents = bulkUpdateAgents as jest.MockedFunction<typeof bu
 const mockedCreateErrorActionResults = createErrorActionResults as jest.MockedFunction<
   typeof createErrorActionResults
 >;
+const mockedHasAgentAction = hasAgentAction as jest.MockedFunction<typeof hasAgentAction>;
 
 const logger = loggerMock.create();
 
@@ -54,40 +55,47 @@ describe('rollbackBatch', () => {
     mockedCreateAgentAction.mockResolvedValue({} as never);
     mockedBulkUpdateAgents.mockResolvedValue(undefined as never);
     mockedCreateErrorActionResults.mockResolvedValue(undefined);
+    mockedHasAgentAction.mockResolvedValue(false);
   });
 
-  it('reports every action id it creates, one per rollback version', async () => {
-    const onActionCreated = jest.fn();
-
+  it('derives each action id from the action that created it', async () => {
+    // nothing else links them: rollback writes no document under the parent action's own id, so a
+    // resumed run finds what an earlier one dispatched by reading these ids back by prefix
     const { actionIds } = await rollbackBatch(
       esClient,
       [createAgent('agent-0', '8.18.0'), createAgent('agent-1', '8.17.0')],
       {},
-      { onActionCreated }
+      { childActionIdPrefix: `parent-1${CHILD_ACTION_ID_SEPARATOR}` }
     );
 
     expect(actionIds).toHaveLength(2);
-    expect(onActionCreated).toHaveBeenCalledTimes(2);
-    expect(onActionCreated.mock.calls.map(([id]) => id)).toEqual(actionIds);
+    for (const actionId of actionIds) {
+      expect(actionId.startsWith(`parent-1${CHILD_ACTION_ID_SEPARATOR}`)).toBe(true);
+    }
+    expect(new Set(actionIds).size).toBe(2);
   });
 
-  it('reports an action id before the writes that follow it, so a failed batch still reports it', async () => {
-    // the batch that fails partway is exactly the one a retry replays, and rollback writes nothing
-    // under the parent action id — without this id the replay sends a second rollback to every
-    // agent this batch already actioned
-    const onActionCreated = jest.fn();
-    mockedCreateErrorActionResults.mockRejectedValue(new Error('Request timed out'));
+  it('derives an error-only action id the same way', async () => {
+    // an agent with no rollback available gets no action of its own, only an error result under a
+    // generated id, and that id has to be found again too
+    const { actionIds } = await rollbackBatch(
+      esClient,
+      [{ id: 'agent-0', upgrade: { rollbacks: [] } } as unknown as Agent],
+      {},
+      { childActionIdPrefix: `parent-1${CHILD_ACTION_ID_SEPARATOR}` }
+    );
 
-    await expect(
-      rollbackBatch(
-        esClient,
-        [createAgent('agent-0', '8.18.0'), { id: 'agent-1' } as unknown as Agent],
-        {},
-        { onActionCreated }
-      )
-    ).rejects.toThrow('Request timed out');
+    expect(actionIds).toHaveLength(1);
+    expect(actionIds[0].startsWith(`parent-1${CHILD_ACTION_ID_SEPARATOR}`)).toBe(true);
+    expect(mockedCreateErrorActionResults).toHaveBeenCalled();
+  });
 
-    expect(onActionCreated).toHaveBeenCalledWith(expect.any(String));
+  it('falls back to a plain id when there is no action to derive one from', async () => {
+    // the synchronous path has no parent action and nothing to deduplicate against
+    const { actionIds } = await rollbackBatch(esClient, [createAgent('agent-0', '8.18.0')], {}, {});
+
+    expect(actionIds).toHaveLength(1);
+    expect(actionIds[0]).not.toContain(CHILD_ACTION_ID_SEPARATOR);
   });
 
   it('marks the agents as rolling back before creating the action that rolls them back', async () => {
@@ -113,6 +121,7 @@ describe('rollbackBatch', () => {
     // writes, but sendRollbackAgentsActions also calls this directly with no retry, and the agents
     // would be left looking like they are upgrading until that times out
     mockedCreateAgentAction.mockRejectedValue(new Error('Request timed out'));
+    mockedHasAgentAction.mockResolvedValue(false);
     const agent = {
       ...createAgent('agent-0', '8.18.0'),
       upgraded_at: '2026-11-01T00:00:00.000Z',
@@ -136,6 +145,39 @@ describe('rollbackBatch', () => {
     );
   });
 
+  it('leaves the upgrade state alone when the action was written after all', async () => {
+    // createAgentAction writes with refresh: 'wait_for', so a timeout on the way back can leave the
+    // action indexed and about to be dispatched; unmarking those agents would show them as idle
+    // while they roll back and let someone start a second rollback on them
+    mockedCreateAgentAction.mockRejectedValue(new Error('Request timed out'));
+    mockedHasAgentAction.mockResolvedValue(true);
+
+    await expect(
+      rollbackBatch(esClient, [createAgent('agent-0', '8.18.0')], {}, {})
+    ).rejects.toThrow('Request timed out');
+
+    // only the forward write, no restore
+    expect(mockedBulkUpdateAgents).toHaveBeenCalledTimes(1);
+  });
+
+  it('warns when the restore only partly lands', async () => {
+    // bulkUpdateAgents reports per agent failures in the map it is given rather than throwing
+    mockedCreateAgentAction.mockRejectedValue(new Error('Request timed out'));
+    mockedBulkUpdateAgents.mockImplementation(async (_esClient, _updates, errors) => {
+      if (mockedBulkUpdateAgents.mock.calls.length > 1) {
+        errors['agent-0'] = new Error('version conflict');
+      }
+    });
+
+    await expect(
+      rollbackBatch(esClient, [createAgent('agent-0', '8.18.0')], {}, {})
+    ).rejects.toThrow('Request timed out');
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Could not restore the upgrade state of 1 agents')
+    );
+  });
+
   it('still raises the original failure when the upgrade state cannot be put back', async () => {
     mockedCreateAgentAction.mockRejectedValue(new Error('Request timed out'));
     mockedBulkUpdateAgents
@@ -152,54 +194,12 @@ describe('rollbackBatch', () => {
 
   it('does not create the action when the agent bookkeeping fails', async () => {
     mockedBulkUpdateAgents.mockRejectedValue(new Error('Request timed out'));
-    const onActionCreated = jest.fn();
 
     await expect(
-      rollbackBatch(esClient, [createAgent('agent-0', '8.18.0')], {}, { onActionCreated })
+      rollbackBatch(esClient, [createAgent('agent-0', '8.18.0')], {}, {})
     ).rejects.toThrow('Request timed out');
 
     // nothing was dispatched, so the retry redoing both writes is harmless
     expect(mockedCreateAgentAction).not.toHaveBeenCalled();
-    expect(onActionCreated).not.toHaveBeenCalled();
-  });
-
-  it('waits for the callback before moving on to the next action', async () => {
-    const resolved: string[] = [];
-    const onActionCreated = jest.fn(async (actionId: string) => {
-      await new Promise((resolve) => setTimeout(resolve, 0));
-      resolved.push(actionId);
-    });
-
-    const { actionIds } = await rollbackBatch(
-      esClient,
-      [createAgent('agent-0', '8.18.0'), createAgent('agent-1', '8.17.0')],
-      {},
-      { onActionCreated }
-    );
-
-    // the id has to be recorded somewhere other than this process's heap before the batch runs on
-    expect(resolved).toEqual(actionIds);
-  });
-
-  it('reports the id of an error-only action too', async () => {
-    // an agent with no rollback available gets no action of its own, only an error result under a
-    // generated id, and that id still has to be deduplicated against
-    const onActionCreated = jest.fn();
-
-    const { actionIds } = await rollbackBatch(
-      esClient,
-      [{ id: 'agent-0', upgrade: { rollbacks: [] } } as unknown as Agent],
-      {},
-      { onActionCreated }
-    );
-
-    expect(onActionCreated.mock.calls.map(([id]) => id)).toEqual(actionIds);
-    expect(mockedCreateErrorActionResults).toHaveBeenCalled();
-  });
-
-  it('does not require a callback', async () => {
-    await expect(
-      rollbackBatch(esClient, [createAgent('agent-0', '8.18.0')], {}, {})
-    ).resolves.toEqual({ actionIds: [expect.any(String)] });
   });
 });
