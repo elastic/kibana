@@ -92,6 +92,22 @@ TS metrics-a
   | EVAL bucket = RANGE_MIN(bucket)`);
   });
 
+  it('declares the metadata fields that the WHERE clauses use in the TS source', () => {
+    const query = createHistogramDistributionQuery({
+      metricItem: createMetric(),
+      bounds,
+      whereStatements: ['_ignored IS NULL'],
+      metadataFields: ['_ignored'],
+      originalSource: 'metrics-*',
+    });
+
+    expect(query).toBe(`SET unmapped_fields = "NULLIFY";
+TS metrics-a METADATA _ignored
+  | WHERE _ignored IS NULL
+  | STATS count = COUNT(latency.exp, bucket) BY bucket = BUCKET(latency.exp, 10, 1, 250), TBUCKET(100)
+  | EVAL bucket = RANGE_MIN(bucket)`);
+  });
+
   it('opens a positive span when min equals max', () => {
     expect(
       createHistogramDistributionQuery({

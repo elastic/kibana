@@ -959,6 +959,38 @@
       "approvedBy": "@elastic/obs-ux-management-team",
       "oasdiffId": "response-required-property-removed",
       "prUrl": "https://github.com/elastic/kibana/pull/302124"
+    },
+    {
+      "path": "/api/observability/slos",
+      "method": "post",
+      "reason": "Widening, not breaking: filters[].meta.value in SLOKqlWithFilters was string-only and now also accepts a range params object and an array of phrase values, matching FilterMeta.value in @kbn/es-query. Every request that was valid before is still valid.",
+      "approvedBy": "@elastic/nightshift-sre-agent-team",
+      "oasdiffId": "request-property-type-changed",
+      "prUrl": "https://github.com/elastic/kibana/pull/303236"
+    },
+    {
+      "path": "/api/observability/slos",
+      "method": "post",
+      "reason": "False-positive: oasdiff reports the anyOf subschemas as removed because each one embeds a filter whose SLOKqlWithFilters filters[].meta.value was widened from string to a union of string, range params object and array of phrase values. No subschema was removed, and every request that was valid before is still valid.",
+      "approvedBy": "@elastic/nightshift-sre-agent-team",
+      "oasdiffId": "request-property-any-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/303236"
+    },
+    {
+      "path": "/api/observability/slos/{id}",
+      "method": "put",
+      "reason": "Widening, not breaking: filters[].meta.value in SLOKqlWithFilters was string-only and now also accepts a range params object and an array of phrase values, matching FilterMeta.value in @kbn/es-query. Every request that was valid before is still valid.",
+      "approvedBy": "@elastic/nightshift-sre-agent-team",
+      "oasdiffId": "request-property-type-changed",
+      "prUrl": "https://github.com/elastic/kibana/pull/303236"
+    },
+    {
+      "path": "/api/observability/slos/{id}",
+      "method": "put",
+      "reason": "False-positive: oasdiff reports the anyOf subschemas as removed because each one embeds a filter whose SLOKqlWithFilters filters[].meta.value was widened from string to a union of string, range params object and array of phrase values. No subschema was removed, and every request that was valid before is still valid.",
+      "approvedBy": "@elastic/nightshift-sre-agent-team",
+      "oasdiffId": "request-property-any-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/303236"
     }
   ]
 }

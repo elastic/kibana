@@ -64,7 +64,7 @@ export const packageReportInputSchema = lazySchema(() =>
     hasConfirmedHit: z
       .boolean()
       .describe(
-        "Whether the hunt cleared the confirmed-hit bar (the coordinator's top-level `has_confirmed_hit`: a required-or-baseline index hit from Tier 1, or a Tier 2 behavior that executed and hit). False covers both an environment that is clean and one where nothing was searchable."
+        "Whether the hunt cleared the confirmed-hit bar (the coordinator's top-level `has_confirmed_hit`: a required-or-baseline index hit from IOC Hunt, or a behavior that executed and hit). False covers both an environment that is clean and one where nothing was searchable."
       ),
     /**
      * Number of SSE attachments the hunt child prepared for this run (`hunt.yaml`'s `sse_count`
@@ -102,7 +102,7 @@ export const packageReportInputSchema = lazySchema(() =>
       .max(200)
       .optional()
       .describe(
-        "The coordinator's `report_intent_targets`: the datasets the report itself points at, without Tier 1 hit indices or the process-bearing streams. Coverage KIs without hit events name these as `data_sources`."
+        "The coordinator's `report_intent_targets`: the datasets the report itself points at, without IOC Hunt hit indices or the process-bearing streams. Coverage KIs without hit events name these as `data_sources`."
       ),
     behaviors: z
       .array(

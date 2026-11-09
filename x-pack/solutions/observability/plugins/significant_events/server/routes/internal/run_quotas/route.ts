@@ -13,6 +13,7 @@ import {
 import {
   MAX_RUN_LIMIT,
   MIN_RUN_LIMIT,
+  RUN_QUOTA_GROUPS,
   type RunQuotaGroup,
   type RunQuotaSettingsPatch,
   type RunQuotasResponse,
@@ -33,17 +34,27 @@ import {
   type RunQuotaSettingsAttributes,
 } from '../../../lib/run_quotas';
 
+const investigationLimitUpdateSchema = lazySchema(() =>
+  z
+    .number()
+    .int()
+    .min(MIN_RUN_LIMIT + 1)
+    .max(MAX_RUN_LIMIT)
+    .nullable()
+    .optional()
+);
+
+const investigationLimitsUpdateShape = {
+  investigation: investigationLimitUpdateSchema,
+  manual_investigation: investigationLimitUpdateSchema,
+  total_investigation: investigationLimitUpdateSchema,
+};
+
 const limitsUpdateSchema = lazySchema(() =>
   z
     .object({
       detection: z.number().int().min(MIN_RUN_LIMIT).max(MAX_RUN_LIMIT).optional(),
-      investigation: z
-        .number()
-        .int()
-        .min(MIN_RUN_LIMIT + 1)
-        .max(MAX_RUN_LIMIT)
-        .nullable()
-        .optional(),
+      ...investigationLimitsUpdateShape,
       ki_extraction: z.number().int().min(MIN_RUN_LIMIT).max(MAX_RUN_LIMIT).optional(),
     })
     .strict()
@@ -83,26 +94,22 @@ const settingsUpdateSchema = lazySchema(() =>
     z
       .object({
         enabled: z.boolean().optional(),
+        investigationLimitsEnabled: z.boolean().optional(),
         limits: limitsUpdateSchema.optional(),
       })
       .strict()
-      .refine((update) => update.enabled !== undefined || update.limits !== undefined, {
-        message: 'At least one run quota setting is required',
-      }),
+      .refine(
+        (update) =>
+          update.enabled !== undefined ||
+          update.investigationLimitsEnabled !== undefined ||
+          update.limits !== undefined,
+        { message: 'At least one run quota setting is required' }
+      ),
     z
       .object({
         activateLimits: activateLimitsSchema,
-        limits: z
-          .object({
-            investigation: z
-              .number()
-              .int()
-              .min(MIN_RUN_LIMIT + 1)
-              .max(MAX_RUN_LIMIT)
-              .nullable(),
-          })
-          .strict()
-          .optional(),
+        investigationLimitsEnabled: z.boolean().optional(),
+        limits: z.object(investigationLimitsUpdateShape).strict().optional(),
       })
       .strict(),
   ])
@@ -114,20 +121,21 @@ const consumeRequestSchema = z.discriminatedUnion('group', [
   z.object({ group: z.literal('investigation') }).strict(),
 ]);
 
-const toStoredLimits = ({
-  investigation,
-  ...limits
-}: z.infer<typeof limitsUpdateSchema>): Partial<Record<RunQuotaGroup, number>> => ({
-  ...limits,
-  ...(investigation === undefined ? {} : { investigation: investigation ?? MIN_RUN_LIMIT }),
-});
+const toStoredLimits = (
+  limits: Partial<Record<RunQuotaGroup, number | null>>
+): Partial<Record<RunQuotaGroup, number>> =>
+  Object.fromEntries(
+    Object.entries(limits).flatMap(([group, limit]) =>
+      limit === undefined ? [] : [[group, limit ?? MIN_RUN_LIMIT]]
+    )
+  );
 
 const toStoredPatch = (body: z.infer<typeof settingsUpdateSchema>): RunQuotaSettingsPatch => {
   if ('activateLimits' in body) {
-    const { limits: investigationLimit, ...activation } = body;
+    const { limits: investigationLimits, ...activation } = body;
     return {
       ...activation,
-      ...(investigationLimit ? { limits: toStoredLimits(investigationLimit) } : {}),
+      ...(investigationLimits ? { limits: toStoredLimits(investigationLimits) } : {}),
     };
   }
   const { limits, ...rest } = body;
@@ -147,24 +155,19 @@ const readRunQuotaSnapshot = async ({
 }): Promise<RunQuotasResponse> => {
   const window = resolveDailyWindow(now);
   const date = dayKey(window);
-  const [detection, investigation, kiExtraction] = await Promise.all([
-    readRunQuotaLedger(internalRepository, date, 'detection'),
-    readRunQuotaLedger(internalRepository, date, 'investigation'),
-    readRunQuotaLedger(internalRepository, date, 'ki_extraction'),
-  ]);
+  const ledgers = await Promise.all(
+    RUN_QUOTA_GROUPS.map((group) => readRunQuotaLedger(internalRepository, date, group))
+  );
 
   return {
     enabled: settings.enabled,
-    limits: {
-      detection: settings.limits.detection,
-      investigation: settings.limits.investigation,
-      ki_extraction: settings.limits.ki_extraction,
-    },
-    counts: {
-      detection: detection.count,
-      investigation: investigation.count,
-      ki_extraction: kiExtraction.count,
-    },
+    investigationLimitsEnabled: settings.investigationLimitsEnabled,
+    limits: Object.fromEntries(
+      RUN_QUOTA_GROUPS.map((group) => [group, settings.limits[group]])
+    ) as Record<RunQuotaGroup, number>,
+    counts: Object.fromEntries(
+      RUN_QUOTA_GROUPS.map((group, index) => [group, ledgers[index].count])
+    ) as Record<RunQuotaGroup, number>,
     window,
     canManage,
   };

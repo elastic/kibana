@@ -9,14 +9,17 @@ import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiConfirmModal,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
+  EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiPopover,
   EuiToolTip,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { MaintenanceWindowStatus } from '../../common';
 import * as i18n from '../translations';
 import { useKibana } from '../utils/kibana_react';
@@ -34,12 +37,17 @@ export interface TableActionsPopoverProps {
 type ModalType = 'cancel' | 'cancelAndArchive' | 'archive' | 'unarchive' | 'delete';
 type ActionType = ModalType | 'edit' | 'copyId';
 
+const MANAGEMENT_ACTIONS: ActionType[] = ['edit', 'copyId'];
+const LIFECYCLE_ACTIONS: ActionType[] = ['cancel', 'cancelAndArchive', 'archive', 'unarchive'];
+const DESTRUCTIVE_ACTIONS: ActionType[] = ['delete'];
+
 export const TableActionsPopover: React.FC<TableActionsPopoverProps> = React.memo(
   ({ id, status, isLoading, onEdit, onCancel, onArchive, onCancelAndArchive, onDelete }) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [modalType, setModalType] = useState<ModalType>();
     const modalTitleId = useGeneratedHtmlId();
+    const { euiTheme } = useEuiTheme();
 
     const {
       notifications: { toasts },
@@ -152,101 +160,77 @@ export const TableActionsPopover: React.FC<TableActionsPopoverProps> = React.mem
     ]);
 
     const items = useMemo(() => {
-      const menuItems = {
-        edit: (
-          <EuiContextMenuItem
-            data-test-subj="table-actions-edit"
-            key="edit"
-            icon="pencil"
-            onClick={() => {
-              closePopover();
-              onEdit(id);
-            }}
-          >
-            {i18n.TABLE_ACTION_EDIT}
-          </EuiContextMenuItem>
-        ),
-        copyId: (
-          <EuiContextMenuItem
-            data-test-subj="table-actions-copy-id"
-            key="copy-id"
-            icon="copy"
-            onClick={() => {
-              closePopover();
-              navigator.clipboard.writeText(id).then(() => {
-                toasts.addSuccess(i18n.COPY_ID_ACTION_SUCCESS);
-              });
-            }}
-          >
-            {i18n.COPY_ID}
-          </EuiContextMenuItem>
-        ),
-        cancel: (
-          <EuiContextMenuItem
-            data-test-subj="table-actions-cancel"
-            key="cancel"
-            icon="stopSlash"
-            onClick={() => {
-              closePopover();
-              showModal('cancel');
-            }}
-          >
-            {i18n.TABLE_ACTION_CANCEL}
-          </EuiContextMenuItem>
-        ),
-        cancelAndArchive: (
-          <EuiContextMenuItem
-            data-test-subj="table-actions-cancel-and-archive"
-            key="cancel-and-archive"
-            icon="folderOpen"
-            onClick={() => {
-              closePopover();
-              showModal('cancelAndArchive');
-            }}
-          >
-            {i18n.TABLE_ACTION_CANCEL_AND_ARCHIVE}
-          </EuiContextMenuItem>
-        ),
-        archive: (
-          <EuiContextMenuItem
-            data-test-subj="table-actions-archive"
-            key="archive"
-            icon="folderOpen"
-            onClick={() => {
-              closePopover();
-              showModal('archive');
-            }}
-          >
-            {i18n.ARCHIVE}
-          </EuiContextMenuItem>
-        ),
-        unarchive: (
-          <EuiContextMenuItem
-            data-test-subj="table-actions-unarchive"
-            key="unarchive"
-            icon="logOut"
-            onClick={() => {
-              closePopover();
-              showModal('unarchive');
-            }}
-          >
-            {i18n.TABLE_ACTION_UNARCHIVE}
-          </EuiContextMenuItem>
-        ),
-        delete: (
-          <EuiContextMenuItem
-            data-test-subj="table-actions-delete"
-            key="delete"
-            icon="trash"
-            onClick={() => {
-              closePopover();
-              showModal('delete');
-            }}
-          >
-            {i18n.TABLE_ACTION_DELETE}
-          </EuiContextMenuItem>
-        ),
+      const menuItems: Record<ActionType, EuiContextMenuPanelItemDescriptor> = {
+        edit: {
+          name: i18n.TABLE_ACTION_EDIT,
+          icon: 'pencil',
+          'data-test-subj': 'table-actions-edit',
+          onClick: () => {
+            closePopover();
+            onEdit(id);
+          },
+        },
+        copyId: {
+          name: i18n.COPY_ID,
+          icon: 'copy',
+          'data-test-subj': 'table-actions-copy-id',
+          onClick: () => {
+            closePopover();
+            navigator.clipboard.writeText(id).then(() => {
+              toasts.addSuccess(i18n.COPY_ID_ACTION_SUCCESS);
+            });
+          },
+        },
+        cancel: {
+          name: i18n.TABLE_ACTION_CANCEL,
+          icon: 'stopSlash',
+          'data-test-subj': 'table-actions-cancel',
+          onClick: () => {
+            closePopover();
+            showModal('cancel');
+          },
+        },
+        cancelAndArchive: {
+          name: i18n.TABLE_ACTION_CANCEL_AND_ARCHIVE,
+          icon: 'folderOpen',
+          'data-test-subj': 'table-actions-cancel-and-archive',
+          onClick: () => {
+            closePopover();
+            showModal('cancelAndArchive');
+          },
+        },
+        archive: {
+          name: i18n.ARCHIVE,
+          icon: 'folderOpen',
+          'data-test-subj': 'table-actions-archive',
+          onClick: () => {
+            closePopover();
+            showModal('archive');
+          },
+        },
+        unarchive: {
+          name: i18n.TABLE_ACTION_UNARCHIVE,
+          icon: 'logOut',
+          'data-test-subj': 'table-actions-unarchive',
+          onClick: () => {
+            closePopover();
+            showModal('unarchive');
+          },
+        },
+        delete: {
+          name: i18n.TABLE_ACTION_DELETE,
+          icon: <EuiIcon type="trash" size="m" color="danger" aria-hidden={true} />,
+          css: css`
+            color: ${euiTheme.colors.textDanger};
+          `,
+          'data-test-subj': 'table-actions-delete',
+          onClick: () => {
+            closePopover();
+            showModal('delete');
+          },
+        },
       };
+
       const statusMenuItemsMap: Record<MaintenanceWindowStatus, ActionType[]> = {
         running: ['edit', 'copyId', 'cancel', 'cancelAndArchive', 'delete'],
         upcoming: ['edit', 'copyId', 'archive', 'delete'],
@@ -254,18 +238,27 @@ export const TableActionsPopover: React.FC<TableActionsPopoverProps> = React.mem
         archived: ['copyId', 'unarchive', 'delete'],
         disabled: ['copyId', 'delete'],
       };
-      return statusMenuItemsMap[status].map((type) => menuItems[type]);
-    }, [status, closePopover, onEdit, id, toasts, showModal]);
+
+      const visibleActions = new Set(statusMenuItemsMap[status]);
+      const candidateGroups = [MANAGEMENT_ACTIONS, LIFECYCLE_ACTIONS, DESTRUCTIVE_ACTIONS].map(
+        (group) => group.filter((type) => visibleActions.has(type)).map((type) => menuItems[type])
+      );
+      const groups = candidateGroups.filter((group) => group.length > 0);
+
+      return groups.flatMap((group, index): EuiContextMenuPanelItemDescriptor[] =>
+        index === 0 ? group : [{ isSeparator: true as const, key: `separator-${index}` }, ...group]
+      );
+    }, [status, closePopover, onEdit, id, toasts, showModal, euiTheme.colors.textDanger]);
 
     const button = useMemo(
       () => (
-        <EuiToolTip content="Upcoming events" disableScreenReaderOutput>
+        <EuiToolTip content={i18n.TABLE_ACTIONS} disableScreenReaderOutput>
           <EuiButtonIcon
             isDisabled={isLoading}
             data-test-subj="table-actions-icon-button"
-            iconType="boxesVertical"
-            size="s"
-            aria-label="Upcoming events"
+            iconType="ellipsis"
+            color="text"
+            aria-label={i18n.TABLE_ACTIONS}
             onClick={onButtonClick}
           />
         </EuiToolTip>
@@ -286,7 +279,7 @@ export const TableActionsPopover: React.FC<TableActionsPopoverProps> = React.mem
               anchorPosition="downCenter"
               data-test-subj="table-actions-popover"
             >
-              <EuiContextMenuPanel items={items} />
+              <EuiContextMenu initialPanelId={0} panels={[{ id: 0, items }]} />
             </EuiPopover>
           </EuiFlexItem>
         </EuiFlexGroup>

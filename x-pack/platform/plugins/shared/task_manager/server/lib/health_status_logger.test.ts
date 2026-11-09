@@ -22,4 +22,18 @@ describe('createHealthStatusLogger', () => {
     expect(logger.warn).toHaveBeenCalledWith('warn message', undefined);
     expect(logger.error).toHaveBeenCalledWith(error, undefined);
   });
+
+  test('logs unhealthy as debug while Elasticsearch-driven backpressure is active without throttling the next warning', () => {
+    const logger = mockLogger();
+    const healthStatusLogger = createHealthStatusLogger(logger);
+
+    healthStatusLogger.unhealthy('unhealthy during backpressure', true);
+
+    expect(logger.debug).toHaveBeenCalledWith('unhealthy during backpressure');
+    expect(logger.warn).not.toHaveBeenCalled();
+
+    healthStatusLogger.unhealthy('unhealthy after backpressure');
+
+    expect(logger.warn).toHaveBeenCalledWith('unhealthy after backpressure');
+  });
 });

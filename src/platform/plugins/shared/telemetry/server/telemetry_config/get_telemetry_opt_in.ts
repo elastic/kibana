@@ -11,21 +11,62 @@ import type SemVer from 'semver/classes/semver';
 import semverParse from 'semver/functions/parse';
 import type { TelemetrySavedObject } from '../saved_objects';
 
+/**
+ * Remote opt-in switch.
+ * It applies when opt-in is locked on (`allowChangingOptInStatus === false` and `telemetry.optIn === true`),
+ * and when the local choice is still undecided (`null`).
+ * A locked opt-out and an unlocked explicit choice are returned as-is.
+ */
+export const TELEMETRY_OPT_IN_FEATURE_FLAG = 'telemetry.optIn';
+
 interface GetTelemetryOptInConfig {
   telemetrySavedObject: TelemetrySavedObject;
   currentKibanaVersion: string;
   allowChangingOptInStatus: boolean;
   configTelemetryOptIn: boolean | null;
+  /**
+   * Latest value of {@link TELEMETRY_OPT_IN_FEATURE_FLAG}.
+   * `undefined` until the first evaluation.
+   */
+  isOptedInFromFeatureFlag: boolean | undefined;
 }
 
-type GetTelemetryOptIn = (config: GetTelemetryOptInConfig) => null | boolean;
+type GetTelemetryOptIn = (config: GetTelemetryOptInConfig) => boolean | null;
 
+/** Resolves telemetry opt-in from local state, then the feature flag where that flag is allowed to apply. */
 export const getTelemetryOptIn: GetTelemetryOptIn = ({
+  isOptedInFromFeatureFlag,
+  allowChangingOptInStatus,
+  configTelemetryOptIn,
+  ...options
+}) => {
+  // Locked on: the feature flag can turn collection off. Stay undecided until the flag is known.
+  if (allowChangingOptInStatus === false && configTelemetryOptIn === true) {
+    return isOptedInFromFeatureFlag ?? null;
+  }
+
+  const localOptIn = getTelemetryOptInFromLocalState({
+    allowChangingOptInStatus,
+    configTelemetryOptIn,
+    ...options,
+  });
+
+  // An unlocked explicit choice, and a locked opt-out, win over the feature flag.
+  if (typeof localOptIn === 'boolean') {
+    return localOptIn;
+  }
+
+  // Undecided: a disabled flag opts out without prompting. An enabled or unknown flag keeps `null`
+  // so the UI can still ask for a choice.
+  return isOptedInFromFeatureFlag === false ? false : null;
+};
+
+const getTelemetryOptInFromLocalState = ({
   telemetrySavedObject,
   currentKibanaVersion,
   allowChangingOptInStatus,
   configTelemetryOptIn,
-}) => {
+}: Omit<GetTelemetryOptInConfig, 'isOptedInFromFeatureFlag'>): boolean | null => {
   if (typeof configTelemetryOptIn === 'boolean' && !allowChangingOptInStatus) {
     return configTelemetryOptIn;
   }

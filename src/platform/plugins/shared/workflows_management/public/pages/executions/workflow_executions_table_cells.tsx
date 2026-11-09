@@ -65,6 +65,10 @@ const workflowLinkCss = css`
   min-width: 0;
 `;
 
+const runNameCellCss = css`
+  width: 100%;
+`;
+
 const durationCellCss = css`
   font-variant-numeric: tabular-nums;
   width: 100%;
@@ -79,6 +83,22 @@ export const getWorkflowExecutionActionContextFromDto = (
   context: execution.context,
   isTestRun: execution.isTestRun,
 });
+
+export const WorkflowExecutionRunNameCell = ({
+  execution,
+}: {
+  execution: WorkflowExecutionListItemDto;
+}) => {
+  if (!execution.runName) {
+    return null;
+  }
+
+  return (
+    <div css={runNameCellCss}>
+      <EuiTextTruncate text={execution.runName} data-test-subj="executionsTableRunName" />
+    </div>
+  );
+};
 
 export const WorkflowExecutionWorkflowCell = ({
   execution,

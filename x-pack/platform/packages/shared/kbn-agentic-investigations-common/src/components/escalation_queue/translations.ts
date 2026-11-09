@@ -8,44 +8,55 @@
 import { i18n } from '@kbn/i18n';
 
 export const ESCALATION_QUEUE_LABELS = Object.freeze({
-  open: i18n.translate('xpack.alertzero.escalationQueue.bucket.open', {
+  open: i18n.translate('xpack.agenticInvestigations.escalationQueue.bucket.open', {
     defaultMessage: 'Open',
   }),
-  closed: i18n.translate('xpack.alertzero.escalationQueue.bucket.closed', {
+  closed: i18n.translate('xpack.agenticInvestigations.escalationQueue.bucket.closed', {
     defaultMessage: 'Closed',
   }),
-  emptyQueue: i18n.translate('xpack.alertzero.escalationQueue.emptyQueue', {
-    defaultMessage: 'No escalations',
+  emptyQueue: Object.freeze({
+    open: i18n.translate('xpack.agenticInvestigations.escalationQueue.emptyQueue.open', {
+      defaultMessage: 'No open escalations',
+    }),
+    closed: i18n.translate('xpack.agenticInvestigations.escalationQueue.emptyQueue.closed', {
+      defaultMessage: 'No closed escalations',
+    }),
   }),
-  emptyQueueWithFilter: i18n.translate('xpack.alertzero.escalationQueue.emptyQueueWithFilter', {
-    defaultMessage: 'No escalations match the current filter.',
-  }),
-  nothingAttached: i18n.translate('xpack.alertzero.escalationQueue.nothingAttached', {
+  emptyQueueWithFilter: i18n.translate(
+    'xpack.agenticInvestigations.escalationQueue.emptyQueueWithFilter',
+    {
+      defaultMessage: 'No escalations match the current filter.',
+    }
+  ),
+  nothingAttached: i18n.translate('xpack.agenticInvestigations.escalationQueue.nothingAttached', {
     defaultMessage: 'Nothing attached',
   }),
-  unassigned: i18n.translate('xpack.alertzero.escalationQueue.unassigned', {
+  unassigned: i18n.translate('xpack.agenticInvestigations.escalationQueue.unassigned', {
     defaultMessage: 'Unassigned',
   }),
-  addAssignee: i18n.translate('xpack.alertzero.escalationQueue.addAssignee', {
+  addAssignee: i18n.translate('xpack.agenticInvestigations.escalationQueue.addAssignee', {
     defaultMessage: 'Add or change assignees',
   }),
-  closedBadge: i18n.translate('xpack.alertzero.escalationQueue.closedBadge', {
+  closedBadge: i18n.translate('xpack.agenticInvestigations.escalationQueue.closedBadge', {
     defaultMessage: 'Closed',
   }),
-  searchAssignees: i18n.translate('xpack.alertzero.escalationQueue.searchAssignees', {
+  searchAssignees: i18n.translate('xpack.agenticInvestigations.escalationQueue.searchAssignees', {
     defaultMessage: 'Search for users',
   }),
-  loadError: i18n.translate('xpack.alertzero.escalationQueue.loadError', {
+  loadError: i18n.translate('xpack.agenticInvestigations.escalationQueue.loadError', {
     defaultMessage: 'Failed to load escalations',
   }),
-  retry: i18n.translate('xpack.alertzero.escalationQueue.retry', {
+  retry: i18n.translate('xpack.agenticInvestigations.escalationQueue.retry', {
     defaultMessage: 'Retry',
   }),
-  updatingAssignees: i18n.translate('xpack.alertzero.escalationQueue.updatingAssignees', {
-    defaultMessage: 'Updating assignees…',
-  }),
+  updatingAssignees: i18n.translate(
+    'xpack.agenticInvestigations.escalationQueue.updatingAssignees',
+    {
+      defaultMessage: 'Updating assignees…',
+    }
+  ),
   showMore: (remaining: number) =>
-    i18n.translate('xpack.alertzero.escalationQueue.showMore', {
+    i18n.translate('xpack.agenticInvestigations.escalationQueue.showMore', {
       defaultMessage: 'Show more ({remaining})',
       values: { remaining },
     }),

@@ -57,7 +57,7 @@ steps:
 `;
     }
 
-    describe.each([true, '${{error.type == "Error"}}'])(
+    describe.each([true, '${{error.type == "Error"}}', '"error.type: Error"'])(
       'when continue is %s',
       (continueTestCase) => {
         beforeEach(async () => {
@@ -125,7 +125,7 @@ steps:
       }
     );
 
-    describe.each([undefined, false, '${{error.type == "SomeOtherError"}}'])(
+    describe.each([undefined, false, '${{error.type == "SomeOtherError"}}', '"error.type: Other"'])(
       'when continue is "%s"',
       (continueTestCase) => {
         beforeEach(async () => {
