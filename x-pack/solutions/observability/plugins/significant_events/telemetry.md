@@ -17,10 +17,10 @@ feature-identification operation ID and equals `workflow_execution_id` when a wo
 operation.
 
 On `agent-tool-event-investigation-attach`, `workflow_execution_id` identifies the workflow that
-invoked the tool and `investigation_id` identifies the attached investigation, which is its Agent
-Builder conversation ID. Before this release, `workflow_execution_id` on that event held the
-investigation ID. The meaning changed rather than gaining an alias, so split historical rows on the
-release that shipped `investigation_id`.
+invoked the tool and `investigation_workflow_execution_id` identifies the attached investigation
+run. Before this release, `workflow_execution_id` on that event held the attached investigation
+run's ID. The meaning changed rather than gaining an alias, so split historical rows on the release
+that shipped `investigation_workflow_execution_id`.
 
 ## How the pipeline connects
 
@@ -54,7 +54,14 @@ runs. Reusing one execution ID would conflate distinct runs. Thread the pipeline
    `detection_workflow_execution_ids`.
 4. Join an investigation to the discovery run that triggered it through
    `source_workflow_execution_id`, and to the significant event through `event_id`.
-5. Use `investigation_id` to join attachment events to `nightshift-investigation-started`.
+5. Use `investigation_workflow_execution_id` to join attachment events to
+   `nightshift-investigation-started.workflow_execution_id`.
+
+Alert-event-client writes also copy their stored `data.workflow_execution_id` into the
+`alerting.alertStatusChanged` trigger. Alert automations forward it as
+`source_workflow_execution_id`, so an alert-triggered investigation retains the producer run when
+one exists. Rule-produced alerts omit it; other alert-event-client writers carry it only when they
+store the same provenance field.
 
 `event_id` is the durable business identity of a significant event; workflow execution IDs describe
 the processing runs that created or changed it. Do not substitute one for the other. Onboarding
@@ -76,7 +83,7 @@ Significant Events event types below drop their `significant-events-` prefix.
 | `events-write` (discovery) | Detection runs it consumed | `detection_workflow_execution_ids` contains the detection run's `workflow_execution_id` |
 | `nightshift-investigation-started` | Discovery run that triggered it | `source_workflow_execution_id` = discovery `workflow_execution_id` |
 | `nightshift-investigation-started` | Significant event | `event_id` |
-| `agent-tool-event-investigation-attach` | Investigation | `investigation_id` |
+| `agent-tool-event-investigation-attach` | Investigation run | `investigation_workflow_execution_id` = `nightshift-investigation-started.workflow_execution_id` |
 | Detection or discovery | Onboarding | `source_id` / `source_ids` only; KIs are shared across onboarding runs |
 
 `parent_workflow_execution_id` joins to `onboarding-scheduled.workflow_execution_id` only for

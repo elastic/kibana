@@ -103,7 +103,7 @@ interface AgentToolEventInvestigationAttachProps extends OptionalWorkflowExecuti
   event_uuid?: string;
   /** Stable event_id slug. Optional for rolling-deploy compatibility with pre-#1517 nodes. */
   event_id?: string;
-  investigation_id: string;
+  investigation_workflow_execution_id: string;
   error_message?: string;
 }
 

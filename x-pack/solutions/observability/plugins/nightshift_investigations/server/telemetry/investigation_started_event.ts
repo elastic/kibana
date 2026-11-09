@@ -69,7 +69,7 @@ const investigationStartedSchema: RootSchema<InvestigationStartedEvent> = {
     type: 'keyword',
     _meta: {
       description:
-        'Execution ID of the discovery run that produced the triggering significant event; absent for manual triggers.',
+        'Execution ID of the workflow that produced the triggering significant event or alert, when available.',
       optional: true,
     },
   },

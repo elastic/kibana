@@ -901,6 +901,31 @@ describe('NightshiftInvestigationsClient.start()', () => {
     );
   });
 
+  it('reports the producer workflow of an alert-triggered investigation', async () => {
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+    mockManagement.runWorkflow.mockResolvedValue('investigation-exec');
+    const telemetry = { reportInvestigationStarted: jest.fn() };
+
+    await makeClient({ telemetry: telemetry as never }).start(
+      {
+        subject: { type: 'alert', id: 'alert-1' },
+        trigger_type: 'automatic',
+        context: {
+          ...alertContext,
+          source_workflow_execution_id: 'alert-producer-exec',
+        },
+      },
+      { entryPoint: 'automation', automationId: 'a1' }
+    );
+
+    expect(telemetry.reportInvestigationStarted).toHaveBeenCalledWith(
+      expect.objectContaining({
+        workflow_execution_id: 'investigation-exec',
+        source_workflow_execution_id: 'alert-producer-exec',
+      })
+    );
+  });
+
   it('persists the subject summary into the workflow context', async () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-123');

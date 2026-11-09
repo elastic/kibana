@@ -214,6 +214,7 @@ export const investigationAlertSnapshotSchema = z.discriminatedUnion('alert_vers
 export const alertInvestigationContextSchema = z
   .object({
     alerts: z.array(investigationAlertSnapshotSchema).min(1).max(MAX_ALERTS_PER_INVESTIGATION),
+    source_workflow_execution_id: z.string().trim().min(1).max(500).optional(),
   })
   .strict();
 

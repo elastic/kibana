@@ -91,6 +91,30 @@ describe('triggerInvestigationStepDefinition', () => {
       );
     });
 
+    it('preserves producer workflow lineage when it resolves the alert snapshot', async () => {
+      (fetchInvestigationAlertSnapshots as jest.Mock).mockResolvedValue(snapshots);
+      const start = jest.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
+      const { definition } = createDefinition(start);
+
+      await definition.handler(
+        createContext({
+          subject_type: 'alert',
+          subject_id: 'episode-1',
+          context: { source_workflow_execution_id: 'producer-workflow-1' },
+        })
+      );
+
+      expect(start).toHaveBeenCalledWith(
+        expect.objectContaining({
+          context: {
+            alerts: snapshots,
+            source_workflow_execution_id: 'producer-workflow-1',
+          },
+        }),
+        expect.anything()
+      );
+    });
+
     it('retries the lookup while the episode is not searchable yet', async () => {
       (fetchInvestigationAlertSnapshots as jest.Mock)
         .mockRejectedValueOnce(Boom.notFound('Alert with id episode-1 not found'))

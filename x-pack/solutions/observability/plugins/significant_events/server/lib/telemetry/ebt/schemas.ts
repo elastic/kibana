@@ -584,11 +584,11 @@ const agentToolEventInvestigationAttachSchema: RootSchema<AgentToolEventInvestig
         optional: true,
       },
     },
-    investigation_id: {
+    investigation_workflow_execution_id: {
       type: 'keyword',
       _meta: {
         description:
-          'The attached investigation ID, which is its Agent Builder conversation ID; joins to nightshift-investigation-started.investigation_id',
+          'Workflow Engine execution ID of the attached investigation run; joins to nightshift-investigation-started.workflow_execution_id',
       },
     },
     error_message: {

@@ -27,7 +27,6 @@ export const attachInvestigationToEvent = async ({
   eventId: string;
   investigation: SignificantEventInvestigation;
   alertEventsClient: AlertEventsClientApi;
-  /** Execution of the workflow writing this version, not the investigation being attached. */
   workflowExecutionId?: string;
   emitTrigger?: TriggerEmitter;
   logger?: Logger;
