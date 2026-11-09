@@ -103,6 +103,23 @@ describe('workflow-page saved object', () => {
       );
     });
 
+    it('sends only the version and refresh options', async () => {
+      const client = savedObjectsClientMock.create();
+      const unsafeOptions = {
+        version: 'v1',
+        refresh: 'wait_for' as const,
+        mergeAttributes: false,
+        upsert: { enabled: true },
+      };
+
+      await partiallyUpdateWorkflowPage(client, 'id', { enabled: false }, unsafeOptions);
+
+      const [[, , , options]] = client.update.mock.calls;
+      expect(options).toEqual({ version: 'v1', refresh: 'wait_for' });
+      expect(options).not.toHaveProperty('mergeAttributes');
+      expect(options).not.toHaveProperty('upsert');
+    });
+
     it('sends a null access level, which takes the page offline', async () => {
       const client = savedObjectsClientMock.create();
       await partiallyUpdateWorkflowPage(client, 'id', { access: null });
