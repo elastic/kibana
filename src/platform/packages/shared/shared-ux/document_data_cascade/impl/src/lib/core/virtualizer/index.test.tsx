@@ -9,9 +9,9 @@
 
 import React from 'react';
 import { renderHook, render } from '@testing-library/react';
-import type { Row } from '@tanstack/react-table';
 import { defaultRangeExtractor, type Range, type VirtualItem } from '@tanstack/react-virtual';
 import type { GroupNode } from '../../../store_provider';
+import type { CascadeTableRow } from '../table';
 import {
   useCascadeVirtualizer,
   useCascadeVirtualizerRangeExtractor,
@@ -20,7 +20,7 @@ import {
   type UseVirtualizerReturnType,
 } from '.';
 
-const rowsToRender = (rowCount: number): Row<GroupNode>[] => {
+const rowsToRender = (rowCount: number): Array<CascadeTableRow<GroupNode>> => {
   return Array.from(
     { length: rowCount },
     (_, index) =>
@@ -30,9 +30,9 @@ const rowsToRender = (rowCount: number): Row<GroupNode>[] => {
           index,
           depth: 0,
           getIsExpanded: () => false,
-          getParentRows: () => [] as Row<GroupNode>[],
-          subRows: [] as Row<GroupNode>[],
-        } as Row<GroupNode>,
+          getParentRows: () => [] as Array<CascadeTableRow<GroupNode>>,
+          subRows: [] as Array<CascadeTableRow<GroupNode>>,
+        } as CascadeTableRow<GroupNode>,
         {
           // escape hatch so we don't have to mock every property on the Row object
           get(target, prop) {
@@ -123,7 +123,7 @@ describe('virtualizer', () => {
       // mock the child row to have a parent row
       jest
         .spyOn(rows[childRowIndex], 'getParentRows')
-        .mockReturnValue([rows[parentRowIndex]] as Row<GroupNode>[]);
+        .mockReturnValue([rows[parentRowIndex]] as Array<CascadeTableRow<GroupNode>>);
 
       const range: Range = {
         startIndex: childRowIndex,

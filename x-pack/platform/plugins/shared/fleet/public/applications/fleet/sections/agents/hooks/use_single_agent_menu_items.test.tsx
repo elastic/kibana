@@ -573,6 +573,45 @@ describe('useSingleAgentMenuItems', () => {
     });
   });
 
+  describe('Restart action', () => {
+    const restartSupportedAgent = (overrides: Partial<Agent> = {}) =>
+      createMockAgent({
+        local_metadata: { elastic: { agent: { version: '9.6.0' } } },
+        ...overrides,
+      });
+
+    it('should enable restart when the agent has no pending restart', () => {
+      const { result } = renderer.renderHook(() =>
+        useSingleAgentMenuItems({
+          agent: restartSupportedAgent(),
+          agentPolicy: createMockAgentPolicy(),
+          callbacks: mockCallbacks,
+        })
+      );
+
+      const restartItem = result.current.find((item) => item.id === 'restart');
+      expect(restartItem).toBeDefined();
+      expect(restartItem?.disabled).toBe(false);
+      expect(restartItem?.toolTipContent).toBeUndefined();
+    });
+
+    it('should disable restart with a tooltip when the agent has a pending restart', () => {
+      const { result } = renderer.renderHook(() =>
+        useSingleAgentMenuItems({
+          agent: restartSupportedAgent({
+            pending_restart: { action_id: 'action-1', created_at: '2026-11-06T10:00:00.000Z' },
+          }),
+          agentPolicy: createMockAgentPolicy(),
+          callbacks: mockCallbacks,
+        })
+      );
+
+      const restartItem = result.current.find((item) => item.id === 'restart');
+      expect(restartItem?.disabled).toBe(true);
+      expect(restartItem?.toolTipContent).toBeDefined();
+    });
+  });
+
   describe('Callback invocations', () => {
     it('should wire up callbacks correctly', () => {
       const { result } = renderer.renderHook(() =>
