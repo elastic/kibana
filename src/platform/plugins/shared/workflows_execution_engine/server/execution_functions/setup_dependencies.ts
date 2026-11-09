@@ -225,7 +225,8 @@ export async function setupDependencies(
     workflowLogger,
     workflowExecutionGraph,
     stepExecutionRuntimeFactory,
-    enhancedDependencies
+    enhancedDependencies,
+    workflowExecutionState
   );
 
   return {

@@ -90,6 +90,10 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
     return;
   }
 
+  // apm.startSpan also makes the span current in the caller's async context, and ending it
+  // never removes it from there, so every node would grow the APM span stack of the run.
+  // Starting it after a microtask keeps it out of the caller's context.
+  await Promise.resolve();
   // Create a span for the entire node execution lifecycle
   const nodeSpan = apm.startSpan(`node: ${node.stepId || node.id}`, 'workflow', 'node');
   if (nodeSpan) {

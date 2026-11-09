@@ -89,6 +89,11 @@ export interface SignificantEventsMaintenanceService {
   /** Read only the persisted maintenance state of the caller's space (no feature-settings I/O). */
   getState(params: { request: KibanaRequest }): Promise<SignificantEventsMaintenanceState>;
   /**
+   * While paused, forget that continuous onboarding should resume. Used when the last source is
+   * deleted so Resume cannot restore a setting that no longer matches the source catalog.
+   */
+  clearContinuousOnboardingRestore(params: { request: KibanaRequest }): Promise<void>;
+  /**
    * In the caller's space only: disable the per-space managed workflows, cancel
    * in-flight executions (including those of the shared workflows), turn off
    * continuous/scheduled Settings toggles (recording which were on), and disable
@@ -526,6 +531,31 @@ export const createSignificantEventsMaintenanceService = ({
   return {
     async getState({ request }) {
       return normalizeState((await readState(request.spaceId))?.state);
+    },
+
+    async clearContinuousOnboardingRestore({ request }) {
+      return withTransitionLock(async () => {
+        const { spaceId } = request;
+        const existing = await readState(spaceId);
+        if (!existing || normalizeState(existing.state) !== 'paused') {
+          return;
+        }
+
+        const disabledWorkflows = existing.disabledWorkflows.filter(
+          ({ id }) => !isContinuousOnboardingWorkflowId(id)
+        );
+        if (disabledWorkflows.length === existing.disabledWorkflows.length) {
+          return;
+        }
+
+        await writeState(spaceId, {
+          ...existing,
+          disabledWorkflows,
+          lastSummary: existing.lastSummary
+            ? { ...existing.lastSummary, workflowsDisabled: disabledWorkflows.length }
+            : undefined,
+        });
+      });
     },
 
     async pause({ request, updatedBy }) {

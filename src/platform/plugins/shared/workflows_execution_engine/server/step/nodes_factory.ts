@@ -98,6 +98,7 @@ import type { StepExecutionRuntime } from '../workflow_context_manager/step_exec
 import type { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
 import type { ContextDependencies } from '../workflow_context_manager/types';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
+import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
 import type { WorkflowRuntimeGraph } from '../workflow_context_manager/workflow_runtime_graph';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
@@ -108,7 +109,8 @@ export class NodesFactory {
     private workflowLogger: IWorkflowEventLogger, // Assuming you have a logger interface
     private workflowGraph: WorkflowRuntimeGraph,
     private stepExecutionRuntimeFactory: StepExecutionRuntimeFactory,
-    private dependencies: ContextDependencies
+    private dependencies: ContextDependencies,
+    private workflowExecutionState: Pick<WorkflowExecutionState, 'getStepExecutionsByStepId'>
   ) {}
 
   public create(stepExecutionRuntime: StepExecutionRuntime): NodeImplementation {
@@ -234,7 +236,8 @@ export class NodesFactory {
           stepLogger,
           this.stepExecutionRuntimeFactory,
           this,
-          this.workflowGraph
+          this.workflowGraph,
+          this.workflowExecutionState
         );
       case 'exit-parallel':
         return new ExitParallelNodeImpl(this.workflowRuntime);

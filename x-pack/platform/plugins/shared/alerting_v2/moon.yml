@@ -165,6 +165,8 @@ dependsOn:
   - '@kbn/cloud-plugin'
   - '@kbn/announcement-banner'
   - '@kbn/ftr-llm-proxy'
+  - '@kbn/code-editor'
+  - '@kbn/code-editor-mock'
 tags:
   - plugin
   - prod

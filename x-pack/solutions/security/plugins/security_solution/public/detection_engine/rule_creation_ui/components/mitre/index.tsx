@@ -21,6 +21,7 @@ import type { Threat, Threats } from '@kbn/securitysolution-io-ts-alerting-types
 import type { MitreFramework, ThreatFrameworkGroup } from '@kbn/security-mitre-attack-common';
 import {
   DEFAULT_MITRE_FRAMEWORK,
+  THREAT_FRAMEWORK_DISPLAY_NAME,
   THREAT_FRAMEWORK_NAME,
   groupThreatsByFramework,
 } from '@kbn/security-mitre-attack-common';
@@ -55,7 +56,7 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
       : [
           {
             framework: DEFAULT_MITRE_FRAMEWORK,
-            label: THREAT_FRAMEWORK_NAME[DEFAULT_MITRE_FRAMEWORK],
+            label: THREAT_FRAMEWORK_DISPLAY_NAME[DEFAULT_MITRE_FRAMEWORK],
             threats: [],
           },
         ];
@@ -166,7 +167,7 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
                   data-test-subj={`addMitreFramework-${framework}`}
                   onClick={() => addFramework(framework)}
                 >
-                  {THREAT_FRAMEWORK_NAME[framework]}
+                  {THREAT_FRAMEWORK_DISPLAY_NAME[framework]}
                 </EuiContextMenuItem>
               ))}
             />

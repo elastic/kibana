@@ -10,6 +10,7 @@ import {
   buildCleanInvestigationSummary,
   buildInvestigationSummary,
 } from './build_investigation_summary';
+import { dedupeCoverageGaps } from './dedupe_coverage_gaps';
 import type { CurrentRunState } from './types';
 
 const state = (overrides: Partial<CurrentRunState> = {}): CurrentRunState => ({
@@ -338,5 +339,41 @@ describe('buildCleanInvestigationSummary', () => {
     expect(buildCleanInvestigationSummary({ inputs: {} })).toContain(
       'Packaging: dismissed, no proposals'
     );
+  });
+});
+
+describe('buildCleanInvestigationSummary for a retired run', () => {
+  const unsearched = dedupeCoverageGaps([
+    { reason: 'unknown_technique_id', detail: 'T9999', technique_id: 'T9999' },
+  ]);
+
+  it('says the report retired without a full search instead of that nothing matched', () => {
+    const summary = buildCleanInvestigationSummary({ inputs: {}, retired: true, unsearched });
+    expect(summary).toContain(
+      'Outcome: no confirmed hits, but 1 gap left part of the report unsearched; the report is retired without a full search.'
+    );
+    expect(summary).toContain('Not searched: T9999 (unknown technique id)');
+    expect(summary).not.toContain('Nothing in this environment matched');
+  });
+
+  it('drops the count and the section when no gaps arrived', () => {
+    const summary = buildCleanInvestigationSummary({ inputs: {}, retired: true });
+    expect(summary).toContain(
+      'Outcome: no confirmed hits, but part of the report could not be searched; the report is retired without a full search.'
+    );
+    expect(summary).not.toContain('Not searched:');
+  });
+
+  it('keeps the whole summary inside the CE cap with 100 gaps', () => {
+    const many = dedupeCoverageGaps(
+      Array.from({ length: 100 }, (_, index) => ({
+        reason: 'unknown_technique_id',
+        detail: `T${9000 + index}`,
+        technique_id: `T${9000 + index}`,
+      }))
+    );
+    const summary = buildCleanInvestigationSummary({ inputs: {}, retired: true, unsearched: many });
+    expect(summary.length).toBeLessThanOrEqual(10_000);
+    expect(summary).toContain('at least 100 gaps');
   });
 });

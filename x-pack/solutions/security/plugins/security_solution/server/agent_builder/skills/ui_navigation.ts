@@ -64,8 +64,8 @@ const ENTITY_NAME = '<ENTITY_NAME>';
 const WATCHLIST_ID = '<WATCHLIST_ID>';
 
 /**
- * Expandable-flyout panels that open Resolution. When the new flyout is enabled,
- * `security.build_redirect_url` translates this to flyoutV2 descriptors.
+ * Expandable-flyout panels that open Resolution. `security.build_redirect_url` translates them
+ * to flyoutV2 descriptors (and returns an error if they can't be translated).
  */
 export function buildResolutionFlyoutTemplate(entityType: EntityResolutionType) {
   const { right, left } = ENTITY_RESOLUTION_PANEL[entityType];

@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import {
+  ES_SERVICE_ACCOUNT_NAMESPACE,
+  SERVICE_ACCOUNT_NAME_MAX_LENGTH,
+  SERVICE_ACCOUNT_NAME_REGEX,
+} from '../../common/service_accounts';
+
 export interface EsServiceAccountPrincipal {
   namespace: string;
   name: string;
@@ -22,4 +28,24 @@ export const parseEsServiceAccountId = (id: string): EsServiceAccountPrincipal |
 
   const [namespace, name] = parts;
   return { namespace, name };
+};
+
+/**
+ * Parses the id of an account Kibana can run as: one in Kibana's own namespace, with a name
+ * Kibana would create. Returns `undefined` for any other id.
+ */
+export const parseBindableEsServiceAccountId = (
+  id: string
+): EsServiceAccountPrincipal | undefined => {
+  const principal = parseEsServiceAccountId(id);
+  if (
+    !principal ||
+    principal.namespace !== ES_SERVICE_ACCOUNT_NAMESPACE ||
+    principal.name.length > SERVICE_ACCOUNT_NAME_MAX_LENGTH ||
+    !SERVICE_ACCOUNT_NAME_REGEX.test(principal.name)
+  ) {
+    return undefined;
+  }
+
+  return principal;
 };
