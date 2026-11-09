@@ -22,7 +22,8 @@ jest.mock('../../../utils/assert_significant_events_access', () => ({
 
 const mockFetchQueryLinks = jest.fn();
 const mockComputeOccurrences = jest.fn();
-const mockGenerateKIQueries = jest.fn();
+const mockBuildKIQueryGenerationInput = jest.fn();
+const mockCollectGeneratedKIQueries = jest.fn();
 const mockCleanupStaleEvents = jest.fn();
 
 jest.mock('../../../../lib/significant_events/fetch_query_occurrences_from_alerts', () => ({
@@ -43,7 +44,8 @@ jest.mock('../../../../lib/significant_events/entities/get_live_entities', () =>
 }));
 
 jest.mock('../../../../lib/significant_events/ki_queries_generation_service', () => ({
-  generateKIQueries: (...args: unknown[]) => mockGenerateKIQueries(...args),
+  buildKIQueryGenerationInput: (...args: unknown[]) => mockBuildKIQueryGenerationInput(...args),
+  collectGeneratedKIQueries: (...args: unknown[]) => mockCollectGeneratedKIQueries(...args),
 }));
 
 jest.mock('../../../../lib/significant_events/events/cleanup_stale_events', () => ({
@@ -563,22 +565,26 @@ describe('persistQueriesRoute', () => {
   });
 });
 
-describe('generateQueriesRoute', () => {
-  const generateRoute =
-    internalKIQueriesRoutes['POST /internal/streams/{sourceId}/queries/_generate'];
-  const strictGenerateParams = DeepStrict(generateRoute.params);
+describe('generateQueriesInputRoute', () => {
+  const inputRoute =
+    internalKIQueriesRoutes['POST /internal/streams/{sourceId}/queries/_generate/input'];
+  const strictInputParams = DeepStrict(inputRoute.params);
 
   beforeEach(() => {
-    mockGenerateKIQueries.mockReset();
-    mockGenerateKIQueries.mockResolvedValue({
-      queries: [],
-      tokensUsed: { prompt: 0, completion: 0, total: 0 },
+    mockBuildKIQueryGenerationInput.mockReset();
+    mockBuildKIQueryGenerationInput.mockResolvedValue({
       connectorId: 'test-connector',
+      message: 'generate queries',
     });
   });
 
   const makeAgentBuilder = () => ({
     agents: { ensure: jest.fn().mockResolvedValue(undefined) },
+    conversations: {
+      getScopedClient: jest.fn().mockResolvedValue({
+        create: jest.fn().mockResolvedValue({ id: 'conversation-1' }),
+      }),
+    },
   });
 
   const makeHandlerParams = ({
@@ -612,43 +618,19 @@ describe('generateQueriesRoute', () => {
         get: jest.fn().mockReturnValue({ warn: jest.fn(), debug: jest.fn(), trace: jest.fn() }),
       },
       telemetry: {},
-    } as unknown as GenerateHandlerParams);
-
-  it('retains valid run ids and rejects blank or overlong run ids during route validation', () => {
-    const parsed = strictGenerateParams.safeParse({
-      path: { sourceId: 'logs.test' },
-      body: { runId: 'run-1' },
-    });
-
-    expect(parsed.success).toBe(true);
-    if (parsed.success) {
-      expect(parsed.data.body?.runId).toBe('run-1');
-    }
-    expect(
-      strictGenerateParams.safeParse({
-        path: { sourceId: 'logs.test' },
-        body: { runId: '   ' },
-      }).success
-    ).toBe(false);
-    expect(
-      strictGenerateParams.safeParse({
-        path: { sourceId: 'logs.test' },
-        body: { runId: 'x'.repeat(MAX_ID_LENGTH + 1) },
-      }).success
-    ).toBe(false);
-  });
+    } as unknown as Parameters<typeof inputRoute.handler>[0]);
 
   it('accepts bounded existing-query context limits and defaults omission to 50', () => {
     for (const value of [0, 10, 50]) {
       expect(
-        strictGenerateParams.safeParse({
+        strictInputParams.safeParse({
           path: { sourceId: 'logs.test' },
           body: { maxExistingQueriesForContext: value },
         }).success
       ).toBe(true);
     }
 
-    const omitted = strictGenerateParams.safeParse({
+    const omitted = strictInputParams.safeParse({
       path: { sourceId: 'logs.test' },
       body: {},
     });
@@ -659,7 +641,7 @@ describe('generateQueriesRoute', () => {
 
     for (const value of [-1, 51, 1.5]) {
       expect(
-        strictGenerateParams.safeParse({
+        strictInputParams.safeParse({
           path: { sourceId: 'logs.test' },
           body: { maxExistingQueriesForContext: value },
         }).success
@@ -667,25 +649,131 @@ describe('generateQueriesRoute', () => {
     }
   });
 
-  it('delegates to query generation and returns its result', async () => {
-    const result = await generateRoute.handler(
+  it('installs the agent in the request space, then returns what the ai.agent step runs with', async () => {
+    const agentBuilder = makeAgentBuilder();
+
+    const result = await inputRoute.handler(
       makeHandlerParams({
-        agentBuilder: makeAgentBuilder(),
-        body: {
-          connectorId: 'test-connector',
-          runId: 'run-1',
-          maxExistingQueriesForContext: 10,
-        },
+        agentBuilder,
+        body: { connectorId: 'test-connector', maxExistingQueriesForContext: 10 },
       })
     );
 
-    expect(mockGenerateKIQueries).toHaveBeenCalledWith(
+    expect(result).toEqual({
+      agentId: KI_QUERY_GENERATION_AGENT_ID,
+      connectorId: 'test-connector',
+      conversationId: 'conversation-1',
+      message: 'generate queries',
+    });
+    expect(agentBuilder.agents.ensure).toHaveBeenCalledWith(
+      expect.objectContaining({
+        spaceId: 'space-a',
+        agent: expect.objectContaining({ id: KI_QUERY_GENERATION_AGENT_ID }),
+      })
+    );
+    expect(mockBuildKIQueryGenerationInput).toHaveBeenCalledWith(
       expect.objectContaining({
         source: { id: 'logs.test', view_name: '$.nightshift.sources.default.logs' },
         connectorId: 'test-connector',
-        runId: 'run-1',
         maxExistingQueriesForContext: 10,
       }),
+      expect.any(Object)
+    );
+  });
+
+  it('fails when agent builder is unavailable', async () => {
+    await expect(
+      inputRoute.handler(makeHandlerParams({ agentBuilder: undefined }))
+    ).rejects.toThrow('Agent Builder is required');
+    expect(mockBuildKIQueryGenerationInput).not.toHaveBeenCalled();
+  });
+
+  it('maps a blocked model to a 400 response', async () => {
+    mockBuildKIQueryGenerationInput.mockRejectedValueOnce(
+      new NightshiftModelBlockedError('custom-model', 'default-model')
+    );
+
+    await expect(
+      inputRoute.handler(
+        makeHandlerParams({
+          agentBuilder: makeAgentBuilder(),
+          body: { connectorId: 'custom-model' },
+        })
+      )
+    ).rejects.toMatchObject({ output: { statusCode: 400 } });
+  });
+});
+
+describe('generateQueriesRoute', () => {
+  const generateRoute =
+    internalKIQueriesRoutes['POST /internal/streams/{sourceId}/queries/_generate'];
+  const strictGenerateParams = DeepStrict(generateRoute.params);
+
+  beforeEach(() => {
+    mockCollectGeneratedKIQueries.mockReset();
+    mockCollectGeneratedKIQueries.mockReturnValue({
+      queries: [],
+      tokensUsed: { prompt: 0, completion: 0, total: 0 },
+      connectorId: 'test-connector',
+    });
+  });
+
+  const makeHandlerParams = ({ agentBuilder }: { agentBuilder: unknown }) =>
+    ({
+      params: {
+        path: { sourceId: 'logs.test' },
+        body: { connectorId: 'test-connector', conversationId: 'conversation-1' },
+      },
+      request: { spaceId: 'space-a' },
+      getScopedClients: jest.fn().mockResolvedValue({
+        sourcesClient: {
+          get: jest.fn().mockResolvedValue({
+            source: { id: 'logs.test', view_name: '$.nightshift.sources.default.logs' },
+          }),
+        },
+        licensing: {},
+      }),
+      server: { agentBuilder },
+      maintenanceService: makeMaintenanceService(),
+      logger: { get: jest.fn().mockReturnValue({ debug: jest.fn() }) },
+      telemetry: {},
+    } as unknown as GenerateHandlerParams);
+
+  it('requires the connector and the conversation of the agent run', () => {
+    const path = { sourceId: 'logs.test' };
+    expect(
+      strictGenerateParams.safeParse({
+        path,
+        body: { connectorId: 'test-connector', conversationId: 'conversation-1' },
+      }).success
+    ).toBe(true);
+    expect(strictGenerateParams.safeParse({ path, body: { connectorId: 'c' } }).success).toBe(
+      false
+    );
+    expect(
+      strictGenerateParams.safeParse({
+        path,
+        body: { connectorId: 'c', conversationId: 'x'.repeat(MAX_ID_LENGTH + 1) },
+      }).success
+    ).toBe(false);
+  });
+
+  it('collects the queries from the conversation the agent step stored', async () => {
+    const conversation = { rounds: [] };
+    const conversationClient = { get: jest.fn().mockResolvedValue(conversation) };
+    const agentBuilder = {
+      conversations: { getScopedClient: jest.fn().mockResolvedValue(conversationClient) },
+    };
+
+    const result = await generateRoute.handler(makeHandlerParams({ agentBuilder }));
+
+    expect(conversationClient.get).toHaveBeenCalledWith('conversation-1');
+    expect(mockCollectGeneratedKIQueries).toHaveBeenCalledWith(
+      {
+        source: { id: 'logs.test', view_name: '$.nightshift.sources.default.logs' },
+        connectorId: 'test-connector',
+        agentConversation: conversation,
+      },
       expect.any(Object)
     );
     expect(result).toEqual({
@@ -695,51 +783,11 @@ describe('generateQueriesRoute', () => {
     });
   });
 
-  it('installs the KI query generation agent in the request space before generating', async () => {
-    const agentBuilder = makeAgentBuilder();
-
-    await generateRoute.handler(makeHandlerParams({ agentBuilder }));
-
-    expect(agentBuilder.agents.ensure).toHaveBeenCalledWith(
-      expect.objectContaining({
-        spaceId: 'space-a',
-        agent: expect.objectContaining({ id: KI_QUERY_GENERATION_AGENT_ID }),
-      })
-    );
-    expect(agentBuilder.agents.ensure.mock.invocationCallOrder[0]).toBeLessThan(
-      mockGenerateKIQueries.mock.invocationCallOrder[0]
-    );
-  });
-
-  it('generates a run id when one is not provided', async () => {
-    await generateRoute.handler(makeHandlerParams({ agentBuilder: makeAgentBuilder() }));
-
-    const { runId, maxExistingQueriesForContext } = mockGenerateKIQueries.mock.calls[0][0];
-    expect(runId).toEqual(expect.any(String));
-    expect(runId).not.toBe('');
-    expect(maxExistingQueriesForContext).toBe(50);
-  });
-
   it('fails when agent builder is unavailable', async () => {
     await expect(
       generateRoute.handler(makeHandlerParams({ agentBuilder: undefined }))
     ).rejects.toThrow('Agent Builder is required');
-    expect(mockGenerateKIQueries).not.toHaveBeenCalled();
-  });
-
-  it('maps a blocked model to a 400 response', async () => {
-    mockGenerateKIQueries.mockRejectedValueOnce(
-      new NightshiftModelBlockedError('custom-model', 'default-model')
-    );
-
-    await expect(
-      generateRoute.handler(
-        makeHandlerParams({
-          agentBuilder: makeAgentBuilder(),
-          body: { connectorId: 'custom-model' },
-        })
-      )
-    ).rejects.toMatchObject({ output: { statusCode: 400 } });
+    expect(mockCollectGeneratedKIQueries).not.toHaveBeenCalled();
   });
 });
 

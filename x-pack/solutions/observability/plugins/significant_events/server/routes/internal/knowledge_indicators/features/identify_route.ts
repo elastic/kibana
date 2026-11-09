@@ -9,16 +9,15 @@ import { v4 as uuidv4 } from 'uuid';
 import { z, lazySchema } from '@kbn/zod/v4';
 import { resolveNightshiftModelForRequest, type InferenceDocument } from '@kbn/nightshift-ai';
 import { MAX_ID_LENGTH } from '@kbn/significant-events-schema';
-import { isInferenceProviderError } from '@kbn/inference-common';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { createServerRoute } from '../../../create_server_route';
 import { assertNotPaused } from '../../../utils/assert_not_paused';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
-import { formatInferenceProviderError } from '../../../utils/create_connector_sse_error';
 import {
   MS_PER_DAY,
   buildTelemetry,
+  buildFeatureIdentificationInput,
   identifyInferredFeatures,
   identifyComputedFeatures,
   MAX_INFERENCE_DOCUMENTS_BYTES,
@@ -29,7 +28,12 @@ import {
 } from '../../../../lib/significant_events/features';
 import { shouldIdentifyFeatures } from '../../../../lib/significant_events/features/should_identify_features';
 import { sourceToAnalysisTarget } from '../../../../lib/significant_events/source_to_analysis_target';
-import { installFeatureIdentificationAgent } from '../../../../agent_builder/agents/feature_identification';
+import {
+  FEATURE_IDENTIFICATION_AGENT_ID,
+  installFeatureIdentificationAgent,
+} from '../../../../agent_builder/agents/feature_identification';
+import { createAgentConversation } from '../../../../lib/significant_events/create_agent_conversation';
+import { FeatureNotEnabledError } from '../../../../lib/errors/feature_not_enabled_error';
 import { createSignificantEventsAvailability } from '../../../../agent_builder/tools/significant_events_availability';
 
 const getSerializedByteLength = (value: unknown) =>
@@ -129,11 +133,11 @@ const prepareInferredSamplingRoute = createServerRoute({
   },
 });
 
-const identifyInferredFeaturesRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/{sourceId}/features/_identify/inferred',
+const identifyInferredFeaturesInputRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/{sourceId}/features/_identify/inferred/input',
   options: {
     access: 'internal',
-    summary: 'Run LLM inference and reconcile KI features for one iteration',
+    summary: 'Build the input of one inferred feature identification agent run',
     timeout: { idleSocket: 300_000 },
   },
   security: {
@@ -146,14 +150,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
       path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
       body: z.object({
         connectorId: z.string().max(MAX_ID_LENGTH).optional(),
-        runId: z.string().max(MAX_ID_LENGTH).optional(),
-        iteration: z.number().optional(),
         documents: inferenceDocumentsSchema,
-        samplingTelemetry: z.object({
-          totalFilters: z.number().int().min(0),
-          filtersCapped: z.boolean(),
-          hasFilteredDocuments: z.boolean(),
-        }),
         maxExcludedFeaturesInPrompt: z.number().int().min(0).max(50),
         maxPreviouslyIdentifiedFeatures: z.number().optional(),
       }),
@@ -165,29 +162,28 @@ const identifyInferredFeaturesRoute = createServerRoute({
     getScopedClients,
     server,
     logger,
-    telemetry,
     maintenanceService,
-  }) => {
+  }): Promise<{
+    agentId: string;
+    connectorId: string;
+    conversationId: string;
+    message: string;
+  }> => {
     const scopedClients = await getScopedClients({ request });
-    const { scopedClusterClient, sourcesClient, inferenceClient, licensing } = scopedClients;
+    const { sourcesClient, licensing } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
 
+    if (!server.agentBuilder) {
+      throw new FeatureNotEnabledError(
+        'Feature identification requires Agent Builder, which is not available'
+      );
+    }
+
     const { sourceId } = params.path;
-    const routeLogger = logger.get('features_identification', 'inferred', sourceId);
-    const now = Date.now();
-    const {
-      connectorId: connectorIdOverride,
-      runId,
-      iteration,
-      documents,
-      samplingTelemetry,
-      maxExcludedFeaturesInPrompt,
-      maxPreviouslyIdentifiedFeatures,
-    } = params.body;
-    const resolvedRunId = runId?.trim() || uuidv4();
-    const { totalFilters, filtersCapped, hasFilteredDocuments } = samplingTelemetry;
+    const routeLogger = logger.get('features_identification', 'input', sourceId);
+    const { connectorId: connectorIdOverride, documents, ...tuning } = params.body;
 
     const [connectorId, { source }] = await Promise.all([
       resolveNightshiftModelForRequest({
@@ -204,23 +200,112 @@ const identifyInferredFeaturesRoute = createServerRoute({
 
     // Startup installs the agent in the default space only, and onboarding runs in the space of
     // the request. Without this every iteration outside the default space fails on a missing agent.
-    if (server.agentBuilder) {
-      await installFeatureIdentificationAgent({
-        agentBuilder: server.agentBuilder,
-        spaceId: request.spaceId,
-        availability: createSignificantEventsAvailability({ server, logger: routeLogger }),
-      });
+    await installFeatureIdentificationAgent({
+      agentBuilder: server.agentBuilder,
+      spaceId: request.spaceId,
+      availability: createSignificantEventsAvailability({ server, logger: routeLogger }),
+    });
+
+    const { message } = await buildFeatureIdentificationInput({
+      kiClient,
+      sourceId: source.id,
+      documents,
+      logger: routeLogger,
+      tuning,
+    });
+
+    const conversationId = await createAgentConversation({
+      agentBuilder: server.agentBuilder,
+      request,
+      agentId: FEATURE_IDENTIFICATION_AGENT_ID,
+      title: `Feature identification: ${source.id}`,
+    });
+
+    return { agentId: FEATURE_IDENTIFICATION_AGENT_ID, connectorId, conversationId, message };
+  },
+});
+
+const identifyInferredFeaturesRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/{sourceId}/features/_identify/inferred',
+  options: {
+    access: 'internal',
+    summary: 'Reconcile and persist the KI features an agent run identified for one iteration',
+    timeout: { idleSocket: 300_000 },
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
+    },
+  },
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
+      body: z.object({
+        connectorId: z.string().max(MAX_ID_LENGTH),
+        /** Conversation the `ai.agent` step ran in, as returned by `_identify/inferred/input`. */
+        conversationId: z.string().max(MAX_ID_LENGTH),
+        runId: z.string().max(MAX_ID_LENGTH).optional(),
+        iteration: z.number().optional(),
+        documents: inferenceDocumentsSchema,
+        samplingTelemetry: z.object({
+          totalFilters: z.number().int().min(0),
+          filtersCapped: z.boolean(),
+          hasFilteredDocuments: z.boolean(),
+        }),
+      }),
+    })
+  ),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+    logger,
+    telemetry,
+    maintenanceService,
+  }) => {
+    const scopedClients = await getScopedClients({ request });
+    const { sourcesClient, licensing } = scopedClients;
+
+    await assertSignificantEventsAccess({ server, licensing });
+    await assertNotPaused({ maintenanceService, request });
+
+    if (!server.agentBuilder) {
+      throw new FeatureNotEnabledError(
+        'Feature identification requires Agent Builder, which is not available'
+      );
     }
+
+    const { sourceId } = params.path;
+    const routeLogger = logger.get('features_identification', 'inferred', sourceId);
+    const now = Date.now();
+    const { connectorId, conversationId, runId, iteration, documents, samplingTelemetry } =
+      params.body;
+    const resolvedRunId = runId?.trim() || uuidv4();
+    const { totalFilters, filtersCapped, hasFilteredDocuments } = samplingTelemetry;
+
+    const { source } = await sourcesClient.get(sourceId);
+    const kiClient = await scopedClients.getKnowledgeIndicatorClient(source);
+
+    // An unreadable conversation is a failed agent run like any other, not a failed workflow.
+    const agentConversation = await server.agentBuilder.conversations
+      .getScopedClient({ request })
+      .then((client) => client.get(conversationId))
+      .catch((error) => {
+        routeLogger.warn(
+          `Could not read conversation [${conversationId}] of the feature identification agent: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+        return undefined;
+      });
 
     try {
       const result = await identifyInferredFeatures({
-        esClient: scopedClusterClient.asCurrentUser,
         kiClient,
-        agentBuilder: server.agentBuilder,
-        request,
+        agentConversation,
         connectorId,
         logger: routeLogger,
-        signal: getRequestAbortSignal(request),
         sourceId: source.id,
         runId: resolvedRunId,
         documents,
@@ -228,10 +313,6 @@ const identifyInferredFeaturesRoute = createServerRoute({
         filtersCapped,
         hasFilteredDocuments,
         iteration,
-        tuning: {
-          maxExcludedFeaturesInPrompt,
-          maxPreviouslyIdentifiedFeatures,
-        },
         trackFeaturesIdentified: (data) => telemetry.trackFeaturesIdentified(data),
       });
 
@@ -260,15 +341,6 @@ const identifyInferredFeaturesRoute = createServerRoute({
           { state: 'failure' }
         )
       );
-
-      if (isInferenceProviderError(error)) {
-        const connector = await inferenceClient
-          .getConnectorById(connectorId)
-          .catch(() => undefined);
-        if (connector) {
-          throw new Error(formatInferenceProviderError(error, connector));
-        }
-      }
 
       throw error;
     }
@@ -390,6 +462,7 @@ const shouldIdentifyRoute = createServerRoute({
 
 export const internalIdentifyKIFeaturesRoutes = {
   ...prepareInferredSamplingRoute,
+  ...identifyInferredFeaturesInputRoute,
   ...identifyInferredFeaturesRoute,
   ...identifyComputedFeaturesRoute,
   ...shouldIdentifyRoute,

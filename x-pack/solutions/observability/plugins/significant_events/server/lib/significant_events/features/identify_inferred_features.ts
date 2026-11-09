@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { Conversation } from '@kbn/agent-builder-common';
 import type { Logger } from '@kbn/logging';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import {
@@ -29,8 +28,10 @@ import {
   toFeatureSummary,
   toFeatureProjection,
 } from './reconcile_features';
-import { executeFeatureIdentificationAgent } from './identify_features_via_agent';
-import { FeatureNotEnabledError } from '../../errors/feature_not_enabled_error';
+import {
+  buildFeatureIdentificationMessage,
+  readFeatureIdentificationResult,
+} from './identify_features_via_agent';
 
 export { findSimilarFeatures } from './feature_similarity_search';
 
@@ -237,12 +238,66 @@ export function buildTelemetry(
 }
 
 // ---------------------------------------------------------------------------
+// Agent input: everything the identification agent is asked, built before the agent runs
+// ---------------------------------------------------------------------------
+
+export interface BuildFeatureIdentificationInputOptions {
+  kiClient: KnowledgeIndicatorClient;
+  sourceId: string;
+  documents: InferenceDocument[];
+  logger: Logger;
+  tuning: IterationTuningParams;
+}
+
+export async function buildFeatureIdentificationInput({
+  kiClient,
+  sourceId,
+  documents,
+  logger,
+  tuning,
+}: BuildFeatureIdentificationInputOptions): Promise<{ message: string }> {
+  const {
+    maxExcludedFeaturesInPrompt,
+    maxPreviouslyIdentifiedFeatures = DEFAULT_MAX_PREVIOUSLY_IDENTIFIED_FEATURES,
+  } = tuning;
+
+  const [{ hits: allFeatures }, { hits: excludedFeatures }] = await Promise.all([
+    kiClient.getFeatures(sourceId),
+    kiClient.getExcludedFeatures(sourceId),
+  ]);
+
+  const allKnownFeatures = allFeatures.filter((f) => !isComputedFeature(f));
+  const topRanked = selectPreviouslyIdentifiedFeatures(
+    allKnownFeatures,
+    maxPreviouslyIdentifiedFeatures
+  );
+  const { text: knownFeatureIds, droppedCount: knownFeatureIdsDropped } =
+    buildKnownFeatureIds(allKnownFeatures);
+  if (knownFeatureIdsDropped > 0) {
+    logger.debug(
+      `known_feature_ids inventory for source "${sourceId}" exceeded its budget; dropped the ${knownFeatureIdsDropped} stalest ids`
+    );
+  }
+  const excludedSummaries: ExcludedFeatureSummary[] = excludedFeatures
+    .slice(0, maxExcludedFeaturesInPrompt)
+    .map(toFeatureProjection);
+
+  return {
+    message: buildFeatureIdentificationMessage({
+      sourceId,
+      sampleDocuments: documents,
+      excludedFeatures: excludedSummaries,
+      previouslyIdentifiedFeatures: topRanked.map(toFeatureProjection),
+      knownFeatureIds,
+    }),
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Single inferred-features iteration (internal)
 // ---------------------------------------------------------------------------
 
 interface RunInferredIterationOptions {
-  kiClient: KnowledgeIndicatorClient;
-  sourceId: string;
   runId: string;
   allFeatures: Feature[];
   discoveredFeatures: Feature[];
@@ -251,13 +306,8 @@ interface RunInferredIterationOptions {
   totalFilters: number;
   filtersCapped: boolean;
   hasFilteredDocuments: boolean;
-  agentBuilder: AgentBuilderPluginStart;
-  request: KibanaRequest;
-  connectorId: string;
+  agentConversation: Pick<Conversation, 'rounds'> | undefined;
   logger: Logger;
-  signal: AbortSignal;
-  tuning: IterationTuningParams;
-  iteration: number;
 }
 
 interface InferredIterationResult {
@@ -280,8 +330,6 @@ interface InferredIterationResult {
 }
 
 async function runInferredIteration({
-  kiClient,
-  sourceId,
   runId,
   allFeatures,
   discoveredFeatures,
@@ -290,63 +338,27 @@ async function runInferredIteration({
   totalFilters,
   filtersCapped,
   hasFilteredDocuments,
-  agentBuilder,
-  request,
-  connectorId,
+  agentConversation,
   logger,
-  signal,
-  tuning,
-  iteration,
 }: RunInferredIterationOptions): Promise<InferredIterationResult> {
-  const {
-    maxExcludedFeaturesInPrompt,
-    maxPreviouslyIdentifiedFeatures = DEFAULT_MAX_PREVIOUSLY_IDENTIFIED_FEATURES,
-  } = tuning;
-
   const docsCount = documents.length;
   const docIds = documents.map((doc) => doc._id).filter((id): id is string => id != null);
 
   const allKnownFeatures = allFeatures.filter((f) => !isComputedFeature(f));
-  const topRanked = selectPreviouslyIdentifiedFeatures(
-    allKnownFeatures,
-    maxPreviouslyIdentifiedFeatures
-  );
-  const { text: knownFeatureIds, droppedCount: knownFeatureIdsDropped } =
-    buildKnownFeatureIds(allKnownFeatures);
-  if (knownFeatureIdsDropped > 0) {
-    logger.debug(
-      `known_feature_ids inventory for source "${sourceId}" exceeded its budget; dropped the ${knownFeatureIdsDropped} stalest ids`
-    );
-  }
-  const excludedSummaries: ExcludedFeatureSummary[] = excludedFeatures
-    .slice(0, maxExcludedFeaturesInPrompt)
-    .map(toFeatureProjection);
 
   let rawFeatures: BaseFeature[];
   let ignoredFeatures: IgnoredFeature[];
   let tokensUsed: ChatCompletionTokenCount;
 
   try {
-    const result = await executeFeatureIdentificationAgent({
-      agentBuilder,
-      request,
-      connectorId,
-      sourceId,
-      sampleDocuments: documents,
-      excludedFeatures: excludedSummaries,
-      previouslyIdentifiedFeatures: topRanked.map(toFeatureProjection),
-      knownFeatureIds,
-      interactionId: runId,
-      signal,
-      logger,
-    });
+    if (!agentConversation) {
+      throw new Error('Feature identification agent step produced no conversation');
+    }
+    const result = readFeatureIdentificationResult({ conversation: agentConversation, logger });
     rawFeatures = result.features;
     ignoredFeatures = result.ignoredFeatures;
     tokensUsed = result.tokensUsed;
   } catch (error) {
-    if (signal.aborted) {
-      throw error;
-    }
     const errorMsg = error instanceof Error ? error.message : String(error);
     logger.warn(`Feature identification agent failed: ${errorMsg}`);
     return {
@@ -393,13 +405,11 @@ async function runInferredIteration({
 // ---------------------------------------------------------------------------
 
 export interface IdentifyInferredFeaturesOptions {
-  esClient: ElasticsearchClient;
   kiClient: KnowledgeIndicatorClient;
-  agentBuilder?: AgentBuilderPluginStart;
-  request: KibanaRequest;
+  /** The conversation the `ai.agent` step stored. Absent when that step failed. */
+  agentConversation: Pick<Conversation, 'rounds'> | undefined;
   connectorId: string;
   logger: Logger;
-  signal: AbortSignal;
   sourceId: string;
   runId: string;
   documents: InferenceDocument[];
@@ -407,7 +417,6 @@ export interface IdentifyInferredFeaturesOptions {
   filtersCapped: boolean;
   hasFilteredDocuments: boolean;
   iteration?: number;
-  tuning: IterationTuningParams;
   trackFeaturesIdentified?: (data: FeaturesIdentifiedTelemetry) => void;
 }
 
@@ -420,13 +429,10 @@ export interface IdentifyInferredFeaturesResult {
 }
 
 export async function identifyInferredFeatures({
-  esClient,
   kiClient,
-  agentBuilder,
-  request,
+  agentConversation,
   connectorId,
   logger,
-  signal,
   sourceId,
   runId,
   documents,
@@ -434,15 +440,8 @@ export async function identifyInferredFeatures({
   filtersCapped,
   hasFilteredDocuments,
   iteration = 1,
-  tuning,
   trackFeaturesIdentified,
 }: IdentifyInferredFeaturesOptions): Promise<IdentifyInferredFeaturesResult> {
-  if (!agentBuilder) {
-    throw new FeatureNotEnabledError(
-      'Feature identification requires Agent Builder, which is not available'
-    );
-  }
-
   const [{ hits: allFeatures }, { hits: excludedFeatures }] = await Promise.all([
     kiClient.getFeatures(sourceId),
     kiClient.getExcludedFeatures(sourceId),
@@ -453,8 +452,6 @@ export async function identifyInferredFeatures({
   const startedAt = Date.now();
 
   const iterationResult = await runInferredIteration({
-    kiClient,
-    sourceId,
     runId,
     allFeatures,
     discoveredFeatures,
@@ -463,18 +460,16 @@ export async function identifyInferredFeatures({
     totalFilters,
     filtersCapped,
     hasFilteredDocuments,
-    agentBuilder,
-    request,
-    connectorId,
+    agentConversation,
     logger,
-    signal,
-    tuning,
-    iteration,
   });
 
   const { docsCount, docIds, outcome } = iterationResult;
 
-  const durationMs = Date.now() - startedAt;
+  // The agent ran as its own workflow step, so its stored round time is added to this step's own,
+  // whether or not it finalized.
+  const agentDurationMs = agentConversation?.rounds.at(-1)?.time_to_last_token ?? 0;
+  const durationMs = Date.now() - startedAt + agentDurationMs;
 
   const telemetryCtx: TelemetryContext = {
     run_id: runId,
