@@ -17,6 +17,7 @@ import {
   OBSERVABLE_TYPE_HOSTNAME,
   OBSERVABLE_TYPE_AGENT_ID,
 } from '../constants/observables';
+import { getHashFields } from './default_observable_types';
 
 export const getIPType = (ip: string): 'IPV4' | 'IPV6' => {
   if (ip.includes(':')) {
@@ -25,28 +26,11 @@ export const getIPType = (ip: string): 'IPV4' | 'IPV6' => {
   return 'IPV4';
 };
 
-// https://www.elastic.co/docs/reference/ecs/ecs-hash
-const HASH_FIELDS = [
-  'cdhash',
-  'md5',
-  'sha1',
-  'sha256',
-  'sha384',
-  'sha512',
-  'ssdeep',
-  'tlsh',
-] as const;
-
-// https://www.elastic.co/docs/reference/ecs/ecs-hash
-const HASH_PARENTS = ['dll', 'file', 'process'] as const;
-
 export type Maybe<T> = T | null;
 export interface FlattedEcsData {
   field: string;
   value?: Maybe<string[]>;
 }
-export const getHashFields = (): string[] =>
-  HASH_PARENTS.map((parent) => HASH_FIELDS.map((field) => `${parent}.hash.${field}`)).flat();
 
 export const processObservable = (
   observablesMap: Map<string, ObservablePost>,
