@@ -57,7 +57,10 @@ export const PostBlockkitSubActionParamsSchema = schema.object({
 });
 
 export const PostMessageParamsSchema = schema.object({
-  subAction: schema.literal('postMessage'),
+  // `schema.literal` takes no `defaultValue`; `as const` keeps `subAction` a narrowable literal.
+  subAction: schema.oneOf([schema.literal('postMessage')], {
+    defaultValue: 'postMessage' as const,
+  }),
   subActionParams: PostMessageSubActionParamsSchema,
 });
 
@@ -65,25 +68,6 @@ export const PostBlockkitParamsSchema = schema.object({
   subAction: schema.literal('postBlockkit'),
   subActionParams: PostBlockkitSubActionParamsSchema,
 });
-
-/**
- * Rules can be saved without subAction. postMessage is the connector default.
- * An explicit subAction is left unchanged so the union still rejects unknown values.
- */
-export function setDefaultSubAction(value: unknown): unknown {
-  if (!value || typeof value !== 'object') {
-    return value;
-  }
-
-  if (
-    !Object.hasOwn(value, 'subAction') ||
-    (value as Record<string, unknown>).subAction === undefined
-  ) {
-    return { ...value, subAction: 'postMessage' };
-  }
-
-  return value;
-}
 
 export const SlackApiParamsSchema = schema.oneOf([
   ValidChannelIdParamsSchema,
