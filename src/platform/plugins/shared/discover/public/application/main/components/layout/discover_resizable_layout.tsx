@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
+import { useEuiTheme, useIsWithinBreakpoints, type UseEuiTheme } from '@elastic/eui';
 import {
   ResizableLayout,
   ResizableLayoutDirection,
@@ -18,6 +18,7 @@ import { css } from '@emotion/react';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import useObservable from 'react-use/lib/useObservable';
 import type { BehaviorSubject } from 'rxjs';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { SidebarToggleState } from '../../../types';
 import { withRestorableState, useRestorableState } from './discover_layout_restorable_state';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -47,6 +48,7 @@ export const InternalDiscoverResizableLayout = ({
   const minSidebarWidth = euiTheme.base * 13;
   const defaultSidebarWidth = euiTheme.base * 19;
   const minMainPanelWidth = euiTheme.base * 24;
+  const layoutCss = useMemoCss(dscPageBodyContentsStyles);
 
   const [sidebarWidth, setSidebarWidth] = useRestorableState(
     'sidebarWidth',
@@ -86,7 +88,7 @@ export const InternalDiscoverResizableLayout = ({
       <InPortal node={mainPanelNode}>{mainPanel}</InPortal>
       <ResizableLayout
         className="dscPageBody__contents" // class is used in other styles
-        css={dscPageBodyContentsCss}
+        css={layoutCss.contents}
         mode={layoutMode}
         direction={layoutDirection}
         fixedPanelSize={sidebarWidth ?? defaultSidebarWidth}
@@ -105,7 +107,41 @@ export const DiscoverResizableLayout = withRestorableState(InternalDiscoverResiz
 
 export type DiscoverResizableLayoutProps = ComponentProps<typeof DiscoverResizableLayout>;
 
-const dscPageBodyContentsCss = css`
-  overflow: hidden;
-  height: 100%;
-`;
+const dscPageBodyContentsStyles = {
+  contents: ({ euiTheme }: UseEuiTheme) => css`
+    overflow: hidden;
+    height: 100%;
+
+    /* POC: open a recessed gutter between field list and results (cancel EUI button overlap) */
+    &.euiFlexGroup {
+      gap: ${euiTheme.size.s};
+    }
+
+    .euiResizableButton {
+      /* POC: match outer pageBody gutter (size.s); default handle is size.base */
+      margin-inline: 0 !important; /* stylelint-disable-line declaration-no-important */
+      inline-size: ${euiTheme.size.s} !important; /* stylelint-disable-line declaration-no-important */
+
+      &::before,
+      &::after {
+        /* Keep the hit target; hide the seam line so recessed shows through */
+        background-color: transparent !important; /* stylelint-disable-line declaration-no-important */
+      }
+
+      &:hover,
+      &:focus,
+      &:active {
+        background-color: transparent;
+      }
+    }
+
+    .euiResizablePanel,
+    > .euiFlexItem {
+      background-color: ${euiTheme.colors.backgroundBasePlain};
+      /* POC: bigger radius + border so panels read as cards on recessed */
+      border-radius: ${euiTheme.border.radius.frame};
+      border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
+      overflow: hidden;
+    }
+  `,
+};

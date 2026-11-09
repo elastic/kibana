@@ -38,6 +38,10 @@ import { BehaviorSubject } from 'rxjs';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
+import {
+  KBN_RECESSED_GLASS_CLASS,
+  kbnRecessedGlassCss,
+} from '@kbn/css-utils/public/recessed_glass_css';
 import { TABS_BAR_HEIGHT } from '@kbn/unified-tabs';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useDiscoverCustomizationContext } from '../../../../customizations';
@@ -108,7 +112,8 @@ export function DiscoverLayout() {
   const dispatch = useInternalStateDispatch();
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
   const styles = useMemoCss(componentStyles);
-  const { euiTheme } = useEuiTheme();
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
   const globalQueryState = data.query.getState();
   const dataStateContainer = useCurrentTabDataStateContainer();
   const isProjectChromeStyle = useIsProjectChromeStyle();
@@ -417,12 +422,14 @@ export function DiscoverLayout() {
 
   return (
     <EuiPage
-      className="dscPage" // class is used in tests and other styles
+      // class is used in tests and other styles; recessed glass lets panel gutters show through
+      className={`dscPage ${KBN_RECESSED_GLASS_CLASS}`}
       data-test-subj="dscPage"
       data-fetch-counter={fetchCounter.current}
       direction="column"
       css={[
         styles.dscPage,
+        css(kbnRecessedGlassCss(euiThemeContext)),
         css`
           ${useEuiBreakpoint(['m', 'l', 'xl'])} {
             ${kbnFullBodyHeightCss(fullBodyHeightOffset)}
@@ -536,15 +543,18 @@ export function DiscoverLayout() {
 }
 
 const componentStyles = {
-  dscPage: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      overflow: 'visible',
-      padding: 0,
-      backgroundColor: euiTheme.colors.backgroundBasePlain,
-    }),
-  pageBody: css({
-    overflow: 'hidden',
+  dscPage: css({
+    overflow: 'visible',
+    padding: 0,
+    // POC: background comes from kbnRecessedGlassCss (backgroundBaseRecessed)
   }),
+  pageBody: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      overflow: 'hidden',
+      // POC: outer gutter so recessed shows around the field list + results panels
+      padding: euiTheme.size.s,
+      paddingTop: euiTheme.size.s,
+    }),
   sidebarContainer: css({
     width: '100%',
     height: '100%',
@@ -560,6 +570,7 @@ const componentStyles = {
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
+    // POC: border/radius live on the outer .euiResizablePanel — avoid a double border here
   }),
   dscPageContent: css({
     position: 'relative',

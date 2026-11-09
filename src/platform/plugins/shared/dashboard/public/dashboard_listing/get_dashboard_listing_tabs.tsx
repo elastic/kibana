@@ -93,6 +93,8 @@ const DashboardsTabContent = ({
       <TableListViewTable<DashboardSavedObjectUserContent>
         tableCaption={tableListViewTableProps.title}
         {...tableListViewTableProps}
+        // POC: parent TabbedTableListView already owns the recessed page template.
+        withoutPageTemplateWrapper
         onFetchSuccess={parentProps.onFetchSuccess}
         setPageDataTestSubject={parentProps.setPageDataTestSubject}
         refreshListBouncer={refreshListBouncer}

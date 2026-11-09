@@ -17,7 +17,6 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import {
   KBN_RECESSED_GLASS_CLASS,
   kbnRecessedGlassCss,
-  kbnRecessedGlassResetCss,
 } from '@kbn/css-utils/public/recessed_glass_css';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
@@ -27,23 +26,15 @@ import { DashboardEmptyScreen } from './empty_screen/dashboard_empty_screen';
 export const DashboardViewport = () => {
   const dashboardApi = useDashboardApi();
   const dashboardInternalApi = useDashboardInternalApi();
-  const [
-    dashboardTitle,
-    description,
-    expandedPanelId,
-    layout,
-    viewMode,
-    useMargins,
-    fullScreenMode,
-  ] = useBatchedPublishingSubjects(
-    dashboardApi.title$,
-    dashboardApi.description$,
-    dashboardApi.expandedPanelId$,
-    dashboardApi.layout$,
-    dashboardApi.viewMode$,
-    dashboardApi.settings.useMargins$,
-    dashboardApi.fullScreenMode$
-  );
+  const [dashboardTitle, description, expandedPanelId, layout, viewMode, fullScreenMode] =
+    useBatchedPublishingSubjects(
+      dashboardApi.title$,
+      dashboardApi.description$,
+      dashboardApi.expandedPanelId$,
+      dashboardApi.layout$,
+      dashboardApi.viewMode$,
+      dashboardApi.fullScreenMode$
+    );
   const onExit = useCallback(() => {
     dashboardApi.setFullScreenMode(false);
   }, [dashboardApi]);
@@ -70,9 +61,8 @@ export const DashboardViewport = () => {
 
   return (
     <div
-      className={classNames('dshDashboardViewportWrapper', {
-        'dshDashboardViewportWrapper--defaultBg': !useMargins,
-        [KBN_RECESSED_GLASS_CLASS]: useMargins,
+      // POC: recessed glass for empty + populated canvas (margins toggle lives on the grid).
+      className={classNames('dshDashboardViewportWrapper', KBN_RECESSED_GLASS_CLASS, {
         'dshDashboardViewportWrapper--isFullscreen': fullScreenMode,
       })}
       css={styles.wrapper}
@@ -106,11 +96,9 @@ const dashboardViewportStyles = {
       display: 'flex',
       flexDirection: 'column' as 'column',
       width: '100%',
+      // POC: fill the framed app area so recessed glass covers empty canvas space.
+      minHeight: '100%',
       ...kbnRecessedGlassCss(euiThemeContext),
-      '&.dshDashboardViewportWrapper--defaultBg': {
-        ...kbnRecessedGlassResetCss,
-        backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-      },
       '.dshDashboardViewport-controls': {
         margin: `0 ${euiTheme.size.s}`,
         paddingTop: euiTheme.size.s,

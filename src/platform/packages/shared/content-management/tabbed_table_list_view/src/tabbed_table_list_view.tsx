@@ -8,7 +8,13 @@
  */
 
 import type { EuiPageHeaderProps } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import {
+  KBN_RECESSED_GLASS_CLASS,
+  kbnRecessedGlassCss,
+} from '@kbn/css-utils/public/recessed_glass_css';
 import React, { useCallback, useEffect, useState } from 'react';
 import type { TableListViewTableProps } from '@kbn/content-management-table-list-view-table';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
@@ -66,6 +72,7 @@ export const TabbedTableListView = ({
   hideTabs,
   rightSideItems,
 }: TabbedTableListViewProps) => {
+  const euiThemeContext = useEuiTheme();
   const [hasInitialFetchReturned, setHasInitialFetchReturned] = useState(false);
   const [pageDataTestSubject, setPageDataTestSubject] = useState<string>();
 
@@ -97,7 +104,14 @@ export const TabbedTableListView = ({
   const hideHeader = !title && !description && hideTabs;
 
   return (
-    <KibanaPageTemplate panelled restrictWidth={false} data-test-subj={pageDataTestSubject}>
+    // POC: recessed glass for listing content (empty + populated); unpanelled so sections stay transparent.
+    <KibanaPageTemplate
+      panelled={false}
+      restrictWidth={false}
+      className={KBN_RECESSED_GLASS_CLASS}
+      css={css(kbnRecessedGlassCss(euiThemeContext))}
+      data-test-subj={pageDataTestSubject}
+    >
       {!hideHeader && (
         <KibanaPageTemplate.Header
           pageTitle={title ? <span id={headingId}>{title}</span> : undefined}

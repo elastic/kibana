@@ -14,7 +14,6 @@ import { css } from '@emotion/react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHideFor,
   useEuiTheme,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
@@ -186,7 +185,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     useState<UnifiedFieldListSidebarContainerApi | null>(null);
   const { euiTheme } = useEuiTheme();
   const services = useDiscoverServices();
-  const chromeStyle = useObservable(services.core.chrome.getChromeStyle$(), 'classic');
   const {
     fieldListVariant,
     selectedDataView,
@@ -458,10 +456,8 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       css={css`
         height: 100%;
         display: ${isSidebarCollapsed && !isMobile ? 'none' : 'flex'};
-        // Make Discover's field list background distinguished for the "new chrome"
-        background-color: ${chromeStyle === 'project'
-          ? euiTheme.colors.backgroundBasePlain
-          : euiTheme.colors.body};
+        // POC: panel sits on recessed Discover body; keep plain surface (gutter provides separation)
+        background-color: ${euiTheme.colors.backgroundBasePlain};
       `}
     >
       <EuiFlexItem>
@@ -495,14 +491,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
           />
         ) : null}
       </EuiFlexItem>
-      <EuiHideFor sizes={['xs', 's']}>
-        <EuiFlexItem
-          grow={false}
-          css={css`
-            border-right: ${euiTheme.border.thin};
-          `}
-        />
-      </EuiHideFor>
     </EuiFlexGroup>
   );
 }
