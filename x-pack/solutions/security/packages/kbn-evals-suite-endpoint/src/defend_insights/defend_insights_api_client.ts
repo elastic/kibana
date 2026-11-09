@@ -51,8 +51,14 @@ const statusOf = (e: unknown): number | undefined => {
 const describeError = (e: unknown): string =>
   (e instanceof Error ? e.message : String(e)).slice(0, MAX_ERROR_LENGTH);
 
-const isTimeoutError = (e: unknown): boolean =>
-  e instanceof Error && (e.name === 'TimeoutError' || e.name === 'AbortError');
+/** `KbnClientRequester` wraps an aborted request in an error that carries the original as `cause`. */
+const isTimeoutError = (e: unknown): boolean => {
+  for (let current = e, depth = 0; current instanceof Error && depth < 5; depth++) {
+    if (current.name === 'TimeoutError' || current.name === 'AbortError') return true;
+    current = current.cause;
+  }
+  return false;
+};
 
 const isRetryable = (status: number | undefined): boolean =>
   status === 429 || (status !== undefined && status >= 500);

@@ -125,6 +125,20 @@ describe('DefendInsightsApiClient', () => {
     expect(gets).toBe(2);
   });
 
+  it('retries a poll whose own request timed out, even when the client wrapped the abort', async () => {
+    let gets = 0;
+    const timeout = Object.assign(new Error('timed out'), { name: 'TimeoutError' });
+    const fetch = createFetch(
+      happyRoute(() => {
+        gets += 1;
+        if (gets === 1) throw new Error('request failed', { cause: timeout });
+        return { data: { status: 'succeeded', insights: [], eventsContextCount: 1 } };
+      })
+    );
+    expect(await run(fetch)).toMatchObject({ status: 'succeeded' });
+    expect(gets).toBe(2);
+  });
+
   it('does not retry a 400 while polling', async () => {
     let gets = 0;
     const fetch = createFetch(
