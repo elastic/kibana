@@ -23,11 +23,8 @@ import {
   type AlertingDomainEvent,
   type AlertingPublisherContext,
 } from '../domain_events';
-import type { EventBus } from '../event_bus';
-import {
-  BaseEventBusSubscriber,
-  type EventBusSubscriptionSpec,
-} from '../base_event_bus_subscriber';
+import type { EventBus, Subscription } from '../event_bus';
+import { BaseEventBusSubscriber } from '../base_event_bus_subscriber';
 
 /**
  * Singleton bus subscriber that forwards `alert.status.changed` domain events
@@ -49,9 +46,13 @@ export class AlertStatusChangedWorkflowSubscriber extends BaseEventBusSubscriber
     super(bus, loggerService.forSubsystem('events'));
   }
 
-  protected getSubscriptions(): EventBusSubscriptionSpec[] {
+  protected createSubscriptions(
+    bus: EventBus<AlertingDomainEvent, AlertingPublisherContext>
+  ): Subscription[] {
     return [
-      this.on(ALERT_STATUS_CHANGED_EVENT_TYPE, (event, context) => this.#dispatch(event, context)),
+      bus.subscribe(ALERT_STATUS_CHANGED_EVENT_TYPE, (event, context) =>
+        this.#dispatch(event, context)
+      ),
     ];
   }
 

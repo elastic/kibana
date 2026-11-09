@@ -10,28 +10,31 @@ import { createLoggerService } from '../services/logger_service/logger_service.m
 import type { AlertingDomainEvent, AlertingPublisherContext } from './domain_events';
 import type { EventBus, Subscription } from './event_bus';
 import { createEventBusMock } from './event_bus/event_bus.mock';
-import { BaseEventBusSubscriber, type EventBusSubscriptionSpec } from './base_event_bus_subscriber';
+import { BaseEventBusSubscriber } from './base_event_bus_subscriber';
+
+type Bus = EventBus<AlertingDomainEvent, AlertingPublisherContext>;
+type SubscriptionBuilder = (bus: Bus) => Subscription;
 
 class TestSubscriber extends BaseEventBusSubscriber {
   constructor(
-    bus: EventBus<AlertingDomainEvent, AlertingPublisherContext>,
+    bus: Bus,
     logger: LoggerServiceContract,
-    private readonly specs: EventBusSubscriptionSpec[]
+    private readonly builders: SubscriptionBuilder[]
   ) {
     super(bus, logger);
   }
 
-  protected getSubscriptions(): EventBusSubscriptionSpec[] {
-    return this.specs;
+  protected createSubscriptions(bus: Bus): Subscription[] {
+    return this.builders.map((build) => build(bus));
   }
 }
 
 describe('BaseEventBusSubscriber', () => {
   const handlerA = jest.fn();
   const handlerB = jest.fn();
-  const specs: EventBusSubscriptionSpec[] = [
-    { attach: (bus) => bus.subscribe('rule.created', handlerA) },
-    { attach: (bus) => bus.subscribe('rule.updated', handlerB) },
+  const specs: SubscriptionBuilder[] = [
+    (bus) => bus.subscribe('rule.created', handlerA),
+    (bus) => bus.subscribe('rule.updated', handlerB),
   ];
 
   const createBus = () => createEventBusMock<AlertingDomainEvent, AlertingPublisherContext>();

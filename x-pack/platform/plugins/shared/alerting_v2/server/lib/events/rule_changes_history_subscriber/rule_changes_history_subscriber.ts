@@ -23,11 +23,8 @@ import {
   type AlertingDomainEvent,
   type AlertingPublisherContext,
 } from '../domain_events';
-import type { EventBus } from '../event_bus';
-import {
-  BaseEventBusSubscriber,
-  type EventBusSubscriptionSpec,
-} from '../base_event_bus_subscriber';
+import type { EventBus, Subscription } from '../event_bus';
+import { BaseEventBusSubscriber } from '../base_event_bus_subscriber';
 import { RULE_LIFECYCLE_TO_CHANGES_HISTORY_MAP } from './mappings';
 
 /**
@@ -54,9 +51,11 @@ export class RuleChangesHistorySubscriber extends BaseEventBusSubscriber {
     super(bus, loggerService.forSubsystem('events'));
   }
 
-  protected getSubscriptions(): EventBusSubscriptionSpec[] {
+  protected createSubscriptions(
+    bus: EventBus<AlertingDomainEvent, AlertingPublisherContext>
+  ): Subscription[] {
     return (Object.keys(RULE_LIFECYCLE_TO_CHANGES_HISTORY_MAP) as Array<RuleEvent['type']>).map(
-      (eventType) => this.on(eventType, (event, context) => this.#dispatch(event, context))
+      (eventType) => bus.subscribe(eventType, (event, context) => this.#dispatch(event, context))
     );
   }
 

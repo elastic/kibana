@@ -24,11 +24,8 @@ import {
   type AlertingDomainEvent,
   type AlertingPublisherContext,
 } from '../domain_events';
-import type { EventBus } from '../event_bus';
-import {
-  BaseEventBusSubscriber,
-  type EventBusSubscriptionSpec,
-} from '../base_event_bus_subscriber';
+import type { EventBus, Subscription } from '../event_bus';
+import { BaseEventBusSubscriber } from '../base_event_bus_subscriber';
 import type { RuleEvent } from '../rule_event_publisher/events';
 
 type ReportedRuleEvent = Extract<RuleEvent, { type: RuleOperation }>;
@@ -59,9 +56,11 @@ export class RuleTelemetrySubscriber extends BaseEventBusSubscriber {
     super(bus, loggerService.forSubsystem('events'));
   }
 
-  protected getSubscriptions(): EventBusSubscriptionSpec[] {
+  protected createSubscriptions(
+    bus: EventBus<AlertingDomainEvent, AlertingPublisherContext>
+  ): Subscription[] {
     return RULE_OPERATIONS.map((eventType) =>
-      this.on(eventType, (event, context) => this.#reportRuleChanged(event, context))
+      bus.subscribe(eventType, (event, context) => this.#reportRuleChanged(event, context))
     );
   }
 

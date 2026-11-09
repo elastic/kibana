@@ -19,11 +19,8 @@ import {
   type AlertingDomainEvent,
   type AlertingPublisherContext,
 } from '../domain_events';
-import type { EventBus } from '../event_bus';
-import {
-  BaseEventBusSubscriber,
-  type EventBusSubscriptionSpec,
-} from '../base_event_bus_subscriber';
+import type { EventBus, Subscription } from '../event_bus';
+import { BaseEventBusSubscriber } from '../base_event_bus_subscriber';
 import { ALERT_ACTION_WORKFLOW_TRIGGERS, type AlertActionWorkflowTriggerBinding } from './triggers';
 
 /**
@@ -68,9 +65,11 @@ export class AlertActionWorkflowSubscriber extends BaseEventBusSubscriber {
     super(bus, loggerService.forSubsystem('events'));
   }
 
-  protected getSubscriptions(): EventBusSubscriptionSpec[] {
+  protected createSubscriptions(
+    bus: EventBus<AlertingDomainEvent, AlertingPublisherContext>
+  ): Subscription[] {
     return ALERT_ACTION_WORKFLOW_TRIGGERS.map((trigger) =>
-      this.on(trigger.eventType, (event, context) => this.#dispatch(trigger, event, context))
+      bus.subscribe(trigger.eventType, (event, context) => this.#dispatch(trigger, event, context))
     );
   }
 
