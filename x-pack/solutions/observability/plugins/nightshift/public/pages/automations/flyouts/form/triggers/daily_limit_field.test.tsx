@@ -57,7 +57,11 @@ describe('DailyLimitField', () => {
   });
 
   it('shows no deployment limit callout for an automation that has no usage yet', () => {
-    (useGlobalLimit as jest.Mock).mockReturnValue({ isReached: true, limit: 6 });
+    (useGlobalLimit as jest.Mock).mockReturnValue({
+      isReached: true,
+      blockingLimit: 'investigation',
+      limit: 6,
+    });
     render(
       <I18nProvider>
         <DailyLimitField value="10" helpText="Help text" onChange={jest.fn()} />
@@ -70,6 +74,7 @@ describe('DailyLimitField', () => {
   it('replaces the per-automation callout with the deployment limit callout', () => {
     (useGlobalLimit as jest.Mock).mockReturnValue({
       isReached: true,
+      blockingLimit: 'investigation',
       limit: 6,
       settingsHref: '/app/nightshift/settings/investigations',
     });
