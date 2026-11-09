@@ -29,10 +29,7 @@ import {
   getConfiguration,
   getDefaultRiskEngineConfiguration,
 } from '../../risk_engine/utils/saved_object_configuration';
-import {
-  buildNamespacedInternalSavedObjectsClientUnsafe,
-  buildInternalSavedObjectsClientWithoutSpacesUnsafe,
-} from '../../utils/internal_saved_objects_client';
+import { buildNamespacedInternalSavedObjectsClientUnsafe } from '../../utils/internal_saved_objects_client';
 import { getIsIdBasedRiskScoringEnabled } from '../is_id_based_risk_scoring_enabled';
 import { getIndexPatternDataStream } from '../configurations';
 import { resetToZero } from './steps/reset_to_zero';
@@ -96,7 +93,6 @@ interface InitializedRunContext {
   pluginsStart: PluginsStart;
   esClient: CoreStart['elasticsearch']['client']['asInternalUser'];
   namespacedSoClient: ReturnType<typeof buildNamespacedInternalSavedObjectsClientUnsafe>;
-  watchlistSoClient: ReturnType<typeof buildInternalSavedObjectsClientWithoutSpacesUnsafe>;
   riskScoreDataClient: RiskScoreDataClient;
   lookupIndex: string;
 }
@@ -199,7 +195,6 @@ export const createRiskScoreMaintainer = ({
           const runConfig = await loadRunConfiguration({
             coreStart: runContext.coreStart,
             namespacedSoClient: runContext.namespacedSoClient,
-            watchlistSoClient: runContext.watchlistSoClient,
             esClient: runContext.esClient,
             riskScoreDataClient: runContext.riskScoreDataClient,
             namespace: runContext.namespace,
@@ -389,7 +384,6 @@ const initializeRunContext = async ({
     coreStart,
     namespace,
   });
-  const watchlistSoClient = buildInternalSavedObjectsClientWithoutSpacesUnsafe({ coreStart });
   const riskScoreDataClient = new RiskScoreDataClient({
     logger,
     kibanaVersion,
@@ -415,7 +409,6 @@ const initializeRunContext = async ({
     pluginsStart,
     esClient,
     namespacedSoClient,
-    watchlistSoClient,
     riskScoreDataClient,
     lookupIndex,
   };
@@ -491,7 +484,6 @@ const checkRunPrerequisites = async ({
 const loadRunConfiguration = async ({
   coreStart,
   namespacedSoClient,
-  watchlistSoClient,
   esClient,
   riskScoreDataClient,
   namespace,
@@ -501,7 +493,6 @@ const loadRunConfiguration = async ({
 }: {
   coreStart: CoreStart;
   namespacedSoClient: ReturnType<typeof buildNamespacedInternalSavedObjectsClientUnsafe>;
-  watchlistSoClient: ReturnType<typeof buildInternalSavedObjectsClientWithoutSpacesUnsafe>;
   esClient: CoreStart['elasticsearch']['client']['asInternalUser'];
   riskScoreDataClient: RiskScoreDataClient;
   namespace: string;
@@ -519,7 +510,7 @@ const loadRunConfiguration = async ({
   const createMissingEntitiesEnabled =
     idBasedRiskScoringEnabled && experimentalFeatures.riskScoreCreateMissingEntitiesEnabled;
   const watchlistConfigs = await fetchWatchlistConfigs({
-    soClient: watchlistSoClient,
+    soClient: namespacedSoClient,
     esClient,
     namespace,
     logger,
