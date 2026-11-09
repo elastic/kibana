@@ -16,10 +16,18 @@ export const ALERTING_V2_SHOW_V1_OBSERVABILITY_ALERTS_TABLE_SETTING_ID =
 
 export const ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID = 'alerting:v2:experimentalFeatures';
 
+/**
+ * Space-scoped. Gates the "Diagnose with AI" action on failed rows of the
+ * Execution history Rules tab.
+ */
+export const ALERTING_V2_EXECUTION_HISTORY_AI_DIAGNOSE_SETTING_ID =
+  'alerting:v2:executionHistory:aiDiagnose:enabled';
+
 export interface AlertingAdvancedSettingValueMap {
   [ALERTING_V2_ENABLED_SETTING_ID]: boolean;
   [ALERTING_V2_SHOW_V1_OBSERVABILITY_ALERTS_TABLE_SETTING_ID]: boolean;
   [ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID]: boolean;
+  [ALERTING_V2_EXECUTION_HISTORY_AI_DIAGNOSE_SETTING_ID]: boolean;
 }
 
 export type AlertingAdvancedSettingId = keyof AlertingAdvancedSettingValueMap;

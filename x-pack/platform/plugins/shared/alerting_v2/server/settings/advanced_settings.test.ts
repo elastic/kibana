@@ -8,6 +8,7 @@
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import {
   ALERTING_V2_ENABLED_SETTING_ID,
+  ALERTING_V2_EXECUTION_HISTORY_AI_DIAGNOSE_SETTING_ID,
   ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID,
   ALERTING_V2_SHOW_V1_OBSERVABILITY_ALERTS_TABLE_SETTING_ID,
 } from '@kbn/alerting-v2-constants';
@@ -47,6 +48,19 @@ describe('registerAlertingAdvancedSettings', () => {
 
     expect(setting.value).toBe(true);
     expect(setting).not.toHaveProperty('experimental');
+  });
+
+  it('enables the execution history AI diagnose setting by default without a page reload', () => {
+    expect(
+      alertingSpaceAdvancedSettings[ALERTING_V2_EXECUTION_HISTORY_AI_DIAGNOSE_SETTING_ID]
+    ).toEqual(
+      expect.objectContaining({
+        category: ['alerting'],
+        value: true,
+        requiresPageReload: false,
+        experimental: true,
+      })
+    );
   });
 
   it('does not mark the V1 Observability alerts table setting experimental', () => {

@@ -33,6 +33,14 @@ export const ALERTING_API_IDS = {
 
 export const RULE_AUTHORING_SKILL_ID = 'rule-authoring';
 export const ACTION_POLICY_AUTHORING_SKILL_ID = 'action-policy-authoring';
+export const RULE_FAILURE_DIAGNOSIS_SKILL_ID = 'rule-failure-diagnosis';
+
+/**
+ * Markdown skill badge that invokes the `rule-failure-diagnosis` skill. The Agent Builder chat
+ * renders it as a skill chip and the model treats it as an explicit request to load the skill.
+ */
+export const getRuleFailureDiagnosisSkillBadge = (): string =>
+  `[/${RULE_FAILURE_DIAGNOSIS_SKILL_ID}](skill://${RULE_FAILURE_DIAGNOSIS_SKILL_ID})`;
 
 /**
  * Initial message sent to the Agent Builder when the user clicks "Create with
