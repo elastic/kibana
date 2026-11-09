@@ -87,6 +87,8 @@ describe('automation request', () => {
             ruleNamePattern: ' cpu ',
             ruleNames: ['Disk full'],
             ruleTags: ['infra'],
+            alertSources: ['classic', 'elastic.significant_events'],
+            alertSourceMode: 'exclude',
           },
         })
       ).toEqual({
@@ -100,6 +102,8 @@ describe('automation request', () => {
               ruleNamePattern: 'cpu',
               ruleNames: ['Disk full'],
               tags: ['infra'],
+              alertSources: ['classic', 'elastic.significant_events'],
+              alertSourceMode: 'exclude',
             },
           ],
         },

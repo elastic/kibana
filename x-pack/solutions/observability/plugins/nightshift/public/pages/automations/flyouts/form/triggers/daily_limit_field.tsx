@@ -49,7 +49,7 @@ export const DailyLimitField = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const {
-    isReached: isGlobalLimitReached,
+    blockingLimit,
     limit: globalInvestigationLimit,
     settingsHref: globalLimitSettingsHref,
   } = useGlobalLimit();
@@ -137,9 +137,10 @@ export const DailyLimitField = ({
       <EuiText size="s" color="subdued">
         {isUnlimited ? triggerLabels.noDailyLimitHelp : helpText}
       </EuiText>
-      {usedToday !== undefined && isGlobalLimitReached && globalInvestigationLimit !== undefined ? (
+      {usedToday !== undefined && blockingLimit && globalInvestigationLimit !== undefined ? (
         <div css={calloutCss}>
           <GlobalLimitCallout
+            group={blockingLimit}
             limit={globalInvestigationLimit}
             settingsHref={globalLimitSettingsHref}
           />

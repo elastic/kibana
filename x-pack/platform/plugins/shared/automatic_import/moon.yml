@@ -68,6 +68,7 @@ dependsOn:
   - '@kbn/shared-ux-ai-components'
   - '@kbn/core-http-browser'
   - '@kbn/ui-callout'
+  - '@kbn/handlebars'
 tags:
   - plugin
   - prod

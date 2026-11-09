@@ -275,6 +275,10 @@ export function buildTrack(
     });
   });
 
+  // Lanes with a parallel config run on bigger agents, so single-worker configs are packed into
+  // lanes of their own instead of sharing them.
+  const singleWorkerTrack = new TestTrack({ runtimeTarget, estimatedLaneSetupDuration });
+
   loads
     // Sort the loads in descending order based on their runtime estimate. The order is important
     // to ensure we get the highest possible lane saturation.
@@ -284,9 +288,15 @@ export function buildTrack(
     // rather than having to open a new one to avoid congestion.
     .sort((a, b) => b.stats.runtime.estimate - a.stats.runtime.estimate)
     .forEach((load) => {
-      const lane = track.addLoadToLeastCongestedLane(load, true);
+      const isParallel = load.metadata.testConfig.type === 'parallel';
+      const lane = (isParallel ? track : singleWorkerTrack).addLoadToLeastCongestedLane(load, true);
       log.debug(`Routed load with ID '${load.id}' to lane #${lane.number}`);
     });
+
+  singleWorkerTrack.lanes.forEach((lane) => {
+    lane.number = track.laneCount + 1;
+    track.lanes.push(lane);
+  });
 
   log.debug(`Routed ${loads.length} loads to ${track.laneCount} lanes`);
 

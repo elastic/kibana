@@ -13,6 +13,7 @@ import {
 } from '@kbn/fleet-plugin/public';
 
 import { getEffectiveNamespace } from '../../common/effective_namespace';
+import { getDefaultEnabledDataStreams } from '../../aws_service_matrix';
 import type { ServiceVars } from '../service_settings_step/use_service_settings';
 import { buildPackageInputs, buildPackageVars, getPackageVarNames } from './package_inputs';
 import {
@@ -184,7 +185,7 @@ export async function updateManagedIntegrationsPolicy(
   const serviceVarsMap: Record<string, ServiceVars> = {};
   for (const { instance, service } of members) {
     serviceVarsMap[service.id] = storedServiceVars[instance.instanceId] ?? {
-      enabledDataStreams: service.dataStreams,
+      enabledDataStreams: getDefaultEnabledDataStreams(service),
       varsByDataStream: {},
     };
   }

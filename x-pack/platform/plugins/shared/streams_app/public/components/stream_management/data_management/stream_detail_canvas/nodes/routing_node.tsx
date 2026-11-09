@@ -114,7 +114,7 @@ export function RoutingNode({ data, selected, dragging }: NodeProps<RoutingNodeT
 
   return (
     <>
-      <ConnectionHandle type="target" position={Position.Left} isConnectable={false} />
+      <ConnectionHandle type="target" position={Position.Left} isConnectable />
       <EuiPanel
         // `nokey` stops React Flow from arming a marquee when a Shift+drag starts
         // on the card, so Shift+click multi-select stays stable.

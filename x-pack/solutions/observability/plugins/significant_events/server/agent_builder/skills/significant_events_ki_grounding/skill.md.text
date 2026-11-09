@@ -30,7 +30,7 @@ on it (the Confirm step's table says what depends on what).
    the result when a value is missing from the entry. An empty or errored sample is an entry that says
    so. Every row matched the rule's phrase, so the phrase is not a finding.
 
-**`candidates:` line.** Right after the entry of a rule that is not small (Confirm step), write
+**`candidates:` line.** Right after the entry of a rule whose `affected` is above 0 (Confirm step), write
 `candidates: {field} ({type}), ...` (working text, never copied into the signal): at most 20 fields a
 `dimensions` query will measure; an aggregate KI writes `candidates: none`. Pick the fields that best
 read the failure: what happened or the result first (whenever the row has one), then who or what is
@@ -86,7 +86,7 @@ When `feature_ids` seeds a feature search, the response also has
 the search used its in-memory fallback. When `truncated` is true, related features may be missing;
 use only returned KIs and treat missing topology as unknown, not as evidence that no relation exists.
 
-ES|QL call for a row-level sample, with the modifications from `<query_rules>` applied (`{1|3}` is the limit the Confirm step sets; an aggregate KI has no `SORT` and gets `| LIMIT 2`):
+ES|QL call for a row-level sample, with the modifications from `<query_rules>` applied (`{1|3}` is `1` for the `sample` and `3` for the `re-sample`; an aggregate KI has no `SORT` and gets `| LIMIT 2`):
 ```json
 { "query": "FROM {view_name} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {KI predicate} | SORT @timestamp DESC | LIMIT {1|3}", "time_range": { "from": "{sample_from}", "to": "now" }, "timeout_seconds": 60 }
 ```
@@ -248,15 +248,15 @@ One sample per rule proves whether its failure is happening now. Apply `<query_r
 - **Definitions.**
   - `affected`: the failing count of the rule's latest `spread`. An `off_topic` rule's second `spread`
     replaces its first, whose figure no longer applies.
-  - small: `affected` is fewer than 6, or its `spread` failed or was never sent (an aggregate KI sends
-    none; an `off_topic` rule with no isolating observed-error condition keeps its profile
-    not measured). A `spread` of 0 with a sample that returns rows is small, not "no failure". A sample
-    that returns 0 rows takes the empty-result path; `affected` does not explain it.
+  - A rule has no `affected` when its `spread` failed or was never sent: an aggregate KI sends none,
+    and an `off_topic` rule with no isolating observed-error condition keeps its profile not
+    measured. Such a rule never has `affected` above 0. A `spread` of 0 with a sample
+    that returns rows is not "no failure". A sample that returns 0 rows takes the empty-result path;
+    `affected` does not explain it.
   - text field: the plain field that is the first argument of a top-level `AND` `MATCH_PHRASE` or
     `MATCH` in `{failure}` (not under `NOT` or `OR`, not inside a function); `:`, `LIKE`, `KQL()`,
-    `QSTR()` and multi-field conditions give none. It is decided from `{failure}` alone and picks the
-    single-row sample; examples also need it usable: the sample result has a column of that
-    name holding a string with a space.
+    `QSTR()` and multi-field conditions give none. It is decided from `{failure}` alone; examples also
+    need it usable: the sample result has a column of that name holding a string with a space.
   - `off_topic` rule: its final sample's verdict is `off_topic` (`<verdicts>`). The isolating condition
     built from that row's observed error replaces `{failure}` in its second `spread` and its profile
     queries.
@@ -275,10 +275,10 @@ One sample per rule proves whether its failure is happening now. Apply `<query_r
   | Stage | Runs for | Shape and limits |
   |---|---|---|
   | `spread` | every rule except an aggregate KI | the Profile step's `spread` on the KI's own `{failure}`, in its variant, over the Profile table's window; the rule's only `spread`, except the `off_topic` rule's second one (Definitions) |
-  | `sample` | every rule | `LIMIT 1` when the rule is not small and has a text field, else `LIMIT 3`; an aggregate KI keeps `LIMIT 2`; an authored KI limit of 3 or fewer rows stays instead of ours; `time_range.from` is the rule's `sample_from` (`<query_rules>` rule 3) |
-  | `re-sample` | once, when a single-row sample does not show the rule's failure (healthy, or `off_topic`) or lacks a usable text-field column | `LIMIT 3`, a new query, not a re-run. Never after an empty or errored sample, an authored limit of 3 or less, or an authored projection without the text field |
-  | `dimensions` | the rule is not small and has 2 or more candidates (an `off_topic` rule too, after its own `spread`) | one query over the candidates |
-  | `examples` | the rule is not small, not `off_topic`, and has a usable text field | 3 messages |
+  | `sample` | every rule | always `LIMIT 1`; an aggregate KI gets `LIMIT 2`; an authored KI limit of 3 or fewer rows stays instead of ours; `time_range.from` is the rule's `sample_from` (`<query_rules>` rule 3) |
+  | `re-sample` | once, when the sample row does not show the rule's failure (healthy, or `off_topic`) or the rule has a text field and the sample result has no usable column for it (Definitions) | `LIMIT 3`, a new query, not a re-run; row-level KIs only. Never after an empty or errored sample or an authored limit of 3 or less, and never just to get a text column that an authored projection omits |
+  | `dimensions` | the rule's `affected` is above 0 and it has 2 or more candidates | one query over the candidates |
+  | `examples` | the rule's `affected` is above 0, it is not `off_topic`, and has a usable text field | 3 messages |
   | `trend`, `baseline` | every rule, except an `off_topic` rule with no isolating observed-error condition | |
   | `breakdown` | one query per kept field with `f` of 2 or more | up to 3 queries |
 
@@ -303,10 +303,10 @@ One sample per rule proves whether its failure is happening now. Apply `<query_r
   KI's `source_id`. Do not assemble view names or strip `$.`.
 - **Row-level queries** keep the authored KI shape: never add a `KEEP` projection or choose a text
   field in the sample query, and leave any authored projection unchanged. Otherwise append
-  `| SORT @timestamp DESC | LIMIT 1` or `| LIMIT 3` as the table says, so the sample returns the most
+  `| SORT @timestamp DESC | LIMIT 1` (`| LIMIT 3` for a `re-sample`), so the sample returns the most
   recent matching logs, which is the current state the severity rests on. An authored limit of 3 or
-  fewer rows stays; when it has no preceding `SORT @timestamp DESC`, insert that sort immediately
-  before the limit.
+  fewer rows stays instead of ours, for a `re-sample` too, so such a KI can return fewer than 3 rows;
+  when it has no preceding `SORT @timestamp DESC`, insert that sort immediately before the limit.
 - **Aggregation queries** (`STATS`/`BY`) keep the aggregation and add `| LIMIT 2`; add no projection.
 - **Executed vs stored.** The block shows the three forms of one query. `Stored`
   (`evidence.esql_query`, `<output_format>`) is the executed query without the `SORT`/`LIMIT` tail. An
@@ -599,8 +599,8 @@ Each entry:
      failure" only from rows that show it:
      - a single-row sample: introduce its values as "a sampled row shows" (not "one sampled row
        has"), with no claim of repetition from that row alone;
-     - a row-level sample that returned fewer rows than the limit we appended (not an aggregation, not
-       a stricter authored limit): give the number of sampled rows; the sample window (`<query_rules>`
+     - a `re-sample` that returned fewer than 3 rows (not an aggregation): give the number of sampled rows;
+       the sample window (`<query_rules>`
        rule 3) holds only those, which says nothing about the profile windows;
      - a value `dimensions` found constant across the failing rows (`f` is 1 and `present_{field} =
        rows`) is stated for the failing rows with no caveat; values that every `examples` result shows

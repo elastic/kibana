@@ -14,7 +14,12 @@ import {
   NIGHTSHIFT_INVESTIGATION_AGENT_ID,
   NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID,
 } from '../agents/investigation';
+import { assertNightshiftSpace } from './assert_nightshift_space';
 
+/**
+ * Ensures the Nightshift investigation agent in the default space, the only space Nightshift runs
+ * in; installing it anywhere else would show Nightshift in a space that cannot use it.
+ */
 export const installInvestigationAgent = async ({
   agentBuilder,
   spaceId,
@@ -30,6 +35,7 @@ export const installInvestigationAgent = async ({
    */
   hidden?: boolean;
 }): Promise<void> => {
+  assertNightshiftSpace(spaceId);
   await agentBuilder.agents.ensure({
     spaceId,
     availability,
@@ -39,13 +45,12 @@ export const installInvestigationAgent = async ({
       type: NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID,
       name: INVESTIGATION_AGENT_NAME,
       description: INVESTIGATION_AGENT_DESCRIPTION,
-      labels: ['observability', 'significant-events', 'investigation', 'cortex', 'sandbox'],
+      labels: ['observability', 'significant-events', 'investigation', 'wiki', 'sandbox'],
       avatar_symbol: 'NI',
       access_control: { access_mode: AgentAccessControlMode.Public },
       configuration: {
         tools: [],
         skill_ids: [],
-        connector_ids: [],
       },
     },
   });

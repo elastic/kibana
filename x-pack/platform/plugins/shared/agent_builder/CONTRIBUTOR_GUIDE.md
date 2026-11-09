@@ -535,7 +535,7 @@ export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
   ),
 
   // Customize buttons based on viewport context
-  getActionButtons: ({ attachment, isCanvas, isSidebar, openCanvas, setPreviewBadgeState, openSidebarConversation }) => {
+  getActionButtons: ({ attachment, isCanvas, isSidebar, openCanvas, openSidebarConversation }) => {
     const buttons = [];
 
     if (isSidebar) {
@@ -572,15 +572,6 @@ export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
         handler: openSidebarConversation,
       });
     }
-    // Optional: if preview happens outside canvas, keep inline badge state in sync
-    buttons.push({
-      label: 'Preview',
-      icon: 'eye',
-      type: ActionButtonType.SECONDARY,
-      handler: () => {
-        setPreviewBadgeState?.('previewing');
-      },
-    });
 
     return buttons;
   },
@@ -658,9 +649,23 @@ getActionButtons: ({ attachment, openSidebarConversation }) => {
 ```
 
 The callback handles setting the correct conversation context in localStorage before opening the sidebar, ensuring the sidebar loads the same conversation. It is `undefined` when already in the sidebar context.
-- **`setPreviewBadgeState`** - Optional callback to control inline preview badge state when preview is driven outside the canvas
 
-`setPreviewBadgeState` accepts:
+#### Previewing outside the canvas
+
+When the attachment is previewed outside the canvas, for example in the app the user is on, return `previewing` from `getPreviewState$`. The inline card then shows a "You're previewing this" badge instead of its action buttons.
+
+```tsx
+getPreviewState$: (attachment) =>
+  previewedAttachment$.pipe(
+    map((previewed) =>
+      previewed?.id === attachment.id && previewed.version === attachment.versionData?.version
+        ? 'previewing'
+        : 'none'
+    )
+  ),
+```
+
+`getPreviewState$` emits:
 
 - **`none`** - regular inline state
 - **`preview_available`** - show "Preview Only" badge

@@ -186,7 +186,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await pageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async () => {
-          const rulePageTitle = await testSubjects.find('header-page-title');
+          const rulePageTitle = await testSubjects.find('appHeaderTitle');
           expect(await rulePageTitle.getVisibleText()).to.be(ruleName1);
         });
       });
@@ -219,7 +219,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.header.waitUntilLoadingHasFinished();
         // Rule page title is not immediately available, so we need to retry until it is
         await retry.try(async () => {
-          const rulePageTitle = await testSubjects.find('header-page-title');
+          const rulePageTitle = await testSubjects.find('appHeaderTitle');
           expect(await rulePageTitle.getVisibleText()).to.be(ruleName1);
         });
       });
