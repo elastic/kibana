@@ -20,6 +20,7 @@ const setup = ({
   getError,
   updateError,
   statusError,
+  statusTimedOut = false,
   keepTags = false,
   alerts = {},
 }: {
@@ -29,6 +30,8 @@ const setup = ({
   getError?: Error & { statusCode?: number };
   updateError?: Error & { statusCode?: number };
   statusError?: Error;
+  /** The status route answers 200 but its update-by-query timed out part way. */
+  statusTimedOut?: boolean;
   keepTags?: boolean;
   /** What an analyst did to a tagged alert since the decision closed it. Default: still closed as a false positive. */
   alerts?: Record<string, { status: string; reason?: string }>;
@@ -55,7 +58,7 @@ const setup = ({
         );
       });
       matching.forEach((id) => state.set(id, { status: body.status }));
-      return { body: { updated: matching.length, failures: [] } };
+      return { body: { updated: matching.length, timed_out: statusTimedOut, failures: [] } };
     }
     if (!keepTags) left = left.filter((id) => !body.ids.includes(id));
     return { body: { updated: body.ids.length, timed_out: false, failures: [] } };
@@ -186,6 +189,15 @@ describe('triage revoke decision step', () => {
 
   it('keeps the tag on alerts it could not reopen, and reports the failure', async () => {
     const { run, calls } = setup({ statusError: new Error('conflict') });
+
+    const { output } = await run();
+
+    expect(output).toEqual(expect.objectContaining({ alerts_reopened: 0, failures: 1 }));
+    expect(calls('/signals/tags')).toEqual([]);
+  });
+
+  it('keeps the tag when the reopen timed out with a 200, so a rerun can find the alerts it missed', async () => {
+    const { run, calls } = setup({ statusTimedOut: true });
 
     const { output } = await run();
 
