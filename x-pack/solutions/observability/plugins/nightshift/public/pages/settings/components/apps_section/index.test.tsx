@@ -332,7 +332,9 @@ describe('SlackChannelsSection', () => {
     fireEvent.click(disconnectBtn);
 
     const modal = await screen.findByTestId('streamsSlackAppDisconnectConfirmModal');
-    expect(modal).toHaveTextContent('a Slack workspace admin may need to approve');
+    expect(modal).toHaveTextContent(
+      'If the Elastic app asks for new permissions, such as private channel access, a Slack workspace admin may need to approve it.'
+    );
 
     const confirmBtn = within(modal).getByRole('button', { name: /disconnect workspace/i });
     fireEvent.click(confirmBtn);

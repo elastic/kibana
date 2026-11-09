@@ -465,7 +465,7 @@ function DisconnectWorkspaceButton({
           <EuiText size="s">
             {i18n.translate('xpack.nightshift.settings.apps.slackDisconnectConfirmBody', {
               defaultMessage:
-                'This removes all Slack channel connections for this deployment. If you connect again, a Slack workspace admin may need to approve the Elastic app again, and you will need to reconnect each channel.',
+                'This removes all Slack channel connections for this deployment. If you connect again, you will need to reconnect each channel. If the Elastic app asks for new permissions, such as private channel access, a Slack workspace admin may need to approve it.',
             })}
           </EuiText>
         </EuiConfirmModal>
