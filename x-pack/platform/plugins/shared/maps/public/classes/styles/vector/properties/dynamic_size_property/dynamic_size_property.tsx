@@ -74,7 +74,7 @@ export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions
   }
 
   /*
-   * Returns interpolation expression linearly translating domain values [minValue, maxValue] to display range [min_size, maxSize]
+   * Returns interpolation expression linearly translating domain values [minValue, maxValue] to display range [min_size, max_size]
    */
   getMbSizeExpression(options?: {
     forceFeatureProperties?: boolean;
