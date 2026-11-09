@@ -42,7 +42,8 @@
         "aws.cloudtrail": "pkg-policy-id-3"
       },
       "policySettings": {
-        "output_id": "logstash-output-id"
+        "output_id": "logstash-output-id",
+        "condition": "${host.platform} == \"linux\""
       }
     }
   ],

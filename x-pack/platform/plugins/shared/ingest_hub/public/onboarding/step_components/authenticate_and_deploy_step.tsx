@@ -476,7 +476,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
           Record<string, unknown>
         >,
         globalRegion,
-        ...toSOSettings(serviceSettings),
+        ...toSOSettings(serviceSettings, 'ecf'),
         dataFormat,
       }));
     if (deploymentId) {
@@ -488,7 +488,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       // This write is load-bearing — failure leaves the SO advertising the wrong mechanism
       // and an orphaned connector reference, so we must confirm it before navigating.
       const writeSucceeded = await updateDeployment(deploymentId, {
-        ...toSOSettingsUpdate(serviceSettings),
+        ...toSOSettingsUpdate(serviceSettings, 'ecf'),
         mechanisms: ['ecf'],
         connectorId: null,
         authMethod: null,

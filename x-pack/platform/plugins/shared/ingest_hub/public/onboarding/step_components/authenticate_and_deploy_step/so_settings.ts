@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type { DeploymentMethod } from '@kbn/fleet-plugin/public';
 import type { ServiceInstance } from '../service_settings_step/use_service_settings';
-import { compactPolicySettings, type PolicySettings } from '../../common/policy_settings';
+import { getPolicySettings, type PolicySettings } from '../../common/policy_settings';
 
 interface SOSettingsSource {
   integrationName?: string;
@@ -43,10 +44,12 @@ const toSOInstances = (
  * The integration name, description, global namespace, service instances and package policy
  * settings for a saved-object write. Spread into every create and update that carries the service selection, so resume sees
  * what the last deploy used (the name can change between deploys while it still follows the
- * selection).
+ * selection). Only the package policy settings of the deployment method are kept: one left over
+ * from another method is hidden in Step 2, so it is neither validated there nor deployed.
  */
 export const toSOSettings = (
-  serviceSettings: SOSettingsSource | null | undefined
+  serviceSettings: SOSettingsSource | null | undefined,
+  deploymentMethod: DeploymentMethod
 ): {
   integrationName?: string;
   description?: string;
@@ -54,7 +57,7 @@ export const toSOSettings = (
   instances?: ServiceInstance[];
   policySettings?: Record<string, unknown>;
 } => {
-  const policySettings = compactPolicySettings(serviceSettings?.policySettings);
+  const policySettings = getPolicySettings(serviceSettings?.policySettings, deploymentMethod);
   const integrationName = serviceSettings?.integrationName?.trim();
   const description = serviceSettings?.description?.trim();
   const namespace = serviceSettings?.namespace?.trim();
@@ -73,7 +76,8 @@ export const toSOSettings = (
  * stored value and the user may just have cleared it.
  */
 export const toSOSettingsUpdate = (
-  serviceSettings: SOSettingsSource | null | undefined
+  serviceSettings: SOSettingsSource | null | undefined,
+  deploymentMethod: DeploymentMethod
 ): {
   integrationName?: string;
   description: string | null;
@@ -81,8 +85,10 @@ export const toSOSettingsUpdate = (
   instances?: ServiceInstance[];
   policySettings: Record<string, unknown>;
 } => {
-  const { integrationName, description, namespace, instances, policySettings } =
-    toSOSettings(serviceSettings);
+  const { integrationName, description, namespace, instances, policySettings } = toSOSettings(
+    serviceSettings,
+    deploymentMethod
+  );
   return {
     ...(integrationName ? { integrationName } : {}),
     description: description ?? null,
@@ -102,6 +108,10 @@ export const toSOSettingsUpdate = (
 export const toSOMetadataUpdate = (
   serviceSettings: SOSettingsSource | null | undefined
 ): { integrationName?: string; description: string | null } => {
-  const { namespace, instances, policySettings, ...metadata } = toSOSettingsUpdate(serviceSettings);
-  return metadata;
+  const integrationName = serviceSettings?.integrationName?.trim();
+  const description = serviceSettings?.description?.trim();
+  return {
+    ...(integrationName ? { integrationName } : {}),
+    description: description || null,
+  };
 };
