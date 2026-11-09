@@ -98,12 +98,22 @@ export function OnboardingAutomationStep({
 }): React.ReactElement {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingId, setEditingId] = useState<string>();
+  // Owned here so prev/next remounts of the flyout keep Overview vs Run history.
+  const [editingRunsTab, setEditingRunsTab] = useState(false);
   // Resolve from the latest list so a save that refreshes automations updates the flyout.
   const editing = automations.find((automation) => automation.id === editingId);
   const { canManage, editDisabledReason } = useOnboardingAutomationPermissions();
   const openCreate = () => {
     if (!canManage) return;
     setIsCreateOpen(true);
+  };
+  const openEdit = (automation: Automation) => {
+    setEditingRunsTab(false);
+    setEditingId(automation.id);
+  };
+  const closeEdit = () => {
+    setEditingId(undefined);
+    setEditingRunsTab(false);
   };
   const hasAutomation = automations.length > 0;
 
@@ -129,7 +139,7 @@ export function OnboardingAutomationStep({
           <AutomationCards
             automations={automations}
             onCreate={openCreate}
-            onEdit={(automation) => setEditingId(automation.id)}
+            onEdit={openEdit}
             canManage={canManage}
             editDisabledReason={editDisabledReason}
           />
@@ -163,8 +173,10 @@ export function OnboardingAutomationStep({
           automations={automations}
           canManage={canManage}
           editDisabledReason={editDisabledReason}
+          embeddedRunsTab={editingRunsTab}
+          onEmbeddedRunsTabChange={setEditingRunsTab}
           onSelectAutomation={(automation) => setEditingId(automation.id)}
-          onClose={() => setEditingId(undefined)}
+          onClose={closeEdit}
         />
       )}
     </div>
@@ -489,6 +501,8 @@ function EditAutomationFlyout({
   automations,
   canManage,
   editDisabledReason,
+  embeddedRunsTab,
+  onEmbeddedRunsTabChange,
   onSelectAutomation,
   onClose,
 }: {
@@ -496,6 +510,8 @@ function EditAutomationFlyout({
   automations: Automation[];
   canManage: boolean;
   editDisabledReason?: string;
+  embeddedRunsTab: boolean;
+  onEmbeddedRunsTabChange: (isRunsTab: boolean) => void;
   onSelectAutomation: (automation: Automation) => void;
   onClose: () => void;
 }): React.ReactElement {
@@ -514,6 +530,8 @@ function EditAutomationFlyout({
     <>
       <AutomationDetailFlyout
         embedded
+        embeddedRunsTab={embeddedRunsTab}
+        onEmbeddedRunsTabChange={onEmbeddedRunsTabChange}
         automations={automations}
         automation={automation}
         canManage={canManage}

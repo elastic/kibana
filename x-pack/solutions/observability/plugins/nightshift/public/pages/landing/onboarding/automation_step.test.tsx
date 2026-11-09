@@ -14,6 +14,7 @@ import {
   useDeleteAutomation,
   type Automation,
 } from '../../../data/automations/use_automations';
+import { useInvestigatorServiceAccount } from '../../../data/service_accounts/use_investigator_service_account';
 import { OnboardingAutomationStep } from './automation_step';
 
 jest.mock('../../../data/automations/use_automations', () => ({
@@ -22,9 +23,7 @@ jest.mock('../../../data/automations/use_automations', () => ({
 }));
 
 jest.mock('../../../data/service_accounts/use_investigator_service_account', () => ({
-  useInvestigatorServiceAccount: () => ({
-    data: { serviceAccountsEnabled: false, canModifyBoundWorkflows: true },
-  }),
+  useInvestigatorServiceAccount: jest.fn(),
 }));
 
 jest.mock('../../../hooks/use_kibana', () => ({
@@ -45,12 +44,20 @@ jest.mock('../../automations/flyouts/create_flyout/create_automation_flyout', ()
 jest.mock('../../automations/detail_flyout/automation_detail_flyout', () => ({
   AutomationDetailFlyout: ({
     automation,
+    canManage,
+    editDisabledReason,
     onDelete,
   }: {
     automation: { id: string; name: string };
+    canManage: boolean;
+    editDisabledReason?: string;
     onDelete: (automation: { id: string; name: string }) => void;
   }) => (
-    <div data-test-subj="automationDetailFlyout">
+    <div
+      data-test-subj="automationDetailFlyout"
+      data-can-manage={String(canManage)}
+      data-edit-disabled-reason={editDisabledReason ?? ''}
+    >
       <button type="button" onClick={() => onDelete(automation)}>
         Delete
       </button>
@@ -97,6 +104,22 @@ const automation = {
 
 const mockUseDeleteAutomation = useDeleteAutomation as jest.Mock;
 const mockUseCreateAutomation = useCreateAutomation as jest.Mock;
+const mockUseInvestigatorServiceAccount = useInvestigatorServiceAccount as jest.Mock;
+
+const mockServiceAccount = ({
+  serviceAccountsEnabled = false,
+  canModifyBoundWorkflows = true,
+  pending = false,
+}: {
+  serviceAccountsEnabled?: boolean;
+  canModifyBoundWorkflows?: boolean;
+  pending?: boolean;
+} = {}) =>
+  mockUseInvestigatorServiceAccount.mockReturnValue({
+    data: pending
+      ? undefined
+      : { serviceAccountsEnabled, canModifyBoundWorkflows },
+  });
 
 const renderStep = (automations: Automation[] = [], onInvestigationClick = jest.fn()) =>
   render(
@@ -114,6 +137,7 @@ describe('OnboardingAutomationStep', () => {
   beforeEach(() => {
     mockUseDeleteAutomation.mockReturnValue({ mutate: jest.fn(), isLoading: false });
     mockUseCreateAutomation.mockReturnValue({ mutate: jest.fn(), isLoading: false });
+    mockServiceAccount();
   });
 
   it('keeps the trial result banner, and offers one first-automation card', () => {
@@ -176,5 +200,33 @@ describe('OnboardingAutomationStep', () => {
       expect.objectContaining({ onSuccess: expect.any(Function) })
     );
     expect(screen.queryByTestId('automationDetailFlyout')).not.toBeInTheDocument();
+  });
+
+  it('disables create while the service-account status is pending', () => {
+    mockServiceAccount({ pending: true });
+    renderStep();
+
+    expect(screen.getByTestId('nightshiftOnboardingCreateAutomation')).toBeDisabled();
+    fireEvent.click(screen.getByTestId('nightshiftOnboardingCreateAutomation'));
+    expect(screen.queryByTestId('createAutomationFlyout')).not.toBeInTheDocument();
+  });
+
+  it('disables create when service accounts require manage_security the user lacks', () => {
+    mockServiceAccount({ serviceAccountsEnabled: true, canModifyBoundWorkflows: false });
+    renderStep();
+
+    const create = screen.getByTestId('nightshiftOnboardingCreateAutomation');
+    expect(create).toBeDisabled();
+    expect(create.closest('[class*="euiToolTip"]') ?? create.parentElement).toBeTruthy();
+  });
+
+  it('opens the detail flyout read-only when the user cannot modify bound workflows', () => {
+    mockServiceAccount({ serviceAccountsEnabled: true, canModifyBoundWorkflows: false });
+    renderStep([automation]);
+
+    fireEvent.click(screen.getByTestId('nightshiftOnboardingEditAutomation'));
+    const flyout = screen.getByTestId('automationDetailFlyout');
+    expect(flyout).toHaveAttribute('data-can-manage', 'false');
+    expect(flyout.getAttribute('data-edit-disabled-reason')).toMatch(/manage_security/);
   });
 });

@@ -79,6 +79,27 @@ describe('useOnboardingVisibility', () => {
     expect(result.current.showOnboarding).toBe(false);
   });
 
+  it('does not open a session when the automations lookup fails', () => {
+    mockUseFetchAutomations.mockReturnValue({
+      data: undefined,
+      isInitialLoading: false,
+      isError: true,
+    });
+    mockUseFetchLatestInvestigation.mockReturnValue({
+      latestInvestigation: undefined,
+      isInitialLoading: false,
+      error: null,
+    });
+    const { result } = renderHook(() =>
+      useOnboardingVisibility({
+        isEnabled: true,
+        canUseAutomations: true,
+        forceOnboarding: false,
+      })
+    );
+    expect(result.current.showOnboarding).toBe(false);
+  });
+
   it('forces onboarding with an automation', () => {
     const { result } = setup({ automations: [{ id: 'a-1' }], forceOnboarding: true });
     expect(result.current.showOnboarding).toBe(true);

@@ -55,12 +55,43 @@ export const useOnboardingVisibility = ({
   );
   const automations = useFetchAutomations({ enabled: isEnabled && canUseAutomations });
   const hasAutomation = (automations.data?.automations.length ?? 0) > 0;
-  const isOnboardingCandidate =
-    isEnabled && (forceOnboarding || (!isDismissed && canUseAutomations && !hasAutomation));
 
+  // Latch once the empty-automation onboarding UI is shown, so creating the first automation
+  // does not tear the page down before Done. Do not latch on a failed automations lookup —
+  // that error already means skip onboarding.
+  const [sessionOpen, setSessionOpen] = useState(false);
+  useEffect(() => {
+    if (
+      forceOnboarding ||
+      (!isDismissed &&
+        !(canUseAutomations && automations.isInitialLoading) &&
+        canUseAutomations &&
+        !hasAutomation &&
+        !automations.isError)
+    ) {
+      setSessionOpen(true);
+    }
+  }, [
+    forceOnboarding,
+    isDismissed,
+    canUseAutomations,
+    hasAutomation,
+    automations.isInitialLoading,
+    automations.isError,
+  ]);
+  useEffect(() => {
+    if (isDismissed) setSessionOpen(false);
+  }, [isDismissed]);
+
+  // Keep polling the trial investigation while onboarding is (or stays) on screen — including a
+  // latched session after the first automation is saved, so the trial card can flip to ready.
+  const shouldPollTrial =
+    forceOnboarding ||
+    (sessionOpen && !isDismissed) ||
+    (!isDismissed && canUseAutomations && !hasAutomation && !automations.isError);
   const investigations = useFetchLatestInvestigation({
     enabled: isEnabled,
-    refetchInterval: isOnboardingCandidate ? TRIAL_INVESTIGATION_REFETCH_INTERVAL_MS : false,
+    refetchInterval: isEnabled && shouldPollTrial ? TRIAL_INVESTIGATION_REFETCH_INTERVAL_MS : false,
   });
   const { latestInvestigation } = investigations;
 
@@ -72,25 +103,15 @@ export const useOnboardingVisibility = ({
     ? automations.isError || hasAutomation
     : investigations.error != null || latestInvestigation != null;
 
-  // Latch once the empty-automation onboarding UI is shown, so creating the first automation
-  // does not tear the page down before Done.
-  const [sessionOpen, setSessionOpen] = useState(false);
-  useEffect(() => {
-    if (forceOnboarding || (!isDismissed && !isLoading && canUseAutomations && !hasAutomation)) {
-      setSessionOpen(true);
-    }
-  }, [forceOnboarding, isDismissed, isLoading, canUseAutomations, hasAutomation]);
-  useEffect(() => {
-    if (isDismissed) setSessionOpen(false);
-  }, [isDismissed]);
-
   const dismiss = useCallback(() => setIsDismissed(true), [setIsDismissed]);
 
   return {
     isLoading,
     showOnboarding:
       isEnabled &&
-      (forceOnboarding || (sessionOpen && !isDismissed) || (!isDismissed && !isLoading && !isDone)),
+      (forceOnboarding ||
+        (sessionOpen && !isDismissed) ||
+        (!isDismissed && !isLoading && !isDone)),
     latestInvestigation,
     dismiss,
   };

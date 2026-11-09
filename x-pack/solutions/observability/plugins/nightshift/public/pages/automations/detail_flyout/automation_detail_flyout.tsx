@@ -143,6 +143,8 @@ export const AutomationDetailFlyout = ({
   onDelete,
   onSelectAutomation,
   embedded = false,
+  embeddedRunsTab = false,
+  onEmbeddedRunsTabChange,
 }: {
   automations: Automation[];
   automation: Automation;
@@ -162,10 +164,12 @@ export const AutomationDetailFlyout = ({
    */
   onSelectAutomation?: (automation: Automation) => void;
   /**
-   * Keep Overview / Run history in local state instead of `/automations/:id[/runs]` routes, so
-   * the flyout can sit on a page that is not the Automations list.
+   * Keep Overview / Run history off `/automations/:id[/runs]` routes, so the flyout can sit on a
+   * page that is not the Automations list. Tab state is owned by the host so prev/next keep it.
    */
   embedded?: boolean;
+  embeddedRunsTab?: boolean;
+  onEmbeddedRunsTabChange?: (isRunsTab: boolean) => void;
 }) => {
   const titleId = useGeneratedHtmlId();
   const { euiTheme } = useEuiTheme();
@@ -186,7 +190,6 @@ export const AutomationDetailFlyout = ({
   const [showValidationErrors, setShowValidationErrors] = useState(false);
   const [selectedRun, setSelectedRun] = useState<Run>();
   const [isActionsOpen, setIsActionsOpen] = useState(false);
-  const [embeddedRunsTab, setEmbeddedRunsTab] = useState(false);
   const originalValues = useMemo(() => toAutomationFormValues(automation), [automation]);
   const [values, setValues] = useState<AutomationFormValues>(originalValues);
   const updateAutomation = useUpdateAutomation();
@@ -238,7 +241,7 @@ export const AutomationDetailFlyout = ({
 
   const navigate = (path: string) => {
     if (embedded) {
-      setEmbeddedRunsTab(path.endsWith('/runs'));
+      onEmbeddedRunsTabChange?.(path.endsWith('/runs'));
       return;
     }
     history.push(path);
