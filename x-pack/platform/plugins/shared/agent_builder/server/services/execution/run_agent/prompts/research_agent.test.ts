@@ -7,7 +7,9 @@
 
 import { ConversationRoundStepType } from '@kbn/agent-builder-common';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
+import { z } from '@kbn/zod/v4';
 import { getResearchAgentPrompt } from './research_agent';
+import { attachmentToolsUnavailableNotice } from './utils/attachments';
 import { prepareMessages } from '../utils/to_langchain_messages';
 
 jest.mock('../utils/to_langchain_messages', () => ({
@@ -420,5 +422,59 @@ describe('getResearchAgentPrompt', () => {
     expect(systemMessage).not.toContain('## ATTACHMENT TYPES');
     expect(systemMessage).not.toContain('## Conversation Attachments');
     expect(systemMessage).not.toMatch(/attachment_id="/);
+  });
+
+  describe('attachment_tools capability', () => {
+    const tableRenderer = {
+      type: 'table',
+      payloadSchema: z.object({ columns: z.array(z.string()) }),
+      getAgentDescription: () => 'Renders a dataset as an interactive table.',
+    };
+
+    const systemPrompt = async (overrides: Record<string, any> = {}) =>
+      asText((await getResearchAgentPrompt(makeParams(overrides)))[0]);
+
+    const off = { instructions: '', aiIndices: [], capabilities: { attachmentTools: false } };
+
+    it('replaces the ATTACHMENTS section with the notice and drops inline rendering when off', async () => {
+      const prompt = await systemPrompt({ configuration: off });
+
+      expect(prompt).toContain(attachmentToolsUnavailableNotice());
+      expect(prompt).not.toContain('attachment_read(');
+      expect(prompt).not.toContain('### INLINE ATTACHMENT RENDERING');
+    });
+
+    it('omits the CUSTOM RENDERING heading when off and there are no renderers', async () => {
+      const prompt = await systemPrompt({ configuration: off });
+
+      expect(prompt).not.toContain('## CUSTOM RENDERING');
+    });
+
+    it('keeps the CUSTOM RENDERING heading for renderers when off', async () => {
+      const prompt = await systemPrompt({
+        configuration: off,
+        renderers: [tableRenderer],
+        experimentalFeatures: { aiIndices: false, bash: true, skills: false },
+      });
+
+      expect(prompt).toContain('## CUSTOM RENDERING');
+      expect(prompt).toContain('#### type: "table"');
+      expect(prompt).not.toContain('### INLINE ATTACHMENT RENDERING');
+    });
+
+    it('keeps the full ATTACHMENTS section and inline rendering when on', async () => {
+      const prompt = await systemPrompt();
+
+      expect(prompt).toContain('MUST use the attachment tools');
+      expect(prompt).toContain('## CUSTOM RENDERING');
+      expect(prompt).toContain('### INLINE ATTACHMENT RENDERING');
+    });
+
+    it('is at least 1,000 characters shorter when off', async () => {
+      const on = await systemPrompt();
+      const offPrompt = await systemPrompt({ configuration: off });
+
+      expect(on.length - offPrompt.length).toBeGreaterThanOrEqual(1000);
+    });
   });
 });

@@ -11,7 +11,11 @@ import type { SerializedMetadataValue } from '@kbn/agent-builder-common';
 import type { ConversationTemplatesService } from '@kbn/agent-builder-server/runner/conversation_templates_service';
 import { getSkillsInstructions, getRelevantSkillsPointerInstructions } from './utils/skills';
 import { renderVisibleContext } from '../utils/visible_context';
-import { attachmentToolsInstructions, renderAttachmentPrompt } from './utils/attachments';
+import {
+  attachmentToolsInstructions,
+  attachmentToolsUnavailableNotice,
+  renderAttachmentPrompt,
+} from './utils/attachments';
 import { structuredOutputDescription } from './utils/custom_instructions';
 import { getFileSystemInstructions } from './utils/filestore';
 import { getDynamicToolsInstructions } from './utils/dynamic_tools';
@@ -96,8 +100,26 @@ ${fieldLines}
 `;
 };
 
+/**
+ * The `## CUSTOM RENDERING` section, written only when something remains under it. Inline
+ * attachment rendering is taught only to agents that have the attachment tools.
+ */
+const getCustomRenderingSection = (attachmentTools: boolean, renderersPrompt: string): string => {
+  if (attachmentTools) {
+    return `## CUSTOM RENDERING\n\n${renderAttachmentPrompt()}\n\n${renderersPrompt}`;
+  }
+  if (!renderersPrompt) {
+    return '';
+  }
+  return `## CUSTOM RENDERING\n\n${renderersPrompt}`;
+};
+
 const getAgentSystemMessage = async ({
-  configuration: { instructions: customInstructions, aiIndexCatalog },
+  configuration: {
+    instructions: customInstructions,
+    aiIndexCatalog,
+    capabilities: { attachmentTools },
+  },
   outputSchema,
   skills,
   spaceId,
@@ -202,7 +224,7 @@ ${customInstructions}
 
 ${structuredOutputDescription(outputSchema)}
 
-${attachmentToolsInstructions()}
+${attachmentTools ? attachmentToolsInstructions() : attachmentToolsUnavailableNotice()}
 
 ## SML '#' REFERENCES
 When the user picks from the # menu, the message includes markdown links: \`[#label](sml://ENTRY_ID)\`. The items they point to are attached to the conversation automatically, and the description of each attachment is the link label without the \`#\`.
@@ -224,11 +246,10 @@ Sub-actions listed in a connector attachment may carry a bracketed scope tag:
 - **[DESTROY]** — the action overwrites, updates, or deletes existing external data. Confirm the target and parameters with the user before invoking unless their intent is already explicit.
 - No tag — the action is read-only and has no external side effects.
 
-## CUSTOM RENDERING
-
-${renderAttachmentPrompt()}
-
-${renderRenderersPrompt(renderers, { bashEnabled: experimentalFeatures.bash })}
+${getCustomRenderingSection(
+  attachmentTools,
+  renderRenderersPrompt(renderers, { bashEnabled: experimentalFeatures.bash })
+)}
 
 ${getDeploymentInstructions(deployment)}`);
 };
