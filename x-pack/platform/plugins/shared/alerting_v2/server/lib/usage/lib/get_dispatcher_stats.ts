@@ -20,7 +20,6 @@ import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../.
 import { EVENT_LOG_INDEX, TERMS_SIZE, bucketsToRecord } from './constants';
 import type {
   DispatcherGroupingModeBucket,
-  DispatcherActionBucket,
   DispatcherEventStatsAggregations,
   DispatcherPolicyActivityBucket,
   DispatcherPolicyStatsAggregations,
