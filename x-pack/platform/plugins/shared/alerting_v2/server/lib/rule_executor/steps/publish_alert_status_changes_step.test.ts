@@ -35,7 +35,12 @@ const transition = (overrides: Partial<AlertStatusTransition> = {}): AlertStatus
 });
 
 const storedEvent = ({ episodeId, status, groupHash }: AlertStatusTransition) =>
-  createAlertEvent({ group_hash: groupHash, type: 'alert', alert: { id: episodeId, status } });
+  createAlertEvent({
+    group_hash: groupHash,
+    fingerprint: `fingerprint-${groupHash}`,
+    type: 'alert',
+    alert: { id: episodeId, status },
+  });
 
 const batchState = (
   transitions: AlertStatusTransition[],
@@ -72,6 +77,7 @@ describe('PublishAlertStatusChangesStep', () => {
         alert: {
           id: 'episode-1',
           groupHash: 'hash-1',
+          fingerprint: 'fingerprint-hash-1',
           status: 'active',
           previousStatus: 'pending',
           severity: null,

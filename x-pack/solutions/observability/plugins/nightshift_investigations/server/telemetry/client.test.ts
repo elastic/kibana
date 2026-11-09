@@ -12,6 +12,7 @@ import {
   NIGHTSHIFT_SEMANTIC_MEMORY_OPTIMIZED_EVENT,
 } from './events';
 import { NIGHTSHIFT_ONLINE_EVAL_SCORE_EVENT } from './online_eval_score_event';
+import { NIGHTSHIFT_ALERT_ENTERED_PIPELINE_EVENT } from './alert_entered_pipeline_event';
 
 describe('NightshiftTelemetryClient', () => {
   const logger = loggerMock.create();
@@ -89,6 +90,14 @@ describe('NightshiftTelemetryClient', () => {
     client.reportOnlineEvalScore(event);
 
     expect(analytics.reportEvent).toHaveBeenCalledWith(NIGHTSHIFT_ONLINE_EVAL_SCORE_EVENT, event);
+  });
+
+  it('registers the alert entered pipeline event', () => {
+    setupNightshiftTelemetry({ analytics: analytics as never, logger });
+
+    expect(analytics.registerEventType).toHaveBeenCalledWith(
+      expect.objectContaining({ eventType: NIGHTSHIFT_ALERT_ENTERED_PIPELINE_EVENT })
+    );
   });
 
   it('never fails the product operation when analytics reporting throws', () => {

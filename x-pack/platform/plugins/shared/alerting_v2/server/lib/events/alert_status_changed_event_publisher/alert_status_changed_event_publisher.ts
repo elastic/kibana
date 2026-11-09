@@ -9,7 +9,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { Request } from '@kbn/core-di-server';
 import { inject, injectable } from 'inversify';
 import type { AlertStatusChangedTriggerPayload } from '../../../../common/workflows/triggers';
-import { AlertStatusChangedOptIns } from '../../alert_status_changed';
+import { AlertStatusChangedOptIns, type AlertStatusChangedOptIn } from '../../alert_status_changed';
 import {
   AlertingDomainEventBusToken,
   type AlertingDomainEvent,
@@ -47,7 +47,7 @@ export interface AlertStatusChangedEventPublisherContract {
  */
 @injectable()
 export class AlertStatusChangedEventPublisher implements AlertStatusChangedEventPublisherContract {
-  #isEnabled: Promise<boolean> | undefined;
+  #enabledOptIns: Promise<AlertStatusChangedOptIn[]> | undefined;
 
   constructor(
     @inject(AlertingDomainEventBusToken)
@@ -64,9 +64,10 @@ export class AlertStatusChangedEventPublisher implements AlertStatusChangedEvent
       return;
     }
 
-    this.#isEnabled ??= this.optIns.isEnabled(this.request);
+    this.#enabledOptIns ??= this.optIns.getEnabled(this.request);
+    const enabledOptIns = await this.#enabledOptIns;
 
-    if (!(await this.#isEnabled)) {
+    if (enabledOptIns.length === 0) {
       return;
     }
 
@@ -81,5 +82,7 @@ export class AlertStatusChangedEventPublisher implements AlertStatusChangedEvent
         origin: toEventOrigin(this.actor, this.request),
       });
     }
+
+    await this.optIns.notify(enabledOptIns, payloads);
   }
 }

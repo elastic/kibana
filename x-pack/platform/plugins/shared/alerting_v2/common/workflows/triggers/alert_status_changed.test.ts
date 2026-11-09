@@ -32,6 +32,7 @@ const clientPayload: AlertStatusChangedTriggerPayload = {
   alert: {
     id: 'alert-2',
     groupHash: 'hash-2',
+    fingerprint: 'fingerprint-2',
     status: 'active',
     previousStatus: null,
     severity: null,

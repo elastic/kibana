@@ -97,6 +97,9 @@ describe('createAlertEventsBatchBuilder', () => {
     expect(doc1.scheduled_timestamp).toBe('2024-12-31T23:59:00.000Z');
     expect(doc1.rule).toEqual({ id: 'rule-123', version: 1 });
     expect(doc1.group_hash).toEqual(expect.any(String));
+    expect(doc1.fingerprint).toBe(
+      '5655949a574713d568b43c4c218c29399bd5a9cac98ada26f5f339d755c077c5'
+    );
     expect(doc1.data).toEqual({ 'host.name': 'host-a', region: 'us-east', count: 10 });
     expect(doc1.status).toBe('breached');
     expect(doc1.source).toBe('internal');
@@ -450,6 +453,7 @@ describe('buildRecoveryAlertEvents', () => {
       scheduled_timestamp: '2024-12-31T23:59:00.000Z',
       rule: { id: 'rule-123', version: 1 },
       group_hash: 'hash-b',
+      fingerprint: '672222187c9e80fedfca44eba98e98c366bdd64ec43ef5cd4eeea9723a98e36f',
       data: {},
       status: 'recovered',
       source: 'internal',
@@ -583,6 +587,7 @@ describe('buildContinuedBreachAlertEvents', () => {
       scheduled_timestamp: '2024-12-31T23:59:00.000Z',
       rule: { id: 'rule-123', version: 1 },
       group_hash: 'hash-a',
+      fingerprint: '70b8c91efdc80d8d55996a759b9e792c76874f039b4715978c1d7aa377ed9d15',
       data: {},
       status: 'breached',
       source: 'internal',
@@ -631,6 +636,7 @@ describe('buildNoDataAlertEvents', () => {
       scheduled_timestamp: '2024-12-31T23:59:00.000Z',
       rule: { id: 'rule-123', version: 1 },
       group_hash: 'hash-a',
+      fingerprint: '70b8c91efdc80d8d55996a759b9e792c76874f039b4715978c1d7aa377ed9d15',
       data: {},
       status: 'no_data',
       source: 'internal',
@@ -721,6 +727,7 @@ describe('buildQueryRecoveryAlertEvents', () => {
       scheduled_timestamp: '2024-12-31T23:59:00.000Z',
       rule: { id: 'rule-123', version: 1 },
       group_hash: activeGroupHash,
+      fingerprint: '035ebd067833938768be8a31ee0ccbe3e6f88ab2c29211c4109b7e4ed3fb0c5f',
       data: { 'host.name': 'host-a', status: 'ok' },
       status: 'recovered',
       source: 'internal',

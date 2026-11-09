@@ -12,7 +12,7 @@ import { alertEventSeveritySchema } from '@kbn/alerting-v2-schemas';
 import { getIngestTimestampPipeline } from './ingest_timestamp_pipeline';
 import type { ResourceDefinition } from './types';
 
-export const ALERT_EVENTS_DATA_STREAM_VERSION = 8;
+export const ALERT_EVENTS_DATA_STREAM_VERSION = 9;
 export const ALERT_EVENTS_BACKING_INDEX = '.ds-.rule-events-*';
 export const ALERT_EVENTS_RESOURCE_KEY = `data_stream:${ALERT_EVENTS_DATA_STREAM}`;
 
@@ -30,6 +30,7 @@ const mappings: MappingsDefinition = {
       },
     },
     group_hash: { type: 'keyword' },
+    fingerprint: { type: 'keyword' },
     data: { type: 'flattened' },
     status: { type: 'keyword' }, // breached | recovered | no_data
     source: { type: 'keyword' },
@@ -75,6 +76,7 @@ export const alertEventSchema = lazySchema(() =>
     scheduled_timestamp: z.string().optional(),
     rule: z.object({ id: z.string().optional(), version: z.number().optional() }).optional(),
     group_hash: z.string(),
+    fingerprint: z.string().optional(),
     data: z.record(z.string(), z.unknown()),
     status: alertEventStatusSchema,
     source: z.string(),
@@ -103,12 +105,16 @@ export type AlertEventType = z.infer<typeof alertEventTypeSchema>;
 export type AlertEpisodeStatus = z.infer<typeof alertEpisodeStatusSchema>;
 
 export const buildRuleEventDocument = (params: AlertEventDocument): AlertEventDocument => {
-  const { scheduled_timestamp, alert, severity, ...required } = params;
+  const { scheduled_timestamp, fingerprint, alert, severity, ...required } = params;
 
   const doc: AlertEventDocument = { ...required };
 
   if (scheduled_timestamp !== undefined) {
     doc.scheduled_timestamp = scheduled_timestamp;
+  }
+
+  if (fingerprint !== undefined) {
+    doc.fingerprint = fingerprint;
   }
 
   if (alert !== undefined) {

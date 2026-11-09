@@ -69,6 +69,20 @@ It guides the agent's telemetry filters; it is not an enforced data-access bound
 automation workflow gets an additional 60 seconds for setup and returning the investigation result.
 The stored managed investigation definition and its default timeout are unchanged.
 
+## Alert ingress telemetry
+
+The `nightshift-alert-entered-pipeline` EBT event is emitted when a new externally ingested
+Alerting v2 episode or an Elastic-configured Alerting v2 rule episode enters Nightshift. It contains
+only `alert_source`, the opaque persisted `fingerprint`, `space_id`, `source_kind`, and
+`sampling_probability`; it never includes alert titles, messages, tags, or customer alert data.
+`alert_source` is `internal` for Elastic-configured rules and the sender-provided integration
+identifier for external alerts. Significant Events are excluded because they have separate ingress
+telemetry.
+
+Volume is bounded with deterministic 10% sampling by fingerprint. Every episode in the same alert
+series therefore makes the same sampling decision, and consumers can use `sampling_probability` to
+weight sampled counts.
+
 Only one schedule row is supported per automation. It can coexist with alert rows; each source has a
 separate guarded investigation step. Alert publication opt-in and alert snapshot resolution are
 separate work. Existing saved schedules activate on their next valid save or enable action, with no

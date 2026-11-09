@@ -285,6 +285,7 @@ describe('AlertEventsClient.createAlertEvent status changes', () => {
         alert: {
           id: result.alert_id,
           groupHash: result.group_hash,
+          fingerprint: result.group_hash,
           status: ALERT_EPISODE_STATUS.ACTIVE,
           previousStatus: null,
           severity: null,

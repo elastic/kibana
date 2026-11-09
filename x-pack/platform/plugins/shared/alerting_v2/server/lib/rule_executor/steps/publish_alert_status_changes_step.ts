@@ -33,6 +33,7 @@ const toKey = (episodeId: string, status: string): string => `${episodeId}:${sta
 const toPayload = (
   { groupHash, episodeId, previousStatus, status }: AlertStatusTransition,
   storedSeverity: AlertEventSeverity | undefined,
+  fingerprint: string | undefined,
   rule: RuleResponse,
   { spaceId, executionId, scheduledAt }: RuleExecutionInput
 ): AlertStatusChangedTriggerPayload => ({
@@ -41,6 +42,7 @@ const toPayload = (
   alert: {
     id: episodeId,
     groupHash,
+    fingerprint,
     status,
     previousStatus,
     severity: status === ALERT_EPISODE_STATUS.INACTIVE ? null : storedSeverity ?? null,
@@ -87,9 +89,13 @@ export class PublishAlertStatusChangesStep implements RuleExecutionStep {
       }
 
       const storedSeverities = new Map<string, AlertEventSeverity | undefined>();
-      for (const { alert, severity } of storedAlertEvents) {
+      const storedFingerprints = new Map<string, string>();
+      for (const { alert, severity, fingerprint } of storedAlertEvents) {
         if (!alert) continue;
         const key = toKey(alert.id, alert.status);
+        if (fingerprint !== undefined) {
+          storedFingerprints.set(key, fingerprint);
+        }
         const previous = storedSeverities.get(key);
         if (
           previous === undefined ||
@@ -119,6 +125,7 @@ export class PublishAlertStatusChangesStep implements RuleExecutionStep {
             toPayload(
               transition,
               storedSeverities.get(toKey(transition.episodeId, transition.status)),
+              storedFingerprints.get(toKey(transition.episodeId, transition.status)),
               rule,
               input
             )

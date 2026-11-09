@@ -73,6 +73,19 @@ export const alertStatusChangedEventSchema = lazySchema(() =>
                 }
               )
             ),
+          fingerprint: z
+            .string()
+            .max(ID_MAX_LENGTH)
+            .optional()
+            .describe(
+              i18n.translate(
+                'xpack.alertingV2.triggers.alertStatusChanged.schema.alert.fingerprint',
+                {
+                  defaultMessage:
+                    'Opaque stable identifier for this alert series. It contains no customer alert content.',
+                }
+              )
+            ),
           status: alertStatusSchema.describe(
             i18n.translate('xpack.alertingV2.triggers.alertStatusChanged.schema.alert.status', {
               defaultMessage: 'Status of the alert after the change.',
