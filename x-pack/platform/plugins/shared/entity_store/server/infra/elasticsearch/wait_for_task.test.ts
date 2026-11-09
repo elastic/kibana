@@ -7,7 +7,10 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { setTimeout as sleep } from 'timers/promises';
 import { cancelTask, pollTaskUntil, waitForTaskToComplete } from './wait_for_task';
+
+jest.mock('timers/promises', () => ({ setTimeout: jest.fn().mockResolvedValue(undefined) }));
 
 const TASK_ID = 'test-task-id:123';
 
@@ -85,6 +88,10 @@ describe('waitForTaskToComplete', () => {
 describe('pollTaskUntil', () => {
   const notFound = Object.assign(new Error('Not Found'), { meta: { statusCode: 404 } });
 
+  beforeEach(() => {
+    jest.mocked(sleep).mockClear();
+  });
+
   it('returns the response when the task completes', async () => {
     const esClient = createMockEsClient([
       { completed: false },
@@ -95,6 +102,26 @@ describe('pollTaskUntil', () => {
 
     expect(result).toEqual({ status: 'completed', response: { total: 3 } });
     expect(esClient.tasks.get).toHaveBeenCalledTimes(2);
+  });
+
+  it('doubles the wait between polls from the minimum up to the maximum', async () => {
+    const esClient = createMockEsClient([
+      { completed: false },
+      { completed: false },
+      { completed: false },
+      { completed: false },
+      { completed: true, response: { total: 3 } },
+    ]);
+
+    const result = await pollTaskUntil({
+      esClient,
+      taskId: TASK_ID,
+      minPollIntervalMs: 5,
+      pollIntervalMs: 12,
+    });
+
+    expect(result).toEqual({ status: 'completed', response: { total: 3 } });
+    expect(jest.mocked(sleep).mock.calls.map(([ms]) => ms)).toEqual([5, 10, 12, 12]);
   });
 
   it('returns pending once the deadline passes', async () => {
