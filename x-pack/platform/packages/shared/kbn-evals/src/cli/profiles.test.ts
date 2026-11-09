@@ -8,6 +8,7 @@
 import Os from 'os';
 import { safeExec } from './utils';
 import {
+  probeHttp,
   readSuiteSecretFromDevVault,
   readVaultConfigFromDevVault,
   resetDevVaultConfigCache,
@@ -177,5 +178,35 @@ describe('resolveDefaultJudgeConnectorId', () => {
       encode({ ...VALID_CONFIG, evaluationConnectorId: 'REPLACE_ME' })
     );
     expect(resolveDefaultJudgeConnectorId(repoRoot, 'dev-vault')).toBeUndefined();
+  });
+});
+
+describe('probeHttp', () => {
+  const originalFetch = globalThis.fetch;
+
+  afterEach(() => {
+    globalThis.fetch = originalFetch;
+  });
+
+  it('cancels the unread body once the headers arrive', async () => {
+    const cancel = jest.fn().mockResolvedValue(undefined);
+    globalThis.fetch = jest.fn().mockResolvedValue({ body: { cancel } }) as typeof fetch;
+
+    await expect(probeHttp('http://es.example')).resolves.toBe(true);
+    expect(cancel).toHaveBeenCalledTimes(1);
+  });
+
+  it('stays reachable when cancelling the body fails', async () => {
+    globalThis.fetch = jest.fn().mockResolvedValue({
+      body: { cancel: jest.fn().mockRejectedValue(new Error('reset')) },
+    }) as typeof fetch;
+
+    await expect(probeHttp('http://es.example')).resolves.toBe(true);
+  });
+
+  it('returns false when the request fails', async () => {
+    globalThis.fetch = jest.fn().mockRejectedValue(new Error('offline')) as typeof fetch;
+
+    await expect(probeHttp('http://es.example')).resolves.toBe(false);
   });
 });

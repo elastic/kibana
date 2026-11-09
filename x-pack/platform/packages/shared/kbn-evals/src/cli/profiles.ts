@@ -38,7 +38,9 @@ export const probeHttp = async (url: string): Promise<boolean> => {
   try {
     const deadline = timeoutSignal(2000);
     try {
-      await fetch(url, { signal: deadline });
+      const response = await fetch(url, { signal: deadline });
+      // Headers are enough. Cancel the unread body before dispose(), which does not abort the download.
+      await response.body?.cancel().catch(() => undefined);
       return true;
     } finally {
       deadline.dispose();
