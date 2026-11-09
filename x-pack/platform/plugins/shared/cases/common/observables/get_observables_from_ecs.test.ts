@@ -5,7 +5,9 @@
  * 2.0.
  */
 import type { ObservablePost } from '../types/api';
+import { DEFAULT_OBSERVABLE_TYPES } from './default_observable_types';
 import { getIPType, getObservablesFromEcs, processObservable } from './get_observables_from_ecs';
+import { resolveObservableTypes } from './resolve_observable_types';
 
 describe('getIPType', () => {
   it('should return IPV4 for a valid IPv4 address', () => {
@@ -251,6 +253,45 @@ describe('getObservablesFromEcsDataArray', () => {
       {
         typeKey: 'observable-type-file-path',
         value: 'path1',
+        description: 'Auto extracted observable',
+      },
+    ]);
+  });
+
+  it('should follow the given observable types', () => {
+    const observableTypes = resolveObservableTypes(DEFAULT_OBSERVABLE_TYPES, [
+      { key: 'observable-type-agent-id', paths: [{ path: 'agent.id', enabled: false }] },
+      {
+        key: 'employee-id',
+        label: 'Employee ID',
+        paths: [{ path: 'user.employee_id', enabled: true }],
+        valuePattern: '^E\\d{6}$',
+      },
+      {
+        key: 'broken',
+        label: 'Broken',
+        paths: [{ path: 'user.name', enabled: true }],
+        valuePattern: '(',
+      },
+    ]);
+
+    expect(
+      getObservablesFromEcs(
+        [
+          [
+            { field: 'agent.id', value: ['agent1'] },
+            { field: 'user.employee_id', value: ['E123456', 'not-an-id'] },
+            { field: 'user.name', value: ['alice'] },
+            { field: 'host.name', value: ['host1'] },
+          ],
+        ],
+        observableTypes
+      )
+    ).toEqual([
+      { typeKey: 'employee-id', value: 'E123456', description: 'Auto extracted observable' },
+      {
+        typeKey: 'observable-type-hostname',
+        value: 'host1',
         description: 'Auto extracted observable',
       },
     ]);

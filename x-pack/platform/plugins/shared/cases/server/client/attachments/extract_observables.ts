@@ -12,6 +12,9 @@ import type { Case } from '../../../common/types/domain';
 import type { AlertInfo } from '../../common/types';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import { LICENSING_CASE_OBSERVABLES_FEATURE } from '../../common/constants';
+import { CASE_CONFIGURE_SAVED_OBJECT } from '../../../common/constants';
+import { DEFAULT_OBSERVABLE_TYPES } from '../../../common/observables/default_observable_types';
+import { resolveObservableTypes } from '../../../common/observables/resolve_observable_types';
 import { getObservablesFromEcs } from '../../../common/observables/get_observables_from_ecs';
 import type { FlattedEcsData } from '../../../common/observables/get_observables_from_ecs';
 import { toStringArray } from '../../../common/utils/attachments/string_utils';
@@ -23,6 +26,7 @@ import {
 import { applyObservablesToCase } from '../cases/observables';
 import { emitObservablesAddedEvent } from '../cases/trigger_utils';
 import type { CasesClientArgs } from '../types';
+import { buildFilter } from '../utils';
 
 /**
  * Zip alert/event ids and indices into AlertInfo pairs.
@@ -61,6 +65,33 @@ const toFlattedEcsData = (flatDoc: Record<string, unknown>): FlattedEcsData[] =>
     value: toStringArray(value),
   }));
 
+const getObservableTypesForOwner = async (
+  owner: string,
+  { unsecuredSavedObjectsClient, services: { caseConfigureService }, logger }: CasesClientArgs
+) => {
+  try {
+    const configurations = await caseConfigureService.find({
+      unsecuredSavedObjectsClient,
+      options: {
+        filter: buildFilter({
+          filters: owner,
+          field: 'owner',
+          operator: 'or',
+          type: CASE_CONFIGURE_SAVED_OBJECT,
+        }),
+      },
+    });
+    const storedTypes = configurations.saved_objects[0]?.attributes.observableTypes ?? [];
+
+    return resolveObservableTypes(DEFAULT_OBSERVABLE_TYPES, storedTypes);
+  } catch (error) {
+    logger.debug(
+      `[extractAndAddObservables] Using the default observable types for owner ${owner}: ${error}`
+    );
+    return DEFAULT_OBSERVABLE_TYPES;
+  }
+};
+
 /**
  * Best-effort: extract observables from the alert/event attachments in a
  * bulkCreate request and persist them to the case.
@@ -79,7 +110,7 @@ const toFlattedEcsData = (flatDoc: Record<string, unknown>): FlattedEcsData[] =>
 export const extractAndAddObservables = async (
   caseId: string,
   attachments: UnifiedAttachmentPayload[],
-  { settings }: Pick<Case, 'settings'>,
+  { settings, owner }: Pick<Case, 'settings' | 'owner'>,
   clientArgs: CasesClientArgs
 ): Promise<CaseSavedObjectTransformed | undefined> => {
   if (!settings?.extractObservables) {
@@ -132,7 +163,8 @@ export const extractAndAddObservables = async (
       return;
     }
 
-    const observables = getObservablesFromEcs(ecsDataArray);
+    const observableTypes = await getObservableTypesForOwner(owner, clientArgs);
+    const observables = getObservablesFromEcs(ecsDataArray, observableTypes);
 
     if (observables.length === 0) {
       return;

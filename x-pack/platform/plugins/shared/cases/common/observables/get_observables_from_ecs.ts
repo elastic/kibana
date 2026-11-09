@@ -46,19 +46,28 @@ export const processObservable = (
   });
 };
 
+const compilePattern = (valuePattern: string): RegExp | null => {
+  try {
+    return new RegExp(valuePattern);
+  } catch {
+    return null;
+  }
+};
+
 const getRulesByPath = (
   observableTypes: Readonly<Record<string, DefaultObservableType>>
 ): Map<string, ExtractionRule[]> => {
   const rulesByPath = new Map<string, ExtractionRule[]>();
 
   for (const { key, paths, valuePattern } of Object.values(observableTypes)) {
-    const rule: ExtractionRule = {
-      typeKey: key,
-      valuePattern: valuePattern === undefined ? undefined : new RegExp(valuePattern),
-    };
+    const compiledPattern = valuePattern === undefined ? undefined : compilePattern(valuePattern);
 
-    for (const { path } of paths.filter(({ enabled }) => enabled)) {
-      rulesByPath.set(path, [...(rulesByPath.get(path) ?? []), rule]);
+    if (compiledPattern !== null) {
+      const rule: ExtractionRule = { typeKey: key, valuePattern: compiledPattern };
+
+      for (const { path } of paths.filter(({ enabled }) => enabled)) {
+        rulesByPath.set(path, [...(rulesByPath.get(path) ?? []), rule]);
+      }
     }
   }
 
@@ -66,13 +75,16 @@ const getRulesByPath = (
 };
 
 // helper function to get observables from array of flattened ECS data
-export const getObservablesFromEcs = (ecsDataArray: FlattedEcsData[][]): ObservablePost[] => {
+export const getObservablesFromEcs = (
+  ecsDataArray: FlattedEcsData[][],
+  observableTypes: Readonly<Record<string, DefaultObservableType>> = DEFAULT_OBSERVABLE_TYPES
+): ObservablePost[] => {
   const observablesMap = new Map<string, ObservablePost>();
 
   const description = i18n.translate('xpack.cases.caseView.observables.autoExtract.description', {
     defaultMessage: AUTO_EXTRACT_OBSERVABLE_DESCRIPTION,
   });
-  const rulesByPath = getRulesByPath(DEFAULT_OBSERVABLE_TYPES);
+  const rulesByPath = getRulesByPath(observableTypes);
 
   for (const ecsData of ecsDataArray) {
     for (const { field, value } of ecsData) {

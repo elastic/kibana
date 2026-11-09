@@ -369,4 +369,66 @@ describe('extractAndAddObservables', () => {
       );
     });
   });
+
+  describe('observable types from the configuration', () => {
+    beforeEach(() => {
+      licensingService.isAtLeastPlatinum.mockResolvedValue(true);
+      alertsService.getAlerts.mockResolvedValue({
+        docs: [makeEcsDoc({ agent: { id: 'agent-1' }, user: { employee_id: 'E123456' } })],
+      });
+      caseService.getCase.mockResolvedValue(caseSO);
+      caseService.patchCase.mockResolvedValue(caseSO);
+    });
+
+    it('extracts with the stored observable types of the case owner', async () => {
+      jest.mocked(clientArgs.services.caseConfigureService.find).mockResolvedValue({
+        saved_objects: [
+          {
+            attributes: {
+              observableTypes: [
+                {
+                  key: 'observable-type-agent-id',
+                  label: 'Agent id',
+                  paths: [{ path: 'agent.id', enabled: false }],
+                },
+                {
+                  key: 'employee-id',
+                  label: 'Employee ID',
+                  paths: [{ path: 'user.employee_id', enabled: true }],
+                },
+              ],
+            },
+          },
+        ],
+      } as unknown as Awaited<ReturnType<typeof clientArgs.services.caseConfigureService.find>>);
+
+      await extractAndAddObservables('case-1', [alertAttachment], makeCase(true), clientArgs);
+
+      expect(clientArgs.services.caseConfigureService.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          options: { filter: expect.objectContaining({ type: 'function' }) },
+        })
+      );
+      const [[{ updatedAttributes }]] = caseService.patchCase.mock.calls;
+      expect(updatedAttributes.observables).toEqual([
+        expect.objectContaining({ typeKey: 'employee-id', value: 'E123456' }),
+      ]);
+    });
+
+    it('extracts with the default observable types when the configuration read fails', async () => {
+      jest
+        .mocked(clientArgs.services.caseConfigureService.find)
+        .mockRejectedValue(new Error('read failed'));
+
+      await extractAndAddObservables('case-1', [alertAttachment], makeCase(true), clientArgs);
+
+      expect(clientArgs.logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('Using the default observable types')
+      );
+      const [[{ updatedAttributes }]] = caseService.patchCase.mock.calls;
+      expect(updatedAttributes.observables).toEqual([
+        expect.objectContaining({ typeKey: 'observable-type-agent-id', value: 'agent-1' }),
+      ]);
+    });
+  });
 });
