@@ -18,7 +18,11 @@ import type {
 } from '@kbn/core/server';
 import type { AuthenticatedPrincipal } from '@kbn/core-security-common';
 import { SERVICE_ACCOUNT_REALM_TYPE } from '@kbn/core-security-common';
-import type { CreateServiceAccountServerParams, ServiceAccount } from '@kbn/core-security-server';
+import type {
+  CreateServiceAccountServerParams,
+  ServiceAccount,
+  ServiceAccountSummary,
+} from '@kbn/core-security-server';
 import { i18n } from '@kbn/i18n';
 import type {
   AuditLogger,
@@ -40,7 +44,7 @@ import {
   ES_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH,
 } from './es_role_limits';
 import type { EsServiceAccountPrincipal } from './es_service_account_id';
-import { parseEsServiceAccountId } from './es_service_account_id';
+import { parseBindableEsServiceAccountId, parseEsServiceAccountId } from './es_service_account_id';
 import type {
   CreateServiceAccountFakeRequestParams,
   ServiceAccountMintedToken,
@@ -59,8 +63,6 @@ import {
   ES_SERVICE_ACCOUNT_NAMESPACE,
   ES_SERVICE_ACCOUNT_TOKEN_NAME,
   SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE,
-  SERVICE_ACCOUNT_NAME_MAX_LENGTH,
-  SERVICE_ACCOUNT_NAME_REGEX,
 } from '../../common/service_accounts';
 import { ServiceAccountAuditAction, serviceAccountAuditEvent } from '../audit';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
@@ -734,6 +736,40 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
   }
 
   /**
+   * Reads the account as `kibana_system`, which can read service accounts but not their tokens.
+   * So `assumable` comes from the stored credential alone, the same as in {@link list}.
+   */
+  async getSummary(id: string): Promise<ServiceAccountSummary | null> {
+    if (!this.license.isEnabled()) {
+      throw Boom.forbidden(
+        'Cannot get a service account: security features are disabled in Elasticsearch'
+      );
+    }
+
+    // Only an account Kibana could run as is named. Any other id names nothing a workload can be
+    // bound to, so it is missing rather than malformed.
+    const principal = parseBindableEsServiceAccountId(id);
+    if (!principal) {
+      return null;
+    }
+
+    const account = await this.readAccount(
+      this.clusterClient.asInternalUser,
+      principal.namespace,
+      principal.name
+    );
+    if (!account) {
+      return null;
+    }
+
+    // `kibana_system` cannot read the account's tokens, so unlike `get` this cannot confirm that
+    // the token Kibana minted still exists. The stored credential is the best answer available,
+    // and the same one `list` gives.
+    const assumable = (await this.credentialStore.findExisting([id])).has(id);
+    return { id: account.id, name: account.name, enabled: account.enabled, assumable };
+  }
+
+  /**
    * Deletes the account's tokens, then the account, and invalidates the access tokens it was
    * issued. The credential Kibana stored for the account goes too, at whichever point keeps a
    * concurrent create of the same name from losing its own.
@@ -1039,13 +1075,8 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       );
     }
 
-    const principal = parseEsServiceAccountId(serviceAccountId);
-    if (
-      !principal ||
-      principal.namespace !== ES_SERVICE_ACCOUNT_NAMESPACE ||
-      principal.name.length > SERVICE_ACCOUNT_NAME_MAX_LENGTH ||
-      !SERVICE_ACCOUNT_NAME_REGEX.test(principal.name)
-    ) {
+    const principal = parseBindableEsServiceAccountId(serviceAccountId);
+    if (!principal) {
       throw Boom.badRequest('Invalid Elasticsearch service account ID.');
     }
 

@@ -131,7 +131,7 @@ function generateKibanaConnectorsIndexFile(contracts: ContractMeta[]) {
  * 
  * To regenerate: node scripts/generate_workflow_kibana_contracts.js
  */
-/* eslint-disable import/order */
+/* eslint-disable @kbn/compat/import-order */
 
 import type { InternalConnectorContract } from '../../../types/latest';
 
