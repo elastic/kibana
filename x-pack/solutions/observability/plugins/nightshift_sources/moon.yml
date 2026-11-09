@@ -30,6 +30,8 @@ dependsOn:
   - '@kbn/scout-oblt'
   - '@kbn/streams-schema'
   - '@kbn/zod'
+  - '@kbn/server-route-repository-utils'
+  - '@kbn/core-spaces-common'
 tags:
   - plugin
   - prod

@@ -10,7 +10,7 @@ import { ByteSizeValue } from '@kbn/config-schema';
 import { BULK_FILTER_MAX_RESOURCES, BULK_QUERY_SAMPLE_SIZE } from '@kbn/alerting-v2-schemas';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { coreMock } from '@kbn/core/server/mocks';
+import { createConfigServiceMock } from '../services/config_service/config_service.mock';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { TaskAlreadyRunningError } from '@kbn/task-manager-plugin/server/lib/errors';
@@ -168,22 +168,18 @@ describe('RulesClient', () => {
       },
     };
 
-    const pluginConfigAccessor =
-      coreMock.createPluginInitializerContext<PluginConfig>(config).config;
-
     return new RulesClient(
       clientRequest,
       rulesSavedObjectService,
       taskManager,
       userService,
       'space-1',
-      pluginConfigAccessor,
+      createConfigServiceMock(config),
       rulesSavedObjectService,
       ruleEventPublisher,
       loggerService,
       artifactTypeRegistry,
-      'user',
-      rulesClientOptions
+      { actor: 'user', options: rulesClientOptions }
     );
   }
 

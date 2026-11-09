@@ -33,9 +33,6 @@ import { AlertContextMenu } from '../../../detections/components/alerts_table/ti
 import { InvestigateInTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
 import * as i18n from './translations';
 import { DEFAULT_ACTION_BUTTON_WIDTH, isAlert } from './helpers';
-import { useNavigateToAnalyzer } from '../../../flyout/document_details/shared/hooks/use_navigate_to_analyzer';
-import { useNavigateToSessionView } from '../../../flyout/document_details/shared/hooks/use_navigate_to_session_view';
-import { useIsNewFlyoutEnabled } from '../../hooks/use_is_new_flyout_enabled';
 import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
 import { FLYOUT_ORIGIN } from '../../lib/telemetry';
 
@@ -91,33 +88,16 @@ const ActionsComponent: React.FC<ActionsComponentProps> = ({
   );
 
   const { startTransaction } = useStartTransaction();
-  const enableNewFlyout = useIsNewFlyoutEnabled();
   const { openAnalyzer, openSessionView: openSessionViewFlyout } = useFlyoutApi();
 
   const eventType = getEventType(ecsData);
 
-  const { navigateToAnalyzer } = useNavigateToAnalyzer({
-    isFlyoutOpen: false,
-    eventId,
-    indexName: ecsData._index,
-    scopeId: timelineId,
-  });
-
-  const { navigateToSessionView } = useNavigateToSessionView({
-    isFlyoutOpen: false,
-    eventId,
-    indexName: ecsData._index,
-    scopeId: timelineId,
-  });
-
   const handleClick = useCallback(() => {
     startTransaction({ name: ALERTS_ACTIONS.OPEN_ANALYZER });
-    if (enableNewFlyout && hit) {
+    if (hit) {
       openAnalyzer({ hit, onAlertUpdated: () => refetch?.(), origin: FLYOUT_ORIGIN.ROW_ACTION });
-    } else {
-      navigateToAnalyzer();
     }
-  }, [startTransaction, navigateToAnalyzer, enableNewFlyout, hit, openAnalyzer, refetch]);
+  }, [startTransaction, hit, openAnalyzer, refetch]);
 
   const sessionViewConfig = useMemo(() => {
     const { process, _id, _index, timestamp, kibana } = ecsData;
@@ -146,25 +126,15 @@ const ActionsComponent: React.FC<ActionsComponentProps> = ({
 
   const openSessionView = useCallback(() => {
     startTransaction({ name: ALERTS_ACTIONS.OPEN_SESSION_VIEW });
-    if (enableNewFlyout && hit) {
+    if (hit) {
       openSessionViewFlyout({
         hit,
         jumpToCursor: sessionViewConfig?.jumpToCursor,
         jumpToEntityId: sessionViewConfig?.jumpToEntityId,
         onAlertUpdated: () => refetch?.(),
       });
-    } else {
-      navigateToSessionView();
     }
-  }, [
-    startTransaction,
-    navigateToSessionView,
-    enableNewFlyout,
-    hit,
-    openSessionViewFlyout,
-    sessionViewConfig,
-    refetch,
-  ]);
+  }, [startTransaction, hit, openSessionViewFlyout, sessionViewConfig, refetch]);
 
   const onExpandEvent = useCallback(() => {
     onEventDetailsPanelOpened();
