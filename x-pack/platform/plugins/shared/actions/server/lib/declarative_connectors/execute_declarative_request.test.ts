@@ -1,0 +1,226 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { createRecordingAxiosClient } from '@kbn/connector-specs/src/lib/recording_axios_client';
+import { loadFixture } from './__fixtures__/load_fixture';
+import { executeDeclarativeRequest } from './execute_declarative_request';
+import { parseDeclarativeConnectorSpec } from './parse_declarative_connector_spec';
+import { TemplateRenderError } from './render_template';
+
+describe('executeDeclarativeRequest', () => {
+  const connector = parseDeclarativeConnectorSpec(loadFixture('abuseipdb-1.1.0.yaml'));
+  const config = { baseUrl: 'https://api.abuseipdb.com' };
+
+  it('sends checkIp as a GET with templated base URL, path, and query', async () => {
+    const { client, requests } = createRecordingAxiosClient({}, () => ({
+      data: { data: { score: 1 } },
+      status: 200,
+      headers: {},
+    }));
+    const requestSpy = jest.spyOn(client, 'request');
+
+    await executeDeclarativeRequest({
+      client,
+      request: connector.actions.checkIp.request,
+      input: { ipAddress: '1.2.3.4', maxAgeInDays: 90, verbose: false },
+      config,
+    });
+
+    expect(requests).toHaveLength(1);
+    expect(requests[0]).toEqual(
+      expect.objectContaining({
+        method: 'get',
+        url: 'https://api.abuseipdb.com/api/v2/check',
+      })
+    );
+    expect(requestSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        method: 'GET',
+        url: 'https://api.abuseipdb.com/api/v2/check',
+        params: {
+          ipAddress: '1.2.3.4',
+          maxAgeInDays: 90,
+          verbose: false,
+        },
+      })
+    );
+    expect(requestSpy.mock.calls[0][0]?.params).not.toHaveProperty('someOtherParam');
+  });
+
+  it('sends reportIp as URLSearchParams and keeps JSON as the default body', async () => {
+    const { client } = createRecordingAxiosClient({});
+    const requestSpy = jest.spyOn(client, 'request');
+
+    await executeDeclarativeRequest({
+      client,
+      request: connector.actions.reportIp.request,
+      input: { ip: '1.2.3.4', categories: [18, 22], comment: 'spam' },
+      config,
+    });
+
+    const formBody = requestSpy.mock.calls[0][0]?.data as URLSearchParams;
+    expect(formBody).toBeInstanceOf(URLSearchParams);
+    expect(formBody.get('ip')).toBe('1.2.3.4');
+    expect(formBody.get('categories')).toBe('18,22');
+    expect(formBody.get('comment')).toBe('spam');
+    expect(requestSpy.mock.calls[0][0]?.headers).toEqual(
+      expect.objectContaining({ 'Content-Type': 'application/x-www-form-urlencoded' })
+    );
+
+    await executeDeclarativeRequest({
+      client,
+      request: {
+        method: 'POST',
+        url: 'https://api.example/json',
+        body: { note: '{{ input.note }}' },
+      },
+      input: { note: 'hello' },
+      config: {},
+    });
+    expect(requestSpy.mock.calls[1][0]).toEqual(
+      expect.objectContaining({
+        data: { note: 'hello' },
+        headers: expect.objectContaining({ 'Content-Type': 'application/json' }),
+      })
+    );
+  });
+
+  it('sends a text body as a string', async () => {
+    const { client } = createRecordingAxiosClient({});
+    const requestSpy = jest.spyOn(client, 'request');
+
+    await executeDeclarativeRequest({
+      client,
+      request: {
+        method: 'POST',
+        url: 'https://api.example/text',
+        bodyType: 'text',
+        body: 'hello {{ input.name }}',
+      },
+      input: { name: 'ada' },
+      config: {},
+    });
+
+    expect(requestSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: 'hello ada',
+        headers: expect.objectContaining({ 'Content-Type': 'text/plain' }),
+      })
+    );
+  });
+
+  it('returns object response data as-is and wraps non-object data', async () => {
+    const request = { method: 'GET' as const, url: 'https://api.example/raw' };
+    const objectClient = createRecordingAxiosClient({}, () => ({
+      data: { score: 1 },
+      status: 200,
+      headers: {},
+    }));
+    await expect(
+      executeDeclarativeRequest({
+        client: objectClient.client,
+        request,
+        input: {},
+        config: {},
+      })
+    ).resolves.toEqual({ score: 1 });
+
+    const scalarClient = createRecordingAxiosClient({}, () => ({
+      data: 'ok',
+      status: 200,
+      headers: {},
+    }));
+    await expect(
+      executeDeclarativeRequest({
+        client: scalarClient.client,
+        request,
+        input: {},
+        config: {},
+      })
+    ).resolves.toEqual({ data: 'ok' });
+  });
+
+  it('does not send a request when rendering or the URL fails', async () => {
+    const { client, requests } = createRecordingAxiosClient({});
+
+    await expect(
+      executeDeclarativeRequest({
+        client,
+        request: { method: 'GET', url: 'https://example.com/{{ input.missing }}' },
+        input: {},
+        config: {},
+      })
+    ).rejects.toThrow(TemplateRenderError);
+    await expect(
+      executeDeclarativeRequest({
+        client,
+        request: { method: 'GET', url: '{{ input.__proto__.x }}' },
+        input: {},
+        config: {},
+      })
+    ).rejects.toThrow(TemplateRenderError);
+    await expect(
+      executeDeclarativeRequest({
+        client,
+        request: { method: 'GET', baseUrl: 'ftp://x', path: '/check' },
+        input: {},
+        config: {},
+      })
+    ).rejects.toThrow(/ftp:/);
+    await expect(
+      executeDeclarativeRequest({
+        client,
+        request: { method: 'GET', baseUrl: 'not a url', path: '/check' },
+        input: {},
+        config: {},
+      })
+    ).rejects.toThrow(/not valid/);
+
+    expect(requests).toHaveLength(0);
+  });
+
+  it('encodes URL template values as one path segment', async () => {
+    const { client } = createRecordingAxiosClient({}, () => ({
+      data: {},
+      status: 200,
+      headers: {},
+    }));
+    const requestSpy = jest.spyOn(client, 'request');
+    const input = { id: 'a/b?next=yes#section' };
+
+    await executeDeclarativeRequest({
+      client,
+      request: { method: 'GET', url: 'https://api.example/items/{{ input.id }}' },
+      input,
+      config: {},
+    });
+    await executeDeclarativeRequest({
+      client,
+      request: { method: 'GET', baseUrl: 'https://api.example', path: '/items/{{ input.id }}' },
+      input,
+      config: {},
+    });
+
+    expect(requestSpy).toHaveBeenCalledTimes(2);
+    for (const [request] of requestSpy.mock.calls) {
+      expect(request.url).toBe('https://api.example/items/a%2Fb%3Fnext%3Dyes%23section');
+    }
+  });
+
+  it('rejects dot path segments before sending a request', async () => {
+    const { client, requests } = createRecordingAxiosClient({});
+    await expect(
+      executeDeclarativeRequest({
+        client,
+        request: { method: 'GET', url: 'https://api.example/items/{{ input.id }}' },
+        input: { id: '..' },
+        config: {},
+      })
+    ).rejects.toThrow(TemplateRenderError);
+    expect(requests).toHaveLength(0);
+  });
+});

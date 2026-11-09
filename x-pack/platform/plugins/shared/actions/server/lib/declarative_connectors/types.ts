@@ -60,6 +60,7 @@ export interface DeclarativeRequest {
   query?: Record<string, unknown>;
   headers?: Record<string, unknown>;
   body?: unknown;
+  bodyType?: 'json' | 'form' | 'text';
 }
 
 export interface DeclarativeAction {
