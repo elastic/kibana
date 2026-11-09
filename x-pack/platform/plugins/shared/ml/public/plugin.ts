@@ -359,6 +359,17 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
                   });
                 }
               }
+
+              if (this.enabledFeatures.dfa && pluginStart.agentBuilder) {
+                const { registerDfaAgentBuilderAttachments } = await import(
+                  './agent_builder/register_agent_builder_attachments'
+                );
+                registerDfaAgentBuilderAttachments(pluginStart.agentBuilder, {
+                  charts: pluginStart.charts,
+                  data: pluginStart.data,
+                  locator: this.locator,
+                });
+              }
             }
           } else {
             // if ml is disabled in elasticsearch, disable ML in kibana

@@ -93,27 +93,33 @@ const getVegaSpecLayer = (
   outliers: boolean,
   dynamicSize: boolean,
   vegaColumns: string[],
-  color?: string
+  color?: string,
+  showOutlierScoreThreshold: boolean = true
 ) => {
+  const outlierCutoff = showOutlierScoreThreshold ? 'mlOutlierScoreThreshold.cutoff' : '0.99';
   const selection = outliers
     ? {
         selection: {
           [USER_SELECTION]: { type: 'interval' },
           [SINGLE_POINT_CLICK]: { type: 'single' },
-          mlOutlierScoreThreshold: {
-            type: 'single',
-            fields: ['cutoff'],
-            bind: {
-              input: 'range',
-              max: 1,
-              min: 0,
-              name: i18n.translate('xpack.ml.splomSpec.outlierScoreThresholdName', {
-                defaultMessage: 'Outlier score threshold: ',
-              }),
-              step: 0.01,
-            },
-            init: { cutoff: 0.99 },
-          },
+          ...(showOutlierScoreThreshold
+            ? {
+                mlOutlierScoreThreshold: {
+                  type: 'single',
+                  fields: ['cutoff'],
+                  bind: {
+                    input: 'range',
+                    max: 1,
+                    min: 0,
+                    name: i18n.translate('xpack.ml.splomSpec.outlierScoreThresholdName', {
+                      defaultMessage: 'Outlier score threshold: ',
+                    }),
+                    step: 0.01,
+                  },
+                  init: { cutoff: 0.99 },
+                },
+              }
+            : {}),
         },
       }
     : {
@@ -146,7 +152,7 @@ const getVegaSpecLayer = (
             {
               calculate: `datum${
                 forCustomVisLink ? `.${CUSTOM_VIS_FIELDS_PATH}` : ''
-              }['${escapedOutlierScoreField}'] >= mlOutlierScoreThreshold.cutoff`,
+              }['${escapedOutlierScoreField}'] >= ${outlierCutoff}`,
               as: 'is_outlier',
             },
           ],
@@ -169,7 +175,7 @@ const getVegaSpecLayer = (
                 value: 1,
                 test: `(datum${
                   forCustomVisLink ? `.${CUSTOM_VIS_FIELDS_PATH}` : ''
-                }['${escapedOutlierScoreField}'] >= mlOutlierScoreThreshold.cutoff)`,
+                }['${escapedOutlierScoreField}'] >= ${outlierCutoff})`,
               },
               value: 0.5,
             },
@@ -189,7 +195,7 @@ const getVegaSpecLayer = (
                       value: 40,
                       test: `(datum${
                         forCustomVisLink ? `.${CUSTOM_VIS_FIELDS_PATH}` : ''
-                      }['${escapedOutlierScoreField}'] >= mlOutlierScoreThreshold.cutoff)`,
+                      }['${escapedOutlierScoreField}'] >= ${outlierCutoff})`,
                     },
                     value: 8,
                   }
@@ -287,7 +293,8 @@ export const getScatterplotMatrixVegaLiteSpec = (
   resultsField?: string,
   color?: string,
   legendType?: LegendType,
-  dynamicSize?: boolean
+  dynamicSize?: boolean,
+  showOutlierScoreThreshold: boolean = true
 ): TopLevelSpec => {
   const vegaValues = values;
   const vegaColumns = columns.map((column) =>
@@ -342,7 +349,8 @@ export const getScatterplotMatrixVegaLiteSpec = (
           outliers,
           !!dynamicSize,
           vegaColumns,
-          color
+          color,
+          showOutlierScoreThreshold
         ),
       ],
     },
@@ -359,7 +367,8 @@ export const getScatterplotMatrixVegaLiteSpec = (
         outliers,
         !!dynamicSize,
         vegaColumns,
-        color
+        color,
+        showOutlierScoreThreshold
       )
     );
   }

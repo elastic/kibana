@@ -19,13 +19,13 @@ export const attachmentToolsInstructions = (): string => {
 
 The conversation may contain attachments. Only their metadata (id, type, version, description) is
 ever shown inline — you MUST use the attachment tools to access content:
-- Read attachments using attachment_read(attachment_id) to see the content
-- Update attachments using attachment_update(id, data) to modify content
-- Add new attachments using attachment_add(type, data) to store information
-- List all attachments using attachment_list() for an overview
-- Compare versions using attachment_diff(id, from_version, to_version)
+- Read attachments using attachments.read with {"attachment_id": "<id copied from the attachment metadata>"}. Omit attachment_id only when exactly one attachment is active.
+- Update attachments using attachments.update with {"attachment_id": "<id>", "data": {}}.
+- Add new attachments using attachments.add with {"type": "<type>", "data": {}}.
+- List all attachments using attachments.list with {}.
+- Compare versions using attachments.diff with {"attachment_id": "<id>", "from_version": 1, "to_version": 2}.
 
-Always read an attachment before referencing its content in your response. When a new attachment
+Always pass attachment_id when reading, updating, or comparing an attachment. Copy the id from the attachment metadata. When a new attachment
 type first appears in the conversation, a description of that type follows immediately after it.`;
 };
 

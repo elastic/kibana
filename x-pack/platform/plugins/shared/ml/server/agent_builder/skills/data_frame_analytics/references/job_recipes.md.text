@@ -1,0 +1,23 @@
+# Recipes
+
+These are field choices, not indexes you should assume exist.
+
+## Unusual clients in web logs
+
+The source is one row per client IP, usually from a transform: request count, bytes sum, bytes max. Analysis type `outlier_detection`. Include those numeric aggregations. Exclude `clientip`. Destination example `weblog-outliers`. After it stops, sort `ml.outlier_score` and read `feature_influence` from `_source`. The field with the largest influence is why that client was flagged. Do not treat 0.5 as a calibrated fraud probability.
+
+## Will the flight be delayed?
+
+Classification. Dependent variable `FlightDelay`. Exclude `Cancelled`, `FlightDelayMin`, and `FlightDelayType` because they restate the label. A first pass on a large flights index can use `training_percent` 10. On a few hundred rows, use about 60. Set `num_top_feature_importance_values` to 4 only if the user asks why a flight was flagged. Set `num_top_classes` to `-1` if you need AUC. Evaluate with `actual_field` `FlightDelay`, `predicted_field` `ml.FlightDelay_prediction`, and `test_split_only` true. A perfect test matrix means a leaked field is still included.
+
+## How many minutes will the flight be delayed?
+
+Regression. Dependent variable `FlightDelayMin`. Exclude `FlightDelay` and `FlightDelayType` if they leak the duration. Default loss stays MSE unless the delay distribution is long-tailed, in which case use `msle`. Evaluate with `predicted_field` `ml.FlightDelayMin_prediction`.
+
+## The model is weak: add fields
+
+Run the same classification twice. First job: distance and elevation only. Second job: those plus elapsed time and velocity. Compare test-split confusion and `total_feature_importance`. If elapsed time becomes the largest importance and the off-diagonal cells the business cares about shrink, keep the second field set. Do not retune eta or tree depth between the two jobs. Ride versus VirtualRide can stay confused. Ride versus walk should not.
+
+## What moves a numeric score?
+
+Regression on the score, with feature importance enabled and identifiers such as country name and year excluded. Read `feature_importance_baseline` and `total_feature_importance`. Per row, importance values plus the baseline approximate the prediction. A feature whose importance flattens at the extremes is a proxy that stops adding information, not a reason to drop every other field.

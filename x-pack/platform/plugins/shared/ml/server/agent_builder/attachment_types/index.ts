@@ -13,3 +13,5 @@ export {
 export { createAnomalySwimLaneAttachmentType } from './anomaly_swimlane';
 export { createAnomalyChartsAttachmentType } from './anomaly_charts';
 export { createSingleMetricViewerAttachmentType } from './single_metric_viewer';
+export { createDfaTotalFeatureImportanceAttachmentType } from './dfa_total_feature_importance';
+export { createDfaScatterplotMatrixAttachmentType } from './dfa_scatterplot_matrix';

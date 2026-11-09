@@ -64,6 +64,14 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.ml}.ad_update_job_config`,
   `${internalNamespaces.ml}.query_anomalies`,
 
+  // ML data frame analytics (Agent Builder skill tools)
+  `${internalNamespaces.ml}.dfa_get_job`,
+  `${internalNamespaces.ml}.dfa_explain`,
+  `${internalNamespaces.ml}.dfa_evaluate`,
+  `${internalNamespaces.ml}.dfa_create_job`,
+  `${internalNamespaces.ml}.dfa_manage_job`,
+  `${internalNamespaces.ml}.dfa_delete_job`,
+
   // Security Solution
   `${internalNamespaces.security}.alertzero.actions.list`,
   `${internalNamespaces.security}.entity_risk_score`,
@@ -314,6 +322,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
 
   // ML
   `${internalNamespaces.ml}.anomaly-detection`,
+  `${internalNamespaces.ml}.data-frame-analytics`,
 
   // Search
   `${internalNamespaces.search}.keyword-search`,
@@ -448,6 +457,8 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   'ml.anomaly_swimlane',
   'ml.anomaly_charts',
   'ml.single_metric_viewer',
+  'ml.dfa_total_feature_importance',
+  'ml.dfa_scatterplot_matrix',
 
   // Platform – Custom Content
   'platform.custom_content.panel_context',

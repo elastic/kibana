@@ -1,0 +1,77 @@
+# Create a job
+
+When the user asks for help creating analytics, clarify the business question first. Look at the source, ask only what is still unknown, decide the job yourself, then explain.
+
+Order after that: `ml.dfa_explain`, then `ml.dfa_create_job`, then `ml.dfa_manage_job` with `operation=start`. Do not start inside the create call. Do not create until explain succeeds.
+
+## Business clarification
+
+This protocol is for users who do not have analytics expertise. Ask in their words. Skip any question the request or the data already answers.
+
+### Look at the source first
+
+Before asking anything, sample the index with `platform.core.execute_esql`. Learn the row count, whether each row is one entity, the likely outcome column, and columns that restate that outcome. If the source is an event stream, describe the pivot and stop. This skill does not create transforms.
+
+### Questions
+
+| Ask | What it decides |
+| --- | --- |
+| What decision should this support? For example, which customers are unlike the rest, will this flight be delayed, or how many minutes late will it be? | Unusual entities, a class, or a number. You choose the analysis. |
+| What is one row? A customer, a flight, a host, a workout? | The entity to keep out of the model, and whether the source is ready. |
+| What would a useful result be: a ranked list, a yes or no, a number, or a reason the row came out that way? | Whether to store per-row explanations. |
+| Which mistakes are expensive? Missing a rare case, or being wrong more often overall? Which categories are close enough that mixing them up is acceptable? | Class objective, and which off-diagonal cells matter when you judge results. |
+| Which columns are the answer written another way, or names that should not explain the row? What would someone who knows this domain look at to tell the rows apart? | Fields to exclude, and the first field set. After the held-out check, add or drop fields and run again. Do not ask the user to build an include list. |
+| Roughly what share of these rows do you expect to be unusual? | `outlier_fraction` only when they give a real share. Otherwise leave the default, about 5 in 100. |
+| Do you need to check the result on rows the model has not used, or should every current row be used to fit it? | Training percent. Keep a held-out slice unless they accept no check. |
+| Is this a one-time look at this table, or will new rows need a score later? | Say that scoring later is a separate deploy step. This skill does not create it. |
+
+Never ask the user to choose the analysis name, the loss, the memory limit, the training percentage, how many classes to keep, or whether to run one job or two. Make those choices from the sample and the answers above.
+
+Say the choice in plain language before explain. Example: "I'll predict whether a flight is delayed, hold back one flight in five to check the result, and ignore how many minutes it was delayed because that gives away the answer."
+
+Show the config only after that summary. Wait for the user to agree before `ml.dfa_create_job`.
+
+## Fields
+
+Outlier detection analyzes numeric and boolean fields. A missing value, null, or multi-value array in an included field skips that document. Regression and classification also use keyword, text, and ip, and they tolerate missing values. A multi-value array still skips the document. Skipped rows increase `skipped_docs_count` and are not modeled.
+
+Include fields the decision is allowed to use. Exclude:
+
+- The entity id (`clientip` when each row is a client) and a row number or sample code that lines up with the label.
+- The label and any field computed from the label.
+- Free-text identifiers that are not categories (`country_name`, `year` when they name the row rather than explain it).
+- Latitude and longitude. The model reads them as ordinary numbers, not as a place.
+- A second copy of the same measurement (`DistanceMiles` and `DistanceKilometers`).
+- Fields that do not help the decision. They still cost memory.
+
+`analyzed_fields.excludes` wins over `includes`.
+
+## Training percent
+
+The create and explain tools count the source index when you omit `training_percent`. More than 100000 documents start at 10. A few hundred documents, such as about 700, use 60. Other sizes use 80. If the count fails, they use 80 so a test split remains.
+
+- Target 200 to 200000 training documents. Training docs are about `source docs * training_percent / 100`.
+- More than 100000 source documents: start at 10, then raise the percent if the held-out metrics are weak and training docs stay under 200000.
+- A few hundred documents, such as about 700: use 60 so the check set is large enough to trust. Raise the percent if that would leave fewer than 200 training documents.
+- Under 200 training documents, raise the percent or get more labeled rows. Do not use 100 unless the user accepts that there is no test split.
+- 100 uses every eligible row for training. The tool result warns when you pass 100.
+
+## What to set, and what to leave alone
+
+Set:
+
+- `analysis_type`, `dependent_variable` for regression and classification, `source_index`, `dest_index`.
+- `training_percent` only when you are overriding the counted value. Omit it to let the tools apply 10, 60, or 80 from the source size.
+- `includes` or `excludes`.
+- `num_top_feature_importance_values` when the user wants a reason for each row. Use a handful of the strongest fields, such as 4, and at most 30. Omit it when they only want predictions. Zero-importance features are not stored.
+- `outlier_fraction` when the user knows what share of rows should be unusual, or when a default outlier job finds none of the rows they already know are unusual. Otherwise leave it unset. The default is about 0.05.
+- `num_top_classes` to `-1`, or at least the class count, when you need AUC ROC.
+- `class_assignment_objective` only to switch to `maximize_accuracy`.
+- `loss_function` of `msle` or `huber` only when the target shape needs it. `huber_delta` only with `huber`.
+- `model_memory_limit` only after explain says the estimate does not fit.
+
+Do not set `eta`, `gamma`, `lambda`, `feature_bag_fraction`, `max_trees`, neighbor count, or outlier method. The first job uses the defaults, and supervised jobs let optimization choose the tree settings. If the held-out result is weak, change the fields or the known outlier share before touching those knobs. Explain shows the memory estimate and which fields will actually be used. If explain rejects a field, drop it rather than forcing it.
+
+Outlier detection takes no dependent variable and no training percent. Feature influence is on by default and is not SHAP.
+
+`results_field` defaults to `ml`. The prediction column is `{results_field}.{dependent_variable}_prediction` unless you set `prediction_field_name`.

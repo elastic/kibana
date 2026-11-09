@@ -44,6 +44,7 @@ export type SkillsDirectoryStructure = Directory<{
     }>;
     ml: FileDirectory<{
       anomaly_detection: FileDirectory;
+      data_frame_analytics: FileDirectory;
     }>;
     security: FileDirectory<{
       alerts: FileDirectory<{

@@ -212,6 +212,26 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
         type: 'quantitative',
       },
     ]);
+    expect(JSON.stringify(vegaLiteSpec)).toContain('mlOutlierScoreThreshold');
+  });
+
+  it('omits the outlier score threshold control when asked', () => {
+    const vegaLiteSpec = getScatterplotMatrixVegaLiteSpec(
+      forCustomLink,
+      [{ x: 1, y: 1 }],
+      [],
+      ['x', 'y'],
+      euiThemeMock,
+      'ml',
+      undefined,
+      undefined,
+      false,
+      false
+    );
+
+    expect(() => compile(vegaLiteSpec)).not.toThrow();
+    expect(JSON.stringify(vegaLiteSpec)).not.toContain('mlOutlierScoreThreshold');
+    expect(JSON.stringify(vegaLiteSpec)).toContain('>= 0.99');
   });
 
   it('should return the spec for classification', () => {

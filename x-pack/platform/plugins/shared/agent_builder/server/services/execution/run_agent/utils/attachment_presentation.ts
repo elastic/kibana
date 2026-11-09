@@ -60,7 +60,9 @@ export const formatAttachmentsMetadata = (
       children: [
         {
           tagName: 'note',
-          children: ['Use attachment_read(attachment_id) to access content.'],
+          children: [
+            'To read content, call attachments.read with {"attachment_id": "<attachment_id>"}. attachment_id is required.',
+          ],
         },
         ...attachmentElements,
       ],
