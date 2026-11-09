@@ -160,13 +160,6 @@ export interface DashboardStart {
   areEqual: (a: DashboardState, b: DashboardState) => Promise<boolean>;
 }
 
-function getComparators(embeddable: EmbeddableStart) {
-  return async (type: string, embeddableState: object) => {
-    const definition = await embeddable.getEmbeddableDefinition(type);
-    return definition?.getComparators?.(embeddableState);
-  };
-}
-
 export class DashboardPlugin
   implements
     Plugin<DashboardSetup, DashboardStart, DashboardSetupDependencies, DashboardStartDependencies>
@@ -433,7 +426,10 @@ export class DashboardPlugin
       dashboardAppClientApi$,
       areEqual: async (a: DashboardState, b: DashboardState) => {
         const { areEqual } = await import('./dashboard_renderer/dashboard_module');
-        return areEqual(a, b, getComparators(plugins.embeddable));
+        return areEqual(a, b, async (type: string, embeddableState: object) => {
+          const definition = await plugins.embeddable.getEmbeddableDefinition(type);
+          return definition?.getComparators?.(embeddableState);
+        });
       },
     };
   }
