@@ -24,9 +24,11 @@ import {
   type AutoRefreshSettings,
   type DateRangePickerOnChangeProps,
   type DateRangePickerSettings,
+  type FirstDayOfWeek,
   type TimeWindowButtonsConfig,
 } from '@kbn/date-range-picker';
 import { useDateRangePickerPresets, type PresetItem } from '@kbn/date-range-picker-presets';
+import moment from 'moment';
 import { LegacyDateRangePicker } from './legacy_date_range_picker';
 
 const DEFAULT_DATE_PICKER_SETTINGS: DateRangePickerSettings = {
@@ -123,6 +125,7 @@ export const AlertingDateRangePicker = ({
 
   const value = `${from} to ${to}`;
   const timeZone = uiSettings.get<string>('dateFormat:tz', 'Browser');
+  const dayOfWeekSetting = uiSettings.get<string>('dateFormat:dow');
   const dateFormat = uiSettings.get<string>('dateFormat');
   const inputDateFormats = useMemo(() => (dateFormat ? [dateFormat] : undefined), [dateFormat]);
   const canAccessAdvancedSettings =
@@ -131,6 +134,13 @@ export const AlertingDateRangePicker = ({
   const settings = useMemo(
     () => (onRefresh ? { ...dateRangePickerSettings, autoRefresh } : dateRangePickerSettings),
     [dateRangePickerSettings, autoRefresh, onRefresh]
+  );
+
+  const calendarOptions = useMemo(
+    () => ({
+      firstDayOfWeek: moment.weekdays().indexOf(dayOfWeekSetting) as FirstDayOfWeek,
+    }),
+    [dayOfWeekSetting]
   );
 
   const handleChange = useCallback(
@@ -212,6 +222,7 @@ export const AlertingDateRangePicker = ({
       collapsed={collapsed}
       inputDateFormats={inputDateFormats}
       timeZone={timeZone}
+      calendarOptions={calendarOptions}
       prependBasePath={http.basePath.prepend}
       canAccessAdvancedSettings={canAccessAdvancedSettings}
       data-test-subj={dataTestSubj}

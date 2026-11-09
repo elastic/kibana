@@ -64,6 +64,22 @@ test.describe(
           assetDetailsPage.hostOverviewTab.getKPIEmbeddableError('cpuUsage')
         ).not.toBeVisible();
       });
+
+      await test.step('metadata summary resolves the OTel resource attributes', async () => {
+        // The resource attributes reach `POST /api/infra/metadata` under their ECS aliases
+        // (`os.version` -> `host.os.version`), so the semconv summary must read those too.
+        await expect(assetDetailsPage.hostOverviewTab.metadataSummaryItems).toHaveCount(2, {
+          timeout: EXTENDED_TIMEOUT,
+        });
+        await expect(
+          assetDetailsPage.hostOverviewTab.metadataSummaryItems.filter({ hasText: 'Host IP' })
+        ).toContainText('122.122.122.122');
+        await expect(
+          assetDetailsPage.hostOverviewTab.metadataSummaryItems.filter({
+            hasText: 'Host OS version',
+          })
+        ).toContainText('6.12.76-linuxkit');
+      });
     });
   }
 );

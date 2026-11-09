@@ -80,6 +80,8 @@ export interface IntegrationCardItem {
   installStatus?: EpmPackageInstallStatus;
   integration: string;
   isCollectionCard?: boolean;
+  // Number of services a collection tile bundles behind it (e.g. AWS onboarding), shown as a badge.
+  collectionSize?: number;
   groupMembers?: IntegrationCardItem[];
   searchableContent?: string;
   // Services bundled behind a single tile (e.g. AWS onboarding). Used to tell the user which
@@ -113,6 +115,9 @@ export interface IntegrationCardItem {
   type?: string;
   supportsAgentless?: boolean;
   signalTypes?: string[];
+  // Whether the package has something to configure on an agent (see `shouldAddIntegrationFromCatalog`).
+  // Only set for catalog packages, not for custom integrations or UI links.
+  addIntegrationFromCatalog?: boolean;
 }
 
 export const mapToCard = ({
@@ -143,6 +148,7 @@ export const mapToCard = ({
   let isReauthorizationRequired = false;
   let isDeprecated = false;
   let deprecationInfo: DeprecationInfo | undefined;
+  let addIntegrationFromCatalog: boolean | undefined;
 
   if (item.type === 'ui_link') {
     uiInternalPathUrl = item.id.includes('language_client.')
@@ -175,7 +181,7 @@ export const mapToCard = ({
     // linking to the overview page. The rest go to the add-integration page when the feature flag is on.
     const { enableIntegrationTileClickToAdd } = ExperimentalFeaturesService.get();
     // Catalog tiles carry the classification, computed before `policy_templates` is stripped from them.
-    const addIntegrationFromCatalog =
+    addIntegrationFromCatalog =
       ('addIntegrationFromCatalog' in item ? item.addIntegrationFromCatalog : undefined) ??
       shouldAddIntegrationFromCatalog(item);
     const url =
@@ -226,6 +232,10 @@ export const mapToCard = ({
 
   if ('supportsAgentless' in item && item.supportsAgentless) {
     cardResult.supportsAgentless = true;
+  }
+
+  if (addIntegrationFromCatalog !== undefined) {
+    cardResult.addIntegrationFromCatalog = addIntegrationFromCatalog;
   }
 
   const signalTypes = getSignalTypes(item);

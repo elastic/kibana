@@ -272,7 +272,7 @@ export async function resolveRestoreStrategy(
   }
 
   // Phase 1.5: cache-invalidation file check — git diff, no network I/O.
-  // Changes to pnpm-lock.yaml, .nvmrc, or .node-version mean node_modules may have
+  // Changes to pnpm-lock.yaml or .nvmrc mean node_modules may have
   // changed since the local artifacts were built. tsc's .tsbuildinfo incremental
   // check compares the hashes of dependency .d.ts outputs in target/types — if
   // those outputs are still from the old node_modules version, tsc considers

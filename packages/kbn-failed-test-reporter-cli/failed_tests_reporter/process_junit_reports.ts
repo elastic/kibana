@@ -8,9 +8,9 @@
  */
 
 import { addMessagesToReport } from './add_messages_to_report';
-import { getFailures } from './get_failures';
+import { getFailures, type TestFailure } from './get_failures';
 import type { ProcessReportsParams } from './process_reports_types';
-import { createFailureIssue, updateFailureIssue } from './report_failure';
+import { createFailureIssue, updateFailureIssue, updateSuiteIssue } from './report_failure';
 import { reportFailuresToEs } from './report_failures_to_es';
 import { reportFailuresToFile } from './report_failures_to_file';
 import { getReportMessageIter } from './report_metadata';
@@ -29,10 +29,12 @@ import { getRootMetadata, readTestReport } from './test_report';
 // Mocha timeout forced to fail on its way out, so they all describe the same event. Only the
 // failure that caused the abort reaches GitHub, the rest are listed on its report.
 
+/** Returns the failures considered for an issue: not irrelevant, not cascading, no duplicates. */
 export async function processJUnitReports(
   reportPaths: string[],
   params: ProcessReportsParams
-): Promise<void> {
+): Promise<TestFailure[]> {
+  const considered: TestFailure[] = [];
   const {
     log,
     existingIssues,
@@ -42,6 +44,7 @@ export async function processJUnitReports(
     pipeline,
     prependTitle,
     updateGithub,
+    perTestIssues,
     indexInEs,
     reportUpdate,
     bkMeta,
@@ -97,6 +100,36 @@ export async function processJUnitReports(
         continue;
       }
       seenNewIssueKeys.add(key);
+      considered.push(failure);
+
+      // a test tracked by a flaky suite issue gets its failures recorded there, not on an issue of its own
+      const suiteIssue = existingIssues.getSuiteIssueForFailure(failure);
+      if (suiteIssue) {
+        const { newBody, newCount } = await updateSuiteIssue(
+          buildUrl,
+          suiteIssue,
+          githubApi,
+          branch,
+          pipeline,
+          failure
+        );
+        const url = suiteIssue.github.htmlUrl;
+        // in dry-run nothing was written, so the next failure of the suite counts from the same body
+        if (updateGithub) {
+          suiteIssue.github.body = newBody;
+        }
+        failure.githubIssue = url;
+        failure.failureCount = updateGithub ? newCount : newCount - 1;
+        pushMessage(
+          `Test is tracked by a flaky suite issue with ${
+            newCount - 1
+          } failures on tracked branches: ${url}`
+        );
+        if (updateGithub) {
+          pushMessage(`Updated flaky suite issue: ${url} (fail count: ${newCount})`);
+        }
+        continue;
+      }
 
       const existingIssue = existingIssues.getForFailure(failure);
       if (existingIssue) {
@@ -109,13 +142,21 @@ export async function processJUnitReports(
           failure
         );
         const url = existingIssue.github.htmlUrl;
-        existingIssue.github.body = newBody;
+        if (updateGithub) {
+          existingIssue.github.body = newBody;
+        }
         failure.githubIssue = url;
         failure.failureCount = updateGithub ? newCount : newCount - 1;
         pushMessage(`Test has failed ${newCount - 1} times on tracked branches: ${url}`);
         if (updateGithub) {
           pushMessage(`Updated existing issue: ${url} (fail count: ${newCount})`);
         }
+        continue;
+      }
+
+      if (!perTestIssues) {
+        pushMessage('No failed-test issue tracks this test yet');
+        failure.failureCount = 0;
         continue;
       }
 
@@ -175,4 +216,6 @@ export async function processJUnitReports(
 
     await reportFailuresToFile(log, failures, bkMeta, getRootMetadata(report));
   }
+
+  return considered;
 }

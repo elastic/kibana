@@ -245,10 +245,13 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await es.deleteByQuery({
+      if (agentIds.length === 0) {
+        return;
+      }
+      await es.bulk({
         index: AGENTS_INDEX,
         refresh: true,
-        query: { terms: { tags: [TEST_TAG] } },
+        operations: agentIds.map((id) => ({ delete: { _id: id } })),
       });
     });
 

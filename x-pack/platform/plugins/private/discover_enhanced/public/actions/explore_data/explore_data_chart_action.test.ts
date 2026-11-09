@@ -68,7 +68,7 @@ const setup = (
 
   const embeddable = {
     type: 'anyEmbeddable',
-    dataViews$: new BehaviorSubject<undefined | DataView[]>([
+    dataSources$: new BehaviorSubject<undefined | DataView[]>([
       {
         id: 'index-ptr-foo',
       } as DataView,
@@ -131,7 +131,7 @@ describe('"Explore underlying data" panel action', () => {
 
     test('returns false if embeddable has more than one data view', async () => {
       const { action, embeddable, context } = setup();
-      embeddable.dataViews$ = new BehaviorSubject<undefined | DataView[]>([
+      embeddable.dataSources$ = new BehaviorSubject<undefined | DataView[]>([
         {
           id: 'index-ptr-foo',
         } as DataView,
@@ -148,7 +148,7 @@ describe('"Explore underlying data" panel action', () => {
     test('returns false if embeddable does not have data views', async () => {
       const { action, embeddable, context } = setup();
       // @ts-expect-error
-      embeddable.dataViews$ = undefined;
+      embeddable.dataSources$ = undefined;
 
       const isCompatible = await action.isCompatible(context);
 
@@ -157,7 +157,7 @@ describe('"Explore underlying data" panel action', () => {
 
     test('returns false if embeddable data views are empty', async () => {
       const { action, embeddable, context } = setup();
-      embeddable.dataViews$ = new BehaviorSubject<undefined | DataView[]>([]);
+      embeddable.dataSources$ = new BehaviorSubject<undefined | DataView[]>([]);
 
       const isCompatible = await action.isCompatible(context);
 

@@ -36,6 +36,8 @@
     "@kbn/cbor",
     "@kbn/lazy-object",
     "@kbn/core-http-server",
+    "@kbn/core-http-browser",
+    "@kbn/core-http-browser-mocks",
   ],
   "exclude": [
     "target/**/*",

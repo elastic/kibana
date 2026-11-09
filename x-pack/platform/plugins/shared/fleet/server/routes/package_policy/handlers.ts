@@ -13,6 +13,10 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { groupBy, isEmpty, isEqual, keyBy, uniq } from 'lodash';
 
 import { populatePackagePolicyAssignedAgentsCount } from '../../services/package_policies/populate_package_policy_assigned_agents_count';
+import {
+  assertOnboardingAccess,
+  assertOnboardingAccessByIds,
+} from '../../services/package_policies/onboarding_access';
 
 import {
   agentPolicyService,
@@ -50,6 +54,7 @@ import {
   PackagePolicyRequestError,
 } from '../../errors';
 import {
+  assertPackagePoliciesUpgradeAcknowledged,
   getInstallation,
   getInstallations,
   getPackageInfo,
@@ -413,6 +418,8 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
     throw new PackagePolicyNotFoundError('Package policy not found');
   }
 
+  assertOnboardingAccess([packagePolicy], request.query.onboarding_deployment_id);
+
   if (limitedToPackages && limitedToPackages.length) {
     // Enforce the package scope against both the existing package policy and the
     // package supplied in the update body. Checking only the saved package would
@@ -588,7 +595,7 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
 
 export const deletePackagePolicyHandler: RequestHandler<
   unknown,
-  unknown,
+  TypeOf<typeof DeletePackagePoliciesRequestSchema.query>,
   TypeOf<typeof DeletePackagePoliciesRequestSchema.body>
 > = async (context, request, response) => {
   const coreContext = await context.core;
@@ -596,6 +603,12 @@ export const deletePackagePolicyHandler: RequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
   const packagePolicyIds = deduplicateIds(request.body.packagePolicyIds);
+
+  await assertOnboardingAccessByIds(
+    soClient,
+    packagePolicyIds,
+    request.query.onboarding_deployment_id
+  );
 
   const body: PostDeletePackagePoliciesResponse = await packagePolicyService.delete(
     soClient,
@@ -620,6 +633,12 @@ export const deleteOnePackagePolicyHandler: RequestHandler<
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
+
+  await assertOnboardingAccessByIds(
+    soClient,
+    [request.params.packagePolicyId],
+    request.query.onboarding_deployment_id
+  );
 
   const res = await packagePolicyService.delete(
     soClient,
@@ -694,6 +713,15 @@ export const upgradePackagePolicyHandler: RequestHandler<
   const packagePolicyIds = deduplicateIds(request.body.packagePolicyIds);
 
   await throwIfTargetsAgentlessPolicies(soClient, packagePolicyIds);
+
+  if (!request.body.acknowledge_breaking_changes) {
+    // Reject the whole request before upgrading anything, so a rejected request leaves all the
+    // package policies unchanged.
+    const packagePolicies =
+      (await packagePolicyService.getByIDs(soClient, packagePolicyIds, { ignoreMissing: true })) ??
+      [];
+    await assertPackagePoliciesUpgradeAcknowledged(packagePolicies);
+  }
 
   const body: UpgradePackagePolicyResponse = await packagePolicyService.bulkUpgrade(
     soClient,

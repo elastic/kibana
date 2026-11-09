@@ -48,10 +48,9 @@ export default ({ getService }: FtrProviderContext) => {
         await deleteAllRules(supertest, log);
       });
 
-      // This is breaking due to this bug: https://github.com/elastic/kibana/issues/252794
-      it.skip('should return the rule with migrated actions after the enable patch', async () => {
-        const [connector, rule] = await Promise.all([
-          supertest
+      const createLegacyConnector = async () =>
+        (
+          await supertest
             .post(`/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
             .send({
@@ -60,17 +59,25 @@ export default ({ getService }: FtrProviderContext) => {
               secrets: {
                 webhookUrl: 'http://localhost:1234',
               },
-            }),
+            })
+        ).body;
+
+      const legacyActionMessage =
+        'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts';
+
+      it('should migrate the legacy actions and delete the sidecar even when the patch changes nothing', async () => {
+        const [connector, rule] = await Promise.all([
+          createLegacyConnector(),
           createRule(supertest, log, getSimpleRule('rule-1')),
         ]);
-        await createLegacyRuleAction(supertest, rule.id, connector.body.id);
+        await createLegacyRuleAction(supertest, rule.id, connector.id);
 
         // check for legacy sidecar action
         const sidecarActionsResults = await getLegacyActionSO(es);
         expect(sidecarActionsResults.hits.hits.length).to.eql(1);
         expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).to.eql(rule.id);
 
-        // patch disable the rule
+        // the rule is already disabled, so this patch does not change it
         const patchResponse = await supertest
           .patch(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
@@ -85,17 +92,60 @@ export default ({ getService }: FtrProviderContext) => {
           {
             action_type_id: '.slack',
             group: 'default',
-            id: connector.body.id,
-            params: {
-              message:
-                'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
-            },
+            id: connector.id,
+            params: { message: legacyActionMessage },
             uuid: bodyToCompare.actions[0].uuid,
             frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
           },
         ];
-        outputRule.revision = 1;
         expect(bodyToCompare).to.eql(outputRule);
+
+        // the migration is persisted on the rule and the sidecar is gone
+        const { body: readRule } = await supertest
+          .get(`${DETECTION_ENGINE_RULES_URL}?id=${rule.id}`)
+          .set('elastic-api-version', '2023-10-31')
+          .expect(200);
+        expect(readRule.actions.length).to.eql(1);
+
+        const sidecarActionsPostResults = await getLegacyActionSO(es);
+        expect(sidecarActionsPostResults.hits.hits.length).to.eql(0);
+      });
+
+      it('should migrate the legacy actions and delete the sidecar when the patch disables an enabled rule', async () => {
+        const [connector, rule] = await Promise.all([
+          createLegacyConnector(),
+          createRule(supertest, log, getSimpleRule('rule-1', true)),
+        ]);
+        await createLegacyRuleAction(supertest, rule.id, connector.id);
+
+        const sidecarActionsResults = await getLegacyActionSO(es);
+        expect(sidecarActionsResults.hits.hits.length).to.eql(1);
+
+        const { body: patchedRule } = await supertest
+          .patch(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send({ id: rule.id, enabled: false })
+          .expect(200);
+
+        expect(patchedRule.enabled).to.eql(false);
+
+        // the actions are persisted on the rule, not only returned in the response
+        const { body: readRule } = await supertest
+          .get(`${DETECTION_ENGINE_RULES_URL}?id=${rule.id}`)
+          .set('elastic-api-version', '2023-10-31')
+          .expect(200);
+
+        expect(readRule.actions).to.eql([
+          {
+            action_type_id: '.slack',
+            group: 'default',
+            id: connector.id,
+            params: { message: legacyActionMessage },
+            uuid: readRule.actions[0].uuid,
+            frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
+          },
+        ]);
 
         // legacy sidecar action should be gone
         const sidecarActionsPostResults = await getLegacyActionSO(es);

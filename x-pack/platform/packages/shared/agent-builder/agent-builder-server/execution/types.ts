@@ -17,6 +17,7 @@ import type {
   ConversationRoundOrigin,
   ConversationOrigin,
   ConversationRoundAuthor,
+  ConversationRoundAuthorDecoration,
   ExecutionStatus,
   InteractivityConfig,
   InteractivityConfigInput,
@@ -106,6 +107,12 @@ export interface ConversationExecutionParams extends BaseExecutionParams {
   readOnly?: boolean;
   /** External origin that initiated this execution, used to resolve the conversation and attribute the round. */
   origin?: ExecutionConversationOrigin;
+  /**
+   * Display decoration for the user message this request writes. Honoured only when the request
+   * principal is a service account, which has no display name on any backend; silently dropped
+   * for interactive users. Never affects the actor's `id`, `username` or `type`.
+   */
+  author?: ConversationRoundAuthorDecoration;
   /** Callback delivery configuration for this execution. */
   callback?: {
     /** URL to deliver the execution result to. */
@@ -162,6 +169,11 @@ export type AgentExecutionParams = StoredConversationExecutionParams | Standalon
 /**
  * Common fields shared by all agent execution documents.
  */
+export interface ExecutionRunAs {
+  type: 'service_account';
+  serviceAccountId: string;
+}
+
 interface BaseAgentExecution {
   /** Unique id of the execution. */
   executionId: string;
@@ -177,6 +189,11 @@ interface BaseAgentExecution {
   spaceId: string;
   /** The user the request that created this execution authenticated as. */
   owner?: UserIdAndName;
+  /**
+   * The service account the execution runs as, captured from the agent's binding at dispatch.
+   * Absent when the execution runs with the caller's own credentials.
+   */
+  runAs?: ExecutionRunAs;
   /** Error details, present when status is 'failed'. */
   error?: SerializedExecutionError;
   /** Why the execution was aborted, present when status is 'aborted' and the origin recorded it. */

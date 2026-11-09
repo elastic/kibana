@@ -14,6 +14,7 @@
     "@kbn/controls-constants",
     "@kbn/custom-content-common",
     "@kbn/dashboard-markdown-schemas",
+    "@kbn/esql-types",
     "@kbn/esql-utils",
     "@kbn/field-types",
     "@kbn/lens-common",

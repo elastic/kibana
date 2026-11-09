@@ -15,3 +15,10 @@ export {
   type ExecuteTypeCheckValidationOptions,
   type TscValidationResult,
 } from './run_type_check_cli';
+export { resolveTypeCheckCompiler } from './src/resolve_compiler';
+export {
+  buildConcurrencyArgs,
+  resolveMemoryLimit,
+  resolveTypeCheckConcurrency,
+  type TypeCheckConcurrency,
+} from './src/resolve_concurrency';

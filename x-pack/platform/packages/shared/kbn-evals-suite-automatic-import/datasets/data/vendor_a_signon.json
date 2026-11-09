@@ -1,0 +1,457 @@
+{
+  "id": "vendor_a_signon",
+  "title": "Vendor A sign-on",
+  "description": "Workday sign-on logs",
+  "cohort": "recent",
+  "format": "json",
+  "samples": [
+    {
+      "line": "{\"Account_Locked__Disabled_or_Expired\":\"0\",\"Active_Session\":\"0\",\"Authentication_Type_for_Signon\":\"SAML\",\"Browser_Type\":\"Chrome\",\"Device_Type\":\"Desktop\",\"Device_is_Trusted\":\"0\",\"Failed_Signon\":\"0\",\"Forgotten_Password_Reset_Request\":\"0\",\"Invalid_Credentials\":\"0\",\"Is_Device_Managed\":\"0\",\"Operating_System\":\"Mac OS X\",\"Password_Changed\":\"0\",\"Request_Originator\":\"UI\",\"SAML_Identity_Provider\":\"IdP_Acme\",\"Session_End\":\"2026-06-18T23:25:22-07:00\",\"Session_Start\":\"2026-06-18T16:59:32-07:00\",\"System_Account\":\"user534.acme / User 534\"}",
+      "expected": {
+        "@timestamp": "2026-06-18T23:59:32.000Z",
+        "device": {
+          "type": "Desktop"
+        },
+        "ecs": {
+          "version": "9.5.0"
+        },
+        "host": {
+          "os": {
+            "name": "Mac OS X"
+          }
+        },
+        "user_agent": {
+          "name": "Chrome"
+        },
+        "event": {
+          "action": "user-signon",
+          "category": [
+            "authentication",
+            "session"
+          ],
+          "end": "2026-06-19T06:25:22.000Z",
+          "kind": "event",
+          "outcome": "success",
+          "start": "2026-06-18T23:59:32.000Z",
+          "type": [
+            "start",
+            "end"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"Account_Locked__Disabled_or_Expired\":\"0\",\"Active_Session\":\"0\",\"Authentication_Type_for_Signon\":\"OAuth 2.0\",\"Device_is_Trusted\":\"0\",\"Failed_Signon\":\"0\",\"Forgotten_Password_Reset_Request\":\"0\",\"Invalid_Credentials\":\"0\",\"Is_Device_Managed\":\"0\",\"Password_Changed\":\"0\",\"Request_Originator\":\"Internal\",\"Session_End\":\"2026-06-18T22:55:34-07:00\",\"Session_Start\":\"2026-06-18T16:55:34-07:00\",\"System_Account\":\"ISU_Integration_049\"}",
+      "expected": {
+        "@timestamp": "2026-06-18T23:55:34.000Z",
+        "ecs": {
+          "version": "9.5.0"
+        },
+        "event": {
+          "action": "user-signon",
+          "category": [
+            "authentication",
+            "session"
+          ],
+          "end": "2026-06-19T05:55:34.000Z",
+          "kind": "event",
+          "outcome": "success",
+          "start": "2026-06-18T23:55:34.000Z",
+          "type": [
+            "start",
+            "end"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"Account_Locked__Disabled_or_Expired\":\"0\",\"Active_Session\":\"0\",\"Authentication_Failure_Message\":\"Mobile PIN has expired. To reset your PIN, first sign in using your user name and password.\",\"Authentication_Type_for_Signon\":\"Biometric\",\"Browser_Type\":\"Workday Phone App\",\"Device_Type\":\"Phone\",\"Device_is_Trusted\":\"0\",\"Failed_Signon\":\"1\",\"Forgotten_Password_Reset_Request\":\"0\",\"Invalid_Credentials\":\"0\",\"Is_Device_Managed\":\"0\",\"Operating_System\":\"iOS\",\"Password_Changed\":\"0\",\"Request_Originator\":\"UI\",\"Session_Start\":\"2026-06-18T16:52:43-07:00\",\"System_Account\":\"user179.acme / User 179\",\"UI_Client_Type\":\"iPhone Native\"}",
+      "expected": {
+        "@timestamp": "2026-06-18T23:52:43.000Z",
+        "device": {
+          "type": "Phone"
+        },
+        "ecs": {
+          "version": "9.5.0"
+        },
+        "host": {
+          "os": {
+            "name": "iOS"
+          }
+        },
+        "user_agent": {
+          "name": "Workday Phone App"
+        },
+        "event": {
+          "action": "user-signon",
+          "category": [
+            "authentication",
+            "session"
+          ],
+          "kind": "event",
+          "outcome": "failure",
+          "reason": "Mobile PIN has expired. To reset your PIN, first sign in using your user name and password.",
+          "start": "2026-06-18T23:52:43.000Z",
+          "type": [
+            "start"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"Account_Locked__Disabled_or_Expired\":\"0\",\"Active_Session\":\"0\",\"Authentication_Type_for_Signon\":\"SAML\",\"Browser_Type\":\"Workday Phone App\",\"Device_Type\":\"Phone\",\"Device_is_Trusted\":\"0\",\"Failed_Signon\":\"0\",\"Forgotten_Password_Reset_Request\":\"0\",\"Invalid_Credentials\":\"0\",\"Is_Device_Managed\":\"0\",\"Operating_System\":\"iOS\",\"Password_Changed\":\"0\",\"Request_Originator\":\"UI\",\"SAML_Identity_Provider\":\"IdP_Acme\",\"Session_End\":\"2026-06-18T22:59:33-07:00\",\"Session_Start\":\"2026-06-18T16:57:04-07:00\",\"System_Account\":\"user179.acme / User 179\"}",
+      "expected": {
+        "@timestamp": "2026-06-18T23:57:04.000Z",
+        "device": {
+          "type": "Phone"
+        },
+        "ecs": {
+          "version": "9.5.0"
+        },
+        "host": {
+          "os": {
+            "name": "iOS"
+          }
+        },
+        "user_agent": {
+          "name": "Workday Phone App"
+        },
+        "event": {
+          "action": "user-signon",
+          "category": [
+            "authentication",
+            "session"
+          ],
+          "end": "2026-06-19T05:59:33.000Z",
+          "kind": "event",
+          "outcome": "success",
+          "start": "2026-06-18T23:57:04.000Z",
+          "type": [
+            "start",
+            "end"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"Account_Locked__Disabled_or_Expired\":\"0\",\"Active_Session\":\"1\",\"Authentication_Type_for_Signon\":\"User Name Password\",\"Device_is_Trusted\":\"0\",\"Failed_Signon\":\"0\",\"Forgotten_Password_Reset_Request\":\"0\",\"Invalid_Credentials\":\"0\",\"Is_Device_Managed\":\"0\",\"Password_Changed\":\"0\",\"Request_Originator\":\"Web Services\",\"Session_Start\":\"2026-06-18T13:18:51-07:00\",\"System_Account\":\"ISU_Integration_001\"}",
+      "expected": {
+        "@timestamp": "2026-06-18T20:18:51.000Z",
+        "ecs": {
+          "version": "9.5.0"
+        },
+        "event": {
+          "action": "user-signon",
+          "category": [
+            "authentication",
+            "session"
+          ],
+          "kind": "event",
+          "outcome": "success",
+          "start": "2026-06-18T20:18:51.000Z",
+          "type": [
+            "start"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"Authentication_Type\":\"SAML\",\"Browser_Type\":\"Chrome\",\"Created_Moment\":\"2026-06-22T01:08:10.374-07:00\",\"Device_Type\":\"Desktop\",\"Device_is_Trusted\":\"0\",\"Operating_System\":\"Mac OS X\",\"Prompt_-_Positive_Integer\":\"linda.andersson / Linda Andersson\",\"Request_Originator\":\"UI\",\"SAML_Identity_Provider\":\"Okta E2\",\"Session_ID\":\"4562a3\",\"Sign-on_Time\":\"2026-06-22T01:08:10-07:00\",\"Signoff_Time\":\"2026-06-22T02:09:01-07:00\",\"Signon_IP_Address\":\"81.2.69.142\",\"Signon_Worker\":\"Linda Andersson (006193)\",\"User_Agent\":\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36\",\"userName\":\"linda.andersson\"}",
+      "expected": {
+        "@timestamp": "2026-06-22T08:08:10.000Z",
+        "device": {
+          "type": "Desktop"
+        },
+        "ecs": {
+          "version": "9.5.0"
+        },
+        "host": {
+          "os": {
+            "name": "Mac OS X"
+          }
+        },
+        "related": {
+          "ip": [
+            "81.2.69.142"
+          ],
+          "user": [
+            "linda.andersson",
+            "Linda Andersson (006193)"
+          ]
+        },
+        "source": {
+          "geo": {
+            "city_name": "London",
+            "continent_name": "Europe",
+            "country_iso_code": "GB",
+            "country_name": "United Kingdom",
+            "region_iso_code": "GB-ENG",
+            "region_name": "England"
+          },
+          "ip": "81.2.69.142"
+        },
+        "user": {
+          "full_name": "Linda Andersson (006193)",
+          "name": "linda.andersson"
+        },
+        "user_agent": {
+          "device": {
+            "name": "Mac"
+          },
+          "name": "Chrome",
+          "original": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36",
+          "os": {
+            "full": "Mac OS X 10.15.7",
+            "name": "Mac OS X",
+            "version": "10.15.7"
+          },
+          "version": "149.0.0.0"
+        },
+        "event": {
+          "action": "user-signon",
+          "category": [
+            "authentication",
+            "session"
+          ],
+          "created": "2026-06-22T08:08:10.374Z",
+          "end": "2026-06-22T09:09:01.000Z",
+          "kind": "event",
+          "outcome": "success",
+          "start": "2026-06-22T08:08:10.000Z",
+          "type": [
+            "start",
+            "end"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"Authentication_Type\":\"User Name Password\",\"Browser_Type\":\"Chrome\",\"Created_Moment\":\"2026-06-22T00:44:17.617-07:00\",\"Device_Type\":\"Desktop\",\"Device_is_Trusted\":\"0\",\"Operating_System\":\"Mac OS X\",\"Prompt_-_Positive_Integer\":\"alina.goajga / Alina Garagancea\",\"Request_Originator\":\"UI\",\"Session_ID\":\"b40162\",\"Sign-on_Time\":\"2026-06-22T00:44:17-07:00\",\"Signoff_Time\":\"2026-06-22T03:35:15-07:00\",\"Signon_IP_Address\":\"81.2.69.144\",\"Signon_Worker\":\"Alina Garagancea (002036)\",\"User_Agent\":\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36\",\"userName\":\"alina.goajga\"}",
+      "expected": {
+        "@timestamp": "2026-06-22T07:44:17.000Z",
+        "device": {
+          "type": "Desktop"
+        },
+        "ecs": {
+          "version": "9.5.0"
+        },
+        "host": {
+          "os": {
+            "name": "Mac OS X"
+          }
+        },
+        "related": {
+          "ip": [
+            "81.2.69.144"
+          ],
+          "user": [
+            "alina.goajga",
+            "Alina Garagancea (002036)"
+          ]
+        },
+        "source": {
+          "geo": {
+            "city_name": "London",
+            "continent_name": "Europe",
+            "country_iso_code": "GB",
+            "country_name": "United Kingdom",
+            "region_iso_code": "GB-ENG",
+            "region_name": "England"
+          },
+          "ip": "81.2.69.144"
+        },
+        "user": {
+          "full_name": "Alina Garagancea (002036)",
+          "name": "alina.goajga"
+        },
+        "user_agent": {
+          "device": {
+            "name": "Mac"
+          },
+          "name": "Chrome",
+          "original": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36",
+          "os": {
+            "full": "Mac OS X 10.15.7",
+            "name": "Mac OS X",
+            "version": "10.15.7"
+          },
+          "version": "149.0.0.0"
+        },
+        "event": {
+          "action": "user-signon",
+          "category": [
+            "authentication",
+            "session"
+          ],
+          "created": "2026-06-22T07:44:17.617Z",
+          "end": "2026-06-22T10:35:15.000Z",
+          "kind": "event",
+          "outcome": "success",
+          "start": "2026-06-22T07:44:17.000Z",
+          "type": [
+            "start",
+            "end"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"Authentication_Type\":\"Trusted\",\"Created_Moment\":\"2026-06-22T00:04:11.094-07:00\",\"Device_Type\":\"Desktop\",\"Device_is_Trusted\":\"0\",\"Prompt_-_Positive_Integer\":\"ISU_Adaptive_Insights_User_Provisioning\",\"Request_Originator\":\"Internal\",\"Session_ID\":\"89d613\",\"Sign-on_Time\":\"2026-06-22T00:04:11-07:00\",\"Signoff_Time\":\"2026-06-22T01:04:11-07:00\",\"Signon_IP_Address\":\"Workday Internal\",\"userName\":\"ISU_Adaptive_Insights_User_Provisioning\"}",
+      "expected": {
+        "@timestamp": "2026-06-22T07:04:11.000Z",
+        "device": {
+          "type": "Desktop"
+        },
+        "ecs": {
+          "version": "9.5.0"
+        },
+        "related": {
+          "user": [
+            "ISU_Adaptive_Insights_User_Provisioning"
+          ]
+        },
+        "user": {
+          "name": "ISU_Adaptive_Insights_User_Provisioning"
+        },
+        "event": {
+          "action": "user-signon",
+          "category": [
+            "authentication",
+            "session"
+          ],
+          "created": "2026-06-22T07:04:11.094Z",
+          "end": "2026-06-22T08:04:11.000Z",
+          "kind": "event",
+          "outcome": "success",
+          "start": "2026-06-22T07:04:11.000Z",
+          "type": [
+            "start",
+            "end"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"Authentication_Type\":\"OAuth 2.0\",\"Created_Moment\":\"2026-06-22T04:29:16.382-07:00\",\"Device_is_Trusted\":\"0\",\"Prompt_-_Positive_Integer\":\"ISU_WD_Logs\",\"Request_Originator\":\"Internal\",\"Session_ID\":\"87ed78\",\"Sign-on_Time\":\"2026-06-22T04:29:16-07:00\",\"Signoff_Time\":\"2026-06-22T05:29:16-07:00\",\"Signon_IP_Address\":\"89.160.20.112\",\"userName\":\"ISU_WD_Logs\"}",
+      "expected": {
+        "@timestamp": "2026-06-22T11:29:16.000Z",
+        "ecs": {
+          "version": "9.5.0"
+        },
+        "related": {
+          "ip": [
+            "89.160.20.112"
+          ],
+          "user": [
+            "ISU_WD_Logs"
+          ]
+        },
+        "source": {
+          "as": {
+            "number": 29518,
+            "organization": {
+              "name": "Bredband2 AB"
+            }
+          },
+          "geo": {
+            "city_name": "Linköping",
+            "continent_name": "Europe",
+            "country_iso_code": "SE",
+            "country_name": "Sweden",
+            "region_iso_code": "SE-E",
+            "region_name": "Östergötland County"
+          },
+          "ip": "89.160.20.112"
+        },
+        "user": {
+          "name": "ISU_WD_Logs"
+        },
+        "event": {
+          "action": "user-signon",
+          "category": [
+            "authentication",
+            "session"
+          ],
+          "created": "2026-06-22T11:29:16.382Z",
+          "end": "2026-06-22T12:29:16.000Z",
+          "kind": "event",
+          "outcome": "success",
+          "start": "2026-06-22T11:29:16.000Z",
+          "type": [
+            "start",
+            "end"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"Authentication_Failure_Message\":\"Invalid password\",\"Authentication_Type\":\"User Name Password\",\"Browser_Type\":\"Chrome\",\"Created_Moment\":\"2026-06-22T06:41:11.320-07:00\",\"Device_Type\":\"Desktop\",\"Device_is_Trusted\":\"0\",\"Operating_System\":\"Mac OS X\",\"Prompt_-_Positive_Integer\":\"chris.carnes / Chris Carnes\",\"Request_Originator\":\"UI\",\"Sign-on_Time\":\"2026-06-22T06:41:11-07:00\",\"Signon_IP_Address\":\"175.16.199.1\",\"Signon_Worker\":\"Chris Carnes (006423)\",\"User_Agent\":\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36\",\"userName\":\"chris.carnes\"}",
+      "expected": {
+        "@timestamp": "2026-06-22T13:41:11.000Z",
+        "device": {
+          "type": "Desktop"
+        },
+        "ecs": {
+          "version": "9.5.0"
+        },
+        "host": {
+          "os": {
+            "name": "Mac OS X"
+          }
+        },
+        "related": {
+          "ip": [
+            "175.16.199.1"
+          ],
+          "user": [
+            "chris.carnes",
+            "Chris Carnes (006423)"
+          ]
+        },
+        "source": {
+          "geo": {
+            "city_name": "Changchun",
+            "continent_name": "Asia",
+            "country_iso_code": "CN",
+            "country_name": "China",
+            "region_iso_code": "CN-22",
+            "region_name": "Jilin Sheng"
+          },
+          "ip": "175.16.199.1"
+        },
+        "user": {
+          "full_name": "Chris Carnes (006423)",
+          "name": "chris.carnes"
+        },
+        "user_agent": {
+          "device": {
+            "name": "Mac"
+          },
+          "name": "Chrome",
+          "original": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36",
+          "os": {
+            "full": "Mac OS X 10.15.7",
+            "name": "Mac OS X",
+            "version": "10.15.7"
+          },
+          "version": "149.0.0.0"
+        },
+        "event": {
+          "action": "user-signon",
+          "category": [
+            "authentication",
+            "session"
+          ],
+          "created": "2026-06-22T13:41:11.320Z",
+          "kind": "event",
+          "outcome": "failure",
+          "reason": "Invalid password",
+          "start": "2026-06-22T13:41:11.000Z",
+          "type": [
+            "start"
+          ]
+        }
+      }
+    }
+  ]
+}

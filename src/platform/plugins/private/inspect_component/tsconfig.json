@@ -27,6 +27,7 @@
     "@kbn/core-http-router-server-mocks",
     "@kbn/test-jest-helpers",
     "@kbn/developer-toolbar-plugin",
-    "@kbn/shared-ux-utility"
+    "@kbn/shared-ux-utility",
+    "@kbn/react-fiber"
   ]
 }

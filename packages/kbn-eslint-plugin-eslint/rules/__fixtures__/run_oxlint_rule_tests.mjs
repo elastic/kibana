@@ -53,10 +53,12 @@ const parityTests = {
   module_migration: () => require('../module_migration.test.js'),
   no_async_foreach: () => require('../no_async_foreach.test.js'),
   no_async_promise_body: () => require('../no_async_promise_body.test.js'),
+  no_uncleared_race_timeout: () => require('../no_uncleared_race_timeout.test.js'),
   no_conditional_saved_object_type_registration: () =>
     require('../no_conditional_saved_object_type_registration.test.js'),
   no_constructor_args_in_property_initializers: () =>
     require('../no_constructor_args_in_property_initializers.test.js'),
+  no_deprecated_imports: () => require('../no_deprecated_imports.test.js'),
   no_export_all: () => require('../no_export_all.test.js'),
   no_feature_flag_snapshot: () => require('../no_feature_flag_snapshot.test.js'),
   no_npx_playwright: () => require('../no_npx_playwright.test.js'),
@@ -87,6 +89,7 @@ const parityTests = {
   scout_no_promise_all_with_playwright_apis: () =>
     require('../scout_no_promise_all_with_playwright_apis.test.js'),
   scout_no_raw_eui_selectors: () => require('../scout_no_raw_eui_selectors.test.js'),
+  scout_no_raw_locators: () => require('../scout_no_raw_locators.test.js'),
   scout_prefer_both_arch_tags: () => require('../scout_prefer_both_arch_tags.test.js'),
   scout_require_api_client_in_api_test: () =>
     require('../scout_require_api_client_in_api_test.test.js'),
@@ -98,7 +101,7 @@ const parityTests = {
 
 // Rules that alias an existing ESLint `create` rule instead of being reimplemented with `createOnce`.
 // Oxlint runs them through its ESLint-compatible API, which re-runs `create` for every file.
-const CREATE_API_RULES = new Set(['security_imports_restriction']);
+const CREATE_API_RULES = new Set(['no_deprecated_imports', 'security_imports_restriction']);
 
 for (const [ruleName, rule] of Object.entries(oxlintPlugin.rules)) {
   const api = CREATE_API_RULES.has(ruleName) ? 'create' : 'createOnce';
