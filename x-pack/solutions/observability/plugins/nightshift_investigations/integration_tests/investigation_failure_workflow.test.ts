@@ -211,6 +211,7 @@ const setup = (failure?: Failure, persistenceFailures = 0, eventWriteFailure = f
       getUnsuccessfulRun: client.getUnsuccessfulRun.bind(client),
       isLatestInvestigationRun: client.isLatestInvestigationRun.bind(client),
       getInvestigationExecutionContext: client.getInvestigationExecutionContext.bind(client),
+      getLifecycleCorrelation: client.getLifecycleCorrelation.bind(client),
       getLifecycleSubject: async () => ({
         subject: { type: 'manual', id: 'question' },
         triggerType: 'manual',

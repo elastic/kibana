@@ -91,6 +91,7 @@ it('emits the investigation and source workflow execution IDs for pipeline joins
       client
     ),
     request: {
+      ...mockRequest,
       isInternalApiRequest: true,
       headers: { 'x-kibana-workflow-execution-id': 'investigation-execution-1' },
     } as unknown as KibanaRequest,

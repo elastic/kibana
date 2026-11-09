@@ -72,10 +72,13 @@ describe('event_investigation_attach tool', () => {
       })
     );
     expect(telemetry.trackAgentToolEventInvestigationAttach).toHaveBeenCalledWith({
+      alert_source: 'elastic.significant_events',
+      fingerprint: 'agent-event-1',
+      space_id: 'default',
       success: true,
       event_id: 'agent-event-1',
       workflow_execution_id: 'attaching-workflow-id',
-      investigation_workflow_execution_id: 'workflow-id',
+      investigation_id: 'workflow-id',
     });
   });
 
@@ -129,7 +132,7 @@ describe('event_investigation_attach tool', () => {
         ...identity,
         success: true,
         event_id: 'event-1',
-        workflow_execution_id: 'workflow-id',
+        investigation_id: 'workflow-id',
       });
       expect(result).toMatchObject({ results: [{ type: 'other' }] });
     });
@@ -145,7 +148,7 @@ describe('event_investigation_attach tool', () => {
         ...identity,
         success: false,
         event_id: 'event-1',
-        workflow_execution_id: 'workflow-id',
+        investigation_id: 'workflow-id',
         error_message: 'index unavailable',
       });
     });

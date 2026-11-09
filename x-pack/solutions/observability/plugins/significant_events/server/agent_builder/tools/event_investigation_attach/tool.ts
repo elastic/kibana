@@ -141,7 +141,7 @@ export const createEventInvestigationAttachTool = ({
               ...existingAlertIdentity({ eventId: toolParams.event_id, spaceId: request.spaceId }),
               success: true,
               event_id: toolParams.event_id,
-              investigation_workflow_execution_id: toolParams.workflow_execution_id,
+              investigation_id: toolParams.workflow_execution_id,
             }),
         });
 
@@ -160,7 +160,7 @@ export const createEventInvestigationAttachTool = ({
               ...existingAlertIdentity({ eventId: toolParams.event_id, spaceId: request.spaceId }),
               success: false,
               event_id: toolParams.event_id,
-              investigation_workflow_execution_id: toolParams.workflow_execution_id,
+              investigation_id: toolParams.workflow_execution_id,
               error_message: message,
             }),
         });

@@ -298,7 +298,12 @@ export const triggerInvestigationStepDefinition = (
               (input.automation_id && input.subject_type === 'alert' ? input.message : undefined),
             source_ids: input.source_ids,
             context: alerts
-              ? { ...input.context, alerts }
+              ? {
+                  alerts,
+                  ...(input.context?.source_workflow_execution_id !== undefined
+                    ? { source_workflow_execution_id: input.context.source_workflow_execution_id }
+                    : {}),
+                }
               : input.scope_query && input.subject_type === 'manual'
               ? { ...input.context, scope_query: input.scope_query }
               : input.context,

@@ -100,7 +100,7 @@ describe('triggerInvestigationStepDefinition', () => {
         createContext({
           subject_type: 'alert',
           subject_id: 'episode-1',
-          context: { source_workflow_execution_id: 'producer-workflow-1' },
+          context: { source_workflow_execution_id: 'producer-workflow-1', unrelated: 'dropped' },
         })
       );
 

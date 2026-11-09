@@ -211,12 +211,14 @@ export const investigationAlertSnapshotSchema = z.discriminatedUnion('alert_vers
  * believing the attach happened. If a single investigation ever needs several triggers, that is a
  * deliberate change to the subject shape, not an extra key smuggled through the context.
  */
-export const alertInvestigationContextSchema = z
-  .object({
-    alerts: z.array(investigationAlertSnapshotSchema).min(1).max(MAX_ALERTS_PER_INVESTIGATION),
-    source_workflow_execution_id: z.string().trim().min(1).max(500).optional(),
-  })
-  .strict();
+export const alertInvestigationContextSchema = lazySchema(() =>
+  z
+    .object({
+      alerts: z.array(investigationAlertSnapshotSchema).min(1).max(MAX_ALERTS_PER_INVESTIGATION),
+      source_workflow_execution_id: z.string().trim().min(1).max(500).optional(),
+    })
+    .strict()
+);
 
 /**
  * Legacy `event_uuid` key, kept optional and id-shaped. The workflow no longer interpolates it
