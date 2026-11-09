@@ -37,7 +37,6 @@ import {
   type NightshiftSourceAttributes,
 } from '../saved_objects/nightshift_source_saved_object';
 import { assertSourceQueryExecutes, hasNoIndicesBehind } from './assert_source_query_executes';
-import { assertUserCanReadSourceQuery } from './assert_user_can_read_source_query';
 import { isEsqlUnknownIndexError, isEsqlVerificationError } from './es_errors';
 import type { EsqlViewsClient } from './esql_views_client';
 import type { SourceChange } from './source_change_emitter';
@@ -105,8 +104,8 @@ export class SourcesClient {
    * The checks create and update run on a new query, without writing. Returns the type to store,
    * and whether any index exists yet behind the query.
    *
-   * The privilege check runs before the probe because the probe alone is not enough: a wildcard
-   * over a readable and an unreadable index succeeds and shows only the readable one.
+   * Nothing here checks which indices the author can read. The routes that call this are gated
+   * behind manage and configure, and the service account's role decides what engines read.
    */
   async validateQuery({
     esql,
@@ -114,7 +113,6 @@ export class SourcesClient {
     esql: string;
   }): Promise<{ type: SourceType; indexExists: boolean }> {
     const type = validateSourceQuery({ esql });
-    await assertUserCanReadSourceQuery({ esClient: this.deps.dataEsClient, esql });
     const { indexExists } = await assertSourceQueryExecutes({
       esClient: this.deps.dataEsClient,
       esql,

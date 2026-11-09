@@ -142,6 +142,7 @@ describe('sessions auto update', () => {
         logger,
         settings,
         enabledBy: 'ana',
+        isServerless: true,
         now: NOW,
       });
       return { esClient, request, result };
@@ -152,7 +153,9 @@ describe('sessions auto update', () => {
       const { esClient, request, result } = run(typed);
 
       expect(await result).toEqual(keyOf('new'));
-      expect(checkSessionsPrivileges).toHaveBeenCalledWith(esClient.asCurrentUser);
+      expect(checkSessionsPrivileges).toHaveBeenCalledWith(esClient.asCurrentUser, {
+        isServerless: true,
+      });
       expect(apiKeys.grant).toHaveBeenCalledWith(request, { grantedBy: 'ana', now: NOW });
       expect(apiKeys.clusterClientFor).toHaveBeenCalledWith(keyOf('new'));
       expect(installSessions).toHaveBeenCalledWith({

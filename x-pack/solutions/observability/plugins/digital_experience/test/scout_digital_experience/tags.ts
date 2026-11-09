@@ -15,9 +15,4 @@ export const DIGITAL_EXPERIENCE_TAGS = [
 // navigation need.
 export const DIGITAL_EXPERIENCE_WITH_UX_TAGS = ['@local-stateful-classic'];
 
-// Stateful only for now: on serverless, enabling sessions fails for users who sign in through UIAM,
-// as the check for document- and field-level security reads `GET _security/user/_privileges`,
-// which serverless only offers to operator users.
-export const DIGITAL_EXPERIENCE_STATEFUL_TAGS = ['@local-stateful-classic'];
-
 export const DIGITAL_EXPERIENCE_SERVERLESS_TAGS = ['@local-serverless-observability_complete'];

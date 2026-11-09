@@ -9,7 +9,12 @@ import { firstValueFrom } from 'rxjs';
 import type { FeatureFlagsStart, KibanaRequest } from '@kbn/core/server';
 import type { ToolAvailabilityConfig, ToolAvailabilityResult } from '@kbn/agent-builder-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { NIGHTSHIFT_API_PRIVILEGES, NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
+import {
+  isNightshiftSupportedSpace,
+  NIGHTSHIFT_API_PRIVILEGES,
+  NIGHTSHIFT_ENABLED_FLAG,
+  NIGHTSHIFT_UNSUPPORTED_SPACE_MESSAGE,
+} from '@kbn/nightshift-shared';
 
 const unavailable = (reason: string): ToolAvailabilityResult => ({ status: 'unavailable', reason });
 
@@ -19,19 +24,27 @@ const unavailable = (reason: string): ToolAvailabilityResult => ({ status: 'unav
  * because the privilege check depends on the user.
  */
 /**
- * Whether the user behind a request may use the sandbox: Nightshift is enabled and, when
- * privileges apply, they hold the Nightshift manage privilege in this space. The sandbox tools and
- * everything else that reads a workspace on a user's behalf go through this one check.
+ * Whether the user behind a request may use the sandbox: the request targets the space Nightshift
+ * runs in, Nightshift is enabled and, when privileges apply, the user holds the Nightshift manage
+ * privilege in that space. The sandbox tools and everything else that reads a workspace on a
+ * user's behalf go through this one check. The space is part of it because these tools are
+ * registered deployment-wide: without it, a manage grant in a space Nightshift was never set up
+ * in would still buy a sandbox shell there.
  */
 export const checkSandboxAccess = async ({
   request,
+  spaceId,
   featureFlags,
   security,
 }: {
   request: KibanaRequest;
+  spaceId: string;
   featureFlags?: FeatureFlagsStart;
   security?: SecurityPluginStart;
 }): Promise<ToolAvailabilityResult> => {
+  if (!isNightshiftSupportedSpace(spaceId)) {
+    return unavailable(NIGHTSHIFT_UNSUPPORTED_SPACE_MESSAGE);
+  }
   if (
     !featureFlags ||
     !(await firstValueFrom(featureFlags.getBooleanValue$(NIGHTSHIFT_ENABLED_FLAG, false)))
@@ -51,7 +64,7 @@ export const checkSandboxAccess = async ({
   });
   return hasAllRequested
     ? { status: 'available' }
-    : unavailable('Sandbox tools require the Nightshift manage privilege in this space.');
+    : unavailable('Nightshift tools require the Nightshift manage privilege in this space.');
 };
 
 export const createSandboxToolAvailability = ({
@@ -60,5 +73,5 @@ export const createSandboxToolAvailability = ({
   getDeps: () => { featureFlags?: FeatureFlagsStart; security?: SecurityPluginStart };
 }): ToolAvailabilityConfig => ({
   cacheMode: 'none',
-  handler: async ({ request }) => checkSandboxAccess({ request, ...getDeps() }),
+  handler: async ({ request, spaceId }) => checkSandboxAccess({ request, spaceId, ...getDeps() }),
 });

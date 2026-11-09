@@ -84,7 +84,7 @@ export const decisionTreeReinforceStepDefinition = ({
         .describe('Decision tree and learning writes applied during this reinforcement turn.'),
     }),
     handler: async (context) => {
-      // The combined optimize workflow installs with Cortex or Memory, so this step is registered
+      // The combined optimize workflow installs with Wiki or Memory, so this step is registered
       // even when the tree feature is off.
       if (isEnabled && !isEnabled()) {
         context.logger.info('Skipped decision tree reinforcement (flag off)');
@@ -120,6 +120,14 @@ export const decisionTreeReinforceStepDefinition = ({
         logger: context.logger,
         signal: context.abortSignal,
       });
+      // Reinforcing a tree from a conversation this caller cannot read would mean reinforcing it
+      // from the hook's partial view of the round, so the round is left alone instead.
+      if (loadedRound.source === 'conversation_unreadable') {
+        context.logger.info(
+          `Skipped decision tree reinforcement — conversation ${conversationId} is not readable by this caller`
+        );
+        return { output: { message: '', skipped: true } };
+      }
       const resolvedRoundId = loadedRound.roundId || roundId || undefined;
       const now = new Date().toISOString();
       const round = buildInvestigationRound({

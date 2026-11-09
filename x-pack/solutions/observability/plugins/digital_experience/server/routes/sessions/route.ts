@@ -167,6 +167,7 @@ const enableRoute = createDigitalExperienceServerRoute({
     request,
     sessionsSettings,
     sessionsApiKeys,
+    isServerless,
     logger,
   }): Promise<SessionsStatus> => {
     const { elasticsearch, security } = await context.core;
@@ -197,6 +198,7 @@ const enableRoute = createDigitalExperienceServerRoute({
         logger,
         settings: sessionsSettings,
         enabledBy,
+        isServerless,
       });
       // Every key has the same name, so the id tells them apart.
       apiKeyRef = apiKey ? `[${apiKey.name}] (${apiKey.id})` : undefined;

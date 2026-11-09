@@ -8,6 +8,7 @@
 export const DISCOVERY_QUERIES_QUERY_KEY = ['discoveryQueries'] as const;
 export const SOURCES_QUERY_KEY = ['nightshiftSources'] as const;
 export const FEATURES_QUERY_KEY = ['features'] as const;
+export const NIGHTSHIFT_ONBOARDING_QUERY_KEY = ['nightshift.onboarding'] as const;
 
 export const DETECTION_OVERVIEW_QUERY_KEY = ['nightshift.detectionOverview'] as const;
 export const DETECTION_ENTITIES_QUERY_KEY = ['nightshift.detectionEntities'] as const;

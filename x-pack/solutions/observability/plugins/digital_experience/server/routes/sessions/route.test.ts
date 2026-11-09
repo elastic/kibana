@@ -81,6 +81,7 @@ const runHandler = (
     sessionsSettings: settings,
     sessionsApiKeys,
     getSessionsAutoUpdateState,
+    isServerless: true,
   });
   return { result, coreContext, logger, request };
 };
@@ -235,6 +236,7 @@ describe('sessions routes', () => {
           request,
           settings,
           enabledBy: 'ana',
+          isServerless: true,
         })
       );
       expect(coreContext.security.audit.logger.log).toHaveBeenCalledWith(

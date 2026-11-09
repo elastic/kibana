@@ -16,12 +16,13 @@ import {
   type PanelResolutionRequest,
   type UpsertPanelContent,
 } from './registry';
-import { isEsqlLensPanel } from './vis';
+import { isEsqlLensPanel, readsDataVegaEditsCannotKeep } from './vis';
 
 /**
  * Error for content that cannot edit the existing panel: it targets another kind or is an
- * attachment, or the panel is a Lens panel not backed by ES|QL or of an unknown type, which are
- * replaced only after the user confirms. Undefined when the content can edit the panel.
+ * attachment, or the panel is a Lens panel not backed by ES|QL, a Vega panel whose data an edit
+ * cannot keep, or of an unknown type, which are replaced only after the user confirms. Undefined
+ * when the content can edit the panel.
  */
 const getPanelEditError = (
   content: UpsertPanelContent,
@@ -33,6 +34,9 @@ const getPanelEditError = (
   const renderer = findPanelRenderer(type);
   if (renderer === 'lens' && !isEsqlLensPanel(existingPanel)) {
     return `Panel "${id}" is a Lens panel that is not backed by ES|QL, so it cannot be edited. ${confirmReplaceHint}`;
+  }
+  if (renderer === 'vega' && readsDataVegaEditsCannotKeep(existingPanel)) {
+    return `Panel "${id}" is a Vega panel that reads data other than one top-level ES|QL query (such as an Elasticsearch query, a map file, inline values, or several sources), so it cannot be edited. ${confirmReplaceHint}`;
   }
   const configPanelType = findConfigPanelType(type);
   if (!renderer && !configPanelType) {

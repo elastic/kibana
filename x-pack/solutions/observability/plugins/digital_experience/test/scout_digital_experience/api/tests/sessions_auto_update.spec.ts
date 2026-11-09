@@ -18,7 +18,7 @@ import {
 } from '../../../../common/sessions';
 import { deleteSessionsData } from '../../common/fixtures/sessions_data';
 import { testData } from '../fixtures';
-import { DIGITAL_EXPERIENCE_STATEFUL_TAGS } from '../../tags';
+import { DIGITAL_EXPERIENCE_TAGS } from '../../tags';
 
 const { COMMON_HEADERS } = testData;
 
@@ -85,7 +85,7 @@ const LEFTOVER_TRANSFORM_ID = 'digital-experience-sessions-0';
 
 apiTest.describe(
   'Digital Experience sessions automatic update',
-  { tag: DIGITAL_EXPERIENCE_STATEFUL_TAGS },
+  { tag: DIGITAL_EXPERIENCE_TAGS },
   () => {
     let headers: Record<string, string>;
     /** Every key enabling granted, so none outlives the suite. */

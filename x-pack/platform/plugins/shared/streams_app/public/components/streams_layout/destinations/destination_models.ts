@@ -16,28 +16,47 @@ import {
 } from '@kbn/streams-schema';
 import type { UnitDestination } from '@kbn/streams-schema';
 import type { Unit } from '../../../services/unit_repository';
-import type {
-  AutoWritePatternValidationError,
-  DestinationSignal,
-  DestinationSignalTargets,
-  DestinationViewModel,
-  ElasticsearchDestinationFormData,
-  S3DestinationViewModel,
-  StaticIndexValidationError,
+import {
+  REMOTE_ELASTICSEARCH_TYPE,
+  type AutoWritePatternValidationError,
+  type DestinationSignal,
+  type DestinationSignalTargets,
+  type DestinationViewModel,
+  type DocsWritePatternValidationError,
+  type ElasticsearchDestinationFormData,
+  type FreeFormIndexValidationError,
+  type PrefixedDestinationSignal,
+  type RemoteElasticsearchDestinationViewModel,
+  type S3DestinationViewModel,
+  type StaticIndexValidationError,
 } from './types';
 
-/** streams-spec elasticsearch.schema.yaml: an index containing `{{` is a template. */
-const INDEX_TEMPLATE_PATTERN = /\{\{/;
-const MAX_INDEX_NAME_BYTES = 255;
+/** An index containing `{{` or `${` is a template, which the transpiler rejects (E035). */
+const INDEX_TEMPLATE_PATTERN = /\{\{|\$\{/;
+/** Elasticsearch and the transpiler cap index names and write patterns at 255 UTF-8 bytes. */
+export const MAX_INDEX_NAME_BYTES = 255;
+
+const exceedsIndexNameBytes = (value: string): boolean =>
+  new TextEncoder().encode(value).length > MAX_INDEX_NAME_BYTES;
 
 const LOCAL_ELASTICSEARCH_TYPE = 'elasticsearch' as const;
 
 export const DESTINATION_SIGNALS: DestinationSignal[] = [...UNIT_DESTINATION_SIGNALS];
 
+export const PREFIXED_DESTINATION_SIGNALS: PrefixedDestinationSignal[] = [
+  'logs',
+  'metrics',
+  'traces',
+];
+
 const AUTO_WRITE_PATTERN_INVALID_CHARS = /[\\/?"<>|,#:\s]/;
+/** streams-transpiler#311 rejects Unicode whitespace or control characters in an index. */
+const WHITESPACE_OR_CONTROL_CHARS = /[\p{White_Space}\p{Cc}]/u;
+/** The managed bulk receiver only accepts an `_index` under these prefixes. */
+const DOCS_INDEX_PREFIX = /^(logs|metrics|traces)-/;
 
 export const SIGNAL_INDEX_FIELDS: Record<
-  DestinationSignal,
+  PrefixedDestinationSignal,
   keyof Pick<ElasticsearchDestinationFormData, 'logsIndex' | 'metricsIndex' | 'tracesIndex'>
 > = {
   logs: 'logsIndex',
@@ -45,12 +64,18 @@ export const SIGNAL_INDEX_FIELDS: Record<
   traces: 'tracesIndex',
 };
 
-export const getStaticIndexRemainder = (signal: DestinationSignal, index: string): string => {
+export const getStaticIndexRemainder = (
+  signal: PrefixedDestinationSignal,
+  index: string
+): string => {
   const prefix = `${signal}-`;
   return index.startsWith(prefix) ? index.slice(prefix.length) : index;
 };
 
-export const composeStaticIndex = (signal: DestinationSignal, remainder: string): string => {
+export const composeStaticIndex = (
+  signal: PrefixedDestinationSignal,
+  remainder: string
+): string => {
   const value = remainder.trim();
   if (!value) {
     return '';
@@ -92,7 +117,11 @@ export const getFormDestinationSignals = (
       ? DESTINATION_SIGNALS.filter((signal) => elasticsearch.customSignals.includes(signal))
       : [...DESTINATION_SIGNALS];
   }
-  return DESTINATION_SIGNALS.filter((signal) => elasticsearch[SIGNAL_INDEX_FIELDS[signal]].trim());
+  return DESTINATION_SIGNALS.filter((signal) =>
+    signal !== 'docs'
+      ? elasticsearch[SIGNAL_INDEX_FIELDS[signal]].trim()
+      : elasticsearch.docsIndex.trim()
+  );
 };
 
 /** Per-signal targets of the single destination the form creates. */
@@ -100,22 +129,30 @@ export const getDestinationCreateSpec = (
   elasticsearch: ElasticsearchDestinationFormData
 ): DestinationSignalTargets => {
   const signals = getFormDestinationSignals(elasticsearch);
-  const valueBySignal = signals.flatMap((signal) => {
-    const value = elasticsearch[SIGNAL_INDEX_FIELDS[signal]].trim();
-    return value ? [[signal, value] as const] : [];
-  });
+  const valueBySignal = signals
+    .filter((signal) => signal !== 'docs')
+    .flatMap((signal) => {
+      const value = elasticsearch[SIGNAL_INDEX_FIELDS[signal]].trim();
+      return value ? [[signal, value] as const] : [];
+    });
   if (elasticsearch.auto) {
+    const { docsWritePatterns } = elasticsearch;
     return {
       signals,
       indexBySignal: {},
-      writePatternsBySignal: Object.fromEntries(
-        valueBySignal.map(([signal, pattern]) => [signal, [pattern]])
-      ),
+      writePatternsBySignal: {
+        ...Object.fromEntries(valueBySignal.map(([signal, pattern]) => [signal, [pattern]])),
+        ...(docsWritePatterns.length > 0 ? { docs: docsWritePatterns } : {}),
+      },
     };
   }
+  const docsIndex = elasticsearch.docsIndex.trim();
   return {
     signals,
-    indexBySignal: Object.fromEntries(valueBySignal),
+    indexBySignal: {
+      ...Object.fromEntries(valueBySignal),
+      ...(docsIndex ? { docs: docsIndex } : {}),
+    },
     writePatternsBySignal: {},
   };
 };
@@ -141,11 +178,37 @@ export const toS3DestinationViewModel = (destination: UnitDestination): S3Destin
   prefix: readConfigString(destination, 'prefix'),
 });
 
+export const toRemoteElasticsearchDestinationViewModel = (
+  destination: UnitDestination
+): RemoteElasticsearchDestinationViewModel => {
+  const signals = readUnitDestinationSignals(destination);
+  const indexBySignal: Partial<Record<DestinationSignal, string>> = {};
+  for (const signal of signals) {
+    const index = readUnitDestinationConfigValue(destination, 'index', signal);
+    if (typeof index === 'string' && index.trim()) {
+      indexBySignal[signal] = index;
+    }
+  }
+  return {
+    id: destination.id,
+    name: destination.name ?? destination.id,
+    description: destination.description?.trim() || undefined,
+    type: REMOTE_ELASTICSEARCH_TYPE,
+    signals,
+    endpoint: readConfigString(destination, 'endpoint') ?? '',
+    mode: Object.keys(indexBySignal).length > 0 ? 'static' : 'auto',
+    indexBySignal,
+  };
+};
+
 export const toDestinationViewModel = (
   destination: UnitDestination
 ): DestinationViewModel | undefined => {
   if (destination.type === 's3') {
     return toS3DestinationViewModel(destination);
+  }
+  if (destination.type === REMOTE_ELASTICSEARCH_TYPE) {
+    return toRemoteElasticsearchDestinationViewModel(destination);
   }
   if (destination.type !== LOCAL_ELASTICSEARCH_TYPE) {
     return undefined;
@@ -221,7 +284,7 @@ export const createUnitDestination = ({
 };
 
 /** Whether `value` has the `<signal>-<dataset>-<namespace>` shape the built-in data stream templates match. */
-const hasSignalDataStreamShape = (signal: DestinationSignal, value: string): boolean => {
+const hasSignalDataStreamShape = (signal: PrefixedDestinationSignal, value: string): boolean => {
   const prefix = `${signal}-`;
   if (!value.startsWith(prefix)) {
     return false;
@@ -231,12 +294,15 @@ const hasSignalDataStreamShape = (signal: DestinationSignal, value: string): boo
 };
 
 export const validateAutoWritePattern = (
-  signal: DestinationSignal,
+  signal: PrefixedDestinationSignal,
   pattern: string
 ): Exclude<AutoWritePatternValidationError, 'required'> | undefined => {
   const value = pattern.trim();
   if (!value) {
     return undefined;
+  }
+  if (exceedsIndexNameBytes(value)) {
+    return 'tooLong';
   }
   if (value !== value.toLowerCase()) {
     return 'uppercase';
@@ -250,10 +316,13 @@ export const validateAutoWritePattern = (
   return undefined;
 };
 
-export const validateStaticSignalIndex = (
-  signal: DestinationSignal,
+/**
+ * A full index name with no signal prefix, as remote indices and the docs index take.
+ * A leading dot is rejected too, as Elasticsearch reserves those names for hidden and system indices.
+ */
+export const validateFreeFormIndexName = (
   index: string
-): StaticIndexValidationError | undefined => {
+): FreeFormIndexValidationError | undefined => {
   const value = index.trim();
   if (!value) {
     return undefined;
@@ -261,7 +330,10 @@ export const validateStaticSignalIndex = (
   if (indexUsesTemplate(value)) {
     return 'template';
   }
-  if (INVALID_STREAM_NAME_CHARACTERS.some((char) => value.includes(char))) {
+  if (
+    INVALID_STREAM_NAME_CHARACTERS.some((char) => value.includes(char)) ||
+    WHITESPACE_OR_CONTROL_CHARS.test(value)
+  ) {
     return 'invalidCharacter';
   }
   if (value !== value.toLowerCase()) {
@@ -269,13 +341,47 @@ export const validateStaticSignalIndex = (
   }
   if (
     RESERVED_STREAM_NAMES.includes(value) ||
+    value.startsWith('.') ||
     INVALID_STREAM_NAME_PREFIXES.some((prefix) => value.startsWith(prefix)) ||
-    new TextEncoder().encode(value).length > MAX_INDEX_NAME_BYTES
+    exceedsIndexNameBytes(value)
   ) {
     return 'invalidName';
   }
-  if (!hasSignalDataStreamShape(signal, value)) {
-    return 'signalPattern';
-  }
   return undefined;
+};
+
+export const validateStaticSignalIndex = (
+  signal: PrefixedDestinationSignal,
+  index: string
+): StaticIndexValidationError | undefined => {
+  const value = index.trim();
+  if (!value) {
+    return undefined;
+  }
+  return (
+    validateFreeFormIndexName(value) ??
+    (hasSignalDataStreamShape(signal, value) ? undefined : 'signalPattern')
+  );
+};
+
+export const validateDocsWritePattern = (
+  pattern: string
+): DocsWritePatternValidationError | undefined => {
+  const value = pattern.trim();
+  if (!value) {
+    return undefined;
+  }
+  if (exceedsIndexNameBytes(value)) {
+    return 'tooLong';
+  }
+  if (indexUsesTemplate(value)) {
+    return 'template';
+  }
+  if (value !== value.toLowerCase()) {
+    return 'uppercase';
+  }
+  if (AUTO_WRITE_PATTERN_INVALID_CHARS.test(value) || WHITESPACE_OR_CONTROL_CHARS.test(value)) {
+    return 'invalidCharacter';
+  }
+  return DOCS_INDEX_PREFIX.test(value) ? undefined : 'docsPrefix';
 };

@@ -85,6 +85,7 @@ export const enableSessionsForUser = async ({
   logger,
   settings,
   enabledBy,
+  isServerless,
   now = new Date(),
 }: {
   /** Scoped to the user behind `request`. */
@@ -94,10 +95,12 @@ export const enableSessionsForUser = async ({
   logger: Logger;
   settings: SessionsSettings;
   enabledBy: string | null;
+  /** Serverless also needs `read_security` for the document- and field-level check. */
+  isServerless: boolean;
   now?: Date;
 }): Promise<SessionsApiKey | null> => {
   // As the user: the key's own privileges can't answer the document- and field-level check.
-  await checkSessionsPrivileges(esClient.asCurrentUser);
+  await checkSessionsPrivileges(esClient.asCurrentUser, { isServerless });
 
   const stored = await apiKeys.getStored();
   const previous = stored?.key ?? null;

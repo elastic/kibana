@@ -178,6 +178,9 @@ export const packagePolicyToAgentlessPolicy = (packagePolicy: PackagePolicy): Ag
     created_by: packagePolicy.created_by,
     updated_at: packagePolicy.updated_at,
     updated_by: packagePolicy.updated_by,
+    ...(packagePolicy.onboarding_deployment_id
+      ? { onboarding_deployment_id: packagePolicy.onboarding_deployment_id }
+      : {}),
   };
 };
 
