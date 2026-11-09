@@ -17,10 +17,10 @@ feature-identification operation ID and equals `workflow_execution_id` when a wo
 operation.
 
 On `agent-tool-event-investigation-attach`, `workflow_execution_id` identifies the workflow that
-invoked the tool and `investigation_workflow_execution_id` identifies the attached investigation.
-Before this release, `workflow_execution_id` on that event held the investigation's ID. The meaning
-changed rather than gaining an alias, so split historical rows on the release that shipped
-`investigation_workflow_execution_id`.
+invoked the tool and `investigation_id` identifies the attached investigation, which is its Agent
+Builder conversation ID. Before this release, `workflow_execution_id` on that event held the
+investigation ID. The meaning changed rather than gaining an alias, so split historical rows on the
+release that shipped `investigation_id`.
 
 ## How the pipeline connects
 
@@ -37,6 +37,33 @@ to each other through stored data, so a run does not flow end to end:
 The manual orchestrator runs detection and discovery as children of one execution, but it is not
 the scheduled path. Reconstruct lineage backwards from an artifact, not forwards from a run.
 
+## What threading the pipeline means
+
+Asynchronous execution does not prevent correlation. An ID crosses an asynchronous boundary by
+being stored with the work before the producer finishes: in a request header, workflow input, task
+payload, or persisted artifact. The consumer reads that value and emits it as a lineage field.
+
+The scheduled pipeline cannot truthfully have one `workflow_execution_id`: each stage is a separate
+Workflow Engine execution, and one discovery run can consume detections from several detection
+runs. Reusing one execution ID would conflate distinct runs. Thread the pipeline as a graph instead:
+
+1. Join each EBT row to its producing run with `workflow_execution_id`.
+2. Join a composed child workflow to its parent through terminal telemetry's `executionChain`;
+   KI child events also expose `parent_workflow_execution_id`.
+3. Join a discovery write to every detection run it consumed through
+   `detection_workflow_execution_ids`.
+4. Join an investigation to the discovery run that triggered it through
+   `source_workflow_execution_id`, and to the significant event through `event_id`.
+5. Use `investigation_id` to join attachment events to `nightshift-investigation-started`.
+
+`event_id` is the durable business identity of a significant event; workflow execution IDs describe
+the processing runs that created or changed it. Do not substitute one for the other. Onboarding
+produces shared KIs and rules that many later runs may consume, so the scheduled architecture has
+no unique onboarding-run-to-detection-run edge. `source_id` can identify the shared source, but it
+cannot prove which onboarding execution supplied a later detection. A single end-to-end
+`pipeline_run_id` would require a different orchestrated design that starts and constrains all
+stages to one cycle.
+
 ## Joins
 
 Significant Events event types below drop their `significant-events-` prefix.
@@ -49,6 +76,7 @@ Significant Events event types below drop their `significant-events-` prefix.
 | `events-write` (discovery) | Detection runs it consumed | `detection_workflow_execution_ids` contains the detection run's `workflow_execution_id` |
 | `nightshift-investigation-started` | Discovery run that triggered it | `source_workflow_execution_id` = discovery `workflow_execution_id` |
 | `nightshift-investigation-started` | Significant event | `event_id` |
+| `agent-tool-event-investigation-attach` | Investigation | `investigation_id` |
 | Detection or discovery | Onboarding | `source_id` / `source_ids` only; KIs are shared across onboarding runs |
 
 `parent_workflow_execution_id` joins to `onboarding-scheduled.workflow_execution_id` only for

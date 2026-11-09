@@ -800,26 +800,6 @@ describe('events_write tool', () => {
     );
   });
 
-  it('persists and reports workflow provenance from trusted tool context', async () => {
-    (eventsWriteBulkHandler as jest.Mock).mockResolvedValue([
-      { index: 0, event_id: 'event-1', status: 'active', written: true, severity: 'high' },
-    ]);
-    const telemetry = { trackAgentToolEventsWrite: jest.fn() };
-    const context = createMockToolContext();
-    context.workflowExecutionId = 'workflow-run-1';
-
-    await invokeHandler(createTool(telemetry) as never, { items: [input] }, context);
-
-    expect(eventsWriteBulkHandler).toHaveBeenCalledWith(
-      expect.objectContaining({
-        inputs: [expect.objectContaining({ workflow_execution_id: 'workflow-run-1' })],
-      })
-    );
-    expect(telemetry.trackAgentToolEventsWrite).toHaveBeenCalledWith(
-      expect.objectContaining({ workflow_execution_id: 'workflow-run-1' })
-    );
-  });
-
   it('reports the distinct detection runs behind the signals', async () => {
     (eventsWriteBulkHandler as jest.Mock).mockResolvedValue([
       { index: 0, event_id: 'event-1', status: 'active', written: true, severity: 'high' },

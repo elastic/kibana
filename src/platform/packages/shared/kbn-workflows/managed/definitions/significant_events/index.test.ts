@@ -202,13 +202,10 @@ describe('significant events persistence workflow contracts', () => {
     });
   });
 
-  it('sends the workflow execution id when generating KI queries', () => {
+  it('sends workflow lineage to the KI child routes', () => {
     expect(requireStep(queriesGeneration, 'generate_queries').with?.body?.runId).toBe(
       '${{ execution.id }}'
     );
-  });
-
-  it('sends the parent execution id to the KI child routes', () => {
     expect(
       requireStep(queriesGeneration, 'generate_queries').with?.body?.parentWorkflowExecutionId
     ).toBe('${{ parent.executionId }}');

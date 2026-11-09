@@ -585,17 +585,19 @@ describe('generateQueriesRoute', () => {
     agentBuilder,
     body = { connectorId: 'test-connector' },
     workflowExecutionId,
+    isInternalApiRequest = workflowExecutionId !== undefined,
   }: {
     agentBuilder: unknown;
     body?: Record<string, unknown>;
     workflowExecutionId?: string;
+    isInternalApiRequest?: boolean;
   }) =>
     ({
       params: { path: { sourceId: 'logs.test' }, body },
       request: {
         spaceId: 'space-a',
         events: { aborted$: { subscribe: jest.fn() } },
-        isInternalApiRequest: workflowExecutionId !== undefined,
+        isInternalApiRequest,
         headers: workflowExecutionId
           ? { 'x-kibana-workflow-execution-id': workflowExecutionId }
           : {},
@@ -706,6 +708,21 @@ describe('generateQueriesRoute', () => {
       tokensUsed: { prompt: 0, completion: 0, total: 0 },
       connectorId: 'test-connector',
     });
+  });
+
+  it('does not accept a workflow execution header from a non-internal request', async () => {
+    await generateRoute.handler(
+      makeHandlerParams({
+        agentBuilder: makeAgentBuilder(),
+        workflowExecutionId: 'caller-chosen-run',
+        isInternalApiRequest: false,
+      })
+    );
+
+    expect(mockGenerateKIQueries).toHaveBeenCalledWith(
+      expect.objectContaining({ workflowExecutionId: undefined }),
+      expect.any(Object)
+    );
   });
 
   it('installs the KI query generation agent in the request space before generating', async () => {

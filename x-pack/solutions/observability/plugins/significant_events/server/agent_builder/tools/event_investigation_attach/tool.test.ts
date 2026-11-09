@@ -74,7 +74,7 @@ describe('event_investigation_attach tool', () => {
       success: true,
       event_id: 'agent-event-1',
       workflow_execution_id: 'attaching-workflow-id',
-      investigation_workflow_execution_id: 'workflow-id',
+      investigation_id: 'workflow-id',
     });
   });
 });

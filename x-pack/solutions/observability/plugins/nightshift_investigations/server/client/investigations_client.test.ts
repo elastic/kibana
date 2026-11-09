@@ -3111,10 +3111,21 @@ describe('NightshiftInvestigationsClient.followUpRecoveredAlert()', () => {
     subjectsClient.listByConversationIds.mockResolvedValue([
       { ...makeStoredSubject(), snapshot: { id: 'alert-1', reason: 'Latency spike' } },
     ]);
+    const telemetry = { reportInvestigationStarted: jest.fn() };
 
-    await expect(makeClient().followUpRecoveredAlert(RECOVERY)).resolves.toEqual({
+    await expect(
+      makeClient({ telemetry: telemetry as never }).followUpRecoveredAlert(RECOVERY)
+    ).resolves.toEqual({
       investigation_id: 'inv-1',
       execution_id: 'exec-rec-1',
+    });
+    expect(telemetry.reportInvestigationStarted).toHaveBeenCalledWith({
+      investigation_id: 'inv-1',
+      workflow_execution_id: 'exec-rec-1',
+      trigger_type: 'automatic',
+      entry_point: 'alert_recovery',
+      subject_type: 'alert',
+      is_follow_up: true,
     });
     expect(mockLogger.info).toHaveBeenCalledWith(
       'Requested a recovery round on investigation "inv-1" for alert/alert-1, execution_id=exec-rec-1'

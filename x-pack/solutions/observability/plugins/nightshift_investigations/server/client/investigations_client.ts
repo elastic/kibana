@@ -1500,6 +1500,14 @@ export class NightshiftInvestigationsClient {
         entry_point: 'alert_recovery' satisfies InvestigationEntryPoint,
       },
     });
+    this.telemetry?.reportInvestigationStarted({
+      investigation_id: existing.id,
+      workflow_execution_id: executionId,
+      trigger_type: 'automatic',
+      entry_point: 'alert_recovery',
+      subject_type: 'alert',
+      is_follow_up: true,
+    });
     this.logger.info(
       `Requested a recovery round on investigation "${existing.id}" for alert/${alertUuid}, execution_id=${executionId}`
     );

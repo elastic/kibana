@@ -134,7 +134,7 @@ export const createEventInvestigationAttachTool = ({
             : {}),
           success: true,
           event_id: toolParams.event_id,
-          investigation_workflow_execution_id: toolParams.workflow_execution_id,
+          investigation_id: toolParams.workflow_execution_id,
         });
 
         return { results: [{ type: ToolResultType.other, data }] };
@@ -147,7 +147,7 @@ export const createEventInvestigationAttachTool = ({
             : {}),
           success: false,
           event_id: toolParams.event_id,
-          investigation_workflow_execution_id: toolParams.workflow_execution_id,
+          investigation_id: toolParams.workflow_execution_id,
           error_message: message,
         });
         return {
