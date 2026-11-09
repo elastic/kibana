@@ -11,10 +11,12 @@ export { isEmbeddableApiContext, type EmbeddableApiContext } from './embeddable_
 
 export {
   type ComparatorFunction,
+  type SerializedStateComparison,
   type StateComparators,
   type WithAllKeys,
   runComparator,
   areComparatorsEqual,
+  byValueComparator,
   diffComparators,
   initializeStateManager,
   shouldLogStateDiff,

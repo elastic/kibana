@@ -35,6 +35,7 @@ import { registerIntegrations } from './register_integrations';
 import type { StartDeps, SetupDeps } from './types';
 import { MapsStorage } from './content_management';
 import { getTransforms } from '../common/embeddable/transforms/get_transforms';
+import { mapStateComparison } from '../common/embeddable/state_comparison';
 
 export class MapsPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
   readonly _initializerContext: PluginInitializerContext<MapsXPackConfig>;
@@ -270,6 +271,7 @@ export class MapsPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
     plugins.embeddable.registerEmbeddableServerDefinition(MAP_SAVED_OBJECT_TYPE, {
       title: 'Map',
       getTransforms,
+      stateComparison: mapStateComparison,
     });
 
     return {

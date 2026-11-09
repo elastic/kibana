@@ -9,19 +9,13 @@
 
 import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import type { OptionsListDSLControlState } from '@kbn/controls-schemas';
-import type { StateComparators } from '@kbn/presentation-publishing/state_manager';
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
+import { optionsListEditorComparators } from '../../../../common/state_comparison';
 
 export type EditorState = Pick<
   OptionsListDSLControlState,
   'search_technique' | 'single_select' | 'run_past_timeout'
 >;
-
-export const editorComparators: StateComparators<EditorState> = {
-  run_past_timeout: 'referenceEquality',
-  search_technique: 'referenceEquality',
-  single_select: 'referenceEquality',
-};
 
 const defaultEditorState = {
   search_technique: DEFAULT_DSL_OPTIONS_LIST_STATE.search_technique,
@@ -30,5 +24,9 @@ const defaultEditorState = {
 };
 
 export const initializeEditorStateManager = (initialState: EditorState) => {
-  return initializeStateManager<EditorState>(initialState, defaultEditorState, editorComparators);
+  return initializeStateManager<EditorState>(
+    initialState,
+    defaultEditorState,
+    optionsListEditorComparators
+  );
 };

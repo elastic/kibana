@@ -61,6 +61,7 @@ export function getEmbeddableServerRegistry(
         ...(typeof throwOnUnmappedPanel === 'boolean' ? { throwOnUnmappedPanel } : {}),
       };
     },
+    getStateComparison: (type: string) => registry[type]?.stateComparison,
     resetCache: () => {
       schemaCache = {};
     },

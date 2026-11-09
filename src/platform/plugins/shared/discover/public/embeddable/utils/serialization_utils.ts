@@ -82,6 +82,7 @@ export const deserializeState = async ({
       savedObjectTitle: session.title,
       savedObjectDescription: session.description,
       selectedTabId: resolvedSelectedTabId,
+      isSelectedTabImplicit: !selectedTabId,
       tabs: session.tabs,
 
       // Overwrite SO state with dashboard state for title, description, etc.
@@ -119,6 +120,7 @@ export const serializeState = ({
   serializeDynamicActions,
   savedObjectId,
   selectedTabId,
+  isSelectedTabImplicit,
 }: {
   uuid: string;
   initialState: SearchEmbeddableRuntimeState;
@@ -128,6 +130,8 @@ export const serializeState = ({
   serializeDynamicActions: () => SerializedDrilldowns;
   savedObjectId?: string;
   selectedTabId?: string;
+  /** The panel was loaded without a selected tab, so it shows the first tab by default. */
+  isSelectedTabImplicit?: boolean;
 }): SearchEmbeddablePanelApiState => {
   const searchSource = savedSearch.searchSource;
   const searchSourceJSON = JSON.stringify(searchSource.getSerializedFields());
@@ -157,12 +161,16 @@ export const serializeState = ({
       }, {});
     }
 
+    // Keep the default tab implicit, since stateless comparisons cannot resolve it from the session.
+    const isDefaultTabSelected =
+      isSelectedTabImplicit && selectedTabId === initialState.tabs?.[0]?.id;
+
     const stored: SearchEmbeddableByReferenceState = {
       ...serializeTitles(),
       ...serializeTimeRange(),
       ...serializeDynamicActions?.(),
       ...overwriteState,
-      ...(selectedTabId !== undefined && { selectedTabId }),
+      ...(selectedTabId !== undefined && !isDefaultTabSelected && { selectedTabId }),
       savedObjectId,
     };
     return fromStoredSearchEmbeddableByRef(stored);

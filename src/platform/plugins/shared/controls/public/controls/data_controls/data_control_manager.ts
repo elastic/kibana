@@ -30,31 +30,17 @@ import type { Filter } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
-import { type StateComparators } from '@kbn/presentation-publishing';
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
 import type { StateManager, WithAllKeys } from '@kbn/presentation-publishing/state_manager/types';
 
 import { dataService, dataViewsService } from '../../services/kibana_services';
 import { openDataControlEditor } from './open_data_control_editor';
 import type { DataControlApi, DataControlFieldFormatter } from './types';
-import { initializeLabelManager, defaultControlLabelComparators } from '../control_labels';
+import { initializeLabelManager } from '../control_labels';
 import { getESQLSingleColumnValues } from '../../../common/options_list';
+import { dataControlComparators } from '../../../common/state_comparison';
 import { getControlsTimezone } from '../utils';
 import { getDataViewIdFromESQLQuery } from '../utils/get_data_view_id_from_esql_query';
-
-export const defaultDataControlComparators: StateComparators<DataControlState> = {
-  ...defaultControlLabelComparators,
-  data_view_id: 'referenceEquality',
-  field_name: 'referenceEquality',
-  values_source: 'referenceEquality',
-  esql_query: 'referenceEquality',
-  use_global_filters: (a: boolean | undefined, b: boolean | undefined) =>
-    (a ?? DEFAULT_DATA_CONTROL_STATE.use_global_filters) ===
-    (b ?? DEFAULT_DATA_CONTROL_STATE.use_global_filters),
-  ignore_validations: (a: boolean | undefined, b: boolean | undefined) =>
-    (a ?? DEFAULT_DATA_CONTROL_STATE.ignore_validations) ===
-    (b ?? DEFAULT_DATA_CONTROL_STATE.ignore_validations),
-};
 
 export const defaultDataControlState: WithAllKeys<Omit<DataControlState, 'title'>> = {
   ...DEFAULT_DATA_CONTROL_STATE,
@@ -95,7 +81,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
   const dataControlStateManager = initializeStateManager<Omit<DataControlState, 'title'>>(
     omit(state, 'title'), // this is handled via the label manager
     defaultDataControlState,
-    defaultDataControlComparators
+    dataControlComparators
   );
 
   const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);

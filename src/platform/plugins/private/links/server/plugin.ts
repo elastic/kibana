@@ -20,6 +20,7 @@ import type { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-p
 
 import { LINKS_EMBEDDABLE_TYPE } from '../common';
 import { transforms } from '../common/embeddable/transforms/transforms';
+import { linksStateComparison } from '../common/embeddable/state_comparison';
 import { registerRoutes } from './api';
 import { linksEmbeddableSchema } from './api/schemas';
 import { linksSavedObjectDefinition } from './links_saved_object';
@@ -46,6 +47,7 @@ export class LinksServerPlugin implements Plugin<object, object> {
       title: 'Links',
       getTransforms: () => transforms,
       getSchema: () => linksEmbeddableSchema,
+      stateComparison: linksStateComparison,
     });
 
     if (plugins.usageCollection) {

@@ -18,6 +18,7 @@ import type {
   PersistableState,
 } from '@kbn/kibana-utils-plugin/common';
 import type { ZodObjectType } from '@kbn/zod';
+import type { SerializedStateComparison } from '@kbn/presentation-publishing';
 import type { EmbeddableFactoryRegistry, EmbeddableRegistryDefinition } from './types';
 import type { EmbeddableStateWithType } from './persistable_state/types';
 import {
@@ -69,6 +70,11 @@ export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType> &
         throwOnUnmappedPanel?: EmbeddableServerDefinition['throwOnUnmappedPanel'];
       })
     | undefined;
+
+  /**
+   * Returns the state comparison rules registered with registerEmbeddableServerDefinition, if any.
+   */
+  getStateComparison: (type: string) => SerializedStateComparison | undefined;
 };
 
 export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
@@ -111,6 +117,7 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
     return {
       getAllEmbeddableSchemas: this.transformsRegistry.getAllEmbeddableSchemas,
       getTransforms: this.transformsRegistry.getEmbeddableTransforms,
+      getStateComparison: this.transformsRegistry.getStateComparison,
       telemetry: getTelemetryFunction(this.getEmbeddableFactory),
       extract: getExtractFunction(this.getEmbeddableFactory),
       inject: getInjectFunction(this.getEmbeddableFactory),

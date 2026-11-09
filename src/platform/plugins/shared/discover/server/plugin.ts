@@ -33,6 +33,8 @@ import { registerAttachments } from './agent_builder/register_attachments';
 import { registerTools } from './agent_builder/register_tools';
 import { registerSkill } from './agent_builder/register_skill';
 import type { ConfigSchema } from './config';
+import { discoverSessionEmbeddableStateComparison } from '../common/embeddable/state_comparison';
+import { changePointGridStateComparison } from '../common/embeddable/change_point_grid_state_comparison';
 import { appLocatorGetLocationCommon } from '../common/app_locator_get_location';
 import {
   METRICS_EXPERIENCE_PRODUCT_FEATURE_ID,
@@ -99,11 +101,13 @@ export class DiscoverServerPlugin
       title: 'Change point charts',
       getTransforms: () => getChangePointGridTransforms(this.logger),
       getSchema: () => changePointGridEmbeddableSchema,
+      stateComparison: changePointGridStateComparison,
     });
     plugins.embeddable.registerEmbeddableServerDefinition(SEARCH_EMBEDDABLE_TYPE, {
       title: 'Discover session',
       getTransforms: (drilldownTransforms) => getSearchEmbeddableTransforms(drilldownTransforms),
       getSchema: (getDrilldownsSchema) => getDiscoverSessionEmbeddableSchema(getDrilldownsSchema),
+      stateComparison: discoverSessionEmbeddableStateComparison,
     });
 
     if (plugins.agentBuilder) {

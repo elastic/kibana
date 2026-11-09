@@ -16,11 +16,13 @@ import {
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
 import { EsqlControlType } from '@kbn/esql-types';
+import { esqlControlStateComparison } from '../../common/state_comparison';
 
 export const registerESQLControlTransforms = (embeddable: EmbeddableSetup) => {
   embeddable.registerEmbeddableServerDefinition(ESQL_CONTROL, {
     title: 'ES|QL variable control',
     getSchema: () => optionsListESQLControlSchema,
+    stateComparison: esqlControlStateComparison,
     getTransforms: () => ({
       transformOut: <
         StoredStateType extends Partial<

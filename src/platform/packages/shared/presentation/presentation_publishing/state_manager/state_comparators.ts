@@ -8,18 +8,21 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import type { StateComparators } from './types';
+import type { ComparatorFunction, StateComparators } from './types';
 import { logStateDiff, shouldLogStateDiff } from './state_diff_logger';
 
 const referenceEquality = <T>(a: T, b: T) => a === b;
 const deepEquality = <T>(a: T, b: T) => deepEqual(a, b);
 
-export const runComparator = <StateType extends object = object>(
-  comparator: StateComparators<StateType>[keyof StateType],
+export const runComparator = <
+  StateType extends object = object,
+  KeyType extends keyof StateType = keyof StateType
+>(
+  comparator: StateComparators<StateType>[KeyType],
   lastSavedState?: Partial<StateType>,
   latestState?: Partial<StateType>,
-  lastSavedValue?: StateType[keyof StateType],
-  latestValue?: StateType[keyof StateType]
+  lastSavedValue?: StateType[KeyType],
+  latestValue?: StateType[KeyType]
 ): boolean => {
   if (comparator === 'skip') return true;
   if (comparator === 'deepEquality') return deepEquality(lastSavedValue, latestValue);
@@ -29,6 +32,21 @@ export const runComparator = <StateType extends object = object>(
   }
   throw new Error(`Comparator ${comparator} is not a valid comparator.`);
 };
+
+const isByReference = (state?: object) =>
+  Boolean(state && 'ref_id' in state && state.ref_id !== undefined);
+
+/**
+ * Wraps the comparator of a by-value key, so it treats the key as equal when both states are by reference
+ * (identified by `ref_id`), since the value then lives in the library item.
+ */
+export const byValueComparator =
+  <StateType extends object, KeyType extends keyof StateType>(
+    comparator: StateComparators<StateType>[KeyType]
+  ): ComparatorFunction<StateType, KeyType> =>
+  (lastValue, currentValue, lastState, currentState) =>
+    (isByReference(lastState) && isByReference(currentState)) ||
+    runComparator(comparator, lastState, currentState, lastValue, currentValue);
 
 /**
  * Run all comparators, and return an object containing only the keys that are not equal, set to the value of the latest state

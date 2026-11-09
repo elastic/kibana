@@ -10,10 +10,8 @@ import type {
   PublishesWritableTitle,
   PublishesWritableDescription,
   SerializedTitles,
-  StateComparators,
   initializeTitleManager,
 } from '@kbn/presentation-publishing';
-import { titleComparators } from '@kbn/presentation-publishing';
 import { apiIsPresentationContainer, apiPublishesSettings } from '@kbn/presentation-publishing';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, map, merge, skip } from 'rxjs';
@@ -36,26 +34,6 @@ import type { StateManagementConfig } from './initialize_state_management';
 
 // Convenience type for the serialized props of this initializer
 type SerializedProps = SerializedTitles & LensPanelProps & LensOverrides & LensSharedProps;
-
-export const dashboardServicesComparators: StateComparators<SerializedProps> = {
-  ...titleComparators,
-  disableTriggers: 'referenceEquality',
-  overrides: 'referenceEquality',
-  id: 'skip',
-  palette: 'skip',
-  renderMode: 'skip',
-  syncColors: 'skip',
-  syncCursor: 'skip',
-  syncTooltips: 'skip',
-  executionContext: 'skip',
-  noPadding: 'skip',
-  viewMode: 'skip',
-  style: 'skip',
-  className: 'skip',
-  forceDSL: 'skip',
-  esqlVariables: 'skip',
-  isApproximate: 'skip',
-};
 
 export interface DashboardServicesConfig {
   api: PublishesWritableTitle &
