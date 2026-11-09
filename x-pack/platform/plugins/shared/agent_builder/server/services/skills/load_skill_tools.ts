@@ -12,14 +12,12 @@ import { getAgentFromRunContext } from '@kbn/agent-builder-server';
 import type {
   AgentBuilderAnalytics,
   AgentBuilderTracking,
+  DynamicToolDefinition,
   ToolProvider,
 } from '@kbn/agent-builder-server';
 import type { RunContext, SkillsService, ToolManager } from '@kbn/agent-builder-server/runner';
 import { ToolManagerToolType } from '@kbn/agent-builder-server/runner';
-import type {
-  DynamicToolDefinition,
-  ExecutableToolWithOrigin,
-} from '@kbn/agent-builder-server/runner/tool_manager';
+import type { ExecutableToolWithOrigin } from '@kbn/agent-builder-server/runner/tool_manager';
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import { pickTools } from '../execution/run_agent/utils/select_tools';
 import { renderDynamicToolDefinition } from '../execution/runner/utils/dynamic_tool_registry';

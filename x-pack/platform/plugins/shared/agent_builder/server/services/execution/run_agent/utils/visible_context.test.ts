@@ -26,6 +26,7 @@ import {
   ConversationRoundStatus,
   ConversationRoundStepType,
   TimelineEventType,
+  ToolOrigin,
   ToolResultType,
   createInjectedContextStep,
   createPreExecutionWorkflowStep,
@@ -54,7 +55,11 @@ import {
   createEmptyConversation,
   createRound,
 } from '../../../../test_utils/conversations';
-import { createAgentHandlerContextMock } from '../../../../test_utils/runner';
+import {
+  createAgentHandlerContextMock,
+  createToolManagerMock,
+} from '../../../../test_utils/runner';
+import { createMockedExecutableTool } from '../../../../test_utils/tools';
 import { createRootStateChunkEvent } from '../../../../test_utils/graph_stream';
 import { roundsToEvents, userMessageActor } from '../../../conversation/client/rounds_to_events';
 import { sourceEvents } from '../../../conversation/client/source_events';
@@ -322,6 +327,62 @@ describe('renderVisibleContext', () => {
     expect(rendered).not.toContain('FIRST_INPUT');
     expect(rendered).not.toContain('COVERED_TEXT');
     expect(rendered.indexOf('VISIBLE_TEXT')).toBeLessThan(rendered.indexOf('SECOND_INPUT'));
+  });
+
+  describe('dynamic tool definitions', () => {
+    const toolManagerListing = (ids: string[]) => {
+      const toolManager = createToolManagerMock();
+      toolManager.listDynamicTools.mockReturnValue(
+        ids.map((id) => ({
+          ...createMockedExecutableTool({ id, description: `${id} description` }),
+          origin: ToolOrigin.inline,
+        }))
+      );
+      return toolManager;
+    };
+
+    it('re-injects the registry definitions right after the summary, read at render time', async () => {
+      const toolManager = toolManagerListing(['dynamic-1']);
+      const messages = await renderVisibleContext(
+        {
+          conversation: conversation(twoRoundTimeline()),
+          run: run([], { cursor: { round_id: 'a', tool_call_id: 'a1' } }),
+          phase: 'research',
+        },
+        { ...deps(), toolManager }
+      );
+      const rendered = text(messages);
+
+      expect(rendered.indexOf('SUMMARY_TEXT')).toBeLessThan(rendered.indexOf('<dynamic_tools>'));
+      expect(rendered.indexOf('<dynamic_tools>')).toBeLessThan(rendered.indexOf('FIRST_INPUT'));
+      // `text` JSON-encodes the messages, so match on the content rather than the quoting
+      expect(rendered).toContain('tool_id');
+      expect(rendered).toContain('dynamic-1 description');
+    });
+
+    it('renders nothing without a summary, even with registered tools', async () => {
+      const toolManager = toolManagerListing(['dynamic-1']);
+      const messages = await renderVisibleContext(
+        { conversation: conversation(twoRoundTimeline()), run: run([]), phase: 'research' },
+        { ...deps(), toolManager }
+      );
+
+      expect(toolManager.listDynamicTools).not.toHaveBeenCalled();
+      expect(text(messages)).not.toContain('<dynamic_tools>');
+    });
+
+    it('renders nothing when the registry is empty', async () => {
+      const messages = await renderVisibleContext(
+        {
+          conversation: conversation(twoRoundTimeline()),
+          run: run([], { cursor: { round_id: 'a', tool_call_id: 'a1' } }),
+          phase: 'research',
+        },
+        { ...deps(), toolManager: toolManagerListing([]) }
+      );
+
+      expect(text(messages)).not.toContain('<dynamic_tools>');
+    });
   });
 });
 

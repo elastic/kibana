@@ -26,6 +26,7 @@ export const getStructuredAnswerPrompt = async (
     resultTransformer,
     resultStore,
     logger,
+    toolManager,
     imageResolver,
   } = params;
 
@@ -38,7 +39,7 @@ export const getStructuredAnswerPrompt = async (
       imageResolver,
       conversationTimestamp,
     },
-    { resultStore, resultTransformer, logger }
+    { resultStore, resultTransformer, logger, toolManager }
   );
 
   return [

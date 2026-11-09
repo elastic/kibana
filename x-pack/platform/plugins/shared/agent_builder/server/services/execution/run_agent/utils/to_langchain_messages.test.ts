@@ -1470,6 +1470,63 @@ describe('prepareMessages', () => {
       expect(noticeMessages).toHaveLength(0);
     });
   });
+
+  describe('dynamic tool definitions after compaction', () => {
+    const compactionSummary: CompactionSummary = {
+      summarized_round_count: 1,
+      created_at: '2024-01-01T00:00:00.000Z',
+      token_count: 100,
+      structured_data: {
+        discussion_summary: 'User loaded a skill.',
+        user_intent: 'Use the skill',
+        key_topics: [],
+        outcomes_and_decisions: [],
+        agent_actions: [],
+        entities: [],
+        unanswered_questions: [],
+        tool_calls_summary: [],
+      },
+    };
+    const definition = {
+      tool_id: 'platform.core.cases',
+      description: 'Search cases',
+      parameters: { type: 'object' as const },
+    };
+
+    it('re-injects the definitions right after the summary', async () => {
+      const result = await prepareMessages({
+        conversation: createConversation({ nextInput: makeRoundInput('follow-up') }),
+        compactionSummary,
+        dynamicToolDefinitions: [definition],
+      });
+
+      // compaction user + compaction assistant + definitions notice + nextInput user
+      expect(result).toHaveLength(4);
+      expect(isHumanMessage(result[2])).toBe(true);
+      expect(result[2].content).toContain('<dynamic_tools>');
+      expect(result[2].content).toContain(JSON.stringify(definition));
+    });
+
+    it('renders no notice when there are no definitions', async () => {
+      const result = await prepareMessages({
+        conversation: createConversation({ nextInput: makeRoundInput('follow-up') }),
+        compactionSummary,
+        dynamicToolDefinitions: [],
+      });
+
+      expect(result).toHaveLength(3);
+      expect(result.some((msg) => String(msg.content).includes('<dynamic_tools>'))).toBe(false);
+    });
+
+    it('renders no notice without a compaction summary', async () => {
+      const result = await prepareMessages({
+        conversation: createConversation({ nextInput: makeRoundInput('follow-up') }),
+        dynamicToolDefinitions: [definition],
+      });
+
+      expect(result.some((msg) => String(msg.content).includes('<dynamic_tools>'))).toBe(false);
+    });
+  });
 });
 
 describe('groupToolCallSteps', () => {
