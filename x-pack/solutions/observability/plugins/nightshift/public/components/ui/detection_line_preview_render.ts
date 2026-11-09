@@ -117,7 +117,11 @@ function pointAt(j: number): { v: number; c: number } {
   return { v: level + amp * n, c: a };
 }
 
-type LineColors = { teal: Rgb; blue: Rgb; pink: Rgb };
+interface LineColors {
+  teal: Rgb;
+  blue: Rgb;
+  pink: Rgb;
+}
 
 const colorFor = (c: number, colors: LineColors): Rgb =>
   c <= 0.5
@@ -125,14 +129,14 @@ const colorFor = (c: number, colors: LineColors): Rgb =>
     : mix(colors.blue, colors.pink, smooth(0.5, 1, c));
 
 /** `px` = artboard units per CSS pixel, so the chart line renders at a fixed 2px. */
-export type DetectionLinePalette = {
+export interface DetectionLinePalette {
   grid: string;
   dotFill: string;
   px: number;
   /** Corner radius in CSS px (from an EUI `border.radius.*` token). */
   cornerRadiusPx: number;
   line: LineColors;
-};
+}
 
 /**
  * Prototype banner media width — used to freeze dot radii to the on-screen size
@@ -197,7 +201,13 @@ export function renderDetectionLineAt(
   const off0 = t * SPEED;
   const j0 = Math.floor(off0) - 1;
 
-  type Pt = { X: number; Y: number; c: number; col: Rgb; s: number };
+  interface Pt {
+    X: number;
+    Y: number;
+    c: number;
+    col: Rgb;
+    s: number;
+  }
   const pts: Pt[] = [];
   for (let j = j0; j <= j0 + N + 3; j++) {
     const p = pointAt(j);

@@ -33,9 +33,9 @@ const themeColorToRgb = (color: string, fallback: Rgb): Rgb => {
   return fallback;
 };
 
-type DetectionLinePreviewProps = {
+interface DetectionLinePreviewProps {
   'data-test-subj'?: string;
-};
+}
 
 /**
  * Detection setup banner art — a line chart whose line, area and background
