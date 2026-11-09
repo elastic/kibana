@@ -30,9 +30,15 @@ import { Footer } from '../../../flyout_v2/entity/service/main/footer';
 import { useObservedService } from '../../../flyout_v2/entity/service/main/hooks/use_observed_service';
 import { SERVICE_PANEL_RISK_SCORE_QUERY_ID } from '../../../flyout_v2/entity/service/main/constants';
 import { EntityType } from '../../../../common/entity_analytics/types';
-import type { IdentityFields } from '../../document_details/shared/utils';
+import {
+  mergeLegacyIdentityWhenStoreEntityMissing,
+  type IdentityFields,
+} from '../../document_details/shared/utils';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 import { useNavigateToServiceDetails } from './hooks/use_navigate_to_service_details';
+import { useAlertTimeRange } from '../../../entity_analytics/hooks/use_alert_time_range';
+import { useNonClosedAlerts } from '../../../cloud_security_posture/hooks/use_non_closed_alerts';
+import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
 import { useEntityFromStore } from '../shared/hooks/use_entity_from_store';
 import {
   buildExecutionContext,
@@ -97,13 +103,25 @@ export const ServicePanel = memo(function ServicePanel({
 
   const euidApi = useEntityStoreEuidApi();
   const documentEntityIdentifiers = useMemo<IdentityFields>(() => {
-    return (
+    const legacyFields: IdentityFields =
+      serviceName != null && serviceName !== '' ? { 'service.name': serviceName } : {};
+    const fromStore =
       euidApi?.euid?.getEntityIdentifiersFromDocument(
         euidApi.getBuiltInEntityDefinition('service'),
         entityFromStoreResult.entityRecord ?? {}
-      ) ?? {}
-    );
-  }, [entityFromStoreResult.entityRecord, euidApi]);
+      ) ?? {};
+    return mergeLegacyIdentityWhenStoreEntityMissing(fromStore, legacyFields);
+  }, [entityFromStoreResult.entityRecord, euidApi, serviceName]);
+
+  const { from: alertFrom, to: alertTo } = useAlertTimeRange(scopeId);
+  const { hasNonClosedAlerts } = useNonClosedAlerts({
+    identityFields: documentEntityIdentifiers,
+    entityType: EntityType.service,
+    entityRecord: entityFromStoreResult.entityRecord,
+    to: alertTo,
+    from: alertFrom,
+    queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}SERVICE_NAME_RIGHT`,
+  });
 
   const serviceNameFilterQuery = useMemo(
     () => (serviceName ? buildEntityNameFilter(EntityType.service, [serviceName]) : undefined),
@@ -168,6 +186,7 @@ export const ServicePanel = memo(function ServicePanel({
     isRiskScoreExist,
     identityFields: documentEntityIdentifiers,
     isPreviewMode,
+    hasNonClosedAlerts,
     entityStoreEntityId,
   });
 

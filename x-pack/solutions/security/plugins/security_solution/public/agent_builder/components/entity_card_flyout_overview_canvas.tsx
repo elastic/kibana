@@ -72,7 +72,6 @@ import { Header as ServicePanelHeader } from '../../flyout_v2/entity/service/mai
 import { useObservedService } from '../../flyout_v2/entity/service/main/hooks/use_observed_service';
 import { ServiceDetailsPanelKey } from '../../flyout/entity_details/service_details_left';
 import { SERVICE_PANEL_RISK_SCORE_QUERY_ID } from '../../flyout_v2/entity/service/main/constants';
-import type { ESQuery } from '../../../common/typed_json';
 import { FlyoutLoading } from '../../flyout_v2/shared/components/flyout_loading';
 import type {
   EntityAttachmentIdentifier,
@@ -422,7 +421,6 @@ const HostEntityFlyoutOverviewCanvas: React.FC<{
           hostName={hostName}
           lastSeen={observedHost.lastSeen}
           entityId={panelDisplayEntityId}
-          identityFields={documentEntityIdentifiers}
           isEntityInStore={!!observedHost.entityRecord}
           riskLevel={
             observedHost.entityRecord
@@ -786,6 +784,7 @@ const UserEntityFlyoutOverviewCanvas: React.FC<{
 
 const useOpenServiceInvestigationInEntityAnalytics = ({
   serviceName,
+  identityFields,
   entityIdForPanels,
   scopeId,
   safeContextID,
@@ -794,7 +793,8 @@ const useOpenServiceInvestigationInEntityAnalytics = ({
   entityStoreEntityId,
 }: {
   serviceName: string;
-  entityIdForPanels: string;
+  identityFields: IdentityFields;
+  entityIdForPanels?: string;
   scopeId: string;
   safeContextID: string;
   isRiskScoreExist: boolean;
@@ -814,6 +814,7 @@ const useOpenServiceInvestigationInEntityAnalytics = ({
         left: {
           id: ServiceDetailsPanelKey,
           params: {
+            identityFields,
             entityId: entityIdForPanels,
             serviceName,
             scopeId,
@@ -837,6 +838,7 @@ const useOpenServiceInvestigationInEntityAnalytics = ({
     [
       entityIdForPanels,
       hasNonClosedAlerts,
+      identityFields,
       entityStoreEntityId,
       isRiskScoreExist,
       navigateWithFlyout,
@@ -873,7 +875,7 @@ const ServiceEntityFlyoutOverviewCanvas: React.FC<{
     () => (!entityId && serviceName ? { 'service.name': serviceName } : undefined),
     [entityId, serviceName]
   );
-  const entityFromStoreResult = useEntityFromStore({
+  const entityFromStoreResult = useEntityFromStore<ServiceItem>({
     entityId,
     identityFields: serviceStoreIdentityFields,
     entityType: 'service',
@@ -1000,6 +1002,7 @@ const ServiceEntityFlyoutOverviewCanvas: React.FC<{
 
   const openDetailsPanel = useOpenServiceInvestigationInEntityAnalytics({
     serviceName,
+    identityFields: documentEntityIdentifiers,
     entityIdForPanels: panelDisplayEntityId,
     scopeId,
     safeContextID,
@@ -1029,7 +1032,6 @@ const ServiceEntityFlyoutOverviewCanvas: React.FC<{
           serviceName={serviceName}
           lastSeen={observedService.lastSeen}
           entityId={panelDisplayEntityId}
-          identityFields={documentEntityIdentifiers}
           isEntityInStore={!!observedService.entityRecord}
           riskLevel={
             observedService.entityRecord
