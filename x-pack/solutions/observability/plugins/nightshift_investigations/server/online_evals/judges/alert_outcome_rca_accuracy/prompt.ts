@@ -7,16 +7,11 @@
 
 import { createPrompt } from '@kbn/inference-common';
 import { z, lazySchema } from '@kbn/zod/v4';
+import { MAX_JUDGE_TEXT_LENGTH } from '../alert_outcome_shared';
 import { gradeSchema } from '../run_judge';
 import systemPromptText from './system_prompt.text';
 
 export const ALERT_OUTCOME_RCA_ACCURACY_TOOL_NAME = 'score_alert_outcome_rca';
-
-/** Generous bound on judge text; explanations are capped separately before persisting. */
-const MAX_JUDGE_TEXT_LENGTH = 100_000;
-
-/** The judge cuts each input to this length, below the prompt bound so the truncation marker fits. */
-export const MAX_JUDGE_INPUT_CHARS = 90_000;
 
 export const alertOutcomeRcaAccuracyOutputSchema = lazySchema(() =>
   z.object({
