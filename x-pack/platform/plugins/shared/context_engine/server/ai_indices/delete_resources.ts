@@ -11,15 +11,13 @@ import type {
   KibanaRequest,
   Logger,
 } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { isResponseError } from '@kbn/es-errors';
 import { formatErrorMessage } from '../utils/format_es_error';
 import { MAX_AI_INDICES } from '../../common/constants';
 import { isIndexPattern } from '../../common/ai_index_dest';
 import type { AiIndexAutomation, AiIndexDest } from '../../common/http_api/ai_indices';
 import type { DeleteWorkflowsApi } from '../types';
-import { createAiIndexIdentityDslFilter } from '../utils/ai_index_identity_filter';
-import { aiIndicesIndexName, type StoredAiIndexDocument } from './storage';
+import { listAiIndexRecords } from './registry_api';
 
 /**
  * Other registry entries pointing at the same backing store, labelled `space/id` when they live in
@@ -30,24 +28,12 @@ const findOtherUsersOfDest = async (
   destValue: string,
   exclude: { aiIndexId: string; spaceId: string }
 ): Promise<string[]> => {
-  const response = await esClient.search<StoredAiIndexDocument>({
-    index: aiIndicesIndexName,
-    size: MAX_AI_INDICES,
-    track_total_hits: false,
-    query: {
-      bool: {
-        filter: [{ term: { 'dest.value': destValue } }],
-        must_not: [createAiIndexIdentityDslFilter(exclude.aiIndexId, exclude.spaceId)],
-      },
-    },
-  });
-  return response.hits.hits.flatMap((hit) => {
-    const id = hit._source?.id ?? hit._id;
-    if (id === undefined) {
+  // No space: a backing store may be shared by entries in other spaces.
+  const records = await listAiIndexRecords(esClient, { dest: destValue, size: MAX_AI_INDICES });
+  return records.flatMap(({ id, space }) => {
+    if (id === exclude.aiIndexId && space === exclude.spaceId) {
       return [];
     }
-    // Pre-upgrade documents carry no `space` and belong to the default space.
-    const space = hit._source?.space ?? DEFAULT_SPACE_ID;
     return [space === exclude.spaceId ? id : `${space}/${id}`];
   });
 };

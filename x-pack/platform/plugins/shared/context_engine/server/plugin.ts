@@ -32,6 +32,7 @@ import type {
 import type { KiVerifierWorkflowRunner } from './ki_verification';
 import { registerFeatures } from './features';
 import { registerAiIndexRoutes } from './routes/ai_indices';
+import { registerSessionMemoryRoutes } from './routes/session_memory';
 import { registerSignalRoutes } from './routes/signals';
 import type {
   FeedbackAnalysisScheduleService,
@@ -43,6 +44,8 @@ import { AiIndexService } from './ai_indices/service';
 import { AiIndexRegistry } from './ai_indices/registry';
 import { ImprovementsService } from './improvements/service';
 import { installImprovementsIndexTemplate } from './improvements/storage';
+import { SessionEventsService } from './session_memory/session_events';
+import { SessionMemoryService } from './session_memory/session_memory';
 import { SignalsService } from './signals/service';
 import type { SignalsServiceApi } from './signals/service';
 import { registerSignalGeneratorTaskDefinition, scheduleSignalGenerator } from './tasks';
@@ -321,6 +324,17 @@ export class ContextEnginePlugin
       getFeedbackLoopEnabled: () => this.isFeedbackLoopEnabled(),
     });
 
+    // Session memory and events routes (proxies to ES `_context_engine`, run as the internal user).
+    registerSessionMemoryRoutes({
+      router,
+      logger: this.logger.get('routes'),
+      getSpaces: async () => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return startDeps.spaces;
+      },
+      isMemoryEnabled,
+    });
+
     return {
       registerAiIndex: (id, properties) => this.aiIndexRegistry.register(id, properties),
     };
@@ -388,6 +402,9 @@ export class ContextEnginePlugin
     });
     const signalsService = this.signalsService;
 
+    const sessionMemoryService = new SessionMemoryService(this.esClient);
+    const sessionEventsService = new SessionEventsService(this.esClient);
+
     const improvementsLogger = this.logger.get('improvements');
     this.createImprovementsService = (esClient: ElasticsearchClient, spaceId: string) =>
       new ImprovementsService({ esClient, logger: improvementsLogger, space: spaceId });
@@ -453,6 +470,17 @@ export class ContextEnginePlugin
       getAiIndexDataReadService: (params) => createAiIndexDataReadService(params),
       getSignalsService: () => signalsService,
       getImprovementsService: (esClient, spaceId) => createImprovementsService(esClient, spaceId),
+      getSessionMemoryService: () => sessionMemoryService,
+      getSessionEventsService: () => sessionEventsService,
+      isMemoryEnabled: async (request) => {
+        const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
+        const scopedGlobalUiSettings =
+          coreStart.uiSettings.globalAsScopedToClient(savedObjectsClient);
+        return (
+          (await scopedGlobalUiSettings.get<boolean>(CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID)) ??
+          false
+        );
+      },
     };
   }
 

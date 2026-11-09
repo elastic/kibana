@@ -22,6 +22,7 @@ import { useAiIndexListMode } from './hooks/use_ai_index_list_mode';
 import { useContextEngineBreadcrumbs } from './hooks/use_context_engine_breadcrumbs';
 import { useListAiIndices } from './hooks/use_list_ai_indices';
 import { useKibana } from './hooks/use_kibana';
+import { useLandingHeaderTabs } from './hooks/use_landing_header_tabs';
 import { ContextEngineLandingHeader } from './layout/context_engine_page_header';
 import {
   ContextEnginePageSection,
@@ -62,6 +63,7 @@ const ContextLandingPageContent = ({
   const { services } = useKibana();
   const contextEngineLinks = services.docLinks.links.contextEngine;
   const { mode, error } = useAiIndexListMode(hasCustomAiIndices, isLoading);
+  const headerTabs = useLandingHeaderTabs('ai_indices');
 
   useContextEngineBreadcrumbs();
 
@@ -102,6 +104,7 @@ const ContextLandingPageContent = ({
         description={headerDescription}
         menu={headerMenu}
         docLink={contextEngineLinks.overview}
+        tabs={headerTabs}
       />
       <ContextEnginePageSection>
         {error ? (

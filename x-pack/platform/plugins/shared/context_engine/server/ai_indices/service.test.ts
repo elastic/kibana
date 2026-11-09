@@ -8,8 +8,7 @@
 import { errors } from '@elastic/elasticsearch';
 import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { MAX_AI_INDEX_AUTOMATIONS } from '../../common/constants';
-import { createSpaceDslFilter } from '../utils/space_filter';
+import { ES_AI_INDEX_PATH, MAX_AI_INDEX_AUTOMATIONS } from '../../common/constants';
 import { AiIndexService } from './service';
 import {
   InvalidAiIndexDestError,
@@ -19,69 +18,30 @@ import {
   AiIndexIdConflictError,
   AiIndexAlreadyExistsError,
 } from './errors';
-import type { AiIndexDocument, AiIndexStorageClient, StoredAiIndexDocument } from './storage';
-import { buildManagedAiIndexDocId, createAiIndexStorageClient } from './storage';
+import type { AiIndexRecord, AiIndexRecordWrite } from './registry_api';
 
-jest.mock('./storage', () => ({
-  ...jest.requireActual('./storage'),
-  createAiIndexStorageClient: jest.fn(),
-}));
-
-const createAiIndexStorageClientMock = createAiIndexStorageClient as jest.Mock;
-
-const createNotFoundError = () =>
+const createResponseError = (name: string, statusCode: number) =>
   new errors.ResponseError({
     meta: {
       aborted: false,
       attempts: 1,
       connection: null,
       context: null,
-      name: 'resource_not_found_exception',
+      name,
       request: {} as unknown as DiagnosticResult['meta']['request'],
     },
     warnings: [],
-    body: 'resource_not_found_exception',
-    statusCode: 404,
+    body: name,
+    statusCode,
   });
 
-const createConflictError = () =>
-  new errors.ResponseError({
-    meta: {
-      aborted: false,
-      attempts: 1,
-      connection: null,
-      context: null,
-      name: 'version_conflict_engine_exception',
-      request: {} as unknown as DiagnosticResult['meta']['request'],
-    },
-    warnings: [],
-    body: 'version_conflict_engine_exception',
-    statusCode: 409,
-  });
+const createNotFoundError = () => createResponseError('resource_not_found_exception', 404);
+const createConflictError = () => createResponseError('version_conflict_engine_exception', 409);
 
 const DEFAULT_SPACE = 'default';
-const AI_INDICES_INDEX = '.contextengine-ai-indices';
+const NOW = '2026-07-09T08:00:00.000Z';
 
-interface SearchHitInput {
-  _id: string;
-  _source: StoredAiIndexDocument;
-  _seq_no?: number;
-  _primary_term?: number;
-}
-
-const searchResponse = (hits: SearchHitInput[] = []) => ({
-  took: 1,
-  timed_out: false,
-  _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
-  hits: {
-    hits: hits.map((hit) => ({
-      _index: AI_INDICES_INDEX,
-      ...hit,
-    })),
-  },
-});
-
-const aiIndexDocument: AiIndexDocument = {
+const aiIndexRecord: AiIndexRecord = {
   id: 'customer_support',
   space: DEFAULT_SPACE,
   description: 'KIs representing previously answered, commonly asked questions',
@@ -94,49 +54,105 @@ const aiIndexDocument: AiIndexDocument = {
   date_modified: '2026-07-08T12:10:30.000Z',
 };
 
-const toHttpItem = (document: AiIndexDocument) => {
-  const { space: _space, ...item } = document;
+const toHttpItem = (record: AiIndexRecord) => {
+  const { space: _space, ...item } = record;
   return {
     ...item,
+    managed: record.managed ?? false,
     memory_enabled:
-      document.memory_enabled !== undefined ? document.memory_enabled : document.managed !== true,
+      record.memory_enabled !== undefined ? record.memory_enabled : record.managed !== true,
+    traces: record.traces ?? [],
   };
 };
 
-const storedHit = (
-  document: StoredAiIndexDocument,
-  {
-    id = document.id ?? 'missing',
-    seqNo = 7,
-    primaryTerm = 2,
-  }: { id?: string; seqNo?: number; primaryTerm?: number } = {}
-): SearchHitInput => ({
-  _id: id,
-  _source: document,
-  _seq_no: seqNo,
-  _primary_term: primaryTerm,
-});
+interface RequestParams {
+  method: string;
+  path: string;
+  querystring?: Record<string, unknown>;
+  body?: AiIndexRecordWrite;
+}
 
 describe('AiIndexService', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
-  let storageClient: jest.Mocked<Pick<AiIndexStorageClient, 'index' | 'search' | 'delete'>>;
   let service: AiIndexService;
+  /** In-memory stand-in for the ES registry, keyed `<space>:<id>` like the real one. */
+  let registry: Map<string, AiIndexRecord>;
+  /** When set, the next write rejects with it, standing in for a concurrent writer. */
+  let nextWriteError: Error | undefined;
 
-  const mockSearchHits = (...hits: SearchHitInput[]) => {
-    storageClient.search.mockResolvedValue(
-      searchResponse(hits) as Awaited<ReturnType<AiIndexStorageClient['search']>>
-    );
+  const key = (space: string, id: string) => `${space}:${id}`;
+  const seed = (...records: AiIndexRecord[]) =>
+    records.forEach((record) => registry.set(key(record.space, record.id), record));
+  const stored = (id: string, space = DEFAULT_SPACE) => registry.get(key(space, id));
+
+  const requests = () => esClient.transport.request.mock.calls.map(([params]) => params);
+  const writes = () => requests().filter((params) => params.method === 'PUT');
+  const lastWrite = () => {
+    const [params] = writes().slice(-1) as RequestParams[];
+    return params;
   };
 
-  const mockSearchHitsOnce = (...hits: SearchHitInput[]) => {
-    storageClient.search.mockResolvedValueOnce(
-      searchResponse(hits) as Awaited<ReturnType<AiIndexStorageClient['search']>>
-    );
+  const fakeRegistry = async (params: RequestParams) => {
+    const { method, path, querystring = {}, body } = params;
+    const id = path.startsWith(`${ES_AI_INDEX_PATH}/`)
+      ? decodeURIComponent(path.slice(ES_AI_INDEX_PATH.length + 1))
+      : undefined;
+    if (method === 'PUT' && id !== undefined && body !== undefined) {
+      if (nextWriteError) {
+        const error = nextWriteError;
+        nextWriteError = undefined;
+        throw error;
+      }
+      const existing = registry.get(key(body.space, id));
+      if (existing && querystring.create) {
+        throw createConflictError();
+      }
+      const record: AiIndexRecord = {
+        ...body,
+        id,
+        date_created: existing?.date_created ?? NOW,
+        date_modified: NOW,
+      };
+      registry.set(key(body.space, id), record);
+      return { result: existing ? 'updated' : 'created', ai_index: record };
+    }
+    if (method === 'GET' && id !== undefined) {
+      const record = registry.get(key(String(querystring.space), id));
+      if (!record) {
+        throw createNotFoundError();
+      }
+      return record;
+    }
+    if (method === 'GET') {
+      const results = [...registry.values()]
+        .filter(
+          (record) =>
+            (querystring.space === undefined || record.space === querystring.space) &&
+            (querystring.dest === undefined || record.dest.value === querystring.dest)
+        )
+        .sort((a, b) => a.id.localeCompare(b.id))
+        .slice(0, Number(querystring.size));
+      return { count: results.length, results };
+    }
+    if (method === 'DELETE' && id !== undefined) {
+      if (!registry.delete(key(String(querystring.space), id))) {
+        throw createNotFoundError();
+      }
+      return { acknowledged: true };
+    }
+    throw new Error(`Unexpected request ${method} ${path}`);
   };
+
+  const createService = (
+    managedBootstrap?: ConstructorParameters<typeof AiIndexService>[0]['managedBootstrap']
+  ) => new AiIndexService({ esClient, logger: loggingSystemMock.createLogger(), managedBootstrap });
 
   beforeEach(() => {
     jest.clearAllMocks();
+    registry = new Map();
+    nextWriteError = undefined;
     esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.transport.request.mockImplementation(fakeRegistry as never);
     esClient.indices.resolveIndex.mockResponse({
       indices: [],
       aliases: [],
@@ -148,19 +164,7 @@ describe('AiIndexService', () => {
         },
       ],
     });
-
-    storageClient = {
-      index: jest.fn(),
-      search: jest.fn(),
-      delete: jest.fn(),
-    };
-    createAiIndexStorageClientMock.mockReturnValue(storageClient);
-    mockSearchHits();
-
-    service = new AiIndexService({
-      esClient,
-      logger: loggingSystemMock.createLogger(),
-    });
+    service = createService();
   });
 
   const properties = {
@@ -172,61 +176,59 @@ describe('AiIndexService', () => {
   };
 
   describe('create', () => {
-    it('indexes a user-created AI index without an id so Elasticsearch assigns _id', async () => {
+    it('creates the record through the API with create=true and no dates', async () => {
       await expect(
         service.create('customer_support', DEFAULT_SPACE, properties)
       ).resolves.toBeUndefined();
 
-      expect(storageClient.search).toHaveBeenCalled();
-      expect(storageClient.index).toHaveBeenCalledWith({
-        refresh: 'wait_for',
-        document: expect.objectContaining({
-          ...properties,
-          id: 'customer_support',
-          space: DEFAULT_SPACE,
-          date_created: expect.any(String),
-          date_modified: expect.any(String),
-        }),
+      expect(lastWrite()).toEqual({
+        method: 'PUT',
+        path: `${ES_AI_INDEX_PATH}/customer_support`,
+        querystring: { create: true },
+        body: { ...properties, space: DEFAULT_SPACE, managed: false, memory_enabled: true },
       });
-      expect(storageClient.index.mock.calls[0][0]).not.toHaveProperty('id');
-      expect(storageClient.index.mock.calls[0][0]).not.toHaveProperty('op_type');
+      expect(lastWrite().body).not.toHaveProperty('date_created');
+      expect(lastWrite().body).not.toHaveProperty('date_modified');
+      expect(stored('customer_support')).toEqual(
+        expect.objectContaining({ id: 'customer_support', space: DEFAULT_SPACE })
+      );
     });
 
     it('defaults memory_enabled to true', async () => {
       await service.create('customer_support', DEFAULT_SPACE, properties);
 
-      expect(storageClient.index).toHaveBeenCalledWith(
-        expect.objectContaining({
-          document: expect.objectContaining({ memory_enabled: true }),
-        })
-      );
+      expect(lastWrite().body).toEqual(expect.objectContaining({ memory_enabled: true }));
     });
 
     it('throws AiIndexAlreadyExistsError when the id already exists', async () => {
-      mockSearchHits(storedHit(aiIndexDocument));
+      seed(aiIndexRecord);
 
       await expect(
         service.create('customer_support', DEFAULT_SPACE, properties)
       ).rejects.toBeInstanceOf(AiIndexAlreadyExistsError);
-      expect(storageClient.index).not.toHaveBeenCalled();
+      expect(writes()).toHaveLength(0);
+    });
+
+    it('throws AiIndexConflictError when a concurrent create wins (409)', async () => {
+      nextWriteError = createConflictError();
+
+      await expect(
+        service.create('customer_support', DEFAULT_SPACE, properties)
+      ).rejects.toBeInstanceOf(AiIndexConflictError);
     });
 
     it('refuses to create a reserved managed id', async () => {
-      service = new AiIndexService({
-        esClient,
-        logger: loggingSystemMock.createLogger(),
-        managedBootstrap: {
-          isManaged: (id) => id === 'elastic',
-          getManagedIds: () => ['elastic'],
-          getRegistration: () => undefined,
-          ensure: jest.fn(),
-        },
+      service = createService({
+        isManaged: (id) => id === 'elastic',
+        getManagedIds: () => ['elastic'],
+        getRegistration: () => undefined,
+        ensure: jest.fn(),
       });
 
       await expect(service.create('elastic', DEFAULT_SPACE, properties)).rejects.toBeInstanceOf(
         AiIndexManagedError
       );
-      expect(storageClient.index).not.toHaveBeenCalled();
+      expect(requests()).toHaveLength(0);
     });
 
     it('rejects an invalid dest before writing', async () => {
@@ -236,104 +238,84 @@ describe('AiIndexService', () => {
           dest: { type: 'data_stream', value: 'customer_support' },
         })
       ).rejects.toBeInstanceOf(InvalidAiIndexDestError);
-      expect(storageClient.index).not.toHaveBeenCalled();
+      expect(requests()).toHaveLength(0);
     });
 
     it('rejects a dot-prefixed index dest on create', async () => {
       await expect(
-        service.create('elastic', DEFAULT_SPACE, {
+        service.create('customer_support', DEFAULT_SPACE, {
           ...properties,
           dest: { type: 'index', value: '.ai-index-idx-elastic-index' },
         })
       ).rejects.toBeInstanceOf(InvalidAiIndexDestError);
-      expect(esClient.indices.resolveIndex).not.toHaveBeenCalled();
-      expect(storageClient.index).not.toHaveBeenCalled();
+      expect(requests()).toHaveLength(0);
+    });
+
+    it('persists feedback_analysis and traces sent on create', async () => {
+      const traces = [{ type: 'index' as const, value: 'logs-*' }];
+      await service.create('customer_support', DEFAULT_SPACE, {
+        ...properties,
+        traces,
+        feedback_analysis: { enabled: false, agent_id: 'my-analysis-agent' },
+      });
+
+      expect(lastWrite().body).toEqual(
+        expect.objectContaining({
+          traces,
+          feedback_analysis: { enabled: false, agent_id: 'my-analysis-agent' },
+        })
+      );
     });
   });
 
   describe('put', () => {
-    it('creates an AI index without an id when none exists', async () => {
+    it('creates an AI index when none exists', async () => {
       await expect(service.put('customer_support', DEFAULT_SPACE, properties)).resolves.toBe(
         'created'
       );
 
-      expect(storageClient.index).toHaveBeenCalledWith({
-        refresh: 'wait_for',
-        document: expect.objectContaining({
-          ...properties,
-          id: 'customer_support',
-          space: DEFAULT_SPACE,
-          managed: false,
-          date_created: expect.any(String),
-          date_modified: expect.any(String),
-        }),
+      expect(lastWrite()).toEqual({
+        method: 'PUT',
+        path: `${ES_AI_INDEX_PATH}/customer_support`,
+        body: { ...properties, space: DEFAULT_SPACE, managed: false, memory_enabled: true },
       });
-      expect(storageClient.index.mock.calls[0][0]).not.toHaveProperty('id');
-      expect(storageClient.index.mock.calls[0][0]).not.toHaveProperty('op_type');
     });
 
-    it('updates an existing AI index, preserving date_created and asserting seq_no', async () => {
-      mockSearchHits(storedHit(aiIndexDocument, { id: 'auto-gen-1', seqNo: 7, primaryTerm: 2 }));
+    it('replaces an existing AI index, leaving date_created to the server', async () => {
+      seed(aiIndexRecord);
 
       await expect(service.put('customer_support', DEFAULT_SPACE, properties)).resolves.toBe(
         'updated'
       );
 
-      expect(storageClient.search).toHaveBeenCalledWith(
-        expect.objectContaining({
-          size: 1,
-          track_total_hits: false,
-          seq_no_primary_term: true,
-        })
-      );
-
-      const [indexArgs] = storageClient.index.mock.calls[0];
-      expect(indexArgs.id).toBe('auto-gen-1');
-      expect(indexArgs.if_seq_no).toBe(7);
-      expect(indexArgs.if_primary_term).toBe(2);
-      expect(indexArgs.document?.date_created).toBe(aiIndexDocument.date_created);
-      expect(indexArgs.document?.date_modified).not.toBe(aiIndexDocument.date_modified);
+      expect(lastWrite().querystring).toBeUndefined();
+      expect(lastWrite().body).not.toHaveProperty('date_created');
+      expect(stored('customer_support')?.date_created).toBe(aiIndexRecord.date_created);
+      expect(stored('customer_support')?.date_modified).toBe(NOW);
     });
 
-    it('persists feedback_analysis when updating an existing AI index', async () => {
-      mockSearchHits(storedHit(aiIndexDocument));
+    it('persists feedback_analysis, memory_enabled, and traces when replacing', async () => {
+      seed({ ...aiIndexRecord, traces: [{ type: 'index', value: 'old-*' }] });
+      const traces = [{ type: 'elastic_agent' as const, value: 'my-agent' }];
 
-      await expect(
-        service.put('customer_support', DEFAULT_SPACE, {
-          ...properties,
+      await service.put('customer_support', DEFAULT_SPACE, {
+        ...properties,
+        traces,
+        memory_enabled: false,
+        feedback_analysis: { enabled: true, agent_id: 'my-analysis-agent' },
+      });
+
+      expect(lastWrite().body).toEqual(
+        expect.objectContaining({
+          traces,
+          memory_enabled: false,
           feedback_analysis: { enabled: true, agent_id: 'my-analysis-agent' },
         })
-      ).resolves.toBe('updated');
-
-      const [indexArgs] = storageClient.index.mock.calls[0];
-      expect(indexArgs.document?.feedback_analysis).toEqual({
-        enabled: true,
-        agent_id: 'my-analysis-agent',
-      });
+      );
     });
 
-    it('persists memory_enabled when updating an existing AI index', async () => {
-      mockSearchHits(storedHit(aiIndexDocument, { seqNo: 7, primaryTerm: 2 }));
-
-      await expect(
-        service.put('customer_support', DEFAULT_SPACE, { ...properties, memory_enabled: true })
-      ).resolves.toBe('updated');
-
-      const [indexArgs] = storageClient.index.mock.calls[0];
-      expect(indexArgs.document?.memory_enabled).toBe(true);
-    });
-
-    it('throws AiIndexConflictError when a concurrent create wins (409)', async () => {
-      storageClient.index.mockRejectedValue(createConflictError());
-
-      await expect(
-        service.put('customer_support', DEFAULT_SPACE, properties)
-      ).rejects.toBeInstanceOf(AiIndexConflictError);
-    });
-
-    it('throws AiIndexConflictError when a concurrent update wins (409)', async () => {
-      mockSearchHits(storedHit(aiIndexDocument));
-      storageClient.index.mockRejectedValue(createConflictError());
+    it('throws AiIndexConflictError when a concurrent write wins (409)', async () => {
+      nextWriteError = createConflictError();
 
       await expect(
         service.put('customer_support', DEFAULT_SPACE, properties)
@@ -341,32 +323,26 @@ describe('AiIndexService', () => {
     });
 
     it('throws AiIndexManagedError when the entry is managed', async () => {
-      mockSearchHits(
-        storedHit({ ...aiIndexDocument, managed: true }, { seqNo: 1, primaryTerm: 1 })
-      );
+      seed({ ...aiIndexRecord, managed: true });
 
       await expect(
         service.put('customer_support', DEFAULT_SPACE, properties)
       ).rejects.toBeInstanceOf(AiIndexManagedError);
-      expect(storageClient.index).not.toHaveBeenCalled();
+      expect(writes()).toHaveLength(0);
     });
 
     it('refuses to put a reserved managed id that does not exist yet', async () => {
-      service = new AiIndexService({
-        esClient,
-        logger: loggingSystemMock.createLogger(),
-        managedBootstrap: {
-          isManaged: (id) => id === 'elastic',
-          getManagedIds: () => ['elastic'],
-          getRegistration: () => undefined,
-          ensure: jest.fn(),
-        },
+      service = createService({
+        isManaged: (id) => id === 'elastic',
+        getManagedIds: () => ['elastic'],
+        getRegistration: () => undefined,
+        ensure: jest.fn(),
       });
 
       await expect(service.put('elastic', DEFAULT_SPACE, properties)).rejects.toBeInstanceOf(
         AiIndexManagedError
       );
-      expect(storageClient.index).not.toHaveBeenCalled();
+      expect(writes()).toHaveLength(0);
     });
 
     it('allows a data_stream dest with no matches yet (lazy creation)', async () => {
@@ -375,7 +351,7 @@ describe('AiIndexService', () => {
       await expect(service.put('customer_support', DEFAULT_SPACE, properties)).resolves.toBe(
         'created'
       );
-      expect(storageClient.index).toHaveBeenCalled();
+      expect(writes()).toHaveLength(1);
     });
 
     it('allows a data_stream dest when resolveIndex returns 404', async () => {
@@ -384,7 +360,7 @@ describe('AiIndexService', () => {
       await expect(service.put('customer_support', DEFAULT_SPACE, properties)).resolves.toBe(
         'created'
       );
-      expect(storageClient.index).toHaveBeenCalled();
+      expect(writes()).toHaveLength(1);
     });
 
     it('rejects a data_stream dest when an alias exists at that name', async () => {
@@ -397,7 +373,7 @@ describe('AiIndexService', () => {
       await expect(service.put('customer_support', DEFAULT_SPACE, properties)).rejects.toThrow(
         /'ai-index-ds-customer_support' is an alias/
       );
-      expect(storageClient.index).not.toHaveBeenCalled();
+      expect(writes()).toHaveLength(0);
     });
 
     it('rejects a data_stream dest when a plain index exists at that name', async () => {
@@ -410,7 +386,7 @@ describe('AiIndexService', () => {
       await expect(
         service.put('customer_support', DEFAULT_SPACE, properties)
       ).rejects.toBeInstanceOf(InvalidAiIndexDestError);
-      expect(storageClient.index).not.toHaveBeenCalled();
+      expect(writes()).toHaveLength(0);
     });
 
     it('rejects a data_stream dest value not prefixed with ai-index-ds- without resolving it', async () => {
@@ -421,7 +397,7 @@ describe('AiIndexService', () => {
         })
       ).rejects.toBeInstanceOf(InvalidAiIndexDestError);
       expect(esClient.indices.resolveIndex).not.toHaveBeenCalled();
-      expect(storageClient.index).not.toHaveBeenCalled();
+      expect(writes()).toHaveLength(0);
     });
 
     it('rejects a data_stream dest not prefixed with ai-index-ds-', async () => {
@@ -440,7 +416,7 @@ describe('AiIndexService', () => {
       await expect(
         service.put('customer_support', DEFAULT_SPACE, properties)
       ).rejects.toBeInstanceOf(InvalidAiIndexDestError);
-      expect(storageClient.index).not.toHaveBeenCalled();
+      expect(writes()).toHaveLength(0);
     });
 
     const indexProperties = {
@@ -456,18 +432,14 @@ describe('AiIndexService', () => {
       });
 
       await expect(service.put('logs', DEFAULT_SPACE, indexProperties)).resolves.toBe('created');
-      expect(storageClient.index).toHaveBeenCalled();
+      expect(writes()).toHaveLength(1);
     });
 
     it('allows an index dest that matches no index yet (lazy creation)', async () => {
-      esClient.indices.resolveIndex.mockResponse({
-        indices: [],
-        aliases: [],
-        data_streams: [],
-      });
+      esClient.indices.resolveIndex.mockResponse({ indices: [], aliases: [], data_streams: [] });
 
       await expect(service.put('logs', DEFAULT_SPACE, indexProperties)).resolves.toBe('created');
-      expect(storageClient.index).toHaveBeenCalled();
+      expect(writes()).toHaveLength(1);
     });
 
     it('rejects an index dest when an alias exists at that name', async () => {
@@ -480,7 +452,7 @@ describe('AiIndexService', () => {
       await expect(service.put('logs', DEFAULT_SPACE, indexProperties)).rejects.toBeInstanceOf(
         InvalidAiIndexDestError
       );
-      expect(storageClient.index).not.toHaveBeenCalled();
+      expect(writes()).toHaveLength(0);
     });
 
     it('rejects an index dest when a data stream exists at that name', async () => {
@@ -495,7 +467,7 @@ describe('AiIndexService', () => {
       await expect(service.put('logs', DEFAULT_SPACE, indexProperties)).rejects.toBeInstanceOf(
         InvalidAiIndexDestError
       );
-      expect(storageClient.index).not.toHaveBeenCalled();
+      expect(writes()).toHaveLength(0);
     });
 
     it('rejects a system index dest', async () => {
@@ -508,7 +480,7 @@ describe('AiIndexService', () => {
       await expect(service.put('logs', DEFAULT_SPACE, indexProperties)).rejects.toBeInstanceOf(
         InvalidAiIndexDestError
       );
-      expect(storageClient.index).not.toHaveBeenCalled();
+      expect(writes()).toHaveLength(0);
     });
 
     it('allows a hidden but non-system index dest', async () => {
@@ -524,7 +496,7 @@ describe('AiIndexService', () => {
         name: indexProperties.dest.value,
         expand_wildcards: ['open', 'hidden', 'closed'],
       });
-      expect(storageClient.index).toHaveBeenCalled();
+      expect(writes()).toHaveLength(1);
     });
 
     it('allows a closed hidden but non-system index dest', async () => {
@@ -540,7 +512,7 @@ describe('AiIndexService', () => {
         name: indexProperties.dest.value,
         expand_wildcards: ['open', 'hidden', 'closed'],
       });
-      expect(storageClient.index).toHaveBeenCalled();
+      expect(writes()).toHaveLength(1);
     });
 
     it('rejects a wildcard index dest without resolving it', async () => {
@@ -551,7 +523,7 @@ describe('AiIndexService', () => {
         })
       ).rejects.toThrow(/must name a single index or data stream, not a pattern/);
       expect(esClient.indices.resolveIndex).not.toHaveBeenCalled();
-      expect(storageClient.index).not.toHaveBeenCalled();
+      expect(writes()).toHaveLength(0);
     });
 
     it('rejects a comma-separated index dest without resolving it', async () => {
@@ -562,7 +534,7 @@ describe('AiIndexService', () => {
         })
       ).rejects.toBeInstanceOf(InvalidAiIndexDestError);
       expect(esClient.indices.resolveIndex).not.toHaveBeenCalled();
-      expect(storageClient.index).not.toHaveBeenCalled();
+      expect(writes()).toHaveLength(0);
     });
 
     it('rejects an index dest whose id has invalid characters', async () => {
@@ -573,7 +545,7 @@ describe('AiIndexService', () => {
         })
       ).rejects.toThrow(/the part after 'ai-index-idx-' must be a valid AI index id/);
       expect(esClient.indices.resolveIndex).not.toHaveBeenCalled();
-      expect(storageClient.index).not.toHaveBeenCalled();
+      expect(writes()).toHaveLength(0);
     });
 
     it('rejects an index dest value not prefixed with ai-index-idx- without resolving it', async () => {
@@ -584,7 +556,7 @@ describe('AiIndexService', () => {
         })
       ).rejects.toBeInstanceOf(InvalidAiIndexDestError);
       expect(esClient.indices.resolveIndex).not.toHaveBeenCalled();
-      expect(storageClient.index).not.toHaveBeenCalled();
+      expect(writes()).toHaveLength(0);
     });
 
     it('rejects an index dest not prefixed with ai-index-idx-', async () => {
@@ -597,7 +569,7 @@ describe('AiIndexService', () => {
       await expect(service.put('logs', DEFAULT_SPACE, indexProperties)).rejects.toBeInstanceOf(
         InvalidAiIndexDestError
       );
-      expect(storageClient.index).not.toHaveBeenCalled();
+      expect(writes()).toHaveLength(0);
     });
 
     it('rejects a dot-prefixed index dest on put', async () => {
@@ -608,7 +580,7 @@ describe('AiIndexService', () => {
         })
       ).rejects.toBeInstanceOf(InvalidAiIndexDestError);
       expect(esClient.indices.resolveIndex).not.toHaveBeenCalled();
-      expect(storageClient.index).not.toHaveBeenCalled();
+      expect(writes()).toHaveLength(0);
     });
   });
 
@@ -628,23 +600,18 @@ describe('AiIndexService', () => {
         data_streams: [],
       });
 
-    it('indexes a managed AI index at ${space}:${id} with op_type create', async () => {
+    it('creates a managed AI index with create=true and memory off by default', async () => {
       mockValidIndexDest();
 
       await expect(service.putManaged('elastic', DEFAULT_SPACE, managedProperties)).resolves.toBe(
         'created'
       );
 
-      expect(storageClient.index).toHaveBeenCalledWith({
-        id: buildManagedAiIndexDocId(DEFAULT_SPACE, 'elastic'),
-        op_type: 'create',
-        refresh: 'wait_for',
-        document: expect.objectContaining({
-          id: 'elastic',
-          space: DEFAULT_SPACE,
-          managed: true,
-          memory_enabled: false,
-        }),
+      expect(lastWrite()).toEqual({
+        method: 'PUT',
+        path: `${ES_AI_INDEX_PATH}/elastic`,
+        querystring: { create: true },
+        body: { ...managedProperties, space: DEFAULT_SPACE, managed: true, memory_enabled: false },
       });
     });
 
@@ -656,54 +623,39 @@ describe('AiIndexService', () => {
         memory_enabled: true,
       });
 
-      expect(storageClient.index).toHaveBeenCalledWith(
-        expect.objectContaining({
-          document: expect.objectContaining({
-            managed: true,
-            memory_enabled: true,
-          }),
-        })
+      expect(lastWrite().body).toEqual(
+        expect.objectContaining({ managed: true, memory_enabled: true })
       );
     });
 
-    it('overwrites an existing managed entry (idempotent upsert)', async () => {
+    it('tolerates an existing managed entry without rewriting it', async () => {
       mockValidIndexDest();
-      mockSearchHits(
-        storedHit(
-          {
-            ...aiIndexDocument,
-            id: 'elastic',
-            managed: true,
-          },
-          { id: buildManagedAiIndexDocId(DEFAULT_SPACE, 'elastic') }
-        )
-      );
+      seed({ ...aiIndexRecord, id: 'elastic', managed: true });
 
       await expect(service.putManaged('elastic', DEFAULT_SPACE, managedProperties)).resolves.toBe(
         'updated'
       );
+      expect(writes()).toHaveLength(0);
+      expect(stored('elastic')?.description).toBe(aiIndexRecord.description);
+    });
 
-      const [indexArgs] = storageClient.index.mock.calls[0];
-      expect(indexArgs.id).toBe(buildManagedAiIndexDocId(DEFAULT_SPACE, 'elastic'));
-      expect(indexArgs.if_seq_no).toBe(7);
-      expect(indexArgs.if_primary_term).toBe(2);
-      expect(indexArgs.document?.managed).toBe(true);
+    it('tolerates losing a concurrent create of the same managed entry', async () => {
+      mockValidIndexDest();
+      nextWriteError = createConflictError();
+
+      await expect(service.putManaged('elastic', DEFAULT_SPACE, managedProperties)).resolves.toBe(
+        'updated'
+      );
     });
 
     it('throws AiIndexIdConflictError when the id is taken by an unmanaged entry', async () => {
       mockValidIndexDest();
-      mockSearchHits(
-        storedHit({
-          ...aiIndexDocument,
-          id: 'elastic',
-          managed: false,
-        })
-      );
+      seed({ ...aiIndexRecord, id: 'elastic', managed: false });
 
       await expect(
         service.putManaged('elastic', DEFAULT_SPACE, managedProperties)
       ).rejects.toBeInstanceOf(AiIndexIdConflictError);
-      expect(storageClient.index).not.toHaveBeenCalled();
+      expect(writes()).toHaveLength(0);
     });
 
     it('accepts a dot-prefixed managed index dest', async () => {
@@ -719,7 +671,7 @@ describe('AiIndexService', () => {
           dest: { type: 'index', value: '.ai-index-idx-elastic-index' },
         })
       ).resolves.toBe('created');
-      expect(storageClient.index).toHaveBeenCalled();
+      expect(writes()).toHaveLength(1);
     });
 
     it('accepts a dot-prefixed managed data_stream dest', async () => {
@@ -741,7 +693,7 @@ describe('AiIndexService', () => {
           dest: { type: 'data_stream', value: '.ai-index-ds-elastic-stream' },
         })
       ).resolves.toBe('created');
-      expect(storageClient.index).toHaveBeenCalled();
+      expect(writes()).toHaveLength(1);
     });
   });
 
@@ -753,74 +705,55 @@ describe('AiIndexService', () => {
       signal_time_range: { type: 'relative' as const, from: 'now-30d' },
     };
 
-    const mockStored = (document: AiIndexDocument) => {
-      mockSearchHits(storedHit(document));
-    };
-
     it('writes the block and leaves the rest of the entry untouched', async () => {
-      mockStored(aiIndexDocument);
+      seed(aiIndexRecord);
 
       await expect(
         service.setFeedbackAnalysis('customer_support', DEFAULT_SPACE, feedbackAnalysis)
       ).resolves.toEqual(feedbackAnalysis);
 
-      const [indexArgs] = storageClient.index.mock.calls[0];
-      expect(indexArgs.document).toEqual(
-        expect.objectContaining({
-          feedback_analysis: feedbackAnalysis,
-          description: aiIndexDocument.description,
-          dest: aiIndexDocument.dest,
-          automations: aiIndexDocument.automations,
-          sources: aiIndexDocument.sources,
-          date_created: aiIndexDocument.date_created,
-        })
-      );
-    });
-
-    it('guards the write with optimistic concurrency control', async () => {
-      mockStored(aiIndexDocument);
-
-      await service.setFeedbackAnalysis('customer_support', DEFAULT_SPACE, feedbackAnalysis);
-
-      const [indexArgs] = storageClient.index.mock.calls[0];
-      expect(indexArgs.if_seq_no).toBe(7);
-      expect(indexArgs.if_primary_term).toBe(2);
+      expect(lastWrite().body).toEqual({
+        space: DEFAULT_SPACE,
+        description: aiIndexRecord.description,
+        managed: false,
+        memory_enabled: true,
+        dest: aiIndexRecord.dest,
+        automations: aiIndexRecord.automations,
+        sources: aiIndexRecord.sources,
+        traces: [],
+        feedback_analysis: feedbackAnalysis,
+      });
+      expect(lastWrite().querystring).toBeUndefined();
     });
 
     it('is permitted on managed AI indices, and preserves the managed flag', async () => {
-      mockStored({ ...aiIndexDocument, managed: true });
+      seed({ ...aiIndexRecord, managed: true });
 
       await expect(
         service.setFeedbackAnalysis('customer_support', DEFAULT_SPACE, feedbackAnalysis)
       ).resolves.toEqual(feedbackAnalysis);
 
-      const [indexArgs] = storageClient.index.mock.calls[0];
-      expect(indexArgs.document?.managed).toBe(true);
+      expect(lastWrite().body).toEqual(expect.objectContaining({ managed: true }));
     });
 
-    it('preserves the disabled fallback for a legacy managed AI index', async () => {
-      mockStored({ ...aiIndexDocument, managed: true });
+    it('preserves the disabled fallback for a managed AI index without the memory flag', async () => {
+      seed({ ...aiIndexRecord, managed: true });
 
       await service.setFeedbackAnalysis('customer_support', DEFAULT_SPACE, feedbackAnalysis);
 
-      const [indexArgs] = storageClient.index.mock.calls[0];
-      expect(indexArgs.document?.memory_enabled).toBe(false);
+      expect(lastWrite().body).toEqual(expect.objectContaining({ memory_enabled: false }));
     });
 
     it('replaces the previous block rather than merging into it', async () => {
-      mockStored({
-        ...aiIndexDocument,
-        feedback_analysis: { enabled: true, agent_id: 'previous-agent' },
-      });
+      seed({ ...aiIndexRecord, feedback_analysis: { enabled: true, agent_id: 'previous-agent' } });
 
       await service.setFeedbackAnalysis('customer_support', DEFAULT_SPACE, { enabled: false });
 
-      const [indexArgs] = storageClient.index.mock.calls[0];
-      expect(indexArgs.document?.feedback_analysis).toEqual({ enabled: false });
+      expect(lastWrite().body?.feedback_analysis).toEqual({ enabled: false });
     });
 
     it('does not re-validate the dest, so a stale backing store can still be switched off', async () => {
-      mockStored(aiIndexDocument);
+      seed(aiIndexRecord);
 
       await service.setFeedbackAnalysis('customer_support', DEFAULT_SPACE, { enabled: false });
 
@@ -831,12 +764,12 @@ describe('AiIndexService', () => {
       await expect(
         service.setFeedbackAnalysis('missing', DEFAULT_SPACE, feedbackAnalysis)
       ).rejects.toBeInstanceOf(AiIndexNotFoundError);
-      expect(storageClient.index).not.toHaveBeenCalled();
+      expect(writes()).toHaveLength(0);
     });
 
     it('throws AiIndexConflictError when a concurrent write wins (409)', async () => {
-      mockStored(aiIndexDocument);
-      storageClient.index.mockRejectedValue(createConflictError());
+      seed(aiIndexRecord);
+      nextWriteError = createConflictError();
 
       await expect(
         service.setFeedbackAnalysis('customer_support', DEFAULT_SPACE, feedbackAnalysis)
@@ -845,92 +778,72 @@ describe('AiIndexService', () => {
   });
 
   describe('get', () => {
-    it('returns the AI index with its id', async () => {
-      mockSearchHits(storedHit(aiIndexDocument));
+    it('reads the record for the id and space', async () => {
+      seed(aiIndexRecord);
 
       await expect(service.get('customer_support', DEFAULT_SPACE)).resolves.toEqual(
-        toHttpItem(aiIndexDocument)
+        toHttpItem(aiIndexRecord)
       );
+      expect(requests()).toEqual([
+        {
+          method: 'GET',
+          path: `${ES_AI_INDEX_PATH}/customer_support`,
+          querystring: { space: DEFAULT_SPACE },
+        },
+      ]);
     });
 
-    it('defaults memory_enabled to true for legacy user-created documents', async () => {
-      mockSearchHits(storedHit(aiIndexDocument));
+    it('defaults memory_enabled to true for user-created records without the flag', async () => {
+      seed(aiIndexRecord);
 
       await expect(service.get('customer_support', DEFAULT_SPACE)).resolves.toEqual(
         expect.objectContaining({ id: 'customer_support', memory_enabled: true })
       );
     });
 
-    it('defaults memory_enabled to false for legacy managed documents', async () => {
-      mockSearchHits(storedHit({ ...aiIndexDocument, managed: true }));
+    it('defaults memory_enabled to false for managed records without the flag', async () => {
+      seed({ ...aiIndexRecord, managed: true });
 
       await expect(service.get('customer_support', DEFAULT_SPACE)).resolves.toEqual(
         expect.objectContaining({ id: 'customer_support', memory_enabled: false })
       );
     });
 
-    it('round-trips memory_enabled from the stored document to the item', async () => {
-      mockSearchHits(storedHit({ ...aiIndexDocument, memory_enabled: true }));
+    it('round-trips memory_enabled from the record to the item', async () => {
+      seed({ ...aiIndexRecord, managed: true, memory_enabled: true });
 
       await expect(service.get('customer_support', DEFAULT_SPACE)).resolves.toEqual(
         expect.objectContaining({ id: 'customer_support', memory_enabled: true })
       );
     });
 
-    it('defaults managed to false for legacy documents without the field', async () => {
-      const { managed: _managed, ...legacyDocument } = aiIndexDocument;
-      mockSearchHits(storedHit(legacyDocument));
+    it('defaults managed to false for records without the field', async () => {
+      const { managed: _managed, ...record } = aiIndexRecord;
+      seed(record);
 
       await expect(service.get('customer_support', DEFAULT_SPACE)).resolves.toEqual(
         expect.objectContaining({ id: 'customer_support', managed: false })
       );
     });
 
-    it('round-trips feedback_analysis from the stored document to the item', async () => {
-      mockSearchHits(
-        storedHit({
-          ...aiIndexDocument,
-          feedback_analysis: {
-            enabled: true,
-            agent_id: 'my-analysis-agent',
-            schedule: { interval: '24h' },
-            signal_time_range: { type: 'relative' as const, from: 'now-30d' },
-          },
-        })
-      );
-
-      await expect(service.get('customer_support', DEFAULT_SPACE)).resolves.toEqual(
-        expect.objectContaining({
-          feedback_analysis: {
-            enabled: true,
-            agent_id: 'my-analysis-agent',
-            schedule: { interval: '24h' },
-            signal_time_range: { type: 'relative', from: 'now-30d' },
-          },
-        })
-      );
-    });
-
-    it('omits feedback_analysis when the stored document has none', async () => {
-      mockSearchHits(storedHit(aiIndexDocument));
-
-      await expect(service.get('customer_support', DEFAULT_SPACE)).resolves.not.toHaveProperty(
-        'feedback_analysis'
-      );
-    });
-
-    it('persists feedback_analysis when creating an AI index', async () => {
-      await service.create('customer_support', DEFAULT_SPACE, {
-        ...properties,
-        feedback_analysis: { enabled: false, agent_id: 'my-analysis-agent' },
+    it('round-trips feedback_analysis and omits it when absent', async () => {
+      const feedbackAnalysis = {
+        enabled: true,
+        agent_id: 'my-analysis-agent',
+        schedule: { interval: '24h' },
+        signal_time_range: { type: 'relative' as const, from: 'now-30d' },
+      };
+      seed(aiIndexRecord, {
+        ...aiIndexRecord,
+        id: 'analyzed',
+        feedback_analysis: feedbackAnalysis,
       });
 
-      expect(storageClient.index).toHaveBeenCalledWith(
-        expect.objectContaining({
-          document: expect.objectContaining({
-            feedback_analysis: { enabled: false, agent_id: 'my-analysis-agent' },
-          }),
-        })
+      await expect(service.get('analyzed', DEFAULT_SPACE)).resolves.toEqual(
+        expect.objectContaining({ feedback_analysis: feedbackAnalysis })
+      );
+      await expect(service.get('customer_support', DEFAULT_SPACE)).resolves.not.toHaveProperty(
+        'feedback_analysis'
       );
     });
 
@@ -940,45 +853,31 @@ describe('AiIndexService', () => {
       );
     });
 
-    it('throws AiIndexNotFoundError when the stored document belongs to another space', async () => {
-      await expect(service.get('ops_logs', 'team_ops')).rejects.toBeInstanceOf(
+    it('throws AiIndexNotFoundError when the record belongs to another space', async () => {
+      seed(aiIndexRecord);
+
+      await expect(service.get('customer_support', 'team_ops')).rejects.toBeInstanceOf(
         AiIndexNotFoundError
       );
-      expect(storageClient.search).toHaveBeenCalledWith(
-        expect.objectContaining({
-          query: {
-            bool: {
-              filter: [
-                createSpaceDslFilter('team_ops'),
-                expect.objectContaining({
-                  bool: expect.objectContaining({
-                    should: [{ term: { id: 'ops_logs' } }, { ids: { values: ['ops_logs'] } }],
-                  }),
-                }),
-              ],
-            },
-          },
-        })
-      );
+      expect(requests()).toEqual([expect.objectContaining({ querystring: { space: 'team_ops' } })]);
     });
 
     it('rethrows unexpected errors', async () => {
-      storageClient.search.mockRejectedValue(new Error('boom'));
+      esClient.transport.request.mockRejectedValue(new Error('boom'));
 
       await expect(service.get('customer_support', DEFAULT_SPACE)).rejects.toThrow('boom');
     });
 
     it('attaches derived queries to stored traces', async () => {
-      const documentWithTraces: AiIndexDocument = {
-        ...aiIndexDocument,
+      seed({
+        ...aiIndexRecord,
         space: 'marketing',
         traces: [
           { type: 'index', value: 'logs-*' },
           { type: 'esql', value: 'FROM foo | LIMIT 1' },
           { type: 'elastic_agent', value: 'my-agent' },
         ],
-      };
-      mockSearchHits(storedHit(documentWithTraces));
+      });
 
       await expect(service.get('customer_support', 'marketing')).resolves.toEqual(
         expect.objectContaining({
@@ -996,54 +895,43 @@ describe('AiIndexService', () => {
     });
 
     it('reads dest from the registration for a managed AI index, leaving the rest as stored', async () => {
-      const staleDocument: AiIndexDocument = {
-        ...aiIndexDocument,
+      const staleRecord: AiIndexRecord = {
+        ...aiIndexRecord,
         id: 'elastic',
         managed: true,
         dest: { type: 'index', value: 'ai-index-idx-sml-data' },
-        traces: [],
       };
-      mockSearchHits(
-        storedHit(staleDocument, { id: buildManagedAiIndexDocId(DEFAULT_SPACE, 'elastic') })
-      );
-      service = new AiIndexService({
-        esClient,
-        logger: loggingSystemMock.createLogger(),
-        managedBootstrap: {
-          isManaged: (id) => id === 'elastic',
-          getManagedIds: () => ['elastic'],
-          getRegistration: () => ({
-            description: 'from code',
-            dest: { type: 'index', value: '.ai-index-idx-elastic-index' },
-            automations: [{ type: 'workflow', value: 'from-code' }],
-            sources: [{ type: 'esql', value: 'FROM code' }],
-            traces: [{ type: 'index', value: 'from-code' }],
-          }),
-          ensure: jest.fn(),
-        },
+      seed(staleRecord);
+      service = createService({
+        isManaged: (id) => id === 'elastic',
+        getManagedIds: () => ['elastic'],
+        getRegistration: () => ({
+          description: 'from code',
+          dest: { type: 'index', value: '.ai-index-idx-elastic-index' },
+          automations: [{ type: 'workflow', value: 'from-code' }],
+          sources: [{ type: 'esql', value: 'FROM code' }],
+          traces: [{ type: 'index', value: 'from-code' }],
+        }),
+        ensure: jest.fn(),
       });
 
       await expect(service.get('elastic', DEFAULT_SPACE)).resolves.toEqual(
         toHttpItem({
-          ...staleDocument,
+          ...staleRecord,
           dest: { type: 'index', value: '.ai-index-idx-elastic-index' },
         })
       );
     });
 
     it('returns a user-owned AI index squatting a managed id as stored', async () => {
-      const squatter: AiIndexDocument = { ...aiIndexDocument, id: 'elastic', managed: false };
-      mockSearchHits(storedHit(squatter));
+      const squatter: AiIndexRecord = { ...aiIndexRecord, id: 'elastic', managed: false };
+      seed(squatter);
       const getRegistration = jest.fn();
-      service = new AiIndexService({
-        esClient,
-        logger: loggingSystemMock.createLogger(),
-        managedBootstrap: {
-          isManaged: (id) => id === 'elastic',
-          getManagedIds: () => ['elastic'],
-          getRegistration,
-          ensure: jest.fn(),
-        },
+      service = createService({
+        isManaged: (id) => id === 'elastic',
+        getManagedIds: () => ['elastic'],
+        getRegistration,
+        ensure: jest.fn(),
       });
 
       await expect(service.get('elastic', DEFAULT_SPACE)).resolves.toEqual(toHttpItem(squatter));
@@ -1051,45 +939,28 @@ describe('AiIndexService', () => {
     });
 
     it('ensures a missing managed AI index and returns it', async () => {
-      const managedDocument: AiIndexDocument = {
-        ...aiIndexDocument,
-        id: 'elastic',
-        managed: true,
-      };
-      const ensure = jest.fn().mockImplementation(async () => {
-        mockSearchHits(
-          storedHit(managedDocument, { id: buildManagedAiIndexDocId(DEFAULT_SPACE, 'elastic') })
-        );
-      });
-      mockSearchHitsOnce();
-      service = new AiIndexService({
-        esClient,
-        logger: loggingSystemMock.createLogger(),
-        managedBootstrap: {
-          isManaged: (id) => id === 'elastic',
-          getManagedIds: () => ['elastic'],
-          getRegistration: () => undefined,
-          ensure,
-        },
+      const managedRecord: AiIndexRecord = { ...aiIndexRecord, id: 'elastic', managed: true };
+      const ensure = jest.fn().mockImplementation(async () => seed(managedRecord));
+      service = createService({
+        isManaged: (id) => id === 'elastic',
+        getManagedIds: () => ['elastic'],
+        getRegistration: () => undefined,
+        ensure,
       });
 
       await expect(service.get('elastic', DEFAULT_SPACE)).resolves.toEqual(
-        toHttpItem(managedDocument)
+        toHttpItem(managedRecord)
       );
       expect(ensure).toHaveBeenCalledWith('elastic', DEFAULT_SPACE);
     });
 
-    it('throws AiIndexNotFoundError when managed ensure succeeds but the document is still missing', async () => {
+    it('throws AiIndexNotFoundError when managed ensure succeeds but the record is still missing', async () => {
       const ensure = jest.fn().mockResolvedValue(undefined);
-      service = new AiIndexService({
-        esClient,
-        logger: loggingSystemMock.createLogger(),
-        managedBootstrap: {
-          isManaged: (id) => id === 'elastic',
-          getManagedIds: () => ['elastic'],
-          getRegistration: () => undefined,
-          ensure,
-        },
+      service = createService({
+        isManaged: (id) => id === 'elastic',
+        getManagedIds: () => ['elastic'],
+        getRegistration: () => undefined,
+        ensure,
       });
 
       await expect(service.get('elastic', DEFAULT_SPACE)).rejects.toBeInstanceOf(
@@ -1099,16 +970,11 @@ describe('AiIndexService', () => {
     });
 
     it('rethrows when managed ensure fails', async () => {
-      const ensure = jest.fn().mockRejectedValue(new InvalidAiIndexDestError('dest not ready'));
-      service = new AiIndexService({
-        esClient,
-        logger: loggingSystemMock.createLogger(),
-        managedBootstrap: {
-          isManaged: (id) => id === 'elastic',
-          getManagedIds: () => ['elastic'],
-          getRegistration: () => undefined,
-          ensure,
-        },
+      service = createService({
+        isManaged: (id) => id === 'elastic',
+        getManagedIds: () => ['elastic'],
+        getRegistration: () => undefined,
+        ensure: jest.fn().mockRejectedValue(new InvalidAiIndexDestError('dest not ready')),
       });
 
       await expect(service.get('elastic', DEFAULT_SPACE)).rejects.toBeInstanceOf(
@@ -1118,41 +984,33 @@ describe('AiIndexService', () => {
   });
 
   describe('list', () => {
-    it('returns AI indices mapped from search hits, in the order they came back', async () => {
-      const billingDocument: AiIndexDocument = {
-        ...aiIndexDocument,
-        id: 'billing',
-      };
-      mockSearchHits(storedHit(billingDocument, { id: 'billing' }), storedHit(aiIndexDocument));
+    it('lists the space through the API, sorted by id', async () => {
+      const billingRecord: AiIndexRecord = { ...aiIndexRecord, id: 'billing' };
+      seed(aiIndexRecord, billingRecord);
 
       await expect(service.list(DEFAULT_SPACE)).resolves.toEqual([
-        toHttpItem(billingDocument),
-        toHttpItem(aiIndexDocument),
+        toHttpItem(billingRecord),
+        toHttpItem(aiIndexRecord),
+      ]);
+      expect(requests()).toEqual([
+        { method: 'GET', path: ES_AI_INDEX_PATH, querystring: { space: DEFAULT_SPACE, size: 100 } },
       ]);
     });
 
-    it('leaves the ordering to Elasticsearch, placing pre-upgrade documents last', async () => {
-      mockSearchHits(storedHit(aiIndexDocument));
+    it('does not list records from other spaces', async () => {
+      seed(aiIndexRecord, { ...aiIndexRecord, id: 'other', space: 'marketing' });
 
-      await service.list(DEFAULT_SPACE);
-
-      expect(storageClient.search).toHaveBeenCalledWith({
-        size: 100,
-        track_total_hits: false,
-        query: createSpaceDslFilter(DEFAULT_SPACE),
-        sort: [{ id: { order: 'asc', missing: '_last' } }, { _doc: { order: 'asc' } }],
-      });
+      await expect(service.list(DEFAULT_SPACE)).resolves.toEqual([toHttpItem(aiIndexRecord)]);
     });
 
-    it("derives elastic_agent trace queries from the document's own stored space", async () => {
-      const otherSpaceDocument: AiIndexDocument = {
-        ...aiIndexDocument,
+    it("derives elastic_agent trace queries from the record's own space", async () => {
+      seed({
+        ...aiIndexRecord,
         space: 'other',
         traces: [{ type: 'elastic_agent', value: 'my-agent' }],
-      };
-      mockSearchHits(storedHit(otherSpaceDocument));
+      });
 
-      const [item] = await service.list('marketing');
+      const [item] = await service.list('other');
 
       expect(item.traces[0]).toEqual(
         expect.objectContaining({
@@ -1162,78 +1020,58 @@ describe('AiIndexService', () => {
     });
 
     it('ensures missing managed AI indices and re-lists', async () => {
-      const managedDocument: AiIndexDocument = {
-        ...aiIndexDocument,
-        id: 'elastic',
-        managed: true,
-      };
-      const ensure = jest.fn().mockResolvedValue(undefined);
-      mockSearchHitsOnce();
-      mockSearchHitsOnce(
-        storedHit(managedDocument, { id: buildManagedAiIndexDocId(DEFAULT_SPACE, 'elastic') })
-      );
-      service = new AiIndexService({
-        esClient,
-        logger: loggingSystemMock.createLogger(),
-        managedBootstrap: {
-          isManaged: (id) => id === 'elastic',
-          getManagedIds: () => ['elastic'],
-          getRegistration: () => undefined,
-          ensure,
-        },
+      const managedRecord: AiIndexRecord = { ...aiIndexRecord, id: 'elastic', managed: true };
+      const ensure = jest.fn().mockImplementation(async () => seed(managedRecord));
+      service = createService({
+        isManaged: (id) => id === 'elastic',
+        getManagedIds: () => ['elastic'],
+        getRegistration: () => undefined,
+        ensure,
       });
 
-      await expect(service.list(DEFAULT_SPACE)).resolves.toEqual([toHttpItem(managedDocument)]);
+      await expect(service.list(DEFAULT_SPACE)).resolves.toEqual([toHttpItem(managedRecord)]);
       expect(ensure).toHaveBeenCalledWith('elastic', DEFAULT_SPACE);
-      expect(storageClient.search).toHaveBeenCalledTimes(2);
+      expect(requests().filter(({ path }) => path === ES_AI_INDEX_PATH)).toHaveLength(2);
     });
 
     it('resolves managed AI indices against their registration, leaving user-owned ones as stored', async () => {
-      const managedDocument: AiIndexDocument = {
-        ...aiIndexDocument,
+      const managedRecord: AiIndexRecord = {
+        ...aiIndexRecord,
         id: 'elastic',
         managed: true,
         dest: { type: 'index', value: 'ai-index-idx-sml-data' },
       };
-      mockSearchHits(
-        storedHit(managedDocument, { id: buildManagedAiIndexDocId(DEFAULT_SPACE, 'elastic') }),
-        storedHit(aiIndexDocument)
-      );
-      service = new AiIndexService({
-        esClient,
-        logger: loggingSystemMock.createLogger(),
-        managedBootstrap: {
-          isManaged: (id) => id === 'elastic',
-          getManagedIds: () => ['elastic'],
-          getRegistration: () => ({
-            dest: { type: 'index', value: '.ai-index-idx-elastic-index' },
-            automations: [],
-            sources: [],
-            traces: [],
-          }),
-          ensure: jest.fn(),
-        },
+      seed(managedRecord, aiIndexRecord);
+      service = createService({
+        isManaged: (id) => id === 'elastic',
+        getManagedIds: () => ['elastic'],
+        getRegistration: () => ({
+          dest: { type: 'index', value: '.ai-index-idx-elastic-index' },
+          automations: [],
+          sources: [],
+          traces: [],
+        }),
+        ensure: jest.fn(),
       });
 
       await expect(service.list(DEFAULT_SPACE)).resolves.toEqual([
+        toHttpItem(aiIndexRecord),
         toHttpItem({
-          ...managedDocument,
+          ...managedRecord,
           dest: { type: 'index', value: '.ai-index-idx-elastic-index' },
         }),
-        toHttpItem(aiIndexDocument),
       ]);
-      expect(storageClient.search).toHaveBeenCalledTimes(1);
+      expect(requests()).toHaveLength(1);
     });
 
     it('logs and continues when one managed AI index fails to bootstrap, returning the rest', async () => {
-      const okDocument: AiIndexDocument = { ...aiIndexDocument, id: 'ok', managed: true };
-      mockSearchHitsOnce();
-      mockSearchHitsOnce(storedHit(okDocument, { id: 'ok' }));
+      const okRecord: AiIndexRecord = { ...aiIndexRecord, id: 'ok', managed: true };
       const logger = loggingSystemMock.createLogger();
       const ensure = jest.fn().mockImplementation(async (id: string) => {
         if (id === 'broken') {
           throw new InvalidAiIndexDestError('dest is invalid');
         }
+        seed(okRecord);
       });
       service = new AiIndexService({
         esClient,
@@ -1246,80 +1084,59 @@ describe('AiIndexService', () => {
         },
       });
 
-      await expect(service.list(DEFAULT_SPACE)).resolves.toEqual([toHttpItem(okDocument)]);
+      await expect(service.list(DEFAULT_SPACE)).resolves.toEqual([toHttpItem(okRecord)]);
       expect(ensure).toHaveBeenCalledWith('ok', DEFAULT_SPACE);
       expect(ensure).toHaveBeenCalledWith('broken', DEFAULT_SPACE);
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('broken'));
     });
 
     it('treats a missing traces field as an empty list', async () => {
-      const { traces: _traces, ...documentWithoutTraces } = aiIndexDocument;
-      mockSearchHits(storedHit(documentWithoutTraces));
+      const { traces: _traces, ...recordWithoutTraces } = aiIndexRecord;
+      seed(recordWithoutTraces);
 
       await expect(service.list(DEFAULT_SPACE)).resolves.toEqual([
-        toHttpItem({ ...documentWithoutTraces, traces: [] }),
+        toHttpItem({ ...recordWithoutTraces, traces: [] }),
       ]);
     });
   });
 
-  describe('traces persistence', () => {
-    it('stores the traces sent on create', async () => {
-      const traces = [{ type: 'index' as const, value: 'logs-*' }];
-      await service.create('customer_support', DEFAULT_SPACE, { ...properties, traces });
-
-      expect(storageClient.index).toHaveBeenCalledWith(
-        expect.objectContaining({
-          document: expect.objectContaining({ traces }),
-        })
-      );
-    });
-
-    it('replaces stored traces on put', async () => {
-      mockSearchHits(
-        storedHit({ ...aiIndexDocument, traces: [{ type: 'index' as const, value: 'old-*' }] })
-      );
-
-      const traces = [{ type: 'elastic_agent' as const, value: 'my-agent' }];
-      await expect(
-        service.put('customer_support', DEFAULT_SPACE, { ...properties, traces })
-      ).resolves.toBe('updated');
-
-      expect(storageClient.index).toHaveBeenCalledWith(
-        expect.objectContaining({
-          document: expect.objectContaining({ traces }),
-        })
-      );
-    });
-  });
-
   describe('delete', () => {
-    it('resolves when the AI index is deleted', async () => {
-      mockSearchHits(storedHit(aiIndexDocument, { id: 'auto-gen-1' }));
-      storageClient.delete.mockResolvedValue({ acknowledged: true, result: 'deleted' });
+    it('deletes the record for the id and space', async () => {
+      seed(aiIndexRecord);
 
       await expect(service.delete('customer_support', DEFAULT_SPACE)).resolves.toBeUndefined();
-      expect(storageClient.delete).toHaveBeenCalledWith({ id: 'auto-gen-1' });
+      expect(requests()).toContainEqual({
+        method: 'DELETE',
+        path: `${ES_AI_INDEX_PATH}/customer_support`,
+        querystring: { space: DEFAULT_SPACE },
+      });
+      expect(stored('customer_support')).toBeUndefined();
     });
 
     it('throws AiIndexNotFoundError when the AI index does not exist', async () => {
       await expect(service.delete('missing', DEFAULT_SPACE)).rejects.toBeInstanceOf(
         AiIndexNotFoundError
       );
-      expect(storageClient.delete).not.toHaveBeenCalled();
+      expect(requests().filter(({ method }) => method === 'DELETE')).toHaveLength(0);
     });
 
     it('throws AiIndexManagedError when the entry is managed', async () => {
-      mockSearchHits(storedHit({ ...aiIndexDocument, managed: true }));
+      seed({ ...aiIndexRecord, managed: true });
 
       await expect(service.delete('customer_support', DEFAULT_SPACE)).rejects.toBeInstanceOf(
         AiIndexManagedError
       );
-      expect(storageClient.delete).not.toHaveBeenCalled();
+      expect(requests().filter(({ method }) => method === 'DELETE')).toHaveLength(0);
     });
 
     it('throws AiIndexNotFoundError when the entry is removed concurrently', async () => {
-      mockSearchHits(storedHit(aiIndexDocument));
-      storageClient.delete.mockResolvedValue({ acknowledged: true, result: 'not_found' });
+      seed(aiIndexRecord);
+      esClient.transport.request.mockImplementation((async (params: RequestParams) => {
+        if (params.method === 'DELETE') {
+          throw createNotFoundError();
+        }
+        return fakeRegistry(params);
+      }) as never);
 
       await expect(service.delete('customer_support', DEFAULT_SPACE)).rejects.toBeInstanceOf(
         AiIndexNotFoundError
@@ -1335,9 +1152,7 @@ describe('AiIndexService', () => {
     });
 
     it('throws AiIndexManagedError when the entry is managed', async () => {
-      mockSearchHits(
-        storedHit({ ...aiIndexDocument, managed: true }, { seqNo: 1, primaryTerm: 1 })
-      );
+      seed({ ...aiIndexRecord, managed: true });
 
       await expect(
         service.assertCanAcceptAutomation('customer_support', DEFAULT_SPACE, {
@@ -1348,18 +1163,13 @@ describe('AiIndexService', () => {
     });
 
     it('rejects when the automation limit is reached', async () => {
-      mockSearchHits(
-        storedHit(
-          {
-            ...aiIndexDocument,
-            automations: Array.from({ length: MAX_AI_INDEX_AUTOMATIONS }, (_, index) => ({
-              type: 'workflow' as const,
-              value: `wf-${index}`,
-            })),
-          },
-          { seqNo: 1, primaryTerm: 1 }
-        )
-      );
+      seed({
+        ...aiIndexRecord,
+        automations: Array.from({ length: MAX_AI_INDEX_AUTOMATIONS }, (_, index) => ({
+          type: 'workflow' as const,
+          value: `wf-${index}`,
+        })),
+      });
 
       await expect(
         service.assertCanAcceptAutomation('customer_support', DEFAULT_SPACE, {
@@ -1370,18 +1180,13 @@ describe('AiIndexService', () => {
     });
 
     it('allows already attached workflows when the automation limit is reached', async () => {
-      mockSearchHits(
-        storedHit(
-          {
-            ...aiIndexDocument,
-            automations: Array.from({ length: MAX_AI_INDEX_AUTOMATIONS }, (_, index) => ({
-              type: 'workflow' as const,
-              value: index === 0 ? 'nightly-refresh' : `wf-${index}`,
-            })),
-          },
-          { seqNo: 1, primaryTerm: 1 }
-        )
-      );
+      seed({
+        ...aiIndexRecord,
+        automations: Array.from({ length: MAX_AI_INDEX_AUTOMATIONS }, (_, index) => ({
+          type: 'workflow' as const,
+          value: index === 0 ? 'nightly-refresh' : `wf-${index}`,
+        })),
+      });
 
       await expect(
         service.assertCanAcceptAutomation('customer_support', DEFAULT_SPACE, {
@@ -1393,17 +1198,8 @@ describe('AiIndexService', () => {
   });
 
   describe('addAutomation', () => {
-    it('appends a workflow automation to the AI index', async () => {
-      mockSearchHits(storedHit(aiIndexDocument, { id: 'auto-gen-1' }));
-      storageClient.index.mockResolvedValue({
-        _id: 'auto-gen-1',
-        _index: AI_INDICES_INDEX,
-        _seq_no: 8,
-        _primary_term: 2,
-        _shards: { total: 1, successful: 1, failed: 0 },
-        _version: 2,
-        result: 'updated',
-      } as Awaited<ReturnType<AiIndexStorageClient['index']>>);
+    it('appends a workflow automation with a read-then-replace', async () => {
+      seed(aiIndexRecord);
 
       await expect(
         service.addAutomation('customer_support', DEFAULT_SPACE, {
@@ -1412,23 +1208,22 @@ describe('AiIndexService', () => {
         })
       ).resolves.toBe('attached');
 
-      expect(storageClient.index).toHaveBeenCalledWith(
+      expect(lastWrite().querystring).toBeUndefined();
+      expect(lastWrite().body).toEqual(
         expect.objectContaining({
-          id: 'auto-gen-1',
-          if_seq_no: 7,
-          if_primary_term: 2,
-          document: expect.objectContaining({
-            automations: [
-              { type: 'workflow', value: 'nightly-refresh' },
-              { type: 'workflow', value: 'wf-new' },
-            ],
-          }),
+          space: DEFAULT_SPACE,
+          automations: [
+            { type: 'workflow', value: 'nightly-refresh' },
+            { type: 'workflow', value: 'wf-new' },
+          ],
         })
       );
+      expect(lastWrite().body).not.toHaveProperty('id');
+      expect(lastWrite().body).not.toHaveProperty('date_created');
     });
 
     it('returns already_attached when the workflow is already linked', async () => {
-      mockSearchHits(storedHit(aiIndexDocument));
+      seed(aiIndexRecord);
 
       await expect(
         service.addAutomation('customer_support', DEFAULT_SPACE, {
@@ -1436,48 +1231,23 @@ describe('AiIndexService', () => {
           value: 'nightly-refresh',
         })
       ).resolves.toBe('already_attached');
-      expect(storageClient.index).not.toHaveBeenCalled();
+      expect(writes()).toHaveLength(0);
     });
 
-    it('retries on concurrent writes', async () => {
-      mockSearchHitsOnce(
-        storedHit(aiIndexDocument, { id: 'auto-gen-1', seqNo: 7, primaryTerm: 2 })
-      );
-      mockSearchHitsOnce(
-        storedHit(
-          {
-            ...aiIndexDocument,
-            automations: [
-              ...aiIndexDocument.automations,
-              { type: 'workflow', value: 'wf-concurrent' },
-            ],
-          },
-          { id: 'auto-gen-1', seqNo: 8, primaryTerm: 2 }
-        )
-      );
-      storageClient.index.mockRejectedValueOnce(createConflictError()).mockResolvedValueOnce({
-        _id: 'auto-gen-1',
-        _index: AI_INDICES_INDEX,
-        _seq_no: 9,
-        _primary_term: 2,
-        _shards: { total: 1, successful: 1, failed: 0 },
-        _version: 3,
-        result: 'updated',
-      } as Awaited<ReturnType<AiIndexStorageClient['index']>>);
+    it('throws AiIndexConflictError when a concurrent write wins (409)', async () => {
+      seed(aiIndexRecord);
+      nextWriteError = createConflictError();
 
       await expect(
         service.addAutomation('customer_support', DEFAULT_SPACE, {
           type: 'workflow',
           value: 'wf-new',
         })
-      ).resolves.toBe('attached');
-      expect(storageClient.index).toHaveBeenCalledTimes(2);
+      ).rejects.toBeInstanceOf(AiIndexConflictError);
     });
 
     it('throws AiIndexManagedError when the entry is managed', async () => {
-      mockSearchHits(
-        storedHit({ ...aiIndexDocument, managed: true }, { seqNo: 1, primaryTerm: 1 })
-      );
+      seed({ ...aiIndexRecord, managed: true });
 
       await expect(
         service.addAutomation('customer_support', DEFAULT_SPACE, {
@@ -1488,18 +1258,13 @@ describe('AiIndexService', () => {
     });
 
     it('rejects when the automation limit is reached', async () => {
-      mockSearchHits(
-        storedHit(
-          {
-            ...aiIndexDocument,
-            automations: Array.from({ length: MAX_AI_INDEX_AUTOMATIONS }, (_, index) => ({
-              type: 'workflow' as const,
-              value: `wf-${index}`,
-            })),
-          },
-          { seqNo: 1, primaryTerm: 1 }
-        )
-      );
+      seed({
+        ...aiIndexRecord,
+        automations: Array.from({ length: MAX_AI_INDEX_AUTOMATIONS }, (_, index) => ({
+          type: 'workflow' as const,
+          value: `wf-${index}`,
+        })),
+      });
 
       await expect(
         service.addAutomation('customer_support', DEFAULT_SPACE, {
@@ -1510,92 +1275,36 @@ describe('AiIndexService', () => {
     });
   });
 
-  describe('pre-upgrade documents', () => {
-    const preUpgradeDocument: StoredAiIndexDocument = {
-      description: 'legacy orders',
-      dest: { type: 'data_stream', value: 'ai-index-ds-customer_support*' },
-      automations: [],
-      sources: [],
-      date_created: '2026-01-01T00:00:00.000Z',
-      date_modified: '2026-01-01T00:00:00.000Z',
-    };
-
-    it('finds, lists, and updates a pre-upgrade document in place in the default space', async () => {
-      mockSearchHits(storedHit(preUpgradeDocument, { id: 'orders', seqNo: 3, primaryTerm: 1 }));
-
-      await expect(service.get('orders', DEFAULT_SPACE)).resolves.toEqual(
-        expect.objectContaining({ id: 'orders', managed: false })
-      );
-      await expect(service.list(DEFAULT_SPACE)).resolves.toEqual([
-        expect.objectContaining({ id: 'orders' }),
-      ]);
-
-      await expect(service.put('orders', DEFAULT_SPACE, properties)).resolves.toBe('updated');
-      expect(storageClient.index).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: 'orders',
-          if_seq_no: 3,
-          if_primary_term: 1,
-          document: expect.objectContaining({
-            id: 'orders',
-            space: DEFAULT_SPACE,
-          }),
-        })
-      );
-    });
-
-    it('is not visible from another space', async () => {
-      await expect(service.get('orders', 'team')).rejects.toBeInstanceOf(AiIndexNotFoundError);
-      expect(storageClient.search).toHaveBeenCalledWith(
-        expect.objectContaining({
-          query: {
-            bool: {
-              filter: [
-                createSpaceDslFilter('team'),
-                expect.objectContaining({
-                  bool: expect.objectContaining({
-                    should: [{ term: { id: 'orders' } }, { ids: { values: ['orders'] } }],
-                  }),
-                }),
-              ],
-            },
-          },
-        })
-      );
-    });
-  });
-
   describe('space isolation', () => {
     it('treats the same logical id as independent across spaces', async () => {
-      const defaultDocument: AiIndexDocument = {
-        ...aiIndexDocument,
+      const defaultRecord: AiIndexRecord = {
+        ...aiIndexRecord,
         id: 'orders',
-        space: DEFAULT_SPACE,
         description: 'default orders',
       };
-      const teamDocument: AiIndexDocument = {
-        ...aiIndexDocument,
+      const teamRecord: AiIndexRecord = {
+        ...aiIndexRecord,
         id: 'orders',
         space: 'team',
         description: 'team orders',
       };
-
-      mockSearchHitsOnce(storedHit(defaultDocument, { id: 'es-default' }));
-      mockSearchHitsOnce(storedHit(teamDocument, { id: 'es-team' }));
+      seed(defaultRecord, teamRecord);
 
       await expect(service.get('orders', DEFAULT_SPACE)).resolves.toEqual(
-        toHttpItem(defaultDocument)
+        toHttpItem(defaultRecord)
       );
-      await expect(service.get('orders', 'team')).resolves.toEqual(toHttpItem(teamDocument));
+      await expect(service.get('orders', 'team')).resolves.toEqual(toHttpItem(teamRecord));
 
-      mockSearchHits();
-      await expect(service.create('orders', 'team', properties)).resolves.toBeUndefined();
-      expect(storageClient.index).toHaveBeenCalledWith(
+      await expect(service.create('orders', 'marketing', properties)).resolves.toBeUndefined();
+      expect(lastWrite()).toEqual(
         expect.objectContaining({
-          document: expect.objectContaining({ id: 'orders', space: 'team' }),
+          path: `${ES_AI_INDEX_PATH}/orders`,
+          querystring: { create: true },
+          body: expect.objectContaining({ space: 'marketing' }),
         })
       );
-      expect(storageClient.index.mock.calls[0][0]).not.toHaveProperty('id');
+      expect(stored('orders', 'marketing')).toBeDefined();
+      expect(stored('orders')?.description).toBe('default orders');
     });
   });
 });
