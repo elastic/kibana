@@ -10,23 +10,29 @@ import type { Severity, SeverityCounts } from '@kbn/nightshift-investigations-pl
 /**
  * Unread homepage Investigate starts, persisted per space until the finished
  * investigation is opened (severity-tile `+N` and card New marks).
+ *
+ * Model: a list of `{ id, severity? }`. Severity is filled in once the home list
+ * observes the id in a finished bucket (so `+N` survives pagination), and cleared
+ * if that id is later seen running again.
  */
 const STORAGE_PREFIX = 'nightshift.manualInvestigationFresh:';
 
 const SEVERITIES: readonly Severity[] = ['critical', 'high', 'medium', 'low'];
 
-interface FreshEntry {
+export interface ManualInvestigationFreshEntry {
   id: string;
-  /** Set once the investigation is observed in a finished severity bucket. */
   severity?: Severity;
 }
 
+/** Minimal section shape the home page syncs against. */
+export interface ManualInvestigationFreshSection {
+  id: string;
+  investigations: ReadonlyArray<{ id: string }>;
+}
+
 const listeners = new Set<() => void>();
-/**
- * Session state used when localStorage cannot be read, or when a write failed while
- * reads still succeed (quota). Pending writes take precedence until a write succeeds.
- */
-const memoryBySpace = new Map<string, FreshEntry[]>();
+/** Session mirror / pending writes when localStorage is blocked or setItem fails. */
+const memoryBySpace = new Map<string, ManualInvestigationFreshEntry[]>();
 const writeFailedBySpace = new Set<string>();
 
 const storageKey = (spaceBasePath: string): string =>
@@ -35,15 +41,16 @@ const storageKey = (spaceBasePath: string): string =>
 const isSeverity = (value: unknown): value is Severity =>
   typeof value === 'string' && (SEVERITIES as readonly string[]).includes(value);
 
-const parseEntries = (raw: string): FreshEntry[] => {
+const emptyCounts = (): SeverityCounts => ({ critical: 0, high: 0, medium: 0, low: 0 });
+
+const parseEntries = (raw: string): ManualInvestigationFreshEntry[] => {
   const parsed: unknown = JSON.parse(raw);
   if (!Array.isArray(parsed)) {
     return [];
   }
-  const entries: FreshEntry[] = [];
+  const entries: ManualInvestigationFreshEntry[] = [];
   for (const item of parsed) {
     if (typeof item === 'string') {
-      // Migrate the original id-only array shape.
       entries.push({ id: item });
       continue;
     }
@@ -64,14 +71,10 @@ const parseEntries = (raw: string): FreshEntry[] => {
   return entries;
 };
 
-const copyEntries = (entries: FreshEntry[]): FreshEntry[] =>
+const copyEntries = (entries: ManualInvestigationFreshEntry[]): ManualInvestigationFreshEntry[] =>
   entries.map((entry) => ({ ...entry }));
 
-/**
- * Prefer live localStorage for multi-tab correctness. If a write previously failed while
- * getItem still works, keep serving the pending in-memory list until a write succeeds.
- */
-const readEntries = (spaceBasePath: string): FreshEntry[] => {
+const readEntries = (spaceBasePath: string): ManualInvestigationFreshEntry[] => {
   const key = storageKey(spaceBasePath);
   if (writeFailedBySpace.has(key)) {
     return copyEntries(memoryBySpace.get(key) ?? []);
@@ -90,7 +93,10 @@ const notify = (): void => {
   }
 };
 
-const writeEntries = (spaceBasePath: string, entries: FreshEntry[]): void => {
+const writeEntries = (
+  spaceBasePath: string,
+  entries: ManualInvestigationFreshEntry[]
+): void => {
   const key = storageKey(spaceBasePath);
   const next = copyEntries(entries);
   memoryBySpace.set(key, next);
@@ -98,7 +104,6 @@ const writeEntries = (spaceBasePath: string, entries: FreshEntry[]): void => {
     window.localStorage.setItem(key, JSON.stringify(next));
     writeFailedBySpace.delete(key);
   } catch {
-    // Keep pending memory so later reads / severity remembers do not loop on stale storage.
     writeFailedBySpace.add(key);
   }
   notify();
@@ -108,7 +113,6 @@ const onStorageEvent = (event: StorageEvent): void => {
   if (!event.key || !event.key.startsWith(STORAGE_PREFIX)) {
     return;
   }
-  // Another tab wrote successfully — drop this tab's pending/fallback for that space.
   memoryBySpace.delete(event.key);
   writeFailedBySpace.delete(event.key);
   notify();
@@ -124,7 +128,6 @@ const ensureStorageListener = (): void => {
   storageListenerAttached = true;
 };
 
-/** Subscribe to fresh-id changes (register / dismiss / severity) so the landing page can re-render. */
 export const subscribeManualInvestigationFresh = (listener: () => void): (() => void) => {
   ensureStorageListener();
   listeners.add(listener);
@@ -141,40 +144,7 @@ export const registerManualInvestigationStart = (
   if (entries.some(({ id }) => id === investigationId)) {
     return;
   }
-  entries.push({ id: investigationId });
-  writeEntries(spaceBasePath, entries);
-};
-
-/**
- * Remember which severity bucket a finished unread investigation landed in, so `+N` can
- * survive once that row scrolls off the first page of the section.
- */
-export const rememberManualInvestigationSeverity = (
-  investigationId: string,
-  severity: Severity,
-  spaceBasePath: string
-): void => {
-  const entries = readEntries(spaceBasePath);
-  const entry = entries.find(({ id }) => id === investigationId);
-  if (!entry || entry.severity === severity) {
-    return;
-  }
-  entry.severity = severity;
-  writeEntries(spaceBasePath, entries);
-};
-
-/** Drop a remembered severity when the investigation is observed running again. */
-export const clearManualInvestigationSeverity = (
-  investigationId: string,
-  spaceBasePath: string
-): void => {
-  const entries = readEntries(spaceBasePath);
-  const entry = entries.find(({ id }) => id === investigationId);
-  if (!entry?.severity) {
-    return;
-  }
-  delete entry.severity;
-  writeEntries(spaceBasePath, entries);
+  writeEntries(spaceBasePath, [...entries, { id: investigationId }]);
 };
 
 export const dismissManualInvestigationFresh = (
@@ -194,21 +164,105 @@ export const isManualInvestigationFresh = (
   spaceBasePath: string
 ): boolean => readEntries(spaceBasePath).some(({ id }) => id === investigationId);
 
-export const getManualInvestigationFreshSeverity = (
-  investigationId: string,
-  spaceBasePath: string
-): Severity | undefined =>
-  readEntries(spaceBasePath).find(({ id }) => id === investigationId)?.severity;
+/**
+ * One pass over loaded home sections: attach severity for finished unread rows, clear it
+ * again if that row is back under In progress. Batched into a single write.
+ */
+export const syncManualInvestigationFreshFromSections = (
+  spaceBasePath: string,
+  sections: ReadonlyArray<ManualInvestigationFreshSection>
+): void => {
+  const entries = readEntries(spaceBasePath);
+  if (entries.length === 0) {
+    return;
+  }
 
-/** Tile `+N` counts from remembered severities (not only currently loaded section rows). */
+  let changed = false;
+  for (const section of sections) {
+    if (section.id === 'in-progress') {
+      for (const { id } of section.investigations) {
+        const entry = entries.find((candidate) => candidate.id === id);
+        if (entry?.severity) {
+          delete entry.severity;
+          changed = true;
+        }
+      }
+      continue;
+    }
+    if (!isSeverity(section.id)) {
+      continue;
+    }
+    for (const { id } of section.investigations) {
+      const entry = entries.find((candidate) => candidate.id === id);
+      if (entry && entry.severity !== section.id) {
+        entry.severity = section.id;
+        changed = true;
+      }
+    }
+  }
+
+  if (changed) {
+    writeEntries(spaceBasePath, entries);
+  }
+};
+
+/** Tile `+N` from remembered severities (unfiltered home). */
 export const getManualInvestigationFreshCounts = (spaceBasePath: string): SeverityCounts => {
-  const counts: SeverityCounts = { critical: 0, high: 0, medium: 0, low: 0 };
+  const counts = emptyCounts();
   for (const { severity } of readEntries(spaceBasePath)) {
     if (severity) {
       counts[severity] += 1;
     }
   }
   return counts;
+};
+
+/** Tile `+N` limited to unread ids present in the currently loaded (e.g. search-filtered) rows. */
+export const getManualInvestigationFreshCountsFromSections = (
+  spaceBasePath: string,
+  sections: ReadonlyArray<ManualInvestigationFreshSection>
+): SeverityCounts => {
+  const counts = emptyCounts();
+  for (const section of sections) {
+    if (!isSeverity(section.id)) {
+      continue;
+    }
+    for (const { id } of section.investigations) {
+      if (isManualInvestigationFresh(id, spaceBasePath)) {
+        counts[section.id] += 1;
+      }
+    }
+  }
+  return counts;
+};
+
+/**
+ * Whether opening this unread id should clear New / `+N`. Uses live list membership and/or a
+ * by-id `in_progress` fetch — never “missing from In progress” alone, never remembered severity.
+ */
+export const shouldDismissManualInvestigationFresh = ({
+  investigationId,
+  sections,
+  fetchedInProgress,
+}: {
+  investigationId: string;
+  sections: ReadonlyArray<ManualInvestigationFreshSection>;
+  fetchedInProgress?: boolean;
+}): boolean => {
+  const seenInProgress = sections.some(
+    (section) =>
+      section.id === 'in-progress' &&
+      section.investigations.some(({ id }) => id === investigationId)
+  );
+  if (seenInProgress || fetchedInProgress === true) {
+    return false;
+  }
+  const seenFinished = sections.some(
+    (section) =>
+      (isSeverity(section.id) || section.id === 'not-rated') &&
+      section.investigations.some(({ id }) => id === investigationId)
+  );
+  return seenFinished || fetchedInProgress === false;
 };
 
 /** Clears session fallback between unit tests. */

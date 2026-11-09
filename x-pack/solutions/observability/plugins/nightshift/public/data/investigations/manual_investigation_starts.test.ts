@@ -8,11 +8,13 @@
 import {
   dismissManualInvestigationFresh,
   getManualInvestigationFreshCounts,
+  getManualInvestigationFreshCountsFromSections,
   isManualInvestigationFresh,
   registerManualInvestigationStart,
-  rememberManualInvestigationSeverity,
   resetManualInvestigationFreshForTests,
+  shouldDismissManualInvestigationFresh,
   subscribeManualInvestigationFresh,
+  syncManualInvestigationFreshFromSections,
 } from './manual_investigation_starts';
 
 describe('manualInvestigationStarts', () => {
@@ -24,17 +26,18 @@ describe('manualInvestigationStarts', () => {
     resetManualInvestigationFreshForTests();
   });
 
-  it('registers, remembers severity for tile counts, and dismisses per space', () => {
+  it('registers, syncs severity from sections, and dismisses per space', () => {
     registerManualInvestigationStart('inv-1', spaceA);
     registerManualInvestigationStart('inv-2', spaceA);
     registerManualInvestigationStart('inv-1', spaceB);
 
     expect(isManualInvestigationFresh('inv-1', spaceA)).toBe(true);
-    expect(isManualInvestigationFresh('inv-2', spaceA)).toBe(true);
     expect(isManualInvestigationFresh('inv-2', spaceB)).toBe(false);
 
-    rememberManualInvestigationSeverity('inv-1', 'critical', spaceA);
-    rememberManualInvestigationSeverity('inv-2', 'high', spaceA);
+    syncManualInvestigationFreshFromSections(spaceA, [
+      { id: 'critical', investigations: [{ id: 'inv-1' }] },
+      { id: 'high', investigations: [{ id: 'inv-2' }] },
+    ]);
 
     expect(getManualInvestigationFreshCounts(spaceA)).toEqual({
       critical: 1,
@@ -42,22 +45,77 @@ describe('manualInvestigationStarts', () => {
       medium: 0,
       low: 0,
     });
-    expect(getManualInvestigationFreshCounts(spaceB)).toEqual({
-      critical: 0,
-      high: 0,
-      medium: 0,
-      low: 0,
-    });
 
-    dismissManualInvestigationFresh('inv-1', spaceA);
-    expect(isManualInvestigationFresh('inv-1', spaceA)).toBe(false);
-    expect(isManualInvestigationFresh('inv-1', spaceB)).toBe(true);
+    // Running again clears severity for +N until the next finish.
+    syncManualInvestigationFreshFromSections(spaceA, [
+      { id: 'in-progress', investigations: [{ id: 'inv-1' }] },
+      { id: 'high', investigations: [{ id: 'inv-2' }] },
+    ]);
     expect(getManualInvestigationFreshCounts(spaceA)).toEqual({
       critical: 0,
       high: 1,
       medium: 0,
       low: 0,
     });
+    expect(isManualInvestigationFresh('inv-1', spaceA)).toBe(true);
+
+    dismissManualInvestigationFresh('inv-1', spaceA);
+    expect(isManualInvestigationFresh('inv-1', spaceA)).toBe(false);
+    expect(isManualInvestigationFresh('inv-1', spaceB)).toBe(true);
+  });
+
+  it('scopes loaded-section counts for search without changing persisted state', () => {
+    registerManualInvestigationStart('inv-1', spaceA);
+    registerManualInvestigationStart('inv-2', spaceA);
+    syncManualInvestigationFreshFromSections(spaceA, [
+      { id: 'critical', investigations: [{ id: 'inv-1' }, { id: 'inv-2' }] },
+    ]);
+
+    expect(
+      getManualInvestigationFreshCountsFromSections(spaceA, [
+        { id: 'critical', investigations: [{ id: 'inv-2' }] },
+      ])
+    ).toEqual({ critical: 1, high: 0, medium: 0, low: 0 });
+    expect(getManualInvestigationFreshCounts(spaceA).critical).toBe(2);
+  });
+
+  it('dismisses only from live finished state', () => {
+    const finishedSections = [{ id: 'critical' as const, investigations: [{ id: 'inv-1' }] }];
+    const runningSections = [{ id: 'in-progress' as const, investigations: [{ id: 'inv-1' }] }];
+
+    expect(
+      shouldDismissManualInvestigationFresh({
+        investigationId: 'inv-1',
+        sections: finishedSections,
+      })
+    ).toBe(true);
+    expect(
+      shouldDismissManualInvestigationFresh({
+        investigationId: 'inv-1',
+        sections: runningSections,
+        fetchedInProgress: false,
+      })
+    ).toBe(false);
+    expect(
+      shouldDismissManualInvestigationFresh({
+        investigationId: 'inv-1',
+        sections: [],
+        fetchedInProgress: false,
+      })
+    ).toBe(true);
+    expect(
+      shouldDismissManualInvestigationFresh({
+        investigationId: 'inv-1',
+        sections: [],
+        fetchedInProgress: true,
+      })
+    ).toBe(false);
+    expect(
+      shouldDismissManualInvestigationFresh({
+        investigationId: 'inv-1',
+        sections: [],
+      })
+    ).toBe(false);
   });
 
   it('notifies subscribers on register and dismiss', () => {
@@ -80,7 +138,9 @@ describe('manualInvestigationStarts', () => {
     );
 
     expect(isManualInvestigationFresh('legacy-1', spaceA)).toBe(true);
-    rememberManualInvestigationSeverity('legacy-1', 'medium', spaceA);
+    syncManualInvestigationFreshFromSections(spaceA, [
+      { id: 'medium', investigations: [{ id: 'legacy-1' }] },
+    ]);
     expect(getManualInvestigationFreshCounts(spaceA).medium).toBe(1);
   });
 
@@ -99,19 +159,25 @@ describe('manualInvestigationStarts', () => {
     getItem.mockRestore();
   });
 
-  it('keeps pending memory when only setItem throws so severity remembers do not loop', () => {
+  it('keeps pending memory when only setItem throws so sync does not loop', () => {
     registerManualInvestigationStart('inv-1', spaceA);
 
     const setItem = jest.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
       throw new Error('quota');
     });
 
-    expect(() => rememberManualInvestigationSeverity('inv-1', 'critical', spaceA)).not.toThrow();
+    expect(() =>
+      syncManualInvestigationFreshFromSections(spaceA, [
+        { id: 'critical', investigations: [{ id: 'inv-1' }] },
+      ])
+    ).not.toThrow();
     expect(getManualInvestigationFreshCounts(spaceA).critical).toBe(1);
-    // Second remember with the same severity is a no-op (no write / notify loop).
+
     const listener = jest.fn();
     const unsubscribe = subscribeManualInvestigationFresh(listener);
-    rememberManualInvestigationSeverity('inv-1', 'critical', spaceA);
+    syncManualInvestigationFreshFromSections(spaceA, [
+      { id: 'critical', investigations: [{ id: 'inv-1' }] },
+    ]);
     expect(listener).not.toHaveBeenCalled();
     unsubscribe();
 
@@ -120,7 +186,6 @@ describe('manualInvestigationStarts', () => {
 
   it('re-reads localStorage before each write so another tab is not overwritten', () => {
     registerManualInvestigationStart('inv-1', spaceA);
-    // Simulate another tab writing inv-2 into storage.
     window.localStorage.setItem(
       'nightshift.manualInvestigationFresh:/s/space-a',
       JSON.stringify([{ id: 'inv-1' }, { id: 'inv-2' }])
