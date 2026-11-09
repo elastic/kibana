@@ -154,10 +154,10 @@ describe('McpClient', () => {
     jest.clearAllMocks();
   });
 
-  describe('constructor', () => {
-    it('creates transport with correct URL and headers', () => {
+  describe('constructor and transport creation', () => {
+    it('creates transport with correct URL and headers', async () => {
       const customHeaders = { 'X-Custom': 'value' };
-      new McpClient(mockLogger, clientDetails, { headers: customHeaders });
+      await new McpClient(mockLogger, clientDetails, { headers: customHeaders }).connect();
 
       expect(StreamableHTTPClientTransport).toHaveBeenCalledWith(
         expect.objectContaining({ href: 'https://example.com/mcp' }),
@@ -169,8 +169,8 @@ describe('McpClient', () => {
       );
     });
 
-    it('creates transport with empty headers when customHeaders not provided', () => {
-      new McpClient(mockLogger, clientDetails);
+    it('creates transport with empty headers when customHeaders not provided', async () => {
+      await new McpClient(mockLogger, clientDetails).connect();
 
       expect(StreamableHTTPClientTransport).toHaveBeenCalledWith(
         expect.objectContaining({ href: 'https://example.com/mcp' }),
@@ -182,8 +182,8 @@ describe('McpClient', () => {
       );
     });
 
-    it('creates transport with reconnection options', () => {
-      new McpClient(mockLogger, clientDetails);
+    it('creates transport with reconnection options', async () => {
+      await new McpClient(mockLogger, clientDetails).connect();
 
       expect(StreamableHTTPClientTransport).toHaveBeenCalledWith(
         expect.anything(),
@@ -198,9 +198,9 @@ describe('McpClient', () => {
       );
     });
 
-    it('creates transport with custom fetch when provided', () => {
+    it('creates transport with custom fetch when provided', async () => {
       const customFetch = jest.fn();
-      new McpClient(mockLogger, clientDetails, { fetch: customFetch });
+      await new McpClient(mockLogger, clientDetails, { fetch: customFetch }).connect();
 
       expect(StreamableHTTPClientTransport).toHaveBeenCalledWith(
         expect.objectContaining({ href: 'https://example.com/mcp' }),
@@ -210,11 +210,17 @@ describe('McpClient', () => {
       );
     });
 
-    it('does not include fetch in transport options when not provided', () => {
-      new McpClient(mockLogger, clientDetails);
+    it('does not include fetch in transport options when not provided', async () => {
+      await new McpClient(mockLogger, clientDetails).connect();
 
       const transportCallArgs = (StreamableHTTPClientTransport as jest.Mock).mock.calls[0][1];
       expect(transportCallArgs).not.toHaveProperty('fetch');
+    });
+
+    it('does not create a transport in the constructor', () => {
+      new McpClient(mockLogger, clientDetails);
+
+      expect(StreamableHTTPClientTransport).not.toHaveBeenCalled();
     });
 
     it('creates client with correct name and version', () => {
@@ -349,6 +355,68 @@ describe('McpClient', () => {
       expect(mockLogger.error).toHaveBeenCalledWith(
         'Error connecting to MCP server test-client, 1.0.0: String error'
       );
+    });
+
+    it('creates a new transport for every connect attempt after a failure', async () => {
+      const firstTransport = {} as StreamableHTTPClientTransport;
+      const secondTransport = {} as StreamableHTTPClientTransport;
+      (StreamableHTTPClientTransport as unknown as jest.Mock)
+        .mockImplementationOnce(() => firstTransport)
+        .mockImplementationOnce(() => secondTransport);
+      mockClient.close.mockResolvedValue(undefined);
+      mockClient.connect.mockRejectedValueOnce(new Error('connection refused'));
+      mockClient.connect.mockResolvedValueOnce(undefined);
+      const client = new McpClient(mockLogger, clientDetails);
+
+      await expect(client.connect()).rejects.toThrow('connection refused');
+      await client.connect();
+
+      expect(StreamableHTTPClientTransport).toHaveBeenCalledTimes(2);
+      expect(mockClient.connect).toHaveBeenNthCalledWith(1, firstTransport);
+      expect(mockClient.connect).toHaveBeenNthCalledWith(2, secondTransport);
+      expect(client.isConnected()).toBe(true);
+    });
+
+    it('closes the SDK client when connect fails', async () => {
+      mockClient.close.mockResolvedValue(undefined);
+      mockClient.connect.mockRejectedValue(new Error('boom'));
+      const client = new McpClient(mockLogger, clientDetails);
+
+      await expect(client.connect()).rejects.toThrow('boom');
+
+      expect(mockClient.close).toHaveBeenCalledTimes(1);
+      expect(client.isConnected()).toBe(false);
+    });
+
+    it('rethrows the connect error when closing the SDK client also fails', async () => {
+      mockClient.close.mockRejectedValue(new Error('close failed'));
+      mockClient.connect.mockRejectedValue(new Error('boom'));
+      const client = new McpClient(mockLogger, clientDetails);
+
+      await expect(client.connect()).rejects.toThrow('Error connecting to MCP server: boom');
+    });
+
+    it('keeps the original error as cause', async () => {
+      mockClient.close.mockResolvedValue(undefined);
+      const unauthorized = new UnauthorizedError('Unauthorized');
+      mockClient.connect.mockRejectedValue(unauthorized);
+      const client = new McpClient(mockLogger, clientDetails);
+
+      const thrown = await client.connect().catch((e) => e);
+
+      expect(thrown).toBeInstanceOf(Error);
+      expect((thrown as Error).cause).toBe(unauthorized);
+    });
+
+    it('keeps the original StreamableHTTPError as cause', async () => {
+      mockClient.close.mockResolvedValue(undefined);
+      const httpError = new StreamableHTTPError(502, 'Bad gateway');
+      mockClient.connect.mockRejectedValue(httpError);
+      const client = new McpClient(mockLogger, clientDetails);
+
+      const thrown = await client.connect().catch((e) => e);
+
+      expect((thrown as Error).cause).toBe(httpError);
     });
 
     it('handles error objects without message property', async () => {
