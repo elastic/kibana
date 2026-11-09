@@ -5,5 +5,10 @@
  * 2.0.
  */
 
-export { findActionPoliciesTool } from './find_action_policies';
-export type { FindActionPoliciesToolDeps } from './find_action_policies';
+import { createPlaywrightConfig } from '@kbn/scout-security';
+
+export default createPlaywrightConfig({
+  testDir: './parallel_tests',
+  workers: 2,
+  runGlobalSetup: false,
+});
