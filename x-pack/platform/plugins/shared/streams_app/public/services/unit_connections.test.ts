@@ -1998,6 +1998,20 @@ describe('routeLine from a routing rule', () => {
     });
   });
 
+  it('limits the child routing node to the signals its parent rule carries', () => {
+    const unit = routedUnit();
+    unit.unit.sources = [
+      { id: 'otlp-input', name: 'OTLP', type: 'otlp', supported_telemetry: ['logs', 'traces'] },
+    ];
+    const line = ruleLine(0, 'es-logs');
+    expect(getRoutableLineSignals(unit, line)).toEqual({ current: ['logs'], available: ['logs'] });
+
+    const next = routeLine(unit, line, [{ destinations: ['es-logs'] }], ['logs', 'traces']);
+    expect(
+      next.unit.pipelines.find(({ id }) => id === 'main-routing')?.supported_telemetry
+    ).toEqual(['logs']);
+  });
+
   it('leaves rules with several targets as they are', () => {
     const unit = routedUnit();
     const line = ruleLine(1, 'es-logs');

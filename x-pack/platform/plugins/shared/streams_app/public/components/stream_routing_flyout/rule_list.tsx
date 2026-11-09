@@ -23,8 +23,10 @@ import { i18n } from '@kbn/i18n';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { UnitSignal } from '../../services/unit_pipeline';
 import { RoutingRuleRow } from './rule_row';
+import { ROUTING_SIGNAL_LABELS } from './signal_labels';
 import {
-  hasCatchAllRule,
+  getRulesTelemetry,
+  getUnmatchedSignals,
   type RoutingRuleChanges,
   type RoutingRuleDraft,
 } from './state_management/routing_flyout_machine';
@@ -49,6 +51,8 @@ export function RoutingRuleList({
   onReorder,
 }: RoutingRuleListProps) {
   const dragAreaId = useGeneratedHtmlId();
+  const unmatchedSignals = getUnmatchedSignals(rules, availableSignals);
+  const handledSignals = getRulesTelemetry(rules, availableSignals);
 
   const onDragEnd: OnDragEndResponder = useCallback(
     ({ source, destination }) => {
@@ -102,14 +106,26 @@ export function RoutingRuleList({
         ) : null}
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      {!hasCatchAllRule(rules) ? (
+      {unmatchedSignals.length > 0 ? (
         <>
           <KbnWarningCallout
             size="s"
-            title={i18n.translate('xpack.streams.routingFlyout.unmatchedDataWarning', {
-              defaultMessage:
-                'Some data doesn’t match any of these conditions and will be dropped. To keep it, add a rule with no condition',
-            })}
+            title={
+              unmatchedSignals.length === handledSignals.length
+                ? i18n.translate('xpack.streams.routingFlyout.unmatchedDataWarning', {
+                    defaultMessage:
+                      'Some data doesn’t match any of these conditions and will be dropped. To keep it, add a rule with no condition',
+                  })
+                : i18n.translate('xpack.streams.routingFlyout.unmatchedSignalsWarning', {
+                    defaultMessage:
+                      'Some {signals} data doesn’t match any of these conditions and will be dropped. To keep it, add a rule with no condition that handles {signals}',
+                    values: {
+                      signals: unmatchedSignals
+                        .map((signal) => ROUTING_SIGNAL_LABELS[signal])
+                        .join(', '),
+                    },
+                  })
+            }
             data-test-subj="streamsRoutingFlyoutUnmatchedDataWarning"
           />
           <EuiSpacer size="m" />

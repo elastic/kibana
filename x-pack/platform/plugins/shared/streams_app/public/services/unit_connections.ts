@@ -1617,6 +1617,15 @@ const routePipelineLine = (
   );
 };
 
+/** A child routing node only receives what its parent rule carries, so requested signals are narrowed to those. */
+const childSignals = (
+  carried: readonly UnitSignal[],
+  requested: readonly UnitSignal[] | undefined
+): UnitSignal[] => {
+  const narrowed = intersectSignals(carried, requested);
+  return narrowed.length > 0 ? narrowed : [...carried];
+};
+
 /**
  * Routes a rule's line through a new child routing pipeline the rule delegates
  * to. Only a rule whose one target is the line's destination is routable, since
@@ -1652,7 +1661,10 @@ const routeRuleLine = (
     ...unit.unit.pipelines,
     {
       id: childId,
-      supported_telemetry: [...(supportedTelemetry ?? ruleSignals(unit, pipeline, rule.ruleIndex))],
+      supported_telemetry: childSignals(
+        ruleSignals(unit, pipeline, rule.ruleIndex),
+        supportedTelemetry
+      ),
       config: [{ name: PIPELINE_ENTRY.routes, value: [...routes] }],
     },
   ]);
@@ -1714,8 +1726,9 @@ export const getRoutableLineSignals = (
 ): RoutingSignals => {
   if (origin.kind === GRAPH_ENDPOINT_KIND.rule) {
     const pipeline = findPipeline(unit, origin.rule.pipelineId);
-    const current = pipeline ? ruleSignals(unit, pipeline, origin.rule.ruleIndex) : [];
-    return withCurrent(current, upstreamSignals(unit, origin.rule.pipelineId));
+    // The child node only receives what the rule carries, not everything its pipeline does.
+    const carried = pipeline ? ruleSignals(unit, pipeline, origin.rule.ruleIndex) : [];
+    return withCurrent(carried, carried);
   }
   if (origin.kind === GRAPH_ENDPOINT_KIND.source) {
     const pipeline =

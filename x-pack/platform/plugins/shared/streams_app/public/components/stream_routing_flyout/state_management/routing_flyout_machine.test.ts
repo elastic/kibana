@@ -8,7 +8,7 @@
 import { createActor, setup } from 'xstate';
 import {
   getNewRoutingNodeRules,
-  hasCatchAllRule,
+  getUnmatchedSignals,
   routingFlyoutMachine,
   type RoutingFlyoutInput,
   type RoutingSaveRequest,
@@ -53,7 +53,7 @@ describe('routingFlyoutMachine', () => {
         base: { destinations: ['es-logs'] },
       },
     ]);
-    expect(hasCatchAllRule(context.rules)).toBe(true);
+    expect(getUnmatchedSignals(context.rules, context.availableSignals)).toEqual([]);
     expect(context.hasChanges).toBe(false);
 
     flyout.send({ type: 'flyout.save' });
@@ -136,10 +136,28 @@ describe('routingFlyoutMachine', () => {
       key: 'rule-1',
       changes: { condition: { field: 'body', operator: 'equals', value: 'x' } },
     });
-    expect(hasCatchAllRule(flyout.getSnapshot().context.rules)).toBe(true);
+    const unmatched = () => {
+      const { rules, availableSignals } = flyout.getSnapshot().context;
+      return getUnmatchedSignals(rules, availableSignals);
+    };
+    expect(unmatched()).toEqual([]);
 
     flyout.send({ type: 'rule.delete', key: 'rule-0' });
-    expect(hasCatchAllRule(flyout.getSnapshot().context.rules)).toBe(false);
+    expect(unmatched()).toEqual(['logs']);
+  });
+
+  it('reports the signals no rule without a condition covers', () => {
+    const { flyout } = startFlyout({
+      target: { kind: 'pipeline', pipelineId: 'routing' },
+      rules: [
+        { telemetry: ['logs'], destinations: ['es-logs'] },
+        { when: 'resource.attributes["team"] == "a"', telemetry: ['traces'], destinations: [] },
+      ],
+      signals: ['logs', 'traces'],
+      availableSignals: ['logs', 'traces'],
+    });
+    const { rules, availableSignals } = flyout.getSnapshot().context;
+    expect(getUnmatchedSignals(rules, availableSignals)).toEqual(['traces']);
   });
 
   it('edits an existing routing node without touching the fields it does not show', () => {

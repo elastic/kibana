@@ -82,10 +82,6 @@ export interface RoutingSaveRequest {
   supportedTelemetry: UnitSignal[];
 }
 
-/** Whether a rule with no condition keeps the data the other rules do not match. */
-export const hasCatchAllRule = (rules: readonly RoutingRuleDraft[]): boolean =>
-  rules.some(({ condition }) => serializeCondition(condition) === undefined);
-
 const toDraft =
   (signals: readonly UnitSignal[]) =>
   (rule: RouteRule, index: number): RoutingRuleDraft => ({
@@ -104,6 +100,25 @@ export const getRulesTelemetry = (
   const used = new Set(rules.flatMap(({ telemetry }) => telemetry));
   const ordered = availableSignals.filter((signal) => used.has(signal));
   return [...ordered, ...[...used].filter((signal) => !availableSignals.includes(signal))];
+};
+
+/**
+ * Signals the rules handle that no rule without a condition covers, so data of
+ * those signals that matches no condition is dropped.
+ */
+export const getUnmatchedSignals = (
+  rules: readonly RoutingRuleDraft[],
+  availableSignals: readonly UnitSignal[]
+): UnitSignal[] => {
+  const handled = getRulesTelemetry(rules, availableSignals);
+  const covered = new Set(
+    rules
+      .filter(({ condition }) => serializeCondition(condition) === undefined)
+      .flatMap(({ telemetry }) => telemetry)
+  );
+  return (handled.length > 0 ? handled : [...availableSignals]).filter(
+    (signal) => !covered.has(signal)
+  );
 };
 
 const sameSignals = (left: readonly UnitSignal[], right: readonly UnitSignal[]): boolean =>
