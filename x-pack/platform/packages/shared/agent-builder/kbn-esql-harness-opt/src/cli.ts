@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Fs from 'fs';
 import Path from 'path';
 import { run } from '@kbn/dev-cli-runner';
 import {
@@ -243,9 +244,17 @@ Both lanes' Kibana processes must run with ESQL_HARNESS_TRACE_FILE pointing at
       }
 
       if (command === 'check') {
+        const snapshots = Fs.existsSync(Path.join(harnessPaths().lineageDir))
+          ? Fs.readdirSync(harnessPaths().lineageDir)
+              .map((entry) => Path.join(harnessPaths().lineageDir, entry, 'baseline-tool'))
+              .filter((candidate) => Fs.existsSync(candidate))
+              .sort()
+          : [];
+
         await verifySealed({
           worktree: process.cwd(),
           baselineRef: optionalFlag(flags.baseline) ?? 'origin/main',
+          baselineDir: optionalFlag(flags.baseline) ? undefined : snapshots[snapshots.length - 1],
           repeats: Number(optionalFlag(flags.repeats) ?? 2),
           rollouts,
           concurrency,

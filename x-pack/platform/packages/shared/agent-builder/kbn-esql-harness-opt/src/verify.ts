@@ -90,6 +90,7 @@ const provenanceTable = (summary: RunSummary): Record<string, number> => {
 export const verifySealed = async ({
   worktree,
   baselineRef,
+  baselineDir,
   repeats,
   rollouts,
   concurrency,
@@ -102,6 +103,14 @@ export const verifySealed = async ({
   worktree: string;
   /** Git ref whose version of the tool is the comparison baseline. */
   baselineRef: string;
+  /**
+   * Directory snapshot to use as the baseline instead of a git ref.
+   *
+   * Preferred: a campaign records what it started from, and that copy still contains the trace
+   * writer. Checking out `origin/main` removes it, so the baseline reports zero tokens and the
+   * cost comparison becomes meaningless (it reported a 3.6e15× cost ratio before this existed).
+   */
+  baselineDir?: string;
   repeats: number;
   rollouts: number;
   concurrency: number;
@@ -144,12 +153,21 @@ export const verifySealed = async ({
   const snapshot = snapshotTool(worktree);
   let baselineRuns: RunSummary[];
   try {
-    await execFileAsync('git', ['checkout', baselineRef, '--', TOOL_DIR], { cwd: worktree });
+    if (baselineDir) {
+      const toolPath = Path.join(worktree, TOOL_DIR);
+      Fs.rmSync(toolPath, { recursive: true, force: true });
+      Fs.cpSync(baselineDir, toolPath, { recursive: true });
+    } else {
+      await execFileAsync('git', ['checkout', baselineRef, '--', TOOL_DIR], { cwd: worktree });
+    }
     await restartLane({ command: restartCommand, url: target.kibanaUrl, log });
     log.info(`[verify] measuring the baseline (${baselineRef}, ${treeHash(worktree)})`);
     baselineRuns = await measure('sealed-baseline', treeHash(worktree));
   } finally {
     snapshot.restore();
+    // `git checkout <ref> -- <path>` also stages what it writes, so the index would stay dirty
+    // with the baseline's version of files the restore has already put back.
+    await execFileAsync('git', ['reset', '--quiet'], { cwd: worktree }).catch(() => undefined);
     await restartLane({ command: restartCommand, url: target.kibanaUrl, log });
   }
 
@@ -164,7 +182,7 @@ export const verifySealed = async ({
     `# Held-out check — ${new Date().toISOString()}`,
     '',
     `Split: ${examples.length} examples · ${repeats} repeat(s) × ${rollouts} rollout(s) per side`,
-    `Current: ${currentHash} · baseline: ${baselineRef}`,
+    `Current: ${currentHash} · baseline: ${baselineDir ?? baselineRef}`,
     '',
     '| metric | baseline | current | Δ |',
     '|---|---|---|---|',

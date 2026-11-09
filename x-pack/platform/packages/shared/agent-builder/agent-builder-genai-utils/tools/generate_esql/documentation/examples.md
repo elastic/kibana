@@ -133,6 +133,53 @@ FROM products METADATA _id, _score
 ```
 
 ```esql
+// How many requests came from team "alpha", how many from team "beta", and what share of the two teams' combined requests is "alpha"?
+// Output exactly: one count per named group, then the share. One overall row, no extra grouping.
+FROM requests
+| EVAL is_first = CASE(team == "alpha", 1, 0), is_second = CASE(team == "beta", 1, 0)
+| STATS first_count = SUM(is_first), second_count = SUM(is_second)
+| EVAL share = first_count::double / (first_count + second_count)::double
+```
+
+```esql
+// Which 5 hosts have the highest 95th percentile of latency, counting only hosts above 250? Show the p95 and the median, highest first.
+// The threshold applies to the aggregate, so WHERE comes after STATS and the input rows are not filtered.
+FROM metrics-app
+| STATS p95 = PERCENTILE(latency, 95), median = MEDIAN(latency) BY host.name
+| WHERE p95 > 250
+| SORT p95 DESC
+| LIMIT 5
+```
+
+```esql
+// For each category, using only records that have a discount, show the total discount, the record count and the average discount per record. Keep categories with more than 1 record, top 5 by average.
+// "Per record" means total divided by the number of records (COUNT(*)), not AVG over the field.
+FROM sales
+| WHERE discount IS NOT NULL
+| STATS total = SUM(discount), events = COUNT(*) BY category
+| EVAL per_event = total::double / events::double
+| WHERE events > 1
+| SORT per_event DESC
+| LIMIT 5
+```
+
+```esql
+// Which user was most recently deleted? Return the id together with the field it was ordered by.
+FROM users
+| WHERE deleted_at IS NOT NULL
+| SORT deleted_at DESC
+| LIMIT 1
+| KEEP id, deleted_at
+```
+
+```esql
+// Detecting large data transfers: return only the identifying fields plus the measured field, with no timestamp or other extra columns.
+FROM logs-*
+| WHERE network.bytes > 1000000
+| KEEP source.ip, destination.ip, network.bytes
+```
+
+```esql
 // Detect change points in CPU usage over the past week
 FROM metrics-*
 | WHERE @timestamp > NOW() - 7 days
