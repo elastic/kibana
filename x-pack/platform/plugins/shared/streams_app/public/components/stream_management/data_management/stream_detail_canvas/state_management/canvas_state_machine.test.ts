@@ -294,7 +294,10 @@ describe('canvas routing flyout', () => {
     ref.send({
       type: 'rule.update',
       key: 'rule-1',
-      changes: { condition: { field: 'body', operator: 'equals', value: 'x' }, action: 'copy' },
+      changes: {
+        condition: { field: 'service.name', operator: 'equals', value: 'x' },
+        action: 'copy',
+      },
     });
     ref.send({ type: 'flyout.save' });
 
@@ -306,7 +309,7 @@ describe('canvas routing flyout', () => {
       {
         name: 'routes',
         value: [
-          { when: 'body == "x"', action: 'copy', destinations: [] },
+          { when: 'resource.attributes["service.name"] == "x"', action: 'copy', destinations: [] },
           { destinations: ['es'] },
         ],
       },
