@@ -143,6 +143,8 @@ describe('createRemoteDestinationProbe', () => {
     ],
     [403, '<html>Forbidden</html>', { outcome: 'rejected', status: 403, message: REFUSED_COPY }],
     [404, '', { outcome: 'rejected', status: 404, message: genericCopy(404) }],
+    [408, '', { outcome: 'unverified', reason: 'unexpected_status', status: 408 }],
+    [429, '', { outcome: 'unverified', reason: 'unexpected_status', status: 429 }],
     [302, '', { outcome: 'unverified', reason: 'unexpected_status', status: 302 }],
     [503, 'upstream down', { outcome: 'unverified', reason: 'unexpected_status', status: 503 }],
   ])('classifies HTTP %i with body %j', async (status, body, expected) => {

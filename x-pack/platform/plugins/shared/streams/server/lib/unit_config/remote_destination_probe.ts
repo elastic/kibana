@@ -12,6 +12,8 @@ const REMOTE_PROBE_TIMEOUT_MS = 10_000;
 const ELASTIC_CLOUD_HOST_SUFFIX = '.elastic.cloud';
 const PROMETHEUS_REMOTE_WRITE_PATH = '/_prometheus/api/v1/write';
 const PROMETHEUS_REMOTE_WRITE_ACTION = 'indices:data/write/prometheus/remote_write';
+// Temporary 4xx answers save with a warning, like a 5xx.
+const TRANSIENT_CLIENT_ERROR_STATUSES = new Set([408, 429]);
 
 const HOST_NOT_ALLOWED_MESSAGE =
   'Remote Elasticsearch destinations must use an https:// Elastic Cloud endpoint whose host ends with .elastic.cloud.';
@@ -131,7 +133,7 @@ export const createRemoteDestinationProbe = ({
       if (status >= 200 && status < 300) {
         return { outcome: 'ok' };
       }
-      if (status >= 400 && status < 500) {
+      if (status >= 400 && status < 500 && !TRANSIENT_CLIENT_ERROR_STATUSES.has(status)) {
         return {
           outcome: 'rejected',
           status,
