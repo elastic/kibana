@@ -137,7 +137,8 @@ export const ManagementApp = ({ dependencies, history, appBasePath }: Management
             // @ts-expect-error Techincally `paddingSize` isn't supported but it is passed through,
             // this is a stop-gap for Stack managmement specifically until page components can be converted to template components
             mainProps={{ paddingSize: mainPaddingSize ?? 'm' }}
-            panelled
+            // POC: project chrome's frame is the recessed glass surface; classic keeps the white panel.
+            panelled={chromeStyle === 'classic'}
           >
             <ManagementRouter
               history={history}
