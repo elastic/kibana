@@ -39,7 +39,7 @@ export const installInvestigationAgent = async ({
       type: NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID,
       name: INVESTIGATION_AGENT_NAME,
       description: INVESTIGATION_AGENT_DESCRIPTION,
-      labels: ['observability', 'significant-events', 'investigation', 'cortex', 'sandbox'],
+      labels: ['observability', 'significant-events', 'investigation', 'wiki', 'sandbox'],
       avatar_symbol: 'NI',
       access_control: { access_mode: AgentAccessControlMode.Public },
       configuration: {
