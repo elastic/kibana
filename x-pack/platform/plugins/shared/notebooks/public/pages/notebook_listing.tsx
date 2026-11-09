@@ -14,23 +14,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { useHistory } from 'react-router-dom';
 import { NOTEBOOK_SAVED_OBJECT_TYPE, PLUGIN_NAME, getNotebookPath } from '../../common/constants';
-import type { InputCellDefinition } from '../../common/types';
-import { buildDemoNotebook } from '../demo/demo_notebook';
-import { resolveInputParams } from '../model/params';
-import { createRunQuery } from '../model/run_query';
+import { WEB_TRAFFIC_DEMO } from '../demo/web_traffic_demo';
 import { useNotebookServices } from '../services';
 import type { NotebookApi } from '../services/notebook_api';
 import { useBreadcrumbs } from './use_breadcrumbs';
 
-const PINNED_TIME: InputCellDefinition = {
-  id: 'demo-time',
-  name: 'time',
-  type: 'input',
-  input: { kind: 'time', defaultValue: { from: 'now-7d/d', to: 'now' }, pinned: true },
-};
-
 export const NotebookListing = ({ api }: { api: NotebookApi }) => {
-  const { core, plugins } = useNotebookServices();
+  const { core } = useNotebookServices();
   const history = useHistory();
   const [isLoadingDemo, setIsLoadingDemo] = useState(false);
   useBreadcrumbs();
@@ -38,17 +28,7 @@ export const NotebookListing = ({ api }: { api: NotebookApi }) => {
   const loadDemo = async () => {
     setIsLoadingDemo(true);
     try {
-      const attributes = await buildDemoNotebook({
-        runQuery: createRunQuery(plugins.data.search),
-        lens: plugins.lens,
-        dataViews: plugins.data.dataViews,
-        defaultParams: resolveInputParams(
-          PINNED_TIME,
-          { kind: 'time', range: { from: 'now-7d/d', to: 'now' } },
-          new Date()
-        ),
-      });
-      const { id } = await api.create(attributes);
+      const { id } = await api.create(WEB_TRAFFIC_DEMO);
       history.push(getNotebookPath(id));
     } catch (error) {
       core.notifications.toasts.addError(error, {

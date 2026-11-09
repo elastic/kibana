@@ -11,13 +11,15 @@ elasticsearch runnning on: http://localhost:9200
 
 ## Demo
 
-Recreate the **[Logs] Web Traffic** sample dashboard (`kibana_sample_data_logs`) as a notebook, loaded via a "Load demo" button:
+Recreate the **[Logs] Web Traffic** sample dashboard (`kibana_sample_data_logs`) as a notebook, loaded via a "Load demo" button. The demo is a notebook built in the UI and exported, stored as `public/demo/web_traffic_demo.ts`; to change it, edit the notebook in Kibana, export it, and regenerate that file from the export's `attributes`, dropping the Lens runtime-only `indexPatternRefs` and `allColumns`.
 
 - **One shared ES|QL cell** computing Visits, Unique Visitors, 4xx %, 5xx % in a single `STATS`, fanning out to **4 metric chart cells** (the "one query feeds many" pitch).
-- Separate ES|QL cells + charts for: extension datatable, URL datatable, bytes histogram (XY), response codes over time (rewritten in ES|QL as `STATS COUNT() BY BUCKET(@timestamp, …), response`, no annotations).
-- A static Markdown cell (instructions panel).
-- Inputs: pinned time range, `country` dropdown (`geo.src`), `os` dropdown (`machine.os.keyword`), `bytes` range; wired into queries via named params so changing one input re-runs only its branch.
-- Out of demo: Map, both Vega panels, annotations.
+- ES|QL cells + charts for the remaining panels, including response codes over time, bytes distribution and errors by host.
+- Both Vega panels (unique destination heatmap, OS and destination Sankey) as Vega cells fed by ES|QL cells.
+- Markdown cells for the instructions and the total requests and bytes panel.
+- Inputs: pinned time range, source country and OS dropdowns, bytes range; wired into queries via named params (`?x IS NULL OR …`) so an empty input matches everything and changing one input re-runs only its branch.
+- An app laying the cells out like the dashboard.
+- Out of demo: Map.
 
 Source dashboard for reference: `src/platform/plugins/shared/home/server/services/sample_data/data_sets/logs/saved_objects.ts` (dashboard id `edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b`). Time field `timestamp` is an alias of `@timestamp`; the ES|QL panels use `@timestamp`.
 
