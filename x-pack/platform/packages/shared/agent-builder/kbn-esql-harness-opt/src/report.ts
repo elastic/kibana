@@ -32,6 +32,9 @@ interface LedgerEntry {
     predictedRegressions?: string[];
   };
   gate?: Record<string, unknown>;
+  failures?: string[];
+  violations?: string[];
+  error?: string;
   filesChanged?: string[];
   diff?: string;
   parentHash?: string;
@@ -216,6 +219,9 @@ export const buildReportPayload = () => {
       round: entry.round,
       campaignId: entry.campaignId ?? 'legacy',
       rejectedReason: entry.rejected,
+      // Why a round never reached the gate: lint violations, a failing typecheck/test/lint run,
+      // or a proposer that did not answer. Without this the report just says "validation".
+      failures: entry.failures ?? entry.violations ?? (entry.error ? [entry.error] : []),
       parentHash: entry.parentHash ?? 'base',
       configHash: entry.variantHash ?? `round-${entry.round}`,
       filesChanged: entry.filesChanged ?? [],

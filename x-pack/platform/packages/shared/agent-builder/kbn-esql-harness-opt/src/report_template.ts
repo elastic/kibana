@@ -182,7 +182,11 @@ function lineageGraph() {
     if (round.rejectedReason && !round.gate) {
       nodes.set('failed-' + round.round, {
         id: 'failed-' + round.round, label: 'round ' + round.round,
-        sub: round.rejectedReason, parent: round.parentHash, state: 'failed',
+        sub:
+          round.rejectedReason +
+          ((round.failures || [])[0]
+            ? ': ' + String((round.failures || [])[0]).replace(/[^ ]*generate_esql\//g, '').slice(0, 40)
+            : ''), parent: round.parentHash, state: 'failed',
         round: round.round, delta: null, cost: null,
       });
       return;
@@ -293,7 +297,13 @@ function viewCampaign() {
         '<td>' + (g ? usd(g.incumbentCostPerSolved) + ' → ' + usd(g.candidateCostPerSolved) : '—') + '</td>' +
         '<td>' + (g ? (g.regressions || []).length : '—') + '</td>' +
         '<td>' + verdict(round) + '</td>' +
-        '<td class="muted">' + esc((round.rationale || '').slice(0, 140)) + '</td></tr>';
+        '<td class="muted">' +
+        esc(
+          ((round.failures || [])[0] || round.rationale || '')
+            .replace(/[^ ]*generate_esql\//g, '')
+            .slice(0, 140)
+        ) +
+        '</td></tr>';
     }).join('') + '</table>';
 }
 
@@ -345,8 +355,16 @@ function viewRounds() {
       ' unpredicted</td></tr></table>'
     : '<p class="muted">No manifest to verify.</p>';
 
+  const failureBlock = (round.failures || []).length
+    ? '<h3>Why it never reached the gate</h3>' +
+      (round.failures || [])
+        .map((failure) => '<pre class="bad">' + esc(String(failure).slice(0, 4000)) + '</pre>')
+        .join('')
+    : '';
+
   return '<p class="back" ' + goAttr({ tab: 'campaign' }) + '>← campaign</p>' +
     '<h2>Round ' + round.round + ' ' + verdict(round) + '</h2>' +
+    failureBlock +
     (g ? cards([
       ['Δ reward', sign(g.meanDelta), cls(g.meanDelta)],
       ['95% CI', '[' + n(g.ciLow) + ', ' + n(g.ciHigh) + ']'],
