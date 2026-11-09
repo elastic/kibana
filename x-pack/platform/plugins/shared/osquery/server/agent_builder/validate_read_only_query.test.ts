@@ -284,14 +284,28 @@ describe('validateReadOnlyQuery', () => {
       ).toBeNull();
     });
 
-    it('validates a deeply nested query in linear time and rejects an oversized one', () => {
-      const depth = 2000;
+    it('validates a deeply nested query under the length cap in linear time', () => {
+      const depth = 1200;
       const nested =
         'SELECT 1 FROM ' + '(SELECT 1 FROM '.repeat(depth) + 'processes' + ')'.repeat(depth);
+      expect(nested.length).toBeLessThan(20000);
       const started = Date.now();
-      validateReadOnlyQuery(nested, ALLOWED);
+      expect(validateReadOnlyQuery(nested, ALLOWED)).toBeNull();
       expect(Date.now() - started).toBeLessThan(500);
-      expect(validateReadOnlyQuery(nested + ' '.repeat(30000), ALLOWED)).toMatch(/too long/i);
+    });
+
+    it('rejects an oversized query', () => {
+      expect(
+        validateReadOnlyQuery(`SELECT 1 FROM processes ${'a'.repeat(30000)}`, ALLOWED)
+      ).toMatch(/too long/i);
+    });
+
+    it.each([
+      ['AS window', "SELECT * FROM processes AS window, curl WHERE url = 'http://internal/'"],
+      ['bare window alias', 'SELECT * FROM processes window, curl'],
+      ['window alias after a join', 'SELECT * FROM processes p JOIN users window ON 1=1, curl'],
+    ])('rejects a table listed after a WINDOW-named alias: %s', (_label, query) => {
+      expect(validateReadOnlyQuery(query, ALLOWED)).toMatch(/curl/i);
     });
 
     it('still accepts a sub-select followed by a JOIN, WHERE or ORDER BY', () => {
