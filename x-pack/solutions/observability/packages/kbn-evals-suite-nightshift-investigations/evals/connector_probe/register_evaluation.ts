@@ -14,6 +14,7 @@ import {
 } from '@kbn/nightshift-investigations-plugin/common';
 import { evaluate } from '../../src/evaluate';
 import { saveConnectorSetOnInvestigator } from '../investigation/connector_sets';
+import { enableNightshiftSpace } from '../investigation/space_setup';
 import { createConnectorProbeEvaluators } from './evaluators';
 import { runConnectorProbe } from './task';
 import type { ConnectorProbeExample, ConnectorProbeTaskOutput } from './types';
@@ -49,6 +50,10 @@ export const registerConnectorProbeEvaluation = ({
     evaluate(
       'answers telemetry probes through the Elasticsearch connector',
       async ({
+        config,
+        esClient,
+        kbnUrl,
+        samlAuth,
         executorClient,
         evalsClient,
         connector,
@@ -63,7 +68,17 @@ export const registerConnectorProbeEvaluation = ({
           Math.ceil((dataset.examples.length * repetitions) / concurrency) * PROBE_BUDGET_MS +
             5 * 60_000
         );
-        // The agents are installed in the background at Kibana start.
+        // Agent Builder reports both agents unavailable until the space is bound to the Nightshift
+        // service accounts, and this shard can run on its own fresh stack.
+        await enableNightshiftSpace({
+          config,
+          esClient,
+          kbnUrl,
+          samlAuth,
+          fetch,
+          log,
+          connectorId: connector.id,
+        });
         await expect
           .poll(
             async () =>
