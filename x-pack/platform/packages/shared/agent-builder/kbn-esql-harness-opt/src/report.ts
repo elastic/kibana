@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Crypto from 'crypto';
 import Fs from 'fs';
 import Http from 'http';
 import Path from 'path';
@@ -71,6 +72,13 @@ const loadRuns = (runsDir: string) => {
 
   return loaded.sort((a, b) => a.mtimeMs - b.mtimeMs);
 };
+
+/** Short, stable identity of a config, so the lineage can be drawn as a tree of configs. */
+const hashConfig = (config: Record<string, unknown> | undefined): string =>
+  Crypto.createHash('sha256')
+    .update(JSON.stringify(config ?? {}))
+    .digest('hex')
+    .slice(0, 8);
 
 const meanBy = <T>(items: T[], pick: (item: T) => number): number =>
   items.length === 0 ? 0 : items.reduce((total, item) => total + pick(item), 0) / items.length;
@@ -165,14 +173,19 @@ export const buildReportPayload = () => {
         };
       });
 
+    const incumbentConfig = entry.incumbentConfig ?? incumbentRun?.config ?? {};
+    const candidateConfig = entry.config ?? candidateRun?.config ?? {};
+
     return {
       round: entry.round,
       rejectedReason: entry.rejected,
+      parentHash: hashConfig(incumbentConfig),
+      configHash: hashConfig(candidateConfig),
       slots: entry.manifest?.slots ?? [],
       rationale: entry.manifest?.rationale ?? '',
       gate: entry.gate,
-      incumbentConfig: entry.incumbentConfig ?? incumbentRun?.config ?? {},
-      candidateConfig: entry.config ?? candidateRun?.config ?? {},
+      incumbentConfig,
+      candidateConfig,
       seedDeltas,
       verification: entry.manifest
         ? verifyManifest({ manifest: entry.manifest, seedDeltas })
@@ -251,8 +264,11 @@ export const buildReportPayload = () => {
         ),
     }));
 
+  const baseHash = rounds.length ? rounds[0].parentHash : hashConfig({});
+
   return {
     generatedAt: new Date().toISOString(),
+    baseHash,
     rounds,
     runs: runViews,
     examples: [...examples.values()],

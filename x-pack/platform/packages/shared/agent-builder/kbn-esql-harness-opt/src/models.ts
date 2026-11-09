@@ -25,6 +25,7 @@ export interface ModelChoice {
  * from 55 options turns the round into model shopping instead of harness design.
  */
 export const DEFAULT_MODEL_CANDIDATES: string[] = [
+  'google-gemini-3.5-flash-lite',
   'openai-gpt-5.4-mini',
   'openai-gpt-5.4',
   'anthropic-claude-5.5-haiku',

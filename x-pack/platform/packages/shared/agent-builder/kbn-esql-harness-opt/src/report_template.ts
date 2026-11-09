@@ -53,6 +53,7 @@ pre { background:var(--panel); border:1px solid var(--line); border-radius:6px; 
         border-radius:8px; padding:10px 12px; cursor:pointer; }
 .node.accepted { border-left-color:var(--good); } .node.rejected { border-left-color:var(--bad); }
 .node:hover { background:var(--panel2); }
+.gnode { cursor:pointer; } .gnode:hover rect:first-of-type { fill:#1b242e; }
 .split { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 .diff-add { background:rgba(70,209,125,.12); border-left:2px solid var(--good); padding-left:6px; }
 .diff-del { background:rgba(255,107,99,.12); border-left:2px solid var(--bad); padding-left:6px; }
@@ -165,6 +166,101 @@ const configDiff = (before, after) => {
     '</table>';
 };
 
+
+/* ------------------------------------------------------------ lineage graph */
+/**
+ * The campaign is a tree of configs, not a list of rounds: every candidate is proposed *from*
+ * some incumbent, and only an accepted one becomes the parent of the next generation. Rejected
+ * candidates stay as leaves hanging off the config they were tried on, which is what makes
+ * "what did we already try from here, and what happened" readable at a glance.
+ */
+function lineageGraph() {
+  const nodes = new Map();
+  nodes.set(DATA.baseHash, {
+    id: DATA.baseHash, label: 'base', sub: 'shipped defaults', parent: null,
+    state: 'base', round: null, delta: null, cost: null,
+  });
+
+  DATA.rounds.forEach((round) => {
+    if (round.rejectedReason && !round.gate) {
+      nodes.set('failed-' + round.round, {
+        id: 'failed-' + round.round, label: 'round ' + round.round,
+        sub: round.rejectedReason, parent: round.parentHash, state: 'failed',
+        round: round.round, delta: null, cost: null,
+      });
+      return;
+    }
+    nodes.set(round.configHash + '-' + round.round, {
+      id: round.configHash + '-' + round.round,
+      label: 'round ' + round.round,
+      sub: (round.slots || []).join(', ') || 'config change',
+      parent: round.parentHash,
+      state: round.gate && round.gate.accepted ? 'accepted' : 'rejected',
+      round: round.round,
+      delta: round.gate ? round.gate.meanDelta : null,
+      cost: round.gate ? round.gate.costRatio : null,
+      hash: round.configHash,
+    });
+  });
+
+  // An accepted candidate *is* the next incumbent, so children attach to its config hash.
+  const byHash = new Map();
+  nodes.forEach((node) => { if (node.hash) byHash.set(node.hash, node.id); });
+  nodes.forEach((node) => {
+    if (node.parent && byHash.has(node.parent)) node.parentId = byHash.get(node.parent);
+    else if (node.parent) node.parentId = DATA.baseHash;
+  });
+
+  // depth = generation; siblings are stacked vertically within their generation
+  const depthOf = (node, guard = 0) =>
+    !node.parentId || guard > 20 ? 0 : depthOf(nodes.get(node.parentId), guard + 1) + 1;
+  const list = [...nodes.values()].map((node) => ({ ...node, depth: depthOf(node) }));
+  const byDepth = new Map();
+  list.forEach((node) => { byDepth.set(node.depth, [...(byDepth.get(node.depth) || []), node]); });
+
+  const W = 230, H = 74, GX = 70, GY = 18;
+  const position = new Map();
+  [...byDepth.keys()].sort((a, b) => a - b).forEach((depth) => {
+    byDepth.get(depth).sort((a, b) => (a.round ?? -1) - (b.round ?? -1)).forEach((node, index) => {
+      position.set(node.id, { x: 10 + depth * (W + GX), y: 10 + index * (H + GY) });
+    });
+  });
+
+  const width = 20 + ([...byDepth.keys()].length) * (W + GX);
+  const height = 20 + Math.max(...[...byDepth.values()].map((group) => group.length)) * (H + GY);
+
+  const edges = list.filter((node) => node.parentId).map((node) => {
+    const from = position.get(node.parentId), to = position.get(node.id);
+    if (!from || !to) return '';
+    const x1 = from.x + W, y1 = from.y + H / 2, x2 = to.x, y2 = to.y + H / 2;
+    const mid = (x1 + x2) / 2;
+    return '<path d="M' + x1 + ',' + y1 + ' C' + mid + ',' + y1 + ' ' + mid + ',' + y2 + ' ' + x2 + ',' + y2 +
+      '" fill="none" stroke="' + (node.state === 'accepted' ? '#46d17d' : '#2a3744') +
+      '" stroke-width="' + (node.state === 'accepted' ? 2 : 1.2) + '"/>';
+  }).join('');
+
+  const colour = { base: '#6cb6ff', accepted: '#46d17d', rejected: '#ff6b63', failed: '#e3b341' };
+  const boxes = list.map((node) => {
+    const p = position.get(node.id);
+    const stroke = colour[node.state];
+    const deltaText = node.delta === null ? '' : sign(node.delta) + ' reward' +
+      (node.cost ? ' · ' + node.cost.toFixed(2) + '× cost' : '');
+    return '<g class="gnode" ' + (node.round !== null ? 'data-go=\'' +
+      JSON.stringify({ tab: 'rounds', round: node.round }) + '\'' : '') + ' transform="translate(' + p.x + ',' + p.y + ')">' +
+      '<rect width="' + W + '" height="' + H + '" rx="9" fill="#141b23" stroke="' + stroke + '" stroke-width="1.5"/>' +
+      '<rect width="4" height="' + H + '" rx="2" fill="' + stroke + '"/>' +
+      '<text x="14" y="22" fill="#e6edf3" font-size="13" font-weight="600">' + esc(node.label) + '</text>' +
+      '<text x="14" y="41" fill="#90a4b7" font-size="11">' + esc(node.sub.slice(0, 32)) + '</text>' +
+      '<text x="14" y="60" fill="' + stroke + '" font-size="11">' + esc(deltaText || node.state) + '</text>' +
+      '</g>';
+  }).join('');
+
+  return '<div style="overflow:auto;border:1px solid var(--line);border-radius:8px;background:var(--bg)">' +
+    '<svg width="' + width + '" height="' + height + '" style="display:block">' + edges + boxes + '</svg></div>' +
+    '<p class="muted">Each column is a generation: every candidate hangs off the config it was proposed from. ' +
+    'Green edges are acceptances — only those extend the chain; red nodes are dead ends that were measured and rejected.</p>';
+}
+
 /* ------------------------------------------------------------- campaign */
 function viewCampaign() {
   const accepted = DATA.rounds.filter((r) => r.gate && r.gate.accepted).length;
@@ -195,7 +291,7 @@ function viewCampaign() {
       ['total runs', DATA.runs.length],
       ['spend (all runs)', usd(DATA.totalCostUsd)],
     ]) +
-    '<h3>Lineage</h3>' + timeline +
+    '<h3>Lineage — configs tried, and what was built on what</h3>' + timeline +
     '<h3>Sealed split</h3>' + sealedTable +
     '<h3>What each round proposed</h3>' +
     '<table><tr><th>round</th><th>slots</th><th>Δ reward [CI]</th><th>$/solved</th><th>regressions</th><th>verdict</th><th>rationale</th></tr>' +
