@@ -16,6 +16,7 @@ import {
   EuiSpacer,
   EuiTabs,
   EuiTab,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SourceViewModel } from './types';
@@ -68,7 +69,7 @@ export const SourceSetupInstructions = ({
               <EuiFlexGroup gutterSize="none" responsive={false}>
                 <EuiFlexItem>
                   <EuiCodeBlock
-                    language="yaml"
+                    language={selectedTab?.language ?? 'yaml'}
                     fontSize="s"
                     paddingSize="m"
                     isCopyable={false}
@@ -105,6 +106,18 @@ export const SourceSetupInstructions = ({
         endpoints={source.endpoints}
         showHelpText={showEndpointHelpText}
       />
+      {config.setupNotes && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiText size="xs" color="subdued" data-test-subj="streamsSourceSetupNotes">
+            <ul>
+              {config.setupNotes.map((note) => (
+                <li key={note}>{note}</li>
+              ))}
+            </ul>
+          </EuiText>
+        </>
+      )}
     </>
   );
 };

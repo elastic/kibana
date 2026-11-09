@@ -372,6 +372,57 @@ describe('score_base_entities', () => {
     });
   });
 
+  describe('scoreBaseEntities entity store refresh', () => {
+    const scoreOnePage = async (entityStoreRefresh?: false) => {
+      mockCompositeAggPage(esClient, ['user:a@okta']);
+      (esClient.esql.query as jest.Mock).mockResolvedValueOnce({
+        values: [esqlRow('user:a@okta')],
+      });
+      (crudClient.listEntities as jest.Mock).mockResolvedValue({
+        entities: [
+          {
+            entity: {
+              id: 'user:a@okta',
+              attributes: { watchlists: [] },
+              relationships: { resolution: { resolved_to: undefined } },
+            },
+            asset: { criticality: undefined },
+          },
+        ],
+        nextSearchAfter: undefined,
+      });
+
+      await scoreBaseEntities({
+        pageTimings: createPageStepTimings(),
+        esClient,
+        crudClient,
+        logger,
+        writer: {
+          bulk: jest.fn().mockResolvedValue({ errors: [], docs_written: 1, took: 1 }),
+        } as unknown as RiskEngineDataWriter,
+        idBasedRiskScoringEnabled: true,
+        createMissingEntities: false,
+        ...(entityStoreRefresh === undefined ? {} : { entityStoreRefresh }),
+        ...baseParams,
+      });
+    };
+
+    it('leaves the entity store refresh to its default, which waits, unless asked otherwise', async () => {
+      await scoreOnePage();
+
+      expect(crudClient.bulkUpdateEntity).toHaveBeenCalledTimes(1);
+      expect(jest.mocked(crudClient.bulkUpdateEntity).mock.calls[0][0].refresh).toBeUndefined();
+    });
+
+    it('forwards the entity store refresh option', async () => {
+      await scoreOnePage(false);
+
+      expect(crudClient.bulkUpdateEntity).toHaveBeenCalledWith(
+        expect.objectContaining({ refresh: false })
+      );
+    });
+  });
+
   describe('scoreBaseEntities not_in_store filter', () => {
     const buildWriter = (): RiskEngineDataWriter =>
       ({
