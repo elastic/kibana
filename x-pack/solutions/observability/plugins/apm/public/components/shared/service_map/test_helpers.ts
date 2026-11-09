@@ -13,6 +13,8 @@ export const MOCK_EUI_THEME = {
     textPrimary: '#1a1c21',
     emptyShade: '#fff',
     backgroundBasePlain: '#fff',
+    backgroundBaseSubdued: '#F5F7FA',
+    borderBaseSubdued: '#D3DAE6',
     textParagraph: '#343741',
     text: '#343741',
     lightShade: '#D3DAE6',
@@ -47,6 +49,6 @@ export const MOCK_EUI_THEME_FOR_USE_THEME = {
   },
   levels: { content: 1000, header: 2000, menu: 2000 },
   shadows: { s: '0 1px 2px rgba(0,0,0,0.1)' },
-  font: { family: '"Inter", sans-serif' },
+  font: { family: '"Inter", sans-serif', weight: { medium: 500, bold: 700 } },
   animation: { fast: '150ms' },
 };
