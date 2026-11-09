@@ -1394,9 +1394,9 @@ steps:
         {},
         mockRequest
       );
-      expect(
-        mockWorkflowsExecutionEngine.executeWorkflowStep.mock.calls[0][0]
-      ).not.toHaveProperty('workflowUid');
+      expect(mockWorkflowsExecutionEngine.executeWorkflowStep.mock.calls[0][0]).not.toHaveProperty(
+        'workflowUid'
+      );
     });
 
     it('links a step test of a saved workflow to that document', async () => {
