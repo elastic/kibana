@@ -269,7 +269,12 @@ export const runCampaign = async ({
     // A proposal may ask to be measured on a different model. That stays out of the code —
     // connector ids are deployment-specific — and is applied by pinning the candidate lane,
     // which is also what makes it show up in the priced cost comparison.
-    const candidateModel = proposal.manifest.model;
+    // A candidate inherits the incumbent's model unless it names a different one. Without this
+    // the first accepted model pin silently reverted for every later candidate: the incumbent
+    // lane stayed on the cheap model while the candidate lane fell back to the code default,
+    // so rounds 10 onwards measured a model downgrade bundled into whatever was proposed and
+    // came back at -0.08 to -0.11 reward and 1.6x cost regardless of the edit.
+    const candidateModel = proposal.manifest.model ?? incumbentModel;
     const candidateConnector = connectorFor(candidateModel);
     if (candidateModel && !candidateConnector) {
       log.warning(
