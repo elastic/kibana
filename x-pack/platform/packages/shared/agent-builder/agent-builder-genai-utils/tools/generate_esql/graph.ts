@@ -46,6 +46,7 @@ import {
 } from './actions';
 import type { EsqlLoadedDocumentation } from './documentation';
 import { hasRejectedJoinTarget } from './join_errors';
+import { fullTracingEnabled } from './harness_trace';
 import { withPromqlKeyword } from './promql_keyword';
 
 export const requestDocumentationSchema = z
@@ -138,14 +139,14 @@ export const createNlToEsqlGraph = ({
       .withStructuredOutput(requestDocumentationSchema, { name: 'request_documentation' })
       .withConfig(requestDocCallConfig);
 
-    const { commands = [], functions = [] } = await requestDocModel.invoke(
-      createRequestDocumentationPrompt({
-        nlQuery: state.nlQuery,
-        documentation,
-        resource: state.resource,
-        additionalContext: state.additionalContext,
-      })
-    );
+    const requestDocPrompt = createRequestDocumentationPrompt({
+      nlQuery: state.nlQuery,
+      documentation,
+      resource: state.resource,
+      additionalContext: state.additionalContext,
+    });
+
+    const { commands = [], functions = [] } = await requestDocModel.invoke(requestDocPrompt);
 
     const requestedKeywords = withPromqlKeyword(
       [...commands, ...functions],
@@ -158,6 +159,7 @@ export const createNlToEsqlGraph = ({
       type: 'request_documentation',
       requestedKeywords,
       fetchedDoc,
+      ...(fullTracingEnabled() ? { prompt: requestDocPrompt } : {}),
     };
 
     return {
@@ -173,18 +175,18 @@ export const createNlToEsqlGraph = ({
   const generateEsql = async (state: StateType) => {
     const generateModel = model.chatModel.withConfig(generateCallConfig);
 
-    const response = await generateModel.invoke(
-      createGenerateEsqlPrompt({
-        nlQuery: state.nlQuery,
-        documentation,
-        resource: state.resource,
-        previousActions: state.actions,
-        additionalInstructions: state.additionalInstructions,
-        additionalContext: state.additionalContext,
-        rowLimit: state.rowLimit,
-        disableNamedParams: state.disableNamedParams,
-      })
-    );
+    const generatePrompt = createGenerateEsqlPrompt({
+      nlQuery: state.nlQuery,
+      documentation,
+      resource: state.resource,
+      previousActions: state.actions,
+      additionalInstructions: state.additionalInstructions,
+      additionalContext: state.additionalContext,
+      rowLimit: state.rowLimit,
+      disableNamedParams: state.disableNamedParams,
+    });
+
+    const response = await generateModel.invoke(generatePrompt);
 
     const responseText = extractTextContent(response);
     const queries = extractEsqlQueries(responseText);
@@ -207,6 +209,7 @@ export const createNlToEsqlGraph = ({
             },
           }
         : {}),
+      ...(fullTracingEnabled() ? { prompt: generatePrompt } : {}),
       ...(refusal && queries.length === 0 ? { refusal } : {}),
     };
 

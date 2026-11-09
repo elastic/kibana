@@ -32,8 +32,9 @@ export const harnessPaths = () => {
 /** Per-lane trace file; each lane is a separate Kibana process writing its own trace. */
 export const lanePaths = (lane: Lane) => {
   const root = Path.join(harnessPaths().root, lane);
-  Fs.mkdirSync(root, { recursive: true });
-  return { root, tracePath: Path.join(root, 'trace.jsonl') };
+  const traceDir = Path.join(root, 'traces');
+  Fs.mkdirSync(traceDir, { recursive: true });
+  return { root, tracePath: Path.join(root, 'trace.jsonl'), traceDir };
 };
 
 /** Identity of a variant: the hash of the diff that produced it. */

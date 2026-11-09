@@ -90,6 +90,8 @@ export const buildTraceBundle = (summary: RunSummary): string => {
       attemptErrors: run.attemptErrors?.map((error) => error.slice(0, 400)),
       tries: run.tries,
       tokens: (run.inputTokens ?? 0) + (run.outputTokens ?? 0),
+      // Relative path to the full graph trace for this call, copied next to the bundle.
+      trace: run.fullTracePath ? `traces/${Path.basename(run.fullTracePath)}` : undefined,
     }));
 
   return JSON.stringify(
@@ -121,6 +123,13 @@ this checkout, the way a Kibana engineer would. It is then measured on held-out 
   alongside the rows the gold query returned. Compare them. Almost every failure here executes
   without error and returns the wrong data, so the rows tell you what went wrong; the query text
   alone usually does not.
+- \`traces/\` — the complete LangGraph trace of every call in this run, one JSON file per call:
+  the exact prompt messages sent to the model (system, user, and the replayed history of earlier
+  attempts), the model's raw replies, the resolved index with its sampled fields and values, the
+  documentation keywords it asked for and the docs it got back, every autocorrect, execution and
+  validation step with its error, and the final state. Each failure in \`bundle.json\` names its
+  trace file. Read a few in full before deciding what to change — this is the only place where
+  you can see what the model was actually told.
 - \`history.json\` — every previous proposal, what it changed, and why it was accepted or not.
 - \`feedback.md\` — measured facts about the tool, and how your last attempt turned out.
 
@@ -199,6 +208,27 @@ Be honest in \`predictedFixes\`: it is checked against what actually changed, an
 cannot predict its own effect is treated as guesswork next round.`;
 
 /** Run the proposer agent in a scratch directory that holds the bundle and nothing else. */
+/**
+ * Copy the full graph traces of the bundled failures next to the bundle.
+ *
+ * One file per call, containing the prompts that were sent, the model's replies, the resource
+ * context, the documentation it requested and every action in order. The bundle summarises; this
+ * is the raw material behind it, for when the summary is not enough.
+ */
+const copyTraces = (summary: RunSummary, scratchDir: string): number => {
+  const traceDir = Path.join(scratchDir, 'traces');
+  Fs.rmSync(traceDir, { recursive: true, force: true });
+  Fs.mkdirSync(traceDir, { recursive: true });
+
+  let copied = 0;
+  for (const run of summary.runs) {
+    if (!run.fullTracePath || !Fs.existsSync(run.fullTracePath)) continue;
+    Fs.copyFileSync(run.fullTracePath, Path.join(traceDir, Path.basename(run.fullTracePath)));
+    copied++;
+  }
+  return copied;
+};
+
 export const proposeCandidate = async ({
   summary,
   history,
@@ -222,6 +252,8 @@ export const proposeCandidate = async ({
 }): Promise<Proposal> => {
   Fs.mkdirSync(scratchDir, { recursive: true });
   Fs.writeFileSync(Path.join(scratchDir, 'bundle.json'), buildTraceBundle(summary));
+  const traceCount = copyTraces(summary, scratchDir);
+  log.info(`[harness-opt] bundle written with ${traceCount} full graph trace(s)`);
   Fs.writeFileSync(Path.join(scratchDir, 'history.json'), JSON.stringify(history, null, 2));
   Fs.writeFileSync(Path.join(scratchDir, 'feedback.md'), feedback);
   const proposalPath = Path.join(scratchDir, 'proposal.json');

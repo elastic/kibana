@@ -22,7 +22,12 @@ import { indexExplorer } from '../index_explorer';
 import { loadDocumentation } from './documentation';
 import { createRequestDocumentationPromptNoResource } from './prompts';
 import { withPromqlKeyword } from './promql_keyword';
-import { harnessTracingEnabled, writeHarnessTrace } from './harness_trace';
+import {
+  fullTracingEnabled,
+  harnessTracingEnabled,
+  writeFullHarnessTrace,
+  writeHarnessTrace,
+} from './harness_trace';
 import { isExecuteQueryAction, isGenerateQueryAction, isValidateQueryAction } from './actions';
 
 export const DEFAULT_EXECUTION_TIMEOUT_MS = 30_000;
@@ -301,6 +306,29 @@ export const generateEsql = async ({
             metadata: { graphName: 'generate_esql' },
           }
         );
+
+        if (fullTracingEnabled()) {
+          // Everything the graph saw and produced, in order: prompts, replies, the resource
+          // context, the documentation it asked for, each execution attempt and its error.
+          writeFullHarnessTrace({
+            ts: new Date().toISOString(),
+            nlQuery,
+            additionalContext,
+            target: selectedTarget,
+            execute,
+            maxRetries,
+            timeRange,
+            connectorId: model.connector?.connectorId,
+            resource: outState.resource,
+            actions: outState.actions,
+            answer: outState.answer,
+            query: outState.query,
+            error: outState.error,
+            resultColumns: outState.results?.columns,
+            resultRowCount: outState.results?.values?.length,
+            durationMs: Date.now() - startedAt,
+          });
+        }
 
         if (harnessTracingEnabled()) {
           const generateActions = outState.actions.filter(isGenerateQueryAction);

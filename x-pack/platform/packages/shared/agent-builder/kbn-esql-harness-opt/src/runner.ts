@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Crypto from 'crypto';
 import Fs from 'fs';
 import Path from 'path';
 import type { Client as EsClient } from '@elastic/elasticsearch';
@@ -39,6 +40,8 @@ export interface ExampleRun {
   attemptErrors?: string[];
   /** Every query the harness generated for this example, not only the one it returned. */
   attemptedQueries?: string[];
+  /** Path to this call's full graph trace: prompts, replies, resource context, every action. */
+  fullTracePath?: string;
   requestedKeywords?: string[];
   resolvedTarget?: string;
   /** Connector that served the call, which is what the run is priced against. */
@@ -147,17 +150,20 @@ export const runVariant = async ({
   goldRows: Map<string, EsqlResult | null>;
   outputDir: string;
 }): Promise<RunSummary> => {
-  const { tracePath } = lanePaths(lane);
+  const { tracePath, traceDir } = lanePaths(lane);
   log.info(
     `[harness-opt] running "${label}" (variant ${variant.hash}${
       variant.tier ? `, tier ${variant.tier.slice(0, 8)}` : ''
     }) over ${examples.length} examples × ${rollouts} rollouts`
   );
 
-  // Each lane keeps its own trace file; clearing it here scopes the records to this run.
+  // Each lane keeps its own trace file and trace directory; clearing both scopes the records to
+  // this run, so the bundle cannot mix in evidence from an earlier variant.
   if (Fs.existsSync(tracePath)) {
     Fs.truncateSync(tracePath, 0);
   }
+  Fs.rmSync(traceDir, { recursive: true, force: true });
+  Fs.mkdirSync(traceDir, { recursive: true });
 
   const work = examples.flatMap((example) =>
     Array.from({ length: rollouts }, (unused, rollout) => ({ example, rollout }))
@@ -195,6 +201,15 @@ export const runVariant = async ({
     }
   );
 
+  // Full traces are written one file per call, named by a hash of the question.
+  const fullTraces = new Map<string, string[]>();
+  if (Fs.existsSync(traceDir)) {
+    for (const file of Fs.readdirSync(traceDir).sort()) {
+      const key = file.split('-')[0];
+      fullTraces.set(key, [...(fullTraces.get(key) ?? []), Path.join(traceDir, file)]);
+    }
+  }
+
   const traces = readTraceRecords(tracePath);
   for (const run of runs) {
     const records = traces.get(run.question) ?? [];
@@ -212,6 +227,9 @@ export const runVariant = async ({
     });
     run.resolvedTarget = record.target as string;
     run.attemptedQueries = (record.generatedQueries as string[]) ?? [];
+    const traceKey = Crypto.createHash('sha256').update(run.question).digest('hex').slice(0, 10);
+    run.fullTracePath =
+      (fullTraces.get(traceKey) ?? [])[run.rollout] ?? (fullTraces.get(traceKey) ?? [])[0];
     run.attemptErrors = ((record.attempts as Array<{ error?: string }>) ?? [])
       .map((attempt) => attempt.error)
       .filter((error): error is string => Boolean(error));

@@ -19,6 +19,8 @@ export interface RequestDocumentationAction {
   type: 'request_documentation';
   requestedKeywords: string[];
   fetchedDoc: Record<string, string>;
+  /** Exact messages sent to the model; only populated under full tracing. */
+  prompt?: unknown;
 }
 
 export interface GenerateQueryAction {
@@ -34,6 +36,8 @@ export interface GenerateQueryAction {
   refusal?: string;
   /** Token spend of the generation call, when the provider reported it. */
   usage?: { inputTokens: number; outputTokens: number };
+  /** Exact messages sent to the model; only populated under full tracing. */
+  prompt?: unknown;
 }
 
 export interface AutocorrectQueryAction {
