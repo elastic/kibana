@@ -69,6 +69,24 @@ describe('getProxyUrlError', () => {
     expect(getProxyUrlError('  ')).toBeUndefined();
     expect(getProxyUrlError('http://proxy.local:3128')).toBeUndefined();
     expect(getProxyUrlError('https://user:pass@proxy.local:8080')).toBeUndefined();
+    expect(getProxyUrlError('HTTP://proxy.local:3128')).toBeUndefined();
+    expect(getProxyUrlError('http://192.168.1.10:3128')).toBeUndefined();
+    expect(getProxyUrlError('  http://proxy.local:3128  ')).toBeUndefined();
+  });
+
+  it('rejects forms that new URL() repairs but the agent would receive unchanged', () => {
+    expect(getProxyUrlError('http:proxy.local:3128')).toBeDefined();
+    expect(getProxyUrlError('http:/proxy.local:3128')).toBeDefined();
+    expect(getProxyUrlError('http:///proxy.local:3128')).toBeDefined();
+    expect(getProxyUrlError('http:\\\\proxy.local:3128')).toBeDefined();
+    expect(getProxyUrlError('https:proxy.local')).toBeDefined();
+  });
+
+  it('rejects a URL without a host', () => {
+    expect(getProxyUrlError('http://')).toBeDefined();
+    expect(getProxyUrlError('https://:3128')).toBeDefined();
+    expect(getProxyUrlError('http://user@')).toBeDefined();
+    expect(getProxyUrlError('http:// proxy.local')).toBeDefined();
   });
 
   it('rejects other schemes and text that is not a URL', () => {

@@ -63,7 +63,15 @@ export const getDescriptionError = (description: string): string | undefined => 
 /** The longest value Fleet stores for a setting of the onboarding record. */
 export const MAX_PROXY_URL_LENGTH = 1024;
 
-/** The proxy URL is optional. When set, it must be an `http` or `https` URL. */
+/** `http://` or `https://` followed by the start of a host (not another slash, a path or a space). */
+const PROXY_URL_PREFIX = /^https?:\/\/[^/?#\\\s]/i;
+
+/**
+ * The proxy URL is optional. When set, it must be written as an `http(s)://` URL with a host.
+ * The value is sent as typed, so the literal text is checked: `new URL()` alone also accepts
+ * `http:proxy.local:3128` or `http:/proxy.local:3128`, which it repairs but the agent receives
+ * unchanged.
+ */
 export const getProxyUrlError = (proxyUrl: string): string | undefined => {
   const trimmed = proxyUrl.trim();
   if (!trimmed) return undefined;
@@ -73,13 +81,13 @@ export const getProxyUrlError = (proxyUrl: string): string | undefined => {
       values: { max: MAX_PROXY_URL_LENGTH },
     });
   }
-  let protocol: string | undefined;
+  let hasHost = false;
   try {
-    protocol = new URL(trimmed).protocol;
+    hasHost = PROXY_URL_PREFIX.test(trimmed) && new URL(trimmed).hostname !== '';
   } catch {
     // Reported below.
   }
-  if (protocol !== 'http:' && protocol !== 'https:') {
+  if (!hasHost) {
     return i18n.translate('xpack.ingestHub.integrationSettings.proxyUrl.invalidError', {
       defaultMessage: 'Enter a valid proxy URL starting with http:// or https://.',
     });
