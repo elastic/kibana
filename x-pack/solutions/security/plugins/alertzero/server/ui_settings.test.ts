@@ -20,11 +20,11 @@ describe('registerUiSettings', () => {
     expect(register()).toHaveProperty(ALERTZERO_ENABLED_SETTING_ID);
   });
 
-  it('registers it off by default, per space, and requiring a page reload', () => {
+  it('registers it on by default, per space, and requiring a page reload', () => {
     expect(register()[ALERTZERO_ENABLED_SETTING_ID]).toEqual(
       expect.objectContaining({
         type: 'boolean',
-        value: false,
+        value: true,
         scope: 'namespace',
         category: ['securitySolution'],
         solutionViews: ['security'],

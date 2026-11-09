@@ -99,7 +99,7 @@ export const AccessBoundary = ({
   const subscription = useObservable(availability$, 'loading');
   const spaceSupported = useObservable(spaceSupported$);
   const enabled$ = useMemo(
-    () => uiSettings.get$<boolean>(ALERTZERO_ENABLED_SETTING_ID, false),
+    () => uiSettings.get$<boolean>(ALERTZERO_ENABLED_SETTING_ID, true),
     [uiSettings]
   );
   const enabled = useObservable(enabled$, false);

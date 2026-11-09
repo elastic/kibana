@@ -18,14 +18,14 @@ const { useUiSetting } = jest.requireMock('@kbn/kibana-react-plugin/public');
 describe('useIsContextEngineEnabled', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  // The explicit `false` default matters: the setting is registered by agent_builder_sml, and
+  // The explicit default matters: the setting is registered by agent_builder_sml, and
   // `uiSettings.get` throws on an unknown key when no default is supplied.
   it('reads the space-aware contextEngine:enabled setting', () => {
     useUiSetting.mockReturnValue(true);
 
     const { result } = renderHook(() => useIsContextEngineEnabled());
 
-    expect(useUiSetting).toHaveBeenCalledWith(CONTEXT_ENGINE_ENABLED_SETTING_ID, false);
+    expect(useUiSetting).toHaveBeenCalledWith(CONTEXT_ENGINE_ENABLED_SETTING_ID, true);
     expect(result.current).toBe(true);
   });
 

@@ -46,7 +46,7 @@ export const registerCaseBridgeUiSettings = (uiSettings: UiSettingsServiceSetup)
             "When a Worker opens an investigation, it also opens a case from the AI investigation template, and the investigation's proposals, hypotheses, and impact are added to that case.",
         }
       ),
-      value: false,
+      value: true,
       schema: schema.boolean(),
       category: ['securitySolution'],
       technicalPreview: true,

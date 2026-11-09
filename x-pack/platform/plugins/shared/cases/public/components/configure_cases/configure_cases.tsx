@@ -154,7 +154,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
   const showTaskListsSection = tasksAuthorized && permissions.settings;
   // Security only: AlertZero cases are the outcomes agents learn from today.
   const showKnowledgeSection = knowledgeEnabled && owner[0] === SECURITY_SOLUTION_OWNER;
-  const contextEngineEnabled = uiSettings.get<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID, false);
+  const contextEngineEnabled = uiSettings.get<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID, true);
   const syncControlsDisabled =
     isPersistingConfiguration ||
     isLoadingCaseConfiguration ||

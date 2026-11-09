@@ -79,7 +79,7 @@ export const registerCasesIntegration = ({
 }): void => {
   // Phase 5 surfaces (Decisions, Needs decision, the copied findings) show only with the setting on.
   const isOpenCasesForInvestigationsOn = () =>
-    uiSettings.get<boolean>(OPEN_CASES_FOR_INVESTIGATIONS_SETTING, false) === true;
+    uiSettings.get<boolean>(OPEN_CASES_FOR_INVESTIGATIONS_SETTING, true) === true;
   cases.decisions.setEnabled(isOpenCasesForInvestigationsOn);
 
   const LazyRelated = makeLazy<CaseViewSectionProps>(

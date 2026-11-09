@@ -28,7 +28,7 @@ export const registerUiSettings = (uiSettings: UiSettingsServiceSetup): void => 
           'Enable AlertZero for this space. AlertZero is the agentic SecOps layer that does the work and returns proposals, while a person still reviews them.',
       }),
       type: 'boolean',
-      value: false,
+      value: true,
       scope: 'namespace',
       category: [SECURITY_SOLUTION_CATEGORY],
       solutionViews: ['security'],
