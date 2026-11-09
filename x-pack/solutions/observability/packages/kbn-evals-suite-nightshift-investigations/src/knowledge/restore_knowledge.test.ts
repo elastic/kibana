@@ -36,10 +36,13 @@ const legacyCortexHit = {
   },
 };
 
-const createSource = (hitsByIndex: Record<string, unknown[]>) =>
+const createSource = (hitsByIndex: Record<string, unknown[]>, missingIndices: string[] = []) =>
   ({
     helpers: {
       async *scrollSearch({ index }: { index: string }) {
+        if (missingIndices.includes(index)) {
+          throw Object.assign(new Error(`no such index [${index}]`), { statusCode: 404 });
+        }
         yield { body: { hits: { hits: hitsByIndex[index] ?? [] } } };
       },
     },
@@ -129,9 +132,11 @@ describe('restoreKnowledge', () => {
     expect(source.close).toHaveBeenCalled();
   });
 
-  it('falls back to the pre-rename cortex index when the wiki index has no documents', async () => {
+  it('falls back to the pre-rename cortex index when the wiki index is missing or empty', async () => {
     const esClient = createTarget();
-    const source = createSource({ [LEGACY_WIKI_AI_INDEX_DEST]: [legacyCortexHit] });
+    const source = createSource({ [LEGACY_WIKI_AI_INDEX_DEST]: [legacyCortexHit] }, [
+      KNOWLEDGE_INDICES.wiki,
+    ]);
 
     const metadata = await restoreKnowledge({
       esClient,

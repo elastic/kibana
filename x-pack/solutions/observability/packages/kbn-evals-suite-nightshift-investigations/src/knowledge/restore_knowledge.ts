@@ -75,12 +75,16 @@ const inSpace = (spaceId: string): estypes.QueryDslQueryContainer => ({
   term: { [SPACE_ID_FIELD]: spaceId },
 });
 
+const isIndexNotFound = (error: unknown): boolean =>
+  typeof error === 'object' &&
+  error !== null &&
+  'statusCode' in error &&
+  (error as { statusCode?: number }).statusCode === 404;
+
 const readSpace = async (source: Client, index: string, spaceId: string) => {
   const hits: Array<{ _id: string; _source: Record<string, unknown> }> = [];
   for await (const response of source.helpers.scrollSearch<Record<string, unknown>>({
     index,
-    ignore_unavailable: true,
-    allow_no_indices: true,
     query: inSpace(spaceId),
     size: 500,
     // Embeddings are recomputed on write, by the eval cluster's own inference endpoint.
@@ -94,8 +98,12 @@ const readSpace = async (source: Client, index: string, spaceId: string) => {
 };
 
 const readSystem = async (source: Client, system: KnowledgeSystem, spaceId: string) => {
-  const hits = await readSpace(source, KNOWLEDGE_INDICES[system], spaceId);
-  if (hits.length > 0 || system !== 'wiki') return hits;
+  try {
+    const hits = await readSpace(source, KNOWLEDGE_INDICES[system], spaceId);
+    if (hits.length > 0 || system !== 'wiki') return hits;
+  } catch (error) {
+    if (system !== 'wiki' || !isIndexNotFound(error)) throw error;
+  }
   return readSpace(source, LEGACY_WIKI_AI_INDEX_DEST, spaceId);
 };
 
