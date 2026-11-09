@@ -10,6 +10,7 @@
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { openLazyFlyout, openLazySystemFlyout } from '@kbn/presentation-util';
+import { getDefaultDataView } from '../lib/get_default_data_view';
 import type { VegaEditableState } from '../lib/library_draft';
 import type { VegaPluginStartDependencies } from '../plugin';
 import { vegaTitleInWizard } from '../vega_icon';
@@ -41,8 +42,7 @@ export const openVegaLibraryEditor = async ({
   }) => {
     const [item, defaultDataView, { VegaLibraryEditor }] = await Promise.all([
       client.get(id).then(({ data }) => ({ id, data })),
-      // A missing default data view shouldn't block editing.
-      deps.dataViews.getDefault().catch((): null => null),
+      getDefaultDataView(deps.dataViews),
       import('./vega_library_editor'),
     ]);
 
@@ -53,7 +53,7 @@ export const openVegaLibraryEditor = async ({
         SearchBar={deps.unifiedSearch.ui.SearchBar}
         savedObjectsTagging={deps.savedObjectsTaggingOss?.getTaggingApi()}
         item={item}
-        defaultDataView={defaultDataView ?? undefined}
+        defaultDataView={defaultDataView}
         canSave={Boolean(core.application.capabilities.visualize_v2?.save)}
         // A panel couldn't switch to a new copy of the item it references.
         allowSaveAsNew={!panel}

@@ -77,6 +77,7 @@ import type { VegaPluginStartDependencies, VegaVisualizationDependencies } from 
 import type { VegaRenderDescriptor } from '../data_model/types';
 import { parseSpec } from '../lib/editor_spec';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
+import { getDefaultDataView } from '../lib/get_default_data_view';
 import { isVegaByReferenceState } from '../../common/embeddable/type_guards';
 import { toPanelFilters, type VegaEditableState } from '../lib/library_draft';
 import {
@@ -354,11 +355,7 @@ export const vegaEmbeddableFactory = (
     }) => {
       const initialSpec = spec$.getValue();
       const initialSearch = panelSearchStateManager.getLatestState();
-      // A missing default data view shouldn't block editing.
-      const defaultDataView =
-        (await getDataViews()
-          .getDefault()
-          .catch((): null => null)) ?? undefined;
+      const defaultDataView = await getDefaultDataView(getDataViews());
       return (
         <VegaEditorFlyout
           api={api}
