@@ -13,12 +13,12 @@ jest.mock('magic-bytes.js', () => ({
 }));
 
 // Mock the sanitizeSvg function
-jest.mock('../sanitizations/svg', () => ({
+jest.mock('@kbn/content-sanitization', () => ({
   sanitizeSvg: jest.fn(),
 }));
 
 import { filetypemime } from 'magic-bytes.js';
-import { sanitizeSvg } from '../sanitizations/svg';
+import { sanitizeSvg } from '@kbn/content-sanitization';
 
 const mockFiletypemime = filetypemime as jest.MockedFunction<typeof filetypemime>;
 const mockSanitizeSvg = sanitizeSvg as jest.MockedFunction<typeof sanitizeSvg>;
