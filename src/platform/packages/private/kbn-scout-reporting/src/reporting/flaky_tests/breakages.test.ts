@@ -17,6 +17,10 @@ import {
 
 const SETUP = 'kibana-on-merge a.config.ts stateful-classic local';
 
+/** Builds run an hour apart, build 0 on Oct 1, 2026. */
+const FIRST_BUILD_AT = Date.UTC(2026, 9, 1);
+const HOUR_MS = 60 * 60 * 1000;
+
 /** Builds numbered from `first` on, oldest first: `x` failed, `.` passed. */
 const setupBuilds = (pattern: string, first = 1, branch = 'main'): SetupBuilds => ({
   branch,
@@ -25,6 +29,7 @@ const setupBuilds = (pattern: string, first = 1, branch = 'main'): SetupBuilds =
     buildId: `build-${first + index}`,
     buildNumber: first + index,
     failed: outcome === 'x',
+    ranAt: new Date(FIRST_BUILD_AT + (first + index) * HOUR_MS),
   })),
 });
 

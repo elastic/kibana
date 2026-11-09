@@ -1,0 +1,76 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { SetupBuilds } from './breakages';
+import { describeFix, lastFailures, looksFixed } from './recently_fixed';
+
+const FIRST_BUILD_AT = Date.UTC(2026, 9, 1);
+const HOUR_MS = 60 * 60 * 1000;
+
+/** Builds an hour apart numbered from `first` on, oldest first: `x` failed, `.` passed. */
+const setupBuilds = (
+  pattern: string,
+  { first = 1, branch = 'main', setup = 'a.config.ts' } = {}
+): SetupBuilds => ({
+  branch,
+  setup,
+  builds: [...pattern].map((outcome, index) => ({
+    buildId: `build-${first + index}`,
+    buildNumber: first + index,
+    failed: outcome === 'x',
+    ranAt: new Date(FIRST_BUILD_AT + (first + index) * HOUR_MS),
+  })),
+});
+
+describe('lastFailures', () => {
+  it('finds the last failure per branch across setups and counts the builds since once', () => {
+    const setups = [
+      setupBuilds('..x.....'),
+      // the same builds in a second setup, one failing later
+      setupBuilds('....x...', { setup: 'b.config.ts' }),
+      setupBuilds('x..', { first: 100, branch: '9.6' }),
+    ];
+
+    expect(lastFailures(setups, new Set())).toEqual([
+      { branch: 'main', at: new Date(FIRST_BUILD_AT + 5 * HOUR_MS), cleanBuilds: 3 },
+      { branch: '9.6', at: new Date(FIRST_BUILD_AT + 100 * HOUR_MS), cleanBuilds: 2 },
+    ]);
+  });
+
+  it('leaves out the given builds, and branches without a failure left', () => {
+    const setups = [setupBuilds('.x..xxx..'), setupBuilds('xx', { first: 100, branch: '9.6' })];
+
+    expect(
+      lastFailures(setups, new Set(['build-5', 'build-6', 'build-7', 'build-100', 'build-101']))
+    ).toEqual(
+      // builds 3, 4, 8 and 9
+      [{ branch: 'main', at: new Date(FIRST_BUILD_AT + 2 * HOUR_MS), cleanBuilds: 4 }]
+    );
+  });
+});
+
+describe('looksFixed', () => {
+  const lastFailure = { branch: 'main', at: new Date(FIRST_BUILD_AT), cleanBuilds: 30 };
+
+  it('needs a day since the last failure and enough builds to have missed 3 failures', () => {
+    const aDayLater = new Date(FIRST_BUILD_AT + 24 * HOUR_MS);
+
+    expect(looksFixed(lastFailure, 0.1, aDayLater)).toBe(true);
+    expect(looksFixed(lastFailure, 0.09, aDayLater)).toBe(false);
+    expect(looksFixed(lastFailure, 0.1, new Date(FIRST_BUILD_AT + 23 * HOUR_MS))).toBe(false);
+  });
+});
+
+describe('describeFix', () => {
+  it('names the clean builds, the branch and the day of the last failure', () => {
+    expect(
+      describeFix({ branch: '9.5', at: new Date('2026-10-20T15:00:00Z'), cleanBuilds: 73 })
+    ).toBe('no failures in the 73 builds on 9.5 since 2026-10-20');
+  });
+});

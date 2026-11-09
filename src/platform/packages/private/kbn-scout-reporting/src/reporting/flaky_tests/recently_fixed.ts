@@ -1,0 +1,73 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { SetupBuilds } from './breakages';
+
+/** A test may be fixed once its last failure on a branch is at least this old. */
+export const MIN_HOURS_SINCE_LAST_FAILURE = 24;
+
+/**
+ * A test is fixed once the builds since its last failure are enough that, failing as often as
+ * before, it would have failed this many times in them.
+ */
+export const MIN_MISSED_FAILURES = 3;
+
+/** When a test last failed on a branch, and how many builds ran it without failing since. */
+export interface LastFailure {
+  branch: string;
+  at: Date;
+  cleanBuilds: number;
+}
+
+/**
+ * Per branch, the test's last failure and the builds that ran it since, leaving out the given
+ * builds. Only the setups where the test failed are read, so the clean builds of the others are
+ * not counted: a test can only look less fixed for it.
+ */
+export const lastFailures = (
+  setups: readonly SetupBuilds[],
+  excludedBuildIds: ReadonlySet<string>
+): LastFailure[] => {
+  const byBranch = new Map<string, Map<string, { ranAt: Date; failed: boolean }>>();
+  for (const { branch, builds } of setups) {
+    const branchBuilds = byBranch.get(branch) ?? new Map();
+    for (const { buildId, ranAt, failed } of builds) {
+      if (excludedBuildIds.has(buildId)) continue;
+      const existing = branchBuilds.get(buildId);
+      branchBuilds.set(buildId, {
+        ranAt: existing && existing.ranAt < ranAt ? existing.ranAt : ranAt,
+        failed: (existing?.failed ?? false) || failed,
+      });
+    }
+    byBranch.set(branch, branchBuilds);
+  }
+
+  return [...byBranch].flatMap(([branch, builds]) => {
+    const failedAt = [...builds.values()]
+      .filter(({ failed }) => failed)
+      .map(({ ranAt }) => ranAt.getTime());
+    if (failedAt.length === 0) {
+      return [];
+    }
+    const at = Math.max(...failedAt);
+    const cleanBuilds = [...builds.values()].filter(({ ranAt }) => ranAt.getTime() > at).length;
+    return [{ branch, at: new Date(at), cleanBuilds }];
+  });
+};
+
+const HOUR_MS = 60 * 60 * 1000;
+
+/** Whether a test failing a share `rate` of its builds on the branch looks fixed there by `now`. */
+export const looksFixed = ({ at, cleanBuilds }: LastFailure, rate: number, now: Date): boolean =>
+  now.getTime() - at.getTime() >= MIN_HOURS_SINCE_LAST_FAILURE * HOUR_MS &&
+  cleanBuilds * rate >= MIN_MISSED_FAILURES;
+
+/** `no failures in the 73 builds on 9.5 since 2026-10-20` */
+export const describeFix = ({ branch, at, cleanBuilds }: LastFailure): string =>
+  `no failures in the ${cleanBuilds} builds on ${branch} since ${at.toISOString().slice(0, 10)}`;

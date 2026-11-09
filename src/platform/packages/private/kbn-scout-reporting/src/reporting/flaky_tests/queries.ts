@@ -554,7 +554,7 @@ export const buildSetupBuildsQuery = (
       `test.id IN (${inList(testIds)})`,
     ].join(' AND ')}`,
     `EVAL failed = ${model.failedExpression}, setup = ${SETUP_EXPRESSION}`,
-    'STATS failed = MAX(failed)' +
+    'STATS failed = MAX(failed), ran_at = MIN(@timestamp)' +
       ' BY test.id, buildkite.branch, setup, buildkite.build.id, buildkite.build.number',
     'INLINE STATS setup_failed = MAX(failed) BY test.id, buildkite.branch, setup',
     'WHERE setup_failed == 1',
@@ -605,6 +605,7 @@ export const fetchSetupBuilds = async (
           build_id: string | null;
           build_number: number | null;
           failed: number;
+          ran_at: string;
         }>(es, buildSetupBuildsQuery(scope, frameworks, batch)),
       }))
     )
@@ -633,6 +634,7 @@ export const fetchSetupBuilds = async (
         buildId: record.build_id,
         buildNumber: record.build_number,
         failed: record.failed === 1,
+        ranAt: new Date(record.ran_at),
       });
     }
   }
