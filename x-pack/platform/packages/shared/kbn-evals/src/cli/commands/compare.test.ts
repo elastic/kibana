@@ -224,6 +224,44 @@ describe('compareCmd exit codes', () => {
     expect('error' in outcome && outcome.error.message).toContain('inconclusive');
   });
 
+  it('does not read 3 repetitions against 1 as a regression when the shared repetition is unchanged', async () => {
+    // Repetition 0 matches the baseline everywhere; only the extra target repetitions fail. The
+    // target means drop on every example, but the baseline never ran those repetitions.
+    const target = Array.from({ length: PAIR_COUNT }, (_, example) =>
+      [1, 0, 0].map((score, repetition) =>
+        scoreDoc(TARGET, example, score, { repetition, totalRepetitions: 3 })
+      )
+    ).flat();
+    stubScores(
+      target,
+      experiment(BASELINE, () => 1)
+    );
+
+    const outcome = await runCompare(GATE);
+
+    // Averaging all 3 target repetitions would give 1/3 against 1 on every example and trip.
+    expect(outcome).toEqual({ exitCode: 0 });
+  });
+
+  it('keeps pairing per repetition without --fail-on-regression', async () => {
+    const repeated = (experimentId: string, score: number) =>
+      [0, 1, 2].flatMap((example) =>
+        [0, 1, 2].map((repetition) =>
+          scoreDoc(experimentId, example, score, { repetition, totalRepetitions: 3 })
+        )
+      );
+    stubScores(repeated(TARGET, 0.4), repeated(BASELINE, 0.8));
+    const write = jest.spyOn(process.stdout, 'write').mockImplementation(() => true);
+    try {
+      await runCompare([TARGET, BASELINE, '--format', 'markdown']);
+      const markdown = write.mock.calls.map(([chunk]) => String(chunk)).join('');
+      // 3 examples x 3 repetitions, as the evals UI and compare route pair them.
+      expect(markdown).toMatch(/\| correctness \| 9 \|/);
+    } finally {
+      write.mockRestore();
+    }
+  });
+
   describe('nothing to compare', () => {
     it.each([
       ['the target has no scores', () => stubScores([], baselineScores)],

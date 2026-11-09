@@ -18,7 +18,7 @@ import { buildExecutionCompareUrl } from '../../utils/evals_ui_url';
 import { readSpaceIdsFlag } from '../run_helpers';
 import { formatCompareReport } from '../../utils/reporting/compare_report';
 import { formatMarkdownCompareReport } from '../../utils/reporting/compare_markdown_report';
-import { averageRepetitions } from '../../utils/reporting/average_repetitions';
+import { averageMatchedRepetitions } from '../../utils/reporting/average_repetitions';
 import { attachEffectSigns } from '../../utils/reporting/effect_direction';
 import { applyHolmCorrection } from '../../utils/reporting/holm_correction';
 import {
@@ -62,7 +62,8 @@ export const compareCmd = {
                                     Exit codes: 0 passed, 1 usage or unexpected error, 2
                                     inconclusive or not evaluated (no baseline, no scores or
                                     pairs, nothing checkable, no evaluator matched), 3
-                                    significant regression
+                                    significant regression. Pairs per example: repetitions are
+                                    averaged over the count both runs share
     --regression-evaluators         Comma-separated evaluator names that can trip the gate
                                     (default: all). Names absent from the
                                     comparison warn; if none match, the run fails.
@@ -345,20 +346,31 @@ export const compareCmd = {
       overlappingDatasetSet.has(score.example.dataset.id)
     );
 
-    // Pair per example, not per repetition: repetitions of one example are not independent, and
-    // counting them as pairs would inflate n for --min-pairs and shrink every p-value.
-    const { pairs, skippedMissingPairs, skippedNullScores } = pairScores(
-      averageRepetitions(filteredTargetScores),
-      averageRepetitions(filteredBaselineScores)
-    );
+    // The gate pairs per example, not per repetition: repetitions of one example are not
+    // independent, and counting them as pairs would inflate n for --min-pairs and shrink every
+    // p-value. Without the gate, pairing stays per repetition so the report matches the evals UI and
+    // compare route, which still pair that way.
+    const averaged = failOnRegression
+      ? averageMatchedRepetitions(filteredTargetScores, filteredBaselineScores)
+      : undefined;
+    const { pairs, skippedMissingPairs, skippedNullScores } = averaged
+      ? pairScores(averaged.target, averaged.baseline)
+      : pairScores(filteredTargetScores, filteredBaselineScores);
 
     if (pairs.length === 0) {
       throw nothingToCompare('No paired scores found between the two experiments.');
     }
 
     log.info(
-      `Paired ${pairs.length} example scores, repetitions averaged (skipped ${skippedMissingPairs} missing pairs, ${skippedNullScores} null scores).`
+      `Paired ${pairs.length} ${
+        averaged ? 'example scores, repetitions averaged' : 'scores'
+      } (skipped ${skippedMissingPairs} missing pairs, ${skippedNullScores} null scores).`
     );
+    if (averaged && averaged.trimmedExamples > 0) {
+      log.warning(
+        `${averaged.trimmedExamples} example(s) had a different number of usable repetitions in the two runs; each was averaged over the count both runs have.`
+      );
+    }
 
     const comparisonResults = compareScores(pairs);
     if (comparisonResults.length === 0) {
