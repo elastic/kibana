@@ -116,7 +116,7 @@ describe('Elasticsearch connector', () => {
             type: 'string',
             label: 'API Key',
             sensitive: true,
-            helpText: expect.stringContaining('The connector adds the "ApiKey" prefix'),
+            helpText: expect.stringContaining('Paste the API key as shown when you create it'),
           })
         );
       });

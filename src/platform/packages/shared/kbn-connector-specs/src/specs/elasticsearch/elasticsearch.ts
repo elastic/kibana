@@ -63,7 +63,7 @@ export const Elasticsearch: ConnectorSpec = {
               }),
               helpText: i18n.translate('connectorSpecs.elasticsearch.auth.apiKey.helpText', {
                 defaultMessage:
-                  'Paste the encoded API key as shown when you create it. The connector adds the "ApiKey" prefix. Grant the key at minimum: read on the indices you search.',
+                  'Paste the API key as shown when you create it. Grant the key at minimum: read on the indices you search.',
               }),
               placeholder: '{{ENCODED_API_KEY}}',
             },
@@ -227,7 +227,7 @@ export const Elasticsearch: ConnectorSpec = {
     '  Example: FROM logs-* | WHERE @timestamp > NOW() - 1 hour | STATS count = COUNT(*) BY service.name | SORT count DESC | LIMIT 10',
     '',
     '### Auth notes',
-    '- API key auth is recommended. Use the encoded API key; the connector adds the "ApiKey" prefix.',
+    '- API key auth is recommended. Use the encoded API key value.',
     '- The key must be granted read privilege on the indices you search.',
     '- For Elastic Cloud deployments, use the Elasticsearch endpoint URL shown in the Cloud console.',
   ].join('\n'),
