@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable import/no-extraneous-dependencies */
+/* eslint-disable @kbn/compat/import-no-extraneous-dependencies */
 import '@testing-library/jest-dom';
 import '@emotion/jest';

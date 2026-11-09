@@ -57,10 +57,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           ],
         },
       },
-      summary: 'Create cloud onboarding deployment',
-      description: 'Create a new Fleet cloud onboarding deployment.',
+      summary: 'Create cloud onboarding instance',
+      description: 'Create a new Fleet cloud onboarding instance.',
       options: {
-        tags: ['oas-tag:Fleet cloud onboarding deployments'],
+        tags: ['oas-tag:Fleet cloud onboarding instances'],
         availability: {
           since: '9.5.0',
           stability: 'experimental',
@@ -107,11 +107,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           ],
         },
       },
-      summary: 'Get cloud onboarding deployment instances',
+      summary: 'Get cloud onboarding instances',
       description:
-        'List cloud onboarding deployment instances, newest first. Optionally filter by package name or provider.',
+        'List cloud onboarding instances, newest first. Optionally filter by package name or provider.',
       options: {
-        tags: ['oas-tag:Fleet cloud onboarding deployments'],
+        tags: ['oas-tag:Fleet cloud onboarding instances'],
         availability: {
           since: '9.7.0',
           stability: 'experimental',
@@ -159,8 +159,8 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           ],
         },
       },
-      summary: 'Get cloud onboarding deployment instance counts',
-      description: 'Count the cloud onboarding deployment instances that cover each package.',
+      summary: 'Get cloud onboarding instance counts',
+      description: 'Count the cloud onboarding instances that cover each package.',
       access: 'internal',
     })
     .addVersion(
@@ -199,10 +199,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           ],
         },
       },
-      summary: 'Get cloud onboarding deployment',
-      description: 'Get a cloud onboarding deployment by ID.',
+      summary: 'Get cloud onboarding instance',
+      description: 'Get a cloud onboarding instance by ID.',
       options: {
-        tags: ['oas-tag:Fleet cloud onboarding deployments'],
+        tags: ['oas-tag:Fleet cloud onboarding instances'],
         availability: {
           since: '9.5.0',
           stability: 'experimental',
@@ -253,10 +253,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           ],
         },
       },
-      summary: 'Get cloud onboarding deployments by connector ID',
-      description: 'List all cloud onboarding deployments for a given connector ID.',
+      summary: 'Get cloud onboarding instances by connector ID',
+      description: 'List all cloud onboarding instances for a given connector ID.',
       options: {
-        tags: ['oas-tag:Fleet cloud onboarding deployments'],
+        tags: ['oas-tag:Fleet cloud onboarding instances'],
         availability: {
           since: '9.5.0',
           stability: 'experimental',
@@ -303,10 +303,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           ],
         },
       },
-      summary: 'Update cloud onboarding deployment',
-      description: 'Update a cloud onboarding deployment by ID.',
+      summary: 'Update cloud onboarding instance',
+      description: 'Update a cloud onboarding instance by ID.',
       options: {
-        tags: ['oas-tag:Fleet cloud onboarding deployments'],
+        tags: ['oas-tag:Fleet cloud onboarding instances'],
         availability: {
           since: '9.5.0',
           stability: 'experimental',
@@ -357,10 +357,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           ],
         },
       },
-      summary: 'Delete cloud onboarding deployment',
-      description: 'Delete a cloud onboarding deployment by ID.',
+      summary: 'Delete cloud onboarding instance',
+      description: 'Delete a cloud onboarding instance by ID.',
       options: {
-        tags: ['oas-tag:Fleet cloud onboarding deployments'],
+        tags: ['oas-tag:Fleet cloud onboarding instances'],
         availability: {
           since: '9.5.0',
           stability: 'experimental',

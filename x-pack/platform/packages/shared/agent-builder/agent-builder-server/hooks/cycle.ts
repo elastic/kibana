@@ -19,6 +19,7 @@ import type {
   SerializedExecutionError,
   ToolCallStep,
 } from '@kbn/agent-builder-common';
+import type { ExecutionConversationAccess } from '../agents/provider';
 import type { ProcessedRoundInput } from '../processed_input';
 import type { ProcessedTimelineEvent } from '../processed_timeline';
 import type { ModelProvider } from '../runner';
@@ -79,6 +80,8 @@ export interface CycleHookExecutionContext {
   readonly conversation: {
     /** Absent for one-shot runs. */
     readonly id?: string;
+    /** `readOnly` when the run must not change the conversation or anything stored for it. */
+    readonly access: ExecutionConversationAccess;
     /** The context timeline before this execution. */
     readonly events: readonly ProcessedTimelineEvent[];
     /** The executions on `events`, oldest first; derived from it. */

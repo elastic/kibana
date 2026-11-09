@@ -6,6 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
+import { of } from 'rxjs';
 import { useQuery } from '@kbn/react-query';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useInstalledSecurityJobsIds } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
@@ -15,13 +16,11 @@ import { useEntitiesWithAnomaliesCount } from './use_entities_with_anomalies_cou
 import { useNewEntityCount } from './use_new_entity_count';
 import { useNewlyHighCriticalCount } from './use_newly_high_critical_count';
 import { useRiskMoversCount } from './use_risk_movers_count';
-import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { TileQueryTimeoutError, retryUnlessTimedOut } from './tile_query_timeout';
 import { useTileQueryInputs } from './use_tile_query_inputs';
 
 jest.mock('@kbn/react-query', () => ({ useQuery: jest.fn() }));
 jest.mock('../../../../../common/lib/kibana', () => ({ useKibana: jest.fn() }));
-jest.mock('../../../../../common/hooks/use_error_toast', () => ({ useErrorToast: jest.fn() }));
 jest.mock('../../../../../common/components/ml/hooks/use_installed_security_jobs', () => ({
   useInstalledSecurityJobsIds: jest.fn(),
 }));
@@ -122,16 +121,14 @@ describe.each([
     expect(pending()).toBe(false);
   });
 
-  it('says it timed out, without a toast of its own (the page shows one for every tile)', () => {
+  it('says it timed out, and is no longer loading', () => {
     query({ error: new TileQueryTimeoutError() });
     const result = renderHook(() => useCount({ spaceId: 'default' })).result.current;
     expect(result.isTimedOut).toBe(true);
     expect(result.isLoading).toBe(false);
-    const toastCalls = (useErrorToast as jest.Mock).mock.calls;
-    expect(toastCalls[toastCalls.length - 1][1]).toBeUndefined();
   });
 
-  it('says it timed out, without a toast, when the group filter lookup timed out', () => {
+  it('says it timed out when the group filter lookup timed out', () => {
     (useTileQueryInputs as jest.Mock).mockReturnValue({
       data: undefined,
       isLoading: false,
@@ -141,8 +138,6 @@ describe.each([
     const result = renderHook(() => useCount({ spaceId: 'default' })).result.current;
     (useTileQueryInputs as jest.Mock).mockImplementation(actualUseTileQueryInputs);
     expect(result.isTimedOut).toBe(true);
-    const toastCalls = (useErrorToast as jest.Mock).mock.calls;
-    expect(toastCalls[toastCalls.length - 1][1]).toBeUndefined();
   });
 
   it('shows no count from an earlier fetch when the refetch timed out', () => {
@@ -174,13 +169,24 @@ describe.each([
     expect(hasCount()).toBe(false);
   });
 
-  it('reports other errors as before, with a toast, and does not call them a timeout', () => {
+  it('reports other errors, and does not call them a timeout', () => {
     const error = new Error('boom');
     query({ error });
     const result = renderHook(() => useCount({ spaceId: 'default' })).result.current;
     expect(result.isTimedOut).toBe(false);
-    const toastCalls = (useErrorToast as jest.Mock).mock.calls;
-    expect(toastCalls[toastCalls.length - 1][1]).toBe(error);
+    expect(result.error).toBe(error);
+  });
+
+  it('runs its query in the local project only', async () => {
+    const search = jest.fn().mockReturnValue(of({ rawResponse: { columns: [], values: [] } }));
+    (useKibana as jest.Mock).mockReturnValue({ services: { data: { search: { search } } } });
+    renderHook(() => useCount({ spaceId: 'default' }));
+    const [key, queryFn] = mockUseQuery.mock.calls[mockUseQuery.mock.calls.length - 1];
+    await queryFn({ signal: undefined });
+    expect(search).toHaveBeenCalledWith(
+      { params: { query: key[1] } },
+      expect.objectContaining({ strategy: 'esql_async', projectRouting: '_alias:_origin' })
+    );
   });
 
   it('retries an error once but not a timeout', () => {
@@ -297,5 +303,71 @@ describe('useEntitiesWithAnomaliesCount', () => {
       renderHook(() => useEntitiesWithAnomaliesCount({ spaceId: 'default' })).result.current
         .isLoading
     ).toBe(false);
+  });
+});
+
+describe('useAlertBasedTiles in a space with no alerts index', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useKibana as jest.Mock).mockReturnValue({
+      services: { data: { search: { search: jest.fn() } } },
+    });
+    (useResolvedLatestEntitiesIndexName as jest.Mock).mockReturnValue({
+      data: { indexName: '.entities-v1' },
+      isLoading: false,
+    });
+  });
+
+  const renderWithQueryError = (error: Error) => {
+    mockUseQuery.mockReturnValue({ data: undefined, isFetching: false, error });
+    return renderHook(() => useAlertBasedTiles({ spaceId: 'default' })).result.current;
+  };
+
+  it('says the alerts index is missing, without an error or a count', () => {
+    const result = renderWithQueryError(
+      new Error('no such index [.alerts-security.alerts-default]')
+    );
+    expect(result.isMissingIndex).toBe(true);
+    expect(result.error).toBeUndefined();
+    expect(result.hasCount).toBe(false);
+  });
+
+  it('reports any other failure as an error', () => {
+    const error = new Error('boom');
+    const result = renderWithQueryError(error);
+    expect(result.isMissingIndex).toBe(false);
+    expect(result.error).toBe(error);
+  });
+});
+
+describe.each([
+  ['useRiskMoversCount', useRiskMoversCount],
+  ['useNewlyHighCriticalCount', useNewlyHighCriticalCount],
+] as const)('%s when the entity index is missing', (_name, useCount) => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useKibana as jest.Mock).mockReturnValue({
+      services: { data: { search: { search: jest.fn() } } },
+    });
+    mockUseQuery.mockReturnValue({ data: undefined, isFetching: false, error: undefined });
+  });
+
+  afterEach(() => {
+    (useTileQueryInputs as jest.Mock).mockImplementation(actualUseTileQueryInputs);
+  });
+
+  it('reports it as an error, not as missing risk score history', () => {
+    const indexError = new Error('no such index [.entities.v2.latest.default]');
+    (useTileQueryInputs as jest.Mock).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: indexError,
+      entityFilterClauses: [],
+    });
+
+    const result = renderHook(() => useCount({ spaceId: 'default' })).result.current;
+
+    expect(result.isMissingIndex).toBe(false);
+    expect(result.error).toBe(indexError);
   });
 });

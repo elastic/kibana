@@ -1237,6 +1237,21 @@ describe('normalizeAPIConfig', () => {
     });
   });
 
+  it('drops the derived schedule interval instead of rejecting the save', function () {
+    const result = normalizeAPIConfig({
+      type: 'http',
+      schedule: { number: '10', unit: 's' },
+      schedule_interval_seconds: 600,
+    } as any);
+
+    expect(result).toEqual({
+      formattedConfig: {
+        type: 'http',
+        schedule: { number: '10', unit: 's' },
+      },
+    });
+  });
+
   it('urls key mappings', function () {
     expect(normalizeAPIConfig({ type: 'http', urls: 'https://www.google.com' } as any)).toEqual({
       formattedConfig: {

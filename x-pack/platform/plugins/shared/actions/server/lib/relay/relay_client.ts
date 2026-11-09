@@ -26,6 +26,7 @@ import type {
   RelayReadMessage,
   RelayReadMessagesInput,
   RelayReadResponse,
+  RelayReadThreadInput,
   RelayTriggerInput,
   RelayTriggerResponse,
 } from './types';
@@ -76,7 +77,7 @@ interface RelayTriggerResponseBody {
   origin?: { external_conversation_id?: string };
 }
 
-/** Raw shape of the channel read response body. */
+/** Raw shape of the channel and thread read response body. */
 interface RelayReadResponseBody {
   channel?: { id?: string; name?: string };
   messages?: Array<{
@@ -257,16 +258,29 @@ export class RelayClient implements RelayClientContract {
   }
 
   /** Read a window of a bound public channel. */
-  async readMessages({
-    tenantKey,
-    channelId,
-    oldest,
-    latest,
-    limit,
-  }: RelayReadMessagesInput): Promise<RelayReadResponse> {
-    const path = `/v1/slack/tenants/${encodeURIComponent(tenantKey)}/channels/${encodeURIComponent(
-      channelId
-    )}/messages`;
+  async readMessages(input: RelayReadMessagesInput): Promise<RelayReadResponse> {
+    return this.read(
+      `/v1/slack/tenants/${encodeURIComponent(input.tenantKey)}/channels/${encodeURIComponent(
+        input.channelId
+      )}/messages`,
+      input
+    );
+  }
+
+  /** Read one thread of a bound public channel. */
+  async readThread(input: RelayReadThreadInput): Promise<RelayReadResponse> {
+    return this.read(
+      `/v1/slack/tenants/${encodeURIComponent(input.tenantKey)}/channels/${encodeURIComponent(
+        input.channelId
+      )}/threads/${encodeURIComponent(input.threadTs)}`,
+      input
+    );
+  }
+
+  private async read(
+    path: string,
+    { oldest, latest, limit }: RelayReadMessagesInput
+  ): Promise<RelayReadResponse> {
     const query = new URLSearchParams();
     if (oldest) query.set('oldest', oldest);
     if (latest) query.set('latest', latest);

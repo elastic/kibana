@@ -1,0 +1,1303 @@
+{
+  "components": {
+    "schemas": {
+      "Anomaly": {
+        "properties": {
+          "active": {
+            "type": "boolean"
+          },
+          "anomalyDetectorArn": {
+            "minLength": 1,
+            "pattern": "^[\\w#+=/:,.@-]*$",
+            "type": "string"
+          },
+          "anomalyId": {
+            "maxLength": 36,
+            "minLength": 36,
+            "type": "string"
+          },
+          "description": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "firstSeen": {
+            "default": 0,
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "histogram": {
+            "additionalProperties": {
+              "default": 0,
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": "object"
+          },
+          "isPatternLevelSuppression": {
+            "type": "boolean"
+          },
+          "lastSeen": {
+            "default": 0,
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "logGroupArnList": {
+            "items": {
+              "maxLength": 2048,
+              "minLength": 1,
+              "pattern": "^[\\w#+=/:,.@-]*$",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "logSamples": {
+            "items": {
+              "$ref": "#/components/schemas/LogEvent"
+            },
+            "type": "array"
+          },
+          "patternId": {
+            "maxLength": 32,
+            "minLength": 32,
+            "type": "string"
+          },
+          "patternRegex": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "patternString": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "patternTokens": {
+            "items": {
+              "$ref": "#/components/schemas/PatternToken"
+            },
+            "type": "array"
+          },
+          "priority": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "state": {
+            "$ref": "#/components/schemas/State"
+          },
+          "suppressed": {
+            "type": "boolean"
+          },
+          "suppressedDate": {
+            "default": 0,
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "suppressedUntil": {
+            "default": 0,
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "anomalyId",
+          "patternId",
+          "anomalyDetectorArn",
+          "patternString",
+          "description",
+          "active",
+          "state",
+          "histogram",
+          "logSamples",
+          "patternTokens",
+          "logGroupArnList"
+        ],
+        "type": "object"
+      },
+      "DataProtectionStatus": {
+        "enum": [
+          "ACTIVATED",
+          "DELETED",
+          "ARCHIVED",
+          "DISABLED"
+        ],
+        "type": "string"
+      },
+      "DescribeLogGroupsRequestContent": {
+        "properties": {
+          "accountIdentifiers": {
+            "items": {
+              "maxLength": 12,
+              "minLength": 12,
+              "pattern": "^\\d{12}$",
+              "type": "string"
+            },
+            "maxItems": 20,
+            "minItems": 0,
+            "type": "array"
+          },
+          "includeLinkedAccounts": {
+            "type": "boolean"
+          },
+          "limit": {
+            "format": "int32",
+            "maximum": 50,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "logGroupClass": {
+            "$ref": "#/components/schemas/LogGroupClass"
+          },
+          "logGroupIdentifiers": {
+            "items": {
+              "maxLength": 2048,
+              "minLength": 1,
+              "pattern": "^[\\w#+=/:,.@-]*$",
+              "type": "string"
+            },
+            "maxItems": 50,
+            "minItems": 1,
+            "type": "array"
+          },
+          "logGroupNamePattern": {
+            "maxLength": 512,
+            "minLength": 0,
+            "pattern": "^[\\.\\-_/#A-Za-z0-9]*$",
+            "type": "string"
+          },
+          "logGroupNamePrefix": {
+            "maxLength": 512,
+            "minLength": 1,
+            "pattern": "^[\\.\\-_/#A-Za-z0-9]+$",
+            "type": "string"
+          },
+          "nextToken": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DescribeLogGroupsResponseContent": {
+        "properties": {
+          "logGroups": {
+            "items": {
+              "$ref": "#/components/schemas/LogGroup"
+            },
+            "type": "array"
+          },
+          "nextToken": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FilterLogEventsRequestContent": {
+        "properties": {
+          "endTime": {
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "filterPattern": {
+            "maxLength": 1024,
+            "minLength": 0,
+            "type": "string"
+          },
+          "interleaved": {
+            "deprecated": true,
+            "type": "boolean"
+          },
+          "limit": {
+            "format": "int32",
+            "maximum": 10000,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "logGroupIdentifier": {
+            "maxLength": 2048,
+            "minLength": 1,
+            "pattern": "^[\\w#+=/:,.@-]*$",
+            "type": "string"
+          },
+          "logGroupName": {
+            "maxLength": 512,
+            "minLength": 1,
+            "pattern": "^[\\.\\-_/#A-Za-z0-9]+$",
+            "type": "string"
+          },
+          "logStreamNamePrefix": {
+            "maxLength": 512,
+            "minLength": 1,
+            "pattern": "^[^:*]*$",
+            "type": "string"
+          },
+          "logStreamNames": {
+            "items": {
+              "maxLength": 512,
+              "minLength": 1,
+              "pattern": "^[^:*]*$",
+              "type": "string"
+            },
+            "maxItems": 100,
+            "minItems": 1,
+            "type": "array"
+          },
+          "nextToken": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "startFromHead": {
+            "type": "boolean"
+          },
+          "startTime": {
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "unmask": {
+            "default": false,
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "FilterLogEventsResponseContent": {
+        "properties": {
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/FilteredLogEvent"
+            },
+            "type": "array"
+          },
+          "nextToken": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "searchedLogStreams": {
+            "items": {
+              "$ref": "#/components/schemas/SearchedLogStream"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FilteredLogEvent": {
+        "properties": {
+          "eventId": {
+            "type": "string"
+          },
+          "ingestionTime": {
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "logStreamName": {
+            "maxLength": 512,
+            "minLength": 1,
+            "pattern": "^[^:*]*$",
+            "type": "string"
+          },
+          "message": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "GetQueryResultsRequestContent": {
+        "properties": {
+          "maxItems": {
+            "format": "int32",
+            "maximum": 10000,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "nextToken": {
+            "maxLength": 1024,
+            "minLength": 0,
+            "type": "string"
+          },
+          "queryId": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "queryId"
+        ],
+        "type": "object"
+      },
+      "GetQueryResultsResponseContent": {
+        "properties": {
+          "encryptionKey": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+          },
+          "nextToken": {
+            "maxLength": 1024,
+            "minLength": 0,
+            "type": "string"
+          },
+          "queryLanguage": {
+            "$ref": "#/components/schemas/QueryLanguage"
+          },
+          "results": {
+            "items": {
+              "items": {
+                "$ref": "#/components/schemas/ResultField"
+              },
+              "type": "array"
+            },
+            "type": "array"
+          },
+          "statistics": {
+            "$ref": "#/components/schemas/QueryStatistics"
+          },
+          "status": {
+            "$ref": "#/components/schemas/QueryStatus"
+          }
+        },
+        "type": "object"
+      },
+      "InheritedProperty": {
+        "enum": [
+          "ACCOUNT_DATA_PROTECTION"
+        ],
+        "type": "string"
+      },
+      "InvalidParameterExceptionResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LimitExceededExceptionResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ListAnomaliesRequestContent": {
+        "properties": {
+          "anomalyDetectorArn": {
+            "minLength": 1,
+            "pattern": "^[\\w#+=/:,.@-]*$",
+            "type": "string"
+          },
+          "limit": {
+            "format": "int32",
+            "maximum": 50,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "nextToken": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "suppressionState": {
+            "$ref": "#/components/schemas/SuppressionState"
+          }
+        },
+        "type": "object"
+      },
+      "ListAnomaliesResponseContent": {
+        "properties": {
+          "anomalies": {
+            "items": {
+              "$ref": "#/components/schemas/Anomaly"
+            },
+            "type": "array"
+          },
+          "nextToken": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LogEvent": {
+        "properties": {
+          "message": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "LogGroup": {
+        "properties": {
+          "arn": {
+            "type": "string"
+          },
+          "bearerTokenAuthenticationEnabled": {
+            "type": "boolean"
+          },
+          "creationTime": {
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "dataProtectionStatus": {
+            "$ref": "#/components/schemas/DataProtectionStatus"
+          },
+          "deletionProtectionEnabled": {
+            "type": "boolean"
+          },
+          "inheritedProperties": {
+            "items": {
+              "$ref": "#/components/schemas/InheritedProperty"
+            },
+            "type": "array"
+          },
+          "kmsKeyId": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+          },
+          "logGroupArn": {
+            "type": "string"
+          },
+          "logGroupClass": {
+            "$ref": "#/components/schemas/LogGroupClass"
+          },
+          "logGroupName": {
+            "maxLength": 512,
+            "minLength": 1,
+            "pattern": "^[\\.\\-_/#A-Za-z0-9]+$",
+            "type": "string"
+          },
+          "metricFilterCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "retentionInDays": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "retentionPolicyName": {
+            "type": "string"
+          },
+          "storedBytes": {
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "LogGroupClass": {
+        "enum": [
+          "STANDARD",
+          "INFREQUENT_ACCESS",
+          "DELIVERY"
+        ],
+        "type": "string"
+      },
+      "MalformedQueryExceptionResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "queryCompileError": {
+            "$ref": "#/components/schemas/QueryCompileError"
+          }
+        },
+        "type": "object"
+      },
+      "OperationAbortedExceptionResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PatternToken": {
+        "properties": {
+          "dynamicTokenPosition": {
+            "default": 0,
+            "format": "int32",
+            "type": "integer"
+          },
+          "enumerations": {
+            "additionalProperties": {
+              "default": 0,
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": "object"
+          },
+          "inferredTokenName": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "isDynamic": {
+            "type": "boolean"
+          },
+          "tokenString": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "QueryCompileError": {
+        "properties": {
+          "location": {
+            "$ref": "#/components/schemas/QueryCompileErrorLocation"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "QueryCompileErrorLocation": {
+        "properties": {
+          "endCharOffset": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "startCharOffset": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "QueryLanguage": {
+        "enum": [
+          "CWLI",
+          "SQL",
+          "PPL"
+        ],
+        "type": "string"
+      },
+      "QueryStatistics": {
+        "properties": {
+          "bytesScanned": {
+            "anyOf": [
+              {
+                "format": "double",
+                "type": "number"
+              },
+              {
+                "enum": [
+                  "NaN",
+                  "Infinity",
+                  "-Infinity"
+                ],
+                "type": "string"
+              }
+            ],
+            "default": 0
+          },
+          "estimatedBytesSkipped": {
+            "anyOf": [
+              {
+                "format": "double",
+                "type": "number"
+              },
+              {
+                "enum": [
+                  "NaN",
+                  "Infinity",
+                  "-Infinity"
+                ],
+                "type": "string"
+              }
+            ],
+            "default": 0
+          },
+          "estimatedRecordsSkipped": {
+            "anyOf": [
+              {
+                "format": "double",
+                "type": "number"
+              },
+              {
+                "enum": [
+                  "NaN",
+                  "Infinity",
+                  "-Infinity"
+                ],
+                "type": "string"
+              }
+            ],
+            "default": 0
+          },
+          "logGroupsScanned": {
+            "anyOf": [
+              {
+                "format": "double",
+                "type": "number"
+              },
+              {
+                "enum": [
+                  "NaN",
+                  "Infinity",
+                  "-Infinity"
+                ],
+                "type": "string"
+              }
+            ],
+            "default": 0
+          },
+          "recordsMatched": {
+            "anyOf": [
+              {
+                "format": "double",
+                "type": "number"
+              },
+              {
+                "enum": [
+                  "NaN",
+                  "Infinity",
+                  "-Infinity"
+                ],
+                "type": "string"
+              }
+            ],
+            "default": 0
+          },
+          "recordsScanned": {
+            "anyOf": [
+              {
+                "format": "double",
+                "type": "number"
+              },
+              {
+                "enum": [
+                  "NaN",
+                  "Infinity",
+                  "-Infinity"
+                ],
+                "type": "string"
+              }
+            ],
+            "default": 0
+          },
+          "resultCount": {
+            "anyOf": [
+              {
+                "format": "double",
+                "type": "number"
+              },
+              {
+                "enum": [
+                  "NaN",
+                  "Infinity",
+                  "-Infinity"
+                ],
+                "type": "string"
+              }
+            ],
+            "default": 0
+          }
+        },
+        "type": "object"
+      },
+      "QueryStatus": {
+        "enum": [
+          "Scheduled",
+          "Running",
+          "Complete",
+          "Failed",
+          "Cancelled",
+          "Timeout",
+          "Unknown"
+        ],
+        "type": "string"
+      },
+      "ResourceNotFoundExceptionResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ResultField": {
+        "properties": {
+          "field": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SearchedLogStream": {
+        "properties": {
+          "logStreamName": {
+            "maxLength": 512,
+            "minLength": 1,
+            "pattern": "^[^:*]*$",
+            "type": "string"
+          },
+          "searchedCompletely": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceUnavailableExceptionResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "StartQueryRequestContent": {
+        "properties": {
+          "endTime": {
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "limit": {
+            "format": "int32",
+            "maximum": 100000,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "logGroupIdentifiers": {
+            "items": {
+              "maxLength": 2048,
+              "minLength": 1,
+              "pattern": "^[\\w#+=/:,.@-]*$",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "logGroupName": {
+            "maxLength": 512,
+            "minLength": 1,
+            "pattern": "^[\\.\\-_/#A-Za-z0-9]+$",
+            "type": "string"
+          },
+          "logGroupNames": {
+            "items": {
+              "maxLength": 512,
+              "minLength": 1,
+              "pattern": "^[\\.\\-_/#A-Za-z0-9]+$",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "queryLanguage": {
+            "$ref": "#/components/schemas/QueryLanguage"
+          },
+          "queryString": {
+            "maxLength": 10000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "startTime": {
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "startTime",
+          "endTime",
+          "queryString"
+        ],
+        "type": "object"
+      },
+      "StartQueryResponseContent": {
+        "properties": {
+          "queryId": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "State": {
+        "enum": [
+          "Active",
+          "Suppressed",
+          "Baseline"
+        ],
+        "type": "string"
+      },
+      "SuppressionState": {
+        "enum": [
+          "SUPPRESSED",
+          "UNSUPPRESSED"
+        ],
+        "type": "string"
+      }
+    },
+    "securitySchemes": {
+      "aws.auth.sigv4": {
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey"
+      }
+    }
+  },
+  "info": {
+    "title": "Amazon CloudWatch Logs"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/DescribeLogGroups": {
+      "post": {
+        "operationId": "DescribeLogGroups",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DescribeLogGroupsRequestContent"
+              }
+            },
+            "application/x-amz-json-1.1": {
+              "schema": {
+                "$ref": "#/components/schemas/DescribeLogGroupsRequestContent"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DescribeLogGroupsResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/DescribeLogGroupsResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidParameterExceptionResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidParameterExceptionResponseContent"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceUnavailableExceptionResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceUnavailableExceptionResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/FilterLogEvents": {
+      "post": {
+        "operationId": "FilterLogEvents",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilterLogEventsRequestContent"
+              }
+            },
+            "application/x-amz-json-1.1": {
+              "schema": {
+                "$ref": "#/components/schemas/FilterLogEventsRequestContent"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilterLogEventsResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilterLogEventsResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/InvalidParameterExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+                    }
+                  ]
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/InvalidParameterExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceUnavailableExceptionResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceUnavailableExceptionResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/GetQueryResults": {
+      "post": {
+        "operationId": "GetQueryResults",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetQueryResultsRequestContent"
+              }
+            },
+            "application/x-amz-json-1.1": {
+              "schema": {
+                "$ref": "#/components/schemas/GetQueryResultsRequestContent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetQueryResultsResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetQueryResultsResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/InvalidParameterExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+                    }
+                  ]
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/InvalidParameterExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceUnavailableExceptionResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceUnavailableExceptionResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ListAnomalies": {
+      "post": {
+        "operationId": "ListAnomalies",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ListAnomaliesRequestContent"
+              }
+            },
+            "application/x-amz-json-1.1": {
+              "schema": {
+                "$ref": "#/components/schemas/ListAnomaliesRequestContent"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListAnomaliesResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListAnomaliesResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/InvalidParameterExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/OperationAbortedExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+                    }
+                  ]
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/InvalidParameterExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/OperationAbortedExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceUnavailableExceptionResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceUnavailableExceptionResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/StartQuery": {
+      "post": {
+        "operationId": "StartQuery",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartQueryRequestContent"
+              }
+            },
+            "application/x-amz-json-1.1": {
+              "schema": {
+                "$ref": "#/components/schemas/StartQueryRequestContent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StartQueryResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/StartQueryResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/InvalidParameterExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/LimitExceededExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/MalformedQueryExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+                    }
+                  ]
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/InvalidParameterExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/LimitExceededExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/MalformedQueryExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceUnavailableExceptionResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceUnavailableExceptionResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "aws.auth.sigv4": []
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://logs.{region}.amazonaws.com",
+      "variables": {
+        "region": {
+          "default": "us-east-1"
+        }
+      }
+    }
+  ],
+  "x-amz-json": {
+    "endpointPrefix": "logs",
+    "targetPrefix": "Logs_20140328",
+    "version": "1.1"
+  }
+}

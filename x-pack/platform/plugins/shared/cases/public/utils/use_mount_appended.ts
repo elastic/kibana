@@ -7,7 +7,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-// eslint-disable-next-line import/no-extraneous-dependencies
+// eslint-disable-next-line @kbn/compat/import-no-extraneous-dependencies
 import { mount } from 'enzyme';
 
 type WrapperOf<F extends (...args: any) => any> = (...args: Parameters<F>) => ReturnType<F>;

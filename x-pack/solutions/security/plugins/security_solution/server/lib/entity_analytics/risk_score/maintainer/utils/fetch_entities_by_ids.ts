@@ -8,6 +8,7 @@
 import type { EntityUpdateClient } from '@kbn/entity-store/server';
 import type { EntityStoreModifierSource, RiskScoreModifierEntity } from '../steps/pipeline_types';
 import type { ScopedLogger } from './with_log_context';
+import { MAX_ENTITY_SEARCH_PAGE_SIZE } from '../../constants';
 
 interface FetchEntitiesByIdsParams {
   crudClient: EntityUpdateClient;
@@ -76,12 +77,14 @@ export const fetchEntitiesByIds = async ({
   }
 
   try {
-    let searchAfter: Array<string | number> | undefined;
-    do {
-      const { entities: batch, nextSearchAfter } = await crudClient.listEntities({
-        filter: { terms: { 'entity.id': entityIds } },
-        size: entityIds.length,
-        searchAfter,
+    // One request per chunk keeps `size` within `index.max_result_window`. `entity.id` is unique in
+    // the index, so a chunk's matches always fit in one response and no cursor is needed.
+    const uniqueIds = [...new Set(entityIds)];
+    for (let start = 0; start < uniqueIds.length; start += MAX_ENTITY_SEARCH_PAGE_SIZE) {
+      const chunk = uniqueIds.slice(start, start + MAX_ENTITY_SEARCH_PAGE_SIZE);
+      const { entities: batch } = await crudClient.listEntities({
+        filter: { terms: { 'entity.id': chunk } },
+        size: chunk.length,
         source: [
           'entity.id',
           'entity.attributes.watchlists',
@@ -95,9 +98,10 @@ export const fetchEntitiesByIds = async ({
           entityMap.set(normalizedEntity.entity.id, normalizedEntity);
         }
       }
-      searchAfter = nextSearchAfter;
-    } while (searchAfter !== undefined);
+    }
   } catch (error) {
+    // All-or-nothing: a partial map would apply modifiers to some entities only.
+    entityMap.clear();
     onError?.();
     if (strict) {
       throw error;
