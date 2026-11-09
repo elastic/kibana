@@ -92,10 +92,10 @@ steps:
             connectorId: "${{ inputs.connectorId }}"
             maxExistingQueriesForContext: "${{ inputs.maxExistingQueriesForContext }}"
         on-failure:
-        retry:
-          max-attempts: 3
-          delay: "5s"
-          strategy: exponential
+          retry:
+            max-attempts: 3
+            delay: "5s"
+            strategy: exponential
 
       # 2b: Run the agent as a workflow step, with the workflow's own credential. A route handler
       # holds the token it was called with and cannot renew it, so an agent run inside one is
@@ -109,10 +109,10 @@ steps:
         product-solution: "observability"
         product-feature: "nightshift"
         on-failure:
-        retry:
-          max-attempts: 3
-          delay: "5s"
-          strategy: exponential
+          retry:
+            max-attempts: 3
+            delay: "5s"
+            strategy: exponential
         with:
           conversation_id: "${{ steps.build_agent_input.output.conversationId }}"
           message: "${{ steps.build_agent_input.output.message }}"
@@ -131,10 +131,10 @@ steps:
             connectorId: "${{ steps.build_agent_input.output.connectorId }}"
             conversationId: "${{ steps.build_agent_input.output.conversationId }}"
         on-failure:
-        retry:
-          max-attempts: 3
-          delay: "5s"
-          strategy: exponential
+          retry:
+            max-attempts: 3
+            delay: "5s"
+            strategy: exponential
 
       # 2d: Keep this attempt's outcome; the loop stops once an attempt finalized.
       - name: update_state

@@ -183,4 +183,33 @@ describe('identifyInferredFeatures', () => {
       expect.objectContaining({ state: 'failure', run_id: 'run-1' })
     );
   });
+
+  it('keeps the stored agent round time in a failed iteration when the agent never finalized', async () => {
+    const kiClient = {
+      getFeatures: jest.fn().mockResolvedValue({ hits: [] }),
+      getExcludedFeatures: jest.fn().mockResolvedValue({ hits: [] }),
+      bulk: jest.fn(),
+      getDefaultExpiresAt: jest.fn(),
+    };
+    const trackFeaturesIdentified = jest.fn();
+
+    await identifyInferredFeatures({
+      kiClient,
+      agentConversation: { rounds: [{ steps: [], time_to_last_token: 240_000 }] },
+      connectorId: 'connector-1',
+      logger: loggerMock.create(),
+      sourceId: 'logs.test',
+      runId: 'run-1',
+      documents: [{ _id: 'doc-1', fields: { message: 'hello' } }],
+      totalFilters: 0,
+      filtersCapped: false,
+      hasFilteredDocuments: false,
+      trackFeaturesIdentified,
+    } as unknown as Parameters<typeof identifyInferredFeatures>[0]);
+
+    expect(trackFeaturesIdentified).toHaveBeenCalledWith(
+      expect.objectContaining({ state: 'failure', duration_ms: expect.any(Number) })
+    );
+    expect(trackFeaturesIdentified.mock.calls[0][0].duration_ms).toBeGreaterThanOrEqual(240_000);
+  });
 });

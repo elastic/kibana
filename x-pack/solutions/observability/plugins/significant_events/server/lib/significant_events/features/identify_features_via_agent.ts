@@ -63,8 +63,6 @@ export function readFeatureIdentificationResult({
   features: BaseFeature[];
   ignoredFeatures: IgnoredFeature[];
   tokensUsed: ChatCompletionTokenCount;
-  /** How long the agent's round took; the agent no longer runs inside the route. */
-  durationMs: number;
 } {
   const round = conversation.rounds.at(-1);
   const finalizeStep = round?.steps
@@ -95,6 +93,5 @@ export function readFeatureIdentificationResult({
     features,
     ignoredFeatures,
     tokensUsed: chatTokenCountFromModelUsage(round?.model_usage) ?? { ...EMPTY_TOKENS },
-    durationMs: round?.time_to_last_token ?? 0,
   };
 }

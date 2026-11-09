@@ -321,7 +321,6 @@ interface InferredIterationResult {
     | {
         state: 'success';
         tokensUsed: ChatCompletionTokenCount;
-        agentDurationMs: number;
         newFeatures: FeatureUpsert[];
         updatedFeatures: FeatureUpsert[];
         ignoredFeatures: IgnoredFeature[];
@@ -350,7 +349,6 @@ async function runInferredIteration({
   let rawFeatures: BaseFeature[];
   let ignoredFeatures: IgnoredFeature[];
   let tokensUsed: ChatCompletionTokenCount;
-  let agentDurationMs: number;
 
   try {
     if (!agentConversation) {
@@ -360,7 +358,6 @@ async function runInferredIteration({
     rawFeatures = result.features;
     ignoredFeatures = result.ignoredFeatures;
     tokensUsed = result.tokensUsed;
-    agentDurationMs = result.durationMs;
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
     logger.warn(`Feature identification agent failed: ${errorMsg}`);
@@ -394,7 +391,6 @@ async function runInferredIteration({
     outcome: {
       state: 'success',
       tokensUsed,
-      agentDurationMs,
       newFeatures,
       updatedFeatures,
       ignoredFeatures,
@@ -470,9 +466,10 @@ export async function identifyInferredFeatures({
 
   const { docsCount, docIds, outcome } = iterationResult;
 
-  // The agent ran as its own workflow step, so its round time is added to this step's own.
-  const durationMs =
-    Date.now() - startedAt + (outcome.state === 'success' ? outcome.agentDurationMs : 0);
+  // The agent ran as its own workflow step, so its stored round time is added to this step's own,
+  // whether or not it finalized.
+  const agentDurationMs = agentConversation?.rounds.at(-1)?.time_to_last_token ?? 0;
+  const durationMs = Date.now() - startedAt + agentDurationMs;
 
   const telemetryCtx: TelemetryContext = {
     run_id: runId,

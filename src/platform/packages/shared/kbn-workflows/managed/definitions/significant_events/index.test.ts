@@ -10,6 +10,8 @@
 import { parse } from 'yaml';
 import { SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW } from '.';
 import BOUND_INVESTIGATION_COMPLETED_YAML from './bound_investigation_completed.yaml';
+import FEATURES_IDENTIFICATION_YAML from './knowledge_indicators/features_identification.yaml';
+import QUERIES_GENERATION_YAML from './knowledge_indicators/queries_generation.yaml';
 import BOUND_ORCHESTRATOR_YAML from './significant_events/bound_orchestrator.yaml';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
 
@@ -31,6 +33,7 @@ interface WorkflowStep {
   'connector-id-by-feature'?: string;
   'on-failure'?: { continue?: boolean };
   steps?: WorkflowStep[];
+  retry?: unknown;
   with?: {
     path?: string;
     body?: Record<string, unknown> & { runId?: string };
@@ -228,5 +231,15 @@ describe('significant events persistence workflow contracts', () => {
       completed_at: '{{ event.completed_at }}',
       outcome: '{{ event.status }}',
     });
+  });
+
+  it.each([
+    ['features_identification', FEATURES_IDENTIFICATION_YAML],
+    ['queries_generation', QUERIES_GENERATION_YAML],
+  ])('nests retry under a non-null on-failure in %s', (_name, yaml) => {
+    const collect = (steps: WorkflowStep[]): WorkflowStep[] =>
+      steps.flatMap((step) => [step, ...collect(step.steps ?? [])]);
+    const steps = collect((parse(yaml) as ParsedWorkflow).steps);
+    expect(steps.filter((step) => 'retry' in step || step['on-failure'] === null)).toEqual([]);
   });
 });

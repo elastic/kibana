@@ -50,7 +50,6 @@ describe('readFeatureIdentificationResult', () => {
       features: [],
       ignoredFeatures: [],
       tokensUsed: { prompt: 10, completion: 5, total: 15, cached: 2 },
-      durationMs: 4321,
     });
   });
 
