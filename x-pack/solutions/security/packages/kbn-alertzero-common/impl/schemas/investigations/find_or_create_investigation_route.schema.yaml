@@ -1,0 +1,106 @@
+openapi: 3.0.0
+info:
+  title: AlertZero find-or-create Worker Investigation route
+  version: '1'
+paths:
+  /internal/alertzero/investigations/find_or_create:
+    post:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: FindOrCreateWorkerInvestigation
+      description: >-
+        Mints the deterministic Investigation id for a Worker's subject (a uuidv5
+        hash of the space, the Worker and the subject, which a workflow cannot
+        compute) and creates the conversation, or reuses the one an earlier
+        review opened. A reused Investigation is reopened when closed and
+        records the calling run. `created` tells the caller which path ran, so
+        a re-review can say it resumed the Investigation instead of claiming
+        to have opened it.
+      summary: Find or create a Worker Investigation
+      tags:
+        - AlertZero API
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [workerId, subjectId, title]
+              additionalProperties: false
+              properties:
+                workerId:
+                  type: string
+                  enum:
+                    - system-security-detection-rule-coverage
+                    - system-security-detection-rule-tuning
+                  description: >-
+                    Catalog id of the Worker whose review owns the Investigation.
+                    Part of the id, so two Workers reviewing the same subject
+                    keep separate Investigations.
+                subjectId:
+                  type: string
+                  minLength: 1
+                  maxLength: 512
+                  description: >-
+                    What the review is about: the knowledge indicator id of a
+                    coverage gap, or the saved-object id of a tuned rule.
+                title:
+                  type: string
+                  minLength: 1
+                  maxLength: 500
+                  description: Title of the Investigation when this call creates it.
+                description:
+                  type: string
+                  maxLength: 10000
+                  description: >-
+                    Investigation description. Written on create and refreshed
+                    on reuse, so it always describes the latest review.
+                workflowExecutionId:
+                  type: string
+                  minLength: 1
+                  maxLength: 128
+                  description: >-
+                    Execution id of the calling review, recorded on the
+                    Investigation's `workflow_execution_ids` whether the call
+                    created or reused it.
+            examples:
+              FindOrCreateWorkerInvestigationRequestExample:
+                summary: Find or create the Investigation for a coverage gap.
+                value:
+                  workerId: system-security-detection-rule-coverage
+                  subjectId: ki-2f9e1c
+                  title: 'Detection coverage: T1078 Valid account abuse'
+                  description: Valid account abuse from an unusual location.
+                  workflowExecutionId: 7c1d7c8e-1b2f-4a3b-9c4d-5e6f7a8b9c0d
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - investigationConversationId
+                  - created
+                  - reopened
+                properties:
+                  investigationConversationId:
+                    type: string
+                    description: uuidv5(worker:subject:{spaceId}|{workerId}|{subjectId}); minted or verified existing.
+                  created:
+                    type: boolean
+                    description: >-
+                      True when this call minted the Investigation; false when
+                      it reused one an earlier review opened.
+                  reopened:
+                    type: boolean
+                    description: >-
+                      True when the reused Investigation was closed and this
+                      call set it back to open.
+              examples:
+                FindOrCreateWorkerInvestigationResponse200Example:
+                  summary: A newly minted Investigation.
+                  value:
+                    investigationConversationId: 8f14e45f-ceea-5e58-8e1c-9f8d4e7a1b2c
+                    created: true
+                    reopened: false

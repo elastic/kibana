@@ -8,6 +8,10 @@
 import { parse } from 'yaml';
 import { MAX_TITLE_LENGTH } from '@kbn/proposals-common';
 import type { RuleCoverageWorkerExtras, RuleTuningWorkerExtras } from '@kbn/alertzero-common';
+import {
+  ALERTZERO_FIND_OR_CREATE_INVESTIGATION_URL,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
+} from '@kbn/alertzero-common';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { createWorkflowLiquidEngine } from '@kbn/workflows';
 import { convertJsonSchemaToZod } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
@@ -370,7 +374,7 @@ describe('detection rule workflows', () => {
       expect(shouldContinue).toBeUndefined();
       expect(post?.type).toBe('ai.conversation.add_user_message');
       expect(post?.with?.conversation_id).toBe(
-        '{{ steps.create_investigation.output.conversation_id }}'
+        '{{ steps.find_or_create_investigation.output.investigationConversationId }}'
       );
       expect(String(post?.with?.message)).toContain('{{ steps.diagnose_rule.error.message }}');
     });
@@ -413,7 +417,9 @@ describe('detection rule workflows', () => {
       const gate = all.find(({ name }) => name === 'entry_gate')!;
       expect(gate.type).toBe('if');
       expect(gate.condition).toContain("inputs.autonomy_level == 'manual'");
-      expect(gate.condition).toContain('steps.create_investigation.output.conversation_id != null');
+      expect(gate.condition).toContain(
+        'steps.find_or_create_investigation.output.investigationConversationId != null'
+      );
       expect((gate.steps ?? []).map(({ name }) => name)).toEqual([
         'propose_entry',
         'entry_decision',
@@ -506,7 +512,9 @@ describe('detection rule workflows', () => {
       // One switch on the change type: the engine runs the first matching arm only.
       const fork = all.find(({ name }) => name === 'propose_tuning')!;
       expect(fork.type).toBe('switch');
-      expect(fork.if).toContain('steps.create_investigation.output.conversation_id != null');
+      expect(fork.if).toContain(
+        'steps.find_or_create_investigation.output.investigationConversationId != null'
+      );
       expect(fork.expression).toContain('steps.diagnose_rule.output.structured_output.change_type');
       expect((fork.cases ?? []).map(({ match }) => match)).toEqual([
         'query',
@@ -1329,20 +1337,58 @@ describe('detection rule workflows', () => {
         });
       });
 
+      // One investigation per rule (elastic/security-team#20386): a rule whose tuning
+      // proposal expired is harvested again by the next sweep, and `ai.conversation.create`
+      // would open a second investigation each time. The route derives the id from the
+      // rule, so every review of the rule lands on the same investigation.
+      it('finds or opens the rule investigation through the AlertZero route', () => {
+        const step = reviewSteps.find(({ name }) => name === 'find_or_create_investigation')!;
+
+        expect(step.type).toBe('kibana.request');
+        expect(step.with?.method).toBe('POST');
+        expect(step.with?.path).toBe(
+          `/s/{{ workflow.spaceId }}${ALERTZERO_FIND_OR_CREATE_INVESTIGATION_URL}`
+        );
+        expect(step.with?.body).toEqual(
+          expect.objectContaining({
+            workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
+            subjectId: '{{ inputs.rule_uuid }}',
+            workflowExecutionId: '{{ execution.id }}',
+          })
+        );
+        expect(step).not.toHaveProperty('on-failure');
+        expect(reviewSteps.map(({ type }) => type)).not.toContain('ai.conversation.create');
+
+        const resumed = reviewSteps.find(({ name }) => name === 'post_resumed')!;
+        expect(resumed.type).toBe('ai.conversation.add_user_message');
+        expect(resumed.if).toContain('steps.find_or_create_investigation.output.created != true');
+        expect(resumed['on-failure']).toEqual({ continue: true });
+        // A reopened Investigation was closed by a decision, so the note must not claim
+        // the earlier review reached none.
+        const note = String(resumed.with?.message);
+        expect(note).toContain('steps.find_or_create_investigation.output.reopened == true');
+        expect(note).toContain('closed this investigation');
+        expect(note).toContain('reached no applied decision');
+      });
+
       // No agent runs in the investigation to reference an attachment, so without
       // `render_inline` the analyst only finds these in the attachment list.
-      it.each(['attach_rule', 'refresh_rule_attachment', 'attach_exception', 'attach_alerts'])(
-        'renders %s inline in the investigation',
-        (stepName) => {
-          const step = reviewSteps.find(({ name }) => name === stepName)!;
+      it.each([
+        'attach_rule',
+        'resume_rule_attachment',
+        'refresh_rule_attachment',
+        'attach_exception',
+        'attach_alerts',
+        'resume_alerts_attachment',
+      ])('renders %s inline in the investigation', (stepName) => {
+        const step = reviewSteps.find(({ name }) => name === stepName)!;
 
-          expect(step.with?.render_inline).toBe(true);
-          expect(step.with?.conversation_id).toBe(
-            '{{ steps.create_investigation.output.conversation_id }}'
-          );
-          expect(step['on-failure']).toEqual({ continue: true });
-        }
-      );
+        expect(step.with?.render_inline).toBe(true);
+        expect(step.with?.conversation_id).toBe(
+          '{{ steps.find_or_create_investigation.output.investigationConversationId }}'
+        );
+        expect(step['on-failure']).toEqual({ continue: true });
+      });
 
       // The card previews the same item the action creates, but its historical
       // description must not claim that a still-pending or dismissed item was added.
@@ -1369,6 +1415,44 @@ describe('detection rule workflows', () => {
           'Added by the rule tuning workflow after {{ inputs.fp_count }} false positives were reviewed.'
         );
         expect(reviewSteps.indexOf(attach)).toBeLessThan(reviewSteps.indexOf(propose));
+      });
+
+      // A resumed review lands on the Investigation an earlier review attached to under
+      // the same fixed ids, so the add fails on the earlier copy. The resume steps then
+      // update that copy with this review's rule and alerts, and the post-tuning refresh
+      // accepts either writer. The add still runs first so an Investigation whose earlier
+      // review failed to attach gets the attachment on the next review.
+      it.each([
+        ['attach_rule', 'resume_rule_attachment', 'tuned-rule'],
+        ['attach_alerts', 'resume_alerts_attachment', 'fp-alerts'],
+      ])('updates %s on a resumed review through %s', (addName, resumeName, attachmentId) => {
+        const add = reviewSteps.find(({ name }) => name === addName)!;
+        const resume = reviewSteps.find(({ name }) => name === resumeName)!;
+
+        expect(add.if).not.toContain('created');
+        expect(resume.type).toBe('ai.attachment.update');
+        expect(resume.if).toContain('steps.find_or_create_investigation.output.created != true');
+        expect(resume.if).toContain(`steps.${addName}.error != null`);
+        expect(resume.with?.attachment_id).toBe(attachmentId);
+        expect(resume.with?.data).toEqual(add.with?.data);
+        expect(resume.with?.description).toBe(add.with?.description);
+        expect(reviewSteps.indexOf(resume)).toBe(reviewSteps.indexOf(add) + 1);
+      });
+
+      it('refreshes the rule attachment whichever step wrote it', () => {
+        const written = reviewSteps.find(({ name }) => name === 'rule_attachment_written')!;
+        const refresh = reviewSteps.find(({ name }) => name === 'refresh_rule_attachment')!;
+
+        expect(written.type).toBe('data.set');
+        expect(String(written.with?.written)).toContain(
+          'steps.attach_rule.output.attachment_id != null'
+        );
+        expect(String(written.with?.written)).toContain(
+          'steps.resume_rule_attachment.output.attachment_id != null'
+        );
+        expect(refresh.if).toContain('steps.rule_attachment_written.output.written == true');
+        expect(refresh.if).not.toContain('steps.attach_rule.error');
+        expect(reviewSteps.indexOf(written)).toBeLessThan(reviewSteps.indexOf(refresh));
       });
 
       // The proposal text no longer links alert ids. The attachment takes the
@@ -1509,10 +1593,12 @@ describe('detection rule workflows', () => {
         const input = note.with as Record<string, string>;
 
         expect(note.type).toBe('ai.conversation.add_user_message');
-        expect(note.if).toContain('steps.create_investigation.output.conversation_id != null');
+        expect(note.if).toContain(
+          'steps.find_or_create_investigation.output.investigationConversationId != null'
+        );
         expect(note['on-failure']).toEqual({ continue: true });
         expect(input.conversation_id).toBe(
-          '{{ steps.create_investigation.output.conversation_id }}'
+          '{{ steps.find_or_create_investigation.output.investigationConversationId }}'
         );
         expect(input.author_name).toBe('{{ consts.author_name }}');
         expect(input.message).toContain(field);
