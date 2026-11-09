@@ -31,9 +31,19 @@ describe('dynamic definition fixtures', () => {
     );
   });
 
-  it.each(ALL_ENTITY_TYPES)('built-in %s parses with no dynamic block', (type) => {
-    const definition = getBuiltInEntityDefinition(type);
-    expect(definition.dynamic).toBeUndefined();
-    expect(entitySchema.safeParse({ ...definition, id: type }).success).toBe(true);
+  it.each(ALL_ENTITY_TYPES.filter((type) => type !== 'host'))(
+    'built-in %s parses with no dynamic block',
+    (type) => {
+      const definition = getBuiltInEntityDefinition(type);
+      expect(definition.dynamic).toBeUndefined();
+      expect(entitySchema.safeParse({ ...definition, id: type }).success).toBe(true);
+    }
+  );
+
+  it('built-in host carries its dynamic block and passes the dynamic rules', () => {
+    const definition = getBuiltInEntityDefinition('host');
+    expect(definition.dynamic).toBeDefined();
+    const result = entitySchema.safeParse({ ...definition, id: 'host' });
+    expect(result.success).toBe(true);
   });
 });

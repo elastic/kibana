@@ -47,6 +47,13 @@ const SUITES = {
       scoutArch: 'serverless',
       scoutDomain: 'observability_complete',
     },
+    {
+      id: 'pinned-judge',
+      name: 'Pinned Judge',
+      ciLabels: ['evals:pinned-judge'],
+      configPath: 'x-pack/pinned-judge/playwright.config.ts',
+      defaultJudge: 'eis-abc-1',
+    },
   ],
 };
 
@@ -103,6 +110,50 @@ describe('eval_pipeline', () => {
       ) as string;
 
       expect(yaml).toContain('EVAL_CONNECTOR_ID: "openrouter-anthropic-claude-sonnet-4-6"');
+    });
+
+    describe('the suite `defaultJudge`', () => {
+      const LABELS = 'evals:pinned-judge,models:openrouter/openai-gpt-5.4';
+
+      const suiteEnvs = (labels: string): Record<string, Record<string, string>> =>
+        Object.fromEntries(
+          (parseStep(getEvalPipeline(labels) as string).steps as Array<Record<string, any>>).map(
+            (step) => [step.key, step.env]
+          )
+        );
+
+      it('sets EVAL_CONNECTOR_ID and EIS models for a suite that pins an EIS judge', () => {
+        const env = suiteEnvs(LABELS)['kbn-evals-pinned-judge'];
+
+        expect(env.EVAL_CONNECTOR_ID).toBe('eis-abc-1');
+        expect(env.EVAL_INCLUDE_EIS_MODELS).toBe('1');
+      });
+
+      it('lets a `models:judge:` label win over the pin', () => {
+        const env = suiteEnvs(`${LABELS},models:judge:openrouter/openai-gpt-5.4`)[
+          'kbn-evals-pinned-judge'
+        ];
+
+        expect(env.EVAL_CONNECTOR_ID).toBe('openrouter-openai-gpt-5-4');
+        expect(env).not.toHaveProperty('EVAL_INCLUDE_EIS_MODELS');
+      });
+
+      it('leaves EVAL_CONNECTOR_ID to the Vault default for a suite without a pin', () => {
+        const env = suiteEnvs('evals:agent-builder,models:eis/openai-gpt-5.4')[
+          'kbn-evals-agent-builder'
+        ];
+
+        expect(env).not.toHaveProperty('EVAL_CONNECTOR_ID');
+      });
+
+      it('applies the pin per suite, not to the other selected suites', () => {
+        const envs = suiteEnvs(
+          'evals:pinned-judge,evals:agent-builder,models:openrouter/openai-gpt-5.4'
+        );
+
+        expect(envs['kbn-evals-pinned-judge'].EVAL_CONNECTOR_ID).toBe('eis-abc-1');
+        expect(envs['kbn-evals-agent-builder']).not.toHaveProperty('EVAL_CONNECTOR_ID');
+      });
     });
 
     it('does not trigger when the only model label is dropped by forwarding (gate parity)', () => {

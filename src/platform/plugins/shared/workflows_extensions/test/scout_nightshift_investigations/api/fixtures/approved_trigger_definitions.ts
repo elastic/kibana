@@ -95,6 +95,10 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
     schemaHash: 'ca5a31feffb0b5b8d9df7cac46938cba39f26bbe2322d2f2becc80ad325cb76b',
   },
   {
+    id: 'alerting.alertStatusChanged',
+    schemaHash: '0840e1303c7b027c3a3830ca0f6ec4a1695eaf35eb7e4567855f51ad11c8ce29',
+  },
+  {
     id: 'alerting.ruleCreated',
     schemaHash: '2e5bdb73915698a7e5f65fd71b9feab19a60a7273c710b32c591939762bd7084',
   },
@@ -124,15 +128,15 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'alerting.v1.alertStatusChanged',
-    schemaHash: '393ba21ad63d5b65d3b019c299b5f7d9e172d9eea52df67c069413b007c22a7a',
+    schemaHash: 'f03ed56b6494a9aeb0deec70247273a3b2ee317396a3b2d8ab0400476f419914',
   },
   {
     id: 'cases.attachmentsAdded',
-    schemaHash: 'af8917afcff27e816e16aab810bb0295d4ea16931414fc266aa629f220e4592c',
+    schemaHash: '77ead983583983a13c3b771915293553e5febfd9d7940c4780ea2737596acf9c',
   },
   {
     id: 'cases.attachmentsDeleted',
-    schemaHash: 'af15c7003f07847f8e3b553e83925d6a82b2de4a0c66f9ecec4e48957c616ad1',
+    schemaHash: 'e75633546da2dec88fe25d5d1093b643b9168726fdf9c58b7d8bc0d41999ae23',
   },
   {
     id: 'cases.caseCreated',
@@ -228,15 +232,15 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'nightshift-investigations.completed',
-    schemaHash: '9c4a56800d90d397279b9e40a872a64d5cee0a3675556850dc16afa5840d3b9a',
+    schemaHash: 'a81a3794f34f13e0b7af432ba84bb3fbde8df3a16936b8de58ec766b683a03ce',
   },
   {
     id: 'nightshift-investigations.failed',
-    schemaHash: 'd5e9e788b13edf73d0f57d07f127e63153eb52a0b2dcb6dfdcaf80b751a428ec',
+    schemaHash: '0f8fce6d41ccd811247ce5c44ab7b3625919ab7cac45de4ae23d90efa3e083b2',
   },
   {
     id: 'nightshift-investigations.started',
-    schemaHash: '80cdd17e8634561e45af961d8df628f767dd02e2ed4e44c7ec2d3170bd39839b',
+    schemaHash: 'dbac6b8b44873df0a4e237adc389045ad4d6ff7fdfcff32cdc55739768b7d79a',
   },
   {
     id: 'security.alertAssigneesChanged',
@@ -324,11 +328,15 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'slack2.message',
-    schemaHash: '971da8845e40c5900b3d729ae9f02ceccfc2a1b8dd0442534bdf710a0fdd31a3',
+    schemaHash: '07628098f9ab1dab2890b457416de279f0f8082ac3ff04a75c1f484056a75d31',
   },
   {
     id: 'slack2.reaction_added',
     schemaHash: 'ce7a24e2c6e45cfa3c306789223a3d619a7ce10dfcb1e688ccd1e830eba14933',
+  },
+  {
+    id: 'slack2.slash_command',
+    schemaHash: 'c9bf4583cec52b8f1608cd007df09e4535088ee372bf0cae3d7ee4fabad19d9d',
   },
   {
     id: 'slack2.team_join',

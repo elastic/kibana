@@ -18,6 +18,7 @@ import { AiAssistantButton } from '../../../../entity_analytics/components/ai_as
 import { getRiskFromEntityRecord } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
 import type { EntityToAttach } from '../../../../cases/attachments/entity';
 import { useEntityCaseTakeActionItems } from '../../../../cases/attachments/entity/hooks/use_entity_case_take_action_items';
+import { useInvalidateEntityGrid } from '../../../../entity_analytics/components/home/entities_grid/hooks/use_invalidate_entity_grid';
 
 export interface FooterProps {
   /**
@@ -60,7 +61,10 @@ export const Footer = ({ userName, identityFields, entity }: FooterProps) => {
     () => ({ id: entityStoreId ?? '', name: identityUserName, type: 'user', riskLevel, riskScore }),
     [entityStoreId, identityUserName, riskLevel, riskScore]
   );
-  const additionalItems = useEntityCaseTakeActionItems(entityToAttach);
+  const invalidateEntityGrid = useInvalidateEntityGrid();
+  const additionalItems = useEntityCaseTakeActionItems(entityToAttach, {
+    onSuccess: invalidateEntityGrid,
+  });
 
   return (
     <EuiFlexGroup justifyContent="flexEnd" alignItems="center">

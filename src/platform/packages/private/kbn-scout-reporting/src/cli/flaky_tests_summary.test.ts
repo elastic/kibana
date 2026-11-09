@@ -374,7 +374,7 @@ describe('buildTopFailingTable', () => {
 
 describe('displaySummary', () => {
   const report: FlakyTestReport = {
-    schemaVersion: 1,
+    schemaVersion: 2,
     generatedAt: now,
     window: {
       lookbackDays: 7,

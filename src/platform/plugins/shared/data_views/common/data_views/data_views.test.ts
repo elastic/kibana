@@ -290,6 +290,7 @@ describe('IndexPatterns', () => {
 
     // eslint-disable-next-line dot-notation
     const createFromSpecOriginal = indexPatterns['createFromSpec'];
+    // eslint-disable-next-line prefer-const
     let mockedCreateFromSpec: jest.Mock;
 
     set(
@@ -334,6 +335,7 @@ describe('IndexPatterns', () => {
 
     // eslint-disable-next-line dot-notation
     const createFromSpecOriginal = indexPatterns['createFromSpecLazy'];
+    // eslint-disable-next-line prefer-const
     let mockedCreateFromSpec: jest.Mock;
 
     set(

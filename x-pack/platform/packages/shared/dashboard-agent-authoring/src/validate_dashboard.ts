@@ -12,7 +12,8 @@ import type {
   DashboardSection,
 } from '@kbn/agent-builder-dashboards-common';
 import { isSection } from '@kbn/agent-builder-dashboards-common';
-import { DASHBOARD_FAILURE_TYPES } from './failure_types';
+import { getControlId, getSectionsById, indexPanelsById } from './dashboard_state';
+import { DASHBOARD_FAILURE_TYPES, type DashboardFailureKind } from './failure_types';
 import type { DashboardFailure } from './utils';
 
 export interface DashboardValidationIssue {
@@ -42,13 +43,19 @@ interface ValidationResult {
 
 const MAX_REPORTED_ISSUES = 10;
 
-const toFailure = (identifier: string, messages: string[], outcome: string): DashboardFailure => {
+const toFailure = (
+  kind: DashboardFailureKind,
+  identifier: string,
+  messages: string[],
+  outcome: string
+): DashboardFailure => {
   const reportedMessages = messages.slice(0, MAX_REPORTED_ISSUES);
   if (messages.length > MAX_REPORTED_ISSUES) {
     reportedMessages.push(`and ${messages.length - MAX_REPORTED_ISSUES} more`);
   }
   return {
     type: DASHBOARD_FAILURE_TYPES.validateDashboard,
+    kind,
     identifier,
     error: `${outcome} because the result does not match the dashboard schema: ${reportedMessages.join(
       '; '
@@ -68,13 +75,6 @@ const appendIssue = <Key>(
   key: Key,
   issue: DashboardValidationIssue
 ) => issuesByKey.set(key, [...(issuesByKey.get(key) ?? []), issue]);
-
-/** Names a panel by its title when it has one, since the agent never saw the id of a new panel. */
-const getPanelIdentifier = ({ id, config: { title } }: AttachmentPanel): string =>
-  typeof title === 'string' && title ? `"${title}" (${id})` : id;
-
-const getAllPanels = (panels: DashboardAttachmentData['panels']): AttachmentPanel[] =>
-  panels.flatMap((widget) => (isSection(widget) ? widget.panels : [widget]));
 
 /** Restores a dashboard field, removing it when the original dashboard did not have it. */
 const restoreField = (
@@ -106,12 +106,12 @@ export const discardInvalidChanges = ({
 }): ValidationResult => {
   const originalControls = originalDashboardData.pinned_panels ?? [];
   // Controls get an id when added; matching by content covers controls stored without one.
-  const findOriginalControl = (control: Control): Control | undefined =>
-    originalControls.find((originalControl) =>
-      control.id === undefined
-        ? isEqual(originalControl, control)
-        : originalControl.id === control.id
+  const findOriginalControl = (control: Control): Control | undefined => {
+    const id = getControlId(control);
+    return originalControls.find((originalControl) =>
+      id === undefined ? isEqual(originalControl, control) : getControlId(originalControl) === id
     );
+  };
 
   const dashboardIssues: DashboardValidationIssue[] = [];
   const controlIssues = new Map<Control, DashboardValidationIssue[]>();
@@ -140,18 +140,19 @@ export const discardInvalidChanges = ({
     return {
       dashboardData: originalDashboardData,
       failures: [
-        toFailure('dashboard', formatIssues(dashboardIssues, 0), 'All changes were discarded'),
+        toFailure(
+          'dashboard',
+          'dashboard',
+          formatIssues(dashboardIssues, 0),
+          'All changes were discarded'
+        ),
       ],
-      discardedPanelIds: new Set(getAllPanels(dashboardData.panels).map(({ id }) => id)),
+      discardedPanelIds: new Set(indexPanelsById(dashboardData.panels).keys()),
     };
   }
 
-  const originalPanelsById = new Map(
-    getAllPanels(originalDashboardData.panels).map((panel) => [panel.id, panel])
-  );
-  const originalSectionIds = new Set(
-    originalDashboardData.panels.filter(isSection).map(({ id }) => id)
-  );
+  const originalPanelsById = indexPanelsById(originalDashboardData.panels);
+  const originalSectionsById = getSectionsById(originalDashboardData);
 
   const failures: DashboardFailure[] = [];
   const discardedPanelIds = new Set<string>();
@@ -167,15 +168,11 @@ export const discardInvalidChanges = ({
 
     discardedPanelIds.add(panel.id);
     if (!originalPanel) {
-      failures.push(toFailure(getPanelIdentifier(panel), problems, 'Panel was not added'));
+      failures.push(toFailure('panel', panel.id, problems, 'Panel was not added'));
       return [];
     }
     failures.push(
-      toFailure(
-        getPanelIdentifier(panel),
-        problems,
-        'Panel was reverted to its state before this call'
-      )
+      toFailure('panel', panel.id, problems, 'Panel was reverted to its state before this call')
     );
     // Keep the new position, so a panel moved into or out of a section stays where it was moved.
     return [{ ...originalPanel, grid: panel.grid }];
@@ -184,12 +181,13 @@ export const discardInvalidChanges = ({
   const resolveSection = (section: DashboardSection): DashboardAttachmentData['panels'] => {
     const sectionPanels = section.panels.flatMap(resolvePanel);
     if (
-      !originalSectionIds.has(section.id) &&
+      !originalSectionsById.has(section.id) &&
       section.panels.length > 0 &&
       sectionPanels.length === 0
     ) {
       failures.push({
         type: DASHBOARD_FAILURE_TYPES.validateDashboard,
+        kind: 'section',
         identifier: section.id,
         error: `Section "${section.title}" was not added because none of its panels are valid.`,
       });
@@ -206,29 +204,35 @@ export const discardInvalidChanges = ({
   };
 
   if (controlIssues.size > 0) {
-    const controls = (dashboardData.pinned_panels ?? []).flatMap((control) => {
-      if (!controlIssues.has(control)) {
+    const controls = (dashboardData.pinned_panels ?? []).flatMap((control, controlIndex) => {
+      const issues = controlIssues.get(control);
+      if (!issues) {
         return [control];
       }
       const originalControl = findOriginalControl(control);
+      failures.push(
+        toFailure(
+          'control',
+          getControlId(control) ?? `pinned_panels[${controlIndex}]`,
+          formatIssues(issues, 2),
+          originalControl
+            ? 'Control was reverted to its state before this call'
+            : 'Control was not added'
+        )
+      );
       return originalControl ? [originalControl] : [];
     });
     nextDashboardData =
       controls.length === 0 && !originalDashboardData.pinned_panels
         ? restoreField(nextDashboardData, originalDashboardData, 'pinned_panels')
         : { ...nextDashboardData, pinned_panels: controls };
-    failures.push(
-      toFailure(
-        'pinned_panels',
-        formatIssues([...controlIssues.values()].flat(), 1),
-        'Invalid control changes were discarded'
-      )
-    );
   }
 
   for (const [field, issues] of fieldIssues) {
     nextDashboardData = restoreField(nextDashboardData, originalDashboardData, field);
-    failures.push(toFailure(field, formatIssues(issues, 1), `Change to "${field}" was reverted`));
+    failures.push(
+      toFailure('dashboard', field, formatIssues(issues, 1), `Change to "${field}" was reverted`)
+    );
   }
 
   return { dashboardData: nextDashboardData, failures, discardedPanelIds };

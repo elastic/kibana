@@ -12,6 +12,7 @@ import { GlobalHeader } from '.';
 import {
   ADD_DATA_PATH,
   ADD_THREAT_INTELLIGENCE_DATA_PATH,
+  ALERTS_PATH,
   SECURITY_FEATURE_ID,
   THREAT_INTELLIGENCE_PATH,
 } from '../../../../common/constants';
@@ -153,17 +154,6 @@ describe('global header', () => {
     expect(getByTestId(DATA_VIEW_PICKER_TEST_ID)).toBeInTheDocument();
   });
 
-  it('shows data view manager on rule details page', () => {
-    (useLocation as jest.Mock).mockReturnValue({ pathname: dataViewPickerPaths[2] });
-
-    const { getByTestId } = render(
-      <TestProviders store={store}>
-        <GlobalHeader />
-      </TestProviders>
-    );
-    expect(getByTestId(DATA_VIEW_PICKER_TEST_ID)).toBeInTheDocument();
-  });
-
   it('shows no data view manager if timeline is open', () => {
     const mockstate = {
       ...mockGlobalState,
@@ -179,7 +169,7 @@ describe('global header', () => {
     };
     const mockStore = createMockStore(mockstate);
 
-    (useLocation as jest.Mock).mockReturnValue({ pathname: dataViewPickerPaths[2] });
+    (useLocation as jest.Mock).mockReturnValue({ pathname: ALERTS_PATH });
 
     const { queryByTestId } = render(
       <TestProviders store={mockStore}>
@@ -195,7 +185,21 @@ describe('global header', () => {
     '/rules/monitoring',
     '/rules/updates',
     '/rules/add_rules',
+    '/rules/create',
+    '/rules/id/123/edit',
+    '/rules_coverage_overview',
     '/exceptions',
+    '/exceptions/details/list-1',
+    '/get_started',
+    '/administration/endpoints',
+    '/administration/policy',
+    '/administration/policy/abc-123/settings',
+    '/administration/trusted_apps',
+    '/administration/response_actions_history',
+    '/administration/script_library',
+    '/manage',
+    '/configurations',
+    '/configurations/integrations/browse',
   ])(
     'does not mount the header action menu on %s, where the page app header owns the actions',
     (pathname) => {
@@ -217,8 +221,30 @@ describe('global header', () => {
     }
   );
 
-  it('mounts the header action menu on the exception list details page', () => {
-    (useLocation as jest.Mock).mockReturnValue({ pathname: '/exceptions/details/list-1' });
+  // Not migrated to `AdministrationListPage`: Notes (whose error state has no header) and the
+  // `/administration` redirect keep the global header action menu.
+  it.each(['/administration', '/administration/notes'])(
+    'mounts the header action menu on %s',
+    (pathname) => {
+      (useLocation as jest.Mock).mockReturnValue({ pathname });
+      const setHeaderActionMenu = jest.fn();
+      (useKibana as jest.Mock).mockReturnValue({
+        ...mockUseKibana(),
+        services: { ...mockUseKibana().services, setHeaderActionMenu },
+      });
+
+      render(
+        <TestProviders store={store}>
+          <GlobalHeader />
+        </TestProviders>
+      );
+
+      expect(setHeaderActionMenu).toHaveBeenCalledWith(expect.any(Function));
+    }
+  );
+
+  it('does not mount the legacy header action menu on the rule details page', () => {
+    (useLocation as jest.Mock).mockReturnValue({ pathname: '/rules/id/123/overview' });
     const setHeaderActionMenu = jest.fn();
     (useKibana as jest.Mock).mockReturnValue({
       ...mockUseKibana(),
@@ -231,24 +257,8 @@ describe('global header', () => {
       </TestProviders>
     );
 
-    expect(setHeaderActionMenu).toHaveBeenCalledWith(expect.any(Function));
-  });
-
-  it('mounts the header action menu on the rule details page', () => {
-    (useLocation as jest.Mock).mockReturnValue({ pathname: '/rules/id/123' });
-    const setHeaderActionMenu = jest.fn();
-    (useKibana as jest.Mock).mockReturnValue({
-      ...mockUseKibana(),
-      services: { ...mockUseKibana().services, setHeaderActionMenu },
-    });
-
-    render(
-      <TestProviders store={store}>
-        <GlobalHeader />
-      </TestProviders>
-    );
-
-    expect(setHeaderActionMenu).toHaveBeenCalledWith(expect.any(Function));
+    expect(setHeaderActionMenu).toHaveBeenCalledWith(undefined);
+    expect(setHeaderActionMenu).not.toHaveBeenCalledWith(expect.any(Function));
   });
 
   it('shows AI Assistant header link', () => {

@@ -92,6 +92,7 @@ export class ToolsService {
         savedObjects,
         topSnippetsDefaults: config.topSnippets,
       },
+      logger,
     });
 
     // Compute the set of tool types that have health tracking enabled
@@ -105,6 +106,8 @@ export class ToolsService {
     const builtinProviderFn = createBuiltinProviderFn({
       registry: this.builtinRegistry,
       toolTypes,
+      uiSettings,
+      savedObjects,
     });
     const persistedProviderFn = createPersistedProviderFn({
       logger,

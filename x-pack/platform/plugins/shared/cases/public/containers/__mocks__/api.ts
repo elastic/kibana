@@ -7,6 +7,7 @@
 
 import type {
   ActionLicense,
+  AttachmentUIV2,
   CasesFindResponseUI,
   CaseUI,
   CasesUI,
@@ -20,6 +21,7 @@ import {
   allCases,
   basicCase,
   basicCaseMetrics,
+  basicCommentUnified,
   basicCasePost,
   basicResolvedCase,
   pushedCase,
@@ -126,7 +128,7 @@ export const createAttachments = async (
   newComment: AttachmentRequest,
   caseId: string,
   signal: AbortSignal
-): Promise<CaseUI> => Promise.resolve(basicCase);
+): Promise<AttachmentUIV2[]> => Promise.resolve([basicCommentUnified]);
 
 export const deleteComment = async (
   caseId: string,

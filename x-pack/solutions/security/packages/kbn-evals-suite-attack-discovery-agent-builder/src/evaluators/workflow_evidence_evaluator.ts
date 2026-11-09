@@ -45,7 +45,10 @@ export const createWorkflowEvidenceEvaluator = (): Evaluator<
       expectedPassedAlertCount == null || output.workflow.passedAlertCount !== null;
     const hasCompleteWorkflowEvidence = retrievedCountAvailable && passedCountAvailable;
 
-    const stagesMatch = expectedStages.every((stage) => stages.includes(stage));
+    const forbiddenStages = expected?.forbiddenWorkflowStages ?? [];
+    const stagesMatch =
+      expectedStages.every((stage) => stages.includes(stage)) &&
+      !forbiddenStages.some((stage) => stages.includes(stage));
     const retrievedCountMatches =
       expectedRetrievedAlertCount == null ||
       output.workflow.retrievedAlertCount === expectedRetrievedAlertCount;
@@ -67,10 +70,12 @@ export const createWorkflowEvidenceEvaluator = (): Evaluator<
         // alone: `pipeline_*` means the product's Alert Retrieval phase
         // reported it, `agent_esql_retrieval` means it came from the agent's
         // OWN retrieval — the only source a `provided`-mode run (retrieval
-        // skipped by design) can have — and the last two are the two ways a
-        // scoped example observes none of its population, both scored 0:
-        // `unscoped_retrieval` (a retrieval happened, out of scope) and `none`
-        // (no alerts retrieval at all).
+        // skipped by design) can have — and the last three are the ways a
+        // scoped example observes none of its population, all scored 0:
+        // `unscoped_retrieval` (a retrieval happened, out of scope),
+        // `agent_esql_retrieval_unidentified` (a scoped retrieval returned rows
+        // that carried no alert identity, so its row count is not a count of
+        // distinct alerts) and `none` (no alerts retrieval at all).
         retrievedAlertCountSource: output.workflow.retrievedAlertCountSource ?? 'none',
         alertRetrievalMode: output.workflow.retrievalEvidence?.alertRetrievalMode ?? null,
         agentEsqlRowCounts: output.workflow.retrievalEvidence?.agentEsqlRowCounts ?? [],
@@ -87,6 +92,7 @@ export const createWorkflowEvidenceEvaluator = (): Evaluator<
         unscopedPipelineAlertRetrievalCounts:
           output.workflow.retrievalEvidence?.unscopedPipelineAlertRetrievalCounts ?? [],
         stages,
+        forbiddenWorkflowStages: forbiddenStages,
         expectedRetrievedAlertCount,
         expectedPassedAlertCount,
         retrievedAlertCount: output.workflow.retrievedAlertCount,

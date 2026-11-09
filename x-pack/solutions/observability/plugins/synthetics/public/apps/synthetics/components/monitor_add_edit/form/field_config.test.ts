@@ -13,17 +13,19 @@ jest.mock('../../../../../utils/kibana_service', () => ({
 }));
 
 describe('FIELD params validation', () => {
-  const getValidParams = (): ((value: string) => unknown) => {
+  const getValidator = (name: string): ((value: string) => unknown) => {
     const validate = FIELD()[ConfigKey.PARAMS]?.validation?.({} as never)?.validate;
-    if (!validate || typeof validate === 'function' || !validate.validParams) {
-      throw new Error('Expected a validParams validator on the params field');
+    if (!validate || typeof validate === 'function' || !validate[name]) {
+      throw new Error(`Expected a ${name} validator on the params field`);
     }
-    return (value) => validate.validParams(value, {} as never);
+    return (value) => validate[name](value, {} as never);
   };
-  const validParams = getValidParams();
+  const validParams = getValidator('validParams');
+  const validParamNames = getValidator('validParamNames');
 
   it.each(['', '{}', '{"username":"elastic"}'])('accepts empty or object params: %s', (value) => {
     expect(validParams(value)).toBe(true);
+    expect(validParamNames(value)).toBe(true);
   });
 
   it.each(['[]', '["secret"]'])('reports that params must be a JSON object: %s', (value) => {
@@ -33,4 +35,11 @@ describe('FIELD params validation', () => {
   it('reports malformed JSON as invalid', () => {
     expect(validParams('{invalid')).toBe('Invalid JSON format');
   });
+
+  it.each(['{"":"orphan"}', '{"token":"a","token":"b"}'])(
+    'reports missing or duplicate parameter names: %s',
+    (value) => {
+      expect(validParamNames(value)).toBe('Parameter names must be unique and cannot be empty');
+    }
+  );
 });

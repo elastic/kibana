@@ -9,6 +9,7 @@ import sinon from 'sinon';
 import { errors } from '@elastic/elasticsearch';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import type { SavedObject } from '@kbn/core/server';
+import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import type {
   RuleExecutorOptions,
   RuleTypeParams,
@@ -2276,7 +2277,7 @@ describe('Task Runner', () => {
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
-  test('should set authentication errors as user-error', async () => {
+  test('should set authentication errors as user-error and tag them auth-error', async () => {
     jest.spyOn(getExecutorServicesModule, 'getExecutorServices').mockImplementation(() => {
       throw new errors.ResponseError({
         warnings: [],
@@ -2300,7 +2301,53 @@ describe('Task Runner', () => {
     expect(loggerCallPrefix[0].trim()).toMatchInlineSnapshot(
       `"Executing Rule default:test:1 has resulted in Error: Response Error"`
     );
-    expect(loggerMeta?.tags).toEqual(['rule-run-failed', 'user-error']);
+    expect(loggerMeta?.tags).toEqual(['rule-run-failed', 'user-error', 'auth-error']);
+  });
+
+  test('should tag authentication errors with user-key when the rule holds a user-supplied API key', async () => {
+    jest.spyOn(getExecutorServicesModule, 'getExecutorServices').mockImplementation(() => {
+      throw new errors.ResponseError({
+        warnings: [],
+        meta: {} as never,
+        statusCode: 401,
+      });
+    });
+
+    const taskRunner = createTaskRunner();
+    mockGetRuleFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      ...mockedRawRuleSO,
+      attributes: { ...mockedRawRuleSO.attributes, apiKeyCreatedByUser: true },
+    });
+
+    await taskRunner.run();
+
+    expect(logger.error).toHaveBeenCalledTimes(1);
+    const loggerMeta = logger.error.mock.calls[0][1];
+    expect(loggerMeta?.tags).toEqual(['rule-run-failed', 'user-error', 'auth-error', 'user-key']);
+  });
+
+  test('should tag a 401 thrown by the rule type executor with auth-error', async () => {
+    // The executor error reaches getState wrapped in an ErrorWithReason, unlike the
+    // getExecutorServices failures above, so this covers the unwrapping.
+    ruleType.executor.mockImplementation(async () => {
+      throw new errors.ResponseError({
+        warnings: [],
+        meta: {} as never,
+        statusCode: 401,
+      });
+    });
+
+    const taskRunner = createTaskRunner();
+    mockGetRuleFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+
+    const runnerResult = await taskRunner.run();
+
+    expect(logger.error).toHaveBeenCalledTimes(1);
+    const loggerMeta = logger.error.mock.calls[0][1];
+    expect(loggerMeta?.tags).toEqual(['rule-run-failed', 'user-error', 'auth-error']);
+    expect(getErrorSource(runnerResult.taskRunError as Error)).toBe(TaskErrorSource.USER);
   });
 
   test('should set unexpected errors as framework-error', async () => {
@@ -4569,6 +4616,7 @@ describe('Task Runner', () => {
       mockGetRuleFromRaw.mockReturnValue({ ...(mockedRuleTypeSavedObject as Rule), actions: [] });
       alertsService.createAlertsClient.mockImplementation(() => alertsClient);
       alertsClient.getProcessedAlerts.mockReturnValue({});
+      alertsClient.getBuiltActiveAlertDataByInstanceId.mockReset();
     });
 
     afterEach(() => {
@@ -4750,11 +4798,78 @@ describe('Task Runner', () => {
               status: 'active',
               actionGroup: 'default',
               start: '2024-01-01T00:00:00.000Z',
+              severity: null,
             },
           },
         },
         expect.anything()
       );
+    });
+
+    describe('severity', () => {
+      const newAlertProcessed = () => {
+        const alert = makeMockAlert({ id: 'alert-1', uuid: 'uuid-1', actionGroup: 'default' });
+        alertsClient.getProcessedAlerts.mockImplementation((type: string) =>
+          type === 'new' ? { 'alert-1': alert } : {}
+        );
+      };
+
+      test('reports the severity the alerts client built for a new alert', async () => {
+        newAlertProcessed();
+        alertsClient.getBuiltActiveAlertDataByInstanceId.mockImplementation((instanceId: string) =>
+          instanceId === 'alert-1' ? { [ALERT_SEVERITY]: 'critical' } : undefined
+        );
+
+        await createRunnerWithBus().run();
+
+        expect(mockBus.publish).toHaveBeenCalledTimes(1);
+        expect(mockBus.publish.mock.calls[0][0].payload.alert.severity).toBe('critical');
+      });
+
+      test('reports severity read from a nested alert document', async () => {
+        newAlertProcessed();
+        alertsClient.getBuiltActiveAlertDataByInstanceId.mockReturnValue({
+          kibana: { alert: { severity: 'low' } },
+        });
+
+        await createRunnerWithBus().run();
+
+        expect(mockBus.publish.mock.calls[0][0].payload.alert.severity).toBe('low');
+      });
+
+      test('reports null when the rule type sets no severity', async () => {
+        newAlertProcessed();
+        alertsClient.getBuiltActiveAlertDataByInstanceId.mockReturnValue({
+          'kibana.alert.reason': 'x',
+        });
+
+        await createRunnerWithBus().run();
+
+        expect(mockBus.publish.mock.calls[0][0].payload.alert.severity).toBeNull();
+      });
+
+      test('reports null when the alerts client has no built document for the alert', async () => {
+        newAlertProcessed();
+        alertsClient.getBuiltActiveAlertDataByInstanceId.mockReturnValue(undefined);
+
+        await createRunnerWithBus().run();
+
+        expect(mockBus.publish.mock.calls[0][0].payload.alert.severity).toBeNull();
+      });
+
+      test('reports null for a recovered alert', async () => {
+        const alert = makeMockAlert({ id: 'alert-2', uuid: 'uuid-2', lastGroup: 'default' });
+        alertsClient.getProcessedAlerts.mockImplementation((type: string) =>
+          type === 'recovered' ? { 'alert-2': alert } : {}
+        );
+        alertsClient.getBuiltActiveAlertDataByInstanceId.mockReturnValue({
+          [ALERT_SEVERITY]: 'critical',
+        });
+
+        await createRunnerWithBus().run();
+
+        expect(mockBus.publish.mock.calls[0][0].payload.alert.severity).toBeNull();
+      });
     });
 
     test('payload built in task_runner passes alertStatusChangedV1EventSchema.parse()', async () => {

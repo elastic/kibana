@@ -8,6 +8,7 @@
 import { sendCreateAgentlessPolicy, sendGetPackageInfoByKey } from '@kbn/fleet-plugin/public';
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import { getDefaultEnabledDataStreams } from '../../aws_service_matrix';
 import type {
   AuthenticateAndDeployStepState,
   ServiceChipState,
@@ -18,8 +19,14 @@ import {
   reconcileInstances,
   groupByPackage,
   buildGroupPolicyNameStem,
+  deriveGroupPolicyName,
   DEFAULT_NAMESPACE,
 } from './deploy_group_helpers';
+import {
+  getPolicySettings,
+  getPolicyVarSettings,
+  type PolicySettings,
+} from '../../common/policy_settings';
 export { collectDeployResults } from './deploy_group_helpers';
 
 /**
@@ -45,6 +52,17 @@ export interface DeployGroup {
   namespace: string;
   /** Sanitized policy name prefix for bundled originals, unique within one deploy. */
   policyNameStem?: string;
+  /**
+   * What follows the integration name in the group's policy name (`aws_bedrock`, `prod`, … or
+   * empty for the bare-name policy), unique within one deploy even where different packages and
+   * namespaces would spell the same suffix.
+   */
+  policyNameSuffix?: string;
+  /**
+   * The package whose policy keeps the integration name as entered. The main `aws` package, or
+   * the only package of the deploy when there is just one (the name already tells which).
+   */
+  bareNamePackage?: string;
 }
 
 export interface GroupDeployOutcome {
@@ -65,7 +83,8 @@ export function buildDeployGroups(
   instances: ServiceInstance[],
   selectedServiceIds: string[],
   servicesMap: Map<string, AwsServiceMatrixEntry>,
-  storedServiceVars: Record<string, ServiceVars> = {}
+  storedServiceVars: Record<string, ServiceVars> = {},
+  globalNamespace?: string
 ): DeployGroup[] {
   // Reconcile persisted instances against the current selectedServiceIds — the same logic
   // use_service_settings applies in-memory. Without this, a user who goes back to step 1 and
@@ -97,12 +116,21 @@ export function buildDeployGroups(
     }
   }
 
-  // An instance without a namespace deploys into the default one, so it shares a policy with the
-  // instances that name it explicitly.
-  return groupByPackage(originals, duplicates, storedServiceVars, DEFAULT_NAMESPACE);
+  // An instance without a namespace of its own takes the global one, and without that deploys into
+  // the default one, so it shares a policy with the instances that name it explicitly.
+  return groupByPackage(
+    originals,
+    duplicates,
+    storedServiceVars,
+    DEFAULT_NAMESPACE,
+    globalNamespace
+  );
 }
 
-function buildAgentlessPolicyName(group: DeployGroup): string {
+function buildAgentlessPolicyName(group: DeployGroup, integrationName?: string): string {
+  const derived = deriveGroupPolicyName(group, integrationName);
+  if (derived) return derived;
+  // Without an integration name (sessions that predate the field), keep the generated name.
   // Date.now() suffix prevents cross-session collisions: Fleet enforces unique agent-policy
   // names space-wide, so a fresh-session re-run would fail without it.
   // Truncate to stay within Fleet's policy name length limit.
@@ -123,11 +151,19 @@ export async function deployGroup(
     globalRegion,
     storedServiceVars,
     authenticateAndDeployStep,
+    integrationName,
+    description,
+    policySettings,
   }: {
     namespace: string;
     globalRegion: string;
     storedServiceVars: Record<string, ServiceVars>;
     authenticateAndDeployStep: AuthenticateAndDeployStepState;
+    /** Integration name as entered in step 2; the policy name is derived from it. */
+    integrationName?: string;
+    description?: string;
+    /** Package policy fields from Step 2 that every policy gets, where agentless supports them. */
+    policySettings?: PolicySettings;
   }
 ): Promise<GroupDeployOutcome> {
   // All members share the same packageName — use the first for pkg info.
@@ -144,13 +180,18 @@ export async function deployGroup(
   const serviceVarsMap: Record<string, ServiceVars> = {};
   for (const { instance, service } of group.members) {
     serviceVarsMap[service.id] = storedServiceVars[instance.instanceId] ?? {
-      enabledDataStreams: service.dataStreams,
+      enabledDataStreams: getDefaultEnabledDataStreams(service),
       varsByDataStream: {},
     };
   }
 
   const services = group.members.map(({ service }) => service);
-  const inputs = buildPackageInputs(services, serviceVarsMap, globalRegion);
+  const inputs = buildPackageInputs(
+    services,
+    serviceVarsMap,
+    globalRegion,
+    getPolicyVarSettings(policySettings, 'managed_integration')
+  );
 
   // Explicitly disable all package inputs not in our selection to avoid Fleet defaulting
   // enabled inputs that would cause "not allowed for agentless" errors.
@@ -180,15 +221,18 @@ export async function deployGroup(
     staticKeys,
     pkgVarNames,
     undefined,
-    connectorId ? undefined : authenticateAndDeployStep.existingSecretRefs
+    connectorId ? undefined : authenticateAndDeployStep.existingSecretRefs,
+    getPolicyVarSettings(policySettings, 'managed_integration', pkgVarNames)
   );
 
   const response = await sendCreateAgentlessPolicy({
-    name: buildAgentlessPolicyName(group),
+    name: buildAgentlessPolicyName(group, integrationName),
+    ...(description?.trim() ? { description: description.trim() } : {}),
     namespace: group.namespace || namespace,
     package: { name: firstService.packageName, version: pkgVersion },
     ...(vars ? { vars } : {}),
     inputs,
+    ...getPolicySettings(policySettings, 'managed_integration'),
     ...(connectorId
       ? {
           cloud_connector: {

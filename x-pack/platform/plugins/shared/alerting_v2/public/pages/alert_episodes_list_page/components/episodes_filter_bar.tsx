@@ -160,9 +160,15 @@ export const EpisodesFilterBar = ({
     [onFilterChange]
   );
 
-  const onKueryChange = useCallback((value: string) => {
-    setQueryStringInput(value);
-  }, []);
+  const onKueryChange = useCallback(
+    (value: string) => {
+      setQueryStringInput(value);
+      if (appliedQueryString && !value.trim()) {
+        onFilterChange((prev) => ({ ...prev, queryString: undefined }));
+      }
+    },
+    [appliedQueryString, onFilterChange]
+  );
 
   const submitQuery = useCallback(() => {
     if (!queryValidation.isValid || !queryNeedsUpdate) {

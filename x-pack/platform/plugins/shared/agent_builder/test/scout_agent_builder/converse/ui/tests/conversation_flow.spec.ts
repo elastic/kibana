@@ -51,9 +51,7 @@ test.describe(
         await expect(page.testSubj.locator('agentBuilderResponseMessage')).toContainText(
           MOCKED_RESPONSE
         );
-        await expect(page.testSubj.locator('agentBuilderConversationTitleButton')).toContainText(
-          MOCKED_TITLE
-        );
+        await expect(page.testSubj.locator('appHeaderTitle')).toContainText(MOCKED_TITLE);
         await expect(
           page.testSubj.locator(`agentBuilderSidebarConversation-${conversationId}`)
         ).toContainText(MOCKED_TITLE);
