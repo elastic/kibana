@@ -61,6 +61,7 @@ const colors: LatencyMapColors = {
   failureRamp: [],
   selectionStroke: 'rgb(1,2,3)',
   selectionFill: 'rgba(1,2,3,0.1)',
+  outsideSelectionMask: 'rgba(4,5,6,0.2)',
   handleFill: '#fff',
   axisText: '#666',
   hoverOutline: '#000',
