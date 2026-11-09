@@ -27,8 +27,6 @@ export interface InvestigationsUpdatedWindow {
   updatedBefore?: string;
 }
 
-const MINUTE_MS = 60_000;
-
 const isValidDate = (value: string | null, roundUp: boolean): value is string =>
   value != null && dateMath.parse(value, { roundUp })?.isValid() === true;
 
@@ -44,9 +42,9 @@ export const getInvestigationsTimeRange = (search: string): InvestigationsTimeRa
 };
 
 /**
- * Resolves a range to the API's filter. Times are rounded down to the minute so a relative range
- * keeps one query key between renders. An end of `now` sends no upper bound: investigations
- * modified after the page loaded still belong in "up to now".
+ * Resolves a range to the API's filter, keeping the range's own precision (`now-1d/d` ends at the
+ * last millisecond of that day). An end of `now` sends no upper bound: investigations modified
+ * after the page loaded still belong in "up to now".
  */
 export const toUpdatedWindow = (
   { from, to }: InvestigationsTimeRange,
@@ -54,9 +52,7 @@ export const toUpdatedWindow = (
 ): InvestigationsUpdatedWindow => {
   const toIso = (value: string, roundUp: boolean): string | undefined => {
     const date = dateMath.parse(value, { roundUp, forceNow: now });
-    return date?.isValid()
-      ? new Date(Math.floor(date.valueOf() / MINUTE_MS) * MINUTE_MS).toISOString()
-      : undefined;
+    return date?.isValid() ? date.toISOString() : undefined;
   };
 
   return {
@@ -69,8 +65,11 @@ export const useInvestigationsTimeRange = (): {
   timeRange: InvestigationsTimeRange;
   updatedWindow: InvestigationsUpdatedWindow;
   setTimeRange: (timeRange: InvestigationsTimeRange) => void;
-  /** Re-resolves a relative range against the current time. */
-  refreshWindow: () => void;
+  /**
+   * Re-resolves a relative range against the current time. Returns `true` when the window moved,
+   * which changes the query keys so the queries refetch on their own.
+   */
+  refreshWindow: () => boolean;
 } => {
   const history = useHistory();
   const { search } = useLocation();
@@ -78,10 +77,19 @@ export const useInvestigationsTimeRange = (): {
   const { from, to } = timeRange;
   const [refreshCount, setRefreshCount] = useState(0);
   // Re-resolved only when the range changes or the user refreshes, so a relative range does not
-  // churn query keys.
+  // churn query keys between renders.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const updatedWindow = useMemo(() => toUpdatedWindow({ from, to }), [from, to, refreshCount]);
-  const refreshWindow = useCallback(() => setRefreshCount((count) => count + 1), []);
+  const refreshWindow = useCallback(() => {
+    const next = toUpdatedWindow({ from, to });
+    const moved =
+      next.updatedAfter !== updatedWindow.updatedAfter ||
+      next.updatedBefore !== updatedWindow.updatedBefore;
+    if (moved) {
+      setRefreshCount((count) => count + 1);
+    }
+    return moved;
+  }, [from, to, updatedWindow]);
 
   const setTimeRange = useCallback(
     (next: InvestigationsTimeRange) => {

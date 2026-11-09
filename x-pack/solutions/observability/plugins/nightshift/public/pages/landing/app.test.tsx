@@ -260,7 +260,7 @@ describe('NightshiftApp', () => {
       );
       expect(mockUseInvestigationSections).toHaveBeenLastCalledWith(
         expect.objectContaining({
-          updatedAfter: '2026-11-06T12:00:00.000Z',
+          updatedAfter: '2026-11-06T12:00:30.000Z',
           updatedBefore: undefined,
         })
       );

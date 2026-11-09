@@ -38,18 +38,24 @@ describe('getInvestigationsTimeRange', () => {
 });
 
 describe('toUpdatedWindow', () => {
-  it('sends only a lower bound, to the minute, when the range ends at now', () => {
+  it('sends only a lower bound when the range ends at now', () => {
     expect(toUpdatedWindow({ from: 'now-3d', to: 'now' }, NOW)).toEqual({
-      updatedAfter: '2026-11-06T12:00:00.000Z',
+      updatedAfter: '2026-11-06T12:00:30.000Z',
       updatedBefore: undefined,
     });
   });
 
   it('sends both bounds for a range that ended in the past', () => {
     expect(toUpdatedWindow({ from: 'now-7d', to: 'now-1d' }, NOW)).toEqual({
-      updatedAfter: '2026-11-02T12:00:00.000Z',
-      updatedBefore: '2026-11-08T12:00:00.000Z',
+      updatedAfter: '2026-11-02T12:00:30.000Z',
+      updatedBefore: '2026-11-08T12:00:30.000Z',
     });
+  });
+
+  it('keeps the end of a rounded day instead of cutting it to the minute', () => {
+    expect(toUpdatedWindow({ from: 'now-2d/d', to: 'now-1d/d' }, NOW).updatedBefore).toBe(
+      '2026-11-08T23:59:59.999Z'
+    );
   });
 });
 
@@ -75,14 +81,35 @@ describe('useInvestigationsTimeRange', () => {
     jest.useFakeTimers().setSystemTime(new Date('2026-11-09T12:00:30.000Z'));
     try {
       const { result } = renderHook(() => useInvestigationsTimeRange(), { wrapper });
-      expect(result.current.updatedWindow.updatedAfter).toBe('2026-11-06T12:00:00.000Z');
+      expect(result.current.updatedWindow.updatedAfter).toBe('2026-11-06T12:00:30.000Z');
 
       jest.setSystemTime(new Date('2026-11-09T12:05:30.000Z'));
-      act(() => result.current.refreshWindow());
+      let moved = false;
+      act(() => {
+        moved = result.current.refreshWindow();
+      });
 
-      expect(result.current.updatedWindow.updatedAfter).toBe('2026-11-06T12:05:00.000Z');
+      expect(moved).toBe(true);
+      expect(result.current.updatedWindow.updatedAfter).toBe('2026-11-06T12:05:30.000Z');
     } finally {
       jest.useRealTimers();
     }
+  });
+
+  it('reports that a fixed range did not move on refresh, so the caller refetches', () => {
+    const fixedWrapper = ({ children }: { children: React.ReactNode }) => (
+      <MemoryRouter
+        initialEntries={['/?rangeFrom=2026-11-01T00:00:00.000Z&rangeTo=2026-11-02T00:00:00.000Z']}
+      >
+        {children}
+      </MemoryRouter>
+    );
+    const { result } = renderHook(() => useInvestigationsTimeRange(), { wrapper: fixedWrapper });
+    let moved = true;
+    act(() => {
+      moved = result.current.refreshWindow();
+    });
+
+    expect(moved).toBe(false);
   });
 });
