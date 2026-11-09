@@ -20,6 +20,7 @@ for (const storedDataset of selectStoredDatasets(
 )) {
   registerInvestigationEvaluation({
     name: storedDataset.id,
+    experimentName: `Nightshift stored investigation traces: ${storedDataset.id}`,
     loadDataset: async (client) =>
       loadStoredInvestigationDataset(client, await resolveStoredDatasetName(client, storedDataset)),
     // Like NIGHTSHIFT_DATASET_NAME: run the upstream copy, keeping its example ids and labels.

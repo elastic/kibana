@@ -178,6 +178,7 @@
         {
           "id": "stored-investigations",
           "optIn": true,
+          "judge": "eis-openai-gpt-6-sol",
           "specFiles": ["evals/investigation/stored.spec.ts"]
         },
         {

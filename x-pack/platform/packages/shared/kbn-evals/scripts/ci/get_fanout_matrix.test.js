@@ -347,6 +347,23 @@ describe('buildFanoutMatrix - shard selection', () => {
     );
   });
 
+  it('throws when every shard is opt-in and none is requested, instead of running the whole suite', () => {
+    const allOptIn = { shards: [{ id: 'daily', optIn: true, specFiles: [OTHER] }] };
+    expect(() => select({ suiteInfo: allOptIn })).toThrow('Every shard of this suite is optIn');
+    expect(() =>
+      select({
+        suiteInfo: { ...allOptIn, specModelGroups: [{ files: [OTHER], models: ['eis/a'] }] },
+        perSpec: true,
+      })
+    ).toThrow('Every shard of this suite is optIn');
+    expect(select({ suiteInfo: allOptIn, grepOverride: true })).toEqual([
+      { connectorId: 'eis-a', shardId: '', specFiles: [] },
+    ]);
+    expect(select({ suiteInfo: allOptIn, requestedShardIds: ['daily'] })).toEqual([
+      { connectorId: 'eis-a', shardId: 'daily', specFiles: [OTHER] },
+    ]);
+  });
+
   it('throws when combined with a grep override, which runs no shard', () => {
     expect(() => select({ grepOverride: true, requestedShardIds: ['daily'] })).toThrow(
       'EVAL_SHARD_IDS cannot be combined with EVAL_GREP / EVAL_GREP_INVERT'

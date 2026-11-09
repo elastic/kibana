@@ -49,6 +49,11 @@ export const registerInvestigationEvaluation = ({
   bundledSynthetic: bundledSyntheticDataset = !process.env.NIGHTSHIFT_EXAMPLES_FILE &&
     !process.env.NIGHTSHIFT_DATASET_NAME,
   metadata: experimentMetadata = {},
+  // Experiment ids come from the build, suite, model and this name, so datasets that can run in one
+  // build need distinct names or their scores merge.
+  experimentName = orca
+    ? 'Nightshift ORCA investigation traces'
+    : 'Nightshift graded investigation traces',
 }: {
   name: string;
   loadDataset?: (
@@ -58,6 +63,7 @@ export const registerInvestigationEvaluation = ({
   orca?: boolean;
   bundledSynthetic?: boolean;
   metadata?: Record<string, string | number>;
+  experimentName?: string;
 }): void => {
   evaluate.describe(`Nightshift investigations: ${name}`, { tag: suiteTags }, () => {
     // Scout retries a failed test once on CI; expensive investigations must not run twice.
@@ -190,9 +196,7 @@ export const registerInvestigationEvaluation = ({
         await replaceCustomContext(fetch, getDatasetCustomContext(dataset));
         const [experiment] = await executorClient.runExperiment(
           {
-            name: orca
-              ? 'Nightshift ORCA investigation traces'
-              : 'Nightshift graded investigation traces',
+            name: experimentName,
             datasets: [dataset],
             trustUpstreamDataset,
             concurrency,

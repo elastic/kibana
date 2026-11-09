@@ -107,7 +107,14 @@ const parseShardIds = (value) => [
 // throw rather than silently running fewer shards than asked for.
 const selectShards = (shards, requestedShardIds) => {
   if (requestedShardIds.length === 0) {
-    return shards.filter((shard) => shard?.optIn !== true);
+    const eligibleShards = shards.filter((shard) => shard?.optIn !== true);
+    // No shards means a whole-suite run, which would include the opt-in specs.
+    if (shards.length > 0 && eligibleShards.length === 0) {
+      throw new Error(
+        'Every shard of this suite is optIn; name the shards to run in EVAL_SHARD_IDS'
+      );
+    }
+    return eligibleShards;
   }
   const availableIds = shards.map((shard) => shard?.id);
   const unknownIds = requestedShardIds.filter((id) => !availableIds.includes(id));
@@ -170,17 +177,20 @@ function buildFanoutMatrix({
   const suiteWeeklyModelGroups = Array.isArray(suiteInfo.weeklyEisModelGroups)
     ? suiteInfo.weeklyEisModelGroups
     : [];
-  const configuredShards = selectShards(
-    Array.isArray(suiteInfo.shards) ? suiteInfo.shards : [],
-    requestedShardIds
-  );
+  // A grep run is one whole-suite step filtered by the pattern, so it uses no shard.
+  const configuredShards = grepOverride
+    ? []
+    : selectShards(Array.isArray(suiteInfo.shards) ? suiteInfo.shards : [], requestedShardIds);
 
   const overrides = modelsByFileFromSpecs(specModelGroups);
   const perSpec = perSpecFlag && !grepOverride && overrides.size > 0;
 
   if (!perSpec) {
-    const shards = grepOverride ? [] : configuredShards;
-    return buildConnectorShardMatrix({ connectors, shards, requestedModelGroups });
+    return buildConnectorShardMatrix({
+      connectors,
+      shards: configuredShards,
+      requestedModelGroups,
+    });
   }
 
   const connectorIds = assertRequestedConnectors(connectors, requestedModelGroups);

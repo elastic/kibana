@@ -32,12 +32,16 @@ export const registerConnectorProbeEvaluation = ({
   name,
   loadDataset,
   trustUpstreamDataset = false,
+  // Experiment ids come from the build, suite, model and this name, so datasets that can run in one
+  // build need distinct names or their scores merge.
+  experimentName = 'Nightshift assistant connector probes',
 }: {
   name: string;
   loadDataset: (
     client: Pick<EvalsClient, 'getDatasetByName' | 'listDatasets'>
   ) => Promise<EvaluationDataset<ConnectorProbeExample>>;
   trustUpstreamDataset?: boolean;
+  experimentName?: string;
 }): void => {
   evaluate.describe(`Nightshift assistant: ${name}`, { tag: suiteTags }, () => {
     // Scout retries a failed test once on CI; a probe dataset must not run and score twice.
@@ -79,7 +83,7 @@ export const registerConnectorProbeEvaluation = ({
 
         const [experiment] = await executorClient.runExperiment(
           {
-            name: 'Nightshift assistant connector probes',
+            name: experimentName,
             datasets: [dataset],
             trustUpstreamDataset,
             concurrency,
