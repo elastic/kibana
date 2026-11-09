@@ -31,6 +31,7 @@ function setupSpaces() {
     return {
       ...clients,
       getSignificantEventsAlertingContext: async () => ({
+        ...(await clients.getSignificantEventsAlertingContext()),
         alertingV2RulesClient: space === 'a' ? rules.a : rules.b,
       }),
       getKnowledgeIndicatorClient: async () => ({

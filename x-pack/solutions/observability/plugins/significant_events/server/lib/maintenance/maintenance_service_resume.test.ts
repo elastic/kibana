@@ -25,6 +25,67 @@ import {
 
 describe('SignificantEventsMaintenanceService', () => {
   describe('resume', () => {
+    it('enables the rules through the account in a set-up space', async () => {
+      const { api } = makeManagementApi();
+      const accountClient = makeV2RulesClient();
+      const { service, v2RulesClient, withAccountAlertingV2RulesClient } = makeService({
+        management: api,
+        ruleBackedRuleIds: ['rule-1'],
+        accountV2RulesClient: accountClient,
+      });
+
+      await service.pause({ request: REQUEST });
+      await service.resume({ request: REQUEST });
+
+      expect(withAccountAlertingV2RulesClient).toHaveBeenCalledTimes(1);
+      expect(accountClient.bulkEnableRules).toHaveBeenCalledWith({ ids: ['rule-1'] });
+      expect(v2RulesClient?.bulkEnableRules).not.toHaveBeenCalled();
+    });
+
+    it('re-keys the rules it enabled and keeps one that cannot be re-keyed for a retry', async () => {
+      const { api } = makeManagementApi();
+      const accountClient = makeV2RulesClient();
+      accountClient.bulkUpdateApiKey.mockResolvedValueOnce({
+        affected_count: 1,
+        errors: [{ id: 'rule-2', error: { code: 'BOOM', message: 'boom' } }],
+      });
+      const { service } = makeService({
+        management: api,
+        ruleBackedRuleIds: ['rule-1', 'rule-2'],
+        accountV2RulesClient: accountClient,
+      });
+
+      await service.pause({ request: REQUEST });
+      const summary = await service.resume({ request: REQUEST });
+
+      expect(accountClient.bulkUpdateApiKey).toHaveBeenCalledWith({ ids: ['rule-1', 'rule-2'] });
+      expect(summary.partialFailures).toContainEqual({ target: 'rule:rule-2', error: 'boom' });
+      expect(summary.rulesDisabled).toBe(1);
+    });
+
+    it('retries a rule whose task was running during the re-key instead of reporting it disabled', async () => {
+      const { api } = makeManagementApi();
+      const accountClient = makeV2RulesClient();
+      accountClient.bulkUpdateApiKey
+        .mockResolvedValueOnce({
+          affected_count: 1,
+          errors: [{ id: 'rule-2', error: { code: 'RULE_ALREADY_RUNNING', message: 'busy' } }],
+        })
+        .mockResolvedValueOnce({ affected_count: 1, errors: [] });
+      const { service } = makeService({
+        management: api,
+        ruleBackedRuleIds: ['rule-1', 'rule-2'],
+        accountV2RulesClient: accountClient,
+      });
+
+      await service.pause({ request: REQUEST });
+      const summary = await service.resume({ request: REQUEST });
+
+      expect(accountClient.bulkUpdateApiKey).toHaveBeenLastCalledWith({ ids: ['rule-2'] });
+      expect(summary.partialFailures).toEqual([]);
+      expect(summary.rulesDisabled).toBe(0);
+    });
+
     it('leaves the rules of a source disabled before or during the pause off', async () => {
       const { api } = makeManagementApi();
       const { service, v2RulesClient } = makeService({
