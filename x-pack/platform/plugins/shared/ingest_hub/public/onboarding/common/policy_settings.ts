@@ -15,6 +15,8 @@ import type { DeploymentMethod } from '@kbn/fleet-plugin/public';
  */
 export interface PolicySettings {
   output_id?: string;
+  /** Agent condition expression that decides whether the integration applies to an agent. */
+  condition?: string;
 }
 
 type PolicySettingKey = keyof PolicySettings;
@@ -34,10 +36,12 @@ const POLICY_SETTINGS: Record<
   { methods: DeploymentMethod[]; isValid: (value: unknown) => boolean }
 > = {
   output_id: { methods: ['agent_based'], isValid: (value) => typeof value === 'string' },
+  condition: { methods: ['agent_based'], isValid: (value) => typeof value === 'string' },
 };
 
+// A blank condition is no condition, so whitespace alone counts as empty.
 const isEmptySetting = (value: unknown): boolean =>
-  value === undefined || value === null || value === '';
+  value === undefined || value === null || (typeof value === 'string' && value.trim() === '');
 
 const getKeys = (method: DeploymentMethod): PolicySettingKey[] =>
   (Object.keys(POLICY_SETTINGS) as PolicySettingKey[]).filter((key) =>

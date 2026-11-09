@@ -30,6 +30,7 @@ import { i18n } from '@kbn/i18n';
 import { GlobalRegionField } from './global_region_field';
 import { SharedAdvancedSettings } from './shared_advanced_settings';
 import type { OutputFieldProps } from './output_field';
+import type { ConditionFieldProps } from './condition_field';
 import { MAX_DESCRIPTION_LENGTH, MAX_INTEGRATION_NAME_LENGTH } from './integration_settings';
 
 const ADVANCED_ANIMATION_MS = 300;
@@ -59,6 +60,11 @@ interface SharedSettingsSectionProps {
   hasServicesIgnoringNamespace?: boolean;
   /** The output field, offered only where an agent-based deploy can set it. */
   output?: OutputFieldProps;
+  /**
+   * The condition field, offered only where an agent-based deploy can set it. The advanced section
+   * stays open while it has an error.
+   */
+  condition?: ConditionFieldProps;
 }
 
 /**
@@ -85,13 +91,14 @@ export function SharedSettingsSection({
   hasLaunchedEcfStack = false,
   hasServicesIgnoringNamespace = false,
   output,
+  condition,
 }: SharedSettingsSectionProps) {
   // Show errors once the field was edited, so the prefilled form does not open with errors.
   const [nameTouched, setNameTouched] = useState(false);
   const [descriptionTouched, setDescriptionTouched] = useState(false);
   // Collapsed by default. It cannot be collapsed over an error, which would hide why Next is off.
   const [advancedToggled, setAdvancedToggled] = useState(false);
-  const isAdvancedOpen = advancedToggled || !!namespaceError;
+  const isAdvancedOpen = advancedToggled || !!namespaceError || !!condition?.error;
   const advancedId = useGeneratedHtmlId({ prefix: 'sharedAdvancedSettings' });
   const { euiTheme } = useEuiTheme();
 
@@ -267,6 +274,7 @@ export function SharedSettingsSection({
             hasLaunchedEcfStack={hasLaunchedEcfStack}
             hasServicesIgnoringNamespace={hasServicesIgnoringNamespace}
             output={output}
+            condition={condition}
           />
         </div>
       </div>

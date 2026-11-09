@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import { InstanceNamespaceField } from './instance_namespace_field';
 import { OutputField, type OutputFieldProps } from './output_field';
+import { ConditionField, type ConditionFieldProps } from './condition_field';
 
 interface SharedAdvancedSettingsProps {
   namespace: string;
@@ -23,6 +24,8 @@ interface SharedAdvancedSettingsProps {
   hasServicesIgnoringNamespace?: boolean;
   /** The output field. It applies to agent-based deploys only, so managed and ECF leave it out. */
   output?: OutputFieldProps;
+  /** The condition field. Like the output, agent-based deploys only. */
+  condition?: ConditionFieldProps;
 }
 
 /**
@@ -36,6 +39,7 @@ export function SharedAdvancedSettings({
   hasLaunchedEcfStack = false,
   hasServicesIgnoringNamespace = false,
   output,
+  condition,
 }: SharedAdvancedSettingsProps) {
   const notes = [
     hasDeployedServices &&
@@ -70,6 +74,11 @@ export function SharedAdvancedSettings({
       {output && (
         <EuiFlexItem>
           <OutputField {...output} />
+        </EuiFlexItem>
+      )}
+      {condition && (
+        <EuiFlexItem>
+          <ConditionField {...condition} />
         </EuiFlexItem>
       )}
     </EuiFlexGrid>

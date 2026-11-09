@@ -65,6 +65,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     namespaceError,
     policySettings,
     setPolicySetting,
+    conditionError,
     bareNamePackage,
     instances,
     filteredInstances,
@@ -132,6 +133,10 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     (outputId: string) => setPolicySetting('output_id', outputId),
     [setPolicySetting]
   );
+  const setCondition = useCallback(
+    (condition: string) => setPolicySetting('condition', condition),
+    [setPolicySetting]
+  );
 
   const [activeFlyoutInstanceId, setActiveFlyoutInstanceId] = useState<string | null>(null);
   const [openMenuInstanceId, setOpenMenuInstanceId] = useState<string | null>(null);
@@ -197,7 +202,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
         })
       );
     }
-    if (integrationNameError || descriptionError || namespaceError) {
+    if (integrationNameError || descriptionError || namespaceError || conditionError) {
       reasons.push(
         i18n.translate('xpack.ingestHub.serviceSettingsStep.continueTooltip.integrationSettings', {
           defaultMessage: 'Fix the integration settings',
@@ -222,6 +227,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     integrationNameError,
     descriptionError,
     namespaceError,
+    conditionError,
     incompleteInstances,
   ]);
 
@@ -491,6 +497,15 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
                   !hasUnloadedSelectedManifests &&
                   !hasErroredSelectedManifests,
                 isInheritedOutputDefault: agentBasedDeployment.agentHostsMode === 'new',
+              }
+            : undefined
+        }
+        condition={
+          supportsPolicySetting('condition', deploymentMethod)
+            ? {
+                value: policySettings.condition ?? '',
+                onChange: setCondition,
+                error: conditionError,
               }
             : undefined
         }

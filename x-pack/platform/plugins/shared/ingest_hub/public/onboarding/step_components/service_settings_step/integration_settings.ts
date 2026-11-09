@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { CLOUD_ONBOARDING_INTEGRATION_NAME_MAX_LENGTH } from '@kbn/fleet-plugin/common';
+import { validateAgentConditionExpression } from '@kbn/elastic-agent-condition-language';
 
 import type { AwsServiceMatrixEntry, DeploymentMethod } from '../../aws_service_matrix';
 
@@ -49,6 +50,29 @@ export const getIntegrationNameError = (name: string): string | undefined => {
       values: { max: MAX_INTEGRATION_NAME_LENGTH },
     });
   }
+};
+
+/** Fleet's package policy condition limit. */
+export const MAX_CONDITION_LENGTH = 10000;
+
+/** Checks the condition as Fleet's Add integration form does. A blank one is no condition. */
+export const getConditionError = (condition: string): string | undefined => {
+  if (condition.length > MAX_CONDITION_LENGTH) {
+    return i18n.translate('xpack.ingestHub.integrationSettings.condition.tooLongError', {
+      defaultMessage: 'The condition must be {max} characters or less.',
+      values: { max: MAX_CONDITION_LENGTH },
+    });
+  }
+  const errors = validateAgentConditionExpression(condition);
+  if (errors.length === 0) return undefined;
+  return errors
+    .map(({ line, column, message }) =>
+      i18n.translate('xpack.ingestHub.integrationSettings.condition.syntaxError', {
+        defaultMessage: 'Line {line}, column {col}: {message}',
+        values: { line, col: column + 1, message },
+      })
+    )
+    .join(' ');
 };
 
 export const getDescriptionError = (description: string): string | undefined => {

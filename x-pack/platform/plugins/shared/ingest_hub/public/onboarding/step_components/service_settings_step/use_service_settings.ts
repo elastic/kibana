@@ -38,8 +38,9 @@ import {
   isMainPackageName,
 } from '../authenticate_and_deploy_step/deploy_group_helpers';
 import { getNamespaceError } from './instance_namespace_field';
-import type { PolicySettings } from '../../common/policy_settings';
+import { supportsPolicySetting, type PolicySettings } from '../../common/policy_settings';
 import {
+  getConditionError,
   getDescriptionError,
   getIntegrationNameError,
   supportsIntegrationSettings,
@@ -577,6 +578,16 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
   const integrationNameError = getIntegrationNameError(integrationName);
   const descriptionError = getDescriptionError(description);
   const namespaceError = getNamespaceError(namespace);
+  // Only where the condition is offered: one kept from another deployment method is never sent,
+  // and could not be fixed from a hidden field.
+  const condition = policySettings.condition ?? '';
+  const conditionError = useMemo(
+    () =>
+      supportsPolicySetting('condition', deploymentMethod)
+        ? getConditionError(condition)
+        : undefined,
+    [condition, deploymentMethod]
+  );
 
   const isReady = useMemo(
     () =>
@@ -584,8 +595,16 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       incompleteInstances.length === 0 &&
       !integrationNameError &&
       !descriptionError &&
-      !namespaceError,
-    [globalRegion, incompleteInstances, integrationNameError, descriptionError, namespaceError]
+      !namespaceError &&
+      !conditionError,
+    [
+      globalRegion,
+      incompleteInstances,
+      integrationNameError,
+      descriptionError,
+      namespaceError,
+      conditionError,
+    ]
   );
 
   const [globalRegionTouched, setGlobalRegionTouched] = useState(false);
@@ -627,6 +646,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     namespaceError,
     policySettings,
     setPolicySetting,
+    conditionError,
     bareNamePackage,
     instances,
     filteredInstances,

@@ -350,4 +350,59 @@ describe('SharedSettingsSection', () => {
       expect(onChange).toHaveBeenCalledWith('');
     });
   });
+
+  describe('condition', () => {
+    it('is hidden unless the deployment is agent-based', () => {
+      renderSection();
+
+      expect(screen.queryByTestId('sharedSettingsCondition')).not.toBeInTheDocument();
+    });
+
+    it('is the last advanced setting, after the output', () => {
+      renderSection({
+        output: {
+          value: '',
+          onChange: jest.fn(),
+          packageName: 'aws',
+          inputTypes: ['aws-s3'],
+          areInputTypesLoaded: true,
+          isInheritedOutputDefault: true,
+        },
+        condition: { value: '', onChange: jest.fn() },
+      });
+
+      const fields = screen
+        .getByTestId('sharedAdvancedSettings')
+        .querySelectorAll('[data-test-subj^="sharedSettings"]');
+      expect(fields[fields.length - 1]).toBe(screen.getByTestId('sharedSettingsCondition'));
+      expect(screen.getByTestId('sharedSettingsOutput')).toBeInTheDocument();
+    });
+
+    it('reports edits', () => {
+      const onChange = jest.fn();
+      renderSection({ condition: { value: '', onChange } });
+      fireEvent.click(screen.getByTestId('sharedSettingsAdvancedToggle'));
+
+      fireEvent.change(screen.getByTestId('sharedSettingsCondition'), {
+        target: { value: '${host.platform} == "linux"' },
+      });
+
+      expect(onChange).toHaveBeenCalledWith('${host.platform} == "linux"');
+    });
+
+    it('opens on its own, and cannot be collapsed, while the condition is invalid', () => {
+      renderSection({
+        condition: {
+          value: '${host.platform} ==',
+          onChange: jest.fn(),
+          error: 'Line 1, column 20: syntax error',
+        },
+      });
+
+      expect(screen.getByTestId('sharedSettingsCondition')).toBeVisible();
+      expect(screen.getByText('Line 1, column 20: syntax error')).toBeInTheDocument();
+      fireEvent.click(screen.getByTestId('sharedSettingsAdvancedToggle'));
+      expect(screen.getByTestId('sharedSettingsCondition')).toBeVisible();
+    });
+  });
 });
