@@ -18,7 +18,7 @@ import {
 import type { ForensicsSummaryInputs } from './types';
 
 const verdictSchema = lazySchema(() =>
-  z.enum(['confirmed_incident', 'not_an_incident', 'unclear', 'in_progress'])
+  z.enum(['confirmed_incident', 'not_an_incident', 'unclear'])
 );
 const decisionGroupSchema = lazySchema(() =>
   z.enum(['awaiting', 'running', 'done', 'failed', 'closed'])
@@ -105,14 +105,7 @@ const DECISION_GROUP_ORDER: readonly DecisionGroup[] = [
   'closed',
 ];
 
-/** The recorded verdict; before the analysis records one, whether it is still running. */
-const toVerdict = (
-  value: string | undefined,
-  analysisStatus: string | undefined
-): ForensicsVerdict => {
-  if (!value && analysisStatus === 'pending') {
-    return 'in_progress';
-  }
+const toVerdict = (value: string | undefined): ForensicsVerdict => {
   const parsed = verdictSchema.safeParse(value);
   return parsed.success ? parsed.data : 'unclear';
 };
@@ -185,7 +178,7 @@ export const buildForensicsSummaryViewModel = (
     version: 1,
     title: host ?? attackTitle ?? 'Endpoint analysis',
     attackTitle: host ? attackTitle : undefined,
-    verdict: toVerdict(inputs.verdict, inputs.analysisStatus),
+    verdict: toVerdict(inputs.verdict),
     autonomy: inputs.autonomy || 'manual',
     analyzedAt: inputs.analyzedAt,
     summary: inputs.summary?.trim() || undefined,

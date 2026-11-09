@@ -21,11 +21,9 @@ import type { IocKind } from './constants';
 import type { ForensicsAlert, ForensicsSummaryInputs } from './types';
 import { toPlainAttackTitle } from './view_model';
 
-/** An Investigation's Endpoint Analysis, from its indicator. */
+/** The finished Endpoint Analysis of an Investigation, from its indicator. */
 export interface EndpointAnalysisIndicator {
   kiId: string;
-  /** `pending` while the analysis runs; `processed` once it recorded its verdict. */
-  status?: string;
   verdict?: string;
   autonomy?: string;
   analyzedAt?: string;
@@ -37,7 +35,6 @@ const indicatorSourceSchema = lazySchema(() =>
     updated_at: z.string().optional(),
     attributes: z
       .object({
-        status: z.string().optional(),
         forensic_verdict: z.string().optional(),
         autonomy: z.string().optional(),
       })
@@ -45,10 +42,7 @@ const indicatorSourceSchema = lazySchema(() =>
   })
 );
 
-/**
- * The Investigation's latest Endpoint Analysis indicator, in whatever status it is: the card shows what the
- * Investigation holds at the moment it is rendered. Undefined when Endpoint Analysis never picked it up.
- */
+/** The Investigation's processed Endpoint Analysis indicator, or undefined when none has finished. */
 export const findEndpointAnalysisIndicator = async ({
   esClient,
   spaceId,
@@ -73,6 +67,7 @@ export const findEndpointAnalysisIndicator = async ({
             { term: { type: ANALYZE_ENDPOINT_KI_TYPE } },
             { term: { 'attributes.space_id': spaceId } },
             { term: { 'attributes.investigation_id': conversationId } },
+            { term: { 'attributes.status': 'processed' } },
           ],
         },
       },
@@ -85,15 +80,12 @@ export const findEndpointAnalysisIndicator = async ({
   if (!hit || !kiId) {
     return undefined;
   }
-  const { updated_at: updatedAt, attributes } = parsed.success ? parsed.data : {};
-  const status = attributes?.status || undefined;
+  const { updated_at: analyzedAt, attributes } = parsed.success ? parsed.data : {};
   return {
     kiId,
-    status,
     verdict: attributes?.forensic_verdict || undefined,
     autonomy: attributes?.autonomy || undefined,
-    // The indicator is last updated when it is retired with its verdict; before that the time says nothing.
-    analyzedAt: status === 'processed' ? updatedAt : undefined,
+    analyzedAt,
   };
 };
 

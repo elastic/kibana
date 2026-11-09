@@ -26,7 +26,6 @@ const VERDICTS: Record<ForensicsVerdict, { label: string; className: string }> =
   confirmed_incident: { label: 'Confirmed incident', className: 'danger' },
   not_an_incident: { label: 'Not an incident', className: 'success' },
   unclear: { label: 'Unclear', className: 'warning' },
-  in_progress: { label: 'Analysis in progress', className: 'neutral' },
 };
 
 const DECISION_LABELS: Record<DecisionGroup, string> = {

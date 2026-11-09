@@ -7,7 +7,7 @@ description: >
   summary. An investigation is summarized only once a proposal is attached; an escalation always
   is. An agent execution ending, a close, or an attachment edit does not start it. The summary is
   one direct model call on the efficient tier, so it does not append a chat round. On an
-  investigation Endpoint Analysis has picked up, it then re-renders the forensics summary card,
+  investigation whose Endpoint Analysis has finished, it then re-renders the forensics summary card,
   with no model call, so the card shows the summary this run wrote and any new proposal awaiting
   a decision.
 enabled: true
@@ -44,8 +44,8 @@ steps:
   # The forensics summary card's only renderer. It refreshes on a new proposal, including the
   # close question, on the summary above, and on the Endpoint Analysis notes that mark the
   # verdict and each decision, which would otherwise write nothing to the investigation.
-  # Writes nothing on an investigation Endpoint Analysis never picked up, or when the card
-  # is current.
+  # Writes nothing until the Endpoint Analysis is processed, so the first card the chat shows
+  # is a finished one, and nothing when the card is current.
   - name: forensics_summary
     type: alertzero.forensics.renderSummary
     if: "${{ event.templateId == 'investigation' }}"

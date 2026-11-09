@@ -49,20 +49,12 @@ const alertHit = (ruleName: string, severity: string, riskScore: number) => ({
   },
 });
 
-const PROCESSED_ATTRIBUTES = {
-  status: 'processed',
-  forensic_verdict: 'confirmed_incident',
-  autonomy: 'manual',
-};
-
 const setup = ({
   indicator = true,
-  indicatorAttributes = PROCESSED_ATTRIBUTES,
   attachments = evidenceAttachments(),
   proposals = fixtureInputs.proposals,
 }: {
   indicator?: boolean;
-  indicatorAttributes?: Record<string, string>;
   attachments?: VersionedAttachment[];
   proposals?: readonly ForensicsProposal[];
 } = {}) => {
@@ -79,7 +71,7 @@ const setup = ({
                   _source: {
                     id: KI_ID,
                     updated_at: '2026-11-02T10:15:00.000Z',
-                    attributes: indicatorAttributes,
+                    attributes: { forensic_verdict: 'confirmed_incident', autonomy: 'manual' },
                   },
                 },
               ]
@@ -151,25 +143,13 @@ describe('runForensicsSummary', () => {
     expect(attachmentsClient.create).not.toHaveBeenCalled();
   });
 
-  it('only searches the space and Investigation it was asked about, in any analysis status', async () => {
+  it('only searches the space and Investigation it was asked about', async () => {
     const { run, esClient } = setup({ indicator: false });
     await run();
     const filters = JSON.stringify(esClient.search.mock.calls[0][0]);
     expect(filters).toContain('"attributes.space_id":"default"');
     expect(filters).toContain(`"attributes.investigation_id":"${CONVERSATION_ID}"`);
-    expect(filters).not.toContain('attributes.status');
-  });
-
-  // A supervised proposal can be decided before the run records its verdict.
-  it('renders what the Investigation holds while the analysis is still running', async () => {
-    const { run, attachmentsClient } = setup({
-      indicatorAttributes: { status: 'pending', autonomy: 'supervised' },
-    });
-    await expect(run()).resolves.toMatchObject({ action: 'created' });
-    const [[{ data, description }]] = attachmentsClient.create.mock.calls;
-    expect(description).toContain('in progress');
-    expect(data.visualization.template).toContain('Analysis in progress');
-    expect(data.visualization.template).not.toContain('Analyzed ');
+    expect(filters).toContain('"attributes.status":"processed"');
   });
 
   it('adds the card, shown in the chat, the first time', async () => {

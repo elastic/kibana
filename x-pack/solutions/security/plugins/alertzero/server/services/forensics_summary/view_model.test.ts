@@ -108,19 +108,6 @@ describe('buildForensicsSummaryViewModel', () => {
     expect(hashes?.values).toHaveLength(MAX_IOCS_PER_KIND);
   });
 
-  it('reads a missing verdict as in progress only while the analysis runs', () => {
-    const noVerdict = { ...fixtureInputs, verdict: undefined };
-    expect(
-      buildForensicsSummaryViewModel({ ...noVerdict, analysisStatus: 'pending' }).verdict
-    ).toBe('in_progress');
-    expect(
-      buildForensicsSummaryViewModel({ ...noVerdict, analysisStatus: 'processed' }).verdict
-    ).toBe('unclear');
-    expect(
-      buildForensicsSummaryViewModel({ ...fixtureInputs, analysisStatus: 'pending' }).verdict
-    ).toBe('confirmed_incident');
-  });
-
   it('reads an unknown verdict or severity as unclear and low', () => {
     const viewModel = buildForensicsSummaryViewModel({
       ...fixtureInputs,

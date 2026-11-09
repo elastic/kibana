@@ -30,7 +30,7 @@ const outputSchema = lazySchema(() =>
       .enum(['no_analysis', 'unchanged', 'cancelled'])
       .optional()
       .describe(
-        'Why nothing was written: Endpoint Analysis never picked up the Investigation, the card is already current, or a newer run cancelled this one.'
+        'Why nothing was written: the Investigation has no finished Endpoint Analysis, the card is already current, or a newer run cancelled this one.'
       ),
     attachment_id: z.string().optional().describe('Id of the summary card attachment.'),
     action: z
@@ -54,7 +54,7 @@ export const renderForensicsSummaryStepCommonDefinition: CommonStepDefinition<
     'xpack.alertzero.workflows.steps.renderForensicsSummary.description',
     {
       defaultMessage:
-        'Renders one HTML summary card of what Endpoint Analysis has left on an Investigation so far: the verdict, the decisions left to make, the kill chain, the timeline, the indicators and the alerts. Writes nothing when the card is already current.',
+        'Renders one HTML summary card for an Investigation that Endpoint Analysis has finished: the verdict, the decisions left to make, the kill chain, the timeline, the indicators and the alerts. Writes nothing when the card is already current.',
     }
   ),
   category: StepCategory.KibanaSecurity,

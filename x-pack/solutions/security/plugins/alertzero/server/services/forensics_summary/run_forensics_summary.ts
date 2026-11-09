@@ -66,7 +66,7 @@ const readOpenDecisions = (description: string | undefined): number => {
 };
 
 /**
- * Renders the forensics summary card from what Endpoint Analysis has left on the Investigation so far, and adds it,
+ * Renders the forensics summary card for an Investigation whose Endpoint Analysis has finished, and adds it,
  * or writes a new version of it when what it shows changed. Interim updates are silent; once the last open
  * decision settles the card is posted in the chat again, since the chat shows an attachment as it was posted.
  */
@@ -117,7 +117,6 @@ export const runForensicsSummary = async ({
   const summary = conversation.metadata?.summary;
 
   const viewModel = buildForensicsSummaryViewModel({
-    analysisStatus: indicator.status,
     verdict: indicator.verdict,
     autonomy: indicator.autonomy,
     analyzedAt: indicator.analyzedAt,
