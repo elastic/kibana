@@ -41,11 +41,11 @@ import { ChromeService } from './chrome_service';
 import { NavLinksService } from './services/nav_links';
 import { ProjectNavigationService } from './services/project_navigation';
 
-const mockhandleSystemColorModeChange = jest.fn();
+const mockSyncColorMode = jest.fn();
 
-jest.mock('./side_effects/handle_system_colormode_change', () => {
+jest.mock('./side_effects/sync_color_mode', () => {
   return {
-    handleSystemColorModeChange: (...args: any[]) => mockhandleSystemColorModeChange(...args),
+    syncColorMode: (...args: any[]) => mockSyncColorMode(...args),
   };
 });
 
@@ -74,7 +74,7 @@ function defaultStartDeps(availableApps?: App[], currentAppId?: string) {
   const notifications = notificationServiceMock.createStartContract();
   const deps = {
     i18n: i18nServiceMock.createStartContract(),
-    theme: themeServiceMock.createStartContract(),
+    theme: themeServiceMock.createInternalStartContract(),
     userProfile: userProfileServiceMock.createStart(),
     application: applicationServiceMock.createInternalStartContract(currentAppId),
     docLinks: docLinksServiceMock.createStartContract(),
@@ -214,26 +214,28 @@ describe('start', () => {
     expect(startDeps.notifications.toasts.addWarning).not.toHaveBeenCalled();
   });
 
-  it('calls handleSystemColorModeChange() with the correct parameters', async () => {
-    mockhandleSystemColorModeChange.mockReset();
-    await start();
-    expect(mockhandleSystemColorModeChange).toHaveBeenCalledTimes(1);
+  it('calls syncColorMode() with the correct parameters', async () => {
+    mockSyncColorMode.mockReset();
+    const { startDeps } = await start();
+    expect(mockSyncColorMode).toHaveBeenCalledTimes(1);
 
-    const [firstCallArg] = mockhandleSystemColorModeChange.mock.calls[0];
+    const [firstCallArg] = mockSyncColorMode.mock.calls[0];
     expect(Object.keys(firstCallArg).sort()).toEqual([
-      'coreStart',
-      'getNotifications',
       'http',
+      'injectedMetadata',
       'logger',
       'stop$',
+      'theme',
       'uiSettings',
+      'userProfile',
     ]);
 
-    expect(mockhandleSystemColorModeChange).toHaveBeenCalledWith({
-      http: expect.any(Object),
-      coreStart: expect.any(Object),
-      uiSettings: expect.any(Object),
-      getNotifications: expect.any(Function),
+    expect(mockSyncColorMode).toHaveBeenCalledWith({
+      theme: startDeps.theme,
+      injectedMetadata: startDeps.injectedMetadata,
+      userProfile: startDeps.userProfile,
+      uiSettings: startDeps.uiSettings,
+      http: startDeps.http,
       stop$: expect.any(Object),
       logger: expect.any(Object),
     });

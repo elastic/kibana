@@ -387,7 +387,6 @@ export class CoreSystem {
         injectedMetadata,
         getNotifications: () => notificationsPromise,
         customBranding,
-        i18n,
         theme,
         userProfile,
         uiSettings,
