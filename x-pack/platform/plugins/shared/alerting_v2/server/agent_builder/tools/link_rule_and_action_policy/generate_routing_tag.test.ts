@@ -34,9 +34,9 @@ describe('generateRoutingTag', () => {
   });
 
   it('strips accents, punctuation and surrounding separators', () => {
-    expect(generateRoutingTag({ ruleName: '  ¡Latencia más alta: API/Pagos!  ', ruleId: RULE_ID })).toBe(
-      'latencia-ma-s-alta-api-pagos-3f2a9c1b'
-    );
+    expect(
+      generateRoutingTag({ ruleName: '  ¡Latencia más alta: API/Pagos!  ', ruleId: RULE_ID })
+    ).toBe('latencia-ma-s-alta-api-pagos-3f2a9c1b');
   });
 
   it('truncates long names without leaving a trailing separator', () => {

@@ -30,7 +30,10 @@ export const generateRoutingTag = ({
   ruleName?: string;
   ruleId: string;
 }): string => {
-  const suffix = ruleId.replace(/[^a-zA-Z0-9]/g, '').slice(0, ID_SUFFIX_LENGTH).toLowerCase();
+  const suffix = ruleId
+    .replace(/[^a-zA-Z0-9]/g, '')
+    .slice(0, ID_SUFFIX_LENGTH)
+    .toLowerCase();
   const slug = slugify(ruleName ?? '') || FALLBACK_PREFIX;
   return `${slug}-${suffix}`;
 };

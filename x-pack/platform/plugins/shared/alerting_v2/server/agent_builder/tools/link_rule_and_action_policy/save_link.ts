@@ -17,7 +17,9 @@ export class LinkRollbackError extends Error {
   constructor(public readonly saveError: unknown, public readonly rollbackError: unknown) {
     super(
       `Failed to save the action policy (${errorMessage(saveError)}) and to restore the rule ` +
-        `attachment (${errorMessage(rollbackError)}). The rule attachment keeps the new routing tag.`
+        `attachment (${errorMessage(
+          rollbackError
+        )}). The rule attachment keeps the new routing tag.`
     );
   }
 }

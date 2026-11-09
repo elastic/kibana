@@ -16,7 +16,10 @@ const resolved = {
   tag: 'tag-1',
   alreadyLinked: false,
   warnings: [],
-  rule: { draft: { attachmentId: 'rule-att', isNew: false, data: originalRuleData }, data: linkedRuleData },
+  rule: {
+    draft: { attachmentId: 'rule-att', isNew: false, data: originalRuleData },
+    data: linkedRuleData,
+  },
   policy: { draft: { attachmentId: 'policy-att', isNew: false, data: {} }, data: linkedPolicyData },
 } as unknown as ResolvedLink;
 
