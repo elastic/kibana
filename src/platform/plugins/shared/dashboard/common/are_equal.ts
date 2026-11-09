@@ -8,6 +8,7 @@
  */
 
 import deepEqual from 'fast-deep-equal';
+import { asyncMap } from '@kbn/std';
 import type {
   DashboardPanel,
   DashboardPinnedPanel,
@@ -18,29 +19,54 @@ import { areComparatorsEqual, type StateComparators } from '@kbn/presentation-pu
 import { isDashboardPanel } from './is_dashboard_panel';
 
 type PanelOrSection = DashboardPanel | DashboardSection;
-type GetComparators = (type: string, embeddableState: object) => StateComparators<object>;
+type GetComparators = (
+  type: string,
+  embeddableState: object
+) => Promise<StateComparators<object> | undefined>;
 
-function arePanelsEqual(a: DashboardPanel, b: DashboardPanel, getComparators: GetComparators) {
+async function areConfigsEqual(
+  getComparators: GetComparators,
+  type: string,
+  configA: object,
+  configB: object
+) {
+  const comparators = await getComparators(type, configB);
+  return comparators
+    ? areComparatorsEqual(comparators, configA, configB)
+    : deepEqual(configA, configB);
+}
+
+async function arePanelsEqual(
+  a: DashboardPanel,
+  b: DashboardPanel,
+  getComparators: GetComparators
+): Promise<boolean> {
   const { config: configA, ...restA } = a;
   const { config: configB, ...restB } = b;
   if (!deepEqual(restA, restB)) return false;
-  return areComparatorsEqual(getComparators(b.type, configB), configA as object, configB as object);
+  return areConfigsEqual(getComparators, b.type, configA as object, configB as object);
 }
 
-function areWidgetsEqual(a: PanelOrSection, b: PanelOrSection, getComparators: GetComparators) {
+async function areWidgetsEqual(
+  a: PanelOrSection,
+  b: PanelOrSection,
+  getComparators: GetComparators
+): Promise<boolean> {
   if (isDashboardPanel(a) && isDashboardPanel(b)) return arePanelsEqual(a, b, getComparators);
   if (isDashboardPanel(a) !== isDashboardPanel(b)) return false;
 
   const { panels: panelsA, ...sectionA } = a as DashboardSection;
   const { panels: panelsB, ...sectionB } = b as DashboardSection;
-  return deepEqual(sectionA, sectionB) && arePanelsListEqual(panelsA, panelsB, getComparators);
+  return (
+    deepEqual(sectionA, sectionB) && (await arePanelsListEqual(panelsA, panelsB, getComparators))
+  );
 }
 
-function arePanelsListEqual(
+async function arePanelsListEqual(
   a: PanelOrSection[] | undefined,
   b: PanelOrSection[] | undefined,
   getComparators: GetComparators
-): boolean {
+): Promise<boolean> {
   if (a === b) return true;
   if (!a || !b || a.length !== b.length) return false;
 
@@ -49,32 +75,30 @@ function arePanelsListEqual(
     if (widget.id) bById.set(widget.id, widget);
   });
 
-  return a.every((widgetA, index) => {
+  const results = await asyncMap(a, (widgetA, index) => {
     const widgetB = widgetA.id ? bById.get(widgetA.id) : b[index];
-    return widgetB !== undefined && areWidgetsEqual(widgetA, widgetB, getComparators);
+    return widgetB !== undefined ? areWidgetsEqual(widgetA, widgetB, getComparators) : false;
   });
+  return results.every(Boolean);
 }
 
 /** Pinned panel order is meaningful, so pinned panels are compared by index. */
-function arePinnedPanelsEqual(
+async function arePinnedPanelsEqual(
   a: DashboardPinnedPanel[] | undefined,
   b: DashboardPinnedPanel[] | undefined,
   getComparators: GetComparators
-): boolean {
+): Promise<boolean> {
   if (a === b) return true;
   if (!a || !b || a.length !== b.length) return false;
 
-  return a.every((pinnedA, index) => {
+  const results = await asyncMap(a, (pinnedA, index) => {
     const pinnedB = b[index];
     const { config: configA, ...restA } = pinnedA;
     const { config: configB, ...restB } = pinnedB;
     if (!deepEqual(restA, restB)) return false;
-    return areComparatorsEqual(
-      getComparators(pinnedB.type, configB),
-      configA as object,
-      configB as object
-    );
+    return areConfigsEqual(getComparators, pinnedB.type, configA as object, configB as object);
   });
+  return results.every(Boolean);
 }
 
 /**
@@ -83,21 +107,25 @@ function arePinnedPanelsEqual(
  * `panels` and `pinned_panels` are compared with the comparators returned by `getComparators`.
  * All other keys are compared with deep equality.
  */
-export function areEqual(
+export async function areEqual(
   a: DashboardState,
   b: DashboardState,
   getComparators: GetComparators
-): boolean {
+): Promise<boolean> {
   const { panels: panelsA, pinned_panels: pinnedPanelsA, ...restA } = a;
   const { panels: panelsB, pinned_panels: pinnedPanelsB, ...restB } = b;
 
+  if (!deepEqual(restA, restB)) return false;
   return (
-    deepEqual(restA, restB) &&
-    arePinnedPanelsEqual(
+    (await arePinnedPanelsEqual(
       pinnedPanelsA as DashboardPinnedPanel[] | undefined,
       pinnedPanelsB as DashboardPinnedPanel[] | undefined,
       getComparators
-    ) &&
-    arePanelsListEqual(panelsA as PanelOrSection[], panelsB as PanelOrSection[], getComparators)
+    )) &&
+    (await arePanelsListEqual(
+      panelsA as PanelOrSection[],
+      panelsB as PanelOrSection[],
+      getComparators
+    ))
   );
 }
