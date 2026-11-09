@@ -136,6 +136,8 @@ export const ALERTING_ERROR_CODES = {
    * dispatcher, so create / update / upsert / API key rotation are rejected.
    */
   ACTION_POLICY_CLOUD_API_KEY_NOT_SUPPORTED: 'ACTION_POLICY_CLOUD_API_KEY_NOT_SUPPORTED',
+  /** A test notification targeted workflows that are not destinations of the action policy. */
+  ACTION_POLICY_TEST_INVALID_DESTINATIONS: 'ACTION_POLICY_TEST_INVALID_DESTINATIONS',
 
   // ──────────────────────── Alert actions ────────────────────
   /**
@@ -211,10 +213,11 @@ export type AlertingV2ErrorCode = (typeof ALERTING_ERROR_CODES)[keyof typeof ALE
  * Naming convention: `<DOMAIN>_<WHAT_HAPPENED>`.
  *
  * The domain matches the subsystem that owns the failure, so an operator can
- * filter a whole area with a prefix: `RULE_*` (rule executor / rules client),
- * `DIRECTOR_*`, `DISPATCH_*`, `POLICY_*`, `EXECUTION_HISTORY_*`, `EVENTS_*`,
- * `STORAGE_*`, `QUERY_*`, `RESOURCES_*`, `MAINTENANCE_WINDOW_*`,
- * `SAVED_OBJECTS_*`, `AGENT_BUILDER_*`, `TASKS_*`, `TELEMETRY_*`.
+ * filter a whole area with a prefix: `ROUTES_*`, `RULE_*` (rule executor /
+ * rules client), `DIRECTOR_*`, `DISPATCH_*`, `POLICY_*` / `ACTION_POLICY_*`,
+ * `EXECUTION_HISTORY_*`, `EVENTS_*`, `STORAGE_*`, `QUERY_*`, `RESOURCES_*`,
+ * `RETRY_*`, `MAINTENANCE_WINDOW_*`, `SAVED_OBJECTS_*`, `AGENT_BUILDER_*`,
+ * `TASKS_*`, `TELEMETRY_*`.
  *
  * The suffix encodes the outcome, from a closed vocabulary:
  * - `warn` (degraded but continued): `_FAILED`, `_SKIPPED`, `_TIMED_OUT`,
@@ -537,6 +540,11 @@ export const ALERTING_LOG_CODES = {
    * valid until an operator revokes it.
    */
   POLICY_API_KEY_LOOKUP_FAILED: 'POLICY_API_KEY_LOOKUP_FAILED',
+  /**
+   * A workflow test run of a test notification could not be started. The error is returned to the
+   * caller for that destination; the other destinations still run.
+   */
+  ACTION_POLICY_TEST_RUN_FAILED: 'ACTION_POLICY_TEST_RUN_FAILED',
 
   // ─────────────────────────── Rule executor ─────────────────────────
   /**
@@ -630,6 +638,15 @@ export const ALERTING_LOG_CODES = {
    * failed to bootstrap. Rule execution stays degraded until it succeeds.
    */
   RESOURCES_BOOTSTRAP_FAILED: 'RESOURCES_BOOTSTRAP_FAILED',
+
+  // ──────────────────────────────── Retries ──────────────────────────
+  /**
+   * An Elasticsearch call failed with a transient error (connection, timeout,
+   * retryable status, unacknowledged mutation, concurrent modification) and is
+   * about to be retried. Emitted under the calling subsystem's `log.logger`;
+   * the final failure, if any, is logged by the caller with its own code.
+   */
+  RETRY_ATTEMPT_FAILED: 'RETRY_ATTEMPT_FAILED',
 
   // ─────────────────────────── Saved objects ─────────────────────────
   /**

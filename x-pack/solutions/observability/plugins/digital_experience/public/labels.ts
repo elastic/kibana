@@ -24,6 +24,32 @@ export const LOAD_TIME_LABEL = i18n.translate('xpack.digitalExperience.loadTime.
   defaultMessage: 'Load time (p75)',
 });
 
+export const LAST_SEEN_LABEL = i18n.translate('xpack.digitalExperience.lastSeen.label', {
+  defaultMessage: 'Last seen',
+});
+
+export const OCCURRENCES_LABEL = i18n.translate('xpack.digitalExperience.occurrences.label', {
+  defaultMessage: 'Occurrences',
+});
+
+export const UNKNOWN_ERROR_TYPE_LABEL = i18n.translate(
+  'xpack.digitalExperience.unknownErrorType.label',
+  { defaultMessage: 'Unknown error type' }
+);
+
+export const BROWSER_LABEL = i18n.translate('xpack.digitalExperience.browser.label', {
+  defaultMessage: 'Browser',
+});
+
+export const OPERATING_SYSTEM_LABEL = i18n.translate(
+  'xpack.digitalExperience.operatingSystem.label',
+  { defaultMessage: 'Operating system' }
+);
+
+export const DEVICE_LABEL = i18n.translate('xpack.digitalExperience.device.label', {
+  defaultMessage: 'Device',
+});
+
 export const SESSIONS_LABEL = i18n.translate('xpack.digitalExperience.sessions.label', {
   defaultMessage: 'Sessions',
 });
@@ -36,3 +62,8 @@ export const SOURCE_LABELS: Record<ApplicationSource, string> = {
     defaultMessage: 'Classic RUM',
   }),
 };
+
+export const ANONYMOUS_USER = i18n.translate(
+  'xpack.digitalExperience.sessions.table.anonymousUserLabel',
+  { defaultMessage: 'Anonymous' }
+);

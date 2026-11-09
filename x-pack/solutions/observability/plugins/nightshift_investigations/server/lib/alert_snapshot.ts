@@ -193,28 +193,33 @@ const fetchV2Snapshots = async (
     ])
   );
   const ruleNames = await fetchRuleNames(getRulesClient, [
-    ...new Set(episodes.map((episode) => episode['rule.id'])),
+    ...new Set(episodes.flatMap((episode) => episode['rule.id'] ?? [])),
   ]);
 
   return new Map(
-    episodes.map((episode) => {
+    episodes.flatMap((episode) => {
       const episodeData = dataByEpisode.get(episode['episode.id']);
-      const snapshot = v2AlertSnapshotSchema.parse({
+      const data = v2AlertSnapshotSchema.shape.data
+        .catch(undefined)
+        .parse(episodeData ? JSON.parse(episodeData) : undefined);
+      const ruleId = episode['rule.id'] ?? undefined;
+      const ruleName = ruleId
+        ? ruleNames.get(ruleId)
+        : v2AlertSnapshotSchema.shape.rule_name.catch(undefined).parse(data?.rule_name);
+      const parsed = v2AlertSnapshotSchema.safeParse({
         alert_version: 'v2',
         id: episode['episode.id'],
-        rule_id: episode['rule.id'],
-        rule_name: ruleNames.get(episode['rule.id']),
+        rule_id: ruleId,
+        rule_name: ruleName,
         group_hash: episode.group_hash,
         status: episode['episode.status'],
         start: episode.first_timestamp,
         last_event_timestamp: episode.last_timestamp,
         severity: episode.severity ?? undefined,
         source: episode.source ?? undefined,
-        data: v2AlertSnapshotSchema.shape.data
-          .catch(undefined)
-          .parse(episodeData ? JSON.parse(episodeData) : undefined),
+        data,
       });
-      return [snapshot.id, snapshot];
+      return parsed.success ? [[parsed.data.id, parsed.data] as const] : [];
     })
   );
 };
