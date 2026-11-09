@@ -6,18 +6,31 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiText } from '@elastic/eui';
+import { EuiButton, EuiToolTip } from '@elastic/eui';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { RuleExecutionView, RuleResponse } from '@kbn/alerting-v2-schemas';
-import { useService } from '@kbn/core-di-browser';
+import { PluginStart } from '@kbn/core-di';
+import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { useAreAgentBuilderSkillsAvailable } from '../../../hooks/use_are_agent_builder_skills_available';
 import { RulesApi } from '../../../services/rules_api';
 import { buildRuleDiagnosisContext } from './build_rule_diagnosis_handoff';
-import { useDiagnoseAvailability } from './use_diagnose_availability';
+import {
+  diagnoseHandoffErrorToastTitle,
+  openRuleFailureDiagnosisChat,
+} from './open_rule_failure_diagnosis_chat';
 
 const diagnoseLabel = i18n.translate('xpack.alertingV2.executionHistory.rulesTab.diagnose.label', {
   defaultMessage: 'Diagnose with AI',
 });
+
+const MISSING_PRIVILEGE_TOOLTIP = i18n.translate(
+  'xpack.alertingV2.executionHistory.rulesTab.diagnose.missingPrivilegeTooltip',
+  {
+    defaultMessage:
+      'To diagnose failures with the AI Agent, you need the "Agent Builder: Read" privilege.',
+  }
+);
 
 interface UseRuleDiagnoseButtonParams {
   /** Resolve a rule name for the conversation title and prompt; falls back to the rule id. */
@@ -26,25 +39,28 @@ interface UseRuleDiagnoseButtonParams {
 
 /**
  * Returns a renderer for the failed-rule "Diagnose with AI" action, styled like the workflows
- * failed-step panel: a "Diagnose with AI" button with the sparkles icon. Returns null in state D
- * (hidden); in state C it renders the license teaser instead of a button.
+ * failed-step panel. Visibility follows the other alerting v2 "with AI Agent" entry points: the
+ * button is always shown and is disabled, with a tooltip, when the user lacks the Agent Builder
+ * capability. The license and LLM connector are not checked here; Agent Builder handles them.
  */
 export const useRuleDiagnoseButton = ({
   getRuleName,
 }: UseRuleDiagnoseButtonParams): ((execution: RuleExecutionView) => React.ReactNode) => {
   const rulesApi = useService(RulesApi);
-  const {
-    state,
-    requiredLicenseTier,
-    isHandoffInFlight,
-    openDiagnose,
-    openLicenseManagement,
-    licenseManagementHref,
-  } = useDiagnoseAvailability();
+  const agentBuilder = useService(PluginStart('agentBuilder'), { optional: true }) as
+    | AgentBuilderPluginStart
+    | undefined;
+  const http = useService(CoreStart('http'));
+  const notifications = useService(CoreStart('notifications'));
+  const isAvailable = useAreAgentBuilderSkillsAvailable() && agentBuilder != null;
   const [loadingExecutionId, setLoadingExecutionId] = useState<string | null>(null);
 
   const onDiagnose = useCallback(
     async (execution: RuleExecutionView) => {
+      if (!agentBuilder) {
+        return;
+      }
+
       setLoadingExecutionId(execution.id);
       let rule: RuleResponse | null = null;
       try {
@@ -52,70 +68,32 @@ export const useRuleDiagnoseButton = ({
       } catch {
         // The rule may have been deleted or be unreadable; diagnose from the execution alone.
       }
-      setLoadingExecutionId(null);
 
-      openDiagnose(
-        buildRuleDiagnosisContext({
-          execution,
-          ruleName: rule?.metadata.name ?? getRuleName(execution.rule.id) ?? execution.rule.id,
-          rule,
-        })
-      );
+      try {
+        openRuleFailureDiagnosisChat({
+          agentBuilder,
+          http,
+          context: buildRuleDiagnosisContext({
+            execution,
+            ruleName: rule?.metadata.name ?? getRuleName(execution.rule.id) ?? execution.rule.id,
+            rule,
+          }),
+        });
+      } catch (error) {
+        notifications.toasts.addError(error instanceof Error ? error : new Error(String(error)), {
+          title: diagnoseHandoffErrorToastTitle(),
+        });
+      } finally {
+        setLoadingExecutionId(null);
+      }
     },
-    [rulesApi, openDiagnose, getRuleName]
+    [agentBuilder, rulesApi, http, notifications, getRuleName]
   );
 
   return useCallback(
     (execution: RuleExecutionView): React.ReactNode => {
-      if (state === 'd') {
-        return null;
-      }
-
-      if (state === 'c') {
-        return (
-          <EuiFlexGroup
-            gutterSize="xs"
-            alignItems="center"
-            responsive={false}
-            data-test-subj="ruleExecutionDiagnoseLicenseTeaser"
-          >
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="sparkles" size="s" color="subdued" aria-hidden={true} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued">
-                <FormattedMessage
-                  id="xpack.alertingV2.executionHistory.rulesTab.diagnose.licenseTeaser"
-                  defaultMessage="Diagnose with AI — {licenseLink}"
-                  values={{
-                    licenseLink: (
-                      <EuiLink
-                        href={licenseManagementHref}
-                        onClick={(event: React.MouseEvent<HTMLAnchorElement>) => {
-                          event.preventDefault();
-                          openLicenseManagement();
-                        }}
-                        data-test-subj="ruleExecutionDiagnoseLicenseLink"
-                      >
-                        {i18n.translate(
-                          'xpack.alertingV2.executionHistory.rulesTab.diagnose.requiresLicense',
-                          {
-                            defaultMessage: 'requires {tier} license',
-                            values: { tier: requiredLicenseTier },
-                          }
-                        )}
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        );
-      }
-
-      const isLoading = isHandoffInFlight || loadingExecutionId === execution.id;
-      return (
+      const isLoading = loadingExecutionId === execution.id;
+      const button = (
         <EuiButton
           size="s"
           color="danger"
@@ -125,22 +103,27 @@ export const useRuleDiagnoseButton = ({
             void onDiagnose(execution);
           }}
           isLoading={isLoading}
-          isDisabled={isLoading}
+          isDisabled={!isAvailable || isLoading}
           data-test-subj="ruleExecutionDiagnoseButton"
           aria-label={diagnoseLabel}
         >
           {diagnoseLabel}
         </EuiButton>
       );
+
+      if (isAvailable) {
+        return button;
+      }
+
+      // A disabled button swallows pointer events, so the tooltip anchors on a wrapper.
+      return (
+        <EuiToolTip content={MISSING_PRIVILEGE_TOOLTIP}>
+          <span tabIndex={0} css={{ display: 'inline-block' }}>
+            {button}
+          </span>
+        </EuiToolTip>
+      );
     },
-    [
-      state,
-      requiredLicenseTier,
-      licenseManagementHref,
-      isHandoffInFlight,
-      loadingExecutionId,
-      openLicenseManagement,
-      onDiagnose,
-    ]
+    [isAvailable, loadingExecutionId, onDiagnose]
   );
 };
