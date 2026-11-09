@@ -55,6 +55,7 @@ import {
   healthRoute,
   metricsRoute,
   executionControlRoutes,
+  perfPollCyclesRoute,
 } from './routes';
 import type { MonitoringStats } from './monitoring';
 import { createMonitoringStats } from './monitoring';
@@ -278,6 +279,7 @@ export class TaskManagerPlugin
       resetMetrics$: this.resetMetrics$,
       taskManagerId: this.taskManagerId,
     });
+    perfPollCyclesRoute({ router, taskManagerId: this.taskManagerId });
     executionControlRoutes({
       router,
       logger: this.logger,
