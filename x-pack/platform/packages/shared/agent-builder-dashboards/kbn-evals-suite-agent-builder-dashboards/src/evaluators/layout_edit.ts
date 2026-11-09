@@ -92,103 +92,66 @@ const checkPanelsKept = (gold: LayoutEditGold, seed: LayoutIndex, result: Layout
 const sameGrid = (container: string, a: AttachmentPanel['grid'], b: AttachmentPanel['grid']) =>
   a.x === b.x && a.w === b.w && a.h === b.h && (container === TOP_LEVEL || a.y === b.y);
 
-const checkStableContainers = (
-  gold: LayoutEditGold,
-  seed: LayoutIndex,
-  result: LayoutIndex
-): Check[] => {
+/**
+ * Every surviving seed panel stays in its container, or in the one a placement
+ * moves it to. A container the edit should not touch also keeps its grids and
+ * gains no panels.
+ */
+const checkContainers = (gold: LayoutEditGold, seed: LayoutIndex, result: LayoutIndex): Check[] => {
   const removed = new Set(gold.removed ?? []);
   const changes = new Set(gold.changes);
+  const destinations = new Map(
+    (gold.placements ?? []).flatMap(({ item, in: container }) =>
+      typeof item === 'string' && container !== undefined ? [[item, container] as const] : []
+    )
+  );
   return [...seed.containers]
-    .filter(([container]) => !changes.has(container) && !removed.has(container))
+    .filter(([container]) => !removed.has(container))
     .map(([container, panels]) => {
+      const stable = !changes.has(container);
       const moved = panels
         .filter(({ id }) => !removed.has(id))
         .flatMap(({ id, grid }) => {
+          const expected = destinations.get(id) ?? container;
           const now = result.panels.get(id);
-          if (now?.container !== container) {
-            return [`${id} left the container`];
+          if (now?.container !== expected) {
+            return [`${id} is not in ${expected}`];
           }
-          return sameGrid(container, grid, now.panel.grid)
+          return !stable || sameGrid(container, grid, now.panel.grid)
             ? []
             : [`${id} ${formatGrid(grid)} -> ${formatGrid(now.panel.grid)}`];
         });
-      const joined = (result.containers.get(container) ?? [])
-        .filter(({ id }) => seed.panels.get(id)?.container !== container)
-        .map(({ id }) => `${id} joined the container`);
-      const changed = [...moved, ...joined];
+      const joined = stable
+        ? (result.containers.get(container) ?? [])
+            .filter(({ id }) => seed.panels.get(id)?.container !== container)
+            .map(({ id }) => `${id} joined the container`)
+        : [];
+      const problems = [...moved, ...joined];
       return {
-        assertion: `stable.${container}`,
-        passed: changed.length === 0,
-        detail: changed.length === 0 ? 'unchanged' : changed.join('; '),
-      };
-    });
-};
-
-// A container the edit may rearrange still keeps its panels, unless the prompt removes
-// them or places them in another container.
-const checkChangedContainers = (
-  gold: LayoutEditGold,
-  seed: LayoutIndex,
-  result: LayoutIndex
-): Check[] => {
-  const removed = new Set(gold.removed ?? []);
-  const destinations = new Map(
-    (gold.placements ?? []).flatMap(({ item, in: container }) =>
-      typeof item === 'string' && container !== undefined
-        ? [[item, container] as [string, string]]
-        : []
-    )
-  );
-  return gold.changes
-    .filter((container) => seed.containers.has(container) && !removed.has(container))
-    .map((container) => {
-      const strayed = (seed.containers.get(container) ?? [])
-        .filter(({ id }) => !removed.has(id))
-        .filter(
-          ({ id }) => result.panels.get(id)?.container !== (destinations.get(id) ?? container)
-        )
-        .map(({ id }) => `${id} is not in ${destinations.get(id) ?? container}`);
-      return {
-        assertion: `members.${container}`,
-        passed: strayed.length === 0,
-        detail:
-          strayed.length === 0 ? 'panels stay where the prompt leaves them' : strayed.join('; '),
+        assertion: `container.${container}`,
+        passed: problems.length === 0,
+        detail: problems.length === 0 ? 'kept as asked' : problems.join('; '),
       };
     });
 };
 
 const checkEdited = (gold: LayoutEditGold, seed: LayoutIndex, result: LayoutIndex): Check[] => {
-  const edited = (id: string) => {
+  const unedited = (gold.changed ?? []).filter((id) => {
     const before = seed.panels.get(id)?.panel;
     const after = result.panels.get(id)?.panel;
     return (
-      before !== undefined &&
-      after !== undefined &&
-      (before.type !== after.type || !isEqual(before.config, after.config))
+      !before || !after || (before.type === after.type && isEqual(before.config, after.config))
     );
-  };
-  const retyped = Object.entries(gold.retyped ?? {});
-  return compact([
-    (gold.changed?.length ?? 0) > 0 && {
-      assertion: 'edited',
-      passed: (gold.changed ?? []).every(edited),
-      detail: `unedited [${(gold.changed ?? []).filter((id) => !edited(id)).join(', ')}]`,
-    },
-    retyped.length > 0 && {
-      assertion: 'retyped',
-      passed: retyped.every(([id, kind]) => {
-        const after = result.panels.get(id)?.panel;
-        return after !== undefined && getPanelKind(after) === kind;
-      }),
-      detail: retyped
-        .map(([id, kind]) => {
-          const after = result.panels.get(id)?.panel;
-          return `${id} is ${after ? getPanelKind(after) : 'missing'}, wanted ${kind}`;
-        })
-        .join('; '),
-    },
-  ]);
+  });
+  return gold.changed?.length
+    ? [
+        {
+          assertion: 'edited',
+          passed: unedited.length === 0,
+          detail: unedited.length === 0 ? 'edited as asked' : `unedited [${unedited.join(', ')}]`,
+        },
+      ]
+    : [];
 };
 
 const checkOuterOrder = (seed: LayoutIndex, result: LayoutIndex): Check => {
@@ -244,6 +207,7 @@ const checkPlacement = (
     after,
     before,
     directlyAfter,
+    kind,
     holds,
   }: LayoutPlacementGold,
   index: number,
@@ -286,6 +250,9 @@ const checkPlacement = (
       ? `not below ${below}`
       : undefined,
     w !== undefined && grid?.w !== w ? `w ${grid?.w}, not ${w}` : undefined,
+    kind !== undefined && located && getPanelKind(located.panel) !== kind
+      ? `${getPanelKind(located.panel)}, not ${kind}`
+      : undefined,
     after !== undefined && !(position(after) !== -1 && position(after) < position(id))
       ? `not after ${after}`
       : undefined,
@@ -312,8 +279,8 @@ const checkPlacement = (
 
 /**
  * Checks that a layout edit changed only what the prompt asked: kept and
- * removed panels, unchanged grids in the containers the edit should not
- * touch, the outer order of surviving top-level panels and sections, collapsed
+ * removed panels, panels staying in their containers and unchanged grids
+ * in the containers the edit should not touch, edited panels, the outer order of surviving top-level panels and sections, collapsed
  * sections, and where the prompt puts each panel. Gaps and overlaps are
  * scored by Dashboard Layout Rules.
  */
@@ -339,8 +306,7 @@ export const dashboardLayoutEditEvaluator: DashboardAgentEvaluator = {
     const result = indexLayout(dashboard);
     const checks = [
       checkPanelsKept(gold, seed, result),
-      ...checkStableContainers(gold, seed, result),
-      ...checkChangedContainers(gold, seed, result),
+      ...checkContainers(gold, seed, result),
       ...checkEdited(gold, seed, result),
       checkOuterOrder(seed, result),
       ...checkCollapsed(seed, result),

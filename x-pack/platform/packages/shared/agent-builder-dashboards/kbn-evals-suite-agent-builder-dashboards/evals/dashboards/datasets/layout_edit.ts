@@ -125,7 +125,7 @@ export const DASHBOARD_LAYOUT_EDIT_EXAMPLES: DashboardDatasetExample[] = [
     layoutEdit: {
       changes: ['traffic', TOP_LEVEL],
       changed: ['intro'],
-      retyped: { 'response-codes': 'data_table' },
+      placements: [{ item: 'response-codes', kind: 'data_table' }],
     },
   }),
   layoutEditExample({

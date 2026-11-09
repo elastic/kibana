@@ -80,7 +80,7 @@ describe('dashboard layout edit evaluator', () => {
       edit(inSection('traffic', withoutPanel('top-urls')))
     );
     expect(result.explanation).toContain('panels: missing [top-urls]');
-    expect(result.explanation).toContain('stable.traffic: top-urls left the container');
+    expect(result.explanation).toContain('container.traffic: top-urls is not in traffic');
   });
 
   it('fails a panel that joins a container the edit should not touch', async () => {
@@ -93,7 +93,7 @@ describe('dashboard layout edit evaluator', () => {
         ])
       )
     );
-    expect(result.explanation).toContain('stable.errors: extra joined the container');
+    expect(result.explanation).toContain('container.errors: extra joined the container');
   });
 
   it('fails a reordered top level and an expanded collapsed section', async () => {

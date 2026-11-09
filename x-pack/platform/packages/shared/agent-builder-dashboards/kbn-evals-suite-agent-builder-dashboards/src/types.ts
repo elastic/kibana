@@ -71,6 +71,8 @@ export interface LayoutPlacementGold {
   before?: string;
   /** Next in reading order after this item, with nothing in between. */
   directlyAfter?: string;
+  /** Chart kind of the panel (`metric`, `xy`, `data_table`, …). */
+  kind?: string;
   /** For a section: it holds at least `count` panels, of `kind` when given. */
   holds?: { count: number; kind?: string };
 }
@@ -83,8 +85,6 @@ export interface LayoutEditGold {
   removed?: readonly string[];
   /** Seed panels the prompt edits; their config or chart type must differ from the seed. */
   changed?: readonly string[];
-  /** Seed panels the prompt turns into another chart kind, by panel id. */
-  retyped?: Readonly<Record<string, string>>;
   placements?: readonly LayoutPlacementGold[];
 }
 
