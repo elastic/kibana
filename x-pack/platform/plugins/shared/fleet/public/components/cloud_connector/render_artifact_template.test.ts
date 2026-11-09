@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { sendRenderIacTemplate } from '../../../hooks/use_request/iac_provisioner';
-import { CLOUD_CONNECTOR_RENDER_FLOW } from '../../../../common/telemetry/iac_provisioner_events';
-import { IAC_FEDERATED_IDENTITY_WORKFLOW } from '../../../../common/types/rest_spec/iac_provisioner';
+import { sendRenderIacTemplate } from '../../hooks/use_request/iac_provisioner';
+import { CLOUD_CONNECTOR_RENDER_FLOW } from '../../../common/telemetry/iac_provisioner_events';
+import { IAC_FEDERATED_IDENTITY_WORKFLOW } from '../../../common/types/rest_spec/iac_provisioner';
 
 import { getRenderIntegrations, renderArtifactTemplate } from './render_artifact_template';
 
-jest.mock('../../../hooks/use_request/iac_provisioner');
+jest.mock('../../hooks/use_request/iac_provisioner');
 
 const mockedSendRenderIacTemplate = jest.mocked(sendRenderIacTemplate);
 

@@ -30,7 +30,7 @@ import {
   isQuickCreateLaunchUrl,
 } from '../utils';
 
-import { getRenderIntegrations, renderArtifactTemplate } from './render_artifact_template';
+import { getRenderIntegrations, renderArtifactTemplate } from '../render_artifact_template';
 
 const MISSING_CONTEXT_ERROR = i18n.translate(
   'xpack.fleet.cloudConnector.iacProvisioner.missingContextError',

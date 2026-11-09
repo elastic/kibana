@@ -204,6 +204,7 @@ test.describe(
       await soGetPromise;
 
       // Drift detected: session has bucket_arn, SO has no serviceVars for elb → isDirty=true.
+      await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeVisible();
       // Next disabled: isAgentDone=false (isDirty) and credentials not yet entered.
       await expect(page.testSubj.locator('authenticateAndDeployStep-nextButton')).toBeDisabled();
 
@@ -436,7 +437,10 @@ test.describe(
       await expect(page.testSubj.locator('onboardingStep-authenticate-and-deploy')).toBeVisible();
       await soGetPromise;
 
-      // No drift: session matches SO — Next must be enabled.
+      // No drift: session matches SO — callout must not appear and Next must be enabled.
+      await expect(
+        page.testSubj.locator('authenticateAndDeployStep-driftCallout')
+      ).not.toBeVisible();
       await expect(page.testSubj.locator('authenticateAndDeployStep-nextButton')).toBeEnabled();
       // Click Next — already-deployed with no drift navigates without any Fleet PUT.
       await page.testSubj.locator('authenticateAndDeployStep-nextButton').click();
@@ -576,6 +580,7 @@ test.describe(
       await soGetPromise;
 
       // Policy-selection drift detected: session ['new-agent-policy-id'] vs SO ['old-agent-policy-id'].
+      await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeVisible();
       await expect(page.testSubj.locator('authenticateAndDeployStep-nextButton')).toBeDisabled();
 
       // Enter roleArn so the credential is ready for deploy.

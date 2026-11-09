@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { sendRenderIacTemplate } from '../../../hooks/use_request/iac_provisioner';
-import { CLOUD_CONNECTOR_RENDER_FLOW } from '../../../../common/telemetry/iac_provisioner_events';
-import { IAC_FEDERATED_IDENTITY_WORKFLOW } from '../../../../common/types/rest_spec/iac_provisioner';
+import { sendRenderIacTemplate } from '../../hooks/use_request/iac_provisioner';
+import { CLOUD_CONNECTOR_RENDER_FLOW } from '../../../common/telemetry/iac_provisioner_events';
+import { IAC_FEDERATED_IDENTITY_WORKFLOW } from '../../../common/types/rest_spec/iac_provisioner';
 import type {
   IacPolicyTemplateSelection,
   RenderedIacBlueprint,
   RenderIacTemplateIntegration,
   RenderIacTemplateRequest,
-} from '../../../../common/types/rest_spec/iac_provisioner';
-import { getArtifactLaunchUrl } from '../utils';
+} from '../../../common/types/rest_spec/iac_provisioner';
+import { getArtifactLaunchUrl } from './utils';
 
 export interface GetRenderIntegrationsParams {
   /** Full integration set to render (union). When set, overrides packageName + policyTemplates. */
