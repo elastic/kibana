@@ -8,8 +8,6 @@
 import type { ReactElement } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { DEFAULT_ICON, ICON_SOURCE } from '../../../../../../common/constants';
-import { OTHER_CATEGORY_LABEL } from '../../style_util';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -18,13 +16,15 @@ import {
   EuiFieldText,
   EuiToolTip,
 } from '@elastic/eui';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { DEFAULT_ICON, ICON_SOURCE } from '../../../../../../common/constants';
+import { OTHER_CATEGORY_LABEL } from '../../style_util';
 import { IconSelect } from './icon_select';
 import { StopInput } from '../stop_input';
 import { getMakiSymbol, PREFERRED_ICONS, SYMBOL_OPTIONS } from '../../symbol_utils';
 import type { IconStop, CustomIcon } from '../../../../../../common/descriptor_types';
 import type { IField } from '../../../../fields/field';
 import { mapColorStopsStyles } from '../map_color_stops.styles';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 function isDuplicateStop(targetStop: string | null, iconStops: IconStop[]) {
   const stops = iconStops.filter(({ stop }) => {

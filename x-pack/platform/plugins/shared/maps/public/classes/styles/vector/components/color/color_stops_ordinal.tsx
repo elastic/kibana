@@ -8,6 +8,7 @@
 import type { ChangeEvent } from 'react';
 import React from 'react';
 import { EuiFieldNumber } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { ColorStops } from './color_stops';
 import type { ColorStop, StopValue } from '../../../../../../common/descriptor_types';
 import {
@@ -16,7 +17,6 @@ import {
   isOrdinalStopsInvalid,
   DEFAULT_CUSTOM_COLOR,
 } from './color_stops_utils';
-import { i18n } from '@kbn/i18n';
 
 interface Props {
   /**
