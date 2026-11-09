@@ -191,6 +191,20 @@ describe('buildDecisionDocument', () => {
     );
   });
 
+  it('scopes the decision to the space it was approved in', () => {
+    const permissionsOf = (spaceId: string) =>
+      (
+        buildDecisionDocument({
+          kind: 'false_positive',
+          group: group('a.exe', 3),
+          provenance: { ...provenance, spaceId },
+        }) as { permissions: unknown }
+      ).permissions;
+
+    expect(permissionsOf('default')).toEqual({ kibana: { privileges: [{ space: 'default' }] } });
+    expect(permissionsOf('security')).toEqual({ kibana: { privileges: [{ space: 'security' }] } });
+  });
+
   it('expires an approval after 30 days and a dismissal after 7', () => {
     const expiry = (kind: 'false_positive' | 'do_not_propose') =>
       Date.parse(

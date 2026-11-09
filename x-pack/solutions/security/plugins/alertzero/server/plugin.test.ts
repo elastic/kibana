@@ -251,7 +251,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         } as never
       );
 
-      expect(contextEngine.registerAiIndex).toHaveBeenCalledTimes(2);
+      expect(contextEngine.registerAiIndex).toHaveBeenCalledTimes(3);
       expect(contextEngine.registerAiIndex).toHaveBeenCalledWith(
         'security-investigations',
         expect.objectContaining({
@@ -262,6 +262,12 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         'security-attack-fingerprints',
         expect.objectContaining({
           dest: { type: 'index', value: 'ai-index-idx-security-attack-fingerprints' },
+        })
+      );
+      expect(contextEngine.registerAiIndex).toHaveBeenCalledWith(
+        'security-triage-decisions',
+        expect.objectContaining({
+          dest: { type: 'index', value: 'ai-index-idx-security-triage-decisions' },
         })
       );
     });

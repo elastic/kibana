@@ -6,7 +6,7 @@
  */
 
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
-import { HUNT_COVERAGE_AI_INDEX_DEST } from '../../../common/step_types/package_report';
+import { TRIAGE_DECISIONS_AI_INDEX_DEST } from '../../../common/step_types/triage_decisions_index';
 import {
   ALERT_FETCH_LIMIT,
   DECISION_MATCH_TOTAL_BUDGET_MS,
@@ -195,7 +195,7 @@ describe('triage match decisions step', () => {
     await run();
 
     expect(mget).toHaveBeenCalledWith({
-      index: HUNT_COVERAGE_AI_INDEX_DEST.value,
+      index: TRIAGE_DECISIONS_AI_INDEX_DEST.value,
       ids: [
         decisionId('false_positive', hashOf('C:\\x.exe')),
         decisionId('do_not_propose', hashOf('C:\\x.exe')),

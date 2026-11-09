@@ -7,7 +7,10 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import { ensureFingerprintIndexMapping } from './ensure_fingerprint_index';
+import {
+  ensureFingerprintIndexMapping,
+  ensureTriageDecisionsIndexMapping,
+} from './ensure_fingerprint_index';
 
 const logger = {
   warn: jest.fn(),
@@ -237,6 +240,67 @@ describe('ensureFingerprintIndexMapping', () => {
         priority: 501,
         composed_of: ['ai-index@mappings'],
       })
+    );
+  });
+});
+
+describe('ensureTriageDecisionsIndexMapping', () => {
+  beforeEach(() => {
+    jest.mocked(logger.warn).mockClear();
+  });
+
+  it('installs the nested space privilege template for the decisions index only', async () => {
+    const esClient = createClient();
+
+    const installed = await ensureTriageDecisionsIndexMapping(
+      esClient as unknown as ElasticsearchClient,
+      logger
+    );
+
+    expect(installed).toBe(true);
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'security-triage-decisions',
+        index_patterns: ['ai-index-idx-security-triage-decisions'],
+        priority: 501,
+      })
+    );
+    const { template } = esClient.indices.putIndexTemplate.mock.calls[0][0];
+    expect(
+      template.mappings.properties.permissions.properties.kibana.properties.privileges.type
+    ).toBe('nested');
+  });
+
+  it('reports false and warns when the template cannot be installed', async () => {
+    const esClient = createClient();
+    esClient.indices.putIndexTemplate.mockRejectedValue(new Error('security_exception'));
+
+    const installed = await ensureTriageDecisionsIndexMapping(
+      esClient as unknown as ElasticsearchClient,
+      logger
+    );
+
+    expect(installed).toBe(false);
+    expect(logger.warn).toHaveBeenCalledWith(
+      'Triage decisions index template was not installed: security_exception'
+    );
+  });
+
+  it('warns about an existing index that does not map the privilege as nested', async () => {
+    const esClient = createClient();
+    esClient.indices.exists.mockResolvedValue(true);
+    esClient.indices.getMapping.mockResolvedValue({
+      'ai-index-idx-security-triage-decisions': { mappings: { properties: {} } },
+    });
+
+    const installed = await ensureTriageDecisionsIndexMapping(
+      esClient as unknown as ElasticsearchClient,
+      logger
+    );
+
+    expect(installed).toBe(true);
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Triage decisions index ai-index-idx-security-triage-decisions')
     );
   });
 });

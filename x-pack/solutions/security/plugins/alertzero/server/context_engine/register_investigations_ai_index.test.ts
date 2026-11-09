@@ -13,7 +13,7 @@ describe('registerInvestigationsAiIndex', () => {
 
     registerInvestigationsAiIndex({ contextEngine: { registerAiIndex } });
 
-    expect(registerAiIndex).toHaveBeenCalledTimes(2);
+    expect(registerAiIndex).toHaveBeenCalledTimes(3);
     expect(registerAiIndex).toHaveBeenCalledWith(
       'security-investigations',
       expect.objectContaining({
@@ -25,6 +25,13 @@ describe('registerInvestigationsAiIndex', () => {
       'security-attack-fingerprints',
       expect.objectContaining({
         dest: { type: 'index', value: 'ai-index-idx-security-attack-fingerprints' },
+        memory_enabled: false,
+      })
+    );
+    expect(registerAiIndex).toHaveBeenCalledWith(
+      'security-triage-decisions',
+      expect.objectContaining({
+        dest: { type: 'index', value: 'ai-index-idx-security-triage-decisions' },
         memory_enabled: false,
       })
     );

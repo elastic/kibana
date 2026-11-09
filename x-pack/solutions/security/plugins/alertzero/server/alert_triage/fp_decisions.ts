@@ -189,6 +189,8 @@ export const buildDecisionDocument = ({
       ...condition.map((entry) => `- ${entry}`),
     ].join('\n'),
     tags: ['watch:alert_triage', `decision:${kind}`],
+    // Context Engine shows a document with no privileges element in every space.
+    permissions: { kibana: { privileges: [{ space: spaceId }] } },
     attributes: {
       decision: kind,
       key_hash: group.hash,

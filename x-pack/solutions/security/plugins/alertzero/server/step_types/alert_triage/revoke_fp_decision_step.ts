@@ -6,7 +6,7 @@
  */
 
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { HUNT_COVERAGE_AI_INDEX_DEST } from '../../../common/step_types/package_report';
+import { TRIAGE_DECISIONS_AI_INDEX_DEST } from '../../../common/step_types/triage_decisions_index';
 import { triageRevokeFpDecisionStepCommonDefinition } from '../../../common/step_types/alert_triage';
 import {
   MAX_REVOKE_PAGES,
@@ -47,7 +47,7 @@ export const getTriageRevokeFpDecisionStepDefinition = () =>
       const es = contextManager.getScopedEsClient();
       try {
         const existing = await es.get<{ attributes?: { space_id?: string } }>({
-          index: HUNT_COVERAGE_AI_INDEX_DEST.value,
+          index: TRIAGE_DECISIONS_AI_INDEX_DEST.value,
           id,
           _source: ['attributes.space_id'],
         });
@@ -56,7 +56,7 @@ export const getTriageRevokeFpDecisionStepDefinition = () =>
           return { output: { status, alerts_reopened: 0, alerts_released: 0, failures } };
         }
         await es.update({
-          index: HUNT_COVERAGE_AI_INDEX_DEST.value,
+          index: TRIAGE_DECISIONS_AI_INDEX_DEST.value,
           id,
           doc: {
             updated_at: new Date().toISOString(),

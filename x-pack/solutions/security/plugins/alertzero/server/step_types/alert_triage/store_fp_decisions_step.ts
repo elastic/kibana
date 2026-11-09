@@ -7,7 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { HUNT_COVERAGE_AI_INDEX_DEST } from '../../../common/step_types/package_report';
+import { TRIAGE_DECISIONS_AI_INDEX_DEST } from '../../../common/step_types/triage_decisions_index';
 import {
   triageStoreFpDecisionsStepCommonDefinition,
   type StoreFpDecisionsSkipReason,
@@ -31,6 +31,8 @@ import {
 
 export interface StoreFpDecisionsStepDependencies {
   isContextEngineEnabled: (request: KibanaRequest) => Promise<boolean>;
+  /** False until the decisions index template is installed, and after its install fails. */
+  areDecisionWritesAllowed: () => boolean;
 }
 
 const NOTHING = {
@@ -49,12 +51,14 @@ const NOTHING = {
  * alerts by the time it runs, and a decision store that is off, denied or down must not turn a
  * finished approval into a failed run. The reason is in `skip_reason` instead.
  *
- * The write goes straight to the backing index, as the Hunt coverage writer does: the Context
- * Engine's own `createKi` step cannot apply the consistency rule, and the worker's role already
- * has `index` on this index. It checks the `contextEngine:enabled` setting first.
+ * The write goes straight to the backing index: the Context Engine's own `createKi` step cannot
+ * apply the consistency rule, and the worker's role has `index` on this index. It checks the
+ * `contextEngine:enabled` setting first, and refuses to write until the index template that maps
+ * the space privilege is installed, because a write would auto-create the index without it.
  */
 export const getTriageStoreFpDecisionsStepDefinition = ({
   isContextEngineEnabled,
+  areDecisionWritesAllowed,
 }: StoreFpDecisionsStepDependencies) =>
   createServerStepDefinition({
     ...triageStoreFpDecisionsStepCommonDefinition,
@@ -74,6 +78,12 @@ export const getTriageStoreFpDecisionsStepDefinition = ({
       try {
         if (!(await isContextEngineEnabled(contextManager.getFakeRequest()))) {
           return result('disabled');
+        }
+        if (!areDecisionWritesAllowed()) {
+          logger.warn(
+            'Triage decisions were not stored: the decisions index template is not installed'
+          );
+          return result('storage_failure');
         }
 
         const kind: FpDecisionKind =
@@ -134,7 +144,7 @@ export const getTriageStoreFpDecisionsStepDefinition = ({
         if (selection.selected.length === 0) return result('none', counts);
 
         const now = new Date();
-        const index = HUNT_COVERAGE_AI_INDEX_DEST.value;
+        const index = TRIAGE_DECISIONS_AI_INDEX_DEST.value;
         const response = await contextManager.getScopedEsClient().bulk({
           refresh: 'wait_for',
           operations: selection.selected.flatMap((group) => [

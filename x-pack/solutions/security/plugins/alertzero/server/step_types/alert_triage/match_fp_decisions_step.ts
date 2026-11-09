@@ -7,7 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { HUNT_COVERAGE_AI_INDEX_DEST } from '../../../common/step_types/package_report';
+import { TRIAGE_DECISIONS_AI_INDEX_DEST } from '../../../common/step_types/triage_decisions_index';
 import {
   triageMatchFpDecisionsStepCommonDefinition,
   type MatchFpDecisionsStatus,
@@ -425,7 +425,7 @@ const readDecisions = async ({
     let response: MgetResponse;
     try {
       response = (await mget({
-        index: HUNT_COVERAGE_AI_INDEX_DEST.value,
+        index: TRIAGE_DECISIONS_AI_INDEX_DEST.value,
         ids: ids.slice(from, from + MGET_CHUNK),
       })) as MgetResponse;
     } catch (error) {
