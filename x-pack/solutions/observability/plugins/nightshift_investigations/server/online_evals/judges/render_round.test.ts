@@ -10,6 +10,7 @@ import {
   MAX_TOOL_FIELD_CHARS,
   renderRound,
   renderTraceMessages,
+  renderTranscript,
   roundEvidenceSchema,
 } from './render_round';
 
@@ -67,6 +68,83 @@ describe('renderRound', () => {
       `[${steps.length - renderedCalls} more tool calls omitted to fit the judge's context]`
     );
     expect(transcript.endsWith('## Agent final answer\nfinal answer')).toBe(true);
+  });
+});
+
+describe('renderTranscript', () => {
+  it('renders the input and tool calls in order without the final answer', () => {
+    const transcript = renderTranscript({
+      input: { message: 'Investigate the checkout latency alert' },
+      steps: [
+        {
+          tool_id: 'platform.core.search',
+          arguments: { index: 'logs-*' },
+          result: { hits: 3 },
+        },
+        { tool_id: 'set_hypotheses', arguments: { hypotheses: ['bad deploy'] }, result: 'ok' },
+      ],
+      response: { message: 'The 14:02 deploy of checkout caused the latency.' },
+    });
+
+    expect(transcript).toBe(
+      [
+        '## User\nInvestigate the checkout latency alert',
+        '## Tool call 1: platform.core.search\nArguments:\n{"index":"logs-*"}\nResult:\n{"hits":3}',
+        '## Tool call 2: set_hypotheses\nArguments:\n{"hypotheses":["bad deploy"]}\nResult:\nok',
+      ].join('\n\n')
+    );
+  });
+
+  it('renders the agent note only when the step has reasoning', () => {
+    const transcript = renderTranscript({
+      input: { message: 'q' },
+      steps: [
+        { tool_id: 'search', reasoning: 'Checking the deploy log.', arguments: {}, result: 'r1' },
+        { tool_id: 'search', reasoning: '', arguments: {}, result: 'r2' },
+      ],
+      response: { message: 'a' },
+    });
+
+    expect(transcript).toBe(
+      [
+        '## User\nq',
+        '## Tool call 1: search\nAgent note:\nChecking the deploy log.\nArguments:\n{}\nResult:\nr1',
+        '## Tool call 2: search\nArguments:\n{}\nResult:\nr2',
+      ].join('\n\n')
+    );
+  });
+
+  it('truncates long agent notes', () => {
+    const transcript = renderTranscript({
+      input: { message: 'q' },
+      steps: [{ tool_id: 'search', reasoning: 'n'.repeat(MAX_TOOL_FIELD_CHARS + 20), result: 'r' }],
+      response: { message: 'a' },
+    });
+
+    expect(transcript).toContain(`${'n'.repeat(MAX_TOOL_FIELD_CHARS)}\n[truncated 20 characters]`);
+    expect(transcript).not.toContain('n'.repeat(MAX_TOOL_FIELD_CHARS + 1));
+  });
+
+  it('omits tool calls past the budget', () => {
+    const steps = Array.from({ length: 100 }, () => ({
+      tool_id: 'search',
+      result: 'y'.repeat(MAX_TOOL_FIELD_CHARS),
+    }));
+    const transcript = renderTranscript({
+      input: { message: 'q' },
+      steps,
+      response: { message: 'final answer' },
+    });
+
+    const renderedCalls = transcript.match(/## Tool call/g)?.length ?? 0;
+    expect(renderedCalls).toBeLessThan(steps.length);
+    expect(transcript.length).toBeLessThan(MAX_TOOL_CALLS_CHARS + 2 * MAX_TOOL_FIELD_CHARS);
+    expect(
+      transcript.endsWith(
+        `[${steps.length - renderedCalls} more tool calls omitted to fit the judge's context]`
+      )
+    ).toBe(true);
+    expect(transcript).not.toContain('final answer');
   });
 });
 
