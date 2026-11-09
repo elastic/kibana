@@ -148,10 +148,11 @@ export const floatingToolbarStyles = {
     width: 0,
     minWidth: '100%',
   },
-  separator: ({ euiTheme }: UseEuiTheme) => ({
+  separator: ({ euiTheme, colorMode }: UseEuiTheme) => ({
     width: euiTheme.border.width.thin,
     alignSelf: 'stretch',
-    backgroundColor: euiTheme.border.color,
+    // the dark surface is lighter than the default border, which would disappear against it
+    backgroundColor: colorMode === 'DARK' ? euiTheme.colors.borderBasePlain : euiTheme.border.color,
     margin: `${euiTheme.size.xs} ${euiTheme.size.m}`,
   }),
 };
@@ -196,15 +197,21 @@ const expandIconStyles = {
 
 const shellStyles = {
   // bottom-centered anchor: the bar grows upward and equally to both sides
-  anchor: ({ euiTheme }: UseEuiTheme) => {
+  anchor: ({ euiTheme, colorMode }: UseEuiTheme) => {
     const shadowColor = transparentize(euiTheme.colors.shadow, 0.16);
+    // a dark shadow is invisible on a dark page, so in dark mode the bar glows instead. The edge
+    // itself is the surface's ring, so the glow is only the soft halo around it.
+    const glowColor = transparentize(euiTheme.colors.plainLight, 0.16);
     return {
       position: 'fixed' as const,
       bottom: euiTheme.size.l,
       left: '50%',
       transform: 'translateX(-50%)',
       zIndex: euiTheme.levels.flyout,
-      filter: `drop-shadow(0 1px 2px ${shadowColor}) drop-shadow(0 6px 16px ${shadowColor})`,
+      filter:
+        colorMode === 'DARK'
+          ? `drop-shadow(0 0 ${euiTheme.size.xs} ${glowColor})`
+          : `drop-shadow(0 ${euiTheme.border.width.thin} ${euiTheme.size.xxs} ${shadowColor}) drop-shadow(0 calc(${euiTheme.size.xs} + ${euiTheme.size.xxs}) ${euiTheme.size.base} ${shadowColor})`,
       // one-shot entrance; `translate` and `scale` compose with the centering `transform` above
       transformOrigin: 'center bottom',
       animation: `${enter} 200ms ${EASE_OUT}`,
@@ -230,8 +237,24 @@ const shellStyles = {
     borderRadius: euiTheme.border.radius.medium,
     transformOrigin: 'center bottom',
   }),
-  surface: {
-    position: 'absolute' as const,
-    inset: 0,
+  surface: ({ euiTheme, colorMode }: UseEuiTheme) => {
+    const isDark = colorMode === 'DARK';
+    return {
+      position: 'absolute' as const,
+      inset: 0,
+      // a crisp edge keeps the bar distinct from the dashboard and from the panels it floats over,
+      // which share its color in light mode. In dark mode the default panel color is also too close
+      // to the dashboard, so the bar gets a lighter neutral surface there.
+      boxShadow: `inset 0 0 0 ${euiTheme.border.width.thin} ${
+        isDark ? euiTheme.colors.borderBasePlain : euiTheme.colors.borderBaseSubdued
+      }`,
+      ...(isDark && { backgroundColor: euiTheme.colors.backgroundBaseFormsPrepend }),
+      // forced colors (e.g. Windows High Contrast) drop box-shadows and filters, which would leave
+      // the bar with no boundary at all, so it gets a real outline in the system text color there
+      '@media (forced-colors: active)': {
+        outline: `${euiTheme.border.width.thin} solid CanvasText`,
+        outlineOffset: `-${euiTheme.border.width.thin}`,
+      },
+    };
   },
 };
