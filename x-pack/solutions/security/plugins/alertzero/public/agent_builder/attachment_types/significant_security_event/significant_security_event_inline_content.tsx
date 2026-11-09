@@ -99,17 +99,23 @@ export const SSE_ATTACHMENT_SEARCHED_FOR_TEST_ID = 'alertzeroSignificantSecurity
 const EVIDENCE_BULLET_LIMIT = 5;
 const ENTITY_CHIP_LIMIT = 10;
 
-/** Plain monospace value; truncates long ids and keeps the full string in a tooltip. */
-const PlainValue: React.FC<{ value: string; testSubj?: string; maxCh?: number }> = ({
-  value,
-  testSubj,
-  maxCh = 32,
-}) => {
+/**
+ * Plain monospace value; truncates long ids and keeps the full string in a tooltip. The
+ * span is a tab stop so the tooltip is reachable by keyboard, except when the caller wraps
+ * it in a link: a focusable element nested in interactive content is invalid, and the link
+ * already gives the tooltip its focus target (`focusable={false}`).
+ */
+const PlainValue: React.FC<{
+  value: string;
+  testSubj?: string;
+  maxCh?: number;
+  focusable?: boolean;
+}> = ({ value, testSubj, maxCh = 32, focusable = true }) => {
   const { euiTheme } = useEuiTheme();
   return (
     <EuiToolTip content={value}>
       <EuiText
-        tabIndex={0}
+        tabIndex={focusable ? 0 : undefined}
         size="xs"
         component="span"
         data-test-subj={testSubj}
@@ -275,6 +281,7 @@ const EventRows: React.FC<{
             value={event.event_id}
             maxCh={18}
             testSubj={`alertzeroSignificantSecurityEventEventLink-${event.event_id}`}
+            focusable={!href}
           />
         );
         return (
@@ -598,32 +605,6 @@ const HypothesisSection: React.FC<{ hypothesis: string }> = ({ hypothesis }) => 
   </Section>
 );
 
-/**
- * Producer chrome often restates Tier 1 / Tier 2 hit counts already shown by What matched
- * and the confirmed-hit badge. Keep those bullets only when there is no structured detection
- * table; keep every evidence_against bullet (negative findings are not on What matched).
- */
-const isRestatementEvidenceFor = (item: string): boolean =>
-  /^(IOC Hunt matched|Behavior Hunt executed|Environment hit confirmed)/.test(item);
-
-const filterStoryEvidence = ({
-  evidenceFor,
-  evidenceAgainst,
-  hasDetections,
-}: {
-  evidenceFor: string[];
-  evidenceAgainst: string[];
-  hasDetections: boolean;
-}): { evidenceFor: string[]; evidenceAgainst: string[] } => {
-  if (!hasDetections) {
-    return { evidenceFor, evidenceAgainst };
-  }
-  return {
-    evidenceFor: evidenceFor.filter((item) => !isRestatementEvidenceFor(item)),
-    evidenceAgainst,
-  };
-};
-
 const SAMPLE_ENTITY_LIMIT = 3;
 
 /**
@@ -649,13 +630,13 @@ const DetectionScope: React.FC<{ detection: SseDetection }> = ({ detection }) =>
     sampleHosts.length > 0
       ? `${sampleHosts.join(', ')}${
           hiddenHosts > 0
-            ? i18n.translate(
+            ? ` ${i18n.translate(
                 'xpack.alertzero.agentBuilder.attachments.sse.detectionScopeMoreHosts',
                 {
-                  defaultMessage: ' +{count} more',
+                  defaultMessage: '+{count} more',
                   values: { count: hiddenHosts },
                 }
-              )
+              )}`
             : ''
         }`
       : undefined;
@@ -663,13 +644,13 @@ const DetectionScope: React.FC<{ detection: SseDetection }> = ({ detection }) =>
     sampleUsers.length > 0
       ? `${sampleUsers.join(', ')}${
           hiddenUsers > 0
-            ? i18n.translate(
+            ? ` ${i18n.translate(
                 'xpack.alertzero.agentBuilder.attachments.sse.detectionScopeMoreUsers',
                 {
-                  defaultMessage: ' +{count} more',
+                  defaultMessage: '+{count} more',
                   values: { count: hiddenUsers },
                 }
-              )
+              )}`
             : ''
         }`
       : undefined;
@@ -700,8 +681,15 @@ const DetectionSeen: React.FC<{ detection: SseDetection }> = ({ detection }) => 
   return (
     <EuiText size="xs" color="subdued" css={{ whiteSpace: 'nowrap' }}>
       {detection.first_seen ? <DateTime value={detection.first_seen} /> : null}
-      {detection.first_seen && detection.last_seen ? ' – ' : null}
-      {detection.last_seen && detection.last_seen !== detection.first_seen ? (
+      {detection.first_seen &&
+      detection.last_seen &&
+      detection.last_seen !== detection.first_seen ? (
+        <>
+          {' – '}
+          <DateTime value={detection.last_seen} />
+        </>
+      ) : null}
+      {!detection.first_seen && detection.last_seen ? (
         <DateTime value={detection.last_seen} />
       ) : null}
     </EuiText>
@@ -1115,18 +1103,17 @@ const nonExecutableReason = (behavior: HuntResultBehavior): 'no_query' | 'not_ru
 
 const QueriesRun: React.FC<{
   tier2: NonNullable<HuntResult['tier2']>;
+  /** Row indexes of behaviors whose query will run, decided once by the parent. */
+  executableRowIndexes: ReadonlySet<number>;
   timeRange: HuntResult['time_range'];
   navigation: AttachmentNavigationDeps;
-}> = ({ tier2, timeRange, navigation }) => {
+}> = ({ tier2, executableRowIndexes, timeRange, navigation }) => {
   const rows: QueriesRunRow[] = tier2.behaviors
     .map((behavior, rowIndex) => ({ behavior, rowIndex }))
-    .filter(
-      ({ behavior }) =>
-        behavior.validated_esql != null && isExecutableHuntQuery(behavior.validated_esql)
-    );
+    .filter(({ rowIndex }) => executableRowIndexes.has(rowIndex));
 
   const nonExecutable = tier2.behaviors.filter(
-    (behavior) => behavior.validated_esql == null || !isExecutableHuntQuery(behavior.validated_esql)
+    (_behavior, rowIndex) => !executableRowIndexes.has(rowIndex)
   );
   const noQueryCount = nonExecutable.filter(
     (behavior) => nonExecutableReason(behavior) === 'no_query'
@@ -1621,6 +1608,7 @@ const RunIdLink: React.FC<{
       value={parsed.run_id}
       testSubj="alertzeroSignificantSecurityEventRunId"
       maxCh={36}
+      focusable={!runHref}
     />
   );
 
@@ -1659,9 +1647,24 @@ const RunIdLink: React.FC<{
 export const SignificantSecurityEventInlineContent: React.FC<
   SignificantSecurityEventInlineContentProps
 > = ({ attachment, navigation }) => {
-  const parsed = parseSignificantSecurityEventData(attachment?.data);
+  const data = attachment?.data;
+  const parsed = React.useMemo(() => parseSignificantSecurityEventData(data), [data]);
+  const viewModel = React.useMemo(() => (parsed ? toSseViewModel(parsed) : undefined), [parsed]);
+  const behaviors = parsed?.hunt_result?.tier2?.behaviors;
+  // `isExecutableHuntQuery` fully parses the ES|QL, so decide once per behavior per render.
+  const executableRowIndexes = React.useMemo(
+    () =>
+      new Set(
+        (behaviors ?? []).flatMap((behavior, rowIndex) =>
+          behavior.validated_esql != null && isExecutableHuntQuery(behavior.validated_esql)
+            ? [rowIndex]
+            : []
+        )
+      ),
+    [behaviors]
+  );
 
-  if (!parsed) {
+  if (!parsed || !viewModel) {
     return (
       <AttachmentEmptyState
         testSubj={SSE_ATTACHMENT_EMPTY_TEST_ID}
@@ -1677,17 +1680,17 @@ export const SignificantSecurityEventInlineContent: React.FC<
   const huntResult = parsed.hunt_result;
   const tier2 = huntResult?.tier2;
 
-  const viewModel = toSseViewModel(parsed);
   const { basis, detections, eventGroups, hypothesisDisplay, entityLine, summary } = viewModel;
   const basisBadge = basis ? basisHeaderBadge(basis) : undefined;
 
   const hasChromeHeader =
     buildSignificantSecurityEventActionButtons({ parsed, navigation }).length > 0;
-  const storyEvidence = filterStoryEvidence({
+  // Shown as written: the mapper already withholds hit-count restatements when it writes
+  // `detections`, and an older payload's bullets are the only story it has.
+  const storyEvidence = {
     evidenceFor: parsed.evidence_for,
     evidenceAgainst: parsed.evidence_against,
-    hasDetections: detections.length > 0,
-  });
+  };
   const hasEvidence =
     storyEvidence.evidenceFor.length > 0 || storyEvidence.evidenceAgainst.length > 0;
 
@@ -1894,16 +1897,15 @@ export const SignificantSecurityEventInlineContent: React.FC<
             testSubj={SSE_ATTACHMENT_QUERIES_RUN_TEST_ID}
             title={i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.queriesRun', {
               defaultMessage: 'Queries run ({count})',
-              values: {
-                count: tier2.behaviors.filter(
-                  (behavior) =>
-                    behavior.validated_esql != null &&
-                    isExecutableHuntQuery(behavior.validated_esql)
-                ).length,
-              },
+              values: { count: executableRowIndexes.size },
             })}
           >
-            <QueriesRun tier2={tier2} timeRange={huntResult.time_range} navigation={navigation} />
+            <QueriesRun
+              tier2={tier2}
+              executableRowIndexes={executableRowIndexes}
+              timeRange={huntResult.time_range}
+              navigation={navigation}
+            />
           </DetailAccordion>
         ) : null}
       </SectionStack>

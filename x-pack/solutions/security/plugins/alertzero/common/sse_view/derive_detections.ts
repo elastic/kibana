@@ -57,17 +57,34 @@ const MAX_NAME_LENGTH = 512;
 const MAX_DETECTION_ID_LENGTH = 256;
 
 /**
- * Stable, dependency-free digest for an over-long id tail: a base-31 polynomial hash
- * reduced modulo 2^32, rendered as 8 hex characters. Only ids within one SSE compete,
- * so a 32-bit space is plenty.
+ * Stable, dependency-free digest for an over-long id tail: two independent polynomial
+ * hashes (bases 31 and 131, each modulo 2^32) rendered as 16 hex characters. Not
+ * cryptographic; only ids within one SSE compete, and `uniqueIds` resolves any residual
+ * collision explicitly so two IOCs can never share a detection id.
  */
 const HASH_MODULUS = 2 ** 32;
-const shortHash = (value: string): string => {
-  let hash = 7;
+const polynomialHash = (value: string, base: number, seed: number): string => {
+  let hash = seed;
   for (let index = 0; index < value.length; index++) {
-    hash = (hash * 31 + value.charCodeAt(index)) % HASH_MODULUS;
+    hash = (hash * base + value.charCodeAt(index)) % HASH_MODULUS;
   }
   return hash.toString(16).padStart(8, '0');
+};
+const shortHash = (value: string): string =>
+  `${polynomialHash(value, 31, 7)}${polynomialHash(value, 131, 5381)}`;
+
+/**
+ * Makes detection ids unique within one SSE: a later detection whose id repeats an
+ * earlier one gets a `~2`, `~3`, ... suffix. Readers resolve the IOC from `ioc_type` and
+ * `matched_on`, never from the id, so the suffix changes nothing they read.
+ */
+const uniqueIds = (detections: SseDetection[]): SseDetection[] => {
+  const seen = new Map<string, number>();
+  return detections.map((detection) => {
+    const count = (seen.get(detection.id) ?? 0) + 1;
+    seen.set(detection.id, count);
+    return count === 1 ? detection : { ...detection, id: `${detection.id}~${count}` };
+  });
 };
 
 /**
@@ -426,5 +443,5 @@ export const deriveDetections = (
     options.techniqueId
   );
 
-  return [...behaviorDetections, ...iocDetections].slice(0, MAX_DETECTIONS);
+  return uniqueIds([...behaviorDetections, ...iocDetections].slice(0, MAX_DETECTIONS));
 };

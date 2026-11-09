@@ -438,6 +438,7 @@ describe('detection ids', () => {
   it('hashes an over-long IOC value so the id fits the schema cap and stays stable', () => {
     const id = buildIocDetectionId('url', longUrl);
     expect(id.length).toBeLessThanOrEqual(256);
+    expect(id).toMatch(/^ioc:url:[0-9a-f]{16}$/);
     expect(id.startsWith('ioc:url:')).toBe(true);
     expect(id).not.toContain('aaaa');
     expect(buildIocDetectionId('url', longUrl)).toBe(id);

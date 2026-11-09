@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { iocOfDetection, type SseDetection } from './derive_detections';
 
 /** Characters a summary may spend, matching `summary`'s own cap on the SSE schema. */
@@ -15,8 +16,13 @@ export interface BuildSummaryOptions {
   techniqueId?: string;
 }
 
-const plural = (count: number, singular: string): string =>
-  `${count} ${singular}${count === 1 ? '' : 's'}`;
+const hostsClause = (hostCount: number | undefined): string =>
+  hostCount === undefined
+    ? ''
+    : i18n.translate('xpack.alertzero.sseView.summary.onHosts', {
+        defaultMessage: ' on {count, plural, one {# host} other {# hosts}}',
+        values: { count: hostCount },
+      });
 
 /** `{technique_id} {technique_name}: {total} event(s) on {host_count} host(s)`, or just the id when the name is absent. */
 const summarizeBehavior = (detection: SseDetection): string => {
@@ -24,12 +30,16 @@ const summarizeBehavior = (detection: SseDetection): string => {
   if (!detection.technique_name) {
     return techniqueId;
   }
-  const hostsPart =
-    detection.host_count !== undefined ? ` on ${plural(detection.host_count, 'host')}` : '';
-  return `${techniqueId} ${detection.technique_name}: ${plural(
-    detection.total,
-    'event'
-  )}${hostsPart}`;
+  return i18n.translate('xpack.alertzero.sseView.summary.behavior', {
+    defaultMessage:
+      '{techniqueId} {techniqueName}: {count, plural, one {# event} other {# events}}{hosts}',
+    values: {
+      techniqueId,
+      techniqueName: detection.technique_name,
+      count: detection.total,
+      hosts: hostsClause(detection.host_count),
+    },
+  });
 };
 
 /**
@@ -40,9 +50,10 @@ const summarizeIoc = (detection: SseDetection): string => {
   const parsed = iocOfDetection(detection);
   const type = parsed?.type ?? detection.field ?? 'indicator';
   const value = parsed?.value ?? detection.matched_on[0]?.value ?? '';
-  const hostsPart =
-    detection.host_count !== undefined ? ` on ${plural(detection.host_count, 'host')}` : '';
-  return `${type} ${value} seen ${detection.total}x${hostsPart}`;
+  return i18n.translate('xpack.alertzero.sseView.summary.ioc', {
+    defaultMessage: '{type} {value} seen {count}x{hosts}',
+    values: { type, value, count: detection.total, hosts: hostsClause(detection.host_count) },
+  });
 };
 
 const summarize = (detection: SseDetection): string =>
@@ -84,7 +95,13 @@ export const buildSummary = (
 
   const leaderText = summarize(leader);
   const others = detections.length - 1;
-  const summary = others > 0 ? `${leaderText} and ${others} more` : leaderText;
+  const summary =
+    others > 0
+      ? i18n.translate('xpack.alertzero.sseView.summary.andMore', {
+          defaultMessage: '{leader} and {count} more',
+          values: { leader: leaderText, count: others },
+        })
+      : leaderText;
 
   return summary.slice(0, MAX_SUMMARY_LENGTH);
 };

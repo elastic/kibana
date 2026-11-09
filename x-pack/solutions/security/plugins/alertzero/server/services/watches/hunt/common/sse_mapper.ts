@@ -753,6 +753,7 @@ const buildChrome = ({
   huntResult,
   behavior,
   tier1RefCount,
+  hasDetections,
 }: {
   reportId: string;
   runId: string;
@@ -760,6 +761,12 @@ const buildChrome = ({
   behavior?: CoordinatorBehavior;
   /** Tier 1 refs this entry carries, which is not the report's Tier 1 total. */
   tier1RefCount: number;
+  /**
+   * Whether the entry carries `detections[]`. Then What matched already tells the hit-count
+   * story, so the restating bullets are withheld and only findings that are not on the
+   * table (the behavior's own evidence, the negative results) remain.
+   */
+  hasDetections: boolean;
 }): Pick<
   SseAttachmentData,
   | 'title'
@@ -789,7 +796,7 @@ const buildChrome = ({
   ).slice(0, 4000);
 
   const evidenceFor: string[] = [];
-  if (huntResult.hit_sources.includes('tier1')) {
+  if (!hasDetections && huntResult.hit_sources.includes('tier1')) {
     // Two things this sentence must not overstate. `counts.total_hits` spans required and
     // optional indices, while only a required-index match sets the hit bar, so the total is
     // "matched", not "confirmed" — one required event beside 99 optional alerts would
@@ -802,12 +809,12 @@ const buildChrome = ({
         : `IOC Hunt matched ${huntResult.tier1.counts.total_hits} event(s) in the hunt window, at least one in a required index (see hunt_result.tier1.per_index for the required/optional split).`
     );
   }
-  if (huntResult.hit_sources.includes('tier2') && behavior?.execution?.hit) {
+  if (!hasDetections && huntResult.hit_sources.includes('tier2') && behavior?.execution?.hit) {
     evidenceFor.push(
       `Behavior Hunt executed ${behavior.technique_id} with ${behavior.execution.row_count} required-index row(s).`
     );
   }
-  if (evidenceFor.length === 0 && huntResult.has_confirmed_hit) {
+  if (!hasDetections && evidenceFor.length === 0 && huntResult.has_confirmed_hit) {
     evidenceFor.push('Environment hit confirmed; see hunt_result for structured detail.');
   }
 
@@ -913,13 +920,6 @@ const buildEntry = ({
   const behavior = techniqueId
     ? result.tier2?.behaviors.find((b) => b.technique_id === techniqueId)
     : undefined;
-  const chrome = buildChrome({
-    reportId,
-    runId: result.run_id,
-    huntResult,
-    behavior,
-    tier1RefCount,
-  });
 
   // Derive from the normalized SSE copy, not the raw coordinator output: `per_ioc`
   // first/last_seen and hit timestamps are only ISO after `buildHuntResult` /
@@ -956,6 +956,14 @@ const buildEntry = ({
     .filter((ioc): ioc is NonNullable<typeof ioc> => ioc !== undefined);
   const basis = classifyBasis(basisIocs, hasBehaviorHit);
   const summary = buildSummary(detections, { techniqueId });
+  const chrome = buildChrome({
+    reportId,
+    runId: result.run_id,
+    huntResult,
+    behavior,
+    tier1RefCount,
+    hasDetections: detections.length > 0,
+  });
 
   return {
     attachment_id: buildSseAttachmentId({ spaceId, reportId, techniqueId }),

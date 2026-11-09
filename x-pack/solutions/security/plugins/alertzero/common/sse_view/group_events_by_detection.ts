@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { iocOfDetection, type SseDetection, type SseEventRef } from './derive_detections';
 
 /** One bucket of events sharing a detection, or the "Other events" catch-all. */
@@ -24,7 +25,9 @@ export interface GroupEventsHuntResult {
   };
 }
 
-const OTHER_EVENTS_LABEL = 'Other events';
+/** Rendered only in the browser, as the catch-all group heading, so it is translated here. */
+const otherEventsLabel = (): string =>
+  i18n.translate('xpack.alertzero.sseView.groups.otherEvents', { defaultMessage: 'Other events' });
 
 const labelForDetection = (detection: SseDetection): string => {
   if (detection.kind === 'behavior') {
@@ -160,7 +163,7 @@ export const groupEventsByDetection = (
   }
 
   if (otherEvents.length > 0) {
-    orderedGroups.push({ label: OTHER_EVENTS_LABEL, events: otherEvents });
+    orderedGroups.push({ label: otherEventsLabel(), events: otherEvents });
   }
   return orderedGroups;
 };

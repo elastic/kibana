@@ -407,7 +407,7 @@ describe('SignificantSecurityEventInlineContent', () => {
       ).not.toBeInTheDocument();
     });
 
-    it('drops producer Tier 1/Tier 2 count restatements when What matched already tells that story', () => {
+    it('renders evidence bullets as written; the mapper decides what to withhold', () => {
       renderWithI18n(
         <SignificantSecurityEventInlineContent
           {...renderProps(
@@ -439,8 +439,8 @@ describe('SignificantSecurityEventInlineContent', () => {
       const evidence = screen.getByTestId('alertzeroSignificantSecurityEventEvidence');
       expect(evidence).toHaveTextContent('Unusual outbound curl to loopback across two hosts');
       expect(evidence).toHaveTextContent('T1059');
-      expect(evidence).not.toHaveTextContent('IOC Hunt matched');
-      expect(evidence).not.toHaveTextContent('Behavior Hunt executed T1071');
+      expect(evidence).toHaveTextContent('IOC Hunt matched 12 event(s)');
+      expect(evidence).toHaveTextContent('Behavior Hunt executed T1071');
     });
 
     it('reveals the evidence past the visible limit on request', async () => {
@@ -627,6 +627,27 @@ describe('SignificantSecurityEventInlineContent', () => {
           query: expect.objectContaining({ esql: expect.stringContaining('203.0.113.5') }),
         })
       );
+    });
+
+    it('renders one date without a range separator when first_seen equals last_seen', () => {
+      renderWithI18n(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(
+            buildAttachment({
+              ...baseData,
+              detections: [
+                iocDetection({
+                  first_seen: '2026-07-30T13:05:00.000Z',
+                  last_seen: '2026-07-30T13:05:00.000Z',
+                }),
+              ],
+            })
+          )}
+        />
+      );
+
+      const whatMatched = screen.getByTestId(SSE_ATTACHMENT_WHAT_MATCHED_TEST_ID);
+      expect(whatMatched).not.toHaveTextContent('–');
     });
 
     it('notes a detection whose scope came from the sampled hits', () => {
@@ -1323,6 +1344,10 @@ describe('SignificantSecurityEventInlineContent', () => {
       expect(link).toHaveAttribute(
         'href',
         '/app/workflows/system-security-hunt-continuous-threat-hunt-default?tab=executions&executionId=run-1'
+      );
+      // The link is the tab stop; the value inside it must not add a second one.
+      expect(screen.getByTestId('alertzeroSignificantSecurityEventRunId')).not.toHaveAttribute(
+        'tabindex'
       );
       expect(getUrlForApp).toHaveBeenCalledWith('workflows', {
         path: '/watch-1-default?tab=executions&executionId=run-1',
