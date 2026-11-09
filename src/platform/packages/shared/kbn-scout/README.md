@@ -679,9 +679,9 @@ node scripts/scout start-server --arch serverless --domain security_complete --s
 
 This starts:
 
-- **Origin ES cluster** (3 nodes, port `9220`) with UIAM
+- **Origin ES cluster** (3 nodes, port `9220`, or `TEST_ES_PORT` when set) with UIAM
 - **Linked ES cluster** (3 nodes, port `9230`) connected to the same UIAM
-- **Kibana** (port `5620`)
+- **Kibana** (port `5620`, or `TEST_KIBANA_PORT` when set)
 
 The linked cluster port is derived from the origin ES port plus `LINKED_CLUSTER_PORT_OFFSET` (defined in `kbn-es`). If the origin port changes, the linked port adjusts automatically via the config set.
 

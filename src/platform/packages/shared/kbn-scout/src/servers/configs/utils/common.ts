@@ -21,10 +21,7 @@ export const formatCurrentDate = () => {
   );
 };
 
-/**
- * Reads a port from `envVar`, falling back to `defaultPort` when it is unset.
- * Throws on a value that is not a valid port, the same as @kbn/test-es-server.
- */
+/** Port from `envVar` (or `defaultPort` when unset); throws unless it is an integer from 1 to 65535. */
 export const getPortFromEnv = (envVar: string, defaultPort: number): number => {
   const value = process.env[envVar];
   if (!value) return defaultPort;
