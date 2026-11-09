@@ -55,7 +55,6 @@ export { ProfilingSchemaStateProvider } from './contexts/profiling_schema_state/
 export { useProfilingSchemaState } from './contexts/profiling_schema_state/use_profiling_schema_state';
 
 export { useTheme } from './hooks/use_theme';
-export { useEditableSettings } from './hooks/use_editable_settings';
 export { useEsSearch, createEsParams } from './hooks/use_es_search';
 export { useValuesList } from './hooks/use_values_list';
 export { useFetcher, FETCH_STATUS } from './hooks/use_fetcher';
