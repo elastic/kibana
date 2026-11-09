@@ -30,6 +30,7 @@ import {
   LEGACY_ALERT_TYPE,
   LENS_ATTACHMENT_TYPE,
   LENS_SO_TYPE,
+  SECURITY_ALERT_ATTACHMENT_TYPE,
   SECURITY_ENTITY_ATTACHMENT_TYPE,
   SECURITY_SOLUTION_OWNER,
 } from '../../../common/constants';
@@ -887,35 +888,56 @@ describe('AttachmentService', () => {
         expect(res).toStrictEqual(createUserAttachment());
       });
 
-      it('throws when the response is missing the attributes.rule.name', async () => {
-        const invalidAttachment = createAlertAttachment();
-        unset(invalidAttachment, 'attributes.rule.name');
+      const ruleLessUnifiedAlert = {
+        type: SECURITY_ALERT_ATTACHMENT_TYPE,
+        attachmentId: 'alert-1',
+        metadata: { index: '.alerts-security.alerts-default' },
+        owner: SECURITY_SOLUTION_OWNER,
+        created_at: '2024-01-01T00:00:00.000Z',
+        created_by: { username: 'u', full_name: null, email: null },
+        pushed_at: null,
+        pushed_by: null,
+        updated_at: null,
+        updated_by: null,
+      };
 
-        unsecuredSavedObjectsClient.update.mockResolvedValue(invalidAttachment);
+      it('does not require metadata.rule.name for a unified alert', async () => {
+        unsecuredSavedObjectsClient.update.mockResolvedValue({
+          id: '1',
+          type: CASE_ATTACHMENT_SAVED_OBJECT,
+          attributes: {},
+          references: [],
+        });
 
         await expect(
           service.update({
-            updatedAttributes: createAlertAttachment().attributes,
             savedObjectId: '1',
+            savedObjectType: CASE_ATTACHMENT_SAVED_OBJECT,
+            updatedAttributes: ruleLessUnifiedAlert,
           })
-        ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Invalid attributes: expected attributes.rule.name for alert attachments"`
-        );
+        ).resolves.not.toThrow();
       });
 
-      it('throws when the request is missing the attributes.rule.name', async () => {
-        const invalidAttachment = createAlertAttachment();
-        unset(invalidAttachment, 'attributes.rule.name');
-
-        unsecuredSavedObjectsClient.update.mockResolvedValue(createAlertAttachment());
+      it('updates a rule-less unified alert on a cases-comments row', async () => {
+        unsecuredSavedObjectsClient.update.mockResolvedValue({
+          id: '1',
+          type: CASE_COMMENT_SAVED_OBJECT,
+          attributes: {},
+          references: [],
+        });
 
         await expect(
           service.update({
-            updatedAttributes: invalidAttachment.attributes,
             savedObjectId: '1',
+            savedObjectType: CASE_COMMENT_SAVED_OBJECT,
+            updatedAttributes: ruleLessUnifiedAlert,
           })
-        ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Invalid attributes: expected attributes.rule.name for alert attachments"`
+        ).resolves.not.toThrow();
+        expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+          CASE_COMMENT_SAVED_OBJECT,
+          '1',
+          expect.objectContaining({ rule: { id: null, name: null } }),
+          expect.anything()
         );
       });
 
@@ -1588,27 +1610,7 @@ describe('AttachmentService', () => {
         expect(res).toStrictEqual({ saved_objects: [createUserAttachment()] });
       });
 
-      it('throws when the response is missing the attributes.rule.name field', async () => {
-        const invalidAttachment = createAlertAttachment();
-        unset(invalidAttachment, 'attributes.rule.name');
-
-        unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
-          saved_objects: [invalidAttachment],
-        });
-
-        const updatedAttributes = createAlertAttachment().attributes;
-
-        await expect(
-          service.bulkUpdate({ comments: [{ savedObjectId: '1', updatedAttributes }] })
-        ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Invalid attributes: expected attributes.rule.name for alert attachments"`
-        );
-      });
-
-      it('throws when the request is missing the attributes.rule.name (legacy bucket)', async () => {
-        const invalidAttachment = createAlertAttachment();
-        unset(invalidAttachment, 'attributes.rule.name');
-
+      it('updates a rule-less unified alert in the legacy bucket', async () => {
         // Force the legacy write path by resolving id '1' to cases-comments.
         unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
           saved_objects: [
@@ -1616,23 +1618,33 @@ describe('AttachmentService', () => {
             { ...createAlertAttachment(), id: '1', type: CASE_COMMENT_SAVED_OBJECT },
           ] as unknown as SavedObjectsBulkResponse['saved_objects'],
         });
-
         unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
-          saved_objects: [createAlertAttachment()],
+          saved_objects: [
+            { id: '1', type: CASE_COMMENT_SAVED_OBJECT, attributes: {}, references: [] },
+          ],
         });
 
         await expect(
           service.bulkUpdate({
             comments: [
               {
-                updatedAttributes: invalidAttachment.attributes,
                 savedObjectId: '1',
+                updatedAttributes: {
+                  type: SECURITY_ALERT_ATTACHMENT_TYPE,
+                  attachmentId: 'alert-1',
+                  metadata: { index: '.alerts-security.alerts-default' },
+                  owner: SECURITY_SOLUTION_OWNER,
+                },
               },
             ],
           })
-        ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Invalid attributes: expected attributes.rule.name for alert attachments"`
-        );
+        ).resolves.not.toThrow();
+        expect(unsecuredSavedObjectsClient.bulkUpdate.mock.calls[0][0]).toEqual([
+          expect.objectContaining({
+            type: CASE_COMMENT_SAVED_OBJECT,
+            attributes: expect.objectContaining({ rule: { id: null, name: null } }),
+          }),
+        ]);
       });
 
       it('strips excess fields from the request', async () => {

@@ -36,55 +36,60 @@ const MATCH_CASES: ReadonlyArray<{
 
 /**
  * Match (wildcard) operator create flow for the Path and File Name fields:
- * form -> real create route -> card condition. Stays in the blocklists spec
- * file because it mutates the same agnostic `endpoint_blocklists` list.
+ * form -> real create route -> card condition.
+ *
+ * The agnostic `endpoint_blocklists` list is shared with the other blocklist
+ * spec files and is not space-isolated, so this suite never wipes it: every
+ * item gets a unique name, is created per-policy (never global, so it cannot
+ * show up on another worker's policy tab), and `endpointArtifactItems`
+ * deletes only the items this test created.
  */
 export const describeBlocklistMatchOperator = (artifact: ArtifactTabCase): void => {
-  const { pagePrefix, listId, urlPath } = artifact;
+  const { pagePrefix, listId, urlPath, entries, osTypes } = artifact;
   const condition = `${pagePrefix}-card-criteriaConditions-condition`;
 
   spaceTest.describe(
     'Blocklist Match (wildcard) operator',
     { tag: ARTIFACT_LIST_PAGE_TAGS },
     () => {
-      spaceTest.beforeAll(async ({ apiServices }) => {
-        await apiServices.endpointArtifacts.deleteList(listId);
-      });
-
       spaceTest.beforeEach(async ({ browserAuth }) => {
         await browserAuth.loginAsEndpointPolicyManager();
-      });
-
-      spaceTest.afterEach(async ({ apiServices }) => {
-        await apiServices.endpointArtifacts.deleteList(listId);
       });
 
       for (const { title, field, value, expectedCondition } of MATCH_CASES) {
         spaceTest(
           `creates a blocklist item with the Match operator for the ${title} field`,
-          async ({ pageObjects }) => {
+          async ({ pageObjects, endpointArtifactItems, endpointPolicy }) => {
             spaceTest.setTimeout(90_000);
+            // The header add button only renders on a populated list.
+            await endpointArtifactItems.create({
+              listId,
+              name: `${ITEM_NAME} seed`,
+              entries,
+              osTypes,
+              policyId: endpointPolicy.id,
+            });
+            const name = endpointArtifactItems.uniqueName(listId, ITEM_NAME);
+
             await pageObjects.artifactListPage.goto(urlPath);
-            await pageObjects.artifactListPage.waitForEmpty(pagePrefix);
-            await pageObjects.artifactListPage.openCreateFromEmpty(pagePrefix);
+            await pageObjects.artifactListPage.waitForList(pagePrefix);
+            await pageObjects.artifactListPage.openCreateFromPage(pagePrefix);
             await pageObjects.policyArtifactsPage.fillBlocklistMatchCreateForm({
-              name: ITEM_NAME,
+              name,
               description: 'Test Description',
               field,
               value,
             });
+            await pageObjects.policyArtifactsPage.selectPerPolicyAssignment();
             await pageObjects.artifactListPage.submitFlyout(pagePrefix);
             await pageObjects.toasts.waitForToastWithText(
-              `"${ITEM_NAME}" has been added to your blocklist.`
+              `"${name}" has been added to your blocklist.`
             );
             await pageObjects.artifactListPage.flyout(pagePrefix).waitFor({ state: 'hidden' });
 
-            await expect(pageObjects.artifactListPage.cardTitle(pagePrefix)).toContainText(
-              ITEM_NAME
-            );
-            await expect(pageObjects.artifactListPage.criteria(condition)).toHaveText(
-              expectedCondition
-            );
+            const card = pageObjects.artifactListPage.cardByName(pagePrefix, name);
+            await expect(card).toBeVisible();
+            await expect(card.getByTestId(condition)).toHaveText(expectedCondition);
           }
         );
       }

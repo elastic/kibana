@@ -7,12 +7,13 @@
 
 export type AfterKey = Record<string, string> | undefined;
 
-/** Top hit from latest_doc sub-agg (present when syncMarker is used) */
+/** Top hit from a top_hits sub-agg */
 export interface LatestDocHit {
+  _id?: string;
   _source?: Record<string, unknown>;
 }
 
-/** Top_hits sub-aggregation result (present when syncMarker is used) */
+/** Top_hits sub-aggregation result */
 export interface LatestDocTopHits {
   hits: {
     hits: LatestDocHit[];
@@ -22,8 +23,13 @@ export interface LatestDocTopHits {
 export interface EntityBucket {
   key: { euid: string };
   doc_count: number;
-  /** Present when buildEntitiesSearchBody is called with syncMarker */
+  /** The entity's single most recent document, regardless of whether it matches queryRule. */
   latest_doc?: LatestDocTopHits;
+  /**
+   * The entity's single most recent document that *also* matches queryRule, if any (only
+   * present when queryRule is set).
+   */
+  latest_matching_doc?: { doc: LatestDocTopHits };
 }
 
 export interface EntitiesAggregation {

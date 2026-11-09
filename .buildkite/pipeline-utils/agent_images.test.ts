@@ -141,6 +141,20 @@ describe('agent_images', () => {
       );
     });
 
+    it('limits the spot queues to the asia-south2 and northamerica-northeast2 zones', () => {
+      const spotZones = [
+        'asia-south2-a',
+        'asia-south2-b',
+        'asia-south2-c',
+        'northamerica-northeast2-a',
+        'northamerica-northeast2-b',
+        'northamerica-northeast2-c',
+      ].join(',');
+
+      expect(expandAgentQueue('n2-4-spot')).toEqual(expect.objectContaining({ spotZones }));
+      expect(expandAgentQueue('n2-8-spot')).toEqual(expect.objectContaining({ spotZones }));
+    });
+
     it('returns virt config for virt queue', () => {
       const config = expandAgentQueue('n2-4-virt');
 

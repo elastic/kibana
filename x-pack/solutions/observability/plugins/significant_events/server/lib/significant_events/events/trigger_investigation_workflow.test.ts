@@ -105,7 +105,7 @@ describe('triggerInvestigationWorkflow', () => {
       event,
     });
 
-    const [request] = getStartMock(nightshiftInvestigations).mock.calls[0];
+    const [request, options] = getStartMock(nightshiftInvestigations).mock.calls[0];
     expect(request.subject).toEqual({
       type: 'significant_event',
       id: 'my-stable-id',
@@ -114,6 +114,7 @@ describe('triggerInvestigationWorkflow', () => {
     expect(request.title).toBe('Checkout latency breach');
     expect(request.trigger_type).toBe('manual');
     expect(request.context.event_id).toBe('my-stable-id');
+    expect(options).toEqual({ entryPoint: 'start_api' });
   });
 
   it('passes the event source_ids through', async () => {

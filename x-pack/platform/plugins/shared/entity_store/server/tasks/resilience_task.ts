@@ -23,7 +23,7 @@ import { shouldDeleteOrphanedEntityStoreTask } from './should_delete_orphaned_ta
 
 const config = TasksConfig[EntityStoreTaskType.enum.resilience];
 
-const getResilienceTaskId = (namespace: string): string => `${config.type}:${namespace}`;
+export const getResilienceTaskId = (namespace: string): string => `${config.type}:${namespace}`;
 
 async function runTask({
   taskInstance,

@@ -16,10 +16,8 @@ import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { ISessionService } from '@kbn/data-plugin/public';
-import type { ExperimentalFeatures } from '../../../../common/experimental_features';
-import { APP_UI_ID, ENABLE_NEW_FLYOUT_SETTING } from '../../../../common/constants';
+import { APP_UI_ID } from '../../../../common/constants';
 import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import {
   buildEntityLeftPanel,
@@ -36,8 +34,6 @@ export interface EntityGraphServices {
   agentBuilder?: AgentBuilderPluginStart;
   chrome?: SecurityAgentBuilderChrome;
   searchSession?: ISessionService;
-  experimentalFeatures: ExperimentalFeatures;
-  uiSettings: IUiSettingsClient;
 }
 
 const DEFAULT_LABEL = i18n.translate(
@@ -90,8 +86,6 @@ export const createEntityGraphAttachmentDefinition = ({
   agentBuilder,
   chrome,
   searchSession,
-  experimentalFeatures,
-  uiSettings,
 }: EntityGraphServices): AttachmentUIDefinition<EntityGraphAttachment> => {
   return {
     getLabel: (attachment) => attachment?.data?.attachmentLabel ?? DEFAULT_LABEL,
@@ -107,10 +101,6 @@ export const createEntityGraphAttachmentDefinition = ({
         return [];
       }
 
-      const isNewFlyoutEnabled =
-        !experimentalFeatures.newFlyoutSystemDisabled &&
-        uiSettings.get<boolean>(ENABLE_NEW_FLYOUT_SETTING, true);
-
       return [
         {
           label: OPEN_FULL_GRAPH_LABEL,
@@ -125,7 +115,6 @@ export const createEntityGraphAttachmentDefinition = ({
               chrome,
               openSidebarConversation,
               searchSession,
-              isNewFlyoutEnabled,
             });
           },
         },

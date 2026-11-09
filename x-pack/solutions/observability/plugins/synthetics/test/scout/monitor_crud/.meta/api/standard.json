@@ -1,5 +1,5 @@
 {
-  "sha1": "9342a2d2d4a06a47c654dbb75c987bd6e3fab736",
+  "sha1": "bae672d56fab113ed6b843664461bb0793b98327",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -472,6 +472,20 @@
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/get_filters.spec.ts",
         "line": 166,
         "column": 8
+      }
+    },
+    {
+      "id": "f25c77e74093a83-279d42b82a25d63",
+      "title": "getMonitorFilters keeps equal-number seconds and minutes schedules in separate buckets",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/get_filters.spec.ts",
+        "line": 258,
+        "column": 27
       }
     },
     {
@@ -1101,7 +1115,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/synthetics_api_security.spec.ts",
-        "line": 145,
+        "line": 149,
         "column": 5
       }
     },
@@ -1114,7 +1128,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/synthetics_api_security.spec.ts",
-        "line": 158,
+        "line": 162,
         "column": 25
       }
     },
