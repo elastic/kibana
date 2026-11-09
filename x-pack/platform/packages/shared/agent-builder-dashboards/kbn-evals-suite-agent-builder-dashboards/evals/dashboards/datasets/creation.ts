@@ -41,7 +41,10 @@ export const DASHBOARD_CREATION_EXAMPLES: DashboardDatasetExample[] = [
       'Create a dashboard using kibana_sample_data_logs with 4 KPI metric panels across the top row and one full-width time series panel directly below them.',
     structure: {
       panelKinds: { metric: 4, xy: 1 },
-      rows: [{ kind: 'metric' }, { kind: 'xy', fullWidth: true }],
+      rows: [
+        { kind: 'metric', atTop: true },
+        { kind: 'xy', fullWidth: true },
+      ],
     },
   }),
 ];

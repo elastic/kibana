@@ -11,6 +11,7 @@ import type {
   AgentConfigContext,
   AgentTypeDefinition,
 } from '@kbn/agent-builder-server/agents';
+import { platformSignificantEventsTools } from '@kbn/agent-builder-common';
 import type { Logger } from '@kbn/core/server';
 import {
   SET_HYPOTHESES_TOOL_ID,
@@ -169,7 +170,8 @@ export type NightshiftAgentTypeOptions = Omit<
 /**
  * Builds the configuration every Nightshift agent type shares: tools, connectors, the Wiki and
  * Memory hooks and the space's custom context. Only the instructions differ between types.
- * With `standalone`, the agent lists only its own tools and the Slack read tool.
+ * With `standalone`, the agent lists only its own tools, the significant event search tool and
+ * the Slack read tool.
  * Agent Builder's own prompt and internal tools still apply to it.
  */
 export const buildNightshiftAgentConfiguration = ({
@@ -198,7 +200,11 @@ export const buildNightshiftAgentConfiguration = ({
         {
           tool_ids: [
             ...(standalone
-              ? [...(sandboxEnabled ? [...SANDBOX_TOOL_IDS] : []), TIME_CONVERTER_TOOL_ID]
+              ? [
+                  ...(sandboxEnabled ? [...SANDBOX_TOOL_IDS] : []),
+                  TIME_CONVERTER_TOOL_ID,
+                  platformSignificantEventsTools.searchEvent,
+                ]
               : [
                   ...(investigationToolsEnabled ? [...INVESTIGATION_TOOL_IDS] : []),
                   ...(proposalsEnabled ? [PROPOSALS_CREATE_TOOL_ID] : []),
@@ -261,8 +267,9 @@ export const buildNightshiftAgentConfiguration = ({
 
 /**
  * Builds the Nightshift investigation agent type. It works from the sandbox, so it carries a
- * standalone prompt and no Elastic tools. Telemetry is reached through an Elasticsearch connector the
- * user assigned, as described in `/workspace/.connector-docs/elastic.md`.
+ * standalone prompt and no Elastic data tools beyond the read-only significant event search.
+ * Telemetry is reached through an Elasticsearch connector the user assigned, as described in
+ * `/workspace/.connector-docs/elastic.md`.
  */
 export const getInvestigationAgentType = ({
   decisionTreesEnabled = false,
