@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
-
 /**
  * Where each cloud region is, keyed by lowercase cloud provider and then by the provider's own
  * region code. Covers the regions Elastic Cloud Serverless is available in.
@@ -84,8 +82,5 @@ export const getRegionLabel = (csp: string, region: string): string => {
     return regionCode;
   }
 
-  return i18n.translate('cpsUtils.projectPicker.regionWithLocation', {
-    defaultMessage: '{location} ({regionCode})',
-    values: { location, regionCode },
-  });
+  return `${location} (${regionCode})`;
 };
