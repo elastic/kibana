@@ -236,6 +236,35 @@ describe('Create Remote cluster', () => {
         }
       });
 
+      test('should focus the error callout when seed nodes and node connections are both invalid', async () => {
+        await goToFormStep({ securityModel: 'api' });
+
+        jest.useFakeTimers();
+        try {
+          const userWithFakeTimers = userEvent.setup({
+            delay: null,
+            advanceTimers: jest.advanceTimersByTime,
+          });
+          await userWithFakeTimers.type(
+            screen.getByTestId('remoteClusterFormNameInput'),
+            'test-cluster'
+          );
+          fireEvent.change(screen.getByTestId('remoteClusterFormNodeConnectionsInput'), {
+            target: { value: String(MAX_NODE_CONNECTIONS + 1) },
+          });
+          await userWithFakeTimers.click(screen.getByTestId('remoteClusterFormNextButton'));
+          act(() => jest.advanceTimersByTime(100));
+
+          expect(screen.getByTestId('remoteClusterFormErrorAnnouncement')).toHaveTextContent(
+            'Some fields require your attention. At least one seed node is required.'
+          );
+          expect(screen.getByTestId('remoteClusterFormNodeConnectionsInput')).not.toHaveFocus();
+          expect(screen.getByTestId('remoteClusterFormGlobalError')).toHaveFocus();
+        } finally {
+          jest.useRealTimers();
+        }
+      });
+
       test('renders no switch for cloud advanced options', async () => {
         await goToFormStep({ securityModel: 'api' });
         expect(

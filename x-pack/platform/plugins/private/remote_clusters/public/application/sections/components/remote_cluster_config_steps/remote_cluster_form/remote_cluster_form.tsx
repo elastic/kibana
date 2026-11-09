@@ -50,10 +50,8 @@ const defaultClusterValues: ClusterPayload = {
   proxySocketConnections: 18,
   serverName: '',
 };
-// EuiComboBox puts aria-invalid on its search input; focusing that input also paints a long
-// polite "Combo box. Selected..." live region that VoiceOver reads instead of the form error.
-const FIRST_INVALID_FOCUSABLE_SELECTOR =
-  'input[aria-invalid="true"]:not([role="combobox"]):not(:disabled), textarea[aria-invalid="true"]:not(:disabled)';
+const FIRST_INVALID_CONTROL_SELECTOR =
+  'input[aria-invalid="true"]:not(:disabled), textarea[aria-invalid="true"]:not(:disabled)';
 interface Props {
   confirmFormAction: (cluster: ClusterPayload) => void;
   onBack?: () => void;
@@ -161,9 +159,13 @@ export const RemoteClusterForm: React.FC<Props> = ({
         }));
       });
       const firstInvalidField = formRef.current?.querySelector<HTMLElement>(
-        FIRST_INVALID_FOCUSABLE_SELECTOR
+        FIRST_INVALID_CONTROL_SELECTOR
       );
-      firstInvalidField?.focus();
+      // Focusing an EuiComboBox makes VoiceOver read its "Combo box. Selected..." instructions
+      // instead of the error, so the callout takes focus when the first invalid field is one.
+      if (firstInvalidField?.getAttribute('role') !== 'combobox') {
+        firstInvalidField?.focus();
+      }
       if (!firstInvalidField || document.activeElement !== firstInvalidField) {
         errorSectionRef.current
           ?.querySelector<HTMLElement>('[data-test-subj="remoteClusterFormGlobalError"]')
