@@ -69,6 +69,7 @@ import {
 } from './lib/task_recovery';
 import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execution_telemetry_client';
 import { validateWorkflowInputs } from './lib/validate_workflow_inputs';
+import { registerPerfProfilerRoutes } from './perf_profiler/register_perf_profiler_routes';
 import {
   getExecutionForTaskRunEvent,
   mapExecutionStatusToOutcome,
@@ -259,6 +260,8 @@ export class WorkflowsExecutionEnginePlugin
 
     // Register telemetry event schemas
     WorkflowExecutionTelemetryClient.setup(core.analytics);
+
+    registerPerfProfilerRoutes(core.http.createRouter(), this.logger.get('perfProfiler'));
 
     const logger = this.logger;
     const config = this.config;
