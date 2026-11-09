@@ -8,7 +8,9 @@
 import { parse } from 'yaml';
 import { evaluateKql } from '@kbn/eval-kql';
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
+import { WorkflowSchemaBase } from '@kbn/workflows';
 import { generateWorkflowYaml, SLACK_MESSAGE_TEXT_LIMIT } from './generate_workflow_yaml';
+import { MAX_ALERT_SOURCE_LENGTH, MAX_ALERT_SOURCES } from '../../../common/automation_limits';
 import { MAX_PROMPT_TEMPLATE_LENGTH } from './schemas';
 import type { NightshiftAutomationAttributes, NightshiftTriggerRow } from './types';
 
@@ -40,20 +42,26 @@ describe('generateWorkflowYaml', () => {
       const automation = baseAutomation();
       automation.trigger.rows = rows;
       const workflow = parse(generateWorkflowYaml({ automationId: 'auto-123', automation }));
-      for (const step of workflow.steps) {
-        for (const investigation of step.steps ?? [step]) {
-          expect(investigation.with.automation_id).toBe('auto-123');
-        }
+      const investigations = workflow.steps
+        .flatMap((step: { steps?: unknown[] }) => step.steps ?? [step])
+        .filter((step: { type: string }) => step.type === 'nightshift.triggerInvestigation');
+      expect(investigations).toHaveLength(
+        rows.length + rows.filter((row) => row.kind === 'alert').length
+      );
+      for (const investigation of investigations) {
+        expect(investigation.with.automation_id).toBe('auto-123');
       }
     }
   );
 
   describe('concurrency settings', () => {
-    it('keys alert-triggered runs on the alert, so one alert does not drop the next', () => {
+    it('keys alert-triggered runs on the alert and its status, so a recovery is not dropped behind the activation', () => {
       const yaml = parse(
         generateWorkflowYaml({ automationId: 'auto-123', automation: baseAutomation() })
       );
-      expect(yaml.settings.concurrency.key).toBe('auto-123-{{ event.alert.uuid }}');
+      expect(yaml.settings.concurrency.key).toBe(
+        'auto-123-{{ event.alert.uuid }}{{ event.alert.id }}-{{ event.alert.status }}'
+      );
     });
 
     it('keys slack-triggered runs on the message', () => {
@@ -70,7 +78,7 @@ describe('generateWorkflowYaml', () => {
       automation.trigger.rows = [{ kind: 'alert' }, { kind: 'slack', event: 'message' }];
       const yaml = parse(generateWorkflowYaml({ automationId: 'auto-123', automation }));
       expect(yaml.settings.concurrency.key).toBe(
-        'auto-123-{{ event.alert.uuid }}{{ event.channel }}-{{ event.messageId }}'
+        'auto-123-{{ event.alert.uuid }}{{ event.alert.id }}-{{ event.alert.status }}{{ event.channel }}-{{ event.messageId }}'
       );
     });
 
@@ -158,15 +166,29 @@ describe('generateWorkflowYaml', () => {
       return evaluateKql(yaml.triggers[0].on.condition, event);
     };
 
-    it('always filters on active alerts', () => {
+    it('matches active and recovered alerts', () => {
       const yaml = parse(
         generateWorkflowYaml({ automationId: 'auto-123', automation: baseAutomation() })
       );
-      expect(yaml.triggers[0].on.condition).toBe('event.alert.status: "active"');
+      expect(yaml.triggers[0].on.condition).toBe(
+        '(event.alert.status: "active" OR event.alert.status: "recovered")'
+      );
       expect(alertMatches({ kind: 'alert' }, alertEvent())).toBe(true);
       expect(alertMatches({ kind: 'alert' }, alertEvent({ alert: { status: 'recovered' } }))).toBe(
+        true
+      );
+      expect(alertMatches({ kind: 'alert' }, alertEvent({ alert: { status: 'untracked' } }))).toBe(
         false
       );
+    });
+
+    it('applies the rule filters to recoveries too', () => {
+      const row: AlertRow = { kind: 'alert', tags: ['prod'] };
+      const recovered = { status: 'recovered' };
+      expect(alertMatches(row, alertEvent({ rule: { tags: ['prod'] }, alert: recovered }))).toBe(
+        true
+      );
+      expect(alertMatches(row, alertEvent({ alert: recovered }))).toBe(false);
     });
 
     it('filters by substring rule name pattern as an unquoted wildcard', () => {
@@ -174,7 +196,7 @@ describe('generateWorkflowYaml', () => {
       automation.trigger.rows = [{ kind: 'alert', ruleNamePattern: 'cpu' }];
       const yaml = parse(generateWorkflowYaml({ automationId: 'auto-123', automation }));
       expect(yaml.triggers[0].on.condition).toBe(
-        'event.alert.status: "active" AND event.rule.name: *cpu*'
+        '(event.alert.status: "active" OR event.alert.status: "recovered") AND event.rule.name: *cpu*'
       );
       expect(alertMatches({ kind: 'alert', ruleNamePattern: 'CPU' }, alertEvent())).toBe(true);
       expect(alertMatches({ kind: 'alert', ruleNamePattern: 'disk' }, alertEvent())).toBe(false);
@@ -195,15 +217,187 @@ describe('generateWorkflowYaml', () => {
       ];
       const yaml = parse(generateWorkflowYaml({ automationId: 'auto-123', automation }));
       expect(yaml.triggers[0].on.condition).toBe(
-        '(event.alert.status: "active" AND event.rule.tags: "k8s") OR (event.alert.status: "active" AND event.rule.tags: "prod")'
+        '((event.alert.status: "active" OR event.alert.status: "recovered") AND event.rule.tags: "k8s") OR ((event.alert.status: "active" OR event.alert.status: "recovered") AND event.rule.tags: "prod")'
       );
+    });
+
+    it('starts investigations only for active alerts and follows up on recovered ones', () => {
+      const yaml = parse(
+        generateWorkflowYaml({ automationId: 'auto-123', automation: baseAutomation() })
+      );
+      expect(yaml.steps).toHaveLength(2);
+      const [active, recovered] = yaml.steps[0].steps;
+      expect(active).toMatchObject({
+        name: 'trigger_investigation_alert',
+        type: 'nightshift.triggerInvestigation',
+        if: "${{ event.alert.status == 'active' }}",
+      });
+      expect(recovered).toEqual({
+        name: 'follow_up_recovered_alert',
+        type: 'nightshift.followUpRecoveredAlert',
+        if: "${{ event.alert.status == 'recovered' }}",
+        with: {
+          alert_uuid: '{{ event.alert.uuid }}',
+          alert_id: '${{ event.alert.id }}',
+          alert_start: '${{ event.alert.start }}',
+          recovered_at: '{{ event.timestamp }}',
+          rule_id: '{{ event.rule.id }}',
+          rule_name: '${{ event.rule.name }}',
+          rule_type_id: '{{ event.rule.ruleTypeId }}',
+          rule_tags: '${{ event.rule.tags }}',
+        },
+      });
+    });
+
+    describe.each([
+      ['alerting.v1.alertStatusChanged', 'recovered'],
+      ['alerting.alertStatusChanged', 'inactive'],
+    ])('%s severity filtering', (triggerType, recoveredStatus) => {
+      const matches = (
+        rows: AlertRow[],
+        alert: Record<string, unknown>,
+        rule: Record<string, unknown> | null = { name: 'CPU usage', tags: ['prod'] }
+      ): boolean => {
+        const automation = baseAutomation();
+        automation.trigger.rows = rows;
+        const yaml = parse(generateWorkflowYaml({ automationId: 'auto-123', automation }));
+        const trigger = yaml.triggers.find(({ type }: { type: string }) => type === triggerType);
+        return evaluateKql(trigger.on.condition, { event: { alert, rule } });
+      };
+
+      it('matches selected activation severities and allows recoveries with no severity', () => {
+        const rows: AlertRow[] = [{ kind: 'alert', severities: ['high', 'critical', 'warning'] }];
+        expect(matches(rows, { status: 'active', severity: 'high', previousStatus: null })).toBe(
+          true
+        );
+        expect(
+          matches(rows, { status: 'active', severity: 'critical', previousStatus: null })
+        ).toBe(true);
+        expect(matches(rows, { status: 'active', severity: 'warning', previousStatus: null })).toBe(
+          true
+        );
+        expect(matches(rows, { status: 'active', severity: 'medium', previousStatus: null })).toBe(
+          false
+        );
+        expect(matches(rows, { status: 'active', severity: null, previousStatus: null })).toBe(
+          false
+        );
+        expect(matches(rows, { status: 'active', previousStatus: null })).toBe(false);
+        expect(matches(rows, { status: recoveredStatus, severity: null })).toBe(true);
+        for (const severities of [undefined, []]) {
+          expect(
+            matches([{ kind: 'alert', severities }], {
+              status: 'active',
+              severity: null,
+              previousStatus: null,
+            })
+          ).toBe(true);
+        }
+      });
+
+      it('combines severity with rule filters and preserves alternatives between rows', () => {
+        const rows: AlertRow[] = [
+          { kind: 'alert', severities: ['high'], tags: ['prod'] },
+          { kind: 'alert', severities: ['major'], ruleNames: ['Disk full'] },
+        ];
+        expect(matches(rows, { status: 'active', severity: 'high', previousStatus: null })).toBe(
+          true
+        );
+        expect(
+          matches(
+            rows,
+            { status: 'active', severity: 'major', previousStatus: null },
+            { name: 'Disk full' }
+          )
+        ).toBe(true);
+        expect(matches(rows, { status: 'active', severity: 'major', previousStatus: null })).toBe(
+          false
+        );
+        expect(
+          matches(rows, { status: 'active', severity: 'high', previousStatus: null }, null)
+        ).toBe(false);
+        expect(matches(rows, { status: recoveredStatus, severity: null }, null)).toBe(false);
+        expect(
+          matches(
+            [{ kind: 'alert', severities: ['high'] }],
+            { status: 'active', severity: 'high', previousStatus: null },
+            null
+          )
+        ).toBe(true);
+      });
+    });
+
+    it('keeps the steps of each alert trigger inside its own guard in a mixed automation', () => {
+      const automation = baseAutomation();
+      automation.trigger.rows = [{ kind: 'alert' }, { kind: 'slack', event: 'message' }];
+      const yaml = parse(generateWorkflowYaml({ automationId: 'auto-123', automation }));
+      expect(yaml.steps[0].steps.map((step: { name: string }) => step.name)).toEqual([
+        'trigger_investigation_alert',
+        'follow_up_recovered_alert',
+      ]);
+      expect(yaml.steps[1].steps.map((step: { name: string }) => step.name)).toEqual([
+        'trigger_investigation_alert_v2',
+        'follow_up_recovered_alert_v2',
+      ]);
+      expect(yaml.steps[2].steps.map((step: { name: string }) => step.name)).toEqual([
+        'trigger_investigation_slack',
+      ]);
+    });
+
+    it.each([
+      [[{ kind: 'alert' }]],
+      [[{ kind: 'alert', ruleNames: ['Disk full'], tags: ['prod'] }]],
+      [[{ kind: 'alert' }, { kind: 'slack', event: 'message' }]],
+      [
+        [
+          { kind: 'alert' },
+          { kind: 'slack', event: 'message' },
+          { kind: 'schedule', schedulePreset: 'daily', time: '09:00' },
+        ],
+      ],
+    ] as NightshiftTriggerRow[][][])(
+      'generates a workflow with status-guarded alert steps that the workflow schema accepts: %j',
+      (rows) => {
+        const automation = baseAutomation();
+        automation.trigger.rows = rows;
+        const workflow = parse(generateWorkflowYaml({ automationId: 'auto-123', automation }));
+        const result = WorkflowSchemaBase.safeParse(workflow);
+        expect(result.error).toBeUndefined();
+      }
+    );
+
+    it('gives the recovery step none of the settings of the investigation it follows up', () => {
+      const automation = baseAutomation();
+      automation.execution.promptTemplate = 'Check the checkout service';
+      automation.runtime.timeoutSeconds = 600;
+      automation.completions = [
+        { action: 'post_to_slack', targetMode: 'channel', destination: 'C123' },
+      ];
+      const yaml = parse(generateWorkflowYaml({ automationId: 'auto-123', automation }));
+      const [active, recovered] = yaml.steps[0].steps;
+
+      expect(active.with).toMatchObject({
+        instructions: 'Check the checkout service',
+        timeout_seconds: 600,
+        notificationDestinations: [expect.objectContaining({ params: { channel: 'C123' } })],
+      });
+      expect(Object.keys(recovered.with).sort()).toEqual([
+        'alert_id',
+        'alert_start',
+        'alert_uuid',
+        'recovered_at',
+        'rule_id',
+        'rule_name',
+        'rule_tags',
+        'rule_type_id',
+      ]);
     });
 
     it('passes the alert to the investigation as context.alerts', () => {
       const yaml = parse(
         generateWorkflowYaml({ automationId: 'auto-123', automation: baseAutomation() })
       );
-      expect(yaml.steps[0].with.context.alerts).toEqual([
+      expect(yaml.steps[0].steps[0].with.context.alerts).toEqual([
         {
           id: '${{ event.alert.uuid }}',
           rule_id: '${{ event.rule.id }}',
@@ -218,10 +412,243 @@ describe('generateWorkflowYaml', () => {
       ]);
     });
 
-    it('adds no alert context to manual and scheduled steps', () => {
+    describe('universal alert trigger', () => {
+      const v2Event = (
+        alert: Record<string, unknown>,
+        rule: Record<string, unknown> | null,
+        source?: string
+      ) => ({
+        event: { alert: { id: 'ep-1', ...alert }, rule, source },
+      });
+      const v2Matches = (row: AlertRow, event: ReturnType<typeof v2Event>): boolean => {
+        const automation = baseAutomation();
+        automation.trigger.rows = [row];
+        const yaml = parse(generateWorkflowYaml({ automationId: 'auto-123', automation }));
+        const trigger = yaml.triggers.find(
+          (t: { type: string }) => t.type === 'alerting.alertStatusChanged'
+        );
+        return evaluateKql(trigger.on.condition, event);
+      };
+      const rule = { id: 'rule-1', name: 'High CPU usage', tags: ['k8s'] };
+
+      it('matches new activations and recoveries, but not a flap back to active or in-between states', () => {
+        const row: AlertRow = { kind: 'alert', severities: ['high'] };
+        expect(
+          v2Matches(
+            row,
+            v2Event({ status: 'active', severity: 'high', previousStatus: null }, rule)
+          )
+        ).toBe(true);
+        expect(
+          v2Matches(
+            row,
+            v2Event({ status: 'active', severity: 'high', previousStatus: 'pending' }, rule)
+          )
+        ).toBe(true);
+        expect(
+          v2Matches(row, v2Event({ status: 'inactive', previousStatus: 'recovering' }, rule))
+        ).toBe(true);
+        expect(
+          v2Matches(
+            row,
+            v2Event({ status: 'active', severity: 'high', previousStatus: 'recovering' }, rule)
+          )
+        ).toBe(false);
+        expect(
+          v2Matches(row, v2Event({ status: 'recovering', previousStatus: 'active' }, rule))
+        ).toBe(false);
+        expect(v2Matches(row, v2Event({ status: 'pending', previousStatus: null }, rule))).toBe(
+          false
+        );
+      });
+
+      it('does not match an alert without a rule when the row filters by rule, and matches it otherwise', () => {
+        const event = v2Event({ status: 'active', previousStatus: null }, null);
+        expect(v2Matches({ kind: 'alert' }, event)).toBe(true);
+        expect(v2Matches({ kind: 'alert', tags: ['k8s'] }, event)).toBe(false);
+        expect(v2Matches({ kind: 'alert', ruleNames: ['High CPU usage'] }, event)).toBe(false);
+        expect(v2Matches({ kind: 'alert', ruleNamePattern: 'CPU' }, event)).toBe(false);
+      });
+
+      it('applies the rule filters to alerts that have a rule', () => {
+        const event = v2Event({ status: 'active', previousStatus: null }, rule);
+        expect(v2Matches({ kind: 'alert', tags: ['k8s'] }, event)).toBe(true);
+        expect(v2Matches({ kind: 'alert', tags: ['prod'] }, event)).toBe(false);
+      });
+
+      describe('alert source filter', () => {
+        it.each([
+          ['internal', 'active', 'high', true],
+          ['pagerduty', 'active', 'high', false],
+          ['internal', 'active', 'medium', false],
+          ['internal', 'inactive', null, true],
+          ['pagerduty', 'inactive', null, false],
+        ])('combines source and severity for %s %s %s', (source, status, severity, expected) => {
+          const row: AlertRow = {
+            kind: 'alert',
+            alertSources: ['internal'],
+            severities: ['high'],
+          };
+          const event = v2Event({ status, severity, previousStatus: null }, rule, source);
+          expect(v2Matches(row, event)).toBe(expected);
+        });
+
+        const sourceEvent = (source: string) =>
+          v2Event({ status: 'active', previousStatus: null }, rule, source);
+
+        it('keeps only the included sources', () => {
+          const row: AlertRow = {
+            kind: 'alert',
+            alertSources: ['elastic.significant_events'],
+            alertSourceMode: 'include',
+          };
+          expect(v2Matches(row, sourceEvent('elastic.significant_events'))).toBe(true);
+          expect(v2Matches(row, sourceEvent('internal'))).toBe(false);
+          expect(v2Matches(row, sourceEvent('pagerduty'))).toBe(false);
+        });
+
+        it('drops the excluded sources and keeps the rest', () => {
+          const row: AlertRow = {
+            kind: 'alert',
+            alertSources: ['internal', 'elastic.significant_events'],
+            alertSourceMode: 'exclude',
+          };
+          expect(v2Matches(row, sourceEvent('internal'))).toBe(false);
+          expect(v2Matches(row, sourceEvent('elastic.significant_events'))).toBe(false);
+          expect(v2Matches(row, sourceEvent('pagerduty'))).toBe(true);
+        });
+
+        it('matches every source outside the first-party ones for external', () => {
+          const row: AlertRow = { kind: 'alert', alertSources: ['external'] };
+          expect(v2Matches(row, sourceEvent('pagerduty'))).toBe(true);
+          expect(v2Matches(row, sourceEvent('internal'))).toBe(false);
+          expect(v2Matches(row, sourceEvent('elastic.significant_events'))).toBe(false);
+          expect(v2Matches(row, sourceEvent('elastic.future_producer'))).toBe(false);
+        });
+
+        it('keeps only the first-party sources when external is excluded', () => {
+          const row: AlertRow = {
+            kind: 'alert',
+            alertSources: ['external'],
+            alertSourceMode: 'exclude',
+          };
+          expect(v2Matches(row, sourceEvent('internal'))).toBe(true);
+          expect(v2Matches(row, sourceEvent('elastic.significant_events'))).toBe(true);
+          expect(v2Matches(row, sourceEvent('pagerduty'))).toBe(false);
+        });
+
+        it('combines external with a first-party source, and excludes both together', () => {
+          const include: AlertRow = { kind: 'alert', alertSources: ['external', 'internal'] };
+          expect(v2Matches(include, sourceEvent('pagerduty'))).toBe(true);
+          expect(v2Matches(include, sourceEvent('internal'))).toBe(true);
+          expect(v2Matches(include, sourceEvent('elastic.significant_events'))).toBe(false);
+          const exclude: AlertRow = { ...include, alertSourceMode: 'exclude' };
+          expect(v2Matches(exclude, sourceEvent('pagerduty'))).toBe(false);
+          expect(v2Matches(exclude, sourceEvent('elastic.significant_events'))).toBe(true);
+        });
+
+        it('combines the source filter with the rule filters', () => {
+          const row: AlertRow = { kind: 'alert', tags: ['k8s'], alertSources: ['internal'] };
+          expect(v2Matches(row, sourceEvent('internal'))).toBe(true);
+          expect(v2Matches(row, sourceEvent('pagerduty'))).toBe(false);
+        });
+
+        const triggerTypes = (row: AlertRow) => {
+          const automation = baseAutomation();
+          automation.trigger.rows = [row];
+          return parse(generateWorkflowYaml({ automationId: 'auto-123', automation })).triggers.map(
+            (t: { type: string }) => t.type
+          );
+        };
+
+        it('emits the classic trigger only when classic passes the filter', () => {
+          const both = ['alerting.v1.alertStatusChanged', 'alerting.alertStatusChanged'];
+          expect(triggerTypes({ kind: 'alert' })).toEqual(both);
+          expect(triggerTypes({ kind: 'alert', alertSources: ['classic', 'internal'] })).toEqual(
+            both
+          );
+          expect(
+            triggerTypes({ kind: 'alert', alertSources: ['internal'], alertSourceMode: 'include' })
+          ).toEqual(['alerting.alertStatusChanged']);
+          expect(
+            triggerTypes({ kind: 'alert', alertSources: ['classic'], alertSourceMode: 'exclude' })
+          ).toEqual(['alerting.alertStatusChanged']);
+        });
+
+        it('rejects a source filter that leaves no trigger when universal alerting is off', () => {
+          const automation = baseAutomation();
+          automation.trigger.rows = [{ kind: 'alert', alertSources: ['internal'] }];
+          expect(() =>
+            generateWorkflowYaml({ automationId: 'auto-123', automation, universalAlerts: false })
+          ).toThrow('no available trigger');
+        });
+
+        it('accepts the largest source filter the request schema allows', () => {
+          const alertSources = Array.from({ length: MAX_ALERT_SOURCES }, (_, i) =>
+            `${i}`.padEnd(MAX_ALERT_SOURCE_LENGTH, 'x')
+          );
+          const automation = baseAutomation();
+          automation.trigger.rows = [{ kind: 'alert', alertSources }];
+          expect(() =>
+            generateWorkflowYaml({ automationId: 'auto-123', automation })
+          ).not.toThrow();
+        });
+
+        it('rejects source filters longer than a trigger condition allows', () => {
+          const alertSources = Array.from(
+            { length: 30 },
+            (_, i) => `source-${i}-${'x'.repeat(90)}`
+          );
+          const automation = baseAutomation();
+          automation.trigger.rows = [{ kind: 'alert', alertSources }];
+          expect(() => generateWorkflowYaml({ automationId: 'auto-123', automation })).toThrow(
+            'too long'
+          );
+        });
+
+        it('emits the universal trigger only when a universal source passes the filter', () => {
+          expect(triggerTypes({ kind: 'alert', alertSources: ['classic'] })).toEqual([
+            'alerting.v1.alertStatusChanged',
+          ]);
+        });
+
+        it('ignores blank and padded sources instead of dropping every alert trigger', () => {
+          expect(triggerTypes({ kind: 'alert', alertSources: [' classic '] })).toEqual([
+            'alerting.v1.alertStatusChanged',
+          ]);
+          expect(triggerTypes({ kind: 'alert', alertSources: [''] })).toEqual([
+            'alerting.v1.alertStatusChanged',
+            'alerting.alertStatusChanged',
+          ]);
+        });
+      });
+
+      it('keys the investigation on the alert id and sends no context, so the alert is looked up', () => {
+        const yaml = parse(
+          generateWorkflowYaml({ automationId: 'auto-123', automation: baseAutomation() })
+        );
+        const [start, recovered] = yaml.steps[1].steps;
+        expect(start.with).toMatchObject({
+          subject_type: 'alert',
+          subject_id: '{{ event.alert.id }}',
+          title: '{{ event.rule.name | default: event.alert.id }}',
+        });
+        expect(start.with).not.toHaveProperty('context');
+        expect(start.if).toBe("${{ event.alert.status == 'active' }}");
+        expect(recovered).toMatchObject({
+          name: 'follow_up_recovered_alert_v2',
+          if: "${{ event.alert.status == 'inactive' }}",
+          with: { alert_uuid: '{{ event.alert.id }}', recovered_at: '{{ event.timestamp }}' },
+        });
+      });
+    });
+
+    it('adds no alert context, status guard or recovery step to manual steps', () => {
       const automation = baseAutomation();
       automation.trigger.rows = [];
       const yaml = parse(generateWorkflowYaml({ automationId: 'auto-123', automation }));
+      expect(yaml.steps).toHaveLength(1);
+      expect(yaml.steps[0]).not.toHaveProperty('if');
       expect(yaml.steps[0].with).not.toHaveProperty('context');
     });
   });
@@ -293,15 +720,42 @@ describe('generateWorkflowYaml', () => {
         with: {
           automation_id: 'auto-123',
           subject_type: 'manual',
-          subject_id: 'manual',
+          subject_id: 'scheduled-auto-123-{{ event.scheduledFor | default: execution.id }}',
           title: 'Test automation',
           summary: 'Test automation',
           trigger_type: 'automatic',
-          message: 'Assess checkout health in the last hour.',
+          message: 'Instructions:\nAssess checkout health in the last hour.',
           scope_query: 'service.name:checkout',
           timeout_seconds: 120,
         },
       });
+    });
+
+    it('emits no universal alert trigger or steps when universal alerting is unavailable', () => {
+      const automation = scheduledAutomation();
+      automation.trigger.rows.push({ kind: 'alert' });
+      const yaml = parse(
+        generateWorkflowYaml({ automationId: 'auto-123', automation, universalAlerts: false })
+      );
+      expect(yaml.triggers.map((trigger: { type: string }) => trigger.type)).toEqual([
+        'alerting.v1.alertStatusChanged',
+        'scheduled',
+      ]);
+      expect(JSON.stringify(yaml.steps)).not.toContain('_v2');
+    });
+
+    it('keeps an alert-only automation unguarded when universal alerting is unavailable', () => {
+      const yaml = parse(
+        generateWorkflowYaml({
+          automationId: 'auto-123',
+          automation: baseAutomation(),
+          universalAlerts: false,
+        })
+      );
+      expect(yaml.triggers).toHaveLength(1);
+      expect(yaml.steps.map((step: { name: string }) => step.name)).not.toContain(
+        'trigger_investigation_alert_v2'
+      );
     });
 
     it('isolates scheduled and alert steps when both sources are configured', () => {
@@ -310,6 +764,7 @@ describe('generateWorkflowYaml', () => {
       const yaml = parse(generateWorkflowYaml({ automationId: 'auto-123', automation }));
       expect(yaml.triggers.map((trigger: { type: string }) => trigger.type)).toEqual([
         'alerting.v1.alertStatusChanged',
+        'alerting.alertStatusChanged',
         'scheduled',
       ]);
       expect(yaml.steps[0].condition).toBe("${{ execution.triggeredBy == 'scheduled' }}");
@@ -330,21 +785,23 @@ describe('generateWorkflowYaml', () => {
       const yaml = parse(generateWorkflowYaml({ automationId: 'auto-123', automation }));
       expect(yaml.triggers.map((trigger: { type: string }) => trigger.type)).toEqual([
         'alerting.v1.alertStatusChanged',
+        'alerting.alertStatusChanged',
         'slack2.message',
         'scheduled',
       ]);
       expect(yaml.steps.map((step: { condition: string }) => step.condition)).toEqual([
         "${{ execution.triggeredBy == 'scheduled' }}",
         "${{ execution.triggeredBy == 'alerting.v1.alertStatusChanged' }}",
+        "${{ execution.triggeredBy == 'alerting.alertStatusChanged' }}",
         "${{ execution.triggeredBy == 'slack2.message' }}",
       ]);
-      const [scheduled, alert, slack] = yaml.steps.map(
+      const [scheduled, alert, , slack] = yaml.steps.map(
         (guard: { steps: Array<{ name: string; with: Record<string, string> }> }) => guard.steps[0]
       );
       expect(new Set([scheduled.name, alert.name, slack.name]).size).toBe(3);
       expect(scheduled.with).toMatchObject({
         subject_type: 'manual',
-        subject_id: 'manual',
+        subject_id: 'scheduled-auto-123-{{ event.scheduledFor | default: execution.id }}',
         timeout_seconds: 120,
       });
       expect(alert.with).toMatchObject({
@@ -352,13 +809,10 @@ describe('generateWorkflowYaml', () => {
         subject_id: '{{ event.alert.uuid }}',
         timeout_seconds: 120,
       });
-      expect(slack.with).toMatchObject({
-        subject_type: 'manual',
-        subject_id: '{{ event.connectorId }}:{{ event.channel }}:{{ event.messageId }}',
-        timeout_seconds: 120,
-      });
+      expect(slack.with).toMatchObject({ subject_type: 'slack_thread', timeout_seconds: 120 });
       expect(scheduled.with.message).not.toContain('event.text');
-      expect(alert.with.message).not.toContain('event.text');
+      expect(alert.with.instructions).not.toContain('event.text');
+      expect(alert.with.message).toBeUndefined();
       expect(slack.with.message).toContain('{{ event.text | truncate: 4000 }}');
       expect(scheduled.with.slack_thread).toBeUndefined();
       expect(alert.with.slack_thread).toBeUndefined();
@@ -366,6 +820,7 @@ describe('generateWorkflowYaml', () => {
         workspace: '{{ event.workspace }}',
         channel: '{{ event.channel }}',
         thread_ts: '{{ event.messageId }}',
+        external_conversation_id: '{{ event.externalConversationId }}',
       });
       expect(scheduled.with.notificationDestinations).toBeUndefined();
       expect(alert.with.notificationDestinations).toBeUndefined();
@@ -605,6 +1060,7 @@ describe('generateWorkflowYaml', () => {
       const yaml = parse(generateWorkflowYaml({ automationId: 'auto-123', automation }));
       expect(yaml.triggers.map((t: { type: string }) => t.type)).toEqual([
         'alerting.v1.alertStatusChanged',
+        'alerting.alertStatusChanged',
         'slack2.message',
       ]);
     });
@@ -623,50 +1079,42 @@ describe('generateWorkflowYaml', () => {
     });
 
     describe('trigger_investigation step', () => {
-      it('investigates a manual subject keyed by the message', () => {
-        const yaml = parse(
-          generateWorkflowYaml({
-            automationId: 'auto-123',
-            automation: slackAutomation(slackRow()),
-          })
-        );
-        expect(yaml.steps[0].with).toMatchObject({
-          subject_type: 'manual',
-          subject_id: '{{ event.connectorId }}:{{ event.channel }}:{{ event.messageId }}',
-          title: 'Test automation',
-        });
-      });
-
-      it("names the message's thread, so a reply in it continues the investigation", () => {
-        const automation = slackAutomation(slackRow());
-        automation.completions = [{ action: 'post_to_slack', targetMode: 'thread' }];
-        const yaml = parse(generateWorkflowYaml({ automationId: 'auto-123', automation }));
-        expect(yaml.steps[0].with.slack_thread).toEqual({
-          workspace: '{{ event.workspace }}',
-          channel: '{{ event.channel }}',
-          thread_ts: '{{ event.messageId }}',
-        });
-      });
-
       it.each<[string, NightshiftAutomationAttributes['completions']]>([
+        ['reports in the thread', [{ action: 'post_to_slack', targetMode: 'thread' }]],
         ['reports nowhere', []],
         [
           'reports in another channel',
           [{ action: 'post_to_slack', targetMode: 'channel', destination: '#prod-alerts' }],
         ],
-      ])('leaves the thread unnamed when the automation %s', (_, completions) => {
-        const automation = slackAutomation(slackRow());
-        automation.completions = completions;
-        const yaml = parse(generateWorkflowYaml({ automationId: 'auto-123', automation }));
-        expect(yaml.steps[0].with.slack_thread).toBeUndefined();
-      });
+      ])(
+        "investigates the message's thread, keyed by the Relay's key, when the automation %s",
+        (_, completions) => {
+          const automation = slackAutomation(slackRow());
+          automation.completions = completions;
+          const { with: input } = parse(
+            generateWorkflowYaml({ automationId: 'auto-123', automation })
+          ).steps[0];
+          expect(input).toMatchObject({
+            subject_type: 'slack_thread',
+            title: 'Test automation',
+            slack_thread: {
+              workspace: '{{ event.workspace }}',
+              channel: '{{ event.channel }}',
+              thread_ts: '{{ event.messageId }}',
+              external_conversation_id: '{{ event.externalConversationId }}',
+            },
+          });
+          expect(input).not.toHaveProperty('subject_id');
+        }
+      );
 
-      it('puts the slack message in the prompt after the prompt template', () => {
+      it('separates the Slack evidence from operator instructions', () => {
         const automation = slackAutomation(slackRow());
         automation.execution.promptTemplate = 'Look for deploy problems.';
         const yaml = parse(generateWorkflowYaml({ automationId: 'auto-123', automation }));
+        expect(yaml.steps[0].with.instructions).toBe('Look for deploy problems.');
         expect(yaml.steps[0].with.message).toBe(
-          'Look for deploy problems.\n\nSlack message from {{ event.botName | default: event.sender | default: event.botId }} in channel {{ event.channel }}:\n\n{{ event.text | truncate: 4000 }}'
+          'Slack message from {{ event.botName | default: event.sender | default: event.botId }} in channel {{ event.channel }}:\n\n{{ event.text | truncate: 4000 }}'
         );
       });
 
@@ -677,6 +1125,7 @@ describe('generateWorkflowYaml', () => {
             automation: slackAutomation(slackRow()),
           })
         );
+        expect(yaml.steps[0].with.instructions).toBe('');
         expect(yaml.steps[0].with.message).toContain('{{ event.text | truncate: 4000 }}');
       });
 
@@ -696,21 +1145,20 @@ describe('generateWorkflowYaml', () => {
         automation.trigger.rows = [slackRow(), { kind: 'alert' }];
         const yaml = parse(generateWorkflowYaml({ automationId: 'auto-123', automation }));
 
-        expect(yaml.steps).toHaveLength(2);
+        expect(yaml.steps).toHaveLength(3);
         expect(yaml.steps.map((s: { condition: string }) => s.condition)).toEqual([
           "${{ execution.triggeredBy == 'alerting.v1.alertStatusChanged' }}",
+          "${{ execution.triggeredBy == 'alerting.alertStatusChanged' }}",
           "${{ execution.triggeredBy == 'slack2.message' }}",
         ]);
-        const [alertGuard, slackGuard] = yaml.steps;
+        const [alertGuard, , slackGuard] = yaml.steps;
         expect(alertGuard.type).toBe('if');
         expect(alertGuard.steps[0].with).toMatchObject({
           subject_type: 'alert',
           subject_id: '{{ event.alert.uuid }}',
         });
-        expect(slackGuard.steps[0].with).toMatchObject({
-          subject_type: 'manual',
-          subject_id: '{{ event.connectorId }}:{{ event.channel }}:{{ event.messageId }}',
-        });
+        expect(slackGuard.steps[0].with).toMatchObject({ subject_type: 'slack_thread' });
+        expect(slackGuard.steps[0].with).not.toHaveProperty('subject_id');
       });
 
       it('gives every step in a mixed automation a distinct name', () => {
@@ -731,35 +1179,36 @@ describe('generateWorkflowYaml', () => {
       const yaml = parse(
         generateWorkflowYaml({ automationId: 'auto-123', automation: baseAutomation() })
       );
-      expect(yaml.steps[0].with.subject_id).toBe('{{ event.alert.uuid }}');
+      expect(yaml.steps[0].steps[0].with.subject_id).toBe('{{ event.alert.uuid }}');
     });
 
     it('uses event.rule.name as title for alert triggers', () => {
       const yaml = parse(
         generateWorkflowYaml({ automationId: 'auto-123', automation: baseAutomation() })
       );
-      expect(yaml.steps[0].with.title).toBe('{{ event.rule.name }}');
+      expect(yaml.steps[0].steps[0].with.title).toBe('{{ event.rule.name }}');
     });
 
     it('passes no concurrency_key to the step, which matches investigations by subject', () => {
       const yaml = parse(
         generateWorkflowYaml({ automationId: 'auto-123', automation: baseAutomation() })
       );
-      expect(yaml.steps[0].with).not.toHaveProperty('concurrency_key');
+      expect(yaml.steps[0].steps[0].with).not.toHaveProperty('concurrency_key');
     });
 
-    it('includes message when promptTemplate is set', () => {
+    it('includes instructions when promptTemplate is set', () => {
       const automation = baseAutomation();
       automation.execution.promptTemplate = 'Investigate this alert carefully.';
       const yaml = parse(generateWorkflowYaml({ automationId: 'auto-123', automation }));
-      expect(yaml.steps[0].with.message).toBe('Investigate this alert carefully.');
+      expect(yaml.steps[0].steps[0].with.instructions).toBe('Investigate this alert carefully.');
+      expect(yaml.steps[0].steps[0].with.message).toBeUndefined();
     });
 
     it('omits message when promptTemplate is not set', () => {
       const yaml = parse(
         generateWorkflowYaml({ automationId: 'auto-123', automation: baseAutomation() })
       );
-      expect(yaml.steps[0].with.message).toBeUndefined();
+      expect(yaml.steps[0].steps[0].with.message).toBeUndefined();
     });
 
     it('copies a Slack channel destination onto the investigation with the default connector', () => {
@@ -772,7 +1221,7 @@ describe('generateWorkflowYaml', () => {
         },
       ];
       const yaml = parse(generateWorkflowYaml({ automationId: 'auto-123', automation }));
-      expect(yaml.steps[0].with.notificationDestinations).toEqual([
+      expect(yaml.steps[0].steps[0].with.notificationDestinations).toEqual([
         {
           type: 'slack',
           connector_id: 'elastic-apps-slack',
@@ -845,7 +1294,7 @@ describe('generateWorkflowYaml', () => {
         const automation = slackAutomationWith({ action: 'post_to_slack', targetMode: 'thread' });
         automation.trigger.rows = [{ kind: 'alert' }, { kind: 'slack', event: 'message' }];
         const yaml = parse(generateWorkflowYaml({ automationId: 'auto-123', automation }));
-        const [alertGuard, slackGuard] = yaml.steps;
+        const [alertGuard, , slackGuard] = yaml.steps;
         expect(alertGuard.steps[0].with.notificationDestinations).toBeUndefined();
         expect(slackGuard.steps[0].with.notificationDestinations).toHaveLength(1);
       });
@@ -862,7 +1311,7 @@ describe('generateWorkflowYaml', () => {
         },
       ];
       const yaml = parse(generateWorkflowYaml({ automationId: 'auto-123', automation }));
-      expect(yaml.steps[0].with.notificationDestinations[0]).toEqual(
+      expect(yaml.steps[0].steps[0].with.notificationDestinations[0]).toEqual(
         expect.objectContaining({
           connector_id: 'my-slack-bot',
           params: { channel: 'C0123456789' },
@@ -885,7 +1334,7 @@ describe('generateWorkflowYaml', () => {
       ];
 
       const yaml = parse(generateWorkflowYaml({ automationId: 'auto-123', automation }));
-      expect(yaml.steps[0].with.notificationDestinations).toEqual([
+      expect(yaml.steps[0].steps[0].with.notificationDestinations).toEqual([
         {
           type: 'slack',
           connector_id: 'elastic-apps-slack',
@@ -916,7 +1365,7 @@ describe('generateWorkflowYaml', () => {
       const automation = baseAutomation();
       automation.completions = [{ ...completion }];
       const yaml = parse(generateWorkflowYaml({ automationId: 'auto-123', automation }));
-      expect(yaml.steps[0].with.notificationDestinations).toBeUndefined();
+      expect(yaml.steps[0].steps[0].with.notificationDestinations).toBeUndefined();
     });
 
     it('does not include execution.id anywhere in the output', () => {

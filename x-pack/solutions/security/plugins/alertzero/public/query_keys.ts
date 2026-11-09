@@ -59,6 +59,11 @@ export const queryKeys = {
     all: ['alertzero', 'hunt-threat-intel-supply'] as const,
     status: () => [...queryKeys.huntThreatIntelSupply.all, 'status'] as const,
   },
+  /** Hunt worker index coverage for the current space. */
+  huntWorkerIndexCoverage: {
+    all: ['alertzero', 'hunt-worker-index-coverage'] as const,
+    coverage: () => [...queryKeys.huntWorkerIndexCoverage.all, 'coverage'] as const,
+  },
   workerDependencies: {
     alertAnalysisSetting: (spaceBasePath: string, cachedValue: boolean) =>
       [

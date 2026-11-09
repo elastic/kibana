@@ -19,7 +19,7 @@ import type { QuickFix, QuickFixMessage } from './types';
 type QuickFixProvider = (message: QuickFixMessage) => QuickFix[];
 
 const loadUnmappedFieldsQuickFix: QuickFix = {
-  title: i18n.translate('kbn-esql-language.esql.quickFix.loadUnmappedFields', {
+  title: i18n.translate('esqlLanguage.esql.quickFix.loadUnmappedFields', {
     defaultMessage: 'Load unmapped fields',
   }),
   displayCondition: hasWiredStreamsInQuery,
@@ -35,7 +35,7 @@ const loadUnmappedFieldsQuickFix: QuickFix = {
 };
 
 const wrapInBackticksQuickFix = (message: QuickFixMessage): QuickFix => ({
-  title: i18n.translate('kbn-esql-language.esql.quickFix.wrapInBackticks', {
+  title: i18n.translate('esqlLanguage.esql.quickFix.wrapInBackticks', {
     defaultMessage: 'Wrap identifier in backticks',
   }),
   fixQuery: (query: string) => {

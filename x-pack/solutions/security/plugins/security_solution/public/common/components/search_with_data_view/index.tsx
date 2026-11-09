@@ -26,8 +26,6 @@ export const SearchWithDataView: React.FC<SearchWithDataViewProps> = ({ dataView
   const { euiTheme } = useEuiTheme();
   const sectionStyles = css`
     margin-inline: -${euiTheme.size.l};
-    padding-block: ${euiTheme.size.s};
-    padding-left: ${euiTheme.size.s};
     background: ${euiTheme.colors.backgroundBaseSubdued};
     min-width: 0;
   `;
@@ -36,6 +34,7 @@ export const SearchWithDataView: React.FC<SearchWithDataViewProps> = ({ dataView
   `;
   // Match the search bar's padding-top so the picker lines up with it
   const dataViewPickerStyles = css`
+    padding-left: ${euiTheme.size.s};
     padding-top: ${euiTheme.size.s};
   `;
 

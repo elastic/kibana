@@ -24,7 +24,6 @@ export const createAlertDetectionsNavigationTree = (): RootNodePanelOpenerDefini
         {
           id: SecurityPageName.attacks,
           link: securityLink(SecurityPageName.attacks),
-          badgeType: 'new',
         },
         {
           id: SecurityPageName.alerts,

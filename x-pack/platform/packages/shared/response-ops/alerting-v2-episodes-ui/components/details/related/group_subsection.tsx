@@ -15,6 +15,10 @@ import { getRuleIdFromRuleState, type RuleState } from '../../../types/rule_stat
 import type { RelatedEpisodesScope } from '../../../queries/related_episodes_query';
 import { RELATED_ALERT_EPISODES_PAGE_SIZE } from '../../../constants';
 import { useFetchEpisodeActions } from '../../../hooks/use_fetch_episode_actions';
+import {
+  useFetchEpisodesDataQuery,
+  withEpisodesData,
+} from '../../../hooks/use_fetch_episodes_data_query';
 import { getGroupAction, useFetchGroupActions } from '../../../hooks/use_fetch_group_actions';
 import { useFetchSameGroupEpisodesQuery } from '../../../hooks/use_fetch_same_group_episodes_query';
 import { AlertEpisodeCardListSkeleton } from '../section_skeletons';
@@ -89,6 +93,17 @@ export function RelatedEpisodesGroupSubsection({
     [sameGroupRows]
   );
 
+  // Loaded on its own, so the rows show up without waiting for it. Without the
+  // data the rows just miss the grouping badges.
+  const { data: sameGroupEpisodesData } = useFetchEpisodesDataQuery({
+    episodeIds: sameGroupEpisodeIds,
+    services: { expressions, spaces },
+  });
+  const sameGroupRowsWithData = useMemo(
+    () => withEpisodesData(sameGroupRows, sameGroupEpisodesData),
+    [sameGroupRows, sameGroupEpisodesData]
+  );
+
   /** We need the actions to display the correct status badges. */
   const { data: sameGroupEpisodeActionsMap } = useFetchEpisodeActions({
     episodeIds: sameGroupEpisodeIds,
@@ -134,7 +149,7 @@ export function RelatedEpisodesGroupSubsection({
         </EuiPanel>
       ) : (
         <RelatedAlertEpisodesList
-          rows={sameGroupRows}
+          rows={sameGroupRowsWithData}
           ruleState={ruleState}
           getEpisodeAction={(id) => sameGroupEpisodeActionsMap?.get(id)}
           getGroupAction={(gh) => getGroupAction(sameGroupGroupActionsMap, ruleId, gh)}

@@ -17,7 +17,7 @@ import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { SortColumnTable } from '@kbn/securitysolution-data-table';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { TimelineItem } from '@kbn/timelines-plugin/common';
+import type { TimelineItem } from '@kbn/securitysolution-timeline-common';
 import type { OnRowSelected, SetEventsDeleted, SetEventsLoading } from '..';
 import type { BrowserFields } from '../../search_strategy';
 

@@ -24,8 +24,7 @@ import type { estypes } from '@elastic/elasticsearch';
  * hunt-usable; promote keeps its own IOC-only filter. KEV reports are hunt-usable
  * but not indicator-eligible.
  *
- * Future work: a CVE-to-environment vuln hunt. The Intelligence Hub does not
- * consume these bars.
+ * Future work: a CVE-to-environment vuln hunt.
  */
 
 /** Hunt-usable bar; see the contract comment at the top of this file. */

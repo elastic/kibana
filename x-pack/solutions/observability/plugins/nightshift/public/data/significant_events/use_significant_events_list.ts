@@ -10,18 +10,13 @@ import type {
   SignificantEventsSortField,
   SignificantEventsSortOrder,
 } from '@kbn/significant-events-plugin/common';
-import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { useFetchErrorToast } from '../../hooks/use_fetch_error_toast';
-import { applyPendingInvestigationCompletions } from '../../hooks/use_fetch_significant_events';
 import { useKibana } from '../../hooks/use_kibana';
 import { significantEventsListQueryKey } from '../query_keys';
-import { getInvestigationState } from './investigation_state';
+import { hasInvestigationsToPoll } from './investigation_state';
 import { toEventsFilterQuery, type SignificantEventsFilters } from './events_filter_query';
 
 const RUNNING_INVESTIGATIONS_REFETCH_INTERVAL_MS = 5_000;
-
-const hasRunningInvestigations = (events: SignificantEvent[]): boolean =>
-  events.some((event) => getInvestigationState(event) === 'in_progress');
 
 export interface SignificantEventsListParams extends SignificantEventsFilters {
   page: number;
@@ -38,28 +33,22 @@ export const useSignificantEventsList = (params: SignificantEventsListParams) =>
   return useQuery({
     queryKey: significantEventsListQueryKey(params),
     queryFn: async ({ signal }) => {
-      const response = await significantEventsRepositoryClient.fetch(
-        'GET /internal/significant_events/events',
-        {
-          params: {
-            query: {
-              ...toEventsFilterQuery(filters),
-              page,
-              perPage,
-              sort_field: sortField,
-              sort_order: sortOrder,
-            },
+      return significantEventsRepositoryClient.fetch('GET /internal/significant_events/events', {
+        params: {
+          query: {
+            ...toEventsFilterQuery(filters),
+            page,
+            perPage,
+            sort_field: sortField,
+            sort_order: sortOrder,
           },
-          signal: signal ?? null,
-        }
-      );
-
-      // Keep completions the flyout saw before the server records them.
-      return { ...response, hits: applyPendingInvestigationCompletions(response.hits) };
+        },
+        signal: signal ?? null,
+      });
     },
     keepPreviousData: true,
     refetchInterval: (data) =>
-      data?.hits && hasRunningInvestigations(data.hits)
+      data?.hits && hasInvestigationsToPoll(data.hits)
         ? RUNNING_INVESTIGATIONS_REFETCH_INTERVAL_MS
         : false,
     onError: showFetchErrorToast,

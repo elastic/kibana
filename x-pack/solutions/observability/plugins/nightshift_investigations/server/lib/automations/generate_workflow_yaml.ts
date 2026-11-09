@@ -7,7 +7,11 @@
 
 import { stringify } from 'yaml';
 import { IF_CONDITION_MAX_LENGTH } from '@kbn/workflows';
-import { DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID } from '../../../common';
+import {
+  CLASSIC_ALERT_SOURCE,
+  EXTERNAL_ALERT_SOURCE,
+  UNIVERSAL_ALERT_SOURCE,
+} from '../../../common/automation_limits';
 import { parsePresetSchedule } from '../../../common/automation_schedule';
 import type { InvestigationNotificationDestination } from '../../../common';
 import type { NightshiftAutomationAttributes, NightshiftTriggerRow, OverlapPolicy } from './types';
@@ -17,6 +21,7 @@ import type { NightshiftAutomationAttributes, NightshiftTriggerRow, OverlapPolic
 export const ELASTIC_APPS_SLACK_CONNECTOR_ID = 'elastic-apps-slack';
 
 const ALERT_TRIGGER_TYPE = 'alerting.v1.alertStatusChanged';
+const ALERT_V2_TRIGGER_TYPE = 'alerting.alertStatusChanged';
 const SLACK_MESSAGE_TRIGGER_TYPE = 'slack2.message';
 const AUTOMATION_TIMEOUT_MARGIN_SECONDS = 60;
 
@@ -29,20 +34,16 @@ const SLACK_MESSAGE_EXCLUSIONS = [
   '(not event.subtype:* or event.subtype:bot_message or event.subtype:file_share)',
 ];
 
-// One investigation per message, so concurrent messages in a channel do not share a subject.
-const SLACK_SUBJECT_ID = '{{ event.connectorId }}:{{ event.channel }}:{{ event.messageId }}';
-
-// The message's thread, which the managed Slack thread workflow looks the investigation up by when
-// someone replies. Only recorded for an automation that already reports in that thread: it makes
-// a reply there report the investigation, which a silent or channel-mode automation does not do.
-// The trigger condition guarantees a workspace.
+// The message's thread, keyed by the Relay's thread key so a later reply or mention in it continues
+// the investigation. Only top-level messages trigger, so each message is its own thread.
 const SLACK_THREAD = {
   workspace: '{{ event.workspace }}',
   channel: '{{ event.channel }}',
   thread_ts: '{{ event.messageId }}',
+  external_conversation_id: '{{ event.externalConversationId }}',
 };
 
-// See MAX_PROMPT_TEMPLATE_LENGTH: the template and this text share the step's message limit.
+// Bound trigger evidence independently from the operator's additional instructions.
 export const SLACK_MESSAGE_TEXT_LIMIT = 4000;
 
 const SLACK_MESSAGE_PROMPT = `Slack message from {{ event.botName | default: event.sender | default: event.botId }} in channel {{ event.channel }}:\n\n{{ event.text | truncate: ${SLACK_MESSAGE_TEXT_LIMIT} }}`;
@@ -62,20 +63,35 @@ export function generateWorkflowYaml({
   automationId,
   automation,
   serviceAccountId,
+  universalAlerts = true,
 }: {
   automationId: string;
   automation: NightshiftAutomationAttributes;
+  universalAlerts?: boolean;
   /** The account the automation runs as (`settings.run_as`); unbound when omitted. */
   serviceAccountId?: string;
 }): string {
   const alertRows = automation.trigger.rows.filter((row): row is AlertRow => row.kind === 'alert');
   const slackRows = automation.trigger.rows.filter(isSlackRow);
   const schedule = automation.trigger.rows.find((row) => row.kind === 'schedule');
+  const classicRows = alertRows.filter(passesClassic);
+  const universalRows = universalAlerts ? alertRows.filter(passesUniversal) : [];
+  if (alertRows.some((row) => !passesClassic(row) && !(universalAlerts && passesUniversal(row)))) {
+    throw new Error('The selected alert sources have no available trigger. Select another source.');
+  }
   const hasMultipleTriggers =
-    Number(alertRows.length > 0) + Number(slackRows.length > 0) + Number(Boolean(schedule)) > 1;
+    Number(classicRows.length > 0) +
+      Number(universalRows.length > 0) +
+      Number(slackRows.length > 0) +
+      Number(Boolean(schedule)) >
+    1;
   const alertWorkflow =
-    alertRows.length > 0 || (slackRows.length === 0 && !schedule)
-      ? generateAlertWorkflow(automationId, automation, alertRows, hasMultipleTriggers)
+    classicRows.length > 0 || (alertRows.length === 0 && slackRows.length === 0 && !schedule)
+      ? generateAlertWorkflow(automationId, automation, classicRows, hasMultipleTriggers)
+      : undefined;
+  const alertV2Workflow =
+    universalRows.length > 0
+      ? generateAlertV2Workflow(automationId, automation, universalRows)
       : undefined;
   const slackWorkflow =
     slackRows.length > 0
@@ -84,7 +100,7 @@ export function generateWorkflowYaml({
   const scheduledWorkflow = schedule
     ? generateScheduledWorkflow(automationId, automation, schedule)
     : undefined;
-  const workflowParts = [scheduledWorkflow, alertWorkflow, slackWorkflow].filter(
+  const workflowParts = [scheduledWorkflow, alertWorkflow, alertV2Workflow, slackWorkflow].filter(
     (part) => part !== undefined
   );
 
@@ -111,6 +127,7 @@ export function generateWorkflowYaml({
     },
     triggers: [
       ...(alertWorkflow?.triggers ?? []),
+      ...(alertV2Workflow?.triggers ?? []),
       ...(slackWorkflow?.triggers ?? []),
       ...(scheduledWorkflow?.triggers ?? []),
     ],
@@ -128,7 +145,7 @@ function generateAlertWorkflow(
   alertRows: Array<Extract<NightshiftTriggerRow, { kind: 'alert' }>>,
   hasMultipleTriggers: boolean
 ) {
-  const condition = buildCondition(alertRows);
+  const condition = buildCondition(alertRows, ALERT_STATUS_CONDITION, false);
   const notificationDestinations = buildNotificationDestinations(automationId, automation, 'alert');
 
   return {
@@ -145,6 +162,7 @@ function generateAlertWorkflow(
       {
         name: hasMultipleTriggers ? 'trigger_investigation_alert' : 'trigger_investigation',
         type: 'nightshift.triggerInvestigation',
+        ...(alertRows.length > 0 ? { if: ALERT_ACTIVE_STEP_CONDITION } : {}),
         with: {
           automation_id: automationId,
           subject_type: alertRows.length > 0 ? 'alert' : 'manual',
@@ -153,7 +171,9 @@ function generateAlertWorkflow(
           summary: automation.name,
           trigger_type: 'automatic',
           ...(automation.execution.promptTemplate
-            ? { message: automation.execution.promptTemplate }
+            ? alertRows.length > 0
+              ? { instructions: automation.execution.promptTemplate }
+              : { message: automation.execution.promptTemplate }
             : {}),
           ...(automation.runtime.timeoutSeconds !== undefined
             ? { timeout_seconds: automation.runtime.timeoutSeconds }
@@ -162,9 +182,86 @@ function generateAlertWorkflow(
           ...(notificationDestinations ? { notificationDestinations } : {}),
         },
       },
+      ...(alertRows.length > 0 ? [RECOVERED_ALERT_STEP] : []),
     ],
   };
 }
+
+function generateAlertV2Workflow(
+  automationId: string,
+  automation: NightshiftAutomationAttributes,
+  alertRows: AlertRow[]
+) {
+  const condition = buildCondition(alertRows, ALERT_V2_STATUS_CONDITION, true);
+  const notificationDestinations = buildNotificationDestinations(automationId, automation, 'alert');
+
+  return {
+    kind: 'alert_v2' as const,
+    triggers: [{ type: ALERT_V2_TRIGGER_TYPE, on: { condition } }],
+    steps: [
+      {
+        name: 'trigger_investigation_alert_v2',
+        type: 'nightshift.triggerInvestigation',
+        if: ALERT_ACTIVE_STEP_CONDITION,
+        with: {
+          automation_id: automationId,
+          subject_type: 'alert',
+          subject_id: '{{ event.alert.id }}',
+          title: '{{ event.rule.name | default: event.alert.id }}',
+          summary: automation.name,
+          trigger_type: 'automatic',
+          ...(automation.execution.promptTemplate
+            ? { instructions: automation.execution.promptTemplate }
+            : {}),
+          ...(automation.runtime.timeoutSeconds !== undefined
+            ? { timeout_seconds: automation.runtime.timeoutSeconds }
+            : {}),
+          ...(notificationDestinations ? { notificationDestinations } : {}),
+        },
+      },
+      RECOVERED_ALERT_V2_STEP,
+    ],
+  };
+}
+
+const ALERT_ACTIVE_STEP_CONDITION = "${{ event.alert.status == 'active' }}";
+
+const RECOVERED_ALERT_V2_STEP = {
+  name: 'follow_up_recovered_alert_v2',
+  type: 'nightshift.followUpRecoveredAlert',
+  if: "${{ event.alert.status == 'inactive' }}",
+  with: {
+    alert_uuid: '{{ event.alert.id }}',
+    alert_id: '{{ event.alert.groupHash }}',
+    recovered_at: '{{ event.timestamp }}',
+    rule_id: '${{ event.rule.id }}',
+    rule_name: '${{ event.rule.name }}',
+    rule_tags: '${{ event.rule.tags }}',
+  },
+};
+
+/**
+ * Continues the open investigation that holds a recovered alert with the recovery brief, or does
+ * nothing when no open investigation holds it. It never starts an investigation, so it does not
+ * consume the automation's daily limit.
+ */
+const RECOVERED_ALERT_STEP = {
+  name: 'follow_up_recovered_alert',
+  type: 'nightshift.followUpRecoveredAlert',
+  if: "${{ event.alert.status == 'recovered' }}",
+  with: {
+    alert_uuid: '{{ event.alert.uuid }}',
+    alert_id: '${{ event.alert.id }}',
+    alert_start: '${{ event.alert.start }}',
+    // Stamped when the event is dispatched to workflows, after the rule run that found the alert
+    // recovered has saved its state.
+    recovered_at: '{{ event.timestamp }}',
+    rule_id: '{{ event.rule.id }}',
+    rule_name: '${{ event.rule.name }}',
+    rule_type_id: '{{ event.rule.ruleTypeId }}',
+    rule_tags: '${{ event.rule.tags }}',
+  },
+};
 
 function buildAlertContext() {
   return {
@@ -207,12 +304,12 @@ function generateScheduledWorkflow(
         with: {
           automation_id: automationId,
           subject_type: 'manual',
-          subject_id: DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID,
+          subject_id: `scheduled-${automationId}-{{ event.scheduledFor | default: execution.id }}`,
           title: automation.name,
           summary: automation.name,
           trigger_type: 'automatic',
           ...(automation.execution.promptTemplate
-            ? { message: automation.execution.promptTemplate }
+            ? { message: `Instructions:\n${automation.execution.promptTemplate}` }
             : {}),
           ...(schedule.scopeQuery ? { scope_query: schedule.scopeQuery } : {}),
           ...(automation.runtime.timeoutSeconds !== undefined
@@ -225,13 +322,16 @@ function generateScheduledWorkflow(
   };
 }
 
-type TriggerKind = 'alert' | 'slack' | 'schedule';
+type TriggerKind = 'alert' | 'alert_v2' | 'slack' | 'schedule';
 
 /**
  * One investigation per alert and per Slack message, so a new one does not cancel or drop the
- * previous one. Scheduled runs have no event payload and share one concurrency key per automation.
+ * previous one. An alert's recovery is keyed apart from its activation, so it is not dropped while
+ * the activation's run is still in progress. Scheduled runs have no event payload and share one
+ * concurrency key per automation.
  */
-const ALERT_CONCURRENCY_SUFFIX = '{{ event.alert.uuid }}';
+const ALERT_CONCURRENCY_SUFFIX =
+  '{{ event.alert.uuid }}{{ event.alert.id }}-{{ event.alert.status }}';
 const SLACK_CONCURRENCY_SUFFIX = '{{ event.channel }}-{{ event.messageId }}';
 
 function buildConcurrencyKey(
@@ -276,7 +376,6 @@ function generateSlackWorkflow(
   hasMultipleTriggers: boolean
 ) {
   const notificationDestinations = buildNotificationDestinations(automationId, automation, 'slack');
-  const repliesInMessageThread = notificationDestinations?.some(({ params }) => params.thread_ts);
   const condition = buildSlackCondition(slackRows);
   // One trigger combines all Slack rows so a message matching several rows starts only one run.
   return {
@@ -294,13 +393,13 @@ function generateSlackWorkflow(
         type: 'nightshift.triggerInvestigation',
         with: {
           automation_id: automationId,
-          subject_type: 'manual',
-          subject_id: SLACK_SUBJECT_ID,
-          ...(repliesInMessageThread ? { slack_thread: SLACK_THREAD } : {}),
+          subject_type: 'slack_thread',
+          slack_thread: SLACK_THREAD,
           title: automation.name,
           summary: automation.name,
           trigger_type: 'automatic',
-          ...buildMessage(automation.execution.promptTemplate, true),
+          instructions: automation.execution.promptTemplate ?? '',
+          message: SLACK_MESSAGE_PROMPT,
           ...(automation.runtime.timeoutSeconds !== undefined
             ? { timeout_seconds: automation.runtime.timeoutSeconds }
             : {}),
@@ -350,23 +449,6 @@ function buildNotificationDestinations(
 
 function isSlackRow(row: NightshiftTriggerRow): row is SlackRow {
   return row.kind === 'slack';
-}
-
-/**
- * The prompt for the investigation. A Slack-triggered run has no alert data to compose a brief
- * from, so the message itself is appended to the prompt. The text is truncated to stay under the
- * investigation step's message limit.
- */
-function buildMessage(
-  promptTemplate: string | undefined,
-  includeSlackMessage: boolean
-): { message?: string } {
-  if (!includeSlackMessage) {
-    return promptTemplate ? { message: promptTemplate } : {};
-  }
-  return {
-    message: [promptTemplate, SLACK_MESSAGE_PROMPT].filter(Boolean).join('\n\n'),
-  };
 }
 
 /**
@@ -462,17 +544,68 @@ function kqlOneOf(field: string, values: string[]): string {
   return clauses.length === 1 ? clauses[0] : `(${clauses.join(' or ')})`;
 }
 
-function buildCondition(rows: Array<Extract<NightshiftTriggerRow, { kind: 'alert' }>>): string {
-  const rowConditions = rows.map(buildRowCondition).filter(Boolean);
-  if (rowConditions.length === 0) return '';
-  if (rowConditions.length === 1) return rowConditions[0];
-  return rowConditions.map((c) => `(${c})`).join(' OR ');
+function passesClassic({ alertSources, alertSourceMode }: AlertRow): boolean {
+  const sources = cleanValues(alertSources);
+  if (sources.length === 0) return true;
+  return sources.includes(CLASSIC_ALERT_SOURCE) === (alertSourceMode !== 'exclude');
 }
 
-const ACTIVE_ALERT_CONDITION = 'event.alert.status: "active"';
+function universalSources({ alertSources }: AlertRow): string[] {
+  return cleanValues(alertSources).filter((source) => source !== CLASSIC_ALERT_SOURCE);
+}
 
-function buildRowCondition(row: Extract<NightshiftTriggerRow, { kind: 'alert' }>): string {
-  const parts: string[] = [ACTIVE_ALERT_CONDITION];
+function passesUniversal(row: AlertRow): boolean {
+  if (cleanValues(row.alertSources).length === 0 || row.alertSourceMode === 'exclude') return true;
+  return universalSources(row).length > 0;
+}
+
+// Alerting v2 reserves the `elastic.` prefix for Elastic-produced events. Any other source besides `internal` is external.
+const FIRST_PARTY_EVENT_SOURCES = `(event.source:"${UNIVERSAL_ALERT_SOURCE}" OR event.source:elastic.*)`;
+
+function buildSourceCondition(row: AlertRow): string | undefined {
+  const sources = universalSources(row);
+  if (sources.length === 0) return undefined;
+  const eventSources = sources.filter((source) => source !== EXTERNAL_ALERT_SOURCE);
+  const clauses = [
+    ...(eventSources.length > 0 ? [kqlOneOf('event.source', eventSources)] : []),
+    ...(eventSources.length < sources.length ? [`NOT ${FIRST_PARTY_EVENT_SOURCES}`] : []),
+  ];
+  const clause = clauses.length === 1 ? clauses[0] : `(${clauses.join(' OR ')})`;
+  return row.alertSourceMode === 'exclude' ? `NOT (${clause})` : clause;
+}
+
+function buildCondition(rows: AlertRow[], statusCondition: string, withSources: boolean): string {
+  const rowConditions = rows
+    .map((row) => buildRowCondition(row, statusCondition, withSources))
+    .filter(Boolean);
+  if (rowConditions.length === 0) return '';
+  const condition =
+    rowConditions.length === 1 ? rowConditions[0] : rowConditions.map((c) => `(${c})`).join(' OR ');
+  if (condition.length > IF_CONDITION_MAX_LENGTH) {
+    throw new Error('The alert source filters are too long. Remove some sources.');
+  }
+  return condition;
+}
+
+const ALERT_STATUS_CONDITION = '(event.alert.status: "active" OR event.alert.status: "recovered")';
+
+const ALERT_V2_STATUS_CONDITION =
+  '((event.alert.status: "active" AND NOT event.alert.previousStatus: "recovering") OR event.alert.status: "inactive")';
+
+function buildRowCondition(row: AlertRow, statusCondition: string, withSources: boolean): string {
+  const parts: string[] = [statusCondition];
+
+  if (row.severities?.length) {
+    // Recoveries carry no severity and must still reach the investigation's follow-up step.
+    parts.push(
+      `(NOT event.alert.status: "active" OR ${kqlOneOf('event.alert.severity', row.severities)})`
+    );
+  }
+
+  const sourceCondition = withSources ? buildSourceCondition(row) : undefined;
+  if (sourceCondition) {
+    parts.push(sourceCondition);
+  }
 
   if (row.ruleNamePattern) {
     parts.push(`event.rule.name: *${escapeKqlWildcardTerm(row.ruleNamePattern)}*`);

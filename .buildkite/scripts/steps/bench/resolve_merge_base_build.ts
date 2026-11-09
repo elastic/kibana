@@ -43,7 +43,7 @@ async function findMergeBaseBuild(
   }
 
   log(
-    `No ${KIBANA_DISTRIBUTABLE_ARTIFACT} on any ${pipelineSlug} build for ${commit}; it has likely expired`
+    `No ${KIBANA_DISTRIBUTABLE_ARTIFACT} on any ${pipelineSlug} build for ${commit}; the build may still be running, have failed, or its artifact may have expired`
   );
   return null;
 }

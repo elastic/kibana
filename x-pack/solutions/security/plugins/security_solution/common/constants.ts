@@ -288,9 +288,6 @@ export const ENABLE_SIEM_READINESS_SETTING = 'securitySolution:enableSiemReadine
 /** This Kibana Advanced Setting allows users to enable/disable the Cloud Connector Feature */
 export const ENABLE_CLOUD_CONNECTOR_SETTING = 'securitySolution:enableCloudConnector' as const;
 
-/** This Kibana Advanced Setting allows users to enable/disable the new EUI-based flyout system */
-export const ENABLE_NEW_FLYOUT_SETTING = 'securitySolution:enableNewFlyout' as const;
-
 /** This Kibana Advanced Setting allows users to enable/disable the rule changes history feature */
 export const ENABLE_RULE_CHANGES_HISTORY_SETTING =
   'securitySolution:enableRuleChangesHistory' as const;
@@ -753,6 +750,7 @@ export enum SecurityAgentBuilderAttachments {
   entity = 'security.entity',
   entityAnalyticsDashboard = 'security.entity_analytics_dashboard',
   entityGraph = 'security.entity_graph',
+  entityAnalyticsAiBrief = 'security.entity_analytics_ai_brief',
   entityRiskScoreHistory = 'security.entity_risk_score_history',
   exception = 'security.exception',
   investigationIocs = 'security.investigation.iocs',

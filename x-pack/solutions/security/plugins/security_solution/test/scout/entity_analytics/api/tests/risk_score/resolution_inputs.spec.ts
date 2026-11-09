@@ -35,6 +35,7 @@ const TARGET_ID = `host:${TARGET_HOST}`;
 const ALIAS_ID = `host:${ALIAS_HOST}`;
 const PLAIN_ID = `host:${PLAIN_HOST}`;
 const RULE_NAME = 'Risk resolution inputs rule';
+const STAMP_FIELD = 'kibana.alert.entity.id';
 // Rule execution, alert polling and a synchronous maintainer run don't fit the 60s default.
 const TEST_TIMEOUT_MS = 180_000;
 
@@ -62,6 +63,25 @@ const seedAliasHostEntity = async (esClient: EsClient) => {
       '@timestamp': now,
     },
   });
+};
+
+/** The entity IDs stamped on the rule's alert for a host. */
+const getStampedEntityIds = async (esClient: EsClient, hostName: string) => {
+  const response = await esClient.search({
+    index: ALERTS_INDEX,
+    size: 1,
+    fields: [STAMP_FIELD],
+    _source: false,
+    query: {
+      bool: {
+        filter: [
+          { term: { 'kibana.alert.rule.name': RULE_NAME } },
+          { term: { 'host.name': hostName } },
+        ],
+      },
+    },
+  });
+  return response.hits.hits[0]?.fields?.[STAMP_FIELD] ?? [];
 };
 
 const waitForAlerts = async (esClient: EsClient, expected: number, timeoutMs = 60_000) => {
@@ -159,7 +179,7 @@ apiTest.describe('Risk score maintainer resolution inputs', { tag: ENTITY_STORE_
   });
 
   apiTest(
-    "scores only the group's members, with each alert's own timestamp",
+    "scores only the group's members, stamped or not, with each alert's own timestamp",
     async ({ apiClient, esClient }) => {
       await seedHostEntity(esClient, { entityId: TARGET_ID, hostName: TARGET_HOST });
       await seedHostEntity(esClient, { entityId: PLAIN_ID, hostName: PLAIN_HOST });
@@ -191,6 +211,34 @@ apiTest.describe('Risk score maintainer resolution inputs', { tag: ENTITY_STORE_
       expect(ruleResponse).toHaveStatusCode(200);
       ruleId = ruleResponse.body.id;
       await waitForAlerts(esClient, 3);
+
+      // Alerts carry their entity IDs, which resolution scoring uses to read only a page's members'
+      // alerts. Alerts from before the stamp have none and must still count, so the alias's alert
+      // loses its stamp here while the target's keeps it.
+      expect(await getStampedEntityIds(esClient, TARGET_HOST)).toContain(TARGET_ID);
+      await esClient.updateByQuery({
+        index: ALERTS_INDEX,
+        refresh: true,
+        conflicts: 'proceed',
+        query: {
+          bool: {
+            filter: [
+              { term: { 'kibana.alert.rule.name': RULE_NAME } },
+              { term: { 'host.name': ALIAS_HOST } },
+            ],
+          },
+        },
+        script: {
+          lang: 'painless',
+          // The stamp may be stored under a dotted key or as nested objects.
+          source: `ctx._source.remove('${STAMP_FIELD}');
+            def kibana = ctx._source.kibana;
+            if (kibana instanceof Map && kibana.alert instanceof Map && kibana.alert.entity instanceof Map) {
+              kibana.alert.entity.remove('id');
+            }`,
+        },
+      });
+      expect(await getStampedEntityIds(esClient, ALIAS_HOST)).toStrictEqual([]);
 
       await triggerMaintainerRun(apiClient, internalHeaders, 'risk-score', { sync: true });
 

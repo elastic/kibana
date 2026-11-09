@@ -11,17 +11,24 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { aiAnonymizationSettings } from '@kbn/ai-anonymization-common';
 import { getAnonymizationUiSettings } from './ui_settings';
 
-describe('ai:anonymizationSettings in the Advanced Settings reference', () => {
+const README_PATH = Path.join(
+  REPO_ROOT,
+  'x-pack',
+  'platform',
+  'plugins',
+  'private',
+  'ai_anonymization_settings',
+  'README.md'
+);
+
+describe('ai:anonymizationSettings default in the Anonymization page README', () => {
   it('shows the default configuration the setting ships with', () => {
-    // The reference copies the default (built-in rules and their regular expressions) by hand, so it
-    // goes stale whenever a built-in pattern changes. To update it, paste the output of
-    // `JSON.stringify(<setting>.value, null, 2)` into the entry's "Default configuration" block.
-    const docs = Fs.readFileSync(
-      Path.join(REPO_ROOT, 'docs', 'reference', 'advanced-settings-space.yml'),
-      'utf8'
-    );
-    const entry = docs.slice(docs.indexOf(`setting: "${aiAnonymizationSettings}"`));
-    const documentedDefault = /```json\n([\s\S]*?)\n\s*```/.exec(entry)?.[1];
+    // The README copies the default (built-in rules and their regular expressions) by hand, so it
+    // goes stale whenever a built-in pattern changes. To update it, paste the registered `value`
+    // into the "Default configuration" section (it is already a pretty-printed JSON string).
+    const readme = Fs.readFileSync(README_PATH, 'utf8');
+    const section = readme.slice(readme.indexOf('## Default configuration'));
+    const documentedDefault = /```json\n([\s\S]*?)\n```/.exec(section)?.[1];
     const shippedDefault = getAnonymizationUiSettings()[aiAnonymizationSettings].value;
 
     expect(documentedDefault).toBeDefined();
