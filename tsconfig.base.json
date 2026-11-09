@@ -253,6 +253,8 @@
       "@kbn/content-management-utils/*": ["./src/platform/packages/shared/kbn-content-management-utils/*"],
       "@kbn/content-packs-schema": ["./x-pack/platform/packages/shared/kbn-content-packs-schema"],
       "@kbn/content-packs-schema/*": ["./x-pack/platform/packages/shared/kbn-content-packs-schema/*"],
+      "@kbn/content-sanitization": ["./x-pack/platform/packages/shared/kbn-content-sanitization"],
+      "@kbn/content-sanitization/*": ["./x-pack/platform/packages/shared/kbn-content-sanitization/*"],
       "@kbn/controls-example-plugin": ["./examples/controls_example"],
       "@kbn/controls-example-plugin/*": ["./examples/controls_example/*"],
       "@kbn/controls-plugin": ["./src/platform/plugins/shared/controls"],

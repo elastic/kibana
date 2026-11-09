@@ -785,6 +785,9 @@ importers:
       '@kbn/content-packs-schema':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-content-packs-schema
+      '@kbn/content-sanitization':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/kbn-content-sanitization
       '@kbn/controls-example-plugin':
         specifier: workspace:*
         version: link:examples/controls_example
@@ -7551,6 +7554,8 @@ importers:
   x-pack/platform/packages/shared/kbn-cloud-security-posture/common: {}
 
   x-pack/platform/packages/shared/kbn-content-packs-schema: {}
+
+  x-pack/platform/packages/shared/kbn-content-sanitization: {}
 
   x-pack/platform/packages/shared/kbn-data-forge: {}
 
