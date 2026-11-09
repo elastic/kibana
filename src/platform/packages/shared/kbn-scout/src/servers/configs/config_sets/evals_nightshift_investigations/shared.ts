@@ -45,14 +45,14 @@ const knowledgeArgs = (): string[] => {
   const selected = new Set((process.env.NIGHTSHIFT_KNOWLEDGE ?? '').split(',').filter(Boolean));
   if (selected.size === 0) {
     return [
-      '--xpack.nightshift_investigations.cortex.enabled=false',
+      '--xpack.nightshift_investigations.wiki.enabled=false',
       '--xpack.nightshift_investigations.memory.enabled=false',
     ];
   }
   const decisionTrees = selected.has('decision-trees');
   return [
-    // Decision trees read the Cortex investigator context, so they need the Cortex runtime.
-    `--xpack.nightshift_investigations.cortex.enabled=${selected.has('cortex') || decisionTrees}`,
+    // Decision trees read the Wiki investigator context, so they need the Wiki runtime.
+    `--xpack.nightshift_investigations.wiki.enabled=${selected.has('wiki') || decisionTrees}`,
     `--xpack.nightshift_investigations.memory.enabled=${selected.has('memory')}`,
     `--xpack.nightshift_investigations.decision_trees.enabled=${decisionTrees}`,
     '--xpack.nightshift_investigations.learning.enabled=false',

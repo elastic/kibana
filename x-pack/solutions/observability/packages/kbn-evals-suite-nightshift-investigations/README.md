@@ -182,7 +182,7 @@ The `evals_nightshift_investigations` server config extends `evals_tracing` when
 exports sandbox credentials. Otherwise it is plain `evals_tracing`, so the smoke eval needs no
 sandbox credentials. It enables the investigation engine, its `nightshift.enabled` feature flag
 and sandbox, pauses online evals (`nightshift.onlineEvals.paused`) so investigations are judged
-only by the suite, disables Cortex and Semantic Memory unless [knowledge switches](#knowledge-switches)
+only by the suite, disables Wiki and Semantic Memory unless [knowledge switches](#knowledge-switches)
 turn them on, and exports full Agent Builder payloads (user messages, system
 instructions, responses, tool arguments/results and conversation IDs) to the profile's configured
 destination. Trace-exporter headers and connector credentials reach Kibana through
@@ -336,7 +336,7 @@ workflow.
 ## Knowledge switches
 
 Investigations run without learned knowledge by default. `NIGHTSHIFT_KNOWLEDGE` turns on any of
-`memory`, `cortex` and `decision-trees` (comma-separated), and the eval then copies that system's
+`memory`, `wiki` and `decision-trees` (comma-separated), and the eval then copies that system's
 knowledge from the endpoint under test into the run's space before the first example:
 
 ```bash
@@ -360,8 +360,8 @@ NIGHTSHIFT_KNOWLEDGE=memory,decision-trees NIGHTSHIFT_DATASETS=trace-only \
   documents for a selected system fails the run.
 - The Scout config set turns on each selected system and turns learning off
   (`xpack.nightshift_investigations.learning.enabled=false`), so the post-run optimize hook doesn't
-  change the knowledge while examples run. Decision trees need the Cortex runtime, so
-  `decision-trees` alone also runs Cortex, with an empty Cortex index.
+  change the knowledge while examples run. Decision trees need the Wiki runtime, so
+  `decision-trees` alone also runs Wiki, with an empty Wiki index.
 - Every score records `knowledge` (the selection, or `none`), `knowledge_source`, and per system the
   number of documents loaded and the newest one's `@timestamp`.
 - Changing `NIGHTSHIFT_KNOWLEDGE` restarts Scout, since it changes the server's flags.
@@ -396,7 +396,7 @@ NIGHTSHIFT_KNOWLEDGE_SPACE_ID=default
 
 ```bash
 set -a; source ~/.nightshift-knowledge-c0.env; set +a
-NIGHTSHIFT_KNOWLEDGE=memory,cortex node scripts/evals start --suite nightshift-investigations ...
+NIGHTSHIFT_KNOWLEDGE=memory,wiki node scripts/evals start --suite nightshift-investigations ...
 ```
 
 The URL must not embed credentials, and the hook fails the run before Scout starts when the key or
@@ -653,7 +653,7 @@ against.
 | Variable                         | Effect                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `NIGHTSHIFT_DATASETS`            | Comma-separated dataset ids (whitespace trimmed). Smoke dataset ids such as `synthetic-smoke` select seeded evals; `trace-only` selects the file-driven investigations; they can be combined, e.g. `synthetic-smoke,trace-only`. Unset or `all` runs every eval when sandbox credentials are present, except that a stored `NIGHTSHIFT_DATASET_NAME` defaults to trace-only when selection is unset. Without them, unset runs only smoke with a warning, while an explicit `all` or `trace-only` fails before any test runs, even when Scout is reused. `connector-probe` selects the [connector probes](#connector-probes), which unset and `all` never include. `wiki-optimize` selects the [Wiki optimizer replay](#wiki-optimizer-replay), which unset and `all` never include and which needs no sandbox credentials. `orcabench` selects the isolated ORCA dataset and cannot be combined with other ids; it requires an ORCA-configured Scout server. Unknown ids fail early. |
-| `NIGHTSHIFT_KNOWLEDGE`           | Comma-separated knowledge systems (`memory`, `cortex`, `decision-trees`) to turn on and restore before the first example. Unset turns them all off. See [knowledge switches](#knowledge-switches).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `NIGHTSHIFT_KNOWLEDGE`           | Comma-separated knowledge systems (`memory`, `wiki`, `decision-trees`) to turn on and restore before the first example. Unset turns them all off. See [knowledge switches](#knowledge-switches).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | `NIGHTSHIFT_PROBE_EXAMPLES_FILE` | Examples file for `connector-probe`; required when it is selected. See [connector probes](#connector-probes).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | `NIGHTSHIFT_WIKI_REPLAY_FILE` | Replay file for `wiki-optimize`; the bundled synthetic examples when unset. Same `nightshift/` dataset-file format as the investigation examples, with the round and expectation fields in [Wiki optimizer replay](#wiki-optimizer-replay). |
 | `NIGHTSHIFT_PROBE_TIME_BUDGET_S` | Seconds a probe may take before `within_time_budget` scores 0 (default 30).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |

@@ -9,6 +9,7 @@ import type { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
 import {
   KNOWLEDGE_INDICES,
+  LEGACY_WIKI_AI_INDEX_DEST,
   restoreKnowledge,
   selectedKnowledge,
   toTargetSpace,
@@ -23,6 +24,16 @@ const ENV = {
 const memoryHit = {
   _id: 'ops:memory_checkout-latency',
   _source: { '@timestamp': '2026-11-01T00:00:00Z', attributes: { space_id: 'ops', slug: 'x' } },
+};
+
+const legacyCortexHit = {
+  _id: 'ops:cortex_service_autoops-api-gateway',
+  _source: {
+    '@timestamp': '2026-11-09T18:47:11.893Z',
+    type: 'service',
+    tags: ['cortex', 'service'],
+    attributes: { space_id: 'ops', slug: 'autoops-api-gateway' },
+  },
 };
 
 const createSource = (hitsByIndex: Record<string, unknown[]>) =>
@@ -47,8 +58,10 @@ const log = new ToolingLog();
 describe('selectedKnowledge', () => {
   it('returns the selection in canonical order and rejects unknown systems', () => {
     expect(selectedKnowledge(undefined)).toEqual([]);
-    expect(selectedKnowledge(' cortex,memory ')).toEqual(['memory', 'cortex']);
-    expect(() => selectedKnowledge('wiki')).toThrow('Unknown NIGHTSHIFT_KNOWLEDGE systems: wiki');
+    expect(selectedKnowledge(' wiki,memory ')).toEqual(['memory', 'wiki']);
+    expect(() => selectedKnowledge('cortex')).toThrow(
+      'Unknown NIGHTSHIFT_KNOWLEDGE systems: cortex'
+    );
   });
 });
 
@@ -59,6 +72,18 @@ describe('toTargetSpace', () => {
       source: {
         '@timestamp': '2026-11-01T00:00:00Z',
         attributes: { space_id: 'default', slug: 'x' },
+      },
+    });
+  });
+
+  it('normalizes legacy cortex page ids and tags to wiki', () => {
+    expect(toTargetSpace(legacyCortexHit, 'ops', 'default')).toEqual({
+      id: 'default:wiki_service_autoops-api-gateway',
+      source: {
+        '@timestamp': '2026-11-09T18:47:11.893Z',
+        type: 'service',
+        tags: ['wiki', 'service'],
+        attributes: { space_id: 'default', slug: 'autoops-api-gateway' },
       },
     });
   });
@@ -104,17 +129,47 @@ describe('restoreKnowledge', () => {
     expect(source.close).toHaveBeenCalled();
   });
 
+  it('falls back to the pre-rename cortex index when the wiki index has no documents', async () => {
+    const esClient = createTarget();
+    const source = createSource({ [LEGACY_WIKI_AI_INDEX_DEST]: [legacyCortexHit] });
+
+    const metadata = await restoreKnowledge({
+      esClient,
+      log,
+      systems: ['wiki'],
+      env: ENV,
+      createSourceClient: () => source,
+    });
+
+    expect(esClient.bulk).toHaveBeenCalledTimes(1);
+    expect(esClient.bulk.mock.calls[0][0].operations).toEqual([
+      {
+        index: {
+          _index: KNOWLEDGE_INDICES.wiki,
+          _id: 'default:wiki_service_autoops-api-gateway',
+        },
+      },
+      toTargetSpace(legacyCortexHit, 'ops', 'default').source,
+    ]);
+    expect(metadata).toEqual({
+      knowledge: 'wiki',
+      knowledge_source: 'c0.example/ops',
+      knowledge_wiki_documents: 1,
+      knowledge_wiki_newest: '2026-11-09T18:47:11.893Z',
+    });
+  });
+
   it('fails before clearing anything when the source space has no documents', async () => {
     const esClient = createTarget();
     await expect(
       restoreKnowledge({
         esClient,
         log,
-        systems: ['cortex'],
+        systems: ['wiki'],
         env: ENV,
         createSourceClient: () => createSource({}),
       })
-    ).rejects.toThrow('no cortex documents in space ops');
+    ).rejects.toThrow('no wiki documents in space ops');
     expect(esClient.deleteByQuery).not.toHaveBeenCalled();
   });
 

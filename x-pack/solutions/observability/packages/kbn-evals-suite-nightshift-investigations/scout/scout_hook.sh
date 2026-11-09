@@ -146,7 +146,7 @@ if [[ -n "$connector_set" && -z "$api_key" ]]; then
   exit 1
 fi
 
-# Knowledge switches: NIGHTSHIFT_KNOWLEDGE lists the systems (memory, cortex, decision-trees) the run
+# Knowledge switches: NIGHTSHIFT_KNOWLEDGE lists the systems (memory, wiki, decision-trees) the run
 # turns on and restores before the first example. They are read from the endpoint the connector set
 # investigates, `nightshiftKnowledge.<set>`, so an ORCA run only ever loads ORCA knowledge.
 knowledge=''
@@ -156,16 +156,16 @@ knowledge_space=''
 knowledge_input="${NIGHTSHIFT_KNOWLEDGE:-}"
 for system in ${knowledge_input//,/ }; do
   case "$system" in
-    memory | cortex | decision-trees) ;;
+    memory | wiki | decision-trees) ;;
     *)
       echo "nightshift-investigations scout hook: unknown NIGHTSHIFT_KNOWLEDGE system '$system';" \
-        "use memory, cortex or decision-trees" >&2
+        "use memory, wiki or decision-trees" >&2
       exit 1
       ;;
   esac
 done
 requested=",${knowledge_input// /},"
-for system in memory cortex decision-trees; do
+for system in memory wiki decision-trees; do
   [[ "$requested" == *",$system,"* ]] && knowledge+="${knowledge:+,}$system"
 done
 if [[ -n "$knowledge" ]]; then

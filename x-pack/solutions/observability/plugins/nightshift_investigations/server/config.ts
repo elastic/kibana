@@ -34,7 +34,7 @@ const memoryConfigSchema = schema.object({
 });
 
 const learningConfigSchema = schema.object({
-  // Governs the investigator's post-run optimize hook (Cortex, Semantic Memory and decision-tree
+  // Governs the investigator's post-run optimize hook (Wiki, Semantic Memory and decision-tree
   // reinforcement). Turn it off to read knowledge without changing it, as the evals do so every
   // example sees the same knowledge.
   enabled: schema.boolean({ defaultValue: true }),

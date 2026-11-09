@@ -9,19 +9,22 @@ import { Client } from '@elastic/elasticsearch';
 import type { estypes } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
-  CORTEX_AI_INDEX_DEST,
   DECISION_TREE_AI_INDEX_DEST,
   MEMORY_INDEX,
+  WIKI_AI_INDEX_DEST,
 } from '@kbn/nightshift-investigations-plugin/common';
 
 /** Each knowledge switch and the index its system stores everything in, in canonical order. */
 export const KNOWLEDGE_INDICES = {
   memory: MEMORY_INDEX,
-  cortex: CORTEX_AI_INDEX_DEST,
+  wiki: WIKI_AI_INDEX_DEST,
   'decision-trees': DECISION_TREE_AI_INDEX_DEST,
 } as const;
 
 export type KnowledgeSystem = keyof typeof KNOWLEDGE_INDICES;
+
+/** Pre-rename Wiki index (#303544); read as a fallback while source clusters still store pages there. */
+export const LEGACY_WIKI_AI_INDEX_DEST = 'ai-index-idx-nightshift-cortex';
 
 const SPACE_ID_FIELD = 'attributes.space_id';
 const BULK_CHUNK_SIZE = 100;
@@ -39,17 +42,32 @@ export const selectedKnowledge = (value = process.env.NIGHTSHIFT_KNOWLEDGE): Kno
   );
 };
 
-/** Moves a stored document into the eval's space: its id and `attributes.space_id` both name it. */
+/**
+ * Moves a stored document into the eval's space: its id and `attributes.space_id` both name it.
+ * Also rewrites pre-rename Cortex page ids (`cortex_<type>_<slug>`) and `'cortex'` tags to Wiki
+ * (`wiki_<type>_<slug>` and `'wiki'`) so `createWikiPageStore` and `materializeWiki` read them.
+ */
 export const toTargetSpace = (
   hit: { _id: string; _source: Record<string, unknown> },
   sourceSpaceId: string,
   targetSpaceId: string
 ): { id: string; source: Record<string, unknown> } => {
   const prefix = `${sourceSpaceId}:`;
+  const rawPageId = hit._id.startsWith(prefix) ? hit._id.slice(prefix.length) : hit._id;
+  const pageId = rawPageId.startsWith('cortex_') ? `wiki_${rawPageId.slice(7)}` : rawPageId;
+  const id =
+    hit._id.startsWith(prefix) || rawPageId !== pageId ? `${targetSpaceId}:${pageId}` : hit._id;
   const attributes = (hit._source.attributes ?? {}) as Record<string, unknown>;
+  const tags = Array.isArray(hit._source.tags)
+    ? hit._source.tags.map((tag) => (tag === 'cortex' ? 'wiki' : tag))
+    : undefined;
   return {
-    id: hit._id.startsWith(prefix) ? `${targetSpaceId}:${hit._id.slice(prefix.length)}` : hit._id,
-    source: { ...hit._source, attributes: { ...attributes, space_id: targetSpaceId } },
+    id,
+    source: {
+      ...hit._source,
+      ...(tags ? { tags } : {}),
+      attributes: { ...attributes, space_id: targetSpaceId },
+    },
   };
 };
 
@@ -61,6 +79,8 @@ const readSpace = async (source: Client, index: string, spaceId: string) => {
   const hits: Array<{ _id: string; _source: Record<string, unknown> }> = [];
   for await (const response of source.helpers.scrollSearch<Record<string, unknown>>({
     index,
+    ignore_unavailable: true,
+    allow_no_indices: true,
     query: inSpace(spaceId),
     size: 500,
     // Embeddings are recomputed on write, by the eval cluster's own inference endpoint.
@@ -71,6 +91,12 @@ const readSpace = async (source: Client, index: string, spaceId: string) => {
     }
   }
   return hits;
+};
+
+const readSystem = async (source: Client, system: KnowledgeSystem, spaceId: string) => {
+  const hits = await readSpace(source, KNOWLEDGE_INDICES[system], spaceId);
+  if (hits.length > 0 || system !== 'wiki') return hits;
+  return readSpace(source, LEGACY_WIKI_AI_INDEX_DEST, spaceId);
 };
 
 const writeAll = async (
@@ -136,7 +162,7 @@ export const restoreKnowledge = async ({
   const dumps = new Map<KnowledgeSystem, Awaited<ReturnType<typeof readSpace>>>();
   try {
     for (const system of systems) {
-      const hits = await readSpace(source, KNOWLEDGE_INDICES[system], sourceSpaceId);
+      const hits = await readSystem(source, system, sourceSpaceId);
       if (hits.length === 0) {
         throw new Error(
           `The knowledge source has no ${system} documents in space ${sourceSpaceId}`
@@ -149,7 +175,7 @@ export const restoreKnowledge = async ({
   }
 
   // A reused Scout stack keeps the previous run's knowledge. Clear every system, not only the
-  // selected ones: decision trees run the Cortex runtime, which must not read an earlier run's pages.
+  // selected ones: decision trees run the Wiki runtime, which must not read an earlier run's pages.
   for (const index of Object.values(KNOWLEDGE_INDICES)) {
     await esClient.deleteByQuery({
       index,

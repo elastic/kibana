@@ -528,9 +528,9 @@ describe('ORCA CI shard', () => {
 
     it("normalizes the selection and reads the connector set's own knowledge source", () => {
       expect(
-        runHook(withKnowledge, { NIGHTSHIFT_KNOWLEDGE: ' cortex,memory,cortex ' }).output.env
+        runHook(withKnowledge, { NIGHTSHIFT_KNOWLEDGE: ' wiki,memory,wiki ' }).output.env
       ).toMatchObject({
-        NIGHTSHIFT_KNOWLEDGE: 'memory,cortex',
+        NIGHTSHIFT_KNOWLEDGE: 'memory,wiki',
         NIGHTSHIFT_KNOWLEDGE_ES_URL: c0.url,
         NIGHTSHIFT_KNOWLEDGE_ES_API_KEY: c0.apiKey,
         NIGHTSHIFT_KNOWLEDGE_SPACE_ID: 'ops',
@@ -565,8 +565,8 @@ describe('ORCA CI shard', () => {
     it.each([
       [
         withKnowledge,
-        { NIGHTSHIFT_KNOWLEDGE: 'wiki' },
-        "unknown NIGHTSHIFT_KNOWLEDGE system 'wiki'",
+        { NIGHTSHIFT_KNOWLEDGE: 'cortex' },
+        "unknown NIGHTSHIFT_KNOWLEDGE system 'cortex'",
       ],
       [existing, { NIGHTSHIFT_KNOWLEDGE: 'memory' }, 'nightshiftKnowledge.default.url and apiKey'],
       [

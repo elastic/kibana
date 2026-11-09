@@ -165,28 +165,28 @@ describe.each([
       SANDBOX_KIBANA_CONFIG,
       ...(knowledge ? { NIGHTSHIFT_KNOWLEDGE: knowledge } : {}),
     }).kbnTestServer.serverArgs.filter((arg: string) =>
-      /nightshift_investigations\.(cortex|memory|decision_trees|learning)\./.test(arg)
+      /nightshift_investigations\.(wiki|memory|decision_trees|learning)\./.test(arg)
     );
 
   it('keeps every knowledge system off without NIGHTSHIFT_KNOWLEDGE', () => {
     expect(knowledgeArgsFor()).toEqual([
-      '--xpack.nightshift_investigations.cortex.enabled=false',
+      '--xpack.nightshift_investigations.wiki.enabled=false',
       '--xpack.nightshift_investigations.memory.enabled=false',
     ]);
   });
 
   it('turns on only the selected knowledge systems and freezes learning', () => {
     expect(knowledgeArgsFor('memory')).toEqual([
-      '--xpack.nightshift_investigations.cortex.enabled=false',
+      '--xpack.nightshift_investigations.wiki.enabled=false',
       '--xpack.nightshift_investigations.memory.enabled=true',
       '--xpack.nightshift_investigations.decision_trees.enabled=false',
       '--xpack.nightshift_investigations.learning.enabled=false',
     ]);
   });
 
-  it('runs Cortex for decision trees, which need its investigator context', () => {
+  it('runs Wiki for decision trees, which need its investigator context', () => {
     expect(knowledgeArgsFor('decision-trees')).toEqual([
-      '--xpack.nightshift_investigations.cortex.enabled=true',
+      '--xpack.nightshift_investigations.wiki.enabled=true',
       '--xpack.nightshift_investigations.memory.enabled=false',
       '--xpack.nightshift_investigations.decision_trees.enabled=true',
       '--xpack.nightshift_investigations.learning.enabled=false',
