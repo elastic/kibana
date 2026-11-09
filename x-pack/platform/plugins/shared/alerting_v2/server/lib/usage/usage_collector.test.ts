@@ -261,6 +261,88 @@ describe('registerAlertingV2UsageCollector', () => {
             },
             type: 'array',
           },
+          action_policies_count_by_status: {
+            enabled: {
+              _meta: { description: 'Number of action policies that are enabled and not snoozed.' },
+              type: 'long',
+            },
+            disabled: {
+              _meta: { description: 'Number of action policies that are disabled.' },
+              type: 'long',
+            },
+            snoozed: {
+              _meta: {
+                description: 'Number of action policies that are enabled and currently snoozed.',
+              },
+              type: 'long',
+            },
+          },
+          action_policies_count_by_grouping_mode: {
+            per_alert: {
+              _meta: {
+                description:
+                  'Number of action policies with grouping mode per_alert (the default).',
+              },
+              type: 'long',
+            },
+            per_field: {
+              _meta: { description: 'Number of action policies with grouping mode per_field.' },
+              type: 'long',
+            },
+            all: {
+              _meta: { description: 'Number of action policies with grouping mode all.' },
+              type: 'long',
+            },
+          },
+          action_policies_count_by_throttle_strategy: {
+            on_status_change: {
+              _meta: {
+                description: 'Number of action policies with throttle strategy on_status_change.',
+              },
+              type: 'long',
+            },
+            per_status_interval: {
+              _meta: {
+                description:
+                  'Number of action policies with throttle strategy per_status_interval.',
+              },
+              type: 'long',
+            },
+            time_interval: {
+              _meta: {
+                description: 'Number of action policies with throttle strategy time_interval.',
+              },
+              type: 'long',
+            },
+            every_time: {
+              _meta: {
+                description: 'Number of action policies with throttle strategy every_time.',
+              },
+              type: 'long',
+            },
+            none: {
+              _meta: { description: 'Number of action policies with no throttle strategy.' },
+              type: 'long',
+            },
+          },
+          action_policies_workflows_per_policy: {
+            p50: {
+              _meta: { description: 'P50 of the number of workflows per action policy (max 10).' },
+              type: 'float',
+            },
+            p99: {
+              _meta: { description: 'P99 of the number of workflows per action policy (max 10).' },
+              type: 'float',
+            },
+            avg: {
+              _meta: { description: 'Average number of workflows per action policy (max 10).' },
+              type: 'float',
+            },
+          },
+          action_policies_count_with_multiple_workflows: {
+            _meta: { description: 'Number of action policies with more than one workflow.' },
+            type: 'long',
+          },
           action_policies_count_with_group_by: {
             _meta: { description: 'Number of action policies with group by.' },
             type: 'long',

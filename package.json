@@ -76,7 +76,7 @@
   },
   "engines": {
     "node": "24.22.1",
-    "pnpm": "~12.4.2"
+    "pnpm": "~12.17.0"
   },
   "resolutions": {
     "**/@babel/core": "7.29.7",
@@ -156,7 +156,7 @@
     "@elastic/ebt": "1.4.1",
     "@elastic/ecs": "9.3.0",
     "@elastic/elasticsearch": "9.5.1",
-    "@elastic/ems-client": "8.7.0",
+    "@elastic/ems-client": "8.8.1",
     "@elastic/esql": "4.33.0",
     "@elastic/esql-definitions": "4.33.0",
     "@elastic/eui": "123.2.0",
@@ -1555,7 +1555,7 @@
     "io-ts": "2.2.22",
     "ipaddr.js": "2.3.0",
     "jest-diff": "29.7.0",
-    "joi": "18.2.9",
+    "joi": "18.3.1",
     "joi-to-json": "5.0.0",
     "jquery": "3.7.1",
     "js-search": "1.4.3",
@@ -1574,11 +1574,11 @@
     "lz-string": "1.5.0",
     "magic-bytes.js": "1.12.1",
     "mapbox-gl-draw-rectangle-mode": "1.0.4",
-    "maplibre-gl": "5.3.0",
+    "maplibre-gl": "6.4.1",
     "markdown-it": "14.3.3",
     "memoize-one": "6.0.0",
     "mime-types": "2.1.35",
-    "minimatch": "10.2.6",
+    "minimatch": "11.0.4",
     "moment": "2.31.0",
     "moment-duration-format": "2.3.2",
     "moment-timezone": "0.6.2",
@@ -1591,9 +1591,9 @@
     "murmurhash": "2.0.1",
     "mustache": "4.2.0",
     "mysql2": "3.24.3",
-    "node-diff3": "3.1.2",
+    "node-diff3": "3.2.1",
     "node-fetch": "2.7.0",
-    "node-forge": "1.4.0",
+    "node-forge": "1.4.2",
     "nodemailer": "10.0.16",
     "normalize-path": "3.0.0",
     "object-hash": "3.0.0",
@@ -1619,7 +1619,7 @@
     "re2js": "2.8.5",
     "react": "18.2.0",
     "react-day-picker": "10.0.1",
-    "react-diff-view": "3.3.1",
+    "react-diff-view": "3.3.3",
     "react-dom": "18.2.0",
     "react-dropzone": "15.0.0",
     "react-fast-compare": "3.2.2",
@@ -2317,5 +2317,5 @@
     "xmlbuilder": "15.1.1",
     "yaml-language-server": "1.23.0"
   },
-  "packageManager": "pnpm@12.4.2"
+  "packageManager": "pnpm@12.17.0"
 }

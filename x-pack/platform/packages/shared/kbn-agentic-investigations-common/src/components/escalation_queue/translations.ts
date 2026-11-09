@@ -14,8 +14,13 @@ export const ESCALATION_QUEUE_LABELS = Object.freeze({
   closed: i18n.translate('xpack.alertzero.escalationQueue.bucket.closed', {
     defaultMessage: 'Closed',
   }),
-  emptyQueue: i18n.translate('xpack.alertzero.escalationQueue.emptyQueue', {
-    defaultMessage: 'No escalations',
+  emptyQueue: Object.freeze({
+    open: i18n.translate('xpack.alertzero.escalationQueue.emptyQueue.open', {
+      defaultMessage: 'No open escalations',
+    }),
+    closed: i18n.translate('xpack.alertzero.escalationQueue.emptyQueue.closed', {
+      defaultMessage: 'No closed escalations',
+    }),
   }),
   emptyQueueWithFilter: i18n.translate('xpack.alertzero.escalationQueue.emptyQueueWithFilter', {
     defaultMessage: 'No escalations match the current filter.',

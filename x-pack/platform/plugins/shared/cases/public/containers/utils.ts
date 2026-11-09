@@ -17,6 +17,7 @@ import {
   CasesRt,
   ConfigurationRt,
   ConfigurationsRt,
+  UnifiedAttachmentsRt,
   UserActionsRt,
 } from '../../common/types/domain';
 import { isAlertAttachmentType, isAttackAttachmentType } from '../../common/utils/attachments';
@@ -40,6 +41,7 @@ import type {
   Cases,
   Configuration,
   Configurations,
+  UnifiedAttachments,
   User,
   UserActions,
 } from '../../common/types/domain';
@@ -79,6 +81,12 @@ export const decodeCasesResponse = (respCase?: Cases) =>
 
 export const decodeCasesWithUpdateSummaryResponse = (response?: CasesPatchResponse) =>
   pipe(PatchCasesResponseRt.decode(response), fold(throwErrors(createToasterPlainError), identity));
+
+export const decodeUnifiedAttachmentsResponse = (respAttachments?: UnifiedAttachments) =>
+  pipe(
+    UnifiedAttachmentsRt.decode(respAttachments),
+    fold(throwErrors(createToasterPlainError), identity)
+  );
 
 export const decodeCaseConfigurationsResponse = (respCase?: Configurations) => {
   return pipe(

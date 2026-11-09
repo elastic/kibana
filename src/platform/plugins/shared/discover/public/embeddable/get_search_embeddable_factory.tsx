@@ -275,6 +275,7 @@ export const getSearchEmbeddableFactory = ({
         getSerializedStateByValue: () => serialize(undefined),
         getSerializedStateByReference: (newId: string) => serialize(newId),
         getInspectorAdapters: () => searchEmbeddable.stateManager.inspectorAdapters.getValue(),
+        supportsJsonExport: true,
         supportedTriggers: () => {
           return [ON_OPEN_PANEL_MENU];
         },

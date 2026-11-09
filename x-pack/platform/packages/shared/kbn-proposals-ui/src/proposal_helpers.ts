@@ -16,6 +16,9 @@ import { formatDismissReason } from './dismiss_reason';
 /** The format of each full date and time in the proposal UI. The time uses 24 hours: "20 Oct 2026, 14:36". */
 export const DATE_TIME_FORMAT = 'D MMM YYYY, HH:mm';
 
+/** Formats an ISO 8601 timestamp the way every full date and time in the proposal UI reads. */
+export const formatDateTime = (iso: string): string => moment(iso).format(DATE_TIME_FORMAT);
+
 /** Stored lowercase (`configure`, `respond`, ...); the caption reads it in sentence case. */
 const toSentenceCase = (value: string): string =>
   value.length > 0 ? `${value[0].toUpperCase()}${value.slice(1)}` : value;
@@ -30,12 +33,15 @@ const impactCaptionPart = (proposal: ApprovalProposal): string | undefined => {
       });
 };
 
-/** Returns `undefined` when there is no deadline. A past deadline still returns text. */
+/**
+ * Returns `undefined` when there is no deadline, or once someone has decided, since the deadline
+ * no longer applies then. A past deadline still returns text.
+ */
 const deadlineCaptionPart = (proposal: ApprovalProposal): string | undefined => {
-  if (!proposal.expiresAt) {
+  if (!proposal.expiresAt || proposal.decision) {
     return undefined;
   }
-  const deadline = moment(proposal.expiresAt).format(DATE_TIME_FORMAT);
+  const deadline = formatDateTime(proposal.expiresAt);
   if (isProposalExpired(proposal)) {
     return i18n.translate('xpack.proposals.approvalModal.caption.expired', {
       defaultMessage: 'Expired on {deadline}',
@@ -128,7 +134,7 @@ export const getProposalDecision = (proposal: ApprovalProposal): ApprovalDecisio
     status,
     actorName,
     decidedAt: proposal.decidedAt,
-    // A failed action reports why it failed, so the analyst is not left with "Action failed"
+    // A failed action reports why it failed, so the analyst is not left with "Failed"
     // alone. A decline's reason is structured (`dismissReason`), with the free-text rationale
     // folded in when the decliner left one; an approval has no `dismissReason` at all, so it
     // falls back to `rationale` alone.

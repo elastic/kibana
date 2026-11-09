@@ -9,7 +9,7 @@ import { platformCoreTools, ToolResultType } from '@kbn/agent-builder-common';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { executeEsqlTool } from './execute_esql';
-import { resolveToolSchema } from './test_utils';
+import { createSchemaContext, resolveToolSchema } from './test_utils';
 
 jest.mock('@kbn/agent-builder-genai-utils/tools/utils/esql', () => {
   const actual = jest.requireActual('@kbn/agent-builder-genai-utils/tools/utils/esql');
@@ -195,6 +195,35 @@ describe('executeEsqlTool', () => {
 
     it('describes how to opt in to the frozen tier', () => {
       expect(executeEsqlTool().description).toContain('include_frozen');
+    });
+
+    describe('in serverless', () => {
+      const tool = executeEsqlTool({ isServerless: true });
+
+      it('does not expose include_frozen or read the space setting', async () => {
+        const context = createSchemaContext(true);
+        const schema = await tool.getSchema(context);
+
+        expect(schema.shape).not.toHaveProperty('include_frozen');
+        expect(context.uiSettings.get).not.toHaveBeenCalled();
+      });
+
+      it('excludes frozen tier indices even when include_frozen is passed', async () => {
+        const schema = await tool.getSchema(createSchemaContext(true));
+
+        await tool.handler(
+          schema.parse({ query: 'FROM logs', include_frozen: true }),
+          createHandlerContext() as any
+        );
+
+        expect(executeEsqlMock.mock.calls[0][0]).toMatchObject({ includeFrozen: false });
+      });
+
+      it('does not mention data tiers in the description', () => {
+        expect(tool.description).not.toContain('include_frozen');
+        expect(tool.description).not.toContain('Data tiers');
+        expect(tool.description).toContain('## API documentation');
+      });
     });
   });
 
