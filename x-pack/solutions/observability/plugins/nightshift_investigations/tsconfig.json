@@ -17,6 +17,7 @@
     "@kbn/share-plugin",
     "@kbn/deeplinks-observability",
     "@kbn/nightshift-decision-trees",
+    "@kbn/config",
     "@kbn/config-schema",
     "@kbn/core",
     "@kbn/core-http-server",
@@ -73,6 +74,8 @@
     "@kbn/core-security-common",
     "@kbn/eval-kql",
     "@kbn/rrule",
-    "@kbn/inference-tracing"
+    "@kbn/inference-tracing",
+    "@kbn/server-route-repository-utils",
+    "@kbn/cloud-plugin"
   ]
 }

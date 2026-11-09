@@ -19,10 +19,15 @@ import { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { evaluate } from '../../src/evaluate';
 import { loadInvestigationDataset } from './datasets';
 import { getDatasetCustomContext, replaceCustomContext } from './custom_context';
-import { createInvestigationJudges } from './judges';
+import { saveConnectorSetOnInvestigator } from './connector_sets';
+import { createInvestigationJudges, createOrcaEvaluators } from './judges';
+import { orcaJudgeConnector } from './orca_judge';
 import { efficiencyEvaluators } from './efficiency_evaluators';
 import { INVESTIGATION_TIMEOUT_MS, runInvestigation } from './task';
+import { assertScoresWithinQueryLimit } from './score_budget';
 import { assertSuccessfulSandboxCommand } from './trace_evidence';
+import { createAdminSessionRequest } from './admin_session_request';
+import type { AdminSessionRequestOptions } from './admin_session_request';
 import type { InvestigationExample, InvestigationTaskOutput } from './types';
 import { assertOrcaSource, hasOrcaTelemetryQuery } from './orca_dataset';
 import {
@@ -44,7 +49,7 @@ export const registerInvestigationEvaluation = ({
 }: {
   name: string;
   loadDataset?: (
-    client: Pick<EvalsClient, 'getDatasetByName'>
+    client: Pick<EvalsClient, 'getDatasetByName' | 'upsertDataset'>
   ) => Promise<EvaluationDataset<InvestigationExample>>;
   trustUpstreamDataset?: boolean;
   orca?: boolean;
@@ -68,20 +73,38 @@ export const registerInvestigationEvaluation = ({
         log,
         inferenceClient,
         evaluationConnector,
+        kbnUrl,
+        samlAuth,
       }) => {
         if (orca) {
           expect(repetitions, 'ORCA runs each incident once').toBe(1);
           await assertOrcaSource();
         }
         const dataset = await loadDataset(evalsClient);
-        // The judges score with the evaluation connector, not the model under test.
-        const judges = createInvestigationJudges({
-          inferenceClient: inferenceClient.bindTo({ connectorId: evaluationConnector.id }),
-          evaluationConnector,
+        // The bundled synthetic examples supply their own evidence and must not query a cluster.
+        const bundledSynthetic =
+          !orca && !process.env.NIGHTSHIFT_EXAMPLES_FILE && !process.env.NIGHTSHIFT_DATASET_NAME;
+        // Customer-0 judges use the suite's evaluation connector. ORCA judges use a fixed model,
+        // not the agent under test.
+        const judgeConnector = orca ? orcaJudgeConnector(evaluationConnector) : evaluationConnector;
+        const judgeDeps = {
+          inferenceClient: inferenceClient.bindTo({ connectorId: judgeConnector.id }),
+          evaluationConnector: judgeConnector,
           log,
-        });
-        const evaluators = [...judges, executionSuccessEvaluator, ...efficiencyEvaluators];
+        };
+        const judges = createInvestigationJudges(judgeDeps);
+        const evaluators = [
+          ...judges,
+          ...(orca ? createOrcaEvaluators(judgeDeps) : []),
+          executionSuccessEvaluator,
+          ...efficiencyEvaluators,
+        ];
         const evaluatorsByName = new Map(evaluators.map((each) => [each.name, each]));
+        assertScoresWithinQueryLimit({
+          examples: dataset.examples.length,
+          repetitions,
+          evaluators: evaluators.length,
+        });
         // The evals_nightshift_investigations config set sizes Task Manager for 16 investigations.
         const concurrency = Math.min(orca ? 8 : 16, requestedConcurrency);
         evaluate.setTimeout(
@@ -93,17 +116,25 @@ export const registerInvestigationEvaluation = ({
         // set up first. The eval user holds manage_security; setup is idempotent. On stateful,
         // Elasticsearch has no predefined roles for the account, so the eval creates them first.
         await ensureNightshiftServiceAccountRoles(esClient, { isServerless: config.serverless });
-        // Like the app's setup step: find or create the accounts by name, then bind the space to
-        // the ids the backend assigned (generated ones on Serverless).
-        const serviceAccountIds = await ensureNightshiftServiceAccounts(
-          createHttpServiceAccountsApi({
-            request: (path, { method, query, body, version }) =>
-              fetch(path, {
+        // UIAM rejects the native superuser behind `fetch` on Serverless, so setup there runs as
+        // the admin's SAML session, as the plugin's Scout API tests do.
+        const setupRequest = config.serverless
+          ? createAdminSessionRequest(
+              kbnUrl.get('/'),
+              (await samlAuth.asInteractiveUser('admin')).cookieHeader
+            )
+          : <T>(path: string, { method, query, body, version }: AdminSessionRequestOptions) =>
+              fetch<T>(path, {
                 method,
                 ...(query ? { query } : {}),
                 ...(body ? { body } : {}),
                 ...(version ? { version } : {}),
-              }),
+              });
+        // Like the app's setup step: find or create the accounts by name, then bind the space to
+        // the ids the backend assigned (generated ones on Serverless).
+        const serviceAccountIds = await ensureNightshiftServiceAccounts(
+          createHttpServiceAccountsApi({
+            request: setupRequest,
             getStatus: (error) => (error as { status?: number }).status,
           }),
           { isServerless: config.serverless }
@@ -111,7 +142,7 @@ export const registerInvestigationEvaluation = ({
         await expect
           .poll(
             async () =>
-              fetch<{ installed: boolean; bound: boolean }>(
+              setupRequest<{ installed: boolean; bound: boolean }>(
                 '/internal/nightshift/investigations/service_account/_enable',
                 { method: 'POST', body: JSON.stringify({ serviceAccountIds }) }
               ).then(
@@ -152,6 +183,7 @@ export const registerInvestigationEvaluation = ({
             { timeout: 60_000 }
           )
           .toBe(true);
+        await saveConnectorSetOnInvestigator(fetch, { withoutConnectors: bundledSynthetic });
         await replaceCustomContext(fetch, getDatasetCustomContext(dataset));
         const [experiment] = await executorClient.runExperiment(
           {
@@ -214,11 +246,7 @@ export const registerInvestigationEvaluation = ({
               if (orca && hasOrcaTelemetryQuery(conversation.rounds)) {
                 casesWithOrcaTelemetry.push(output.case_id);
               }
-              if (
-                !orca &&
-                !process.env.NIGHTSHIFT_EXAMPLES_FILE &&
-                !process.env.NIGHTSHIFT_DATASET_NAME
-              ) {
+              if (bundledSynthetic) {
                 assertSuccessfulSandboxCommand(conversation.rounds);
               }
               expect(output.traceId).toMatch(/^[a-f0-9]{32}$/);

@@ -13,6 +13,7 @@ import {
   ALERT_EPISODE_STATUS,
   type AlertEpisodeStatus,
   type AlertEventSeverity,
+  type CreateAlertEventResponse,
 } from '@kbn/alerting-v2-schemas';
 import {
   SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS,
@@ -65,6 +66,11 @@ import { toRuleEvent } from './to_rule_event';
 
 /** `.rule-events` groups a series of writes by `group_hash`, not `event_id` (unavailable as a column). */
 const GROUP_HASH_FIELD = 'group_hash';
+
+export interface CreateEventResult {
+  groupHash: string;
+  alertId: string;
+}
 
 export type UpdateEventResult =
   | { updated: true }
@@ -325,6 +331,8 @@ const applySort = (
   switch (sortField) {
     case 'created_at':
       return query.sort(['created_at', direction], ['@timestamp', 'DESC'], ['_id', 'ASC']);
+    case 'updated_at':
+      return query.sort(['@timestamp', direction], ['created_at', 'DESC'], ['_id', 'ASC']);
     case 'severity':
       return query.pipe`EVAL ${esql.col(SORT_RANK_COLUMN)} = CASE(${esql.col(
         'severity'
@@ -983,8 +991,9 @@ export class RuleEventsClient {
   }
 
   /** Writes the first version of an event; unguarded, as there is no prior version to compare. */
-  async createEvent({ event }: { event: SignificantEvent }): Promise<void> {
-    await this.writeVersion({ event });
+  async createEvent({ event }: { event: SignificantEvent }): Promise<CreateEventResult> {
+    const { group_hash: groupHash, alert_id: alertId } = await this.writeVersion({ event });
+    return { groupHash, alertId };
   }
 
   /** Writes the next version only while `prior` is still the head (best effort, not atomic). */
@@ -1059,7 +1068,7 @@ export class RuleEventsClient {
   }: {
     event: SignificantEvent;
     prior?: SignificantEvent;
-  }): Promise<void> {
+  }): Promise<CreateAlertEventResponse> {
     const { getAlertEventsClient, emitTrigger } = this.clients;
     if (!getAlertEventsClient) {
       throw new Error('RuleEventsClient was created without a writer, so it cannot write events');
@@ -1067,11 +1076,12 @@ export class RuleEventsClient {
 
     const alertEventsClient = await getAlertEventsClient();
     // `createAlertEvent` waits for a refresh, so the new version is readable immediately.
-    await alertEventsClient.createAlertEvent(toRuleEvent(event));
+    const response = await alertEventsClient.createAlertEvent(toRuleEvent(event));
     emitSignificantEventWriteTriggers({
       emitTrigger,
       significantEvent: event,
       priorSignificantEvent: prior,
     });
+    return response;
   }
 }

@@ -29,10 +29,12 @@ describe('isSourceComponent', () => {
     expect(isSourceComponent({ type: { displayName: 'EuiButton' } })).toBe(false);
     expect(isSourceComponent({ type: { name: 'EmotionCssPropInternal' } })).toBe(false);
     expect(isSourceComponent({ type: { name: 'ConnectFunction' } })).toBe(false);
+    expect(isSourceComponent({ type: { name: 'Route' } })).toBe(false);
     expect(isSourceComponent({ type: null })).toBe(false);
   });
 
-  it('should accept application components', () => {
+  it('should accept application components, including the ones named after a route', () => {
     expect(isSourceComponent({ type: { name: 'SaveButton' } })).toBe(true);
+    expect(isSourceComponent({ type: { name: 'DiscoverMainRoute' } })).toBe(true);
   });
 });

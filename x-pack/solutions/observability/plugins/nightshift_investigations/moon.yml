@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/share-plugin'
   - '@kbn/deeplinks-observability'
   - '@kbn/nightshift-decision-trees'
+  - '@kbn/config'
   - '@kbn/config-schema'
   - '@kbn/core'
   - '@kbn/core-http-server'
@@ -78,6 +79,8 @@ dependsOn:
   - '@kbn/eval-kql'
   - '@kbn/rrule'
   - '@kbn/inference-tracing'
+  - '@kbn/server-route-repository-utils'
+  - '@kbn/cloud-plugin'
 tags:
   - plugin
   - prod

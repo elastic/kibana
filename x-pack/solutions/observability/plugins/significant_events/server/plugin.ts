@@ -49,10 +49,9 @@ import {
 import { SlackAppService } from './lib/slack_app/service';
 import { getSignificantEventsMaintenanceStateSavedObjectType } from './lib/maintenance/saved_object';
 import {
-  consumeRunQuota,
+  consumeInvestigationRunQuota,
   createRunQuotaInternalRepository,
   dayKey,
-  releaseRunQuota,
   resolveDailyWindow,
   runQuotaLedgerSavedObjectType,
   runQuotaSettingsSavedObjectType,
@@ -185,20 +184,22 @@ export class SignificantEventsPlugin
     core.savedObjects.registerType(runQuotaSettingsSavedObjectType);
     core.savedObjects.registerType(runQuotaLedgerSavedObjectType);
 
-    plugins.nightshiftInvestigations?.registerInvestigationQuota(async () => {
+    plugins.nightshiftInvestigations?.registerInvestigationQuota(async (trigger) => {
       if (!this.server?.core) {
         throw new Error('Significant Events start services are unavailable');
       }
-      const internalRepository = createRunQuotaInternalRepository(this.server);
-      const date = dayKey(resolveDailyWindow());
-      const { allowed } = await consumeRunQuota({
-        internalRepository,
-        group: 'investigation',
-        date,
+      const result = await consumeInvestigationRunQuota({
+        internalRepository: createRunQuotaInternalRepository(this.server),
+        group: trigger === 'manual' ? 'manual_investigation' : 'investigation',
+        date: dayKey(resolveDailyWindow()),
       });
+      if (result.allowed) {
+        return result;
+      }
       return {
-        allowed,
-        release: () => releaseRunQuota({ internalRepository, group: 'investigation', date }),
+        allowed: false,
+        deniedBy: result.deniedBy === 'total_investigation' ? 'all' : trigger,
+        limit: result.limit,
       };
     });
 

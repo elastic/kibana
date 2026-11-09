@@ -107,9 +107,8 @@ export default function (providerContext: FtrProviderContextWithServices) {
           index: '.fleet-agents',
           ignore_unavailable: true,
           query: {
-            term: {
-              policy_id: policyId,
-            },
+            // by id: with the sentinel version enabled, the agent can be moved to `<policy id>#sentinel`
+            ids: { values: ['inactive-agent-1'] },
           },
         });
 
@@ -147,9 +146,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
           index: '.fleet-agents',
           ignore_unavailable: true,
           query: {
-            term: {
-              policy_id: policyId,
-            },
+            ids: { values: ['inactive-agent-stale'] },
           },
         });
 
@@ -190,9 +187,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
           index: '.fleet-agents',
           ignore_unavailable: true,
           query: {
-            term: {
-              policy_id: policyIdSpace1,
-            },
+            ids: { values: ['inactive-agent-space1'] },
           },
         });
 
@@ -223,9 +218,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
         index: '.fleet-agents',
         ignore_unavailable: true,
         query: {
-          term: {
-            policy_id: policyId,
-          },
+          ids: { values: ['active-agent-1'] },
         },
       });
       const agentDoc = agentRes.hits.hits[0]._source as any;
@@ -245,9 +238,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
         index: '.fleet-agents',
         ignore_unavailable: true,
         query: {
-          term: {
-            policy_id: policyId,
-          },
+          ids: { values: ['inactive-agent-2'] },
         },
       });
       const agentDoc = agentRes.hits.hits[0]._source as any;

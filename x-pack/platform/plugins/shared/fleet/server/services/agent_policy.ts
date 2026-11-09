@@ -305,7 +305,8 @@ class AgentPolicyService {
         getAllowedOutputTypesForAgentPolicy({ ...existingAgentPolicy, ...agentPolicy })
       );
     }
-    agentPolicy = this.normalizeDownloadSourceFields(agentPolicy);
+    // Defense in depth: internal callers may pass full policy objects, never persist `id`
+    agentPolicy = omit(this.normalizeDownloadSourceFields(agentPolicy), 'id');
     await soClient
       .update<AgentPolicySOAttributes>(savedObjectType, id, {
         ...agentPolicy,
@@ -1149,7 +1150,8 @@ class AgentPolicyService {
       });
     }
 
-    const { space_ids: _, ...preparedAgentPolicySo } = agentPolicy;
+    // `id` is the saved object id and must never be persisted in the attributes
+    const preparedAgentPolicySo = omit(agentPolicy, ['space_ids', 'id']);
     const { hasAgentVersionConditions, minAgentVersion, packageAgentVersionConditions } =
       await this.computeMinAgentVersionData(soClient, id);
     return this._update(soClient, esClient, id, { ...preparedAgentPolicySo }, options?.user, {
