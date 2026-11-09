@@ -5,166 +5,76 @@
  * 2.0.
  */
 
-import { httpServerMock } from '@kbn/core/server/mocks';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { ExecutionStatus, type WorkflowExecutionDto } from '@kbn/workflows';
-import { INVESTIGATE_STEP_ID, type InvestigationState } from '@kbn/significant-events-schema';
-import {
-  resolveInvestigationStatuses,
-  resolveStatusFromExecution,
-} from './resolve_investigation_status';
+import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
+import { resolveInvestigationStatuses } from './resolve_investigation_status';
 
-const investigationState: InvestigationState = {
-  summary: 'Investigate the latency spike.',
-  hypotheses: [{ candidate: 'Checkout deploy regression', confidence: 0.9, status: 'confirmed' }],
-};
+const request = httpServerMock.createKibanaRequest();
 
-const execution = (
-  status: ExecutionStatus,
-  stepExecutions: Array<Partial<WorkflowExecutionDto['stepExecutions'][number]>> = []
-): Pick<WorkflowExecutionDto, 'status' | 'stepExecutions'> => {
-  return { status, stepExecutions } as Pick<WorkflowExecutionDto, 'status' | 'stepExecutions'>;
-};
-
-describe('resolveStatusFromExecution', () => {
-  it.each([ExecutionStatus.PENDING, ExecutionStatus.RUNNING, ExecutionStatus.WAITING])(
-    'reports pending while the execution is %s',
-    (status) => {
-      expect(resolveStatusFromExecution(execution(status))).toBe('pending');
-    }
-  );
-
-  it('reports complete when the investigate step produced a parseable result', () => {
-    expect(
-      resolveStatusFromExecution(
-        execution(ExecutionStatus.COMPLETED, [
-          { stepId: INVESTIGATE_STEP_ID, output: { structured_output: investigationState } },
-        ])
-      )
-    ).toBe('complete');
-  });
-
-  it('reports failed when the investigate step errored', () => {
-    expect(
-      resolveStatusFromExecution(
-        execution(ExecutionStatus.FAILED, [
-          { stepId: INVESTIGATE_STEP_ID, error: { type: 'Error', message: 'boom' } },
-        ])
-      )
-    ).toBe('failed');
-  });
-
-  it('reports failed for a terminal execution that did not complete', () => {
-    expect(resolveStatusFromExecution(execution(ExecutionStatus.TIMED_OUT))).toBe('failed');
-  });
-
-  it('reports pending for a completed execution whose output has not been persisted yet', () => {
-    expect(resolveStatusFromExecution(execution(ExecutionStatus.COMPLETED))).toBe('pending');
-  });
-
-  it('reports pending when the persisted output does not match the investigation schema', () => {
-    expect(
-      resolveStatusFromExecution(
-        execution(ExecutionStatus.COMPLETED, [
-          { stepId: INVESTIGATE_STEP_ID, output: { structured_output: { nope: true } } },
-        ])
-      )
-    ).toBe('pending');
-  });
-
-  it('takes the last attempt when the investigate step was retried', () => {
-    expect(
-      resolveStatusFromExecution(
-        execution(ExecutionStatus.COMPLETED, [
-          {
-            stepId: INVESTIGATE_STEP_ID,
-            stepExecutionIndex: 0,
-            error: { type: 'Error', message: 'first attempt died' },
-          },
-          {
-            stepId: INVESTIGATE_STEP_ID,
-            stepExecutionIndex: 1,
-            output: { structured_output: investigationState },
-          },
-        ])
-      )
-    ).toBe('complete');
-  });
-
-  it('reports failed when the last attempt of a retried investigate step errored', () => {
-    expect(
-      resolveStatusFromExecution(
-        execution(ExecutionStatus.COMPLETED, [
-          {
-            stepId: INVESTIGATE_STEP_ID,
-            stepExecutionIndex: 1,
-            error: { type: 'Error', message: 'retry died too' },
-          },
-          {
-            stepId: INVESTIGATE_STEP_ID,
-            stepExecutionIndex: 0,
-            output: { structured_output: investigationState },
-          },
-        ])
-      )
-    ).toBe('failed');
-  });
-
-  it('ignores step executions from other steps', () => {
-    expect(
-      resolveStatusFromExecution(
-        execution(ExecutionStatus.COMPLETED, [
-          { stepId: 'some_other_step', output: { structured_output: investigationState } },
-        ])
-      )
-    ).toBe('pending');
-  });
-});
+const withList = (list: jest.Mock) =>
+  ({
+    getInvestigationsClient: jest.fn().mockReturnValue({ list }),
+  } as unknown as Pick<AgenticInvestigationsPluginStart, 'getInvestigationsClient'>);
 
 describe('resolveInvestigationStatuses', () => {
-  const logger = loggingSystemMock.createLogger();
-
-  const resolve = (getWorkflowExecution?: jest.Mock, workflowExecutionIds: string[] = ['exec-1']) =>
-    resolveInvestigationStatuses({
-      request: httpServerMock.createKibanaRequest(),
-      workflowsManagement: getWorkflowExecution
-        ? ({ management: { getClient: () => ({ getWorkflowExecution }) } } as never)
-        : undefined,
-      spaceId: 'default',
-      workflowExecutionIds,
-      logger,
+  it('reports pending while in progress, complete otherwise, and omits unknown ids', async () => {
+    const list = jest.fn().mockResolvedValue({
+      results: [
+        { id: 'inv-running', in_progress: true },
+        { id: 'inv-done', in_progress: false },
+      ],
     });
 
-  it('omits an execution that does not exist', async () => {
-    await expect(resolve(jest.fn().mockResolvedValue(null))).resolves.toEqual({});
-  });
+    await expect(
+      resolveInvestigationStatuses({
+        agenticInvestigations: withList(list),
+        request,
+        investigationIds: ['inv-running', 'inv-done', 'legacy-execution', 'inv-done', ''],
+        logger: loggingSystemMock.createLogger(),
+      })
+    ).resolves.toEqual({ 'inv-running': 'pending', 'inv-done': 'complete' });
 
-  it('reports an execution that cannot be read as unavailable', async () => {
-    await expect(resolve(jest.fn().mockRejectedValue(new Error('corrupt')))).resolves.toEqual({
-      'exec-1': 'unavailable',
+    expect(list).toHaveBeenCalledWith({
+      id: ['inv-running', 'inv-done', 'legacy-execution'],
+      per_page: 3,
     });
   });
 
-  it('reports unavailable when workflow management cannot read executions', async () => {
-    await expect(resolve()).resolves.toEqual({ 'exec-1': 'unavailable' });
-  });
+  it('reads at most a hundred ids per call', async () => {
+    const list = jest.fn().mockResolvedValue({ results: [] });
+    const ids = Array.from({ length: 150 }, (_, index) => `inv-${index}`);
 
-  it('limits concurrent execution reads', async () => {
-    let activeReads = 0;
-    let maxActiveReads = 0;
-    const getWorkflowExecution = jest.fn(async () => {
-      activeReads += 1;
-      maxActiveReads = Math.max(maxActiveReads, activeReads);
-      await new Promise<void>((complete) => setImmediate(complete));
-      activeReads -= 1;
-      return null;
+    await resolveInvestigationStatuses({
+      agenticInvestigations: withList(list),
+      request,
+      investigationIds: ids,
+      logger: loggingSystemMock.createLogger(),
     });
 
-    await resolve(
-      getWorkflowExecution,
-      Array.from({ length: 10 }, (_, index) => `exec-${index}`)
-    );
+    expect(list).toHaveBeenCalledTimes(2);
+    expect(list.mock.calls[1][0]).toEqual({ id: ids.slice(100), per_page: 50 });
+  });
 
-    expect(maxActiveReads).toBe(5);
+  it('reports unavailable when the read fails', async () => {
+    const list = jest.fn().mockRejectedValue(new Error('forbidden'));
+
+    await expect(
+      resolveInvestigationStatuses({
+        agenticInvestigations: withList(list),
+        request,
+        investigationIds: ['inv-1'],
+        logger: loggingSystemMock.createLogger(),
+      })
+    ).resolves.toEqual({ 'inv-1': 'unavailable' });
+  });
+
+  it('reports unavailable without agentic investigations', async () => {
+    await expect(
+      resolveInvestigationStatuses({
+        request,
+        investigationIds: ['inv-1'],
+        logger: loggingSystemMock.createLogger(),
+      })
+    ).resolves.toEqual({ 'inv-1': 'unavailable' });
   });
 });

@@ -160,6 +160,8 @@ export const Graph = memo<GraphProps>(
     // Merge with defaults so new fields added in future releases are always visible
     // even for users who have an older stored value missing those keys.
     const displayOptions: GraphDisplayOptions = {
+      highlightOrigin:
+        storedDisplayOptions?.highlightOrigin ?? DEFAULT_GRAPH_DISPLAY_OPTIONS.highlightOrigin,
       entity: { ...DEFAULT_GRAPH_DISPLAY_OPTIONS.entity, ...storedDisplayOptions?.entity },
       event: { ...DEFAULT_GRAPH_DISPLAY_OPTIONS.event, ...storedDisplayOptions?.event },
     };

@@ -23,9 +23,10 @@ import deepMerge from 'deepmerge';
 import { useMemo } from 'react';
 import type { Observable } from 'rxjs';
 import { filter, map, merge, startWith, Subject } from 'rxjs';
-import { get } from 'lodash';
 import { useObservable, type ValueObservable } from '@kbn/use-observable';
 import { buildPath } from '@kbn/core-http-browser';
+import { getFlattenedObject, withTimeout } from '@kbn/std';
+import { createKibanaOfrepProvider } from './kibana_ofrep_provider';
 
 /**
  * setup method dependencies
@@ -52,6 +53,19 @@ type FeatureFlagValueType = 'boolean' | 'string' | 'number';
 interface ReportedFlagValue {
   type: FeatureFlagValueType;
   value: FeatureFlagValue;
+}
+
+/** Injected provider values, with `feature_flags.overrides` winning. */
+function seedFlags(
+  injectedMetadata: ReturnType<InternalInjectedMetadataSetup['getFeatureFlags']>
+): Record<string, unknown> {
+  if (!injectedMetadata) {
+    return {};
+  }
+  return {
+    ...injectedMetadata.initialFeatureFlags,
+    ...getFlattenedObject(injectedMetadata.overrides ?? {}),
+  };
 }
 
 const getFeatureFlagValueType = (value: FeatureFlagValue): FeatureFlagValueType => {
@@ -99,7 +113,6 @@ export class FeatureFlagsService {
   private readonly lastReportedValues = new Map<string, ReportedFlagValue>();
   private isProviderReadyPromise?: Promise<void>;
   private context: MultiContextEvaluationContext = { kind: 'multi' };
-  private overrides: Record<string, unknown> = {};
   private http?: InternalHttpSetup;
 
   /**
@@ -118,39 +131,10 @@ export class FeatureFlagsService {
    */
   public setup(deps: FeatureFlagsSetupDeps): FeatureFlagsSetup {
     const featureFlagsInjectedMetadata = deps.injectedMetadata.getFeatureFlags();
-    if (featureFlagsInjectedMetadata) {
-      this.overrides = featureFlagsInjectedMetadata.overrides;
-    }
     this.http = deps.http;
+    this.installProvider(deps.http, featureFlagsInjectedMetadata);
     return {
       getInitialFeatureFlags: () => featureFlagsInjectedMetadata?.initialFeatureFlags ?? {},
-      setProvider: (provider) => {
-        if (this.isProviderReadyPromise) {
-          throw new Error('A provider has already been set. This API cannot be called twice.');
-        }
-        const transaction = apm.startTransaction('set-provider', 'feature-flags');
-        this.isProviderReadyPromise = OpenFeature.setProviderAndWait(provider);
-        this.isProviderReadyPromise
-          .then(() => {
-            if (transaction) {
-              // @ts-expect-error RUM types are not correct
-              transaction.outcome = 'success';
-              transaction.end();
-            }
-          })
-          .catch((err) => {
-            this.logger.error(err);
-            apm.captureError(err);
-            if (transaction) {
-              // @ts-expect-error RUM types are not correct
-              transaction.outcome = 'failure';
-              transaction.end();
-            }
-          });
-
-        // Emit a context change event when the provider is ready to force the reevaluation of the subscribed flags.
-        OpenFeature.addHandler(ClientProviderEvents.Ready, () => this.contextChanged$.next());
-      },
       appendContext: (contextToAppend) => this.appendContext(contextToAppend),
     };
   }
@@ -176,7 +160,14 @@ export class FeatureFlagsService {
         startWith([flagName]) // only to emit on the first call
       );
 
-    await this.waitForProviderInitialization();
+    try {
+      await this.waitForProviderInitialization();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(
+        `Feature flags provider failed to initialize. Evaluations use fallbacks until it recovers: ${message}`
+      );
+    }
 
     const getBooleanValue = (flagName: string, fallbackValue: boolean) =>
       this.evaluateFlag(this.featureFlagsClient.getBooleanValue, flagName, fallbackValue);
@@ -217,26 +208,62 @@ export class FeatureFlagsService {
   }
 
   /**
+   * Installs the Kibana OFREP provider. Injected flags and config overrides are served until the first response.
+   */
+  private installProvider(
+    http: InternalHttpSetup,
+    injectedMetadata: ReturnType<InternalInjectedMetadataSetup['getFeatureFlags']>
+  ): void {
+    const transaction = apm.startTransaction('set-provider', 'feature-flags');
+    const provider = createKibanaOfrepProvider({
+      http,
+      initialFlags: seedFlags(injectedMetadata),
+      logger: this.logger,
+    });
+    this.isProviderReadyPromise = OpenFeature.setProviderAndWait(provider);
+    this.isProviderReadyPromise
+      .then(() => {
+        if (transaction) {
+          // @ts-expect-error RUM types are not correct
+          transaction.outcome = 'success';
+          transaction.end();
+        }
+      })
+      .catch((err) => {
+        this.logger.error(err);
+        apm.captureError(err);
+        if (transaction) {
+          // @ts-expect-error RUM types are not correct
+          transaction.outcome = 'failure';
+          transaction.end();
+        }
+      });
+
+    // Reevaluate subscribed flags once the provider is ready.
+    OpenFeature.addHandler(ClientProviderEvents.Ready, () => this.contextChanged$.next());
+  }
+
+  /**
    * Waits for the provider initialization with a timeout to avoid holding the page load for too long
    * @internal
    */
   private async waitForProviderInitialization() {
     // Adding a timeout here to avoid hanging the start for too long if the provider is unresponsive
-    let timeoutId: NodeJS.Timeout | undefined;
-    await Promise.race([
-      this.isProviderReadyPromise,
-      new Promise((resolve) => {
-        timeoutId = setTimeout(resolve, 2 * 1000);
-      }).then(() => {
-        const msg = `The feature flags provider took too long to initialize.
+    if (!this.isProviderReadyPromise) {
+      return;
+    }
+    const outcome = await withTimeout({
+      promise: this.isProviderReadyPromise,
+      timeoutMs: 2 * 1000,
+    });
+    if (outcome.timedout) {
+      const msg = `The feature flags provider took too long to initialize.
         Won't hold the page load any longer.
         Feature flags will return the provided fallbacks until the provider is eventually initialized.`;
-        this.logger.warn(msg);
-        // Flag the transaction as slow so that we can quantify how often it happens
-        apm.getCurrentTransaction()?.addLabels({ slow_setup: true });
-      }),
-    ]);
-    clearTimeout(timeoutId);
+      this.logger.warn(msg);
+      // Flag the transaction as slow so that we can quantify how often it happens
+      apm.getCurrentTransaction()?.addLabels({ slow_setup: true });
+    }
   }
 
   /**
@@ -251,12 +278,10 @@ export class FeatureFlagsService {
     flagName: string,
     fallbackValue: T
   ): T {
-    const override = get(this.overrides, flagName); // using lodash get because flagName can come with dots and the config parser might structure it in objects.
-    const value =
-      typeof override !== 'undefined'
-        ? (override as T)
-        : // We have to bind the evaluation or the client will lose its internal context
-          evaluationFn.bind(this.featureFlagsClient)(flagName, fallbackValue);
+    // Bind the evaluation or the client will lose its internal context.
+    // Overrides are already part of the server snapshot this provider reads
+    // and are taken into account in the `initialFlags` property when bootstrapping the client.
+    const value = evaluationFn.bind(this.featureFlagsClient)(flagName, fallbackValue);
     apm.addLabels({ [`flag_${flagName.replaceAll('.', '_')}`]: value });
 
     this.reportValueIfChanged(flagName, value);

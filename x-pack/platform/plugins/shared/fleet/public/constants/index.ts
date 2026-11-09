@@ -75,3 +75,13 @@ export type TOUR_STORAGE_CONFIG = {
 };
 
 export const MAX_FLYOUT_WIDTH = 800;
+
+/**
+ * Query params to append when the add integration flow navigates to an integration's policies
+ * table on save: the table opens the agent enrollment flyout, and shows the add agent help
+ * popover, for the agent policy id carried by these params.
+ */
+export const INTEGRATION_POLICIES_ON_SAVE_QUERY_PARAMS = {
+  showAddAgentHelp: { renameKey: 'showAddAgentHelpForPolicyId', policyIdAsValue: true },
+  openEnrollmentFlyout: { renameKey: 'addAgentToPolicyId', policyIdAsValue: true },
+} as const;

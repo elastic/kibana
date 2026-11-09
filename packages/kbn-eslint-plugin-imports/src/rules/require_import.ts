@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Rule } from 'eslint';
+import type { CreateOnceRule } from '@oxlint/plugins';
 import { load } from 'cheerio';
 
 type StringModuleConfig = string;
@@ -23,7 +23,7 @@ enum ReferenceModuleAs {
   typeReference = 'typeReference',
 }
 
-export const RequireImportRule: Rule.RuleModule = {
+export const RequireImportRule: CreateOnceRule = {
   meta: {
     type: 'problem',
     fixable: 'code',
@@ -56,21 +56,21 @@ export const RequireImportRule: Rule.RuleModule = {
     },
   },
 
-  create(context) {
-    const requiredImports: ModuleConfig[] = context.options;
-
-    const mappedOptions: ObjectModuleConfig[] = requiredImports.map((config) => {
-      if (typeof config === 'string') {
-        return {
-          module: config,
-          as: ReferenceModuleAs.typeReference,
-        };
-      }
-      return config;
-    });
-
+  createOnce(context) {
     return {
       'Program:exit': (node) => {
+        const requiredImports = context.options as ModuleConfig[];
+
+        const mappedOptions: ObjectModuleConfig[] = requiredImports.map((config) => {
+          if (typeof config === 'string') {
+            return {
+              module: config,
+              as: ReferenceModuleAs.typeReference,
+            };
+          }
+          return config;
+        });
+
         mappedOptions.forEach((option) => {
           switch (option.as) {
             case ReferenceModuleAs.typeReference:

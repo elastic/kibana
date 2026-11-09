@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/dev-cli-runner'
   - '@kbn/core-test-helpers-kbn-server'
   - '@kbn/core-plugins-server-internal'
+  - '@kbn/std'
 tags:
   - test-helper
   - package
@@ -32,6 +33,4 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

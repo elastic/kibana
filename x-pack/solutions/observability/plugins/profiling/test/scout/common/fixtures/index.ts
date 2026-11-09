@@ -86,9 +86,11 @@ export const apiTest = base.extend<{}, { profilingHelper: ProfilingHelper }>({
         }
 
         await Promise.all([
-          collectorId ? apiServices.fleet.package_policies.delete(collectorId) : Promise.resolve(),
+          collectorId
+            ? apiServices.fleet.package_policies.delete(collectorId, { force: true })
+            : Promise.resolve(),
           symbolizerId
-            ? apiServices.fleet.package_policies.delete(symbolizerId)
+            ? apiServices.fleet.package_policies.delete(symbolizerId, { force: true })
             : Promise.resolve(),
           apmPolicyPromise,
         ]);

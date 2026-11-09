@@ -175,7 +175,7 @@ export const Okta: ConnectorSpec = {
   metadata: {
     id: '.okta',
     displayName: 'Okta',
-    description: i18n.translate('core.kibanaConnectorSpecs.okta.metadata.description', {
+    description: i18n.translate('connectorSpecs.okta.metadata.description', {
       defaultMessage:
         'Contain compromised Okta identities - suspend users, revoke sessions, reset MFA, manage group membership, and query System Log events',
     }),
@@ -202,52 +202,40 @@ export const Okta: ConnectorSpec = {
             certificateBinding: { hidden: true },
             certificate: { hidden: true },
             tokenUrl: {
-              label: i18n.translate('core.kibanaConnectorSpecs.okta.auth.oauth.tokenUrl.label', {
+              label: i18n.translate('connectorSpecs.okta.auth.oauth.tokenUrl.label', {
                 defaultMessage: 'Token URL',
               }),
               placeholder: 'https://your-okta-domain.okta.com/oauth2/v1/token',
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.okta.auth.oauth.tokenUrl.helpText',
-                {
-                  defaultMessage:
-                    'Org Authorization Server token endpoint. Must match your Org URL, for example https://your-okta-domain.okta.com/oauth2/v1/token. Create an API Services app with Public key/Private key client authentication, grant scopes okta.users.manage okta.groups.manage okta.logs.read (groups.manage is required for add/remove group membership or those calls return 403), assign an admin role that can manage users and groups, and disable Require Demonstrating Proof of Possession (DPoP) on the app - Kibana does not send DPoP proofs yet.',
-                }
-              ),
+              helpText: i18n.translate('connectorSpecs.okta.auth.oauth.tokenUrl.helpText', {
+                defaultMessage:
+                  'Org Authorization Server token endpoint. Must match your Org URL, for example https://your-okta-domain.okta.com/oauth2/v1/token. Create an API Services app with Public key/Private key client authentication, grant scopes okta.users.manage okta.groups.manage okta.logs.read (groups.manage is required for add/remove group membership or those calls return 403), assign an admin role that can manage users and groups, and disable Require Demonstrating Proof of Possession (DPoP) on the app - Kibana does not send DPoP proofs yet.',
+              }),
             },
             clientId: {
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.okta.auth.oauth.clientId.helpText',
-                {
-                  defaultMessage: 'Client ID of the Okta API Services (service) app integration.',
-                }
-              ),
+              helpText: i18n.translate('connectorSpecs.okta.auth.oauth.clientId.helpText', {
+                defaultMessage: 'Client ID of the Okta API Services (service) app integration.',
+              }),
             },
             keyId: {
-              label: i18n.translate('core.kibanaConnectorSpecs.okta.auth.oauth.keyId.label', {
+              label: i18n.translate('connectorSpecs.okta.auth.oauth.keyId.label', {
                 defaultMessage: 'Key ID (kid)',
               }),
-              helpText: i18n.translate('core.kibanaConnectorSpecs.okta.auth.oauth.keyId.helpText', {
+              helpText: i18n.translate('connectorSpecs.okta.auth.oauth.keyId.helpText', {
                 defaultMessage:
                   'kid of the public key registered on the service app JWKS. Required for Okta private_key_jwt.',
               }),
             },
             privateKey: {
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.okta.auth.oauth.privateKey.helpText',
-                {
-                  defaultMessage:
-                    'PEM-encoded private key that matches the public key on the service app. Must begin with -----BEGIN PRIVATE KEY----- or -----BEGIN RSA PRIVATE KEY-----.',
-                }
-              ),
+              helpText: i18n.translate('connectorSpecs.okta.auth.oauth.privateKey.helpText', {
+                defaultMessage:
+                  'PEM-encoded private key that matches the public key on the service app. Must begin with -----BEGIN PRIVATE KEY----- or -----BEGIN RSA PRIVATE KEY-----.',
+              }),
             },
             passphrase: {
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.okta.auth.oauth.passphrase.helpText',
-                {
-                  defaultMessage:
-                    'Only required if the private key is encrypted (ENCRYPTED PRIVATE KEY).',
-                }
-              ),
+              helpText: i18n.translate('connectorSpecs.okta.auth.oauth.passphrase.helpText', {
+                defaultMessage:
+                  'Only required if the private key is encrypted (ENCRYPTED PRIVATE KEY).',
+              }),
             },
           },
         },
@@ -258,16 +246,13 @@ export const Okta: ConnectorSpec = {
         overrides: {
           meta: {
             apiToken: {
-              label: i18n.translate('core.kibanaConnectorSpecs.okta.auth.ssws.apiToken.label', {
+              label: i18n.translate('connectorSpecs.okta.auth.ssws.apiToken.label', {
                 defaultMessage: 'API token (SSWS)',
               }),
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.okta.auth.ssws.apiToken.helpText',
-                {
-                  defaultMessage:
-                    'Paste the raw Okta API token from Security > API > Tokens. Do not include a prefix - the connector sends Authorization: SSWS automatically. Prefer the OAuth service-app auth type when possible. Token privileges must allow user lifecycle, sessions, groups, and System Log read (equivalent to okta.users.manage, okta.groups.manage, okta.logs.read).',
-                }
-              ),
+              helpText: i18n.translate('connectorSpecs.okta.auth.ssws.apiToken.helpText', {
+                defaultMessage:
+                  'Paste the raw Okta API token from Security > API > Tokens. Do not include a prefix - the connector sends Authorization: SSWS automatically. Prefer the OAuth service-app auth type when possible. Token privileges must allow user lifecycle, sessions, groups, and System Log read (equivalent to okta.users.manage, okta.groups.manage, okta.logs.read).',
+              }),
               placeholder: '00…',
             },
           },
@@ -281,10 +266,10 @@ export const Okta: ConnectorSpec = {
       orgUrl: UISchemas.url('https://your-okta-domain.okta.com')
         .describe('Okta organization URL')
         .meta({
-          label: i18n.translate('core.kibanaConnectorSpecs.okta.config.orgUrl.label', {
+          label: i18n.translate('connectorSpecs.okta.config.orgUrl.label', {
             defaultMessage: 'Org URL',
           }),
-          helpText: i18n.translate('core.kibanaConnectorSpecs.okta.config.orgUrl.helpText', {
+          helpText: i18n.translate('connectorSpecs.okta.config.orgUrl.helpText', {
             defaultMessage:
               'Base URL of your Okta org, for example https://your-okta-domain.okta.com or https://your-okta-domain.oktapreview.com. Custom domains are supported. Do not include /api/v1.',
           }),

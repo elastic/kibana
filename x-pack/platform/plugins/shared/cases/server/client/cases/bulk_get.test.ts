@@ -61,13 +61,13 @@ describe('bulkGet', () => {
       await expect(
         bulkGet({ ids: Array(MAX_BULK_GET_CASES + 1).fill('foobar') }, clientArgs)
       ).rejects.toThrow(
-        `Error: The length of the field ids is too long. Array must be of length <= ${MAX_BULK_GET_CASES}.`
+        `Error: ids: The length of the field ids is too long. Array must be of length <= ${MAX_BULK_GET_CASES}.`
       );
     });
 
     it('throws when trying to fetch zero cases', async () => {
       await expect(bulkGet({ ids: [] }, clientArgs)).rejects.toThrow(
-        'Error: The length of the field ids is too short. Array must be of length >= 1.'
+        'Error: ids: The length of the field ids is too short. Array must be of length >= 1.'
       );
     });
 
@@ -78,7 +78,7 @@ describe('bulkGet', () => {
           { ids: ['1'], foo: 'bar' },
           clientArgs
         )
-      ).rejects.toThrow('invalid keys "foo"');
+      ).rejects.toThrow('Excess keys are not allowed');
     });
 
     it('constructs the case error correctly', async () => {

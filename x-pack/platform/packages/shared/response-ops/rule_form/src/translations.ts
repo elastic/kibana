@@ -669,6 +669,21 @@ export const RULE_FORM_PAGE_RULE_ACTIONS_NO_PERMISSION_DESCRIPTION = i18n.transl
   }
 );
 
+export const RULE_FORM_PAGE_RULE_NO_PERMISSION_TITLE = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleNoPermissionTitle',
+  {
+    defaultMessage: 'Rule privileges missing',
+  }
+);
+
+export const RULE_FORM_PAGE_RULE_NO_PERMISSION_DESCRIPTION = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleNoPermissionDescription',
+  {
+    defaultMessage:
+      'You must have All privileges for the feature this rule belongs to in order to edit it.',
+  }
+);
+
 export const RULE_FORM_PAGE_RULE_DETAILS_TITLE = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleDetailsTitle',
   {
@@ -686,11 +701,6 @@ export const RULE_FORM_PAGE_RULE_DETAILS_TITLE_SHORT = i18n.translate(
 export const RULE_FORM_RETURN_TITLE = i18n.translate('responseOpsRuleForm.ruleForm.returnTitle', {
   defaultMessage: 'Return',
 });
-
-export const CLASSIC_RULES_BADGE_LABEL = i18n.translate(
-  'responseOpsRuleForm.ruleForm.classicRulesBadgeLabel',
-  { defaultMessage: 'Classic rules' }
-);
 
 export const RULE_FORM_CANCEL_MODAL_TITLE = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleFormCancelModalTitle',

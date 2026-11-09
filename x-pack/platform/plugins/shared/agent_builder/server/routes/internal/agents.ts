@@ -77,7 +77,7 @@ export function registerInternalAgentRoutes({
 
       const { agents: agentsService } = getInternalServices();
       const registry = await agentsService.getRegistry({ request });
-      const agents = await registry.list();
+      const agents = await registry.list({ includeHidden: true });
 
       // Base configuration belongs to the agent's type, so each distinct type resolves once.
       const types = [...new Set(agents.map(({ type }) => type))];

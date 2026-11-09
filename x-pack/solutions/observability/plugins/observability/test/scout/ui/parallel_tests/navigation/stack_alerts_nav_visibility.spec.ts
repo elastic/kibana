@@ -39,7 +39,7 @@ test.describe(
       await expect(panel).toBeVisible();
 
       // Rules stays as the control that the panel finished resolving deep links.
-      // The default Scout server leaves alerting:v2:enabled unpinned (false).
+      // The parallel global setup pins alerting:v2:enabled to false.
       await expect(
         panel.locator('[data-test-subj~="nav-item-id-management:triggersActions"]')
       ).toBeVisible();

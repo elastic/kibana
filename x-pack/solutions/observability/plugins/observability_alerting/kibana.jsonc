@@ -9,8 +9,8 @@
     "id": "observabilityAlerting",
     "browser": true,
     "server": false,
-    "requiredPlugins": ["alertingVTwo", "triggersActionsUi"],
-    "optionalPlugins": ["nightshiftInvestigations"],
-    "requiredBundles": ["alertingVTwo", "observability"],
+    "requiredPlugins": ["alertingVTwo", "triggersActionsUi", "observabilityShared"],
+    "optionalPlugins": ["cases", "nightshiftInvestigations", "security"],
+    "requiredBundles": ["alertingVTwo", "cases", "observability"],
   },
 }

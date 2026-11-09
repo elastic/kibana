@@ -34,7 +34,7 @@ export const triggerInvestigationWorkflow = async ({
   const {
     title,
     summary,
-    stream_names,
+    source_ids,
     event_id,
     status,
     severity,
@@ -47,22 +47,24 @@ export const triggerInvestigationWorkflow = async ({
 
   let investigationId: string;
   try {
-    const response = await client.start({
-      subject: { type: 'significant_event', id: event_id, summary },
-      title,
-      trigger_type: 'manual',
-      message: `${title}\n\n${summary}`,
-      stream_names: stream_names ?? [],
-      concurrency_key: event_id,
-      context: {
-        event_id,
-        status,
-        severity,
-        confidence,
-        causal_features: causal_features ?? [],
-        blast_radius: blast_radius ?? [],
+    const response = await client.start(
+      {
+        subject: { type: 'significant_event', id: event_id, summary },
+        title,
+        trigger_type: 'manual',
+        message: `${title}\n\n${summary}`,
+        source_ids: source_ids ?? [],
+        context: {
+          event_id,
+          status,
+          severity,
+          confidence,
+          causal_features: causal_features ?? [],
+          blast_radius: blast_radius ?? [],
+        },
       },
-    });
+      { entryPoint: 'start_api' }
+    );
     investigationId = response.investigation_id;
   } catch (err) {
     if (err instanceof InvestigationUnavailableError) {

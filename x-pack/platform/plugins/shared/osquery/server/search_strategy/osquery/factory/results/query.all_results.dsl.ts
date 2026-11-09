@@ -87,6 +87,13 @@ export const buildResultsQuery = ({
     allow_no_indices: true,
     index,
     ignore_unavailable: true,
+    // Offset pages of one action (or one scheduled execution) are served by the same shard copies,
+    // so the `_doc` tie-break below keeps them disjoint (its order differs between copies).
+    // The prefix keeps a schedule id that starts with `_` from being read as a built-in preference.
+    preference:
+      scheduleId != null && executionCount != null
+        ? `osquery:${scheduleId}:${executionCount}`
+        : actionId,
     aggs: {
       count_by_agent_id: {
         terms: {
@@ -110,11 +117,17 @@ export const buildResultsQuery = ({
     size: querySize,
     track_total_hits: true,
     fields: ['elastic_agent.*', 'agent.*', 'osquery.*'],
-    sort:
-      sort?.map((sortConfig) => ({
-        [sortConfig.field]: {
-          order: sortConfig.direction,
-        },
-      })) ?? [],
+    // `_doc` breaks ties so offset pages stay disjoint when many documents share a sort value
+    // (rows of one bulk request share `event.ingested`).
+    sort: sort?.length
+      ? [
+          ...sort.map((sortConfig) => ({
+            [sortConfig.field]: {
+              order: sortConfig.direction,
+            },
+          })),
+          '_doc',
+        ]
+      : [],
   };
 };

@@ -31,6 +31,19 @@ export interface WorkflowLookupOptions {
   managedFilter?: ManagedFilter;
 }
 
+/** How many workflows {@link WorkflowRepository.getWorkflowStatuses} reads in one request. */
+export const WORKFLOW_STATUSES_CHUNK_SIZE = 1000;
+
+/**
+ * Whether a workflow exists in the space it was asked for, as far as one read could tell.
+ * A soft-deleted workflow is `missing`. `unknown` means the read failed, and says nothing about
+ * the workflow.
+ */
+export type WorkflowStatus =
+  | { status: 'present'; name?: string }
+  | { status: 'missing' }
+  | { status: 'unknown' };
+
 export class WorkflowRepository {
   private options: WorkflowRepositoryOptions;
 
@@ -311,6 +324,109 @@ export class WorkflowRepository {
     }
 
     return result;
+  }
+
+  /**
+   * Reads whether each workflow exists in the space it was asked for, keyed by
+   * `${spaceId}:${workflowId}`, with an entry for every ref. Global workflows cannot be bound to a
+   * service account, so a ref whose ID points at a global workflow is `missing`.
+   *
+   * - `present`: the workflow is in that space and not soft-deleted.
+   * - `missing`: the read found no document with that ID, found it in another space, or found it
+   *   soft-deleted.
+   * - `unknown`: the document or its chunk could not be read, or the index does not exist. A
+   *   missing index can mean the index is being restored, so it is not taken as proof that the
+   *   workflows are gone.
+   *
+   * Reads the workflows by ID in chunks of {@link WORKFLOW_STATUSES_CHUNK_SIZE}, one after another.
+   * A failed chunk makes only its own workflows `unknown`. Throws once `signal` is aborted.
+   */
+  async getWorkflowStatuses(
+    refs: ReadonlyArray<{ workflowId: string; spaceId: string }>,
+    { signal }: { signal?: AbortSignal } = {}
+  ): Promise<Map<string, WorkflowStatus>> {
+    const result = new Map<string, WorkflowStatus>();
+    const spacesById = new Map<string, Set<string>>();
+    for (const { workflowId, spaceId } of refs) {
+      spacesById.set(workflowId, (spacesById.get(workflowId) ?? new Set()).add(spaceId));
+    }
+
+    const setForId = (workflowId: string, toStatus: (spaceId: string) => WorkflowStatus) => {
+      for (const spaceId of spacesById.get(workflowId) ?? []) {
+        result.set(`${spaceId}:${workflowId}`, toStatus(spaceId));
+      }
+    };
+
+    const ids = [...spacesById.keys()];
+    for (let start = 0; start < ids.length; start += WORKFLOW_STATUSES_CHUNK_SIZE) {
+      signal?.throwIfAborted();
+      const chunk = ids.slice(start, start + WORKFLOW_STATUSES_CHUNK_SIZE);
+      const statuses = await this.readWorkflowStatusChunk(chunk, signal);
+      // A document the response leaves out has no evidence about it either way.
+      chunk.forEach((workflowId) =>
+        setForId(workflowId, statuses.get(workflowId) ?? (() => ({ status: 'unknown' })))
+      );
+    }
+
+    return result;
+  }
+
+  /**
+   * Reads one chunk for {@link getWorkflowStatuses}, and returns, for each workflow ID the
+   * response answered, the status of that ID in a given space. A failed request answers every ID
+   * `unknown`, unless `signal` was aborted, which throws.
+   */
+  private async readWorkflowStatusChunk(
+    chunk: string[],
+    signal: AbortSignal | undefined
+  ): Promise<Map<string, (spaceId: string) => WorkflowStatus>> {
+    const statuses = new Map<string, (spaceId: string) => WorkflowStatus>();
+    const unknown = (): WorkflowStatus => ({ status: 'unknown' });
+
+    let response;
+    try {
+      response = await this.options.esClient.mget<
+        Pick<EsWorkflow, 'name'> & { spaceId?: string; deleted_at?: string | null }
+      >(
+        {
+          index: this.options.indexName,
+          ids: chunk,
+          _source_includes: ['name', 'spaceId', 'deleted_at'],
+        },
+        { signal }
+      );
+    } catch (error) {
+      signal?.throwIfAborted();
+      this.options.logger.warn(
+        `Could not read ${chunk.length} workflow(s) to check whether they exist: ${error}`
+      );
+      chunk.forEach((workflowId) => statuses.set(workflowId, unknown));
+      return statuses;
+    }
+
+    for (const doc of response.docs) {
+      const found = 'error' in doc ? undefined : doc.found;
+      const source = !('error' in doc) && doc.found ? doc._source : undefined;
+      if (found === false) {
+        statuses.set(doc._id, () => ({ status: 'missing' }));
+      } else if (typeof source?.spaceId !== 'string') {
+        // A read error, or a document without a space, says nothing about the workflow.
+        statuses.set(doc._id, unknown);
+      } else {
+        const { spaceId: storedSpaceId, deleted_at: deletedAt, name } = source;
+        statuses.set(doc._id, (spaceId) => {
+          // A soft-deleted workflow never runs. A bulk overwrite can revive it, but that write
+          // goes through `withWorkflowBindingChange`, which checks `manage_security` and binds
+          // again, so the old binding is not needed.
+          if (spaceId !== storedSpaceId || deletedAt) {
+            return { status: 'missing' };
+          }
+          return typeof name === 'string' ? { status: 'present', name } : { status: 'present' };
+        });
+      }
+    }
+
+    return statuses;
   }
 
   /**

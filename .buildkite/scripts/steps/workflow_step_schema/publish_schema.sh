@@ -25,6 +25,9 @@
 #   - Repo-scoped CI Vault access to kv/ci-shared/workflows-library/gcs-publish
 #     (provisioned via a KV2Path resource in Terrazzo, see elastic/terrazzo#1483).
 #     The Buildkite agent env hook exports VAULT_TOKEN; no explicit vault login needed.
+#   - The Vault token expires ~20 minutes into a job. Long jobs (the serverless image build)
+#     get the key preloaded into WORKFLOWS_SCHEMA_GCS_SA_KEY by setup_job_env.sh; short jobs
+#     (the DRA release step) fall back to reading it from Vault here.
 
 set -euo pipefail
 
@@ -112,9 +115,14 @@ cp -r "$SRC/." "$STAGE/"
 jq -S --arg v "$STAMP_VERSION" --arg h "$BUILD_HASH" --arg c "$CHANNEL" \
   '.kibanaVersion = $v | .buildHash = $h | .channel = $c' "$SRC/index.json" > "$STAGE/index.json"
 
-echo "--- Fetch GCS credentials from Vault"
-GCS_SA_KEY="$(retry 5 5 vault kv get -field=credentials kv/ci-shared/workflows-library/gcs-publish)"
-buildkite-agent redactor add "$GCS_SA_KEY" 2>/dev/null || true
+if [[ -n "${WORKFLOWS_SCHEMA_GCS_SA_KEY:-}" ]]; then
+  echo "--- Using GCS credentials preloaded by setup_job_env.sh"
+  GCS_SA_KEY="$WORKFLOWS_SCHEMA_GCS_SA_KEY"
+else
+  echo "--- Fetch GCS credentials from Vault"
+  GCS_SA_KEY="$(retry 5 5 vault kv get -field=credentials kv/ci-shared/workflows-library/gcs-publish)"
+  buildkite-agent redactor add "$GCS_SA_KEY" 2>/dev/null || true
+fi
 GCS_SA_EMAIL="$(jq -r '.client_email // empty' <<<"$GCS_SA_KEY")"
 
 echo "--- Authenticate to GCP"

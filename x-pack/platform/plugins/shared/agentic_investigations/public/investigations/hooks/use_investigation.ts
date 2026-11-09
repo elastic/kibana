@@ -13,7 +13,10 @@ import type { Investigation } from '../../../common';
 import { retryOnTransientError } from '../../retry_on_transient_error';
 import { investigationQueryKeys } from '../query_keys';
 
-/** How often an investigation an agent is working on is read again. */
+/**
+ * How often an investigation is read again: always while the flyout shows it, and while it is in
+ * progress on a brief card.
+ */
 export const IN_PROGRESS_REFETCH_INTERVAL_MS = 5_000;
 
 export const fetchInvestigation = (
@@ -27,8 +30,10 @@ export const fetchInvestigation = (
   });
 
 /**
- * Reads an investigation from the shared query API and reads it again every few seconds while an
- * Agent Builder execution runs for it, so findings appear as they are recorded.
+ * Reads an investigation from the shared query API for the flyout, and reads it again every few
+ * seconds while the flyout is open, so findings appear as they are recorded. An idle investigation
+ * can start running again without any action in the flyout (a proposal decided elsewhere or past
+ * its deadline, a new worker taking over), so polling does not depend on `in_progress`.
  */
 export const useInvestigation = (id: string) => {
   const {
@@ -38,8 +43,7 @@ export const useInvestigation = (id: string) => {
   return useQuery({
     queryKey: investigationQueryKeys.detail(id),
     queryFn: ({ signal }) => fetchInvestigation(http, id, signal),
-    refetchInterval: (data: Investigation | undefined) =>
-      data?.in_progress ? IN_PROGRESS_REFETCH_INTERVAL_MS : false,
+    refetchInterval: IN_PROGRESS_REFETCH_INTERVAL_MS,
     retry: retryOnTransientError,
   });
 };

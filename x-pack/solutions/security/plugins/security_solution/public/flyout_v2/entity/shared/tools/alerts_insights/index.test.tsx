@@ -44,12 +44,16 @@ jest.mock(
       value,
       entityId,
       entityType,
+      mode,
+      scopeId,
       onShowAlert,
     }: {
       field: string;
       value: string;
       entityId?: string;
       entityType?: string;
+      mode?: string;
+      scopeId?: string;
       onShowAlert?: (eventId: string, indexName: string, ruleName?: string) => void;
     }) => (
       <button
@@ -59,6 +63,8 @@ jest.mock(
         data-value={value}
         data-entity-id={entityId ?? ''}
         data-entity-type={entityType ?? ''}
+        data-mode={mode ?? ''}
+        data-scope-id={scopeId ?? ''}
         onClick={() => onShowAlert?.('event-1', '.alerts-security', 'My Alert Rule')}
       >
         {'alerts-table'}
@@ -138,6 +144,33 @@ describe('<AlertsInsights /> host', () => {
     expect(table).toHaveAttribute('data-value', 'my-host');
     expect(table).toHaveAttribute('data-entity-id', 'euid-123');
     expect(table).toHaveAttribute('data-entity-type', 'host');
+    expect(table).toHaveAttribute('data-mode', '');
+  });
+
+  it('forwards the originating scope id to the alerts table', () => {
+    const { getByTestId } = render(
+      <AlertsInsights
+        entityType={EntityType.host}
+        value="my-host"
+        scopeId="entity-analytics-home-table"
+      />
+    );
+    expect(getByTestId('mockAlertsDetailsTable')).toHaveAttribute(
+      'data-scope-id',
+      'entity-analytics-home-table'
+    );
+  });
+
+  it('forwards the resolved mode to the alerts table', () => {
+    const { getByTestId } = render(
+      <AlertsInsights
+        entityType={EntityType.host}
+        value="my-host"
+        entityId="euid-123"
+        mode="resolved"
+      />
+    );
+    expect(getByTestId('mockAlertsDetailsTable')).toHaveAttribute('data-mode', 'resolved');
   });
 
   it('forwards onShowEntity to the header click handler', () => {

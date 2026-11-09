@@ -12,7 +12,8 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
 import { resolveScopedModel } from './scoped_model';
 
-const FEATURE_ID = 'alertzero_fast';
+const FEATURE_ID = 'alertzero_efficient';
+const TELEMETRY_PLUGIN_ID = 'alertzero_threat_intel_classify_severity';
 
 const request = {} as KibanaRequest;
 
@@ -61,6 +62,7 @@ describe('resolveScopedModel', () => {
       request,
       uiSettingsClient: createUiSettingsClient(),
       featureId: FEATURE_ID,
+      telemetryPluginId: TELEMETRY_PLUGIN_ID,
       logger,
     });
 
@@ -76,16 +78,22 @@ describe('resolveScopedModel', () => {
       request,
       uiSettingsClient: createUiSettingsClient('genai-default'),
       featureId: FEATURE_ID,
+      telemetryPluginId: TELEMETRY_PLUGIN_ID,
       logger,
     });
 
     expect(outcome.ok).toBe(true);
     expect(inference.getChatModel).toHaveBeenCalledWith(
-      expect.objectContaining({ connectorId: 'feature-endpoint' })
+      expect.objectContaining({
+        connectorId: 'feature-endpoint',
+        chatModelOptions: {
+          telemetryMetadata: { pluginId: TELEMETRY_PLUGIN_ID, aggregateBy: 'alertzero_parent' },
+        },
+      })
     );
   });
 
-  it.each(['alertzero_fast', 'alertzero_reasoning'])(
+  it.each(['alertzero_efficient', 'alertzero_frontier'])(
     'returns no_connector when %s is unregistered even if the registry offers a default',
     async (featureId) => {
       const inference = createInference();
@@ -98,6 +106,7 @@ describe('resolveScopedModel', () => {
         request,
         uiSettingsClient: createUiSettingsClient('genai-default'),
         featureId,
+        telemetryPluginId: TELEMETRY_PLUGIN_ID,
         logger,
       });
 
@@ -119,6 +128,7 @@ describe('resolveScopedModel', () => {
       request,
       uiSettingsClient: createUiSettingsClient('genai-default'),
       featureId: FEATURE_ID,
+      telemetryPluginId: TELEMETRY_PLUGIN_ID,
       logger,
     });
 
@@ -136,12 +146,18 @@ describe('resolveScopedModel', () => {
       request,
       uiSettingsClient: createUiSettingsClient('genai-default'),
       featureId: FEATURE_ID,
+      telemetryPluginId: TELEMETRY_PLUGIN_ID,
       logger,
     });
 
     expect(outcome.ok).toBe(true);
     expect(inference.getChatModel).toHaveBeenCalledWith(
-      expect.objectContaining({ connectorId: 'genai-default' })
+      expect.objectContaining({
+        connectorId: 'genai-default',
+        chatModelOptions: {
+          telemetryMetadata: { pluginId: TELEMETRY_PLUGIN_ID, aggregateBy: 'alertzero_parent' },
+        },
+      })
     );
   });
 
@@ -160,6 +176,7 @@ describe('resolveScopedModel', () => {
       request,
       uiSettingsClient,
       featureId: FEATURE_ID,
+      telemetryPluginId: TELEMETRY_PLUGIN_ID,
       logger,
     });
 
@@ -178,6 +195,7 @@ describe('resolveScopedModel', () => {
       request,
       uiSettingsClient: createUiSettingsClient('genai-default'),
       featureId: FEATURE_ID,
+      telemetryPluginId: TELEMETRY_PLUGIN_ID,
       logger,
     });
 
@@ -196,6 +214,7 @@ describe('resolveScopedModel', () => {
       request,
       uiSettingsClient: createUiSettingsClient(),
       featureId: FEATURE_ID,
+      telemetryPluginId: TELEMETRY_PLUGIN_ID,
       logger,
     });
 
@@ -231,7 +250,8 @@ describe('resolveScopedModel — endpoint fallback within a feature', () => {
       searchInferenceEndpoints: twoEndpoints as never,
       request: {} as never,
       uiSettingsClient: { get: jest.fn() } as never,
-      featureId: 'alertzero_fast',
+      featureId: 'alertzero_efficient',
+      telemetryPluginId: TELEMETRY_PLUGIN_ID,
       logger: loggingSystemMock.createLogger(),
     });
 
@@ -252,7 +272,8 @@ describe('resolveScopedModel — endpoint fallback within a feature', () => {
       searchInferenceEndpoints: twoEndpoints as never,
       request: {} as never,
       uiSettingsClient: { get: jest.fn() } as never,
-      featureId: 'alertzero_fast',
+      featureId: 'alertzero_efficient',
+      telemetryPluginId: TELEMETRY_PLUGIN_ID,
       logger: loggingSystemMock.createLogger(),
     });
 

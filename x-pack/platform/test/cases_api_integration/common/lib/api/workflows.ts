@@ -72,6 +72,41 @@ export const deleteWorkflow = async ({
     .expect(200);
 };
 
+/** The parts of a workflow execution the Cases suites assert on. */
+export interface WorkflowExecutionSummary {
+  status: string;
+  /** The context the execution started from; on alert runs, `event` holds the expanded alerts. */
+  context?: {
+    event?: {
+      alerts?: Array<{ _id: string; _index: string }>;
+      rule?: { id: string };
+    };
+  };
+}
+
+/**
+ * Gets a workflow execution via GET /api/workflows/executions/{executionId}.
+ */
+export const getWorkflowExecution = async ({
+  supertest: st,
+  executionId,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.Agent;
+  executionId: string;
+  auth?: { user: User; space: string | null } | null;
+}): Promise<WorkflowExecutionSummary> => {
+  const apiCall = st.get(
+    `${getSpaceUrlPrefix(auth?.space)}/api/workflows/executions/${executionId}`
+  );
+
+  void setupAuth({ apiCall, headers: {}, auth });
+
+  const { body } = await apiCall.set('elastic-api-version', WORKFLOWS_API_VERSION).expect(200);
+
+  return body as WorkflowExecutionSummary;
+};
+
 /**
  * Calls POST /internal/cases/workflows/{workflowId}/run.
  * Returns the parsed body; callers should assert on expectedHttpCode and the body shape.

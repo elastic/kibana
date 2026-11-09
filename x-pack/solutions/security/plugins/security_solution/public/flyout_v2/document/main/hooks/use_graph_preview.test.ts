@@ -41,20 +41,21 @@ const IDENTITY_FIELDS_BY_TYPE: Record<string, string[]> = {
 };
 const mockEuid = {
   getEntityIdentifiersFromDocument: (
-    entityType: string,
+    { type }: { type: string },
     doc: Record<string, unknown>
   ): Record<string, unknown> | undefined => {
-    const fields = IDENTITY_FIELDS_BY_TYPE[entityType] ?? [];
+    const fields = IDENTITY_FIELDS_BY_TYPE[type] ?? [];
     const matches: Record<string, unknown> = {};
     for (const field of fields) {
       if (doc[field] != null) matches[field] = doc[field];
     }
     return Object.keys(matches).length > 0 ? matches : undefined;
   },
-  getEuidSourceFields: (entityType: string) => ({
-    identitySourceFields: IDENTITY_FIELDS_BY_TYPE[entityType] ?? [],
+  getEuidSourceFields: ({ type }: { type: string }) => ({
+    identitySourceFields: IDENTITY_FIELDS_BY_TYPE[type] ?? [],
   }),
 };
+const mockGetBuiltInEntityDefinition = (type: string) => ({ type });
 
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
   ({
@@ -79,7 +80,10 @@ describe('useGraphPreview', () => {
     mockUseHasGraphVisualizationLicense.mockReturnValue(true);
     mockUseIsEntityStoreV2Available.mockReturnValue({ data: { indexExists: true } });
     mockUseEntityStoreStatus.mockReturnValue({ data: { status: 'running' } });
-    mockUseEntityStoreEuidApi.mockReturnValue({ euid: mockEuid });
+    mockUseEntityStoreEuidApi.mockReturnValue({
+      euid: mockEuid,
+      getBuiltInEntityDefinition: mockGetBuiltInEntityDefinition,
+    });
   });
 
   it('returns hasGraphData=false for an empty hit', () => {
@@ -181,6 +185,7 @@ describe('useGraphPreview', () => {
         ...mockEuid,
         getEntityIdentifiersFromDocument: jest.fn(() => undefined),
       },
+      getBuiltInEntityDefinition: mockGetBuiltInEntityDefinition,
     });
 
     const { result } = renderHook(() =>

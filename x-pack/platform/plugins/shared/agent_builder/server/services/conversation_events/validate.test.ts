@@ -47,6 +47,13 @@ describe('validateConversationEvents', () => {
     ).toThrow('internal and cannot be added directly');
   });
 
+  it('throws 400 for a built-in activity event type', () => {
+    const registry = makeRegistry([]);
+    expect(() =>
+      validateConversationEvents([{ type: 'title_updated', data: {} }], registry)
+    ).toThrow('internal and cannot be added directly');
+  });
+
   it('throws 400 with Zod issue path on schema failure', () => {
     const registry = makeRegistry([noteDefinition]);
     expect(() =>

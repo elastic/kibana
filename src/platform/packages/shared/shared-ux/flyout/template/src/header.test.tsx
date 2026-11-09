@@ -206,6 +206,32 @@ describe('FlyoutTemplate header title icon and description', () => {
     expect(container.querySelector('[data-euiicon-type]')).toBeNull();
   });
 
+  it('renders a loading spinner beside the title, outside the heading', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Header title="Alert details" isLoading />
+        {body}
+      </FlyoutTemplate>
+    );
+
+    const spinner = screen.getByTestId('flyoutHeaderTitleLoading');
+    expect(spinner).toHaveAttribute('aria-label', 'Loading');
+    expect(screen.getByRole('heading', { level: 3, name: 'Alert details' })).not.toContainElement(
+      spinner
+    );
+  });
+
+  it('renders no loading spinner by default', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Header title="Alert details" />
+        {body}
+      </FlyoutTemplate>
+    );
+
+    expect(screen.queryByTestId('flyoutHeaderTitleLoading')).not.toBeInTheDocument();
+  });
+
   it('renders the description below the title', () => {
     renderTemplate(
       <FlyoutTemplate onClose={noop} session="never">

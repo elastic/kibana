@@ -1,4 +1,5 @@
-@launchdarkly/js-client-sdk
+@openfeature/ofrep-web-provider
+cbor2
 @eslint-community/eslint-plugin-eslint-comments
 eslint-plugin-n
 @xterm/xterm
@@ -41,7 +42,6 @@ react-element-to-jsx-string
 @babel/plugin-transform-class-static-block
 @swc/core
 lightningcss
-tar-fs
 browserslist
 react-day-picker
 mysql2

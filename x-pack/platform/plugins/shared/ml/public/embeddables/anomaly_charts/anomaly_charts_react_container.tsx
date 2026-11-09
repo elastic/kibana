@@ -51,6 +51,7 @@ export interface AnomalyChartsContainerProps {
   onLoading: (v: boolean) => void;
   onError: (error: Error) => void;
   showFilterIcons?: boolean;
+  isInteractive?: boolean;
 }
 
 const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
@@ -63,6 +64,7 @@ const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
   onLoading,
   api,
   showFilterIcons = true,
+  isInteractive = true,
 }) => {
   const isMounted = useMountedState();
 
@@ -291,6 +293,7 @@ const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
               chartsService={chartsService}
               timeRange={timeRange}
               showFilterIcons={showFilterIcons}
+              isInteractive={isInteractive}
             />
           ) : null}
         </div>

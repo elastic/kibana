@@ -6,6 +6,7 @@
  */
 
 import type { MitreEntity } from '@kbn/security-mitre-attack-common';
+import { MITRE_FRAMEWORKS } from '@kbn/security-mitre-attack-common';
 import { loadMitreArtifact } from './load_artifact';
 
 describe('loadMitreArtifact', () => {
@@ -27,6 +28,11 @@ describe('loadMitreArtifact', () => {
       expect(entity.framework.length).toBeGreaterThan(0);
       expect(entity.framework_version.length).toBeGreaterThan(0);
     }
+  });
+
+  it.each(MITRE_FRAMEWORKS)('contains entities for the %s framework', (framework) => {
+    const frameworkEntities = entities.filter((entity) => entity.framework === framework);
+    expect(frameworkEntities.length).toBeGreaterThan(0);
   });
 
   it('every framework/version group contains at least one tactic, technique, and subtechnique', () => {
@@ -55,10 +61,24 @@ describe('loadMitreArtifact', () => {
     }
   });
 
-  it('every subtechnique technique_id equals its own id dot prefix', () => {
+  it('every subtechnique technique_id equals its own id without the last dot segment', () => {
     for (const entity of entities) {
       if (entity.type === 'subtechnique') {
-        expect(entity.technique_id).toBe(entity.id.split('.')[0]);
+        // ATT&CK 'T1003.001' -> 'T1003'; ATLAS 'AML.T0024.002' -> 'AML.T0024'.
+        expect(entity.technique_id).toBe(entity.id.slice(0, entity.id.lastIndexOf('.')));
+      }
+    }
+  });
+
+  it('every subtechnique technique_id resolves to a technique in the same framework/version group', () => {
+    for (const groupEntities of groups.values()) {
+      const techniqueIds = new Set(
+        groupEntities.filter((e) => e.type === 'technique').map((e) => e.id)
+      );
+      for (const entity of groupEntities) {
+        if (entity.type === 'subtechnique') {
+          expect(techniqueIds).toContain(entity.technique_id);
+        }
       }
     }
   });

@@ -8,6 +8,7 @@
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { BasicPrettyPrinter } from '@elastic/esql';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { Logger } from '@kbn/logging';
 import type { FeatureWithFilter } from '@kbn/significant-events-schema';
 import { getSampleDocumentsEsql } from '@kbn/ai-tools';
@@ -43,7 +44,7 @@ const createFeature = ({
 }): FeatureWithFilter =>
   ({
     id,
-    stream_name: 'logs.test-default',
+    source_id: 'logs.test-default',
     type: 'system',
     description: id,
     properties: {},
@@ -91,6 +92,35 @@ describe('fetchSampleDocuments', () => {
         diverseRatio: 0.3,
       })
     ).rejects.toThrow('must be <= 1');
+  });
+
+  it('rejects with a 400 that explains the missing index when nothing exists to sample', async () => {
+    getSampleDocumentsEsqlMock.mockRejectedValueOnce(
+      new Error(
+        'verification_exception\n\tRoot causes:\n\t\tverification_exception: Unknown index [test]'
+      )
+    );
+
+    await expect(
+      fetchSampleDocuments({
+        esClient: elasticsearchServiceMock.createElasticsearchClient(),
+        index: 'logs.test-default',
+        start: 100,
+        end: 200,
+        features: [],
+        logger,
+        size: 5,
+        entityFilteredRatio: 0,
+        diverseRatio: 0,
+        maxEntityFilters: 10,
+        samplingTimeoutMs: 30_000,
+        iteration: 1,
+      })
+    ).rejects.toMatchObject({
+      statusCode: 400,
+      message:
+        'There are no documents to sample: an index behind [logs.test-default] does not exist yet.',
+    });
   });
 
   it('uses ES|QL random sampling when there are no entity filters', async () => {

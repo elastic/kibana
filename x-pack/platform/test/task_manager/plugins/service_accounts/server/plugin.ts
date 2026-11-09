@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import { setTimeout } from 'timers/promises';
+import { errors } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
 import type { CoreSetup, Plugin } from '@kbn/core/server';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import type {
@@ -37,11 +40,18 @@ const runAsSchema = schema.object({
   ]),
 });
 
+const runParamsSchema = schema.object({
+  expectedServiceAccountId: schema.maybe(schema.string({ minLength: 1, maxLength: 1024 })),
+  // Authenticates again after this long, once the first token has expired.
+  renewAfterMs: schema.maybe(schema.number({ min: 0, max: 20000 })),
+});
+type RunParams = TypeOf<typeof runParamsSchema>;
+
 // Tasks are disabled unless asked otherwise, so they're never claimed.
-const getTestTask = (id: string, enabled = false, runAt?: Date) => ({
+const getTestTask = (id: string, enabled = false, params: RunParams = {}, runAt?: Date) => ({
   id,
   taskType: TASK_TYPE,
-  params: {},
+  params,
   state: {},
   enabled,
   schedule: { interval: '1h' },
@@ -66,6 +76,9 @@ interface DecryptedTaskAttributes {
 export class TaskManagerServiceAccountsTestPlugin
   implements Plugin<void, void, SetupDependencies, StartDependencies>
 {
+  // Usernames of the runs waiting to authenticate again, by task id.
+  private readonly runsInFlight = new Map<string, string>();
+
   setup(core: CoreSetup<StartDependencies>, { taskManager }: SetupDependencies): void {
     core.security.serviceAccounts.registerWorkloadType({
       type: WORKLOAD_TYPE,
@@ -82,24 +95,44 @@ export class TaskManagerServiceAccountsTestPlugin
           },
         },
         // Records who the run was authenticated as.
-        createTaskRunner: ({ runAs }) => ({
+        createTaskRunner: ({ runAs, taskInstance }) => ({
           run: async () => {
             if (!runAs) {
               throw new Error('The task has no service account to run as');
             }
-            return runAs.withScopedRequest(async (request) => {
-              const [coreStart] = await core.getStartServices();
-              const { username, authentication_realm: realm } = await coreStart.elasticsearch.client
-                .asScoped(request)
-                .asCurrentUser.security.authenticate();
-              return {
-                state: {
+            const { id } = taskInstance;
+            const { expectedServiceAccountId, renewAfterMs }: RunParams = taskInstance.params;
+            return runAs.withScopedRequest(
+              async (request) => {
+                const [coreStart] = await core.getStartServices();
+                const client = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
+                const { username, authentication_realm: realm } =
+                  await client.security.authenticate();
+                const state = {
                   username,
                   realm: realm.name,
                   principal: coreStart.security.authc.getPrincipal(request),
-                },
-              };
-            });
+                };
+                if (renewAfterMs === undefined) {
+                  return { state };
+                }
+
+                this.runsInFlight.set(id, username);
+                try {
+                  await setTimeout(renewAfterMs);
+                  await client.security.authenticate();
+                  return { state: { ...state, renewalStatus: 200 } };
+                } catch (error) {
+                  if (!(error instanceof errors.ResponseError)) {
+                    throw error;
+                  }
+                  return { state: { ...state, renewalStatus: error.statusCode } };
+                } finally {
+                  this.runsInFlight.delete(id);
+                }
+              },
+              { expectedServiceAccountId }
+            );
           },
         }),
       },
@@ -119,13 +152,19 @@ export class TaskManagerServiceAccountsTestPlugin
             enabled: schema.boolean({ defaultValue: false }),
             // ISO date; lets an enabled task be changed before its first run.
             runAt: schema.maybe(schema.string({ maxLength: 64 })),
+            params: schema.maybe(runParamsSchema),
           }),
         },
       },
       async (_context, request, response) => {
         const [, { taskManager: taskManagerStart }] = await core.getStartServices();
-        const { runAs, enabled, runAt } = request.body;
-        const task = getTestTask(request.params.id, enabled, runAt ? new Date(runAt) : undefined);
+        const { runAs, enabled, runAt, params } = request.body;
+        const task = getTestTask(
+          request.params.id,
+          enabled,
+          params,
+          runAt ? new Date(runAt) : undefined
+        );
         const { id } = runAs
           ? await taskManagerStart.schedule({ ...task, runAs })
           : await taskManagerStart.schedule(task, { request });
@@ -176,22 +215,39 @@ export class TaskManagerServiceAccountsTestPlugin
               schema.literal('bulkUpdateState'),
               schema.literal('bulkUpdateSchedules'),
             ]),
+            regenerateApiKey: schema.boolean({ defaultValue: false }),
           }),
         },
       },
       async (_context, request, response) => {
         const [, { taskManager: taskManagerStart }] = await core.getStartServices();
         const { id } = request.params;
-        const { tasks, errors } =
-          request.body.api === 'bulkUpdateState'
+        const { api, regenerateApiKey } = request.body;
+        const { tasks, errors: updateErrors } =
+          api === 'bulkUpdateState'
             ? await taskManagerStart.bulkUpdateState(
                 [id],
                 (state) => ({ ...state, updated: true }),
                 { request }
               )
-            : await taskManagerStart.bulkUpdateSchedules([id], { interval: '2h' }, { request });
-        return response.ok({ body: { ids: tasks.map((task) => task.id), errors } });
+            : await taskManagerStart.bulkUpdateSchedules(
+                [id],
+                { interval: '2h' },
+                { request, regenerateApiKey }
+              );
+        return response.ok({ body: { ids: tasks.map((task) => task.id), errors: updateErrors } });
       }
+    );
+
+    router.get(
+      {
+        path: `${TASK_PATH}/_in_flight`,
+        options: { access: 'internal' },
+        security: { authz },
+        validate: { params: taskParamsSchema },
+      },
+      async (_context, request, response) =>
+        response.ok({ body: { username: this.runsInFlight.get(request.params.id) ?? null } })
     );
 
     router.get(

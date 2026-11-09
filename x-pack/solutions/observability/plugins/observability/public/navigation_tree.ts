@@ -4,7 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import type {
+  NavigationTreeDefinition,
+  PanelOpenerChildDefinition,
+} from '@kbn/core-chrome-browser';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
@@ -52,6 +55,7 @@ function createNavTree({
   showAiAssistant,
   isCloudEnabled,
   ingestHubAvailable,
+  entityInventoryNavGroup,
 }: {
   coreStart: CoreStart;
   significantEventsAvailable: boolean;
@@ -59,6 +63,7 @@ function createNavTree({
   showAiAssistant?: boolean;
   isCloudEnabled?: boolean;
   ingestHubAvailable?: boolean;
+  entityInventoryNavGroup?: PanelOpenerChildDefinition;
 }) {
   const navTree: NavigationTreeDefinition = {
     body: [
@@ -171,6 +176,12 @@ function createNavTree({
                   defaultMessage: 'User experience',
                 }),
               },
+              {
+                link: 'digital_experience',
+                title: i18n.translate('xpack.observability.obltNav.apm.digitalExperience', {
+                  defaultMessage: 'Digital experience',
+                }),
+              },
             ],
           },
           {
@@ -255,10 +266,11 @@ function createNavTree({
               },
             ],
           },
+          ...(entityInventoryNavGroup ? [entityInventoryNavGroup] : []),
           {
             id: 'profiling',
             title: i18n.translate('xpack.observability.obltNav.infrastructure.universalProfiling', {
-              defaultMessage: 'Universal Profiling',
+              defaultMessage: 'Profiling',
             }),
             children: [
               {
@@ -519,6 +531,9 @@ function createNavTree({
                 link: 'management:index_management',
               },
               {
+                link: 'management:data_federation',
+              },
+              {
                 link: 'management:index_lifecycle_management',
               },
               {
@@ -529,9 +544,6 @@ function createNavTree({
               },
               {
                 link: 'management:rollup_jobs',
-              },
-              {
-                link: 'management:data_federation',
               },
               {
                 link: 'management:esql_views',
@@ -649,6 +661,7 @@ function createNavTree({
             }),
             children: [
               { link: 'management:genAiSettings' },
+              { link: 'management:aiAnonymizationSettings' },
               { link: 'management:aiAssistantManagementSelection' },
             ],
           },
@@ -748,6 +761,7 @@ export const createDefinition = (
           showAiAssistant: chatExperience !== AIChatExperience.Agent,
           isCloudEnabled: pluginsStart.cloud?.isCloudEnabled,
           ingestHubAvailable,
+          entityInventoryNavGroup: pluginsStart.entityInventoryApp?.navTreeGroup,
         })
       )
     ),

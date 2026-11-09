@@ -12,6 +12,7 @@ import { fireEvent, render } from '@testing-library/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DataSource } from '../common';
 import { DataSourcesTable } from './data_sources_table';
+import { docLinksMock } from './doc_links_mock';
 
 const createDataSource = (name: string, type: DataSource['type'] | string): DataSource =>
   ({
@@ -21,23 +22,6 @@ const createDataSource = (name: string, type: DataSource['type'] | string): Data
     description: '',
     settings: {},
   } as unknown as DataSource);
-
-const docLinksMock = {
-  links: {
-    dataFederation: {
-      overview: '',
-      quickstart: '',
-      dataSources: '',
-      datasets: '',
-      datasetSettings: '',
-      authentication: '',
-      staticCredentials: '',
-      federatedIdentity: '',
-      querying: '',
-      security: '',
-    },
-  },
-};
 
 describe('DataSourcesTable', () => {
   const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation((...args: unknown[]) => {

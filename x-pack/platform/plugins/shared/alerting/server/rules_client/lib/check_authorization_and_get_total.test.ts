@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
@@ -17,6 +18,8 @@ import { MAX_RULES_NUMBER_FOR_BULK_OPERATION } from '../common/constants';
 import type { KueryNode } from '@kbn/es-query';
 import { checkAuthorizationAndGetTotal } from './check_authorization_and_get_total';
 import type { RulesClientContext } from '../types';
+import { RulesNotFoundError } from './rules_not_found_error';
+import { RulesNotVisibleError } from './rules_not_visible_error';
 
 const logger = loggingSystemMock.create().get();
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
@@ -133,6 +136,80 @@ describe('checkAuthorizationAndGetTotal', () => {
         checkAuthorizationAndGetTotal(context, { filter: null, action: 'GET' })
       ).rejects.toThrow(`No rules found for bulk get`);
       expect(authorization.bulkEnsureAuthorized).not.toHaveBeenCalled();
+    });
+
+    describe('when the authorized count is empty', () => {
+      const filter = { type: 'function', function: 'is', arguments: [] } as KueryNode;
+      const baseFilter = { type: 'function', function: 'and', arguments: [] } as KueryNode;
+      const emptyFindResponse = {
+        aggregations: { alertTypeId: { buckets: [] } },
+        saved_objects: [],
+        per_page: 0,
+        page: 1,
+        total: 0,
+      };
+
+      const getRejection = async (params: Parameters<typeof checkAuthorizationAndGetTotal>[1]) => {
+        try {
+          await checkAuthorizationAndGetTotal(context, params);
+        } catch (error) {
+          return error;
+        }
+        throw new Error('expected checkAuthorizationAndGetTotal to throw');
+      };
+
+      it('throws Boom-wrapped RulesNotFoundError without a second count when baseFilter is omitted', async () => {
+        unsecuredSavedObjectsClient.find.mockResolvedValue(emptyFindResponse);
+
+        const error = await getRejection({ filter, action: 'DELETE' });
+
+        expect(error).toBeInstanceOf(RulesNotFoundError);
+        expect(Boom.isBoom(error)).toBe(true);
+        expect((error as Boom.Boom).output.statusCode).toBe(400);
+        expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
+      });
+
+      it('throws Boom-wrapped RulesNotFoundError when the unauthorized count is also zero', async () => {
+        unsecuredSavedObjectsClient.find.mockResolvedValue(emptyFindResponse);
+
+        const error = await getRejection({ filter, baseFilter, action: 'DELETE' });
+
+        expect(error).toBeInstanceOf(RulesNotFoundError);
+        expect(error).not.toBeInstanceOf(RulesNotVisibleError);
+        expect(Boom.isBoom(error)).toBe(true);
+        expect((error as Boom.Boom).output.statusCode).toBe(400);
+        expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(2);
+        expect(unsecuredSavedObjectsClient.find).toHaveBeenLastCalledWith({
+          filter: baseFilter,
+          page: 1,
+          perPage: 0,
+          type: RULE_SAVED_OBJECT_TYPE,
+        });
+        expect(authorization.bulkEnsureAuthorized).not.toHaveBeenCalled();
+      });
+
+      it('throws Boom-wrapped RulesNotVisibleError when the unauthorized count is nonzero', async () => {
+        unsecuredSavedObjectsClient.find
+          .mockResolvedValueOnce(emptyFindResponse)
+          .mockResolvedValueOnce({ ...emptyFindResponse, total: 2 });
+
+        const error = await getRejection({ filter, baseFilter, action: 'DELETE' });
+
+        expect(error).toBeInstanceOf(RulesNotVisibleError);
+        expect(error).not.toBeInstanceOf(RulesNotFoundError);
+        expect(Boom.isBoom(error)).toBe(true);
+        expect((error as Boom.Boom).output.statusCode).toBe(400);
+        expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(2);
+        expect(authorization.bulkEnsureAuthorized).not.toHaveBeenCalled();
+      });
+    });
+
+    it('does not run the unauthorized count when the authorized count is nonzero', async () => {
+      const baseFilter = { type: 'function', function: 'and', arguments: [] } as KueryNode;
+
+      await checkAuthorizationAndGetTotal(context, { filter: null, baseFilter, action: 'DELETE' });
+
+      expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
     });
 
     it('throws when rules found exceed MAX_RULES_NUMBER_FOR_BULK_OPERATION', async () => {

@@ -13,17 +13,20 @@ import { useMemo } from 'react';
 import {
   computeTopologyFingerprint,
   ExecutionStatus,
+  getTriggerName,
   transformWorkflowToGraph,
 } from '@kbn/workflows';
 import type {
   HandleSide,
   LayoutDirection,
+  StructureSequence,
   TransformResult,
   WorkflowStepExecutionDto,
   WorkflowYaml,
 } from '@kbn/workflows';
 import { computeWorkflowLayout } from './workflow_layout_pipeline';
 import type { LayoutSnapshot } from './workflow_layout_pipeline';
+import { useOptionalWorkflowsUiServices } from '../../context';
 
 /** Stable empty result used when no workflow is loaded, avoiding `as TransformResult` casts. */
 const EMPTY_TRANSFORM: TransformResult = {
@@ -33,7 +36,25 @@ const EMPTY_TRANSFORM: TransformResult = {
   bypassLaneNodes: [],
   nodeRefs: {},
   fallbackLanes: [],
+  structure: { triggers: [], items: [] },
 };
+
+/**
+ * The part of a workflow's content the layout depends on beyond its topology: an empty
+ * branch is a bypass lane that reserves the width of its edge label, so its head and
+ * label belong in the layout key. Labels of branches with steps do not move anything.
+ */
+const emptyBranchSignature = (items: StructureSequence): string[] =>
+  items.flatMap((item) => [
+    ...(item.kind === 'fork'
+      ? item.branches.flatMap(({ head, items: branchItems, label }) =>
+          branchItems.length === 0 ? [`${head}:${label}`] : emptyBranchSignature(branchItems)
+        )
+      : []),
+    ...(item.kind === 'container' ? emptyBranchSignature(item.body) : []),
+    ...(item.kind === 'step' && item.attached ? emptyBranchSignature(item.attached) : []),
+    ...item.lanes.flatMap((lane) => emptyBranchSignature(lane.items)),
+  ]);
 
 const HANDLE_SIDE_TO_POSITION: Record<HandleSide, Position> = {
   top: Position.Top,
@@ -62,9 +83,9 @@ interface UseWorkflowLayoutResult {
 }
 
 /**
- * Memoized YAML→graph transform + dagre layout. Layout is keyed on the
- * topology fingerprint so non-structural edits (description, params, etc.)
- * never retrigger dagre.
+ * Memoized YAML→graph transform + dagre layout. Layout is keyed on the topology
+ * fingerprint and the labels of empty branches, so other edits (description, params,
+ * the match value of a case with steps) never retrigger dagre.
  *
  * Step-execution status is merged onto node data without retriggering layout.
  */
@@ -76,19 +97,31 @@ export function useWorkflowLayout({
   onPerfMark,
   onLayoutFailed,
 }: UseWorkflowLayoutParams): UseWorkflowLayoutResult {
+  const services = useOptionalWorkflowsUiServices();
   const transformed: TransformResult = useMemo(() => {
     if (transformedProp) return transformedProp;
     if (!workflow) return EMPTY_TRANSFORM;
     const t0 = performance.now();
-    const next = transformWorkflowToGraph(workflow);
+    const next = transformWorkflowToGraph(workflow, (triggerType) =>
+      getTriggerName(
+        triggerType,
+        services?.workflowsExtensions.getTriggerDefinition(triggerType)?.title
+      )
+    );
     onPerfMark?.('transform_ms', performance.now() - t0);
     return next;
-  }, [transformedProp, workflow, onPerfMark]);
+  }, [transformedProp, workflow, onPerfMark, services]);
 
   // Stable string capturing only topology (step names/types/nesting/trigger
   // types). Non-structural edits (descriptions, params, expressions) produce
   // the same fingerprint → dagre never re-runs for them.
   const topologyFingerprint = computeTopologyFingerprint(workflow);
+  // The fingerprint skips empty branches, but each one is a bypass node whose size
+  // comes from its label, so adding one or editing its label must re-run the layout.
+  const layoutKey = useMemo(
+    () => `${topologyFingerprint}\n${emptyBranchSignature(transformed.structure.items).join('\n')}`,
+    [topologyFingerprint, transformed]
+  );
 
   const layoutSnapshot = useMemo<LayoutSnapshot>(() => {
     if (!workflow) return { nodes: [], edges: [] };
@@ -101,13 +134,13 @@ export function useWorkflowLayout({
       onLayoutFailed?.(err instanceof Error ? err.message : 'unknown');
       return { nodes: [], edges: [] };
     }
-    // Keyed on the topology fingerprint string (not `workflow` or `transformed`
-    // object identity) so that non-structural YAML edits never retrigger dagre.
-    // `transformed` is read directly — it is always consistent with the
-    // fingerprint because both are computed from the same `workflow`/
-    // `transformedProp` on the same render.
+    // Keyed on `layoutKey` (not `workflow` or `transformed` object identity) so that
+    // edits which change neither the topology nor an empty branch's label never
+    // retrigger dagre. `transformed` is read directly — it is always consistent with
+    // the key because both are computed from the same `workflow`/`transformedProp`
+    // on the same render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [topologyFingerprint, direction, onLayoutFailed, onPerfMark]);
+  }, [layoutKey, direction, onLayoutFailed, onPerfMark]);
 
   const stepExecutionMap = useMemo(() => {
     if (!stepExecutions) return null;

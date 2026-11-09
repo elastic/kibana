@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 import type { Position } from '@elastic/charts';
-import { LegendSize } from '@kbn/chart-expressions-common';
 
 import type { VisualizationToolbarProps } from '@kbn/lens-common';
 import type { HeatmapVisualizationState } from '../types';
@@ -29,8 +28,6 @@ export const HeatmapLegendSettings = ({
   ).truncateText;
 
   const legendSize = state?.legend.legendSize;
-
-  const [hadAutoLegendSize] = useState(() => legendSize === LegendSize.AUTO);
 
   return (
     <LegendSettings
@@ -82,7 +79,6 @@ export const HeatmapLegendSettings = ({
           },
         });
       }}
-      showAutoLegendSizeOption={hadAutoLegendSize}
     />
   );
 };

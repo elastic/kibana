@@ -12,7 +12,7 @@ module.exports = {
   collectCoverageFrom: [
     '<rootDir>/x-pack/platform/packages/private/security/role_management_model/**/*.{ts,tsx}',
   ],
-  preset: '@kbn/test',
+  preset: '@kbn/jest',
   rootDir: '../../../../../..',
   roots: ['<rootDir>/x-pack/platform/packages/private/security/role_management_model'],
 };

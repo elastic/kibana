@@ -21,6 +21,7 @@ import type {
   AppMenuPrimaryActionItem,
   AppMenuRunActionParams,
 } from '@kbn/core-chrome-app-menu-components';
+import { useChangeHistoryModal } from '@kbn/change-history-ui';
 import type { AppHeaderShareAction } from '@kbn/app-header';
 import { useDashboardExportItems } from './share/use_dashboard_export_items';
 import { getAccessControlClient } from '../../services/access_control_service';
@@ -54,6 +55,8 @@ export const useDashboardMenuItems = ({
   const isMounted = useMountedState();
   const accessControlClient = getAccessControlClient();
   const appId = useObservable(coreServices.application.currentAppId$);
+
+  const { openModal } = useChangeHistoryModal();
 
   const [isSaveInProgress, setIsSaveInProgress] = useState(false);
 
@@ -126,10 +129,15 @@ export const useDashboardMenuItems = ({
       }
       confirmDiscardUnsavedChanges(async () => {
         setIsResetting(true);
-        await dashboardApi.asyncResetToLastSavedState();
-        if (isMounted()) {
-          setIsResetting(false);
-          switchModes?.();
+        try {
+          await dashboardApi.asyncResetToLastSavedState();
+          if (isMounted()) switchModes?.();
+        } catch (error) {
+          coreServices.notifications.toasts.addError(error, {
+            title: topNavStrings.resetChangesError.title,
+          });
+        } finally {
+          if (isMounted()) setIsResetting(false);
         }
       }, viewMode);
     },
@@ -148,7 +156,7 @@ export const useDashboardMenuItems = ({
    */
   const quickSaveDashboard = useCallback(() => {
     setIsSaveInProgress(true);
-    dashboardApi.runQuickSave().then(() =>
+    dashboardApi.runQuickSave().finally(() =>
       setTimeout(() => {
         setIsSaveInProgress(false);
       }, 100)
@@ -356,6 +364,16 @@ export const useDashboardMenuItems = ({
         run: (params) => openSettingsFlyout(dashboardApi, params?.returnFocus),
       } as AppMenuItemType,
 
+      history: {
+        order: 7,
+        // an unsaved dashboard has no persisted history, so there is nothing to list or restore
+        disableButton: disableTopNav || !lastSavedId,
+        id: 'dashboard-history',
+        testId: 'dashboardHistoryMenuItem',
+        iconType: 'clock',
+        run: openModal,
+        label: topNavStrings.history.label,
+      },
       // Action items
       edit: {
         label: topNavStrings.edit.label,
@@ -421,6 +439,7 @@ export const useDashboardMenuItems = ({
     resetChangesMenuItem,
     exportItems,
     viewMode,
+    openModal,
   ]);
 
   /**
@@ -488,6 +507,7 @@ export const useDashboardMenuItems = ({
       menuItems.add,
       menuItems.switchToViewMode,
       menuItems.settings,
+      menuItems.history,
     ];
 
     if (shareAction) {
@@ -522,6 +542,7 @@ export const useDashboardMenuItems = ({
     menuItems.backgroundSearch,
     menuItems.save,
     menuItems.add,
+    menuItems.history,
     hasExportMenuItems,
     historyConfig,
     shareAction,

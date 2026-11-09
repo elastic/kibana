@@ -8,12 +8,13 @@
 import { randomUUID } from 'crypto';
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import type { Logger } from '@kbn/core/server';
-import type {
-  GetInvestigationResponse,
-  InvestigationNotificationDestination,
-} from '../../../common';
+import type { InvestigationNotificationDestination } from '../../../common';
 import { prepareNotificationDelivery } from './notification_delivery';
-import type { ExecuteConnector, NotificationDelivery } from './notification_delivery';
+import type {
+  ExecuteConnector,
+  NotifiableInvestigation,
+  NotificationDelivery,
+} from './notification_delivery';
 import type { NotificationRoutingClient } from './notification_routing_client';
 import type {
   NotificationPhase,
@@ -21,6 +22,7 @@ import type {
   NotificationRouting,
   NotificationDestination,
 } from './notification_routing';
+import { notificationPhaseSchema } from './notification_routing';
 
 export interface DeliverInvestigationNotificationsResult {
   sent: number;
@@ -29,7 +31,7 @@ export interface DeliverInvestigationNotificationsResult {
 }
 
 interface DeliverInvestigationNotificationsParams {
-  investigation: GetInvestigationResponse;
+  investigation: NotifiableInvestigation;
   executionId: string;
   workflowId: string;
   phase: NotificationPhase;
@@ -40,6 +42,7 @@ interface DeliverInvestigationNotificationsParams {
   routingClient: NotificationRoutingClient;
   signal: AbortSignal;
   logger: Pick<Logger, 'warn'>;
+  onTerminalPhaseSelected?: () => Promise<void>;
 }
 
 interface PreparedDestinationDelivery {
@@ -56,7 +59,9 @@ const countAttempts = (
   const counts = { sent: 0, failed: 0, unconfirmed: 0 };
   for (const attempt of routing?.attempts ?? []) {
     if (attempt.execution_id === executionId && attempt.phase === phase) {
-      counts[attempt.status]++;
+      const status =
+        attempt.status === 'sent' || attempt.status === 'failed' ? attempt.status : 'unconfirmed';
+      counts[status]++;
     }
   }
   return counts;
@@ -75,8 +80,47 @@ const hasDeliveryAttempt = (
       attempt.phase === phase
   );
 
+/**
+ * The message this execution's phase posted or edited, whether the root post, a reply in the
+ * retained thread, or a reply under the caller's message. Undefined when that delivery was not
+ * confirmed.
+ */
+export const getSentMessageTs = (
+  routing: NotificationRouting,
+  executionId: string,
+  destination: NotificationDestination,
+  phase: NotificationPhase
+): string | undefined =>
+  routing.attempts.find(
+    (attempt) =>
+      attempt.execution_id === executionId &&
+      attempt.destination_id === destination.id &&
+      attempt.phase === phase &&
+      attempt.status === 'sent'
+  )?.message_ts;
+
+/** The execution's single message: the one its started phase posted, edited by the terminal phase. */
+export const getStartedMessageTs = (
+  routing: NotificationRouting,
+  executionId: string,
+  destination: NotificationDestination
+): string | undefined =>
+  routing.attempts.find(
+    (attempt) =>
+      attempt.execution_id === executionId &&
+      attempt.destination_id === destination.id &&
+      attempt.phase === 'started' &&
+      attempt.status === 'sent'
+  )?.message_ts;
+
 const prepareDestinationDelivery = (
-  { investigation, investigationUrl, phase, reason }: DeliverInvestigationNotificationsParams,
+  {
+    investigation,
+    investigationUrl,
+    executionId,
+    phase,
+    reason,
+  }: DeliverInvestigationNotificationsParams,
   routing: NotificationRouting,
   destination: NotificationDestination,
   setupError?: string
@@ -86,22 +130,27 @@ const prepareDestinationDelivery = (
     destination.thread?.thread_ts ||
     (typeof explicitParent === 'string' && explicitParent) ||
     undefined;
-  const createsRoot = phase === 'started' && !threadTs;
+  const createsRoot =
+    (phase === 'started' || phase === 'failed' || phase === 'timed_out') && !threadTs;
   const uncertainRoot =
     !threadTs &&
     routing.attempts.some(
       (attempt) =>
         attempt.destination_id === destination.id &&
         attempt.creates_root &&
-        attempt.status === 'unconfirmed'
+        attempt.status !== 'sent' &&
+        attempt.status !== 'failed'
     );
   let diagnostic = setupError;
   if (uncertainRoot) {
     diagnostic = 'A previous root delivery is unconfirmed; automatic thread creation is blocked';
-  } else if (phase !== 'started' && !threadTs) {
+  } else if (!createsRoot && !threadTs) {
     diagnostic = 'No confirmed notification thread is available';
   }
 
+  // The terminal phase edits the started message, so the thread keeps a single message.
+  const messageTs =
+    phase === 'started' ? undefined : getStartedMessageTs(routing, executionId, destination);
   let delivery: NotificationDelivery | undefined;
   try {
     delivery = prepareNotificationDelivery({
@@ -109,6 +158,7 @@ const prepareDestinationDelivery = (
       url: investigationUrl,
       phase,
       reason,
+      ...(messageTs ? { messageTs } : {}),
       notificationDestination: {
         type: destination.type,
         connector_id: destination.connector_id,
@@ -142,11 +192,29 @@ const executeDestinationDelivery = async (
     return { status: 'failed', error: diagnostic || 'Notification delivery is unavailable' };
   }
   try {
-    const response = await execute({
+    let response = await execute({
       actionId: destination.connector_id,
       signal,
       params: delivery.params,
     });
+    const subActionParams = delivery.params.subActionParams;
+    if (
+      !signal.aborted &&
+      response.status !== 'ok' &&
+      subActionParams &&
+      typeof subActionParams === 'object' &&
+      'blocks' in subActionParams &&
+      /invalid_blocks|msg_blocks_too_long|failed to post outbound message/i.test(
+        response.serviceMessage || response.message || ''
+      )
+    ) {
+      const { blocks, ...textOnlyParams } = subActionParams;
+      response = await execute({
+        actionId: destination.connector_id,
+        signal,
+        params: { ...delivery.params, subActionParams: textOnlyParams },
+      });
+    }
     return signal.aborted
       ? { status: 'unconfirmed', error: 'Cancelled during notification delivery' }
       : delivery.getOutcome(response);
@@ -236,9 +304,8 @@ const deliverToDestination = async (
  * Delivers one lifecycle phase for an investigation workflow execution and returns its persisted
  * sent, failed, and unconfirmed counts, including attempts encountered on replay.
  *
- * The started phase merges caller destinations into routing and freezes this execution's
- * participants. Terminal phases require that snapshot and select one terminal outcome before
- * posting, preventing completion and failure notifications for the same execution.
+ * Started and unsuccessful phases initialize the execution's participants without changing an existing
+ * snapshot; terminal phases select one outcome before posting or emitting lifecycle events.
  *
  * Resolves Actions once, then reads current routing for each destination, skips existing attempts,
  * and prepares a root or thread reply. Each post requires a durable unconfirmed claim before the
@@ -267,8 +334,16 @@ export const deliverInvestigationNotifications = async (
   if (signal.aborted || !(await routingClient.isActive())) {
     return countAttempts(existingRouting, executionId, phase);
   }
-  if (!existingRouting && notificationDestinations.length === 0) {
+  if (
+    !existingRouting &&
+    notificationDestinations.length === 0 &&
+    phase !== 'failed' &&
+    phase !== 'timed_out'
+  ) {
     return countAttempts(existingRouting, executionId, phase);
+  }
+  if (phase === 'failed' || phase === 'timed_out') {
+    await routingClient.initialize(executionId, workflowId, notificationDestinations);
   }
   const routing =
     phase === 'started'
@@ -277,6 +352,24 @@ export const deliverInvestigationNotifications = async (
   const execution = routing.executions.find(({ id }) => id === executionId);
   if (!execution || execution.workflow_id !== workflowId) {
     throw new Error('Notification execution was not initialized for this workflow');
+  }
+  if (execution.terminal_phase) {
+    // A newer terminal outcome is authoritative even when this version cannot interpret it.
+    const terminalPhase = notificationPhaseSchema.safeParse(execution.terminal_phase);
+    if (!terminalPhase.success || terminalPhase.data === 'started') {
+      return countAttempts(routing, executionId, phase);
+    }
+  }
+  if (phase !== 'started' && execution.terminal_phase !== phase) {
+    return countAttempts(routing, executionId, phase);
+  }
+  if (
+    phase !== 'started' &&
+    !signal.aborted &&
+    params.onTerminalPhaseSelected &&
+    (await routingClient.claimTerminalLifecycle(executionId, phase, randomUUID()))
+  ) {
+    await params.onTerminalPhaseSelected();
   }
   const hasEligibleDestinations = execution.destination_ids.some(
     (id) => !hasDeliveryAttempt(routing, executionId, id, phase)

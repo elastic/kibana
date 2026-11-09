@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import DOMPurify from 'dompurify';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { applyHtmlTheme, injectCsp, injectStyleTag, sanitizeHtml } from './prepare_html';
+import * as internalLink from './internal_link';
 
 describe('injectStyleTag', () => {
   it('injects a <style> tag after <head>', () => {
@@ -41,6 +43,10 @@ describe('injectCsp', () => {
     const once = injectCsp('<p>hello</p>');
     const twice = injectCsp(once);
     expect(twice.split('Content-Security-Policy').length).toBe(2);
+  });
+
+  it('forbids form submissions to any destination', () => {
+    expect(injectCsp('<p>hello</p>')).toContain("form-action 'none'");
   });
 });
 
@@ -152,10 +158,130 @@ describe('sanitizeHtml', () => {
     expect(result).not.toContain('onerror');
   });
 
-  it('removes <a> tags (FORBID_TAGS config)', () => {
-    const result = sanitizeHtml('<p>hello</p><a href="https://example.com">click</a>');
-    expect(result).not.toContain('<a');
-    expect(result).toContain('hello');
+  describe('links', () => {
+    const anchorOf = (html: string, basePath = { requestBasePath: '', serverBasePath: '' }) => {
+      const doc = new DOMParser().parseFromString(sanitizeHtml(html, basePath), 'text/html');
+      return doc.querySelector('a');
+    };
+
+    it('keeps an internal app link, forcing top-window navigation', () => {
+      const a = anchorOf('<a href="/app/dashboards#/view/abc">go</a>');
+      expect(a?.getAttribute('href')).toBe('/app/dashboards#/view/abc');
+      expect(a?.getAttribute('target')).toBe('_top');
+      expect(a?.getAttribute('rel')).toBe('noopener noreferrer');
+      expect(a?.textContent).toBe('go');
+    });
+
+    it('drops the href of every link when Kibana is framed by another page', () => {
+      const framed = jest.spyOn(internalLink, 'isKibanaFramed').mockReturnValue(true);
+      const a = anchorOf('<a href="/app/dashboards" target="_top">go</a>');
+      framed.mockRestore();
+      expect(a?.hasAttribute('href')).toBe(false);
+      expect(a?.hasAttribute('target')).toBe(false);
+      expect(a?.textContent).toBe('go');
+    });
+
+    it('drops the href of every link in a non-interactive view', () => {
+      const html = sanitizeHtml(
+        '<a href="/app/dashboards" target="_top">go</a>',
+        { requestBasePath: '', serverBasePath: '' },
+        false
+      );
+      const a = new DOMParser().parseFromString(html, 'text/html').querySelector('a');
+      expect(a?.hasAttribute('href')).toBe(false);
+      expect(a?.hasAttribute('target')).toBe(false);
+      expect(a?.textContent).toBe('go');
+    });
+
+    it('drops the href of a link to an app that is not allowed', () => {
+      expect(anchorOf('<a href="/app/dev_tools">go</a>')?.hasAttribute('href')).toBe(false);
+    });
+
+    it('prepends the base path', () => {
+      expect(
+        anchorOf('<a href="/app/discover">go</a>', {
+          requestBasePath: '/kbn',
+          serverBasePath: '/kbn',
+        })?.getAttribute('href')
+      ).toBe('/kbn/app/discover');
+    });
+
+    it('overrides an author-supplied target and rel', () => {
+      const a = anchorOf('<a href="/app/dashboards" target="_blank" rel="opener">go</a>');
+      expect(a?.getAttribute('target')).toBe('_top');
+      expect(a?.getAttribute('rel')).toBe('noopener noreferrer');
+    });
+
+    it.each([
+      'https://example.com',
+      `${['java', 'script'].join('')}:alert(1)`,
+      '//example.com/app/x',
+      '/api/status',
+      '/logout',
+      '/app/%2e%2e/api/status',
+    ])('drops the href of a link to %s', (href) => {
+      const a = anchorOf(`<a href="${href}" target="_blank">go</a>`);
+      expect(a?.hasAttribute('href')).toBe(false);
+      expect(a?.hasAttribute('target')).toBe(false);
+      expect(a?.textContent).toBe('go');
+    });
+
+    it('strips attributes that can trigger requests or downloads', () => {
+      const a = anchorOf(
+        '<a href="/app/dashboards" ping="https://example.com/p" download="x" referrerpolicy="unsafe-url" hreflang="en">go</a>'
+      );
+      expect(a?.getAttributeNames().sort()).toEqual(['href', 'rel', 'target']);
+    });
+
+    it('strips the href from SVG links, including xlink:href', () => {
+      const html = sanitizeHtml(
+        '<svg xmlns:xlink="http://www.w3.org/1999/xlink"><a href="https://example.com"><text>x</text></a><a xlink:href="https://example.com"><text>y</text></a></svg>'
+      );
+      expect(html).not.toContain('example.com');
+    });
+
+    it('keeps same-document references on SVG elements', () => {
+      const html = sanitizeHtml(
+        '<svg xmlns:xlink="http://www.w3.org/1999/xlink"><defs><path id="arc" d="M0 0"/><linearGradient id="base"/><linearGradient id="derived" href="#base"/></defs><text><textPath href="#arc">x</textPath></text><rect fill="url(#derived)" xlink:href="#base"/></svg>'
+      );
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+      expect(doc.querySelector('textPath')?.getAttribute('href')).toBe('#arc');
+      expect(doc.querySelector('#derived')?.getAttribute('href')).toBe('#base');
+      expect(html).toContain('#base');
+    });
+
+    it('strips even a same-document href from an SVG link, since a click navigates', () => {
+      const html = sanitizeHtml(
+        '<svg xmlns:xlink="http://www.w3.org/1999/xlink"><a href="#x"><text>x</text></a><a xlink:href="#y"><text>y</text></a></svg>'
+      );
+      expect(html).not.toContain('#x');
+      expect(html).not.toContain('#y');
+    });
+
+    it('strips an external reference from an SVG element that also has fragment references', () => {
+      const html = sanitizeHtml(
+        '<svg><linearGradient id="g" href="https://example.com/x.svg#base"/><text><textPath href="/app/dashboards#a">x</textPath></text></svg>'
+      );
+      expect(html).not.toContain('example.com');
+      expect(html).not.toContain('/app/dashboards');
+    });
+
+    it('strips href and xlink:href from every element that is not an HTML link', () => {
+      const html = sanitizeHtml(
+        '<svg xmlns:xlink="http://www.w3.org/1999/xlink"><use href="/app/dashboards"/><image xlink:href="/app/dashboards"/></svg><div href="/app/dashboards">x</div>'
+      );
+      expect(html).not.toContain('href');
+    });
+
+    it('validates hrefs filled in from data after templating', () => {
+      expect(sanitizeHtml('<a href="//example.com/app/x">go</a>')).not.toContain('example.com');
+    });
+
+    it('does not leave its hook behind for other DOMPurify callers', () => {
+      sanitizeHtml('<a href="/app/x">go</a>');
+      const foreign = DOMPurify.sanitize('<a href="https://example.com">x</a>');
+      expect(foreign).toContain('https://example.com');
+    });
   });
 
   it('removes image-map links, which would otherwise bypass the <a> ban', () => {

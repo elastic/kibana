@@ -147,6 +147,7 @@ export const getMonitorAgentAssignment: SyntheticsRestApiRouteFactory<
           agentPolicyName:
             policyNameById.get(privateLocation.agentPolicyId) ?? privateLocation.agentPolicyId,
           agents,
+          hasCompleteAgent: [...enrolled.values()].some((meta) => meta.complete),
         });
       }
 

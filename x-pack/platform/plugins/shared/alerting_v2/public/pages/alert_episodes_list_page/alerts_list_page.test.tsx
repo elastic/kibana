@@ -8,7 +8,6 @@
 import React from 'react';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient } from '@kbn/react-query';
-import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { createMockLocators, ListPageTestProviders } from '../../test_utils/test_providers';
 import { ManageRulesHrefProvider } from '../../application/manage_rules_href_context';
 import { AlertsListPage } from './alerts_list_page';
@@ -66,6 +65,7 @@ jest.mock('@kbn/unified-data-table', () => ({
       () =>
         leftSide
   ),
+  getRowHeight: jest.fn(() => 3),
 }));
 
 jest.mock('@kbn/alerting-v2-episodes-ui/apis/fetch_alerting_episodes');
@@ -78,7 +78,7 @@ jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_alerting_episodes_data_view');
 
 jest.mock('@kbn/alerting-v2-episodes-ui/actions', () => ({
   createEpisodeActions: jest.fn(() => []),
-  READ_SAFE_EPISODE_ACTION_IDS: new Set(['ALERTING_V2_OPEN_EPISODE_IN_DISCOVER']),
+  OPEN_ALERT_EVENTS_HISTORY_ACTION_ID: 'ALERTING_V2_OPEN_ALERT_EVENTS_HISTORY_IN_DISCOVER',
 }));
 
 jest.mock('@kbn/alerting-v2-episodes-ui/components/details/details_flyout', () => ({
@@ -109,7 +109,7 @@ jest.mock('../../components/rule/flyouts/rule_summary/rule_summary_flyout_contai
 
 jest.mock('../../hooks/use_breadcrumbs', () => ({ useBreadcrumbs: jest.fn() }));
 
-jest.mock('./components/episodes_kpis', () => ({
+jest.mock('@kbn/alerting-v2-episodes-ui/components/episodes_kpis', () => ({
   EpisodesKpis: () => null,
 }));
 
@@ -133,7 +133,7 @@ jest.mock('./components/episodes_filter_bar', () => ({
   ),
 }));
 
-jest.mock('./components/episodes_histogram', () => ({
+jest.mock('@kbn/alerting-v2-episodes-ui/components/episodes_histogram', () => ({
   EpisodesHistogram: () => null,
 }));
 
@@ -179,6 +179,13 @@ const mockServices = {
   uiActions: { getTriggerCompatibleActions: jest.fn().mockResolvedValue([]) },
   spaces: mockSpaces,
   storage: mockStorage,
+  docLinks: {
+    links: {
+      alerting: {
+        viewAndManageAlerts: 'https://docs.test/view-and-manage-alerts',
+      },
+    },
+  },
 };
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
@@ -260,11 +267,6 @@ describe('AlertsListPage', () => {
     });
   });
 
-  it('renders the experimental badge in the page header', () => {
-    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Alerts');
-    expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
-  });
-
   it('renders the manage rules link in the app header menu', async () => {
     const { rulesLocators } = mockLocators;
     const manageRulesLink = await screen.findByTestId('alertingV2EpisodesListManageRules');
@@ -304,10 +306,12 @@ describe('AlertsListPage', () => {
       'severity',
       '@timestamp',
       'rule.id',
+      'reason',
       'duration',
       'tags',
       'rule_tags',
       'assignees',
+      'suppressed',
     ]);
     expect(lastCall?.externalCustomRenderers).toHaveProperty('severity');
     expect(typeof lastCall?.externalCustomRenderers?.severity).toBe('function');
@@ -316,6 +320,8 @@ describe('AlertsListPage', () => {
   it.each([
     ['tags', 'Alert tags'],
     ['rule_tags', 'Rule tags'],
+    ['suppressed', 'Suppressed'],
+    ['reason', 'Reason'],
   ])('labels the %s column %p and takes its sort control away', (columnId, label) => {
     const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
     const customize = lastCall?.customGridColumnsConfiguration?.[columnId];
@@ -326,6 +332,46 @@ describe('AlertsListPage', () => {
       displayAsText: label,
       isSortable: false,
     });
+  });
+
+  it.each([
+    'episode.status',
+    'alerting_source',
+    'severity',
+    '@timestamp',
+    'rule.id',
+    'reason',
+    'duration',
+    'tags',
+    'rule_tags',
+    'assignees',
+    'suppressed',
+  ])('takes the remove column action away from the %s column', (columnId) => {
+    const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+    const customize = lastCall?.customGridColumnsConfiguration?.[columnId];
+
+    expect(customize).toBeDefined();
+    const column = customize!({
+      column: {
+        id: columnId,
+        actions: { showHide: { label: 'Remove column' }, showMoveLeft: true },
+      },
+      headerRowHeight: 1,
+    });
+    expect(column.actions).toEqual({ showHide: false, showMoveLeft: true });
+  });
+
+  it('keeps disabled column actions disabled', () => {
+    const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+    const customize = lastCall?.customGridColumnsConfiguration?.['rule.id'];
+
+    expect(customize!({ column: { id: 'rule.id', actions: false } }).actions).toBe(false);
+  });
+
+  it('registers a cell renderer for the suppressed column', () => {
+    const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+
+    expect(typeof lastCall?.externalCustomRenderers?.suppressed).toBe('function');
   });
 
   it('does not pass key prop derived from tableKey (no tableKey state)', () => {
@@ -557,6 +603,34 @@ describe('episode count + reset filters toolbar', () => {
     expect(node).toHaveAttribute('tabindex', '0');
   });
 
+  it('passes the loaded episode count as totalHits when under the page size cap', async () => {
+    renderPage();
+
+    await waitFor(() => {
+      const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+      expect(lastCall?.rows?.length).toBe(mockEpisodes.length);
+      expect(lastCall?.totalHits).toBe(mockEpisodes.length);
+    });
+  });
+
+  it('passes totalHits above the page size cap when the limit is reached', async () => {
+    const cappedEpisodes = Array.from({ length: ALERT_EPISODES_LIST_PAGE_SIZE }, (_, index) => ({
+      'episode.id': `ep${index}`,
+      'rule.id': `rule${index}`,
+      group_hash: `gh${index}`,
+      '@timestamp': '2026-01-01T00:00:00Z',
+    }));
+    jest.mocked(fetchAlertingEpisodes).mockResolvedValue(cappedEpisodes as any);
+
+    renderPage();
+
+    await waitFor(() => {
+      const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+      expect(lastCall?.rows?.length).toBe(ALERT_EPISODES_LIST_PAGE_SIZE);
+      expect(lastCall?.totalHits).toBe(ALERT_EPISODES_LIST_PAGE_SIZE + 1);
+    });
+  });
+
   it('disables the reset filters button when filter state equals the default', async () => {
     renderPage();
     const button = await screen.findByTestId('episodesFilterBar-resetFilters');
@@ -596,6 +670,16 @@ describe('privilege gating', () => {
     order: 50,
     displayName: 'Open in Discover',
     iconType: 'productDiscover',
+    enforcesOwnPrivileges: true,
+    isCompatible: () => true,
+    execute: jest.fn(async () => {}),
+  };
+  const historyAction = {
+    id: 'ALERTING_V2_OPEN_ALERT_EVENTS_HISTORY_IN_DISCOVER',
+    order: 51,
+    displayName: 'Open alert events history',
+    iconType: 'productDiscover',
+    enforcesOwnPrivileges: true,
     isCompatible: () => true,
     execute: jest.fn(async () => {}),
   };
@@ -606,12 +690,20 @@ describe('privilege gating', () => {
     jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
     jest.mocked(fetchClassicAlertsAsEpisodes).mockResolvedValue([]);
     mockHttp.post.mockResolvedValue({ rules: [] });
-    mockCreateEpisodeActions.mockReturnValue([ackAction, discoverAction]);
+    mockCreateEpisodeActions.mockReturnValue([ackAction, discoverAction, historyAction]);
   });
 
   const getRowControlIds = (): string[] => {
     const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
     return (lastCall?.rowAdditionalLeadingControls ?? []).map((control) => control.id);
+  };
+  const getFlyoutActionIds = (): string[] => {
+    const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+    const renderDocumentView = lastCall?.renderDocumentView as (hit: {
+      flattened: Record<string, unknown>;
+    }) => React.ReactElement;
+    const node = renderDocumentView({ flattened: { 'episode.id': 'ep-1' } });
+    return node.props.actions.map(({ id }: { id: string }) => id);
   };
 
   const waitForRows = () =>
@@ -634,6 +726,7 @@ describe('privilege gating', () => {
       'ALERTING_V2_ACK_EPISODE',
       OPEN_IN_DISCOVER_EPISODE_ACTION_ID,
     ]);
+    expect(getFlyoutActionIds()).toContain('ALERTING_V2_OPEN_ALERT_EVENTS_HISTORY_IN_DISCOVER');
   });
 
   it('hides mutating episode actions when the user only has read privilege', async () => {
@@ -646,6 +739,7 @@ describe('privilege gating', () => {
     expect(getCapturedBulkActions().map((action) => action.key)).toEqual([
       OPEN_IN_DISCOVER_EPISODE_ACTION_ID,
     ]);
+    expect(getFlyoutActionIds()).toContain('ALERTING_V2_OPEN_ALERT_EVENTS_HISTORY_IN_DISCOVER');
   });
 });
 

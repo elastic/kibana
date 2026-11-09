@@ -112,12 +112,14 @@ dependsOn:
   - '@kbn/ui-callout'
   - '@kbn/alerting-v2-utils'
   - '@kbn/user-profile-components'
+  - '@kbn/alerting-v2-constants'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - .storybook/**/*
@@ -126,6 +128,4 @@ fileGroups:
     - common/**/*
     - config.ts
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

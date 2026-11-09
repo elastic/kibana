@@ -13,6 +13,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DataSetWithName, DataSource } from '../common';
 import { mainTranslations } from './main_i18n';
 import { DataSourcesTabContent } from './data_sources_tab_content';
+import { docLinksMock } from './doc_links_mock';
 import type { DataFederationKibanaServices } from './types';
 import { UI_COUNTER_EVENTS } from './ui_counters';
 
@@ -132,22 +133,7 @@ const createServicesMock = ({
     datasetsClient: { get: jest.fn() },
     toasts: { addDanger: jest.fn(), addSuccess: jest.fn() },
     reportUiCounter,
-    docLinks: {
-      links: {
-        dataFederation: {
-          overview: '',
-          quickstart: '',
-          dataSources: '',
-          datasets: '',
-          datasetSettings: '',
-          authentication: '',
-          staticCredentials: '',
-          federatedIdentity: '',
-          querying: '',
-          security: '',
-        },
-      },
-    },
+    docLinks: docLinksMock,
   } as unknown as DataFederationKibanaServices);
 
 const renderComponent = async ({

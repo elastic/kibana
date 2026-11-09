@@ -11,6 +11,7 @@ import type { EuiButtonGroupOptionProps } from '@elastic/eui';
 import { EuiFormRow, EuiButtonGroup } from '@elastic/eui';
 import type { AreaFillOption as AreaFillOptionValue } from '@kbn/expression-xy-plugin/common';
 import { AreaFillOptions } from '@kbn/expression-xy-plugin/public';
+import { defaultAreaFill } from '../../types';
 
 const fillLabel = i18n.translate('xpack.lens.xyChart.fillLabel', {
   defaultMessage: 'Fill',
@@ -39,7 +40,7 @@ const areaFillOptions: EuiButtonGroupOptionProps[] = [
 ];
 
 export const AreaFillOption: React.FC<AreaFillOptionProps> = ({
-  value = AreaFillOptions.SOLID,
+  value = defaultAreaFill,
   onChange,
 }) => {
   const selectedOption =

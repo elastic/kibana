@@ -22,7 +22,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllRules(supertest, log);
     });
 
-    it('DOES NOT report a conflict if there is an attempt to import two rules with the same rule_id', async () => {
+    it('reports a conflict if there is an attempt to import two rules with the same rule_id', async () => {
       const ndjson = combineToNdJson(
         getCustomQueryRuleParams({ rule_id: 'rule-1', name: 'Rule 1' }),
         getCustomQueryRuleParams({ rule_id: 'rule-1', name: 'Rule 2' })
@@ -36,10 +36,19 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(200);
 
       expect(body).toMatchObject({
-        errors: [],
-        success: true,
+        errors: [
+          {
+            error: {
+              message: 'More than one rule with rule-id: "rule-1" found',
+              status_code: 400,
+            },
+            rule_id: 'rule-1',
+          },
+        ],
+        success: false,
         success_count: 1,
         rules_count: 2,
+        rules_summary: { created: 1, updated: 0, skipped: 0, failed: 1 },
       });
 
       const importedRule = await fetchRule(supertest, { ruleId: 'rule-1' });

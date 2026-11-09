@@ -21,4 +21,3 @@ export {
   type EsqlViewNameValidationError,
 } from './esql_view_validation';
 export { getViewEsqlQuery } from './get_view_esql_query';
-export { resolveViewColumnToIndexField } from './resolve_view_column_to_index_field';

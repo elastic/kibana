@@ -10,17 +10,28 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { apm } from '@elastic/apm-rum';
 import type { AsCodeRelatedItem } from '@kbn/as-code-shared-schemas';
+import { isHttpFetchError } from '@kbn/core-http-browser';
 import { importJsonFlyoutStrings } from './import_json_strings';
 import type { CreateFromJson, ImportJsonFlyoutServices, SanitizeImportJson } from './types';
 
 /** Client-side import limit; deployments may configure `server.maxPayload` differently. */
 const MAX_IMPORT_JSON_FILE_BYTES = 1_048_576;
 
+// Only 4xx messages describe user-fixable input; 5xx details stay in server logs.
+const getClientErrorMessage = (error: unknown): string | undefined => {
+  if (!isHttpFetchError(error)) return;
+  const status = error.response?.status ?? 0;
+  if (status < 400 || status > 499) return;
+  const { body } = error;
+  if (typeof body === 'object' && body !== null && 'message' in body) {
+    return typeof body.message === 'string' && body.message ? body.message : undefined;
+  }
+};
+
 interface UseImportJsonFlyoutStateParams<SanitizedState> {
   title: string;
   closeFlyout: () => void;
   services: ImportJsonFlyoutServices;
-  serverValidationErrorTitle: string;
   sanitizeImportJson: SanitizeImportJson<SanitizedState>;
   createFromJson: CreateFromJson<SanitizedState>;
   onImportSuccess: (id: string, title: string) => void;
@@ -30,13 +41,12 @@ export const useImportJsonFlyoutState = <SanitizedState>({
   title,
   closeFlyout,
   services,
-  serverValidationErrorTitle,
   sanitizeImportJson,
   createFromJson,
   onImportSuccess,
 }: UseImportJsonFlyoutStateParams<SanitizedState>) => {
   const [filePickerError, setFilePickerError] = useState<string | null>(null);
-  const [serverError, setServerError] = useState<string | null>(null);
+  const [serverError, setServerError] = useState<{ details?: string } | null>(null);
   const [warnings, setWarnings] = useState<string[]>([]);
   const [relatedItems, setRelatedItems] = useState<AsCodeRelatedItem[]>([]);
   const [relatedItemsCount, setRelatedItemsCount] = useState(0);
@@ -120,7 +130,7 @@ export const useImportJsonFlyoutState = <SanitizedState>({
               error_type: 'SanitizeImportJsonFailure',
             },
           });
-          setServerError(serverValidationErrorTitle);
+          setServerError({ details: getClientErrorMessage(error) });
         }
       } finally {
         if (sanitizeAbortRef.current === abortController) {
@@ -129,7 +139,7 @@ export const useImportJsonFlyoutState = <SanitizedState>({
         }
       }
     },
-    [abortSanitize, sanitizeImportJson, serverValidationErrorTitle]
+    [abortSanitize, sanitizeImportJson]
   );
 
   const onImport = useCallback(async () => {
@@ -143,7 +153,7 @@ export const useImportJsonFlyoutState = <SanitizedState>({
     } catch (error) {
       services.notifications.toasts.addDanger({
         title,
-        text: error instanceof Error ? error.message : String(error),
+        text: getClientErrorMessage(error) ?? importJsonFlyoutStrings.getGenericImportError(),
       });
     } finally {
       setIsImporting(false);

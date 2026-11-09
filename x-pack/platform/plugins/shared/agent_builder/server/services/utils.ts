@@ -11,7 +11,11 @@ import {
   extractApiKeyIdFromAuthzHeader,
   type SecurityServiceStart,
 } from '@kbn/core-security-server';
-import type { CurrentUser } from '@kbn/agent-builder-common';
+import {
+  REALM_USER_ID_PREFIX,
+  serviceAccountUserId,
+  type CurrentUser,
+} from '@kbn/agent-builder-common';
 import { errors } from '@elastic/elasticsearch';
 import { APPLICATION_PREFIX } from '@kbn/security-plugin/common/constants';
 import { apiPrivileges } from '../../common/features';
@@ -37,15 +41,18 @@ interface StableUserIdAuthUser {
  */
 export const toStableUserId = async ({
   authUser,
+  request,
   resolveApiKeyProfileUid,
 }: {
   authUser: StableUserIdAuthUser;
-  resolveApiKeyProfileUid?: () => Promise<string | undefined>;
+  request: KibanaRequest;
+  resolveApiKeyProfileUid: () => Promise<string | undefined>;
 }): Promise<string | undefined> => {
-  const isApiKey = authUser.authentication_type === 'api_key';
+  // Fake requests always authenticate with an API key, even when their identity hides it.
+  const isApiKey = request.isFakeRequest || authUser.authentication_type === 'api_key';
   let profileUid = authUser.profile_uid;
 
-  if (isApiKey && profileUid === undefined && resolveApiKeyProfileUid) {
+  if (isApiKey && profileUid === undefined) {
     profileUid = await resolveApiKeyProfileUid();
   }
 
@@ -64,7 +71,7 @@ export const toStableUserId = async ({
     return undefined;
   }
 
-  return `realm:${JSON.stringify([realmType, realmName, username])}`;
+  return `${REALM_USER_ID_PREFIX}${JSON.stringify([realmType, realmName, username])}`;
 };
 
 /**
@@ -114,10 +121,15 @@ const resolveApiKeyOwnerProfileUid = async ({
  * For fake requests (e.g. from Task Manager using an API key), `getCurrentUser` returns the
  * originating user's identity when the request was enriched at schedule time (profile_uid and
  * username persisted on the task's userScope). This is required for Cross-Project Search, where
- * the API key owner's username does not match the originating user.
+ * the API key owner's username does not match the originating user. A fake request authenticates
+ * with an API key, so when no profile_uid was attached the id is the key owner's profile uid: the
+ * identity Elasticsearch authorizes the run as.
  *
  * For un-enriched fake requests (e.g. tasks scheduled before enrichment was available), we fall
- * back to the ES `_security/_authenticate` API for the username only.
+ * back to the ES `_security/_authenticate` API for the username. When it authenticated an API key,
+ * the id is the key owner's profile uid, as for an HTTP request made with the same key.
+ *
+ * Service accounts are recognised first, through `security.authc.getPrincipal`.
  */
 export const getUserFromRequest = async ({
   request,
@@ -128,46 +140,63 @@ export const getUserFromRequest = async ({
   security: SecurityServiceStart;
   esClient: ElasticsearchClient;
 }): Promise<CurrentUser> => {
+  const { isAdmin, canManageSecurity } = await getCallerPrivileges({ esClient });
   const authUser = security.authc.getCurrentUser(request);
-  const isAdmin = await isAdminFromRequest({ esClient });
 
-  if (authUser?.username) {
+  const principal = security.authc.getPrincipal(request);
+  if (principal?.type === 'service_account') {
     return {
-      id: await toStableUserId({
-        authUser,
-        resolveApiKeyProfileUid: () => resolveApiKeyOwnerProfileUid({ request, esClient }),
-      }),
-      username: authUser.username,
+      id: serviceAccountUserId(principal.serviceAccountId),
+      // A fake request Kibana minted for the account carries a credential but no stored user.
+      username: authUser?.username ?? (await esClient.security.authenticate()).username,
+      type: 'service_account',
       isAdmin,
+      canManageSecurity,
     };
   }
 
-  const authResponse = await esClient.security.authenticate();
-  return {
-    id: authUser?.profile_uid,
-    username: authResponse.username,
-    isAdmin,
-  };
+  const resolveApiKeyProfileUid = () => resolveApiKeyOwnerProfileUid({ request, esClient });
+
+  if (authUser?.username) {
+    const id = await toStableUserId({ authUser, request, resolveApiKeyProfileUid });
+
+    return { id, username: authUser.username, type: 'user', isAdmin, canManageSecurity };
+  }
+
+  // A user on this path may have a profile that `getCurrentUser` could not see; a realm id would
+  // stop matching their profile-owned conversations, whereas username matching still finds them.
+  const { username } = await esClient.security.authenticate();
+  const id = await toStableUserId({ authUser: authUser ?? {}, request, resolveApiKeyProfileUid });
+
+  return { id, username, type: 'user', isAdmin, canManageSecurity };
 };
 
 const ADMIN_PRIVILEGE = 'agent_builder:admin'; // intentionally unregistered privilege
+const MANAGE_SECURITY_PRIVILEGE = 'manage_security';
+
+export interface CallerPrivileges {
+  /** Wildcard Elasticsearch privileges (for example `superuser`). */
+  isAdmin: boolean;
+  /** The `manage_security` cluster privilege, which gates service account bindings. */
+  canManageSecurity: boolean;
+}
 
 /**
- * Returns `true` only for users with wildcard Elasticsearch privileges (for example `superuser`).
+ * Resolves the caller's platform-level privileges with a single `has_privileges` call.
  *
- * We intentionally check an application privilege name that is not registered by Kibana
- * (`agent_builder:admin`). Because this privilege is unregistered, normal roles fail this check,
- * while wildcard roles (for example application/cluster `*`/`all`) pass.
- *
- * This is used as an internal admin check, independent of feature/sub-feature grants.
+ * Admin is checked against an application privilege name that is not registered by Kibana
+ * (`agent_builder:admin`). Because it is unregistered, normal roles fail this check while wildcard
+ * roles (for example application/cluster `*`/`all`) pass, which gives an internal admin check
+ * independent of feature/sub-feature grants.
  */
-export const isAdminFromRequest = async ({
+export const getCallerPrivileges = async ({
   esClient,
 }: {
   esClient: ElasticsearchClient;
-}): Promise<boolean> => {
+}): Promise<CallerPrivileges> => {
   try {
-    const { has_all_requested: isAdmin } = await esClient.security.hasPrivileges({
+    const response = await esClient.security.hasPrivileges({
+      cluster: [MANAGE_SECURITY_PRIVILEGE],
       application: [
         {
           application: KIBANA_APPLICATION,
@@ -177,11 +206,23 @@ export const isAdminFromRequest = async ({
       ],
     });
 
-    return isAdmin;
+    return {
+      isAdmin: response.application?.[KIBANA_APPLICATION]?.['*']?.[ADMIN_PRIVILEGE] ?? false,
+      canManageSecurity: response.cluster?.[MANAGE_SECURITY_PRIVILEGE] ?? false,
+    };
   } catch {
-    return false;
+    return { isAdmin: false, canManageSecurity: false };
   }
 };
+
+/**
+ * Returns `true` only for users with wildcard Elasticsearch privileges (for example `superuser`).
+ */
+export const isAdminFromRequest = async ({
+  esClient,
+}: {
+  esClient: ElasticsearchClient;
+}): Promise<boolean> => (await getCallerPrivileges({ esClient })).isAdmin;
 
 export const getAgentApiAccessFromRequest = async ({
   esClient,

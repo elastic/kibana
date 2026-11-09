@@ -81,6 +81,12 @@ export class DiscoverEbt {
       .click();
   }
 
+  async waitForSurroundingDocuments(): Promise<void> {
+    for (const testSubj of ['predecessorsLoadMoreButton', 'successorsLoadMoreButton']) {
+      await expect(this.page.testSubj.locator(testSubj)).toBeEnabled({ timeout: 30_000 });
+    }
+  }
+
   async clickFlyoutFieldAction(field: string, action: string): Promise<void> {
     const flyout = this.page.testSubj.locator('docViewerFlyout');
     // Log documents open on the overview tab. Column and filter actions live on the fields table.

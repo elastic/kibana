@@ -9,9 +9,10 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { useInferenceSettings, useSaveInferenceSettings } from '../../hooks/use_inference_settings';
 import { useRegisteredFeatures } from '../../hooks/use_registered_features';
-import type { InferenceFeatureResponse } from '../../../common/types';
+import type { InferenceEndpointSetting, InferenceFeatureResponse } from '../../../common/types';
 
 type Assignments = Record<string, string[]>;
+type SavedEndpoints = Map<string, InferenceEndpointSetting[]>;
 
 export interface FeatureSection extends InferenceFeatureResponse {
   children: InferenceFeatureResponse[];
@@ -32,7 +33,11 @@ export interface ModelSettingsForm {
 }
 
 const getEffectiveEndpoints = (
-  feature: { recommendedEndpoints: string[]; parentFeatureId?: string },
+  feature: {
+    recommendedEndpoints: string[];
+    parentFeatureId?: string;
+    ignoreGlobalDefault?: boolean;
+  },
   recommendedEndpointsById: Map<string, string[]>
 ): string[] => {
   if (feature.recommendedEndpoints.length > 0) {
@@ -44,24 +49,37 @@ const getEffectiveEndpoints = (
       return parentEndpoints;
     }
   }
+  // A row that opts out of the global default, and has nothing of its own to recommend,
+  // stays empty. Substituting the Kibana default would show a model the workers do not use.
+  if (feature.ignoreGlobalDefault) {
+    return [];
+  }
   return [defaultInferenceEndpoints.KIBANA_DEFAULT_CHAT_COMPLETION];
 };
 
-const toApiFormat = (assignments: Assignments) =>
-  Object.entries(assignments).map(([featureId, ids]) => ({
-    feature_id: featureId,
-    endpoints: ids.map((id) => ({ id })),
-  }));
+const toApiFormat = (assignments: Assignments, savedEndpoints: SavedEndpoints) =>
+  Object.entries(assignments).map(([featureId, ids]) => {
+    const savedById = new Map((savedEndpoints.get(featureId) ?? []).map((e) => [e.id, e]));
+    return {
+      feature_id: featureId,
+      endpoints: ids.map((id) => savedById.get(id) ?? { id }),
+    };
+  });
 
 const arraysEqual = (a: string[], b: string[]) =>
   a.length === b.length && a.every((v, i) => v === b[i]);
+
+const hasSavedParameters = (ids: string[], endpoints: InferenceEndpointSetting[] = []) =>
+  endpoints.some((e) => e.parameters !== undefined && ids.includes(e.id));
 
 // Returns only the assignments that differ from recommended, so the server-side fallback
 // chain (recommendedEndpoints → parent) stays in effect for unchanged features.
 const getChangedAssignments = (
   assignments: Assignments,
   registeredFeatures: InferenceFeatureResponse[],
-  recommendedEndpointsById: Map<string, string[]>
+  recommendedEndpointsById: Map<string, string[]>,
+  savedEndpoints: SavedEndpoints,
+  dirtyFeatureIds: ReadonlySet<string>
 ): Assignments => {
   const featureById = new Map(registeredFeatures.map((f) => [f.featureId, f]));
   return Object.fromEntries(
@@ -69,7 +87,10 @@ const getChangedAssignments = (
       const feature = featureById.get(featureId);
       if (!feature) return true;
       const defaults = getEffectiveEndpoints(feature, recommendedEndpointsById);
-      return !arraysEqual(ids, defaults);
+      if (!arraysEqual(ids, defaults)) return true;
+      return (
+        !dirtyFeatureIds.has(featureId) && hasSavedParameters(ids, savedEndpoints.get(featureId))
+      );
     })
   );
 };
@@ -125,14 +146,28 @@ export const useModelSettingsForm = (): ModelSettingsForm => {
     [sections, recommendedEndpointsById]
   );
 
+  const savedEndpoints = useMemo<SavedEndpoints>(
+    () =>
+      new Map(
+        (settingsData?.data?.features ?? []).map((f): [string, InferenceEndpointSetting[]] => [
+          f.feature_id,
+          f.endpoints ?? [],
+        ])
+      ),
+    [settingsData]
+  );
+
   const savedMap = useMemo(
     () =>
       new Map<string, string[]>(
-        (settingsData?.data?.features ?? [])
-          .map((f): [string, string[]] => [f.feature_id, (f.endpoints ?? []).map((e) => e.id)])
+        [...savedEndpoints]
+          .map(([featureId, endpoints]): [string, string[]] => [
+            featureId,
+            endpoints.map((e) => e.id),
+          ])
           .filter(([, ids]) => ids.length > 0)
       ),
-    [settingsData]
+    [savedEndpoints]
   );
 
   const hasSavedObject = useMemo(
@@ -188,10 +223,19 @@ export const useModelSettingsForm = (): ModelSettingsForm => {
     const changed = getChangedAssignments(
       assignments,
       registeredFeatures,
-      recommendedEndpointsById
+      recommendedEndpointsById,
+      savedEndpoints,
+      dirtyFeatureIds
     );
-    await saveSettings({ features: toApiFormat(changed) });
-  }, [saveSettings, assignments, registeredFeatures, recommendedEndpointsById]);
+    await saveSettings({ features: toApiFormat(changed, savedEndpoints) });
+  }, [
+    saveSettings,
+    assignments,
+    registeredFeatures,
+    recommendedEndpointsById,
+    savedEndpoints,
+    dirtyFeatureIds,
+  ]);
 
   return {
     isLoading,

@@ -8,12 +8,13 @@
 import Boom from '@hapi/boom';
 import type { AlertEpisodeActionType } from '@kbn/alerting-v2-schemas';
 import type { AlertingV2ErrorCode } from '../../errors/error_codes';
-import type { AlertEventRecord } from '../types';
 
 interface NoOpConflictParams {
   code: AlertingV2ErrorCode;
   message: string;
-  alertEvent: AlertEventRecord;
+  groupHash: string;
+  /** Set by the alert-scoped actions; series-scoped actions target no single alert. */
+  alertId?: string;
   actionType: AlertEpisodeActionType;
   /** Extra context for the failing precondition, merged into `details`. */
   details?: Record<string, unknown>;
@@ -29,15 +30,16 @@ interface NoOpConflictParams {
 export const noOpConflict = ({
   code,
   message,
-  alertEvent,
+  groupHash,
+  alertId,
   actionType,
   details,
 }: NoOpConflictParams): Boom.Boom =>
   Boom.conflict(message, {
     code,
     details: {
-      group_hash: alertEvent.group_hash,
-      alert_id: alertEvent.episode_id,
+      group_hash: groupHash,
+      ...(alertId != null ? { alert_id: alertId } : {}),
       action_type: actionType,
       ...details,
     },

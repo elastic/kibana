@@ -86,7 +86,11 @@ async function handleFromAutocomplete(
   });
 
   // METADATA suggestions - uses commandText for regex pattern matching
-  const metadataSuggestions = await getMetadataSuggestions(command, commandText);
+  const metadataSuggestions = await getMetadataSuggestions(
+    command,
+    commandText,
+    callbacks?.isServerless
+  );
   if (metadataSuggestions) {
     return metadataSuggestions;
   }

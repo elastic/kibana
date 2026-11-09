@@ -91,7 +91,6 @@ function getUnquotedText(ctx: ParserRuleContext) {
           ecmaVersion: 2018,
         },
         rules: {
-          '@kbn/imports/no_unresolvable_imports': 'off',
           'prettier/prettier': [
             'error',
             {

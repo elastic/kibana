@@ -14,6 +14,7 @@ import type {
 export interface AgentPermissions {
   update_agent: boolean;
   update_access_control: boolean;
+  update_approvals: boolean;
 }
 
 export type AgentDefinitionWithPermissions = AgentDefinition & {

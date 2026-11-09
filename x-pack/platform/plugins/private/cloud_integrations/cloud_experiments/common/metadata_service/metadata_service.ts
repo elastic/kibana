@@ -22,7 +22,7 @@ import {
 import { type Duration } from 'moment';
 import type { Logger } from '@kbn/logging';
 import type { BuildFlavor } from '@kbn/config';
-import type { EvaluationContext } from '@kbn/core-feature-flags-browser';
+import type { EvaluationContext } from '@kbn/core-feature-flags-server';
 import { removeUndefined } from './remove_undefined';
 
 export interface MetadataServiceStartContract {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { IKibanaResponse } from '@kbn/core/server';
+import path from 'path';
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod';
 import { MAX_MONITOR_BULK_SIZE, routeId } from '../zod_query';
@@ -45,11 +46,18 @@ export const deleteSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory<
 > = () => ({
   method: 'DELETE',
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/{id}',
+  options: {
+    summary: 'Delete a monitor',
+    description:
+      'Delete a monitor from the Synthetics app.\n\nYou must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.',
+    operationId: 'delete-synthetic-monitor',
+    oasOperationObject: () => path.join(__dirname, 'examples/delete_monitor.yaml'),
+  },
   validate: {},
   validation: {
     request: {
       params: z.strictObject({
-        id: routeId,
+        id: routeId.describe('The identifier for the monitor that you want to delete.'),
       }),
     },
   },
@@ -65,6 +73,7 @@ export const deleteSyntheticsMonitorsRoute: SyntheticsRestApiRouteFactory<
 > = () => ({
   method: 'DELETE',
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS,
+  options: { excludeFromOAS: true },
   validate: {},
   validation: {
     request: {

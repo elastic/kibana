@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import type { EisInferenceEndpoint } from '../../../common/types';
 import { ModelDetailFlyout } from './model_detail_flyout';
 import { useKibana } from '../../hooks/use_kibana';
@@ -53,34 +53,69 @@ describe('ModelDetailFlyout', () => {
 
   it('renders flyout with model_id as header when no display metadata', () => {
     renderFlyout();
-    expect(screen.getByText(MODEL_ID)).toBeInTheDocument();
+    expect(screen.getByTestId('modelDetailFlyoutTitle')).toHaveTextContent(MODEL_ID);
   });
 
-  it('renders display name from metadata when available', () => {
-    const endpoint = {
+  describe('header with display metadata', () => {
+    const anthropicEndpoint = {
       ...createEndpoint(),
       metadata: { display: { name: 'Anthropic Claude Opus 4.5', model_creator: 'Anthropic' } },
     } as unknown as EisInferenceEndpoint;
-    renderFlyout(MODEL_ID, [endpoint]);
 
-    expect(screen.getByText('Anthropic Claude Opus 4.5')).toBeInTheDocument();
-    expect(screen.getByText('Anthropic')).toBeInTheDocument();
+    it('renders the model name without the provider prefix', () => {
+      renderFlyout(MODEL_ID, [anthropicEndpoint]);
+      expect(screen.getByTestId('modelDetailFlyoutTitle')).toHaveTextContent(/^Claude Opus 4\.5$/);
+    });
+
+    it('renders the provider name', () => {
+      renderFlyout(MODEL_ID, [anthropicEndpoint]);
+      expect(screen.getByTestId('modelDetailFlyoutProvider')).toHaveTextContent('Anthropic');
+    });
+
+    it('renders the provider icon', () => {
+      renderFlyout(MODEL_ID, [anthropicEndpoint]);
+      expect(screen.getByTestId('modelDetailFlyoutProviderIcon')).not.toHaveAttribute(
+        'data-euiicon-type',
+        'machineLearningApp'
+      );
+    });
+  });
+
+  it('renders a fallback provider icon for an unknown provider', () => {
+    renderFlyout();
+    expect(screen.getByTestId('modelDetailFlyoutProviderIcon')).toHaveAttribute(
+      'data-euiicon-type',
+      'machineLearningApp'
+    );
   });
 
   it('falls back to Unknown for model author when no creator metadata', () => {
     renderFlyout();
-    expect(screen.getByText('Unknown')).toBeInTheDocument();
+    expect(screen.getByTestId('modelDetailFlyoutProvider')).toHaveTextContent('Unknown');
+    expect(screen.getByTestId('flyoutModelDetails')).toHaveTextContent('Unknown');
   });
 
-  it('renders task type badges in header', () => {
+  it.each([
+    ['preview', { status: 'preview' }, `modelPreviewBadge-${MODEL_ID}`],
+    ['deprecated', { status: 'deprecated' }, `modelDeprecatedBadge-${MODEL_ID}`],
+    [
+      'end-of-life',
+      { status: 'deprecated', end_of_life_date: '2020-01-01' },
+      `modelEolBadge-${MODEL_ID}`,
+    ],
+  ])('does not render header badges when the model is %s', (_status, heuristics, badgeTestId) => {
     const endpoints = [
       createEndpoint({ inference_id: 'ep-1', task_type: 'text_embedding' }),
-      createEndpoint({ inference_id: 'ep-2', task_type: 'completion' }),
-    ];
+      createEndpoint({
+        inference_id: 'ep-2',
+        task_type: 'completion',
+        metadata: { heuristics },
+      }),
+    ] as unknown as EisInferenceEndpoint[];
     renderFlyout(MODEL_ID, endpoints);
 
-    expect(screen.getAllByText('text_embedding').length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText('completion').length).toBeGreaterThanOrEqual(1);
+    expect(screen.queryByTestId('flyoutTaskBadges')).not.toBeInTheDocument();
+    expect(screen.queryByTestId(badgeTestId)).not.toBeInTheDocument();
   });
 
   it('filters endpoints by modelId', () => {
@@ -114,56 +149,12 @@ describe('ModelDetailFlyout', () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  it('renders documentation link', () => {
+  it('renders the EIS documentation link', () => {
     renderFlyout();
-    expect(screen.getByText('View documentation')).toBeInTheDocument();
-  });
 
-  describe('model status badge', () => {
-    it('renders the EOL badge when metadata has an end_of_life_date in the past', () => {
-      const endpoint = {
-        ...createEndpoint(),
-        metadata: {
-          heuristics: { status: 'deprecated', end_of_life_date: '2020-01-01' },
-        },
-      } as unknown as EisInferenceEndpoint;
-      renderFlyout(MODEL_ID, [endpoint]);
-
-      const badges = screen.getByTestId('flyoutTaskBadges');
-      expect(within(badges).getByTestId(`modelEolBadge-${MODEL_ID}`)).toBeInTheDocument();
-    });
-
-    it('renders the deprecated badge when metadata has status', () => {
-      const endpoint = {
-        ...createEndpoint(),
-        metadata: {
-          heuristics: { status: 'deprecated' },
-        },
-      } as unknown as EisInferenceEndpoint;
-      renderFlyout(MODEL_ID, [endpoint]);
-
-      const badges = screen.getByTestId('flyoutTaskBadges');
-      expect(within(badges).getByTestId(`modelDeprecatedBadge-${MODEL_ID}`)).toBeInTheDocument();
-    });
-
-    it('renders the preview badge when metadata status is preview', () => {
-      const endpoint = {
-        ...createEndpoint(),
-        metadata: { heuristics: { status: 'preview' } },
-      } as unknown as EisInferenceEndpoint;
-      renderFlyout(MODEL_ID, [endpoint]);
-
-      const badges = screen.getByTestId('flyoutTaskBadges');
-      expect(within(badges).getByTestId(`modelPreviewBadge-${MODEL_ID}`)).toBeInTheDocument();
-    });
-
-    it('renders no status badge when endpoint has no metadata', () => {
-      renderFlyout();
-
-      expect(screen.queryByTestId(`modelPreviewBadge-${MODEL_ID}`)).not.toBeInTheDocument();
-      expect(screen.queryByTestId(`modelDeprecatedBadge-${MODEL_ID}`)).not.toBeInTheDocument();
-      expect(screen.queryByTestId(`modelEolBadge-${MODEL_ID}`)).not.toBeInTheDocument();
-    });
+    expect(screen.getByTestId('modelDetailFlyoutViewEisDocumentationLink')).toHaveTextContent(
+      'View EIS documentation'
+    );
   });
 
   describe('region options', () => {
@@ -367,8 +358,8 @@ describe('ModelDetailFlyout', () => {
       } as unknown as EisInferenceEndpoint;
       renderFlyout(MODEL_ID, [endpoint]);
 
-      expect(valueForLabel(releaseLabel)).not.toHaveTextContent('--');
-      expect(valueForLabel(eolLabel)).not.toHaveTextContent('--');
+      expect(valueForLabel(releaseLabel)).toHaveTextContent('2025-01-10');
+      expect(valueForLabel(eolLabel)).toHaveTextContent('2026-04-15');
     });
 
     it('renders -- for both dates when metadata is absent', () => {
@@ -396,7 +387,7 @@ describe('ModelDetailFlyout', () => {
       } as unknown as EisInferenceEndpoint;
       renderFlyout(MODEL_ID, [endpoint]);
 
-      expect(valueForLabel(releaseLabel)).not.toHaveTextContent('--');
+      expect(valueForLabel(releaseLabel)).toHaveTextContent('2025-01-10');
       expect(valueForLabel(eolLabel)).toHaveTextContent('--');
     });
 
@@ -408,7 +399,7 @@ describe('ModelDetailFlyout', () => {
       renderFlyout(MODEL_ID, [endpoint]);
 
       expect(valueForLabel(releaseLabel)).toHaveTextContent('--');
-      expect(valueForLabel(eolLabel)).not.toHaveTextContent('--');
+      expect(valueForLabel(eolLabel)).toHaveTextContent('2026-04-15');
     });
   });
 

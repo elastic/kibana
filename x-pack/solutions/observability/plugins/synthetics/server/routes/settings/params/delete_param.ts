@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import path from 'path';
 import { z } from '@kbn/zod';
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-server';
@@ -43,11 +44,18 @@ export const deleteSyntheticsParamRoute: SyntheticsRestApiRouteFactory<
 > = () => ({
   method: 'DELETE',
   path: SYNTHETICS_API_URLS.PARAMS + '/{id}',
+  options: {
+    summary: 'Delete a parameter',
+    description:
+      'Delete a parameter from the Synthetics app.\n\nYou must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.',
+    operationId: 'delete-parameter',
+    oasOperationObject: () => path.join(__dirname, 'examples/delete_parameter.yaml'),
+  },
   validate: {},
   validation: {
     request: {
       params: z.strictObject({
-        id: routeId,
+        id: routeId.describe('The ID for the parameter to delete.'),
       }),
     },
   },
@@ -63,6 +71,7 @@ export const deleteSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
 > = () => ({
   method: 'DELETE',
   path: SYNTHETICS_API_URLS.PARAMS,
+  options: { excludeFromOAS: true },
   validate: {},
   validation: {
     request: {

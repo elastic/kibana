@@ -85,7 +85,7 @@ export async function runFeatureIdentificationAgent({
     title: `Feature identification: ${streamName}`,
   });
   const userMessage = buildFeatureIdentificationUserMessage({
-    streamName,
+    sourceId: streamName,
     sampleDocuments: JSON.stringify(sampleDocuments),
     previouslyIdentifiedFeatures: previouslyIdentifiedFeatures?.length
       ? JSON.stringify(previouslyIdentifiedFeatures)
@@ -100,7 +100,7 @@ export async function runFeatureIdentificationAgent({
   });
   const rawParams = getSuccessfulFinalizeFeaturesParams(result.steps);
 
-  const { features, ignoredFeatures } = parseFinalizedFeatures(rawParams, streamName);
+  const { features, ignoredFeatures } = parseFinalizedFeatures(rawParams);
 
   return {
     features,

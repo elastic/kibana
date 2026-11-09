@@ -12,6 +12,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./export_rules'));
     loadTestFile(require.resolve('./import_rules'));
     loadTestFile(require.resolve('./import_rules_with_overwrite'));
+    loadTestFile(require.resolve('./import_rules_telemetry'));
     loadTestFile(require.resolve('./import_rules_transport_errors'));
   });
 }

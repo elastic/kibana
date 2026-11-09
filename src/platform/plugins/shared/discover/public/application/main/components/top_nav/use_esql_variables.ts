@@ -66,7 +66,14 @@ export const useESQLVariables = ({
 
     // Handling the reset unsaved changes badge
     if (!isEqual(previousControlGroupStateRef.current, currentControlGroupState)) {
+      const previousControlIds = Object.keys(previousControlGroupStateRef.current ?? {});
       previousControlGroupStateRef.current = currentControlGroupState;
+      // updateInput only updates existing controls; removed controls must be deleted explicitly.
+      for (const id of previousControlIds) {
+        if (!currentControlGroupState?.[id]) {
+          controlGroupApi.removePanel(id);
+        }
+      }
       controlGroupApi.updateInput({ initialChildControlState: currentControlGroupState });
     }
   }, [currentControlGroupState, controlGroupApi, isEsqlMode]);

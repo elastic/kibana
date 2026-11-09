@@ -48,7 +48,10 @@ jest.mock('@kbn/workflows', () => {
 });
 
 jest.mock('./lib/get_user', () => ({
-  getAuthenticatedUser: jest.fn().mockResolvedValue('test-user'),
+  getAuthenticatedUser: jest.fn().mockResolvedValue({
+    executedBy: 'test-user',
+    user: { name: 'Test User', username: 'test-user' },
+  }),
 }));
 
 const mockRunWorkflow = jest.fn();
@@ -131,6 +134,7 @@ describe('workflow:scheduled task runner', () => {
     initializerContext = coreMock.createPluginInitializerContext({
       logging: { console: false },
       eventDriven: { enabled: true, logEvents: true, maxChainDepth: 10 },
+      storage: { source: 'plain_index', dataRetention: '90d' },
     });
     plugin = new WorkflowsExecutionEnginePlugin(initializerContext);
     const coreSetup = coreMock.createSetup();
@@ -401,6 +405,48 @@ describe('workflow:scheduled task runner', () => {
       space_id: spaceId,
       outcome: 'completed',
     });
+  });
+
+  it('stamps the scheduled run event with the task runAt so a retry of the same slot keeps it', async () => {
+    setupPlugin();
+    mockGetWorkflow.mockResolvedValue({
+      id: workflowId,
+      enabled: true,
+      yaml: 'name: test',
+      definition: {
+        name: 'test',
+        enabled: true,
+        triggers: [{ type: 'scheduled' }],
+        steps: [],
+      },
+    });
+    mockCreateWorkflowExecution.mockImplementation(async (execution: { id: string }) => {
+      mockGetWorkflowExecutionById.mockResolvedValue({
+        id: execution.id,
+        workflowId,
+        spaceId,
+        status: ExecutionStatus.COMPLETED,
+      });
+    });
+
+    const runner = taskDefinitions[WORKFLOW_SCHEDULED_TASK_TYPE]!.createTaskRunner(
+      taskManagerMock.createRunContext({
+        taskInstance: createTaskInstance(),
+        fakeRequest: {} as KibanaRequest,
+        setCustomTaskRunEventFields: jest.fn(),
+      })
+    );
+
+    await runner.run();
+
+    expect(mockCreateWorkflowExecution).toHaveBeenCalledWith(
+      expect.objectContaining({
+        context: expect.objectContaining({
+          event: expect.objectContaining({ scheduledFor: '2024-01-01T10:00:00.000Z' }),
+        }),
+      }),
+      expect.anything()
+    );
   });
 
   it('stamps failed with workflow_execution_id when run fails after create', async () => {
