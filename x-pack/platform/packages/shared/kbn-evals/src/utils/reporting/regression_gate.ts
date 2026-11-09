@@ -60,6 +60,8 @@ export interface RegressionGateDecision {
   untestable: UntestableFinding[];
   /** Significant rows whose rank-based test and mean difference point in opposite directions. */
   directionConflicts: DirectionConflictFinding[];
+  /** In-scope rows of neutral evaluators, which have no worse direction to check. */
+  neutralSkipped: number;
 }
 
 const toFinite = (value: number | null | undefined): number | null =>
@@ -89,10 +91,14 @@ export const evaluateRegressionGate = ({
   const untestable: UntestableFinding[] = [];
   const directionConflicts: DirectionConflictFinding[] = [];
   let checked = 0;
+  let neutralSkipped = 0;
 
   for (const result of results) {
     if (scope && !scope.has(result.evaluatorName)) continue;
-    if (result.direction === 'neutral') continue;
+    if (result.direction === 'neutral') {
+      neutralSkipped += 1;
+      continue;
+    }
 
     if (result.sampleSize < minPairs) {
       insufficientPairs.push({
@@ -158,6 +164,7 @@ export const evaluateRegressionGate = ({
     insufficientPairs,
     untestable,
     directionConflicts,
+    neutralSkipped,
   };
 };
 
@@ -197,6 +204,11 @@ export const formatRegressionGateReport = ({
     lines.push(
       'Regression gate inconclusive: no evaluator could be checked, so regressions can be neither confirmed nor ruled out.'
     );
+    if (decision.neutralSkipped > 0) {
+      lines.push(
+        `Note: ${decision.neutralSkipped} neutral evaluator comparison(s) in scope were skipped; neutral evaluators have no worse direction to check.`
+      );
+    }
   } else {
     lines.push(
       `Regression gate passed: no evaluator got significantly worse (${decision.checked} evaluator comparison(s) checked).`

@@ -137,6 +137,23 @@ describe('formatCompareReport', () => {
     expect(tableOutput).toContain('-0.50');
   });
 
+  it('flags a difference whose rank test and mean disagree as mixed', () => {
+    const { tableOutput } = formatCompareReport({
+      targetExperimentId: 'experiment-1',
+      baselineExperimentId: 'experiment-2',
+      results: [
+        { ...makeResult({ evaluatorName: 'Conflicted', meanTarget: 0.6 }), effectSign: 1 },
+        { ...makeResult({ evaluatorName: 'Neutral', direction: 'neutral' }), effectSign: -1 },
+        makeResult({ evaluatorName: 'Agreeing' }),
+      ],
+    });
+
+    const rowFor = (name: string) => tableOutput.split('\n').find((line) => line.includes(name));
+    expect(rowFor('Conflicted')).toContain('-0.10 (mixed)');
+    expect(rowFor('Neutral')).not.toContain('(mixed)');
+    expect(rowFor('Agreeing')).not.toContain('(mixed)');
+  });
+
   it('handles empty results gracefully', () => {
     const { header, summary, tableOutput, significantCount } = formatCompareReport({
       targetExperimentId: 'experiment-1',

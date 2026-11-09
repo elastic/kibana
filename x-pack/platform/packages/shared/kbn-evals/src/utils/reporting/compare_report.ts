@@ -7,8 +7,8 @@
 
 import chalk from 'chalk';
 import { table } from 'table';
-import { isImproved } from '@kbn/evals-common';
-import type { Direction } from '@kbn/evals-common';
+import { getEffectDirection } from './effect_direction';
+import type { EffectDirection, WithEffectSign } from './effect_direction';
 import { countHolmFamily, getEffectivePValue } from './holm_correction';
 import type { CorrectableComparisonResult } from './holm_correction';
 import { formatDiscordantPairs, getTestLabel } from './test_label';
@@ -26,18 +26,21 @@ function formatNumber(value: number): string {
   return Number.isFinite(value) ? value.toFixed(2) : '-';
 }
 
-function formatDifference(value: number, direction: Direction): string {
+const DIFFERENCE_STYLES: Record<EffectDirection, (formatted: string) => string> = {
+  improved: (formatted) => chalk.green(formatted),
+  worse: (formatted) => chalk.red(formatted),
+  unchanged: (formatted) => formatted,
+  // The rank test and the mean disagree, so neither color would be honest.
+  mixed: (formatted) => chalk.yellow(`${formatted} (mixed)`),
+};
+
+function formatDifference(value: number, effect: EffectDirection): string {
   if (!Number.isFinite(value)) {
     return chalk.gray('-');
   }
 
   const formatted = value > 0 ? `+${value.toFixed(2)}` : value.toFixed(2);
-
-  if (value === 0 || direction === 'neutral') {
-    return formatted;
-  }
-
-  return isImproved(value, direction) ? chalk.green(formatted) : chalk.red(formatted);
+  return DIFFERENCE_STYLES[effect](formatted);
 }
 
 function buildTableConfig(columnCount: number): {
@@ -63,7 +66,7 @@ export function formatCompareReport({
 }: {
   targetExperimentId: string;
   baselineExperimentId: string;
-  results: CorrectableComparisonResult[];
+  results: Array<WithEffectSign<CorrectableComparisonResult>>;
   significanceThreshold?: number;
 }): {
   header: string[];
@@ -112,7 +115,8 @@ export function formatCompareReport({
       result.sampleSize.toString(),
       formatNumber(result.meanTarget),
       formatNumber(result.meanBaseline),
-      formatDifference(delta, result.direction) + formatDiscordantPairs(result.hypothesisTest),
+      formatDifference(delta, getEffectDirection(result)) +
+        formatDiscordantPairs(result.hypothesisTest),
       getTestLabel(result.hypothesisTest.id),
       formatPValue(result.pValue),
       ...(multiplicityCorrected ? [formatPValue(result.adjustedPValue ?? null)] : []),

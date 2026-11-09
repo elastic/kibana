@@ -99,6 +99,18 @@ describe('Wilcoxon rows where the ranks and the mean disagree', () => {
   });
 });
 
+describe('getEffectDirection', () => {
+  it('calls a neutral evaluator unchanged, even when its ranks and mean disagree', () => {
+    const [row] = compare(
+      mostlyBetterFewCollapse.map((pair) => ({ ...pair, direction: 'neutral' as const }))
+    );
+
+    expect(row.effectSign).toBe(1);
+    expect(row.meanTarget - row.meanBaseline).toBeLessThan(0);
+    expect(getEffectDirection(row)).toBe('unchanged');
+  });
+});
+
 describe('attachEffectSigns', () => {
   it('leaves McNemar rows alone: their direction is the mean difference', () => {
     const pairs = makePairs([...repeat<[number, number]>(12, [0, 1]), [1, 1], [0, 0]], 'Passed');

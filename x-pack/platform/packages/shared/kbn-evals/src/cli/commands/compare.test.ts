@@ -275,6 +275,117 @@ describe('compareCmd exit codes', () => {
     });
   });
 
+  describe('direction and neutral rows', () => {
+    const asEvaluator = (
+      docs: EvaluationScoreDocument[],
+      name: string,
+      direction: EvaluationScoreDocument['evaluator']['direction'] = 'maximize'
+    ) => docs.map((doc) => ({ ...doc, evaluator: { ...doc.evaluator, name, direction } }));
+
+    it(`exits ${GATE_INCONCLUSIVE_EXIT_CODE} when every significant row is a direction conflict`, async () => {
+      // 20 pairs up by 0.03, 3 pairs collapse from 1 to 0: the mean drops, the ranks say better.
+      const pair = (experimentId: string, index: number, score: number) =>
+        scoreDoc(experimentId, index, score);
+      const target = [
+        ...Array.from({ length: 20 }, (_, i) => pair(TARGET, i, 0.53)),
+        ...Array.from({ length: 3 }, (_, i) => pair(TARGET, 20 + i, 0)),
+      ];
+      const baseline = [
+        ...Array.from({ length: 20 }, (_, i) => pair(BASELINE, i, 0.5)),
+        ...Array.from({ length: 3 }, (_, i) => pair(BASELINE, 20 + i, 1)),
+      ];
+      stubScores(target, baseline);
+
+      const outcome = await runCompare(GATE);
+
+      expect(outcome.exitCode).toBe(GATE_INCONCLUSIVE_EXIT_CODE);
+      expect('error' in outcome && outcome.error.message).toContain('the rank test and the mean');
+    });
+
+    it(`exits ${GATE_INCONCLUSIVE_EXIT_CODE} with a note when only neutral evaluators are in scope`, async () => {
+      stubScores(
+        asEvaluator(regressedScores, 'length', 'neutral'),
+        asEvaluator(baselineScores, 'length', 'neutral')
+      );
+
+      const outcome = await runCompare(GATE);
+
+      expect(outcome.exitCode).toBe(GATE_INCONCLUSIVE_EXIT_CODE);
+      expect('error' in outcome && outcome.error.message).toContain(
+        '1 neutral evaluator comparison(s) in scope were skipped'
+      );
+    });
+  });
+
+  describe('markdown report under the gate', () => {
+    const captureMarkdown = async (argv: string[]) => {
+      const write = jest.spyOn(process.stdout, 'write').mockImplementation(() => true);
+      try {
+        const outcome = await runCompare([...argv, '--format', 'markdown']);
+        return { outcome, markdown: write.mock.calls.map(([chunk]) => String(chunk)).join('') };
+      } finally {
+        write.mockRestore();
+      }
+    };
+
+    it('marks a regression the gate cannot trip on as not gated', async () => {
+      stubScores(regressedScores, baselineScores);
+
+      const gated = await captureMarkdown([...GATE, '--min-pairs', String(PAIR_COUNT + 1)]);
+      expect(gated.outcome.exitCode).toBe(GATE_INCONCLUSIVE_EXIT_CODE);
+      expect(gated.markdown).toContain('| Regression (not gated) |');
+
+      const ungated = await captureMarkdown([TARGET, BASELINE]);
+      expect(ungated.markdown).toContain('| Regression |');
+      expect(ungated.markdown).not.toContain('(not gated)');
+    });
+  });
+
+  describe('failed reads', () => {
+    it('asks the client to throw instead of returning an empty result', async () => {
+      await runCompare(GATE);
+
+      expect(mockEvalsClient.getExperimentScores).toHaveBeenCalledTimes(2);
+      for (const call of mockEvalsClient.getExperimentScores.mock.calls) {
+        expect(call[2]).toEqual({ throwOnError: true });
+      }
+    });
+
+    it('exits 1, not inconclusive, when the scores cannot be fetched', async () => {
+      mockEvalsClient.getExperimentScores.mockRejectedValue(
+        new Error('Failed to retrieve scores for experiment ID target-exp: 503')
+      );
+
+      const outcome = await runCompare(GATE);
+
+      expect(outcome.exitCode).toBeUndefined();
+      expect('error' in outcome && isFailError(outcome.error)).toBe(false);
+      expect('error' in outcome && outcome.error.message).toContain('503');
+    });
+
+    it('exits 1, not inconclusive, when the --baseline-branch lookup fails', async () => {
+      mockEvalsClient.findLatestBaselineExperiment.mockRejectedValueOnce(
+        new Error('Failed to find baseline experiment for suite suite on branch main: 502')
+      );
+
+      const outcome = await runCompare([
+        'bk-1::suite::model',
+        '--baseline-branch',
+        'main',
+        '--suite',
+        'suite',
+        '--fail-on-regression',
+      ]);
+
+      expect('error' in outcome && isFailError(outcome.error)).toBe(false);
+      expect('error' in outcome && outcome.error.message).toContain('502');
+      expect(mockEvalsClient.findLatestBaselineExperiment).toHaveBeenCalledWith(
+        expect.objectContaining({ throwOnError: true })
+      );
+      expect(mockEvalsClient.getExperimentScores).not.toHaveBeenCalled();
+    });
+  });
+
   it('reports an unreachable evals plugin as a usage error (exit 1)', async () => {
     mockEvalsClient.assertPluginEnabled.mockRejectedValue(new Error('evals plugin is disabled'));
 

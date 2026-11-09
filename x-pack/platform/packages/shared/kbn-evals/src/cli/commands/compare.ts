@@ -207,6 +207,7 @@ export const compareCmd = {
         const resolved = await evalsClient.findLatestExperimentForBuild({
           suiteId,
           baseExecutionId: targetExperimentId,
+          throwOnError: true,
         });
         if (resolved) {
           log.info(`Resolved PR experiment: ${targetExperimentId} → ${resolved.executionId}`);
@@ -233,6 +234,7 @@ export const compareCmd = {
         branch: baselineBranch,
         taskModelId,
         excludeExecutionId: targetExperimentId,
+        throwOnError: true,
       });
 
       if (!baselineMetadata) {
@@ -267,6 +269,7 @@ export const compareCmd = {
           const resolved = await evalsClient.findLatestExperimentForBuild({
             suiteId,
             baseExecutionId: id,
+            throwOnError: true,
           });
           if (resolved) {
             log.info(`Resolved experiment ${id} → ${resolved.executionId}`);
@@ -288,6 +291,7 @@ export const compareCmd = {
           baselineMetadata = await evalsClient.findLatestExperimentForBuild({
             suiteId,
             baseExecutionId: baselineBaseId,
+            throwOnError: true,
           });
         }
       }
@@ -296,9 +300,11 @@ export const compareCmd = {
     const targetFilter = suiteId ? { suiteId, executionId: targetExperimentId } : undefined;
     const baselineFilter = suiteId ? { suiteId, executionId: baselineExperimentId } : undefined;
 
+    // A failed request has to stay an error (exit 1): read as "no baseline" or "no scores" it
+    // would turn an outage into an inconclusive gate.
     const [targetExperimentScores, baselineExperimentScores] = await Promise.all([
-      evalsClient.getExperimentScores(targetExperimentId, targetFilter),
-      evalsClient.getExperimentScores(baselineExperimentId, baselineFilter),
+      evalsClient.getExperimentScores(targetExperimentId, targetFilter, { throwOnError: true }),
+      evalsClient.getExperimentScores(baselineExperimentId, baselineFilter, { throwOnError: true }),
     ]);
 
     if (targetExperimentScores.length === 0) {
@@ -380,7 +386,8 @@ export const compareCmd = {
     }
 
     // Holm runs over every comparison in this run (all datasets x evaluators), so the family is
-    // the full set of hypotheses the report shows.
+    // the full set of hypotheses the report shows. Gate scoping does not shrink it: the gate is
+    // judged on the same adjusted p-values the report prints.
     const results = attachEffectSigns(
       multiplicityCorrection ? applyHolmCorrection(comparisonResults) : comparisonResults,
       pairs
@@ -411,6 +418,9 @@ export const compareCmd = {
         skippedMissingPairs,
         skippedNullScores,
         baselineBranch: baselineBranch ?? undefined,
+        regressionGate: failOnRegression
+          ? { minPairs, evaluators: regressionEvaluators }
+          : undefined,
       });
 
       if (outputPath) {

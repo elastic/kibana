@@ -40,13 +40,30 @@ const OUTCOME_LABELS: Record<EffectDirection, string> = {
   mixed: 'Mixed',
 };
 
+export interface MarkdownRegressionGateOptions {
+  minPairs: number;
+  evaluators?: readonly string[];
+}
+
+const NOT_GATED_SUFFIX = ' (not gated)';
+
+const isGated = (
+  result: CorrectableComparisonResult,
+  gate: MarkdownRegressionGateOptions
+): boolean =>
+  result.sampleSize >= gate.minPairs &&
+  (!gate.evaluators || gate.evaluators.includes(result.evaluatorName));
+
 function formatOutcome(
   result: WithEffectSign<CorrectableComparisonResult>,
-  threshold: number
+  threshold: number,
+  gate: MarkdownRegressionGateOptions | undefined
 ): string {
   const pValue = getEffectivePValue(result);
   if (pValue === null || !Number.isFinite(pValue) || pValue >= threshold) return '-';
-  return OUTCOME_LABELS[getEffectDirection(result)];
+  const direction = getEffectDirection(result);
+  const label = OUTCOME_LABELS[direction];
+  return direction === 'worse' && gate && !isGated(result, gate) ? label + NOT_GATED_SUFFIX : label;
 }
 
 function formatDifference(value: number): string {
@@ -86,6 +103,7 @@ export function formatMarkdownCompareReport({
   skippedMissingPairs = 0,
   skippedNullScores = 0,
   baselineBranch = 'main',
+  regressionGate,
 }: {
   targetExperimentId: string;
   baselineExperimentId: string;
@@ -98,6 +116,8 @@ export function formatMarkdownCompareReport({
   skippedMissingPairs?: number;
   skippedNullScores?: number;
   baselineBranch?: string;
+  /** When the regression gate runs, regressions it cannot trip on are marked "(not gated)". */
+  regressionGate?: MarkdownRegressionGateOptions;
 }): string {
   const sortedResults = [...results].sort(
     (a, b) =>
@@ -213,7 +233,7 @@ export function formatMarkdownCompareReport({
         formatPValue(r.pValue),
         ...(multiplicityCorrected ? [formatPValue(r.adjustedPValue ?? null)] : []),
         formatSig(getEffectivePValue(r), significanceThreshold),
-        formatOutcome(r, significanceThreshold),
+        formatOutcome(r, significanceThreshold, regressionGate),
       ];
       tableLines.push(`| ${cols.join(' | ')} |`);
     });
@@ -225,6 +245,15 @@ export function formatMarkdownCompareReport({
     lines.push('');
     lines.push(renderTable(significantResults));
     lines.push('');
+    const hasUngatedRegression = significantResults.some((result) =>
+      formatOutcome(result, significanceThreshold, regressionGate).endsWith(NOT_GATED_SUFFIX)
+    );
+    if (regressionGate && hasUngatedRegression) {
+      lines.push(
+        `_Regression (not gated)_: fewer than ${regressionGate.minPairs} pairs or outside \`--regression-evaluators\`, so it cannot fail the regression gate.`
+      );
+      lines.push('');
+    }
   }
 
   if (nonSignificantResults.length > 0) {

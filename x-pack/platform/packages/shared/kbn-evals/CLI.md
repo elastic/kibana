@@ -229,7 +229,7 @@ node scripts/evals compare <run-id> --baseline-branch main --suite <suite-id> --
 | `--min-pairs <n>`              | Evaluators with fewer pairs are reported as "insufficient pairs" and cannot trip the gate (default: 10)      |
 | `--no-multiplicity-correction` | Judge significance on raw p-values; by default p-values are Holm-Bonferroni adjusted across all comparisons |
 
-Exit codes with `--fail-on-regression`: 0 = passed, 1 = usage or unexpected error (bad flags, Kibana unreachable), 2 = inconclusive or not evaluated (no baseline, no scores or pairs, nothing checkable, no evaluator matched), 3 = significant regression. See the [README](./README.md#14-comparing-experiments-and-gating-on-regressions) for details.
+Exit codes with `--fail-on-regression`: 0 = passed, 1 = usage or unexpected error (bad flags, Kibana unreachable, a failed request), 2 = inconclusive or not evaluated (no baseline, no scores or pairs, nothing checkable, no evaluator matched), 3 = significant regression. See the [README](./README.md#14-comparing-experiments-and-gating-on-regressions) for details.
 
 ### `env` -- List environment variables
 

@@ -73,9 +73,10 @@ export const attachEffectSigns = <T extends ComparisonResult>(
 };
 
 export const getEffectDirection = (result: WithEffectSign<ComparisonResult>): EffectDirection => {
+  if (result.direction === 'neutral') return 'unchanged';
   const meanSign = Math.sign(result.meanTarget - result.meanBaseline);
   const testSign = result.effectSign ?? meanSign;
   if (testSign !== meanSign) return 'mixed';
-  if (testSign === 0 || result.direction === 'neutral') return 'unchanged';
+  if (testSign === 0) return 'unchanged';
   return isImproved(testSign, result.direction) ? 'improved' : 'worse';
 };

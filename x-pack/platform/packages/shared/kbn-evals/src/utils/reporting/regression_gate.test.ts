@@ -228,8 +228,27 @@ describe('evaluateRegressionGate inconclusive outcomes', () => {
 
     expect(decision.status).toBe('inconclusive');
     expect(decision.checked).toBe(0);
+    expect(decision.neutralSkipped).toBe(1);
     expect(decision.tripped).toBe(false);
-    expect(formatRegressionGateReport({ decision })).not.toContain('passed');
+    const report = formatRegressionGateReport({ decision });
+    expect(report).not.toContain('passed');
+    expect(report).toContain(
+      'Note: 1 neutral evaluator comparison(s) in scope were skipped; neutral evaluators have no worse direction to check.'
+    );
+  });
+
+  it('counts only in-scope neutral rows and omits the note when nothing was skipped', () => {
+    const outOfScope = evaluateRegressionGate({
+      results: [
+        makeResult({ evaluatorName: 'Neutral', direction: 'neutral' }),
+        makeResult({ evaluatorName: 'Correctness', sampleSize: 2 }),
+      ],
+      evaluators: ['Correctness'],
+    });
+
+    expect(outOfScope.status).toBe('inconclusive');
+    expect(outOfScope.neutralSkipped).toBe(0);
+    expect(formatRegressionGateReport({ decision: outOfScope })).not.toContain('Note:');
   });
 
   it('counts checked rows and reports passed only when something was actually tested', () => {
