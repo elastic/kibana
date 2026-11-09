@@ -7,11 +7,16 @@
 
 import type { RenderIacTemplateIntegration } from '@kbn/fleet-plugin/public';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
-import { makeDsView } from '../../aws_service_matrix';
+import { getDefaultEnabledDataStreams, makeDsView } from '../../aws_service_matrix';
 import type { AuthenticateAndDeployStepState } from '../../onboarding_flow_context';
 import type { CredentialVarName, ExistingSecretRefs, SecretRefValue } from './secret_refs';
 import {
+  REGION_FIELD_NAMES,
+  getStreamVarGroups,
+  isFieldVisible,
+  isInSelectedVarGroupOption,
   resolveFieldMeta,
+  resolveVarGroupSelections,
   shouldDefaultCollectS3Logs,
   toTyped,
 } from '../service_settings_step/field_config';
@@ -24,7 +29,15 @@ import type {
 
 export interface PackageInputEntry {
   enabled: boolean;
-  streams: Record<string, { enabled: boolean; vars: Record<string, string | boolean | string[]> }>;
+  streams: Record<
+    string,
+    {
+      enabled: boolean;
+      vars: Record<string, string | boolean | string[]>;
+      /** Selected option per stream-level var_group; only set when the stream declares groups. */
+      var_group_selections?: Record<string, string>;
+    }
+  >;
 }
 
 export function getRegionFieldName(
@@ -50,8 +63,17 @@ export function buildStreamVars(
   activeInput: string
 ): Record<string, string | boolean | string[]> {
   const result: Record<string, string | boolean | string[]> = {};
+  // Vars of a var_group option that is not selected are left out: a value typed under one
+  // option (e.g. a log group name) must not ride along once the user switched to another (the
+  // ARN), or the agent would receive both and reject the config.
+  const selections = resolveVarGroupSelections(
+    service,
+    activeInput,
+    dsVars.varGroupSelectionsByInput?.[activeInput]
+  );
 
   for (const [key, value] of Object.entries(dsVars.varsByInput[activeInput] ?? {})) {
+    if (!isFieldVisible(service, activeInput, key, selections)) continue;
     const meta = resolveFieldMeta(service, activeInput, key);
     if (!meta) {
       result[key] = value;
@@ -69,6 +91,7 @@ export function buildStreamVars(
   const allShowUserFields = [...(service.requiredConfig ?? []), ...(service.optionalConfig ?? [])];
   for (const key of allShowUserFields) {
     if (key in result) continue;
+    if (!isFieldVisible(service, activeInput, key, selections)) continue;
     const meta = resolveFieldMeta(service, activeInput, key);
     if (!meta) continue;
     const typed = toTyped(undefined, meta);
@@ -90,6 +113,19 @@ export function buildStreamVars(
     const regionMeta = resolveFieldMeta(service, activeInput, regionField);
     if (regionMeta) {
       result[regionField] = globalRegion;
+    }
+  }
+
+  // A var_group option that names a region var (a log group name or prefix needs `region_name`)
+  // gets the global region as well: the var is optional in the manifest, so the backfill above
+  // skips it, yet the selected option makes it mandatory and the wizard never asks for regions.
+  if (globalRegion) {
+    for (const name of REGION_FIELD_NAMES) {
+      if (result[name]) continue;
+      if (!isInSelectedVarGroupOption(service, activeInput, name, selections)) continue;
+      if (resolveFieldMeta(service, activeInput, name)) {
+        result[name] = globalRegion;
+      }
     }
   }
 
@@ -128,7 +164,8 @@ function resolveServiceVars(
   instanceId: string = service.id
 ): ServiceVars {
   const rawVars = storedServiceVars[instanceId] ?? storedServiceVars[service.id];
-  if (!rawVars) return { enabledDataStreams: service.dataStreams, varsByDataStream: {} };
+  if (!rawVars)
+    return { enabledDataStreams: getDefaultEnabledDataStreams(service), varsByDataStream: {} };
   // Guard against stale session state: filter out dsIds the current service no longer has.
   // If filtering removes every ID from a non-empty original the user hadn't explicitly cleared,
   // fall back to service defaults — an empty list is the "intentional opt-out" sentinel.
@@ -172,11 +209,25 @@ export function buildPackageInputs(
       for (const inputType of activeInputs) {
         const inputKey = `${ptName}-${inputType}`;
         const streamVars = buildStreamVars(dsView, dsVars, globalRegion, inputType);
+        // Fleet validates a stream's var_groups only when the policy carries the selection;
+        // without it the group-controlled vars are skipped server-side.
+        const varGroupSelections =
+          getStreamVarGroups(dsView, inputType).length > 0
+            ? resolveVarGroupSelections(
+                dsView,
+                inputType,
+                dsVars.varGroupSelectionsByInput?.[inputType]
+              )
+            : undefined;
 
         if (!inputs[inputKey]) {
           inputs[inputKey] = { enabled: true, streams: {} };
         }
-        inputs[inputKey].streams[streamKey] = { enabled: true, vars: streamVars };
+        inputs[inputKey].streams[streamKey] = {
+          enabled: true,
+          vars: streamVars,
+          ...(varGroupSelections ? { var_group_selections: varGroupSelections } : {}),
+        };
       }
     }
   }
