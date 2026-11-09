@@ -173,7 +173,11 @@ describe('alertsTool', () => {
 
     it('enhances the query with a KEEP clause for essential alert fields', async () => {
       (runSearchTool as jest.Mock).mockResolvedValue({ results: [] });
-      const fieldsList = ESSENTIAL_ALERT_FIELDS.map((field) => `\`${field}\``).join(', ');
+      const fieldsList = ESSENTIAL_ALERT_FIELDS.filter(
+        (field) => field !== '_id' && field !== '_index'
+      )
+        .map((field) => `\`${field}\``)
+        .join(', ');
 
       await tool.handler(
         { query: 'find all alerts' },

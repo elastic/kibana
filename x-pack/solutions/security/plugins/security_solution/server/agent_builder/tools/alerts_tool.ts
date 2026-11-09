@@ -42,13 +42,20 @@ const alertsSchema = lazySchema(() =>
 
 export const SECURITY_ALERTS_TOOL_ID = securityTool('alerts');
 
+// `_id` duplicates `kibana.alert.uuid`, and `_index` is a metadata field that fails ES|QL validation in KEEP.
+const KEEP_EXCLUDED_METADATA_FIELDS = new Set(['_id', '_index']);
+
 /**
  * Enhances the natural language query with instructions to use KEEP clause for alert searches.
  * This ensures the LLM generates ES|QL queries that filter to only essential fields.
  * Additionally, for count queries, ensures optimal count query generation.
  */
 const enhanceQueryForAlerts = (nlQuery: string, isCount?: boolean): string => {
-  const fieldsList = ESSENTIAL_ALERT_FIELDS.map((field) => `\`${field}\``).join(', ');
+  const fieldsList = ESSENTIAL_ALERT_FIELDS.filter(
+    (field) => !KEEP_EXCLUDED_METADATA_FIELDS.has(field)
+  )
+    .map((field) => `\`${field}\``)
+    .join(', ');
   let instruction = ` IMPORTANT: When generating ES|QL queries, you MUST include a KEEP clause to limit results to only these essential fields: ${fieldsList}. This reduces context window usage by filtering out unnecessary nested data like DLL lists, call stacks, and memory regions. Add the KEEP clause before any LIMIT clause, or at the end if there's no LIMIT.`;
 
   // For count queries, add specific instructions to ensure optimal count query generation
