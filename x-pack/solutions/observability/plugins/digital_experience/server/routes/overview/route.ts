@@ -11,7 +11,7 @@ import type { ApplicationOverviewResponse } from '../../../common/types/overview
 import { APM_API_PRIVILEGE, DIGITAL_EXPERIENCE_API_PRIVILEGES } from '../../../common/feature';
 import { MAX_SERVICE_NAME_LENGTH } from '../../lib/constants';
 import { createDigitalExperienceServerRoute } from '../create_digital_experience_server_route';
-import { timeRangeQuery } from '../params';
+import { filteredTimeRangeQuery } from '../params';
 import { getOtelOverview } from './otel/get_otel_overview';
 
 export const APPLICATION_OVERVIEW_ENDPOINT =
@@ -29,12 +29,12 @@ export const overviewRouteRepository = createDigitalExperienceServerRoute({
       path: z.object({
         serviceName: z.string().min(1).max(MAX_SERVICE_NAME_LENGTH),
       }),
-      query: timeRangeQuery(),
+      query: filteredTimeRangeQuery(),
     })
   ),
   handler: async ({ params, context, request }): Promise<ApplicationOverviewResponse> => {
     const { serviceName } = params.path;
-    const { environment } = params.query;
+    const { environment, browser, os, device, country, pageUrl } = params.query;
     const start = Date.parse(params.query.start);
     const end = Date.parse(params.query.end);
 
@@ -42,6 +42,14 @@ export const overviewRouteRepository = createDigitalExperienceServerRoute({
     const esClient = elasticsearch.client.asCurrentUser;
     const signal = getRequestAbortedSignal(request.events.aborted$);
 
-    return getOtelOverview({ esClient, serviceName, start, end, environment, signal });
+    return getOtelOverview({
+      esClient,
+      serviceName,
+      start,
+      end,
+      environment,
+      filters: { browser, os, device, country, pageUrl },
+      signal,
+    });
   },
 });

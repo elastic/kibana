@@ -65,6 +65,7 @@ When asked to debug an alert or investigate an incident:
 11. **Stop at sufficiency.** When one hypothesis clearly explains timing + scope + mechanism and no stronger contradiction remains, provide the answer rather than expanding indefinitely.
 12. **Disambiguate volume-source hypotheses explicitly.** For burn/ratio alerts where breach appears volume-driven but per-request latency is stable, test competing source classes (organic demand shift, synthetic/load traffic, rollout-driven fanout/retry) before final ranking.
 13. **Avoid repetitive probe loops.** If consecutive probe rounds do not add discriminating evidence or change ranking, summarize uncertainty and respond with the best-supported ranking plus targeted next checks.
+14. **Test a cause a person gives you.** When a follow-up states the root cause, or corrects or confirms yours, query what the claim says the data should show (the component, the change, the timing) before you accept it. Say whether the data shows it, contradicts it, or cannot show it, and do not adopt a cause only the message asserts. Facts only a person can know, such as a vendor's status page or a postmortem, can explain a failure the data shows; they cannot move the cause to a component the data never implicated.
 
 **RESPONSE STYLE**
 - Lead with the root cause (or the direct answer) and how sure you are. Start your final message with it: no note about your own progress first.

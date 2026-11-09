@@ -1,5 +1,5 @@
 {
-  "sha1": "aab4a9d80fe2df6aec1cc1089d470a4efbfb4520",
+  "sha1": "6e92f894f58099136a11f03e29df16f11e37ddf8",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -736,7 +736,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/run_quotas/gates.spec.ts",
-        "line": 114,
+        "line": 115,
         "column": 36
       }
     },
@@ -752,8 +752,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/run_quotas/gates.spec.ts",
-        "line": 131,
-        "column": 56
+        "line": 132,
+        "column": 69
       }
     },
     {
@@ -768,8 +768,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/run_quotas/gates.spec.ts",
-        "line": 155,
-        "column": 58
+        "line": 156,
+        "column": 76
       }
     },
     {
