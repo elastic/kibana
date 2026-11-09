@@ -107,6 +107,9 @@ describe('Transform: Job List Columns', () => {
     expect(screen.getByText('100%')).toBeInTheDocument();
     expect(screen.queryByTestId('transformListProgress')).not.toBeInTheDocument();
 
+    rerender(<>{executionColumn.render?.({ ...item, stats: undefined })}</>);
+    expect(screen.getByText('One-time')).toBeInTheDocument();
+
     rerender(<>{progressColumn.render?.(item)}</>);
     expect(screen.getByTestId('transformListProgress')).toBeInTheDocument();
 

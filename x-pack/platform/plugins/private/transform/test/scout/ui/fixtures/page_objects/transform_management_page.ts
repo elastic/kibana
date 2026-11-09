@@ -17,7 +17,7 @@ export type TransformRowAction =
   | 'Start'
   | 'Stop';
 
-export type TransformRowColumn = 'Id' | 'Description' | 'Type' | 'Status' | 'Mode';
+export type TransformRowColumn = 'Id' | 'Description' | 'Type' | 'Status' | 'Execution';
 
 export type ExpandedRowTab = 'Details' | 'Stats' | 'Json' | 'Health' | 'Messages' | 'Preview';
 
@@ -34,6 +34,7 @@ const EXPANDED_ROW_TAB_CONTENT: Record<Exclude<ExpandedRowTab, 'Preview'>, strin
 export class TransformManagementPage {
   public readonly listPage: Locator;
   public readonly statsBar: Locator;
+  public readonly emptyPrompt: Locator;
   public readonly createButton: Locator;
   public readonly createPage: Locator;
   public readonly listTable: Locator;
@@ -50,6 +51,7 @@ export class TransformManagementPage {
   constructor(private readonly page: ScoutPage) {
     this.listPage = page.getByTestId('transformPageTransformList');
     this.statsBar = page.getByTestId('transformStatsBar');
+    this.emptyPrompt = page.getByTestId('transformNoTransformsFound');
     this.createButton = page.getByTestId('transformButtonCreate');
     this.createPage = page.getByTestId('transformPageCreateTransform');
     this.listTable = page.getByTestId(/^transformListTable /);

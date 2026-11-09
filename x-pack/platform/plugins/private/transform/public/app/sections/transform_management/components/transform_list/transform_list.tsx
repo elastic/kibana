@@ -10,64 +10,22 @@ import React, { type FC, useCallback, useEffect, useMemo, useRef, useState } fro
 import { i18n } from '@kbn/i18n';
 import type { EuiSearchBarProps, EuiTableComputedColumnType } from '@elastic/eui';
 import {
-  Comparators,
-  EuiButton,
   EuiButtonEmpty,
   EuiCheckbox,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
   EuiInMemoryTable,
   EuiPageTemplate,
-  EuiPopover,
   EuiSearchBar,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
 import type { TransformFunction } from '../../../../../../common/constants';
-import {
-  isReauthorizeActionDisabled,
-  ReauthorizeActionModal,
-  ReauthorizeActionName,
-  useReauthorizeAction,
-} from '../action_reauthorize';
 import type { TransformId } from '../../../../../../common/types/transform';
 
 import { type TransformListRow, TRANSFORM_LIST_COLUMN } from '../../../../common';
-import { useRefreshTransformList, useTransformCapabilities } from '../../../../hooks';
+import { useRefreshTransformList } from '../../../../hooks';
 
 import { CreateTransformButton } from '../create_transform_button';
 import { RefreshTransformListButton } from '../refresh_transform_list_button';
-import {
-  DeleteActionModal,
-  DeleteActionName,
-  isDeleteActionDisabled,
-  useDeleteAction,
-} from '../action_delete';
-import {
-  isResetActionDisabled,
-  ResetActionModal,
-  ResetActionName,
-  useResetAction,
-} from '../action_reset';
-import {
-  isStartActionDisabled,
-  StartActionModal,
-  StartActionName,
-  useStartAction,
-} from '../action_start';
-import {
-  isScheduleNowActionDisabled,
-  ScheduleNowActionName,
-  useScheduleNowAction,
-} from '../action_schedule_now';
-import { isStopActionDisabled, StopActionName, useStopAction } from '../action_stop';
-import {
-  isProjectScopeActionDisabled,
-  ProjectScopeActionFlyout,
-  ProjectScopeActionModal,
-  ProjectScopeActionName,
-  useProjectScopeAction,
-} from '../action_project_scope';
 import { useColumns } from './use_columns';
 import { ExpandedRow } from './expanded_row';
 import {
@@ -77,10 +35,11 @@ import {
 } from './transform_search_bar_filters';
 import { TransformStatsBar } from './transforms_stats_bar';
 import { useTableSettings } from './use_table_settings';
+import { TransformBulkActionsMenu } from './transform_bulk_actions_menu';
+import { getCurrentPageTransforms } from './get_current_page_transforms';
 import { StatsBarContainer } from '../stats_bar';
 import { useAlertRuleFlyout } from '../../../../../alerting/transform_alerting_flyout';
 import type { TransformHealthAlertRule } from '../../../../../../common/types/alerting';
-import { StopActionModal } from '../action_stop/stop_action_modal';
 
 type ItemIdToExpandedRowMap = Record<string, JSX.Element>;
 
@@ -152,13 +111,6 @@ export const TransformList: FC<TransformListProps> = ({
     setTransformSelection(selected);
   }, []);
   const selectionCheckboxId = useGeneratedHtmlId({ prefix: 'transformSelection' });
-  const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
-  const bulkStartAction = useStartAction(false, transformNodes);
-  const bulkDeleteAction = useDeleteAction(false);
-  const bulkReauthorizeAction = useReauthorizeAction(false, transformNodes);
-  const bulkResetAction = useResetAction(false);
-  const bulkStopAction = useStopAction(false);
-  const bulkScheduleNowAction = useScheduleNowAction(false, transformNodes);
   const clearTransformSelection = useCallback((submittedItems: TransformListRow[]) => {
     if (!haveSameTransformIds(transformSelectionRef.current, submittedItems)) {
       return;
@@ -167,11 +119,6 @@ export const TransformList: FC<TransformListProps> = ({
     transformSelectionRef.current = [];
     setTransformSelection([]);
   }, []);
-  const bulkProjectScopeAction = useProjectScopeAction({
-    onUpdateSuccess: clearTransformSelection,
-  });
-
-  const capabilities = useTransformCapabilities();
 
   const { sorting, pagination, onTableChange } = useTableSettings<TransformListRow>(
     TRANSFORM_LIST_COLUMN.ID,
@@ -212,24 +159,17 @@ export const TransformList: FC<TransformListProps> = ({
     }
   }, [filteredTransforms, updateTransformSelection]);
 
-  const currentPageTransforms = useMemo(() => {
-    const sortColumn = columns.find(
-      (column) =>
-        column.name === sorting.sort.field ||
-        ('field' in column && column.field === sorting.sort.field)
-    );
-    const sortable = sortColumn && 'sortable' in sortColumn ? sortColumn.sortable : undefined;
-    const sortField = sortColumn && 'field' in sortColumn ? sortColumn.field : sorting.sort.field;
-    const sortedTransforms = [...filteredTransforms].sort(
-      typeof sortable === 'function'
-        ? Comparators.value(sortable, Comparators.default(sorting.sort.direction))
-        : Comparators.property(sortField, Comparators.default(sorting.sort.direction))
-    );
-    const pageIndex = pagination.pageIndex ?? 0;
-    const pageSize = pagination.pageSize ?? sortedTransforms.length;
-
-    return sortedTransforms.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
-  }, [columns, filteredTransforms, pagination.pageIndex, pagination.pageSize, sorting.sort]);
+  // EUI does not expose its computed page, so mirror it for cross-page selection controls.
+  const currentPageTransforms = useMemo(
+    () =>
+      getCurrentPageTransforms({
+        columns,
+        pagination,
+        sorting,
+        transforms: filteredTransforms,
+      }),
+    [columns, filteredTransforms, pagination, sorting]
+  );
 
   const selectedTransformIds = useMemo(
     () => new Set(transformSelection.map(({ id }) => id)),
@@ -340,123 +280,6 @@ export const TransformList: FC<TransformListProps> = ({
     transformsStatsLoading
   );
 
-  const bulkActionMenuItems = [
-    <EuiContextMenuItem
-      key="startAction"
-      onClick={() => {
-        setIsActionsMenuOpen(false);
-        bulkStartAction.openModal(transformSelection);
-      }}
-      disabled={isStartActionDisabled(
-        transformSelection,
-        capabilities.canStartStopTransform,
-        transformNodes
-      )}
-    >
-      <StartActionName items={transformSelection} transformNodes={transformNodes} />
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="scheduleNowAction"
-      onClick={() => {
-        setIsActionsMenuOpen(false);
-        bulkScheduleNowAction.scheduleNowTransforms(
-          transformSelection.map((item) => ({ id: item.id }))
-        );
-      }}
-      disabled={isScheduleNowActionDisabled(
-        transformSelection,
-        capabilities.canScheduleNowTransform,
-        transformNodes
-      )}
-    >
-      <ScheduleNowActionName items={transformSelection} transformNodes={transformNodes} />
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="stopAction"
-      onClick={() => {
-        setIsActionsMenuOpen(false);
-        bulkStopAction.openModal(transformSelection);
-      }}
-      disabled={isStopActionDisabled(transformSelection, capabilities.canStartStopTransform, false)}
-    >
-      <StopActionName items={transformSelection} />
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="reauthorizeAction"
-      onClick={() => {
-        setIsActionsMenuOpen(false);
-        bulkReauthorizeAction.openModal(transformSelection);
-      }}
-      disabled={isReauthorizeActionDisabled(
-        transformSelection,
-        capabilities.canStartStopTransform,
-        transformNodes
-      )}
-    >
-      <ReauthorizeActionName items={transformSelection} transformNodes={transformNodes} />
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="projectScopeAction"
-      onClick={() => {
-        setIsActionsMenuOpen(false);
-        bulkProjectScopeAction.openFlyout(transformSelection);
-      }}
-      disabled={isProjectScopeActionDisabled({
-        canCreateTransform: bulkProjectScopeAction.canCreateTransform,
-        hasLinkedProjects: bulkProjectScopeAction.hasLinkedProjects,
-        isCpsEnabled: bulkProjectScopeAction.isCpsEnabled,
-        isLoading: bulkProjectScopeAction.isLoading,
-        items: transformSelection,
-      })}
-    >
-      <ProjectScopeActionName
-        canCreateTransform={bulkProjectScopeAction.canCreateTransform}
-        disabled={isProjectScopeActionDisabled({
-          canCreateTransform: bulkProjectScopeAction.canCreateTransform,
-          hasLinkedProjects: bulkProjectScopeAction.hasLinkedProjects,
-          isCpsEnabled: bulkProjectScopeAction.isCpsEnabled,
-          isLoading: bulkProjectScopeAction.isLoading,
-          items: transformSelection,
-        })}
-        hasLinkedProjects={bulkProjectScopeAction.hasLinkedProjects}
-        isCpsEnabled={bulkProjectScopeAction.isCpsEnabled}
-        isLoading={bulkProjectScopeAction.isLoading}
-        items={transformSelection}
-      />
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="resetAction"
-      onClick={() => {
-        setIsActionsMenuOpen(false);
-        bulkResetAction.openModal(transformSelection);
-      }}
-      disabled={isResetActionDisabled(transformSelection, false)}
-    >
-      <ResetActionName
-        canResetTransform={capabilities.canResetTransform}
-        disabled={isResetActionDisabled(transformSelection, false)}
-        isBulkAction={true}
-        items={transformSelection}
-      />
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="deleteAction"
-      onClick={() => {
-        setIsActionsMenuOpen(false);
-        bulkDeleteAction.openModal(transformSelection);
-      }}
-      disabled={isDeleteActionDisabled(transformSelection, false)}
-    >
-      <DeleteActionName
-        canDeleteTransform={capabilities.canDeleteTransform}
-        disabled={isDeleteActionDisabled(transformSelection, false)}
-        isBulkAction={true}
-        items={transformSelection}
-        forceDisable={false}
-      />
-    </EuiContextMenuItem>,
-  ];
-
   const selectAllFilteredTransforms = () => {
     updateTransformSelection(filteredTransforms);
   };
@@ -466,44 +289,13 @@ export const TransformList: FC<TransformListProps> = ({
   };
 
   const renderBulkActions = () => {
-    const bulkActionButton = (
-      <EuiButton
-        color="primary"
-        data-test-subj="transformBulkActionsMenuButton"
-        iconSide="right"
-        iconType="chevronSingleDown"
-        size="s"
-        onClick={() => {
-          setIsActionsMenuOpen((isOpen) => !isOpen);
-        }}
-      >
-        {i18n.translate('xpack.transform.multiTransformActionsMenu.transformsCount', {
-          defaultMessage: '{count} selected',
-          values: { count: transformSelection.length },
-        })}
-      </EuiButton>
-    );
-
-    const bulkActionIcon = (
-      <EuiPopover
-        key="bulkActionIcon"
-        id="transformBulkActionsMenu"
-        aria-label={i18n.translate(
-          'xpack.transform.multiTransformActionsMenu.bulkActionsPopoverAriaLabel',
-          { defaultMessage: 'Bulk actions' }
-        )}
-        button={bulkActionButton}
-        isOpen={isActionsMenuOpen}
-        closePopover={() => setIsActionsMenuOpen(false)}
-        panelPaddingSize="none"
-      >
-        <EuiContextMenuPanel items={bulkActionMenuItems} />
-      </EuiPopover>
-    );
-
     return (
       <StatsBarContainer>
-        {bulkActionIcon}
+        <TransformBulkActionsMenu
+          items={transformSelection}
+          onProjectScopeUpdateSuccess={clearTransformSelection}
+          transformNodes={transformNodes}
+        />
         {isCurrentPageSelected &&
           filteredTransforms.length > currentPageTransforms.length &&
           !areAllFilteredTransformsSelected && (
@@ -564,21 +356,6 @@ export const TransformList: FC<TransformListProps> = ({
 
   return (
     <div data-test-subj="transformListTableContainer">
-      {/* Bulk Action Modals */}
-      {bulkStartAction.isModalVisible && <StartActionModal {...bulkStartAction} />}
-      {bulkDeleteAction.isModalVisible && <DeleteActionModal {...bulkDeleteAction} />}
-      {bulkReauthorizeAction.isModalVisible && (
-        <ReauthorizeActionModal {...bulkReauthorizeAction} />
-      )}
-      {bulkResetAction.isModalVisible && <ResetActionModal {...bulkResetAction} />}
-      {bulkStopAction.isModalVisible && <StopActionModal {...bulkStopAction} />}
-      {bulkProjectScopeAction.isFlyoutVisible && (
-        <ProjectScopeActionFlyout {...bulkProjectScopeAction} />
-      )}
-      {bulkProjectScopeAction.isModalVisible && (
-        <ProjectScopeActionModal {...bulkProjectScopeAction} />
-      )}
-
       {/* Single Action Modals */}
       {singleActionModals}
 

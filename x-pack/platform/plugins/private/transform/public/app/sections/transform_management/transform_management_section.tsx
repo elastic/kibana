@@ -49,6 +49,7 @@ import {
   TransformAlertFlyoutWrapper,
 } from '../../../alerting/transform_alerting_flyout';
 import { DanglingTasksWarning } from './components/dangling_task_warning/dangling_task_warning';
+import { TransformNodesWarning } from './components/transform_nodes_warning';
 
 const getDefaultTransformListState = (): ListingPageUrlState => ({
   pageIndex: 0,
@@ -245,6 +246,8 @@ export const TransformManagement: FC = () => {
               />
             ) : null}
             <EuiSpacer size="s" />
+
+            <TransformNodesWarning transformNodes={transformNodes} />
 
             <AlertRulesManageContext.Provider value={getAlertRuleManageContext()}>
               <DanglingTasksWarning transformIdsWithoutConfig={transformIdsWithoutConfig} />

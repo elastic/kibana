@@ -20,7 +20,7 @@ test.describe('Transform list', { tag: tags.deploymentAgnostic }, () => {
     await test.step('loads the transform list page', async () => {
       await transformManagement.goto();
       expect(page.url()).toContain('/transform');
-      await expect(transformManagement.statsBar).toBeVisible();
+      await expect(transformManagement.emptyPrompt).toBeVisible();
       await expect(transformManagement.createButton).toBeVisible();
     });
 

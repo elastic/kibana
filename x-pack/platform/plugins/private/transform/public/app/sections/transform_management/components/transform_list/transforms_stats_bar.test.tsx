@@ -20,11 +20,6 @@ jest.mock('../../../../serverless_context', () => ({
   useEnabledFeatures: () => mockUseEnabledFeatures(),
 }));
 
-jest.mock('../../../../hooks', () => ({
-  useDocumentationLinks: () => ({ esNodeRoles: 'https://example.test/node-roles' }),
-  useRefreshTransformList: () => jest.fn(),
-}));
-
 describe('TransformStatsBar', () => {
   beforeEach(() => {
     mockUseEnabledFeatures.mockReturnValue({ showNodeInfo: false });

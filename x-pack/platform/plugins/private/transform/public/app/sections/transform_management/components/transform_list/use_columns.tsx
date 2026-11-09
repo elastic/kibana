@@ -265,7 +265,11 @@ export const useColumns = (
         }
 
         const progress = getTransformProgress(item);
-        return progress === undefined ? null : `${progress}%`;
+        return progress === undefined
+          ? i18n.translate('xpack.transform.execution.oneTime', {
+              defaultMessage: 'One-time',
+            })
+          : `${progress}%`;
       },
       width: '100px',
     },

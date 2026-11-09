@@ -231,9 +231,9 @@ test.describe('Create pivot transform from a data view', { tag: tags.deploymentA
         await transformManagement.filterByTransformId(data.transformId);
         await assertTransformRow(transformManagement, data.transformId, {
           description: data.description,
-          type: 'pivot',
-          status: 'stopped',
-          mode: 'batch',
+          type: 'Pivot',
+          status: 'Stopped',
+          execution: '100%',
           progress: 100,
           health: 'Healthy',
         });

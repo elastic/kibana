@@ -116,9 +116,9 @@ test.describe('Create latest transform from a data view', { tag: tags.deployment
       await transformManagement.filterByTransformId(TRANSFORM_ID);
       await assertTransformRow(transformManagement, TRANSFORM_ID, {
         description: DESCRIPTION,
-        type: 'latest',
-        status: 'stopped',
-        mode: 'batch',
+        type: 'Latest',
+        status: 'Stopped',
+        execution: '100%',
         progress: 100,
         health: 'Healthy',
       });

@@ -7,18 +7,12 @@
 
 import React, { type FC, type ReactNode } from 'react';
 
-import { EuiLink, EuiSpacer } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { useEnabledFeatures } from '../../../../serverless_context';
 import { TRANSFORM_MODE, TRANSFORM_STATE } from '../../../../../../common/constants';
 
 import type { TransformListRow } from '../../../../common';
-
-import { useDocumentationLinks, useRefreshTransformList } from '../../../../hooks';
 
 import { StatsBar } from '../stats_bar';
 
@@ -36,8 +30,6 @@ export const TransformStatsBar: FC<TransformStatsBarProps> = ({
   transformsList,
 }) => {
   const { showNodeInfo } = useEnabledFeatures();
-  const refreshTransformList = useRefreshTransformList();
-  const { esNodeRoles } = useDocumentationLinks();
 
   const oneTimeCount = transformsList.filter(({ mode }) => mode === TRANSFORM_MODE.BATCH).length;
   const continuousCount = transformsList.filter(
@@ -94,52 +86,5 @@ export const TransformStatsBar: FC<TransformStatsBarProps> = ({
     });
   }
 
-  return (
-    <>
-      {showNodeInfo && transformNodes === 0 && (
-        <>
-          <KbnWarningCallout
-            announceOnMount
-            title={
-              <FormattedMessage
-                id="xpack.transform.transformNodes.noTransformNodesCallOutTitle"
-                defaultMessage="There are no transform nodes available."
-              />
-            }
-            text={
-              <p>
-                <FormattedMessage
-                  id="xpack.transform.transformNodes.noTransformNodesCallOutBody"
-                  defaultMessage="You will not be able to create or run transforms. {learnMoreLink}"
-                  values={{
-                    learnMoreLink: (
-                      <EuiLink href={esNodeRoles} target="_blank">
-                        <FormattedMessage
-                          id="xpack.transform.transformNodes.noTransformNodesLearnMoreLinkText"
-                          defaultMessage="Learn more"
-                        />
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              </p>
-            }
-            actionProps={{
-              primary: {
-                onClick: () => refreshTransformList(),
-                children: (
-                  <FormattedMessage
-                    id="xpack.transform.transformNodes.noTransformNodesRetryButtonText"
-                    defaultMessage="Retry"
-                  />
-                ),
-              },
-            }}
-          />
-          <EuiSpacer size="s" />
-        </>
-      )}
-      <StatsBar stats={stats} dataTestSub="transformStatsBar" />
-    </>
-  );
+  return <StatsBar stats={stats} dataTestSub="transformStatsBar" />;
 };
