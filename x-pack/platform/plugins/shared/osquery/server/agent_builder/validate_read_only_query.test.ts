@@ -166,6 +166,20 @@ describe('validateReadOnlyQuery', () => {
     });
   });
 
+  describe('set operators', () => {
+    it.each(['EXCEPT', 'INTERSECT'])('scans the right-hand side of %s', (op) => {
+      expect(
+        validateReadOnlyQuery(`SELECT pid FROM processes ${op} SELECT pid FROM curl`, ALLOWED)
+      ).toMatch(/not read-only/i);
+    });
+
+    it('allows EXCEPT between allowlisted tables', () => {
+      expect(
+        validateReadOnlyQuery('SELECT pid FROM processes EXCEPT SELECT uid FROM users', ALLOWED)
+      ).toBeNull();
+    });
+  });
+
   describe('comment and literal tokenization', () => {
     it('does not treat -- inside a string literal as a comment start', () => {
       expect(

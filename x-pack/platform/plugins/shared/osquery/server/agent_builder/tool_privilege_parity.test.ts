@@ -162,12 +162,12 @@ describe('Osquery Agent Builder tool privilege parity', () => {
       const authz = registeredRouteAuthz(route.method, route.path);
 
       if (authz && 'requiredPrivileges' in authz) {
-        // Each privilege the route accepts must also satisfy the tool, so the
-        // tool never denies a caller the route would admit, and (checked via
-        // the denial test below) never admits one the route would reject.
+        // The tool must assert exactly what the route requires: a superset check
+        // would let a tool admit callers the route rejects (extra OR-alternatives).
         const routePrivileges = authz.requiredPrivileges.map((p) =>
           typeof p === 'string' ? p : JSON.stringify(p)
         );
+        expect([...OSQUERY_TOOL_PRIVILEGES[privilege]].sort()).toEqual([...routePrivileges].sort());
         for (const routePrivilege of routePrivileges) {
           expect(OSQUERY_TOOL_PRIVILEGES[privilege]).toContain(routePrivilege);
         }
