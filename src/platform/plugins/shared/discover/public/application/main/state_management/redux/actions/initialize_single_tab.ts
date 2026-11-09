@@ -40,7 +40,12 @@ import type { ConnectedCustomizationService } from '../../../../../customization
 import { ProfileStateType, type ProfileStateMap } from '../../../../../../common/context_awareness';
 import { selectTab } from '../selectors';
 import type { TabState, TabStateGlobalState } from '../types';
-import { GLOBAL_STATE_URL_KEY, PROFILE_STATE_URL_KEY } from '../../../../../../common/constants';
+import {
+  GLOBAL_STATE_URL_KEY,
+  PROFILE_STATE_URL_KEY,
+  TAB_STATE_URL_KEY,
+} from '../../../../../../common/constants';
+import type { TabsUrlState } from '../../../../../../common/types';
 import { fromSavedObjectTabToSearchSource } from '../tab_mapping_utils';
 import { createInternalStateAsyncThunk, extractEsqlVariables } from '../utils';
 import { isNonEmptyEsqlQuery } from '../../utils/is_non_empty_esql_query';
@@ -180,10 +185,13 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
 
     await loadDataAvailability(initialUrlState.initialQuery);
 
-    // Tab operations rewrite every tab state and push the selected tab's state to the URL,
-    // so a URL changed while waiting only belongs to this tab if its state is unchanged.
+    // Tab operations push the selected tab ID and state to the URL before rewriting every tab
+    // state, so a URL changed while waiting only belongs to this tab if neither points elsewhere.
+    const urlTabId = urlStateStorage.get<TabsUrlState>(TAB_STATE_URL_KEY)?.tabId;
+    const isUrlOwnedByTab =
+      getTabState() === tabStateBeforeAvailability && (!urlTabId || urlTabId === tabId);
     const { urlGlobalState, urlAppState, urlProfileState, hasGlobalState, initialQuery } =
-      getTabState() === tabStateBeforeAvailability ? readUrlState() : initialUrlState;
+      isUrlOwnedByTab ? readUrlState() : initialUrlState;
     const isEsqlMode = isOfAggregateQueryType(initialQuery);
     const { hasESData, hasDataView } = await loadDataAvailability(initialQuery);
 

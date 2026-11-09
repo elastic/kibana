@@ -19,6 +19,7 @@ import {
 } from '..';
 import { DataSourceType } from '../../../../../../common/data_sources';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
+import { TAB_STATE_URL_KEY } from '../../../../../../common/constants';
 import {
   GLOBAL_STATE_URL_KEY,
   PROFILE_STATE_URL_KEY,
@@ -1584,6 +1585,50 @@ describe('tab_state actions', () => {
     expect(
       toolkit.stateStorageContainer.get<DiscoverAppState>(APP_STATE_URL_KEY)?.dataSource
     ).toEqual({ type: DataSourceType.DataView, dataViewId: logsDataView.id });
+  });
+
+  it('keeps the initial URL when a tab switch is in progress after the data availability checks', async () => {
+    const services = createDiscoverServicesMock();
+    const availability = Promise.withResolvers<boolean>();
+    jest.mocked(services.dataViews.hasData.hasDataView).mockReturnValueOnce(availability.promise);
+    const logsDataView = buildDataViewMock({
+      id: 'logs-data-view-id',
+      name: 'logs',
+      fields: deepMockedFields,
+      timeFieldName: '@timestamp',
+    });
+    const toolkit = getDiscoverInternalStateMock({
+      services,
+      persistedDataViews: [dataViewMockWithTimeField, logsDataView],
+    });
+    const getUrlAppState = (dataViewId: string): DiscoverAppState => ({
+      dataSource: { type: DataSourceType.DataView, dataViewId },
+      query: { language: 'kuery', query: '' },
+    });
+
+    await toolkit.stateStorageContainer.set(
+      APP_STATE_URL_KEY,
+      getUrlAppState(dataViewMockWithTimeField.id!)
+    );
+    await toolkit.initializeTabs();
+    const tabId = toolkit.getCurrentTab().id;
+    const tabInitialization = toolkit.initializeSingleTab({
+      tabId,
+      skipWaitForDataFetching: true,
+    });
+
+    await waitFor(() => expect(services.dataViews.hasData.hasDataView).toHaveBeenCalled());
+    // updateTabs writes the destination tab to the URL before it updates the tabs state
+    await toolkit.stateStorageContainer.set(TAB_STATE_URL_KEY, { tabId: 'destination-tab-id' });
+    await toolkit.stateStorageContainer.set(APP_STATE_URL_KEY, getUrlAppState(logsDataView.id!));
+
+    availability.resolve(true);
+    await tabInitialization;
+
+    expect(selectTab(toolkit.internalState.getState(), tabId).appState.dataSource).toEqual({
+      type: DataSourceType.DataView,
+      dataViewId: dataViewMockWithTimeField.id,
+    });
   });
 
   it('keeps the initial URL when switching tabs while waiting for the data availability checks', async () => {
