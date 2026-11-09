@@ -177,6 +177,14 @@ describe('SourceRuleSummaryFlyout', () => {
       expect(screen.getByTestId('sourceRuleSummaryFlyoutTakeActionButton')).toBeDisabled();
     });
 
+    it('does not render the Take action button when the source has no details link', () => {
+      renderFlyout({ rule: undefined, isLoading: true, ruleDetailsHref: null });
+
+      expect(
+        screen.queryByTestId('sourceRuleSummaryFlyoutTakeActionButton')
+      ).not.toBeInTheDocument();
+    });
+
     it('calls onClose from the footer close button', () => {
       const onClose = jest.fn();
       renderFlyout({ rule: undefined, isLoading: true, onClose });

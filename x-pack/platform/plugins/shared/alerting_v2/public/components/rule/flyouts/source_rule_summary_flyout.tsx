@@ -105,7 +105,7 @@ const buildMetadataItems = (rule: RuleResponse, dateFormat: string): DetailItem[
 };
 
 export interface SourceRuleSummaryFlyoutProps {
-  /** Unset while loading, or when the rule failed to load or does not exist. */
+  /** Unset while loading, or when no rule is available (missing, or failed to load with no cached copy). */
   rule?: RuleResponse;
   isLoading?: boolean;
   ruleCategory?: string;
@@ -131,24 +131,30 @@ export const SourceRuleSummaryFlyout = ({
   const conditionItems = rule ? buildConditionItems(rule, ruleCategory) : [];
   const metadataItems = rule ? buildMetadataItems(rule, dateFormat) : [];
 
-  const takeActionPanels: FlyoutFooterMenuPanel[] = ruleDetailsHref
-    ? [
-        {
-          id: 0,
-          items: [
-            {
-              key: 'viewDetails',
-              name: i18n.translate('xpack.alertingV2.sourceRuleSummaryFlyout.viewDetails', {
-                defaultMessage: 'View details',
-              }),
-              icon: 'eye',
-              href: ruleDetailsHref,
-              'data-test-subj': 'sourceRuleSummaryFlyoutViewDetailsAction',
-            },
-          ],
-        },
-      ]
-    : [];
+  const getTakeActionPanels = (): FlyoutFooterMenuPanel[] => {
+    if (!ruleDetailsHref) {
+      return [];
+    }
+    if (!rule) {
+      return DISABLED_TAKE_ACTION_PANELS;
+    }
+    return [
+      {
+        id: 0,
+        items: [
+          {
+            key: 'viewDetails',
+            name: i18n.translate('xpack.alertingV2.sourceRuleSummaryFlyout.viewDetails', {
+              defaultMessage: 'View details',
+            }),
+            icon: 'eye',
+            href: ruleDetailsHref,
+            'data-test-subj': 'sourceRuleSummaryFlyoutViewDetailsAction',
+          },
+        ],
+      },
+    ];
+  };
 
   const renderBody = () => {
     if (isLoading) {
@@ -250,7 +256,7 @@ export const SourceRuleSummaryFlyout = ({
               defaultMessage: 'Rule actions',
             }
           )}
-          panels={rule ? takeActionPanels : DISABLED_TAKE_ACTION_PANELS}
+          panels={getTakeActionPanels()}
           isDisabled={!rule}
           data-test-subj="sourceRuleSummaryFlyoutTakeActionButton"
         />
