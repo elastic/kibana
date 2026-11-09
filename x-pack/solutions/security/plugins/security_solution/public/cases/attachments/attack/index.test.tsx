@@ -38,14 +38,9 @@ import {
 import { TestProviders } from '../../../common/mock/test_providers';
 import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../../flyout_v2/use_flyout_api.mock';
-import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
 import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry';
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: () => ({ openFlyout: jest.fn() }),
-}));
 jest.mock('../../../flyout_v2/use_flyout_api');
-jest.mock('../../../common/hooks/use_is_new_flyout_enabled');
 
 type Props = UnifiedReferenceAttachmentViewProps<AttackAttachmentPayload['metadata']>;
 
@@ -82,7 +77,6 @@ describe('Attack attachment', () => {
     jest.clearAllMocks();
     flyoutApi = createFlyoutApiMock();
     jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
   });
 
   it('creates the attachment type correctly', () => {
