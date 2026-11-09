@@ -13,12 +13,15 @@ import {
   MAX_CUSTOM_FIELD_KEY_LENGTH,
   MAX_CUSTOM_FIELD_LABEL_LENGTH,
   MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
-  MAX_CUSTOM_OBSERVABLE_TYPES,
   MAX_DESCRIPTION_LENGTH,
   MAX_LENGTH_PER_TAG,
   MAX_LENGTH_PER_WORKFLOW_TAG,
+  MAX_OBSERVABLE_TYPE_ENTRIES,
   MAX_OBSERVABLE_TYPE_KEY_LENGTH,
   MAX_OBSERVABLE_TYPE_LABEL_LENGTH,
+  MAX_OBSERVABLE_TYPE_PATHS,
+  MAX_OBSERVABLE_TYPE_PATH_LENGTH,
+  MAX_OBSERVABLE_TYPE_VALUE_PATTERN_LENGTH,
   MAX_TAGS_PER_CASE,
   MAX_TAGS_PER_TEMPLATE,
   MAX_TEMPLATES_LENGTH,
@@ -707,8 +710,46 @@ describe('configure', () => {
       expect(result.success).toBe(false);
     });
 
-    it('should invalidate an observable types configuration with a missing label', () => {
-      const result = ObservableTypesConfigurationSchema.safeParse([{ key: 'observable_key_1' }]);
+    it('should accept an entry without a label, which overrides a built-in type', () => {
+      const result = ObservableTypesConfigurationSchema.safeParse([
+        { key: 'observable-type-agent-id', paths: [{ path: 'agent.id', enabled: false }] },
+      ]);
+      expect(result.success).toBe(true);
+    });
+
+    it('should invalidate a path exceeding max length', () => {
+      const result = ObservableTypesConfigurationSchema.safeParse([
+        {
+          key: 'observable_key_1',
+          label: 'label',
+          paths: [{ path: 'a'.repeat(MAX_OBSERVABLE_TYPE_PATH_LENGTH + 1), enabled: true }],
+        },
+      ]);
+      expect(result.success).toBe(false);
+    });
+
+    it('should invalidate a paths count exceeding max', () => {
+      const result = ObservableTypesConfigurationSchema.safeParse([
+        {
+          key: 'observable_key_1',
+          label: 'label',
+          paths: Array.from({ length: MAX_OBSERVABLE_TYPE_PATHS + 1 }, (_, index) => ({
+            path: `field.${index}`,
+            enabled: true,
+          })),
+        },
+      ]);
+      expect(result.success).toBe(false);
+    });
+
+    it('should invalidate a value pattern exceeding max length', () => {
+      const result = ObservableTypesConfigurationSchema.safeParse([
+        {
+          key: 'observable_key_1',
+          label: 'label',
+          valuePattern: 'a'.repeat(MAX_OBSERVABLE_TYPE_VALUE_PATTERN_LENGTH + 1),
+        },
+      ]);
       expect(result.success).toBe(false);
     });
 
@@ -732,7 +773,7 @@ describe('configure', () => {
     });
 
     it('should invalidate an observable types configuration with observableTypes count exceeding max', () => {
-      const invalidData = new Array(MAX_CUSTOM_OBSERVABLE_TYPES + 1).fill({
+      const invalidData = new Array(MAX_OBSERVABLE_TYPE_ENTRIES + 1).fill({
         key: 'foo',
         label: 'label',
       });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { CaseConnectorSchema, ConnectorMappingsSchema } from '../connector/v1';
 import { UserSchema } from '../user/v1';
 import {
@@ -61,7 +61,14 @@ export const CustomFieldConfigurationSchema = z.union([
 
 export const CustomFieldsConfigurationSchema = z.array(CustomFieldConfigurationSchema);
 
-export const ObservableTypesConfigurationSchema = z.array(CaseObservableTypeSchema);
+export const ObservableTypesConfigurationSchema = lazySchema(() =>
+  z.array(
+    CaseObservableTypeSchema.extend({
+      paths: z.array(z.object({ path: z.string(), enabled: z.boolean() })).optional(),
+      valuePattern: z.string().optional(),
+    })
+  )
+);
 
 export const WorkflowTagsConfigurationSchema = z.array(z.string());
 
