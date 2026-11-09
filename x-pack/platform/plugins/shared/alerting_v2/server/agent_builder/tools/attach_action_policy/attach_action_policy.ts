@@ -13,9 +13,11 @@ import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { ALERTING_TOOL_IDS } from '@kbn/alerting-v2-constants';
-import { actionPolicyAttachmentDataSchema } from '@kbn/alerting-v2-schemas';
+import {
+  ACTION_POLICY_ATTACHMENT_TYPE,
+  actionPolicyAttachmentDataSchema,
+} from '@kbn/alerting-v2-schemas';
 import { ensureToolPrivilege } from '../../common/unauthorized_tool_result';
-import { createAttachmentsClient } from '../../../lib/attachments_client';
 import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
 import type { ActionPolicyClient } from '../../../lib/action_policy_client';
 import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
@@ -56,8 +58,9 @@ export const attachActionPolicyTool = ({
       return unauthorized;
     }
 
-    const { actionPolicies } = createAttachmentsClient(attachments);
-    const existing = actionPolicies.list().find(({ origin }) => origin === policyId);
+    const existing = attachments
+      .getActive()
+      .find(({ type, origin }) => type === ACTION_POLICY_ATTACHMENT_TYPE && origin === policyId);
     if (existing) {
       return {
         results: [
@@ -78,12 +81,15 @@ export const attachActionPolicyTool = ({
         id: policyId,
       });
       const data = actionPolicyAttachmentDataSchema.parse(policy);
-      const added = await actionPolicies.saveDraft(
-        { ...actionPolicies.getDraft(), origin: policyId },
-        data,
+      const added = await attachments.add(
+        {
+          type: ACTION_POLICY_ATTACHMENT_TYPE,
+          data,
+          origin: policyId,
+          description: `Action Policy: ${data.name}`,
+        },
         ATTACHMENT_REF_ACTOR.agent
       );
-
       return {
         results: [
           {
