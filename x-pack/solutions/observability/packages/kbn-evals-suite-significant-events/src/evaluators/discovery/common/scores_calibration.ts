@@ -6,9 +6,13 @@
  */
 
 import type { EvaluationCriterion, Evaluator } from '@kbn/evals';
-import { SEVERITY_CONTRACT_RULE } from '@kbn/significant-events-schema';
+import {
+  DISCOVERY_SEVERITY_APPLICATION_RULE,
+  SEVERITY_CONTRACT_RULE,
+} from '@kbn/significant-events-schema';
 import type { CreateScenarioCriteriaLlmEvaluatorOptions } from '../../scenario_criteria/evaluators';
 import { createScenarioCriteriaLlmEvaluator } from '../../scenario_criteria/evaluators';
+import { skipWhenNoSignificantEvents } from './evidence_quality';
 
 type CalibrationCriteriaFn = CreateScenarioCriteriaLlmEvaluatorOptions['criteriaFn'];
 
@@ -16,7 +20,13 @@ const createCalibrationEvaluator = (
   name: string,
   criteria: EvaluationCriterion[],
   criteriaFn: CalibrationCriteriaFn
-): Evaluator => createScenarioCriteriaLlmEvaluator({ name, criteria, criteriaFn });
+): Evaluator =>
+  createScenarioCriteriaLlmEvaluator({
+    name,
+    criteria,
+    criteriaFn,
+    skipWhen: skipWhenNoSignificantEvents,
+  });
 
 const SEVERITY_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
   {
@@ -25,7 +35,7 @@ const SEVERITY_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
   },
   {
     id: 'critical_severity_requires_confirmed_impact',
-    text: `Apply the \`severity\` field contract in order — do not invent alternate tier rules. Contract:\n\n${SEVERITY_CONTRACT_RULE.trim()}\n\nGrade the direct signal evidence over a generic "degraded" phrase in the summary.`,
+    text: `Apply the \`severity\` field contract in order — do not invent tier rules beyond it and its discovery application rule. Contract:\n\n${SEVERITY_CONTRACT_RULE.trim()}\n\n${DISCOVERY_SEVERITY_APPLICATION_RULE.trim()}\n\nGrade the direct signal evidence over a generic "degraded" phrase in the summary.`,
   },
   {
     id: 'weak_signals_low_severity',
@@ -39,7 +49,7 @@ const SEVERITY_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
   },
   {
     id: 'under_escalation_is_fail',
-    text: 'Under-escalation is a FAIL. When grounding confirms a non-benign failure or material degradation, assign the highest tier the `severity` field contract supports for that confirmed mechanism and blocked or degraded work. Do not assign `medium` or `low` solely because topology is sparse, the component is internal, narratives use cautious wording, or detection metadata looks weak — unless the known-ongoing cap explicitly applies or impact is genuinely bounded/unconfirmed per the schema. Grade `title`, `symptom_hypothesis`, and `summary` together: the tier must be evident in the narratives.',
+    text: 'Under-escalation is a FAIL. When grounding confirms a non-benign failure or material degradation, assign the highest tier the `severity` field contract supports for that confirmed mechanism and blocked or degraded work. Do not assign `medium` or `low` solely because topology is sparse, the component is internal, narratives use cautious wording, or detection metadata looks weak — unless the known-ongoing cap explicitly applies, a contained-failure cue lowers the tier per the discovery application rule, or impact is genuinely bounded/unconfirmed per the schema. Grade `title`, `symptom_hypothesis`, and `summary` together: the tier must be evident in the narratives.',
     score: 2,
   },
 ];
@@ -47,7 +57,7 @@ const SEVERITY_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
 const CONFIDENCE_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
   {
     id: 'confidence_reflects_support',
-    text: 'Confidence reflects how well-supported the assessment is — KI backing, number of confirmed evidences, and corroboration — not the raw anomaly strength.',
+    text: 'Confidence follows the agent’s confidence rule: for a new event the base comes from the strongest detection’s `p_value` (≤0.01 → 0.55–0.65; 0.01–0.05 → 0.40–0.55; 0.05–0.1 → 0.25–0.40; >0.1 → below 0.25), plus up to 0.10 for several `confirms` verdicts and aligned KI backing, minus 0.10 for outnumbering non-`confirms` verdicts, missing `causal_features` or a key query that is not `found`; a figure the descriptions state as not measured (share, duration) caps it at 0.65. A continuation starts from the matched active event’s stored confidence and adjusts it incrementally; it is not recalculated from `p_value`. Confidence is at most 0.30 with no `confirms` verdict and at most 0.85 in any case; a `dimensions`, examples or `breakdown` query that could not be run or was not sent counts toward neither cap. A low confidence that follows from a weak `p_value` is correct even when the finding is well supported; do not penalise it, and do not credit support the rule does not count.',
   },
   {
     id: 'no_ki_caps_confidence',

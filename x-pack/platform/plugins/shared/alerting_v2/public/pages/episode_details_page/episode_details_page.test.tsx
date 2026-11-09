@@ -207,12 +207,12 @@ const fetchRuleResult = {
 
 const episodeId = 'ep-1';
 
-const renderPage = () =>
+const renderPage = (props: React.ComponentProps<typeof EpisodeDetailsPage> = {}) =>
   render(
     <MockChromeContextProvider>
       <TestProviders locators={mockLocators}>
         <MemoryRouter>
-          <EpisodeDetailsPage />
+          <EpisodeDetailsPage {...props} />
         </MemoryRouter>
       </TestProviders>
     </MockChromeContextProvider>
@@ -490,6 +490,46 @@ describe('EpisodeDetailsPage', () => {
     expect(
       screen.getByTestId('episodeActionsBar-overflow-ALERTING_V2_EDIT_EPISODE_TAGS')
     ).toBeInTheDocument();
+  });
+
+  it('hosts dynamic solution actions before the platform actions and keeps overflow actions in the menu', async () => {
+    const startInvestigation = jest.fn();
+    const useHeaderMenuItems = jest.fn(() => [
+      {
+        id: 'investigate',
+        label: 'Investigate',
+        iconType: 'inspect',
+        order: -1,
+        overflow: false,
+        run: startInvestigation,
+        testId: 'hostInvestigate',
+      },
+      {
+        id: 'reinvestigate',
+        label: 'Re-investigate',
+        iconType: 'inspect',
+        overflow: true,
+        run: jest.fn(),
+        testId: 'hostReinvestigate',
+      },
+    ]);
+    renderPage({ useAdditionalEpisodeDetailsHeaderMenuItems: useHeaderMenuItems });
+
+    expect(useHeaderMenuItems).toHaveBeenCalledWith(
+      expect.objectContaining({ 'episode.id': episodeId })
+    );
+    expect(screen.queryByTestId('hostReinvestigate')).not.toBeInTheDocument();
+    await openAppMenuOverflow();
+    const investigate = await screen.findByTestId('hostInvestigate');
+    expect(
+      investigate.compareDocumentPosition(
+        screen.getByTestId('episodeActionsBar-primary-ALERTING_V2_ACK_EPISODE')
+      )
+    ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    await userEvent.click(investigate);
+    expect(startInvestigation).toHaveBeenCalledTimes(1);
+    await openAppMenuOverflow();
+    expect(screen.getByTestId('hostReinvestigate')).toBeInTheDocument();
   });
 
   it('holds back the app header menu actions until the action state loads', async () => {

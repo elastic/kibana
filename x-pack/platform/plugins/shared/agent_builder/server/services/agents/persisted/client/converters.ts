@@ -54,6 +54,7 @@ export const fromEs = (document: Document): PersistedAgentDefinition => {
     created_at: document._source.created_at,
     updated_by: readOwner(document._source.updated_by_id, document._source.updated_by_name),
     updated_at: document._source.updated_at,
+    service_account_id: document._source.service_account_id,
     configuration: {
       instructions: configuration.instructions,
       tools: configuration.tools,

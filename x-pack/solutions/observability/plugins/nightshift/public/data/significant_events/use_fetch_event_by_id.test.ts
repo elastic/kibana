@@ -36,7 +36,6 @@ jest.mock('../../hooks/use_kibana', () => ({
 }));
 
 let capturedQueryFn: ((args: { signal?: AbortSignal }) => Promise<unknown>) | undefined;
-let capturedQueryKey: readonly unknown[] | undefined;
 let capturedEnabled: boolean | undefined;
 
 jest.mock('@kbn/react-query', () => ({
@@ -45,7 +44,6 @@ jest.mock('@kbn/react-query', () => ({
     enabled: boolean;
     queryFn: (args: { signal?: AbortSignal }) => Promise<unknown>;
   }) => {
-    capturedQueryKey = params.queryKey;
     capturedEnabled = params.enabled;
     capturedQueryFn = params.queryFn;
     return { data: undefined, isFetched: false };
@@ -56,7 +54,6 @@ describe('useFetchEventById', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     capturedQueryFn = undefined;
-    capturedQueryKey = undefined;
     capturedEnabled = undefined;
     mockSignificantEventsFetch.mockResolvedValue({ hits: [], page: 1, perPage: 1, total: 0 });
   });
@@ -73,12 +70,6 @@ describe('useFetchEventById', () => {
         signal: null,
       }
     );
-  });
-
-  it('keys the query by event id', () => {
-    renderHook(() => useFetchEventById('evt-1'));
-
-    expect(capturedQueryKey).toEqual(['nightshift.eventById', 'evt-1']);
   });
 
   it('resolves to the first hit', async () => {

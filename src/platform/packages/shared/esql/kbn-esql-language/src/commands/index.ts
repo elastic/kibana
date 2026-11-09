@@ -16,6 +16,7 @@ export * from './definitions/constants';
 export * from './definitions/types';
 export * from './definitions/all_operators';
 export * from './definitions/utils/promql';
+export * from './definitions/utils/named_subqueries';
 export { inlineCasts as inlineCastsMapping } from '@elastic/esql-definitions/inline-cast';
 
 // Utilities from definitions

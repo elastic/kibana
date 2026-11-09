@@ -75,5 +75,5 @@ export const logEntryCategoryExamplesResponseRT = rt.intersection([
   }),
 ]);
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
+// eslint-disable-next-line @kbn/compat/typescript-naming-convention
 export type logEntryCategoryExamplesResponse = rt.TypeOf<typeof logEntryCategoryExamplesResponseRT>;

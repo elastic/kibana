@@ -11,6 +11,7 @@ import { getResearchAgentPrompt } from './research_agent';
 import { prepareMessages } from '../utils/to_langchain_messages';
 
 jest.mock('../utils/to_langchain_messages', () => ({
+  ...jest.requireActual('../utils/to_langchain_messages'),
   prepareMessages: jest.fn().mockResolvedValue([['human', 'history']]),
 }));
 
@@ -262,7 +263,7 @@ describe('getResearchAgentPrompt', () => {
     expect(system.indexOf('## AI INDICES')).toBeLessThan(system.indexOf('## INSTRUCTIONS'));
   });
 
-  it('omits the SML sections when experimental features are off', async () => {
+  it('omits the SML tool instructions when experimental features are off', async () => {
     const messages = await getResearchAgentPrompt(
       makeParams({
         experimentalFeatures: {
@@ -275,9 +276,27 @@ describe('getResearchAgentPrompt', () => {
     );
     const system = asText(messages[0]);
 
-    expect(system).not.toContain("## SML '#' REFERENCES");
+    expect(system).not.toContain('sml_attach');
     expect(system).not.toContain('## CONNECTOR DISCOVERY');
     expect(system).not.toMatch(/^(<<<<<<<|=======|>>>>>>>)/m);
+  });
+
+  it('explains the # references even when experimental features are off', async () => {
+    const messages = await getResearchAgentPrompt(
+      makeParams({
+        experimentalFeatures: {
+          aiIndices: true,
+          sml: false,
+          bash: false,
+          skills: false,
+        },
+      })
+    );
+    const system = asText(messages[0]);
+
+    expect(system).toContain("## SML '#' REFERENCES");
+    expect(system).toContain('`[#label](sml://ENTRY_ID)`');
+    expect(system).toContain('matching them to the links by description');
   });
 
   it('renders the SML sections with # references when SML is on', async () => {
@@ -295,6 +314,8 @@ describe('getResearchAgentPrompt', () => {
 
     expect(system).toContain("## SML '#' REFERENCES");
     expect(system).toContain('`[#label](sml://ENTRY_ID)`');
+    expect(system).toContain('call `sml_attach`');
+    expect(system).toContain('## CONNECTOR DISCOVERY');
     expect(system).not.toMatch(/^(<<<<<<<|=======|>>>>>>>)/m);
   });
 

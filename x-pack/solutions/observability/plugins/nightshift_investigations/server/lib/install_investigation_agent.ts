@@ -19,28 +19,32 @@ export const installInvestigationAgent = async ({
   agentBuilder,
   spaceId,
   availability,
+  hidden,
 }: {
   agentBuilder: AgentBuilderPluginStart;
   spaceId: string;
   availability: AgentAvailabilityConfig;
+  /**
+   * Agent Builder keeps one picker visibility per agent id for the whole process, and an omitted
+   * value leaves it as is, so only the plugin start sets it.
+   */
+  hidden?: boolean;
 }): Promise<void> => {
   await agentBuilder.agents.ensure({
     spaceId,
     availability,
-    // Unlike the other Nightshift agents, users chat with the investigator directly.
-    hidden: false,
+    hidden,
     agent: {
       id: NIGHTSHIFT_INVESTIGATION_AGENT_ID,
       type: NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID,
       name: INVESTIGATION_AGENT_NAME,
       description: INVESTIGATION_AGENT_DESCRIPTION,
-      labels: ['observability', 'significant-events', 'investigation', 'cortex', 'sandbox'],
+      labels: ['observability', 'significant-events', 'investigation', 'wiki', 'sandbox'],
       avatar_symbol: 'NI',
       access_control: { access_mode: AgentAccessControlMode.Public },
       configuration: {
         tools: [],
         skill_ids: [],
-        connector_ids: [],
       },
     },
   });

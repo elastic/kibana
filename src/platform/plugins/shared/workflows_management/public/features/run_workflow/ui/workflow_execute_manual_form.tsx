@@ -21,7 +21,7 @@ import {
   omitRequiredWithDefaults,
 } from '@kbn/workflows/spec/lib/field_conversion';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
-import { generateSampleFromJsonSchema, WORKFLOWS_MONACO_EDITOR_THEME } from '@kbn/workflows-ui';
+import { generateSampleFromJsonSchema, workflowsEditorChromeOverrides } from '@kbn/workflows-ui';
 import { InputValidationCallout } from './input_validation_callout';
 const SCHEMA_URI = `inmemory://schemas/workflow-manual-json-editor-schema`;
 
@@ -203,6 +203,7 @@ export const WorkflowExecuteManualForm = ({
         >
           <CodeEditor
             languageId="json"
+            chromeOverrides={workflowsEditorChromeOverrides}
             value={value}
             width="100%"
             height="100%"
@@ -225,7 +226,6 @@ export const WorkflowExecuteManualForm = ({
               renderWhitespace: 'all',
               wordWrapColumn: 80,
               wrappingIndent: 'indent',
-              theme: WORKFLOWS_MONACO_EDITOR_THEME,
               formatOnType: true,
               quickSuggestions: false,
               suggestOnTriggerCharacters: false,
