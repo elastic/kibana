@@ -67,6 +67,9 @@ const renderView = (overrides: Partial<TracesLatencyMapViewProps> = {}) => {
   return { actions, mapProps };
 };
 
+// The clauses name fields of every trace family, so the query is told to null the unmapped ones.
+const SET_NULLIFY = 'SET unmapped_fields="NULLIFY";\n';
+
 describe('TracesLatencyMapView', () => {
   beforeEach(() => {
     jest.mocked(LatencyMap).mockClear();
@@ -92,7 +95,7 @@ describe('TracesLatencyMapView', () => {
     mapProps.onSelectionCommit({ ...selection, to: '2026-10-26T10:10:00.000Z' }, nextCondition);
     const updater = actions.updateESQLQuery.mock.lastCall?.[0] as (query: string) => string;
     expect(updater(`FROM traces-apm*\n| WHERE ${selectionClause}`)).toBe(
-      `FROM traces-apm*\n| WHERE ${nextCondition}`
+      `${SET_NULLIFY}FROM traces-apm*\n| WHERE ${nextCondition}`
     );
   });
 
@@ -116,7 +119,7 @@ describe('TracesLatencyMapView', () => {
     mapProps.onSelectionCommit({ ...selection, to: '2026-10-26T10:10:00.000Z' }, nextCondition);
     const updater = actions.updateESQLQuery.mock.lastCall?.[0] as (query: string) => string;
     expect(updater(`FROM traces-apm*\n| WHERE ${selectionClause}`)).toBe(
-      `FROM traces-apm*\n| WHERE ${nextCondition}`
+      `${SET_NULLIFY}FROM traces-apm*\n| WHERE ${nextCondition}`
     );
   });
 
@@ -137,11 +140,11 @@ describe('TracesLatencyMapView', () => {
     mapProps.onFailedOnlyChange!(true);
     let updater = actions.updateESQLQuery.mock.lastCall?.[0] as (query: string) => string;
     const withFilter = updater('FROM traces-apm*');
-    expect(withFilter).toBe(`FROM traces-apm*\n| WHERE ${FAILED_SPAN_CONDITION}`);
+    expect(withFilter).toBe(`${SET_NULLIFY}FROM traces-apm*\n| WHERE ${FAILED_SPAN_CONDITION}`);
 
     mapProps.onFailedOnlyChange!(false);
     updater = actions.updateESQLQuery.mock.lastCall?.[0] as (query: string) => string;
-    expect(updater(withFilter)).toBe('FROM traces-apm*');
+    expect(updater(withFilter)).toBe(`${SET_NULLIFY}FROM traces-apm*`);
   });
 
   it('replaces a failure filter already in the query rather than stacking another', () => {
@@ -149,7 +152,7 @@ describe('TracesLatencyMapView', () => {
     mapProps.onFailedOnlyChange!(true);
     const updater = actions.updateESQLQuery.mock.lastCall?.[0] as (query: string) => string;
     expect(updater(`FROM traces-apm*\n| WHERE ${FAILED_SPAN_CONDITION}`)).toBe(
-      `FROM traces-apm*\n| WHERE ${FAILED_SPAN_CONDITION}`
+      `${SET_NULLIFY}FROM traces-apm*\n| WHERE ${FAILED_SPAN_CONDITION}`
     );
   });
 

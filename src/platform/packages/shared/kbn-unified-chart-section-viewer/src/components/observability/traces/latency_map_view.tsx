@@ -10,7 +10,7 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { css } from '@emotion/react';
 import { EuiPanel } from '@elastic/eui';
-import { appendToESQLQuery, getESQLResults } from '@kbn/esql-utils';
+import { getESQLResults } from '@kbn/esql-utils';
 import { getTimeZoneFromSettings } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import {
@@ -23,7 +23,7 @@ import {
 import type { LatencyMapCell, LatencyMapSelection, RunEsql } from '@kbn/trace-latency-map';
 import type { UnifiedMetricsGridProps } from '../../../types';
 import { extractFilters } from '../../../utils';
-import { removeWhere } from './latency_map_query_clauses';
+import { appendMapClause, removeWhere } from './latency_map_query_clauses';
 import { buildExampleSpanQuery } from './example_span_query';
 import { getSearchErrorReason } from './search_error';
 import { useStableTraceSource } from './use_stable_trace_source';
@@ -92,9 +92,7 @@ export function TracesLatencyMapView({
         const withoutSelection = extractFilters(query)
           .filter(isSelectionCondition)
           .reduce(removeWhere, query);
-        return esqlCondition
-          ? appendToESQLQuery(withoutSelection, `| WHERE ${esqlCondition}`)
-          : withoutSelection;
+        return esqlCondition ? appendMapClause(withoutSelection, esqlCondition) : withoutSelection;
       });
     },
     [updateESQLQuery]
@@ -109,9 +107,7 @@ export function TracesLatencyMapView({
         const withoutFailedOnly = extractFilters(query)
           .filter(isFailedOnlyCondition)
           .reduce(removeWhere, query);
-        return next
-          ? appendToESQLQuery(withoutFailedOnly, `| WHERE ${FAILED_SPAN_CONDITION}`)
-          : withoutFailedOnly;
+        return next ? appendMapClause(withoutFailedOnly, FAILED_SPAN_CONDITION) : withoutFailedOnly;
       });
     },
     [updateESQLQuery]
