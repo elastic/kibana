@@ -33,6 +33,8 @@ const esResponseError = (statusCode: number, type: string) =>
 const LIFECYCLE =
   '| WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"\n| WHERE expires_at IS NULL OR expires_at > NOW()';
 const MEMORY_EXCLUSION =
+  '| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact")';
+const DREAMING_EXCLUSION =
   '| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact" AND NOT type LIKE "fact.*" AND NOT type LIKE "entity.*")';
 
 const emptyResponse = { columns: [], values: [] };
@@ -168,7 +170,21 @@ describe('describeAiIndexAggregations', () => {
     });
   });
 
-  it('counts the dreamed fact types only when asked to', async () => {
+  it('leaves the types dreaming writes out of the type and tag counts when the AI index dreams', async () => {
+    await describeAiIndexAggregations({
+      ...params,
+      fields: [field('type', true), field('tags', true)],
+      dreams: true,
+    });
+
+    expect(queries()).toHaveLength(2);
+    for (const query of queries()) {
+      expect(query).toContain(`${LIFECYCLE}\n${DREAMING_EXCLUSION}\n`);
+      expect(Parser.parse(query).errors).toEqual([]);
+    }
+  });
+
+  it('counts only the given fact types, each of them', async () => {
     const fields = [field('type', true)];
     await describeAiIndexAggregations({ ...params, fields });
     expect(queries()).toHaveLength(1);
@@ -178,17 +194,21 @@ describe('describeAiIndexAggregations', () => {
       columns: [{ name: 'count' }, { name: 'type' }],
       values: [[4, 'fact.preference']],
     });
-    const result = await describeAiIndexAggregations({ ...params, fields, countFactTypes: true });
+    const result = await describeAiIndexAggregations({
+      ...params,
+      fields,
+      factTypes: ['fact.preference', 'fact.policy'],
+    });
 
     expect(esqlQuery).toHaveBeenLastCalledWith({
       query: [
         'FROM ai-index-idx-* METADATA _id, _index',
         LIFECYCLE,
-        '| WHERE type LIKE "fact.*"',
+        '| WHERE type IN ("fact.preference", "fact.policy")',
         '| WHERE type IS NOT NULL',
         '| STATS count = COUNT(*) BY type',
         '| SORT count DESC, type ASC',
-        `| LIMIT ${MAX_AI_INDEX_DESCRIBE_TYPE_COUNTS}`,
+        '| LIMIT 2',
       ].join('\n'),
       filter: buildAiIndexSpaceFilter('team-a'),
       allow_partial_results: false,
