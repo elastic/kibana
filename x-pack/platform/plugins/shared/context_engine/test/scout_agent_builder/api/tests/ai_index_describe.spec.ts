@@ -148,13 +148,21 @@ const OTHER_INDEX_ROLE: KibanaRole = {
   kibana: [CONTEXT_ENGINE_READ],
 };
 
-const registerAiIndex = (id: string, dest: { type: 'index' | 'data_stream'; value: string }) => ({
+const registerAiIndex = (
+  id: string,
+  dest: { type: 'index' | 'data_stream'; value: string },
+  dreaming?: { enabled: boolean; facts: Array<{ type: string }> }
+) => ({
   id,
   description: `Scout describe fixture ${id}`,
   dest,
   automations: [],
   sources: [],
+  ...(dreaming && { dreaming }),
 });
+
+// Takes memories without scheduling a dreaming workflow.
+const MEMORY_DREAMING_CONFIG = { enabled: false, facts: [{ type: 'note' }] };
 
 // The `agent_builder` Scout config set pins `contextEngine:enabled=true` through
 // `uiSettings.overrides`. Memory remains runtime-configurable so this suite enables only the
@@ -216,7 +224,11 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
     });
 
     for (const body of [
-      registerAiIndex(SINGLE_AI_INDEX_ID, { type: 'index', value: INDEX_A }),
+      registerAiIndex(
+        SINGLE_AI_INDEX_ID,
+        { type: 'index', value: INDEX_A },
+        MEMORY_DREAMING_CONFIG
+      ),
       registerAiIndex(TEMPLATE_AI_INDEX_ID, { type: 'index', value: INDEX_B }),
       registerAiIndex(DATA_STREAM_AI_INDEX_ID, { type: 'data_stream', value: DATA_STREAM }),
       registerAiIndex(MISSING_AI_INDEX_ID, { type: 'index', value: MISSING_INDEX }),
@@ -319,7 +331,7 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
       const block = blockOf(response.body);
       expect(sectionLines(block, 'Memory')).toStrictEqual(
         expect.arrayContaining([
-          'Memory writes are enabled for this AI-index registry entry.',
+          'This AI index takes memories: dreaming is set up for it.',
           'memory.session',
           'memory.session_fact',
           'Use platform.context_engine.remember to write memory.',

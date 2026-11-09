@@ -140,14 +140,42 @@ describe('AiIndexChangeNotifier', () => {
       );
     });
 
-    it('runs when the save wrote the whole AI index', async () => {
+    it('runs when a save of the whole AI index changed the field', async () => {
       const notifier = new AiIndexChangeNotifier(logger);
       const feedback = onFeedbackSaved();
       notifier.register(feedback);
 
-      await notifier.notify({ ...change, previous: aiIndex, current: aiIndex });
+      await notifier.notify({
+        ...change,
+        previous: aiIndex,
+        current: { ...aiIndex, feedback_analysis: { enabled: true } },
+      });
 
       expect(feedback.onChange).toHaveBeenCalledTimes(1);
+    });
+
+    it('runs on every delete, even of an AI index that never set the field', async () => {
+      const notifier = new AiIndexChangeNotifier(logger);
+      const feedback = onFeedbackSaved();
+      notifier.register(feedback);
+
+      await notifier.notify({ ...change, previous: aiIndex });
+
+      expect(feedback.onChange).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not run when a save of the whole AI index left the field unchanged', async () => {
+      const notifier = new AiIndexChangeNotifier(logger);
+      const feedback = onFeedbackSaved();
+      notifier.register(feedback);
+
+      await notifier.notify({
+        ...change,
+        previous: aiIndex,
+        current: { ...aiIndex, description: 'Support cases' },
+      });
+
+      expect(feedback.onChange).not.toHaveBeenCalled();
     });
 
     it('does not run when the save wrote other fields only', async () => {

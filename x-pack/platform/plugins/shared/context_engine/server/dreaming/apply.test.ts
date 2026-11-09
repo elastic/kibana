@@ -1,0 +1,345 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { KiConflictError, KiNotFoundError } from '../ai_indices/errors';
+import { findKiRevision, putKiRevision, type KiRevision } from '../ai_indices/ki_revision';
+import { softDeleteKi } from '../ai_indices/ki_write';
+import { addReferences, applyOperations, type ApplyContext } from './apply';
+import type { DreamedKi } from './dreamed_ki';
+
+jest.mock('../ai_indices/ki_revision', () => ({
+  ...jest.requireActual('../ai_indices/ki_revision'),
+  findKiRevision: jest.fn(),
+  putKiRevision: jest.fn(),
+}));
+jest.mock('../ai_indices/ki_write', () => ({ softDeleteKi: jest.fn() }));
+
+const writer = { uri: 'workflow://dreaming', metadata: { run_id: 'exec-1' } };
+
+const context = (dest: ApplyContext['dest'] = { type: 'index', value: 'ai-index-idx-a' }) => ({
+  esClient: elasticsearchServiceMock.createElasticsearchClient(),
+  aiIndexId: 'a',
+  dest,
+  writer,
+});
+
+const revisionOf = (source: DreamedKi): KiRevision => ({
+  index: 'ai-index-idx-a',
+  documentId: source.id,
+  seqNo: 3,
+  primaryTerm: 1,
+  source,
+});
+
+const stored = new Map<string, DreamedKi>();
+const written = () =>
+  jest.mocked(putKiRevision).mock.calls.map(([{ document }]) => document as DreamedKi);
+
+describe('applyOperations', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    stored.clear();
+    jest.mocked(findKiRevision).mockImplementation(async ({ kiId }) => {
+      const source = stored.get(kiId);
+      return source ? revisionOf(source) : undefined;
+    });
+    jest.mocked(putKiRevision).mockResolvedValue(undefined);
+  });
+
+  it('creates an entity with its attributes, sighting and the memories it came from', async () => {
+    const counts = await applyOperations(context(), [
+      {
+        op: 'upsert_entity',
+        id: 'entity-customer-825464',
+        type: 'customer',
+        name: 'Customer 825464',
+        content: 'Nova member in Montreal.',
+        attributes: { tier: 'Nova' },
+        sourceMemoryIds: ['m-1', 'm-2'],
+        lastSeenAt: '2026-11-02T18:40:12.000Z',
+      },
+    ]);
+
+    expect(counts).toEqual({ created: 1, updated: 0, deleted: 0 });
+    expect(putKiRevision).toHaveBeenCalledWith(
+      expect.objectContaining({
+        kiId: 'entity-customer-825464',
+        failIfExists: true,
+        refresh: true,
+        existing: undefined,
+      })
+    );
+    expect(written()[0]).toEqual(
+      expect.objectContaining({
+        id: 'entity-customer-825464',
+        type: 'entity.customer',
+        title: 'Customer 825464',
+        content: 'Nova member in Montreal.',
+        attributes: {
+          tier: 'Nova',
+          'memory.number_of_occurrences': 2,
+          'memory.last_seen_at': '2026-11-02T18:40:12.000Z',
+        },
+        references: [
+          { uri: 'ki://m-1', relation: 'derived_from' },
+          { uri: 'ki://m-2', relation: 'derived_from' },
+        ],
+        governance: {
+          provenance: { created_by: writer, updated_by: writer },
+          lifecycle: { status: 'active' },
+        },
+      })
+    );
+  });
+
+  it('counts only memories an item does not cite yet, and keeps the latest sighting', async () => {
+    stored.set('entity-person-bob', {
+      id: 'entity-person-bob',
+      type: 'entity.person',
+      title: 'Bob',
+      content: 'Bob.',
+      attributes: {
+        role: 'SRE',
+        'memory.number_of_occurrences': 1,
+        'memory.last_seen_at': '2026-11-03T00:00:00.000Z',
+      },
+      references: [{ uri: 'ki://m-1', relation: 'derived_from' }],
+      governance: { provenance: { created_by: { uri: 'workflow://first', metadata: {} } } },
+    });
+
+    const counts = await applyOperations(context(), [
+      {
+        op: 'upsert_entity',
+        id: 'entity-person-bob',
+        type: 'person',
+        name: 'Bob',
+        attributes: {},
+        sourceMemoryIds: ['m-1', 'm-2'],
+        lastSeenAt: '2026-11-01T00:00:00.000Z',
+      },
+    ]);
+
+    expect(counts).toEqual({ created: 0, updated: 1, deleted: 0 });
+    const [document] = written();
+    expect(document.attributes).toEqual({
+      role: 'SRE',
+      'memory.number_of_occurrences': 2,
+      'memory.last_seen_at': '2026-11-03T00:00:00.000Z',
+    });
+    expect(document.content).toBe('Bob.');
+    expect(document.governance?.provenance?.created_by).toEqual({
+      uri: 'workflow://first',
+      metadata: {},
+    });
+    expect(putKiRevision).toHaveBeenCalledWith(
+      expect.objectContaining({ existing: revisionOf(stored.get('entity-person-bob')!) })
+    );
+  });
+
+  it('replaces the entities a fact is about, and renders its access patterns', async () => {
+    stored.set('fact-1', {
+      id: 'fact-1',
+      type: 'fact.preference',
+      title: 'Old',
+      content: 'Old.',
+      references: [
+        { uri: 'ki://entity-person-old', relation: 'relates_to', description: 'about' },
+        { uri: 'ki://m-1', relation: 'derived_from' },
+      ],
+    });
+    const pattern = {
+      question_type: 'member profile',
+      esql_template: 'FROM loyalty | WHERE id == ?customer | LIMIT 1',
+      esql_example: 'FROM loyalty | WHERE id == 825464 | LIMIT 1',
+      returns: 'The member',
+    };
+
+    await applyOperations(context(), [
+      {
+        op: 'upsert_fact',
+        id: 'fact-1',
+        type: 'preference',
+        title: 'Customer 825464 prefers early departures',
+        content: 'Customer 825464 prefers early morning departures.',
+        about: ['entity-customer-825464'],
+        accessPatterns: [pattern],
+        sourceMemoryIds: ['m-2'],
+      },
+    ]);
+
+    const [document] = written();
+    expect(document.references).toEqual([
+      { uri: 'ki://m-1', relation: 'derived_from' },
+      { uri: 'ki://entity-customer-825464', relation: 'relates_to', description: 'about' },
+      { uri: 'ki://m-2', relation: 'derived_from' },
+    ]);
+    expect(document.content).toBe(
+      [
+        'Customer 825464 prefers early morning departures.',
+        '',
+        '## Access patterns',
+        '- [member profile] The member',
+        '  Template: `FROM loyalty | WHERE id == ?customer | LIMIT 1`',
+        '  Example: `FROM loyalty | WHERE id == 825464 | LIMIT 1`',
+      ].join('\n')
+    );
+    expect(document.attributes).toEqual(
+      expect.objectContaining({
+        esql: [pattern.esql_example],
+        access_patterns: [JSON.stringify(pattern)],
+        'memory.number_of_occurrences': 2,
+      })
+    );
+  });
+
+  it('adds a relationship to its source entity, and removes it again', async () => {
+    stored.set('entity-person-bob', {
+      id: 'entity-person-bob',
+      type: 'entity.person',
+      title: 'Bob',
+      references: [{ uri: 'ki://m-1', relation: 'derived_from' }],
+    });
+    const relationship = {
+      op: 'relationship' as const,
+      sourceId: 'entity-person-bob',
+      targetId: 'entity-team-ops',
+      type: 'member_of',
+      sourceMemoryIds: ['m-1'],
+    };
+
+    await applyOperations(context(), [{ ...relationship, remove: false }]);
+    const added = written()[0];
+    expect(added.references).toEqual([
+      { uri: 'ki://m-1', relation: 'derived_from' },
+      { uri: 'ki://entity-team-ops', relation: 'relates_to', description: 'member_of' },
+    ]);
+
+    stored.set('entity-person-bob', added);
+    await applyOperations(context(), [{ ...relationship, remove: true, sourceMemoryIds: [] }]);
+    expect(written()[1].references).toEqual([{ uri: 'ki://m-1', relation: 'derived_from' }]);
+  });
+
+  it('skips a relationship whose source entity does not exist', async () => {
+    const counts = await applyOperations(context(), [
+      {
+        op: 'relationship',
+        sourceId: 'entity-person-missing',
+        targetId: 'entity-team-ops',
+        type: 'member_of',
+        remove: false,
+        sourceMemoryIds: ['m-1'],
+      },
+    ]);
+
+    expect(counts).toEqual({ created: 0, updated: 0, deleted: 0 });
+    expect(putKiRevision).not.toHaveBeenCalled();
+  });
+
+  it('appends a new revision to a data stream instead of overwriting', async () => {
+    stored.set('entity-person-bob', {
+      id: 'entity-person-bob',
+      type: 'entity.person',
+      title: 'Bob',
+    });
+
+    await applyOperations(context({ type: 'data_stream', value: 'ai-index-ds-a' }), [
+      {
+        op: 'upsert_entity',
+        id: 'entity-person-bob',
+        type: 'person',
+        name: 'Bob',
+        attributes: {},
+        sourceMemoryIds: ['m-1'],
+      },
+    ]);
+
+    expect(putKiRevision).toHaveBeenCalledWith(expect.objectContaining({ existing: undefined }));
+  });
+
+  it('retries a write that lost to a concurrent one', async () => {
+    jest
+      .mocked(putKiRevision)
+      .mockRejectedValueOnce(new KiConflictError('a', 'entity-team-ops'))
+      .mockResolvedValue(undefined);
+
+    const counts = await applyOperations(context(), [
+      {
+        op: 'upsert_entity',
+        id: 'entity-team-ops',
+        type: 'team',
+        name: 'Ops',
+        attributes: {},
+        sourceMemoryIds: ['m-1'],
+      },
+    ]);
+
+    expect(counts.created).toBe(1);
+    expect(putKiRevision).toHaveBeenCalledTimes(2);
+  });
+
+  it('soft-deletes, and does not count a KI that is already gone', async () => {
+    jest
+      .mocked(softDeleteKi)
+      .mockResolvedValueOnce({ id: 'fact-1' })
+      .mockRejectedValueOnce(new KiNotFoundError('a', 'fact-2'));
+
+    const counts = await applyOperations(context(), [
+      { op: 'delete', id: 'fact-1' },
+      { op: 'delete', id: 'fact-2' },
+    ]);
+
+    expect(counts).toEqual({ created: 0, updated: 0, deleted: 1 });
+    expect(softDeleteKi).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ kiId: 'fact-1', writer, refresh: true })
+    );
+  });
+});
+
+describe('addReferences', () => {
+  const citations = (count: number, from = 0) =>
+    Array.from({ length: count }, (_, index) => ({
+      uri: `ki://m-${from + index}`,
+      relation: 'derived_from' as const,
+    }));
+  const relationships = [
+    { uri: 'ki://entity-a', relation: 'relates_to' as const, description: 'knows' },
+    { uri: 'ki://entity-b', relation: 'relates_to' as const, description: 'knows' },
+  ];
+
+  it('drops the oldest memory citations before any relationship when over the cap', () => {
+    const newRelationship = {
+      uri: 'ki://entity-c',
+      relation: 'relates_to' as const,
+      description: 'knows',
+    };
+
+    const references = addReferences(
+      [...relationships, ...citations(100)],
+      [newRelationship, ...citations(1, 100)]
+    );
+
+    expect(references).toHaveLength(100);
+    expect(references).toEqual(expect.arrayContaining([...relationships, newRelationship]));
+    expect(references).not.toContainEqual({ uri: 'ki://m-0', relation: 'derived_from' });
+    expect(references).toContainEqual({ uri: 'ki://m-100', relation: 'derived_from' });
+  });
+
+  it('drops the oldest relationships only once no citation is left', () => {
+    const many = Array.from({ length: 101 }, (_, index) => ({
+      uri: `ki://entity-${index}`,
+      relation: 'relates_to' as const,
+      description: 'knows',
+    }));
+
+    const references = addReferences(many, []);
+
+    expect(references).toHaveLength(100);
+    expect(references).not.toContainEqual(many[0]);
+  });
+});

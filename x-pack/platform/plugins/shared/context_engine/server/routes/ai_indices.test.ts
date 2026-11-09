@@ -2349,7 +2349,9 @@ describe('ai indices routes', () => {
 
     it('reconciles after a full update, which can drop the block entirely', async () => {
       aiIndexService.put.mockResolvedValue('updated');
-      aiIndexService.get.mockResolvedValue(aiIndexItem);
+      aiIndexService.get
+        .mockResolvedValueOnce({ ...aiIndexItem, feedback_analysis: feedbackAnalysis })
+        .mockResolvedValue(aiIndexItem);
 
       await callRoute('PUT', AI_INDEX_BY_ID_PATH, {
         params: { aiIndexId: 'customer_support' },
@@ -2424,6 +2426,7 @@ describe('ai indices routes', () => {
           feedback_analysis: feedbackAnalysis,
         },
       });
+      aiIndexService.get.mockResolvedValueOnce(aiIndexItem);
       await callRoute('PUT', AI_INDEX_BY_ID_PATH, {
         params: { aiIndexId: 'customer_support' },
         body: {

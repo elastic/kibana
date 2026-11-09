@@ -1553,6 +1553,42 @@ describe('AiIndexService', () => {
     });
   });
 
+  describe('removeAutomation', () => {
+    const automation = { type: 'workflow' as const, value: 'nightly-refresh' };
+
+    it('detaches the workflow automation and keeps the others', async () => {
+      mockSearchHits(
+        storedHit({
+          ...aiIndexDocument,
+          automations: [automation, { type: 'workflow', value: 'other' }],
+        })
+      );
+
+      await expect(
+        service.removeAutomation('customer_support', DEFAULT_SPACE, automation)
+      ).resolves.toBe('removed');
+
+      const [indexArgs] = storageClient.index.mock.calls[0];
+      expect(indexArgs.document?.automations).toEqual([{ type: 'workflow', value: 'other' }]);
+      expect(indexArgs.if_seq_no).toBe(7);
+    });
+
+    it('writes nothing when the workflow is not attached', async () => {
+      mockSearchHits(storedHit({ ...aiIndexDocument, automations: [] }));
+
+      await expect(
+        service.removeAutomation('customer_support', DEFAULT_SPACE, automation)
+      ).resolves.toBe('not_attached');
+      expect(storageClient.index).not.toHaveBeenCalled();
+    });
+
+    it('throws AiIndexNotFoundError when the AI index does not exist', async () => {
+      await expect(
+        service.removeAutomation('missing', DEFAULT_SPACE, automation)
+      ).rejects.toBeInstanceOf(AiIndexNotFoundError);
+    });
+  });
+
   describe('pre-upgrade documents', () => {
     const preUpgradeDocument: StoredAiIndexDocument = {
       description: 'legacy orders',

@@ -48,8 +48,8 @@ export interface AiIndexChangeHandler {
   /** The fields the handler reacts to. Missing: it runs on every save and delete. */
   fields?: readonly AiIndexChangeField[];
   /**
-   * `changed` (default) runs the handler when one of `fields` changed value. `saved` runs it
-   * whenever a save wrote one of them, even with the value it already had.
+   * `changed` (default) runs the handler when one of `fields` changed value. `saved` also runs it
+   * on delete and when a partial save wrote one of them.
    */
   when?: 'changed' | 'saved';
   onChange: (event: AiIndexChangeEvent) => Promise<void>;
@@ -77,15 +77,18 @@ export const diffAiIndex = (
 
 const shouldRun = (
   { fields, when = 'changed' }: AiIndexChangeHandler,
-  { changed, saved }: AiIndexChangeEvent
+  { changed, saved, current }: AiIndexChangeEvent
 ): boolean => {
   if (fields === undefined) {
     return true;
   }
-  if (when === 'saved') {
-    return saved === undefined || fields.some((field) => saved.has(field));
+  if (fields.some((field) => changed.has(field))) {
+    return true;
   }
-  return fields.some((field) => changed.has(field));
+  if (when !== 'saved') {
+    return false;
+  }
+  return current === undefined || (saved !== undefined && fields.some((field) => saved.has(field)));
 };
 
 /**

@@ -1,0 +1,368 @@
+version: '1'
+name: __NAME__
+description: 'Turns the memories agents save in a Context Engine AI index into long-term facts, entities and relationships, as the AI index dreaming config describes.'
+enabled: false
+tags:
+  - context-engine
+  - memory
+  - dreaming
+  - scheduled
+settings:
+  timeout: '30m'
+  concurrency:
+    key: __CONCURRENCY_KEY__
+    strategy: drop
+    max: 1
+consts:
+  ai_index_id: __AI_INDEX_ID__
+  memories_index: __MEMORIES_INDEX__
+  connector_id: __CONNECTOR_ID__
+  instructions: __INSTRUCTIONS__
+  fact_types: __FACT_TYPES__
+  entity_types: __ENTITY_TYPES__
+  relationship_types: __RELATIONSHIP_TYPES__
+outputs:
+  - name: memories
+    type: number
+triggers:
+  - type: scheduled
+    with:
+      every: '__INTERVAL_MINUTES__m'
+  - type: manual
+steps:
+  - name: status
+    type: context-engine.getDreamingStatus
+    with:
+      ai_index_id: '{{ consts.ai_index_id }}'
+
+  - name: paused
+    type: if
+    condition: '${{ steps.status.output.dream != true }}'
+    steps:
+      - name: skip
+        type: workflow.output
+        status: cancelled
+        with:
+          memories: 0
+          reason: '{{ steps.status.output.reason }}'
+
+  - name: last_run
+    type: workflow.getLastRun
+    with:
+      default_hours: 168
+      max_hours: 720
+
+  - name: read_memories
+    type: elasticsearch.search
+    with:
+      index: '{{ consts.memories_index }}'
+      ignore_unavailable: true
+      size: 500
+      sort:
+        - updated_at: desc
+      collapse:
+        field: id
+      _source:
+        - id
+        - type
+        - title
+        - content
+        - updated_at
+        - attributes
+        - governance.lifecycle.status
+      query:
+        bool:
+          filter:
+            - terms:
+                type:
+                  - memory.session_fact
+                  - memory.session
+            - range:
+                updated_at:
+                  gte: '{{ steps.last_run.output.since }}'
+
+  - name: active
+    type: data.set
+    with:
+      memories: >-
+        ${{ steps.read_memories.output.hits.hits | map: "_source"
+        | reject_exp: "memory", "memory.governance.lifecycle.status == 'deleted' or memory.governance.lifecycle.status == 'verification_failed'" }}
+
+  - name: dream
+    type: if
+    condition: '${{ variables.memories.size > 0 }}'
+    steps:
+      - name: batches
+        type: foreach
+        foreach: '{{ variables.memories | reverse | chunk: 50 | json }}'
+        steps:
+          - name: read_existing
+            type: elasticsearch.search
+            with:
+              index: '{{ consts.memories_index }}'
+              ignore_unavailable: true
+              size: 300
+              sort:
+                - updated_at: desc
+              collapse:
+                field: id
+              _source:
+                - id
+                - type
+                - title
+                - content
+                - attributes
+                - references
+                - governance.lifecycle.status
+              query:
+                bool:
+                  should:
+                    - prefix:
+                        type: 'fact.'
+                    - prefix:
+                        type: 'entity.'
+                  minimum_should_match: 1
+
+          - name: consolidate
+            type: ai.prompt
+            connector-id: '{{ consts.connector_id }}'
+            connector-id-by-feature: '{% if consts.connector_id == blank %}context_engine_prompt{% endif %}'
+            on-failure:
+              retry:
+                max-attempts: 2
+                delay: '30s'
+            with:
+              prompt: |
+                You consolidate short-term memories into long-term memory: entities, facts about them, and relationships between entities.
+
+                You are given MEMORIES (new notes agents saved while working) and EXISTING long-term entities and facts.
+
+                A memory is a note an agent chose to remember: its title and content. Take from it only what it states.
+
+                Return only changes. Update an existing item by repeating its id as ref with the new values; create one with a new key like "new:1"; delete one with delete: true.
+
+                Merge rather than duplicate: if a memory restates or refines an existing item, update that item.
+
+                When a memory restates or confirms an existing item, return its ref with that memory in source_memory_ids even if nothing else changes: that records that it was seen again. Each EXISTING item shows attributes["memory.number_of_occurrences"], how many memories it was seen in, and attributes["memory.last_seen_at"], when it was last seen.
+
+                Facts are read without their entities, so write each one to stand alone: name the entities it is about in its title and content, and keep every number exactly as stated.
+
+                Add a relationship of a configured type whenever the memories support it, so related entities are linked.
+
+                List every entity a fact is about in its about field, creating an entity of a configured type if none exists yet.
+
+                Give every entity a content summary of what is known about it: its attribute values and the main facts about it. When you create, update or delete a fact about an entity, update that entity and rewrite its content to match.
+
+                Give an entity or fact access_patterns when the MEMORIES show how to query the raw data about it: up to 5 distinct questions a later agent could answer from that data. Build them only from indices, fields, values and queries that appear in the MEMORIES; return none rather than invent an index or field. Each has:
+                - question_type: a short label for the kind of question.
+                - esql_template: the query with named ?param placeholders, without quotes, where the filters go. Scope an entity's queries to it, for example WHERE customer_id == ?customer.
+                - esql_example: the same query with real values from the MEMORIES in place of the placeholders.
+                - returns: a short description of what the query returns.
+                esql_example is run to verify it, and a pattern that fails is dropped, so it must be valid and runnable:
+                - Start with FROM <index>; use | between commands; use field names exactly as the MEMORIES give them, with backticks around names with spaces.
+                - Quote string literals with double quotes; do not quote numbers or booleans. Write dates in ISO 8601.
+                - Boolean fields take COUNT(*) WHERE field == true, never SUM()/AVG()/MIN()/MAX(). Only use AVG()/SUM() on numeric fields.
+                - Keep it cheap: end it with a small | LIMIT n (n <= 20).
+                An item's existing access_patterns are shown with it. Return access_patterns only to change them; the list you return replaces them.
+
+                Every created or updated item must list the MEMORIES it is based on in source_memory_ids.
+
+                Ignore memories that hold nothing worth remembering. An empty change set is a valid answer.
+
+                How to read EXISTING: an item's type is its kind and its configured type, so entity.customer is an entity of type customer and fact.preference is a fact of type preference. On an entity, each references entry with relation relates_to is a relationship: its description is the relationship type and its uri, ki://<id>, names the target entity. On a fact, the relates_to entries with description about name the entities it is about.
+
+                FACT TYPES:
+                {%- for fact_type in consts.fact_types %}
+                - {{ fact_type.type }}{% if fact_type.description %}: {{ fact_type.description }}{% endif %}
+                {%- else %}
+                none: do not create facts.
+                {%- endfor %}
+                ENTITY TYPES:
+                {%- for entity_type in consts.entity_types %}
+                - {{ entity_type.type }}{% if entity_type.description %}: {{ entity_type.description }}{% endif %}{% if entity_type.attributes.size > 0 %} (attributes: {{ entity_type.attributes | join: ', ' }}){% endif %}
+                {%- else %}
+                none: do not create entities.
+                {%- endfor %}
+                RELATIONSHIP TYPES:
+                {%- for relationship_type in consts.relationship_types %}
+                - {{ relationship_type.type }}: {{ relationship_type.source }} -> {{ relationship_type.target }}{% if relationship_type.description %} ({{ relationship_type.description }}){% endif %}
+                {%- else %}
+                none: do not create relationships.
+                {%- endfor %}
+
+                INSTRUCTIONS:
+
+                {{ consts.instructions }}
+
+                MEMORIES (one per line):
+                {%- for memory in foreach.item %}
+                {{ memory | json }}
+                {%- endfor %}
+
+                EXISTING (one item per line, none when empty):
+                {%- for hit in steps.read_existing.output.hits.hits %}
+                {%- unless hit._source.governance.lifecycle.status == 'deleted' or hit._source.governance.lifecycle.status == 'verification_failed' %}
+                {{ hit._source | json }}
+                {%- endunless %}
+                {%- endfor %}
+              schema:
+                type: object
+                properties:
+                  entities:
+                    type: array
+                    description: Entities to create, update, or delete. Leave out entities that do not change.
+                    items:
+                      type: object
+                      properties:
+                        ref:
+                          type: string
+                          description: An id from EXISTING, or a new key like "new:1" to create something. Reuse the same new key to refer to a new entity elsewhere in this change set.
+                        delete:
+                          type: boolean
+                          description: True deletes an existing entity.
+                        type:
+                          type: string
+                          description: One of the configured entity types.
+                        name:
+                          type: string
+                          description: The canonical name of the entity.
+                        description:
+                          type: string
+                          description: A one-line description.
+                        content:
+                          type: string
+                          description: A short summary of what is known about the entity, its attribute values and the main facts about it, with exact values.
+                        attributes:
+                          type: array
+                          description: Values for the attribute keys configured for this entity type.
+                          items:
+                            type: object
+                            properties:
+                              key:
+                                type: string
+                              value:
+                                type: string
+                            required:
+                              - key
+                              - value
+                        access_patterns:
+                          type: array
+                          description: Replaces the existing access patterns; leave out to keep them.
+                          items:
+                            type: object
+                            properties:
+                              question_type:
+                                type: string
+                              esql_template:
+                                type: string
+                              esql_example:
+                                type: string
+                              returns:
+                                type: string
+                            required:
+                              - question_type
+                              - esql_template
+                              - esql_example
+                              - returns
+                        source_memory_ids:
+                          type: array
+                          description: Ids of the MEMORIES this is based on. Required unless deleting.
+                          items:
+                            type: string
+                      required:
+                        - ref
+                  facts:
+                    type: array
+                    description: Facts to create, update, or delete. Leave out facts that do not change.
+                    items:
+                      type: object
+                      properties:
+                        ref:
+                          type: string
+                          description: An id from EXISTING, or a new key like "new:1" to create something.
+                        delete:
+                          type: boolean
+                          description: True deletes an existing fact.
+                        type:
+                          type: string
+                          description: One of the configured fact types.
+                        title:
+                          type: string
+                          description: A short label for the fact that names the entities it is about.
+                        content:
+                          type: string
+                          description: The fact, stated so it can be used on its own, naming the entities it is about and keeping exact values.
+                        about:
+                          type: array
+                          description: Refs of the entities the fact is about.
+                          items:
+                            type: string
+                        access_patterns:
+                          type: array
+                          description: Replaces the existing access patterns; leave out to keep them.
+                          items:
+                            type: object
+                            properties:
+                              question_type:
+                                type: string
+                              esql_template:
+                                type: string
+                              esql_example:
+                                type: string
+                              returns:
+                                type: string
+                            required:
+                              - question_type
+                              - esql_template
+                              - esql_example
+                              - returns
+                        source_memory_ids:
+                          type: array
+                          description: Ids of the MEMORIES this is based on. Required unless deleting.
+                          items:
+                            type: string
+                      required:
+                        - ref
+                  relationships:
+                    type: array
+                    description: Relationships between entities to add or remove.
+                    items:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                          description: One of the configured relationship types.
+                        source:
+                          type: string
+                          description: Ref of the source entity.
+                        target:
+                          type: string
+                          description: Ref of the target entity.
+                        remove:
+                          type: boolean
+                          description: True removes an existing relationship.
+                        source_memory_ids:
+                          type: array
+                          description: Ids of the MEMORIES this is based on. Required unless removing.
+                          items:
+                            type: string
+                      required:
+                        - type
+                        - source
+                        - target
+                required:
+                  - entities
+                  - facts
+                  - relationships
+
+          - name: apply_changes
+            type: context-engine.applyDreamChanges
+            with:
+              ai_index_id: '{{ consts.ai_index_id }}'
+              memories: '${{ foreach.item }}'
+              changes: '${{ steps.consolidate.output.content }}'
+
+  - name: output_result
+    type: workflow.output
+    with:
+      memories: '${{ variables.memories | size | default: 0 }}'

@@ -1,0 +1,165 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        putAiIndexDreamingRequestExample:
+          summary: "Configure dreaming"
+          description: "Example request that turns dreaming on with fact, entity and relationship types"
+          value:
+            enabled: true
+            schedule:
+              interval: 24h
+            instructions: Record confirmed fixes, known issues and policies from support tickets.
+            facts:
+              - type: known_issue
+                description: A problem confirmed to affect customers, with where it happens.
+              - type: workaround
+                description: A confirmed way around a problem until it is fixed.
+            entities:
+              nodes:
+                - type: issue
+                  description: A known problem customers run into.
+                  attributes:
+                    - status
+                    - fixed_in
+                - type: platform
+                  description: A browser, operating system or device, with its version.
+              edges:
+                - type: occurs_on
+                  source: issue
+                  target: platform
+                  description: The issue happens only on this platform or version.
+        putAiIndexDreamingOffRequestExample:
+          summary: "Turn dreaming off"
+          description: "Example request that turns scheduled dreaming off and keeps the configured types"
+          value:
+            enabled: false
+            facts:
+              - type: known_issue
+responses:
+  200:
+    content:
+      application/json:
+        examples:
+          putAiIndexDreamingResponseExample:
+            summary: "Dreaming configured"
+            description: "Example response returning the stored dreaming configuration"
+            value:
+              dreaming:
+                enabled: true
+                schedule:
+                  interval: 24h
+                instructions: Record confirmed fixes, known issues and policies from support tickets.
+                facts:
+                  - type: known_issue
+                    description: A problem confirmed to affect customers, with where it happens.
+                  - type: workaround
+                    description: A confirmed way around a problem until it is fixed.
+                entities:
+                  nodes:
+                    - type: issue
+                      description: A known problem customers run into.
+                      attributes:
+                        - status
+                        - fixed_in
+                    - type: platform
+                      description: A browser, operating system or device, with its version.
+                  edges:
+                    - type: occurs_on
+                      source: issue
+                      target: platform
+                      description: The issue happens only on this platform or version.
+  400:
+    content:
+      application/json:
+        examples:
+          unknownEntityTypeExample:
+            summary: "Relationship to an unknown entity type"
+            description: "A relationship type links an entity type that is not configured"
+            value:
+              statusCode: 400
+              error: Bad Request
+              message: "Relationship type 'occurs_on' links entity type 'device', which is not configured."
+          memoryDisabledExample:
+            summary: "Memory turned off"
+            description: "The request sets up dreaming while the global Context Engine memory setting is off"
+            value:
+              statusCode: 400
+              error: Bad Request
+              message: "Context Engine memory is disabled. Enable the global memory setting before setting up dreaming."
+  404:
+    content:
+      application/json:
+        examples:
+          notFoundExample:
+            summary: "AI Index not found"
+            description: "No AI Index with the given ID exists in the current space"
+            value:
+              statusCode: 404
+              error: Not Found
+              message: "AI index 'customer_support' not found"
+          contextEngineDisabledExample:
+            summary: "Context Engine turned off"
+            description: "Context Engine is turned off in this space"
+            value:
+              statusCode: 404
+              error: Not Found
+              message: Not Found
+  409:
+    content:
+      application/json:
+        examples:
+          conflictExample:
+            summary: "Concurrent update"
+            description: "The AI Index was modified by another request during the write"
+            value:
+              statusCode: 409
+              error: Conflict
+              message: "AI index 'customer_support' was modified concurrently; please retry"
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X PUT "https://${KIBANA_URL}/api/context_engine/ai_index/customer_support/_dreaming" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        -H "kbn-xsrf: true" \
+        -H "Content-Type: application/json" \
+        -d '{
+          "enabled": true,
+          "schedule": { "interval": "24h" },
+          "instructions": "Record confirmed fixes, known issues and policies from support tickets.",
+          "facts": [
+            { "type": "known_issue", "description": "A problem confirmed to affect customers, with where it happens." },
+            { "type": "workaround", "description": "A confirmed way around a problem until it is fixed." }
+          ],
+          "entities": {
+            "nodes": [
+              { "type": "issue", "description": "A known problem customers run into.", "attributes": ["status", "fixed_in"] },
+              { "type": "platform", "description": "A browser, operating system or device, with its version." }
+            ],
+            "edges": [
+              { "type": "occurs_on", "source": "issue", "target": "platform", "description": "The issue happens only on this platform or version." }
+            ]
+          }
+        }'
+  - lang: Console
+    source: |
+      PUT kbn:/api/context_engine/ai_index/customer_support/_dreaming
+      {
+        "enabled": true,
+        "schedule": { "interval": "24h" },
+        "instructions": "Record confirmed fixes, known issues and policies from support tickets.",
+        "facts": [
+          { "type": "known_issue", "description": "A problem confirmed to affect customers, with where it happens." },
+          { "type": "workaround", "description": "A confirmed way around a problem until it is fixed." }
+        ],
+        "entities": {
+          "nodes": [
+            { "type": "issue", "description": "A known problem customers run into.", "attributes": ["status", "fixed_in"] },
+            { "type": "platform", "description": "A browser, operating system or device, with its version." }
+          ],
+          "edges": [
+            { "type": "occurs_on", "source": "issue", "target": "platform", "description": "The issue happens only on this platform or version." }
+          ]
+        }
+      }
