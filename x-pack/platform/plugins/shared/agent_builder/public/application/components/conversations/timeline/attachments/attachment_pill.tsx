@@ -20,7 +20,7 @@ import { css } from '@emotion/react';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { getVersion } from '@kbn/agent-builder-common/attachments';
 import { useAgentBuilderServices } from '../../../../hooks/use_agent_builder_service';
-import { ATTACHMENT_PILL_WIDTH } from '../../conversation_input/image_upload_styles';
+import { ATTACHMENT_PILL_WIDTH } from '../../conversation_input/attachment_upload_styles';
 
 const MAX_PILL_WIDTH = 320;
 const DEFAULT_ICON = 'document';

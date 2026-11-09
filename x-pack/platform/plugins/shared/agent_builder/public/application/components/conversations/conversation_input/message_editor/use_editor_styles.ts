@@ -13,9 +13,9 @@ import {
   ATTACHMENT_PLACEHOLDER_REMOVE_ATTRIBUTE,
 } from './attachment_placeholder';
 import {
-  imageUploadProgressFillStyles,
-  imageUploadProgressTrackColorStyles,
-} from '../image_upload_styles';
+  attachmentUploadProgressFillStyles,
+  attachmentUploadProgressTrackColorStyles,
+} from '../attachment_upload_styles';
 
 /** Returns CSS for the attachment placeholder chip inside the contenteditable editor. */
 export const useAttachmentPlaceholderStyles = () => {
@@ -91,12 +91,12 @@ export const useAttachmentPlaceholderStyles = () => {
       right: ${euiTheme.size.xs};
       height: ${euiTheme.border.width.thick};
       transform: translateY(-50%);
-      ${imageUploadProgressTrackColorStyles(euiTheme)}
+      ${attachmentUploadProgressTrackColorStyles(euiTheme)}
     }
     [${ATTACHMENT_PLACEHOLDER_ATTRIBUTE}][data-uploading='true']
       > .attachment-placeholder-progress-track
       > .attachment-placeholder-progress-fill {
-      ${imageUploadProgressFillStyles(euiTheme)}
+      ${attachmentUploadProgressFillStyles(euiTheme)}
     }
   `;
 };

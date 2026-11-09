@@ -122,7 +122,7 @@ export const useUserMessageMarkdownPlugins = ({
           const name = decodeBadgeName(parsed.path);
           const badge = (
             <span
-              css={styles.imageBadgeWrapper}
+              css={styles.attachmentBadgeWrapper}
               tabIndex={0}
               onMouseEnter={onHoverAttachment ? () => onHoverAttachment(name) : undefined}
               onMouseLeave={onHoverAttachment ? () => onHoverAttachment(null) : undefined}
@@ -132,7 +132,7 @@ export const useUserMessageMarkdownPlugins = ({
                 size="s"
                 aria-hidden={true}
               />
-              <span className="image-badge-label" css={styles.imageBadgeInner}>
+              <span className="attachment-badge-label" css={styles.attachmentBadgeInner}>
                 {name}
               </span>
             </span>

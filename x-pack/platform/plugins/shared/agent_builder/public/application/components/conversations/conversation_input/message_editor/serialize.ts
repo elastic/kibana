@@ -23,11 +23,11 @@ const SCHEME_BY_KIND: Readonly<Record<PlaceholderKind, string>> = {
 };
 
 /**
- * Encodes an image filename for use as the path in a serialized image link.
+ * Encodes an attachment file name for use as the path in a serialized attachment link.
  * Uses encodeURIComponent and additionally escapes parentheses to avoid
  * breaking the badge regex parser.
  */
-export const encodeImageName = (name: string): string =>
+export const encodeAttachmentName = (name: string): string =>
   encodeURIComponent(name).replace(/\(/g, '%28').replace(/\)/g, '%29');
 
 /**
@@ -65,7 +65,7 @@ export const serializeEditorContent = (editorElement: HTMLElement): string => {
       const name = element.getAttribute('aria-label') ?? '';
       const displayName = name.replace(/[\[\]]/g, '');
       const scheme = SCHEME_BY_KIND[getPlaceholderKind(element)];
-      result += `[${displayName}](${scheme}://${encodeImageName(name)})`;
+      result += `[${displayName}](${scheme}://${encodeAttachmentName(name)})`;
     } else if (isElementCommandBadge(element)) {
       result += serializeCommandBadge(element);
     } else if (element.tagName === 'BR') {

@@ -19,9 +19,9 @@ import { useConversationContext } from '../../../context/conversation/conversati
 import {
   ATTACHMENT_PILL_WIDTH,
   ATTACHMENT_PILL_HEIGHT,
-  imageUploadProgressFillStyles,
-  imageUploadProgressTrackColorStyles,
-} from './image_upload_styles';
+  attachmentUploadProgressFillStyles,
+  attachmentUploadProgressTrackColorStyles,
+} from './attachment_upload_styles';
 
 export interface AttachmentPillsRowProps {
   attachments: ConversationAttachment[];
@@ -62,10 +62,10 @@ const UploadingImagePill: React.FC<{ name: string }> = ({ name }) => {
           left: 4px;
           right: 4px;
           height: 2px;
-          ${imageUploadProgressTrackColorStyles(euiTheme)}
+          ${attachmentUploadProgressTrackColorStyles(euiTheme)}
         `}
       >
-        <div css={imageUploadProgressFillStyles(euiTheme)} />
+        <div css={attachmentUploadProgressFillStyles(euiTheme)} />
       </div>
     </div>
   );

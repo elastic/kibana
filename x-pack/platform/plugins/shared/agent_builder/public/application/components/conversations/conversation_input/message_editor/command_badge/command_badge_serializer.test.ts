@@ -6,7 +6,7 @@
  */
 
 import { deserializeInputSegments } from './command_badge_serializer';
-import { serializeEditorContent, encodeImageName } from '../serialize';
+import { serializeEditorContent, encodeAttachmentName } from '../serialize';
 import { createCommandBadgeElement } from './create_badge_element';
 import { createAttachmentPlaceholderElement } from '../attachment_placeholder';
 import { CommandId } from '../command_menu/types';
@@ -199,17 +199,17 @@ describe('serializeEditorContent', () => {
   });
 });
 
-describe('encodeImageName', () => {
+describe('encodeAttachmentName', () => {
   it('encodes spaces', () => {
-    expect(encodeImageName('my file.png')).toBe('my%20file.png');
+    expect(encodeAttachmentName('my file.png')).toBe('my%20file.png');
   });
 
   it('encodes parentheses', () => {
-    expect(encodeImageName('Screenshot (1).png')).toBe('Screenshot%20%281%29.png');
+    expect(encodeAttachmentName('Screenshot (1).png')).toBe('Screenshot%20%281%29.png');
   });
 
   it('leaves normal filenames unchanged', () => {
-    expect(encodeImageName('photo.png')).toBe('photo.png');
+    expect(encodeAttachmentName('photo.png')).toBe('photo.png');
   });
 });
 

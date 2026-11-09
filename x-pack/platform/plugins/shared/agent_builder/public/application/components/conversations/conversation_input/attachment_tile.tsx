@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
-import { ATTACHMENT_PILL_WIDTH, ATTACHMENT_PILL_HEIGHT } from './image_upload_styles';
+import { ATTACHMENT_PILL_WIDTH, ATTACHMENT_PILL_HEIGHT } from './attachment_upload_styles';
 
 const removeAriaLabel = i18n.translate('xpack.agentBuilder.attachmentTile.removeAriaLabel', {
   defaultMessage: 'Remove attachment',
