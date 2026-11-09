@@ -47,9 +47,9 @@ export class RollbackActionRunner extends ActionRunner {
         // returned list: the writes that follow one can fail, and the batch that failed partway is
         // precisely the one a retry replays — without its id the replay re-sends a rollback to
         // every agent the interrupted batch already actioned.
-        onActionCreated: (actionId: string) => {
+        onActionCreated: async (actionId: string) => {
           this.allActionIds.push(actionId);
-          this.recordChildActionIds([actionId]);
+          await this.recordChildActionIds([actionId]);
         },
       },
       this.actionParams?.spaceId ? [this.actionParams.spaceId] : undefined
@@ -103,7 +103,7 @@ export async function rollbackBatch(
     total?: number;
     spaceIds?: string[];
     /** Called with each action id as its document is created, before the writes that follow it. */
-    onActionCreated?: (actionId: string) => void;
+    onActionCreated?: (actionId: string) => Promise<void> | void;
   },
   spaceIds?: string[]
 ): Promise<{ actionIds: string[] }> {
@@ -185,6 +185,32 @@ export async function rollbackBatch(
       rollback: true,
     };
 
+    errorsByActionId[actionId] = {};
+
+    // Assign version-specific errors (expired rollbacks, hosted agents) to this action
+    if (errorsByRollbackVersion[version]) {
+      Object.assign(errorsByActionId[actionId], errorsByRollbackVersion[version]);
+    }
+
+    // The agents are marked as rolling back before the action that rolls them back is created, so
+    // that an action document implies its agents' bookkeeping has been written. The other way
+    // round, a timeout in between leaves agents dispatched but still showing their old upgrade
+    // state, and the retry — which deduplicates on the action document — filters exactly those
+    // agents out and never comes back to fix them. This way the same timeout leaves agents marked
+    // with no action dispatched, which the retry does redo, and both writes are idempotent. This
+    // is the order `reassignBatch` already uses.
+    await bulkUpdateAgents(
+      esClient,
+      agents.map((agent) => ({
+        agentId: agent.id,
+        data: {
+          upgraded_at: null,
+          upgrade_started_at: now,
+        },
+      })),
+      errorsByActionId[actionId]
+    );
+
     await createAgentAction(esClient, soClient, {
       id: actionId,
       created_at: now,
@@ -197,25 +223,7 @@ export async function rollbackBatch(
     });
 
     actionIds.push(actionId);
-    options.onActionCreated?.(actionId);
-    errorsByActionId[actionId] = {};
-
-    // Assign version-specific errors (expired rollbacks, hosted agents) to this action
-    if (errorsByRollbackVersion[version]) {
-      Object.assign(errorsByActionId[actionId], errorsByRollbackVersion[version]);
-    }
-
-    await bulkUpdateAgents(
-      esClient,
-      agents.map((agent) => ({
-        agentId: agent.id,
-        data: {
-          upgraded_at: null,
-          upgrade_started_at: now,
-        },
-      })),
-      errorsByActionId[actionId]
-    );
+    await options.onActionCreated?.(actionId);
   }
 
   // Create actions for versions that have errors but no eligible agents
@@ -247,7 +255,7 @@ export async function rollbackBatch(
     });
 
     actionIds.push(actionId);
-    options.onActionCreated?.(actionId);
+    await options.onActionCreated?.(actionId);
     errorsByActionId[actionId] = { ...versionErrors };
   }
 
@@ -278,7 +286,7 @@ export async function rollbackBatch(
         namespaces,
       });
       actionIds.push(errorOnlyActionId);
-      options.onActionCreated?.(errorOnlyActionId);
+      await options.onActionCreated?.(errorOnlyActionId);
       errorsByActionId[errorOnlyActionId] = preActionErrors;
     }
   }

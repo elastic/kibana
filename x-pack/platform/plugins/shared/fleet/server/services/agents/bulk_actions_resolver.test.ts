@@ -22,6 +22,7 @@ import { BulkActionsResolver, createRetryTask } from './bulk_actions_resolver';
 import { BulkActionTaskType } from './bulk_action_types';
 import {
   CHECK_TASK_INTERVAL_MINUTES,
+  MAX_CHILD_ACTION_IDS,
   MAX_CHECK_TASK_RESUMES,
   MAX_CHECK_TASK_RUNS,
 } from './retry_helper';
@@ -152,6 +153,43 @@ describe('BulkActionsResolver', () => {
       await expect(
         resolver.updateCheckTaskState('task1:check', { nbAgentsProcessed: 1 })
       ).rejects.toThrow('Could not update the state of task task1:check: Not Found');
+    });
+
+    it('merges child action ids with the stored ones instead of replacing them', async () => {
+      // these writes are made as each child action is created, so two can be in flight at once; a
+      // write carrying one id landing after one carrying two would otherwise drop the second, and
+      // with it the only reference that stops a resume dispatching that action's agents again
+      await resolver.updateCheckTaskState('task1:check', { childActionIds: ['child-1'] });
+
+      const stateMapFn = taskManager.bulkUpdateState.mock.calls[0][1];
+      expect(stateMapFn({ childActionIds: ['child-1', 'child-2'] }, 'task1:check')).toEqual({
+        childActionIds: ['child-1', 'child-2'],
+        checkpointUpdatedAt: expect.any(String),
+      });
+    });
+
+    it('caps the merged child action ids', async () => {
+      await resolver.updateCheckTaskState('task1:check', { childActionIds: ['child-new'] });
+
+      const stateMapFn = taskManager.bulkUpdateState.mock.calls[0][1];
+      const stored = Array.from({ length: MAX_CHILD_ACTION_IDS }, (_, i) => `child-${i}`);
+      const merged = stateMapFn({ childActionIds: stored }, 'task1:check') as {
+        childActionIds: string[];
+      };
+
+      expect(merged.childActionIds).toHaveLength(MAX_CHILD_ACTION_IDS);
+      expect(merged.childActionIds).not.toContain('child-new');
+    });
+
+    it('leaves the stored child action ids alone when a write does not carry any', async () => {
+      await resolver.updateCheckTaskState('task1:check', { nbAgentsProcessed: 10 });
+
+      const stateMapFn = taskManager.bulkUpdateState.mock.calls[0][1];
+      expect(stateMapFn({ childActionIds: ['child-1'] }, 'task1:check')).toEqual({
+        childActionIds: ['child-1'],
+        nbAgentsProcessed: 10,
+        checkpointUpdatedAt: expect.any(String),
+      });
     });
 
     it('bumps only the timestamp for a heartbeat, leaving the checkpoint alone', async () => {
@@ -754,6 +792,33 @@ describe('createRetryTask', () => {
         },
         schedule: CHECK_TASK_SCHEDULE,
       });
+    });
+
+    it('gives up on the state re-read rather than running past the task timeout', async () => {
+      jest.useFakeTimers();
+      try {
+        esClient.search.mockRejectedValue(new EsErrors.TimeoutError('Request timed out'));
+        // the read that failed the run is often the same one this would make, and a run that
+        // expires has its whole return value discarded, schedule included
+        resolver.getCheckTaskState.mockReturnValue(new Promise(() => {}));
+
+        const run = createRetryTask(
+          createTaskInstance({ state: { searchAfter: ['olderAgent'], runCount: 4 } }),
+          getDeps,
+          jest.fn()
+        ).run();
+        await jest.advanceTimersByTimeAsync(5_000);
+
+        expect(await run).toEqual({
+          state: { searchAfter: ['olderAgent'], runCount: 5 },
+          schedule: CHECK_TASK_SCHEDULE,
+        });
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining('Timed out reading the state of check task')
+        );
+      } finally {
+        jest.useRealTimers();
+      }
     });
 
     it('falls back to the claimed state when the state cannot be read after a failed run', async () => {

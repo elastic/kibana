@@ -1004,6 +1004,29 @@ describe('Agent actions', () => {
       expect(esClientMock.closePointInTime).toHaveBeenCalledWith({ id: 'pit2' });
     });
 
+    it('stops collecting and stops paging at the limit', async () => {
+      // the limit is the caller's memory bound, so it has to stop the read rather than be applied
+      // to what it returns: the documents naming a million agents are held to produce that set
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+      const fullPage = Array.from({ length: 1000 }, (_, i) => [`agent${i}`]);
+      esClientMock.search.mockResolvedValue(mockHits(fullPage) as any);
+
+      const agentIds = await getAgentIdsFromActions(esClientMock, ['action1'], { limit: 10 });
+
+      expect(agentIds.size).toBe(10);
+      expect(esClientMock.search).toHaveBeenCalledTimes(1);
+      expect(esClientMock.openPointInTime).not.toHaveBeenCalled();
+    });
+
+    it('is empty for a limit of zero', async () => {
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+
+      await expect(
+        getAgentIdsFromActions(esClientMock, ['action1'], { limit: 0 })
+      ).resolves.toEqual(new Set());
+      expect(esClientMock.search).not.toHaveBeenCalled();
+    });
+
     it('closes the point in time when a page fails', async () => {
       const esClientMock = elasticsearchServiceMock.createInternalClient();
       const fullPage = Array.from({ length: 1000 }, (_, i) => [`agent${i}`]);
@@ -1023,12 +1046,34 @@ describe('Agent actions', () => {
     it('returns the agents that have no result for the action', async () => {
       const esClientMock = elasticsearchServiceMock.createInternalClient();
       esClientMock.search.mockResolvedValue({
-        hits: { hits: [{ _source: { agent_id: 'agent2' } }] },
+        hits: { hits: [] },
+        aggregations: { agent_ids: { buckets: [{ key: 'agent2' }] } },
       } as any);
 
       await expect(
         getAgentsWithoutActionResults(esClientMock, ['action1'], ['agent1', 'agent2'])
       ).resolves.toEqual(['agent1']);
+    });
+
+    it('counts an agent once however many results it has', async () => {
+      // result documents carry generated ids, so a retry can write a second one for an agent, and
+      // an agent can have one under more than one of the given action ids; a page of hits sized to
+      // the number of agents asked about could be filled by those duplicates and hide the rest
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+      esClientMock.search.mockResolvedValue({
+        hits: { hits: [] },
+        aggregations: { agent_ids: { buckets: [{ key: 'agent1' }, { key: 'agent2' }] } },
+      } as any);
+
+      await expect(
+        getAgentsWithoutActionResults(esClientMock, ['action1', 'child1'], ['agent1', 'agent2'])
+      ).resolves.toEqual([]);
+      expect(esClientMock.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          size: 0,
+          aggs: { agent_ids: { terms: { field: 'agent_id', size: 2 } } },
+        })
+      );
     });
 
     it('does not search without an agent to look for', async () => {

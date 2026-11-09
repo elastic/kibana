@@ -288,12 +288,11 @@ describe('unenroll', () => {
         }
 
         if (request?.index === AGENT_ACTIONS_RESULTS_INDEX) {
+          // the agents that already have a result come back as aggregation buckets, so that
+          // several results for one agent cannot crowd another agent's out of a page of hits
           return {
-            hits: {
-              hits: [
-                { _source: { action_id: 'other-action1', agent_id: 'agent-in-regular-policy' } },
-              ],
-            },
+            hits: { hits: [] },
+            aggregations: { agent_ids: { buckets: [{ key: 'agent-in-regular-policy' }] } },
           };
         }
 

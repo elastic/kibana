@@ -30,6 +30,7 @@ import type { BulkActionCheckTaskState, RetryParams } from './retry_helper';
 import {
   CHECK_TASK_INTERVAL_MINUTES,
   getRetryParams,
+  MAX_CHILD_ACTION_IDS,
   MAX_RETRY_COUNT,
   RejectedCheckpointError,
   RUNNER_HEARTBEAT_INTERVAL_MINUTES,
@@ -70,16 +71,6 @@ export const ACTION_SORT_ORDER = 'asc' as const;
  * rather than re-reading most of a fast action every batch.
  */
 const DEDUPE_REFRESH_OVERLAP_MINUTES = 1;
-
-/**
- * Ceiling on the child action ids carried in the checkpoint. Rollback writes one action per
- * rollback version per batch, so a large fleet paged with a small `batchSize` could otherwise grow
- * this list without bound inside a saved object. The earliest ids are the ones kept, since an
- * action restarting from the beginning re-pages their agents first; past the ceiling such an action
- * deduplicates the agents it has ids for and re-actions the rest, as it did before they were
- * recorded at all.
- */
-const MAX_CHILD_ACTION_IDS = 1000;
 
 /**
  * Ceiling on the agent ids held for deduplication. The set is one entry per agent this action has
@@ -146,7 +137,7 @@ export abstract class ActionRunner {
    * under the action's own id. They are checkpointed with the cursor, so a later run can read them
    * back and deduplicate against the agents they cover.
    */
-  protected recordChildActionIds(actionIds: string[]) {
+  protected async recordChildActionIds(actionIds: string[]): Promise<void> {
     let recordedNewId = false;
     for (const actionId of actionIds) {
       if (
@@ -174,8 +165,12 @@ export abstract class ActionRunner {
     // are what a resume deduplicates against, and a runner that dies mid-batch would otherwise take
     // them with it. Writing only this field is safe mid-batch for the same reason the heartbeat is
     // — the list only ever grows, while the cursor and the count are valid between batches only.
+    //
+    // Awaited so the batch does not run on past an id that has not been recorded anywhere but this
+    // process's heap, and so nothing is left in flight at shutdown. The write itself merges rather
+    // than replaces, so two of these overlapping cannot drop an id either way.
     if (recordedNewId) {
-      void this.writeCheckTaskState({ childActionIds: [...this.childActionIds] });
+      await this.writeCheckTaskState({ childActionIds: [...this.childActionIds] });
     }
   }
 
@@ -483,8 +478,10 @@ export abstract class ActionRunner {
    * and retrying. A missing `.fleet-actions` is not a failure and comes back as an empty set.
    */
   private async getActionedAgentIds(): Promise<Set<string>> {
-    if (this.actionedAgentIds && this.actionedAgentIds.size >= MAX_ACTIONED_AGENT_IDS) {
-      return this.actionedAgentIds;
+    const alreadyRead = this.actionedAgentIds;
+    const remainingCapacity = MAX_ACTIONED_AGENT_IDS - (alreadyRead?.size ?? 0);
+    if (remainingCapacity <= 0) {
+      return alreadyRead!;
     }
 
     const readStartedAt = moment()
@@ -493,17 +490,25 @@ export abstract class ActionRunner {
       .toISOString();
     const actionIds = [this.actionParams.actionId!, ...this.childActionIds];
 
-    if (!this.actionedAgentIds) {
-      this.actionedAgentIds = await getAgentIdsFromActions(this.esClient, actionIds);
+    // The ceiling is pushed down into the read rather than applied to what comes back: a set this
+    // big is built from documents that have to be held in memory to produce it, so checking the
+    // size afterwards would bound how long the peak lasts but not the peak itself.
+    if (!alreadyRead) {
+      this.actionedAgentIds = await getAgentIdsFromActions(this.esClient, actionIds, {
+        limit: remainingCapacity,
+      });
     } else {
       const since = this.actionedAgentIdsReadAt;
-      for (const agentId of await getAgentIdsFromActions(this.esClient, actionIds, { since })) {
-        this.actionedAgentIds.add(agentId);
+      for (const agentId of await getAgentIdsFromActions(this.esClient, actionIds, {
+        since,
+        limit: remainingCapacity,
+      })) {
+        alreadyRead.add(agentId);
       }
     }
     this.actionedAgentIdsReadAt = readStartedAt;
 
-    if (this.actionedAgentIds.size >= MAX_ACTIONED_AGENT_IDS) {
+    if (this.actionedAgentIds!.size >= MAX_ACTIONED_AGENT_IDS) {
       appContextService
         .getLogger()
         .warn(
@@ -511,7 +516,7 @@ export abstract class ActionRunner {
         );
     }
 
-    return this.actionedAgentIds;
+    return this.actionedAgentIds!;
   }
 
   /**

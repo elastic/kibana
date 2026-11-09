@@ -671,10 +671,14 @@ describe('ActionRunner', () => {
       // same range: a set read once cannot see what the other writes, so every later batch could be
       // actioned twice rather than only the boundary batch
       expect(mockedGetAgentIdsFromActions).toHaveBeenCalledTimes(3);
-      // the first read is complete, the rest only ask for what has been written since
-      expect(mockedGetAgentIdsFromActions).toHaveBeenNthCalledWith(1, esClient, [ACTION_ID]);
+      // the first read is complete, the rest only ask for what has been written since, and both
+      // carry the remaining memory budget so the read itself stops there
+      expect(mockedGetAgentIdsFromActions).toHaveBeenNthCalledWith(1, esClient, [ACTION_ID], {
+        limit: MAX_ACTIONED_AGENT_IDS,
+      });
       expect(mockedGetAgentIdsFromActions).toHaveBeenNthCalledWith(2, esClient, [ACTION_ID], {
         since: expect.any(String),
+        limit: MAX_ACTIONED_AGENT_IDS - 1,
       });
     });
 
@@ -703,7 +707,7 @@ describe('ActionRunner', () => {
       expect(mockedGetAgentIdsFromActions).toHaveBeenLastCalledWith(
         esClient,
         [ACTION_ID, 'child-1'],
-        expect.anything()
+        expect.objectContaining({ since: expect.any(String) })
       );
       expect(resolver.updateCheckTaskState).toHaveBeenLastCalledWith(
         CHECK_TASK_ID,
@@ -728,10 +732,11 @@ describe('ActionRunner', () => {
       );
     });
 
-    it('stops growing and reading the dedupe set once it reaches its ceiling', async () => {
+    it('bounds the dedupe read itself, not just what it keeps', async () => {
       mockAgentPages(3, 2);
       // the set is one entry per agent actioned, so it is bounded by the size of the action rather
-      // than by anything this code controls
+      // than by anything this code controls; the ceiling has to reach the read, since the documents
+      // naming those agents are held in memory to produce it
       mockedGetAgentIdsFromActions.mockResolvedValue(
         new Set(Array.from({ length: MAX_ACTIONED_AGENT_IDS }, (_, i) => `other-${i}`))
       );
@@ -739,6 +744,9 @@ describe('ActionRunner', () => {
       await createRunner({ total: 6 }).runActionAsyncWithRetry();
 
       expect(mockedGetAgentIdsFromActions).toHaveBeenCalledTimes(1);
+      expect(mockedGetAgentIdsFromActions).toHaveBeenCalledWith(esClient, [ACTION_ID], {
+        limit: MAX_ACTIONED_AGENT_IDS,
+      });
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining(`actioned more than ${MAX_ACTIONED_AGENT_IDS} agents`)
       );

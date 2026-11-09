@@ -76,14 +76,67 @@ describe('rollbackBatch', () => {
     // under the parent action id — without this id the replay sends a second rollback to every
     // agent this batch already actioned
     const onActionCreated = jest.fn();
+    mockedCreateErrorActionResults.mockRejectedValue(new Error('Request timed out'));
+
+    await expect(
+      rollbackBatch(
+        esClient,
+        [createAgent('agent-0', '8.18.0'), { id: 'agent-1' } as unknown as Agent],
+        {},
+        { onActionCreated }
+      )
+    ).rejects.toThrow('Request timed out');
+
+    expect(onActionCreated).toHaveBeenCalledWith(expect.any(String));
+  });
+
+  it('marks the agents as rolling back before creating the action that rolls them back', async () => {
+    // the other way round, a timeout in between leaves agents dispatched but still showing their
+    // old upgrade state, and the retry deduplicates on the action document and filters exactly
+    // those agents out, so nothing ever comes back to fix them
+    const order: string[] = [];
+    mockedBulkUpdateAgents.mockImplementation(async () => {
+      order.push('bulkUpdateAgents');
+    });
+    mockedCreateAgentAction.mockImplementation(async () => {
+      order.push('createAgentAction');
+      return {} as never;
+    });
+
+    await rollbackBatch(esClient, [createAgent('agent-0', '8.18.0')], {}, {});
+
+    expect(order).toEqual(['bulkUpdateAgents', 'createAgentAction']);
+  });
+
+  it('does not create the action when the agent bookkeeping fails', async () => {
     mockedBulkUpdateAgents.mockRejectedValue(new Error('Request timed out'));
+    const onActionCreated = jest.fn();
 
     await expect(
       rollbackBatch(esClient, [createAgent('agent-0', '8.18.0')], {}, { onActionCreated })
     ).rejects.toThrow('Request timed out');
 
-    expect(onActionCreated).toHaveBeenCalledTimes(1);
-    expect(onActionCreated).toHaveBeenCalledWith(expect.any(String));
+    // nothing was dispatched, so the retry redoing both writes is harmless
+    expect(mockedCreateAgentAction).not.toHaveBeenCalled();
+    expect(onActionCreated).not.toHaveBeenCalled();
+  });
+
+  it('waits for the callback before moving on to the next action', async () => {
+    const resolved: string[] = [];
+    const onActionCreated = jest.fn(async (actionId: string) => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      resolved.push(actionId);
+    });
+
+    const { actionIds } = await rollbackBatch(
+      esClient,
+      [createAgent('agent-0', '8.18.0'), createAgent('agent-1', '8.17.0')],
+      {},
+      { onActionCreated }
+    );
+
+    // the id has to be recorded somewhere other than this process's heap before the batch runs on
+    expect(resolved).toEqual(actionIds);
   });
 
   it('reports the id of an error-only action too', async () => {

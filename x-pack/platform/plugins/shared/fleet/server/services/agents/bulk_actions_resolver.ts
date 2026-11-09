@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { SavedObjectsErrorHelpers, type SavedObjectsClientContract } from '@kbn/core/server';
+import { withTimeout } from '@kbn/std';
 import type { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
@@ -30,6 +31,7 @@ import {
   CHECK_TASK_INTERVAL_MINUTES,
   MAX_CHECK_TASK_RESUMES,
   MAX_CHECK_TASK_RUNS,
+  MAX_CHILD_ACTION_IDS,
   getRetryParams,
 } from './retry_helper';
 import { BulkActionTaskType } from './bulk_action_types';
@@ -231,11 +233,26 @@ export class BulkActionsResolver {
     }
     const result = await retryTransientEsErrors(
       () =>
-        this.taskManager!.bulkUpdateState([taskId], (state) => ({
-          ...state,
-          ...checkpoint,
-          checkpointUpdatedAt: new Date().toISOString(),
-        })),
+        this.taskManager!.bulkUpdateState([taskId], (state) => {
+          const nextState: BulkActionCheckTaskState = {
+            ...state,
+            ...checkpoint,
+            checkpointUpdatedAt: new Date().toISOString(),
+          };
+          if (checkpoint.childActionIds) {
+            // Merged with what is stored rather than replacing it. These writes are made as each
+            // child action is created, so two of them can be in flight at once, and the map
+            // function runs against whatever the task document held when this attempt fetched it —
+            // including on the refetch that follows a version conflict. Replacing would let a write
+            // carrying one id land after one carrying two and drop the second, taking with it the
+            // only reference that stops a resume dispatching that action's agents again. The list
+            // only ever grows, so a union is always the right answer.
+            nextState.childActionIds = [
+              ...new Set([...(state.childActionIds ?? []), ...checkpoint.childActionIds]),
+            ].slice(0, MAX_CHILD_ACTION_IDS);
+          }
+          return nextState;
+        }),
       { logger }
     );
 
@@ -298,6 +315,12 @@ export class BulkActionsResolver {
     }
   }
 }
+
+/**
+ * How long a failed check task run will wait to re-read its state before giving up on it. Small
+ * against the task's 1m timeout, since the run has already spent part of that.
+ */
+const FAILED_RUN_STATE_READ_TIMEOUT_MS = 5_000;
 
 /** A task that does not exist comes back as a 404 from the saved objects client. */
 const isTaskNotFoundError = (error: Error & { statusCode?: number }): boolean =>
@@ -582,21 +605,37 @@ const runCheckTask = async (
  *
  * When even that read fails — likely, when the read is what failed in the first place — the claimed
  * state is all there is, and Task Manager offers no way to leave the field alone.
+ *
+ * It is given a deadline of its own rather than the Elasticsearch request timeout. The run that
+ * brought us here has already spent part of this task's 1m budget, often waiting on Elasticsearch,
+ * and a run that expires has its whole return value discarded: the `runCount` this is here to
+ * advance, and the schedule that adopts a check task created before this one was recurring. A
+ * stale state costs one replayed stretch of an action; an expired run costs the watchdog.
  */
 const getStateForFailedCheckTaskRun = async (
   taskInstance: ConcreteTaskInstance
 ): Promise<BulkActionCheckTaskState> => {
   const claimedState: BulkActionCheckTaskState = taskInstance.state ?? {};
+  const logger = appContextService.getLogger();
   let currentState = claimedState;
   try {
     const resolver = await appContextService.getBulkActionsResolver();
-    currentState = (await resolver?.getCheckTaskState(taskInstance.id)) ?? claimedState;
-  } catch (error) {
-    appContextService
-      .getLogger()
-      .warn(
-        `Could not read the state of check task ${taskInstance.id} after a failed run, falling back to the one it claimed: ${error.message}`
+    const read = await withTimeout({
+      promise: Promise.resolve(resolver?.getCheckTaskState(taskInstance.id)),
+      timeoutMs: FAILED_RUN_STATE_READ_TIMEOUT_MS,
+      unref: true,
+    });
+    if (read.timedout) {
+      logger.warn(
+        `Timed out reading the state of check task ${taskInstance.id} after a failed run, falling back to the one it claimed`
       );
+    } else {
+      currentState = read.value ?? claimedState;
+    }
+  } catch (error) {
+    logger.warn(
+      `Could not read the state of check task ${taskInstance.id} after a failed run, falling back to the one it claimed: ${error.message}`
+    );
   }
   return { ...currentState, runCount: (currentState.runCount ?? 0) + 1 };
 };

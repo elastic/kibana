@@ -369,15 +369,21 @@ const ACTION_DOCS_PAGE_SIZE = 1000;
  */
 const ACTION_DOCS_PIT_KEEP_ALIVE = '2m';
 
+/** Collects a page's agent ids, stopping at `limit`. Returns whether the limit has been reached. */
 const collectAgentIds = (
   hits: Array<SearchHit<Pick<FleetServerAgentAction, 'agents'>>>,
-  agentIds: Set<string>
-) => {
+  agentIds: Set<string>,
+  limit: number
+): boolean => {
   for (const hit of hits) {
     for (const agentId of hit._source?.agents ?? []) {
+      if (agentIds.size >= limit) {
+        return true;
+      }
       agentIds.add(agentId);
     }
   }
+  return agentIds.size >= limit;
 };
 
 /**
@@ -395,14 +401,20 @@ const collectAgentIds = (
  * the ids of an earlier read can top it up cheaply instead of re-reading everything. Action
  * documents are only ever created, never updated, so the union of such reads is exact as long as
  * the windows overlap.
+ *
+ * `limit` stops the read — collecting and paging both — once that many ids are in hand. It is the
+ * caller's memory bound, so it has to be honoured here rather than applied to the result: an
+ * action that has touched a million agents would otherwise be a million ids and the documents
+ * naming them held at once, whatever the caller then did with them.
  */
 export async function getAgentIdsFromActions(
   esClient: ElasticsearchClient,
   actionIds: string[],
-  options: { since?: string } = {}
+  options: { since?: string; limit?: number } = {}
 ): Promise<Set<string>> {
   const agentIds = new Set<string>();
-  if (actionIds.length === 0) {
+  const limit = options.limit ?? Infinity;
+  if (actionIds.length === 0 || limit <= 0) {
     return agentIds;
   }
 
@@ -425,8 +437,8 @@ export async function getAgentIdsFromActions(
     ignore_unavailable: true,
     ...search,
   });
-  collectAgentIds(firstPage.hits.hits, agentIds);
-  if (firstPage.hits.hits.length < ACTION_DOCS_PAGE_SIZE) {
+  const reachedLimit = collectAgentIds(firstPage.hits.hits, agentIds, limit);
+  if (reachedLimit || firstPage.hits.hits.length < ACTION_DOCS_PAGE_SIZE) {
     return agentIds;
   }
 
@@ -455,8 +467,7 @@ export async function getAgentIdsFromActions(
       });
       pitId = page.pit_id ?? pitId;
       const { hits } = page.hits;
-      collectAgentIds(hits, agentIds);
-      if (hits.length < ACTION_DOCS_PAGE_SIZE) {
+      if (collectAgentIds(hits, agentIds, limit) || hits.length < ACTION_DOCS_PAGE_SIZE) {
         return agentIds;
       }
       searchAfter = hits[hits.length - 1].sort;
@@ -470,6 +481,10 @@ export async function getAgentIdsFromActions(
           .debug(`Could not close the point in time of an action documents read: ${error.message}`)
       );
   }
+}
+
+interface AgentIdsWithResultsAggregation {
+  agent_ids: { buckets: Array<{ key: string }> };
 }
 
 /**
@@ -486,18 +501,30 @@ export async function getAgentsWithoutActionResults(
     return [];
   }
   try {
-    const res = await esClient.search<{ agent_id?: string }>({
+    // Aggregated rather than paged through as hits. One agent can hold several results — the
+    // documents carry generated ids, so a retry can write a second one, and an agent can have one
+    // under more than one of the given action ids — so a page of `agentIds.length` hits can be
+    // filled by duplicates of a few agents and hide the results of the rest, which is exactly the
+    // conclusion this draws: "no result" means it is about to write one. A terms aggregation whose
+    // size is the number of agents asked about cannot miss a bucket, since the query already
+    // restricts it to those agents.
+    const res = await esClient.search<unknown, AgentIdsWithResultsAggregation>({
       index: AGENT_ACTIONS_RESULTS_INDEX,
       query: {
         bool: {
           must: [{ terms: { action_id: actionIds } }, { terms: { agent_id: agentIds } }],
         },
       },
-      _source: ['agent_id'],
-      size: agentIds.length,
+      size: 0,
+      track_total_hits: false,
+      aggs: {
+        agent_ids: {
+          terms: { field: 'agent_id', size: agentIds.length },
+        },
+      },
     });
     const agentIdsWithResults = new Set(
-      res.hits.hits.map((hit) => hit._source?.agent_id).filter((id): id is string => !!id)
+      res.aggregations?.agent_ids.buckets.map(({ key }) => key) ?? []
     );
     return agentIds.filter((agentId) => !agentIdsWithResults.has(agentId));
   } catch (err) {

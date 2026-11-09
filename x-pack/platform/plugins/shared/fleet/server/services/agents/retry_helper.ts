@@ -49,6 +49,16 @@ export const MAX_CHECK_TASK_RESUMES = 20;
  */
 export const MAX_CHECK_TASK_RUNS = (24 * 60) / CHECK_TASK_INTERVAL_MINUTES;
 
+/**
+ * Ceiling on the child action ids carried in the checkpoint. Rollback writes one action per
+ * rollback version per batch, so a large fleet paged with a small `batchSize` could otherwise grow
+ * this list without bound inside a saved object. The earliest ids are the ones kept, since an
+ * action restarting from the beginning re-pages their agents first; past the ceiling such an action
+ * deduplicates the agents it has ids for and re-actions the rest, as it did before they were
+ * recorded at all.
+ */
+export const MAX_CHILD_ACTION_IDS = 1000;
+
 export interface RetryParams {
   pitId?: string;
   searchAfter?: SortResults;
