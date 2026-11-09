@@ -40,6 +40,7 @@ import {
   type DecisionCursor,
   countClosedByDecision,
   fetchDecisionCandidates,
+  findAlertsNotClosedAsFalsePositive,
   findOpenAlertIds,
   statusCodeOf,
   tagAlerts,
@@ -199,13 +200,13 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
         };
 
         /**
-         * Takes the decision's tag off the alerts the close left alone because they were no longer
-         * open (an analyst acknowledged them after the search), and returns them. Unlike
-         * `untagStillOpen`, a failure here throws, because the notes must not claim a close that
-         * did not happen.
+         * Takes the decision's tag off the alerts the close left alone, because an analyst moved
+         * them on after the search (acknowledged, or closed for another reason), and returns them.
+         * Unlike `untagStillOpen`, a failure here throws, because the notes must not claim a close
+         * that did not happen.
          */
         const releaseMovedOn = async (id: string, alertIds: string[]): Promise<string[]> => {
-          const left = await findOpenAlertIds(contextManager, alertIds);
+          const left = await findAlertsNotClosedAsFalsePositive(contextManager, alertIds);
           if (left.length > 0) {
             await tagInChunks(write, {
               alertIds: left,
