@@ -87,6 +87,21 @@ describe('rawRuleSchemaV17', () => {
     expect(rawRuleSchema.validate(rule).lastRun?.warning).toBe('reason-from-a-newer-kibana');
   });
 
+  it('accepts the configuration reason in executionStatus.error and lastRun.warning', () => {
+    const validated = rawRuleSchema.validate({
+      ...baseRule,
+      executionStatus: {
+        ...baseRule.executionStatus,
+        status: 'error',
+        error: { reason: 'configuration', message: 'boom' },
+      },
+      lastRun: { outcome: 'failed', alertsCount: {}, warning: 'configuration' },
+    });
+
+    expect(validated.executionStatus.error?.reason).toBe('configuration');
+    expect(validated.lastRun?.warning).toBe('configuration');
+  });
+
   it('still accepts a null lastRun.warning', () => {
     const validated = rawRuleSchema.validate({
       ...baseRule,
