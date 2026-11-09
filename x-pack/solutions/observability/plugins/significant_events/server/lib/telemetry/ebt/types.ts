@@ -7,8 +7,9 @@
 
 import type { SignificantEventsToolUsage } from '@kbn/nightshift-ai';
 import type { Severity, SignificantEventStatus } from '@kbn/significant-events-schema';
+import type { EbtTelemetryContext } from './cps_telemetry_context';
 
-interface KnowledgeIndicatorQueriesGeneratedProps {
+interface KnowledgeIndicatorQueriesGeneratedProps extends EbtTelemetryContext {
   count: number;
   connector_id: string;
   input_tokens_used: number;
@@ -20,7 +21,7 @@ interface KnowledgeIndicatorQueriesGeneratedProps {
   external_content_tool_continuations?: number;
 }
 
-interface KnowledgeIndicatorFeaturesIdentifiedProps {
+interface KnowledgeIndicatorFeaturesIdentifiedProps extends EbtTelemetryContext {
   run_id: string;
   connector_id: string;
   iteration: number;
@@ -43,7 +44,7 @@ interface KnowledgeIndicatorFeaturesIdentifiedProps {
   state: 'success' | 'failure' | 'canceled';
 }
 
-interface AgentBuilderKnowledgeIndicatorCreatedProps {
+interface AgentBuilderKnowledgeIndicatorCreatedProps extends EbtTelemetryContext {
   ki_kind: 'feature' | 'query';
   tool_id: 'ki_feature_create' | 'ki_query_create';
   success: boolean;
@@ -51,23 +52,21 @@ interface AgentBuilderKnowledgeIndicatorCreatedProps {
   error_message?: string;
 }
 
-interface AgentToolKnowledgeIndicatorIdentificationStartedProps {
+interface AgentToolKnowledgeIndicatorIdentificationStartedProps extends EbtTelemetryContext {
   success: boolean;
   source_id: string;
   error_message?: string;
 }
 
 /** Identity used to join telemetry to `.rule-events`; a failed operation may have no row. */
-interface ExistingAlertIdentityProps {
+interface ExistingAlertIdentityProps extends EbtTelemetryContext {
   alert_source: string;
   fingerprint: string;
-  space_id: string;
 }
 
 /** `fingerprint` is absent for an unpersisted server-generated id; `group_hash` only on create. */
-interface AlertCreationAttemptIdentityProps {
+interface AlertCreationAttemptIdentityProps extends EbtTelemetryContext {
   alert_source: string;
-  space_id: string;
   fingerprint?: string;
   group_hash?: string;
 }
@@ -103,12 +102,11 @@ interface AgentToolEventInvestigationAttachProps extends ExistingAlertIdentityPr
   error_message?: string;
 }
 
-interface DiscoveryTriggeredProps {
+interface DiscoveryTriggeredProps extends EbtTelemetryContext {
   execution_id: string;
-  space_id: string;
 }
 
-interface DetectionScanProps {
+interface DetectionScanProps extends EbtTelemetryContext {
   /** ES `took` (ms) reported by the alerts-source search itself. */
   took_ms: number;
   /** Wall-clock (ms) around the reader call, including transport and parsing. */
@@ -133,15 +131,12 @@ interface DetectionScanProps {
   default_lookback: string;
   /** Default analysis outer bucket interval, e.g. `5m`. */
   default_bucket_interval: string;
-  /** The Kibana space in which the scan ran. */
-  space_id: string;
 }
 
-interface KnowledgeIndicatorOnboardingScheduledProps {
+interface KnowledgeIndicatorOnboardingScheduledProps extends EbtTelemetryContext {
   source_id: string;
   execution_id: string;
   workflow_id: string;
-  space_id: string;
   skip_features: boolean;
   skip_queries: boolean;
 }
@@ -158,7 +153,7 @@ interface AgentToolEventWriteProps extends AlertCreationAttemptIdentityProps {
   severity?: Severity;
 }
 
-interface AgentToolEventSearchProps {
+interface AgentToolEventSearchProps extends EbtTelemetryContext {
   success: boolean;
   result_count: number;
   has_query: boolean;
@@ -170,6 +165,7 @@ interface AgentToolEventSearchProps {
 }
 
 export {
+  type EbtTelemetryContext,
   type AlertCreationAttemptIdentityProps,
   type ExistingAlertIdentityProps,
   type AgentBuilderKnowledgeIndicatorCreatedProps,

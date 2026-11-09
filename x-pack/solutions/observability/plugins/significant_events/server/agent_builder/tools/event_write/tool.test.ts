@@ -787,7 +787,8 @@ describe('events_write tool', () => {
     );
     expect(telemetry.trackAgentToolEventsWrite).toHaveBeenCalledTimes(2);
     expect(telemetry.trackAgentToolEventsWrite).toHaveBeenLastCalledWith(
-      expect.objectContaining({ success: false, written: false, error_message: 'busy' })
+      expect.objectContaining({ success: false, written: false, error_message: 'busy' }),
+      expect.anything()
     );
   });
 

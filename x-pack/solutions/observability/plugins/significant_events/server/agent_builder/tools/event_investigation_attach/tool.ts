@@ -133,12 +133,18 @@ export const createEventInvestigationAttachTool = ({
           logger,
           description: 'event_investigation_attach telemetry',
           track: () =>
-            telemetry.trackAgentToolEventInvestigationAttach({
-              ...existingAlertIdentity({ eventId: toolParams.event_id, spaceId: request.spaceId }),
-              success: true,
-              event_id: toolParams.event_id,
-              workflow_execution_id: toolParams.workflow_execution_id,
-            }),
+            telemetry.trackAgentToolEventInvestigationAttach(
+              {
+                ...existingAlertIdentity({
+                  eventId: toolParams.event_id,
+                  spaceId: request.spaceId,
+                }),
+                success: true,
+                event_id: toolParams.event_id,
+                workflow_execution_id: toolParams.workflow_execution_id,
+              },
+              request
+            ),
         });
 
         return { results: [{ type: ToolResultType.other, data }] };
@@ -149,13 +155,19 @@ export const createEventInvestigationAttachTool = ({
           logger,
           description: 'failed event_investigation_attach telemetry',
           track: () =>
-            telemetry.trackAgentToolEventInvestigationAttach({
-              ...existingAlertIdentity({ eventId: toolParams.event_id, spaceId: request.spaceId }),
-              success: false,
-              event_id: toolParams.event_id,
-              workflow_execution_id: toolParams.workflow_execution_id,
-              error_message: message,
-            }),
+            telemetry.trackAgentToolEventInvestigationAttach(
+              {
+                ...existingAlertIdentity({
+                  eventId: toolParams.event_id,
+                  spaceId: request.spaceId,
+                }),
+                success: false,
+                event_id: toolParams.event_id,
+                workflow_execution_id: toolParams.workflow_execution_id,
+                error_message: message,
+              },
+              request
+            ),
         });
         return {
           results: [

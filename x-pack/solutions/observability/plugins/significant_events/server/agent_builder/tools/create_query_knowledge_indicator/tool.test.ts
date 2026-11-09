@@ -173,7 +173,8 @@ describe('ki_query_create tool', () => {
         tool_id: 'ki_query_create',
         success: true,
         source_id: 'logs.test',
-      })
+      }),
+      expect.anything()
     );
   });
 
@@ -203,7 +204,8 @@ describe('ki_query_create tool', () => {
         success: false,
         source_id: 'logs.test',
         error_message: 'upsert failed',
-      })
+      }),
+      expect.anything()
     );
   });
 
@@ -222,7 +224,8 @@ describe('ki_query_create tool', () => {
 
     expect(queryClient.upsertQuery).not.toHaveBeenCalled();
     expect(telemetry.trackAgentBuilderKnowledgeIndicatorCreated).toHaveBeenCalledWith(
-      expect.objectContaining({ ki_kind: 'query', success: false })
+      expect.objectContaining({ ki_kind: 'query', success: false }),
+      expect.anything()
     );
   });
 });

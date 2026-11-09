@@ -207,21 +207,24 @@ const changePointScanRoute = createServerRoute({
     const criticalRuleCount = countRulesForProfile(queryLinks, CRITICAL_ANALYSIS_PROFILE);
     const defaultRuleCount = countRulesForProfile(queryLinks, DEFAULT_ANALYSIS_PROFILE);
 
-    telemetry.trackSignificantEventsDetectionScan({
-      took_ms: took,
-      duration_ms: durationMs,
-      rules_requested: queryLinks.length,
-      rules_scanned: buckets.length,
-      critical_rule_count: criticalRuleCount,
-      default_rule_count: defaultRuleCount,
-      alerting_engine: 'v2',
-      alerts_source_index: sigEventsContext.alertsReader.index,
-      lookback: criticalLookback,
-      bucket_interval: criticalBucketInterval,
-      default_lookback: defaultConfig.lookback,
-      default_bucket_interval: defaultConfig.bucketInterval,
-      space_id: spaceId,
-    });
+    telemetry.trackSignificantEventsDetectionScan(
+      {
+        took_ms: took,
+        duration_ms: durationMs,
+        rules_requested: queryLinks.length,
+        rules_scanned: buckets.length,
+        critical_rule_count: criticalRuleCount,
+        default_rule_count: defaultRuleCount,
+        alerting_engine: 'v2',
+        alerts_source_index: sigEventsContext.alertsReader.index,
+        lookback: criticalLookback,
+        bucket_interval: criticalBucketInterval,
+        default_lookback: defaultConfig.lookback,
+        default_bucket_interval: defaultConfig.bucketInterval,
+        space_id: spaceId,
+      },
+      request
+    );
 
     return { alertIndex: sigEventsContext.alertsReader.index, aggregations };
   },

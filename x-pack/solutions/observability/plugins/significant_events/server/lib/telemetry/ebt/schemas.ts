@@ -20,10 +20,47 @@ import type {
   KnowledgeIndicatorOnboardingScheduledProps,
   AgentToolEventWriteProps,
   AgentToolEventSearchProps,
+  EbtTelemetryContext,
 } from './types';
+
+const ebtTelemetryContextSchema: RootSchema<EbtTelemetryContext> = {
+  space_id: {
+    type: 'keyword',
+    _meta: { description: 'The Kibana space in which the operation ran' },
+  },
+  target_cluster_scope: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'CPS target scope: origin for operations limited to the Nightshift project, or all for operations spanning linked projects',
+      optional: true,
+    },
+  },
+  target_cluster_ids: {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: { description: 'An opaque serverless project ID' },
+    },
+    _meta: {
+      description:
+        'Stable opaque IDs of the Elasticsearch projects targeted by this operation; only present when CPS is enabled',
+      optional: true,
+    },
+  },
+  target_cluster_ids_complete: {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Whether target_cluster_ids includes every project in the target scope visible to the request',
+      optional: true,
+    },
+  },
+};
 
 const knowledgeIndicatorQueriesGeneratedSchema: RootSchema<KnowledgeIndicatorQueriesGeneratedProps> =
   {
+    ...ebtTelemetryContextSchema,
     count: {
       type: 'long',
       _meta: {
@@ -130,6 +167,7 @@ const knowledgeIndicatorQueriesGeneratedSchema: RootSchema<KnowledgeIndicatorQue
 
 const knowledgeIndicatorFeaturesIdentifiedSchema: RootSchema<KnowledgeIndicatorFeaturesIdentifiedProps> =
   {
+    ...ebtTelemetryContextSchema,
     run_id: {
       type: 'keyword',
       _meta: {
@@ -256,6 +294,7 @@ const knowledgeIndicatorFeaturesIdentifiedSchema: RootSchema<KnowledgeIndicatorF
 
 const agentBuilderKnowledgeIndicatorCreatedSchema: RootSchema<AgentBuilderKnowledgeIndicatorCreatedProps> =
   {
+    ...ebtTelemetryContextSchema,
     ki_kind: {
       type: 'keyword',
       _meta: {
@@ -291,6 +330,7 @@ const agentBuilderKnowledgeIndicatorCreatedSchema: RootSchema<AgentBuilderKnowle
 
 const agentToolKnowledgeIndicatorIdentificationStartedSchema: RootSchema<AgentToolKnowledgeIndicatorIdentificationStartedProps> =
   {
+    ...ebtTelemetryContextSchema,
     success: {
       type: 'boolean',
       _meta: {
@@ -320,11 +360,6 @@ const alertSourceSchema = {
   },
 };
 
-const alertSpaceIdSchema = {
-  type: 'keyword' as const,
-  _meta: { description: 'The Kibana space that owns the alert' },
-};
-
 const fingerprintDescription =
   'The stable caller-visible series identity of the alert the operation addressed, before Alerting v2 hashes it with space and source into `group_hash`. The operation may have failed; filter on `success` to keep only alerts that exist in `.rule-events`';
 
@@ -338,12 +373,13 @@ const groupHashSchema = {
 };
 
 const existingAlertIdentitySchema: RootSchema<ExistingAlertIdentityProps> = {
+  ...ebtTelemetryContextSchema,
   alert_source: alertSourceSchema,
   fingerprint: { type: 'keyword', _meta: { description: fingerprintDescription } },
-  space_id: alertSpaceIdSchema,
 };
 
 const alertCreationAttemptIdentitySchema: RootSchema<AlertCreationAttemptIdentityProps> = {
+  ...ebtTelemetryContextSchema,
   alert_source: alertSourceSchema,
   fingerprint: {
     type: 'keyword',
@@ -353,7 +389,6 @@ const alertCreationAttemptIdentitySchema: RootSchema<AlertCreationAttemptIdentit
     },
   },
   group_hash: groupHashSchema,
-  space_id: alertSpaceIdSchema,
 };
 
 const agentToolEventCreateSchema: RootSchema<AgentToolEventCreateProps> = {
@@ -424,17 +459,15 @@ const agentToolEventStatusUpdateSchema: RootSchema<AgentToolEventStatusUpdatePro
 };
 
 const discoveryTriggeredSchema = {
+  ...ebtTelemetryContextSchema,
   execution_id: {
     type: 'keyword' as const,
     _meta: { description: 'The workflow execution ID returned by the orchestrator' },
   },
-  space_id: {
-    type: 'keyword' as const,
-    _meta: { description: 'The Kibana space in which the pipeline was triggered' },
-  },
 };
 
 const detectionScanSchema: RootSchema<DetectionScanProps> = {
+  ...ebtTelemetryContextSchema,
   took_ms: {
     type: 'long',
     _meta: {
@@ -508,15 +541,10 @@ const detectionScanSchema: RootSchema<DetectionScanProps> = {
       description: 'Default analysis outer bucket interval (e.g. `5m`)',
     },
   },
-  space_id: {
-    type: 'keyword',
-    _meta: {
-      description: 'The Kibana space in which the scan ran',
-    },
-  },
 };
 
 const onboardingScheduledSchema: RootSchema<KnowledgeIndicatorOnboardingScheduledProps> = {
+  ...ebtTelemetryContextSchema,
   source_id: {
     type: 'keyword',
     _meta: {
@@ -534,12 +562,6 @@ const onboardingScheduledSchema: RootSchema<KnowledgeIndicatorOnboardingSchedule
     type: 'keyword',
     _meta: {
       description: 'The managed workflow ID that was triggered (system-streams-ki-onboarding)',
-    },
-  },
-  space_id: {
-    type: 'keyword',
-    _meta: {
-      description: 'The Kibana space in which the workflow execution was created',
     },
   },
   skip_features: {
@@ -653,6 +675,7 @@ const agentToolEventWriteSchema: RootSchema<AgentToolEventWriteProps> = {
 };
 
 const agentToolEventSearchSchema: RootSchema<AgentToolEventSearchProps> = {
+  ...ebtTelemetryContextSchema,
   success: {
     type: 'boolean',
     _meta: {

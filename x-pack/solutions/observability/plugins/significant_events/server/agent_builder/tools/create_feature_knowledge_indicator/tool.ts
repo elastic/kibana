@@ -119,12 +119,15 @@ export function createFeatureKnowledgeIndicatorTool({
           logger,
         });
 
-        telemetry.trackAgentBuilderKnowledgeIndicatorCreated({
-          ki_kind: 'feature',
-          tool_id: 'ki_feature_create',
-          success: true,
-          source_id: source.id,
-        });
+        telemetry.trackAgentBuilderKnowledgeIndicatorCreated(
+          {
+            ki_kind: 'feature',
+            tool_id: 'ki_feature_create',
+            success: true,
+            source_id: source.id,
+          },
+          request
+        );
 
         return {
           results: [
@@ -149,13 +152,16 @@ export function createFeatureKnowledgeIndicatorTool({
           logger.debug(String(error));
         }
 
-        telemetry.trackAgentBuilderKnowledgeIndicatorCreated({
-          ki_kind: 'feature',
-          tool_id: 'ki_feature_create',
-          success: false,
-          source_id: sourceId,
-          error_message: message,
-        });
+        telemetry.trackAgentBuilderKnowledgeIndicatorCreated(
+          {
+            ki_kind: 'feature',
+            tool_id: 'ki_feature_create',
+            success: false,
+            source_id: sourceId,
+            error_message: message,
+          },
+          request
+        );
 
         return {
           results: [

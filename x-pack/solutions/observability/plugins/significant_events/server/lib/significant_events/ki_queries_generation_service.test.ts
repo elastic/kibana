@@ -140,7 +140,8 @@ describe('generateKIQueries', () => {
         source_id: 'source-1',
         input_tokens_used: 10,
         output_tokens_used: 20,
-      })
+      }),
+      expect.anything()
     );
   });
 

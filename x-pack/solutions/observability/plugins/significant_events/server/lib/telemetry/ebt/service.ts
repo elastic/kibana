@@ -6,6 +6,7 @@
  */
 
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import type { Logger } from '@kbn/core/server';
 import {
   agentBuilderKnowledgeIndicatorCreatedEventType,
   agentToolEventCreateEventType,
@@ -21,14 +22,26 @@ import {
   agentToolEventSearchEventType,
 } from './events';
 import { EbtTelemetryClient } from './client';
+import {
+  CpsTelemetryContextProvider,
+  type CpsTelemetryContextConfig,
+} from './cps_telemetry_context';
 
 export class EbtTelemetryService {
   private analytics?: AnalyticsServiceSetup;
+  private contextProvider?: CpsTelemetryContextProvider;
+  private logger?: Logger;
 
   constructor() {}
 
-  public setup(analytics: AnalyticsServiceSetup) {
+  public setup(
+    analytics: AnalyticsServiceSetup,
+    contextConfig: CpsTelemetryContextConfig,
+    logger: Logger
+  ) {
     this.analytics = analytics;
+    this.contextProvider = new CpsTelemetryContextProvider(contextConfig);
+    this.logger = logger;
     this.analytics.registerEventType(knowledgeIndicatorEventsGeneratedEventType);
     this.analytics.registerEventType(knowledgeIndicatorFeaturesIdentifiedEventType);
     this.analytics.registerEventType(agentBuilderKnowledgeIndicatorCreatedEventType);
@@ -44,9 +57,9 @@ export class EbtTelemetryService {
   }
 
   public getClient() {
-    if (!this.analytics) {
+    if (!this.analytics || !this.contextProvider || !this.logger) {
       throw new Error('Analytics service is not available.');
     }
-    return new EbtTelemetryClient(this.analytics);
+    return new EbtTelemetryClient(this.analytics, this.contextProvider, this.logger);
   }
 }

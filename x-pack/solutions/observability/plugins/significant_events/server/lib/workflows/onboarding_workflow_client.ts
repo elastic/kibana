@@ -338,14 +338,17 @@ export class SignificantEventsKIsOnboardingClient {
       request,
     });
 
-    this.telemetry.trackOnboardingScheduled({
-      source_id: inputs.sourceId,
-      execution_id: executionId,
-      workflow_id: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
-      space_id: request.spaceId,
-      skip_features: inputs.features.skip,
-      skip_queries: inputs.queries.skip,
-    });
+    this.telemetry.trackOnboardingScheduled(
+      {
+        source_id: inputs.sourceId,
+        execution_id: executionId,
+        workflow_id: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
+        space_id: request.spaceId,
+        skip_features: inputs.features.skip,
+        skip_queries: inputs.queries.skip,
+      },
+      request
+    );
 
     return { executionId };
   }

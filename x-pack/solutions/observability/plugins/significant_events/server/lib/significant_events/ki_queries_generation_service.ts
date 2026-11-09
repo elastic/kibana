@@ -65,15 +65,18 @@ export async function generateKIQueries(
   });
   const durationMs = Date.now() - startedAt;
 
-  telemetry.trackSignificantEventsQueriesGenerated({
-    count: queries.length,
-    connector_id: connectorId,
-    source_id: source.id,
-    input_tokens_used: tokensUsed.prompt,
-    output_tokens_used: tokensUsed.completion,
-    cached_tokens_used: tokensUsed.cached ?? 0,
-    duration_ms: durationMs,
-  });
+  telemetry.trackSignificantEventsQueriesGenerated(
+    {
+      count: queries.length,
+      connector_id: connectorId,
+      source_id: source.id,
+      input_tokens_used: tokensUsed.prompt,
+      output_tokens_used: tokensUsed.completion,
+      cached_tokens_used: tokensUsed.cached ?? 0,
+      duration_ms: durationMs,
+    },
+    request
+  );
 
   return { queries, tokensUsed, connectorId };
 }

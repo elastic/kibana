@@ -128,12 +128,15 @@ export function createQueryKnowledgeIndicatorTool({
           logger,
         });
 
-        telemetry.trackAgentBuilderKnowledgeIndicatorCreated({
-          ki_kind: 'query',
-          tool_id: 'ki_query_create',
-          success: true,
-          source_id: source.id,
-        });
+        telemetry.trackAgentBuilderKnowledgeIndicatorCreated(
+          {
+            ki_kind: 'query',
+            tool_id: 'ki_query_create',
+            success: true,
+            source_id: source.id,
+          },
+          request
+        );
 
         return {
           results: [
@@ -158,13 +161,16 @@ export function createQueryKnowledgeIndicatorTool({
           logger.debug(String(error));
         }
 
-        telemetry.trackAgentBuilderKnowledgeIndicatorCreated({
-          ki_kind: 'query',
-          tool_id: 'ki_query_create',
-          success: false,
-          source_id: sourceId,
-          error_message: message,
-        });
+        telemetry.trackAgentBuilderKnowledgeIndicatorCreated(
+          {
+            ki_kind: 'query',
+            tool_id: 'ki_query_create',
+            success: false,
+            source_id: sourceId,
+            error_message: message,
+          },
+          request
+        );
 
         return {
           results: [

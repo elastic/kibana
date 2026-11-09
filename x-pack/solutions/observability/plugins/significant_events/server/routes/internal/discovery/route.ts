@@ -84,10 +84,13 @@ const discoveryExecuteRoute = createServerRoute({
           }),
       });
       if (isNew) {
-        telemetry.trackSignificantEventsDiscoveryTriggered({
-          execution_id: executionId,
-          space_id: spaceId,
-        });
+        telemetry.trackSignificantEventsDiscoveryTriggered(
+          {
+            execution_id: executionId,
+            space_id: spaceId,
+          },
+          request
+        );
       }
       return { executionId };
     }

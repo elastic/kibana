@@ -270,7 +270,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
           maxExcludedFeaturesInPrompt,
           maxPreviouslyIdentifiedFeatures,
         },
-        trackFeaturesIdentified: (data) => telemetry.trackFeaturesIdentified(data),
+        trackFeaturesIdentified: (data) => telemetry.trackFeaturesIdentified(data, request),
       });
 
       await bootstrapSyncWorkflow({
@@ -303,7 +303,8 @@ const identifyInferredFeaturesRoute = createServerRoute({
           },
           Date.now() - now,
           { state: 'failure' }
-        )
+        ),
+        request
       );
 
       if (isInferenceProviderError(error)) {
