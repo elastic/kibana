@@ -19,6 +19,7 @@ import { activeConfigPath, harnessPaths, writeActiveConfig } from './workspace';
 export interface ExampleRun {
   exampleId: string;
   seedId: string;
+  provenance: string;
   rollout: number;
   question: string;
   index?: string;
@@ -48,6 +49,8 @@ export interface RunSummary {
   totalInputTokens: number;
   totalOutputTokens: number;
   meanLatencyMs: number;
+  /** Mean reward split by provenance — the anchor set is reported separately on purpose. */
+  rewardByProvenance: Record<string, { reward: number; count: number }>;
 }
 
 const mean = (values: number[]): number =>
@@ -161,6 +164,7 @@ export const runConfig = async ({
       return {
         exampleId: example.id,
         seedId: example.seedId,
+        provenance: example.provenance,
         rollout,
         question: example.question,
         index: example.index,
@@ -204,6 +208,15 @@ export const runConfig = async ({
     totalInputTokens: runs.reduce((total, run) => total + (run.inputTokens ?? 0), 0),
     totalOutputTokens: runs.reduce((total, run) => total + (run.outputTokens ?? 0), 0),
     meanLatencyMs: mean(runs.map((run) => run.latencyMs)),
+    rewardByProvenance: Object.fromEntries(
+      [...new Set(runs.map((run) => run.provenance))].map((provenance) => {
+        const subset = runs.filter((run) => run.provenance === provenance);
+        return [
+          provenance,
+          { reward: mean(subset.map((run) => run.score.reward)), count: subset.length },
+        ];
+      })
+    ),
   };
 
   Fs.mkdirSync(outputDir, { recursive: true });

@@ -10,35 +10,82 @@ import { createRandom } from './corpora/random';
 
 export interface GateResult {
   accepted: boolean;
+  /** Which acceptance path the candidate took, if any. */
+  acceptedVia: 'quality' | 'cost' | null;
   meanDelta: number;
   ciLow: number;
   ciHigh: number;
+  /** Δ(tokens per solved example), candidate − incumbent. Negative is cheaper. */
+  costPerSolvedDelta: number;
+  costPerSolvedCiLow: number;
+  costPerSolvedCiHigh: number;
+  incumbentCostPerSolved: number;
+  candidateCostPerSolved: number;
   improvements: string[];
   regressions: string[];
   costRatio: number;
   reasons: string[];
 }
 
-const meanBySeed = (runs: ExampleRun[]): Map<string, number> => {
-  const totals = new Map<string, { sum: number; count: number }>();
+interface SeedAggregate {
+  reward: number;
+  tokens: number;
+}
+
+const aggregateBySeed = (runs: ExampleRun[]): Map<string, SeedAggregate> => {
+  const totals = new Map<string, { reward: number; tokens: number; count: number }>();
   for (const run of runs) {
-    const current = totals.get(run.seedId) ?? { sum: 0, count: 0 };
-    totals.set(run.seedId, { sum: current.sum + run.score.reward, count: current.count + 1 });
+    const current = totals.get(run.seedId) ?? { reward: 0, tokens: 0, count: 0 };
+    totals.set(run.seedId, {
+      reward: current.reward + run.score.reward,
+      tokens: current.tokens + (run.inputTokens ?? 0) + (run.outputTokens ?? 0),
+      count: current.count + 1,
+    });
   }
   return new Map(
-    [...totals].map(([seedId, { sum, count }]) => [seedId, count === 0 ? 0 : sum / count])
+    [...totals].map(([seedId, { reward, tokens, count }]) => [
+      seedId,
+      { reward: count === 0 ? 0 : reward / count, tokens: count === 0 ? 0 : tokens / count },
+    ])
   );
 };
 
-const totalTokens = (summary: RunSummary): number =>
-  summary.totalInputTokens + summary.totalOutputTokens;
+/**
+ * Tokens spent per unit of reward earned, over a set of seeds.
+ *
+ * Ratio-of-sums rather than mean-of-ratios: a seed the harness never solves would otherwise
+ * contribute an infinite per-seed ratio and dominate the statistic.
+ */
+const costPerSolved = (seeds: string[], aggregates: Map<string, SeedAggregate>): number => {
+  let tokens = 0;
+  let reward = 0;
+  for (const seedId of seeds) {
+    const aggregate = aggregates.get(seedId);
+    if (!aggregate) continue;
+    tokens += aggregate.tokens;
+    reward += aggregate.reward;
+  }
+  return reward === 0 ? Number.POSITIVE_INFINITY : tokens / reward;
+};
+
+const percentile = (sorted: number[], fraction: number): number =>
+  sorted[Math.min(sorted.length - 1, Math.floor(fraction * sorted.length))] ?? 0;
 
 /**
- * Paired accept test, clustered by seed.
+ * Paired accept test, clustered by seed, with two acceptance paths.
  *
  * Resampling is over *seeds*, not rows: rollouts and (later) permutations of the same seed are
- * not independent observations, and treating them as such is exactly the winner's curse the
+ * not independent observations, and treating them as such is the winner's curse the
  * harness-optimization literature measures at 13–20 points of inflated held-out accuracy.
+ *
+ * The two paths mirror the experiment's success criteria, and keep quality and cost jointly
+ * optimized without inventing a weight between them:
+ *
+ * - **quality**: reward is significantly up, cost no more than `maxCostRatio`;
+ * - **cost**: reward is non-inferior (its CI's lower bound stays above `−nonInferiorityMargin`)
+ *   and tokens per solved example are significantly down.
+ *
+ * Either way regressions are capped, so a candidate cannot trade solved examples for averages.
  */
 export const gateCandidate = ({
   incumbent,
@@ -47,6 +94,7 @@ export const gateCandidate = ({
   maxCostRatio = 1.1,
   iterations = 10_000,
   regressionEpsilon = 0.05,
+  nonInferiorityMargin = 0.02,
 }: {
   incumbent: RunSummary;
   candidate: RunSummary;
@@ -54,57 +102,82 @@ export const gateCandidate = ({
   maxCostRatio?: number;
   iterations?: number;
   regressionEpsilon?: number;
+  nonInferiorityMargin?: number;
 }): GateResult => {
-  const incumbentBySeed = meanBySeed(incumbent.runs);
-  const candidateBySeed = meanBySeed(candidate.runs);
+  const incumbentBySeed = aggregateBySeed(incumbent.runs);
+  const candidateBySeed = aggregateBySeed(candidate.runs);
   const seeds = [...incumbentBySeed.keys()].filter((seedId) => candidateBySeed.has(seedId));
 
-  const deltas = seeds.map(
-    (seedId) => (candidateBySeed.get(seedId) ?? 0) - (incumbentBySeed.get(seedId) ?? 0)
-  );
+  const rewardDelta = (seedId: string): number =>
+    (candidateBySeed.get(seedId)?.reward ?? 0) - (incumbentBySeed.get(seedId)?.reward ?? 0);
+
+  const deltas = seeds.map(rewardDelta);
   const meanDelta = deltas.reduce((total, delta) => total + delta, 0) / (deltas.length || 1);
 
+  const incumbentCostPerSolved = costPerSolved(seeds, incumbentBySeed);
+  const candidateCostPerSolved = costPerSolved(seeds, candidateBySeed);
+  const costPerSolvedDelta = candidateCostPerSolved - incumbentCostPerSolved;
+
+  // One resampling pass produces both statistics, so they describe the same bootstrap draws.
   const random = createRandom(`gate:${incumbent.configHash}:${candidate.configHash}`);
-  const bootstrapMeans: number[] = [];
+  const rewardMeans: number[] = [];
+  const costDeltas: number[] = [];
   for (let iteration = 0; iteration < iterations; iteration++) {
-    let sum = 0;
-    for (let i = 0; i < deltas.length; i++) {
-      sum += deltas[random.int(deltas.length)];
+    const sample: string[] = [];
+    let rewardSum = 0;
+    for (let i = 0; i < seeds.length; i++) {
+      const seedId = seeds[random.int(seeds.length)];
+      sample.push(seedId);
+      rewardSum += rewardDelta(seedId);
     }
-    bootstrapMeans.push(sum / (deltas.length || 1));
+    rewardMeans.push(rewardSum / (seeds.length || 1));
+    costDeltas.push(
+      costPerSolved(sample, candidateBySeed) - costPerSolved(sample, incumbentBySeed)
+    );
   }
-  bootstrapMeans.sort((a, b) => a - b);
-  const ciLow = bootstrapMeans[Math.floor(0.025 * bootstrapMeans.length)] ?? 0;
-  const ciHigh = bootstrapMeans[Math.floor(0.975 * bootstrapMeans.length)] ?? 0;
+  rewardMeans.sort((a, b) => a - b);
+  costDeltas.sort((a, b) => a - b);
 
-  const improvements = seeds.filter(
-    (seedId) =>
-      (candidateBySeed.get(seedId) ?? 0) - (incumbentBySeed.get(seedId) ?? 0) > regressionEpsilon
-  );
-  const regressions = seeds.filter(
-    (seedId) =>
-      (incumbentBySeed.get(seedId) ?? 0) - (candidateBySeed.get(seedId) ?? 0) > regressionEpsilon
-  );
+  const ciLow = percentile(rewardMeans, 0.025);
+  const ciHigh = percentile(rewardMeans, 0.975);
+  const costPerSolvedCiLow = percentile(costDeltas, 0.025);
+  const costPerSolvedCiHigh = percentile(costDeltas, 0.975);
 
-  const incumbentCost = totalTokens(incumbent) || 1;
-  const costRatio = totalTokens(candidate) / incumbentCost;
+  const improvements = seeds.filter((seedId) => rewardDelta(seedId) > regressionEpsilon);
+  const regressions = seeds.filter((seedId) => rewardDelta(seedId) < -regressionEpsilon);
+
+  const incumbentTokens = incumbent.totalInputTokens + incumbent.totalOutputTokens || 1;
+  const costRatio = (candidate.totalInputTokens + candidate.totalOutputTokens) / incumbentTokens;
+
+  const qualityWin = ciLow > 0 && costRatio <= maxCostRatio;
+  const costWin = ciLow > -nonInferiorityMargin && costPerSolvedCiHigh < 0;
+  const regressionsOk = regressions.length <= maxRegressions;
 
   const reasons: string[] = [];
-  if (ciLow <= 0) {
-    reasons.push(`paired bootstrap CI includes 0 (${ciLow.toFixed(3)}, ${ciHigh.toFixed(3)})`);
-  }
-  if (regressions.length > maxRegressions) {
+  if (!regressionsOk) {
     reasons.push(`${regressions.length} regressed seeds (max ${maxRegressions})`);
   }
-  if (costRatio > maxCostRatio) {
-    reasons.push(`cost ratio ${costRatio.toFixed(2)}× (max ${maxCostRatio}×)`);
+  if (!qualityWin && !costWin) {
+    reasons.push(
+      `no accept path: reward CI (${ciLow.toFixed(3)}, ${ciHigh.toFixed(3)}) at ${costRatio.toFixed(
+        2
+      )}× cost; cost/solved CI (${costPerSolvedCiLow.toFixed(0)}, ${costPerSolvedCiHigh.toFixed(
+        0
+      )}) tokens`
+    );
   }
 
   return {
-    accepted: reasons.length === 0,
+    accepted: regressionsOk && (qualityWin || costWin),
+    acceptedVia: !regressionsOk ? null : qualityWin ? 'quality' : costWin ? 'cost' : null,
     meanDelta,
     ciLow,
     ciHigh,
+    costPerSolvedDelta,
+    costPerSolvedCiLow,
+    costPerSolvedCiHigh,
+    incumbentCostPerSolved,
+    candidateCostPerSolved,
     improvements,
     regressions,
     costRatio,

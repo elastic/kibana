@@ -57,6 +57,14 @@ export interface EsqlHarnessConfig {
     /** How many timed-out executions are tolerated before the call ends (today: 1 retry). */
     timeoutRetryBudget: number;
   };
+  /**
+   * Slot F — which model tier runs each step. Today both steps run on the `low` tier; keyword
+   * selection and query generation are different tasks, so the loop can price them separately.
+   */
+  model: {
+    generateEffort: 'low' | 'medium' | 'high';
+    requestDocEffort: 'low' | 'medium' | 'high';
+  };
   /** Slot G — prompt prose. Appended to the instruction block; opened last on purpose. */
   instructions: {
     extraInstructions: string;
@@ -100,6 +108,10 @@ Can you fix the query?`,
     executionTimeoutMs: null,
     stopOnJoinReject: true,
     timeoutRetryBudget: 1,
+  },
+  model: {
+    generateEffort: 'low',
+    requestDocEffort: 'low',
   },
   instructions: {
     extraInstructions: '',

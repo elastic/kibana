@@ -1,0 +1,432 @@
+[
+  {
+    "question": "How many events belong to the \"devs\" group and how many to the \"ops\" group, and what fraction of those two groups' combined events comes from devs?",
+    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| EVAL is_first = CASE(group.name == \"devs\", 1, 0), is_second = CASE(group.name == \"ops\", 1, 0)\n| STATS first_count = SUM(is_first), second_count = SUM(is_second)\n| EVAL share = first_count::double / (first_count + second_count)::double",
+    "index": "logs-production.evaluations.2025.01.01",
+    "family": "filtered-ratio",
+    "rowCount": 1,
+    "solvedBy": 1,
+    "attempts": 2,
+    "difficulty": "easy"
+  },
+  {
+    "question": "In the Postgres logs, where the message reports a query duration in milliseconds (\"duration: … ms\"), what are the average and the maximum durations?",
+    "goldQuery": "FROM postgres-logs-production.evaluations.2025.01.01\n| DISSECT message \"%{} duration: %{duration} ms%{}\"\n| EVAL duration_ms = TO_DOUBLE(duration)\n| WHERE duration_ms IS NOT NULL\n| STATS average_duration = AVG(duration_ms), slowest = MAX(duration_ms)",
+    "index": "postgres-logs-production.evaluations.2025.01.01",
+    "family": "text-extraction",
+    "rowCount": 1,
+    "solvedBy": 1,
+    "attempts": 2,
+    "difficulty": "easy"
+  },
+  {
+    "question": "How many network events went to github.com, and how many went to cdn.io? Also show what fraction of those two counts combined went to github.com.",
+    "goldQuery": "FROM packetbeat-production.evaluations.2025.01.01\n| EVAL is_first = CASE(destination.domain == \"github.com\", 1, 0), is_second = CASE(destination.domain == \"cdn.io\", 1, 0)\n| STATS first_count = SUM(is_first), second_count = SUM(is_second)\n| EVAL share = first_count::double / (first_count + second_count)::double",
+    "index": "packetbeat-production.evaluations.2025.01.01",
+    "family": "filtered-ratio",
+    "rowCount": 1,
+    "solvedBy": 1,
+    "attempts": 2,
+    "difficulty": "easy"
+  },
+  {
+    "question": "What are the average, highest and lowest system CPU percentages across all the system metrics?",
+    "goldQuery": "FROM metricbeat-production.evaluations-2025.01.01\n| STATS average = AVG(system.cpu.system.pct), maximum = MAX(system.cpu.system.pct), minimum = MIN(system.cpu.system.pct)",
+    "index": "metricbeat-production.evaluations-2025.01.01",
+    "family": "single-stat",
+    "rowCount": 1,
+    "solvedBy": 1,
+    "attempts": 2,
+    "difficulty": "easy"
+  },
+  {
+    "question": "Which 15 combinations of day and host have the most metrics events? Show the event count for each, highest first.",
+    "goldQuery": "FROM metricbeat-production.evaluations-2025.01.01\n| STATS events = COUNT(*) BY day = BUCKET(@timestamp, 1 day), host.name\n| SORT events DESC\n| LIMIT 15",
+    "index": "metricbeat-production.evaluations-2025.01.01",
+    "family": "time-bucket-by-dimension",
+    "rowCount": 4,
+    "solvedBy": 1,
+    "attempts": 2,
+    "difficulty": "easy"
+  },
+  {
+    "question": "Ignoring metrics records with no system CPU percentage, give each host's total system CPU percentage, its number of records, and its average per record. Only keep hosts with more than one record, and show the 5 with the highest per-record average, highest first.",
+    "goldQuery": "FROM metricbeat-production.evaluations-2025.01.01\n| WHERE system.cpu.system.pct IS NOT NULL\n| STATS total = SUM(system.cpu.system.pct), events = COUNT(*) BY host.name\n| EVAL per_event = total::double / events::double\n| WHERE events > 1\n| SORT per_event DESC\n| LIMIT 5",
+    "index": "metricbeat-production.evaluations-2025.01.01",
+    "family": "multi-stage",
+    "rowCount": 4,
+    "solvedBy": 1,
+    "attempts": 2,
+    "difficulty": "easy"
+  },
+  {
+    "question": "Counting only employees with a salary, what is each country's total salary, employee count and average salary per employee (total divided by count)? Keep countries with more than one employee and return the top 5 by that average, highest first.",
+    "goldQuery": "FROM employees-production.evaluations.2025.01.01\n| WHERE salary IS NOT NULL\n| STATS total = SUM(salary), events = COUNT(*) BY country.keyword\n| EVAL per_event = total::double / events::double\n| WHERE events > 1\n| SORT per_event DESC\n| LIMIT 5",
+    "index": "employees-production.evaluations.2025.01.01",
+    "family": "multi-stage",
+    "rowCount": 4,
+    "solvedBy": 1,
+    "attempts": 2,
+    "difficulty": "easy"
+  },
+  {
+    "question": "For each hour of hire date, how many employees were hired, what was their total salary, and what was the salary per hire? Show the 10 hours with the highest salary per hire, highest first.",
+    "goldQuery": "FROM employees-production.evaluations.2025.01.01\n| EVAL hour = DATE_TRUNC(1 hour, hire_date)\n| STATS events = COUNT(*), measured = SUM(salary) BY hour\n| EVAL per_event = measured::double / events::double\n| SORT per_event DESC\n| LIMIT 10",
+    "index": "employees-production.evaluations.2025.01.01",
+    "family": "bucketed-ratio",
+    "rowCount": 10,
+    "solvedBy": 1,
+    "attempts": 2,
+    "difficulty": "easy"
+  },
+  {
+    "question": "Group the employee records by country and by hire day, and find each country's busiest single day for hiring. Show the 5 countries with the highest single-day hire count, largest first.",
+    "goldQuery": "FROM employees-production.evaluations.2025.01.01\n| EVAL day = DATE_TRUNC(1 day, hire_date)\n| STATS events = COUNT(*) BY day, country.keyword\n| STATS busiest_day_events = MAX(events) BY country.keyword\n| SORT busiest_day_events DESC\n| LIMIT 5",
+    "index": "employees-production.evaluations.2025.01.01",
+    "family": "period-comparison",
+    "rowCount": 4,
+    "solvedBy": 1,
+    "attempts": 2,
+    "difficulty": "easy"
+  },
+  {
+    "question": "Count the projects for each combination of calendar day (by creation date) and project name. Show the 15 day-and-name pairs with the highest counts, highest first.",
+    "goldQuery": "FROM projects\n| STATS events = COUNT(*) BY day = BUCKET(created_at, 1 day), name\n| SORT events DESC\n| LIMIT 15",
+    "index": "projects",
+    "family": "time-bucket-by-dimension",
+    "rowCount": 15,
+    "solvedBy": 1,
+    "attempts": 2,
+    "difficulty": "easy"
+  },
+  {
+    "question": "Using only events that have a bytes-transferred value, show each event category's total bytes, its event count, and its average bytes per event. Include only categories with more than one such event, and return the 5 with the highest average bytes per event, highest first.",
+    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| WHERE bytes_transferred IS NOT NULL\n| STATS total = SUM(bytes_transferred), events = COUNT(*) BY event.category.keyword\n| EVAL per_event = total::double / events::double\n| WHERE events > 1\n| SORT per_event DESC\n| LIMIT 5",
+    "index": "logs-production.evaluations.2025.01.01",
+    "family": "multi-stage",
+    "rowCount": 4,
+    "solvedBy": 0,
+    "attempts": 2,
+    "difficulty": "unsolved"
+  },
+  {
+    "question": "Using only events that have a normalized total CPU usage value, show each event category's summed CPU usage, its event count, and its average CPU usage per event. Include only categories with more than one such event, and return the 5 with the highest per-event average, highest first.",
+    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| WHERE system.cpu.total.norm.pct IS NOT NULL\n| STATS total = SUM(system.cpu.total.norm.pct), events = COUNT(*) BY event.category.keyword\n| EVAL per_event = total::double / events::double\n| WHERE events > 1\n| SORT per_event DESC\n| LIMIT 5",
+    "index": "logs-production.evaluations.2025.01.01",
+    "family": "multi-stage",
+    "rowCount": 4,
+    "solvedBy": 0,
+    "attempts": 2,
+    "difficulty": "unsolved"
+  },
+  {
+    "question": "In the evaluation logs, how many events went to destination address dst-4 and how many to dst-10, and what fraction of those two counts combined belongs to dst-4?",
+    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| EVAL is_first = CASE(destination.address == \"dst-4\", 1, 0), is_second = CASE(destination.address == \"dst-10\", 1, 0)\n| STATS first_count = SUM(is_first), second_count = SUM(is_second)\n| EVAL share = first_count::double / (first_count + second_count)::double",
+    "index": "logs-production.evaluations.2025.01.01",
+    "family": "filtered-ratio",
+    "rowCount": 1,
+    "solvedBy": 0,
+    "attempts": 2,
+    "difficulty": "unsolved"
+  },
+  {
+    "question": "In the evaluation logs, counting only events that have a bytes-transferred value, which 5 destination addresses with more than one such event have the highest average bytes per event? Show each one's total bytes, event count and bytes per event, highest per-event value first.",
+    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| WHERE bytes_transferred IS NOT NULL\n| STATS total = SUM(bytes_transferred), events = COUNT(*) BY destination.address\n| EVAL per_event = total::double / events::double\n| WHERE events > 1\n| SORT per_event DESC\n| LIMIT 5",
+    "index": "logs-production.evaluations.2025.01.01",
+    "family": "multi-stage",
+    "rowCount": 5,
+    "solvedBy": 0,
+    "attempts": 2,
+    "difficulty": "unsolved"
+  },
+  {
+    "question": "In the evaluation logs, counting only events that have a normalized total CPU value, which 5 destination addresses with more than one such event have the highest average CPU per event? Show each one's summed CPU, event count and CPU per event, highest per-event value first.",
+    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| WHERE system.cpu.total.norm.pct IS NOT NULL\n| STATS total = SUM(system.cpu.total.norm.pct), events = COUNT(*) BY destination.address\n| EVAL per_event = total::double / events::double\n| WHERE events > 1\n| SORT per_event DESC\n| LIMIT 5",
+    "index": "logs-production.evaluations.2025.01.01",
+    "family": "multi-stage",
+    "rowCount": 5,
+    "solvedBy": 0,
+    "attempts": 2,
+    "difficulty": "unsolved"
+  },
+  {
+    "question": "In the evaluation logs, how many events came from host-d and how many from host-c, and what fraction of those two counts combined belongs to host-d?",
+    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| EVAL is_first = CASE(host.name == \"host-d\", 1, 0), is_second = CASE(host.name == \"host-c\", 1, 0)\n| STATS first_count = SUM(is_first), second_count = SUM(is_second)\n| EVAL share = first_count::double / (first_count + second_count)::double",
+    "index": "logs-production.evaluations.2025.01.01",
+    "family": "filtered-ratio",
+    "rowCount": 1,
+    "solvedBy": 0,
+    "attempts": 2,
+    "difficulty": "unsolved"
+  },
+  {
+    "question": "In the evaluation logs, counting only events that have a bytes-transferred value, which 5 hosts with more than one such event have the highest average bytes per event? Show each host's total bytes, event count and bytes per event, highest per-event value first.",
+    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| WHERE bytes_transferred IS NOT NULL\n| STATS total = SUM(bytes_transferred), events = COUNT(*) BY host.name\n| EVAL per_event = total::double / events::double\n| WHERE events > 1\n| SORT per_event DESC\n| LIMIT 5",
+    "index": "logs-production.evaluations.2025.01.01",
+    "family": "multi-stage",
+    "rowCount": 4,
+    "solvedBy": 0,
+    "attempts": 2,
+    "difficulty": "unsolved"
+  },
+  {
+    "question": "In the evaluation logs, counting only events that have a normalized total CPU value, which 5 hosts with more than one such event have the highest average CPU per event? Show each host's summed CPU, event count and CPU per event, highest per-event value first.",
+    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| WHERE system.cpu.total.norm.pct IS NOT NULL\n| STATS total = SUM(system.cpu.total.norm.pct), events = COUNT(*) BY host.name\n| EVAL per_event = total::double / events::double\n| WHERE events > 1\n| SORT per_event DESC\n| LIMIT 5",
+    "index": "logs-production.evaluations.2025.01.01",
+    "family": "multi-stage",
+    "rowCount": 4,
+    "solvedBy": 0,
+    "attempts": 2,
+    "difficulty": "unsolved"
+  },
+  {
+    "question": "Looking only at events that record bytes transferred, give each group's total bytes, number of events and average bytes per event. Keep groups with more than one event and show the top 5 by bytes per event, highest first.",
+    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| WHERE bytes_transferred IS NOT NULL\n| STATS total = SUM(bytes_transferred), events = COUNT(*) BY group.name\n| EVAL per_event = total::double / events::double\n| WHERE events > 1\n| SORT per_event DESC\n| LIMIT 5",
+    "index": "logs-production.evaluations.2025.01.01",
+    "family": "multi-stage",
+    "rowCount": 3,
+    "solvedBy": 0,
+    "attempts": 2,
+    "difficulty": "unsolved"
+  },
+  {
+    "question": "Looking only at events that record normalized total system CPU usage, give each group's summed CPU value, number of events and average CPU per event. Keep groups with more than one event and show the top 5 by CPU per event, highest first.",
+    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| WHERE system.cpu.total.norm.pct IS NOT NULL\n| STATS total = SUM(system.cpu.total.norm.pct), events = COUNT(*) BY group.name\n| EVAL per_event = total::double / events::double\n| WHERE events > 1\n| SORT per_event DESC\n| LIMIT 5",
+    "index": "logs-production.evaluations.2025.01.01",
+    "family": "multi-stage",
+    "rowCount": 3,
+    "solvedBy": 0,
+    "attempts": 2,
+    "difficulty": "unsolved"
+  },
+  {
+    "question": "Broken down by hour, how many events were there, how many total bytes were transferred, and what were the average bytes per event? Show the 10 hours with the highest bytes per event, highest first.",
+    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| EVAL hour = DATE_TRUNC(1 hour, @timestamp)\n| STATS events = COUNT(*), measured = SUM(bytes_transferred) BY hour\n| EVAL per_event = measured::double / events::double\n| SORT per_event DESC\n| LIMIT 10",
+    "index": "logs-production.evaluations.2025.01.01",
+    "family": "bucketed-ratio",
+    "rowCount": 6,
+    "solvedBy": 0,
+    "attempts": 2,
+    "difficulty": "unsolved"
+  },
+  {
+    "question": "In the metrics data, label each record \"small\" if its user CPU percentage is below 0.46 and \"large\" otherwise. Which 10 host and size label combinations have the most documents? Show the document count for each, highest first.",
+    "goldQuery": "FROM metricbeat-production.evaluations-2025.01.01\n| EVAL size_class = CASE(system.cpu.user.pct < 0.46, \"small\", \"large\")\n| STATS documents = COUNT(*) BY size_class, host.name\n| SORT documents DESC\n| LIMIT 10",
+    "index": "metricbeat-production.evaluations-2025.01.01",
+    "family": "case-bucketing",
+    "rowCount": 8,
+    "solvedBy": 0,
+    "attempts": 2,
+    "difficulty": "unsolved"
+  },
+  {
+    "question": "How many metrics records come from host-b and how many from host-a? Of those two hosts combined, what fraction of records belongs to host-b?",
+    "goldQuery": "FROM metricbeat-production.evaluations-2025.01.01\n| EVAL is_first = CASE(host.name == \"host-b\", 1, 0), is_second = CASE(host.name == \"host-a\", 1, 0)\n| STATS first_count = SUM(is_first), second_count = SUM(is_second)\n| EVAL share = first_count::double / (first_count + second_count)::double",
+    "index": "metricbeat-production.evaluations-2025.01.01",
+    "family": "filtered-ratio",
+    "rowCount": 1,
+    "solvedBy": 0,
+    "attempts": 2,
+    "difficulty": "unsolved"
+  },
+  {
+    "question": "Ignoring metric records with no CPU core count, give each host's total CPU cores summed across its events, its number of events, and the total divided by the event count. Only include hosts with more than one event, and show the top 5 by that per-event figure, highest first.",
+    "goldQuery": "FROM metricbeat-production.evaluations-2025.01.01\n| WHERE system.cpu.cores IS NOT NULL\n| STATS total = SUM(system.cpu.cores), events = COUNT(*) BY host.name\n| EVAL per_event = total::double / events::double\n| WHERE events > 1\n| SORT per_event DESC\n| LIMIT 5",
+    "index": "metricbeat-production.evaluations-2025.01.01",
+    "family": "multi-stage",
+    "rowCount": 4,
+    "solvedBy": 0,
+    "attempts": 2,
+    "difficulty": "unsolved"
+  },
+  {
+    "question": "Which 15 combinations of hire day and country have the most employees hired? Show the number of hires for each, highest first.",
+    "goldQuery": "FROM employees-production.evaluations.2025.01.01\n| STATS events = COUNT(*) BY day = BUCKET(hire_date, 1 day), country.keyword\n| SORT events DESC\n| LIMIT 15",
+    "index": "employees-production.evaluations.2025.01.01",
+    "family": "time-bucket-by-dimension",
+    "rowCount": 15,
+    "solvedBy": 0,
+    "attempts": 2,
+    "difficulty": "unsolved"
+  },
+  {
+    "question": "How many employees are from the Netherlands (NL) and how many are from France (FR)? Also show what share of those two groups combined is from NL, as a fraction.",
+    "goldQuery": "FROM employees-production.evaluations.2025.01.01\n| EVAL is_first = CASE(country.keyword == \"NL\", 1, 0), is_second = CASE(country.keyword == \"FR\", 1, 0)\n| STATS first_count = SUM(is_first), second_count = SUM(is_second)\n| EVAL share = first_count::double / (first_count + second_count)::double",
+    "index": "employees-production.evaluations.2025.01.01",
+    "family": "filtered-ratio",
+    "rowCount": 1,
+    "solvedBy": 0,
+    "attempts": 2,
+    "difficulty": "unsolved"
+  },
+  {
+    "question": "For each day of creation and each user name, how many user records are there? Show the 15 day-and-name pairs with the most records, highest count first.",
+    "goldQuery": "FROM users\n| STATS events = COUNT(*) BY day = BUCKET(created_at, 1 day), name\n| SORT events DESC\n| LIMIT 15",
+    "index": "users",
+    "family": "time-bucket-by-dimension",
+    "rowCount": 15,
+    "solvedBy": 0,
+    "attempts": 2,
+    "difficulty": "unsolved"
+  },
+  {
+    "question": "How many user records are named \"pavel ferreira\" and how many are named \"ida dubois\"? Of those two names combined, what fraction of the records belongs to \"pavel ferreira\"?",
+    "goldQuery": "FROM users\n| EVAL is_first = CASE(name == \"pavel ferreira\", 1, 0), is_second = CASE(name == \"ida dubois\", 1, 0)\n| STATS first_count = SUM(is_first), second_count = SUM(is_second)\n| EVAL share = first_count::double / (first_count + second_count)::double",
+    "index": "users",
+    "family": "filtered-ratio",
+    "rowCount": 1,
+    "solvedBy": 0,
+    "attempts": 2,
+    "difficulty": "unsolved"
+  },
+  {
+    "question": "How many user records have the ID \"user-0\" and how many have the ID \"user-1\"? Of those two IDs combined, what fraction of the records belongs to \"user-0\"?",
+    "goldQuery": "FROM users\n| EVAL is_first = CASE(id == \"user-0\", 1, 0), is_second = CASE(id == \"user-1\", 1, 0)\n| STATS first_count = SUM(is_first), second_count = SUM(is_second)\n| EVAL share = first_count::double / (first_count + second_count)::double",
+    "index": "users",
+    "family": "filtered-ratio",
+    "rowCount": 1,
+    "solvedBy": 0,
+    "attempts": 2,
+    "difficulty": "unsolved"
+  },
+  {
+    "question": "Which 15 day and owner combinations had the most projects created? Show the day, the owner ID and the count, highest count first.",
+    "goldQuery": "FROM projects\n| STATS events = COUNT(*) BY day = BUCKET(created_at, 1 day), owner_id\n| SORT events DESC\n| LIMIT 15",
+    "index": "projects",
+    "family": "time-bucket-by-dimension",
+    "rowCount": 15,
+    "solvedBy": 0,
+    "attempts": 2,
+    "difficulty": "unsolved"
+  },
+  {
+    "question": "Show me 20 events from the evaluation logs where the event category is \"network\".",
+    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| WHERE event.category.keyword == \"network\"\n| LIMIT 20",
+    "index": "logs-production.evaluations.2025.01.01",
+    "family": "filter-keep",
+    "rowCount": 20,
+    "solvedBy": 2,
+    "attempts": 2,
+    "difficulty": "trivial"
+  },
+  {
+    "question": "How many events in the evaluation logs have the destination address \"dst-4\"?",
+    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| WHERE destination.address == \"dst-4\"\n| STATS matches = COUNT(*)",
+    "index": "logs-production.evaluations.2025.01.01",
+    "family": "count-filtered",
+    "rowCount": 1,
+    "solvedBy": 2,
+    "attempts": 2,
+    "difficulty": "trivial"
+  },
+  {
+    "question": "How many different event categories appear in the evaluation logs?",
+    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| STATS unique_values = COUNT_DISTINCT(event.category.keyword)",
+    "index": "logs-production.evaluations.2025.01.01",
+    "family": "distinct-count",
+    "rowCount": 1,
+    "solvedBy": 2,
+    "attempts": 2,
+    "difficulty": "trivial"
+  },
+  {
+    "question": "What are the 10 most common event categories in the evaluation logs, with the number of events for each, most events first?",
+    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| STATS events = COUNT(*) BY event.category.keyword\n| SORT events DESC\n| LIMIT 10",
+    "index": "logs-production.evaluations.2025.01.01",
+    "family": "stat-by-dimension",
+    "rowCount": 4,
+    "solvedBy": 2,
+    "attempts": 2,
+    "difficulty": "trivial"
+  },
+  {
+    "question": "Show me 20 events from the evaluation logs where the destination address is \"dst-4\".",
+    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| WHERE destination.address == \"dst-4\"\n| LIMIT 20",
+    "index": "logs-production.evaluations.2025.01.01",
+    "family": "filter-keep",
+    "rowCount": 20,
+    "solvedBy": 2,
+    "attempts": 2,
+    "difficulty": "trivial"
+  },
+  {
+    "question": "How many events in the evaluation logs have the event category \"network\"?",
+    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| WHERE event.category.keyword == \"network\"\n| STATS matches = COUNT(*)",
+    "index": "logs-production.evaluations.2025.01.01",
+    "family": "count-filtered",
+    "rowCount": 1,
+    "solvedBy": 2,
+    "attempts": 2,
+    "difficulty": "trivial"
+  },
+  {
+    "question": "How many different destination addresses appear in the evaluation logs?",
+    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| STATS unique_values = COUNT_DISTINCT(destination.address)",
+    "index": "logs-production.evaluations.2025.01.01",
+    "family": "distinct-count",
+    "rowCount": 1,
+    "solvedBy": 2,
+    "attempts": 2,
+    "difficulty": "trivial"
+  },
+  {
+    "question": "Show me 20 events from the evaluation logs where the host name is \"host-d\".",
+    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| WHERE host.name == \"host-d\"\n| LIMIT 20",
+    "index": "logs-production.evaluations.2025.01.01",
+    "family": "filter-keep",
+    "rowCount": 20,
+    "solvedBy": 2,
+    "attempts": 2,
+    "difficulty": "trivial"
+  },
+  {
+    "question": "How many evaluation log entries have the group name \"devs\"? Give me just the total.",
+    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| WHERE group.name == \"devs\"\n| STATS matches = COUNT(*)",
+    "index": "logs-production.evaluations.2025.01.01",
+    "family": "count-filtered",
+    "rowCount": 1,
+    "solvedBy": 2,
+    "attempts": 2,
+    "difficulty": "trivial"
+  },
+  {
+    "question": "Which 10 destination addresses appear most often in the evaluation logs? Show the number of events for each, most events first.",
+    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| STATS events = COUNT(*) BY destination.address\n| SORT events DESC\n| LIMIT 10",
+    "index": "logs-production.evaluations.2025.01.01",
+    "family": "stat-by-dimension",
+    "rowCount": 10,
+    "solvedBy": 2,
+    "attempts": 2,
+    "difficulty": "trivial"
+  },
+  {
+    "question": "Which 10 hosts have the most events in the evaluation logs? Show the number of events for each host, most events first.",
+    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| STATS events = COUNT(*) BY host.name\n| SORT events DESC\n| LIMIT 10",
+    "index": "logs-production.evaluations.2025.01.01",
+    "family": "stat-by-dimension",
+    "rowCount": 4,
+    "solvedBy": 2,
+    "attempts": 2,
+    "difficulty": "trivial"
+  },
+  {
+    "question": "Show me 20 evaluation log entries where the group name is \"devs\".",
+    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| WHERE group.name == \"devs\"\n| LIMIT 20",
+    "index": "logs-production.evaluations.2025.01.01",
+    "family": "filter-keep",
+    "rowCount": 20,
+    "solvedBy": 2,
+    "attempts": 2,
+    "difficulty": "trivial"
+  },
+  {
+    "question": "How many different group names appear in the evaluation logs?",
+    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| STATS unique_values = COUNT_DISTINCT(group.name)",
+    "index": "logs-production.evaluations.2025.01.01",
+    "family": "distinct-count",
+    "rowCount": 1,
+    "solvedBy": 2,
+    "attempts": 2,
+    "difficulty": "trivial"
+  }
+]

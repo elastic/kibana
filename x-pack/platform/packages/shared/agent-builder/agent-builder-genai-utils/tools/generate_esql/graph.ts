@@ -90,6 +90,7 @@ export type StateType = typeof StateAnnotation.State;
 
 export const createNlToEsqlGraph = ({
   model,
+  requestDocModel = model,
   esClient,
   docBase,
   documentation,
@@ -101,6 +102,8 @@ export const createNlToEsqlGraph = ({
   cacheControl,
 }: {
   model: ScopedModel;
+  /** Model used for the keyword-selection step; defaults to the generation model. */
+  requestDocModel?: ScopedModel;
   esClient: ElasticsearchClient;
   docBase: EsqlDocumentBase;
   documentation: EsqlLoadedDocumentation;
@@ -135,11 +138,11 @@ export const createNlToEsqlGraph = ({
       return {}; // pre-computed by caller
     }
 
-    const requestDocModel = model.chatModel
+    const structuredRequestDocModel = requestDocModel.chatModel
       .withStructuredOutput(requestDocumentationSchema, { name: 'request_documentation' })
       .withConfig(requestDocCallConfig);
 
-    const { commands = [], functions = [] } = await requestDocModel.invoke(
+    const { commands = [], functions = [] } = await structuredRequestDocModel.invoke(
       createRequestDocumentationPrompt({
         nlQuery: state.nlQuery,
         documentation,

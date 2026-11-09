@@ -186,9 +186,19 @@ export const generateEsql = async ({
   const effectiveExecutionTimeoutMs = retryPolicy.executionTimeoutMs ?? executionTimeoutMs;
   const startedAt = Date.now();
 
+  // Slot F: the model tier is part of the search space, so it is resolved from the harness
+  // config rather than hardcoded. Defaults to `low` for both steps, i.e. today's behaviour.
   const model = modelProvider
-    ? await modelProvider.selectModel({ effortLevel: EffortLevels.low })
+    ? await modelProvider.selectModel({
+        effortLevel: EffortLevels[harnessConfig.model.generateEffort],
+      })
     : inputModel!;
+  const requestDocModel =
+    modelProvider && harnessConfig.model.requestDocEffort !== harnessConfig.model.generateEffort
+      ? await modelProvider.selectModel({
+          effortLevel: EffortLevels[harnessConfig.model.requestDocEffort],
+        })
+      : model;
   const timeRange = inputTimeRange ?? { from: 'now-24h', to: 'now' };
   const docBase = await EsqlDocumentBase.load();
   const documentation = await loadDocumentation();
@@ -199,6 +209,7 @@ export const generateEsql = async ({
 
   const graph = createNlToEsqlGraph({
     model,
+    requestDocModel,
     esClient,
     docBase,
     documentation,
@@ -228,10 +239,11 @@ export const generateEsql = async ({
         if (!selectedTarget && harnessConfig.docRetrieval.prefetchWithoutResource) {
           // Pre-fetch doc keywords from the NL query alone, in parallel with index discovery.
           // The resource-less prompt is an accepted quality tradeoff for the latency win.
-          const requestDocModel = model.chatModel.withStructuredOutput(requestDocumentationSchema, {
-            name: 'request_documentation',
-          });
-          const docPromise = requestDocModel
+          const prefetchDocModel = requestDocModel.chatModel.withStructuredOutput(
+            requestDocumentationSchema,
+            { name: 'request_documentation' }
+          );
+          const docPromise = prefetchDocModel
             .invoke(
               createRequestDocumentationPromptNoResource({
                 nlQuery,

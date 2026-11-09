@@ -18,6 +18,19 @@ import { syntheticFixtureDocuments } from './synthetic_documents';
  *
  * Idempotent: existing indices are left alone, documents are written with deterministic ids.
  */
+/** Every index the corpus generator may synthesize queries against. */
+export const corpusIndices: string[] = [
+  'logs-production.evaluations.2025.01.01',
+  'postgres-logs-production.evaluations.2025.01.01',
+  'packetbeat-production.evaluations.2025.01.01',
+  'nyc_taxis-production.evaluations.2025.01.01',
+  'metricbeat-production.evaluations-2025.01.01',
+  'employees-production.evaluations.2025.01.01',
+  'users',
+  'projects',
+  'error_rate_daily',
+];
+
 export const setupFixtures = async ({
   esClient,
   log,

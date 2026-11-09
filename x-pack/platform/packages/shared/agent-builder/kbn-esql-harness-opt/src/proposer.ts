@@ -5,14 +5,44 @@
  * 2.0.
  */
 
-import { execFile } from 'child_process';
+import { spawn } from 'child_process';
 import Fs from 'fs';
 import Path from 'path';
-import { promisify } from 'util';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { RunSummary } from './runner';
 
-const execFileAsync = promisify(execFile);
+/** Run the proposer, streaming its output to a log file so a stuck round is visible while it runs. */
+const runProposerCommand = ({
+  command,
+  args,
+  logPath,
+  timeoutMs,
+}: {
+  command: string;
+  args: string[];
+  logPath: string;
+  timeoutMs: number;
+}): Promise<number> =>
+  new Promise((resolve, reject) => {
+    const logStream = Fs.createWriteStream(logPath, { flags: 'a' });
+    const child = spawn(command, args, { stdio: ['ignore', 'pipe', 'pipe'] });
+    child.stdout.pipe(logStream);
+    child.stderr.pipe(logStream);
+
+    const timer = setTimeout(() => {
+      child.kill('SIGKILL');
+      reject(new Error(`proposer timed out after ${timeoutMs}ms (log: ${logPath})`));
+    }, timeoutMs);
+
+    child.on('error', (error) => {
+      clearTimeout(timer);
+      reject(error);
+    });
+    child.on('close', (code) => {
+      clearTimeout(timer);
+      resolve(code ?? 0);
+    });
+  });
 
 export interface ProposalManifest {
   slots: string[];
@@ -164,8 +194,8 @@ export const proposeCandidate = async ({
   history,
   scratchDir,
   log,
-  model = process.env.HARNESS_PROPOSER_MODEL ?? 'grok-4.7-high',
-  timeoutMs = Number(process.env.HARNESS_PROPOSER_TIMEOUT_MS ?? 2_400_000),
+  model = process.env.HARNESS_PROPOSER_MODEL ?? 'grok-4.7-low',
+  timeoutMs = Number(process.env.HARNESS_PROPOSER_TIMEOUT_MS ?? 900_000),
 }: {
   summary: RunSummary;
   incumbentConfig: Record<string, unknown>;
@@ -191,21 +221,20 @@ export const proposeCandidate = async ({
     process.env.HARNESS_PROPOSER_CMD ??
     Path.join(process.env.HOME ?? '', '.pi/agent/skills/cursor-subagent/cursor-task');
 
-  log.info(`[harness-opt] proposing candidate with ${command} (${model})`);
+  const logPath = Path.join(scratchDir, 'proposer.log');
+  log.info(`[harness-opt] proposing candidate with ${command} (${model}); log: ${logPath}`);
   try {
-    const { stdout } = await execFileAsync(
+    const code = await runProposerCommand({
       command,
-      [scratchDir, '--model', model, PROPOSER_TASK('incumbent.json')],
-      { timeout: timeoutMs, maxBuffer: 20 * 1024 * 1024 }
-    );
-    log.debug(stdout.slice(-2000));
+      args: [scratchDir, '--model', model, PROPOSER_TASK('incumbent.json')],
+      logPath,
+      timeoutMs,
+    });
+    if (code !== 0) {
+      log.warning(`[harness-opt] proposer exited with code ${code}; see ${logPath}`);
+    }
   } catch (e) {
-    const { stdout = '', stderr = '' } = e as { stdout?: string; stderr?: string };
-    log.warning(
-      `[harness-opt] proposer command failed: ${(e as Error).message}\n${stdout.slice(
-        -1000
-      )}\n${stderr.slice(-1000)}`
-    );
+    log.warning(`[harness-opt] proposer command failed: ${(e as Error).message}`);
   }
 
   if (!Fs.existsSync(proposalPath)) {

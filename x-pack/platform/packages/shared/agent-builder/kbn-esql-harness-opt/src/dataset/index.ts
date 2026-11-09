@@ -6,6 +6,8 @@
  */
 
 import Crypto from 'crypto';
+import Fs from 'fs';
+import Path from 'path';
 import { securityRegressionExamples } from './security_regression';
 import { agentBuilderEsqlExamples } from './agent_builder_esql';
 
@@ -21,6 +23,10 @@ export interface HarnessExample {
   index?: string;
   provenance: string;
   split: Split;
+  /** Template family, for generated examples: lets a round report per-family deltas. */
+  family?: string;
+  /** How many probe attempts reproduced the gold result when the corpus was built. */
+  difficulty?: string;
 }
 
 const hashToUnitInterval = (value: string): number => {
@@ -76,5 +82,39 @@ export const anchorExamples: HarnessExample[] = [
   ),
 ];
 
+/** Path of the generated corpus; absent until `generate-corpus` has been run. */
+export const GENERATED_CORPUS_PATH = Path.resolve(__dirname, 'generated_corpus.json');
+
+interface GeneratedCorpusEntry {
+  question: string;
+  goldQuery: string;
+  index: string;
+  family?: string;
+  difficulty?: string;
+}
+
+/**
+ * Generated examples, loaded from disk when present.
+ *
+ * Reported separately from the anchor set on purpose: the anchor set is real user language with
+ * human-verified gold and stays the benchmark of record, while the generated corpus is search
+ * substrate. A gain that only shows up here is not a promotion signal.
+ */
+export const generatedExamples = (): HarnessExample[] => {
+  if (!Fs.existsSync(GENERATED_CORPUS_PATH)) {
+    return [];
+  }
+  const entries = JSON.parse(
+    Fs.readFileSync(GENERATED_CORPUS_PATH, 'utf8')
+  ) as GeneratedCorpusEntry[];
+  return entries.map(({ question, goldQuery, index, family, difficulty }) => ({
+    ...toExample({ question, goldQuery, index, provenance: 'generated-corpus' }),
+    family,
+    difficulty,
+  }));
+};
+
+export const allExamples = (): HarnessExample[] => [...anchorExamples, ...generatedExamples()];
+
 export const examplesForSplit = (split: Split): HarnessExample[] =>
-  anchorExamples.filter((example) => example.split === split);
+  allExamples().filter((example) => example.split === split);

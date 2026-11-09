@@ -44,6 +44,13 @@ the HTTP response does not expose.
    node scripts/esql_harness_opt.js setup-fixtures
    ```
 
+2b. Optionally regenerate the synthetic corpus (query-first synthesis → back-translation →
+   difficulty probe). It is committed, so this is only needed when the fixtures change:
+
+   ```bash
+   node scripts/esql_harness_opt.js generate-corpus --probes 2 --concurrency 6
+   ```
+
 3. Measure what the current harness costs and buys, including the matched-compute baselines
    (`maxRetries ∈ {1, 3, 5}`) that any later "gain" has to beat:
 
@@ -73,10 +80,26 @@ the HTTP response does not expose.
 - Gate requires: paired bootstrap 95% CI over seeds excluding 0, ≤2 regressed seeds, and ≤1.1×
   token cost.
 
+## The dataset
+
+Two parts, always reported separately:
+
+- **Anchor set (34)** — 31 from the security ES|QL regression suite, 3 from the agent-builder
+  ES|QL spec. Human-written language, human-written gold. This is the benchmark of record.
+- **Generated corpus (43)** — built by `generate-corpus`: templates instantiated against the
+  live mappings and sampled literals, executed (so the gold is an observed fact, never a model's
+  opinion), back-translated into questions by a different model family, then probed twice
+  through the current harness to label difficulty.
+
+The probe exists because the first generated corpus was **saturated**: the harness solved 95% of
+it on the first attempt, so it could show neither improvement nor regression. The corpus keeps
+every flipping case (solved on one attempt, not the other), caps never-solved examples, and
+admits trivial ones only as regression ballast (≤30%).
+
 ## Known limitations (read before believing a number)
 
-- The anchor dataset is 34 hand-written examples. That is enough to smoke-test the loop and
-  nowhere near enough to promote a config to production defaults.
+- 77 seeds total. Enough for the gate to resolve effects around +0.08 reward; not enough to
+  promote a config to production defaults.
 - Several gold queries in the security regression set are themselves dubious or non-executable;
   those examples score on `executes` / `ast_valid` only.
 - Only one model tier is exercised per run. Harness fixes are pathology-matched to a model, so a

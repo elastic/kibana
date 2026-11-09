@@ -37,7 +37,10 @@ describe('harness config', () => {
     process.env.ESQL_HARNESS_CONFIG = path;
 
     const config = getEsqlHarnessConfig();
-    expect(config.exemplars).toEqual({ selection: 'knn', k: DEFAULT_ESQL_HARNESS_CONFIG.exemplars.k });
+    expect(config.exemplars).toEqual({
+      selection: 'knn',
+      k: DEFAULT_ESQL_HARNESS_CONFIG.exemplars.k,
+    });
     expect(config.feedback).toEqual(DEFAULT_ESQL_HARNESS_CONFIG.feedback);
 
     Fs.unlinkSync(path);
