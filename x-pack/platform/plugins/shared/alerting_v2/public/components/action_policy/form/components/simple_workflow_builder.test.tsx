@@ -117,8 +117,7 @@ describe('SimpleWorkflowBuilder', () => {
 
     await user.click(screen.getByTestId('simpleWorkflowAdd-slack'));
 
-    const editor = await screen.findByTestId(/inlineWorkflowEditor-/);
-    expect(editor).toBeInTheDocument();
+    await screen.findByTestId(/inlineWorkflowEditor-/);
     // The add buttons remain so more workflows can be created.
     expect(screen.getByTestId('simpleWorkflowAdd-slack')).toBeInTheDocument();
   });

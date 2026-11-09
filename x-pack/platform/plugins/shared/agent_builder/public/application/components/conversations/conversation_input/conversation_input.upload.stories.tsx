@@ -9,7 +9,6 @@ import React, { useMemo, useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { EuiGlobalToastList } from '@elastic/eui';
 import type { EuiGlobalToastListToast } from '@elastic/eui';
-import { QueryClient } from '@kbn/react-query';
 import { fn, userEvent, within } from '@storybook/test';
 import type { VersionedAttachment } from '@kbn/agent-builder-common';
 import type {
@@ -299,16 +298,12 @@ const createBinaryStoryServices = ({
   };
 };
 
-/** Gives a file story its own query cache, so the supported types answer does not carry over, and shows toasts. */
+/** Shows toasts in a file story. */
 const BinaryStoryProvider: React.FC<{
   services: ReturnType<typeof createBinaryStoryServices>;
   children: React.ReactNode;
 }> = ({ services, children }) => {
   const [toasts, setToasts] = useState<EuiGlobalToastListToast[]>([]);
-  const queryClient = useMemo(
-    () => new QueryClient({ defaultOptions: { queries: { retry: false } } }),
-    []
-  );
   const kibanaServices = useMemo(() => {
     const base = createStorybookKibanaServices();
     base.notifications.toasts.addDanger = (input) => {
@@ -324,11 +319,7 @@ const BinaryStoryProvider: React.FC<{
 
   return (
     <>
-      <AgentBuilderStorybookProvider
-        services={services}
-        queryClient={queryClient}
-        kibanaServices={kibanaServices}
-      >
+      <AgentBuilderStorybookProvider services={services} kibanaServices={kibanaServices}>
         {children}
       </AgentBuilderStorybookProvider>
       <EuiGlobalToastList

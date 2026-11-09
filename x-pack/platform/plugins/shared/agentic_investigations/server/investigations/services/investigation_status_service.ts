@@ -17,6 +17,13 @@ import type {
   InvestigationClosePreviewResponse,
   ClosePreviewProposal,
 } from '../../../common/investigations/status';
+import {
+  INVESTIGATION_SEVERITY_CHANGED_EVENT_TYPE,
+  type InvestigationSeverityChangedEventData,
+  type SetInvestigationSeverityRequest,
+  type SetInvestigationSeverityResponse,
+} from '../../../common/investigations/severity_change';
+import { isInvestigationSeverity } from '../../../common/investigations/severity';
 import { MissingDismissReasonError } from './errors';
 import { CloseTargetsChangedError } from './close_targets_changed_error';
 import { ProposalDismissFailedError } from './proposal_dismiss_failed_error';
@@ -243,6 +250,50 @@ export class InvestigationStatusService {
       pending_proposals: pending,
       running_proposal_count: running,
     };
+  }
+
+  /**
+   * Sets the severity a user chose and records the change on the timeline, so the agent continuing
+   * the investigation sees it was a human judgement. Setting the current severity again is a no-op.
+   */
+  async setSeverity(
+    request: KibanaRequest,
+    conversationId: string,
+    { severity }: SetInvestigationSeverityRequest
+  ): Promise<SetInvestigationSeverityResponse> {
+    const client = await this.getConversationClient(request);
+    const conversation = await client.get(conversationId);
+    if (conversation.template_id !== INVESTIGATION_TEMPLATE_ID) {
+      throw new WrongTemplateError(conversationId, INVESTIGATION_TEMPLATE_ID);
+    }
+
+    const current = conversation.metadata?.severity;
+    const previousSeverity = isInvestigationSeverity(current) ? current : undefined;
+    if (previousSeverity === severity) {
+      return { conversation_id: conversationId, severity, previous_severity: previousSeverity };
+    }
+
+    await client.patchMetadata(conversationId, { severity }, { access: 'converse' });
+
+    const data: InvestigationSeverityChangedEventData = {
+      severity,
+      ...(previousSeverity && { previous_severity: previousSeverity }),
+    };
+    // Best-effort: the severity is already written, and a missing note must not fail the change.
+    try {
+      await client.addEvents({
+        conversationId,
+        events: [{ type: INVESTIGATION_SEVERITY_CHANGED_EVENT_TYPE, data }],
+      });
+    } catch (error) {
+      this.logger.warn(
+        `Failed to record the severity change of investigation ${conversationId}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+
+    return { conversation_id: conversationId, severity, previous_severity: previousSeverity };
   }
 
   async setStatus(

@@ -236,6 +236,7 @@ const defaultServices: AgentBuilderInternalService = {
   eventsService: { track: noOp } as never,
   isEarsEnabled: false,
   isEarsExperimentalEnabled: false,
+  isServerless: false,
   openSidebarConversation: () => ({} as never),
 };
 

@@ -76,7 +76,9 @@ export const useBulkActionsByTableType = (
   tableId: TableId,
   query: AlertsTableProps['query'],
   refresh: () => void,
-  runtimeMappings?: MappingRuntimeFields
+  runtimeMappings?: MappingRuntimeFields,
+  /** The query the table runs, when a host such as a case overrides `query`. */
+  tableQuery: AlertsTableProps['query'] = query
 ): [ItemsPanelConfig, ...BulkActionsPanelConfig[]] => {
   const { from, to } = useGlobalTime();
   const filters = useMemo(() => {
@@ -133,7 +135,11 @@ export const useBulkActionsByTableType = (
 
   const { alertTagsItems, alertTagsPanels } = useBulkAlertTagsItems(bulkAlertTagParams);
 
-  const { runWorkflowItems, runWorkflowPanels } = useBulkRunAlertWorkflowPanel();
+  const runWorkflowParams = useMemo(
+    () => ({ tableQuery, scopeId: PageScope.alerts, tableId }),
+    [tableQuery, tableId]
+  );
+  const { runWorkflowItems, runWorkflowPanels } = useBulkRunAlertWorkflowPanel(runWorkflowParams);
 
   const items = useMemo(() => {
     return [

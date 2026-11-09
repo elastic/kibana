@@ -95,5 +95,16 @@ describe('ExecutionError', () => {
 
       expect(Object.keys(serialized)).toEqual(['type', 'message']);
     });
+
+    it.each([false, true])('keeps retryable: %s through a serialize round trip', (retryable) => {
+      const serialized = new ExecutionError({
+        type: 'Test',
+        message: 'msg',
+        retryable,
+      }).toSerializableObject();
+
+      expect(serialized).toEqual({ type: 'Test', message: 'msg', retryable });
+      expect(new ExecutionError(serialized).retryable).toBe(retryable);
+    });
   });
 });

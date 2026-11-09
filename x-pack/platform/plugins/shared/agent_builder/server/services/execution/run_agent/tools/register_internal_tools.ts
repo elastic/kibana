@@ -28,13 +28,13 @@ import { createAskUserQuestionTool } from './ask_user_question';
 import { createReadFileTool } from './read_file';
 import { createListFilesTool } from './list_files';
 import { createBashTool } from './bash';
+import { createExecuteDynamicTool } from './execute_dynamic_tool';
 import {
   createDiscoverApisTool,
   createDescribeApiTool,
   createDescribeApiTypeTool,
   createExecuteApiTool,
 } from './api';
-import { createTodoTool } from '../../../tools/builtin/todo';
 import { createSetConversationMetadataTool } from '../../../tools/builtin/set_conversation_metadata';
 import { builtinToolToExecutable } from '../utils/select_tools';
 import type { BackgroundExecutionService } from '../background_execution_service';
@@ -107,7 +107,6 @@ export const registerInternalTools = async ({
     trackingService,
     filesystemService,
     bashService,
-    todoStateManager,
     selfClient,
     parentExecutionId,
     conversationAccess,
@@ -124,11 +123,6 @@ export const registerInternalTools = async ({
   tools.push(createListFilesTool({ filesystemService }));
   if (experimentalFeatures.bash && bashService) {
     tools.push(createBashTool({ bashService }));
-  }
-
-  // Todos — FF-gated.
-  if (experimentalFeatures.todos) {
-    tools.push(createTodoTool({ todoStateManager }));
   }
 
   // HTTP API introspection/invocation — always on, except discovery, which is FF-gated.
@@ -224,10 +218,13 @@ export const registerInternalTools = async ({
 
   await toolManager.addTools({
     type: ToolManagerToolType.executable,
-    tools: tools.map((tool) => ({
-      ...builtinToolToExecutable({ tool, runner: runner as ScopedRunner }),
-      origin: ToolOrigin.internal,
-    })),
+    tools: [
+      ...tools.map((tool) => ({
+        ...builtinToolToExecutable({ tool, runner: runner as ScopedRunner }),
+        origin: ToolOrigin.internal,
+      })),
+      ...(experimentalFeatures.dynamicTools ? [createExecuteDynamicTool({ toolManager })] : []),
+    ],
     logger,
   });
 };

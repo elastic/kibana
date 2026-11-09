@@ -45,6 +45,7 @@ const heightStyles = css`
 const resetStyles = (id: string) => css`
   &#${CSS.escape(id)} {
     outline-style: none;
+    white-space: pre-wrap;
   }
 `;
 const disabledStyles = css`
@@ -167,6 +168,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
       commandMatch={commandMatch}
       editorRef={ref}
       onSelect={messageEditor.handleCommandSelect}
+      onReplaceText={messageEditor.handleCommandReplaceText}
       onContentChange={messageEditor.reportMenuContent}
       commandMenuRef={commandMenuRef}
       data-test-subj={`${dataTestSubj}-container`}
@@ -174,7 +176,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
       <div
         ref={ref}
         id={editorId}
-        contentEditable={disabled ? 'false' : 'true'}
+        contentEditable={disabled ? 'false' : 'plaintext-only'}
         role="textbox"
         aria-multiline="true"
         aria-label={ariaLabel ?? editorAriaLabel}
@@ -247,7 +249,12 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
             messageEditor.dismissActionMenu();
             return;
           }
-          if (commandMatch.isActive && commandMenuRef.current?.isKeyDownEventHandled(event)) {
+          // A hidden menu stays mounted, so it must not take keys
+          if (
+            commandMatch.isActive &&
+            commandMatch.hasVisibleContent &&
+            commandMenuRef.current?.isKeyDownEventHandled(event)
+          ) {
             commandMenuRef.current.handleKeyDown(event);
             event.preventDefault();
             return;

@@ -8,7 +8,14 @@
 import fs from 'fs';
 import path from 'path';
 import { getCompositeSLOParamsSchema } from '@kbn/slo-schema';
+import type {
+  DefaultRouteCreateOptions,
+  ServerRouteRepository,
+} from '@kbn/server-route-repository-utils';
 import { createCompositeSloServerRoute } from './create_composite_slo_server_route';
+
+const getRouteOptions = (route: ServerRouteRepository[string]): DefaultRouteCreateOptions =>
+  'options' in route ? route.options : {};
 
 const ENDPOINT = 'GET /api/observability/slo_composites/{id} 2023-10-31';
 
@@ -32,6 +39,24 @@ describe('createCompositeSloServerRoute', () => {
       handler: routes[ENDPOINT].handler,
     };
   };
+
+  it('hides the route from the OpenAPI spec', () => {
+    const routes = createCompositeSloServerRoute({
+      endpoint: ENDPOINT,
+      options: { access: 'public' },
+      security: {
+        authz: {
+          requiredPrivileges: ['slo_read'],
+        },
+      },
+      params: getCompositeSLOParamsSchema,
+      handler: jest.fn(),
+    });
+
+    expect(getRouteOptions(routes[ENDPOINT])).toEqual(
+      expect.objectContaining({ access: 'public', excludeFromOAS: true })
+    );
+  });
 
   it('returns 404 when the composite SLO feature flag is disabled', async () => {
     const { innerHandler, handler } = createRouteHandler();

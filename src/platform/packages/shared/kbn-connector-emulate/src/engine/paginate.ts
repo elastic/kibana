@@ -11,7 +11,7 @@ import { set } from '@kbn/safer-lodash-set';
 import { cloneDeep, get, unset } from 'lodash';
 import type { ContractRequest, ContractResponse, Responder } from '../contract/types';
 import { isRecord } from '../openapi/schema_walk';
-import { MOCK_PAGE_PARAM } from '../openapi/validate_request';
+import { MOCK_PAGE_PARAM } from '../openapi/read_parameters';
 import type { ContractOperation } from '../openapi/types';
 import type { OperationRef, RecordedExchange, StoredResponse } from './response_engine';
 import { createOperationIndex } from './response_engine';
@@ -498,8 +498,8 @@ export const withPagination = (
       })
     )
   );
-  return (operation, request) => {
-    const response = respond(operation, request);
+  return async (operation, request, context) => {
+    const response = await respond(operation, request, context);
     const options = paginated.get(operation);
     return options && response.statusCode < 300 ? paginate(options, request, response) : response;
   };

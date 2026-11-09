@@ -20,13 +20,10 @@ describe('SourcesToolbar', () => {
       <SourcesToolbar
         query=""
         typeOptions={[]}
-        statusOptions={[]}
         selectedTypes={[]}
-        selectedStatuses={[]}
         isRefreshing={false}
         onQueryChange={onQueryChange}
         onSelectedTypesChange={jest.fn()}
-        onSelectedStatusesChange={jest.fn()}
         onRefresh={onRefresh}
         onAddSource={onAddSource}
       />

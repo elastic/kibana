@@ -11,7 +11,8 @@ import { createLogstashLensEditorSuiteSetup, spaceTest } from '../fixtures';
 
 const OVERRIDE_AXIS_TITLE = 'overridden axis';
 
-spaceTest.describe('Lens chart style settings', { tag: tags.deploymentAgnostic }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/299835
+spaceTest.describe.skip('Lens chart style settings', { tag: tags.deploymentAgnostic }, () => {
   const suiteSetup = createLogstashLensEditorSuiteSetup({ enableChartDebug: true });
 
   spaceTest.beforeAll(suiteSetup.beforeAll);

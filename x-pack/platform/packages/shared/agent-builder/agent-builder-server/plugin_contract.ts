@@ -9,7 +9,11 @@ import type { ZodObject } from '@kbn/zod/v4';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AgentCreateRequest, ConversationTemplate } from '@kbn/agent-builder-common';
 import type { ConversationPublicClient } from './conversations';
-import type { CallbackConversationResolver, CallbackTransportDefinition } from './callbacks';
+import type {
+  OnBeforeNewConversationHook,
+  CallbackConversationResolver,
+  CallbackTransportDefinition,
+} from './callbacks';
 import type { StaticToolRegistration, ToolRegistry } from './tools';
 import type { AttachmentTypeDefinition, AttachmentPublicClient } from './attachments';
 import type { RendererTypeDefinition } from './renderers';
@@ -275,9 +279,16 @@ export interface CallbacksSetup {
   /**
    * Registers a resolver for the conversation an execution's origin continues, when the execution
    * names no conversation. Resolvers are asked in registration order and the first answer wins.
-   * When all return `undefined`, the default lookup by origin runs.
+   * When all return `undefined`, the default lookup by origin runs. A resolved conversation runs on
+   * its own agent, and one the caller cannot converse in is skipped.
    */
   registerConversationResolver(resolver: CallbackConversationResolver): void;
+  /**
+   * Registers a hook for an execution whose origin no conversation continues, run before the new
+   * conversation or its message is written. Hooks run in registration order; one that throws
+   * refuses the execution with its error.
+   */
+  registerOnBeforeNewConversation(hook: OnBeforeNewConversationHook): void;
   /** Registers a callback transport. The first registered transport that handles a URL delivers to it. */
   registerTransport(transport: CallbackTransportDefinition): void;
 }

@@ -26,7 +26,7 @@ import type {
 import type { RuntimeAgentConfigurationOverrides } from '../agents/definition';
 import type { ConversationAccessControl } from './access_control';
 import type { RoundState } from './round_state';
-import type { ConversationEvent } from './timeline_events';
+import type { ActiveExecution, ConversationEvent } from './timeline_events';
 import type { ExecutionInterruption } from './events';
 import type { MetadataFieldValue } from '../templates';
 
@@ -60,11 +60,13 @@ export interface RoundInput {
    */
   attachments?: Attachment[];
   /**
-   * References to versioned conversation-level attachments.
+   * @deprecated Written before attachment events became the source of truth; read-only, rendered
+   * by the legacy path only.
    */
   attachment_refs?: AttachmentVersionRef[];
   /**
-   * Pre-rendered, immutable prompt context for attachments created/updated in this round
+   * @deprecated Written before attachment events became the source of truth; read-only, rendered
+   * by the legacy path only.
    */
   attachment_context?: string;
 }
@@ -80,13 +82,9 @@ export interface ConverseInput {
   /**
    * Optional attachments to provide to the agent.
    * Use `origin` without `data` for by-reference types that implement `resolve`.
-   * @deprecated Use attachment_refs with conversation-level attachments instead
+   * @deprecated Use conversation-level attachments instead
    */
   attachments?: AttachmentInput[];
-  /**
-   * References to versioned conversation-level attachments.
-   */
-  attachment_refs?: AttachmentVersionRef[];
   /**
    * Response from the user to prompt requests.
    */
@@ -109,7 +107,6 @@ export enum ConversationRoundStepType {
   reasoning = 'reasoning',
   compaction = 'compaction',
   backgroundAgentComplete = 'background_agent_complete',
-  updateTodos = 'update_todos',
   askUserQuestion = 'ask_user_question',
   relevantSkills = 'relevant_skills',
   preExecutionWorkflow = 'pre_execution_workflow',
@@ -136,6 +133,16 @@ export interface ToolCallProgress {
    * Optional structured metadata attached to this progress event.
    */
   metadata?: Record<string, string>;
+}
+
+/**
+ * How the model reached a tool.
+ */
+export enum ToolCallInvocation {
+  /** Bound to the model as a native tool. */
+  native = 'native',
+  /** Reached through the `execute_dynamic_tool` meta-tool. */
+  dynamic = 'dynamic',
 }
 
 /**
@@ -173,6 +180,17 @@ export interface ToolCallWithResult {
    * outcome (usually `[]`). An empty `results` without this flag is a real empty return.
    */
   interrupted?: true;
+  /**
+   * How the model reached the tool; absent means `native` (steps persisted before this field
+   * existed have none). For `dynamic`, `tool_id` and `params` are the inner tool's; the
+   * `execute_dynamic_tool` wrapper is restored when the call is rendered back to the model or
+   * re-run on resume. Use `isDynamicToolCall` rather than comparing the value.
+   */
+  invocation?: ToolCallInvocation;
+  /**
+   * Short description, provided by the model, of what the agent is doing with this call.
+   */
+  intent?: string;
 }
 
 export type ToolCallStep = ConversationRoundStepMixin<
@@ -191,6 +209,11 @@ export const isToolCallStep = (step: ConversationRoundStep): step is ToolCallSte
   return step.type === ConversationRoundStepType.toolCall;
 };
 
+/** True when the call went through the `execute_dynamic_tool` meta-tool. */
+export const isDynamicToolCall = (call: Pick<ToolCallWithResult, 'invocation'>): boolean => {
+  return call.invocation === ToolCallInvocation.dynamic;
+};
+
 export const createReasoningStep = (reasoningStepWithResult: ReasoningStepData): ReasoningStep => {
   return {
     type: ConversationRoundStepType.reasoning,
@@ -203,7 +226,10 @@ export interface ReasoningStepData {
   reasoning: string;
   /** if true, will not be displayed in the thinking panel, only used as "current thinking" **/
   transient?: boolean;
-  /** when reasoning is bound to a tool call, the corresponding tool call ID */
+  /**
+   * when reasoning is bound to a tool call, the corresponding tool call ID
+   * @deprecated No longer produced; kept for conversations stored before tool call intent.
+   */
   tool_call_id?: string;
   /** when reasoning is bound to a tool call group, the corresponding tool call group ID */
   tool_call_group_id?: string;
@@ -300,6 +326,9 @@ export const isInjectedContextStep = (step: ConversationRoundStep): step is Inje
   return step.type === ConversationRoundStepType.injectedContext;
 };
 
+/** Registration id of the skill pre-selection cycle hook; its `injected_context` steps carry it. */
+export const relevantSkillsHookId = 'relevant-skills';
+
 export type BackgroundAgentCompleteStep = ConversationRoundStepMixin<
   ConversationRoundStepType.backgroundAgentComplete,
   BackgroundExecutionState
@@ -311,19 +340,14 @@ export const isBackgroundAgentCompleteStep = (
   return step.type === ConversationRoundStepType.backgroundAgentComplete;
 };
 
-export interface TodosStepData {
-  todos: TodoItem[];
-  /** True when todos were inherited from the previous round, not written by the agent this round */
-  carried_over?: boolean;
-}
+/**
+ * Step type written by the removed `write_todos` tool. Conversations persisted before its removal
+ * still carry such steps; they are dropped when loaded, so no runtime type describes them.
+ */
+export const LEGACY_TODOS_STEP_TYPE = 'update_todos';
 
-export type TodosStep = ConversationRoundStepMixin<
-  ConversationRoundStepType.updateTodos,
-  TodosStepData
->;
-
-export const isTodosStep = (step: ConversationRoundStep): step is TodosStep => {
-  return step.type === ConversationRoundStepType.updateTodos;
+export const isLegacyTodosStep = (step: { type: string }): boolean => {
+  return step.type === LEGACY_TODOS_STEP_TYPE;
 };
 
 // ask_user_question step
@@ -416,33 +440,11 @@ export const isPreExecutionWorkflowStep = (
   return step.type === ConversationRoundStepType.preExecutionWorkflow;
 };
 
-/**
- * Returns the (single) todos step from a list of steps, if present.
- * A round only ever has at most one todos step, which is updated in place.
- */
-export const findTodosStep = (
-  steps: ConversationRoundStep[] | undefined
-): TodosStep | undefined => {
-  return steps?.find(isTodosStep);
-};
-
-/**
- * Returns the todo list to carry over from the previous round, or undefined if nothing should carry over.
- * Carryover only happens when at least one item is still incomplete (pending / in_progress).
- * When carried over, both complete and incomplete items are included so the full plan is visible.
- */
-export const carriedOverTodos = (todos: TodoItem[] | undefined): TodoItem[] | undefined => {
-  if (!todos?.length) return undefined;
-  const hasIncomplete = todos.some((t) => t.status !== 'completed' && t.status !== 'cancelled');
-  return hasIncomplete ? todos : undefined;
-};
-
 export type ConversationRoundStep =
   | ToolCallStep
   | ReasoningStep
   | CompactionStep
   | BackgroundAgentCompleteStep
-  | TodosStep
   | AskUserQuestionStep
   | RelevantSkillsStep
   | PreExecutionWorkflowStep
@@ -806,6 +808,8 @@ export interface Conversation {
   read?: boolean;
   /** current status of the conversation */
   status?: ConversationRoundStatus;
+  /** The run lock held by the conversation's current execution. */
+  active_execution?: ActiveExecution;
   /**
    * Identifier of the bash/VFS workspace for this conversation.
    */
@@ -839,13 +843,6 @@ export interface Conversation {
   feedback?: Record<string, ConversationRoundFeedback>;
 }
 
-export type TodoStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';
-
-export interface TodoItem {
-  content: string;
-  status: TodoStatus;
-}
-
 /**
  * Internal storage for the conversation's arbitrary state.
  * Used for example to keep track of the prompt responses.
@@ -865,8 +862,6 @@ export interface ConversationInternalState {
   compaction_summary?: CompactionSummary;
   /** Background sub-agent executions keyed by execution ID. */
   background_executions?: Record<string, BackgroundExecutionState>;
-  /** Active todo list for the current conversation. Replaced wholesale on each write. */
-  todos?: TodoItem[];
   /**
    * Map of persistent sub-agent name → sub agent entry describing the sub agent/run.
    */

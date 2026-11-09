@@ -7,7 +7,7 @@
 
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import type { EventTypeOpts } from '@kbn/core/server';
-import type { RuleChangedEventOrigin } from '../event_origin/origin_schemas';
+import type { EventOrigin } from '../event_origin/origin_schemas';
 import {
   RULE_CREATED_EBT_EVENT_TYPE,
   RULE_DELETED_EBT_EVENT_TYPE,
@@ -132,30 +132,22 @@ export const ruleChangeTelemetryEvents: Array<EventTypeOpts<RuleChangedEbtData>>
     schema: ruleChangedEventSchema,
   }));
 
-const toEventOrigin = ({
-  actor,
-  channel,
-  app,
-}: RuleChangedEventOrigin): RuleChangedEventOrigin => ({
-  actor,
-  channel,
-  ...(app ? { app } : {}),
-});
-
-/** Projects a rule-change telemetry payload. Rule fields are omitted when `rule` is absent. */
+/**
+ * Projects a rule-change telemetry payload. Rule fields are omitted when `rule`
+ * is absent. `templateId` is passed separately because the public response no
+ * longer carries `metadata.template`; the lifecycle event supplies it.
+ */
 export const buildRuleChangedEventData = (
   rule: RuleResponse | undefined,
-  origin: RuleChangedEventOrigin,
-  ruleId: string
+  origin: EventOrigin,
+  ruleId: string,
+  templateId?: string
 ): RuleChangedEbtData => {
-  const eventOrigin = toEventOrigin(origin);
-
   if (!rule) {
-    return { rule_id: ruleId, origin: eventOrigin };
+    return { rule_id: ruleId, origin };
   }
 
   const { kind, enabled, created_at: createdAt, metadata } = rule;
-  const templateId = metadata.template?.id;
   const builderType = metadata.builder?.type;
 
   return {
@@ -165,6 +157,6 @@ export const buildRuleChangedEventData = (
     kind,
     ...(builderType ? { builder_type: builderType } : {}),
     enabled,
-    origin: eventOrigin,
+    origin,
   };
 };

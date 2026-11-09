@@ -379,3 +379,94 @@ describe('InvestigationStatusService.setStatus — releaseGate conflict classifi
     expect(result.failed_proposal_ids).toHaveLength(0);
   });
 });
+
+// ---------------------------------------------------------------------------
+// InvestigationStatusService.setSeverity
+// ---------------------------------------------------------------------------
+
+describe('InvestigationStatusService.setSeverity', () => {
+  const makeService = (conversation: Record<string, unknown> = MOCK_CONVERSATION) => {
+    const client = {
+      get: jest.fn().mockResolvedValue(conversation),
+      patchMetadata: jest.fn().mockResolvedValue({ conversation, changedFields: ['severity'] }),
+      addEvents: jest.fn().mockResolvedValue([]),
+    };
+    const service = new InvestigationStatusService({
+      getConversationClient: jest.fn().mockResolvedValue(client),
+      getProposals: jest.fn().mockReturnValue(undefined),
+      getSpaceId: jest.fn().mockReturnValue(SPACE_ID),
+      logger,
+    });
+    return { service, client };
+  };
+
+  it('writes the severity and records the change with the previous one', async () => {
+    const { service, client } = makeService({
+      ...MOCK_CONVERSATION,
+      metadata: { severity: 'high' },
+    });
+
+    const result = await service.setSeverity(request, 'conv-1', { severity: 'low' });
+
+    expect(client.patchMetadata).toHaveBeenCalledWith(
+      'conv-1',
+      { severity: 'low' },
+      { access: 'converse' }
+    );
+    expect(client.addEvents).toHaveBeenCalledWith({
+      conversationId: 'conv-1',
+      events: [
+        {
+          type: 'investigation_severity_changed',
+          data: { severity: 'low', previous_severity: 'high' },
+        },
+      ],
+    });
+    expect(result).toEqual({
+      conversation_id: 'conv-1',
+      severity: 'low',
+      previous_severity: 'high',
+    });
+  });
+
+  it('omits the previous severity when none was set', async () => {
+    const { service, client } = makeService();
+
+    await service.setSeverity(request, 'conv-1', { severity: 'critical' });
+
+    expect(client.addEvents).toHaveBeenCalledWith(
+      expect.objectContaining({
+        events: [{ type: 'investigation_severity_changed', data: { severity: 'critical' } }],
+      })
+    );
+  });
+
+  it('does nothing when the severity is unchanged', async () => {
+    const { service, client } = makeService({
+      ...MOCK_CONVERSATION,
+      metadata: { severity: 'medium' },
+    });
+
+    await service.setSeverity(request, 'conv-1', { severity: 'medium' });
+
+    expect(client.patchMetadata).not.toHaveBeenCalled();
+    expect(client.addEvents).not.toHaveBeenCalled();
+  });
+
+  it('still succeeds when the timeline event cannot be written', async () => {
+    const { service, client } = makeService();
+    client.addEvents.mockRejectedValue(new Error('boom'));
+
+    await expect(service.setSeverity(request, 'conv-1', { severity: 'low' })).resolves.toEqual(
+      expect.objectContaining({ severity: 'low' })
+    );
+    expect(logger.warn).toHaveBeenCalled();
+  });
+
+  it('rejects a conversation on another template', async () => {
+    const { service, client } = makeService({ ...MOCK_CONVERSATION, template_id: 'escalation' });
+
+    await expect(service.setSeverity(request, 'conv-1', { severity: 'low' })).rejects.toThrow();
+    expect(client.patchMetadata).not.toHaveBeenCalled();
+  });
+});

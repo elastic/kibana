@@ -99,7 +99,11 @@ describe('HomePublicPlugin', () => {
     });
 
     test('when cloud is enabled, it sets the cloud environment and the tutorials variable "cloud"', () => {
-      const cloud = { ...cloudMock.createSetup(), isCloudEnabled: true };
+      const cloud = {
+        ...cloudMock.createSetup(),
+        isCloudEnabled: true,
+        deploymentSecurityUrl: 'deployment-security-url',
+      };
       const plugin = new HomePublicPlugin(mockInitializerContext);
       const setup = plugin.setup(coreMock.createSetup(), {
         cloud,
@@ -111,9 +115,8 @@ describe('HomePublicPlugin', () => {
       expect(setup.tutorials.setVariable).toHaveBeenCalledTimes(1);
       expect(setup.tutorials.setVariable).toHaveBeenCalledWith('cloud', {
         id: 'mock-cloud-id',
-        baseUrl: 'base-url',
-        deploymentUrl: 'deployment-url',
         profileUrl: 'profile-url',
+        deploymentSecurityUrl: 'deployment-security-url',
       });
     });
   });

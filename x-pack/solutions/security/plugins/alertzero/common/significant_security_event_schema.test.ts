@@ -64,6 +64,45 @@ describe('significantSecurityEventAttachmentDataSchema', () => {
     expect(result.success).toBe(false);
   });
 
+  it('keeps an entity origin when present', () => {
+    const origin = { local: false, remote_clusters: ['cluster_b'] };
+    const result = significantSecurityEventAttachmentDataSchema.safeParse({
+      ...validPayload,
+      entities: [{ field: 'host.name', value: 'srv-01', ...origin }],
+    });
+
+    expect(result.success && result.data.entities).toEqual([
+      { field: 'host.name', value: 'srv-01', ...origin },
+    ]);
+  });
+
+  it('rejects an entity origin naming more remote clusters than the bound', () => {
+    const result = significantSecurityEventAttachmentDataSchema.safeParse({
+      ...validPayload,
+      entities: [
+        {
+          field: 'host.name',
+          value: 'srv-01',
+          local: false,
+          remote_clusters: Array.from({ length: 21 }, (_, i) => `c${i}`),
+        },
+      ],
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects an entity origin with a cluster alias over 255 characters', () => {
+    const result = significantSecurityEventAttachmentDataSchema.safeParse({
+      ...validPayload,
+      entities: [
+        { field: 'host.name', value: 'srv-01', local: false, remote_clusters: ['c'.repeat(256)] },
+      ],
+    });
+
+    expect(result.success).toBe(false);
+  });
+
   it('rejects alerts missing index', () => {
     const result = significantSecurityEventAttachmentDataSchema.safeParse({
       ...validPayload,
@@ -92,7 +131,18 @@ describe('significantSecurityEventAttachmentDataSchema', () => {
       '.preview.alerts-security.alerts-default',
       '.kibana',
       'logs-a,logs-b',
-      'remote:logs-default',
+      '*:logs-default',
+      're*:logs-default',
+      'remote:logs-*',
+      'remote:.alerts-security.alerts-default',
+      'remote:.ds-.alerts-security.alerts-default',
+      'a:b:logs-default',
+      '_coordinator:logs-default',
+      ':logs-default',
+      'remote:',
+      '-remote:logs-default',
+      'logs-default::failures',
+      'remote:logs-default::failures',
       '-logs-default',
       'logs default',
       '.ds-.alerts-security.alerts-default',
@@ -126,6 +176,19 @@ describe('significantSecurityEventAttachmentDataSchema', () => {
       ],
     });
     expect(dataStreamBacking.success).toBe(true);
+
+    // A cross-cluster hit reports `<cluster>:<index>` in `_index`; one named cluster in front
+    // of an otherwise allowed concrete name is still a single source.
+    for (const remote of [
+      'infosec_zocalo:.ds-logs-aws.cloudtrail-default-2026.10.26-000001',
+      'infosec-redsector:logs-endpoint.events.process-default',
+    ]) {
+      const result = significantSecurityEventAttachmentDataSchema.safeParse({
+        ...validPayload,
+        events: [{ event_id: 'evt-1', source_index: remote }],
+      });
+      expect([remote, result.success]).toEqual([remote, true]);
+    }
   });
 
   it('rejects hunt results whose status contradicts its counts', () => {

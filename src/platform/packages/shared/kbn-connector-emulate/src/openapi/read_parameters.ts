@@ -7,8 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { coerceValue, getSchemaTypes } from './coerce_value';
-import type { ContractOperation, OperationParameter } from './types';
+import {
+  allowsUndeclaredProperties,
+  coerceValue,
+  declaresProperty,
+  getPropertySchema,
+  getSchemaTypes,
+} from './coerce_value';
+import type { ContractOperation, OpenApiDocument, OperationParameter } from './types';
+
+/** The query parameter that selects the page in opaque next-page URLs the mock issues. */
+export const MOCK_PAGE_PARAM = 'contract-mock-page';
 
 export interface ParameterInput {
   readonly query: Readonly<Record<string, string | string[]>>;
@@ -62,11 +71,53 @@ const splitValue = (
   return value;
 };
 
-const readQuery = (
-  { name, style, explode }: OperationParameter,
-  query: ParameterInput['query'],
+/**
+ * Query keys that aren't operation parameters: the mock's page key, API keys sent in the query,
+ * and the query parameters an `x-ms-paths` key fixes.
+ */
+export const nonParameterQueryKeys = ({
+  security,
+  fixedQuery = [],
+}: ContractOperation): Set<string> =>
+  new Set([
+    MOCK_PAGE_PARAM,
+    ...security
+      .flat()
+      .flatMap(({ credential }) => (credential?.in === 'query' ? [credential.name] : [])),
+    ...fixedQuery.map(({ name }) => name),
+  ]);
+
+/** Whether a query parameter is an object sent as one query key per property (form, exploded). */
+export const spreadsQueryKeys = (
+  { in: location, style, explode }: OperationParameter,
   types: Set<string>
+): boolean =>
+  location === 'query' && style === 'form' && explode && types.has('object') && !types.has('array');
+
+const readQuery = (
+  parameter: OperationParameter,
+  query: ParameterInput['query'],
+  types: Set<string>,
+  takesKey: (key: string) => boolean,
+  document: OpenApiDocument
 ): unknown => {
+  const { name, style, explode } = parameter;
+  if (spreadsQueryKeys(parameter, types)) {
+    // The parameter's name isn't sent; the query keys it takes are its properties.
+    // A lone value is a one-item array for a property that takes arrays (a map of string lists).
+    const entries = Object.entries(query)
+      .filter(([key]) => takesKey(key))
+      .map(([key, value]) => [
+        key,
+        typeof value === 'string' &&
+        getSchemaTypes(getPropertySchema(parameter.schema?.schema, key, document), document).has(
+          'array'
+        )
+          ? [value]
+          : value,
+      ]);
+    return entries.length > 0 ? Object.fromEntries(entries) : undefined;
+  }
   if (style === 'deepObject') {
     const prefix = `${name}[`;
     const entries = Object.entries(query)
@@ -107,10 +158,16 @@ const parseCookies = (header = ''): Record<string, string> =>
       .filter(Boolean)
   );
 
-const readRaw = (parameter: OperationParameter, input: ParameterInput, types: Set<string>) => {
+const readRaw = (
+  parameter: OperationParameter,
+  input: ParameterInput,
+  types: Set<string>,
+  takesKey: (key: string) => boolean,
+  document: OpenApiDocument
+) => {
   const { name, in: location, explode } = parameter;
   if (location === 'query') {
-    return readQuery(parameter, input.query, types);
+    return readQuery(parameter, input.query, types, takesKey, document);
   }
   if (location === 'path') {
     const value = input.pathParameters[name];
@@ -133,12 +190,54 @@ const readRaw = (parameter: OperationParameter, input: ParameterInput, types: Se
  * to its `style` and `explode` and converting it to the types of its schema.
  */
 export const readParameters = (
-  { parameters, spec: { document } }: ContractOperation,
+  operation: ContractOperation,
   input: ParameterInput
-): ReadParameter[] =>
-  parameters.map((parameter) => {
+): ReadParameter[] => {
+  const {
+    parameters,
+    spec: { document },
+  } = operation;
+  // Query keys with a meaning of their own, which form-exploded objects don't take: other
+  // parameters' names, and the `name[key]` keys of `deepObject` parameters.
+  const claimedNames = new Set([
+    ...nonParameterQueryKeys(operation),
+    ...parameters.flatMap(({ in: location, name }) => (location === 'query' ? [name] : [])),
+  ]);
+  const deepObjectPrefixes = parameters.flatMap(({ in: location, style, name }) =>
+    location === 'query' && style === 'deepObject' ? [`${name}[`] : []
+  );
+  const isClaimed = (key: string): boolean =>
+    claimedNames.has(key) ||
+    (key.endsWith(']') && deepObjectPrefixes.some((prefix) => key.startsWith(prefix)));
+  // Form-exploded objects share the query string: a key goes to the objects that declare it,
+  // else to the objects that take undeclared properties (maps).
+  const spreading = parameters.filter((parameter) =>
+    spreadsQueryKeys(parameter, getSchemaTypes(parameter.schema?.schema, document))
+  );
+  const declares = (parameter: OperationParameter, key: string): boolean =>
+    declaresProperty(parameter.schema?.schema, key, document);
+  const allowsUndeclared = (parameter: OperationParameter): boolean =>
+    allowsUndeclaredProperties(parameter.schema?.schema, document);
+  const takesKeyOf =
+    (parameter: OperationParameter) =>
+    (key: string): boolean => {
+      if (key === parameter.name) {
+        return true;
+      }
+      if (isClaimed(key)) {
+        return false;
+      }
+      if (spreading.some((other) => declares(other, key))) {
+        return declares(parameter, key);
+      }
+      // A key nobody declares goes to the maps, or to every object when none takes it, so that
+      // validation rejects it.
+      return allowsUndeclared(parameter) || !spreading.some(allowsUndeclared);
+    };
+  return parameters.map((parameter) => {
     const schema = parameter.schema?.schema;
     const types = getSchemaTypes(schema, document);
-    const raw = readRaw(parameter, input, types);
+    const raw = readRaw(parameter, input, types, takesKeyOf(parameter), document);
     return { parameter, value: raw === undefined ? undefined : coerceValue(raw, schema, document) };
   });
+};

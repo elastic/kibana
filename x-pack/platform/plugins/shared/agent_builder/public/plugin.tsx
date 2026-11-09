@@ -135,11 +135,13 @@ export class AgentBuilderPlugin
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private isEarsEnabled = true;
   private isEarsExperimentalEnabled = false;
+  private readonly isServerless: boolean;
   private experimentalDeepLinksSubscription?: Subscription;
   private sidebarOpenSubscription?: Subscription;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
+    this.isServerless = context.env.packageInfo.buildFlavor === 'serverless';
   }
   setup(
     core: CoreSetup<AgentBuilderStartDependencies, AgentBuilderPluginStart>,
@@ -323,6 +325,7 @@ export class AgentBuilderPlugin
       eventsService,
       isEarsEnabled: this.isEarsEnabled,
       isEarsExperimentalEnabled: this.isEarsExperimentalEnabled,
+      isServerless: this.isServerless,
       openSidebarConversation: (options?: OpenSidebarInternalOptions) => {
         return openSidebarInternal(options);
       },

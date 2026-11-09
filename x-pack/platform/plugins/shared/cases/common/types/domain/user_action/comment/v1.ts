@@ -5,25 +5,29 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import { UserActionTypes } from '../action/v1';
-import {
-  AttachmentRequestRtV2,
-  AttachmentRequestWithoutRefsRtV2,
-} from '../../../api/attachment/v2_union';
+import { AttachmentPayloadSchema, AttachmentPayloadWithoutRefsSchema } from '../../attachment/v1';
+import { UnifiedAttachmentPayloadSchema } from '../../attachment/v2';
 
-export const CommentUserActionPayloadRt = rt.strict({ comment: AttachmentRequestRtV2 });
-
-export const CommentUserActionPayloadWithoutIdsRt = rt.strict({
-  comment: AttachmentRequestWithoutRefsRtV2,
+/**
+ * Stored user actions are decoded on read, so they use the shape-only payload schemas.
+ * Request bounds are enforced at ingress by the api schemas.
+ */
+export const CommentUserActionPayloadSchema = z.object({
+  comment: z.union([AttachmentPayloadSchema, UnifiedAttachmentPayloadSchema]),
 });
 
-export const CommentUserActionRt = rt.strict({
-  type: rt.literal(UserActionTypes.comment),
-  payload: CommentUserActionPayloadRt,
+export const CommentUserActionPayloadWithoutIdsSchema = z.object({
+  comment: z.union([AttachmentPayloadWithoutRefsSchema, UnifiedAttachmentPayloadSchema]),
 });
 
-export const CommentUserActionWithoutIdsRt = rt.strict({
-  type: rt.literal(UserActionTypes.comment),
-  payload: CommentUserActionPayloadWithoutIdsRt,
+export const CommentUserActionSchema = z.object({
+  type: z.literal(UserActionTypes.comment),
+  payload: CommentUserActionPayloadSchema,
+});
+
+export const CommentUserActionWithoutIdsSchema = z.object({
+  type: z.literal(UserActionTypes.comment),
+  payload: CommentUserActionPayloadWithoutIdsSchema,
 });

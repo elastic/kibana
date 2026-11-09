@@ -49,6 +49,21 @@ export class CommandBadgeSerializationError extends Error {
   }
 }
 
+const encodeId = (id: string): string =>
+  encodeURIComponent(id).replace(/[()]/g, (char) => `%${char.charCodeAt(0).toString(16)}`);
+
+const decodeId = (id: string): string => {
+  try {
+    return decodeURIComponent(id);
+  } catch {
+    // Malformed percent-encoding, keep the raw id.
+    return id;
+  }
+};
+
+// Unescaped brackets would end the link text early, and the badge would not parse.
+export const unescapeLinkText = (text: string): string => text.replace(/\\([\\[\]])/g, '$1');
+
 export const serializeCommandBadge = (element: HTMLElement): string => {
   const commandId = element.getAttribute(COMMAND_ID_ATTRIBUTE) ?? '';
   const commandDefinition = getCommandDefinition(commandId);
@@ -56,7 +71,7 @@ export const serializeCommandBadge = (element: HTMLElement): string => {
     return '';
   }
   const { scheme } = commandDefinition;
-  const displayText = element.textContent ?? '';
+  const displayText = (element.textContent ?? '').replace(/[\\[\]]/g, '\\$&');
 
   const metadataRaw = element.getAttribute(COMMAND_METADATA_ATTRIBUTE);
   let id = '';
@@ -87,7 +102,8 @@ export const serializeCommandBadge = (element: HTMLElement): string => {
     }
   }
 
-  return `[${displayText}](${scheme}://${id}${queryString})`;
+  // The id is encoded: an unencoded `:` (SML entry ids) or `)` would make the link invalid.
+  return `[${displayText}](${scheme}://${encodeId(id)}${queryString})`;
 };
 
 // Matches serialized badge markdown-links: [displayText](scheme://id) or [displayText](scheme://id?key=value)
@@ -96,7 +112,7 @@ export const serializeCommandBadge = (element: HTMLElement): string => {
 //   Group 2: scheme        → "skill"
 //   Group 3: id (path)     → "skill-1"
 //   Group 4: query string  → optional
-const BADGE_PATTERN = /\[([^\]]+)\]\((\w+):\/\/([^?)]+)(?:\?([^)]*))?\)/g;
+const BADGE_PATTERN = /\[((?:\\.|[^\]\\])+)\]\((\w+):\/\/([^?)]+)(?:\?([^)]*))?\)/g;
 
 const ATTACHMENT_SEGMENT_TYPE_BY_SCHEME: ReadonlyMap<
   string,
@@ -123,7 +139,8 @@ export const deserializeInputSegments = (text: string): ContentSegment[] => {
       segments.push({ type: 'text', value: text.slice(lastIndex, match.index) });
     }
 
-    const [_, displayText, scheme, path, queryString] = match;
+    const [_, escapedDisplayText, scheme, path, queryString] = match;
+    const displayText = unescapeLinkText(escapedDisplayText);
 
     const attachmentSegmentType = ATTACHMENT_SEGMENT_TYPE_BY_SCHEME.get(scheme);
     if (attachmentSegmentType) {
@@ -156,7 +173,7 @@ export const deserializeInputSegments = (text: string): ContentSegment[] => {
           data: {
             commandId,
             label,
-            id: path,
+            id: decodeId(path),
             metadata,
           },
         });
