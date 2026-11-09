@@ -6,8 +6,13 @@
  */
 
 import type { Unit } from '../../../../services/unit_repository';
-import { getUnitRoutings } from '../../../streams_layout/routing/routing_models';
-import { buildUnitCanvasGraph } from './build_unit_connection_edges';
+import {
+  buildUnitCanvasGraph,
+  readLineOrigin,
+  readLineTarget,
+  readRoutingRuleIndex,
+} from './build_unit_connection_edges';
+import { DESTINATION_NODE_TYPE, SOURCE_NODE_TYPE, type ClassicCanvasNode } from './types';
 
 const routedUnit: Unit = {
   unit: {
@@ -51,37 +56,113 @@ const sourceIds = ['direct-source', 'routed-source'];
 const destinationIds = ['es-a', 'es-b', 'es-c'];
 
 const buildRouted = (shownSourceIds = sourceIds) =>
-  buildUnitCanvasGraph(routedUnit, shownSourceIds, destinationIds, getUnitRoutings(routedUnit));
+  buildUnitCanvasGraph(routedUnit, shownSourceIds, destinationIds);
 
 describe('buildUnitCanvasGraph with routing nodes', () => {
-  it('draws direct lines from the unit graph and routed lines through routing nodes', () => {
+  it('draws direct lines, lines into routing nodes and lines out of their rules', () => {
     expect(
-      buildRouted().edges.map(({ source, sourceHandle, target }) => [source, sourceHandle, target])
+      buildRouted().edges.map(({ id, source, sourceHandle, target }) => [
+        id,
+        source,
+        sourceHandle,
+        target,
+      ])
     ).toEqual([
-      ['configured-source-direct-source', undefined, 'configured-destination-es-a'],
-      ['configured-source-routed-source', undefined, 'configured-routing-p-routed'],
-      ['configured-routing-p-routed', 'rule-0', 'configured-destination-es-a'],
-      ['configured-routing-p-routed', 'rule-1', 'configured-routing-child'],
-      ['configured-routing-p-routed', 'rule-2', 'configured-destination-es-b'],
-      ['configured-routing-child', 'rule-0', 'configured-destination-es-c'],
+      [
+        'unit-connection-direct-source->es-a',
+        'configured-source-direct-source',
+        undefined,
+        'configured-destination-es-a',
+      ],
+      [
+        'unit-connection-configured-source-routed-source->configured-routing-p-routed',
+        'configured-source-routed-source',
+        undefined,
+        'configured-routing-p-routed',
+      ],
+      [
+        'unit-connection-configured-routing-p-routed:rule-0->configured-destination-es-a',
+        'configured-routing-p-routed',
+        'rule-0',
+        'configured-destination-es-a',
+      ],
+      [
+        'unit-connection-configured-routing-p-routed:rule-1->configured-routing-child',
+        'configured-routing-p-routed',
+        'rule-1',
+        'configured-routing-child',
+      ],
+      [
+        'unit-connection-configured-routing-p-routed:rule-2->configured-destination-es-b',
+        'configured-routing-p-routed',
+        'rule-2',
+        'configured-destination-es-b',
+      ],
+      [
+        'unit-connection-configured-routing-child:rule-0->configured-destination-es-c',
+        'configured-routing-child',
+        'rule-0',
+        'configured-destination-es-c',
+      ],
     ]);
   });
 
-  it('lets every rule line be moved, but not lines into a routing node', () => {
-    const edges = buildRouted().edges.filter(({ data }) => data?.routing);
+  it('builds a routing node per routed pipeline, including a bare delegated child', () => {
+    expect(
+      buildRouted().routingNodes.map(({ id, data }) => [
+        id,
+        data.pipelineId,
+        data.rules.map(({ handleId, label, isCatchAll, connected }) => ({
+          handleId,
+          label,
+          isCatchAll,
+          connected,
+        })),
+      ])
+    ).toEqual([
+      [
+        'configured-routing-p-routed',
+        'p-routed',
+        [
+          {
+            handleId: 'rule-0',
+            label: 'Condition: attributes["env"] == "prod"',
+            isCatchAll: false,
+            connected: true,
+          },
+          { handleId: 'rule-1', label: 'Condition: true', isCatchAll: false, connected: true },
+          { handleId: 'rule-2', label: 'Otherwise', isCatchAll: true, connected: true },
+        ],
+      ],
+      [
+        'configured-routing-child',
+        'child',
+        [{ handleId: 'rule-0', label: 'All data', isCatchAll: true, connected: true }],
+      ],
+    ]);
+  });
+
+  it('lets every reference line be moved and unhooked', () => {
+    const { edges } = buildRouted();
 
     expect(new Set(edges.map(({ id }) => id)).size).toBe(edges.length);
     expect(
-      edges.map(({ target, reconnectable, data }) => [target, reconnectable, data?.unitConnection])
+      edges.map(({ target, reconnectable, className, data }) => [
+        target,
+        reconnectable,
+        className,
+        data?.reference?.kind,
+      ])
     ).toEqual([
-      ['configured-routing-p-routed', false, false],
-      ['configured-destination-es-a', 'target', true],
-      ['configured-routing-child', 'target', true],
-      ['configured-destination-es-b', 'target', true],
-      ['configured-destination-es-c', 'target', true],
+      ['configured-destination-es-a', 'target', 'streamsUnitConnection nopan', 'destinations'],
+      ['configured-routing-p-routed', 'target', 'streamsUnitConnection nopan', 'sources'],
+      ['configured-destination-es-a', 'target', 'streamsUnitConnection nopan', 'routeDestinations'],
+      ['configured-routing-child', 'target', 'streamsUnitConnection nopan', 'routePipelines'],
+      ['configured-destination-es-b', 'target', 'streamsUnitConnection nopan', 'routeDestinations'],
+      ['configured-destination-es-c', 'target', 'streamsUnitConnection nopan', 'destinations'],
     ]);
     edges.forEach((edge) => {
-      expect(edge).toMatchObject({ deletable: false, selectable: false });
+      expect(edge).toMatchObject({ deletable: false, selectable: false, type: 'animated' });
     });
   });
 
@@ -135,26 +216,31 @@ const processingUnit: Unit = {
           { name: 'destinations', value: ['es'] },
         ],
       },
+      {
+        id: 'p-fixed',
+        supported_telemetry: ['logs'],
+        config: [
+          { name: 'sources', value: ['plain'] },
+          { name: 'processors', value: ['parse'] },
+          { name: 'routes', value: [{ destinations: ['debug'] }] },
+        ],
+      },
     ],
   },
   ui_metadata: {},
 };
 
 describe('buildUnitCanvasGraph with processing', () => {
-  const graph = buildUnitCanvasGraph(
-    processingUnit,
-    ['src', 'plain'],
-    ['es', 'debug'],
-    getUnitRoutings(processingUnit)
-  );
+  const graph = buildUnitCanvasGraph(processingUnit, ['src', 'plain'], ['es', 'debug']);
 
-  it('creates processing nodes for plain pipelines, routing pipelines and routes', () => {
+  it('creates processing nodes for pipelines, routes and delegated children', () => {
     expect(graph.processingNodes.map(({ id, data }) => [id, data.output])).toEqual([
-      ['processing-pipeline-p-plain', 'connect'],
       ['processing-route-p-src-0', 'reconnect'],
-      ['processing-pipeline-processing-1', 'fixed'],
+      ['processing-pipeline-processing-1', 'connect'],
+      ['processing-pipeline-p-plain', 'connect'],
+      ['processing-pipeline-p-fixed', 'fixed'],
     ]);
-    expect(graph.processingNodes[2]).toEqual(
+    expect(graph.processingNodes[1]).toEqual(
       expect.objectContaining({
         type: 'processing',
         deletable: false,
@@ -163,7 +249,7 @@ describe('buildUnitCanvasGraph with processing', () => {
           title: 'Enrich',
           processorCount: 2,
           editable: true,
-          output: 'fixed',
+          output: 'connect',
         },
       })
     );
@@ -180,32 +266,10 @@ describe('buildUnitCanvasGraph with processing', () => {
       }))
     ).toEqual([
       {
-        source: 'configured-source-plain',
-        sourceHandle: undefined,
-        target: 'processing-pipeline-p-plain',
-        reconnectable: false,
-        processingTarget: {
-          ref: { kind: 'pipeline', pipelineId: 'p-plain' },
-          position: 'start',
-          exists: true,
-        },
-      },
-      {
-        source: 'processing-pipeline-p-plain',
-        sourceHandle: undefined,
-        target: 'configured-destination-es',
-        reconnectable: true,
-        processingTarget: {
-          ref: { kind: 'pipeline', pipelineId: 'p-plain' },
-          position: 'end',
-          exists: true,
-        },
-      },
-      {
         source: 'configured-source-src',
         sourceHandle: undefined,
         target: 'configured-routing-p-src',
-        reconnectable: false,
+        reconnectable: 'target',
         processingTarget: {
           ref: { kind: 'pipeline', pipelineId: 'p-src' },
           position: 'end',
@@ -248,17 +312,6 @@ describe('buildUnitCanvasGraph with processing', () => {
       {
         source: 'processing-pipeline-processing-1',
         sourceHandle: undefined,
-        target: 'configured-routing-processing-1',
-        reconnectable: false,
-        processingTarget: {
-          ref: { kind: 'pipeline', pipelineId: 'processing-1' },
-          position: 'end',
-          exists: true,
-        },
-      },
-      {
-        source: 'configured-routing-processing-1',
-        sourceHandle: 'rule-0',
         target: 'configured-destination-es',
         reconnectable: 'target',
         processingTarget: {
@@ -267,6 +320,165 @@ describe('buildUnitCanvasGraph with processing', () => {
           exists: true,
         },
       },
+      {
+        source: 'configured-source-plain',
+        sourceHandle: undefined,
+        target: 'processing-pipeline-p-plain',
+        reconnectable: 'target',
+        processingTarget: {
+          ref: { kind: 'pipeline', pipelineId: 'p-plain' },
+          position: 'start',
+          exists: true,
+        },
+      },
+      {
+        source: 'processing-pipeline-p-plain',
+        sourceHandle: undefined,
+        target: 'configured-destination-es',
+        reconnectable: 'target',
+        processingTarget: {
+          ref: { kind: 'pipeline', pipelineId: 'p-plain' },
+          position: 'end',
+          exists: true,
+        },
+      },
+      {
+        source: 'configured-source-plain',
+        sourceHandle: undefined,
+        target: 'processing-pipeline-p-fixed',
+        reconnectable: 'target',
+        processingTarget: {
+          ref: { kind: 'pipeline', pipelineId: 'p-fixed' },
+          position: 'start',
+          exists: true,
+        },
+      },
+      {
+        source: 'processing-pipeline-p-fixed',
+        sourceHandle: undefined,
+        target: 'configured-routing-p-fixed',
+        reconnectable: false,
+        processingTarget: {
+          ref: { kind: 'pipeline', pipelineId: 'p-fixed' },
+          position: 'end',
+          exists: true,
+        },
+      },
+      {
+        source: 'configured-routing-p-fixed',
+        sourceHandle: 'rule-0',
+        target: 'configured-destination-debug',
+        reconnectable: 'target',
+        processingTarget: {
+          ref: { kind: 'route', pipelineId: 'p-fixed', routeIndex: 0 },
+          position: 'end',
+          exists: false,
+        },
+      },
     ]);
+  });
+
+  it('marks fixed lines and telemetry-scoped lines as not editable', () => {
+    const scoped = buildUnitCanvasGraph(
+      {
+        ...processingUnit,
+        unit: {
+          ...processingUnit.unit,
+          pipelines: [
+            {
+              id: 'scoped',
+              supported_telemetry: ['logs', 'metrics'],
+              config: [
+                { name: 'sources', value: ['src'] },
+                { name: 'routes', value: [{ destinations: ['es'] }], telemetry: ['logs'] },
+                { name: 'routes', value: [{ destinations: ['debug'] }], telemetry: ['metrics'] },
+              ],
+            },
+          ],
+        },
+      },
+      ['src'],
+      ['es', 'debug']
+    );
+
+    expect(
+      scoped.edges.map(({ reconnectable, className, data }) => [
+        reconnectable,
+        className,
+        data?.editable,
+      ])
+    ).toEqual([
+      [false, 'streamsRoutingConnection nopan', false],
+      [false, 'streamsRoutingConnection nopan', false],
+      [false, 'streamsRoutingConnection nopan', false],
+    ]);
+    expect(scoped.routingNodes[0].data.rules.map(({ signals }) => signals)).toEqual([
+      ['logs'],
+      ['metrics'],
+    ]);
+  });
+});
+
+describe('reading line ends from canvas nodes', () => {
+  const sourceNode: ClassicCanvasNode = {
+    id: 'configured-source-src',
+    type: SOURCE_NODE_TYPE,
+    position: { x: 0, y: 0 },
+    data: { sourceId: 'src', title: 'src', subtitle: 'OTLP' },
+  };
+  const destinationNode: ClassicCanvasNode = {
+    id: 'configured-destination-es',
+    type: DESTINATION_NODE_TYPE,
+    position: { x: 0, y: 0 },
+    data: { destinationId: 'es', title: 'es' },
+  };
+  const graph = buildUnitCanvasGraph(processingUnit, ['src', 'plain'], ['es', 'debug']);
+  const nodes = [sourceNode, destinationNode, ...graph.processingNodes, ...graph.routingNodes];
+
+  it('reads sources, rule handles and processing nodes as line origins', () => {
+    expect(readLineOrigin(nodes, 'configured-source-src', 'src')).toEqual({
+      kind: 'source',
+      id: 'src',
+    });
+    expect(readLineOrigin(nodes, 'configured-routing-p-src', 'rule-1')).toEqual({
+      kind: 'rule',
+      rule: { pipelineId: 'p-src', ruleIndex: 1 },
+    });
+    expect(readLineOrigin(nodes, 'configured-routing-p-src', null)).toBeUndefined();
+    expect(readLineOrigin(nodes, 'processing-route-p-src-0', null)).toEqual({
+      kind: 'processing',
+      ref: { kind: 'route', pipelineId: 'p-src', routeIndex: 0 },
+    });
+    expect(readLineOrigin(nodes, 'processing-pipeline-p-plain', null)).toEqual({
+      kind: 'processing',
+      ref: { kind: 'pipeline', pipelineId: 'p-plain' },
+    });
+    expect(readLineOrigin(nodes, 'configured-destination-es', null)).toBeUndefined();
+    expect(readLineOrigin(nodes, 'unknown', null)).toBeUndefined();
+  });
+
+  it('reads destinations, routing nodes and pipeline processing as line targets', () => {
+    expect(readLineTarget(nodes, 'configured-destination-es')).toEqual({
+      kind: 'destination',
+      id: 'es',
+    });
+    expect(readLineTarget(nodes, 'configured-routing-p-src')).toEqual({
+      kind: 'pipeline',
+      id: 'p-src',
+    });
+    expect(readLineTarget(nodes, 'processing-pipeline-processing-1')).toEqual({
+      kind: 'pipeline',
+      id: 'processing-1',
+    });
+    expect(readLineTarget(nodes, 'processing-route-p-src-0')).toBeUndefined();
+    expect(readLineTarget(nodes, 'configured-source-src')).toBeUndefined();
+  });
+
+  it('only reads well-formed rule handles', () => {
+    expect(readRoutingRuleIndex('rule-3')).toBe(3);
+    expect(readRoutingRuleIndex('rule--1')).toBeUndefined();
+    expect(readRoutingRuleIndex('rule-x')).toBeUndefined();
+    expect(readRoutingRuleIndex('src')).toBeUndefined();
+    expect(readRoutingRuleIndex(null)).toBeUndefined();
   });
 });
