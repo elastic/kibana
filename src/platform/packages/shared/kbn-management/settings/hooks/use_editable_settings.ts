@@ -8,10 +8,10 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { isEmpty, pickBy } from 'lodash';
+import { isEmpty, keyBy, pick, pickBy } from 'lodash';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { i18n } from '@kbn/i18n';
-import { getFieldDefinition } from '@kbn/management-settings-field-definition';
+import { getFieldDefinitions } from '@kbn/management-settings-field-definition';
 import type {
   FieldDefinition,
   OnFieldChangeFn,
@@ -51,24 +51,14 @@ export interface UseEditableSettingsResult {
 const getSettingsFields = (
   settingsKeys: readonly string[],
   settingsClient: IUiSettingsClient
-): Record<string, FieldDefinition> => {
-  const normalizedSettings = normalizeSettings(settingsClient.getAll());
-
-  return settingsKeys.reduce<Record<string, FieldDefinition>>((fields, id) => {
-    const setting = normalizedSettings[id];
-    if (setting) {
-      fields[id] = getFieldDefinition({
-        id,
-        setting,
-        params: {
-          isCustom: settingsClient.isCustom(id),
-          isOverridden: settingsClient.isOverridden(id),
-        },
-      });
-    }
-    return fields;
-  }, {});
-};
+): Record<string, FieldDefinition> =>
+  keyBy(
+    getFieldDefinitions(
+      pick(normalizeSettings(settingsClient.getAll()), settingsKeys),
+      settingsClient
+    ),
+    'id'
+  );
 
 /**
  * React hook for editing a fixed list of UI settings: their field definitions, unsaved changes, and saving.
