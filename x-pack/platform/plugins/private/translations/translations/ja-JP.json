@@ -17603,7 +17603,6 @@
     "xpack.cloudDefend.networkResponse": "ネットワーク（まもなくリリース予定）",
     "xpack.cloudDefend.networkSelector": "ネットワーク（まもなくリリース予定）",
     "xpack.cloudDefend.policies.policiesPageHeader": "Defend for containers（D4C）",
-    "xpack.cloudDefend.policies.policiesPageHeader.addIntegrationButtonLabel": "統合の追加",
     "xpack.cloudDefend.policies.policiesTable.agentPolicyColumnTitle": "エージェントポリシー",
     "xpack.cloudDefend.policies.policiesTable.createdAtColumnTitle": "作成日時：",
     "xpack.cloudDefend.policies.policiesTable.createdByColumnTitle": "作成者",

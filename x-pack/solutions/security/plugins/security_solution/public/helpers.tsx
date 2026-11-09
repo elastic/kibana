@@ -17,6 +17,7 @@ import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { dataTableActions, TableId } from '@kbn/securitysolution-data-table';
 import { isObject } from 'lodash';
 import { CLOUD_SECURITY_POSTURE_BASE_PATH } from '@kbn/cloud-security-posture-common';
+import { CLOUD_DEFEND_BASE_PATH } from '@kbn/cloud-defend-plugin/public';
 import { PageScope } from './data_view_manager/constants';
 import {
   ALERTS_PATH,
@@ -255,6 +256,15 @@ export const isCloudSecurityPosturePath = (pathname: string): boolean =>
   });
 
 /**
+ * Matches the Defend for containers (D4C) pages, whose app header owns the page actions.
+ */
+export const isCloudDefendPath = (pathname: string): boolean =>
+  !!matchPath(pathname, {
+    path: CLOUD_DEFEND_BASE_PATH,
+    strict: false,
+  });
+
+/**
  * Matches the Configurations page, whose app header owns the page actions.
  */
 export const isConfigurationsPath = (pathname: string): boolean =>
@@ -313,6 +323,7 @@ export const isPageWithAppHeaderPath = (pathname: string): boolean =>
     isCoverageOverviewPath,
     isExceptionsPath,
     isCloudSecurityPosturePath,
+    isCloudDefendPath,
     isConfigurationsPath,
     isEndpointManagementPath,
     isManageLandingPath,

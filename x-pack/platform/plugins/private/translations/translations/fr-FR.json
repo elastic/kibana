@@ -17525,7 +17525,6 @@
     "xpack.cloudDefend.networkResponse": "Réseau (bientôt disponible)",
     "xpack.cloudDefend.networkSelector": "Réseau (bientôt disponible)",
     "xpack.cloudDefend.policies.policiesPageHeader": "Defend pour les conteneurs (D4C)",
-    "xpack.cloudDefend.policies.policiesPageHeader.addIntegrationButtonLabel": "Ajouter une intégration",
     "xpack.cloudDefend.policies.policiesTable.agentPolicyColumnTitle": "Politique d'agent",
     "xpack.cloudDefend.policies.policiesTable.createdAtColumnTitle": "Créé à",
     "xpack.cloudDefend.policies.policiesTable.createdByColumnTitle": "Créé par",

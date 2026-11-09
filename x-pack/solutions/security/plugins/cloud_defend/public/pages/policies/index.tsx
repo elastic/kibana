@@ -8,11 +8,9 @@
 import React, { useState } from 'react';
 import type { EuiFieldSearchProps } from '@elastic/eui';
 import {
-  EuiButton,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPageHeader,
   EuiSpacer,
   EuiText,
   EuiTextColor,
@@ -20,7 +18,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
-import { CloudDefendPageTitle } from '../../components/cloud_defend_page_title';
+import { CloudDefendAppHeader } from '../../components/cloud_defend_app_header';
 import { CloudDefendPage } from '../../components/cloud_defend_page';
 import { PoliciesTable } from '../../components/policies_table';
 import type { UseCloudDefendPoliciesProps } from './use_cloud_defend_policies';
@@ -29,27 +27,12 @@ import { extractErrorMessage } from '../../../common/utils/helpers';
 import * as TEST_SUBJ from './test_subjects';
 import { LOCAL_STORAGE_PAGE_SIZE } from '../../common/constants';
 import { usePageSize } from '../../common/hooks/use_page_size';
-import { useCloudDefendIntegrationLinks } from '../../common/navigation/use_cloud_defend_integration_links';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
-const AddIntegrationButton = () => {
-  const { addIntegrationLink } = useCloudDefendIntegrationLinks();
-
-  return (
-    <EuiButton
-      data-test-subj={TEST_SUBJ.ADD_INTEGRATION_TEST_SUBJ}
-      fill
-      iconType="plusCircle"
-      href={addIntegrationLink}
-    >
-      <FormattedMessage
-        id="xpack.cloudDefend.policies.policiesPageHeader.addIntegrationButtonLabel"
-        defaultMessage="Add Integration"
-      />
-    </EuiButton>
-  );
-};
+const PAGE_TITLE = i18n.translate('xpack.cloudDefend.policies.policiesPageHeader', {
+  defaultMessage: 'Defend for containers (D4C)',
+});
 
 const EmptyState = ({ name }: { name: string }) => (
   <div>
@@ -140,18 +123,7 @@ export const Policies = () => {
 
   return (
     <CloudDefendPage>
-      <EuiPageHeader
-        data-test-subj={TEST_SUBJ.POLICIES_PAGE_HEADER}
-        pageTitle={
-          <CloudDefendPageTitle
-            title={i18n.translate('xpack.cloudDefend.policies.policiesPageHeader', {
-              defaultMessage: 'Defend for containers (D4C)',
-            })}
-          />
-        }
-        rightSideItems={[<AddIntegrationButton />]}
-        bottomBorder
-      />
+      <CloudDefendAppHeader title={PAGE_TITLE} />
       <EuiSpacer />
       <SearchField
         isLoading={queryResult.isFetching}

@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-export const POLICIES_PAGE_HEADER = 'policies-page-header';
 export const POLICIES_TABLE_DATA_TEST_SUBJ = 'cloud_defend_policies_table';
-export const ADD_INTEGRATION_TEST_SUBJ = 'cloud_defend_add_integration';
 export const POLICIES_TABLE_COLUMNS = {
   INTEGRATION_NAME: 'policies-table-column-integration-name',
   AGENT_POLICY: 'policies-table-column-agent-policy',

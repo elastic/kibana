@@ -17611,7 +17611,6 @@
     "xpack.cloudDefend.networkResponse": "网络（即将推出）",
     "xpack.cloudDefend.networkSelector": "网络（即将推出）",
     "xpack.cloudDefend.policies.policiesPageHeader": "Defend for containers (D4C)",
-    "xpack.cloudDefend.policies.policiesPageHeader.addIntegrationButtonLabel": "添加集成",
     "xpack.cloudDefend.policies.policiesTable.agentPolicyColumnTitle": "代理策略",
     "xpack.cloudDefend.policies.policiesTable.createdAtColumnTitle": "创建于",
     "xpack.cloudDefend.policies.policiesTable.createdByColumnTitle": "创建者",

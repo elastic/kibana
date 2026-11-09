@@ -318,6 +318,8 @@ describe('isPageWithAppHeaderPath', () => {
     ['the exception list details page', '/exceptions/details/list-1'],
     ['a cloud security posture page', '/cloud_security_posture/findings'],
     ['the cloud security posture base path', '/cloud_security_posture'],
+    ['the Defend for containers policies page', '/cloud_defend/policies'],
+    ['the cloud defend base path', '/cloud_defend'],
     ['the Manage landing page', '/manage'],
     ['the Configurations page', '/configurations'],
     ['a Configurations sub-route', '/configurations/integrations/browse'],
@@ -355,6 +357,7 @@ describe('isPageWithAppHeaderPath', () => {
       'a path that only starts like the cloud security posture base path',
       '/cloud_security_posturefoo',
     ],
+    ['a path that only starts like the cloud defend base path', '/cloud_defendfoo'],
   ])('returns false for %s', (_name, pathname) => {
     expect(isPageWithAppHeaderPath(pathname)).toBe(false);
   });
