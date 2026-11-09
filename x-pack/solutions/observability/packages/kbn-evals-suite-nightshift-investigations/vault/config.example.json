@@ -11,6 +11,7 @@
   },
   "nightshiftOrcaEs": {
     "url": "https://REPLACE_ME:443",
-    "apiKey": "REPLACE_ME"
+    "apiKey": "REPLACE_ME",
+    "noFlagsApiKey": "REPLACE_ME"
   }
 }

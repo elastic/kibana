@@ -6,17 +6,23 @@
  */
 
 import { registerInvestigationEvaluation } from './register_evaluation';
-import { loadOrcaDataset, ORCA_RELEASE } from './orca_dataset';
+import { loadOrcaDataset, resolveOrcaRun, resolveOrcaTelemetryVariant } from './orca_dataset';
+
+const run = resolveOrcaRun();
+const telemetryVariant = resolveOrcaTelemetryVariant();
+const { release, slice } = run;
 
 registerInvestigationEvaluation({
   name: 'orcabench',
-  loadDataset: loadOrcaDataset,
+  loadDataset: (client) => loadOrcaDataset(client, run),
   // Execute exactly the fetched, validated snapshot rather than resolving mutable contents again.
   trustUpstreamDataset: false,
   orca: true,
   metadata: {
-    dataset_release: ORCA_RELEASE.name,
-    dataset_sha256: ORCA_RELEASE.sha256,
+    dataset_release: release.name,
+    dataset_sha256: release.sha256,
     source_release: 'data-0418/2026-10-01',
+    telemetry_variant: telemetryVariant,
+    ...(slice ? { dataset_slice: `${slice.index}/${slice.count}` } : {}),
   },
 });

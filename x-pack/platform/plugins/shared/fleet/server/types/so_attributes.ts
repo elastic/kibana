@@ -420,6 +420,8 @@ export interface CloudOnboardingDeploymentSOAttributes {
   namespace?: string;
   /** The service instances (originals and duplicates) of the last deploy. Hydrated into the Service settings step on resume so duplicates and their names come back. */
   instances?: CloudOnboardingInstance[];
+  /** Package policy settings from the Service settings step that apply to every package policy of the deployment, keyed by package policy field (e.g. output_id). Each deployment method uses only the settings it supports. */
+  policySettings?: Record<string, unknown>;
   /** Names of the integration packages this deployment covers. Mapped as keyword so deployments can be listed per package. */
   packageNames?: string[];
   /** Display name of each service as shown in the onboarding flow, by service id. */

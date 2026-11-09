@@ -148,7 +148,7 @@ const enableRoute = createDigitalExperienceServerRoute({
   security: {
     authz: { requiredPrivileges: [DIGITAL_EXPERIENCE_API_PRIVILEGES.manageSessions] },
   },
-  handler: async ({ context, sessionsSettings, logger }): Promise<SessionsStatus> => {
+  handler: async ({ context, sessionsSettings, isServerless, logger }): Promise<SessionsStatus> => {
     const { elasticsearch, security } = await context.core;
     const enabledBy = security.authc.getCurrentUser()?.username ?? null;
     const audit = (outcome: 'success' | 'failure', error?: Error) =>
@@ -172,6 +172,7 @@ const enableRoute = createDigitalExperienceServerRoute({
         logger,
         settings: sessionsSettings,
         enabledBy,
+        isServerless,
       });
     } catch (error) {
       audit('failure', error);
