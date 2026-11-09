@@ -8,14 +8,15 @@
 export type RoutingConditionOperator = 'equals' | 'notEquals';
 
 export interface RoutingFieldCondition {
+  /** The attribute name as users know it, such as `service.name`. */
   field: string;
   operator: RoutingConditionOperator;
   value: string;
 }
 
 /**
- * The form edits a rule's `when` as a field compared with a value. Any other
- * OTTL condition is kept as written and shown read-only.
+ * The form edits a rule's `when` as a resource attribute compared with a
+ * value. Any other OTTL condition is kept as written and shown read-only.
  */
 export type RoutingRuleCondition = RoutingFieldCondition | { raw: string };
 
@@ -24,11 +25,18 @@ const OTTL_OPERATORS: Readonly<Record<RoutingConditionOperator, string>> = {
   notEquals: '!=',
 };
 
-const COMPARISON_CONDITION = /^\s*(.+?)\s*(==|!=)\s*"((?:[^"\\]|\\.)*)"\s*$/;
+const QUOTED = '"((?:[^"\\\\]|\\\\.)*)"';
 
-const escapeValue = (value: string): string => value.replace(/[\\"]/g, (char) => `\\${char}`);
+const COMPARISON_CONDITION = new RegExp(
+  `^\\s*resource\\.attributes\\[${QUOTED}\\]\\s*(==|!=)\\s*${QUOTED}\\s*$`
+);
 
-const unescapeValue = (value: string): string => value.replace(/\\(.)/g, '$1');
+const escapeString = (value: string): string => value.replace(/[\\"]/g, (char) => `\\${char}`);
+
+const unescapeString = (value: string): string => value.replace(/\\(.)/g, '$1');
+
+/** The OTTL path of a resource attribute. */
+const attributePath = (field: string): string => `resource.attributes["${escapeString(field)}"]`;
 
 /** Reads a rule's `when`; `undefined` is a rule with no condition. */
 export const parseWhen = (when: string | undefined): RoutingRuleCondition | undefined => {
@@ -41,9 +49,9 @@ export const parseWhen = (when: string | undefined): RoutingRuleCondition | unde
   }
   const [, field, operator, value] = match;
   return {
-    field,
+    field: unescapeString(field),
     operator: operator === OTTL_OPERATORS.notEquals ? 'notEquals' : 'equals',
-    value: unescapeValue(value),
+    value: unescapeString(value),
   };
 };
 
@@ -61,7 +69,9 @@ export const serializeCondition = (
   if (field === '') {
     return undefined;
   }
-  return `${field} ${OTTL_OPERATORS[condition.operator]} "${escapeValue(condition.value)}"`;
+  return `${attributePath(field)} ${OTTL_OPERATORS[condition.operator]} "${escapeString(
+    condition.value
+  )}"`;
 };
 
 export const isRawCondition = (

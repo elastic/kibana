@@ -207,7 +207,7 @@ function RoutingConditionForm({
                 compressed
                 value={current.field}
                 placeholder={i18n.translate('xpack.streams.routingFlyout.rule.fieldPlaceholder', {
-                  defaultMessage: 'attributes["service.name"]',
+                  defaultMessage: 'service.name',
                 })}
                 onChange={(event) => update({ field: event.target.value })}
                 data-test-subj="streamsRoutingRuleField"

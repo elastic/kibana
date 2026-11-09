@@ -75,14 +75,14 @@ describe('routingFlyoutMachine', () => {
       type: 'rule.update',
       key: 'rule-1',
       changes: {
-        condition: { field: 'attributes["team"]', operator: 'equals', value: 'a' },
+        condition: { field: 'team', operator: 'equals', value: 'a' },
         action: 'copy',
       },
     });
     flyout.send({ type: 'flyout.save' });
 
     expect(requests[0].rules).toEqual([
-      { when: 'attributes["team"] == "a"', action: 'copy', destinations: [] },
+      { when: 'resource.attributes["team"] == "a"', action: 'copy', destinations: [] },
       { destinations: ['es-logs'] },
     ]);
   });
@@ -94,7 +94,7 @@ describe('routingFlyoutMachine', () => {
       type: 'rule.update',
       key: 'rule-1',
       changes: {
-        condition: { field: 'body', operator: 'equals', value: 'x' },
+        condition: { field: 'service.name', operator: 'equals', value: 'x' },
         telemetry: ['traces', 'logs'],
       },
     });
@@ -103,7 +103,7 @@ describe('routingFlyoutMachine', () => {
     expect(requests[0].supportedTelemetry).toEqual(['logs', 'traces']);
     // The catch-all keeps handling logs only, so it now names its signal.
     expect(requests[0].rules).toEqual([
-      { when: 'body == "x"', destinations: [] },
+      { when: 'resource.attributes["service.name"] == "x"', destinations: [] },
       { destinations: ['es-logs'], telemetry: ['logs'] },
     ]);
   });

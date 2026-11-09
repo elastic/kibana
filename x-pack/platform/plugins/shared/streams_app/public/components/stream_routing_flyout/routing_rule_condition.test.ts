@@ -13,36 +13,40 @@ describe('routing rule conditions', () => {
     expect(serializeCondition(undefined)).toBeUndefined();
   });
 
-  it('round-trips a field matched against a value', () => {
-    const when = serializeCondition({
-      field: 'attributes["service.name"]',
-      operator: 'equals',
-      value: 'api',
-    });
-    expect(when).toBe('attributes["service.name"] == "api"');
-    expect(parseWhen(when)).toEqual({
-      field: 'attributes["service.name"]',
-      operator: 'equals',
-      value: 'api',
-    });
+  it('writes a field name as a resource attribute and reads it back by name', () => {
+    const when = serializeCondition({ field: 'service.name', operator: 'equals', value: 'api' });
+    expect(when).toBe('resource.attributes["service.name"] == "api"');
+    expect(parseWhen(when)).toEqual({ field: 'service.name', operator: 'equals', value: 'api' });
   });
 
   it('round-trips a field that does not equal a value', () => {
-    const when = serializeCondition({ field: 'body', operator: 'notEquals', value: 'x' });
-    expect(when).toBe('body != "x"');
-    expect(parseWhen(when)).toEqual({ field: 'body', operator: 'notEquals', value: 'x' });
+    const when = serializeCondition({ field: 'env', operator: 'notEquals', value: 'x' });
+    expect(when).toBe('resource.attributes["env"] != "x"');
+    expect(parseWhen(when)).toEqual({ field: 'env', operator: 'notEquals', value: 'x' });
   });
 
-  it('escapes quotes and backslashes in the value', () => {
-    const when = serializeCondition({ field: 'body', operator: 'equals', value: 'say "hi" \\o/' });
-    expect(when).toBe('body == "say \\"hi\\" \\\\o/"');
-    expect(parseWhen(when)).toEqual({ field: 'body', operator: 'equals', value: 'say "hi" \\o/' });
+  it('trims the field name', () => {
+    expect(serializeCondition({ field: ' env ', operator: 'equals', value: 'prod' })).toBe(
+      'resource.attributes["env"] == "prod"'
+    );
+  });
+
+  it('escapes quotes and backslashes in the field name and value', () => {
+    const condition = { field: 'a"b\\c', operator: 'equals' as const, value: 'say "hi" \\o/' };
+    const when = serializeCondition(condition);
+    expect(when).toBe('resource.attributes["a\\"b\\\\c"] == "say \\"hi\\" \\\\o/"');
+    expect(parseWhen(when)).toEqual(condition);
   });
 
   it('keeps other OTTL conditions as written', () => {
-    const when = 'severity_number >= 17 and IsMatch(body, "error")';
-    expect(parseWhen(when)).toEqual({ raw: when });
-    expect(serializeCondition({ raw: when })).toBe(when);
+    for (const when of [
+      'severity_number >= 17 and IsMatch(body, "error")',
+      'attributes["team"] == "a"',
+      'body == "x"',
+    ]) {
+      expect(parseWhen(when)).toEqual({ raw: when });
+      expect(serializeCondition({ raw: when })).toBe(when);
+    }
   });
 
   it('leaves a rule with an empty field without a condition', () => {
