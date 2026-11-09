@@ -102,6 +102,8 @@ export interface StepFormField {
 export interface StepFormSchema {
   readonly stepType: string;
   readonly fields: readonly StepFormField[];
+  /** The step-level `if`; absent for a step whose own config rules it out (the `if` step). */
+  readonly condition?: StepFormField;
 }
 
 /** Field-label alias for the shared catalog key prettifier. */
@@ -690,6 +692,32 @@ const connectorTypeCandidates = (stepType: string): readonly string[] => {
 };
 
 /**
+ * The step-level `if`: a KQL condition that gates the step, which the engine runs as an `if` step
+ * around it, so it is written like that step's `condition` (a whole `${{ }}` is evaluated).
+ */
+const STEP_CONDITION_FIELD: StepFormField = {
+  key: 'if',
+  path: ['if'],
+  label: i18n.translate('workflows.stepConfigPanel.conditionLabel', {
+    defaultMessage: 'Condition',
+  }),
+  description: i18n.translate('workflows.stepConfigPanel.conditionDescription', {
+    defaultMessage: 'Run this step only when this condition is true.',
+  }),
+  required: false,
+  kind: 'code',
+  language: 'kuery',
+  valueFormWhenWhole: true,
+};
+
+/** Every step takes `if`, unless its own config declares it `never` (the `if` step gates on `condition`). */
+const getStepCondition = (configSchema: z.ZodType | undefined): StepFormField | undefined => {
+  const root = configSchema && unwrapSchema(configSchema);
+  const shape = root instanceof z.ZodObject ? (root.shape as Record<string, z.ZodType>) : undefined;
+  return shape?.if && isNeverSchema(shape.if) ? undefined : STEP_CONDITION_FIELD;
+};
+
+/**
  * Builds the configuration form for a step type from the same schemas that
  * power the Actions menu: built-in step definitions (`inputSchema` → `with`,
  * `configSchema` → root keys) or a connector contract (`paramsSchema` → `with`,
@@ -710,6 +738,7 @@ export const getStepFormSchema = (
           : []),
         ...fieldsFromObject(stepType, builtIn.inputSchema, ['with']),
       ],
+      condition: getStepCondition(builtIn.configSchema),
     };
   }
 
@@ -734,7 +763,7 @@ export const getStepFormSchema = (
   // through aliases so deprecated YAML types still get a usable form.
   fields.push(...fieldsFromObject(stepType, connector.configSchema, []));
   fields.push(...fieldsFromObject(stepType, connector.paramsSchema, ['with']));
-  return { stepType, fields };
+  return { stepType, fields, condition: getStepCondition(connector.configSchema) };
 };
 
 const readPath = (step: Record<string, unknown>, path: readonly string[]): unknown =>

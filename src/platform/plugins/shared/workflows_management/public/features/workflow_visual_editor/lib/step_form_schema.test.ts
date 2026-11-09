@@ -8,6 +8,7 @@
  */
 
 import type { ConnectorContractUnion } from '@kbn/workflows';
+import { INDEX_CONTRACT } from '@kbn/workflows/spec/elasticsearch/overrides/elasticsearch.index';
 import { SET_ALERTS_STATUS_CONTRACT } from '@kbn/workflows/spec/kibana/overrides/kibana.set_alerts_status';
 import { z } from '@kbn/zod/v4';
 import {
@@ -129,6 +130,45 @@ describe('step_form_schema', () => {
         } as unknown as ConnectorContractUnion;
         const keys = getStepFormSchema('elasticsearch.search', [esLike])?.fields.map((f) => f.key);
         expect(keys).toEqual(['index']);
+      });
+    });
+
+    describe('the step-level `if`', () => {
+      it('is a KQL condition written as a value, for a connector step and a built-in one', () => {
+        const expected = {
+          path: ['if'],
+          kind: 'code',
+          language: 'kuery',
+          required: false,
+          valueFormWhenWhole: true,
+        };
+        expect(getStepFormSchema('slack', connectors)?.condition).toMatchObject(expected);
+        expect(getStepFormSchema('foreach', [])?.condition).toMatchObject(expected);
+      });
+
+      it('is left out for the `if` step, whose config rules it out and gates on `condition`', () => {
+        const schema = getStepFormSchema('if', []);
+        expect(schema?.condition).toBeUndefined();
+        expect(schema?.fields.some((field) => field.key === 'condition')).toBe(true);
+      });
+
+      it('never adds `if` to the fields of the Inputs form', () => {
+        expect(getStepFormSchema('slack', connectors)?.fields.some((f) => f.key === 'if')).toBe(
+          false
+        );
+      });
+    });
+
+    it('offers an optional `id` on elasticsearch.index, not a choice between writing it with or without one', () => {
+      const fields = getStepFormSchema('elasticsearch.index', [
+        INDEX_CONTRACT as unknown as ConnectorContractUnion,
+      ])?.fields;
+      expect(fields?.some((field) => field.kind === 'variants')).toBe(false);
+      expect(fields?.find((field) => field.key === 'id')).toMatchObject({
+        path: ['with', 'id'],
+        kind: 'text',
+        required: false,
+        advanced: false,
       });
     });
 

@@ -722,6 +722,74 @@ with:
     expect(screen.getByTestId('workflowStepConfigPanelSettings')).toBeInTheDocument();
   });
 
+  describe('step condition (`if`) in Advanced', () => {
+    const baseFragment = 'name: n\ntype: slack\nconnector-id: a\nwith:\n  message: hi\n';
+    const lastFragment = (spy: jest.Mock) => spy.mock.calls[spy.mock.calls.length - 1][0] as string;
+
+    it('sits above Error handling, with a Condition control', () => {
+      renderPanel({ initialFragment: baseFragment });
+      expandSettingsAccordion();
+      const section = screen.getByTestId('workflowStepConfigConditionSection');
+      expect(
+        within(section).getByRole('heading', { name: 'Conditional execution' })
+      ).toBeInTheDocument();
+      expect(within(section).getByTestId('workflowStepConfigField-if')).toBeInTheDocument();
+      expect(within(section).getByText('Condition')).toBeInTheDocument();
+      const errorHandling = screen.getByTestId('workflowStepConfigErrorHandlingSection');
+      expect(section.compareDocumentPosition(errorHandling)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    });
+
+    it('writes the condition as the step-level `if`, and removes the key when cleared', () => {
+      const { onFragmentChange } = renderPanel({ initialFragment: baseFragment });
+      expandSettingsAccordion();
+      fireEvent.change(activateField('workflowStepConfigField-if'), {
+        target: { value: 'steps.a.output.ok : true' },
+      });
+      const written = parseDocument(lastFragment(onFragmentChange));
+      expect(written.get('if')).toBe('steps.a.output.ok : true');
+      expect(written.getIn(['with', 'if'])).toBeUndefined();
+
+      fireEvent.change(activateField('workflowStepConfigField-if'), { target: { value: '' } });
+      expect(parseDocument(lastFragment(onFragmentChange)).has('if')).toBe(false);
+    });
+
+    it('writes a pick into the empty condition as a whole value', () => {
+      const { onFragmentChange } = renderPanel({ initialFragment: baseFragment });
+      expandSettingsAccordion();
+      fireEvent.focusIn(activateField('workflowStepConfigField-if'));
+      act(() => {
+        insertIntoActiveDataReferenceTarget('{{ steps.a.output.ok }}');
+      });
+      expect(lastFragment(onFragmentChange)).toMatch(
+        /\nif: ["']?\$\{\{ steps\.a\.output\.ok \}\}["']?/
+      );
+    });
+
+    it('is not offered by the `if` step, which gates on its own condition', () => {
+      renderPanel({
+        stepType: 'if',
+        initialFragment: 'name: branch\ntype: if\ncondition: "true"\n',
+        connectors: [],
+      });
+      expandSettingsAccordion();
+      expect(screen.queryByTestId('workflowStepConfigConditionSection')).not.toBeInTheDocument();
+    });
+
+    it('is offered next to the note when a step has no error handling', () => {
+      renderPanel({
+        stepType: 'while',
+        initialFragment:
+          'name: w\ntype: while\ncondition: "x"\nsteps:\n  - name: a\n    type: console\n    with:\n      message: hi\n',
+        connectors: [],
+      });
+      expandSettingsAccordion();
+      expect(screen.getByTestId('workflowStepConfigConditionSection')).toBeInTheDocument();
+      expect(
+        screen.getByText('Error handling is not available for this step.')
+      ).toBeInTheDocument();
+    });
+  });
+
   it('writes retry and continue through on-failure and clears keys when toggled off', () => {
     renderPanel({
       initialFragment: 'name: n\ntype: slack\nconnector-id: a\nwith:\n  message: hi\n',

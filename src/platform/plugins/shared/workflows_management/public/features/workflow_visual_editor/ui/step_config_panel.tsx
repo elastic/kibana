@@ -234,8 +234,8 @@ const writeFragmentValue = (
   const doc = parseDocument(fragment);
   if (!isMap(doc.contents)) return fragment;
   // An empty string is the expression-mode sentinel for boolean/number fields —
-  // don't delete it; keep the key so the UI stays in expression mode.
-  if (isEmptyFieldValue(value) && value !== '' && !field.required) {
+  // don't delete it; keep the key so the UI stays in expression mode. KQL text has no such mode.
+  if (isEmptyFieldValue(value) && (value !== '' || field.language === 'kuery') && !field.required) {
     // Nothing to delete when the key — or an ancestor mapping like `with` —
     // is absent: unlike `setIn`, `deleteIn` throws on a missing intermediate
     // node instead of treating it as a no-op.
@@ -263,6 +263,9 @@ const toJs = (value: unknown): unknown =>
 
 /** Stable id for field rows and draft-error maps. */
 const fieldId = (field: StepFormField): string => field.path.join('.');
+
+/** For a row whose field has no sub-fields (only a `variants` field renders any). */
+const renderNoSubFields = (): React.ReactElement => <></>;
 
 /**
  * True when the panel draft differs from the applied snapshot opened with.
@@ -585,6 +588,7 @@ export function StepConfigPanel({
   }, [onClose]);
 
   const showSettings = !isFallbackStep && stepSupportsErrorHandling(stepType);
+  const stepCondition = schema?.condition;
 
   const editorModeOptions: Array<{
     id: ParametersMode;
@@ -1006,6 +1010,33 @@ export function StepConfigPanel({
                     data-test-subj="workflowStepConfigPanelSettings"
                     css={{ paddingTop: euiTheme.size.m }}
                   >
+                    {stepCondition ? (
+                      <div
+                        data-test-subj="workflowStepConfigConditionSection"
+                        css={{ marginBlockEnd: euiTheme.size.l }}
+                      >
+                        <EuiTitle size="xxs" css={{ marginBlockEnd: euiTheme.size.s }}>
+                          <h5>
+                            {i18n.translate('workflows.stepConfigPanel.conditionTitle', {
+                              defaultMessage: 'Conditional execution',
+                            })}
+                          </h5>
+                        </EuiTitle>
+                        <StepFieldRow
+                          field={stepCondition}
+                          value={toJs(readFragmentValue(fragment, stepCondition.path))}
+                          showValidation={showValidation}
+                          referenceCatalog={referenceCatalog}
+                          showOptionalMarker={false}
+                          onChange={(value) => handleFieldChange(stepCondition, value)}
+                          onDraftErrorChange={(error) =>
+                            handleDraftErrorChange(fieldId(stepCondition), error)
+                          }
+                          onExpand={() => handleExpandField(stepCondition)}
+                          renderSubField={renderNoSubFields}
+                        />
+                      </div>
+                    ) : null}
                     {showSettings ? (
                       <div data-test-subj="workflowStepConfigErrorHandlingSection">
                         <EuiTitle size="xxs" css={{ marginBlockEnd: euiTheme.size.s }}>
