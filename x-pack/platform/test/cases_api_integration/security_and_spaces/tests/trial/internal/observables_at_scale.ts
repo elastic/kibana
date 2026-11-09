@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { v4 as uuidv4 } from 'uuid';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import {
   MAX_BULK_CREATE_OBSERVABLES,
@@ -67,10 +68,10 @@ export default ({ getService }: FtrProviderContext): void => {
    */
   const seedFieldObservables = async (caseId: string, observables: ObservablePost[]) => {
     const now = new Date().toISOString();
-    const fieldObservables: Observable[] = observables.map((observable, index) => ({
+    const fieldObservables: Observable[] = observables.map((observable) => ({
       ...observable,
       description: observable.description ?? null,
-      id: `field-observable-${caseId}-${index}`,
+      id: uuidv4(),
       createdAt: now,
       updatedAt: null,
     }));
@@ -329,7 +330,12 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(edited?.description).to.be('edited');
         expect(edited?.updatedAt).not.to.be(null);
 
-        await deleteObservable({ supertest, caseId: postedCase.id, observableId: added[1].id });
+        await deleteObservable({
+          supertest,
+          caseId: postedCase.id,
+          observableId: added[1].id,
+          expectedHttpCode: 204,
+        });
 
         expect(await countCaseObservableObjects(es, postedCase.id)).to.be(1);
         expect((await getCase({ supertest, caseId: postedCase.id })).total_observables).to.be(1);

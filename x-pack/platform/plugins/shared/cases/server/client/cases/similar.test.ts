@@ -87,6 +87,9 @@ describe('similar', () => {
       },
     ]);
     expect(query?.bool?.minimum_should_match).toBe(1);
+    // A raw search reads `cases.owner`, not the find-style `cases.attributes.owner`.
+    expect(JSON.stringify(query?.bool?.filter)).toContain('"cases.owner"');
+    expect(JSON.stringify(query?.bool?.filter)).not.toContain('cases.attributes.owner');
   });
 
   it('matches on the source case observables in both stores and on candidates from the type', async () => {

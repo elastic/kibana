@@ -26,7 +26,7 @@ import { decodeWithExcessOrThrowZod, decodeOrThrowZod } from '../../common/runti
 
 import { createCaseError } from '../../common/error';
 import type { CasesClient, CasesClientArgs } from '..';
-import { convertSortField, buildFilter } from '../utils';
+import { convertSortField, buildFilter, removeAttributesFromFilter } from '../utils';
 import { Operations } from '../../authorization';
 import { combineFilterWithAuthorizationFilter } from '../../authorization/utils';
 import { getAvailableObservableTypesMap } from '../observable_types';
@@ -156,7 +156,10 @@ export const similar = async (
       namespaces: [spaceIdToNamespace(spaceId) ?? DEFAULT_NAMESPACE_STRING],
       query: {
         bool: {
-          filter: casesFilter ? [toElasticsearchQuery(casesFilter)] : [],
+          // The raw search reads `cases.<field>`, not the find-style `cases.attributes.<field>`.
+          filter: casesFilter
+            ? [toElasticsearchQuery(removeAttributesFromFilter(casesFilter))]
+            : [],
           must_not: [{ term: { _id: `${CASE_SAVED_OBJECT}:${caseId}` } }],
           should: [
             ...fieldMatchClauses(sourceKeys),
