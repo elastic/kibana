@@ -54,6 +54,7 @@ const timeRange = { rangeFrom: '2021-01-18T12:00:00.000Z', rangeTo: '2021-01-18T
 const fetch = jest.fn();
 const setFilter = jest.fn();
 const setFilters = jest.fn();
+const setKuery = jest.fn();
 
 /** The Overview's filters and KQL query in the URL, as the hooks return them. */
 const mockSearch = ({
@@ -66,7 +67,7 @@ const mockSearch = ({
   const encoded = encodeOverviewFilters(filters);
   const params = encoded ? { filters: encoded } : {};
   jest.mocked(useOverviewSearchParams).mockReturnValue(kuery ? { ...params, kuery } : params);
-  jest.mocked(useOverviewKuery).mockReturnValue({ kuery, setKuery: jest.fn() });
+  jest.mocked(useOverviewKuery).mockReturnValue({ kuery, setKuery });
   jest.mocked(useOverviewFilters).mockReturnValue({
     filters,
     params,
@@ -190,6 +191,19 @@ describe('ErrorsTab', () => {
     // Clears what shows, and leaves the page, which the Overview shows.
     fireEvent.click(screen.getByTestId('digitalExperienceOverviewClearFilters'));
     expect(setFilters).toHaveBeenCalledWith({ browser: [] });
+  });
+
+  it('clears the KQL query from the tab, as it is the only thing that narrows the errors', async () => {
+    mockSearch({ kuery: 'user_agent.name: Chrome' });
+    render(<ErrorsTab serviceName="shop" />, { wrapper: Providers });
+
+    expect(await screen.findByTestId('digitalExperienceErrorsKuery')).toHaveTextContent(
+      'user_agent.name: Chrome'
+    );
+    fireEvent.click(screen.getByTestId('digitalExperienceErrorsKueryClear'));
+
+    expect(setKuery).toHaveBeenCalledWith('');
+    expect(setFilters).not.toHaveBeenCalled();
   });
 
   it('shows no filters while none narrows the errors', async () => {

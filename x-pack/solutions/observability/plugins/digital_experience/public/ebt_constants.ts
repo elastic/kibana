@@ -83,6 +83,7 @@ export const ERRORS_EBT_ELEMENTS = {
   RETRY: 'errorsRetry',
   ERROR: 'errorsError',
   VIEW_ALL: 'errorsViewAll',
+  CLEAR_KUERY: 'errorsClearKuery',
 } as const;
 
 export const NETWORK_EBT_ELEMENTS = {

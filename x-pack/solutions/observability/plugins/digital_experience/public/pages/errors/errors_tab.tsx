@@ -7,12 +7,13 @@
 
 import React from 'react';
 import { omit } from 'lodash';
-import { EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { PAGE_FILTER_NAMES } from '../../../common/overview_filters';
 import { ApplicationTabToolbar } from '../../components/application_tab_toolbar';
 import { LoadErrorPrompt } from '../../components/load_error_prompt';
-import { ERRORS_EBT_ELEMENTS } from '../../ebt_constants';
+import { DIGITAL_EXPERIENCE_EBT_ACTIONS, ERRORS_EBT_ELEMENTS } from '../../ebt_constants';
 import { useLastEnvironments } from '../../hooks/use_last_environments';
 import { useOverviewFilters } from '../../hooks/use_overview_filters';
 import { useOverviewKuery } from '../../hooks/use_overview_search';
@@ -32,6 +33,10 @@ const kueryNote = (kuery: string) =>
     values: { kuery },
   });
 
+const CLEAR_KUERY_LABEL = i18n.translate('xpack.digitalExperience.errors.clearKuery', {
+  defaultMessage: 'Clear query',
+});
+
 /**
  * The JS errors of one EDOT Browser application, grouped, with their stack trace, narrowed by the
  * Overview's filters and KQL query in the URL, which show above the errors and can be removed.
@@ -40,7 +45,7 @@ export function ErrorsTab({ serviceName }: { serviceName: string }) {
   const { response, isLoading, error, refresh } = useApplicationErrors(serviceName);
   const environments = useLastEnvironments(serviceName, response);
   const { filters, setFilter, setFilters } = useOverviewFilters();
-  const { kuery } = useOverviewKuery();
+  const { kuery, setKuery } = useOverviewKuery();
   // The page does not narrow the errors, so it is not shown as if it did.
   const errorFilters = omit(filters, PAGE_FILTER_NAMES);
   // Clears what shows here only: the page stays for the Overview, which shows it.
@@ -68,9 +73,27 @@ export function ErrorsTab({ serviceName }: { serviceName: string }) {
       {kuery && (
         <>
           <EuiSpacer size="s" />
-          <EuiText size="xs" color="subdued" data-test-subj="digitalExperienceErrorsKuery">
-            {kueryNote(kuery)}
-          </EuiText>
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued" data-test-subj="digitalExperienceErrorsKuery">
+                {kueryNote(kuery)}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="xs"
+                iconType="cross"
+                onClick={() => setKuery('')}
+                data-test-subj="digitalExperienceErrorsKueryClear"
+                {...getEbtProps({
+                  action: DIGITAL_EXPERIENCE_EBT_ACTIONS.CLEAR_FILTERS,
+                  element: ERRORS_EBT_ELEMENTS.CLEAR_KUERY,
+                })}
+              >
+                {CLEAR_KUERY_LABEL}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </>
       )}
       <EuiSpacer size="m" />
