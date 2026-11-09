@@ -57,7 +57,9 @@ export const toSOSettings = (
   instances?: ServiceInstance[];
   policySettings?: Record<string, unknown>;
 } => {
-  const policySettings = getPolicySettings(serviceSettings?.policySettings, deploymentMethod);
+  const policySettings: Record<string, unknown> = {
+    ...getPolicySettings(serviceSettings?.policySettings, deploymentMethod),
+  };
   const integrationName = serviceSettings?.integrationName?.trim();
   const description = serviceSettings?.description?.trim();
   const namespace = serviceSettings?.namespace?.trim();
