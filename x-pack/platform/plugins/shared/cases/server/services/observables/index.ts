@@ -71,6 +71,8 @@ export interface FindObservablesPageArgs {
   sortOrder: ObservableSortOrder;
   typeKeys?: string[];
   search?: string;
+  /** Restricts the page to these type keys and values, such as the ones a metadata filter matched. */
+  keys?: ObservableKey[];
 }
 
 interface ObservableServiceContext {
@@ -484,8 +486,13 @@ export class ObservableService {
     sortOrder,
     typeKeys,
     search,
+    keys,
   }: FindObservablesPageArgs): Promise<{ items: ObservablesPageItem[]; total: number }> {
     const filter: estypes.QueryDslQueryContainer[] = [caseReferenceQuery([caseId])];
+
+    if (keys != null) {
+      filter.push(keysQuery(keys));
+    }
 
     if (typeKeys != null && typeKeys.length > 0) {
       filter.push({ terms: { [observableField('type_key')]: typeKeys } });

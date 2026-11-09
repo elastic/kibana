@@ -151,6 +151,97 @@ describe('findObservables', () => {
   });
 });
 
+describe('findObservables with metadata', () => {
+  const clientArgs = createCasesClientMockArgs();
+  const { caseService, observableService, observableSharedService } = clientArgs.services;
+
+  const pageOf = (observables: Observable[]) => ({
+    items: observables.map((item) => ({
+      observable: item,
+      sort: getSortValues(item, 'createdAt'),
+    })),
+    total: observables.length,
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    caseService.getCase.mockResolvedValue({
+      ...mockCases[0],
+      attributes: { ...mockCases[0].attributes, observables: fieldObservables },
+    });
+    clientArgs.authorization.ensureAuthorized.mockResolvedValue(undefined);
+    observableService.findPage.mockResolvedValue(pageOf(typeObservables));
+    observableSharedService.findByKeys.mockResolvedValue(new Map());
+  });
+
+  it('keeps the observables of both stores whose value matches the metadata filter', async () => {
+    observableSharedService.findKeysByMetadata.mockResolvedValue([
+      { typeKey: fieldObservables[0].typeKey, value: fieldObservables[0].value },
+      { typeKey: typeObservables[0].typeKey, value: typeObservables[0].value },
+    ]);
+    observableService.findPage.mockResolvedValue(pageOf([typeObservables[0]]));
+
+    const result = await findObservables(
+      mockCases[0].id,
+      { metadata: [{ key: 'triage', value: 'confirmed' }] },
+      clientArgs
+    );
+
+    expect(observableSharedService.findKeysByMetadata).toHaveBeenCalledWith({
+      owner: mockCases[0].attributes.owner,
+      filters: [{ key: 'triage', value: 'confirmed' }],
+      cap: 10_000,
+    });
+    expect(observableService.findPage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        keys: [
+          { typeKey: fieldObservables[0].typeKey, value: fieldObservables[0].value },
+          { typeKey: typeObservables[0].typeKey, value: typeObservables[0].value },
+        ],
+      })
+    );
+    expect(result.observables.map(({ id }) => id)).toEqual(['f1', 't1']);
+    expect(result.total).toBe(2);
+  });
+
+  it('returns an empty page without reading the case observables when no value matches', async () => {
+    observableSharedService.findKeysByMetadata.mockResolvedValue([]);
+
+    const result = await findObservables(
+      mockCases[0].id,
+      { metadata: [{ key: 'triage' }] },
+      clientArgs
+    );
+
+    expect(result).toEqual({ observables: [], total: 0 });
+    expect(observableService.findPage).not.toHaveBeenCalled();
+  });
+
+  it('attaches the metadata of each value to the observables of the page', async () => {
+    observableSharedService.findByKeys.mockResolvedValue(
+      new Map([
+        [
+          JSON.stringify([typeObservables[0].typeKey, typeObservables[0].value]),
+          {
+            id: 'shared-1',
+            owner: 'securitySolution',
+            typeKey: typeObservables[0].typeKey,
+            value: typeObservables[0].value,
+            metadata: { triage: 'confirmed' },
+          },
+        ],
+      ])
+    );
+
+    const result = await findObservables(mockCases[0].id, { perPage: 10 }, clientArgs);
+
+    expect(result.observables.find(({ id }) => id === 't1')?.metadata).toEqual({
+      triage: 'confirmed',
+    });
+    expect(result.observables.find(({ id }) => id === 'f1')).not.toHaveProperty('metadata');
+  });
+});
+
 describe('compareSortValues', () => {
   it('orders the first value as requested and the tie-breakers ascending', () => {
     const a: ObservableSortValues = [1, 'a', 'x'];

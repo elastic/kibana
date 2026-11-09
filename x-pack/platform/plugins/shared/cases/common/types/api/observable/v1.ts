@@ -9,6 +9,10 @@ import {
   DEFAULT_OBSERVABLES_PER_PAGE,
   MAX_BULK_CREATE_OBSERVABLES,
   MAX_OBSERVABLE_DESCRIPTION_LENGTH,
+  MAX_OBSERVABLE_METADATA_FILTERS,
+  MAX_OBSERVABLE_METADATA_KEY_LENGTH,
+  MAX_OBSERVABLE_METADATA_PAIRS,
+  MAX_OBSERVABLE_METADATA_VALUE_LENGTH,
   MAX_OBSERVABLE_TYPE_KEY_LENGTH,
   MAX_OBSERVABLE_VALUE_LENGTH,
   MAX_OBSERVABLES_CURSOR_LENGTH,
@@ -27,10 +31,36 @@ const BoundedObservableDescriptionSchema = lazySchema(() =>
   z.string().max(MAX_OBSERVABLE_DESCRIPTION_LENGTH).nullable()
 );
 
+const ObservableMetadataKeySchema = lazySchema(() =>
+  z
+    .string()
+    .min(1)
+    .max(MAX_OBSERVABLE_METADATA_KEY_LENGTH)
+    // `*` would turn a key into a field pattern when the list filters by it.
+    .refine((key) => !key.includes('*'), { message: 'A metadata key cannot contain *' })
+);
+
+/**
+ * Free-form key/value pairs of an observable value, shared by every case of the space and owner
+ * that holds the value.
+ */
+export const ObservableMetadataSchema = lazySchema(() =>
+  z
+    .record(
+      ObservableMetadataKeySchema,
+      z.string().min(1).max(MAX_OBSERVABLE_METADATA_VALUE_LENGTH)
+    )
+    .refine((metadata) => Object.keys(metadata).length <= MAX_OBSERVABLE_METADATA_PAIRS, {
+      message: `An observable value holds at most ${MAX_OBSERVABLE_METADATA_PAIRS} metadata pairs`,
+    })
+);
+
 export const ObservablePostSchema = lazySchema(() =>
   CaseObservableBaseSchema.extend({
     value: BoundedObservableValueSchema,
     description: BoundedObservableDescriptionSchema,
+    /** Merged into the metadata the value already holds. */
+    metadata: ObservableMetadataSchema.optional(),
   })
 );
 
@@ -40,6 +70,19 @@ export const ObservablePatchSchema = lazySchema(() =>
   z.object({
     value: z.string().max(MAX_STORED_OBSERVABLE_FIELD_LENGTH),
     description: z.string().max(MAX_STORED_OBSERVABLE_FIELD_LENGTH).nullable(),
+    /** Leaving it out keeps the value's metadata, an object replaces it and null clears it. */
+    metadata: ObservableMetadataSchema.nullable().optional(),
+  })
+);
+
+/** A metadata filter of the observables list: a key's value, a value prefix or a key's presence. */
+export const ObservableMetadataFilterSchema = lazySchema(() =>
+  z.object({
+    key: ObservableMetadataKeySchema,
+    /** Matches the whole value, ignoring case. */
+    value: z.string().min(1).max(MAX_OBSERVABLE_METADATA_VALUE_LENGTH).optional(),
+    /** Matches the start of the value, ignoring case. */
+    prefix: z.string().min(1).max(MAX_OBSERVABLE_METADATA_VALUE_LENGTH).optional(),
   })
 );
 
@@ -116,12 +159,26 @@ export const FindObservablesRequestSchema = lazySchema(() =>
     }).optional(),
     /** Matches the start of the value, ignoring case. */
     search: z.string().max(MAX_OBSERVABLE_VALUE_LENGTH).optional(),
+    /** Metadata filters, all of which must match. */
+    metadata: limitedArraySchema({
+      codec: ObservableMetadataFilterSchema,
+      min: 0,
+      max: MAX_OBSERVABLE_METADATA_FILTERS,
+      fieldName: 'metadata',
+    }).optional(),
+  })
+);
+
+/** An observable of the list, with the metadata its value holds. */
+export const ObservableWithMetadataSchema = lazySchema(() =>
+  CaseObservableSchema.extend({
+    metadata: z.record(z.string(), z.string()).optional(),
   })
 );
 
 export const FindObservablesResponseSchema = lazySchema(() =>
   z.object({
-    observables: z.array(CaseObservableSchema),
+    observables: z.array(ObservableWithMetadataSchema),
     total: z.number(),
     /** Pass it back to get the next page; absent on the last page. */
     cursor: z.string().optional(),
@@ -139,3 +196,6 @@ export type BulkCreateObservablesResponse = z.infer<typeof BulkCreateObservables
 export type ObservablesSortField = z.infer<typeof ObservablesSortFieldSchema>;
 export type FindObservablesRequest = z.input<typeof FindObservablesRequestSchema>;
 export type FindObservablesResponse = z.infer<typeof FindObservablesResponseSchema>;
+export type ObservableMetadata = z.infer<typeof ObservableMetadataSchema>;
+export type ObservableMetadataFilter = z.infer<typeof ObservableMetadataFilterSchema>;
+export type ObservableWithMetadata = z.infer<typeof ObservableWithMetadataSchema>;

@@ -23,6 +23,7 @@ import {
   type BulkCreateObservablesRequest,
   type BulkCreateObservablesResponse,
   type BulkDeleteObservablesRequest,
+  type ObservableMetadata,
   type ObservablePost,
 } from '../../../common/types/api';
 import {
@@ -234,6 +235,75 @@ const chunk = <T>(items: T[], size: number): T[][] => {
   return chunks;
 };
 
+/** Metadata writes of one request that run at the same time. */
+const METADATA_WRITE_CONCURRENCY = 10;
+
+/**
+ * Merges the metadata a request sent with each observable it added into the shared object of the
+ * value, so the pairs show in every case of the space and owner that holds the value.
+ */
+const writeMetadataOfAddedObservables = async (
+  theCase: CaseSavedObjectTransformed,
+  requested: ObservablePost[],
+  added: Observable[],
+  { services: { observableSharedService }, user }: CasesClientArgs
+) => {
+  const metadataByKey = new Map(
+    requested.flatMap(({ typeKey, value, metadata }) =>
+      metadata != null && Object.keys(metadata).length > 0
+        ? [[observableKey({ typeKey, value }), metadata] as const]
+        : []
+    )
+  );
+
+  const writes = added.flatMap(({ typeKey, value }) => {
+    const metadata = metadataByKey.get(observableKey({ typeKey, value }));
+    return metadata != null ? [{ typeKey, value, metadata }] : [];
+  });
+
+  for (const batch of chunk(writes, METADATA_WRITE_CONCURRENCY)) {
+    await Promise.all(
+      batch.map(({ typeKey, value, metadata }) =>
+        observableSharedService.writeMetadata({
+          owner: theCase.attributes.owner,
+          typeKey,
+          value,
+          metadata,
+          mode: 'merge',
+          user,
+        })
+      )
+    );
+  }
+};
+
+/**
+ * Applies the metadata of an observable edit to the shared object of the observable's (new)
+ * value: left out keeps it, an object replaces it, and null clears it.
+ */
+const writeMetadataOfEditedObservable = async (
+  theCase: CaseSavedObjectTransformed,
+  {
+    typeKey,
+    value,
+    metadata,
+  }: { typeKey: string; value: string; metadata?: ObservableMetadata | null },
+  { services: { observableSharedService }, user }: CasesClientArgs
+) => {
+  if (metadata === undefined) {
+    return;
+  }
+
+  await observableSharedService.writeMetadata({
+    owner: theCase.attributes.owner,
+    typeKey,
+    value,
+    metadata,
+    mode: 'replace',
+    user,
+  });
+};
+
 export interface AppliedObservables {
   /** The case with its updated total; set only when observables were added. */
   caseWithPatch?: CaseSavedObjectTransformed;
@@ -362,6 +432,8 @@ export const applyObservablesToCase = async (
         fieldObservables.length + (typeCount ?? (await observableService.countForCase(caseId))),
     };
   }
+
+  await writeMetadataOfAddedObservables(theCase, observables, newlyAddedObservables, clientArgs);
 
   const { caseWithPatch, totalObservables } = await patchObservablesTotal(theCase, clientArgs);
   await recordObservablesUserAction(theCase, newlyAddedObservables.length, 'add', clientArgs);
@@ -529,6 +601,8 @@ export const updateObservable = async (
 
   try {
     const paramArgs = decodeWithExcessOrThrowZod(UpdateObservableRequestSchema)(params);
+    // Metadata belongs to the value's shared object, never to the observable itself.
+    const { metadata, ...observablePatch } = paramArgs.observable;
     const retrievedCase = await caseService.getCase({ id: caseId });
     await ensureUpdateAuthorized(authorization, retrievedCase);
 
@@ -537,12 +611,12 @@ export const updateObservable = async (
 
     if (fieldObservable) {
       // An edited observable stays in the store that holds it: here, the case field.
-      if (paramArgs.observable.value !== fieldObservable.value) {
+      if (observablePatch.value !== fieldObservable.value) {
         await ensureNoRepeatAcrossStores({
           caseId,
           observableId,
           typeKey: fieldObservable.typeKey,
-          value: paramArgs.observable.value,
+          value: observablePatch.value,
           fieldObservables,
           clientArgs,
         });
@@ -565,19 +639,16 @@ export const updateObservable = async (
             );
           }
 
-          validateChangedObservableLengths(
-            currentObservables[observableIndex],
-            paramArgs.observable
-          );
+          validateChangedObservableLengths(currentObservables[observableIndex], observablePatch);
           validateObservableValue(
             currentObservables[observableIndex].typeKey,
-            paramArgs.observable.value
+            observablePatch.value
           );
 
           const updatedObservables = [...currentObservables];
           updatedObservables[observableIndex] = {
             ...updatedObservables[observableIndex],
-            ...paramArgs.observable,
+            ...observablePatch,
             updatedAt: new Date().toISOString(),
           };
 
@@ -589,6 +660,11 @@ export const updateObservable = async (
         },
       });
 
+      await writeMetadataOfEditedObservable(
+        latestCase,
+        { typeKey: fieldObservable.typeKey, value: observablePatch.value, metadata },
+        clientArgs
+      );
       await recordObservablesUserAction(latestCase, 1, 'update', clientArgs);
       return await buildCaseResponse(caseWithPatch, clientArgs);
     }
@@ -602,15 +678,15 @@ export const updateObservable = async (
     }
 
     const stored = toObservable(storedObservable);
-    validateChangedObservableLengths(stored, paramArgs.observable);
-    validateObservableValue(stored.typeKey, paramArgs.observable.value);
+    validateChangedObservableLengths(stored, observablePatch);
+    validateObservableValue(stored.typeKey, observablePatch.value);
 
-    if (paramArgs.observable.value !== stored.value) {
+    if (observablePatch.value !== stored.value) {
       await ensureNoRepeatAcrossStores({
         caseId,
         observableId,
         typeKey: stored.typeKey,
-        value: paramArgs.observable.value,
+        value: observablePatch.value,
         fieldObservables,
         clientArgs,
       });
@@ -620,12 +696,18 @@ export const updateObservable = async (
       id: observableId,
       version: storedObservable.version,
       attributes: {
-        value: paramArgs.observable.value,
-        description: paramArgs.observable.description ?? null,
+        value: observablePatch.value,
+        description: observablePatch.description ?? null,
         updated_at: new Date().toISOString(),
         updated_by: user,
       },
     });
+
+    await writeMetadataOfEditedObservable(
+      retrievedCase,
+      { typeKey: stored.typeKey, value: observablePatch.value, metadata },
+      clientArgs
+    );
 
     const { caseWithPatch } = await patchObservablesTotal(retrievedCase, clientArgs);
     await recordObservablesUserAction(retrievedCase, 1, 'update', clientArgs);
