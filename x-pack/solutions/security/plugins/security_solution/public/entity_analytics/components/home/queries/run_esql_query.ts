@@ -28,7 +28,7 @@ export const runEsqlQuery = async (
     executionContext: {
       ...buildExecutionContext(EA_EXECUTION_CONTEXT_NAMES.HOME_PAGE, contextId),
       // APM labels come from the top-level `page`, never from the child context.
-      page: contextId,
+      page: `${EA_EXECUTION_CONTEXT_NAMES.HOME_PAGE}:${contextId}`,
     },
   });
   return response;
