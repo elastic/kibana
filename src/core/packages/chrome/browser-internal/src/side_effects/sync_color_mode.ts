@@ -74,6 +74,17 @@ const systemDarkMode$ = (): Observable<boolean> => {
   );
 };
 
+interface SyncColorModeDeps {
+  theme: InternalThemeServiceStart;
+  injectedMetadata: InternalInjectedMetadataStart;
+  userProfile: UserProfileService;
+  uiSettings: IUiSettingsClient;
+  settings: SettingsStart;
+  http: InternalHttpStart;
+  stop$: Observable<void>;
+  logger: Logger;
+}
+
 /**
  * Applies color mode changes live, resolving the effective value the same way the server does
  * when rendering the page: the user profile wins over the space setting, unless the space setting
@@ -88,16 +99,7 @@ export function syncColorMode({
   http,
   stop$,
   logger,
-}: {
-  theme: InternalThemeServiceStart;
-  injectedMetadata: InternalInjectedMetadataStart;
-  userProfile: UserProfileService;
-  uiSettings: IUiSettingsClient;
-  settings: SettingsStart;
-  http: InternalHttpStart;
-  stop$: Observable<void>;
-  logger: Logger;
-}): void {
+}: SyncColorModeDeps): void {
   if (http.anonymousPaths.isAnonymous(window.location.pathname)) {
     return;
   }
