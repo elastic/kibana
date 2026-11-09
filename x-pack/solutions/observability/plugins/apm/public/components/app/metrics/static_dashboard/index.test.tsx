@@ -141,8 +141,25 @@ describe('JsonMetricsDashboard', () => {
       expect(dashboardApi.setFilters).not.toHaveBeenCalled();
       expect(dashboardApi.setQuery).not.toHaveBeenCalled();
       expect(dashboardApi.setTimeRange).not.toHaveBeenCalled();
+
+      // A recreated embeddable (e.g. savedObjectId/key change) delivers a fresh API, which must
+      // be picked up again so unified-search state is pushed onto the new dashboard.
+      const recreatedDashboardApi = {
+        setFilters: jest.fn(),
+        setQuery: jest.fn(),
+        setTimeRange: jest.fn(),
+      };
+
+      await act(async () => {
+        capturedOnApiAvailable!(recreatedDashboardApi);
+      });
+
+      expect(recreatedDashboardApi.setFilters).toHaveBeenCalled();
+      expect(recreatedDashboardApi.setQuery).toHaveBeenCalled();
+      expect(recreatedDashboardApi.setTimeRange).toHaveBeenCalled();
     });
   });
+
   describe('getCreationOptions', () => {
     it('returns useControlsIntegration: true', async () => {
       jest.spyOn(helper, 'convertSavedDashboardToPanels').mockResolvedValue(mockPanels as any);
