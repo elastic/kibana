@@ -25,6 +25,7 @@ import {
 import { EsServiceAccounts } from './es_service_accounts';
 import { UIAM_SERVICE_ACCOUNT_MAX_ROLES } from './uiam_role_limits';
 import { licenseMock } from '../../common/licensing/index.mock';
+import { SERVICE_ACCOUNT_NAME_MAX_LENGTH } from '../../common/service_accounts';
 import { auditLoggerMock, auditServiceMock } from '../audit/mocks';
 import { securityMock } from '../mocks';
 import { securityTelemetry } from '../otel/instrumentation';
@@ -1712,6 +1713,108 @@ describe('EsServiceAccounts', () => {
       );
 
       expect(await serviceAccounts.get(request, ACCOUNT_ID)).not.toHaveProperty('description');
+    });
+  });
+
+  describe('#getSummary', () => {
+    const ACCOUNT_ID = 'kibana/nightshift-relay';
+
+    it('reads the account as Kibana and reports only its name and status', async () => {
+      clusterClient.asInternalUser.transport.request.mockResolvedValueOnce(
+        accountEntry({ roles: ['viewer'], description: 'Runs investigation workflows.' })
+      );
+      credentialStore.findExisting.mockResolvedValue(new Set([ACCOUNT_ID]));
+
+      await expect(serviceAccounts.getSummary(ACCOUNT_ID)).resolves.toEqual({
+        id: ACCOUNT_ID,
+        name: 'nightshift-relay',
+        enabled: true,
+        assumable: true,
+      });
+      expect(clusterClient.asInternalUser.transport.request).toHaveBeenCalledTimes(1);
+      expect(clusterClient.asInternalUser.transport.request).toHaveBeenCalledWith(READ_ACCOUNT, {
+        ignore: [404],
+      });
+      expect(credentialStore.findExisting).toHaveBeenCalledWith([ACCOUNT_ID]);
+    });
+
+    // kibana_system can read service accounts but not their tokens, so the token check that #get
+    // makes as the user is not made here.
+    it('takes `assumable` from the stored credential without reading the account tokens', async () => {
+      clusterClient.asInternalUser.transport.request.mockResolvedValueOnce(
+        accountEntry({ enabled: false })
+      );
+
+      await expect(serviceAccounts.getSummary(ACCOUNT_ID)).resolves.toEqual({
+        id: ACCOUNT_ID,
+        name: 'nightshift-relay',
+        enabled: false,
+        assumable: false,
+      });
+      expect(clusterClient.asInternalUser.transport.request).not.toHaveBeenCalledWith(
+        expect.objectContaining({ path: CREDENTIALS_PATH }),
+        expect.anything()
+      );
+    });
+
+    it('authorizes no user and makes no call as one', async () => {
+      clusterClient.asInternalUser.transport.request.mockResolvedValueOnce(accountEntry());
+
+      await serviceAccounts.getSummary(ACCOUNT_ID);
+
+      expect(mockCheckPrivileges.globally).not.toHaveBeenCalled();
+      expect(clusterClient.asScoped).not.toHaveBeenCalled();
+    });
+
+    it('resolves `null` when there is no such account', async () => {
+      clusterClient.asInternalUser.transport.request.mockResolvedValueOnce({});
+
+      await expect(serviceAccounts.getSummary(ACCOUNT_ID)).resolves.toBeNull();
+      expect(credentialStore.findExisting).not.toHaveBeenCalled();
+    });
+
+    it('resolves `null` for an account Elasticsearch reports as not user-managed', async () => {
+      clusterClient.asInternalUser.transport.request.mockResolvedValueOnce({
+        [ACCOUNT_ID]: { type: 'built_in', role_descriptor: {} },
+      });
+
+      await expect(serviceAccounts.getSummary(ACCOUNT_ID)).resolves.toBeNull();
+    });
+
+    it('resolves `null` for an id Kibana could never run as, without reaching Elasticsearch', async () => {
+      for (const id of [
+        'nightshift-relay',
+        'kibana/../_cluster',
+        'a/b/c',
+        '',
+        'kibana/',
+        '/nightshift-relay',
+        'elastic/kibana',
+        'other/nightshift-relay',
+        `kibana/${'a'.repeat(SERVICE_ACCOUNT_NAME_MAX_LENGTH + 1)}`,
+      ]) {
+        await expect(serviceAccounts.getSummary(id)).resolves.toBeNull();
+      }
+      expect(clusterClient.asInternalUser.transport.request).not.toHaveBeenCalled();
+    });
+
+    it('rejects with a 502 when the account is reported in an unrecognized shape', async () => {
+      clusterClient.asInternalUser.transport.request.mockResolvedValueOnce(
+        accountEntry({ roles: 'viewer' })
+      );
+
+      await expect(serviceAccounts.getSummary(ACCOUNT_ID)).rejects.toMatchObject({
+        output: { statusCode: 502 },
+      });
+    });
+
+    it('rejects with a 403 when security features are disabled in Elasticsearch', async () => {
+      license.isEnabled.mockReturnValue(false);
+
+      await expect(serviceAccounts.getSummary(ACCOUNT_ID)).rejects.toMatchObject({
+        output: { statusCode: 403 },
+      });
+      expect(clusterClient.asInternalUser.transport.request).not.toHaveBeenCalled();
     });
   });
 

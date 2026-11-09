@@ -7,6 +7,7 @@
 
 import {
   parsePresetSchedule,
+  type AlertSourceMode,
   type PresetSchedule,
 } from '@kbn/nightshift-investigations-plugin/common';
 import type { AlertSeverity } from '@kbn/rule-data-utils';
@@ -36,6 +37,8 @@ export type TriggerFormValues =
       ruleNames: string[];
       ruleTags: string[];
       severities: AlertSeverity[];
+      alertSources: string[];
+      alertSourceMode: AlertSourceMode;
     }
   | {
       kind: 'every';
@@ -86,7 +89,15 @@ export const createTriggerFormValues = (kind: TriggerFormValues['kind']): Trigge
     return { kind, channels: [], users: [], bots: [], messageFilter: '' };
   }
   if (kind === 'alert') {
-    return { kind, ruleNamePattern: '', ruleNames: [], ruleTags: [], severities: [] };
+    return {
+      kind,
+      ruleNamePattern: '',
+      ruleNames: [],
+      ruleTags: [],
+      severities: [],
+      alertSources: [],
+      alertSourceMode: 'include',
+    };
   }
   return {
     kind,
@@ -148,6 +159,8 @@ export const toAutomationFormValues = (automation: Automation): AutomationFormVa
           ruleNames: row.ruleNames ?? [],
           ruleTags: row.tags ?? [],
           severities: row.severities ?? [],
+          alertSources: row.alertSources ?? [],
+          alertSourceMode: row.alertSourceMode ?? 'include',
         }
       : row?.kind === 'slack'
       ? {

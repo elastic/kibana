@@ -89,6 +89,8 @@ describe('automation request', () => {
             ruleNames: ['Disk full'],
             ruleTags: ['infra'],
             severities: ['critical', 'major'],
+            alertSources: ['classic', 'elastic.significant_events'],
+            alertSourceMode: 'exclude',
           },
         })
       ).toEqual({
@@ -103,6 +105,8 @@ describe('automation request', () => {
               severities: ['critical', 'major'],
               ruleNames: ['Disk full'],
               tags: ['infra'],
+              alertSources: ['classic', 'elastic.significant_events'],
+              alertSourceMode: 'exclude',
             },
           ],
         },
@@ -223,7 +227,11 @@ describe('automation request', () => {
       'round trips severity selection through editing and clears it: %j',
       (severities) => {
         const automation = buildAutomation({
-          trigger: { rows: [{ kind: 'alert', severities }] },
+          trigger: {
+            rows: [
+              { kind: 'alert', severities, alertSources: ['internal'], alertSourceMode: 'exclude' },
+            ],
+          },
         });
         const values = toAutomationFormValues(automation);
         const { trigger } = values;
@@ -233,13 +241,22 @@ describe('automation request', () => {
         expect(toAutomationRequestBody({ ...values, trigger }).trigger.rows[0]).toEqual({
           kind: 'alert',
           ...(severities?.length ? { severities } : {}),
+          alertSources: ['internal'],
+          alertSourceMode: 'exclude',
         });
         expect(
           toAutomationUpdateBody(
             { ...values, trigger: { ...trigger, ruleNamePattern: 'cpu', severities: [] } },
             automation
           ).trigger?.rows
-        ).toEqual([{ kind: 'alert', ruleNamePattern: 'cpu' }]);
+        ).toEqual([
+          {
+            kind: 'alert',
+            ruleNamePattern: 'cpu',
+            alertSources: ['internal'],
+            alertSourceMode: 'exclude',
+          },
+        ]);
       }
     );
 

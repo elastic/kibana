@@ -161,6 +161,16 @@ describe('createWorkerLogger', () => {
       expect(logger.getDroppedLogLineCount()).toBe(0);
     });
 
+    it('cuts the message even when the uptime renders longer on every sample', () => {
+      const uptimes = [1.5, 1.567, 1.56789, 1.5678901];
+      jest.spyOn(process, 'uptime').mockImplementation(() => uptimes.shift() ?? 1.5678901);
+      const logger = createWorkerLogger(config, 'watchdog');
+      logger.warn<TestMeta>('m'.repeat(10_000), { kibana: { a: 1 } });
+      expect(Buffer.byteLength(line())).toBeLessThanOrEqual(4095);
+      expect(JSON.parse(line()).message).toMatch(/^m+ \[truncated\]$/);
+      expect(logger.getDroppedLogLineCount()).toBe(0);
+    });
+
     it('keeps the log line within the limit when the data alone is too long', () => {
       createWorkerLogger(config, 'watchdog').warn<TestMeta>('msg', {
         kibana: { a: 1, event_loop_watchdog: { blockedMs: 1 } },

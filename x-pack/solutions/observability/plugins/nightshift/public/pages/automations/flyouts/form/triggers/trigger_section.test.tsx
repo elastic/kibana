@@ -20,6 +20,9 @@ const defaultCatalog = {
   ],
   isError: false,
 };
+jest.mock('../../../hooks/use_global_limit', () => ({
+  useGlobalLimit: () => ({ isReached: false }),
+}));
 const mockUseRuleCatalog = jest.fn();
 jest.mock('../../../../../data/rules/use_rule_catalog', () => ({
   useRuleCatalog: () => mockUseRuleCatalog(),
@@ -40,6 +43,8 @@ const legacyPatternTrigger: TriggerFormValues = {
   ruleNames: [],
   ruleTags: [],
   severities: [],
+  alertSources: [],
+  alertSourceMode: 'include',
 };
 
 const onTriggerChange = jest.fn();
@@ -183,7 +188,10 @@ describe('AutomationTriggerSection', () => {
   });
 
   it('selects and clears named severities without changing the rule filter', async () => {
-    render(<TriggerSection initialTrigger={legacyPatternTrigger} />);
+    render(
+      <TriggerSection initialTrigger={{ ...legacyPatternTrigger, alertSources: ['internal'] }} />
+    );
+    expect(screen.getByTestId('automationAlertSources')).toHaveTextContent('Universal rules');
     expect(screen.getByTestId('automationAlertSeverity')).toHaveTextContent('Any severity');
     expect(
       screen.getByText(
@@ -197,6 +205,7 @@ describe('AutomationTriggerSection', () => {
     expect(lastTrigger()).toMatchObject({
       ruleNamePattern: 'cpu',
       severities: ['major', 'high', 'warning'],
+      alertSources: ['internal'],
     });
     fireEvent.click(screen.getByRole('option', { name: 'High' }));
     fireEvent.click(screen.getByRole('option', { name: 'Major' }));

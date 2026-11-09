@@ -165,7 +165,7 @@ export const useSetUpNightshiftServiceAccount = (): UseMutationResult<
       queryClient.invalidateQueries({ queryKey: NIGHTSHIFT_ONBOARDING_QUERY_KEY });
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.nightshift.serviceAccount.enabledToastTitle', {
-          defaultMessage: 'Elastic Nightshift enabled',
+          defaultMessage: 'Elastic nightshift enabled',
         }),
       });
       warnAboutUnboundAutomations(status, notifications);
@@ -176,7 +176,7 @@ export const useSetUpNightshiftServiceAccount = (): UseMutationResult<
       queryClient.invalidateQueries({ queryKey: NIGHTSHIFT_ONBOARDING_QUERY_KEY });
       notifications.toasts.addError(toError(error, { isServerless }), {
         title: i18n.translate('xpack.nightshift.serviceAccount.setupErrorToastTitle', {
-          defaultMessage: 'Could not enable Elastic Nightshift',
+          defaultMessage: 'Could not enable Elastic nightshift',
         }),
       });
     },
