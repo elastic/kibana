@@ -101,9 +101,10 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   /**
    * Options for the legacy `EuiSuperDatePicker`. They apply whenever the legacy picker is rendered
    * (`enableDateRangePicker` is `false`, or the new picker feature flag is off) and are ignored by the
-   * new `DateRangePicker`. `minDate` limits the absolute dates the user can pick; it does not validate
-   * relative values or the recently used ranges. `commonlyUsedRanges` replaces the quick ranges of the
-   * `timepicker:quickRanges` advanced setting.
+   * new `DateRangePicker`. `minDate` disables the earlier days in the calendar and marks a range whose
+   * start is before it as invalid, so it cannot be applied. Quick ranges, recently used ranges and the
+   * time window buttons are applied directly and are not checked against it. `commonlyUsedRanges`
+   * replaces the quick ranges of the `timepicker:quickRanges` advanced setting.
    */
   legacyDatePickerProps?: LegacyDatePickerProps;
   filters?: Filter[];
