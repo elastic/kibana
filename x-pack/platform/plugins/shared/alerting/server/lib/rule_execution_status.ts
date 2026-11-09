@@ -7,12 +7,16 @@
 
 import type { Logger } from '@kbn/core/server';
 import { ActionsCompletion } from '@kbn/alerting-state-types';
-import { reasonForReportedError } from './reason_for_reported_error';
 import type { RuleResultService } from '../monitoring/rule_result_service';
 import type { RuleExecutionStatus, RawRuleExecutionStatus, RawRule, Rule } from '../types';
-import { RuleExecutionStatusValues, RuleExecutionStatusWarningReasons } from '../types';
+import {
+  RuleExecutionStatusValues,
+  RuleExecutionStatusWarningReasons,
+  RuleExecutionStatusErrorReasons,
+} from '../types';
 import { getReasonFromError } from './error_with_reason';
 import { getEsErrorMessage } from './errors';
+import { normalizeExecutionStatusErrorReason } from './normalize_rule_execution_reasons';
 import type { RuleExecutionStatuses } from '../../common';
 import { translations } from '../constants/translations';
 import type { RunRuleResult } from '../task_runner/types';
@@ -68,11 +72,9 @@ export function executionStatusFromState({
     ruleResultService.getLastRunResults();
   if (errorsFromLastRun.length > 0) {
     status = RuleExecutionStatusValues[2];
-    // The executor finished and reported these via addLastRunError. One status reason is
-    // stored; the first reported reason wins. User errors are configuration failures.
-    const [firstError] = errorsFromLastRun;
+    // These errors are reported by ruleResultService.addLastRunError, therefore they are landed in successful execution map
     error = {
-      reason: reasonForReportedError(firstError.userError, firstError.reason),
+      reason: RuleExecutionStatusErrorReasons.Unknown,
       message: errorsFromLastRun.map((lastRunError) => lastRunError.message).join(','),
     };
   }
@@ -164,7 +166,10 @@ export function ruleExecutionStatusFromRaw(
   }
 
   if (error) {
-    executionStatus.error = error;
+    executionStatus.error = {
+      ...error,
+      reason: normalizeExecutionStatusErrorReason(error.reason),
+    };
   }
 
   if (warning) {

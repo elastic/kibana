@@ -6,21 +6,15 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { RuleExecutionStatusErrorReasons } from '@kbn/alerting-types';
 import { executionStatusWarningReason, outcome } from './v3';
 import { rawRuleSchema as rawRuleSchemaV16 } from './v16';
 
-export const executionStatusErrorReason = schema.oneOf([
-  schema.literal(RuleExecutionStatusErrorReasons.Read),
-  schema.literal(RuleExecutionStatusErrorReasons.Decrypt),
-  schema.literal(RuleExecutionStatusErrorReasons.Execute),
-  schema.literal(RuleExecutionStatusErrorReasons.Configuration), // change
-  schema.literal(RuleExecutionStatusErrorReasons.Unknown),
-  schema.literal(RuleExecutionStatusErrorReasons.License),
-  schema.literal(RuleExecutionStatusErrorReasons.Timeout),
-  schema.literal(RuleExecutionStatusErrorReasons.Disabled),
-  schema.literal(RuleExecutionStatusErrorReasons.Validate),
-]);
+/**
+ * Error reasons are stored as plain strings so a newer Kibana can write a reason an older
+ * Kibana does not know yet without breaking forward compatibility during rollouts and
+ * rollbacks. Unknown values are normalized to a known reason when the rule is read.
+ */
+const reasonSchema = schema.string({ maxLength: 100 });
 
 export const rawRuleExecutionStatusSchema = schema.object({
   status: schema.oneOf([
@@ -38,7 +32,7 @@ export const rawRuleExecutionStatusSchema = schema.object({
   lastDuration: schema.maybe(schema.number()),
   error: schema.nullable(
     schema.object({
-      reason: executionStatusErrorReason, // change
+      reason: reasonSchema, // change
       message: schema.string(),
     })
   ),
@@ -60,9 +54,7 @@ export const rawRuleLastRunSchema = schema.object({
     ignored: schema.maybe(schema.nullable(schema.number())),
   }),
   outcomeMsg: schema.maybe(schema.nullable(schema.arrayOf(schema.string()))),
-  warning: schema.maybe(
-    schema.nullable(schema.oneOf([executionStatusErrorReason, executionStatusWarningReason])) // change
-  ),
+  warning: schema.maybe(schema.nullable(reasonSchema)), // change
 });
 
 export const rawRuleSchema = rawRuleSchemaV16.extends({

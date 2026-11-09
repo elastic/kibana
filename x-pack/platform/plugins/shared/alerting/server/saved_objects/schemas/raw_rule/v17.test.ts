@@ -39,11 +39,6 @@ describe('rawRuleSchemaV17', () => {
     params: {},
   };
 
-  const configurationError = {
-    reason: 'configuration',
-    message: 'Index pattern does not match any indices',
-  };
-
   it('keeps documents written by the previous model version valid', () => {
     const previous = rawRuleSchemaV16.validate({
       ...baseRule,
@@ -62,40 +57,79 @@ describe('rawRuleSchemaV17', () => {
     expect(() => rawRuleSchema.validate(previous)).not.toThrow();
   });
 
-  it('accepts the configuration error reason in executionStatus.error', () => {
-    const validated = rawRuleSchema.validate({
+  it('accepts an executionStatus.error.reason the previous model version rejects', () => {
+    const rule = {
       ...baseRule,
       executionStatus: {
         ...baseRule.executionStatus,
         status: 'error',
-        error: configurationError,
+        error: { reason: 'reason-from-a-newer-kibana', message: 'boom' },
       },
-    });
+    };
 
-    expect(validated.executionStatus.error).toEqual(configurationError);
+    expect(() => rawRuleSchemaV16.validate(rule)).toThrow();
+    expect(rawRuleSchema.validate(rule).executionStatus.error?.reason).toBe(
+      'reason-from-a-newer-kibana'
+    );
   });
 
-  it('accepts the configuration error reason in lastRun.warning', () => {
-    const validated = rawRuleSchema.validate({
+  it('accepts a lastRun.warning the previous model version rejects', () => {
+    const rule = {
       ...baseRule,
       lastRun: {
         outcome: 'failed',
         alertsCount: {},
-        warning: 'configuration',
+        warning: 'reason-from-a-newer-kibana',
       },
-    });
+    };
 
-    expect(validated.lastRun?.warning).toBe('configuration');
+    expect(() => rawRuleSchemaV16.validate(rule)).toThrow();
+    expect(rawRuleSchema.validate(rule).lastRun?.warning).toBe('reason-from-a-newer-kibana');
   });
 
-  it('rejects an unknown error reason', () => {
+  it('still accepts a null lastRun.warning', () => {
+    const validated = rawRuleSchema.validate({
+      ...baseRule,
+      lastRun: { outcome: 'succeeded', alertsCount: {}, warning: null },
+    });
+
+    expect(validated.lastRun?.warning).toBeNull();
+  });
+
+  it('rejects a non-string executionStatus.error.reason', () => {
     expect(() =>
       rawRuleSchema.validate({
         ...baseRule,
         executionStatus: {
           ...baseRule.executionStatus,
           status: 'error',
-          error: { reason: 'not-a-reason', message: 'boom' },
+          error: { reason: 42, message: 'boom' },
+        },
+      })
+    ).toThrow();
+  });
+
+  it('rejects an unreasonably long executionStatus.error.reason', () => {
+    expect(() =>
+      rawRuleSchema.validate({
+        ...baseRule,
+        executionStatus: {
+          ...baseRule.executionStatus,
+          status: 'error',
+          error: { reason: 'a'.repeat(101), message: 'boom' },
+        },
+      })
+    ).toThrow();
+  });
+
+  it('still validates executionStatus.warning.reason against the known values', () => {
+    expect(() =>
+      rawRuleSchema.validate({
+        ...baseRule,
+        executionStatus: {
+          ...baseRule.executionStatus,
+          status: 'warning',
+          warning: { reason: 'not-a-warning-reason', message: 'careful' },
         },
       })
     ).toThrow();

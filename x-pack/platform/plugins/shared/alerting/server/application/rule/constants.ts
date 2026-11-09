@@ -30,7 +30,6 @@ export const ruleExecutionStatusErrorReason = {
   READ: 'read',
   DECRYPT: 'decrypt',
   EXECUTE: 'execute',
-  CONFIGURATION: 'configuration',
   UNKNOWN: 'unknown',
   LICENSE: 'license',
   TIMEOUT: 'timeout',

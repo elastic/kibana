@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { reasonForReportedError } from '../lib/reason_for_reported_error';
-import type { RuleExecutionStatusErrorReasons } from '../types';
-import { type PublicLastRunSetters } from '../types';
+import type { PublicLastRunSetters } from '../types';
 
 export interface RuleResultServiceResults {
   errors: LastRunError[];
@@ -18,7 +16,6 @@ export interface RuleResultServiceResults {
 interface LastRunError {
   message: string;
   userError: boolean;
-  reason?: RuleExecutionStatusErrorReasons;
 }
 
 export class RuleResultService {
@@ -54,16 +51,8 @@ export class RuleResultService {
     };
   }
 
-  private addLastRunError(
-    message: string,
-    userError = false,
-    reason?: RuleExecutionStatusErrorReasons
-  ) {
-    this.errors.push({
-      message,
-      userError,
-      reason: reasonForReportedError(userError, reason),
-    });
+  private addLastRunError(message: string, userError = false) {
+    this.errors.push({ message, userError });
   }
 
   private addLastRunWarning(warning: string) {
