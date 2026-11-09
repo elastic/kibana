@@ -31,10 +31,12 @@ export class XYZTMSSource extends AbstractSource implements IRasterSource {
 
   readonly _descriptor: XYZTMSSourceDescriptor;
 
-  static createDescriptor({ urlTemplate }: XYZTMSSourceConfig): XYZTMSSourceDescriptor {
+  static createDescriptor({
+    url_template: urlTemplate,
+  }: XYZTMSSourceConfig): XYZTMSSourceDescriptor {
     return {
       type: SOURCE_TYPES.EMS_XYZ,
-      urlTemplate,
+      url_template: urlTemplate,
     };
   }
 
@@ -46,16 +48,16 @@ export class XYZTMSSource extends AbstractSource implements IRasterSource {
   async getImmutableProperties(): Promise<ImmutableSourceProperty[]> {
     return [
       { label: getDataSourceLabel(), value: sourceTitle },
-      { label: getUrlLabel(), value: this._descriptor.urlTemplate },
+      { label: getUrlLabel(), value: this._descriptor.url_template },
     ];
   }
 
   async getDisplayName(): Promise<string> {
-    return this._descriptor.urlTemplate;
+    return this._descriptor.url_template;
   }
 
   async getUrlTemplate(): Promise<string> {
-    return this._descriptor.urlTemplate;
+    return this._descriptor.url_template;
   }
   async hasLegendDetails(): Promise<boolean> {
     return false;

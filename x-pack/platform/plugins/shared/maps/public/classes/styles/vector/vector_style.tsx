@@ -203,7 +203,7 @@ export class VectorStyle implements IVectorStyle {
     return {
       type: LAYER_STYLE_TYPE.VECTOR,
       properties: { ...getDefaultStaticProperties(), ...properties },
-      isTimeAware,
+      is_time_aware: isTimeAware,
     } as NormalizedVectorStyleDescriptor;
   }
 
@@ -224,7 +224,7 @@ export class VectorStyle implements IVectorStyle {
     this._descriptor = descriptor
       ? {
           ...descriptor,
-          ...VectorStyle.createDescriptor(descriptor.properties, descriptor.isTimeAware),
+          ...VectorStyle.createDescriptor(descriptor.properties, descriptor.is_time_aware),
         }
       : VectorStyle.createDescriptor();
 
@@ -551,7 +551,7 @@ export class VectorStyle implements IVectorStyle {
   }
 
   isTimeAware() {
-    return this._descriptor.isTimeAware ?? true;
+    return this._descriptor.is_time_aware ?? true;
   }
 
   getPropertiesDescriptor(): NormalizedVectorStyleDescriptor['properties'] {
@@ -633,13 +633,13 @@ export class VectorStyle implements IVectorStyle {
 
   _getIconMeta(
     symbolId: string
-  ): { svg: string; label: string; iconSource: ICON_SOURCE } | undefined {
-    const icon = this._customIcons.find(({ symbolId: value }) => value === symbolId);
+  ): { svg: string; label: string; icon_source: ICON_SOURCE } | undefined {
+    const icon = this._customIcons.find(({ symbol_id: value }) => value === symbolId);
     if (icon) {
-      return { ...icon, iconSource: ICON_SOURCE.CUSTOM };
+      return { ...icon, icon_source: ICON_SOURCE.CUSTOM };
     }
     const symbol = getMakiSymbol(symbolId);
-    return symbol ? { ...symbol, iconSource: ICON_SOURCE.MAKI } : undefined;
+    return symbol ? { ...symbol, icon_source: ICON_SOURCE.MAKI } : undefined;
   }
 
   getPrimaryColor() {
@@ -698,7 +698,7 @@ export class VectorStyle implements IVectorStyle {
 
   isUsingCustomIcon(symbolId: string) {
     if (this._icon.isDynamic()) {
-      const { customIconStops } = this._icon.getOptions() as IconDynamicOptions;
+      const { custom_icon_stops: customIconStops } = this._icon.getOptions() as IconDynamicOptions;
       return customIconStops ? customIconStops.some(({ icon }) => icon === symbolId) : false;
     }
     const { value } = this._icon.getOptions() as IconStaticOptions;
@@ -1012,19 +1012,19 @@ export class VectorStyle implements IVectorStyle {
       let label;
       let iconSource;
       if (meta) {
-        ({ svg, label, iconSource } = meta);
+        ({ svg, label, icon_source: iconSource } = meta);
       }
       return new StaticIconProperty(
-        { value, svg, label, iconSource } as IconStaticOptions,
+        { value, svg, label, icon_source: iconSource } as IconStaticOptions,
         VECTOR_STYLES.ICON
       );
     } else if (descriptor.type === DynamicStyleProperty.type) {
       const options = { ...descriptor.options } as IconDynamicOptions;
-      if (options.customIconStops) {
-        options.customIconStops.forEach((iconStop) => {
+      if (options.custom_icon_stops) {
+        options.custom_icon_stops.forEach((iconStop) => {
           const meta = this._getIconMeta(iconStop.icon);
           if (meta) {
-            (iconStop.iconSource as Writable<IconStop['iconSource']>) = meta.iconSource;
+            (iconStop.icon_source as Writable<IconStop['icon_source']>) = meta.icon_source;
           }
         });
       }

@@ -37,13 +37,13 @@ describe('SavedMap.whenReady adhoc data views', () => {
   });
 
   test('should call dataViewService.create for each adhoc data view spec', async () => {
-    const spec1 = { id: 'adhoc-1', title: 'logstash-*', timeFieldName: '@timestamp' };
+    const spec1 = { id: 'adhoc-1', title: 'logstash-*', time_field_name: '@timestamp' };
     const spec2 = { id: 'adhoc-2', title: 'metrics-*' };
 
     const mapEmbeddableState: MapByValueState = {
       attributes: {
         title: 'test map',
-        adHocDataViews: [spec1, spec2],
+        ad_hoc_data_views: [spec1, spec2],
       } as MapByValueState['attributes'],
     };
 

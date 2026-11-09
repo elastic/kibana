@@ -85,9 +85,9 @@ export function OrdinalDataMappingPopover<DynamicOptions>(props: Props<DynamicOp
   function onIsEnabledChange(event: EuiSwitchEvent) {
     // @ts-expect-error
     props.onChange({
-      fieldMetaOptions: {
+      field_meta_options: {
         ...props.fieldMetaOptions,
-        isEnabled: event.target.checked,
+        is_enabled: event.target.checked,
       },
     });
   }
@@ -95,7 +95,7 @@ export function OrdinalDataMappingPopover<DynamicOptions>(props: Props<DynamicOp
   function onSigmaChange(event: _SingleRangeChangeEvent) {
     // @ts-expect-error
     props.onChange({
-      fieldMetaOptions: {
+      field_meta_options: {
         ...props.fieldMetaOptions,
         sigma: parseInt(event.currentTarget.value, 10),
       },
@@ -106,24 +106,24 @@ export function OrdinalDataMappingPopover<DynamicOptions>(props: Props<DynamicOp
     const updatedOptions =
       value === DATA_MAPPING_FUNCTION.PERCENTILES
         ? {
-            dataMappingFunction: value,
-            fieldMetaOptions: {
+            data_mapping_function: value,
+            field_meta_options: {
               ...props.fieldMetaOptions,
-              isEnabled: true,
+              is_enabled: true,
               percentiles: props.fieldMetaOptions.percentiles
                 ? props.fieldMetaOptions.percentiles
                 : DEFAULT_PERCENTILES,
             },
           }
         : {
-            dataMappingFunction: value,
+            data_mapping_function: value,
           };
     // @ts-expect-error
     props.onChange(updatedOptions);
   }
 
   function renderEasingForm() {
-    const sigmaInput = props.fieldMetaOptions.isEnabled ? (
+    const sigmaInput = props.fieldMetaOptions.is_enabled ? (
       <EuiFormRow
         label={
           <span>
@@ -163,7 +163,7 @@ export function OrdinalDataMappingPopover<DynamicOptions>(props: Props<DynamicOp
               label={i18n.translate('xpack.maps.styles.ordinalDataMapping.isEnabledSwitchLabel', {
                 defaultMessage: 'Get min and max from data set',
               })}
-              checked={props.fieldMetaOptions.isEnabled}
+              checked={props.fieldMetaOptions.is_enabled}
               onChange={onIsEnabledChange}
               disabled={!props.supportsFieldMetaFromLocalData}
               compressed
@@ -200,7 +200,7 @@ export function OrdinalDataMappingPopover<DynamicOptions>(props: Props<DynamicOp
     function onPercentilesChange(percentiles: number[]) {
       // @ts-expect-error
       props.onChange({
-        fieldMetaOptions: {
+        field_meta_options: {
           ...props.fieldMetaOptions,
           percentiles: _.uniq(percentiles.sort()),
         },

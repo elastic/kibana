@@ -74,7 +74,7 @@ export function ChoroplethChart({
       : '',
     joins: [
       {
-        leftField: emsField,
+        left_field: emsField,
         right: {
           id: args.valueAccessor,
           type: SOURCE_TYPES.TABLE_SOURCE,
@@ -96,10 +96,10 @@ export function ChoroplethChart({
         } as { id: string; type: string; [key: string]: unknown },
       },
     ],
-    sourceDescriptor: {
+    source_descriptor: {
       type: SOURCE_TYPES.EMS_FILE,
       id: emsLayerId,
-      tooltipProperties: [emsField],
+      tooltip_properties: [emsField],
     },
     style: {
       type: 'VECTOR',
@@ -109,14 +109,14 @@ export function ChoroplethChart({
           type: STYLE_TYPE.DYNAMIC,
           options: {
             color: 'Blue to Red',
-            colorCategory: 'palette_0',
-            fieldMetaOptions: { isEnabled: true, sigma: 3 },
+            color_category: 'palette_0',
+            field_meta_options: { is_enabled: true, sigma: 3 },
             type: COLOR_MAP_TYPE.ORDINAL,
             field: {
               name: args.valueAccessor,
               origin: FIELD_ORIGIN.JOIN,
             },
-            useCustomColorRamp: false,
+            use_custom_color_ramp: false,
           },
         },
         [VECTOR_STYLES.LINE_COLOR]: {
@@ -127,7 +127,7 @@ export function ChoroplethChart({
         },
         [VECTOR_STYLES.LINE_WIDTH]: { type: STYLE_TYPE.STATIC, options: { size: 1 } },
       },
-      isTimeAware: false,
+      is_time_aware: false,
     },
     type: LAYER_TYPE.GEOJSON_VECTOR,
   } as LayerDescriptor;

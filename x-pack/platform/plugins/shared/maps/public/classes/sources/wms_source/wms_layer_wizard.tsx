@@ -31,7 +31,7 @@ export const wmsLayerWizardConfig: LayerWizard = {
       }
 
       const layerDescriptor = RasterTileLayer.createDescriptor({
-        sourceDescriptor: WMSSource.createDescriptor(sourceConfig as Partial<WMSSourceDescriptor>),
+        source_descriptor: WMSSource.createDescriptor(sourceConfig as Partial<WMSSourceDescriptor>),
       });
       previewLayers([layerDescriptor]);
     };

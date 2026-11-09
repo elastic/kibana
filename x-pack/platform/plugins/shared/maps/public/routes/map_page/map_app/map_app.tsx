@@ -354,8 +354,8 @@ export class MapApp extends React.Component<Props, State> {
       return this._initialTimeFromUrl;
     }
 
-    return !this.props.savedMap.hasSaveAndReturnConfig() && mapState?.timeFilters
-      ? mapState.timeFilters
+    return !this.props.savedMap.hasSaveAndReturnConfig() && mapState?.time_filters
+      ? mapState.time_filters
       : getTimeFilter().getTime();
   }
 

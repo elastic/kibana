@@ -250,7 +250,7 @@ export class DynamicStyleProperty<T extends object>
 
   getStyleMetaHash(): string {
     const fieldMetaOptions = this.getFieldMetaOptions();
-    const parts: string[] = [fieldMetaOptions.isEnabled.toString()];
+    const parts: string[] = [fieldMetaOptions.is_enabled.toString()];
     if (this.isOrdinal()) {
       const dataMappingFunction = this.getDataMappingFunction();
       parts.push(dataMappingFunction);
@@ -276,7 +276,7 @@ export class DynamicStyleProperty<T extends object>
 
   isFieldMetaEnabled() {
     const fieldMetaOptions = this.getFieldMetaOptions();
-    return this.supportsFieldMeta() && _.get(fieldMetaOptions, 'isEnabled', true);
+    return this.supportsFieldMeta() && _.get(fieldMetaOptions, 'is_enabled', true);
   }
 
   supportsFieldMeta() {
@@ -321,7 +321,7 @@ export class DynamicStyleProperty<T extends object>
   }
 
   getFieldMetaOptions(): FieldMetaOptions {
-    const fieldMetaOptions = _.get(this.getOptions(), 'fieldMetaOptions', { isEnabled: true });
+    const fieldMetaOptions = _.get(this.getOptions(), 'field_meta_options', { is_enabled: true });
 
     // In 8.0, UI changed to not allow setting isEnabled to false when fieldMeta from local not supported
     // Saved objects created prior to 8.0 may have a configuration where
@@ -333,14 +333,15 @@ export class DynamicStyleProperty<T extends object>
     return this._field && !this._field.supportsFieldMetaFromLocalData()
       ? {
           ...fieldMetaOptions,
-          isEnabled: true,
+          is_enabled: true,
         }
       : fieldMetaOptions;
   }
 
   getDataMappingFunction() {
-    return 'dataMappingFunction' in this._options
-      ? (this._options as T & { dataMappingFunction: DATA_MAPPING_FUNCTION }).dataMappingFunction
+    return 'data_mapping_function' in this._options
+      ? (this._options as T & { data_mapping_function: DATA_MAPPING_FUNCTION })
+          .data_mapping_function
       : DATA_MAPPING_FUNCTION.INTERPOLATE;
   }
 

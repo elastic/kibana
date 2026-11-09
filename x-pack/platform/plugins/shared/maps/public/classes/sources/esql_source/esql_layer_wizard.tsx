@@ -32,7 +32,10 @@ export const esqlLayerWizardConfig: LayerWizard = {
       }
 
       const sourceDescriptor = ESQLSource.createDescriptor(sourceConfig);
-      const layerDescriptor = GeoJsonVectorLayer.createDescriptor({ sourceDescriptor }, mapColors);
+      const layerDescriptor = GeoJsonVectorLayer.createDescriptor(
+        { source_descriptor: sourceDescriptor },
+        mapColors
+      );
       previewLayers([layerDescriptor]);
     };
 

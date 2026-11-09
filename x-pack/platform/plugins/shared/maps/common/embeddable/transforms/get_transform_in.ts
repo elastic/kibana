@@ -11,6 +11,7 @@ import type { MapByReferenceState, MapByValueState, MapEmbeddableState } from '.
 import type { StoredMapEmbeddableState } from './types';
 import { MAP_SAVED_OBJECT_TYPE } from '../../constants';
 import { transformMapAttributesIn } from '../../content_management/transform_map_attributes_in';
+import { convertToCamelCase } from '../../content_management/convert_keys';
 
 export const MAP_SAVED_OBJECT_REF_NAME = 'savedObjectRef';
 
@@ -19,7 +20,15 @@ export function getTransformIn(transformDrilldownsIn: DrilldownTransforms['trans
     state: StoredMapEmbeddableState;
     references: Reference[];
   } {
-    const { state: storedState, references: drilldownReferences } = transformDrilldownsIn(state);
+    const { state: transformedState, references: drilldownReferences } =
+      transformDrilldownsIn(state);
+    // Stored map settings are camelCase, API map settings are snake_case
+    const storedState = (transformedState as MapEmbeddableState).mapSettings
+      ? {
+          ...transformedState,
+          mapSettings: convertToCamelCase((transformedState as MapEmbeddableState).mapSettings),
+        }
+      : transformedState;
 
     // by ref
     if ((storedState as MapByReferenceState).savedObjectId) {

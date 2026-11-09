@@ -23,7 +23,7 @@ jest.mock('../../../kibana_services', () => {
         type: 'date',
       },
     ],
-    timeFieldName: '@timestamp',
+    time_field_name: '@timestamp',
     getIndexPattern: () => {
       return DEFAULT_DATA_VIEW_INDEX_PATTERN;
     },
@@ -68,12 +68,12 @@ describe('CreateSourceEditor', () => {
     render(<CreateSourceEditor onSourceConfigChange={onSourceConfigChange} />);
     await waitFor(() =>
       expect(onSourceConfigChange).toHaveBeenCalledWith({
-        dateField: '@timestamp',
+        date_field: '@timestamp',
         esql: 'from logs | keep location | limit 10000',
-        geoField: 'location',
-        narrowByGlobalSearch: true,
-        narrowByGlobalTime: true,
-        narrowByMapBounds: true,
+        geo_field: 'location',
+        narrow_by_global_search: true,
+        narrow_by_global_time: true,
+        narrow_by_map_bounds: true,
       })
     );
   });
@@ -88,12 +88,12 @@ describe('CreateSourceEditor', () => {
     );
     await waitFor(() =>
       expect(onSourceConfigChange).toHaveBeenCalledWith({
-        dateField: undefined,
+        date_field: undefined,
         esql: 'from world_countries | keep geometry | limit 10000',
-        geoField: 'geometry',
-        narrowByGlobalSearch: true,
-        narrowByGlobalTime: false,
-        narrowByMapBounds: true,
+        geo_field: 'geometry',
+        narrow_by_global_search: true,
+        narrow_by_global_time: false,
+        narrow_by_map_bounds: true,
       })
     );
   });

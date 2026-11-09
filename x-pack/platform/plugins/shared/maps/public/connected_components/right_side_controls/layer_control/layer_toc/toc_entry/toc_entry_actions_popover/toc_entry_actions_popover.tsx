@@ -97,7 +97,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
     }
 
     if (
-      (source as ESSearchSource).getSyncMeta().scalingType === SCALING_TYPES.CLUSTERS ||
+      (source as ESSearchSource).getSyncMeta().scaling_type === SCALING_TYPES.CLUSTERS ||
       this.props.layer.isPreviewLayer() ||
       !this.props.layer.isVisible() ||
       this.props.layer.hasJoins()

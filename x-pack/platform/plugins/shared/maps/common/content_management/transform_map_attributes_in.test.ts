@@ -26,9 +26,9 @@ describe('transformMapIn', () => {
         title: 'my map',
         layers: [
           {
-            sourceDescriptor: {
+            source_descriptor: {
               type: SOURCE_TYPES.ES_GEO_GRID,
-              indexPatternId: 'c698b940-e149-11e8-a35a-370a8516603a',
+              index_pattern_id: 'c698b940-e149-11e8-a35a-370a8516603a',
             },
           } as any,
         ],
@@ -54,7 +54,7 @@ describe('transformMapIn', () => {
     expect(
       transformMapAttributesIn({
         title: 'my map',
-        adHocDataViews: [],
+        ad_hoc_data_views: [],
         center: {
           lat: 60,
           lon: 120,
@@ -64,12 +64,12 @@ describe('transformMapIn', () => {
           query: 'find me',
           language: 'kql',
         },
-        refreshInterval: {
+        refresh_interval: {
           pause: false,
           value: 500,
         },
         settings: {},
-        timeFilters: {
+        time_filters: {
           from: 'now',
           to: 'now-15m',
         },
@@ -90,8 +90,8 @@ describe('transformMapIn', () => {
     expect(
       transformMapAttributesIn({
         title: 'my map',
-        isLayerTOCOpen: false,
-        openTOCDetails: ['layer1'],
+        is_layer_toc_open: false,
+        open_toc_details: ['layer1'],
       })
     ).toMatchInlineSnapshot(`
       Object {

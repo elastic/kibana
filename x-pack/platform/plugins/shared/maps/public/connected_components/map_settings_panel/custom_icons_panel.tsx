@@ -54,7 +54,7 @@ export class CustomIconsPanel extends Component<Props, State> {
       return null;
     }
     if (this.state.selectedIcon) {
-      const { symbolId, label, svg, cutoff, radius } = this.state.selectedIcon;
+      const { symbol_id: symbolId, label, svg, cutoff, radius } = this.state.selectedIcon;
       return (
         <CustomIconModal
           title={i18n.translate('xpack.maps.mapSettingsPanel.editCustomIcon', {
@@ -89,14 +89,14 @@ export class CustomIconsPanel extends Component<Props, State> {
   };
 
   private _handleSave = (icon: CustomIcon) => {
-    const { symbolId, label, svg, cutoff, radius } = icon;
+    const { symbol_id: symbolId, label, svg, cutoff, radius } = icon;
 
     const icons = [
       ...this.props.customIcons.filter((i) => {
-        return i.symbolId !== symbolId;
+        return i.symbol_id !== symbolId;
       }),
       {
-        symbolId,
+        symbol_id: symbolId,
         svg,
         label,
         cutoff,
@@ -149,7 +149,7 @@ export class CustomIconsPanel extends Component<Props, State> {
     }
 
     const customIconsList = this.props.customIcons.map((icon) => {
-      const { symbolId, label, svg } = icon;
+      const { symbol_id: symbolId, label, svg } = icon;
       return {
         label,
         key: symbolId,

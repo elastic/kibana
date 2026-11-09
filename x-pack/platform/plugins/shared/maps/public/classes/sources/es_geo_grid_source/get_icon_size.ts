@@ -10,27 +10,27 @@ import { GRID_RESOLUTION } from '../../../../common/constants';
 export function getIconSize(resolution: GRID_RESOLUTION) {
   if (resolution === GRID_RESOLUTION.COARSE) {
     return {
-      minSize: 16,
-      maxSize: 48,
+      min_size: 16,
+      max_size: 48,
     };
   }
 
   if (resolution === GRID_RESOLUTION.FINE) {
     return {
-      minSize: 8,
-      maxSize: 24,
+      min_size: 8,
+      max_size: 24,
     };
   }
 
   if (resolution === GRID_RESOLUTION.MOST_FINE) {
     return {
-      minSize: 4,
-      maxSize: 12,
+      min_size: 4,
+      max_size: 12,
     };
   }
 
   return {
-    minSize: 2,
-    maxSize: 6,
+    min_size: 2,
+    max_size: 6,
   };
 }

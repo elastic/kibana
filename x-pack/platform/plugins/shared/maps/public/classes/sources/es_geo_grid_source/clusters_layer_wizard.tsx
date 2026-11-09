@@ -107,13 +107,13 @@ export const clustersLayerWizardConfig: LayerWizard = {
       });
 
       const layerDescriptor =
-        sourceDescriptor.requestType === RENDER_AS.HEX
+        sourceDescriptor.request_type === RENDER_AS.HEX
           ? MvtVectorLayer.createDescriptor({
-              sourceDescriptor,
+              source_descriptor: sourceDescriptor,
               style,
             })
           : GeoJsonVectorLayer.createDescriptor({
-              sourceDescriptor,
+              source_descriptor: sourceDescriptor,
               style,
             });
       previewLayers([layerDescriptor]);

@@ -166,23 +166,23 @@ export function createLayerDescriptor({
       label,
       joins: [
         {
-          leftField: 'iso2',
+          left_field: 'iso2',
           right: {
             type: SOURCE_TYPES.ES_TERM_SOURCE,
             id: joinId,
-            indexPatternId: apmDataViewId,
+            index_pattern_id: apmDataViewId,
             term: 'client.geo.country_iso_code',
             metrics: [metricsDescriptor],
-            whereQuery: apmSourceQuery,
-            applyGlobalQuery: true,
-            applyGlobalTime: true,
-            applyForceRefresh: true,
+            where_query: apmSourceQuery,
+            apply_global_query: true,
+            apply_global_time: true,
+            apply_force_refresh: true,
           },
         },
       ],
-      sourceDescriptor: EMSFileSource.createDescriptor({
+      source_descriptor: EMSFileSource.createDescriptor({
         id: emsWorldLayerId,
-        tooltipProperties: ['name', 'iso2'],
+        tooltip_properties: ['name', 'iso2'],
       }),
       style: VectorStyle.createDescriptor({
         [VECTOR_STYLES.FILL_COLOR]: createDynamicFillColorDescriptor(layer, {
@@ -200,10 +200,10 @@ export function createLayerDescriptor({
   }
 
   const geoGridSourceDescriptor = ESGeoGridSource.createDescriptor({
-    indexPatternId: apmDataViewId,
-    geoField: 'client.geo.location',
+    index_pattern_id: apmDataViewId,
+    geo_field: 'client.geo.location',
     metrics: [metricsDescriptor],
-    requestType: getGeoGridRequestType(display),
+    request_type: getGeoGridRequestType(display),
     resolution: GRID_RESOLUTION.MOST_FINE,
   });
 
@@ -211,7 +211,7 @@ export function createLayerDescriptor({
     return HeatmapLayer.createDescriptor({
       label,
       query: apmSourceQuery,
-      sourceDescriptor: geoGridSourceDescriptor,
+      source_descriptor: geoGridSourceDescriptor,
     });
   }
 
@@ -244,7 +244,7 @@ export function createLayerDescriptor({
   return GeoJsonVectorLayer.createDescriptor({
     label,
     query: apmSourceQuery,
-    sourceDescriptor: geoGridSourceDescriptor,
+    source_descriptor: geoGridSourceDescriptor,
     style: VectorStyle.createDescriptor(styleProperties),
   });
 }

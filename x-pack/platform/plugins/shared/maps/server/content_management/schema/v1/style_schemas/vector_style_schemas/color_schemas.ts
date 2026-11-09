@@ -32,9 +32,9 @@ export const colorDynamicOptions = z
   .object({
     // ordinal color properties
     color: z.string().optional(),
-    customColorRamp: z.array(ordinalColorStop).optional(),
-    useCustomColorRamp: z.boolean().optional(),
-    dataMappingFunction: z
+    custom_color_ramp: z.array(ordinalColorStop).optional(),
+    use_custom_color_ramp: z.boolean().optional(),
+    data_mapping_function: z
       .union([
         z.literal(DATA_MAPPING_FUNCTION.INTERPOLATE),
         z.literal(DATA_MAPPING_FUNCTION.PERCENTILES),
@@ -43,13 +43,13 @@ export const colorDynamicOptions = z
     invert: z.boolean().optional(),
 
     // category color properties
-    colorCategory: z.string().optional(),
-    customColorPalette: z.array(categoryColorStop).optional(),
-    useCustomColorPalette: z.boolean().optional(),
-    otherCategoryColor: z.string().optional(),
+    color_category: z.string().optional(),
+    custom_color_palette: z.array(categoryColorStop).optional(),
+    use_custom_color_palette: z.boolean().optional(),
+    other_category_color: z.string().optional(),
 
     field: styleFieldSchema.optional(),
-    fieldMetaOptions: fieldMetaOptionsSchema,
+    field_meta_options: fieldMetaOptionsSchema,
 
     type: z
       .union([z.literal(COLOR_MAP_TYPE.CATEGORICAL), z.literal(COLOR_MAP_TYPE.ORDINAL)])

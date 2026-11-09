@@ -6,12 +6,11 @@
  */
 
 import _ from 'lodash';
-import type { Writable } from '@kbn/utility-types';
 import { SOURCE_TYPES, SCALING_TYPES } from '../constants';
-import type { LayerDescriptor, ESSearchSourceDescriptor } from '../descriptor_types';
+import type { StoredLayer } from './stored_layer';
 import type { StoredMapAttributes } from '../../server';
 
-function isEsDocumentSource(layerDescriptor: LayerDescriptor) {
+function isEsDocumentSource(layerDescriptor: StoredLayer) {
   const sourceType = _.get(layerDescriptor, 'sourceDescriptor.type');
   return sourceType === SOURCE_TYPES.ES_SEARCH;
 }
@@ -25,23 +24,19 @@ export function migrateUseTopHitsToScalingType({
     return attributes;
   }
 
-  let layerList: LayerDescriptor[] = [];
+  let layerList: StoredLayer[] = [];
   try {
     layerList = JSON.parse(attributes.layerListJSON);
   } catch (e) {
     throw new Error('Unable to parse attribute layerListJSON');
   }
 
-  layerList.forEach((layerDescriptor: LayerDescriptor) => {
+  layerList.forEach((layerDescriptor) => {
     if (isEsDocumentSource(layerDescriptor)) {
-      const sourceDescriptor =
-        layerDescriptor.sourceDescriptor as Writable<ESSearchSourceDescriptor>;
+      const sourceDescriptor = layerDescriptor.sourceDescriptor!;
       sourceDescriptor.scalingType = _.get(layerDescriptor, 'sourceDescriptor.useTopHits', false)
         ? SCALING_TYPES.TOP_HITS
         : SCALING_TYPES.LIMIT;
-      // @ts-expect-error
-      // useTopHits no longer in type definition but that does not mean its not in live data
-      // hence the entire point of this method
       delete sourceDescriptor.useTopHits;
     }
   });

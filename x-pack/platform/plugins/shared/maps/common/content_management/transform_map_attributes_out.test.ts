@@ -49,8 +49,8 @@ describe('transformMapOut', () => {
       Object {
         "layers": Array [
           Object {
-            "sourceDescriptor": Object {
-              "indexPatternId": "c698b940-e149-11e8-a35a-370a8516603a",
+            "source_descriptor": Object {
+              "index_pattern_id": "c698b940-e149-11e8-a35a-370a8516603a",
               "type": "ES_GEO_GRID",
             },
           },
@@ -76,7 +76,7 @@ describe('transformMapOut', () => {
           "lat": 60,
           "lon": 120,
         },
-        "refreshInterval": Object {
+        "refresh_interval": Object {
           "pause": false,
           "value": 500,
         },
@@ -102,7 +102,7 @@ describe('transformMapOut', () => {
       )
     ).toMatchInlineSnapshot(`
       Object {
-        "timeFilters": Object {
+        "time_filters": Object {
           "from": "now-17m",
           "to": "now",
         },
@@ -122,8 +122,8 @@ describe('transformMapOut', () => {
       )
     ).toMatchInlineSnapshot(`
       Object {
-        "isLayerTOCOpen": false,
-        "openTOCDetails": Array [
+        "is_layer_toc_open": false,
+        "open_toc_details": Array [
           "layer1",
         ],
         "title": "my map",

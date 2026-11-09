@@ -22,7 +22,7 @@ import type { JoinSourceDescriptor } from '.';
 export type { Attribution } from '../../server';
 
 export type JoinDescriptor = {
-  leftField?: string;
+  left_field?: string;
   right: Partial<JoinSourceDescriptor>;
   error?: string;
 };
@@ -85,7 +85,7 @@ export type LayerDescriptor =
   | HeatmapLayerDescriptor
   | EMSVectorTileLayerDescriptor
   | (LayerGroupDescriptor & {
-      sourceDescriptor?: { type: string };
+      source_descriptor?: { type: string };
       style?: { type: string };
     })
   | (RasterLayerDescriptor & {

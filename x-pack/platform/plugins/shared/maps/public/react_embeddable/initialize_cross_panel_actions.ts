@@ -75,8 +75,8 @@ export function initializeCrossPanelActions({
   function mapSyncHandler(lat: number, lon: number, zoom: number) {
     // auto fit to bounds is not compatable with map synchronization
     // auto fit to bounds may cause map location to never stablize and bound back and forth between bounds on different maps
-    if (getMapSettings(savedMap.getStore().getState()).autoFitToDataBounds) {
-      savedMap.getStore().dispatch(setMapSettings({ autoFitToDataBounds: false }));
+    if (getMapSettings(savedMap.getStore().getState()).auto_fit_to_data_bounds) {
+      savedMap.getStore().dispatch(setMapSettings({ auto_fit_to_data_bounds: false }));
     }
     savedMap.getStore().dispatch<any>(jumpTo({ lat, lon, zoom }));
   }
@@ -157,7 +157,7 @@ export function initializeCrossPanelActions({
         gotoSynchronizedLocation();
       } else if (!isMovementSynchronized && savedMap.getAutoFitToBounds()) {
         // restore autoFitToBounds when isMovementSynchronized disabled
-        savedMap.getStore().dispatch(setMapSettings({ autoFitToDataBounds: true }));
+        savedMap.getStore().dispatch(setMapSettings({ auto_fit_to_data_bounds: true }));
       }
     },
     getIsFilterByMapExtent,

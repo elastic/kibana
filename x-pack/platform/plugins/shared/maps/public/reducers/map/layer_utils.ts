@@ -82,8 +82,8 @@ export function updateLayerSourceDescriptorProp(
   const layerIdx = getLayerIndex(layerList, layerId);
   const updatedLayer = {
     ...layerList[layerIdx],
-    sourceDescriptor: {
-      ...layerList[layerIdx].sourceDescriptor,
+    source_descriptor: {
+      ...layerList[layerIdx].source_descriptor,
       [propName]: value,
     },
   };
