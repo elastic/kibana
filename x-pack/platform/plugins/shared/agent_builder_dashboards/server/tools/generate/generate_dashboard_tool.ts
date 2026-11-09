@@ -19,8 +19,8 @@ import {
 } from '@kbn/agent-builder-dashboards-common';
 
 import {
-  arrangeDashboardLayout,
   executeDashboardUpsert,
+  createDashboardLayout,
   getErrorMessage,
   hasValidNewDashboardMetadata,
   upsertDashboardSchema,
@@ -28,7 +28,13 @@ import {
 } from '@kbn/dashboard-agent-authoring';
 import {
   dashboardTools,
+  DASHBOARD_BUILD_ENDED_UI_EVENT,
+  DASHBOARD_BUILD_STARTED_UI_EVENT,
+  DASHBOARD_PANEL_RESOLVED_UI_EVENT,
   DASHBOARD_UPDATED_UI_EVENT,
+  type DashboardBuildEndedUiEventData,
+  type DashboardBuildStartedUiEventData,
+  type DashboardPanelResolvedUiEventData,
   type DashboardUpdatedUiEventData,
 } from '../../../common';
 import { retrieveLatestVersion } from './attachment_state';
@@ -169,6 +175,7 @@ Changes are applied one by one: failed ones are listed in \`failures\` with the 
       { dashboardId: previousAttachmentId, layout, ...upsert },
       { logger, attachments, events, esClient, modelProvider }
     ) => {
+      let buildStartedFor: string | undefined;
       try {
         const latestVersion = retrieveLatestVersion(attachments, previousAttachmentId);
         const isNewDashboard = !latestVersion;
@@ -179,6 +186,12 @@ Changes are applied one by one: failed ones are listed in \`failures\` with the 
         }
 
         const dashboardAttachmentId = previousAttachmentId ?? uuidv4();
+        const dashboardLayout = createDashboardLayout({
+          originalPanels: latestVersion?.data.panels ?? [],
+          instructions: layout,
+          arrangeLayout: createLayoutArranger({ modelProvider }),
+          logger,
+        });
         const {
           dashboardData: validatedDashboardData,
           created,
@@ -204,17 +217,41 @@ Changes are applied one by one: failed ones are listed in \`failures\` with the 
             esClient: esClient.asCurrentUser,
           }),
           validator: await getDashboardValidator(),
+          onPlanned: (predictedDashboardData) => {
+            dashboardLayout.start(predictedDashboardData);
+          },
+          onNewPanelsPlanned: (newPanels, title) => {
+            if (newPanels.length === 0) return;
+            buildStartedFor = dashboardAttachmentId;
+            events.sendUiEvent<
+              typeof DASHBOARD_BUILD_STARTED_UI_EVENT,
+              DashboardBuildStartedUiEventData
+            >(DASHBOARD_BUILD_STARTED_UI_EVENT, {
+              attachmentId: dashboardAttachmentId,
+              title,
+              panels: newPanels.map(({ id, label, chartType }) => ({
+                id,
+                label: label?.slice(0, 80) ?? '',
+                chartType,
+              })),
+            });
+          },
+          onPanelResolved: (panelId, attempt) => {
+            if (!buildStartedFor) return;
+            events.sendUiEvent<
+              typeof DASHBOARD_PANEL_RESOLVED_UI_EVENT,
+              DashboardPanelResolvedUiEventData
+            >(DASHBOARD_PANEL_RESOLVED_UI_EVENT, {
+              attachmentId: dashboardAttachmentId,
+              panelId,
+              panel: attempt.type === 'success' ? attempt.panelContent : undefined,
+            });
+          },
         });
 
         // The arranger checks its own output and writes only grids, so the result is not validated again.
         const { dashboardData: generatedDashboardData, failure: layoutFailure } =
-          await arrangeDashboardLayout({
-            originalPanels: latestVersion?.data.panels ?? [],
-            dashboardData: validatedDashboardData,
-            instructions: layout,
-            arrangeLayout: createLayoutArranger({ modelProvider }),
-            logger,
-          });
+          await dashboardLayout.finish(validatedDashboardData);
         if (layoutFailure) {
           failures.push(layoutFailure);
         }
@@ -332,6 +369,13 @@ Changes are applied one by one: failed ones are listed in \`failures\` with the 
             },
           ],
         };
+      } finally {
+        if (buildStartedFor) {
+          events.sendUiEvent<typeof DASHBOARD_BUILD_ENDED_UI_EVENT, DashboardBuildEndedUiEventData>(
+            DASHBOARD_BUILD_ENDED_UI_EVENT,
+            { attachmentId: buildStartedFor }
+          );
+        }
       }
     },
   };

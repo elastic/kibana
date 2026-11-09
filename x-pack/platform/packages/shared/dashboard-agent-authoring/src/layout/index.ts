@@ -5,6 +5,7 @@
  * 2.0.
  */
 
-export { arrangeDashboardLayout } from './arrange_layout';
+export { createDashboardLayout } from './early_layout';
+export type { DashboardLayout } from './early_layout';
 export { buildLayoutPrompt, parseLayoutAnswer } from './layout_prompt';
 export type { ArrangeDashboardLayout, LayoutArrangement, LayoutRequest } from './types';

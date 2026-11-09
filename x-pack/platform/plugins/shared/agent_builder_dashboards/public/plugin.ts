@@ -17,6 +17,7 @@ import type {
   AgentBuilderDashboardsPluginPublicSetupDependencies,
   AgentBuilderDashboardsPluginPublicStartDependencies,
 } from './types';
+import { DASHBOARD_SKELETON_EMBEDDABLE_TYPE } from '../common';
 import { createIdGenerator, registerDashboardAttachmentUiDefinition } from './attachment_types';
 
 export class AgentBuilderDashboardsPlugin
@@ -37,8 +38,12 @@ export class AgentBuilderDashboardsPlugin
       AgentBuilderDashboardsPluginPublicStartDependencies,
       AgentBuilderDashboardsPluginPublicStart
     >,
-    _plugins: AgentBuilderDashboardsPluginPublicSetupDependencies
+    { embeddable }: AgentBuilderDashboardsPluginPublicSetupDependencies
   ): AgentBuilderDashboardsPluginPublicSetup {
+    embeddable.registerEmbeddablePublicDefinition(DASHBOARD_SKELETON_EMBEDDABLE_TYPE, async () => {
+      const { skeletonEmbeddableFactory } = await import('./skeleton/skeleton_embeddable');
+      return skeletonEmbeddableFactory;
+    });
     return {};
   }
 

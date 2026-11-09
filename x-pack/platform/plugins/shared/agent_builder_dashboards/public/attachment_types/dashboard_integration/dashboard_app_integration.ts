@@ -21,6 +21,7 @@ import {
   UNSAVED_CHANGES_DEBOUNCE,
 } from '@kbn/presentation-publishing';
 import { createAgentLiveUpdatesSubscription } from './agent_live_updates_subscription';
+import { liveBuildActive$ } from './live_build';
 import { createNewAttachmentIdRegenerationSubscription } from './new_attachment_id_regeneration_subscription';
 import { createOriginSyncSubscription } from './origin_sync_subscription';
 import type { IdGenerator } from '..';
@@ -70,6 +71,8 @@ export const registerDashboardAppIntegration = ({
   let pendingAddAttachmentTimeout: ReturnType<typeof setTimeout> | undefined;
 
   const addAttachmentFromDashboard = () => {
+    // the dashboard is mid-build, the final agent update is what gets attached
+    if (liveBuildActive$.getValue()) return;
     const dashboardId = api.savedObjectId$.getValue();
     const syncAttachment = state.attachments?.find(({ origin }) => origin === dashboardId);
     const dashboardData = dashboardStateToAttachmentData(api.getSerializedState().attributes);
@@ -131,6 +134,7 @@ export const registerDashboardAppIntegration = ({
       const otherAttachments = (state.attachments ?? []).filter(({ id }) => id !== attachment.id);
       state.attachments = [...otherAttachments, attachment];
     },
+    getAttachments: () => state.attachments,
   });
 
   const newAttachmentIdRegenerationSubscription = createNewAttachmentIdRegenerationSubscription({

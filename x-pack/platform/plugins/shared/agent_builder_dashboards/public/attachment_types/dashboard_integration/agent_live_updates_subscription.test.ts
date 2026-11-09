@@ -46,6 +46,7 @@ const createHarness = (savedObjectId: string | undefined, isNewConversation = fa
     } as unknown as AgentBuilderPluginStart,
     api: { savedObjectId$: { getValue: () => savedObjectId }, setState } as unknown as DashboardApi,
     upsertAttachment,
+    getAttachments: () => [],
   });
 
   return {
