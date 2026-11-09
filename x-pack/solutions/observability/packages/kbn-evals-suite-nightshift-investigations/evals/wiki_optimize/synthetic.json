@@ -53,16 +53,8 @@
       },
       "output": {
         "must_capture": [
-          {
-            "entity_type": "integration",
-            "section": "Tool failures",
-            "terms": ["timed out|timeout"]
-          },
-          {
-            "entity_type": "integration",
-            "section": "Tool failures",
-            "terms": ["remote cluster|no_such_remote_cluster"]
-          }
+          { "entity_type": "integration", "section": "Tool failures", "terms": ["timed out|timeout"] },
+          { "entity_type": "integration", "section": "Tool failures", "terms": ["remote cluster|no_such_remote_cluster"] }
         ],
         "must_not": ["120001", "412"],
         "effects": [],
@@ -170,16 +162,8 @@
       },
       "output": {
         "must_capture": [
-          {
-            "entity_type": "service",
-            "section": "dependencies",
-            "terms": ["checkout-api", "session-cache"]
-          },
-          {
-            "entity_type": "ontology",
-            "section": "relations",
-            "terms": ["checkout-api", "session-cache"]
-          }
+          { "entity_type": "service", "section": "dependencies", "terms": ["checkout-api", "session-cache"] },
+          { "entity_type": "ontology", "section": "relations", "terms": ["checkout-api", "session-cache"] }
         ],
         "must_not": ["yesterday", "this morning"],
         "effects": [],
@@ -335,9 +319,7 @@
       "output": {
         "must_capture": [],
         "must_not": ["ap-south", "11:02"],
-        "effects": [
-          { "match": { "terms": ["connection pool"] }, "round": 0, "effect": "corroborated" }
-        ],
+        "effects": [{ "match": { "terms": ["connection pool"] }, "round": 0, "effect": "corroborated" }],
         "max_pages_matching": [{ "match": { "terms": ["connection pool"] }, "max": 1 }]
       },
       "metadata": { "case_id": "synthetic-dedup-same-condition", "kind": "dedup" }
