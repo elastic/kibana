@@ -187,7 +187,7 @@ function RoutingConditionForm({
   return (
     <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
       <EuiFlexItem>
-        <EuiText color="ghost">
+        <EuiText color="default">
           <strong>
             {i18n.translate('xpack.streams.renderConditionForm.strong.conditionLabel', {
               defaultMessage: 'Condition',
