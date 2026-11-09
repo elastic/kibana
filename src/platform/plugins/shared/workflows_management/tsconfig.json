@@ -57,6 +57,7 @@
     "@kbn/security-plugin-types-server",
     "@kbn/spaces-plugin",
     "@kbn/css-utils",
+    "@kbn/core-chrome-browser-hooks",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/alerting-plugin",
     "@kbn/logging-mocks",
