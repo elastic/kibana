@@ -55,10 +55,6 @@ export const sqlSearchStrategyProvider = (
           {
             format: params?.format ?? 'json',
             ...getDefaultAsyncGetParams(searchConfig, options),
-            // the browser long-polls (and stops sleeping between polls) when the protocol supports multiplexing
-            ...(params.wait_for_completion_timeout
-              ? { wait_for_completion_timeout: params.wait_for_completion_timeout }
-              : {}),
             id,
           },
           {

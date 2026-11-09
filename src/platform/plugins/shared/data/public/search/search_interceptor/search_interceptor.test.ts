@@ -2889,10 +2889,9 @@ describe('SearchInterceptor', () => {
       )[1];
       const pollBody = JSON.parse(pollRequest?.body as string);
 
-      // Should use DEFAULT_MULTIPLEXING_POLL_LENGTH (30s)
-      expect(pollBody.params.wait_for_completion_timeout).toBe('30s');
-      // Also sent as an option, so strategies that rebuild `params` still long-poll
+      // Should use DEFAULT_MULTIPLEXING_POLL_LENGTH (30s), sent as an option
       expect(pollBody.pollLength).toBe('30s');
+      expect(pollBody.params.wait_for_completion_timeout).toBeUndefined();
     });
 
     test('should not set wait_for_completion_timeout when pollLength is not set and protocol does not support multiplexing', async () => {

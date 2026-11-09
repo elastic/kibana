@@ -585,8 +585,6 @@ export class SearchInterceptor {
       : undefined;
     const paramsToUse = request.id
       ? {
-          wait_for_completion_timeout: pollLength,
-
           // FIXME: the dropNullColumns param shouldn't be needed during polling
           // once https://github.com/elastic/elasticsearch/issues/138439 is resolved
           // at that point, exclude all params when request.id is defined (polling phase)
