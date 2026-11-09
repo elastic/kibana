@@ -20,6 +20,8 @@ interface Props extends EditorBaseProps {
   caseId?: string;
   onChange: (value: string) => void;
   value: string;
+  /** Skips inline image paste, for hosts that handle pasted files themselves. */
+  disablePasteUpload?: boolean;
   /** any additional props accepted by the underlying editor components */
   [key: string]: unknown;
 }
@@ -41,25 +43,29 @@ function useHasFilesContext(): boolean {
  *
  * This lets higher-level forms stay unaware of the internal branching logic.
  */
-export const CommentEditor = forwardRef<MarkdownEditorRef, Props>((props, ref) => {
-  // Consumers of Cases may not wrap their tree in <FilesContext>, so guard it.
-  const hasFilesContext = useHasFilesContext();
-  const { owner: ownerList } = useCasesContext();
-  const owner = ownerList[0];
+export const CommentEditor = forwardRef<MarkdownEditorRef, Props>(
+  ({ disablePasteUpload = false, ...props }, ref) => {
+    // Consumers of Cases may not wrap their tree in <FilesContext>, so guard it.
+    const hasFilesContext = useHasFilesContext();
+    const { owner: ownerList } = useCasesContext();
+    const owner = ownerList[0];
 
-  if (hasFilesContext && props.caseId && isOwner(owner)) {
-    return (
-      <PastableMarkdownEditor
-        {...props}
-        ref={ref}
-        field={props.field}
-        caseId={props.caseId}
-        owner={owner}
-      />
-    );
+    if (!disablePasteUpload && hasFilesContext && props.caseId && isOwner(owner)) {
+      return (
+        <PastableMarkdownEditor
+          {...props}
+          ref={ref}
+          field={props.field}
+          caseId={props.caseId}
+          owner={owner}
+        />
+      );
+    }
+
+    // `field` and `caseId` only feed the paste editor; keep them off the DOM.
+    const { field: _field, caseId: _caseId, ...editorProps } = props;
+    return <MarkdownEditor {...editorProps} ref={ref} />;
   }
-
-  return <MarkdownEditor {...props} ref={ref} onChange={props.onChange} value={props.value} />;
-});
+);
 
 CommentEditor.displayName = 'CommentEditor';

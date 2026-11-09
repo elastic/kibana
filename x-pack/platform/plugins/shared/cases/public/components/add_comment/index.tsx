@@ -11,10 +11,18 @@ import React, {
   forwardRef,
   useImperativeHandle,
   useEffect,
+  useMemo,
   useState,
 } from 'react';
 import { css } from '@emotion/react';
-import { EuiButton, EuiFlexItem, EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiLoadingSpinner,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import { isEmpty } from 'lodash';
 
 import {
@@ -23,11 +31,19 @@ import {
   UseField,
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
+import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
+import {
+  COMMENT_ATTACHMENT_TYPE,
+  FILE_ATTACHMENT_TYPE,
+} from '../../../common/constants/attachments';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
+import { deleteFileAttachments } from '../../containers/api';
 import type { MarkdownEditorRef } from '../markdown_editor';
 import { MarkdownEditorForm } from '../markdown_editor';
-import { getMarkdownEditorStorageKey } from '../markdown_editor/utils';
+import { FileTray, useFileTray } from '../markdown_editor/file_tray';
+import type { TrayFile } from '../markdown_editor/file_tray';
+import { DROP_FILE_HERE } from '../markdown_editor/file_tray/translations';
+import { getMarkdownEditorStorageKey, isOwner } from '../markdown_editor/utils';
 import { removeItemFromSessionStorage } from '../utils';
 
 import * as i18n from './translations';
@@ -41,6 +57,29 @@ import type { CaseAttachmentsWithoutOwner } from '../../types';
 const initialCommentValue: AddCommentFormSchema = {
   comment: '',
 };
+
+const getFileAttachment = (
+  { id, fileJSON }: Required<Pick<TrayFile, 'id' | 'fileJSON'>>,
+  comment: string
+): CaseAttachmentsWithoutOwner[number] => ({
+  type: FILE_ATTACHMENT_TYPE,
+  attachmentId: id,
+  ...(comment.trim().length > 0 ? { data: { content: comment } } : {}),
+  metadata: {
+    files: [
+      {
+        name: fileJSON.name,
+        extension: fileJSON.extension ?? '',
+        mimeType: fileJSON.mimeType ?? '',
+        created: fileJSON.created,
+      },
+    ],
+    soType: FILE_SO_TYPE,
+  },
+});
+
+const getFilesFromDataTransfer = (dataTransfer: DataTransfer | null): File[] =>
+  Array.from(dataTransfer?.files ?? []);
 
 export interface AddCommentRefObject {
   addQuote: (quote: string) => void;
@@ -76,6 +115,10 @@ export const AddComment = React.memo(
       const [focusOnContext, setFocusOnContext] = useState(false);
       const { permissions, owner } = useCasesContext();
       const { isLoading, mutate: createAttachments } = useCreateAttachments();
+      const { euiTheme } = useEuiTheme();
+      const fileTray = useFileTray({ caseId, owner: isOwner(owner[0]) ? owner[0] : null });
+      const { trayFile, addFiles, reset: resetFileTray } = fileTray;
+      const [isDraggingFile, setIsDraggingFile] = useState(false);
       const draftStorageKey = getMarkdownEditorStorageKey({
         appId: owner[0],
         caseId,
@@ -115,16 +158,28 @@ export const AddComment = React.memo(
         editor: editorRef.current,
       }));
 
+      const uploadedFile = useMemo(
+        () =>
+          trayFile?.status === 'uploaded' && trayFile.id && trayFile.fileJSON
+            ? { id: trayFile.id, fileJSON: trayFile.fileJSON }
+            : null,
+        [trayFile]
+      );
+
       const onSubmit = useCallback(async () => {
-        const { isValid, data } = await submit();
+        // A file can go out without text, so the empty-comment check only applies without one.
+        const { isValid, data } = uploadedFile
+          ? { isValid: true, data: { comment: comment ?? '' } }
+          : await submit();
+
         if (isValid) {
           if (onCommentSaving != null) {
             onCommentSaving();
           }
 
-          const attachments: CaseAttachmentsWithoutOwner = [
-            { type: COMMENT_ATTACHMENT_TYPE, data: { content: data.comment } },
-          ];
+          const attachments: CaseAttachmentsWithoutOwner = uploadedFile
+            ? [getFileAttachment(uploadedFile, data.comment)]
+            : [{ type: COMMENT_ATTACHMENT_TYPE, data: { content: data.comment } }];
 
           createAttachments(
             {
@@ -136,14 +191,24 @@ export const AddComment = React.memo(
               onSuccess: () => {
                 onCommentPosted();
               },
+              // The error toast comes from the hook; drop the file so it doesn't linger unattached.
+              ...(uploadedFile
+                ? {
+                    onError: () =>
+                      deleteFileAttachments({ caseId, fileIds: [uploadedFile.id] }).catch(() => {}),
+                  }
+                : {}),
             }
           );
 
           reset({ defaultValue: {} });
+          resetFileTray();
         }
 
         removeItemFromSessionStorage(draftStorageKey);
       }, [
+        uploadedFile,
+        comment,
         submit,
         onCommentSaving,
         createAttachments,
@@ -151,6 +216,7 @@ export const AddComment = React.memo(
         owner,
         onCommentPosted,
         reset,
+        resetFileTray,
         draftStorageKey,
       ]);
 
@@ -186,8 +252,50 @@ export const AddComment = React.memo(
         // eslint-disable-next-line react-hooks/exhaustive-deps
       }, [focusOnContext]);
 
+      // A file still uploading or rejected blocks sending until it finishes or is removed.
+      const hasPendingFile = trayFile != null && uploadedFile == null;
+      const commentLength = comment?.trim().length ?? 0;
       const isDisabled =
-        isLoading || !comment?.trim().length || comment.trim().length > MAX_COMMENT_LENGTH;
+        isLoading ||
+        hasPendingFile ||
+        (!uploadedFile && commentLength === 0) ||
+        commentLength > MAX_COMMENT_LENGTH;
+
+      const onPaste = useCallback(
+        (event: React.ClipboardEvent<HTMLDivElement>) => {
+          const files = getFilesFromDataTransfer(event.clipboardData);
+          if (!fileTray.isEnabled || files.length === 0) return;
+          event.preventDefault();
+          addFiles(files);
+        },
+        [addFiles, fileTray.isEnabled]
+      );
+
+      const onDragOver = useCallback(
+        (event: React.DragEvent<HTMLDivElement>) => {
+          if (!fileTray.isEnabled || !event.dataTransfer.types.includes('Files')) return;
+          event.preventDefault();
+          setIsDraggingFile(true);
+        },
+        [fileTray.isEnabled]
+      );
+
+      const onDragLeave = useCallback((event: React.DragEvent<HTMLDivElement>) => {
+        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+          setIsDraggingFile(false);
+        }
+      }, []);
+
+      const onDrop = useCallback(
+        (event: React.DragEvent<HTMLDivElement>) => {
+          setIsDraggingFile(false);
+          const files = getFilesFromDataTransfer(event.dataTransfer);
+          if (!fileTray.isEnabled || files.length === 0) return;
+          event.preventDefault();
+          addFiles(files);
+        },
+        [addFiles, fileTray.isEnabled]
+      );
 
       const handleKeyDown = useCallback(
         (event: KeyboardEvent) => {
@@ -228,42 +336,70 @@ export const AddComment = React.memo(
           )}
           {permissions.createComment && (
             <Form form={form} data-test-subj="add-comment-form-wrapper">
-              <UseField
-                path={fieldName}
-                component={MarkdownEditorForm}
-                componentProps={{
-                  ref: editorRef,
-                  id,
-                  draftStorageKey,
-                  caseId,
-                  idAria: 'caseComment',
-                  isDisabled: isLoading,
-                  dataTestSubj: 'add-comment',
-                  placeholder: i18n.ADD_COMMENT_HELP_TEXT,
-                  bottomRightContent: (
-                    <EuiFlexGroup gutterSize="s" alignItems="flexEnd" responsive={false} wrap>
-                      {statusActionButton && (
-                        <EuiFlexItem grow={false}>{statusActionButton}</EuiFlexItem>
-                      )}
-                      {attachActionButton && (
-                        <EuiFlexItem grow={false}>{attachActionButton}</EuiFlexItem>
-                      )}
-                      <EuiFlexItem grow={false}>
-                        <EuiButton
-                          data-test-subj="submit-comment"
-                          fill
-                          iconType="plusCircle"
-                          isDisabled={isDisabled}
-                          isLoading={isLoading}
-                          onClick={onSubmit}
-                        >
-                          {i18n.ADD_COMMENT}
-                        </EuiButton>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  ),
-                }}
-              />
+              <div
+                onPaste={onPaste}
+                onDragOver={onDragOver}
+                onDragLeave={onDragLeave}
+                onDrop={onDrop}
+                css={
+                  isDraggingFile &&
+                  css`
+                    outline: ${euiTheme.border.width.thick} dashed ${euiTheme.colors.primary};
+                    outline-offset: ${euiTheme.size.xs};
+                    border-radius: ${euiTheme.border.radius.medium};
+                  `
+                }
+                data-test-subj="add-comment-drop-zone"
+              >
+                <UseField
+                  path={fieldName}
+                  component={MarkdownEditorForm}
+                  componentProps={{
+                    ref: editorRef,
+                    id,
+                    draftStorageKey,
+                    caseId,
+                    idAria: 'caseComment',
+                    isDisabled: isLoading,
+                    dataTestSubj: 'add-comment',
+                    placeholder: i18n.ADD_COMMENT_HELP_TEXT,
+                    disablePasteUpload: fileTray.isEnabled,
+                    belowEditorContent: isDraggingFile ? (
+                      <EuiText size="xs" color="subdued" data-test-subj="add-comment-drop-hint">
+                        {DROP_FILE_HERE}
+                      </EuiText>
+                    ) : (
+                      <FileTray
+                        trayFile={trayFile}
+                        trayError={fileTray.trayError}
+                        onRemove={fileTray.removeFile}
+                      />
+                    ),
+                    bottomRightContent: (
+                      <EuiFlexGroup gutterSize="s" alignItems="flexEnd" responsive={false} wrap>
+                        {statusActionButton && (
+                          <EuiFlexItem grow={false}>{statusActionButton}</EuiFlexItem>
+                        )}
+                        {attachActionButton && (
+                          <EuiFlexItem grow={false}>{attachActionButton}</EuiFlexItem>
+                        )}
+                        <EuiFlexItem grow={false}>
+                          <EuiButton
+                            data-test-subj="submit-comment"
+                            fill
+                            iconType="plusCircle"
+                            isDisabled={isDisabled}
+                            isLoading={isLoading}
+                            onClick={onSubmit}
+                          >
+                            {i18n.ADD_COMMENT}
+                          </EuiButton>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    ),
+                  }}
+                />
+              </div>
               <InsertTimeline fieldName="comment" />
             </Form>
           )}

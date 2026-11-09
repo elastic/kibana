@@ -16,9 +16,13 @@ import {
   renderWithTestingProviders,
 } from '../../common/mock';
 
-import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
+import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
+import {
+  COMMENT_ATTACHMENT_TYPE,
+  FILE_ATTACHMENT_TYPE,
+} from '../../../common/constants/attachments';
 import { SECURITY_SOLUTION_OWNER, MAX_COMMENT_LENGTH } from '../../../common/constants';
-import { createAttachments } from '../../containers/api';
+import { createAttachments, deleteFileAttachments } from '../../containers/api';
 import type { AddCommentProps, AddCommentRefObject } from '.';
 import { AddComment } from '.';
 import { CasesTimelineIntegrationProvider } from '../timeline_context';
@@ -26,10 +30,56 @@ import { timelineIntegrationMock } from '../__mock__/timeline';
 
 import { useCreateAttachments } from '../../containers/use_create_attachments';
 import { KibanaServices } from '../../common/lib/kibana';
+import { useFileTray } from '../markdown_editor/file_tray';
+import type { TrayFile, UseFileTrayReturn } from '../markdown_editor/file_tray';
 
 jest.mock('../../containers/use_create_attachments');
+jest.mock('../../containers/api', () => ({
+  ...jest.requireActual('../../containers/api'),
+  deleteFileAttachments: jest.fn().mockResolvedValue(undefined),
+}));
+jest.mock('../markdown_editor/file_tray', () => ({
+  ...jest.requireActual('../markdown_editor/file_tray'),
+  useFileTray: jest.fn(),
+}));
 
 const useCreateAttachmentsMock = useCreateAttachments as jest.Mock;
+const useFileTrayMock = useFileTray as jest.Mock;
+const deleteFileAttachmentsMock = deleteFileAttachments as jest.Mock;
+
+const addFilesMock = jest.fn();
+const resetFileTrayMock = jest.fn();
+const mockFileTray = (overrides: Partial<UseFileTrayReturn> = {}) =>
+  useFileTrayMock.mockReturnValue({
+    isEnabled: true,
+    trayFile: null,
+    trayError: null,
+    addFiles: addFilesMock,
+    removeFile: jest.fn(),
+    reset: resetFileTrayMock,
+    ...overrides,
+  });
+
+const pdf = new File(['%PDF'], 'report.pdf', { type: 'application/pdf' });
+const uploadedTrayFile: TrayFile = {
+  file: pdf,
+  status: 'uploaded',
+  id: 'file-1',
+  fileJSON: {
+    id: 'file-1',
+    name: 'report',
+    extension: 'pdf',
+    mimeType: 'application/pdf',
+    size: 4,
+    created: '2026-11-09T10:00:00.000Z',
+    updated: '2026-11-09T10:00:00.000Z',
+    fileKind: 'securitySolution',
+    status: 'READY',
+    alt: undefined,
+    meta: {},
+    user: undefined,
+  },
+};
 
 const createAttachmentsMock = jest.fn().mockImplementation(() => defaultResponse);
 const onCommentSaving = jest.fn();
@@ -61,6 +111,7 @@ const getCasesConfig = (attachmentsEnabled: boolean): ReturnType<typeof KibanaSe
 describe('AddComment ', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockFileTray();
     getConfigMock.mockReturnValue(getCasesConfig(false));
 
     useCreateAttachmentsMock.mockReturnValue({
@@ -181,6 +232,114 @@ describe('AddComment ', () => {
     );
   });
 
+  describe('file tray', () => {
+    const fileAttachment = {
+      type: FILE_ATTACHMENT_TYPE,
+      attachmentId: 'file-1',
+      metadata: {
+        files: [
+          {
+            name: 'report',
+            extension: 'pdf',
+            mimeType: 'application/pdf',
+            created: '2026-11-09T10:00:00.000Z',
+          },
+        ],
+        soType: FILE_SO_TYPE,
+      },
+    };
+
+    it('sends a file attachment with the comment text', async () => {
+      mockFileTray({ trayFile: uploadedTrayFile });
+      renderWithTestingProviders(<AddComment {...addCommentProps} />);
+
+      await userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), sampleData.comment);
+      await userEvent.click(screen.getByTestId('submit-comment'));
+
+      await waitFor(() =>
+        expect(createAttachmentsMock).toHaveBeenCalledWith(
+          {
+            caseId: addCommentProps.caseId,
+            attachments: [{ ...fileAttachment, data: { content: sampleData.comment } }],
+            caseOwner: SECURITY_SOLUTION_OWNER,
+          },
+          { onSuccess: expect.any(Function), onError: expect.any(Function) }
+        )
+      );
+      expect(resetFileTrayMock).toHaveBeenCalled();
+    });
+
+    it('deletes the uploaded file when sending fails', async () => {
+      mockFileTray({ trayFile: uploadedTrayFile });
+      renderWithTestingProviders(<AddComment {...addCommentProps} />);
+
+      await userEvent.click(screen.getByTestId('submit-comment'));
+      await waitFor(() => expect(createAttachmentsMock).toHaveBeenCalled());
+
+      const [, { onError }] = createAttachmentsMock.mock.calls[0];
+      onError();
+
+      expect(deleteFileAttachmentsMock).toHaveBeenCalledWith({
+        caseId: addCommentProps.caseId,
+        fileIds: ['file-1'],
+      });
+    });
+
+    it('sends a file without text', async () => {
+      mockFileTray({ trayFile: uploadedTrayFile });
+      renderWithTestingProviders(<AddComment {...addCommentProps} />);
+
+      await userEvent.click(screen.getByTestId('submit-comment'));
+
+      await waitFor(() =>
+        expect(createAttachmentsMock).toHaveBeenCalledWith(
+          expect.objectContaining({ attachments: [fileAttachment] }),
+          expect.objectContaining({ onSuccess: expect.any(Function) })
+        )
+      );
+    });
+
+    it('disables submit while the file uploads', async () => {
+      mockFileTray({ trayFile: { file: pdf, status: 'uploading' } });
+      renderWithTestingProviders(<AddComment {...addCommentProps} />);
+
+      await userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), sampleData.comment);
+
+      expect(screen.getByTestId('submit-comment')).toBeDisabled();
+    });
+
+    it('adds dropped files to the tray', () => {
+      renderWithTestingProviders(<AddComment {...addCommentProps} />);
+
+      fireEvent.drop(screen.getByTestId('add-comment-drop-zone'), {
+        dataTransfer: { files: [pdf], types: ['Files'] },
+      });
+
+      expect(addFilesMock).toHaveBeenCalledWith([pdf]);
+    });
+
+    it('adds pasted files to the tray', () => {
+      renderWithTestingProviders(<AddComment {...addCommentProps} />);
+
+      fireEvent.paste(screen.getByTestId('euiMarkdownEditorTextArea'), {
+        clipboardData: { files: [pdf] },
+      });
+
+      expect(addFilesMock).toHaveBeenCalledWith([pdf]);
+    });
+
+    it('ignores drops when files are not supported', () => {
+      mockFileTray({ isEnabled: false });
+      renderWithTestingProviders(<AddComment {...addCommentProps} />);
+
+      fireEvent.drop(screen.getByTestId('add-comment-drop-zone'), {
+        dataTransfer: { files: [pdf], types: ['Files'] },
+      });
+
+      expect(addFilesMock).not.toHaveBeenCalled();
+    });
+  });
+
   it('should insert a quote', async () => {
     const sampleQuote = 'what a cool quote \n with new lines';
     const ref = React.createRef<AddCommentRefObject>();
@@ -273,6 +432,7 @@ describe('AddComment ', () => {
 describe('draft comment ', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockFileTray();
     getConfigMock.mockReturnValue(getCasesConfig(false));
     useCreateAttachmentsMock.mockReturnValue({
       isLoading: false,
