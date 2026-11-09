@@ -58,10 +58,13 @@ export const listToolsCache = new LRUCache<string, ListToolsResponse>({
  * - Connections are established automatically on-demand (lazy connection):
  *   - When calling listTools() or callTool(), the connector will auto-connect if not already connected.
  * - Connections are disconnected after each operation completes to ensure proper cleanup.
+ * - The connector owns one undici dispatcher (see `buildCustomFetch`). The client, its transport
+ *   and the dispatcher are released after each operation, on success and on failure.
  */
 export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConnectorSecrets> {
   private mcpClient: McpClient;
   private authHeaders: Record<string, string>;
+  private readonly closeFetch: () => Promise<void>;
 
   constructor(params: ServiceParams<MCPConnectorConfig, MCPConnectorSecrets>) {
     super(params);
@@ -85,8 +88,9 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
     // Build client options
     const clientOptions: McpClientOptions = {
       headers,
-      fetch: customFetch,
+      fetch: customFetch.fetch,
     };
+    this.closeFetch = customFetch.close;
 
     // Create client details using connector ID and server URL
     const clientDetails: ClientDetails = {
@@ -163,8 +167,7 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
       );
       throw error;
     } finally {
-      // Always disconnect after test to clean up
-      await this.safeDisconnect('test');
+      await this.releaseResources('test');
     }
   }
 
@@ -185,6 +188,24 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
       this.logger.debug(
         `Error disconnecting${operationContext}: ${
           disconnectError instanceof Error ? disconnectError.message : String(disconnectError)
+        }`
+      );
+    }
+  }
+
+  /**
+   * Disconnects the MCP client and closes the fetch dispatcher, so sockets do not outlive the operation.
+   * Logs any errors but does not throw, making it safe to use in finally blocks.
+   */
+  private async releaseResources(operationName: string): Promise<void> {
+    await this.safeDisconnect(operationName);
+
+    try {
+      await this.closeFetch();
+    } catch (closeError) {
+      this.logger.debug(
+        `Error closing fetch dispatcher after ${operationName}: ${
+          closeError instanceof Error ? closeError.message : String(closeError)
         }`
       );
     }
@@ -278,8 +299,7 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
       await this.handleConnectionError(error, 'listTools');
       throw error;
     } finally {
-      // Always disconnect after operation to clean up
-      await this.safeDisconnect('listTools');
+      await this.releaseResources('listTools');
     }
   }
 
@@ -312,8 +332,7 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
       await this.handleConnectionError(error, `callTool(${params.name})`);
       throw error;
     } finally {
-      // Always disconnect after operation to clean up
-      await this.safeDisconnect(`callTool(${params.name})`);
+      await this.releaseResources(`callTool(${params.name})`);
     }
   }
   /**
