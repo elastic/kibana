@@ -61,8 +61,7 @@ export const DASHBOARD_LAYOUT_EDIT_EXAMPLES: DashboardDatasetExample[] = [
         {
           item: { added: 'xy' },
           in: 'traffic',
-          after: 'requests-over-time',
-          before: 'requests-by-os',
+          directlyAfter: 'requests-over-time',
         },
       ],
     },
@@ -71,14 +70,27 @@ export const DASHBOARD_LAYOUT_EDIT_EXAMPLES: DashboardDatasetExample[] = [
     question: 'add a Key metrics section with total requests, bytes and error rate',
     layoutEdit: {
       changes: [TOP_LEVEL],
-      placements: [{ item: { added: 'section' }, before: 'traffic' }],
+      placements: [
+        {
+          item: { added: 'section' },
+          before: 'traffic',
+          holds: { count: 3, kind: 'metric' },
+        },
+      ],
     },
   }),
   layoutEditExample({
     question: 'add a section about response sizes between Traffic and Errors',
     layoutEdit: {
       changes: [TOP_LEVEL],
-      placements: [{ item: { added: 'section' }, after: 'traffic', before: 'errors' }],
+      placements: [
+        {
+          item: { added: 'section' },
+          after: 'traffic',
+          before: 'errors',
+          holds: { count: 1 },
+        },
+      ],
     },
   }),
   layoutEditExample({
@@ -105,12 +117,16 @@ export const DASHBOARD_LAYOUT_EDIT_EXAMPLES: DashboardDatasetExample[] = [
   }),
   layoutEditExample({
     question: 'make the requests over time chart red and rename it to "Requests"',
-    layoutEdit: { changes: [] },
+    layoutEdit: { changes: [], changed: ['requests-over-time'] },
   }),
   layoutEditExample({
     question:
       'turn the response codes pie into a data table, and expand the intro markdown with a bullet list of what each section shows',
-    layoutEdit: { changes: ['traffic', TOP_LEVEL] },
+    layoutEdit: {
+      changes: ['traffic', TOP_LEVEL],
+      changed: ['intro'],
+      retyped: { 'response-codes': 'data_table' },
+    },
   }),
   layoutEditExample({
     question:

@@ -69,6 +69,10 @@ export interface LayoutPlacementGold {
   after?: string;
   /** Earlier in reading order than this item. */
   before?: string;
+  /** Next in reading order after this item, with nothing in between. */
+  directlyAfter?: string;
+  /** For a section: it holds at least `count` panels, of `kind` when given. */
+  holds?: { count: number; kind?: string };
 }
 
 /** What a layout edit prompt may change, and where it puts things. */
@@ -77,6 +81,10 @@ export interface LayoutEditGold {
   changes: readonly string[];
   /** Seed panels and sections the prompt removes. */
   removed?: readonly string[];
+  /** Seed panels the prompt edits; their config or chart type must differ from the seed. */
+  changed?: readonly string[];
+  /** Seed panels the prompt turns into another chart kind, by panel id. */
+  retyped?: Readonly<Record<string, string>>;
   placements?: readonly LayoutPlacementGold[];
 }
 

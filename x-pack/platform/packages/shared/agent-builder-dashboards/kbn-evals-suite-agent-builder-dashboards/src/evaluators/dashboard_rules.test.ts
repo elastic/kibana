@@ -76,16 +76,24 @@ describe('dashboard rules', () => {
       const kpi = metric('a', { x: 0, y: 0, w: 24, h: 5 });
       expect(findViolations(dashboard([kpi]), ['layout_gap'])).toEqual([]);
       const violations = findViolations(
-        dashboard([
-          kpi,
-          section('s1', 'Traffic', 5, [xy('b', { x: 0, y: 0, w: 48, h: 10 })]),
-          xy('c', { x: 0, y: 6, w: 24, h: 10 }),
-        ]),
+        dashboard([kpi, section('s1', 'Traffic', 5, [xy('b', { x: 0, y: 0, w: 48, h: 10 })])]),
         ['layout_gap']
       );
       expect(violations.map(({ detail }) => detail)).toEqual([
         'empty cell at x=24 y=0 in the top level, above other panels',
       ]);
+    });
+
+    it('accepts a partly filled panel below a section', () => {
+      expect(
+        findViolations(
+          dashboard([
+            section('s1', 'Traffic', 0, [xy('a', { x: 0, y: 0, w: 48, h: 10 })]),
+            xy('b', { x: 0, y: 1, w: 24, h: 10 }),
+          ]),
+          ['layout_gap']
+        )
+      ).toEqual([]);
     });
 
     it('accepts full rows and a partly filled last row', () => {

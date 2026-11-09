@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { compact } from 'lodash';
+import { compact, isEqual } from 'lodash';
 import {
   isSection,
   type AttachmentPanel,
@@ -125,6 +125,72 @@ const checkStableContainers = (
     });
 };
 
+// A container the edit may rearrange still keeps its panels, unless the prompt removes
+// them or places them in another container.
+const checkChangedContainers = (
+  gold: LayoutEditGold,
+  seed: LayoutIndex,
+  result: LayoutIndex
+): Check[] => {
+  const removed = new Set(gold.removed ?? []);
+  const destinations = new Map(
+    (gold.placements ?? []).flatMap(({ item, in: container }) =>
+      typeof item === 'string' && container !== undefined
+        ? [[item, container] as [string, string]]
+        : []
+    )
+  );
+  return gold.changes
+    .filter((container) => seed.containers.has(container) && !removed.has(container))
+    .map((container) => {
+      const strayed = (seed.containers.get(container) ?? [])
+        .filter(({ id }) => !removed.has(id))
+        .filter(
+          ({ id }) => result.panels.get(id)?.container !== (destinations.get(id) ?? container)
+        )
+        .map(({ id }) => `${id} is not in ${destinations.get(id) ?? container}`);
+      return {
+        assertion: `members.${container}`,
+        passed: strayed.length === 0,
+        detail:
+          strayed.length === 0 ? 'panels stay where the prompt leaves them' : strayed.join('; '),
+      };
+    });
+};
+
+const checkEdited = (gold: LayoutEditGold, seed: LayoutIndex, result: LayoutIndex): Check[] => {
+  const edited = (id: string) => {
+    const before = seed.panels.get(id)?.panel;
+    const after = result.panels.get(id)?.panel;
+    return (
+      before !== undefined &&
+      after !== undefined &&
+      (before.type !== after.type || !isEqual(before.config, after.config))
+    );
+  };
+  const retyped = Object.entries(gold.retyped ?? {});
+  return compact([
+    (gold.changed?.length ?? 0) > 0 && {
+      assertion: 'edited',
+      passed: (gold.changed ?? []).every(edited),
+      detail: `unedited [${(gold.changed ?? []).filter((id) => !edited(id)).join(', ')}]`,
+    },
+    retyped.length > 0 && {
+      assertion: 'retyped',
+      passed: retyped.every(([id, kind]) => {
+        const after = result.panels.get(id)?.panel;
+        return after !== undefined && getPanelKind(after) === kind;
+      }),
+      detail: retyped
+        .map(([id, kind]) => {
+          const after = result.panels.get(id)?.panel;
+          return `${id} is ${after ? getPanelKind(after) : 'missing'}, wanted ${kind}`;
+        })
+        .join('; '),
+    },
+  ]);
+};
+
 const checkOuterOrder = (seed: LayoutIndex, result: LayoutIndex): Check => {
   const resultOuter = new Set(result.outerOrder);
   const seedOuter = new Set(seed.outerOrder);
@@ -168,7 +234,18 @@ const getSiblingOrder = (id: string, result: LayoutIndex): string[] => {
 };
 
 const checkPlacement = (
-  { item, in: container, first, beside, below, w, after, before }: LayoutPlacementGold,
+  {
+    item,
+    in: container,
+    first,
+    beside,
+    below,
+    w,
+    after,
+    before,
+    directlyAfter,
+    holds,
+  }: LayoutPlacementGold,
   index: number,
   seed: LayoutIndex,
   result: LayoutIndex
@@ -190,6 +267,13 @@ const checkPlacement = (
   const besideGrid = beside === undefined ? undefined : neighbour(beside);
   const belowGrid = below === undefined ? undefined : neighbour(below);
 
+  const held =
+    holds === undefined
+      ? []
+      : (result.sections.get(id)?.panels ?? []).filter(
+          (panel) => holds.kind === undefined || getPanelKind(panel) === holds.kind
+        );
+
   const problems = compact([
     container !== undefined && (located?.container ?? TOP_LEVEL) !== container
       ? `in ${located?.container ?? TOP_LEVEL}, not ${container}`
@@ -207,6 +291,13 @@ const checkPlacement = (
       : undefined,
     before !== undefined && !(position(before) !== -1 && position(id) < position(before))
       ? `not before ${before}`
+      : undefined,
+    directlyAfter !== undefined &&
+    (position(directlyAfter) === -1 || position(id) !== position(directlyAfter) + 1)
+      ? `not directly after ${directlyAfter}`
+      : undefined,
+    holds !== undefined && held.length < holds.count
+      ? `holds ${held.length} ${holds.kind ?? 'panels'}, not ${holds.count}`
       : undefined,
   ]);
 
@@ -249,6 +340,8 @@ export const dashboardLayoutEditEvaluator: DashboardAgentEvaluator = {
     const checks = [
       checkPanelsKept(gold, seed, result),
       ...checkStableContainers(gold, seed, result),
+      ...checkChangedContainers(gold, seed, result),
+      ...checkEdited(gold, seed, result),
       checkOuterOrder(seed, result),
       ...checkCollapsed(seed, result),
       ...(gold.placements ?? []).map((placement, index) =>
