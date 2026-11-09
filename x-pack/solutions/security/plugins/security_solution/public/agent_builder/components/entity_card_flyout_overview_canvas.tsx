@@ -23,6 +23,7 @@ import {
   buildHostNamesFilter,
   buildUserNamesFilter,
   EntityType as SearchEntityType,
+  ServiceItem,
   type EntityRiskScore,
   type RiskSeverity,
   type RiskStats,
