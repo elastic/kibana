@@ -91,6 +91,7 @@ describe('useUserMessageThumbnails', () => {
         thumbnailUrl: THUMBNAIL_URL,
         label: 'photo.png',
         name: 'photo.png',
+        order: 0,
       },
       {
         key: 'img2-v1',
@@ -98,6 +99,7 @@ describe('useUserMessageThumbnails', () => {
         thumbnailUrl: THUMBNAIL_URL,
         label: 'shot.png',
         name: 'shot.png',
+        order: 1,
       },
     ]);
   });

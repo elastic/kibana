@@ -19,6 +19,8 @@ export interface UserMessageAttachmentTilesProps {
   hoveredAttachmentName?: string | null;
 }
 
+type Tile = ({ kind: 'thumbnail' } & UserMessageThumbnail) | ({ kind: 'file' } & UserMessageFile);
+
 export const UserMessageAttachmentTiles: React.FC<UserMessageAttachmentTilesProps> = ({
   thumbnails,
   files = [],
@@ -28,25 +30,31 @@ export const UserMessageAttachmentTiles: React.FC<UserMessageAttachmentTilesProp
     return null;
   }
 
+  const tiles: Tile[] = [
+    ...thumbnails.map((thumbnail) => ({ kind: 'thumbnail' as const, ...thumbnail })),
+    ...files.map((file) => ({ kind: 'file' as const, ...file })),
+  ].sort((a, b) => a.order - b.order);
+
   return (
     <EuiFlexItem grow={false}>
       <EuiFlexGroup direction="row" wrap responsive={false} gutterSize="s">
-        {thumbnails.map(({ key, name, ...pillProps }) => (
-          <EuiFlexItem grow={false} key={key}>
-            <ThumbnailAttachmentPill
-              {...pillProps}
-              isHighlighted={hoveredAttachmentName != null && hoveredAttachmentName === name}
-            />
-          </EuiFlexItem>
-        ))}
-        {files.map(({ key, attachmentId, name, mimeType }) => (
-          <EuiFlexItem grow={false} key={key}>
-            <FileAttachmentPill
-              attachmentId={attachmentId}
-              name={name}
-              mimeType={mimeType}
-              isHighlighted={hoveredAttachmentName != null && hoveredAttachmentName === name}
-            />
+        {tiles.map((tile) => (
+          <EuiFlexItem grow={false} key={tile.key}>
+            {tile.kind === 'thumbnail' ? (
+              <ThumbnailAttachmentPill
+                attachmentId={tile.attachmentId}
+                thumbnailUrl={tile.thumbnailUrl}
+                label={tile.label}
+                isHighlighted={hoveredAttachmentName != null && hoveredAttachmentName === tile.name}
+              />
+            ) : (
+              <FileAttachmentPill
+                attachmentId={tile.attachmentId}
+                name={tile.name}
+                mimeType={tile.mimeType}
+                isHighlighted={hoveredAttachmentName != null && hoveredAttachmentName === tile.name}
+              />
+            )}
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>

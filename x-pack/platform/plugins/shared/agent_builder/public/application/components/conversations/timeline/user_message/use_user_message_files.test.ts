@@ -48,7 +48,13 @@ describe('useUserMessageFiles', () => {
     );
 
     expect(result.current).toEqual([
-      { key: 'doc1-v1', attachmentId: 'doc1', name: 'invoice.pdf', mimeType: 'application/pdf' },
+      {
+        key: 'doc1-v1',
+        attachmentId: 'doc1',
+        name: 'invoice.pdf',
+        mimeType: 'application/pdf',
+        order: 0,
+      },
     ]);
   });
 
@@ -63,7 +69,25 @@ describe('useUserMessageFiles', () => {
     );
 
     expect(result.current).toEqual([
-      { key: 'txt1-v1', attachmentId: 'txt1', name: 'notes.md', mimeType: undefined },
+      { key: 'txt1-v1', attachmentId: 'txt1', name: 'notes.md', mimeType: undefined, order: 0 },
+    ]);
+  });
+
+  it('keeps the place of each file among all attachments of the message', () => {
+    const { result } = renderHook(() =>
+      useUserMessageFiles({
+        attachmentRefs: [userRef('txt1'), userRef('img1'), userRef('doc1')],
+        conversationAttachments: [
+          makeVersioned('txt1', AttachmentType.text, { content: '# Hi', name: 'notes.md' }),
+          makeVersioned('img1', AttachmentType.image, { name: 'photo.png' }),
+          makeVersioned('doc1', AttachmentType.binary, { name: 'invoice.pdf' }),
+        ],
+      })
+    );
+
+    expect(result.current.map(({ attachmentId, order }) => [attachmentId, order])).toEqual([
+      ['txt1', 0],
+      ['doc1', 2],
     ]);
   });
 

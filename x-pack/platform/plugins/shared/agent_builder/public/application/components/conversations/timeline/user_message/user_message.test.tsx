@@ -60,6 +60,7 @@ const thumbnail: UserMessageThumbnail = {
   thumbnailUrl: 'data:image/png;base64,abc',
   label: 'photo.png',
   name: 'photo.png',
+  order: 0,
 };
 
 const file: UserMessageFile = {
@@ -67,6 +68,7 @@ const file: UserMessageFile = {
   attachmentId: 'doc1',
   name: 'notes.md',
   mimeType: 'text/markdown',
+  order: 1,
 };
 
 const currentUser = {

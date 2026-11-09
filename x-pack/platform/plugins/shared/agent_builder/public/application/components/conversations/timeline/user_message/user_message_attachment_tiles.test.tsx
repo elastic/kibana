@@ -29,21 +29,23 @@ jest.mock('../../conversation_input/file_attachment_pill', () => ({
 const MockThumbnailAttachmentPill = jest.mocked(ThumbnailAttachmentPill);
 const MockFileAttachmentPill = jest.mocked(FileAttachmentPill);
 
-const makeBinary = (id: string, name: string): UserMessageFile => ({
+const makeBinary = (id: string, name: string, order = 0): UserMessageFile => ({
   key: `${id}-v1`,
   attachmentId: id,
   name,
   mimeType: 'text/markdown',
+  order,
 });
 
 const render = (ui: React.ReactElement) => rtlRender(<EuiThemeProvider>{ui}</EuiThemeProvider>);
 
-const makeThumbnail = (id: string, name: string): UserMessageThumbnail => ({
+const makeThumbnail = (id: string, name: string, order = 0): UserMessageThumbnail => ({
   key: `${id}-v1`,
   attachmentId: id,
   thumbnailUrl: 'data:image/png;base64,abc',
   label: name,
   name,
+  order,
 });
 
 describe('UserMessageAttachmentTiles', () => {
@@ -85,6 +87,29 @@ describe('UserMessageAttachmentTiles', () => {
       mimeType: 'text/markdown',
     });
     expect(MockThumbnailAttachmentPill).not.toHaveBeenCalled();
+  });
+
+  it('shows images and files in the order they were attached', () => {
+    const { container } = render(
+      <UserMessageAttachmentTiles
+        thumbnails={[makeThumbnail('img1', 'photo.png', 3)]}
+        files={[
+          makeBinary('doc1', 'notes.md', 0),
+          makeBinary('doc2', 'data.csv', 1),
+          makeBinary('doc3', 'notes.txt', 2),
+        ]}
+      />
+    );
+
+    const renderedIds = Array.from(
+      container.querySelectorAll('[data-test-subj^="agentBuilderAttachmentPill-"]')
+    ).map((element) => element.getAttribute('data-test-subj'));
+    expect(renderedIds).toEqual([
+      'agentBuilderAttachmentPill-doc1',
+      'agentBuilderAttachmentPill-doc2',
+      'agentBuilderAttachmentPill-doc3',
+      'agentBuilderAttachmentPill-img1',
+    ]);
   });
 
   it('highlights only the file whose name matches hoveredAttachmentName', () => {

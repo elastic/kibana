@@ -28,6 +28,8 @@ export interface UserMessageFile {
   /** The file name, used to match the file with its badge in the message text. */
   name: string;
   mimeType?: string;
+  /** The place of the attachment among the attachments of the message. */
+  order: number;
 }
 
 const getFileData = ({ attachment, version }: ResolvedReference) =>
@@ -56,7 +58,7 @@ export const useUserMessageFiles = ({
     actorFilter,
   });
 
-  return allResolved.reduce<UserMessageFile[]>((acc, ref) => {
+  return allResolved.reduce<UserMessageFile[]>((acc, ref, order) => {
     if (!isFileAttachment(ref)) {
       return acc;
     }
@@ -67,6 +69,7 @@ export const useUserMessageFiles = ({
       attachmentId: attachment.id,
       name: data?.name ?? attachment.description ?? attachment.type,
       mimeType: data?.mime_type,
+      order,
     });
     return acc;
   }, []);
