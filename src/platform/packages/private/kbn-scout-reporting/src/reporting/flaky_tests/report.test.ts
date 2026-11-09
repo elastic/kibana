@@ -228,10 +228,10 @@ describe('checkFlakyTest', () => {
     });
 
     it('is kept until it missed enough failures', () => {
-      // 40 clean builds: 2.9 failures missed at 7.1%
-      const fewer = `${'.........x'.repeat(10)}${'.'.repeat(40)}`;
+      // 15 clean builds: 1.3 failures missed at 8.7%
+      const fewer = `${'.........x'.repeat(10)}${'.'.repeat(15)}`;
       expect(
-        checkFlakyTest([setupBuilds(fewer)], [branchCounts('main', 140, 10)], strict, after(500))
+        checkFlakyTest([setupBuilds(fewer)], [branchCounts('main', 115, 10)], strict, after(500))
       ).toEqual({ outcome: 'none' });
     });
 
@@ -244,9 +244,10 @@ describe('checkFlakyTest', () => {
     });
 
     it('is judged on its failure rate without its breakages', () => {
-      // 5 of 130 failed outside a 20 build breakage: 1.9 failures missed, 8.3 with the breakage
-      const withBreakage = `${'.'.repeat(30)}${'x'.repeat(20)}${pattern.slice(50)}`;
-      const breakageCounts = [branchCounts('main', 150, 25)];
+      // 5 of 110 failed outside a 20 build breakage: 1.4 failures missed, 5.8 with the breakage
+      const flaky = '.........x'.repeat(5);
+      const withBreakage = `${'.'.repeat(30)}${'x'.repeat(20)}${flaky}${'.'.repeat(30)}`;
+      const breakageCounts = [branchCounts('main', 130, 25)];
       expect(
         checkFlakyTest([setupBuilds(withBreakage)], breakageCounts, strict, after(100, 24))
       ).toMatchObject({ outcome: 'kept' });

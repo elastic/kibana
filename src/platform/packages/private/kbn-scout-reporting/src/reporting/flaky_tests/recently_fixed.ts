@@ -14,9 +14,9 @@ export const MIN_HOURS_SINCE_LAST_FAILURE = 24;
 
 /**
  * A test is fixed once the builds since its last failure are enough that, failing as often as
- * before, it would have failed this many times in them.
+ * before, it would have failed this many times in them on average.
  */
-export const MIN_MISSED_FAILURES = 3;
+export const MIN_MISSED_FAILURES = 1.5;
 
 /** When a test last failed on a branch, and how many builds ran it without failing since. */
 export interface LastFailure {

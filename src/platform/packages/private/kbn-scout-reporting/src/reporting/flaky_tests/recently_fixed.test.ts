@@ -58,12 +58,12 @@ describe('lastFailures', () => {
 describe('looksFixed', () => {
   const lastFailure = { branch: 'main', at: new Date(FIRST_BUILD_AT), cleanBuilds: 30 };
 
-  it('needs a day since the last failure and enough builds to have missed 3 failures', () => {
+  it('needs a day since the last failure and enough builds to have missed 1.5 failures', () => {
     const aDayLater = new Date(FIRST_BUILD_AT + 24 * HOUR_MS);
 
-    expect(looksFixed(lastFailure, 0.1, aDayLater)).toBe(true);
-    expect(looksFixed(lastFailure, 0.09, aDayLater)).toBe(false);
-    expect(looksFixed(lastFailure, 0.1, new Date(FIRST_BUILD_AT + 23 * HOUR_MS))).toBe(false);
+    expect(looksFixed(lastFailure, 0.05, aDayLater)).toBe(true);
+    expect(looksFixed(lastFailure, 0.045, aDayLater)).toBe(false);
+    expect(looksFixed(lastFailure, 0.05, new Date(FIRST_BUILD_AT + 23 * HOUR_MS))).toBe(false);
   });
 });
 
