@@ -6,6 +6,7 @@
  */
 
 import { execFile } from 'child_process';
+import Crypto from 'crypto';
 import Fs from 'fs';
 import Path from 'path';
 import { promisify } from 'util';
@@ -194,6 +195,36 @@ export const setupCandidateWorktree = async ({
 export const resetCandidate = async (workspace: CandidateWorkspace): Promise<void> => {
   await run('git', ['checkout', '--', '.'], workspace.path);
   await run('git', ['clean', '-fd', TOOL_DIR], workspace.path);
+};
+
+/**
+ * Identity of a harness variant: a hash of the tool's files as they are on disk.
+ *
+ * Not the diff against HEAD — promoting an accepted variant by committing it makes that diff
+ * empty, which collapsed the new variant's identity back onto the pristine one and made the
+ * lineage graph claim every later round branched from base.
+ */
+export const treeHash = (worktreePath: string): string => {
+  const root = Path.join(worktreePath, TOOL_DIR);
+  const hash = Crypto.createHash('sha256');
+
+  const walk = (dir: string) => {
+    for (const entry of Fs.readdirSync(dir, { withFileTypes: true }).sort((a, b) =>
+      a.name.localeCompare(b.name)
+    )) {
+      if (entry.name.startsWith('.')) continue;
+      const absolute = Path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        walk(absolute);
+      } else {
+        hash.update(Path.relative(root, absolute));
+        hash.update(Fs.readFileSync(absolute));
+      }
+    }
+  };
+
+  walk(root);
+  return hash.digest('hex').slice(0, 10);
 };
 
 /** Committed content of a file in the candidate worktree. */

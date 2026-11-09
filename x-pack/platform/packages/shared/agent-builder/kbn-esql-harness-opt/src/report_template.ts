@@ -173,8 +173,8 @@ const renderDiff = (diff, files) => {
 function lineageGraph() {
   const nodes = new Map();
   nodes.set(DATA.baseHash, {
-    id: DATA.baseHash, label: 'base', sub: 'shipped defaults', parent: null,
-    state: 'base', round: null, delta: null, cost: null,
+    id: DATA.baseHash, label: 'start', sub: 'tool as of ' + DATA.baseHash, parent: null,
+    state: 'base', round: null, delta: null, cost: null, hash: DATA.baseHash,
   });
 
   const campaigns = [...new Set(DATA.rounds.map((round) => round.campaignId))];

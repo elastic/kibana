@@ -17,7 +17,7 @@ import { gateCandidate } from './gate';
 import type { GateResult } from './gate';
 import { proposeCandidate } from './proposer';
 import { verificationSummary, verifyManifest } from './verification';
-import { harnessPaths, variantHash } from './workspace';
+import { harnessPaths } from './workspace';
 import { readModelChoices } from './models';
 import {
   applyAndValidateEdits,
@@ -26,6 +26,7 @@ import {
   promoteEdits,
   resetCandidate,
   restartLane,
+  treeHash,
 } from './candidate_workspace';
 import type { CodeEdit } from './candidate_workspace';
 
@@ -130,7 +131,7 @@ export const runCampaign = async ({
     .slice(0, 14);
   const priorRounds = ledger.length;
   log.info(
-    `[harness-opt] campaign ${campaignId} starting from variant ${variantHash(incumbentDiff)}${
+    `[harness-opt] campaign ${campaignId} starting from variant ${treeHash(mainWorktree)}${
       incumbentEdits.length ? ` (${incumbentEdits.length} file(s) already changed)` : ' (clean)'
     }`
   );
@@ -138,7 +139,7 @@ export const runCampaign = async ({
   for (let roundInCampaign = 0; roundInCampaign < rounds; roundInCampaign++) {
     const round = priorRounds + roundInCampaign;
     const outputDir = Path.join(runsDir, `round-${Date.now()}`);
-    const incumbentVariant = { hash: variantHash(incumbentDiff), diff: incumbentDiff };
+    const incumbentVariant = { hash: treeHash(mainWorktree), diff: incumbentDiff };
 
     const searchRun = await runVariant({
       label: `round${round}-incumbent-search`,
@@ -207,7 +208,7 @@ export const runCampaign = async ({
     }
 
     const diff = await candidateDiff(workspace);
-    const candidateVariant = { hash: variantHash(diff), diff };
+    const candidateVariant = { hash: treeHash(workspace.path), diff };
     const candidateReady = await restartLane({
       command: restartCommands.candidate,
       url: workspace.kibanaUrl,
