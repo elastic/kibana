@@ -459,7 +459,7 @@ describe('RuleEventsClient', () => {
       );
     });
 
-    it('filters topologyFeatureIds via MV_INTERSECTS against causal_features.feature_id OR blast_radius.feature_id', async () => {
+    it('filters topologyFeatureIds via MV_INTERSECTS against feature ids and dependency endpoints', async () => {
       const { client, query } = createClient(async (request) =>
         request.query.includes('STATS total') ? countResponse(0) : sourceResponse([])
       );
@@ -467,12 +467,14 @@ describe('RuleEventsClient', () => {
       await client.findLatestByCurrentStatePaginated({ topologyFeatureIds: ['feat-1'] });
 
       const q = lastQuery(query, (query_) => !query_.includes('STATS total'));
-      expect(q).toContain(
-        'MV_INTERSECTS(FIELD_EXTRACT(data, "causal_features.feature_id"), ["feat-1"])'
-      );
-      expect(q).toContain(
-        'MV_INTERSECTS(FIELD_EXTRACT(data, "blast_radius.feature_id"), ["feat-1"])'
-      );
+      for (const path of [
+        'causal_features.feature_id',
+        'blast_radius.feature_id',
+        'blast_radius.source',
+        'blast_radius.target',
+      ]) {
+        expect(q).toContain(`MV_INTERSECTS(FIELD_EXTRACT(data, "${path}"), ["feat-1"])`);
+      }
     });
 
     it('filters search, time range and status against the latest revision of each series', async () => {
