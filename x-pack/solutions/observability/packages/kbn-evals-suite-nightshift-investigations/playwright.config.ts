@@ -17,6 +17,7 @@ const {
   runInvestigations,
   runOrca,
   runConnectorProbes,
+  runWikiOptimize,
   storedDatasetIds,
   fellBackToSmoke,
 } = resolveEvalSelection();
@@ -42,5 +43,6 @@ export default createPlaywrightEvalsConfig({
     ...(runStoredInvestigations ? [] : ['**/investigation/stored.spec.ts']),
     ...(runConnectorProbes ? [] : ['**/connector_probe/connector_probe.spec.ts']),
     ...(runStoredConnectorProbes ? [] : ['**/connector_probe/stored.spec.ts']),
+    ...(runWikiOptimize ? [] : ['**/wiki_optimize/**']),
   ],
 });

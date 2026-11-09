@@ -79,7 +79,7 @@ const createHandlerParams = ({
 
   const handlerParams = {
     params: { body: { scheduledDiscovery } },
-    request: {},
+    request: { spaceId: 'default' },
     getScopedClients: jest.fn().mockResolvedValue({
       licensing: {},
       uiSettingsClient,

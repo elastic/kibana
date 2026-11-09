@@ -6,8 +6,8 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import { applyCortexEdits } from '../cortex/optimize';
-import { createCortexPageStore } from '../cortex/page_store';
+import { applyWikiEdits } from '../wiki/optimize';
+import { createWikiPageStore } from '../wiki/page_store';
 import { createDecisionTreeStore } from '../decision_trees/store';
 import { createLearningStore } from '../decision_trees/learning_store';
 import { applyMemoryEdits } from '../memory/optimize';
@@ -25,14 +25,14 @@ const FULL_TREE = `flowchart TD
     E3 --> X2((Slow query))`;
 
 describe('PR 3b write provenance, reinforcementSessionRegistry, and applied_writes', () => {
-  it('stamps Cortex provenance, increments version, and returns full before/after applied_writes', async () => {
+  it('stamps Wiki provenance, increments version, and returns full before/after applied_writes', async () => {
     const esClient = {
       search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
       get: jest
         .fn()
         .mockResolvedValueOnce({
           found: true,
-          _id: 'default:cortex_service_checkout',
+          _id: 'default:wiki_service_checkout',
           _seq_no: 1,
           _primary_term: 1,
           _source: {
@@ -49,7 +49,7 @@ describe('PR 3b write provenance, reinforcementSessionRegistry, and applied_writ
         })
         .mockResolvedValueOnce({
           found: true,
-          _id: 'default:cortex_service_checkout',
+          _id: 'default:wiki_service_checkout',
           _seq_no: 1,
           _primary_term: 1,
           _source: {
@@ -67,13 +67,13 @@ describe('PR 3b write provenance, reinforcementSessionRegistry, and applied_writ
       index: jest.fn().mockResolvedValue({ _seq_no: 2, _primary_term: 1 }),
     };
 
-    const store = createCortexPageStore({
+    const store = createWikiPageStore({
       esClient: esClient as never,
       logger: loggerMock.create(),
       spaceId: 'default',
     });
 
-    const appliedWrites = await applyCortexEdits({
+    const appliedWrites = await applyWikiEdits({
       store,
       edits: [
         {
@@ -108,8 +108,8 @@ describe('PR 3b write provenance, reinforcementSessionRegistry, and applied_writ
     );
     expect(appliedWrites).toEqual([
       {
-        store: 'cortex',
-        item_id: 'cortex_service_checkout',
+        store: 'wiki',
+        item_id: 'wiki_service_checkout',
         action: 'upsert',
         version: 2,
         before_status: 'tentative',
