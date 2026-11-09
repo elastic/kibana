@@ -21,7 +21,7 @@ const setup = ({
   updateError,
   statusError,
   keepTags = false,
-  closed = tagged,
+  alerts = {},
 }: {
   decisionId?: string;
   tagged?: string[];
@@ -30,28 +30,32 @@ const setup = ({
   updateError?: Error & { statusCode?: number };
   statusError?: Error;
   keepTags?: boolean;
-  /** The tagged alerts that are still closed; the others were moved on by an analyst. */
-  closed?: string[];
+  /** What an analyst did to a tagged alert since the decision closed it. Default: still closed as a false positive. */
+  alerts?: Record<string, { status: string; reason?: string }>;
 }) => {
   let left = [...tagged];
+  const state = new Map(
+    tagged.map((id) => [id, alerts[id] ?? { status: 'closed', reason: 'false_positive' }])
+  );
   const callKibanaApi = jest.fn(async ({ path, body }: { path: string; body?: any }) => {
     if (path.endsWith('/signals/search')) {
-      return {
-        body: {
-          hits: {
-            hits: left.map((_id) => ({
-              _id,
-              _source: {
-                'kibana.alert.workflow_status': closed.includes(_id) ? 'closed' : 'acknowledged',
-              },
-            })),
-          },
-        },
-      };
+      return { body: { hits: { hits: left.map((_id) => ({ _id })) } } };
     }
     if (path.endsWith('/signals/status')) {
       if (statusError) throw statusError;
-      return { body: { updated: body.signal_ids.length, failures: [] } };
+      // The route applies the query, so an alert that moved on is not updated.
+      const filter: any[] = body.query.bool.filter;
+      const ids: string[] = filter.find((f) => f.ids).ids.values;
+      const terms = filter.filter((f) => f.term).map((f) => Object.values(f.term)[0]);
+      const matching = ids.filter((id) => {
+        const alert = state.get(id);
+        return (
+          alert !== undefined &&
+          terms.every((t) => [alert.status, alert.reason].includes(t as string))
+        );
+      });
+      matching.forEach((id) => state.set(id, { status: body.status }));
+      return { body: { updated: matching.length, failures: [] } };
     }
     if (!keepTags) left = left.filter((id) => !body.ids.includes(id));
     return { body: { updated: body.ids.length, timed_out: false, failures: [] } };
@@ -94,7 +98,20 @@ describe('triage revoke decision step', () => {
         doc: expect.objectContaining({ governance: { lifecycle: { status: 'deleted' } } }),
       })
     );
-    expect(calls('/signals/status')).toEqual([{ signal_ids: ['a', 'b'], status: 'open' }]);
+    expect(calls('/signals/status')).toEqual([
+      {
+        query: {
+          bool: {
+            filter: [
+              { ids: { values: ['a', 'b'] } },
+              { term: { 'kibana.alert.workflow_status': 'closed' } },
+              { term: { 'kibana.alert.workflow_reason': 'false_positive' } },
+            ],
+          },
+        },
+        status: 'open',
+      },
+    ]);
     expect(calls('/signals/tags')).toEqual([
       {
         ids: ['a', 'b'],
@@ -105,12 +122,18 @@ describe('triage revoke decision step', () => {
   });
 
   it('does not reopen an alert an analyst moved on from, and still removes its tag', async () => {
-    const { run, calls } = setup({ tagged: ['a', 'b'], closed: ['a'] });
+    const { run, calls } = setup({
+      tagged: ['a', 'b', 'c'],
+      alerts: {
+        // Reopened, then investigated and closed as a true positive: the analyst's verdict stands.
+        b: { status: 'closed', reason: 'true_positive' },
+        c: { status: 'acknowledged' },
+      },
+    });
 
     const { output } = await run();
 
-    expect(calls('/signals/status')).toEqual([{ signal_ids: ['a'], status: 'open' }]);
-    expect(calls('/signals/tags')[0].ids).toEqual(['a', 'b']);
+    expect(calls('/signals/tags')[0].ids).toEqual(['a', 'b', 'c']);
     expect(output).toEqual({ status: 'ok', alerts_reopened: 1, alerts_released: 0, failures: 0 });
   });
 

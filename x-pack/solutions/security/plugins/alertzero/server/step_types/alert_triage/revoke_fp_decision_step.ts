@@ -16,13 +16,19 @@ import {
 } from '../../alert_triage/constants';
 import { FP_DECISION_ID_PREFIX } from '../../alert_triage/fp_decisions';
 import { tagInChunks } from '../../alert_triage/plan_sweep';
-import { findAlertsByTag, openAlerts, statusCodeOf, tagAlerts } from './ports';
+import {
+  findAlertIdsByTag,
+  reopenFalsePositiveClosedAlerts,
+  statusCodeOf,
+  tagAlerts,
+} from './ports';
 
 /**
  * Takes a decision back. The decision is soft-deleted first, as the Context Engine does, so no
  * later sweep matches it, and then its alerts are put back:
- * - an approved decision's alerts that are still closed are reopened, and all of them lose
- *   `az:closed_by_decision:<id>`. An alert an analyst moved on (acknowledged, closed again) keeps its status;
+ * - an approved decision's alerts that are still closed as a false positive are reopened, and all
+ *   of them lose `az:closed_by_decision:<id>`. An alert an analyst moved on (acknowledged, or closed
+ *   again for another reason) keeps its status;
  * - a dismissal's alerts lose `az:inconclusive` and `az:skipped_by_decision:<id>`, so the sweep
  *   picks them up again.
  *
@@ -89,20 +95,16 @@ export const getTriageRevokeFpDecisionStepDefinition = () =>
         let drained = false;
         for (let page = 0; page < MAX_REVOKE_PAGES; page++) {
           // The tag leaves the alerts on success, so each page is the next batch of what is left.
-          const tagged = await findAlertsByTag(contextManager, tag);
-          const alertIds = tagged.map((alert) => alert.id);
+          const alertIds = await findAlertIdsByTag(contextManager, tag);
           if (alertIds.length === 0) {
             drained = true;
             break;
           }
           if (isApproval) {
-            // The tag stays on an alert an analyst reopened, so only alerts that are still closed
-            // are reopened; the rest keep the analyst's later status and only lose the tag.
-            const stillClosed = tagged
-              .filter((alert) => alert.status === 'closed')
-              .map((alert) => alert.id);
-            if (stillClosed.length > 0) await openAlerts(contextManager, stillClosed);
-            reopened += stillClosed.length;
+            // The tag stays on an alert an analyst reopened, and that analyst may have closed it
+            // again as a true positive. Only alerts still closed as a false positive are reopened;
+            // the rest keep the analyst's later state and only lose the tag.
+            reopened += await reopenFalsePositiveClosedAlerts(contextManager, alertIds);
           }
           await tagInChunks(write, {
             alertIds,
