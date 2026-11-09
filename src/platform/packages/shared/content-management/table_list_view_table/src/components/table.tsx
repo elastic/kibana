@@ -404,8 +404,6 @@ export function Table<T extends UserContentCommonSchema>({
           scrollableInline
           tableLayout="auto"
           responsiveBreakpoint={false}
-          // POC: let the recessed glass listing surface show through the table.
-          hasBackground={false}
           css={cssFavoriteHoverWithinEuiTableRow(euiTheme.euiTheme)}
         />
       </TagFilterContextProvider>

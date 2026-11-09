@@ -415,8 +415,6 @@ const ContentListTableComponent = ({
         scrollableInline={scrollableInline}
         responsiveBreakpoint={responsiveBreakpoint}
         tableLayout={tableLayout}
-        // POC: let the recessed glass listing surface show through the table.
-        hasBackground={false}
         data-test-subj={dataTestSubj}
       />
       {deleteModal}
