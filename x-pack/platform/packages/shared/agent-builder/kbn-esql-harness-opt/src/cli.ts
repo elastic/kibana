@@ -24,6 +24,7 @@ import { executeGold, scoreQuery } from './scorers';
 import type { RunSummary } from './runner';
 import { gateCandidate } from './gate';
 import { lintProposal, proposeCandidate } from './proposer';
+import { verificationSummary, verifyManifest } from './verification';
 import { harnessPaths, writeActiveConfig } from './workspace';
 import { serveReport, writeReport } from './report';
 import { readModelChoices, setupModelConnectors } from './models';
@@ -36,7 +37,7 @@ import {
   writeLabelled,
 } from './corpus/generate';
 import type { GeneratedExample } from './corpus/generate';
-import { corpusIndices } from './corpora/setup';
+import { corpusIndices, installSampleData } from './corpora/setup';
 
 type HarnessConfigObject = Record<string, unknown>;
 
@@ -69,7 +70,7 @@ export const cli = () =>
 
       if (command === 'help') {
         log.info(`Commands:
-  setup-fixtures                    create and seed the fixture indices
+  setup-fixtures [--sample-data]    create and seed the fixture indices (and sample data sets)
   generate-corpus [--probes n]      synthesize, back-translate and difficulty-label a corpus
   baseline [--rollouts n]           run the default config plus matched-compute variants
   round [--config path]             one propose → gate round against the current incumbent
@@ -177,6 +178,9 @@ Start Kibana with:
       }
 
       if (command === 'setup-fixtures') {
+        if (flags['sample-data']) {
+          await installSampleData({ ...target, log });
+        }
         await setupFixtures({ esClient, log });
         const gold = await buildGoldRowCache({ esClient, examples: anchorExamples });
         const executable = [...gold.values()].filter((rows) => rows !== null).length;
@@ -259,6 +263,7 @@ Start Kibana with:
 
         let incumbent = loadConfig(optionalFlag(flags.config));
         let incumbentGateRun: RunSummary | undefined;
+        let lastFeedback = '';
 
         for (let round = 0; round < roundCount; round++) {
           const outputDir = Path.join(runsDir, `round-${Date.now()}`);
@@ -276,12 +281,35 @@ Start Kibana with:
             outputDir,
           });
 
+          const measuredFacts = [
+            '# Measured facts about this harness',
+            '',
+            `- Over ${
+              searchRun.runs.length
+            } runs on the search split the harness needed ${searchRun.meanTries.toFixed(
+              2
+            )} generation attempts on average and ${(searchRun.meanExecutes * 100).toFixed(
+              0
+            )}% of queries executed. Almost nothing fails with an Elasticsearch error.`,
+            '- A matched-compute baseline measured `maxRetries` 1, 3 and 5 as indistinguishable.',
+            '  Retry policy (slot E) and error feedback (slot D) therefore have almost no surface',
+            '  on this dataset: the failures are semantic (wrong rows), not syntactic.',
+            `- Mean result equivalence is ${searchRun.meanResultEquivalence.toFixed(
+              3
+            )} while execution is near-perfect, so the gap is entirely in producing the right rows.`,
+            '- Cost is priced in USD per model, so switching the model slot changes cost even when',
+            '  token counts stay the same.',
+            '',
+            lastFeedback ? `# Your last proposal\n\n${lastFeedback}` : '',
+          ].join('\n');
+
           let proposal;
           try {
             proposal = await proposeCandidate({
               summary: searchRun,
               incumbentConfig: incumbent,
               history: ledger,
+              feedback: measuredFacts,
               scratchDir: Path.join(outputDir, 'proposer'),
               log,
               modelChoices: readModelChoices(),
@@ -303,61 +331,116 @@ Start Kibana with:
             continue;
           }
 
-          incumbentGateRun = await runConfig({
-            label: `round${round}-incumbent-gate`,
-            config: incumbent,
-            examples: gateExamples,
-            rollouts: Math.max(rollouts, 2),
-            esClient,
-            target,
-            log,
-            concurrency,
-            goldRows: gateGold,
-            outputDir,
-          });
+          // Harness fixes are pathology-matched to a model, so a candidate has to clear the gate
+          // on every tier it is evaluated on, not just the one it was diagnosed from.
+          const tiers = (optionalFlag(flags.tiers) ?? '')
+            .split(',')
+            .map((tier) => tier.trim())
+            .filter(Boolean);
+          const tierConfigs: Array<{
+            name: string;
+            apply: (config: HarnessConfigObject) => HarnessConfigObject;
+          }> = tiers.length
+            ? tiers.map((connectorId) => ({
+                name: connectorId,
+                apply: (config) => ({
+                  ...config,
+                  model: { ...(config.model as object), generateConnectorId: connectorId },
+                }),
+              }))
+            : [{ name: 'default-tier', apply: (config) => config }];
 
-          const candidateGateRun = await runConfig({
-            label: `round${round}-candidate-gate`,
-            config: proposal.config,
-            examples: gateExamples,
-            rollouts: Math.max(rollouts, 2),
-            esClient,
-            target,
-            log,
-            concurrency,
-            goldRows: gateGold,
-            outputDir,
-          });
+          const tierResults: Array<{ tier: string; gate: ReturnType<typeof gateCandidate> }> = [];
+          let lastIncumbentGate: RunSummary | undefined;
+          let lastCandidateGate: RunSummary | undefined;
 
-          const gateResult = gateCandidate({
-            incumbent: incumbentGateRun,
-            candidate: candidateGateRun,
-          });
+          for (const tier of tierConfigs) {
+            const incumbentTierRun = await runConfig({
+              label: `round${round}-incumbent-gate${
+                tiers.length ? `-${tier.name.slice(0, 8)}` : ''
+              }`,
+              config: tier.apply(incumbent),
+              examples: gateExamples,
+              rollouts: Math.max(rollouts, 2),
+              esClient,
+              target,
+              log,
+              concurrency,
+              goldRows: gateGold,
+              outputDir,
+            });
 
-          log.info(
-            `[harness-opt] round ${round}: Δreward ${gateResult.meanDelta.toFixed(
-              3
-            )} [${gateResult.ciLow.toFixed(3)}, ${gateResult.ciHigh.toFixed(
-              3
-            )}], tokens/solved ${gateResult.incumbentCostPerSolved.toFixed(
-              0
-            )} → ${gateResult.candidateCostPerSolved.toFixed(
-              0
-            )} [${gateResult.costPerSolvedCiLow.toFixed(
-              0
-            )}, ${gateResult.costPerSolvedCiHigh.toFixed(0)}], regressions ${
-              gateResult.regressions.length
-            }, cost ${gateResult.costRatio.toFixed(2)}× → ${
-              gateResult.accepted
-                ? `ACCEPTED via ${gateResult.acceptedVia}`
-                : `rejected (${gateResult.reasons.join('; ')})`
-            }`
+            const candidateTierRun = await runConfig({
+              label: `round${round}-candidate-gate${
+                tiers.length ? `-${tier.name.slice(0, 8)}` : ''
+              }`,
+              config: tier.apply(proposal.config),
+              examples: gateExamples,
+              rollouts: Math.max(rollouts, 2),
+              esClient,
+              target,
+              log,
+              concurrency,
+              goldRows: gateGold,
+              outputDir,
+            });
+
+            tierResults.push({
+              tier: tier.name,
+              gate: gateCandidate({ incumbent: incumbentTierRun, candidate: candidateTierRun }),
+            });
+            lastIncumbentGate = incumbentTierRun;
+            lastCandidateGate = candidateTierRun;
+          }
+
+          incumbentGateRun = lastIncumbentGate!;
+          const candidateGateRun = lastCandidateGate!;
+          const gateResult = {
+            ...tierResults[0].gate,
+            accepted: tierResults.every(({ gate }) => gate.accepted),
+            reasons: tierResults.flatMap(({ tier, gate }) =>
+              gate.accepted ? [] : gate.reasons.map((reason) => `[${tier}] ${reason}`)
+            ),
+          };
+
+          const incumbentRuns = incumbentGateRun.runs;
+          const seedDeltas = [...new Set(incumbentRuns.map((entry) => entry.exampleId))].map(
+            (exampleId) => {
+              const rewardFor = (entries: typeof incumbentRuns) => {
+                const subset = entries.filter((entry) => entry.exampleId === exampleId);
+                return subset.length
+                  ? subset.reduce((total, entry) => total + entry.score.reward, 0) / subset.length
+                  : 0;
+              };
+              const example = incumbentRuns.find((entry) => entry.exampleId === exampleId);
+              const incumbentReward = rewardFor(incumbentRuns);
+              const candidateReward = rewardFor(candidateGateRun.runs);
+              return {
+                exampleId,
+                question: example?.question ?? exampleId,
+                provenance: example?.provenance ?? '',
+                incumbent: incumbentReward,
+                candidate: candidateReward,
+                delta: candidateReward - incumbentReward,
+              };
+            }
           );
+
+          const verification = verifyManifest({ manifest: proposal.manifest, seedDeltas });
+          lastFeedback = [
+            verificationSummary(verification),
+            `The edit itself was ${gateResult.accepted ? 'accepted' : 'rejected'}${
+              gateResult.accepted ? '' : ` because: ${gateResult.reasons.join('; ')}`
+            }.`,
+          ].join(' ');
 
           ledger.push({
             round,
             manifest: proposal.manifest,
+            verification,
+            incumbentConfig: incumbent,
             gate: gateResult,
+            tiers: tierResults,
             searchReward: searchRun.meanReward,
             incumbentGateReward: incumbentGateRun.meanReward,
             candidateGateReward: candidateGateRun.meanReward,
@@ -395,14 +478,16 @@ Start Kibana with:
           'probes',
           'port',
           'host',
+          'tiers',
         ],
-        boolean: ['serve'],
+        boolean: ['serve', 'sample-data'],
         help: `
         --config <path>      incumbent config to start from (default: shipped defaults)
         --split <name>       search | gate | sealed (baseline only)
         --rollouts <n>       repetitions per example (default 1)
         --rounds <n>         rounds for the campaign command (default 3)
         --concurrency <n>    parallel tool calls (default 4)
+        --tiers <ids>        comma-separated connector ids; candidate must pass the gate on each
         --kibana-url <url>   default http://localhost:5601
         --es-url <url>       default http://localhost:9200
         `,

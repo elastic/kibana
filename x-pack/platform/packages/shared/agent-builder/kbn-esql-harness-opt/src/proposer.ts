@@ -162,7 +162,8 @@ Kibana \`generate_esql\` harness. In this directory you will find:
   the query the harness produced, the gold query, the Elasticsearch error the model was shown,
   how many generation attempts it took, and token spend.
 - \`${incumbentConfigName}\` — the configuration that produced those results.
-- \`history.json\` — previously proposed configs with their gate outcomes (may be empty).
+- \`history.json\` — every earlier proposal with its gate outcome and the reason it was rejected.
+- \`feedback.md\` — measured facts about this harness and how your last prediction held up.
 
 Your job is to propose ONE new configuration that scores better on the composite reward
 \`0.6·result_equivalence + 0.3·executes + 0.1·ast_valid\` without increasing token cost by more
@@ -182,6 +183,8 @@ Rules, which are enforced mechanically after you answer:
    generation step buys quality at a token price, a lower tier for keyword selection buys
    savings. A candidate can also win by holding quality while spending less.
 4. Base the change on evidence in \`bundle.json\`: name the failures you expect it to fix.
+5. Read \`feedback.md\` first. Do not re-propose an edit that history.json already shows was
+   rejected unless you change it materially and say what is different this time.
 
 ${
   modelChoices.length
@@ -208,6 +211,7 @@ export const proposeCandidate = async ({
   summary,
   incumbentConfig,
   history,
+  feedback,
   scratchDir,
   log,
   modelChoices = [],
@@ -217,6 +221,8 @@ export const proposeCandidate = async ({
   summary: RunSummary;
   incumbentConfig: Record<string, unknown>;
   history: unknown[];
+  /** Measured facts + last round's manifest verification, written to `feedback.md`. */
+  feedback: string;
   scratchDir: string;
   log: ToolingLog;
   modelChoices?: Array<{ connectorId: string; inferenceId: string }>;
@@ -230,6 +236,7 @@ export const proposeCandidate = async ({
     JSON.stringify(incumbentConfig, null, 2)
   );
   Fs.writeFileSync(Path.join(scratchDir, 'history.json'), JSON.stringify(history, null, 2));
+  Fs.writeFileSync(Path.join(scratchDir, 'feedback.md'), feedback);
   const proposalPath = Path.join(scratchDir, 'proposal.json');
   if (Fs.existsSync(proposalPath)) {
     Fs.unlinkSync(proposalPath);

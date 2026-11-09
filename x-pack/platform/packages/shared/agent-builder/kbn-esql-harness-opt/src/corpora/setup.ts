@@ -29,7 +29,38 @@ export const corpusIndices: string[] = [
   'users',
   'projects',
   'error_rate_daily',
+  // Shipped sample data: real-ish business, geo/temporal and web-log shapes, installed with
+  // `node scripts/esql_harness_opt.js setup-fixtures --sample-data`.
+  'kibana_sample_data_ecommerce',
+  'kibana_sample_data_flights',
+  'kibana_sample_data_logs',
 ];
+
+/** Install the shipped sample data sets through Kibana, so the corpus is not only our fixtures. */
+export const installSampleData = async ({
+  kibanaUrl,
+  username,
+  password,
+  log,
+}: {
+  kibanaUrl: string;
+  username: string;
+  password: string;
+  log: ToolingLog;
+}): Promise<void> => {
+  for (const id of ['ecommerce', 'flights', 'logs']) {
+    const response = await fetch(`${kibanaUrl}/api/sample_data/${id}`, {
+      method: 'POST',
+      headers: {
+        'kbn-xsrf': 'harness-opt',
+        // The sample-data API is an internal route in this deployment shape.
+        'x-elastic-internal-origin': 'Kibana',
+        authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`,
+      },
+    });
+    log.info(`[harness-opt] sample data ${id}: ${response.status}`);
+  }
+};
 
 export const setupFixtures = async ({
   esClient,

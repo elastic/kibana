@@ -10,225 +10,260 @@ import Http from 'http';
 import Path from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { harnessPaths } from './workspace';
+import { reportTemplate } from './report_template';
+import { verifyManifest } from './verification';
+import type { ExampleRun, RunSummary } from './runner';
 
 interface StoredRun {
-  summary: Record<string, unknown>;
+  summary: Omit<RunSummary, 'runs'> & { configHash: string };
   config: Record<string, unknown>;
-  runs: Array<Record<string, unknown>>;
+  runs: ExampleRun[];
 }
 
-interface ReportPayload {
-  generatedAt: string;
-  ledger: unknown[];
-  runs: Array<{ id: string; file: string; summary: Record<string, unknown>; runs: unknown[] }>;
+interface LedgerEntry {
+  round: number;
+  rejected?: string;
+  manifest?: {
+    slots?: string[];
+    rationale?: string;
+    predictedFixes?: string[];
+    predictedRegressions?: string[];
+  };
+  gate?: Record<string, unknown>;
+  config?: Record<string, unknown>;
+  incumbentConfig?: Record<string, unknown>;
 }
 
-const collectRuns = (runsDir: string): ReportPayload['runs'] => {
+const readJson = <T>(path: string): T | undefined => {
+  try {
+    return JSON.parse(Fs.readFileSync(path, 'utf8')) as T;
+  } catch (e) {
+    return undefined;
+  }
+};
+
+const loadRuns = (runsDir: string) => {
   if (!Fs.existsSync(runsDir)) return [];
-  const collected: ReportPayload['runs'] = [];
+  const loaded: Array<{
+    id: string;
+    group: string;
+    label: string;
+    stored: StoredRun;
+    mtimeMs: number;
+  }> = [];
 
-  for (const directory of Fs.readdirSync(runsDir).sort()) {
-    const absolute = Path.join(runsDir, directory);
-    if (!Fs.statSync(absolute).isDirectory()) continue;
-    for (const file of Fs.readdirSync(absolute)) {
+  for (const group of Fs.readdirSync(runsDir)) {
+    const groupDir = Path.join(runsDir, group);
+    if (!Fs.statSync(groupDir).isDirectory()) continue;
+    for (const file of Fs.readdirSync(groupDir)) {
       if (!file.endsWith('.json')) continue;
-      try {
-        const stored = JSON.parse(Fs.readFileSync(Path.join(absolute, file), 'utf8')) as StoredRun;
-        collected.push({
-          id: `${directory}/${file.replace('.json', '')}`,
-          file: Path.join(absolute, file),
-          summary: { ...stored.summary, config: stored.config },
-          // Only the fields the UI shows, so the report stays small enough to open.
-          runs: stored.runs.map((run) => ({
-            exampleId: run.exampleId,
-            provenance: run.provenance,
-            question: run.question,
-            goldQuery: run.goldQuery,
-            generatedQuery: run.generatedQuery,
-            score: run.score,
-            tries: run.tries,
-            inputTokens: run.inputTokens,
-            outputTokens: run.outputTokens,
-            latencyMs: run.latencyMs,
-            connectorId: run.connectorId,
-            costUsd: run.costUsd,
-          })),
-        });
-      } catch (e) {
-        // a half-written run directory should not break the report
-      }
+      const stored = readJson<StoredRun>(Path.join(groupDir, file));
+      if (!stored?.summary) continue;
+      loaded.push({
+        id: `${group}/${file.replace(/\.json$/, '')}`,
+        group,
+        label: file.replace(/\.json$/, ''),
+        stored,
+        mtimeMs: Fs.statSync(Path.join(groupDir, file)).mtimeMs,
+      });
     }
   }
 
-  return collected;
+  return loaded.sort((a, b) => a.mtimeMs - b.mtimeMs);
 };
 
-const TEMPLATE = (payload: string) => `<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8" />
-<title>ES|QL harness optimization — rounds</title>
-<style>
-  :root { color-scheme: dark; --bg:#0d1117; --panel:#161b22; --line:#30363d; --fg:#e6edf3;
-          --muted:#8b949e; --good:#3fb950; --bad:#f85149; --accent:#58a6ff; }
-  * { box-sizing: border-box; }
-  body { margin:0; background:var(--bg); color:var(--fg); font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace; }
-  header { padding:16px 24px; border-bottom:1px solid var(--line); display:flex; gap:24px; align-items:baseline; }
-  h1 { font-size:16px; margin:0; font-weight:600; }
-  .muted { color:var(--muted); }
-  main { display:grid; grid-template-columns:320px 1fr; height:calc(100vh - 57px); }
-  nav { border-right:1px solid var(--line); overflow:auto; }
-  nav button { display:block; width:100%; text-align:left; background:none; border:none; color:var(--fg);
-               padding:10px 16px; cursor:pointer; border-bottom:1px solid var(--line); font:inherit; }
-  nav button:hover, nav button.active { background:var(--panel); }
-  nav .tag { font-size:11px; padding:1px 6px; border-radius:10px; border:1px solid var(--line); }
-  section { overflow:auto; padding:20px 24px; }
-  table { border-collapse:collapse; width:100%; margin:12px 0 24px; }
-  th, td { text-align:left; padding:6px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
-  th { color:var(--muted); font-weight:500; }
-  pre { background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:10px;
-        white-space:pre-wrap; overflow-x:auto; margin:6px 0; }
-  .ok { color:var(--good); } .no { color:var(--bad); } .accent { color:var(--accent); }
-  .pill { display:inline-block; padding:1px 8px; border-radius:10px; font-size:12px; border:1px solid var(--line); }
-  details summary { cursor:pointer; padding:4px 0; }
-  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-bottom:16px; }
-  .card { background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:10px 12px; }
-  .card .k { color:var(--muted); font-size:12px; } .card .v { font-size:18px; }
-</style>
-</head>
-<body>
-<header>
-  <h1>ES|QL harness optimization</h1>
-  <span class="muted" id="generated"></span>
-</header>
-<main>
-  <nav id="nav"></nav>
-  <section id="detail"></section>
-</main>
-<script id="payload" type="application/json">${payload}</script>
-<script>
-const data = JSON.parse(document.getElementById('payload').textContent);
-document.getElementById('generated').textContent =
-  data.ledger.length + ' rounds · ' + data.runs.length + ' runs · generated ' + data.generatedAt;
+const meanBy = <T>(items: T[], pick: (item: T) => number): number =>
+  items.length === 0 ? 0 : items.reduce((total, item) => total + pick(item), 0) / items.length;
 
-const n = (value, digits = 3) => (typeof value === 'number' ? value.toFixed(digits) : '—');
-const esc = (value) => String(value ?? '').replace(/[&<>]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
-
-const views = [
-  ...data.ledger.map((entry, index) => ({ kind: 'round', index, entry })),
-  ...data.runs.map((run, index) => ({ kind: 'run', index, run })),
-];
-
-const nav = document.getElementById('nav');
-views.forEach((view, i) => {
-  const button = document.createElement('button');
-  if (view.kind === 'round') {
-    const gate = view.entry.gate;
-    const verdict = view.entry.rejected ? view.entry.rejected : gate ? (gate.accepted ? 'accepted' : 'rejected') : '—';
-    const colour = gate && gate.accepted ? 'ok' : 'no';
-    button.innerHTML = '<b>round ' + view.entry.round + '</b> <span class="tag ' + colour + '">' + verdict +
-      '</span><br><span class="muted">' + esc((view.entry.manifest?.slots ?? []).join(', ') || 'no manifest') + '</span>';
-  } else {
-    button.innerHTML = '<b>' + esc(view.run.id.split('/')[1]) + '</b><br><span class="muted">reward ' +
-      n(view.run.summary.meanReward) + ' · ' + esc(view.run.id.split('/')[0]) + '</span>';
+/** Mean reward per example id, so two runs can be compared example by example. */
+const rewardByExample = (runs: ExampleRun[]): Map<string, number> => {
+  const totals = new Map<string, { sum: number; count: number }>();
+  for (const run of runs) {
+    const current = totals.get(run.exampleId) ?? { sum: 0, count: 0 };
+    totals.set(run.exampleId, { sum: current.sum + run.score.reward, count: current.count + 1 });
   }
-  button.onclick = () => select(i);
-  nav.appendChild(button);
-});
-
-const configDiff = (config) => Object.entries(config ?? {})
-  .map(([slot, value]) => '<tr><td>' + esc(slot) + '</td><td><pre>' + esc(JSON.stringify(value, null, 1)) + '</pre></td></tr>')
-  .join('');
-
-const renderRound = ({ entry }) => {
-  const gate = entry.gate;
-  const cards = gate ? [
-    ['Δ reward', n(gate.meanDelta)],
-    ['95% CI', '[' + n(gate.ciLow) + ', ' + n(gate.ciHigh) + ']'],
-    ['$ / solved', n(gate.incumbentCostPerSolved, 4) + ' → ' + n(gate.candidateCostPerSolved, 4)],
-    ['regressions', (gate.regressions ?? []).length],
-    ['improvements', (gate.improvements ?? []).length],
-    ['cost ratio', n(gate.costRatio, 2) + '×'],
-  ] : [];
-
-  return '<h2>Round ' + entry.round + ' — ' +
-    (entry.rejected ? '<span class="no">' + esc(entry.rejected) + '</span>'
-      : gate?.accepted ? '<span class="ok">accepted via ' + esc(gate.acceptedVia) + '</span>'
-      : '<span class="no">rejected</span>') + '</h2>' +
-    '<div class="grid">' + cards.map(([k, v]) => '<div class="card"><div class="k">' + k + '</div><div class="v">' + v + '</div></div>').join('') + '</div>' +
-    (gate && !gate.accepted ? '<p class="muted">' + esc((gate.reasons ?? []).join(' · ')) + '</p>' : '') +
-    (entry.manifest ? '<h3>Proposal manifest</h3><p><span class="pill">' + esc((entry.manifest.slots ?? []).join(', ')) + '</span></p>' +
-      '<pre>' + esc(entry.manifest.rationale ?? '') + '</pre>' +
-      '<details><summary>predicted fixes / regressions</summary><pre>' +
-      esc(JSON.stringify({ fixes: entry.manifest.predictedFixes, regressions: entry.manifest.predictedRegressions }, null, 1)) +
-      '</pre></details>' : '') +
-    '<h3>Rewards</h3><table><tr><th>search (incumbent)</th><th>gate (incumbent)</th><th>gate (candidate)</th></tr>' +
-    '<tr><td>' + n(entry.searchReward) + '</td><td>' + n(entry.incumbentGateReward) + '</td><td>' + n(entry.candidateGateReward) + '</td></tr></table>' +
-    (entry.config ? '<h3>Candidate config</h3><table>' + configDiff(entry.config) + '</table>' : '');
+  return new Map([...totals].map(([id, { sum, count }]) => [id, sum / count]));
 };
-
-const renderRun = ({ run }) => {
-  const summary = run.summary;
-  const byProvenance = Object.entries(summary.rewardByProvenance ?? {})
-    .map(([key, value]) => '<tr><td>' + esc(key) + '</td><td>' + n(value.reward) + '</td><td>' + value.count + '</td></tr>').join('');
-
-  const rows = [...run.runs]
-    .sort((a, b) => (a.score?.reward ?? 0) - (b.score?.reward ?? 0))
-    .map((item) => '<tr><td>' + (item.score?.reward >= 0.95 ? '<span class="ok">' : '<span class="no">') + n(item.score?.reward, 2) + '</span></td>' +
-      '<td>' + esc(item.provenance) + '</td>' +
-      '<td>' + esc(item.question).slice(0, 160) + '</td>' +
-      '<td><details><summary>' + (item.score?.executes ? 'executes' : '<span class="no">fails</span>') +
-      ' · eq ' + n(item.score?.resultEquivalence, 2) + '</summary>' +
-      '<pre>' + esc(item.generatedQuery ?? '(no query)') + '</pre>' +
-      '<div class="muted">gold</div><pre>' + esc(item.goldQuery) + '</pre>' +
-      (item.score?.error ? '<div class="muted">error</div><pre>' + esc(item.score.error).slice(0, 800) + '</pre>' : '') +
-      '</details></td>' +
-      '<td>' + (item.tries ?? '—') + '</td><td>' + ((item.inputTokens ?? 0) + (item.outputTokens ?? 0)) +
-      '</td><td>' + esc((item.connectorId ?? '').replace('harness-opt-', '')) + '</td></tr>').join('');
-
-  return '<h2>' + esc(run.id) + '</h2>' +
-    '<div class="grid">' +
-    [['reward', n(summary.meanReward)], ['executes', n(summary.meanExecutes, 2)], ['result eq', n(summary.meanResultEquivalence)],
-     ['tries', n(summary.meanTries, 2)], ['tokens', (summary.totalInputTokens ?? 0) + (summary.totalOutputTokens ?? 0)],
-     ['cost USD', n(summary.totalCostUsd, 3)],
-     ['config', esc(summary.configHash ?? '')]]
-      .map(([k, v]) => '<div class="card"><div class="k">' + k + '</div><div class="v">' + v + '</div></div>').join('') + '</div>' +
-    (byProvenance ? '<h3>By provenance</h3><table><tr><th>source</th><th>reward</th><th>runs</th></tr>' + byProvenance + '</table>' : '') +
-    '<h3>Examples (worst first)</h3><table><tr><th>reward</th><th>source</th><th>question</th><th>result</th><th>tries</th><th>tokens</th><th>model</th></tr>' + rows + '</table>';
-};
-
-function select(index) {
-  [...nav.children].forEach((child, i) => child.classList.toggle('active', i === index));
-  const view = views[index];
-  document.getElementById('detail').innerHTML = view.kind === 'round' ? renderRound(view) : renderRun(view);
-}
-select(0);
-</script>
-</body>
-</html>`;
 
 /**
- * Write a single self-contained HTML file for browsing rounds and runs.
+ * Build everything the UI needs: a campaign timeline, per-round config diffs and per-seed
+ * effects, a run browser, and a per-example history across every run.
  *
- * Deliberately dependency-free and offline: the point is that anyone can open the artifact of a
- * campaign and audit what each round proposed, what it was measured at, and why it was accepted
- * or rejected — without the repo, a server, or the runner's state.
+ * All of it is derived from the run files and the ledger, so the report is reproducible from a
+ * campaign directory alone and re-rendering is a pure function of what is on disk.
  */
-/** Render the report HTML from whatever is on disk right now. */
-export const renderReport = (): string => {
-  const { runsDir, lineageDir, root } = harnessPaths();
-  const ledgerPath = Path.join(lineageDir, 'ledger.json');
-  const payload: ReportPayload = {
-    generatedAt: new Date().toISOString(),
-    ledger: Fs.existsSync(ledgerPath)
-      ? (JSON.parse(Fs.readFileSync(ledgerPath, 'utf8')) as unknown[])
-      : [],
-    runs: collectRuns(runsDir),
-  };
+export const buildReportPayload = () => {
+  const { runsDir, lineageDir } = harnessPaths();
+  const runs = loadRuns(runsDir);
+  const ledger = readJson<LedgerEntry[]>(Path.join(lineageDir, 'ledger.json')) ?? [];
 
-  void root;
-  return TEMPLATE(JSON.stringify(payload).replace(/</g, '\\u003c'));
+  const runViews = runs.map(({ id, group, label, stored }) => {
+    const results = stored.runs ?? [];
+    return {
+      id,
+      group,
+      label,
+      configHash: stored.summary.configHash,
+      config: stored.config,
+      meanReward: stored.summary.meanReward,
+      meanExecutes: stored.summary.meanExecutes,
+      meanResultEquivalence: stored.summary.meanResultEquivalence,
+      meanTries: stored.summary.meanTries,
+      totalInputTokens: stored.summary.totalInputTokens,
+      totalOutputTokens: stored.summary.totalOutputTokens,
+      totalCostUsd: stored.summary.totalCostUsd ?? 0,
+      rewardByProvenance: stored.summary.rewardByProvenance ?? {},
+      exampleCount: new Set(results.map((result) => result.exampleId)).size,
+      models: [
+        ...new Set(
+          results
+            .map((result) => (result.connectorId ?? '').replace('harness-opt-', ''))
+            .filter(Boolean)
+        ),
+      ],
+      results: results.map((result) => ({
+        exampleId: result.exampleId,
+        provenance: result.provenance,
+        question: result.question,
+        goldQuery: result.goldQuery,
+        generatedQuery: result.generatedQuery,
+        score: result.score,
+        tries: result.tries,
+        costUsd: result.costUsd,
+        connectorId: result.connectorId,
+      })),
+    };
+  });
+
+  const byLabel = new Map(runViews.map((run) => [run.label, run]));
+
+  const rounds = ledger.map((entry) => {
+    const candidateRun = byLabel.get(`round${entry.round}-candidate-gate`);
+    const incumbentRun = byLabel.get(`round${entry.round}-incumbent-gate`);
+    const searchRun = byLabel.get(`round${entry.round}-incumbent-search`);
+
+    const incumbentRewards = incumbentRun
+      ? rewardByExample(incumbentRun.results as ExampleRun[])
+      : new Map();
+    const candidateRewards = candidateRun
+      ? rewardByExample(candidateRun.results as ExampleRun[])
+      : new Map();
+
+    const seedDeltas = [...incumbentRewards.keys()]
+      .filter((exampleId) => candidateRewards.has(exampleId))
+      .map((exampleId) => {
+        const example = (incumbentRun?.results ?? []).find(
+          (result) => result.exampleId === exampleId
+        );
+        return {
+          exampleId,
+          question: example?.question ?? exampleId,
+          provenance: example?.provenance ?? '',
+          incumbent: incumbentRewards.get(exampleId) ?? 0,
+          candidate: candidateRewards.get(exampleId) ?? 0,
+          delta: (candidateRewards.get(exampleId) ?? 0) - (incumbentRewards.get(exampleId) ?? 0),
+        };
+      });
+
+    return {
+      round: entry.round,
+      rejectedReason: entry.rejected,
+      slots: entry.manifest?.slots ?? [],
+      rationale: entry.manifest?.rationale ?? '',
+      gate: entry.gate,
+      incumbentConfig: entry.incumbentConfig ?? incumbentRun?.config ?? {},
+      candidateConfig: entry.config ?? candidateRun?.config ?? {},
+      seedDeltas,
+      verification: entry.manifest
+        ? verifyManifest({ manifest: entry.manifest, seedDeltas })
+        : undefined,
+      runs: [searchRun?.id, incumbentRun?.id, candidateRun?.id].filter(Boolean),
+    };
+  });
+
+  // Per-example history across every run: the fastest way to see whether an example is simply
+  // hard, or whether a particular config broke it.
+  const examples = new Map<
+    string,
+    {
+      exampleId: string;
+      question: string;
+      goldQuery: string;
+      provenance: string;
+      index?: string;
+      difficulty?: string;
+      split?: string;
+      runs: number;
+      meanReward: number;
+      history: Array<Record<string, unknown>>;
+    }
+  >();
+
+  for (const run of runViews) {
+    for (const result of run.results) {
+      const current = examples.get(result.exampleId) ?? {
+        exampleId: result.exampleId,
+        question: result.question,
+        goldQuery: result.goldQuery,
+        provenance: result.provenance,
+        runs: 0,
+        meanReward: 0,
+        history: [],
+      };
+      current.history.push({
+        runId: run.id,
+        label: run.label,
+        reward: result.score.reward,
+        resultEquivalence: result.score.resultEquivalence,
+        executes: result.score.executes,
+        error: result.score.error,
+        generatedQuery: result.generatedQuery,
+        tries: result.tries,
+        connectorId: result.connectorId,
+      });
+      current.meanReward =
+        (current.meanReward * current.runs + result.score.reward) / (current.runs + 1);
+      current.runs += 1;
+      examples.set(result.exampleId, current);
+    }
+  }
+
+  const sealedRuns = runViews
+    .filter((run) => run.label === 'sealed')
+    .map((run) => ({
+      label: `${run.group} (${run.configHash})`,
+      isBaseline: JSON.stringify(run.config).length < 400,
+      meanReward: run.meanReward,
+      anchorReward: meanBy(
+        run.results.filter((result) => result.provenance !== 'generated-corpus'),
+        (result) => result.score.reward
+      ),
+      generatedReward: meanBy(
+        run.results.filter((result) => result.provenance === 'generated-corpus'),
+        (result) => result.score.reward
+      ),
+      totalCostUsd: run.totalCostUsd,
+      costPerSolved:
+        run.totalCostUsd /
+        Math.max(
+          run.results.reduce((t, r) => t + r.score.reward, 0),
+          0.0001
+        ),
+    }));
+
+  return {
+    generatedAt: new Date().toISOString(),
+    rounds,
+    runs: runViews,
+    examples: [...examples.values()],
+    exampleCount: examples.size,
+    sealed: sealedRuns,
+    totalCostUsd: runViews.reduce((total, run) => total + run.totalCostUsd, 0),
+  };
 };
+
+export const renderReport = (): string =>
+  reportTemplate(JSON.stringify(buildReportPayload()).replace(/</g, '\\u003c'));
 
 export const writeReport = (): string => {
   const outputPath = Path.join(harnessPaths().root, 'report.html');
@@ -237,11 +272,8 @@ export const writeReport = (): string => {
 };
 
 /**
- * Serve the report over HTTP, re-rendering on every request.
- *
- * Rendering is a pure function of the run directory and the ledger, so a reload always shows the
- * current state of a campaign — including one that is still running — and the same URL can be
- * opened from another machine on the network.
+ * Serve the report, re-rendering on every request so a reload reflects a campaign that is still
+ * running, and the same URL works from another machine.
  */
 export const serveReport = ({
   host,
@@ -260,12 +292,11 @@ export const serveReport = ({
         return;
       }
       try {
-        const html = renderReport();
         response.writeHead(200, {
           'content-type': 'text/html; charset=utf-8',
           'cache-control': 'no-store',
         });
-        response.end(html);
+        response.end(renderReport());
       } catch (e) {
         response.writeHead(500, { 'content-type': 'text/plain' });
         response.end(String((e as Error).message));
@@ -274,7 +305,7 @@ export const serveReport = ({
 
     server.on('error', reject);
     server.listen(port, host, () => {
-      log.info(`[harness-opt] report served on http://${host}:${port} (re-rendered per request)`);
+      log.info(`[harness-opt] report on http://${host}:${port} — re-rendered per request`);
     });
     process.on('SIGINT', () => {
       server.close();
