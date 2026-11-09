@@ -10,6 +10,8 @@ import {
   isProposalSettling,
   isAwaitingRetry,
   isTerminal,
+  listProposalsQuerySchema,
+  MAX_ROOT_PROPOSAL_IDS,
   OPEN_PROPOSAL_STATUSES,
   proposalChartsSummaryQuerySchema,
   proposalStatusSchema,
@@ -159,5 +161,24 @@ describe('reviseProposalResponseSchema', () => {
         status: 'pending',
       })
     ).toEqual({ proposalId: 'proposal-1', revision: 2, status: 'pending' });
+  });
+});
+
+describe('listProposalsQuerySchema rootProposalIds', () => {
+  it('wraps a single query-string value in an array', () => {
+    expect(listProposalsQuerySchema.parse({ rootProposalIds: 'root-1' }).rootProposalIds).toEqual([
+      'root-1',
+    ]);
+  });
+
+  it('keeps repeated values', () => {
+    expect(
+      listProposalsQuerySchema.parse({ rootProposalIds: ['root-1', 'root-2'] }).rootProposalIds
+    ).toEqual(['root-1', 'root-2']);
+  });
+
+  it('refuses more chains than one page can hold', () => {
+    const ids = Array.from({ length: MAX_ROOT_PROPOSAL_IDS + 1 }, (_, i) => `root-${i}`);
+    expect(listProposalsQuerySchema.safeParse({ rootProposalIds: ids }).success).toBe(false);
   });
 });

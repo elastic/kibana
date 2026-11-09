@@ -10,10 +10,10 @@ import { EuiNotificationBadge } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
-import { useCasesContext } from '../cases_context/use_cases_context';
 import { type CaseUI } from '../../../common';
 import { useGetCaseFileStats } from '../../containers/use_get_case_file_stats';
 import { useCaseObservables } from './use_case_observables';
+import { useEnabledAttachmentTypes } from './hooks/use_enabled_attachment_types';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import { resolveUnifiedAttachmentType } from '../../../common/utils/attachments/migration_utils';
 import { FILE_ATTACHMENT_TYPE } from '../../../common/constants';
@@ -84,7 +84,7 @@ AttachmentsBadge.displayName = 'AttachmentsBadge';
  * search term and filters so the badge stays a stable total.
  */
 export const useCaseAttachmentsTotal = ({ caseData }: { caseData: CaseUI }): number => {
-  const { unifiedAttachmentTypeRegistry } = useCasesContext();
+  const enabledAttachmentTypes = useEnabledAttachmentTypes();
   const { data: fileStatsData } = useGetCaseFileStats({ caseId: caseData.id });
   const { observables } = useCaseObservables(caseData);
   const { observablesAuthorized: canShowObservableTabs, isObservablesFeatureEnabled } =
@@ -93,8 +93,7 @@ export const useCaseAttachmentsTotal = ({ caseData }: { caseData: CaseUI }): num
   return useMemo(() => {
     const owner = Array.isArray(caseData.owner) ? caseData.owner[0] : caseData.owner;
     const typesWithTabView = new Set(
-      unifiedAttachmentTypeRegistry
-        .list()
+      enabledAttachmentTypes
         .filter(
           (type) => type.id !== FILE_ATTACHMENT_TYPE && type.getAttachmentList?.()?.children != null
         )
@@ -116,7 +115,7 @@ export const useCaseAttachmentsTotal = ({ caseData }: { caseData: CaseUI }): num
   }, [
     caseData.owner,
     caseData.comments,
-    unifiedAttachmentTypeRegistry,
+    enabledAttachmentTypes,
     fileStatsData?.total,
     canShowObservableTabs,
     isObservablesFeatureEnabled,

@@ -9,6 +9,7 @@ import type { AgenticInvestigationsPublicPluginStart } from '@kbn/agentic-invest
 import type { ProposalsPublicPluginStart } from '@kbn/proposals-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
+import type { CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -29,6 +30,8 @@ export interface AlertZeroStartDependencies {
   licensing: LicensingPluginStart;
   cloud?: CloudStart;
   agentBuilder?: AgentBuilderPluginStart;
+  /** Adds a proposal to a case from the queue. */
+  cases?: CasesPublicStart;
   agenticInvestigations?: AgenticInvestigationsPublicPluginStart;
   proposals?: ProposalsPublicPluginStart;
   /** Optional; absent in minimal Kibana deployments without X-Pack security. */

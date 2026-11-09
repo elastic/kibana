@@ -101,6 +101,11 @@ export interface CasesPublicStartDependencies {
   toastNotifications: IToasts;
   agentBuilder?: AgentBuilderPluginStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
+  /**
+   * Only its presence is read, to register the proposal attachment type. Not typed with the
+   * plugin's contract so Cases does not take a project reference on the proposals plugin.
+   */
+  proposals?: object;
 }
 
 /**

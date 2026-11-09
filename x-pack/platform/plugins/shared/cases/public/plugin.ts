@@ -135,6 +135,7 @@ export class CasesUiPlugin
     registerInternalAttachments(this.unifiedAttachmentTypeRegistry, {
       hasDashboardPluginEnabled: Boolean(plugins.dashboard),
       hasMapsPluginEnabled: Boolean(plugins.maps),
+      hasProposalsPluginEnabled: Boolean(plugins.proposals),
     });
 
     KibanaServices.init({

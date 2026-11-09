@@ -196,6 +196,41 @@ describe('AttachmentTypeFilter', () => {
     });
   });
 
+  it('omits a type the viewer cannot use', async () => {
+    const registry = buildRegistry();
+    registry.register({
+      id: 'proposal',
+      isEnabled: () => false,
+      getLabel: () => 'Proposals',
+      getIcon: () => 'lock',
+      getCreationActivity: () => ({ event: 'added a proposal' }),
+      schema: z.object({}),
+    });
+    const caseWithProposal = {
+      ...caseWithAlerts,
+      comments: [
+        ...caseWithAlerts.comments,
+        { ...alertComment, id: 'proposal-comment', type: 'proposal', attachmentId: 'p-1' },
+      ],
+    } as unknown as CaseUI;
+
+    renderWithTestingProviders(
+      <AttachmentTypeFilter
+        caseData={caseWithProposal}
+        selectedAttachmentTypes={[]}
+        onAttachmentTypesChange={onAttachmentTypesChange}
+      />,
+      { wrapperProps: { unifiedAttachmentTypeRegistry: registry } }
+    );
+
+    await userEvent.click(screen.getByTestId('options-filter-popover-button-attachmentType'));
+
+    expect(
+      await screen.findByTestId('options-filter-popover-item-security.alert')
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId('options-filter-popover-item-proposal')).not.toBeInTheDocument();
+  });
+
   it('omits excluded type ids from the dropdown', async () => {
     renderWithTestingProviders(
       <AttachmentTypeFilter

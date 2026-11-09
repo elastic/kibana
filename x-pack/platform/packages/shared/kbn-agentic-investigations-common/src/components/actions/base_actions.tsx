@@ -70,7 +70,12 @@ const useContextMenuItems = (
   );
 };
 
-export type CardActionType = 'createEscalation' | 'attachToEscalation' | 'close' | 'reopen';
+export type CardActionType =
+  | 'createEscalation'
+  | 'attachToEscalation'
+  | 'addToCase'
+  | 'close'
+  | 'reopen';
 
 export interface BaseActionsProps {
   investigation: Investigation;
@@ -84,6 +89,11 @@ export interface BaseActionsProps {
    * performs the HTTP mutation. Without it the fallback modal does nothing.
    */
   canCloseInvestigation?: boolean;
+  /**
+   * When true the menu offers "Add to case". The caller handles the `addToCase` action, which
+   * carries the record id.
+   */
+  canAddToCase?: boolean;
   /** Always offered, including on a decided investigation, so the menu is never empty. */
   onCopyLink: (id: Investigation['id']) => void;
   /** When false the menu trigger is disabled and its tooltip names the missing privilege. */
@@ -98,6 +108,7 @@ export const BaseActions = memo<BaseActionsProps>(
     onClickAction,
     canManageEscalations = false,
     canCloseInvestigation = false,
+    canAddToCase = false,
     onCopyLink,
     canOpenInvestigationDetails = true,
     'data-test-subj': dataTestSubj,
@@ -155,6 +166,16 @@ export const BaseActions = memo<BaseActionsProps>(
               },
             ]
           : []),
+        ...(canAddToCase
+          ? [
+              {
+                key: 'addToCase',
+                icon: 'casesApp' as IconType,
+                name: ACTIONS_TRANSLATIONS.buttons.addToCase,
+                onClick: () => onClickAction('addToCase', investigation.recordId),
+              },
+            ]
+          : []),
         {
           key: 'copyLink',
           icon: COPY_LINK_ACTION.iconType as IconType,
@@ -199,6 +220,7 @@ export const BaseActions = memo<BaseActionsProps>(
         onClickAction,
         canManageEscalations,
         canCloseInvestigation,
+        canAddToCase,
         onCopyLink,
       ]
     );

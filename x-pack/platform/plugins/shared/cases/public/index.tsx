@@ -39,6 +39,7 @@ export type {
   UnifiedReferenceAttachmentViewProps,
   UnifiedValueAttachmentViewProps,
   AttachmentAction,
+  AttachmentTypeEnabledContext,
   DocumentActionProps,
   RelatedRemovalChoice,
   WorkflowActivityLabelProps,

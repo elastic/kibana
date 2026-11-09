@@ -35,6 +35,7 @@ import {
 } from '@kbn/agentic-investigations-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
+import type { CasesPublicStart } from '@kbn/cases-plugin/public';
 import { useQueueAssignees } from '../../components/connected_assignees/use_queue_assignees';
 import { useAlertZeroInvestigationsCapabilities } from '../../hooks/use_alertzero_investigations_capabilities';
 import { ALERTZERO_PROPOSAL_ORIGIN } from '../../../common/proposals/origin';
@@ -70,6 +71,10 @@ import { useDropDecidedProposal } from './queue/use_drop_decided_proposal';
 import { QueueSection } from './queue/queue_section';
 import { AgentBuilderPrivilegeCallout } from '../../components/agent_builder_privilege_callout/agent_builder_privilege_callout';
 import { ScanFailureCallout } from '../../components/scan_failure_callout/scan_failure_callout';
+import {
+  AddProposalToCase,
+  canAddProposalToCase,
+} from '../../components/add_to_case/add_proposal_to_case';
 import {
   ALERTZERO_UI_EVENTS,
   classifyError,
@@ -264,8 +269,9 @@ const ConversationsPageContent: React.FC = () => {
   );
 
   const {
-    services: { notifications },
-  } = useKibana<CoreStart>();
+    services: { notifications, cases },
+  } = useKibana<CoreStart & { cases?: CasesPublicStart }>();
+  const canAddToCase = canAddProposalToCase(cases);
 
   const { mutateAsync: setInvestigationStatus } = useSetInvestigationStatus();
 
@@ -388,6 +394,12 @@ const ConversationsPageContent: React.FC = () => {
     }
   }, [selectedConversationId, canAccessAgentBuilder, notifications, clearSelectedConversation]);
 
+  // A card's record id is its proposal id, so the proposal to add comes straight from the queue.
+  const proposalToAddToCase =
+    modalState.type === 'addToCase' && modalState.recordId
+      ? proposalsById.get(modalState.recordId)
+      : undefined;
+
   const actionInvestigation = useMemo(
     () =>
       modalState.recordId
@@ -413,6 +425,9 @@ const ConversationsPageContent: React.FC = () => {
         renderCloseModal={canManageInvestigations ? renderCloseModal : undefined}
         renderEscalationModal={renderEscalationModal}
       />
+      {canAddToCase && (
+        <AddProposalToCase cases={cases} proposal={proposalToAddToCase} onOpened={closeModal} />
+      )}
 
       {/* No `wrap`: a wrapping column sizes each line to its widest content, which let a
           long row title push the queue past the viewport instead of truncating. */}
@@ -495,6 +510,7 @@ const ConversationsPageContent: React.FC = () => {
                 getChatHref={getChatHrefForProposal}
                 canManageEscalations={canManageEscalations}
                 canCloseInvestigation={canManageInvestigations}
+                canAddToCase={canAddToCase}
                 onCopyLink={copyLinkForProposal}
                 renderAssignees={renderAssignees}
                 renderInFlightStatus={renderInFlightStatus}

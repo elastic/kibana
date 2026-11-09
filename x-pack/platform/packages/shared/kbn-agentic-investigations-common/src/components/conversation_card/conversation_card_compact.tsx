@@ -60,6 +60,8 @@ interface ConversationCardCompactProps {
   /** When false the card is inert and its chat control and menu are disabled. Defaults to true. */
   canOpenInvestigationDetails?: boolean;
   chatHref?: string;
+  /** Offers "Add to case", which a decided proposal can still be. */
+  canAddToCase?: boolean;
   onCopyLink: BaseActionsProps['onCopyLink'];
 }
 
@@ -77,6 +79,7 @@ export const ConversationCardCompact = memo<ConversationCardCompactProps>(
     onOpenChat,
     canOpenInvestigationDetails = true,
     chatHref,
+    canAddToCase,
     onCopyLink,
   }) => {
     const { euiTheme } = useEuiTheme();
@@ -163,6 +166,7 @@ export const ConversationCardCompact = memo<ConversationCardCompactProps>(
                   onOpenChat={() => onOpenChat(investigation.id)}
                   chatHref={chatHref}
                   canOpenInvestigationDetails={canOpenInvestigationDetails}
+                  canAddToCase={canAddToCase}
                   onCopyLink={onCopyLink}
                 />
               </EuiFlexItem>

@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import type { CaseUI } from '../../../../common';
 import { resolveUnifiedAttachmentType } from '../../../../common/utils/attachments/migration_utils';
-import { useCasesContext } from '../../cases_context/use_cases_context';
+import { useEnabledAttachmentTypes } from '../hooks/use_enabled_attachment_types';
 import { useCasesFeatures } from '../../../common/use_cases_features';
 import type { MultiSelectFilterOption } from '../../all_cases/components/multi_select_filter';
 import { MultiSelectFilter } from '../../all_cases/components/multi_select_filter';
@@ -37,7 +37,7 @@ export const AttachmentTypeFilter = React.memo<AttachmentTypeFilterProps>(
     isLoading = false,
     excludedTypes,
   }) => {
-    const { unifiedAttachmentTypeRegistry } = useCasesContext();
+    const enabledAttachmentTypes = useEnabledAttachmentTypes();
     const { observablesAuthorized, isObservablesFeatureEnabled } = useCasesFeatures();
 
     const excluded = useMemo(() => new Set(excludedTypes ?? []), [excludedTypes]);
@@ -54,14 +54,15 @@ export const AttachmentTypeFilter = React.memo<AttachmentTypeFilterProps>(
     }, [caseData.comments, caseData.owner]);
 
     const options = useMemo<Array<MultiSelectFilterOption<string>>>(() => {
-      const registryOptions = unifiedAttachmentTypeRegistry
-        .list()
-        .reduce<Array<MultiSelectFilterOption<string>>>((acc, item) => {
+      const registryOptions = enabledAttachmentTypes.reduce<Array<MultiSelectFilterOption<string>>>(
+        (acc, item) => {
           if (availableTypes.has(item.id) && !excluded.has(item.id)) {
             acc.push({ key: item.id, label: item.getLabel() });
           }
           return acc;
-        }, []);
+        },
+        []
+      );
 
       const observablesOption =
         observablesAuthorized &&
@@ -74,7 +75,7 @@ export const AttachmentTypeFilter = React.memo<AttachmentTypeFilterProps>(
         a.label.localeCompare(b.label)
       );
     }, [
-      unifiedAttachmentTypeRegistry,
+      enabledAttachmentTypes,
       availableTypes,
       observablesAuthorized,
       isObservablesFeatureEnabled,

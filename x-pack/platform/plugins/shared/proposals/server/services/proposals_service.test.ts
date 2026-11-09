@@ -3024,6 +3024,21 @@ describe('ProposalsService', () => {
       );
     });
 
+    it('should restrict to the given revision chains', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+
+      await service.list(listQuery({ rootProposalIds: ['root-1', 'root-2'] }), SPACE_ID, request);
+
+      const [[searchArgs]] = storage.search.mock.calls;
+      expect(searchArgs.query.bool.filter).toEqual(
+        expect.arrayContaining([
+          { term: { spaceId: SPACE_ID } },
+          { terms: { rootProposalId: ['root-1', 'root-2'] } },
+        ])
+      );
+    });
+
     it('should restrict to a set of conversations for in-process callers', async () => {
       const storage = createStorage(baseDocument());
       const { service } = createService(storage);

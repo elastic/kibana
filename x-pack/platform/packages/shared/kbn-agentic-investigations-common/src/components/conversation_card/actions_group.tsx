@@ -33,6 +33,7 @@ export interface ConversationsActionsGroupProps {
    * caller supplies a real handler; without it the fallback modal does nothing.
    */
   canCloseInvestigation?: boolean;
+  canAddToCase?: boolean;
   /** Backs the menu's "Copy link" item. The caller owns how the link is built and copied. */
   onCopyLink: BaseActionsProps['onCopyLink'];
 }
@@ -51,6 +52,7 @@ export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
     canOpenInvestigationDetails = true,
     canManageEscalations,
     canCloseInvestigation,
+    canAddToCase,
     onCopyLink,
   }) => {
     const { euiTheme } = useEuiTheme();
@@ -94,6 +96,7 @@ export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
             onClickAction={onClickAction}
             canManageEscalations={canManageEscalations}
             canCloseInvestigation={canCloseInvestigation}
+            canAddToCase={canAddToCase}
             onCopyLink={onCopyLink}
             canOpenInvestigationDetails={canOpenInvestigationDetails}
           />

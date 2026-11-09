@@ -70,6 +70,7 @@ export {
   SECURITY_ENTITY_ATTACHMENT_TYPE,
   SECURITY_TIMELINE_ATTACHMENT_TYPE,
   SECURITY_ATTACK_ATTACHMENT_TYPE,
+  PROPOSAL_ATTACHMENT_TYPE,
   MANAGE_TEMPLATES_CAPABILITY,
   ML_ANOMALY_SWIMLANE_ATTACHMENT_TYPE,
   ML_ANOMALY_CHARTS_ATTACHMENT_TYPE,
@@ -81,6 +82,7 @@ export {
 } from './constants';
 
 export type { AttachmentAttributes } from './types/domain';
+export type { ProposalAttachmentMetadata } from './types/domain/attachment/proposal/v2';
 export { ConnectorTypes, AttachmentType, ExternalReferenceStorageType } from './types/domain';
 export { getCasesFromAlertsUrl, getCaseFindUserActionsUrl } from './api';
 export { createUICapabilities, type CasesUiCapabilities } from './utils/capabilities';
