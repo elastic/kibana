@@ -385,6 +385,7 @@ function viewRounds() {
       ['95% CI', '[' + n(g.ciLow) + ', ' + n(g.ciHigh) + ']'],
       ['$ / solved', usd(g.incumbentCostPerSolved) + ' → ' + usd(g.candidateCostPerSolved)],
       ['cost ratio', n(g.costRatio, 2) + '×', g.costRatio > 1.1 ? 'bad' : 'good'],
+      ['model', esc(round.model || 'code default')],
       ['improved seeds', (g.improvements || []).length, 'good'],
       ['regressed seeds', (g.regressions || []).length, (g.regressions || []).length ? 'bad' : 'muted'],
     ]) : '') +

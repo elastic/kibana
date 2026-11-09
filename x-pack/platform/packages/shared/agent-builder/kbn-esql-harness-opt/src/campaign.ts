@@ -19,6 +19,8 @@ import { proposeCandidate } from './proposer';
 import { reviewEdits } from './review';
 import { verificationSummary, verifyManifest } from './verification';
 import { harnessPaths } from './workspace';
+import { readModelChoices } from './models';
+import { priceFor } from './pricing';
 import {
   applyAndValidateEdits,
   candidateDiff,
@@ -114,6 +116,12 @@ export const runCampaign = async ({
   // Continue from whatever the incumbent worktree already is — a previous campaign's accepted
   // variants live there, and starting from an empty diff would relabel them as "base" and
   // re-explore ground that was already won.
+  const modelChoices = readModelChoices();
+  const aliasOf = (inferenceId: string) => inferenceId.replace('harness-opt-', '');
+  const connectorFor = (alias?: string) =>
+    modelChoices.find((choice) => aliasOf(choice.inferenceId) === alias)?.connectorId;
+  let incumbentModel: string | undefined;
+
   let incumbentEdits: CodeEdit[] = await collectEdits({
     path: mainWorktree,
     kibanaUrl: incumbentTarget.kibanaUrl,
@@ -164,6 +172,11 @@ export const runCampaign = async ({
       proposal = await proposeCandidate({
         summary: searchRun,
         history: ledger,
+        models: modelChoices.map((choice) => {
+          const alias = aliasOf(choice.inferenceId);
+          const price = priceFor(alias);
+          return { alias, inputPrice: price.input, outputPrice: price.output };
+        }),
         feedback: measuredFacts(searchRun, lastFeedback),
         scratchDir: Path.join(workspace.path, '.harness-scratch'),
         workingDir: workspace.path,
@@ -253,10 +266,23 @@ export const runCampaign = async ({
 
     const diff = await candidateDiff(workspace);
     const candidateVariant = { hash: treeHash(workspace.path), diff };
+    // A proposal may ask to be measured on a different model. That stays out of the code —
+    // connector ids are deployment-specific — and is applied by pinning the candidate lane,
+    // which is also what makes it show up in the priced cost comparison.
+    const candidateModel = proposal.manifest.model;
+    const candidateConnector = connectorFor(candidateModel);
+    if (candidateModel && !candidateConnector) {
+      log.warning(
+        `[harness-opt] unknown model alias "${candidateModel}"; running the code's choice`
+      );
+    }
+
     const candidateReady = await restartLane({
       command: restartCommands.candidate,
       url: workspace.kibanaUrl,
-      env: laneEnv,
+      env: candidateConnector
+        ? { ...laneEnv, ESQL_HARNESS_MODEL_CONNECTOR: candidateConnector }
+        : laneEnv,
       log,
     });
     if (!candidateReady) {
@@ -393,6 +419,7 @@ export const runCampaign = async ({
       verification,
       filesChanged: codeEdits.map((edit) => edit.path),
       diff: diff.slice(0, 40_000),
+      model: candidateModel ?? incumbentModel ?? 'code default',
       parentHash: incumbentVariant.hash,
       variantHash: candidateVariant.hash,
       gate: gateResult,
@@ -407,15 +434,19 @@ export const runCampaign = async ({
     if (gateResult.accepted) {
       incumbentEdits = codeEdits;
       incumbentDiff = diff;
+      incumbentModel = candidateModel ?? incumbentModel;
       const acceptedDir = Path.join(lineageDir, `accepted-${round}-${candidateVariant.hash}`);
       Fs.mkdirSync(acceptedDir, { recursive: true });
       Fs.writeFileSync(Path.join(acceptedDir, 'variant.diff'), diff);
       // Lock it in: the incumbent process runs this code from now on.
       promoteEdits({ edits: codeEdits, targetWorktree: mainWorktree });
+      const incumbentConnector = connectorFor(incumbentModel);
       await restartLane({
         command: restartCommands.incumbent,
         url: incumbentTarget.kibanaUrl,
-        env: laneEnv,
+        env: incumbentConnector
+          ? { ...laneEnv, ESQL_HARNESS_MODEL_CONNECTOR: incumbentConnector }
+          : laneEnv,
         log,
       });
       log.info(`[harness-opt] round ${round} promoted to incumbent`);

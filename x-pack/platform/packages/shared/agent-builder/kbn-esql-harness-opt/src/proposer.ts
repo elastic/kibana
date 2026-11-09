@@ -52,7 +52,10 @@ export interface ProposalManifest {
 }
 
 export interface Proposal {
-  manifest: ProposalManifest;
+  manifest: ProposalManifest & {
+    /** Optional model alias the candidate should be measured on. */
+    model?: string;
+  };
 }
 
 /**
@@ -112,7 +115,11 @@ export const buildTraceBundle = (summary: RunSummary): string => {
   );
 };
 
-const PROPOSER_TASK = () => `You are improving the Kibana \`generate_esql\` tool: the thing that
+const PROPOSER_TASK = ({
+  models,
+}: {
+  models: Array<{ alias: string; inputPrice: number; outputPrice: number }>;
+}) => `You are improving the Kibana \`generate_esql\` tool: the thing that
 turns a natural-language question into an ES|QL query. You improve it by editing its source in
 this checkout, the way a Kibana engineer would. It is then measured on held-out examples.
 
@@ -171,6 +178,28 @@ Read the file before you change it, and keep the style of the code around you.
 - **Add a processing step.** Add it to \`graph.ts\` as a node, or to the middleware files, with
   the same error handling as the code around it.
 
+## Choosing a different model
+
+Two different things, and only one of them belongs in the code:
+
+- **The tier** is code. \`nl_to_esql.ts\` selects with
+  \`modelProvider.selectModel({ effortLevel: EffortLevels.low })\`, and raising it to \`medium\`
+  or \`high\` is a legitimate edit every deployment can honour. Never write a connector id:
+  those are UUIDs that exist on one machine only.
+- **A specific model** is not code, because a model that exists here may not exist elsewhere.
+  If you want one measured, name it in your manifest instead:
+
+  \`"model": "<alias>"\` — the candidate is then run on that model and priced accordingly.
+
+${
+  models.length
+    ? `Available aliases, with list price per million tokens (input / output):\n${models
+        .map((entry) => `- ${entry.alias} — $${entry.inputPrice} / $${entry.outputPrice}`)
+        .join('\n')}\n\nThe reward is not cost-adjusted, but the gate rejects a candidate that` +
+      ' costs more than 1.1x the incumbent unless it is also materially better, so an expensive' +
+      ' model has to earn its price.\n'
+    : ''
+}
 ## Verify before you finish
 
 You have a shell. Run these from the repo root; a round that fails them is wasted:
@@ -244,13 +273,18 @@ export const proposeCandidate = async ({
   scratchDir,
   workingDir,
   log,
-  model = process.env.HARNESS_PROPOSER_MODEL ?? 'grok-4.7-low',
+  models = [],
+  // No default: the wrapper's own CLI default is used unless one is named, and claiming a model
+  // the wrapper then ignores is worse than claiming none.
+  model = process.env.HARNESS_PROPOSER_MODEL ?? '',
   timeoutMs = Number(process.env.HARNESS_PROPOSER_TIMEOUT_MS ?? 900_000),
 }: {
   summary: RunSummary;
   history: unknown[];
   /** Measured facts + last round's manifest verification, written to `feedback.md`. */
   feedback: string;
+  /** Models the candidate may be measured on, with their prices. */
+  models?: Array<{ alias: string; inputPrice: number; outputPrice: number }>;
   scratchDir: string;
   /** Directory the agent runs in: the candidate worktree. */
   workingDir: string;
@@ -296,11 +330,19 @@ export const proposeCandidate = async ({
     Path.join(process.env.HOME ?? '', '.pi/agent/skills/cursor-subagent/cursor-task');
 
   const logPath = Path.join(scratchDir, 'proposer.log');
-  log.info(`[harness-opt] proposing candidate with ${command} (${model}); log: ${logPath}`);
+  log.info(
+    `[harness-opt] proposing candidate with ${command} (${
+      model || 'wrapper default'
+    }); log: ${logPath}`
+  );
   try {
     const code = await runProposerCommand({
       command,
-      args: [workingDir ?? scratchDir, '--model', model, PROPOSER_TASK()],
+      args: [
+        workingDir ?? scratchDir,
+        ...(model ? ['--model', model] : []),
+        PROPOSER_TASK({ models }),
+      ],
       logPath,
       timeoutMs,
     });

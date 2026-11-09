@@ -40,6 +40,7 @@ interface LedgerEntry {
   error?: string;
   filesChanged?: string[];
   diff?: string;
+  model?: string;
   parentHash?: string;
   variantHash?: string;
 }
@@ -240,6 +241,7 @@ export const buildReportPayload = () => {
       configHash: entry.variantHash ?? `round-${entry.round}`,
       filesChanged: entry.filesChanged ?? [],
       diff: entry.diff ?? '',
+      model: entry.model ?? 'code default',
       slots: entry.manifest?.slots ?? [],
       rationale: entry.manifest?.rationale ?? '',
       gate: entry.gate,
