@@ -214,6 +214,14 @@ Write replacement content for \`documentation/*.md\` or \`prompts/instructions.m
 runtime without touching code.
 
 ${editableFiles ? `## Channel 3 — code\n\n${EDITABLE_FILES_TEXT}\n` : ''}
+## Which channel to use
+
+Channel 1 alone is rarely enough: the measured facts in \`feedback.md\` show retry and feedback
+policy have little surface on this dataset. The remaining gap is in what the model is *told* —
+the documentation corpus, the exemplars it is shown, the instruction block — and in how the
+graph decides it is done. Read the files before you decide, and prefer a channel that no
+previous round has tried.
+
 ## Rules, enforced mechanically
 
 1. Change at most TWO areas. A diffuse edit cannot be attributed to anything.
