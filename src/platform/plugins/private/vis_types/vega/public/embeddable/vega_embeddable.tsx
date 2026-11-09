@@ -261,12 +261,17 @@ export const vegaEmbeddableFactory = (
       };
     };
 
+    // A by-value panel's state, with its own spec, query and filters.
+    const serializeOwnByValueState = (): VegaByValueState => ({
+      ...serializePanelOwnedState(),
+      ...serializePanelSearch(),
+      spec: spec$.getValue(),
+    });
+
     // Unlinking copies the library item's spec, query, and filters into the panel.
     const serializeByValue = (): VegaByValueState => {
       const libraryItem = libraryItem$.getValue();
-      if (!libraryItem) {
-        return { ...serializePanelOwnedState(), ...serializePanelSearch(), spec: spec$.getValue() };
-      }
+      if (!libraryItem) return serializeOwnByValueState();
       const { spec, query, filters } = libraryItem;
       return { ...serializePanelOwnedState(), query, filters, spec };
     };
@@ -281,9 +286,7 @@ export const vegaEmbeddableFactory = (
       uuid,
       parentApi,
       serializeState: () =>
-        isByReference
-          ? serializeByReference(libraryId)
-          : { ...serializePanelOwnedState(), ...serializePanelSearch(), spec: spec$.getValue() },
+        isByReference ? serializeByReference(libraryId) : serializeOwnByValueState(),
       anyStateChange$: merge(
         titleManager.anyStateChange$,
         timeRangeManager.anyStateChange$,
