@@ -28,19 +28,16 @@ export interface LastFailure {
 const latest = (a?: Date, b?: Date): Date | undefined => (!a || (b && b > a) ? b : a);
 
 /**
- * Per branch, the test's last failure and the builds that ran it since, leaving out the given
- * builds. Only the setups where the test failed are read, so the clean builds of the others are
- * not counted: a test can only look less fixed for it.
+ * Per branch, the test's last failure, a breakage included, and the builds that ran it since. A
+ * breakage is not flakiness, but the test may have changed to end it, so it counts here. Only the
+ * setups where the test failed are read, so the clean builds of the others are not counted: a
+ * test can only look less fixed for it.
  */
-export const lastFailures = (
-  setups: readonly SetupBuilds[],
-  excludedBuildIds: ReadonlySet<string>
-): LastFailure[] => {
+export const lastFailures = (setups: readonly SetupBuilds[]): LastFailure[] => {
   const byBranch = new Map<string, Map<string, { ranAt: Date; failedAt?: Date }>>();
   for (const { branch, builds } of setups) {
     const branchBuilds = byBranch.get(branch) ?? new Map();
     for (const { buildId, ranAt, failedAt } of builds) {
-      if (excludedBuildIds.has(buildId)) continue;
       const existing = branchBuilds.get(buildId);
       branchBuilds.set(buildId, {
         ranAt: existing && existing.ranAt < ranAt ? existing.ranAt : ranAt,

@@ -72,7 +72,8 @@ breakage that dropped it, or the longest one, and each test kept with how many b
 Tests that were fixed since are dropped too. On every branch the test qualifies on, its last failure
 was at least 24 hours before the end of the window, and it has passed enough builds since then
 that, failing as often as before, it would have failed at least 1.5 times on average. The failure
-rate leaves out the breakage builds. For a test failing 8% of its builds, that's 19 builds. Only
+rate leaves out the breakage builds, but a breakage still counts as its last failure, as the test
+may have changed to end it. For a test failing 8% of its builds, that's 19 builds. Only
 the pipelines, configs and targets where the test failed are counted, so a test can only look less
 fixed for it.
 

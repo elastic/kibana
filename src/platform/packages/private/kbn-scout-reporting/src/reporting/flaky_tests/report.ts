@@ -172,7 +172,7 @@ export const checkFlakyTest = (
     breakages.flatMap(({ builds }) => builds.map(({ buildId }) => buildId))
   );
   const lastFailureByBranch = new Map(
-    lastFailures(setups, breakageBuildIds).map((lastFailure) => [lastFailure.branch, lastFailure])
+    lastFailures(setups).map((lastFailure) => [lastFailure.branch, lastFailure])
   );
   const fixes = qualifying.map(({ branch, buildFailRate }) => {
     const lastFailure = lastFailureByBranch.get(branch);

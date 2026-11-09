@@ -256,6 +256,24 @@ describe('checkFlakyTest', () => {
         checkFlakyTest([setupBuilds(withBreakage)], breakageCounts, strict, after(100, 24))
       ).toMatchObject({ outcome: 'kept' });
     });
+
+    it('counts a breakage as its last failure', () => {
+      // 10 of 145 failed outside a 12 build breakage that ended 5 builds ago: 35 clean builds
+      // since the failure before it would be enough, the 5 since the breakage are not
+      const breakageSince = `${'.........x'.repeat(10)}${'.'.repeat(30)}${'x'.repeat(12)}.....`;
+      expect(
+        checkFlakyTest(
+          [setupBuilds(breakageSince)],
+          [branchCounts('main', 157, 22)],
+          strict,
+          after(157, 48)
+        )
+      ).toEqual({
+        outcome: 'kept',
+        breakageBuilds: 12,
+        flakiestBranch: { branch: 'main', builds: 145, failedBuilds: 10, buildFailRate: 10 / 145 },
+      });
+    });
   });
 });
 

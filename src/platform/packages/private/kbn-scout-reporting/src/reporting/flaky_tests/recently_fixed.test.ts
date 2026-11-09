@@ -41,7 +41,7 @@ describe('lastFailures', () => {
       setupBuilds('x..', { first: 100, branch: '9.6' }),
     ];
 
-    expect(lastFailures(setups, new Set())).toEqual([
+    expect(lastFailures(setups)).toEqual([
       { branch: 'main', at: new Date(FIRST_BUILD_AT + 5 * HOUR_MS), cleanBuilds: 3 },
       { branch: '9.6', at: new Date(FIRST_BUILD_AT + 100 * HOUR_MS), cleanBuilds: 2 },
     ]);
@@ -52,23 +52,18 @@ describe('lastFailures', () => {
     const [retried, ...later] = builds;
     const failedAt = new Date(FIRST_BUILD_AT + 3.5 * HOUR_MS);
 
-    expect(
-      lastFailures([{ ...setup, builds: [{ ...retried, failedAt }, ...later] }], new Set())
-    ).toEqual(
+    expect(lastFailures([{ ...setup, builds: [{ ...retried, failedAt }, ...later] }])).toEqual(
       // only build 4 ran after the retry
       [{ branch: 'main', at: failedAt, cleanBuilds: 1 }]
     );
   });
 
-  it('leaves out the given builds, and branches without a failure left', () => {
-    const setups = [setupBuilds('.x..xxx..'), setupBuilds('xx', { first: 100, branch: '9.6' })];
+  it('leaves out branches without a failure', () => {
+    const setups = [setupBuilds('.x..xxx..'), setupBuilds('...', { first: 100, branch: '9.6' })];
 
-    expect(
-      lastFailures(setups, new Set(['build-5', 'build-6', 'build-7', 'build-100', 'build-101']))
-    ).toEqual(
-      // builds 3, 4, 8 and 9
-      [{ branch: 'main', at: new Date(FIRST_BUILD_AT + 2 * HOUR_MS), cleanBuilds: 4 }]
-    );
+    expect(lastFailures(setups)).toEqual([
+      { branch: 'main', at: new Date(FIRST_BUILD_AT + 7 * HOUR_MS), cleanBuilds: 2 },
+    ]);
   });
 });
 
