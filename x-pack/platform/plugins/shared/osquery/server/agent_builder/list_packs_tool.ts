@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId, type BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -19,15 +19,17 @@ import { hasOsqueryToolPrivilege, unauthorizedToolResult } from './tool_authz';
 
 export const LIST_PACKS_TOOL_ID = osqueryTool('list_packs');
 
-const listPacksSchema = z.object({
-  search: z.string().optional().describe('Search term to filter packs by name or description'),
-  enabled: z
-    .boolean()
-    .optional()
-    .describe('Filter to only enabled (true) or disabled (false) packs'),
-  page: z.number().int().min(1).optional().default(1),
-  page_size: z.number().int().min(1).max(100).optional().default(20),
-});
+const listPacksSchema = lazySchema(() =>
+  z.object({
+    search: z.string().optional().describe('Search term to filter packs by name or description'),
+    enabled: z
+      .boolean()
+      .optional()
+      .describe('Filter to only enabled (true) or disabled (false) packs'),
+    page: z.number().int().min(1).optional().default(1),
+    page_size: z.number().int().min(1).max(100).optional().default(20),
+  })
+);
 
 export const listPacksTool = (
   osqueryContext: OsqueryAppContext,

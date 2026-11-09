@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId, type BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -18,19 +18,21 @@ import { hasOsqueryToolPrivilege, unauthorizedToolResult } from './tool_authz';
 
 export const GET_TABLE_SCHEMA_TOOL_ID = osqueryTool('get_table_schema');
 
-const getTableSchemaSchema = z.object({
-  table_name: z
-    .string()
-    .describe(
-      'Osquery table name to get the schema for (e.g. "processes", "process_open_sockets", "scheduled_tasks")'
-    ),
-  platform: z
-    .enum(['linux', 'windows', 'darwin'])
-    .optional()
-    .describe(
-      'Platform to get the schema for. Tables not available on this platform are rejected; columns return the table catalog entry, which covers all supported platforms.'
-    ),
-});
+const getTableSchemaSchema = lazySchema(() =>
+  z.object({
+    table_name: z
+      .string()
+      .describe(
+        'Osquery table name to get the schema for (e.g. "processes", "process_open_sockets", "scheduled_tasks")'
+      ),
+    platform: z
+      .enum(['linux', 'windows', 'darwin'])
+      .optional()
+      .describe(
+        'Platform to get the schema for. Tables not available on this platform are rejected; columns return the table catalog entry, which covers all supported platforms.'
+      ),
+  })
+);
 
 export const getTableSchemaTool = (
   osqueryContext: OsqueryAppContext,

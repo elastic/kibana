@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId, type BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -24,14 +24,16 @@ import { hasOsqueryToolPrivilege, unauthorizedToolResult } from './tool_authz';
 
 export const CHECK_INTEGRATION_TOOL_ID = osqueryTool('check_integration');
 
-const checkIntegrationSchema = z.object({
-  agent_id: z
-    .string()
-    .optional()
-    .describe(
-      'Specific agent ID to check Osquery capability for. If omitted, checks space-wide enrollment.'
-    ),
-});
+const checkIntegrationSchema = lazySchema(() =>
+  z.object({
+    agent_id: z
+      .string()
+      .optional()
+      .describe(
+        'Specific agent ID to check Osquery capability for. If omitted, checks space-wide enrollment.'
+      ),
+  })
+);
 
 /**
  * `unknown` is distinct from `false`: a Fleet or package-policy lookup failure

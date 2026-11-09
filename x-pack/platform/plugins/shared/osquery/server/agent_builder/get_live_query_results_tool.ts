@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId, type BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -23,28 +23,30 @@ const DEFAULT_WAIT_SECONDS = 60;
 const MAX_WAIT_SECONDS = 120;
 const MAX_RESULT_ROWS = 100;
 
-const getLiveQueryResultsSchema = z.object({
-  action_id: z
-    .string()
-    .min(1)
-    .describe('action_id returned by osquery.run_live_query when dispatching a live query'),
-  wait_seconds: z
-    .number()
-    .int()
-    .min(1)
-    .max(MAX_WAIT_SECONDS)
-    .optional()
-    .describe(
-      `Seconds to wait for agent responses before returning. Default ${DEFAULT_WAIT_SECONDS}, max ${MAX_WAIT_SECONDS}.`
-    ),
-  max_rows: z
-    .number()
-    .int()
-    .min(1)
-    .max(MAX_RESULT_ROWS)
-    .optional()
-    .describe(`Maximum rows to return for chat display. Default ${MAX_RESULT_ROWS}.`),
-});
+const getLiveQueryResultsSchema = lazySchema(() =>
+  z.object({
+    action_id: z
+      .string()
+      .min(1)
+      .describe('action_id returned by osquery.run_live_query when dispatching a live query'),
+    wait_seconds: z
+      .number()
+      .int()
+      .min(1)
+      .max(MAX_WAIT_SECONDS)
+      .optional()
+      .describe(
+        `Seconds to wait for agent responses before returning. Default ${DEFAULT_WAIT_SECONDS}, max ${MAX_WAIT_SECONDS}.`
+      ),
+    max_rows: z
+      .number()
+      .int()
+      .min(1)
+      .max(MAX_RESULT_ROWS)
+      .optional()
+      .describe(`Maximum rows to return for chat display. Default ${MAX_RESULT_ROWS}.`),
+  })
+);
 
 export const getLiveQueryResultsTool = (
   osqueryContext: OsqueryAppContext,

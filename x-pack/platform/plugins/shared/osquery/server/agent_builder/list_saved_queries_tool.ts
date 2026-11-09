@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId, type BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -21,14 +21,16 @@ import { hasOsqueryToolPrivilege, unauthorizedToolResult } from './tool_authz';
 
 export const LIST_SAVED_QUERIES_TOOL_ID = osqueryTool('list_saved_queries');
 
-const listSavedQueriesSchema = z.object({
-  search: z
-    .string()
-    .optional()
-    .describe('Search term to filter saved queries by name, description, or query text'),
-  page: z.number().int().min(1).optional().default(1),
-  page_size: z.number().int().min(1).max(100).optional().default(20),
-});
+const listSavedQueriesSchema = lazySchema(() =>
+  z.object({
+    search: z
+      .string()
+      .optional()
+      .describe('Search term to filter saved queries by name, description, or query text'),
+    page: z.number().int().min(1).optional().default(1),
+    page_size: z.number().int().min(1).max(100).optional().default(20),
+  })
+);
 
 export const listSavedQueriesTool = (
   osqueryContext: OsqueryAppContext,
