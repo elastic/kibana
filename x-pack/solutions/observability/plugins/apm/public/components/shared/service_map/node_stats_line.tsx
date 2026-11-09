@@ -9,10 +9,13 @@ import React from 'react';
 import { EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import type { ServiceMapServiceStats } from '@kbn/apm-types';
 import type { AggregatedServiceMapStats } from '../../../../common/service_map';
 import { asDuration, asPercent } from '../../../../common/utils/formatters';
 import { formatCompactRate, getFailureLevel, useFailureColor } from './failure_ring';
 import { textHaloStyles } from './text_halo';
+
+type NodeStatsLineStats = AggregatedServiceMapStats | ServiceMapServiceStats;
 
 /**
  * A node's failure rate and latency on one line, the failure rate coloured by how serious it is.
@@ -22,7 +25,7 @@ export function NodeStatsLine({
   stats,
   showRequests = false,
 }: {
-  stats?: AggregatedServiceMapStats;
+  stats?: NodeStatsLineStats;
   showRequests?: boolean;
 }) {
   const { euiTheme } = useEuiTheme();

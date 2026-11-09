@@ -142,6 +142,23 @@ export function FailureRing({
   );
 }
 
+function formatRateValue(perMinute: number): { value: string; perHour: boolean } {
+  if (perMinute < 1) {
+    const perHour = perMinute * 60;
+    return {
+      value: perHour >= 10 ? String(Math.round(perHour)) : perHour.toFixed(1),
+      perHour: true,
+    };
+  }
+  const value =
+    perMinute >= 1000
+      ? `${(perMinute / 1000).toFixed(perMinute >= 10000 ? 0 : 1)}k`
+      : perMinute >= 10
+      ? String(Math.round(perMinute))
+      : perMinute.toFixed(1);
+  return { value, perHour: false };
+}
+
 /**
  * Requests, short enough for the centre of a node: 412/m, 1.2k/m, or per hour below one a
  * minute (12/h), so low traffic doesn't read as zero.
@@ -153,21 +170,38 @@ export function formatCompactRate(perMinute?: number): string | undefined {
   if (perMinute <= 0) {
     return i18n.translate('xpack.apm.serviceMap.node.noRequests', { defaultMessage: '0' });
   }
-  if (perMinute < 1) {
-    const perHour = perMinute * 60;
-    return i18n.translate('xpack.apm.serviceMap.node.compactRatePerHour', {
-      defaultMessage: '{value}/h',
-      values: { value: perHour >= 10 ? String(Math.round(perHour)) : perHour.toFixed(1) },
+  const { value, perHour } = formatRateValue(perMinute);
+  return perHour
+    ? i18n.translate('xpack.apm.serviceMap.node.compactRatePerHour', {
+        defaultMessage: '{value}/h',
+        values: { value },
+      })
+    : i18n.translate('xpack.apm.serviceMap.node.compactRate', {
+        defaultMessage: '{value}/m',
+        values: { value },
+      });
+}
+
+/**
+ * Same rate as {@link formatCompactRate}, spelled out for screen readers ("14 requests per minute").
+ */
+export function describeCompactRate(perMinute?: number): string | undefined {
+  if (perMinute === undefined) {
+    return undefined;
+  }
+  if (perMinute <= 0) {
+    return i18n.translate('xpack.apm.serviceMap.node.noRequestsDescribed', {
+      defaultMessage: '0 requests per minute',
     });
   }
-  const value =
-    perMinute >= 1000
-      ? `${(perMinute / 1000).toFixed(perMinute >= 10000 ? 0 : 1)}k`
-      : perMinute >= 10
-      ? String(Math.round(perMinute))
-      : perMinute.toFixed(1);
-  return i18n.translate('xpack.apm.serviceMap.node.compactRate', {
-    defaultMessage: '{value}/m',
-    values: { value },
-  });
+  const { value, perHour } = formatRateValue(perMinute);
+  return perHour
+    ? i18n.translate('xpack.apm.serviceMap.node.requestsPerHourDescribed', {
+        defaultMessage: '{value} requests per hour',
+        values: { value },
+      })
+    : i18n.translate('xpack.apm.serviceMap.node.requestsPerMinuteDescribed', {
+        defaultMessage: '{value} requests per minute',
+        values: { value },
+      });
 }
