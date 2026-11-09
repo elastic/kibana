@@ -86,12 +86,16 @@ describe('usePanelSelectionGestures', () => {
 
   const getSelection = () => mockDashboardApi.selectedPanelIds$.value;
 
-  const renderGestures = ({ enabled = true } = {}) => {
+  const renderGestures = ({
+    enabled = true,
+    unmountedPanelIds = [],
+  }: { enabled?: boolean; unmountedPanelIds?: string[] } = {}) => {
     const layoutRef = { current: root } as React.RefObject<HTMLDivElement>;
     const panelRefs = {
-      current: Object.fromEntries(
-        Object.entries(panels).map(([id, element]) => [id, { current: element }])
-      ),
+      current: Object.fromEntries([
+        ...Object.entries(panels).map(([id, element]) => [id, { current: element }]),
+        ...unmountedPanelIds.map((id) => [id, { current: null }]),
+      ]),
     } as React.MutableRefObject<{ [panelId: string]: React.Ref<HTMLDivElement> }>;
     return renderHook(() => usePanelSelectionGestures({ layoutRef, panelRefs, enabled }));
   };
@@ -174,6 +178,15 @@ describe('usePanelSelectionGestures', () => {
       expect(getSelection()).toEqual([]);
       expect(onPanelContentClick).toHaveBeenCalledTimes(1);
     });
+
+    it('leaves Ctrl+A to the browser', () => {
+      renderGestures();
+
+      const notPrevented = fireEvent.keyDown(document, { key: 'a', ctrlKey: true });
+
+      expect(notPrevented).toBe(true);
+      expect(getSelection()).toEqual([]);
+    });
   });
 
   describe('in selection mode', () => {
@@ -232,6 +245,33 @@ describe('usePanelSelectionGestures', () => {
       renderGestures();
 
       fireEvent.keyDown(input, { key: 'Escape' });
+
+      expect(getSelection()).toEqual(['panel1']);
+    });
+
+    it('selects every mounted panel on Ctrl+A instead of selecting the page text', () => {
+      renderGestures({ unmountedPanelIds: ['collapsedPanel'] });
+
+      const notPrevented = fireEvent.keyDown(document, { key: 'a', ctrlKey: true });
+
+      expect(notPrevented).toBe(false);
+      expect(getSelection()).toEqual(['panel1', 'panel2', 'panel3']);
+    });
+
+    it('leaves Ctrl+A to a focused input', () => {
+      renderGestures();
+
+      const notPrevented = fireEvent.keyDown(input, { key: 'a', ctrlKey: true });
+
+      expect(notPrevented).toBe(true);
+      expect(getSelection()).toEqual(['panel1']);
+    });
+
+    it('ignores Ctrl+Shift+A and A without the modifier', () => {
+      renderGestures();
+
+      fireEvent.keyDown(document, { key: 'A', ctrlKey: true, shiftKey: true });
+      fireEvent.keyDown(document, { key: 'a' });
 
       expect(getSelection()).toEqual(['panel1']);
     });
