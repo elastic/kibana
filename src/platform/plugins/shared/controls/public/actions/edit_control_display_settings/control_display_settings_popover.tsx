@@ -24,7 +24,7 @@ import {
 import type { ControlWidth } from '@kbn/controls-schemas';
 import { i18n } from '@kbn/i18n';
 import { apiCanLockHoverActions } from '@kbn/presentation-publishing';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ACTION_EDIT_CONTROL_DISPLAY_SETTINGS } from '../constants';
 import type { PinnableControlApi } from './types';
 
@@ -39,6 +39,7 @@ export const ControlDisplaySettingsPopover: React.FC<Props> = ({ api, displayNam
 
   const initialState = useMemo(
     () => {
+      console.log('RECALC');
       return api.parentApi.getLayout(api.uuid);
     },
     // We should re-calculate `initialState` when the popover opens/closes
@@ -48,6 +49,11 @@ export const ControlDisplaySettingsPopover: React.FC<Props> = ({ api, displayNam
 
   const [width, setWidth] = useState<ControlWidth>(initialState.width as ControlWidth);
   const [grow, setGrow] = useState<boolean>(initialState.grow);
+
+  useEffect(() => {
+    setWidth(initialState.width);
+    setGrow(initialState.grow);
+  }, [initialState]);
 
   const onClose = useCallback(() => {
     setIsPopoverOpen(false);
