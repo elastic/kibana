@@ -26,7 +26,6 @@ import {
   type EntityRiskScore,
   type RiskSeverity,
   type RiskStats,
-  type ServiceItem,
 } from '../../../common/search_strategy';
 import { useKibana } from '../../common/lib/kibana';
 import { Content as HostPanelContent } from '../../flyout_v2/entity/host/main/content';
