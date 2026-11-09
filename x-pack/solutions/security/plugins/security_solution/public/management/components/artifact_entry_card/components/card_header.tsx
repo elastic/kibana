@@ -20,6 +20,8 @@ export interface CardHeaderProps
   name: string;
   createdDate: string;
   updatedDate: string;
+  /** Re-mounts the date fields so their relative labels are recomputed when the list is refreshed */
+  dataUpdatedAt?: number;
 }
 
 const StyledEuiFlexItemSmallBottomMargin = styled(EuiFlexItem)`
@@ -27,7 +29,7 @@ const StyledEuiFlexItemSmallBottomMargin = styled(EuiFlexItem)`
 `;
 
 export const CardHeader = memo<CardHeaderProps>(
-  ({ name, createdDate, updatedDate, actions, 'data-test-subj': dataTestSubj }) => {
+  ({ name, createdDate, updatedDate, actions, dataUpdatedAt, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
 
     return (
@@ -43,6 +45,7 @@ export const CardHeader = memo<CardHeaderProps>(
               <EuiFlexGroup responsive={false} gutterSize="xl">
                 <EuiFlexItem grow={false}>
                   <DateFieldValue
+                    key={dataUpdatedAt}
                     date={updatedDate}
                     type="update"
                     data-test-subj={getTestId('updated')}
@@ -50,6 +53,7 @@ export const CardHeader = memo<CardHeaderProps>(
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <DateFieldValue
+                    key={dataUpdatedAt}
                     date={createdDate}
                     type="create"
                     data-test-subj={getTestId('created')}
