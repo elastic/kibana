@@ -51,8 +51,8 @@ interface CleanupClients {
 /**
  * Deletes matching documents, including from hidden indices and data streams (the Defend Insights
  * store is hidden, so a default `expand_wildcards` silently matches nothing). Without a `log` the
- * result is ignored, as in the other suites; with one, the deleted count is logged and errors are
- * reported as warnings instead of swallowed.
+ * result is ignored, as in the other suites; with one, the deleted and version-conflict counts are
+ * logged (conflicts as a warning) and errors are reported as warnings instead of swallowed.
  */
 const deleteByQuerySafe = async ({
   client,
@@ -66,7 +66,7 @@ const deleteByQuerySafe = async ({
   log?: ToolingLog;
 }): Promise<number> => {
   try {
-    const { deleted = 0 } = await client.deleteByQuery({
+    const { deleted = 0, version_conflicts: versionConflicts = 0 } = await client.deleteByQuery({
       index,
       query,
       refresh: true,
@@ -75,7 +75,13 @@ const deleteByQuerySafe = async ({
       // Concurrent writers (the route's background run) must not turn a cleanup into a 409 failure.
       conflicts: 'proceed',
     });
-    log?.info(`cleanup ${index}: deleted ${deleted}`);
+    const summary = `cleanup ${index}: deleted ${deleted}, ${versionConflicts} version conflicts skipped`;
+    // Skipped documents survive the cleanup and can leak into the next run, so make them visible.
+    if (versionConflicts > 0) {
+      log?.warning(summary);
+    } else {
+      log?.info(summary);
+    }
     return deleted;
   } catch (e) {
     log?.warning(`cleanup ${index} failed: ${e instanceof Error ? e.message : String(e)}`);
