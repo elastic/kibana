@@ -12,6 +12,7 @@ import {
   euiOverflowScroll,
   euiShadow,
   highContrastModeStyles,
+  transparentize,
   type UseEuiTheme,
 } from '@elastic/eui';
 import { layoutVar, layoutLevels } from '../constants';
@@ -45,8 +46,28 @@ const root = (appearance: LayoutAppearance = 'plain'): EmotionFn => {
       // Only apply distinguished background styling for framed appearance
       ${isFramedAppearance &&
       css`
-        background-color: ${euiTheme.colors.backgroundBasePlain};
+        // POC: the frame is the recessed glass surface; the ambient field shows through it.
+        background-color: transparent;
         border-radius: ${euiTheme.border.radius.frame};
+
+        // A pseudo-element carries the backdrop filter so the wrapper doesn't become the
+        // containing block for position: fixed descendants inside apps.
+        &::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          z-index: -1;
+          border-radius: inherit;
+          pointer-events: none;
+          // POC: mirrors kbnRecessedGlassCss in @kbn/css-utils; move to an EUI token.
+          background-color: ${transparentize(euiTheme.colors.backgroundBaseRecessed, 0.77)};
+          backdrop-filter: blur(1px);
+
+          @media (prefers-reduced-transparency: reduce) {
+            background-color: ${euiTheme.colors.backgroundBaseRecessed};
+            backdrop-filter: none;
+          }
+        }
 
         ${euiShadow(useEuiTheme, 'xs', { border: 'none' })};
 
@@ -56,11 +77,6 @@ const root = (appearance: LayoutAppearance = 'plain'): EmotionFn => {
         // can't cover it.
         // borderBaseFloating is transparent in light mode and visible in dark mode.
         outline: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseFloating};
-
-        // POC: glass surfaces (KBN_RECESSED_GLASS_CLASS in @kbn/css-utils) show the ambient field instead of the frame fill.
-        &:has(.kbnRecessedGlass) {
-          background-color: transparent;
-        }
       `}
       ${!isFramedAppearance &&
       css`

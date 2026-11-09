@@ -10,12 +10,8 @@
 import type { FC } from 'react';
 import React from 'react';
 import classNames from 'classnames';
-import { EuiPageTemplate, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
-import {
-  KBN_RECESSED_GLASS_CLASS,
-  kbnRecessedGlassCss,
-} from '@kbn/css-utils/public/recessed_glass_css';
+import { EuiPageTemplate } from '@elastic/eui';
+import { useChromeStyle } from '@kbn/core-chrome-browser-hooks';
 
 import { withSolutionNav } from '@kbn/shared-ux-page-solution-nav';
 import type { KibanaPageTemplateProps as Props } from '@kbn/shared-ux-page-kibana-template-types';
@@ -41,7 +37,7 @@ export const KibanaPageTemplateInner: FC<Props> = ({
   emptyPageBody,
   ...rest
 }) => {
-  const euiThemeContext = useEuiTheme();
+  const isProjectChrome = useChromeStyle() === 'project';
   let header;
 
   if (isEmptyState && pageHeader && !children) {
@@ -84,10 +80,7 @@ export const KibanaPageTemplateInner: FC<Props> = ({
     sideBar = <EuiPageTemplate.Sidebar {...sideBarProps}>{pageSideBar}</EuiPageTemplate.Sidebar>;
   }
 
-  const classes = getClasses(
-    undefined,
-    classNames(className, { [KBN_RECESSED_GLASS_CLASS]: isEmptyState })
-  );
+  const classes = getClasses(undefined, className);
 
   return (
     <EuiPageTemplate
@@ -98,9 +91,9 @@ export const KibanaPageTemplateInner: FC<Props> = ({
       offset={0}
       minHeight={header ? 'var(--kbn-application--content-height)' : 0}
       grow={header ? false : undefined}
-      // POC: empty states sit on the recessed glass surface; unpanelled so sections stay transparent.
-      css={isEmptyState ? css(kbnRecessedGlassCss(euiThemeContext)) : undefined}
-      panelled={isEmptyState ? false : undefined}
+      // POC: project chrome's frame is the recessed glass surface, so sections default to
+      // transparent; pages that need a plain surface pass `panelled` explicitly.
+      panelled={isProjectChrome ? false : undefined}
       {...rest}
     >
       {sideBar}
