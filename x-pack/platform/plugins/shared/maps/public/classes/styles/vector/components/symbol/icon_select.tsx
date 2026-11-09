@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import type { KeyboardEvent } from 'react';
 import React, { Component, Fragment } from 'react';
+import type { EuiFormControlLayoutProps, EuiSelectableOption } from '@elastic/eui';
 import {
   EuiButton,
   EuiFieldText,
@@ -27,18 +29,32 @@ import { SYMBOL_OPTIONS } from '../../symbol_utils';
 import { getIsDarkMode } from '../../../../../kibana_services';
 import { CustomIconModal } from './custom_icon_modal';
 import { PrependButton } from './prepend_button';
+import type { CustomIcon } from '../../../../../../common/descriptor_types';
 
-function isKeyboardEvent(event) {
-  return typeof event === 'object' && 'keyCode' in event;
+function isKeyboardEvent(event: unknown): event is KeyboardEvent {
+  return typeof event === 'object' && event !== null && 'keyCode' in event;
 }
 
-export class IconSelect extends Component {
-  state = {
+interface Props {
+  append?: EuiFormControlLayoutProps['append'];
+  customIcons: CustomIcon[];
+  icon: { value: string; svg?: string; label?: string };
+  onChange: (params: { selectedIconId: string }) => void;
+  onCustomIconsChange: (customIcons: CustomIcon[]) => void;
+}
+
+interface State {
+  isPopoverOpen: boolean;
+  isModalVisible: boolean;
+}
+
+export class IconSelect extends Component<Props, State> {
+  state: State = {
     isPopoverOpen: false,
     isModalVisible: false,
   };
 
-  _handleSave = ({ symbolId, svg, cutoff, radius, label }) => {
+  _handleSave = ({ symbolId, svg, cutoff, radius, label }: CustomIcon) => {
     const icons = [
       ...this.props.customIcons.filter((i) => {
         return i.symbolId !== symbolId;
@@ -83,7 +99,7 @@ export class IconSelect extends Component {
     }));
   };
 
-  _handleKeyboardActivity = (e) => {
+  _handleKeyboardActivity = (e: unknown) => {
     if (isKeyboardEvent(e)) {
       if (e.key === keys.ENTER) {
         e.preventDefault();
@@ -94,14 +110,14 @@ export class IconSelect extends Component {
     }
   };
 
-  _onIconSelect = (options) => {
+  _onIconSelect = (options: EuiSelectableOption[]) => {
     const selectedOption = options.find((option) => {
       return option.checked === 'on';
     });
 
     if (selectedOption) {
       const { key } = selectedOption;
-      this.props.onChange({ selectedIconId: key });
+      this.props.onChange({ selectedIconId: key as string });
     }
     this._closePopover();
   };
@@ -117,14 +133,14 @@ export class IconSelect extends Component {
         compressed
         readOnly
         fullWidth
-        prepend={<PrependButton value={value} svg={svg} />}
+        prepend={<PrependButton value={value} svg={svg as string} />}
         append={this.props.append}
       />
     );
   }
 
   _renderIconSelectable() {
-    const makiOptions = [
+    const makiOptions: EuiSelectableOption[] = [
       {
         label: i18n.translate('xpack.maps.styles.vector.iconSelect.kibanaIconsGroupLabel', {
           defaultMessage: 'Kibana icons',
@@ -147,20 +163,22 @@ export class IconSelect extends Component {
       }),
     ];
 
-    const customOptions = this.props.customIcons.map(({ symbolId, label, svg }) => {
-      return {
-        key: symbolId,
-        label,
-        prepend: (
-          <SymbolIcon
-            key={symbolId}
-            symbolId={symbolId}
-            svg={svg}
-            fill={getIsDarkMode() ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
-          />
-        ),
-      };
-    });
+    const customOptions: EuiSelectableOption[] = this.props.customIcons.map(
+      ({ symbolId, label, svg }) => {
+        return {
+          key: symbolId,
+          label,
+          prepend: (
+            <SymbolIcon
+              key={symbolId}
+              symbolId={symbolId}
+              svg={svg}
+              fill={getIsDarkMode() ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
+            />
+          ),
+        };
+      }
+    );
 
     if (customOptions.length)
       customOptions.splice(0, 0, {
@@ -173,7 +191,7 @@ export class IconSelect extends Component {
     const options = [...customOptions, ...makiOptions];
 
     return (
-      <EuiSelectable searchable options={options} onChange={this._onIconSelect} compressed={true}>
+      <EuiSelectable searchable options={options} onChange={this._onIconSelect}>
         {(list, search) => (
           <div style={{ width: '300px' }}>
             <EuiPopoverTitle>{search}</EuiPopoverTitle>

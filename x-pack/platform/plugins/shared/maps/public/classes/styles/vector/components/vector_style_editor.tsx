@@ -38,12 +38,16 @@ import type {
   DynamicStylePropertyOptions,
   IconDynamicOptions,
   IconStaticOptions,
+  LabelBorderSizeOptions,
   LabelDynamicOptions,
   LabelStaticOptions,
+  OrientationDynamicOptions,
+  OrientationStaticOptions,
   SizeDynamicOptions,
   SizeStaticOptions,
   StaticStylePropertyOptions,
   StylePropertyOptions,
+  SymbolizeAsOptions,
   VectorStylePropertiesDescriptor,
 } from '../../../../../common/descriptor_types';
 import type { IStyleProperty } from '../properties/style_property';
@@ -400,7 +404,11 @@ export class VectorStyleEditor extends Component<Props, State> {
           disabled={!hasLabel}
           disabledBy={VECTOR_STYLES.LABEL_TEXT}
           handlePropertyChange={this.props.handlePropertyChange}
-          styleProperty={this.props.styleProperties[VECTOR_STYLES.LABEL_BORDER_SIZE]}
+          styleProperty={
+            this.props.styleProperties[
+              VECTOR_STYLES.LABEL_BORDER_SIZE
+            ] as IStyleProperty<LabelBorderSizeOptions>
+          }
         />
         <EuiSpacer size="m" />
       </Fragment>
@@ -416,7 +424,9 @@ export class VectorStyleEditor extends Component<Props, State> {
         this.props.styleProperties[VECTOR_STYLES.SYMBOLIZE_AS] as SymbolizeAsProperty
       ).isSymbolizedAsIcon()
     ) {
-      const orientationStyleProperty = this.props.styleProperties[VECTOR_STYLES.ICON_ORIENTATION];
+      const orientationStyleProperty = this.props.styleProperties[
+        VECTOR_STYLES.ICON_ORIENTATION
+      ] as IStyleProperty<OrientationStaticOptions | OrientationDynamicOptions>;
       const iconStyleProperty = this.props.styleProperties[VECTOR_STYLES.ICON] as IStyleProperty<
         IconDynamicOptions | IconStaticOptions
       >;
@@ -433,10 +443,12 @@ export class VectorStyleEditor extends Component<Props, State> {
               this._isLayerSourceMvt()
             )}
             defaultStaticStyleOptions={
-              this.state.defaultStaticProperties[VECTOR_STYLES.ICON_ORIENTATION].options
+              this.state.defaultStaticProperties[VECTOR_STYLES.ICON_ORIENTATION]
+                .options as OrientationStaticOptions
             }
             defaultDynamicStyleOptions={
-              this.state.defaultDynamicProperties[VECTOR_STYLES.ICON_ORIENTATION].options
+              this.state.defaultDynamicProperties[VECTOR_STYLES.ICON_ORIENTATION]
+                .options as OrientationDynamicOptions
             }
           />
           <EuiSpacer size="m" />
@@ -476,7 +488,11 @@ export class VectorStyleEditor extends Component<Props, State> {
         <VectorStyleSymbolizeAsEditor
           disabled={!hasMarkerOrIcon}
           disabledBy={VECTOR_STYLES.ICON_SIZE}
-          styleProperty={this.props.styleProperties[VECTOR_STYLES.SYMBOLIZE_AS]}
+          styleProperty={
+            this.props.styleProperties[
+              VECTOR_STYLES.SYMBOLIZE_AS
+            ] as IStyleProperty<SymbolizeAsOptions>
+          }
           handlePropertyChange={this.props.handlePropertyChange}
         />
         <EuiSpacer size="m" />

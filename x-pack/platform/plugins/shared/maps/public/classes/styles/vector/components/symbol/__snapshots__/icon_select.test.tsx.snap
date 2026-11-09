@@ -38,7 +38,6 @@ exports[`Should render icon select 1`] = `
       clickOutsideDisables={true}
     >
       <EuiSelectable
-        compressed={true}
         isPreFiltered={false}
         onChange={[Function]}
         optionMatcher={[Function]}
@@ -123,7 +122,6 @@ exports[`Should render icon select with custom icons 1`] = `
       clickOutsideDisables={true}
     >
       <EuiSelectable
-        compressed={true}
         isPreFiltered={false}
         onChange={[Function]}
         optionMatcher={[Function]}

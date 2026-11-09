@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ChangeEvent } from 'react';
 import React from 'react';
 
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
@@ -12,6 +13,15 @@ import { getVectorStyleLabel, getDisabledByMessage } from '../get_vector_style_l
 import { i18n } from '@kbn/i18n';
 import { LABEL_BORDER_SIZES, VECTOR_STYLES } from '../../../../../../common/constants';
 import { DisabledToolTip } from '../../disabled_tooltip';
+import type { LabelBorderSizeOptions } from '../../../../../../common/descriptor_types';
+import type { IStyleProperty } from '../../properties/style_property';
+
+interface Props {
+  disabled?: boolean;
+  disabledBy?: VECTOR_STYLES;
+  handlePropertyChange: (propertyName: VECTOR_STYLES, stylePropertyDescriptor: unknown) => void;
+  styleProperty: IStyleProperty<LabelBorderSizeOptions>;
+}
 
 const options = [
   {
@@ -45,10 +55,10 @@ export function VectorStyleLabelBorderSizeEditor({
   disabledBy,
   handlePropertyChange,
   styleProperty,
-}) {
-  function onChange(e) {
+}: Props) {
+  function onChange(e: ChangeEvent<HTMLSelectElement>) {
     const styleDescriptor = {
-      options: { size: e.target.value },
+      options: { size: e.target.value as LABEL_BORDER_SIZES },
     };
     handlePropertyChange(styleProperty.getStyleName(), styleDescriptor);
   }
@@ -73,7 +83,7 @@ export function VectorStyleLabelBorderSizeEditor({
   }
 
   return (
-    <DisabledToolTip content={getDisabledByMessage(disabledBy)}>
+    <DisabledToolTip content={getDisabledByMessage(disabledBy!)}>
       {labelBorderSizeForm}
     </DisabledToolTip>
   );

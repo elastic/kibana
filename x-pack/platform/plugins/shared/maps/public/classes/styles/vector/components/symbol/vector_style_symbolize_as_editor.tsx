@@ -13,6 +13,15 @@ import { i18n } from '@kbn/i18n';
 import { SYMBOLIZE_AS_TYPES, VECTOR_STYLES } from '../../../../../../common/constants';
 import { getDisabledByMessage } from '../get_vector_style_label';
 import { DisabledToolTip } from '../../disabled_tooltip';
+import type { SymbolizeAsOptions } from '../../../../../../common/descriptor_types';
+import type { IStyleProperty } from '../../properties/style_property';
+
+interface Props {
+  disabled?: boolean;
+  disabledBy?: VECTOR_STYLES;
+  styleProperty: IStyleProperty<SymbolizeAsOptions>;
+  handlePropertyChange: (propertyName: VECTOR_STYLES, stylePropertyDescriptor: unknown) => void;
+}
 
 const SYMBOLIZE_AS_OPTIONS = [
   {
@@ -34,16 +43,16 @@ export function VectorStyleSymbolizeAsEditor({
   disabledBy,
   styleProperty,
   handlePropertyChange,
-}) {
+}: Props) {
   const styleOptions = styleProperty.getOptions();
   const selectedOption = SYMBOLIZE_AS_OPTIONS.find(({ id }) => {
     return id === styleOptions.value;
   });
 
-  const onSymbolizeAsChange = (optionId) => {
+  const onSymbolizeAsChange = (optionId: string) => {
     const styleDescriptor = {
       options: {
-        value: optionId,
+        value: optionId as SYMBOLIZE_AS_TYPES,
       },
     };
     handlePropertyChange(VECTOR_STYLES.SYMBOLIZE_AS, styleDescriptor);
@@ -55,10 +64,11 @@ export function VectorStyleSymbolizeAsEditor({
   const symbolizeAsForm = (
     <EuiFormRow label={symbolLabel} display="columnCompressed">
       <EuiButtonGroup
+        type="single"
         isDisabled={disabled}
         buttonSize="compressed"
         options={SYMBOLIZE_AS_OPTIONS}
-        idSelected={selectedOption ? selectedOption.id : undefined}
+        idSelected={selectedOption ? selectedOption.id : ''}
         onChange={onSymbolizeAsChange}
         isFullWidth
         legend={symbolLabel}
@@ -71,6 +81,6 @@ export function VectorStyleSymbolizeAsEditor({
   }
 
   return (
-    <DisabledToolTip content={getDisabledByMessage(disabledBy)}>{symbolizeAsForm}</DisabledToolTip>
+    <DisabledToolTip content={getDisabledByMessage(disabledBy!)}>{symbolizeAsForm}</DisabledToolTip>
   );
 }

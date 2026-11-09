@@ -5,12 +5,26 @@
  * 2.0.
  */
 
+import type { ReactNode } from 'react';
 import React from 'react';
 import { ValidatedRange } from '../../../../../components/validated_range';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { VECTOR_STYLES } from '../../../../../../common/constants';
+import type { OrientationStaticOptions } from '../../../../../../common/descriptor_types';
+import type { StaticOrientationProperty } from '../../properties/static_orientation_property';
 
-export function StaticOrientationForm({ onStaticStyleChange, staticDynamicSelect, styleProperty }) {
-  const onOrientationChange = (orientation) => {
+interface Props {
+  onStaticStyleChange: (propertyName: VECTOR_STYLES, options: OrientationStaticOptions) => void;
+  staticDynamicSelect?: ReactNode;
+  styleProperty: StaticOrientationProperty;
+}
+
+export function StaticOrientationForm({
+  onStaticStyleChange,
+  staticDynamicSelect,
+  styleProperty,
+}: Props) {
+  const onOrientationChange = (orientation: number) => {
     onStaticStyleChange(styleProperty.getStyleName(), { orientation });
   };
 

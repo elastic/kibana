@@ -6,6 +6,7 @@
  */
 
 import _ from 'lodash';
+import type { ReactNode } from 'react';
 import React from 'react';
 import {
   EuiSpacer,
@@ -15,11 +16,26 @@ import {
   EuiFormRow,
   EuiToolTip,
 } from '@elastic/eui';
+import type { ColorStop, StopValue } from './color_stops_utils';
 import { removeRow, isColorInvalid } from './color_stops_utils';
 import { i18n } from '@kbn/i18n';
 import { MbValidatedColorPicker } from './mb_validated_color_picker';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { mapColorStopsStyles } from '../map_color_stops.styles';
+
+interface Props {
+  onChange: (params: { colorStops: ColorStop[]; isInvalid: boolean }) => void;
+  colorStops: ColorStop[];
+  isStopsInvalid: (colorStops: ColorStop[]) => boolean;
+  getStopError: (stop: StopValue, index: number) => string | null | undefined;
+  renderStopInput: (
+    stop: StopValue,
+    onStopChange: (newStopValue: StopValue) => void,
+    index: number
+  ) => ReactNode;
+  addNewRow: (colorStops: ColorStop[], index: number) => ColorStop[];
+  swatches?: string[];
+}
 
 export const ColorStops = ({
   onChange,
@@ -29,10 +45,10 @@ export const ColorStops = ({
   renderStopInput,
   addNewRow,
   swatches,
-}) => {
+}: Props) => {
   const styles = useMemoCss(mapColorStopsStyles);
-  function getStopInput(stop, index) {
-    const onStopChange = (newStopValue) => {
+  function getStopInput(stop: StopValue, index: number) {
+    const onStopChange = (newStopValue: StopValue) => {
       const newColorStops = _.cloneDeep(colorStops);
       newColorStops[index].stop = newStopValue;
       onChange({
@@ -48,7 +64,7 @@ export const ColorStops = ({
   }
 
   const rows = colorStops.map((colorStop, index) => {
-    const onColorChange = (color) => {
+    const onColorChange = (color: string) => {
       const newColorStops = _.cloneDeep(colorStops);
       newColorStops[index].color = color;
       onChange({
@@ -67,7 +83,7 @@ export const ColorStops = ({
         })
       : undefined;
 
-    const errors = [];
+    const errors: string[] = [];
     if (stopError) {
       errors.push(stopError);
     }

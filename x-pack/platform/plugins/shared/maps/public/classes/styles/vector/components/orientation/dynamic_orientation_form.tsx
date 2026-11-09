@@ -5,22 +5,34 @@
  * 2.0.
  */
 
+import type { ReactNode } from 'react';
 import React from 'react';
 import { FieldSelect } from '../field_select';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { VECTOR_STYLES } from '../../../../../../common/constants';
+import type { OrientationDynamicOptions } from '../../../../../../common/descriptor_types';
+import type { StyleField } from '../../style_fields_helper';
+import type { DynamicOrientationProperty } from '../../properties/dynamic_orientation_property';
+
+interface Props {
+  fields: StyleField[];
+  onDynamicStyleChange: (propertyName: VECTOR_STYLES, options: OrientationDynamicOptions) => void;
+  staticDynamicSelect?: ReactNode;
+  styleProperty: DynamicOrientationProperty;
+}
 
 export function DynamicOrientationForm({
   fields,
   onDynamicStyleChange,
   staticDynamicSelect,
   styleProperty,
-}) {
+}: Props) {
   const styleOptions = styleProperty.getOptions();
 
-  const onFieldChange = ({ field }) => {
+  const onFieldChange = ({ field }: { field: StyleField | null }) => {
     onDynamicStyleChange(styleProperty.getStyleName(), {
       ...styleOptions,
-      field,
+      field: field ?? undefined,
     });
   };
 
