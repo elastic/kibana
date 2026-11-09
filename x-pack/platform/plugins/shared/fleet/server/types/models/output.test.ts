@@ -514,4 +514,35 @@ describe('Output model', () => {
       });
     });
   });
+
+  describe('secrets cleared with an explicit null', () => {
+    it.each([
+      ['elasticsearch', { secrets: { ssl: { key: null } } }],
+      ['logstash', { secrets: { ssl: { key: null } } }],
+      ['remote_elasticsearch', { secrets: { service_token: null, ssl: { key: null } } }],
+      // the Kafka update payload requires a name
+      ['kafka', { name: 'kafka', secrets: { password: null, ssl: { key: null } } }],
+      [
+        'otlp',
+        {
+          secrets: {
+            otlp_exporter: { tls: { key_pem: null, tpm: { owner_auth: null, auth: null } } },
+          },
+        },
+      ],
+    ])('accepts a null secret in a %s update payload', (type, payload) => {
+      expect(() => UpdateOutputSchema.validate({ type, ...payload })).not.toThrow();
+    });
+
+    it('does not accept a null secret when creating an output', () => {
+      expect(() =>
+        schema.object(LogstashSchema).validate({
+          name: 'test-logstash-output',
+          type: 'logstash',
+          hosts: ['test.fr:5044'],
+          secrets: { ssl: { key: null } },
+        })
+      ).toThrow();
+    });
+  });
 });

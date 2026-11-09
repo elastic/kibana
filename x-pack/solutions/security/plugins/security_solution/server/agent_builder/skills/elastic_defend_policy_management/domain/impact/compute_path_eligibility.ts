@@ -138,6 +138,10 @@ export const computePathEligibility = (
     return ineligible('linux_ransomware_protection_experimental_disabled');
   }
 
+  if (!isEqual(proposedValue, get(context.aiDataCollectionStripped, path))) {
+    return ineligible(context.aiDataCollectionReason);
+  }
+
   if (!isEqual(proposedValue, get(context.registryCredentialHardeningStripped, path))) {
     return ineligible(context.registryCredentialHardeningReason);
   }

@@ -17,9 +17,11 @@ project:
   owner: '@elastic/nightshift'
   sourceRoot: x-pack/solutions/observability/plugins/nightshift_investigations
 dependsOn:
+  - '@kbn/dev-cli-runner'
   - '@kbn/share-plugin'
   - '@kbn/deeplinks-observability'
   - '@kbn/nightshift-decision-trees'
+  - '@kbn/config'
   - '@kbn/config-schema'
   - '@kbn/core'
   - '@kbn/core-http-server'
@@ -44,13 +46,21 @@ dependsOn:
   - '@kbn/nightshift-shared'
   - '@kbn/agent-builder-server'
   - '@kbn/agentic-investigations-plugin'
+  - '@kbn/evals-plugin'
   - '@kbn/storage-adapter'
   - '@kbn/agent-builder-genai-utils'
   - '@kbn/i18n'
   - '@kbn/core-saved-objects-server'
   - '@kbn/rule-data-utils'
+  - '@kbn/alerting-v2-constants'
+  - '@kbn/alerting-v2-common-queries'
+  - '@kbn/alerting-v2-plugin'
+  - '@kbn/es-types'
   - '@kbn/rule-registry-plugin'
   - '@kbn/actions-plugin'
+  - '@kbn/actions-types'
+  - '@kbn/connector-specs'
+  - '@kbn/alerting-plugin'
   - '@kbn/sandbox-plugin'
   - '@kbn/context-engine-plugin'
   - '@kbn/inference-common'
@@ -68,20 +78,24 @@ dependsOn:
   - '@kbn/core-security-common'
   - '@kbn/eval-kql'
   - '@kbn/rrule'
+  - '@kbn/inference-tracing'
+  - '@kbn/server-route-repository-utils'
+  - '@kbn/cloud-plugin'
 tags:
   - plugin
   - prod
   - group-observability
   - private
   - jest-unit-tests
+  - jest-integration-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
     - server/**/*
     - public/**/*
     - integration_tests/**/*
+    - scripts/**/*
     - test/scout*/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

@@ -13,17 +13,23 @@ import {
   DISCOVER_QUERY_MODE_KEY,
   type DiscoverGotoOptions,
   type DiscoverQueryMode,
+  type TimeoutOptions,
 } from './base';
 
 /** Navigation, query-mode switch, wait helpers, and chrome app-menu actions. */
 export abstract class DiscoverNavigation extends DiscoverAppBase {
   async goto(options: DiscoverGotoOptions) {
     await this.setQueryMode(options.queryMode);
-    await this.page.gotoApp(
-      'discover',
-      options.savedSearchId ? { hash: `/view/${options.savedSearchId}` } : undefined
-    );
-    await this.waitForDiscoverPage();
+    await this.page.gotoApp('discover', {
+      hash: options.savedSearchId ? `/view/${options.savedSearchId}` : undefined,
+      readyWhen: this.page.testSubj.locator('dscPage'),
+      // Covers the cold bundle download plus Discover's slow initialization in serverless CI.
+      readyTimeout: 45_000,
+    });
+    if (options.queryMode === 'esql') {
+      // Discover discards the seeded mode unless it matches the resolved `discover.isEsqlDefault`.
+      await this.selectTextBaseLang({ timeout: 30_000 });
+    }
   }
 
   protected async waitForDiscoverPage() {
@@ -82,15 +88,15 @@ export abstract class DiscoverNavigation extends DiscoverAppBase {
   }
 
   /** Detects whether Discover is in ES|QL or classic mode by checking which editor is visible. */
-  async getCurrentQueryMode(): Promise<DiscoverQueryMode> {
+  async getCurrentQueryMode({ timeout }: TimeoutOptions = {}): Promise<DiscoverQueryMode> {
     const esqlEditor = this.esqlEditor.editor;
     const classicQueryInput = this.page.testSubj.locator('queryInput');
-    await expect(esqlEditor.or(classicQueryInput)).toBeVisible();
+    await expect(esqlEditor.or(classicQueryInput)).toBeVisible({ timeout });
     return (await esqlEditor.isVisible()) ? 'esql' : 'classic';
   }
 
-  async selectTextBaseLang() {
-    const currentMode = await this.getCurrentQueryMode();
+  async selectTextBaseLang(options: TimeoutOptions = {}) {
+    const currentMode = await this.getCurrentQueryMode(options);
     if (currentMode !== 'esql') {
       await this.page.testSubj.click('select-text-based-language-btn');
     }

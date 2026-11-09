@@ -36,6 +36,7 @@ export const getPolicySettingsFormTestSubjects = (
   const attackSurfaceTestSubj = genTestSubj.withPrefix('attackSurface');
   const deviceControlTestSubj = genTestSubj.withPrefix('deviceControl');
   const perOsDeviceControlTestSubj = genTestSubj.withPrefix('perOsDeviceControl');
+  const perOsAiDataCollectionTestSubj = genTestSubj.withPrefix('perOsAiDataCollection');
 
   return {
     form: genTestSubj(),
@@ -369,6 +370,26 @@ export const getPolicySettingsFormTestSubjects = (
         notifyUser: perOsDeviceControlTestSubj('mac-notifyUser'),
         notifyUserCheckbox: perOsDeviceControlTestSubj('mac-notifyUser-checkbox'),
         notifyCustomMessage: perOsDeviceControlTestSubj('mac-notifyUser-customMessage'),
+      },
+    },
+    perOsAiDataCollection: {
+      card: perOsAiDataCollectionTestSubj(),
+      technicalPreviewBadge: perOsAiDataCollectionTestSubj('technicalPreviewBadge'),
+      supportedVersion: perOsAiDataCollectionTestSubj('supportedVersion'),
+      windows: {
+        row: perOsAiDataCollectionTestSubj('windows'),
+        enableDisableSwitch: perOsAiDataCollectionTestSubj('windows-enableDisableSwitch'),
+        switchLabel: perOsAiDataCollectionTestSubj('windows-switchLabel'),
+      },
+      mac: {
+        row: perOsAiDataCollectionTestSubj('mac'),
+        enableDisableSwitch: perOsAiDataCollectionTestSubj('mac-enableDisableSwitch'),
+        switchLabel: perOsAiDataCollectionTestSubj('mac-switchLabel'),
+      },
+      linux: {
+        row: perOsAiDataCollectionTestSubj('linux'),
+        enableDisableSwitch: perOsAiDataCollectionTestSubj('linux-enableDisableSwitch'),
+        switchLabel: perOsAiDataCollectionTestSubj('linux-switchLabel'),
       },
     },
     advancedSection: {

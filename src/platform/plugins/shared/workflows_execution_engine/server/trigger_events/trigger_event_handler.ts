@@ -53,6 +53,7 @@ export interface EmitEventParams {
   triggerId: string;
   payload: Record<string, unknown>;
   request: KibanaRequest;
+  authenticatedUser?: string;
 }
 
 export type EmitEvent = (params: EmitEventParams) => Promise<void>;
@@ -197,7 +198,7 @@ export class TriggerEventHandler {
       );
       return;
     }
-    const { triggerId, payload, request } = params;
+    const { triggerId, payload, request, authenticatedUser } = params;
 
     const spaceId = this.spaces?.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
@@ -269,7 +270,12 @@ export class TriggerEventHandler {
         eventChainContext,
         triggerId,
       };
-      scheduleStats = await this.scheduleMatchingWorkflows(workflows, request, eventParams);
+      scheduleStats = await this.scheduleMatchingWorkflows(
+        workflows,
+        request,
+        eventParams,
+        authenticatedUser
+      );
       this.logger.trace(
         `Workflows trigger schedule outcomes: triggerId=${triggerId} ${JSON.stringify(
           scheduleStats
@@ -514,7 +520,8 @@ export class TriggerEventHandler {
   private async scheduleMatchingWorkflows(
     workflows: WorkflowDetailDto[],
     request: KibanaRequest,
-    eventParams: ScheduleEventParams
+    eventParams: ScheduleEventParams,
+    authenticatedUser?: string
   ): Promise<TriggerEventScheduleStats> {
     if (workflows.length === 0) {
       return createEmptyTriggerScheduleStats();
@@ -558,7 +565,11 @@ export class TriggerEventHandler {
                 eventId: eventParams.eventId,
               },
             };
-            await this.scheduleWorkflow(workflowToRun, context, request);
+            if (authenticatedUser) {
+              await this.scheduleWorkflow(workflowToRun, context, request, { authenticatedUser });
+            } else {
+              await this.scheduleWorkflow(workflowToRun, context, request);
+            }
             return 'success';
           } catch (reason) {
             const message = reason instanceof Error ? reason.message : String(reason);

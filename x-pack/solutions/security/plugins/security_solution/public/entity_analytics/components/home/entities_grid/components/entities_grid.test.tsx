@@ -7,13 +7,19 @@
 
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
+import type { EuiDataGridProps } from '@elastic/eui';
 import { TestProviders } from '../../../../../common/mock';
 import type { Row } from '../common';
+import { RISK_SCORE_NORM_FIELD } from '../common';
 import { INDIVIDUAL_ROWS_COLUMNS, RESOLVED_ROWS_COLUMNS } from '../grid_columns';
 import { useEntityGridData } from '../hooks/use_entity_grid_data';
+import type { EntityGridLoadState } from '../hooks/use_entity_grid_data';
 import { useEntityAnalyticsUrlState } from '../hooks/use_entity_analytics_url_state';
+import { useGridLoadTelemetry } from '../hooks/use_grid_load_telemetry';
 import { EntitiesGrid } from './entities_grid';
 import type { EntitiesGridProps } from './entities_grid';
+import type { ReadAccess } from '../grid_columns';
+import type { RowActions } from './cells/row_actions_cell';
 
 jest.mock('../hooks/use_entity_grid_data', () => ({
   ...jest.requireActual('../hooks/use_entity_grid_data'),
@@ -24,10 +30,39 @@ jest.mock('../hooks/use_entity_analytics_url_state', () => ({
   useEntityAnalyticsUrlState: jest.fn(),
 }));
 
+jest.mock('../hooks/use_grid_load_telemetry', () => ({
+  ...jest.requireActual('../hooks/use_grid_load_telemetry'),
+  useGridLoadTelemetry: jest.fn(),
+}));
+
+const mockEuiDataGrid = jest.fn();
+
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  const EuiDataGrid = actual.EuiDataGrid;
+  return {
+    ...actual,
+    EuiDataGrid: (props: EuiDataGridProps) => {
+      mockEuiDataGrid(props);
+      return <EuiDataGrid {...props} />;
+    },
+  };
+});
+
+const getLastDataGridSorting = () =>
+  mockEuiDataGrid.mock.calls.at(-1)?.[0]?.sorting as EuiDataGridProps['sorting'];
+
 const GROUP: Row = { 'entity.id': 'host:a', 'entity.name': 'alpha', group_size: 3 };
 const SINGLE_ENTITY: Row = { 'entity.id': 'host:b', 'entity.name': 'beta', group_size: 1 };
 
 const toggleExpandedId = jest.fn();
+
+const SETTLED: EntityGridLoadState = {
+  isRowsPending: false,
+  isCountPending: false,
+  isEnrichPending: false,
+  hasError: false,
+};
 
 const mockGridData = (data: Partial<ReturnType<typeof useEntityGridData>> = {}) =>
   jest.mocked(useEntityGridData).mockReturnValue({
@@ -37,10 +72,13 @@ const mockGridData = (data: Partial<ReturnType<typeof useEntityGridData>> = {}) 
     updatedAt: null,
     isFetching: false,
     isAtLoadLimit: false,
+    loadState: SETTLED,
     prefetch: jest.fn(),
     onRowsInViewChange: jest.fn(),
     ...data,
   } as ReturnType<typeof useEntityGridData>);
+
+const FULL_ACCESS: ReadAccess = { alerts: true, risk: true, anomalies: true, cases: true };
 
 const renderGrid = (props: Partial<EntitiesGridProps> = {}) =>
   render(
@@ -53,6 +91,7 @@ const renderGrid = (props: Partial<EntitiesGridProps> = {}) =>
         sortField="entity.name"
         sortDirection="asc"
         onSortChange={jest.fn()}
+        readAccess={FULL_ACCESS}
         {...props}
       />
     </TestProviders>
@@ -84,10 +123,22 @@ describe('EntitiesGrid', () => {
     expect(screen.getByText('beta')).toBeInTheDocument();
   });
 
+  it('leaves full screen when the grid unmounts', () => {
+    const onFullScreenChange = jest.fn();
+    const { unmount } = renderGrid({ onFullScreenChange });
+    onFullScreenChange.mockClear();
+
+    unmount();
+
+    expect(onFullScreenChange).toHaveBeenCalledWith(false);
+  });
+
   it('expands only the groups that have records', () => {
     renderGrid();
 
-    const expanders = screen.getAllByRole('button', { name: 'Expand group' });
+    const expanders = screen.getAllByRole('button', {
+      name: 'Show records resolved to this entity',
+    });
     expect(expanders).toHaveLength(1);
 
     fireEvent.click(expanders[0]);
@@ -116,16 +167,81 @@ describe('EntitiesGrid', () => {
     );
   });
 
+  it('lists a large group by risk score, with its main entity marked even when its score is lower', () => {
+    const MAIN_ENTITY: Row = {
+      'entity.id': 'host:a',
+      'entity.name': 'alpha',
+      'entity.risk.calculated_score_norm': 20,
+    };
+    const ALIAS: Row = {
+      'entity.id': 'host:a-okta',
+      'entity.name': 'alpha-okta',
+      'entity.risk.calculated_score_norm': 80,
+    };
+    jest.mocked(useEntityGridData).mockImplementation((options) => {
+      const data = {
+        isEnriching: false,
+        updatedAt: null,
+        isFetching: false,
+        isAtLoadLimit: false,
+        loadState: SETTLED,
+        prefetch: jest.fn(),
+        onRowsInViewChange: jest.fn(),
+      };
+      if (options.keyScope !== 'children') return { ...data, rows: [GROUP], total: 1 };
+      return options.entityExpression?.startsWith('entity.id')
+        ? { ...data, rows: [MAIN_ENTITY], total: 1 }
+        : { ...data, rows: [ALIAS], total: 150 };
+    });
+    jest.mocked(useEntityAnalyticsUrlState).mockReturnValue({
+      expandedIds: ['host:a'],
+      toggleExpandedId,
+    } as unknown as ReturnType<typeof useEntityAnalyticsUrlState>);
+
+    renderGrid();
+
+    const recordNames = screen.getAllByText(/^alpha/).slice(1);
+    expect(recordNames.map((name) => name.textContent)).toEqual(['alpha-okta', 'alpha']);
+    expect(screen.getAllByTestId('entityGridMainEntityIcon')).toHaveLength(1);
+    expect(screen.getByText('Showing 2 of 151 records')).toBeInTheDocument();
+  });
+
   it('has no expander when the rows are individual records', () => {
     renderGrid({ rowsMode: 'individual', columns: INDIVIDUAL_ROWS_COLUMNS });
 
-    expect(screen.queryByRole('button', { name: 'Expand group' })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Show records resolved to this entity' })
+    ).not.toBeInTheDocument();
   });
 
-  it('has no Cases column for users who cannot read cases', () => {
-    renderGrid();
+  it.each([
+    ['alerts', ['Alerts', 'Last alert'], ['alert_count', 'last_seen_alert']],
+    ['risk', ['Risk score change'], ['risk_score_change']],
+    ['anomalies', ['Anomalies'], ['anomaly_count']],
+    ['cases', ['Cases'], ['case_count']],
+  ] as const)(
+    'leaves out the %s columns, and their queries, for users who cannot read them',
+    (source, headers, columnIds) => {
+      renderGrid({ readAccess: { ...FULL_ACCESS, [source]: false } });
 
-    expect(screen.queryByText('Cases')).not.toBeInTheDocument();
+      headers.forEach((header) => expect(screen.queryByText(header)).not.toBeInTheDocument());
+      const [options] = jest.mocked(useEntityGridData).mock.calls.at(-1) ?? [];
+      columnIds.forEach((id) => expect(options?.columnIds).not.toContain(id));
+    }
+  );
+
+  it('sorts by risk score when the sort column is one the user cannot read', () => {
+    renderGrid({
+      sortField: 'anomaly_count',
+      sortDirection: 'asc',
+      readAccess: { ...FULL_ACCESS, anomalies: false },
+    });
+
+    const [options] = jest.mocked(useEntityGridData).mock.calls.at(-1) ?? [];
+    expect(options).toMatchObject({
+      sortField: 'entity.risk.calculated_score_norm',
+      sortDirection: 'desc',
+    });
   });
 
   it('offers to reset the filters when no entity matches', () => {
@@ -137,6 +253,29 @@ describe('EntitiesGrid', () => {
     expect(screen.getByRole('button', { name: 'Reset' })).toBeInTheDocument();
   });
 
+  it('hides "Investigate in timeline" for rows when the action is unavailable', () => {
+    const rowActions: RowActions = {
+      onInvestigateInTimeline: undefined,
+      onOpenEntityGraph: jest.fn(),
+    };
+
+    renderGrid({ rowsMode: 'individual', columns: INDIVIDUAL_ROWS_COLUMNS, rowActions });
+
+    expect(
+      screen.queryByRole('button', { name: 'Investigate in timeline' })
+    ).not.toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: 'Open entity graph' }).length).toBeGreaterThan(0);
+  });
+
+  it('resets to the default sort when the user unsorts a column', () => {
+    const onSortChange = jest.fn();
+    renderGrid({ onSortChange });
+
+    getLastDataGridSorting()?.onSort?.([]);
+
+    expect(onSortChange).toHaveBeenCalledWith(RISK_SCORE_NORM_FIELD, 'desc');
+  });
+
   it('says in the toolbar how many rows it shows when the view has more', () => {
     mockGridData({ isAtLoadLimit: true, total: 3789 });
 
@@ -146,5 +285,54 @@ describe('EntitiesGrid', () => {
     expect(document.querySelector('.entityAnalyticsDataTableTotal')).toHaveTextContent(
       'Showing 2 of 3.8k resolved entities'
     );
+  });
+
+  describe('load telemetry', () => {
+    const telemetryCalls = () => jest.mocked(useGridLoadTelemetry).mock.calls.map(([o]) => o);
+
+    it('reports the loads of the grid the page opts in, with what was asked for', () => {
+      mockGridData({ isAtLoadLimit: true });
+
+      renderGrid({
+        sortField: 'alert_count',
+        sortDirection: 'desc',
+        loadTelemetry: {
+          runKey: 'page-run-key',
+          isFilterPending: true,
+          hasTileFilter: true,
+          hasEntityFilters: false,
+        },
+      });
+
+      expect(telemetryCalls().at(-1)).toMatchObject({
+        skip: false,
+        runKey: 'page-run-key',
+        isFilterPending: true,
+        meta: {
+          rowsMode: 'resolved',
+          sortField: 'alert_count',
+          timeRange: '7d',
+          hasTileFilter: true,
+          hasEntityFilters: false,
+          isAtLoadLimit: true,
+        },
+      });
+    });
+
+    it("doesn't report for a grid inside a group, nor for its expanded groups' records", () => {
+      jest.mocked(useEntityAnalyticsUrlState).mockReturnValue({
+        expandedIds: ['host:a'],
+        toggleExpandedId,
+      } as unknown as ReturnType<typeof useEntityAnalyticsUrlState>);
+
+      // A group renders its grid without `loadTelemetry`.
+      renderGrid();
+
+      // The expanded group's records loaded, and nothing asked to report.
+      const scopes = jest.mocked(useEntityGridData).mock.calls.map(([o]) => o.keyScope);
+      expect(scopes).toContain('children');
+      expect(telemetryCalls().length).toBeGreaterThan(0);
+      expect(telemetryCalls().every(({ skip }) => skip)).toBe(true);
+    });
   });
 });

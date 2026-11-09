@@ -7,7 +7,7 @@
 
 import { encode } from '@kbn/rison';
 import 'cypress-network-idle';
-import { formatPageFilterSearchParam } from '@kbn/security-solution-plugin/common/utils/format_page_filter_search_param';
+import { formatPageFilterSearchParam } from '@kbn/securitysolution-alerts-page-url';
 import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
 import {
   ACKNOWLDEGED_ALERTS_FILTER_BTN,
@@ -374,7 +374,8 @@ export const groupAlertsBy = (field: string) => {
 };
 
 export const closeFirstGroupedAlerts = () => {
-  cy.get(TAKE_ACTION_GROUPED_ALERTS_BTN).first().click();
+  // Scroll to the center so a sticky page header, like the rule details one, does not cover the button.
+  cy.get(TAKE_ACTION_GROUPED_ALERTS_BTN).first().click({ scrollBehavior: 'center' });
   cy.get(CLOSE_ALERT_BTN).click();
   selectAndConfirmClosingReason();
 };

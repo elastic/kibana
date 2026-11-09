@@ -81,3 +81,19 @@ test.describe('Stateful classic feature', { tag: tags.stateful.classic }, () => 
 ```
 
 See [Deployment tags](./deployment-tags.md) for shortcuts and patterns.
+
+## Skip tests in FIPS mode [skip-tests-fips]
+
+To keep a suite out of FIPS runs (for example, because it relies on an algorithm FIPS doesn't allow), add `tags.limit.except.fips` next to its deployment tags:
+
+```ts
+import { test, tags } from '@kbn/scout';
+
+test.describe('Non-FIPS feature', { tag: [...tags.stateful.classic, tags.limit.except.fips] }, () => {
+  test('my test', async ({ page }) => {
+    // this test is skipped when Kibana runs in FIPS mode
+  });
+});
+```
+
+See [Limit tags](./deployment-tags.md#scout-deployment-tags-limit) for details.

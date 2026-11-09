@@ -813,6 +813,13 @@ export type PartialSerializedConcreteTaskInstance = Partial<SerializedConcreteTa
 
 export interface ApiKeyOptions {
   request?: KibanaRequest;
+  /**
+   * When true with a request, replace the API key of tasks that already exist with one granted (or
+   * cloned, see `cloneApiKey`) from this request, and queue the previous key for invalidation.
+   * Honored by `bulkUpdateSchedules` and by `ensureScheduled` when the task is already scheduled;
+   * `ensureScheduled` only replaces the key of an idle task and rejects with a conflict error when
+   * concurrent updates prevented the replacement.
+   */
   regenerateApiKey?: boolean;
   /**
    * When true with a request that includes an API key, clone the caller's credentials into a
@@ -821,6 +828,12 @@ export interface ApiKeyOptions {
    * such as workflows.
    */
   cloneApiKey?: boolean;
+  /**
+   * Defaults to true, so Elasticsearch refreshes after granting or cloning the task's API key and a
+   * search-based lookup of the new key (e.g. `GET _security/api_key`) finds it when the task runs.
+   * Set to false to skip the refresh: scheduling is faster, but that lookup may briefly miss the key.
+   */
+  refreshApiKey?: boolean;
   /**
    * When true with a request, grant only the Elasticsearch API key (skip UIAM). Intended for
    * tests and narrow internal flows that need tasks with ES credentials only.

@@ -28,8 +28,10 @@ import {
 import {
   disableProtections,
   ensureOnlyEventCollectionIsAllowed,
+  isAiDataCollectionEnabled,
   isBillablePolicy,
   isLinuxRansomwareProtectionEnabled,
+  removeAiDataCollection,
   removeCustomYaraSignatures,
   removeDeviceControl,
   removeLinuxDnsEvents,
@@ -106,6 +108,10 @@ export const createDefaultPolicy = (
 
   if (!isLinuxRansomwareProtectionEnabled(experimentalFeatures)) {
     defaultPolicyPerType = removeLinuxRansomware(defaultPolicyPerType);
+  }
+
+  if (!isAiDataCollectionEnabled(experimentalFeatures)) {
+    defaultPolicyPerType = removeAiDataCollection(defaultPolicyPerType);
   }
 
   // Without the per-OS form macOS ransomware has no card, so new policies keep it opt-in.

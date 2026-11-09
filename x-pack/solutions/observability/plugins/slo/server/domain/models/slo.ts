@@ -6,10 +6,10 @@
  */
 
 import type { sloDefinitionSchema, sloIdSchema, storedSloDefinitionSchema } from '@kbn/slo-schema';
-import type * as t from 'io-ts';
+import type { z } from '@kbn/zod';
 
-type SLODefinition = t.TypeOf<typeof sloDefinitionSchema>;
-type StoredSLODefinition = t.OutputOf<typeof storedSloDefinitionSchema>;
-type SLOId = t.TypeOf<typeof sloIdSchema>;
+type SLODefinition = z.output<typeof sloDefinitionSchema>;
+type StoredSLODefinition = z.input<typeof storedSloDefinitionSchema>;
+type SLOId = z.output<typeof sloIdSchema>;
 
 export type { SLODefinition, StoredSLODefinition, SLOId };

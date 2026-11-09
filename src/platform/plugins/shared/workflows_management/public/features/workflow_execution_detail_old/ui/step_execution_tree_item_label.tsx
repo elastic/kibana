@@ -19,10 +19,9 @@ import { TokenUsageBadge } from './shared/token_usage_badge';
 import { formatDuration } from '../../../shared/lib/format_duration';
 import { getStatusLabel } from '../../../shared/translations';
 
-const actionRequiredLabel = i18n.translate(
-  'workflowsManagement.stepExecutionTreeItemLabel.actionRequired',
-  { defaultMessage: 'Action is required' }
-);
+const actionRequiredLabel = i18n.translate('workflows.stepExecutionTreeItemLabel.actionRequired', {
+  defaultMessage: 'Action is required',
+});
 
 export interface StepExecutionTreeItemLabelProps {
   stepId: string;

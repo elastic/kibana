@@ -25,8 +25,8 @@ export function registerDocumentRoute({ router, log }: RouteDependencies) {
       },
       validate: {
         params: schema.object({
-          document_id: schema.string(),
-          index_name: schema.string(),
+          document_id: schema.string({ maxLength: 512 }),
+          index_name: schema.string({ maxLength: 1024 }),
         }),
       },
     },

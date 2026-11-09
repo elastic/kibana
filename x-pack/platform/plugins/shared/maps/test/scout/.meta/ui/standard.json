@@ -1,5 +1,5 @@
 {
-  "sha1": "2d009255fd94da8f30ac358295f7f9fa98f49fac",
+  "sha1": "7eb4eea8af34b4f1dfc6d4ad0f0ea9ddb17c6b71",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -15,6 +15,46 @@
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/add_layer_panel.spec.ts",
         "line": 23,
         "column": 23
+      }
+    },
+    {
+      "id": "854a799e84b9bab-6e296e5ed32d09f",
+      "title": "Maps - add to dashboard save flow new map saved by value to a new dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/add_to_dashboard.spec.ts",
+        "line": 14,
+        "column": 11
+      }
+    },
+    {
+      "id": "854a799e84b9bab-13e26d488a5ab05",
+      "title": "Maps - add to dashboard save flow new map saved by reference to a new dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/add_to_dashboard.spec.ts",
+        "line": 23,
+        "column": 17
       }
     },
     {
@@ -83,6 +123,19 @@
       }
     },
     {
+      "id": "afb81292fdb2fae-4bd8bd8d2207605",
+      "title": "Maps - dashboard reporting: creates a map report PNG file matches the baseline image, using embeddable example",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/dashboard_reporting.spec.ts",
+        "line": 84,
+        "column": 18
+      }
+    },
+    {
       "id": "ec95465caa2c2e6-e43f59b01c6aca8",
       "title": "Maps - discover visualize button should link geo_shape fields to Maps application",
       "expectedStatus": "passed",
@@ -91,8 +144,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/discover.spec.ts",
-        "line": 32,
-        "column": 43
+        "line": 33,
+        "column": 13
       }
     },
     {
@@ -106,6 +159,97 @@
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/discover.spec.ts",
         "line": 42,
         "column": 95
+      }
+    },
+    {
+      "id": "7705009e05970cb-f2cdf356be66c2a",
+      "title": "Maps - documents source - docvalue_fields should only fetch geo_point field and time field and nothing else when source does not have data driven styling",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/docvalue_fields.spec.ts",
+        "line": 56,
+        "column": 56
+      }
+    },
+    {
+      "id": "7705009e05970cb-ab6564e109b8aff",
+      "title": "Maps - documents source - docvalue_fields should only fetch geo_point field and data driven styling fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/docvalue_fields.spec.ts",
+        "line": 72,
+        "column": 17
+      }
+    },
+    {
+      "id": "7705009e05970cb-ff11ec786715872",
+      "title": "Maps - documents source - docvalue_fields should format date fields as epoch_millis when data driven styling is applied to a date field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/docvalue_fields.spec.ts",
+        "line": 85,
+        "column": 15
+      }
+    },
+    {
+      "id": "7bb1c014d258d13-a4b331b9efb2c28",
+      "title": "Maps - embed in dashboard should render map embeddables",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/embed_in_dashboard.spec.ts",
+        "line": 71,
+        "column": 16
+      }
+    },
+    {
+      "id": "7bb1c014d258d13-f54d53db8e21b46",
+      "title": "Maps - embed in dashboard should apply filters added to the dashboard filter bar to map panels",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/embed_in_dashboard.spec.ts",
+        "line": 99,
+        "column": 56
+      }
+    },
+    {
+      "id": "7bb1c014d258d13-473b4873570e817",
+      "title": "Maps - embed in dashboard should apply filters saved in the map panel itself",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/embed_in_dashboard.spec.ts",
+        "line": 140,
+        "column": 9
+      }
+    },
+    {
+      "id": "7bb1c014d258d13-3bb6b011c0c8ba6",
+      "title": "Maps - embed in dashboard should re-fetch documents on refresh",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/embed_in_dashboard.spec.ts",
+        "line": 157,
+        "column": 14
       }
     },
     {
@@ -132,6 +276,58 @@
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/embedded_map_search_cancellation.spec.ts",
         "line": 62,
         "column": 7
+      }
+    },
+    {
+      "id": "4759cc5bce2db63-0221cfeeccfad03",
+      "title": "Maps - geojson vector layer - es geo grid source geo_point - aggregation request and data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/es_geo_grid_source.spec.ts",
+        "line": 53,
+        "column": 13
+      }
+    },
+    {
+      "id": "4759cc5bce2db63-19db4da1ba93d41",
+      "title": "Maps - geojson vector layer - es geo grid source geo_point - request lifecycle",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/es_geo_grid_source.spec.ts",
+        "line": 77,
+        "column": 11
+      }
+    },
+    {
+      "id": "4759cc5bce2db63-75f9ca121d3380c",
+      "title": "Maps - geojson vector layer - es geo grid source geo_point - grid features follow the map extent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/es_geo_grid_source.spec.ts",
+        "line": 104,
+        "column": 18
+      }
+    },
+    {
+      "id": "4759cc5bce2db63-27c749f5fbcc543",
+      "title": "Maps - geojson vector layer - es geo grid source geo_shape - grid cells and inspector",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/es_geo_grid_source.spec.ts",
+        "line": 128,
+        "column": 15
       }
     },
     {
@@ -190,7 +386,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/full_screen_mode.spec.ts",
         "line": 18,
-        "column": 43
+        "column": 41
       }
     },
     {
@@ -282,6 +478,97 @@
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/mapbox_styles.spec.ts",
         "line": 22,
         "column": 8
+      }
+    },
+    {
+      "id": "8b2ad00fab0b9bf-2e2cdcad1a4dab7",
+      "title": "Maps - security feature controls global maps all privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/maps_security.spec.ts",
+        "line": 43,
+        "column": 33
+      }
+    },
+    {
+      "id": "8b2ad00fab0b9bf-bc572582da8adb9",
+      "title": "Maps - security feature controls global maps read-only privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/maps_security.spec.ts",
+        "line": 72,
+        "column": 5
+      }
+    },
+    {
+      "id": "8b2ad00fab0b9bf-7d48a06f16c07c3",
+      "title": "Maps - security feature controls no maps privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/maps_security.spec.ts",
+        "line": 88,
+        "column": 13
+      }
+    },
+    {
+      "id": "ec5ff3e707d71e9-951ad9a0b55ca6a",
+      "title": "Maps - spaces feature controls space with no features disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/maps_spaces.spec.ts",
+        "line": 32,
+        "column": 55
+      }
+    },
+    {
+      "id": "ec5ff3e707d71e9-66b8fffc03982b6",
+      "title": "Maps - spaces feature controls space with Maps disabled returns a 404",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/maps_spaces.spec.ts",
+        "line": 60,
+        "column": 49
+      }
+    },
+    {
+      "id": "214846f58c032b8-5ddc1584d6536d5",
+      "title": "Maps - multiple data views ignores global filters on layers using a data view without the filter field by default",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/multiple_data_views.spec.ts",
+        "line": 40,
+        "column": 28
+      }
+    },
+    {
+      "id": "214846f58c032b8-e5e195698a0e35c",
+      "title": "Maps - multiple data views applies global filters on layers using a data view without the filter field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/multiple_data_views.spec.ts",
+        "line": 46,
+        "column": 21
       }
     },
     {
@@ -384,8 +671,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/mvt_scaling.spec.ts",
-        "line": 232,
-        "column": 13
+        "line": 231,
+        "column": 15
       }
     },
     {
@@ -397,8 +684,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/mvt_scaling.spec.ts",
-        "line": 232,
-        "column": 13
+        "line": 231,
+        "column": 15
       }
     },
     {
@@ -410,8 +697,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/mvt_scaling.spec.ts",
-        "line": 232,
-        "column": 13
+        "line": 231,
+        "column": 15
       }
     },
     {
@@ -423,8 +710,151 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/mvt_scaling.spec.ts",
-        "line": 232,
+        "line": 231,
+        "column": 15
+      }
+    },
+    {
+      "id": "618b9f5d0692d9f-f898ff7f9df730f",
+      "title": "Maps - save and return work flow new map: save should return to dashboard and add new map panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/save_and_return.spec.ts",
+        "line": 39,
+        "column": 5
+      }
+    },
+    {
+      "id": "618b9f5d0692d9f-c93b52bdfd85b5c",
+      "title": "Maps - save and return work flow new map: save and uncheck return to origin switch should cut the originator and stay in maps application",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/save_and_return.spec.ts",
+        "line": 51,
+        "column": 11
+      }
+    },
+    {
+      "id": "618b9f5d0692d9f-7b5209c860fd1b0",
+      "title": "Maps - save and return work flow edit existing map: save and return should return to dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/save_and_return.spec.ts",
+        "line": 61,
+        "column": 16
+      }
+    },
+    {
+      "id": "618b9f5d0692d9f-5019cf352d6fcf6",
+      "title": "Maps - save and return work flow edit existing map: save and return should lose its connection to the dashboard when creating new map",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/save_and_return.spec.ts",
+        "line": 78,
+        "column": 7
+      }
+    },
+    {
+      "id": "618b9f5d0692d9f-e8dba5f9301ee02",
+      "title": "Maps - save and return work flow edit existing map: save as should return to dashboard and add new panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/save_and_return.spec.ts",
+        "line": 86,
+        "column": 19
+      }
+    },
+    {
+      "id": "618b9f5d0692d9f-a412f6fc65adba5",
+      "title": "Maps - save and return work flow edit existing map: save as and uncheck return to origin switch should cut the originator and stay in maps application",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/save_and_return.spec.ts",
+        "line": 99,
         "column": 13
+      }
+    },
+    {
+      "id": "2901e50a7f667c0-1bdc834bbe85684",
+      "title": "Maps - documents source - search hits should re-fetch documents with refresh timer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/search_hits.spec.ts",
+        "line": 70,
+        "column": 10
+      }
+    },
+    {
+      "id": "2901e50a7f667c0-c6aa87eeb38f581",
+      "title": "Maps - documents source - search hits query bar",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/search_hits.spec.ts",
+        "line": 82,
+        "column": 19
+      }
+    },
+    {
+      "id": "2901e50a7f667c0-fb7b4d673a3f52a",
+      "title": "Maps - documents source - search hits layer query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/search_hits.spec.ts",
+        "line": 117,
+        "column": 15
+      }
+    },
+    {
+      "id": "2901e50a7f667c0-45a48e4cba9c376",
+      "title": "Maps - documents source - search hits filter by extent - should handle geo_point filtering with extents that cross antimeridian",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/search_hits.spec.ts",
+        "line": 141,
+        "column": 20
+      }
+    },
+    {
+      "id": "2901e50a7f667c0-965ebd750d43a73",
+      "title": "Maps - documents source - search hits filter by extent - should handle geo_shape filtering with extents that cross antimeridian",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/search_hits.spec.ts",
+        "line": 144,
+        "column": 26
       }
     },
     {
@@ -523,7 +953,8 @@
       "title": "Maps - visualize create menu maps alias with write permission shows maps in create menu and opens Maps app",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/visualize_create_menu.spec.ts",
@@ -536,12 +967,13 @@
       "title": "Maps - visualize create menu maps alias without write permission does not show maps in create menu",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/visualize_create_menu.spec.ts",
         "line": 65,
-        "column": 9
+        "column": 5
       }
     },
     {
@@ -549,12 +981,13 @@
       "title": "Maps - visualize create menu edit meta-data: should allow to change meta-data on a map visualization",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/visualize_create_menu.spec.ts",
         "line": 72,
-        "column": 11
+        "column": 5
       }
     }
   ]

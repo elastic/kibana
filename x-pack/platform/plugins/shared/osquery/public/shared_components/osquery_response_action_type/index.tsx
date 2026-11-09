@@ -207,9 +207,7 @@ const OsqueryResponseActionParamsFormComponent = ({
         <QueryPackSelectable canRunPacks={canRunPacks} canRunSingleQuery={canRunSingleQuery} />
         <EuiSpacer size="m" />
         {queryType === 'query' && <LiveQueryQueryField />}
-        {queryType === 'pack' && (
-          <PackFieldWrapper liveQueryDetails={queries && !packData ? queryDetails : undefined} />
-        )}
+        {queryType === 'pack' && <PackFieldWrapper liveQueryDetails={queryDetails} />}
       </FormProvider>
     </>
   );

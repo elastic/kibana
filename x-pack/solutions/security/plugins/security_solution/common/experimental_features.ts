@@ -98,13 +98,10 @@ export const allowedExperimentalValues = Object.freeze({
 
   /**
    * AI Agent chat-first endpoint response actions skill (isolate, unisolate, etc.)
-   * Release: TBD
    *
-   * Ships disabled: this skill dispatches destructive endpoint response actions,
-   * so it must not be enabled by default on any branch. Enable it explicitly via
-   * config (or a Scout evals config) for local/CI testing.
+   * Release: 9.6.0
    */
-  endpointResponseActionsSkill: false,
+  endpointResponseActionsSkill: true,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
@@ -237,7 +234,7 @@ export const allowedExperimentalValues = Object.freeze({
    * the Attacks page and the attack flyout, and registers the `security.attack` unified
    * cases attachment type on the server.
    */
-  attackAttachmentsEnabled: false,
+  attackAttachments: true,
   /**
    *  Enables the QRadar rules import feature
    */
@@ -273,6 +270,11 @@ export const allowedExperimentalValues = Object.freeze({
   splunkV2DashboardsEnabled: true,
 
   /**
+   * Enables the Tines workflows migration API (create, get, update, start, and stop).
+   */
+  tinesWorkflowsMigration: false,
+
+  /**
    * Enables Detection Engine Health UI
    */
   deHealthUIEnabled: false,
@@ -286,6 +288,9 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the Automatic Troubleshooting Agent Builder skill
    */
   automaticTroubleshootingSkill: true,
+
+  /** Enables the universal Automatic Troubleshooting Agent Builder skill */
+  automaticTroubleshootingUniversalSkill: false,
 
   /**
    * Enables the PCI DSS v4.0.1 Compliance Agent Builder skill and its backing tools.
@@ -319,14 +324,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Part of the DEX AI skills family (`dexAiSkill*`).
    */
   dexAiSkillRecommendPrebuiltRules: true,
-
-  /**
-   * Disables the new flyout using the EUI flyout system. When this flag is off (the default), the
-   * "Enable new flyout" advanced setting is registered and defaults to off, so users can opt in.
-   * Turning this flag on unregisters that advanced setting, forcing the
-   * legacy flyout and effectively removing the new flyout option.
-   */
-  newFlyoutSystemDisabled: false,
 
   /**
    * Uses entity store v2 for entity analytics skill
@@ -381,14 +378,21 @@ export const allowedExperimentalValues = Object.freeze({
    * feature is treated as disabled unless both flags are on (`isLinuxRansomwareProtectionEnabled`).
    * Release: 9.6
    */
-  linuxRansomwareProtection: false,
+  linuxRansomwareProtection: true,
+
+  /**
+   * Enables the AI Data Collection card in the per-OS Elastic Defend policy settings form and
+   * turns AI event enrichment on by default for new policies (requires `perOsPolicySettings`).
+   * Release: 9.6
+   */
+  endpointAiDataCollection: true,
 
   /**
    * Enables the Registry credential hardening toggle in the Elastic Defend policy
    * Attack Surface Reduction section (`windows.attack_surface_reduction.registry_credential_hardening`).
    * Release: 9.6
    */
-  registryCredentialHardening: false,
+  registryCredentialHardening: true,
 
   /**
    * Risk score maintainer create-if-missing path: when an alert's EUID passes the entity type's
@@ -400,7 +404,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the SIEM Rule Migrations Agent Builder tools.
    */
-  siemRuleMigrationsAgentBuilderEnabled: false,
+  siemRuleMigrationsAgentBuilderEnabled: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

@@ -8,6 +8,7 @@
 import { cloneDeep } from 'lodash';
 import type { Immutable, PolicyConfig } from '../../../../../../../common/endpoint/types';
 import type {
+  AiDataCollectionOSes,
   BehaviorProtectionOSes,
   DeviceControlOSes,
   MalwareProtectionOSes,
@@ -20,7 +21,8 @@ type PerOsPolicyOperatingSystem =
   | MemoryProtectionOSes
   | BehaviorProtectionOSes
   | RansomwareProtectionOSes
-  | DeviceControlOSes;
+  | DeviceControlOSes
+  | AiDataCollectionOSes;
 
 /**
  * `OS` is invariant because `update` takes an `OS`-typed callback. Callers therefore use the
@@ -69,3 +71,8 @@ export const createDeviceControlPolicyAccessor = (
   policy: PolicyConfig,
   os: DeviceControlOSes
 ): PerOsPolicyAccessor<DeviceControlOSes> => createPerOsPolicyAccessor(policy, os);
+
+export const createAiDataCollectionPolicyAccessor = (
+  policy: PolicyConfig,
+  os: AiDataCollectionOSes
+): PerOsPolicyAccessor<AiDataCollectionOSes> => createPerOsPolicyAccessor(policy, os);

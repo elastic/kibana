@@ -126,7 +126,7 @@ export const CONFIG_EDITOR_EDITOR_SAVE_LABEL = i18n.translate(
 );
 
 export const CONFIG_EDITOR_KQL_ERROR_TOAST_TITLE = i18n.translate(
-  'alertsFiltersForm.configEditor.kqlConverstionErrorToastTitle',
+  'xpack.embeddableAlertsTable.configEditor.kqlConverstionErrorToastTitle',
   {
     defaultMessage: 'Cannot apply alerts panel filters',
   }

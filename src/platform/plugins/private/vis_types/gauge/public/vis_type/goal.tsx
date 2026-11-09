@@ -25,7 +25,7 @@ export const getGoalVisTypeDefinition = (
 ): VisTypeDefinition<GaugeVisParams> => ({
   name: 'goal',
   title: i18n.translate('visTypeGauge.goal.goalTitle', { defaultMessage: 'Goal' }),
-  icon: 'visGoal',
+  icon: 'chartGauge',
   description: i18n.translate('visTypeGauge.goal.goalDescription', {
     defaultMessage: 'Track how a metric progresses to a goal.',
   }),

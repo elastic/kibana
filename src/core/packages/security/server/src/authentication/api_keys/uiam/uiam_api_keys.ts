@@ -65,7 +65,10 @@ export interface UiamAPIKeysType {
   /** True if `value` equals Kibana's UIAM shared secret. */
   isOwnClientAuthentication(value: string): boolean;
 
-  /** True if the request is authenticated with a user-created (external) UIAM API key. */
+  /**
+   * True if the request carries a user-created (external) UIAM API key, either as its authenticated
+   * credential or, for a fake request, as marked by `markExternalUiamCredential`.
+   */
   isExternalApiKey(request: KibanaRequest): boolean;
 }
 
