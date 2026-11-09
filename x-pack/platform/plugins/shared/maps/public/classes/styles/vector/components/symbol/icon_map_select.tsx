@@ -33,13 +33,13 @@ export interface StyleOptionChanges {
 }
 
 interface Props {
-  custom_icon_stops?: IconStop[];
-  icon_palette_id: string | null;
+  customIconStops?: IconStop[];
+  iconPaletteId: string | null;
   customIcons: CustomIcon[];
   onCustomIconsChange: (customIcons: CustomIcon[]) => void;
   onChange: (changes: StyleOptionChanges) => void;
   styleProperty: IDynamicStyleProperty<IconDynamicOptions>;
-  use_custom_icon_map?: boolean;
+  useCustomIconMap?: boolean;
   isCustomOnly: boolean;
 }
 
@@ -49,8 +49,8 @@ interface State {
 
 export class IconMapSelect extends Component<Props, State> {
   state = {
-    customIconStops: this.props.custom_icon_stops
-      ? this.props.custom_icon_stops
+    customIconStops: this.props.customIconStops
+      ? this.props.customIconStops
       : DEFAULT_ICON_STOPS,
   };
 
@@ -62,7 +62,7 @@ export class IconMapSelect extends Component<Props, State> {
     };
     // edge case when custom palette is first enabled
     // customIconStops is undefined so need to update custom stops with default so icons are rendered.
-    if (!this.props.custom_icon_stops) {
+    if (!this.props.customIconStops) {
       changes.custom_icon_stops = DEFAULT_ICON_STOPS;
     }
     this.props.onChange(changes);
@@ -87,7 +87,7 @@ export class IconMapSelect extends Component<Props, State> {
   };
 
   _renderCustomStopsInput() {
-    return !this.props.isCustomOnly && !this.props.use_custom_icon_map ? null : (
+    return !this.props.isCustomOnly && !this.props.useCustomIconMap ? null : (
       <IconStops
         field={this.props.styleProperty.getField()}
         getValueSuggestions={this.props.styleProperty.getValueSuggestions}
@@ -115,10 +115,10 @@ export class IconMapSelect extends Component<Props, State> {
     ];
 
     let valueOfSelected = '';
-    if (this.props.use_custom_icon_map) {
+    if (this.props.useCustomIconMap) {
       valueOfSelected = CUSTOM_MAP_ID;
-    } else if (this.props.icon_palette_id) {
-      valueOfSelected = this.props.icon_palette_id;
+    } else if (this.props.iconPaletteId) {
+      valueOfSelected = this.props.iconPaletteId;
     }
 
     return (
