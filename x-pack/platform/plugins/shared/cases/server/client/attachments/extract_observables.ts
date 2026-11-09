@@ -161,8 +161,10 @@ export const extractAndAddObservables = async (
       return;
     }
 
+    // Writes `cases-observables` objects in chunks of 1,000, checking repeats and the cap before
+    // each chunk; observables over the cap are skipped and logged.
     const result = await applyObservablesToCase(caseId, observablesWithinBounds, clientArgs);
-    if (!result) {
+    if (!result.caseWithPatch) {
       logger.debug(`[extractAndAddObservables] No new observables added to case ${caseId}`);
       return;
     }

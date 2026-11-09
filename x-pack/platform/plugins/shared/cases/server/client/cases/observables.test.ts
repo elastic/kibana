@@ -9,6 +9,7 @@ import {
   deleteObservable,
   updateObservable,
   bulkAddObservables,
+  bulkCreateObservables,
   bulkDeleteObservables,
   applyObservablesToCase,
 } from './observables';
@@ -23,8 +24,8 @@ import {
   OBSERVABLE_TYPE_IPV6,
   MAX_OBSERVABLE_DESCRIPTION_LENGTH,
   MAX_OBSERVABLE_VALUE_LENGTH,
-  MAX_OBSERVABLES_PER_CASE,
   MAX_STORED_OBSERVABLE_FIELD_LENGTH,
+  MAX_STORED_OBSERVABLES_PER_CASE,
 } from '../../../common/constants';
 import type { ObservablePost } from '../../../common/types/api';
 import type { Observable } from '../../../common/types/domain';
@@ -38,6 +39,11 @@ const mockClientArgs = createCasesClientMockArgs();
 const mockLicensingService = mockClientArgs.services.licensingService;
 const mockCaseService = mockClientArgs.services.caseService;
 const mockUserActionService = mockClientArgs.services.userActionService;
+const mockObservableService = mockClientArgs.services.observableService;
+
+/** The observables an add wrote to the `cases-observables` type, across every bulk create. */
+const createdObservables = () =>
+  mockObservableService.bulkCreate.mock.calls.flatMap(([{ observables }]) => observables);
 
 const mockObservablePost = {
   value: '127.0.0.1',
@@ -191,19 +197,18 @@ describe('addObservable', () => {
       mockCasesClient
     );
 
+    expect(createdObservables()).toEqual([
+      expect.objectContaining({ typeKey: OBSERVABLE_TYPE_IPV4.key, value: '192.168.0.1' }),
+    ]);
+    // The field is not rewritten; its two stored rows stay and count toward the total.
     expect(mockCaseService.patchCase).toHaveBeenCalledWith(
       expect.objectContaining({
-        updatedAttributes: {
-          observables: expect.arrayContaining([
-            mockObservable,
-            duplicateStoredObservable,
-            expect.objectContaining({
-              typeKey: OBSERVABLE_TYPE_IPV4.key,
-              value: '192.168.0.1',
-            }),
-          ]),
-          total_observables: 3,
-        },
+        updatedAttributes: expect.not.objectContaining({ observables: expect.anything() }),
+      })
+    );
+    expect(mockCaseService.patchCase).toHaveBeenCalledWith(
+      expect.objectContaining({
+        updatedAttributes: expect.objectContaining({ total_observables: 2 }),
       })
     );
   });
@@ -518,17 +523,9 @@ describe('bulkAddObservables', () => {
     );
     expect(result).toBeDefined();
 
-    const expectedObservables = [mockObservable, observables[0], observables[1]];
-    expect(mockCaseService.patchCase).toHaveBeenCalledWith(
-      expect.objectContaining({
-        updatedAttributes: expect.objectContaining({
-          observables: expect.arrayContaining(
-            expectedObservables.map((observable) =>
-              expect.objectContaining({ typeKey: observable.typeKey, value: observable.value })
-            )
-          ),
-        }),
-      })
+    expect(createdObservables()).toEqual(observables.map(createObservableMatcher));
+    expect(mockObservableService.bulkCreate).toHaveBeenCalledWith(
+      expect.objectContaining({ caseId: caseSO.id, owner: caseSO.attributes.owner })
     );
   });
 
@@ -586,39 +583,15 @@ describe('bulkAddObservables', () => {
     expect(mockClientArgs.casesEventBus.emitObservablesAdded).not.toHaveBeenCalled();
   });
 
-  it('should return the max number of observables', async () => {
+  it('adds only as many observables as fit under the cap', async () => {
     mockLicensingService.isAtLeastPlatinum.mockResolvedValue(true);
-    const moreThanMaxObservables = [];
-    for (let i = 0; i < MAX_OBSERVABLES_PER_CASE; i++) {
-      moreThanMaxObservables.push({ ...mockObservablePost, value: `192.168.0.${i}` });
-    }
-    await bulkAddObservables(
-      { caseId: 'case-id', observables: moreThanMaxObservables },
-      mockClientArgs,
-      mockCasesClient
-    );
+    // The field holds one observable and the type all but two of the rest, so one more fits.
+    mockObservableService.countForCase.mockResolvedValueOnce(MAX_STORED_OBSERVABLES_PER_CASE - 2);
+    const observables = [0, 1, 2].map((i) => ({ ...mockObservablePost, value: `192.168.0.${i}` }));
 
-    const expectedObservables = [
-      mockObservable,
-      // offset by one to account for the existing observable in the case
-      ...moreThanMaxObservables.slice(0, MAX_OBSERVABLES_PER_CASE - 1),
-    ];
-    const excludedObservable = moreThanMaxObservables[moreThanMaxObservables.length - 1];
+    await bulkAddObservables({ caseId: 'case-id', observables }, mockClientArgs, mockCasesClient);
 
-    expect(mockCaseService.patchCase).toHaveBeenCalledWith(
-      expect.objectContaining({
-        updatedAttributes: expect.objectContaining({
-          observables: expect.arrayContaining(expectedObservables.map(createObservableMatcher)),
-        }),
-      })
-    );
-    expect(mockCaseService.patchCase).toHaveBeenCalledWith(
-      expect.objectContaining({
-        updatedAttributes: expect.objectContaining({
-          observables: expect.not.arrayContaining([createObservableMatcher(excludedObservable)]),
-        }),
-      })
-    );
+    expect(createdObservables()).toEqual([createObservableMatcher(observables[0])]);
   });
 
   it('should create a user action with the correct payload', async () => {
@@ -708,10 +681,10 @@ describe('bulkDeleteObservables', () => {
     expect(mockCaseService.patchCase).toHaveBeenCalledWith(
       expect.objectContaining({
         version: caseSOWithMultipleObservables.version,
-        updatedAttributes: {
+        updatedAttributes: expect.objectContaining({
           observables: [mockObservable3],
           total_observables: 1,
-        },
+        }),
       })
     );
   });
@@ -729,10 +702,10 @@ describe('bulkDeleteObservables', () => {
 
     expect(mockCaseService.patchCase).toHaveBeenCalledWith(
       expect.objectContaining({
-        updatedAttributes: {
+        updatedAttributes: expect.objectContaining({
           observables: [mockObservable2, mockObservable3],
           total_observables: 2,
-        },
+        }),
       })
     );
   });
@@ -838,60 +811,111 @@ describe('bulkDeleteObservables', () => {
 });
 
 describe('applyObservablesToCase', () => {
-  beforeEach(() => {
-    mockCaseService.patchCase.mockResolvedValue(caseSO);
-    mockCaseService.getCase.mockResolvedValue(caseSO);
-    jest.clearAllMocks();
+  const caseWith = (observables: Observable[]) => ({
+    ...caseSO,
+    attributes: { ...caseSO.attributes, observables },
   });
 
-  it('returns early without hitting the database when observables is empty', async () => {
-    await applyObservablesToCase(caseSO.id, [], mockClientArgs);
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockCaseService.patchCase.mockResolvedValue(caseSO);
+    mockCaseService.getCase.mockResolvedValue(caseWith([]));
+    mockObservableService.countForCase.mockResolvedValue(0);
+    mockObservableService.findExisting.mockResolvedValue([]);
+  });
 
-    expect(mockCaseService.getCase).not.toHaveBeenCalled();
+  it('writes nothing when observables is empty', async () => {
+    const result = await applyObservablesToCase(caseSO.id, [], mockClientArgs);
+
+    expect(result.caseWithPatch).toBeUndefined();
+    expect(mockObservableService.bulkCreate).not.toHaveBeenCalled();
     expect(mockCaseService.patchCase).not.toHaveBeenCalled();
     expect(mockUserActionService.creator.createUserAction).not.toHaveBeenCalled();
   });
 
-  it('patches the case with the new observables', async () => {
-    mockCaseService.getCase.mockResolvedValue({
-      ...caseSO,
-      attributes: { ...caseSO.attributes, observables: [] },
-    });
+  it('writes new observables only as cases-observables objects and sets the stored total', async () => {
+    mockObservableService.countForCase.mockResolvedValueOnce(0).mockResolvedValueOnce(1);
 
     await applyObservablesToCase(caseSO.id, [mockObservablePost], mockClientArgs);
 
-    expect(mockCaseService.patchCase).toHaveBeenCalledWith(
+    expect(mockObservableService.bulkCreate).toHaveBeenCalledWith(
       expect.objectContaining({
         caseId: caseSO.id,
-        updatedAttributes: expect.objectContaining({
-          observables: expect.arrayContaining([
-            expect.objectContaining({ value: mockObservablePost.value }),
-          ]),
-          total_observables: 1,
-        }),
+        owner: caseSO.attributes.owner,
+        user: mockClientArgs.user,
+        observables: [
+          expect.objectContaining({
+            id: expect.any(String),
+            typeKey: mockObservablePost.typeKey,
+            value: mockObservablePost.value,
+            description: null,
+          }),
+        ],
       })
     );
+    const [[{ updatedAttributes, version }]] = mockCaseService.patchCase.mock.calls;
+    expect(updatedAttributes).not.toHaveProperty('observables');
+    expect(updatedAttributes).toEqual(
+      expect.objectContaining({
+        total_observables: 1,
+        updated_at: expect.any(String),
+        updated_by: mockClientArgs.user,
+      })
+    );
+    // Adds do not write the case field, so they do not need the case version.
+    expect(version).toBeUndefined();
   });
 
-  it('deduplicates observables — skips both patchCase and user action when all incoming observables already exist', async () => {
-    mockCaseService.getCase.mockResolvedValue({
-      ...caseSO,
-      attributes: { ...caseSO.attributes, observables: [mockObservable] },
-    });
+  it('gives the observables of one request increasing created times in request order', async () => {
+    const observables = ['10.0.0.1', '10.0.0.2', '10.0.0.3'].map((value) => ({
+      ...mockObservablePost,
+      value,
+    }));
 
-    await applyObservablesToCase(caseSO.id, [mockObservablePost], mockClientArgs);
+    await applyObservablesToCase(caseSO.id, observables, mockClientArgs);
 
-    // No SO write and no user action because newObservablesCount === 0
-    expect(mockCaseService.patchCase).not.toHaveBeenCalled();
-    expect(mockUserActionService.creator.createUserAction).not.toHaveBeenCalled();
+    const createdAt = createdObservables().map((observable) => Date.parse(observable.createdAt));
+    expect(createdAt[1] - createdAt[0]).toBe(1);
+    expect(createdAt[2] - createdAt[1]).toBe(1);
+  });
+
+  it('skips repeats of the case field, of the type and within the request', async () => {
+    mockCaseService.getCase.mockResolvedValue(caseWith([mockObservable]));
+    const repeatOfType = { ...mockObservablePost, value: '10.0.0.7' };
+    mockObservableService.findExisting.mockResolvedValue([
+      { ...mockObservable, id: 'type-obs', value: repeatOfType.value },
+    ]);
+    const newObservable = { ...mockObservablePost, value: '10.0.0.8' };
+
+    const result = await applyObservablesToCase(
+      caseSO.id,
+      [mockObservablePost, repeatOfType, newObservable, newObservable],
+      mockClientArgs
+    );
+
+    expect(createdObservables()).toEqual([expect.objectContaining({ value: newObservable.value })]);
+    expect(result.skippedDuplicates).toEqual([mockObservablePost, newObservable, repeatOfType]);
+    expect(mockObservableService.findExisting).toHaveBeenCalledWith(caseSO.id, [
+      repeatOfType,
+      newObservable,
+    ]);
+  });
+
+  it('treats type keys that contain a dash as distinct', async () => {
+    mockCaseService.getCase.mockResolvedValue(
+      caseWith([{ ...mockObservable, typeKey: 'a-b', value: 'c' }])
+    );
+
+    await applyObservablesToCase(
+      caseSO.id,
+      [{ typeKey: 'a', value: 'b-c', description: null }],
+      mockClientArgs
+    );
+
+    expect(createdObservables()).toHaveLength(1);
   });
 
   it('creates a user action when new observables are added', async () => {
-    mockCaseService.getCase.mockResolvedValue({
-      ...caseSO,
-      attributes: { ...caseSO.attributes, observables: [] },
-    });
-
     await applyObservablesToCase(caseSO.id, [mockObservablePost], mockClientArgs);
 
     expect(mockUserActionService.creator.createUserAction).toHaveBeenCalledWith({
@@ -903,39 +927,58 @@ describe('applyObservablesToCase', () => {
     });
   });
 
-  it('caps at MAX_OBSERVABLES_PER_CASE', async () => {
-    const existingObservables = Array.from({ length: MAX_OBSERVABLES_PER_CASE - 1 }, (_, i) => ({
-      ...mockObservable,
-      id: `obs-${i}`,
-      value: `10.0.0.${i}`,
-    }));
-
-    mockCaseService.getCase.mockResolvedValue({
-      ...caseSO,
-      attributes: { ...caseSO.attributes, observables: existingObservables },
-    });
+  it('adds only as many as fit under the cap and reports and logs the rest', async () => {
+    mockCaseService.getCase.mockResolvedValue(caseWith([mockObservable]));
+    mockObservableService.countForCase.mockResolvedValue(MAX_STORED_OBSERVABLES_PER_CASE - 2);
 
     const extraObservables: ObservablePost[] = [
       { value: '192.168.1.1', typeKey: OBSERVABLE_TYPE_IPV4.key, description: null },
       { value: '192.168.1.2', typeKey: OBSERVABLE_TYPE_IPV4.key, description: null },
     ];
 
-    await applyObservablesToCase(caseSO.id, extraObservables, mockClientArgs);
+    const result = await applyObservablesToCase(caseSO.id, extraObservables, mockClientArgs);
 
-    expect(mockCaseService.patchCase).toHaveBeenCalledWith(
-      expect.objectContaining({
-        updatedAttributes: expect.objectContaining({
-          total_observables: MAX_OBSERVABLES_PER_CASE,
-        }),
-      })
+    expect(createdObservables()).toEqual([expect.objectContaining({ value: '192.168.1.1' })]);
+    expect(result.skippedOverCap).toEqual([extraObservables[1]]);
+    expect(mockClientArgs.logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Skipped 1 observable(s)')
     );
   });
 
+  it('adds nothing, and writes nothing to the case, when the case is already at the cap', async () => {
+    mockObservableService.countForCase.mockResolvedValue(MAX_STORED_OBSERVABLES_PER_CASE);
+
+    const result = await applyObservablesToCase(
+      caseSO.id,
+      [{ value: '192.168.99.1', typeKey: OBSERVABLE_TYPE_IPV4.key, description: null }],
+      mockClientArgs
+    );
+
+    expect(result.caseWithPatch).toBeUndefined();
+    expect(result.skippedOverCap).toHaveLength(1);
+    expect(result.totalObservables).toBe(MAX_STORED_OBSERVABLES_PER_CASE);
+    expect(mockObservableService.bulkCreate).not.toHaveBeenCalled();
+    expect(mockCaseService.patchCase).not.toHaveBeenCalled();
+    expect(mockUserActionService.creator.createUserAction).not.toHaveBeenCalled();
+  });
+
+  it('checks repeats and the cap before each chunk of 1,000', async () => {
+    const observables = Array.from({ length: 1500 }, (_, i) => ({
+      ...mockObservablePost,
+      value: `10.1.${Math.floor(i / 250)}.${i % 250}`,
+    }));
+
+    const result = await applyObservablesToCase(caseSO.id, observables, mockClientArgs);
+
+    expect(mockObservableService.findExisting).toHaveBeenCalledTimes(2);
+    expect(mockObservableService.bulkCreate).toHaveBeenCalledTimes(2);
+    expect(result.newlyAddedObservables).toHaveLength(1500);
+    // One user action for the whole request.
+    expect(mockUserActionService.creator.createUserAction).toHaveBeenCalledTimes(1);
+  });
+
   it('returns the newly-added observables so callers can emit with only the new ids', async () => {
-    mockCaseService.getCase.mockResolvedValue({
-      ...caseSO,
-      attributes: { ...caseSO.attributes, observables: [mockObservable] },
-    });
+    mockCaseService.getCase.mockResolvedValue(caseWith([mockObservable]));
 
     const newObservable: ObservablePost = {
       value: '10.0.0.1',
@@ -950,23 +993,18 @@ describe('applyObservablesToCase', () => {
     );
 
     // Only the new observable id — not the existing one
-    expect(result?.newlyAddedObservables).toHaveLength(1);
-    expect(result?.newlyAddedObservables[0].value).toBe(newObservable.value);
+    expect(result.newlyAddedObservables).toHaveLength(1);
+    expect(result.newlyAddedObservables[0].value).toBe(newObservable.value);
     // applyObservablesToCase no longer emits; callers are responsible for that
     expect(mockClientArgs.casesEventBus.emitObservablesAdded).not.toHaveBeenCalled();
   });
 
-  it('still writes and returns correct result when stored observables have duplicate typeKey+value entries', async () => {
+  it('keeps stored field rows that repeat each other and adds the new observable', async () => {
     // Reachable via SO import or data written before the dedupe path was added.
-    // Both stored rows must be preserved — the new observable is appended, not
-    // substituted for one of the duplicates.
     const dupA = { ...mockObservable, id: 'dup-a' };
     const dupB = { ...mockObservable, id: 'dup-b' }; // same typeKey+value as dupA
-
-    mockCaseService.getCase.mockResolvedValue({
-      ...caseSO,
-      attributes: { ...caseSO.attributes, observables: [dupA, dupB] },
-    });
+    mockCaseService.getCase.mockResolvedValue(caseWith([dupA, dupB]));
+    mockObservableService.countForCase.mockResolvedValueOnce(0).mockResolvedValueOnce(1);
 
     const newObservable: ObservablePost = {
       value: '10.0.0.2',
@@ -978,60 +1016,73 @@ describe('applyObservablesToCase', () => {
 
     expect(mockCaseService.patchCase).toHaveBeenCalledTimes(1);
     expect(mockUserActionService.creator.createUserAction).toHaveBeenCalledTimes(1);
-
-    // Both dup-a and dup-b survive; the new observable is appended (3 total).
-    const writtenObservables = mockCaseService.patchCase.mock.calls[0][0].updatedAttributes
-      .observables as Observable[];
-    expect(writtenObservables).toHaveLength(3);
-    expect(writtenObservables.map(({ id }) => id)).toEqual(
-      expect.arrayContaining(['dup-a', 'dup-b'])
+    expect(mockCaseService.patchCase).toHaveBeenCalledWith(
+      expect.objectContaining({
+        updatedAttributes: expect.objectContaining({ total_observables: 3 }),
+      })
     );
-    expect(writtenObservables.some(({ value }) => value === newObservable.value)).toBe(true);
-
-    expect(result?.newlyAddedObservables).toHaveLength(1);
-    expect(result?.newlyAddedObservables[0].value).toBe(newObservable.value);
+    expect(result.newlyAddedObservables).toHaveLength(1);
+    expect(result.newlyAddedObservables[0].value).toBe(newObservable.value);
   });
 
-  it('returns undefined when all observables are duplicates', async () => {
-    mockCaseService.getCase.mockResolvedValue({
-      ...caseSO,
-      attributes: { ...caseSO.attributes, observables: [mockObservable] },
-    });
+  it('returns no case when all observables are duplicates', async () => {
+    mockCaseService.getCase.mockResolvedValue(caseWith([mockObservable]));
 
-    // All duplicates — applyObservablesToCase returns early before the patch
     const result = await applyObservablesToCase(caseSO.id, [mockObservablePost], mockClientArgs);
 
-    expect(result).toBeUndefined();
+    expect(result.caseWithPatch).toBeUndefined();
+    expect(result.skippedDuplicates).toEqual([mockObservablePost]);
     expect(mockCaseService.patchCase).not.toHaveBeenCalled();
   });
+});
 
-  it('returns undefined when the input is empty', async () => {
-    const result = await applyObservablesToCase(caseSO.id, [], mockClientArgs);
-
-    expect(result).toBeUndefined();
+describe('bulkCreateObservables', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockLicensingService.isAtLeastPlatinum.mockResolvedValue(true);
+    mockCaseService.getCase.mockResolvedValue(caseSOWithObservables);
+    mockCaseService.patchCase.mockResolvedValue(caseSOWithObservables);
+    mockObservableService.countForCase.mockResolvedValue(0);
+    mockObservableService.findExisting.mockResolvedValue([]);
   });
 
-  it('does not add any observable when the case is already at the cap', async () => {
-    const atCapObservables = Array.from({ length: MAX_OBSERVABLES_PER_CASE }, (_, i) => ({
-      ...mockObservable,
-      id: `obs-${i}`,
-      value: `10.0.0.${i}`,
-    }));
+  it('reports what it added and what it skipped instead of failing', async () => {
+    const newObservable = { ...mockObservablePost, value: '10.0.0.9' };
 
-    mockCaseService.getCase.mockResolvedValue({
-      ...caseSO,
-      attributes: { ...caseSO.attributes, observables: atCapObservables },
-    });
-
-    const result = await applyObservablesToCase(
+    const result = await bulkCreateObservables(
       caseSO.id,
-      [{ value: '192.168.99.1', typeKey: OBSERVABLE_TYPE_IPV4.key, description: null }],
-      mockClientArgs
+      { observables: [mockObservablePost, newObservable] },
+      mockClientArgs,
+      mockCasesClient
     );
 
-    expect(result).toBeUndefined();
-    expect(mockCaseService.patchCase).not.toHaveBeenCalled();
-    expect(mockUserActionService.creator.createUserAction).not.toHaveBeenCalled();
+    expect(result.added).toEqual([expect.objectContaining({ value: newObservable.value })]);
+    expect(result.skipped_duplicates).toEqual([mockObservablePost]);
+    expect(result.skipped_over_cap).toEqual([]);
+    expect(mockClientArgs.casesEventBus.emitObservablesAdded).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not fail or emit when nothing was added', async () => {
+    const result = await bulkCreateObservables(
+      caseSO.id,
+      { observables: [mockObservablePost] },
+      mockClientArgs,
+      mockCasesClient
+    );
+
+    expect(result.added).toEqual([]);
+    expect(mockClientArgs.casesEventBus.emitObservablesAdded).not.toHaveBeenCalled();
+  });
+
+  it('rejects more than 1,000 observables', async () => {
+    const observables = Array.from({ length: 1001 }, (_, i) => ({
+      ...mockObservablePost,
+      value: `10.2.${Math.floor(i / 250)}.${i % 250}`,
+    }));
+
+    await expect(
+      bulkCreateObservables(caseSO.id, { observables }, mockClientArgs, mockCasesClient)
+    ).rejects.toThrow();
   });
 });
 
@@ -1055,17 +1106,17 @@ describe('optimistic concurrency on observable writes', () => {
     mockCaseService.patchCase.mockResolvedValue(caseSO);
     mockLicensingService.isAtLeastPlatinum.mockResolvedValue(true);
     mockClientArgs.authorization.ensureAuthorized.mockResolvedValue(undefined);
+    mockObservableService.countForCase.mockResolvedValue(0);
+    mockObservableService.findExisting.mockResolvedValue([]);
   });
 
-  describe('the case version is sent on every write', () => {
+  describe('adds write only the type, so they do not send the case version', () => {
     it('applyObservablesToCase', async () => {
       mockCaseService.getCase.mockResolvedValue(versionedCase('v-add', []));
 
       await applyObservablesToCase(caseSO.id, [newObservablePost], mockClientArgs);
 
-      expect(mockCaseService.patchCase).toHaveBeenCalledWith(
-        expect.objectContaining({ version: 'v-add' })
-      );
+      expect(mockCaseService.patchCase.mock.calls[0][0].version).toBeUndefined();
     });
 
     it('addObservable', async () => {
@@ -1078,9 +1129,7 @@ describe('optimistic concurrency on observable writes', () => {
         mockCasesClient
       );
 
-      expect(mockCaseService.patchCase).toHaveBeenCalledWith(
-        expect.objectContaining({ version: 'v-add-one' })
-      );
+      expect(mockCaseService.patchCase.mock.calls[0][0].version).toBeUndefined();
     });
 
     it('bulkAddObservables', async () => {
@@ -1092,11 +1141,11 @@ describe('optimistic concurrency on observable writes', () => {
         mockCasesClient
       );
 
-      expect(mockCaseService.patchCase).toHaveBeenCalledWith(
-        expect.objectContaining({ version: 'v-bulk-add' })
-      );
+      expect(mockCaseService.patchCase.mock.calls[0][0].version).toBeUndefined();
     });
+  });
 
+  describe('the case version is sent on every write to the case field', () => {
     it('updateObservable', async () => {
       mockCaseService.getCase.mockResolvedValue(versionedCase('v-update', [mockObservable]));
 
@@ -1305,76 +1354,20 @@ describe('optimistic concurrency on observable writes', () => {
     });
   });
 
-  describe('on a version conflict', () => {
-    it('re-reads the case and keeps the observable a concurrent writer added', async () => {
-      // Failure scenario: an alert auto-extraction wrote mockObservable2 between our read and our write.
-      mockCaseService.getCase
-        .mockResolvedValueOnce(versionedCase('v1', [mockObservable]))
-        .mockResolvedValueOnce(versionedCase('v2', [mockObservable, mockObservable2]));
-      mockCaseService.patchCase
-        .mockRejectedValueOnce(conflictError())
-        .mockResolvedValueOnce(caseSO);
-
-      const result = await applyObservablesToCase(caseSO.id, [newObservablePost], mockClientArgs);
-
-      expect(mockCaseService.patchCase).toHaveBeenCalledTimes(2);
-      const [firstWrite, secondWrite] = mockCaseService.patchCase.mock.calls.map(([args]) => args);
-      expect(firstWrite.version).toBe('v1');
-      expect(firstWrite.updatedAttributes.observables).toHaveLength(2);
-      expect(secondWrite.version).toBe('v2');
-      expect(secondWrite.updatedAttributes.observables).toEqual([
-        mockObservable,
-        mockObservable2,
-        expect.objectContaining({ value: newObservablePost.value }),
-      ]);
-      expect(secondWrite.updatedAttributes.total_observables).toBe(3);
-      expect(result?.newlyAddedObservables).toHaveLength(1);
-    });
-
-    it('does not write the user action for the failed attempt', async () => {
+  describe('when an add fails', () => {
+    it('records no user action and does not set the total when the type write fails', async () => {
       mockCaseService.getCase.mockResolvedValue(versionedCase('v1', []));
-      mockCaseService.patchCase
-        .mockRejectedValueOnce(conflictError())
-        .mockResolvedValueOnce(caseSO);
+      mockObservableService.bulkCreate.mockRejectedValueOnce(new Error('create failed'));
 
-      await applyObservablesToCase(caseSO.id, [newObservablePost], mockClientArgs);
+      await expect(
+        applyObservablesToCase(caseSO.id, [newObservablePost], mockClientArgs)
+      ).rejects.toThrow('create failed');
 
-      expect(mockUserActionService.creator.createUserAction).toHaveBeenCalledTimes(1);
-    });
-
-    it('skips the write when the refreshed case already holds the observable', async () => {
-      // Failure scenario: the concurrent writer added the very same observable, so there is nothing left to add.
-      mockCaseService.getCase
-        .mockResolvedValueOnce(versionedCase('v1', []))
-        .mockResolvedValueOnce(
-          versionedCase('v2', [{ ...mockObservable, value: newObservablePost.value }])
-        );
-      mockCaseService.patchCase.mockRejectedValueOnce(conflictError());
-
-      const result = await applyObservablesToCase(caseSO.id, [newObservablePost], mockClientArgs);
-
-      expect(result).toBeUndefined();
-      expect(mockCaseService.patchCase).toHaveBeenCalledTimes(1);
+      expect(mockCaseService.patchCase).not.toHaveBeenCalled();
       expect(mockUserActionService.creator.createUserAction).not.toHaveBeenCalled();
     });
 
-    it('throws a 409 once the attempts are exhausted, without a user action', async () => {
-      // Failure scenario: writers keep winning the race; the request must fail, not overwrite them.
-      mockCaseService.getCase.mockResolvedValue(versionedCase('v1', []));
-      mockCaseService.patchCase.mockRejectedValue(conflictError());
-
-      const error = await applyObservablesToCase(
-        caseSO.id,
-        [newObservablePost],
-        mockClientArgs
-      ).catch((e) => e);
-
-      expect(Boom.isBoom(error, 409)).toBe(true);
-      expect(mockCaseService.patchCase).toHaveBeenCalledTimes(3);
-      expect(mockUserActionService.creator.createUserAction).not.toHaveBeenCalled();
-    });
-
-    it('rethrows an error that is not a version conflict without retrying', async () => {
+    it('rethrows an error from setting the stored total', async () => {
       mockCaseService.getCase.mockResolvedValue(versionedCase('v1', []));
       mockCaseService.patchCase.mockRejectedValue(new Error('write failed'));
 
@@ -1383,8 +1376,11 @@ describe('optimistic concurrency on observable writes', () => {
       ).rejects.toThrow('write failed');
 
       expect(mockCaseService.patchCase).toHaveBeenCalledTimes(1);
+      expect(mockUserActionService.creator.createUserAction).not.toHaveBeenCalled();
     });
+  });
 
+  describe('on a version conflict', () => {
     it('retries bulkDeleteObservables against the refreshed case', async () => {
       mockCaseService.getCase
         .mockResolvedValueOnce(versionedCase('v1', [mockObservable, mockObservable2]))
@@ -1402,10 +1398,12 @@ describe('optimistic concurrency on observable writes', () => {
 
       const [, secondWrite] = mockCaseService.patchCase.mock.calls.map(([args]) => args);
       expect(secondWrite.version).toBe('v2');
-      expect(secondWrite.updatedAttributes).toEqual({
-        observables: [mockObservable2, mockObservable3],
-        total_observables: 2,
-      });
+      expect(secondWrite.updatedAttributes).toEqual(
+        expect.objectContaining({
+          observables: [mockObservable2, mockObservable3],
+          total_observables: 2,
+        })
+      );
       expect(mockUserActionService.creator.createUserAction).toHaveBeenCalledWith({
         userAction: expect.objectContaining({
           payload: { observables: { count: 1, actionType: 'delete' } },
@@ -1471,10 +1469,12 @@ describe('optimistic concurrency on observable writes', () => {
 
       const [, secondWrite] = mockCaseService.patchCase.mock.calls.map(([args]) => args);
       expect(secondWrite.version).toBe('v2');
-      expect(secondWrite.updatedAttributes).toEqual({
-        observables: [mockObservable2],
-        total_observables: 1,
-      });
+      expect(secondWrite.updatedAttributes).toEqual(
+        expect.objectContaining({
+          observables: [mockObservable2],
+          total_observables: 1,
+        })
+      );
       expect(mockUserActionService.creator.createUserAction).toHaveBeenCalledTimes(1);
     });
 
@@ -1490,5 +1490,171 @@ describe('optimistic concurrency on observable writes', () => {
 
       expect(mockUserActionService.creator.createUserAction).not.toHaveBeenCalled();
     });
+  });
+});
+
+describe('observables stored as cases-observables objects', () => {
+  const storedObservable = {
+    id: 'type-observable-id',
+    type: 'cases-observables',
+    version: 'WzEsMV0=',
+    references: [{ type: 'cases', id: caseSO.id, name: 'associated-cases' }],
+    attributes: {
+      owner: 'securitySolution',
+      type_key: OBSERVABLE_TYPE_IPV4.key,
+      value: '10.10.10.10',
+      description: null,
+      source_attachment_id: null,
+      created_at: '2026-11-06T09:30:00.000Z',
+      created_by: { username: 'analyst', full_name: null, email: null },
+      updated_at: null,
+      updated_by: null,
+    },
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockLicensingService.isAtLeastPlatinum.mockResolvedValue(true);
+    mockClientArgs.authorization.ensureAuthorized.mockResolvedValue(undefined);
+    mockCaseService.getCase.mockResolvedValue(caseSOWithObservables);
+    mockCaseService.patchCase.mockResolvedValue(caseSOWithObservables);
+    mockObservableService.countForCase.mockResolvedValue(1);
+    mockObservableService.findExisting.mockResolvedValue([]);
+    mockObservableService.getForCase.mockImplementation(async (_caseId, ids) => ({
+      found: ids.includes(storedObservable.id) ? [storedObservable] : [],
+      missingIds: ids.filter((id) => id !== storedObservable.id),
+    }));
+  });
+
+  it('updates an observable of the type in place, with its version', async () => {
+    await updateObservable(
+      caseSO.id,
+      storedObservable.id,
+      { observable: { value: '10.10.10.11', description: 'edited' } },
+      mockClientArgs,
+      mockCasesClient
+    );
+
+    expect(mockObservableService.update).toHaveBeenCalledWith({
+      id: storedObservable.id,
+      version: storedObservable.version,
+      attributes: expect.objectContaining({
+        value: '10.10.10.11',
+        description: 'edited',
+        updated_by: mockClientArgs.user,
+      }),
+    });
+    // The case field is not rewritten; only the total and the update time are set.
+    expect(mockCaseService.patchCase).toHaveBeenCalledWith(
+      expect.objectContaining({
+        updatedAttributes: expect.objectContaining({ total_observables: 2 }),
+      })
+    );
+    expect(mockCaseService.patchCase.mock.calls[0][0].updatedAttributes).not.toHaveProperty(
+      'observables'
+    );
+    expect(mockUserActionService.creator.createUserAction).toHaveBeenCalledWith({
+      userAction: expect.objectContaining({
+        payload: { observables: { count: 1, actionType: 'update' } },
+      }),
+    });
+  });
+
+  it('rejects a value edit that repeats an observable of the case field', async () => {
+    await expect(
+      updateObservable(
+        caseSO.id,
+        storedObservable.id,
+        { observable: { value: mockObservable.value, description: null } },
+        mockClientArgs,
+        mockCasesClient
+      )
+    ).rejects.toThrow('Invalid duplicated observables in request.');
+
+    expect(mockObservableService.update).not.toHaveBeenCalled();
+  });
+
+  it('rejects a field edit whose value repeats an observable of the type', async () => {
+    mockObservableService.findExisting.mockResolvedValue([
+      {
+        id: 'other-type-observable',
+        typeKey: mockObservable.typeKey,
+        value: '10.20.30.40',
+        description: null,
+        createdAt: '2026-11-06T09:30:00.000Z',
+        updatedAt: null,
+      },
+    ]);
+
+    await expect(
+      updateObservable(
+        caseSO.id,
+        mockObservable.id,
+        { observable: { value: '10.20.30.40', description: null } },
+        mockClientArgs,
+        mockCasesClient
+      )
+    ).rejects.toThrow('Invalid duplicated observables in request.');
+
+    expect(mockCaseService.patchCase).not.toHaveBeenCalled();
+  });
+
+  it('returns not found for an id in neither store', async () => {
+    await expect(
+      updateObservable(
+        caseSO.id,
+        'unknown-id',
+        { observable: { value: '1.1.1.1', description: null } },
+        mockClientArgs,
+        mockCasesClient
+      )
+    ).rejects.toThrow('observable id unknown-id not found');
+  });
+
+  it('deletes an observable of the type and sets the total', async () => {
+    mockObservableService.countForCase.mockResolvedValue(0);
+
+    await deleteObservable(caseSO.id, storedObservable.id, mockClientArgs, mockCasesClient);
+
+    expect(mockObservableService.bulkDelete).toHaveBeenCalledWith([storedObservable.id]);
+    expect(mockCaseService.patchCase).toHaveBeenCalledWith(
+      expect.objectContaining({
+        updatedAttributes: expect.objectContaining({ total_observables: 1 }),
+      })
+    );
+  });
+
+  it('bulk deletes across both stores with one user action', async () => {
+    mockObservableService.countForCase.mockResolvedValue(0);
+
+    await bulkDeleteObservables(
+      { caseId: caseSO.id, observableIds: [mockObservable.id, storedObservable.id] },
+      mockClientArgs
+    );
+
+    expect(mockObservableService.bulkDelete).toHaveBeenCalledWith([storedObservable.id]);
+    expect(mockCaseService.patchCase).toHaveBeenCalledWith(
+      expect.objectContaining({
+        version: caseSOWithObservables.version,
+        updatedAttributes: expect.objectContaining({ observables: [], total_observables: 0 }),
+      })
+    );
+    expect(mockUserActionService.creator.createUserAction).toHaveBeenCalledTimes(1);
+    expect(mockUserActionService.creator.createUserAction).toHaveBeenCalledWith({
+      userAction: expect.objectContaining({
+        payload: { observables: { count: 2, actionType: 'delete' } },
+      }),
+    });
+  });
+
+  it('bulk deletes nothing when an id is in neither store', async () => {
+    await expect(
+      bulkDeleteObservables(
+        { caseId: caseSO.id, observableIds: [storedObservable.id, 'unknown-id'] },
+        mockClientArgs
+      )
+    ).rejects.toThrow('observable ids not found: unknown-id');
+
+    expect(mockObservableService.bulkDelete).not.toHaveBeenCalled();
   });
 });

@@ -27,6 +27,8 @@ import type {
   AddObservableRequest,
   UpdateObservableRequest,
   BulkAddObservablesRequest,
+  BulkCreateObservablesRequest,
+  BulkCreateObservablesResponse,
   BulkDeleteObservablesRequest,
   CasesPatchResponse,
 } from '../../../common/types/api';
@@ -64,6 +66,7 @@ import { similar } from './similar';
 import {
   addObservable,
   bulkAddObservables,
+  bulkCreateObservables,
   bulkDeleteObservables,
   deleteObservable,
   updateObservable,
@@ -179,6 +182,13 @@ export interface CasesSubClient {
    */
   bulkAddObservables(params: BulkAddObservablesRequest): Promise<Case>;
   /**
+   * Adds up to 1,000 observables to the case and reports the ones that were not added
+   */
+  bulkCreateObservables(
+    caseId: string,
+    params: BulkCreateObservablesRequest
+  ): Promise<BulkCreateObservablesResponse>;
+  /**
    * Bulk deletes observables from the case
    */
   bulkDeleteObservables(params: BulkDeleteObservablesRequest): Promise<Case>;
@@ -213,6 +223,7 @@ const usageCounterByMethod = {
   updateObservable: 'update_observable',
   deleteObservable: 'delete_observable',
   bulkAddObservables: 'bulk_add_observables',
+  bulkCreateObservables: 'bulk_create_observables',
   bulkDeleteObservables: 'bulk_delete_observables',
   getApplicableFields: null,
 } as const satisfies Record<keyof CasesSubClient, string | null>;
@@ -288,6 +299,12 @@ export const createCasesSubClient = (
       usageCounterByMethod.bulkAddObservables,
       clientArgs,
       (params: BulkAddObservablesRequest) => bulkAddObservables(params, clientArgs, casesClient)
+    ),
+    bulkCreateObservables: withUsageCounter(
+      usageCounterByMethod.bulkCreateObservables,
+      clientArgs,
+      (caseId: string, params: BulkCreateObservablesRequest) =>
+        bulkCreateObservables(caseId, params, clientArgs, casesClient)
     ),
     bulkDeleteObservables: withUsageCounter(
       usageCounterByMethod.bulkDeleteObservables,

@@ -260,12 +260,16 @@ describe('extractAndAddObservables', () => {
 
       await extractAndAddObservables('case-1', [alertAttachment], theCase, clientArgs);
 
+      expect(clientArgs.services.observableService.bulkCreate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          caseId: caseSO.id,
+          observables: [expect.objectContaining({ value: '1.2.3.4' })],
+        })
+      );
       expect(caseService.patchCase).toHaveBeenCalledWith(
         expect.objectContaining({
           caseId: caseSO.id,
-          updatedAttributes: expect.objectContaining({
-            observables: expect.arrayContaining([expect.objectContaining({ value: '1.2.3.4' })]),
-          }),
+          updatedAttributes: expect.objectContaining({ total_observables: expect.any(Number) }),
         })
       );
 
@@ -284,12 +288,15 @@ describe('extractAndAddObservables', () => {
       expect(payload).not.toHaveProperty('observables');
     });
 
-    it('returns the patched case with the new observables and version', async () => {
+    it('returns the patched case with the new total and version', async () => {
       licensingService.isAtLeastPlatinum.mockResolvedValue(true);
       alertsService.getAlerts.mockResolvedValue({
         docs: [makeEcsDoc({ 'source.ip': '1.2.3.4' })],
       });
       caseService.getCase.mockResolvedValue(caseSO);
+      clientArgs.services.observableService.countForCase
+        .mockResolvedValueOnce(0)
+        .mockResolvedValueOnce(1);
       caseService.patchCase.mockImplementation(async ({ updatedAttributes }) => ({
         id: caseSO.id,
         type: caseSO.type,
@@ -306,10 +313,11 @@ describe('extractAndAddObservables', () => {
       );
 
       expect(res?.version).toBe('patched-version');
-      expect(res?.attributes.observables).toEqual([
-        expect.objectContaining({ typeKey: OBSERVABLE_TYPE_IPV4.key, value: '1.2.3.4' }),
-      ]);
-      expect(res?.attributes.total_observables).toBe(1);
+      // The case field is untouched; the new observable is a cases-observables object.
+      expect(res?.attributes.observables).toEqual(caseSO.attributes.observables);
+      expect(res?.attributes.total_observables).toBe(
+        (caseSO.attributes.observables ?? []).length + 1
+      );
     });
 
     it('skips an over-length value, persists the rest, and logs only the count', async () => {
@@ -323,10 +331,8 @@ describe('extractAndAddObservables', () => {
 
       await extractAndAddObservables('case-1', [alertAttachment], makeCase(true), clientArgs);
 
-      const [[patchArgs]] = caseService.patchCase.mock.calls;
-      expect(patchArgs.updatedAttributes.observables).toEqual([
-        expect.objectContaining({ value: '1.2.3.4' }),
-      ]);
+      const [[{ observables }]] = clientArgs.services.observableService.bulkCreate.mock.calls;
+      expect(observables).toEqual([expect.objectContaining({ value: '1.2.3.4' })]);
       expect(clientArgs.logger.warn).toHaveBeenCalledWith(
         '[extractAndAddObservables] Skipped 1 observable(s) for case case-1: the value or description exceeds the maximum length'
       );
@@ -346,10 +352,8 @@ describe('extractAndAddObservables', () => {
 
       await extractAndAddObservables('case-1', [alertAttachment], makeCase(true), clientArgs);
 
-      const [[patchArgs]] = caseService.patchCase.mock.calls;
-      expect(patchArgs.updatedAttributes.observables).toEqual([
-        expect.objectContaining({ value: maxLengthValue }),
-      ]);
+      const [[{ observables }]] = clientArgs.services.observableService.bulkCreate.mock.calls;
+      expect(observables).toEqual([expect.objectContaining({ value: maxLengthValue })]);
       expect(clientArgs.logger.warn).not.toHaveBeenCalled();
     });
 
