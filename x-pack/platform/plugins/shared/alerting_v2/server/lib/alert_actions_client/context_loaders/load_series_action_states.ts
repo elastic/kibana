@@ -10,7 +10,6 @@ import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import { ACTIONS_SERIES_ID_EVAL } from '@kbn/alerting-v2-common-queries';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import type { DecodedSeriesId } from '@kbn/alerting-v2-utils';
-import { queryResponseToRecords } from '../../services/query_service/query_response_to_records';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 
 /**
@@ -105,9 +104,7 @@ export const loadSeriesActionStatesBySeries = async ({
     .keep('series_id', 'last_snooze_action', 'snoozed_until')
     .toRequest();
 
-  const rows = queryResponseToRecords<RawSeriesActionStateRow>(
-    await queryService.executeQuery({ query: query.query })
-  );
+  const rows = await queryService.executeQuery<RawSeriesActionStateRow>({ query: query.query });
 
   const now = Date.now();
   return new Map(rows.map((row) => [row.series_id, toSeriesActionState(row, now)]));
