@@ -9,11 +9,11 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { EuiFormErrorText, EuiSkeletonRectangle, useEuiTheme } from '@elastic/eui';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { fromKueryExpression } from '@kbn/es-query';
 import type { Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import type { StatefulSearchBarProps } from '@kbn/unified-search-plugin/public';
 import { DIGITAL_EXPERIENCE_FEATURE_ID } from '../../../../../common/feature';
+import { translateKuery } from '../../../../../common/kuery';
 import { OTEL_LOGS_INDEX, OTEL_TRACES_INDEX } from '../../../../../common/otel_data';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
 import { useOverviewKuery } from '../../../../hooks/use_overview_search';
@@ -60,13 +60,10 @@ const getOtelDataView = (
   return created;
 };
 
+/** What is wrong with the query, the same as the routes would answer with a 400. */
 const kueryErrorOf = (kuery: string): string | undefined => {
-  try {
-    fromKueryExpression(kuery);
-    return undefined;
-  } catch (error) {
-    return error instanceof Error ? error.message : String(error);
-  }
+  const translation = translateKuery(kuery);
+  return 'issue' in translation ? translation.issue : undefined;
 };
 
 /**

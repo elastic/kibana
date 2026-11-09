@@ -7,26 +7,25 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import { badRequest } from '@hapi/boom';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+import { translateKuery } from '../../../common/kuery';
 
 /**
- * The query a KQL expression stands for, `undefined` for none. The fields are the stored ones of
- * the OTel indices, so no data view is needed. An expression that does not parse is the client's
- * mistake, answered with a 400 that says where.
+ * The query a KQL expression stands for, `undefined` for none. An expression that does not parse,
+ * or names fields by a pattern, is the client's mistake, answered with a 400 that says what.
  */
 export const kueryToQuery = (kuery?: string): estypes.QueryDslQueryContainer | undefined => {
   if (!kuery?.trim()) {
     return undefined;
   }
-  try {
-    return toElasticsearchQuery(fromKueryExpression(kuery)) as estypes.QueryDslQueryContainer;
-  } catch (error) {
+  const translation = translateKuery(kuery);
+  if ('issue' in translation) {
     throw badRequest(
       i18n.translate('xpack.digitalExperience.api.invalidKuery', {
         defaultMessage: 'The KQL query is not valid: {reason}',
-        values: { reason: error instanceof Error ? error.message : String(error) },
+        values: { reason: translation.issue },
       })
     );
   }
+  return translation.query;
 };

@@ -189,6 +189,18 @@ describe('OverviewSearchBar', () => {
     expect(onRefresh).not.toHaveBeenCalled();
   });
 
+  it('refuses a field named by a pattern, which no field has the name of, and sets nothing', async () => {
+    await renderBar();
+
+    submit('browser.*: "Chrome"');
+
+    expect(screen.getByTestId('digitalExperienceOverviewKueryError')).toHaveTextContent(
+      'browser.* has a wildcard'
+    );
+    expect(setKuery).not.toHaveBeenCalled();
+    expect(onRefresh).not.toHaveBeenCalled();
+  });
+
   it('drops the error once a valid query is submitted', async () => {
     await renderBar();
     submit('user_agent.name: (Chrome');

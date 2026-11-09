@@ -24,6 +24,25 @@ describe('kueryToQuery', () => {
     expect(serialized).toContain('{"range":{"http.response.status_code":{"gte":"500"}}}');
   });
 
+  it('answers a field named by a pattern with a 400, as no field has that name', () => {
+    expect(() => kueryToQuery('browser.*: "Chrome"')).toThrow(
+      expect.objectContaining({
+        isBoom: true,
+        output: expect.objectContaining({ statusCode: 400 }),
+        message: expect.stringContaining('browser.* has a wildcard'),
+      })
+    );
+    expect(() => kueryToQuery('browser.name: Chrome and os.*: iOS')).toThrow(
+      expect.objectContaining({ message: expect.stringContaining('os.* has a wildcard') })
+    );
+  });
+
+  it('takes a wildcard in a value, and a field that exists or is looked for by pattern', () => {
+    expect(JSON.stringify(kueryToQuery('browser.name: Chr*'))).toContain('browser.name');
+    expect(kueryToQuery('browser.*: *')).toBeDefined();
+    expect(kueryToQuery('not browser.name: Chrome')).toBeDefined();
+  });
+
   it('answers an expression that does not parse with a 400 that says why', () => {
     expect(() => kueryToQuery('user_agent.name: (Chrome')).toThrow(
       expect.objectContaining({
