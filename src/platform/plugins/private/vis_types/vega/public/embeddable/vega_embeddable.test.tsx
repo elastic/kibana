@@ -35,7 +35,11 @@ import type { VegaEvent, VegaEventHandler } from '../types';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
 import { reportVegaRender } from '../lib/vega_render_telemetry';
 import { setDataViews } from '../services';
-import type { VegaByReferenceState, VegaByValueState, VegaEmbeddableState } from '../../server';
+import type {
+  VegaByReferenceState,
+  VegaByValueState,
+  VegaEmbeddableState,
+} from '../../server/embeddable/schema';
 import { openVegaLibraryEditor } from '../library/open_vega_library_editor';
 import { openVegaEditor } from './open_vega_editor';
 import { vegaEmbeddableFactory } from './vega_embeddable';

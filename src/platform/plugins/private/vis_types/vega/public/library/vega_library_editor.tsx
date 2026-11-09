@@ -33,7 +33,8 @@ import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plug
 import { parse } from 'hjson';
 import { BehaviorSubject } from 'rxjs';
 import { VEGA_EMBEDDABLE_TYPE } from '../../common/constants';
-import type { VegaByValueState, VegaReadResponseBody } from '../../server';
+import type { VegaByValueState } from '../../server';
+import type { VegaReadResponseBody } from '../../server/api/read/types';
 import {
   VegaEditorBody,
   hasTooManyFilters,

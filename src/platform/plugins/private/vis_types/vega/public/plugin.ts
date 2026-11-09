@@ -57,7 +57,7 @@ import {
 import type { IServiceSettings } from './vega_view/vega_map_view/service_settings/service_settings_types';
 
 import type { ConfigSchema } from '../server/config';
-import type { VegaByReferenceState } from '../server';
+import type { VegaByReferenceState } from '../server/embeddable/schema';
 
 import { getVegaInspectorView } from './vega_inspector/vega_inspector';
 import { getServiceSettingsLazy } from './vega_view/vega_map_view/service_settings/get_service_settings_lazy';

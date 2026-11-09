@@ -25,12 +25,4 @@ export async function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export type { VisTypeVegaPluginStart, VisTypeVegaPluginSetup } from './types';
-export type {
-  VegaByReferenceState,
-  VegaByValueState,
-  VegaEmbeddableState,
-} from './embeddable/schema';
-export type { VegaCreateRequestBody, VegaCreateResponseBody } from './api/create/types';
-export type { VegaReadResponseBody } from './api/read/types';
-export type { VegaUpdateRequestBody, VegaUpdateResponseBody } from './api/update/types';
-export type { VegaSearchRequestQuery, VegaSearchResponseBody } from './api/search/types';
+export type { VegaByValueState } from './embeddable/schema';

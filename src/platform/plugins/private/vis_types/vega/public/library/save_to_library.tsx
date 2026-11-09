@@ -15,7 +15,7 @@ import {
   showSaveModal,
 } from '@kbn/saved-objects-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import type { VegaCreateResponseBody } from '../../server';
+import type { VegaCreateResponseBody } from '../../server/api/create/types';
 import type { VegaEditableState } from '../lib/library_draft';
 import type { VegaLibraryClient } from './vega_library_client';
 import { hasVegaLibraryItemWithTitle } from './vega_library_client';

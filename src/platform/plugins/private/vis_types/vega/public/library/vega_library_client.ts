@@ -13,15 +13,10 @@ import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import { toAsCodeTags, toStoredTags } from '@kbn/as-code-shared-transforms';
 import type { BasicVisualizationClient } from '@kbn/visualizations-plugin/public';
 import { VEGA_API_PATH, VEGA_API_VERSION, VEGA_SAVED_OBJECT_TYPE } from '../../common/constants';
-import type {
-  VegaCreateRequestBody,
-  VegaCreateResponseBody,
-  VegaReadResponseBody,
-  VegaSearchRequestQuery,
-  VegaSearchResponseBody,
-  VegaUpdateRequestBody,
-  VegaUpdateResponseBody,
-} from '../../server';
+import type { VegaCreateRequestBody, VegaCreateResponseBody } from '../../server/api/create/types';
+import type { VegaReadResponseBody } from '../../server/api/read/types';
+import type { VegaSearchRequestQuery, VegaSearchResponseBody } from '../../server/api/search/types';
+import type { VegaUpdateRequestBody, VegaUpdateResponseBody } from '../../server/api/update/types';
 
 /** The details and spec of a library item as the API returns them, minus the tags. */
 type VegaLibraryAttributes = Omit<VegaReadResponseBody['data'], 'tags'>;

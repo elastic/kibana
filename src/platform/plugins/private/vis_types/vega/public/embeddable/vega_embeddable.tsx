@@ -84,7 +84,11 @@ import { getEsqlQueriesFromSpec } from '../lib/spec_uses_esql';
 import { reportVegaRender } from '../lib/vega_render_telemetry';
 import { getDataViews } from '../services';
 import { createInspectorAdapters } from '../vega_inspector';
-import type { VegaByReferenceState, VegaByValueState, VegaEmbeddableState } from '../../server';
+import type {
+  VegaByReferenceState,
+  VegaByValueState,
+  VegaEmbeddableState,
+} from '../../server/embeddable/schema';
 // Frame only. The spec editor stays a separate lazy chunk inside this module, so Edit does not
 // wait on `vega_editor_flyout` before the flyout can render.
 import { VegaEditorFlyout } from './vega_editor_flyout';
