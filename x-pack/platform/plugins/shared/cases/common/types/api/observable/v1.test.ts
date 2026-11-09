@@ -9,6 +9,7 @@ import {
   MAX_OBSERVABLE_DESCRIPTION_LENGTH,
   MAX_OBSERVABLE_VALUE_LENGTH,
   MAX_OBSERVABLES_PER_CASE,
+  MAX_STORED_OBSERVABLE_FIELD_LENGTH,
   OBSERVABLE_ID_MAX_LENGTH,
 } from '../../../constants';
 import { parseErrors } from '../../../test_helpers/zod_schema_test_utils';
@@ -58,16 +59,16 @@ describe('observable value and description bounds', () => {
     );
   });
 
-  it('UpdateObservableRequestSchema accepts the maximum length and rejects one over', () => {
+  it('UpdateObservableRequestSchema accepts the longest stored length and rejects one over', () => {
+    // A patch sends back stored fields that can predate the bounds; the client checks changed fields.
     const parse = (value: string, description: string | null) =>
       UpdateObservableRequestSchema.safeParse({ observable: { value, description } });
+    const longestStored = 'a'.repeat(MAX_STORED_OBSERVABLE_FIELD_LENGTH);
+    const overLongestStored = 'a'.repeat(MAX_STORED_OBSERVABLE_FIELD_LENGTH + 1);
 
-    expect(
-      parse('a'.repeat(MAX_OBSERVABLE_VALUE_LENGTH), 'a'.repeat(MAX_OBSERVABLE_DESCRIPTION_LENGTH))
-        .success
-    ).toBe(true);
-    expect(parse('a'.repeat(MAX_OBSERVABLE_VALUE_LENGTH + 1), null).success).toBe(false);
-    expect(parse('a', 'a'.repeat(MAX_OBSERVABLE_DESCRIPTION_LENGTH + 1)).success).toBe(false);
+    expect(parse(longestStored, longestStored).success).toBe(true);
+    expect(parse(overLongestStored, null).success).toBe(false);
+    expect(parse('a', overLongestStored).success).toBe(false);
   });
 });
 

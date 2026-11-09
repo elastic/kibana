@@ -506,6 +506,12 @@ export const MAX_OBSERVABLE_VALUE_LENGTH = 1024;
 
 export const MAX_OBSERVABLE_DESCRIPTION_LENGTH = 2048;
 
+/**
+ * Lucene's maximum term length in bytes. The case field maps observable values and descriptions as
+ * keywords without `ignore_above`, so no stored one is longer, in bytes or in characters.
+ */
+export const MAX_STORED_OBSERVABLE_FIELD_LENGTH = 32766;
+
 export const MIN_BULK_DELETE_OBSERVABLE_IDS = 1;
 
 export const MAX_OBSERVABLE_TYPE_LABEL_LENGTH = 50;

@@ -34,6 +34,7 @@ import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import { flattenCaseSavedObject } from '../../common/utils';
 import { LICENSING_CASE_OBSERVABLES_FEATURE } from '../../common/constants';
 import {
+  validateChangedObservableLengths,
   validateDuplicatedObservablesInRequest,
   validateObservableTypeKeyExists,
   validateObservableValue,
@@ -355,6 +356,7 @@ export const updateObservable = async (
           );
         }
 
+        validateChangedObservableLengths(currentObservables[observableIndex], paramArgs.observable);
         validateObservableValue(
           currentObservables[observableIndex].typeKey,
           paramArgs.observable.value

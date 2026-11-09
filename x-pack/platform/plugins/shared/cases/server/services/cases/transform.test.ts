@@ -509,13 +509,24 @@ describe('case transforms', () => {
         );
       });
 
-      it('ignores a total_observables supplied by the caller', () => {
+      it('persists a supplied total_observables over the length of the observables', () => {
+        // Observables stored outside the case field count toward the total.
         expect(
           transformAttributesToESModel({ observables: [], total_observables: 42 }).attributes
             .total_observables
+        ).toBe(42);
+        expect(
+          transformAttributesToESModel({ total_observables: 42 }).attributes.total_observables
+        ).toBe(42);
+      });
+
+      it('derives total_observables from the observables when the supplied total is null', () => {
+        expect(
+          transformAttributesToESModel({ observables: [], total_observables: null }).attributes
+            .total_observables
         ).toBe(0);
         expect(
-          transformAttributesToESModel({ total_observables: 42 }).attributes
+          transformAttributesToESModel({ total_observables: null }).attributes
         ).not.toHaveProperty('total_observables');
       });
     });

@@ -7,7 +7,13 @@
 
 import Boom from '@hapi/boom';
 import { getValidatorForObservableType } from '../../common/observables/validators';
-import { OBSERVABLE_TYPES_BUILTIN } from '../../common/constants';
+import {
+  MAX_OBSERVABLE_DESCRIPTION_LENGTH,
+  MAX_OBSERVABLE_VALUE_LENGTH,
+  OBSERVABLE_TYPES_BUILTIN,
+} from '../../common/constants';
+import type { ObservablePatch } from '../../common/types/api';
+import type { Observable } from '../../common/types/domain';
 import { type CasesClient } from './client';
 import { getAvailableObservableTypesMap } from './observable_types';
 
@@ -139,6 +145,31 @@ export const validateObservableValue = (
   if (validationError) {
     throw Boom.badRequest(
       `Observable value "${observableValue}" is not valid for selected observable type ${observableTypeKey}.`
+    );
+  }
+};
+
+/**
+ * Throws an error if a patch changes an observable's value or description to one over the length bounds.
+ * Unchanged fields are allowed past the bounds, because stored observables can predate them.
+ */
+export const validateChangedObservableLengths = (
+  storedObservable: Pick<Observable, 'value' | 'description'>,
+  { value, description }: ObservablePatch
+): void => {
+  if (value !== storedObservable.value && value.length > MAX_OBSERVABLE_VALUE_LENGTH) {
+    throw Boom.badRequest(
+      `The observable value cannot be longer than ${MAX_OBSERVABLE_VALUE_LENGTH} characters.`
+    );
+  }
+
+  if (
+    description !== storedObservable.description &&
+    description != null &&
+    description.length > MAX_OBSERVABLE_DESCRIPTION_LENGTH
+  ) {
+    throw Boom.badRequest(
+      `The observable description cannot be longer than ${MAX_OBSERVABLE_DESCRIPTION_LENGTH} characters.`
     );
   }
 };

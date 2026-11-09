@@ -127,8 +127,7 @@ export function transformAttributesToESModel(caseAttributes: Partial<CaseTransfo
     status,
     incremental_id,
     settings,
-    // Derived from `observables` below, so a caller-supplied value is never persisted.
-    total_observables: _totalObservables,
+    total_observables: totalObservables,
     ...restAttributes
   } = caseAttributes;
   const { connector_id: pushConnectorId, ...restExternalService } = external_service ?? {};
@@ -164,9 +163,13 @@ export function transformAttributesToESModel(caseAttributes: Partial<CaseTransfo
           extractObservables: settings.extractObservables ?? false,
         },
       }),
-      ...(restAttributes.observables !== undefined && {
-        total_observables: restAttributes.observables.length,
-      }),
+      // A supplied total wins, because observables stored outside the case field count toward it.
+      // An update that touches neither leaves the stored total alone.
+      ...(totalObservables != null
+        ? { total_observables: totalObservables }
+        : restAttributes.observables !== undefined && {
+            total_observables: restAttributes.observables.length,
+          }),
     },
     referenceHandler: buildReferenceHandler(connector?.id, pushConnectorId),
   };
