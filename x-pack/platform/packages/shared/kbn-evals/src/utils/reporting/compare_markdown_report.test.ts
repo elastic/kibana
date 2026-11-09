@@ -276,6 +276,17 @@ describe('formatMarkdownCompareReport', () => {
       expect(dataRow).not.toContain('Regression');
     });
 
+    it('shows Mixed when the rank test and the mean disagree on the direction', () => {
+      const output = formatMarkdownCompareReport({
+        targetExperimentId: 'exp-a',
+        baselineExperimentId: 'exp-b',
+        results: [{ ...makeResult({ meanTarget: 0.6, meanBaseline: 0.8 }), effectSign: 1 }],
+      });
+      const dataRow = output.split('\n').find((l) => l.includes('Criteria'));
+      expect(dataRow).toContain('| Mixed |');
+      expect(dataRow).not.toContain('Regression');
+    });
+
     it('shows - for non-significant results regardless of direction', () => {
       const output = formatMarkdownCompareReport({
         targetExperimentId: 'exp-a',

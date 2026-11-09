@@ -7,7 +7,7 @@
 
 import Fs from 'fs';
 import { createFailError, createFlagError } from '@kbn/dev-cli-errors';
-import type { Command } from '@kbn/dev-cli-runner';
+import type { Command, RunContext } from '@kbn/dev-cli-runner';
 import { KbnClient } from '@kbn/kbn-client';
 import { compareScores, pairScores } from '@kbn/evals-common';
 import type { BaselineExperiment } from '../../utils/evals_client';
@@ -18,6 +18,7 @@ import { buildExecutionCompareUrl } from '../../utils/evals_ui_url';
 import { readSpaceIdsFlag } from '../run_helpers';
 import { formatCompareReport } from '../../utils/reporting/compare_report';
 import { formatMarkdownCompareReport } from '../../utils/reporting/compare_markdown_report';
+import { attachEffectSigns } from '../../utils/reporting/effect_direction';
 import { applyHolmCorrection } from '../../utils/reporting/holm_correction';
 import {
   DEFAULT_REGRESSION_MIN_PAIRS,
@@ -27,10 +28,12 @@ import {
 
 const DEFAULT_EVAL_KBN_URL = 'http://elastic:changeme@localhost:5601';
 
-// `createFailError` defaults to exit code 1, which is reserved for a tripped gate.
-const GATE_INCONCLUSIVE_EXIT_CODE = 2;
+// Exit 1 stays with usage and unexpected errors (including ones the CLI runner raises before this
+// command runs), so a regression needs a code of its own.
+export const GATE_INCONCLUSIVE_EXIT_CODE = 2;
+export const GATE_REGRESSION_EXIT_CODE = 3;
 
-export const compareCmd: Command<void> = {
+export const compareCmd = {
   name: 'compare',
   description: `
   Compare two evaluation experiments with a paired statistical test per dataset and evaluator.
@@ -55,9 +58,10 @@ export const compareCmd: Command<void> = {
     --fail-on-regression            Exit non-zero if any evaluator got significantly worse
                                     (direction-aware; higher-is-better and lower-is-better
                                     evaluators are both handled, neutral ones never trip).
-                                    Exit codes: 0 passed, 1 regression or unexpected error, 2
+                                    Exit codes: 0 passed, 1 usage or unexpected error, 2
                                     inconclusive or not evaluated (no baseline, no scores or
-                                    pairs, nothing checkable, no evaluator matched)
+                                    pairs, nothing checkable, no evaluator matched), 3
+                                    significant regression
     --regression-evaluators         Comma-separated evaluator names that can trip the gate
                                     (default: all). Names absent from the
                                     comparison warn; if none match, the run fails.
@@ -95,13 +99,13 @@ export const compareCmd: Command<void> = {
       --output           Append markdown output to a file instead of stdout
       --refresh-url      URL to include as a "Refresh Baseline" link in markdown output
       --space-ids        Spaces the experiments were run in
-      --fail-on-regression            Exit 1 if any evaluator got significantly worse, 2 if the gate was inconclusive or not evaluated
+      --fail-on-regression            Exit 3 if any evaluator got significantly worse, 2 if the gate was inconclusive or not evaluated
       --regression-evaluators         Comma-separated evaluator names that can trip the gate (default: all)
       --min-pairs                     Minimum paired scores for an evaluator to be gated (default: ${DEFAULT_REGRESSION_MIN_PAIRS})
       --no-multiplicity-correction    Use raw p-values instead of Holm-Bonferroni adjusted ones
     `,
   },
-  run: async ({ log, flagsReader }) => {
+  run: async ({ log, flagsReader }: RunContext) => {
     const positionals = flagsReader.getPositionals();
     const baselineBranch = flagsReader.string('baseline-branch');
     const suiteId = flagsReader.string('suite');
@@ -111,12 +115,12 @@ export const compareCmd: Command<void> = {
     const refreshUrl = flagsReader.string('refresh-url');
     const failOnRegression = flagsReader.boolean('fail-on-regression');
     const multiplicityCorrection = flagsReader.boolean('multiplicity-correction');
-    const regressionEvaluators = flagsReader
-      .string('regression-evaluators')
+    const rawRegressionEvaluators = flagsReader.string('regression-evaluators');
+    const regressionEvaluators = rawRegressionEvaluators
       ?.split(',')
       .map((name) => name.trim())
       .filter(Boolean);
-    const minPairs = flagsReader.number('min-pairs') ?? DEFAULT_REGRESSION_MIN_PAIRS;
+    const rawMinPairs = flagsReader.string('min-pairs');
     // Scores are only readable from the spaces they were ingested into, so a
     // comparison has to be made from where the runs put them.
     const spaceIds = readSpaceIdsFlag(flagsReader) ?? getSpaceIdsFromEnv();
@@ -134,8 +138,18 @@ export const compareCmd: Command<void> = {
       throw createFlagError('--format must be "terminal" or "markdown".');
     }
 
-    if (!Number.isInteger(minPairs) || minPairs < 1) {
+    // FlagsReader.number uses parseFloat, which would accept "10abc".
+    if (rawMinPairs !== undefined && !/^\s*\d+\s*$/.test(rawMinPairs)) {
       throw createFlagError('--min-pairs must be a positive integer.');
+    }
+    const minPairs =
+      rawMinPairs === undefined ? DEFAULT_REGRESSION_MIN_PAIRS : Number(rawMinPairs.trim());
+    if (minPairs < 1) {
+      throw createFlagError('--min-pairs must be a positive integer.');
+    }
+
+    if (rawRegressionEvaluators !== undefined && regressionEvaluators?.length === 0) {
+      throw createFlagError('--regression-evaluators must list at least one evaluator name.');
     }
 
     const evaluationsKbnUrl = process.env.EVAL_KBN_URL;
@@ -223,15 +237,8 @@ export const compareCmd: Command<void> = {
 
       if (!baselineMetadata) {
         const message = `No baseline experiment found for suite ${suiteId} on branch ${baselineBranch}. Nothing to compare.`;
-        if (failOnRegression) {
-          // A missing baseline must not look like a clean pass in CI.
-          throw createFailError(
-            `${message} --fail-on-regression: regression gate was NOT evaluated.`,
-            {
-              exitCode: GATE_INCONCLUSIVE_EXIT_CODE,
-            }
-          );
-        }
+        // A missing baseline must not look like a clean pass in CI.
+        if (failOnRegression) throw nothingToCompare(message);
         log.warning(message);
         return;
       }
@@ -344,12 +351,7 @@ export const compareCmd: Command<void> = {
 
     const comparisonResults = compareScores(pairs);
     if (comparisonResults.length === 0) {
-      if (failOnRegression) {
-        throw createFailError(
-          'No comparison results returned. --fail-on-regression: regression gate was NOT evaluated.',
-          { exitCode: GATE_INCONCLUSIVE_EXIT_CODE }
-        );
-      }
+      if (failOnRegression) throw nothingToCompare('No comparison results returned.');
       log.warning('No comparison results returned.');
       return;
     }
@@ -379,9 +381,10 @@ export const compareCmd: Command<void> = {
 
     // Holm runs over every comparison in this run (all datasets x evaluators), so the family is
     // the full set of hypotheses the report shows.
-    const results = multiplicityCorrection
-      ? applyHolmCorrection(comparisonResults)
-      : comparisonResults;
+    const results = attachEffectSigns(
+      multiplicityCorrection ? applyHolmCorrection(comparisonResults) : comparisonResults,
+      pairs
+    );
 
     if (format === 'markdown') {
       const effectiveKibanaUrl = kibanaUrl ?? evaluationsKbnUrl;
@@ -436,7 +439,7 @@ export const compareCmd: Command<void> = {
       const gateReport = formatRegressionGateReport({ decision, minPairs });
 
       if (decision.status === 'tripped') {
-        throw createFailError(gateReport);
+        throw createFailError(gateReport, { exitCode: GATE_REGRESSION_EXIT_CODE });
       }
       if (decision.status === 'inconclusive') {
         throw createFailError(gateReport, { exitCode: GATE_INCONCLUSIVE_EXIT_CODE });
@@ -444,4 +447,4 @@ export const compareCmd: Command<void> = {
       log.info(gateReport);
     }
   },
-};
+} satisfies Command<void>;

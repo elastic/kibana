@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { isImproved, PARAMETRIC_UPGRADE_MIN_PAIRS } from '@kbn/evals-common';
-import type { Direction } from '@kbn/evals-common';
+import { PARAMETRIC_UPGRADE_MIN_PAIRS } from '@kbn/evals-common';
+import { getEffectDirection } from './effect_direction';
+import type { EffectDirection, WithEffectSign } from './effect_direction';
 import { countHolmFamily, getEffectivePValue } from './holm_correction';
 import type { CorrectableComparisonResult } from './holm_correction';
 import { formatDiscordantPairs, getTestLabel } from './test_label';
@@ -32,15 +33,20 @@ function formatNumber(value: number): string {
   return Number.isFinite(value) ? value.toFixed(2) : '-';
 }
 
+const OUTCOME_LABELS: Record<EffectDirection, string> = {
+  improved: 'Improvement',
+  worse: 'Regression',
+  unchanged: '-',
+  mixed: 'Mixed',
+};
+
 function formatOutcome(
-  delta: number,
-  direction: Direction,
-  pValue: number | null,
+  result: WithEffectSign<CorrectableComparisonResult>,
   threshold: number
 ): string {
+  const pValue = getEffectivePValue(result);
   if (pValue === null || !Number.isFinite(pValue) || pValue >= threshold) return '-';
-  if (direction === 'neutral') return '-';
-  return isImproved(delta, direction) ? 'Improvement' : 'Regression';
+  return OUTCOME_LABELS[getEffectDirection(result)];
 }
 
 function formatDifference(value: number): string {
@@ -83,7 +89,7 @@ export function formatMarkdownCompareReport({
 }: {
   targetExperimentId: string;
   baselineExperimentId: string;
-  results: CorrectableComparisonResult[];
+  results: Array<WithEffectSign<CorrectableComparisonResult>>;
   significanceThreshold?: number;
   comparePageUrl?: string;
   baselineTimestamp?: string;
@@ -207,7 +213,7 @@ export function formatMarkdownCompareReport({
         formatPValue(r.pValue),
         ...(multiplicityCorrected ? [formatPValue(r.adjustedPValue ?? null)] : []),
         formatSig(getEffectivePValue(r), significanceThreshold),
-        formatOutcome(delta, r.direction, getEffectivePValue(r), significanceThreshold),
+        formatOutcome(r, significanceThreshold),
       ];
       tableLines.push(`| ${cols.join(' | ')} |`);
     });

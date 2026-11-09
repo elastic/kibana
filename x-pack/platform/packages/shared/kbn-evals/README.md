@@ -350,9 +350,12 @@ EVAL_SLACK_NOTIFICATION_CHANNEL=#my-test-channel
 
 Exit codes (with `--fail-on-regression`):
 
-- **0, passed**: at least one evaluator comparison was actually checked and none got significantly worse. The `Regression gate passed` line says how many were checked. Any `insufficient pairs` or `no usable p-value` warning means those evaluators were not checked, not that they passed.
-- **1, significant regression or an unexpected error**: `Regression gate tripped`, listing each regressed dataset / evaluator with delta, raw (and adjusted) p-value, the test used and the number of pairs. Unexpected errors (bad flags, Kibana unreachable) also exit 1, so read the log line to tell the two apart.
+- **0, passed**: at least one evaluator comparison was actually checked and none got significantly worse. The `Regression gate passed` line says how many were checked. Any `insufficient pairs`, `no usable p-value` or direction-conflict warning means those evaluators were not checked, not that they passed.
+- **1, usage or unexpected error**: bad flags, Kibana unreachable, the evals plugin disabled, and similar. Never a regression verdict.
 - **2, inconclusive or not evaluated**: the gate could not rule regressions in or out, so it fails instead of passing silently. This happens when no baseline is found on `--baseline-branch`, when there are no scores, no overlapping datasets or no paired scores to compare, when the comparison returns no results, when `--regression-evaluators` matches no evaluator, and when nothing was checkable (every row has too few pairs or no usable p-value, or only neutral evaluators are in scope).
+- **3, significant regression**: `Regression gate tripped`, listing each regressed dataset / evaluator with delta, raw (and adjusted) p-value, the test used and the number of pairs.
+
+The direction of a change is the one the row's test measured: the mean difference for the paired t-test, the discordant pairs for McNemar (which follow the mean for pass/fail scores), and the signed-rank sum for Wilcoxon. Wilcoxon is rank-based, so a few large drops can lower the mean while most pairs improve, or the reverse. Such a row shows `Mixed` in the markdown Outcome column, cannot trip the gate, is not counted as checked and is listed in a warning to inspect by hand.
 
 Without `--fail-on-regression`, `compare` keeps its old behavior: a missing baseline or empty comparison logs a warning and exits 0, and missing scores, datasets or pairs remain plain errors (exit 1).
 

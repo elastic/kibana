@@ -87,10 +87,20 @@ describe('evaluateRegressionGate', () => {
 
   it('does not trip when the means are equal, whatever the p-value', () => {
     const decision = evaluateRegressionGate({
-      results: [makeResult({ meanTarget: 0.7, meanBaseline: 0.7, pValue: 0.001 })],
+      results: [
+        makeResult({ meanTarget: 0.7, meanBaseline: 0.7, pValue: 0.001 }),
+        makeResult({
+          evaluatorName: 'Latency',
+          direction: 'minimize',
+          meanTarget: 3,
+          meanBaseline: 3,
+          pValue: 0.001,
+        }),
+      ],
     });
 
     expect(decision.tripped).toBe(false);
+    expect(decision.checked).toBe(2);
   });
 
   it('reports insufficient pairs without tripping, even for a large significant drop', () => {
@@ -275,5 +285,33 @@ describe('formatRegressionGateReport', () => {
     expect(report).toContain('Regression gate passed');
     expect(report).toContain('fewer than 10 pairs and were NOT checked');
     expect(report).toContain('Dataset One / Correctness: insufficient pairs (n=3)');
+  });
+
+  it('lists significant rows whose test and mean disagree, and still passes on the rest', () => {
+    const decision = evaluateRegressionGate({
+      results: [
+        { ...makeResult({ evaluatorName: 'Conflicted', pValue: 0.002 }), effectSign: 1 },
+        makeResult({ evaluatorName: 'Fine', pValue: 0.5 }),
+      ],
+    });
+
+    expect(decision.status).toBe('passed');
+    expect(decision.checked).toBe(1);
+    const report = formatRegressionGateReport({ decision });
+    expect(report).toContain(
+      '1 evaluator(s) changed significantly, but the rank test and the mean'
+    );
+    expect(report).toContain(
+      '  - Dataset One / Conflicted: mean delta -0.200, p=0.002, n=20 pairs'
+    );
+  });
+
+  it('checks a non-significant row normally even when its test and mean disagree', () => {
+    const decision = evaluateRegressionGate({
+      results: [{ ...makeResult({ pValue: 0.4 }), effectSign: 1 }],
+    });
+
+    expect(decision.status).toBe('passed');
+    expect(decision.directionConflicts).toEqual([]);
   });
 });

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { isImproved } from '@kbn/evals-common';
 import type { ComparisonResult } from '@kbn/evals-common';
+import { getEffectDirection } from './effect_direction';
+import type { WithEffectSign } from './effect_direction';
 import { getEffectivePValue } from './holm_correction';
 import type { CorrectableComparisonResult } from './holm_correction';
 import { getTestLabel } from './test_label';
@@ -37,6 +38,14 @@ export interface UntestableFinding {
   sampleSize: number;
 }
 
+export interface DirectionConflictFinding {
+  datasetName: string;
+  evaluatorName: string;
+  delta: number;
+  effectivePValue: number;
+  sampleSize: number;
+}
+
 export type RegressionGateStatus = 'passed' | 'tripped' | 'inconclusive';
 
 export interface RegressionGateDecision {
@@ -49,21 +58,19 @@ export interface RegressionGateDecision {
   insufficientPairs: InsufficientPairsFinding[];
   /** Rows with enough pairs but a null or non-finite p-value, so no test result to judge. */
   untestable: UntestableFinding[];
+  /** Significant rows whose rank-based test and mean difference point in opposite directions. */
+  directionConflicts: DirectionConflictFinding[];
 }
 
 const toFinite = (value: number | null | undefined): number | null =>
   value !== null && value !== undefined && Number.isFinite(value) ? value : null;
 
 /**
- * Decides whether a comparison contains a statistically significant change in the worse
- * direction. A row trips the gate only when it is in scope, has at least `minPairs` pairs, has a
- * direction (neutral evaluators cannot regress), moved against that direction, and its effective
- * p-value (Holm-adjusted when a correction was applied) is below `significanceThreshold`.
- *
- * `evaluators` limits which evaluator names are considered; omitted or empty means all.
- *
- * "Nothing tripped" is not "passed": when no row could be checked (too few pairs, no usable
- * p-value, or only neutral evaluators in scope) the status is `inconclusive`.
+ * A row trips the gate when it is in scope, directional, has at least `minPairs` pairs, its test
+ * measured a change in the worse direction, and its effective (Holm-adjusted when applied)
+ * p-value is below `significanceThreshold`. Significant rows where the test and the mean
+ * disagree on the direction cannot trip and are not counted as checked. With no checked row the
+ * status is `inconclusive`, never `passed`.
  */
 export const evaluateRegressionGate = ({
   results,
@@ -71,7 +78,7 @@ export const evaluateRegressionGate = ({
   minPairs = DEFAULT_REGRESSION_MIN_PAIRS,
   evaluators,
 }: {
-  results: readonly CorrectableComparisonResult[];
+  results: ReadonlyArray<WithEffectSign<CorrectableComparisonResult>>;
   significanceThreshold?: number;
   minPairs?: number;
   evaluators?: readonly string[];
@@ -80,6 +87,7 @@ export const evaluateRegressionGate = ({
   const regressions: RegressionFinding[] = [];
   const insufficientPairs: InsufficientPairsFinding[] = [];
   const untestable: UntestableFinding[] = [];
+  const directionConflicts: DirectionConflictFinding[] = [];
   let checked = 0;
 
   for (const result of results) {
@@ -106,10 +114,22 @@ export const evaluateRegressionGate = ({
       continue;
     }
 
-    checked += 1;
     const delta = result.meanTarget - result.meanBaseline;
-    const isWorse = delta !== 0 && !isImproved(delta, result.direction);
-    if (!isWorse || effectivePValue >= significanceThreshold) continue;
+    const isSignificant = effectivePValue < significanceThreshold;
+    const effect = getEffectDirection(result);
+    if (isSignificant && effect === 'mixed') {
+      directionConflicts.push({
+        datasetName: result.datasetName,
+        evaluatorName: result.evaluatorName,
+        delta,
+        effectivePValue,
+        sampleSize: result.sampleSize,
+      });
+      continue;
+    }
+
+    checked += 1;
+    if (!isSignificant || effect !== 'worse') continue;
 
     regressions.push({
       datasetName: result.datasetName,
@@ -130,7 +150,15 @@ export const evaluateRegressionGate = ({
     ? 'inconclusive'
     : 'passed';
 
-  return { status, tripped, checked, regressions, insufficientPairs, untestable };
+  return {
+    status,
+    tripped,
+    checked,
+    regressions,
+    insufficientPairs,
+    untestable,
+    directionConflicts,
+  };
 };
 
 const formatP = (value: number): string => (value < 0.001 ? '<0.001' : value.toFixed(3));
@@ -193,6 +221,19 @@ export const formatRegressionGateReport = ({
     for (const finding of decision.untestable) {
       lines.push(
         `  - ${finding.datasetName} / ${finding.evaluatorName}: no usable p-value (n=${finding.sampleSize})`
+      );
+    }
+  }
+
+  if (decision.directionConflicts.length > 0) {
+    lines.push(
+      `Warning: ${decision.directionConflicts.length} evaluator(s) changed significantly, but the rank test and the mean disagree on the direction (a few large changes against most pairs). They were NOT checked for regressions; inspect them by hand:`
+    );
+    for (const finding of decision.directionConflicts) {
+      lines.push(
+        `  - ${finding.datasetName} / ${finding.evaluatorName}: mean delta ${formatDelta(
+          finding.delta
+        )}, p=${formatP(finding.effectivePValue)}, n=${finding.sampleSize} pairs`
       );
     }
   }
