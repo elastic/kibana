@@ -31,7 +31,9 @@ export const averageRepetitions = (
 
   return [...groups.values()].map((group) => {
     const [first] = group;
-    if (group.length === 1) return first;
+    // Every collapsed doc gets index 0, including lone ones: pairScores still keys on it, and a
+    // surviving repetition 2 on one side must pair with repetition 0 on the other.
+    if (group.length === 1) return { ...first, task: { ...first.task, repetition_index: 0 } };
     const finite = group
       .map((score) => score.evaluator.score)
       .filter((value): value is number => typeof value === 'number' && Number.isFinite(value));

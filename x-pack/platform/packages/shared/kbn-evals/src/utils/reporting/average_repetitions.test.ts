@@ -74,6 +74,13 @@ describe('averageRepetitions', () => {
     expect(empty.evaluator.score).toBeNull();
   });
 
+  it('pairs an example whose only surviving repetition differs between the runs', () => {
+    const target = averageRepetitions([doc({ repetition: 2, score: 0.4 })]);
+    const baseline = averageRepetitions([doc({ repetition: 0, score: 0.8 })]);
+
+    expect(pairScores(target, baseline).pairs).toHaveLength(1);
+  });
+
   it('turns 5 examples x 3 repetitions into 5 pairs, not 15', () => {
     const run = (score: number) =>
       [0, 1, 2, 3, 4].flatMap((example) =>
