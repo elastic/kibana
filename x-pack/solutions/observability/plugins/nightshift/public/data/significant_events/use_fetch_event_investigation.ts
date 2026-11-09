@@ -22,7 +22,7 @@ const IN_PROGRESS_REFETCH_INTERVAL_MS = 5_000;
 /** How long to wait for a just-started investigation to be listed, as the alerts UI does. */
 const PENDING_START_TIMEOUT_MS = 60_000;
 
-/** More than a handful of investigations of one episode is not read: the newest open one wins. */
+/** More than a handful of investigations of one episode is not read: the most recently updated open one wins. */
 const EVENT_INVESTIGATIONS_PAGE_SIZE = 10;
 
 /**

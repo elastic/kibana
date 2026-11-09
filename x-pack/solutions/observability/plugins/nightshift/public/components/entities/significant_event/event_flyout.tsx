@@ -165,10 +165,15 @@ export function EventFlyout({
   const [startedInvestigation, setStartedInvestigation] = useState<{
     id: string;
     startedAt: number;
+    episodeId: string | undefined;
   }>();
   const { triggerInvestigation, triggeringEventId } = useTriggerEventInvestigation({
     onTriggered: (investigationId) => {
-      setStartedInvestigation({ id: investigationId, startedAt: Date.now() });
+      setStartedInvestigation({
+        id: investigationId,
+        startedAt: Date.now(),
+        episodeId: event.episode_id,
+      });
       void lifecycleQuery.refetch();
     },
   });
@@ -176,7 +181,8 @@ export function EventFlyout({
   // The investigation is found through its subject (the event's alert, by episode id), as for any
   // alert. The event's own `investigations[]` is not read here.
   const { investigation: subjectInvestigation } = useFetchEventInvestigation(event.episode_id, {
-    awaiting: startedInvestigation,
+    awaiting:
+      startedInvestigation?.episodeId === event.episode_id ? startedInvestigation : undefined,
   });
   const hasInvestigation = subjectInvestigation != null;
 

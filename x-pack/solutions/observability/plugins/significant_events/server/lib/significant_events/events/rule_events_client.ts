@@ -304,8 +304,7 @@ const INVESTIGATION_STATE_COLUMN = 'investigation_state';
 
 /**
  * Derives `not_started` / `in_progress` / `completed` from the flattened `investigations` entries:
- * an entry without `completed_at` means a run is still open. Mirrors the browser's
- * `getInvestigationState` so the filter and the list agree. `FIELD_EXTRACT` drops duplicate
+ * an entry without `completed_at` means a run is still open. `FIELD_EXTRACT` drops duplicate
  * values, so two runs finishing in the same millisecond would read as in progress (verified live).
  */
 const withInvestigationState = (query: ComposerQuery): ComposerQuery => {

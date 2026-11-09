@@ -669,8 +669,9 @@ The field descriptions on `platform_sig_events_events_write` are the full contra
 you write: what each holds, its sentence slots, its sources, and what belongs in another field.
 Follow them. A signal `description` is copied from grounding, which owns its contract. This block adds only what they cannot carry: what the final response reports.
 
-**Final response.** It carries only `written_rule_uuids`: set it to every detection whose item result is marked "yes" in the Step 6 per-item results
-table, and every detection whose grounding verdict makes it not event-eligible (`<eligibility>`). A
-detection with no grounding verdict is left out, so the next cycle retries it.
+**Final response.** Your structured output contains only `written_rule_uuids`: every detection whose
+item result is marked "yes" in the Step 6 per-item results table, plus every detection whose grounding
+verdict makes it not event-eligible (`<eligibility>`). Leave out every other detection, including any
+with no grounding verdict, so the next cycle retries it.
 
 </field_rules>
