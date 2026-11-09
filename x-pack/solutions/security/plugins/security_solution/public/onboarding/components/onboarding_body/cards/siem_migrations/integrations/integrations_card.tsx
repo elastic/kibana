@@ -45,6 +45,44 @@ interface SecurityIntegrationsProps {
   topCalloutRenderer?: TopCalloutRenderer;
 }
 
+/**
+ * Keeps only the cards that have integrations stats, sets the total-rules title badge, and orders
+ * them like `integrationsStats` (descending by total rules from the API).
+ * A collection card (several packages behind one tile) has no stats of its own: it matches on the
+ * stats of its members and shows their combined total.
+ */
+export const matchCardsToIntegrationsStats = (
+  cards: IntegrationCardItem[],
+  integrationsStats: RuleMigrationAllIntegrationsStats
+): IntegrationCardItem[] => {
+  const statsById = new Map(
+    integrationsStats.map(({ id, total_rules: totalRules }, position) => [
+      id,
+      { totalRules, position },
+    ])
+  );
+  const matched = cards.reduce<Array<{ card: IntegrationCardItem; position: number }>>(
+    (acc, card) => {
+      const ids = card.isCollectionCard
+        ? (card.groupMembers ?? []).map((member) => member.id)
+        : [card.id];
+      const stats = ids.flatMap((id) => statsById.get(id) ?? []).filter((s) => s.totalRules);
+      if (!stats.length) {
+        return acc;
+      }
+      const totalRules = stats.reduce((sum, s) => sum + s.totalRules, 0);
+      const titleBadge = <EuiBadge color="hollow">{i18n.TOTAL_RULES(totalRules)}</EuiBadge>;
+      acc.push({
+        card: { ...card, titleBadge },
+        position: Math.min(...stats.map((s) => s.position)),
+      });
+      return acc;
+    },
+    []
+  );
+  return matched.sort((a, b) => a.position - b.position).map(({ card }) => card);
+};
+
 export const SecurityMigrationIntegrations = withAvailablePackages<SecurityIntegrationsProps>(
   ({
     availablePackages,
@@ -66,29 +104,7 @@ export const SecurityMigrationIntegrations = withAvailablePackages<SecurityInteg
       if (!integrationsStats?.length) {
         return list;
       }
-      const indexedStats = Object.fromEntries(
-        integrationsStats.map((stats) => [stats.id, stats.total_rules])
-      );
-      // Process the list to include only the cards that have integrations stats and set the title badge
-      // Use indexedStats to keep O(n) complexity
-      const indexedCards = list.reduce<Record<string, IntegrationCardItem>>((acc, card) => {
-        const totalRules = indexedStats[card.id];
-        if (!totalRules) {
-          return acc;
-        }
-        const titleBadge = <EuiBadge color="hollow">{i18n.TOTAL_RULES(totalRules)}</EuiBadge>;
-        acc[card.id] = { ...card, titleBadge };
-        return acc;
-      }, {});
-
-      // Use the same order as the integrationsStats (descending by total rules from API)
-      return integrationsStats.reduce<IntegrationCardItem[]>((acc, { id }) => {
-        const card = indexedCards[id];
-        if (card) {
-          acc.push(card);
-        }
-        return acc;
-      }, []);
+      return matchCardsToIntegrationsStats(list, integrationsStats);
     }, [list, integrationsStats]);
 
     return (

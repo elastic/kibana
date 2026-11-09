@@ -114,6 +114,33 @@ describe('useIntegrationCardList', () => {
     expect(result.current[0].onCardClick).toBeInstanceOf(Function);
   });
 
+  it('keeps a collection card when one of its members is featured', () => {
+    const [endpoint, auditbeat] = mockIntegrationsList;
+    const collection = {
+      ...endpoint,
+      id: 'collection:security',
+      name: 'security',
+      isCollectionCard: true,
+      groupMembers: [endpoint, auditbeat],
+    };
+    const otherCollection = {
+      ...collection,
+      id: 'collection:other',
+      name: 'other',
+      groupMembers: [auditbeat],
+    };
+
+    const { result } = renderHook(() =>
+      useIntegrationCardList({
+        integrationsList: [collection, otherCollection, auditbeat],
+        activeIntegrations: mockActiveIntegrations,
+        selectedTab: { ...selectedTab, featuredCardIds: ['epr:endpoint'] },
+      })
+    );
+
+    expect(result.current.map(({ id }) => id)).toEqual(['collection:security']);
+  });
+
   it('tracks integration card click', () => {
     const { result } = renderHook(() =>
       useIntegrationCardList({

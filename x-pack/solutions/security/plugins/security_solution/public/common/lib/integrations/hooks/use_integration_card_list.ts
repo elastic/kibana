@@ -96,7 +96,14 @@ export const useIntegrationCardList = ({
   );
 
   if (featuredCardIds && featuredCardIds.length > 0) {
-    return integrationCards.filter((card) => featuredCardIds.includes(card.id));
+    // A collection card has its own id (`collection:<group>`), so it is featured when any of its
+    // member packages is.
+    return integrationCards.filter(
+      (card) =>
+        featuredCardIds.includes(card.id) ||
+        (card.isCollectionCard &&
+          card.groupMembers?.some((member) => featuredCardIds.includes(member.id)))
+    );
   }
   return integrationCards ?? [];
 };
