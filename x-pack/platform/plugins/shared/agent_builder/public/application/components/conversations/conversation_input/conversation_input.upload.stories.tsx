@@ -239,10 +239,11 @@ export const ImageMultipleWithTrickyFilenames: Story = {
 };
 
 const createStoryBinaryAttachment = (
+  id: string,
   name: string,
   mimeType: SupportedBinaryMimeType
 ): VersionedAttachment => ({
-  id: 'story-binary-attachment',
+  id,
   type: 'binary',
   current_version: 1,
   versions: [
@@ -254,8 +255,6 @@ const createStoryBinaryAttachment = (
     },
   ],
 });
-
-const STORY_PDF_ATTACHMENT = createStoryBinaryAttachment('invoice.pdf', 'application/pdf');
 
 const STORY_CONVERSATION = {
   id: 'story-conversation',
@@ -269,10 +268,19 @@ const STORY_CONVERSATION = {
 };
 
 const READING_TIME_MS = 800;
-const readsBinary = () =>
-  new Promise<VersionedAttachment>((resolve) =>
-    setTimeout(() => resolve(STORY_PDF_ATTACHMENT), READING_TIME_MS)
+let storyBinaryCount = 0;
+// Each PDF gets its own attachment id, so a second PDF does not replace the first pill.
+const readsBinary = () => {
+  storyBinaryCount += 1;
+  const attachment = createStoryBinaryAttachment(
+    `story-binary-attachment-${storyBinaryCount}`,
+    'invoice.pdf',
+    'application/pdf'
   );
+  return new Promise<VersionedAttachment>((resolve) =>
+    setTimeout(() => resolve(attachment), READING_TIME_MS)
+  );
+};
 const neverReadsBinary = () => new Promise<VersionedAttachment>(() => {});
 
 const createBinaryStoryServices = ({
