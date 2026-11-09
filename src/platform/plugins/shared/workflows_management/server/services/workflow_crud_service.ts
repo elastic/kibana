@@ -52,6 +52,8 @@ import type {
   ManagedWorkflowOrphan,
   ReadModifyWriteWorkflowDocumentParams,
   VersionedWorkflowDocument,
+  WorkflowDocumentBulkWrite,
+  WorkflowDocumentBulkWriteResult,
   WorkflowDocumentGetOptions,
   WriteWorkflowDocumentWithOccParams,
 } from './workflow_occ_types';
@@ -72,7 +74,11 @@ import type {
   WorkflowRestoreMetadata,
 } from '../../common/lib/workflow_change_history/types';
 import { getWorkflowZodSchema } from '../../common/schema';
-import { fetchOccHitsByIds, type OccWorkflowHit } from '../api/lib/bulk_occ_index';
+import {
+  fetchOccHitsByIds,
+  type OccWorkflowHit,
+  type WorkflowStorageClient,
+} from '../api/lib/bulk_occ_index';
 import { extractBulkItemError } from '../api/lib/bulk_response_helpers';
 import { cleanupDeletedWorkflows, deleteWorkflows } from '../api/lib/workflow_deletion';
 import { disableAllWorkflows, mutateWorkflowToDisabled } from '../api/lib/workflow_disable_all';
@@ -228,6 +234,113 @@ export class WorkflowCrudService {
       seqNo: hit._seq_no,
       primaryTerm: hit._primary_term,
     };
+  }
+
+  /**
+   * Reads workflow documents by id in one search, across all spaces and including deleted ones.
+   * Callers decide what a document in another space or a deleted one means for them.
+   */
+  async getWorkflowDocumentsWithVersionByIds(
+    ids: readonly string[]
+  ): Promise<Map<string, VersionedWorkflowDocument>> {
+    const uniqueIds = [...new Set(ids)];
+    if (uniqueIds.length === 0) {
+      return new Map();
+    }
+
+    const searchResponse = await this.deps.workflowStorage.getClient().search({
+      query: { ids: { values: uniqueIds } },
+      seq_no_primary_term: true,
+      size: uniqueIds.length,
+      track_total_hits: false,
+      allow_partial_search_results: false,
+    });
+    // An incomplete search would otherwise read as missing workflows.
+    if (searchResponse.timed_out) {
+      throw new Error('Could not read workflows from an incomplete search.');
+    }
+
+    const documents = new Map<string, VersionedWorkflowDocument>();
+    for (const {
+      _id: id,
+      _source: source,
+      _seq_no: seqNo,
+      _primary_term: primaryTerm,
+    } of searchResponse.hits.hits) {
+      if (id && source && seqNo != null && primaryTerm != null) {
+        documents.set(id, { source: source as WorkflowProperties, seqNo, primaryTerm });
+      }
+    }
+    return documents;
+  }
+
+  /**
+   * Writes workflow documents in one `_bulk` request with `refresh: true`: `create` for new
+   * documents and `index` guarded by the previous seq_no/primary_term for updates. Documents that
+   * carry or replace a service-account binding are refused, because changing a binding needs a
+   * user request (see {@link indexWorkflowDocument}).
+   */
+  async bulkWriteWorkflowDocuments(
+    writes: readonly WorkflowDocumentBulkWrite[]
+  ): Promise<WorkflowDocumentBulkWriteResult[]> {
+    const results: WorkflowDocumentBulkWriteResult[] = [];
+    const operations: Parameters<WorkflowStorageClient['bulk']>[0]['operations'] = [];
+    const operationWriteIndexes: number[] = [];
+
+    for (const [writeIndex, { id, document, previous }] of writes.entries()) {
+      if (document.definition?.settings?.run_as || previous?.source.definition?.settings?.run_as) {
+        results[writeIndex] = {
+          status: 'failed',
+          error: new Error(
+            `Workflow ${id} is bound to a service account and cannot be written in bulk.`
+          ),
+        };
+      } else {
+        operationWriteIndexes.push(writeIndex);
+        operations.push(
+          previous
+            ? {
+                index: {
+                  _id: id,
+                  document,
+                  if_seq_no: previous.seqNo,
+                  if_primary_term: previous.primaryTerm,
+                },
+              }
+            : { create: { _id: id, document } }
+        );
+      }
+    }
+
+    if (operations.length === 0) {
+      return results;
+    }
+
+    const { items } = await this.deps.workflowStorage.getClient().bulk({
+      operations,
+      refresh: true,
+    });
+
+    for (const [operationIndex, writeIndex] of operationWriteIndexes.entries()) {
+      const item = items[operationIndex];
+      const operation = item?.index ?? item?.create;
+      if (!operation) {
+        results[writeIndex] = {
+          status: 'failed',
+          error: new Error(`Missing bulk response item for workflow ${writes[writeIndex].id}.`),
+        };
+      } else if (!operation.error) {
+        results[writeIndex] = { status: 'written' };
+      } else if (operation.status === OCC_CONFLICT_STATUS_CODE) {
+        results[writeIndex] = { status: 'conflict' };
+      } else {
+        results[writeIndex] = {
+          status: 'failed',
+          error: new Error(extractBulkItemError(operation.error)),
+        };
+      }
+    }
+    return results;
   }
 
   private async getWorkflowRevision(

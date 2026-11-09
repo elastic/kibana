@@ -192,6 +192,7 @@ describe('WorkflowsService (facade)', () => {
     ]);
     managedSpies = spyPrototype(ManagedWorkflowsService, [
       'installManagedWorkflow',
+      'installManagedWorkflows',
       'pluginReady',
       'cleanupUnregisteredOrphans',
       'markInstallIncomplete',
@@ -514,6 +515,36 @@ describe('WorkflowsService (facade)', () => {
       expect(managedSpies.markInstallIncomplete).not.toHaveBeenCalled();
       expect(managedSpies.pluginReady).toHaveBeenCalledWith('owner');
       expect(managedSpies.cleanupUnregisteredOrphans).toHaveBeenCalledWith(['owner']);
+    });
+
+    it('skips a gated batch install and marks the install pass incomplete', async () => {
+      mockedWaitForManagedWorkflowInstallReadiness.mockResolvedValue({
+        ready: false,
+        reason: 'stopping',
+      });
+      const service = await buildService();
+
+      await expect(
+        service.installManagedWorkflows([{ id: 'wf.managed' as any, spaceId: '*' }], 'owner')
+      ).resolves.toEqual({ failed: [] });
+
+      expect(managedSpies.installManagedWorkflows).not.toHaveBeenCalled();
+      expect(managedSpies.markInstallIncomplete).toHaveBeenCalledWith('owner');
+    });
+
+    it('checks readiness once for a whole batch install', async () => {
+      mockedWaitForManagedWorkflowInstallReadiness.mockResolvedValue({ ready: true });
+      const service = await buildService();
+      mockedWaitForManagedWorkflowInstallReadiness.mockClear();
+      const items = [
+        { id: 'wf.one' as any, spaceId: '*' },
+        { id: 'wf.two' as any, spaceId: '*' },
+      ];
+
+      await service.installManagedWorkflows(items, 'owner');
+
+      expect(mockedWaitForManagedWorkflowInstallReadiness).toHaveBeenCalledTimes(1);
+      expect(managedSpies.installManagedWorkflows).toHaveBeenCalledWith(items, 'owner');
     });
   });
 

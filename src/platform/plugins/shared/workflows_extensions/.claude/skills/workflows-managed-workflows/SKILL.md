@@ -1,6 +1,6 @@
 ---
 name: workflows-managed-workflows
-description: Register and roll out managed workflows from a Kibana plugin using `@kbn/workflows-extensions` and `@kbn/workflows/managed`. Use when adding or modifying a code-owned workflow definition, `registerManagedWorkflowOwner`, `initManagedWorkflowsClient`, `install` / `uninstall` / `ready` / `disable`, choosing `lifecycle` / `versionStrategy` / `enablement`, authoring `yaml` vs `yamlTemplate`, space-scoped vs global installs, `getWorkflowStatus`, or `execute`, or reviewing PRs that touch managed workflow definitions or rollout. Always ask for the user's plugin id first to locate the correct plugin and definition file paths.
+description: Register and roll out managed workflows from a Kibana plugin using `@kbn/workflows-extensions` and `@kbn/workflows/managed`. Use when adding or modifying a code-owned workflow definition, `registerManagedWorkflowOwner`, `initManagedWorkflowsClient`, `install` / `installMany` / `uninstall` / `ready` / `disable`, choosing `lifecycle` / `versionStrategy` / `enablement`, authoring `yaml` vs `yamlTemplate`, space-scoped vs global installs, `getWorkflowStatus`, or `execute`, or reviewing PRs that touch managed workflow definitions or rollout. Always ask for the user's plugin id first to locate the correct plugin and definition file paths.
 ---
 
 # Workflows — Managed Workflow Registration
@@ -66,7 +66,8 @@ See [MANAGED_WORKFLOWS.md](../../dev_docs/MANAGED_WORKFLOWS.md) for rationale an
 | `yaml` / `yamlTemplate` | Exactly one. A YAML change alone already triggers rollout via `definitionHash`          |
 | `version`               | Bump for non-YAML config, `yamlTemplate` closing over imports, or a deliberate signal   |
 | `setup()`               | `registerManagedWorkflowOwner` only — never `install`                                   |
-| `start()`               | `initManagedWorkflowsClient` → static `install`s → `ready()`                            |
+| `start()`               | `initManagedWorkflowsClient` → one `installMany` of the static set → `ready()`          |
+| Static + `run_as`       | Never: static installs have no user request, and a binding needs one                   |
 | `spaceId`               | Required on every operation; use `GLOBAL_WORKFLOW_SPACE_ID` explicitly for global       |
 | Raw request paths       | `kibana.request`, `with.request`, `with.form_data` all skip prefixing. Add `/s/<executing space>/` (usually `{{ workflow.spaceId }}`) |
 | Multi-instance          | Use `workflowIdSuffix` or full `workflowId` — bare id overwrites                        |
@@ -174,7 +175,7 @@ When adding a managed workflow:
    - [ ] `workflowsExtensions` in `requiredPlugins`
    - [ ] `registerManagedWorkflowOwner` in `setup()` only
    - [ ] `initManagedWorkflowsClient` in `start()`
-   - [ ] Static workflows installed in `start()` before `ready()`
+   - [ ] Static workflows installed in `start()` with one `installMany` call, before `ready()`
    - [ ] `ready()` called after all static installs
    - [ ] Dynamic/on-demand installs use deterministic suffixes
    - [ ] Every `install` / `execute` passes explicit `spaceId`
@@ -193,7 +194,7 @@ When reviewing a PR that adds or modifies managed workflows:
 - [ ] Definition appears in `managedWorkflowDefinitions` and id is re-exported
 - [ ] `management` policy matches install pattern (static + `ready()` vs dynamic on-demand)
 - [ ] No `install` calls in `setup()`
-- [ ] Static installs happen before `ready()`; dynamic workflows not expected to survive reconciliation alone
+- [ ] Static installs happen before `ready()`, in one `installMany` call rather than `install` per workflow; dynamic workflows not expected to survive reconciliation alone
 - [ ] Multi-instance installs use suffix or full `workflowId` — not bare definition id repeated for different entities
 - [ ] `spaceId` explicit everywhere; global installs use `GLOBAL_WORKFLOW_SPACE_ID`, not omitted
 - [ ] `execute` passes request and requesting space (not `'*'` for execution stamping)

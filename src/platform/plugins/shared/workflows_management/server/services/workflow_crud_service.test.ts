@@ -499,6 +499,116 @@ describe('WorkflowCrudService', () => {
     });
   });
 
+  describe('getWorkflowDocumentsWithVersionByIds', () => {
+    it('reads every requested id once, across spaces and including deleted documents', async () => {
+      const { deps, client } = makeDeps();
+      client.search.mockResolvedValue({
+        hits: { hits: [occSearchHit('wf-1', { spaceId: 'other' }, 3, 2)] },
+      });
+
+      const service = new WorkflowCrudService(deps);
+      const result = await service.getWorkflowDocumentsWithVersionByIds(['wf-1', 'wf-2', 'wf-1']);
+
+      expect(client.search).toHaveBeenCalledWith({
+        query: { ids: { values: ['wf-1', 'wf-2'] } },
+        seq_no_primary_term: true,
+        size: 2,
+        track_total_hits: false,
+        allow_partial_search_results: false,
+      });
+      expect([...result]).toEqual([
+        [
+          'wf-1',
+          { source: expect.objectContaining({ spaceId: 'other' }), seqNo: 3, primaryTerm: 2 },
+        ],
+      ]);
+    });
+
+    it('throws instead of reporting workflows as missing when the search is incomplete', async () => {
+      const { deps, client } = makeDeps();
+      client.search.mockResolvedValue({ timed_out: true, hits: { hits: [] } });
+
+      const service = new WorkflowCrudService(deps);
+
+      await expect(service.getWorkflowDocumentsWithVersionByIds(['wf-1'])).rejects.toThrow(
+        'incomplete search'
+      );
+    });
+  });
+
+  describe('bulkWriteWorkflowDocuments', () => {
+    it('creates new documents and updates existing ones against their seq_no in one refreshed request', async () => {
+      const { deps, client } = makeDeps();
+      client.bulk.mockResolvedValue({
+        items: [
+          { create: { _id: 'wf-new', status: 201 } },
+          { index: { _id: 'wf-updated', status: 200 } },
+          { index: { _id: 'wf-raced', status: 409, error: { type: 'version_conflict' } } },
+          { create: { _id: 'wf-broken', status: 400, error: { type: 'x', reason: 'bad doc' } } },
+        ],
+      });
+      const document = makeSource();
+      const previous = { source: makeSource(), seqNo: 4, primaryTerm: 2 };
+
+      const service = new WorkflowCrudService(deps);
+      const results = await service.bulkWriteWorkflowDocuments([
+        { id: 'wf-new', document },
+        { id: 'wf-updated', document, previous },
+        { id: 'wf-raced', document, previous },
+        { id: 'wf-broken', document },
+      ]);
+
+      expect(client.bulk).toHaveBeenCalledWith({
+        operations: [
+          { create: { _id: 'wf-new', document } },
+          { index: { _id: 'wf-updated', document, if_seq_no: 4, if_primary_term: 2 } },
+          { index: { _id: 'wf-raced', document, if_seq_no: 4, if_primary_term: 2 } },
+          { create: { _id: 'wf-broken', document } },
+        ],
+        refresh: true,
+      });
+      expect(results).toEqual([
+        { status: 'written' },
+        { status: 'written' },
+        { status: 'conflict' },
+        { status: 'failed', error: new Error('bad doc') },
+      ]);
+    });
+
+    it('refuses documents that carry or replace a service-account binding', async () => {
+      const { deps, client } = makeDeps();
+      client.bulk.mockResolvedValue({ items: [{ create: { _id: 'wf-plain', status: 201 } }] });
+      const bound = makeSource({
+        definition: {
+          version: '1',
+          name: 'Test',
+          enabled: true,
+          triggers: [{ type: 'manual' }],
+          steps: [],
+          settings: { run_as: 'service-account-1' },
+        },
+      });
+
+      const service = new WorkflowCrudService(deps);
+      const results = await service.bulkWriteWorkflowDocuments([
+        { id: 'wf-binds', document: bound },
+        {
+          id: 'wf-unbinds',
+          document: makeSource(),
+          previous: { source: bound, seqNo: 1, primaryTerm: 1 },
+        },
+        { id: 'wf-plain', document: makeSource() },
+      ]);
+
+      expect(client.bulk).toHaveBeenCalledWith(
+        expect.objectContaining({
+          operations: [{ create: { _id: 'wf-plain', document: makeSource() } }],
+        })
+      );
+      expect(results.map(({ status }) => status)).toEqual(['failed', 'failed', 'written']);
+    });
+  });
+
   describe('createWorkflow', () => {
     const validYaml = [
       'name: My Workflow',

@@ -57,6 +57,7 @@ const createMockWorkflowsService = (
     }),
     getManagedWorkflowStatus,
     installManagedWorkflow: jest.fn().mockResolvedValue(undefined),
+    installManagedWorkflows: jest.fn().mockResolvedValue({ failed: [] }),
     uninstallManagedWorkflow: jest.fn().mockResolvedValue(undefined),
     disableManagedWorkflow: overrides.disableManagedWorkflow ?? jest.fn().mockResolvedValue(true),
     getInstalledManagedWorkflowState:
@@ -307,6 +308,37 @@ describe('createManagedWorkflowsSystemApiProvider', () => {
       client.getWorkflowStatus(EXAMPLE_MANAGED_WORKFLOW_ID, { spaceId: 'default' })
     ).rejects.toThrow('Workflows is not available in this environment');
     expect(getManagedWorkflowStatus).not.toHaveBeenCalled();
+  });
+
+  it('should delegate requestless batch installs as the owner plugin when available', async () => {
+    const service = createMockWorkflowsService();
+    const config = { available: true } as WorkflowsManagementConfig;
+    const provider = createManagedWorkflowsSystemApiProvider(service, config, logger);
+    const item = {
+      id: EXAMPLE_MANAGED_WORKFLOW_ID,
+      spaceId: 'default',
+      values: { recipient: 'World' },
+    } as const;
+
+    const client = await provider('testPlugin');
+
+    await expect(client.installMany([item])).resolves.toEqual({ failed: [] });
+    expect(service.installManagedWorkflows).toHaveBeenCalledWith([item], 'testPlugin');
+  });
+
+  it('should skip requestless batch installs when unavailable', async () => {
+    const service = createMockWorkflowsService({ hasAtLeast: false });
+    const config = { available: true } as WorkflowsManagementConfig;
+    const provider = createManagedWorkflowsSystemApiProvider(service, config, logger);
+
+    const client = await provider('testPlugin');
+
+    await expect(
+      client.installMany([
+        { id: EXAMPLE_MANAGED_WORKFLOW_ID, spaceId: 'default', values: { recipient: 'World' } },
+      ])
+    ).resolves.toEqual({ failed: [] });
+    expect(service.installManagedWorkflows).not.toHaveBeenCalled();
   });
 
   it('should delegate requestless managed workflow disable as the owner plugin when available', async () => {

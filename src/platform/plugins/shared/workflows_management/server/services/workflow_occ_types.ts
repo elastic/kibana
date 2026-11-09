@@ -52,6 +52,18 @@ export interface WriteWorkflowDocumentWithOccParams {
   ifPrimaryTerm: number;
 }
 
+export interface WorkflowDocumentBulkWrite {
+  id: string;
+  document: WorkflowProperties;
+  /** The stored document this write replaces, guarded by its seq_no; omit to create. */
+  previous?: VersionedWorkflowDocument;
+}
+
+export type WorkflowDocumentBulkWriteResult =
+  | { status: 'written' }
+  | { status: 'conflict' }
+  | { status: 'failed'; error: Error };
+
 export interface ReadModifyWriteWorkflowDocumentParams {
   request?: KibanaRequest;
   mutate: (existing: WorkflowProperties) => WorkflowProperties;

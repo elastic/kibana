@@ -51,6 +51,30 @@ export type ManagedWorkflowServiceInstallOptions = ManagedWorkflowOperationBaseO
     values?: ManagedWorkflowTemplateValues;
   };
 
+/** One static workflow in an `installMany` batch, with the same `values` typing as `install()`. */
+export type ManagedWorkflowInstallManyItem<TId extends ManagedWorkflowId> = {
+  id: TId;
+} & ManagedWorkflowOperationBaseOptions &
+  ManagedWorkflowInstallValuesOption<TId>;
+
+export type ManagedWorkflowServiceInstallManyItem = ManagedWorkflowOperationBaseOptions & {
+  id: ManagedWorkflowId;
+  values?: ManagedWorkflowTemplateValues;
+};
+
+export interface ManagedWorkflowInstallFailure {
+  /** Managed workflow definition id. */
+  id: ManagedWorkflowId;
+  /** Workflow document id, when the item resolved to one. */
+  workflowId?: string;
+  spaceId: string;
+  error: Error;
+}
+
+export interface ManagedWorkflowInstallManyResult {
+  failed: ManagedWorkflowInstallFailure[];
+}
+
 export type ExecuteManagedWorkflowOptions = ManagedWorkflowOperationOptions & {
   inputs?: Record<string, unknown>;
   triggeredBy?: string;
@@ -124,6 +148,20 @@ export interface RegisteredManagedWorkflowsLifecycleApi {
     id: TId,
     options: ManagedWorkflowInstallOptions<TId>
   ) => Promise<void>;
+  /**
+   * Install or update this plugin's static managed workflows in one pass: one read, then `_bulk`
+   * writes in bounded chunks with one refresh each. Use it for the static set a plugin installs at
+   * start-up; `install()` keeps writing one workflow at a time.
+   *
+   * A failed item (unknown or dynamic definition, a `settings.run_as` binding, a user workflow
+   * with the same id, a write error) is reported in `failed` and does not stop the others. Rejects
+   * only when the whole pass fails, such as the initial read. Best-effort like `install()`: may
+   * resolve without persisting when Workflows is unavailable, Kibana is stopping, or ES is not
+   * ready for managed writes.
+   */
+  installMany: <TId extends ManagedWorkflowId>(
+    items: ReadonlyArray<ManagedWorkflowInstallManyItem<TId>>
+  ) => Promise<ManagedWorkflowInstallManyResult>;
   uninstall: <TId extends ManagedWorkflowId>(
     id: TId,
     options: ManagedWorkflowOperationOptions

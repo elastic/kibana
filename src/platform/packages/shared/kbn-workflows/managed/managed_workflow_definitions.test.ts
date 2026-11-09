@@ -191,6 +191,10 @@ const alertZeroDefinitionsById = managedDefinitionsById.filter(([id]) =>
   alertZeroWorkflowIds.has(id)
 );
 
+const staticDefinitionsById = managedDefinitionsById.filter(
+  ([, definition]) => definition.management.lifecycle === 'static'
+);
+
 function hasYamlTemplate(
   definition: ManagedWorkflowDefinition
 ): definition is YamlTemplateManagedWorkflowDefinition {
@@ -472,6 +476,13 @@ describe('managedWorkflowDefinitions', () => {
     expect(renderWorkflowYaml(definition)).not.toMatch(
       /api\/asset_criticality|entityStore\.updateAssetCriticality/
     );
+  });
+
+  // Static workflows install without a user request, and creating or changing a service-account
+  // binding needs one (with manage_security, in a specific space). A static definition that set
+  // `run_as` would only fail when it is installed, so it fails here instead.
+  it.each(staticDefinitionsById)('%s does not bind a service account', (_id, definition) => {
+    expect(parse(renderWorkflowYaml(definition))?.settings?.run_as).toBeUndefined();
   });
 
   it.each(managedTemplateDefinitionsById)(

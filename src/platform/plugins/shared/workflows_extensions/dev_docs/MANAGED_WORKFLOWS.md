@@ -73,6 +73,7 @@ const managed = await workflowsExtensions.initManagedWorkflowsClient(MY_PLUGIN_I
 Client surface:
 
 - `install(id, options)` — no request required
+- `installMany(items)` — no request required; installs the static set a plugin installs in `start()` in one pass (see [Installing the static set with `installMany`](#32-installing-the-static-set-with-installmany))
 - `uninstall(id, options)` — no request required
 - `disable(id, options)` — no request required; switches the workflow off and changes nothing else (see [Disabling a managed workflow](#disabling-a-managed-workflow))
 - `getWorkflowStatus(id, options)` — no request required
@@ -112,11 +113,15 @@ After installing all **static** workflows in `start()`, call `managed.ready()` t
 // start()
 const managed = await workflowsExtensions.initManagedWorkflowsClient(MY_PLUGIN_ID);
 
-await managed.install(WORKFLOW_A_ID, { spaceId: 'default' });
-await managed.install(WORKFLOW_B_ID, { workflowIdSuffix: 'us-east', spaceId: 'us-east' });
-await managed.install(WORKFLOW_B_ID, { workflowIdSuffix: 'eu-west', spaceId: 'eu-west' });
+const { failed } = await managed.installMany([
+  { id: WORKFLOW_A_ID, spaceId: 'default' },
+  { id: WORKFLOW_B_ID, workflowIdSuffix: 'us-east', spaceId: 'us-east' },
+  { id: WORKFLOW_B_ID, workflowIdSuffix: 'eu-west', spaceId: 'eu-west' },
+]);
 
-await managed.ready();
+if (failed.length === 0) {
+  await managed.ready();
+}
 ```
 
 ### What `ready()` does
@@ -165,6 +170,27 @@ code-defined upgrade: the persisted owner, definition ID, space, template values
 concurrency control and never creates or repairs a binding. User-requested edits, initial
 binding, rebinding, and unbinding still require `manage_security` in addition to the normal
 Workflows privileges. Requestless deletion of a bound workflow remains unsupported.
+
+## 3.2) Installing the static set with `installMany`
+
+Use `installMany` for the static workflows a plugin installs in `start()`, and `install` for everything installed on demand.
+
+Every write to the workflow index runs on Elasticsearch's small `system_write` thread pool, which login sessions, saved objects and Task Manager also write with. `install` writes one workflow per request with `refresh: true`, so a burst of start-up installs fills that pool and delays logins on a fresh deployment. `installMany` instead:
+
+- reads the stored documents of the whole batch with one search, and skips unchanged workflows, so a restart with nothing to change costs that one search;
+- writes missing and changed workflows with `_bulk`, at most 50 documents or 2 MB per request, one request at a time, each with `refresh: true`. The workflows are readable as soon as the call resolves, and the pass never holds more than one `system_write` thread;
+- re-reads workflows that another Kibana node wrote at the same time, and skips them when they are already up to date.
+
+It follows the same rules as `install` for what to write, keep or skip, and resolves with the items it could not install instead of throwing for them:
+
+```ts
+const { failed } = await managed.installMany(ids.map((id) => ({ id, spaceId: GLOBAL_WORKFLOW_SPACE_ID })));
+for (const { id, error } of failed) {
+  logger.error(`Failed to install managed workflow "${id}": ${error.message}`);
+}
+```
+
+An item fails when its definition is dynamic, belongs to another plugin, appears twice in the batch, collides with a user workflow or one in another space, or sets `settings.run_as`. Static workflows install without a user request, and a service-account binding needs one, so a static definition must not set `run_as` (the registry test enforces this). The call rejects only when the whole pass fails, such as its first read. It is best-effort like `install`: it may resolve without writing when Workflows is unavailable, Kibana is stopping, or Elasticsearch is not ready.
 
 ## 4) Space-scoped vs global installs
 

@@ -209,6 +209,12 @@ export class WorkflowsExtensionsServerPlugin
           'No managed workflows system API provider set, using noop install to avoid errors.'
         );
       },
+      installMany: async () => {
+        this.logger.warn(
+          'No managed workflows system API provider set, using noop installMany to avoid errors.'
+        );
+        return { failed: [] };
+      },
       uninstall: async () => {
         this.logger.warn(
           'No managed workflows system API provider set, using noop uninstall to avoid errors.'
@@ -252,6 +258,7 @@ export class WorkflowsExtensionsServerPlugin
   ): PluginScopedManagedWorkflowsApi {
     return {
       install: systemClient.install,
+      installMany: systemClient.installMany,
       uninstall: systemClient.uninstall,
       disable: systemClient.disable,
       ready: systemClient.ready,

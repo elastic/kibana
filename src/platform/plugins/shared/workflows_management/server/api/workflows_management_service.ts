@@ -39,8 +39,10 @@ import type { ManagedWorkflowId } from '@kbn/workflows/managed';
 import type {
   ExecuteManagedWorkflowOptions,
   GetManagedWorkflowStatusOptions,
+  ManagedWorkflowInstallManyResult,
   ManagedWorkflowInstanceState,
   ManagedWorkflowOperationOptions,
+  ManagedWorkflowServiceInstallManyItem,
   ManagedWorkflowServiceInstallOptions,
   ManagedWorkflowStatusReport,
 } from '@kbn/workflows/server/types';
@@ -777,6 +779,26 @@ export class WorkflowsService {
       registeredPluginId,
       request
     );
+  }
+
+  /**
+   * Install or update static managed workflows with `_bulk`, after one ES readiness check for the
+   * whole batch. Best-effort like {@link installManagedWorkflow}: a gated batch resolves with no
+   * failures and marks the plugin install pass incomplete.
+   */
+  public async installManagedWorkflows(
+    items: readonly ManagedWorkflowServiceInstallManyItem[],
+    registeredPluginId: string
+  ): Promise<ManagedWorkflowInstallManyResult> {
+    await this.ensureInitialized();
+    const readiness = await this.ensureManagedInstallReady(
+      `install of ${items.length} workflow(s) for plugin '${registeredPluginId}'`
+    );
+    if (!readiness.ready) {
+      this.managedWorkflowsService.markInstallIncomplete(registeredPluginId);
+      return { failed: [] };
+    }
+    return this.managedWorkflowsService.installManagedWorkflows(items, registeredPluginId);
   }
 
   public async uninstallManagedWorkflow(
