@@ -5,16 +5,12 @@
  * 2.0.
  */
 
-import { termsQuery } from '@kbn/es-query';
+import { termQuery, termsQuery } from '@kbn/es-query';
 import { OTEL_EVENT_NAME, URL_FULL } from '@kbn/apm-types';
 import { TOP_ROWS } from '../../../../common/top_rows';
 import { p75Of } from '../../../lib/helpers/aggregations';
-import { environmentFilter } from '../../../lib/helpers/environment';
 import {
   BROWSER_CSS_SELECTOR,
-  BROWSER_MOBILE,
-  BROWSER_NAME,
-  BROWSER_PLATFORM,
   BROWSER_TAG_NAME,
   EVENT_NAVIGATION_TIMING,
   EVENT_USER_ACTION_CLICK,
@@ -22,23 +18,33 @@ import {
   OTEL_LOGS_INDEX,
 } from '../../../../common/otel_data';
 import {
-  ENVIRONMENT_FIELDS,
+  documentFilters,
+  filterFieldOf,
+  filterRuntimeMappings,
+  pageLoadFilters,
+} from '../../../lib/otel/overview_filters';
+import {
   applicationDocuments,
   eventCount,
+  inEnvironmentFilter,
   otelSearchDefaults,
 } from '../../../lib/otel/queries';
 import type { ApplicationSearchParams } from '../../application_tab_route';
 
-/** Device types: `browser.mobile` is `true` or `false`. */
-const DEVICE_TYPES = 2;
-
 /**
  * What users load and do in one application: top pages and breakdowns (navigation timings) and top
- * clicks, over the selected environment only.
+ * clicks, over the selected environment and the Overview's filters. The page filter narrows the
+ * page loads only, as the clicks carry no page URL yet. The breakdowns read the fields the filters
+ * and the Sessions read, so a row is a value the filter takes.
  */
-export const usageSearch = ({ environment, ...application }: ApplicationSearchParams) => {
+export const usageSearch = ({
+  environment,
+  filters = {},
+  ...application
+}: ApplicationSearchParams) => {
   return {
     ...otelSearchDefaults(OTEL_LOGS_INDEX),
+    runtime_mappings: filterRuntimeMappings(),
     query: {
       bool: {
         filter: [
@@ -49,18 +55,25 @@ export const usageSearch = ({ environment, ...application }: ApplicationSearchPa
     },
     aggs: {
       inEnvironment: {
-        filter: environmentFilter(ENVIRONMENT_FIELDS, environment),
+        filter: inEnvironmentFilter(environment, documentFilters(filters)),
         aggs: {
           pageLoads: {
-            ...eventCount(EVENT_NAVIGATION_TIMING),
+            filter: {
+              bool: {
+                filter: [
+                  ...termQuery(OTEL_EVENT_NAME, EVENT_NAVIGATION_TIMING),
+                  ...pageLoadFilters(filters),
+                ],
+              },
+            },
             aggs: {
               topPages: {
                 terms: { field: URL_FULL, size: TOP_ROWS },
                 aggs: { loadTime: p75Of(NAVIGATION_TIMING_LOAD_EVENT_END) },
               },
-              browsers: { terms: { field: BROWSER_NAME, size: TOP_ROWS } },
-              operatingSystems: { terms: { field: BROWSER_PLATFORM, size: TOP_ROWS } },
-              devices: { terms: { field: BROWSER_MOBILE, size: DEVICE_TYPES } },
+              browsers: { terms: { field: filterFieldOf('browser'), size: TOP_ROWS } },
+              operatingSystems: { terms: { field: filterFieldOf('os'), size: TOP_ROWS } },
+              devices: { terms: { field: filterFieldOf('device'), size: TOP_ROWS } },
             },
           },
           clicks: {

@@ -78,7 +78,11 @@ describe('InvestigationsSettingsTab', () => {
     expect(screen.getByTestId('nightshiftInvestigationProcessSection')).toHaveTextContent(
       'Investigation process'
     );
-    expect(mockRunLimitGroups).toEqual(['investigation']);
+    expect(mockRunLimitGroups).toEqual([
+      'investigation',
+      'manual_investigation',
+      'total_investigation',
+    ]);
     expect(mockRunLimitExhaustionCallouts).toBe('automations');
     fireEvent.click(screen.getByTestId('streams-settings-save-button'));
 

@@ -27,7 +27,6 @@ pageLoadAssetSize:
   cloudConnect: 5575
   cloudDataMigration: 2042
   cloudDefend: 3030
-  cloudExperiments: 137406
   cloudFullStory: 1642
   cloudLinks: 21894
   cloudSecurityPosture: 14802
@@ -151,7 +150,7 @@ pageLoadAssetSize:
   observabilityLogsExplorer: 1351
   observabilityOnboarding: 8873
   observabilityShared: 8355
-  osquery: 14483
+  osquery: 14738
   painlessLab: 2550
   presentationUtil: 350
   productDocBase: 4218
