@@ -9,7 +9,15 @@ import type {
   DefaultRouteCreateOptions,
   ServerRouteRepository,
 } from '@kbn/server-route-repository-utils';
-import { createSloServerRoute } from './create_slo_server_route';
+import {
+  SLOError,
+  SLOIdConflict,
+  SLONotFound,
+  SLOOperationTimeout,
+  SLOTemplateNotFound,
+  SecurityException,
+} from '../../errors';
+import { createSloServerRoute, handleSLOError } from './create_slo_server_route';
 
 const getRouteOptions = (route: ServerRouteRepository[string]): DefaultRouteCreateOptions =>
   'options' in route ? route.options : {};
@@ -43,5 +51,21 @@ describe('createSloServerRoute', () => {
     });
 
     expect(getRouteOptions(routes[ENDPOINT]).tags).toEqual(['existing', 'oas-tag:slo']);
+  });
+});
+
+describe('handleSLOError', () => {
+  it.each([
+    [new SLONotFound('not found'), 404],
+    [new SLOTemplateNotFound('template not found'), 404],
+    [new SLOIdConflict('conflict'), 409],
+    [new SecurityException('forbidden'), 403],
+    [new SLOOperationTimeout('timeout'), 503],
+    [new SLOError('bad request'), 400],
+  ])('maps %p to a %p response', (error, statusCode) => {
+    const boom = handleSLOError(error);
+
+    expect(boom.output.statusCode).toBe(statusCode);
+    expect(boom.message).toBe(error.message);
   });
 });

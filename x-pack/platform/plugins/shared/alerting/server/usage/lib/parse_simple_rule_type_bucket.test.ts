@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable @kbn/compat/typescript-naming-convention */
 
 import { parseSimpleRuleTypeBucket } from './parse_simple_rule_type_bucket';
 

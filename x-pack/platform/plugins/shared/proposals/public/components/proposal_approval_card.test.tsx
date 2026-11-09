@@ -16,6 +16,7 @@ import {
   useDismissProposal,
   useIsApprovingProposal,
   useIsDecliningProposal,
+  isDecisionShown,
 } from '../hooks/use_proposals_api';
 import { useCurrentUserProfile } from '../hooks/use_current_user_profile';
 import type { ProposalWithMetadata } from '@kbn/proposals-common';
@@ -136,7 +137,7 @@ jest.mock('@kbn/proposals-ui', () => {
               `decision` yet. */}
           {!isReplaced && !decision && proposal.previousExecutionError && (
             <div data-test-subj="warning-callout">
-              A previous attempt at this action failed
+              Previous attempt to apply this proposal failed
               {proposal.previousExecutionError}
             </div>
           )}
@@ -165,6 +166,7 @@ jest.mock('../hooks/use_proposals_api', () => ({
   useIsDecliningProposal: jest.fn(),
   useReopenProposal: jest.fn(() => ({ mutateAsync: jest.fn() })),
   useIsReopeningProposal: jest.fn(() => false),
+  isDecisionShown: jest.fn(() => false),
 }));
 
 jest.mock('../hooks/use_current_user_profile', () => ({
@@ -180,6 +182,7 @@ jest.mock('@kbn/user-profile-components', () => ({
 const useProposalMock = useProposal as jest.MockedFunction<typeof useProposal>;
 const useApproveProposalMock = useApproveProposal as jest.MockedFunction<typeof useApproveProposal>;
 const useDismissProposalMock = useDismissProposal as jest.MockedFunction<typeof useDismissProposal>;
+const isDecisionShownMock = isDecisionShown as jest.MockedFunction<typeof isDecisionShown>;
 const useIsApprovingProposalMock = useIsApprovingProposal as jest.MockedFunction<
   typeof useIsApprovingProposal
 >;
@@ -197,6 +200,7 @@ const capabilitiesFor = (canDecide: boolean) =>
       application: {
         capabilities: { proposals: { decideProposals: canDecide } },
       },
+      http: { basePath: { serverBasePath: '', prepend: (path: string) => path } },
     },
   } as unknown as ReturnType<typeof useKibana>);
 
@@ -239,6 +243,7 @@ const setupMocks = (
   >);
   useIsApprovingProposalMock.mockReturnValue(false);
   useIsDecliningProposalMock.mockReturnValue(false);
+  isDecisionShownMock.mockReturnValue(false);
   useCurrentUserProfileMock.mockReturnValue({ data: null } as unknown as ReturnType<
     typeof useCurrentUserProfile
   >);
@@ -339,7 +344,7 @@ describe('ProposalApprovalCard', () => {
       const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
 
       const callout = getByTestId('warning-callout');
-      expect(callout).toHaveTextContent('A previous attempt at this action failed');
+      expect(callout).toHaveTextContent('Previous attempt to apply this proposal failed');
       // The reason is the actionable half: the title alone does not tell an
       // analyst whether re-approving is likely to fail the same way.
       expect(callout).toHaveTextContent(FAILURE);
@@ -464,7 +469,7 @@ describe('ProposalApprovalCard', () => {
         })
       );
       const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
-      expect(getByTestId('approval-decision')).toHaveTextContent('applying:Someone');
+      expect(getByTestId('approval-decision')).toHaveTextContent('applying:Unknown user');
     });
   });
 
@@ -585,6 +590,15 @@ describe('ProposalApprovalCard', () => {
       useIsApprovingProposalMock.mockReturnValue(true);
       const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
       expect(getByTestId('approval-is-submitting')).toHaveTextContent('applying');
+    });
+
+    it('tells the decision hooks whether the data of its own proposal shows a decision', () => {
+      setupMocks();
+      isDecisionShownMock.mockReturnValue(true);
+      render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
+
+      expect(useIsApprovingProposalMock).toHaveBeenCalledWith(PROPOSAL_ID, true);
+      expect(useIsDecliningProposalMock).toHaveBeenCalledWith(PROPOSAL_ID, true);
     });
 
     it('rejects with a friendly message rather than the raw generic error', async () => {

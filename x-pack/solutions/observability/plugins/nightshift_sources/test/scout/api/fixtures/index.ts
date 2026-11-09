@@ -7,6 +7,7 @@
 
 export { apiTest } from '@kbn/scout-oblt';
 export {
+  NIGHTSHIFT_MANAGE_ONLY_ROLE,
   NIGHTSHIFT_MANAGER_ROLE,
   NIGHTSHIFT_READ_ONLY_NO_ES_ROLE,
   NIGHTSHIFT_READ_ONLY_ROLE,
@@ -21,9 +22,11 @@ export {
   deleteTestIndex,
   findListed,
   getSource,
+  listRecommendedSources,
   listSources,
   listedIds,
   readView,
+  recommendedSourceTestIndexName,
   setSourceEnabled,
   testIndexName,
   uniqueSuffix,

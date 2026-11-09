@@ -34,7 +34,8 @@ const getLabels = (
   disabled: boolean | undefined,
   isApproximate: boolean,
   additionalText?: string,
-  disabledTooltip?: string
+  disabledTooltip?: string,
+  additionalDisabledText?: string
 ) => {
   if (invalidLicense || disabled) {
     const ariaLabel = i18n.translate('unifiedSearch.esqlApproximationToggle.unavailable', {
@@ -49,20 +50,20 @@ const getLabels = (
         }),
       };
     }
-    const additionalDisabledText = invalidLicense
+    const disabledText = invalidLicense
       ? i18n.translate('unifiedSearch.esqlApproximationToggle.invalidLicenseText', {
           defaultMessage: 'Upgrade to Enterprise license to enable fast mode.',
         })
-      : additionalText;
+      : additionalDisabledText ?? additionalText;
     return {
       tooltipContent: (
         <>
           <strong>{ariaLabel}</strong>
-          {additionalDisabledText && (
+          {disabledText && (
             <>
               <br />
               <br />
-              {additionalDisabledText}
+              {disabledText}
             </>
           )}
         </>
@@ -105,6 +106,10 @@ interface EsqlApproximationToggleProps {
   isApproximate: boolean;
   onChange: (isApproximate: boolean) => void;
   additionalText?: string;
+  /**
+   * Text shown in the tooltip when the toggle is disabled. Falls back to `additionalText`.
+   */
+  additionalDisabledText?: string;
   disabled?: boolean;
   disabledReason?: string;
 }
@@ -113,6 +118,7 @@ export const EsqlApproximationToggle = ({
   isApproximate,
   onChange,
   additionalText,
+  additionalDisabledText,
   disabled,
   disabledReason,
 }: EsqlApproximationToggleProps) => {
@@ -145,8 +151,22 @@ export const EsqlApproximationToggle = ({
   }, [licensing]);
 
   const { tooltipContent, ariaLabel, switchLabel } = useMemo(() => {
-    return getLabels(invalidLicense, isDisabled, isApproximate, additionalText, disabledTooltip);
-  }, [isDisabled, disabledTooltip, isApproximate, additionalText, invalidLicense]);
+    return getLabels(
+      invalidLicense,
+      isDisabled,
+      isApproximate,
+      additionalText,
+      disabledTooltip,
+      additionalDisabledText
+    );
+  }, [
+    isDisabled,
+    disabledTooltip,
+    isApproximate,
+    additionalText,
+    additionalDisabledText,
+    invalidLicense,
+  ]);
 
   return (
     <EuiFlexItem grow={false}>

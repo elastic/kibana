@@ -16,6 +16,7 @@ import {
 import { FLYOUT_ORIGIN } from '../../common/lib/telemetry/events/flyout_v2/types';
 import {
   buildEntityFlyoutV2NavigationState,
+  buildEntityRightPanel,
   getAgentBuilderLastAgentIdForSecurityOpenChat,
   getHostNameForHostDetailsUrl,
   getServiceNameForServiceDetailsUrl,
@@ -165,6 +166,44 @@ describe('entity_explore_navigation', () => {
           entity_id: 'service:abc-123',
         })
       ).toBe('service:abc-123');
+    });
+  });
+
+  describe('buildEntityRightPanel', () => {
+    it.each(['host', 'user', 'service'] as const)(
+      'carries mode "resolved" into the %s panel params',
+      (identifierType) => {
+        const panel = buildEntityRightPanel({
+          identifierType,
+          identifier: 'alpha',
+          entityStoreId: `${identifierType}:alpha`,
+          mode: 'resolved',
+        });
+        expect(panel?.params).toMatchObject({ mode: 'resolved' });
+      }
+    );
+
+    it('leaves mode out when the identifier has none', () => {
+      const panel = buildEntityRightPanel({
+        identifierType: 'host',
+        identifier: 'alpha',
+        entityStoreId: 'host:alpha',
+      });
+      expect(panel?.params).not.toHaveProperty('mode');
+    });
+
+    it('puts mode "resolved" on the flyout v2 descriptor', () => {
+      const panel = buildEntityRightPanel({
+        identifierType: 'host',
+        identifier: 'alpha',
+        entityStoreId: 'host:alpha',
+        mode: 'resolved',
+      });
+      const [descriptor] = buildEntityFlyoutV2NavigationState({
+        preview: [],
+        right: panel!,
+      }) as Array<{ mode?: string }>;
+      expect(descriptor.mode).toBe('resolved');
     });
   });
 
@@ -331,10 +370,10 @@ describe('entity_explore_navigation', () => {
         expect(params.get('watchlistId')).toBe('wl-123');
         expect(params.get('watchlistName')).toBe('VIPs');
         expect(params.get('groupBy')).toBe('resolution');
-        expect(params.get('flyout')).toContain('right');
+        expect(params.get(FLYOUT_V2_URL_PARAM)).not.toBeNull();
       });
 
-      it('writes flyoutV2 and removes a stale legacy flyout when the new flyout is enabled', () => {
+      it('writes flyoutV2 and removes a stale legacy flyout', () => {
         const application = buildApplicationMock();
         window.history.replaceState({}, '', `${EA_HOME_PATH}?flyout=stale&watchlistId=wl-123`);
 
@@ -352,7 +391,6 @@ describe('entity_explore_navigation', () => {
               },
             },
           },
-          isNewFlyoutEnabled: true,
         });
 
         const [, options] = application.navigateToApp.mock.calls[0];

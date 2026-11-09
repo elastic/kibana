@@ -173,6 +173,7 @@ describe('saveAutomationHandler', () => {
     createWorkflow: jest.Mock;
     updateWorkflow: jest.Mock;
     deleteWorkflows: jest.Mock;
+    validateWorkflow: jest.Mock;
   };
 
   beforeEach(() => {
@@ -192,16 +193,23 @@ describe('saveAutomationHandler', () => {
     };
     workflowsManagement = {
       getWorkflow: jest.fn().mockResolvedValue({ id: 'wf-new', enabled: true }),
-      createWorkflow: jest.fn(),
-      updateWorkflow: jest.fn().mockResolvedValue({ id: 'wf-new', enabled: true }),
+      createWorkflow: jest.fn().mockResolvedValue({ id: 'wf-new', name: 'pilot', valid: true }),
+      updateWorkflow: jest
+        .fn()
+        .mockResolvedValue({ id: 'wf-new', enabled: true, valid: true, validationErrors: [] }),
       deleteWorkflows: jest.fn().mockResolvedValue({ total: 1, deleted: 1, failures: [] }),
+      validateWorkflow: jest.fn().mockResolvedValue({ valid: true, diagnostics: [] }),
     };
     getCoreStart.mockResolvedValue({});
   });
 
   it('creates the workflow and attaches it to the AI index', async () => {
     aiIndexService.addAutomation.mockResolvedValue('attached');
-    workflowsManagement.createWorkflow.mockResolvedValue({ id: 'wf-new', name: 'pilot' });
+    workflowsManagement.createWorkflow.mockResolvedValue({
+      id: 'wf-new',
+      name: 'pilot',
+      valid: true,
+    });
 
     const attachments = createAttachmentStateManager();
 
@@ -351,6 +359,80 @@ describe('saveAutomationHandler', () => {
     expect(workflowsManagement.createWorkflow).not.toHaveBeenCalled();
   });
 
+  describe('surfacing an invalid saved definition', () => {
+    it('flags a created workflow that was stored as invalid and includes diagnostics', async () => {
+      aiIndexService.addAutomation.mockResolvedValue('attached');
+      workflowsManagement.createWorkflow.mockResolvedValue({
+        id: 'wf-new',
+        name: 'pilot',
+        valid: false,
+        definition: null,
+      });
+      workflowsManagement.validateWorkflow.mockResolvedValue({
+        valid: false,
+        diagnostics: [
+          { severity: 'error', message: 'Unknown connector id', source: 'schema', ruleId: 'x' },
+          { severity: 'warning', message: 'just a warning', source: 'schema', ruleId: 'y' },
+        ],
+      });
+
+      const result = await saveAutomationHandler({
+        params: { workflowAttachmentId: WORKFLOW_ATTACHMENT_ID },
+        request,
+        spaceId: 'default',
+        attachments: createAttachmentStateManager() as never,
+        logger,
+        getAiIndexService: async () => aiIndexService as unknown as AiIndexService,
+        getCoreStart,
+        getSecurityStart,
+        getWorkflowsManagement: () => workflowsManagement as never,
+      });
+
+      // The workflow is still saved and attached — the save stores invalid YAML by design.
+      expect(aiIndexService.addAutomation).toHaveBeenCalled();
+      expect(result).toEqual({
+        aiIndexId: 'my-ai-index',
+        workflowId: 'wf-new',
+        status: 'saved_and_attached',
+        valid: false,
+        validationErrors: ['Unknown connector id'],
+      });
+    });
+
+    it('flags an updated workflow that was stored as invalid with its validationErrors', async () => {
+      aiIndexService.addAutomation.mockResolvedValue('already_attached');
+      workflowsManagement.getWorkflow.mockResolvedValue({ id: 'wf-persisted', enabled: true });
+      workflowsManagement.updateWorkflow.mockResolvedValue({
+        id: 'wf-persisted',
+        enabled: false,
+        valid: false,
+        validationErrors: ['Unknown connector id'],
+      });
+
+      const result = await saveAutomationHandler({
+        params: { workflowYaml: 'name: pilot\nsteps: []', workflowId: 'wf-persisted' },
+        request,
+        spaceId: 'default',
+        attachments: createAttachmentStateManager({ origin: 'wf-persisted' }) as never,
+        logger,
+        getAiIndexService: async () => aiIndexService as unknown as AiIndexService,
+        getCoreStart,
+        getSecurityStart,
+        getWorkflowsManagement: () => workflowsManagement as never,
+      });
+
+      // Diagnostics come straight from the update response, so validateWorkflow is not called again.
+      expect(workflowsManagement.validateWorkflow).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        aiIndexId: 'my-ai-index',
+        workflowId: 'wf-persisted',
+        status: 'saved_and_attached',
+        valid: false,
+        validationErrors: ['Unknown connector id'],
+      });
+    });
+  });
+
   describe('run after save', () => {
     const save = (params: Parameters<typeof saveAutomationHandler>[0]['params']) =>
       saveAutomationHandler({
@@ -367,7 +449,11 @@ describe('saveAutomationHandler', () => {
 
     beforeEach(() => {
       aiIndexService.addAutomation.mockResolvedValue('attached');
-      workflowsManagement.createWorkflow.mockResolvedValue({ id: 'wf-new', name: 'pilot' });
+      workflowsManagement.createWorkflow.mockResolvedValue({
+        id: 'wf-new',
+        name: 'pilot',
+        valid: true,
+      });
     });
 
     it('does not execute a workflow during save', async () => {
@@ -608,7 +694,11 @@ describe('saveAutomationHandler', () => {
 
   it('continues when updateOrigin fails after creating a workflow', async () => {
     aiIndexService.addAutomation.mockResolvedValue('attached');
-    workflowsManagement.createWorkflow.mockResolvedValue({ id: 'wf-new', name: 'pilot' });
+    workflowsManagement.createWorkflow.mockResolvedValue({
+      id: 'wf-new',
+      name: 'pilot',
+      valid: true,
+    });
 
     const attachments = createAttachmentStateManager();
     attachments.updateOrigin.mockResolvedValue(false);
@@ -666,7 +756,11 @@ describe('saveAutomationHandler', () => {
     aiIndexService.assertCanAcceptAutomation.mockRejectedValue(
       new AiIndexManagedError('my-ai-index')
     );
-    workflowsManagement.createWorkflow.mockResolvedValue({ id: 'wf-new', name: 'pilot' });
+    workflowsManagement.createWorkflow.mockResolvedValue({
+      id: 'wf-new',
+      name: 'pilot',
+      valid: true,
+    });
 
     const attachments = createAttachmentStateManager();
 
@@ -696,7 +790,11 @@ describe('saveAutomationHandler', () => {
         `AI index "my-ai-index" already has the maximum number of automations (${MAX_AI_INDEX_AUTOMATIONS}).`
       )
     );
-    workflowsManagement.createWorkflow.mockResolvedValue({ id: 'wf-new', name: 'pilot' });
+    workflowsManagement.createWorkflow.mockResolvedValue({
+      id: 'wf-new',
+      name: 'pilot',
+      valid: true,
+    });
 
     const attachments = createAttachmentStateManager();
 
@@ -898,7 +996,11 @@ describe('saveAutomationHandler', () => {
 
   it('rolls back a newly created workflow when attach fails after pre-check', async () => {
     aiIndexService.addAutomation.mockRejectedValue(new AiIndexManagedError('my-ai-index'));
-    workflowsManagement.createWorkflow.mockResolvedValue({ id: 'wf-new', name: 'pilot' });
+    workflowsManagement.createWorkflow.mockResolvedValue({
+      id: 'wf-new',
+      name: 'pilot',
+      valid: true,
+    });
 
     const attachments = createAttachmentStateManager();
 
