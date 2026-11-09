@@ -154,7 +154,6 @@ overrides:
   'gaxios>node-fetch': '2.7.0'
   'glob-stream': '8.0.0'
   'module-replacements': '2.3.2'
-  'node-jose>uuid': '11.1.1'
   'nwsapi': '2.2.2'
   'react-focus-lock': '2.9.5'
   'react-focus-on': '3.9.1'
