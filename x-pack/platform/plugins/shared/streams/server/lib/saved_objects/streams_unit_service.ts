@@ -25,12 +25,15 @@ import type {
   PrepareCredentialsInput,
   PreparedCredentials,
   PrepareUnitCredentials,
+  ProbeRemoteDestination,
   PublishUnitConfig,
+  RemoteDestinationUnverified,
   RepublishUnitOutcome,
   StoredUnitCredential,
   UnitValidationResult,
   ValidateUnitConfig,
 } from '../unit_config/types';
+import { selectRemoteDestinationsToProbe } from '../unit_config/remote_destinations_to_probe';
 import { invalidateUnitApiKeys } from '../unit_config/unit_api_keys';
 import type { InvalidateApiKeysAsInternalUser, UnitApiKey } from '../unit_config/unit_api_keys';
 
@@ -86,6 +89,17 @@ const pruneStaleNodeMetadata = (
 };
 
 const emptySecrets = (): StreamsUnit.Secrets => ({});
+
+const MAX_REMOTE_DESTINATIONS_CHECKED_PER_SAVE = 10;
+
+// Never log the raw endpoint, it can carry `user:pass@`.
+const hostOf = (endpoint: string): string => {
+  try {
+    return new URL(endpoint).hostname;
+  } catch {
+    return '<invalid endpoint>';
+  }
+};
 
 const mergeUnitSecrets = (
   incoming: StreamsUnit.Secrets | undefined,
@@ -154,6 +168,7 @@ export class StreamsUnitService {
   private readonly encryptedSavedObjectsClient?: EncryptedSavedObjectsClient;
   private readonly canEncrypt: boolean;
   private readonly invalidateApiKeys?: InvalidateApiKeysAsInternalUser;
+  private readonly probeRemoteDestination?: ProbeRemoteDestination;
 
   constructor({
     soClient,
@@ -164,6 +179,7 @@ export class StreamsUnitService {
     encryptedSavedObjectsClient,
     canEncrypt = false,
     invalidateApiKeys,
+    probeRemoteDestination,
   }: {
     soClient: SavedObjectsClientContract;
     logger: Logger;
@@ -173,6 +189,7 @@ export class StreamsUnitService {
     encryptedSavedObjectsClient?: EncryptedSavedObjectsClient;
     canEncrypt?: boolean;
     invalidateApiKeys?: InvalidateApiKeysAsInternalUser;
+    probeRemoteDestination?: ProbeRemoteDestination;
   }) {
     this.soClient = soClient;
     this.logger = logger;
@@ -182,6 +199,7 @@ export class StreamsUnitService {
     this.encryptedSavedObjectsClient = encryptedSavedObjectsClient;
     this.canEncrypt = canEncrypt;
     this.invalidateApiKeys = invalidateApiKeys;
+    this.probeRemoteDestination = probeRemoteDestination;
   }
 
   async getUnit(unitId: string): Promise<StreamsUnit.GetResponse> {
@@ -274,7 +292,12 @@ export class StreamsUnitService {
     secrets?: StreamsUnit.Secrets;
     /** Runs once the unit is published, before the UI metadata write. */
     onPublished?: (previousUnit: StreamsUnit.Configuration | undefined) => Promise<void>;
-  }): Promise<UnitValidationResult & { ui_metadata_not_persisted?: true }> {
+  }): Promise<
+    UnitValidationResult & {
+      ui_metadata_not_persisted?: true;
+      remote_destinations_unverified?: RemoteDestinationUnverified[];
+    }
+  > {
     if (!this.canEncrypt) {
       throw new StatusError(
         'Cannot store Streams unit credentials: encrypted saved objects are not configured.',
@@ -315,6 +338,17 @@ export class StreamsUnitService {
         400
       );
     }
+
+    const remoteDestinationsUnverified = await this.checkRemoteDestinations({
+      unit,
+      secrets: secretsToStore,
+      previousUnit: existingConfiguration?.attributes.unit,
+      previousSecrets,
+    });
+    const unverified =
+      remoteDestinationsUnverified.length > 0
+        ? { remote_destinations_unverified: remoteDestinationsUnverified }
+        : {};
 
     const { credentials, sealed } = await this.prepareUnitCredentials({
       secrets: secretsToStore,
@@ -378,10 +412,61 @@ export class StreamsUnitService {
       // The unit is already stored and published. Fail the metadata write
       // in-band so the PUT can still acknowledge the live configuration.
       this.logger.error(`Failed to persist Streams unit UI metadata [${unitId}]: ${error}`);
-      return { ...validation, ui_metadata_not_persisted: true };
+      return { ...validation, ui_metadata_not_persisted: true, ...unverified };
     }
 
-    return validation;
+    return { ...validation, ...unverified };
+  }
+
+  private async checkRemoteDestinations(
+    params: Parameters<typeof selectRemoteDestinationsToProbe>[0]
+  ): Promise<RemoteDestinationUnverified[]> {
+    const probe = this.probeRemoteDestination;
+    if (!probe) {
+      return [];
+    }
+
+    const toProbe = selectRemoteDestinationsToProbe(params);
+    // The unit is not validated yet, so cap how many hosts one PUT can reach.
+    if (toProbe.length > MAX_REMOTE_DESTINATIONS_CHECKED_PER_SAVE) {
+      throw new StatusError(
+        `At most ${MAX_REMOTE_DESTINATIONS_CHECKED_PER_SAVE} new or changed remote Elasticsearch destinations can be checked in one save.`,
+        400
+      );
+    }
+
+    const results = await Promise.all(
+      toProbe.map(async ({ id, endpoint, apiKey }) => ({
+        id,
+        host: hostOf(endpoint),
+        result: await probe({ endpoint, apiKey }),
+      }))
+    );
+
+    const rejectedMessages = results.flatMap(({ id, host, result }) => {
+      if (result.outcome !== 'rejected') {
+        return [];
+      }
+      const status = result.status !== undefined ? `: HTTP ${result.status}` : '';
+      this.logger.info(`Rejected remote Elasticsearch destination [${id}] at ${host}${status}`);
+      return [result.message];
+    });
+    if (rejectedMessages.length > 0) {
+      throw new StatusError(rejectedMessages.join(' '), 400);
+    }
+
+    return results.flatMap(({ id, host, result }) => {
+      if (result.outcome !== 'unverified') {
+        return [];
+      }
+      const { reason, status } = result;
+      this.logger.warn(
+        `Could not verify remote Elasticsearch destination [${id}] at ${host}: ${reason}${
+          status !== undefined ? ` HTTP ${status}` : ''
+        }`
+      );
+      return [{ destination_id: id, host, reason, ...(status !== undefined ? { status } : {}) }];
+    });
   }
 
   async listUnitIds(): Promise<string[]> {

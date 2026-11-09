@@ -197,6 +197,40 @@ describe('unit repository', () => {
     expect(addWarning).toHaveBeenCalledTimes(1);
   });
 
+  it('warns once per unverified remote destination', async () => {
+    const addWarning = jest.fn();
+    const fetch = jest.fn().mockResolvedValue({
+      acknowledged: true,
+      remote_destinations_unverified: [
+        {
+          destination_id: 'r1',
+          host: 'abc.elastic.cloud',
+          reason: 'unexpected_status',
+          status: 503,
+        },
+        { destination_id: 'r2', host: 'def.elastic.cloud', reason: 'timeout' },
+      ],
+    });
+    const repository = createRepository(fetch, { toasts: { addWarning } as never });
+
+    await repository.persist(storedUnit);
+
+    expect(addWarning.mock.calls).toEqual([
+      [
+        {
+          title: 'Could not verify the remote cluster',
+          text: 'The destination was saved, but abc.elastic.cloud answered with HTTP 503. Check that the cluster is reachable and the API key can write.',
+        },
+      ],
+      [
+        {
+          title: 'Could not verify the remote cluster',
+          text: 'The destination was saved, but def.elastic.cloud did not answer in time. Check that the cluster is reachable and the API key can write.',
+        },
+      ],
+    ]);
+  });
+
   it('sends secrets in the PUT envelope when given', async () => {
     const fetch = jest.fn().mockResolvedValue({ acknowledged: true });
     const repository = createRepository(fetch);

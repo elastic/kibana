@@ -85,7 +85,7 @@ With the feature flags enabled you can then access V2 via `/app/streams/v2/unit/
 | Request | Kibana API privilege | Kibana calls | The user's Elasticsearch privileges |
 | --- | --- | --- | --- |
 | `GET /internal/streams/unit/{id}` | `read_streams_v2` | The unit saved object, through an internal client | None |
-| `PUT /internal/streams/unit/{id}` | `manage_streams_v2` | The unit saved object, the distributor (Kibana's mTLS client certificate), and `DELETE /_security/api_key` as Kibana for removed components | None |
+| `PUT /internal/streams/unit/{id}` | `manage_streams_v2` | The unit saved object, the distributor (Kibana's mTLS client certificate), `DELETE /_security/api_key` as Kibana for removed components, and an empty `POST <endpoint>/_prometheus/api/v1/write` with the user's key for new or changed remote Elasticsearch destinations | None |
 | `GET /internal/streams/components` | `read_streams_v2` | The distributor | None |
 | `POST /internal/streams/components/_validate` | `manage_streams_v2` | The distributor | None |
 | `GET /internal/streams/unit/{id}/_resolve_indices` | `read_streams_v2` | `GET /_resolve/index/<destination targets>`, `GET /_data_stream/<names>`, `POST /_security/user/_has_privileges` | `view_index_metadata` on the destination targets (see "Destination targets"). Indices the user can't see are left out. |
