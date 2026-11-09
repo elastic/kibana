@@ -93,6 +93,8 @@ export function ServiceDashboards() {
     setServiceDashboards(filteredServiceDashboards);
   }, [allAvailableDashboards, data]);
 
+  const onApiCleanup = useCallback(() => setDashboard(undefined), []);
+
   const getCreationOptions = useCallback((): Promise<DashboardCreationOptions> => {
     const getInitialInput = () => ({
       viewMode: 'view' as ViewMode,
@@ -209,7 +211,7 @@ export function ServiceDashboards() {
                 savedObjectId={dashboardId}
                 getCreationOptions={getCreationOptions}
                 onApiAvailable={setDashboard}
-                onApiCleanup={() => setDashboard(undefined)}
+                onApiCleanup={onApiCleanup}
               />
             )}
           </EuiFlexItem>
