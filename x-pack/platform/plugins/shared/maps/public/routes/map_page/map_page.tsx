@@ -24,7 +24,6 @@ interface Props {
   mapEmbeddableState?: MapEmbeddableState;
   embeddableId?: string;
   onAppLeave: AppMountParameters['onAppLeave'];
-  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   stateTransfer: EmbeddableStateTransfer;
   originatingApp?: string;
   originatingPath?: string;
@@ -85,7 +84,6 @@ export class MapPage extends Component<Props, State> {
           history={this.props.history}
           savedMap={this.state.savedMap}
           onAppLeave={this.props.onAppLeave}
-          setHeaderActionMenu={this.props.setHeaderActionMenu}
           saveCounter={this.state.saveCounter}
         />
       </Provider>

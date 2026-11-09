@@ -12,6 +12,7 @@ import {
   fetchCandidateEntities,
   resolveDisplayName,
 } from './entity_conversion';
+import { PRIVILEGED_USER_WATCHLIST_ID } from './observation_modules/utils';
 
 type EntityRecord = Parameters<typeof entityRecordToLeadEntity>[0];
 
@@ -131,37 +132,112 @@ describe('resolveDisplayName', () => {
 
 describe('fetchCandidateEntities', () => {
   const logger = loggingSystemMock.createLogger();
-  const listEntities = jest.fn();
-  const crudClient = { listEntities } as unknown as EntityStoreCRUDClient;
+  const listEntitiesBatch = jest.fn();
+  const crudClient = { listEntitiesBatch } as unknown as EntityStoreCRUDClient;
+
+  const STRATEGY_COUNT = 5;
+  const emptyResult = { records: [], total: 0 };
+
+  type BatchParams = Array<{ sortField: string; filter?: unknown; filterQuery?: string }>;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    listEntitiesBatch.mockImplementation((paramsList: BatchParams) =>
+      Promise.resolve(paramsList.map(() => emptyResult))
+    );
+  });
+
+  it('issues a single listEntitiesBatch call with one query per strategy', async () => {
+    await fetchCandidateEntities(crudClient, logger);
+
+    expect(listEntitiesBatch).toHaveBeenCalledTimes(1);
+    expect(listEntitiesBatch.mock.calls[0][0]).toHaveLength(STRATEGY_COUNT);
+  });
+
+  it('selects ungoverned privileged candidates by privileged-user watchlist membership', async () => {
+    await fetchCandidateEntities(crudClient, logger);
+
+    const batch = listEntitiesBatch.mock.calls[0][0] as BatchParams;
+    const ungoverned = batch.find((query) =>
+      query.filterQuery?.includes('entity.attributes.watchlists')
+    );
+
+    expect(ungoverned).toBeDefined();
+    expect(JSON.parse(ungoverned?.filterQuery ?? '{}')).toEqual({
+      bool: {
+        filter: [{ prefix: { 'entity.attributes.watchlists': PRIVILEGED_USER_WATCHLIST_ID } }],
+        should: [
+          { term: { 'entity.attributes.managed': false } },
+          { term: { 'entity.attributes.mfa_enabled': false } },
+        ],
+        minimum_should_match: 1,
+      },
+    });
+  });
+
+  it('dedupes candidates found by multiple strategies', async () => {
+    listEntitiesBatch.mockImplementation((paramsList: BatchParams) =>
+      Promise.resolve(
+        paramsList.map(({ sortField }) =>
+          sortField === 'entity.risk.calculated_score_norm'
+            ? { records: [{ entity: { id: 'user:alice', type: 'user', name: 'Alice' } }], total: 1 }
+            : emptyResult
+        )
+      )
+    );
+
+    const result = await fetchCandidateEntities(crudClient, logger);
+
+    expect(result).toHaveLength(1);
+    expect(result[0].id).toBe('user:alice');
   });
 
   it('filters out records that have no EUID', async () => {
-    listEntities.mockResolvedValueOnce({
-      entities: [
-        { entity: { id: 'user:alice', type: 'user', name: 'Alice' } },
-        { entity: { type: 'user', name: 'NoId' } },
-        { entity: { id: 'host:server-01', EngineMetadata: { Type: 'host' }, name: 'server-01' } },
-      ],
-      total: 3,
-    });
+    listEntitiesBatch.mockImplementation((paramsList: BatchParams) =>
+      Promise.resolve(
+        paramsList.map((params, i) =>
+          i === 0
+            ? {
+                records: [
+                  { entity: { id: 'user:alice', type: 'user', name: 'Alice' } },
+                  { entity: { type: 'user', name: 'NoId' } },
+                  {
+                    entity: {
+                      id: 'host:server-01',
+                      EngineMetadata: { Type: 'host' },
+                      name: 'server-01',
+                    },
+                  },
+                ],
+                total: 3,
+              }
+            : emptyResult
+        )
+      )
+    );
 
     const result = await fetchCandidateEntities(crudClient, logger);
 
     expect(result).toHaveLength(2);
-    expect(result.map((e) => e.id)).toEqual(['user:alice', 'host:server-01']);
+    expect(result.map((e) => e.id).sort()).toEqual(['host:server-01', 'user:alice']);
   });
 
   it('logs the skipped-without-EUID count when non-zero', async () => {
-    listEntities.mockResolvedValueOnce({
-      entities: [
-        { entity: { id: 'user:alice', type: 'user', name: 'Alice' } },
-        { entity: { type: 'user', name: 'NoId' } },
-      ],
-      total: 2,
-    });
+    listEntitiesBatch.mockImplementation((paramsList: BatchParams) =>
+      Promise.resolve(
+        paramsList.map((params, i) =>
+          i === 0
+            ? {
+                records: [
+                  { entity: { id: 'user:alice', type: 'user', name: 'Alice' } },
+                  { entity: { type: 'user', name: 'NoId' } },
+                ],
+                total: 2,
+              }
+            : emptyResult
+        )
+      )
+    );
 
     await fetchCandidateEntities(crudClient, logger);
 
@@ -169,14 +245,35 @@ describe('fetchCandidateEntities', () => {
   });
 
   it('does not mention skipped entities when all records have an EUID', async () => {
-    listEntities.mockResolvedValueOnce({
-      entities: [{ entity: { id: 'user:alice', type: 'user', name: 'Alice' } }],
-      total: 1,
-    });
-
     await fetchCandidateEntities(crudClient, logger);
 
     const debugCalls = logger.debug.mock.calls.flat().join(' ');
     expect(debugCalls).not.toContain('skipped');
+  });
+
+  it('degrades to the other strategies when one item comes back with an error', async () => {
+    listEntitiesBatch.mockImplementation((paramsList: BatchParams) =>
+      Promise.resolve(
+        paramsList.map(({ sortField }) => {
+          if (sortField === 'entity.lifecycle.first_seen') {
+            return { error: 'ES timeout' };
+          }
+          if (sortField === 'entity.risk.calculated_score_norm') {
+            return {
+              records: [{ entity: { id: 'user:alice', type: 'user', name: 'Alice' } }],
+              total: 1,
+            };
+          }
+          return emptyResult;
+        })
+      )
+    );
+
+    const result = await fetchCandidateEntities(crudClient, logger);
+
+    expect(result.map((e) => e.id)).toContain('user:alice');
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Candidate strategy "newly_observed" failed')
+    );
   });
 });

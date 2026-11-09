@@ -8,18 +8,20 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   EuiBetaBadge,
-  EuiFormRow,
-  EuiSuperSelect,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
+  EuiSuperSelect,
   EuiText,
+  type EuiSuperSelectOption,
 } from '@elastic/eui';
 import { useController, useFormState } from 'react-hook-form';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import deepEqual from 'fast-deep-equal';
-import { i18n } from '@kbn/i18n';
+import { isResultType, type ResultType } from '../../common/result_type';
 
-const SNAPSHOT_OPTION = {
+export const SNAPSHOT_OPTION: EuiSuperSelectOption<ResultType> = {
   value: 'snapshot',
   inputDisplay: (
     <FormattedMessage
@@ -27,9 +29,10 @@ const SNAPSHOT_OPTION = {
       defaultMessage="Snapshot"
     />
   ),
+  'data-test-subj': 'result-type-option-snapshot',
 };
 
-const DIFFERENTIAL_OPTION = {
+export const DIFFERENTIAL_OPTION: EuiSuperSelectOption<ResultType> = {
   value: 'differential',
   inputDisplay: (
     <FormattedMessage
@@ -37,19 +40,25 @@ const DIFFERENTIAL_OPTION = {
       defaultMessage="Differential"
     />
   ),
+  'data-test-subj': 'result-type-option-differential',
 };
 
-const DIFFERENTIAL_ADDED_ONLY_OPTION = {
-  value: 'added_only',
+export const DIFFERENTIAL_ADDED_ONLY_OPTION: EuiSuperSelectOption<ResultType> = {
+  value: 'differential_added_only',
   inputDisplay: (
     <FormattedMessage
-      id="xpack.osquery.pack.queryFlyoutForm.resultsTypeField.differentialAddedOnlyValueLabel"
-      defaultMessage="Differential (Ignore removals)"
+      id="xpack.osquery.pack.queryFlyoutForm.resultsTypeField.differentialAddedOnlyLabel"
+      defaultMessage="Differential (ignore removals)"
     />
   ),
+  'data-test-subj': 'result-type-option-differential-added-only',
 };
 
-const FIELD_OPTIONS = [SNAPSHOT_OPTION, DIFFERENTIAL_OPTION, DIFFERENTIAL_ADDED_ONLY_OPTION];
+export const RESULT_TYPE_SELECT_OPTIONS: Array<EuiSuperSelectOption<ResultType>> = [
+  SNAPSHOT_OPTION,
+  DIFFERENTIAL_OPTION,
+  DIFFERENTIAL_ADDED_ONLY_OPTION,
+];
 
 interface ResultsTypeFieldProps {
   euiFieldProps?: Record<string, unknown>;
@@ -74,8 +83,23 @@ const ResultsTypeFieldComponent: React.FC<ResultsTypeFieldProps> = ({ euiFieldPr
     defaultValue: defaultValues?.removed,
   });
 
+  // `result_type` is the canonical field the serializer reads. The
+  // `snapshot`/`removed` booleans remain the display source (and the legacy
+  // wire encoding), but writing only those left `result_type` undefined, so a
+  // per-query Differential override was silently dropped on save.
+  const {
+    field: { onChange: onResultTypeChange },
+  } = useController({
+    name: 'result_type',
+    defaultValue: defaultValues?.result_type,
+  });
+
   const handleChange = useCallback(
-    (newValue: any) => {
+    (newValue: string) => {
+      if (isResultType(newValue)) {
+        onResultTypeChange(newValue);
+      }
+
       if (newValue === SNAPSHOT_OPTION.value) {
         onSnapshotChange(true);
         onRemovedChange(false);
@@ -91,7 +115,7 @@ const ResultsTypeFieldComponent: React.FC<ResultsTypeFieldProps> = ({ euiFieldPr
         onRemovedChange(false);
       }
     },
-    [onRemovedChange, onSnapshotChange]
+    [onRemovedChange, onSnapshotChange, onResultTypeChange]
   );
 
   useEffect(() => {
@@ -133,20 +157,18 @@ const ResultsTypeFieldComponent: React.FC<ResultsTypeFieldProps> = ({ euiFieldPr
         </EuiFlexGroup>
       }
       labelAppend={
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            <FormattedMessage
-              id="xpack.osquery.queryFlyoutForm.fieldOptionalLabel"
-              defaultMessage="(optional)"
-            />
-          </EuiText>
-        </EuiFlexItem>
+        <EuiText size="xs" color="subdued">
+          <FormattedMessage
+            id="xpack.osquery.queryFlyoutForm.optionalLabel"
+            defaultMessage="optional"
+          />
+        </EuiText>
       }
       fullWidth
     >
       <EuiSuperSelect
         data-test-subj={'resultsTypeField'}
-        options={FIELD_OPTIONS}
+        options={RESULT_TYPE_SELECT_OPTIONS}
         fullWidth
         valueOfSelected={selectedOption}
         onChange={handleChange}

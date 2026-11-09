@@ -32,6 +32,12 @@ paths:
             type: string
             maxLength: 1024
           description: When provided, fetches examples for all experiments in this execution
+        - name: include_previews
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
       responses:
         '200':
           description: Successful response
@@ -61,7 +67,45 @@ components:
           type: array
           items:
             $ref: '../common_attributes.schema.yaml#/components/schemas/EvaluationScoreDocument'
+        previews:
+          type: array
+          description: Bounded input and output previews, one per repetition
+          items:
+            $ref: '#/components/schemas/EvaluationExperimentExamplePreview'
       required:
         - example_id
         - example_index
         - scores
+    EvaluationExperimentExamplePreview:
+      type: object
+      properties:
+        repetition_index:
+          type: integer
+        input:
+          type: object
+          nullable: true
+          properties:
+            content:
+              type: string
+              maxLength: 2048
+            truncated:
+              type: boolean
+          required:
+            - content
+            - truncated
+        output:
+          type: object
+          nullable: true
+          properties:
+            content:
+              type: string
+              maxLength: 2048
+            truncated:
+              type: boolean
+          required:
+            - content
+            - truncated
+      required:
+        - repetition_index
+        - input
+        - output

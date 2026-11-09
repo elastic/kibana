@@ -24,7 +24,7 @@ const buildSignal = (data: Partial<EsqlToolCallSignal['data']> = {}): EsqlToolCa
     producer: 'trace_tool',
     span_id: 'span-1',
     conversation_id: 'conversation-1',
-    agent: { id: 'agent-1', name: 'support-agent', class: 'user' },
+    agent: { id: 'agent-1', name: 'support-agent' },
     query: 'FROM logs-* | LIMIT 10',
     returned: { columns: ['message'], row_count: 1 },
     duration_ms: 12,
@@ -34,14 +34,6 @@ const buildSignal = (data: Partial<EsqlToolCallSignal['data']> = {}): EsqlToolCa
 });
 
 describe('classify', () => {
-  it('skips management-agent signals entirely (matched by id via class)', () => {
-    const signal = buildSignal({
-      agent: { id: 'platform.context_engine.agent', name: 'Context Engine', class: 'management' },
-      status: 'Error',
-    });
-    expect(classify(signal)).toEqual([]);
-  });
-
   it('tags a failed query as query_error', () => {
     expect(classify(buildSignal({ status: 'Error' }))).toContain('query_error');
   });

@@ -18,7 +18,13 @@ import type {
   DeleteTransformsResponseSchema,
 } from '../../api_schemas/delete_transforms';
 
-import { isRequestTimeout, fillResultsWithTimeouts } from '../../utils/error_utils';
+import { isRequestTimeout, fillResultsWithTimeouts, getErrorBody } from '../../utils/error_utils';
+
+const getDeleteTimeoutResult = (error: NonNullable<ResponseStatus['error']>) => ({
+  transformDeleted: { success: false, error },
+  destIndexDeleted: { success: false },
+  destDataViewDeleted: { success: false },
+});
 
 export async function deleteTransforms(
   reqBody: DeleteTransformsRequestSchema,
@@ -63,7 +69,16 @@ export async function deleteTransforms(
           const transformConfig = body.transforms[0];
           destinationIndex = transformConfig.dest.index;
         } catch (getTransformConfigError) {
-          transformDeleted.error = getTransformConfigError.meta.body.error;
+          if (isRequestTimeout(getTransformConfigError)) {
+            return fillResultsWithTimeouts({
+              results,
+              id: transformId,
+              items: transformsInfo,
+              action: TRANSFORM_ACTIONS.DELETE,
+              getResult: getDeleteTimeoutResult,
+            });
+          }
+          transformDeleted.error = getErrorBody(getTransformConfigError);
           results[transformId] = {
             transformDeleted,
             destIndexDeleted,
@@ -92,7 +107,24 @@ export async function deleteTransforms(
         transformDeleted.success = true;
         destIndexDeleted.success = deleteDestIndex;
       } catch (deleteTransformJobError) {
-        transformDeleted.error = deleteTransformJobError.meta.body.error;
+        if (isRequestTimeout(deleteTransformJobError)) {
+          return fillResultsWithTimeouts({
+            results,
+            id: transformId,
+            items: transformsInfo,
+            action: TRANSFORM_ACTIONS.DELETE,
+            getResult: (error, item) =>
+              item.id === transformId
+                ? {
+                    transformDeleted: { success: false, error },
+                    destIndexDeleted,
+                    destDataViewDeleted,
+                    destinationIndex,
+                  }
+                : getDeleteTimeoutResult(error),
+          });
+        }
+        transformDeleted.error = getErrorBody(deleteTransformJobError);
         if (deleteTransformJobError.statusCode === 403) {
           return response.forbidden();
         }
@@ -111,9 +143,10 @@ export async function deleteTransforms(
           id: transformInfo.id,
           items: transformsInfo,
           action: TRANSFORM_ACTIONS.DELETE,
+          getResult: getDeleteTimeoutResult,
         });
       }
-      results[transformId] = { transformDeleted: { success: false, error: e.meta.body.error } };
+      results[transformId] = { transformDeleted: { success: false, error: getErrorBody(e) } };
     }
   }
   return results;

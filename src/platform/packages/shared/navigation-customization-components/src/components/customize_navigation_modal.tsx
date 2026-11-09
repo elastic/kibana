@@ -33,7 +33,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useState } from 'react';
 import type { NavigationItemInfo } from '../types';
 import { DraggableItem } from './draggable_item';
-import { EmptyDropPlaceholder } from './empty_drop_placeholder';
+import { EmptyDropPlaceholder, getEmptyDroppableStyle } from './empty_drop_placeholder';
 import { useItemList, HIDDEN_DROPPABLE_ID, VISIBLE_DROPPABLE_ID } from './use_item_list';
 
 const modalCss = css`
@@ -78,6 +78,7 @@ export const CustomizeNavigationModal = ({
   } = useItemList(initialItems);
 
   const [isSaving, setIsSaving] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
     const order = items.map((item) => item.id);
@@ -134,8 +135,22 @@ export const CustomizeNavigationModal = ({
         </EuiFlexGroup>
       </EuiModalHeader>
       <EuiModalBody css={modalBodyCss(euiTheme)}>
-        <EuiDragDropContext onDragEnd={handleDragEnd}>
-          <EuiDroppable droppableId={VISIBLE_DROPPABLE_ID} spacing="none">
+        <EuiDragDropContext
+          onDragStart={() => setIsDragging(true)}
+          onDragEnd={(result) => {
+            setIsDragging(false);
+            handleDragEnd(result);
+          }}
+        >
+          <EuiDroppable
+            droppableId={VISIBLE_DROPPABLE_ID}
+            spacing="none"
+            style={
+              visibleItems.length === 0
+                ? getEmptyDroppableStyle(euiTheme, { isDragging })
+                : undefined
+            }
+          >
             {visibleItems.length > 0 ? (
               visibleItems.map((item, index) => (
                 <DraggableItem
@@ -178,7 +193,15 @@ export const CustomizeNavigationModal = ({
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer css={css({ blockSize: euiTheme.size.m })} />
-          <EuiDroppable droppableId={HIDDEN_DROPPABLE_ID} spacing="none">
+          <EuiDroppable
+            droppableId={HIDDEN_DROPPABLE_ID}
+            spacing="none"
+            style={
+              hiddenItems.length === 0
+                ? getEmptyDroppableStyle(euiTheme, { isDragging })
+                : undefined
+            }
+          >
             {hiddenItems.length > 0 ? (
               hiddenItems.map((item, index) => (
                 <DraggableItem

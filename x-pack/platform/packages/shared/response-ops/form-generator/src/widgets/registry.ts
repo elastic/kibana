@@ -11,6 +11,7 @@ import { WidgetType } from './types';
 import { getMeta as defaultGetMeta, setMeta as defaultSetMeta } from '../schema_connector_metadata';
 import type { GetMetaFn, SetMetaFn } from '../meta_types';
 import { TextWidget } from './components/text_widget';
+import { NumberWidget } from './components/number_widget';
 import { SelectWidget } from './components/select_widget';
 import { PasswordWidget } from './components/password_widget';
 import { DiscriminatedUnionWidget } from './components/discriminated_union_widget';
@@ -20,6 +21,7 @@ import { FileUploadWidget } from './components/file_upload_widget';
 
 const WIDGET_REGISTRY = {
   [WidgetType.Text]: TextWidget,
+  [WidgetType.Number]: NumberWidget,
   [WidgetType.Password]: PasswordWidget,
   [WidgetType.Select]: SelectWidget,
   [WidgetType.FormFieldset]: DiscriminatedUnionWidget,
@@ -43,6 +45,8 @@ const getDefaultWidgetForSchema = (schema: z.ZodType, { getMeta, setMeta }: Meta
       return WidgetType.Password;
     }
     return WidgetType.Text;
+  } else if (schema instanceof z.ZodNumber) {
+    return WidgetType.Number;
   } else if (schema instanceof z.ZodEnum) {
     return WidgetType.Select;
   } else if (schema instanceof z.ZodDiscriminatedUnion) {

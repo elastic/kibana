@@ -6,6 +6,7 @@
  */
 
 import type { SavedObject } from '@kbn/core/server';
+import { asSpaceId } from '@kbn/core-spaces-common';
 
 import { ElasticsearchAssetType, KibanaSavedObjectType } from '../../../types';
 import type { Installation } from '../../../types';
@@ -17,7 +18,7 @@ const mockInstallation: SavedObject<Installation> = {
   references: [],
   type: 'epm-packages',
   attributes: {
-    installed_kibana_space_id: 'default',
+    installed_kibana_space_id: asSpaceId('default'),
     installed_kibana: [{ type: KibanaSavedObjectType.dashboard, id: 'dashboard-1' }],
     installed_es: [{ type: ElasticsearchAssetType.ingestPipeline, id: 'pipeline' }],
     package_assets: [],
@@ -37,7 +38,7 @@ const mockInstallationUpdateFail: SavedObject<Installation> = {
   references: [],
   type: 'epm-packages',
   attributes: {
-    installed_kibana_space_id: 'default',
+    installed_kibana_space_id: asSpaceId('default'),
     installed_kibana: [{ type: KibanaSavedObjectType.dashboard, id: 'dashboard-1' }],
     installed_es: [{ type: ElasticsearchAssetType.ingestPipeline, id: 'pipeline' }],
     package_assets: [],

@@ -20,6 +20,7 @@ import type { PackagePolicy } from '../../types';
 import type { AgentPrivilegeLevelChangeUserInfo } from '../../../common/types';
 
 import { createAgentAction } from './actions';
+import { throwIfAgentInAgentlessPolicy } from './hosted_agent';
 import type { GetAgentsOptions } from './crud';
 import { getAgentById, getAgents, getAgentsByKuery, openPointInTime } from './crud';
 import {
@@ -36,6 +37,12 @@ export async function changeAgentPrivilegeLevel(
   } | null
 ) {
   const agent = await getAgentById(esClient, soClient, agentId);
+
+  await throwIfAgentInAgentlessPolicy(
+    soClient,
+    agent,
+    `Cannot remove root privilege for managed agent ${agentId}`
+  );
 
   // Return fast if agent is already unprivileged.
   if (agent.local_metadata?.elastic?.agent?.unprivileged === true) {

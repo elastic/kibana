@@ -10,6 +10,7 @@
 /** @deprecated Import from `@kbn/app-menu` instead. */
 export {
   AppMenuComponent,
+  AppMenuLoading,
   AppMenuItem,
   AppMenuActionButton,
   AppMenuOverflowButton,
@@ -36,6 +37,7 @@ export {
 
 /** @deprecated Import from `@kbn/app-menu` instead. */
 export type {
+  AppMenuLoadingProps,
   AppMenuBreakpointSource,
   AppMenuRunAction,
   AppMenuRunActionParams,

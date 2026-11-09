@@ -7,13 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { DiscoverTabType } from '@kbn/discover-session-constants';
+import { cloneDeep } from 'lodash';
+import { ESQL_CONTROL } from '@kbn/controls-constants';
+import type { ControlPanelState, ControlPanelsState } from '@kbn/control-group-renderer';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
+import type { RefreshInterval } from '@kbn/data-plugin/common';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
 import { getPersistedTabMock, getTabStateMock } from '../__mocks__/internal_state.mocks';
 import { internalStateActions } from '..';
-import { selectHasUnsavedChanges } from './unsaved_changes';
+import { FilterStateStore, type Filter } from '@kbn/es-query';
+import { searchSourceComparator, selectHasUnsavedChanges } from './unsaved_changes';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_with_timefield';
+import { GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
+import { createContextAwarenessMocks } from '../../../../../context_awareness/__mocks__/context_awareness';
+import { DataSourceCategory } from '../../../../../context_awareness';
+import {
+  createProfileStateRegistry,
+  METRICS_STATE_DEF,
+} from '../../../../../../common/context_awareness';
 
 const setup = async () => {
   const services = createDiscoverServicesMock();
@@ -45,6 +59,114 @@ const setup = async () => {
 };
 
 describe('selectHasUnsavedChanges', () => {
+  describe('control order', () => {
+    const first: ControlPanelState<OptionsListESQLControlState> = {
+      order: 0,
+      type: ESQL_CONTROL,
+      width: 'medium',
+      grow: true,
+      control_type: 'STATIC_VALUES',
+      variable_name: 'environment',
+      variable_type: 'values',
+      available_options: ['production', 'staging'],
+      selected_options: ['production'],
+      single_select: true,
+    };
+    const last = { ...first, order: 2, variable_name: 'region' };
+    const persistedControls = { first, last };
+
+    it.each<{
+      name: string;
+      controls: ControlPanelsState<OptionsListESQLControlState>;
+      storedControls?: ControlPanelsState<OptionsListESQLControlState>;
+      expected: ReturnType<typeof selectHasUnsavedChanges>;
+    }>([
+      {
+        name: 'ignores gaps in numeric positions',
+        controls: { first, last: { ...last, order: 1 } },
+        expected: { hasUnsavedChanges: false, unsavedTabIds: [] },
+      },
+      {
+        name: 'ignores object key order when numeric positions are distinct',
+        controls: { last, first },
+        expected: { hasUnsavedChanges: false, unsavedTabIds: [] },
+      },
+      {
+        name: 'ignores object key order when numeric positions are equal',
+        storedControls: { first, last: { ...last, order: 0 } },
+        controls: { last: { ...last, order: 0 }, first },
+        expected: { hasUnsavedChanges: false, unsavedTabIds: [] },
+      },
+      {
+        name: 'ignores renumbering equal positions while preserving their sequence',
+        storedControls: { last: { ...last, order: 0 }, first },
+        controls: { last: { ...last, order: 0 }, first: { ...first, order: 1 } },
+        expected: { hasUnsavedChanges: false, unsavedTabIds: [] },
+      },
+      {
+        name: 'detects a changed selection when numeric positions are equal',
+        storedControls: { first, last: { ...last, order: 0 } },
+        controls: {
+          last: { ...last, order: 0 },
+          first: { ...first, selected_options: ['staging'] },
+        },
+        expected: { hasUnsavedChanges: true, unsavedTabIds: ['persisted-tab'] },
+      },
+      {
+        name: 'detects a change in visual order',
+        controls: { first: { ...first, order: 2 }, last: { ...last, order: 0 } },
+        expected: { hasUnsavedChanges: true, unsavedTabIds: ['persisted-tab'] },
+      },
+      {
+        name: 'detects a changed selection',
+        controls: { first: { ...first, selected_options: ['staging'] }, last },
+        expected: { hasUnsavedChanges: true, unsavedTabIds: ['persisted-tab'] },
+      },
+      {
+        name: 'detects a removed control',
+        controls: { first },
+        expected: { hasUnsavedChanges: true, unsavedTabIds: ['persisted-tab'] },
+      },
+      {
+        name: 'detects an added control',
+        controls: { first, last, added: { ...first, order: 3, variable_name: 'service' } },
+        expected: { hasUnsavedChanges: true, unsavedTabIds: ['persisted-tab'] },
+      },
+      {
+        name: 'detects changed layout settings',
+        controls: { first: { ...first, grow: false }, last },
+        expected: { hasUnsavedChanges: true, unsavedTabIds: ['persisted-tab'] },
+      },
+    ])('$name', async ({ controls, storedControls = persistedControls, expected }) => {
+      const { internalState, runtimeStateManager, services, getCurrentTab } = await setup();
+      const tabId = getCurrentTab().id;
+      internalState.dispatch(
+        internalStateActions.updateAttributes({
+          tabId,
+          attributes: { controlGroupState: controls },
+        })
+      );
+      const state = {
+        ...internalState.getState(),
+        persistedDiscoverSession: createDiscoverSessionMock({
+          id: 'test-id',
+          tabs: [
+            {
+              ...getPersistedTabMock({ tabId, dataView: dataViewWithTimefieldMock, services }),
+              controlGroupJson: JSON.stringify(storedControls),
+            },
+          ],
+        }),
+      };
+      const before = cloneDeep(state);
+
+      expect(selectHasUnsavedChanges(state, { runtimeStateManager, services })).toStrictEqual(
+        expected
+      );
+      expect(state).toStrictEqual(before);
+    });
+  });
+
   it('returns false when there is no persisted discover session', async () => {
     const services = createDiscoverServicesMock();
     const { internalState, runtimeStateManager, initializeTabs, addNewTab } =
@@ -91,6 +213,27 @@ describe('selectHasUnsavedChanges', () => {
       runtimeStateManager,
       services,
     });
+
+    expect(result).toEqual({ hasUnsavedChanges: false, unsavedTabIds: [] });
+  });
+
+  it('does not flag the default query as a change when the saved query is missing', async () => {
+    const { internalState, runtimeStateManager, services, getCurrentTab } = await setup();
+    const persistedTab = getPersistedTabMock({
+      tabId: getCurrentTab().id,
+      dataView: dataViewWithTimefieldMock,
+      services,
+      appStateOverrides: { query: undefined },
+    });
+    const state = {
+      ...internalState.getState(),
+      persistedDiscoverSession: createDiscoverSessionMock({
+        id: 'test-id',
+        tabs: [persistedTab],
+      }),
+    };
+
+    const result = selectHasUnsavedChanges(state, { runtimeStateManager, services });
 
     expect(result).toEqual({ hasUnsavedChanges: false, unsavedTabIds: [] });
   });
@@ -190,6 +333,103 @@ describe('selectHasUnsavedChanges', () => {
       return { internalState, runtimeStateManager, services, getCurrentTab };
     };
 
+    describe('saved time range without a refresh interval', () => {
+      const timeRange = { from: 'now-15m', to: 'now' };
+      const timefilterRefreshInterval = { pause: true, value: 60000 };
+
+      const setupOmittedRefreshIntervalTest = async (urlRefreshInterval?: RefreshInterval) => {
+        const services = createDiscoverServicesMock();
+        let currentRefreshInterval = timefilterRefreshInterval;
+        jest
+          .spyOn(services.timefilter, 'getRefreshInterval')
+          .mockImplementation(() => currentRefreshInterval);
+        jest
+          .spyOn(services.timefilter, 'setRefreshInterval')
+          .mockImplementation((refreshInterval) => {
+            currentRefreshInterval = { ...currentRefreshInterval, ...refreshInterval };
+          });
+
+        const {
+          internalState,
+          runtimeStateManager,
+          initializeTabs,
+          initializeSingleTab,
+          getCurrentTab,
+          stateStorageContainer,
+        } = getDiscoverInternalStateMock({
+          services,
+          persistedDataViews: [dataViewWithTimefieldMock],
+        });
+
+        const persistedTab = getPersistedTabMock({
+          tabId: 'persisted-tab',
+          dataView: dataViewWithTimefieldMock,
+          globalStateOverrides: { timeRange },
+          attributesOverrides: { timeRestore: true },
+          services,
+        });
+        const persistedDiscoverSession = createDiscoverSessionMock({
+          id: 'test-id',
+          tabs: [persistedTab],
+        });
+
+        if (urlRefreshInterval) {
+          await stateStorageContainer.set(GLOBAL_STATE_URL_KEY, {
+            refreshInterval: urlRefreshInterval,
+          });
+        }
+
+        await initializeTabs({ persistedDiscoverSession });
+        await initializeSingleTab({ tabId: persistedTab.id });
+
+        return { internalState, runtimeStateManager, services, getCurrentTab, persistedTab };
+      };
+
+      it('does not detect unsaved changes when the inherited refresh interval is loaded', async () => {
+        const { internalState, runtimeStateManager, services, getCurrentTab, persistedTab } =
+          await setupOmittedRefreshIntervalTest();
+
+        expect(persistedTab.refreshInterval).toBeUndefined();
+        expect(getCurrentTab().globalState).toMatchObject({
+          timeRange,
+          refreshInterval: timefilterRefreshInterval,
+        });
+        expect(
+          selectHasUnsavedChanges(internalState.getState(), { runtimeStateManager, services })
+        ).toEqual({ hasUnsavedChanges: false, unsavedTabIds: [] });
+      });
+
+      it('detects a refresh interval change after loading', async () => {
+        const { internalState, runtimeStateManager, services, persistedTab } =
+          await setupOmittedRefreshIntervalTest();
+
+        internalState.dispatch(
+          internalStateActions.updateGlobalState({
+            tabId: persistedTab.id,
+            globalState: { refreshInterval: { pause: false, value: 30000 } },
+          })
+        );
+
+        expect(
+          selectHasUnsavedChanges(internalState.getState(), { runtimeStateManager, services })
+        ).toEqual({ hasUnsavedChanges: true, unsavedTabIds: [persistedTab.id] });
+      });
+
+      it('does not detect unsaved changes when the URL supplies the refresh interval', async () => {
+        const urlRefreshInterval = { pause: true, value: 30000 };
+        const { internalState, runtimeStateManager, services, getCurrentTab } =
+          await setupOmittedRefreshIntervalTest(urlRefreshInterval);
+
+        expect(getCurrentTab().globalState).toMatchObject({
+          timeRange,
+          refreshInterval: urlRefreshInterval,
+        });
+        expect(
+          selectHasUnsavedChanges(internalState.getState(), { runtimeStateManager, services })
+        ).toEqual({ hasUnsavedChanges: false, unsavedTabIds: [] });
+      });
+    });
+
     it('detects unsaved changes when timeRestore is true and timeRange changes', async () => {
       const { internalState, runtimeStateManager, services, getCurrentTab } =
         await setupTimeRestoreTest(true);
@@ -272,6 +512,138 @@ describe('selectHasUnsavedChanges', () => {
 
       expect(result.hasUnsavedChanges).toBe(false);
       expect(result.unsavedTabIds).toEqual([]);
+    });
+  });
+
+  describe('tab type', () => {
+    const setupMetricsTab = async (persistedDimensions: string[]) => {
+      const services = createDiscoverServicesMock();
+      services.profileStateRegistry = createProfileStateRegistry();
+
+      const { profilesManagerMock, dataSourceProfileProviderMock } = createContextAwarenessMocks();
+      services.profilesManager = profilesManagerMock;
+      jest.mocked(dataSourceProfileProviderMock.resolve).mockReturnValue({
+        isMatch: true,
+        context: {
+          category: DataSourceCategory.Metrics,
+          tabType: DiscoverTabType.Metrics,
+          profileState: METRICS_STATE_DEF,
+        },
+      });
+
+      const { internalState, runtimeStateManager, initializeTabs, initializeSingleTab } =
+        getDiscoverInternalStateMock({
+          services,
+          persistedDataViews: [dataViewWithTimefieldMock],
+        });
+
+      const persistedTab = getPersistedTabMock({
+        tabId: 'metrics-tab',
+        dataView: dataViewWithTimefieldMock,
+        services,
+        tabType: DiscoverTabType.Metrics,
+        profileState: { metricsState: { dimensions: persistedDimensions } },
+      });
+      const persistedDiscoverSession = createDiscoverSessionMock({
+        id: 'test-id',
+        tabs: [persistedTab],
+      });
+
+      await initializeTabs({ persistedDiscoverSession });
+      await initializeSingleTab({ tabId: persistedTab.id });
+
+      return { internalState, runtimeStateManager, services };
+    };
+
+    it('does not flag unsaved changes when the tab type state matches what was persisted', async () => {
+      const { internalState, runtimeStateManager, services } = await setupMetricsTab(['host.name']);
+
+      const result = selectHasUnsavedChanges(internalState.getState(), {
+        runtimeStateManager,
+        services,
+      });
+
+      expect(result).toEqual({ hasUnsavedChanges: false, unsavedTabIds: [] });
+    });
+
+    it('flags unsaved changes when the live dimensions differ from what was persisted', async () => {
+      const { internalState, runtimeStateManager, services } = await setupMetricsTab(['host.name']);
+      const tabId = 'metrics-tab';
+
+      internalState.dispatch(
+        internalStateActions.setProfileState({
+          tabId,
+          profileStateDefinition: METRICS_STATE_DEF,
+          profileState: {
+            ...METRICS_STATE_DEF.defaultState,
+            dimensions: ['service.name'],
+          },
+        })
+      );
+
+      const result = selectHasUnsavedChanges(internalState.getState(), {
+        runtimeStateManager,
+        services,
+      });
+
+      expect(result.hasUnsavedChanges).toBe(true);
+      expect(result.unsavedTabIds).toEqual([tabId]);
+    });
+
+    it('does not flag a phantom change when a persisted tab resolves with only default state', async () => {
+      const { internalState, runtimeStateManager, services } = await setupMetricsTab([]);
+
+      expect(
+        selectHasUnsavedChanges(internalState.getState(), { runtimeStateManager, services })
+      ).toEqual({ hasUnsavedChanges: false, unsavedTabIds: [] });
+    });
+  });
+
+  describe('searchSourceComparator', () => {
+    const phraseMeta = {
+      index: 'data-view-id',
+      key: 'response',
+      field: 'response',
+      type: 'phrase',
+      params: { query: '200' },
+    };
+    const query = { match_phrase: { response: '200' } };
+    const uiFilter: Filter = {
+      $state: { store: FilterStateStore.APP_STATE },
+      meta: { ...phraseMeta, alias: null, negate: false, disabled: false },
+      query,
+    };
+
+    it('does not detect changes when the filter only went through the HTTP API conversion', () => {
+      const apiFilter: Filter = { meta: { ...phraseMeta, disabled: false }, query };
+
+      expect(searchSourceComparator({ filter: [uiFilter] }, { filter: [apiFilter] })).toBe(true);
+    });
+
+    it('does not detect changes when a filter is pinned', () => {
+      const pinnedFilter: Filter = {
+        ...uiFilter,
+        $state: { store: FilterStateStore.GLOBAL_STATE },
+      };
+
+      expect(searchSourceComparator({ filter: [uiFilter] }, { filter: [pinnedFilter] })).toBe(true);
+    });
+
+    it('detects a change to a query option that the HTTP API conversion drops', () => {
+      const slopFilter: Filter = {
+        ...uiFilter,
+        query: { match_phrase: { response: { query: '200', slop: 2 } } },
+      };
+
+      expect(searchSourceComparator({ filter: [uiFilter] }, { filter: [slopFilter] })).toBe(false);
+    });
+
+    it('detects a negated filter', () => {
+      const negatedFilter: Filter = { ...uiFilter, meta: { ...uiFilter.meta, negate: true } };
+
+      expect(searchSourceComparator({ filter: [uiFilter] }, { filter: [negatedFilter] })).toBe(
+        false
+      );
     });
   });
 });

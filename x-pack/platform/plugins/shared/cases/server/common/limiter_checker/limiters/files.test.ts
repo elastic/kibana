@@ -7,7 +7,7 @@
 
 import { createFileServiceMock } from '@kbn/files-plugin/server/mocks';
 import { FileLimiter } from './files';
-import { createFileRequests, createUserRequests } from '../test_utils';
+import { createFileRequests, createUnifiedFileRequests, createUserRequests } from '../test_utils';
 
 describe('FileLimiter', () => {
   const mockFileService = createFileServiceMock();
@@ -70,6 +70,21 @@ describe('FileLimiter', () => {
           ...createFileRequests({ numRequests: 2, numFiles: 1 }),
         ])
       ).toBe(2);
+    });
+
+    it('counts unified file attachments', () => {
+      expect(
+        file.countOfItemsInRequest(createUnifiedFileRequests({ numRequests: 2, numFiles: 1 }))
+      ).toBe(2);
+    });
+
+    it('aggregates legacy and unified file requests in the same request batch', () => {
+      const requests = [
+        ...createUserRequests(1),
+        ...createFileRequests({ numRequests: 1, numFiles: 2 }), // 2
+        ...createUnifiedFileRequests({ numRequests: 1, numFiles: 3 }), // 3
+      ];
+      expect(file.countOfItemsInRequest(requests)).toBe(2 + 3);
     });
   });
 

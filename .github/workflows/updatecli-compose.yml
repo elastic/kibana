@@ -18,7 +18,7 @@ jobs:
       packages: read
       pull-requests: write
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
@@ -30,7 +30,7 @@ jobs:
 
       - name: Free Disk Space
         continue-on-error: true
-        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # v1.3.1
+        uses: elastic/oblt-actions/github/free-disk-space@v1
         with:
           android: true
           dotnet: true
@@ -38,7 +38,7 @@ jobs:
           large-packages: false
           docker-images: true
           swap-storage: false
-          tool-cache: false
+          preinstalled-runtimes: false
 
       - uses: elastic/oblt-actions/updatecli/run@v1
         with:

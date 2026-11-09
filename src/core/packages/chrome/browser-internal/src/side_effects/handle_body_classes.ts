@@ -16,8 +16,7 @@ import {
   takeUntil,
   type Observable,
 } from 'rxjs';
-import type { MountPoint } from '@kbn/core-mount-utils-browser';
-import type { ChromeStyle, ChromeUserBanner } from '@kbn/core-chrome-browser';
+import type { ChromeUserBanner } from '@kbn/core-chrome-browser';
 
 const SNAPSHOT_REGEX = /-snapshot/i;
 
@@ -25,8 +24,6 @@ export interface BodyClassesSideEffectDeps {
   kibanaVersion: string;
   headerBanner$: Observable<ChromeUserBanner | undefined>;
   isVisible$: Observable<boolean>;
-  chromeStyle$: Observable<ChromeStyle | undefined>;
-  actionMenu$: Observable<MountPoint | undefined>;
   stop$: Observable<void>;
 }
 
@@ -35,8 +32,6 @@ export const handleBodyClasses = ({
   kibanaVersion,
   headerBanner$,
   isVisible$,
-  chromeStyle$,
-  actionMenu$,
   stop$,
 }: BodyClassesSideEffectDeps): void => {
   const areClassesEqual = (prev: string[], next: string[]) =>
@@ -51,16 +46,15 @@ export const handleBodyClasses = ({
 
   const body = document.body;
 
-  combineLatest([headerBanner$, isVisible$, chromeStyle$, actionMenu$])
+  combineLatest([headerBanner$, isVisible$])
     .pipe(
-      map(([headerBanner, isVisible, chromeStyleValue, actionMenu]) => {
+      map(([headerBanner, isVisible]) => {
         return [
           'kbnBody',
           headerBanner ? 'kbnBody--hasHeaderBanner' : 'kbnBody--noHeaderBanner',
           isVisible ? 'kbnBody--chromeVisible' : 'kbnBody--chromeHidden',
-          chromeStyleValue === 'project' && actionMenu ? 'kbnBody--hasProjectActionMenu' : '',
           getKbnVersionClass(),
-        ].filter((className) => Boolean(className));
+        ];
       }),
       distinctUntilChanged(areClassesEqual),
       startWith<string[]>([]),

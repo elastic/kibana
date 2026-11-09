@@ -114,7 +114,7 @@ describe('Buckets Transforms', () => {
     it('should throw for unsupported operation', () => {
       expect(() =>
         fromBucketLensApiToLensState({ operation: 'unsupported', field: 'value' } as any, [])
-      ).toThrowError('Unsupported bucket operation');
+      ).toThrow('Unsupported bucket operation');
     });
 
     describe('terms rank_by metric_index with reference metrics', () => {
@@ -317,7 +317,7 @@ describe('Buckets Transforms', () => {
     it('should throw for unsupported operation', () => {
       expect(() =>
         fromBucketLensStateToAPI({ operationType: 'unsupported', sourceField: 'value' } as any, [])
-      ).toThrowError('Unsupported bucket operation');
+      ).toThrow('Unsupported bucket operation');
     });
   });
 });

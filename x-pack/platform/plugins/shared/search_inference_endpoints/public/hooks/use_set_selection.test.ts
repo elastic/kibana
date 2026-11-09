@@ -55,6 +55,36 @@ describe('useSetSelection', () => {
   });
 
   // ---------------------------------------------------------------------------
+  // reset
+  // ---------------------------------------------------------------------------
+  describe('reset', () => {
+    it('restores selected to the seeded initial value', () => {
+      const { result } = renderHook(() => useSetSelection(ALL_KEYS));
+      act(() => result.current.seed(new Set(['a', 'b'])));
+      act(() => result.current.toggle('c'));
+      expect(result.current.isDirty).toBe(true);
+
+      act(() => result.current.reset());
+
+      expect(result.current.selected).toEqual(new Set(['a', 'b']));
+      expect(result.current.isDirty).toBe(false);
+    });
+
+    it('does not overwrite initial — isDirty is false after a second reset', () => {
+      const { result } = renderHook(() => useSetSelection(ALL_KEYS));
+      act(() => result.current.seed(new Set(['a'])));
+      act(() => result.current.toggle('b'));
+
+      act(() => result.current.reset());
+      act(() => result.current.toggle('b'));
+      act(() => result.current.reset());
+
+      expect(result.current.selected).toEqual(new Set(['a']));
+      expect(result.current.isDirty).toBe(false);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
   // toggle
   // ---------------------------------------------------------------------------
   describe('toggle', () => {

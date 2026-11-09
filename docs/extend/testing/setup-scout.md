@@ -15,7 +15,7 @@ This page shows the **minimum setup** to add Scout tests to a plugin/package. Fo
 Generate a working scaffold (folders, configs, and sample tests) by following the guided setup:
 
 ```bash
-node scripts/scout.js generate
+node scripts/scout generate
 ```
 
 This command will also automatically enable your plugin or package's Scout tests in the CI by updating the `.buildkite/scout_ci_config.yml` file.
@@ -168,9 +168,10 @@ A namespace holds the same layout you'd otherwise place at the Scout root, one l
 Pass `--namespace` to the [Scout CLI](#scout-setup-cli):
 
 ```bash
-node scripts/scout.js generate \
+node scripts/scout generate \
   --path x-pack/solutions/security/plugins/security_solution \
-  --namespace detection_engine
+  --namespace detection_engine \
+  --type both
 ```
 
 In interactive mode, if the plugin already uses namespaces, the generator lists the existing ones so you can pick one or create a new one. After scaffolding, it reminds you to set the namespace owner in `.github/CODEOWNERS`:

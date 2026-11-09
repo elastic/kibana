@@ -8,8 +8,7 @@
  */
 
 import { randomUUID } from 'crypto';
-import type { RoleApiCredentials } from '@kbn/scout';
-import { tags } from '@kbn/scout';
+import { tags, type RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import {
   apiTest,
@@ -88,9 +87,6 @@ apiTest.describe('sample data API', { tag: tags.stateful.classic }, () => {
       await apiTest.step(
         'ES index contains timestamps relative to current time (no ?now= param)',
         async () => {
-          // Sample data is bulk-inserted without a refresh, so wait for the docs to become
-          // searchable before reading them back; otherwise the search can race the refresh
-          // interval and return zero hits.
           await esClient.indices.refresh({ index: FLIGHTS_ES_INDEX });
           const result = await esClient.search<{ timestamp: string }>({
             index: FLIGHTS_ES_INDEX,
@@ -111,8 +107,6 @@ apiTest.describe('sample data API', { tag: tags.stateful.classic }, () => {
             { headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader } }
           );
           expect(reinstallResponse).toHaveStatusCode(200);
-          // Reinstall recreates the index and bulk-inserts without a refresh; wait for the
-          // docs to be searchable before reading them back.
           await esClient.indices.refresh({ index: FLIGHTS_ES_INDEX });
           const result = await esClient.search<{ timestamp: string }>({
             index: FLIGHTS_ES_INDEX,
@@ -125,6 +119,7 @@ apiTest.describe('sample data API', { tag: tags.stateful.classic }, () => {
       );
 
       await apiTest.step('list returns installed status after install', async () => {
+        await esClient.indices.refresh({ index: FLIGHTS_ES_INDEX });
         const response = await apiClient.get(apiPath, {
           headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
           responseType: 'json',
@@ -187,6 +182,7 @@ apiTest.describe('sample data API', { tag: tags.stateful.classic }, () => {
       await apiTest.step(
         'list shows installed status and the canonical overviewDashboard ID in non-default space',
         async () => {
+          await esClient.indices.refresh({ index: FLIGHTS_ES_INDEX });
           const response = await apiClient.get(apiPath, {
             headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
             responseType: 'json',

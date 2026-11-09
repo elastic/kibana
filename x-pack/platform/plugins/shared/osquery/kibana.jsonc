@@ -24,7 +24,9 @@
       "triggersActionsUi",
       "ruleRegistry",
       "security",
-      "unifiedDocViewer"
+      "uiActions",
+      "unifiedDocViewer",
+      "unifiedSearch"
     ],
     "optionalPlugins": [
       "cps",
@@ -34,8 +36,7 @@
       "telemetry",
       "cases",
       "spaces",
-      "uiActions",
-      "unifiedSearch"
+      "workflowsExtensions"
     ],
     "requiredBundles": [
       "esUiShared",

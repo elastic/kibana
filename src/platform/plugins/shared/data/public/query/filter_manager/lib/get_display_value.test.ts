@@ -18,6 +18,7 @@ import {
 } from '../../../../common/stubs';
 import { getDisplayValueFromFilter, getFieldDisplayValueFromFilter } from './get_display_value';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { NULL_LABEL } from '@kbn/field-formats-common';
 
 describe('getDisplayValueFromFilter', () => {
   beforeEach(() => {
@@ -30,13 +31,13 @@ describe('getDisplayValueFromFilter', () => {
     expect(displayValue).toBe('abc');
   });
 
-  it('returns the value if undefined', () => {
+  it('returns NULL_LABEL if value is undefined', () => {
     const filter = {
       ...phraseFilter,
       meta: { ...phraseFilter.meta, value: undefined, params: { query: undefined } },
     };
     const displayValue = getDisplayValueFromFilter(filter, [stubIndexPattern]);
-    expect(displayValue).toBe('');
+    expect(displayValue).toBe(NULL_LABEL);
   });
 
   it('returns 0 if value undefined and numeric field', () => {
@@ -64,6 +65,26 @@ describe('getDisplayValueFromFilter', () => {
     };
     const displayValue = getDisplayValueFromFilter(filter, [stubIndexPattern]);
     expect(displayValue).toBe('0');
+  });
+
+  it('throws if the data view is found but the field is missing', () => {
+    const filter = {
+      ...phraseFilter,
+      meta: { ...phraseFilter.meta, key: 'unknownField' },
+      query: { match_phrase: { unknownField: 'ios' } },
+    };
+    expect(() => getDisplayValueFromFilter(filter, [stubIndexPattern])).toThrow(
+      `Field unknownField not found in data view ${stubIndexPattern.title}`
+    );
+  });
+
+  it('does not throw if the data view is not found', () => {
+    const filter = {
+      ...phraseFilter,
+      meta: { ...phraseFilter.meta, key: 'unknownField' },
+      query: { match_phrase: { unknownField: 'ios' } },
+    };
+    expect(() => getDisplayValueFromFilter(filter, [])).not.toThrow();
   });
 
   it('phrase filters without formatter', () => {

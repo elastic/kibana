@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import { EuiBadge, EuiContextMenu, EuiPopover, EuiTextTruncate } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 
@@ -19,6 +19,8 @@ import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 
 import { createReloadPageToast } from './reload_page_toast';
 import type { CreateSAMLResponseParams } from '../server';
+
+export const DATA_TEST_SUBJ_ROLE_SWITCHER_BUTTON = 'mockIdpRoleSwitcherButton';
 
 const useCurrentUser = () => {
   const { services } = useKibana<CoreStart>();
@@ -52,7 +54,14 @@ export const useAuthenticator = (reloadPage = false) => {
   });
 };
 
-export const RoleSwitcher = () => {
+const switchRoleAriaLabel = i18n.translate('kbnMockIdpPlugin.roleSwitcher.popoverAriaLabel', {
+  defaultMessage: 'Switch role',
+});
+
+const ROLE_LABEL_WIDTH = 40;
+
+/** Dev-only mock IDP control that lets the current user switch roles. */
+export const RoleSwitcher = (): React.JSX.Element | null => {
   const [isOpen, setIsOpen] = useState(false);
   const [roles, setRoles] = useState<string[]>([]);
   const [currentUserState, getCurrentUser] = useCurrentUser();
@@ -76,56 +85,52 @@ export const RoleSwitcher = () => {
     }
   }, [authenticateUserState.value]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (
-    !currentUserState.value ||
-    !isAuthenticatedWithMockIDP(currentUserState.value) ||
-    roles.length === 0
-  ) {
+  const currentUser = currentUserState.value;
+  if (!currentUser || !isAuthenticatedWithMockIDP(currentUser) || roles.length === 0) {
     return null;
   }
 
-  const [currentRole] = currentUserState.value.roles;
+  const [currentRole] = currentUser.roles;
+  const isLoading = currentUserState.loading || authenticateUserState.loading;
 
   return (
     <EuiPopover
       button={
-        <EuiButton
-          color="text"
-          size="s"
-          iconType="chevronSingleDown"
-          iconSide="right"
-          minWidth={false}
+        <EuiBadge
+          color="#0B1628"
+          iconType="user"
+          iconSide="left"
           onClick={() => setIsOpen((toggle) => !toggle)}
-          isLoading={currentUserState.loading || authenticateUserState.loading}
+          onClickAriaLabel={switchRoleAriaLabel}
+          isDisabled={isLoading}
+          data-test-subj={DATA_TEST_SUBJ_ROLE_SWITCHER_BUTTON}
         >
-          {currentRole}
-        </EuiButton>
+          <EuiTextTruncate text={currentRole} width={ROLE_LABEL_WIDTH} />
+        </EuiBadge>
       }
       panelPaddingSize="none"
       offset={4}
-      anchorPosition="downRight"
+      anchorPosition="upRight"
       repositionOnScroll
       repositionToCrossAxis={false}
       isOpen={isOpen}
       closePopover={() => setIsOpen(false)}
-      aria-label={i18n.translate('kbnMockIdpPlugin.roleSwitcher.popoverAriaLabel', {
-        defaultMessage: 'Switch role',
-      })}
+      aria-label={switchRoleAriaLabel}
     >
       <EuiContextMenu
         initialPanelId={0}
         panels={[
           {
             id: 0,
-            title: 'Switch role',
+            title: switchRoleAriaLabel,
             items: roles.map((role) => ({
               name: role,
-              icon: currentUserState.value!.roles.includes(role) ? 'check' : 'empty',
+              icon: currentUser.roles.includes(role) ? 'check' : 'empty',
               onClick: () => {
                 authenticateUser({
-                  username: currentUserState.value!.username,
-                  full_name: currentUserState.value!.full_name,
-                  email: currentUserState.value!.email,
+                  username: currentUser.username,
+                  full_name: currentUser.full_name,
+                  email: currentUser.email,
                   roles: [role],
                   url: window.location.href,
                 });

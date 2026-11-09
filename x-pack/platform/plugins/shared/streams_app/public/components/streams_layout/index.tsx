@@ -31,9 +31,7 @@ export function StreamsLayout() {
   } = useStreamsAppParams('/new-experience/{tab}');
   const router = useStreamsAppRouter();
   const { rangeFrom, rangeTo } = useTimeRange();
-  const {
-    features: { canvas },
-  } = useStreamsPrivileges();
+  const { access } = useStreamsPrivileges();
 
   const appHeaderTabs = useMemo<AppHeaderTab[]>(
     () =>
@@ -50,7 +48,7 @@ export function StreamsLayout() {
     [tab, router, rangeFrom, rangeTo]
   );
 
-  if (!canvas.enabled) {
+  if (!access.v2) {
     return <RedirectTo path="/" />;
   }
 
@@ -64,6 +62,11 @@ export function StreamsLayout() {
   }
 
   const { Component, noPadding } = streamsLayoutTabs[tab];
+  const body = (
+    <StreamsAppPageTemplate.Body noPadding={noPadding} paddingSize="m">
+      <Component />
+    </StreamsAppPageTemplate.Body>
+  );
 
   return (
     <>
@@ -77,9 +80,7 @@ export function StreamsLayout() {
         })}
         tabs={appHeaderTabs}
       />
-      <StreamsAppPageTemplate.Body noPadding={noPadding} paddingSize="m">
-        <Component />
-      </StreamsAppPageTemplate.Body>
+      {body}
     </>
   );
 }

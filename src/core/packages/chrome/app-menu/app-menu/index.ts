@@ -8,6 +8,7 @@
  */
 export {
   AppMenuComponent,
+  AppMenuLoading,
   AppMenuItem,
   AppMenuActionButton,
   AppMenuOverflowButton,
@@ -33,6 +34,7 @@ export {
 } from '@kbn/ui-app-menu';
 
 export type {
+  AppMenuLoadingProps,
   AppMenuBreakpointSource,
   AppMenuRunAction,
   AppMenuRunActionParams,

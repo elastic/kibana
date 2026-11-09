@@ -42,6 +42,12 @@ describe('TavilyConnector', () => {
     });
   });
 
+  it('supports Context Engine alongside workflows and Agent Builder', () => {
+    expect(TavilyConnector.metadata.supportedFeatureIds).toContain('workflows');
+    expect(TavilyConnector.metadata.supportedFeatureIds).toContain('agentBuilder');
+    expect(TavilyConnector.metadata.supportedFeatureIds).toContain('contextEngine');
+  });
+
   describe('tavilySearch action', () => {
     it('applies defaults when only query is provided', async () => {
       const input = parse('tavilySearch', { query: 'elastic search' });

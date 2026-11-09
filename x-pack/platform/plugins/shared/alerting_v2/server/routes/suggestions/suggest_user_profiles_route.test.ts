@@ -5,58 +5,56 @@
  * 2.0.
  */
 
-import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { securityMock } from '@kbn/security-plugin/server/mocks';
-import { createRouteDependencies } from '../test_utils';
-import { SuggestUserProfilesRoute } from './suggest_user_profiles_route';
+// The route handler is covered end-to-end by the Scout API spec
+// (test/scout/alerts/api/tests/user_profiles_suggestions.spec.ts). Only the
+// pure response mapper is unit tested here, because the avatar `imageUrl` ->
+// `image_url` rename and the conditional avatar shape are awkward to seed
+// deterministically through a running stack.
+import type { UserProfile } from '@kbn/core-user-profile-common';
+import { toSuggestUserProfilesResponse } from './suggest_user_profiles_route';
 
-const request = httpServerMock.createKibanaRequest({ body: { name: 'john', size: 10 } });
-const securityStart = securityMock.createStart();
+const profile = (overrides: Partial<UserProfile> = {}): UserProfile => ({
+  uid: 'uid-1',
+  enabled: true,
+  user: { username: 'alice', full_name: 'Alice Smith', email: 'alice@example.com' },
+  data: {},
+  ...overrides,
+});
 
-describe('SuggestUserProfilesRoute', () => {
-  it('returns suggested profiles for current space', async () => {
-    const { ctx } = createRouteDependencies();
+describe('toSuggestUserProfilesResponse', () => {
+  it('maps the user fields and renames the avatar imageUrl to image_url', () => {
+    const profiles: UserProfile[] = [
+      profile({
+        uid: 'uid-1',
+        data: { avatar: { initials: 'AS', color: '#aabbcc', imageUrl: 'https://avatars/a.png' } },
+      }),
+    ];
 
-    securityStart.userProfiles.suggest.mockResolvedValue([{ uid: 'u-1' } as any]);
-
-    const route = new SuggestUserProfilesRoute(ctx, request, securityStart);
-
-    await route.handle();
-
-    expect(securityStart.userProfiles.suggest).toHaveBeenCalledWith({
-      name: 'john',
-      size: 10,
-      dataPath: 'avatar',
-    });
-    expect(ctx.response.ok).toHaveBeenCalledWith({ body: [{ uid: 'u-1' }] });
+    expect(toSuggestUserProfilesResponse(profiles)).toEqual([
+      {
+        uid: 'uid-1',
+        user: { username: 'alice', full_name: 'Alice Smith', email: 'alice@example.com' },
+        avatar: { initials: 'AS', color: '#aabbcc', image_url: 'https://avatars/a.png' },
+      },
+    ]);
   });
 
-  it('accepts dataPath in body', async () => {
-    const { ctx } = createRouteDependencies();
-    const requestWithDataPath = httpServerMock.createKibanaRequest({
-      body: { name: 'john', size: 10, dataPath: 'avatar' },
-    });
+  it('omits the avatar entirely when the profile has no avatar data', () => {
+    const [mapped] = toSuggestUserProfilesResponse([profile({ uid: 'uid-2', data: {} })]);
 
-    securityStart.userProfiles.suggest.mockResolvedValue([]);
-
-    const route = new SuggestUserProfilesRoute(ctx, requestWithDataPath, securityStart);
-
-    await route.handle();
-
-    expect(securityStart.userProfiles.suggest).toHaveBeenCalledWith(
-      expect.objectContaining({ dataPath: 'avatar' })
-    );
+    expect(mapped).not.toHaveProperty('avatar');
+    expect(mapped.user.username).toBe('alice');
   });
 
-  it('returns customError on suggest failure', async () => {
-    const { ctx } = createRouteDependencies();
+  it('passes through optional user fields as undefined when missing', () => {
+    const [mapped] = toSuggestUserProfilesResponse([
+      profile({ user: { username: 'bob' }, data: {} }),
+    ]);
 
-    securityStart.userProfiles.suggest.mockRejectedValue(new Error('boom'));
+    expect(mapped.user).toEqual({ username: 'bob', full_name: undefined, email: undefined });
+  });
 
-    const route = new SuggestUserProfilesRoute(ctx, request, securityStart);
-
-    await route.handle();
-
-    expect(ctx.response.customError).toHaveBeenCalledTimes(1);
+  it('returns an empty array for no profiles', () => {
+    expect(toSuggestUserProfilesResponse([])).toEqual([]);
   });
 });

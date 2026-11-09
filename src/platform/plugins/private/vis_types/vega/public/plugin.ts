@@ -22,6 +22,7 @@ import type { MapsEmsPluginPublicStart } from '@kbn/maps-ems-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import {
   ADD_CANVAS_ELEMENT_TRIGGER,
   ADD_PANEL_TRIGGER,
@@ -44,12 +45,8 @@ import type { ConfigSchema } from '../server/config';
 
 import { getVegaInspectorView } from './vega_inspector/vega_inspector';
 import { getServiceSettingsLazy } from './vega_view/vega_map_view/service_settings/get_service_settings_lazy';
-import {
-  ADD_VEGA_EMBEDDABLE_ACTION_ID,
-  ADD_VEGA_PANEL_ACTION_ID,
-  VEGA_EMBEDDABLE_TYPE,
-  VEGA_STANDALONE_EMBEDDABLE_FLAG,
-} from './constants';
+import { VEGA_EMBEDDABLE_TYPE, VEGA_STANDALONE_EMBEDDABLE_FLAG } from '../common/constants';
+import { ADD_VEGA_EMBEDDABLE_ACTION_ID, ADD_VEGA_PANEL_ACTION_ID } from './constants';
 
 /** @internal */
 export interface VegaVisualizationDependencies {
@@ -77,6 +74,7 @@ export interface VegaPluginStartDependencies {
   mapsEms: MapsEmsPluginPublicStart;
   dataViews: DataViewsPublicPluginStart;
   uiActions: UiActionsStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   usageCollection: UsageCollectionStart;
   inspector: InspectorStart;
 }
@@ -123,6 +121,7 @@ export class VegaPlugin implements Plugin<void, void> {
       const { vegaEmbeddableFactory } = await import('./embeddable/vega_embeddable');
       return vegaEmbeddableFactory(startCore, {
         uiActions: startDeps.uiActions,
+        SearchBar: startDeps.unifiedSearch.ui.SearchBar,
         visualizationDependencies,
       });
     });
@@ -149,7 +148,7 @@ export class VegaPlugin implements Plugin<void, void> {
       const { getAddVegaEmbeddableAction } = await import(
         './embeddable/add_vega_embeddable_action'
       );
-      return getAddVegaEmbeddableAction();
+      return getAddVegaEmbeddableAction(core);
     });
 
     // The feature flag swaps both Dashboard and Canvas from legacy Visualize action to the
@@ -171,6 +170,5 @@ export class VegaPlugin implements Plugin<void, void> {
 
   public stop() {
     this.standaloneEmbeddableFlagSubscription?.unsubscribe();
-    this.standaloneEmbeddableFlagSubscription = undefined;
   }
 }

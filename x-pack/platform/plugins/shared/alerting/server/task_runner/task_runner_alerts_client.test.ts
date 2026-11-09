@@ -103,6 +103,7 @@ import {
   ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_SEVERITY_IMPROVING,
   ALERT_SNOOZED,
+  ALERT_TRACKED,
   ALERT_PENDING_RECOVERED_COUNT,
 } from '@kbn/rule-data-utils';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
@@ -396,16 +397,20 @@ describe('Task Runner', () => {
 
         expect(ruleType.executor).toHaveBeenCalledTimes(1);
         expect(logger.debug).toHaveBeenCalledTimes(5);
-        expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
-          labels: {
-            executionId: RULE_EXECUTION_UUID,
-            ruleId: '1',
-            ruleType: 'test',
-            spaceId: 'default',
-            taskInstanceId: '1',
-          },
-        });
-        expect(logger.debug).nthCalledWith(
+        expect(logger.debug).toHaveBeenNthCalledWith(
+          1,
+          'executing rule test:1 at 1970-01-01T00:00:00.000Z',
+          {
+            labels: {
+              executionId: RULE_EXECUTION_UUID,
+              ruleId: '1',
+              ruleType: 'test',
+              spaceId: 'default',
+              taskInstanceId: '1',
+            },
+          }
+        );
+        expect(logger.debug).toHaveBeenNthCalledWith(
           2,
           'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"ok"}',
           {
@@ -418,7 +423,7 @@ describe('Task Runner', () => {
             },
           }
         );
-        expect(logger.debug).nthCalledWith(
+        expect(logger.debug).toHaveBeenNthCalledWith(
           3,
           'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeOrder":0,"outcomeMsg":null,"warning":null,"alertsCount":{"active":0,"new":0,"recovered":0,"ignored":0}}',
           {
@@ -431,7 +436,7 @@ describe('Task Runner', () => {
             },
           }
         );
-        expect(logger.debug).nthCalledWith(
+        expect(logger.debug).toHaveBeenNthCalledWith(
           4,
           'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":0,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":0,"hasReachedAlertLimit":false,"triggeredActionsStatus":"complete"}',
           {
@@ -453,7 +458,9 @@ describe('Task Runner', () => {
           })
         );
 
-        expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toBeCalledTimes(1);
+        expect(
+          taskRunnerFactoryInitializerParams.executionContext.withContext
+        ).toHaveBeenCalledTimes(1);
         expect(
           taskRunnerFactoryInitializerParams.executionContext.withContext
         ).toHaveBeenCalledWith(
@@ -534,7 +541,7 @@ describe('Task Runner', () => {
         expect(logger.debug).toHaveBeenCalledTimes(useDataStreamForAlerts ? 9 : 10);
 
         let debugCall = 1;
-        expect(logger.debug).nthCalledWith(
+        expect(logger.debug).toHaveBeenNthCalledWith(
           debugCall++,
           'executing rule test:1 at 1970-01-01T00:00:00.000Z',
           {
@@ -547,27 +554,30 @@ describe('Task Runner', () => {
             },
           }
         );
-        expect(logger.debug).nthCalledWith(debugCall++, `Initializing resources for AlertsService`);
+        expect(logger.debug).toHaveBeenNthCalledWith(
+          debugCall++,
+          `Initializing resources for AlertsService`
+        );
 
         if (!useDataStreamForAlerts) {
-          expect(logger.debug).nthCalledWith(
+          expect(logger.debug).toHaveBeenNthCalledWith(
             debugCall++,
             'Installing ILM policy .alerts-ilm-policy'
           );
         }
-        expect(logger.debug).nthCalledWith(
+        expect(logger.debug).toHaveBeenNthCalledWith(
           debugCall++,
           'Installing component template .alerts-framework-mappings'
         );
-        expect(logger.debug).nthCalledWith(
+        expect(logger.debug).toHaveBeenNthCalledWith(
           debugCall++,
           'Installing component template .alerts-legacy-alert-mappings'
         );
-        expect(logger.debug).nthCalledWith(
+        expect(logger.debug).toHaveBeenNthCalledWith(
           debugCall++,
           'Installing component template .alerts-ecs-mappings'
         );
-        expect(logger.debug).nthCalledWith(
+        expect(logger.debug).toHaveBeenNthCalledWith(
           debugCall++,
           'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"ok"}',
           {
@@ -580,7 +590,7 @@ describe('Task Runner', () => {
             },
           }
         );
-        expect(logger.debug).nthCalledWith(
+        expect(logger.debug).toHaveBeenNthCalledWith(
           debugCall++,
           'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeOrder":0,"outcomeMsg":null,"warning":null,"alertsCount":{"active":0,"new":0,"recovered":0,"ignored":0}}',
           {
@@ -593,7 +603,7 @@ describe('Task Runner', () => {
             },
           }
         );
-        expect(logger.debug).nthCalledWith(
+        expect(logger.debug).toHaveBeenNthCalledWith(
           debugCall++,
           'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":0,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":0,"numberOfDelayedAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}',
           {
@@ -613,7 +623,9 @@ describe('Task Runner', () => {
             },
           })
         );
-        expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toBeCalledTimes(1);
+        expect(
+          taskRunnerFactoryInitializerParams.executionContext.withContext
+        ).toHaveBeenCalledTimes(1);
         expect(
           taskRunnerFactoryInitializerParams.executionContext.withContext
         ).toHaveBeenCalledWith(
@@ -726,6 +738,7 @@ describe('Task Runner', () => {
               [ALERT_SNOOZED]: false,
               [ALERT_START]: DATE_1970,
               [ALERT_STATUS]: 'active',
+              [ALERT_TRACKED]: true,
               [ALERT_TIME_RANGE]: { gte: DATE_1970 },
               [ALERT_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
               [ALERT_WORKFLOW_STATUS]: 'open',
@@ -802,15 +815,19 @@ describe('Task Runner', () => {
         expect(ruleType.executor).toHaveBeenCalledTimes(1);
 
         expect(logger.debug).toHaveBeenCalledTimes(5);
-        expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
-          labels: {
-            taskInstanceId: '1',
-            executionId: RULE_EXECUTION_UUID,
-            ruleId: '1',
-            ruleType: 'test',
-            spaceId: 'default',
-          },
-        });
+        expect(logger.debug).toHaveBeenNthCalledWith(
+          1,
+          'executing rule test:1 at 1970-01-01T00:00:00.000Z',
+          {
+            labels: {
+              taskInstanceId: '1',
+              executionId: RULE_EXECUTION_UUID,
+              ruleId: '1',
+              ruleType: 'test',
+              spaceId: 'default',
+            },
+          }
+        );
 
         expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
           ...generateRuleUpdateParams({
@@ -820,7 +837,9 @@ describe('Task Runner', () => {
           })
         );
 
-        expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toBeCalledTimes(1);
+        expect(
+          taskRunnerFactoryInitializerParams.executionContext.withContext
+        ).toHaveBeenCalledTimes(1);
         expect(
           taskRunnerFactoryInitializerParams.executionContext.withContext
         ).toHaveBeenCalledWith(
@@ -893,15 +912,19 @@ describe('Task Runner', () => {
         expect(ruleType.executor).toHaveBeenCalledTimes(1);
 
         expect(logger.debug).toHaveBeenCalledTimes(5);
-        expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
-          labels: {
-            taskInstanceId: '1',
-            executionId: RULE_EXECUTION_UUID,
-            ruleId: '1',
-            ruleType: 'test',
-            spaceId: 'default',
-          },
-        });
+        expect(logger.debug).toHaveBeenNthCalledWith(
+          1,
+          'executing rule test:1 at 1970-01-01T00:00:00.000Z',
+          {
+            labels: {
+              taskInstanceId: '1',
+              executionId: RULE_EXECUTION_UUID,
+              ruleId: '1',
+              ruleType: 'test',
+              spaceId: 'default',
+            },
+          }
+        );
 
         expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
           ...generateRuleUpdateParams({
@@ -911,7 +934,9 @@ describe('Task Runner', () => {
           })
         );
 
-        expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toBeCalledTimes(1);
+        expect(
+          taskRunnerFactoryInitializerParams.executionContext.withContext
+        ).toHaveBeenCalledTimes(1);
         expect(
           taskRunnerFactoryInitializerParams.executionContext.withContext
         ).toHaveBeenCalledWith(

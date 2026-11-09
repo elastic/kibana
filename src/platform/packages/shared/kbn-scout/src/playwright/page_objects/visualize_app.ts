@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import type { ScoutPage } from '..';
 import { expect } from '..';
+import { AppMenu } from './app_menu';
 import { SavedObjectSaveModal } from './saved_object_save_modal';
 
 type VisType = 'lens' | 'vega' | 'metrics' | 'aggbased' | 'maps';
@@ -24,10 +26,13 @@ export class VisualizeApp {
   private readonly editInLensButton;
   /** Save modal locators/actions, shared with other apps (e.g. Maps) via `SavedObjectSaveModal`. */
   readonly saveModal: SavedObjectSaveModal;
+  private readonly appMenu: AppMenu;
 
   constructor(private readonly page: ScoutPage) {
     this.landingPage = this.page.testSubj.locator('visualizationLandingPage');
-    this.newItemButton = this.page.testSubj.locator('newItemButton');
+    this.newItemButton = this.page.locator(
+      `[data-test-subj="${APP_HEADER_TEST_SUBJECTS.root}"] [data-test-subj="newItemButton"]`
+    );
     this.visNewDialogGroups = this.page.testSubj.locator('visNewDialogGroups');
     this.visNewDialogTypes = this.page.testSubj.locator('visNewDialogTypes');
     this.legacyTab = this.page.testSubj.locator('groupModalLegacyTab');
@@ -35,6 +40,7 @@ export class VisualizeApp {
     this.visualizationLoader = this.page.testSubj.locator('visualizationLoader');
     this.editInLensButton = this.page.testSubj.locator('visualizeEditInLensButton');
     this.saveModal = new SavedObjectSaveModal(this.page);
+    this.appMenu = new AppMenu(this.page);
   }
 
   async goto() {
@@ -45,6 +51,7 @@ export class VisualizeApp {
   }
 
   async openNewVisualizationWizard() {
+    await this.appMenu.revealItem(this.newItemButton);
     await this.newItemButton.click();
     await expect(this.visNewDialogGroups).toBeVisible();
   }
@@ -89,6 +96,7 @@ export class VisualizeApp {
   }
 
   async openSaveModal() {
+    await this.appMenu.revealItem(this.visualizeSaveButton);
     await this.visualizeSaveButton.click();
     await expect(this.saveModal.modal).toBeVisible();
   }
@@ -137,7 +145,13 @@ export class VisualizeApp {
   }
 
   async clickEditInLensButton() {
+    await this.appMenu.revealItem(this.editInLensButton);
     await this.editInLensButton.click();
+  }
+
+  async expectEditInLensButtonVisible() {
+    await this.appMenu.revealItem(this.editInLensButton);
+    await expect(this.editInLensButton).toBeVisible();
   }
 
   getEditInLensButton() {

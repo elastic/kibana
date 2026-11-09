@@ -22,6 +22,37 @@ import type { DashboardChildren } from './layout_manager/types';
 
 export const highlightAnimationDuration = 2000;
 
+const getRelatedPanelsFromSiblings = (
+  children: DashboardChildren,
+  idToCompareForBlur: string
+): Observable<string[]> => {
+  const relatedPanelPublishers = Object.entries(children)
+    .map(([id, sibling]) =>
+      apiPublishesRelatedPanels(sibling)
+        ? sibling.relatedPanels$.pipe(
+            map((relatedPanels) => ({
+              id,
+              relatedPanels,
+            }))
+          )
+        : null
+    )
+    .filter((result) => result !== null);
+
+  // combineLatest([]) completes without emitting, so use of([]) when nobody publishes relatedPanels$.
+  if (!relatedPanelPublishers.length) {
+    return of([]);
+  }
+
+  return combineLatest(relatedPanelPublishers).pipe(
+    map((entries) =>
+      entries
+        .map(({ id, relatedPanels }) => (relatedPanels.includes(idToCompareForBlur) ? id : null))
+        .filter((result) => result !== null)
+    )
+  );
+};
+
 export function initializeTrackPanel(
   untilLoaded: (id: string) => Promise<undefined>,
   children$: Observable<DashboardChildren>,
@@ -67,29 +98,8 @@ export function initializeTrackPanel(
         const focusedChild = children[idToCompareForBlur];
         const relatedPanels$ = apiPublishesRelatedPanels(focusedChild)
           ? focusedChild.relatedPanels$
-          : // If the focused child doesn't publish related panels, derive which panels it's related to from all other panels that do
-            combineLatest(
-              Object.entries(children)
-                .map(([id, sibling]) =>
-                  apiPublishesRelatedPanels(sibling)
-                    ? sibling.relatedPanels$.pipe(
-                        map((relatedPanels) => ({
-                          id,
-                          relatedPanels,
-                        }))
-                      )
-                    : null
-                )
-                .filter((result) => result !== null)
-            ).pipe(
-              map((entries) =>
-                entries
-                  .map(({ id, relatedPanels }) =>
-                    relatedPanels.includes(idToCompareForBlur) ? id : null
-                  )
-                  .filter((result) => result !== null)
-              )
-            );
+          : // If the focused child doesn't publish related panels, derive which panels it's related to from siblings that do
+            getRelatedPanelsFromSiblings(children, idToCompareForBlur);
         return relatedPanels$.pipe(
           map((relatedPanels) => ({ focusedChildId: idToCompareForBlur, relatedPanels, siblings }))
         );
@@ -104,8 +114,33 @@ export function initializeTrackPanel(
       );
     });
 
+  const selectedPanelIds$ = new BehaviorSubject<string[]>([]);
+  // Selection must not survive a view mode switch, and must drop panels that no longer exist
+  const selectionCleanupSubscription = combineLatest([viewMode$, children$]).subscribe(
+    ([viewMode, children]) => {
+      const current = selectedPanelIds$.value;
+      if (!current.length) return;
+      const next = viewMode === 'edit' ? current.filter((id) => Boolean(children[id])) : [];
+      if (next.length !== current.length) selectedPanelIds$.next(next);
+    }
+  );
+
   return {
     api: {
+      selectedPanelIds$,
+      togglePanelSelection: (panelId: string) => {
+        const current = selectedPanelIds$.value;
+        selectedPanelIds$.next(
+          current.includes(panelId) ? current.filter((id) => id !== panelId) : [...current, panelId]
+        );
+      },
+      clearSelectedPanels: () => {
+        if (selectedPanelIds$.value.length) selectedPanelIds$.next([]);
+      },
+      addPanelsToSelection: (panelIds: string[]) => {
+        const next = Array.from(new Set([...selectedPanelIds$.value, ...panelIds]));
+        if (next.length !== selectedPanelIds$.value.length) selectedPanelIds$.next(next);
+      },
       expandedPanelId$,
       expandPanel: (panelId: string) => {
         const isPanelExpanded = panelId === expandedPanelId$.value;
@@ -125,14 +160,18 @@ export function initializeTrackPanel(
         const id = highlightPanelId$.value;
         if (!id) return;
 
-        untilLoaded(id).then(async () => {
-          // Adds the highlight class in the next event loop to allow the DOM to update
-          await new Promise((res) => setTimeout(res, 0));
-          panelRef.classList.add('dshDashboardGrid__item--highlighted');
-          // Removes the class after the highlight animation finishes
-          await new Promise((res) => setTimeout(res, highlightAnimationDuration));
-          panelRef.classList.remove('dshDashboardGrid__item--highlighted');
-        });
+        untilLoaded(id)
+          .then(async () => {
+            // Adds the highlight class in the next event loop to allow the DOM to update
+            await new Promise((res) => setTimeout(res, 0));
+            panelRef.classList.add('dshDashboardGrid__item--highlighted');
+            // Removes the class after the highlight animation finishes
+            await new Promise((res) => setTimeout(res, highlightAnimationDuration));
+            panelRef.classList.remove('dshDashboardGrid__item--highlighted');
+          })
+          .catch(() => {
+            // highlighting is cosmetic; ignore panels that fail to load
+          });
 
         highlightPanelId$.next(undefined);
       },
@@ -145,22 +184,27 @@ export function initializeTrackPanel(
         const id = scrollToPanelId$.value;
         if (!id) return;
 
-        untilLoaded(id).then(() => {
-          if (scrollPosition$.value !== undefined) {
-            scrollTo({ top: scrollPosition$.value, behavior: 'smooth' });
-            scrollPosition$.next(undefined);
-          } else {
-            const { top: viewportTop, bottom: viewportBottom } = getViewportBoundaries();
-            const { top: panelTop, bottom: panelBottom } = panelRef.getBoundingClientRect();
+        untilLoaded(id)
+          .then(() => {
+            if (scrollPosition$.value !== undefined) {
+              scrollTo({ top: scrollPosition$.value, behavior: 'smooth' });
+              scrollPosition$.next(undefined);
+            } else {
+              const { top: viewportTop, bottom: viewportBottom } = getViewportBoundaries();
+              const { top: panelTop, bottom: panelBottom } = panelRef.getBoundingClientRect();
 
-            // only scroll if panel is not fully visible within the current viewport
-            if (panelTop < viewportTop || panelBottom > viewportBottom) {
-              panelRef.scrollIntoView({ block: 'start', behavior: 'smooth' });
+              // only scroll if panel is not fully visible within the current viewport
+              if (panelTop < viewportTop || panelBottom > viewportBottom) {
+                panelRef.scrollIntoView({ block: 'start', behavior: 'smooth' });
+              }
             }
-          }
 
-          setScrollToPanelId(undefined);
-        });
+            setScrollToPanelId(undefined);
+          })
+          .catch(() => {
+            // scrolling is cosmetic; just clear the pending scroll request
+            setScrollToPanelId(undefined);
+          });
       },
       scrollPosition$,
       scrollToTop: () => {
@@ -182,6 +226,7 @@ export function initializeTrackPanel(
     },
     cleanup: () => {
       blurredPanelIdsSubscription.unsubscribe();
+      selectionCleanupSubscription.unsubscribe();
     },
   };
 }

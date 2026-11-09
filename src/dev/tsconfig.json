@@ -16,9 +16,10 @@
     "type_check_validation_loader.js"
   ],
   "kbn_references": [
+    "@kbn/scout",
     "@kbn/core",
     "@kbn/screenshotting-plugin",
-    "@kbn/test",
+    "@kbn/jest",
     "@kbn/dev-cli-runner",
     "@kbn/dev-cli-errors",
     "@kbn/repo-info",
@@ -30,7 +31,7 @@
     "@kbn/std",
     "@kbn/dev-utils",
     "@kbn/utils",
-    "@kbn/optimizer",
+    "@kbn/rspack-optimizer",
     "@kbn/peggy",
     "@kbn/swc-config",
     "@kbn/import-resolver",
@@ -50,7 +51,7 @@
     "@kbn/yarn-lock-validator",
     "@kbn/sort-package-json",
     "@kbn/swc-register",
-    "@kbn/rspack-optimizer",
-    "@kbn/dev-validation-runner"
+    "@kbn/dev-validation-runner",
+    "@kbn/test",
   ]
 }

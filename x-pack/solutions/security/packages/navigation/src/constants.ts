@@ -7,8 +7,14 @@
 
 export const SECURITY_UI_APP_ID = 'securitySolutionUI' as const;
 
-/** PND ships as its own app, so its deep links are namespaced separately from the Security UI. */
-export const PND_APP_ID = 'pnd' as const;
+/**
+ * AlertZero ships as its own app, so its deep links are namespaced separately from the Security UI.
+ *
+ * Deliberately duplicated from `ALERTZERO_APP_ID` in `@kbn/alertzero-common`: this package is
+ * page-load critical, and its single entry point would drag the schemas and mock catalogs in.
+ * Keep the two values in sync — if they drift, `alertZeroLink()` produces dead deep links.
+ */
+export const ALERTZERO_APP_ID = 'alertzero' as const;
 
 export { SecurityPageName } from '@kbn/deeplinks-security';
 
@@ -42,7 +48,3 @@ export enum SecurityGroupName {
 /** This Kibana Advanced Setting allows users to enable/disable Attack Discovery 2.0 Workflows per space */
 export const ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING =
   'securitySolution:enableAttackDiscoveryWorkflows' as const;
-
-/** This Kibana Advanced Setting allows users to enable/disable the Alerts and Attacks Alignment feature */
-export const ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING =
-  'securitySolution:enableAlertsAndAttacksAlignment' as const;

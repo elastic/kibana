@@ -16,10 +16,10 @@ const createContext = (input: unknown) =>
 describe('addAlertsStepDefinition', () => {
   it('adds alerts to a case', async () => {
     const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const bulkCreate = jest.fn().mockResolvedValue(createCaseResponseFixture);
+    const bulkCreateAndGetCase = jest.fn().mockResolvedValue(createCaseResponseFixture);
     const getCasesClient = jest.fn().mockResolvedValue({
       cases: { get },
-      attachments: { bulkCreate },
+      attachments: { bulkCreateAndGetCase },
     } as unknown as CasesClient);
     const definition = addAlertsStepDefinition(getCasesClient);
 
@@ -31,15 +31,17 @@ describe('addAlertsStepDefinition', () => {
     );
 
     expect(definition.id).toBe('cases.addAlerts');
-    expect(bulkCreate).toHaveBeenCalledWith({
+    expect(bulkCreateAndGetCase).toHaveBeenCalledWith({
       caseId: 'case-1',
       attachments: [
         {
-          type: 'alert',
-          alertId: ['alert-1'],
-          index: ['.alerts-security.alerts-default'],
+          type: 'security.alert',
+          attachmentId: ['alert-1'],
+          metadata: {
+            index: ['.alerts-security.alerts-default'],
+            rule: { id: null, name: null },
+          },
           owner: createCaseResponseFixture.owner,
-          rule: { id: null, name: null },
         },
       ],
     });
@@ -47,10 +49,10 @@ describe('addAlertsStepDefinition', () => {
 
   it('creates a single alert attachment for multiple alerts for the same rule', async () => {
     const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const bulkCreate = jest.fn().mockResolvedValue(createCaseResponseFixture);
+    const bulkCreateAndGetCase = jest.fn().mockResolvedValue(createCaseResponseFixture);
     const getCasesClient = jest.fn().mockResolvedValue({
       cases: { get },
-      attachments: { bulkCreate },
+      attachments: { bulkCreateAndGetCase },
     } as unknown as CasesClient);
     const definition = addAlertsStepDefinition(getCasesClient);
 
@@ -72,15 +74,17 @@ describe('addAlertsStepDefinition', () => {
       })
     );
 
-    expect(bulkCreate).toHaveBeenCalledWith({
+    expect(bulkCreateAndGetCase).toHaveBeenCalledWith({
       caseId: 'case-1',
       attachments: [
         {
-          type: 'alert',
-          alertId: ['alert-1', 'alert-2'],
-          index: ['.alerts-security.alerts-default', '.alerts-security.alerts-default'],
+          type: 'security.alert',
+          attachmentId: ['alert-1', 'alert-2'],
+          metadata: {
+            index: ['.alerts-security.alerts-default', '.alerts-security.alerts-default'],
+            rule: { id: 'rule-1', name: 'Test rule' },
+          },
           owner: createCaseResponseFixture.owner,
-          rule: { id: 'rule-1', name: 'Test rule' },
         },
       ],
     });
@@ -88,10 +92,10 @@ describe('addAlertsStepDefinition', () => {
 
   it('creates one alert attachment per distinct rule', async () => {
     const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const bulkCreate = jest.fn().mockResolvedValue(createCaseResponseFixture);
+    const bulkCreateAndGetCase = jest.fn().mockResolvedValue(createCaseResponseFixture);
     const getCasesClient = jest.fn().mockResolvedValue({
       cases: { get },
-      attachments: { bulkCreate },
+      attachments: { bulkCreateAndGetCase },
     } as unknown as CasesClient);
     const definition = addAlertsStepDefinition(getCasesClient);
 
@@ -113,22 +117,26 @@ describe('addAlertsStepDefinition', () => {
       })
     );
 
-    expect(bulkCreate).toHaveBeenCalledWith({
+    expect(bulkCreateAndGetCase).toHaveBeenCalledWith({
       caseId: 'case-1',
       attachments: [
         {
-          type: 'alert',
-          alertId: ['alert-1'],
-          index: ['idx-1'],
+          type: 'security.alert',
+          attachmentId: ['alert-1'],
+          metadata: {
+            index: ['idx-1'],
+            rule: { id: 'rule-a', name: 'A' },
+          },
           owner: createCaseResponseFixture.owner,
-          rule: { id: 'rule-a', name: 'A' },
         },
         {
-          type: 'alert',
-          alertId: ['alert-2'],
-          index: ['idx-2'],
+          type: 'security.alert',
+          attachmentId: ['alert-2'],
+          metadata: {
+            index: ['idx-2'],
+            rule: { id: 'rule-b', name: 'B' },
+          },
           owner: createCaseResponseFixture.owner,
-          rule: { id: 'rule-b', name: 'B' },
         },
       ],
     });
@@ -136,10 +144,10 @@ describe('addAlertsStepDefinition', () => {
 
   it('groups alerts without a rule id into a single attachment', async () => {
     const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const bulkCreate = jest.fn().mockResolvedValue(createCaseResponseFixture);
+    const bulkCreateAndGetCase = jest.fn().mockResolvedValue(createCaseResponseFixture);
     const getCasesClient = jest.fn().mockResolvedValue({
       cases: { get },
-      attachments: { bulkCreate },
+      attachments: { bulkCreateAndGetCase },
     } as unknown as CasesClient);
     const definition = addAlertsStepDefinition(getCasesClient);
 
@@ -153,15 +161,17 @@ describe('addAlertsStepDefinition', () => {
       })
     );
 
-    expect(bulkCreate).toHaveBeenCalledWith({
+    expect(bulkCreateAndGetCase).toHaveBeenCalledWith({
       caseId: 'case-1',
       attachments: [
         {
-          type: 'alert',
-          alertId: ['alert-1', 'alert-2'],
-          index: ['idx-1', 'idx-2'],
+          type: 'security.alert',
+          attachmentId: ['alert-1', 'alert-2'],
+          metadata: {
+            index: ['idx-1', 'idx-2'],
+            rule: { id: null, name: 'name only' },
+          },
           owner: createCaseResponseFixture.owner,
-          rule: { id: null, name: 'name only' },
         },
       ],
     });

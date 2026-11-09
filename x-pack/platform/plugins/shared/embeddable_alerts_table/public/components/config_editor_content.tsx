@@ -34,7 +34,7 @@ import type {
   AlertsFiltersExpressionErrors,
 } from '@kbn/response-ops-alerts-filters-form/types';
 import type { RuleTypeSolution } from '@kbn/alerting-types';
-import type { EuiSuperSelect } from '@elastic/eui/src/components/form/super_select/super_select';
+import type { EuiSuperSelectRef } from '@elastic/eui';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import {
   FILTER_TYPE_REQUIRED_ERROR_MESSAGE,
@@ -104,7 +104,7 @@ export const ConfigEditorContent = ({
 }: ConfigEditorContentProps) => {
   const { http, overlays } = services;
   const flyoutBodyRef = useRef<HTMLDivElement>(null);
-  const solutionSelectorRef = useRef<EuiSuperSelect<RuleTypeSolution>>(null);
+  const solutionSelectorRef = useRef<EuiSuperSelectRef>(null);
   const [filters, setFilters] = useState<
     EmbeddableAlertsTableConfig['query']['filters'] | undefined
   >(initialConfig?.query?.filters ?? EMPTY_FILTERS);

@@ -10,6 +10,7 @@ schema:
       - alert
       - assignees
       - attachment
+      - bulkAttachments
       - comment
       - connector
       - create_case
@@ -21,4 +22,5 @@ schema:
       - tags
       - title
       - user
+      - workflow
     example: create_case

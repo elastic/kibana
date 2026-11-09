@@ -15,6 +15,7 @@ import {
   profilingPervCPUWattX86,
   profilingAzureCostDiscountRate,
 } from '@kbn/observability-plugin/common';
+import type { ProfilingSchema } from '@kbn/profiling-utils';
 import { percentToFactor } from '../../utils/percent_to_factor';
 import type { RegisterServicesParams } from '../register_services';
 
@@ -25,6 +26,8 @@ export interface FetchFlamechartParams {
   stacktraceIdsField?: string;
   query: QueryDslQueryContainer;
   totalSeconds: number;
+  abortSignal?: AbortSignal;
+  schema?: ProfilingSchema;
 }
 
 const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
@@ -37,6 +40,8 @@ export function createFetchFlamechart({ createProfilingEsClient }: RegisterServi
     stacktraceIdsField,
     query,
     totalSeconds,
+    abortSignal,
+    schema,
   }: FetchFlamechartParams) => {
     const [
       co2PerKWH,
@@ -56,7 +61,7 @@ export function createFetchFlamechart({ createProfilingEsClient }: RegisterServi
       core.uiSettings.client.get<number>(profilingAzureCostDiscountRate),
     ]);
 
-    const profilingEsClient = createProfilingEsClient({ esClient });
+    const profilingEsClient = createProfilingEsClient({ esClient, abortSignal });
 
     const flamegraph = await profilingEsClient.profilingFlamegraph({
       query,
@@ -71,6 +76,7 @@ export function createFetchFlamechart({ createProfilingEsClient }: RegisterServi
       azureCostDiscountRate: percentToFactor(azureCostDiscountRate),
       indices,
       stacktraceIdsField,
+      schema,
     });
     return { ...flamegraph, TotalSeconds: totalSeconds };
   };

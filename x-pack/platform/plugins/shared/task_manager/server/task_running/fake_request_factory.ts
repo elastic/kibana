@@ -7,6 +7,7 @@
 
 import type { FakeRawRequest, Headers, KibanaRequest } from '@kbn/core/server';
 import type { FakeRequestEnricher } from '@kbn/core-security-server';
+import { markExternalUiamCredential } from '@kbn/core-security-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { brandSpaceId } from '@kbn/core-spaces-common';
 
@@ -15,6 +16,7 @@ interface BuildTaskFakeRequestOpts {
   spaceId?: string;
   userProfileId?: string;
   userName?: string;
+  uiamApiKeyExternal?: boolean;
   enrichFakeRequest?: FakeRequestEnricher;
 }
 
@@ -30,6 +32,7 @@ export const buildTaskFakeRequest = ({
   spaceId,
   userProfileId,
   userName,
+  uiamApiKeyExternal,
   enrichFakeRequest,
 }: BuildTaskFakeRequestOpts): KibanaRequest | undefined => {
   if (!apiKey) return;
@@ -41,6 +44,14 @@ export const buildTaskFakeRequest = ({
   };
 
   const fakeRequest = kibanaRequestFactory(fakeRawRequest);
+
+  // An external (user-created Cloud) UIAM API key must not be presented to Elasticsearch with the
+  // UIAM shared secret - UIAM rejects external keys carrying client authentication. The verdict is
+  // UIAM's own, captured when the task was scheduled and persisted on `userScope`. Framework-granted
+  // UIAM keys (flag absent) keep receiving the shared secret.
+  if (uiamApiKeyExternal === true) {
+    markExternalUiamCredential(fakeRequest);
+  }
 
   if ((userProfileId || userName) && enrichFakeRequest) {
     enrichFakeRequest(fakeRequest, { profileId: userProfileId, username: userName });

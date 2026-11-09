@@ -19,20 +19,8 @@ export interface UseDimensionsWipeParams {
   isLoading: boolean;
   /** Skip when the last fetch errored; pruning would discard intent based on invalid data. */
   hasError: boolean;
-  /**
-   * Discover's current breakdown field. Used to decide whether the wipe
-   * needs to update it: if the current breakdown survives the prune we
-   * leave it untouched.
-   */
-  breakdownField: string | undefined;
   /** Called with the pruned subset of `selectedDimensions`. */
   onSelectedDimensionsChange: (pruned: Dimension[]) => void;
-  /**
-   * Called only when the current `breakdownField` does NOT survive the
-   * prune. Receives the new default (`pruned[0]?.name`, possibly
-   * `undefined`).
-   */
-  onBreakdownFieldChange?: (next: string | undefined) => void;
 }
 
 /**
@@ -41,8 +29,7 @@ export interface UseDimensionsWipeParams {
  * The grid keeps `selectedDimensions` (intent) in URL state, persisted
  * across stream switches. After a successful `METRICS_INFO` fetch we know
  * the per-stream universe (`allDimensions`); any selection outside that
- * universe is pruned. If the current `breakdownField` no longer maps to a
- * surviving selection, we also propose a new default to Discover.
+ * universe is pruned.
  *
  * We only act on a fresh, successful response (gates on `isLoading` and
  * `hasError`) to avoid discarding intent based on stale or invalid data.
@@ -55,9 +42,7 @@ export function useDimensionsWipe({
   allDimensions,
   isLoading,
   hasError,
-  breakdownField,
   onSelectedDimensionsChange,
-  onBreakdownFieldChange,
 }: UseDimensionsWipeParams): void {
   useEffect(() => {
     if (isLoading || hasError || selectedDimensions.length === 0 || allDimensions.length === 0) {
@@ -70,19 +55,5 @@ export function useDimensionsWipe({
       return;
     }
     onSelectedDimensionsChange(pruned);
-
-    const breakdownSurvived =
-      breakdownField != null && pruned.some((dimension) => dimension.name === breakdownField);
-    if (!breakdownSurvived) {
-      onBreakdownFieldChange?.(pruned[0]?.name);
-    }
-  }, [
-    allDimensions,
-    selectedDimensions,
-    isLoading,
-    hasError,
-    breakdownField,
-    onSelectedDimensionsChange,
-    onBreakdownFieldChange,
-  ]);
+  }, [allDimensions, selectedDimensions, isLoading, hasError, onSelectedDimensionsChange]);
 }

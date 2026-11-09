@@ -7,7 +7,6 @@
 
 import type { EuiSwitchEvent } from '@elastic/eui';
 import {
-  EuiAccordion,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
@@ -16,7 +15,6 @@ import {
   EuiSkeletonText,
   EuiSpacer,
   EuiText,
-  EuiTitle,
   EuiFlexGroup,
   EuiPanel,
 } from '@elastic/eui';
@@ -36,6 +34,7 @@ import {
   computeEntitySummaryStalenessReasons,
 } from '@kbn/entity-store/common/entity_summary';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { ExpandableSection } from '../../../../flyout_v2/shared/components/expandable_section';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
@@ -45,20 +44,35 @@ import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { useHasEntityHighlightsLicense } from '../../../../common/hooks/use_has_entity_highlights_license';
 import { useFetchEntityDetailsHighlights } from '../hooks/use_fetch_entity_details_highlights';
 import { useFetchPersistedAiSummary } from '../hooks/use_fetch_persisted_ai_summary';
-import { useInferenceConnectorAccess } from '../hooks/use_inference_connector_access';
+import { useInferenceConnectorAccess } from '../../../hooks/use_inference_connector_access';
 import { EntityHighlightsSettings } from './entity_highlights_settings';
 import { EntityHighlightsResult } from './entity_highlights_result';
 import type { Entity } from '../../../../../common/api/entity_analytics';
 import { INFERENCE_CONNECTOR_CLUSTER_PRIVILEGE } from '../../../../../common/inference_connector/constants';
 import { buildEntitySummaryStalenessEntitySnapshot } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
 import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import type { EntityViewMode } from '../../../../../common/entity_analytics/entity_store/resolution_group';
 
 export const EntityHighlightsAccordion: React.FC<{
   entityIdentifier: string;
   entityType: EntityType;
   entityRecord?: Entity | null;
   refetchEntityRecord?: () => void;
-}> = ({ entityType, entityIdentifier, entityRecord, refetchEntityRecord }) => {
+  mode?: EntityViewMode;
+  /**
+   * True while the entity store record is still being resolved. The persisted summary is keyed
+   * by the record's EUID and the staleness check needs its risk score, so wait for it instead of
+   * fetching with a placeholder identifier and re-laying out once the record arrives.
+   */
+  isEntityRecordLoading?: boolean;
+}> = ({
+  entityType,
+  entityIdentifier,
+  entityRecord,
+  refetchEntityRecord,
+  mode = 'single',
+  isEntityRecordLoading = false,
+}) => {
   // Degrade gracefully on surfaces that render outside `AssistantProvider` (e.g. the Agent
   // Builder attachment Canvas). The Elastic Assistant–backed summary cannot work without it.
   const assistantContext = useMaybeAssistantContext();
@@ -131,16 +145,20 @@ export const EntityHighlightsAccordion: React.FC<{
   } = useFetchPersistedAiSummary({
     entityType,
     entityIdentifier,
+    mode,
+    skip: isEntityRecordLoading,
   });
 
   // Snapshot of current entity signals — passed to the hook so they are persisted
-  // alongside the summary at generation time for future staleness detection.
+  // alongside the summary at generation time for future staleness detection. In resolved
+  // mode the summary is built from the resolution-group risk score, so track that instead.
   const entitySnapshot = useMemo(
     () =>
       buildEntitySummaryStalenessEntitySnapshot(
-        entityRecord ? (entityRecord as EntityStoreRecord) : null
+        entityRecord ? (entityRecord as EntityStoreRecord) : null,
+        { useResolutionRisk: mode === 'resolved' }
       ),
-    [entityRecord]
+    [entityRecord, mode]
   );
 
   const {
@@ -154,6 +172,7 @@ export const EntityHighlightsAccordion: React.FC<{
     anonymizationFields: anonymizationFields?.data ?? [],
     entityType,
     entityIdentifier,
+    mode,
     storedSummary,
     entitySnapshot,
     refetchEntityRecord,
@@ -190,10 +209,11 @@ export const EntityHighlightsAccordion: React.FC<{
 
   // Dismiss state — stored per-entity per-space so dismiss is local to this browser session
   // and does not affect other users. The stored value is the risk score at dismissal time;
-  // if the score changes again the callout re-appears automatically.
+  // if the score changes again the callout re-appears automatically. Single mode keeps the
+  // historical key shape; the resolved-mode summary tracks a different score, so it gets its own.
   const staleDismissKey = `securitySolution.entitySummary.staleness.dismissed.${
     spaceId ?? 'default'
-  }.${entityType}.${entityIdentifier}`;
+  }.${entityType}.${entityIdentifier}${mode === 'resolved' ? `.${mode}` : ''}`;
   const [dismissedAtScore, setDismissedAtScore, removeDismissedAtScore] =
     useLocalStorage<number>(staleDismissKey);
 
@@ -274,6 +294,7 @@ export const EntityHighlightsAccordion: React.FC<{
     () =>
       isGeneratingSummary ||
       isPersistedSummaryLoading ||
+      isEntityRecordLoading ||
       // Connector / anonymization loading only matters for generation, not for
       // displaying an already-persisted summary to a read-only user.
       (canGenerate &&
@@ -284,6 +305,7 @@ export const EntityHighlightsAccordion: React.FC<{
       isGeneratingSummary,
       isLoadingConnectors,
       isPersistedSummaryLoading,
+      isEntityRecordLoading,
       isCheckingInferencePrivileges,
     ]
   );
@@ -296,7 +318,8 @@ export const EntityHighlightsAccordion: React.FC<{
 
   const hasAssistantResult = assistantResult != null;
   // First paint with nothing to show yet — replace the body with a skeleton.
-  const isLoadingInitialSummary = !hasAssistantResult && isPersistedSummaryLoading;
+  const isLoadingInitialSummary =
+    !hasAssistantResult && (isPersistedSummaryLoading || isEntityRecordLoading);
   // Content is already on screen; keep it mounted and show a thin progress bar
   // while the persisted summary refetches in the background
   const isSummaryRefreshing =
@@ -320,27 +343,26 @@ export const EntityHighlightsAccordion: React.FC<{
   }
 
   // hide section if user cannot generate a summary and there is no stored summary
-  if (!canGenerate && (isPersistedSummaryLoading || !hasReadablePersistedSummary)) {
+  if (!canGenerate && (isLoadingInitialSummary || !hasReadablePersistedSummary)) {
     return null;
   }
 
   return (
     <>
-      <EuiAccordion
-        initialIsOpen
-        id="entity-highlights"
-        buttonContent={
-          <EuiTitle size="xs">
-            <h3>
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.entityDetails.highlights.title"
-                defaultMessage="Entity summary"
-              />{' '}
-              <AiIcon iconType="sparkles" aria-hidden={true} />
-            </h3>
-          </EuiTitle>
+      <ExpandableSection
+        expanded={true}
+        gutterSize="none"
+        headingLevel="h3"
+        data-test-subj="entity-highlights-accordion"
+        title={
+          <>
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.entityDetails.highlights.title"
+              defaultMessage="Entity summary"
+            />{' '}
+            <AiIcon iconType="sparkles" aria-hidden={true} />
+          </>
         }
-        data-test-subj="asset-criticality-selector"
         extraAction={
           canGenerate &&
           (aiConnectors?.length ?? 0) > 0 && (
@@ -363,7 +385,6 @@ export const EntityHighlightsAccordion: React.FC<{
           )
         }
       >
-        <EuiSpacer size="m" />
         {showErrorBanner && (
           <>
             <EuiCallOut
@@ -502,7 +523,7 @@ export const EntityHighlightsAccordion: React.FC<{
             </EuiFlexGroup>
           </EuiPanel>
         )}
-      </EuiAccordion>
+      </ExpandableSection>
       <EuiHorizontalRule />
     </>
   );

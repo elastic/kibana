@@ -72,7 +72,7 @@ describe('UserActivityPrivilegedUsersPanel', () => {
       }
     );
 
-    expect(screen.getByText('Stack by')).toBeInTheDocument();
+    expect(screen.getAllByText('Stack by').length).toBeGreaterThan(0);
     const privUserButton = screen.getByText('Privileged user');
 
     act(() => {

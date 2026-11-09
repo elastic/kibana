@@ -7,7 +7,6 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import { dateRangeQuery } from '@kbn/es-query';
 import { buildCountQuery } from '../../utils/build_count_query';
 import { getEsqlColumnSchema } from '../../utils/get_esql_column_schema';
 import { DEFAULT_ESQL_QUERY_TIMEOUT_MS } from '../../utils/default_esql_query_timeout';
@@ -20,12 +19,14 @@ export async function describeDataset({
   end,
   index,
   kql,
+  signal = AbortSignal.timeout(DEFAULT_ESQL_QUERY_TIMEOUT_MS),
 }: {
   esClient: ElasticsearchClient;
   start: number;
   end: number;
   index: string | string[];
   kql?: string;
+  signal?: AbortSignal;
 }) {
   const [columns, sampleDocs, total] = await Promise.all([
     getEsqlColumnSchema({
@@ -33,7 +34,7 @@ export async function describeDataset({
       index,
       start,
       end,
-      signal: AbortSignal.timeout(DEFAULT_ESQL_QUERY_TIMEOUT_MS),
+      signal,
     }),
     getSampleDocumentsEsql({
       esClient,
@@ -41,9 +42,16 @@ export async function describeDataset({
       start,
       end,
       kql,
-      requestTimeout: DEFAULT_ESQL_QUERY_TIMEOUT_MS,
+      abortSignal: signal,
     }),
-    runEsqlPopulationCount({ esClient, index, start, end, kql }),
+    runEsqlPopulationCount({
+      esClient,
+      index,
+      start,
+      end,
+      kql,
+      signal,
+    }),
   ]);
 
   const schema = columns.map((column) => {
@@ -68,18 +76,22 @@ async function runEsqlPopulationCount({
   start,
   end,
   kql,
+  signal,
 }: {
   esClient: ElasticsearchClient;
   index: string | string[];
   start: number;
   end: number;
   kql?: string;
+  signal?: AbortSignal;
 }): Promise<number> {
-  const response = (await esClient.esql.query({
-    query: buildCountQuery({ index, kql }),
-    filter: { bool: { filter: dateRangeQuery(start, end) } },
-    drop_null_columns: true,
-  })) as unknown as ESQLSearchResponse;
+  const response = (await esClient.esql.query(
+    {
+      query: buildCountQuery({ index, start, end, kql }),
+      drop_null_columns: true,
+    },
+    { signal }
+  )) as unknown as ESQLSearchResponse;
   const total = response.values[0]?.[0];
 
   return typeof total === 'number' ? total : 0;

@@ -32,13 +32,13 @@ The Storybook aggregates stories from sibling packages including:
 Run the Content Management Storybook:
 
 ```bash
-yarn storybook content_management
+pnpm storybook content_management
 ```
 
 Build a static Storybook site:
 
 ```bash
-yarn storybook --site content_management
+pnpm storybook --site content_management
 ```
 
 ## Usage

@@ -9,8 +9,13 @@ import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { css } from '@emotion/react';
 import type { ActionButton, AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DashboardLocatorParams, DashboardState } from '@kbn/dashboard-plugin/common';
-import type { DashboardApi, DashboardRendererProps } from '@kbn/dashboard-plugin/public';
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
+import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
+import type {
+  DashboardApi,
+  DashboardCreationOptions,
+  DashboardRendererProps,
+} from '@kbn/dashboard-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { UseEuiTheme } from '@elastic/eui';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
@@ -113,8 +118,9 @@ export const DashboardCanvasContent = ({
 
   const getCreationOptions = useCallback(
     () =>
-      Promise.resolve({
+      Promise.resolve<DashboardCreationOptions>({
         getInitialInput: () => ({ ...dashboardState, viewMode: 'view' as const }),
+        changedBy: ['agent'],
       }),
     [dashboardState]
   );

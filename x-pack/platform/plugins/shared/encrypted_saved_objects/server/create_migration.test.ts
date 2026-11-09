@@ -163,7 +163,7 @@ describe('createMigration()', () => {
           },
           migrationContext
         );
-      }).toThrowError(`decryption failed!`);
+      }).toThrow(`decryption failed!`);
 
       expect(encryptionSavedObjectService.decryptAttributesSync).toHaveBeenCalledWith(
         {
@@ -215,7 +215,7 @@ describe('createMigration()', () => {
           },
           migrationContext
         );
-      }).toThrowError(`decryption failed!`);
+      }).toThrow(`decryption failed!`);
 
       expect(encryptionSavedObjectService.decryptAttributesSync).toHaveBeenCalledWith(
         {
@@ -337,7 +337,7 @@ describe('createMigration()', () => {
           },
           migrationContext
         );
-      }).toThrowError(`migration failed!`);
+      }).toThrow(`migration failed!`);
 
       expect(encryptionSavedObjectService.decryptAttributesSync).toHaveBeenCalledWith(
         {
@@ -389,7 +389,7 @@ describe('createMigration()', () => {
           },
           migrationContext
         );
-      }).toThrowError(`migration failed!`);
+      }).toThrow(`migration failed!`);
 
       expect(encryptionSavedObjectService.decryptAttributesSync).toHaveBeenCalledWith(
         {
@@ -441,7 +441,7 @@ describe('createMigration()', () => {
           },
           migrationContext
         );
-      }).toThrowError(`encryption failed!`);
+      }).toThrow(`encryption failed!`);
 
       expect(encryptionSavedObjectService.decryptAttributesSync).toHaveBeenCalledWith(
         {
@@ -501,7 +501,7 @@ describe('createMigration()', () => {
           },
           migrationContext
         );
-      }).toThrowError(`encryption failed!`);
+      }).toThrow(`encryption failed!`);
 
       expect(encryptionSavedObjectService.decryptAttributesSync).toHaveBeenCalledWith(
         {

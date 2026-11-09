@@ -9,7 +9,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, useIsWithinBreakpoints } from '@e
 import { css } from '@emotion/react';
 import { isDraftGetResponse, Streams } from '@kbn/streams-schema';
 import React, { type CSSProperties, type ReactNode, useMemo } from 'react';
-import { useSignificantEventsApp } from '../../hooks/use_significant_events_app';
 import { useStreamDetail } from '../../hooks/use_stream_detail';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { AboutPanel } from './about_panel';
@@ -28,17 +27,6 @@ export function StreamOverview() {
   const {
     features: { contentPacks },
   } = useStreamsPrivileges();
-  const {
-    significantEventsApp,
-    isAvailable,
-    isLoading: isAvailabilityLoading,
-  } = useSignificantEventsApp();
-  const KnowledgeIndicatorsPanel = useMemo(
-    () => significantEventsApp?.getKnowledgeIndicatorsPanel(),
-    [significantEventsApp]
-  );
-  const showKnowledgeIndicatorsPanel =
-    KnowledgeIndicatorsPanel != null && isAvailable && !isAvailabilityLoading;
 
   const isIngest = Streams.ingest.all.GetResponse.is(definition);
   const isDraft = isDraftGetResponse(definition);
@@ -63,13 +51,6 @@ export function StreamOverview() {
 
   const sidebarSections: OverviewSection[] = [
     { id: 'about', node: <AboutPanel />, show: true },
-    {
-      id: 'knowledge-indicators',
-      node: KnowledgeIndicatorsPanel ? (
-        <KnowledgeIndicatorsPanel streamName={definition.stream.name} />
-      ) : null,
-      show: showKnowledgeIndicatorsPanel,
-    },
     {
       id: 'import-export',
       node: <ImportExportPanel definition={definition} refreshDefinition={refresh} />,

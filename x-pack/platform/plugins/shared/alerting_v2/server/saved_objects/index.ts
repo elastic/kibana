@@ -45,9 +45,13 @@ export type ActionPolicyAttributesNotPartiallyUpdatable =
   | 'apiKeyOwner'
   | 'apiKeyCreatedByUser';
 
+/**
+ * The encrypted attribute and its AAD are banned as `never` rather than just omitted, because an
+ * `Omit` alone is defeated by a spread, which skips the excess property check.
+ */
 export type PartiallyUpdateableActionPolicyAttributes = Partial<
   Omit<ActionPolicySavedObjectAttributes, ActionPolicyAttributesNotPartiallyUpdatable>
->;
+> & { [K in ActionPolicyAttributesNotPartiallyUpdatable]?: never };
 
 const registerType = ({
   resource,

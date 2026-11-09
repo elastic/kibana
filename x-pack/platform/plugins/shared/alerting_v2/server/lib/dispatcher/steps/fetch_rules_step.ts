@@ -8,7 +8,8 @@
 import { inject, injectable } from 'inversify';
 import type { RulesSavedObjectServiceContract } from '../../services/rules_saved_object_service/rules_saved_object_service';
 import { RulesSavedObjectServiceInternalToken } from '../../services/rules_saved_object_service/tokens';
-import { savedObjectNamespacesToSpaceId } from '../../space_id_to_namespace';
+import { savedObjectNamespacesToSpaceId } from '../../saved_object_namespaces_to_space_id';
+import { AlertTriage, RuleCatalog } from '../state';
 import type {
   DispatcherPipelineState,
   DispatcherStep,
@@ -16,6 +17,7 @@ import type {
   Rule,
   RuleId,
 } from '../types';
+import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 
 @injectable()
 export class FetchRulesStep implements DispatcherStep {
@@ -26,28 +28,33 @@ export class FetchRulesStep implements DispatcherStep {
     private readonly rulesSavedObjectService: RulesSavedObjectServiceContract
   ) {}
 
-  public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
-    const { dispatchable = [] } = state;
+  public async execute(
+    state: Readonly<DispatcherPipelineState>,
+    _: LoggerServiceContract
+  ): Promise<DispatcherStepOutput> {
+    const { triage = AlertTriage.empty() } = state;
 
-    const uniqueRuleIds = Array.from(
-      new Set(dispatchable.map((ep) => ep.rule_id).filter((id): id is string => id !== null))
-    );
+    const uniqueRuleIds = triage.dispatchableRuleIds();
     if (uniqueRuleIds.length === 0) {
-      return { type: 'continue', data: { rules: new Map() } };
+      return { type: 'continue', data: { rules: RuleCatalog.empty() } };
     }
 
-    const result = await this.rulesSavedObjectService.findByIds(uniqueRuleIds);
+    const result = await this.rulesSavedObjectService.findByIds(uniqueRuleIds, {
+      fields: ['metadata', 'grouping'],
+    });
     const rules = new Map<RuleId, Rule>();
 
     for (const doc of result) {
+      const { metadata, grouping } = doc.attributes;
       rules.set(doc.id, {
         id: doc.id,
         spaceId: savedObjectNamespacesToSpaceId(doc.namespaces),
-        name: doc.attributes.metadata.name,
-        tags: doc.attributes.metadata.tags ?? [],
+        name: metadata.name,
+        routingTags: metadata.routing_tags ?? [],
+        groupingFields: grouping?.fields ?? [],
       });
     }
 
-    return { type: 'continue', data: { rules } };
+    return { type: 'continue', data: { rules: RuleCatalog.of(rules) } };
   }
 }

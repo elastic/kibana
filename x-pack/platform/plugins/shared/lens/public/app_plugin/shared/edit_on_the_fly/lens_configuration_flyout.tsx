@@ -21,9 +21,12 @@ import {
   EuiButtonIcon,
   EuiToolTip,
 } from '@elastic/eui';
-import { isOfAggregateQueryType } from '@kbn/es-query';
-import type { TypedLensSerializedState, LensDatasourceId } from '@kbn/lens-common';
-import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
+import type {
+  DatasourceStates,
+  TypedLensSerializedState,
+  LensDatasourceId,
+} from '@kbn/lens-common';
+import { LENS_DATASOURCE_ID, LENS_LAYER_TYPES, isTextBasedAttributes } from '@kbn/lens-common';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
 import type { TextBasedQueryState } from '../../../editor_frame_service/editor_frame/config_panel/types';
 import { getLensFeatureFlags } from '../../../get_feature_flags';
@@ -32,6 +35,7 @@ import {
   selectFramePublicAPI,
   useLensDispatch,
   selectHideTextBasedEditor,
+  selectSelectedLayerId,
 } from '../../../state_management';
 import { serializeVisualizationToSave } from '../../../state_management/shared_logic';
 import {
@@ -43,10 +47,13 @@ import { LayerConfiguration } from './layer_configuration_section';
 import type { EditConfigPanelProps } from './types';
 import { FlyoutWrapper } from './flyout_wrapper';
 import { SuggestionPanel } from '../../../editor_frame_service/editor_frame/suggestion_panel';
+import { useHasMultipleVisibleLayers } from '../../../editor_frame_service/editor_frame/config_panel/use_has_multiple_visible_layers';
 import { VisualizationToolbarWrapper } from '../../../editor_frame_service/editor_frame/visualization_toolbar';
 import { useEditorFrameService } from '../../../editor_frame_service/editor_frame_service_context';
 import { useApplicationUserMessages } from '../../get_application_user_messages';
-import { trackSaveUiCounterEvents } from '../../../lens_ui_telemetry';
+import { trackCreateUiCounterEvents, trackSaveUiCounterEvents } from '../../../lens_ui_telemetry';
+import { getInlineTelemetrySource } from '../../app_helpers';
+import { getParentContext } from '../../../react_embeddable/helper';
 import { useCurrentAttributes } from './use_current_attributes';
 import { deleteUserChartTypeFromSessionStorage } from '../../../chart_type_session_storage';
 import { LayerTabsWrapper } from './layer_tabs';
@@ -95,6 +102,7 @@ export function LensEditConfigurationFlyout({
   const { datasourceStates, visualization, isLoading, annotationGroups, searchSessionId } =
     useLensSelector((state) => state.lens);
   const hideTextBasedEditor = useLensSelector(selectHideTextBasedEditor);
+  const selectedLayerId = useLensSelector(selectSelectedLayerId);
 
   const activeVisualization =
     visualizationMap[visualization.activeId ?? attributes.visualizationType];
@@ -107,40 +115,57 @@ export function LensEditConfigurationFlyout({
 
   const dispatch = useLensDispatch();
 
+  const currentAttributes: TypedLensSerializedState['attributes'] | undefined =
+    useCurrentAttributes({
+      initialAttributes: attributes,
+    });
+
   const attributesChanged = useMemo<boolean>(() => {
     if (isNewPanel) return true;
 
-    const datasource = datasourceMap[datasourceId];
-
-    const rawState = datasourceStates[datasourceId].state;
-    const currentPersistable = rawState ? datasource.getPersistableState(rawState) : null;
-
     const previousAttrs = previousAttributes.current;
-    const previousDsState = previousAttrs.state.datasourceStates[datasourceId];
-    // Only textBased stores private state (e.g. indexPatternRefs) in attributes; normalize to persistable for comparison.
-    // formBased attributes are already persistable and getPersistableState expects private state.
-    let previousPersistable: typeof currentPersistable = null;
-    if (previousDsState) {
-      previousPersistable =
-        datasourceId === LENS_DATASOURCE_ID.TEXT_BASED
-          ? datasource.getPersistableState(previousDsState)
+    const previousReferences = [
+      ...previousAttrs.references,
+      ...(previousAttrs.state.internalReferences ?? []),
+    ];
+    // Persisted secondary datasources (for example, a form-based reference line on
+    // an ES|QL chart) must participate in dirty detection. Include the current active
+    // datasource as well so datasource conversions are still detected.
+    const datasourceIds = new Set<LensDatasourceId>([
+      ...(Object.keys(previousAttrs.state.datasourceStates) as LensDatasourceId[]),
+      datasourceId,
+    ]);
+
+    for (const id of datasourceIds) {
+      const currentDatasourceState = datasourceStates[id]?.state;
+      const previousDatasourceState = previousAttrs.state.datasourceStates[id];
+      if (!currentDatasourceState || !previousDatasourceState) {
+        return true;
+      }
+
+      const currentDatasource = datasourceMap[id as LensDatasourceId];
+      const currentPersistable = currentDatasource.getPersistableState(currentDatasourceState);
+      // Only textBased stores private state (e.g. indexPatternRefs) in attributes;
+      // formBased attributes are already persistable and getPersistableState expects private state.
+      const previousPersistable =
+        id === LENS_DATASOURCE_ID.TEXT_BASED
+          ? currentDatasource.getPersistableState(previousDatasourceState)
           : {
-              state: previousDsState,
-              references: previousAttrs.references,
+              state: previousDatasourceState,
+              references: previousReferences,
             };
+
+      if (
+        !currentDatasource.isEqual(
+          previousPersistable.state,
+          previousPersistable.references,
+          currentPersistable.state,
+          currentPersistable.references
+        )
+      ) {
+        return true;
+      }
     }
-
-    const datasourceStatesAreSame =
-      currentPersistable != null &&
-      previousPersistable != null &&
-      datasource.isEqual(
-        previousPersistable.state,
-        previousPersistable.references,
-        currentPersistable.state,
-        currentPersistable.references
-      );
-
-    if (!datasourceStatesAreSame) return true;
 
     const visualizationState = visualization.state;
     const customIsEqual = visualizationMap[previousAttrs.visualizationType]?.isEqual;
@@ -186,11 +211,27 @@ export function LensEditConfigurationFlyout({
               previousAttrs.references
             )
           : previousAttrs.state.datasourceStates[previousDatasourceId];
+        // restore every datasource state from the previous attributes, not only the
+        // active one, so non-active loaded states are not dropped on cancel
+        const allPreviousDatasourceStates: DatasourceStates = Object.fromEntries(
+          Object.entries(previousAttrs.state.datasourceStates).map(([id, state]) => [
+            id,
+            {
+              isLoading: false,
+              state:
+                datasourceMap[id as LensDatasourceId]?.injectReferencesToLayers?.(
+                  state,
+                  previousAttrs.references
+                ) ?? state,
+            },
+          ])
+        );
         updatePanelState?.(
           currentDatasourceState,
           previousAttrs.state.visualization,
           undefined,
-          previousDatasourceId
+          previousDatasourceId,
+          allPreviousDatasourceStates
         );
       } else {
         updateSuggestion?.(previousAttrs);
@@ -215,13 +256,7 @@ export function LensEditConfigurationFlyout({
     onCancelCallback,
   ]);
 
-  const textBasedMode = isOfAggregateQueryType(attributes.state.query);
-
-  const currentAttributes: TypedLensSerializedState['attributes'] | undefined =
-    useCurrentAttributes({
-      textBasedMode,
-      initialAttributes: attributes,
-    });
+  const textBasedMode = isTextBasedAttributes(attributes);
 
   const onTextBasedQueryStateChange = useCallback((state: TextBasedQueryState) => {
     setESQLQueryState(state);
@@ -265,12 +300,19 @@ export function LensEditConfigurationFlyout({
     if (telemetryEvents && telemetryEvents.length) {
       trackSaveUiCounterEvents(telemetryEvents);
     }
+    if (isNewPanel) {
+      trackCreateUiCounterEvents(
+        isTextBasedAttributes(attributesToSave) ? 'esql' : 'dsl',
+        getInlineTelemetrySource(getParentContext(parentApi)?.type)
+      );
+    }
 
     deleteUserChartTypeFromSessionStorage();
     closeFlyout?.();
   }, [
     visualization.activeId,
     savedObjectId,
+    isNewPanel,
     closeFlyout,
     onApplyCallback,
     visualization.state,
@@ -279,6 +321,7 @@ export function LensEditConfigurationFlyout({
     coreStart.notifications.toasts,
     saveByRef,
     updateByRefInput,
+    parentApi,
   ]);
 
   const { getUserMessages } = useApplicationUserMessages({
@@ -375,6 +418,25 @@ export function LensEditConfigurationFlyout({
       : [];
   }, [activeVisualization, visualization.state]);
 
+  // Suggestions are single-layer: applying one would silently drop the other
+  // layers (e.g. annotations, reference lines), so show the panel only for
+  // single-layer ES|QL charts edited via layer tabs. Hidden layers (e.g. the
+  // metric trendline) do not render as tabs and must not count here.
+  const hasMultipleVisibleLayers = useHasMultipleVisibleLayers({
+    activeVisualization,
+    visualizationState: visualization.state,
+    framePublicAPI,
+  });
+  const selectedLayerType =
+    selectedLayerId && visualization.state
+      ? activeVisualization?.getLayerType(selectedLayerId, visualization.state)
+      : undefined;
+  const isReferenceLineOrAnnotationLayer =
+    selectedLayerType === LENS_LAYER_TYPES.REFERENCELINE ||
+    selectedLayerType === LENS_LAYER_TYPES.ANNOTATIONS;
+  const showSuggestions =
+    !isReferenceLineOrAnnotationLayer && (!textBasedMode || !hasMultipleVisibleLayers);
+
   const showConvertToEsqlButton = useMemo(() => {
     return getLensFeatureFlags().enableEsqlConversion && !textBasedMode;
   }, [textBasedMode]);
@@ -439,6 +501,26 @@ export function LensEditConfigurationFlyout({
         </EuiFlexItem>
       ) : null}
     </>
+  );
+
+  const layerConfiguration = (
+    <LayerConfiguration
+      attributes={attributes}
+      dataLoading$={dataLoading$}
+      lensAdapters={lensAdapters}
+      getUserMessages={getUserMessages}
+      coreStart={coreStart}
+      startDependencies={startDependencies}
+      framePublicAPI={framePublicAPI}
+      setIsInlineFlyoutVisible={setIsInlineFlyoutVisible}
+      updateSuggestion={updateSuggestion}
+      setCurrentAttributes={setCurrentAttributes}
+      closeFlyout={closeFlyout}
+      parentApi={parentApi}
+      panelId={panelId}
+      editorContainer={editorContainer.current || undefined}
+      onTextBasedQueryStateChange={onTextBasedQueryStateChange}
+    />
   );
 
   const layerTabs = (
@@ -537,15 +619,12 @@ export function LensEditConfigurationFlyout({
                   flex: 1;
                 }
               }
-              /* Scrollable accordion content area with custom scrollbar styling.
-                 pointer-events handling allows drag-drop to work outside content bounds. */
+              /* EUI sets overflow: hidden here. A vertical scroll on this box
+                 also clips the chips drawn to the left of each row. */
               .euiAccordion__childWrapper {
                 ${euiScrollBarStyles(euiTheme)}
-                overflow-y: auto !important;
+                overflow: visible !important;
                 pointer-events: none;
-
-                padding-left: ${euiTheme.euiTheme.components.forms.maxWidth};
-                margin-left: -${euiTheme.euiTheme.components.forms.maxWidth};
                 > * {
                   pointer-events: auto;
                 }
@@ -576,99 +655,88 @@ export function LensEditConfigurationFlyout({
             </EuiFlexItem>
             {/* Visualization parameters accordion - grows when open to fill available space */}
             <EuiFlexItem
-              grow={isLayerAccordionOpen ? 1 : false}
+              grow={isReferenceLineOrAnnotationLayer || isLayerAccordionOpen ? 1 : false}
               css={css`
                 .euiAccordion__childWrapper {
                   flex: ${isLayerAccordionOpen ? 1 : 'none'};
                 }
-                padding: 0 ${euiTheme.euiTheme.size.base};
+                padding: ${isReferenceLineOrAnnotationLayer ? euiTheme.euiTheme.size.base : '0'}
+                  ${euiTheme.euiTheme.size.base} 0;
               `}
             >
-              <EuiAccordion
-                id="layer-configuration"
-                buttonContent={
-                  <EuiTitle
-                    size="xxs"
-                    css={css`
-                      padding: 2px;
-                    `}
-                  >
-                    <h5>
-                      {i18n.translate('xpack.lens.config.visualizationConfigurationLabel', {
-                        defaultMessage: 'Visualization parameters',
-                      })}
-                    </h5>
-                  </EuiTitle>
-                }
-                buttonProps={{
-                  paddingSize: 'm',
-                }}
-                initialIsOpen={isLayerAccordionOpen}
-                forceState={isLayerAccordionOpen ? 'open' : 'closed'}
-                onToggle={(status) => {
-                  if (status && isSuggestionsAccordionOpen) {
-                    setIsSuggestionsAccordionOpen(!status);
+              {isReferenceLineOrAnnotationLayer ? (
+                layerConfiguration
+              ) : (
+                <EuiAccordion
+                  id="layer-configuration"
+                  buttonContent={
+                    <EuiTitle
+                      size="xxs"
+                      css={css`
+                        padding: 2px;
+                      `}
+                    >
+                      <h5>
+                        {i18n.translate('xpack.lens.config.visualizationConfigurationLabel', {
+                          defaultMessage: 'Visualization parameters',
+                        })}
+                      </h5>
+                    </EuiTitle>
                   }
-                  if (status && isESQLResultsAccordionOpen) {
-                    setIsESQLResultsAccordionOpen(!status);
-                  }
-                  setIsLayerAccordionOpen(!isLayerAccordionOpen);
-                }}
-              >
-                <>
-                  <LayerConfiguration
-                    attributes={attributes}
-                    dataLoading$={dataLoading$}
-                    lensAdapters={lensAdapters}
-                    getUserMessages={getUserMessages}
-                    coreStart={coreStart}
-                    startDependencies={startDependencies}
-                    framePublicAPI={framePublicAPI}
-                    setIsInlineFlyoutVisible={setIsInlineFlyoutVisible}
-                    updateSuggestion={updateSuggestion}
-                    setCurrentAttributes={setCurrentAttributes}
-                    closeFlyout={closeFlyout}
-                    parentApi={parentApi}
-                    panelId={panelId}
-                    editorContainer={editorContainer.current || undefined}
-                    onTextBasedQueryStateChange={onTextBasedQueryStateChange}
-                  />
-                </>
-              </EuiAccordion>
+                  buttonProps={{
+                    paddingSize: 'm',
+                  }}
+                  initialIsOpen={isLayerAccordionOpen}
+                  forceState={isLayerAccordionOpen ? 'open' : 'closed'}
+                  onToggle={(status) => {
+                    if (status && isSuggestionsAccordionOpen) {
+                      setIsSuggestionsAccordionOpen(!status);
+                    }
+                    if (status && isESQLResultsAccordionOpen) {
+                      setIsESQLResultsAccordionOpen(!status);
+                    }
+                    setIsLayerAccordionOpen(!isLayerAccordionOpen);
+                  }}
+                >
+                  {layerConfiguration}
+                </EuiAccordion>
+              )}
             </EuiFlexItem>
 
-            <EuiFlexItem
-              grow={isSuggestionsAccordionOpen ? 1 : false}
-              data-test-subj="InlineEditingSuggestions"
-              css={css`
-                border-top: ${euiTheme.euiTheme.border.thin};
-                border-bottom: ${euiTheme.euiTheme.border.thin};
-                padding-left: ${euiTheme.euiTheme.size.base};
-                padding-right: ${euiTheme.euiTheme.size.base};
-                .euiAccordion__childWrapper {
-                  flex: ${isSuggestionsAccordionOpen ? 1 : 'none'};
-                }
-              `}
-            >
-              <SuggestionPanel
-                ExpressionRenderer={startDependencies.expressions.ReactExpressionRenderer}
-                frame={framePublicAPI}
-                core={coreStart}
-                nowProvider={startDependencies.data.nowProvider}
-                showOnlyIcons
-                wrapSuggestions
-                isAccordionOpen={isSuggestionsAccordionOpen}
-                toggleAccordionCb={(status) => {
-                  if (!status && isLayerAccordionOpen) {
-                    setIsLayerAccordionOpen(status);
+            {showSuggestions && (
+              <EuiFlexItem
+                grow={isSuggestionsAccordionOpen ? 1 : false}
+                data-test-subj="InlineEditingSuggestions"
+                css={css`
+                  border-top: ${euiTheme.euiTheme.border.thin};
+                  border-bottom: ${euiTheme.euiTheme.border.thin};
+                  padding-left: ${euiTheme.euiTheme.size.base};
+                  padding-right: ${euiTheme.euiTheme.size.base};
+                  .euiAccordion__childWrapper {
+                    flex: ${isSuggestionsAccordionOpen ? 1 : 'none'};
                   }
-                  if (status && isESQLResultsAccordionOpen) {
-                    setIsESQLResultsAccordionOpen(!status);
-                  }
-                  setIsSuggestionsAccordionOpen(!isSuggestionsAccordionOpen);
-                }}
-              />
-            </EuiFlexItem>
+                `}
+              >
+                <SuggestionPanel
+                  ExpressionRenderer={startDependencies.expressions.ReactExpressionRenderer}
+                  frame={framePublicAPI}
+                  core={coreStart}
+                  nowProvider={startDependencies.data.nowProvider}
+                  showOnlyIcons
+                  wrapSuggestions
+                  isAccordionOpen={isSuggestionsAccordionOpen}
+                  toggleAccordionCb={(status) => {
+                    if (!status && isLayerAccordionOpen) {
+                      setIsLayerAccordionOpen(status);
+                    }
+                    if (status && isESQLResultsAccordionOpen) {
+                      setIsESQLResultsAccordionOpen(!status);
+                    }
+                    setIsSuggestionsAccordionOpen(!isSuggestionsAccordionOpen);
+                  }}
+                />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
           {isModalVisible && esqlConvertAttributes ? (
             <ConvertToEsqlModal

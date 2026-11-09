@@ -33,6 +33,60 @@ describe('applyAuditOtelFieldMap', () => {
     expect(result).not.toHaveProperty('client.ip');
   });
 
+  it('replaces the user profile UID in user.id with the username', () => {
+    const result = applyAuditOtelFieldMap({ 'user.id': 'uid', 'user.name': 'jdoe' });
+
+    expect(result['user.id']).toBe('jdoe');
+    expect(result['user.name']).toBe('jdoe');
+  });
+
+  it('drops user.id when there is no username to key the user by', () => {
+    expect(applyAuditOtelFieldMap({ 'user.id': 'uid' })).not.toHaveProperty('user.id');
+    expect(applyAuditOtelFieldMap({ 'user.id': 'uid', 'user.name': '' })).not.toHaveProperty(
+      'user.id'
+    );
+  });
+
+  it('passes the service account target and workload of a service account event through', () => {
+    const result = applyAuditOtelFieldMap({
+      'user.id': 'kibana/nightshift-relay',
+      'user.name': 'kibana/nightshift-relay',
+      'user.target.id': 'kibana/nightshift-relay',
+      'user.target.name': 'nightshift-relay',
+      'kibana.workload.plugin_id': 'workflowsManagement',
+      'kibana.workload.type': 'workflow',
+      'kibana.workload.id': 'WORKFLOW_ID',
+    });
+
+    expect(result).toMatchObject({
+      'user.id': 'kibana/nightshift-relay',
+      'user.name': 'kibana/nightshift-relay',
+      'user.target.id': 'kibana/nightshift-relay',
+      'user.target.name': 'nightshift-relay',
+      'kibana.workload.plugin_id': 'workflowsManagement',
+      'kibana.workload.type': 'workflow',
+      'kibana.workload.id': 'WORKFLOW_ID',
+    });
+  });
+
+  it('maps kibana.authentication_realm to user.domain', () => {
+    const result = applyAuditOtelFieldMap({ 'kibana.authentication_realm': 'cloud-saml-kibana' });
+
+    expect(result['user.domain']).toBe('cloud-saml-kibana');
+    expect(result).not.toHaveProperty('kibana.authentication_realm');
+  });
+
+  it('passes user.email and user.full_name through unchanged', () => {
+    const result = applyAuditOtelFieldMap({
+      'user.name': 'jdoe',
+      'user.email': 'jdoe@example.com',
+      'user.full_name': 'Jane Doe',
+    });
+
+    expect(result['user.email']).toBe('jdoe@example.com');
+    expect(result['user.full_name']).toBe('Jane Doe');
+  });
+
   it('renames trace.id to http.request.id and x-forwarded-for to network.forwarded_ip', () => {
     const result = applyAuditOtelFieldMap({
       'trace.id': 'REQUEST_ID',
@@ -82,7 +136,6 @@ describe('applyAuditOtelFieldMap', () => {
     const result = applyAuditOtelFieldMap({
       'kibana.lookup_realm': 'cloud-saml-kibana',
       'kibana.authentication_provider': 'cloud-saml-kibana',
-      'kibana.authentication_realm': 'cloud-saml-kibana',
       'log.logger': 'plugins.security.audit.ecs',
       'service.id': '5b2de169-2785-441b-ae8c-186a1936b17d',
       'service.node.roles': ['ui'],
@@ -94,7 +147,6 @@ describe('applyAuditOtelFieldMap', () => {
     for (const key of [
       'kibana.lookup_realm',
       'kibana.authentication_provider',
-      'kibana.authentication_realm',
       'log.logger',
       'service.id',
       'service.node.roles',
@@ -156,6 +208,7 @@ describe('applyAuditOtelFieldMap', () => {
       'url.domain': 'localhost',
       'url.path': '/api/status',
       'url.port': 5601,
+      'user.id': 'uid',
       'user.name': 'jdoe',
     });
 
@@ -173,6 +226,8 @@ describe('applyAuditOtelFieldMap', () => {
       'source.address': '3.3.3.3',
       'source.ip': '3.3.3.3',
       'url.original': 'http://localhost/api/status',
+      'user.domain': 'cloud-saml-kibana',
+      'user.id': 'jdoe',
       'user.name': 'jdoe',
     });
   });

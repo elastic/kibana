@@ -1,0 +1,440 @@
+{
+  "sha1": "5124dd4e15104dc82a7abc65c29080e9c35a7540",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "a4e12ccd0873270-f2a8ca37a15ac25",
+      "title": "Dataset quality details - field limit root cause reports an exceeded field limit as the root cause of a past issue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/degraded_field_rca_field_limit.spec.ts",
+        "line": 287,
+        "column": 13
+      }
+    },
+    {
+      "id": "a4e12ccd0873270-1c6bde7adb33795",
+      "title": "Dataset quality details - field limit root cause offers increasing the field limit only where the assets can be edited",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/degraded_field_rca_field_limit.spec.ts",
+        "line": 308,
+        "column": 23
+      }
+    },
+    {
+      "id": "a4e12ccd0873270-f65ad642d1f0c31",
+      "title": "Dataset quality details - field limit root cause offers integration specific manual mitigations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/degraded_field_rca_field_limit.spec.ts",
+        "line": 370,
+        "column": 13
+      }
+    },
+    {
+      "id": "a4e12ccd0873270-e3ac318145c5651",
+      "title": "Dataset quality details - field limit root cause shows an error callout when the field limit cannot be raised",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/degraded_field_rca_field_limit.spec.ts",
+        "line": 415,
+        "column": 5
+      }
+    },
+    {
+      "id": "a4e12ccd0873270-d9502d9f7cda039",
+      "title": "Dataset quality details - field limit root cause lets the user raise the field limit of an integration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/degraded_field_rca_field_limit.spec.ts",
+        "line": 429,
+        "column": 76
+      }
+    },
+    {
+      "id": "d87fd2b522244fa-8e94cfb79161cb4",
+      "title": "Dataset quality details integrations hides the integration rows for a data set without an integration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/details_integrations.spec.ts",
+        "line": 87,
+        "column": 13
+      }
+    },
+    {
+      "id": "d87fd2b522244fa-70912f083b0ee48",
+      "title": "Dataset quality details integrations shows the integration rows and actions for an integration data set",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/details_integrations.spec.ts",
+        "line": 105,
+        "column": 7
+      }
+    },
+    {
+      "id": "d87fd2b522244fa-a1e6bc31b5d265e",
+      "title": "Dataset quality details integrations hides the dashboards action and links to the overview of a package without dashboards",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/details_integrations.spec.ts",
+        "line": 128,
+        "column": 9
+      }
+    },
+    {
+      "id": "d87fd2b522244fa-97d5aa5c631a586",
+      "title": "Dataset quality details integrations navigates to the index template of the integration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/details_integrations.spec.ts",
+        "line": 157,
+        "column": 9
+      }
+    },
+    {
+      "id": "d87fd2b522244fa-464c3cac58e2a2e",
+      "title": "Dataset quality details integrations navigates to the selected integration dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/details_integrations.spec.ts",
+        "line": 173,
+        "column": 9
+      }
+    },
+    {
+      "id": "895330fa1c11046-dbd73c9a19e7dc2",
+      "title": "Dataset quality privileges - index scoped keeps the app usable for a user scoped to a single data set type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/privileges_index_scoped.spec.ts",
+        "line": 126,
+        "column": 25
+      }
+    },
+    {
+      "id": "895330fa1c11046-65c020de5a91021",
+      "title": "Dataset quality privileges - index scoped renders the types filter for a user authorized for several types",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/privileges_index_scoped.spec.ts",
+        "line": 148,
+        "column": 15
+      }
+    },
+    {
+      "id": "895330fa1c11046-c3f4793566f9ace",
+      "title": "Dataset quality privileges - index scoped hides size information when no data stream can be monitored",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/privileges_index_scoped.spec.ts",
+        "line": 158,
+        "column": 11
+      }
+    },
+    {
+      "id": "895330fa1c11046-4b9b6a75bfd3d12",
+      "title": "Dataset quality privileges - index scoped warns per data set when only some can be monitored",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/privileges_index_scoped.spec.ts",
+        "line": 175,
+        "column": 88
+      }
+    },
+    {
+      "id": "895330fa1c11046-bc599062c1c6102",
+      "title": "Dataset quality privileges - index scoped hides \"View dashboards\" from a user without dashboard access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/privileges_index_scoped.spec.ts",
+        "line": 193,
+        "column": 94
+      }
+    },
+    {
+      "id": "270fa0b522f6e2f-d1a9177608a3cd5",
+      "title": "Dataset quality table filters shows full data set names when toggled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/table_filters.spec.ts",
+        "line": 91,
+        "column": 7
+      }
+    },
+    {
+      "id": "270fa0b522f6e2f-0f7c32565452e34",
+      "title": "Dataset quality table filters searches the data sets",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/table_filters.spec.ts",
+        "line": 119,
+        "column": 10
+      }
+    },
+    {
+      "id": "270fa0b522f6e2f-c629cba27ad8bc4",
+      "title": "Dataset quality table filters filters for an integration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/table_filters.spec.ts",
+        "line": 137,
+        "column": 10
+      }
+    },
+    {
+      "id": "270fa0b522f6e2f-d31df884b981917",
+      "title": "Dataset quality table filters filters for a namespace",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/table_filters.spec.ts",
+        "line": 160,
+        "column": 13
+      }
+    },
+    {
+      "id": "270fa0b522f6e2f-7d6d94e584da85c",
+      "title": "Dataset quality table filters filters for a quality",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/table_filters.spec.ts",
+        "line": 194,
+        "column": 9
+      }
+    },
+    {
+      "id": "57658b1b1579fd0-6f2ca6f7f7c7032",
+      "title": "Dataset quality table sorts by data set name and shows the namespace",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/table.spec.ts",
+        "line": 77,
+        "column": 48
+      }
+    },
+    {
+      "id": "57658b1b1579fd0-5382faf679fd09d",
+      "title": "Dataset quality table shows last activity only for data sets with recent data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/table.spec.ts",
+        "line": 84,
+        "column": 24
+      }
+    },
+    {
+      "id": "57658b1b1579fd0-56fb15664764bdc",
+      "title": "Dataset quality table renders the degraded docs percentage per data set",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/table.spec.ts",
+        "line": 131,
+        "column": 7
+      }
+    },
+    {
+      "id": "57658b1b1579fd0-e4dddf836ef3260",
+      "title": "Dataset quality table shows the data set name supplied by the integration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/table.spec.ts",
+        "line": 142,
+        "column": 59
+      }
+    },
+    {
+      "id": "57658b1b1579fd0-b0a295026700786",
+      "title": "Dataset quality table opens the data set in Discover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/table.spec.ts",
+        "line": 145,
+        "column": 20
+      }
+    },
+    {
+      "id": "57658b1b1579fd0-422459bfc2e8aa0",
+      "title": "Dataset quality table hides inactive data sets when toggled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/table.spec.ts",
+        "line": 151,
+        "column": 78
+      }
+    },
+    {
+      "id": "57658b1b1579fd0-74a17d1dc74bf21",
+      "title": "Dataset quality table renders a formatted size for every data set",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/tests/table.spec.ts",
+        "line": 136,
+        "column": 24
+      }
+    }
+  ]
+}

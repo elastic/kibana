@@ -75,7 +75,7 @@ describe('useAddToCase', function () {
     });
 
     expect(core.http?.post).toHaveBeenCalledTimes(1);
-    expect(core.http?.post).toHaveBeenCalledWith('/api/cases/test/comments', {
+    expect(core.http?.post).toHaveBeenCalledWith('/api/cases/test/attachments', {
       body: JSON.stringify({
         type: LENS_ATTACHMENT_TYPE,
         data: {

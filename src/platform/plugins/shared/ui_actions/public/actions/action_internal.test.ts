@@ -44,7 +44,7 @@ describe('ActionInternal', () => {
         },
       });
       await action.execute({});
-      expect(addWarningMock).toBeCalledTimes(1);
+      expect(addWarningMock).toHaveBeenCalledTimes(1);
     });
 
     test('execute function is async', async () => {
@@ -55,7 +55,7 @@ describe('ActionInternal', () => {
         },
       });
       await action.execute({});
-      expect(addWarningMock).toBeCalledTimes(1);
+      expect(addWarningMock).toHaveBeenCalledTimes(1);
     });
   });
 });

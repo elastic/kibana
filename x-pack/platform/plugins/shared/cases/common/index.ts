@@ -49,6 +49,7 @@ export {
   READ_CASES_CAPABILITY,
   UPDATE_CASES_CAPABILITY,
   INTERNAL_BULK_GET_CASES_URL,
+  COMMENT_ATTACHMENT_TYPE,
   LENS_ATTACHMENT_TYPE,
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
   CASE_COMMENT_SAVED_OBJECT,
@@ -68,6 +69,7 @@ export {
   LEGACY_INDICATOR_ATTACHMENT_TYPE,
   SECURITY_ENTITY_ATTACHMENT_TYPE,
   SECURITY_TIMELINE_ATTACHMENT_TYPE,
+  SECURITY_ATTACK_ATTACHMENT_TYPE,
   MANAGE_TEMPLATES_CAPABILITY,
   ML_ANOMALY_SWIMLANE_ATTACHMENT_TYPE,
   ML_ANOMALY_CHARTS_ATTACHMENT_TYPE,
@@ -80,7 +82,7 @@ export {
 
 export type { AttachmentAttributes } from './types/domain';
 export { ConnectorTypes, AttachmentType, ExternalReferenceStorageType } from './types/domain';
-export { getCasesFromAlertsUrl, getCaseFindUserActionsUrl, throwErrors } from './api';
+export { getCasesFromAlertsUrl, getCaseFindUserActionsUrl } from './api';
 export { createUICapabilities, type CasesUiCapabilities } from './utils/capabilities';
 export { getApiTags, type CasesApiTags } from './utils/api_tags';
 export { CaseMetricsFeature } from './types/api';
@@ -93,9 +95,11 @@ export { getSavedObjectsTypes } from './utils/saved_object_types';
 export {
   isEventAttachmentType,
   isAlertAttachmentType,
+  isAttackAttachmentType,
   isLegacyAttachmentRequest,
   isUnifiedEventAttachment,
   isUnifiedAlertAttachment,
+  isUnifiedCommentAttachment,
   isIndexMetadata,
   toStringArray,
   toStringOrStringArray,
@@ -103,9 +107,10 @@ export {
   isStringArray,
   getRuleInfo,
   getManualAlertIds,
+  buildAlertCaseAttachment,
 } from './utils/attachments';
 
 export { AttachmentActionType } from './utils/attachment_actions';
 
-export { buildAlertAttachmentPayloadSchema } from './types/domain_zod/attachment/alert/v2';
-export type { AlertAttachmentMetadata } from './types/domain_zod/attachment/alert/v2';
+export { buildAlertAttachmentPayloadSchema } from './types/domain/attachment/alert/v2';
+export type { AlertAttachmentMetadata } from './types/domain/attachment/alert/v2';

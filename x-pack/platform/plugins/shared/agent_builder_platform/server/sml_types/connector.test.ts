@@ -9,9 +9,11 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { SmlListItem } from '@kbn/agent-builder-sml-plugin/server';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
+import { CONNECTOR_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import { createConnectorSmlType } from './connector';
 
 jest.mock('@kbn/connector-specs', () => ({
+  ...jest.requireActual('@kbn/connector-specs'),
   getConnectorSpec: jest.fn(),
 }));
 
@@ -29,6 +31,8 @@ const mockFinder = {
 
 const mockSavedObjectsClient = {
   get: jest.fn(),
+  find: jest.fn(),
+  bulkGet: jest.fn(),
   createPointInTimeFinder: jest.fn().mockReturnValue(mockFinder),
 };
 
@@ -64,8 +68,8 @@ describe('connectorSmlType', () => {
   });
 
   describe('id', () => {
-    it('equals connector', () => {
-      expect(connectorSmlType.id).toBe('connector');
+    it('equals CONNECTOR_KI_TYPE', () => {
+      expect(connectorSmlType.id).toBe(CONNECTOR_KI_TYPE);
     });
   });
 
@@ -273,7 +277,6 @@ describe('connectorSmlType', () => {
         type: 'connector',
         title: 'My MCP Connector',
         content: 'My MCP Connector\nMCP\nModel Context Protocol connector',
-        discovery_labels: [{ kind: 'shortcut', value: 'connector/My MCP Connector' }],
       });
       expect(result).not.toHaveProperty('permissions');
     });
@@ -313,7 +316,7 @@ describe('connectorSmlType', () => {
       expect(result!.content).toBe('MCP\nModel Context Protocol connector');
     });
 
-    it('includes sub-action descriptions when spec has isTool actions', async () => {
+    it('includes sub-action descriptions when spec has actions', async () => {
       mockSavedObjectsClient.get.mockResolvedValue({
         id: 'conn-1',
         type: 'action',
@@ -369,19 +372,15 @@ describe('connectorSmlType', () => {
         type: 'connector',
         title: 'Basic Connector',
         content: 'Basic Connector\n.unknown',
-        discovery_labels: [{ kind: 'shortcut', value: 'connector/Basic Connector' }],
       });
     });
   });
 
   describe('getPermissions', () => {
-    it('returns the saved_object:action/get Kibana privilege', () => {
-      // The actions plugin gates connector reads on saved-object read access for the `action`
-      // type — `saved_object:action/get` is the correct privilege string. Pinning it here
-      // so a regression to a non-existent privilege name fails loudly.
+    it('returns the ai_index:connector/read action', () => {
       const permissions = connectorSmlType.getPermissions!('conn-1', createContext() as never);
       expect(permissions).toEqual({
-        kibana: { privileges: [{ name: 'saved_object:action/get' }] },
+        kibana: { privileges: { name: ['ai_index:connector/read'] } },
       });
     });
   });
@@ -396,12 +395,13 @@ describe('connectorSmlType', () => {
       });
 
       const result = await connectorSmlType.toAttachment!(
-        { origin_id: 'conn-1' } as never,
+        { references: [{ uri: 'connector://conn-1', relation: 'derived_from' }] } as never,
         createAttachmentContext() as never
       );
 
       expect(result).toEqual({
         type: AttachmentType.connector,
+        origin: 'conn-1',
         data: {
           connector_id: 'conn-1',
           connector_name: 'My MCP Connector',
@@ -414,7 +414,7 @@ describe('connectorSmlType', () => {
       mockSavedObjectsClient.get.mockRejectedValue(new Error('Not found'));
 
       const result = await connectorSmlType.toAttachment!(
-        { origin_id: 'missing-conn' } as never,
+        { references: [{ uri: 'connector://missing-conn', relation: 'derived_from' }] } as never,
         createAttachmentContext() as never
       );
 
@@ -433,17 +433,89 @@ describe('connectorSmlType', () => {
       });
 
       const result = await connectorSmlType.toAttachment!(
-        { origin_id: 'conn-1' } as never,
+        { references: [{ uri: 'connector://conn-1', relation: 'derived_from' }] } as never,
         createAttachmentContext() as never
       );
 
       expect(result).toEqual({
         type: AttachmentType.connector,
+        origin: 'conn-1',
         data: {
           connector_id: 'conn-1',
           connector_name: 'conn-1',
           connector_type: '.mcp',
         },
+      });
+    });
+  });
+
+  describe('searchByTitle', () => {
+    const connector = (id: string, name: string, actionTypeId = '.github') => ({
+      id,
+      attributes: { name, actionTypeId },
+    });
+
+    const search = async (
+      title: string,
+      constraints?: { connector: { ids?: string[] } },
+      size = 10
+    ) => {
+      const context = {
+        ...createAttachmentContext(),
+        savedObjectsClient: {} as never,
+      };
+      return connectorSmlType.searchByTitle!({ title, size, constraints }, context);
+    };
+
+    beforeEach(() => {
+      isChatCallableConnectorType.mockImplementation((type: string) => type !== '.index');
+      mockSavedObjectsClient.find.mockResolvedValue({
+        saved_objects: [
+          connector('c-1', 'Sales GitHub'),
+          connector('c-2', 'Other'),
+          connector('c-3', 'Sales index', '.index'),
+        ],
+      });
+    });
+
+    it('lists the callable connectors whose name matches, as the user, when the agent has no list', async () => {
+      expect(await search('SALES')).toEqual([{ originId: 'c-1', title: 'Sales GitHub' }]);
+
+      expect(mockGetActionSavedObjectsClient).toHaveBeenCalled();
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'action' })
+      );
+    });
+
+    describe('when the agent has a list of connectors', () => {
+      beforeEach(() => {
+        mockSavedObjectsClient.bulkGet.mockResolvedValue({
+          saved_objects: [
+            connector('c-2', 'Other'),
+            connector('c-1', 'Sales GitHub'),
+            connector('c-3', 'Sales index', '.index'),
+            { id: 'gone', error: { statusCode: 404, message: 'Not found' } },
+          ],
+        });
+      });
+
+      it('reads only those connectors, skipping missing ones and types the agent cannot call', async () => {
+        const ids = ['c-2', 'c-1', 'c-3', 'gone'];
+
+        expect(await search('', { connector: { ids } })).toEqual([
+          { originId: 'c-2', title: 'Other' },
+          { originId: 'c-1', title: 'Sales GitHub' },
+        ]);
+        expect(mockSavedObjectsClient.bulkGet).toHaveBeenCalledWith(
+          ids.map((id) => ({ type: 'action', id, fields: ['name', 'actionTypeId'] }))
+        );
+        expect(mockSavedObjectsClient.find).not.toHaveBeenCalled();
+      });
+
+      it('reads nothing when the agent has no connectors', async () => {
+        expect(await search('', { connector: { ids: [] } })).toEqual([]);
+        expect(mockSavedObjectsClient.bulkGet).not.toHaveBeenCalled();
+        expect(mockSavedObjectsClient.find).not.toHaveBeenCalled();
       });
     });
   });

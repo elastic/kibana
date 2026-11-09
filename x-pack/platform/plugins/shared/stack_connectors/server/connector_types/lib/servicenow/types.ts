@@ -37,7 +37,8 @@ export type { SNProductsConfigValue, SNProductsConfig } from '../../../../common
 export type ServiceNowExecutorResultData =
   | PushToServiceResponse
   | GetCommonFieldsResponse
-  | GetChoicesResponse;
+  | GetChoicesResponse
+  | ServiceNowIncident;
 
 export type ServiceNowEndpoint = 'table' | 'import_set' | 'oauth' | 'jwt' | 'event' | 'other';
 

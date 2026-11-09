@@ -17,7 +17,10 @@ export function isValidNamespace(
   allowBlankNamespace?: boolean,
   allowedNamespacePrefixes?: string[]
 ): { valid: boolean; error?: string } {
-  if (!namespace.trim() && allowBlankNamespace) {
+  // Only a truly empty string is treated as "blank" here. A whitespace-only value (e.g. " ")
+  // must continue on to isValidEntity below so it gets rejected by INVALID_NAMESPACE_CHARACTERS,
+  // instead of being short-circuited as if the namespace were intentionally left blank.
+  if (namespace === '' && allowBlankNamespace) {
     return { valid: true };
   }
 
@@ -120,6 +123,21 @@ function isValidEntity(
 }
 
 export const INVALID_NAMESPACE_CHARACTERS = /[\*\\/\?"<>|\s,#:-]+/;
+
+// Namespaces cannot contain `-`, so everything after the last one is the namespace.
+const DATA_STREAM_INDEX_PATTERN_REGEX = /^(logs|metrics)-[a-z0-9_.]+-([^-]+)$/;
+
+/**
+ * Whether `pattern` is a `logs-<dataset>-<namespace>` or `metrics-<dataset>-<namespace>` pattern
+ * accepted by `DATA_STREAM_API_ROUTES.HAS_DATA_PATTERN`, where `<namespace>` is `*` or a valid namespace.
+ */
+export function isValidDataStreamIndexPattern(pattern: string): boolean {
+  const namespace = DATA_STREAM_INDEX_PATTERN_REGEX.exec(pattern)?.[2];
+  if (namespace === undefined) {
+    return false;
+  }
+  return namespace === '*' || isValidNamespace(namespace).valid;
+}
 
 export const VALID_DATA_STREAM_TYPES: readonly PackageDataStreamTypes[] = [
   'logs',

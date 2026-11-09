@@ -17,6 +17,7 @@ import {
   ALERTING_V2_RULE_LIBRARY_APP_ID,
   ALERTING_V2_RULES_APP_ID,
 } from '@kbn/alerting-v2-constants';
+import { ACTION_POLICY_KI_TYPE, RULE_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import {
   ACTION_POLICY_SAVED_OBJECT_TYPE,
   RULE_SAVED_OBJECT_TYPE,
@@ -92,7 +93,7 @@ type AlertingV2UICapability = AlertingV2TopLevelUICapability | AlertingV2SubFeat
 
 type AlertingV2FeaturePrivilege = Pick<
   FeatureKibanaPrivileges,
-  'api' | 'ui' | 'savedObject' | 'alerts'
+  'api' | 'ui' | 'savedObject' | 'alerts' | 'aiIndex'
 > & {
   readonly api: readonly AlertingV2ApiPrivilege[];
   readonly ui: readonly AlertingV2TopLevelUICapability[];
@@ -126,8 +127,10 @@ export interface AlertingV2FeatureDefinition {
   readonly name: string;
   readonly managementApp: string;
   /**
-   * Extra management apps granted by this feature. Used when a feature owns
-   * more than one Stack Management page (e.g. Rules also owns Rule library).
+   * Extra Stack Management apps this feature owns. Granted only by the `all`
+   * privilege (e.g. Rules also owns the write-only Rule library page).
+   * Still listed on the feature `management` block so Core does not treat
+   * them as unowned/public.
    */
   readonly additionalManagementApps?: readonly string[];
   readonly privileges: {
@@ -149,6 +152,7 @@ export const ALERTING_V2_FEATURES = {
     additionalManagementApps: [ALERTING_V2_RULE_LIBRARY_APP_ID],
     privileges: {
       all: {
+        aiIndex: { read: [RULE_KI_TYPE] },
         api: [ALERTING_V2_API_PRIVILEGES.rules.read, ALERTING_V2_API_PRIVILEGES.rules.write],
         ui: [ALERTING_V2_UI_CAPABILITIES.rules.all, ALERTING_V2_UI_CAPABILITIES.rules.read],
         savedObject: {
@@ -159,6 +163,7 @@ export const ALERTING_V2_FEATURES = {
         },
       },
       read: {
+        aiIndex: { read: [RULE_KI_TYPE] },
         api: [ALERTING_V2_API_PRIVILEGES.rules.read],
         ui: [ALERTING_V2_UI_CAPABILITIES.rules.read],
         savedObject: {
@@ -201,6 +206,7 @@ export const ALERTING_V2_FEATURES = {
     managementApp: ALERTING_V2_ACTION_POLICIES_APP_ID,
     privileges: {
       all: {
+        aiIndex: { read: [ACTION_POLICY_KI_TYPE] },
         api: [
           ALERTING_V2_API_PRIVILEGES.actionPolicies.read,
           ALERTING_V2_API_PRIVILEGES.actionPolicies.write,
@@ -215,6 +221,7 @@ export const ALERTING_V2_FEATURES = {
         },
       },
       read: {
+        aiIndex: { read: [ACTION_POLICY_KI_TYPE] },
         api: [ALERTING_V2_API_PRIVILEGES.actionPolicies.read],
         ui: [ALERTING_V2_UI_CAPABILITIES.actionPolicies.read],
         savedObject: {

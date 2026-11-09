@@ -32,6 +32,15 @@ const renderValuesInput = (
 const getNumberInput = () => screen.getByLabelText(/number of values/i);
 
 describe('Values', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
+  });
+
   it('should render EuiFieldNumber correctly', () => {
     renderValuesInput();
     expect(getNumberInput()).toHaveValue(5);
@@ -47,7 +56,8 @@ describe('Values', () => {
   it('should run onChange function on update', async () => {
     const onChangeSpy = jest.fn();
     renderValuesInput({ onChange: onChangeSpy });
-    await userEvent.type(getNumberInput(), '{backspace}7');
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    await user.type(getNumberInput(), '{backspace}7');
 
     expect(getNumberInput()).toHaveValue(7);
     expect(onChangeSpy).toHaveBeenCalledTimes(1);
@@ -57,7 +67,8 @@ describe('Values', () => {
   it('should not run onChange function on update when value is out of 1-10000 range', async () => {
     const onChangeSpy = jest.fn();
     renderValuesInput({ onChange: onChangeSpy });
-    await userEvent.type(getNumberInput(), '{backspace}10007');
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    await user.type(getNumberInput(), '{backspace}10007');
 
     expect(getNumberInput()).toHaveValue(10007);
     expect(onChangeSpy).toHaveBeenCalledWith(10000);
@@ -70,7 +81,8 @@ describe('Values', () => {
     expect(
       screen.getByText('Value is lower than the minimum 1, the minimum value is used instead.')
     ).toBeInTheDocument();
-    await userEvent.type(getNumberInput(), '{backspace}{backspace}10007');
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    await user.type(getNumberInput(), '{backspace}{backspace}10007');
     expect(getNumberInput()).toBeInvalid();
     expect(
       screen.getByText('Value is higher than the maximum 10000, the maximum value is used instead.')
@@ -87,9 +99,10 @@ describe('Values', () => {
 
     renderValuesInput({ value: 123 }, { wrapper: Wrapper });
 
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     async function changeAndBlur(newValue: string) {
-      await userEvent.type(getNumberInput(), newValue);
-      await userEvent.click(
+      await user.type(getNumberInput(), newValue);
+      await user.click(
         screen.getByRole('button', { name: /testing blur by clicking outside button/i })
       );
     }

@@ -20,13 +20,13 @@ const queryClient = new QueryClient();
 
 const ONBOARDING_API_PATHS = {
   apiKey: '/internal/serverless_vectordb/api_key',
-  deploymentStats: '/internal/serverless_vectordb/deployment_stats',
 };
 
 export const renderApp = (
   core: CoreStart,
   services: ServerlessVectordbServices,
-  { element, history }: AppMountParameters
+  { element, history }: AppMountParameters,
+  onOnboardingExit: () => void
 ) => {
   ReactDOM.render(
     core.rendering.addContext(
@@ -35,7 +35,7 @@ export const renderApp = (
           <I18nProvider>
             <OnboardingApiPathsProvider paths={ONBOARDING_API_PATHS}>
               <Router history={history}>
-                <AppRoutes />
+                <AppRoutes onOnboardingExit={onOnboardingExit} />
               </Router>
             </OnboardingApiPathsProvider>
           </I18nProvider>

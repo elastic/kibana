@@ -12,8 +12,6 @@ import type { StreamsRouteRepository } from './routes';
 import type { AttachmentClient } from './lib/streams/attachments/attachment_client';
 import type { StreamsClient } from './lib/streams/client';
 import { config } from './config';
-import { PromptsConfigService } from './lib/prompts/prompts_config_service';
-import type { PromptsConfigAttributes } from './lib/prompts/prompts_config';
 
 export type {
   StreamsConfig,
@@ -22,10 +20,7 @@ export type {
   StreamsRouteRepository,
   AttachmentClient,
   StreamsClient,
-  PromptsConfigAttributes,
 };
-
-export { PromptsConfigService };
 
 export { config };
 

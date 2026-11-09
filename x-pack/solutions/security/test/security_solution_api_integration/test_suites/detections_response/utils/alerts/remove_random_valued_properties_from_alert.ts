@@ -13,6 +13,7 @@ import {
   CPS_SCOPE_EXPRESSION,
   CPS_SCOPE_LINKED_PROJECTS,
 } from '@kbn/rule-data-utils';
+import { stripMissingUiamApiKeyTagFromAlert } from '../missing_uiam_api_key_tag';
 
 export const removeRandomValuedPropertiesFromAlert = (alert: DetectionAlert | undefined) => {
   if (!alert) {
@@ -34,6 +35,6 @@ export const removeRandomValuedPropertiesFromAlert = (alert: DetectionAlert | un
     [CPS_SCOPE_EXPRESSION]: cpsExpression,
     [CPS_SCOPE_LINKED_PROJECTS]: cpsLinkedProjects,
     ...restOfAlert
-  } = alert;
+  } = stripMissingUiamApiKeyTagFromAlert(alert);
   return restOfAlert;
 };

@@ -29,6 +29,7 @@ import { registerErrorBudgetEmbeddable } from './lib/embeddables/register_error_
 import { registerOverviewEmbeddable } from './lib/embeddables/register_overview_embeddable';
 import { getScopedClusterClientWithInspect } from './lib/inspect/create_inspectable_scoped_cluster_client';
 import { registerBurnRateRule } from './lib/rules/register_burn_rate_rule';
+import { registerSloEbtEvents, SloTelemetryService, toEventOrigin } from './lib/telemetry';
 import { getSloServerRouteRepository } from './routes/utils/get_slo_server_route_repository';
 import { registerServerRoutes } from './routes/utils/register_routes';
 import type { SLORoutesDependencies } from './routes/utils/types';
@@ -58,6 +59,7 @@ import { OrphanSummaryCleanupTask } from './services/tasks/orphan_summary_cleanu
 import { StaleInstancesCleanupTask } from './services/tasks/stale_instances_cleanup_task/stale_instances_cleanup_task';
 import { TempSummaryCleanupTask } from './services/tasks/temp_summary_cleanup_task/temp_summary_cleanup_task';
 import { createTransformGenerators } from './services/transform_generators';
+import { REQUEST_RETRY_OPTIONS } from './utils/retry';
 import type {
   SLOConfig,
   SLOPluginSetupDependencies,
@@ -162,6 +164,8 @@ export class SLOPlugin
 
     registerBurnRateRule(plugins.alerting, core.http.basePath, this.isCpsEnabled);
     registerSloUsageCollector(plugins.usageCollection);
+    registerSloEbtEvents(core.analytics);
+    const telemetryService = new SloTelemetryService(core.analytics, this.logger.get('telemetry'));
 
     const mappedPlugins = mapValues(plugins, (value, key) => {
       return {
@@ -175,11 +179,29 @@ export class SLOPlugin
 
     registerDataProviders({ core, plugins, logger: this.logger });
 
+    const commonResourcesInstalled = core
+      .getStartServices()
+      .then(async ([coreStart]) => {
+        const esInternalClient = coreStart.elasticsearch.client.asInternalUser;
+        const sloResourceInstaller = new DefaultResourceInstaller(esInternalClient, this.logger);
+        await lockManager.withLock(LOCK_ID_RESOURCE_INSTALLER, () =>
+          sloResourceInstaller.ensureCommonResourcesInstalled()
+        );
+      })
+      .catch((err) => {
+        if (err instanceof LockAcquisitionError) {
+          this.logger.debug('Cannot install SLO resources, another process is already doing it');
+        } else {
+          this.logger.error(`Failed to install SLO common resources: ${err.message}`);
+        }
+      });
+
     registerServerRoutes({
       core,
       dependencies: {
         corePlugins: core,
         plugins: mappedPlugins,
+        commonResourcesInstalled,
         config: {
           isServerless: this.isServerless,
           isCpsEnabled: this.isCpsEnabled,
@@ -206,15 +228,17 @@ export class SLOPlugin
             isDev: this.isDev,
           });
 
-          const [dataViewsService, rulesClient, { id: spaceId }, racClient] = await Promise.all([
-            pluginsStart.dataViews.dataViewsServiceFactory(
-              soClient,
-              scopedClusterClient.asCurrentUser
-            ),
-            pluginsStart.alerting.getRulesClientWithRequest(request),
-            pluginsStart.spaces?.spacesService.getActiveSpace(request) ?? { id: 'default' },
-            pluginsStart.ruleRegistry.getRacClientWithRequest(request),
-          ]);
+          const [dataViewsService, rulesClient, { id: spaceId }, racClient, isCpsAvailable] =
+            await Promise.all([
+              pluginsStart.dataViews.dataViewsServiceFactory(
+                soClient,
+                scopedClusterClient.asCurrentUser
+              ),
+              pluginsStart.alerting.getRulesClientWithRequest(request),
+              pluginsStart.spaces?.spacesService.getActiveSpace(request) ?? { id: 'default' },
+              pluginsStart.ruleRegistry.getRacClientWithRequest(request),
+              this.isCpsEnabled ? plugins.cps?.isTierEligible() ?? false : false,
+            ]);
 
           const repository = new DefaultSLODefinitionRepository(soClient, logger);
           const compositeRepository = new DefaultCompositeSLORepository(soClient, logger);
@@ -222,19 +246,16 @@ export class SLOPlugin
           const templateRepository = new DefaultSLOTemplateRepository(soClient);
 
           const transformManager = new DefaultTransformManager(
-            createTransformGenerators(
-              spaceId,
-              dataViewsService,
-              this.isServerless,
-              this.isCpsEnabled
-            ),
+            createTransformGenerators(spaceId, dataViewsService, this.isServerless, isCpsAvailable),
             scopedClusterClient,
-            logger
+            logger,
+            { retryOptions: REQUEST_RETRY_OPTIONS }
           );
           const summaryTransformManager = new DefaultSummaryTransformManager(
-            new DefaultSummaryTransformGenerator(this.isServerless, this.isCpsEnabled),
+            new DefaultSummaryTransformGenerator(this.isServerless, isCpsAvailable),
             scopedClusterClient,
-            logger
+            logger,
+            { retryOptions: REQUEST_RETRY_OPTIONS }
           );
 
           return {
@@ -244,6 +265,7 @@ export class SLOPlugin
             dataViewsService,
             rulesClient,
             spaceId,
+            isCpsAvailable,
             repository,
             compositeRepository,
             settingsRepository,
@@ -251,6 +273,7 @@ export class SLOPlugin
             transformManager,
             summaryTransformManager,
             racClient,
+            telemetry: telemetryService.getReporter(toEventOrigin(request)),
           };
         },
       },
@@ -260,21 +283,6 @@ export class SLOPlugin
       }),
       isDev: this.isDev,
     });
-
-    core
-      .getStartServices()
-      .then(async ([coreStart, pluginStart]) => {
-        const esInternalClient = coreStart.elasticsearch.client.asInternalUser;
-        const sloResourceInstaller = new DefaultResourceInstaller(esInternalClient, this.logger);
-        await lockManager.withLock(LOCK_ID_RESOURCE_INSTALLER, () =>
-          sloResourceInstaller.ensureCommonResourcesInstalled()
-        );
-      })
-      .catch((err) => {
-        if (err instanceof LockAcquisitionError) {
-          this.logger.debug('Cannot install SLO resources, another process is already doing it');
-        }
-      });
 
     this.orphanSummaryCleanupTask = new OrphanSummaryCleanupTask({
       core,
@@ -308,6 +316,7 @@ export class SLOPlugin
       core,
       taskManager: plugins.taskManager,
       logFactory: this.initContext.logger,
+      telemetryService,
     });
 
     new HealthScanTask({

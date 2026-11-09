@@ -10,12 +10,20 @@
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { AxiosError } from 'axios';
+import { v4 as uuidv4 } from 'uuid';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
+import type { ConnectorIngressContext, HandleEventsResult } from '../../connector_spec_events';
+import {
+  DATADOG_ALERT_EVENT_ID,
+  DATADOG_ALERT_EVENT_KEY,
+  DATADOG_CONNECTOR_TYPE_ID,
+} from './constants';
 import {
   CancelDowntimeInputSchema,
   CreateIncidentInputSchema,
   DATADOG_SITE_API_URLS,
   DATADOG_SITES,
+  DatadogReceivedEventSchema,
   GetAlertEventsInputSchema,
   GetMonitorInputSchema,
   ListMonitorsInputSchema,
@@ -112,11 +120,41 @@ function formatDatadogError(action: string, error: unknown): Error {
 const joinCsv = (values: string[] | undefined): string | undefined =>
   values && values.length > 0 ? values.join(',') : undefined;
 
+const hasAlertIdentity = (
+  rawBody: unknown
+): rawBody is Record<'monitor_id' | 'scopes', unknown> => {
+  if (typeof rawBody !== 'object' || rawBody === null || Array.isArray(rawBody)) {
+    return false;
+  }
+
+  const { monitor_id: monitorId, scopes } = rawBody as Record<string, unknown>;
+  return monitorId !== undefined && monitorId !== null && scopes !== undefined && scopes !== null;
+};
+
+const handleDatadogEvents = async (ctx: ConnectorIngressContext): Promise<HandleEventsResult> => {
+  if (!hasAlertIdentity(ctx.rawBody)) {
+    return { type: 'emit', events: [] };
+  }
+
+  return {
+    type: 'emit',
+    events: [
+      {
+        eventId: DATADOG_ALERT_EVENT_ID,
+        correlationKey: uuidv4(),
+        payload: {
+          body: ctx.rawBody,
+        },
+      },
+    ],
+  };
+};
+
 export const Datadog: ConnectorSpec = {
   metadata: {
-    id: '.datadog',
+    id: DATADOG_CONNECTOR_TYPE_ID,
     displayName: 'Datadog',
-    description: i18n.translate('core.kibanaConnectorSpecs.datadog.metadata.description', {
+    description: i18n.translate('connectorSpecs.datadog.metadata.description', {
       defaultMessage:
         'List and mute monitors, manage downtimes and incidents, post events, and query metrics and logs in Datadog',
     }),
@@ -131,30 +169,27 @@ export const Datadog: ConnectorSpec = {
         type: 'basic',
         defaults: {},
         overrides: {
-          label: i18n.translate('core.kibanaConnectorSpecs.datadog.auth.basic.label', {
+          label: i18n.translate('connectorSpecs.datadog.auth.basic.label', {
             defaultMessage: 'API and Application keys',
           }),
           meta: {
             username: {
-              label: i18n.translate('core.kibanaConnectorSpecs.datadog.auth.apiKey.label', {
+              label: i18n.translate('connectorSpecs.datadog.auth.apiKey.label', {
                 defaultMessage: 'API Key',
               }),
-              helpText: i18n.translate('core.kibanaConnectorSpecs.datadog.auth.apiKey.helpText', {
+              helpText: i18n.translate('connectorSpecs.datadog.auth.apiKey.helpText', {
                 defaultMessage:
                   'Datadog API key from Organization Settings > API Keys. Required together with an Application Key for monitor, downtime, incident, event, metric, and log actions.',
               }),
             },
             password: {
-              label: i18n.translate('core.kibanaConnectorSpecs.datadog.auth.applicationKey.label', {
+              label: i18n.translate('connectorSpecs.datadog.auth.applicationKey.label', {
                 defaultMessage: 'Application Key',
               }),
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.datadog.auth.applicationKey.helpText',
-                {
-                  defaultMessage:
-                    'Datadog application key from Organization Settings > Application Keys. Required together with an API Key for monitor, downtime, incident, event, metric, and log actions.',
-                }
-              ),
+              helpText: i18n.translate('connectorSpecs.datadog.auth.applicationKey.helpText', {
+                defaultMessage:
+                  'Datadog application key from Organization Settings > Application Keys. Required together with an API Key for monitor, downtime, incident, event, metric, and log actions.',
+              }),
             },
           },
         },
@@ -175,10 +210,10 @@ export const Datadog: ConnectorSpec = {
           'Datadog site (region) where the account lives. Maps to the regional API host, e.g. datadoghq.com → api.datadoghq.com.'
         )
         .meta({
-          label: i18n.translate('core.kibanaConnectorSpecs.datadog.config.site.label', {
+          label: i18n.translate('connectorSpecs.datadog.config.site.label', {
             defaultMessage: 'Datadog site',
           }),
-          helpText: i18n.translate('core.kibanaConnectorSpecs.datadog.config.site.helpText', {
+          helpText: i18n.translate('connectorSpecs.datadog.config.site.helpText', {
             defaultMessage:
               'Select the Datadog site shown in your Datadog URL (for example datadoghq.com for US1, datadoghq.eu for EU1, us3.datadoghq.com for US3). Requests go to the matching api.* host.',
           }),
@@ -189,6 +224,7 @@ export const Datadog: ConnectorSpec = {
   actions: {
     listMonitors: {
       isTool: true,
+      scope: 'read',
       description:
         'List Datadog monitors and their alert states, optionally filtered by tags, name, or group state. Use this to enumerate alerting rules before acting on a specific monitor.',
       input: ListMonitorsInputSchema,
@@ -216,6 +252,7 @@ export const Datadog: ConnectorSpec = {
 
     getMonitor: {
       isTool: true,
+      scope: 'read',
       description:
         "Retrieve a single Datadog monitor's full definition and current overall state by numeric ID. Use the IDs returned by listMonitors.",
       input: GetMonitorInputSchema,
@@ -240,6 +277,7 @@ export const Datadog: ConnectorSpec = {
 
     getAlertEvents: {
       isTool: true,
+      scope: 'read',
       description:
         'Search Datadog alert-type events over a time range. Use this to triage and enrich a firing monitor with recent alert events from the event stream.',
       input: GetAlertEventsInputSchema,
@@ -269,6 +307,7 @@ export const Datadog: ConnectorSpec = {
 
     muteMonitor: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Mute a Datadog monitor (optionally for a scope or until a timestamp) so notifications are suppressed during maintenance or noise suppression.',
       input: MuteMonitorInputSchema,
@@ -295,6 +334,7 @@ export const Datadog: ConnectorSpec = {
 
     unmuteMonitor: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Unmute a previously muted Datadog monitor (optionally for a scope) so notifications resume.',
       input: UnmuteMonitorInputSchema,
@@ -321,6 +361,7 @@ export const Datadog: ConnectorSpec = {
 
     scheduleDowntime: {
       isTool: true,
+      scope: 'write',
       description:
         'Schedule a Datadog downtime for a scope (and optional monitor tags or monitor ID) over a time window so alerting is suppressed during deploys or maintenance.',
       input: ScheduleDowntimeInputSchema,
@@ -354,6 +395,7 @@ export const Datadog: ConnectorSpec = {
 
     cancelDowntime: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Cancel an active or scheduled Datadog downtime by ID so alerting resumes for that scope. Use the downtime ID returned by scheduleDowntime.',
       input: CancelDowntimeInputSchema,
@@ -373,6 +415,7 @@ export const Datadog: ConnectorSpec = {
 
     createIncident: {
       isTool: true,
+      scope: 'write',
       description:
         'Create a Datadog incident (for example when an alert crosses a severity threshold). Returns the new incident including its ID for later updateIncident calls. Requires Datadog Incident Management to be enabled on the account.',
       input: CreateIncidentInputSchema,
@@ -428,6 +471,7 @@ export const Datadog: ConnectorSpec = {
 
     updateIncident: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Update a Datadog incident (title, severity, customer impact, or state such as resolved). Provide at least one field to change. Use the incident ID from createIncident.',
       input: UpdateIncidentInputSchema,
@@ -477,6 +521,7 @@ export const Datadog: ConnectorSpec = {
 
     postEvent: {
       isTool: true,
+      scope: 'write',
       description:
         'Post an event to the Datadog Events Explorer so workflow actions (remediation ran, ticket opened) appear on Datadog timelines and dashboards.',
       input: PostEventInputSchema,
@@ -501,6 +546,7 @@ export const Datadog: ConnectorSpec = {
 
     queryTimeseries: {
       isTool: true,
+      scope: 'read',
       description:
         'Query Datadog timeseries metrics over a time range. Use this to confirm or enrich an alert with the metric current value before acting.',
       input: QueryTimeseriesInputSchema,
@@ -524,6 +570,7 @@ export const Datadog: ConnectorSpec = {
 
     searchLogs: {
       isTool: true,
+      scope: 'read',
       description:
         'Search Datadog logs over a time range and optional indexes. Use matching log events as evidence during alert triage or incident response. Requires Log Management with at least one valid index on the Datadog account; pass indexes (e.g. ["main"]) when the account does not search all indexes by default.',
       input: SearchLogsInputSchema,
@@ -550,6 +597,23 @@ export const Datadog: ConnectorSpec = {
         }
       },
     },
+  },
+
+  events: {
+    definitions: {
+      [DATADOG_ALERT_EVENT_KEY]: {
+        eventId: DATADOG_ALERT_EVENT_ID,
+        title: i18n.translate('connectorSpecs.datadog.events.alert.title', {
+          defaultMessage: 'Alert',
+        }),
+        description: i18n.translate('connectorSpecs.datadog.events.alert.description', {
+          defaultMessage:
+            'A Datadog alert webhook payload was accepted on the connector ingest URL.',
+        }),
+        eventSchema: DatadogReceivedEventSchema,
+      },
+    },
+    handleEvents: handleDatadogEvents,
   },
 
   skill: [

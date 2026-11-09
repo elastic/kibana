@@ -8,15 +8,48 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { MAX_WORKFLOW_ENTITY_ID_LENGTH } from './route_constants';
+import { ES_MAX_RESULT_WINDOW } from '../../../lib/workflow_history_pagination_error';
 
 export const idParamSchema = schema.object({
-  id: schema.string({ meta: { description: 'Workflow ID' } }),
+  id: schema.string({
+    maxLength: MAX_WORKFLOW_ENTITY_ID_LENGTH,
+    meta: { description: 'Workflow ID' },
+  }),
 });
 
 export const executionIdParamSchema = schema.object({
-  executionId: schema.string({ meta: { description: 'Workflow execution ID' } }),
+  executionId: schema.string({
+    maxLength: MAX_WORKFLOW_ENTITY_ID_LENGTH,
+    meta: { description: 'Workflow execution ID' },
+  }),
 });
 
 export const workflowIdParamSchema = schema.object({
-  workflowId: schema.string({ meta: { description: 'Workflow ID' } }),
+  workflowId: schema.string({
+    maxLength: MAX_WORKFLOW_ENTITY_ID_LENGTH,
+    meta: { description: 'Workflow ID' },
+  }),
 });
+
+/** Rejects `page * size` past the ES result window; `defaultSize` applies when `size` is omitted. */
+export const validatePaginationWindow =
+  (defaultSize: number) =>
+  ({ page, size }: { page?: number; size?: number }): string | undefined => {
+    if (page !== undefined && page * (size ?? defaultSize) > ES_MAX_RESULT_WINDOW) {
+      return `page * size must not exceed ${ES_MAX_RESULT_WINDOW}`;
+    }
+  };
+
+/** True when `searchAfter` is a JSON array with at least one sort value. */
+export const hasSearchAfterCursor = (searchAfter?: string): boolean => {
+  if (!searchAfter) {
+    return false;
+  }
+  try {
+    const parsed: unknown = JSON.parse(searchAfter);
+    return Array.isArray(parsed) && parsed.length > 0;
+  } catch {
+    return false;
+  }
+};

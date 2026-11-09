@@ -24,7 +24,6 @@ describe('Context API', () => {
       ...internalApi.attributes$.getValue(),
       state: {
         ...internalApi.attributes$.getValue().state,
-        query: { esql: 'FROM kibana_sample_data_logs | LIMIT 1' },
         filters: [{ meta: { alias: 'test', disabled: false, negate: false, index: 'test' } }],
       },
     });
@@ -71,7 +70,7 @@ describe('Context API', () => {
         ...internalApi.attributes$.getValue(),
         state: {
           ...internalApi.attributes$.getValue().state,
-          query: { esql: 'FROM kibana_sample_data_logs | LIMIT 1' },
+          query: { query: 'new-query', language: 'kuery' },
         },
       });
 
@@ -112,49 +111,68 @@ describe('Context API', () => {
     });
   });
 
-  describe('usesEsql$', () => {
-    it('should be false by default for a non-ES|QL query', () => {
+  describe('esql$', () => {
+    it('should be empty by default for a non-ES|QL query', () => {
       const { api, cleanup } = setupSearchContextApi();
-      expect(api.usesEsql$.getValue()).toBe(false);
+      expect(api.esql$.getValue()).toEqual([]);
       cleanup();
     });
 
-    it('should become true when the query attribute changes to an ES|QL query', () => {
+    it('should emit the ES|QL query when the query attribute changes to an ES|QL query', () => {
       const { api, cleanup, internalApi } = setupSearchContextApi();
 
       internalApi.updateAttributes({
         ...internalApi.attributes$.getValue(),
         state: {
           ...internalApi.attributes$.getValue().state,
-          query: { esql: 'FROM kibana_sample_data_logs | LIMIT 1' },
+          datasourceStates: {
+            textBased: {
+              layers: {
+                layer1: {
+                  query: { esql: 'FROM kibana_sample_data_logs | LIMIT 1' },
+                  columns: [],
+                },
+              },
+            },
+          },
         },
       });
 
-      expect(api.usesEsql$.getValue()).toBe(true);
+      expect(api.esql$.getValue().length).toBeGreaterThan(0);
       cleanup();
     });
 
-    it('should become false again when the query attribute changes back to a non-ES|QL query', () => {
+    it('should become empty again when the query attribute changes back to a non-ES|QL query', () => {
       const { api, cleanup, internalApi } = setupSearchContextApi();
 
       internalApi.updateAttributes({
         ...internalApi.attributes$.getValue(),
         state: {
           ...internalApi.attributes$.getValue().state,
-          query: { esql: 'FROM kibana_sample_data_logs | LIMIT 1' },
+          datasourceStates: {
+            textBased: {
+              layers: {
+                layer1: {
+                  query: { esql: 'FROM kibana_sample_data_logs | LIMIT 1' },
+                  columns: [],
+                },
+              },
+            },
+          },
         },
       });
-      expect(api.usesEsql$.getValue()).toBe(true);
+      expect(api.esql$.getValue().length).toBeGreaterThan(0);
 
       internalApi.updateAttributes({
         ...internalApi.attributes$.getValue(),
         state: {
           ...internalApi.attributes$.getValue().state,
+          datasourceStates: { formBased: { layers: {} } },
           query: { query: '', language: 'kuery' },
         },
       });
 
-      expect(api.usesEsql$.getValue()).toBe(false);
+      expect(api.esql$.getValue()).toEqual([]);
       cleanup();
     });
   });

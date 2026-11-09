@@ -6,14 +6,92 @@
  */
 
 import type { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
-import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import { z, lazySchema } from '@kbn/zod/v4';
+import { STREAMS_STATS_READ_PRIVILEGE } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
-import { getDataStreamsMeteringStats, processAsyncInChunks } from '../doc_counts/utils';
+import {
+  getDataStreamsMeteringStats,
+  getDataStreamsWithIndexNames,
+  processAsyncInChunks,
+  statsStreamNamesBodySchema,
+} from '../doc_counts/utils';
 
 export interface StreamStorageStat {
   stream: string;
   store_size_bytes: number;
 }
+
+const getStorageStatsForStreams = async ({
+  esClient,
+  meteringClient,
+  isServerless,
+  streamNames,
+}: {
+  esClient: ElasticsearchClient;
+  meteringClient: ElasticsearchClient;
+  isServerless: boolean;
+  streamNames?: readonly string[];
+}): Promise<StreamStorageStat[]> => {
+  // Streams without backing datastreams (query, draft) have no storage size associated with them.
+  const dataStreams = await getDataStreamsWithIndexNames({ esClient, streamNames });
+
+  if (!dataStreams.length) {
+    return [];
+  }
+
+  const dataStreamNames = dataStreams.map((ds) => ds.name);
+  const sizeByStream: Record<string, number> = {};
+
+  // Both stats APIs report sizes per backing index, so sum them up per stream.
+  const backingIndexToStream = new Map<string, string>();
+  for (const ds of dataStreams) {
+    for (const idx of ds.indices) {
+      backingIndexToStream.set(idx.index_name, ds.name);
+    }
+  }
+  const addIndexSize = (indexName: string, sizeBytes: number) => {
+    const stream = backingIndexToStream.get(indexName) ?? indexName;
+    sizeByStream[stream] = (sizeByStream[stream] ?? 0) + sizeBytes;
+  };
+
+  if (isServerless) {
+    const statsByIndex = await getDataStreamsMeteringStats({
+      esClient: meteringClient,
+      dataStreams: dataStreamNames,
+    });
+
+    for (const [indexName, { sizeBytes }] of Object.entries(statsByIndex)) {
+      addIndexSize(indexName, sizeBytes);
+    }
+  } else {
+    const statsResponses = await processAsyncInChunks<
+      string,
+      { indices?: Record<string, IndicesStatsIndicesStats> }
+    >({
+      items: dataStreamNames,
+      processChunk: async (chunk) =>
+        esClient.indices.stats({
+          index: chunk,
+          metric: ['store'],
+          // Use `total` (primaries + replicas) to stay consistent with getDslPhaseStats so
+          // per-phase sizes always sum to the stream total, even with replication > 0.
+          filter_path: 'indices.*.total.store.total_data_set_size_in_bytes',
+        }),
+    });
+
+    for (const statsResponse of statsResponses) {
+      if (!statsResponse.indices) continue;
+      for (const [indexName, stats] of Object.entries(statsResponse.indices)) {
+        addIndexSize(indexName, stats.total?.store?.total_data_set_size_in_bytes ?? 0);
+      }
+    }
+  }
+
+  return Object.entries(sizeByStream)
+    .filter(([, size]) => size > 0)
+    .map(([stream, size]) => ({ stream, store_size_bytes: size }));
+};
 
 const bulkStorageStatsRoute = createServerRoute({
   endpoint: 'GET /internal/streams/storage_stats',
@@ -22,73 +100,50 @@ const bulkStorageStatsRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_STATS_READ_PRIVILEGE],
     },
   },
   handler: async ({ getScopedClients, request, server }): Promise<StreamStorageStat[]> => {
     const { scopedClusterClient, isSecurityEnabled } = await getScopedClients({ request });
     const esClient = scopedClusterClient.asCurrentUser;
 
-    // Streams without backing datastreams (query, draft) have no storage size associated with them.
-    const { data_streams: dataStreams } = await esClient.indices.getDataStream();
+    return await getStorageStatsForStreams({
+      esClient,
+      meteringClient: isSecurityEnabled ? scopedClusterClient.asSecondaryAuthUser : esClient,
+      isServerless: server.isServerless,
+    });
+  },
+});
 
-    if (!dataStreams.length) {
-      return [];
-    }
+const storageStatsForStreamsRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/storage_stats',
+  options: {
+    access: 'internal',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_STATS_READ_PRIVILEGE],
+    },
+  },
+  params: lazySchema(() =>
+    z.object({
+      body: statsStreamNamesBodySchema,
+    })
+  ),
+  handler: async ({ getScopedClients, request, server, params }): Promise<StreamStorageStat[]> => {
+    const { scopedClusterClient, isSecurityEnabled } = await getScopedClients({ request });
+    const esClient = scopedClusterClient.asCurrentUser;
 
-    const dataStreamNames = dataStreams.map((ds) => ds.name);
-    const sizeByStream: Record<string, number> = {};
-
-    if (server.isServerless) {
-      const meteringClient = isSecurityEnabled ? scopedClusterClient.asSecondaryAuthUser : esClient;
-
-      const statsByStream = await getDataStreamsMeteringStats({
-        esClient: meteringClient,
-        dataStreams: dataStreamNames,
-      });
-
-      for (const [stream, stats] of Object.entries(statsByStream)) {
-        sizeByStream[stream] = stats.sizeBytes;
-      }
-    } else {
-      const backingIndexToStream = new Map<string, string>();
-      for (const ds of dataStreams) {
-        for (const idx of ds.indices) {
-          backingIndexToStream.set(idx.index_name, ds.name);
-        }
-      }
-
-      const statsResponses = await processAsyncInChunks<
-        string,
-        { indices?: Record<string, IndicesStatsIndicesStats> }
-      >({
-        items: dataStreamNames,
-        processChunk: async (chunk) =>
-          esClient.indices.stats({
-            index: chunk,
-            metric: ['store'],
-            // Use `total` (primaries + replicas) to stay consistent with getDslPhaseStats so
-            // per-phase sizes always sum to the stream total, even with replication > 0.
-            filter_path: 'indices.*.total.store.total_data_set_size_in_bytes',
-          }),
-      });
-
-      for (const statsResponse of statsResponses) {
-        if (!statsResponse.indices) continue;
-        for (const [indexName, stats] of Object.entries(statsResponse.indices)) {
-          const sizeBytes = stats.total?.store?.total_data_set_size_in_bytes ?? 0;
-          const stream = backingIndexToStream.get(indexName) ?? indexName;
-          sizeByStream[stream] = (sizeByStream[stream] ?? 0) + sizeBytes;
-        }
-      }
-    }
-
-    return Object.entries(sizeByStream)
-      .filter(([, size]) => size > 0)
-      .map(([stream, size]) => ({ stream, store_size_bytes: size }));
+    return await getStorageStatsForStreams({
+      esClient,
+      meteringClient: isSecurityEnabled ? scopedClusterClient.asSecondaryAuthUser : esClient,
+      isServerless: server.isServerless,
+      streamNames: params.body.streams,
+    });
   },
 });
 
 export const storageStatsRoutes = {
   ...bulkStorageStatsRoute,
+  ...storageStatsForStreamsRoute,
 };

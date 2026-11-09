@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-
+import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { getErrorMessage } from '../../../lib/streams/errors/parse_error';
 import { createServerRoute } from '../../create_server_route';
@@ -30,8 +30,8 @@ export const validateClassicStreamRoute = createServerRoute({
   },
   params: z.object({
     body: z.object({
-      name: z.string(),
-      selectedTemplateName: z.string(),
+      name: z.string().max(MAX_STREAM_NAME_LENGTH),
+      selectedTemplateName: z.string().max(256),
     }),
   }),
   handler: async ({ params, request, getScopedClients, logger }) => {

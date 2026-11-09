@@ -25,7 +25,7 @@ export const createMonitorAPI = async ({
 }: {
   monitor: SyntheticsMonitor | EncryptedSyntheticsMonitor;
 }): Promise<UpsertMonitorResponse> => {
-  return await apiService.post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS, monitor, null, {
+  return await apiService.post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS, monitor, {
     version: INITIAL_REST_VERSION,
     internal: true,
   });
@@ -50,14 +50,14 @@ export const inspectMonitorAPI = async ({
   hideParams?: boolean;
   monitor: SyntheticsMonitor | EncryptedSyntheticsMonitor;
 }): Promise<InspectMonitorAPIResponse> => {
-  return await apiService.post(SYNTHETICS_API_URLS.SYNTHETICS_MONITOR_INSPECT, monitor, undefined, {
+  return await apiService.post(SYNTHETICS_API_URLS.SYNTHETICS_MONITOR_INSPECT, monitor, {
     hideParams,
   });
 };
 
 export const fetchMonitorAPI = async ({ id }: { id: string }): Promise<SyntheticsMonitorWithId> => {
   return await apiService.get<SyntheticsMonitorWithId>(
-    SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', id)
+    SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR.replace('{id}', id)
   );
 };
 
@@ -70,7 +70,7 @@ export const updateMonitorAPI = async ({
   spaceId?: string;
   id: string;
 }): Promise<UpsertMonitorResponse> => {
-  return await apiService.put(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${id}`, monitor, null, {
+  return await apiService.put(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${id}`, monitor, {
     spaceId,
     internal: true,
     version: INITIAL_REST_VERSION,
@@ -95,7 +95,7 @@ export const resetMonitorAPI = async ({
   force?: boolean;
 }): Promise<{ id: string; reset: boolean } | ServiceLocationErrorsResponse> => {
   const url = SYNTHETICS_API_URLS.SYNTHETICS_MONITOR_RESET.replace('{monitorId}', id);
-  return await apiService.post(url, undefined, undefined, { force });
+  return await apiService.post(url, undefined, { force });
 };
 
 export const resetMonitorBulkAPI = async ({

@@ -9,8 +9,9 @@ import type { Rule } from './rule';
 
 export type BulkEditSkipReason = 'RULE_NOT_MODIFIED';
 export type BulkGapsFillingSkipReason = 'NO_GAPS_TO_FILL';
+export type BulkDeleteSkipReason = 'RULE_NOT_FOUND';
 
-type AllowedSkipReason = BulkEditSkipReason | BulkGapsFillingSkipReason;
+type AllowedSkipReason = BulkEditSkipReason | BulkGapsFillingSkipReason | BulkDeleteSkipReason;
 
 interface SkipResult<SkipReason extends AllowedSkipReason> {
   id: Rule['id'];
@@ -22,4 +23,9 @@ export type BulkEditActionSkipResult = SkipResult<BulkEditSkipReason>;
 
 export type BulkGapsFillingSkipResult = SkipResult<BulkGapsFillingSkipReason>;
 
-export type BulkActionSkipResult = BulkEditActionSkipResult | BulkGapsFillingSkipResult;
+export type BulkDeleteActionSkipResult = SkipResult<BulkDeleteSkipReason>;
+
+export type BulkActionSkipResult =
+  | BulkEditActionSkipResult
+  | BulkGapsFillingSkipResult
+  | BulkDeleteActionSkipResult;

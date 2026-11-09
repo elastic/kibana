@@ -10,7 +10,9 @@ import React from 'react';
 import { screen, within, fireEvent, waitFor } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 
-import { docLinksServiceMock } from '@kbn/core/public/mocks';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { coreMock, docLinksServiceMock } from '@kbn/core/public/mocks';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
 
@@ -78,6 +80,7 @@ jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useHistory: () => ({
     createHref: jest.fn(),
+    push: jest.fn(),
     location: {
       search: '',
     },
@@ -121,15 +124,19 @@ const testSort = (headerName: string) => {
   expect(getPolicyNames()).toMatchSnapshot();
 };
 
+const coreStart = coreMock.createStart();
+
 const TestComponent = ({ testPolicies }: { testPolicies: PolicyFromES[] }) => {
   return (
-    <KibanaContextProvider
-      services={{ getUrlForApp: () => '', docLinks: docLinksServiceMock.createStartContract() }}
-    >
-      <PolicyListContextProvider>
-        <PolicyList updatePolicies={jest.fn()} policies={testPolicies} />
-      </PolicyListContextProvider>
-    </KibanaContextProvider>
+    <KibanaRenderContextProvider {...coreStart}>
+      <KibanaContextProvider
+        services={{ getUrlForApp: () => '', docLinks: docLinksServiceMock.createStartContract() }}
+      >
+        <PolicyListContextProvider>
+          <PolicyList updatePolicies={jest.fn()} policies={testPolicies} />
+        </PolicyListContextProvider>
+      </KibanaContextProvider>
+    </KibanaRenderContextProvider>
   );
 };
 
@@ -148,8 +155,15 @@ describe('policy table', () => {
   });
 
   test('shows empty state when there are no policies', () => {
-    const { container } = renderWithI18n(<TestComponent testPolicies={[]} />);
-    expect(container).toMatchSnapshot();
+    renderWithI18n(<TestComponent testPolicies={[]} />);
+
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+      'Index Lifecycle Policies'
+    );
+    expect(
+      screen.getByRole('heading', { name: 'Create your first index lifecycle policy' })
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('createPolicyButton')).toHaveTextContent('Create policy');
   });
 
   test('changes pages when a pagination link is clicked on', () => {

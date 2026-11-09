@@ -7,7 +7,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-import type { Locator, ScoutPage } from '@kbn/scout';
+import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 export class AbstractPageObject {
@@ -26,8 +26,18 @@ const commonPrefix = (values: string[]) => {
 };
 
 export class IndexManagement extends AbstractPageObject {
+  constructor(page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+    super(page);
+  }
+
   async goto() {
-    await this.page.gotoApp('management/data/index_management');
+    // `gotoApp` resolves on the browser `load` event
+    // The load even occurs earlier so its less likely that goto will timeout.
+    await this.page.goto(this.kbnUrl.app('management/data/index_management'), {
+      waitUntil: 'commit',
+    });
+    // the indices table below is the readiness gate.
+    await expect(this.page.testSubj.locator('indexTable')).toBeVisible({ timeout: 30_000 });
   }
 
   async sectionHeadingText() {
@@ -246,15 +256,44 @@ export class IndexManagement extends AbstractPageObject {
       await expect(this.page.testSubj.locator('appHeaderBack')).toBeVisible();
     },
 
-    changeTab: async (
-      tab: 'indexDetailsTab-mappings' | 'indexDetailsTab-overview' | 'indexDetailsTab-settings'
-    ) => {
-      await this.page.testSubj.locator(tab).click();
-    },
-
     mappingsAddFieldButton: () => this.page.testSubj.locator('indexDetailsMappingsAddField'),
 
     editSettingsSwitch: () => this.page.testSubj.locator('indexDetailsSettingsEditModeSwitch'),
+
+    changeTab: async (tab: 'overview' | 'settings' | 'mappings' | 'stats') => {
+      await this.page.testSubj.locator(`indexDetailsTab-${tab}`).click();
+      await this.page
+        .locator(`[data-test-subj="indexDetailsTab-${tab}"][aria-selected="true"]`)
+        .waitFor({ state: 'visible' });
+      // The tabs that back a settings/stats a11y scan fetch on mount, so wait for
+      // their content — otherwise the scan can capture a loading spinner and pass
+      // vacuously. Overview and mappings render deterministically once selected.
+      const contentSubjByTab: Partial<Record<typeof tab, string>> = {
+        settings: 'indexDetailsSettingsCodeBlock',
+        stats: 'indexDetailsStatsCodeBlock',
+      };
+      const contentSubj = contentSubjByTab[tab];
+      if (contentSubj) {
+        await this.page.testSubj
+          .locator(contentSubj)
+          .waitFor({ state: 'visible', timeout: 30_000 });
+      }
+    },
+
+    /** Flips the settings tab from read-only to the editable JSON view. */
+    enableSettingsEditMode: async () => {
+      const editModeSwitch = this.page.testSubj.locator('indexDetailsSettingsEditModeSwitch');
+      await editModeSwitch.waitFor({ state: 'visible' });
+      await editModeSwitch.click();
+      // Edit mode swaps the read-only code block for the Monaco editor, so its
+      // detachment signals the mode change. `CodeEditor` honors only
+      // `dataTestSubj`, so `indexDetailsSettingsEditor` never renders — wait on
+      // Monaco's own DOM, which mounts in an effect after the swap.
+      await this.page.testSubj
+        .locator('indexDetailsSettingsCodeBlock')
+        .waitFor({ state: 'detached', timeout: 30_000 });
+      await expect(this.page.locator('.monaco-editor .view-lines')).toBeVisible();
+    },
   };
 
   indexTemplateWizard = {

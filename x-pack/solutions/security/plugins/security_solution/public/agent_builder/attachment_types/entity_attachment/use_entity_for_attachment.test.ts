@@ -161,4 +161,90 @@ describe('useEntityForAttachment', () => {
     await waitFor(() => expect(result.current.data?.isEntityInStore).toBe(true));
     expect(result.current.data?.watchlistIds).toEqual(['4be6078f-d987-471d-bd8f-41dd280437fb']);
   });
+
+  describe('resolved mode', () => {
+    const target = {
+      '@timestamp': '2026-10-29T10:00:00.000Z',
+      entity: {
+        id: 'host:gold',
+        name: 'gold',
+        source: 'okta',
+        risk: { calculated_score_norm: 13, calculated_level: 'Unknown' },
+        relationships: {
+          resolution: { risk: { calculated_score_norm: 83, calculated_level: 'High' } },
+        },
+        lifecycle: {
+          first_seen: '2026-10-10T00:00:00.000Z',
+          last_activity: '2026-10-29T09:00:00.000Z',
+        },
+        attributes: { watchlists: 'w1' },
+      },
+      asset: { criticality: 'low_impact' },
+    };
+    const alias = {
+      '@timestamp': '2026-10-29T11:00:00.000Z',
+      entity: {
+        id: 'host:alias',
+        source: ['entra'],
+        lifecycle: {
+          first_seen: '2026-10-01T00:00:00.000Z',
+          last_activity: '2026-10-29T08:00:00.000Z',
+        },
+        attributes: { watchlists: ['w2'] },
+      },
+      asset: { criticality: 'high_impact' },
+    };
+    const identifier: EntityAttachmentIdentifier = {
+      identifierType: 'host',
+      identifier: 'gold',
+      entityStoreId: 'host:gold',
+      mode: 'resolved',
+    };
+
+    it("shows the group's values, instead of the entity itself", async () => {
+      mockFetch.mockResolvedValue({ target, aliases: [alias], group_size: 2 });
+
+      const { result } = renderHook(() => useEntityForAttachment(identifier), {
+        wrapper: createWrapper(),
+      });
+
+      await waitFor(() => expect(result.current.data?.isEntityInStore).toBe(true));
+      expect(result.current.data).toMatchObject({
+        riskScore: 83,
+        riskLevel: 'High',
+        assetCriticality: 'high_impact',
+        sources: ['okta', 'entra'],
+        watchlistIds: ['w1', 'w2'],
+        firstSeen: '2026-10-01T00:00:00.000Z',
+        lastSeen: '2026-10-29T09:00:00.000Z',
+        timestamp: '2026-10-29T11:00:00.000Z',
+      });
+    });
+
+    it('shows only the entity itself without the mode', async () => {
+      mockFetch.mockResolvedValue({ records: [target] });
+
+      const { result } = renderHook(
+        () => useEntityForAttachment({ ...identifier, mode: undefined }),
+        { wrapper: createWrapper() }
+      );
+
+      await waitFor(() => expect(result.current.data?.isEntityInStore).toBe(true));
+      expect(result.current.data).toMatchObject({ riskScore: 13, assetCriticality: 'low_impact' });
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('reads the group in one request, from the resolution group route', async () => {
+      mockFetch.mockResolvedValue({ target, aliases: [alias], group_size: 2 });
+
+      const { result } = renderHook(() => useEntityForAttachment(identifier), {
+        wrapper: createWrapper(),
+      });
+
+      await waitFor(() => expect(result.current.data?.isEntityInStore).toBe(true));
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+      expect(mockFetch.mock.calls[0][0]).toMatch(/resolution\/group$/);
+      expect(mockFetch.mock.calls[0][1].query).toEqual({ entity_id: 'host:gold' });
+    });
+  });
 });

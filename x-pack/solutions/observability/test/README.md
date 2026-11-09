@@ -96,10 +96,10 @@ node scripts/functional_tests_server.js --config x-pack/solutions/observability/
 node scripts/functional_test_runner.js --config x-pack/solutions/observability/test/api_integration/apis/cases/config.ts
 
 # Start test server for functional tests
-node scripts/functional_tests_server.js --config x-pack/solutions/observability/test/functional/apps/dataset_quality/config.ts
+node scripts/functional_tests_server.js --config x-pack/solutions/observability/test/functional/apps/infra/config.ts
 
 # Run functional tests
-node scripts/functional_test_runner.js --config x-pack/solutions/observability/test/functional/apps/dataset_quality/config.ts
+node scripts/functional_test_runner.js --config x-pack/solutions/observability/test/functional/apps/infra/config.ts
 ```
 
 **Note**: The config paths shown above are examples. Replace it with the actual path to the config file for the test suite you want to run.

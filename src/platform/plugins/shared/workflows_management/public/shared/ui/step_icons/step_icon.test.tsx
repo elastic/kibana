@@ -144,19 +144,40 @@ describe('StepIcon', () => {
     });
   });
 
-  describe('execution status overrides', () => {
-    it('renders a loading spinner when execution status is RUNNING', () => {
+  describe('execution status does not replace type icons', () => {
+    it('keeps the http globe when execution status is RUNNING', () => {
       const { container } = render(
         <StepIcon stepType="http" executionStatus={ExecutionStatus.RUNNING} />
       );
-      expect(container.querySelector('.euiLoadingSpinner')).toBeInTheDocument();
+      expect(container.querySelector('[data-euiicon-type="globe"]')).toBeInTheDocument();
+      expect(container.querySelector('.euiLoadingSpinner')).not.toBeInTheDocument();
     });
 
-    it('renders hourglass icon when execution status is WAITING_FOR_INPUT', () => {
+    it('keeps the http globe when execution status is WAITING_FOR_INPUT', () => {
       const { container } = render(
         <StepIcon stepType="http" executionStatus={ExecutionStatus.WAITING_FOR_INPUT} />
       );
-      expect(container.querySelector('[data-euiicon-type="hourglass"]')).toBeInTheDocument();
+      expect(container.querySelector('[data-euiicon-type="globe"]')).toBeInTheDocument();
+      expect(container.querySelector('[data-euiicon-type="hourglass"]')).not.toBeInTheDocument();
+    });
+
+    it('keeps the http globe when execution status is WAITING_FOR_CHILD', () => {
+      const { container } = render(
+        <StepIcon stepType="http" executionStatus={ExecutionStatus.WAITING_FOR_CHILD} />
+      );
+      expect(container.querySelector('[data-euiicon-type="globe"]')).toBeInTheDocument();
+      expect(container.querySelector('[data-euiicon-type="hourglass"]')).not.toBeInTheDocument();
+    });
+
+    it('keeps brand logo colors when FAILED instead of tinting with danger', () => {
+      const { container } = render(
+        <StepIcon stepType="elasticsearch.esql" executionStatus={ExecutionStatus.FAILED} />
+      );
+      const icon = container.querySelector('[data-euiicon-type="logoElasticsearch"]');
+      expect(icon).toBeInTheDocument();
+      // Status color must not be passed through — logos use their own tokens.
+      expect(icon).not.toHaveAttribute('color', 'danger');
+      expect(container.innerHTML).not.toMatch(/fill:\s*[^;]*danger|fill:\s*#/);
     });
   });
 

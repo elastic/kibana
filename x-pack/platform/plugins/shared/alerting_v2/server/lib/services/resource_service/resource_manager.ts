@@ -7,7 +7,7 @@
 
 import { inject, injectable } from 'inversify';
 
-import type { IRetryService } from '../retry_service/alerting_retry_service';
+import type { IRetryService } from '../retry_service/types';
 import type { LoggerServiceContract } from '../logger_service/logger_service';
 import { LoggerServiceToken } from '../logger_service/logger_service';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
@@ -50,11 +50,14 @@ export interface ResourceManagerContract {
 export class ResourceManager implements ResourceManagerContract {
   private readonly resources = new Map<string, ResourceState>();
   private readonly startupResourceKeys = new Set<string>();
+  private readonly logger: LoggerServiceContract;
 
   constructor(
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract,
     @inject(RetryServiceToken) private readonly retryService: IRetryService
-  ) {}
+  ) {
+    this.logger = loggerService.forSubsystem('resources');
+  }
 
   /**
    * Register a resource initializer instance, keyed by a unique name.
@@ -101,7 +104,8 @@ export class ResourceManager implements ResourceManagerContract {
       // and consumers will fail fast when calling `waitUntilReady()` / `ensureResourceReady()`.
       void this.initResource(key).catch(() => {
         this.logger.debug({
-          message: `ResourceManager: Initialization for resource [${key}] failed`,
+          message: 'Resource initialization failed',
+          labels: { resource: key },
         });
       });
     }
@@ -128,7 +132,8 @@ export class ResourceManager implements ResourceManagerContract {
       }
 
       this.logger.debug({
-        message: `ResourceManager: optional resource [${key}] failed to initialize, continuing`,
+        message: 'Optional resource failed to initialize; continuing',
+        labels: { resource: key },
       });
     }
   }
@@ -171,10 +176,15 @@ export class ResourceManager implements ResourceManagerContract {
     state.status = 'pending';
 
     state.initializationPromise = this.retryService
-      .retry(() => state.initializer!.initialize())
+      .retry(() => state.initializer!.initialize(), {
+        logger: this.logger.withLabels({ resource: key }),
+      })
       .then(() => {
         state.status = 'ready';
-        this.logger.debug({ message: `ResourceManager: resource [${key}] is ready` });
+        this.logger.debug({
+          message: 'Resource is ready',
+          labels: { resource: key },
+        });
       })
       .catch((err) => {
         state.status = 'failed';
@@ -183,6 +193,7 @@ export class ResourceManager implements ResourceManagerContract {
         this.logger.error({
           error: err,
           code: ALERTING_LOG_CODES.RESOURCES_BOOTSTRAP_FAILED,
+          labels: { resource: key },
         });
 
         throw state.error;

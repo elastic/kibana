@@ -81,7 +81,7 @@ export const OpensearchAwsOpensearchService: ConnectorSpec = {
     id: '.opensearch_aws_opensearch_service',
     displayName: 'OpenSearch (AWS OpenSearch Service)',
     description: i18n.translate(
-      'core.kibanaConnectorSpecs.opensearchAwsOpensearchService.metadata.description',
+      'connectorSpecs.opensearchAwsOpensearchService.metadata.description',
       {
         defaultMessage:
           'Acknowledge and search alerts, manage monitors, retrieve Security Analytics findings, and search and index documents in OpenSearch',
@@ -103,13 +103,13 @@ export const OpensearchAwsOpensearchService: ConnectorSpec = {
         defaults: {},
         overrides: {
           label: i18n.translate(
-            'core.kibanaConnectorSpecs.opensearchAwsOpensearchService.auth.awsCredentials.label',
+            'connectorSpecs.opensearchAwsOpensearchService.auth.awsCredentials.label',
             { defaultMessage: 'AWS access key (Amazon OpenSearch Service)' }
           ),
           meta: {
             accessKeyId: {
               helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.opensearchAwsOpensearchService.auth.accessKeyId.helpText',
+                'connectorSpecs.opensearchAwsOpensearchService.auth.accessKeyId.helpText',
                 {
                   defaultMessage:
                     'An IAM access key with es:ESHttpGet, es:ESHttpPost, es:ESHttpPut, and es:ESHttpDelete permissions on the domain.',
@@ -123,14 +123,13 @@ export const OpensearchAwsOpensearchService: ConnectorSpec = {
         type: 'basic',
         defaults: {},
         overrides: {
-          label: i18n.translate(
-            'core.kibanaConnectorSpecs.opensearchAwsOpensearchService.auth.basic.label',
-            { defaultMessage: 'Username and password (self-managed cluster)' }
-          ),
+          label: i18n.translate('connectorSpecs.opensearchAwsOpensearchService.auth.basic.label', {
+            defaultMessage: 'Username and password (self-managed cluster)',
+          }),
           meta: {
             password: {
               helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.opensearchAwsOpensearchService.auth.basic.password.helpText',
+                'connectorSpecs.opensearchAwsOpensearchService.auth.basic.password.helpText',
                 {
                   defaultMessage:
                     'The internal user or Security-plugin backend role must be mapped to a role with the alerting and security-analytics cluster permissions used by this connector\u2019s actions, plus read/write on the indices you search or index into.',
@@ -151,7 +150,7 @@ export const OpensearchAwsOpensearchService: ConnectorSpec = {
         )
         .meta({
           label: i18n.translate(
-            'core.kibanaConnectorSpecs.opensearchAwsOpensearchService.config.endpoint.label',
+            'connectorSpecs.opensearchAwsOpensearchService.config.endpoint.label',
             { defaultMessage: 'Endpoint URL' }
           ),
         }),
@@ -163,6 +162,7 @@ export const OpensearchAwsOpensearchService: ConnectorSpec = {
 
     acknowledgeAlert: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Acknowledge one or more active alerts on a monitor so they stop re-notifying. Use getAlerts first to find the monitor ID and alert IDs. Returns which alert IDs succeeded and which failed (e.g. because they were already COMPLETED, ERROR, or ACKNOWLEDGED).',
       input: AcknowledgeAlertInputSchema,
@@ -178,6 +178,7 @@ export const OpensearchAwsOpensearchService: ConnectorSpec = {
 
     getAlerts: {
       isTool: true,
+      scope: 'read',
       description:
         'List OpenSearch Alerting alerts across all monitors, or for a specific monitor, optionally filtered by state or severity. Use this to drive triage — branch on the returned alerts and acknowledge, or dig into the monitor that raised them with getMonitor.',
       input: GetAlertsInputSchema,
@@ -201,6 +202,7 @@ export const OpensearchAwsOpensearchService: ConnectorSpec = {
 
     executeMonitor: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Run a monitor immediately instead of waiting for its schedule, evaluating its query and trigger conditions now. Set dryrun to true to see the trigger results without sending any notification actions.',
       input: ExecuteMonitorInputSchema,
@@ -216,6 +218,7 @@ export const OpensearchAwsOpensearchService: ConnectorSpec = {
 
     getMonitor: {
       isTool: true,
+      scope: 'read',
       description:
         'Fetch a monitor\u2019s full definition (schedule, inputs, triggers) and current enabled state by ID. This is the read most branching workflow steps depend on before calling enableMonitor, disableMonitor, updateMonitor, or executeMonitor.',
       input: MonitorIdInputSchema,
@@ -227,6 +230,7 @@ export const OpensearchAwsOpensearchService: ConnectorSpec = {
 
     enableMonitor: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Resume scheduled evaluation of a monitor that was previously disabled, e.g. to restore alerting after a maintenance window. Use getMonitor or searchMonitors first to find the monitor ID.',
       input: MonitorIdInputSchema,
@@ -244,6 +248,7 @@ export const OpensearchAwsOpensearchService: ConnectorSpec = {
 
     disableMonitor: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Suspend scheduled evaluation of a monitor without deleting it, e.g. to silence a known-noisy monitor during a maintenance window. Call enableMonitor afterward to restore it. Use getMonitor or searchMonitors first to find the monitor ID.',
       input: MonitorIdInputSchema,
@@ -261,6 +266,7 @@ export const OpensearchAwsOpensearchService: ConnectorSpec = {
 
     searchMonitors: {
       isTool: true,
+      scope: 'read',
       description:
         'Search for monitors by name, source index, or enabled state. Use this to locate the correct monitor ID before calling getMonitor, executeMonitor, enableMonitor, disableMonitor, updateMonitor, or deleteMonitor. Omit all filters to list monitors.',
       input: SearchMonitorsInputSchema,
@@ -277,7 +283,8 @@ export const OpensearchAwsOpensearchService: ConnectorSpec = {
 
     createMonitor: {
       // Not a tool: creates new detection logic (an admin-style operation), workflow steps only.
-      isTool: false,
+      isTool: true,
+      scope: 'write',
       description:
         'Create a new OpenSearch Alerting monitor (query-level, bucket-level, or doc-level) to stand up detection, e.g. as part of an automated onboarding workflow. See the "inputs" and "triggers" parameter descriptions for the exact shape each monitor type expects.',
       input: CreateMonitorInputSchema,
@@ -307,6 +314,7 @@ export const OpensearchAwsOpensearchService: ConnectorSpec = {
     updateMonitor: {
       // Not a tool: replaces the monitor's stored definition (an admin-style operation), workflow steps only.
       isTool: false,
+      scope: 'destroy',
       description:
         'Update an existing monitor\u2019s name, schedule, inputs, or triggers without recreating it. Only the fields you provide are changed; everything else on the monitor is preserved. Use getMonitor or searchMonitors first to find the monitor ID.',
       input: UpdateMonitorInputSchema,
@@ -332,6 +340,7 @@ export const OpensearchAwsOpensearchService: ConnectorSpec = {
     deleteMonitor: {
       // Not a tool: irreversible deletion, workflow steps only.
       isTool: false,
+      scope: 'destroy',
       description:
         'Permanently delete a monitor, completing the monitor lifecycle for teardown and cleanup. This does not delete alerts already raised by the monitor. Use getMonitor or searchMonitors first to confirm the monitor ID.',
       input: MonitorIdInputSchema,
@@ -349,6 +358,7 @@ export const OpensearchAwsOpensearchService: ConnectorSpec = {
 
     searchDetectors: {
       isTool: true,
+      scope: 'read',
       description:
         'Search for Security Analytics detectors by name or log type. Use this to find a detector ID or type before calling getDetectorFindings or acknowledgeDetectorAlert.',
       input: SearchDetectorsInputSchema,
@@ -361,6 +371,7 @@ export const OpensearchAwsOpensearchService: ConnectorSpec = {
 
     acknowledgeDetectorAlert: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Acknowledge one or more active alerts raised by a Security Analytics detector, closing the loop on a threat detection alongside the Alerting-plugin acknowledgeAlert action. Use getDetectorFindings or the detector alert list to find the detector ID and alert IDs.',
       input: AcknowledgeDetectorAlertInputSchema,
@@ -378,6 +389,7 @@ export const OpensearchAwsOpensearchService: ConnectorSpec = {
 
     getDetectorFindings: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve Security Analytics findings (matched Sigma rules or threat-intelligence hits) for a detector or detector type, to enrich an alert triage workflow with detection context. Either detectorId or detectorType is required — use searchDetectors first if you only know the detector name.',
       input: GetDetectorFindingsInputSchema,
@@ -400,6 +412,7 @@ export const OpensearchAwsOpensearchService: ConnectorSpec = {
 
     listIndices: {
       isTool: true,
+      scope: 'read',
       description:
         'List indices and their health, status, and document/storage size, optionally filtered by name or pattern. Use this to discover which index to pass to runQuery or indexDocument.',
       input: ListIndicesInputSchema,
@@ -415,6 +428,7 @@ export const OpensearchAwsOpensearchService: ConnectorSpec = {
 
     runQuery: {
       isTool: true,
+      scope: 'read',
       description:
         'Run a search query against an index using the OpenSearch Query DSL, to gather evidence from cluster data during triage. Pass the full search request body (query, aggregations, sort, size, etc.) in the "query" parameter.',
       input: RunQueryInputSchema,
@@ -427,6 +441,7 @@ export const OpensearchAwsOpensearchService: ConnectorSpec = {
 
     indexDocument: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Write a document to an index, giving a workflow a write-back path for enrichment or audit output (e.g. recording triage notes). Provide an explicit "id" to create or fully replace a specific document, or omit it to let OpenSearch generate one.',
       input: IndexDocumentInputSchema,
@@ -462,12 +477,9 @@ export const OpensearchAwsOpensearchService: ConnectorSpec = {
 
   test: {
     enabled: true,
-    description: i18n.translate(
-      'core.kibanaConnectorSpecs.opensearchAwsOpensearchService.test.description',
-      {
-        defaultMessage: 'Verifies the connection by checking cluster health',
-      }
-    ),
+    description: i18n.translate('connectorSpecs.opensearchAwsOpensearchService.test.description', {
+      defaultMessage: 'Verifies the connection by checking cluster health',
+    }),
     handler: async (ctx) => {
       const health = await callOpenSearchApi<{ status?: string; cluster_name?: string }>(
         ctx,

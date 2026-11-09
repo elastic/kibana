@@ -42,12 +42,12 @@ for raw_suite in "${requested_suites[@]}"; do
       EVAL_MODEL_GROUPS: "${EVAL_MODEL_GROUPS:-}"
       EVAL_CONNECTOR_ID: "${EVAL_CONNECTOR_ID:-}"
       EVAL_SLACK_NOTIFICATION_CHANNEL: "${EVAL_SLACK_NOTIFICATION_CHANNEL:-}"
-      EVAL_TRIAGE_MODEL_ID: "${EVAL_TRIAGE_MODEL_ID:-}"
       EVAL_SUITE_ID: "${suite_one}"
       EVAL_FANOUT: "1"
       EVAL_SERVER_CONFIG_SET: "${EVAL_SERVER_CONFIG_SET:-}"
       EVAL_GREP: "${EVAL_GREP:-}"
       EVAL_REPETITIONS: "${EVAL_REPETITIONS:-}"
+      EVAL_CONCURRENCY: "${EVAL_CONCURRENCY:-}"
       KIBANA_BUILD_ID: "${KIBANA_BUILD_ID:-}"
     timeout_in_minutes: ${EVAL_STEP_TIMEOUT_IN_MINUTES:-120}
     agents:
@@ -56,6 +56,7 @@ for raw_suite in "${requested_suites[@]}"; do
       provider: gcp
       machineType: n2-standard-8
       preemptible: true
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     retry:
       automatic:
         - exit_status: "-1"

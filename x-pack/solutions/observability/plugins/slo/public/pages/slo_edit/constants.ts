@@ -35,6 +35,8 @@ import type { CreateSLOForm } from './types';
 
 export const MAX_WIDTH = 900;
 
+export const HISTOGRAM_FIELD_TYPES: readonly string[] = ['histogram', 'exponential_histogram'];
+
 export const SLI_OPTIONS: Array<{
   value: IndicatorType;
   text: string;
@@ -210,7 +212,6 @@ export const SYNTHETICS_AVAILABILITY_DEFAULT_VALUES: SyntheticsAvailabilityIndic
 export const SETTINGS_DEFAULT_VALUES = {
   frequency: 1,
   preventInitialBackfill: false,
-  preventCrossProjectSearch: false,
   syncDelay: 1,
   syncField: null,
 };

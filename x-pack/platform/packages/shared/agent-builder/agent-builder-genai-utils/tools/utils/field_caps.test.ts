@@ -9,7 +9,12 @@ import type {
   FieldCapsResponse,
   FieldCapsFieldCapability,
 } from '@elastic/elasticsearch/lib/api/types';
-import { processFieldCapsResponse, processFieldCapsResponsePerIndex } from './field_caps';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import {
+  fetchFieldCaps,
+  processFieldCapsResponse,
+  processFieldCapsResponsePerIndex,
+} from './field_caps';
 
 const caps = (
   source: { type: string } & Partial<FieldCapsFieldCapability>
@@ -20,6 +25,39 @@ const caps = (
     ...source,
   };
 };
+
+describe('fetchFieldCaps', () => {
+  let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+
+  beforeEach(() => {
+    esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.fieldCaps.mockResolvedValue({ indices: ['index_1'], fields: {} });
+  });
+
+  it('requests all fields for the given index', async () => {
+    await fetchFieldCaps({ index: 'index_1', esClient });
+
+    expect(esClient.fieldCaps).toHaveBeenCalledWith(
+      expect.objectContaining({ index: 'index_1', fields: ['*'] })
+    );
+  });
+
+  it('excludes frozen tier indices via index_filter by default', async () => {
+    await fetchFieldCaps({ index: 'index_1', esClient });
+
+    expect(esClient.fieldCaps.mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        index_filter: { bool: { must_not: [{ term: { _tier: 'data_frozen' } }] } },
+      })
+    );
+  });
+
+  it('omits index_filter when frozen tier indices are included', async () => {
+    await fetchFieldCaps({ index: 'index_1', esClient, includeFrozen: true });
+
+    expect(esClient.fieldCaps.mock.calls[0][0]).not.toHaveProperty('index_filter');
+  });
+});
 
 describe('processFieldCapsResponse', () => {
   it('returns the corresponding index list', () => {

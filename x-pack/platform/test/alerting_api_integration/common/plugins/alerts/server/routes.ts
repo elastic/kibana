@@ -17,6 +17,7 @@ import type {
   SavedObject,
 } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { InvalidatePendingApiKey } from '@kbn/alerting-plugin/server/types';
 import type { RawRule } from '@kbn/alerting-plugin/server/types';
 import type {
@@ -37,6 +38,7 @@ import { AlertingEventLogger } from '@kbn/alerting-plugin/server/lib/alerting_ev
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import type { FixtureStartDeps } from './plugin';
 import { retryIfConflicts } from './lib/retry_if_conflicts';
+import { RULE_CREATING_TASK_TYPE } from './task_types';
 
 export function defineRoutes(
   core: CoreSetup<FixtureStartDeps>,
@@ -433,7 +435,7 @@ export function defineRoutes(
         await actionsClient.bulkEnqueueExecution([
           {
             id: req.params.id,
-            spaceId: spaces ? spaces.spacesService.getSpaceId(req) : 'default',
+            spaceId: spaces ? spaces.spacesService.getSpaceId(req) : DEFAULT_SPACE_ID,
             executionId: uuidv4(),
             apiKey: createAPIKeyResult
               ? Buffer.from(`${createAPIKeyResult.id}:${createAPIKeyResult.api_key}`).toString(
@@ -518,6 +520,76 @@ export function defineRoutes(
         return res.ok({ body: await taskManager.runSoon(taskId) });
       } catch (err) {
         return res.ok({ body: { id: taskId, error: `${err}` } });
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: `/api/alerts_fixture/task_manager_api_key_invalidation/_run_soon`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: {},
+    },
+    async function (
+      _: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> {
+      // Task Manager drains the keys it marked for invalidation with its own task, which is
+      // separate from the alerting one above even though both read the same saved objects.
+      const taskId = 'invalidate_api_keys';
+      try {
+        const taskManager = await taskManagerStart;
+        return res.ok({ body: await taskManager.runSoon(taskId) });
+      } catch (err) {
+        return res.ok({ body: { id: taskId, error: `${err}` } });
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: `/api/alerts_fixture/{ruleName}/_schedule_rule_creating_task`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: {
+        params: schema.object({
+          ruleName: schema.string(),
+        }),
+        body: schema.object({
+          cloneApiKey: schema.boolean(),
+        }),
+      },
+    },
+    async function (
+      _: RequestHandlerContext,
+      req: KibanaRequest<{ ruleName: string }, any, { cloneApiKey: boolean }, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> {
+      try {
+        const taskManager = await taskManagerStart;
+        // `cloneApiKey` mirrors how Agent Builder schedules its run-agent task: Task Manager
+        // grants the task a key of its own, which it invalidates once the task is removed.
+        const task = await taskManager.schedule(
+          {
+            taskType: RULE_CREATING_TASK_TYPE,
+            params: { ruleName: req.params.ruleName, cloneApiKey: req.body.cloneApiKey },
+            state: {},
+          },
+          { request: req, cloneApiKey: true }
+        );
+        return res.ok({ body: { id: task.id } });
+      } catch (err) {
+        return res.badRequest({ body: err });
       }
     }
   );
@@ -806,6 +878,43 @@ export function defineRoutes(
         }
 
         return res.ok({ body: err.message });
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: '/api/alerts_fixture/{id}/_test_get_sandbox_credentials',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: {
+        params: schema.object({
+          id: schema.string({ maxLength: 128 }),
+        }),
+      },
+    },
+    async (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> => {
+      const [_, { actions }] = await core.getStartServices();
+      const actionsClient = await actions.getActionsClientWithRequest(req);
+
+      try {
+        return res.ok({
+          body: await actionsClient.getSandboxCredentials({ id: req.params.id }),
+        });
+      } catch (err) {
+        if (err.isBoom && err.output.statusCode === 403) {
+          return res.forbidden({ body: err });
+        }
+
+        throw err;
       }
     }
   );

@@ -8,7 +8,7 @@
 import type { XYBrushEvent } from '@elastic/charts';
 import { Axis, BarSeries, niceTimeFormatter, Position, ScaleType, Settings } from '@elastic/charts';
 import { timeFormatter } from '@elastic/charts/dist/utils/data/formatters';
-import { EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiIcon, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, useEuiTheme } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
@@ -112,27 +112,24 @@ export function APMSection({ bucketSize }: Props) {
           <StyledStat
             title={`${formatTpmStat(stats?.transactions.value)} tpm`}
             description={
-              <EuiToolTip
-                content={i18n.translate('xpack.observability.overview.apm.throughputTip', {
-                  defaultMessage:
-                    'Values are calculated for transactions with type "Request" or "page-load". If neither are available, values reflect the top transaction type.',
-                })}
-              >
-                <>
-                  {i18n.translate('xpack.observability.overview.apm.throughput', {
-                    defaultMessage: 'Throughput',
-                  })}{' '}
-                  <EuiIcon
-                    aria-label={i18n.translate('xpack.observability.overview.apm.throughputHelp', {
-                      defaultMessage: 'Throughput information',
-                    })}
-                    size="s"
-                    color="subdued"
-                    type="question"
-                    className="eui-alignCenter"
-                  />
-                </>
-              </EuiToolTip>
+              <>
+                {i18n.translate('xpack.observability.overview.apm.throughput', {
+                  defaultMessage: 'Throughput',
+                })}{' '}
+                <EuiIconTip
+                  content={i18n.translate('xpack.observability.overview.apm.throughputTip', {
+                    defaultMessage:
+                      'Values are calculated for transactions with type "Request" or "page-load". If neither are available, values reflect the top transaction type.',
+                  })}
+                  aria-label={i18n.translate('xpack.observability.overview.apm.throughputHelp', {
+                    defaultMessage: 'Throughput information',
+                  })}
+                  size="s"
+                  color="subdued"
+                  type="question"
+                  iconProps={{ className: 'eui-alignCenter' }}
+                />
+              </>
             }
             isLoading={isLoading}
             // color={transactionsColor}

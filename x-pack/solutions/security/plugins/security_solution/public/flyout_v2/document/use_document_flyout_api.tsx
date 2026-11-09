@@ -6,7 +6,6 @@
  */
 
 import React, { lazy, useCallback, useMemo } from 'react';
-import { useHistory } from 'react-router-dom';
 import { noop } from 'lodash/fp';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { FlyoutOrigin } from '../../common/lib/telemetry';
@@ -44,9 +43,7 @@ import {
 import { getAlertHistoryTitle, getDocumentTitle } from './main/utils/get_header_title';
 import { useFlyoutSessionContext } from '../session_context';
 import { useFlyoutV2UrlWriter } from '../shared/url_state/flyout_v2_url_writer';
-import type { FlyoutDescriptor } from '../shared/url_state/flyout_v2_url_param';
 import {
-  decodeFlyoutV2UrlParam,
   FLYOUT_DESCRIPTOR_KIND,
   urlParamKeyForHistoryKey,
 } from '../shared/url_state/flyout_v2_url_param';
@@ -112,9 +109,11 @@ export interface OpenDocumentFlyoutParams {
   origin?: FlyoutOrigin;
   /**
    * Flyout-history title to use for this open, when already known synchronously by the caller
-   * (e.g. `getDocumentHistoryTitle(hit)`). For `openDocumentFlyoutFromIndex`, omitted means no
-   * title. For `openDocumentFlyoutFromIndexAsChild`, omitted falls back to the bare "Alert" title,
-   * since the full document isn't loaded yet at open time.
+   * (e.g. `getDocumentHistoryTitle(hit)`).
+   * - `openDocumentFlyoutFromIndex` — omitted means no title.
+   * - `openDocumentFlyoutFromIndexAsChild` / `openDocumentFlyoutFromPattern` — omitted falls back
+   *   to the bare "Alert" label so EUI's managed flyout never shows "Unknown Flyout" in its
+   *   navigation history. Supply a richer title (e.g. `"Alert: <rule name>"`) when available.
    */
   title?: string;
 }
@@ -256,13 +255,15 @@ export interface DocumentFlyoutApi {
  * Must be used within the Security Solution app shell (Redux store + router + Kibana services).
  */
 export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
-  const history = useHistory();
   const { session: sessionMode, historyKey } = useFlyoutSessionContext();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
   const defaultToolsFlyoutProperties = useDefaultToolsFlyoutProperties();
   const open = useOpenFlyout();
   const urlParamKey = urlParamKeyForHistoryKey(historyKey);
-  const { writeOnOpen, buildOnClose } = useFlyoutV2UrlWriter(urlParamKey, historyKey);
+  const { writeOnOpen, buildOnClose, readRootDescriptor } = useFlyoutV2UrlWriter(
+    urlParamKey,
+    historyKey
+  );
   const isInSecurityApp = useIsInSecurityApp();
 
   // Stable wrapper so prevalence's `columns` (built internally, see `openDocumentPrevalence`)
@@ -271,16 +272,6 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
     (props: OpenFlyoutLinkProps) => <OpenFlyoutLink {...props} />,
     []
   );
-
-  // Reads the first descriptor from the current URL stack without bumping the generation.
-  // Used by openDocumentFlyoutFromIndexAsChild to determine the parent descriptor (close fallback)
-  // before appending the child descriptor with writeOnOpen('inherit').
-  const readFirstDescriptor = useCallback((): FlyoutDescriptor | null => {
-    if (!history?.location) return null;
-    const raw = new URLSearchParams(history.location.search).get(urlParamKey);
-    const stack = decodeFlyoutV2UrlParam(raw);
-    return stack?.[0] ?? null;
-  }, [history, urlParamKey]);
 
   // Builds the document flyout content (resolved from a concrete `_index`), shared by both the main
   // and child open methods. Only the `session` differs between them, so it is kept private here and
@@ -346,7 +337,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
     (params: OpenDocumentFlyoutParams) => {
       // Read the parent descriptor from the URL before appending the child so we know what to
       // restore to when the child closes (e.g. the analyzer that opened this document as a child).
-      const parentDescriptor = readFirstDescriptor();
+      const parentDescriptor = readRootDescriptor();
       writeOnOpen(
         {
           kind: FLYOUT_DESCRIPTOR_KIND.document,
@@ -379,7 +370,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
       buildFromIndexContent,
       defaultDocumentFlyoutProperties,
       historyKey,
-      readFirstDescriptor,
+      readRootDescriptor,
       writeOnOpen,
       buildOnClose,
     ]
@@ -392,6 +383,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
       renderCellActions = cellActionRenderer,
       onAlertUpdated = noop,
       origin,
+      title,
     }: OpenDocumentFlyoutParams) => {
       writeOnOpen({
         kind: FLYOUT_DESCRIPTOR_KIND.documentFromPattern,
@@ -406,7 +398,16 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           renderCellActions={renderCellActions}
           onAlertUpdated={onAlertUpdated}
         />,
-        { ...defaultDocumentFlyoutProperties, historyKey, session: sessionMode, onClose },
+        {
+          ...defaultDocumentFlyoutProperties,
+          historyKey,
+          session: sessionMode,
+          // Fall back to the bare "Alert" label so EUI's managed flyout never shows
+          // "Unknown Flyout" in its navigation history. Callers may supply a richer
+          // title (e.g. "Alert: <rule name>") if they know it at call time.
+          title: title ?? getAlertHistoryTitle(),
+          onClose,
+        },
         {
           surface: FLYOUT_SURFACE.FLYOUT,
           flyoutType: FLYOUT_TYPE.DOCUMENT,

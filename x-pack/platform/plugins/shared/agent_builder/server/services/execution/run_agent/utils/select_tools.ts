@@ -8,21 +8,22 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { defaultAgentToolIds } from '@kbn/agent-builder-common';
 import { ToolOrigin, ToolType, filterToolsBySelection } from '@kbn/agent-builder-common';
+import { contextEngineMemoryTools } from '@kbn/agent-builder-common/tools';
 import type {
   ToolProvider,
   ExecutableTool,
   ScopedRunner,
-  BuiltinToolDefinition,
+  InternalBuiltinToolDefinition,
 } from '@kbn/agent-builder-server';
 import type { AgentConfiguration, ToolSelection } from '@kbn/agent-builder-common';
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { AttachmentsService, SkillsService } from '@kbn/agent-builder-server/runner';
 import type { ExecutableToolWithOrigin } from '@kbn/agent-builder-server/runner/tool_manager';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
-import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
+import { getLatestVersion, toAttachment } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentFormatContext } from '@kbn/agent-builder-server/attachments';
 import { createAttachmentTools } from '../../../tools/builtin/attachments';
+import type { AiIndexCatalogEntry } from '../types';
 import type { ProcessedConversation } from './prepare_conversation';
 
 export interface SelectToolsResult {
@@ -38,6 +39,8 @@ export const selectTools = async ({
   request,
   toolProvider,
   agentConfiguration,
+  aiIndexCatalog,
+  aiIndicesEnabled,
   attachmentsService,
   spaceId,
   runner,
@@ -50,6 +53,8 @@ export const selectTools = async ({
   toolProvider: ToolProvider;
   attachmentsService: AttachmentsService;
   agentConfiguration: AgentConfiguration;
+  aiIndexCatalog?: AiIndexCatalogEntry[];
+  aiIndicesEnabled: boolean;
   spaceId: string;
   runner: ScopedRunner;
 }): Promise<SelectToolsResult> => {
@@ -69,11 +74,15 @@ export const selectTools = async ({
   });
 
   const versionedAttachmentTools = createVersionedAttachmentTools({
-    attachmentStateManager: conversation.attachmentStateManager,
     attachmentsService,
     formatContext,
     runner,
   });
+
+  // The read tools come from the `ki-retrieval` skill, which carries the guidance for using them.
+  // Memory tools have no skill of their own, so they stay static.
+  const hasMemoryEnabledAiIndex =
+    aiIndexCatalog?.some(({ memoryEnabled }) => memoryEnabled) ?? false;
 
   // pick tools from provider (from agent config and attachment-type tools)
   const staticRegistryTools = await pickTools({
@@ -82,6 +91,9 @@ export const selectTools = async ({
       ...agentConfiguration.tools,
       ...(agentConfiguration.enable_elastic_capabilities
         ? [{ tool_ids: defaultAgentToolIds }]
+        : []),
+      ...(aiIndicesEnabled && hasMemoryEnabledAiIndex
+        ? [{ tool_ids: Object.values(contextEngineMemoryTools) }]
         : []),
     ],
     toolProvider,
@@ -135,18 +147,15 @@ const withOrigin = (tools: ExecutableTool[], origin: ToolOrigin): ExecutableTool
  * These tools allow the LLM to add, read, update, delete, restore, list, and diff attachments.
  */
 const createVersionedAttachmentTools = ({
-  attachmentStateManager,
   attachmentsService,
   formatContext,
   runner,
 }: {
-  attachmentStateManager: AttachmentStateManager;
   attachmentsService: AttachmentsService;
   formatContext: AttachmentFormatContext;
   runner: ScopedRunner;
 }): ExecutableTool[] => {
   const builtinTools = createAttachmentTools({
-    attachmentManager: attachmentStateManager,
     attachmentsService,
     formatContext,
   });
@@ -160,7 +169,7 @@ export const builtinToolToExecutable = ({
   tool,
   runner,
 }: {
-  tool: BuiltinToolDefinition;
+  tool: InternalBuiltinToolDefinition;
   runner: ScopedRunner;
 }): ExecutableTool => {
   return {
@@ -217,15 +226,8 @@ const getVersionedAttachmentBoundTools = async ({
       continue;
     }
 
-    const input: Attachment = {
-      id: attachment.id,
-      type: attachment.type,
-      data: latest.data as Attachment['data'],
-      ...(attachment.hidden !== undefined ? { hidden: attachment.hidden } : {}),
-    };
-
     try {
-      const formatted = await definition.format(input, formatContext);
+      const formatted = await definition.format(toAttachment(attachment, latest), formatContext);
       const boundedTools = formatted.getBoundedTools ? await formatted.getBoundedTools() : [];
       for (const tool of boundedTools) {
         tools.push(attachmentsService.convertAttachmentTool(tool));

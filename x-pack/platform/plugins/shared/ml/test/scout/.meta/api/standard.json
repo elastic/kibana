@@ -1,10 +1,672 @@
 {
-  "sha1": "ced47ddfa9cfe6cbc92c73894a2a76996867826e",
+  "sha1": "8065d9e1b4f8c9d580c9553383e5d9c61a3c56a0",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "97e576c0d6b0f41-d345041eb543bba",
+      "title": "close anomaly detector job with spaces ML poweruser can close a job from the correct space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/close_with_spaces.spec.ts",
+        "line": 24,
+        "column": 49
+      }
+    },
+    {
+      "id": "97e576c0d6b0f41-1fd8ddf83cea954",
+      "title": "close anomaly detector job with spaces ML poweruser cannot close a job from the wrong space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/close_with_spaces.spec.ts",
+        "line": 38,
+        "column": 30
+      }
+    },
+    {
+      "id": "a6b16fbfec3ac99-79b705a59055cbf",
+      "title": "create anomaly detector job with inline datafeed config ML poweruser creates a single metric job with datafeed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/create_with_datafeed.spec.ts",
+        "line": 27,
+        "column": 49
+      }
+    },
+    {
+      "id": "42ed6b8cc7c7be3-e1f42bb2f2211c2",
+      "title": "create anomaly detector job in a space should create a job in space1 and associate it with that space only",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/create_with_spaces.spec.ts",
+        "line": 25,
+        "column": 49
+      }
+    },
+    {
+      "id": "c3e1c2ce0526fc5-4876c0edda4a457",
+      "title": "create anomaly detector job ML poweruser creates a single metric job",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/create.spec.ts",
+        "line": 13,
+        "column": 11
+      }
+    },
+    {
+      "id": "c3e1c2ce0526fc5-0076da193f17b97",
+      "title": "create anomaly detector job ML viewer cannot create a job",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/create.spec.ts",
+        "line": 24,
+        "column": 22
+      }
+    },
+    {
+      "id": "7f231750ccdbc5c-3f38d9dc8a72dcf",
+      "title": "delete anomaly detector job with spaces ML poweruser can delete a job that belongs to their space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/delete_with_spaces.spec.ts",
+        "line": 24,
+        "column": 49
+      }
+    },
+    {
+      "id": "7f231750ccdbc5c-02909afd4d0f51d",
+      "title": "delete anomaly detector job with spaces ML poweruser cannot delete a job from a different space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/delete_with_spaces.spec.ts",
+        "line": 36,
+        "column": 15
+      }
+    },
+    {
+      "id": "fd0fb7eb5e27128-70bf858e1a79342",
+      "title": "POST anomaly_detectors _forecast with spaces forecast for non-existent job returns 404",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/forecast_with_spaces.spec.ts",
+        "line": 41,
+        "column": 9
+      }
+    },
+    {
+      "id": "fd0fb7eb5e27128-4a1d641171a29c0",
+      "title": "POST anomaly_detectors _forecast with spaces forecast in wrong space returns 404",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/forecast_with_spaces.spec.ts",
+        "line": 51,
+        "column": 47
+      }
+    },
+    {
+      "id": "fd0fb7eb5e27128-91d533515b66826",
+      "title": "POST anomaly_detectors _forecast with spaces forecast lifecycle journey",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/forecast_with_spaces.spec.ts",
+        "line": 65,
+        "column": 70
+      }
+    },
+    {
+      "id": "cfddbf1d73e3894-071104c35ce4f2c",
+      "title": "POST anomaly_detectors results buckets should get buckets with correct structure for a job",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_buckets.spec.ts",
+        "line": 35,
+        "column": 28
+      }
+    },
+    {
+      "id": "cfddbf1d73e3894-2008db1a62cce46",
+      "title": "POST anomaly_detectors results buckets should get a single bucket when timestamp is specified",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_buckets.spec.ts",
+        "line": 52,
+        "column": 21
+      }
+    },
+    {
+      "id": "cfddbf1d73e3894-ccf211eeffe8525",
+      "title": "POST anomaly_detectors results buckets should fail with non-existent job",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_buckets.spec.ts",
+        "line": 77,
+        "column": 66
+      }
+    },
+    {
+      "id": "cfddbf1d73e3894-7f61c33342628b2",
+      "title": "POST anomaly_detectors results buckets should fail with non-existent timestamp",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_buckets.spec.ts",
+        "line": 91,
+        "column": 27
+      }
+    },
+    {
+      "id": "facd02a18ab1bad-41ba408aec73157",
+      "title": "POST anomaly_detectors results overall_buckets should get overall buckets with correct structure for multiple jobs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_overall_buckets.spec.ts",
+        "line": 52,
+        "column": 25
+      }
+    },
+    {
+      "id": "facd02a18ab1bad-511dbe522d4df2b",
+      "title": "POST anomaly_detectors results overall_buckets should respect the bucket_span parameter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_overall_buckets.spec.ts",
+        "line": 77,
+        "column": 23
+      }
+    },
+    {
+      "id": "facd02a18ab1bad-f9b1abddabb8dc1",
+      "title": "POST anomaly_detectors results overall_buckets should filter results based on overall_score",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_overall_buckets.spec.ts",
+        "line": 100,
+        "column": 27
+      }
+    },
+    {
+      "id": "facd02a18ab1bad-9eaa05726f30b9e",
+      "title": "POST anomaly_detectors results overall_buckets should fail with non-existent job",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_overall_buckets.spec.ts",
+        "line": 134,
+        "column": 45
+      }
+    },
+    {
+      "id": "b06d258a252508a-dde9595275e0919",
+      "title": "get anomaly detector job stats with spaces GET stats for a non-existing job returns 404",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_stats_with_spaces.spec.ts",
+        "line": 41,
+        "column": 28
+      }
+    },
+    {
+      "id": "b06d258a252508a-045933947ba1174",
+      "title": "get anomaly detector job stats with spaces GET stats for a non-existing job wildcard returns an empty list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_stats_with_spaces.spec.ts",
+        "line": 48,
+        "column": 47
+      }
+    },
+    {
+      "id": "b06d258a252508a-d53d198109645e4",
+      "title": "get anomaly detector job stats with spaces GET stats by ID from correct space returns the job stats",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_stats_with_spaces.spec.ts",
+        "line": 60,
+        "column": 42
+      }
+    },
+    {
+      "id": "b06d258a252508a-e370732c1ee3ad6",
+      "title": "get anomaly detector job stats with spaces GET stats by ID from wrong space returns 404",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_stats_with_spaces.spec.ts",
+        "line": 72,
+        "column": 6
+      }
+    },
+    {
+      "id": "b06d258a252508a-e955b8c56182fca",
+      "title": "get anomaly detector job stats with spaces GET stats without an ID from correct space returns all job stats in that space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_stats_with_spaces.spec.ts",
+        "line": 80,
+        "column": 50
+      }
+    },
+    {
+      "id": "b06d258a252508a-78cd0778aed6431",
+      "title": "get anomaly detector job stats with spaces GET stats without an ID from wrong space returns an empty list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_stats_with_spaces.spec.ts",
+        "line": 92,
+        "column": 15
+      }
+    },
+    {
+      "id": "b06d258a252508a-51589c03ffbe4f5",
+      "title": "get anomaly detector job stats with spaces GET stats by wildcard from correct space returns the job stats",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_stats_with_spaces.spec.ts",
+        "line": 104,
+        "column": 27
+      }
+    },
+    {
+      "id": "b06d258a252508a-bed97228b8e510e",
+      "title": "get anomaly detector job stats with spaces GET stats by wildcard from wrong space returns an empty list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_stats_with_spaces.spec.ts",
+        "line": 114,
+        "column": 20
+      }
+    },
+    {
+      "id": "b06d258a252508a-9b5e0501fa59835",
+      "title": "get anomaly detector job stats with spaces GET stats by group from correct space returns the job stats",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_stats_with_spaces.spec.ts",
+        "line": 125,
+        "column": 50
+      }
+    },
+    {
+      "id": "b06d258a252508a-af5279ac1942d05",
+      "title": "get anomaly detector job stats with spaces GET stats by group wildcard from correct space returns the job stats",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_stats_with_spaces.spec.ts",
+        "line": 138,
+        "column": 49
+      }
+    },
+    {
+      "id": "b06d258a252508a-b5d270a87b36f55",
+      "title": "get anomaly detector job stats with spaces GET stats by group from wrong space returns 404",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_stats_with_spaces.spec.ts",
+        "line": 154,
+        "column": 25
+      }
+    },
+    {
+      "id": "b06d258a252508a-0f39a0e3e5685fc",
+      "title": "get anomaly detector job stats with spaces GET stats by group wildcard from wrong space returns an empty list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_stats_with_spaces.spec.ts",
+        "line": 159,
+        "column": 25
+      }
+    },
+    {
+      "id": "bd1de6fde95ceb7-c0ce97cb52ad462",
+      "title": "get anomaly detector jobs with spaces GET a non-existing job returns 404",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_with_spaces.spec.ts",
+        "line": 39,
+        "column": 28
+      }
+    },
+    {
+      "id": "bd1de6fde95ceb7-3718d84d6017f36",
+      "title": "get anomaly detector jobs with spaces GET a non-existing job wildcard returns an empty list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_with_spaces.spec.ts",
+        "line": 46,
+        "column": 47
+      }
+    },
+    {
+      "id": "bd1de6fde95ceb7-1923b46596d92e6",
+      "title": "get anomaly detector jobs with spaces GET job by ID from correct space returns the job",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_with_spaces.spec.ts",
+        "line": 58,
+        "column": 42
+      }
+    },
+    {
+      "id": "bd1de6fde95ceb7-0142aa0dae36aef",
+      "title": "get anomaly detector jobs with spaces GET job by ID from wrong space returns 404",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_with_spaces.spec.ts",
+        "line": 70,
+        "column": 6
+      }
+    },
+    {
+      "id": "bd1de6fde95ceb7-c7ebd593c4daccb",
+      "title": "get anomaly detector jobs with spaces GET without an ID from correct space returns all jobs in that space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_with_spaces.spec.ts",
+        "line": 76,
+        "column": 48
+      }
+    },
+    {
+      "id": "bd1de6fde95ceb7-3ce4d6a74494d41",
+      "title": "get anomaly detector jobs with spaces GET without an ID from wrong space returns an empty list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_with_spaces.spec.ts",
+        "line": 87,
+        "column": 15
+      }
+    },
+    {
+      "id": "bd1de6fde95ceb7-cbdd8e8df848f67",
+      "title": "get anomaly detector jobs with spaces GET job by wildcard from correct space returns the job",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_with_spaces.spec.ts",
+        "line": 99,
+        "column": 27
+      }
+    },
+    {
+      "id": "bd1de6fde95ceb7-f349e1d14c7dcc5",
+      "title": "get anomaly detector jobs with spaces GET job by wildcard from wrong space returns an empty list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_with_spaces.spec.ts",
+        "line": 109,
+        "column": 20
+      }
+    },
+    {
+      "id": "bd1de6fde95ceb7-67bc379d36276ab",
+      "title": "get anomaly detector jobs with spaces GET jobs by group from correct space returns the job",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_with_spaces.spec.ts",
+        "line": 120,
+        "column": 50
+      }
+    },
+    {
+      "id": "bd1de6fde95ceb7-6aa41e21e3e8381",
+      "title": "get anomaly detector jobs with spaces GET jobs by group wildcard from correct space returns the job",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_with_spaces.spec.ts",
+        "line": 133,
+        "column": 49
+      }
+    },
+    {
+      "id": "bd1de6fde95ceb7-612db0ecdd101b3",
+      "title": "get anomaly detector jobs with spaces GET jobs by group from wrong space returns 404",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_with_spaces.spec.ts",
+        "line": 149,
+        "column": 25
+      }
+    },
+    {
+      "id": "bd1de6fde95ceb7-054fe431d49ed07",
+      "title": "get anomaly detector jobs with spaces GET jobs by group wildcard from wrong space returns an empty list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_with_spaces.spec.ts",
+        "line": 154,
+        "column": 25
+      }
+    },
+    {
+      "id": "fdf2fbd43067c5e-a19e8e812964520",
+      "title": "get anomaly detector jobs GET all jobs returns the created jobs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get.spec.ts",
+        "line": 20,
+        "column": 26
+      }
+    },
+    {
+      "id": "fdf2fbd43067c5e-4a96878d5a5c535",
+      "title": "get anomaly detector jobs GET job by ID returns the expected job",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get.spec.ts",
+        "line": 31,
+        "column": 16
+      }
+    },
+    {
+      "id": "fdf2fbd43067c5e-fa550a70ef37b98",
+      "title": "get anomaly detector jobs GET jobs by comma-separated IDs returns both jobs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get.spec.ts",
+        "line": 42,
+        "column": 73
+      }
+    },
+    {
+      "id": "fdf2fbd43067c5e-0cbf8c2254c8271",
+      "title": "get anomaly detector jobs GET stats for all jobs returns the created jobs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get.spec.ts",
+        "line": 56,
+        "column": 82
+      }
+    },
+    {
+      "id": "fdf2fbd43067c5e-c9d1552170d1852",
+      "title": "get anomaly detector jobs GET stats by job ID returns the expected job",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get.spec.ts",
+        "line": 66,
+        "column": 16
+      }
+    },
+    {
+      "id": "fdf2fbd43067c5e-b9a7568c69606cb",
+      "title": "get anomaly detector jobs GET stats by comma-separated IDs returns both jobs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get.spec.ts",
+        "line": 81,
+        "column": 30
+      }
+    },
+    {
+      "id": "1469be006bd847d-e764b6a8f4aa725",
+      "title": "open anomaly detector job with spaces ML poweruser can open a job from the correct space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/open_with_spaces.spec.ts",
+        "line": 24,
+        "column": 49
+      }
+    },
+    {
+      "id": "1469be006bd847d-538e28523be92e2",
+      "title": "open anomaly detector job with spaces ML poweruser cannot open a job from the wrong space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/open_with_spaces.spec.ts",
+        "line": 38,
+        "column": 30
+      }
+    },
     {
       "id": "83ee0201f304e1d-f77aa9e072947e6",
       "title": "bm_classification source index document count ft_bank_marketing has exactly 9314 documents",
@@ -120,6 +782,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -127,7 +790,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/create_filters.spec.ts",
-        "line": 30,
+        "line": 28,
         "column": 7
       }
     },
@@ -137,6 +800,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -144,7 +808,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/create_filters.spec.ts",
-        "line": 52,
+        "line": 50,
         "column": 9
       }
     },
@@ -154,6 +818,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -161,7 +826,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/create_filters.spec.ts",
-        "line": 69,
+        "line": 67,
         "column": 11
       }
     },
@@ -171,6 +836,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -178,7 +844,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/create_filters.spec.ts",
-        "line": 88,
+        "line": 86,
         "column": 64
       }
     },
@@ -188,6 +854,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -195,7 +862,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/create_filters.spec.ts",
-        "line": 110,
+        "line": 108,
         "column": 20
       }
     },
@@ -205,6 +872,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -212,7 +880,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/delete_filters.spec.ts",
-        "line": 57,
+        "line": 55,
         "column": 26
       }
     },
@@ -222,6 +890,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -229,7 +898,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/delete_filters.spec.ts",
-        "line": 72,
+        "line": 70,
         "column": 9
       }
     },
@@ -239,6 +908,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -246,7 +916,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/delete_filters.spec.ts",
-        "line": 91,
+        "line": 89,
         "column": 15
       }
     },
@@ -256,6 +926,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -263,7 +934,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/delete_filters.spec.ts",
-        "line": 106,
+        "line": 104,
         "column": 18
       }
     },
@@ -273,6 +944,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -280,8 +952,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/get_filters_stats.spec.ts",
-        "line": 81,
-        "column": 18
+        "line": 79,
+        "column": 23
       }
     },
     {
@@ -290,6 +962,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -297,8 +970,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/get_filters_stats.spec.ts",
-        "line": 127,
-        "column": 21
+        "line": 126,
+        "column": 20
       }
     },
     {
@@ -307,6 +980,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -314,8 +988,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/get_filters_stats.spec.ts",
-        "line": 138,
-        "column": 25
+        "line": 136,
+        "column": 50
       }
     },
     {
@@ -324,6 +998,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -331,7 +1006,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/get_filters.spec.ts",
-        "line": 43,
+        "line": 41,
         "column": 61
       }
     },
@@ -341,6 +1016,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -348,7 +1024,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/get_filters.spec.ts",
-        "line": 53,
+        "line": 51,
         "column": 20
       }
     },
@@ -358,6 +1034,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -365,7 +1042,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/get_filters.spec.ts",
-        "line": 63,
+        "line": 61,
         "column": 27
       }
     },
@@ -375,6 +1052,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -382,7 +1060,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/get_filters.spec.ts",
-        "line": 75,
+        "line": 73,
         "column": 27
       }
     },
@@ -392,6 +1070,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -399,7 +1078,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/get_filters.spec.ts",
-        "line": 88,
+        "line": 86,
         "column": 13
       }
     },
@@ -409,6 +1088,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -416,7 +1096,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/update_filters.spec.ts",
-        "line": 66,
+        "line": 64,
         "column": 25
       }
     },
@@ -426,6 +1106,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -433,7 +1114,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/update_filters.spec.ts",
-        "line": 80,
+        "line": 78,
         "column": 42
       }
     },
@@ -443,6 +1124,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -450,7 +1132,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/update_filters.spec.ts",
-        "line": 96,
+        "line": 94,
         "column": 50
       }
     },
@@ -460,6 +1142,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -467,8 +1150,777 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/update_filters.spec.ts",
-        "line": 115,
+        "line": 113,
         "column": 25
+      }
+    },
+    {
+      "id": "0bc0055023e12dd-bc448c4c909166b",
+      "title": "get_module: load each module by ID loads each module and verifies response shape",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/get_module_by_id.spec.ts",
+        "line": 15,
+        "column": 59
+      }
+    },
+    {
+      "id": "15559f47520e6d4-ff34449c74c2488",
+      "title": "get_module: list and filter lists all modules in expected order",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/get_module_list.spec.ts",
+        "line": 15,
+        "column": 59
+      }
+    },
+    {
+      "id": "15559f47520e6d4-d500007acd75850",
+      "title": "get_module: list and filter lists only security modules when filtered by security",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/get_module_list.spec.ts",
+        "line": 24,
+        "column": 45
+      }
+    },
+    {
+      "id": "15559f47520e6d4-74d1139b211281e",
+      "title": "get_module: list and filter returns 404 when filtering a non-security module by security tag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/get_module_list.spec.ts",
+        "line": 39,
+        "column": 23
+      }
+    },
+    {
+      "id": "8382f3cd7fbd950-959ad4fb230792e",
+      "title": "GET ml/modules/jobs_exist: space-scoped job discovery finds jobs installed by module without a prefix",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/jobs_exist.spec.ts",
+        "line": 39,
+        "column": 31
+      }
+    },
+    {
+      "id": "8382f3cd7fbd950-d18e4fc184b1a1b",
+      "title": "GET ml/modules/jobs_exist: space-scoped job discovery finds jobs installed by module with a prefix",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/jobs_exist.spec.ts",
+        "line": 62,
+        "column": 48
+      }
+    },
+    {
+      "id": "8382f3cd7fbd950-0a8d744b50432bd",
+      "title": "GET ml/modules/jobs_exist: space-scoped job discovery does not find jobs installed into a different space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/jobs_exist.spec.ts",
+        "line": 85,
+        "column": 29
+      }
+    },
+    {
+      "id": "8382f3cd7fbd950-d0fe09741089a24",
+      "title": "GET ml/modules/jobs_exist: space-scoped job discovery returns jobsExist: false for a module that has not been installed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/jobs_exist.spec.ts",
+        "line": 120,
+        "column": 33
+      }
+    },
+    {
+      "id": "c558d01dad887b3-3830b5422f0fd1e",
+      "title": "recognize_module: data stream datasets (requires Fleet packages) recognizes apache data stream dataset as apache_data_stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/recognize_module_data_streams.spec.ts",
+        "line": 17,
+        "column": 13
+      }
+    },
+    {
+      "id": "c558d01dad887b3-64b3fdb91b273c0",
+      "title": "recognize_module: data stream datasets (requires Fleet packages) recognizes nginx data stream dataset as nginx_data_stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/recognize_module_data_streams.spec.ts",
+        "line": 34,
+        "column": 49
+      }
+    },
+    {
+      "id": "85678f85cde8537-d9387363878b4cc",
+      "title": "recognize_module: infrastructure datasets recognizes heartbeat dataset as uptime_heartbeat",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/recognize_module_infrastructure.spec.ts",
+        "line": 19,
+        "column": 24
+      }
+    },
+    {
+      "id": "85678f85cde8537-1aead738b9e255f",
+      "title": "recognize_module: infrastructure datasets recognizes auditbeat dataset as security_linux_v3",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/recognize_module_infrastructure.spec.ts",
+        "line": 37,
+        "column": 48
+      }
+    },
+    {
+      "id": "85678f85cde8537-84b54f532e17ed0",
+      "title": "recognize_module: infrastructure datasets recognizes metricbeat dataset as metricbeat_system_ecs and security_linux_v3",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/recognize_module_infrastructure.spec.ts",
+        "line": 51,
+        "column": 27
+      }
+    },
+    {
+      "id": "85678f85cde8537-e239a047e24a664",
+      "title": "recognize_module: infrastructure datasets recognizes metrics UI dataset as security_linux_v3 (metrics UI modules have no recognizer query)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/recognize_module_infrastructure.spec.ts",
+        "line": 65,
+        "column": 17
+      }
+    },
+    {
+      "id": "85678f85cde8537-e317bbf91dbba35",
+      "title": "recognize_module: infrastructure datasets recognizes APM transaction dataset as apm_transaction",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/recognize_module_infrastructure.spec.ts",
+        "line": 80,
+        "column": 27
+      }
+    },
+    {
+      "id": "69b4bb25291df43-a203ae8002b52e3",
+      "title": "recognize_module: sample data and logs datasets recognizes sample logs dataset as sample_data_weblogs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/recognize_module_sample_and_logs.spec.ts",
+        "line": 19,
+        "column": 24
+      }
+    },
+    {
+      "id": "69b4bb25291df43-2948a06af71eeb1",
+      "title": "recognize_module: sample data and logs datasets recognizes apache dataset as apache_ecs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/recognize_module_sample_and_logs.spec.ts",
+        "line": 33,
+        "column": 64
+      }
+    },
+    {
+      "id": "69b4bb25291df43-0e1c5a37c9714a0",
+      "title": "recognize_module: sample data and logs datasets returns no modules for logs dataset (logs modules have no recognizer query)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/recognize_module_sample_and_logs.spec.ts",
+        "line": 47,
+        "column": 25
+      }
+    },
+    {
+      "id": "69b4bb25291df43-f24b31667c9f0a4",
+      "title": "recognize_module: sample data and logs datasets recognizes nginx dataset as nginx_ecs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/recognize_module_sample_and_logs.spec.ts",
+        "line": 59,
+        "column": 27
+      }
+    },
+    {
+      "id": "69b4bb25291df43-98723377771f15b",
+      "title": "recognize_module: sample data and logs datasets recognizes sample ecommerce dataset as sample_data_ecommerce",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/recognize_module_sample_and_logs.spec.ts",
+        "line": 71,
+        "column": 6
+      }
+    },
+    {
+      "id": "69b4bb25291df43-5b3145267c2c67c",
+      "title": "recognize_module: sample data and logs datasets returns empty list for non-existent index pattern",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/recognize_module_sample_and_logs.spec.ts",
+        "line": 81,
+        "column": 19
+      }
+    },
+    {
+      "id": "8a3c83f4af6abcd-2484b7f64d46c0d",
+      "title": "recognize_module: security datasets recognizes security auditbeat dataset as security_auth",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/recognize_module_security.spec.ts",
+        "line": 40,
+        "column": 40
+      }
+    },
+    {
+      "id": "8a3c83f4af6abcd-3d020245bd82d02",
+      "title": "recognize_module: security datasets recognizes security packetbeat dataset as security_packetbeat",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/recognize_module_security.spec.ts",
+        "line": 58,
+        "column": 5
+      }
+    },
+    {
+      "id": "8a3c83f4af6abcd-2d763360e666a1d",
+      "title": "recognize_module: security datasets recognizes security winlogbeat dataset as security_auth, security_network, security_windows_v3",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/recognize_module_security.spec.ts",
+        "line": 71,
+        "column": 30
+      }
+    },
+    {
+      "id": "8a3c83f4af6abcd-d6b788a0c626e9a",
+      "title": "recognize_module: security datasets recognizes security endpoint dataset as 5 security modules",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/recognize_module_security.spec.ts",
+        "line": 89,
+        "column": 19
+      }
+    },
+    {
+      "id": "8a3c83f4af6abcd-c2849679153768f",
+      "title": "recognize_module: security datasets recognizes security cloudtrail dataset as security_cloudtrail",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/recognize_module_security.spec.ts",
+        "line": 108,
+        "column": 30
+      }
+    },
+    {
+      "id": "8a3c83f4af6abcd-f92ddef38566eed",
+      "title": "recognize_module: security datasets recognizes security azure activity logs dataset as security_azure_activitylogs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/recognize_module_security.spec.ts",
+        "line": 130,
+        "column": 25
+      }
+    },
+    {
+      "id": "8a3c83f4af6abcd-2263032fe91f22d",
+      "title": "recognize_module: security datasets recognizes security GCP audit dataset as security_gcp_audit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/recognize_module_security.spec.ts",
+        "line": 148,
+        "column": 25
+      }
+    },
+    {
+      "id": "2c85c05b5fe2469-6a5dbdb1ff58944",
+      "title": "setup_module: apache_ecs with startDatafeed true sets up apache_ecs module with datafeed and verifies saved objects",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/setup_module_apache_ecs.spec.ts",
+        "line": 63,
+        "column": 15
+      }
+    },
+    {
+      "id": "6369388ff7ddf78-5f2547064fb2c61",
+      "title": "setup_module: apm and logs modules with startDatafeed true sets up apm_transaction module with datafeed and verifies states",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/setup_module_apm_and_logs.spec.ts",
+        "line": 90,
+        "column": 9
+      }
+    },
+    {
+      "id": "6369388ff7ddf78-eb8dd7341439c8f",
+      "title": "setup_module: apm and logs modules with startDatafeed true sets up logs_ui_analysis module with datafeed and verifies states",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/setup_module_apm_and_logs.spec.ts",
+        "line": 90,
+        "column": 9
+      }
+    },
+    {
+      "id": "6369388ff7ddf78-afb77b11a17f100",
+      "title": "setup_module: apm and logs modules with startDatafeed true sets up logs_ui_categories module with datafeed and verifies states",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/setup_module_apm_and_logs.spec.ts",
+        "line": 90,
+        "column": 9
+      }
+    },
+    {
+      "id": "145da0ef6016ae4-0b95ccc7b047aeb",
+      "title": "setup_module: data stream modules with startDatafeed true (requires Fleet packages) sets up apache_data_stream module with datafeed and verifies states",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/setup_module_data_streams.spec.ts",
+        "line": 127,
+        "column": 52
+      }
+    },
+    {
+      "id": "145da0ef6016ae4-0b88f87964a6005",
+      "title": "setup_module: data stream modules with startDatafeed true (requires Fleet packages) sets up nginx_data_stream module with datafeed and verifies states",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/setup_module_data_streams.spec.ts",
+        "line": 127,
+        "column": 52
+      }
+    },
+    {
+      "id": "91d4c1e78788788-c7ec9aab239d34e",
+      "title": "setup_module: metrics modules with startDatafeed true sets up metricbeat_system_ecs module with datafeed and verifies states",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/setup_module_metrics.spec.ts",
+        "line": 104,
+        "column": 17
+      }
+    },
+    {
+      "id": "91d4c1e78788788-821b67cfcf6776b",
+      "title": "setup_module: metrics modules with startDatafeed true sets up metrics_ui_hosts module with datafeed and verifies states",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/setup_module_metrics.spec.ts",
+        "line": 104,
+        "column": 17
+      }
+    },
+    {
+      "id": "91d4c1e78788788-cf828201db23c90",
+      "title": "setup_module: metrics modules with startDatafeed true sets up metrics_ui_k8s module with datafeed and verifies states",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/setup_module_metrics.spec.ts",
+        "line": 104,
+        "column": 17
+      }
+    },
+    {
+      "id": "0b924074c4cb14c-c200d66ceac0454",
+      "title": "setup_module: estimate model memory limit estimates model memory limits when estimateModelMemory is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/setup_module_mml.spec.ts",
+        "line": 27,
+        "column": 13
+      }
+    },
+    {
+      "id": "0b924074c4cb14c-4c264b473357710",
+      "title": "setup_module: estimate model memory limit uses module default memory limits when estimateModelMemory is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/setup_module_mml.spec.ts",
+        "line": 49,
+        "column": 11
+      }
+    },
+    {
+      "id": "0b924074c4cb14c-f411510741442af",
+      "title": "setup_module: estimate model memory limit estimates model memory limits by default when estimateModelMemory is omitted",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/setup_module_mml.spec.ts",
+        "line": 75,
+        "column": 31
+      }
+    },
+    {
+      "id": "0b924074c4cb14c-1c42e01f732e3e5",
+      "title": "setup_module: estimate model memory limit preserves a larger jobOverrides memory limit over the estimate",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/setup_module_mml.spec.ts",
+        "line": 102,
+        "column": 17
+      }
+    },
+    {
+      "id": "4355470211fbb69-36d3a012e1dc64e",
+      "title": "setup_module: rejected requests returns 400 when a non-existent data view is specified",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/setup_module_negative.spec.ts",
+        "line": 18,
+        "column": 7
+      }
+    },
+    {
+      "id": "4355470211fbb69-68b9f446bd5ea20",
+      "title": "setup_module: rejected requests returns 403 when the user lacks ML write permission",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/setup_module_negative.spec.ts",
+        "line": 31,
+        "column": 48
+      }
+    },
+    {
+      "id": "12656e5c68baa69-e6892dbfeb12a0a",
+      "title": "setup_module: nginx_ecs with startDatafeed true sets up nginx_ecs module with datafeed and verifies saved objects",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/setup_module_nginx_ecs.spec.ts",
+        "line": 65,
+        "column": 66
+      }
+    },
+    {
+      "id": "059a47ad69cff83-00fd022892d8996",
+      "title": "setup_module: sample_data_weblogs with startDatafeed false creates jobs and stopped datafeeds without starting them",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/setup_module_no_datafeed.spec.ts",
+        "line": 25,
+        "column": 9
+      }
+    },
+    {
+      "id": "a81d9dee88b7f2b-befe8d19c1ae238",
+      "title": "setup_module: sample data modules with startDatafeed true sets up sample_data_weblogs module with datafeed and verifies states",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/setup_module_samples_datafeed.spec.ts",
+        "line": 79,
+        "column": 7
+      }
+    },
+    {
+      "id": "a81d9dee88b7f2b-04dc44a1dd37d1e",
+      "title": "setup_module: sample data modules with startDatafeed true sets up sample_data_ecommerce module with datafeed and verifies states",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/setup_module_samples_datafeed.spec.ts",
+        "line": 79,
+        "column": 7
+      }
+    },
+    {
+      "id": "6b13e1872d9911a-431d8b8f7f6c9f3",
+      "title": "setup_module: security and uptime modules with startDatafeed true sets up security_packetbeat module with datafeed and verifies states",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/setup_module_security_and_uptime.spec.ts",
+        "line": 134,
+        "column": 17
+      }
+    },
+    {
+      "id": "6b13e1872d9911a-646bc9e0030174e",
+      "title": "setup_module: security and uptime modules with startDatafeed true sets up uptime_heartbeat module with datafeed and verifies states",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/setup_module_security_and_uptime.spec.ts",
+        "line": 134,
+        "column": 17
+      }
+    },
+    {
+      "id": "6b13e1872d9911a-db56d176f90d2a7",
+      "title": "setup_module: security and uptime modules with startDatafeed true sets up security_cloudtrail module with datafeed and verifies states",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/setup_module_security_and_uptime.spec.ts",
+        "line": 134,
+        "column": 17
+      }
+    },
+    {
+      "id": "c91ed0019c055a5-35fa01c399b9974",
+      "title": "GET notifications count returns default response when no ML entities are present",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/notifications/count_notifications.spec.ts",
+        "line": 18,
+        "column": 5
+      }
+    },
+    {
+      "id": "c91ed0019c055a5-994724c48e57c03",
+      "title": "GET notifications count returns notifications count by level after creating a job",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/notifications/count_notifications.spec.ts",
+        "line": 30,
+        "column": 25
+      }
+    },
+    {
+      "id": "c91ed0019c055a5-2857969ec32437b",
+      "title": "GET notifications count returns 403 for unauthorized user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/notifications/count_notifications.spec.ts",
+        "line": 51,
+        "column": 27
+      }
+    },
+    {
+      "id": "cd521395242df6f-7212962e16c4739",
+      "title": "GET notifications returns all notifications for an authorized user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/notifications/get_notifications.spec.ts",
+        "line": 49,
+        "column": 26
+      }
+    },
+    {
+      "id": "cd521395242df6f-836ef260b6d6b85",
+      "title": "GET notifications returns notifications for an authorized user when no queryString is provided",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/notifications/get_notifications.spec.ts",
+        "line": 58,
+        "column": 98
+      }
+    },
+    {
+      "id": "cd521395242df6f-a3b9f58189e5a6b",
+      "title": "GET notifications returns filtered notifications when queryString is provided",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/notifications/get_notifications.spec.ts",
+        "line": 80,
+        "column": 64
+      }
+    },
+    {
+      "id": "cd521395242df6f-b4464aa0d8cf703",
+      "title": "GET notifications returns notifications sorted ascending by job_id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/notifications/get_notifications.spec.ts",
+        "line": 98,
+        "column": 21
+      }
+    },
+    {
+      "id": "cd521395242df6f-0bc643cbb3c31a4",
+      "title": "GET notifications returns notifications sorted descending by job_id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/notifications/get_notifications.spec.ts",
+        "line": 109,
+        "column": 47
+      }
+    },
+    {
+      "id": "cd521395242df6f-e2d5ed246ca9645",
+      "title": "GET notifications returns 403 for unauthorized user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/notifications/get_notifications.spec.ts",
+        "line": 121,
+        "column": 4
       }
     }
   ]

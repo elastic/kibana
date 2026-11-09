@@ -23,6 +23,18 @@ const useCases = {
   'With IPs': { ips: ['10.200.0.202', '74.25.14.20'], countryCodes: [] },
   'With country codes': { ips: [], countryCodes: ['us', 'fr', 'es'] },
   'With both': { ips: ['10.200.0.202', '74.25.14.20'], countryCodes: ['us', 'fr', 'es'] },
+  'IP overflow badge': {
+    ips: ['10.200.0.202', '192.168.1.1', '74.25.14.20', '172.16.0.1'],
+    countryCodes: [],
+  },
+  'Flag overflow badge': {
+    ips: [],
+    countryCodes: ['us', 'fr', 'es', 'de', 'jp', 'br'],
+  },
+  'Both overflow badges': {
+    ips: ['10.200.0.202', '192.168.1.1', '74.25.14.20'],
+    countryCodes: ['us', 'fr', 'es', 'de', 'jp'],
+  },
 };
 
 const Template = () => {

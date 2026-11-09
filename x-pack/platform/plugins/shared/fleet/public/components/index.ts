@@ -21,6 +21,8 @@ export { PackagePolicyActionsMenu } from './package_policy_actions_menu';
 export { AddAgentHelpPopover } from './add_agent_help_popover';
 export { EuiButtonWithTooltip } from './eui_button_with_tooltip';
 export * from './agent_policy_summary_line';
+export { AgentStatusBadge } from './agent_status_badge';
+export type { AgentStatusBadgeProps } from './agent_status_badge';
 export * from './agent_enrollment_flyout';
 export * from './platform_selector';
 export { ConfirmForceInstallModal } from './confirm_force_install_modal';
@@ -36,3 +38,5 @@ export type {
 } from './agentless_enrollment_flyout';
 export { AgentlessStatusDetailsFlyout } from './agentless_status_details_flyout';
 export type { AgentlessStatusDetailsFlyoutProps } from './agentless_status_details_flyout';
+export { DataStreamTypeSelector } from './data_stream_type_selector';
+export type { DataStreamTypeSelectorProps } from './data_stream_type_selector';

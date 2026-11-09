@@ -15,10 +15,16 @@ import {
   getResolutionRuleConfig,
   type ResolutionRuleConfig,
 } from './rule_registry';
+import {
+  findCustomResolutionRule,
+  findCustomResolutionRules,
+  type CustomResolutionRule,
+} from './custom';
 
 export interface EffectiveResolutionRule {
   id: ResolutionRuleConfig['id'];
   kind: ResolutionRuleConfig['kind'];
+  description: string;
   managed: true;
   enabled: boolean;
 }
@@ -38,6 +44,14 @@ export class ResolutionRulesClient {
     return RESOLUTION_RULE_CONFIGS.map((config) =>
       this.toEffectiveRule(config, overrides.get(config.id)?.enabled)
     );
+  }
+
+  getCustomRules(): Promise<CustomResolutionRule[]> {
+    return findCustomResolutionRules(this.soClient);
+  }
+
+  getCustomRule(id: string): Promise<CustomResolutionRule | undefined> {
+    return findCustomResolutionRule(this.soClient, id);
   }
 
   async isEnabled(id: ResolutionRuleId): Promise<boolean> {
@@ -131,6 +145,7 @@ export class ResolutionRulesClient {
     return {
       id: config.id,
       kind: config.kind,
+      description: config.description,
       managed: true,
       enabled: enabledOverride ?? config.defaultEnabled,
     };

@@ -7,10 +7,11 @@
 
 import React, { type FC } from 'react';
 
-import { EuiButton, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiLink, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { useEnabledFeatures } from '../../../../serverless_context';
 import { TRANSFORM_MODE, TRANSFORM_STATE } from '../../../../../../common/constants';
@@ -140,7 +141,7 @@ export const TransformStatsBar: FC<TransformStatsBarProps> = ({
     <>
       {showNodeInfo && transformNodes === 0 && (
         <>
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount
             title={
               <FormattedMessage
@@ -148,32 +149,36 @@ export const TransformStatsBar: FC<TransformStatsBarProps> = ({
                 defaultMessage="There are no transform nodes available."
               />
             }
-            color="warning"
-            iconType="warning"
-          >
-            <p>
-              <FormattedMessage
-                id="xpack.transform.transformNodes.noTransformNodesCallOutBody"
-                defaultMessage="You will not be able to create or run transforms. {learnMoreLink}"
-                values={{
-                  learnMoreLink: (
-                    <EuiLink href={esNodeRoles} target="_blank">
-                      <FormattedMessage
-                        id="xpack.transform.transformNodes.noTransformNodesLearnMoreLinkText"
-                        defaultMessage="Learn more"
-                      />
-                    </EuiLink>
-                  ),
-                }}
-              />
-            </p>
-            <EuiButton onClick={() => refreshTransformList()} size="s">
-              <FormattedMessage
-                id="xpack.transform.transformNodes.noTransformNodesRetryButtonText"
-                defaultMessage="Retry"
-              />
-            </EuiButton>
-          </EuiCallOut>
+            text={
+              <p>
+                <FormattedMessage
+                  id="xpack.transform.transformNodes.noTransformNodesCallOutBody"
+                  defaultMessage="You will not be able to create or run transforms. {learnMoreLink}"
+                  values={{
+                    learnMoreLink: (
+                      <EuiLink href={esNodeRoles} target="_blank">
+                        <FormattedMessage
+                          id="xpack.transform.transformNodes.noTransformNodesLearnMoreLinkText"
+                          defaultMessage="Learn more"
+                        />
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              </p>
+            }
+            actionProps={{
+              primary: {
+                onClick: () => refreshTransformList(),
+                children: (
+                  <FormattedMessage
+                    id="xpack.transform.transformNodes.noTransformNodesRetryButtonText"
+                    defaultMessage="Retry"
+                  />
+                ),
+              },
+            }}
+          />
           <EuiSpacer size="s" />
         </>
       )}

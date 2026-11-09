@@ -28,6 +28,20 @@ viewport breakpoint using the previous viewport mapping: `xs` and `s` collapse, 
 the medium layout, and `xl` shows the full menu. Menus that should preserve viewport-based behavior,
 such as the Classic and legacy Project Chrome headers, set `breakpointSource="viewport"`.
 
+## Loading skeleton
+
+`AppMenuLoading` skeletons the same responsive layouts. Mount it in the same slot as
+`AppMenuComponent` while the menu config is not ready. It defaults to one overflow-style
+placeholder plus a primary-action rectangle; `buttonCount` is clamped to `APP_MENU_ITEM_LIMIT`.
+
+```tsx
+<AppMenuLoading />
+<AppMenuLoading buttonCount={2} hasPrimary={false} />
+```
+
+Collapsed breakpoints show only the overflow placeholder (the primary action lives inside that
+menu). Minimal shows overflow + primary. Expanded shows `buttonCount` icon placeholders + primary.
+
 ## Strict props
 
 The public types are the contract. A type assertion can still pass a React node as a `label`, or

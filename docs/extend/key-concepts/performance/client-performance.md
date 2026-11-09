@@ -58,7 +58,7 @@ export class MyPlugin implements Plugin<MyPluginSetup> {
 
 ## Understanding plugin bundle size
 
-Kibana Platform plugins are pre-built with `@kbn/optimizer`
+Kibana Platform plugins are pre-built with `@kbn/rspack-optimizer`
 and distributed as package artifacts. This means that it is no
 longer necessary for us to include the `optimizer` in the
 distributable version of Kibana Every plugin artifact contains all
@@ -67,34 +67,39 @@ stateful dependencies shared across plugin bundles via
 `@kbn/ui-shared-deps-npm` and `@kbn/ui-shared-deps-src`. This means
 that plugin artifacts _tend to be larger_ than they were in the
 legacy platform. To understand the current size of your plugin
-artifact, run `@kbn/optimizer` with:
+artifact, run `@kbn/rspack-optimizer` with:
 
 ```bash
-node scripts/build_kibana_platform_plugins.js --dist --profile --focus=my_plugin
+node scripts/build_kibana_platform_plugins.js --dist --profile-stats-only --profile-focus=my_plugin
 ```
 
-and check the output in the `target` sub-folder of your plugin folder:
+and check the output in the `target/public/bundles` directory at the repository root:
 
 ```bash
-ls -lh plugins/my_plugin/target/public/
+ls -lh target/public/bundles/ target/public/bundles/chunks/
 # output
-# an async chunk loaded on demand
-... 262K 0.plugin.js
-# eagerly loaded chunk
-... 50K  my_plugin.plugin.js
+# main entry + runtime, loaded eagerly
+... kibana.bundle.js
+# async chunks (plugins, heavy vendors, shared code) loaded on demand
+... chunks/1a2b3c4d.js
 ```
 
-You might see at least one js bundle - `my_plugin.plugin.js`. This is
-the _only_ artifact loaded by Kibana during bootstrap in the
-browser. The rule of thumb is to keep its size as small as possible.
-Other lazily loaded parts of your plugin will be present in the same folder as
-separate chunks under `{number}.myplugin.js` names. If you want to
-investigate what your plugin bundle consists of, you need to run
-`@kbn/optimizer` with `--profile` flag to generate a
-[webpack stats file](https://webpack.js.org/api/stats/).
+All plugins are compiled together in a single unified build. Your plugin's
+code lives in the `plugin-my_plugin` chunk plus any shared chunks it
+contributes to; the per-plugin `page load bundle size` is reported in
+`target/public/bundles/metrics.json` (copied to
+`target/optimizer_bundle_metrics.json` by `node scripts/build`). The rule of thumb is to keep the
+eagerly loaded portion as small as possible and to move other parts of your
+plugin behind `import()` boundaries so they become separate async chunks. If
+you want to investigate what your plugin bundle consists of, run
+`@kbn/rspack-optimizer` with `--profile-stats-only` (or `--profile`, which also opens
+an RsDoctor report) to generate a webpack-compatible
+[stats file](https://webpack.js.org/api/stats/) at
+`target/public/bundles/stats.json`. Use `--profile-focus` to include
+module-level detail for specific plugins:
 
 ```bash
-node scripts/build_kibana_platform_plugins.js --dist --no-examples --profile
+node scripts/build_kibana_platform_plugins.js --dist --profile-stats-only --profile-focus=my_plugin
 ```
 
 Many OSS tools allow you to analyze the generated stats file:

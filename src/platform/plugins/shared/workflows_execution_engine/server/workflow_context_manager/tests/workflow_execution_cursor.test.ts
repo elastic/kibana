@@ -7,30 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
+import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import { WorkflowExecutionCursor } from '../workflow_execution_cursor';
+import type { WorkflowRuntimeGraph } from '../workflow_runtime_graph';
 
 describe('WorkflowExecutionCursor', () => {
   let workflowExecutionCursor: WorkflowExecutionCursor;
-  let workflowExecutionGraph: WorkflowGraph;
+  let workflowExecutionGraph: WorkflowRuntimeGraph;
 
   beforeEach(() => {
+    const topologicalOrder = ['node1', 'node2', 'node3'];
+    const graphNodes: Record<string, GraphNodeUnion> = {
+      node1: { id: 'node1', stepId: 's1', type: 't1' } as GraphNodeUnion,
+      node2: { id: 'node2', stepId: 's2', type: 't2' } as GraphNodeUnion,
+      node3: { id: 'node3', stepId: 's3', type: 't3' } as GraphNodeUnion,
+    };
     workflowExecutionGraph = {
-      topologicalOrder: ['node1', 'node2', 'node3'],
-      getNode: jest.fn().mockImplementation((nodeId: string) => {
-        if (nodeId === 'node1') {
-          return { id: 'node1', stepId: 's1', type: 't1' } as GraphNodeUnion;
-        }
-        if (nodeId === 'node2') {
-          return { id: 'node2', stepId: 's2', type: 't2' } as GraphNodeUnion;
-        }
-        if (nodeId === 'node3') {
-          return { id: 'node3', stepId: 's3', type: 't3' } as GraphNodeUnion;
+      topologicalOrder,
+      nodeAfter: jest.fn().mockImplementation((nodeId: string | undefined) => {
+        const index = topologicalOrder.findIndex((id) => id === nodeId);
+        if (index >= 0 && index < topologicalOrder.length - 1) {
+          return graphNodes[topologicalOrder[index + 1]];
         }
         return undefined;
       }),
-      getNodeStack: jest.fn().mockImplementation((nodeId: string) => [nodeId]),
-    } as unknown as WorkflowGraph;
+      getNode: jest.fn().mockImplementation((nodeId: string) => {
+        return graphNodes[nodeId];
+      }),
+      getNodeStack: jest.fn().mockReturnValue({ stackFrames: [] }),
+      insertSyntheticScope: jest.fn(),
+    } as unknown as WorkflowRuntimeGraph;
 
     workflowExecutionCursor = new WorkflowExecutionCursor({
       nodeId: 'node1',

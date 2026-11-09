@@ -978,7 +978,7 @@ describe('custom assets', () => {
           new AbortController().signal,
           { debug: jest.fn() } as any
         )
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         new FleetError(
           `Syncing ingest pipelines that reference enrich policies is not supported. Please sync manually.`
         )

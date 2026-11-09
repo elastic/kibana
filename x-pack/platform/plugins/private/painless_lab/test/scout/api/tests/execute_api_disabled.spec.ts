@@ -15,9 +15,11 @@ apiTest.describe(
   { tag: tags.serverless.search },
   () => {
     let adminApiCredentials: RoleApiCredentials;
+
     apiTest.beforeAll(async ({ requestAuth }) => {
       adminApiCredentials = await requestAuth.getApiKey('admin');
     });
+
     apiTest('should return 404', async ({ apiClient }) => {
       const response = await apiClient.post('api/painless_lab/execute', {
         headers: {

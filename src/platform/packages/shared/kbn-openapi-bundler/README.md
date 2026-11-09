@@ -77,7 +77,7 @@ And add a script entry to your `package.json` file
 Finally you should be able to run OpenAPI bundler via
 
 ```bash
-yarn openapi:bundle
+pnpm openapi:bundle
 ```
 
 This command will produce one or multiple bundled files like
@@ -201,7 +201,7 @@ Finally you should be able to run OpenAPI merger via
 node ./path/to/the/script.js
 ```
 
-or it could be added to a `package.json` and run via `yarn`.
+or it could be added to a `package.json` and run via `pnpm`.
 
 After running the script it will log different information and write a merged OpenAPI specification to a the provided path.
 
@@ -791,11 +791,11 @@ In case you decide to contribute to the `kbn-openapi-bundler` package please mak
 To run package tests use the following command in the repo root folder
 
 ```bash
-yarn test:jest src/platform/packages/shared/kbn-openapi-bundler
+pnpm test:jest src/platform/packages/shared/kbn-openapi-bundler
 ```
 
 Jest watch mode can be enabled by passing `--watch` flag
 
 ```bash
-yarn test:jest src/platform/packages/shared/kbn-openapi-bundler --watch
+pnpm test:jest src/platform/packages/shared/kbn-openapi-bundler --watch
 ```

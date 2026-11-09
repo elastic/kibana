@@ -96,6 +96,29 @@ describe('<KeyValuePairsField />', () => {
     expect(onBlur).toHaveBeenCalledTimes(2);
   });
 
+  it('deletes a pair without submitting the surrounding form', async () => {
+    const onSubmit = jest.fn((event: React.FormEvent) => event.preventDefault());
+    const { getByTestId, getAllByTestId, queryByTestId } = render(
+      <form onSubmit={onSubmit}>
+        <WrappedComponent
+          defaultValue={[
+            ['lb1', 'test1'],
+            ['lb2', 'test2'],
+          ]}
+        />
+      </form>
+    );
+
+    expect(getByTestId('keyValuePairsKey1')).toBeInTheDocument();
+
+    const [firstDeleteButton] = getAllByTestId('syntheticsKeyValuePairsFieldButton');
+    await userEvent.click(firstDeleteButton);
+
+    expect(onSubmit).not.toHaveBeenCalled();
+    expect(queryByTestId('keyValuePairsKey1')).not.toBeInTheDocument();
+    expect(onChange).toHaveBeenLastCalledWith([['lb2', 'test2']]);
+  });
+
   it('handles adding and editing a new row', async () => {
     const { getByTestId, queryByTestId, getByText } = render(
       <WrappedComponent defaultValue={[]} />
@@ -114,7 +137,7 @@ describe('<KeyValuePairsField />', () => {
     await waitFor(() => {
       expect(newRowKey.value).toEqual('');
       expect(newRowValue.value).toEqual('');
-      expect(onChange).toBeCalledWith([[newRowKey.value, newRowValue.value]]);
+      expect(onChange).toHaveBeenCalledWith([[newRowKey.value, newRowValue.value]]);
     });
 
     fireEvent.change(newRowKey, { target: { value: 'newKey' } });
@@ -123,7 +146,7 @@ describe('<KeyValuePairsField />', () => {
     await waitFor(() => {
       expect(newRowKey.value).toEqual('newKey');
       expect(newRowValue.value).toEqual('newValue');
-      expect(onChange).toBeCalledWith([[newRowKey.value, newRowValue.value]]);
+      expect(onChange).toHaveBeenCalledWith([[newRowKey.value, newRowValue.value]]);
     });
   });
 });

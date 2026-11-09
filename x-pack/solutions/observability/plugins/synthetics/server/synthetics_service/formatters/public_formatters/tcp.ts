@@ -6,10 +6,11 @@
  */
 
 import type { TCPFields } from '../../../../common/runtime_types';
-import { ConfigKey } from '../../../../common/runtime_types';
+import { ConfigKey, Mode } from '../../../../common/runtime_types';
 import type { Formatter } from './common';
 import { commonFormatters } from './common';
 import { tlsFormatters } from './tls';
+import { omitDefaultFormatter } from './formatting_utils';
 
 export type TCPFormatMap = Record<keyof TCPFields, Formatter>;
 export const tcpFormatters: TCPFormatMap = {
@@ -22,7 +23,8 @@ export const tcpFormatters: TCPFormatMap = {
   [ConfigKey.PROXY_URL]: null,
   [ConfigKey.PORT]: null,
   [ConfigKey.URLS]: null,
-  [ConfigKey.MODE]: null,
+  // 'any' matches Heartbeat's default (elastic/kibana#241818).
+  [ConfigKey.MODE]: omitDefaultFormatter(Mode.ANY),
   [ConfigKey.IPV4]: null,
   [ConfigKey.IPV6]: null,
   [ConfigKey.METADATA]: null,

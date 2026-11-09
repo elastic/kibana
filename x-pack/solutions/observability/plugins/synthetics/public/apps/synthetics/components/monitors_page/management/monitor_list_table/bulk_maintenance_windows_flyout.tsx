@@ -12,7 +12,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonGroup,
-  EuiCallOut,
   EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
@@ -27,6 +26,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { EncryptedSyntheticsSavedMonitor } from '../../../../../../../common/runtime_types';
 import { ConfigKey, SourceType } from '../../../../../../../common/runtime_types';
 import { useGetUrlParams } from '../../../../hooks';
@@ -260,9 +260,7 @@ export const BulkMaintenanceWindowsFlyout = ({
         {skippedMonitors.length > 0 && (
           <>
             <EuiSpacer size="m" />
-            <EuiCallOut
-              color="warning"
-              iconType="warning"
+            <KbnWarningCallout
               announceOnMount={false}
               title={i18n.translate(
                 'xpack.synthetics.bulkMaintenanceWindowsFlyout.skippedWarning.title',
@@ -272,10 +270,8 @@ export const BulkMaintenanceWindowsFlyout = ({
                   values: { count: skippedMonitors.length },
                 }
               )}
+              text={SKIPPED_DESCRIPTION}
             >
-              <EuiText size="s">
-                <p>{SKIPPED_DESCRIPTION}</p>
-              </EuiText>
               <EuiAccordion id={skippedAccordionId} buttonContent={SHOW_SKIPPED_LABEL}>
                 <EuiSpacer size="xs" />
                 <EuiText size="s">
@@ -286,7 +282,7 @@ export const BulkMaintenanceWindowsFlyout = ({
                   </ul>
                 </EuiText>
               </EuiAccordion>
-            </EuiCallOut>
+            </KbnWarningCallout>
           </>
         )}
       </EuiFlyoutBody>

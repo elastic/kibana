@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { get } from 'lodash';
 import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import {
@@ -14,7 +15,6 @@ import {
   ENTITY_STORE_TAGS,
   LATEST_ALIAS,
 } from '../../../common/fixtures/constants';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common';
 import {
   ENTITY_CONFIDENCE,
   USER_ENTITY_NAMESPACE,
@@ -27,19 +27,22 @@ import {
   expectedUserEntities,
 } from '../../../common/fixtures/entity_extraction_expected';
 import {
-  clearEntityStoreIndices,
+  clearInstalledEntityStoreDocuments,
   forceLogExtraction,
   ingestDoc,
   normalizeKeywordList,
+  resetLogExtractionConfig,
   searchDocById,
+  setupLogsTestDataStream,
+  teardownLogsTestDataStream,
+  updateLogExtractionConfig,
 } from '../../../common/fixtures/helpers';
-import { LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT } from '../../../../../server/domain/saved_objects';
 
 apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
   let internalHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ samlAuth, apiClient, esArchiver, kbnClient }) => {
+  apiTest.beforeAll(async ({ samlAuth, apiClient, esClient, esArchiver }) => {
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = {
       ...credentials.cookieHeader,
@@ -49,11 +52,6 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       ...credentials.cookieHeader,
       ...INTERNAL_HEADERS,
     };
-
-    // enable feature flag
-    await kbnClient.uiSettings.update({
-      [FF_ENABLE_ENTITY_STORE_V2]: true,
-    });
 
     // Pre-create the `security-solution-default` data view. In API-only test
     // environments the Security Solution sourcerer (which normally creates it
@@ -75,27 +73,20 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     });
     expect(dataViewResponse.statusCode).toBe(200);
 
-    // Install the entity store
-    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {},
-    });
-    expect(response.statusCode).toBe(201);
+    await clearInstalledEntityStoreDocuments(esClient);
 
+    await setupLogsTestDataStream(esClient);
     await esArchiver.loadIfNeeded(
-      'x-pack/platform/plugins/shared/entity_store/test/scout/common/es_archives/updates'
+      'x-pack/platform/plugins/shared/entity_store/test/scout/common/es_archives/logs'
     );
   });
 
   apiTest.afterAll(async ({ apiClient, esClient }) => {
-    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {},
-    });
-    expect(response.statusCode).toBe(200);
-    await clearEntityStoreIndices(esClient);
+    try {
+      await resetLogExtractionConfig({ apiClient, headers: defaultHeaders });
+    } finally {
+      await teardownLogsTestDataStream(esClient);
+    }
   });
 
   apiTest('Should extract properly extract host', async ({ apiClient, esClient, log }) => {
@@ -131,6 +122,8 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
   });
 
   apiTest('Should extract properly extract user', async ({ apiClient, esClient, log }) => {
+    // Pinned to 'single': the archive includes non-asset user logs that the priority
+    // identity-source gate drops when entityStore.dualProcess.enabled defaults to true.
     const extractionResponse = await apiClient.post(
       ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('user'),
       {
@@ -139,6 +132,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         body: {
           fromDateISO: '2026-01-20T11:00:00Z',
           toDateISO: '2026-01-20T13:00:00Z',
+          process: 'single',
         },
       }
     );
@@ -444,6 +438,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
   apiTest(
     'Should apply user postAggFilter: IDP asset/iam paths and entity.id-after-LOOKUP; omit when no keep branch',
     async ({ apiClient, esClient }) => {
+      // Pinned to 'single': the IAM enrich path is a non-asset log the priority gate drops.
       const from = '2026-03-01T10:00:00Z';
       const to = '2026-03-01T12:00:00Z';
 
@@ -456,7 +451,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
           name: 'IDP NoLatest',
         },
       });
-      const ext1 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to);
+      const ext1 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to, 'single');
       expect(ext1.statusCode).toBe(200);
       const hit1 = await searchDocById(esClient, 'user:postagg-idp-nolatest@okta');
       expect(hit1.hits.hits).toHaveLength(1);
@@ -479,7 +474,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
           name: 'IDP InLatest',
         },
       });
-      await forceLogExtraction(apiClient, internalHeaders, 'user', from, to);
+      await forceLogExtraction(apiClient, internalHeaders, 'user', from, to, 'single');
       await ingestDoc(esClient, {
         '@timestamp': '2026-03-01T10:03:00Z',
         event: { kind: 'asset', module: 'okta' },
@@ -488,7 +483,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
           name: 'IDP InLatest Updated',
         },
       });
-      const ext2 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to);
+      const ext2 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to, 'single');
       expect(ext2.statusCode).toBe(200);
       const hit2 = await searchDocById(esClient, 'user:postagg-idp-inlatest@okta');
       expect(hit2.hits.hits).toHaveLength(1);
@@ -502,7 +497,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         },
       });
 
-      // 3. Not non-IDP (no host.id). Matches idpDocumentFilter (user.id/name) but not idpPostAggFilter (not asset/iam)
+      // 3. Not non-IDP (no host.id). Matches idpDocumentFilter (user.id/name) but not idpPostAggFilter (not event.kind: asset)
       //    and not nonIdpPostAggFilter (no host.id) and no entity.id yet → no postAgg keep branch → not extracted.
       await ingestDoc(esClient, {
         '@timestamp': '2026-03-01T10:04:00Z',
@@ -512,49 +507,40 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
           name: 'NoPostAggKeep NoLatest',
         },
       });
-      const ext3 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to);
+      const ext3 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to, 'single');
       expect(ext3.statusCode).toBe(200);
       const hit3 = await searchDocById(esClient, 'user:postagg-nopostaggkeep-nolatest@okta');
       expect(hit3.hits.hits).toHaveLength(0);
 
-      // 4. IDP: IAM user event (entityanalytics_ad) — matches idpPostAggFilter; namespace active_directory from fieldEvaluations.
+      // 4. IDP: IAM lifecycle event (entityanalytics_ad) with no host.id — the IdP gate only accepts
+      //    `event.kind: asset`, and there is no host.id for the non-IDP branch, so no entity is created.
       await ingestDoc(esClient, {
         '@timestamp': '2026-03-01T10:05:00Z',
         event: { category: 'iam', type: 'user', module: 'entityanalytics_ad' },
         user: {
-          id: 'postagg-idp-iam-ad-inlatest',
-          name: 'IDP IAM AD InLatest',
+          id: 'postagg-idp-iam-ad-nolatest',
+          name: 'IDP IAM AD NoLatest',
         },
       });
-      const ext4 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to);
+      const ext4 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to, 'single');
       expect(ext4.statusCode).toBe(200);
       const hit4 = await searchDocById(
         esClient,
-        'user:postagg-idp-iam-ad-inlatest@active_directory'
+        'user:postagg-idp-iam-ad-nolatest@active_directory'
       );
-      expect(hit4.hits.hits).toHaveLength(1);
-      expect(hit4.hits.hits[0]._source).toMatchObject({
-        entity: {
-          id: 'user:postagg-idp-iam-ad-inlatest@active_directory',
-          type: 'Identity',
-          name: 'IDP IAM AD InLatest',
-          namespace: 'active_directory',
-          confidence: ENTITY_CONFIDENCE.High,
-        },
-      });
+      expect(hit4.hits.hits).toHaveLength(0);
 
-      // 5. Follow-up doc is not asset/iam (no idpPostAggFilter) and has no host.id (no nonIdpPostAggFilter);
-      //    row is kept via entity.id after LOOKUP (prior latest from step 4) → still extracted/updated.
-      await forceLogExtraction(apiClient, internalHeaders, 'user', from, to);
+      // 5. An IAM lifecycle event still enriches an entity that already exists.
+      //    First create the entity with an `event.kind: asset` doc.
       await ingestDoc(esClient, {
         '@timestamp': '2026-03-01T10:06:00Z',
-        event: { kind: 'not-asset-or-iam', module: 'entityanalytics_ad' },
+        event: { kind: 'asset', module: 'entityanalytics_ad' },
         user: {
           id: 'postagg-idp-iam-ad-inlatest',
-          name: 'IDP IAM AD InLatest Updated',
+          name: 'IDP AD InLatest',
         },
       });
-      const ext5 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to);
+      const ext5 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to, 'single');
       expect(ext5.statusCode).toBe(200);
       const hit5 = await searchDocById(
         esClient,
@@ -565,7 +551,44 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         entity: {
           id: 'user:postagg-idp-iam-ad-inlatest@active_directory',
           type: 'Identity',
-          name: 'IDP IAM AD InLatest Updated',
+          name: 'IDP AD InLatest',
+          namespace: 'active_directory',
+          confidence: ENTITY_CONFIDENCE.High,
+        },
+      });
+
+      // 6. IAM lifecycle doc for the same user: no `event.kind: asset` (no idpPostAggFilter) and no
+      //    host.id (no nonIdpPostAggFilter). The extraction window holds only this doc, so the row can
+      //    only be kept via entity.id after LOOKUP against the entity created in step 5 → it enriches it.
+      const iamOnlyFrom = '2026-03-01T11:00:00Z';
+      const iamOnlyTo = '2026-03-01T12:00:00Z';
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-03-01T11:01:00Z',
+        event: { category: 'iam', type: 'user', module: 'entityanalytics_ad' },
+        user: {
+          id: 'postagg-idp-iam-ad-inlatest',
+          name: 'IDP AD InLatest Updated',
+        },
+      });
+      const ext6 = await forceLogExtraction(
+        apiClient,
+        internalHeaders,
+        'user',
+        iamOnlyFrom,
+        iamOnlyTo,
+        'single'
+      );
+      expect(ext6.statusCode).toBe(200);
+      const hit6 = await searchDocById(
+        esClient,
+        'user:postagg-idp-iam-ad-inlatest@active_directory'
+      );
+      expect(hit6.hits.hits).toHaveLength(1);
+      expect(hit6.hits.hits[0]._source).toMatchObject({
+        entity: {
+          id: 'user:postagg-idp-iam-ad-inlatest@active_directory',
+          type: 'Identity',
+          name: 'IDP AD InLatest Updated',
           namespace: 'active_directory',
           confidence: ENTITY_CONFIDENCE.High,
         },
@@ -574,8 +597,68 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
   );
 
   apiTest(
+    'Should resolve CloudTrail actors to the inventory IAM role entity via user.entity.id (aws)',
+    async ({ apiClient, esClient }) => {
+      // Pinned to 'single': CloudTrail rows are event.kind 'event', which the priority gate drops.
+      const from = '2026-04-01T10:00:00Z';
+      const to = '2026-04-01T12:00:00Z';
+      const roleArn = 'arn:aws:iam::123456789012:role/scout/ExtractionRole';
+      const roleEntityId = `user:${roleArn}@aws`;
+      const readList = (source: Record<string, unknown>, path: string): unknown[] => {
+        const value = source[path] ?? get(source, path);
+        return Array.isArray(value) ? value : [value];
+      };
+
+      // 1. A CloudTrail event alone cannot create the user (event.kind is not asset).
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-04-01T10:01:00Z',
+        event: { kind: 'event', module: 'aws', action: 'AssumeRole', outcome: 'success' },
+        cloud: { provider: 'aws' },
+        user: { id: 'AROAEXAMPLE:session-1', name: 'session-1', entity: { id: roleArn } },
+      });
+      const ext1 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to, 'single');
+      expect(ext1.statusCode).toBe(200);
+      expect((await searchDocById(esClient, roleEntityId)).hits.hits).toHaveLength(0);
+
+      // 2. Cloud Asset Inventory creates the IAM role entity keyed by ARN.
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-04-01T10:02:00Z',
+        event: { kind: 'asset', module: 'asset_discovery' },
+        cloud: { provider: 'aws' },
+        user: { id: roleArn, name: 'ExtractionRole', entity: { id: roleArn } },
+      });
+      const ext2 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to, 'single');
+      expect(ext2.statusCode).toBe(200);
+      const created = await searchDocById(esClient, roleEntityId);
+      expect(created.hits.hits).toHaveLength(1);
+      expect(created.hits.hits[0]._source).toMatchObject({
+        entity: { id: roleEntityId, namespace: 'aws' },
+      });
+
+      // 3. A later CloudTrail event updates the same entity instead of creating user:<principalId>@aws.
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-04-01T10:03:00Z',
+        event: { kind: 'event', module: 'aws', action: 'ListBuckets', outcome: 'success' },
+        cloud: { provider: 'aws' },
+        user: { id: 'AROAEXAMPLE:session-2', name: 'session-2', entity: { id: roleArn } },
+      });
+      const ext3 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to, 'single');
+      expect(ext3.statusCode).toBe(200);
+      const updated = await searchDocById(esClient, roleEntityId);
+      expect(updated.hits.hits).toHaveLength(1);
+      const source = updated.hits.hits[0]._source as Record<string, unknown>;
+      expect(readList(source, 'user.id')).toContain('AROAEXAMPLE:session-2');
+      expect(readList(source, 'event.kind')).toContain('event');
+      expect(
+        (await searchDocById(esClient, 'user:AROAEXAMPLE:session-2@aws')).hits.hits
+      ).toHaveLength(0);
+    }
+  );
+
+  apiTest(
     'Should only enrich (update) existing entities when entity already exists for both IDP and non-IDP, no new entity creation',
     async ({ apiClient, esClient }) => {
+      // Pinned to 'single': the local entity is built from a non-asset log the priority gate drops.
       const from = '2026-03-02T10:00:00Z';
       const to = '2026-03-02T12:00:00Z';
 
@@ -585,7 +668,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         event: { kind: 'asset', module: 'okta' },
         user: { id: 'enrich-idp-user', name: 'Enrich IDP' },
       });
-      const ext1 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to);
+      const ext1 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to, 'single');
       expect(ext1.statusCode).toBe(200);
       expect(ext1.body).toMatchObject({ count: 1 });
 
@@ -596,7 +679,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         user: { name: 'enrich-local-user' },
         host: { id: 'enrich-host-1', name: 'enrich-ws' },
       });
-      const ext2 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to);
+      const ext2 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to, 'single');
       expect(ext2.statusCode).toBe(200);
       expect(ext2.body).toMatchObject({ count: 2 });
 
@@ -620,7 +703,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       });
 
       // 4. Run extraction - should only enrich (update) existing entities, no new creation
-      const ext3 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to);
+      const ext3 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to, 'single');
       expect(ext3.statusCode).toBe(200);
       expect(ext3.body).toMatchObject({ count: 2 });
 
@@ -656,7 +739,8 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     'Should set entity.namespace to local and entity.name to user.name and host.name for non-IDP documents',
     async ({ apiClient, esClient }) => {
       // Non-IDP: user.name + host.id present, user.name not in excluded list.
-      // Event must NOT be asset/iam so identity fieldEvaluations (condition whenClause) set entity.namespace = 'local'.
+      // Event must NOT be `event.kind: asset` so identity fieldEvaluations (condition whenClause) set entity.namespace = 'local'.
+      // Pinned to 'single': that non-asset log is dropped by the priority gate.
       await ingestDoc(esClient, {
         '@timestamp': '2026-03-18T10:00:00Z',
         event: { kind: 'event', category: 'network', outcome: 'success' },
@@ -669,7 +753,8 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         internalHeaders,
         'user',
         '2026-03-18T09:59:00Z',
-        '2026-03-18T10:01:00Z'
+        '2026-03-18T10:01:00Z',
+        'single'
       );
       expect(extractionResponse.statusCode).toBe(200);
       expect(extractionResponse.body).toMatchObject({ count: 1 });
@@ -691,6 +776,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
   apiTest(
     'Should set entity.name to user.name when non-IDP local document has no host.name',
     async ({ apiClient, esClient }) => {
+      // Pinned to 'single': this local user is a non-asset log the priority gate drops.
       await ingestDoc(esClient, {
         '@timestamp': '2026-03-18T11:00:00Z',
         event: { kind: 'event', category: 'network', outcome: 'success' },
@@ -703,7 +789,8 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         internalHeaders,
         'user',
         '2026-03-18T10:59:00Z',
-        '2026-03-18T11:01:00Z'
+        '2026-03-18T11:01:00Z',
+        'single'
       );
       expect(extractionResponse.statusCode).toBe(200);
       expect(extractionResponse.body).toMatchObject({ count: 1 });
@@ -769,7 +856,8 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         {
           headers: internalHeaders,
           responseType: 'json',
-          body: { fromDateISO: from, toDateISO: to },
+          // Pinned to 'single': the local user is a non-asset log the priority gate drops.
+          body: { fromDateISO: from, toDateISO: to, process: 'single' },
         }
       );
 
@@ -821,7 +909,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
 
       // Excluded user names per user.ts: root, bin, daemon, sys, nobody, jenkins, ansible, deploy,
       // terraform, gitlab-runner, postgres, mysql, redis, elasticsearch, kafka, admin, operator, service.
-      // Non-IDP docs only (user.name + host.id, no event.kind=asset, no event.category=iam).
+      // Non-IDP docs only (user.name + host.id, no event.kind=asset).
       const excludedNames = ['root', 'jenkins', 'ansible', 'postgres', 'admin', 'service'];
       for (let i = 0; i < excludedNames.length; i++) {
         const name = excludedNames[i];
@@ -846,7 +934,8 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         {
           headers: internalHeaders,
           responseType: 'json',
-          body: { fromDateISO: from, toDateISO: to },
+          // Pinned to 'single': the allowed local user is a non-asset log the priority gate drops.
+          body: { fromDateISO: from, toDateISO: to, process: 'single' },
         }
       );
 
@@ -935,7 +1024,12 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
           {
             headers: internalHeaders,
             responseType: 'json',
-            body: { fromDateISO: from, toDateISO: to },
+            body: {
+              fromDateISO: from,
+              toDateISO: to,
+              // The local user doc is non-asset. Only the user type has a priority gate.
+              ...(entityType === 'user' ? { process: 'single' } : {}),
+            },
           }
         );
         expect(extractionResponse.statusCode).toBe(200);
@@ -1031,7 +1125,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       });
 
       // 4. user.name only, plain network event (no host.id) — idpDocumentFilter passes but postAggFilter omits
-      //    (not idpPostAgg asset/iam shape, not nonIdpPostAgg without host.id, no entity.id).
+      //    (not idpPostAgg `event.kind: asset` shape, not nonIdpPostAgg without host.id, no entity.id).
       await ingestDoc(esClient, {
         '@timestamp': '2026-03-18T11:04:00Z',
         event: { kind: 'event', category: 'network', outcome: 'success' },
@@ -1116,12 +1210,11 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       const TOTAL_DOCS = 6; // > MAX_LOGS_PER_PAGE so a second outer iteration is required
 
       // Shrink the log-slice window to force multiple outer loop iterations within one run.
-      const updateResponse = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+      await updateLogExtractionConfig({
+        apiClient,
         headers: defaultHeaders,
-        responseType: 'json',
-        body: { logExtraction: { maxLogsPerPage: MAX_LOGS_PER_PAGE } },
+        logExtraction: { maxLogsPerPage: MAX_LOGS_PER_PAGE },
       });
-      expect(updateResponse.statusCode).toBe(200);
 
       try {
         // Ingest TOTAL_DOCS host documents all sharing @timestamp = fromDateISO.
@@ -1151,11 +1244,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         }
       } finally {
         // Restore default so subsequent tests are not affected.
-        await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
-          headers: defaultHeaders,
-          responseType: 'json',
-          body: { logExtraction: { maxLogsPerPage: LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT } },
-        });
+        await resetLogExtractionConfig({ apiClient, headers: defaultHeaders });
       }
     }
   );
@@ -1279,10 +1368,8 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         event: { kind: 'asset', module: 'asset_discovery' },
         user: { id: 'cloud-no-provider-user' },
       });
-      // 6. event.kind is not 'asset' → field-mapping condition does not fire;
-      //    cloud.provider=aws and event.module=custom-module produce different namespaces so
-      //    the wrong path would yield 'aws' while the correct path yields 'custom-module'.
-      //    IAM event so postAggFilter passes via idpGate (event.category=iam + event.type=user).
+      // 6. IAM lifecycle event with no `event.kind: asset` and no host.id → the IdP gate rejects it,
+      //    so no entity is created at all (negative coverage: cloud.provider routing never runs).
       await ingestDoc(esClient, {
         '@timestamp': '2026-06-01T10:06:00Z',
         event: { category: 'iam', type: 'user', module: 'custom-module' },
@@ -1307,7 +1394,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         to
       );
       expect(extractionResponse.statusCode).toBe(200);
-      expect(extractionResponse.body).toMatchObject({ success: true, count: 7 });
+      expect(extractionResponse.body).toMatchObject({ success: true, count: 6 });
 
       // 1. aws → namespace aws
       const awsHit = await searchDocById(esClient, 'user:cloud-aws-user@aws');
@@ -1370,18 +1457,9 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         },
       });
 
-      // 6. event.kind ≠ 'asset' → cloud.provider mapping condition does not fire;
-      //    namespace comes from event.module ('custom-module'), not from cloud.provider ('aws')
+      // 6. IAM lifecycle event without `event.kind: asset` and without host.id → no entity created
       const nonAssetHit = await searchDocById(esClient, 'user:cloud-non-asset-user@custom-module');
-      expect(nonAssetHit.hits.hits).toHaveLength(1);
-      expect(nonAssetHit.hits.hits[0]._source).toMatchObject({
-        entity: {
-          id: 'user:cloud-non-asset-user@custom-module',
-          namespace: 'custom-module',
-          confidence: ENTITY_CONFIDENCE.High,
-        },
-        cloud: { provider: 'aws' },
-      });
+      expect(nonAssetHit.hits.hits).toHaveLength(0);
 
       // 7. event.kind=asset but event.module ≠ 'asset_discovery' → defensive: cloud.provider mapping
       //    does NOT fire; namespace comes from event.module ('other_integration'), not 'aws'.

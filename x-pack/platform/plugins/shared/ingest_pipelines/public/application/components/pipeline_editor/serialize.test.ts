@@ -31,4 +31,54 @@ describe('serialize()', () => {
       ]);
     });
   });
+
+  describe('WHEN serializing a foreach processor', () => {
+    it('SHOULD serialize only the field when no processor is configured', () => {
+      expect(
+        serialize({
+          pipeline: {
+            processors: [
+              {
+                id: 'foreach-processor',
+                type: 'foreach',
+                options: { field: 'test_foreach_processor' },
+              },
+            ],
+          },
+        }).processors
+      ).toEqual([
+        {
+          foreach: {
+            field: 'test_foreach_processor',
+          },
+        },
+      ]);
+    });
+
+    it('SHOULD parse a processor sub-pipeline that contains escaped characters', () => {
+      expect(
+        serialize({
+          pipeline: {
+            processors: [
+              {
+                id: 'foreach-processor',
+                type: 'foreach',
+                options: {
+                  field: 'test_foreach_processor',
+                  processor: '{"def_1":"""aaa"bbb""", "def_2":"aaa(bbb"}',
+                },
+              },
+            ],
+          },
+        }).processors
+      ).toEqual([
+        {
+          foreach: {
+            field: 'test_foreach_processor',
+            processor: { def_1: 'aaa"bbb', def_2: 'aaa(bbb' },
+          },
+        },
+      ]);
+    });
+  });
 });

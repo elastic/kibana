@@ -30,7 +30,7 @@ describe('CaseContainerComponent', () => {
       ),
     });
 
-    expect(mockedSetBadge).not.toBeCalled();
+    expect(mockedSetBadge).not.toHaveBeenCalled();
   });
 
   it('displays the readonly glasses badge read permissions but not write', () => {
@@ -40,6 +40,6 @@ describe('CaseContainerComponent', () => {
       ),
     });
 
-    expect(mockedSetBadge).toBeCalledTimes(1);
+    expect(mockedSetBadge).toHaveBeenCalledTimes(1);
   });
 });

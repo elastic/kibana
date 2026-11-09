@@ -14,7 +14,6 @@ import { TestProviders } from '../mock/test_providers/test_providers';
 import { useKnowledgeBaseStatus } from '../assistant/api/knowledge_base/use_knowledge_base_status';
 import { mockSystemPrompts } from '../mock/system_prompt';
 import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
-import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { of } from 'rxjs';
 
 const mockUseAssistantContext = {
@@ -34,7 +33,6 @@ const mockUseAssistantContext = {
   },
   chrome: {
     getChromeStyle$: jest.fn(() => of('classic')),
-    navControls: chromeServiceMock.createStartContract().navControls,
   },
 };
 

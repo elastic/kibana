@@ -61,6 +61,7 @@ export interface ConnectorViewActions {
   nameAndDescriptionApiSuccess: ConnectorNameAndDescriptionActions['apiSuccess'];
   startConnectorPoll: CachedFetchConnectorByIdApiLogicActions['startPolling'];
   stopConnectorPoll: CachedFetchConnectorByIdApiLogicActions['stopPolling'];
+  updateConnectorData: CachedFetchConnectorByIdApiLogicActions['updateConnectorData'];
   updateConnectorConfiguration: PostConnectorConfigurationActions['makeRequest'];
   updateConnectorConfigurationSuccess: PostConnectorConfigurationActions['apiSuccess'];
 }
@@ -108,6 +109,7 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
         'apiReset as fetchConnectorApiReset',
         'startPolling as startConnectorPoll',
         'stopPolling as stopConnectorPoll',
+        'updateConnectorData',
       ],
       FetchIndexApiLogic,
       [
@@ -174,10 +176,8 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
         actions.fetchConnector({ connectorId: values.connectorId });
       }
     },
-    nameAndDescriptionApiSuccess: () => {
-      if (values.connectorId) {
-        actions.fetchConnector({ connectorId: values.connectorId });
-      }
+    nameAndDescriptionApiSuccess: ({ name, description }) => {
+      actions.updateConnectorData({ name, description });
     },
     updateConnectorConfigurationSuccess: () => {
       if (values.connectorId) {

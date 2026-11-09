@@ -144,7 +144,7 @@ export const FilterGroupContextMenu = () => {
             aria-label={FILTER_GROUP_MENU}
             display="empty"
             size="s"
-            iconType="boxesVertical"
+            iconType="ellipsis"
             onClick={toggleContextMenu}
             data-test-subj={TEST_IDS.CONTEXT_MENU.BTN}
           />

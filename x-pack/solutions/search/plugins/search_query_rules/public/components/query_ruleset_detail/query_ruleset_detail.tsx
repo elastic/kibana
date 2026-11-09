@@ -5,35 +5,27 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  EuiPopover,
   EuiTitle,
-  EuiToolTip,
   EuiTourStep,
-  useEuiTheme,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { AppHeader } from '@kbn/app-header';
+import type { AppHeaderMenu } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { useParams } from 'react-router-dom';
+import { PLUGIN_TITLE } from '../../../common';
 import { PLUGIN_ROUTE_ROOT } from '../../../common/api_routes';
 import { docLinks } from '../../../common/doc_links';
 import { useKibana } from '../../hooks/use_kibana';
 import { usePutRuleset } from '../../hooks/use_put_query_rules_ruleset';
-import { UseRunQueryRuleset } from '../../hooks/use_run_query_ruleset';
+import { useRunQueryRulesetAction } from '../../hooks/use_run_query_ruleset';
 import { QueryRulesPageTemplate } from '../../layout/query_rules_page_template';
 import { isNotFoundError, isPermissionError } from '../../utils/query_rules_utils';
 import { ErrorPrompt } from '../error_prompt/error_prompt';
@@ -50,7 +42,6 @@ export interface QueryRulesetDetailProps {
 }
 
 export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMode = false }) => {
-  const { euiTheme } = useEuiTheme();
   const {
     services: { application, http, history, notifications, overlays },
   } = useKibana();
@@ -99,10 +90,6 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
     createMode,
   });
 
-  const [isPopoverActionsOpen, setPopoverActions] = useState(false);
-  const splitButtonPopoverActionsId = useGeneratedHtmlId({
-    prefix: 'splitButtonPopoverActionsId',
-  });
   const isTourEnabled = notifications.tours.isEnabled();
   const TOUR_QUERY_RULES_STORAGE_KEY = 'queryRules.tour';
 
@@ -111,6 +98,11 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
     isTourActive: true,
     tourPopoverWidth: 360,
   };
+
+  const [tourAnchorElement, setTourAnchorElement] = useState<HTMLDivElement | null>(null);
+  const tourTargetRef = useCallback((node: HTMLDivElement | null) => {
+    setTourAnchorElement(node);
+  }, []);
 
   const tourStepsInfo = [
     {
@@ -131,7 +123,7 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
         defaultMessage:
           'Rules will trigger based on the priority order. The first rule will take precedence over any following rules',
       }),
-      tourTargetRef: useRef<HTMLDivElement>(null),
+      tourTargetRef,
     },
   ];
 
@@ -159,6 +151,32 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
   useEffect(() => {
     localStorage.setItem(TOUR_QUERY_RULES_STORAGE_KEY, JSON.stringify(tourState));
   }, [tourState]);
+
+  const [consoleTourAnchor, setConsoleTourAnchor] = useState<HTMLElement | null>(null);
+  useEffect(() => {
+    if (!isTourEnabled || !tourState.isTourActive) {
+      return;
+    }
+    const findButton = () =>
+      document.querySelector<HTMLElement>(
+        '[data-test-subj="queryRulesetDetailTestInConsoleButton"]'
+      );
+    const existing = findButton();
+    if (existing) {
+      setConsoleTourAnchor(existing);
+      return;
+    }
+    const observer = new MutationObserver(() => {
+      const button = findButton();
+      if (button) {
+        setConsoleTourAnchor(button);
+        observer.disconnect();
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, [isTourEnabled, tourState.isTourActive]);
+
   const incrementStep = () => {
     setTourState({
       ...tourState,
@@ -173,23 +191,6 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
     });
   };
 
-  const items = [
-    <EuiContextMenuItem
-      css={css`
-        color: ${euiTheme.colors.danger};
-      `}
-      key="delete"
-      icon="trash"
-      disabled={createMode || isInitialLoading}
-      onClick={() => setRulesetToDelete(rulesetId)}
-      data-test-subj="queryRulesetDetailDeleteButton"
-    >
-      {i18n.translate('xpack.queryRules.queryRulesetDetail.deleteRulesetButton', {
-        defaultMessage: 'Delete ruleset',
-      })}
-    </EuiContextMenuItem>,
-  ];
-
   const [rulesetToDelete, setRulesetToDelete] = useState<string | null>(null);
 
   const finishTour = () => {
@@ -199,7 +200,7 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
     });
   };
 
-  const handleSave = () => {
+  const handleSave = useCallback(() => {
     setIsFormDirty(false);
     useTracker?.click(
       createMode ? AnalyticsEvents.rulesetCreateClicked : AnalyticsEvents.rulesetUpdateClicked
@@ -209,9 +210,72 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
       forceWrite: true,
       rules: unfilteredRules,
     });
-  };
+  }, [createMode, rulesetId, unfilteredRules, useTracker, createRuleset]);
 
   const [isFormDirty, setIsFormDirty] = useState(createMode);
+
+  const { run: runInConsole, isAvailable: isConsoleAvailable } = useRunQueryRulesetAction({
+    rulesetId,
+    disabled: createMode,
+    onClick: () => {
+      useTracker?.click(AnalyticsEvents.testInConsoleClicked);
+      finishTour();
+    },
+  });
+
+  const menu = useMemo<AppHeaderMenu>(
+    () => ({
+      items: [
+        ...(isConsoleAvailable
+          ? [
+              {
+                id: 'testInConsole',
+                label: i18n.translate('xpack.queryRules.queryRulesetDetail.testButton', {
+                  defaultMessage: 'Test in Console',
+                }),
+                iconType: 'commandLine' as const,
+                run: runInConsole,
+                disableButton: createMode,
+                testId: 'queryRulesetDetailTestInConsoleButton',
+              },
+            ]
+          : []),
+        {
+          id: 'delete',
+          label: i18n.translate('xpack.queryRules.queryRulesetDetail.deleteRulesetButton', {
+            defaultMessage: 'Delete ruleset',
+          }),
+          iconType: 'trash',
+          overflow: true,
+          isDestructive: true,
+          disableButton: createMode || isInitialLoading || rules.length === 0,
+          run: () => setRulesetToDelete(rulesetId),
+          testId: 'queryRulesetDetailDeleteButton',
+        },
+      ],
+      primaryActionItem: {
+        id: 'save',
+        label: i18n.translate('xpack.queryRules.queryRulesetDetail.saveButton', {
+          defaultMessage: 'Save',
+        }),
+        iconType: 'save',
+        run: handleSave,
+        disableButton: !isFormDirty || isInitialLoading || unfilteredRules.length === 0,
+        testId: 'queryRulesetDetailHeaderSaveButton',
+      },
+    }),
+    [
+      isConsoleAvailable,
+      runInConsole,
+      createMode,
+      isInitialLoading,
+      rules?.length,
+      isFormDirty,
+      unfilteredRules?.length,
+      rulesetId,
+      handleSave,
+    ]
+  );
 
   useUnsavedChangesPrompt({
     cancelButtonText: i18n.translate('xpack.queryRules.queryRulesetDetail.unsavedPrompt.cancel', {
@@ -236,189 +300,15 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
   return (
     <QueryRulesPageTemplate>
       {!isInitialLoading && !isError && !!queryRuleset && !blockRender && (
-        <KibanaPageTemplate.Header
-          pageTitle={rulesetId}
-          breadcrumbs={[
-            {
-              text: (
-                <>
-                  <EuiIcon size="s" type="chevronSingleLeft" aria-hidden />{' '}
-                  {i18n.translate('xpack.queryRules.queryRulesetDetail.backButton', {
-                    defaultMessage: 'Back',
-                  })}
-                </>
-              ),
-              'data-test-subj': 'queryRulesetDetailBackButton',
-              color: 'primary',
-              'aria-current': false,
-              onClick: () => {
-                useTracker?.click(AnalyticsEvents.backToRulesetListClicked);
-                application.navigateToUrl(http.basePath.prepend(`${PLUGIN_ROUTE_ROOT}`));
-              },
-            },
-          ]}
-          restrictWidth
-          data-test-subj="queryRulesetDetailHeader"
-          rightSideItems={[
-            <EuiFlexGroup
-              alignItems="center"
-              justifyContent="flexEnd"
-              key="queryRulesetDetailHeaderButtons"
-            >
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  data-test-subj="queryRulesetDetailApiReferenceButton"
-                  iconType="documentation"
-                  color="text"
-                  aria-label={i18n.translate(
-                    'xpack.queryRules.queryRulesetDetail.apiReferenceButton',
-                    {
-                      defaultMessage: 'API reference',
-                    }
-                  )}
-                  href={docLinks.queryRulesApi}
-                  target="_blank"
-                >
-                  {i18n.translate('xpack.queryRules.queryRulesetDetail.apiReferenceButton', {
-                    defaultMessage: 'API reference',
-                  })}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiTourStep
-                  content={<p>{tourStepsInfo[0].content}</p>}
-                  isStepOpen={
-                    isTourEnabled && tourState.isTourActive && tourState.currentTourStep === 1
-                  }
-                  minWidth={tourState.tourPopoverWidth}
-                  onFinish={finishTour}
-                  step={1}
-                  stepsTotal={(queryRuleset?.rules?.length ?? 0) > 1 ? 2 : 1}
-                  title={
-                    <EuiTitle size="xs">
-                      <h6>{tourStepsInfo[0].title}</h6>
-                    </EuiTitle>
-                  }
-                  anchorPosition="rightUp"
-                  zIndex={1}
-                  footerAction={
-                    <EuiFlexGroup direction="row">
-                      <EuiFlexItem>
-                        {queryRuleset.rules.length > 1 ? (
-                          <EuiButtonEmpty
-                            data-test-subj="searchQueryRulesQueryRulesetDetailCloseTourButton"
-                            size="s"
-                            color="text"
-                            onClick={finishTour}
-                          >
-                            {i18n.translate('xpack.queryRules.queryRulesetDetail.closeTourButton', {
-                              defaultMessage: 'Close tour',
-                            })}
-                          </EuiButtonEmpty>
-                        ) : (
-                          <EuiButton
-                            data-test-subj="searchQueryRulesQueryRulesetDetailCloseTourButton"
-                            size="s"
-                            color="success"
-                            onClick={finishTour}
-                          >
-                            {i18n.translate('xpack.queryRules.queryRulesetDetail.closeTourButton', {
-                              defaultMessage: 'Close tour',
-                            })}
-                          </EuiButton>
-                        )}
-                      </EuiFlexItem>
-                      {queryRuleset.rules.length > 1 && (
-                        <EuiFlexItem>
-                          <EuiButton
-                            data-test-subj="searchQueryRulesQueryRulesetDetailNextButton"
-                            color="success"
-                            size="s"
-                            onClick={incrementStep}
-                          >
-                            {i18n.translate('xpack.queryRules.queryRulesetDetail.nextTourButton', {
-                              defaultMessage: 'Next',
-                            })}
-                          </EuiButton>
-                        </EuiFlexItem>
-                      )}
-                    </EuiFlexGroup>
-                  }
-                >
-                  <UseRunQueryRuleset
-                    disabled={createMode}
-                    rulesetId={rulesetId}
-                    type="emptyButton"
-                    color="text"
-                    content={i18n.translate('xpack.queryRules.queryRulesetDetail.testButton', {
-                      defaultMessage: 'Test in Console',
-                    })}
-                    onClick={() => {
-                      useTracker?.click(AnalyticsEvents.testInConsoleClicked);
-                      finishTour();
-                    }}
-                  />
-                </EuiTourStep>
-              </EuiFlexItem>
-              <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    iconType="save"
-                    fill
-                    color="primary"
-                    data-test-subj="queryRulesetDetailHeaderSaveButton"
-                    onClick={handleSave}
-                    disabled={!isFormDirty || isInitialLoading || unfilteredRules.length === 0}
-                  >
-                    <FormattedMessage
-                      id="xpack.queryRules.queryRulesetDetail.saveButton"
-                      defaultMessage="Save"
-                    />
-                  </EuiButton>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiPopover
-                    aria-label={i18n.translate(
-                      'xpack.queryRules.queryRulesetDetail.actionsPopover.ariaLabel',
-                      { defaultMessage: 'Ruleset actions' }
-                    )}
-                    id={splitButtonPopoverActionsId}
-                    button={
-                      <EuiToolTip
-                        content={i18n.translate(
-                          'xpack.queryRules.queryRulesetDetail.contextMenuPanel.ariaLabel',
-                          {
-                            defaultMessage: 'More',
-                          }
-                        )}
-                        disableScreenReaderOutput
-                      >
-                        <EuiButtonIcon
-                          disabled={createMode || isInitialLoading || rules.length === 0}
-                          data-test-subj="searchQueryRulesQueryRulesetActionsButton"
-                          size="m"
-                          iconType="boxesVertical"
-                          aria-label={i18n.translate(
-                            'xpack.queryRules.queryRulesetDetail.contextMenuPanel.ariaLabel',
-                            {
-                              defaultMessage: 'More',
-                            }
-                          )}
-                          onClick={() => setPopoverActions(!isPopoverActionsOpen)}
-                        />
-                      </EuiToolTip>
-                    }
-                    isOpen={isPopoverActionsOpen}
-                    closePopover={() => setPopoverActions(false)}
-                    panelPaddingSize="none"
-                    anchorPosition="downLeft"
-                  >
-                    <EuiContextMenuPanel items={items} />
-                  </EuiPopover>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexGroup>,
-          ]}
+        <AppHeader
+          title={rulesetId}
+          back={{
+            href: http.basePath.prepend(`${PLUGIN_ROUTE_ROOT}`),
+            onClick: () => useTracker?.click(AnalyticsEvents.backToRulesetListClicked),
+            label: PLUGIN_TITLE,
+          }}
+          menu={menu}
+          docLink={docLinks.queryRulesApi}
         />
       )}
       {(!blockRender && !isFailsafeLoading && isError && createMode) ||
@@ -439,9 +329,73 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
               setSearchFilter={setSearchFilter}
             />
 
-            {tourStepsInfo[1]?.tourTargetRef?.current !== null && (
+            {consoleTourAnchor !== null && (
               <EuiTourStep
-                anchor={() => tourStepsInfo[1]?.tourTargetRef?.current || document.body}
+                anchor={consoleTourAnchor}
+                content={<p>{tourStepsInfo[0].content}</p>}
+                isStepOpen={
+                  isTourEnabled && tourState.isTourActive && tourState.currentTourStep === 1
+                }
+                minWidth={tourState.tourPopoverWidth}
+                onFinish={finishTour}
+                step={1}
+                stepsTotal={(queryRuleset?.rules?.length ?? 0) > 1 ? 2 : 1}
+                title={
+                  <EuiTitle size="xs">
+                    <h6>{tourStepsInfo[0].title}</h6>
+                  </EuiTitle>
+                }
+                anchorPosition="downRight"
+                zIndex={1}
+                footerAction={
+                  <EuiFlexGroup direction="row">
+                    <EuiFlexItem>
+                      {(queryRuleset?.rules?.length ?? 0) > 1 ? (
+                        <EuiButtonEmpty
+                          data-test-subj="searchQueryRulesQueryRulesetDetailCloseTourButton"
+                          size="s"
+                          color="text"
+                          onClick={finishTour}
+                        >
+                          {i18n.translate('xpack.queryRules.queryRulesetDetail.closeTourButton', {
+                            defaultMessage: 'Close tour',
+                          })}
+                        </EuiButtonEmpty>
+                      ) : (
+                        <EuiButton
+                          data-test-subj="searchQueryRulesQueryRulesetDetailCloseTourButton"
+                          size="s"
+                          color="success"
+                          onClick={finishTour}
+                        >
+                          {i18n.translate('xpack.queryRules.queryRulesetDetail.closeTourButton', {
+                            defaultMessage: 'Close tour',
+                          })}
+                        </EuiButton>
+                      )}
+                    </EuiFlexItem>
+                    {(queryRuleset?.rules?.length ?? 0) > 1 && (
+                      <EuiFlexItem>
+                        <EuiButton
+                          data-test-subj="searchQueryRulesQueryRulesetDetailNextButton"
+                          color="success"
+                          size="s"
+                          onClick={incrementStep}
+                        >
+                          {i18n.translate('xpack.queryRules.queryRulesetDetail.nextTourButton', {
+                            defaultMessage: 'Next',
+                          })}
+                        </EuiButton>
+                      </EuiFlexItem>
+                    )}
+                  </EuiFlexGroup>
+                }
+              />
+            )}
+
+            {tourAnchorElement !== null && (
+              <EuiTourStep
+                anchor={tourAnchorElement}
                 content={<p>{tourStepsInfo[1].content}</p>}
                 isStepOpen={
                   isTourEnabled && tourState.isTourActive && tourState.currentTourStep === 2

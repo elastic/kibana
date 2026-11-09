@@ -1,8 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/282570
-type: bug-fix
-products:
-- product: cloud-serverless
-  target: 2026-08-12
-- product: kibana
-title: Fix maintenance window name references in Synthetics monitors

@@ -236,25 +236,22 @@ export const WorkflowChangeHistoryPreviewSettingsPopover = ({
     [onHighlightValidationErrorsChange]
   );
 
-  const settingsLabel = i18n.translate(
-    'xpack.workflowsManagement.changeHistory.preview.settings.label',
-    { defaultMessage: 'YAML editor settings' }
-  );
+  const settingsLabel = i18n.translate('workflows.changeHistory.preview.settings.label', {
+    defaultMessage: 'YAML editor settings',
+  });
 
   const codeComparingLabel = i18n.translate(
-    'xpack.workflowsManagement.changeHistory.preview.settings.codeComparing',
+    'workflows.changeHistory.preview.settings.codeComparing',
     { defaultMessage: 'Code comparing' }
   );
 
-  const unifiedLabel = i18n.translate(
-    'xpack.workflowsManagement.changeHistory.preview.settings.unified',
-    { defaultMessage: 'Unified' }
-  );
+  const unifiedLabel = i18n.translate('workflows.changeHistory.preview.settings.unified', {
+    defaultMessage: 'Unified',
+  });
 
-  const splitLabel = i18n.translate(
-    'xpack.workflowsManagement.changeHistory.preview.settings.split',
-    { defaultMessage: 'Split' }
-  );
+  const splitLabel = i18n.translate('workflows.changeHistory.preview.settings.split', {
+    defaultMessage: 'Split',
+  });
 
   const focusCompareTile = useCallback((mode: WorkflowChangeHistoryCompareMode): void => {
     (mode === 'unified' ? unifiedTileRef : splitTileRef).current?.focus();
@@ -432,7 +429,7 @@ export const WorkflowChangeHistoryPreviewSettingsPopover = ({
             id={highlightValidationId}
             data-test-subj="workflowChangeHistoryHighlightValidationErrors"
             label={i18n.translate(
-              'xpack.workflowsManagement.changeHistory.preview.settings.highlightValidationErrors',
+              'workflows.changeHistory.preview.settings.highlightValidationErrors',
               { defaultMessage: 'Highlight the validation errors' }
             )}
             checked={highlightValidationErrors}

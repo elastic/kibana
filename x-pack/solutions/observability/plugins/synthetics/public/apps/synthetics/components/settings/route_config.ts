@@ -10,11 +10,10 @@ import type { useHistory } from 'react-router-dom';
 import type { RouteProps } from '../../routes';
 import { SETTINGS_ROUTE, SYNTHETICS_SETTINGS_ROUTE } from '../../../../../common/constants';
 import { SettingsPage } from './settings_page';
-import { getSettingsPageHeader } from './page_header';
 
 export const getSettingsRouteConfig = (
-  history: ReturnType<typeof useHistory>,
-  syntheticsPath: string,
+  _history: ReturnType<typeof useHistory>,
+  _syntheticsPath: string,
   baseTitle: string
 ) => {
   const sharedProps = {
@@ -23,10 +22,9 @@ export const getSettingsRouteConfig = (
       values: { baseTitle },
     }),
     component: SettingsPage,
-    pageHeader: getSettingsPageHeader(history, syntheticsPath),
     dataTestSubj: 'syntheticsSettingsPage',
     pageSectionProps: {
-      paddingSize: 'm',
+      paddingSize: 'm' as const,
     },
   };
 

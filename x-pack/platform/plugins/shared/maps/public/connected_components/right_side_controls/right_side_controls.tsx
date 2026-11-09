@@ -14,9 +14,10 @@ import type { MapSettings } from '../../../common/descriptor_types';
 
 export interface Props {
   settings: MapSettings;
+  isInteractive?: boolean;
 }
 
-export function RightSideControls({ settings }: Props) {
+export function RightSideControls({ settings, isInteractive }: Props) {
   return (
     <EuiFlexGroup
       className="mapWidgetOverlay"
@@ -26,10 +27,10 @@ export function RightSideControls({ settings }: Props) {
       gutterSize="s"
     >
       <EuiFlexItem className="mapWidgetOverlay__layerWrapper">
-        {!settings.hideLayerControl && <LayerControl />}
+        {isInteractive && !settings.hideLayerControl && <LayerControl />}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        {!settings.hideViewControl && <MouseCoordinatesControl />}
+        {isInteractive && !settings.hideViewControl && <MouseCoordinatesControl />}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <AttributionControl />

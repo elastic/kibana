@@ -36,6 +36,7 @@ import {
   INVALID_CONFIGURATION_ERROR,
 } from '../../routes/monitor_cruds/monitor_validation';
 import { normalizeProjectMonitor } from './normalizers';
+import { isSecretConnectionsEnabled } from '../../config';
 
 type FailedError = Array<{ id?: string; reason: string; details: string; payload?: object }>;
 
@@ -118,7 +119,7 @@ export class ProjectMonitorFormatter {
       (monitor) => (monitor.maintenanceWindows?.length ?? 0) > 0
     );
     const maintenanceWindowsPromise = needsMaintenanceWindows
-      ? this.syntheticsMonitorClient.syntheticsService.getMaintenanceWindows(this.spaceId)
+      ? this.syntheticsMonitorClient.getMaintenanceWindows(this.spaceId)
       : Promise.resolve([]);
 
     const [locations, existingMonitors, maintenanceWindows] = await Promise.all([
@@ -154,6 +155,7 @@ export class ProjectMonitorFormatter {
         monitor,
         publicLocations: this.publicLocations,
         privateLocations: this.privateLocations,
+        isNewMonitor: !previousMonitor,
       });
       if (normM) {
         if (
@@ -195,10 +197,12 @@ export class ProjectMonitorFormatter {
     monitor,
     publicLocations,
     privateLocations,
+    isNewMonitor,
   }: {
     monitor: ProjectMonitor;
     publicLocations: Locations;
     privateLocations: SyntheticsPrivateLocations;
+    isNewMonitor: boolean;
   }) => {
     try {
       const { normalizedFields: normalizedMonitor, errors } = normalizeProjectMonitor({
@@ -216,6 +220,11 @@ export class ProjectMonitorFormatter {
         return null;
       }
 
+      // Only gate brand-new API Journey monitors on Serverless; re-pushing an
+      // already-existing project monitor (e.g. one grandfathered in before
+      // this restriction) must not fail just because it's unchanged.
+      const isServerless = Boolean(this.server.cloud?.isServerlessEnabled) && isNewMonitor;
+
       /* Validates that the payload sent from the synthetics agent is valid */
       const { valid: isMonitorPayloadValid } = this.validateMonitor({
         validationResult: validateProjectMonitor(
@@ -224,7 +233,8 @@ export class ProjectMonitorFormatter {
             type: normalizedMonitor[ConfigKey.MONITOR_TYPE],
           },
           publicLocations,
-          privateLocations
+          privateLocations,
+          isServerless
         ),
         monitorId: monitor.id,
       });
@@ -235,7 +245,12 @@ export class ProjectMonitorFormatter {
 
       /* Validates that the normalized monitor is a valid monitor saved object type */
       const { valid: isNormalizedMonitorValid, decodedMonitor } = this.validateMonitor({
-        validationResult: validateMonitor(normalizedMonitor as MonitorFields, this.spaceId),
+        validationResult: validateMonitor(
+          normalizedMonitor as MonitorFields,
+          this.spaceId,
+          isServerless,
+          isSecretConnectionsEnabled(this.server.config)
+        ),
         monitorId: monitor.id,
       });
 
@@ -299,6 +314,7 @@ export class ProjectMonitorFormatter {
           privateLocations: this.privateLocations,
           spaceId: this.spaceId,
         });
+        const failedMonitorIds = new Set(failedMonitors.map(({ monitor }) => monitor.id));
 
         if (newMonitors.length > 0) {
           newMonitors.forEach((monitor) => {
@@ -313,6 +329,9 @@ export class ProjectMonitorFormatter {
                 details: monitor.error.message,
                 payload: monitor,
               });
+              return;
+            }
+            if (failedMonitorIds.has(monitor.id)) {
               return;
             }
             const journeyId = monitor.attributes[ConfigKey.JOURNEY_ID];

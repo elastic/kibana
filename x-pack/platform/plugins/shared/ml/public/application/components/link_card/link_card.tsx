@@ -8,22 +8,13 @@
 import type { FC, ReactElement } from 'react';
 import React from 'react';
 
-import type { IconType } from '@elastic/eui';
-import {
-  EuiIcon,
-  EuiText,
-  EuiTitle,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiPanel,
-  EuiLink,
-} from '@elastic/eui';
+import type { EuiIconProps } from '@elastic/eui';
+import { EuiCard } from '@elastic/eui';
 
 interface Props {
-  icon: IconType | ReactElement;
-  iconAreaLabel?: string;
-  title: any;
-  description: any;
+  icon: ReactElement;
+  title: string;
+  description: string;
   href?: string;
   onClick?: () => void;
   isDisabled?: boolean;
@@ -34,53 +25,25 @@ interface Props {
 // icon, card title, description and link.
 export const LinkCard: FC<Props> = ({
   icon,
-  iconAreaLabel,
   title,
   description,
   onClick,
   href,
   isDisabled,
   'data-test-subj': dataTestSubj,
-}) => {
-  const linkHrefAndOnClickProps = {
-    ...(href ? { href } : {}),
-    ...(onClick ? { onClick } : {}),
-  };
-  return (
-    <EuiPanel
-      style={{ cursor: isDisabled ? 'not-allowed' : undefined }}
-      hasShadow={false}
-      hasBorder
-    >
-      <EuiLink
-        style={{
-          display: 'block',
-          pointerEvents: isDisabled ? 'none' : undefined,
-          background: 'transparent',
-          outline: 'none',
-        }}
-        data-test-subj={dataTestSubj}
-        color="subdued"
-        {...linkHrefAndOnClickProps}
-      >
-        <EuiFlexGroup gutterSize="l" responsive={true}>
-          <EuiFlexItem grow={false} style={{ paddingTop: '8px' }}>
-            {typeof icon === 'string' ? (
-              <EuiIcon size="xl" type={icon} aria-label={iconAreaLabel} />
-            ) : (
-              (icon as React.ReactNode)
-            )}
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiTitle size="s">
-              <h3>{title}</h3>
-            </EuiTitle>
-            <EuiText color="subdued">
-              <p>{description}</p>
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiLink>
-    </EuiPanel>
-  );
-};
+}) => (
+  <EuiCard
+    hasBorder
+    layout="horizontal"
+    title={title}
+    titleSize="xs"
+    titleElement="h3"
+    description={description}
+    // Custom recognizer logos (e.g. <img>) are still rendered in the icon slot.
+    icon={icon as ReactElement<EuiIconProps>}
+    onClick={onClick}
+    href={href}
+    isDisabled={isDisabled}
+    data-test-subj={dataTestSubj}
+  />
+);

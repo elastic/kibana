@@ -180,6 +180,52 @@ describe('createProjectFetcher', () => {
     });
   });
 
+  describe('missing privilege (403)', () => {
+    // Shaped like core's HttpFetchError (name/request/response)
+    const forbiddenError = Object.assign(new Error('Forbidden'), {
+      request: {},
+      response: { status: 403 },
+    });
+
+    it('should resolve to null without retrying', async () => {
+      mockHttp.post.mockRejectedValue(forbiddenError);
+
+      const fetcher = createProjectFetcher(mockHttp, mockLogger);
+      const result = await fetcher.fetchProjects('_alias:*');
+
+      expect(result).toBeNull();
+      expect(mockHttp.post).toHaveBeenCalledTimes(1);
+    });
+
+    it('should cache the null result to avoid repeated requests', async () => {
+      mockHttp.post.mockRejectedValue(forbiddenError);
+
+      const fetcher = createProjectFetcher(mockHttp, mockLogger);
+
+      const result1 = await fetcher.fetchProjects('_alias:*');
+      const result2 = await fetcher.fetchProjects('_alias:*');
+
+      expect(result1).toBeNull();
+      expect(result2).toBeNull();
+      expect(mockHttp.post).toHaveBeenCalledTimes(1);
+    });
+
+    it('should fetch again after the TTL expires', async () => {
+      mockHttp.post.mockRejectedValueOnce(forbiddenError).mockResolvedValueOnce(mockResponse);
+
+      const fetcher = createProjectFetcher(mockHttp, mockLogger);
+
+      const result1 = await fetcher.fetchProjects('_alias:*');
+      expect(result1).toBeNull();
+
+      jest.advanceTimersByTime(CACHE_TTL_MS + 1);
+
+      const result2 = await fetcher.fetchProjects('_alias:*');
+      expect(result2!.origin).toEqual(mockOriginProject);
+      expect(mockHttp.post).toHaveBeenCalledTimes(2);
+    });
+  });
+
   describe('in-flight deduplication', () => {
     it('should share a single HTTP request for concurrent calls with the same routing', async () => {
       let resolvePost: (value: ProjectTagsResponse) => void;

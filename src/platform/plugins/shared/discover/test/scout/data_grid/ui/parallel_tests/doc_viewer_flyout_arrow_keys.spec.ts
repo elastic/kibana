@@ -116,7 +116,7 @@ spaceTest.describe(
         await page.keyboard.press('ArrowRight');
         await expect(docViewer.getNavigationPage(1)).toBeVisible();
 
-        await page.keyboard.press('Tab');
+        await page.keyboard.press('Shift+Tab');
         await page.keyboard.press('ArrowRight');
         await expect(docViewer.getNavigationPage(2)).toBeVisible();
       }

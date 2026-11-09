@@ -12,11 +12,13 @@ import type { TopNFunctionSortField } from '@kbn/profiling-utils';
 import { AsyncComponent } from '../../../components/async_component';
 import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { TopNFunctionsGrid } from '../../../components/topn_functions';
+import { NoProfilingDataPrompt } from '../../../components/no_profiling_data_prompt';
 import { useProfilingParams } from '../../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../../hooks/use_profiling_router';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useTimeRangeAsync } from '../../../hooks/use_time_range_async';
 import { AsyncStatus } from '../../../hooks/use_async';
+import { useProfilingSchema } from '../../../components/contexts/profiling_schema/use_profiling_schema';
 
 export function TopNFunctionsView() {
   const { onPageReady } = usePerformanceContext();
@@ -36,9 +38,13 @@ export function TopNFunctionsView() {
   const {
     services: { fetchTopNFunctions },
   } = useProfilingDependencies();
+  const { selectedSchema } = useProfilingSchema();
 
   const state = useTimeRangeAsync(
     ({ http }) => {
+      if (!selectedSchema) {
+        return undefined;
+      }
       return fetchTopNFunctions({
         http,
         timeFrom: new Date(timeRange.start).getTime(),
@@ -46,9 +52,10 @@ export function TopNFunctionsView() {
         startIndex: 0,
         endIndex: 100000,
         kuery,
+        schema: selectedSchema,
       });
     },
-    [fetchTopNFunctions, timeRange.start, timeRange.end, kuery]
+    [fetchTopNFunctions, timeRange.start, timeRange.end, kuery, selectedSchema]
   );
 
   const profilingRouter = useProfilingRouter();
@@ -107,19 +114,21 @@ export function TopNFunctionsView() {
           <EuiFlexGroup direction="column" gutterSize="s">
             <EuiFlexItem>
               <AsyncComponent {...state} size="xl" alignTop>
-                <TopNFunctionsGrid
-                  topNFunctions={state.data}
-                  totalSeconds={timeRange.inSeconds.end - timeRange.inSeconds.start}
-                  isDifferentialView={false}
-                  onFrameClick={handleOnFrameClick}
-                  pageIndex={pageIndex}
-                  onChangePage={handlePageChange}
-                  sortField={sortField}
-                  sortDirection={sortDirection}
-                  onChangeSort={handleSortChange}
-                  searchFunctionName={searchFunctionName}
-                  onSearchFunctionNameChange={handleSearchFunctionNameChange}
-                />
+                <NoProfilingDataPrompt hasData={state.data?.TopN.length !== 0}>
+                  <TopNFunctionsGrid
+                    topNFunctions={state.data}
+                    totalSeconds={timeRange.inSeconds.end - timeRange.inSeconds.start}
+                    isDifferentialView={false}
+                    onFrameClick={handleOnFrameClick}
+                    pageIndex={pageIndex}
+                    onChangePage={handlePageChange}
+                    sortField={sortField}
+                    sortDirection={sortDirection}
+                    onChangeSort={handleSortChange}
+                    searchFunctionName={searchFunctionName}
+                    onSearchFunctionNameChange={handleSearchFunctionNameChange}
+                  />
+                </NoProfilingDataPrompt>
               </AsyncComponent>
             </EuiFlexItem>
           </EuiFlexGroup>

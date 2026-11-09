@@ -203,7 +203,7 @@ export function validateCustomThreshold({
             }
           );
         }
-        if (metric.aggType === 'count' && metric.filter) {
+        if (metric.filter) {
           try {
             fromKueryExpression(metric.filter);
           } catch (e) {

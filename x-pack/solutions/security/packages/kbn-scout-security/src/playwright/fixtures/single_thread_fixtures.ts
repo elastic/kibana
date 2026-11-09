@@ -24,6 +24,7 @@ import {
   getNetworkApiService,
   getHostApiService,
   getUserApiService,
+  getEndpointArtifactsApiService,
 } from './worker';
 import { extendPageObjects, securityBrowserAuthFixture } from './test';
 
@@ -104,6 +105,11 @@ export const test = securityFixtures.extend<SecurityTestFixtures, SecurityWorker
         log,
       });
       extendedApiServices.user = getUserApiService({
+        esClient,
+        log,
+      });
+      extendedApiServices.endpointArtifacts = getEndpointArtifactsApiService({
+        kbnClient,
         esClient,
         log,
       });

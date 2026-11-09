@@ -24,12 +24,7 @@ import type { RouteHandlerScopedClients, GetScopedClients } from '../../routes/t
  */
 type ToolScopedClients = Pick<
   RouteHandlerScopedClients,
-  | 'streamsClient'
-  | 'scopedClusterClient'
-  | 'getKnowledgeIndicatorClient'
-  | 'uiSettingsClient'
-  | 'attachmentClient'
-  | 'uiSettingsClient'
+  'streamsClient' | 'scopedClusterClient' | 'uiSettingsClient' | 'attachmentClient'
 >;
 
 /**
@@ -95,7 +90,6 @@ export const createMockGetScopedClients = () => {
     scopedClusterClient,
     uiSettingsClient,
     attachmentClient,
-    getKnowledgeIndicatorClient: jest.fn().mockRejectedValue(new Error('Not implemented')),
   };
 
   const getScopedClients = jest

@@ -23,7 +23,7 @@ export const UpdateWatchlistRequestParams = lazySchema(() =>
     /**
      * The ID of the watchlist to update
      */
-    id: z.string().max(256),
+    id: z.string().max(256).describe('The ID of the watchlist to update'),
   })
 );
 export type UpdateWatchlistRequestParams = z.infer<typeof UpdateWatchlistRequestParams>;
@@ -34,19 +34,23 @@ export const UpdateWatchlistRequestBody = lazySchema(() =>
     /**
      * Unique name of the watchlist
      */
-    name: z.string().max(256),
+    name: z.string().max(256).describe('Unique name of the watchlist'),
     /**
      * Description of the watchlist
      */
-    description: z.string().max(1000).optional(),
+    description: z.string().max(1000).optional().describe('Description of the watchlist'),
     /**
      * Risk score modifier associated with the watchlist
      */
-    riskModifier: z.number().min(0).max(2),
+    riskModifier: z
+      .number()
+      .min(0)
+      .max(2)
+      .describe('Risk score modifier associated with the watchlist'),
     /**
      * Indicates if the watchlist is managed by the system
      */
-    managed: z.boolean().optional(),
+    managed: z.boolean().optional().describe('Indicates if the watchlist is managed by the system'),
   })
 );
 export type UpdateWatchlistRequestBody = z.infer<typeof UpdateWatchlistRequestBody>;

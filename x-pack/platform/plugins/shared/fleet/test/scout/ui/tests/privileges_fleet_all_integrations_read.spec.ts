@@ -15,6 +15,9 @@ test.describe(
   'When the user has All privilege for Fleet but Read for integrations',
   { tag: tags.stateful.classic },
   () => {
+    // Creating the agent policy with sys_monitoring installs the system package, which is
+    // slower on ECH than locally and can exceed the default 60 s hook budget.
+    test.setTimeout(2 * 60 * 1000); // 2 minutes
     const agentPolicyName = 'Test Agent Policy';
     let policyId: string;
 
@@ -62,12 +65,9 @@ test.describe(
       await browserAuth.loginWithCustomRole(getFleetAllIntegrationsReadRole());
       const { integrationHome } = pageObjects;
 
-      await integrationHome.navigateTo();
-      await integrationHome.waitForPageToLoad();
-
-      // Scroll to and click the Apache integration
-      await integrationHome.scrollToIntegration('apache');
-      await integrationHome.clickIntegrationCard('apache');
+      // Apache is now grouped into a collection tile, so navigate directly to its detail
+      // page instead of browsing and clicking through the collection.
+      await integrationHome.navigateToDetailPage('apache');
 
       // Verify the Add Integration button is disabled
       await expect(integrationHome.getAddIntegrationPolicyButton()).toBeDisabled();

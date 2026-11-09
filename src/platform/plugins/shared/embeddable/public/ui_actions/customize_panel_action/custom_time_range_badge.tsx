@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PrettyDuration } from '@elastic/eui';
+import { EuiBadge, PrettyDuration } from '@elastic/eui';
 import type {
   Action,
   ActionExecutionMeta,
@@ -39,7 +39,13 @@ export class CustomTimeRangeBadge
     return '';
   }
 
-  public readonly MenuItem = ({ context }: { context: EmbeddableApiContext }) => {
+  public readonly MenuItem = ({
+    context,
+    dataTestSubj,
+  }: {
+    context: EmbeddableApiContext;
+    dataTestSubj?: string;
+  }) => {
     const { embeddable } = context;
     if (!apiPublishesTimeRange(embeddable)) throw new IncompatibleActionError();
 
@@ -48,11 +54,18 @@ export class CustomTimeRangeBadge
       throw new IncompatibleActionError();
     }
     return (
-      <PrettyDuration
-        timeTo={timeRange.to}
-        timeFrom={timeRange.from}
-        dateFormat={core.uiSettings.get<string>(UI_SETTINGS.DATE_FORMAT) ?? 'Browser'}
-      />
+      <EuiBadge
+        iconType="calendar"
+        onClick={() => this.execute(context as Parameters<typeof this.execute>[0])}
+        onClickAriaLabel={this.getDisplayName(context)}
+        data-test-subj={dataTestSubj}
+      >
+        <PrettyDuration
+          timeTo={timeRange.to}
+          timeFrom={timeRange.from}
+          dateFormat={core.uiSettings.get<string>(UI_SETTINGS.DATE_FORMAT) ?? 'Browser'}
+        />
+      </EuiBadge>
     );
   };
 

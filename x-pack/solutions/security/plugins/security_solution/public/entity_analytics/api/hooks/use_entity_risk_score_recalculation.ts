@@ -16,9 +16,11 @@ import { RISK_INPUTS_TAB_QUERY_ID } from '../../components/entity_details_flyout
 import { RESOLUTION_GROUP_QUERY_KEY } from '../../components/entity_resolution/hooks/use_resolution_group';
 import {
   QUERY_KEY_ENTITY_ANALYTICS,
+  QUERY_KEY_FILTERED_RESOLUTION_GROUPS,
   QUERY_KEY_GRID_DATA,
-  QUERY_KEY_TARGET_METADATA,
+  QUERY_KEY_UNFILTERED_RESOLUTION_GROUPS,
 } from '../../components/home/entities_table/constants';
+import { ENTITY_GRID_QUERY_KEY } from '../../components/home/entities_grid/common';
 import { useOnAssetCriticalityToolEvent } from '../../hooks/use_on_asset_criticality_tool_event';
 
 interface UseEntityRiskScoreRecalculationParams<T extends EntityType> {
@@ -29,6 +31,12 @@ interface UseEntityRiskScoreRecalculationParams<T extends EntityType> {
   entityFromStoreResult: { refetch: () => void };
   riskScoreState: { refetch: () => void };
   onRecalculation?: () => void;
+  /**
+   * True when the caller renders a resolution group for `entityId`. Forwarded to
+   * {@link useEntityRiskScores}, which only fetches the resolution score in the group view when the
+   * new entity analytics page flag is on. Defaults to false.
+   */
+  isGroupView?: boolean;
 }
 
 interface UseEntityRiskScoreRecalculationResult<T extends EntityType> {
@@ -56,8 +64,9 @@ export const useEntityRiskScoreRecalculation = <T extends EntityType>({
   entityFromStoreResult,
   riskScoreState,
   onRecalculation,
+  isGroupView = false,
 }: UseEntityRiskScoreRecalculationParams<T>): UseEntityRiskScoreRecalculationResult<T> => {
-  const entityRiskScores = useEntityRiskScores(entityType, entityId);
+  const entityRiskScores = useEntityRiskScores(entityType, entityId, { isGroupView });
   const refetchRiskInputsTab = useRefetchQueryById(RISK_INPUTS_TAB_QUERY_ID);
   const queryClient = useQueryClient();
 
@@ -74,13 +83,15 @@ export const useEntityRiskScoreRecalculation = <T extends EntityType>({
     (refetchRiskInputsTab as Refetch | null)?.();
     // Entity resolution group tab/table shown in the flyout.
     queryClient.invalidateQueries({ queryKey: [RESOLUTION_GROUP_QUERY_KEY] });
+    // New entity analytics home grid (rows, counts, enrichment).
+    queryClient.invalidateQueries({ queryKey: [ENTITY_GRID_QUERY_KEY] });
     // Entity analytics home table rows (flat grid + the leaf tables inside expanded groups).
     queryClient.invalidateQueries({ queryKey: [QUERY_KEY_ENTITY_ANALYTICS, QUERY_KEY_GRID_DATA] });
-    // Risk score on the resolution group accordion headers. We refresh only this
-    // metadata (not the grouping aggregation) so the header badge updates without
-    // re-ordering the buckets, which would collapse any expanded groups.
     queryClient.invalidateQueries({
-      queryKey: [QUERY_KEY_ENTITY_ANALYTICS, QUERY_KEY_TARGET_METADATA],
+      queryKey: [QUERY_KEY_ENTITY_ANALYTICS, QUERY_KEY_UNFILTERED_RESOLUTION_GROUPS],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QUERY_KEY_ENTITY_ANALYTICS, QUERY_KEY_FILTERED_RESOLUTION_GROUPS],
     });
     // Context-specific extras (e.g. agent-builder attachment cache).
     onRecalculation?.();

@@ -11,9 +11,16 @@ import {
   createExternalReferenceRequests,
   createFileRequests,
   createPersistableStateRequests,
+  createUnifiedFileRequests,
   createUserRequests,
 } from '../test_utils';
-import { MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES } from '../../../../common/constants';
+import {
+  INDICATOR_ATTACHMENT_TYPE,
+  LENS_ATTACHMENT_TYPE,
+  MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES,
+  OSQUERY_ATTACHMENT_TYPE,
+  SECURITY_ENDPOINT_ATTACHMENT_TYPE,
+} from '../../../../common/constants';
 
 describe('PersistableStateAndExternalReferencesLimiter', () => {
   const caseId = 'test-id';
@@ -80,6 +87,35 @@ describe('PersistableStateAndExternalReferencesLimiter', () => {
           })
         )
       ).toBe(0);
+    });
+
+    it('counts unified persistable state and externalReference attachments', () => {
+      expect(
+        limiter.countOfItemsInRequest([
+          { type: LENS_ATTACHMENT_TYPE, data: {}, owner: 'test' },
+          { type: SECURITY_ENDPOINT_ATTACHMENT_TYPE, attachmentId: 'so-id', owner: 'test' },
+          { type: OSQUERY_ATTACHMENT_TYPE, attachmentId: 'osquery-id', owner: 'test' },
+          { type: INDICATOR_ATTACHMENT_TYPE, attachmentId: 'indicator-id', owner: 'test' },
+        ])
+      ).toBe(4);
+    });
+
+    it('excludes unified file attachments from the count', () => {
+      expect(
+        limiter.countOfItemsInRequest(createUnifiedFileRequests({ numRequests: 1, numFiles: 1 }))
+      ).toBe(0);
+    });
+
+    it('aggregates legacy and unified requests in the same request batch', () => {
+      const requests = [
+        createPersistableStateRequests(1)[0], // legacy, counted
+        createExternalReferenceRequests(1)[0], // legacy, counted
+        createUserRequests(1)[0], // not counted
+        createFileRequests({ numRequests: 1, numFiles: 1 })[0], // legacy file, excluded
+        { type: LENS_ATTACHMENT_TYPE, data: {}, owner: 'test' }, // unified, counted
+        ...createUnifiedFileRequests({ numRequests: 1, numFiles: 1 }), // unified file, excluded
+      ];
+      expect(limiter.countOfItemsInRequest(requests)).toBe(3);
     });
   });
 });

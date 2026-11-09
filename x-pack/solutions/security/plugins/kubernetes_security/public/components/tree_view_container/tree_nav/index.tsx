@@ -97,7 +97,6 @@ export const TreeNav = () => {
               onChange={handleTreeViewSwitch}
               buttonSize="compressed"
               isFullWidth
-              color="primary"
               css={styles.treeViewSwitcher}
             />
           </EuiFlexItem>

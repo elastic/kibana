@@ -79,9 +79,19 @@ const configSchema = schema.object(
       target: schema.oneOf([schema.literal('auto'), schema.literal('local')], {
         defaultValue: 'auto' as const,
       }),
+      maxRedirects: schema.number({
+        defaultValue: 0,
+        min: 0,
+        max: 20,
+        validate: (value) => (Number.isInteger(value) ? undefined : 'must be an integer'),
+      }),
       // Keep an eye on existing validation in src/platform/packages/shared/kbn-server-http-tools/src/ssl/ssl_config.ts
       // If this SSL validation starts becoming more complex we may want to share validation
       ssl: schema.object({
+        verificationMode: schema.oneOf(
+          [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
+          { defaultValue: 'full' as const }
+        ),
         certificateAuthorities: schema.maybe(
           schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 100 }), schema.string()])
         ),
@@ -408,7 +418,11 @@ export class HttpConfig implements IHttpConfig {
   public publicBaseUrl?: string;
   public selfHttp: {
     target: 'auto' | 'local';
-    ssl: { certificateAuthorities?: string[] };
+    maxRedirects: number;
+    ssl: {
+      verificationMode: 'none' | 'certificate' | 'full';
+      certificateAuthorities?: string[];
+    };
   };
   public rewriteBasePath: boolean;
   public cdn: CdnConfig;
@@ -476,7 +490,9 @@ export class HttpConfig implements IHttpConfig {
     this.publicBaseUrl = rawHttpConfig.publicBaseUrl;
     this.selfHttp = {
       target: rawHttpConfig.selfHttp.target,
+      maxRedirects: rawHttpConfig.selfHttp.maxRedirects,
       ssl: {
+        verificationMode: rawHttpConfig.selfHttp.ssl.verificationMode,
         certificateAuthorities: readCertificateAuthorities(
           rawHttpConfig.selfHttp.ssl?.certificateAuthorities
         ),

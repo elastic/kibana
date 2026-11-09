@@ -14,7 +14,7 @@ path:
 or
 
 ```
-yarn es snapshot --license=trial -E path.repo=/tmp/es-backups
+pnpm es snapshot --license=trial -E path.repo=/tmp/es-backups
 ```
 
 2. Use Console or UI to add a repository. Use the file system path above as the `location` setting:
@@ -71,10 +71,10 @@ There is one official repository plugin available: HDFS. You can find the reposi
 
 To run ES with plugins:
 
-1. Run `yarn es snapshot` from the Kibana directory like normal, then exit out of process.
+1. Run `pnpm es snapshot` from the Kibana directory like normal, then exit out of process.
 2. `cd .es/8.0.0`
 3. `bin/elasticsearch-plugin install https://snapshots.elastic.co/downloads/elasticsearch-plugins/repository-hdfs/repository-hdfs-8.0.0-SNAPSHOT.zip`
-4. Run `bin/elasticsearch` from the `.es/8.0.0` directory. Otherwise, starting ES with `yarn es snapshot` would overwrite the plugins you just installed.
+4. Run `bin/elasticsearch` from the `.es/8.0.0` directory. Otherwise, starting ES with `pnpm es snapshot` would overwrite the plugins you just installed.
 
 
 ### SLM status

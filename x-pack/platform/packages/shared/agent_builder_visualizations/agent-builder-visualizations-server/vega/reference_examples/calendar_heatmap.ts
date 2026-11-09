@@ -11,9 +11,8 @@ export const spec: Record<string, unknown> = {
   data: {
     url: {
       '%type%': 'esql',
-      '%timefield%': '@timestamp',
       query:
-        'FROM logs-* | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | EVAL week = DATE_FORMAT("YYYY-ww", @timestamp), weekday = DATE_FORMAT("EEE", @timestamp) | STATS count = COUNT(*) BY week, weekday | SORT week ASC',
+        'FROM logs-* | EVAL week = DATE_FORMAT("YYYY-ww", @timestamp), weekday = DATE_FORMAT("EEE", @timestamp) | STATS count = COUNT(*) BY week, weekday | SORT week ASC',
     },
   },
   mark: 'rect',

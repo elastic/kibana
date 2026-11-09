@@ -13,7 +13,7 @@ import { FILE_STORAGE_METADATA_AGENT_INDEX } from '../../constants';
 import { appContextService } from '../app_context';
 import { createAppContextStartContractMock } from '../../mocks';
 
-import { deleteAgentUploadFile, getAgentUploads } from './uploads';
+import { deleteAgentUploadFile, getAgentIdForUploadFile, getAgentUploads } from './uploads';
 import {
   AGENT_ACTIONS_FIXTURES,
   AGENT_ACTIONS_RESULTS_FIXTURES,
@@ -63,6 +63,43 @@ describe('getAgentUploads', () => {
       }
     });
     expect(response.map(({ createTime, name, ...rest }) => rest)).toMatchSnapshot();
+  });
+});
+
+describe('getAgentIdForUploadFile', () => {
+  const esClient = {} as ElasticsearchClient;
+
+  beforeAll(async () => {
+    appContextService.start(createAppContextStartContractMock());
+  });
+
+  afterAll(() => {
+    appContextService.stop();
+  });
+
+  it('should return the agent id from file metadata', async () => {
+    esClient.search = jest.fn().mockResolvedValueOnce({
+      hits: { hits: [{ _id: 'file-1', _source: { agent_id: 'agent-1' } }] },
+    });
+
+    const result = await getAgentIdForUploadFile(esClient, 'file-1');
+
+    expect(result).toBe('agent-1');
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: FILE_STORAGE_METADATA_AGENT_INDEX,
+        query: { ids: { values: ['file-1'] } },
+        _source: ['agent_id'],
+      })
+    );
+  });
+
+  it('should throw FleetNotFoundError when file is not found', async () => {
+    esClient.search = jest.fn().mockResolvedValueOnce({ hits: { hits: [] } });
+
+    await expect(getAgentIdForUploadFile(esClient, 'missing-file')).rejects.toThrow(
+      'File missing-file not found'
+    );
   });
 });
 

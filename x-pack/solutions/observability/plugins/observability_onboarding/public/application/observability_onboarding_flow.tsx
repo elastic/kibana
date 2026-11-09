@@ -8,8 +8,7 @@
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React, { useEffect } from 'react';
 import { Route, Routes } from '@kbn/shared-ux-router';
-import { Redirect } from 'react-router-dom';
-import { useLocation } from 'react-router-dom-v5-compat';
+import { Redirect, useLocation } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 import {
@@ -31,7 +30,10 @@ import {
 } from './pages/host';
 import type { ObservabilityOnboardingAppServices } from '..';
 import { CloudwatchIntegrationRedirect } from './cloudwatch_integration_redirect';
-import { IS_ADD_DATA_PAGE_V2_ENABLED } from '../../common/feature_flags';
+import {
+  ADD_DATA_PAGE_V2_ENABLED_DEFAULT,
+  IS_ADD_DATA_PAGE_V2_ENABLED,
+} from '../../common/feature_flags';
 import { useFlowBreadcrumb } from './shared/use_flow_breadcrumbs';
 import { useManagedOtlpServiceAvailability } from './shared/use_managed_otlp_service_availability';
 
@@ -53,7 +55,10 @@ export function ObservabilityOnboardingFlow() {
       context: { isDev, isCloud, isServerless },
     },
   } = useKibana<ObservabilityOnboardingAppServices>();
-  const isAddDataPageV2Enabled = featureFlags.getBooleanValue(IS_ADD_DATA_PAGE_V2_ENABLED, false);
+  const isAddDataPageV2Enabled = featureFlags.useBooleanValue(
+    IS_ADD_DATA_PAGE_V2_ENABLED,
+    ADD_DATA_PAGE_V2_ENABLED_DEFAULT
+  );
 
   useFlowBreadcrumb(null);
 

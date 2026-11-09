@@ -1,0 +1,223 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { EuiFlyoutProps } from '@elastic/eui';
+import { EuiHealth, EuiLoadingSpinner, EuiSwitch } from '@elastic/eui';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { RuleExecutionOutcome } from '@kbn/alerting-v2-schemas';
+import { useRuleAutoAttach } from '@kbn/alerting-v2-browser-shared';
+import { RULE_KIND_ICONS, RULE_KIND_LABELS } from '@kbn/alerting-v2-constants';
+import { PluginStart } from '@kbn/core-di';
+import { CoreStart, useService } from '@kbn/core-di-browser';
+import { FlyoutTemplate } from '@kbn/flyout-template';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { useAlertingLocators } from '../../../../application/locator_context';
+import { useRuleAuditMetadata } from '../../../../hooks/use_rule_audit_metadata';
+import { useRuleLastExecution } from '../../../../hooks/use_rule_last_execution';
+import {
+  getRuleDetailsLink,
+  RULE_MENU_ARIA_LABEL,
+  useRuleMenuPanels,
+} from '../../../../pages/rules_list_page/use_rule_menu_panels';
+import type { RuleApiResponse } from '../../../../services/rules_api';
+import {
+  RuleSummaryAboutSection,
+  RuleSummaryArtifactsSection,
+  RuleSummaryBody,
+  RuleSummaryInvestigationSection,
+} from '../../rule_summary';
+
+const LAST_EXECUTION_HEALTH_COLOR: Record<RuleExecutionOutcome, 'success' | 'danger'> = {
+  success: 'success',
+  failure: 'danger',
+};
+
+export interface RuleSummaryFlyoutProps {
+  rule: RuleApiResponse;
+  onClose: () => void;
+  onEdit: (rule: RuleApiResponse) => void;
+  onClone: (rule: RuleApiResponse) => void;
+  onDelete: (rule: RuleApiResponse) => void;
+  onToggleEnabled: (rule: RuleApiResponse) => void;
+  onRun: (rule: RuleApiResponse) => void;
+  onUpdateApiKey?: (rule: RuleApiResponse) => void;
+  onViewChangeHistory?: (rule: RuleApiResponse) => void;
+  canWrite?: boolean;
+  isToggleLoading?: boolean;
+  session?: EuiFlyoutProps['session'];
+}
+
+export const RuleSummaryFlyout = ({
+  rule,
+  onClose,
+  onEdit,
+  onClone,
+  onDelete,
+  onToggleEnabled,
+  onRun,
+  onUpdateApiKey,
+  onViewChangeHistory,
+  canWrite = true,
+  isToggleLoading = false,
+  session,
+}: RuleSummaryFlyoutProps) => {
+  const chrome = useService(CoreStart('chrome'));
+  const agentBuilder = useService(PluginStart('agentBuilder'), { optional: true }) as
+    | AgentBuilderPluginStart
+    | undefined;
+  const { rulesLocators } = useAlertingLocators();
+  useRuleAutoAttach(rule, { chrome, agentBuilder });
+  const { createdByDisplay, updatedByDisplay, updatedAtFormatted } = useRuleAuditMetadata(rule);
+  const lastExecution = useRuleLastExecution(rule.id);
+  const takeActionPanels = useRuleMenuPanels({
+    rule,
+    canWrite,
+    detailsLink: getRuleDetailsLink(rulesLocators, rule.id),
+    onEdit,
+    onClone,
+    onDelete,
+    onToggleEnabled,
+    onRun,
+    onUpdateApiKey,
+    onViewChangeHistory,
+  });
+
+  const kindLabel = RULE_KIND_LABELS[rule.kind] ?? rule.kind;
+  const enabledLabel = rule.enabled
+    ? i18n.translate('xpack.alertingV2.ruleSummaryFlyout.enabled', {
+        defaultMessage: 'Enabled',
+      })
+    : i18n.translate('xpack.alertingV2.ruleSummaryFlyout.disabled', {
+        defaultMessage: 'Disabled',
+      });
+
+  const { Header, Body, Footer } = FlyoutTemplate;
+  const { Badge, InfoBlock } = Header;
+
+  const renderLastExecutionValue = (): React.ReactNode => {
+    if (lastExecution.isLoading) {
+      return <EuiLoadingSpinner data-test-subj="ruleSummaryFlyoutLastExecutionSpinner" size="m" />;
+    }
+    if (lastExecution.isError) {
+      return (
+        <EuiHealth color="subdued" data-test-subj="ruleSummaryFlyoutLastExecutionError">
+          {lastExecution.value}
+        </EuiHealth>
+      );
+    }
+    if (lastExecution.outcome) {
+      return (
+        <EuiHealth
+          color={LAST_EXECUTION_HEALTH_COLOR[lastExecution.outcome]}
+          data-test-subj="ruleSummaryFlyoutLastExecutionStatus"
+        >
+          {lastExecution.value}
+        </EuiHealth>
+      );
+    }
+    return lastExecution.value;
+  };
+
+  return (
+    <FlyoutTemplate
+      type="overlay"
+      size="m"
+      resizable
+      ownFocus={false}
+      session={session}
+      onClose={onClose}
+      data-test-subj="ruleSummaryFlyout"
+    >
+      <Header title={rule.metadata.name} description={updatedAtFormatted}>
+        <Badge color="hollow" data-test-subj="universalRulesBadge">
+          {i18n.translate('xpack.alertingV2.ruleSummaryFlyout.universalRulesBadge', {
+            defaultMessage: 'Universal',
+          })}
+        </Badge>
+        <Badge
+          color="hollow"
+          iconType={RULE_KIND_ICONS[rule.kind] ?? 'dot'}
+          data-test-subj="kindBadge"
+        >
+          {kindLabel}
+        </Badge>
+        <Badge
+          color={rule.enabled ? 'success' : 'default'}
+          data-test-subj={rule.enabled ? 'enabledBadge' : 'disabledBadge'}
+        >
+          {enabledLabel}
+        </Badge>
+        <InfoBlock
+          title={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.enabled', {
+            defaultMessage: 'Enabled',
+          })}
+          data-test-subj="ruleSummaryFlyoutEnabledBlock"
+        >
+          {isToggleLoading ? (
+            <EuiLoadingSpinner data-test-subj="ruleSummaryFlyoutEnabledSpinner" size="m" />
+          ) : (
+            <EuiSwitch
+              compressed
+              checked={rule.enabled}
+              disabled={!canWrite}
+              showLabel={false}
+              label={enabledLabel}
+              onChange={() => onToggleEnabled(rule)}
+              data-test-subj="ruleSummaryFlyoutEnabledSwitch"
+            />
+          )}
+        </InfoBlock>
+        {lastExecution.visible && (
+          <InfoBlock
+            title={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.lastExecution', {
+              defaultMessage: 'Last execution',
+            })}
+            data-test-subj="ruleSummaryFlyoutLastExecutionBlock"
+          >
+            {renderLastExecutionValue()}
+          </InfoBlock>
+        )}
+        <InfoBlock
+          title={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.createdBy', {
+            defaultMessage: 'Created by',
+          })}
+          data-test-subj="ruleSummaryFlyoutCreatedByBlock"
+        >
+          {createdByDisplay}
+        </InfoBlock>
+        <InfoBlock
+          title={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.updatedBy', {
+            defaultMessage: 'Updated by',
+          })}
+          data-test-subj="ruleSummaryFlyoutUpdatedByBlock"
+        >
+          {updatedByDisplay}
+        </InfoBlock>
+      </Header>
+
+      <Body>
+        <RuleSummaryBody rule={rule}>
+          <RuleSummaryAboutSection />
+          <RuleSummaryInvestigationSection />
+          <RuleSummaryArtifactsSection />
+        </RuleSummaryBody>
+      </Body>
+
+      <Footer>
+        <Footer.PrimaryActionMenu
+          label={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.takeAction', {
+            defaultMessage: 'Take action',
+          })}
+          aria-label={RULE_MENU_ARIA_LABEL}
+          panels={takeActionPanels}
+          data-test-subj="ruleSummaryFlyoutTakeActionButton"
+        />
+      </Footer>
+    </FlyoutTemplate>
+  );
+};

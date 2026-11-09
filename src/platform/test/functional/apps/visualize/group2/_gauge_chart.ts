@@ -103,9 +103,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should add machine.os.raw:win 8 filter by click on the first Gauge', async () => {
         await visChart.clickOnGaugeByLabel('win 8');
         await visChart.waitForVisualizationRenderingStabilized();
-        const hasFilter = await filterBar.hasFilter('machine.os.raw', 'win 8');
-
-        expect(hasFilter).to.eql(true);
+        await filterBar.expectFilter('machine.os.raw', 'win 8');
       });
 
       it('should show correct values for fields with fieldFormatters', async () => {

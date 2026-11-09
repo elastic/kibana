@@ -20,18 +20,31 @@ export const TestSingleFileConnector: ConnectorSpec = {
   auth: {
     types: [
       'none',
-      'basic',
+      {
+        type: 'basic',
+        supportsSandbox: true,
+        defaults: {},
+      },
       {
         type: 'api_key_header',
         defaults: {
           headerField: 'Key',
         },
       },
+      {
+        type: 'oauth_authorization_code',
+        supportsSandbox: true,
+        defaults: {},
+      },
     ],
     headers: {
       'x-test-header': 'i-am-a-test-header-value',
       'kbn-xsrf': 'foo',
     },
+  },
+
+  sandbox: {
+    hostsFromConfig: ['apiUrl'],
   },
 
   schema: z.object({
@@ -41,6 +54,7 @@ export const TestSingleFileConnector: ConnectorSpec = {
   actions: {
     testHandlerParams: {
       isTool: true,
+      scope: 'read',
       input: z.object({
         message: z.string(),
       }),
@@ -56,6 +70,7 @@ export const TestSingleFileConnector: ConnectorSpec = {
     },
     validateAuthentication: {
       isTool: true,
+      scope: 'read',
       input: z.object({}),
       handler: async (ctx, input) => {
         const response = await ctx.client(ctx.config?.apiUrl as string, {
@@ -68,6 +83,7 @@ export const TestSingleFileConnector: ConnectorSpec = {
     },
     validateHeaders: {
       isTool: true,
+      scope: 'read',
       input: z.object({}),
       handler: async (ctx, input) => {
         const response = await ctx.client(ctx.config?.apiUrl as string, {
@@ -80,6 +96,7 @@ export const TestSingleFileConnector: ConnectorSpec = {
     },
     validateParams: {
       isTool: true,
+      scope: 'read',
       input: z.object({
         foobar: z.string(),
       }),
@@ -89,6 +106,7 @@ export const TestSingleFileConnector: ConnectorSpec = {
     },
     throwError: {
       isTool: true,
+      scope: 'read',
       input: z.object({
         foobar: z.string(),
       }),

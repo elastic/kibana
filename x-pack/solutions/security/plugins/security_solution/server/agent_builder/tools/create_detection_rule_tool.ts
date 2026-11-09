@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { v4 as uuidv4 } from 'uuid';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
@@ -34,8 +34,21 @@ import type { RuleAttachmentData } from '../attachments/rule';
 
 export const SECURITY_CREATE_DETECTION_RULE_TOOL_ID = securityTool('create_detection_rule');
 
-const RULE_CREATION_GENERIC_ERROR_MESSAGE =
-  'Failed to create detection rule. Please try again or refine your request.';
+const RULE_CREATION_ERROR_PREFIX = 'Failed to create detection rule';
+const RULE_CREATION_GENERIC_ERROR_MESSAGE = `${RULE_CREATION_ERROR_PREFIX}. Please try again or refine your request.`;
+
+/**
+ * Builds the error message returned to the agent. The underlying reasons are included so the agent
+ * can tell the user what actually went wrong (e.g. a missing index privilege) instead of guessing.
+ */
+const buildRuleCreationErrorMessage = (reasons: unknown[]): string => {
+  const detail = reasons
+    .filter((reason): reason is string => typeof reason === 'string')
+    .map((reason) => reason.trim())
+    .filter(Boolean)
+    .join('; ');
+  return detail ? `${RULE_CREATION_ERROR_PREFIX}: ${detail}` : RULE_CREATION_GENERIC_ERROR_MESSAGE;
+};
 
 const isRuleAttachment = (
   attachment: VersionedAttachment
@@ -120,19 +133,21 @@ export const resolveAttachmentTarget = (
   };
 };
 
-const createDetectionRuleSchema = z.object({
-  user_query: z
-    .string()
-    .describe(
-      'Natural language description of the detection rule to create, including threat scenarios, data sources, and desired detection logic'
-    ),
-  attachment_id: z
-    .string()
-    .optional()
-    .describe(
-      'ID of the existing rule attachment to update. Pass when rewriting the query of an existing rule so the tool reads the current rule state and updates in place. Omit for a fresh create.'
-    ),
-});
+const createDetectionRuleSchema = lazySchema(() =>
+  z.object({
+    user_query: z
+      .string()
+      .describe(
+        'Natural language description of the detection rule to create, including threat scenarios, data sources, and desired detection logic'
+      ),
+    attachment_id: z
+      .string()
+      .optional()
+      .describe(
+        'ID of the existing rule attachment to update. Pass when rewriting the query of an existing rule so the tool reads the current rule state and updates in place. Omit for a fresh create.'
+      ),
+  })
+);
 
 export function createDetectionRuleTool(
   core: CoreSetup<SecuritySolutionPluginStartDependencies, SecuritySolutionPluginStart>,
@@ -281,6 +296,7 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
           savedObjectsClient,
           rulesClient,
           events,
+          mitreDataClient: startPlugins.mitreAttack?.getMitreDataClient?.(),
         });
 
         // Seed the graph with the existing rule when rewriting a query; otherwise create fresh.
@@ -330,7 +346,7 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
               {
                 type: ToolResultType.error,
                 data: {
-                  message: RULE_CREATION_GENERIC_ERROR_MESSAGE,
+                  message: buildRuleCreationErrorMessage(result.errors),
                 },
               },
             ],
@@ -403,14 +419,16 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
           ],
         };
       } catch (error) {
-        logger.error(`Create detection rule tool failed: ${error.message}`, error);
+        // A rejection is not guaranteed to be an Error instance; normalize before reporting.
+        const reason = error instanceof Error ? error.message : String(error);
+        logger.error(`Create detection rule tool failed: ${reason}`, error);
 
         return {
           results: [
             {
               type: ToolResultType.error,
               data: {
-                message: RULE_CREATION_GENERIC_ERROR_MESSAGE,
+                message: buildRuleCreationErrorMessage([reason]),
               },
             },
           ],

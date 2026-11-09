@@ -14,6 +14,7 @@ import {
 } from '../../../../screens/alerts_detection_rules';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getDetails } from '../../../../tasks/rule_details';
+import { shouldHaveTagsText } from '../../../../helpers/tags';
 import { ruleFields } from '../../../../data/detection_engine';
 import { getExistingRule, getNewRule } from '../../../../objects/rule';
 
@@ -136,7 +137,7 @@ describe(
           expect(removeExternalLinkText(details.text())).equal(ruleFields.referenceUrls.join(''));
         });
         getDetails(FALSE_POSITIVES_DETAILS).should('have.text', ruleFields.falsePositives.join(''));
-        getDetails(TAGS_DETAILS).should('have.text', ruleFields.ruleTags.join(''));
+        shouldHaveTagsText(getDetails(TAGS_DETAILS), ruleFields.ruleTags.join(''));
       });
       cy.get(THREAT_TACTIC).should(
         'contain',

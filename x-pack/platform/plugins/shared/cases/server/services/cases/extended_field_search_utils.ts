@@ -14,7 +14,7 @@ import {
 import type { Template } from '../../../common/types/domain/template/v1';
 import type { InlineField } from '../../../common/types/domain/template/fields';
 import { FieldType } from '../../../common/types/domain/template/fields';
-import { getFieldSnakeKey } from '../../../common/utils/template_fields';
+import { getFieldSnakeKey, isSafeExtendedFieldKey } from '../../../common/utils/template_fields';
 
 export interface ExtendedFieldFilter {
   label: string;
@@ -432,6 +432,15 @@ const buildLabelToMetasIndex = (
   }) => {
     const labelKey = label.toLowerCase();
     const storageKey = getFieldSnakeKey(name, type);
+
+    // Guard the Painless literal: if the derived key is not safe to interpolate (wrong charset
+    // or over the length cap) skip this meta entirely. This closes the unguarded literal at
+    // `buildPainlessScript` and keeps `buildExtendedFieldRuntimeMappings` / `buildFieldLabelRuntimeMappings`
+    // consistent. Uses the lenient read guard — not the strict authoring guard — so keys that
+    // predate the strict rule (hyphenated, UUID-shaped migration output) are still handled.
+    if (!isSafeExtendedFieldKey(storageKey)) {
+      return;
+    }
 
     let byStorageKey = labelToMetas.get(labelKey);
     if (byStorageKey == null) {

@@ -53,9 +53,9 @@ apiTest.describe(
     apiTest(
       'bulk-dismisses multiple leads and returns { updated: N }',
       async ({ apiClient, esClient }) => {
-        const { id: id1 } = await seedLead(esClient, { status: 'active' });
-        const { id: id2 } = await seedLead(esClient, { status: 'active' });
-        await seedLead(esClient, { status: 'active' }); // third lead — NOT in the update set
+        const { id: id1 } = await seedLead(esClient, { status: 'active', entityName: 'alice' });
+        const { id: id2 } = await seedLead(esClient, { status: 'active', entityName: 'bob' });
+        await seedLead(esClient, { status: 'active', entityName: 'carol' }); // NOT in the update set
 
         const response = await apiClient.post(LEAD_GENERATION_ROUTES.BULK_UPDATE, {
           headers: defaultHeaders,
@@ -71,8 +71,8 @@ apiTest.describe(
     apiTest(
       'bulk-updated leads appear with the new status in GET /leads',
       async ({ apiClient, esClient }) => {
-        const { id: id1 } = await seedLead(esClient, { status: 'active' });
-        const { id: id2 } = await seedLead(esClient, { status: 'active' });
+        const { id: id1 } = await seedLead(esClient, { status: 'active', entityName: 'alice' });
+        const { id: id2 } = await seedLead(esClient, { status: 'active', entityName: 'bob' });
 
         await apiClient.post(LEAD_GENERATION_ROUTES.BULK_UPDATE, {
           headers: defaultHeaders,
@@ -95,8 +95,14 @@ apiTest.describe(
     apiTest(
       'leads not in the ids list keep their original status',
       async ({ apiClient, esClient }) => {
-        const { id: toUpdate } = await seedLead(esClient, { status: 'active' });
-        const { id: untouched } = await seedLead(esClient, { status: 'active' });
+        const { id: toUpdate } = await seedLead(esClient, {
+          status: 'active',
+          entityName: 'alice',
+        });
+        const { id: untouched } = await seedLead(esClient, {
+          status: 'active',
+          entityName: 'bob',
+        });
 
         await apiClient.post(LEAD_GENERATION_ROUTES.BULK_UPDATE, {
           headers: defaultHeaders,

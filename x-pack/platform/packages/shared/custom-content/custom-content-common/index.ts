@@ -12,15 +12,20 @@ export {
   CUSTOM_CONTENT_MAX_TEMPLATE_BYTES,
   CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH,
   CUSTOM_CONTENT_SCRIPT_PATTERN,
-  CUSTOM_CONTENT_ENABLED_FLAG_KEY,
+  CUSTOM_CONTENT_DEFAULT_HEIGHT,
+  CUSTOM_CONTENT_MIN_HEIGHT,
+  CUSTOM_CONTENT_MAX_HEIGHT,
+  CUSTOM_CONTENT_UPDATE_PANEL_TOOL_ID,
+  CUSTOM_CONTENT_GENERATE_DASHBOARD_TOOL_ID,
 } from './constants';
 
-export { customContentStateSchema } from './schema';
+export {
+  customContentStateSchema,
+  customContentPanelUpdateSchema,
+  readEsqlQuery,
+  toEsqlQueryState,
+} from './schema';
 export type { CustomContentState } from './schema';
 
 export { stripMarkdownFences } from './strip_markdown_fences';
-export {
-  CUSTOM_CONTENT_CSS_VARS_GUIDANCE,
-  CUSTOM_CONTENT_SANDBOX_GUIDANCE,
-  CUSTOM_CONTENT_LIQUID_DATA_MODEL_GUIDANCE,
-} from './template_guidance';
+export { CUSTOM_CONTENT_LIQUID_OPTIONS } from './liquid_options';

@@ -155,6 +155,13 @@ apiTest.describe(
 
     apiTest.beforeEach(async ({ kbnClient }) => {
       await kbnClient.savedObjects.clean({ types: [SYNTHETICS_PARAM_SO_TYPE] });
+      // Share-across-spaces uniqueness is cluster-wide; leftover keys in other
+      // spaces (this suite only cleans the default space above) would 409.
+      for (const spaceId of spacesToCleanUp) {
+        await kbnClient.savedObjects
+          .clean({ types: [SYNTHETICS_PARAM_SO_TYPE], space: spaceId })
+          .catch(() => {});
+      }
     });
 
     apiTest.afterAll(async ({ kbnClient }) => {
@@ -343,18 +350,37 @@ apiTest.describe(
 
     apiTest('handles share across spaces', async ({ apiClient, kbnClient }) => {
       const spaceId = await createSpace(kbnClient);
+      // Share-across-spaces keys are globally unique; leftover `test` params in
+      // other spaces from earlier tests would 409 if we reused `testParam`.
+      const sharedParam = { key: `shared-${uuidv4()}`, value: 'test' };
       await createParam(
         apiClient,
         allHeaders,
-        { ...testParam, share_across_spaces: true },
+        { ...sharedParam, share_across_spaces: true },
         { spaceId }
       );
       const getResponse = await getParams(apiClient, allHeaders, { spaceId });
       const param = (getResponse.body as ParamBody[])[0];
       expect(param.namespaces).toStrictEqual(['*']);
-      expect(param.key).toBe(testParam.key);
+      expect(param.key).toBe(sharedParam.key);
       expect(param.value).toBeUndefined();
     });
+
+    apiTest(
+      'returns 409 when sharing a key that exists in another space',
+      async ({ apiClient, kbnClient }) => {
+        const spaceA = await createSpace(kbnClient);
+        const spaceB = await createSpace(kbnClient);
+        const key = `collide-${uuidv4()}`;
+        await createParam(apiClient, allHeaders, { key, value: 'a' }, { spaceId: spaceA });
+        await createParam(
+          apiClient,
+          allHeaders,
+          { key, value: 'b', share_across_spaces: true },
+          { spaceId: spaceB, statusCode: 409 }
+        );
+      }
+    );
 
     apiTest('should NOT return values for editor user', async ({ apiClient }) => {
       const editorTestParam = { key: 'editorTestParam', value: 'editorTestParamValue' };
@@ -534,10 +560,8 @@ apiTest.describe(
       await getParam(apiClient, allHeaders, paramId, { statusCode: 404 });
     });
 
-    // Skipped in FTR too — duplicate keys are not yet rejected.
-    // Bug ticket https://github.com/elastic/kibana/issues/243894
-    apiTest.skip('returns a 409 conflict when creating a duplicate key', async ({ apiClient }) => {
-      const param = { key: 'duplicate-key', value: 'value1' };
+    apiTest('returns a 409 conflict when creating a duplicate key', async ({ apiClient }) => {
+      const param = { key: `duplicate-key-${uuidv4()}`, value: 'value1' };
       await createParam(apiClient, allHeaders, param);
       await createParam(apiClient, allHeaders, { ...param, value: 'value2' }, { statusCode: 409 });
 

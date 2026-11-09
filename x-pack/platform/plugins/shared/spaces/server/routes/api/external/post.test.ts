@@ -18,6 +18,7 @@ import {
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import type { INpreClient } from '@kbn/cps/server/npre';
 import type { CPSServerStart } from '@kbn/cps/server/types';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
@@ -113,6 +114,8 @@ describe('Spaces Public API', () => {
     const mockCpsStart = options.cpsEnabled
       ? {
           createNpreClient: jest.fn().mockReturnValue(npreClient),
+          getLinkedProjects: jest.fn().mockResolvedValue([]),
+          isCpsActive: jest.fn().mockResolvedValue(false),
         }
       : undefined;
 
@@ -126,7 +129,7 @@ describe('Spaces Public API', () => {
 
   it('should create a new space with the provided ID', async () => {
     const payload = {
-      id: 'my-space-id',
+      id: asSpaceId('my-space-id'),
       name: 'my new space',
       description: 'with a description',
       disabledFeatures: ['foo'],
@@ -173,7 +176,7 @@ describe('Spaces Public API', () => {
 
   it('should not allow a space to be updated', async () => {
     const payload = {
-      id: 'a-space',
+      id: asSpaceId('a-space'),
       name: 'my updated space',
       description: 'with a description',
       disabledFeatures: [],
@@ -196,7 +199,7 @@ describe('Spaces Public API', () => {
 
   it('should not require disabledFeatures to be specified', async () => {
     const payload = {
-      id: 'my-space-id',
+      id: asSpaceId('my-space-id'),
       name: 'my new space',
       description: 'with a description',
       disabledFeatures: [],
@@ -225,7 +228,7 @@ describe('Spaces Public API', () => {
   describe('Cross-project search', () => {
     it('creates the space with projectRouting when CPS is enabled and user has permission', async () => {
       const payload = {
-        id: 'my-space-id',
+        id: asSpaceId('my-space-id'),
         name: 'my new space',
         description: 'with a description',
         disabledFeatures: ['foo'],
@@ -257,7 +260,7 @@ describe('Spaces Public API', () => {
 
     it('creates the space without projectRouting when CPS is enabled and user does not submit projectRouting NPRE', async () => {
       const payload = {
-        id: 'my-space-id',
+        id: asSpaceId('my-space-id'),
         name: 'my new space',
         description: 'with a description',
         disabledFeatures: ['foo'],
@@ -285,7 +288,7 @@ describe('Spaces Public API', () => {
 
     it('returns 403 when CPS is enabled and user does not have permission to create NPRE', async () => {
       const payload = {
-        id: 'my-space-id',
+        id: asSpaceId('my-space-id'),
         name: 'my new space',
         description: 'with a description',
         disabledFeatures: ['foo'],
@@ -314,7 +317,7 @@ describe('Spaces Public API', () => {
 
     it('creates the space without projectRouting when CPS is disabled', async () => {
       const payload = {
-        id: 'my-space-id',
+        id: asSpaceId('my-space-id'),
         name: 'my new space',
         description: 'with a description',
         disabledFeatures: ['foo'],
@@ -348,7 +351,7 @@ describe('Spaces Public API', () => {
   describe('Preferred chat experience default', () => {
     it('persists Agent chat experience when creating a solution space', async () => {
       const payload = {
-        id: 'solution-space',
+        id: asSpaceId('solution-space'),
         name: 'Observability',
         description: 'desc',
         disabledFeatures: [],
@@ -376,7 +379,7 @@ describe('Spaces Public API', () => {
 
     it('does not seed when the new space has no solution in the request body', async () => {
       const payload = {
-        id: 'plain-space',
+        id: asSpaceId('plain-space'),
         name: 'Plain',
         description: 'desc',
         disabledFeatures: [],
@@ -398,7 +401,7 @@ describe('Spaces Public API', () => {
 
     it('persists Agent when solution view is Classic', async () => {
       const payload = {
-        id: 'classic-space',
+        id: asSpaceId('classic-space'),
         name: 'Classic nav',
         description: 'desc',
         disabledFeatures: [],
@@ -426,7 +429,7 @@ describe('Spaces Public API', () => {
 
     it('still returns 200 when seeding the chat experience fails', async () => {
       const payload = {
-        id: 'failing-seed-space',
+        id: asSpaceId('failing-seed-space'),
         name: 'Security',
         description: 'desc',
         disabledFeatures: [],

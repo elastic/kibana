@@ -8,13 +8,13 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiAccordion,
-  EuiCallOut,
   EuiConfirmModal,
   EuiSpacer,
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { EncryptedSyntheticsSavedMonitor } from '../../../../../../../common/runtime_types';
 import { ConfigKey } from '../../../../../../../common/runtime_types';
 import { useCanUsePublicLocationsPermission } from '../../../../../../hooks/use_capabilities';
@@ -22,7 +22,7 @@ import { useKibanaSpace } from '../../../../../../hooks/use_kibana_space';
 import { getMonitorSpaceToAppend } from '../../../../hooks';
 import { fetchBulkUpdateMonitors } from '../../../../state';
 import { kibanaService } from '../../../../../../utils/kibana_service';
-import { isMonitorBulkEditable } from './bulk_edit_eligibility';
+import { isMonitorBulkStatusEditable } from './bulk_edit_eligibility';
 
 export const BulkStatusUpdateModal = ({
   monitors,
@@ -43,10 +43,12 @@ export const BulkStatusUpdateModal = ({
   const modalTitleId = useGeneratedHtmlId();
   const skippedAccordionId = useGeneratedHtmlId();
 
-  // Only monitors that can actually be patched are sent to the bulk API:
-  // project/terraform monitors are rejected server-side, and public-location
-  // monitors require the elastic-managed-locations capability. Ineligible
-  // monitors are surfaced as skipped so the user understands why.
+  // Only monitors that can actually be patched are sent to the bulk API. Unlike
+  // other bulk edits, enable/disable IS allowed on project/terraform monitors
+  // (an `enabled`-only patch, reconciled on the next push); the only ineligible
+  // ones here use public locations without the elastic-managed-locations
+  // capability. Ineligible monitors are surfaced as skipped so the user
+  // understands why.
   //
   // Monitors are multi-space saved objects and the bulk API resolves ids within
   // a single space, so a monitor only visible via "show from all spaces" must be
@@ -59,7 +61,7 @@ export const BulkStatusUpdateModal = ({
     let eligible = 0;
     for (const monitor of monitors) {
       const id = monitor[ConfigKey.CONFIG_ID];
-      if (!isMonitorBulkEditable(monitor, canUsePublicLocations)) {
+      if (!isMonitorBulkStatusEditable(monitor, canUsePublicLocations)) {
         skipped.push({ id, name: monitor[ConfigKey.NAME] });
         continue;
       }
@@ -138,27 +140,21 @@ export const BulkStatusUpdateModal = ({
       {skippedMonitors.length > 0 && (
         <>
           <EuiSpacer size="m" />
-          <EuiCallOut
-            color="warning"
-            iconType="warning"
+          <KbnWarningCallout
             announceOnMount={false}
             title={i18n.translate('xpack.synthetics.bulkStatusUpdateModal.skippedWarning.title', {
               defaultMessage:
                 '{count, plural, one {# monitor} other {# monitors}} will not be updated',
               values: { count: skippedMonitors.length },
             })}
+            text={i18n.translate(
+              'xpack.synthetics.bulkStatusUpdateModal.skippedWarning.description',
+              {
+                defaultMessage:
+                  'Monitors using Elastic managed locations require additional permissions to enable or disable.',
+              }
+            )}
           >
-            <EuiText size="s">
-              <p>
-                {i18n.translate(
-                  'xpack.synthetics.bulkStatusUpdateModal.skippedWarning.description',
-                  {
-                    defaultMessage:
-                      'Project and Terraform-managed monitors cannot be edited here (update them from their source instead), and monitors using Elastic managed locations require additional permissions.',
-                  }
-                )}
-              </p>
-            </EuiText>
             <EuiAccordion
               id={skippedAccordionId}
               buttonContent={i18n.translate(
@@ -175,7 +171,7 @@ export const BulkStatusUpdateModal = ({
                 </ul>
               </EuiText>
             </EuiAccordion>
-          </EuiCallOut>
+          </KbnWarningCallout>
         </>
       )}
     </EuiConfirmModal>

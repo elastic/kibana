@@ -11,16 +11,17 @@ import { WorkspaceLayoutComponent } from '.';
 import { coreMock } from '@kbn/core/public/mocks';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import type { Start as InspectorStart, RequestAdapter } from '@kbn/inspector-plugin/public';
-import type { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
 import type {
   GraphSavePolicy,
   GraphWorkspaceSavedObject,
   IndexPatternProvider,
   Workspace,
+  WorkspaceNode,
 } from '../../types';
 import type { OverlayStart, Capabilities } from '@kbn/core/public';
 import type { SharingSavedObjectProps } from '../../helpers/use_workspace_loader';
-import { GraphVisualization } from '../graph_visualization';
+import { ControlPanel } from '../control_panel';
+import { ReduxGraphVisualization } from '../graph_visualization';
 
 jest.mock('react-router-dom', () => {
   const useLocation = () => ({
@@ -44,9 +45,7 @@ describe('workspace_layout', () => {
     capabilities: {} as Capabilities,
     coreStart: coreMock.createStart(),
     graphSavePolicy: 'configAndDataWithConsent' as GraphSavePolicy,
-    navigation: {} as NavigationStart,
     canEditDrillDownUrls: true,
-    setHeaderActionMenu: jest.fn(),
     sharingSavedObjectProps: {
       outcome: 'exactMatch',
       aliasTargetId: '',
@@ -76,7 +75,7 @@ describe('workspace_layout', () => {
       otherObjectPath: '#/workspace/conflictId?query={}',
     });
   });
-  it('should not show GraphVisualization when workspaceInitialized is false, savedWorkspace.id is undefined, and savedWorkspace.isSaving is false', () => {
+  it('should not show ReduxGraphVisualization when workspaceInitialized is false, savedWorkspace.id is undefined, and savedWorkspace.isSaving is false', () => {
     const component = shallow(
       <WorkspaceLayoutComponent
         {...defaultProps}
@@ -84,9 +83,9 @@ describe('workspace_layout', () => {
         savedWorkspace={{ id: undefined, isSaving: false } as GraphWorkspaceSavedObject}
       />
     );
-    expect(component.find(GraphVisualization).exists()).toBe(false);
+    expect(component.find(ReduxGraphVisualization).exists()).toBe(false);
   });
-  it('should show GraphVisualization when workspaceInitialized is true', () => {
+  it('should show ReduxGraphVisualization when workspaceInitialized is true', () => {
     const component = shallow(
       <WorkspaceLayoutComponent
         {...defaultProps}
@@ -94,9 +93,9 @@ describe('workspace_layout', () => {
         savedWorkspace={{ id: undefined, isSaving: false } as GraphWorkspaceSavedObject}
       />
     );
-    expect(component.find(GraphVisualization).exists()).toBe(true);
+    expect(component.find(ReduxGraphVisualization).exists()).toBe(true);
   });
-  it('should show GraphVisualization when savedWorkspace.id is defined', () => {
+  it('should show ReduxGraphVisualization when savedWorkspace.id is defined', () => {
     const component = shallow(
       <WorkspaceLayoutComponent
         {...defaultProps}
@@ -104,9 +103,9 @@ describe('workspace_layout', () => {
         savedWorkspace={{ id: 'test', isSaving: false } as GraphWorkspaceSavedObject}
       />
     );
-    expect(component.find(GraphVisualization).exists()).toBe(true);
+    expect(component.find(ReduxGraphVisualization).exists()).toBe(true);
   });
-  it('should show GraphVisualization when savedWorkspace.isSaving is true', () => {
+  it('should show ReduxGraphVisualization when savedWorkspace.isSaving is true', () => {
     const component = shallow(
       <WorkspaceLayoutComponent
         {...defaultProps}
@@ -114,6 +113,26 @@ describe('workspace_layout', () => {
         savedWorkspace={{ id: undefined, isSaving: true } as GraphWorkspaceSavedObject}
       />
     );
-    expect(component.find(GraphVisualization).exists()).toBe(true);
+    expect(component.find(ReduxGraphVisualization).exists()).toBe(true);
+  });
+
+  it('rerenders the control panel when editor focus changes', () => {
+    const firstNode = { id: 'first-node' } as WorkspaceNode;
+    const secondNode = { id: 'second-node' } as WorkspaceNode;
+    const component = shallow(<WorkspaceLayoutComponent {...defaultProps} />);
+
+    component.find(ControlPanel).prop('selectSelected')(firstNode);
+    component.update();
+    expect(component.find(ControlPanel).props()).toMatchObject({
+      control: 'editLabel',
+      selectedNode: firstNode,
+    });
+
+    component.find(ControlPanel).prop('selectSelected')(secondNode);
+    component.update();
+    expect(component.find(ControlPanel).props()).toMatchObject({
+      control: 'editLabel',
+      selectedNode: secondNode,
+    });
   });
 });

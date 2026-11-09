@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { BuildkiteMetadata } from '@kbn/evals-common';
+import type { BuildkiteMetadata, Direction, Model } from '@kbn/evals-common';
 
 /** A single example (row) of a dataset that a task is executed against. */
 export interface RunnerExample {
@@ -30,6 +30,8 @@ export interface EvaluatorScore {
   explanation?: string | null;
   metadata?: Record<string, unknown>;
   traceId?: string | null;
+  /** Overrides the evaluator's `direction` for this score alone. */
+  direction?: Direction;
 }
 
 /**
@@ -41,6 +43,9 @@ export interface EvaluatorResult {
     name: string;
     version?: string;
     kind?: 'llm' | 'code';
+    /** Model this evaluator judged with. Absent for code evaluators. */
+    model?: Model;
+    direction?: Direction;
   };
   scores: EvaluatorScore[];
 }

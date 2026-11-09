@@ -17,14 +17,13 @@ import { css } from '@emotion/react';
 import React, { memo } from 'react';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { DataGridDensity } from '@kbn/discover-utils';
+import { DataGridDensity } from '@kbn/discover-session-constants';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
   type CustomCellRenderer,
   type CustomGridColumnsConfiguration,
   DataLoadingState,
-  type DataTableColumnsMeta,
   SELECT_ROW,
   type SortOrder,
   UnifiedDataTable,
@@ -48,7 +47,6 @@ export interface WorkflowExecuteUnifiedDataTableProps {
   dataView: DataView | null;
   getNoCellActions: UiActionsStart['getTriggerCompatibleActions'];
   visibleTableColumns: string[];
-  columnsMeta: DataTableColumnsMeta;
   dataTableRows: DataTableRecord[];
   rowsLength: number;
   unifiedDataTableServices: React.ComponentProps<typeof UnifiedDataTable>['services'];
@@ -87,7 +85,6 @@ export const WorkflowExecuteUnifiedDataTable = memo(function WorkflowExecuteUnif
   dataView,
   getNoCellActions,
   visibleTableColumns,
-  columnsMeta,
   dataTableRows,
   rowsLength,
   unifiedDataTableServices,
@@ -243,7 +240,6 @@ export const WorkflowExecuteUnifiedDataTable = memo(function WorkflowExecuteUnif
                     <UnifiedDataTable
                       ariaLabelledBy={ariaLabelledBy ?? dataTestSubj}
                       columns={visibleTableColumns}
-                      columnsMeta={columnsMeta}
                       rows={dataTableRows}
                       dataView={dataView}
                       loadingState={tableLoadingState}
@@ -259,7 +255,6 @@ export const WorkflowExecuteUnifiedDataTable = memo(function WorkflowExecuteUnif
                       totalHits={totalHits}
                       onFetchMoreRecords={onFetchMoreRecords}
                       dataGridDensityState={DataGridDensity.NORMAL}
-                      isPlainRecord={true}
                       showFullScreenButton={false}
                       showKeyboardShortcuts={false}
                       enableInTableSearch={true}

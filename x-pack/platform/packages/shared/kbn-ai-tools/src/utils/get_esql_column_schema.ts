@@ -21,6 +21,8 @@ export interface EsqlColumnSchema {
   name: string;
   type: string;
   originalTypes?: string[];
+  /** ES's `suggested_cast` for a union-typed column. */
+  suggestedCast?: string;
 }
 
 export interface GetEsqlColumnSchemaParams {
@@ -71,6 +73,7 @@ function parseColumns(response: ESQLSearchResponse): EsqlColumnSchema[] {
         name: column.name,
         type: column.type,
         ...(column.original_types ? { originalTypes: column.original_types } : {}),
+        ...(column.suggested_cast ? { suggestedCast: column.suggested_cast } : {}),
       },
     ];
   });

@@ -8,7 +8,7 @@ description: "Data views are the central method of defining queryable data sets 
 _Note: Kibana index patterns are currently being renamed to data views. There will be some naming inconsistencies until the transition is complete._
 
 Data views (formerly Kibana index patterns or KIPs) are the central method of describing sets of indices for queries. Usage is strongly recommended
-as a number of high level [building blocks](../ui/building-blocks.md) rely on them. Further, they provide a consistent view of data across
+because high-level search and visualization APIs rely on them. Further, they provide a consistent view of data across
 a variety Kibana apps.
 
 Data views are defined by a wildcard string (an index pattern) which matches indices, data streams, and index aliases, optionally specify a

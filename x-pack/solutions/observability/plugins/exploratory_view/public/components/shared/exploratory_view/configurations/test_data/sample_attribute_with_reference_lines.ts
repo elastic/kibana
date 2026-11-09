@@ -162,6 +162,7 @@ export const sampleAttributeWithReferenceLines = {
         yRight: true,
       },
       curveType: 'CURVE_MONOTONE_X',
+      areaFill: 'solid',
       fittingFunction: 'Linear',
       gridlinesVisibilitySettings: {
         x: false,

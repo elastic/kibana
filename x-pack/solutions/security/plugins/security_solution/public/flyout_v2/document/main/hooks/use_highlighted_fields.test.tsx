@@ -398,4 +398,37 @@ describe('useHighlightedFields', () => {
       'AZkupz0BWCNsCtptscaU',
     ]);
   });
+
+  it('should include custom YARA signature fields when present', () => {
+    const hookResult = renderHook(() =>
+      useHighlightedFields({
+        hit: buildMockHit(
+          dataFormattedForFieldBrowser.concat([
+            {
+              category: 'rule',
+              field: 'rule.custom_yara_signature.entry_name',
+              values: ['User defined entry name'],
+              originalValue: ['User defined entry name'],
+              isObjectArray: false,
+            },
+            {
+              category: 'rule',
+              field: 'rule.custom_yara_signature.rule_identifier',
+              values: ['User_Defined_Rule_Identifier_1'],
+              originalValue: ['User_Defined_Rule_Identifier_1'],
+              isObjectArray: false,
+            },
+          ])
+        ),
+        investigationFields: [],
+      })
+    );
+
+    expect(hookResult.result.current['rule.custom_yara_signature.entry_name']).toEqual({
+      values: ['User defined entry name'],
+    });
+    expect(hookResult.result.current['rule.custom_yara_signature.rule_identifier']).toEqual({
+      values: ['User_Defined_Rule_Identifier_1'],
+    });
+  });
 });

@@ -38,8 +38,6 @@
       "indexManagement",
       "contentConnectors",
       "searchInferenceEndpoints",
-      "searchPlayground",
-      "usageCollection",
       "workflowsManagement",
     ],
     "requiredBundles": [

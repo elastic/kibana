@@ -13,7 +13,6 @@ export const noLimitPalette: PaletteOutput<CustomPaletteParams> = {
   name: 'custom',
   type: 'palette',
   params: {
-    steps: 3,
     name: 'custom',
     reverse: false,
     rangeType: 'percent',
@@ -21,7 +20,6 @@ export const noLimitPalette: PaletteOutput<CustomPaletteParams> = {
     rangeMin: null,
     // @ts-expect-error - This can be null
     rangeMax: null,
-    progression: 'fixed',
     stops: [
       {
         color: '#24c292',
@@ -53,7 +51,6 @@ export const noLimitPalette: PaletteOutput<CustomPaletteParams> = {
       },
     ],
     continuity: 'all',
-    maxSteps: 5,
   },
 };
 
@@ -61,14 +58,12 @@ export const lowerLimitPalette: PaletteOutput<CustomPaletteParams> = {
   name: 'custom',
   type: 'palette',
   params: {
-    steps: 3,
     name: 'custom',
     reverse: false,
     rangeType: 'percent',
     rangeMin: 0,
     // @ts-expect-error - This can be null
     rangeMax: null,
-    progression: 'fixed',
     stops: [
       {
         color: '#24c292',
@@ -99,7 +94,6 @@ export const lowerLimitPalette: PaletteOutput<CustomPaletteParams> = {
       },
     ],
     continuity: 'above',
-    maxSteps: 5,
   },
 };
 
@@ -107,14 +101,12 @@ export const upperLimitPalette: PaletteOutput<CustomPaletteParams> = {
   name: 'custom',
   type: 'palette',
   params: {
-    steps: 3,
     name: 'custom',
     reverse: false,
     rangeType: 'percent',
     // @ts-expect-error - This can be null
     rangeMin: null,
     rangeMax: 100,
-    progression: 'fixed',
     stops: [
       {
         color: '#24c292',
@@ -145,7 +137,6 @@ export const upperLimitPalette: PaletteOutput<CustomPaletteParams> = {
       },
     ],
     continuity: 'below',
-    maxSteps: 5,
   },
 };
 
@@ -153,13 +144,11 @@ export const upperAndLowerLimitPalette: PaletteOutput<CustomPaletteParams> = {
   name: 'custom',
   type: 'palette',
   params: {
-    steps: 3,
     name: 'custom',
     reverse: false,
     rangeType: 'percent',
     rangeMin: 0,
     rangeMax: 100,
-    progression: 'fixed',
     stops: [
       {
         color: '#24c292',
@@ -189,6 +178,5 @@ export const upperAndLowerLimitPalette: PaletteOutput<CustomPaletteParams> = {
       },
     ],
     continuity: 'none',
-    maxSteps: 5,
   },
 };

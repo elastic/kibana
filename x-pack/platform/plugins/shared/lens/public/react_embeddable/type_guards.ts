@@ -48,9 +48,14 @@ export const isLensApi = (api: unknown): api is LensApi => {
 export function apiHasLensComponentCallbacks(api: unknown): api is LensPublicCallbacks {
   return (
     isObject(api) &&
-    ['onFilter', 'onBrushEnd', 'onLoad', 'onTableRowClick', 'onBeforeBadgesRender'].some((fn) =>
-      Object.hasOwn(api, fn)
-    )
+    [
+      'onFilter',
+      'onBrushEnd',
+      'onLoad',
+      'onTableRowClick',
+      'onBeforeBadgesRender',
+      'onAnnotationClick',
+    ].some((fn) => Object.hasOwn(api, fn))
   );
 }
 

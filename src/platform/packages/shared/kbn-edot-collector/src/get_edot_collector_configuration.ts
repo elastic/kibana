@@ -57,20 +57,9 @@ export function getEdotCollectorConfig({
         endpoint: elasticsearchEndpoint,
         user: username,
         password,
+        tls: elasticsearchEndpoint.startsWith('https://') ? { insecure_skip_verify: true } : {},
         mapping: {
           mode: 'otel',
-        },
-        logs_dynamic_index: {
-          enabled: true,
-        },
-        metrics_dynamic_index: {
-          enabled: true,
-        },
-        traces_dynamic_index: {
-          enabled: true,
-        },
-        flush: {
-          interval: '1s',
         },
       },
     },

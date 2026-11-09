@@ -6,8 +6,7 @@
  */
 
 import React, { Fragment, type ReactNode } from 'react';
-
-import { EuiCallOut } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 interface Props {
   title: ReactNode;
@@ -17,9 +16,7 @@ interface Props {
 export function SectionUnauthorized({ title, children }: Props) {
   return (
     <Fragment>
-      <EuiCallOut title={title} color="warning" iconType="question">
-        {children}
-      </EuiCallOut>
+      <KbnWarningCallout title={title}>{children}</KbnWarningCallout>
     </Fragment>
   );
 }

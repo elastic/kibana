@@ -80,7 +80,7 @@ describe('setup.getCspConfig()', () => {
     const csp = injectedMetadata.setup().getCspConfig();
     expect(() => {
       csp.warnLegacyBrowsers = false;
-    }).toThrowError();
+    }).toThrow();
   });
 });
 
@@ -115,18 +115,18 @@ describe('setup.getPlugins()', () => {
     const plugins = injectedMetadata.setup().getPlugins();
     expect(() => {
       plugins.pop();
-    }).toThrowError();
+    }).toThrow();
     expect(() => {
       plugins.push({ id: 'new-plugin', plugin: {} as DiscoveredPlugin });
-    }).toThrowError();
+    }).toThrow();
     expect(() => {
       // @ts-expect-error TS knows this shouldn't be possible
       plugins[0].name = 'changed';
-    }).toThrowError();
+    }).toThrow();
     expect(() => {
       // @ts-expect-error TS knows this shouldn't be possible
       plugins[0].newProp = 'changed';
-    }).toThrowError();
+    }).toThrow();
   });
 });
 
@@ -158,7 +158,7 @@ describe('setup.getLegacyMetadata()', () => {
     expect(() => {
       // @ts-expect-error TS knows this shouldn't be possible
       legacyMetadata.foo = false;
-    }).toThrowError();
+    }).toThrow();
   });
 });
 

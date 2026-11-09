@@ -22,7 +22,6 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiPortal,
-  useEuiShadow,
   mathWithUnits,
 } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -42,8 +41,6 @@ interface WelcomeProps {
  */
 export const Welcome: React.FC<WelcomeProps> = ({ urlBasePath, onSkip }: WelcomeProps) => {
   const services = getServices();
-  const euiShadowM = useEuiShadow('m');
-
   const kbnFullScreenBgCss = useKbnFullScreenBgCss();
 
   const redirectToAddData = () => {
@@ -84,14 +81,12 @@ export const Welcome: React.FC<WelcomeProps> = ({ urlBasePath, onSkip }: Welcome
         <header className="homeWelcome__header">
           <div className="homeWelcome__content eui-textCenter">
             <EuiSpacer size="xl" />
-            <span
+            <EuiIcon
               className="homeWelcome__logo"
-              css={css`
-                ${euiShadowM}
-              `}
-            >
-              <EuiIcon type="logoElastic" size="xxl" aria-hidden={true} />
-            </span>
+              type="logoElastic"
+              size="xxl"
+              aria-hidden={true}
+            />
             <EuiTitle size="l">
               <h1>
                 <FormattedMessage id="home.welcomeTitle" defaultMessage="Welcome to Elastic" />
@@ -125,7 +120,6 @@ const styles = ({ euiTheme }: UseEuiTheme) =>
     },
     '.homeWelcome__logo': {
       marginBottom: euiTheme.size.xl,
-      display: 'inline-block',
     },
     '.homeWelcome__content': {
       margin: 'auto',

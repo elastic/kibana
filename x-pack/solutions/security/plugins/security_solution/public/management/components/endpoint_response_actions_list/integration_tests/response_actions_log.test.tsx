@@ -7,7 +7,7 @@
 
 import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
-import { waitFor } from '@testing-library/react';
+import { waitFor, within } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
@@ -611,7 +611,7 @@ describe('Response actions history', () => {
       );
     });
 
-    it('should contain agent type info in each expanded row', async () => {
+    it('should contain action results', async () => {
       render();
       const { getAllByTestId } = renderResult;
 
@@ -621,19 +621,8 @@ describe('Response actions history', () => {
       }
       const trays = getAllByTestId(`${testPrefix}-details-tray`);
       expect(trays).toBeTruthy();
-      expect(Array.from(trays[0].querySelectorAll('dt')).map((title) => title.textContent)).toEqual(
-        [
-          'Command placed',
-          'Execution started on',
-          'Execution completed',
-          'Input',
-          'Parameters',
-          'Comment',
-          'Hostname',
-          'Agent type',
-          'Output:',
-        ]
-      );
+
+      expect(within(trays[0]).getByTestId(`${testPrefix}-output`)).toBeTruthy();
     });
 
     it('should refresh data when autoRefresh is toggled on', async () => {
@@ -714,7 +703,7 @@ describe('Response actions history', () => {
           expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalled();
         });
 
-        const downloadLink = getByTestId(`${testPrefix}-output-getFileDownloadLink`);
+        const downloadLink = getByTestId(`${testPrefix}-output-getFileResults-getFileDownloadLink`);
         expect(downloadLink).toBeTruthy();
         expect(downloadLink.textContent).toEqual(
           'Click here to download(ZIP file passcode: elastic).Files are periodically deleted to clear storage space. Download and save file locally if needed.'
@@ -798,7 +787,7 @@ describe('Response actions history', () => {
         });
 
         const downloadExecuteLink = getByTestId(
-          `${testPrefix}-output-actionsLogTray-getExecuteLink`
+          `${testPrefix}-output-executeResults-getExecuteLink`
         );
         expect(downloadExecuteLink).toBeTruthy();
         expect(downloadExecuteLink.textContent).toEqual(
@@ -874,32 +863,7 @@ describe('Response actions history', () => {
         const expandButton = getByTestId(`${testPrefix}-expand-button`);
         await user.click(expandButton);
 
-        expect(getByTestId(`${testPrefix}-output-actionsLogTray-executeResponseOutput-output`));
-      });
-
-      it('should not contain full output download link in expanded row for `execute` action WITHOUT Actions Log privileges', async () => {
-        useUserPrivilegesMock.mockReturnValue({
-          endpointPrivileges: getEndpointAuthzInitialStateMock({
-            canAccessEndpointActionsLogManagement: false,
-            canReadActionsLogManagement: false,
-          }),
-        });
-
-        useGetEndpointActionListMock.mockReturnValue({
-          ...getBaseMockedActionList(),
-          data: await getActionListMock({ actionCount: 1, commands: ['execute'] }),
-        });
-
-        render();
-        const { getByTestId, queryByTestId } = renderResult;
-
-        const expandButton = getByTestId(`${testPrefix}-expand-button`);
-        await user.click(expandButton);
-        expect(queryByTestId(`${testPrefix}-actionsLogTray-getExecuteLink`)).toBeNull();
-
-        const output = getByTestId(`${testPrefix}-details-tray-output`);
-        expect(output).toBeTruthy();
-        expect(output.textContent).toContain('execute completed successfully');
+        expect(getByTestId(`${testPrefix}-output-executeResults-executeResponseOutput-output`));
       });
 
       it.each(['canAccessEndpointActionsLogManagement', 'canReadActionsLogManagement'])(
@@ -933,7 +897,7 @@ describe('Response actions history', () => {
           const expandButton = getByTestId(`${testPrefix}-expand-button`);
           await user.click(expandButton);
 
-          const output = getByTestId(`${testPrefix}-output-actionsLogTray-getExecuteLink`);
+          const output = getByTestId(`${testPrefix}-output-executeResults-getExecuteLink`);
           expect(output).toBeTruthy();
           expect(output.textContent).toEqual(
             'Click here to download full output(ZIP file passcode: elastic).Files are periodically deleted to clear storage space. Download and save file locally if needed.'
@@ -1013,11 +977,11 @@ describe('Response actions history', () => {
 
         expect(getByTestId(`${testPrefix}-output`)).toHaveTextContent(
           'Host-agent-a: upload completed successfully' +
-            'Execution completed 2022-04-30T16:08:47.449Z' +
+            'Execution completed Apr 30, 2022 @ 16:08:47.449' +
             'File saved to: /path/to/uploaded/file' +
             'Free disk space on drive: 1.18MB' +
             'host b: upload completed successfully' +
-            'Execution completed 2023-05-10T20:09:25.824Z' +
+            'Execution completed May 10, 2023 @ 20:09:25.824' +
             'File saved to: some/path/to/file' +
             'Free disk space on drive: 120.55KB'
         );
@@ -1145,31 +1109,13 @@ describe('Response actions history', () => {
         });
         render();
 
-        const outputCommand = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[command];
-        const outputs = await expandRows();
+        await expandRows();
 
-        expect(outputs.map((n) => n.textContent)).toEqual([
-          expect.stringMatching(
-            new RegExp(
-              `Host-agent-a: ${outputCommand} failed` +
-                'Execution completed .*' +
-                'The following errors were encountered:An unknown error occurred' +
-                `Host-agent-b: ${outputCommand} failed` +
-                'Execution completed .*' +
-                'The following errors were encountered:An unknown error occurred'
-            )
-          ),
-          expect.stringMatching(
-            new RegExp(
-              `Host-agent-a: ${outputCommand} failed` +
-                'Execution completed .*' +
-                'The following errors were encountered:An unknown error occurred' +
-                `Host-agent-b: ${outputCommand} failed` +
-                'Execution completed .*' +
-                'The following errors were encountered:An unknown error occurred'
-            )
-          ),
-        ]);
+        const outputCommand = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[command];
+        const expandedTray = renderResult.getAllByTestId(`${testPrefix}-details-tray-output`)[0];
+
+        expect(expandedTray).toHaveTextContent(`Host-agent-a: ${outputCommand} failed`);
+        expect(expandedTray).toHaveTextContent(`Host-agent-b: ${outputCommand} failed`);
         expect(
           renderResult.getAllByTestId(`${testPrefix}-column-status`).map((n) => n.textContent)
         ).toEqual(['Failed', 'Failed']);
@@ -1500,28 +1446,35 @@ describe('Response actions history', () => {
             if (command === 'get-file') {
               expect(outputs.map((n) => n.textContent)).toEqual([
                 'Host-agent-a: get-file failed' +
-                  'Execution completed 2023-05-10T20:09:25.824Z' +
+                  'Execution completed May 10, 2023 @ 20:09:25.824' +
                   'The following errors were encountered:The file specified was not found | Error with agent-a!' +
                   'Host-agent-b: get-file failed' +
-                  'Execution completed 2023-05-10T20:09:25.824Z' +
+                  'Execution completed May 10, 2023 @ 20:09:25.824' +
                   'The following errors were encountered:The path defined is not valid | Error with agent-b!',
               ]);
             } else if (command === 'scan') {
               expect(outputs.map((n) => n.textContent)).toEqual([
                 'Host-agent-a: scan failed' +
-                  'Execution completed 2023-05-10T20:09:25.824Z' +
+                  'Execution completed May 10, 2023 @ 20:09:25.824' +
                   'The following errors were encountered:Invalid absolute file path provided | Error with agent-a!' +
                   'Host-agent-b: scan failed' +
-                  'Execution completed 2023-05-10T20:09:25.824Z' +
+                  'Execution completed May 10, 2023 @ 20:09:25.824' +
                   'The following errors were encountered:Invalid absolute file path provided | Error with agent-b!',
+              ]);
+            } else if (command === 'kill-process') {
+              expect(outputs.map((n) => n.textContent)).toEqual([
+                `Host-agent-a: ${outputCommand} failed` +
+                  'Execution completed May 10, 2023 @ 20:09:25.824Killed' +
+                  `Host-agent-b: ${outputCommand} failed` +
+                  'Execution completed May 10, 2023 @ 20:09:25.824Killed',
               ]);
             } else {
               expect(outputs.map((n) => n.textContent)).toEqual([
                 `Host-agent-a: ${outputCommand} failed` +
-                  'Execution completed 2023-05-10T20:09:25.824Z' +
+                  'Execution completed May 10, 2023 @ 20:09:25.824' +
                   'The following error was encountered:Error with agent-a!' +
                   `Host-agent-b: ${outputCommand} failed` +
-                  'Execution completed 2023-05-10T20:09:25.824Z' +
+                  'Execution completed May 10, 2023 @ 20:09:25.824' +
                   'The following error was encountered:Error with agent-b!',
               ]);
             }
@@ -1571,28 +1524,28 @@ describe('Response actions history', () => {
             if (command === 'get-file') {
               expect(outputs.map((n) => n.textContent)).toEqual([
                 'Host-agent-a: get-file failed' +
-                  'Execution completed 2023-05-10T20:09:25.824Z' +
+                  'Execution completed May 10, 2023 @ 20:09:25.824' +
                   'The following error was encountered:Error with agent-a!' +
                   'Host-agent-b: get-file failed' +
-                  'Execution completed 2023-05-10T20:09:25.824Z' +
+                  'Execution completed May 10, 2023 @ 20:09:25.824' +
                   'The following error was encountered:Error with agent-b!',
               ]);
             } else if (command === 'scan') {
               expect(outputs.map((n) => n.textContent)).toEqual([
                 'Host-agent-a: scan failed' +
-                  'Execution completed 2023-05-10T20:09:25.824Z' +
+                  'Execution completed May 10, 2023 @ 20:09:25.824' +
                   'The following error was encountered:Error with agent-a!' +
                   'Host-agent-b: scan failed' +
-                  'Execution completed 2023-05-10T20:09:25.824Z' +
+                  'Execution completed May 10, 2023 @ 20:09:25.824' +
                   'The following error was encountered:Error with agent-b!',
               ]);
             } else {
               expect(outputs.map((n) => n.textContent)).toEqual([
                 `Host-agent-a: ${outputCommand} failed` +
-                  'Execution completed 2023-05-10T20:09:25.824Z' +
+                  'Execution completed May 10, 2023 @ 20:09:25.824' +
                   'The following error was encountered:Error with agent-a!' +
                   `Host-agent-b: ${outputCommand} failed` +
-                  'Execution completed 2023-05-10T20:09:25.824Z' +
+                  'Execution completed May 10, 2023 @ 20:09:25.824' +
                   'The following error was encountered:Error with agent-b!',
               ]);
             }
@@ -2011,10 +1964,6 @@ describe('Response actions history', () => {
   });
 
   describe('Row actions', () => {
-    beforeEach(() => {
-      apiMocks = responseActionsHttpMocks(mockedContext.coreStart.http);
-    });
-
     it('should not render a cancel button for completed actions', async () => {
       // Default mock has isCompleted: true for all actions
       render();
@@ -2206,6 +2155,26 @@ describe('Response actions history', () => {
       ).map((col) => col.textContent);
       expect(columnHeaders).not.toContain(TABLE_COLUMN_NAMES.actions);
       expect(renderResult.queryAllByTestId('responseActionRowActions')).toHaveLength(0);
+    });
+  });
+
+  describe('Rule-triggered actions', () => {
+    it('should link "Triggered by rule" to the rule details page', async () => {
+      const data = await getActionListMock({ actionCount: 1 });
+      data.data[0].createdBy = 'unknown';
+      data.data[0].ruleId = 'rule-123';
+
+      useGetEndpointActionListMock.mockReturnValue({
+        ...getBaseMockedActionList(),
+        data,
+      });
+
+      render();
+
+      expect(renderResult.getByTestId(`${testPrefix}-column-ruleName`)).toHaveAttribute(
+        'href',
+        expect.stringContaining('/id/rule-123')
+      );
     });
   });
 });

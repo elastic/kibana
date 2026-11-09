@@ -152,12 +152,20 @@ export class PointInTimeFinder<T = unknown, A = unknown>
     searchAfter?: estypes.SortResults;
   }) {
     try {
+      const { sort, sortField, sortOrder, ...rest } = findOptions;
+      const hasSortArray = Array.isArray(sort) && sort.length > 0;
+
       return await this.#client.find<T, A>(
         {
-          ...findOptions,
-          // Sort fields are required to use searchAfter, so we set some defaults here
-          sortField: findOptions.sortField ?? 'updated_at',
-          sortOrder: findOptions.sortOrder ?? 'desc',
+          ...rest,
+          // search_after needs a sort. An explicit list is used as-is, including any tiebreaker.
+          // Otherwise default to updated_at so every page has a sort value.
+          ...(hasSortArray
+            ? { sort, sortField, sortOrder }
+            : {
+                sortField: sortField ?? 'updated_at',
+                sortOrder: sortOrder ?? 'desc',
+              }),
           // Bump keep_alive by 2m on every new request to allow for the ES client
           // to make multiple retries in the event of a network failure.
           pit: id ? { id, keepAlive: '2m' } : undefined,

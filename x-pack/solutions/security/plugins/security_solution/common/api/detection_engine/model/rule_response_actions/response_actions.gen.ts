@@ -27,8 +27,8 @@ export const ResponseActionTypesEnum = ResponseActionTypes.enum;
 export const EcsMapping = lazySchema(() =>
   z.object({}).catchall(
     z.object({
-      field: z.string().optional(),
-      value: z.union([z.string(), z.array(z.string())]).optional(),
+      field: z.string().max(2000).optional(),
+      value: z.union([z.string().max(30000), z.array(z.string().max(30000))]).optional(),
     })
   )
 );
@@ -39,17 +39,17 @@ export const OsqueryQuery = lazySchema(() =>
     /**
      * Query ID
      */
-    id: z.string(),
+    id: z.string().max(256).describe('Query ID'),
     /**
      * Query to run
      */
-    query: z.string(),
+    query: z.string().max(30000).describe('Query to run'),
     ecs_mapping: EcsMapping.optional(),
     /**
      * Query version
      */
-    version: z.string().optional(),
-    platform: z.string().optional(),
+    version: z.string().max(256).optional().describe('Query version'),
+    platform: z.string().max(256).optional(),
     removed: z.boolean().optional(),
     snapshot: z.boolean().optional(),
   })
@@ -61,32 +61,55 @@ export const OsqueryParams = lazySchema(() =>
     /**
      * To run a single query, use the query field and enter a SQL query. Example: "query": "SELECT * FROM processes;"
      */
-    query: z.string().optional(),
+    query: z
+      .string()
+      .max(30000)
+      .optional()
+      .describe(
+        'To run a single query, use the query field and enter a SQL query. Example: "query": "SELECT * FROM processes;"'
+      ),
     ecs_mapping: EcsMapping.optional(),
     queries: z.array(OsqueryQuery).optional(),
     /**
      * To specify a query pack, use the packId field. Example: "packId": "processes_elastic"
      */
-    pack_id: z.string().optional(),
+    pack_id: z
+      .string()
+      .max(256)
+      .optional()
+      .describe(
+        'To specify a query pack, use the packId field. Example: "packId": "processes_elastic"'
+      ),
     /**
      * To run a saved query, use the saved_query_id field and specify the saved query ID. Example: "saved_query_id": "processes_elastic"
      */
-    saved_query_id: z.string().optional(),
+    saved_query_id: z
+      .string()
+      .max(256)
+      .optional()
+      .describe(
+        'To run a saved query, use the saved_query_id field and specify the saved query ID. Example: "saved_query_id": "processes_elastic"'
+      ),
     /**
      * A timeout period, in seconds, after which the query will stop running. Overwriting the default timeout allows you to support queries that require more time to complete. The default and minimum supported value is 60. The maximum supported value is 900. Example: "timeout": 120.
      */
-    timeout: z.number().optional(),
+    timeout: z
+      .number()
+      .optional()
+      .describe(
+        'A timeout period, in seconds, after which the query will stop running. Overwriting the default timeout allows you to support queries that require more time to complete. The default and minimum supported value is 60. The maximum supported value is 900. Example: "timeout": 120.'
+      ),
   })
 );
 export type OsqueryParams = z.infer<typeof OsqueryParams>;
 
 export const OsqueryParamsCamelCase = lazySchema(() =>
   z.object({
-    query: z.string().optional(),
+    query: z.string().max(30000).optional(),
     ecsMapping: EcsMapping.optional(),
     queries: z.array(OsqueryQuery).optional(),
-    packId: z.string().optional(),
-    savedQueryId: z.string().optional(),
+    packId: z.string().max(256).optional(),
+    savedQueryId: z.string().max(256).optional(),
     timeout: z.number().optional(),
   })
 );
@@ -111,7 +134,7 @@ export type RuleResponseOsqueryAction = z.infer<typeof RuleResponseOsqueryAction
 export const DefaultParams = lazySchema(() =>
   z.object({
     command: z.literal('isolate'),
-    comment: z.string().optional(),
+    comment: z.string().max(30000).optional(),
   })
 );
 export type DefaultParams = z.infer<typeof DefaultParams>;
@@ -121,15 +144,27 @@ export const RunScriptOsConfigValues = lazySchema(() =>
     /**
      * The ID of the script to run (from the Kibana Script library)
      */
-    scriptId: z.string().optional(),
+    scriptId: z
+      .string()
+      .max(256)
+      .optional()
+      .describe('The ID of the script to run (from the Kibana Script library)'),
     /**
      * The arguments to pass to the script (if any)
      */
-    scriptInput: z.string().optional(),
+    scriptInput: z
+      .string()
+      .max(8192)
+      .optional()
+      .describe('The arguments to pass to the script (if any)'),
     /**
      * Specify the timeout in seconds for the script execution
      */
-    timeout: z.number().int().optional(),
+    timeout: z
+      .number()
+      .int()
+      .optional()
+      .describe('Specify the timeout in seconds for the script execution'),
   })
 );
 export type RunScriptOsConfigValues = z.infer<typeof RunScriptOsConfigValues>;
@@ -143,7 +178,13 @@ export const RunscriptParams = lazySchema(() =>
     /**
      * Add a note that explains or describes the action. You can find your comment in the response actions history log
      */
-    comment: z.string().optional(),
+    comment: z
+      .string()
+      .max(30000)
+      .optional()
+      .describe(
+        'Add a note that explains or describes the action. You can find your comment in the response actions history log'
+      ),
     config: z
       .object({
         linux: RunScriptOsConfigValues.optional(),
@@ -160,24 +201,41 @@ export const KillProcessParams = lazySchema(() =>
     /**
      * To run an endpoint response action, specify a value for the command field. Example: "command": "kill-process"
      */
-    command: z.literal('kill-process'),
+    command: z
+      .literal('kill-process')
+      .describe(
+        'To run an endpoint response action, specify a value for the command field. Example: "command": "kill-process"'
+      ),
     /**
      * Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: "comment": "Check processes"
      */
-    comment: z.string().optional(),
+    comment: z
+      .string()
+      .max(30000)
+      .optional()
+      .describe(
+        'Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: "comment": "Check processes"'
+      ),
     config: z.object({
       /**
        * Field to use instead of `process.pid`
        */
-      field: z.string().max(2000),
+      field: z.string().max(2000).describe('Field to use instead of `process.pid`'),
       /**
        * Whether to overwrite field with `process.pid`
        */
-      overwrite: z.boolean().optional().default(true),
+      overwrite: z
+        .boolean()
+        .optional()
+        .default(true)
+        .describe('Whether to overwrite field with `process.pid`'),
       /**
        * Whether to also terminate the descendant processes of the targeted process.
        */
-      kill_descendants: z.boolean().optional(),
+      kill_descendants: z
+        .boolean()
+        .optional()
+        .describe('Whether to also terminate the descendant processes of the targeted process.'),
     }),
   })
 );
@@ -188,20 +246,34 @@ export const SuspendProcessParams = lazySchema(() =>
     /**
      * To run an endpoint response action, specify a value for the command field. Example: "command": "suspend-process"
      */
-    command: z.literal('suspend-process'),
+    command: z
+      .literal('suspend-process')
+      .describe(
+        'To run an endpoint response action, specify a value for the command field. Example: "command": "suspend-process"'
+      ),
     /**
      * Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: "comment": "Check processes"
      */
-    comment: z.string().optional(),
+    comment: z
+      .string()
+      .max(30000)
+      .optional()
+      .describe(
+        'Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: "comment": "Check processes"'
+      ),
     config: z.object({
       /**
        * Field to use instead of process.pid
        */
-      field: z.string().max(2000),
+      field: z.string().max(2000).describe('Field to use instead of process.pid'),
       /**
        * Whether to overwrite field with process.pid
        */
-      overwrite: z.boolean().optional().default(true),
+      overwrite: z
+        .boolean()
+        .optional()
+        .default(true)
+        .describe('Whether to overwrite field with process.pid'),
     }),
   })
 );

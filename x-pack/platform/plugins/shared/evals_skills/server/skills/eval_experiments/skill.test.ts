@@ -8,7 +8,7 @@
 import { validateSkillDefinition } from '@kbn/agent-builder-server/skills/type_definition';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { EvalExperimentsToolDeps } from './tools/deps';
-import { evalsTools } from './tools/common';
+import { evalsExperimentTools } from './tools/tool_utils';
 import { createEvalExperimentsSkill } from './skill';
 
 const deps: EvalExperimentsToolDeps = {
@@ -31,20 +31,20 @@ describe('createEvalExperimentsSkill', () => {
     const tools = (await skill.getInlineTools?.()) ?? [];
 
     expect(tools.map((tool) => tool.id)).toEqual([
-      evalsTools.listDatasets,
-      evalsTools.listEvaluators,
-      evalsTools.listTargets,
-      evalsTools.listConnectors,
-      evalsTools.previewExperiment,
-      evalsTools.saveExperiment,
-      evalsTools.runExperiment,
+      evalsExperimentTools.listDatasets,
+      evalsExperimentTools.listEvaluators,
+      evalsExperimentTools.listTargets,
+      evalsExperimentTools.listConnectors,
+      evalsExperimentTools.previewExperiment,
+      evalsExperimentTools.saveExperiment,
+      evalsExperimentTools.runExperiment,
     ]);
   });
 
   it('guards the run tool behind a user confirmation', async () => {
     const skill = createEvalExperimentsSkill(deps);
     const tools = (await skill.getInlineTools?.()) ?? [];
-    const runTool = tools.find((tool) => tool.id === evalsTools.runExperiment) as {
+    const runTool = tools.find((tool) => tool.id === evalsExperimentTools.runExperiment) as {
       confirmation?: { askUser?: string };
     };
 

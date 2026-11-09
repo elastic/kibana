@@ -11,7 +11,7 @@ import React, { useEffect, useState } from 'react';
 import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { FeedbackFormData, FeedbackRegistryEntry } from '../types';
+import type { AppDetails, FeedbackFormData, FeedbackRegistryEntry } from '../types';
 import { FeedbackHeader } from './header';
 import { FeedbackBody } from './body/feedback_body';
 import { FeedbackFooter } from './footer/feedback_footer';
@@ -20,7 +20,7 @@ import { useQuestionsForApp } from '../hooks/use_questions_for_app';
 
 export interface FeedbackContainerProps {
   getQuestions: (appId: string) => Promise<FeedbackRegistryEntry[]>;
-  getAppDetails: () => { title: string; id: string; url: string };
+  getAppDetails: () => AppDetails;
   getCurrentUserEmail: () => Promise<string | undefined>;
   sendFeedback: (data: FeedbackFormData) => Promise<void>;
   showToast: (title: string, type: 'success' | 'error') => void;
@@ -44,7 +44,7 @@ export const FeedbackContainer = ({
   const [isEmailValid, setIsEmailValid] = useState(true);
   const [forceShowEmailError, setForceShowEmailError] = useState(false);
 
-  const { title: appTitle, id: appId, url: appUrl } = getAppDetails();
+  const { title: appTitle, id: appId, url: appUrl, context } = getAppDetails();
 
   const { questions, isLoading, error } = useQuestionsForApp({ getQuestions, appId });
 
@@ -119,6 +119,7 @@ export const FeedbackContainer = ({
           answer: questionAnswers[question.id]?.trim() || 'N/A',
         })),
         url: appUrl,
+        ...(context && { context }),
       };
 
       await sendFeedback(eventData);

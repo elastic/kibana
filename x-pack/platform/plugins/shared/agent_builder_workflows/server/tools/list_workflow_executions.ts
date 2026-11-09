@@ -13,7 +13,7 @@ import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import { errorResult, otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
-import { hasWorkflowExecutionReadPrivilege } from './utils/check_execution_read_privilege';
+import { hasWorkflowExecutionReadPrivilege } from '@kbn/agent-builder-tools-base/workflows';
 
 const executionStatusSchema = z.enum(ExecutionStatusValues as [string, ...string[]]);
 
@@ -64,10 +64,17 @@ export const listWorkflowExecutionsTool = ({
     Note: date range, trigger type filtering, and cursor-based pagination are not yet supported.
     `),
     schema: listWorkflowExecutionsSchema,
+    annotations: {
+      title: 'List Workflow Executions',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     handler: async ({ workflowId, statuses, limit, page }, { spaceId, request }) => {
       try {
         const authorized = await hasWorkflowExecutionReadPrivilege({
-          getSecurity,
+          security: getSecurity(),
           request,
           spaceId,
         });
@@ -86,6 +93,7 @@ export const listWorkflowExecutionsTool = ({
             page: page ?? 1,
             size: limit ?? 10,
             omitStepRuns: true,
+            request,
           },
           spaceId
         );

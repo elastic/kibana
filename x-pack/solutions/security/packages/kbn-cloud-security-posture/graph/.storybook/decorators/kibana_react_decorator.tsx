@@ -122,12 +122,12 @@ const services: Partial<KibanaServices> = {
   application: applicationServiceMock.createStartContract(),
   featureFlags: {
     appendContext: () => Promise.resolve(),
-    getBooleanValue: (_flagName, fallback) => fallback,
-    getStringValue: (_flagName, fallback) => fallback,
-    getNumberValue: (_flagName, fallback) => fallback,
     getBooleanValue$: (_flagName, fallback) => of(fallback),
     getStringValue$: (_flagName, fallback) => of(fallback),
     getNumberValue$: (_flagName, fallback) => of(fallback),
+    useBooleanValue: (_flagName, fallback) => fallback,
+    useStringValue: (_flagName, fallback) => fallback,
+    useNumberValue: (_flagName, fallback) => fallback,
   },
   kql: {
     autocomplete: {

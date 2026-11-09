@@ -59,6 +59,7 @@ function createPassthroughStepIoService(state: WorkflowExecutionState): StepIoSe
       return { totalBytes, stepCount: sizes.size };
     }),
     hasEvictedOutputs: jest.fn().mockReturnValue(false),
+    pinOutputsForRead: jest.fn(),
     rehydrateOutputs: jest.fn().mockResolvedValue(undefined),
     prepareForRead: jest.fn().mockResolvedValue(undefined),
     releaseReadPins: jest.fn(),
@@ -363,6 +364,7 @@ describe('StepExecutionRuntime', () => {
           startedAt: originalStartedAt,
         })
       );
+      expect(workflowLogger.logInfo).not.toHaveBeenCalled();
     });
   });
 
@@ -566,18 +568,34 @@ describe('StepExecutionRuntime', () => {
         );
       });
 
-      it('should exit wait state and clear resumeAt when step already has resumeAt in state', () => {
+      it('exits the wait and clears resumeAt once the stored resumeAt has passed', () => {
+        const now = new Date();
+        const resumeAt = new Date(now.getTime() - 1_000).toISOString();
         (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue({
           status: ExecutionStatus.WAITING,
-          state: { resumeAt: '2025-12-31T00:00:00.000Z' },
+          state: { resumeAt },
         } as Partial<EsWorkflowStepExecution>);
 
-        const entered = underTest.tryEnterWaitUntil(new Date('2025-12-31T00:00:00.000Z'));
+        const entered = underTest.tryEnterWaitUntil(new Date(now.getTime()));
 
         expect(entered).toBe(false);
         expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
           expect.objectContaining({ state: undefined })
         );
+      });
+
+      it('stays parked when re-entered before the stored resumeAt', () => {
+        const now = new Date();
+        const resumeAt = new Date(now.getTime() + 60_000).toISOString();
+        (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue({
+          status: ExecutionStatus.WAITING,
+          state: { resumeAt, resolvedDuration: '60s' },
+        } as Partial<EsWorkflowStepExecution>);
+
+        const entered = underTest.tryEnterWaitUntil(new Date(now.getTime() + 60_000));
+
+        expect(entered).toBe(true);
+        expect(workflowExecutionState.upsertStep).not.toHaveBeenCalled();
       });
 
       it('should enter wait state even when status is WAITING but resumeAt is absent', () => {
@@ -842,6 +860,76 @@ describe('StepExecutionRuntime', () => {
         stepName: 'Display name',
         stepExecutionId: fakeStepExecutionId,
       });
+    });
+  });
+
+  describe('getStepTimeoutMs', () => {
+    const createRuntime = (configuration?: Record<string, unknown>) =>
+      new StepExecutionRuntime({
+        node: { ...fakeNode, configuration } as GraphNodeUnion,
+        stackFrames: fakeStackFrames,
+        stepExecutionId: fakeStepExecutionId,
+        contextManager: {
+          renderValueAccordingToContext: jest.fn((value: string) =>
+            value === '{{ inputs.timeout }}' ? '2m' : value
+          ),
+        } as unknown as WorkflowContextManager,
+        workflowExecutionGraph,
+        stepLogger: workflowLogger,
+        workflowExecutionState,
+        stepIoService,
+      });
+
+    it('returns the step timeout in milliseconds', () => {
+      expect(createRuntime({ timeout: '10m' }).getStepTimeoutMs()).toBe(600_000);
+    });
+
+    it('renders a templated step timeout', () => {
+      expect(createRuntime({ timeout: '{{ inputs.timeout }}' }).getStepTimeoutMs()).toBe(120_000);
+    });
+
+    it('returns undefined when the node has no timeout', () => {
+      expect(createRuntime({ name: 'step' }).getStepTimeoutMs()).toBeUndefined();
+      expect(createRuntime().getStepTimeoutMs()).toBeUndefined();
+    });
+  });
+
+  // The ordering here is the whole point: `StepIoService.rehydrateOutputs`
+  // snapshots only the ids that are evicted at entry, so an id that is resident
+  // at that moment is not in its fetch set. If the pin were taken after the
+  // await -- or not at all -- the concurrent eviction cycle could drop that
+  // output during the ES round trip, and it would be neither fetched nor
+  // resident when the caller reads it.
+  describe('rehydrateStepOutputs', () => {
+    it('pins the requested ids BEFORE awaiting rehydration', async () => {
+      const calls: string[] = [];
+      jest.spyOn(stepIoService, 'pinOutputsForRead').mockImplementation(() => {
+        calls.push('pin');
+      });
+      jest.spyOn(stepIoService, 'rehydrateOutputs').mockImplementation(async () => {
+        calls.push('rehydrate');
+      });
+
+      await underTest.rehydrateStepOutputs(['a', 'b']);
+
+      expect(calls).toEqual(['pin', 'rehydrate']);
+    });
+
+    it('pins the whole requested set, not just the evicted subset', async () => {
+      const pin = jest.spyOn(stepIoService, 'pinOutputsForRead').mockImplementation(() => {});
+      jest.spyOn(stepIoService, 'rehydrateOutputs').mockImplementation(async () => {});
+
+      await underTest.rehydrateStepOutputs(['a', 'b']);
+
+      expect(pin).toHaveBeenCalledWith(underTest.stepExecutionId, ['a', 'b']);
+    });
+
+    it('releases the pins under the same consumer id', () => {
+      const release = jest.spyOn(stepIoService, 'releaseReadPins').mockImplementation(() => {});
+
+      underTest.releaseReadOutputPins();
+
+      expect(release).toHaveBeenCalledWith(underTest.stepExecutionId);
     });
   });
 });

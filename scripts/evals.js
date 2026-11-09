@@ -195,7 +195,7 @@ function runFastCiMap(repoRoot, args) {
       entries.push({
         label: labels[j],
         suiteId: suite.id,
-        command: 'EVAL_CONNECTOR_ID=<connector-id> node scripts/evals run --suite ' + suite.id,
+        command: 'node scripts/evals run --suite ' + suite.id,
       });
     }
   }
@@ -227,13 +227,20 @@ var ENV_DOCS = [
   },
   {
     name: 'EVAL_CONNECTOR_ID',
-    description: 'Connector used for LLM-as-a-judge evaluators (required).',
+    description:
+      'Connector used for LLM-as-a-judge evaluators. Defaults to the profile\'s evaluationConnectorId (see the kbn-evals README, "Default judge").',
     example: 'EVAL_CONNECTOR_ID=bedrock-claude',
   },
   {
     name: 'EVAL_REPETITIONS',
     description: 'Overrides configured repetition count for evals.',
     example: 'EVAL_REPETITIONS=3',
+  },
+  {
+    name: 'EVAL_CONCURRENCY',
+    description:
+      'Overrides how many examples an experiment runs at once (default 5). A concurrency passed to runExperiment in the spec still wins.',
+    example: 'EVAL_CONCURRENCY=8',
   },
   {
     name: 'KBN_EVALS_SKIP_CONNECTOR_SETUP',
@@ -274,14 +281,15 @@ var ENV_DOCS = [
     example: 'SELECTED_EVALUATORS="Factuality,Relevance"',
   },
   {
-    name: 'RAG_EVAL_K',
-    description: 'Overrides default k used by RAG evaluators.',
-    example: 'RAG_EVAL_K=5',
+    name: 'IR_EVAL_K',
+    description: 'Overrides default k used by IR evaluators (deprecated RAG_EVAL_K still read).',
+    example: 'IR_EVAL_K=5',
   },
   {
-    name: 'INDEX_FOCUSED_RAG_EVAL',
-    description: 'Restrict RAG evaluators to ground-truth indices.',
-    example: 'INDEX_FOCUSED_RAG_EVAL=true',
+    name: 'INDEX_FOCUSED_IR_EVAL',
+    description:
+      'Restrict IR evaluators to ground-truth indices (deprecated INDEX_FOCUSED_RAG_EVAL still read).',
+    example: 'INDEX_FOCUSED_IR_EVAL=true',
   },
 ];
 

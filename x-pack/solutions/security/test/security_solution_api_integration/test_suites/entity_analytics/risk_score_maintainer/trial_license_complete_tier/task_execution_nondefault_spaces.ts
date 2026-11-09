@@ -8,18 +8,20 @@
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
 import { deleteAllRules, deleteAllAlerts } from '@kbn/detections-response-ftr-services';
+import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/common';
 import {
   readRiskScores,
-  waitForRiskScoresToBePresent,
   normalizeScores,
   EntityStoreUtils,
   entityMaintainerRouteHelpersFactory,
   cleanUpRiskScoreMaintainer,
   indexListOfDocumentsFactory,
   riskScoreMaintainerScenarioFactory,
+  riskScoreMaintainerEntityBuilders,
   createAndSyncRuleAndAlertsFactory,
   setupMaintainerLogsDataStream,
   cleanupMaintainerLogsDataStream,
+  waitForEntityStoreDoc,
 } from '../../utils';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -93,23 +95,6 @@ export default ({ getService }: FtrProviderContext): void => {
           name: namespace,
           disabledFeatures: [],
         });
-
-        const { documentIds } = await maintainerScenario.seedEntities(
-          Array(10)
-            .fill(0)
-            .map((_, i) => ({ kind: 'host', hostName: `host-${i}` }))
-        );
-
-        await maintainerScenario.createAlertsForDocumentIds({
-          documentIds,
-          alerts: 10,
-          riskScore: 40,
-        });
-
-        await maintainerScenario.installAndRunMaintainer({
-          entityTypes: ['user', 'host'],
-          dataViewPattern: testLogsIndex,
-        });
       });
 
       afterEach(async () => {
@@ -121,14 +106,46 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('calculates and persists risk scores for alert documents', async () => {
-        const index = `risk-score.risk-score-${namespace}`;
+        const suffix = uuidv4().slice(0, 8);
+        const { documentIds, testEntities } = await maintainerScenario.seedEntities(
+          Array(10)
+            .fill(0)
+            .map((_, i) =>
+              riskScoreMaintainerEntityBuilders.host({ hostName: `host-${i}-${suffix}` })
+            )
+        );
 
-        await waitForRiskScoresToBePresent({
-          es,
-          log,
-          scoreCount: 10,
-          index: [index],
+        await maintainerScenario.createAlertsForDocumentIds({
+          documentIds,
+          alerts: 10,
+          riskScore: 40,
         });
+
+        await entityStoreUtils.installEntityStoreV2({
+          entityTypes: ['user', 'host'],
+          dataViewPattern: testLogsIndex,
+          waitForEntities: false,
+        });
+        for (const entity of testEntities) {
+          await waitForEntityStoreDoc({ es, retry, entityId: entity.expectedEuid, namespace });
+        }
+        await es.indices.refresh({ index: getEntitiesAlias(ENTITY_LATEST, namespace) });
+        await maintainerRoutes.runMaintainerSync('risk-score');
+
+        const index = `risk-score.risk-score-${namespace}`;
+        const expectedEuids = testEntities.map((e) => e.expectedEuid).sort();
+
+        await retry.waitForWithTimeout(
+          `all 10 host scores present in namespace ${namespace}`,
+          60_000,
+          async () => {
+            const scores = normalizeScores(await readRiskScores(es, [index]));
+            const idValues = Array.from(
+              new Set(scores.map(({ id_value: idValue }) => idValue).filter(Boolean))
+            );
+            return expectedEuids.every((euid) => idValues.includes(euid));
+          }
+        );
 
         const scores = await readRiskScores(es, [index]);
         const normalized = normalizeScores(scores);
@@ -138,10 +155,6 @@ export default ({ getService }: FtrProviderContext): void => {
         const idValues = Array.from(
           new Set(normalized.map(({ id_value: idValue }) => idValue).filter(Boolean))
         ).sort();
-        const expectedEuids = Array(10)
-          .fill(0)
-          .map((_, _index) => `host:host-${_index}`)
-          .sort();
         expect(idValues).to.eql(expectedEuids);
       });
     });

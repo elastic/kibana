@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { httpServerMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import {
   isInboxActionConflictError,
   isInvalidInboxActionSourceIdError,
@@ -20,12 +20,7 @@ import {
   createWorkflowsInboxProvider,
   WORKFLOWS_INBOX_SOURCE_APP,
 } from './workflows_inbox_provider';
-import type { WorkflowManagementAuditLog } from '../api/routes/utils/workflow_audit_logging';
 import type { WorkflowsManagementApi } from '../api/workflows_management_api';
-
-function createTestAudit(): WorkflowManagementAuditLog {
-  return { logExecutionResumed: jest.fn() } as unknown as WorkflowManagementAuditLog;
-}
 
 const buildStep = (overrides: Partial<EsWorkflowStepExecution> = {}): EsWorkflowStepExecution => ({
   spaceId: 'default',
@@ -80,7 +75,6 @@ const fakeApi = () => {
     })),
     resumeWorkflowExecution: jest.fn(async () => ({ resumedBy: 'user' })),
     getStepExecution: jest.fn(async () => buildStep()),
-    markStepAsResponded: jest.fn(async () => true),
   };
   return api as jest.Mocked<WorkflowsManagementApi>;
 };
@@ -90,7 +84,6 @@ describe('createWorkflowsInboxProvider', () => {
     const provider = createWorkflowsInboxProvider({
       api: fakeApi(),
       logger: loggerMock.create(),
-      audit: createTestAudit(),
     });
     expect(provider.sourceApp).toBe(WORKFLOWS_INBOX_SOURCE_APP);
   });
@@ -101,7 +94,6 @@ describe('createWorkflowsInboxProvider', () => {
       const provider = createWorkflowsInboxProvider({
         api,
         logger: loggerMock.create(),
-        audit: createTestAudit(),
       });
 
       const result = await provider.list({}, ctx());
@@ -128,7 +120,6 @@ describe('createWorkflowsInboxProvider', () => {
       const provider = createWorkflowsInboxProvider({
         api,
         logger: loggerMock.create(),
-        audit: createTestAudit(),
       });
 
       const result = await provider.list({}, ctx());
@@ -143,7 +134,6 @@ describe('createWorkflowsInboxProvider', () => {
       const provider = createWorkflowsInboxProvider({
         api,
         logger: loggerMock.create(),
-        audit: createTestAudit(),
       });
 
       const result = await provider.listProcessed!({}, ctx());
@@ -193,7 +183,6 @@ describe('createWorkflowsInboxProvider', () => {
       const provider = createWorkflowsInboxProvider({
         api,
         logger: loggerMock.create(),
-        audit: createTestAudit(),
       });
 
       const result = await provider.listProcessed!({}, ctx());
@@ -212,7 +201,6 @@ describe('createWorkflowsInboxProvider', () => {
       const provider = createWorkflowsInboxProvider({
         api,
         logger: loggerMock.create(),
-        audit: createTestAudit(),
       });
 
       const result = await provider.listProcessed!({}, ctx());
@@ -225,7 +213,7 @@ describe('createWorkflowsInboxProvider', () => {
     it('calls resumeWorkflowExecution with the parsed executionId and the opaque input', async () => {
       const api = fakeApi();
       const logger = loggerMock.create();
-      const provider = createWorkflowsInboxProvider({ api, logger, audit: createTestAudit() });
+      const provider = createWorkflowsInboxProvider({ api, logger });
       const c = ctx();
 
       await provider.respond('wf-1:run-1:step-exec-1', { approved: true, reason: 'contained' }, c);
@@ -244,7 +232,6 @@ describe('createWorkflowsInboxProvider', () => {
       const provider = createWorkflowsInboxProvider({
         api,
         logger: loggerMock.create(),
-        audit: createTestAudit(),
       });
       const c = ctx({ channel: 'example-mcp-app-security' });
 
@@ -264,7 +251,6 @@ describe('createWorkflowsInboxProvider', () => {
       const provider = createWorkflowsInboxProvider({
         api,
         logger: loggerMock.create(),
-        audit: createTestAudit(),
       });
       const c = ctx();
 
@@ -284,13 +270,12 @@ describe('createWorkflowsInboxProvider', () => {
       const provider = createWorkflowsInboxProvider({
         api,
         logger: loggerMock.create(),
-        audit: createTestAudit(),
       });
       const c = ctx();
 
       await provider.respond('wf-1:run-1:step-exec-1', { approved: true }, c);
 
-      expect(api.markStepAsResponded).not.toHaveBeenCalled();
+      expect(api.resumeWorkflowExecution).toHaveBeenCalledTimes(1);
       expect(api.resumeWorkflowExecution).toHaveBeenCalledWith(
         'run-1',
         'default',
@@ -300,16 +285,14 @@ describe('createWorkflowsInboxProvider', () => {
       );
     });
 
-    it('maps a lost first-writer-wins claim to InboxActionConflictError without an audit-failure log', async () => {
+    it('maps a lost first-writer-wins claim to InboxActionConflictError', async () => {
       const api = fakeApi();
       (api.resumeWorkflowExecution as jest.Mock).mockRejectedValueOnce(
         new WorkflowExecutionInvalidStatusError('run-1', 'already responded', 'waiting_for_input')
       );
-      const audit = createTestAudit();
       const provider = createWorkflowsInboxProvider({
         api,
         logger: loggerMock.create(),
-        audit,
       });
 
       const err = await provider
@@ -317,52 +300,40 @@ describe('createWorkflowsInboxProvider', () => {
         .catch((e: unknown) => e);
 
       expect(isInboxActionConflictError(err)).toBe(true);
-      expect((err as Error).message).toContain('already claimed');
-      expect(audit.logExecutionResumed).not.toHaveBeenCalled();
     });
 
-    it('emits the same security audit as the resume HTTP route after a successful inbox resume', async () => {
-      // Parity with the resume HTTP route's security audit (added in
-      // #256603): the inbox path must emit the same `logExecutionResumed`
-      // event with the engine-resolved `resumedBy` so the audit trail is
-      // consistent regardless of which client triggered the resume.
+    it('forwards channel and stepExecutionId so API-owned security audit covers inbox resume', async () => {
       const api = fakeApi();
-      const audit = createTestAudit();
       const provider = createWorkflowsInboxProvider({
         api,
         logger: loggerMock.create(),
-        audit,
       });
       const c = ctx();
 
       await provider.respond('wf-1:run-1:step-exec-1', { approved: true }, c);
 
-      expect(audit.logExecutionResumed).toHaveBeenCalledWith(c.request, {
-        executionId: 'run-1',
-        resumedBy: 'user',
-      });
+      expect(api.resumeWorkflowExecution).toHaveBeenCalledWith(
+        'run-1',
+        'default',
+        { approved: true },
+        c.request,
+        { channel: 'inbox', stepExecutionId: 'step-exec-1' }
+      );
     });
 
-    it('emits a security audit failure event when resumeWorkflowExecution rejects', async () => {
+    it('propagates resumeWorkflowExecution rejection', async () => {
       const api = fakeApi();
       const boom = new Error('engine unavailable');
       (api.resumeWorkflowExecution as jest.Mock).mockRejectedValueOnce(boom);
-      const audit = createTestAudit();
       const provider = createWorkflowsInboxProvider({
         api,
         logger: loggerMock.create(),
-        audit,
       });
       const c = ctx();
 
       await expect(
         provider.respond('wf-1:run-1:step-exec-1', { approved: true }, c)
       ).rejects.toThrow(boom);
-
-      expect(audit.logExecutionResumed).toHaveBeenCalledWith(c.request, {
-        executionId: 'run-1',
-        error: boom,
-      });
     });
 
     it('verifies the targeted step is still waiting before forwarding to the engine', async () => {
@@ -376,14 +347,14 @@ describe('createWorkflowsInboxProvider', () => {
       const provider = createWorkflowsInboxProvider({
         api,
         logger: loggerMock.create(),
-        audit: createTestAudit(),
       });
 
       await provider.respond('wf-1:run-1:step-exec-1', { approved: true }, ctx());
 
       expect(api.getStepExecution).toHaveBeenCalledWith(
         { executionId: 'run-1', id: 'step-exec-1' },
-        'default'
+        'default',
+        expect.objectContaining({ id: '123' })
       );
       // Verify the lookup happens before the resume call so a stale
       // response cannot race past the check.
@@ -398,7 +369,6 @@ describe('createWorkflowsInboxProvider', () => {
       const provider = createWorkflowsInboxProvider({
         api,
         logger: loggerMock.create(),
-        audit: createTestAudit(),
       });
 
       const err = await provider
@@ -417,7 +387,6 @@ describe('createWorkflowsInboxProvider', () => {
       const provider = createWorkflowsInboxProvider({
         api,
         logger: loggerMock.create(),
-        audit: createTestAudit(),
       });
 
       const err = await provider
@@ -441,7 +410,6 @@ describe('createWorkflowsInboxProvider', () => {
       const provider = createWorkflowsInboxProvider({
         api,
         logger: loggerMock.create(),
-        audit: createTestAudit(),
       });
 
       const err = await provider
@@ -458,7 +426,6 @@ describe('createWorkflowsInboxProvider', () => {
       const provider = createWorkflowsInboxProvider({
         api: fakeApi(),
         logger: loggerMock.create(),
-        audit: createTestAudit(),
       });
 
       const err = await provider.respond('invalid', {}, ctx()).catch((e: unknown) => e);
@@ -473,7 +440,6 @@ describe('createWorkflowsInboxProvider', () => {
       const provider = createWorkflowsInboxProvider({
         api,
         logger: loggerMock.create(),
-        audit: createTestAudit(),
       });
 
       await provider.respond('invalid', {}, ctx()).catch(() => undefined);

@@ -8,8 +8,31 @@
  */
 
 import React from 'react';
-import { EuiButtonEmpty, EuiPageHeader } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
+import { i18n } from '@kbn/i18n';
+
+const savedObjectsTitle = i18n.translate(
+  'savedObjectsManagement.objectsTable.header.savedObjectsTitle',
+  { defaultMessage: 'Saved Objects' }
+);
+
+const savedObjectsDescription = i18n.translate(
+  'savedObjectsManagement.objectsTable.howToDeleteSavedObjectsDescription',
+  {
+    defaultMessage:
+      'Manage and share your saved objects. To edit the underlying data of an object, go to its associated application.',
+  }
+);
+
+const importButtonLabel = i18n.translate(
+  'savedObjectsManagement.objectsTable.header.importButtonLabel',
+  { defaultMessage: 'Import' }
+);
+
+const refreshButtonLabel = i18n.translate(
+  'savedObjectsManagement.objectsTable.header.refreshButtonLabel',
+  { defaultMessage: 'Refresh' }
+);
 
 export const Header = ({
   onExportAll,
@@ -21,53 +44,41 @@ export const Header = ({
   onImport: () => void;
   onRefresh: () => void;
   filteredCount: number;
-}) => (
-  <EuiPageHeader
-    pageTitle={
-      <FormattedMessage
-        id="savedObjectsManagement.objectsTable.header.savedObjectsTitle"
-        defaultMessage="Saved Objects"
-      />
-    }
-    description={
-      <FormattedMessage
-        id="savedObjectsManagement.objectsTable.howToDeleteSavedObjectsDescription"
-        defaultMessage="Manage and share your saved objects. To edit the underlying data of an object, go to its associated application."
-      />
-    }
-    bottomBorder
-    rightSideItems={[
-      <EuiButtonEmpty
-        size="s"
-        iconType="upload"
-        data-test-subj="exportAllObjects"
-        onClick={onExportAll}
-      >
-        <FormattedMessage
-          id="savedObjectsManagement.objectsTable.header.exportButtonLabel"
-          defaultMessage="Export {filteredCount, plural, one{# object} other {# objects}}"
-          values={{
-            filteredCount,
-          }}
-        />
-      </EuiButtonEmpty>,
-      <EuiButtonEmpty
-        size="s"
-        iconType="download"
-        data-test-subj="importObjects"
-        onClick={onImport}
-      >
-        <FormattedMessage
-          id="savedObjectsManagement.objectsTable.header.importButtonLabel"
-          defaultMessage="Import"
-        />
-      </EuiButtonEmpty>,
-      <EuiButtonEmpty size="s" iconType="refresh" onClick={onRefresh}>
-        <FormattedMessage
-          id="savedObjectsManagement.objectsTable.header.refreshButtonLabel"
-          defaultMessage="Refresh"
-        />
-      </EuiButtonEmpty>,
-    ]}
-  />
-);
+}) => {
+  const menu: AppHeaderMenu = {
+    primaryActionItem: {
+      id: 'exportAll',
+      label: i18n.translate('savedObjectsManagement.objectsTable.header.exportButtonLabel', {
+        defaultMessage: 'Export {filteredCount, plural, one{# object} other {# objects}}',
+        values: { filteredCount },
+      }),
+      iconType: 'upload',
+      testId: 'exportAllObjects',
+      run: onExportAll,
+    },
+    items: [
+      {
+        id: 'refresh',
+        label: refreshButtonLabel,
+        iconType: 'refresh',
+        run: onRefresh,
+      },
+      {
+        id: 'import',
+        label: importButtonLabel,
+        iconType: 'download',
+        testId: 'importObjects',
+        run: onImport,
+      },
+    ],
+  };
+
+  return (
+    <AppHeader
+      title={savedObjectsTitle}
+      description={savedObjectsDescription}
+      menu={menu}
+      spacing="bleed"
+    />
+  );
+};

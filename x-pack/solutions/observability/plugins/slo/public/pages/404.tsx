@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCallOut } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { usePluginContext } from '../hooks/use_plugin_context';
 
 function PageNotFound() {
@@ -15,21 +15,20 @@ function PageNotFound() {
 
   return (
     <ObservabilityPageTemplate data-test-subj="pageNotFound">
-      <EuiCallOut
-        color="warning"
-        iconType="info"
+      <KbnWarningCallout
         title={
           <FormattedMessage id="xpack.slo.notFoundPage.title" defaultMessage="Page Not Found" />
         }
         data-test-subj={'observabilityPageNotFoundBanner'}
-      >
-        <p data-test-subj={'observabilityPageNotFoundBannerText'}>
-          <FormattedMessage
-            id="xpack.slo.notFoundPage.bannerText"
-            defaultMessage="The Observability application doesn't recognize this route"
-          />
-        </p>
-      </EuiCallOut>
+        text={
+          <p data-test-subj={'observabilityPageNotFoundBannerText'}>
+            <FormattedMessage
+              id="xpack.slo.notFoundPage.bannerText"
+              defaultMessage="The Observability application doesn't recognize this route"
+            />
+          </p>
+        }
+      />
     </ObservabilityPageTemplate>
   );
 }

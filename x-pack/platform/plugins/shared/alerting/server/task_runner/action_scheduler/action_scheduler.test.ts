@@ -849,7 +849,7 @@ describe('Action Scheduler', () => {
     });
 
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(0);
-    expect(defaultSchedulerContext.logger.debug).nthCalledWith(
+    expect(defaultSchedulerContext.logger.debug).toHaveBeenNthCalledWith(
       1,
       `skipping scheduling of actions for '1' in rule ${defaultSchedulerContext.ruleLabel}: rule is muted`,
       {
@@ -882,7 +882,7 @@ describe('Action Scheduler', () => {
     clock.tick(30000);
 
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(0);
-    expect(defaultSchedulerContext.logger.debug).nthCalledWith(
+    expect(defaultSchedulerContext.logger.debug).toHaveBeenNthCalledWith(
       1,
       `skipping scheduling of actions for '1' in rule ${defaultSchedulerContext.ruleLabel}: rule is throttled`,
       {
@@ -928,7 +928,7 @@ describe('Action Scheduler', () => {
     clock.tick(30000);
 
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(0);
-    expect(defaultSchedulerContext.logger.debug).nthCalledWith(
+    expect(defaultSchedulerContext.logger.debug).toHaveBeenNthCalledWith(
       1,
       `skipping scheduling of actions for '1' in rule ${defaultSchedulerContext.ruleLabel}: rule is throttled`,
       {
@@ -990,7 +990,7 @@ describe('Action Scheduler', () => {
     });
 
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(0);
-    expect(defaultSchedulerContext.logger.debug).nthCalledWith(
+    expect(defaultSchedulerContext.logger.debug).toHaveBeenNthCalledWith(
       1,
       `skipping scheduling of actions for '1' in rule ${defaultSchedulerContext.ruleLabel}: rule is muted`,
       {
@@ -1097,7 +1097,7 @@ describe('Action Scheduler', () => {
         ],
       ]
     `);
-    expect(alertingEventLogger.logAction).toBeCalledWith({
+    expect(alertingEventLogger.logAction).toHaveBeenCalledWith({
       alertSummary: { new: 1, ongoing: 0, recovered: 0 },
       id: '1',
       uuid: '111-111',
@@ -1246,7 +1246,7 @@ describe('Action Scheduler', () => {
         ],
       ]
     `);
-    expect(alertingEventLogger.logAction).toBeCalledWith({
+    expect(alertingEventLogger.logAction).toHaveBeenCalledWith({
       alertSummary: { new: 1, ongoing: 0, recovered: 0 },
       id: '1',
       uuid: '111-111',
@@ -2188,7 +2188,7 @@ describe('Action Scheduler', () => {
     const actionScheduler = new ActionScheduler(
       getSchedulerContext({
         ...defaultSchedulerContext,
-        priority: TaskPriority.Low,
+        priority: TaskPriority.Maintenance,
         rule: {
           ...defaultSchedulerContext.rule,
           actions: [
@@ -2819,7 +2819,7 @@ describe('Action Scheduler', () => {
         ]
       `);
 
-      expect(alertingEventLogger.logAction).toBeCalledWith({
+      expect(alertingEventLogger.logAction).toHaveBeenCalledWith({
         alertSummary: { new: 1, ongoing: 0, recovered: 0 },
         id: '1',
         uuid: 'test',

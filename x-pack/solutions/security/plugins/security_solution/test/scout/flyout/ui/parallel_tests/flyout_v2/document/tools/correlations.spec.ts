@@ -14,7 +14,10 @@ spaceTest.describe(
   () => {
     let ruleName: string;
 
-    spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace }) => {
+    spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace }, testInfo) => {
+      // Rule execution can be slow under parallel load.
+      testInfo.setTimeout(testInfo.timeout + 120_000);
+
       const { sourceIndex } = await apiServices.correlations.createCorrelationsFixture(
         scoutSpace.id
       );
@@ -25,6 +28,8 @@ spaceTest.describe(
         name: ruleName,
         index: [sourceIndex],
       });
+      await apiServices.detectionAlerts.waitForAlerts(ruleName, 1, 60_000);
+
       // Verify that a read-only Security Solution analyst can access correlations.
       await browserAuth.loginAsT1Analyst();
     });

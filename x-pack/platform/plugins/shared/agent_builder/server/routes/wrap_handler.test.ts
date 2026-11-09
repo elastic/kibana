@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { createInternalError } from '@kbn/agent-builder-common';
+import { createConversationBusyError, createInternalError } from '@kbn/agent-builder-common';
 import { createInferenceRequestError, createInferenceProviderError } from '@kbn/inference-common';
 import { getHandlerWrapper } from './wrap_handler';
 
@@ -95,6 +96,36 @@ describe('getHandlerWrapper', () => {
     });
   });
 
+  it('logs a conversationBusy refusal at debug and returns the active execution id', async () => {
+    const handler = wrapHandler(async () => {
+      throw createConversationBusyError({
+        conversationId: 'conversation-1',
+        activeExecutionId: 'exec-1',
+      });
+    });
+
+    const result: any = await handler(createCtx(), req, kibanaResponseFactory);
+
+    expect(result.status).toBe(409);
+    expect(result.payload).toEqual({
+      message: 'Conversation conversation-1 already has an execution in progress',
+      attributes: { trace_id: undefined, active_execution_id: 'exec-1' },
+    });
+    expect(logger.debug).toHaveBeenCalled();
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('logs other AgentBuilderErrors as errors', async () => {
+    const handler = wrapHandler(async () => {
+      throw createInternalError('boom');
+    });
+
+    await handler(createCtx(), req, kibanaResponseFactory);
+
+    expect(logger.error).toHaveBeenCalled();
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
   it('propagates the status of an InferenceTaskRequestError (e.g. 404 from connector lookup)', async () => {
     const message =
       "No connector or inference endpoint found for ID '.anthropic-claude-3.7-sonnet-chat_completion'";
@@ -133,6 +164,43 @@ describe('getHandlerWrapper', () => {
   it('falls back to 500 for an inference error with status outside 4xx/5xx', async () => {
     const handler = wrapHandler(async () => {
       throw createInferenceProviderError('not really an error', { status: 200 });
+    });
+
+    const result: any = await handler(createCtx(), req, kibanaResponseFactory);
+
+    expect(result.status).toBe(500);
+  });
+
+  it('propagates the status of a 4xx Boom error', async () => {
+    const message =
+      'Unable to grant an API key for service account [elastic/fleet-server]: refused';
+    const handler = wrapHandler(async () => {
+      throw Boom.badRequest(message);
+    });
+
+    const result: any = await handler(createCtx(), req, kibanaResponseFactory);
+
+    expect(result.status).toBe(400);
+    expect(result.payload).toEqual({ message });
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('forwards the headers of a 4xx Boom error', async () => {
+    const boom = Boom.tooManyRequests('slow down');
+    boom.output.headers['Retry-After'] = '10';
+    const handler = wrapHandler(async () => {
+      throw boom;
+    });
+
+    const result: any = await handler(createCtx(), req, kibanaResponseFactory);
+
+    expect(result.status).toBe(429);
+    expect(result.options.headers).toEqual({ 'Retry-After': '10' });
+  });
+
+  it('falls back to 500 for a 5xx Boom error', async () => {
+    const handler = wrapHandler(async () => {
+      throw Boom.serverUnavailable('unavailable');
     });
 
     const result: any = await handler(createCtx(), req, kibanaResponseFactory);

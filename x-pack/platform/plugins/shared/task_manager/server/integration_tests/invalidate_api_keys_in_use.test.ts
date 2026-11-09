@@ -15,6 +15,7 @@ import { INVALIDATE_API_KEY_SO_NAME } from '../saved_objects';
 import type { ApiKeyToInvalidate } from '../saved_objects/schemas/api_key_to_invalidate';
 import { TaskStatus } from '../task';
 import { injectTask, setupTestServers } from './lib';
+import { asSpaceId } from '@kbn/core-spaces-common';
 
 const TASK_MANAGER_INDEX = '.kibana_task_manager';
 
@@ -67,7 +68,11 @@ describe('invalidate api keys task - in-use guard', () => {
       startedAt: null,
       retryAt: null,
       ownerId: null,
-      userScope: { apiKeyId: sharedKeyId, apiKeyCreatedByUser: false, spaceId: 'default' },
+      userScope: {
+        apiKeyId: sharedKeyId,
+        apiKeyCreatedByUser: false,
+        spaceId: asSpaceId('default'),
+      },
     });
 
     // Both keys are queued for invalidation, created far enough in the past to clear removalDelay.
@@ -110,5 +115,85 @@ describe('invalidate api keys task - in-use guard', () => {
     const remainingKeyIds = remaining.map((so) => so.attributes.apiKeyId);
     expect(remainingKeyIds).toContain(sharedKeyId);
     expect(remainingKeyIds).not.toContain(orphanKeyId);
+  });
+
+  test('keeps a key replaced during a run that is still in progress, but not one from a finished run', async () => {
+    const coreStart = kibanaServer.coreStart;
+    const esClient = coreStart.elasticsearch.client.asInternalUser;
+    const soClient = coreStart.savedObjects.createInternalRepository([INVALIDATE_API_KEY_SO_NAME]);
+
+    const stillRunningTaskId = uuidV4();
+    const rerunTaskId = uuidV4();
+    const stillRunningKeyId = `still-running-${uuidV4()}`;
+    const rerunKeyId = `rerun-${uuidV4()}`;
+    const replacedDuringRunStartedAt = new Date(Date.now() - 60_000);
+
+    const runningTask = (id: string, startedAt: Date) => ({
+      id,
+      taskType: 'sampleTask',
+      params: {},
+      state: {},
+      stateVersion: 1,
+      runAt: new Date(),
+      enabled: true,
+      scheduledAt: new Date(),
+      attempts: 1,
+      status: TaskStatus.Running,
+      startedAt,
+      retryAt: new Date(Date.now() + 60 * 60 * 1000),
+      ownerId: 'kibana-1',
+    });
+
+    // Both keys were replaced while their task was running. One task is still in that run; the
+    // other has since started a new one.
+    await injectTask(esClient, runningTask(stillRunningTaskId, replacedDuringRunStartedAt));
+    await injectTask(esClient, runningTask(rerunTaskId, new Date()));
+
+    const createdAt = new Date(Date.now() - 10_000).toISOString();
+    const taskStartedAt = replacedDuringRunStartedAt.toISOString();
+    await soClient.create(INVALIDATE_API_KEY_SO_NAME, {
+      apiKeyId: stillRunningKeyId,
+      createdAt,
+      taskId: stillRunningTaskId,
+      taskStartedAt,
+    });
+    await soClient.create(INVALIDATE_API_KEY_SO_NAME, {
+      apiKeyId: rerunKeyId,
+      createdAt,
+      taskId: rerunTaskId,
+      taskStartedAt,
+    });
+    await esClient.indices.refresh({ index: TASK_MANAGER_INDEX });
+
+    const invalidatedIds: string[] = [];
+    const invalidateApiKeyFn = jest.fn(async ({ ids }: { ids: string[] }) => {
+      invalidatedIds.push(...ids);
+      return { invalidated_api_keys: ids, previously_invalidated_api_keys: [], error_count: 0 };
+    });
+
+    await taskRunner({
+      logger: loggingSystemMock.createLogger(),
+      configInterval: '5m',
+      coreStartServices: async () => [
+        coreStart as unknown as CoreStart,
+        {} as unknown as TaskManagerPluginsStart,
+        {} as unknown as TaskManagerStartContract,
+      ],
+      getEncryptedSavedObjectsClient: () => undefined,
+      invalidateApiKeyFn,
+      invalidateUiamApiKeyFn: () => undefined,
+      removalDelay: '1s',
+    })({ taskInstance: { state: {} } }).run();
+
+    expect(invalidatedIds).toContain(rerunKeyId);
+    expect(invalidatedIds).not.toContain(stillRunningKeyId);
+
+    const { saved_objects: remaining } = await soClient.find<ApiKeyToInvalidate>({
+      type: INVALIDATE_API_KEY_SO_NAME,
+      perPage: 100,
+    });
+    const remainingKeyIds = remaining.map((so) => so.attributes.apiKeyId);
+    expect(remainingKeyIds).toContain(stillRunningKeyId);
+    expect(remainingKeyIds).not.toContain(rerunKeyId);
   });
 });

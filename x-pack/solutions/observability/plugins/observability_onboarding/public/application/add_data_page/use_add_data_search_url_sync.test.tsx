@@ -8,14 +8,14 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
-import { CompatRouter, useLocation, useNavigate } from 'react-router-dom-v5-compat';
+import { MemoryRouter } from '@kbn/shared-ux-router';
+import { useHistory, useLocation } from 'react-router-dom';
 import { useAddDataSearchUrlSync } from './use_add_data_search_url_sync';
 
 const Probe = () => {
   const [value, setValue] = useAddDataSearchUrlSync();
   const location = useLocation();
-  const navigate = useNavigate();
+  const history = useHistory();
 
   return (
     <>
@@ -25,7 +25,7 @@ const Probe = () => {
         onChange={(event) => setValue(event.target.value)}
       />
       <div data-test-subj="probeSearch">{location.search}</div>
-      <button data-test-subj="probeNavigate" onClick={() => navigate('/?search=from-url')} />
+      <button data-test-subj="probeNavigate" onClick={() => history.push('/?search=from-url')} />
     </>
   );
 };
@@ -33,9 +33,7 @@ const Probe = () => {
 const renderProbe = (initialEntry: string) =>
   render(
     <MemoryRouter initialEntries={[initialEntry]}>
-      <CompatRouter>
-        <Probe />
-      </CompatRouter>
+      <Probe />
     </MemoryRouter>
   );
 
@@ -68,6 +66,23 @@ describe('useAddDataSearchUrlSync', () => {
     expect(search).toContain('tag=a');
     expect(search).toContain('tag=b');
     expect(search).toContain('search=nginx');
+  });
+
+  it('drops a pending collection chooser when the term changes', async () => {
+    const user = userEvent.setup();
+    renderProbe('/?search=nginx&collection=nginx');
+    await user.type(screen.getByTestId('probeInput'), 'x');
+    const search = screen.getByTestId('probeSearch').textContent ?? '';
+    expect(search).toContain('search=nginxx');
+    expect(search).not.toContain('collection');
+  });
+
+  it('keeps a pending collection chooser when only untrimmed whitespace changes', async () => {
+    const user = userEvent.setup();
+    renderProbe('/?search=nginx&collection=nginx');
+    await user.type(screen.getByTestId('probeInput'), ' ');
+    expect(screen.getByTestId('probeInput')).toHaveValue('nginx ');
+    expect(screen.getByTestId('probeSearch')).toHaveTextContent('collection=nginx');
   });
 
   it('adopts external URL changes (back/forward, navigation)', async () => {

@@ -150,7 +150,7 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getEndpointAuthz: async (): Promise<Immutable<EndpointAuthz>> => {
         if (!endpointAuthz) {
-          // eslint-disable-next-line require-atomic-updates
+          // eslint-disable-next-line @kbn/compat/eslint-require-atomic-updates
           endpointAuthz = await endpointAppContextService.getEndpointAuthz(request);
         }
 
@@ -207,7 +207,6 @@ export class RequestContextFactory implements IRequestContextFactory {
           productFeaturesService,
           license: licensing.license,
           analytics: core.analytics,
-          userProfile: coreStart.userProfile,
           logger: options.logger,
         });
       }),
@@ -333,6 +332,7 @@ export class RequestContextFactory implements IRequestContextFactory {
       getRulesAuthz: memoize(() => {
         return rulesAuthz;
       }),
+      getMitreDataClient: () => startPlugins.mitreAttack?.getMitreDataClient?.(),
     };
   }
 }

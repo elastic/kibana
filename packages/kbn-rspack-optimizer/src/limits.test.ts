@@ -118,18 +118,20 @@ describe('validateLimitsForAllBundles', () => {
     Fs.rmSync(tmpDir, { recursive: true });
   });
 
-  it('error messages reference the rspack update command', () => {
+  it('error messages reference the single full-build update command', () => {
     const tmpDir = createTmpDir();
     const limitsPath = Path.join(tmpDir, 'limits.yml');
     Fs.writeFileSync(limitsPath, 'pageLoadAssetSize:\n  core: 500000\n');
 
     const log = createMockLog();
+    let message = '';
     try {
       validateLimitsForAllBundles(log as any, ['core', 'discover'], limitsPath);
-    } catch (e: any) {
-      expect(e.message).toContain('node scripts/build_rspack_bundles');
-      expect(e.message).not.toContain('build_kibana_platform_plugins');
+    } catch (e) {
+      message = e instanceof Error ? e.message : String(e);
     }
+    expect(message).toContain('node scripts/build_kibana_platform_plugins --update-limits');
+    expect(message).not.toContain('--focus');
 
     Fs.rmSync(tmpDir, { recursive: true });
   });

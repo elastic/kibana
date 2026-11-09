@@ -8,78 +8,101 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiToolTip, EuiBadge, EuiIcon } from '@elastic/eui';
+import { EuiBadge, EuiTextColor, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { MemoryMonitor, type MemoryInfo } from './memory_monitor';
+
+const TREND_MIN_SAMPLES = 10;
 
 const badgeStyles = css`
   cursor: default;
 `;
 
+const tooltipContentStyles = css`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+
+const emphasisStyles = css`
+  font-weight: bold;
+`;
+
+const formatTrend = (trend: number): string => {
+  const roundedTrend = Math.round(trend * 10) / 10;
+  const normalizedTrend = Object.is(roundedTrend, -0) ? 0 : roundedTrend;
+  return `${normalizedTrend > 0 ? '+' : ''}${normalizedTrend.toFixed(1)}`;
+};
+
 export const MemoryUsageIndicator: React.FC = () => {
-  const [memoryInfo, setMemoryInfo] = useState<MemoryInfo | null>(null);
+  const [memoryInfo, setMemoryInfo] = useState<MemoryInfo | null | undefined>(undefined);
 
   useEffect(() => {
-    if (!MemoryMonitor.isSupported()) return;
-
     const monitor = new MemoryMonitor();
+    const unsubscribe = monitor.subscribe(setMemoryInfo);
     monitor.startMonitoring();
 
-    const unsubscribe = monitor.subscribe(setMemoryInfo);
-
     return () => {
-      monitor.stopMonitoring();
       unsubscribe();
+      monitor.destroy();
     };
   }, []);
 
-  if (!memoryInfo) {
-    const displayText = 'Mem -GB';
-    const tooltipContent = MemoryMonitor.isSupported() ? (
-      <div>Memory monitoring is initializing...</div>
-    ) : (
-      <div>Memory monitoring is not supported in this environment.</div>
-    );
+  if (memoryInfo === undefined || memoryInfo === null) {
+    const tooltipContent =
+      memoryInfo === undefined ? 'Measuring…' : 'Not supported in this browser.';
 
     return (
-      <EuiToolTip content={tooltipContent}>
-        <EuiBadge color="#0B1628" css={badgeStyles} tabIndex={0}>
-          {displayText}
+      <EuiToolTip content={<div>{tooltipContent}</div>}>
+        {/* EuiBadge derives a native title from its text; undefined suppresses the duplicate. */}
+        <EuiBadge color="#0B1628" css={badgeStyles} tabIndex={0} title={undefined}>
+          Mem —
         </EuiBadge>
       </EuiToolTip>
     );
   }
 
-  const warningThreshold = 1000; // 1GB in MB
-  const isWarning = memoryInfo.memoryUsage > warningThreshold || memoryInfo.leak;
-  const memoryGB = (memoryInfo.memoryUsage / 1000).toFixed(2);
+  const { heapUsageRatio, growthDetected, sampleCount, shortTrendPerMin } = memoryInfo;
+  const isUnderHeapPressure = heapUsageRatio > 0.85;
+  const warningColor = growthDetected && isUnderHeapPressure ? 'danger' : 'warning';
+  const warningSeverity = growthDetected || isUnderHeapPressure ? warningColor : null;
+  const memoryGiB = (memoryInfo.memoryUsage / 1024).toFixed(2);
+  const trendText =
+    sampleCount >= TREND_MIN_SAMPLES && Number.isFinite(shortTrendPerMin)
+      ? `Trend: ${formatTrend(shortTrendPerMin)} MiB/min`
+      : null;
+  const heapUtilizationPercentage = Math.round(heapUsageRatio * 100);
+  const heapText = `Heap: ${memoryGiB} GiB (${heapUtilizationPercentage}% of limit)`;
 
   const tooltipContent = (
-    <div>
-      <div>Memory usage: {memoryGB}GB</div>
-      <div>Threshold: {(warningThreshold / 1000).toFixed(1)}GB</div>
-      {memoryInfo.leak && (
-        <div>
-          <EuiIcon type="warningFill" color={'danger'} size="s" aria-hidden={true} /> Potential
-          memory leak detected
+    <div css={tooltipContentStyles}>
+      {isUnderHeapPressure ? (
+        <div css={emphasisStyles}>
+          <EuiTextColor color={warningColor}>{heapText}</EuiTextColor>
+        </div>
+      ) : (
+        <div>{heapText}</div>
+      )}
+      {trendText && <div>{trendText}</div>}
+      {growthDetected && (
+        <div css={emphasisStyles}>
+          <EuiTextColor color={warningColor}>Heap growing steadily.</EuiTextColor>
         </div>
       )}
-      <div>Samples: {memoryInfo.history.length}</div>
     </div>
   );
-
-  const displayText = `Mem ${memoryGB}GB`;
 
   return (
     <EuiToolTip content={tooltipContent}>
       <EuiBadge
-        color={isWarning ? 'danger' : '#0B1628'}
+        color={warningSeverity ?? '#0B1628'}
         css={badgeStyles}
-        iconType={memoryInfo.leak ? 'warningFill' : undefined}
+        iconType={warningSeverity ? 'warningFill' : undefined}
         iconSide={'right'}
         tabIndex={0}
+        title={undefined}
       >
-        {displayText}
+        {`Mem ${memoryGiB} GiB`}
       </EuiBadge>
     </EuiToolTip>
   );

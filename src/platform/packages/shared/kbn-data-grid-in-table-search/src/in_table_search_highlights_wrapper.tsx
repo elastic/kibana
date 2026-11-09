@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { escapeRegExp } from 'lodash';
 import { HIGHLIGHT_CLASS_NAME, CELL_MATCH_INDEX_ATTRIBUTE } from './constants';
+import { InTableSearchCellContext } from './in_table_search_cell_context';
 import type { InTableSearchHighlightsWrapperProps } from './types';
 
 /**
@@ -61,7 +62,18 @@ export const InTableSearchHighlightsWrapper: React.FC<InTableSearchHighlightsWra
     onHighlightsCountFound,
   ]);
 
-  return <span ref={cellValueRef}>{children}</span>;
+  const cellContextValue = useMemo(
+    () => ({ inTableSearchTerm: inTableSearchTerm ?? '', isCounting: dryRun }),
+    [inTableSearchTerm, dryRun]
+  );
+
+  return (
+    <span ref={cellValueRef}>
+      <InTableSearchCellContext.Provider value={cellContextValue}>
+        {children}
+      </InTableSearchCellContext.Provider>
+    </span>
+  );
 };
 
 const searchTermRegExpCache = new Map<string, RegExp>();

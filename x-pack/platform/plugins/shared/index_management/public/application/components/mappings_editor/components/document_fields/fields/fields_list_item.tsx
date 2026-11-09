@@ -120,6 +120,7 @@ function FieldListItemComponent(
   const indent = treeDepth * CHILD_FIELD_INDENT_SIZE - substractIndentAmount;
 
   const isSemanticText = source.type === 'semantic_text';
+  const isSemantic = source.type === 'semantic';
 
   const hasDottedLine = isMultiField
     ? isLastItem
@@ -321,7 +322,7 @@ function FieldListItemComponent(
                 </EuiBadge>
               </EuiFlexItem>
 
-              {isSemanticText && source.inference_id ? (
+              {(isSemanticText || isSemantic) && source.inference_id ? (
                 <EuiFlexItem grow={false}>
                   <EuiBadge color="hollow">{source.inference_id as string}</EuiBadge>
                 </EuiFlexItem>

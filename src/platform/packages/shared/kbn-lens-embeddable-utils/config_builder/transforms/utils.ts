@@ -21,7 +21,12 @@ import type {
   LensDatasourceId,
 } from '@kbn/lens-common';
 import { cleanupFormulaReferenceColumns } from '@kbn/lens-common';
-import { getIndexPatternFromESQLQuery, parseTimeFieldFromESQLQuery } from '@kbn/esql-utils';
+import {
+  getIndexPatternFromESQLQuery,
+  parseTimeFieldFromESQLQuery,
+  getESQLQueryVariables,
+} from '@kbn/esql-utils';
+import { VariableNamePrefix } from '@kbn/esql-types';
 import { Sha256 } from '@kbn/crypto-browser';
 import { stableStringify } from '@kbn/std';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
@@ -33,6 +38,7 @@ import {
   AS_CODE_DATA_VIEW_SPEC_TYPE,
 } from '@kbn/as-code-data-views-schema';
 import type { AsCodeDataViewReference } from '@kbn/as-code-data-views-schema';
+import { DataViewNotFoundError } from '../errors';
 import type { LensAttributes } from '../types';
 import type { LensApiAllOperations, LensApiConfig, NarrowByType } from '../schema';
 import { fromBucketLensStateToAPI } from './columns/buckets';
@@ -57,7 +63,6 @@ import type {
   DataSourceTypeESQL,
   DataSourceTypeNoESQL,
 } from '../schema/data_source';
-import type { DataLayerTypeESQL } from '../schema/charts/xy';
 import type { XScaleSchemaType } from '../schema/charts/shared';
 import { fromFilterLensStateToAPI, toLensStateFilterLanguage } from './columns/filter';
 
@@ -351,7 +356,7 @@ export function buildDataSourceStateNoESQL(
     inlineDataViewId
   );
   if (!dataViewId) {
-    throw new Error(`Cannot resolve the data view for layer "${layerId}".`);
+    throw new DataViewNotFoundError(layerId);
   }
   return buildDataViewDataSource(dataViewId, adHocDataViews);
 }
@@ -440,6 +445,27 @@ export function getDataSourceIndex(dataSource: DataSourceType) {
   }
 }
 
+/**
+ * Stamps each column's ES|QL Control Variable by matching `??`-prefixed field names against the
+ * Identifier (`??`) variables declared in the layer query.
+ */
+function reconstructESQLControlVariables(
+  columns: TextBasedLayerColumn[],
+  esql: string
+): TextBasedLayerColumn[] {
+  const identifierVariables = new Set(getESQLQueryVariables(esql, VariableNamePrefix.IDENTIFIER));
+  if (identifierVariables.size === 0) {
+    return columns;
+  }
+  return columns.map((column) => {
+    if (!column.fieldName.startsWith(VariableNamePrefix.IDENTIFIER)) {
+      return column;
+    }
+    const variable = column.fieldName.slice(VariableNamePrefix.IDENTIFIER.length);
+    return variable && identifierVariables.has(variable) ? { ...column, variable } : column;
+  });
+}
+
 // internal function used to build datasource states layer
 function buildDatasourceStatesLayer(
   layer: unknown,
@@ -471,7 +497,7 @@ function buildDatasourceStatesLayer(
       index: generateAdHocDataViewId({ ...dataSourceIndex, dataSourceType: 'esql' }),
       query: { esql: ds.query },
       timeField: dataSourceIndex.timeFieldName || undefined,
-      columns,
+      columns: reconstructESQLControlVariables(columns, ds.query),
       ignoreGlobalFilters: layerWithSettings.ignore_global_filters,
     };
   }
@@ -763,23 +789,10 @@ export const filtersAndQueryToApiFormat = (
   };
 };
 
-function extraQueryFromAPIState(state: LensApiConfig): { esql: string } | Query | undefined {
-  if ('data_source' in state && state.data_source.type === 'esql') {
-    return { esql: state.data_source.query };
-  }
-  if ('layers' in state && Array.isArray(state.layers)) {
-    // pick only the first one for now
-    const esqlLayer = state.layers.find(
-      (layer): layer is DataLayerTypeESQL =>
-        layer.type !== 'reference_lines' &&
-        layer.type !== 'annotations' &&
-        'data_source' in layer &&
-        layer.data_source?.type === 'esql'
-    );
-    if (esqlLayer && 'query' in esqlLayer.data_source) {
-      return { esql: esqlLayer.data_source.query };
-    }
-  }
+function extraQueryFromAPIState(state: LensApiConfig): Query | undefined {
+  // ES|QL queries live exclusively on the text-based datasource layers
+  // (written by the layer transforms); the top-level slot only carries the
+  // chart-scoped KQL/Lucene filter from the API `query` field.
   if ('query' in state && state.query) {
     return queryToLensState(state.query satisfies LensApiFilterType);
   }

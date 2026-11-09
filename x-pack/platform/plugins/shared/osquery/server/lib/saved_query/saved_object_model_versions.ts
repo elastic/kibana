@@ -10,7 +10,13 @@ import type {
   SavedObjectsModelVersion,
 } from '@kbn/core-saved-objects-server';
 import { v5 as uuidv5 } from 'uuid';
-import { savedQuerySchemaV2, packSchemaV2, packSchemaV3, packSchemaV4 } from './schemas';
+import {
+  savedQuerySchemaV2,
+  packSchemaV2,
+  packSchemaV3,
+  packSchemaV4,
+  packSchemaV5,
+} from './schemas';
 import {
   deriveEffectiveQueryKey,
   hasQueries,
@@ -184,6 +190,34 @@ export const packSavedObjectModelVersion4: SavedObjectsModelVersion = {
   schemas: {
     forwardCompatibility: packSchemaV4.extends({}, { unknowns: 'ignore' }),
     create: packSchemaV4.extends({}, { unknowns: 'allow' }),
+  },
+};
+
+/**
+ * V5 adds three pack-level execution defaults: `min_osquery_version`,
+ * `result_type`, and `platform`. CRITICAL: pack SO root is NOT
+ * `dynamic: false` (it inherits index `dynamic: 'strict'`), so these need an
+ * explicit mapping or ES rejects writes (`strict_dynamic_mapping_exception`).
+ * `mappings_addition` is also required so `getLatestMappingsVersionNumber`
+ * bumps and the migrator PUTs the updated type mappings.
+ * Per-query `enabled` / `result_type` live in the `queries` map which is
+ * `dynamic: false` with `unknowns: 'allow'`, so no mappings addition is
+ * needed there.
+ */
+export const packSavedObjectModelVersion5: SavedObjectsModelVersion = {
+  changes: [
+    {
+      type: 'mappings_addition',
+      addedMappings: {
+        min_osquery_version: { type: 'keyword', ignore_above: 1024 },
+        result_type: { type: 'keyword', ignore_above: 1024 },
+        platform: { type: 'keyword', ignore_above: 1024 },
+      },
+    },
+  ],
+  schemas: {
+    forwardCompatibility: packSchemaV5.extends({}, { unknowns: 'ignore' }),
+    create: packSchemaV5.extends({}, { unknowns: 'allow' }),
   },
 };
 

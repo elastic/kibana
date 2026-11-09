@@ -8,6 +8,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import { ConfirmDeleteModal } from './confirm_delete_modal';
@@ -16,7 +17,7 @@ import { spacesManagerMock } from '../../../spaces_manager/mocks';
 describe('ConfirmDeleteModal', () => {
   it('renders as expected', () => {
     const space = {
-      id: 'my-space',
+      id: asSpaceId('my-space'),
       name: 'My Space',
       disabledFeatures: [],
     };
@@ -74,7 +75,7 @@ describe('ConfirmDeleteModal', () => {
 
   it('deletes the space when confirmed', async () => {
     const space = {
-      id: 'my-space',
+      id: asSpaceId('my-space'),
       name: 'My Space',
       disabledFeatures: [],
     };

@@ -7,8 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import React from 'react';
+import { of } from 'rxjs';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
+import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import type { TemplateBody } from '@kbn/workflows-library';
 import { TemplateDetail } from './template_detail';
 import { WorkflowsUiServicesProvider } from '../../context';
@@ -91,13 +94,17 @@ jest.mock('./template_yaml_preview', () => ({
 }));
 
 // The install section has its own test (it needs kibana services and a query
-// client); the stub exposes the preview-values callback and echoes the
-// `previewYaml` prop so their wiring through TemplateDetail can be asserted.
+// client); the stub exposes the preview-values and step callbacks and echoes
+// the `previewYaml` prop so their wiring through TemplateDetail can be asserted.
 jest.mock('./install_form', () => ({
   TemplateInstallSection: ({
+    step,
+    onStepChange,
     onPreviewValuesChange,
     previewYaml,
   }: {
+    step: string;
+    onStepChange: (step: 'details' | 'setup') => void;
     onPreviewValuesChange?: (values: Record<string, unknown>) => void;
     previewYaml: string;
   }) => (
@@ -107,6 +114,12 @@ jest.mock('./install_form', () => ({
         data-test-subj="mockInstallSectionCommit"
         onClick={() => onPreviewValuesChange?.({ 'max-age': 42 })}
       />
+      <button
+        type="button"
+        data-test-subj="mockInstallSectionSetup"
+        onClick={() => onStepChange('setup')}
+      />
+      <pre data-test-subj="mockInstallSectionStep">{step}</pre>
       <pre data-test-subj="mockInstallSectionPreviewYaml">{previewYaml}</pre>
     </div>
   ),
@@ -151,19 +164,24 @@ const TEMPLATE_BODY: TemplateBody = {
   raw: RAW,
 };
 
-const renderDetail = () =>
+const LIBRARY_BACK = { href: '/app/workflows/library', label: 'Template Library' };
+
+const renderWithProviders = (
+  ui: React.ReactElement,
+  chrome = chromeServiceMock.createStartContract()
+) =>
   render(
-    <WorkflowsUiServicesProvider services={createMockWorkflowsUiServices()}>
-      <TemplateDetail slug="my-template" />
-    </WorkflowsUiServicesProvider>
+    <MockAppHeaderProvider chrome={chrome}>
+      <WorkflowsUiServicesProvider services={createMockWorkflowsUiServices()}>
+        {ui}
+      </WorkflowsUiServicesProvider>
+    </MockAppHeaderProvider>
   );
 
+const renderDetail = () => renderWithProviders(<TemplateDetail slug="my-template" />);
+
 const renderGraphDetail = () =>
-  render(
-    <WorkflowsUiServicesProvider services={createMockWorkflowsUiServices()}>
-      <TemplateDetail slug="my-template" showGraphPreview={true} />
-    </WorkflowsUiServicesProvider>
-  );
+  renderWithProviders(<TemplateDetail slug="my-template" showGraphPreview={true} />);
 
 describe('TemplateDetail', () => {
   beforeEach(() => {
@@ -176,6 +194,35 @@ describe('TemplateDetail', () => {
     expect(screen.getByRole('heading', { name: 'My Template' })).toBeInTheDocument();
     expect(screen.getByText('Does useful things.')).toBeInTheDocument();
     expect(screen.getByTestId('workflowLibraryTemplateDetail-version')).toHaveTextContent('1.2.0');
+  });
+
+  it('links to the template source and prefills the issue form with template details', () => {
+    mockUseTemplate.mockReturnValue({
+      data: {
+        ...TEMPLATE_BODY,
+        metadata: { ...TEMPLATE_BODY.metadata, name: 'My Template & Slack #1' },
+      },
+      isLoading: false,
+      isError: false,
+    });
+    renderDetail();
+
+    const reportLink = screen.getByRole('link', { name: 'Report an issue with this template' });
+    const url = new URL(reportLink.getAttribute('href') ?? '');
+    expect(url.origin + url.pathname).toBe('https://github.com/elastic/workflows/issues/new');
+    expect(url.searchParams.get('template')).toBe('template_issue.yml');
+    expect(url.searchParams.get('title')).toBe('[Template issue]: My Template & Slack #1');
+    expect(url.searchParams.get('template_details')).toBe(
+      'Name: My Template & Slack #1\n' +
+        'Slug: my-template\n' +
+        'Version: 1.2.0\n' +
+        'Availability: >=9.5.0\n' +
+        'Source: https://github.com/elastic/workflows/blob/main/library/workflows/my-template/my-template.yaml'
+    );
+    expect(screen.getByRole('link', { name: 'Edit this template' })).toHaveAttribute(
+      'href',
+      'https://github.com/elastic/workflows/edit/main/library/workflows/my-template/my-template.yaml'
+    );
   });
 
   it('should render the solution logo and localized tag badges under the title', () => {
@@ -193,11 +240,7 @@ describe('TemplateDetail', () => {
 
   it('should call onLoaded with the loaded template', () => {
     const onLoaded = jest.fn();
-    render(
-      <WorkflowsUiServicesProvider services={createMockWorkflowsUiServices()}>
-        <TemplateDetail slug="my-template" onLoaded={onLoaded} />
-      </WorkflowsUiServicesProvider>
-    );
+    renderWithProviders(<TemplateDetail slug="my-template" onLoaded={onLoaded} />);
     expect(onLoaded).toHaveBeenCalledWith(TEMPLATE_BODY);
   });
 
@@ -229,6 +272,72 @@ describe('TemplateDetail', () => {
     expect(sectionYaml.textContent).toBe(
       screen.getByTestId('workflowLibraryTemplateDetail-preview').textContent
     );
+  });
+
+  it('should swap the metadata block for the setup header on the setup step', () => {
+    renderDetail();
+    expect(screen.queryByTestId('workflowLibraryTemplateDetail-setupHeader')).toBeNull();
+
+    fireEvent.click(screen.getByTestId('mockInstallSectionSetup'));
+
+    const setupHeader = screen.getByTestId('workflowLibraryTemplateDetail-setupHeader');
+    expect(
+      within(setupHeader).getByRole('heading', { name: 'Setup workflow' })
+    ).toBeInTheDocument();
+    expect(within(setupHeader).getByText('For My Template')).toBeInTheDocument();
+    expect(screen.getByTestId('mockInstallSectionStep')).toHaveTextContent('setup');
+    // The summary is gone, the preview stays.
+    expect(screen.queryByTestId('workflowLibraryTemplateDetail-tags')).toBeNull();
+    expect(screen.queryByTestId('workflowLibraryTemplateDetail-version')).toBeNull();
+    expect(screen.getByTestId('workflowLibraryTemplateDetail-preview')).toBeInTheDocument();
+  });
+
+  it('should return to the template summary from the setup step, keeping the committed values', () => {
+    renderWithProviders(<TemplateDetail slug="my-template" back={LIBRARY_BACK} />);
+
+    const backButton = () => screen.getByTestId('workflowLibraryTemplateDetailBackButton');
+    expect(backButton()).toHaveTextContent('Back to Template Library');
+    expect(backButton()).toHaveAttribute('href', LIBRARY_BACK.href);
+
+    fireEvent.click(screen.getByTestId('mockInstallSectionCommit'));
+    fireEvent.click(screen.getByTestId('mockInstallSectionSetup'));
+
+    // The host's back target is replaced by one that returns to the summary.
+    expect(backButton()).toHaveTextContent('Back to My Template');
+    fireEvent.click(backButton());
+
+    expect(screen.getByRole('heading', { name: 'My Template' })).toBeInTheDocument();
+    expect(backButton()).toHaveTextContent('Back to Template Library');
+    expect(screen.getByTestId('mockInstallSectionStep')).toHaveTextContent('details');
+    expect(screen.getByTestId('workflowLibraryTemplateDetail-preview').textContent).toContain(
+      'maxAge: 42'
+    );
+  });
+
+  it('should register a step-aware back in the Chrome header instead of the in-page link in project chrome', () => {
+    const chrome = chromeServiceMock.createStartContract();
+    chrome.getChromeStyle.mockReturnValue('project');
+    chrome.getChromeStyle$.mockReturnValue(of('project'));
+    renderWithProviders(<TemplateDetail slug="my-template" back={LIBRARY_BACK} />, chrome);
+
+    expect(screen.queryByTestId('workflowLibraryTemplateDetailBackButton')).toBeNull();
+    expect(chrome.appHeader.set).toHaveBeenLastCalledWith({ back: LIBRARY_BACK });
+
+    fireEvent.click(screen.getByTestId('mockInstallSectionSetup'));
+
+    const setupBack = chrome.appHeader.set.mock.lastCall?.[0].back;
+    expect(setupBack).toEqual(expect.objectContaining({ label: 'My Template' }));
+
+    const preventDefault = jest.fn();
+    act(() => {
+      if (setupBack) {
+        setupBack.onClick?.({ preventDefault } as unknown as React.MouseEvent);
+      }
+    });
+
+    expect(preventDefault).toHaveBeenCalled();
+    expect(screen.getByTestId('mockInstallSectionStep')).toHaveTextContent('details');
+    expect(chrome.appHeader.set).toHaveBeenLastCalledWith({ back: LIBRARY_BACK });
   });
 
   it('should show the selected step YAML in a read-only graph flyover', () => {
@@ -264,11 +373,11 @@ describe('TemplateDetail', () => {
     // No slug and no fetch result — the query must not be consulted.
     mockUseTemplate.mockReturnValue({ data: undefined, isLoading: true, isError: true });
 
-    render(
-      <WorkflowsUiServicesProvider services={createMockWorkflowsUiServices()}>
-        <TemplateDetail template={TEMPLATE_BODY} installMode="custom" />
-      </WorkflowsUiServicesProvider>
-    );
+    renderWithProviders(<TemplateDetail template={TEMPLATE_BODY} installMode="custom" />);
+    expect(
+      screen.queryByRole('link', { name: 'Report an issue with this template' })
+    ).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Edit this template' })).not.toBeInTheDocument();
 
     expect(mockUseTemplate).toHaveBeenCalledWith(undefined);
     expect(screen.getByRole('heading', { name: 'My Template' })).toBeInTheDocument();

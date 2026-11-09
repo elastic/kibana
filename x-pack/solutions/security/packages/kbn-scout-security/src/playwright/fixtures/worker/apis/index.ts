@@ -39,3 +39,6 @@ export type { HostApiService } from './host';
 
 export { getUserApiService } from './user';
 export type { UserApiService } from './user';
+
+export { getEndpointArtifactsApiService } from './endpoint_artifacts';
+export type { EndpointArtifactsApiService } from './endpoint_artifacts';

@@ -22,7 +22,8 @@ export const createCategorizeFieldAction = (getStartServices: AiopsCoreSetup['ge
       return field.esTypes?.includes('text') === true;
     },
     execute: async (context: CategorizeFieldContext) => {
-      const { field, dataView, originatingApp, additionalFilter, focusTrapProps } = context;
+      const { field, dataView, originatingApp, additionalFilter, focusTrapProps, projectRouting } =
+        context;
       const [[coreStart, pluginStart], { showCategorizeFlyout }] = await Promise.all([
         getStartServices(),
         import('./show_flyout'),
@@ -34,7 +35,8 @@ export const createCategorizeFieldAction = (getStartServices: AiopsCoreSetup['ge
         pluginStart,
         originatingApp,
         additionalFilter,
-        focusTrapProps
+        focusTrapProps,
+        projectRouting
       );
     },
   });

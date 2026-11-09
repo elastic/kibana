@@ -312,7 +312,7 @@ EOF
   
   # Post comment directly to PR
   echo "Posting performance report to PR"
-  (cd "$KIBANA_DIR" && ts-node .buildkite/scripts/lifecycle/comment_on_pr.ts \
+  (cd "$KIBANA_DIR" && node .buildkite/scripts/lifecycle/comment_on_pr.ts \
     --message "$(cat "$PR_COMMENT_FILE")" \
     --context "entity-store-performance-job" \
     --clear-previous)
@@ -326,4 +326,3 @@ EOF
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
   generate_performance_report
 fi
-

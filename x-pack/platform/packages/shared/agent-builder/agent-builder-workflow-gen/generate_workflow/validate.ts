@@ -7,6 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { WorkflowsManagementApi } from '@kbn/workflows-management-plugin/server';
+import type { WorkflowDiagnostic } from '@kbn/workflows/types/v1';
 import type { ValidationResult } from './types';
 
 interface Deps {
@@ -20,14 +21,21 @@ export const validateGeneratedYaml = async (
   { api, spaceId, request }: Deps
 ): Promise<ValidationResult> => {
   const result = await api.validateWorkflow(yaml, spaceId, request);
+  const errorDiagnostics = (result.diagnostics ?? []).filter((d) => d.severity === 'error');
+  const unknownSources = errorDiagnostics.filter((d) => d.ruleId === 'esqlUnknownSource');
+  const blocking = errorDiagnostics.filter((d) => d.ruleId !== 'esqlUnknownSource');
 
-  if (result.valid && result.parsedWorkflow) {
-    return { valid: true, parsedWorkflow: result.parsedWorkflow, errors: [] };
+  if (blocking.length === 0 && result.parsedWorkflow) {
+    return {
+      valid: true,
+      parsedWorkflow: result.parsedWorkflow,
+      errors: [],
+      unknownSources: unknownSources.map(formatDiagnostic),
+    };
   }
 
-  const errors = (result.diagnostics ?? [])
-    .filter((d) => d.severity === 'error')
-    .map((d) => `[${d.source}] ${d.message}${d.path ? ` (at ${d.path.join('.')})` : ''}`);
-
-  return { valid: false, errors };
+  return { valid: false, errors: blocking.map(formatDiagnostic), unknownSources: [] };
 };
+
+const formatDiagnostic = (d: WorkflowDiagnostic): string =>
+  `[${d.source}] ${d.message}${d.path ? ` (at ${d.path.join('.')})` : ''}`;

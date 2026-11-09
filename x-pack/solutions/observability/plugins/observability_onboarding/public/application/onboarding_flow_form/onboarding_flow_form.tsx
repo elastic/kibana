@@ -25,7 +25,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import { useSearchParams, useNavigate, useLocation } from 'react-router-dom-v5-compat';
+import { useSearchParams } from '@kbn/shared-ux-router';
+import { useHistory, useLocation } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { LazyPackageCard } from '@kbn/fleet-plugin/public';
 import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
@@ -146,7 +147,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
   const { onPageReady } = usePerformanceContext();
 
   const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
+  const history = useHistory();
   const location = useLocation();
 
   const suggestedPackagesRef = useRef<HTMLDivElement | null>(null);
@@ -318,7 +319,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
               }}
               onClick={() => {
                 if (option.id === 'kubernetes' && !isSelectingCategoryWithKeyboard.current) {
-                  navigate(buildKubernetesRoutePath(location.search));
+                  history.push(buildKubernetesRoutePath(location.search));
                   return;
                 }
                 if (!isSelectingCategoryWithKeyboard.current && suggestedPackagesRef.current) {

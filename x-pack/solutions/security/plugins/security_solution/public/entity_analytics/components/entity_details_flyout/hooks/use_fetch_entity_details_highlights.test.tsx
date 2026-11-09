@@ -124,12 +124,22 @@ describe('useFetchEntityDetailsHighlights', () => {
     });
 
     expect(mockFetchEntityDetailsHighlights).toHaveBeenCalledWith({
-      entityType: 'user',
-      entityIdentifier: 'test-user',
-      anonymizationFields: mockProps.anonymizationFields,
-      from: expect.any(Number),
-      to: expect.any(Number),
-      connectorId: 'test-connector-id',
+      params: {
+        entityType: 'user',
+        entityIdentifier: 'test-user',
+        anonymizationFields: mockProps.anonymizationFields,
+        from: expect.any(Number),
+        to: expect.any(Number),
+        connectorId: 'test-connector-id',
+        mode: 'single',
+      },
+      context: {
+        child: {
+          type: 'security_solution',
+          name: 'entity_analytics:entity_details_flyout',
+          id: 'highlights',
+        },
+      },
     });
 
     expect(mockInferenceOutput).toHaveBeenCalledWith({
@@ -289,22 +299,70 @@ describe('useFetchEntityDetailsHighlights', () => {
       });
 
       expect(mockSaveEntityAiSummary).toHaveBeenCalledWith({
-        entityId: 'test-user',
-        entityType: 'user',
-        summary: {
-          highlights: mockSuccessfulInferenceOutput.output.highlights,
-          recommended_actions: mockSuccessfulInferenceOutput.output.recommended_actions,
-          generated_at: expect.any(Number),
-          staleness: {
-            enabled_signals: ['risk_score'],
-            snapshot: { risk_score: 55 },
+        params: {
+          entityId: 'test-user',
+          entityType: 'user',
+          summary: {
+            highlights: mockSuccessfulInferenceOutput.output.highlights,
+            recommended_actions: mockSuccessfulInferenceOutput.output.recommended_actions,
+            generated_at: expect.any(Number),
+            staleness: {
+              enabled_signals: ['risk_score'],
+              snapshot: { risk_score: 55 },
+            },
+          },
+          modelOutputCounts: {
+            highlights: 1,
+            recommendedActions: 2,
           },
         },
-        modelOutputCounts: {
-          highlights: 1,
-          recommendedActions: 2,
+        context: {
+          child: {
+            type: 'security_solution',
+            name: 'entity_analytics:entity_details_flyout',
+            id: 'ai_summary_save',
+          },
         },
       });
+    });
+
+    it('does not tag single-mode summaries with a variant id', async () => {
+      mockFetchEntityDetailsHighlights.mockResolvedValueOnce(mockEntityDetailsResponse);
+      mockInferenceOutput.mockResolvedValueOnce(mockSuccessfulInferenceOutput);
+
+      const { result } = renderHook(() => useFetchEntityDetailsHighlights(mockProps));
+
+      await act(async () => {
+        await result.current.fetchEntityHighlights();
+      });
+
+      const [{ params }] = mockSaveEntityAiSummary.mock.calls[0];
+      expect(params.summary).not.toHaveProperty('variant_id');
+    });
+
+    it('requests a group summary and persists it under the resolved variant in resolved mode', async () => {
+      mockFetchEntityDetailsHighlights.mockResolvedValueOnce(mockEntityDetailsResponse);
+      mockInferenceOutput.mockResolvedValueOnce(mockSuccessfulInferenceOutput);
+
+      const { result } = renderHook(() =>
+        useFetchEntityDetailsHighlights({ ...mockProps, mode: 'resolved' })
+      );
+
+      await act(async () => {
+        await result.current.fetchEntityHighlights();
+      });
+
+      expect(mockFetchEntityDetailsHighlights).toHaveBeenCalledWith(
+        expect.objectContaining({ params: expect.objectContaining({ mode: 'resolved' }) })
+      );
+      expect(mockSaveEntityAiSummary).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            entityId: 'test-user',
+            summary: expect.objectContaining({ variant_id: 'resolved' }),
+          }),
+        })
+      );
     });
 
     it('skips persistence when the user lacks metadata read access (canRead: false)', async () => {
@@ -424,6 +482,33 @@ describe('useFetchEntityDetailsHighlights', () => {
 
       expect(result.current.generationBaseline).toBeNull();
     });
+
+    it('resets the generation baseline when the view mode changes for the same entity', async () => {
+      mockFetchEntityDetailsHighlights.mockResolvedValueOnce(mockEntityDetailsResponse);
+      mockInferenceOutput.mockResolvedValueOnce(mockSuccessfulInferenceOutput);
+
+      const { result, rerender } = renderHook(
+        (props: Parameters<typeof useFetchEntityDetailsHighlights>[0]) =>
+          useFetchEntityDetailsHighlights(props),
+        {
+          initialProps: {
+            ...mockProps,
+            mode: 'single',
+            entitySnapshot: mockEntitySnapshot,
+          } as Parameters<typeof useFetchEntityDetailsHighlights>[0],
+        }
+      );
+
+      await act(async () => {
+        await result.current.fetchEntityHighlights();
+      });
+
+      expect(result.current.generationBaseline).toEqual(mockEntitySnapshot);
+
+      rerender({ ...mockProps, mode: 'resolved', entitySnapshot: mockEntitySnapshot });
+
+      expect(result.current.generationBaseline).toBeNull();
+    });
   });
 
   describe('stored summary hydration', () => {
@@ -454,6 +539,26 @@ describe('useFetchEntityDetailsHighlights', () => {
         generatedBy: mockStoredSummary.generated_by,
         authorProfileUid: mockStoredSummary.author_profile_uid,
       });
+    });
+
+    it('clears the result when switching to an entity that has no stored summary', () => {
+      const { result, rerender } = renderHook(
+        (props: Parameters<typeof useFetchEntityDetailsHighlights>[0]) =>
+          useFetchEntityDetailsHighlights(props),
+        {
+          initialProps: {
+            ...mockProps,
+            storedSummary: mockStoredSummary as PersistedEntityAiSummary | null,
+          },
+        }
+      );
+
+      expect(result.current.result).not.toBeNull();
+
+      // Switch to an entity with no persisted summary
+      rerender({ ...mockProps, entityIdentifier: 'entity-without-summary', storedSummary: null });
+
+      expect(result.current.result).toBeNull();
     });
 
     it('does not overwrite a freshly generated result when a stored summary arrives later', async () => {

@@ -5,12 +5,14 @@ set -euo pipefail
 source .buildkite/scripts/common/util.sh
 
 KIBANA_GITHUB_URL="https://github.com/elastic/kibana"
+UIAM_COSMOSDB_REPO="mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator"
+UIAM_COSMOSDB_IMAGE_PATTERN="^mcr\.microsoft\.com/cosmosdb/linux/azure-cosmos-emulator:[A-Za-z0-9_.-]+$"
 
 if [[ -z "${UIAM_COSMOSDB_IMAGE:-}" ]]; then
   echo "UIAM_COSMOSDB_IMAGE is not set"
   exit 1
-elif [[ "$UIAM_COSMOSDB_IMAGE" != *"mcr.microsoft.com"* ]]; then
-  echo "UIAM_COSMOSDB_IMAGE should be a mcr.microsoft.com image"
+elif [[ ! "$UIAM_COSMOSDB_IMAGE" =~ $UIAM_COSMOSDB_IMAGE_PATTERN ]]; then
+  echo "UIAM_COSMOSDB_IMAGE should be a tagged $UIAM_COSMOSDB_REPO image"
   exit 1
 fi
 

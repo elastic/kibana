@@ -6,7 +6,7 @@
  */
 
 import { attachmentTools } from '@kbn/agent-builder-common';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createAttachmentReadTool } from './attachment_read';
 import { createAttachmentUpdateTool } from './attachment_update';
 import { createAttachmentAddTool } from './attachment_add';
@@ -32,12 +32,12 @@ export const attachmentToolIds = [
  */
 export const createAttachmentTools = (
   options: AttachmentToolsOptions
-): BuiltinToolDefinition<any>[] => {
+): InternalBuiltinToolDefinition<any>[] => {
   return [
     createAttachmentReadTool(options),
     createAttachmentUpdateTool(options),
     createAttachmentAddTool(options),
-    createAttachmentListTool(options),
-    createAttachmentDiffTool(options),
+    createAttachmentListTool(),
+    createAttachmentDiffTool(),
   ];
 };

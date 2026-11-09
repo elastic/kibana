@@ -8,9 +8,15 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { BulkResponse, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/logging';
+import type { TelemetryReporter } from '../../telemetry/events';
+import {
+  ENTITY_STORE_RESOLUTION_LINK_EVENT,
+  ENTITY_STORE_RESOLUTION_UNLINK_EVENT,
+} from '../../telemetry/events';
+import { reportResolutionError } from './resolution_telemetry';
 import { ENTITY_ID_FIELD } from '../../../common/domain/definitions/common_fields';
 import { getFieldValue } from '../../../common/domain/euid/commons';
-import { getLatestEntitiesIndexName } from '../../../common/domain/entity_index';
+import { resolveLatestEntitiesIndexName } from '../asset_manager/resolve_entity_store_indices';
 import {
   ChainResolutionError,
   EntitiesNotFoundError,
@@ -30,12 +36,18 @@ import {
 
 const RESOLVED_TO_FIELD = 'entity.relationships.resolution.resolved_to';
 const ENGINE_METADATA_TYPE_FIELD = 'entity.EngineMetadata.Type';
-const MAX_RESOLUTION_SEARCH_SIZE = 10_000;
+export const MAX_RESOLUTION_SEARCH_SIZE = 10_000;
 
 interface ResolutionClientOpts {
   logger: Logger;
   esClient: ElasticsearchClient;
   namespace: string;
+  analytics?: TelemetryReporter;
+  /**
+   * Latest-entities index already resolved by the caller; reads by the caller
+   * and writes here must use the same one.
+   */
+  latestIndex?: string;
 }
 
 export interface LinkResult {
@@ -81,6 +93,12 @@ export interface ResolutionWriteOptions {
    * bulk imports.
    */
   awaitVisibility?: boolean;
+
+  /**
+   * When false, the per-call link/unlink and resolution-error events are not emitted.
+   * Default: true.
+   */
+  reportTelemetry?: boolean;
 }
 
 interface FetchedEntities {
@@ -92,11 +110,19 @@ export class ResolutionClient {
   private readonly logger: Logger;
   private readonly esClient: ElasticsearchClient;
   private readonly namespace: string;
+  private readonly analytics?: TelemetryReporter;
+  private readonly latestIndex?: string;
 
-  constructor({ logger, esClient, namespace }: ResolutionClientOpts) {
+  constructor({ logger, esClient, namespace, analytics, latestIndex }: ResolutionClientOpts) {
     this.logger = logger;
     this.esClient = esClient;
     this.namespace = namespace;
+    this.analytics = analytics;
+    this.latestIndex = latestIndex;
+  }
+
+  private async latestIndexName(): Promise<string> {
+    return this.latestIndex ?? resolveLatestEntitiesIndexName(this.esClient, this.namespace);
   }
 
   /**
@@ -109,9 +135,32 @@ export class ResolutionClient {
     rawEntityIds: string[],
     options: ResolutionWriteOptions = {}
   ): Promise<LinkResult> {
+    const analytics = options.reportTelemetry === false ? undefined : this.analytics;
+    try {
+      const result = await this.performLink(targetId, rawEntityIds, options);
+      analytics?.reportEvent(ENTITY_STORE_RESOLUTION_LINK_EVENT, {
+        entityType: result.entity_type,
+        entitiesLinked: result.linked.length,
+        entitiesSkipped: result.skipped.length,
+        namespace: this.namespace,
+      });
+      return result;
+    } catch (error) {
+      if (analytics) {
+        reportResolutionError(analytics, 'link', this.namespace, error);
+      }
+      throw error;
+    }
+  }
+
+  private async performLink(
+    targetId: string,
+    rawEntityIds: string[],
+    options: ResolutionWriteOptions
+  ): Promise<LinkResult> {
     const { awaitVisibility = false } = options;
     const refresh: RefreshOption = awaitVisibility ? 'wait_for' : false;
-    const index = getLatestEntitiesIndexName(this.namespace);
+    const index = await this.latestIndexName();
 
     // 1. Deduplicate entity_ids
     const entityIds = [...new Set(rawEntityIds)];
@@ -185,7 +234,7 @@ export class ResolutionClient {
     targetId: string,
     rawEntityIds: string[]
   ): Promise<CascadeResult> {
-    const index = getLatestEntitiesIndexName(this.namespace);
+    const index = await this.latestIndexName();
     const entityIds = [...new Set(rawEntityIds)];
 
     if (entityIds.includes(targetId)) {
@@ -267,9 +316,31 @@ export class ResolutionClient {
     rawEntityIds: string[],
     options: ResolutionWriteOptions = {}
   ): Promise<UnlinkResult> {
+    const analytics = options.reportTelemetry === false ? undefined : this.analytics;
+    try {
+      const result = await this.performUnlink(rawEntityIds, options);
+      analytics?.reportEvent(ENTITY_STORE_RESOLUTION_UNLINK_EVENT, {
+        entityType: result.entity_type,
+        entitiesUnlinked: result.unlinked.length,
+        entitiesSkipped: result.skipped.length,
+        namespace: this.namespace,
+      });
+      return result;
+    } catch (error) {
+      if (analytics) {
+        reportResolutionError(analytics, 'unlink', this.namespace, error);
+      }
+      throw error;
+    }
+  }
+
+  private async performUnlink(
+    rawEntityIds: string[],
+    options: ResolutionWriteOptions
+  ): Promise<UnlinkResult> {
     const { awaitVisibility = false } = options;
     const refresh: RefreshOption = awaitVisibility ? 'wait_for' : false;
-    const index = getLatestEntitiesIndexName(this.namespace);
+    const index = await this.latestIndexName();
 
     // 1. Deduplicate and fetch all entities
     const entityIds = [...new Set(rawEntityIds)];
@@ -323,7 +394,7 @@ export class ResolutionClient {
    * Standalone entities return as the target with empty aliases.
    */
   public async getResolutionGroup(entityId: string): Promise<ResolutionGroup> {
-    const index = getLatestEntitiesIndexName(this.namespace);
+    const index = await this.latestIndexName();
 
     // 1. Fetch the requested entity
     const { sources } = await this.fetchAndValidateEntities([entityId]);
@@ -420,7 +491,7 @@ export class ResolutionClient {
    * Throws EntitiesNotFoundError if any IDs are missing.
    */
   private async fetchAndValidateEntities(entityIds: string[]): Promise<FetchedEntities> {
-    const index = getLatestEntitiesIndexName(this.namespace);
+    const index = await this.latestIndexName();
     const response = await searchEntitiesByIds(this.esClient, {
       index,
       entityIdField: ENTITY_ID_FIELD,
@@ -452,8 +523,8 @@ export class ResolutionClient {
    * For a list of entity IDs, finds which ones have aliases pointing to them.
    * Returns a map from entity ID → list of alias entity IDs.
    */
-  private async findEntitiesWithAliases(entityIds: string[]): Promise<Map<string, string[]>> {
-    const index = getLatestEntitiesIndexName(this.namespace);
+  public async findEntitiesWithAliases(entityIds: string[]): Promise<Map<string, string[]>> {
+    const index = await this.latestIndexName();
     const response = await searchByResolvedToField(this.esClient, {
       index,
       resolvedToField: RESOLVED_TO_FIELD,
@@ -488,7 +559,7 @@ export class ResolutionClient {
     targetId: string;
     entityIds: string[];
   }): Promise<{ aliasDocIds: Map<string, string>; cascadesBlocked: number }> {
-    const index = getLatestEntitiesIndexName(this.namespace);
+    const index = await this.latestIndexName();
     const response = await searchByResolvedToField(this.esClient, {
       index,
       resolvedToField: RESOLVED_TO_FIELD,

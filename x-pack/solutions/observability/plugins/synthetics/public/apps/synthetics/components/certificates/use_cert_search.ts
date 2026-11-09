@@ -30,6 +30,7 @@ export const useCertSearch = ({
   issuers,
   notValidAfter,
   remoteNames,
+  showFromAllSpaces,
 }: GetCertsParams): CertResult & { isLoading?: boolean } => {
   const { lastRefresh } = useContext(SyntheticsRefreshContext);
 
@@ -50,6 +51,7 @@ export const useCertSearch = ({
         issuers,
         notValidAfter,
         remoteNames,
+        showFromAllSpaces,
       })
     );
   }, [
@@ -67,6 +69,7 @@ export const useCertSearch = ({
     issuers,
     notValidAfter,
     remoteNames,
+    showFromAllSpaces,
   ]);
 
   const { data, isLoading } = useSelector(selectCertsListState);

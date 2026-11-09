@@ -8,7 +8,7 @@
  */
 
 import type { WorkflowDetailDto } from '@kbn/workflows';
-import { pickWorkflowDocumentVersion } from '@kbn/workflows';
+import { pickWorkflowDocumentVersion, storedWorkflowAccessControlSchema } from '@kbn/workflows';
 import type { WorkflowPartialDetailDto } from '@kbn/workflows/types/v1';
 
 import type { WorkflowProperties } from '../../storage/workflow_storage';
@@ -24,11 +24,15 @@ export const transformStorageDocumentToWorkflowDto = (
   if (!id || !source) {
     throw new Error('Invalid document, id or source is undefined');
   }
+  const accessControl = storedWorkflowAccessControlSchema.parse(source.access_control);
   return {
     id,
+    ...(source.owner_id ? { owner_id: source.owner_id } : {}),
+    ...(accessControl ? { access_control: accessControl } : {}),
     name: source.name,
     description: source.description,
     enabled: source.enabled,
+    tags: source.tags,
     managed: source.managed,
     managedBy: source.managedBy,
     definitionHash: source.definitionHash,
@@ -70,6 +74,7 @@ export const transformStoragePartialToWorkflowDto = (
   if ('name' in source) dto.name = source.name;
   if ('description' in source) dto.description = source.description;
   if ('enabled' in source) dto.enabled = source.enabled;
+  if ('tags' in source) dto.tags = source.tags;
   if ('managed' in source) dto.managed = source.managed;
   if ('managedBy' in source) dto.managedBy = source.managedBy;
   if ('definitionHash' in source) dto.definitionHash = source.definitionHash;

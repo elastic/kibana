@@ -6,14 +6,15 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiCodeBlock, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiCodeBlock, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { css } from '@emotion/react';
 
 export const HelpCommands = ({ apiKey }: { apiKey: string }) => {
   return (
     <div css={helpCommandsStyles} data-test-subj="syntheticsProjectApiKeyHelpCommands">
-      <EuiCallOut title={API_KEY_WARNING_LABEL} iconType="info" size="s" />
+      <KbnInfoCallout title={API_KEY_WARNING_LABEL} size="s" />
       <EuiSpacer size="s" />
       <EuiText size="s">
         <strong>{API_KEY_LABEL}</strong>

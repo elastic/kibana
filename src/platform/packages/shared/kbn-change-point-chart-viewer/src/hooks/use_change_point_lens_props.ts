@@ -7,11 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  LensAttributes,
-  LensESQLDataset,
-  LensXYConfig,
-} from '@kbn/lens-embeddable-utils/config_builder';
+import type { LensAttributes, LensXYConfig } from '@kbn/lens-embeddable-utils/config_builder';
 import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
 import { useEuiTheme } from '@elastic/eui';
 import { useEffect, useRef, useState } from 'react';
@@ -33,7 +29,7 @@ import {
   combineLatest,
   map,
 } from 'rxjs';
-import type { TimeRange } from '@kbn/data-plugin/common';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { UnifiedChangePointGridProps } from '../types';
 
 export type ChangePointLensProps = Pick<
@@ -49,7 +45,10 @@ export type ChangePointLensProps = Pick<
   | 'onLoad'
   | 'lastReloadRequestTime'
   | 'userMessages'
->;
+> & {
+  filters?: Filter[];
+  query?: Query;
+};
 
 /**
  * Builds and keeps the Lens embeddable props up-to-date for a single change point chart card.
@@ -83,6 +82,8 @@ export const useChangePointLensProps = ({
   error,
   userMessages,
   description,
+  searchContext,
+  reportVisibility = false,
 }: {
   lensInstanceId: string;
   /** Human-readable label shown in the Lens panel header, e.g. `"web-server-1"`. */
@@ -108,12 +109,20 @@ export const useChangePointLensProps = ({
   userMessages?: EmbeddableComponentProps['userMessages'];
   /** Optional Lens panel description (e.g. entity identity). Forwarded to `LensAttributes.description` for use as case-attachment metadata. */
   description?: string;
+  /**
+   * Dashboard filters and input query. Discover omits this so its mini charts keep their current search context.
+   */
+  searchContext?: {
+    filters: Filter[];
+    query?: Query;
+  };
+  /** When true, mirror viewport visibility into React state for panel render reporting. */
+  reportVisibility?: boolean;
 } & Pick<UnifiedChangePointGridProps, 'services' | 'fetchParams'>) => {
   const { euiTheme } = useEuiTheme();
   // Captured once — used only as IntersectionObserver rootMargin and does not need to cause the
   // subscription to be torn down and recreated when the theme changes.
   const rootMarginRef = useRef(euiTheme.size.base);
-
   // Emits whenever any prop that affects the compiled Lens attributes changes, bridging React's
   // render cycle into the RxJS pipeline without recreating the subscription. A BehaviorSubject
   // is used (rather than a plain Subject) so the initial emission fires immediately on mount,
@@ -142,13 +151,14 @@ export const useChangePointLensProps = ({
       },
       layers: chartLayers,
       fittingFunction: 'Linear',
+      areaFill: 'solid',
     };
 
     // builder.build() compiles the high-level LensXYConfig into a full LensSavedObjectAttributes
     // document (visualizationType, datasourceStates, visualization, query, filters, references).
-    const result = (await new LensConfigBuilder(services.dataViews).build(lensParams, {
-      query: { esql: (lensParams.dataset as LensESQLDataset).esql },
-    })) as LensAttributes;
+    const result = (await new LensConfigBuilder(services.dataViews).build(
+      lensParams
+    )) as LensAttributes;
 
     // LensConfigBuilder does not expose a description field in its config; set it directly on
     // the built attributes so it is available as case-attachment metadata.
@@ -161,6 +171,7 @@ export const useChangePointLensProps = ({
 
   const [lensPropsContext, setLensPropsContext] = useState<ChangePointLensProps>();
   const [buildError, setBuildError] = useState<Error | undefined>();
+  const [isInView, setIsInView] = useState<boolean | undefined>();
 
   // useStableCallback always invokes the latest closure, so fetchParams and timeRangeOverride
   // are always current even though this callback is only created once (stable identity).
@@ -177,6 +188,8 @@ export const useChangePointLensProps = ({
         esqlVariables: fetchParams.esqlVariables,
         attributes,
         lastReloadRequestTime: fetchParams.lastReloadRequestTime,
+        filters: searchContext?.filters,
+        query: searchContext?.query,
         userMessages,
       })
     )
@@ -240,13 +253,23 @@ export const useChangePointLensProps = ({
         setBuildError(undefined);
         updateLensPropsContext(attributes);
       });
+    // Ordinary charts keep the observer inside this pipeline. Reporting is the only caller
+    // that needs the visibility result as React state.
+    const visibilitySubscription = reportVisibility
+      ? intersecting$.subscribe(setIsInView)
+      : undefined;
 
     return () => {
       subscription.unsubscribe();
+      visibilitySubscription?.unsubscribe();
     };
-  }, [discoverFetch$, buildAttributesFn, updateLensPropsContext, chartRef]);
+  }, [discoverFetch$, buildAttributesFn, updateLensPropsContext, chartRef, reportVisibility]);
 
-  return { lensProps: lensPropsContext, buildError };
+  return {
+    lensProps: lensPropsContext,
+    buildError,
+    isInView: reportVisibility ? isInView : undefined,
+  };
 };
 
 export const getChangePointLensProps = ({
@@ -256,12 +279,16 @@ export const getChangePointLensProps = ({
   attributes,
   lastReloadRequestTime,
   esqlVariables,
+  filters,
+  query,
   userMessages,
 }: {
   id: string;
   searchSessionId?: string;
   attributes: LensAttributes;
   esqlVariables: ESQLControlVariable[] | undefined;
+  filters?: Filter[];
+  query?: Query;
   timeRange: TimeRange;
   lastReloadRequestTime?: number;
   userMessages?: EmbeddableComponentProps['userMessages'];
@@ -272,6 +299,8 @@ export const getChangePointLensProps = ({
   attributes,
   noPadding: true,
   esqlVariables,
+  filters,
+  query,
   searchSessionId,
   executionContext: {
     description: 'change point chart viewer',

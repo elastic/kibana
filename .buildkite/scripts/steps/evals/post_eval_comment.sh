@@ -20,7 +20,6 @@ set -euo pipefail
 
 # Bootstrap is required so that workspace packages (e.g. @kbn/setup-node-env)
 # are available when calling `node scripts/evals compare`.
-export KBN_BOOTSTRAP_NO_PREBUILT=true
 .buildkite/scripts/bootstrap.sh
 
 GITHUB_PR_NUMBER="${GITHUB_PR_NUMBER:-${EVAL_PR_NUMBER:-${BUILDKITE_PULL_REQUEST:-}}}"
@@ -164,4 +163,4 @@ export GITHUB_PR_NUMBER
 # Always delete-and-recreate so the comment surfaces at the bottom of the PR
 # thread after each build run, keeping it visible alongside newer activity.
 export EVAL_COMMENT_CLEAR_PREVIOUS=1
-ts-node .buildkite/scripts/steps/evals/post_eval_pr_comment.ts < "$MARKDOWN_FILE"
+node .buildkite/scripts/steps/evals/post_eval_pr_comment.ts < "$MARKDOWN_FILE"

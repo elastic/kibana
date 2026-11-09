@@ -5,48 +5,44 @@
  * 2.0.
  */
 
-import type { UseEuiTheme } from '@elastic/eui';
-import { EuiButton, EuiCallOut } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 
 import { ApplicationConnectionsTable } from './application_connections_table';
 import { labels } from '../constants/i18n';
 import { useNavigation } from '../hooks/use_navigation';
 
-const headerStyles = ({ euiTheme }: UseEuiTheme) => css`
-  background-color: ${euiTheme.colors.backgroundBasePlain};
-  border-style: none;
-`;
-
-const callOutStyles = ({ euiTheme }: UseEuiTheme) => css`
-  margin-block: ${euiTheme.size.m};
+const pageBodyStyles = css`
+  flex-grow: 0;
 `;
 
 export const ApplicationConnections = () => {
-  const { mcpClientsListUrl } = useNavigation();
+  const { mcpClientsListUrl, navigateToMcpClientsList } = useNavigation();
+
+  const menu: AppHeaderMenu = {
+    primaryActionItem: {
+      id: 'manageMcpClients',
+      label: labels.page.manageClientsLink,
+      iconType: 'gear',
+      testId: 'applicationConnectionsManageClientsLink',
+      href: mcpClientsListUrl,
+      run: navigateToMcpClientsList,
+    },
+  };
+
   return (
     <>
-      <KibanaPageTemplate.Header
-        css={headerStyles}
-        pageTitle={labels.page.title}
-        rightSideItems={[
-          <EuiButton
-            color="text"
-            iconType="gear"
-            href={mcpClientsListUrl}
-            data-test-subj="applicationConnectionsManageClientsLink"
-          >
-            {labels.page.manageClientsLink}
-          </EuiButton>,
-        ]}
-      />
-      <KibanaPageTemplate.Section paddingSize="none">
-        <EuiCallOut size="s" title={labels.page.pageCallout} iconType="info" css={callOutStyles} />
+      <AppHeader title={labels.page.title} menu={menu} spacing="bleed" />
+      <EuiSpacer size="l" />
+      <div css={pageBodyStyles}>
+        <KbnInfoCallout size="s" title={labels.page.pageCallout} />
+        <EuiSpacer size="m" />
         <ApplicationConnectionsTable />
-      </KibanaPageTemplate.Section>
+      </div>
     </>
   );
 };

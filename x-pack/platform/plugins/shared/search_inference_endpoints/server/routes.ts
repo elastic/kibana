@@ -85,8 +85,8 @@ export function defineRoutes({
       },
       validate: {
         params: schema.object({
-          type: schema.string(),
-          id: schema.string(),
+          type: schema.string({ maxLength: 100 }),
+          id: schema.string({ maxLength: 256 }),
         }),
         query: schema.object({
           scanUsage: schema.maybe(schema.boolean()),

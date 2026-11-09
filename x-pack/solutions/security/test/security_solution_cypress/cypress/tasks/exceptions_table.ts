@@ -43,9 +43,9 @@ import {
   IMPORT_SHARED_EXCEPTION_LISTS_OVERWRITE_EXISTING_CHECKBOX,
   INCLUDE_EXPIRED_EXCEPTION_ITEMS_SWITCH,
   LINKED_RULES_BADGE,
-  MANAGE_EXCEPTION_CREATE_BUTTON_EXCEPTION,
-  MANAGE_EXCEPTION_CREATE_BUTTON_MENU,
-  MANAGE_EXCEPTION_CREATE_LIST_BUTTON,
+  MANAGE_EXCEPTION_CREATE_ITEM,
+  MANAGE_EXCEPTION_MENU_DROPDOWN,
+  MANAGE_EXCEPTION_CREATE_LIST,
   MANAGE_RULES_SAVE,
   RULE_ACTION_LINK_RULE_SWITCH,
 } from '../screens/exceptions';
@@ -133,8 +133,7 @@ export const createSharedExceptionList = (
   { name, description }: { name: string; description?: string },
   submit: boolean
 ) => {
-  cy.get(MANAGE_EXCEPTION_CREATE_BUTTON_MENU).first().click();
-  cy.get(MANAGE_EXCEPTION_CREATE_LIST_BUTTON).first().click();
+  cy.get(MANAGE_EXCEPTION_CREATE_LIST).first().click();
 
   cy.get(CREATE_SHARED_EXCEPTION_LIST_NAME_INPUT).type(`${name}`);
   cy.get(CREATE_SHARED_EXCEPTION_LIST_NAME_INPUT).should('have.value', name);
@@ -196,7 +195,8 @@ export const editExceptionLisDetails = ({
   description?: { original: string; updated: string | null };
 }) => {
   cy.get(EXCEPTIONS_LIST_MANAGEMENT_NAME).should('exist');
-  cy.get(EXCEPTIONS_LIST_MANAGEMENT_EDIT_NAME_BTN).first().click();
+  cy.get('[data-test-subj="app-menu-overflow-button"]').click();
+  cy.get(EXCEPTIONS_LIST_MANAGEMENT_EDIT_NAME_BTN).click();
 
   if (name != null) {
     cy.get(EXCEPTIONS_LIST_MANAGEMENT_NAME).should('have.text', name.original);
@@ -250,15 +250,19 @@ export const validateSharedListLinkedRules = (
   );
   cy.get(EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU).click();
   linkedRulesNames.forEach((ruleName) => {
-    cy.get(EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU_ITEM).contains('a', ruleName);
+    cy.get(EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU_ITEM)
+      .contains(ruleName)
+      .closest('a')
+      .should('have.attr', 'href')
+      .and('include', '/rules/id/');
   });
 };
 
 export const addExceptionListFromSharedExceptionListHeaderMenu = () => {
-  // Click on "Create shared exception list" button on the header
-  cy.get(MANAGE_EXCEPTION_CREATE_BUTTON_MENU).click();
+  // Open the create menu from the chevron of the "Create shared exception list" split button
+  cy.get(MANAGE_EXCEPTION_MENU_DROPDOWN).click();
   // Click on "Create exception item"
-  cy.get(MANAGE_EXCEPTION_CREATE_BUTTON_EXCEPTION).click();
+  cy.get(MANAGE_EXCEPTION_CREATE_ITEM).click();
 };
 
 export const importExceptionListWithSelectingOverwriteExistingOption = () => {

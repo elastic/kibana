@@ -25,6 +25,7 @@ import {
 import { login } from '../../../../tasks/login';
 import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
+import { openAppMenuOverflow } from '../../../../tasks/app_menu';
 
 // TODO: https://github.com/elastic/kibana/issues/164451 We should find a way to make this spec work in Serverless
 // TODO: https://github.com/elastic/kibana/issues/161540
@@ -46,6 +47,7 @@ describe('All rules - read only', { tags: ['@ess', '@serverless', '@skipInServer
   });
 
   it('Disables value lists upload', () => {
+    openAppMenuOverflow();
     cy.get(VALUE_LISTS_MODAL_ACTIVATOR).should('be.disabled');
   });
 

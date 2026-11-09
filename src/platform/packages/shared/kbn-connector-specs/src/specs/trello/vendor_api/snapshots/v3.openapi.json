@@ -1,0 +1,3135 @@
+{
+  "components": {
+    "responses": {
+      "NotFound": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "Action": {
+        "properties": {
+          "data": {
+            "properties": {
+              "board": {
+                "properties": {
+                  "id": {
+                    "$ref": "#/components/schemas/TrelloID",
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "shortLink": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "card": {
+                "properties": {
+                  "id": {
+                    "$ref": "#/components/schemas/TrelloID",
+                    "type": "string"
+                  },
+                  "idShort": {
+                    "type": "integer"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "shortLink": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "list": {
+                "properties": {
+                  "id": {
+                    "$ref": "#/components/schemas/TrelloID",
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "text": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "date": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "display": {
+            "properties": {
+              "entities": {
+                "properties": {
+                  "card": {
+                    "properties": {
+                      "hideIfContext": {
+                        "type": "boolean"
+                      },
+                      "id": {
+                        "$ref": "#/components/schemas/TrelloID",
+                        "type": "string"
+                      },
+                      "shortLink": {
+                        "type": "string"
+                      },
+                      "text": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "comment": {
+                    "properties": {
+                      "text": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "contextOn": {
+                    "properties": {
+                      "hideIfContext": {
+                        "type": "boolean"
+                      },
+                      "idContext": {
+                        "$ref": "#/components/schemas/TrelloID",
+                        "type": "string"
+                      },
+                      "translationKey": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "memberCreator": {
+                    "properties": {
+                      "id": {
+                        "$ref": "#/components/schemas/TrelloID"
+                      },
+                      "text": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "type": "string"
+                      },
+                      "username": {
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  }
+                },
+                "type": "object"
+              },
+              "translationKey": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "id": {
+            "$ref": "#/components/schemas/TrelloID",
+            "type": "string"
+          },
+          "idMemberCreator": {
+            "$ref": "#/components/schemas/TrelloID",
+            "type": "string"
+          },
+          "limits": {
+            "properties": {
+              "reactions": {
+                "properties": {
+                  "perAction": {
+                    "properties": {
+                      "disableAt": {
+                        "type": "number"
+                      },
+                      "status": {
+                        "type": "string"
+                      },
+                      "warnAt": {
+                        "type": "number"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "uniquePerAction": {
+                    "properties": {
+                      "disableAt": {
+                        "type": "number"
+                      },
+                      "status": {
+                        "type": "string"
+                      },
+                      "warnAt": {
+                        "type": "number"
+                      }
+                    },
+                    "type": "object"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "memberCreator": {
+            "properties": {
+              "activityBlocked": {
+                "type": "boolean"
+              },
+              "avatarHash": {
+                "type": "string"
+              },
+              "avatarUrl": {
+                "format": "url",
+                "type": "string"
+              },
+              "fullName": {
+                "type": "string"
+              },
+              "id": {
+                "$ref": "#/components/schemas/TrelloID",
+                "type": "string"
+              },
+              "idMemberReferrer": {
+                "$ref": "#/components/schemas/TrelloID",
+                "nullable": true,
+                "type": "string"
+              },
+              "initials": {
+                "type": "string"
+              },
+              "username": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Board": {
+        "properties": {
+          "closed": {
+            "type": "boolean"
+          },
+          "creationMethod": {
+            "nullable": true,
+            "type": "string"
+          },
+          "dateLastActivity": {
+            "format": "date",
+            "type": "string"
+          },
+          "dateLastView": {
+            "format": "date",
+            "type": "string"
+          },
+          "datePluginDisable": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "desc": {
+            "type": "string"
+          },
+          "descData": {
+            "type": "string"
+          },
+          "enterpriseOwned": {
+            "type": "boolean"
+          },
+          "id": {
+            "$ref": "#/components/schemas/TrelloID"
+          },
+          "idMemberCreator": {
+            "$ref": "#/components/schemas/TrelloID"
+          },
+          "idOrganization": {
+            "$ref": "#/components/schemas/TrelloID"
+          },
+          "idTags": {
+            "type": "string"
+          },
+          "ixUpdate": {
+            "type": "integer"
+          },
+          "labelNames": {
+            "properties": {
+              "black": {
+                "type": "string"
+              },
+              "blue": {
+                "type": "string"
+              },
+              "green": {
+                "type": "string"
+              },
+              "lime": {
+                "type": "string"
+              },
+              "orange": {
+                "type": "string"
+              },
+              "pink": {
+                "type": "string"
+              },
+              "purple": {
+                "type": "string"
+              },
+              "red": {
+                "type": "string"
+              },
+              "sky": {
+                "type": "string"
+              },
+              "yellow": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "limits": {
+            "$ref": "#/components/schemas/Limits",
+            "type": "object"
+          },
+          "memberships": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "pinned": {
+            "type": "boolean"
+          },
+          "powerUps": {
+            "type": "string"
+          },
+          "prefs": {
+            "$ref": "#/components/schemas/Prefs"
+          },
+          "shortLink": {
+            "type": "string"
+          },
+          "shortUrl": {
+            "format": "url",
+            "type": "string"
+          },
+          "starred": {
+            "type": "boolean"
+          },
+          "subscribed": {
+            "type": "boolean"
+          },
+          "templateGallery": {
+            "nullable": true,
+            "type": "string"
+          },
+          "url": {
+            "format": "url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "BoardFields": {
+        "enum": [
+          "id",
+          "name",
+          "desc",
+          "descData",
+          "closed",
+          "idMemberCreator",
+          "idOrganization",
+          "pinned",
+          "url",
+          "shortUrl",
+          "prefs",
+          "labelNames",
+          "starred",
+          "limits",
+          "memberships",
+          "enterpriseOwned"
+        ],
+        "type": "string"
+      },
+      "Card": {
+        "properties": {
+          "address": {
+            "nullable": true,
+            "type": "string"
+          },
+          "badges": {
+            "properties": {
+              "attachments": {
+                "type": "integer"
+              },
+              "attachmentsByType": {
+                "properties": {
+                  "trello": {
+                    "properties": {
+                      "board": {
+                        "type": "number"
+                      },
+                      "card": {
+                        "type": "number"
+                      }
+                    },
+                    "type": "object"
+                  }
+                },
+                "type": "object"
+              },
+              "checkItems": {
+                "type": "integer"
+              },
+              "checkItemsChecked": {
+                "type": "integer"
+              },
+              "comments": {
+                "type": "integer"
+              },
+              "description": {
+                "type": "boolean"
+              },
+              "due": {
+                "format": "date",
+                "nullable": true,
+                "type": "string"
+              },
+              "dueComplete": {
+                "type": "boolean"
+              },
+              "fogbugz": {
+                "type": "string"
+              },
+              "location": {
+                "type": "boolean"
+              },
+              "start": {
+                "format": "date",
+                "nullable": true,
+                "type": "string"
+              },
+              "subscribed": {
+                "type": "boolean"
+              },
+              "viewingMemberVoted": {
+                "type": "boolean"
+              },
+              "votes": {
+                "type": "integer"
+              }
+            },
+            "type": "object"
+          },
+          "cardRole": {
+            "enum": [
+              "separator",
+              "board",
+              "mirror",
+              "link"
+            ],
+            "nullable": true,
+            "type": "string"
+          },
+          "checkItemStates": {
+            "items": {
+              "oneOf": [
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "type": "array"
+          },
+          "closed": {
+            "type": "boolean"
+          },
+          "coordinates": {
+            "nullable": true,
+            "type": "string"
+          },
+          "cover": {
+            "properties": {
+              "brightness": {
+                "enum": [
+                  "light",
+                  "dark"
+                ],
+                "type": "string"
+              },
+              "color": {
+                "$ref": "#/components/schemas/Color",
+                "nullable": true
+              },
+              "idAttachment": {
+                "$ref": "#/components/schemas/TrelloID",
+                "nullable": true,
+                "type": "string"
+              },
+              "idUploadedBackground": {
+                "nullable": true,
+                "type": "boolean"
+              },
+              "isTemplate": {
+                "type": "boolean"
+              },
+              "size": {
+                "enum": [
+                  "normal"
+                ],
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "creationMethod": {
+            "nullable": true,
+            "type": "string"
+          },
+          "dateLastActivity": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "desc": {
+            "type": "string"
+          },
+          "descData": {
+            "properties": {
+              "emoji": {
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "due": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "dueReminder": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "$ref": "#/components/schemas/TrelloID"
+          },
+          "idAttachmentCover": {
+            "$ref": "#/components/schemas/TrelloID",
+            "nullable": true,
+            "type": "string"
+          },
+          "idBoard": {
+            "$ref": "#/components/schemas/TrelloID",
+            "type": "string"
+          },
+          "idChecklists": {
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/Checklist"
+                },
+                {
+                  "$ref": "#/components/schemas/TrelloID"
+                }
+              ]
+            },
+            "type": "array"
+          },
+          "idLabels": {
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/Label"
+                },
+                {
+                  "$ref": "#/components/schemas/TrelloID"
+                }
+              ]
+            },
+            "type": "array"
+          },
+          "idList": {
+            "$ref": "#/components/schemas/TrelloID",
+            "type": "string"
+          },
+          "idMembers": {
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/TrelloID"
+                }
+              ]
+            },
+            "type": "array"
+          },
+          "idMembersVoted": {
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/TrelloID"
+                }
+              ]
+            },
+            "type": "array"
+          },
+          "idShort": {
+            "type": "integer"
+          },
+          "labels": {
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/TrelloID"
+                }
+              ]
+            },
+            "type": "array"
+          },
+          "limits": {
+            "$ref": "#/components/schemas/Limits",
+            "type": "object"
+          },
+          "locationName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "manualCoverAttachment": {
+            "type": "boolean"
+          },
+          "mirrorSourceId": {
+            "$ref": "#/components/schemas/TrelloID",
+            "nullable": true,
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "pos": {
+            "format": "float",
+            "type": "number"
+          },
+          "shortLink": {
+            "type": "string"
+          },
+          "shortUrl": {
+            "format": "url",
+            "type": "string"
+          },
+          "subscribed": {
+            "type": "boolean"
+          },
+          "url": {
+            "format": "url",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CardAging": {
+        "enum": [
+          "pirate",
+          "regular"
+        ],
+        "type": "string"
+      },
+      "Checklist": {
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/TrelloID"
+          }
+        },
+        "type": "object"
+      },
+      "Color": {
+        "enum": [
+          "yellow",
+          "purple",
+          "blue",
+          "red",
+          "green",
+          "orange",
+          "black",
+          "sky",
+          "pink",
+          "lime"
+        ],
+        "nullable": true,
+        "type": "string"
+      },
+      "Error": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "type": "object"
+      },
+      "ImageDescriptor": {
+        "properties": {
+          "height": {
+            "type": "integer"
+          },
+          "url": {
+            "format": "url",
+            "type": "string"
+          },
+          "width": {
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "Label": {
+        "properties": {
+          "color": {
+            "$ref": "#/components/schemas/Color",
+            "type": "string"
+          },
+          "id": {
+            "$ref": "#/components/schemas/TrelloID",
+            "type": "string"
+          },
+          "idBoard": {
+            "$ref": "#/components/schemas/TrelloID",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 16384,
+            "minLength": 0,
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Limits": {
+        "properties": {
+          "attachments": {
+            "properties": {
+              "perBoard": {
+                "$ref": "#/components/schemas/LimitsObject",
+                "type": "object"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "LimitsObject": {
+        "properties": {
+          "disableAt": {
+            "type": "number"
+          },
+          "status": {
+            "enum": [
+              "ok",
+              "warning"
+            ],
+            "type": "string"
+          },
+          "warnAt": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "Member": {
+        "properties": {
+          "aaEmail": {
+            "format": "email",
+            "nullable": true,
+            "type": "string"
+          },
+          "aaEnrolledDate": {
+            "nullable": true,
+            "type": "string"
+          },
+          "aaId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "activityBlocked": {
+            "type": "boolean"
+          },
+          "avatarHash": {
+            "type": "string"
+          },
+          "avatarSource": {
+            "enum": [
+              "gravatar",
+              "upload"
+            ],
+            "type": "string"
+          },
+          "avatarUrl": {
+            "format": "url",
+            "type": "string"
+          },
+          "bio": {
+            "type": "string"
+          },
+          "bioData": {
+            "properties": {
+              "emoji": {
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "confirmed": {
+            "type": "boolean"
+          },
+          "email": {
+            "type": "string"
+          },
+          "fullName": {
+            "type": "string"
+          },
+          "gravatarHash": {
+            "type": "string"
+          },
+          "id": {
+            "$ref": "#/components/schemas/TrelloID"
+          },
+          "idBoards": {
+            "items": {
+              "$ref": "#/components/schemas/TrelloID"
+            },
+            "type": "array"
+          },
+          "idBoardsPinned": {
+            "items": {
+              "$ref": "#/components/schemas/TrelloID"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "idEnterprise": {
+            "$ref": "#/components/schemas/TrelloID",
+            "type": "string"
+          },
+          "idEnterprisesAdmin": {
+            "items": {
+              "$ref": "#/components/schemas/TrelloID"
+            },
+            "type": "array"
+          },
+          "idEnterprisesDeactivated": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "idMemberReferrer": {
+            "$ref": "#/components/schemas/TrelloID",
+            "nullable": true
+          },
+          "idOrganizations": {
+            "items": {
+              "$ref": "#/components/schemas/TrelloID"
+            },
+            "type": "array"
+          },
+          "idPremOrgsAdmin": {
+            "items": {
+              "$ref": "#/components/schemas/TrelloID"
+            },
+            "type": "array"
+          },
+          "initials": {
+            "type": "string"
+          },
+          "isAaMastered": {
+            "type": "boolean"
+          },
+          "ixUpdate": {
+            "type": "number"
+          },
+          "limits": {
+            "$ref": "#/components/schemas/LimitsObject"
+          },
+          "loginTypes": {
+            "items": {
+              "enum": [
+                "password",
+                "saml"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "marketingOptIn": {
+            "properties": {
+              "date": {
+                "format": "date",
+                "type": "string"
+              },
+              "optedIn": {
+                "type": "boolean"
+              }
+            },
+            "type": "object"
+          },
+          "memberType": {
+            "enum": [
+              "normal",
+              "ghost"
+            ],
+            "type": "string"
+          },
+          "messagesDismissed": {
+            "properties": {
+              "_id": {
+                "$ref": "#/components/schemas/TrelloID"
+              },
+              "count": {
+                "type": "string"
+              },
+              "lastDismissed": {
+                "format": "date",
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "nonPublic": {
+            "properties": {
+              "avatarHash": {
+                "type": "string"
+              },
+              "avatarUrl": {
+                "format": "url",
+                "type": "string"
+              },
+              "fullName": {
+                "type": "string"
+              },
+              "initials": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "nonPublicAvailable": {
+            "type": "boolean"
+          },
+          "oneTimeMessagesDismissed": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "prefs": {
+            "$ref": "#/components/schemas/MemberPrefs"
+          },
+          "premiumFeatures": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "products": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array"
+          },
+          "status": {
+            "enum": [
+              "disconnected"
+            ],
+            "type": "string"
+          },
+          "trophies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "uploadedAvatarHash": {
+            "type": "string"
+          },
+          "uploadedAvatarUrl": {
+            "format": "url",
+            "type": "string"
+          },
+          "url": {
+            "format": "url",
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "MemberFields": {
+        "enum": [
+          "id"
+        ],
+        "type": "string"
+      },
+      "MemberPrefs": {
+        "properties": {
+          "colorBlind": {
+            "type": "boolean"
+          },
+          "locale": {
+            "type": "string"
+          },
+          "minutesBeforeDeadlineToNotify": {
+            "type": "integer"
+          },
+          "minutesBetweenSummaries": {
+            "type": "integer"
+          },
+          "privacy": {
+            "properties": {
+              "avatar": {
+                "enum": [
+                  "public",
+                  "private",
+                  "collaborator"
+                ],
+                "type": "string"
+              },
+              "fullName": {
+                "enum": [
+                  "public",
+                  "private",
+                  "collaborator"
+                ],
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "sendSummaries": {
+            "type": "boolean"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "timezoneInfo": {
+            "properties": {
+              "dateNext": {
+                "format": "date",
+                "type": "string"
+              },
+              "offsetCurrent": {
+                "type": "integer"
+              },
+              "offsetNext": {
+                "type": "integer"
+              },
+              "timezoneCurrent": {
+                "type": "string"
+              },
+              "timezoneNext": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "twoFactor": {
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              },
+              "needsNewBackups": {
+                "type": "boolean"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "Organization": {
+        "properties": {
+          "dateLastActivity": {
+            "format": "date",
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "id": {
+            "$ref": "#/components/schemas/TrelloID"
+          },
+          "idBoards": {
+            "items": {
+              "$ref": "#/components/schemas/TrelloID"
+            },
+            "type": "array"
+          },
+          "idEnterprise": {
+            "$ref": "#/components/schemas/TrelloID"
+          },
+          "memberships": {
+            "items": {
+              "$ref": "#/components/schemas/TrelloID"
+            },
+            "type": "array"
+          },
+          "name": {
+            "type": "string"
+          },
+          "offering": {
+            "type": "string"
+          },
+          "prefs": {
+            "$ref": "#/components/schemas/OrganizationPrefs"
+          },
+          "premiumFeatures": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "url": {
+            "format": "url",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "OrganizationFields": {
+        "enum": [
+          "id",
+          "name"
+        ],
+        "type": "string"
+      },
+      "OrganizationPrefs": {
+        "properties": {
+          "attachmentRestrictions": {
+            "items": {
+              "enum": [
+                "computer",
+                "trello",
+                "google-drive",
+                "box",
+                "onedrive",
+                "link"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "boardDeleteRestrict": {
+            "type": "object"
+          },
+          "boardVisibilityRestrict": {
+            "type": "object"
+          },
+          "permissionLevel": {
+            "enum": [
+              "org",
+              "private",
+              "public",
+              "enterprise",
+              "domain"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Prefs": {
+        "properties": {
+          "background": {
+            "$ref": "#/components/schemas/TrelloID"
+          },
+          "backgroundBottomColor": {
+            "type": "string"
+          },
+          "backgroundBrightness": {
+            "type": "string"
+          },
+          "backgroundImage": {
+            "format": "uri",
+            "type": "string"
+          },
+          "backgroundImageScaled": {
+            "items": {
+              "$ref": "#/components/schemas/ImageDescriptor"
+            },
+            "type": "array"
+          },
+          "backgroundTile": {
+            "type": "boolean"
+          },
+          "backgroundTopColor": {
+            "type": "string"
+          },
+          "calendarFeedEnabled": {
+            "type": "boolean"
+          },
+          "canBeEnterprise": {
+            "type": "boolean"
+          },
+          "canBeOrg": {
+            "type": "boolean"
+          },
+          "canBePrivate": {
+            "type": "boolean"
+          },
+          "canBePublic": {
+            "type": "boolean"
+          },
+          "canInvite": {
+            "type": "boolean"
+          },
+          "cardAging": {
+            "$ref": "#/components/schemas/CardAging"
+          },
+          "cardCovers": {
+            "type": "boolean"
+          },
+          "comments": {
+            "type": "string"
+          },
+          "hideVotes": {
+            "type": "boolean"
+          },
+          "invitations": {
+            "enum": [
+              "admins",
+              "members"
+            ]
+          },
+          "isTemplate": {
+            "type": "boolean"
+          },
+          "permissionLevel": {
+            "enum": [
+              "org",
+              "board"
+            ],
+            "type": "string"
+          },
+          "selfJoin": {
+            "type": "boolean"
+          },
+          "voting": {
+            "enum": [
+              "disabled",
+              "enabled"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TrelloID": {
+        "pattern": "^[0-9a-fA-F]{24}$",
+        "type": "string"
+      },
+      "TrelloList": {
+        "properties": {
+          "closed": {
+            "type": "boolean"
+          },
+          "id": {
+            "$ref": "#/components/schemas/TrelloID"
+          },
+          "idBoard": {
+            "type": "string"
+          },
+          "limits": {
+            "$ref": "#/components/schemas/Limits"
+          },
+          "name": {
+            "type": "string"
+          },
+          "pos": {
+            "type": "number"
+          },
+          "softLimit": {
+            "type": "string"
+          },
+          "subscribed": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "ViewFilter": {
+        "enum": [
+          "all",
+          "closed",
+          "none",
+          "open"
+        ],
+        "type": "string"
+      }
+    },
+    "securitySchemes": {
+      "APIKey": {
+        "in": "query",
+        "name": "key",
+        "type": "apiKey"
+      },
+      "APIToken": {
+        "in": "query",
+        "name": "token",
+        "type": "apiKey"
+      },
+      "OAuth2": {
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "https://auth.atlassian.com/authorize",
+            "scopes": {
+              "read:board:trello": "Read cards, lists, and comments in boards.",
+              "read:enterprise:trello": "Read enterprises.",
+              "read:member:trello": "Read email address, public name, public avatar, and memberships of boards, workspaces, and enterprises.",
+              "read:organization:trello": "Read workspaces.",
+              "write:board:membership:trello": "Add, remove, or modify memberships on boards.",
+              "write:board:trello": "Create and update cards, lists, and comments in boards.",
+              "write:enterprise:trello": "Update and manage enterprises.",
+              "write:member:trello": "Upload custom emojis and stickers, star boards, and save searches.",
+              "write:organization:membership:trello": "Add, remove, or modify memberships on workspaces.",
+              "write:organization:trello": "Update workspaces."
+            },
+            "tokenUrl": "https://auth.atlassian.com/authorize/oauth/token"
+          }
+        },
+        "type": "oauth2"
+      }
+    }
+  },
+  "info": {
+    "title": "Trello REST API"
+  },
+  "openapi": "3.0.0",
+  "paths": {
+    "/boards/{id}": {
+      "get": {
+        "deprecated": false,
+        "operationId": "get-boards-id",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "actions",
+            "required": false,
+            "schema": {
+              "default": "all",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "boardStars",
+            "required": false,
+            "schema": {
+              "default": "none",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cards",
+            "required": false,
+            "schema": {
+              "default": "none",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "card_pluginData",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "checklists",
+            "required": false,
+            "schema": {
+              "default": "none",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "customFields",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "required": false,
+            "schema": {
+              "default": "name,desc,descData,closed,idOrganization,pinned,url,shortUrl,prefs,labelNames",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "labels",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "lists",
+            "required": false,
+            "schema": {
+              "default": "open",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "members",
+            "required": false,
+            "schema": {
+              "default": "none",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "memberships",
+            "required": false,
+            "schema": {
+              "default": "none",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pluginData",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "organization",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "organization_pluginData",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "myPrefs",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tags",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Board"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2": [
+              "read:board:trello"
+            ]
+          }
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/TrelloID"
+          }
+        }
+      ]
+    },
+    "/boards/{id}/cards": {
+      "get": {
+        "deprecated": false,
+        "operationId": "get-boards-id-cards",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {}
+        },
+        "security": [
+          {
+            "OAuth2": [
+              "read:board:trello"
+            ]
+          }
+        ]
+      }
+    },
+    "/boards/{id}/labels": {
+      "get": {
+        "deprecated": false,
+        "operationId": "get-boards-id-labels",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/TrelloID"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/Label"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "maximum": 1000,
+              "minimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {}
+        },
+        "security": [
+          {
+            "OAuth2": [
+              "read:board:trello"
+            ]
+          }
+        ]
+      }
+    },
+    "/boards/{id}/lists": {
+      "get": {
+        "deprecated": false,
+        "operationId": "get-boards-id-lists",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "cards",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/ViewFilter"
+            }
+          },
+          {
+            "in": "query",
+            "name": "card_fields",
+            "required": false,
+            "schema": {
+              "default": "all",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "filter",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/ViewFilter"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "required": false,
+            "schema": {
+              "default": "all",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TrelloList"
+                  },
+                  "type": "array"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2": [
+              "read:board:trello"
+            ]
+          }
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/TrelloID"
+          }
+        }
+      ]
+    },
+    "/boards/{id}/members": {
+      "get": {
+        "deprecated": false,
+        "operationId": "get-boards-id-members",
+        "responses": {
+          "200": {}
+        },
+        "security": [
+          {
+            "OAuth2": [
+              "read:board:trello"
+            ]
+          }
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/TrelloID"
+          }
+        }
+      ]
+    },
+    "/cards": {
+      "post": {
+        "deprecated": false,
+        "operationId": "post-cards",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "name",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "desc",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pos",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "enum": [
+                    "top",
+                    "bottom"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "format": "float",
+                  "minimum": 0,
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "due",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "start",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dueComplete",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "idList",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/TrelloID"
+            }
+          },
+          {
+            "in": "query",
+            "name": "idMembers",
+            "required": false,
+            "schema": {
+              "items": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/TrelloID"
+                  }
+                ]
+              },
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "idLabels",
+            "required": false,
+            "schema": {
+              "items": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/TrelloID"
+                  }
+                ]
+              },
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "urlSource",
+            "required": false,
+            "schema": {
+              "format": "url",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fileSource",
+            "required": false,
+            "schema": {
+              "format": "binary",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "mimeType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "idCardSource",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/TrelloID"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "keepFromSource",
+            "required": false,
+            "schema": {
+              "default": "all",
+              "enum": [
+                "all",
+                "attachments",
+                "checklists",
+                "comments",
+                "customFields",
+                "due",
+                "start",
+                "labels",
+                "members",
+                "start",
+                "stickers"
+              ],
+              "type": "string"
+            },
+            "style": "form"
+          },
+          {
+            "in": "query",
+            "name": "address",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "locationName",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "coordinates",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cardRole",
+            "required": false,
+            "schema": {
+              "enum": [
+                "separator",
+                "board",
+                "mirror",
+                "link"
+              ],
+              "nullable": true,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Card"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2": [
+              "write:board:trello"
+            ]
+          }
+        ]
+      }
+    },
+    "/cards/{id}": {
+      "get": {
+        "deprecated": false,
+        "operationId": "get-cards-id",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "fields",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "actions",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "attachments",
+            "required": false,
+            "schema": {
+              "default": false,
+              "oneOf": [
+                {
+                  "enum": [
+                    "cover"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "boolean"
+                }
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "attachment_fields",
+            "required": false,
+            "schema": {
+              "default": "all",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "members",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "member_fields",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "membersVoted",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "memberVoted_fields",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "checkItemStates",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "checklists",
+            "required": false,
+            "schema": {
+              "default": "none",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "checklist_fields",
+            "required": false,
+            "schema": {
+              "default": "all",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "board",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "board_fields",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "list",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pluginData",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "stickers",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sticker_fields",
+            "required": false,
+            "schema": {
+              "default": "all",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "customFieldItems",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Card"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2": [
+              "read:board:trello"
+            ]
+          }
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/TrelloID"
+          }
+        }
+      ],
+      "put": {
+        "deprecated": false,
+        "operationId": "put-cards-id",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "name",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "desc",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "closed",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "idMembers",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/TrelloID"
+            },
+            "style": "form"
+          },
+          {
+            "in": "query",
+            "name": "idAttachmentCover",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/TrelloID"
+            }
+          },
+          {
+            "in": "query",
+            "name": "idList",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/TrelloID"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "idLabels",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/TrelloID"
+            },
+            "style": "form"
+          },
+          {
+            "in": "query",
+            "name": "idBoard",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/TrelloID"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pos",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "enum": [
+                    "top",
+                    "bottom"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "format": "float",
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "due",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "start",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dueComplete",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "subscribed",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "address",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "locationName",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "coordinates",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cover",
+            "required": false,
+            "schema": {
+              "properties": {
+                "value": {
+                  "properties": {
+                    "brightness": {
+                      "enum": [
+                        "dark",
+                        "light"
+                      ],
+                      "type": "string"
+                    },
+                    "color": {
+                      "enum": [
+                        "pink",
+                        "yellow",
+                        "lime",
+                        "blue",
+                        "black",
+                        "orange",
+                        "red",
+                        "purple",
+                        "sky",
+                        "green"
+                      ],
+                      "type": "string"
+                    },
+                    "url": {
+                      "format": "url",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Card"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2": [
+              "read:board:trello",
+              "write:board:trello"
+            ]
+          }
+        ]
+      }
+    },
+    "/cards/{id}/actions": {
+      "get": {
+        "deprecated": false,
+        "operationId": "get-cards-id-actions",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/TrelloID"
+            }
+          },
+          {
+            "in": "query",
+            "name": "filter",
+            "required": false,
+            "schema": {
+              "default": "commentCard, updateCard:idList",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "maximum": 19,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Action"
+                  },
+                  "type": "array"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2": [
+              "read:board:trello"
+            ]
+          }
+        ]
+      }
+    },
+    "/cards/{id}/actions/comments": {
+      "post": {
+        "deprecated": false,
+        "operationId": "post-cards-id-actions-comments",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/TrelloID"
+            }
+          },
+          {
+            "in": "query",
+            "name": "text",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Action"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2": [
+              "write:board:trello"
+            ]
+          }
+        ]
+      }
+    },
+    "/lists/{id}/cards": {
+      "get": {
+        "deprecated": false,
+        "operationId": "get-lists-id-cards",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/TrelloID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Card"
+                  },
+                  "type": "array"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2": [
+              "read:board:trello"
+            ]
+          }
+        ]
+      }
+    },
+    "/members/{id}": {
+      "get": {
+        "deprecated": false,
+        "operationId": "get-members=id",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/TrelloID"
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "actions",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "boards",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "boardBackgrounds",
+            "required": false,
+            "schema": {
+              "default": "none",
+              "enum": [
+                "all",
+                "custom",
+                "default",
+                "none",
+                "premium"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "boardsInvited",
+            "required": false,
+            "schema": {
+              "enum": [
+                "closed",
+                "members",
+                "open",
+                "organization",
+                "pinned",
+                "public",
+                "starred",
+                "unpinned"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "boardsInvited_fields",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/BoardFields",
+              "default": "name,closed,idOrganization,pinned"
+            },
+            "style": "form"
+          },
+          {
+            "in": "query",
+            "name": "boardStars",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cards",
+            "required": false,
+            "schema": {
+              "default": "none",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "customBoardBackgrounds",
+            "required": false,
+            "schema": {
+              "default": "none",
+              "enum": [
+                "all",
+                "none"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "customEmoji",
+            "required": false,
+            "schema": {
+              "default": "none",
+              "enum": [
+                "all",
+                "none"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "customStickers",
+            "required": false,
+            "schema": {
+              "default": "none",
+              "enum": [
+                "all",
+                "none"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/MemberFields",
+              "default": "all"
+            }
+          },
+          {
+            "in": "query",
+            "name": "notifications",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "organizations",
+            "required": false,
+            "schema": {
+              "default": "none",
+              "enum": [
+                "all",
+                "members",
+                "none",
+                "public"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "organization_fields",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/OrganizationFields",
+              "default": "all"
+            }
+          },
+          {
+            "in": "query",
+            "name": "organization_paid_account",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "organizationsInvited",
+            "required": false,
+            "schema": {
+              "default": "none",
+              "enum": [
+                "all",
+                "members",
+                "none",
+                "public"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "organizationsInvited_fields",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/OrganizationFields",
+              "default": "all"
+            }
+          },
+          {
+            "deprecated": true,
+            "in": "query",
+            "name": "paid_account",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "savedSearches",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tokens",
+            "required": false,
+            "schema": {
+              "default": "none",
+              "enum": [
+                "all",
+                "none"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/Member"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    },
+    "/members/{id}/boards": {
+      "get": {
+        "deprecated": false,
+        "operationId": "get-members-id-boards",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/TrelloID"
+            }
+          },
+          {
+            "in": "query",
+            "name": "filter",
+            "required": false,
+            "schema": {
+              "default": "all",
+              "enum": [
+                "all",
+                "closed",
+                "members",
+                "open",
+                "organization",
+                "public",
+                "starred"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/BoardFields",
+              "default": "all"
+            }
+          },
+          {
+            "in": "query",
+            "name": "lists",
+            "required": false,
+            "schema": {
+              "default": "none",
+              "enum": [
+                "all",
+                "closed",
+                "none",
+                "open"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "organization",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "organization_fields",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/OrganizationFields",
+              "default": "name,displayName"
+            },
+            "style": "form"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Board"
+                  },
+                  "type": "array"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2": [
+              "read:board:trello"
+            ]
+          }
+        ]
+      }
+    },
+    "/search": {
+      "get": {
+        "deprecated": false,
+        "operationId": "get-search",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "query",
+            "required": true,
+            "schema": {
+              "maxLength": 16834,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "idBoards",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "enum": [
+                    "mine"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "$ref": "#/components/schemas/TrelloID"
+                }
+              ]
+            },
+            "style": "form"
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "idOrganizations",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "style": "form"
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "idCards",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "style": "form"
+          },
+          {
+            "in": "query",
+            "name": "modelTypes",
+            "required": false,
+            "schema": {
+              "default": "all",
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "board_fields",
+            "required": false,
+            "schema": {
+              "default": "name,idOrganization",
+              "type": "string"
+            },
+            "style": "form"
+          },
+          {
+            "in": "query",
+            "name": "boards_limit",
+            "required": false,
+            "schema": {
+              "default": 10,
+              "maximum": 1000,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "board_organization",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "card_fields",
+            "required": false,
+            "schema": {
+              "default": "all",
+              "type": "string"
+            },
+            "style": "form"
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "cards_limit",
+            "required": false,
+            "schema": {
+              "default": 10,
+              "maximum": 1000,
+              "type": "integer"
+            },
+            "style": "form"
+          },
+          {
+            "in": "query",
+            "name": "cards_page",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "maximum": 100,
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "card_board",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "card_list",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "card_members",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "card_stickers",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "card_attachments",
+            "required": false,
+            "schema": {
+              "default": "false",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "organization_fields",
+            "required": false,
+            "schema": {
+              "default": "name,displayName",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "organizations_limit",
+            "required": false,
+            "schema": {
+              "default": "10",
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "member_fields",
+            "required": false,
+            "schema": {
+              "default": "avatarHash,fullName,initials,username,confirmed",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "members_limit",
+            "required": false,
+            "schema": {
+              "default": "10",
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "partial",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "oneOf": [
+                      {
+                        "$ref": "#/components/schemas/Member"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Card"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Board"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Organization"
+                      }
+                    ]
+                  },
+                  "type": "array"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    }
+  },
+  "security": [
+    {
+      "APIKey": [],
+      "APIToken": []
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://api.trello.com/1"
+    }
+  ]
+}

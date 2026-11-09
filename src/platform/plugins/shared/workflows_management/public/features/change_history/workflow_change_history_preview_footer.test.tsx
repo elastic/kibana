@@ -11,20 +11,24 @@ import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
+import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import { WorkflowChangeHistoryPreviewFooter } from './workflow_change_history_preview_footer';
-import type { YamlValidationResult } from '../validate_workflow_yaml/model/types';
 
 jest.mock('../../widgets/workflow_yaml_editor/ui/workflow_yaml_validation_accordion', () => ({
   WorkflowYamlValidationAccordion: ({
     validationErrors,
     isLoading,
+    error,
   }: {
     validationErrors?: YamlValidationResult[] | null;
     isLoading?: boolean;
+    error?: Error | null;
   }) => (
     <div data-test-subj="workflowYamlEditorValidationErrorsList">
       {isLoading || validationErrors === null
         ? 'Initializing validation...'
+        : error
+        ? `Validation failed: ${error.message}`
         : !validationErrors || validationErrors.length === 0
         ? 'No validation errors'
         : `${validationErrors.length} error(s)`}
@@ -35,6 +39,7 @@ jest.mock('../../widgets/workflow_yaml_editor/ui/workflow_yaml_validation_accord
 const sampleError: YamlValidationResult = {
   id: 'custom-error',
   owner: 'step-name-validation',
+  ruleId: 'duplicateStepName',
   severity: 'error',
   message: 'Duplicate step name',
   startLineNumber: 2,
@@ -54,6 +59,7 @@ const renderFooter = (
         validationResults={[]}
         isEditorMounted={true}
         isValidationLoading={false}
+        validationError={null}
         highlightValidationErrors={true}
         {...props}
       />
@@ -88,6 +94,14 @@ describe('WorkflowChangeHistoryPreviewFooter', () => {
 
     expect(screen.getByText('1 error(s)')).toBeInTheDocument();
     expect(screen.queryByText('Initializing validation...')).not.toBeInTheDocument();
+  });
+
+  it('shows operational validation failures separately from diagnostics', () => {
+    renderFooter({ validationError: new Error('Connector metadata is unavailable') });
+
+    expect(
+      screen.getByText('Validation failed: Connector metadata is unavailable')
+    ).toBeInTheDocument();
   });
 
   it('renders a spacer when highlight is disabled', () => {

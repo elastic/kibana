@@ -19,6 +19,7 @@ import {
   createRequestToEs,
   fromEs,
   updateRequestToEs,
+  withPermissions,
 } from './converters';
 
 const creationDate = '2024-09-04T06:44:17.944Z';
@@ -67,6 +68,7 @@ describe('fromEs', () => {
             tool_ids: ['id_1', 'id_2'],
           },
         ],
+        subagent_ids: [],
       },
       description: 'description',
       labels: ['foo', 'bar'],
@@ -101,6 +103,7 @@ describe('fromEs', () => {
             tool_ids: ['legacy_id_1', 'legacy_id_2'],
           },
         ],
+        subagent_ids: [],
       },
       description: 'description',
       labels: ['foo', 'bar'],
@@ -201,6 +204,25 @@ describe('fromEs', () => {
     expect(definition.configuration.ai_indices).toBeUndefined();
   });
 
+  it('returns stored approvals normalized', () => {
+    const document = getSampleDoc();
+    document._source!.config!.approvals = {
+      auto_approved_apis: { elasticsearch: ['indices.create'], kibana: [] },
+    };
+
+    const definition = fromEs(document);
+
+    expect(definition.configuration.approvals).toEqual({
+      auto_approved_apis: { elasticsearch: ['indices.create'] },
+    });
+  });
+
+  it('leaves approvals unset when the config has none', () => {
+    const definition = fromEs(getSampleDoc());
+
+    expect(definition.configuration.approvals).toBeUndefined();
+  });
+
   it('defaults enable_elastic_capabilities to true for default agent when missing', () => {
     const document = getSampleDoc();
     document._source!.id = agentBuilderDefaultAgentId;
@@ -274,6 +296,61 @@ describe('fromEs', () => {
       access_mode: AgentAccessControlMode.Shared,
       entries: accessControlEntries,
     });
+  });
+});
+
+describe('withPermissions', () => {
+  const aliceEntry = { type: 'user' as const, name: 'alice', role: AgentAccessControlRole.Editor };
+  const bobEntry = { type: 'user' as const, name: 'bob', role: AgentAccessControlRole.User };
+
+  const getDocument = (): Required<Document> => ({
+    _id: 'agent-1',
+    _source: {
+      id: 'agent-1',
+      name: 'Agent 1',
+      type: AgentType.chat,
+      space: 'default',
+      description: 'description',
+      access_control: {
+        access_mode: AgentAccessControlMode.Private,
+        entries: [aliceEntry, bobEntry],
+      },
+      created_by_id: 'owner-id',
+      created_by_name: 'owner',
+      config: {
+        tools: [],
+      },
+      created_at: creationDate,
+      updated_at: updateDate,
+    },
+  });
+
+  it('adds permissions from the CurrentUser admin state', () => {
+    const definition = withPermissions({
+      document: getDocument(),
+      user: { id: 'admin-id', username: 'admin', isAdmin: true },
+    });
+
+    expect(definition.permissions).toEqual({
+      update_agent: true,
+      update_access_control: true,
+      update_approvals: true,
+    });
+    expect(definition.access_control?.entries).toEqual([aliceEntry, bobEntry]);
+  });
+
+  it("keeps only the caller's entry when the caller cannot manage access control", () => {
+    const definition = withPermissions({
+      document: getDocument(),
+      user: { id: 'bob-id', username: 'bob', isAdmin: false },
+    });
+
+    expect(definition.permissions).toEqual({
+      update_agent: false,
+      update_access_control: false,
+      update_approvals: false,
+    });
+    expect(definition.access_control?.entries).toEqual([bobEntry]);
   });
 });
 
@@ -379,6 +456,42 @@ describe('createRequestToEs', () => {
     expect(docProperties.config!.ai_indices).toEqual(['ai-index-1', 'ai-index-2']);
   });
 
+  describe('approvals', () => {
+    const convert = (approvals: AgentCreateRequest['configuration']['approvals']) =>
+      createRequestToEs({
+        profile: {
+          id: 'id',
+          name: 'name',
+          description: 'description',
+          configuration: { tools: [], approvals },
+        },
+        user: { id: 'user-id', username: 'test-user' },
+        space: 'space',
+        creationDate: new Date(),
+      });
+
+    it('stores normalized approvals', () => {
+      const approvals = {
+        auto_approved_apis: {
+          elasticsearch: ['indices.delete', 'indices.create', 'indices.delete'],
+          kibana: [],
+        },
+      };
+
+      expect(convert(approvals).config.approvals).toEqual({
+        auto_approved_apis: { elasticsearch: ['indices.create', 'indices.delete'] },
+      });
+    });
+
+    it('does not store empty approvals', () => {
+      expect(convert(undefined).config.approvals).toBeUndefined();
+      expect(convert({}).config.approvals).toBeUndefined();
+      expect(
+        convert({ auto_approved_apis: { elasticsearch: [], kibana: [] } }).config.approvals
+      ).toBeUndefined();
+    });
+  });
+
   it('defaults the type to chat and persists an explicit type', () => {
     const baseRequest: AgentCreateRequest = {
       id: 'id',
@@ -454,7 +567,7 @@ describe('createRequestToEs', () => {
       description: 'description',
       access_control: {
         access_mode: AgentAccessControlMode.Private,
-        entries: [{ type: 'user' as const, name: 'alice', role: AgentAccessControlRole.Editor }],
+        entries: [{ type: 'user' as const, id: 'u_alice', role: AgentAccessControlRole.Editor }],
       },
       configuration: {
         instructions: 'instructions',
@@ -740,6 +853,69 @@ describe('updateRequestToEs', () => {
     });
   });
 
+  describe('approvals', () => {
+    const storedApprovals = {
+      auto_approved_apis: { elasticsearch: ['indices.create', 'indices.delete'] },
+    };
+    const getAgentProps = (): AgentProperties => ({
+      id: 'id',
+      type: AgentType.chat,
+      name: 'name',
+      description: 'description',
+      space: 'space',
+      config: { tools: [], approvals: storedApprovals },
+      labels: [],
+      access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
+      created_by_id: 'test-user-id',
+      created_by_name: 'test-user',
+      created_at: creationDate,
+      updated_at: updateDate,
+    });
+    const convert = (update: AgentUpdateRequest) =>
+      updateRequestToEs({
+        agentId: 'id',
+        currentProps: getAgentProps(),
+        update,
+        updateDate: new Date(),
+        user: testUser,
+      });
+
+    it('keeps stored approvals when the update does not mention them', () => {
+      expect(convert({ configuration: { instructions: 'new' } }).config.approvals).toBe(
+        storedApprovals
+      );
+      expect(convert({ name: 'renamed' }).config.approvals).toBe(storedApprovals);
+    });
+
+    it('stores the approvals of the update normalized', () => {
+      const docProperties = convert({
+        configuration: {
+          approvals: {
+            auto_approved_apis: {
+              elasticsearch: ['indices.delete', 'indices.create'],
+              kibana: ['alerting.delete-alerting-rule-id'],
+            },
+          },
+        },
+      });
+
+      expect(docProperties.config.approvals).toEqual({
+        auto_approved_apis: {
+          elasticsearch: ['indices.create', 'indices.delete'],
+          kibana: ['alerting.delete-alerting-rule-id'],
+        },
+      });
+    });
+
+    it('clears the approvals when the update sends empty lists', () => {
+      const docProperties = convert({
+        configuration: { approvals: { auto_approved_apis: { elasticsearch: [], kibana: [] } } },
+      });
+
+      expect(docProperties.config.approvals).toBeUndefined();
+    });
+  });
+
   it('preserves the stored type on update (type is immutable)', () => {
     const agentProps: AgentProperties = {
       id: 'id',
@@ -984,5 +1160,41 @@ describe('accessControlUpdateToEs', () => {
     expect(result.updated_at).toBe(aclUpdateDate.toISOString());
     expect(result.access_control).toEqual(nextAccessControl);
     expect(result.created_by_id).toBe('creator-id');
+  });
+});
+
+describe('service_account_id', () => {
+  const storedDoc = (serviceAccountId?: string): Document => ({
+    _id: 'agent-1',
+    _source: {
+      id: 'agent-1',
+      name: 'Agent 1',
+      type: AgentType.chat,
+      space: 'default',
+      description: 'description',
+      config: { tools: [] },
+      created_at: creationDate,
+      updated_at: updateDate,
+      ...(serviceAccountId ? { service_account_id: serviceAccountId } : {}),
+    },
+  });
+
+  it('reads the bound account from the document', () => {
+    expect(fromEs(storedDoc('kibana/sa-1')).service_account_id).toBe('kibana/sa-1');
+    expect(fromEs(storedDoc()).service_account_id).toBeUndefined();
+  });
+
+  it('writes the account on create only when the request names one', () => {
+    const request: AgentCreateRequest = {
+      id: 'agent-1',
+      name: 'Agent 1',
+      description: 'description',
+      configuration: { tools: [] },
+    };
+    const base = { user: testUser, space: 'default', creationDate: new Date(creationDate) };
+
+    expect(createRequestToEs({ ...base, profile: request })).not.toHaveProperty(
+      'service_account_id'
+    );
   });
 });

@@ -7,6 +7,7 @@
 
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server';
+import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
@@ -60,25 +61,12 @@ const buildToolDeps = () => ({
 });
 
 const buildContext = (overrides: Partial<ToolHandlerContext> = {}): ToolHandlerContext => ({
-  attachments: {} as never,
-  callContext: { callSource: 'agent', toolCallId: 'test-tool-call-id', toolId: 'test-tool-id' },
+  ...agentBuilderMocks.tools.createHandlerContext(),
   esClient: elasticsearchClientMock.createScopedClusterClient(),
-  events: {} as never,
-  experimentalFeatures: {} as never,
   logger: loggingSystemMock.createLogger(),
   modelProvider: { getDefaultModel: mockGetDefaultModel } as never,
-  prompts: {} as never,
   request: FAKE_REQUEST,
-  resultStore: {} as never,
-  runContext: { runId: 'test-run-id', stack: [] },
-  runner: {} as never,
-  savedObjectsClient: {} as never,
-  skills: {} as never,
-  skillsStore: {} as never,
   spaceId: 'default',
-  stateManager: {} as never,
-  toolManager: {} as never,
-  toolProvider: {} as never,
   ...overrides,
 });
 
@@ -241,6 +229,29 @@ describe('getRunAttackDiscoveryTool', () => {
       expect.objectContaining({
         alerts: ['Alert 1', 'Alert 2'],
         workflowConfig: expect.objectContaining({ default_retrieval_enabled: false }),
+      })
+    );
+  });
+
+  it('normalizes an explicit provided alert_retrieval_mode to the default-retrieval query mode', async () => {
+    // `provided` is an alias for "the alerts are supplied". The value that reaches
+    // the generation workflow config is the built-in default-retrieval query mode,
+    // because `alert_retrieval_mode` is typed as `custom_query | esql`
+    // (WorkflowConfig) and is derived as `mode === 'esql' ? 'esql' : 'custom_query'`.
+    // The pipeline_data route reconstructs the provided-alert entry from
+    // `tracking.providedAlerts` for exactly this reason — see its Step 2.5 tests.
+    await invokeHandler({
+      alerts: ['Alert 1', 'Alert 2'],
+      alert_retrieval_mode: 'provided',
+    });
+
+    expect(mockExecuteGenerationWorkflow).toHaveBeenCalledWith(
+      expect.objectContaining({
+        alerts: ['Alert 1', 'Alert 2'],
+        workflowConfig: expect.objectContaining({
+          alert_retrieval_mode: 'custom_query',
+          default_retrieval_enabled: false,
+        }),
       })
     );
   });

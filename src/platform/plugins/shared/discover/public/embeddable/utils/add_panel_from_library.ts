@@ -12,7 +12,7 @@ import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import { apiHasUniqueId, apiPublishesEditablePauseFetch } from '@kbn/presentation-publishing';
 import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
-import type { DiscoverSessionEmbeddableState } from '../../../server';
+import type { DiscoverSessionEmbeddableState } from '../../../common/embeddable/types';
 import { addControlsFromSavedSession } from './add_controls_from_saved_session';
 
 type OnAddParams = Parameters<RegistryItem['onAdd']>;

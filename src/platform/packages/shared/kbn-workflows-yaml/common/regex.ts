@@ -7,16 +7,75 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const VARIABLE_REGEX = /\{\{\s*(?<key>[\w.\s|()\[\],"']*?[\w.\s|()\[\],"'])\s*\}\}/;
+/**
+ * The characters a mustache key may contain. `}` is deliberately absent: it is what
+ * terminates the greedy match below, and keeping it out of the class is what makes the
+ * pattern linear.
+ */
+const VARIABLE_KEY_CHARS = String.raw`[\w.\s|()\[\],"']`;
+
+/**
+ * Matches `{{ … }}`. The key is greedy and bounded by the closing braces, with no
+ * surrounding `\s*`: an earlier form padded a lazy key with `\s*` on both sides, and
+ * because the key class also matches whitespace, the engine had to try every split of a
+ * whitespace run between the three (CodeQL `js/polynomial-redos`). `matchVariable` and
+ * friends trim the captured key, so callers see the same value as before.
+ */
+export const VARIABLE_REGEX = new RegExp(String.raw`\{\{(?<key>${VARIABLE_KEY_CHARS}*)\}\}`);
 export const VARIABLE_REGEX_GLOBAL = new RegExp(VARIABLE_REGEX.source, 'g');
-export const UNFINISHED_VARIABLE_REGEX_GLOBAL =
-  /\{\{\s*(?<key>[\w.\s|()\[\],"']*?[\w.\s|()\[\],"']?)\s*$/g;
+/** Matches a `{{ …` that runs to the end of the line, for autocomplete. */
+export const UNFINISHED_VARIABLE_REGEX_GLOBAL = new RegExp(
+  String.raw`\{\{(?<key>${VARIABLE_KEY_CHARS}*)$`,
+  'g'
+);
 
-export const ALLOWED_KEY_REGEX =
-  /^[a-zA-Z_$][a-zA-Z0-9_$]*(?:\.[a-zA-Z_$][a-zA-Z0-9_$]*|\[\s*(?:\d+|"[^"]*"|'[^']*')\s*\])*(?:\s*\|.*)?$/;
+/**
+ * A match of a mustache-variable pattern above. The `key` group is unconditional in each
+ * of them, so it always participates in a successful match and is never `undefined`. It
+ * can be the empty string: `{{}}` and `{{ }}` both capture nothing.
+ */
+export type VariableMatch = RegExpMatchArray & { groups: { key: string } };
 
-export const PROPERTY_PATH_REGEX =
-  /^[a-zA-Z_$][a-zA-Z0-9_$]*(?:\.[a-zA-Z_$][a-zA-Z0-9_$]*|\[\s*(?:\d+|"[^"]*"|'[^']*')\s*\])*$/;
+/** Trims the captured key in place, so callers never see the padding the class absorbed. */
+const withTrimmedKey = (match: RegExpMatchArray | null): VariableMatch | null => {
+  if (!match?.groups) {
+    return null;
+  }
+  match.groups.key = match.groups.key.trim();
+  return match as VariableMatch;
+};
+
+/** The first complete `{{ … }}` expression in `text`, or `null`. */
+export const matchVariable = (text: string): VariableMatch | null =>
+  withTrimmedKey(VARIABLE_REGEX.exec(text));
+
+/** Every complete `{{ … }}` expression in `text`, in source order. */
+export const matchAllVariables = (text: string): VariableMatch[] =>
+  Array.from(text.matchAll(VARIABLE_REGEX_GLOBAL), withTrimmedKey).filter(
+    (match): match is VariableMatch => match !== null
+  );
+
+/** The last complete `{{ … }}` expression in `text`, or `null`. */
+export const matchLastVariable = (text: string): VariableMatch | null =>
+  matchAllVariables(text).pop() ?? null;
+
+/** The last unterminated `{{ …` expression in `text`, or `null`. */
+export const matchLastUnfinishedVariable = (text: string): VariableMatch | null =>
+  withTrimmedKey(Array.from(text.matchAll(UNFINISHED_VARIABLE_REGEX_GLOBAL)).pop() ?? null);
+
+/** One JS-identifier path segment (`ep`, `rule_id`). */
+const IDENT = String.raw`[a-zA-Z_$][a-zA-Z0-9_$]*`;
+/**
+ * Bracket subscript: numeric index, quoted key, or a Liquid variable path
+ * (`[0]`, `["rule-1"]`, `[ep]`, `[ep.rule_id]`).
+ */
+const BRACKET_KEY = String.raw`(?:\d+|"[^"]*"|'[^']*'|${IDENT}(?:\.${IDENT})*)`;
+/** Liquid also reads a numeric dot segment as an index (`items.0` is `items[0]`). */
+const PATH_TAIL = String.raw`(?:\.(?:${IDENT}|\d+)|\[\s*${BRACKET_KEY}\s*\])`;
+
+export const ALLOWED_KEY_REGEX = new RegExp(String.raw`^${IDENT}${PATH_TAIL}*(?:\s*\|.*)?$`);
+
+export const PROPERTY_PATH_REGEX = new RegExp(String.raw`^${IDENT}${PATH_TAIL}*$`);
 
 // Liquid-specific regex patterns
 // Matches: {{ variable | filter_prefix (but not {{ variable | filter }})
@@ -83,15 +142,18 @@ export function isVariableValue(value: unknown): boolean {
   return VARIABLE_VALUE_REGEX.test(value);
 }
 
-// Regex to match Liquid tags: {% ... %} or {%- ... -%} (with optional dashes)
-// Matches both single-line and multi-line Liquid tag blocks
-export const LIQUID_TAG_VALUE_REGEX = /\{\%-?\s*[^%]*?\s*-?\%\}/s;
+/**
+ * Matches Liquid tags: {% ... %} or {%- ... -%}, single-line or multi-line. The dashes and
+ * the padding are already matched by `[^%]*`, so the pattern needs no `-?` / `\s*` around it.
+ * Padding it with `\s*` (as an earlier form did) made an unclosed `{%` followed by a
+ * whitespace run cubic, because the engine tried every split of the run (CodeQL
+ * `js/polynomial-redos`).
+ */
+export const LIQUID_TAG_VALUE_REGEX = /\{\%[^%]*\%\}/;
 
 /**
  * Checks if a value contains Liquid tag patterns ({% ... %} or {%- ... -%})
  * Examples: {% if condition %}, {%- if condition -%}, multi-line blocks with Liquid tags
- * Pattern: matches {% or {%- followed by content and %} or -%}
- * The 's' flag allows . to match newlines for multi-line support
  */
 export function isLiquidTagValue(value: unknown): boolean {
   if (typeof value !== 'string') {
