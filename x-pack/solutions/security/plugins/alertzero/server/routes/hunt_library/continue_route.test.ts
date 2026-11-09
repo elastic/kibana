@@ -9,7 +9,6 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { ApiPrivileges } from '@kbn/core-security-server';
 import type { RouteDependencies } from '../register_routes';
-import { createHuntProfileTokenSigner } from '../../hunt_library/profile_token';
 import { HuntContinueError } from '../../hunt_library/continue_session';
 import { registerHuntContinueRoute } from './continue_route';
 
@@ -20,12 +19,8 @@ jest.mock('../../hunt_library/continue_session', () => ({
 }));
 
 const makeDeps = ({
-  signer = createHuntProfileTokenSigner({ key: 'k'.repeat(40) }) as ReturnType<
-    typeof createHuntProfileTokenSigner
-  > | null,
   management = {} as unknown | null,
 }: {
-  signer?: ReturnType<typeof createHuntProfileTokenSigner> | null;
   management?: unknown | null;
 } = {}) => {
   const post = jest.fn();
@@ -37,7 +32,6 @@ const makeDeps = ({
     logger: loggingSystemMock.createLogger(),
     getSpaceId: () => 'default',
     getWorkflowsManagement: () => management ?? undefined,
-    getHuntProfileTokenSigner: () => signer ?? undefined,
     getAgentBuilderConversations: () => ({ getScopedClient: async () => ({}) }),
     getAgentBuilderAttachments: () => ({ getScopedClient: async () => ({}) }),
     reportTelemetryEvent,
@@ -138,8 +132,8 @@ describe('hunt continue route', () => {
     });
   });
 
-  it('returns 503 when no signing key or Workflows management is available', async () => {
-    for (const deps of [makeDeps({ signer: null }), makeDeps({ management: null })]) {
+  it('returns 503 when Workflows management is not available', async () => {
+    for (const deps of [makeDeps({ management: null })]) {
       const response = await call(deps);
       expect(response.customError).toHaveBeenCalledWith(
         expect.objectContaining({ statusCode: 503 })

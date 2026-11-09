@@ -7,33 +7,21 @@
 
 import { config, configSchema } from './config';
 
-const KEY_A = 'a'.repeat(32);
-const KEY_B = 'b'.repeat(32);
+const KEY = 'a'.repeat(32);
 
-describe('alertzero config huntLibrary keys', () => {
-  it('leaves both keys unset by default', () => {
-    const { huntLibrary } = configSchema.validate({});
-
-    expect(huntLibrary.profileTokenKey).toBeUndefined();
-    expect(huntLibrary.fingerprintKey).toBeUndefined();
+describe('alertzero config huntLibrary key', () => {
+  it('leaves the fingerprint key unset by default', () => {
+    expect(configSchema.validate({}).huntLibrary.fingerprintKey).toBeUndefined();
   });
 
-  it('accepts distinct keys', () => {
-    const { huntLibrary } = configSchema.validate({
-      huntLibrary: { profileTokenKey: KEY_A, fingerprintKey: KEY_B },
-    });
+  it('accepts a fingerprint key', () => {
+    const { huntLibrary } = configSchema.validate({ huntLibrary: { fingerprintKey: KEY } });
 
-    expect(huntLibrary.profileTokenKey).toBe(KEY_A);
+    expect(huntLibrary.fingerprintKey).toBe(KEY);
   });
 
-  it('rejects a profile token key equal to the fingerprint key', () => {
-    expect(() =>
-      configSchema.validate({ huntLibrary: { profileTokenKey: KEY_A, fingerprintKey: KEY_A } })
-    ).toThrow('profileTokenKey must differ from fingerprintKey');
-  });
-
-  it('rejects a profile token key shorter than 32 characters', () => {
-    expect(() => configSchema.validate({ huntLibrary: { profileTokenKey: 'short' } })).toThrow();
+  it('rejects a fingerprint key shorter than 32 characters', () => {
+    expect(() => configSchema.validate({ huntLibrary: { fingerprintKey: 'short' } })).toThrow();
   });
 });
 

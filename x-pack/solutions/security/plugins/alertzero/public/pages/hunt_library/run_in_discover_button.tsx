@@ -61,8 +61,8 @@ export const RunInDiscoverButton: React.FC<RunInDiscoverButtonProps> = ({ hunt }
     attempt.current = undefined;
     reportEvent(ALERTZERO_UI_EVENTS.HuntLaunched, { hunt_id: hunt.id });
 
-    // The signed token travels in navigation state, which a URL cannot carry, so Hunt mode needs
-    // the locator. Without a token Discover still opens, in its normal mode.
+    // The session id travels in navigation state, which a URL cannot carry, so Hunt mode needs
+    // the locator. Without a session id Discover still opens, in its normal mode.
     const locator = services.share?.url.locators.get('DISCOVER_APP_LOCATOR');
     if (launch?.profile_token && locator) {
       await locator.navigate({

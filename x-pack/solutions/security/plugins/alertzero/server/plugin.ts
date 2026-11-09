@@ -56,10 +56,6 @@ import {
   runHandoffSweep,
 } from './hunt_library/handoff_sweeper';
 import { runHuntLibraryPreflight, type HuntLibraryPreflight } from './hunt_library/preflight';
-import {
-  createHuntProfileTokenSigner,
-  type HuntProfileTokenSigner,
-} from './hunt_library/profile_token';
 import { registerAlertZeroInferenceFeatures } from './inference_features';
 import { registerUiSettings } from './ui_settings';
 import { registerRoutes } from './routes/register_routes';
@@ -112,7 +108,6 @@ export class AlertZeroPlugin
   /** Settles once start has checked retention and the fingerprint key; Phase 3 gates the worker on it. */
   private huntLibraryPreflight?: Promise<HuntLibraryPreflight | undefined>;
   private readonly config: AlertZeroConfig;
-  private huntProfileTokenSigner?: HuntProfileTokenSigner;
   private readonly isServerless: boolean;
   private serverlessTierAvailable = false;
 
@@ -363,12 +358,6 @@ export class AlertZeroPlugin
         this.workflowsManagementApi
           ? new WatchWorkflowsManagementClientImpl(this.workflowsManagementApi)
           : undefined,
-      getHuntProfileTokenSigner: () => {
-        const { profileTokenKey } = this.config.huntLibrary;
-        if (!profileTokenKey) return undefined;
-        this.huntProfileTokenSigner ??= createHuntProfileTokenSigner({ key: profileTokenKey });
-        return this.huntProfileTokenSigner;
-      },
       resolveUserNames: async (uids) => {
         const names = new Map<string, string>();
         if (!this.security || uids.length === 0) return names;

@@ -10,7 +10,8 @@ import { ApiPrivileges } from '@kbn/core-security-server';
 import { API_VERSIONS, INTERNAL_API_ACCESS } from '@kbn/alertzero-common';
 import { ALERTZERO_API_PRIVILEGE_READ, HUNT_LIBRARY_URL } from '../../../common/constants';
 import type { HuntPreserveResponse } from '../../../common/hunt_library';
-import { HUNT_PROFILE_TOKEN_MAX_BYTES } from '../../../common/hunt_library_profile_state';
+import { HUNT_SESSION_HANDLE_MAX_LENGTH } from '../../../common/hunt_library_profile_state';
+import { readHuntUserKey, resolveHuntSession } from '../../hunt_library/session_lookup';
 import {
   HUNT_SESSION_MAX_FIELDS_PER_ROW,
   HUNT_SESSION_MAX_FILTERS,
@@ -49,14 +50,13 @@ const rowSchema = schema.oneOf([
 /**
  * Preserves rows an analyst selected in Discover as evidence on an Investigation, creating it on
  * the first preservation. Needs AlertZero Read and `manage_investigations`. The space comes from the
- * request and from the signed Hunt state, never from the body.
+ * request and the hunt from the session's own execution, never from the body.
  */
 export const registerHuntPreserveRoute = ({
   router,
   logger,
   getSpaceId,
   getWorkflowsManagement,
-  getHuntProfileTokenSigner,
   getAgentBuilderConversations,
   getAgentBuilderAttachments,
   reportTelemetryEvent,
@@ -81,7 +81,7 @@ export const registerHuntPreserveRoute = ({
         validate: {
           request: {
             body: schema.object({
-              token: schema.string({ minLength: 1, maxLength: HUNT_PROFILE_TOKEN_MAX_BYTES }),
+              token: schema.string({ minLength: 1, maxLength: HUNT_SESSION_HANDLE_MAX_LENGTH }),
               preservation_id: schema.string({
                 minLength: 36,
                 maxLength: 36,
@@ -105,13 +105,6 @@ export const registerHuntPreserveRoute = ({
         },
       },
       withAlertZeroEnabled(async (context, request, response) => {
-        const signer = getHuntProfileTokenSigner();
-        if (!signer) {
-          return response.customError({
-            statusCode: 503,
-            body: { message: 'Hunt mode is not configured' },
-          });
-        }
         const management = getWorkflowsManagement();
         if (!management) {
           return response.customError({
@@ -120,7 +113,24 @@ export const registerHuntPreserveRoute = ({
           });
         }
 
-        const verified = signer.verify(request.body.token, { spaceId: getSpaceId(request) });
+        const core = await context.core;
+        const user = core.security.authc.getCurrentUser();
+        let verified;
+        try {
+          verified = await resolveHuntSession({
+            management,
+            request,
+            spaceId: getSpaceId(request),
+            sessionExecutionId: request.body.token,
+            userKey: readHuntUserKey(user),
+          });
+        } catch (err) {
+          logger.error(`Failed to resolve Hunt session: ${(err as Error).message}`);
+          return response.customError({
+            statusCode: 500,
+            body: { message: 'Failed to resolve the Hunt session' },
+          });
+        }
         if (!verified.ok) {
           return response.badRequest({
             body: {
@@ -129,7 +139,7 @@ export const registerHuntPreserveRoute = ({
             },
           });
         }
-        const { payload: claims } = verified;
+        const { claims } = verified;
         const definition = getHuntDefinition(claims.definitionId);
         if (!definition || definition.version !== claims.definitionVersion) {
           return response.conflict({
@@ -141,7 +151,6 @@ export const registerHuntPreserveRoute = ({
         }
 
         try {
-          const core = await context.core;
           const { body } = request;
           const result = await preserveHuntEvidence({
             management,
@@ -152,7 +161,7 @@ export const registerHuntPreserveRoute = ({
             logger,
             definition,
             claims,
-            actor: core.security.authc.getCurrentUser()?.username ?? 'unknown',
+            actor: user?.username ?? 'unknown',
             preservationId: body.preservation_id,
             note: body.note,
             context: {
@@ -174,14 +183,7 @@ export const registerHuntPreserveRoute = ({
             evidence_count: result.evidenceCount,
             added_count: result.addedCount,
             created: result.created,
-            profile_token: signer.issue({
-              spaceId: claims.spaceId,
-              definitionId: claims.definitionId,
-              definitionVersion: claims.definitionVersion,
-              sessionId: claims.sessionId,
-              sessionExecutionId: claims.sessionExecutionId,
-              investigationId: result.investigationId,
-            }),
+            profile_token: claims.sessionExecutionId,
           };
           return response.ok({ body: responseBody });
         } catch (err) {

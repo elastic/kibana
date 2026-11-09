@@ -20,7 +20,8 @@ import type {
   HuntLaunchResponse,
   HuntSessionVerification,
 } from '../../../common/hunt_library';
-import { HUNT_PROFILE_TOKEN_MAX_BYTES } from '../../../common/hunt_library_profile_state';
+import { HUNT_SESSION_HANDLE_MAX_LENGTH } from '../../../common/hunt_library_profile_state';
+import { readHuntUserKey, resolveHuntSession } from '../../hunt_library/session_lookup';
 import type {
   HuntAvailability,
   HuntLibraryDetail,
@@ -96,7 +97,6 @@ export const registerHuntLibraryRoutes = ({
   logger,
   getSpaceId,
   getWorkflowsManagement,
-  getHuntProfileTokenSigner,
   resolveUserNames,
   isServerless,
 }: RouteDependencies) => {
@@ -159,8 +159,7 @@ export const registerHuntLibraryRoutes = ({
         authc?: { getCurrentUser: () => { profile_uid?: string; username?: string } | null };
       };
     };
-    const user = core.security?.authc?.getCurrentUser();
-    return user?.profile_uid ?? user?.username ?? 'unknown';
+    return readHuntUserKey(core.security?.authc?.getCurrentUser());
   };
 
   router.versioned
@@ -369,18 +368,11 @@ export const registerHuntLibraryRoutes = ({
             sessionId: request.body.session_id,
             logger,
           });
-          const profileToken = getHuntProfileTokenSigner()?.issue({
-            spaceId,
-            definitionId: definition.id,
-            definitionVersion: definition.version,
-            sessionId: result.sessionId,
-            sessionExecutionId: result.executionId,
-          });
           const body: HuntLaunchResponse = {
             session_id: result.sessionId,
             execution_id: result.executionId,
             reused_existing: result.reusedExisting,
-            ...(profileToken ? { profile_token: profileToken } : {}),
+            profile_token: result.executionId,
           };
           return response.ok({ body });
         } catch (err) {
@@ -401,7 +393,7 @@ export const registerHuntLibraryRoutes = ({
       path: `${HUNT_LIBRARY_URL}/profile_state/verify`,
       access: INTERNAL_API_ACCESS,
       security: { authz: { requiredPrivileges: [ALERTZERO_API_PRIVILEGE_READ] } },
-      summary: 'Verify signed Hunt session state and return the hunt guidance for Discover',
+      summary: 'Resolve a Hunt session and return the hunt guidance for Discover',
     })
     .addVersion(
       {
@@ -409,21 +401,36 @@ export const registerHuntLibraryRoutes = ({
         validate: {
           request: {
             body: schema.object({
-              token: schema.string({ minLength: 1, maxLength: HUNT_PROFILE_TOKEN_MAX_BYTES }),
+              token: schema.string({ minLength: 1, maxLength: HUNT_SESSION_HANDLE_MAX_LENGTH }),
             }),
           },
         },
       },
-      withAlertZeroEnabled(async (_context, request, response) => {
-        const signer = getHuntProfileTokenSigner();
-        if (!signer) {
+      withAlertZeroEnabled(async (context, request, response) => {
+        const management = getWorkflowsManagement();
+        if (!management) {
           return response.customError({
             statusCode: 503,
-            body: { message: 'Hunt mode is not configured' },
+            body: { message: 'Workflows are not available' },
           });
         }
 
-        const result = signer.verify(request.body.token, { spaceId: getSpaceId(request) });
+        let result;
+        try {
+          result = await resolveHuntSession({
+            management,
+            request,
+            spaceId: getSpaceId(request),
+            sessionExecutionId: request.body.token,
+            userKey: await readUserKey(context),
+          });
+        } catch (err) {
+          logger.error(`Failed to resolve Hunt session: ${(err as Error).message}`);
+          return response.customError({
+            statusCode: 500,
+            body: { message: 'Failed to resolve the Hunt session' },
+          });
+        }
         if (!result.ok) {
           return response.badRequest({
             body: {
@@ -433,7 +440,7 @@ export const registerHuntLibraryRoutes = ({
           });
         }
 
-        const { payload } = result;
+        const { claims: payload, expiresAt } = result;
         const definition = getHuntDefinition(payload.definitionId);
         if (!definition || definition.version !== payload.definitionVersion) {
           return response.conflict({
@@ -448,7 +455,7 @@ export const registerHuntLibraryRoutes = ({
           session_id: payload.sessionId,
           session_execution_id: payload.sessionExecutionId,
           ...(payload.investigationId ? { investigation_id: payload.investigationId } : {}),
-          expires_at: new Date(payload.exp * 1000).toISOString(),
+          expires_at: expiresAt.toISOString(),
           definition: {
             id: definition.id,
             version: definition.version,

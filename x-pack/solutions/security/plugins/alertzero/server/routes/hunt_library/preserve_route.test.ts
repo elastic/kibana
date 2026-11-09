@@ -9,7 +9,6 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { ApiPrivileges } from '@kbn/core-security-server';
 import type { RouteDependencies } from '../register_routes';
-import { createHuntProfileTokenSigner } from '../../hunt_library/profile_token';
 import { HuntPreserveError } from '../../hunt_library/preserve';
 import { HuntEvidenceRejectedError } from '../../hunt_library/evidence';
 import { HuntSessionStoreError } from '../../hunt_library/session_attachment_store';
@@ -21,7 +20,12 @@ jest.mock('../../hunt_library/preserve', () => ({
   preserveHuntEvidence: (...args: unknown[]) => mockPreserve(...args),
 }));
 
-const KEY = 'k'.repeat(40);
+const mockResolve = jest.fn();
+jest.mock('../../hunt_library/session_lookup', () => ({
+  ...jest.requireActual('../../hunt_library/session_lookup'),
+  resolveHuntSession: (...args: unknown[]) => mockResolve(...args),
+}));
+
 const SESSION = '0b7c1a3e-5d2f-4c8a-9e61-3f4b8a7d2c10';
 const PRESERVATION = '11111111-1111-4111-8111-111111111111';
 const claims = {
@@ -33,13 +37,9 @@ const claims = {
 };
 
 const makeDeps = ({
-  signer = createHuntProfileTokenSigner({ key: KEY }) as ReturnType<
-    typeof createHuntProfileTokenSigner
-  > | null,
   spaceId = 'default',
   management = {} as unknown | null,
 }: {
-  signer?: ReturnType<typeof createHuntProfileTokenSigner> | null;
   spaceId?: string;
   management?: unknown;
 } = {}) => {
@@ -52,7 +52,6 @@ const makeDeps = ({
     logger: loggingSystemMock.createLogger(),
     getSpaceId: () => spaceId,
     getWorkflowsManagement: () => management ?? undefined,
-    getHuntProfileTokenSigner: () => signer ?? undefined,
     getAgentBuilderConversations: () => ({ getScopedClient: async () => ({ conv: true }) }),
     getAgentBuilderAttachments: () => ({ getScopedClient: async () => ({ att: true }) }),
     reportTelemetryEvent,
@@ -79,11 +78,16 @@ const makeDeps = ({
   };
 };
 
-const token = (overrides: Partial<typeof claims> = {}) =>
-  createHuntProfileTokenSigner({ key: KEY }).issue({ ...claims, ...overrides });
+const EXPIRES_AT = new Date('2026-11-09T12:00:00.000Z');
+const resolves = (overrides: Partial<typeof claims> & { investigationId?: string } = {}) =>
+  mockResolve.mockResolvedValue({
+    ok: true,
+    claims: { ...claims, ...overrides },
+    expiresAt: EXPIRES_AT,
+  });
 
 const body = (overrides: Record<string, unknown> = {}) => ({
-  token: token(),
+  token: claims.sessionExecutionId,
   preservation_id: PRESERVATION,
   query: 'FROM logs-okta',
   filters: [],
@@ -105,7 +109,11 @@ const call = async (deps: ReturnType<typeof makeDeps>, requestBody = body()) => 
 };
 
 describe('hunt preserve route', () => {
-  beforeEach(() => mockPreserve.mockReset());
+  beforeEach(() => {
+    mockPreserve.mockReset();
+    mockResolve.mockReset();
+    resolves();
+  });
 
   it('is internal and needs AlertZero Read and manage_investigations', () => {
     const { route } = makeDeps();
@@ -139,7 +147,7 @@ describe('hunt preserve route', () => {
         { rows: Array.from({ length: 51 }, () => ({ kind: 'aggregate', values: {} })) },
       ],
       ['a non-UUID preservation id', { preservation_id: 'nope' }],
-      ['an oversized token', { token: 'a'.repeat(4097) }],
+      ['an oversized session id', { token: 'a'.repeat(65) }],
       ['too many columns', { columns: Array.from({ length: 31 }, (_, i) => `c${i}`) }],
       ['too many filters', { filters: Array.from({ length: 51 }, () => ({})) }],
       ['an unknown row kind', { rows: [{ kind: 'other' }] }],
@@ -174,14 +182,7 @@ describe('hunt preserve route', () => {
       added_count: 1,
       created: true,
     });
-    const refreshed = createHuntProfileTokenSigner({ key: KEY }).verify(ok.profile_token, {
-      spaceId: 'default',
-    });
-    expect(refreshed.ok && refreshed.payload).toMatchObject({
-      investigationId: 'inv-1',
-      sessionId: SESSION,
-      sessionExecutionId: claims.sessionExecutionId,
-    });
+    expect(ok.profile_token).toBe(claims.sessionExecutionId);
     expect(mockPreserve).toHaveBeenCalledWith(
       expect.objectContaining({
         actor: 'analyst',
@@ -227,38 +228,53 @@ describe('hunt preserve route', () => {
     expect(deps.reportTelemetryEvent).not.toHaveBeenCalled();
   });
 
-  it('rejects a forged, expired or malformed token before doing anything', async () => {
-    const forged = createHuntProfileTokenSigner({ key: 'z'.repeat(40) }).issue(claims);
-    const deps = makeDeps();
+  it.each(['not_found', 'not_owner', 'expired'])(
+    'rejects a session that resolves as %s before doing anything',
+    async (reason) => {
+      mockResolve.mockResolvedValue({ ok: false, reason });
+      const deps = makeDeps();
 
-    for (const [t, reason] of [
-      [forged, 'bad_signature'],
-      ['v1.a.b', 'bad_signature'],
-      ['junk', 'malformed'],
-    ]) {
-      const response = await call(deps, body({ token: t }));
+      const response = await call(deps);
+
       expect(response.badRequest).toHaveBeenCalledWith(
-        expect.objectContaining({
-          body: expect.objectContaining({ attributes: { reason } }),
-        })
+        expect.objectContaining({ body: expect.objectContaining({ attributes: { reason } }) })
       );
+      expect(mockPreserve).not.toHaveBeenCalled();
     }
-    expect(mockPreserve).not.toHaveBeenCalled();
+  );
+
+  it('looks the session up in the request space for the calling user', async () => {
+    const deps = makeDeps({ spaceId: 'other' });
+
+    await call(deps);
+
+    expect(mockResolve).toHaveBeenCalledWith(
+      expect.objectContaining({
+        spaceId: 'other',
+        sessionExecutionId: claims.sessionExecutionId,
+        userKey: 'analyst',
+      })
+    );
   });
 
-  it('rejects a token issued for another space', async () => {
-    const deps = makeDeps({ spaceId: 'other' });
+  it('returns a generic 500 when the session lookup fails', async () => {
+    mockResolve.mockRejectedValue(new Error('secret detail'));
+    const deps = makeDeps();
 
     const response = await call(deps);
 
-    expect(response.badRequest).toHaveBeenCalled();
+    expect(response.customError).toHaveBeenCalledWith({
+      statusCode: 500,
+      body: { message: 'Failed to resolve the Hunt session' },
+    });
     expect(mockPreserve).not.toHaveBeenCalled();
   });
 
-  it('refuses a token for a hunt that changed', async () => {
+  it('refuses a session for a hunt that changed', async () => {
+    resolves({ definitionVersion: 99 });
     const deps = makeDeps();
 
-    const response = await call(deps, body({ token: token({ definitionVersion: 99 }) }));
+    const response = await call(deps, body());
 
     expect(response.conflict).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -268,8 +284,8 @@ describe('hunt preserve route', () => {
     expect(mockPreserve).not.toHaveBeenCalled();
   });
 
-  it('returns 503 when no signing key or no Workflows management is available', async () => {
-    for (const deps of [makeDeps({ signer: null }), makeDeps({ management: null })]) {
+  it('returns 503 when Workflows management is not available', async () => {
+    for (const deps of [makeDeps({ management: null })]) {
       const response = await call(deps);
       expect(response.customError).toHaveBeenCalledWith(
         expect.objectContaining({ statusCode: 503 })

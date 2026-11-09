@@ -11,7 +11,7 @@ import {
   createAttachmentNotFoundError,
   createConversationAlreadyExistsError,
 } from '@kbn/agent-builder-common';
-import type { HuntProfileTokenPayload } from '../../common/hunt_library_profile_state';
+import type { HuntSessionClaims } from '../../common/hunt_library_profile_state';
 import { HUNT_SESSION_ATTACHMENT_ID } from '../../common/hunt_session_attachment_schema';
 import type { PreservationContext } from './evidence';
 import { deriveManualInvestigationId } from './investigation';
@@ -32,15 +32,12 @@ const INVESTIGATION = deriveManualInvestigationId({
   definitionId: definition.id,
   sessionId: SESSION,
 });
-const claims: HuntProfileTokenPayload = {
-  v: 1,
+const claims: HuntSessionClaims = {
   spaceId: 'default',
   definitionId: definition.id,
   definitionVersion: definition.version,
   sessionId: SESSION,
   sessionExecutionId: EXECUTION,
-  iat: 0,
-  exp: 9_999_999_999,
 };
 const context: PreservationContext = {
   query: 'FROM logs-okta',

@@ -9,7 +9,7 @@ import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/serve
 import type { AttachmentPublicClient, ConversationPublicClient } from '@kbn/agent-builder-server';
 import { ALERTZERO_HUNT_MANUAL_SESSION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { HuntSessionAttachment } from '../../common/hunt_session_attachment_schema';
-import type { HuntProfileTokenPayload } from '../../common/hunt_library_profile_state';
+import type { HuntSessionClaims } from '../../common/hunt_library_profile_state';
 import type { WatchWorkflowsManagementClient } from '../services/watches/watch_workflows_management_client';
 import type { EvidenceSelection, PreservationContext } from './evidence';
 import { prepareEvidence } from './evidence';
@@ -107,7 +107,7 @@ export const preserveHuntEvidence = async ({
   esClient: ElasticsearchClient;
   logger: Logger;
   definition: HuntDefinition;
-  claims: HuntProfileTokenPayload;
+  claims: HuntSessionClaims;
   actor: string;
   preservationId: string;
   /** Context the analyst wrote for this preservation. */
@@ -120,7 +120,7 @@ export const preserveHuntEvidence = async ({
   const { spaceId, sessionId, sessionExecutionId } = claims;
   const workflowId = ALERTZERO_HUNT_MANUAL_SESSION_WORKFLOW_ID;
 
-  // 1. The Investigation: a linked one from the signed state wins over the session-derived id.
+  // 1. The Investigation: a linked one from the session wins over the session-derived id.
   const linkedId = claims.investigationId;
   const investigationId =
     linkedId ?? deriveManualInvestigationId({ spaceId, definitionId: definition.id, sessionId });

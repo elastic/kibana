@@ -31,7 +31,6 @@ const setup = () => {
     isServerless: false,
     getWorkflowsManagement: service,
     resolveUserNames: service,
-    getHuntProfileTokenSigner: service,
     reportTelemetryEvent: service,
   });
   const routes = (['get', 'post', 'put', 'patch', 'delete'] as const).flatMap((method) =>

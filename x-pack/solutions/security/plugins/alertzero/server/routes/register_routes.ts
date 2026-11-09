@@ -17,7 +17,6 @@ import type { HuntServices } from '../services/watches/hunt';
 import type { ScanFailuresService } from '../services/scan_failures/scan_failures_service';
 import type { ThreatIntelSupplyService } from '../services/threat_intel_supply';
 import type { AlertZeroTelemetryReporter } from '../telemetry';
-import type { HuntProfileTokenSigner } from '../hunt_library/profile_token';
 import { registerListWatchesRoute } from './watches/list_watches';
 import { registerGetWatchRoute } from './watches/get_watch';
 import { registerListWorkersRoute } from './workers/list_workers';
@@ -52,8 +51,6 @@ export interface RouteDependencies {
   getWorkflowsManagement: () => WatchWorkflowsManagementClient | undefined;
   /** Display names for user profile uids; uids that cannot be resolved are omitted. Never throws. */
   resolveUserNames: (uids: string[]) => Promise<Map<string, string>>;
-  /** Signs and verifies Hunt profile state; undefined when no profile token key is configured. */
-  getHuntProfileTokenSigner: () => HuntProfileTokenSigner | undefined;
   /** Reports an AlertZero telemetry event; never throws. */
   reportTelemetryEvent: AlertZeroTelemetryReporter;
 }

@@ -32,8 +32,9 @@ const toHuntSessionInfo = (verification: HuntSessionVerification): HuntSessionIn
 });
 
 /**
- * Lets Discover enter Hunt mode for sessions AlertZero launched. The server checks the signed state,
- * so a forged or expired token resolves to `undefined` and Discover stays in its normal mode.
+ * Lets Discover enter Hunt mode for sessions AlertZero launched. The server checks the session and
+ * its owner, so one that is unknown, expired or someone else's resolves to `undefined` and Discover
+ * stays in its normal mode.
  */
 export const registerHuntSessionFeature = ({
   discoverShared,

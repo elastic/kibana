@@ -93,20 +93,17 @@ export interface HuntLaunchResponse {
   execution_id: string;
   /** True when this call was a retry of a launch that already recorded the session. */
   reused_existing: boolean;
-  /**
-   * Signed state that opens Discover in Hunt mode. Absent when no profile token key is configured,
-   * in which case Discover opens without Hunt mode.
-   */
-  profile_token?: string;
+  /** Identifies the session to Discover, which opens in Hunt mode with it. */
+  profile_token: string;
 }
 
-/** What a verified Hunt session token resolves to, for Discover's Hunt mode. */
+/** What a Hunt session resolves to, for Discover's Hunt mode. */
 export interface HuntSessionVerification {
   session_id: string;
   session_execution_id: string;
   /** Set when the session continues an existing Investigation. */
   investigation_id?: string;
-  /** ISO-8601 time the token stops being accepted. */
+  /** ISO-8601 time the session stops being accepted. */
   expires_at: string;
   definition: {
     id: string;
@@ -133,7 +130,7 @@ export interface HuntPreserveResponse {
   added_count: number;
   /** True when this request created the Investigation. */
   created: boolean;
-  /** Signed state linked to the Investigation; later preservations from this tab append to it. */
+  /** Identifies the session, now linked to the Investigation; later preservations append to it. */
   profile_token: string;
 }
 
@@ -144,7 +141,7 @@ export interface HuntContinueResponse {
   execution_id: string;
   investigation_id: string;
   definition_id: string;
-  /** Signed state that opens Discover in Hunt mode, linked to this Investigation. */
+  /** Identifies the new session, linked to this Investigation, that opens Discover in Hunt mode. */
   profile_token: string;
   /** The Discover state to restore. Row selection and other UI state are not restored. */
   resume: {

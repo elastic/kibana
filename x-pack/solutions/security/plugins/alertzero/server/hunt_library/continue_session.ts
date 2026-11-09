@@ -8,10 +8,11 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { AttachmentPublicClient, ConversationPublicClient } from '@kbn/agent-builder-server';
+import { ALERTZERO_HUNT_MANUAL_SESSION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { HuntContinueResponse } from '../../common/hunt_library';
 import type { WatchWorkflowsManagementClient } from '../services/watches/watch_workflows_management_client';
-import { launchManualSession } from './manual_session';
-import type { HuntProfileTokenSigner } from './profile_token';
+import { HUNT_LABEL_OWNER_ID } from './execution_labels';
+import { launchManualSession, MANUAL_SESSION_IMMUTABLE_LABEL_KEYS } from './manual_session';
 import { getHuntDefinition } from './seed';
 import { readHuntSessionAttachment } from './session_attachment_store';
 
@@ -31,8 +32,8 @@ export class HuntContinueError extends Error {
 /**
  * Reopens a hunt from an Investigation. A manual session resumes at its latest saved Discover state.
  * An automated one that no human has extended yet opens at the hunt's initial query, columns and the
- * window the automated run used. Either way a fresh session is recorded, and the signed state it
- * returns carries the Investigation id, so evidence the analyst preserves next lands on the same
+ * window the automated run used. Either way a fresh session is recorded, and the session records
+ * the Investigation id, so evidence the analyst preserves next lands on the same
  * Investigation. The session execution is recreated when the original expired under retention.
  */
 export const continueHuntSession = async ({
@@ -40,7 +41,6 @@ export const continueHuntSession = async ({
   request,
   conversations,
   attachments,
-  signer,
   logger,
   spaceId,
   investigationId,
@@ -50,7 +50,6 @@ export const continueHuntSession = async ({
   request: KibanaRequest;
   conversations: Pick<ConversationPublicClient, 'get'>;
   attachments: Pick<AttachmentPublicClient, 'get'>;
-  signer: HuntProfileTokenSigner;
   logger: Logger;
   spaceId: string;
   investigationId: string;
@@ -84,6 +83,16 @@ export const continueHuntSession = async ({
     logger,
   });
 
+  // Link the session to the Investigation so the evidence it preserves lands there.
+  await management.updateExecutionLabels({
+    executionId,
+    spaceId,
+    workflowId: ALERTZERO_HUNT_MANUAL_SESSION_WORKFLOW_ID,
+    labelOwnerId: HUNT_LABEL_OWNER_ID,
+    labels: { 'hunt.investigation_id': investigationId },
+    immutableKeys: MANUAL_SESSION_IMMUTABLE_LABEL_KEYS,
+  });
+
   // The saved Discover state of the latest manual work, if a human has worked it.
   const resume = session.resumeSnapshot;
 
@@ -92,14 +101,7 @@ export const continueHuntSession = async ({
     execution_id: executionId,
     investigation_id: investigationId,
     definition_id: definition.id,
-    profile_token: signer.issue({
-      spaceId,
-      definitionId: definition.id,
-      definitionVersion: definition.version,
-      sessionId,
-      sessionExecutionId: executionId,
-      investigationId,
-    }),
+    profile_token: executionId,
     resume: resume
       ? {
           query: resume.query,

@@ -10,11 +10,9 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { createAttachmentNotFoundError } from '@kbn/agent-builder-common';
 import { HUNT_SESSION_ATTACHMENT_ID } from '../../common/hunt_session_attachment_schema';
 import { continueHuntSession } from './continue_session';
-import { createHuntProfileTokenSigner } from './profile_token';
 import { getHuntDefinition } from './seed';
 
 const definition = getHuntDefinition('okta_failed_oauth_public_client_scope')!;
-const signer = createHuntProfileTokenSigner({ key: 'k'.repeat(40) });
 const NEW_SESSION = '0b7c1a3e-5d2f-4c8a-9e61-3f4b8a7d2c10';
 const INVESTIGATION = 'inv-1';
 
@@ -87,7 +85,6 @@ const setup = ({ stored, getFails = false }: { stored?: unknown; getFails?: bool
         request: httpServerMock.createKibanaRequest(),
         conversations: conversations as never,
         attachments: attachments as never,
-        signer,
         logger: loggingSystemMock.createLogger(),
         spaceId: 'default',
         investigationId: INVESTIGATION,
@@ -125,7 +122,7 @@ describe('continueHuntSession', () => {
     });
   });
 
-  it('records a fresh session and signs state linked to the Investigation', async () => {
+  it('records a fresh session linked to the Investigation', async () => {
     const { run, management } = setup({ stored: manual });
 
     const result = await run();
@@ -135,13 +132,20 @@ describe('continueHuntSession', () => {
       expect.objectContaining({ executionId: result.execution_id })
     );
     expect(result.investigation_id).toBe(INVESTIGATION);
-    const verified = signer.verify(result.profile_token, { spaceId: 'default' });
-    expect(verified.ok && verified.payload).toMatchObject({
-      investigationId: INVESTIGATION,
-      sessionId: NEW_SESSION,
-      sessionExecutionId: result.execution_id,
-      definitionId: definition.id,
-    });
+    expect(result.profile_token).toBe(result.execution_id);
+    expect(management.updateExecutionLabels).toHaveBeenCalledWith(
+      expect.objectContaining({
+        executionId: result.execution_id,
+        labels: { 'hunt.investigation_id': INVESTIGATION },
+      })
+    );
+  });
+
+  it('fails when the session cannot be linked to the Investigation', async () => {
+    const { run, management } = setup({ stored: manual });
+    management.updateExecutionLabels.mockRejectedValue(new Error('label write failed'));
+
+    await expect(run()).rejects.toThrow('label write failed');
   });
 
   it('refuses an Investigation the analyst cannot reach, and starts no session', async () => {

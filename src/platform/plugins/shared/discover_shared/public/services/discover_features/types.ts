@@ -340,7 +340,7 @@ export interface HuntSessionInfo {
   sessionExecutionId: string;
   /** Set when the session continues an existing Investigation. */
   investigationId?: string;
-  /** ISO-8601 time the signed state stops being accepted. */
+  /** ISO-8601 time the session stops being accepted. */
   expiresAt: string;
   definition: {
     id: string;
@@ -359,9 +359,9 @@ export interface HuntSessionInfo {
 }
 
 /**
- * Lets Discover enter Hunt mode only for genuine sessions. The owner of Hunt sessions verifies the
- * signed state opaque to Discover and returns the hunt to show, or `undefined` when the state is
- * forged, expired, malformed or belongs to another space.
+ * Lets Discover enter Hunt mode only for genuine sessions. The owner of Hunt sessions checks the
+ * session id, opaque to Discover, and returns the hunt to show, or `undefined` when the session is
+ * unknown, expired or not the caller's.
  */
 export interface HuntSessionFeature {
   id: 'hunt-session';
@@ -376,7 +376,7 @@ export type HuntEvidenceSelection =
   | { kind: 'aggregate'; values: Record<string, string | number | boolean | null> };
 
 export interface HuntPreserveRequest {
-  /** The signed state the tab was opened with. */
+  /** The session id the tab was opened with. */
   token: string;
   /** Minted once per attempt and reused on retry, so a retry never adds evidence twice. */
   preservationId: string;
@@ -398,7 +398,7 @@ export interface HuntPreserveResult {
   evidenceCount: number;
   /** Rows this request added. Zero for a retry or a repeated selection. */
   addedCount: number;
-  /** Signed state linked to the Investigation; later preservations append to it. */
+  /** The session id; the session is now linked to the Investigation, so later preservations append to it. */
   profileToken: string;
 }
 

@@ -15,7 +15,7 @@ import type { RouteDependencies } from '../register_routes';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 
 /**
- * Reopens a hunt from an Investigation: returns the Discover state to restore and signed Hunt state
+ * Reopens a hunt from an Investigation: returns the Discover state to restore and the Hunt session
  * linked to that Investigation. Needs AlertZero Read and `manage_investigations`, like preserving.
  */
 export const registerHuntContinueRoute = ({
@@ -23,7 +23,6 @@ export const registerHuntContinueRoute = ({
   logger,
   getSpaceId,
   getWorkflowsManagement,
-  getHuntProfileTokenSigner,
   getAgentBuilderConversations,
   getAgentBuilderAttachments,
   reportTelemetryEvent,
@@ -54,13 +53,6 @@ export const registerHuntContinueRoute = ({
         },
       },
       withAlertZeroEnabled(async (_context, request, response) => {
-        const signer = getHuntProfileTokenSigner();
-        if (!signer) {
-          return response.customError({
-            statusCode: 503,
-            body: { message: 'Hunt mode is not configured' },
-          });
-        }
         const management = getWorkflowsManagement();
         if (!management) {
           return response.customError({
@@ -75,7 +67,6 @@ export const registerHuntContinueRoute = ({
             request,
             conversations: await getAgentBuilderConversations().getScopedClient({ request }),
             attachments: await getAgentBuilderAttachments().getScopedClient({ request }),
-            signer,
             logger,
             spaceId: getSpaceId(request),
             investigationId: request.body.investigation_id,

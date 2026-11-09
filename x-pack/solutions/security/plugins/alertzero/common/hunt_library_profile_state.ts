@@ -11,18 +11,14 @@
  */
 export const HUNT_PROFILE_STATE_KEY = 'huntSession';
 
-/** Version of the token payload. */
-export const HUNT_PROFILE_TOKEN_VERSION = 1;
+/** How long a Hunt session stays usable after it starts. */
+export const HUNT_SESSION_TTL_SECONDS = 12 * 60 * 60;
 
-/** How long an issued token stays valid. */
-export const HUNT_PROFILE_TOKEN_TTL_SECONDS = 12 * 60 * 60;
+/** Longest session handle accepted, in characters. It is the session execution id, a UUID. */
+export const HUNT_SESSION_HANDLE_MAX_LENGTH = 64;
 
-/** Largest serialized token accepted, in bytes. */
-export const HUNT_PROFILE_TOKEN_MAX_BYTES = 4096;
-
-/** What a signed token asserts about the Hunt session that opened Discover. */
-export interface HuntProfileTokenPayload {
-  v: typeof HUNT_PROFILE_TOKEN_VERSION;
+/** What the server knows about a Hunt session, read from its execution and never from a request. */
+export interface HuntSessionClaims {
   spaceId: string;
   definitionId: string;
   definitionVersion: number;
@@ -30,16 +26,15 @@ export interface HuntProfileTokenPayload {
   sessionExecutionId: string;
   /** Set when the session continues an existing Investigation. */
   investigationId?: string;
-  /** Issued at, in epoch seconds. */
-  iat: number;
-  /** Expires at, in epoch seconds. */
-  exp: number;
 }
 
-/** The Discover locator `profileState` that opens a Hunt session. */
+/**
+ * The Discover locator `profileState` that opens a Hunt session. `token` is the session's execution
+ * id. It identifies the session but proves nothing: the server checks who started it on every use.
+ */
 export type HuntProfileLocatorState = Record<typeof HUNT_PROFILE_STATE_KEY, { token: string }>;
 
-/** Builds the locator `profileState` that carries a signed token into Discover. */
+/** Builds the locator `profileState` that carries the session id into Discover. */
 export const buildHuntProfileLocatorState = (token: string): HuntProfileLocatorState => ({
   [HUNT_PROFILE_STATE_KEY]: { token },
 });

@@ -12,9 +12,9 @@ import type { ProfileStateDefinition } from '../profile_state';
 import { ProfileStateType } from '../profile_state';
 
 /**
- * State that marks a Discover tab as a Hunt session. The token is an opaque, signed value issued
- * by the server when a hunt is launched or continued. Discover never interprets it; the server
- * verifies it on every Hunt action.
+ * State that marks a Discover tab as a Hunt session. The token is an opaque session id issued by
+ * the server when a hunt is launched or continued. Discover never interprets it; the server checks
+ * the session and its owner on every Hunt action.
  */
 export interface HuntSessionState extends SerializableRecord {
   token: string;

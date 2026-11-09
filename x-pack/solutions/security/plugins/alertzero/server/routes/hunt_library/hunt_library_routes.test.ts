@@ -9,24 +9,23 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { RouteDependencies } from '../register_routes';
 import { HUNT_DEFINITIONS } from '../../hunt_library/seed';
-import {
-  createHuntProfileTokenSigner,
-  type HuntProfileTokenSigner,
-} from '../../hunt_library/profile_token';
 import { registerHuntLibraryRoutes } from './hunt_library_routes';
+
+const mockResolve = jest.fn();
+jest.mock('../../hunt_library/session_lookup', () => ({
+  ...jest.requireActual('../../hunt_library/session_lookup'),
+  resolveHuntSession: (...args: unknown[]) => mockResolve(...args),
+}));
 
 const makeDeps = ({
   universe = ['logs-*'],
   isServerless = false,
   userName = 'analyst',
-  signer = createHuntProfileTokenSigner({ key: 'k'.repeat(40) }),
   spaceId = 'default',
 }: {
   universe?: string[];
   isServerless?: boolean;
   userName?: string;
-  /** Pass `null` for a deployment with no signing key. */
-  signer?: HuntProfileTokenSigner | null;
   spaceId?: string;
 } = {}) => {
   const get = jest.fn();
@@ -55,7 +54,6 @@ const makeDeps = ({
     logger: loggingSystemMock.createLogger(),
     getSpaceId: () => spaceId,
     getWorkflowsManagement: () => managementRef.current,
-    getHuntProfileTokenSigner: () => signer ?? undefined,
     resolveUserNames,
     isServerless,
   } as unknown as RouteDependencies);
@@ -286,7 +284,6 @@ describe('registerHuntLibraryRoutes', () => {
 });
 
 describe('hunt profile state verify route', () => {
-  const KEY = 'k'.repeat(40);
   const claims = {
     spaceId: 'default',
     definitionId: 'rare_lsass_process_access',
@@ -294,9 +291,20 @@ describe('hunt profile state verify route', () => {
     sessionId: '0b7c1a3e-5d2f-4c8a-9e61-3f4b8a7d2c10',
     sessionExecutionId: 'a8c1d5f2-3b7e-5f4a-9d10-6e2b8c4a7f13',
   };
-  const verifyRequest = (token: string) => httpServerMock.createKibanaRequest({ body: { token } });
-  const issue = (overrides: Partial<typeof claims> & { investigationId?: string } = {}) =>
-    createHuntProfileTokenSigner({ key: KEY }).issue({ ...claims, ...overrides });
+  const EXPIRES_AT = new Date(Date.now() + 60 * 60 * 1000);
+  const resolves = (overrides: Partial<typeof claims> & { investigationId?: string } = {}) =>
+    mockResolve.mockResolvedValue({
+      ok: true,
+      claims: { ...claims, ...overrides },
+      expiresAt: EXPIRES_AT,
+    });
+  const verifyRequest = (token: string = claims.sessionExecutionId) =>
+    httpServerMock.createKibanaRequest({ body: { token } });
+
+  beforeEach(() => {
+    mockResolve.mockReset();
+    resolves();
+  });
 
   it('requires only AlertZero Read and is internal', () => {
     const { verifyRoute } = makeDeps();
@@ -305,21 +313,24 @@ describe('hunt profile state verify route', () => {
     expect(verifyRoute.security.authz.requiredPrivileges).toEqual(['alertzero_read']);
   });
 
-  it('bounds the body to one token of at most 4 KB', () => {
+  it('bounds the body to one session id of at most 64 characters', () => {
     const { verifyValidate } = makeDeps();
     const body = verifyValidate.request.body;
 
-    expect(body.validate({ token: 'v1.a.b' })).toEqual({ token: 'v1.a.b' });
+    expect(body.validate({ token: claims.sessionExecutionId })).toEqual({
+      token: claims.sessionExecutionId,
+    });
     expect(() => body.validate({ token: '' })).toThrow();
-    expect(() => body.validate({ token: 'a'.repeat(4097) })).toThrow();
+    expect(() => body.validate({ token: 'a'.repeat(65) })).toThrow();
     expect(() => body.validate({ token: 'a', space_id: 'other' })).toThrow();
   });
 
-  it('returns the session and the hunt guidance for a valid token', async () => {
+  it('returns the session and the hunt guidance for the session its owner started', async () => {
+    resolves({ investigationId: 'inv-1' });
     const { verify, context } = makeDeps();
     const response = httpServerMock.createResponseFactory();
 
-    await verify(context, verifyRequest(issue({ investigationId: 'inv-1' })), response);
+    await verify(context, verifyRequest(), response);
 
     const body = response.ok.mock.calls[0][0]!.body as {
       session_id: string;
@@ -332,51 +343,50 @@ describe('hunt profile state verify route', () => {
       session_id: claims.sessionId,
       session_execution_id: claims.sessionExecutionId,
       investigation_id: 'inv-1',
+      expires_at: EXPIRES_AT.toISOString(),
     });
-    expect(Date.parse(body.expires_at)).toBeGreaterThan(Date.now());
     expect(body.definition.id).toBe('rare_lsass_process_access');
     expect(body.definition.hypothesis.length).toBeGreaterThan(0);
     expect(body.definition).not.toHaveProperty('query');
   });
 
-  it('rejects a token for another space', async () => {
+  it('looks the session up in the request space for the calling user', async () => {
     const { verify, context } = makeDeps({ spaceId: 'other' });
-    const response = httpServerMock.createResponseFactory();
 
-    await verify(context, verifyRequest(issue()), response);
+    await verify(context, verifyRequest(), httpServerMock.createResponseFactory());
 
-    expect(response.badRequest).toHaveBeenCalledWith(
+    expect(mockResolve).toHaveBeenCalledWith(
       expect.objectContaining({
-        body: expect.objectContaining({ attributes: { reason: 'wrong_space' } }),
+        spaceId: 'other',
+        sessionExecutionId: claims.sessionExecutionId,
+        userKey: 'analyst',
       })
     );
-    expect(response.ok).not.toHaveBeenCalled();
   });
 
-  it('rejects a forged or malformed token', async () => {
-    const { verify, context } = makeDeps();
-    const forged = createHuntProfileTokenSigner({ key: 'z'.repeat(40) }).issue(claims);
-
-    for (const [token, reason] of [
-      [forged, 'bad_signature'],
-      ['not-a-token', 'malformed'],
-    ]) {
+  it.each(['not_found', 'not_owner', 'expired'])(
+    'rejects a session that resolves as %s',
+    async (reason) => {
+      mockResolve.mockResolvedValue({ ok: false, reason });
+      const { verify, context } = makeDeps();
       const response = httpServerMock.createResponseFactory();
-      await verify(context, verifyRequest(token), response);
-      expect(response.badRequest).toHaveBeenCalledWith(
-        expect.objectContaining({
-          body: expect.objectContaining({ attributes: { reason } }),
-        })
-      );
-    }
-  });
 
-  it('refuses a token for a hunt that no longer exists or changed version', async () => {
+      await verify(context, verifyRequest(), response);
+
+      expect(response.badRequest).toHaveBeenCalledWith(
+        expect.objectContaining({ body: expect.objectContaining({ attributes: { reason } }) })
+      );
+      expect(response.ok).not.toHaveBeenCalled();
+    }
+  );
+
+  it('refuses a session for a hunt that no longer exists or changed version', async () => {
     const { verify, context } = makeDeps();
 
     for (const overrides of [{ definitionId: 'nope' }, { definitionVersion: 99 }]) {
+      resolves(overrides);
       const response = httpServerMock.createResponseFactory();
-      await verify(context, verifyRequest(issue(overrides)), response);
+      await verify(context, verifyRequest(), response);
       expect(response.conflict).toHaveBeenCalledWith(
         expect.objectContaining({
           body: expect.objectContaining({ attributes: { reason: 'definition_changed' } }),
@@ -385,13 +395,27 @@ describe('hunt profile state verify route', () => {
     }
   });
 
-  it('returns 503 when no signing key is configured', async () => {
-    const { verify, context } = makeDeps({ signer: null });
+  it('returns 503 when Workflows management is unavailable', async () => {
+    const { verify, context, managementRef } = makeDeps();
+    managementRef.current = undefined;
     const response = httpServerMock.createResponseFactory();
 
-    await verify(context, verifyRequest(issue()), response);
+    await verify(context, verifyRequest(), response);
 
     expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 503 }));
+  });
+
+  it('returns a generic 500 when the lookup fails', async () => {
+    mockResolve.mockRejectedValue(new Error('secret detail'));
+    const { verify, context } = makeDeps();
+    const response = httpServerMock.createResponseFactory();
+
+    await verify(context, verifyRequest(), response);
+
+    expect(response.customError).toHaveBeenCalledWith({
+      statusCode: 500,
+      body: { message: 'Failed to resolve the Hunt session' },
+    });
   });
 });
 
@@ -472,34 +496,17 @@ describe('hunt launch route', () => {
     expect(management.executeLabeledWorkflow).not.toHaveBeenCalled();
   });
 
-  it('returns a signed profile token bound to the session and space', async () => {
-    const signer = createHuntProfileTokenSigner({ key: 'k'.repeat(40) });
-    const { launch, context } = makeDeps({ signer, spaceId: 'sec' });
+  it('returns the session execution id as the Discover session handle', async () => {
+    const { launch, context } = makeDeps({ spaceId: 'sec' });
     const response = httpServerMock.createResponseFactory();
 
     await launch(context, launchRequest(), response);
 
     const body = response.ok.mock.calls[0][0]!.body as {
-      session_id: string;
       execution_id: string;
-      profile_token?: string;
+      profile_token: string;
     };
-    const verified = signer.verify(body.profile_token, { spaceId: 'sec' });
-    expect(verified.ok && verified.payload).toMatchObject({
-      spaceId: 'sec',
-      definitionId: 'rare_lsass_process_access',
-      sessionId: SESSION,
-      sessionExecutionId: body.execution_id,
-    });
-  });
-
-  it('launches without a profile token when no signing key is configured', async () => {
-    const { launch, context } = makeDeps({ signer: null });
-    const response = httpServerMock.createResponseFactory();
-
-    await launch(context, launchRequest(), response);
-
-    expect(response.ok.mock.calls[0][0]!.body).not.toHaveProperty('profile_token');
+    expect(body.profile_token).toBe(body.execution_id);
   });
 
   it('returns 503 when Workflows management is unavailable', async () => {
