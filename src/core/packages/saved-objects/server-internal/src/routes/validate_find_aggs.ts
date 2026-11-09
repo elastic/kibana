@@ -7,46 +7,71 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isPlainObject } from 'lodash';
+import { isPlainObject, isString, last } from 'lodash';
 
-const NESTED_AGGREGATION_KEYS: readonly string[] = ['aggs', 'aggregations'];
-const NAMESPACE_FIELDS: readonly string[] = ['namespace', 'namespaces'];
+const NESTED_AGGREGATION_KEYS = ['aggs', 'aggregations'];
+const NAMESPACE_FIELDS = ['namespace', 'namespaces'];
 // keys whose string value is a field path, e.g. `terms: { field: 'dashboard.namespaces' }`
-const FIELD_VALUE_KEYS: readonly string[] = ['field', 'path'];
+const FIELD_VALUE_KEYS = ['field', 'path'];
 // keys whose own keys are field paths, e.g. `range: { 'dashboard.namespaces': { gte: 'a' } }`
-const FIELD_MAP_KEYS: readonly string[] = ['term', 'range'];
+const FIELD_MAP_KEYS = ['term', 'range'];
 
-const isRecord = (value: unknown): value is Record<string, unknown> => isPlainObject(value);
+type JsonRecord = Record<string, unknown>;
 
-const containsTopHits = (aggs: unknown): boolean =>
-  isRecord(aggs) &&
-  Object.values(aggs).some(
-    (container) =>
-      isRecord(container) &&
-      ('top_hits' in container ||
-        NESTED_AGGREGATION_KEYS.some((key) => containsTopHits(container[key])))
-  );
+interface Entry {
+  parentKey?: string;
+  key: string;
+  value: unknown;
+}
 
-const collectFieldPaths = (value: unknown, parentKey?: string): string[] => {
+const isRecord = (value: unknown): value is JsonRecord => isPlainObject(value);
+
+// Every aggregation body in the tree: the values of the `aggs` map and of any nested `aggs` / `aggregations` maps.
+const collectAggBodies = (aggs: unknown): JsonRecord[] =>
+  isRecord(aggs)
+    ? Object.values(aggs)
+        .filter(isRecord)
+        .flatMap((body) => [
+          body,
+          ...NESTED_AGGREGATION_KEYS.flatMap((key) => collectAggBodies(body[key])),
+        ])
+    : [];
+
+// Every `key: value` pair in the tree, depth first, with the key of the enclosing object.
+const collectEntries = (value: unknown, parentKey?: string): Entry[] => {
   if (Array.isArray(value)) {
-    return value.flatMap((item) => collectFieldPaths(item, parentKey));
+    return value.flatMap((item) => collectEntries(item, parentKey));
   }
   if (!isRecord(value)) {
     return [];
   }
-  const isFieldMap = parentKey !== undefined && FIELD_MAP_KEYS.includes(parentKey);
   return Object.entries(value).flatMap(([key, child]) => [
-    ...(isFieldMap ? [key] : []),
-    ...(FIELD_VALUE_KEYS.includes(key) && typeof child === 'string' ? [child] : []),
-    ...collectFieldPaths(child, key),
+    { parentKey, key, value: child },
+    ...collectEntries(child, key),
   ]);
 };
+
+const isFieldValueEntry = ({ key, value }: Entry): boolean =>
+  FIELD_VALUE_KEYS.includes(key) && isString(value);
+
+const isFieldMapEntry = ({ parentKey }: Entry): boolean =>
+  parentKey !== undefined && FIELD_MAP_KEYS.includes(parentKey);
+
+const collectFieldPaths = (aggs: unknown): string[] => {
+  const entries = collectEntries(aggs);
+  return [
+    ...entries.filter(isFieldValueEntry).map(({ value }) => value),
+    ...entries.filter(isFieldMapEntry).map(({ key }) => key),
+  ].filter(isString);
+};
+
+const hasTopHits = (body: JsonRecord): boolean => 'top_hits' in body;
 
 // Matches the root namespace fields, bare (`namespaces`) or type-prefixed (`dashboard.namespaces`).
 // `{type}.attributes.namespace` is a type's own attribute and stays allowed.
 const isNamespaceField = (fieldPath: string): boolean => {
   const segments = fieldPath.split('.');
-  return segments.length <= 2 && NAMESPACE_FIELDS.includes(segments[segments.length - 1]);
+  return segments.length <= 2 && NAMESPACE_FIELDS.includes(last(segments) ?? '');
 };
 
 /**
@@ -55,7 +80,7 @@ const isNamespaceField = (fieldPath: string): boolean => {
  * user may not be authorized for, so both are blocked on the HTTP API only.
  */
 export const getUnsupportedFindAggsReason = (aggs: unknown): string | undefined => {
-  if (containsTopHits(aggs)) {
+  if (collectAggBodies(aggs).some(hasTopHits)) {
     return 'Invalid aggregation: top_hits aggregations are not supported by this API';
   }
   const namespaceField = collectFieldPaths(aggs).find(isNamespaceField);
