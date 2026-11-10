@@ -50738,7 +50738,6 @@
     "xpack.queryActivity.breadcrumb.management": "Stack Management",
     "xpack.queryActivity.feature.featureName": "查询活动",
     "xpack.queryActivity.feature.privilegesTooltip": "授予此功能权限后，会显示“查询活动”导航选项，但访问该页面还需要集群权限（cluster:monitor 或 cluster:manage）。",
-    "xpack.queryActivity.flyout.ariaLabel": "查询详情",
     "xpack.queryActivity.flyout.closeButton": "关闭",
     "xpack.queryActivity.flyout.indicesLabel": "索引",
     "xpack.queryActivity.flyout.loadErrorBody": "关闭弹出面板，然后重试。",

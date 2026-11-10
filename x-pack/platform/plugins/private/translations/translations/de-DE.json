@@ -50635,7 +50635,6 @@
     "xpack.queryActivity.breadcrumb.management": "Stack-Management",
     "xpack.queryActivity.feature.featureName": "Abfrageaktivität",
     "xpack.queryActivity.feature.privilegesTooltip": "Durch Erteilung dieser Feature-Berechtigung wird die Navigationsoption „Abfrageaktivität“ angezeigt, aber für den Zugriff auf die Seite sind auch Cluster-Berechtigungen (cluster:monitor oder cluster:manage) erforderlich.",
-    "xpack.queryActivity.flyout.ariaLabel": "Abfragedetails",
     "xpack.queryActivity.flyout.closeButton": "Schließen",
     "xpack.queryActivity.flyout.indicesLabel": "Indizes",
     "xpack.queryActivity.flyout.loadErrorBody": "Schließen Sie das Flyout und versuchen Sie es erneut.",

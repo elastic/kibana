@@ -50769,7 +50769,6 @@
     "xpack.queryActivity.breadcrumb.management": "Stack Management",
     "xpack.queryActivity.feature.featureName": "Atividade de consulta",
     "xpack.queryActivity.feature.privilegesTooltip": "Conceder esse privilégio de recurso exibe a opção de navegação Atividade de consulta, mas também são necessários privilégios de cluster (cluster:monitor ou cluster:manage) para acessar a página.",
-    "xpack.queryActivity.flyout.ariaLabel": "Detalhes da consulta",
     "xpack.queryActivity.flyout.closeButton": "Fechar",
     "xpack.queryActivity.flyout.indicesLabel": "Índices",
     "xpack.queryActivity.flyout.loadErrorBody": "Feche o painel lateral e tente novamente.",
