@@ -103,7 +103,7 @@ describe('alertAnalysisSkill guidance for literal-following models (security-tea
   });
 
   it('keeps _id and _index out of the field list injected into security.alerts queries', async () => {
-    (runSearchTool as jest.Mock).mockResolvedValue({ results: [] });
+    (runSearchTool as jest.Mock).mockResolvedValue([]);
     const mockModelProvider = agentBuilderMocks.createModelProvider();
 
     await alertsTool(mockCore, mockLogger).handler(

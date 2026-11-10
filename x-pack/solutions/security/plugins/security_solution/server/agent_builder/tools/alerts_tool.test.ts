@@ -17,7 +17,7 @@ import {
   createToolTestMocks,
   setupMockCoreStartServices,
 } from '../__mocks__/test_helpers';
-import { alertsTool, SECURITY_ALERTS_TOOL_ID } from './alerts_tool';
+import { alertsTool, MAX_ALERT_ROWS, SECURITY_ALERTS_TOOL_ID } from './alerts_tool';
 
 jest.mock('@kbn/agent-builder-genai-utils/tools', () => ({
   runSearchTool: jest.fn(),
@@ -148,7 +148,7 @@ describe('alertsTool', () => {
 
     it('calls runSearchTool with the current space alerts alias', async () => {
       const mockResults = [{ type: ToolResultType.other, data: 'test results' }];
-      (runSearchTool as jest.Mock).mockResolvedValue({ results: mockResults });
+      (runSearchTool as jest.Mock).mockResolvedValue(mockResults);
 
       await tool.handler(
         { query: 'find all alerts' },
@@ -168,11 +168,12 @@ describe('alertsTool', () => {
         modelProvider: mockModelProvider,
         events: mockEvents,
         logger: mockLogger,
+        rowLimit: MAX_ALERT_ROWS,
       });
     });
 
     it('enhances the query with a KEEP clause for essential alert fields', async () => {
-      (runSearchTool as jest.Mock).mockResolvedValue({ results: [] });
+      (runSearchTool as jest.Mock).mockResolvedValue([]);
       const fieldsList = ESSENTIAL_ALERT_FIELDS.filter(
         (field) => field !== '_id' && field !== '_index'
       )
@@ -191,8 +192,75 @@ describe('alertsTool', () => {
       expect(callArgs.nlQuery).toContain(fieldsList);
     });
 
+    describe('result size cap', () => {
+      const buildEsqlResult = (rowCount: number) => ({
+        tool_result_id: 'esql-result',
+        type: ToolResultType.esqlResults,
+        data: {
+          query: 'FROM alerts | LIMIT 100',
+          columns: [{ name: 'kibana.alert.uuid', type: 'keyword' }],
+          values: Array.from({ length: rowCount }, (_, i) => [`alert-${i}`]),
+        },
+      });
+
+      const callHandler = async () =>
+        (await tool.handler(
+          { query: 'find all alerts' },
+          createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
+            modelProvider: mockModelProvider,
+            events: mockEvents as ToolHandlerContext['events'],
+          })
+        )) as ToolHandlerStandardReturn;
+
+      it('asks the search tool to limit generated queries to the row cap', async () => {
+        (runSearchTool as jest.Mock).mockResolvedValue([]);
+
+        await callHandler();
+
+        expect(runSearchTool).toHaveBeenCalledWith(
+          expect.objectContaining({ rowLimit: MAX_ALERT_ROWS })
+        );
+      });
+
+      // Why: one 100-row result pushed the agent context to ~160k tokens in security-team#20696.
+      it('truncates results above the cap and tells the model how many rows were dropped', async () => {
+        const total = MAX_ALERT_ROWS + 35;
+        (runSearchTool as jest.Mock).mockResolvedValue([buildEsqlResult(total)]);
+
+        const { results } = await callHandler();
+
+        const [esqlResult, note] = results;
+        expect((esqlResult.data as { values: unknown[][] }).values).toHaveLength(MAX_ALERT_ROWS);
+        expect((esqlResult.data as { values: unknown[][] }).values[0]).toEqual(['alert-0']);
+        expect(note).toMatchObject({
+          type: ToolResultType.other,
+          data: {
+            message: expect.stringContaining(`${MAX_ALERT_ROWS} of ${total}`),
+          },
+        });
+      });
+
+      it('returns results at or below the cap unchanged, without a note', async () => {
+        const atCap = buildEsqlResult(MAX_ALERT_ROWS);
+        (runSearchTool as jest.Mock).mockResolvedValue([atCap]);
+
+        const { results } = await callHandler();
+
+        expect(results).toEqual([atCap]);
+      });
+
+      it('passes error results through untouched', async () => {
+        const errorResult = { type: ToolResultType.error, data: { message: 'boom' } };
+        (runSearchTool as jest.Mock).mockResolvedValue([errorResult]);
+
+        const { results } = await callHandler();
+
+        expect(results).toEqual([errorResult]);
+      });
+    });
+
     it('uses handler context spaceId when building the alerts alias', async () => {
-      (runSearchTool as jest.Mock).mockResolvedValue({ results: [] });
+      (runSearchTool as jest.Mock).mockResolvedValue([]);
 
       await tool.handler(
         { query: 'find all alerts' },
@@ -208,7 +276,7 @@ describe('alertsTool', () => {
     });
 
     it('forwards time_window_hours to runSearchTool as a time range', async () => {
-      (runSearchTool as jest.Mock).mockResolvedValue({ results: [] });
+      (runSearchTool as jest.Mock).mockResolvedValue([]);
 
       await tool.handler(
         { query: 'find alerts', time_window_hours: 72 },
@@ -223,7 +291,7 @@ describe('alertsTool', () => {
     });
 
     it('leaves the time range unset when time_window_hours is not provided (24h default preserved)', async () => {
-      (runSearchTool as jest.Mock).mockResolvedValue({ results: [] });
+      (runSearchTool as jest.Mock).mockResolvedValue([]);
 
       await tool.handler(
         { query: 'find alerts' },
@@ -238,7 +306,7 @@ describe('alertsTool', () => {
     });
 
     it('ignores a caller-supplied index and still uses the space alias', async () => {
-      (runSearchTool as jest.Mock).mockResolvedValue({ results: [] });
+      (runSearchTool as jest.Mock).mockResolvedValue([]);
 
       await tool.handler(
         // Simulate a stale model/tool call that still sends index; schema strips it,
@@ -256,7 +324,7 @@ describe('alertsTool', () => {
     });
 
     it('enhances query with count instructions when isCount is true', async () => {
-      (runSearchTool as jest.Mock).mockResolvedValue({ results: [] });
+      (runSearchTool as jest.Mock).mockResolvedValue([]);
 
       await tool.handler(
         { query: 'how many alerts', isCount: true },
@@ -271,7 +339,7 @@ describe('alertsTool', () => {
     });
 
     it('logs debug message with correct parameters', async () => {
-      (runSearchTool as jest.Mock).mockResolvedValue({ results: [] });
+      (runSearchTool as jest.Mock).mockResolvedValue([]);
 
       await tool.handler(
         { query: 'test query', isCount: true },
@@ -288,8 +356,7 @@ describe('alertsTool', () => {
 
     it('returns results from runSearchTool', async () => {
       const mockResults = [{ type: ToolResultType.other, data: 'test results' }];
-      const runSearchToolResult = { results: mockResults };
-      (runSearchTool as jest.Mock).mockResolvedValue(runSearchToolResult);
+      (runSearchTool as jest.Mock).mockResolvedValue(mockResults);
 
       const result = await tool.handler(
         { query: 'find alerts' },
@@ -299,7 +366,7 @@ describe('alertsTool', () => {
         })
       );
 
-      expect(result).toEqual({ results: runSearchToolResult });
+      expect(result).toEqual({ results: mockResults });
     });
   });
 });

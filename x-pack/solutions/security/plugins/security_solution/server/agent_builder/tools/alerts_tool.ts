@@ -6,9 +6,9 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
-import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
+import { ToolType, ToolResultType, type EsqlResults } from '@kbn/agent-builder-common';
 import { runSearchTool } from '@kbn/agent-builder-genai-utils/tools';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { BuiltinToolDefinition, ToolHandlerResult } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { Logger } from '@kbn/logging';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
@@ -42,6 +42,9 @@ const alertsSchema = lazySchema(() =>
 
 export const SECURITY_ALERTS_TOOL_ID = securityTool('alerts');
 
+// Caps the rows handed to the model: an uncapped list-style query returned 100 alerts and ~160k tokens of context.
+export const MAX_ALERT_ROWS = 25;
+
 // `_id` duplicates `kibana.alert.uuid`, and `_index` is a metadata field that fails ES|QL validation in KEEP.
 const KEEP_EXCLUDED_METADATA_FIELDS = new Set(['_id', '_index']);
 
@@ -65,6 +68,30 @@ const enhanceQueryForAlerts = (nlQuery: string, isCount?: boolean): string => {
 
   return `${nlQuery}${instruction}`;
 };
+
+const isEsqlResult = (result: ToolHandlerResult): result is ToolHandlerResult<EsqlResults> =>
+  result.type === ToolResultType.esqlResults;
+
+const capAlertRows = (results: ToolHandlerResult[]): ToolHandlerResult[] =>
+  results.flatMap((result) => {
+    if (!isEsqlResult(result)) {
+      return [result];
+    }
+    const { values } = result.data;
+    if (values.length <= MAX_ALERT_ROWS) {
+      return [result];
+    }
+    return [
+      { ...result, data: { ...result.data, values: values.slice(0, MAX_ALERT_ROWS) } },
+      {
+        tool_result_id: getToolResultId(),
+        type: ToolResultType.other,
+        data: {
+          message: `Showing the first ${MAX_ALERT_ROWS} of ${values.length} rows returned by the query. Narrow the query (shorter time window, severity, host or rule) to see the rest.`,
+        },
+      },
+    ];
+  });
 
 export const alertsTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
@@ -140,9 +167,10 @@ export const alertsTool = (
         events,
         logger,
         timeRange,
+        rowLimit: MAX_ALERT_ROWS,
       });
 
-      return { results };
+      return { results: capAlertRows(results) };
     },
     tags: ['security', 'alerts'],
     annotations: {
