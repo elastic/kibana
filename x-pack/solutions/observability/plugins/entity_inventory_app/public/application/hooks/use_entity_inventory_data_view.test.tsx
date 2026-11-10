@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import { Router } from '@kbn/shared-ux-router';
+import { createMemoryHistory } from 'history';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -51,12 +53,15 @@ const renderDataViewHook = (entityCategory: EntityInventoryEntityCategory) => {
   const dataViews = dataViewPluginMocks.createStartContract();
   const dataView = { title: 'created', fields: [] } as unknown as DataView;
   (dataViews.create as jest.Mock).mockResolvedValue(dataView);
+  const history = createMemoryHistory();
 
   const wrapper = ({ children }: { children?: React.ReactNode }) => (
     <KibanaContextProvider services={{ ...coreMock.createStart(), dataViews }}>
-      <EntityInventorySearchProvider entityCategory={entityCategory}>
-        {children}
-      </EntityInventorySearchProvider>
+      <Router history={history}>
+        <EntityInventorySearchProvider entityCategory={entityCategory}>
+          {children}
+        </EntityInventorySearchProvider>
+      </Router>
     </KibanaContextProvider>
   );
 

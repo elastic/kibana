@@ -6,6 +6,8 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import { Router } from '@kbn/shared-ux-router';
+import { createMemoryHistory } from 'history';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import type { Filter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -52,9 +54,11 @@ const renderSearchBar = (entityCategory: EntityInventoryEntityCategory = 'all') 
 
   return render(
     <KibanaContextProvider services={{ ...coreMock.createStart(), unifiedSearch }}>
-      <EntityInventorySearchProvider entityCategory={entityCategory}>
-        <EntityInventorySearchBar />
-      </EntityInventorySearchProvider>
+      <Router history={createMemoryHistory()}>
+        <EntityInventorySearchProvider entityCategory={entityCategory}>
+          <EntityInventorySearchBar />
+        </EntityInventorySearchProvider>
+      </Router>
     </KibanaContextProvider>
   );
 };
@@ -141,6 +145,6 @@ describe('EntityInventorySearchBar', () => {
       lastSearchBarProps().onFiltersUpdated?.(filters);
     });
 
-    expect(lastSearchBarProps().filters).toBe(filters);
+    expect(lastSearchBarProps().filters).toEqual(filters);
   });
 });

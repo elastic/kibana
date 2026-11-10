@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import { Router } from '@kbn/shared-ux-router';
+import { createMemoryHistory } from 'history';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -25,9 +27,11 @@ jest.mock('../hooks/use_attribute_values', () => ({
 const renderControls = (entityCategory: EntityInventoryEntityCategory) =>
   render(
     <KibanaContextProvider services={coreMock.createStart()}>
-      <EntityInventorySearchProvider entityCategory={entityCategory}>
-        <EntityInventoryPageFilterControls />
-      </EntityInventorySearchProvider>
+      <Router history={createMemoryHistory()}>
+        <EntityInventorySearchProvider entityCategory={entityCategory}>
+          <EntityInventoryPageFilterControls />
+        </EntityInventorySearchProvider>
+      </Router>
     </KibanaContextProvider>
   );
 

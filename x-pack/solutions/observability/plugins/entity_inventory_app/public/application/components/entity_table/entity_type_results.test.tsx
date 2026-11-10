@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import { Router } from '@kbn/shared-ux-router';
+import { createMemoryHistory } from 'history';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -49,15 +51,18 @@ const NewRangeButton = () => {
 };
 
 const renderResults = (inventoryApi: EntityInventoryApiClient, entityType = 'host') => {
+  const history = createMemoryHistory();
   const results = (type: string) => (
     <I18nProvider>
       <EuiProvider>
         <KibanaContextProvider services={createAppServicesMock({ inventoryApi })}>
           <EntityTablePreferencesProvider>
-            <EntityInventorySearchProvider entityCategory="hosts">
-              <NewRangeButton />
-              <EntityTypeResults entityType={type} />
-            </EntityInventorySearchProvider>
+            <Router history={history}>
+              <EntityInventorySearchProvider entityCategory="hosts">
+                <NewRangeButton />
+                <EntityTypeResults entityType={type} />
+              </EntityInventorySearchProvider>
+            </Router>
           </EntityTablePreferencesProvider>
         </KibanaContextProvider>
       </EuiProvider>

@@ -38,6 +38,20 @@ describe('buildDocumentFilter', () => {
     expect(buildDocumentFilter({ query: { language: 'kuery', query: '   ' } })).toBeUndefined();
   });
 
+  it('ignores an empty or whitespace-only Lucene query', () => {
+    expect(buildDocumentFilter({ query: { language: 'lucene', query: '' } })).toBeUndefined();
+    expect(buildDocumentFilter({ query: { language: 'lucene', query: '   ' } })).toBeUndefined();
+  });
+
+  it('builds a Lucene query as a query string clause', () => {
+    const documentFilter = buildDocumentFilter({
+      query: { language: 'lucene', query: 'host.name:web-1' },
+    });
+
+    expect(JSON.stringify(documentFilter)).toContain('query_string');
+    expect(JSON.stringify(documentFilter)).toContain('host.name:web-1');
+  });
+
   it('ignores attributes with no selected values', () => {
     expect(buildDocumentFilter({ attributes: { 'os.type': [] } })).toBeUndefined();
   });
