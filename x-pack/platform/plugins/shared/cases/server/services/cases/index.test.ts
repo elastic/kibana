@@ -3783,6 +3783,31 @@ describe('CasesService', () => {
       const namespaces = ['default'];
       const search = 'awesome case';
 
+      const unifiedCommentClause = {
+        bool: {
+          filter: [{ terms: { 'cases-attachments.type': ['comment'] } }],
+          must: [{ match_phrase: { 'cases-attachments.data.content': search } }],
+        },
+      };
+      const unifiedAlertClause = {
+        bool: {
+          filter: [
+            {
+              terms: {
+                'cases-attachments.type': ['security.alert', 'observability.alert', 'stack.alert'],
+              },
+            },
+          ],
+          must: [{ match: { 'cases-attachments.attachmentId': search } }],
+        },
+      };
+      const unifiedEventClause = {
+        bool: {
+          filter: [{ terms: { 'cases-attachments.type': ['security.event'] } }],
+          must: [{ match: { 'cases-attachments.attachmentId': search } }],
+        },
+      };
+
       const mockEmptySearchResponse = () => {
         // The SO mock doesn't include `search` by default, so wire it up here.
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -3800,6 +3825,7 @@ describe('CasesService', () => {
         const searchCall = (unsecuredSavedObjectsClient as any).search.mock.calls[0][0];
         expect(searchCall.query.bool.should).toEqual([
           { match_phrase: { 'cases-comments.comment': search } },
+          unifiedCommentClause,
         ]);
       });
 
@@ -3815,7 +3841,9 @@ describe('CasesService', () => {
         const searchCall = (unsecuredSavedObjectsClient as any).search.mock.calls[0][0];
         expect(searchCall.query.bool.should).toEqual([
           { match: { 'cases-comments.alertId': search } },
+          unifiedAlertClause,
           { match: { 'cases-comments.eventId': search } },
+          unifiedEventClause,
         ]);
       });
 
@@ -3831,8 +3859,43 @@ describe('CasesService', () => {
         const searchCall = (unsecuredSavedObjectsClient as any).search.mock.calls[0][0];
         expect(searchCall.query.bool.should).toEqual([
           { match: { 'cases-comments.alertId': search } },
+          unifiedAlertClause,
           { match_phrase: { 'cases-comments.comment': search } },
+          unifiedCommentClause,
         ]);
+      });
+
+      it('searches both the legacy and the unified attachment saved object types', async () => {
+        mockEmptySearchResponse();
+
+        await service.getCaseIdsByAttachmentSearch(namespaces, search, ['cases-comments.comment']);
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const searchCall = (unsecuredSavedObjectsClient as any).search.mock.calls[0][0];
+        expect(searchCall.type).toEqual(['cases-comments', 'cases-attachments']);
+      });
+
+      it('returns the case ids referenced by matching unified attachments', async () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (unsecuredSavedObjectsClient as any).search = jest.fn().mockResolvedValue({
+          hits: {
+            hits: [
+              {
+                _id: 'cases-attachments:attachment-1',
+                _source: {
+                  type: 'cases-attachments',
+                  references: [{ type: 'cases', id: 'case-1', name: 'associated-cases' }],
+                },
+              },
+            ],
+          },
+        });
+
+        const caseIds = await service.getCaseIdsByAttachmentSearch(namespaces, 'alert-1', [
+          'cases-comments.alertId',
+        ]);
+
+        expect(caseIds).toEqual(['case-1']);
       });
     });
 

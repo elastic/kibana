@@ -41,6 +41,10 @@ import {
   CASE_SAVED_OBJECT,
   MAX_DOCS_PER_PAGE,
 } from '../../../common/constants';
+import {
+  COMMENT_ATTACHMENT_TYPE,
+  SECURITY_EVENT_ATTACHMENT_TYPE,
+} from '../../../common/constants/attachments';
 import { UNIFIED_ALERT_TYPES_ARRAY } from '../../../common/utils/attachments';
 import { decodeOrThrowZod } from '../../common/runtime_types';
 import type {
@@ -180,13 +184,41 @@ const buildAttachmentSearchClause = (
   field: string,
   search: string
 ): estypes.QueryDslQueryContainer => {
-  // TODO: add support for CASE_ATTACHMENT_SAVED_OBJECT
-  // https://github.com/elastic/security-team/issues/15066
   if (field === `${CASE_COMMENT_SAVED_OBJECT}.comment`) {
     return { match_phrase: { [field]: search } };
   }
   return { match: { [field]: search } };
 };
+
+/**
+ * The unified `cases-attachments` type stores a comment in `data.content` and an alert or
+ * event id in `attachmentId`, so each legacy search field maps to a type-scoped clause.
+ */
+const UNIFIED_ATTACHMENT_TYPES_BY_SEARCH_FIELD: Record<string, string[]> = {
+  [`${CASE_COMMENT_SAVED_OBJECT}.comment`]: [COMMENT_ATTACHMENT_TYPE],
+  [`${CASE_COMMENT_SAVED_OBJECT}.alertId`]: UNIFIED_ALERT_TYPES_ARRAY,
+  [`${CASE_COMMENT_SAVED_OBJECT}.eventId`]: [SECURITY_EVENT_ATTACHMENT_TYPE],
+};
+
+const buildUnifiedAttachmentSearchClause = (
+  field: string,
+  search: string
+): estypes.QueryDslQueryContainer => ({
+  bool: {
+    filter: [
+      {
+        terms: {
+          [`${CASE_ATTACHMENT_SAVED_OBJECT}.type`]: UNIFIED_ATTACHMENT_TYPES_BY_SEARCH_FIELD[field],
+        },
+      },
+    ],
+    must: [
+      field === `${CASE_COMMENT_SAVED_OBJECT}.comment`
+        ? { match_phrase: { [`${CASE_ATTACHMENT_SAVED_OBJECT}.data.content`]: search } }
+        : { match: { [`${CASE_ATTACHMENT_SAVED_OBJECT}.attachmentId`]: search } },
+    ],
+  },
+});
 
 export class CasesService {
   private readonly log: Logger;
@@ -366,12 +398,16 @@ export class CasesService {
       return [];
     }
 
+    // Both types are searched regardless of `attachments.enabled`: existing cases can hold either.
     const response = await this.searchCases({
-      type: [CASE_COMMENT_SAVED_OBJECT],
+      type: [CASE_COMMENT_SAVED_OBJECT, CASE_ATTACHMENT_SAVED_OBJECT],
       namespaces,
       query: {
         bool: {
-          should: attachmentSearchFields.map((field) => buildAttachmentSearchClause(field, search)),
+          should: attachmentSearchFields.flatMap((field) => [
+            buildAttachmentSearchClause(field, search),
+            buildUnifiedAttachmentSearchClause(field, search),
+          ]),
         },
       },
     });
