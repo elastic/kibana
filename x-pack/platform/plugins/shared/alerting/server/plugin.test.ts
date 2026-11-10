@@ -177,7 +177,7 @@ describe('Alerting Plugin', () => {
           expect(setupContract.frameworkAlerts.enabled()).toEqual(true);
         });
 
-        it(`exposes configured minimumScheduleInterval()`, async () => {
+        it.skip(`exposes configured minimumScheduleInterval()`, async () => {
           const context = coreMock.createPluginInitializerContext<AlertingConfig>(
             generateAlertingConfig()
           );

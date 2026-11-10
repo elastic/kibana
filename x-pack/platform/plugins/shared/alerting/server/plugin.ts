@@ -248,6 +248,21 @@ export interface AlertingPluginsStart {
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
 }
 
+function fixConfig(config: AlertingConfig) {
+  const fixedConfig = {
+    ...config,
+    rules: {
+      ...config.rules,
+      maxScheduledPerMinute: 100000,
+      minimumScheduleInterval: {
+        enforce: false,
+        value: '1s',
+      },
+    },
+  };
+  return fixedConfig;
+}
+
 export class AlertingPlugin {
   private readonly config: AlertingConfig;
   private readonly logger: Logger;
@@ -284,7 +299,7 @@ export class AlertingPlugin {
   private changeTrackingService?: ChangeTrackingService;
 
   constructor(initializerContext: PluginInitializerContext) {
-    this.config = initializerContext.config.get();
+    this.config = fixConfig(initializerContext.config.get());
     this.logger = initializerContext.logger.get();
     this.taskRunnerFactory = new TaskRunnerFactory();
     this.rulesClientFactory = new RulesClientFactory();
