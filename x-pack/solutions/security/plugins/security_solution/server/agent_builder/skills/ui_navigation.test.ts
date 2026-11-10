@@ -88,12 +88,8 @@ describe('buildWatchlistEditPath', () => {
   });
 });
 
-// The manage-watchlists UI-navigation section is the reply contract the agent follows when it
-// declines and redirects. The eval suite (kbn-evals-suite-entity-analytics, "UI navigation —
-// watchlist edit flyout") grades the reply against it, so the contract has to be stated
-// explicitly and testably: the three decline parts, the "pick from the list" instruction for
-// the bare-tab destination, and the rule that a missing CSV attachment does not change the
-// destination. The reply-shape assertions below fail on the pre-fix section text.
+// The eval suite (kbn-evals-suite-entity-analytics, "UI navigation — watchlist edit flyout") grades the
+// agent reply against this section, so the reply shape has to be stated explicitly.
 describe('WATCHLISTS_UI_NAVIGATION_CONTENT reply-shape contract', () => {
   const flat = WATCHLISTS_UI_NAVIGATION_CONTENT.replace(/\s+/g, ' ');
 
