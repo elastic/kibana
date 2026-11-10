@@ -18,6 +18,7 @@ import {
 import type { Logger } from '@kbn/logging';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
+import type { PageProfilingOptions } from '../../../lib/entity_analytics/risk_score/maintainer/instrumentation/page_timing_types';
 import type { ExperimentalFeatures } from '../../../../common';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 import { AssetCriticalityLevelsForBulkUpload } from '../../../../common/api/entity_analytics/asset_criticality/bulk_upload_asset_criticality.gen';
@@ -87,7 +88,8 @@ export const setAssetCriticalityTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger,
   experimentalFeatures: ExperimentalFeatures,
-  kibanaVersion: string
+  kibanaVersion: string,
+  profiling: PageProfilingOptions
 ): BuiltinToolDefinition<typeof schema> => {
   return {
     id: SECURITY_SET_ASSET_CRITICALITY_TOOL_ID,
@@ -218,6 +220,9 @@ export const setAssetCriticalityTool = (
             namespace: spaceId,
             soClient: savedObjectsClient,
             logger,
+            collectScores: true,
+            telemetry: core.analytics,
+            profiling,
           });
           if (!canRecalculate) {
             logger.warn(
@@ -243,6 +248,8 @@ export const setAssetCriticalityTool = (
               idBasedRiskScoringEnabled: true,
               logger,
               collectScores: true,
+              telemetry: core.analytics,
+              profiling,
             });
             if (entityScore.baseScore != null) {
               riskScore = {

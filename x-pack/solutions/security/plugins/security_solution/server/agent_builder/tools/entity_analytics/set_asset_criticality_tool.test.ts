@@ -96,7 +96,10 @@ describe('setAssetCriticalityTool', () => {
     ]);
   });
 
-  const tool = setAssetCriticalityTool(mockCore, mockLogger, mockExperimentalFeatures, '8.0.0');
+  const tool = setAssetCriticalityTool(mockCore, mockLogger, mockExperimentalFeatures, '8.0.0', {
+    profile: false,
+    profileInterval: 7,
+  });
 
   describe('schema', () => {
     it('accepts valid inputs', () => {
@@ -381,6 +384,12 @@ describe('setAssetCriticalityTool', () => {
         ctx
       )) as ToolHandlerStandardReturn;
 
+      expect(mockRecalculate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          telemetry: mockCore.analytics,
+          profiling: { profile: false, profileInterval: 7 },
+        })
+      );
       const other = result.results[0] as OtherResult;
       expect(
         (

@@ -111,6 +111,13 @@ describe('CanvasFlyout', () => {
       expect(props?.historyKey).toBeUndefined();
       expect(props?.outsideClickCloses).toBe(true);
     });
+
+    it('fills the available width in the sidebar', () => {
+      const props = renderCanvas({ isSidebar: true });
+
+      expect(props?.size).toBe('fill');
+      expect(props?.resizable).toBe(false);
+    });
   });
 
   it('shows a fallback instead of crashing when renderCanvasContent throws', () => {

@@ -85,12 +85,14 @@ dependsOn:
   - '@kbn/agentic-investigations-plugin'
   - '@kbn/core-elasticsearch-server-mocks'
   - '@kbn/core-http-server-mocks'
+  - '@kbn/std'
 tags:
   - plugin
   - prod
   - group-observability
   - private
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*

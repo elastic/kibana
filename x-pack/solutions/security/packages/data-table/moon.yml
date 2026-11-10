@@ -18,7 +18,7 @@ project:
   sourceRoot: x-pack/solutions/security/packages/data-table
 dependsOn:
   - '@kbn/cell-actions'
-  - '@kbn/timelines-plugin'
+  - '@kbn/securitysolution-timeline-common'
   - '@kbn/es-query'
   - '@kbn/securitysolution-ecs'
   - '@kbn/safer-lodash-set'

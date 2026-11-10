@@ -28,6 +28,11 @@ import type {
   AgentBuilderStartDependencies,
 } from './types';
 import { registerFeatures } from './features';
+import {
+  AGENT_WORKLOAD_TYPE,
+  resolveAgentWorkloads,
+} from './services/agents/service_account_binding';
+import { createStorage as createAgentStorage } from './services/agents/persisted/client/storage';
 import { registerRoutes } from './routes';
 import { agentBuilderSpaceSettingsType } from './saved_objects';
 import { registerUISettings } from './ui_settings';
@@ -144,6 +149,7 @@ export class AgentBuilderPlugin
 
     registerTaskDefinitions({
       taskManager: setupDeps.taskManager,
+      getStartServices: coreSetup.getStartServices,
       getTaskHandler: () => {
         const services = this.serviceManager.internalStart;
         if (!services) {
@@ -154,6 +160,25 @@ export class AgentBuilderPlugin
     });
 
     registerFeatures({ features: setupDeps.features });
+
+    // Registered even where service accounts are disabled so existing bindings can still be
+    // listed and removed.
+    coreSetup.security.serviceAccounts.registerWorkloadType({
+      type: AGENT_WORKLOAD_TYPE,
+      name: 'Agent',
+      description: 'Agent Builder agent that runs every conversation as the bound service account',
+      resolveWorkloads: async (workloads, { signal }) => {
+        const [coreStart] = await coreSetup.getStartServices();
+        return resolveAgentWorkloads({
+          storage: createAgentStorage({
+            logger: this.logger.get('agents'),
+            esClient: coreStart.elasticsearch.client.asInternalUser,
+          }),
+          workloads,
+          signal,
+        });
+      },
+    });
 
     coreSetup.savedObjects.registerType(agentBuilderSpaceSettingsType);
 
@@ -258,6 +283,7 @@ export class AgentBuilderPlugin
       workflowsManagement: setupDeps.workflowsManagement,
       logger: this.logger,
       getInternalServices,
+      getStartServices: coreSetup.getStartServices,
     });
 
     registerSkillToolsLoaderHook(serviceSetups, {
@@ -333,6 +359,7 @@ export class AgentBuilderPlugin
       },
       callbacks: {
         registerConversationResolver: serviceSetups.callbacks.registerConversationResolver,
+        registerOnBeforeNewConversation: serviceSetups.callbacks.registerOnBeforeNewConversation,
         registerTransport: serviceSetups.callbacks.registerTransport,
       },
       topSnippets: this.config.topSnippets,
@@ -393,6 +420,8 @@ export class AgentBuilderPlugin
       }),
       deductiveRegister: this.config.deductive?.register ?? false,
       isomer,
+      getSmlTypeDefinition: startDeps.agentBuilderSml.getTypeDefinition,
+      cloud: this.cloudSetup,
       conversationEventBus: this.conversationEventBus,
     });
 
@@ -435,7 +464,10 @@ export class AgentBuilderPlugin
       esClient: elasticsearch.client.asInternalUser,
       features: searchInferenceEndpoints.features,
     });
-    this.recommendedEndpointsPoller.start();
+    // Intentionally not started: the EIS-derived list is too broad with the current family
+    // heuristic, so the static recommended endpoints are used instead.
+    // See https://github.com/elastic/search-team/issues/16741
+    // this.recommendedEndpointsPoller.start();
 
     return {
       agents: {

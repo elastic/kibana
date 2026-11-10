@@ -10,7 +10,7 @@ import { dirname, resolve } from 'path';
 import { Client } from '@elastic/elasticsearch';
 import { run } from '@kbn/dev-cli-runner';
 import { FP_TP_INFERENCE_FEATURE_ID } from '../src/constants';
-import { createLiveKbnRequest } from '../src/world';
+import { assertServerlessSpace, createLiveKbnRequest } from '../src/world';
 import {
   assertWorkerModeSpace,
   buildWorkerModePlan,
@@ -62,7 +62,10 @@ const writeManifest = async (path: string, plan: WorkerModeSeedPlan): Promise<vo
 
 run(
   async ({ flags, log }) => {
-    const space = assertWorkerModeSpace(optionalString(flags.space));
+    const serverless = Boolean(flags.serverless);
+    const space = serverless
+      ? assertServerlessSpace(optionalString(flags.space))
+      : assertWorkerModeSpace(optionalString(flags.space));
     const sets = toSetCount(flags.sets);
     const append = flags.append === true;
     const example = resolveWorkerModeExample({
@@ -108,7 +111,7 @@ run(
           `Appending onto host ${hostUser.hostName} (${hostUser.hostId}) user ${hostUser.userName}`
         );
       } else {
-        const cleaned = await cleanupWorkerModeSpace({ esClient, kbnRequest, space });
+        const cleaned = await cleanupWorkerModeSpace({ esClient, kbnRequest, space, serverless });
         log.info(
           `Removed ${cleaned.alerts} earlier seeded alert(s) and their events and entities on ${cleaned.hostIds.length} host(s)`
         );
@@ -120,6 +123,7 @@ run(
         const plan = buildWorkerModePlan({
           space,
           exampleId: example.id,
+          serverless,
           ...(hostUser === undefined ? {} : { hostUser }),
         });
         await seedWorkerModePlan({ esClient, kbnRequest, plan });
@@ -176,7 +180,7 @@ run(
         'reasoningConnectorId',
         'manifest',
       ],
-      boolean: ['append'],
+      boolean: ['append', 'serverless'],
       default: {
         sets: '1',
         kibanaUrl: 'http://127.0.0.1:5601',
@@ -203,6 +207,10 @@ run(
                                 flag is absent and stays out of shell history
         --reasoningConnectorId  Connector to map alertzero_frontier to in the space
                                 (Default: keep the existing mapping; one is required)
+        --serverless            Serverless project seeding: raw events go to seeder-owned
+                                logs-endpoint.events.fp-tp-<kind>-<space> data streams
+                                (template + ingest pipeline installed by the script), and
+                                cleanup stays inside them
         --manifest              Manifest path (Default: target/ad_worker_fp_tp/<space>-<marker>.json
                                 in this package)
       `,

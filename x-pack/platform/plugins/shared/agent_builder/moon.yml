@@ -17,6 +17,7 @@ project:
   owner: '@elastic/workchat-eng'
   sourceRoot: x-pack/platform/plugins/shared/agent_builder
 dependsOn:
+  - '@kbn/isomer-components'
   - '@kbn/core-ui-settings-browser'
   - '@kbn/core'
   - '@kbn/datemath'
@@ -161,6 +162,8 @@ tags:
   - group-platform
   - shared
   - jest-unit-tests
+  - jest-integration-tests
+  - scout-tests
 fileGroups:
   src:
     - .storybook/**/*

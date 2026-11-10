@@ -5,12 +5,18 @@
  * 2.0.
  */
 
-import { dashboardAttachmentDataSchema, isSection } from '@kbn/agent-builder-dashboards-common';
+import {
+  dashboardAttachmentDataSchema,
+  isSection,
+  type AttachmentPanel,
+} from '@kbn/agent-builder-dashboards-common';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import {
   metricConfigSchemaESQL,
   pieConfigSchemaESQL,
   tagcloudConfigSchemaESQL,
   xyConfigSchemaESQL,
+  xyConfigSchemaNoESQL,
 } from '@kbn/lens-embeddable-utils';
 import type { z } from '@kbn/zod';
 import { findViolations, type DashboardRuleId } from '../evaluators/dashboard_rules';
@@ -19,6 +25,10 @@ import { getLeafPanels, getPanelKind } from '../dashboard_panels';
 import { DISSECT_DERIVED_COLUMNS, DISSECT_LOGS_RESULTS } from './dissect_logs_results';
 import { MESSY_LOGS_DASHBOARD, MESSY_LOGS_DASHBOARD_DEFECTS } from './messy_logs_dashboard';
 import { SAMPLE_LOGS_MAPPED_FIELDS } from './sample_logs_fields';
+import { SECTIONED_LOGS_DASHBOARD } from './sectioned_logs_dashboard';
+
+const isEsqlLensPanel = ({ type, config }: AttachmentPanel): boolean =>
+  type === LENS_EMBEDDABLE_TYPE && JSON.stringify(config).includes('"type":"esql"');
 
 const LENS_SCHEMA_BY_KIND: Record<string, z.ZodType> = {
   metric: metricConfigSchemaESQL,
@@ -33,10 +43,8 @@ describe('seeded messy logs dashboard', () => {
     expect(parsed.success ? undefined : parsed.error.issues).toBeUndefined();
   });
 
-  it('has Lens panels that parse against the ES|QL chart schemas', () => {
-    const lensPanels = getLeafPanels(MESSY_LOGS_DASHBOARD).filter(
-      (panel) => getPanelKind(panel) !== 'markdown'
-    );
+  it('has ES|QL Lens panels that parse against the ES|QL chart schemas', () => {
+    const lensPanels = getLeafPanels(MESSY_LOGS_DASHBOARD).filter(isEsqlLensPanel);
     expect(lensPanels.length).toBeGreaterThan(0);
     for (const panel of lensPanels) {
       const schema = LENS_SCHEMA_BY_KIND[getPanelKind(panel)];
@@ -46,6 +54,16 @@ describe('seeded messy logs dashboard', () => {
         parsed.success ? undefined : { panel: panel.id, issues: parsed.error.issues }
       ).toBeUndefined();
     }
+  });
+
+  it('keeps a data-view Lens, a Vega and an ML panel the agent must leave alone', () => {
+    const kinds = getLeafPanels(MESSY_LOGS_DASHBOARD).map(({ type }) => type);
+    expect(kinds).toEqual(expect.arrayContaining(['vega', 'ml_anomaly_swimlane']));
+    const dataViewPanel = getLeafPanels(MESSY_LOGS_DASHBOARD).find(
+      (panel) => panel.type === LENS_EMBEDDABLE_TYPE && !isEsqlLensPanel(panel)
+    );
+    const parsed = xyConfigSchemaNoESQL.safeParse(dataViewPanel?.config);
+    expect(parsed.success ? undefined : parsed.error.issues).toBeUndefined();
   });
 
   it('shows every rule defect it declares', () => {
@@ -60,6 +78,14 @@ describe('seeded messy logs dashboard', () => {
 
   it('has sections nowhere, so every panel is a leaf', () => {
     expect(MESSY_LOGS_DASHBOARD.panels.some(isSection)).toBe(false);
+  });
+});
+
+describe('sectioned logs dashboard', () => {
+  it('parses against the dashboard attachment schema, controls included', () => {
+    const parsed = dashboardAttachmentDataSchema.safeParse(SECTIONED_LOGS_DASHBOARD);
+    expect(parsed.success ? undefined : parsed.error.issues).toBeUndefined();
+    expect(SECTIONED_LOGS_DASHBOARD.pinned_panels).toHaveLength(3);
   });
 });
 

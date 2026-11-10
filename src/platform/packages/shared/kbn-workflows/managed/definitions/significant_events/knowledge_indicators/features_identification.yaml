@@ -68,16 +68,28 @@ triggers:
         description: "Number of days before a KI feature expires and is cleaned up."
       - name: entityFilteredRatio
         type: number
+        default: 0.4
         description: "Fraction (0–1) of sample allocated to entity-filtered (must_not) documents."
       - name: diverseRatio
         type: number
+        default: 0.4
         description: "Fraction (0–1) of sample allocated to diverse (unfiltered) documents."
       - name: maxExcludedFeaturesInPrompt
         type: number
+        default: 10
         description: "Maximum number of excluded KI features sent in the LLM prompt."
       - name: maxEntityFilters
         type: number
+        default: 10
         description: "Maximum number of entity filters applied during sampling."
+      - name: samplingTimeoutMs
+        type: number
+        default: 60000
+        description: "Deadline (ms) per ES|QL sampling query during features identification sampling."
+      - name: computedFeaturesTimeoutMs
+        type: number
+        default: 60000
+        description: "Deadline (ms) for the whole computed-feature generation pass."
       - name: maxPreviouslyIdentifiedFeatures
         type: number
         description: "Maximum number of previously identified features sent in the LLM prompt."
@@ -124,6 +136,7 @@ steps:
             entityFilteredRatio: "${{ inputs.entityFilteredRatio }}"
             diverseRatio: "${{ inputs.diverseRatio }}"
             maxEntityFilters: "${{ inputs.maxEntityFilters }}"
+            samplingTimeoutMs: "${{ inputs.samplingTimeoutMs }}"
 
       # 2b: If no documents were returned, stop the loop.
       - name: check_docs
@@ -234,6 +247,7 @@ steps:
         end: "${{ inputs.end }}"
         runId: "${{ execution.id }}"
         featureTtlDays: "${{ inputs.featureTtlDays }}"
+        computedFeaturesTimeoutMs: "${{ inputs.computedFeaturesTimeoutMs }}"
 
   # -----------------------------------------------------------------------
   # Step 5: Output results.

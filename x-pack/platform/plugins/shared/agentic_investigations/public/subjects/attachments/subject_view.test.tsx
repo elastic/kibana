@@ -20,9 +20,20 @@ import { SubjectList, SubjectView } from './subject_view';
 // The flyout itself is covered by `subject_details_flyout.test.tsx`; here only the row's choice
 // between opening it and following its link matters.
 jest.mock('./subject_details_flyout', () => ({
-  SubjectDetailsFlyout: ({ alertId, detailsHref }: { alertId: string; detailsHref?: string }) => (
+  SubjectDetailsFlyout: ({
+    alertId,
+    detailsHref,
+    onClose,
+  }: {
+    alertId: string;
+    detailsHref?: string;
+    onClose: () => void;
+  }) => (
     <div data-test-subj="subjectFlyoutStub" data-href={detailsHref}>
       {alertId}
+      <button type="button" data-test-subj="subjectFlyoutStubClose" onClick={onClose}>
+        close
+      </button>
     </div>
   ),
 }));
@@ -232,6 +243,21 @@ describe('SubjectView', () => {
   });
 });
 
+describe('SubjectView presentation', () => {
+  it('is presented as a significant event when its source says so', () => {
+    renderView({
+      ...base,
+      subjectType: 'alert',
+      subjectId: 'episode-1',
+      snapshot: { source: 'elastic.significant_events', rule_name: 'Checkout errors' },
+    });
+
+    expect(screen.getByTestId('investigationSubject-alert')).toHaveTextContent(
+      'Trigger · Significant event'
+    );
+  });
+});
+
 describe('SubjectView alert flyout', () => {
   const alert = {
     ...base,
@@ -239,6 +265,20 @@ describe('SubjectView alert flyout', () => {
     subjectId: 'alert-1',
     snapshot: { rule_name: 'High latency', url: '/app/observability/alerts/alert-1' },
   };
+
+  it('gives focus back to the row when the flyout closes', async () => {
+    renderView(alert, { http: {} as never });
+
+    const row = screen.getByTestId('investigationSubject-alert');
+    row.focus();
+    fireEvent.click(row);
+    fireEvent.click(await screen.findByTestId('subjectFlyoutStubClose'));
+    // The browser leaves focus on the page body when a flyout without its own focus trap unmounts.
+    (document.activeElement as HTMLElement | null)?.blur();
+
+    await waitFor(() => expect(row).toHaveFocus());
+    expect(screen.queryByTestId('subjectFlyoutStub')).not.toBeInTheDocument();
+  });
 
   it('opens the alert in a flyout instead of navigating, and keeps the href', async () => {
     renderView(alert, { http: {} as never });
@@ -283,6 +323,68 @@ describe('SubjectView alert flyout', () => {
   });
 });
 
+describe('SubjectView alert with a registered flyout', () => {
+  const sourceAlert = {
+    ...base,
+    subjectType: 'alert' as const,
+    subjectId: 'episode-1',
+    snapshot: { source: 'elastic.example', rule_name: 'Checkout errors' },
+  };
+
+  it('opens the registered flyout in place instead of navigating', async () => {
+    const { services, navigate } = createShare();
+    const getAlertFlyout = jest.fn((source?: string) =>
+      source === 'elastic.example' ? () => null : undefined
+    );
+    renderView(sourceAlert, { ...services, getAlertFlyout });
+
+    await waitFor(() =>
+      expect(screen.getByTestId('investigationSubject-alert')).toHaveAttribute('href')
+    );
+    const row = screen.getByTestId('investigationSubject-alert');
+    const click = createEvent.click(row, { bubbles: true, cancelable: true });
+    fireEvent(row, click);
+
+    expect(click.defaultPrevented).toBe(true);
+    expect(await screen.findByTestId('subjectFlyoutStub')).toHaveTextContent('episode-1');
+    expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it('opens a flyout registered after the row rendered, since it decides when clicked', async () => {
+    const { services, navigate } = createShare();
+    const registry: { flyout?: () => null } = {};
+    renderView(sourceAlert, { ...services, getAlertFlyout: () => registry.flyout });
+    await waitFor(() =>
+      expect(screen.getByTestId('investigationSubject-alert')).toHaveAttribute('href')
+    );
+
+    registry.flyout = () => null;
+    const row = screen.getByTestId('investigationSubject-alert');
+    const click = createEvent.click(row, { bubbles: true, cancelable: true });
+    fireEvent(row, click);
+
+    expect(click.defaultPrevented).toBe(true);
+    expect(await screen.findByTestId('subjectFlyoutStub')).toHaveTextContent('episode-1');
+    expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it('lets the browser handle a new-tab click', async () => {
+    const { services, navigate } = createShare();
+    renderView(sourceAlert, { ...services, getAlertFlyout: () => () => null });
+
+    await waitFor(() =>
+      expect(screen.getByTestId('investigationSubject-alert')).toHaveAttribute('href')
+    );
+    const row = screen.getByTestId('investigationSubject-alert');
+    const click = createEvent.click(row, { bubbles: true, cancelable: true, metaKey: true });
+    fireEvent(row, click);
+
+    expect(click.defaultPrevented).toBe(false);
+    expect(screen.queryByTestId('subjectFlyoutStub')).not.toBeInTheDocument();
+    expect(navigate).not.toHaveBeenCalled();
+  });
+});
+
 const alertStart = (id: string): string => `2026-07-28T14:0${id.slice(-1)}:00.000Z`;
 
 const alertSubject = (id: string): SubjectRowData => ({
@@ -316,6 +418,23 @@ describe('SubjectList', () => {
     );
     expect(screen.getByTestId('investigationSubject-manual')).toHaveTextContent('Why is it slow?');
     expect(screen.queryByTestId('investigationSubject-alerts')).not.toBeInTheDocument();
+  });
+
+  it('hides a Slack thread that no trigger started and keeps one that did', () => {
+    renderList([
+      { type: 'manual', id: 'q-1', summary: 'Why is it slow?' },
+      { type: 'slack_thread', id: 'notification', slack: { channel: 'C1', thread_ts: '1.1' } },
+      {
+        type: 'slack_thread',
+        id: 'trigger',
+        trigger_type: 'automatic',
+        slack: { channel: 'C2', thread_ts: '2.2' },
+      },
+    ]);
+
+    const rows = screen.getAllByTestId('investigationSubject-slack_thread');
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toHaveTextContent('#C2');
   });
 
   it('lists several alerts inline when there is no alerts list to link to', () => {

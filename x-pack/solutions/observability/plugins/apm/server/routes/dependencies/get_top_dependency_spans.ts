@@ -8,7 +8,7 @@
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { kqlQuery, rangeQuery, termQuery, termsQuery } from '@kbn/observability-plugin/server';
 import { keyBy } from 'lodash';
-import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import type { Logger } from '@kbn/core/server';
 import type { DependencySpan } from '@kbn/apm-api-shared';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
@@ -30,11 +30,14 @@ import { EventOutcome } from '../../../common/event_outcome';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { maybe } from '../../../common/utils/maybe';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { compactMap } from '../../utils/compact_map';
+import { createApmEventFieldsAccessor } from '../../utils/create_apm_event_fields_accessor';
 
 const MAX_NUM_SPANS = 1000;
 
 export async function getTopDependencySpans({
   apmEventClient,
+  logger,
   dependencyName,
   spanName,
   start,
@@ -45,6 +48,7 @@ export async function getTopDependencySpans({
   sampleRangeTo,
 }: {
   apmEventClient: APMEventClient;
+  logger: Logger;
   dependencyName: string;
   spanName: string;
   start: number;
@@ -61,11 +65,12 @@ export async function getTopDependencySpans({
     SERVICE_NAME,
     AGENT_NAME,
     SPAN_DURATION,
-    EVENT_OUTCOME,
     AT_TIMESTAMP,
   ] as const);
+  // `event.outcome` is not guaranteed on OTel spans, so it is requested but not required.
+  const topDedsFields = asMutableArray([...topDedsRequiredFields, EVENT_OUTCOME] as const);
 
-  const spans = (
+  const spanHits = (
     await apmEventClient.search('get_top_dependency_spans', {
       apm: {
         events: [ProcessorEvent.span, ProcessorEvent.transaction],
@@ -95,11 +100,17 @@ export async function getTopDependencySpans({
           ],
         },
       },
-      fields: topDedsRequiredFields,
+      fields: topDedsFields,
     })
-  ).hits.hits.map((hit) =>
-    accessKnownApmEventFields(hit.fields).requireFields(topDedsRequiredFields)
-  );
+  ).hits.hits;
+
+  // Span documents can be OTel-native or partial/legacy APM docs that do not always populate
+  // every required field. Skipping a malformed hit keeps the whole request from failing with a 500.
+  const spansAccessor = createApmEventFieldsAccessor({
+    logger,
+    operation: 'get_top_dependency_spans',
+  });
+  const spans = compactMap(spanHits, (hit) => spansAccessor.tryAccess(hit, topDedsRequiredFields));
 
   const traceIds = spans.map((span) => span[TRACE_ID]);
 
@@ -110,7 +121,7 @@ export async function getTopDependencySpans({
     TRANSACTION_NAME,
   ] as const);
 
-  const transactions = (
+  const transactionHits = (
     await apmEventClient.search('get_transactions_for_dependency_spans', {
       apm: {
         events: [ProcessorEvent.transaction],
@@ -127,7 +138,15 @@ export async function getTopDependencySpans({
         '@timestamp': 'desc',
       },
     })
-  ).hits.hits.map((hit) => accessKnownApmEventFields(hit.fields).requireFields(txRequiredFields));
+  ).hits.hits;
+
+  const txAccessor = createApmEventFieldsAccessor({
+    logger,
+    operation: 'get_transactions_for_dependency_spans',
+  });
+  const transactions = compactMap(transactionHits, (hit) =>
+    txAccessor.tryAccess(hit, txRequiredFields)
+  );
 
   const transactionsByTraceId = keyBy(transactions, (transaction) => transaction[TRACE_ID]);
 

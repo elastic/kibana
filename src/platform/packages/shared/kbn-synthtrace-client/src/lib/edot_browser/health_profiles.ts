@@ -7,15 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Distribution, HealthProfileName } from '../edot_shared/health_profiles';
+
+export { sample, type Distribution, type HealthProfileName } from '../edot_shared/health_profiles';
+
 export type WebVitalName = 'lcp' | 'inp' | 'cls' | 'fcp' | 'ttfb';
 export type WebVitalRating = 'good' | 'needs-improvement' | 'poor';
-export type HealthProfileName = 'healthy' | 'slow' | 'erroring' | 'critical';
-
-/** Log-normal distribution described by its median and the standard deviation of its log. */
-export interface Distribution {
-  median: number;
-  sigma: number;
-}
 
 export interface HealthProfile {
   name: HealthProfileName;
@@ -52,16 +49,6 @@ export const getWebVitalRating = (name: WebVitalName, value: number): WebVitalRa
   }
   return value > good ? 'needs-improvement' : 'good';
 };
-
-const gaussian = (random: () => number) => {
-  // Box-Muller transform; `1 - random()` avoids `log(0)`
-  return Math.sqrt(-2 * Math.log(1 - random())) * Math.cos(2 * Math.PI * random());
-};
-
-export const sample = (
-  { median, sigma }: Distribution,
-  random: () => number = Math.random
-): number => median * Math.exp(sigma * gaussian(random));
 
 export const HEALTH_PROFILES: Readonly<Record<HealthProfileName, HealthProfile>> = {
   healthy: {

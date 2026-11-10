@@ -31,7 +31,7 @@ describe('source_create tool', () => {
   const checkout = sourceWithSlug('checkout', { ...params, type: 'logs' });
 
   const createTool = ({
-    featurePrivilege = 'all',
+    featurePrivilege = 'all_and_manage_engines',
     create = jest.fn().mockResolvedValue(checkout),
     maintenanceState = 'enabled',
     getState = jest.fn().mockResolvedValue(maintenanceState),
@@ -105,10 +105,10 @@ describe('source_create tool', () => {
     });
   });
 
-  it('does not create a source without the Nightshift manage privilege', async () => {
+  it('does not create a source without the Nightshift manage and configure privileges', async () => {
     const create = jest.fn();
 
-    const result = await createTool({ featurePrivilege: 'read', create }).handler(
+    const result = await createTool({ featurePrivilege: 'all', create }).handler(
       params,
       createMockToolContext()
     );
@@ -118,7 +118,11 @@ describe('source_create tool', () => {
       results: [
         {
           type: 'error',
-          data: { message: expect.stringContaining('requires the Nightshift manage privilege') },
+          data: {
+            message: expect.stringContaining(
+              'requires the Nightshift manage and Nightshift configure privileges'
+            ),
+          },
         },
       ],
     });
