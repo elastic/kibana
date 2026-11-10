@@ -941,6 +941,38 @@
       }
     },
     {
+      "id": "69411a87481f950-011564e7a181c6d",
+      "title": "Agent Builder - converse callback API ships the image for upload in place of its tag when the callback uploads assets",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
+        "line": 373,
+        "column": 5
+      }
+    },
+    {
+      "id": "69411a87481f950-d3340e7c0ee2bcb",
+      "title": "Agent Builder - converse callback API shows the image's name when the callback doesn't upload assets",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
+        "line": 406,
+        "column": 5
+      }
+    },
+    {
       "id": "69411a87481f950-92f5e782bc9e4c1",
       "title": "Agent Builder - converse callback API stores callback origin authorship on list and get conversation responses",
       "expectedStatus": "passed",
