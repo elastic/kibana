@@ -71,7 +71,6 @@ const createActionsConfigMock = () => {
     }),
     isConnectorSigningKeysEnabled: jest.fn().mockReturnValue(false),
     isEarsExperimentalEnabled: jest.fn().mockReturnValue(false),
-    isConnectorCatalogEnabled: jest.fn().mockReturnValue(false),
   };
   return mocked;
 };

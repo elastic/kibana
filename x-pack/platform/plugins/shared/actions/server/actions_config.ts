@@ -175,7 +175,6 @@ export interface ActionsConfigurationUtilities {
   getInboundEventsAdmission: () => InboundEventAdmissionConfig;
   getInboundEventsRateLimit: () => InboundEventRateLimitConfig;
   isConnectorSigningKeysEnabled: () => boolean;
-  isConnectorCatalogEnabled: () => boolean;
 }
 
 function allowListErrorMessage(field: AllowListingField, value: string) {
@@ -439,6 +438,5 @@ export function getActionsConfigurationUtilities(
       },
     }),
     isConnectorSigningKeysEnabled: () => config.connectorSigningKeys.enabled,
-    isConnectorCatalogEnabled: () => config.catalog.enabled,
   };
 }
