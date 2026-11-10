@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
 import type { EventTypeOpts, RootSchema } from '@kbn/core/server';
+import { SIGNIFICANT_EVENTS_ALERT_SOURCE } from '@kbn/significant-events-schema';
+import { UNIVERSAL_ALERT_SOURCE } from '../../common';
 
 export const NIGHTSHIFT_ALERT_ENTERED_PIPELINE_EVENT = 'nightshift-alert-entered-pipeline';
 export const ALERT_ENTERED_PIPELINE_SAMPLING_PROBABILITY = 0.1;
@@ -22,10 +25,11 @@ interface AlertStatusChange {
   spaceId: string;
   source: string;
   alert: {
-    fingerprint?: string;
+    groupHash: string;
     status: string;
     previousStatus: string | null;
   };
+  rule: { id: string } | null;
 }
 
 interface AlertEnteredPipelineReporter {
@@ -76,29 +80,38 @@ export const isAlertEnteredPipelineSampled = (
   return Number.isFinite(sample) && sample < probability;
 };
 
+// Rule group hashes are rule-local; a written alert's already covers space and source.
+const toFingerprint = ({ spaceId, source, alert, rule }: AlertStatusChange): string =>
+  rule
+    ? createHash('sha256')
+        .update(`${spaceId}:${source}:${rule.id}:${alert.groupHash}`)
+        .digest('hex')
+    : alert.groupHash;
+
 export const reportAlertsEnteredPipeline = (
   payloads: readonly AlertStatusChange[],
   telemetry: AlertEnteredPipelineReporter
 ): void => {
-  for (const { spaceId, source, alert } of payloads) {
+  for (const payload of payloads) {
+    const { spaceId, source, alert } = payload;
     const isNewEpisode =
       (alert.previousStatus === null || alert.previousStatus === 'inactive') &&
       (alert.status === 'pending' || alert.status === 'active');
 
-    if (
-      !isNewEpisode ||
-      !alert.fingerprint ||
-      source === 'elastic.significant_events' ||
-      !isAlertEnteredPipelineSampled(alert.fingerprint)
-    ) {
+    if (!isNewEpisode || source === SIGNIFICANT_EVENTS_ALERT_SOURCE) {
+      continue;
+    }
+
+    const fingerprint = toFingerprint(payload);
+    if (!isAlertEnteredPipelineSampled(fingerprint)) {
       continue;
     }
 
     telemetry.reportAlertEnteredPipeline({
       alert_source: source,
-      fingerprint: alert.fingerprint,
+      fingerprint,
       space_id: spaceId,
-      source_kind: source === 'internal' ? 'elastic_configured' : 'external',
+      source_kind: source === UNIVERSAL_ALERT_SOURCE ? 'elastic_configured' : 'external',
       sampling_probability: ALERT_ENTERED_PIPELINE_SAMPLING_PROBABILITY,
     });
   }

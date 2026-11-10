@@ -143,7 +143,6 @@ export class AlertEventsClient {
       ...(event.timestamp != null ? { '@timestamp': event.timestamp } : {}),
       scheduled_timestamp: event.timestamp ?? new Date().toISOString(),
       group_hash: groupHash,
-      fingerprint: groupHash,
       data: event.data ?? {},
       status,
       source,
@@ -181,7 +180,6 @@ export class AlertEventsClient {
       await this.publishAlertStatusChange({
         source,
         groupHash,
-        fingerprint: groupHash,
         episodeId,
         status: episodeStatus,
         previousStatus,
@@ -203,7 +201,6 @@ export class AlertEventsClient {
   private async publishAlertStatusChange({
     source,
     groupHash,
-    fingerprint,
     episodeId,
     status,
     previousStatus,
@@ -211,7 +208,6 @@ export class AlertEventsClient {
   }: {
     source: string;
     groupHash: string;
-    fingerprint: string;
     episodeId: string;
     status: AlertEpisodeStatus;
     previousStatus: AlertEpisodeStatus | null;
@@ -222,7 +218,7 @@ export class AlertEventsClient {
         {
           spaceId: this.spaceId,
           source,
-          alert: { id: episodeId, groupHash, fingerprint, status, previousStatus, severity },
+          alert: { id: episodeId, groupHash, status, previousStatus, severity },
           rule: null,
           execution: null,
         },

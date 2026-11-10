@@ -97,7 +97,6 @@ describe('alertEventSchema', () => {
     const externalEvent = {
       '@timestamp': '2026-07-01T12:00:00.000Z',
       group_hash: 'pd-group-hash',
-      fingerprint: 'pd-group-hash',
       data: { 'pd.incident.id': 'PD-123' },
       status: 'breached' as const,
       source: 'pagerduty',
@@ -108,7 +107,6 @@ describe('alertEventSchema', () => {
 
     const result = alertEventSchema.safeParse(externalEvent);
     expect(result.success).toBe(true);
-    expect(result.success && result.data.fingerprint).toBe('pd-group-hash');
   });
 
   it('validates an internal event document with a rule object', () => {

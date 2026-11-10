@@ -11,8 +11,9 @@ import {
 } from './alert_entered_pipeline_event';
 
 describe('alert entered pipeline telemetry', () => {
-  const sampledFingerprint = '00000000aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
-  const unsampledFingerprint = 'ffffffffaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+  const sampledGroupHash = '00000000aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+  const unsampledGroupHash = 'ffffffffaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+  const sampledRuleFingerprint = '179390612a7be955ea2ffeae24130e6019fae04ec7b316c4b2256e82ab4ade7b';
 
   it('reports sampled external and Elastic-configured episodes', () => {
     const telemetry = { reportAlertEnteredPipeline: jest.fn() };
@@ -22,20 +23,14 @@ describe('alert entered pipeline telemetry', () => {
         {
           spaceId: 'space-a',
           source: 'datadog',
-          alert: {
-            fingerprint: sampledFingerprint,
-            status: 'pending',
-            previousStatus: null,
-          },
+          alert: { groupHash: sampledGroupHash, status: 'pending', previousStatus: null },
+          rule: null,
         },
         {
           spaceId: 'space-b',
           source: 'internal',
-          alert: {
-            fingerprint: sampledFingerprint,
-            status: 'active',
-            previousStatus: 'inactive',
-          },
+          alert: { groupHash: 'group-hash', status: 'active', previousStatus: 'inactive' },
+          rule: { id: 'rule-25' },
         },
       ],
       telemetry
@@ -43,21 +38,21 @@ describe('alert entered pipeline telemetry', () => {
 
     expect(telemetry.reportAlertEnteredPipeline).toHaveBeenNthCalledWith(1, {
       alert_source: 'datadog',
-      fingerprint: sampledFingerprint,
+      fingerprint: sampledGroupHash,
       space_id: 'space-a',
       source_kind: 'external',
       sampling_probability: ALERT_ENTERED_PIPELINE_SAMPLING_PROBABILITY,
     });
     expect(telemetry.reportAlertEnteredPipeline).toHaveBeenNthCalledWith(2, {
       alert_source: 'internal',
-      fingerprint: sampledFingerprint,
+      fingerprint: sampledRuleFingerprint,
       space_id: 'space-b',
       source_kind: 'elastic_configured',
       sampling_probability: ALERT_ENTERED_PIPELINE_SAMPLING_PROBABILITY,
     });
   });
 
-  it('ignores non-entry transitions, Significant Events, missing fingerprints, and dropped samples', () => {
+  it('ignores non-entry transitions, Significant Events, and dropped samples', () => {
     const telemetry = { reportAlertEnteredPipeline: jest.fn() };
 
     reportAlertsEnteredPipeline(
@@ -65,34 +60,20 @@ describe('alert entered pipeline telemetry', () => {
         {
           spaceId: 'default',
           source: 'datadog',
-          alert: {
-            fingerprint: sampledFingerprint,
-            status: 'active',
-            previousStatus: 'pending',
-          },
+          alert: { groupHash: sampledGroupHash, status: 'active', previousStatus: 'pending' },
+          rule: null,
         },
         {
           spaceId: 'default',
           source: 'elastic.significant_events',
-          alert: {
-            fingerprint: sampledFingerprint,
-            status: 'pending',
-            previousStatus: null,
-          },
-        },
-        {
-          spaceId: 'default',
-          source: 'internal',
-          alert: { status: 'pending', previousStatus: null },
+          alert: { groupHash: sampledGroupHash, status: 'pending', previousStatus: null },
+          rule: null,
         },
         {
           spaceId: 'default',
           source: 'pagerduty',
-          alert: {
-            fingerprint: unsampledFingerprint,
-            status: 'active',
-            previousStatus: null,
-          },
+          alert: { groupHash: unsampledGroupHash, status: 'active', previousStatus: null },
+          rule: null,
         },
       ],
       telemetry

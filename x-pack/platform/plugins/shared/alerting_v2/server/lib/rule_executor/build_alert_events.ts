@@ -81,16 +81,6 @@ function sha256(value: string) {
   return createHash('sha256').update(value).digest('hex');
 }
 
-export const buildRuleAlertFingerprint = ({
-  spaceId,
-  ruleId,
-  groupHash,
-}: {
-  spaceId: string;
-  ruleId: string;
-  groupHash: string;
-}): string => sha256(`${spaceId}:${RULE_EXECUTION_SOURCE}:${ruleId}:${groupHash}`);
-
 /**
  * Stable `group_hash` shared by every row of an **ungrouped** rule (a rule with
  * no `grouping.fields`).
@@ -190,7 +180,6 @@ export function createAlertEventsBatchBuilder({
         scheduled_timestamp: scheduledTimestamp,
         rule: { id: ruleId, version: ruleVersion },
         group_hash: groupHash,
-        fingerprint: buildRuleAlertFingerprint({ spaceId, ruleId, groupHash }),
         data: rowDoc,
         status: 'breached',
         source,
@@ -251,7 +240,6 @@ export function buildRecoveryAlertEvents({
         scheduled_timestamp: scheduledTimestamp,
         rule: { id: ruleId, version: ruleVersion },
         group_hash,
-        fingerprint: buildRuleAlertFingerprint({ spaceId, ruleId, groupHash: group_hash }),
         data: {},
         status: 'recovered',
         source: RULE_EXECUTION_SOURCE,
@@ -288,7 +276,6 @@ export function buildContinuedBreachAlertEvents({
     scheduled_timestamp: scheduledTimestamp,
     rule: { id: ruleId, version: ruleVersion },
     group_hash: groupHash,
-    fingerprint: buildRuleAlertFingerprint({ spaceId, ruleId, groupHash }),
     data: {},
     status: 'breached' as const,
     source: RULE_EXECUTION_SOURCE,
@@ -323,7 +310,6 @@ export function buildNoDataAlertEvents({
     scheduled_timestamp: scheduledTimestamp,
     rule: { id: ruleId, version: ruleVersion },
     group_hash: groupHash,
-    fingerprint: buildRuleAlertFingerprint({ spaceId, ruleId, groupHash }),
     data: {},
     status: 'no_data' as const,
     source: RULE_EXECUTION_SOURCE,
@@ -394,7 +380,6 @@ export function buildQueryRecoveryAlertEvents({
       scheduled_timestamp: scheduledTimestamp,
       rule: { id: ruleId, version: ruleVersion },
       group_hash: groupHash,
-      fingerprint: buildRuleAlertFingerprint({ spaceId, ruleId, groupHash }),
       data,
       status: 'recovered',
       source: RULE_EXECUTION_SOURCE,
