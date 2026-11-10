@@ -36,6 +36,7 @@ import {
   WORKFLOWS_INDEX,
   WORKFLOWS_STEP_EXECUTIONS_INDEX,
 } from '../../common';
+import { buildWorkflowExecutionsSpaceFilter } from '../api/lib/build_workflow_executions_search_query';
 import { NAMED_EXECUTION_AGGREGATION } from '../api/lib/search_workflow_executions';
 
 describe('WorkflowExecutionQueryService', () => {
@@ -220,34 +221,129 @@ describe('WorkflowExecutionQueryService', () => {
       );
     });
 
-    it('reports a named execution that is not on the current page', async () => {
+    it('reports a named execution outside the current filters and page', async () => {
       mockEsClient.search.mockResolvedValue({
         hits: { hits: [], total: { value: 50, relation: 'eq' } },
-        aggregations: { [NAMED_EXECUTION_AGGREGATION]: { doc_count: 1 } },
+        aggregations: {
+          [NAMED_EXECUTION_AGGREGATION]: { doc_count: 50, matching: { doc_count: 1 } },
+        },
       } as any);
 
+      const accessControlFilter = { term: { executedBy: 'allowed-user' } };
       const result = await service.getWorkflowExecutions(
-        { workflowId: 'wf-1', size: 50 },
+        {
+          workflowId: 'wf-1',
+          statuses: [ExecutionStatus.FAILED],
+          executionTypes: [ExecutionType.TEST],
+          executedBy: ['user-1'],
+          accessControlFilter,
+          size: 50,
+        },
         'default'
       );
 
-      expect(mockEsClient.search.mock.calls[0][0]).toEqual(
-        expect.objectContaining({
-          aggs: {
-            [NAMED_EXECUTION_AGGREGATION]: {
-              filter: { wildcard: { runName: { value: '?*' } } },
-            },
-          },
-        })
-      );
+      const aggs = mockEsClient.search.mock.calls[0][0]?.aggs as {
+        namedExecutions: { aggs: { matching: { filter: { bool: { must: unknown[] } } } } };
+      };
+      expect(aggs[NAMED_EXECUTION_AGGREGATION].aggs.matching.filter.bool.must).toEqual([
+        { term: { workflowId: 'wf-1' } },
+        buildWorkflowExecutionsSpaceFilter('default'),
+        accessControlFilter,
+        { wildcard: { runName: { value: '?*' } } },
+      ]);
       expect(result.hasNamedExecution).toBe(true);
       expect(result.results).toEqual([]);
     });
 
-    it('reports that no matching execution has a name', async () => {
+    it('counts named executions across the workflow, ignoring date range and other list filters', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 0, relation: 'eq' } },
+        aggregations: {
+          [NAMED_EXECUTION_AGGREGATION]: { doc_count: 0, matching: { doc_count: 1 } },
+        },
+      } as any);
+
+      const startedAt = {
+        gte: '2026-01-01T00:00:00.000Z',
+        lte: '2026-01-31T00:00:00.000Z',
+      };
+      const finishedAt = {
+        gte: '2026-02-01T00:00:00.000Z',
+        lte: '2026-02-28T00:00:00.000Z',
+      };
+      const result = await service.getWorkflowExecutions(
+        {
+          workflowId: 'wf-1',
+          statuses: [ExecutionStatus.FAILED],
+          executionTypes: [ExecutionType.TEST],
+          executedBy: ['user-1'],
+          runName: 'deploy',
+          concurrencyGroupKey: 'group-1',
+          omitStepRuns: true,
+          startedAfter: startedAt.gte,
+          startedBefore: startedAt.lte,
+          finishedAfter: finishedAt.gte,
+          finishedBefore: finishedAt.lte,
+        },
+        'default'
+      );
+
+      const call = mockEsClient.search.mock.calls[0][0] as any;
+      const listFilters = call.query.bool.must;
+      expect(listFilters).toEqual(
+        expect.arrayContaining([
+          { terms: { status: [ExecutionStatus.FAILED] } },
+          { term: { isTestRun: true } },
+          { terms: { executedBy: ['user-1'] } },
+          { wildcard: { runName: { value: '*deploy*', case_insensitive: true } } },
+          { term: { concurrencyGroupKey: 'group-1' } },
+          { bool: { must_not: { exists: { field: 'stepId' } } } },
+          { range: { startedAt } },
+          { range: { finishedAt } },
+        ])
+      );
+
+      expect(call.aggs[NAMED_EXECUTION_AGGREGATION]).toEqual({
+        global: {},
+        aggs: {
+          matching: {
+            filter: {
+              bool: {
+                must: [
+                  { term: { workflowId: 'wf-1' } },
+                  buildWorkflowExecutionsSpaceFilter('default'),
+                  { wildcard: { runName: { value: '?*' } } },
+                ],
+                must_not: [{ term: { deleted: true } }],
+              },
+            },
+          },
+        },
+      });
+      expect(result.hasNamedExecution).toBe(true);
+      expect(result.results).toEqual([]);
+    });
+
+    it('does not check named executions again on a later page', async () => {
       mockEsClient.search.mockResolvedValue({
         hits: { hits: [], total: { value: 50, relation: 'eq' } },
-        aggregations: { [NAMED_EXECUTION_AGGREGATION]: { doc_count: 0 } },
+      } as any);
+
+      const result = await service.getWorkflowExecutions(
+        { workflowId: 'wf-1', searchAfter: ['2024-01-01T00:00:00.000Z', 'exec-1'] },
+        'default'
+      );
+
+      expect(mockEsClient.search.mock.calls[0][0]).not.toHaveProperty('aggs');
+      expect(result.hasNamedExecution).toBeUndefined();
+    });
+
+    it('reports that no execution of the workflow has a name', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 50, relation: 'eq' } },
+        aggregations: {
+          [NAMED_EXECUTION_AGGREGATION]: { doc_count: 50, matching: { doc_count: 0 } },
+        },
       } as any);
 
       const result = await service.getWorkflowExecutions({ workflowId: 'wf-1' }, 'default');

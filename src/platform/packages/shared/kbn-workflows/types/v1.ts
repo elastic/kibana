@@ -367,8 +367,8 @@ export interface WorkflowExecutionListDto {
    */
   searchAfter?: unknown[];
   /**
-   * True when any execution matching this query has a name, including executions
-   * outside the current page. Absent when the search did not check.
+   * True when this workflow has a named execution in the space, ignoring list
+   * filters. Present only on the first page of a per-workflow list.
    */
   hasNamedExecution?: boolean;
 }

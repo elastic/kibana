@@ -52,8 +52,6 @@ export interface WorkflowExecutionListProps {
   /** Last opened execution — persists after Back until a different row is opened. */
   lastViewedId: string | null;
   setPaginationObserver: (ref: HTMLDivElement | null) => void;
-  /** Saved workflow defines `run-name`. */
-  workflowUsesExecutionNames?: boolean;
   showExecutor?: boolean;
   canCancel: boolean;
   isCancelInProgress: boolean;
@@ -76,7 +74,6 @@ export const WorkflowExecutionList = ({
   selectedId,
   lastViewedId,
   setPaginationObserver,
-  workflowUsesExecutionNames = false,
   showExecutor = false,
   canCancel,
   isCancelInProgress,
@@ -139,16 +136,8 @@ export const WorkflowExecutionList = ({
     });
   }, [executedByUserProfiles, executedByValuesToResolve, showUnresolvedExecutors]);
 
-  const showExecutionName = useMemo(() => {
-    if (
-      workflowUsesExecutionNames ||
-      Boolean(filters.runName?.trim()) ||
-      executions?.hasNamedExecution
-    ) {
-      return true;
-    }
-    return executions?.results.some((execution) => Boolean(execution.runName?.trim())) ?? false;
-  }, [executions, filters.runName, workflowUsesExecutionNames]);
+  const showExecutionName =
+    Boolean(filters.runName?.trim()) || Boolean(executions?.hasNamedExecution);
 
   const columns = useMemo(
     () =>

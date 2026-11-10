@@ -148,7 +148,7 @@ const RunModeFlask = ({ isTestRun, stepId }: { isTestRun: boolean; stepId?: stri
 
 export interface ExecutionHistoryColumnContext {
   euiTheme: EuiThemeComputed;
-  /** Saved `run-name`, a named execution, or an active name filter. */
+  /** The workflow has a named execution, or an execution-name filter is active. */
   showExecutionName: boolean;
   showExecutor: boolean;
   executedByUserProfiles: Map<string, UserProfileWithAvatar>;

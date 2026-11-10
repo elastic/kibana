@@ -105,16 +105,12 @@ describe('WorkflowExecutionList', () => {
     renderComponent({
       executions: {
         ...mockExecutions,
+        hasNamedExecution: true,
         results: [{ ...mockExecutions.results[0], runName: 'Deploy staging' }],
       },
     });
     expect(screen.getByRole('columnheader', { name: 'Execution name' })).toBeInTheDocument();
     expect(screen.getByText('Deploy staging')).toBeInTheDocument();
-  });
-
-  it('shows the execution name column when the workflow defines run-name', () => {
-    renderComponent({ workflowUsesExecutionNames: true });
-    expect(screen.getByRole('columnheader', { name: 'Execution name' })).toBeInTheDocument();
   });
 
   it('shows the execution name column when an unloaded run has a name', () => {
