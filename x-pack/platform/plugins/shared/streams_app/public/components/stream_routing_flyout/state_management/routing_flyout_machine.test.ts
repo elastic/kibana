@@ -214,41 +214,52 @@ describe('routingFlyoutMachine', () => {
       rules: [
         { when: 'resource.attributes["team"] == "a"', destinations: ['es-a'] },
         { when: 'resource.attributes["team"] == "b"', destinations: ['es-b'] },
-        { destinations: ['es-logs'] },
+        { telemetry: ['traces'], destinations: ['es-traces'] },
       ],
+      signals: ['logs', 'traces'],
+      availableSignals: ['logs', 'traces'],
     });
+    const keys = () => flyout.getSnapshot().context.rules.map(({ key }) => key);
     flyout.send({
       type: 'rule.update',
       key: 'rule-0',
       changes: { condition: { field: '  ', operator: 'equals', value: 'a' } },
     });
     const { rules } = flyout.getSnapshot().context;
-    expect(rules.map(({ key }) => key)).toEqual(['rule-1', 'rule-2', 'rule-0']);
+    expect(keys()).toEqual(['rule-1', 'rule-2', 'rule-0']);
     expect(rules[2].condition).toBeUndefined();
 
     // Default rules cannot be dragged above the conditional ones.
     flyout.send({ type: 'rule.reorder', from: 2, to: 0 });
     flyout.send({ type: 'rule.reorder', from: 0, to: 1 });
-    expect(flyout.getSnapshot().context.rules.map(({ key }) => key)).toEqual([
-      'rule-1',
-      'rule-2',
-      'rule-0',
-    ]);
+    expect(keys()).toEqual(['rule-1', 'rule-2', 'rule-0']);
     flyout.send({ type: 'rule.add' });
-    expect(flyout.getSnapshot().context.rules.map(({ key }) => key)).toEqual([
-      'rule-1',
-      'rule-3',
-      'rule-2',
-      'rule-0',
-    ]);
+    expect(keys()).toEqual(['rule-1', 'rule-3', 'rule-2', 'rule-0']);
 
     flyout.send({ type: 'rule.delete', key: 'rule-3' });
     flyout.send({ type: 'flyout.save' });
     expect(requests[0].rules).toEqual([
       { when: 'resource.attributes["team"] == "b"', destinations: ['es-b'] },
-      { destinations: ['es-logs'] },
+      { telemetry: ['traces'], destinations: ['es-traces'] },
       { destinations: ['es-a'] },
     ]);
+  });
+
+  it('merges a rule whose condition is cleared into a default rule handling the same signals', () => {
+    const { flyout, requests } = startFlyout({
+      target: { kind: 'pipeline', pipelineId: 'routing' },
+      rules: [
+        { when: 'resource.attributes["team"] == "a"', destinations: ['es-a'] },
+        { destinations: ['es-logs'] },
+      ],
+    });
+    flyout.send({
+      type: 'rule.update',
+      key: 'rule-0',
+      changes: { condition: { field: '', operator: 'equals', value: '' } },
+    });
+    flyout.send({ type: 'flyout.save' });
+    expect(requests[0].rules).toEqual([{ destinations: ['es-logs', 'es-a'] }]);
   });
 
   it('saves rules left without a field after the rules with conditions', () => {
@@ -287,6 +298,117 @@ describe('routingFlyoutMachine', () => {
       { when: 'resource.attributes["team"] == "a"', destinations: [] },
       { destinations: ['es-logs'] },
     ]);
+  });
+
+  it('merges a rule applied with no condition into the existing default rule', () => {
+    const { flyout, requests } = startFlyout();
+    flyout.send({ type: 'rule.add' });
+    flyout.send({
+      type: 'rule.update',
+      key: 'rule-1',
+      changes: { condition: { field: '', operator: 'equals', value: '' } },
+    });
+    expect(flyout.getSnapshot().context.rules.map(({ key }) => key)).toEqual(['rule-0']);
+
+    flyout.send({ type: 'flyout.save' });
+    expect(requests[0].rules).toEqual([{ destinations: ['es-logs'] }]);
+  });
+
+  it('merges a rule given the same condition as another, keeping both targets', () => {
+    const { flyout, requests } = startFlyout({
+      target: { kind: 'pipeline', pipelineId: 'routing' },
+      rules: [
+        { when: 'resource.attributes["team"] == "a"', destinations: ['es-a'] },
+        { when: 'resource.attributes["team"] == "b"', destinations: ['es-b'] },
+        { destinations: ['es-logs'] },
+      ],
+    });
+    flyout.send({
+      type: 'rule.update',
+      key: 'rule-1',
+      changes: { condition: { field: 'team', operator: 'equals', value: 'a' } },
+    });
+    flyout.send({ type: 'flyout.save' });
+    expect(requests[0].rules).toEqual([
+      { when: 'resource.attributes["team"] == "a"', destinations: ['es-a', 'es-b'] },
+      { destinations: ['es-logs'] },
+    ]);
+  });
+
+  it('keeps rules with the same condition apart when they handle different signals or actions', () => {
+    const { flyout } = startFlyout({
+      target: { kind: 'pipeline', pipelineId: 'routing' },
+      rules: [
+        { telemetry: ['logs'], destinations: ['es-logs'] },
+        { when: 'resource.attributes["team"] == "a"', destinations: ['es-a'] },
+      ],
+      signals: ['logs', 'traces'],
+      availableSignals: ['logs', 'traces'],
+    });
+    const keys = () => flyout.getSnapshot().context.rules.map(({ key }) => key);
+    flyout.send({
+      type: 'rule.update',
+      key: 'rule-1',
+      changes: { condition: undefined, telemetry: ['traces'] },
+    });
+    expect(keys()).toEqual(['rule-0', 'rule-1']);
+
+    flyout.send({ type: 'rule.add' });
+    flyout.send({
+      type: 'rule.update',
+      key: 'rule-2',
+      changes: { condition: undefined, action: 'copy', telemetry: ['logs'] },
+    });
+    expect(keys()).toEqual(['rule-2', 'rule-0', 'rule-1']);
+  });
+
+  it('discards a default rule whose signals the other default rules already cover', () => {
+    const { flyout, requests } = startFlyout({
+      target: { kind: 'pipeline', pipelineId: 'routing' },
+      rules: [
+        { when: 'resource.attributes["team"] == "a"', destinations: ['es-a'] },
+        { telemetry: ['logs'], destinations: ['es-logs'] },
+        { telemetry: ['traces'], destinations: ['es-traces'] },
+      ],
+      signals: ['logs', 'traces'],
+      availableSignals: ['logs', 'traces'],
+    });
+    const keys = () => flyout.getSnapshot().context.rules.map(({ key }) => key);
+    flyout.send({ type: 'rule.add' });
+    flyout.send({
+      type: 'rule.update',
+      key: 'rule-3',
+      changes: { condition: undefined, telemetry: ['logs', 'traces'] },
+    });
+    expect(keys()).toEqual(['rule-0', 'rule-1', 'rule-2']);
+
+    flyout.send({ type: 'flyout.save' });
+    expect(requests[0].rules).toEqual([
+      { when: 'resource.attributes["team"] == "a"', destinations: ['es-a'] },
+      { telemetry: ['logs'], destinations: ['es-logs'] },
+      { telemetry: ['traces'], destinations: ['es-traces'] },
+    ]);
+  });
+
+  it('keeps a default rule for signals the other default rules leave uncovered', () => {
+    const { flyout } = startFlyout({
+      target: { kind: 'pipeline', pipelineId: 'routing' },
+      rules: [
+        { when: 'resource.attributes["team"] == "a"', destinations: ['es-a'] },
+        { telemetry: ['logs'], destinations: ['es-logs'] },
+      ],
+      signals: ['logs', 'traces'],
+      availableSignals: ['logs', 'traces'],
+    });
+    flyout.send({ type: 'rule.add' });
+    flyout.send({
+      type: 'rule.update',
+      key: 'rule-2',
+      changes: { condition: undefined, telemetry: ['logs', 'traces'] },
+    });
+    const { rules, availableSignals } = flyout.getSnapshot().context;
+    expect(rules.map(({ key }) => key)).toEqual(['rule-0', 'rule-1', 'rule-2']);
+    expect(getUnmatchedSignals(rules, availableSignals)).toEqual([]);
   });
 
   it('appends new rules when there is no catch-all', () => {

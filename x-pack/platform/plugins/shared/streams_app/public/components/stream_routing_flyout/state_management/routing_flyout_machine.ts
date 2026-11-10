@@ -5,8 +5,13 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import { assign, sendTo, setup, type ActorRefFrom, type AnyActorRef } from 'xstate';
-import type { RouteRule, UnitSignal } from '../../../services/unit_pipeline';
+import {
+  isDelegatingRoute,
+  type RouteRule,
+  type UnitSignal,
+} from '../../../services/unit_pipeline';
 import type { UnitRoutableLine } from '../../../services/unit_connections';
 import {
   createEmptyCondition,
@@ -183,6 +188,98 @@ const defaultSectionStart = (rules: readonly RoutingRuleDraft[]): number => {
   return start;
 };
 
+const unionIds = (left: readonly string[], right: readonly string[]): string[] => [
+  ...new Set(left).union(new Set(right)),
+];
+
+/**
+ * `kept` with the targets of `duplicate` added. Undefined when they cannot be
+ * combined: different processors, or destinations on one and pipelines on the other.
+ */
+const mergeRouteTargets = (kept: RouteRule, duplicate: RouteRule): RouteRule | undefined => {
+  const keptProcessors = kept.processors ?? [];
+  const duplicateProcessors = duplicate.processors ?? [];
+  if (
+    duplicateProcessors.length > 0 &&
+    (duplicateProcessors.length !== keptProcessors.length ||
+      duplicateProcessors.some((id, index) => keptProcessors[index] !== id))
+  ) {
+    return undefined;
+  }
+  const keptIds = isDelegatingRoute(kept) ? kept.pipelines : kept.destinations;
+  const duplicateIds = isDelegatingRoute(duplicate) ? duplicate.pipelines : duplicate.destinations;
+  if (duplicateIds.length === 0) {
+    return kept;
+  }
+  if (isDelegatingRoute(kept) !== isDelegatingRoute(duplicate)) {
+    if (keptIds.length > 0) {
+      return undefined;
+    }
+    // The kept rule routes nowhere yet, so it takes the other rule's kind of targets.
+    const rest = omit(kept, ['destinations', 'pipelines']);
+    return isDelegatingRoute(duplicate)
+      ? { ...rest, pipelines: [...duplicateIds] }
+      : { ...rest, destinations: [...duplicateIds] };
+  }
+  return isDelegatingRoute(kept)
+    ? { ...kept, pipelines: unionIds(keptIds, duplicateIds) }
+    : { ...kept, destinations: unionIds(keptIds, duplicateIds) };
+};
+
+const isSameRule = (left: RoutingRuleDraft, right: RoutingRuleDraft): boolean =>
+  serializeCondition(left.condition) === serializeCondition(right.condition) &&
+  left.action === right.action &&
+  sameSignals(left.telemetry, right.telemetry);
+
+/**
+ * Whether `rule` is a default rule whose signals the other default rules
+ * already cover between them, so it would never receive any data. A default
+ * rule for logs and traces is covered by one for logs and one for traces,
+ * but not by one for logs alone.
+ */
+const isCoveredDefaultRule = (
+  rules: readonly RoutingRuleDraft[],
+  rule: RoutingRuleDraft
+): boolean => {
+  if (!isDefaultRule(rule)) {
+    return false;
+  }
+  const covered = new Set(
+    rules
+      .filter((candidate) => candidate.key !== rule.key && isDefaultRule(candidate))
+      .flatMap(({ telemetry }) => telemetry)
+  );
+  return rule.telemetry.every((signal) => covered.has(signal));
+};
+
+/**
+ * Folds the rule `key` into another rule with the same condition,
+ * action and signals, which keeps its place and gains the rule's targets.
+ * Without such a rule, a default rule whose signals the other default rules
+ * already cover is discarded. Otherwise the rules are left as they are.
+ */
+const withDuplicateMerged = (
+  rules: readonly RoutingRuleDraft[],
+  key: string
+): RoutingRuleDraft[] => {
+  const rule = rules.find((candidate) => candidate.key === key);
+  const existing = rule
+    ? rules.find((candidate) => candidate.key !== key && isSameRule(candidate, rule))
+    : undefined;
+  const base = rule && existing ? mergeRouteTargets(existing.base, rule.base) : undefined;
+  if (!existing || !base) {
+    return rule && isCoveredDefaultRule(rules, rule)
+      ? rules.filter((candidate) => candidate.key !== key)
+      : [...rules];
+  }
+  return rules.flatMap((candidate) => {
+    if (candidate.key === key) {
+      return [];
+    }
+    return candidate.key === existing.key ? [{ ...existing, base }] : [candidate];
+  });
+};
+
 export const routingFlyoutMachine = setup({
   types: {
     input: {} as RoutingFlyoutInput,
@@ -218,14 +315,20 @@ export const routingFlyoutMachine = setup({
         // A cleared condition leaves no condition; a move rule then joins the default rules at the end.
         const cleared = { ...next, condition: undefined };
         return {
-          rules: isDefaultRule(cleared)
-            ? [...others, cleared]
-            : context.rules.map((rule) => (rule.key === event.key ? cleared : rule)),
+          rules: withDuplicateMerged(
+            isDefaultRule(cleared)
+              ? [...others, cleared]
+              : context.rules.map((rule) => (rule.key === event.key ? cleared : rule)),
+            event.key
+          ),
           hasChanges: true,
         };
       }
       return {
-        rules: context.rules.map((rule) => (rule.key === event.key ? next : rule)),
+        rules: withDuplicateMerged(
+          context.rules.map((rule) => (rule.key === event.key ? next : rule)),
+          event.key
+        ),
         hasChanges: true,
       };
     }),
