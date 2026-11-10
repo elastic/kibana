@@ -88,13 +88,35 @@ describe('renderWorkflowOption', () => {
       })
     );
 
-    expect(screen.getByText('2')).toBeInTheDocument();
+    expect(screen.getByTestId('workflowOptionTagsBadge')).toHaveTextContent('2');
+    expect(screen.getByLabelText('Tags: slack, alerts')).toBeInTheDocument();
+  });
+
+  it('shows the tags on hover', async () => {
+    const user = userEvent.setup({ delay: null });
+    renderOption(
+      createWorkflow({
+        definition: {
+          version: '1',
+          name: 'Slack notification workflow',
+          enabled: true,
+          triggers: [],
+          steps: [],
+          tags: ['slack', 'alerts'],
+        },
+      })
+    );
+
+    await user.hover(screen.getByTestId('workflowOptionTagsBadge'));
+
+    expect(await screen.findByText('slack, alerts')).toBeInTheDocument();
+    expect(screen.getByTestId('workflowOptionTagsBadge')).toHaveAttribute('title', '');
   });
 
   it('does not render a tag badge without tags', () => {
     renderOption(createWorkflow());
 
-    expect(screen.queryByLabelText('Show tags')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('workflowOptionTagsBadge')).not.toBeInTheDocument();
   });
 
   it('marks disabled workflows and explains why on hover', async () => {

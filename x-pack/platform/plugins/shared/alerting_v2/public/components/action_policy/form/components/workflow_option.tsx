@@ -15,13 +15,13 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { WorkflowListDto } from '@kbn/workflows';
 import {
   DISABLED_BADGE_LABEL,
   DISABLED_WORKFLOW_TOOLTIP,
   MANAGED_BADGE_LABEL,
   MANAGED_BADGE_TOOLTIP,
-  TagsBadge,
   WORKFLOW_EMPTY_DESCRIPTION,
 } from '@kbn/workflows-ui';
 import React from 'react';
@@ -85,7 +85,22 @@ export const renderWorkflowOption = (
       )}
       {tags.length > 0 && (
         <EuiFlexItem grow={false}>
-          <TagsBadge tags={tags} />
+          <EuiToolTip content={tags.join(', ')}>
+            <EuiBadge
+              color="hollow"
+              iconType="tag"
+              tabIndex={0}
+              // EuiBadge defaults `title` to its text (the count), which adds a native tooltip.
+              title=""
+              aria-label={i18n.translate(
+                'xpack.alertingV2.actionPolicy.form.destination.workflowTagsAriaLabel',
+                { defaultMessage: 'Tags: {tags}', values: { tags: tags.join(', ') } }
+              )}
+              data-test-subj="workflowOptionTagsBadge"
+            >
+              {tags.length}
+            </EuiBadge>
+          </EuiToolTip>
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
