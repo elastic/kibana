@@ -11,6 +11,7 @@ import {
 } from '../../common/step_types/apply_dream_changes';
 import type { DreamedKi } from './dreamed_ki';
 import { batchKeyOf, factId } from './ids';
+import { audienceKeyOf } from './permissions';
 import {
   referencedIds,
   resolveChangeSet,
@@ -50,8 +51,12 @@ const context = (overrides: Partial<ResolveContext> = {}): ResolveContext => ({
     [existingEntity.id, existingEntity],
     [existingFact.id, existingFact],
   ]),
+  memoryPermissions: new Map(),
   ...overrides,
 });
+
+const teamA = { kibana: { privileges: [{ space: 'team-a', name: ['ai_index:a/read'] }] } };
+const teamB = { kibana: { privileges: [{ space: 'team-a', name: ['ai_index:b/read'] }] } };
 
 const changeSet = (value: Partial<DreamChangeSet>): DreamChangeSet =>
   dreamChangeSetSchema.parse(value);
@@ -164,12 +169,35 @@ describe('resolveChangeSet', () => {
     const entities = changeSet({
       entities: [{ ref: 'new:1', type: 'person', title: 'Bob', source_memory_ids: ['m-1'] }],
     });
+    const memoryPermissions = new Map([['m-1', teamA]]);
 
     const [open] = resolveChangeSet(entities, context()).operations;
-    const [restricted] = resolveChangeSet(entities, context({ audience: 'a1b2' })).operations;
+    const [restricted] = resolveChangeSet(entities, context({ memoryPermissions })).operations;
 
     expect(open).toMatchObject({ id: 'entity-person--bob' });
-    expect(restricted).toMatchObject({ id: 'entity-person--bob--a1b2' });
+    expect(restricted).toMatchObject({ id: `entity-person--bob--${audienceKeyOf([teamA])}` });
+  });
+
+  it('keys a new entity by the audience of the memories it cites, not of the whole batch', () => {
+    const entities = changeSet({
+      entities: [{ ref: 'new:1', type: 'person', title: 'Bob', source_memory_ids: ['m-1'] }],
+    });
+
+    const [mixedBatch] = resolveChangeSet(
+      entities,
+      context({
+        memoryPermissions: new Map([
+          ['m-1', teamA],
+          ['m-2', teamB],
+        ]),
+      })
+    ).operations;
+    const [teamABatch] = resolveChangeSet(
+      entities,
+      context({ memoryPermissions: new Map([['m-1', teamA]]) })
+    ).operations;
+
+    expect(mixedBatch.id).toBe(teamABatch.id);
   });
 
   it('accepts types written with their kind prefix, as EXISTING shows them', () => {

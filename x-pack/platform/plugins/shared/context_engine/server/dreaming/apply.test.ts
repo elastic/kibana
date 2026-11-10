@@ -74,7 +74,7 @@ describe('applyOperations', () => {
       },
     ]);
 
-    expect(counts).toEqual({ created: 1, updated: 0, deleted: 0 });
+    expect(counts).toEqual({ created: 1, updated: 0, deleted: 0, rejected: [] });
     expect(putKiRevision).toHaveBeenCalledWith(
       expect.objectContaining({
         kiId: 'entity-customer-825464',
@@ -133,7 +133,7 @@ describe('applyOperations', () => {
       },
     ]);
 
-    expect(counts).toEqual({ created: 0, updated: 1, deleted: 0 });
+    expect(counts).toEqual({ created: 0, updated: 1, deleted: 0, rejected: [] });
     const [document] = written();
     expect(document.attributes).toEqual({
       role: 'SRE',
@@ -257,7 +257,7 @@ describe('applyOperations', () => {
       { op: 'delete', id: 'fact-3' },
     ]);
 
-    expect(counts).toEqual({ created: 0, updated: 0, deleted: 1 });
+    expect(counts).toEqual({ created: 0, updated: 0, deleted: 1, rejected: [] });
     expect(softDeleteKi).toHaveBeenCalledTimes(2);
     expect(softDeleteKi).toHaveBeenCalledWith(
       expect.anything(),
@@ -351,6 +351,8 @@ describe('applyOperations', () => {
             sourceMemoryIds,
           };
 
+    const reason = 'it has different permissions than its memories';
+
     for (const dryRun of [undefined, new Map()]) {
       const counts = await applyOperations({ ...context(undefined, memoryPermissions), dryRun }, [
         update('fact-1', ['m-1']),
@@ -358,13 +360,53 @@ describe('applyOperations', () => {
         update('entity-person--bob', ['m-a']),
       ]);
 
-      expect(counts).toEqual({ created: 0, updated: 0, deleted: 0 });
+      expect(counts).toEqual({
+        created: 0,
+        updated: 0,
+        deleted: 0,
+        rejected: [
+          { item: 'fact fact-1', reason },
+          { item: 'fact fact-1', reason },
+          { item: 'entity entity-person--bob', reason },
+        ],
+      });
+      expect(dryRun?.size ?? 0).toBe(0);
     }
     expect(putKiRevision).not.toHaveBeenCalled();
 
     await applyOperations(context(undefined, memoryPermissions), [update('fact-1', ['m-a'])]);
 
     expect(written()[0]).toMatchObject({ title: 'A2', permissions: teamA });
+  });
+
+  it('updates a KI that also cites memories from earlier batches, keeping its permissions', async () => {
+    const teamA = restrictedTo({ space: '*', name: ['ai_index:a/read'] });
+    stored.set('fact-1', {
+      id: 'fact-1',
+      type: 'fact.note',
+      title: 'A',
+      references: [{ uri: 'ki://m-old', relation: 'derived_from' }],
+      permissions: teamA,
+    });
+    const fact = (title: string, sourceMemoryIds: string[]) => ({
+      op: 'upsert_fact' as const,
+      id: 'fact-1',
+      type: 'note',
+      title,
+      content: `${title}.`,
+      sourceMemoryIds,
+    });
+
+    const counts = await applyOperations(context(undefined, new Map([['m-new', teamA]])), [
+      fact('A2', ['m-old']),
+      fact('A3', ['m-old', 'm-new']),
+    ]);
+
+    expect(counts).toEqual({ created: 0, updated: 2, deleted: 0, rejected: [] });
+    expect(written().map(({ title, permissions }) => ({ title, permissions }))).toEqual([
+      { title: 'A2', permissions: teamA },
+      { title: 'A3', permissions: teamA },
+    ]);
   });
 
   it('leaves alone a KI this space cannot see', async () => {
@@ -390,7 +432,7 @@ describe('applyOperations', () => {
         { op: 'delete', id: 'fact-1' },
       ]);
 
-      expect(counts).toEqual({ created: 0, updated: 0, deleted: 0 });
+      expect(counts).toEqual({ created: 0, updated: 0, deleted: 0, rejected: [] });
       expect(dryRun?.size ?? 0).toBe(0);
     }
     expect(putKiRevision).not.toHaveBeenCalled();
@@ -453,7 +495,7 @@ describe('applyOperations', () => {
       const counts = await applyOperations({ ...context(), dryRun }, operations);
 
       expect(counts).toEqual(await applyOperations(context(), operations));
-      expect(counts).toEqual({ created: 2, updated: 1, deleted: 1 });
+      expect(counts).toEqual({ created: 2, updated: 1, deleted: 1, rejected: [] });
       expect(jest.mocked(putKiRevision).mock.calls).toHaveLength(3);
       expect(jest.mocked(softDeleteKi).mock.calls).toHaveLength(1);
     });
@@ -505,7 +547,7 @@ describe('applyOperations', () => {
         operations[2],
       ]);
 
-      expect(counts).toEqual({ created: 1, updated: 0, deleted: 1 });
+      expect(counts).toEqual({ created: 1, updated: 0, deleted: 1, rejected: [] });
       expect(dryRun.get('entity-person-bob')).toEqual(
         expect.objectContaining({ change: 'created' })
       );

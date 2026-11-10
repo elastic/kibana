@@ -62,6 +62,11 @@ export interface ApplyCounts {
   deleted: number;
 }
 
+export interface ApplyResult extends ApplyCounts {
+  /** Writes refused because the KI has different permissions than its memories. */
+  rejected: Array<{ item: string; reason: string }>;
+}
+
 /** A KI a dry run would write, as it would be stored; `ki` is absent when it would be deleted. */
 export interface PlannedWrite {
   change: 'created' | 'updated' | 'deleted';
@@ -108,7 +113,13 @@ export const addReferences = (
 const sourceReferences = (sourceMemoryIds: readonly string[]): DreamedKiReference[] =>
   sourceMemoryIds.map((id) => ({ uri: kiUri(id), relation: 'derived_from' }));
 
-type BuildDocument = (current: DreamedKi | undefined) => Omit<DreamedKi, 'governance'> | undefined;
+type BuildDocument = (current: DreamedKi | undefined) => Omit<DreamedKi, 'governance'>;
+
+type BuildPermittedDocument = (
+  current: DreamedKi | undefined
+) => Omit<DreamedKi, 'governance'> | 'rejected';
+
+type WriteResult = 'created' | 'updated' | 'skipped' | 'rejected';
 
 const activeSource = (revision: KiRevision | undefined): DreamedKi | undefined => {
   const source = revision?.source as DreamedKi | undefined;
@@ -147,19 +158,21 @@ const withDerivedPermissions =
     { spaceId, memoryPermissions }: ApplyContext,
     sourceMemoryIds: readonly string[],
     build: BuildDocument
-  ): BuildDocument =>
+  ): BuildPermittedDocument =>
   (current) => {
-    const permissions = derivedPermissions(
-      sourceMemoryIds.map((id) => memoryPermissions.get(id)),
-      spaceId
-    );
+    const cited = new Set(current ? citedMemoryIds(current) : []);
+    const sources = sourceMemoryIds.filter((id) => memoryPermissions.has(id) || !cited.has(id));
+    const permissions =
+      sources.length > 0
+        ? derivedPermissions(
+            sources.map((id) => memoryPermissions.get(id)),
+            spaceId
+          )
+        : current?.permissions;
     if (current && !samePermissions(current.permissions, permissions)) {
-      return undefined;
+      return 'rejected';
     }
     const document = build(current);
-    if (!document) {
-      return undefined;
-    }
     return permissions ? { ...document, permissions } : document;
   };
 
@@ -167,8 +180,8 @@ const planDocument = async (
   context: ApplyContext,
   planned: Map<string, PlannedWrite>,
   kiId: string,
-  build: BuildDocument
-): Promise<'created' | 'updated' | 'skipped'> => {
+  build: BuildPermittedDocument
+): Promise<WriteResult> => {
   const { esClient, aiIndexId, dest, writer, abortSignal } = context;
   const previous = planned.get(kiId);
   const revision = previous
@@ -179,8 +192,8 @@ const planDocument = async (
   }
   const current = previous ? (previous.ki as DreamedKi | undefined) : activeSource(revision);
   const document = build(current);
-  if (!document) {
-    return 'skipped';
+  if (document === 'rejected') {
+    return document;
   }
   planned.set(kiId, {
     change: previous?.change === 'created' || !current ? 'created' : 'updated',
@@ -194,7 +207,7 @@ const writeDocument = async (
   kiId: string,
   sourceMemoryIds: readonly string[],
   buildDocument: BuildDocument
-): Promise<'created' | 'updated' | 'skipped'> => {
+): Promise<WriteResult> => {
   const { esClient, aiIndexId, dest, writer, abortSignal, dryRun } = context;
   const build = withDerivedPermissions(context, sourceMemoryIds, buildDocument);
   if (dryRun) {
@@ -215,8 +228,8 @@ const writeDocument = async (
       }
       const current = activeSource(revision);
       const document = build(current);
-      if (!document) {
-        return 'skipped' as const;
+      if (document === 'rejected') {
+        return document;
       }
       await putKiRevision({
         esClient,
@@ -314,7 +327,7 @@ const upsertFact = (context: ApplyContext, operation: UpsertFactOperation) =>
 const upsert = (
   context: ApplyContext,
   operation: Exclude<DreamingOperation, DeleteOperation>
-): Promise<'created' | 'updated' | 'skipped'> => {
+): Promise<WriteResult> => {
   switch (operation.op) {
     case 'upsert_entity':
       return upsertEntity(context, operation);
@@ -371,19 +384,24 @@ const deleteKi = async (context: ApplyContext, kiId: string): Promise<boolean> =
 export const applyOperations = async (
   context: ApplyContext,
   operations: readonly DreamingOperation[]
-): Promise<ApplyCounts> => {
-  const counts: ApplyCounts = { created: 0, updated: 0, deleted: 0 };
+): Promise<ApplyResult> => {
+  const result: ApplyResult = { created: 0, updated: 0, deleted: 0, rejected: [] };
   for (const operation of operations) {
     if (operation.op === 'delete') {
       if (await deleteKi(context, operation.id)) {
-        counts.deleted += 1;
+        result.deleted += 1;
       }
       continue;
     }
-    const result = await upsert(context, operation);
-    if (result !== 'skipped') {
-      counts[result] += 1;
+    const written = await upsert(context, operation);
+    if (written === 'rejected') {
+      result.rejected.push({
+        item: `${operation.op === 'upsert_entity' ? 'entity' : 'fact'} ${operation.id}`,
+        reason: 'it has different permissions than its memories',
+      });
+    } else if (written !== 'skipped') {
+      result[written] += 1;
     }
   }
-  return counts;
+  return result;
 };

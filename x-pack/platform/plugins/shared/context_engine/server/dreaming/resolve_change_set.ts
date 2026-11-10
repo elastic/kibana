@@ -16,6 +16,7 @@ import type { AccessPattern, DreamChangeSet } from '../../common/step_types/appl
 import { baseContent } from './access_patterns';
 import { citedMemoryIds, kindOf, type DreamedKi, type DreamedKiKind } from './dreamed_ki';
 import { batchKeyOf, entityId, factId } from './ids';
+import { audienceKeyOf, type KiPermissions } from './permissions';
 
 const NEW_REF_PREFIX = 'new:';
 
@@ -41,8 +42,8 @@ export interface ResolveContext {
   memories: ReadonlyMap<string, string | undefined>;
   /** The current facts and entities the change set refers to, by id. */
   existing: ReadonlyMap<string, DreamedKi>;
-  /** Who can see the memories, when they are restricted; new entities are kept apart by it. */
-  audience?: string;
+  /** The permissions of each memory the model was shown; new entities are kept apart by those of their sources. */
+  memoryPermissions: ReadonlyMap<string, KiPermissions | undefined>;
 }
 
 export interface UpsertEntityOperation {
@@ -102,7 +103,7 @@ const reject: (reason: string) => never = (reason) => {
 /** Validates a change set and resolves its refs to KI ids, rejecting invalid items. */
 export const resolveChangeSet = (
   changeSet: DreamChangeSet,
-  { executionId, vocabulary, memories, existing, audience }: ResolveContext
+  { executionId, vocabulary, memories, existing, memoryPermissions }: ResolveContext
 ): ResolvedChangeSet => {
   const operations: DreamingOperation[] = [];
   const rejected: ResolvedChangeSet['rejected'] = [];
@@ -186,7 +187,13 @@ export const resolveChangeSet = (
       const sourceMemoryIds = resolveSources(entity.source_memory_ids, current);
       operations.push({
         op: 'upsert_entity',
-        id: current?.id ?? entityId(type, title, audience),
+        id:
+          current?.id ??
+          entityId(
+            type,
+            title,
+            audienceKeyOf(sourceMemoryIds.map((id) => memoryPermissions.get(id)))
+          ),
         type,
         title,
         ...(entity.description !== undefined && { description: entity.description }),

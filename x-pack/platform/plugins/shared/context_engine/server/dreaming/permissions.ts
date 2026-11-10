@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash';
 import { shortHash } from './ids';
 
 export interface KiPrivilegeGroup {
@@ -38,11 +37,17 @@ export const isVisibleInSpace = (
 const restrictedOrUndefined = (permissions: KiPermissions | undefined): KiPermissions | undefined =>
   privilegesOf(permissions).length > 0 ? permissions : undefined;
 
-/** Whether two KIs have the same permissions, counting no privileges as open. */
+const canonicalPrivileges = (groups: KiPrivilegeGroup[]): string =>
+  groups
+    .map(({ space, name, count }) => JSON.stringify([space, [...(name ?? [])].sort(), count]))
+    .sort()
+    .join('\u0000');
+
+/** Whether two KIs have the same permissions in any order, counting no privileges as open. */
 export const samePermissions = (
   a: KiPermissions | undefined,
   b: KiPermissions | undefined
-): boolean => isEqual(restrictedOrUndefined(a), restrictedOrUndefined(b));
+): boolean => canonicalPrivileges(privilegesOf(a)) === canonicalPrivileges(privilegesOf(b));
 
 /**
  * The permissions of a KI built from others, all visible in `spaceId`: theirs when they all have
@@ -64,12 +69,6 @@ export const derivedPermissions = (
   const names = [...new Set(restricted.flatMap((groups) => groupFor(groups, spaceId)?.name ?? []))];
   return { kibana: { privileges: [{ space: spaceId, name: names, count: names.length }] } };
 };
-
-const canonicalPrivileges = (groups: KiPrivilegeGroup[]): string =>
-  groups
-    .map(({ space, name, count }) => JSON.stringify([space, [...(name ?? [])].sort(), count]))
-    .sort()
-    .join('\u0000');
 
 /** A short key for who can see a set of memories; undefined when none is restricted. */
 export const audienceKeyOf = (

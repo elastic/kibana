@@ -174,6 +174,44 @@ describe('getApplyDreamChangesStepDefinition', () => {
     );
   });
 
+  it('rejects an update to a KI with different permissions than its memories', async () => {
+    const stored: Record<string, Record<string, unknown>> = {
+      [existingCustomer.id]: existingCustomer,
+    };
+    const context = createMockStepContext({
+      input: {
+        ai_index_id: 'support',
+        memories: [
+          {
+            id: 'mem-2',
+            updated_at: '2026-11-02T18:40:12.000Z',
+            permissions: {
+              kibana: { privileges: [{ space: 'default', name: ['ai_index:support/read'] }] },
+            },
+          },
+        ],
+        changes: { entities: [changes.entities[0]] },
+      },
+      esClient: createEsClient(stored),
+    });
+
+    const { output } = await definition(aiIndexService()).handler(context);
+
+    expect(output).toEqual({
+      created: 0,
+      updated: 0,
+      deleted: 0,
+      rejected: [
+        {
+          item: `entity ${existingCustomer.id}`,
+          reason: 'it has different permissions than its memories',
+        },
+      ],
+      dropped_access_patterns: 0,
+    });
+    expect(stored[existingCustomer.id]).toBe(existingCustomer);
+  });
+
   it('on a dry run, reports what it would write and writes nothing', async () => {
     const stored: Record<string, Record<string, unknown>> = {
       [existingCustomer.id]: existingCustomer,
