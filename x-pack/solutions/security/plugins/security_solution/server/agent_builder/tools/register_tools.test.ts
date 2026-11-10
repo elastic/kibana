@@ -16,6 +16,7 @@ import {
 } from './siem_readiness';
 
 import { allowedExperimentalValues } from '../../../common/experimental_features';
+import type { PageProfilingOptions } from '../../lib/entity_analytics/risk_score/maintainer/instrumentation/page_timing_types';
 import { registerTools } from './register_tools';
 
 const SIEM_READINESS_TOOL_IDS = [
@@ -57,6 +58,7 @@ const buildArgs = (
   {} as never,
   false,
   '9.0.0',
+  {} as PageProfilingOptions,
   true,
 ];
 
