@@ -13,6 +13,7 @@ import {
   type CreateWorkflowMigrationResponse,
 } from '../../../../../common/siem_migrations/model/api/workflows/workflow_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
+import { SiemMigrationAuditLogger } from '../../common/api/util/audit';
 import { withLicense } from '../../common/api/util/with_license';
 import { authz } from './util/authz';
 
@@ -36,9 +37,26 @@ export const registerSiemWorkflowMigrationsCreateRoute = (
         },
       },
       withLicense(
-        async (_context, req, res): Promise<IKibanaResponse<CreateWorkflowMigrationResponse>> => {
-          logger.debug(`Workflow migration create is not implemented (${req.body.name})`);
-          return res.ok({ body: { migration_id: '' } });
+        async (context, req, res): Promise<IKibanaResponse<CreateWorkflowMigrationResponse>> => {
+          const siemMigrationAuditLogger = new SiemMigrationAuditLogger(
+            context.securitySolution,
+            'workflows'
+          );
+          try {
+            const ctx = await context.resolve(['securitySolution']);
+            const workflowsMigrationsClient =
+              ctx.securitySolution.siemMigrations.getWorkflowsClient();
+            await siemMigrationAuditLogger.logCreateMigration();
+            const migrationId = await workflowsMigrationsClient.data.migrations.create(
+              req.body.name
+            );
+
+            return res.ok({ body: { migration_id: migrationId } });
+          } catch (error) {
+            logger.error(error);
+            await siemMigrationAuditLogger.logCreateMigration({ error });
+            return res.badRequest({ body: error.message });
+          }
         }
       )
     );

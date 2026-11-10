@@ -23,7 +23,8 @@ import { registerSiemWorkflowMigrationsUpdateWorkflowsRoute } from './workflows/
 
 /**
  * Workflow migration routes follow the SIEM rule migration API.
- * Handlers are placeholders until they are wired to the data service.
+ * CRUD and Tines story ingest write through the data client.
+ * Start, stop, and stats handlers stay placeholders until the task service exists.
  */
 export const registerSiemWorkflowMigrationsRoutes = (
   router: SecuritySolutionPluginRouter,
