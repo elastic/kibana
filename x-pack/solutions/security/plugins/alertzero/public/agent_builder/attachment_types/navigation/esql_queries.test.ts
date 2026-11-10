@@ -140,10 +140,29 @@ describe('esql_queries', () => {
       })
     ).toBe('FROM "logs-*" | WHERE MV_CONTAINS(TO_IP(related.ip), "203.0.113.77"::ip)');
     // An untyped value that parses as an address still compares as ip: `MV_CONTAINS` needs
-    // matching types, and an `ip` column against a keyword literal fails verification.
+    // matching types, and an `ip` column against a keyword literal fails verification. The
+    // literal is the canonical spelling, which the `::ip` cast always accepts.
     expect(
       buildIocMatchEsql({ indices: ['logs-*'], field: 'source.ip', value: '2001:DB8::1' })
-    ).toBe('FROM "logs-*" | WHERE MV_CONTAINS(TO_IP(source.ip), "2001:DB8::1"::ip)');
+    ).toBe('FROM "logs-*" | WHERE MV_CONTAINS(TO_IP(source.ip), "2001:db8:0:0:0:0:0:1"::ip)');
+  });
+
+  it('casts a canonical literal, never the stored spelling, since a null literal matches every row', () => {
+    // `"[::1]"::ip`, `"fe80::1%eth0"::ip` and `"010.0.0.1"::ip` are null or lossy in ES|QL.
+    expect(buildIocMatchEsql({ indices: ['logs-*'], field: 'source.ip', value: '[::1]' })).toBe(
+      'FROM "logs-*" | WHERE MV_CONTAINS(TO_IP(source.ip), "0:0:0:0:0:0:0:1"::ip)'
+    );
+    expect(
+      buildIocMatchEsql({
+        indices: ['logs-*'],
+        field: 'source.ip',
+        value: 'fe80::1%eth0',
+        iocType: 'ip',
+      })
+    ).toBe('FROM "logs-*" | WHERE MV_CONTAINS(TO_IP(source.ip), "fe80:0:0:0:0:0:0:1"::ip)');
+    expect(buildIocMatchEsql({ indices: ['logs-*'], field: 'source.ip', value: '010.0.0.1' })).toBe(
+      'FROM "logs-*" | WHERE MV_CONTAINS(TO_IP(source.ip), "10.0.0.1"::ip)'
+    );
   });
 
   it('never casts an unparseable ip value, since a null literal would match every row', () => {

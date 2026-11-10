@@ -7,7 +7,7 @@
 
 import { groupBy } from 'lodash';
 import { HUNT_CASE_INSENSITIVE_IOC_TYPES } from '@kbn/alertzero-common';
-import { isIpAddress } from '../../../../common/sse_view';
+import { normalizeIpAddress } from '../../../../common/sse_view';
 
 export const DEFAULT_ALERTS_INDEX = '.alerts-security.alerts' as const;
 export const THREAT_REPORTS_INDEX_PATTERN = '.kibana-threat-reports*' as const;
@@ -152,9 +152,10 @@ export const buildEntityLookupEsql = ({
  * or an untyped one that parses as an address) compares as `ip`, which canonicalizes IPv6
  * spellings and accepts keyword fields that hold addresses; hash and domain IOCs compare
  * case-folded, matching Tier 1's case-insensitive clauses; everything else compares as a
- * string via `TO_STRING`. An `ip` IOC whose value does not parse takes the string branch,
- * because `"bad"::ip` is null and `MV_CONTAINS(field, null)` matches every row. Absent when
- * field/value/indices are empty.
+ * string via `TO_STRING`. The ip literal is the canonical spelling, not the stored value:
+ * `"bad"::ip`, `"[::1]"::ip` and `"010.0.0.1"::ip` are all null, and `MV_CONTAINS(field, null)`
+ * matches every row, so an `ip` IOC whose value does not parse takes the string branch
+ * instead. Absent when field/value/indices are empty.
  */
 export const buildIocMatchEsql = ({
   indices,
@@ -173,9 +174,10 @@ export const buildIocMatchEsql = ({
     return undefined;
   }
 
-  const compareAsIp = (iocType === 'ip' || iocType === undefined) && isIpAddress(value);
-  const predicate = compareAsIp
-    ? `MV_CONTAINS(TO_IP(${field}), "${escapeEsqlString(value)}"::ip)`
+  const ipLiteral =
+    iocType === 'ip' || iocType === undefined ? normalizeIpAddress(value) : undefined;
+  const predicate = ipLiteral
+    ? `MV_CONTAINS(TO_IP(${field}), "${ipLiteral}"::ip)`
     : iocType && HUNT_CASE_INSENSITIVE_IOC_TYPES.has(iocType)
     ? `MV_CONTAINS(TO_LOWER(${field}), "${escapeEsqlString(value.toLowerCase())}")`
     : `MV_CONTAINS(TO_STRING(${field}), "${escapeEsqlString(value)}")`;

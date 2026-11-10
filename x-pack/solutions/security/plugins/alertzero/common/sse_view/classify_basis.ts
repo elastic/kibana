@@ -128,9 +128,18 @@ const isWeakIpv4 = (value: string): boolean => {
 
 const isWeakIp = (value: string): boolean => isWeakIpv4(value) || isWeakIpv6(value);
 
-/** Whether `value` is a well-formed IPv4 or IPv6 literal, in any spelling this module grades. */
-export const isIpAddress = (value: string): boolean =>
-  parseIpv4Octets(value) !== undefined || parseIpv6Hextets(value) !== undefined;
+/**
+ * Canonical spelling of a well-formed IPv4 or IPv6 literal, in any spelling this
+ * module grades: dotted decimal without leading zeros, or all eight lowercase
+ * hextets with no `::` gap, brackets or zone id. Every result is a literal the
+ * ES|QL `::ip` cast accepts; undefined when `value` is not an address.
+ */
+export const normalizeIpAddress = (value: string): string | undefined => {
+  const octets = parseIpv4Octets(value);
+  if (octets) return octets.join('.');
+  const hextets = parseIpv6Hextets(value);
+  return hextets?.map((hextet) => hextet.toString(16)).join(':');
+};
 
 /** Hash, public IP, domain, URL and email all grade strong; only a non-public `ip` grades weak. */
 const isStrongIoc = (ioc: ClassifyBasisIoc): boolean =>
