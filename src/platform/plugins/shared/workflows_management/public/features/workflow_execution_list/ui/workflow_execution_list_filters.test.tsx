@@ -118,6 +118,7 @@ describe('ExecutionListFilters', () => {
     renderComponent({
       filters: { ...defaultFilters, runName: 'production' },
       onFiltersChange,
+      showExecutionName: true,
     });
     await openPopover();
     fireEvent.click(screen.getByText('Failed'));
@@ -134,6 +135,7 @@ describe('ExecutionListFilters', () => {
     renderComponent({
       filters: { ...defaultFilters, runName: 'production' },
       onFiltersChange,
+      showExecutionName: true,
     });
     expect(screen.getByTestId('workflowExecutionListFilterCount')).toHaveTextContent('1');
     await openPopover();

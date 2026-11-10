@@ -252,8 +252,6 @@ export function ExecutionListFilters({
     });
   };
 
-  const showExecutionNameField = showExecutionName || Boolean(filters.runName?.trim());
-
   const numActiveFilters =
     statusOptions.filter((item) => item.checked === 'on').length +
     runTypeOptions.filter((item) => item.checked === 'on').length +
@@ -328,7 +326,7 @@ export function ExecutionListFilters({
         </EuiFlexGroup>
       </EuiPopoverTitle>
 
-      {showExecutionNameField && (
+      {showExecutionName && (
         <>
           <div css={styles.section}>
             <EuiText size="xs" color="subdued" css={styles.sectionTitle}>
