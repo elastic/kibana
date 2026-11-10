@@ -122,7 +122,7 @@ export const SelectedPanelsToolbar = () => {
               disableScreenReaderOutput={canCopySelection}
             >
               <EuiButtonIcon
-                iconType="addToDashboard"
+                iconType="logOut"
                 color="text"
                 size="s"
                 iconSize="m"
