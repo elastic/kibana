@@ -17,6 +17,12 @@ import type {
   InvestigationClosePreviewResponse,
   ClosePreviewProposal,
 } from '../../../common/investigations/status';
+
+/**
+ * A pending proposal plus whether declining it has to be justified. Internal: the flag decides
+ * what the close asks the user for, which the response carries once for the whole investigation.
+ */
+type PendingProposal = ClosePreviewProposal & { requiresDiscardReason: boolean };
 import {
   INVESTIGATION_SEVERITY_CHANGED_EVENT_TYPE,
   type InvestigationSeverityChangedEventData,
@@ -145,12 +151,12 @@ export class InvestigationStatusService {
     conversationId: string,
     spaceId: string,
     request: KibanaRequest
-  ): Promise<ClosePreviewProposal[]> {
+  ): Promise<PendingProposal[]> {
     const proposals = this.getProposals();
     if (!proposals) return [];
 
     const proposalsService = proposals.getProposalsService();
-    const allProposals: ClosePreviewProposal[] = [];
+    const allProposals: PendingProposal[] = [];
     let from = 0;
     const size = 100;
 
@@ -173,7 +179,7 @@ export class InvestigationStatusService {
           id: p.id,
           // Mirrors the fallback order in proposal_approval_card.tsx:196
           action_name: p.action?.name ?? p.actionWorkflowId ?? null,
-          requires_discard_reason: !isTodoProposal(p),
+          requiresDiscardReason: !isTodoProposal(p),
         }))
       );
       if (allProposals.length >= page.total || page.proposals.length < size) break;
@@ -220,7 +226,7 @@ export class InvestigationStatusService {
   async listPendingProposalsForRequest(
     conversationId: string,
     request: KibanaRequest
-  ): Promise<ClosePreviewProposal[]> {
+  ): Promise<PendingProposal[]> {
     const proposals = this.getProposals();
     if (proposals) {
       // assertCanRead throws ProposalForbiddenError when the principal lacks read access.
@@ -248,8 +254,11 @@ export class InvestigationStatusService {
     );
     return {
       pending_proposal_count: pending.length,
-      pending_proposals: pending,
-      requires_discard_reason: pending.some((p) => p.requires_discard_reason),
+      pending_proposals: pending.map(({ id, action_name: actionName }) => ({
+        id,
+        action_name: actionName,
+      })),
+      requires_discard_reason: pending.some((p) => p.requiresDiscardReason),
       running_proposal_count: running,
     };
   }
@@ -324,7 +333,7 @@ export class InvestigationStatusService {
       if (pending.length > 0) {
         // Only proposals that stand for an action the agent would have taken need a justification;
         // a close that drops to-dos alone records `no_reason` without prompting the user.
-        const requiresDismissReason = pending.some((p) => p.requires_discard_reason);
+        const requiresDismissReason = pending.some((p) => p.requiresDiscardReason);
         if (requiresDismissReason && !body.dismiss_reason) {
           throw new MissingDismissReasonError();
         }

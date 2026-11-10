@@ -62,7 +62,7 @@ describe('CloseInvestigationModal: running actions', () => {
     renderModal(
       preview({
         pending_proposal_count: 1,
-        pending_proposals: [{ id: 'p-1', action_name: 'Block IP', requires_discard_reason: true }],
+        pending_proposals: [{ id: 'p-1', action_name: 'Block IP' }],
         requires_discard_reason: true,
         running_proposal_count: 2,
       })
@@ -76,7 +76,7 @@ describe('CloseInvestigationModal: running actions', () => {
     renderModal(
       preview({
         pending_proposal_count: 1,
-        pending_proposals: [{ id: 'p-1', action_name: null, requires_discard_reason: true }],
+        pending_proposals: [{ id: 'p-1', action_name: null }],
         requires_discard_reason: true,
       })
     );
@@ -94,9 +94,7 @@ describe('CloseInvestigationModal: running actions', () => {
 describe('CloseInvestigationModal: discard reason', () => {
   const todoPreview = preview({
     pending_proposal_count: 1,
-    pending_proposals: [
-      { id: 'p-1', action_name: 'Restart the pod', requires_discard_reason: false },
-    ],
+    pending_proposals: [{ id: 'p-1', action_name: 'Restart the pod' }],
     requires_discard_reason: false,
   });
 
@@ -104,7 +102,7 @@ describe('CloseInvestigationModal: discard reason', () => {
     renderModal(
       preview({
         pending_proposal_count: 1,
-        pending_proposals: [{ id: 'p-1', action_name: 'Block IP', requires_discard_reason: true }],
+        pending_proposals: [{ id: 'p-1', action_name: 'Block IP' }],
         requires_discard_reason: true,
       })
     );

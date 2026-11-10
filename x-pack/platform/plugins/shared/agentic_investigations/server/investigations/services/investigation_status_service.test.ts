@@ -107,9 +107,7 @@ describe('InvestigationStatusService.getPreview', () => {
   it('maps action name from action.name', async () => {
     const { service, proposalsService } = makeDeps([{ id: 'p-1', action: { name: 'Block IP' } }]);
     const result = await service.getPreview(request, 'conv-1');
-    expect(result.pending_proposals).toEqual([
-      { id: 'p-1', action_name: 'Block IP', requires_discard_reason: true },
-    ]);
+    expect(result.pending_proposals).toEqual([{ id: 'p-1', action_name: 'Block IP' }]);
     expect(proposalsService.list).toHaveBeenCalledWith(
       expect.objectContaining({ conversationId: 'conv-1', status: 'pending' }),
       SPACE_ID,
@@ -148,17 +146,13 @@ describe('InvestigationStatusService.getPreview', () => {
   it('falls back to actionWorkflowId when action is absent', async () => {
     const { service } = makeDeps([{ id: 'p-2', actionWorkflowId: 'wf-123' }]);
     const result = await service.getPreview(request, 'conv-1');
-    expect(result.pending_proposals).toEqual([
-      { id: 'p-2', action_name: 'wf-123', requires_discard_reason: true },
-    ]);
+    expect(result.pending_proposals).toEqual([{ id: 'p-2', action_name: 'wf-123' }]);
   });
 
   it('sets action_name to null when neither action nor actionWorkflowId is present', async () => {
     const { service } = makeDeps([{ id: 'p-3' }]);
     const result = await service.getPreview(request, 'conv-1');
-    expect(result.pending_proposals).toEqual([
-      { id: 'p-3', action_name: null, requires_discard_reason: true },
-    ]);
+    expect(result.pending_proposals).toEqual([{ id: 'p-3', action_name: null }]);
   });
 
   it('includes pending_proposal_count matching the list length', async () => {
