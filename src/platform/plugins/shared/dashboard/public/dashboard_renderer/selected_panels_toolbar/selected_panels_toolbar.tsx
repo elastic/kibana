@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
+import React, { useCallback } from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiBadge,
@@ -52,9 +52,6 @@ const deletePanelsLabel = i18n.translate('dashboard.selectedPanelsToolbar.delete
   defaultMessage: 'Delete panels',
 });
 
-/** Selecting again within this long after the toolbar left skips its entrance */
-const QUICK_RESELECT_WINDOW = 1000;
-
 /** Floating toolbar shown while panels are selected; exposes the bulk actions available for the selection */
 export const SelectedPanelsToolbar = () => {
   const dashboardApi = useDashboardApi();
@@ -64,24 +61,6 @@ export const SelectedPanelsToolbar = () => {
     dashboardApi.viewMode$,
     dashboardApi.children$
   );
-
-  const isVisible = viewMode === 'edit' && selectedPanelIds.length > 0;
-
-  // The toolbar leaves instantly when the selection is cleared. Selecting again right after skips
-  // the entrance, so quick reselections don't replay it. Decided before paint, so the entrance
-  // never starts and then cuts off.
-  const [skipEntrance, setSkipEntrance] = useState(false);
-  const wasVisibleRef = useRef(isVisible);
-  const hiddenAtRef = useRef(0);
-  useLayoutEffect(() => {
-    if (isVisible === wasVisibleRef.current) return;
-    wasVisibleRef.current = isVisible;
-    if (isVisible) {
-      setSkipEntrance(Date.now() - hiddenAtRef.current < QUICK_RESELECT_WINDOW);
-    } else {
-      hiddenAtRef.current = Date.now();
-    }
-  }, [isVisible]);
 
   const onRemove = useCallback(() => {
     if (dashboardApi.canRemovePanels && !dashboardApi.canRemovePanels()) return;
@@ -93,7 +72,7 @@ export const SelectedPanelsToolbar = () => {
     openCopyToDashboardModal(dashboardApi, dashboardApi.selectedPanelIds$.value);
   }, [dashboardApi]);
 
-  if (!isVisible) return null;
+  if (viewMode !== 'edit' || selectedPanelIds.length === 0) return null;
 
   const showCopyToDashboard = userCanCopyToDashboard();
   const canCopySelection = selectedPanelIds.every((panelId) =>
@@ -106,7 +85,6 @@ export const SelectedPanelsToolbar = () => {
       paddingSize="s"
       hasShadow
       hasBorder
-      data-skip-entrance={skipEntrance}
       data-test-subj="dashboardSelectedPanelsToolbar"
     >
       <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
@@ -206,7 +184,6 @@ const selectedPanelsToolbarStyles = {
       '@supports (animation-timing-function: linear(0, 1))': {
         animation: `${enter} ${ENTER_SPRING.duration}ms ${ENTER_SPRING.easing}`,
       },
-      '&[data-skip-entrance="true"]': { animation: 'none' },
       '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
       // In dark mode the default panel color is too close to the dashboard behind it and a dark
       // shadow is invisible: a lighter neutral surface, a stronger edge and a soft white glow keep
