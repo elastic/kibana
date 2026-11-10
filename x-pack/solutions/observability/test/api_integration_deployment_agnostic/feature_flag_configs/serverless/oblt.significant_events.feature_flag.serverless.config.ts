@@ -5,9 +5,15 @@
  * 2.0.
  */
 
+import { getKbnServerlessUiamCert } from '@kbn/dev-utils';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import { createServerlessFeatureFlagTestConfig } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/default_configs/feature_flag.serverless.config.base';
 import { services } from '../../services';
+
+// UIAM reads Kibana's project type from its client certificate and refuses to let Kibana assume the
+// service accounts of a project of another type. The shared serverless base presents the search
+// project's certificate, so an observability project needs its own.
+const uiamCert = getKbnServerlessUiamCert('observability');
 
 export default createServerlessFeatureFlagTestConfig<typeof services>({
   services,
@@ -21,6 +27,8 @@ export default createServerlessFeatureFlagTestConfig<typeof services>({
     // A UIAM service account that schedules a rule executor task needs a UIAM key; Task Manager
     // only grants one when this is on, and otherwise tries an Elasticsearch key and fails.
     '--xpack.task_manager.grant_uiam_api_keys=true',
+    `--xpack.security.uiam.ssl.certificate=${uiamCert.certPath}`,
+    `--xpack.security.uiam.ssl.key=${uiamCert.keyPath}`,
     '--uiSettings.globalOverrides.alerting:v2:enabled=true',
   ],
   junit: {
