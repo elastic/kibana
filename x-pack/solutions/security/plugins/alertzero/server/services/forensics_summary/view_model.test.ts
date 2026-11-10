@@ -55,6 +55,71 @@ describe('buildForensicsSummaryViewModel', () => {
     expect(countOpenDecisions(viewModel)).toBe(2);
   });
 
+  it('groups proposals by category, urgent containment first, keeping open ones first in each', () => {
+    const viewModel = buildForensicsSummaryViewModel({
+      ...fixtureInputs,
+      proposals: [
+        { title: 'configure', status: 'pending', category: 'configure' },
+        { title: 'investigate', status: 'pending', category: 'investigate' },
+        { title: 'respond done', status: 'succeeded', category: 'respond' },
+        { title: 'respond open', status: 'pending', category: 'respond' },
+        { title: 'no category', status: 'pending' },
+      ],
+    });
+    expect(viewModel.proposals.map(({ title, category }) => [title, category])).toEqual([
+      ['respond open', 'respond'],
+      ['respond done', 'respond'],
+      ['investigate', 'investigate'],
+      ['configure', 'configure'],
+      ['no category', 'other'],
+    ]);
+  });
+
+  it('shows the comment while a proposal is open, and who decided once it is settled', () => {
+    const viewModel = buildForensicsSummaryViewModel({
+      ...fixtureInputs,
+      proposals: [
+        {
+          title: 'open',
+          status: 'pending',
+          comment: '## Why\n**Isolate** the host: <b>it</b> runs `ransom.exe`.',
+          decidedBy: { username: 'nobody' },
+          actionInput: { endpoint_ids: ['agent-1', 'agent-2', 'agent-3'] },
+        },
+        {
+          title: 'dismissed',
+          status: 'no_action',
+          decision: 'dismissed',
+          comment: 'hidden once settled',
+          decidedBy: { username: 'analyst1' },
+          actionInput: { endpoint_ids: [] },
+        },
+      ],
+    });
+    const [open, dismissed] = viewModel.proposals;
+    expect(open).toMatchObject({
+      comment: 'Why Isolate the host: it runs ransom.exe.',
+      decidedBy: undefined,
+      dismissed: false,
+      agent: { id: 'agent-1', more: 2 },
+    });
+    expect(dismissed).toMatchObject({
+      comment: undefined,
+      decidedBy: 'analyst1',
+      dismissed: true,
+      agent: undefined,
+    });
+  });
+
+  it('cuts a long comment to one line', () => {
+    const { proposals } = buildForensicsSummaryViewModel({
+      ...fixtureInputs,
+      proposals: [{ title: 'long', status: 'pending', comment: 'word '.repeat(100) }],
+    });
+    expect(proposals[0].comment).toHaveLength(200);
+    expect(proposals[0].comment?.endsWith('…')).toBe(true);
+  });
+
   it('only shows an expiry while a proposal awaits a decision', () => {
     const viewModel = buildForensicsSummaryViewModel({
       ...fixtureInputs,
@@ -68,6 +133,7 @@ describe('buildForensicsSummaryViewModel', () => {
     expect(viewModel.peakRisk).toEqual({ score: 99, severity: 'critical' });
     expect(viewModel.alerts.shown.map(({ riskScore }) => riskScore)).toEqual([99, 95, 73]);
     expect(viewModel.alerts.total).toBe(3);
+    expect(viewModel.host).toBe('win-fin-07');
   });
 
   it('opens the alerts while a close of the attack awaits a decision', () => {

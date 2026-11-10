@@ -166,6 +166,7 @@ export const readForensicsAttachments = (
 };
 
 const ALERT_FIELDS = [
+  '@timestamp',
   'kibana.alert.rule.name',
   'kibana.alert.severity',
   'kibana.alert.risk_score',
@@ -174,6 +175,7 @@ const ALERT_FIELDS = [
 /** `fields` returns each value as an array, whether the alert stores it dotted or nested. */
 const alertFieldsSchema = lazySchema(() =>
   z.object({
+    '@timestamp': z.tuple([z.string()], z.unknown()).optional().catch(undefined),
     'kibana.alert.rule.name': z.tuple([z.string()], z.unknown()).catch(['Unknown rule']),
     'kibana.alert.severity': z.tuple([z.string()], z.unknown()).catch(['low']),
     'kibana.alert.risk_score': z.tuple([z.number()], z.unknown()).catch([0]),
@@ -210,10 +212,11 @@ export const readAttackAlerts = async ({
   );
   return response.hits.hits.map(({ fields }) => {
     const {
+      '@timestamp': timestamp,
       'kibana.alert.rule.name': [ruleName],
       'kibana.alert.severity': [severity],
       'kibana.alert.risk_score': [riskScore],
     } = alertFieldsSchema.parse(fields ?? {});
-    return { ruleName, severity, riskScore };
+    return { ruleName, severity, riskScore, timestamp: timestamp?.[0] };
   });
 };

@@ -1,60 +1,188 @@
-/* The renderer's tokens carry no subdued text or tint, so they are mixed from its text color. */
-.fs{--subdued:color-mix(in srgb,var(--cc-color-text) 75%,transparent);--tint:color-mix(in srgb,var(--cc-color-text) 7%,transparent);max-width:736px;font:14px/1.5 var(--cc-font-family);color:var(--cc-color-text);font-variant-numeric:tabular-nums}
+/*
+ * Every color is a `--cc-*` theme token or a mix of them, so the card follows the viewer's Kibana theme.
+ * The tokens carry no subdued text, tint or track, so those are mixed from the text color, and a token's
+ * text variant is mixed toward the text color so it reads on either background. `light-dark()` is kept
+ * for the colors EUI has no token for: the high, medium and low severities and the warning text.
+ */
+.fs{
+  --subdued:color-mix(in srgb,var(--cc-color-text) 75%,transparent);
+  --tint:color-mix(in srgb,var(--cc-color-text) 7%,transparent);
+  --track:color-mix(in srgb,var(--cc-color-text) 12%,transparent);
+  --card:color-mix(in srgb,var(--cc-color-text) 3%,var(--cc-color-surface));
+  --on-fill:var(--cc-color-surface);
+  /* Dark in both themes: the visualization palette's colors are light enough to need dark ink. */
+  --ink-on-vis:light-dark(var(--cc-color-text),var(--cc-color-surface));
+  --shadow:0 1px 2px color-mix(in srgb,var(--cc-color-text) 6%,transparent);
+  --primary-text:color-mix(in srgb,var(--cc-color-primary) 85%,var(--cc-color-text));
+  --accent-text:color-mix(in srgb,var(--cc-color-accent) 65%,var(--cc-color-text));
+  --accent-2-text:color-mix(in srgb,var(--cc-color-accent-2) 80%,var(--cc-color-text));
+  --warning-text:light-dark(#825803,#FCD883);
+  --sev-critical:var(--cc-color-danger);
+  --sev-high:light-dark(#D36108,#F1A03B);
+  --sev-medium:light-dark(#FACB3D,#FEC514);
+  --sev-low:light-dark(#00BFB3,#48EFCF);
+  --mono:'Roboto Mono',Menlo,Courier,monospace;
+  max-width:736px;padding:10px;border:1px solid var(--cc-color-border);border-radius:var(--cc-radius);
+  background:var(--cc-color-surface);color:var(--cc-color-text);
+  font:14px/1.5 var(--cc-font-family);font-variant-numeric:tabular-nums;overflow-x:hidden
+}
 .fs *{box-sizing:border-box}
-.fs h1,.fs h2,.fs h3,.fs p,.fs ol,.fs ul,.fs figure{margin:0;padding:0}
-.fs h1{margin:4px 0 8px;font-size:20px;line-height:1.25;overflow-wrap:anywhere}
-.fs h2{display:flex;align-items:baseline;gap:8px;margin-bottom:8px;font-size:16px;font-weight:600;line-height:1.3}
-.fs h2 .meta{font-weight:400}
-.fs .meta{font-size:12px;line-height:16px;color:var(--subdued);overflow-wrap:anywhere}
-.fs .meta>span:not(:last-child)::after{content:' ·'}
-.fs .eyebrow{margin-bottom:4px;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--cc-color-primary)}
-.fs .header{padding-bottom:16px;border-bottom:1px solid var(--cc-color-border)}
-.fs .section{margin-top:20px}
-.fs .badges{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
-/* A badge is a pill, hollow or tinted by a status. */
-.fs .badge{display:inline-flex;align-items:center;height:20px;padding:0 9px;border-radius:24px;font-size:12px;font-weight:500;line-height:18px;white-space:nowrap;background:var(--tint);color:var(--subdued)}
-.fs .hollow{border:1px solid var(--cc-color-border);background:var(--cc-color-surface);color:var(--cc-color-text)}
-/* EUI's badge colors for the light and dark theme; the renderer has no tokens for green, orange or yellow. */
+.fs h1,.fs h2,.fs h3,.fs p,.fs ol,.fs ul{margin:0;padding:0}
+.fs h1{font-size:20px;font-weight:700;line-height:1.25;letter-spacing:-.01em;overflow-wrap:anywhere}
+.fs h2{display:flex;align-items:baseline;gap:8px;margin-bottom:6px;font-size:14px;font-weight:600;line-height:1.5}
+.fs h3{display:flex;align-items:baseline;gap:6px;margin-bottom:6px;font-size:13px;font-weight:600;line-height:1.5}
+.fs h2 .meta,.fs h3 .meta{font-weight:400}
+.fs .meta{font-size:12px;line-height:1.5;color:var(--subdued);overflow-wrap:anywhere}
+.fs .meta>span:not(:last-child)::after{content:' · '}
+.fs .section{margin-top:10px}
+.fs .clamp1,.fs .clamp2{display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden}
+.fs .clamp1{-webkit-line-clamp:1}
+.fs .clamp2{-webkit-line-clamp:2}
+.fs code{padding:0 4px;border:1px solid var(--cc-color-border);border-radius:var(--cc-radius-s);background:var(--cc-color-surface);font:12px/1.5 var(--mono);overflow-wrap:anywhere}
+
+/* Header: a four-color stripe of the theme's accents across the top. */
+.fs .hdr{position:relative;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:13px 14px 10px;overflow:hidden;border:1px solid var(--cc-color-border);border-radius:var(--cc-radius);background:var(--card)}
+.fs .hdr::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--cc-color-accent-2),var(--cc-color-warning),var(--cc-color-accent),var(--cc-color-primary))}
+.fs .hdr-text{flex:1 1 auto;min-width:0}
+.fs .eyebrow{font-size:12px;font-weight:500;color:var(--subdued)}
+.fs .eyebrow .brand{color:var(--accent-text)}
+.fs .sub{margin-top:2px;font-size:12px;color:var(--subdued);overflow-wrap:anywhere}
+.fs .pills{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex:none}
+.fs .flow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:6px;font-size:12px;color:var(--subdued)}
+.fs .flow .step{padding:0 8px;border:1px solid var(--cc-color-border);border-radius:var(--cc-radius-s);background:var(--cc-color-surface);color:var(--cc-color-text);font-weight:500;line-height:20px}
+.fs .flow .step.done{border-color:var(--cc-color-accent);color:var(--accent-text)}
+.fs .flow .step.cur{border-color:var(--cc-color-accent-2);color:var(--accent-2-text)}
+
+/* A badge is a pill, hollow or tinted by a status. EUI's badge colors where the theme has no token. */
+.fs .badge{display:inline-flex;align-items:center;height:20px;padding:0 8px;border:1px solid transparent;border-radius:var(--cc-radius-s);font-size:12px;font-weight:500;line-height:18px;white-space:nowrap;background:var(--tint);color:var(--subdued)}
+.fs .hollow{border-color:var(--cc-color-border);background:var(--cc-color-surface);color:var(--cc-color-text)}
 .fs .success{background:light-dark(#C9F3E3,#0D362B);color:light-dark(#09724D,#24C292)}
-.fs .risk{background:light-dark(#FFDEBF,#4A221C);color:light-dark(#9E3A16,#FF995E)}
-.fs .warning{background:light-dark(#FDE9B5,#3D3014);color:light-dark(#825803,#FCD883)}
+.fs .warning{background:light-dark(#FDE9B5,#3D3014);color:var(--warning-text)}
 .fs .danger{background:color-mix(in srgb,var(--cc-color-danger) 15%,transparent);color:var(--cc-color-danger)}
-.fs .neutral{background:color-mix(in srgb,var(--cc-color-primary) 12%,transparent);color:var(--cc-color-primary)}
-.fs .callout{padding:12px 16px;border-left:3px solid var(--cc-color-primary);border-radius:var(--cc-radius);background:var(--tint)}
-/* A tile is a bordered panel: label top-left, value bottom-right. */
-.fs .tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.fs .tile,.fs .proposal{border:1px solid var(--cc-color-border);border-radius:calc(var(--cc-radius) * 3);background:var(--cc-color-surface)}
-.fs .tile{display:flex;flex-direction:column;padding:12px}
-.fs .tile-label{font-size:13px;font-weight:600}
-.fs .tile-value{margin-top:auto;padding-top:8px;font-size:28px;font-weight:600;line-height:1.2;text-align:right}
-.fs .tile .meta{text-align:right}
-.fs .chain{display:flex;flex-wrap:wrap;gap:4px;list-style:none}
-.fs .tactic{padding:2px 8px;border-radius:var(--cc-radius);font-size:11px;font-weight:500;background:var(--tint);color:var(--subdued)}
-.fs .tactic[data-detected=true]{background:var(--cc-color-danger);color:var(--cc-color-surface)}
-.fs .proposals,.fs .events,.fs .iocs,.fs .bars{display:flex;flex-direction:column;gap:6px;list-style:none}
-.fs .proposal{display:flex;flex-direction:column;gap:4px;padding:8px 12px}
-.fs .proposal[data-group=done],.fs .proposal[data-group=closed]{opacity:.75}
-.fs .proposal-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
-.fs .proposal-title{font-weight:600;overflow-wrap:anywhere}
-.fs .event{display:grid;grid-template-columns:160px 1fr;gap:12px;align-items:baseline}
-.fs .event time{font-size:12px;color:var(--subdued);white-space:nowrap}
-.fs .event p{overflow-wrap:anywhere}
-.fs .ioc{display:grid;grid-template-columns:130px 32px 1fr;gap:8px;align-items:baseline}
-.fs .ioc-label{display:flex;align-items:center;gap:6px;font-weight:500}
-.fs .swatch{flex:none;width:8px;height:8px;border-radius:50%}
-.fs .ioc-count{text-align:right;font-weight:600}
-.fs .ioc-values{font-family:monospace;font-size:12px;color:var(--subdued);overflow-wrap:anywhere}
-.fs summary{cursor:pointer}
-.fs summary h2{display:inline-flex;margin-bottom:0}
-.fs details[open]>summary{margin-bottom:8px}
-.fs .bar{display:grid;grid-template-columns:220px 1fr 32px;gap:8px;align-items:center;font-size:12px}
-.fs .bar-label{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
-.fs .bar-track{height:8px;border-radius:4px;background:var(--tint);overflow:hidden}
-.fs .bar-fill{display:block;height:100%;border-radius:4px}
+.fs .neutral{background:color-mix(in srgb,var(--cc-color-primary) 12%,transparent);color:var(--primary-text)}
+
+.fs .callout{margin-top:10px;padding:6px 12px;border-left:3px solid var(--cc-color-accent-2);border-radius:var(--cc-radius);background:color-mix(in srgb,var(--cc-color-accent-2) 8%,transparent)}
+.fs .callout-title{font-weight:600;color:var(--accent-2-text)}
+.fs .banner{margin-top:12px;padding:10px 14px;border:1px solid var(--cc-color-accent);border-radius:var(--cc-radius);background:color-mix(in srgb,var(--cc-color-accent) 8%,transparent);color:var(--accent-text);font-size:13px;font-weight:500}
+
+/* Cards: the KPI tiles, the proposals and the two indicator panels. */
+.fs .card,.fs .panel{padding:10px 12px;border:1px solid var(--cc-color-border);border-radius:var(--cc-radius);background:var(--card);box-shadow:var(--shadow);min-width:0}
+.fs .kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:10px}
+.fs .kpis .card:nth-child(1){border-left:3px solid var(--cc-color-primary)}
+.fs .kpis .card:nth-child(2){border-left:3px solid var(--cc-color-accent)}
+.fs .kpis .card:nth-child(3){border-left:3px solid var(--cc-color-warning)}
+.fs .kpi{display:flex;flex-direction:column;gap:3px;padding:8px 12px}
+.fs .kpi-decisions{flex-direction:row;align-items:center;gap:10px}
+.fs .kpi-body{min-width:0}
+.fs .kpi-label{font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--subdued)}
+.fs .kpi-value{font-size:24px;font-weight:700;line-height:1.15;letter-spacing:-.02em}
+.fs .kpi-value small{margin-left:4px;font-size:12px;font-weight:500;letter-spacing:normal;color:var(--subdued)}
+.fs .kpi-value.t-critical{color:var(--sev-critical)}
+.fs .kpi-value.t-high{color:var(--sev-high)}
+.fs .kpi-value.t-medium{color:var(--warning-text)}
+.fs .kpi-text{font-size:12px;color:var(--subdued);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fs .split{display:flex;height:6px;border-radius:3px;overflow:hidden;background:var(--track)}
+.fs .split i{display:block;height:100%}
+.fs .donut{flex:none}
+.fs .donut-track{fill:none;stroke:var(--track);stroke-width:9}
+.fs .donut-seg{fill:none;stroke-width:9}
+.fs .legend{display:flex;flex-wrap:wrap;gap:0 8px;list-style:none;font-size:11px;color:var(--subdued)}
+.fs .legend i{display:inline-block;width:8px;height:8px;margin-right:4px;border-radius:2px}
+
+/* Decision states, for the donut's arcs and its legend. */
+.fs .d-wait{stroke:var(--cc-color-warning);background:var(--cc-color-warning)}
+.fs .d-run{stroke:var(--cc-color-primary);background:var(--cc-color-primary)}
+.fs .d-done{stroke:var(--cc-color-accent);background:var(--cc-color-accent)}
+.fs .d-fail{stroke:var(--cc-color-danger);background:var(--cc-color-danger)}
+.fs .d-closed{stroke:var(--subdued);background:var(--subdued)}
+
+/* Severities, as fills for SVG marks and backgrounds for bars. */
+.fs .s-critical{fill:var(--sev-critical);background:var(--sev-critical)}
+.fs .s-high{fill:var(--sev-high);background:var(--sev-high)}
+.fs .s-medium{fill:var(--sev-medium);background:var(--sev-medium)}
+.fs .s-low{fill:var(--sev-low);background:var(--sev-low)}
+
+/* Indicator kinds, in EUI's colorblind-safe visualization palette. */
+.fs .k0{fill:var(--cc-vis-0);background:var(--cc-vis-0)}
+.fs .k1{fill:var(--cc-vis-1);background:var(--cc-vis-1)}
+.fs .k2{fill:var(--cc-vis-2);background:var(--cc-vis-2)}
+.fs .k3{fill:var(--cc-vis-3);background:var(--cc-vis-3)}
+.fs .k4{fill:var(--cc-vis-4);background:var(--cc-vis-4)}
+.fs .k5{fill:var(--cc-vis-5);background:var(--cc-vis-5)}
+.fs .k6{fill:var(--cc-vis-6);background:var(--cc-vis-6)}
+.fs .k7{fill:var(--cc-vis-7);background:var(--cc-vis-7)}
+.fs .k8{fill:var(--cc-vis-8);background:var(--cc-vis-8)}
+.fs .k9{fill:var(--cc-vis-9);background:var(--cc-vis-9)}
+
+.fs .chain{display:block;width:100%;height:auto;margin-top:2px}
+.fs .chev{fill:var(--track)}
+.fs .chev.on{fill:var(--cc-color-accent-2)}
+.fs .chev-label{font:500 9.5px var(--cc-font-family);fill:var(--subdued);text-anchor:middle}
+.fs .chev-label.on{font-weight:600;fill:var(--on-fill)}
+
+/* Proposals, grouped by category, each with an edge in its group's color. */
+.fs .group{margin:4px 0 2px;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--subdued)}
+.fs .cards{display:flex;flex-direction:column;gap:5px;list-style:none}
+.fs .proposal{display:grid;grid-template-columns:28px 1fr;align-items:center;gap:10px;padding:5px 10px;border-left:3px solid var(--edge)}
+.fs .proposal.respond{--edge:var(--cc-color-danger)}
+.fs .proposal.investigate{--edge:var(--cc-color-primary)}
+.fs .proposal.other{--edge:var(--subdued)}
+.fs .proposal.settled{opacity:.6}
+.fs .icon{display:flex;align-items:center;justify-content:center;width:28px;height:28px;border:1px solid var(--cc-color-border);border-radius:50%;background:var(--cc-color-surface);color:var(--edge)}
+.fs .icon svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.fs .proposal-body{min-width:0}
+.fs .proposal-top{display:flex;justify-content:space-between;align-items:center;gap:10px;min-width:0}
+.fs .proposal-title{font-weight:600;line-height:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fs .proposal p{font-size:13px;line-height:18px}
+.fs .facts{display:flex;align-items:center;gap:10px;margin-top:1px;font-size:12px;line-height:17px;color:var(--subdued);white-space:nowrap;overflow:hidden}
+.fs .facts strong{font-weight:600;color:var(--cc-color-text)}
+.fs .meter{display:inline-flex;align-items:center;gap:2px;vertical-align:middle}
+.fs .meter i{display:block;width:6px;height:10px;border-radius:1px;background:var(--track)}
+.fs .meter.impact i.on{background:var(--sev-high)}
+.fs .meter.confidence i{width:7px;height:7px;border-radius:50%}
+.fs .meter.confidence i.on{background:var(--cc-color-primary)}
+
+/* Timeline: events on a time axis, alerts as severity diamonds under it, then the numbered list. */
+.fs .timeline{display:block;width:100%;height:auto}
+.fs .axis{stroke:var(--track);stroke-width:2}
+.fs .event{fill:var(--cc-color-primary)}
+.fs .event-number{font:600 10px var(--cc-font-family);fill:var(--on-fill);text-anchor:middle}
+.fs .tick{font:400 10px var(--mono);fill:var(--subdued)}
+.fs .lane{font:600 9px var(--cc-font-family);fill:var(--subdued);letter-spacing:.04em}
+.fs .gap{font:500 9px var(--mono);fill:var(--subdued);text-anchor:middle}
+.fs .event-list{display:flex;flex-direction:column;gap:1px;margin-top:2px;list-style:none;font-size:12px;line-height:17px}
+.fs .event-list li{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fs .event-list b{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;margin-right:6px;border-radius:50%;background:var(--cc-color-primary);color:var(--on-fill);font-size:10px;font-weight:600;vertical-align:1px}
+.fs .event-list time{margin-right:6px;font:400 12px var(--mono);color:var(--primary-text)}
+
+/* Entities and indicators, side by side. */
+.fs .cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.fs .graph{display:block;width:100%;height:auto}
+.fs .edge{stroke:var(--cc-color-border);stroke-width:1.5}
+.fs .edge-label{font:400 9px var(--cc-font-family);fill:var(--subdued);text-anchor:middle}
+.fs .host-box{fill:var(--cc-color-surface);stroke:var(--cc-color-primary);stroke-width:1.5}
+.fs .host-label{font:600 11px var(--mono);fill:var(--primary-text);text-anchor:middle}
+.fs .node{stroke:var(--card);stroke-width:2}
+.fs .node-label{font:400 9.5px var(--mono);fill:var(--cc-color-text);text-anchor:middle}
+.fs .node-kind{font:600 8px var(--cc-font-family);fill:var(--ink-on-vis);text-anchor:middle;letter-spacing:.04em}
+
+.fs .bars{display:flex;flex-direction:column;gap:4px}
+.fs .bar{display:grid;grid-template-columns:92px 1fr 24px;align-items:center;gap:8px;font-size:12px}
+.fs .bar.wide{grid-template-columns:190px 1fr 24px}
+.fs .bar-label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fs .bar-track{height:8px;border-radius:2px;background:var(--track);overflow:hidden}
+.fs .bar-track i{display:block;height:100%;border-radius:2px}
 .fs .bar-value{text-align:right;font-weight:600}
-/* EUI's severity colors, which the card's tokens don't carry. */
-.fs .sev-critical{background:light-dark(#C61E25,#E7664C)}
-.fs .sev-high{background:light-dark(#D36108,#F1A03B)}
-.fs .sev-medium{background:light-dark(#FACB3D,#FEC514)}
-.fs .sev-low{background:light-dark(#00BFB3,#48EFCF)}
-.fs .reach{margin-top:8px;font-weight:500;color:var(--cc-color-danger)}
+.fs .scale{display:flex;justify-content:space-between;margin:2px 32px 0 198px;font:10px var(--mono);color:var(--subdued)}
+.fs .reach{margin-top:8px;padding:6px 10px;border:1px solid var(--cc-color-warning);border-radius:var(--cc-radius-s);background:color-mix(in srgb,var(--cc-color-warning) 15%,transparent);color:var(--warning-text);font-size:12px;font-weight:500}
+.fs .chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+
+.fs details{margin-top:6px}
+.fs details>summary{cursor:pointer;font-size:12px;font-weight:500;color:var(--primary-text);list-style:none}
+.fs details>summary::-webkit-details-marker{display:none}
+.fs details>summary::before{content:'▸ '}
+.fs details[open]>summary::before{content:'▾ '}
+.fs details.alerts{margin-top:0}
+.fs details.alerts>summary{color:var(--cc-color-text)}
+.fs details.alerts>summary h2{display:inline-flex}
+.fs details.alerts>summary::before{color:var(--subdued)}

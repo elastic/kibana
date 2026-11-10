@@ -5,114 +5,100 @@
  * 2.0.
  */
 
-import { sumBy } from 'lodash';
+import { sumBy, uniq } from 'lodash';
 import type { ForensicsSummaryViewModel } from './view_model';
 
-// The sandboxed card can't measure itself, so its height is estimated from rounded sizes for the 736 px
-// chat width with the system font the sandbox falls back to. The margin covers a wider font.
+// The sandboxed card can't measure itself, so its height is summed from section sizes measured in the
+// Kibana chat frame at the 736 px card width. Every line of text is clamped or truncated to one line
+// (the summary to two), so the sizes don't depend on the text's length. The margin covers a wider font.
 
-const MARGIN = 30;
+const MARGIN = 16;
 const HEIGHTS = {
-  /** The eyebrow, title, badge row and the gap below the header, without its line of facts. */
-  header: 101,
-  /** A line of body text, and a line of small text. */
-  line: 21,
-  meta: 16,
-  /** A section's heading and the gap above it. */
-  section: 49,
-  /** The gap above the tiles, and the tiles. */
-  tiles: 122,
-  /** The callout's padding. */
-  callout: 24,
-  /** A row of kill-chain chips and the gap under it. */
-  chainRow: 24,
-  /** A proposal's padding, title row and line of facts, and the gap under it. */
-  proposal: 65,
-  /** The gap under a list row. */
-  rowGap: 6,
-  /** The alerts' summary line and the gap above it, and one alert's bar row. */
-  alertsSummary: 49,
-  alertBar: 24,
-  reach: 29,
+  /** The frame and the renderer's padding, the header with its line of facts, the KPI tiles, and the Decide heading. */
+  base: 316,
+  /** The attack's title under the host. */
+  subtitle: 20,
+  /** The "What happened" callout with one line, and its second line. */
+  callout: 43,
+  calloutLine: 21,
+  /** The "No endpoint evidence" banner. */
+  banner: 73,
+  /** The line saying nothing was proposed. */
+  noProposals: 18,
+  chain: 63,
+  /** A category's label, a proposal card, its comment line, and the gap under it. */
+  group: 18,
+  proposal: 52,
+  comment: 19,
+  cardGap: 5,
+  /** The timeline's heading, its chart, one event's line, and the line counting the rest. */
+  timeline: 37,
+  timelineChart: 52,
+  event: 18,
+  moreEvents: 18,
+  /** The section gap, the taller of the entity graph's panel and the indicator panel's fixed part, and one indicator bar. */
+  colsGap: 10,
+  graphPanel: 200,
+  indicatorPanel: 69,
+  indicatorBar: 22,
+  /** The alerts' summary line, the open section's scale and reach line, one alert's bar, and the line when none is left. */
+  alertsSummary: 37,
+  alertsOpen: 49,
+  alertBar: 22,
+  noAlertsLine: 18,
 };
-const CHARACTERS_PER_LINE = {
-  /** Full-width prose. */
-  prose: 90,
-  /** A timeline event's description, beside its 150 px timestamp. */
-  event: 70,
-  /** Indicator values, monospaced, beside their label and count. */
-  ioc: 75,
-  /** Small text at full width. */
-  meta: 120,
-};
-/** The kill-chain chips at 736 px fit about this many to a row. */
-const TACTICS_PER_ROW = 11;
-
-const countLines = (text: string, charactersPerLine: number): number =>
-  Math.max(1, Math.ceil(text.length / charactersPerLine));
+/** About this many characters fit on one line of the callout. */
+const CALLOUT_CHARACTERS_PER_LINE = 90;
 
 /** The height of the forensics summary card in pixels: an estimate, plus a margin. */
 export const estimateForensicsSummaryHeight = (viewModel: ForensicsSummaryViewModel): number => {
-  const { attackTitle, analyzedAt, summary, killChain, proposals, timeline, indicators, alerts } =
-    viewModel;
-  const headerFacts = [attackTitle, analyzedAt].filter(Boolean).join(' · ');
+  const { attackTitle, summary, killChain, proposals, timeline, indicators, alerts } = viewModel;
+  const hasEvidence = timeline.total > 0 || indicators.length > 0;
 
-  const header =
-    HEIGHTS.header +
-    (headerFacts ? countLines(headerFacts, CHARACTERS_PER_LINE.meta) * HEIGHTS.meta : 0);
-  const summaryHeight = summary
-    ? HEIGHTS.section +
-      HEIGHTS.callout +
-      countLines(summary, CHARACTERS_PER_LINE.prose) * HEIGHTS.line
+  const header = HEIGHTS.base + (attackTitle ? HEIGHTS.subtitle : 0);
+  const callout = summary
+    ? HEIGHTS.callout + (summary.length > CALLOUT_CHARACTERS_PER_LINE ? HEIGHTS.calloutLine : 0)
     : 0;
-  const chain = killChain.length
-    ? HEIGHTS.section + Math.ceil(killChain.length / TACTICS_PER_ROW) * HEIGHTS.chainRow
-    : 0;
-  const proposalsHeight = proposals.length
-    ? HEIGHTS.section +
+  const decide = proposals.length
+    ? uniq(proposals.map(({ category }) => category)).length * HEIGHTS.group +
       sumBy(
         proposals,
-        ({ title }) =>
-          HEIGHTS.proposal + (countLines(title, CHARACTERS_PER_LINE.prose) - 1) * HEIGHTS.line
+        ({ comment }) => HEIGHTS.proposal + (comment ? HEIGHTS.comment : 0) + HEIGHTS.cardGap
       )
-    : 0;
+    : HEIGHTS.noProposals;
   const timelineHeight = timeline.events.length
-    ? HEIGHTS.section +
-      sumBy(
-        timeline.events,
-        ({ description }) =>
-          countLines(description, CHARACTERS_PER_LINE.event) * HEIGHTS.line + HEIGHTS.rowGap
-      ) +
-      (timeline.total > timeline.events.length ? HEIGHTS.meta : 0)
+    ? HEIGHTS.timeline +
+      (timeline.events.some(({ timestamp }) => !Number.isNaN(Date.parse(timestamp)))
+        ? HEIGHTS.timelineChart
+        : 0) +
+      timeline.events.length * HEIGHTS.event +
+      (timeline.total > timeline.events.length ? HEIGHTS.moreEvents : 0)
     : 0;
-  const indicatorsHeight = indicators.length
-    ? HEIGHTS.section +
-      sumBy(
-        indicators,
-        ({ values }) =>
-          Math.max(
-            HEIGHTS.line,
-            countLines(values.join(' · '), CHARACTERS_PER_LINE.ioc) * HEIGHTS.meta
-          ) + HEIGHTS.rowGap
+  const cols = indicators.length
+    ? HEIGHTS.colsGap +
+      Math.max(
+        HEIGHTS.graphPanel,
+        HEIGHTS.indicatorPanel + indicators.length * HEIGHTS.indicatorBar
       )
     : 0;
   const alertsHeight =
     alerts.total > 0
       ? HEIGHTS.alertsSummary +
         (alerts.closePending
-          ? Math.max(alerts.shown.length * HEIGHTS.alertBar, HEIGHTS.meta) + HEIGHTS.reach
+          ? HEIGHTS.alertsOpen +
+            (alerts.shown.length ? alerts.shown.length * HEIGHTS.alertBar : HEIGHTS.noAlertsLine)
           : 0)
       : 0;
 
   return (
     MARGIN +
     header +
-    summaryHeight +
-    HEIGHTS.tiles +
-    chain +
-    proposalsHeight +
+    callout +
+    (hasEvidence ? 0 : HEIGHTS.banner) +
+    (killChain.length ? HEIGHTS.chain : 0) +
+    decide +
     timelineHeight +
-    indicatorsHeight +
+    cols +
     alertsHeight
   );
 };

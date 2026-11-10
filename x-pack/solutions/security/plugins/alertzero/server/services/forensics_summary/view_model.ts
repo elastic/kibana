@@ -6,6 +6,7 @@
  */
 
 import type { ProposalStatus } from '@kbn/proposals-common';
+import { proposalStatusSchema } from '@kbn/proposals-common';
 import { z, lazySchema } from '@kbn/zod/v4';
 import {
   CLOSE_ATTACK_ACTION_WORKFLOW_ID,
@@ -34,6 +35,8 @@ export const forensicsSummaryViewModelSchema = lazySchema(() =>
   z.object({
     version: z.literal(1),
     title: z.string(),
+    /** The analyzed host, when the run resolved one. */
+    host: z.string().optional(),
     attackTitle: z.string().optional(),
     verdict: verdictSchema,
     autonomy: z.string(),
@@ -50,12 +53,19 @@ export const forensicsSummaryViewModelSchema = lazySchema(() =>
     proposals: z.array(
       z.object({
         title: z.string(),
-        status: z.string(),
+        status: proposalStatusSchema,
         group: decisionGroupSchema,
         category: z.string(),
         impact: z.string().optional(),
         confidence: z.string().optional(),
         expiresAt: z.string().optional(),
+        /** The proposal's comment as one line of plain text, while it awaits a decision. */
+        comment: z.string().optional(),
+        dismissed: z.boolean(),
+        decidedBy: z.string().optional(),
+        actionWorkflowId: z.string().optional(),
+        /** The first Defend agent the action targets, and how many more it does. */
+        agent: z.object({ id: z.string(), more: z.number().int().min(0) }).optional(),
       })
     ),
     timeline: z.object({
@@ -67,6 +77,7 @@ export const forensicsSummaryViewModelSchema = lazySchema(() =>
     }),
     indicators: z.array(
       z.object({
+        key: z.string(),
         label: z.string(),
         color: z.number().int().min(0),
         count: z.number().int().min(0),
@@ -76,7 +87,12 @@ export const forensicsSummaryViewModelSchema = lazySchema(() =>
     alerts: z.object({
       total: z.number().int().min(0),
       shown: z.array(
-        z.object({ ruleName: z.string(), severity: severitySchema, riskScore: z.number() })
+        z.object({
+          ruleName: z.string(),
+          severity: severitySchema,
+          riskScore: z.number(),
+          timestamp: z.string().optional(),
+        })
       ),
       /** A pending close reaches every alert of the attack, so the section opens under it. */
       closePending: z.boolean(),
@@ -104,6 +120,43 @@ const DECISION_GROUP_ORDER: readonly DecisionGroup[] = [
   'done',
   'closed',
 ];
+
+/** Urgent containment first; categories outside these follow in the order they were read. */
+const CATEGORY_ORDER: readonly string[] = ['respond', 'investigate'];
+
+const categoryRank = (category: string): number => {
+  const rank = CATEGORY_ORDER.indexOf(category);
+  return rank === -1 ? CATEGORY_ORDER.length : rank;
+};
+
+const MAX_COMMENT_LENGTH = 200;
+
+/** A markdown comment as one line of plain text: tags, emphasis, code ticks and heading marks dropped. */
+const toPlainComment = (comment: string | undefined): string | undefined => {
+  const plain = comment
+    ?.slice(0, MAX_COMMENT_LENGTH * 4)
+    .replace(/<[^>]{0,256}>/g, ' ')
+    .replace(/[*`#]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (!plain) {
+    return undefined;
+  }
+  return plain.length > MAX_COMMENT_LENGTH
+    ? `${plain.slice(0, MAX_COMMENT_LENGTH - 1).trimEnd()}…`
+    : plain;
+};
+
+const endpointIdsSchema = lazySchema(() => z.object({ endpoint_ids: z.array(z.string()).min(1) }));
+
+const toAgent = (actionInput: Record<string, unknown> | undefined) => {
+  const parsed = endpointIdsSchema.safeParse(actionInput);
+  if (!parsed.success) {
+    return undefined;
+  }
+  const [id, ...rest] = parsed.data.endpoint_ids;
+  return { id, more: rest.length };
+};
 
 const toVerdict = (value: string | undefined): ForensicsVerdict => {
   const parsed = verdictSchema.safeParse(value);
@@ -154,15 +207,27 @@ export const buildForensicsSummaryViewModel = (
   });
   const sortedProposals = DECISION_GROUP_ORDER.flatMap((order) =>
     groupedProposals.filter(({ group }) => group === order)
-  ).map(({ proposal: { title, status, category, impact, confidence, expiresAt }, group }) => ({
-    title,
-    status: status.replace(/_/g, ' '),
-    group,
-    category: category ?? 'other',
-    impact,
-    confidence,
-    expiresAt: group === 'awaiting' ? expiresAt : undefined,
-  }));
+  )
+    .map(({ proposal, group }) => ({ proposal, group, category: proposal.category || 'other' }))
+    // A stable sort, so each category keeps its open decisions first.
+    .sort((a, b) => categoryRank(a.category) - categoryRank(b.category))
+    .map(({ proposal, group, category }) => {
+      const isOpen = group === 'awaiting' || group === 'running';
+      return {
+        title: proposal.title,
+        status: proposal.status,
+        group,
+        category,
+        impact: proposal.impact,
+        confidence: proposal.confidence,
+        expiresAt: group === 'awaiting' ? proposal.expiresAt : undefined,
+        comment: isOpen ? toPlainComment(proposal.comment) : undefined,
+        dismissed: proposal.decision === 'dismissed',
+        decidedBy: isOpen ? undefined : proposal.decidedBy?.username || undefined,
+        actionWorkflowId: proposal.actionWorkflowId,
+        agent: toAgent(proposal.actionInput),
+      };
+    });
 
   const rankedAlerts = [...alerts].sort((a, b) => b.riskScore - a.riskScore);
   const peak = rankedAlerts[0];
@@ -177,6 +242,7 @@ export const buildForensicsSummaryViewModel = (
   return {
     version: 1,
     title: host ?? attackTitle ?? 'Endpoint analysis',
+    host,
     attackTitle: host ? attackTitle : undefined,
     verdict: toVerdict(inputs.verdict),
     autonomy: inputs.autonomy || 'manual',
@@ -207,6 +273,7 @@ export const buildForensicsSummaryViewModel = (
       return values.length
         ? [
             {
+              key,
               label,
               color,
               count: values.length,
@@ -217,11 +284,14 @@ export const buildForensicsSummaryViewModel = (
     }),
     alerts: {
       total: attack?.alertIds.length ?? 0,
-      shown: rankedAlerts.slice(0, MAX_ALERTS).map(({ ruleName, severity, riskScore }) => ({
-        ruleName,
-        severity: toSeverity(severity),
-        riskScore,
-      })),
+      shown: rankedAlerts
+        .slice(0, MAX_ALERTS)
+        .map(({ ruleName, severity, riskScore, timestamp }) => ({
+          ruleName,
+          severity: toSeverity(severity),
+          riskScore,
+          timestamp,
+        })),
       closePending: proposals.some(
         ({ actionWorkflowId, status }) =>
           actionWorkflowId === CLOSE_ATTACK_ACTION_WORKFLOW_ID && status === 'pending'

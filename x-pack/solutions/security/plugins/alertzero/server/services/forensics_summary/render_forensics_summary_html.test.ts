@@ -34,11 +34,13 @@ describe('renderForensicsSummaryHtml', () => {
     expect(text).toContain('Confirmed incident');
     expect(text).toContain('What happened');
     expect(text).toContain('1 awaiting');
-    expect(text).toContain('Kill chain 4 of 14 tactics');
+    expect(text).toContain('Kill chain 4 of 14 MITRE ATT&CK tactics');
     expect(text).toContain('Close the attack and its 3 alerts');
-    expect(text).toContain('Timeline 2 events');
+    expect(text).toContain('Awaiting approval');
+    expect(text).toContain('closes 3 alerts');
+    expect(text).toContain('Timeline 2 events over 3 minutes on win-fin-07');
+    expect(text).toContain('Entities from the indicators');
     expect(text).toContain('Indicators 8 extracted');
-    expect(text).toContain('+1 more');
     expect(text).toContain('An approved close reaches all 3 alerts and the attack.');
   });
 
@@ -47,14 +49,17 @@ describe('renderForensicsSummaryHtml', () => {
     const text = textOf(html);
     expect(text).toContain('Endpoint analysis');
     expect(text).toContain('Unclear');
-    expect(text).toContain('none raised');
+    expect(text).toContain('No endpoint evidence');
+    expect(text).toContain('Endpoint Analysis proposed nothing for this host.');
     expect(text).not.toContain('Kill chain');
     expect(text).not.toContain('Timeline');
     expect(text).not.toContain('Alerts in this attack');
   });
 
-  it('opens the alerts only while a close awaits a decision', () => {
-    expect(renderForensicsSummaryHtml(fixtureViewModel).html).toContain('<details open>');
+  it('opens the alerts under the decisions only while a close awaits one', () => {
+    const { html } = renderForensicsSummaryHtml(fixtureViewModel);
+    expect(html).toContain('<details class="alerts" open>');
+    expect(html.indexOf('Alerts in this attack')).toBeLessThan(html.indexOf('<h2>Timeline'));
     const decided = buildForensicsSummaryViewModel({
       ...fixtureInputs,
       proposals: fixtureInputs.proposals.map((proposal) => ({
@@ -62,7 +67,11 @@ describe('renderForensicsSummaryHtml', () => {
         status: 'succeeded' as const,
       })),
     });
-    expect(renderForensicsSummaryHtml(decided).html).toContain('<details>');
+    const decidedHtml = renderForensicsSummaryHtml(decided).html;
+    expect(decidedHtml).toContain('<details class="alerts">');
+    expect(decidedHtml.indexOf('Alerts in this attack')).toBeGreaterThan(
+      decidedHtml.indexOf('<h2>Timeline')
+    );
   });
 
   it('escapes data, including braces, so neither markup nor a template survives', () => {
@@ -84,6 +93,18 @@ describe('renderForensicsSummaryHtml', () => {
     expect(empty).toBeGreaterThanOrEqual(CUSTOM_CONTENT_MIN_HEIGHT);
     expect(full).toBeGreaterThan(empty);
     expect(full).toBeLessThanOrEqual(CUSTOM_CONTENT_MAX_HEIGHT);
+  });
+
+  it('colors only with theme tokens and their mixes, except the documented light-dark pairs', () => {
+    const { html } = renderForensicsSummaryHtml(fixtureViewModel);
+    const css = html.slice(html.indexOf('<style>'), html.indexOf('</style>'));
+    const hexColors = css.match(/#[0-9a-f]{3,8}\b/gi) ?? [];
+    const lightDarkColors = (css.match(/light-dark\([^)]*\)/g) ?? [])
+      .join(' ')
+      .match(/#[0-9a-f]{3,8}\b/gi);
+    expect(hexColors.length).toBeGreaterThan(0);
+    expect(hexColors).toEqual(lightDarkColors);
+    expect(html.slice(html.indexOf('</style>'))).not.toMatch(/[^&]#[0-9a-f]{6}\b/i);
   });
 
   it('stays well under the template size limit', () => {

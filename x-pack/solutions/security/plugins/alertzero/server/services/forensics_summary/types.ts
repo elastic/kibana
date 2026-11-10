@@ -22,17 +22,24 @@ export interface ForensicsIoc {
 export interface ForensicsProposal {
   title: string;
   status: ProposalStatus;
+  /** Markdown explaining what is proposed. */
+  comment?: string;
+  decision?: string;
+  decidedBy?: { username: string | null };
   category?: string;
   impact?: string;
   confidence?: string;
   expiresAt?: string;
   actionWorkflowId?: string;
+  actionInput?: Record<string, unknown>;
 }
 
 export interface ForensicsAlert {
   ruleName: string;
   severity: string;
   riskScore: number;
+  /** The alert's `@timestamp`, which places it on the timeline. */
+  timestamp?: string;
 }
 
 /** Everything the card is built from, as read from the Investigation and the indices. */

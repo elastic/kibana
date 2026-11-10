@@ -1,112 +1,140 @@
 <style>{{{css}}}</style>
 <div class="fs">
-  <header class="header">
-    <p class="eyebrow">Forensics summary</p>
-    <h1>{{title}}</h1>
-    <div class="badges">
-      <span class="badge {{verdictClass}}">{{verdictLabel}}</span>
-      <span class="badge hollow">Autonomy: {{autonomy}}</span>
+  <header class="hdr">
+    <div class="hdr-text">
+      <p class="eyebrow"><span class="brand">Elastic Security</span> · Forensics summary</p>
+      <p class="meta">{{#windowFacts}}<span>{{.}}</span>{{/windowFacts}}</p>
+      <h1>{{title}}</h1>
+      {{#attackTitle}}<p class="sub">{{attackTitle}}</p>{{/attackTitle}}
+      <div class="flow">{{#flow}}{{^first}}<span class="sep" aria-hidden="true">›</span>{{/first}}<span class="step {{className}}">{{label}}</span>{{/flow}}</div>
     </div>
-    <p class="meta">{{#attackTitle}}<span>{{attackTitle}}</span> {{/attackTitle}}{{#analyzedAt}}<span>Analyzed {{analyzedAt}}</span> {{/analyzedAt}}</p>
+    <div class="pills">
+      <span class="badge {{verdictClass}}">{{verdictLabel}}</span>
+      <span class="badge hollow">{{autonomyLabel}}</span>
+    </div>
   </header>
   {{#summary}}
-  <section class="section">
-    <h2>What happened</h2>
-    <p class="callout">{{summary}}</p>
-  </section>
+  <div class="callout"><p class="clamp2"><strong class="callout-title">What happened · </strong>{{summary}}</p></div>
   {{/summary}}
-  <section class="section">
-    <div class="tiles">
-      <div class="tile">
-        <div class="tile-label">Decisions</div>
-        <div class="tile-value">{{openDecisions}}</div>
-        <p class="meta">{{#decisionFacts}}<span>{{count}} {{label}}</span> {{/decisionFacts}}{{^decisionFacts}}<span>none raised</span>{{/decisionFacts}}</p>
-      </div>
-      <div class="tile">
-        <div class="tile-label">Peak risk</div>
-        {{#peakRisk}}
-        <div class="tile-value">{{score}}</div>
-        <p class="meta"><span>{{severity}} severity</span></p>
-        {{/peakRisk}}
-        {{^peakRisk}}
-        <div class="tile-value">–</div>
-        <p class="meta"><span>no alerts read</span></p>
-        {{/peakRisk}}
-      </div>
-      <div class="tile">
-        <div class="tile-label">Scope</div>
-        <div class="tile-value">{{scope.hosts}}</div>
-        <p class="meta">{{#scopeFacts}}<span>{{.}}</span> {{/scopeFacts}}</p>
+  {{#noEvidence}}
+  <div class="banner">No endpoint evidence: Endpoint Analysis attached no timeline or indicators{{^host}} and resolved no host{{/host}}. The host may not run Elastic Defend, or its events may live on a remote cluster this Worker can't read yet.</div>
+  {{/noEvidence}}
+
+  <div class="kpis">
+    {{#decisionsKpi}}
+    <div class="card kpi kpi-decisions">
+      <svg class="donut" viewBox="0 0 52 52" width="52" height="52" role="img" aria-label="{{label}}">
+        <circle class="donut-track" cx="26" cy="26" r="20"/>
+        {{#segments}}<circle class="donut-seg {{className}}" cx="26" cy="26" r="20" transform="rotate(-90 26 26)" stroke-dasharray="{{dashArray}}" stroke-dashoffset="{{dashOffset}}"/>{{/segments}}
+      </svg>
+      <div class="kpi-body">
+        <p class="kpi-label">Decisions</p>
+        <div class="kpi-value">{{value}}<small>{{suffix}}</small></div>
+        <ul class="legend">{{#legend}}<li><i class="{{className}}"></i>{{label}}</li>{{/legend}}</ul>
       </div>
     </div>
-  </section>
+    {{/decisionsKpi}}
+    {{#peakKpi}}
+    <div class="card kpi" title="Highest risk score among the attack's alerts">
+      <p class="kpi-label">Peak risk</p>
+      <div class="kpi-value {{className}}">{{value}}<small>{{suffix}}</small></div>
+      <span class="split">{{#split}}<i class="{{className}}" style="width:{{width}}%"></i>{{/split}}</span>
+      <span class="kpi-text">{{text}}</span>
+    </div>
+    {{/peakKpi}}
+    {{#scopeKpi}}
+    <div class="card kpi" title="Hosts, identities and network destinations in the indicators">
+      <p class="kpi-label">Scope</p>
+      <div class="kpi-value">{{value}}<small>{{suffix}}</small></div>
+      <span class="split">{{#split}}<i class="{{className}}" style="width:{{width}}%"></i>{{/split}}</span>
+      <span class="kpi-text">{{text}}</span>
+    </div>
+    {{/scopeKpi}}
+  </div>
+
   {{#hasKillChain}}
   <section class="section">
-    <h2>Kill chain <span class="meta">{{detectedTactics}} of {{tacticCount}} tactics</span></h2>
-    <ol class="chain">
-      {{#killChain}}<li class="tactic" data-detected="{{detected}}" title="{{name}}">{{short}}</li>{{/killChain}}
-    </ol>
+    <h3>Kill chain <span class="meta">{{detectedTactics}} of {{killChain.length}} MITRE ATT&amp;CK tactics</span></h3>
+    <svg class="chain" viewBox="0 0 734 30" role="img" aria-label="MITRE ATT&amp;CK tactics in this attack">
+      {{#chevrons}}<g><title>{{name}}</title><polygon class="chev{{#on}} on{{/on}}" points="{{points}}"/><text class="chev-label{{#on}} on{{/on}}" x="{{labelX}}" y="18.5">{{short}}</text></g>{{/chevrons}}
+    </svg>
   </section>
   {{/hasKillChain}}
-  {{#hasProposals}}
+
   <section class="section">
-    <h2>Decisions <span class="meta">{{proposalCount}} proposed</span></h2>
-    <ul class="proposals">
+    <h2>Decide <span class="meta">{{proposalCount}} · urgent containment first</span></h2>
+    {{^proposalGroups}}<p class="meta">Endpoint Analysis proposed nothing for this host.</p>{{/proposalGroups}}
+    {{#proposalGroups}}
+    <p class="group">{{label}}</p>
+    <ul class="cards">
       {{#proposals}}
-      <li class="proposal" data-group="{{group}}">
-        <div class="proposal-head">
-          <span class="proposal-title">{{title}}</span>
-          <span class="badge {{statusClass}}">{{status}}</span>
+      <li class="card proposal {{edgeClass}}{{#settled}} settled{{/settled}}">
+        <span class="icon" aria-hidden="true"><svg viewBox="0 0 16 16">{{{icon}}}</svg></span>
+        <div class="proposal-body">
+          <div class="proposal-top"><span class="proposal-title" title="{{title}}">{{title}}</span><span class="badge {{statusClass}}">{{statusLabel}}</span></div>
+          {{#comment}}<p class="clamp1">{{comment}}</p>{{/comment}}
+          <div class="facts">
+            {{#expiresAt}}<strong>expires {{expiresAt}}</strong>{{/expiresAt}}
+            {{#impact}}{{#impactMeter.length}}<span title="{{impact}} impact">impact <span class="meter impact">{{#impactMeter}}<i{{#on}} class="on"{{/on}}></i>{{/impactMeter}}</span></span>{{/impactMeter.length}}{{/impact}}
+            {{#confidence}}{{#confidenceMeter.length}}<span title="{{confidence}} confidence">confidence <span class="meter confidence">{{#confidenceMeter}}<i{{#on}} class="on"{{/on}}></i>{{/confidenceMeter}}</span></span>{{/confidenceMeter.length}}{{/confidence}}
+            {{#closesAlerts}}<strong>closes {{closesAlerts}} ↓</strong>{{/closesAlerts}}
+            {{#agent}}<span>agent <code>{{id}}</code>{{#more}} +{{more}}{{/more}}</span>{{/agent}}
+            {{#decidedBy}}<span>by {{decidedBy}}</span>{{/decidedBy}}
+          </div>
         </div>
-        <p class="meta"><span>{{category}}</span> {{#impact}}<span>{{impact}} impact</span> {{/impact}}{{#confidence}}<span>{{confidence}} confidence</span> {{/confidence}}{{#expiresAt}}<span>expires {{expiresAt}}</span> {{/expiresAt}}</p>
       </li>
       {{/proposals}}
     </ul>
+    {{/proposalGroups}}
   </section>
-  {{/hasProposals}}
+  {{#alertsAbove}}{{> alerts}}{{/alertsAbove}}
+
   {{#hasTimeline}}
   <section class="section">
     <h2>Timeline <span class="meta">{{timelineMeta}}</span></h2>
-    <ol class="events">
-      {{#timeline.events}}
-      <li class="event"><time>{{timestamp}}</time><p>{{description}}</p></li>
-      {{/timeline.events}}
+    {{#plot}}
+    <svg class="timeline" viewBox="0 0 736 56" role="img" aria-label="Forensic events and detection alerts over time">
+      <text class="lane" x="0" y="25">EVENTS</text>
+      <line class="axis" x1="64" y1="22" x2="724" y2="22"/>
+      {{#gaps}}<text class="gap" x="{{x}}" y="10">{{label}}</text>{{/gaps}}
+      {{#events}}<g><title>{{title}}</title><circle class="event" cx="{{x}}" cy="22" r="9"/><text class="event-number" x="{{x}}" y="25.5">{{number}}</text></g>{{/events}}
+      {{#alerts.length}}<text class="lane" x="0" y="45">ALERTS</text>{{/alerts.length}}
+      {{#alerts}}<g><title>{{title}}</title><path class="s-{{severity}}" d="M{{x}} 36 l6 6 -6 6 -6 -6 z"/></g>{{/alerts}}
+      <text class="tick" x="64" y="55">{{start}}</text>
+      <text class="tick" x="724" y="55" text-anchor="end">{{end}}</text>
+    </svg>
+    {{/plot}}
+    <ol class="event-list">
+      {{#eventList}}<li title="{{title}}"><b>{{number}}</b><time>{{time}}</time>{{description}}</li>{{/eventList}}
     </ol>
     {{#moreEvents}}<p class="meta">{{moreEvents}} more in the timeline attachment.</p>{{/moreEvents}}
   </section>
   {{/hasTimeline}}
+
   {{#hasIndicators}}
-  <section class="section">
-    <h2>Indicators <span class="meta">{{indicatorTotal}} extracted</span></h2>
-    <ul class="iocs">
-      {{#indicators}}
-      <li class="ioc">
-        <span class="ioc-label"><span class="swatch" style="background:var(--cc-vis-{{color}})"></span>{{label}}</span>
-        <span class="ioc-count">{{count}}</span>
-        <span class="ioc-values">{{valuesText}}</span>
-      </li>
-      {{/indicators}}
-    </ul>
+  <section class="section cols">
+    <div class="panel">
+      <h3>Entities <span class="meta">from the indicators</span></h3>
+      {{#graph}}
+      <svg class="graph" viewBox="0 0 340 170" role="img" aria-label="Entities linked to the host">
+        {{#left}}<line class="edge" x1="56" y1="{{y}}" x2="88" y2="85"/><text class="edge-label" x="72" y="{{edgeLabelY}}">{{edgeLabel}}</text>{{/left}}
+        {{#right}}<line class="edge" x1="220" y1="85" x2="268" y2="{{y}}"/><text class="edge-label" x="244" y="{{edgeLabelY}}">{{edgeLabel}}</text>{{/right}}
+        {{#left}}<g><title>{{value}}</title><circle class="node {{className}}" cx="40" cy="{{y}}" r="16"/><text class="node-kind" x="40" y="{{y}}" dy="3">{{kind}}</text><text class="node-label" x="40" y="{{y}}" dy="29">{{label}}</text></g>{{/left}}
+        {{#right}}<g><title>{{value}}</title><circle class="node {{className}}" cx="284" cy="{{y}}" r="16"/><text class="node-kind" x="284" y="{{y}}" dy="3">{{kind}}</text><text class="node-label" x="284" y="{{y}}" dy="29">{{label}}</text></g>{{/right}}
+        <g><title>{{host}}</title><rect class="host-box" x="88" y="67" width="132" height="36" rx="6"/><text class="host-label" x="154" y="89">{{host}}</text></g>
+        {{#empty}}<text class="edge-label" x="154" y="128">No related entities extracted</text>{{/empty}}
+      </svg>
+      {{/graph}}
+    </div>
+    <div class="panel">
+      <h3>Indicators <span class="meta">{{indicatorTotal}} extracted</span></h3>
+      <div class="bars">
+        {{#indicatorBars}}<div class="bar"><span class="bar-label">{{label}}</span><span class="bar-track"><i class="{{className}}" style="width:{{width}}%"></i></span><span class="bar-value">{{count}}</span></div>{{/indicatorBars}}
+      </div>
+      <details class="values"><summary>Values</summary><div class="chips">{{#indicatorValues}}<code title="{{value}}">{{label}}</code>{{/indicatorValues}}</div></details>
+    </div>
   </section>
   {{/hasIndicators}}
-  {{#hasAlerts}}
-  <section class="section">
-    <details{{#alerts.closePending}} open{{/alerts.closePending}}>
-      <summary><h2>Alerts in this attack <span class="meta">{{alerts.total}} · risk score by alert</span></h2></summary>
-      {{#hasShownAlerts}}
-      <ul class="bars">
-        {{#alerts.shown}}
-        <li class="bar">
-          <span class="bar-label" title="{{ruleName}}">{{ruleName}}</span>
-          <span class="bar-track"><span class="bar-fill sev-{{severity}}" style="width:{{width}}%"></span></span>
-          <span class="bar-value">{{riskScore}}</span>
-        </li>
-        {{/alerts.shown}}
-      </ul>
-      {{/hasShownAlerts}}
-      {{^hasShownAlerts}}<p class="meta">The attack's alerts are no longer in this space's alert index.</p>{{/hasShownAlerts}}
-      {{#alerts.closePending}}<p class="reach">An approved close reaches all {{alerts.total}} alerts and the attack.</p>{{/alerts.closePending}}
-    </details>
-  </section>
-  {{/hasAlerts}}
+
+  {{#alertsBelow}}{{> alerts}}{{/alertsBelow}}
 </div>

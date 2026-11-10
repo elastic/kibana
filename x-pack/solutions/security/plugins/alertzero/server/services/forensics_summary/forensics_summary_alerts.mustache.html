@@ -1,0 +1,13 @@
+<section class="section">
+  <details class="alerts"{{#alerts.closePending}} open{{/alerts.closePending}}>
+    <summary><h2>Alerts in this attack <span class="meta">{{alerts.total}} · risk score by alert</span></h2></summary>
+    {{#hasShownAlerts}}
+    <div class="bars">
+      {{#alertRows}}<div class="bar wide"><span class="bar-label" title="{{ruleName}}">{{ruleName}}</span><span class="bar-track"><i class="s-{{severity}}" style="width:{{width}}%"></i></span><span class="bar-value">{{riskScore}}</span></div>{{/alertRows}}
+    </div>
+    <div class="scale"><span>0</span><span>50</span><span>100</span></div>
+    {{/hasShownAlerts}}
+    {{^hasShownAlerts}}<p class="meta">The attack's {{alerts.total}} alerts are no longer in this space's alert index.</p>{{/hasShownAlerts}}
+    {{#alerts.closePending}}<p class="reach">An approved close reaches all {{alerts.total}} alerts and the attack.</p>{{/alerts.closePending}}
+  </details>
+</section>

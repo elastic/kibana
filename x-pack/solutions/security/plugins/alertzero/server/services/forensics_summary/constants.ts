@@ -53,16 +53,23 @@ export const KILL_CHAIN_TACTICS = [
   { name: 'Impact', short: 'Impact' },
 ] as const;
 
-/** The IoC attachment's categories in reading order, each with its `--cc-vis-*` color index. */
+/**
+ * The IoC attachment's categories in reading order, each with its `--cc-vis-*` color index. EUI's palette
+ * alternates a strong color and its light tint, so the kinds the entity graph draws get strong ones.
+ */
 export const IOC_KINDS = [
   { key: 'affected_hosts', label: 'Hosts', color: 0 },
-  { key: 'compromised_identities', label: 'Identities', color: 1 },
-  { key: 'ips', label: 'Network', color: 2 },
-  { key: 'shas', label: 'File hashes', color: 3 },
-  { key: 'file_paths', label: 'Files and keys', color: 4 },
-  { key: 'malicious_commands', label: 'Commands', color: 5 },
-  { key: 'ransom_note', label: 'Ransom notes', color: 6 },
-  { key: 'encryption_marker', label: 'Encryption markers', color: 7 },
+  { key: 'compromised_identities', label: 'Identities', color: 2 },
+  { key: 'ips', label: 'Network', color: 4 },
+  { key: 'shas', label: 'File hashes', color: 6 },
+  { key: 'file_paths', label: 'Files and keys', color: 8 },
+  { key: 'malicious_commands', label: 'Commands', color: 1 },
+  { key: 'ransom_note', label: 'Ransom notes', color: 3 },
+  { key: 'encryption_marker', label: 'Encryption markers', color: 5 },
 ] as const;
+
+/** The class that colors an indicator kind: `k` and its `--cc-vis-*` index. */
+export const getIocKindClass = (key: IocKind): string =>
+  `k${IOC_KINDS.find((kind) => kind.key === key)?.color ?? 0}`;
 
 export type IocKind = (typeof IOC_KINDS)[number]['key'];
