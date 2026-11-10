@@ -23,7 +23,7 @@ export {
 } from './spec/builtin_step_definitions';
 export type { BuiltInStepDefinition } from './spec/builtin_step_definitions';
 export {
-  builtInTriggerDefinitions,
+  getBuiltInTriggerDefinitions,
   getBuiltInTriggerDefinition,
 } from './spec/builtin_trigger_definitions';
 export { getTriggerName } from './common/get_trigger_name';

@@ -23,6 +23,7 @@ import type {
   EsWorkflowStepExecution,
   ExecutionStatus,
   ExecutionType,
+  TriggerSchemaOptions,
   UpdatedWorkflowResponseDto,
   ValidateWorkflowResponseDto,
   WorkflowAggsDto,
@@ -730,6 +731,10 @@ export class WorkflowsService {
   ): Promise<GetAvailableConnectorsResponse> {
     await this.ensureInitialized();
     return this.validationService.getAvailableConnectors(spaceId, request);
+  }
+
+  public getTriggerSchemaOptions(): TriggerSchemaOptions {
+    return { includePageTrigger: this.pagesEnabled };
   }
 
   public async getRegisteredCustomTriggerDefinitions(): Promise<ServerTriggerDefinition[]> {
