@@ -6,13 +6,35 @@
  */
 
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
+import type { SyntheticsMonitorWithId } from '../../../../../../common/runtime_types';
+import { ConfigKey } from '../../../../../../common/runtime_types';
 import { fetchSyntheticsMonitor } from '../../../state/monitor_details/api';
 import { useGetUrlParams } from '../../../hooks';
+import { useCanRevealParameterValues } from '../../../../../hooks/use_capabilities';
+
+export const prepareMonitorForClone = (
+  monitor: SyntheticsMonitorWithId,
+  canRevealParams: boolean
+): { monitor: SyntheticsMonitorWithId; paramsOmitted: boolean } => {
+  const paramsOmitted = !canRevealParams && Boolean(monitor[ConfigKey.PARAMS]);
+  return {
+    monitor: paramsOmitted ? { ...monitor, [ConfigKey.PARAMS]: '' } : monitor,
+    paramsOmitted,
+  };
+};
 
 export const useCloneMonitor = () => {
   const { cloneId } = useGetUrlParams();
-  return useFetcher(() => {
+  const canRevealParams = useCanRevealParameterValues();
+  const { data, ...cloneMonitor } = useFetcher(async () => {
     if (!cloneId) return Promise.resolve(undefined);
-    return fetchSyntheticsMonitor({ monitorId: cloneId });
-  }, [cloneId]);
+    const monitor = await fetchSyntheticsMonitor({ monitorId: cloneId });
+    return prepareMonitorForClone(monitor, canRevealParams);
+  }, [canRevealParams, cloneId]);
+
+  return {
+    ...cloneMonitor,
+    data: data?.monitor,
+    paramsOmitted: data?.paramsOmitted ?? false,
+  };
 };

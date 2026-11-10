@@ -14,6 +14,7 @@ import type {
 } from '../../../../common/runtime_types';
 import { ConfigKey } from '../../../../common/runtime_types';
 import { SCHEDULE_INTERVAL_FIELD } from '../../../../common/lib/schedule_to_time';
+import { maskMonitorParams } from '../../../../common/utils/mask_monitor_params';
 
 const keysToOmit = [
   ConfigKey.URLS,
@@ -68,15 +69,21 @@ export const transformPublicKeys = (result: Result) => {
 export function mapSavedObjectToMonitor({
   monitor,
   internal = false,
+  maskParams = false,
 }: {
   monitor: SavedObject<MonitorFields | EncryptedSyntheticsMonitor>;
   internal?: boolean;
+  /** Replaces the parameter values with placeholders, for users who cannot read them. */
+  maskParams?: boolean;
 }) {
   let result = {
     ...omit(monitor.attributes, SCHEDULE_INTERVAL_FIELD),
     created_at: monitor.created_at,
     updated_at: monitor.updated_at,
   } as Result;
+  if (maskParams) {
+    result[ConfigKey.PARAMS] = maskMonitorParams(result[ConfigKey.PARAMS]);
+  }
   if (internal) {
     return result;
   }

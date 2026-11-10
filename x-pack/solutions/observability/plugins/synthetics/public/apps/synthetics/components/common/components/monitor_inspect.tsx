@@ -37,6 +37,7 @@ import type {
   SyntheticsMonitorWithId,
 } from '../../../../../../common/runtime_types';
 import { MonitorTypeEnum } from '../../../../../../common/runtime_types';
+import { useCanRevealParameterValues } from '../../../../../hooks/use_capabilities';
 import type {
   MonitorInspectResponse,
   PackagePolicyLink,
@@ -63,8 +64,9 @@ interface InspectorProps {
 export const MonitorInspect = ({ isValid, monitorFields, isEditFlow = false }: InspectorProps) => {
   const { isDev } = useSyntheticsSettingsContext();
   const registerHeader = useRegisterInspectMonitorHeader();
+  const canRevealParams = useCanRevealParameterValues();
 
-  const [hideParams, setHideParams] = useState(() => !isDev);
+  const [hideParams, setHideParams] = useState(() => !isDev || !canRevealParams);
   const [asJson, setAsJson] = useState(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
@@ -120,14 +122,16 @@ export const MonitorInspect = ({ isValid, monitorFields, isEditFlow = false }: I
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiSwitch
-                compressed
-                label={HIDE_PARAMS}
-                checked={hideParams}
-                onChange={(e) => setHideParams(e.target.checked)}
-              />
-            </EuiFlexItem>
+            {canRevealParams && (
+              <EuiFlexItem>
+                <EuiSwitch
+                  compressed
+                  label={HIDE_PARAMS}
+                  checked={hideParams}
+                  onChange={(e) => setHideParams(e.target.checked)}
+                />
+              </EuiFlexItem>
+            )}
             <EuiFlexItem>
               <EuiSwitch
                 compressed

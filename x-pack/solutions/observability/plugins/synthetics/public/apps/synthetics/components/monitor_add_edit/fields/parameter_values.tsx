@@ -20,7 +20,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { countBy } from 'lodash';
+import { useCanRevealParameterValues } from '../../../../../hooks/use_capabilities';
 import { isJsonObjectString } from '../../../../../../common/utils/is_json_object_string';
+import {
+  MASKED_PARAM_VALUE,
+  maskMonitorParams,
+} from '../../../../../../common/utils/mask_monitor_params';
 import type { Pair } from './key_value_field';
 import { JSONEditor } from './code_editor';
 
@@ -143,6 +148,7 @@ export const ParameterValuesEditor = ({
   readOnly,
   value,
 }: ParameterValuesEditorProps): React.ReactElement => {
+  const canReveal = useCanRevealParameterValues();
   const nextRowId = useRef(0);
   const createRow = useCallback(([key, rowValue]: Pair): ParameterRow => {
     nextRowId.current += 1;
@@ -155,6 +161,9 @@ export const ParameterValuesEditor = ({
   const [isJsonMode, setIsJsonMode] = useState(() => !canUseParameterPairs(value));
   const [rows, setRows] = useState<ParameterRow[]>(() => createRows(value));
   const [visibleRows, setVisibleRows] = useState<Record<string, boolean>>({});
+  const [isJsonValueVisible, setIsJsonValueVisible] = useState(false);
+  // Rows whose masked value was cleared for editing; left empty, they get the mask back on blur.
+  const clearedMaskRowIds = useRef(new Set<string>());
   // Empty values have nothing to protect, so those rows are editable without clicking edit.
   const [editingIds, setEditingIds] = useState<ReadonlySet<string>>(() =>
     getEmptyValueRowIds(rows)
@@ -245,6 +254,27 @@ export const ParameterValuesEditor = ({
     });
   }, []);
 
+  const editValue = useCallback(
+    (row: ParameterRow) => {
+      if (row.value === MASKED_PARAM_VALUE) {
+        clearedMaskRowIds.current.add(row.id);
+        updateRows(
+          rows.map((current) => (current.id === row.id ? { ...row, value: '' } : current))
+        );
+      }
+      startEditing(row.id);
+      setFocusTarget({ rowId: row.id, field: 'value' });
+    },
+    [rows, startEditing, updateRows]
+  );
+
+  const jsonVisibilityLabel = !canReveal
+    ? NO_READ_PARAMETER_VALUES_PERMISSION
+    : isJsonValueVisible
+    ? HIDE_PARAMETER_VALUE_LABEL
+    : SHOW_PARAMETER_VALUE_LABEL;
+  const hideJsonValues = canReveal && !isJsonValueVisible;
+
   const modeToggle = isJsonMode ? (
     <EuiToolTip content={canUsePairs ? undefined : PAIRS_UNAVAILABLE_LABEL}>
       <EuiButtonEmpty
@@ -275,6 +305,22 @@ export const ParameterValuesEditor = ({
     <div data-test-subj="syntheticsMonitorConfigParams">
       <EuiSpacer size="s" />
       <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" responsive={false}>
+        {isJsonMode && (
+          <EuiFlexItem grow={false}>
+            <EuiToolTip content={jsonVisibilityLabel} disableScreenReaderOutput>
+              <span tabIndex={canReveal ? -1 : 0}>
+                <EuiButtonIcon
+                  aria-label={jsonVisibilityLabel}
+                  data-test-subj="syntheticsParamValueVisibilityJson"
+                  iconType={isJsonValueVisible ? 'eyeSlash' : 'eye'}
+                  isDisabled={!canReveal}
+                  onClick={() => setIsJsonValueVisible((visible) => !visible)}
+                  size="s"
+                />
+              </span>
+            </EuiToolTip>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={false}>{modeToggle}</EuiFlexItem>
         {!isJsonMode && (
           <EuiFlexItem grow={false}>
@@ -303,8 +349,8 @@ export const ParameterValuesEditor = ({
           height="100px"
           id="syntheticsMonitorConfigParams"
           onChange={emit}
-          readOnly={readOnly}
-          value={value ?? ''}
+          readOnly={readOnly || hideJsonValues}
+          value={hideJsonValues ? maskMonitorParams(value) ?? '' : value ?? ''}
         />
       ) : (
         rows.length > 0 && (
@@ -347,14 +393,20 @@ export const ParameterValuesEditor = ({
               const isValueVisible = Boolean(visibleRows[id]);
               const isEditing = editingIds.has(id);
               const showValue = isValueVisible || isEditing;
-              const visibilityLabel = isValueVisible
+              const visibilityLabel = !canReveal
+                ? NO_READ_PARAMETER_VALUES_PERMISSION
+                : isValueVisible
                 ? HIDE_PARAMETER_VALUE_LABEL
                 : SHOW_PARAMETER_VALUE_LABEL;
               const updateRow = (nextRow: Partial<ParameterRow>) => {
                 updateRows(rows.map((row) => (row.id === id ? { ...row, ...nextRow } : row)));
               };
               const handleValueBlur = () => {
-                if (paramValue) {
+                const wasMaskCleared = clearedMaskRowIds.current.delete(id);
+                if (wasMaskCleared && !paramValue) {
+                  updateRow({ value: MASKED_PARAM_VALUE });
+                  stopEditing(id);
+                } else if (paramValue) {
                   stopEditing(id);
                 }
                 onBlur?.();
@@ -375,7 +427,16 @@ export const ParameterValuesEditor = ({
                         }}
                         isInvalid={invalidRowIds.has(id)}
                         onBlur={onBlur}
-                        onChange={(event) => updateRow({ key: event.target.value })}
+                        onChange={(event) => {
+                          if (paramValue !== MASKED_PARAM_VALUE) {
+                            updateRow({ key: event.target.value });
+                            return;
+                          }
+                          // The stored secret is keyed by name, so a renamed mask has nothing to restore.
+                          clearedMaskRowIds.current.delete(id);
+                          startEditing(id);
+                          updateRow({ key: event.target.value, value: '' });
+                        }}
                         readOnly={readOnly}
                         value={key}
                       />
@@ -425,16 +486,19 @@ export const ParameterValuesEditor = ({
                       >
                         <EuiFlexItem grow={false}>
                           <EuiToolTip content={visibilityLabel} disableScreenReaderOutput>
-                            <EuiButtonIcon
-                              aria-label={visibilityLabel}
-                              data-test-subj={`syntheticsParamValueVisibility${index}`}
-                              display="empty"
-                              iconType={isValueVisible ? 'eyeSlash' : 'eye'}
-                              size="s"
-                              onClick={() => {
-                                setVisibleRows((visible) => ({ ...visible, [id]: !visible[id] }));
-                              }}
-                            />
+                            <span tabIndex={canReveal ? -1 : 0}>
+                              <EuiButtonIcon
+                                aria-label={visibilityLabel}
+                                data-test-subj={`syntheticsParamValueVisibility${index}`}
+                                display="empty"
+                                iconType={isValueVisible ? 'eyeSlash' : 'eye'}
+                                isDisabled={!canReveal}
+                                size="s"
+                                onClick={() => {
+                                  setVisibleRows((visible) => ({ ...visible, [id]: !visible[id] }));
+                                }}
+                              />
+                            </span>
                           </EuiToolTip>
                         </EuiFlexItem>
                         <EuiFlexItem grow={false}>
@@ -446,10 +510,7 @@ export const ParameterValuesEditor = ({
                               iconType="pencil"
                               isDisabled={readOnly}
                               size="s"
-                              onClick={() => {
-                                startEditing(id);
-                                setFocusTarget({ rowId: id, field: 'value' });
-                              }}
+                              onClick={() => editValue(rows[index])}
                             />
                           </EuiToolTip>
                         </EuiFlexItem>
@@ -534,5 +595,12 @@ const HIDE_PARAMETER_VALUE_LABEL = i18n.translate(
   'xpack.synthetics.monitorConfig.params.hideValueButtonLabel',
   {
     defaultMessage: 'Hide parameter value',
+  }
+);
+
+const NO_READ_PARAMETER_VALUES_PERMISSION = i18n.translate(
+  'xpack.synthetics.monitorConfig.params.noReadPermissionTooltip',
+  {
+    defaultMessage: 'You do not have permission to read parameter values.',
   }
 );
