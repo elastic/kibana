@@ -73,24 +73,6 @@ describe('openLazySystemFlyout', () => {
     expect(overlayRef.close).toHaveBeenCalledTimes(1);
   });
 
-  it('returns focus to the trigger, re-queried after closing re-renders it', async () => {
-    const trigger = document.createElement('button');
-    trigger.id = 'editTrigger';
-    document.body.appendChild(trigger);
-    trigger.focus();
-    openLazySystemFlyout({ core, loadContent: async () => <div>Content</div> });
-
-    openSystemFlyout.mock.calls[0][1]?.onClose?.();
-    // The trigger re-renders after the flyout closes.
-    trigger.remove();
-    const refreshed = document.createElement('button');
-    refreshed.id = 'editTrigger';
-    document.body.appendChild(refreshed);
-
-    await waitFor(() => expect(document.activeElement).toBe(refreshed));
-    refreshed.remove();
-  });
-
   it.each(['resolve', 'reject'] as const)('ignores a late %s after closing', async (outcome) => {
     let resolveLoad: (content: JSX.Element) => void = () => {};
     let rejectLoad: (error: Error) => void = () => {};
@@ -111,5 +93,93 @@ describe('openLazySystemFlyout', () => {
     expect(core.notifications.toasts.addWarning).not.toHaveBeenCalled();
     expect(core.notifications.toasts.addError).not.toHaveBeenCalled();
     expect(overlayRef.close).toHaveBeenCalledTimes(1);
+  });
+
+  describe('focus management', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      document.body.innerHTML = '';
+    });
+
+    const getOnClose = () => openSystemFlyout.mock.calls[0][1]?.onClose;
+
+    it('returns focus to the element that was focused when the flyout was opened', () => {
+      const trigger = document.createElement('button');
+      document.body.appendChild(trigger);
+      trigger.focus();
+
+      openLazySystemFlyout({ core, loadContent: async () => <div>Content</div> });
+
+      // Simulate the flyout taking focus away from the trigger.
+      const insideFlyout = document.createElement('input');
+      document.body.appendChild(insideFlyout);
+      insideFlyout.focus();
+
+      getOnClose()?.();
+      jest.runAllTimers();
+
+      expect(document.activeElement).toBe(trigger);
+    });
+
+    it('re-queries the trigger by id when the original node was replaced by a re-render', () => {
+      const trigger = document.createElement('button');
+      trigger.id = 'editTrigger';
+      document.body.appendChild(trigger);
+      trigger.focus();
+
+      openLazySystemFlyout({ core, loadContent: async () => <div>Content</div> });
+
+      getOnClose()?.();
+
+      // The trigger re-renders after the flyout closes, before the deferred focus fires.
+      trigger.remove();
+      const refreshed = document.createElement('button');
+      refreshed.id = 'editTrigger';
+      document.body.appendChild(refreshed);
+
+      jest.runAllTimers();
+
+      expect(document.activeElement).toBe(refreshed);
+    });
+
+    it('does not throw when the trigger was removed and has no id to re-query', () => {
+      const trigger = document.createElement('button');
+      document.body.appendChild(trigger);
+      trigger.focus();
+
+      openLazySystemFlyout({ core, loadContent: async () => <div>Content</div> });
+
+      trigger.remove();
+
+      expect(() => {
+        getOnClose()?.();
+        jest.runAllTimers();
+      }).not.toThrow();
+    });
+
+    it('defers return focus until after the flyout closes', () => {
+      const trigger = document.createElement('button');
+      trigger.id = 'editTrigger';
+      document.body.appendChild(trigger);
+      trigger.focus();
+
+      openLazySystemFlyout({ core, loadContent: async () => <div>Content</div> });
+
+      const insideFlyout = document.createElement('input');
+      document.body.appendChild(insideFlyout);
+      insideFlyout.focus();
+
+      getOnClose()?.();
+      expect(document.activeElement).not.toBe(trigger);
+
+      jest.runAllTimers();
+
+      expect(document.activeElement).toBe(trigger);
+    });
   });
 });
