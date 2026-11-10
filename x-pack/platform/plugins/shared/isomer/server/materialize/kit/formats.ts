@@ -22,18 +22,8 @@ export interface FormatSettings {
   numberLocale: string;
 }
 
-// Numeral.js locale ids `Intl` doesn't take as they are.
-const NUMERAL_LOCALE_ALIASES: Record<string, string> = { chs: 'zh-Hans' };
-
-/** The `Intl` locale for a Numeral.js locale id, such as `de` or `zh-cn`; `en` if there is none. */
-export const intlLocaleFor = (numberLocale: string | undefined): string => {
-  const id = NUMERAL_LOCALE_ALIASES[numberLocale ?? ''] ?? numberLocale ?? 'en';
-  try {
-    return Intl.getCanonicalLocales(id)[0] ?? 'en';
-  } catch {
-    return 'en';
-  }
-};
+// Shared with the charts render context, so materialized formats and resolved charts agree.
+export { intlLocaleFor } from '@kbn/isomer';
 
 /** How a column's Kibana field format reaches a chart node. */
 export interface FormatMapping {
@@ -513,7 +503,7 @@ export const createFormatMapper = (registry: IFieldFormatsRegistry, settings: Fo
             ? {
                 approximated: i18n.translate('xpack.isomer.materialize.format.dateTokens', {
                   defaultMessage:
-                    'The date pattern\'s {tokens} {count, plural, one {part has} other {parts have}} no portable form.',
+                    "The date pattern's {tokens} {count, plural, one {part has} other {parts have}} no portable form.",
                   values: { tokens: dropped.join(', '), count: dropped.length },
                 }),
               }

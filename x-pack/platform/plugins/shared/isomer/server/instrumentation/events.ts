@@ -34,6 +34,19 @@ export interface RenderEvent {
   budget_refused: boolean;
 }
 
+/** One PNG drawn in Kibana's process, by the PNG host. */
+export interface PngEvent {
+  node_type: string;
+  duration_ms: number;
+  queued_ms: number;
+  png_bytes: number;
+  width: number;
+  height: number;
+  scale: number;
+  rss_delta_bytes: number;
+  engine_loaded: boolean;
+}
+
 export const MATERIALIZE_EVENT: EventTypeOpts<MaterializeEvent> = {
   eventType: 'isomer_materialize',
   schema: {
@@ -118,6 +131,53 @@ export const RENDER_EVENT: EventTypeOpts<RenderEvent> = {
       _meta: {
         description: "Whether the render refused the composition as over Isomer's input budget.",
       },
+    },
+  },
+};
+
+export const PNG_EVENT: EventTypeOpts<PngEvent> = {
+  eventType: 'isomer_render_png',
+  schema: {
+    node_type: {
+      type: 'keyword',
+      _meta: {
+        description: 'The Isomer node type drawn, such as metric, or view for a composition.',
+      },
+    },
+    duration_ms: {
+      type: 'long',
+      _meta: { description: 'Milliseconds to validate, draw and rasterize, after the queue.' },
+    },
+    queued_ms: {
+      type: 'long',
+      _meta: { description: 'Milliseconds the render waited for a slot.' },
+    },
+    png_bytes: {
+      type: 'long',
+      _meta: { description: 'Bytes in the PNG.' },
+    },
+    width: {
+      type: 'integer',
+      _meta: { description: 'The image width in CSS pixels.' },
+    },
+    height: {
+      type: 'integer',
+      _meta: { description: 'The image height in CSS pixels.' },
+    },
+    scale: {
+      type: 'float',
+      _meta: { description: 'Device pixels per CSS pixel.' },
+    },
+    rss_delta_bytes: {
+      type: 'long',
+      _meta: {
+        description:
+          "The process's resident set size after the render less before it. Other work in the process moves it too.",
+      },
+    },
+    engine_loaded: {
+      type: 'boolean',
+      _meta: { description: 'Whether this render loaded headless Elastic Charts.' },
     },
   },
 };

@@ -6,7 +6,12 @@
  */
 
 /** Kibana's shared primitive pack for rendering Isomer content. */
-export { type ComponentsNode, componentsPack, componentsPrimitives } from './src/pack';
+export {
+  type ComponentsNode,
+  componentsPack,
+  componentsPackWithCharts,
+  componentsPrimitives,
+} from './src/pack';
 /** Context values available to component renderers. */
 export type { ComponentsRenderContext } from './src/lib';
 /** Enhancement identifiers used by component renderers. */

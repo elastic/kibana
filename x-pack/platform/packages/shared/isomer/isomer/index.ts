@@ -68,6 +68,12 @@ export type {
   XySeries,
 } from '@elastic/isomer-primitives-charts/scene';
 export { resolveChart } from '@elastic/isomer-primitives-charts/resolve';
+export { intlLocaleFor, loadKibanaChartsPack, toKibanaChartsRenderContext } from './src/charts';
+export type {
+  KibanaChartsRenderContext,
+  KibanaChartsSettings,
+  LoadKibanaChartsPackOptions,
+} from './src/charts';
 export { createKibanaIsomerRuntime } from './src/create_kibana_isomer_runtime';
 export type {
   KibanaIsomerRuntime,

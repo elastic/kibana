@@ -17,11 +17,12 @@ import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
-import type { KibanaIsomerRuntime } from '@kbn/isomer';
+import type { Composition, KibanaIsomerRuntime, PrimitiveNode } from '@kbn/isomer';
 import { firstValueFrom } from 'rxjs';
 import { MATERIALIZE_FEATURE_FLAG } from '../common/constants';
 import type { MaterializeEvent, RenderEvent } from './instrumentation/events';
-import { MATERIALIZE_EVENT, RENDER_EVENT } from './instrumentation/events';
+import type { PngEvent } from './instrumentation/events';
+import { MATERIALIZE_EVENT, PNG_EVENT, RENDER_EVENT } from './instrumentation/events';
 import { instrumentRuntime } from './instrumentation/instrument_runtime';
 import { createScopedMaterializeClient } from './materialize/materialize_client';
 import { createHasField } from './materialize/has_field';
@@ -41,6 +42,10 @@ import { LINKS_SAVED_OBJECT_TYPE, createLinksMaterializer } from './materializer
 import { MARKDOWN_SAVED_OBJECT_TYPE, createMarkdownMaterializer } from './materializers/markdown';
 import { registerFiltersForSelectionRoute } from './routes/filters_for_selection_route';
 import { registerMaterializeRoute } from './routes/materialize_route';
+import { registerRenderPngRoute } from './routes/render_png_route';
+import type { ChartPngHost, ChartPngOptions, ChartPngResult } from './render/png_host';
+import { createChartPngHost } from './render/png_host';
+import { createLazyHeadlessRenderer } from './render/headless_renderer';
 
 /** Setup contract for registering materializers before the plugin starts. */
 export interface IsomerPluginSetup {
@@ -79,14 +84,28 @@ export interface IsomerPluginStart {
    * @param options Optional abort signal for work started by the client.
    */
   asScoped: (request: KibanaRequest, options?: AsScopedOptions) => ScopedMaterializeClient;
+  /**
+   * Draws a materialized node, or a composition, to a PNG in Kibana's process, behind the
+   * `isomer.materializeEnabled` flag. The image runtime, takumi and headless Elastic Charts load
+   * on the first call. At most two renders run at once; past a short queue it throws
+   * `RenderBusyError`.
+   */
+  renderPng: (
+    input: PrimitiveNode | Composition,
+    options?: ChartPngOptions
+  ) => Promise<ChartPngResult>;
 }
 
+// The shared runtime draws charts with headless Elastic Charts on the server; the engine loads on
+// the first chart drawn, not when the runtime is built.
 const createRuntime = async (): Promise<KibanaIsomerRuntime> => {
-  const [{ createKibanaIsomerRuntime }, { componentsPack }] = await Promise.all([
-    import('@kbn/isomer'),
-    import('@kbn/isomer-components'),
-  ]);
-  return createKibanaIsomerRuntime({ packs: [componentsPack] });
+  const [{ createKibanaIsomerRuntime, loadKibanaChartsPack }, { componentsPackWithCharts }] =
+    await Promise.all([import('@kbn/isomer'), import('@kbn/isomer-components')]);
+  const chartsPack = await loadKibanaChartsPack({
+    environment: 'server',
+    sceneRenderers: [createLazyHeadlessRenderer()],
+  });
+  return createKibanaIsomerRuntime({ packs: [componentsPackWithCharts, chartsPack] });
 };
 
 /** Registers the materialization API and exposes the shared Isomer runtime. */
@@ -104,6 +123,7 @@ export class IsomerPlugin
   private readonly registry = new MaterializerRegistry();
   private runtime?: Promise<KibanaIsomerRuntime>;
   private featureFlags?: CoreStart['featureFlags'];
+  private pngHost?: ChartPngHost;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -113,8 +133,14 @@ export class IsomerPlugin
   setup(core: CoreSetup): IsomerPluginSetup {
     core.analytics.registerEventType(MATERIALIZE_EVENT);
     core.analytics.registerEventType(RENDER_EVENT);
+    core.analytics.registerEventType(PNG_EVENT);
     const router = core.http.createRouter();
     registerMaterializeRoute({ router, createClient: this.createClient });
+    registerRenderPngRoute({
+      router,
+      createClient: this.createClient,
+      getPngHost: this.getPngHost,
+    });
     registerFiltersForSelectionRoute({
       router,
       createClient: this.createClient,
@@ -185,8 +211,30 @@ export class IsomerPlugin
           savedObjectsClient: core.savedObjects.getScopedClient(request),
           abortSignal: abortSignal ?? abortSignalFor(request),
         }),
+      renderPng: async (input, options) => {
+        if (!(await this.isMaterializeEnabled())) {
+          throw new Error('Drawing PNGs is off with materialization (isomer.materializeEnabled).');
+        }
+        return this.getPngHost().renderPng(input, options);
+      },
     };
   }
+
+  async stop() {
+    await this.pngHost?.close();
+  }
+
+  private readonly getPngHost = (): ChartPngHost => {
+    this.pngHost ??= createChartPngHost({
+      logger: this.logger.get('png'),
+      report: this.reportPng,
+    });
+    return this.pngHost;
+  };
+
+  private readonly reportPng = (event: PngEvent) => {
+    this.reportEvent?.(PNG_EVENT.eventType, event);
+  };
 
   private readonly startServices = () => {
     const { data, uiSettings, elasticsearch } = this;
@@ -259,7 +307,7 @@ export class IsomerPlugin
   private readonly getRuntime = (): Promise<KibanaIsomerRuntime> => {
     this.runtime ??= createRuntime().then(
       (runtime) => {
-        this.logger.debug('Built the Isomer runtime with the components pack.');
+        this.logger.debug('Built the Isomer runtime with the components and charts packs.');
         return instrumentRuntime(runtime, this.reportRender);
       },
       (error) => {

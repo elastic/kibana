@@ -418,6 +418,12 @@ importers:
       '@elastic/filesaver':
         specifier: 1.1.2
         version: 1.1.2
+      '@elastic/isomer-charts-elastic':
+        specifier: file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-charts-elastic-0.0.0-c8.05c3442.tgz
+        version: file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-charts-elastic-0.0.0-c8.05c3442.tgz(@elastic/charts@file:x-pack/platform/packages/shared/isomer/vendor/elastic-charts-73.3.2-pr2939-a87de627.tgz(@types/react@18.2.79)(moment-timezone@0.6.2)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(redux@5.0.1)(reselect@5.1.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)
+      '@elastic/isomer-image-takumi':
+        specifier: file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-image-takumi-0.0.0-c8.05c3442.tgz
+        version: file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-image-takumi-0.0.0-c8.05c3442.tgz(csstype@3.0.7)(react@18.2.0)
       '@elastic/isomer-primitives-charts':
         specifier: file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-primitives-charts-0.0.0-c8.05c3442.tgz
         version: file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-primitives-charts-0.0.0-c8.05c3442.tgz(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)
@@ -5144,9 +5150,6 @@ importers:
       '@elastic/eui-theme-common':
         specifier: 10.1.0
         version: 10.1.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      '@elastic/isomer-charts-elastic':
-        specifier: file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-charts-elastic-0.0.0-c8.05c3442.tgz
-        version: file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-charts-elastic-0.0.0-c8.05c3442.tgz(@elastic/charts@file:x-pack/platform/packages/shared/isomer/vendor/elastic-charts-73.3.2-pr2939-a87de627.tgz(@types/react@18.2.79)(moment-timezone@0.6.2)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(redux@5.0.1)(reselect@5.1.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)
       '@elastic/makelogs':
         specifier: 6.1.1
         version: 6.1.1
@@ -11278,6 +11281,10 @@ packages:
       react-dom: ^18.0.0
       zod: 4.6.5
 
+  '@elastic/isomer-image-takumi@file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-image-takumi-0.0.0-c8.05c3442.tgz':
+    resolution: {integrity: sha512-+RaIncTxqjsrmqOKM2y0YmPGWKgau5/GWILi/kqgS3lnLmFYS1MjW2NNApp+EUZK1XzQT3vClnLQeOmQqdVceg==, tarball: file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-image-takumi-0.0.0-c8.05c3442.tgz}
+    version: 0.0.0-c8.05c3442
+
   '@elastic/isomer-primitives-charts@file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-primitives-charts-0.0.0-c8.05c3442.tgz':
     resolution: {integrity: sha512-wrGNydwHBVHakOrFSVbY8rQJldj7cB/JGMppIB4VFuauOFEty+fBmWCZXduc8q51+Lzd7iVzas7IcHmNlhi1xA==, tarball: file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-primitives-charts-0.0.0-c8.05c3442.tgz}
     version: 0.0.0-c8.05c3442
@@ -14692,6 +14699,79 @@ packages:
 
   '@swc/types@0.1.28':
     resolution: {integrity: sha512-V6Mnml8v09QALx6K0elJ7o9K/MkVDtW3t6L+7Ou/JcWtb3xwId2AH4FeOceySd2JaO87IMw4+6vSZxLm34LPbw==}
+
+  '@takumi-rs/core-darwin-arm64@2.18.1':
+    resolution: {integrity: sha512-stC9L6PlJtFo9FQGjSHZwQeIksKwqqcagHfeE+oHyFf8Jlm4jWiiOLsWMs9TjujZhphheh4+vjqnQuxIKfzTbw==}
+    engines: {node: '>=18'}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@takumi-rs/core-darwin-x64@2.18.1':
+    resolution: {integrity: sha512-OC5J7mAiTyHy5PwvHS7bJ6zCieNgLFJwgoHM5vhqumAwQjB3/tgTUAsNBgp/WvlJae4q4AsJ8y5T0JyyF1zNgg==}
+    engines: {node: '>=18'}
+    cpu: [x64]
+    os: [darwin]
+
+  '@takumi-rs/core-linux-arm64-gnu@2.18.1':
+    resolution: {integrity: sha512-EM4F2r8Ycbfqve40OQO0ktbDCa2eovzhsfdlmsCq0/ZPOngWSBwbd2jbMvaVpTtEEfc24wOJzQjYauJ8Yan9kg==}
+    engines: {node: '>=18'}
+    cpu: [arm64]
+    os: [linux]
+    libc: [glibc]
+
+  '@takumi-rs/core-linux-arm64-musl@2.18.1':
+    resolution: {integrity: sha512-mj/wING8VQ0OmrGN64x2biGGLisqoCJJnfL2ld+GYHTiZMzxI3A2p3MF1eRSRAqqaK39AMokWiWK0UaxOMdnuA==}
+    engines: {node: '>=18'}
+    cpu: [arm64]
+    os: [linux]
+    libc: [musl]
+
+  '@takumi-rs/core-linux-x64-gnu@2.18.1':
+    resolution: {integrity: sha512-eBcFMD8uBnre8tHQfDLhkzZfEq5orqcYuCRRmKXl1hYnr7CVrgg9w/0ZugrP8F18/eD9oWVn4JpJ3yPhRywZTw==}
+    engines: {node: '>=18'}
+    cpu: [x64]
+    os: [linux]
+    libc: [glibc]
+
+  '@takumi-rs/core-linux-x64-musl@2.18.1':
+    resolution: {integrity: sha512-YNKZ0tW7/OVgyMBX0vXy3VHNwgh+X16hTP/HV0YfoL7EpGDuK195BUJbDDsL38JJ+EDsR0p4oiUFok0tIWxdaw==}
+    engines: {node: '>=18'}
+    cpu: [x64]
+    os: [linux]
+    libc: [musl]
+
+  '@takumi-rs/core-win32-arm64-msvc@2.18.1':
+    resolution: {integrity: sha512-wiETLpqyIHHJLG28fSbfdg/7AtWMB9zBT4wDtWX4zf7Rhsa+X8L4VDqfDk1ziulciBhCddFfUArETOeUZtIoIw==}
+    engines: {node: '>=18'}
+    cpu: [arm64]
+    os: [win32]
+
+  '@takumi-rs/core-win32-x64-msvc@2.18.1':
+    resolution: {integrity: sha512-/63/xcPYtB4Q7JQdAIM05kMv/MyEcglPVniuVpCKgiYKpN4M22GJrH7MqG9dUN8n+j31QTpFFNNcmp7NUgTyRw==}
+    engines: {node: '>=18'}
+    cpu: [x64]
+    os: [win32]
+
+  '@takumi-rs/core@2.18.1':
+    resolution: {integrity: sha512-JiKzlQ8teYSRi7TIsJCuFr6Q+KGY7W3pnXspNIJfLNm1D4nw2RZaUjtXMPc+QXSZaspbKHkBorziHqaGqjbTYQ==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      csstype: '*'
+    peerDependenciesMeta:
+      csstype:
+        optional: true
+
+  '@takumi-rs/helpers@2.18.1':
+    resolution: {integrity: sha512-Fi1hEDYyt+I+QsI8pZNy1RvCsvfW2JEBkX0iD/I0zP/gGnLvaaZG+8K+ZmL48+U2MaE3SxgcevxxZLhSs7ZNqQ==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      preact: ^10.0.0 || ^11.0.0
+      react: ^18.0.0 || ^19.0.0
+    peerDependenciesMeta:
+      preact:
+        optional: true
+      react:
+        optional: true
 
   '@tanstack/match-sorter-utils@8.19.4':
     resolution: {integrity: sha512-Wo1iKt2b9OT7d+YGhvEPD3DXvPv2etTusIMhMUoG7fbhmxcXCtIjJDEygy91Y2JFlwGyjqiBPRozme7UD8hoqg==}
@@ -24214,6 +24294,15 @@ packages:
     resolution: {integrity: sha512-yEFYrVhod+hdNyx7g5Bnkkb0G6si8HJurOoOEgC8B/O0uXLHlaey/65KRv6cuWBNhBgHKAROVpc7QyYqE5gFng==}
     engines: {node: '>=20'}
 
+  takumi-pdf@0.18.3:
+    resolution: {integrity: sha512-4n8LfsiFtunoOzF8s7s/SgW9MuUnYwpHDc9dQsaaDPP4GIc6yvuBCk6oy+1MDezRLyHWpPKUxlW5hIxtVAvIrQ==}
+    engines: {node: '>=20.19'}
+    peerDependencies:
+      react: ^18.0.0 || ^19.0.0
+    peerDependenciesMeta:
+      react:
+        optional: true
+
   tapable@2.3.3:
     resolution: {integrity: sha512-uxc/zpqFg6x7C8vOE7lh6Lbda8eEL9zmVm/PLeTPBRhh1xCgdWaQ+J1CUieGpIfm2HdtsUpRv+HshiasBMcc6A==}
     engines: {node: '>=6'}
@@ -27428,6 +27517,16 @@ snapshots:
       zod: 4.6.5
     transitivePeerDependencies:
       - supports-color
+
+  '@elastic/isomer-image-takumi@file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-image-takumi-0.0.0-c8.05c3442.tgz(csstype@3.0.7)(react@18.2.0)':
+    dependencies:
+      '@takumi-rs/core': 2.18.1(csstype@3.0.7)(react@18.2.0)
+      '@takumi-rs/helpers': 2.18.1(react@18.2.0)
+      takumi-pdf: 0.18.3(react@18.2.0)
+    transitivePeerDependencies:
+      - csstype
+      - preact
+      - react
 
   '@elastic/isomer-primitives-charts@file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-primitives-charts-0.0.0-c8.05c3442.tgz(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)':
     dependencies:
@@ -31320,6 +31419,51 @@ snapshots:
   '@swc/types@0.1.28':
     dependencies:
       '@swc/counter': 0.1.3
+
+  '@takumi-rs/core-darwin-arm64@2.18.1':
+    optional: true
+
+  '@takumi-rs/core-darwin-x64@2.18.1':
+    optional: true
+
+  '@takumi-rs/core-linux-arm64-gnu@2.18.1':
+    optional: true
+
+  '@takumi-rs/core-linux-arm64-musl@2.18.1':
+    optional: true
+
+  '@takumi-rs/core-linux-x64-gnu@2.18.1':
+    optional: true
+
+  '@takumi-rs/core-linux-x64-musl@2.18.1':
+    optional: true
+
+  '@takumi-rs/core-win32-arm64-msvc@2.18.1':
+    optional: true
+
+  '@takumi-rs/core-win32-x64-msvc@2.18.1':
+    optional: true
+
+  '@takumi-rs/core@2.18.1(csstype@3.0.7)(react@18.2.0)':
+    dependencies:
+      '@takumi-rs/helpers': 2.18.1(react@18.2.0)
+    optionalDependencies:
+      '@takumi-rs/core-darwin-arm64': 2.18.1
+      '@takumi-rs/core-darwin-x64': 2.18.1
+      '@takumi-rs/core-linux-arm64-gnu': 2.18.1
+      '@takumi-rs/core-linux-arm64-musl': 2.18.1
+      '@takumi-rs/core-linux-x64-gnu': 2.18.1
+      '@takumi-rs/core-linux-x64-musl': 2.18.1
+      '@takumi-rs/core-win32-arm64-msvc': 2.18.1
+      '@takumi-rs/core-win32-x64-msvc': 2.18.1
+      csstype: 3.0.7
+    transitivePeerDependencies:
+      - preact
+      - react
+
+  '@takumi-rs/helpers@2.18.1(react@18.2.0)':
+    optionalDependencies:
+      react: 18.2.0
 
   '@tanstack/match-sorter-utils@8.19.4':
     dependencies:
@@ -42726,6 +42870,14 @@ snapshots:
       strip-ansi: 6.0.1
 
   tagged-tag@1.0.0: {}
+
+  takumi-pdf@0.18.3(react@18.2.0):
+    dependencies:
+      '@takumi-rs/helpers': 2.18.1(react@18.2.0)
+    optionalDependencies:
+      react: 18.2.0
+    transitivePeerDependencies:
+      - preact
 
   tapable@2.3.3: {}
 

@@ -147,6 +147,34 @@ export const materializeRequestBodySchema = lazySchema(() =>
     .strict()
 );
 
+/** Validates a request to materialize content and draw it to a PNG. */
+export const renderPngRequestBodySchema = lazySchema(() =>
+  z
+    .object({
+      input: z.union([byReferenceSchema, byValueSchema]),
+      context: contextSchema.optional(),
+      image: z
+        .object({
+          scheme: z.enum(['light', 'dark']).optional().meta({
+            description: "The color scheme. Default: the user's `theme:darkMode`.",
+          }),
+          scale: z.number().min(1).max(2).optional().meta({
+            description: 'Device pixels per CSS pixel, 1 to 2. Default 2.',
+          }),
+          width: z.number().int().min(160).max(1920).optional().meta({
+            description:
+              'The image width in CSS pixels. Default 512, one chart at its laid-out width.',
+          }),
+        })
+        .strict()
+        .optional(),
+    })
+    .strict()
+);
+
+/** The validated body accepted by the render PNG route. */
+export type RenderPngRequestBody = z.infer<typeof renderPngRequestBodySchema>;
+
 /** The validated body accepted by the materialize API. */
 export type MaterializeRequestBody = z.infer<typeof materializeRequestBodySchema>;
 

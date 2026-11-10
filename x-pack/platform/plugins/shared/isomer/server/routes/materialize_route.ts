@@ -29,7 +29,7 @@ interface MaterializeRouteDeps {
   createClient: (scope: MaterializeScope) => ScopedMaterializeClient;
 }
 
-const toContext = ({
+export const toContext = ({
   time_range: timeRange,
   query,
   filters,

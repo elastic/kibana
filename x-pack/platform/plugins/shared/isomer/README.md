@@ -4,7 +4,7 @@ Hosts Kibana's shared Isomer runtime with its primitive packs, and materializes 
 
 ## Runtime
 
-The start contract's `getRuntime()` resolves a `createKibanaIsomerRuntime` with `@kbn/isomer-components`' `componentsPack`. Primitive schemas stay in memory for the life of the process once built, so the runtime and its packs load on the first call rather than at startup, and every later call shares that runtime. Call `getRuntime()` when a request needs it, not during `setup` or `start`.
+The start contract's `getRuntime()` resolves a `createKibanaIsomerRuntime` with `@kbn/isomer-components`' `componentsPackWithCharts` and Isomer's charts pack (`loadKibanaChartsPack` from `@kbn/isomer`), which draws charts with headless Elastic Charts on the server. The engine loads on the first chart drawn, not with the runtime. Primitive schemas stay in memory for the life of the process once built, so the runtime and its packs load on the first call rather than at startup, and every later call shares that runtime. Call `getRuntime()` when a request needs it, not during `setup` or `start`.
 
 ## Materialization
 
@@ -92,7 +92,27 @@ The plugin registers the `lens` materializer. It takes a Lens chart in Lens's AP
 Sizes are measured as Isomer's input budget counts them (`measureInput` matches the SDK's `checkInputBudget`), and reported as event-based telemetry and debug logs (`plugins.isomer.instrumentation`):
 
 - **`isomer_materialize`**, once per node, nested ones included: saved object type, outcome, node type, depth, values, characters, time, planned data requests, how many hit the row cap, and whether the node was over the input budget.
+- **`isomer_render_png`**, once per PNG the PNG host draws: node type, time drawing and time queued, PNG bytes, size and scale, the process's RSS after less before, and whether the render loaded the engine.
 - **`isomer_render`**, once per HTML, text, Markdown or Slack render of a composition holding charts pack nodes, through the runtime `getRuntime()` returns: surface, node count, values and characters, render time, output characters, and whether the render refused the composition as over the budget.
+
+## Chart images in Kibana's process
+
+The PNG host (`server/render/png_host.ts`) draws a node, or a composition, to a PNG without a browser or a render service: the `snapshot` surface under the charts frame, headless Elastic Charts' SVG for each chart (`@elastic/isomer-charts-elastic/headless`), and takumi's rasterizer (`@elastic/isomer-image-takumi`). It follows Isomer's guidance for a small server (elastic/isomer#378):
+
+- **Nothing loads at start.** The image runtime, takumi's native binary and its fonts load on the first PNG, and headless Elastic Charts on the first chart, so a Kibana that never draws an image never pays for them (measured by Isomer at about 50 MB of RSS loaded).
+- **Two renders at once, eight queued.** Past the queue, a render throws `RenderBusyError` and the route answers `429` with `retry-after`.
+- **At most 2× scale**, and **25,000 values** (1,000,000 characters) per image, a tenth of the charts pack's budget. Content over it is refused before drawing (`RenderInputError`, `400`).
+- **One takumi backend per process**, with Inter, Latin only, at 400, 500, 600 and 700, registered once (`server/render/fonts`, subset from Kibana's own Inter, OFL).
+- **Kibana's render context.** Charts resolve in the user's color scheme (`theme:darkMode`), `Intl` locale (from `format:number:defaultLocale`) and time zone (`dateFormat:tz`, `Browser` as UTC). `snapshot` takes no host context, so the host passes it to the charts pack's resolver through an `AsyncLocalStorage`.
+
+The start contract's `renderPng(node, options)` draws a materialized node, behind `isomer.materializeEnabled`. `POST /internal/isomer/render/png` (version `1`) materializes the same input as `POST /api/isomer/materialize` and returns the PNG, with `image: { scheme?, scale?, width? }`. One chart draws 512 CSS pixels wide by default: the 480 pixels a chart lays out for on Node, in the charts frame's padding. To try it on the sample web logs:
+
+```sh
+node x-pack/platform/plugins/shared/isomer/scripts/render_png.js --example metric --out metric.png
+node x-pack/platform/plugins/shared/isomer/scripts/render_png.js --example xy --scheme dark --out xy.png
+```
+
+The headless engine needs elastic/elastic-charts#2939, which isn't released: this branch replaces `@elastic/charts` with a build of it. See `x-pack/platform/packages/shared/isomer/vendor/README.md`.
 
 Materialization is off unless the `isomer.materializeEnabled` feature flag is on. While it's off, the route returns `404` and `materialize` returns `unsupported`. To turn it on locally, add this to `kibana.dev.yml`:
 

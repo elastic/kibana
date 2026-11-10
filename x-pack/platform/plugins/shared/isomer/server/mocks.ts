@@ -44,6 +44,7 @@ const createStartContract = (): jest.Mocked<IsomerPluginStart> => {
     asScoped: jest.fn<ScopedMaterializeClient, Parameters<IsomerPluginStart['asScoped']>>(
       () => scopedClient
     ),
+    renderPng: jest.fn(),
   };
 };
 

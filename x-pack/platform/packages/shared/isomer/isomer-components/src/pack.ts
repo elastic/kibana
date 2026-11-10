@@ -68,21 +68,33 @@ export type ComponentsNode =
   | TableNode;
 
 /** Kibana's content and layout primitives. */
-export const componentsPack = definePrimitivePack({
-  id: 'components',
-  primitives: componentsPrimitives,
-  styleAdapter: isomerStyleAdapter,
-  styleCollector: ISOMER_STYLE_COLLECTOR,
-  enhancements: [codeCopyEnhancement, tableSortEnhancement],
-  authoring: {
-    groups: [
-      { title: 'Narrative and content', types: ['markdown'] },
-      {
-        title: 'Message layout',
-        types: ['header', 'section', 'context', 'divider', 'quote', 'actions', 'link'],
-      },
-      { title: 'Data', types: ['fields', 'code', 'table'] },
-      { title: 'Status', types: ['unsupported'] },
-    ],
-  },
-});
+const createComponentsPack = ({ unsupported: withUnsupported }: { unsupported: boolean }) =>
+  definePrimitivePack({
+    id: 'components',
+    primitives: withUnsupported
+      ? componentsPrimitives
+      : componentsPrimitives.filter(({ type }) => type !== 'unsupported'),
+    styleAdapter: isomerStyleAdapter,
+    styleCollector: ISOMER_STYLE_COLLECTOR,
+    enhancements: [codeCopyEnhancement, tableSortEnhancement],
+    authoring: {
+      groups: [
+        { title: 'Narrative and content', types: ['markdown'] },
+        {
+          title: 'Message layout',
+          types: ['header', 'section', 'context', 'divider', 'quote', 'actions', 'link'],
+        },
+        { title: 'Data', types: ['fields', 'code', 'table'] },
+        ...(withUnsupported ? [{ title: 'Status', types: ['unsupported'] }] : []),
+      ],
+    },
+  });
+
+export const componentsPack = createComponentsPack({ unsupported: true });
+
+/**
+ * The components pack for a runtime that also registers Isomer's charts pack: without
+ * `unsupported`, which the charts pack defines too, with the provenance materialized
+ * placeholders carry.
+ */
+export const componentsPackWithCharts = createComponentsPack({ unsupported: false });
