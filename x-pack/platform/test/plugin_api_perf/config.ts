@@ -29,14 +29,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...integrationConfig.get('kbnTestServer.serverArgs'),
         `--plugin-path=${path.resolve(
           __dirname,
-          '..',
-          '..',
-          'plugins',
-          'private',
-          'test',
-          'response_ops',
-          'plugin_api_integration',
-          'sample_task_plugin'
+          '../../test_plugins/response_ops/plugin_api_integration/sample_task_plugin'
         )}`,
         ...findTestPluginPaths(
           path.resolve(__dirname, '../../test_plugins/response_ops/plugin_api_perf')
