@@ -5,33 +5,44 @@
  * 2.0.
  */
 
+import type { NotificationsStart } from '@kbn/core/public';
 import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common/types';
 import { attachmentDataToDashboardState } from '@kbn/agent-builder-dashboards-common';
 import type { DashboardApi, DashboardRendererProps } from '@kbn/dashboard-plugin/public';
-import { enterEditModeForAgentChanges } from './enter_edit_mode';
+import { applyAgentChangesToDashboard } from './apply_agent_changes';
 
 interface PreviewAttachmentInDashboardParams {
   attachment: DashboardAttachment;
   dashboardApi: DashboardApi;
+  canWriteDashboards: boolean;
   dashboardLocator?: DashboardRendererProps['locator'];
+  toasts: NotificationsStart['toasts'];
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
 }
 
 export const previewAttachmentInDashboard = async ({
   attachment,
   dashboardApi,
+  canWriteDashboards,
   dashboardLocator,
+  toasts,
   checkSavedDashboardExist,
 }: PreviewAttachmentInDashboardParams) => {
   const dashboardState = attachmentDataToDashboardState(attachment.data);
   const currentSavedObjectId = dashboardApi.savedObjectId$.getValue();
+  const applyAgentChanges = () =>
+    applyAgentChangesToDashboard({
+      api: dashboardApi,
+      dashboardState,
+      canWriteDashboards,
+      dashboardLocator,
+      toasts,
+    });
 
   // a) Viewing saved dashboard + attachment linked to same dashboard -> apply state
   // Also handles both being undefined (unsaved dashboard, unlinked attachment)
   if (attachment.origin === currentSavedObjectId) {
-    enterEditModeForAgentChanges(dashboardApi);
-    dashboardApi.setState(dashboardState, { changedBy: ['agent'] });
-    return;
+    return applyAgentChanges();
   }
 
   // Check if the attachment's linked dashboard still exists
@@ -41,9 +52,7 @@ export const previewAttachmentInDashboard = async ({
 
   if (!currentSavedObjectId && !linkedDashboardExists) {
     // b) Viewing unsaved dashboard + attachment linked to deleted dashboard
-    enterEditModeForAgentChanges(dashboardApi);
-    dashboardApi.setState(dashboardState, { changedBy: ['agent'] });
-    return;
+    return applyAgentChanges();
   }
 
   // c) Attachment linked to different existing dashboard -> navigate to linked dashboard or a new unsaved dashboard with the attachment's state

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { NotificationsStart } from '@kbn/core/public';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
@@ -26,12 +27,15 @@ const buildAttachment = (origin?: string): DashboardAttachment => ({
 
 const buildLocator = () => ({ navigate: jest.fn(), getRedirectUrl: jest.fn() });
 
+const buildToasts = () => ({ addWarning: jest.fn() } as unknown as NotificationsStart['toasts']);
+
 const buildDashboardApi = (savedObjectId: string | undefined) => ({
   savedObjectId$: { getValue: () => savedObjectId },
+  getAppContext: () => ({ currentAppId: 'dashboards' }),
+  isEditableByUser: true,
+  isManaged: false,
   setState: jest.fn(),
   setViewMode: jest.fn(),
-  isEditableByUser: true,
-  getAppContext: () => ({ currentAppId: 'dashboards' }),
   locator: buildLocator(),
 });
 
@@ -51,6 +55,7 @@ describe('handlePreview with a published dashboard', () => {
         canWriteDashboards: true,
         isSidebar: true,
         dashboardLocator,
+        toasts: buildToasts(),
         checkSavedDashboardExist: async () => true,
       });
 
@@ -68,7 +73,7 @@ describe('handlePreview with a published dashboard', () => {
     }
   );
 
-  it('applies the attachment in place when it is linked to the viewed dashboard', async () => {
+  it('applies the attachment in place in edit mode when it is linked to the viewed dashboard', async () => {
     const dashboardApi = buildDashboardApi('dashboard-1');
     const dashboardLocator = buildLocator();
 
@@ -78,6 +83,7 @@ describe('handlePreview with a published dashboard', () => {
       canWriteDashboards: true,
       isSidebar: true,
       dashboardLocator,
+      toasts: buildToasts(),
       checkSavedDashboardExist: async () => true,
     });
 
@@ -88,10 +94,11 @@ describe('handlePreview with a published dashboard', () => {
       }),
       { changedBy: ['agent'] }
     );
+    expect(dashboardApi.setViewMode).toHaveBeenCalledWith('edit');
     expect(dashboardLocator.navigate).not.toHaveBeenCalled();
   });
 
-  it('applies the attachment in place on an unsaved dashboard when its linked dashboard was deleted', async () => {
+  it('applies the attachment in place in edit mode on an unsaved dashboard when its linked dashboard was deleted', async () => {
     const dashboardApi = buildDashboardApi(undefined);
     const dashboardLocator = buildLocator();
 
@@ -101,6 +108,7 @@ describe('handlePreview with a published dashboard', () => {
       canWriteDashboards: true,
       isSidebar: true,
       dashboardLocator,
+      toasts: buildToasts(),
       checkSavedDashboardExist: async () => false,
     });
 
@@ -108,6 +116,29 @@ describe('handlePreview with a published dashboard', () => {
       expect.objectContaining({ title: 'Agent dashboard' }),
       { changedBy: ['agent'] }
     );
+    expect(dashboardApi.setViewMode).toHaveBeenCalledWith('edit');
     expect(dashboardLocator.navigate).not.toHaveBeenCalled();
+  });
+
+  it('opens the attachment in a new dashboard and warns when the viewed linked dashboard is managed', async () => {
+    const dashboardApi = { ...buildDashboardApi('dashboard-1'), isManaged: true };
+    const dashboardLocator = buildLocator();
+    const toasts = buildToasts();
+
+    await handlePreview({
+      attachment: buildAttachment('dashboard-1'),
+      dashboardApi: dashboardApi as unknown as DashboardApi,
+      canWriteDashboards: true,
+      isSidebar: true,
+      dashboardLocator,
+      toasts,
+      checkSavedDashboardExist: async () => true,
+    });
+
+    expect(dashboardApi.setState).not.toHaveBeenCalled();
+    expect(dashboardLocator.navigate).toHaveBeenCalledWith(
+      expect.not.objectContaining({ dashboardId: expect.anything() })
+    );
+    expect(toasts.addWarning).toHaveBeenCalledTimes(1);
   });
 });

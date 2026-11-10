@@ -9,7 +9,8 @@ import { debounceTime, Observable } from 'rxjs';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { UpdateOriginResponse } from '@kbn/agent-builder-common';
-import type { DashboardApi } from '@kbn/dashboard-plugin/public';
+import type { NotificationsStart } from '@kbn/core/public';
+import type { DashboardApi, DashboardRendererProps } from '@kbn/dashboard-plugin/public';
 import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common/types';
 import {
   isDashboardAttachment,
@@ -21,6 +22,7 @@ import {
   UNSAVED_CHANGES_DEBOUNCE,
 } from '@kbn/presentation-publishing';
 import { createAgentLiveUpdatesSubscription } from './agent_live_updates_subscription';
+import { canApplyAgentChangesInPlace } from './apply_agent_changes';
 import { createNewAttachmentIdRegenerationSubscription } from './new_attachment_id_regeneration_subscription';
 import { createOriginSyncSubscription } from './origin_sync_subscription';
 import type { IdGenerator } from '..';
@@ -37,6 +39,8 @@ export interface DashboardAppIntegrationParams {
   agentBuilder: AgentBuilderPluginStart;
   api: DashboardApi;
   canWriteDashboards: boolean;
+  dashboardLocator?: DashboardRendererProps['locator'];
+  toasts: NotificationsStart['toasts'];
   draftAttachmentId: IdGenerator;
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
   /**
@@ -60,6 +64,8 @@ export const registerDashboardAppIntegration = ({
   agentBuilder,
   api,
   canWriteDashboards,
+  dashboardLocator,
+  toasts,
   draftAttachmentId,
   checkSavedDashboardExist,
   getUpdateOrigin,
@@ -72,8 +78,12 @@ export const registerDashboardAppIntegration = ({
   let pendingAddAttachmentTimeout: ReturnType<typeof setTimeout> | undefined;
 
   const addAttachmentFromDashboard = () => {
-    const dashboardId = api.savedObjectId$.getValue();
-    const syncAttachment = state.attachments?.find(({ origin }) => origin === dashboardId);
+    // agent changes to a dashboard the user can't edit open in a new dashboard, so don't link the attachment to it
+    const isLinkable = canApplyAgentChangesInPlace(api, canWriteDashboards);
+    const dashboardId = isLinkable ? api.savedObjectId$.getValue() : undefined;
+    const syncAttachment = isLinkable
+      ? state.attachments?.find(({ origin }) => origin === dashboardId)
+      : undefined;
     const dashboardData = dashboardStateToAttachmentData(api.getSerializedState().attributes);
 
     // update an existing linked attachment, or add a draft attachment only when the conversation is new
@@ -130,6 +140,8 @@ export const registerDashboardAppIntegration = ({
     agentBuilder,
     api,
     canWriteDashboards,
+    dashboardLocator,
+    toasts,
     upsertAttachment: (attachment: DashboardAttachment) => {
       const otherAttachments = (state.attachments ?? []).filter(({ id }) => id !== attachment.id);
       state.attachments = [...otherAttachments, attachment];

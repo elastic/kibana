@@ -8,6 +8,7 @@
 import { BehaviorSubject, Subject } from 'rxjs';
 import { ChatEventType } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import type { NotificationsStart } from '@kbn/core/public';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
@@ -31,7 +32,10 @@ const buildToolUiEvent = (
   data: { tool_id: 'tool', tool_call_id: 'call', custom_event: customEvent, data: { attachment } },
 });
 
-const createHarness = (savedObjectId: string | undefined, isNewConversation = false) => {
+const createHarness = (
+  savedObjectId: string | undefined,
+  { isNewConversation = false, isManaged = false } = {}
+) => {
   const chatEvents$ = new Subject();
   const activeConversation$ = new BehaviorSubject<{ id?: string }>({
     id: isNewConversation ? undefined : 'conversation-1',
@@ -40,6 +44,8 @@ const createHarness = (savedObjectId: string | undefined, isNewConversation = fa
   const setState = jest.fn();
   const setViewMode = jest.fn();
   const upsertAttachment = jest.fn();
+  const dashboardLocator = { navigate: jest.fn(), getRedirectUrl: jest.fn() };
+  const toasts = { addWarning: jest.fn() };
 
   const subscription = createAgentLiveUpdatesSubscription({
     agentBuilder: {
@@ -47,12 +53,15 @@ const createHarness = (savedObjectId: string | undefined, isNewConversation = fa
     } as unknown as AgentBuilderPluginStart,
     api: {
       savedObjectId$: { getValue: () => savedObjectId },
-      setState,
-      isEditableByUser: true,
       getAppContext: () => ({ currentAppId: 'dashboards' }),
+      isEditableByUser: true,
+      isManaged,
+      setState,
       setViewMode,
     } as unknown as DashboardApi,
     canWriteDashboards: true,
+    dashboardLocator,
+    toasts: toasts as unknown as NotificationsStart['toasts'],
     upsertAttachment,
   });
 
@@ -62,6 +71,8 @@ const createHarness = (savedObjectId: string | undefined, isNewConversation = fa
     getChatEvents$,
     setState,
     setViewMode,
+    dashboardLocator,
+    toasts,
     upsertAttachment,
     subscription,
   };
@@ -87,15 +98,49 @@ describe('createAgentLiveUpdatesSubscription', () => {
     }
   );
 
+  it('switches the dashboard to edit mode when applying the changes', () => {
+    const { chatEvents$, setViewMode, subscription } = createHarness('dashboard-1');
+
+    chatEvents$.next(buildToolUiEvent(buildAttachment('dashboard-1')));
+
+    expect(setViewMode).toHaveBeenCalledWith('edit');
+    subscription.unsubscribe();
+  });
+
+  it('opens the changes in a new dashboard instead of changing a managed dashboard', async () => {
+    const { chatEvents$, setState, dashboardLocator, toasts, subscription } = createHarness(
+      'dashboard-1',
+      { isManaged: true }
+    );
+
+    chatEvents$.next(buildToolUiEvent(buildAttachment('dashboard-1')));
+    await new Promise(process.nextTick);
+
+    expect(setState).not.toHaveBeenCalled();
+    expect(dashboardLocator.navigate).toHaveBeenCalledWith(
+      expect.not.objectContaining({ dashboardId: expect.anything() })
+    );
+    expect(toasts.addWarning).toHaveBeenCalledTimes(1);
+    subscription.unsubscribe();
+  });
+
+  it('opens the changes of an unlinked attachment in a new dashboard when viewing a managed dashboard', async () => {
+    const { chatEvents$, setState, dashboardLocator, subscription } = createHarness(
+      'managed-dashboard',
+      { isManaged: true }
+    );
+
+    chatEvents$.next(buildToolUiEvent(buildAttachment(undefined)));
+    await new Promise(process.nextTick);
+
+    expect(setState).not.toHaveBeenCalled();
+    expect(dashboardLocator.navigate).toHaveBeenCalledTimes(1);
+    subscription.unsubscribe();
+  });
+
   it('applies the dashboard state from the first run of a new conversation', () => {
-    const {
-      chatEvents$,
-      activeConversation$,
-      getChatEvents$,
-      setState,
-      setViewMode,
-      subscription,
-    } = createHarness(undefined, true);
+    const { chatEvents$, activeConversation$, getChatEvents$, setState, subscription } =
+      createHarness(undefined, { isNewConversation: true });
     expect(getChatEvents$).not.toHaveBeenCalled();
 
     // The chat creates the conversation before sending, so its id is published before the run streams

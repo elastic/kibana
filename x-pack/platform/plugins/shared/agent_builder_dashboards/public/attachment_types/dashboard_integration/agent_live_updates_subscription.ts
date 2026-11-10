@@ -8,16 +8,19 @@
 import { EMPTY, filter, switchMap, type Subscription } from 'rxjs';
 import { isToolUiEvent, type ToolUiEvent } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart, BrowserChatEvent } from '@kbn/agent-builder-browser';
+import type { NotificationsStart } from '@kbn/core/public';
 import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common';
 import { attachmentDataToDashboardState } from '@kbn/agent-builder-dashboards-common';
-import type { DashboardApi } from '@kbn/dashboard-plugin/public';
+import type { DashboardApi, DashboardRendererProps } from '@kbn/dashboard-plugin/public';
 import { DASHBOARD_UPDATED_UI_EVENT, type DashboardUpdatedUiEventData } from '../../../common';
-import { enterEditModeForAgentChanges } from './enter_edit_mode';
+import { applyAgentChangesToDashboard, canApplyAgentChangesInPlace } from './apply_agent_changes';
 
 export interface AgentLiveUpdatesSubscriptionParams {
   agentBuilder: AgentBuilderPluginStart;
   api: DashboardApi;
   canWriteDashboards: boolean;
+  dashboardLocator?: DashboardRendererProps['locator'];
+  toasts: NotificationsStart['toasts'];
   upsertAttachment: (attachment: DashboardAttachment) => void;
 }
 
@@ -34,6 +37,8 @@ export const createAgentLiveUpdatesSubscription = ({
   agentBuilder,
   api,
   canWriteDashboards,
+  dashboardLocator,
+  toasts,
   upsertAttachment,
 }: AgentLiveUpdatesSubscriptionParams): Subscription =>
   agentBuilder.events.ui.activeConversation$
@@ -51,14 +56,21 @@ export const createAgentLiveUpdatesSubscription = ({
       upsertAttachment(attachment);
 
       const currentSavedObjectId = api.savedObjectId$.getValue();
+      // Attachments staged from a dashboard the user can't edit are left unlinked
+      const isOwnAttachment =
+        attachment.origin === currentSavedObjectId ||
+        (!attachment.origin && !canApplyAgentChangesInPlace(api, canWriteDashboards));
 
       // Skip if viewing a saved dashboard that differs from the attachment's linked dashboard
-      if (currentSavedObjectId && attachment.origin !== currentSavedObjectId) {
+      if (currentSavedObjectId && !isOwnAttachment) {
         return;
       }
 
-      if (canWriteDashboards) {
-        enterEditModeForAgentChanges(api);
-      }
-      api.setState(attachmentDataToDashboardState(attachment.data), { changedBy: ['agent'] });
+      applyAgentChangesToDashboard({
+        api,
+        dashboardState: attachmentDataToDashboardState(attachment.data),
+        canWriteDashboards,
+        dashboardLocator,
+        toasts,
+      });
     });

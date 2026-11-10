@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { NotificationsStart } from '@kbn/core/public';
 import { attachmentDataToDashboardState } from '@kbn/agent-builder-dashboards-common';
 import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common/types';
 import type { DashboardApi, DashboardRendererProps } from '@kbn/dashboard-plugin/public';
@@ -17,6 +18,7 @@ export const handlePreview = async ({
   canWriteDashboards,
   isSidebar,
   dashboardLocator,
+  toasts,
   checkSavedDashboardExist,
   openCanvas,
 }: {
@@ -25,6 +27,7 @@ export const handlePreview = async ({
   canWriteDashboards: boolean;
   isSidebar: boolean;
   dashboardLocator?: DashboardRendererProps['locator'];
+  toasts: NotificationsStart['toasts'];
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
   openCanvas?: () => void;
 }) => {
@@ -33,7 +36,9 @@ export const handlePreview = async ({
     return previewAttachmentInDashboard({
       attachment,
       dashboardApi,
+      canWriteDashboards,
       dashboardLocator,
+      toasts,
       checkSavedDashboardExist,
     });
   }

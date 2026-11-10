@@ -10,6 +10,7 @@ import { BehaviorSubject, skip, Subject } from 'rxjs';
 import type { ChatEvent, Conversation } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import { notificationServiceMock } from '@kbn/core/public/mocks';
 import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/agent-builder-dashboards-common';
 import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common/types';
@@ -43,10 +44,11 @@ interface MockDashboardApi {
   filters$: BehaviorSubject<unknown[]>;
   query$: BehaviorSubject<unknown>;
   timeRange$: BehaviorSubject<unknown>;
+  getAppContext: () => { currentAppId: string };
+  isEditableByUser: boolean;
+  isManaged: boolean;
   setState: jest.Mock;
   setViewMode: jest.Mock;
-  isEditableByUser: boolean;
-  getAppContext: () => { currentAppId: string };
   getSerializedState: jest.Mock;
 }
 
@@ -57,10 +59,11 @@ const createMockDashboardApi = (anyStateChange$: Observable<void>): MockDashboar
   filters$: new BehaviorSubject<unknown[]>([]),
   query$: new BehaviorSubject<unknown>({ query: '', language: 'kuery' }),
   timeRange$: new BehaviorSubject<unknown>({ from: 'now-15m', to: 'now' }),
+  getAppContext: () => ({ currentAppId: 'dashboards' }),
+  isEditableByUser: true,
+  isManaged: false,
   setState: jest.fn(),
   setViewMode: jest.fn(),
-  isEditableByUser: true,
-  getAppContext: () => ({ currentAppId: 'dashboards' }),
   getSerializedState: jest.fn().mockReturnValue({
     attributes: {
       title: 'Test Dashboard',
@@ -198,6 +201,7 @@ describe('registerDashboardAppIntegration', () => {
       agentBuilder,
       api: mockApi as unknown as DashboardApi,
       canWriteDashboards: true,
+      toasts: notificationServiceMock.createStartContract().toasts,
       draftAttachmentId,
       checkSavedDashboardExist,
       getUpdateOrigin,
@@ -222,6 +226,56 @@ describe('registerDashboardAppIntegration', () => {
         type: DASHBOARD_ATTACHMENT_TYPE,
         origin: 'dashboard-1',
       })
+    );
+  });
+
+  it('stages the attachment of a managed dashboard without linking it to the dashboard', () => {
+    mockApi.savedObjectId$.next('managed-dashboard');
+    mockApi.isManaged = true;
+    register();
+    emitConversationChange({});
+
+    jest.runOnlyPendingTimers();
+
+    expect(addAttachment).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'draft-attachment-id-1', origin: undefined })
+    );
+  });
+
+  it('does not sync manual changes of a managed dashboard into an unlinked attachment of an existing conversation', () => {
+    mockApi.savedObjectId$.next('managed-dashboard');
+    mockApi.isManaged = true;
+    register();
+    emitConversationChange({
+      id: 'conversation-1',
+      attachments: [createVersionedAttachment(createDashboardAttachment())],
+    });
+
+    jest.runOnlyPendingTimers();
+    simulateDashboardStateChange();
+    jest.advanceTimersByTime(MANUAL_CHANGES_DEBOUNCE_MS);
+
+    expect(addAttachment).not.toHaveBeenCalled();
+  });
+
+  it('links an unlinked attachment to the new dashboard it was opened in once saved', async () => {
+    register();
+    emitConversationChange({
+      id: 'conversation-1',
+      attachments: [createVersionedAttachment(createDashboardAttachment())],
+    });
+
+    mockApi.onSave$.next({
+      previousDashboardId: undefined,
+      dashboardId: 'new-dashboard',
+      dashboardState: createDashboardSaveState(),
+    });
+    await Promise.resolve();
+
+    expect(updateAttachmentOrigin).toHaveBeenCalledWith(
+      'conversation-1',
+      'dashboard-attachment-id',
+      'new-dashboard'
     );
   });
 
