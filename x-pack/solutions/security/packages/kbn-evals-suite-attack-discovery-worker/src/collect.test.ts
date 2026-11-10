@@ -11,6 +11,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { WorkflowExecutionDto, WorkflowStepExecutionDto } from '@kbn/workflows';
 import {
   analysisUsageOf,
+  collectReviewArtifact,
   collectWorkerArtifacts,
   countIndexedAttacks,
   generationUsageOf,
@@ -72,6 +73,28 @@ describe('isParkedAtGate', () => {
 
   it('is not parked once the review ended', () => {
     expect(isParkedAtGate(review('completed', [escalate, openGate]))).toBe(false);
+  });
+});
+
+describe('collectReviewArtifact', () => {
+  const collect = (execution: WorkflowExecutionDto) =>
+    collectReviewArtifact({
+      client: {} as AttackDiscoveryWorkerClient,
+      review: execution,
+      fetch: jest.fn() as unknown as HttpHandler,
+      spaceId: 'space',
+    });
+
+  it('carries the execution error message of a failed review', async () => {
+    const failed = {
+      ...review('failed', []),
+      error: { type: 'Error', message: 'analyze step failed' },
+    } as unknown as WorkflowExecutionDto;
+    expect(await collect(failed)).toMatchObject({ status: 'failed', error: 'analyze step failed' });
+  });
+
+  it('carries no error for a review that did not fail', async () => {
+    expect(await collect(review('waiting_for_input', []))).not.toHaveProperty('error');
   });
 });
 

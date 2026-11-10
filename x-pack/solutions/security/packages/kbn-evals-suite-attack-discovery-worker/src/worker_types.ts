@@ -104,6 +104,8 @@ export interface ReviewArtifact {
   parked: boolean;
   /** Set when the wait for this review ran out before it settled. */
   timedOutAfterMs?: number;
+  /** The execution's error message, set when the review ended `failed`. */
+  error?: string;
   verdict?: Verdict;
   investigationId?: string;
   investigationOpened: boolean;

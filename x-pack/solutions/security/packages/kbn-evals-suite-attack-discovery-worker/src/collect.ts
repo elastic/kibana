@@ -392,6 +392,7 @@ const buildReviewArtifact = async ({
     status: review.status,
     parked: isParkedAtGate(review),
     ...(timedOutAfterMs !== undefined ? { timedOutAfterMs } : {}),
+    ...(review.error?.message ? { error: review.error.message } : {}),
     verdict:
       asVerdict(analysis?.verdict) ??
       asVerdict(emit?.verdict) ??

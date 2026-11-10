@@ -109,6 +109,76 @@ describe('scoreReviewsSettled', () => {
   it('passes reviews that settled', () => {
     expect(scoreReviewsSettled(expected, artifacts({ reviews: [review()] })).score).toBe(1);
   });
+
+  it('fails a review whose execution failed, naming the status and the error', () => {
+    const result = scoreReviewsSettled(
+      expected,
+      artifacts({
+        reviews: [
+          review({ parked: false, status: 'failed', error: 'analysis step errored: boom' }),
+        ],
+      })
+    );
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('review failed');
+    expect(result.explanation).toContain('analysis step errored: boom');
+  });
+
+  it('fails a failed review that has no error message', () => {
+    const result = scoreReviewsSettled(
+      expected,
+      artifacts({ reviews: [review({ parked: false, status: 'failed' })] })
+    );
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('review failed');
+  });
+
+  it('fails a review that was cancelled while it was not parked at the gate', () => {
+    const result = scoreReviewsSettled(
+      expected,
+      artifacts({ reviews: [review({ parked: false, status: 'cancelled' })] })
+    );
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('review cancelled');
+  });
+
+  it('fails the row when one of several reviews failed', () => {
+    const result = scoreReviewsSettled(
+      expected,
+      artifacts({
+        reviews: [review(), review({ executionId: 'review-2', parked: false, status: 'failed' })],
+      })
+    );
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('review-2');
+  });
+
+  it('passes a completed review', () => {
+    const result = scoreReviewsSettled(
+      expected,
+      artifacts({ reviews: [review({ parked: false, status: 'completed' })] })
+    );
+    expect(result.score).toBe(1);
+  });
+
+  it('passes a review that is waiting at the analyst gate', () => {
+    const result = scoreReviewsSettled(
+      expected,
+      artifacts({ reviews: [review({ parked: true, status: 'waiting_for_input' })] })
+    );
+    expect(result.score).toBe(1);
+  });
+
+  it('reports a timeout as a timeout even when the execution also carries a failed status', () => {
+    const result = scoreReviewsSettled(
+      expected,
+      artifacts({
+        reviews: [review({ parked: false, status: 'failed', timedOutAfterMs: 300_000 })],
+      })
+    );
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('timed out after 5m');
+  });
 });
 
 describe('scoreParkedAtGate', () => {

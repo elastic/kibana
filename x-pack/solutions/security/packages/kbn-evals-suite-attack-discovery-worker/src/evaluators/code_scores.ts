@@ -131,18 +131,27 @@ export const scoreRunnerCompleted: CodeScorer = (_expected, artifacts) => {
       );
 };
 
-/** Every review ended or parked at the gate within the wait; one that ran out of time fails. */
+/**
+ * Every review completed or parked at the gate within the wait; one that ran out of time, failed
+ * or was cancelled fails. The review snapshot is read before teardown cancels a parked review.
+ */
 export const scoreReviewsSettled: CodeScorer = (_expected, artifacts) =>
   foldReviews(
     artifacts.reviews,
-    (review) =>
-      review.timedOutAfterMs !== undefined
-        ? fail(
-            `review timed out after ${Math.round(review.timedOutAfterMs / 60_000)}m (status ${
-              review.status
-            })`
-          )
-        : pass(`review ${review.status}`),
+    (review) => {
+      if (review.timedOutAfterMs !== undefined) {
+        return fail(
+          `review timed out after ${Math.round(review.timedOutAfterMs / 60_000)}m (status ${
+            review.status
+          })`
+        );
+      }
+      // The error is a plain string, so a model refusal cannot be told from a pipeline break
+      // here and every failed review gates.
+      return review.status === 'failed' || review.status === 'cancelled'
+        ? fail(`review ${review.status}${review.error ? `: ${review.error}` : ''}`)
+        : pass(`review ${review.status}`);
+    },
     'no review ran'
   );
 
