@@ -32,6 +32,7 @@ dependsOn:
   - '@kbn/i18n-react'
   - '@kbn/ui-callout'
   - '@kbn/react-kibana-context-styled'
+  - '@kbn/elastic-agent-condition-language'
 tags:
   - plugin
   - prod

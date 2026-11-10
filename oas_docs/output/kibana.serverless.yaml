@@ -48901,7 +48901,7 @@ paths:
                         policySettings:
                           additionalProperties:
                             default: null
-                            maxLength: 1024
+                            maxLength: 10000
                             nullable: true
                             type: string
                           description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
@@ -49207,7 +49207,7 @@ paths:
                 policySettings:
                   additionalProperties:
                     default: null
-                    maxLength: 1024
+                    maxLength: 10000
                     nullable: true
                     type: string
                   description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
@@ -49521,7 +49521,7 @@ paths:
                       policySettings:
                         additionalProperties:
                           default: null
-                          maxLength: 1024
+                          maxLength: 10000
                           nullable: true
                           type: string
                         description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
@@ -49974,7 +49974,7 @@ paths:
                       policySettings:
                         additionalProperties:
                           default: null
-                          maxLength: 1024
+                          maxLength: 10000
                           nullable: true
                           type: string
                         description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
@@ -50323,7 +50323,7 @@ paths:
                 policySettings:
                   additionalProperties:
                     default: null
-                    maxLength: 1024
+                    maxLength: 10000
                     nullable: true
                     type: string
                   description: Integration policy settings that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`). Replaces the stored settings; omit it to keep them.
@@ -50594,7 +50594,7 @@ paths:
                       policySettings:
                         additionalProperties:
                           default: null
-                          maxLength: 1024
+                          maxLength: 10000
                           nullable: true
                           type: string
                         description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
@@ -50974,7 +50974,7 @@ paths:
                         policySettings:
                           additionalProperties:
                             default: null
-                            maxLength: 1024
+                            maxLength: 10000
                             nullable: true
                             type: string
                           description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
@@ -142868,6 +142868,7 @@ paths:
                 getWorkflowExecutionsResponseExample:
                   description: Example response returning a paginated list of executions for a workflow
                   value:
+                    hasNamedExecution: false
                     page: 1
                     results:
                       - duration: 3000
@@ -153334,7 +153335,7 @@ components:
           minLength: 1
           type: string
         name:
-          description: Rule name (must be unique within the space).
+          description: Rule name.
           maxLength: 256
           minLength: 1
           type: string
@@ -153383,7 +153384,7 @@ components:
           nullable: true
           type: string
         name:
-          description: Rule name (must be unique within the space).
+          description: Rule name.
           maxLength: 256
           minLength: 1
           type: string
