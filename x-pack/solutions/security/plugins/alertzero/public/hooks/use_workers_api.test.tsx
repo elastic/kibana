@@ -85,7 +85,7 @@ describe('notifyWorkerUpdateError', () => {
     notifyWorkerUpdateError(toasts, error);
 
     expect(toasts.addError).toHaveBeenCalledWith(error, {
-      title: 'Unable to update the worker',
+      title: "Couldn't update the Worker",
       toastMessage: '500',
     });
     expect(toasts.addWarning).not.toHaveBeenCalled();
@@ -99,7 +99,7 @@ describe('notifyWorkerUpdateError', () => {
     notifyWorkerUpdateError(toasts, error);
 
     expect(toasts.addError).toHaveBeenCalledWith(error, {
-      title: 'Unable to update the worker',
+      title: "Couldn't update the Worker",
       toastMessage: 'Alert Triage cannot be turned on because no AI model is available.',
     });
   });
@@ -153,7 +153,7 @@ describe('notifyWorkerUpdateError', () => {
       notifyWorkerUpdateError(toasts, error);
 
       expect(toasts.addError).toHaveBeenCalledWith(error, {
-        title: 'Unable to update the worker',
+        title: "Couldn't update the Worker",
         toastMessage: '500',
       });
     });
@@ -182,7 +182,7 @@ describe('notifyWorkerUpdateError', () => {
       notifyWorkerUpdateError(toasts, error);
 
       expect(toasts.addError).toHaveBeenCalledWith(error, {
-        title: 'Unable to update the worker',
+        title: "Couldn't update the Worker",
         toastMessage: 'No response from the server',
       });
     });
@@ -191,7 +191,7 @@ describe('notifyWorkerUpdateError', () => {
       notifyWorkerUpdateError(toasts, '');
 
       expect(toasts.addError).toHaveBeenCalledWith(expect.any(Error), {
-        title: 'Unable to update the worker',
+        title: "Couldn't update the Worker",
         toastMessage: 'No response from the server',
       });
     });

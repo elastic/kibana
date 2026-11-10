@@ -100,7 +100,12 @@ export const CUSTOM_CONTENT_EDIT_EXAMPLES: CustomContentDatasetExample[] = [
       question: `${CREATE_PANEL} with a status card for each machine.os in ${LOGS}, showing the request count and an OK or Warning badge.`,
       followUp: 'Also show the average bytes per operating system in each card.',
     },
-    output: { data: 'query', edit: 'data', queryContains: ['machine.os', 'AVG(bytes)'] },
+    output: {
+      data: 'query',
+      edit: 'data',
+      addsMeasure: 'AVG(bytes)',
+      queryContains: ['machine.os', 'AVG(bytes)'],
+    },
     metadata: { useCase: 'data-edit', dataSource: 'logs' },
   },
   {
@@ -116,7 +121,7 @@ export const CUSTOM_CONTENT_EDIT_EXAMPLES: CustomContentDatasetExample[] = [
       question: `${CREATE_PANEL} with a banner: the title "Web Traffic Overview" on a blue gradient. It needs no data.`,
       followUp: `Now show the live total number of requests from ${LOGS} under the title. It must update with the dashboard time range.`,
     },
-    output: { data: 'query', edit: 'data' },
+    output: { data: 'query', edit: 'data', addsMeasure: 'COUNT(', queryContains: ['COUNT('] },
     metadata: { useCase: 'static-to-data-edit', dataSource: 'logs' },
   },
 ];

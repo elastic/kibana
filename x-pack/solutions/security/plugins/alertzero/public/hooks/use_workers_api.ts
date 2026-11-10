@@ -61,7 +61,7 @@ const workerSettingsForbiddenMessage = (name: string) =>
   });
 
 const WORKER_UPDATE_ERROR_TITLE = i18n.translate('xpack.alertzero.workerUpdateErrorMessage', {
-  defaultMessage: 'Unable to update the worker',
+  defaultMessage: "Couldn't update the Worker",
 });
 
 const workerUpdateErrorTitle = (name: string) =>

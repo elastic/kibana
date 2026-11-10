@@ -32,6 +32,12 @@ export const OWNER_SPACE_ID_TAG_PREFIX = 'ownerSpaceId:';
 /** Exception list entry field type used to store YARA rule text */
 export const CUSTOM_YARA_SIGNATURE_FIELD_TYPE = 'custom_yara_signature';
 
+/**
+ * Maximum YARA rule text size stored in the value field.
+ * Upper-bounded by Elasticsearch `keyword` (32766 UTF-8 bytes).
+ */
+export const MAX_YARA_RULE_CONTENT_BYTE_LENGTH = 32766;
+
 export const PROCESS_DESCENDANT_EXTRA_ENTRY: EntryMatch = Object.freeze({
   field: 'event.category',
   operator: 'included',

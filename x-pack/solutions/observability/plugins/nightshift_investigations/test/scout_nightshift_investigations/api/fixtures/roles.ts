@@ -5,12 +5,26 @@
  * 2.0.
  */
 
-import { NIGHTSHIFT_FEATURE_ID } from '@kbn/nightshift-shared';
+import {
+  NIGHTSHIFT_FEATURE_ID,
+  NIGHTSHIFT_MANAGE_ENGINES_SUB_FEATURE_ID,
+} from '@kbn/nightshift-shared';
 import type { KibanaRole } from '@kbn/scout-oblt';
 
 export const NIGHTSHIFT_MANAGE_ROLE: KibanaRole = {
   elasticsearch: { cluster: [], indices: [] },
   kibana: [{ base: [], feature: { [NIGHTSHIFT_FEATURE_ID]: ['all'] }, spaces: ['*'] }],
+};
+
+export const NIGHTSHIFT_MANAGE_ENGINES_ROLE: KibanaRole = {
+  elasticsearch: { cluster: [], indices: [] },
+  kibana: [
+    {
+      base: [],
+      feature: { [NIGHTSHIFT_FEATURE_ID]: ['all', NIGHTSHIFT_MANAGE_ENGINES_SUB_FEATURE_ID] },
+      spaces: ['*'],
+    },
+  ],
 };
 
 export const NIGHTSHIFT_READ_ROLE: KibanaRole = {

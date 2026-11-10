@@ -36,6 +36,12 @@ const LazyMeasureButton = lazy(() =>
   }))
 );
 
+const LazyFontInspectButton = lazy(() =>
+  import('@kbn/design-tools').then(({ FontInspectButton }) => ({
+    default: FontInspectButton,
+  }))
+);
+
 const LazyDesignToolsButton = lazy(() =>
   import('@kbn/design-tools').then(({ DesignToolsButton }) => ({
     default: DesignToolsButton,
@@ -77,6 +83,15 @@ export class DeveloperToolbarPlugin
       children: (
         <Suspense fallback={null}>
           <LazyMeasureButton />
+        </Suspense>
+      ),
+    });
+
+    this.registerItem({
+      id: 'Inspect Font',
+      children: (
+        <Suspense fallback={null}>
+          <LazyFontInspectButton />
         </Suspense>
       ),
     });

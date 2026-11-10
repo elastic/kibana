@@ -17,7 +17,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { SchedulingConfiguraton } from '@kbn/search-connectors';
-import { ConnectorStatus, ConnectorSchedulingComponent } from '@kbn/search-connectors';
+import { ConnectorStatus } from '@kbn/search-connectors';
+import { ConnectorSchedulingComponent } from '@kbn/search-connectors/components';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useHistory } from 'react-router-dom';

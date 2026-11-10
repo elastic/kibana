@@ -440,7 +440,7 @@ describe('ThreatEuiFlexGroup', () => {
       renderThreat([atlasEntry('AML.T0044'), attackEntry] as Threats);
 
       const titles = await screen.findAllByTestId('threatFrameworkGroupTitle');
-      expect(titles.map((title) => title.textContent)).toEqual(['MITRE ATT&CK', 'MITRE ATLAS']);
+      expect(titles.map((title) => title.textContent)).toEqual(['MITRE ATT&CK®', 'MITRE ATLAS™']);
       expect(screen.getByTestId('threatFrameworkGroup-enterprise')).toBeInTheDocument();
       expect(screen.getByTestId('threatFrameworkGroup-atlas')).toBeInTheDocument();
     });
@@ -461,7 +461,7 @@ describe('ThreatEuiFlexGroup', () => {
       renderThreat([atlasEntry('AML.T9999')] as Threats);
 
       const warning = await screen.findByTestId('threatUnsupportedMitreIdWarning-AML.T9999');
-      expect(warning).toHaveTextContent('MITRE ATLAS');
+      expect(warning).toHaveTextContent('MITRE ATLAS™');
     });
 
     it('renders an unknown framework as its own group with a warning and no id warnings', async () => {
@@ -483,7 +483,7 @@ describe('ThreatEuiFlexGroup', () => {
       renderThreat([{ ...attackEntry, framework: '' }] as Threats);
 
       expect(await screen.findByTestId('threatFrameworkGroupTitle')).toHaveTextContent(
-        'MITRE ATT&CK'
+        'MITRE ATT&CK®'
       );
       expect(screen.getByTestId('threatFrameworkGroup-enterprise')).toBeInTheDocument();
     });

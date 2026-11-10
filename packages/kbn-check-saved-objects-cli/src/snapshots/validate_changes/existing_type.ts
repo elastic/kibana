@@ -53,7 +53,6 @@ export function validateChangesExistingType({
       typeName: name,
       message: `Modifications have been detected in the '${name}.migrations'. This property is deprecated and no modifications are allowed.`,
       fixHint: `Revert any changes to '${name}.migrations' and use a model version instead.`,
-      docsAnchor: '#defining-model-versions',
     });
   }
 
@@ -67,7 +66,6 @@ export function validateChangesExistingType({
       typeName: name,
       message: `Some model versions have been deleted for SO type '${name}'.`,
       fixHint: `Restore the missing model version(s); existing model versions cannot be deleted.`,
-      docsAnchor: '#defining-model-versions',
     });
   }
 
@@ -98,7 +96,6 @@ export function validateChangesExistingType({
           typeName: name,
           message: `The '${name}' SO type has changes in the mappings, but is missing a modelVersion that defines these changes.`,
           fixHint: `Add a new model version with a 'mappings_addition' change describing the new fields.`,
-          docsAnchor: '#defining-model-versions',
         });
       }
       break;
@@ -123,7 +120,6 @@ export function validateChangesExistingType({
         typeName: name,
         message: `The SO type '${name}' is defining ${newModelVersionCount} new model versions, but can only define one at a time.`,
         fixHint: `Split the change across multiple PRs so each one introduces a single new model version.`,
-        docsAnchor: '#defining-model-versions',
       });
   }
 }

@@ -46,6 +46,20 @@ const sessionTimePickerStyles = css({
   maxWidth: '100%',
 });
 
+// Chat markdown wraps this card in EuiText. Its description-list margins push Summary
+// field names below a one-line cell. These rules only apply inside that wrapper.
+// TODO: Remove this temporary fix once Agent Builder renders attachment cards outside EuiText.
+const chatProseResetStyles = css({
+  '.euiText &': {
+    dl: {
+      marginBlockEnd: 0,
+    },
+    dt: {
+      marginBlock: 0,
+    },
+  },
+});
+
 const saveTableToDashboardButtonLabel = i18n.translate(
   'discover.agentBuilder.saveTableToDashboardButtonLabel',
   {
@@ -282,37 +296,39 @@ export const DiscoverSessionInline = ({
   }, [application, data, effectiveTimeRange, embeddableApi, locator, registerActionButtons]);
 
   return (
-    <SearchEmbeddableToolbarProvider value={toolbarSlot}>
-      {blockingError && (
-        <>
-          {toolbarLeftSide}
-          <EuiSpacer size="s" />
-        </>
-      )}
-      <div
-        css={css`
-          height: ${INLINE_TABLE_HEIGHT}px;
-          overflow: hidden;
-        `}
-      >
-        <EmbeddableRenderer<SearchEmbeddablePanelApiState, SearchEmbeddableApi>
-          key={embeddableKey}
-          maybeId={undefined}
-          type={SEARCH_EMBEDDABLE_TYPE}
-          getParentApi={() => parentApi}
-          onApiAvailable={setEmbeddableApi}
-          hidePanelChrome
-        />
-      </div>
-      {isSaveModalOpen && (
-        <SavedObjectSaveModalDashboard
-          objectType={saveModalObjectType}
-          documentInfo={{ title: data.title ?? '', description: data.description }}
-          canSaveByReference={false}
-          onClose={closeSaveModal}
-          onSave={onSaveToDashboard}
-        />
-      )}
-    </SearchEmbeddableToolbarProvider>
+    <div css={chatProseResetStyles} data-test-subj="discoverAgentBuilderSessionCard">
+      <SearchEmbeddableToolbarProvider value={toolbarSlot}>
+        {blockingError && (
+          <>
+            {toolbarLeftSide}
+            <EuiSpacer size="s" />
+          </>
+        )}
+        <div
+          css={css`
+            height: ${INLINE_TABLE_HEIGHT}px;
+            overflow: hidden;
+          `}
+        >
+          <EmbeddableRenderer<SearchEmbeddablePanelApiState, SearchEmbeddableApi>
+            key={embeddableKey}
+            maybeId={undefined}
+            type={SEARCH_EMBEDDABLE_TYPE}
+            getParentApi={() => parentApi}
+            onApiAvailable={setEmbeddableApi}
+            hidePanelChrome
+          />
+        </div>
+        {isSaveModalOpen && (
+          <SavedObjectSaveModalDashboard
+            objectType={saveModalObjectType}
+            documentInfo={{ title: data.title ?? '', description: data.description }}
+            canSaveByReference={false}
+            onClose={closeSaveModal}
+            onSave={onSaveToDashboard}
+          />
+        )}
+      </SearchEmbeddableToolbarProvider>
+    </div>
   );
 };
