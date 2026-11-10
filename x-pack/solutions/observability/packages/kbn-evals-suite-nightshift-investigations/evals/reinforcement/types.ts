@@ -86,6 +86,8 @@ export interface ReinforcementTaskOutput {
   traceId?: string;
   workflow_status?: string;
   execution_error?: string;
+  /** Set when the replay's trees could not be rolled back, which leaves them for later replays. */
+  rollback_error?: string;
   /** Submit calls, in order. Empty when the agent never submitted. */
   submissions: SubmitArguments[];
   /** Mermaid of the tree after the run, or the prior tree when the run did not replace it. */

@@ -88,6 +88,12 @@ const assertReinforcementScores = async ({
     })
     .toBe(runs.length * judgeCount);
 
+  // A failed rollback leaves trees that later replays snapshot as their baseline, so unlike a missed
+  // submit it fails the spec on its own, after the scores are recorded.
+  const rollbackErrors = runs
+    .map(({ output }) => output as ReinforcementTaskOutput)
+    .filter(({ rollback_error: rollbackError }) => rollbackError)
+    .map(({ case_id: caseId, rollback_error: rollbackError }) => `${caseId}: ${rollbackError}`);
   for (const run of runs) {
     const output = run.output as ReinforcementTaskOutput;
     expect(Array.isArray(output.submissions)).toBe(true);
@@ -128,6 +134,7 @@ const assertReinforcementScores = async ({
       .map((score) => `- ${score.evaluator.explanation ?? 'no explanation'}`)
       .join('\n')}`
   ).toBeGreaterThanOrEqual(MIN_CONSISTENT_RATE);
+  expect(rollbackErrors, 'Every replay must roll back its decision trees').toEqual([]);
 };
 
 evaluate.describe('Nightshift decision-tree reinforcement', { tag: suiteTags }, () => {

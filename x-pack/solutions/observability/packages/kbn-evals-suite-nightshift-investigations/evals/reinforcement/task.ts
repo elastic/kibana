@@ -633,6 +633,7 @@ export const runReinforcementExample = async ({
     result = {
       ...result,
       execution_error: [result.execution_error, rollback].filter(Boolean).join('\n'),
+      rollback_error: rollback,
     };
   }
   return result;

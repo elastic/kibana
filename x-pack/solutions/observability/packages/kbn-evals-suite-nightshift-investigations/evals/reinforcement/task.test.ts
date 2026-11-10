@@ -263,6 +263,7 @@ describe('runReinforcementExample', () => {
     });
 
     expect(output.execution_error).toContain('Rolling back the replay');
+    expect(output.rollback_error).toContain('delete failed');
     expect(log.warning).toHaveBeenCalledWith(expect.stringContaining('delete failed'));
   });
 

@@ -362,8 +362,9 @@ investigator response confirms a cause and those edges carry ✅, and that decla
 agree with the tree before the run and the tree after it. An LLM judge scores whether those merges
 and paths match the investigation. A run passes when its reinforce step finishes with a code score
 of 1, and the spec fails when fewer than 75% of runs pass: one miss in four replays passes, two
-fail. A replay that throws, or whose rollback fails, is a failed run rather than a failed
-experiment. It is not part of an unset or `all` run: selecting it exports
+fail. A replay that throws is a failed run rather than a failed experiment. A failed rollback
+also fails the spec outright once the scores are recorded, since it leaves trees for later
+replays. It is not part of an unset or `all` run: selecting it exports
 `NIGHTSHIFT_DECISION_TREES`, which enables decision trees without turning Wiki on. It cannot be
 combined with other dataset ids or with `NIGHTSHIFT_KNOWLEDGE`. Restart Scout when switching to or
 from it. Each example's trace is the reinforcement agent's Agent Builder trace, which shows the system prompt and the submit tool schema. It is not the eval task span.
