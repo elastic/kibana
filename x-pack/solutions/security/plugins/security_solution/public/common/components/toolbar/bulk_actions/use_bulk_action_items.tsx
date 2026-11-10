@@ -8,7 +8,6 @@
 import { useMemo, useCallback } from 'react';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { useBulkClosingReasonItems } from '@kbn/response-ops-detections-close-reason';
-import { flattenObject } from '@kbn/object-utils';
 import type { AlertTableContextMenuItem } from '../../../../detections/components/alerts_table/types';
 import { FILTER_ACKNOWLEDGED, FILTER_CLOSED, FILTER_OPEN } from '../../../../../common/types';
 import type {
@@ -29,6 +28,8 @@ import type { OnUpdateAlertStatusError, OnUpdateAlertStatusSuccess } from './typ
 import { useAlertCloseInfoModal } from '../../../../detections/hooks/use_alert_close_info_modal';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useRunDocumentWorkflowPanel } from '../../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel';
+import { toDocumentSelections } from '../../../../detections/components/alerts_table/timeline_actions/to_document_selections';
+import type { RunWorkflowSelectionScope } from '../../../../detections/components/alerts_table/timeline_actions/use_run_workflow_selection';
 import { ALERT_STATUS_ACTION_IDS } from '../../../constants/action_ids';
 
 export type BulkActionMenuItem = AlertTableContextMenuItem;
@@ -60,6 +61,15 @@ export interface BulkActionsProps {
   data?: TimelineItem[];
   closePopover?: () => void;
   showRunWorkflowActions?: boolean;
+  /** True when the user chose "select all N", so the selection exceeds the loaded rows. */
+  isAllSelected?: boolean;
+  /**
+   * Query context used to resolve a select-all beyond the loaded rows for the run-workflow
+   * action. Omit it and a run stays scoped to the loaded rows, as it always has.
+   */
+  selectionScope?: RunWorkflowSelectionScope;
+  /** Number of items a select-all covers, so the run-workflow action can refuse too many. */
+  totalItems?: number;
 }
 
 type CustomActionGroups = Pick<BulkActionGroups, 'casesItems' | 'timelineItems' | 'customItems'>;
@@ -121,6 +131,9 @@ export const useBulkActionItems = ({
   data,
   closePopover,
   showRunWorkflowActions = true,
+  isAllSelected,
+  selectionScope,
+  totalItems,
 }: BulkActionsProps) => {
   const { addSuccess, addError, addWarning } = useAppToasts();
   const { startTransaction } = useStartTransaction();
@@ -234,29 +247,20 @@ export const useBulkActionItems = ({
       },
     });
 
-  const workflowDocuments = useMemo(() => {
-    if (!data) return [];
-    return data
-      .filter((item) => eventIds.includes(item._id))
-      .map((item) => {
-        const flattened = flattenObject(item.ecs);
-        const fields: Record<string, unknown> = {};
-        for (const [field, value] of Object.entries(flattened)) {
-          fields[field] = value;
-        }
-        return {
-          _id: item._id,
-          _index: item._index ?? '',
-          ...fields,
-        };
-      });
-  }, [data, eventIds]);
+  // Ids only, to keep large selections under `server.maxPayload`.
+  const workflowDocumentIds = useMemo(
+    () => toDocumentSelections((data ?? []).filter(({ _id }) => eventIds.includes(_id))),
+    [data, eventIds]
+  );
 
   const noop = useCallback(() => {}, []);
   const { runWorkflowMenuItem, runDocumentWorkflowPanel } = useRunDocumentWorkflowPanel({
-    documents: workflowDocuments,
+    documentIds: workflowDocumentIds,
     closePopover: closePopover ?? noop,
     isBulk: true,
+    isAllSelected,
+    selectionScope,
+    totalItems,
   });
 
   const statusItems = useMemo<BulkActionMenuItem[]>(() => {

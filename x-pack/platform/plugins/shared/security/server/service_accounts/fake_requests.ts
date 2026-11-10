@@ -11,6 +11,7 @@ import type { FakeRawRequest, Headers, KibanaRequest, Logger } from '@kbn/core/s
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { brandSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
+import { ServiceAccountCredentialRefusedError } from './credential_refused_error';
 import { ServiceAccountTokenExchangeError } from './token_exchange_error';
 
 /**
@@ -20,6 +21,15 @@ import { ServiceAccountTokenExchangeError } from './token_exchange_error';
  * that keeps failing right after minting is never re-minted in a tight loop.
  */
 export const SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS = 10_000;
+
+/**
+ * Before a Kibana self call, a token younger than this share of its lifetime is reused even when it
+ * expires before the call's timeout. A timeout as long as a token lives (`kibana.request` and UIAM
+ * both use five minutes) would otherwise re-mint once every
+ * {@link SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS}. The handler still gets at least the rest of the
+ * lifetime, four minutes of a UIAM token.
+ */
+export const SERVICE_ACCOUNT_TOKEN_SELF_CALL_REUSE_SHARE = 0.2;
 
 /**
  * After a transient mint failure, further mint attempts are suppressed
@@ -38,6 +48,16 @@ export const SERVICE_ACCOUNT_MINT_FAILURE_BACKOFF_MS = 5_000;
  * retried after the mint-failure backoff.
  */
 export type ServiceAccountMintInterceptor = (mint: () => Promise<string>) => Promise<string>;
+
+/** A credential minted for a service account bound fake request. */
+export interface ServiceAccountMintedToken {
+  token: string;
+  /**
+   * How long the token stays valid after it was minted, as reported by the backend that issued it.
+   * Omitted when the backend does not say.
+   */
+  expiresInMs?: number;
+}
 
 /** What a backend is told about the request it mints a credential for. */
 export interface ServiceAccountMintOptions {
@@ -111,6 +131,8 @@ interface ServiceAccountFakeRequestEntry {
   token: string;
   createdAt: number;
   mintedAt: number;
+  /** When {@link token} expires upstream, or `undefined` when its backend did not say. */
+  expiresAt?: number;
   /** Single-flight mint: concurrent refreshes await the same exchange instead of stampeding UIAM. */
   inflight?: Promise<string>;
   retryAt?: number;
@@ -150,7 +172,7 @@ export class ServiceAccountFakeRequests {
     private readonly mintToken: (
       serviceAccountId: string,
       options: ServiceAccountMintOptions
-    ) => Promise<string>,
+    ) => Promise<ServiceAccountMintedToken>,
     private readonly requestLifetimeMs: number
   ) {}
 
@@ -175,7 +197,11 @@ export class ServiceAccountFakeRequests {
       );
     }
 
-    const token = await this.mintWithInterceptor(serviceAccountId, { boundAt }, mintInterceptor);
+    const { token, expiresAt } = await this.mintWithInterceptor(
+      serviceAccountId,
+      { boundAt },
+      mintInterceptor
+    );
 
     // The lowercase `authorization` key is load-bearing: the ES client derives a fake request's
     // credential by picking exact lowercased keys off its headers, so any other casing would
@@ -196,6 +222,7 @@ export class ServiceAccountFakeRequests {
       token,
       createdAt: now,
       mintedAt: now,
+      expiresAt,
       maxLifetimeMs: maxLifetimeMs ?? this.requestLifetimeMs,
       mintInterceptor,
       boundAt,
@@ -207,6 +234,15 @@ export class ServiceAccountFakeRequests {
 
   isServiceAccountRequest(request: KibanaRequest): boolean {
     return this.registry.has(request);
+  }
+
+  /**
+   * Whether the request is registered and its `authorization` header still carries the token this
+   * registry issued for it. Only then may its credential be replaced or vouched for.
+   */
+  carriesIssuedToken(request: KibanaRequest): boolean {
+    const entry = this.registry.get(request);
+    return entry !== undefined && hasIssuedToken(request, entry);
   }
 
   /**
@@ -222,7 +258,7 @@ export class ServiceAccountFakeRequests {
 
     // The headers are mutable in place, so a swapped credential would otherwise still be vouched
     // for as the service account while Elasticsearch authenticates someone else.
-    if (request.headers.authorization !== `Bearer ${entry.token}`) {
+    if (!hasIssuedToken(request, entry)) {
       this.logger.error(
         `Authorization header on a fake request bound to service account [${entry.serviceAccountId}] ` +
           `was replaced; refusing to identify the request as that service account.`
@@ -281,7 +317,7 @@ export class ServiceAccountFakeRequests {
         },
       }
     )
-      .then((token) => {
+      .then(({ token, expiresAt }) => {
         this.ensureStillRegistered(request, entry);
         this.ensureWithinLifetime(entry);
 
@@ -290,6 +326,7 @@ export class ServiceAccountFakeRequests {
         (request.headers as Record<string, string>).authorization = `Bearer ${token}`;
         entry.token = token;
         entry.mintedAt = Date.now();
+        entry.expiresAt = expiresAt;
         entry.retryAt = undefined;
         this.logger.debug(
           `Replaced the token of a fake request bound to service account ${entry.serviceAccountId}`
@@ -333,6 +370,61 @@ export class ServiceAccountFakeRequests {
   }
 
   /**
+   * Refreshes a token before it is handed to a caller that cannot renew it, aiming to cover
+   * `validForMs` without promising validity beyond the token's own lifetime.
+   *
+   * A token is reused while it is younger than {@link SERVICE_ACCOUNT_TOKEN_SELF_CALL_REUSE_SHARE}
+   * of its lifetime, and never for less than {@link SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS}. An older
+   * token is reused only when its reported expiry covers the call. A token of unknown lifetime only
+   * gets the shorter window, since there is no lifetime to take a share of.
+   *
+   * A token that is reused is returned without any other check, even when the request can no
+   * longer mint: an issued token keeps its upstream expiry. Otherwise, throws
+   * {@link ServiceAccountCredentialRefusedError} when the request will never get a replacement or
+   * was released while one was minted, and whatever {@link ensureFreshToken} throws when a
+   * replacement failed for now.
+   */
+  async refreshTokenBeforeUse(request: KibanaRequest, validForMs: number): Promise<string> {
+    const entry = this.registry.get(request);
+    if (!entry) {
+      throw new Error('The provided request is not bound to a service account.');
+    }
+
+    const now = Date.now();
+    const reuseWindowMs =
+      entry.expiresAt === undefined
+        ? SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS
+        : Math.max(
+            SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS,
+            (entry.expiresAt - entry.mintedAt) * SERVICE_ACCOUNT_TOKEN_SELF_CALL_REUSE_SHARE
+          );
+    if (
+      now - entry.mintedAt <= reuseWindowMs ||
+      (entry.expiresAt !== undefined && entry.expiresAt - now >= validForMs)
+    ) {
+      return entry.token;
+    }
+
+    let token: string;
+    try {
+      // The reuse window has elapsed, and the token's lifetime is insufficient or unknown.
+      token = await this.ensureFreshToken(request, 0);
+    } catch (err) {
+      if (this.registry.get(request) !== entry || entry.nonRetryableError) {
+        throw new ServiceAccountCredentialRefusedError();
+      }
+      throw err;
+    }
+
+    // A release strips the credential the call was started with. Sending the call anyway would
+    // run it with no credential at all, so it fails instead.
+    if (this.registry.get(request) !== entry) {
+      throw new ServiceAccountCredentialRefusedError();
+    }
+    return token;
+  }
+
+  /**
    * Drops the request from the registry and strips its credential.
    * Idempotent; returns whether the request was registered.
    */
@@ -347,18 +439,31 @@ export class ServiceAccountFakeRequests {
     return released;
   }
 
-  private mintWithInterceptor(
+  private async mintWithInterceptor(
     serviceAccountId: string,
     options: ServiceAccountMintOptions,
     mintInterceptor?: ServiceAccountMintInterceptor,
     { onExchangeFailure }: { onExchangeFailure?: (error: unknown) => void } = {}
-  ): Promise<string> {
-    const mint = () =>
-      this.mintToken(serviceAccountId, options).catch((error) => {
+  ): Promise<{ token: string; expiresAt?: number }> {
+    // The interceptor contract deals in plain tokens, so the expiry of the one it returns is kept
+    // aside rather than threaded through it.
+    let minted: { token: string; expiresAt?: number } | undefined;
+    const mint = async () => {
+      // The lifetime is counted from before the exchange was sent, not from when it answered: the
+      // token was issued somewhere in between, and erring early never overstates what is left.
+      const requestedAt = Date.now();
+      try {
+        const { token, expiresInMs } = await this.mintToken(serviceAccountId, options);
+        minted = { token, expiresAt: toExpiresAt(requestedAt, expiresInMs) };
+        return token;
+      } catch (error) {
         onExchangeFailure?.(error);
         throw error;
-      });
-    return mintInterceptor ? mintInterceptor(mint) : mint();
+      }
+    };
+
+    const token = await (mintInterceptor ? mintInterceptor(mint) : mint());
+    return { token, expiresAt: token === minted?.token ? minted.expiresAt : undefined };
   }
 
   private ensureStillRegistered(
@@ -388,3 +493,9 @@ export class ServiceAccountFakeRequests {
     }
   }
 }
+
+const toExpiresAt = (requestedAt: number, expiresInMs: number | undefined): number | undefined =>
+  expiresInMs !== undefined && expiresInMs > 0 ? requestedAt + expiresInMs : undefined;
+
+const hasIssuedToken = (request: KibanaRequest, entry: ServiceAccountFakeRequestEntry): boolean =>
+  request.headers.authorization === `Bearer ${entry.token}`;

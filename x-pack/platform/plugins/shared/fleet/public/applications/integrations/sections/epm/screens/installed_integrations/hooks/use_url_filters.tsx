@@ -55,7 +55,7 @@ export function useViewPolicies() {
       history.push({
         search: toUrlParams(
           {
-            ...omit(urlParams, 'viewPolicies'),
+            ...omit(urlParams, 'viewPolicies', 'viewInstances'),
             ...(packageName ? { viewPolicies: packageName } : {}),
           },
           {
@@ -114,4 +114,38 @@ export function useUrlFilters(): InstalledIntegrationsFilter {
       q,
     };
   }, [urlParams]);
+}
+
+export function useViewOnboardingInstances() {
+  const { toUrlParams, urlParams } = useUrlParams();
+  const history = useHistory();
+
+  // Opening one drawer closes the other, so both params are always dropped before setting one.
+  const addViewOnboardingInstances = useCallback(
+    (packageName: string) => {
+      history.push({
+        search: toUrlParams(
+          {
+            ...omit(urlParams, 'viewPolicies', 'viewInstances'),
+            ...(packageName ? { viewInstances: packageName } : {}),
+          },
+          {
+            skipEmptyString: true,
+          }
+        ),
+      });
+    },
+    [urlParams, toUrlParams, history]
+  );
+
+  const selectedPackageViewOnboardingInstances = useMemo(() => {
+    if (typeof urlParams.viewInstances === 'string') {
+      return urlParams.viewInstances;
+    }
+  }, [urlParams]);
+
+  return {
+    addViewOnboardingInstances,
+    selectedPackageViewOnboardingInstances,
+  };
 }

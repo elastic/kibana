@@ -9,6 +9,8 @@ import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks
 import { MonitorConfigRepository } from './monitor_config_repository';
 import type { SyntheticsMonitor } from '../../common/runtime_types';
 import { ConfigKey } from '../../common/runtime_types';
+import { fullHttpMonitor } from '../../common/runtime_types/test_helpers/monitor_fixtures';
+import { scheduleIntervalModelVersion } from '../saved_objects/synthetics_monitor/schedule_model_version';
 import * as utils from '../synthetics_service/utils';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
@@ -21,6 +23,7 @@ import {
   syntheticsMonitorSavedObjectType,
 } from '../../common/types/saved_objects';
 import { MONITOR_SEARCH_FIELDS } from '../routes/common';
+import { SCHEDULE_INTERVAL_FIELD } from '../../common/lib/schedule_to_time';
 
 // Mock the utils functions
 jest.mock('../synthetics_service/utils', () => ({
@@ -301,6 +304,31 @@ describe('MonitorConfigRepository', () => {
 
       expect(result).toBe(mockCreatedMonitor);
     });
+
+    it('stores the schedule duration in seconds', async () => {
+      const id = 'test-id';
+      const normalizedMonitor = {
+        name: 'Test Monitor',
+        [ConfigKey.SCHEDULE]: { number: '10', unit: 'm' },
+      } as unknown as SyntheticsMonitor;
+      soClient.create.mockResolvedValue({
+        id,
+        attributes: {},
+        type: syntheticsMonitorSavedObjectType,
+        references: [],
+      });
+
+      await repository.create({ id, normalizedMonitor, spaceId: 'default' });
+
+      expect(soClient.create).toHaveBeenCalledWith(
+        syntheticsMonitorSavedObjectType,
+        expect.objectContaining({
+          [ConfigKey.SCHEDULE]: { number: '10', unit: 'm' },
+          [SCHEDULE_INTERVAL_FIELD]: 600,
+        }),
+        expect.any(Object)
+      );
+    });
   });
 
   describe('createBulk', () => {
@@ -370,6 +398,31 @@ describe('MonitorConfigRepository', () => {
 
       expect(result).toBe(mockBulkCreateResult.saved_objects);
     });
+
+    it('stores the schedule duration in seconds', async () => {
+      soClient.bulkCreate.mockResolvedValue({ saved_objects: [] });
+
+      await repository.createBulk({
+        monitors: [
+          {
+            id: 'test-id',
+            monitor: {
+              name: 'Test Monitor',
+              [ConfigKey.SCHEDULE]: { number: '10', unit: 's' },
+            } as any,
+          },
+        ],
+      });
+
+      expect(soClient.bulkCreate).toHaveBeenCalledWith([
+        expect.objectContaining({
+          attributes: expect.objectContaining({
+            [ConfigKey.SCHEDULE]: { number: '10', unit: 's' },
+            [SCHEDULE_INTERVAL_FIELD]: 10,
+          }),
+        }),
+      ]);
+    });
   });
 
   describe('update', () => {
@@ -438,6 +491,88 @@ describe('MonitorConfigRepository', () => {
       });
       expect(result).toBe(mockCreated);
     });
+
+    it('passes the create schema when a space change recreates the monitor', async () => {
+      const id = 'test-id';
+      const previousSpaces = ['default'];
+      const nextSpaces = ['space-2'];
+      const data = {
+        ...fullHttpMonitor(),
+        spaces: nextSpaces,
+      };
+      const decryptedPreviousMonitor = {
+        id,
+        type: syntheticsMonitorSavedObjectType,
+        namespaces: previousSpaces,
+        attributes: { ...data, spaces: previousSpaces },
+        references: [],
+      } as any;
+
+      soClient.delete.mockResolvedValue({} as any);
+      soClient.create.mockResolvedValue({
+        id,
+        attributes: data,
+        type: syntheticsMonitorSavedObjectType,
+      } as any);
+
+      await repository.update(id, data as any, decryptedPreviousMonitor);
+
+      const stored = {
+        ...data,
+        [SCHEDULE_INTERVAL_FIELD]: 300,
+      };
+      expect(soClient.delete).toHaveBeenCalledWith(syntheticsMonitorSavedObjectType, id, {
+        force: true,
+      });
+      expect(soClient.create).toHaveBeenCalledWith(syntheticsMonitorSavedObjectType, stored, {
+        id,
+        initialNamespaces: nextSpaces,
+        references: undefined,
+      });
+      // Validate what the repository handed to the saved-object client, not the test input.
+      const [, createdAttributes] = soClient.create.mock.calls[0];
+      expect(scheduleIntervalModelVersion.schemas?.create?.validate(createdAttributes)).toEqual(
+        createdAttributes
+      );
+    });
+
+    it('recomputes the duration when the schedule changes from minutes to seconds', async () => {
+      const id = 'test-id';
+      const decryptedPreviousMonitor = {
+        id,
+        type: syntheticsMonitorSavedObjectType,
+        namespaces: ['default'],
+        attributes: {
+          [ConfigKey.SCHEDULE]: { number: '10', unit: 'm' },
+          [SCHEDULE_INTERVAL_FIELD]: 600,
+        },
+        references: [],
+      } as any;
+      const data = {
+        name: 'Test Monitor',
+        spaces: ['default'],
+        [ConfigKey.SCHEDULE]: { number: '10', unit: 's' },
+        [SCHEDULE_INTERVAL_FIELD]: 600,
+      } as any;
+      soClient.update.mockResolvedValue({
+        id,
+        attributes: data,
+        type: syntheticsMonitorSavedObjectType,
+        references: [],
+      } as any);
+
+      await repository.update(id, data, decryptedPreviousMonitor);
+
+      expect(soClient.update).toHaveBeenCalledWith(
+        syntheticsMonitorSavedObjectType,
+        id,
+        expect.objectContaining({
+          [ConfigKey.SCHEDULE]: { number: '10', unit: 's' },
+          [SCHEDULE_INTERVAL_FIELD]: 10,
+        }),
+        expect.objectContaining({ mergeAttributes: false })
+      );
+    });
   });
 
   describe('bulkUpdate', () => {
@@ -496,6 +631,43 @@ describe('MonitorConfigRepository', () => {
       ]);
 
       expect(result).toEqual(mockBulkUpdateResult);
+    });
+
+    it('recomputes the duration when the schedule changes from minutes to seconds', async () => {
+      const monitors = [
+        {
+          id: 'test-id',
+          attributes: {
+            name: 'Updated Monitor',
+            spaces: ['default'],
+            [ConfigKey.SCHEDULE]: { number: '10', unit: 's' },
+            [SCHEDULE_INTERVAL_FIELD]: 600,
+          },
+          previousMonitor: {
+            id: 'test-id',
+            type: syntheticsMonitorSavedObjectType,
+            namespaces: ['default'],
+            attributes: {
+              [ConfigKey.SCHEDULE]: { number: '10', unit: 'm' },
+              [SCHEDULE_INTERVAL_FIELD]: 600,
+            },
+            references: [],
+          },
+        },
+      ] as any;
+      soClient.bulkUpdate.mockResolvedValue({ saved_objects: [] });
+
+      await repository.bulkUpdate({ monitors });
+
+      expect(soClient.bulkUpdate).toHaveBeenCalledWith([
+        expect.objectContaining({
+          id: 'test-id',
+          attributes: expect.objectContaining({
+            [ConfigKey.SCHEDULE]: { number: '10', unit: 's' },
+            [SCHEDULE_INTERVAL_FIELD]: 10,
+          }),
+        }),
+      ]);
     });
 
     it('should update multiple monitors in bulk when spaces do not change', async () => {
@@ -720,6 +892,56 @@ describe('MonitorConfigRepository', () => {
           },
         ],
       });
+    });
+
+    it('passes the create schema when a space change recreates the monitor', async () => {
+      const id = 'test-id';
+      const previousSpaces = ['default'];
+      const nextSpaces = ['space-2'];
+      const attributes = {
+        ...fullHttpMonitor(),
+        spaces: nextSpaces,
+      };
+      soClient.bulkDelete.mockResolvedValue({} as any);
+      soClient.bulkCreate.mockResolvedValue({ saved_objects: [] } as any);
+
+      await repository.bulkUpdate({
+        monitors: [
+          {
+            id,
+            attributes: attributes as any,
+            previousMonitor: {
+              id,
+              type: syntheticsMonitorSavedObjectType,
+              namespaces: previousSpaces,
+              attributes: {},
+              references: [],
+            } as any,
+          },
+        ],
+      });
+
+      const stored = {
+        ...attributes,
+        [SCHEDULE_INTERVAL_FIELD]: 300,
+      };
+      expect(soClient.bulkDelete).toHaveBeenCalledWith(
+        [{ id, type: syntheticsMonitorSavedObjectType }],
+        { force: true }
+      );
+      expect(soClient.bulkCreate).toHaveBeenCalledWith([
+        {
+          id,
+          type: syntheticsMonitorSavedObjectType,
+          attributes: stored,
+          initialNamespaces: nextSpaces,
+        },
+      ]);
+      const [createdObjects] = soClient.bulkCreate.mock.calls[0];
+      const createdAttributes = createdObjects[0].attributes;
+      expect(scheduleIntervalModelVersion.schemas?.create?.validate(createdAttributes)).toEqual(
+        createdAttributes
+      );
     });
   });
 

@@ -31,14 +31,10 @@ export function getEsql({
 }) {
   return getEsqlFn({
     getStartDependencies: async (getKibanaRequest) => {
-      const [{ savedObjects, uiSettings }, , { search }] = await getStartServices();
-      const request = getKibanaRequest();
-      const savedObjectsClient = savedObjects.getScopedClient(request);
-      const scopedClient = search.asScoped(request);
+      const [, , { search }] = await getStartServices();
 
       return {
-        searchService: scopedClient,
-        uiSettings: uiSettings.asScopedToClient(savedObjectsClient),
+        searchService: search.asScoped(getKibanaRequest()),
       };
     },
   });

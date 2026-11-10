@@ -11,7 +11,6 @@ import type {
   SignificantEventsSortOrder,
 } from '@kbn/significant-events-plugin/common';
 import { useFetchErrorToast } from '../../hooks/use_fetch_error_toast';
-import { applyPendingInvestigationCompletions } from '../../hooks/use_fetch_significant_events';
 import { useKibana } from '../../hooks/use_kibana';
 import { significantEventsListQueryKey } from '../query_keys';
 import { hasInvestigationsToPoll } from './investigation_state';
@@ -34,24 +33,18 @@ export const useSignificantEventsList = (params: SignificantEventsListParams) =>
   return useQuery({
     queryKey: significantEventsListQueryKey(params),
     queryFn: async ({ signal }) => {
-      const response = await significantEventsRepositoryClient.fetch(
-        'GET /internal/significant_events/events',
-        {
-          params: {
-            query: {
-              ...toEventsFilterQuery(filters),
-              page,
-              perPage,
-              sort_field: sortField,
-              sort_order: sortOrder,
-            },
+      return significantEventsRepositoryClient.fetch('GET /internal/significant_events/events', {
+        params: {
+          query: {
+            ...toEventsFilterQuery(filters),
+            page,
+            perPage,
+            sort_field: sortField,
+            sort_order: sortOrder,
           },
-          signal: signal ?? null,
-        }
-      );
-
-      // Keep completions the flyout saw before the server records them.
-      return { ...response, hits: applyPendingInvestigationCompletions(response.hits) };
+        },
+        signal: signal ?? null,
+      });
     },
     keepPreviousData: true,
     refetchInterval: (data) =>

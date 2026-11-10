@@ -92,18 +92,23 @@ describe('ki_get', () => {
       },
     });
 
-    expect(search).toHaveBeenCalledWith({
-      index: DEST_VALUE,
-      ignore_unavailable: true,
-      allow_no_indices: true,
-      query: {
-        bool: {
-          filter: [kiIdQuery('ki-1'), { term: { _index: BACKING_INDEX } }],
+    expect(search).toHaveBeenCalledWith(
+      {
+        index: DEST_VALUE,
+        ignore_unavailable: true,
+        allow_no_indices: true,
+        query: {
+          bool: {
+            filter: [kiIdQuery('ki-1'), { term: { _index: BACKING_INDEX } }],
+          },
         },
+        sort: [{ '@timestamp': { order: 'desc', unmapped_type: 'date' } }],
+        size: 10,
+        seq_no_primary_term: true,
+        _source: true,
       },
-      sort: [{ '@timestamp': { order: 'desc', unmapped_type: 'date' } }],
-      size: 1,
-    });
+      { signal: undefined }
+    );
   });
 
   it('breaks an equal-timestamp tie on a data stream by the greatest _id', async () => {
@@ -143,7 +148,9 @@ describe('ki_get', () => {
       id: 'ki-1',
       document: { id: 'ki-1', '@timestamp': '2026-01-01T00:00:00Z', title: 'B' },
     });
-    expect(search).toHaveBeenCalledWith(expect.objectContaining({ size: 10 }));
+    expect(search).toHaveBeenCalledWith(expect.objectContaining({ size: 10 }), {
+      signal: undefined,
+    });
   });
 
   it('returns a deleted KI when lifecycleStatuses includes deleted', async () => {
@@ -286,8 +293,9 @@ describe('ki_get', () => {
     expect(search).toHaveBeenCalledWith(
       expect.objectContaining({
         index: 'ai-index-ds-sample',
-        query: { bool: { filter: [kiIdQuery('ki-1')] } },
-      })
+        query: kiIdQuery('ki-1'),
+      }),
+      { signal: undefined }
     );
   });
 
@@ -358,7 +366,11 @@ describe('ki_get', () => {
             filter: [kiIdQuery('ki-1'), { term: { _index: 'idx-b' } }],
           },
         },
-      })
+        size: 10,
+        seq_no_primary_term: true,
+        _source: true,
+      }),
+      { signal: undefined }
     );
   });
 });

@@ -139,6 +139,15 @@ describe('Histogram', () => {
     expect(screen.getByText('Lens embeddable')).toBeVisible();
   });
 
+  it('exposes the series type of the rendered chart', async () => {
+    await renderComponent();
+
+    expect(screen.getByTestId('unifiedHistogramChart')).toHaveAttribute(
+      'data-series-type',
+      'bar_stacked'
+    );
+  });
+
   it('should only update lens.EmbeddableComponent props when fetch$ is triggered', async () => {
     const { fetch$, fetchParams, lensVisMock } = await renderComponent();
 

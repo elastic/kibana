@@ -271,6 +271,7 @@ export const User: FC<UserProps> = memo(function User({
 
   const { tabs, selectedTabId, setSelectedTabId } = useEntityPanelTabs({
     entityRecord: observedUser.entityRecord ?? null,
+    isGroupView,
   });
 
   const tabsNode = tabs ? (
@@ -337,6 +338,7 @@ export const User: FC<UserProps> = memo(function User({
             entityType: EntityType.user,
             entityName: userName,
             entityId: entityStoreEntityId,
+            scopeId,
             onShowEntity: onOpenUser,
             title: userName,
             subTab: path.subTab as RiskScoreLeftPanelSubTab | undefined,
@@ -482,6 +484,7 @@ export const User: FC<UserProps> = memo(function User({
             onCriticalitySave={onCriticalitySave}
           />
         )}
+        {isGroupView && !tabs && <EuiSpacer size="l" />}
         {tabsNode}
         {tabs && <EuiSpacer size="l" />}
         {tabs && selectedTabId === TABLE_TAB_ID && observedUser.entityRecord ? (

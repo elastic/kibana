@@ -29,6 +29,7 @@ import { promqlFunctionDefinitions } from '@elastic/esql-definitions/promql-func
 import { promqlOperatorDefinitions as pkgPromqlOperatorDefs } from '@elastic/esql-definitions/promql-operators';
 import { promqlFunctionDocs } from '@elastic/esql-definitions/promql-function-docs';
 import { promqlOperatorDocs } from '@elastic/esql-definitions/promql-operator-docs';
+import { toDefaultMessage } from '../lib/docs';
 import type { GeneratedFile } from '../lib/generated_file';
 import {
   GENERATED_DEFINITIONS_DIR,
@@ -329,7 +330,7 @@ const renderFunctionDefinition = (
 const ${getDefinitionName(name)}: FunctionDefinition = {
   type: FunctionDefinitionTypes.${type.toUpperCase()},
   name: EsqlFunctionNames.${name.toUpperCase()},
-    description: i18n.translate('kbn-esql-language.esql.definitions.${name}', { defaultMessage: ${JSON.stringify(
+    description: i18n.translate('esqlLanguage.esql.definitions.${name}', { defaultMessage: ${toDefaultMessage(
     removeAsciiDocInternalCrossReferences(removeInlineAsciiDocLinks(description), functionNames)
   )} }),${functionDefinition.ignoreAsSuggestion ? 'ignoreAsSuggestion: true,' : ''}${
     functionDefinition.tsdbCompatible === false ? '\n  tsdbCompatible: false,' : ''
@@ -497,7 +498,7 @@ function printPromQLFunctionsGeneratedFile(definitions: PromQLESFunctionDefiniti
 const ${getDefinitionName(name)}: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.${type.toUpperCase()},
   name: '${name}',
-  description: i18n.translate('kbn-esql-language.promql.definitions.${name}', { defaultMessage: ${JSON.stringify(
+  description: i18n.translate('esqlLanguage.promql.definitions.${name}', { defaultMessage: ${toDefaultMessage(
       description
     )} }),
   ${snapshot_only ? 'ignoreAsSuggestion: true,' : ''}
@@ -549,7 +550,7 @@ const ${getDefinitionName(name)}: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.OPERATOR,
   name: '${name}',
   operator: '${operator}',
-  description: i18n.translate('kbn-esql-language.promql.definitions.${name}', { defaultMessage: ${JSON.stringify(
+  description: i18n.translate('esqlLanguage.promql.definitions.${name}', { defaultMessage: ${toDefaultMessage(
       description
     )} }),
   ${snapshot_only ? 'ignoreAsSuggestion: true,' : ''}
@@ -601,7 +602,7 @@ const ${getDefinitionName(name)}: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.LABEL_MATCHING_OPERATOR,
   name: '${name}',
   operator: '${operator}',
-  description: i18n.translate('kbn-esql-language.promql.definitions.${name}', { defaultMessage: ${JSON.stringify(
+  description: i18n.translate('esqlLanguage.promql.definitions.${name}', { defaultMessage: ${toDefaultMessage(
       description
     )} }),
   ${snapshot_only ? 'ignoreAsSuggestion: true,' : ''}

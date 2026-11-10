@@ -5,29 +5,22 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
+import React from 'react';
 import { RESPONSE_ACTIONS_HISTORY } from '../../../../app/translations';
+import { useKibana } from '../../../../common/lib/kibana';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 import { ResponseActionsLog } from '../../../components/endpoint_response_actions_list/response_actions_log';
-import { UX_MESSAGES } from '../../../components/endpoint_response_actions_list/translations';
 
 export const ResponseActionsListPage = () => {
-  const [hideHeader, setHideHeader] = useState(true);
-  const resetPageHeader = useCallback((isData: boolean) => {
-    setHideHeader(!isData);
-  }, []);
+  const { docLinks } = useKibana().services;
+
   return (
     <AdministrationListPage
       data-test-subj="responseActionsPage"
       title={RESPONSE_ACTIONS_HISTORY}
-      subtitle={UX_MESSAGES.pageSubTitle}
-      hideHeader={hideHeader}
+      docLink={docLinks.links.securitySolution.responseActionsHistory}
     >
-      <ResponseActionsLog
-        showHostNames={true}
-        isFlyout={false}
-        setIsDataInResponse={resetPageHeader}
-      />
+      <ResponseActionsLog showHostNames={true} isFlyout={false} />
     </AdministrationListPage>
   );
 };
