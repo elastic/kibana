@@ -14,7 +14,10 @@ import type { SignificantEventsServer } from '../../../types';
 import { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 
 describe('startKiIdentificationToolHandler', () => {
-  const setup = (maintenanceState: 'enabled' | 'paused' = 'enabled') => {
+  const setup = (
+    maintenanceState: 'enabled' | 'paused' = 'enabled',
+    principal: { type: 'service_account'; serviceAccountId: string } | undefined = undefined
+  ) => {
     const managementApi = {
       getWorkflow: jest.fn().mockResolvedValue({
         id: 'system-sources-ki-onboarding-bound-default',
@@ -43,6 +46,15 @@ describe('startKiIdentificationToolHandler', () => {
     const server = {
       inference: { getConnectorById },
       core: {
+        security: {
+          authc: { getPrincipal: jest.fn(() => principal) },
+          serviceAccounts: {
+            isEnabled: () => true,
+            getWorkloadBinding: jest
+              .fn()
+              .mockResolvedValue({ serviceAccountId: 'kibana/detection' }),
+          },
+        },
         savedObjects: { getScopedClient: jest.fn() },
         uiSettings: {
           asScopedToClient: jest.fn(() => ({ get: jest.fn().mockResolvedValue(false) })),
@@ -94,6 +106,25 @@ describe('startKiIdentificationToolHandler', () => {
       request,
       'nightshift-detection-engine'
     );
+  });
+
+  it('refuses a service account that is not the space detection account before the run starts', async () => {
+    const { managementApi, streamsKIsOnboardingClient, maintenanceService, request, server } =
+      setup('enabled', { type: 'service_account', serviceAccountId: 'kibana/other' });
+
+    await expect(
+      startKiIdentificationToolHandler({
+        sourceId: 'logs.nginx',
+        sourceSlug: 'logs-nginx',
+        steps: [KIsOnboardingStep.FeaturesIdentification],
+        server,
+        streamsKIsOnboardingClient,
+        maintenanceService,
+        request,
+      })
+    ).rejects.toMatchObject({ statusCode: 403 });
+
+    expect(managementApi.runWorkflow).not.toHaveBeenCalled();
   });
 
   it('rejects with SignificantEventsPausedError while paused', async () => {

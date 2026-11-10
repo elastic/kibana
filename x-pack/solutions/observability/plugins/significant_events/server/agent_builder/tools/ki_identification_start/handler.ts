@@ -13,6 +13,7 @@ import type {
   SignificantEventsKIsOnboardingInputs,
 } from '../../../lib/workflows/onboarding_workflow_client';
 import type { SignificantEventsMaintenanceService } from '../../../lib/maintenance/maintenance_service';
+import { assertServiceAccountActsForSpace } from '../../../lib/service_accounts/detection_engine_account';
 import { assertNotPaused } from '../../../routes/utils/assert_not_paused';
 import { NIGHTSHIFT_SOURCES_APP_PATH } from '../../../../common/constants';
 import type { SignificantEventsServer } from '../../../types';
@@ -48,8 +49,15 @@ export async function startKiIdentificationToolHandler({
   maintenanceService,
   request,
 }: StartKiIdentificationHandlerParams): Promise<StartKiIdentificationHandlerResult> {
-  // Agent Builder bypasses the HTTP onboarding route; enforce the same pause
-  // gate so Nightshift cannot start onboarding while activity is paused.
+  // Agent Builder bypasses the HTTP onboarding route, whose scoped clients refuse a service account
+  // that is not the space's detection account. Enforce the same here: the run executes as that
+  // account, so another account must not be able to start it through this tool.
+  await assertServiceAccountActsForSpace({
+    core: server.core,
+    request,
+    spaceId: request.spaceId,
+  });
+  // Same for the pause gate, so Nightshift cannot start onboarding while activity is paused.
   await assertNotPaused({ maintenanceService, request });
 
   // The run executes as the detection engine service account, which may reach connectors the

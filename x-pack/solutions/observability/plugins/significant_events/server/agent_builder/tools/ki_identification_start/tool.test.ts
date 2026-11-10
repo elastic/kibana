@@ -48,7 +48,11 @@ describe('createKiIdentificationStartTool', () => {
     };
 
     const tool = createKiIdentificationStartTool({
-      server: createSignificantEventsServer({ featurePrivilege }),
+      server: {
+        ...createSignificantEventsServer({ featurePrivilege }),
+        // A user's request: the service account guard has nothing to refuse.
+        core: { security: { authc: { getPrincipal: () => undefined } } } as never,
+      },
       telemetry: telemetry as never,
       streamsKIsOnboardingClient,
       maintenanceService: maintenanceService as never,
