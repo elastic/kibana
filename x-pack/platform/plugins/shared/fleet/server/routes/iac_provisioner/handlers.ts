@@ -305,12 +305,18 @@ export const deleteProvisioningCallbackHandler: FleetRequestHandler<
 /**
  * Called by the stack's Lambda. The route is not authenticated: the only thing that admits the
  * report is the record's own token, presented in a header and checked by the service.
+ *
+ * The flag is a runtime one, read per request, so the route cannot be left unregistered while
+ * it is off; it answers as a missing route does instead, before any record is looked up.
  */
 export const receiveProvisioningCallbackHandler: FleetRequestHandler<
   TypeOf<typeof ReceiveProvisioningCallbackRequestSchema.params>,
   undefined,
   TypeOf<typeof ReceiveProvisioningCallbackRequestSchema.body>
 > = async (context, request, response) => {
+  if (!(await isAwsIdentityFederationEnabled(context))) {
+    return response.notFound(AWS_IDENTITY_FEDERATION_DISABLED);
+  }
   const logger = appContextService
     .getLogger()
     .get('IacProvisioner receiveProvisioningCallbackHandler');

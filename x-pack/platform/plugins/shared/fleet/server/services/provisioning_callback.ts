@@ -91,6 +91,18 @@ export type ProvisioningCallbackReceiveResult =
   /** Fields are individually well-formed but disagree with each other. */
   | { outcome: 'invalid'; message: string };
 
+/** What the audit log says about each outcome of a report; `invalid` carries its own message. */
+const RECEIVE_OUTCOME_REASONS: Record<
+  Exclude<ProvisioningCallbackReceiveResult['outcome'], 'invalid'>,
+  string
+> = {
+  received: 'report accepted',
+  receiving: 'same report already being applied',
+  not_found: 'no such record, or the token is not the one bound to it',
+  conflict: 'different values already received for this record',
+  gone: 'record expired or cancelled',
+};
+
 const RECEIVED_FIELDS: Array<keyof CloudConnectorCallbackReceivedValues> = [
   'role_arn',
   'stack_arn',
@@ -280,6 +292,23 @@ class ProvisioningCallbackService {
    * or finds the connector the first one created.
    */
   public async receive(
+    soClient: SavedObjectsClientContract,
+    id: string,
+    input: ProvisioningCallbackReceiveInput
+  ): Promise<ProvisioningCallbackReceiveResult> {
+    const result = await this.judgeReport(soClient, id, input);
+    // Every outcome is audited, not only the one that creates the identity: a rejected report,
+    // such as a second role for the same launch, is what an auditor looks for. The reported
+    // values are not secrets; the token is never written.
+    auditLoggingService.writeCustomAuditLog({
+      message: `Provisioning callback report [id=${id}] [outcome=${result.outcome}] [reason=${
+        result.outcome === 'invalid' ? result.message : RECEIVE_OUTCOME_REASONS[result.outcome]
+      }] [role_arn=${input.payload.role_arn}] [stack_arn=${input.payload.stack_arn}]`,
+    });
+    return result;
+  }
+
+  private async judgeReport(
     soClient: SavedObjectsClientContract,
     id: string,
     { token, payload }: ProvisioningCallbackReceiveInput

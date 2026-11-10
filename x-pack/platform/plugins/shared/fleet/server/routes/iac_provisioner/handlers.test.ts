@@ -760,6 +760,17 @@ describe('Provisioning callback handlers', () => {
     };
     const withToken = { [PROVISIONING_CALLBACK_TOKEN_HEADER]: 'tok-1' };
 
+    it('answers 404 without consulting the record when AWS identity federation is not enabled', async () => {
+      mockedIsAwsIdentityFederationEnabled.mockResolvedValue(false);
+
+      await receive(withToken);
+
+      expect(response.notFound).toHaveBeenCalledWith({
+        body: { message: 'AWS identity federation is not enabled' },
+      });
+      expect(mockedService.receive).not.toHaveBeenCalled();
+    });
+
     it('passes the presented token to the service and answers 200 on receive', async () => {
       mockedService.receive.mockResolvedValue({
         outcome: 'received',

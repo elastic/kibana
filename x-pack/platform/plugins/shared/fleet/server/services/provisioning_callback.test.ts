@@ -487,7 +487,7 @@ describe('provisioningCallbackService', () => {
       expect(soClient.update).not.toHaveBeenCalled();
     });
 
-    it('is not_found when the token is not the one bound to the record', async () => {
+    it('is not_found when the token is not the one bound to the record, and audit-logs the rejection without the token', async () => {
       mockRecord(pendingAttrs());
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
         token: OTHER_TOKEN,
@@ -495,6 +495,11 @@ describe('provisioningCallbackService', () => {
       });
       expect(result).toEqual({ outcome: 'not_found' });
       expect(soClient.update).not.toHaveBeenCalled();
+      expect(mockedAudit.writeCustomAuditLog).toHaveBeenCalledTimes(1);
+      expect(mockedAudit.writeCustomAuditLog).toHaveBeenCalledWith({
+        message: `Provisioning callback report [id=cb-1] [outcome=not_found] [reason=no such record, or the token is not the one bound to it] [role_arn=${ROLE_ARN}] [stack_arn=${STACK_ARN}]`,
+      });
+      expect(JSON.stringify(mockedAudit.writeCustomAuditLog.mock.calls)).not.toContain(OTHER_TOKEN);
     });
 
     it('is not_found when no token was presented', async () => {
@@ -530,7 +535,7 @@ describe('provisioningCallbackService', () => {
       expect(soClient.update).not.toHaveBeenCalled();
     });
 
-    it('is gone for a cancelled record', async () => {
+    it('is gone for a cancelled record, and audit-logs it', async () => {
       mockRecord(pendingAttrs({ status: 'cancelled' }));
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
         token: TOKEN,
@@ -539,6 +544,9 @@ describe('provisioningCallbackService', () => {
       expect(result).toEqual({ outcome: 'gone' });
       expect(soClient.update).not.toHaveBeenCalled();
       expect(cloudConnectorService.create).not.toHaveBeenCalled();
+      expect(mockedAudit.writeCustomAuditLog).toHaveBeenCalledWith({
+        message: `Provisioning callback report [id=cb-1] [outcome=gone] [reason=record expired or cancelled] [role_arn=${ROLE_ARN}] [stack_arn=${STACK_ARN}]`,
+      });
     });
 
     it('is invalid when the role ARN and the stack ARN are in different accounts', async () => {
@@ -595,8 +603,12 @@ describe('provisioningCallbackService', () => {
         },
         { version: 'v2' }
       );
+      // Two audit entries: the identity made from the record, and the report that led to it.
       expect(mockedAudit.writeCustomAuditLog).toHaveBeenCalledWith({
         message: `Provisioning callback received [id=cb-1] [cloud_connector_id=cc-1] [role_arn=${ROLE_ARN}]`,
+      });
+      expect(mockedAudit.writeCustomAuditLog).toHaveBeenCalledWith({
+        message: `Provisioning callback report [id=cb-1] [outcome=received] [reason=report accepted] [role_arn=${ROLE_ARN}] [stack_arn=${STACK_ARN}]`,
       });
       expect(logger.info).toHaveBeenCalledWith(
         'Provisioning callback received [id=cb-1] [cloud_connector_id=cc-1]'
@@ -948,7 +960,7 @@ describe('provisioningCallbackService', () => {
       expect(soClient.update).not.toHaveBeenCalled();
     });
 
-    it('is a conflict when a different payload arrives after received', async () => {
+    it('is a conflict when a different payload arrives after received, and audit-logs the values it refused', async () => {
       mockRecord(pendingAttrs({ status: 'received', received_at: PAST, ...PAYLOAD }));
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
         token: TOKEN,
@@ -956,6 +968,9 @@ describe('provisioningCallbackService', () => {
       });
       expect(result).toMatchObject({ outcome: 'conflict' });
       expect(soClient.update).not.toHaveBeenCalled();
+      expect(mockedAudit.writeCustomAuditLog).toHaveBeenCalledWith({
+        message: `Provisioning callback report [id=cb-1] [outcome=conflict] [reason=different values already received for this record] [role_arn=arn:aws:iam::123456789012:role/another] [stack_arn=${STACK_ARN}]`,
+      });
     });
   });
 
