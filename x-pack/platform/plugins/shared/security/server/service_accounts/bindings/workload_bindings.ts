@@ -7,12 +7,17 @@
 
 import Boom from '@hapi/boom';
 import { randomBytes } from 'crypto';
+import pMap from 'p-map';
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type {
   BindServiceAccountWorkloadParams,
   ServiceAccountSummary,
+  ServiceAccountWorkloadBinder,
   ServiceAccountWorkloadBinding,
+  ServiceAccountWorkloadBindingChange,
+  ServiceAccountWorkloadBindingChangeError,
+  ServiceAccountWorkloadBindingChangeResult,
   ServiceAccountWorkloadCoordinates,
   ServiceAccountWorkloadRef,
   ServiceAccountWorkloadRequestParams,
@@ -23,15 +28,14 @@ import type {
   CheckPrivilegesWithRequest,
 } from '@kbn/security-plugin-types-server';
 
-import type { WorkloadBindingCoordinates } from './binding_saved_object';
+import type { WorkloadBindingAttributes, WorkloadBindingCoordinates } from './binding_saved_object';
 import { bestEffortUserProfileIdResolver, resolveWorkloadBinder } from './resolve_workload_binder';
-import type { WorkloadBindingStore } from './workload_binding_store';
+import type { WorkloadBindingStore, WorkloadBindingWriteOutcome } from './workload_binding_store';
 import type { AuthenticatedUser, SecurityLicense } from '../../../common';
 import type { ServiceAccountAuditEventParams } from '../../audit';
 import { ServiceAccountAuditAction, serviceAccountAuditEvent } from '../../audit';
-import { getDetailedErrorMessage } from '../../errors';
-import type { EnsureClusterPrivilegeParams } from '../cluster_privilege';
-import { ensureClusterPrivilege } from '../cluster_privilege';
+import { getDetailedErrorMessage, getErrorStatusCode, toErrorStatusCode } from '../../errors';
+import { clusterPrivilegeRefusal, hasClusterPrivilege } from '../cluster_privilege';
 import type { ServiceAccountMintInterceptor } from '../fake_requests';
 import { isTerminalMintFailure } from '../fake_requests';
 import type { ServiceAccountsBackend } from '../types';
@@ -41,6 +45,80 @@ import type { ServiceAccountsBackend } from '../types';
  * and exists so that every other attribute is covered by an authentication tag.
  */
 const CANARY_BYTE_LENGTH = 32;
+
+/**
+ * How many prior bindings a bulk update reads at once. Each read is a verified, single-document
+ * get, since only a verified binding may name an account in the audit log.
+ */
+const PREVIOUS_BINDING_READ_CONCURRENCY = 10;
+
+/**
+ * The outcome of one change, as {@link ServiceAccountWorkloadBindings.applyChanges} reports it.
+ * A failure keeps the error it failed with, so a single-workload call can throw it unchanged.
+ */
+type ChangeOutcome =
+  | {
+      op: 'bind';
+      ok: true;
+      binding: ServiceAccountWorkloadBinding;
+      previousServiceAccountId?: string;
+    }
+  | { op: 'unbind'; ok: true; removed: boolean; previousServiceAccountId?: string }
+  | { op: ServiceAccountWorkloadBindingChange['op']; ok: false; error: Error };
+
+/** The account a workload was bound to before a change, or why it could not be read. */
+type PreviousBinding = { ok: true; serviceAccountId?: string } | { ok: false; error: Error };
+
+const toError = (error: unknown): Error =>
+  error instanceof Error ? error : new Error(getDetailedErrorMessage(error));
+
+/**
+ * Why a change failed, as the bulk update reports it. A client error keeps its message, as the
+ * same call for that one workload would have thrown it. Anything else is reported with its status
+ * and a generic message, since its details can carry what the caller's own client must not see.
+ */
+const toChangeError = (error: Error): ServiceAccountWorkloadBindingChangeError => {
+  const boom = Boom.isBoom(error)
+    ? error
+    : new Boom.Boom(error.message, { statusCode: toErrorStatusCode(getErrorStatusCode(error)) });
+  const {
+    statusCode,
+    payload: { message },
+  } = boom.output;
+  return { statusCode, message };
+};
+
+/** The account a change replaced or removed, when it is known, for the change's outcome. */
+const previousAccount = (prior: PreviousBinding): { previousServiceAccountId?: string } =>
+  prior.ok && prior.serviceAccountId !== undefined
+    ? { previousServiceAccountId: prior.serviceAccountId }
+    : {};
+
+/** Stands in for a write outcome the store did not report, which it always does. */
+const missingWriteOutcome = (): { ok: false; error: Error } => ({
+  ok: false,
+  error: Boom.internal('The binding write reported no outcome for this workload.'),
+});
+
+/**
+ * Runs one bulk write and reports an outcome per binding. A write that fails as a whole fails each
+ * of its bindings with the same error, and a write with nothing to do is never sent.
+ */
+const settleBulkWrite = async <T>(
+  count: number,
+  write: () => Promise<Array<WorkloadBindingWriteOutcome<T>>>
+): Promise<Array<WorkloadBindingWriteOutcome<T> | { ok: false; error: Error }>> => {
+  if (count === 0) {
+    return [];
+  }
+
+  try {
+    return await write();
+  } catch (e) {
+    const error = toError(e);
+    return Array.from({ length: count }, () => ({ ok: false as const, error }));
+  }
+};
 
 /**
  * Manages and executes workload bindings, one plugin per call. The plugin id is supplied by Core
@@ -59,6 +137,12 @@ export interface ServiceAccountWorkloadBindingsApi {
     request: KibanaRequest,
     params: ServiceAccountWorkloadRef
   ): Promise<boolean>;
+
+  bulkUpdateWorkloadBindings(
+    pluginId: string,
+    request: KibanaRequest,
+    changes: readonly ServiceAccountWorkloadBindingChange[]
+  ): Promise<ServiceAccountWorkloadBindingChangeResult[]>;
 
   getBinding(
     pluginId: string,
@@ -96,6 +180,14 @@ export interface ServiceAccountWorkloadBindingsOptions {
   getSpaceId: (request: KibanaRequest) => string;
   /** Whether saved object encryption is possible at all; without it, bindings cannot be trusted. */
   canEncrypt: boolean;
+}
+
+/** The audit events of one change to a workload's binding. */
+interface BindingAudit {
+  /** The change is authorized and about to be written. */
+  intent(action: ServiceAccountAuditAction, serviceAccountId?: string): void;
+  /** The change is refused, because the request may not change bindings. */
+  refused(action: ServiceAccountAuditAction, serviceAccountId?: string): (error: Error) => void;
 }
 
 /** The `service_account_assume` events of one workload execution. */
@@ -149,62 +241,17 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
     request: KibanaRequest,
     { serviceAccountId, workloadType, workloadId }: BindServiceAccountWorkloadParams
   ): Promise<ServiceAccountWorkloadBinding> {
-    this.ensureAvailable();
+    const [outcome] = await this.applyChanges(pluginId, request, [
+      { op: 'bind', serviceAccountId, workloadType, workloadId },
+    ]);
 
-    const user = this.getCurrentUser(request);
-    if (!user) {
-      throw Boom.unauthorized(
-        'Cannot bind a service account to a workload: the request is not authenticated'
-      );
+    if (!outcome.ok) {
+      throw outcome.error;
     }
-
-    const bindingAudit = this.bindingAudit(request, {
-      plugin_id: pluginId,
-      type: workloadType,
-      id: workloadId,
-    });
-    await this.ensureCanManage(
-      request,
-      'bind a service account to a workload',
-      bindingAudit.refused(ServiceAccountAuditAction.WORKLOAD_BIND, serviceAccountId)
-    );
-
-    const spaceId = this.getSpaceId(request);
-
-    // A rebind takes the workload away from one account and gives it to another. Both ends are
-    // audited, so that a search on either account finds the change.
-    const previousServiceAccountId = await this.readBoundServiceAccountId({
-      pluginId,
-      workloadType,
-      workloadId,
-      spaceId,
-    });
-    if (previousServiceAccountId !== undefined && previousServiceAccountId !== serviceAccountId) {
-      bindingAudit.intent(ServiceAccountAuditAction.WORKLOAD_UNBIND, previousServiceAccountId);
+    if (outcome.op !== 'bind') {
+      throw new Error('A bind of one workload reported the outcome of an unbind.');
     }
-    bindingAudit.intent(ServiceAccountAuditAction.WORKLOAD_BIND, serviceAccountId);
-
-    const binding = await this.store.set({
-      pluginId,
-      workloadType,
-      workloadId,
-      serviceAccountId,
-      spaceId,
-      boundBy: await resolveWorkloadBinder(
-        user,
-        bestEffortUserProfileIdResolver(this.getCurrentUserProfileId, request, this.logger)
-      ),
-      boundAt: new Date().toISOString(),
-      // Fresh per bind, so no two generations of a binding share one. This does not make a
-      // rebind irreversible; see the attribute's own note.
-      canary: randomBytes(CANARY_BYTE_LENGTH).toString('base64'),
-    });
-
-    this.logger.debug(
-      `Bound a service account to workload [${workloadType}/${workloadId}] of plugin [${pluginId}]`
-    );
-
-    return binding;
+    return outcome.binding;
   }
 
   async unbindWorkload(
@@ -212,47 +259,48 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
     request: KibanaRequest,
     { workloadType, workloadId }: ServiceAccountWorkloadRef
   ): Promise<boolean> {
-    this.ensureAvailable();
+    const [outcome] = await this.applyChanges(pluginId, request, [
+      { op: 'unbind', workloadType, workloadId },
+    ]);
 
-    // Same gate as bindWorkload: unbinding a workload silently drops it to no identity at all, which is
-    // as much a privileged change as granting one.
-    const bindingAudit = this.bindingAudit(request, {
-      plugin_id: pluginId,
-      type: workloadType,
-      id: workloadId,
+    if (!outcome.ok) {
+      throw outcome.error;
+    }
+    if (outcome.op !== 'unbind') {
+      throw new Error('An unbind of one workload reported the outcome of a bind.');
+    }
+    return outcome.removed;
+  }
+
+  async bulkUpdateWorkloadBindings(
+    pluginId: string,
+    request: KibanaRequest,
+    changes: readonly ServiceAccountWorkloadBindingChange[]
+  ): Promise<ServiceAccountWorkloadBindingChangeResult[]> {
+    const outcomes = await this.applyChanges(pluginId, request, changes);
+    // The changes each server error failed, so that one error is logged once, however many
+    // changes it failed: a write that fails as a whole fails every change in it.
+    const serverErrors = new Map<Error, ServiceAccountWorkloadBindingChange[]>();
+
+    const results = outcomes.map((outcome, index): ServiceAccountWorkloadBindingChangeResult => {
+      const change = changes[index];
+      const { workloadType, workloadId } = change;
+      if (outcome.ok) {
+        return { workloadType, workloadId, ...outcome };
+      }
+
+      const error = toChangeError(outcome.error);
+      if (error.statusCode >= 500) {
+        serverErrors.set(outcome.error, [...(serverErrors.get(outcome.error) ?? []), change]);
+      }
+      return { workloadType, workloadId, op: outcome.op, ok: false, error };
     });
-    await this.ensureCanManage(
-      request,
-      'unbind a service account from a workload',
-      bindingAudit.refused(ServiceAccountAuditAction.WORKLOAD_UNBIND)
-    );
 
-    const spaceId = this.getSpaceId(request);
-    const coordinates = { pluginId, workloadType, workloadId, spaceId };
-
-    // The delete addresses the binding by its coordinates, so the account it takes the workload
-    // from is read first, verified, for the event. Absent when there is no binding to remove or
-    // the stored one cannot be trusted.
-    bindingAudit.intent(
-      ServiceAccountAuditAction.WORKLOAD_UNBIND,
-      await this.readBoundServiceAccountId(coordinates)
-    );
-
-    const deleted = await this.store.delete(coordinates);
-
-    if (deleted) {
-      this.logger.debug(
-        `Unbound the service account from workload [${workloadType}/${workloadId}] of plugin [${pluginId}] in space [${spaceId}]`
-      );
-    } else {
-      // Worth a warning rather than silence: a plugin deleting a workload from the wrong space would
-      // otherwise leave a binding behind with nothing to show for it.
-      this.logger.warn(
-        `Unbinding matched no binding for workload [${workloadType}/${workloadId}] of plugin [${pluginId}] in space [${spaceId}]`
-      );
+    for (const [error, failed] of serverErrors) {
+      this.logChangeFailure(pluginId, failed, error);
     }
 
-    return deleted;
+    return results;
   }
 
   async getBinding(
@@ -300,6 +348,248 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
       // on a singleton, captured in a closure) is never re-credentialed and expires for good.
       this.backend.releaseFakeRequest(request);
     }
+  }
+
+  /**
+   * Applies binding changes in the space of the request, and reports the outcome of each, in the
+   * order given. Both the single-workload methods and the bulk update are this, so a change is
+   * authorized, audited, and written the same way whichever of them makes it.
+   *
+   * The call rejects, before anything is audited, when bindings are unavailable, when a change
+   * binds an account and the request is not authenticated, or when the privilege check itself
+   * fails. Past that point a change fails on its own: a refusal, a prior binding that cannot be
+   * read, or a write that fails is that change's outcome, and leaves the others to go ahead.
+   */
+  private async applyChanges(
+    pluginId: string,
+    request: KibanaRequest,
+    changes: readonly ServiceAccountWorkloadBindingChange[]
+  ): Promise<ChangeOutcome[]> {
+    this.ensureAvailable();
+
+    if (changes.length === 0) {
+      return [];
+    }
+
+    // Only a bind records who made it. An unbind needs nothing but the privilege, which is checked
+    // against the request whatever principal it carries.
+    const user = this.getCurrentUser(request);
+    if (!user && changes.some(({ op }) => op === 'bind')) {
+      throw Boom.unauthorized(
+        'Cannot bind a service account to a workload: the request is not authenticated'
+      );
+    }
+
+    const auditLogger = this.audit.asScoped(request);
+    const audits = changes.map(({ workloadType, workloadId }) =>
+      this.bindingAudit(auditLogger, { plugin_id: pluginId, type: workloadType, id: workloadId })
+    );
+
+    if (
+      !(await hasClusterPrivilege({
+        request,
+        checkPrivilegesWithRequest: this.checkPrivilegesWithRequest,
+        privilege: 'manage_security',
+      }))
+    ) {
+      return this.refuseChanges(changes, audits);
+    }
+
+    const spaceId = this.getSpaceId(request);
+    // Picks the coordinates out explicitly, so a caller's extra fields never reach the store.
+    const coordinates = changes.map(
+      ({ workloadType, workloadId }): WorkloadBindingCoordinates => ({
+        pluginId,
+        workloadType,
+        workloadId,
+        spaceId,
+      })
+    );
+
+    // The bindings a change replaces or removes, read first, verified, for the events. A change
+    // whose prior binding cannot be read is not applied: its write would share the failure.
+    const previous = await pMap(
+      coordinates,
+      async (workload): Promise<PreviousBinding> => {
+        try {
+          return { ok: true, serviceAccountId: await this.readBoundServiceAccountId(workload) };
+        } catch (e) {
+          return { ok: false, error: toError(e) };
+        }
+      },
+      { concurrency: PREVIOUS_BINDING_READ_CONCURRENCY }
+    );
+
+    // A rebind takes the workload away from one account and gives it to another. Both ends are
+    // audited, so that a search on either account finds the change.
+    changes.forEach((change, index) => {
+      const prior = previous[index];
+      if (!prior.ok) {
+        return;
+      }
+      if (change.op === 'unbind') {
+        audits[index].intent(ServiceAccountAuditAction.WORKLOAD_UNBIND, prior.serviceAccountId);
+        return;
+      }
+      if (
+        prior.serviceAccountId !== undefined &&
+        prior.serviceAccountId !== change.serviceAccountId
+      ) {
+        audits[index].intent(ServiceAccountAuditAction.WORKLOAD_UNBIND, prior.serviceAccountId);
+      }
+      audits[index].intent(ServiceAccountAuditAction.WORKLOAD_BIND, change.serviceAccountId);
+    });
+
+    const binds: Array<{ index: number; attributes: WorkloadBindingAttributes }> = [];
+    const unbinds: Array<{ index: number; coordinates: WorkloadBindingCoordinates }> = [];
+    // One binder and one time for the whole call: every binding it writes was made by the same
+    // principal, at the same moment.
+    let binder: Promise<ServiceAccountWorkloadBinder> | undefined;
+    const boundAt = new Date().toISOString();
+    for (const [index, change] of changes.entries()) {
+      if (!previous[index].ok) {
+        continue;
+      }
+      if (change.op === 'unbind') {
+        unbinds.push({ index, coordinates: coordinates[index] });
+        continue;
+      }
+      binder ??= this.resolveBinder(request, user);
+      binds.push({
+        index,
+        attributes: {
+          ...coordinates[index],
+          serviceAccountId: change.serviceAccountId,
+          boundBy: await binder,
+          boundAt,
+          // Fresh per binding, so no two generations of a binding share one. This does not make a
+          // rebind irreversible; see the attribute's own note.
+          canary: randomBytes(CANARY_BYTE_LENGTH).toString('base64'),
+        },
+      });
+    }
+
+    const [bindOutcomes, unbindOutcomes] = await Promise.all([
+      settleBulkWrite(binds.length, () =>
+        this.store.bulkSet(binds.map(({ attributes }) => attributes))
+      ),
+      settleBulkWrite(unbinds.length, () =>
+        this.store.bulkDelete(unbinds.map(({ coordinates: workload }) => workload))
+      ),
+    ]);
+
+    const bindOutcomeAt = new Map(
+      binds.map(({ index }, position) => [index, bindOutcomes[position]] as const)
+    );
+    const unbindOutcomeAt = new Map(
+      unbinds.map(({ index }, position) => [index, unbindOutcomes[position]] as const)
+    );
+
+    return changes.map((change, index): ChangeOutcome => {
+      const prior = previous[index];
+      if (!prior.ok) {
+        return { op: change.op, ok: false, error: prior.error };
+      }
+
+      const { workloadType, workloadId } = change;
+      if (change.op === 'bind') {
+        const written = bindOutcomeAt.get(index) ?? missingWriteOutcome();
+        if (!written.ok) {
+          return { op: 'bind', ok: false, error: written.error };
+        }
+
+        this.logger.debug(
+          `Bound a service account to workload [${workloadType}/${workloadId}] of plugin [${pluginId}]`
+        );
+        return { op: 'bind', ok: true, binding: written.value, ...previousAccount(prior) };
+      }
+
+      const deleted = unbindOutcomeAt.get(index) ?? missingWriteOutcome();
+      if (!deleted.ok) {
+        return { op: 'unbind', ok: false, error: deleted.error };
+      }
+
+      if (deleted.value) {
+        this.logger.debug(
+          `Unbound the service account from workload [${workloadType}/${workloadId}] of plugin [${pluginId}] in space [${spaceId}]`
+        );
+      } else {
+        // Worth a warning rather than silence: a plugin deleting a workload from the wrong space
+        // would otherwise leave a binding behind with nothing to show for it.
+        this.logger.warn(
+          `Unbinding matched no binding for workload [${workloadType}/${workloadId}] of plugin [${pluginId}] in space [${spaceId}]`
+        );
+      }
+      return { op: 'unbind', ok: true, removed: deleted.value, ...previousAccount(prior) };
+    });
+  }
+
+  /**
+   * Refuses every change, for a request that may not change bindings. Each change is refused with
+   * the message its own operation is refused with alone, and is audited as a refusal on its own.
+   * The refusal is logged once per operation, not once per change.
+   */
+  private refuseChanges(
+    changes: readonly ServiceAccountWorkloadBindingChange[],
+    audits: readonly BindingAudit[]
+  ): ChangeOutcome[] {
+    // Each made on first use, so a refusal is logged once per operation.
+    let bindRefusal: Boom.Boom | undefined;
+    let unbindRefusal: Boom.Boom | undefined;
+    const refuse = (action: string): Boom.Boom =>
+      clusterPrivilegeRefusal({ logger: this.logger, privilege: 'manage_security', action });
+
+    return changes.map((change, index): ChangeOutcome => {
+      if (change.op === 'bind') {
+        bindRefusal ??= refuse('bind a service account to a workload');
+        audits[index].refused(
+          ServiceAccountAuditAction.WORKLOAD_BIND,
+          change.serviceAccountId
+        )(bindRefusal);
+        return { op: 'bind', ok: false, error: bindRefusal };
+      }
+
+      unbindRefusal ??= refuse('unbind a service account from a workload');
+      audits[index].refused(ServiceAccountAuditAction.WORKLOAD_UNBIND)(unbindRefusal);
+      return { op: 'unbind', ok: false, error: unbindRefusal };
+    });
+  }
+
+  /** Records who is making a bind, best effort beyond the principal itself. */
+  private async resolveBinder(
+    request: KibanaRequest,
+    user: AuthenticatedUser | null
+  ): Promise<ServiceAccountWorkloadBinder> {
+    if (!user) {
+      throw Boom.unauthorized(
+        'Cannot bind a service account to a workload: the request is not authenticated'
+      );
+    }
+
+    return await resolveWorkloadBinder(
+      user,
+      bestEffortUserProfileIdResolver(this.getCurrentUserProfileId, request, this.logger)
+    );
+  }
+
+  /**
+   * Logs a server error that failed changes, with the details the bulk update keeps from its
+   * caller. One line per error: the workload when it failed one change, else how many it failed.
+   */
+  private logChangeFailure(
+    pluginId: string,
+    [first, ...rest]: readonly ServiceAccountWorkloadBindingChange[],
+    error: Error
+  ): void {
+    const detail = getDetailedErrorMessage(error);
+    const workload = `[${first.workloadType}/${first.workloadId}]`;
+    this.logger.error(
+      rest.length === 0
+        ? `Failed to ${first.op} workload ${workload} of plugin [${pluginId}]: ${detail}`
+        : `Failed to change the bindings of ${
+            rest.length + 1
+          } workloads of plugin [${pluginId}], including ${workload}: ${detail}`
+    );
   }
 
   /**
@@ -516,10 +806,9 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
    * the failed attempt when the request may not manage bindings.
    */
   private bindingAudit(
-    request: KibanaRequest,
+    auditLogger: AuditLogger,
     workload: NonNullable<ServiceAccountAuditEventParams['workload']>
-  ) {
-    const auditLogger = this.audit.asScoped(request);
+  ): BindingAudit {
     const log = (
       action: ServiceAccountAuditAction,
       serviceAccountId: string | undefined,
@@ -535,31 +824,9 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
       );
 
     return {
-      intent: (action: ServiceAccountAuditAction, serviceAccountId?: string) =>
-        log(action, serviceAccountId, { outcome: 'unknown' }),
-      refused: (action: ServiceAccountAuditAction, serviceAccountId?: string) => (error: Error) =>
-        log(action, serviceAccountId, { error }),
+      intent: (action, serviceAccountId) => log(action, serviceAccountId, { outcome: 'unknown' }),
+      refused: (action, serviceAccountId) => (error) => log(action, serviceAccountId, { error }),
     };
-  }
-
-  /**
-   * Refuses with a 403 unless the request may manage bindings, calling `onRefused` first. Other
-   * errors from the check (an unavailable cluster, say) say nothing about authorization, and do
-   * not call it.
-   */
-  private ensureCanManage(
-    request: KibanaRequest,
-    action: string,
-    onRefused: EnsureClusterPrivilegeParams['onRefused']
-  ): Promise<void> {
-    return ensureClusterPrivilege({
-      privilege: 'manage_security',
-      request,
-      checkPrivilegesWithRequest: this.checkPrivilegesWithRequest,
-      logger: this.logger,
-      action,
-      onRefused,
-    });
   }
 
   // Picks the coordinates out explicitly, so a caller's extra fields never reach the store.

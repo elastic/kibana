@@ -81,6 +81,7 @@ describe('getDefaultSecurityImplementation', () => {
     it.each([
       'bindWorkload',
       'unbindWorkload',
+      'bulkUpdateWorkloadBindings',
       'getWorkloadBinding',
       'getWorkloadServiceAccountSummary',
       'withScopedRequestForWorkload',

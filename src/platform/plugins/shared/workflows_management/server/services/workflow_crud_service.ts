@@ -13,6 +13,7 @@ import { randomBytes } from 'node:crypto';
 import pMap from 'p-map';
 import { firstValueFrom } from 'rxjs';
 import type { KibanaRequest } from '@kbn/core/server';
+import type { ServiceAccountWorkloadBinding } from '@kbn/core-security-server';
 import { buildEntityReadAccessQuery, isEntityAccessControlAdmin } from '@kbn/entity-access-control';
 import { isNotFoundError } from '@kbn/es-errors';
 import {
@@ -55,11 +56,18 @@ import type {
   WorkflowDocumentGetOptions,
   WriteWorkflowDocumentWithOccParams,
 } from './workflow_occ_types';
+import type {
+  WorkflowBindingChangeOutcome,
+  WorkflowBindingToReconcile,
+} from './workflow_service_account_binding';
 import {
+  applyWorkflowBindingChanges,
+  BINDING_COMPENSATION_FAILED_MESSAGE,
   ensureManagedOrphanDisablePreservesBinding,
   ensureManagedOrphanUnchanged,
   ensureManagedWorkflowUpgradePreservesBinding,
   ensureWorkflowServiceAccountMutationAuthorized,
+  reconcileWorkflowBindings,
   withWorkflowBindingChange,
 } from './workflow_service_account_binding';
 import {
@@ -126,6 +134,17 @@ const extractRestoreSnapshotYaml = (
   const trimmed = yaml.trim();
   return trimmed.length > 0 ? yaml : null;
 };
+
+const getErrorMessage = (error: unknown): string =>
+  error instanceof Error ? error.message : String(error);
+
+const toDeletionError = (error: unknown, id: string): unknown =>
+  !(error instanceof WorkflowConflictError) && isElasticsearchWriteConflict(error)
+    ? new WorkflowConflictError(
+        'Workflow changed during deletion. Retry with the latest version.',
+        id
+      )
+    : error;
 
 export type {
   ReadModifyWriteWorkflowDocumentParams,
@@ -778,18 +797,14 @@ export class WorkflowCrudService {
           seenCustomIds.add(customId);
         }
 
-        if (prepared.definition?.settings?.run_as && !options?.overwrite) {
-          created.push(await this.createWorkflow(workflows[i], spaceId, request));
-        } else {
-          validWorkflows.push({
-            idx: i,
-            id: prepared.id,
-            baseId: prepared.id,
-            idSource: workflows[i].id ? 'user-supplied' : 'server-generated',
-            workflowData: prepared.workflowData,
-            definition: prepared.definition,
-          });
-        }
+        validWorkflows.push({
+          idx: i,
+          id: prepared.id,
+          baseId: prepared.id,
+          idSource: workflows[i].id ? 'user-supplied' : 'server-generated',
+          workflowData: prepared.workflowData,
+          definition: prepared.definition,
+        });
       } catch (error) {
         failed.push({
           index: i,
@@ -827,50 +842,32 @@ export class WorkflowCrudService {
       const seenIds = new Set<string>(resolvedWorkflows.map((vw) => vw.id));
 
       for (let attempt = 0; attempt <= TOCTOU_MAX_RETRIES && pending.length > 0; attempt++) {
-        const bulkOperations = pending.map((vw) => ({
-          create: { _id: vw.id, document: vw.workflowData },
-        }));
-
-        const bulkResponse = await this.deps.workflowStorage.getClient().bulk({
-          operations: bulkOperations,
-          refresh: 'wait_for',
+        const result = await this.createNewBulkEntries({
+          entries: pending,
+          spaceId,
+          request,
+          toDocument: (entry) => entry.workflowData,
+          canRetry: (entry, status) =>
+            attempt < TOCTOU_MAX_RETRIES &&
+            status === OCC_CONFLICT_STATUS_CODE &&
+            entry.idSource === 'server-generated',
         });
-
-        const toRetryBaseIds: string[] = [];
-        const toRetryEntries: BulkWorkflowEntry[] = [];
-
-        for (let itemIndex = 0; itemIndex < bulkResponse.items.length; itemIndex++) {
-          const item = bulkResponse.items[itemIndex];
-          const operation = item.create;
-          const entry = pending[itemIndex];
-
-          if (!operation?.error) {
-            created.push(transformStorageDocumentToWorkflowDto(entry.id, entry.workflowData));
-            successfullyWritten.push(entry);
-          } else {
-            const isVersionConflict = operation.status === OCC_CONFLICT_STATUS_CODE;
-            const canRetry = isVersionConflict && entry.idSource === 'server-generated';
-
-            if (canRetry && attempt < TOCTOU_MAX_RETRIES) {
-              toRetryBaseIds.push(entry.baseId);
-              toRetryEntries.push(entry);
-            } else {
-              failed.push({
-                index: entry.idx,
-                id: entry.id,
-                error: extractBulkItemError(operation.error),
-              });
-            }
-          }
+        failed.push(...result.failed);
+        for (const entry of result.written) {
+          created.push(transformStorageDocumentToWorkflowDto(entry.id, entry.workflowData));
+          successfullyWritten.push(entry);
         }
+        const toRetryEntries = result.retry;
 
         if (toRetryEntries.length === 0) {
           pending = [];
           break;
         }
 
-        const reResolved = await resolveUniqueWorkflowIds(toRetryBaseIds, seenIds, (candidateIds) =>
-          this.checkExistingIds(candidateIds)
+        const reResolved = await resolveUniqueWorkflowIds(
+          toRetryEntries.map((entry) => entry.baseId),
+          seenIds,
+          (candidateIds) => this.checkExistingIds(candidateIds)
         );
         pending = toRetryEntries.map((entry, i) => ({ ...entry, id: reResolved[i] }));
       }
@@ -1178,6 +1175,7 @@ export class WorkflowCrudService {
       });
     }
     const unboundSoftDeletes: OccWorkflowHit[] = [];
+    const boundBatchDeletes: Array<{ id: string; versioned: VersionedWorkflowDocument }> = [];
     const deleteWorkflow = async (id: string): Promise<void> => {
       try {
         // Authorize and delete the same revision, including initially unbound workflows.
@@ -1224,6 +1222,10 @@ export class WorkflowCrudService {
               id
             );
           }
+          if (batch) {
+            boundBatchDeletes.push({ id, versioned });
+            return;
+          }
         }
         await withWorkflowBindingChange({
           getSpaceId: this.deps.getSpaceId,
@@ -1251,21 +1253,21 @@ export class WorkflowCrudService {
           },
         });
       } catch (error) {
-        const deletionError =
-          !(error instanceof WorkflowConflictError) && isElasticsearchWriteConflict(error)
-            ? new WorkflowConflictError(
-                'Workflow changed during deletion. Retry with the latest version.',
-                id
-              )
-            : error;
+        const deletionError = toDeletionError(error, id);
         if (ids.length === 1) throw deletionError;
-        result.failures.push({
-          id,
-          error: deletionError instanceof Error ? deletionError.message : String(deletionError),
-        });
+        result.failures.push({ id, error: getErrorMessage(deletionError) });
       }
     };
     await pMap([...new Set(ids)], deleteWorkflow, { concurrency: 10 });
+    if (boundBatchDeletes.length > 0) {
+      await this.deleteBoundWorkflowBatch({
+        workflows: boundBatchDeletes,
+        spaceId,
+        deletionOptions,
+        request,
+        result,
+      });
+    }
     if (unboundSoftDeletes.length > 0) {
       const deleted = await this.deleteWorkflowDocuments(
         unboundSoftDeletes.map((hit) => hit._id),
@@ -1289,6 +1291,86 @@ export class WorkflowCrudService {
         logger: this.deps.logger,
       });
     return result;
+  }
+
+  /**
+   * Deletes the bound workflows of a batch that passed their checks. Their bindings are removed in
+   * one call before their documents go, and a binding whose workflow is not deleted is restored.
+   */
+  private async deleteBoundWorkflowBatch({
+    workflows,
+    spaceId,
+    deletionOptions,
+    request,
+    result,
+  }: {
+    workflows: Array<{ id: string; versioned: VersionedWorkflowDocument }>;
+    spaceId: string;
+    deletionOptions: Parameters<WorkflowCrudService['deleteWorkflowDocuments']>[2];
+    request?: KibanaRequest;
+    result: DeleteWorkflowsResponse;
+  }): Promise<void> {
+    const failures = new Map<string, string>();
+    let outcomes: Map<string, WorkflowBindingChangeOutcome>;
+    try {
+      const bindings = this.deps.getServiceAccountBindings?.();
+      if (!bindings) throw new Error('Service account bindings are unavailable.');
+      outcomes = await applyWorkflowBindingChanges({
+        bindings,
+        core: this.deps.getCoreStart(),
+        getSpaceId: this.deps.getSpaceId,
+        spaceId,
+        request,
+        targets: workflows.map(({ id }) => ({ workflowId: id })),
+      });
+    } catch (error) {
+      result.failures.push(...workflows.map(({ id }) => ({ id, error: getErrorMessage(error) })));
+      return;
+    }
+
+    const toReconcile: WorkflowBindingToReconcile[] = [];
+    const unbound = workflows.filter(({ id }) => {
+      const outcome = outcomes.get(id);
+      if (outcome?.ok) return true;
+      failures.set(id, outcome?.error ?? 'The service account unbind reported no result.');
+      if (outcome?.mayHaveApplied) toReconcile.push({ workflowId: id });
+      return false;
+    });
+
+    await pMap(
+      unbound,
+      async ({ id, versioned }) => {
+        try {
+          const item = await this.deleteWorkflowDocuments(
+            [id],
+            spaceId,
+            deletionOptions,
+            versioned,
+            undefined,
+            true
+          );
+          if (item.deleted !== 1)
+            throw new Error(item.failures[0]?.error ?? 'Workflow deletion failed.');
+          result.deleted += item.deleted;
+          result.successfulIds?.push(id);
+        } catch (error) {
+          failures.set(id, getErrorMessage(toDeletionError(error, id)));
+          const outcome = outcomes.get(id);
+          if (outcome?.ok && outcome.changed) toReconcile.push({ workflowId: id, written: null });
+        }
+      },
+      { concurrency: 10 }
+    );
+
+    const unreconciled = request
+      ? await this.reconcileBulkBindings(toReconcile, spaceId, request)
+      : new Set(toReconcile.map(({ workflowId }) => workflowId));
+    for (const [id, error] of failures) {
+      result.failures.push({
+        id,
+        error: unreconciled.has(id) ? BINDING_COMPENSATION_FAILED_MESSAGE : error,
+      });
+    }
   }
 
   private accessAuditContext(
@@ -1604,6 +1686,194 @@ export class WorkflowCrudService {
     );
   }
 
+  /**
+   * Creates new workflows with one bulk write. The ones that run as a service account are bound
+   * first, in one binding call, and a binding whose workflow is not written is undone. An entry
+   * `canRetry` accepts is reported for a retry under another ID instead of as a failure.
+   */
+  private async createNewBulkEntries({
+    entries,
+    spaceId,
+    request,
+    toDocument,
+    canRetry = () => false,
+  }: {
+    entries: BulkWorkflowEntry[];
+    spaceId: string;
+    request: KibanaRequest;
+    toDocument: (entry: BulkWorkflowEntry) => WorkflowProperties;
+    canRetry?: (entry: BulkWorkflowEntry, status: number) => boolean;
+  }): Promise<{
+    written: SuccessfullyWrittenBulkEntry[];
+    retry: BulkWorkflowEntry[];
+    failed: BulkFailureEntry[];
+  }> {
+    const { ready, bound, failed } = await this.bindNewBulkEntries(entries, spaceId, request);
+    const written: SuccessfullyWrittenBulkEntry[] = [];
+    if (ready.length === 0) return { written, retry: [], failed };
+
+    const operations = ready.map((entry) => ({
+      create: { _id: entry.id, document: toDocument(entry) },
+    }));
+    let bulkResponse: estypes.BulkResponse;
+    try {
+      bulkResponse = await this.deps.workflowStorage.getClient().bulk({
+        operations,
+        refresh: 'wait_for',
+      });
+    } catch (error) {
+      await this.releaseNewBulkBindings(ready, bound, spaceId, request);
+      throw error;
+    }
+
+    const retrying: BulkWorkflowEntry[] = [];
+    const rejected: Array<{ entry: BulkWorkflowEntry; error: string }> = [];
+    ready.forEach((entry, itemIndex) => {
+      const operation = bulkResponse.items[itemIndex]?.create;
+      if (operation && !operation.error) {
+        written.push({ ...entry, workflowData: operations[itemIndex].create.document });
+      } else if (operation && canRetry(entry, operation.status)) {
+        retrying.push(entry);
+      } else {
+        rejected.push({
+          entry,
+          error: operation?.error
+            ? extractBulkItemError(operation.error)
+            : 'The workflow write reported no result.',
+        });
+      }
+    });
+
+    const unreleased = await this.releaseNewBulkBindings(
+      [...retrying, ...rejected.map(({ entry }) => entry)],
+      bound,
+      spaceId,
+      request
+    );
+    for (const { entry, error } of rejected) {
+      failed.push({
+        index: entry.idx,
+        id: entry.id,
+        error: unreleased.has(entry.id) ? BINDING_COMPENSATION_FAILED_MESSAGE : error,
+      });
+    }
+    const retry = retrying.filter((entry) => {
+      if (!unreleased.has(entry.id)) return true;
+      failed.push({ index: entry.idx, id: entry.id, error: BINDING_COMPENSATION_FAILED_MESSAGE });
+      return false;
+    });
+    return { written, retry, failed };
+  }
+
+  /**
+   * Binds the new workflows among `entries` that run as a service account. Resolves the entries
+   * ready to write, with the binding each bound one got, and fails the ones that could not be
+   * bound. A bind that failed with a server error may still have been applied, so it is undone.
+   */
+  private async bindNewBulkEntries(
+    entries: BulkWorkflowEntry[],
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<{
+    ready: BulkWorkflowEntry[];
+    bound: Map<string, ServiceAccountWorkloadBinding>;
+    failed: BulkFailureEntry[];
+  }> {
+    const bound = new Map<string, ServiceAccountWorkloadBinding>();
+    const failed: BulkFailureEntry[] = [];
+    const isBound = (entry: BulkWorkflowEntry) => !!entry.definition?.settings?.run_as;
+    const boundEntries = entries.filter(isBound);
+    if (boundEntries.length === 0) return { ready: entries, bound, failed };
+
+    let outcomes: Map<string, WorkflowBindingChangeOutcome>;
+    try {
+      const bindings = this.deps.getServiceAccountBindings?.();
+      if (!bindings) throw new Error('Service account bindings are unavailable.');
+      outcomes = await applyWorkflowBindingChanges({
+        bindings,
+        core: this.deps.getCoreStart(),
+        getSpaceId: this.deps.getSpaceId,
+        spaceId,
+        request,
+        targets: boundEntries.map((entry) => ({
+          workflowId: entry.id,
+          accountId: entry.definition?.settings?.run_as,
+        })),
+      });
+    } catch (error) {
+      failed.push(
+        ...boundEntries.map((entry) => ({
+          index: entry.idx,
+          id: entry.id,
+          error: getErrorMessage(error),
+        }))
+      );
+      return { ready: entries.filter((entry) => !isBound(entry)), bound, failed };
+    }
+
+    const ready: BulkWorkflowEntry[] = [];
+    const rejected: Array<{ entry: BulkWorkflowEntry; error: string }> = [];
+    const unknown: WorkflowBindingToReconcile[] = [];
+    for (const entry of entries) {
+      const outcome = outcomes.get(entry.id);
+      if (!isBound(entry)) {
+        ready.push(entry);
+      } else if (outcome?.ok && outcome.written) {
+        bound.set(entry.id, outcome.written);
+        ready.push(entry);
+      } else {
+        const error =
+          outcome && !outcome.ok ? outcome.error : 'The service account bind reported no result.';
+        rejected.push({ entry, error });
+        if (!outcome?.ok && outcome?.mayHaveApplied) unknown.push({ workflowId: entry.id });
+      }
+    }
+    const unreleased = await this.reconcileBulkBindings(unknown, spaceId, request);
+    for (const { entry, error } of rejected) {
+      failed.push({
+        index: entry.idx,
+        id: entry.id,
+        error: unreleased.has(entry.id) ? BINDING_COMPENSATION_FAILED_MESSAGE : error,
+      });
+    }
+    return { ready, bound, failed };
+  }
+
+  /** Undoes the bindings of new workflows that were not written. Resolves those it could not undo. */
+  private releaseNewBulkBindings(
+    entries: BulkWorkflowEntry[],
+    bound: ReadonlyMap<string, ServiceAccountWorkloadBinding>,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<Set<string>> {
+    return this.reconcileBulkBindings(
+      entries.flatMap((entry) => {
+        const written = bound.get(entry.id);
+        return written ? [{ workflowId: entry.id, written }] : [];
+      }),
+      spaceId,
+      request
+    );
+  }
+
+  private async reconcileBulkBindings(
+    workflows: WorkflowBindingToReconcile[],
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<Set<string>> {
+    if (workflows.length === 0) return new Set();
+    const bindings = this.deps.getServiceAccountBindings?.();
+    if (!bindings) return new Set(workflows.map(({ workflowId }) => workflowId));
+    return reconcileWorkflowBindings({
+      bindings,
+      logger: this.deps.logger,
+      spaceId,
+      request,
+      workflows,
+      getWorkflowRevision: (workflowId) => this.getWorkflowRevision(workflowId, spaceId),
+    });
+  }
+
   private async executeBulkOverwrite(
     entries: BulkWorkflowEntry[],
     spaceId: string,
@@ -1635,27 +1905,6 @@ export class WorkflowCrudService {
     const occHitById = new Map(occHits.map((hit) => [hit._id, hit]));
 
     const newEntries = entries.filter((entry) => !occHitById.has(entry.id));
-    for (let index = newEntries.length - 1; index >= 0; index--) {
-      const entry = newEntries[index];
-      if (entry.definition?.settings?.run_as) {
-        newEntries.splice(index, 1);
-        try {
-          created.push(
-            await this.createWorkflow(
-              { id: entry.id, yaml: entry.workflowData.yaml },
-              spaceId,
-              params.request
-            )
-          );
-        } catch (error) {
-          failed.push({
-            index: entry.idx,
-            id: entry.id,
-            error: error instanceof Error ? error.message : String(error),
-          });
-        }
-      }
-    }
     const existingEntries = entries.filter((entry) => occHitById.has(entry.id));
     const inSpaceUpdateEntries: BulkWorkflowEntry[] = [];
     const crossSpaceOverwriteEntries: Array<{ entry: BulkWorkflowEntry; occHit: OccWorkflowHit }> =
@@ -1686,37 +1935,21 @@ export class WorkflowCrudService {
     };
 
     if (newEntries.length > 0) {
-      const operations = newEntries.map((entry) => ({
-        create: {
-          _id: entry.id,
-          document: applyWorkflowVersion(entry.workflowData, undefined),
-        },
-      }));
-      const bulkResponse = await client.bulk({
-        operations,
-        refresh: 'wait_for',
+      const result = await this.createNewBulkEntries({
+        entries: newEntries,
+        spaceId,
+        request: params.request,
+        toDocument: (entry) => applyWorkflowVersion(entry.workflowData, undefined),
       });
-
-      for (let itemIndex = 0; itemIndex < bulkResponse.items.length; itemIndex++) {
-        const operation = bulkResponse.items[itemIndex].create;
-        const entry = newEntries[itemIndex];
-        const document = operations[itemIndex].create.document;
-
-        if (!operation?.error) {
-          created.push(transformStorageDocumentToWorkflowDto(entry.id, document));
-          successfullyWritten.push({ ...entry, workflowData: document });
-          historyEntries.push({
-            id: entry.id,
-            document,
-            action: WorkflowChangeHistoryAction.workflowCreate,
-          });
-        } else {
-          failed.push({
-            index: entry.idx,
-            id: entry.id,
-            error: extractBulkItemError(operation.error),
-          });
-        }
+      failed.push(...result.failed);
+      for (const entry of result.written) {
+        created.push(transformStorageDocumentToWorkflowDto(entry.id, entry.workflowData));
+        successfullyWritten.push(entry);
+        historyEntries.push({
+          id: entry.id,
+          document: entry.workflowData,
+          action: WorkflowChangeHistoryAction.workflowCreate,
+        });
       }
     }
 

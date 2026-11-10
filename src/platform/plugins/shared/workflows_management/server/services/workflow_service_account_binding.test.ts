@@ -14,7 +14,15 @@ import {
   loggingSystemMock,
   securityServiceMock,
 } from '@kbn/core/server/mocks';
-import { withWorkflowBindingChange } from './workflow_service_account_binding';
+import type {
+  ServiceAccountWorkloadBindingChange,
+  ServiceAccountWorkloadBindingChangeResult,
+} from '@kbn/core-security-server';
+import {
+  applyWorkflowBindingChanges,
+  reconcileWorkflowBindings,
+  withWorkflowBindingChange,
+} from './workflow_service_account_binding';
 
 const setup = () => {
   const core = {
@@ -294,4 +302,161 @@ it('reconciles to persisted identity when both competing writes fail', async () 
     })
   ).rejects.toThrow('Y failed');
   expect(currentBinding.serviceAccountId).toBe('original');
+});
+
+/** Applies every change, as the binding store would when nothing fails. */
+const applyAll =
+  (binding: ReturnType<typeof setup>['binding']) =>
+  async (
+    _request: unknown,
+    changes: readonly ServiceAccountWorkloadBindingChange[]
+  ): Promise<ServiceAccountWorkloadBindingChangeResult[]> =>
+    changes.map((change) =>
+      change.op === 'bind'
+        ? {
+            ...change,
+            ok: true,
+            binding: {
+              ...binding,
+              workloadId: change.workloadId,
+              serviceAccountId: change.serviceAccountId,
+            },
+          }
+        : { ...change, ok: true, removed: true }
+    );
+
+describe('bulk workflow binding changes', () => {
+  it('binds and unbinds many workflows in one call and reports each outcome', async () => {
+    const { params, bindings, binding } = setup();
+    bindings.bulkUpdateWorkloadBindings.mockImplementation(async (request, changes) => [
+      ...(await applyAll(binding)(request, changes.slice(0, 1))),
+      {
+        op: 'bind',
+        workloadType: 'workflow',
+        workloadId: 'refused',
+        ok: false,
+        error: { statusCode: 403, message: 'refused' },
+      },
+      {
+        op: 'bind',
+        workloadType: 'workflow',
+        workloadId: 'timed-out',
+        ok: false,
+        error: { statusCode: 503, message: 'unavailable' },
+      },
+      { op: 'unbind', workloadType: 'workflow', workloadId: 'gone', ok: true, removed: false },
+    ]);
+
+    const outcomes = await applyWorkflowBindingChanges({
+      ...params,
+      targets: [
+        { workflowId: 'bound', accountId: 'a' },
+        { workflowId: 'refused', accountId: 'a' },
+        { workflowId: 'timed-out', accountId: 'a' },
+        { workflowId: 'gone' },
+      ],
+    });
+
+    expect(bindings.bulkUpdateWorkloadBindings).toHaveBeenCalledTimes(1);
+    expect(bindings.bulkUpdateWorkloadBindings).toHaveBeenCalledWith(params.request, [
+      { op: 'bind', workloadType: 'workflow', workloadId: 'bound', serviceAccountId: 'a' },
+      { op: 'bind', workloadType: 'workflow', workloadId: 'refused', serviceAccountId: 'a' },
+      { op: 'bind', workloadType: 'workflow', workloadId: 'timed-out', serviceAccountId: 'a' },
+      { op: 'unbind', workloadType: 'workflow', workloadId: 'gone' },
+    ]);
+    expect(Object.fromEntries(outcomes)).toEqual({
+      bound: { ok: true, written: { ...binding, workloadId: 'bound' }, changed: true },
+      refused: { ok: false, error: 'refused', mayHaveApplied: false },
+      'timed-out': { ok: false, error: 'unavailable', mayHaveApplied: true },
+      gone: { ok: true, written: null, changed: false },
+    });
+    expect(bindings.getWorkloadBinding).not.toHaveBeenCalled();
+    expect(bindings.bindWorkload).not.toHaveBeenCalled();
+  });
+
+  it('splits changes into calls of at most the Core limit', async () => {
+    const { params, bindings, binding } = setup();
+    bindings.bulkUpdateWorkloadBindings.mockImplementation(applyAll(binding));
+    const targets = Array.from({ length: 1001 }, (_, index) => ({
+      workflowId: `workflow-${index}`,
+      accountId: 'a',
+    }));
+
+    const outcomes = await applyWorkflowBindingChanges({ ...params, targets });
+
+    expect(
+      bindings.bulkUpdateWorkloadBindings.mock.calls.map(([, changes]) => changes.length)
+    ).toEqual([1000, 1]);
+    expect(outcomes.size).toBe(1001);
+  });
+
+  it('rejects before changing any binding when the caller lacks manage_security', async () => {
+    const { params, bindings, client } = setup();
+    client.security.hasPrivileges.mockResolvedValue({
+      has_all_requested: false,
+      username: 'editor',
+      cluster: { manage_security: false },
+      index: {},
+      application: {},
+    });
+
+    await expect(
+      applyWorkflowBindingChanges({ ...params, targets: [{ workflowId: 'w', accountId: 'a' }] })
+    ).rejects.toThrow('manage_security');
+    expect(bindings.bulkUpdateWorkloadBindings).not.toHaveBeenCalled();
+  });
+
+  it('reconciles failed writes to their persisted workflow revisions', async () => {
+    const { params, bindings, binding } = setup();
+    const written = { ...binding, workloadId: 'not-created' };
+    bindings.getWorkloadBinding.mockImplementation(async ({ workloadId }) => {
+      if (workloadId === 'not-created') return written;
+      if (workloadId === 'not-deleted') return null;
+      if (workloadId === 'changed-since') return { ...binding, serviceAccountId: 'other' };
+      return { ...binding, workloadId };
+    });
+    bindings.bulkUpdateWorkloadBindings.mockImplementation(applyAll(binding));
+    const getWorkflowRevision = jest.fn(async (workflowId: string) =>
+      workflowId === 'not-deleted' ? { seqNo: 1, primaryTerm: 1, accountId: 'a' } : null
+    );
+
+    const unreconciled = await reconcileWorkflowBindings({
+      ...params,
+      getWorkflowRevision,
+      workflows: [
+        { workflowId: 'not-created', written },
+        { workflowId: 'not-deleted', written: null },
+        { workflowId: 'changed-since', written },
+        { workflowId: 'unknown' },
+      ],
+    });
+
+    expect(unreconciled).toEqual(new Set());
+    expect(bindings.bulkUpdateWorkloadBindings).toHaveBeenCalledTimes(1);
+    expect(bindings.bulkUpdateWorkloadBindings).toHaveBeenCalledWith(params.request, [
+      { op: 'unbind', workloadType: 'workflow', workloadId: 'not-created' },
+      { op: 'bind', workloadType: 'workflow', workloadId: 'not-deleted', serviceAccountId: 'a' },
+      { op: 'unbind', workloadType: 'workflow', workloadId: 'unknown' },
+    ]);
+    expect(getWorkflowRevision).not.toHaveBeenCalledWith('changed-since');
+  });
+
+  it('reports workflows it could not reconcile', async () => {
+    const { params, bindings, binding } = setup();
+    bindings.getWorkloadBinding.mockImplementation(async ({ workloadId }) => {
+      if (workloadId === 'unreadable') throw new Error('read failed');
+      return { ...binding, workloadId };
+    });
+    bindings.bulkUpdateWorkloadBindings.mockRejectedValue(new Error('write failed'));
+
+    const unreconciled = await reconcileWorkflowBindings({
+      ...params,
+      workflows: [
+        { workflowId: 'unreadable', written: { ...binding, workloadId: 'unreadable' } },
+        { workflowId: 'unwritable', written: { ...binding, workloadId: 'unwritable' } },
+      ],
+    });
+
+    expect(unreconciled).toEqual(new Set(['unreadable', 'unwritable']));
+  });
 });

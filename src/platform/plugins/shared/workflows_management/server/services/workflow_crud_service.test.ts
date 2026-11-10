@@ -14,6 +14,10 @@ import {
   httpServerMock,
   securityServiceMock,
 } from '@kbn/core/server/mocks';
+import type {
+  ServiceAccountWorkloadBinding,
+  ServiceAccountWorkloadBindingChangeResult,
+} from '@kbn/core-security-server';
 import { buildEntityReadAccessQuery } from '@kbn/entity-access-control';
 import { loggerMock } from '@kbn/logging-mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
@@ -154,6 +158,55 @@ const makeTaskScheduler = () => ({
   unscheduleWorkflowTasks: jest.fn().mockResolvedValue(undefined),
   updateWorkflowTasks: jest.fn().mockResolvedValue(undefined),
 });
+
+/**
+ * Backs the bindings mock with an in-memory store, so bulk binds, unbinds and reads agree. An id
+ * in `refuse` is refused with a 403, and a bind of one in `unavailable` fails with a 503 after
+ * applying.
+ */
+const stubBindingStore = (
+  bindings: ReturnType<typeof securityServiceMock.createStart>['serviceAccounts'],
+  { refuse = [], unavailable = [] }: { refuse?: string[]; unavailable?: string[] } = {}
+) => {
+  const store = new Map<string, ServiceAccountWorkloadBinding>();
+  bindings.getWorkloadBinding.mockImplementation(
+    async ({ workloadId }) => store.get(workloadId) ?? null
+  );
+  bindings.bulkUpdateWorkloadBindings.mockImplementation(async (_request, changes) =>
+    changes.map((change): ServiceAccountWorkloadBindingChangeResult => {
+      if (refuse.includes(change.workloadId)) {
+        return { ...change, ok: false, error: { statusCode: 403, message: 'Refused' } };
+      }
+      const removed = store.delete(change.workloadId);
+      const binding =
+        change.op === 'bind'
+          ? {
+              pluginId: 'workflowsExecutionEngine',
+              workloadType: 'workflow',
+              workloadId: change.workloadId,
+              spaceId: 'default',
+              serviceAccountId: change.serviceAccountId,
+              boundAt: '2026-11-10',
+              boundBy: { type: 'user' as const, username: 'owner' },
+            }
+          : undefined;
+      if (binding) store.set(change.workloadId, binding);
+      if (change.op === 'bind' && unavailable.includes(change.workloadId)) {
+        return { ...change, ok: false, error: { statusCode: 503, message: 'Unavailable' } };
+      }
+      return binding && change.op === 'bind'
+        ? { ...change, ok: true, binding }
+        : {
+            op: 'unbind',
+            workloadType: 'workflow',
+            workloadId: change.workloadId,
+            ok: true,
+            removed,
+          };
+    })
+  );
+  return store;
+};
 
 const lightweightWorkflowYaml = [
   'name: My Workflow',
@@ -3993,7 +4046,18 @@ describe('bound workflow deletion errors', () => {
   });
 
   it('retains per-item failures and successes for a multi-workflow delete', async () => {
-    const { service, request, conflict, deleteDocuments } = setup();
+    const { service, request, conflict, deleteDocuments, bindings } = setup();
+    bindings.getWorkloadBinding.mockReset();
+    const store = stubBindingStore(bindings);
+    store.set('bound', {
+      pluginId: 'workflowsExecutionEngine',
+      workloadType: 'workflow',
+      workloadId: 'bound',
+      spaceId: 'default',
+      serviceAccountId: 'account-a',
+      boundAt: '2026-09-23',
+      boundBy: { type: 'user', username: 'owner' },
+    });
     await expect(
       service.deleteWorkflows(['bound', 'ordinary'], 'default', { force: true }, request)
     ).resolves.toEqual({
@@ -4003,6 +4067,9 @@ describe('bound workflow deletion errors', () => {
       successfulIds: ['ordinary'],
     });
     expect(deleteDocuments).toHaveBeenCalledTimes(2);
+    expect(store.get('bound')?.serviceAccountId).toBe('account-a');
+    expect(bindings.unbindWorkload).not.toHaveBeenCalled();
+    expect(bindings.bindWorkload).not.toHaveBeenCalled();
   });
 });
 
@@ -4233,6 +4300,7 @@ describe('service account mutation race regressions', () => {
     'keeps the first duplicate ID in a mixed ordinary/bound import (bound first=%s)',
     async (boundFirst) => {
       const { service, client, bindings } = setupProbe();
+      stubBindingStore(bindings);
       client.search.mockResolvedValue({ hits: { hits: [] } });
       client.bulk.mockResolvedValue({ items: [{ create: { _id: 'same', status: 201 } }] });
       const bound = `${lightweightWorkflowYaml}\nsettings:\n  run_as: account-a\n`;
@@ -4251,7 +4319,8 @@ describe('service account mutation race regressions', () => {
       expect(result.failed).toEqual([
         { index: 1, id: 'same', error: "Duplicate workflow id 'same' in batch" },
       ]);
-      expect(bindings.bindWorkload).toHaveBeenCalledTimes(boundFirst ? 1 : 0);
+      expect(bindings.bulkUpdateWorkloadBindings).toHaveBeenCalledTimes(boundFirst ? 1 : 0);
+      expect(bindings.bindWorkload).not.toHaveBeenCalled();
     }
   );
 
@@ -4675,5 +4744,324 @@ describe('managed orphan cleanup without a request', () => {
       );
       expect(client.index).not.toHaveBeenCalled();
     });
+  });
+});
+
+describe('bulk service account bindings', () => {
+  afterEach(() => jest.restoreAllMocks());
+
+  const boundYaml = (name: string, accountId: string) =>
+    `${lightweightWorkflowYaml.replace('My Workflow', name)}\nsettings:\n  run_as: ${accountId}\n`;
+
+  const setup = (options?: Parameters<typeof stubBindingStore>[1]) => {
+    const core = {
+      ...coreMock.createStart(),
+      security: securityServiceMock.createStart(),
+      elasticsearch: elasticsearchServiceMock.createStart(),
+    };
+    const bindings = core.security.serviceAccounts;
+    bindings.isEnabled.mockReturnValue(true);
+    const store = stubBindingStore(bindings, options);
+    core.elasticsearch.client.asScoped().asCurrentUser.security.hasPrivileges.mockResolvedValue({
+      has_all_requested: true,
+      username: 'owner',
+      cluster: { manage_security: true },
+      index: {},
+      application: {},
+    });
+    core.elasticsearch.client.asInternalUser.get.mockResolvedValue({
+      _index: '.workflows-workflows',
+      _id: 'missing',
+      found: false,
+    });
+    const { deps, client } = makeDeps(undefined, {
+      getCoreStart: () => core,
+      getServiceAccountBindings: () => bindings,
+    });
+    client.search.mockResolvedValue({ hits: { hits: [] } });
+    return {
+      core,
+      bindings,
+      store,
+      client,
+      service: new WorkflowCrudService(deps),
+      request: httpServerMock.createKibanaRequest(),
+    };
+  };
+
+  const bulkCreated = (...ids: string[]) => ({
+    items: ids.map((id) => ({ create: { _id: id, status: 201 } })),
+  });
+
+  it.each([false, true])(
+    'binds every new bound workflow in one call and writes them in one bulk (overwrite=%s)',
+    async (overwrite) => {
+      const { service, client, bindings, store, request } = setup();
+      client.bulk.mockResolvedValue(bulkCreated('bound-a', 'bound-b', 'plain'));
+
+      const result = await service.bulkCreateWorkflows(
+        [
+          { id: 'bound-a', yaml: boundYaml('A', 'account-a') },
+          { id: 'bound-b', yaml: boundYaml('B', 'account-b') },
+          { id: 'plain', yaml: lightweightWorkflowYaml },
+        ],
+        'default',
+        request,
+        { overwrite }
+      );
+
+      expect(result.failed).toEqual([]);
+      expect(result.created.map(({ id }) => id)).toEqual(['bound-a', 'bound-b', 'plain']);
+      expect(bindings.bulkUpdateWorkloadBindings).toHaveBeenCalledTimes(1);
+      expect(bindings.bulkUpdateWorkloadBindings).toHaveBeenCalledWith(request, [
+        {
+          op: 'bind',
+          workloadType: 'workflow',
+          workloadId: 'bound-a',
+          serviceAccountId: 'account-a',
+        },
+        {
+          op: 'bind',
+          workloadType: 'workflow',
+          workloadId: 'bound-b',
+          serviceAccountId: 'account-b',
+        },
+      ]);
+      expect(client.bulk).toHaveBeenCalledTimes(1);
+      expect(client.index).not.toHaveBeenCalled();
+      expect(bindings.bindWorkload).not.toHaveBeenCalled();
+      expect(store.get('bound-b')?.serviceAccountId).toBe('account-b');
+    }
+  );
+
+  it('fails only the refused workflow and writes the rest', async () => {
+    const { service, client, store, request } = setup({ refuse: ['refused'] });
+    client.bulk.mockResolvedValue(bulkCreated('bound', 'plain'));
+
+    const result = await service.bulkCreateWorkflows(
+      [
+        { id: 'refused', yaml: boundYaml('Refused', 'account-a') },
+        { id: 'bound', yaml: boundYaml('Bound', 'account-a') },
+        { id: 'plain', yaml: lightweightWorkflowYaml },
+      ],
+      'default',
+      request
+    );
+
+    expect(result.failed).toEqual([{ index: 0, id: 'refused', error: 'Refused' }]);
+    expect(result.created.map(({ id }) => id)).toEqual(['bound', 'plain']);
+    expect(client.bulk.mock.calls[0][0].operations.map(({ create }: any) => create._id)).toEqual([
+      'bound',
+      'plain',
+    ]);
+    expect([...store.keys()]).toEqual(['bound']);
+  });
+
+  it('fails every bound workflow without binding when the caller lacks manage_security', async () => {
+    const { service, client, core, bindings, request } = setup();
+    core.elasticsearch.client.asScoped().asCurrentUser.security.hasPrivileges.mockResolvedValue({
+      has_all_requested: false,
+      username: 'editor',
+      cluster: { manage_security: false },
+      index: {},
+      application: {},
+    });
+    client.bulk.mockResolvedValue(bulkCreated('plain'));
+
+    const result = await service.bulkCreateWorkflows(
+      [
+        { id: 'bound', yaml: boundYaml('Bound', 'account-a') },
+        { id: 'plain', yaml: lightweightWorkflowYaml },
+      ],
+      'default',
+      request
+    );
+
+    expect(result.failed).toEqual([
+      { index: 0, id: 'bound', error: expect.stringContaining('manage_security') },
+    ]);
+    expect(result.created.map(({ id }) => id)).toEqual(['plain']);
+    expect(bindings.bulkUpdateWorkloadBindings).not.toHaveBeenCalled();
+  });
+
+  it('undoes the binding of a bound workflow whose write failed', async () => {
+    const { service, client, store, request } = setup();
+    client.bulk.mockResolvedValue({
+      items: [
+        { create: { _id: 'kept', status: 201 } },
+        {
+          create: {
+            _id: 'rejected',
+            status: 400,
+            error: { type: 'mapper_parsing_exception', reason: 'bad document' },
+          },
+        },
+      ],
+    });
+
+    const result = await service.bulkCreateWorkflows(
+      [
+        { id: 'kept', yaml: boundYaml('Kept', 'account-a') },
+        { id: 'rejected', yaml: boundYaml('Rejected', 'account-a') },
+      ],
+      'default',
+      request
+    );
+
+    expect(result.failed).toEqual([
+      { index: 1, id: 'rejected', error: expect.stringContaining('bad document') },
+    ]);
+    expect([...store.keys()]).toEqual(['kept']);
+  });
+
+  it('undoes a bind that failed with a server error, since it may have been applied', async () => {
+    const { service, client, store, request } = setup({ unavailable: ['timed-out'] });
+    client.bulk.mockResolvedValue(bulkCreated('plain'));
+
+    const result = await service.bulkCreateWorkflows(
+      [
+        { id: 'timed-out', yaml: boundYaml('Timed out', 'account-a') },
+        { id: 'plain', yaml: lightweightWorkflowYaml },
+      ],
+      'default',
+      request
+    );
+
+    expect(result.failed).toEqual([{ index: 0, id: 'timed-out', error: 'Unavailable' }]);
+    expect(store.has('timed-out')).toBe(false);
+  });
+
+  it('undoes every binding when the bulk write itself fails', async () => {
+    const { service, client, store, request } = setup();
+    client.bulk.mockRejectedValue(new Error('cluster unavailable'));
+
+    await expect(
+      service.bulkCreateWorkflows(
+        [
+          { id: 'first', yaml: boundYaml('First', 'account-a') },
+          { id: 'second', yaml: boundYaml('Second', 'account-a') },
+        ],
+        'default',
+        request
+      )
+    ).rejects.toThrow('cluster unavailable');
+    expect(store.size).toBe(0);
+  });
+
+  it('moves the binding to the new ID when a server-generated ID loses a create race', async () => {
+    const { service, client, bindings, store, request } = setup();
+    client.bulk
+      .mockImplementationOnce(async ({ operations }) => ({
+        items: operations.map(({ create }: any) => ({
+          create: {
+            _id: create._id,
+            status: 409,
+            error: { type: 'version_conflict_engine_exception', reason: 'taken' },
+          },
+        })),
+      }))
+      .mockImplementationOnce(async ({ operations }) => ({
+        items: operations.map(({ create }: any) => ({ create: { _id: create._id, status: 201 } })),
+      }));
+
+    const result = await service.bulkCreateWorkflows(
+      [{ yaml: boundYaml('Race', 'account-a') }],
+      'default',
+      request
+    );
+
+    expect(result.failed).toEqual([]);
+    const [lost, won] = client.bulk.mock.calls.map(
+      ([{ operations }]) => operations[0].create._id as string
+    );
+    expect(won).not.toBe(lost);
+    expect(result.created.map(({ id }) => id)).toEqual([won]);
+    expect([...store.keys()]).toEqual([won]);
+    expect(bindings.bulkUpdateWorkloadBindings.mock.calls.map(([, changes]) => changes)).toEqual([
+      [{ op: 'bind', workloadType: 'workflow', workloadId: lost, serviceAccountId: 'account-a' }],
+      [{ op: 'unbind', workloadType: 'workflow', workloadId: lost }],
+      [{ op: 'bind', workloadType: 'workflow', workloadId: won, serviceAccountId: 'account-a' }],
+    ]);
+  });
+
+  it('unbinds a batch of bound workflows in one call and restores the one not deleted', async () => {
+    const { service, client, core, bindings, store, request } = setup();
+    const boundSource = (accountId: string) => ({
+      definition: {
+        version: '1' as const,
+        name: 'Bound',
+        enabled: true,
+        triggers: [{ type: 'manual' as const }],
+        steps: [],
+        settings: { run_as: accountId },
+      },
+    });
+    client.search.mockResolvedValue({
+      hits: {
+        hits: [
+          occSearchHit('bound-a', boundSource('account-a')),
+          occSearchHit('bound-b', boundSource('account-b')),
+          occSearchHit('plain'),
+        ],
+      },
+    });
+    for (const [id, accountId] of [
+      ['bound-a', 'account-a'],
+      ['bound-b', 'account-b'],
+    ]) {
+      store.set(id, {
+        pluginId: 'workflowsExecutionEngine',
+        workloadType: 'workflow',
+        workloadId: id,
+        spaceId: 'default',
+        serviceAccountId: accountId,
+        boundAt: '2026-11-01',
+        boundBy: { type: 'user', username: 'owner' },
+      });
+    }
+    core.elasticsearch.client.asInternalUser.get.mockResolvedValue({
+      _index: '.workflows-workflows',
+      _id: 'bound-b',
+      found: true,
+      _seq_no: 5,
+      _primary_term: 1,
+      _version: 1,
+      _source: { spaceId: 'default', definition: { settings: { run_as: 'account-b' } } },
+    });
+    const conflict = new WorkflowConflictError('Workflow changed', 'bound-b');
+    jest.spyOn(workflowDeletion, 'deleteWorkflows').mockImplementation(async ({ ids }) => {
+      if (ids.includes('bound-b')) throw conflict;
+      return { total: ids.length, deleted: ids.length, failures: [], successfulIds: ids };
+    });
+
+    const result = await service.deleteWorkflows(
+      ['bound-a', 'bound-b', 'plain'],
+      'default',
+      { force: true },
+      request
+    );
+
+    expect(result).toMatchObject({
+      deleted: 2,
+      failures: [{ id: 'bound-b', error: conflict.message }],
+    });
+    expect([...(result.successfulIds ?? [])].sort()).toEqual(['bound-a', 'plain']);
+    expect(bindings.bulkUpdateWorkloadBindings.mock.calls.map(([, changes]) => changes)).toEqual([
+      [
+        { op: 'unbind', workloadType: 'workflow', workloadId: 'bound-a' },
+        { op: 'unbind', workloadType: 'workflow', workloadId: 'bound-b' },
+      ],
+      [
+        {
+          op: 'bind',
+          workloadType: 'workflow',
+          workloadId: 'bound-b',
+          serviceAccountId: 'account-b',
+        },
+      ],
+    ]);
+    expect(store.has('bound-a')).toBe(false);
+    expect(store.get('bound-b')?.serviceAccountId).toBe('account-b');
+    expect(bindings.unbindWorkload).not.toHaveBeenCalled();
   });
 });
