@@ -27,6 +27,7 @@ export interface BulkUpgradeTaskParams {
   force?: boolean;
   prerelease?: boolean;
   upgradePackagePolicies?: boolean;
+  acknowledgeBreakingChanges?: boolean;
 }
 
 interface BulkUpgradeTaskState {
@@ -59,6 +60,7 @@ export async function _runBulkUpgradeTask({
     force,
     prerelease,
     upgradePackagePolicies,
+    acknowledgeBreakingChanges,
   } = taskParams;
   const esClient = appContextService.getInternalUserESClient();
   const savedObjectsClient = appContextService.getInternalUserSOClientForSpaceId(spaceId);
@@ -80,6 +82,8 @@ export async function _runBulkUpgradeTask({
         pkgkey: pkg?.version ? `${pkg.name}-${pkg.version}` : pkg.name,
         force,
         prerelease,
+        checkBreakingChanges: true,
+        acknowledgeBreakingChanges,
       });
 
       if (installResult.error) {

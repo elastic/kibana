@@ -82,7 +82,12 @@ export const openAIAdapter: InferenceConnectorAdapter = {
         // params when the tools list is empty. Only forward tools/tool_choice when tools exist.
         ...(hasTools
           ? {
-              tool_choice: toolChoiceToOpenAI(toolChoice, { connector, tools }),
+              tool_choice: toolChoiceToOpenAI(toolChoice, {
+                connector,
+                tools,
+                modelId: modelName ?? connector.config?.defaultModel,
+                logger,
+              }),
               tools: openAiTools,
             }
           : {}),

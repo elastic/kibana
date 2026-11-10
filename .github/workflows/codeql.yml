@@ -63,7 +63,7 @@ jobs:
       continue-on-error: true
       uses: advanced-security/dismiss-alerts@a18f986bdb40edba0dd7a74382c15d4a3d50a1c8 # 2.0.3
       env:
-        GITHUB_TOKEN: ${{secrets.KIBANAMACHINE_TOKEN}}
+        GITHUB_TOKEN: ${{ github.token }}
       with:
         sarif-id: ${{ steps.analyze.outputs.sarif-id }}
         sarif-file: sarif-results/${{ matrix.language }}.sarif

@@ -166,6 +166,39 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
     },
 
+    /**
+     * Selects a combobox option and waits for the choice to be committed to the Lens state,
+     * re-selecting when the option click never landed.
+     *
+     * @param testTargetId - the selector of the combobox, which must also carry `committedAttribute`
+     * @param committedAttribute - the attribute holding the committed option label
+     * @param name - the option label to select
+     */
+    async selectCommittedOptionFromComboBox(
+      testTargetId: string,
+      committedAttribute: string,
+      name: string
+    ) {
+      // EUI drops the option click under load, and the filter text setElement leaves behind makes
+      // the input read back as `name` either way. Match case-insensitively, as comboBox itself does.
+      const expected = name.trim().toLowerCase();
+      await retry.try(
+        async () => {
+          await this.selectOptionFromComboBox(testTargetId, name);
+          await retry.waitForWithTimeout(`[${name}] selection to commit`, 10_000, async () => {
+            const combo = await testSubjects.find(testTargetId);
+            const committed = (await combo.getAttribute(committedAttribute)) ?? '';
+            return committed.trim().toLowerCase() === expected;
+          });
+        },
+        {
+          description: `select [${name}] from [${testTargetId}]`,
+          timeout: 60_000,
+          onFailureBlock: async () => comboBox.clearInputField(testTargetId),
+        }
+      );
+    },
+
     async configureQueryAnnotation(opts: {
       queryString: string;
       timeField: string;
@@ -241,8 +274,32 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       } else {
         await this.selectOperation(opts.operation, opts.isPreviousIncompatible);
       }
-      if (opts.field) {
-        await this.selectOptionFromComboBox('indexPattern-dimension-field', opts.field);
+      const field = opts.field;
+      if (field) {
+        // Close too early discards the operation→field transition. Do not wait on the
+        // combobox input alone: setElement types `field` as a filter before the option is
+        // clicked. data-selected-field updates only after insertOrReplaceColumn. The
+        // selected label can differ from the search text (for example, "records" or a
+        // prefix of a field name), so compare it with the combobox's selected label.
+        // Re-select on failure because EUI drops the option click under load, and the filter text
+        // setElement leaves behind can make the input read back as `field`.
+        await retry.try(
+          async () => {
+            await this.selectOptionFromComboBox('indexPattern-dimension-field', field);
+            await retry.waitForWithTimeout('field selection to commit', 10_000, async () => {
+              const fieldCombo = await testSubjects.find('indexPattern-dimension-field');
+              const committedLabel = (await fieldCombo.getAttribute('data-selected-field')) ?? '';
+              const input = await fieldCombo.findByTagName('input');
+              const selectedLabel = (await input.getAttribute('value')) ?? '';
+              return committedLabel !== '' && committedLabel === selectedLabel;
+            });
+          },
+          {
+            description: `configureDimension - select field [${field}]`,
+            timeout: 60_000,
+            onFailureBlock: async () => comboBox.clearInputField('indexPattern-dimension-field'),
+          }
+        );
       }
 
       if (opts.formula) {
@@ -782,7 +839,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         `input[data-test-subj="${testSubj}"][type='number']`
       );
       await numericInput.click();
-      await numericInput.clearValue();
+      // These inputs are controlled by React state, so the clear has to arrive as real key events
+      await numericInput.clearValueWithKeyboard();
       return numericInput;
     },
 
@@ -1142,6 +1200,21 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       const paginationControl = await testSubjects.find('lnsWorkspaceErrorsPaginationControl');
       const paginationItems = await paginationControl.findAllByCssSelector('.euiPagination__item');
       return paginationItems.length;
+    },
+
+    /** Waits for the visible warnings in the config panel to settle on the expected count */
+    async assertWorkspaceErrorCount(expectedCount: number) {
+      await retry.waitForWithTimeout(
+        `workspace error count to be ${expectedCount}`,
+        10_000,
+        async () => {
+          const actualCount = await this.getWorkspaceErrorCount();
+          if (actualCount !== expectedCount) {
+            throw new Error(`Expected ${expectedCount} workspace errors, found ${actualCount}`);
+          }
+          return true;
+        }
+      );
     },
 
     async searchOnChartSwitch(subVisualizationId: string, searchTerm?: string) {

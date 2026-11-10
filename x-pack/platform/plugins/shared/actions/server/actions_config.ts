@@ -6,10 +6,10 @@
  */
 
 import { readFileSync } from 'fs';
+import { isIPv6 } from 'node:net';
 
 import { i18n } from '@kbn/i18n';
 import { tryCatch, map, mapNullable, getOrElse } from 'fp-ts/Option';
-import url from 'url';
 import { curry } from 'lodash';
 import { pipe } from 'fp-ts/pipeable';
 
@@ -104,16 +104,35 @@ function disabledActionTypeErrorMessage(actionType: string) {
   });
 }
 
+// URL wraps IPv6 hostnames in brackets and compresses them (`2001:db8:0::1` -> `2001:db8::1`),
+// so both allowedHosts entries and checked hostnames are reduced to that same unbracketed form
+function normalizeHostname(hostname: string): string {
+  const unbracketed =
+    hostname.startsWith('[') && hostname.endsWith(']') ? hostname.slice(1, -1) : hostname;
+  if (!isIPv6(unbracketed)) return unbracketed;
+
+  try {
+    return new URL(`http://[${unbracketed}]`).hostname.slice(1, -1);
+  } catch (err) {
+    return unbracketed;
+  }
+}
+
 function isAllowed({ allowedHosts }: ActionsConfig, hostname: string | null): boolean {
-  const allowed = new Set(allowedHosts);
+  const allowed = new Set(allowedHosts.map(normalizeHostname));
   if (allowed.has(AllowedHosts.Any)) return true;
-  if (hostname && allowed.has(hostname)) return true;
+  if (hostname && allowed.has(normalizeHostname(hostname))) return true;
   return false;
+}
+
+function parseUri(uri: string): URL {
+  // network path references (`//host/path`) have no scheme, which URL requires
+  return new URL(uri.startsWith('//') ? `http:${uri}` : uri);
 }
 
 function isHostnameAllowedInUri(config: ActionsConfig, uri: string): boolean {
   return pipe(
-    tryCatch(() => url.parse(uri, false /* parseQueryString */, true /* slashesDenoteHost */)),
+    tryCatch(() => parseUri(uri)),
     map((parsedUrl) => parsedUrl.hostname),
     mapNullable((hostname) => isAllowed(config, hostname)),
     getOrElse<boolean>(() => false)

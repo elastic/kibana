@@ -38,7 +38,7 @@ export const PLATFORM_AND_SOLUTION_SCOUT_ROOT_PATH_GLOB =
 
 export const EXAMPLE_PLUGIN_SCOUT_ROOT_PATH_GLOB = '{examples,x-pack/examples}/**/test/scout{_*,}';
 
-export const CORE_MODULE_SCOUT_ROOT_PATH_GLOB = 'src/core/test/scout{_*,}';
+export const CORE_MODULE_SCOUT_ROOT_PATH_GLOB = 'src/core/packages/core/test/scout{_*,}';
 
 export const TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB = `{${[
   PLATFORM_AND_SOLUTION_SCOUT_ROOT_PATH_GLOB,
@@ -91,7 +91,7 @@ export const SCOUT_UNIFIED_CONFIG_PATH_REGEX = new RegExp(
   `^(?:` +
     `(?<examplesRoot>examples|x-pack/examples)/(?<examplePlugin>[^/]+)` +
     `|` +
-    `(?<coreRoot>src/core)` +
+    `(?<coreRoot>src/core/packages/core)` +
     `|` +
     `(?:src|x-pack)/(?:(?<platformOrCore>platform|core)|solutions/(?<solution>\\w+))` +
     `/(?<moduleKind>plugins|packages)/?(?<moduleVisibility>shared|private|)` +
@@ -194,6 +194,9 @@ export const CRITICAL_FILES_SCOUT: readonly string[] = [
   'src/platform/packages/shared/kbn-scout/**/*',
   'src/platform/packages/private/kbn-scout-reporting/**/*',
   'scripts/scout.js',
+  'scripts/moon_test_configs.js',
+  'packages/kbn-moon/src/test_config_selection.ts',
+  '.moon/tasks/scout-tests.yml',
   '.buildkite/scripts/steps/test/scout/**/*',
   '.buildkite/pipeline-utils/affected-packages/**/*.{ts,js,sh}',
   '.buildkite/pipeline-utils/ci-stats/**/*.{ts,js}',

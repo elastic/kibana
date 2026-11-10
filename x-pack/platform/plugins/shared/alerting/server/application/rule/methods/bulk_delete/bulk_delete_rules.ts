@@ -25,6 +25,7 @@ import {
   getAuthorizationFilter,
   checkAuthorizationAndGetTotal,
   bulkMigrateLegacyActions,
+  deleteLegacyActionsForRules,
 } from '../../../../rules_client/lib';
 import {
   retryIfBulkOperationConflicts,
@@ -57,25 +58,15 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
   const ignoreInternalRuleTypes = options.ignoreInternalRuleTypes ?? true;
 
   const kueryNodeFilter = ids ? convertRuleIdsToKueryNode(ids) : buildKueryNodeFilter(filter);
-  const authorizationFilter = await getAuthorizationFilter(context, { action: 'DELETE' });
-  const internalRuleTypeFilter = constructIgnoreInternalRuleTypesFilter({
-    ruleTypes: context.ruleTypeRegistry.list(),
+
+  const { searchFilterWithAuth, searchFilterWithoutAuth } = await buildSearchFilters(context, {
+    kueryNodeFilter,
+    ignoreInternalRuleTypes,
   });
 
-  const kueryNodeFilterWithAuth =
-    authorizationFilter && kueryNodeFilter
-      ? nodeBuilder.and([kueryNodeFilter, authorizationFilter as KueryNode])
-      : kueryNodeFilter;
-
-  const finalFilter = ignoreInternalRuleTypes
-    ? combineFiltersWithInternalRuleTypeFilter({
-        filter: kueryNodeFilterWithAuth,
-        internalRuleTypeFilter,
-      })
-    : kueryNodeFilterWithAuth;
-
   const { total } = await checkAuthorizationAndGetTotal(context, {
-    filter: finalFilter,
+    filter: searchFilterWithAuth,
+    baseFilter: searchFilterWithoutAuth,
     action: 'DELETE',
   });
 
@@ -92,7 +83,7 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
               metadata: { bulkCount: total, ...options.changeTracking?.metadata },
             },
           }),
-        filter: finalFilter,
+        filter: searchFilterWithAuth,
       })
   );
 
@@ -154,6 +145,39 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
   }
 };
 
+const buildSearchFilters = async (
+  context: RulesClientContext,
+  {
+    kueryNodeFilter,
+    ignoreInternalRuleTypes,
+  }: {
+    kueryNodeFilter: KueryNode | null;
+    ignoreInternalRuleTypes: boolean;
+  }
+): Promise<{
+  searchFilterWithAuth: KueryNode | null;
+  searchFilterWithoutAuth: KueryNode | null;
+}> => {
+  const authorizationFilter = await getAuthorizationFilter(context, { action: 'DELETE' });
+  const internalRuleTypeFilter = constructIgnoreInternalRuleTypesFilter({
+    ruleTypes: context.ruleTypeRegistry.list(),
+  });
+
+  const withInternalType = (f: KueryNode | null) =>
+    ignoreInternalRuleTypes
+      ? combineFiltersWithInternalRuleTypeFilter({ filter: f, internalRuleTypeFilter })
+      : f;
+
+  return {
+    searchFilterWithAuth: withInternalType(
+      authorizationFilter && kueryNodeFilter
+        ? nodeBuilder.and([kueryNodeFilter, authorizationFilter as KueryNode])
+        : kueryNodeFilter
+    ),
+    searchFilterWithoutAuth: withInternalType(kueryNodeFilter),
+  };
+};
+
 const bulkDeleteWithOCC = async (
   context: RulesClientContext,
   {
@@ -176,6 +200,7 @@ const bulkDeleteWithOCC = async (
   );
 
   const rulesToDelete: Array<SavedObject<RawRule>> = [];
+  const migratedRuleIds = new Set<string>();
   const apiKeyToRuleIdMapping: Record<string, string> = {};
   const uiamApiKeyToRuleIdMapping: Record<string, string> = {};
   const taskIdToRuleIdMapping: Record<string, string> = {};
@@ -185,11 +210,13 @@ const bulkDeleteWithOCC = async (
     { name: 'Get rules, collect them and their attributes', type: 'rules' },
     async () => {
       for await (const response of rulesFinder.find()) {
-        await bulkMigrateLegacyActions({
+        // the deleted rules are returned with their legacy actions
+        const migratedIds = await bulkMigrateLegacyActions({
           context,
           rules: response.saved_objects,
           skipActionsValidation: true,
         });
+        migratedIds.forEach((id) => migratedRuleIds.add(id));
         for (const rule of response.saved_objects) {
           const { apiKey, apiKeyCreatedByUser, uiamApiKey } = rule.attributes;
 
@@ -268,6 +295,12 @@ const bulkDeleteWithOCC = async (
     }
   });
   const rules = rulesToDelete.filter((rule) => deletedRuleIds.includes(rule.id));
+
+  // Legacy actions are deleted only once the rules are deleted
+  await deleteLegacyActionsForRules(
+    context,
+    deletedRuleIds.filter((id) => migratedRuleIds.has(id))
+  );
 
   if (deletedRuleIds.length > 0) {
     try {

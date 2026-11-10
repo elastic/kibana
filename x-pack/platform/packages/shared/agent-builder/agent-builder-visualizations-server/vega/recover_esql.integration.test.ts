@@ -50,7 +50,7 @@ const createMockLogger = (): Logger =>
 // Failing: See https://github.com/elastic/kibana/issues/276821
 describe.skip('recover_esql end-to-end (real build_config + real graph)', () => {
   const events = {} as ToolEventEmitter;
-  const esClient = { asCurrentUser: {} } as IScopedClusterClient;
+  const esClient = { asCurrentUser: {}, asInternalUser: {} } as IScopedClusterClient;
 
   let logger: Logger;
   let invoke: jest.Mock;

@@ -233,7 +233,6 @@ describe('xy_visualization', () => {
                         "type": "other",
                       },
                     ],
-                    "touched": false,
                   },
                 ],
               },

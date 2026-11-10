@@ -275,7 +275,7 @@ describe('actions_connectors_list', () => {
       expect(runButtons[runButtons.length - 1]).toBeDisabled();
     });
 
-    it('renders authentication column with Service account for shared authMode', async () => {
+    it('renders the credential scope column with Shared credentials for shared authMode', async () => {
       const actionsWithAuth: ActionConnector[] = [
         createMockActionConnector({
           id: '1',
@@ -300,12 +300,13 @@ describe('actions_connectors_list', () => {
       );
 
       expect(await screen.findByTestId('actionsTable')).toBeInTheDocument();
+      expect(screen.getByText('Credential scope')).toBeInTheDocument();
       const authModeCells = await screen.findAllByTestId('connectorsTableCell-authMode');
       expect(authModeCells).toHaveLength(1);
-      expect(authModeCells[0]).toHaveTextContent('Service account');
+      expect(authModeCells[0]).toHaveTextContent('Shared credentials');
     });
 
-    it('renders authentication column with Personal credentials for per-user authMode', async () => {
+    it('renders Personal credentials for per-user authMode', async () => {
       const actionsWithAuth: ActionConnector[] = [
         createMockActionConnector({
           id: '1',

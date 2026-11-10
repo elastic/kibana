@@ -79,7 +79,7 @@ else
   echo "--- Skip saving snapshot (FALLOW_SAVE_SNAPSHOT not set to 'true')"
 fi
 
-if [ "${KIBANA_SLACK_NOTIFICATIONS_ENABLED:-}" = "true" ]; then
+if [ "${ELASTIC_SLACK_NOTIFICATIONS_ENABLED:-}" = "true" ] || [ "${KIBANA_SLACK_NOTIFICATIONS_ENABLED:-}" = "true" ]; then
   echo "--- Send Slack notification"
   CHANNEL="${SLACK_NOTIFICATIONS_CHANNEL:-}"
   if [ -z "$CHANNEL" ]; then
@@ -107,6 +107,8 @@ Build: ${BUILD_URL}"
       echo "      provider: gcp"
       echo "      machineType: n2-standard-2"
       echo "      preemptible: true"
+      echo "      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c"
+      echo "      diskSizeGb: 85"
       echo "    notify:"
       echo "      - slack:"
       echo "          channels:"

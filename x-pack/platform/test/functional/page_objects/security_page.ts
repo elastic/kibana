@@ -408,9 +408,7 @@ export class SecurityPageObject extends FtrService {
       }
     };
 
-    await this.retry.tryWithRetries('force logout with retries', performForceLogout, {
-      retryCount: 2,
-    });
+    await this.retry.try(performForceLogout, { description: 'force logout with retries' });
   }
 
   async clickRolesSection() {
@@ -435,10 +433,12 @@ export class SecurityPageObject extends FtrService {
 
   async clickCancelEditUser() {
     await this.find.clickByButtonText('Cancel');
+    await this.testSubjects.existOrFail('createUserButton', { timeout: 20000 });
   }
 
   async clickCancelEditRole() {
     await this.testSubjects.click('roleFormCancelButton');
+    await this.testSubjects.existOrFail('createRoleButton', { timeout: 20000 });
   }
 
   async clickSaveEditUser() {

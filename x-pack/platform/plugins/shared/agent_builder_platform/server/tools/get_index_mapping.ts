@@ -5,14 +5,20 @@
  * 2.0.
  */
 
+import { memoize, once } from 'lodash';
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { MappingField } from '@kbn/agent-builder-genai-utils';
 import { otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
 import { getIndexFields } from '@kbn/agent-builder-genai-utils';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { DynamicSchemaBuiltinToolDefinition } from '@kbn/agent-builder-server';
+import {
+  createIncludeFrozenSchema,
+  getIncludeFrozenByDefault,
+  getIncludeFrozenParam,
+} from './include_frozen_schema';
 
-const getIndexMappingsSchema = z.object({
+const createGetIndexMappingsSchemaShape = () => ({
   indices: z
     .array(z.string())
     .min(1)
@@ -24,6 +30,21 @@ const getIndexMappingsSchema = z.object({
       '(Optional) Whether to return the raw mapping tree instead of the summarized fields.'
     ),
 });
+
+const createGetIndexMappingsSchema = memoize((includeFrozenByDefault: boolean) =>
+  z.object({
+    ...createGetIndexMappingsSchemaShape(),
+    include_frozen: createIncludeFrozenSchema(includeFrozenByDefault),
+  })
+);
+
+const createServerlessGetIndexMappingsSchema = once(() =>
+  z.object(createGetIndexMappingsSchemaShape())
+);
+
+type GetIndexMappingsSchema =
+  | ReturnType<typeof createGetIndexMappingsSchema>
+  | ReturnType<typeof createServerlessGetIndexMappingsSchema>;
 
 const renderTypeSegment = (field: MappingField): string => {
   const parts: string[] = [field.type];
@@ -53,15 +74,17 @@ const FIELD_LIMIT = 500;
 const truncationNote = (totalFields: number): string =>
   `Truncated: showing ${FIELD_LIMIT} of ${totalFields} fields. Use a more specific index pattern to retrieve full mappings.`;
 
-const NO_FIELDS_NOTE =
-  'No fields found. Frozen tier indices are excluded from mappings, so this can happen when every backing index of a data stream is on the frozen tier.';
+const NO_FIELDS_FROZEN_EXCLUDED_NOTE =
+  'No fields found. Frozen tier indices were excluded from mappings, so this can happen when every backing index of a data stream is on the frozen tier. Retry with include_frozen set to true to include them.';
 
-const fieldsNote = (totalFields: number): string | undefined => {
+const NO_FIELDS_NOTE = 'No fields found.';
+
+const fieldsNote = (totalFields: number, frozenExcluded: boolean): string | undefined => {
   if (totalFields > FIELD_LIMIT) {
     return truncationNote(totalFields);
   }
   if (totalFields === 0) {
-    return NO_FIELDS_NOTE;
+    return frozenExcluded ? NO_FIELDS_FROZEN_EXCLUDED_NOTE : NO_FIELDS_NOTE;
   }
   return undefined;
 };
@@ -82,18 +105,31 @@ const countMappingNodes = (properties: Record<string, MappingNodeProps> | undefi
   return count;
 };
 
-export const getIndexMappingsTool = (): BuiltinToolDefinition<typeof getIndexMappingsSchema> => {
+type GetIndexMappingsTool = DynamicSchemaBuiltinToolDefinition<GetIndexMappingsSchema>;
+
+export const getIndexMappingsTool = ({
+  isServerless = false,
+}: {
+  isServerless?: boolean;
+} = {}): GetIndexMappingsTool => {
   return {
     id: platformCoreTools.getIndexMapping,
     type: ToolType.builtin,
     description: 'Retrieve mappings for indices, aliases or datastreams.',
-    schema: getIndexMappingsSchema,
-    handler: async ({ indices, raw }, { esClient }) => {
+    getSchema: async (schemaContext) =>
+      isServerless
+        ? createServerlessGetIndexMappingsSchema()
+        : createGetIndexMappingsSchema(await getIncludeFrozenByDefault(schemaContext)),
+    handler: async (params, { esClient }) => {
+      const { indices, raw } = params;
+      const includeFrozen = getIncludeFrozenParam(params);
+      const frozenExcluded = !isServerless && !includeFrozen;
       // getIndexFields transparently handles the local-vs-CCS split:
       //  - local indices use _mapping API (full mapping tree in rawMapping)
       //  - CCS indices use batched _field_caps API (flat field list)
       const indexFields = await getIndexFields({
         indices,
+        includeFrozen,
         esClient: esClient.asCurrentUser,
       });
 
@@ -102,7 +138,7 @@ export const getIndexMappingsTool = (): BuiltinToolDefinition<typeof getIndexMap
           const totalFields = v.fields.length;
           const truncated = totalFields > FIELD_LIMIT;
           const cappedFields = truncated ? v.fields.slice(0, FIELD_LIMIT) : v.fields;
-          const note = fieldsNote(totalFields);
+          const note = fieldsNote(totalFields, frozenExcluded);
 
           if (raw) {
             if (v.rawMapping) {

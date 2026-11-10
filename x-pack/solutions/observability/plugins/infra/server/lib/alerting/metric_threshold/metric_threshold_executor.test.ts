@@ -449,6 +449,24 @@ describe('The metric threshold rule type', () => {
     });
   });
 
+  describe('rule schedule', () => {
+    test('passes the rule schedule interval in milliseconds to the rule evaluation', async () => {
+      setEvaluationResults([]);
+
+      await executor({
+        ...mockOptions,
+        services,
+        params: {
+          criteria: [baseNonCountCriterion],
+        },
+      });
+
+      expect(jest.requireMock('./lib/evaluate_rule').evaluateRule.mock.calls[0][10]).toEqual(
+        3600000
+      );
+    });
+  });
+
   describe('querying with a groupBy parameter', () => {
     const execute = (
       comparator: COMPARATORS,

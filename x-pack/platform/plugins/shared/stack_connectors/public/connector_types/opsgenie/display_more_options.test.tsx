@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { screen, render } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, screen, render } from '@testing-library/react';
 import { DisplayMoreOptions } from './display_more_options';
 
 describe('DisplayMoreOptions', () => {
@@ -32,10 +31,10 @@ describe('DisplayMoreOptions', () => {
     expect(screen.getByText('Hide options')).toBeInTheDocument();
   });
 
-  it('calls toggleShowingMoreOptions when clicked', async () => {
+  it('calls toggleShowingMoreOptions when clicked', () => {
     render(<DisplayMoreOptions {...options} />);
 
-    await userEvent.click(screen.getByTestId('opsgenie-display-more-options'));
+    fireEvent.click(screen.getByTestId('opsgenie-display-more-options'));
 
     expect(toggleShowingMoreOptions).toHaveBeenCalledTimes(1);
   });

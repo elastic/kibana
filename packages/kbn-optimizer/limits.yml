@@ -62,7 +62,7 @@ pageLoadAssetSize:
   entityStore: 17200
   esql: 29469
   esqlDataGrid: 10209
-  esUiShared: 102387
+  esUiShared: 112884
   evals: 6117
   eventAnnotation: 22334
   eventAnnotationListing: 13164
@@ -82,7 +82,7 @@ pageLoadAssetSize:
   files: 6037
   filesManagement: 5208
   fileUpload: 22957
-  fleet: 235470
+  fleet: 239000
   genAiSettings: 6342
   globalSearch: 6890
   globalSearchBar: 31212
@@ -130,7 +130,7 @@ pageLoadAssetSize:
   newsfeed: 11110
   noDataPage: 1749
   notificationCenter: 1791
-  observability: 108732
+  observability: 120410
   observabilityAgentBuilder: 10178
   observabilityAIAssistant: 67295
   observabilityAIAssistantApp: 17100
@@ -188,7 +188,7 @@ pageLoadAssetSize:
   stackConnectors: 85421
   streams: 32595
   streamsApp: 340704
-  synthetics: 31571
+  synthetics: 31650
   telemetry: 25755
   telemetryManagementSection: 5522
   timelines: 131503

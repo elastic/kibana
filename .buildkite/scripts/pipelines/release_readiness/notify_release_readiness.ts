@@ -240,7 +240,12 @@ function getMaxPromotionAgeHours(): number {
 function sendSlackNotification(message: string): void {
   const channel = process.env.SLACK_NOTIFICATIONS_CHANNEL;
 
-  if (DRY_RUN || process.env.KIBANA_SLACK_NOTIFICATIONS_ENABLED !== 'true' || !channel) {
+  if (
+    DRY_RUN ||
+    (process.env.ELASTIC_SLACK_NOTIFICATIONS_ENABLED !== 'true' &&
+      process.env.KIBANA_SLACK_NOTIFICATIONS_ENABLED !== 'true') ||
+    !channel
+  ) {
     console.log(`Not sending slack message (DRY_RUN=${DRY_RUN}, channel=${channel}):\n${message}`);
     return;
   }
@@ -260,6 +265,7 @@ function sendSlackNotification(message: string): void {
     '      provider: gcp',
     '      machineType: n2-standard-2',
     '      preemptible: true',
+    '      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c',
     '    notify:',
     '      - slack:',
     '          channels:',

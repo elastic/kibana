@@ -6,7 +6,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test/jest_integration',
+  preset: '@kbn/jest/jest_integration',
   rootDir: '../../../../../../../../../../../../../../..',
   roots: [
     '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management_ui/pages/rule_management/__integration_tests__/rules_upgrade/upgrade_rule_after_preview/fields/type_specific',

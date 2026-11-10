@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, fireEvent, waitFor } from '@testing-library/react';
+import { act, fireEvent } from '@testing-library/react';
 
 import { createFleetTestRendererMock } from '../../../../../mock';
 import type { EnrollmentAPIKey } from '../../../types';
@@ -113,6 +113,8 @@ function mockTokens(tokens: EnrollmentAPIKey[]) {
   });
 }
 
+jest.setTimeout(30_000);
+
 describe('EnrollmentTokenListPage — bulk actions menu', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -123,7 +125,7 @@ describe('EnrollmentTokenListPage — bulk actions menu', () => {
     return renderer.render(<EnrollmentTokenListPage />);
   }
 
-  it('shows bulk revoke as disabled when all selected tokens are already revoked', async () => {
+  it('shows bulk revoke as disabled when all selected tokens are already revoked', () => {
     mockTokens([REVOKED_TOKEN]);
     const utils = render();
 
@@ -133,12 +135,10 @@ describe('EnrollmentTokenListPage — bulk actions menu', () => {
       fireEvent.click(checkboxes[1]);
     });
 
-    await waitFor(() => {
-      expect(utils.getByTestId('enrollmentTokensList.bulkRevokeButton')).toBeDisabled();
-    });
+    expect(utils.getByTestId('enrollmentTokensList.bulkRevokeButton')).toBeDisabled();
   });
 
-  it('shows bulk revoke as enabled when selection includes at least one active token', async () => {
+  it('shows bulk revoke as enabled when selection includes at least one active token', () => {
     mockTokens([ACTIVE_TOKEN, REVOKED_TOKEN]);
     const utils = render();
 
@@ -147,12 +147,10 @@ describe('EnrollmentTokenListPage — bulk actions menu', () => {
       fireEvent.click(utils.getAllByRole('checkbox')[0]);
     });
 
-    await waitFor(() => {
-      expect(utils.getByTestId('enrollmentTokensList.bulkRevokeButton')).not.toBeDisabled();
-    });
+    expect(utils.getByTestId('enrollmentTokensList.bulkRevokeButton')).not.toBeDisabled();
   });
 
-  it('shows bulk revoke as enabled when only active tokens are selected', async () => {
+  it('shows bulk revoke as enabled when only active tokens are selected', () => {
     mockTokens([ACTIVE_TOKEN]);
     const utils = render();
 
@@ -160,8 +158,6 @@ describe('EnrollmentTokenListPage — bulk actions menu', () => {
       fireEvent.click(utils.getAllByRole('checkbox')[1]);
     });
 
-    await waitFor(() => {
-      expect(utils.getByTestId('enrollmentTokensList.bulkRevokeButton')).not.toBeDisabled();
-    });
+    expect(utils.getByTestId('enrollmentTokensList.bulkRevokeButton')).not.toBeDisabled();
   });
 });

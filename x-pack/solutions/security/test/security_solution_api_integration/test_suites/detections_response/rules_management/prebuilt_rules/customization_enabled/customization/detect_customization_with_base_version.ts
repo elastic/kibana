@@ -621,6 +621,96 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         }));
     });
+
+    describe('"required_fields" comparison', () => {
+      beforeEach(async () => {
+        await createPrebuiltRuleAssetSavedObjects(es, [
+          QUERY_PREBUILT_RULE_WITH_REQUIRED_FIELDS_ASSET,
+        ]);
+        await installPrebuiltRules(es, supertest);
+      });
+
+      it('does NOT mark the rule as customized when "required_fields" are reordered via PATCH', async () => {
+        const { body } = await detectionsApi
+          .patchRule({
+            body: {
+              rule_id: PREBUILT_RULE_ID,
+              required_fields: [...PREBUILT_REQUIRED_FIELDS].reverse(),
+            },
+          })
+          .expect(200);
+
+        expect(body.rule_source).toMatchObject({
+          type: 'external',
+          is_customized: false,
+          customized_fields: [],
+        });
+      });
+
+      it('does NOT mark the rule as customized when "required_fields" are reordered via PUT', async () => {
+        const { body: nonCustomizedRule } = await detectionsApi
+          .readRule({
+            query: { rule_id: PREBUILT_RULE_ID },
+          })
+          .expect(200);
+
+        const { body } = await detectionsApi
+          .updateRule({
+            body: {
+              ...nonCustomizedRule,
+              id: undefined,
+              required_fields: [...PREBUILT_REQUIRED_FIELDS].reverse(),
+            },
+          })
+          .expect(200);
+
+        expect(body.rule_source).toMatchObject({
+          type: 'external',
+          is_customized: false,
+          customized_fields: [],
+        });
+      });
+
+      it('does NOT mark the rule as customized when only "ecs" differs', async () => {
+        const { body } = await detectionsApi
+          .patchRule({
+            body: {
+              rule_id: PREBUILT_RULE_ID,
+              required_fields: PREBUILT_REQUIRED_FIELDS.map((field) => ({
+                ...field,
+                ecs: false,
+              })),
+            },
+          })
+          .expect(200);
+
+        expect(body.rule_source).toMatchObject({
+          type: 'external',
+          is_customized: false,
+          customized_fields: [],
+        });
+      });
+
+      it('marks the rule as customized when a required field is added', async () => {
+        const { body } = await detectionsApi
+          .patchRule({
+            body: {
+              rule_id: PREBUILT_RULE_ID,
+              required_fields: [
+                ...PREBUILT_REQUIRED_FIELDS,
+                { name: 'user.name', type: 'keyword' },
+              ],
+            },
+          })
+          .expect(200);
+
+        expect(body.rule_source).toMatchObject({
+          type: 'external',
+          is_customized: true,
+          customized_fields: [{ field_name: 'required_fields' }],
+        });
+      });
+    });
   });
 };
 
@@ -628,6 +718,15 @@ const PREBUILT_RULE_ID = 'test-prebuilt-rule';
 const QUERY_PREBUILT_RULE_ASSET = createRuleAssetSavedObject({
   rule_id: PREBUILT_RULE_ID,
   version: 3,
+});
+const PREBUILT_REQUIRED_FIELDS = [
+  { name: '@timestamp', type: 'date' },
+  { name: 'host.name', type: 'keyword' },
+];
+const QUERY_PREBUILT_RULE_WITH_REQUIRED_FIELDS_ASSET = createRuleAssetSavedObject({
+  rule_id: PREBUILT_RULE_ID,
+  version: 3,
+  required_fields: PREBUILT_REQUIRED_FIELDS,
 });
 const SAVED_QUERY_PREBUILT_RULE_ASSET = createRuleAssetSavedObject({
   type: 'saved_query',

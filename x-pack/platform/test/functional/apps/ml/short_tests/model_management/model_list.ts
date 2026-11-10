@@ -281,13 +281,15 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.testExecution.logTestStep('should display the trained model in the table');
         await ml.trainedModelsTable.filterWithSearchString(modelWithoutPipelineData.modelId, 1);
         await ml.testExecution.logTestStep(
-          'should not show collapsed actions menu for the model in the table'
+          'should show collapsed actions menu for the model in the table'
         );
         await ml.trainedModelsTable.assertModelCollapsedActionsButtonExists(
           modelWithoutPipelineData.modelId,
           true
         );
-        await ml.testExecution.logTestStep('should show deploy action for the model in the table');
+        await ml.testExecution.logTestStep(
+          'should not show an inline deploy action for the model in the table'
+        );
         await ml.trainedModelsTable.assertModelDeployActionButtonExists(
           modelWithoutPipelineData.modelId,
           false

@@ -28,12 +28,14 @@ dependsOn:
   - '@kbn/repo-packages'
   - '@kbn/stdio-dev-helpers'
   - '@kbn/utils'
+  - '@kbn/std'
 tags:
   - shared-server
   - package
   - dev
   - group-platform
   - private
+  - jest-integration-tests
 fileGroups:
   src:
     - '**/*.ts'

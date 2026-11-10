@@ -106,6 +106,38 @@ apiTest.describe(
       expect(response).toHaveStatusCode(400);
     });
 
+    apiTest('POST persists include_frozen', async ({ asAdmin }) => {
+      const testTool = {
+        ...mockTool,
+        id: 'include-frozen-esql-test-tool',
+        configuration: { ...mockTool.configuration, include_frozen: true },
+      };
+      const createResponse = await asAdmin.post(`${API_AGENT_BUILDER}/tools`, {
+        body: testTool,
+        responseType: 'json',
+      });
+      expect(createResponse).toHaveStatusCode(200);
+      createdToolIds.push(testTool.id);
+
+      const response = await asAdmin.get(`${API_AGENT_BUILDER}/tools/${testTool.id}`, {
+        responseType: 'json',
+      });
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.configuration.include_frozen).toBe(true);
+    });
+
+    apiTest('POST validates include_frozen is boolean', async ({ asAdmin }) => {
+      const response = await asAdmin.post(`${API_AGENT_BUILDER}/tools`, {
+        body: {
+          ...mockTool,
+          id: 'invalid-include-frozen-esql-tool',
+          configuration: { ...mockTool.configuration, include_frozen: 'yes' },
+        },
+        responseType: 'json',
+      });
+      expect(response).toHaveStatusCode(400);
+    });
+
     // Nested suite mirrors FTR lifecycle: index create in beforeAll, delete in afterAll.
     // eslint-disable-next-line playwright/max-nested-describe -- hooks must be scoped to this test only
     apiTest.describe('POST /tools/_execute with indexed ES|QL data', () => {
@@ -225,6 +257,24 @@ apiTest.describe(
       });
       expect(response).toHaveStatusCode(200);
       expect(response.body.description).toBe('Updated description');
+    });
+
+    apiTest('PUT updates include_frozen', async ({ asAdmin }) => {
+      const testTool = { ...mockTool, id: 'update-include-frozen-esql-test-tool' };
+      await asAdmin.post(`${API_AGENT_BUILDER}/tools`, {
+        body: testTool,
+        responseType: 'json',
+      });
+      createdToolIds.push(testTool.id);
+
+      const response = await asAdmin.put(`${API_AGENT_BUILDER}/tools/${testTool.id}`, {
+        body: { configuration: { include_frozen: true } },
+        responseType: 'json',
+      });
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.configuration.include_frozen).toBe(true);
+      expect(response.body.configuration.query).toBe(mockTool.configuration.query);
+      expect(response.body.configuration.params).toStrictEqual(mockTool.configuration.params);
     });
 
     apiTest('PUT returns 404 for missing tool', async ({ asAdmin }) => {
