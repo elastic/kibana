@@ -203,6 +203,22 @@ describe('SubFeatureCard', () => {
     expect(screen.getByTestId('useRecommendedDefaultsToggle-test_feature')).toBeInTheDocument();
   });
 
+  it('marks the feature title as unsaved when the feature is dirty', () => {
+    renderCard(['ep-1'], undefined, undefined, undefined, { isFeatureDirty: true });
+
+    expect(
+      screen.getByTestId(`subFeatureCardTitle-${feature.featureId}-unsaved`)
+    ).toBeInTheDocument();
+  });
+
+  it('does not mark the feature title as unsaved when the feature is clean', () => {
+    renderCard(['ep-1']);
+
+    expect(
+      screen.queryByTestId(`subFeatureCardTitle-${feature.featureId}-unsaved`)
+    ).not.toBeInTheDocument();
+  });
+
   describe('feature status badges', () => {
     it.each([
       {

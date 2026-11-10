@@ -23,7 +23,6 @@ import {
   EuiSpacer,
   EuiSplitPanel,
   EuiText,
-  EuiTitle,
   EuiToolTip,
   euiDragDropReorder,
 } from '@elastic/eui';
@@ -42,6 +41,7 @@ import { CopyToModal } from './copy_to_modal';
 import { DisableRecommendedModelsModal } from './disable_recommended_models_modal';
 import { RecommendedDefaultsSwitch } from './recommended_defaults_switch';
 import { ResetDefaultsModal } from './reset_defaults_modal';
+import { SettingTitle } from './setting_title';
 
 const COLLAPSED_COUNT = 5;
 
@@ -237,9 +237,12 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
         >
           <EuiFlexGroup responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiTitle size="xs">
-                <h4>{feature.featureName}</h4>
-              </EuiTitle>
+              <SettingTitle
+                heading="h4"
+                data-test-subj={`subFeatureCardTitle-${featureId}`}
+                isUnsaved={isFeatureDirty}
+                title={feature.featureName}
+              />
             </EuiFlexItem>
             {(isTechPreview || isBeta) && (
               <EuiFlexItem grow={false}>
