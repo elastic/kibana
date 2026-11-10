@@ -15,7 +15,6 @@ import type {
 import {
   TaskCost,
   TaskPriority,
-  throwUnrecoverableError,
   type TaskManagerSetupContract,
   type TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
@@ -28,7 +27,8 @@ import { measureSourceVolume } from './measure_source_volume';
 import { SOURCE_VOLUME_EVENT_TYPE, type SourceVolumeEntry } from './source_volume_event';
 
 export const SOURCE_VOLUME_TASK_TYPE = 'nightshiftSources:sourceVolumeTelemetry';
-export const SOURCE_VOLUME_TASK_ID = 'nightshift-sources:source-volume-telemetry:1.0.0';
+export const SOURCE_VOLUME_TASK_ID = 'nightshift-sources:source-volume-telemetry';
+const LEGACY_SOURCE_VOLUME_TASK_ID = 'nightshift-sources:source-volume-telemetry:1.0.0';
 const TASK_INTERVAL = '24h';
 const TASK_TIMEOUT = '10m';
 const WINDOW_MS = 24 * 60 * 60 * 1000;
@@ -152,9 +152,7 @@ export const registerSourceVolumeTask = ({
       createTaskRunner: ({ taskInstance, fakeRequest, signal }) => ({
         async run() {
           if (!fakeRequest) {
-            return throwUnrecoverableError(
-              new Error('Source volume telemetry task has no user credentials')
-            );
+            throw new Error('Source volume telemetry task has no user credentials');
           }
           await reportSourceVolumes(await getDeps(fakeRequest), signal);
           return { state: taskInstance.state };
@@ -176,6 +174,7 @@ export const scheduleSourceVolumeTask = async (
     state: {},
     scope: ['nightshiftSources'],
   };
+  await taskManager.removeIfExists(LEGACY_SOURCE_VOLUME_TASK_ID);
   await taskManager.ensureScheduled(task, { request, regenerateApiKey: true });
 };
 
@@ -183,5 +182,8 @@ export const scheduleSourceVolumeTask = async (
 export const removeSourceVolumeTask = async (
   taskManager: TaskManagerStartContract
 ): Promise<void> => {
-  await taskManager.removeIfExists(SOURCE_VOLUME_TASK_ID);
+  await Promise.all([
+    taskManager.removeIfExists(SOURCE_VOLUME_TASK_ID),
+    taskManager.removeIfExists(LEGACY_SOURCE_VOLUME_TASK_ID),
+  ]);
 };
