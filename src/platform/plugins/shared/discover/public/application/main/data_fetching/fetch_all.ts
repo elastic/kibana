@@ -153,7 +153,7 @@ export function fetchAll(
           dataSource: fetchedDataSource,
           approximationApplied,
         }) => {
-          // A replay doesn't query Elasticsearch, so its timing would skew the metrics
+          // Replay can mix cached responses and server requests, so exclude it from fresh load timings.
           if (!isReplayedLoad(currentTab.dataRequestParams)) {
             fetchAllRequestsOnlyTracker.reportEvent({
               requestAdapter: inspectorAdapters.requests,

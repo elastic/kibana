@@ -9,7 +9,7 @@
 
 import type { InternalStateDataRequestParams } from '../redux';
 
-/** A replayed load shows results from the client cache instead of querying Elasticsearch. */
+/** A replayed load reuses a cached session and time range, fetching any missing responses from Elasticsearch. */
 export const isReplayedLoad = ({
   replayCacheLastFetched,
 }: Pick<InternalStateDataRequestParams, 'replayCacheLastFetched'>) =>

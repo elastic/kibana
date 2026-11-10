@@ -140,7 +140,7 @@ describe('test getDataStateContainer', () => {
       dataStateContainer.fetch();
       await waitFor(() => expect(reportedEvents).toContain('discoverFetchAll'));
 
-      // Only the refresh reports: the replay before it came from the client cache
+      // Only the refresh reports: replay loads are excluded from these metrics.
       expect(reportedEvents).toEqual(['discoverFetchAllRequestsOnly', 'discoverFetchAll']);
       trackSpy.mockRestore();
     });
