@@ -197,9 +197,7 @@ export function NightshiftOnboarding({
   const hasLiveSuggestions = (liveSuggestions?.length ?? 0) > 0;
   // Fabricated sample rows (or a forced empty list) must not start real investigations.
   const isDesignPreviewReadOnly =
-    forceAnalyzing ||
-    forceSuggestionsEmpty ||
-    (forceSuggestionsFilled && !hasLiveSuggestions);
+    forceAnalyzing || forceSuggestionsEmpty || (forceSuggestionsFilled && !hasLiveSuggestions);
   const designExecution: OnboardingSuggestionsExecution | undefined = forceAnalyzing
     ? { ...(execution ?? DESIGN_PREVIEW_EXECUTION), status: 'running', suggestions: undefined }
     : forceSuggestions
