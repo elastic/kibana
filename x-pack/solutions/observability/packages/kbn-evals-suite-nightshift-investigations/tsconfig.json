@@ -29,6 +29,7 @@
     "@kbn/workflows",
     "@kbn/zod",
     "@kbn/config",
-    "@kbn/config-schema"
+    "@kbn/config-schema",
+    "@kbn/std"
   ]
 }

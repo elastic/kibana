@@ -13,6 +13,7 @@ import path from 'path';
 import { run } from '@kbn/dev-cli-runner';
 import { createFailError, createFlagError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { timeoutSignal } from '@kbn/std';
 import { getCodeOwnersEntries, getOwningTeamsForPath } from '@kbn/code-owners';
 import type { DriftReportEntry } from '../src/test/vendor_api/detect_drift';
 import { detectDrift } from '../src/test/vendor_api/detect_drift';
@@ -76,11 +77,16 @@ const writeJson = async (file: string, value: unknown): Promise<void> => {
 };
 
 const fetchText = async (url: string): Promise<string> => {
-  const response = await fetch(url, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
-  if (!response.ok) {
-    throw new Error(`${response.status} ${response.statusText}`);
+  const deadline = timeoutSignal(FETCH_TIMEOUT_MS);
+  try {
+    const response = await fetch(url, { signal: deadline });
+    if (!response.ok) {
+      throw new Error(`${response.status} ${response.statusText}`);
+    }
+    return response.text();
+  } finally {
+    deadline.dispose();
   }
-  return response.text();
 };
 
 run(

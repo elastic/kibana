@@ -49,8 +49,8 @@ export function ConnectorListItem({
     display: flex;
     align-items: center;
     gap: ${euiTheme.size.s};
-    padding: ${euiTheme.size.s} ${euiTheme.size.m};
-    border-radius: ${euiTheme.border.radius.medium};
+    padding: ${euiTheme.size.xs} ${euiTheme.size.s};
+    border-radius: ${euiTheme.border.radius.control};
 
     &:hover,
     &:focus-within {
@@ -128,6 +128,7 @@ export function ConnectorListItem({
         >
           <EuiButtonIcon
             iconType="maximize"
+            color="text"
             aria-label={openDetailsLabel}
             isDisabled={openDetailsDisabledReason !== undefined}
             onClick={onOpenDetails}

@@ -374,6 +374,10 @@ import type {
   ListWatchlistEntitySourcesResponse,
 } from './entity_analytics/watchlists/data_source/list.gen';
 import type {
+  UpdateWatchlistEntitySourceApiKeyRequestParamsInput,
+  UpdateWatchlistEntitySourceApiKeyResponse,
+} from './entity_analytics/watchlists/data_source/update_api_key.gen';
+import type {
   UpdateWatchlistEntitySourceRequestParamsInput,
   UpdateWatchlistEntitySourceRequestBodyInput,
   UpdateWatchlistEntitySourceResponse,
@@ -3930,6 +3934,24 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * Replace the API key of an index entity source with a new one owned by the user making this request, for example after the user who created the source is removed or loses access to the index. The new key is created and saved first; the previous key is invalidated only afterwards, so a failure leaves the source with its previous key. The user must be able to read the source's index pattern.
+   */
+  async updateWatchlistEntitySourceApiKey(props: UpdateWatchlistEntitySourceApiKeyProps) {
+    this.log.info(`${new Date().toISOString()} Calling API UpdateWatchlistEntitySourceApiKey`);
+    return this.kbnClient
+      .request<UpdateWatchlistEntitySourceApiKeyResponse>({
+        path: replaceParams(
+          '/api/entity_analytics/watchlists/{watchlist_id}/entity_source/{id}/_update_api_key',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Updates mutable fields of an existing workflow migration
    */
   async updateWorkflowMigration(props: UpdateWorkflowMigrationProps) {
@@ -4544,6 +4566,9 @@ export interface UpdateWatchlistProps {
 export interface UpdateWatchlistEntitySourceProps {
   params: UpdateWatchlistEntitySourceRequestParamsInput;
   body: UpdateWatchlistEntitySourceRequestBodyInput;
+}
+export interface UpdateWatchlistEntitySourceApiKeyProps {
+  params: UpdateWatchlistEntitySourceApiKeyRequestParamsInput;
 }
 export interface UpdateWorkflowMigrationProps {
   params: UpdateWorkflowMigrationRequestParamsInput;
