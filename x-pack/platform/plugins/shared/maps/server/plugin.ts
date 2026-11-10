@@ -24,7 +24,7 @@ import { getEcommerceSavedObjects } from './sample_data/ecommerce_saved_objects'
 import { getFlightsSavedObjects } from './sample_data/flights_saved_objects';
 import { getWebLogsSavedObjects } from './sample_data/web_logs_saved_objects';
 import { registerMapsUsageCollector } from './maps_telemetry/collectors/register';
-import { APP_ID, APP_ICON, MAP_SAVED_OBJECT_TYPE, getFullPath } from '../common/constants';
+import { APP_ID, MAP_SAVED_OBJECT_TYPE, getFullPath } from '../common/constants';
 import type { MapsXPackConfig } from './config';
 import { setStartServices } from './kibana_server_services';
 import { emsBoundariesSpecProvider } from './tutorials/ems';
@@ -64,7 +64,7 @@ export class MapsPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
         },
         getPath: getFullPath,
         label: sampleDataLinkLabel,
-        icon: APP_ICON,
+        icon: 'map',
       },
     ]);
 
@@ -92,7 +92,7 @@ export class MapsPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
         },
         getPath: getFullPath,
         label: sampleDataLinkLabel,
-        icon: APP_ICON,
+        icon: 'map',
       },
     ]);
 
@@ -119,7 +119,7 @@ export class MapsPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
         },
         getPath: getFullPath,
         label: sampleDataLinkLabel,
-        icon: APP_ICON,
+        icon: 'map',
       },
     ]);
     home.sampleData.replacePanelInSampleDatasetDashboard({
