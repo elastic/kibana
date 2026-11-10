@@ -87,6 +87,7 @@ dependsOn:
   - '@kbn/isomer'
   - '@kbn/isomer-plugin'
   - '@kbn/isomer-components'
+  - '@kbn/core-security-server'
 tags:
   - plugin
   - prod
