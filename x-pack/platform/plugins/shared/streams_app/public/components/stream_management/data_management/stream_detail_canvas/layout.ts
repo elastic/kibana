@@ -168,6 +168,12 @@ interface ApplyLayoutOptions {
    * jumping to the origin.
    */
   onlyIds?: Set<string>;
+  /**
+   * The `onlyIds` nodes whose current positions anchor the tidied block. Leave
+   * out nodes that have no meaningful position yet, such as one just added to
+   * the flow. Defaults to every node in `onlyIds`.
+   */
+  anchorIds?: ReadonlySet<string>;
 }
 
 /**
@@ -207,7 +213,7 @@ export const getConnectedNodeIds = (
 export const applyLayout = <N extends PositionedNode>(
   nodes: N[],
   edges: LayoutEdge[],
-  { onlyIds }: ApplyLayoutOptions = {}
+  { onlyIds, anchorIds }: ApplyLayoutOptions = {}
 ): N[] => {
   const targetNodes = onlyIds ? nodes.filter((node) => onlyIds.has(node.id)) : nodes;
   if (targetNodes.length === 0) {
@@ -226,9 +232,15 @@ export const applyLayout = <N extends PositionedNode>(
   let offsetX = 0;
   let offsetY = 0;
   if (onlyIds) {
-    const laidPositions = [...positions.values()];
-    const currentMinX = Math.min(...targetNodes.map((node) => node.position.x));
-    const currentMinY = Math.min(...targetNodes.map((node) => node.position.y));
+    // Measure the same nodes before and after, so the anchors' top-left stays put.
+    const requestedAnchors = anchorIds ? targetNodes.filter(({ id }) => anchorIds.has(id)) : [];
+    const anchorNodes = requestedAnchors.length > 0 ? requestedAnchors : targetNodes;
+    const laidPositions = anchorNodes.flatMap(({ id }) => {
+      const position = positions.get(id);
+      return position ? [position] : [];
+    });
+    const currentMinX = Math.min(...anchorNodes.map((node) => node.position.x));
+    const currentMinY = Math.min(...anchorNodes.map((node) => node.position.y));
     const laidMinX = Math.min(...laidPositions.map((position) => position.x));
     const laidMinY = Math.min(...laidPositions.map((position) => position.y));
     offsetX = currentMinX - laidMinX;

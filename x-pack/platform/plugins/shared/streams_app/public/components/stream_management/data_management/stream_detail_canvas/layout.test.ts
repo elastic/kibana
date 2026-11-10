@@ -177,6 +177,29 @@ describe('applyLayout', () => {
     expect(source.position.y).toBe(destination.position.y);
   });
 
+  it('anchors the tidied block to the anchor nodes only', () => {
+    const nodes = [
+      { id: 'source', position: { x: 1000, y: 1000 } },
+      // Just added, so still at its default spot near the origin.
+      { id: 'processing', position: { x: COLUMN_GAP, y: 0 } },
+      { id: 'destination', position: { x: 1000 + COLUMN_GAP, y: 1000 } },
+    ];
+    const flowEdges = [
+      { source: 'source', target: 'processing' },
+      { source: 'processing', target: 'destination' },
+    ];
+
+    const result = applyLayout(nodes, flowEdges, {
+      onlyIds: new Set(['source', 'processing', 'destination']),
+      anchorIds: new Set(['source', 'destination']),
+    });
+    const positionOf = (id: string) => result.find((node) => node.id === id)!.position;
+
+    expect(positionOf('source')).toEqual({ x: 1000, y: 1000 });
+    expect(positionOf('processing')).toEqual({ x: 1000 + COLUMN_GAP, y: 1000 });
+    expect(positionOf('destination')).toEqual({ x: 1000 + COLUMN_GAP * 2, y: 1000 });
+  });
+
   it('returns the input untouched when the selection is empty', () => {
     const nodes = [{ id: 'source', position: { x: 1, y: 2 } }];
     expect(applyLayout(nodes, edges, { onlyIds: new Set() })).toBe(nodes);

@@ -83,6 +83,11 @@ export const useCanvasIsSaving = () => {
   );
 };
 
+/** True from the moment a processing flyout save is staged until it persists or fails. */
+export const useCanvasIsSavingProcessing = () => {
+  return useCanvasStateSelector((state) => state.context.savingComponentIntent === 'processing');
+};
+
 export const useCanvasIsInitializing = () => {
   return useCanvasStateSelector(
     (state) => state.matches('initializingFromUrl') || state.matches({ ready: { unit: 'loading' } })
@@ -133,6 +138,9 @@ export const useCanvasEvents = () => {
       },
       updateNodePositions: (positions: Record<string, XYPosition>) => {
         service.send({ type: 'nodes.positions.change', positions });
+      },
+      restoreNodePositions: (positions: Record<string, XYPosition>) => {
+        service.send({ type: 'nodes.positions.restore', positions });
       },
       saveUnit: () => {
         service.send({ type: 'unit.save' });

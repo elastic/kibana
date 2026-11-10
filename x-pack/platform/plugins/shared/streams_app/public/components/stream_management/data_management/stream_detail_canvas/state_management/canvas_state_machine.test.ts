@@ -211,6 +211,34 @@ describe('canvas processing flyout', () => {
     expect(flyout.ref.getSnapshot().context.saveError).toBe('Distributor rejected the unit');
   });
 
+  it('restores the node positions from before the save when the save fails', async () => {
+    const { canvas } = startCanvas(async () => {
+      throw new Error('Distributor rejected the unit');
+    });
+    await waitForUnitReady(canvas);
+    canvas.send({ type: 'nodes.positions.change', positions: { es: { x: 10, y: 20 } } });
+    const positionsBeforeSave = canvas.getSnapshot().context.nodePositions;
+
+    stageProcessorAndSave(canvas);
+    // The canvas tidies the flow the new processing node joined while it saves.
+    canvas.send({ type: 'nodes.positions.change', positions: { es: { x: 370, y: 20 } } });
+
+    await waitFor(canvas, (snapshot) => snapshot.matches({ ready: { unit: 'saveFailed' } }));
+    expect(canvas.getSnapshot().context.nodePositions).toBe(positionsBeforeSave);
+  });
+
+  it('keeps the node positions written during the save when it succeeds', async () => {
+    const { canvas } = startCanvas(async (unit) => unit);
+    await waitForUnitReady(canvas);
+
+    stageProcessorAndSave(canvas);
+    canvas.send({ type: 'nodes.positions.change', positions: { es: { x: 370, y: 20 } } });
+
+    await waitFor(canvas, (snapshot) => snapshot.context.processingFlyout === undefined);
+    await waitForUnitReady(canvas);
+    expect(canvas.getSnapshot().context.nodePositions).toEqual({ es: { x: 370, y: 20 } });
+  });
+
   it('moves a shared source line onto its own pipeline only when its processing saves', async () => {
     const fanOut = loadedUnit();
     fanOut.unit.destinations.push({ id: 'debug', type: 'debug', supported_telemetry: ['logs'] });
@@ -268,6 +296,23 @@ describe('canvas processing flyout', () => {
 
     expect(canvas.getSnapshot().context.processingFlyout).toBeUndefined();
     expect(canvas.getSnapshot().context.nextUnit).toBe(staged);
+  });
+});
+
+describe('canvas node positions', () => {
+  it('merges changed positions and replaces them all on restore', async () => {
+    const { canvas } = startCanvas(async (unit) => unit);
+    await waitForUnitReady(canvas);
+
+    canvas.send({ type: 'nodes.positions.change', positions: { src: { x: 1, y: 2 } } });
+    canvas.send({ type: 'nodes.positions.change', positions: { es: { x: 3, y: 4 } } });
+    expect(canvas.getSnapshot().context.nodePositions).toEqual({
+      src: { x: 1, y: 2 },
+      es: { x: 3, y: 4 },
+    });
+
+    canvas.send({ type: 'nodes.positions.restore', positions: { src: { x: 1, y: 2 } } });
+    expect(canvas.getSnapshot().context.nodePositions).toEqual({ src: { x: 1, y: 2 } });
   });
 });
 

@@ -28,6 +28,7 @@ import {
   type OnConnectStart,
   type OnNodesDelete,
   type OnReconnect,
+  type XYPosition,
 } from '@xyflow/react';
 import type { ResolvedDestinationIndex } from '@kbn/streams-plugin/common';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -82,6 +83,7 @@ import {
   useCanvasHasUnsavedChanges,
   useCanvasIsInitializing,
   useCanvasIsSaving,
+  useCanvasIsSavingProcessing,
   useCanvasIsUnitUnavailable,
   useCanvasNodePositions,
   useCanvasUnitDefinition,
@@ -217,6 +219,7 @@ function StreamsCanvasInner() {
     selectTab,
     changeSearchQuery,
     updateNodePositions,
+    restoreNodePositions,
     saveUnit,
     changeUnitConnection,
     openProcessingFlyout,
@@ -225,6 +228,7 @@ function StreamsCanvasInner() {
   const unitDefinition = useCanvasUnitDefinition();
   const hasUnsavedChanges = useCanvasHasUnsavedChanges();
   const isSaving = useCanvasIsSaving();
+  const isSavingProcessing = useCanvasIsSavingProcessing();
   const isInitializing = useCanvasIsInitializing();
   const isUnitUnavailable = useCanvasIsUnitUnavailable();
   const nodePositions = useCanvasNodePositions();
@@ -340,14 +344,20 @@ function StreamsCanvasInner() {
       if (extra.unit !== unitDefinition) {
         changeUnitConnection(extra.unit);
       }
+      // Stored positions go back with the unit, or the graph sync below would
+      // re-apply the ones written after this snapshot was taken.
+      if (extra.nodePositions !== nodePositions) {
+        restoreNodePositions(extra.nodePositions);
+      }
     },
-    [changeUnitConnection, unitDefinition]
+    [changeUnitConnection, nodePositions, restoreNodePositions, unitDefinition]
   );
   const { record, hold, reset, discard, undo, redo, canUndo, canRedo } = useCanvasHistory({
     nodes,
     edges,
     extra: {
       unit: unitDefinition,
+      nodePositions,
     },
     setNodes,
     setEdges,
@@ -356,18 +366,29 @@ function StreamsCanvasInner() {
   // The machine holds this canvas when a create save starts, then resets the
   // stack on persist success so undo cannot restore a destination / source whose key was revoked.
   useBindCanvasCreateHistory({ hold, reset, discard });
-  // Hold the spinner until the unit, the source environment, and the first
-  // unit.loaded sync have settled. Resolved indices refresh in the background.
-  const isCanvasLoading =
-    isInitializing ||
-    isSourceEnvironmentLoading ||
-    ((!hasReceivedUnit || !hasReceivedDestinationsUnit) && !isUnitUnavailable);
+
+  // The unit an edit on this canvas last staged, until the graph sync below sees
+  // it. This is how the sync tells a node the user just placed from one that
+  // undo, redo or a reload brought in.
+  const userEditUnitRef = useRef<Unit>();
+  const stageUserEdit = useCallback(
+    (next: Unit) => {
+      record();
+      userEditUnitRef.current = next;
+      changeUnitConnection(next);
+    },
+    [changeUnitConnection, record]
+  );
 
   const graphNodeIdsRef = useRef('');
   const graphEdgeIdsRef = useRef('');
   const knownNodeIdsRef = useRef<ReadonlySet<string>>(new Set());
 
   useEffect(() => {
+    const isUserEdit = userEditUnitRef.current === unitDefinition;
+    if (isUserEdit) {
+      userEditUnitRef.current = undefined;
+    }
     const nextNodeIds = getGraphNodeIds(graph.nodes);
     const nextEdgeIds = graph.edges.map((edge) => edge.id).join('\n');
     if (graphNodeIdsRef.current === nextNodeIds) {
@@ -391,20 +412,22 @@ function StreamsCanvasInner() {
     setEdges(graph.edges);
 
     // A routing or processing node placed on a line makes that flow one column
-    // longer, so tidy the flow it joined exactly as "Tidy up selection" would with
-    // that flow selected. Other flows keep their positions, and the initial load
-    // is left to the full layout.
-    const placedNodeIds =
-      isCanvasLoading || knownNodeIds.size === 0
-        ? []
-        : graph.nodes
+    // longer, so tidy the flow it joined as "Tidy up selection" would with that
+    // flow selected. Other flows keep their positions. Only an edit on this canvas
+    // or a processing flyout save places a node: one that the initial load, undo,
+    // redo or a reload brings in keeps its stored position.
+    const placedNodeIds = new Set(
+      isUserEdit || isSavingProcessing
+        ? graph.nodes
             .filter(
               ({ id, type }) =>
                 (type === ROUTING_NODE_TYPE || type === PROCESSING_NODE_TYPE) &&
                 !knownNodeIds.has(id)
             )
-            .map(({ id }) => id);
-    if (placedNodeIds.length === 0) {
+            .map(({ id }) => id)
+        : []
+    );
+    if (placedNodeIds.size === 0) {
       setNodes(positionedNodes);
       return;
     }
@@ -418,7 +441,11 @@ function StreamsCanvasInner() {
         : node;
     });
     const flowNodeIds = getConnectedNodeIds(placedNodeIds, graph.edges);
-    const tidiedNodes = applyLayout(liveNodes, graph.edges, { onlyIds: flowNodeIds });
+    // The placed node is not on screen yet, so keep the flow where its other nodes are.
+    const tidiedNodes = applyLayout(liveNodes, graph.edges, {
+      onlyIds: flowNodeIds,
+      anchorIds: new Set([...flowNodeIds].filter((id) => !placedNodeIds.has(id))),
+    });
     setNodes(tidiedNodes);
     // Store the tidied positions so the next graph change does not undo them.
     updateNodePositions(
@@ -428,7 +455,7 @@ function StreamsCanvasInner() {
           .map(({ id, position }) => [id, position])
       )
     );
-  }, [graph, isCanvasLoading, setNodes, setEdges, updateNodePositions]);
+  }, [graph, unitDefinition, isSavingProcessing, setNodes, setEdges, updateNodePositions]);
 
   // Tracks whether a pointer drag is in progress so we snapshot each gesture
   // exactly once.
@@ -556,10 +583,9 @@ function StreamsCanvasInner() {
       if (!origin || !target) {
         return;
       }
-      record();
-      changeUnitConnection(connectLine(unitDefinition, origin, target));
+      stageUserEdit(connectLine(unitDefinition, origin, target));
     },
-    [changeUnitConnection, readConnectionOrigin, readConnectionTarget, record, unitDefinition]
+    [readConnectionOrigin, readConnectionTarget, stageUserEdit, unitDefinition]
   );
 
   const onConnectStart = useCallback<OnConnectStart>(
@@ -613,17 +639,9 @@ function StreamsCanvasInner() {
       if (next === unitDefinition) {
         return;
       }
-      record();
-      changeUnitConnection(next);
+      stageUserEdit(next);
     },
-    [
-      canEditConnections,
-      changeUnitConnection,
-      readConnectionOrigin,
-      readConnectionTarget,
-      record,
-      unitDefinition,
-    ]
+    [canEditConnections, readConnectionOrigin, readConnectionTarget, stageUserEdit, unitDefinition]
   );
 
   const onReconnectEnd = useCallback<
@@ -645,17 +663,9 @@ function StreamsCanvasInner() {
       if (next === unitDefinition) {
         return;
       }
-      record();
-      changeUnitConnection(next);
+      stageUserEdit(next);
     },
-    [
-      canEditConnections,
-      changeUnitConnection,
-      readConnectionOrigin,
-      readConnectionTarget,
-      record,
-      unitDefinition,
-    ]
+    [canEditConnections, readConnectionOrigin, readConnectionTarget, stageUserEdit, unitDefinition]
   );
 
   // Testing aid for the routing flyout: unset when the line cannot be routed. TO BE REMOVED
@@ -673,18 +683,16 @@ function StreamsCanvasInner() {
       return undefined;
     }
     return () => {
-      record();
-      changeUnitConnection(next);
+      stageUserEdit(next);
       closeRoutingFlyout();
     };
   }, [
-    changeUnitConnection,
     closeRoutingFlyout,
     graph.edges,
     readConnectionOrigin,
     readConnectionTarget,
-    record,
     routingFlyout,
+    stageUserEdit,
     unitDefinition,
   ]);
 
@@ -704,15 +712,14 @@ function StreamsCanvasInner() {
       if (removedSourceIds.length === 0 && removedDestinationIds.length === 0) {
         return;
       }
-      record();
-      changeUnitConnection(
+      stageUserEdit(
         withoutDeletedComponents(unitDefinition, removedSourceIds, removedDestinationIds)
       );
       if (flyoutName && removedDestinationIds.includes(flyoutName)) {
         closeFlyout();
       }
     },
-    [changeUnitConnection, closeFlyout, flyoutName, record, unitDefinition]
+    [closeFlyout, flyoutName, stageUserEdit, unitDefinition]
   );
 
   const onNodeClick = useCallback<NodeMouseHandler<ClassicCanvasNode>>(
@@ -817,6 +824,13 @@ function StreamsCanvasInner() {
     onEscape,
     onEnter,
   });
+
+  // Hold the spinner until the unit, the source environment, and the first
+  // unit.loaded sync have settled. Resolved indices refresh in the background.
+  const isCanvasLoading =
+    isInitializing ||
+    isSourceEnvironmentLoading ||
+    ((!hasReceivedUnit || !hasReceivedDestinationsUnit) && !isUnitUnavailable);
 
   const searchBar = <CanvasSearchBar query={query ?? ''} onQueryChange={changeSearchQuery} />;
 
@@ -1178,6 +1192,7 @@ export const buildConfiguredDestinationNode = (
 
 interface CanvasEditSnapshot {
   unit: Unit;
+  nodePositions: Record<string, XYPosition>;
 }
 
 const withoutDeletedComponents = (

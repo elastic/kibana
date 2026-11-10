@@ -92,6 +92,8 @@ export interface CanvasState {
   processingRollbackUnit?: Unit;
   /** Processor ids written for the flyout's steps, in step order, while they save. */
   processingSaveIds?: string[];
+  /** Node positions to return to when a processing flyout save fails. */
+  processingRollbackNodePositions?: Record<string, XYPosition>;
   nodePositions: Record<string, XYPosition>;
   sourcesRef: SourcesActorRef;
   destinationsRef: DestinationsActorRef;
@@ -123,6 +125,7 @@ export type CanvasUrlEvent =
   | { type: 'unit.save' }
   | { type: 'unit.reload' }
   | { type: 'nodes.positions.change'; positions: Record<string, XYPosition> }
+  | { type: 'nodes.positions.restore'; positions: Record<string, XYPosition> }
   | { type: 'xstate.done.actor.loadUnitDefinition'; output: Unit }
   | { type: 'xstate.error.actor.loadUnitDefinition'; error: unknown }
   | { type: 'xstate.done.actor.validateUnitDefinition'; output: void }
