@@ -120,9 +120,12 @@ const buildWorkloadQuery = (tsPrefix: string): string => `${tsPrefix}
 | EVAL kind = CASE(kubernetes.deployment.name IS NOT NULL, "deployment",
                    kubernetes.statefulset.name IS NOT NULL, "statefulset",
                    kubernetes.daemonset.name   IS NOT NULL, "daemonset",
+                   kubernetes.cronjob.name     IS NOT NULL, "cronjob",
+                   kubernetes.job.name         IS NOT NULL, "job",
                    kubernetes.replicaset.name  IS NOT NULL, "replicaset", NULL),
        workload = COALESCE(kubernetes.deployment.name, kubernetes.statefulset.name,
-                           kubernetes.daemonset.name, kubernetes.replicaset.name)
+                           kubernetes.daemonset.name, kubernetes.cronjob.name,
+                           kubernetes.job.name, kubernetes.replicaset.name)
 | WHERE workload IS NOT NULL
 | STATS replicas = COUNT_DISTINCT(kubernetes.pod.uid), last_seen = MAX(@timestamp)
   BY orchestrator.cluster.name, kubernetes.namespace, kind, workload`;
