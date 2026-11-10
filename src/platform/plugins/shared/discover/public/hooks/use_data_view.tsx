@@ -35,7 +35,7 @@ const loadDataView = ({
     .find(({ id }) => id === index);
 
   if (profileDataViewSpec) {
-    return dataViews.create({ ...profileDataViewSpec, managed: true });
+    return dataViews.create(profileDataViewSpec);
   }
 
   return dataViews.get(index);

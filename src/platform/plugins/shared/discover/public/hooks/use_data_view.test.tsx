@@ -98,11 +98,8 @@ describe('useDataView', () => {
     const { result } = await render({ dataViewId: profileDataViewSpec.id });
 
     expect(mockServices.dataViews.get).toHaveBeenCalledTimes(0);
-    expect(mockServices.dataViews.create).toHaveBeenCalledWith({
-      ...profileDataViewSpec,
-      managed: true,
-    });
-    expect(result.current.dataView).toEqual({ ...profileDataViewSpec, managed: true });
+    expect(mockServices.dataViews.create).toHaveBeenCalledWith(profileDataViewSpec);
+    expect(result.current.dataView).toEqual(profileDataViewSpec);
   });
 
   it('should wait for the root profile to load', async () => {
