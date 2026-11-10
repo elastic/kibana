@@ -10,10 +10,19 @@ sources:
 
 ## Enabling it
 
-The plugin is disabled by default, on both stateful and serverless. Enable it with
-`xpack.digital_experience.enabled: true`. Users who can access Digital Experience (Digital Experience
-and APM privileges, with the ux plugin enabled) see it instead of the legacy User Experience navigation
-entry; everyone else keeps the legacy entry. `/app/ux` stays reachable by URL.
+The plugin is always installed, and the `digitalExperience.enabled` feature flag (fallback `false`)
+controls whether users see it. With the flag off there is no navigation entry, the app is inaccessible,
+the legacy User Experience stays, and the `/internal/digital_experience/*` routes answer 404. With it
+on, users who can access Digital Experience (Digital Experience and APM privileges, with the ux plugin
+enabled) see it instead of the legacy User Experience navigation entry; everyone else keeps the legacy
+entry. `/app/ux` stays reachable by URL.
+
+- **Serverless and Elastic Cloud Hosted:** a LaunchDarkly rule on `digitalExperience.enabled`, per project or deployment.
+- **On-prem and local:** set `feature_flags.overrides: { digitalExperience.enabled: true }` in `kibana.yml`.
+- **Kill switch:** turn the flag off. It takes effect on the next page load, and the sessions health task stops querying Elasticsearch.
+- **GA:** the flag goes away.
+
+`xpack.digital_experience.enabled` is deprecated and ignored; Kibana logs a warning when it is set.
 
 ## Pages
 

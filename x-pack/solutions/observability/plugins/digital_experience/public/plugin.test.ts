@@ -6,7 +6,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import { firstValueFrom, take, toArray } from 'rxjs';
+import { firstValueFrom, of, take, toArray } from 'rxjs';
 import type { App, AppUpdater, CoreSetup, CoreStart } from '@kbn/core/public';
 import { AppStatus } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -27,14 +27,17 @@ const createUx = () => ({ hideLegacyNavigation: jest.fn() });
 
 const setup = ({
   show,
+  flag = true,
   ux = createUx(),
 }: {
   show: boolean;
+  flag?: boolean;
   ux?: { hideLegacyNavigation: jest.Mock } | null;
 }) => {
   const coreSetup = coreMock.createSetup();
   const coreStart = coreMock.createStart();
   coreStart.application.capabilities = createCapabilities(show);
+  coreStart.featureFlags.getBooleanValue$.mockReturnValue(of(flag));
   const pluginsStart = { ux: ux ?? undefined } as unknown as DigitalExperienceStartDeps;
   coreSetup.getStartServices.mockResolvedValue([coreStart, pluginsStart, {}]);
 
@@ -51,7 +54,7 @@ const setup = ({
   const sections$: Observable<Array<{ label: string; entries: unknown[] }>> =
     registerSections.mock.calls[0][0];
   const start = () => plugin.start(coreStart, pluginsStart);
-  return { app, start, sections$ };
+  return { app, start, sections$, coreStart };
 };
 
 describe('hasDigitalExperienceAccess', () => {
@@ -124,6 +127,37 @@ describe('DigitalExperiencePlugin', () => {
         entries: [expect.objectContaining({ app: 'digital_experience', path: '/' })],
       });
     }
+  });
+
+  describe('with the feature flag off', () => {
+    it('evaluates digitalExperience.enabled with a false fallback', () => {
+      const { start, coreStart } = setup({ show: true, flag: false });
+
+      start();
+
+      expect(coreStart.featureFlags.getBooleanValue$).toHaveBeenCalledWith(
+        'digitalExperience.enabled',
+        false
+      );
+    });
+
+    it('keeps the app inaccessible and the legacy navigation, even with access', async () => {
+      const ux = createUx();
+      const { app, start } = setup({ show: true, flag: false, ux });
+      const updates = firstValueFrom(app.updater$!.pipe(take(2), toArray()));
+
+      start();
+
+      const [, afterStart] = await updates;
+      expect((afterStart as AppUpdater)(app)).toEqual({ status: AppStatus.inaccessible });
+      expect(ux.hideLegacyNavigation).not.toHaveBeenCalled();
+    });
+
+    it('registers no nav section, even with access', async () => {
+      const { sections$ } = setup({ show: true, flag: false });
+
+      expect(await firstValueFrom(sections$)).toEqual([]);
+    });
   });
 
   it('keeps Applications selected on every page, including the app root', async () => {

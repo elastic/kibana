@@ -13,17 +13,22 @@ apiTest.describe(
   'Digital Experience disabled by default',
   { tag: DIGITAL_EXPERIENCE_DISABLED_TAGS },
   () => {
-    apiTest('does not register the feature', async ({ apiClient, requestAuth }) => {
+    apiTest('answers 404 from its routes', async ({ apiClient, requestAuth }) => {
       const { apiKeyHeader } = await requestAuth.getApiKeyForAdmin();
 
-      const response = await apiClient.get('api/features', {
-        headers: { ...apiKeyHeader },
-        responseType: 'json',
-      });
+      const response = await apiClient.get(
+        'internal/digital_experience/applications?start=2026-01-01T00:00:00.000Z&end=2026-01-02T00:00:00.000Z',
+        {
+          headers: {
+            ...apiKeyHeader,
+            'kbn-xsrf': 'some-xsrf-token',
+            'x-elastic-internal-origin': 'kibana',
+          },
+          responseType: 'json',
+        }
+      );
 
-      expect(response).toHaveStatusCode(200);
-      const featureIds = (response.body as Array<{ id: string }>).map(({ id }) => id);
-      expect(featureIds).not.toContain('digital_experience');
+      expect(response).toHaveStatusCode(404);
     });
   }
 );

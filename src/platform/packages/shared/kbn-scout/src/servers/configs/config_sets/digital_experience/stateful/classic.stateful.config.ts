@@ -10,7 +10,7 @@
 import type { ScoutServerConfig } from '../../../../../types';
 import { defaultConfig } from '../../default/stateful/base.config';
 
-// The plugin is disabled by default (xpack.digital_experience.enabled),
+// Digital Experience is hidden behind the digitalExperience.enabled feature flag,
 // so its tests run against a config set that turns it on.
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
@@ -18,7 +18,7 @@ export const servers: ScoutServerConfig = {
     ...defaultConfig.kbnTestServer,
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
-      '--xpack.digital_experience.enabled=true',
+      '--feature_flags.overrides.digitalExperience.enabled=true',
     ],
   },
 };

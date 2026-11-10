@@ -1,11 +1,11 @@
 # Digital Experience Scout tests
 
-The plugin is behind `xpack.digital_experience.enabled` (default `false`), so both states are tested:
+The plugin is behind the `digitalExperience.enabled` feature flag (default `false`), so both states are tested:
 
 | Folder | Flag | Server config | Deployments (`tags.ts`) |
 | --- | --- | --- | --- |
 | `scout/` | off | default | every Observability deployment, Cloud included |
-| `scout_digital_experience/` | on | `digital_experience` config set | local stateful and serverless Observability Complete |
+| `scout_digital_experience/` | on | `digital_experience` config set (`feature_flags.overrides.digitalExperience.enabled=true`) | local stateful and serverless Observability Complete |
 
 Specs that need the ux plugin (Classic RUM dashboard, legacy navigation) run on stateful only, because serverless disables it.
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BehaviorSubject, from, map } from 'rxjs';
+import { BehaviorSubject, from, map, switchMap, take } from 'rxjs';
 import type {
   AppMountParameters,
   AppUpdater,
@@ -15,6 +15,7 @@ import type {
 } from '@kbn/core/public';
 import { AppStatus, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { DIGITAL_EXPERIENCE_FEATURE_ID } from '../common/feature';
+import { DIGITAL_EXPERIENCE_ENABLED_FLAG } from '../common/feature_flags';
 import { hasDigitalExperienceAccess } from './capabilities';
 import { APPLICATIONS_LABEL, DIGITAL_EXPERIENCE_LABEL } from './labels';
 import type { DigitalExperienceSetupDeps, DigitalExperienceStartDeps } from './types';
@@ -27,8 +28,16 @@ export class DigitalExperiencePlugin
   public setup(core: CoreSetup<DigitalExperienceStartDeps>, plugins: DigitalExperienceSetupDeps) {
     plugins.observabilityShared.navigation.registerSections(
       from(core.getStartServices()).pipe(
-        map(([coreStart]) =>
-          hasDigitalExperienceAccess(coreStart.application.capabilities)
+        switchMap(([coreStart]) =>
+          coreStart.featureFlags.getBooleanValue$(DIGITAL_EXPERIENCE_ENABLED_FLAG, false).pipe(
+            take(1),
+            map((isEnabled) => {
+              return isEnabled && hasDigitalExperienceAccess(coreStart.application.capabilities);
+            })
+          )
+        ),
+        map((hasAccess) =>
+          hasAccess
             ? [
                 {
                   label: DIGITAL_EXPERIENCE_LABEL,
@@ -70,14 +79,19 @@ export class DigitalExperiencePlugin
   }
 
   public start(core: CoreStart, { ux }: DigitalExperienceStartDeps) {
-    if (!hasDigitalExperienceAccess(core.application.capabilities)) {
-      this.appUpdater$.next(() => ({ status: AppStatus.inaccessible }));
-      return;
-    }
+    core.featureFlags
+      .getBooleanValue$(DIGITAL_EXPERIENCE_ENABLED_FLAG, false)
+      .pipe(take(1))
+      .subscribe((isEnabled) => {
+        if (!isEnabled || !hasDigitalExperienceAccess(core.application.capabilities)) {
+          this.appUpdater$.next(() => ({ status: AppStatus.inaccessible }));
+          return;
+        }
 
-    this.appUpdater$.next(() => ({ status: AppStatus.accessible }));
-    // Only users who can use Digital Experience lose the legacy User Experience entry.
-    ux?.hideLegacyNavigation();
+        this.appUpdater$.next(() => ({ status: AppStatus.accessible }));
+        // Only users who can use Digital Experience lose the legacy User Experience entry.
+        ux?.hideLegacyNavigation();
+      });
   }
 
   public stop() {}
