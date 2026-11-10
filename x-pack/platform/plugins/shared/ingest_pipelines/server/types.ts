@@ -8,11 +8,13 @@
 import type { IRouter } from '@kbn/core/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { HousekeepingServerSetup } from '@kbn/housekeeping-plugin/server';
 import type { handleEsError } from './shared_imports';
 
 export interface Dependencies {
   security: SecurityPluginSetup;
   features: FeaturesPluginSetup;
+  housekeeping?: HousekeepingServerSetup;
 }
 
 export interface RouteDependencies {

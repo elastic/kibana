@@ -9,7 +9,7 @@ import type { CoreSetup } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { i18n } from '@kbn/i18n';
 
-import type { ClientConfigType } from '../types';
+import type { ClientConfigType, StartDependencies } from '../types';
 import { httpService } from './services/http';
 import type { UiMetricService } from './services';
 import { breadcrumbService, docTitleService } from './services/navigation';
@@ -17,7 +17,7 @@ import type { AppDependencies } from './app_context';
 import { renderApp } from '.';
 
 export async function mountManagementSection(
-  coreSetup: CoreSetup,
+  coreSetup: CoreSetup<StartDependencies>,
   services: {
     uiMetricService: UiMetricService;
   },
@@ -25,7 +25,7 @@ export async function mountManagementSection(
   params: ManagementAppMountParams
 ) {
   const { element, setBreadcrumbs, history } = params;
-  const [core] = await coreSetup.getStartServices();
+  const [core, { housekeeping }] = await coreSetup.getStartServices();
   const {
     chrome: { docTitle },
     settings,
@@ -37,6 +37,7 @@ export async function mountManagementSection(
   const appDependencies: AppDependencies = {
     core,
     config,
+    housekeeping,
     services: {
       uiSettings: coreSetup.uiSettings,
       settings,

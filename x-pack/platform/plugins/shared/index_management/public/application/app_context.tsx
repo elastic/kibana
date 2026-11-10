@@ -33,6 +33,7 @@ import type { ReindexServicePublicStart } from '@kbn/reindex-service-plugin/publ
 import type { EuiBreadcrumb } from '@elastic/eui';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import type { HousekeepingPublicStart } from '@kbn/housekeeping-plugin/public';
 import type { ExtensionsService } from '../services';
 import type { HttpService, NotificationService, UiMetricService } from './services';
 import type { IndexManagementBreadcrumb } from './services/breadcrumbs';
@@ -57,6 +58,7 @@ export interface AppDependencies {
     cloud?: CloudSetup;
     cloudConnect?: CloudConnectedPluginStart;
     console?: ConsolePluginStart;
+    housekeeping?: HousekeepingPublicStart;
     licensing?: LicensingPluginStart;
     ml?: MlPluginStart;
     streams?: StreamsPluginStart;

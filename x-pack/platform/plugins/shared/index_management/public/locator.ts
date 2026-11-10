@@ -9,6 +9,7 @@ import type { ManagementAppLocator } from '@kbn/management-plugin/common';
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
 import {
   INDEX_MANAGEMENT_LOCATOR_ID,
+  Section,
   type IndexManagementLocatorParams,
 } from '@kbn/index-management-shared-types';
 import {
@@ -67,7 +68,7 @@ export class IndexManagementLocatorDefinition
       case 'index_template': {
         return {
           ...location,
-          path: location.path + getTemplateDetailsLink(params.indexTemplate),
+          path: location.path + getTemplateDetailsLink(params.indexTemplate, params.legacy),
         };
       }
       case 'index_template_edit': {
@@ -122,6 +123,15 @@ export class IndexManagementLocatorDefinition
         return {
           ...location,
           path: location.path + getIndexDetailsLink(params.indexName, '', params.tab),
+        };
+      }
+      case 'enrich_policy': {
+        // The list opens the details flyout of the policy in the query.
+        return {
+          ...location,
+          path:
+            location.path +
+            `/${Section.EnrichPolicies}?policy=${encodeURIComponent(params.policyName)}`,
         };
       }
     }

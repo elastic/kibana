@@ -19,6 +19,7 @@
       "share"
     ],
     "optionalPlugins": [
+      "housekeeping",
       "cloud",
       "usageCollection",
       "indexManagement",

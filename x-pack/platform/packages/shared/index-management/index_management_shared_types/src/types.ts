@@ -50,6 +50,7 @@ export type IndexManagementLocatorParams = SerializableRecord &
     | {
         page: 'index_template';
         indexTemplate: string;
+        legacy?: boolean;
       }
     | {
         page: 'index_template_edit';
@@ -86,6 +87,10 @@ export type IndexManagementLocatorParams = SerializableRecord &
         page: 'index_details';
         indexName: string;
         tab?: string;
+      }
+    | {
+        page: 'enrich_policy';
+        policyName: string;
       }
   );
 

@@ -13,6 +13,12 @@ import { ApiRoutes } from './routes';
 import { IndexDataEnricher } from './services';
 import { handleEsError } from './shared_imports';
 import type { IndexManagementConfig } from './config';
+import {
+  enrichPolicyProvider,
+  indexResourceProvider,
+  legacyTemplateProvider,
+} from './housekeeping/resource_provider';
+import { indexManagementChecks } from './housekeeping/checks';
 
 export interface IndexManagementPluginSetup {
   indexDataEnricher: {
@@ -31,7 +37,10 @@ export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup,
     this.config = initContext.config.get();
   }
 
-  setup({ http }: CoreSetup, { features, security }: Dependencies): IndexManagementPluginSetup {
+  setup(
+    { http }: CoreSetup,
+    { features, security, housekeeping }: Dependencies
+  ): IndexManagementPluginSetup {
     features.registerElasticsearchFeature({
       id: PLUGIN.id,
       privileges: [
@@ -76,6 +85,13 @@ export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup,
         handleEsError,
       },
     });
+
+    if (housekeeping) {
+      [indexResourceProvider, enrichPolicyProvider, legacyTemplateProvider].forEach((provider) =>
+        housekeeping.registerResourceProvider(provider)
+      );
+      indexManagementChecks.forEach((check) => housekeeping.registerCheck(check));
+    }
 
     return {
       indexDataEnricher: {

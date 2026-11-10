@@ -24,7 +24,8 @@
       "usageCollection",
       "security",
       "cloud",
-      "home"
+      "home",
+      "housekeeping"
     ],
     "requiredBundles": [
       "esUiShared",

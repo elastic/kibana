@@ -16,7 +16,7 @@ import { AppHeader, type AppHeaderTab } from '@kbn/app-header';
 import type { Section } from '../../constants';
 import { BASE_PATH, UIM_REPOSITORY_SET_DEFAULT_PRIVILEGE_MISSING } from '../../constants';
 import { useCanSetDefaultRepository } from '../../services/authorization';
-import { useConfig, useCore, useServices } from '../../app_context';
+import { useConfig, useCore, useHousekeeping, useServices } from '../../app_context';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
 
 import { RepositoryList } from './repository_list';
@@ -37,6 +37,7 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
   const { slm_ui: slmUi } = useConfig();
   const { docLinks } = useCore();
   const { uiMetricService } = useServices();
+  const housekeeping = useHousekeeping();
   const canSetDefaultRepository = useCanSetDefaultRepository();
   const hasReportedMissingSetDefaultPrivilege = useRef(false);
 
@@ -113,6 +114,19 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
         tabs={tabs}
         docLink={docLinks.links.snapshotRestore.guide}
         spacing="bleed"
+        menu={
+          housekeeping
+            ? {
+                items: [
+                  housekeeping.getAppMenuItem({
+                    resourceTypes: slmUi.enabled
+                      ? ['snapshot_repository', 'slm_policy']
+                      : ['snapshot_repository'],
+                  }),
+                ],
+              }
+            : undefined
+        }
       />
 
       <EuiSpacer size="l" />

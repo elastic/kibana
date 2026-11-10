@@ -13,6 +13,7 @@
     "../../../../../typings/**/*"
   ],
   "kbn_references": [
+    "@kbn/housekeeping-plugin",
     "@kbn/core",
     "@kbn/management-plugin",
     "@kbn/share-plugin",

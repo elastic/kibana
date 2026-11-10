@@ -2412,6 +2412,9 @@ importers:
       '@kbn/home-sample-data-types':
         specifier: workspace:*
         version: link:src/platform/packages/shared/home/sample_data_types
+      '@kbn/housekeeping-plugin':
+        specifier: workspace:*
+        version: link:src/platform/plugins/shared/housekeeping
       '@kbn/human-readable-id':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-human-readable-id
@@ -8753,6 +8756,8 @@ importers:
   src/platform/plugins/shared/files: {}
 
   src/platform/plugins/shared/home: {}
+
+  src/platform/plugins/shared/housekeeping: {}
 
   src/platform/plugins/shared/inspector: {}
 

@@ -10,6 +10,7 @@ import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/serv
 import type { IngestPipelinesConfigType } from './config';
 import { ApiRoutes } from './routes';
 import { handleEsError } from './shared_imports';
+import { createPipelineResourceProvider } from './housekeeping/resource_provider';
 import type { Dependencies } from './types';
 import {
   APP_CAPABILITIES,
@@ -27,7 +28,7 @@ export class IngestPipelinesPlugin implements Plugin<void, void, any, any> {
     this.config = initContext.config.get();
   }
 
-  public setup({ http }: CoreSetup, { security, features }: Dependencies) {
+  public setup({ http }: CoreSetup, { security, features, housekeeping }: Dependencies) {
     const router = http.createRouter();
 
     features.registerElasticsearchFeature({
@@ -57,6 +58,12 @@ export class IngestPipelinesPlugin implements Plugin<void, void, any, any> {
         handleEsError,
       },
     });
+
+    housekeeping?.registerResourceProvider(
+      createPipelineResourceProvider({
+        unusedAfterDays: this.config.housekeeping.unusedAfterDays,
+      })
+    );
   }
 
   public start() {}

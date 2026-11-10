@@ -95,6 +95,7 @@ export function getIndexManagementDependencies({
       cloud,
       cloudConnect: startDependencies.cloudConnect,
       console: startDependencies.console,
+      housekeeping: startDependencies.housekeeping,
       ml: startDependencies.ml,
       streams: startDependencies.streams,
       licensing: startDependencies.licensing,
