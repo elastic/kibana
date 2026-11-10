@@ -126,6 +126,7 @@ export { SOURCE_TYPES, sourceTypeSchema, type SourceType } from './src/sources/s
 export {
   analyzeSourceQuery,
   getSourceCommandQuery,
+  getSourceLocalIndexExpressions,
   getSourceReadTargets,
   hasMultipleSourceIndices,
   validateSourceQuery,
