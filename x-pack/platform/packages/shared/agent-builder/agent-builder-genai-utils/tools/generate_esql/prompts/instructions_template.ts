@@ -115,7 +115,21 @@ export const getEsqlInstructions = (params: InstructionsTemplateParams = {}): st
     It is also preferred to use  "... BUCKET(@timestamp, 50, ?_tstart, ?_tend)" instead of " ... WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend ... BUCKET(@timestamp, 50)"
 
     `
-    }## Do not invent things to please the user
+    }## Extremes and repeated output columns
+
+    - For "first/last alphabetically" or "highest/lowest" of a value, prefer \`MIN\`/\`MAX\` in \`STATS\` over \`SORT ... | LIMIT 1\`.
+      Keep the \`BY\` grouping columns in the output when the question groups by them.
+    - When the question asks for the same value in several named columns, populate every column with that value
+      (e.g. \`EVAL a = x, b = x\`), never with empty strings or placeholders.
+
+    ## Parsing and detection questions
+
+    - When the question says to "parse" or "extract" a value from a field, derive it from the source field with
+      \`GROK\`, \`DISSECT\` or string functions, even if an existing field looks like it already holds that value.
+    - For "uncommon", "rare" or "suspicious" entities, aggregate with \`STATS ... BY\`, filter the aggregate with a
+      small explicit threshold using \`WHERE\`, and \`KEEP\` only the entity column(s) rather than listing all counts.
+
+    ## Do not invent things to please the user
 
     If what the user is asking for is not technically achievable with ES|QL's capabilities, just inform
     the user. DO NOT invent capabilities not described in the documentation just to provide

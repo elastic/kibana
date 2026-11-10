@@ -153,6 +153,25 @@ FROM sales
 ```
 
 ```esql
+// Count orders per size label and per category, where each order has several line items in the multi-valued field items.price
+// Do not MV_EXPAND items.price: one row per order keeps COUNT(*) equal to the number of orders.
+FROM orders
+| EVAL size_class = CASE(items.price < 10, "small", "large")
+| STATS orders = COUNT(*) BY size_class, category
+| SORT orders DESC
+| LIMIT 10
+```
+
+```esql
+// How many events are there per day? Show the first 30 days, earliest first.
+// Group a date by a calendar unit with BUCKET, not by formatting it as a string.
+FROM events
+| STATS events = COUNT(*) BY day = BUCKET(created_at, 1 day)
+| SORT day ASC
+| LIMIT 30
+```
+
+```esql
 // Enrich firewall logs with threat intelligence by joining on source IP
 FROM firewall_logs
 | LOOKUP JOIN threat_list ON source.ip
