@@ -76,9 +76,7 @@ describe('session memory', () => {
 
   it('finds nothing before Elasticsearch creates the streams', async () => {
     await expect(service.forget(jdoe, ['missing'])).resolves.toEqual({ missing: 'not_found' });
-    await expect(service.hardDelete(jdoe, ['missing'])).resolves.toEqual({
-      deletedDocuments: 0,
-    });
+    await expect(service.hardDelete(jdoe, ['missing'])).resolves.toEqual({ missing: 'not_found' });
   });
 
   it('hides a memory from other users and other spaces', async () => {
@@ -90,7 +88,7 @@ describe('session memory', () => {
       isolated: 'not_found',
     });
     await expect(service.hardDelete(otherSpace, ['isolated'])).resolves.toEqual({
-      deletedDocuments: 0,
+      isolated: 'not_found',
     });
 
     await expect(service.forget(jdoe, ['isolated'])).resolves.toEqual({
@@ -130,10 +128,28 @@ describe('session memory', () => {
     await service.forget(jdoe, ['deleted']);
     await refresh();
 
-    await expect(service.hardDelete(jdoe, ['deleted'])).resolves.toEqual({ deletedDocuments: 3 });
+    await expect(service.hardDelete(jdoe, ['deleted', 'unknown'])).resolves.toEqual({
+      deleted: 'deleted',
+      unknown: 'not_found',
+    });
     await refresh();
 
     expect(await countRevisions('deleted')).toBe(1);
+  });
+
+  it('reports a memory of another user with the same id as not found and keeps it', async () => {
+    const asmith = { space: 'default', userId: 'asmith' };
+    await seed(
+      revision('shared-id', '2026-11-08T09:00:00.000Z', asmith),
+      revision('shared-id', '2026-11-08T10:00:00.000Z', asmith)
+    );
+
+    await expect(service.hardDelete(jdoe, ['shared-id'])).resolves.toEqual({
+      'shared-id': 'not_found',
+    });
+    await refresh();
+
+    expect(await countRevisions('shared-id')).toBe(2);
   });
 
   it('stores one session event per turn', async () => {

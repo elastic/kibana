@@ -9,8 +9,8 @@ import { randomUUID } from 'crypto';
 import type { BulkResponse, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { SESSION_EVENTS_DATA_STREAM, SESSION_MEMORY_DATA_STREAM } from './data_streams';
+import type { ForgetOutcome } from '../../common/http_api/session_memory';
 import type {
-  ForgetOutcome,
   SessionMemoryScope,
   SessionMemoryService,
   StoredSessionEvent,
@@ -49,6 +49,24 @@ const getForgetOutcome = (latest: StoredSessionMemory | undefined): ForgetOutcom
     return 'not_found';
   }
   return latest.deleted_at === undefined ? 'forgotten' : 'already_forgotten';
+};
+
+// Collapses to the latest revision of each memory before anything looks at tombstones. Filtering
+// out tombstones in the query instead would surface an older revision of a forgotten memory.
+const findLatestRevisions = async (
+  esClient: ElasticsearchClient,
+  scope: SessionMemoryScope,
+  ids: readonly string[]
+): Promise<StoredSessionMemory[]> => {
+  const response = await esClient.search<StoredSessionMemory>({
+    index: SESSION_MEMORY_DATA_STREAM,
+    ...ignoreMissingStream,
+    query: { bool: { filter: [{ terms: { id: [...ids] } }, ...scopeFilter(scope)] } },
+    collapse: { field: 'id' },
+    sort: [{ '@timestamp': 'desc' }],
+    size: ids.length,
+  });
+  return response.hits.hits.flatMap(({ _source }) => _source ?? []);
 };
 
 /**
@@ -105,17 +123,7 @@ export const createSessionMemoryService = (
       return {};
     }
 
-    // Collapse to the latest revision of each memory before looking at tombstones. Filtering out
-    // tombstones in the query instead would surface an older revision of a forgotten memory.
-    const response = await esClient.search<StoredSessionMemory>({
-      index: SESSION_MEMORY_DATA_STREAM,
-      ...ignoreMissingStream,
-      query: { bool: { filter: [{ terms: { id: uniqueIds } }, ...scopeFilter(scope)] } },
-      collapse: { field: 'id' },
-      sort: [{ '@timestamp': 'desc' }],
-      size: uniqueIds.length,
-    });
-    const latestRevisions = response.hits.hits.flatMap(({ _source }) => _source ?? []);
+    const latestRevisions = await findLatestRevisions(esClient, scope, uniqueIds);
     const latestById = new Map(latestRevisions.map((latest) => [latest.id, latest]));
 
     const timestamp = new Date().toISOString();
@@ -137,22 +145,31 @@ export const createSessionMemoryService = (
   },
 
   hardDelete: async (scope, ids) => {
-    if (ids.length === 0) {
-      return { deletedDocuments: 0 };
+    const uniqueIds = [...new Set(ids)];
+    if (uniqueIds.length === 0) {
+      return {};
     }
 
-    const { deleted = 0, failures = [] } = await esClient.deleteByQuery({
-      index: SESSION_MEMORY_DATA_STREAM,
-      ...ignoreMissingStream,
-      query: { bool: { filter: [{ terms: { id: [...ids] } }, ...scopeFilter(scope)] } },
-      conflicts: 'proceed',
-    });
-    if (failures.length > 0) {
-      throw new Error(
-        `Failed to delete from session memory: ${failures[0].cause?.reason ?? 'unknown error'}`
-      );
+    const foundIds = new Set(
+      (await findLatestRevisions(esClient, scope, uniqueIds)).map(({ id }) => id)
+    );
+    if (foundIds.size > 0) {
+      const { failures = [] } = await esClient.deleteByQuery({
+        index: SESSION_MEMORY_DATA_STREAM,
+        ...ignoreMissingStream,
+        query: { bool: { filter: [{ terms: { id: [...foundIds] } }, ...scopeFilter(scope)] } },
+        conflicts: 'proceed',
+      });
+      if (failures.length > 0) {
+        throw new Error(
+          `Failed to delete from session memory: ${failures[0].cause?.reason ?? 'unknown error'}`
+        );
+      }
     }
-    return { deletedDocuments: deleted };
+
+    return Object.fromEntries(
+      uniqueIds.map((id) => [id, foundIds.has(id) ? 'deleted' : 'not_found'])
+    );
   },
 
   saveEvent: async ({ space, userId }, input) => {

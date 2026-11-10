@@ -210,7 +210,44 @@ describe('createSessionMemoryService', () => {
   });
 
   describe('hardDelete', () => {
+    it('deletes the memories it finds in scope and reports every id', async () => {
+      esClient.search.mockResolvedValue(searchResponse([storedMemory, forgottenMemory]));
+      esClient.deleteByQuery.mockResolvedValue({ deleted: 3 });
+
+      await expect(
+        service.hardDelete(scope, ['memory-1', 'memory-2', 'memory-3', 'memory-1'])
+      ).resolves.toEqual({
+        'memory-1': 'deleted',
+        'memory-2': 'deleted',
+        'memory-3': 'not_found',
+      });
+      expect(esClient.deleteByQuery).toHaveBeenCalledWith({
+        index: SESSION_MEMORY_DATA_STREAM,
+        ignore_unavailable: true,
+        query: {
+          bool: {
+            filter: [
+              { terms: { id: ['memory-1', 'memory-2'] } },
+              { term: { space: 'default' } },
+              { term: { user_id: 'jdoe' } },
+            ],
+          },
+        },
+        conflicts: 'proceed',
+      });
+    });
+
+    it('deletes nothing when no memory is found in scope', async () => {
+      esClient.search.mockResolvedValue(searchResponse([]));
+
+      await expect(service.hardDelete(scope, ['memory-1'])).resolves.toEqual({
+        'memory-1': 'not_found',
+      });
+      expect(esClient.deleteByQuery).not.toHaveBeenCalled();
+    });
+
     it('throws when Elasticsearch fails to delete some documents', async () => {
+      esClient.search.mockResolvedValue(searchResponse([storedMemory]));
       esClient.deleteByQuery.mockResolvedValue({
         deleted: 1,
         failures: [
@@ -229,7 +266,8 @@ describe('createSessionMemoryService', () => {
     });
 
     it('does nothing for an empty list', async () => {
-      await expect(service.hardDelete(scope, [])).resolves.toEqual({ deletedDocuments: 0 });
+      await expect(service.hardDelete(scope, [])).resolves.toEqual({});
+      expect(esClient.search).not.toHaveBeenCalled();
       expect(esClient.deleteByQuery).not.toHaveBeenCalled();
     });
   });
