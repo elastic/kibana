@@ -1485,8 +1485,16 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
     return [...options, ...customFields];
   }, [rowsMode, groupsSelected]);
   const groupByFields = useMemo(
-    () => (isDataViewLoading ? [] : dataView.fields.getAll()),
-    [isDataViewLoading, dataView]
+    () =>
+      isDataViewLoading
+        ? []
+        : dataView.fields
+            .getAll()
+            .filter(
+              ({ name }) =>
+                !(rowsMode === 'resolved' && name === ENTITY_GROUPING_OPTIONS.RESOLUTION)
+            ),
+    [isDataViewLoading, dataView, rowsMode]
   );
 
   // Memoized: the grid toolbar rebuilds whenever this element changes.
