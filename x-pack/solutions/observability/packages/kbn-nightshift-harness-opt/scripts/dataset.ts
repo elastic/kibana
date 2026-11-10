@@ -139,15 +139,33 @@ export const assignSplits = (tasks: OrcaTask[]): Map<string, Split> => {
  */
 export const tasksForSplit = (
   split: Split,
-  { limit, controls = true }: { limit?: number; controls?: boolean } = {}
+  { limit, controlShare = 0.25 }: { limit?: number; controlShare?: number } = {}
 ): OrcaTask[] => {
   const tasks = loadTasks();
   const splits = assignSplits(tasks);
   const inSplit = tasks
     .filter((task) => splits.get(task.incident) === split)
-    .filter((task) => controls || !task.control)
     .sort((a, b) => sha(a.caseId).localeCompare(sha(b.caseId)));
   if (!limit || limit >= inSplit.length) return inSplit;
+  // Controls are drawn separately, a quarter of the subset by default: drawn together with
+  // incidents they never make it in (they are a sixth of the pool), and without them nothing in
+  // the reward pushes back on an agent that claims an incident every time.
+  const controlCount = Math.round(limit * controlShare);
+  return [
+    ...pickSubset(
+      inSplit.filter((task) => !task.control),
+      limit - controlCount
+    ),
+    ...pickSubset(
+      inSplit.filter((task) => task.control),
+      controlCount
+    ),
+  ];
+};
+
+/** At most one task per incident, largest cutoff groups first, difficulties alternating. */
+const pickSubset = (inSplit: OrcaTask[], limit: number): OrcaTask[] => {
+  if (limit <= 0) return [];
 
   const byCutoff = new Map<string, OrcaTask[]>();
   for (const task of inSplit)

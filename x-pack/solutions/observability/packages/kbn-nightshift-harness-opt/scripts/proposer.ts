@@ -41,11 +41,21 @@ const runCommand = ({
 }): Promise<number> =>
   new Promise((resolve, reject) => {
     const logStream = Fs.createWriteStream(logPath, { flags: 'a' });
-    const child = spawn(command, args, { cwd, stdio: ['ignore', 'pipe', 'pipe'] });
+    // Own process group: cursor-task forks the agent, and killing only the wrapper on a timeout
+    // left the agent editing the candidate worktree while the next stage measured it.
+    const child = spawn(command, args, { cwd, stdio: ['ignore', 'pipe', 'pipe'], detached: true });
+    const killGroup = () => {
+      try {
+        if (child.pid) process.kill(-child.pid, 'SIGKILL');
+      } catch (e) {
+        // already gone
+      }
+    };
+    process.once('exit', killGroup);
     child.stdout.pipe(logStream);
     child.stderr.pipe(logStream);
     const timer = setTimeout(() => {
-      child.kill('SIGKILL');
+      killGroup();
       reject(
         new Error(`${Path.basename(command)} timed out after ${timeoutMs}ms (log: ${logPath})`)
       );
@@ -56,6 +66,9 @@ const runCommand = ({
     });
     child.on('close', (code) => {
       clearTimeout(timer);
+      process.removeListener('exit', killGroup);
+      // Anything the wrapper left running in its group must not outlive the stage.
+      killGroup();
       resolve(code ?? 0);
     });
   });

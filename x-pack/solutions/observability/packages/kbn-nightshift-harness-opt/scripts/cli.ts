@@ -54,6 +54,10 @@ export const cli = () =>
   run(
     async ({ flags, log }) => {
       const [command] = flags._;
+      // Turn termination into a normal exit, so sub-agent process groups are killed with us.
+      for (const signal of ['SIGTERM', 'SIGINT'] as const) {
+        process.once(signal, () => process.exit(130));
+      }
       await ensureDataset();
       const lanes = defaultLanes();
       const agentConnectorId = str(flags.agent) ?? DEFAULT_AGENT;
