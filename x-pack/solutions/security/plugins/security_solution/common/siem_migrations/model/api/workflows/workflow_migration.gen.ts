@@ -20,8 +20,8 @@ import { ArrayFromString, BooleanFromString } from '@kbn/zod-helpers/v4';
 import { NonEmptyString } from '../../../../api/model/primitives.gen';
 import { MigrationTaskStats, MigrationTranslationStats, LangSmithOptions } from '../../common.gen';
 import {
-  OriginalWorkflow,
   WorkflowMigration,
+  OriginalWorkflow,
   WorkflowMigrationWorkflow,
   UpdateWorkflowMigrationWorkflow,
 } from '../../workflow_migration.gen';

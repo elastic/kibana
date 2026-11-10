@@ -1071,8 +1071,25 @@ For detailed information on Kibana actions and alerting, and additional API call
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Parses Tines story exports and stores each story as an original workflow with vendor tines and format json. Use this for a raw Tines story export. An empty list stores nothing. A body that is not a Tines story is rejected and stores nothing. A missing migration id returns 404.
+   * Create a new Timeline or Timeline template.
    */
+  async createTimelines(props: CreateTimelinesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CreateTimelines`);
+    return this.kbnClient
+      .request<CreateTimelinesResponse>({
+        path: '/api/timeline',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+    * Parses Tines story exports and stores each story as an original workflow with vendor tines and format json. Use this for a raw Tines story export. An empty list stores nothing. A body that is not a Tines story is rejected and stores nothing. A missing migration id returns 404.
+
+    */
   async createTinesWorkflowMigrationWorkflows(props: CreateTinesWorkflowMigrationWorkflowsProps) {
     this.log.info(`${new Date().toISOString()} Calling API CreateTinesWorkflowMigrationWorkflows`);
     return this.kbnClient
@@ -1083,22 +1100,6 @@ For detailed information on Kibana actions and alerting, and additional API call
         ),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        },
-        method: 'POST',
-        body: props.body,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
-   * Create a new Timeline or Timeline template.
-   */
-  async createTimelines(props: CreateTimelinesProps) {
-    this.log.info(`${new Date().toISOString()} Calling API CreateTimelines`);
-    return this.kbnClient
-      .request<CreateTimelinesResponse>({
-        path: '/api/timeline',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'POST',
         body: props.body,
@@ -1173,8 +1174,9 @@ For detailed information on Kibana actions and alerting, and additional API call
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Adds original workflows to an existing migration. Each workflow already includes its vendor, so this route does not parse a vendor export. Use it when the caller has an OriginalWorkflow. An empty list stores nothing. A missing migration id returns 404.
-   */
+    * Adds original workflows to an existing migration. Each workflow already includes its vendor, so this route does not parse a vendor export. Use it when the caller has an OriginalWorkflow. An empty list stores nothing. A missing migration id returns 404.
+
+    */
   async createWorkflowMigrationWorkflows(props: CreateWorkflowMigrationWorkflowsProps) {
     this.log.info(`${new Date().toISOString()} Calling API CreateWorkflowMigrationWorkflows`);
     return this.kbnClient
@@ -4132,12 +4134,12 @@ export interface CreateSentinelRuleMigrationRulesProps {
   params: CreateSentinelRuleMigrationRulesRequestParamsInput;
   body: CreateSentinelRuleMigrationRulesRequestBodyInput;
 }
+export interface CreateTimelinesProps {
+  body: CreateTimelinesRequestBodyInput;
+}
 export interface CreateTinesWorkflowMigrationWorkflowsProps {
   params: CreateTinesWorkflowMigrationWorkflowsRequestParamsInput;
   body: CreateTinesWorkflowMigrationWorkflowsRequestBodyInput;
-}
-export interface CreateTimelinesProps {
-  body: CreateTimelinesRequestBodyInput;
 }
 export interface CreateUpdateProtectionUpdatesNoteProps {
   params: CreateUpdateProtectionUpdatesNoteRequestParamsInput;
