@@ -20,7 +20,11 @@ import {
 } from '@openfeature/server-sdk';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { configServiceMock } from '@kbn/config-mocks';
-import { FeatureFlagsService, type InternalFeatureFlagsStart } from '..';
+import {
+  FeatureFlagsService,
+  type InternalFeatureFlagsSetup,
+  type InternalFeatureFlagsStart,
+} from '..';
 import type { FeatureFlagsConfig } from './feature_flags_config';
 
 describe('FeatureFlagsService Server', () => {
@@ -52,6 +56,7 @@ describe('FeatureFlagsService Server', () => {
     await featureFlagsService.stop();
     jest.spyOn(OpenFeature, 'setProviderAndWait').mockRestore(); // Make sure that we clean up any previous mocked implementations
     jest.clearAllMocks();
+    OpenFeature.clearHandlers();
     await OpenFeature.clearProviders();
   });
 
@@ -186,6 +191,7 @@ describe('FeatureFlagsService Server', () => {
   });
 
   describe('flag evaluation', () => {
+    let setupContract: InternalFeatureFlagsSetup;
     let startContract: InternalFeatureFlagsStart;
     let apmSpy: jest.SpyInstance;
     let addHandlerSpy: jest.SpyInstance;
@@ -193,7 +199,7 @@ describe('FeatureFlagsService Server', () => {
     beforeEach(() => {
       mockFlagEvaluationCounterAdd.mockClear();
       addHandlerSpy = jest.spyOn(featureFlagsClient, 'addHandler');
-      featureFlagsService.setup({
+      setupContract = featureFlagsService.setup({
         http: httpServiceMock.createInternalSetupContract(),
       });
       startContract = featureFlagsService.start();
@@ -499,14 +505,6 @@ describe('FeatureFlagsService Server', () => {
     });
 
     test('reevaluates subscribed flags when the provider becomes ready', async () => {
-      // setProvider is not called in this suite's beforeEach, so register it here.
-      const openFeatureAddHandlerSpy = jest.spyOn(OpenFeature, 'addHandler');
-      const { setProvider } = featureFlagsService.setup({
-        http: httpServiceMock.createInternalSetupContract(),
-      });
-      jest.spyOn(OpenFeature, 'setProviderAndWait').mockResolvedValue();
-      setProvider({ metadata: { name: 'fake provider' } } as Provider);
-
       const getBooleanValueSpy = jest.spyOn(featureFlagsClient, 'getBooleanValue');
       getBooleanValueSpy.mockResolvedValue(false);
 
@@ -516,17 +514,220 @@ describe('FeatureFlagsService Server', () => {
       await expect(firstValueFrom(flag$)).resolves.toEqual(false);
       expect(observedValues).toEqual([false]);
 
+      // Register the provider after the initial evaluation. Going not-ready must not emit.
+      const openFeatureAddHandlerSpy = jest.spyOn(OpenFeature, 'addHandler');
+      jest.spyOn(OpenFeature, 'setProviderAndWait').mockResolvedValue(undefined);
+      setupContract.setProvider({ metadata: { name: 'fake provider' } } as Provider);
+      await Promise.resolve();
+      expect(observedValues).toEqual([false]);
+
       const readyHandler = openFeatureAddHandlerSpy.mock.calls.find(
         ([event]) => event === ServerProviderEvents.Ready
       )?.[1];
       expect(readyHandler).toBeDefined();
 
       getBooleanValueSpy.mockResolvedValue(true);
-      await readyHandler!();
+      readyHandler!();
       await expect(firstValueFrom(flag$)).resolves.toEqual(true);
       expect(observedValues).toEqual([false, true]);
 
       openFeatureAddHandlerSpy.mockRestore();
+    });
+
+    describe('waits for the provider to be ready', () => {
+      let markProviderReady: () => void;
+
+      beforeEach(() => {
+        const openFeatureAddHandlerSpy = jest.spyOn(OpenFeature, 'addHandler');
+        jest.spyOn(OpenFeature, 'setProviderAndWait').mockResolvedValue(undefined);
+        setupContract.setProvider({ metadata: { name: 'fake provider' } } as Provider);
+        const readyHandler = openFeatureAddHandlerSpy.mock.calls.find(
+          ([event]) => event === ServerProviderEvents.Ready
+        )?.[1];
+        if (!readyHandler) {
+          throw new Error('Expected a provider Ready handler to be registered');
+        }
+        markProviderReady = () => {
+          readyHandler();
+        };
+      });
+
+      afterEach(() => {
+        jest.spyOn(OpenFeature, 'addHandler').mockRestore();
+      });
+
+      test('holds every evaluation type until the provider is ready', async () => {
+        const getBooleanValueSpy = jest.spyOn(featureFlagsClient, 'getBooleanValue');
+        const getStringValueSpy = jest.spyOn(featureFlagsClient, 'getStringValue');
+        const getNumberValueSpy = jest.spyOn(featureFlagsClient, 'getNumberValue');
+
+        const booleanEvaluation = startContract.getBooleanValue('bool-flag', false);
+        const stringEvaluation = startContract.getStringValue('string-flag', 'fallback');
+        const numberEvaluation = startContract.getNumberValue('number-flag', 1);
+
+        await Promise.resolve();
+        expect(getBooleanValueSpy).not.toHaveBeenCalled();
+        expect(getStringValueSpy).not.toHaveBeenCalled();
+        expect(getNumberValueSpy).not.toHaveBeenCalled();
+
+        markProviderReady();
+
+        await expect(booleanEvaluation).resolves.toEqual(false);
+        await expect(stringEvaluation).resolves.toEqual('fallback');
+        await expect(numberEvaluation).resolves.toEqual(1);
+        expect(getBooleanValueSpy).toHaveBeenCalledTimes(1);
+        expect(getBooleanValueSpy).toHaveBeenCalledWith('bool-flag', false);
+        expect(getStringValueSpy).toHaveBeenCalledTimes(1);
+        expect(getStringValueSpy).toHaveBeenCalledWith('string-flag', 'fallback');
+        expect(getNumberValueSpy).toHaveBeenCalledTimes(1);
+        expect(getNumberValueSpy).toHaveBeenCalledWith('number-flag', 1);
+      });
+
+      test('does not wait when the provider is already ready', async () => {
+        markProviderReady();
+        const getBooleanValueSpy = jest.spyOn(featureFlagsClient, 'getBooleanValue');
+
+        await expect(startContract.getBooleanValue('my-flag', false)).resolves.toEqual(false);
+        expect(getBooleanValueSpy).toHaveBeenCalledTimes(1);
+        expect(getBooleanValueSpy).toHaveBeenCalledWith('my-flag', false);
+      });
+
+      test('does not wait when the flag is overridden', async () => {
+        const getBooleanValueSpy = jest.spyOn(featureFlagsClient, 'getBooleanValue');
+
+        await expect(startContract.getBooleanValue('my-overridden-flag', false)).resolves.toEqual(
+          true
+        );
+        expect(getBooleanValueSpy).not.toHaveBeenCalled();
+      });
+
+      test('observable overrides do not wait for the provider', async () => {
+        const getBooleanValueSpy = jest.spyOn(featureFlagsClient, 'getBooleanValue');
+        const observedValues: boolean[] = [];
+        const flag$ = startContract.getBooleanValue$('my-overridden-flag', false);
+        flag$.subscribe((value) => observedValues.push(value));
+
+        await expect(firstValueFrom(flag$)).resolves.toEqual(true);
+        expect(observedValues).toEqual([true]);
+        expect(getBooleanValueSpy).not.toHaveBeenCalled();
+      });
+
+      test('times out and evaluates when the provider never becomes ready', async () => {
+        jest.useFakeTimers();
+        const getBooleanValueSpy = jest.spyOn(featureFlagsClient, 'getBooleanValue');
+        const evaluation = startContract.getBooleanValue('my-flag', false);
+
+        await Promise.resolve();
+        expect(getBooleanValueSpy).not.toHaveBeenCalled();
+
+        await jest.advanceTimersByTimeAsync(9_999);
+        expect(getBooleanValueSpy).not.toHaveBeenCalled();
+
+        await jest.advanceTimersByTimeAsync(1);
+        await expect(evaluation).resolves.toEqual(false);
+        expect(getBooleanValueSpy).toHaveBeenCalledTimes(1);
+        expect(getBooleanValueSpy).toHaveBeenCalledWith('my-flag', false);
+      });
+
+      test('does not wait again after the provider wait has timed out', async () => {
+        jest.useFakeTimers();
+        const getBooleanValueSpy = jest.spyOn(featureFlagsClient, 'getBooleanValue');
+        const evaluation = startContract.getBooleanValue('my-flag', false);
+
+        await jest.advanceTimersByTimeAsync(10_000);
+        await expect(evaluation).resolves.toEqual(false);
+
+        await expect(startContract.getBooleanValue('another-flag', true)).resolves.toEqual(true);
+        expect(getBooleanValueSpy).toHaveBeenCalledTimes(2);
+        expect(getBooleanValueSpy).toHaveBeenLastCalledWith('another-flag', true);
+      });
+
+      test('unblocks every evaluation waiting on the provider', async () => {
+        const getBooleanValueSpy = jest.spyOn(featureFlagsClient, 'getBooleanValue');
+        const first = startContract.getBooleanValue('flag-a', false);
+        const second = startContract.getBooleanValue('flag-b', true);
+
+        await Promise.resolve();
+        expect(getBooleanValueSpy).not.toHaveBeenCalled();
+
+        markProviderReady();
+
+        await expect(first).resolves.toEqual(false);
+        await expect(second).resolves.toEqual(true);
+        expect(getBooleanValueSpy).toHaveBeenCalledTimes(2);
+        expect(getBooleanValueSpy).toHaveBeenNthCalledWith(1, 'flag-a', false);
+        expect(getBooleanValueSpy).toHaveBeenNthCalledWith(2, 'flag-b', true);
+      });
+
+      test('observable evaluation waits for the provider as well', async () => {
+        const getBooleanValueSpy = jest.spyOn(featureFlagsClient, 'getBooleanValue');
+        getBooleanValueSpy.mockResolvedValue(false);
+        const observedValues: boolean[] = [];
+        const flag$ = startContract.getBooleanValue$('my-flag', false);
+        flag$.subscribe((value) => observedValues.push(value));
+
+        await Promise.resolve();
+        expect(observedValues).toHaveLength(0);
+        expect(getBooleanValueSpy).not.toHaveBeenCalled();
+
+        getBooleanValueSpy.mockResolvedValue(true);
+        markProviderReady();
+
+        await expect(firstValueFrom(flag$)).resolves.toEqual(true);
+        expect(observedValues).toEqual([true]);
+        expect(getBooleanValueSpy).toHaveBeenCalledWith('my-flag', false);
+      });
+
+      test('waits for the evaluation context and the provider', async () => {
+        const providerMetadataSpy = jest
+          .spyOn(OpenFeature, 'providerMetadata', 'get')
+          .mockReturnValue({ name: 'test-provider' });
+        const getBooleanValueSpy = jest.spyOn(featureFlagsClient, 'getBooleanValue');
+        const evaluation = startContract.getBooleanValue('my-flag', false);
+
+        await Promise.resolve();
+        expect(getBooleanValueSpy).not.toHaveBeenCalled();
+
+        markProviderReady();
+        await Promise.resolve();
+        expect(getBooleanValueSpy).not.toHaveBeenCalled();
+
+        startContract.appendContext({ kind: 'multi', kibana: { key: 'kibana-1' } });
+        await expect(evaluation).resolves.toEqual(false);
+        expect(getBooleanValueSpy).toHaveBeenCalledTimes(1);
+
+        providerMetadataSpy.mockRestore();
+      });
+
+      test('stays blocked on the provider after the context is ready', async () => {
+        const providerMetadataSpy = jest
+          .spyOn(OpenFeature, 'providerMetadata', 'get')
+          .mockReturnValue({ name: 'test-provider' });
+        const getBooleanValueSpy = jest.spyOn(featureFlagsClient, 'getBooleanValue');
+        const evaluation = startContract.getBooleanValue('my-flag', false);
+
+        startContract.appendContext({ kind: 'multi', kibana: { key: 'kibana-1' } });
+        await Promise.resolve();
+        expect(getBooleanValueSpy).not.toHaveBeenCalled();
+
+        markProviderReady();
+        await expect(evaluation).resolves.toEqual(false);
+        expect(getBooleanValueSpy).toHaveBeenCalledTimes(1);
+
+        providerMetadataSpy.mockRestore();
+      });
+
+      test('resolves if the service stops before the provider is ready', async () => {
+        const getBooleanValueSpy = jest.spyOn(featureFlagsClient, 'getBooleanValue');
+        const evaluation = startContract.getBooleanValue('my-flag', false);
+        await Promise.resolve();
+        expect(getBooleanValueSpy).not.toHaveBeenCalled();
+
+        await expect(featureFlagsService.stop()).resolves.toBeUndefined();
+        await expect(evaluation).resolves.toEqual(false);
+        expect(getBooleanValueSpy).toHaveBeenCalledTimes(1);
+        expect(getBooleanValueSpy).toHaveBeenCalledWith('my-flag', false);
+      });
     });
   });
 
