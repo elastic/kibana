@@ -212,7 +212,7 @@ describe('runHop', () => {
     expect(out.edges[1].payload).toBeUndefined();
   });
 
-  it('caps each query at the smaller of max_edges_per_hop and the edge budget still unfilled', async () => {
+  it('caps every query at the smaller of max_edges_per_hop and the unfilled edge budget', async () => {
     const execute = executor([
       result([
         ['role-a', 'role-b'],
@@ -233,16 +233,16 @@ describe('runHop', () => {
       },
       execute
     );
-    // Five edges may still be admitted, so the first query takes the per-hop cap of four; it
-    // returns two, so the second query is limited to the three left.
-    expect(execute.queryLimits).toEqual([4, 3]);
+    // Five edges may still be admitted, so both queries, issued together, take the per-hop
+    // cap of four.
+    expect(execute.queryLimits).toEqual([4, 4]);
     expect(out.edges.map((e) => e.target)).toEqual(['role-b', 'role-c', 'i-1']);
     expect(out.stats).toMatchObject({ queries: 2, queries_skipped: 0, edges_added: 3 });
     expect(out.truncated).toBe(false);
     expect(out.stop_reason).toBe('');
   });
 
-  it('stops issuing queries once the collected edges fill the remaining edge budget', async () => {
+  it('issues every query together and lets the edge cap trim what exceeds the budget', async () => {
     const execute = executor([
       result([
         ['role-a', 'role-b'],
@@ -264,12 +264,49 @@ describe('runHop', () => {
       },
       execute
     );
-    // Two distinct edges fill the budget of two, so the runs_as query is never sent.
-    expect(execute.calls).toHaveLength(1);
+    // Both queries run; the budget of two keeps the first field's distinct edges and drops the
+    // runs_as edge, reporting the same truncation.
+    expect(execute.calls).toHaveLength(2);
     expect(out.edges.map((e) => e.target)).toEqual(['role-b', 'role-c']);
-    expect(out.stats).toMatchObject({ queries: 1, queries_skipped: 1, edges_added: 2 });
+    expect(out.stats).toMatchObject({
+      queries: 2,
+      queries_skipped: 0,
+      edges_added: 2,
+      dropped_edges: 1,
+    });
     expect(out.truncated).toBe(true);
     expect(out.stop_reason).toBe('max_edges_total');
+  });
+
+  it('issues the queries of a hop together rather than one after another', async () => {
+    // Every query's response is held back until both have been requested, so a sequential
+    // caller would never finish.
+    let arrived = 0;
+    let release: () => void = () => {};
+    const allRequested = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const execute = async () => {
+      arrived += 1;
+      if (arrived === hop.target_fields.length) release();
+      await allRequested;
+      return result([]);
+    };
+    const out = await runHop(
+      {
+        hop,
+        index: INDEX,
+        direction: 'out',
+        frontier: ['role-a'],
+        visited: ['role-a'],
+        edgesSoFar: 0,
+        truncatedSoFar: false,
+        limits,
+      },
+      execute
+    );
+    expect(arrived).toBe(hop.target_fields.length);
+    expect(out.stats.queries).toBe(hop.target_fields.length);
   });
 
   it('filters visited ids inside the hop query, after the pointer field is exploded', async () => {

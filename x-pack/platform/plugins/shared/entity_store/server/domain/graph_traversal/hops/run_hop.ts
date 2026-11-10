@@ -60,7 +60,7 @@ export interface RunHopStats {
   frontier_expanded: number;
   dropped_frontier: number;
   queries: number;
-  /** Queries not issued because the edges already collected filled the run's edge budget. */
+  /** Always 0 since a hop's queries are issued together; kept so the stats shape is stable. */
   queries_skipped: number;
   rows_returned: number;
   edges_added: number;
@@ -77,7 +77,7 @@ export interface RunHopStats {
   hubs_skipped: string[];
   /** Milliseconds spent before the first query: resolving the space and the lookup index. */
   setup_ms: number;
-  /** Milliseconds the hop's queries took round trip, from request to parsed response, summed. */
+  /** Milliseconds from issuing the hop's queries together to the last response parsed. */
   query_ms: number;
   /** Milliseconds Elasticsearch reports it spent on the hop's queries (`took`), summed. */
   es_took_ms: number;
@@ -343,49 +343,44 @@ export const runHop = async (
     return finish([], []);
   }
 
-  // 3. One query per relationship field and leg, until the edge budget is already full
-  const collected: CollectedEdge[] = [];
-  const collectedKeys = new Set<string>();
+  // 3. One query per relationship field and leg, all issued together so the hop waits for its
+  //    slowest query rather than the sum. Each is capped at the smaller of max_edges_per_hop
+  //    and the whole unfilled edge budget: what a sibling returns is not known in advance, so
+  //    the edge cap below trims any overshoot. Results are read back in field and leg order,
+  //    so admission under the caps is the same as when they ran one after another.
   const legs = direction === 'both' ? [false, true] : [false];
-  for (const inbound of legs) {
-    for (const { field, relation } of hop.target_fields) {
-      if (collectedKeys.size >= edgeCapacity) {
-        // Whatever this query returned would be cut by the edge cap below, so it is not
-        // issued; the hop reports the same truncation the cap would have.
-        stats.queries_skipped += 1;
-        truncated = true;
-        stopReason = 'max_edges_total';
-      } else {
-        // Rows past the unfilled edge capacity could never be admitted, so they are not read.
-        const limit = Math.min(limits.max_edges_per_hop, edgeCapacity - collectedKeys.size);
-        const query = buildHopQuery({
-          hop,
-          index,
-          lookupIndex,
-          targetField: field,
-          frontier,
-          limit,
-          lookback,
-          exclusions,
-          visited: input.visited,
-          hubDegree: limits.hub_degree,
-          inbound,
-        });
-        const queryStartedAt = performance.now();
-        const result = await execute(query);
-        stats.query_ms = roundMs(stats.query_ms + performance.now() - queryStartedAt);
-        if (typeof result.took === 'number') stats.es_took_ms += result.took;
-        stats.queries += 1;
-        stats.rows_returned += result.values.length;
-        if (result.values.length >= limit) truncated = true;
-        const parsed = parseRows({ result, hop, relation, frontier: frontierSet, inbound });
-        for (const { edge } of parsed) {
-          collectedKeys.add(`${edge.relation}\u0000${edge.source}\u0000${edge.target}`);
-        }
-        collected.push(...parsed);
-      }
-    }
-  }
+  const limit = Math.min(limits.max_edges_per_hop, edgeCapacity);
+  const requests = legs.flatMap((inbound) =>
+    hop.target_fields.map(({ field, relation }) => ({
+      inbound,
+      relation,
+      query: buildHopQuery({
+        hop,
+        index,
+        lookupIndex,
+        targetField: field,
+        frontier,
+        limit,
+        lookback,
+        exclusions,
+        visited: input.visited,
+        hubDegree: limits.hub_degree,
+        inbound,
+      }),
+    }))
+  );
+  const queriesStartedAt = performance.now();
+  const results = await Promise.all(requests.map(({ query }) => execute(query)));
+  stats.query_ms = roundMs(performance.now() - queriesStartedAt);
+  const collected: CollectedEdge[] = [];
+  requests.forEach(({ inbound, relation }, position) => {
+    const result = results[position];
+    if (typeof result.took === 'number') stats.es_took_ms += result.took;
+    stats.queries += 1;
+    stats.rows_returned += result.values.length;
+    if (result.values.length >= limit) truncated = true;
+    collected.push(...parseRows({ result, hop, relation, frontier: frontierSet, inbound }));
+  });
 
   // 4. Excluded nodes (the query already left out excluded documents and pointer values;
   //    this covers whichever end the query could not filter)
