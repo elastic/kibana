@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { EuiHealth, useEuiTheme } from '@elastic/eui';
-import { ML_ANOMALY_THRESHOLD, getThemeResolvedSeverityColor } from '@kbn/ml-anomaly-utils';
+import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
+import { getThemeResolvedSeverityColor } from '@kbn/ml-anomaly-utils/use_severity_color';
 
 /**
  * Map a raw anomaly score (0–100) to the ML severity bucket. Buckets mirror
