@@ -13,6 +13,7 @@ import {
   ALERT_EPISODE_STATUS,
   type AlertEpisodeStatus,
   type AlertEventSeverity,
+  type CreateAlertEventResponse,
 } from '@kbn/alerting-v2-schemas';
 import {
   SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS,
@@ -43,6 +44,7 @@ import {
   isIndexNotFoundError,
   pickLatestPerGroup,
   queryEsql,
+  resolveTimeBound,
 } from '../latest_source_query';
 import {
   SIGNIFICANT_EVENT_INVESTIGATION_STATES,
@@ -64,6 +66,11 @@ import { toRuleEvent } from './to_rule_event';
 
 /** `.rule-events` groups a series of writes by `group_hash`, not `event_id` (unavailable as a column). */
 const GROUP_HASH_FIELD = 'group_hash';
+
+export interface CreateEventResult {
+  groupHash: string;
+  alertId: string;
+}
 
 export type UpdateEventResult =
   | { updated: true }
@@ -90,8 +97,18 @@ export interface SeriesHead {
 export interface OperatorDeactivation {
   groupHash: string;
   episodeId: string;
+  /** Empty when the operator gave none (blank, or the standard no-reason note). */
   reason: string;
   deactivatedAt: string;
+}
+
+/**
+ * What the deactivation read found. `failed` means the read did not complete, so an absent series
+ * proves nothing; otherwise an absent series has no user deactivation.
+ */
+export interface OperatorDeactivationLookup {
+  deactivations: Map<string, OperatorDeactivation>;
+  failed: boolean;
 }
 
 /** A `.alert-actions` row; `Readonly` keeps it a type alias, which `esqlToObjects` accepts. */
@@ -266,19 +283,21 @@ const ruleUuidsIntersects = (values: string[]): ESQLAstExpression =>
   )}), [${values.map((value) => esql.str(value))}])`;
 
 /**
- * Topology feature filter: an event matches when either
- * `causal_features.feature_id` or `blast_radius.feature_id` contains any requested ID, both read
- * through `FIELD_EXTRACT` since they live in the flattened `data` column. Verified live against
- * `.rule-events` on nightshift-program#1517.
+ * Topology feature filter: an event matches when any requested ID appears in
+ * `causal_features.feature_id`, `blast_radius.feature_id`, or a dependency blast-radius entry's
+ * `source` or `target`. All four are read through `FIELD_EXTRACT` since they live in the flattened
+ * `data` column. `FIELD_EXTRACT` loses the pairing with `type`, but `source` and `target` exist
+ * only on dependency rows. The two `feature_id` paths were verified live against `.rule-events`
+ * on nightshift-program#1517.
  */
 const topologyFeatureIdsIntersects = (values: string[]): ESQLAstExpression => {
   const literals = values.map((value) => esql.str(value));
   const dataCol = esql.col('data');
-  return esql.exp`(MV_INTERSECTS(FIELD_EXTRACT(${dataCol}, ${esql.str(
-    'causal_features.feature_id'
-  )}), [${literals}]) OR MV_INTERSECTS(FIELD_EXTRACT(${dataCol}, ${esql.str(
+  const intersects = (path: string) =>
+    esql.exp`MV_INTERSECTS(FIELD_EXTRACT(${dataCol}, ${esql.str(path)}), [${literals}])`;
+  return esql.exp`(${intersects('causal_features.feature_id')} OR ${intersects(
     'blast_radius.feature_id'
-  )}), [${literals}]))`;
+  )} OR ${intersects('blast_radius.source')} OR ${intersects('blast_radius.target')})`;
 };
 
 const INVESTIGATION_STATE_COLUMN = 'investigation_state';
@@ -314,6 +333,8 @@ const applySort = (
   switch (sortField) {
     case 'created_at':
       return query.sort(['created_at', direction], ['@timestamp', 'DESC'], ['_id', 'ASC']);
+    case 'updated_at':
+      return query.sort(['@timestamp', direction], ['created_at', 'DESC'], ['_id', 'ASC']);
     case 'severity':
       return query.pipe`EVAL ${esql.col(SORT_RANK_COLUMN)} = CASE(${esql.col(
         'severity'
@@ -566,9 +587,12 @@ export class RuleEventsClient {
   ): Promise<{ entities: Record<string, number>; unassigned: number }> {
     const { esClient } = this.clients;
     const base = this.buildLatestByCurrentStateQuery({ ...options, status: ['active'] });
-    // CASE preserves events whose causal features or blast radius is absent.
-    const entitiesQuery = base.pipe`EVAL a = FIELD_EXTRACT(data, "causal_features.feature_id"), b = FIELD_EXTRACT(data, "blast_radius.feature_id")`
-      .pipe`EVAL fid = MV_DEDUPE(CASE(a IS NULL, b, b IS NULL, a, MV_APPEND(a, b)))`
+    // CASE preserves a side when the other extract is null: MV_APPEND(null, x) would drop x.
+    // Dependency endpoints live only on source and target, so they join the same id set the
+    // topology filter matches.
+    const entitiesQuery = base.pipe`EVAL a = FIELD_EXTRACT(data, "causal_features.feature_id"), b = FIELD_EXTRACT(data, "blast_radius.feature_id"), s = FIELD_EXTRACT(data, "blast_radius.source"), t = FIELD_EXTRACT(data, "blast_radius.target")`
+      .pipe`EVAL ab = CASE(a IS NULL, b, b IS NULL, a, MV_APPEND(a, b)), st = CASE(s IS NULL, t, t IS NULL, s, MV_APPEND(s, t))`
+      .pipe`EVAL fid = MV_DEDUPE(CASE(ab IS NULL, st, st IS NULL, ab, MV_APPEND(ab, st)))`
       .pipe`MV_EXPAND fid`;
     try {
       const [rows, unassigned] = await Promise.all([
@@ -717,16 +741,17 @@ export class RuleEventsClient {
    * an older deactivation never applies to it. Other actions (snooze, ack, assign, tag) are not
    * read, so they never mask a deactivation. Keyed by `group_hash`.
    *
-   * Any read failure counts as "not deactivated" and is logged: a missing index or an unreadable
-   * mapping must not break the write path that calls this.
+   * A deactivation with no reason is kept, with an empty `reason`, so it differs from no
+   * deactivation. A read failure is logged and reported as `failed` instead of thrown: a missing
+   * index or an unreadable mapping must not break the write path that calls this.
    */
   async findOperatorDeactivations({
     heads,
   }: {
     heads: readonly SeriesHead[];
-  }): Promise<Map<string, OperatorDeactivation>> {
+  }): Promise<OperatorDeactivationLookup> {
     const deactivations = new Map<string, OperatorDeactivation>();
-    if (heads.length === 0) return deactivations;
+    if (heads.length === 0) return { deactivations, failed: false };
 
     try {
       const groupHashes = [...new Set(heads.map(({ groupHash }) => groupHash))];
@@ -754,9 +779,8 @@ export class RuleEventsClient {
         if (current === undefined || isLaterAction(row, current)) latest.set(row.group_hash, row);
       }
 
-      // A deactivation with no reason carries the standard note and tells the agent nothing, so it
-      // is not held: the series reopens like any new event. Kibana's locale is instance-wide, so
-      // the browser and this server write and read the same text.
+      // The standard no-reason note tells the agent nothing, so it counts as no reason. Kibana's
+      // locale is instance-wide, so the browser and this server write and read the same text.
       const noReasonNote = operatorFallbackAssessmentNote('inactive');
       for (const { groupHash, episodeId } of heads) {
         const action = latest.get(groupHash);
@@ -768,22 +792,21 @@ export class RuleEventsClient {
           continue;
         }
         const reason = (action.reason ?? '').trim();
-        if (reason === noReasonNote) continue;
         deactivations.set(groupHash, {
           groupHash,
           episodeId,
-          reason,
+          reason: reason === noReasonNote ? '' : reason,
           deactivatedAt: action['@timestamp'],
         });
       }
-      return deactivations;
+      return { deactivations, failed: false };
     } catch (error) {
       this.clients.logger?.error(
         `deactivation_check_failed: could not read operator deactivations from ${ALERT_ACTIONS_DATA_STREAM}: ${
           error instanceof Error ? error.message : String(error)
         }`
       );
-      return new Map();
+      return { deactivations: new Map(), failed: true };
     }
   }
 
@@ -791,29 +814,36 @@ export class RuleEventsClient {
    * Reads, in one query, the live series (`active` or `recovering`) the requested rules are members
    * of, with each member's latest stored signal. A rule in none is absent from the map.
    *
-   * `from` bounds the read on a series' latest version, applied after `created_at` is computed over
-   * the whole lineage: bounding earlier would clip `created_at` and make an old series look young.
-   * A live series with no write since `from` is read as "not a live member", which sends its
-   * detections to the agent. Capped at MAX_DEDUP_SCAN_LIMIT series, newest first; a space with more
-   * can omit older ones, which callers must read the same way.
+   * `lookback` (ISO or date math) bounds which versions can establish membership, after
+   * `created_at` is computed over the full lineage; `from` bounds a series' latest version. A
+   * series outside either bound reads as "not a live member". Capped at MAX_DEDUP_SCAN_LIMIT live
+   * series, newest first.
    */
   async findLiveMemberships({
     ruleUuids,
+    lookback,
     from,
   }: {
     ruleUuids: string[];
-    from: string;
+    lookback?: string;
+    from?: string;
   }): Promise<Map<string, LiveRuleMembership[]>> {
     const live = new Map<string, LiveRuleMembership[]>();
     if (ruleUuids.length === 0) return live;
 
     const requested = new Set(ruleUuids);
-    const lineage = buildBaseQuery(this.clients.space)
-      .pipe`INLINE STATS created_at = MIN(@timestamp) BY ${esql.col(GROUP_HASH_FIELD)}`;
-    const query = applyTimeRange({
-      query: pickLatestPerGroup(lineage, GROUP_HASH_FIELD),
-      from,
-    }).where`${ruleUuidsIntersects(ruleUuids)}`;
+    const base = buildBaseQuery(this.clients.space);
+    const lookbackIso = lookback === undefined ? undefined : resolveTimeBound(lookback);
+    let lineage = base.pipe`INLINE STATS created_at = MIN(@timestamp) BY ${esql.col(
+      GROUP_HASH_FIELD
+    )}`;
+    if (lookbackIso !== undefined) {
+      lineage = lineage.where`@timestamp >= TO_DATETIME(${{ lookbackIso }})`;
+    }
+    let query = applyTimeRange({ query: pickLatestPerGroup(lineage, GROUP_HASH_FIELD), from });
+    query = query.where`${eventStatus()} IN (${SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS.map((status) =>
+      esql.str(status)
+    )})`.where`${ruleUuidsIntersects(ruleUuids)}`;
     const rows = await executeEsqlQuery<RuleEventSourceRowWithCreatedAt>({
       esClient: this.clients.esClient,
       query: withDataJsonProjection(query)
@@ -882,11 +912,9 @@ export class RuleEventsClient {
   }
 
   /**
-   * Reads every operator deactivation of an event from Alerting v2's `.alert-actions`: the episode
-   * and the operator's reason. It is history, not current state: a deactivation that an operator
-   * later activated again is still listed. The version a deactivation writes to `.rule-events`
-   * only copies the previous version's data, so the reason lives only here. Failures read as no
-   * deactivations and are logged.
+   * Reads every operator deactivation of an event from `.alert-actions`, oldest first: the episode,
+   * the time and the reason. The version a deactivation writes to `.rule-events` only copies the
+   * previous data, so the reason lives only here. Failures read as none and are logged.
    */
   async findEventDeactivations(eventId: string): Promise<EventDeactivation[]> {
     try {
@@ -900,7 +928,11 @@ export class RuleEventsClient {
       );
       if (series === undefined) return [];
 
-      const rows = esqlToObjects<{ alert_id: string | null; reason: string | null }>(
+      const rows = esqlToObjects<{
+        '@timestamp': string;
+        alert_id: string | null;
+        reason: string | null;
+      }>(
         await queryEsql({
           esClient: this.actionsEsClient(),
           query: esql.from([ALERT_ACTIONS_DATA_STREAM], []).where`space_id == ${esql.str(
@@ -908,14 +940,20 @@ export class RuleEventsClient {
           )}`.where`group_hash == ${esql.str(series.group_hash)}`
             .where`action_type == "deactivate" AND actor.type == "user"`
             .sort(['@timestamp', 'ASC'])
-            .keep('alert_id', 'reason'),
+            .keep('@timestamp', 'alert_id', 'reason'),
         })
       );
       // `alert_id` in `.alert-actions` is the episode id.
       return rows.flatMap((row) =>
         row.alert_id === null
           ? []
-          : [{ episode_id: row.alert_id, reason: (row.reason ?? '').trim() }]
+          : [
+              {
+                '@timestamp': row['@timestamp'],
+                episode_id: row.alert_id,
+                reason: (row.reason ?? '').trim(),
+              },
+            ]
       );
     } catch (error) {
       this.clients.logger?.error(
@@ -958,8 +996,9 @@ export class RuleEventsClient {
   }
 
   /** Writes the first version of an event; unguarded, as there is no prior version to compare. */
-  async createEvent({ event }: { event: SignificantEvent }): Promise<void> {
-    await this.writeVersion({ event });
+  async createEvent({ event }: { event: SignificantEvent }): Promise<CreateEventResult> {
+    const { group_hash: groupHash, alert_id: alertId } = await this.writeVersion({ event });
+    return { groupHash, alertId };
   }
 
   /** Writes the next version only while `prior` is still the head (best effort, not atomic). */
@@ -1034,7 +1073,7 @@ export class RuleEventsClient {
   }: {
     event: SignificantEvent;
     prior?: SignificantEvent;
-  }): Promise<void> {
+  }): Promise<CreateAlertEventResponse> {
     const { getAlertEventsClient, emitTrigger } = this.clients;
     if (!getAlertEventsClient) {
       throw new Error('RuleEventsClient was created without a writer, so it cannot write events');
@@ -1042,11 +1081,12 @@ export class RuleEventsClient {
 
     const alertEventsClient = await getAlertEventsClient();
     // `createAlertEvent` waits for a refresh, so the new version is readable immediately.
-    await alertEventsClient.createAlertEvent(toRuleEvent(event));
+    const response = await alertEventsClient.createAlertEvent(toRuleEvent(event));
     emitSignificantEventWriteTriggers({
       emitTrigger,
       significantEvent: event,
       priorSignificantEvent: prior,
     });
+    return response;
   }
 }

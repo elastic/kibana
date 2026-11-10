@@ -11,6 +11,7 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import { createEmulatorFetch } from '../fetch/create_emulator_fetch';
 import type { SmithyModel } from '.';
+import { toAwsJsonDocument } from './aws_json';
 import { convertSmithy, isSmithyModel } from '.';
 
 const NS = 'example.storage';
@@ -618,14 +619,30 @@ describe('convertSmithy', () => {
     expect(rejectedResponses).toEqual([]);
   });
 
-  it('rejects services of other protocols and ambiguous models', () => {
+  it('describes awsJson services by operation', () => {
     const service = model.shapes[id('Storage')];
     const awsJson: SmithyModel = {
       smithy: '2.0',
       shapes: {
-        [id('Metrics')]: {
+        ...model.shapes,
+        [id('Storage')]: {
           ...service,
           traits: { 'aws.protocols#awsJson1_0': {}, 'aws.auth#sigv4': { name: 'monitoring' } },
+        },
+      },
+    };
+
+    expect(convertSmithy(awsJson)).toEqual(toAwsJsonDocument(awsJson));
+  });
+
+  it('rejects services of other protocols and ambiguous models', () => {
+    const service = model.shapes[id('Storage')];
+    const awsQuery: SmithyModel = {
+      smithy: '2.0',
+      shapes: {
+        [id('Metrics')]: {
+          ...service,
+          traits: { 'aws.protocols#awsQuery': {}, 'aws.auth#sigv4': { name: 'monitoring' } },
         },
       },
     };
@@ -634,8 +651,8 @@ describe('convertSmithy', () => {
       shapes: { [id('A')]: service, [id('B')]: service },
     };
 
-    expect(() => convertSmithy(awsJson)).toThrow(
-      'example.storage#Metrics uses aws.protocols#awsJson1_0; convertSmithy supports aws.protocols#restJson1'
+    expect(() => convertSmithy(awsQuery)).toThrow(
+      'example.storage#Metrics uses aws.protocols#awsQuery; convertSmithy supports aws.protocols#restJson1'
     );
     expect(() => convertSmithy(twoServices)).toThrow(
       'Expected one service in the model, found example.storage#A, example.storage#B; pass the service to convert'

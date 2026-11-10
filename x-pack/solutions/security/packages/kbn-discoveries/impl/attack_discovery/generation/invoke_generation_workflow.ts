@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
 import type { AuthenticatedUser, KibanaRequest, Logger } from '@kbn/core/server';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import type {
@@ -23,6 +24,7 @@ import {
 import { getDurationNanoseconds } from '../../lib/persistence';
 
 import { AttackDiscoveryError } from '../../lib/errors/attack_discovery_error';
+import { isContentFilterError } from '../../lib/errors/is_content_filter_error';
 import { isContextLengthExceededError } from '../../lib/errors/is_context_length_exceeded_error';
 
 import type {
@@ -79,6 +81,8 @@ export interface InvokeGenerationWorkflowParams {
   sourceMetadata?: SourceMetadata;
   spaceId: string;
   start?: string;
+  /** Token-usage attribution the generation step applies to its model calls. */
+  telemetryMetadata?: TelemetryMetadata;
   workflowId: string;
   workflowConfig: WorkflowConfig;
   workflowsManagementApi: WorkflowsManagementApi;
@@ -147,6 +151,7 @@ const buildWorkflowInputs = ({
   logger,
   size,
   start,
+  telemetryMetadata,
   workflowConfig,
 }: {
   alertRetrievalResult: AlertRetrievalResult;
@@ -157,6 +162,7 @@ const buildWorkflowInputs = ({
   logger: Logger;
   size?: number;
   start?: string;
+  telemetryMetadata?: TelemetryMetadata;
   workflowConfig: WorkflowConfig;
 }): Record<string, unknown> => {
   // Combine the config-supplied context with the corroboration context the skill
@@ -194,6 +200,11 @@ const buildWorkflowInputs = ({
     validation_workflow_id: workflowConfig.validation_workflow_id,
     size: size ?? 100,
     start: start ?? undefined,
+    // Generation-step telemetry attribution, set only by a caller that opted in.
+    ...(telemetryMetadata?.aggregateBy != null
+      ? { aggregate_by: telemetryMetadata.aggregateBy }
+      : {}),
+    ...(telemetryMetadata?.pluginId != null ? { plugin_id: telemetryMetadata.pluginId } : {}),
   };
 };
 
@@ -227,6 +238,14 @@ const extractGenerationWorkflowResult = ({
 }): ExtractedGenerationWorkflowResult => {
   if (execution.status === 'failed') {
     const errorMessage = execution.error?.message ?? 'Unknown error';
+
+    if (isContentFilterError(errorMessage)) {
+      throw new AttackDiscoveryError({
+        errorCategory: 'content_filter',
+        message: `Generation workflow failed: ${errorMessage}`,
+        workflowId: execution.workflowId,
+      });
+    }
 
     if (isContextLengthExceededError(errorMessage)) {
       throw new AttackDiscoveryError({
@@ -586,6 +605,7 @@ export const invokeGenerationWorkflow = async ({
   sourceMetadata,
   spaceId,
   start,
+  telemetryMetadata,
   workflowId,
   workflowConfig,
   workflowsManagementApi,
@@ -619,6 +639,7 @@ export const invokeGenerationWorkflow = async ({
       logger,
       size,
       start,
+      ...(telemetryMetadata != null ? { telemetryMetadata } : {}),
       workflowConfig,
     });
 

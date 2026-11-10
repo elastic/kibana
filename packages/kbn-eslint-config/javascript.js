@@ -17,8 +17,6 @@
  * under the License.
  */
 
-const RESTRICTED_MODULES = { paths: ['gulp-util'] };
-
 module.exports = {
   overrides: [
     /**
@@ -56,18 +54,14 @@ module.exports = {
       },
 
       rules: {
-        camelcase: [ 'error', { properties: 'never', allow: ['^UNSAFE_'] } ],
-        'consistent-return': 'off',
         'no-multi-str': 'off',
         'no-new': 'off',
         'no-path-concat': 'off',
-        'no-restricted-modules': [2, RESTRICTED_MODULES],
         'no-return-assign': 'off',
         'no-shadow': 'off',
         'no-undef': 'error',
         'no-underscore-dangle': 'off',
         'no-unused-expressions': 'off',
-        strict: [ 'error', 'never' ],
         yoda: 'off',
       }
     },

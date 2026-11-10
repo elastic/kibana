@@ -7,14 +7,14 @@
 
 import { withSpan } from '@kbn/apm-utils';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { withNotDefined } from '../../../lib/helpers/environment';
 import { toTimeSeries } from '../../../lib/helpers/time_series';
+import { pickerEnvironments } from '../../../lib/otel/environments';
 import { SEARCH_SPAN_NAMES } from '../constants';
 import type { SourceApplications } from '../types';
 import type { SearchParams, SpansSearchParams } from './search_requests';
 import { logsSearch, spansSearch } from './search_requests';
 import type { LogsAggregations, SpansAggregations } from './search_responses';
-import { environmentsOf, toApplication } from './to_application';
+import { toApplication } from './to_application';
 
 interface GetOtelApplicationsParams extends SearchParams {
   esClient: ElasticsearchClient;
@@ -61,7 +61,7 @@ const searchOtelApplications = async ({
 
   return {
     applications,
-    environments: withNotDefined(environmentsOf(logs), logs?.environmentNotDefined.doc_count ?? 0),
+    environments: pickerEnvironments(logs),
     pageLoadsOverTime: toTimeSeries(logs?.inEnvironment.pageLoadsOverTime?.histogram),
   };
 };

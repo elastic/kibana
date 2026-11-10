@@ -80,6 +80,11 @@ export interface MigrateDocumentOptions {
    * Defaults to `false`.
    */
   allowDowngrade?: boolean;
+  /**
+   * Skip the deep clone for upgrades and downgrades when the caller hands over ownership, see {@link DocumentMigrateOptions.allowSkipClone}.
+   * Defaults to `false`.
+   */
+  allowSkipClone?: boolean;
 }
 
 /** @internal */

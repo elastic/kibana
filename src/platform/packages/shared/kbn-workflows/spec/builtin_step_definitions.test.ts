@@ -25,6 +25,8 @@ const EXPECTED_BUILT_IN_IDS = [
   'data.set',
   'workflow.execute',
   'workflow.executeAsync',
+  'workflow.output',
+  'workflow.fail',
 ];
 
 describe('builtInStepDefinitions', () => {
@@ -84,6 +86,27 @@ describe('getBuiltInStepDefinition', () => {
     expect(def).toBeDefined();
     expect(def!.id).toBe('workflow.executeAsync');
     expect(def!.category).toBe(StepCategory.FlowControl);
+  });
+
+  it('requires a console message', () => {
+    const { inputSchema } = getBuiltInStepDefinition('console')!;
+    expect(inputSchema.safeParse({}).success).toBe(false);
+    expect(inputSchema.safeParse({ message: 'hello' }).success).toBe(true);
+  });
+
+  it('types data.set output as the rendered key-value object', () => {
+    const { outputSchema } = getBuiltInStepDefinition('data.set')!;
+    expect(outputSchema.parse({ user: 'a', count: 2 })).toEqual({ user: 'a', count: 2 });
+  });
+
+  it('types if output with conditionResult', () => {
+    const { outputSchema } = getBuiltInStepDefinition('if')!;
+    expect(outputSchema.safeParse({ conditionResult: true }).success).toBe(true);
+    expect(outputSchema.safeParse({}).success).toBe(false);
+  });
+
+  it.each(['workflow.output', 'workflow.fail'])('defines %s as a flow control step', (id) => {
+    expect(getBuiltInStepDefinition(id)?.category).toBe(StepCategory.FlowControl);
   });
 
   it('returns undefined for an unknown id', () => {

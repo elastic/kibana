@@ -33,11 +33,10 @@ import {
   deleteDetections,
   deleteFeature,
   getFeaturesEndpoint,
-  deleteSignificantEvent,
   seedDetection,
   seedFeature,
-  seedSignificantEvent,
 } from '../../fixtures/built_in_role_access';
+import { deleteSignificantEvent, seedSignificantEvent } from '../../fixtures/rule_events';
 
 // The built-in `viewer` role has no index privileges on `.rule-events` or `.significant_events-*`.
 // Reads rely on the implicit grants attached to the Nightshift `read` privilege.
@@ -57,7 +56,7 @@ apiTest.describe(
     apiTest.beforeAll(async ({ apiServices, esClient, kbnClient, samlAuth }) => {
       // Detection writes are rejected while Significant Events is paused.
       await apiServices.significantEventsTest.resumeSignificantEvents();
-      await seedSignificantEvent(esClient, eventId);
+      await seedSignificantEvent(esClient, eventId, { title: 'Built-in role access check' });
       ({ id: sourceId, slug: sourceSlug } = await createAccessSource({
         kbnClient,
         title: sourceTitle,
@@ -77,6 +76,7 @@ apiTest.describe(
     });
 
     apiTest('lists and opens significant events', async ({ apiClient }) => {
+      // Nightshift opens an event by filtering the collection route by event_id.
       await expect
         .poll(async () => {
           const response = await apiClient.get(`${EVENTS_ENDPOINT}?event_id=${eventId}`, {
@@ -91,13 +91,6 @@ apiTest.describe(
           };
         }, POLL_OPTIONS)
         .toStrictEqual({ statusCode: 200, eventIds: [eventId] });
-
-      const response = await apiClient.get(`${EVENTS_ENDPOINT}/${eventId}`, {
-        headers,
-        responseType: 'json',
-      });
-      expect(response).toHaveStatusCode(200);
-      expect(response.body).toMatchObject({ event_id: eventId });
     });
 
     apiTest('lists detections', async ({ apiClient }) => {
