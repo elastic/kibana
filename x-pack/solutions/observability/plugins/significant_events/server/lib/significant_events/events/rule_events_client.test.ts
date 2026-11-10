@@ -144,7 +144,7 @@ describe('RuleEventsClient', () => {
       const result = await createStatusSearchClient(existing, alertEventsClient).updateEventStatus({
         eventId: existing.event_id,
         change: DEACTIVATE_STATUS,
-        actor: 'human',
+        actor: 'rest_api',
       });
 
       expect(result).toEqual({ updated: 1, ignored: 0, status: 'inactive' });
@@ -159,7 +159,7 @@ describe('RuleEventsClient', () => {
         await createStatusSearchClient(existing, alertEventsClient).updateEventStatus({
           eventId: existing.event_id,
           change: DEACTIVATE_STATUS,
-          actor: 'human',
+          actor: 'rest_api',
           assessmentNote,
         });
         return lastStatusWritten(alertEventsClient).data;
@@ -185,7 +185,7 @@ describe('RuleEventsClient', () => {
         await createStatusSearchClient(existing, alertEventsClient).updateEventStatus({
           eventId: existing.event_id,
           change: StatusChange.byOperator(status),
-          actor: 'human',
+          actor: 'rest_api',
         });
 
         expect(lastStatusWritten(alertEventsClient).data).toMatchObject({
@@ -205,7 +205,7 @@ describe('RuleEventsClient', () => {
         {
           eventId: 'missing-event',
           change,
-          actor: 'human',
+          actor: 'rest_api',
         }
       );
 
@@ -220,7 +220,7 @@ describe('RuleEventsClient', () => {
       const result = await createStatusSearchClient(existing, alertEventsClient).updateEventStatus({
         eventId: existing.event_id,
         change: DEACTIVATE_STATUS,
-        actor: 'human',
+        actor: 'rest_api',
       });
 
       expect(result).toEqual({
@@ -249,7 +249,7 @@ describe('RuleEventsClient', () => {
       const result = await eventSearchClient.updateEventStatus({
         eventId: existing.event_id,
         change: DEACTIVATE_STATUS,
-        actor: 'human',
+        actor: 'rest_api',
       });
 
       expect(result).toEqual({ updated: 0, ignored: 1, status: 'active', reason: 'superseded' });
@@ -263,7 +263,7 @@ describe('RuleEventsClient', () => {
       const superseded = await createStatusSearchClient(existing, stale).updateEventStatus({
         eventId: existing.event_id,
         change: DEACTIVATE_STATUS,
-        actor: 'human',
+        actor: 'rest_api',
         expectedTimestamp: '2000-01-01T00:00:00.000Z',
       });
       expect(superseded).toEqual({
@@ -280,7 +280,7 @@ describe('RuleEventsClient', () => {
       ).updateEventStatus({
         eventId: existing.event_id,
         change: DEACTIVATE_STATUS,
-        actor: 'human',
+        actor: 'rest_api',
         expectedTimestamp: existing['@timestamp'],
       });
       expect(current.updated).toBe(1);
@@ -293,7 +293,7 @@ describe('RuleEventsClient', () => {
       const result = await createStatusSearchClient(existing, alertEventsClient).updateEventStatus({
         eventId: existing.event_id,
         change: StatusChange.assessed('breached'),
-        actor: 'human',
+        actor: 'rest_api',
       });
 
       expect(result).toEqual({
@@ -330,7 +330,7 @@ describe('RuleEventsClient', () => {
       await withTelemetry(existing).updateEventStatus({
         eventId: existing.event_id,
         change: DEACTIVATE_STATUS,
-        actor: 'human',
+        actor: 'rest_api',
       });
 
       const [[reported]] = telemetry.trackEventStatusChanged.mock.calls;
@@ -341,7 +341,7 @@ describe('RuleEventsClient', () => {
         entity_type: 'significant_event',
         previous_status: 'active',
         status: 'inactive',
-        actor: 'human',
+        actor: 'rest_api',
         change_kind: 'operator',
         severity: 'medium',
         confidence: 0.8,
@@ -355,13 +355,13 @@ describe('RuleEventsClient', () => {
     it('reports a created version without a prior status and keeps the assessment outcome', async () => {
       await withTelemetry(undefined).createEvent({
         event: createStatusEvent(),
-        origin: { actor: 'agent', change: StatusChange.assessed('breached') },
+        origin: { actor: 'agent_tool', change: StatusChange.assessed('breached') },
       });
 
       const [[reported]] = telemetry.trackEventStatusChanged.mock.calls;
       expect(reported).toMatchObject({
         status: 'active',
-        actor: 'agent',
+        actor: 'agent_tool',
         change_kind: 'assessment',
         assessment_outcome: 'breached',
       });
@@ -374,7 +374,7 @@ describe('RuleEventsClient', () => {
       await withTelemetry(existing).updateEvent({
         event: { ...existing, summary: 'Refined summary' },
         prior: existing,
-        origin: { actor: 'agent' },
+        origin: { actor: 'agent_tool' },
       });
 
       expect(telemetry.trackEventStatusChanged).not.toHaveBeenCalled();
@@ -389,7 +389,7 @@ describe('RuleEventsClient', () => {
       const result = await withTelemetry(existing).updateEventStatus({
         eventId: existing.event_id,
         change: DEACTIVATE_STATUS,
-        actor: 'human',
+        actor: 'rest_api',
       });
 
       expect(result).toEqual({ updated: 1, ignored: 0, status: 'inactive' });

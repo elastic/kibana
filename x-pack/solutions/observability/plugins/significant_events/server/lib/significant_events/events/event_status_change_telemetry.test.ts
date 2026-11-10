@@ -34,7 +34,7 @@ describe('buildEventStatusChangedProps', () => {
       buildEventStatusChangedProps({
         event: event({ status: 'recovering', signals, workflow_execution_id: 'exec-1' }),
         prior: { status: 'active' },
-        origin: { actor: 'agent', change: StatusChange.assessed('recovered') },
+        origin: { actor: 'agent_tool', change: StatusChange.assessed('recovered') },
         spaceId: 'space-a',
       })
     ).toEqual({
@@ -44,7 +44,7 @@ describe('buildEventStatusChangedProps', () => {
       entity_type: 'significant_event',
       previous_status: 'active',
       status: 'recovering',
-      actor: 'agent',
+      actor: 'agent_tool',
       change_kind: 'assessment',
       assessment_outcome: 'recovered',
       severity: 'high',
@@ -54,5 +54,23 @@ describe('buildEventStatusChangedProps', () => {
       source_ids: ['source-1'],
       workflow_execution_id: 'exec-1',
     });
+  });
+
+  it.each([
+    ['inactive', 'dismissed'],
+    ['active', undefined],
+  ] as const)('carries the close reason only when closing: %s', (status, expected) => {
+    const props = buildEventStatusChangedProps({
+      event: event({ status }),
+      prior: { status: 'recovering' },
+      origin: {
+        actor: 'rest_api',
+        change: StatusChange.byOperator(status),
+        closeReason: 'dismissed',
+      },
+      spaceId: 'space-a',
+    });
+
+    expect(props?.close_reason).toBe(expected);
   });
 });

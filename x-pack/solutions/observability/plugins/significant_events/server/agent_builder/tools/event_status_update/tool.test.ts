@@ -76,11 +76,19 @@ describe('event_status_update tool', () => {
 
     const result = await invokeHandler(
       tool as never,
-      { event_id: 'e1', status: 'inactive', assessment_note: 'Recovered after rollback' },
+      {
+        event_id: 'e1',
+        status: 'inactive',
+        close_reason: 'resolved',
+        assessment_note: 'Recovered after rollback',
+      },
       createMockToolContext()
     );
     expect(updateEventStatusToolHandler).toHaveBeenCalledWith(
-      expect.objectContaining({ assessmentNote: 'Recovered after rollback' })
+      expect.objectContaining({
+        closeReason: 'resolved',
+        assessmentNote: 'Recovered after rollback',
+      })
     );
 
     if ('results' in result) {

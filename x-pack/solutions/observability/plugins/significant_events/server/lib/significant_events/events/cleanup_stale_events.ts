@@ -127,7 +127,7 @@ export const cleanupStaleEvents = async ({
           eventSearchClient.updateEventStatus({
             eventId: event.event_id,
             change: StatusChange.ruleDeleted(),
-            actor: 'system',
+            actor: 'stale_event_cleanup',
             assessmentNote: STALE_EVENT_ASSESSMENT_NOTE,
             expectedTimestamp: event['@timestamp'],
           })

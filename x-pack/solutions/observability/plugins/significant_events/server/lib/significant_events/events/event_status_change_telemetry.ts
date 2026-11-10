@@ -6,9 +6,11 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import {
   SIGNIFICANT_EVENTS_ALERT_SOURCE,
   type SignificantEvent,
+  type SignificantEventCloseReason,
 } from '@kbn/significant-events-schema';
 import { SIGNIFICANT_EVENT_ENTITY_TYPE } from '../../telemetry/ebt/constants';
 import type {
@@ -24,6 +26,7 @@ export type EventStatusChangeReporter = Pick<EbtTelemetryClient, 'trackEventStat
 export interface WriteOrigin {
   actor: SignificantEventActor;
   change?: StatusChange;
+  closeReason?: SignificantEventCloseReason;
 }
 
 /** The status-change record for a written version; undefined when the status did not change. */
@@ -42,7 +45,9 @@ export const buildEventStatusChangedProps = ({
     return undefined;
   }
   const signals = event.signals ?? [];
-  const { actor, change } = origin;
+  const { actor, change, closeReason } = origin;
+  const closedByOperator =
+    change?.kind === 'operator' && event.status === ALERT_EPISODE_STATUS.INACTIVE;
   return {
     alert_source: SIGNIFICANT_EVENTS_ALERT_SOURCE,
     fingerprint: event.event_id,
@@ -53,6 +58,7 @@ export const buildEventStatusChangedProps = ({
     actor,
     ...(change !== undefined ? { change_kind: change.kind } : {}),
     ...(change?.kind === 'assessment' ? { assessment_outcome: change.outcome } : {}),
+    ...(closedByOperator && closeReason !== undefined ? { close_reason: closeReason } : {}),
     severity: event.severity,
     confidence: event.confidence,
     signal_count: signals.length,

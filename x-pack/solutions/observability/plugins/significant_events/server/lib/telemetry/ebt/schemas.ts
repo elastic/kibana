@@ -450,14 +450,14 @@ const eventStatusChangedSchema: RootSchema<EventStatusChangedProps> = {
     type: 'keyword',
     _meta: {
       description:
-        'Who caused the write: `agent` (discovery or a chat tool), `human` (operator update from the UI) or `system` (maintenance such as rule deletion)',
+        'The entry point that wrote the version: `agent_tool` (an Agent Builder tool, in discovery or chat), `rest_api` (the event update route, which the UI calls) or `stale_event_cleanup` (the cleanup that closes events whose rule was deleted). It names the code path, not whether a person was behind it',
     },
   },
   change_kind: {
     type: 'keyword',
     _meta: {
       description:
-        'How the status was decided: `operator` (a status chosen through the update route or a chat tool), `assessment` (discovery re-checked the member signals) or `rule_deleted`. Absent when the writer supplied the status itself, as `event_create` does. An `operator` deactivation is a manual close; whether it was noise or a real resolution is not recorded yet',
+        'How the status was decided: `operator` (a status chosen through the update route or a chat tool), `assessment` (discovery re-checked the member signals) or `rule_deleted`. Absent when the writer supplied the status itself, as `event_create` does. An `operator` deactivation is a manual close; `close_reason` says why when the caller stated it',
       optional: true,
     },
   },
@@ -466,6 +466,14 @@ const eventStatusChangedSchema: RootSchema<EventStatusChangedProps> = {
     _meta: {
       description:
         'For `change_kind: assessment`, what the member signals said: `breached`, `recovered` or `no_data`',
+      optional: true,
+    },
+  },
+  close_reason: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'Why an operator set the event inactive: `resolved` (a real problem that is over) or `dismissed` (noise, not worth surfacing). Absent when the caller did not state it and on every other change',
       optional: true,
     },
   },

@@ -27,6 +27,7 @@ import {
   type Severity,
   type SignalVerdict,
   type SignificantEventStatus,
+  type SignificantEventCloseReason,
 } from '@kbn/significant-events-schema';
 import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import {
@@ -1039,13 +1040,15 @@ export class RuleEventsClient {
     eventId,
     change,
     actor,
+    closeReason,
     assessmentNote,
     expectedTimestamp,
   }: {
     eventId: string;
     change: StatusChange;
-    /** Not derived from `change`: a `byOperator` change is a human's from the UI but the agent's from a chat tool. */
+    /** Not derived from `change`: a `byOperator` change comes from the update route or from a chat tool. */
     actor: SignificantEventActor;
+    closeReason?: SignificantEventCloseReason;
     assessmentNote?: string;
     /** Skips the write when the latest version's `@timestamp` differs (the event changed since). */
     expectedTimestamp?: string;
@@ -1075,7 +1078,7 @@ export class RuleEventsClient {
     const written = await this.updateEvent({
       event: decision.event,
       prior: latest,
-      origin: { actor, change },
+      origin: { actor, change, closeReason },
     });
     if (!written.updated) {
       return {

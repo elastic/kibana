@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { SignificantEventManualStatus } from '@kbn/significant-events-schema';
+import type {
+  SignificantEventCloseReason,
+  SignificantEventManualStatus,
+} from '@kbn/significant-events-schema';
 import type {
   RuleEventsClient,
   UpdateEventStatusResult,
@@ -16,17 +19,20 @@ export async function updateEventStatusToolHandler({
   eventSearchClient,
   eventId,
   status,
+  closeReason,
   assessmentNote,
 }: {
   eventSearchClient: RuleEventsClient;
   eventId: string;
   status: SignificantEventManualStatus;
+  closeReason?: SignificantEventCloseReason;
   assessmentNote?: string;
 }): Promise<{ event_id: string } & UpdateEventStatusResult> {
   const result = await eventSearchClient.updateEventStatus({
     eventId,
     change: StatusChange.byOperator(status),
-    actor: 'agent',
+    actor: 'agent_tool',
+    closeReason,
     assessmentNote,
   });
 

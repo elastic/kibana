@@ -413,7 +413,7 @@ const writeVersions = ({
     pendingWrites.map(({ candidate, document }) =>
       writeLimit(async (): Promise<WriteOutcome> => {
         try {
-          const origin = { actor: 'agent' as const, change: candidate.change };
+          const origin = { actor: 'agent_tool' as const, change: candidate.change };
           if (candidate.latest === undefined) {
             const { groupHash } = await eventSearchClient.createEvent({ event: document, origin });
             return { created: true, groupHash };

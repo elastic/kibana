@@ -6,7 +6,11 @@
  */
 
 import type { SignificantEventsToolUsage } from '@kbn/nightshift-ai';
-import type { Severity, SignificantEventStatus } from '@kbn/significant-events-schema';
+import type {
+  Severity,
+  SignificantEventCloseReason,
+  SignificantEventStatus,
+} from '@kbn/significant-events-schema';
 import type {
   StatusChange,
   StatusOutcome,
@@ -95,7 +99,8 @@ interface AgentToolEventStatusUpdateProps extends ExistingAlertIdentityProps {
   error_message?: string;
 }
 
-type SignificantEventActor = 'agent' | 'human' | 'system';
+/** The entry point that wrote the version, not who was behind it. */
+type SignificantEventActor = 'agent_tool' | 'rest_api' | 'stale_event_cleanup';
 
 interface EventStatusChangedProps extends ExistingAlertIdentityProps {
   entity_type: typeof SIGNIFICANT_EVENT_ENTITY_TYPE;
@@ -104,6 +109,7 @@ interface EventStatusChangedProps extends ExistingAlertIdentityProps {
   actor: SignificantEventActor;
   change_kind?: StatusChange['kind'];
   assessment_outcome?: StatusOutcome;
+  close_reason?: SignificantEventCloseReason;
   severity: Severity;
   confidence: number;
   signal_count: number;

@@ -9,6 +9,7 @@ import {
   significantEventInvestigationSchema,
   significantEventStatusSchema,
   significantEventManualStatusSchema,
+  significantEventCloseReasonSchema,
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
   severitySchema,
   MAX_ID_LENGTH,
@@ -463,6 +464,7 @@ const eventsUpdateRoute = createServerRoute({
     }),
     body: z.object({
       status: significantEventManualStatusSchema,
+      close_reason: significantEventCloseReasonSchema.optional(),
       assessment_note: z.string().max(MAX_TEXT_LENGTH).optional(),
     }),
   }),
@@ -474,7 +476,8 @@ const eventsUpdateRoute = createServerRoute({
     return (await getEventSearchClient()).updateEventStatus({
       eventId: params.path.id,
       change: StatusChange.byOperator(params.body.status),
-      actor: 'human',
+      actor: 'rest_api',
+      closeReason: params.body.close_reason,
       assessmentNote: params.body.assessment_note,
     });
   },

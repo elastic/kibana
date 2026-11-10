@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { lazySchema } from '@kbn/zod/v4';
 import {
   significantEventManualStatusSchema,
+  significantEventCloseReasonSchema,
   significantEventSchema,
 } from '@kbn/significant-events-schema';
 import dedent from 'dedent';
@@ -37,6 +38,7 @@ export const eventStatusUpdateSchema = lazySchema(() =>
     })
     .extend({
       status: significantEventManualStatusSchema,
+      close_reason: significantEventCloseReasonSchema.optional(),
       event_id: significantEventSchema.shape.event_id.describe(
         'The event_id of the existing significant event to update.'
       ),
@@ -87,6 +89,7 @@ export function createEventStatusUpdateTool({
           eventSearchClient: await getEventSearchClient(),
           eventId: toolParams.event_id,
           status: toolParams.status,
+          closeReason: toolParams.close_reason,
           assessmentNote: toolParams.assessment_note,
         });
 
