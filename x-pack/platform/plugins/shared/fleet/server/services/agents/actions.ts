@@ -329,10 +329,36 @@ export async function bulkCreateAgentActionResults(
    * failures, drives the acknowledged count negative and can complete an action early. Reusing the
    * id turns that case into a per item 409 instead, which is read below as "already written".
    *
+   * That conflict is only guaranteed within one backing index, though: `.fleet-actions-results` is
+   * a data stream, and a `create` goes to whichever backing index is the write index when it
+   * arrives, so a rollover between a landed attempt and its resend would be accepted rather than
+   * refused. `findAlreadyWritten` is what covers the gap, which is why it runs before a resend that
+   * follows a transport error — the only case where an id may already be in the index.
+   *
    * The ids stay local to this call rather than being derived from the action and agent: nothing
    * here owns the `_id` scheme of an index Fleet Server also writes to.
    */
   let pending = results.map((result) => ({ documentId: uuidv4(), result }));
+
+  /**
+   * Which of the given entries are already in the index.
+   *
+   * Only meaningful after a transport failure, where it is unknown whether the write landed. A
+   * search sees only what has refreshed, so this can report an id as absent that is about to
+   * appear; resending it is then still safe, since the conflict covers everything but a rollover
+   * in between.
+   */
+  const findAlreadyWritten = async (toCheck: typeof pending) => {
+    const res = await esClient.search({
+      index: AGENT_ACTIONS_RESULTS_INDEX,
+      ignore_unavailable: true,
+      size: toCheck.length,
+      _source: false,
+      track_total_hits: false,
+      query: { ids: { values: toCheck.map(({ documentId }) => documentId) } },
+    });
+    return new Set(res.hits.hits.map((hit) => hit._id));
+  };
 
   /**
    * Sends one bulk and hands back the entries to try again, in request order.
@@ -393,6 +419,30 @@ export async function bulkCreateAgentActionResults(
     if (attempt > 1) {
       await delay(RESULT_WRITE_RETRY_DELAY_MS * (attempt - 1));
     }
+
+    // Only after a throw: an item Elasticsearch refused indexed nothing, so there is nothing to
+    // find, while a transport failure leaves that open. A failure to look is not a reason to stop
+    // — resending is still right, and the conflict covers every case but a rollover in between.
+    if (transportError) {
+      try {
+        const alreadyWritten = await findAlreadyWritten(pending);
+        if (alreadyWritten.size > 0) {
+          logger.debug(
+            `${alreadyWritten.size} agent action results were already written by an earlier attempt`
+          );
+          pending = pending.filter(({ documentId }) => !alreadyWritten.has(documentId));
+        }
+      } catch (error) {
+        logger.warn(
+          `Could not check which agent action results an earlier attempt wrote: ${error.message}`
+        );
+      }
+      if (pending.length === 0) {
+        transportError = undefined;
+        break;
+      }
+    }
+
     try {
       pending = await writeOnce(pending);
       transportError = undefined;
