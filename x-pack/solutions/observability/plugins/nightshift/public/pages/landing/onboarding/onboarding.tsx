@@ -95,9 +95,12 @@ const ENABLE_SECTION_TITLE = i18n.translate('xpack.nightshift.onboarding.enable.
   defaultMessage: 'Enable Elastic nightshift',
 });
 
-const AUTOMATE_SECTION_TITLE = i18n.translate('xpack.nightshift.onboarding.automate.trialTitle', {
-  defaultMessage: 'Try first investigation',
-});
+const AUTOMATE_SECTION_TITLE = i18n.translate(
+  'xpack.nightshift.onboarding.automate.tryFirstInvestigationTitle',
+  {
+    defaultMessage: 'Try first investigation',
+  }
+);
 
 /**
  * First-run Nightshift: enable the space, add telemetry data, connect other sources, try a first

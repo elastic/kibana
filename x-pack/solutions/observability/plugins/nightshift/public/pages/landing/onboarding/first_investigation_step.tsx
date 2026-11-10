@@ -182,7 +182,7 @@ export function OnboardingFirstInvestigationStep({
             }
             body={
               <p>
-                {i18n.translate('xpack.nightshift.onboarding.investigate.emptyBody', {
+                {i18n.translate('xpack.nightshift.onboarding.investigate.emptySuggestionsBody', {
                   defaultMessage:
                     "Elastic nightshift couldn't find anything worth investigating in your data. Try again later, or ask your own question below.",
                 })}

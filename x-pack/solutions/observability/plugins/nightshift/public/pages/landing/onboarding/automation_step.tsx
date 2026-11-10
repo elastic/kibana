@@ -372,17 +372,23 @@ function TrialInvestigationCard({
                   })}
                 </strong>
                 {' · '}
-                {i18n.translate('xpack.nightshift.onboarding.automate.investigatingDescription', {
-                  defaultMessage:
-                    "It might take up to 5 minutes. Meanwhile, create an automation so you don't repeat this work manually",
-                })}
+                {i18n.translate(
+                  'xpack.nightshift.onboarding.automate.investigatingAutomationHint',
+                  {
+                    defaultMessage:
+                      "It might take up to 5 minutes. Meanwhile, create an automation so you don't repeat this work manually",
+                  }
+                )}
               </>
             ) : (
               <>
                 <strong>
-                  {i18n.translate('xpack.nightshift.onboarding.automate.completedTitle', {
-                    defaultMessage: 'Investigation results are ready',
-                  })}
+                  {i18n.translate(
+                    'xpack.nightshift.onboarding.automate.investigationResultsReadyTitle',
+                    {
+                      defaultMessage: 'Investigation results are ready',
+                    }
+                  )}
                 </strong>
                 {' · '}
                 {AUTOMATION_PITCH}
@@ -398,7 +404,7 @@ function TrialInvestigationCard({
               onClick={() => onOpenInvestigation(investigation)}
               data-test-subj="nightshiftOnboardingTrialInvestigationOpen"
             >
-              {i18n.translate('xpack.nightshift.onboarding.automate.openButton', {
+              {i18n.translate('xpack.nightshift.onboarding.automate.viewResultsButton', {
                 defaultMessage: 'View results',
               })}
             </EuiButton>
