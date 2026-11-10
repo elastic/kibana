@@ -10,6 +10,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { EbtTelemetryClient } from './client';
 import {
+  SIGNIFICANT_EVENTS_AGENT_BUILDER_KNOWLEDGE_INDICATOR_CREATED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_DETECTION_SCAN_EVENT_TYPE,
   SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_QUERIES_GENERATED_EVENT_TYPE,
 } from './constants';
@@ -149,6 +150,37 @@ describe('EbtTelemetryClient', () => {
           space_id: 'space-a',
           target_cluster_scope: 'all',
           target_cluster_ids: ['origin-project', 'linked-project'],
+          target_cluster_ids_complete: true,
+        })
+      );
+    });
+  });
+
+  describe('trackAgentBuilderKnowledgeIndicatorCreated', () => {
+    it('reports origin scope without resolving linked projects', () => {
+      const getLinkedProjectIds = jest.fn().mockResolvedValue(['linked-project']);
+      client = new EbtTelemetryClient(
+        analyticsService,
+        new CpsTelemetryContextProvider({
+          cpsEnabled: true,
+          originProjectId: 'origin-project',
+          getLinkedProjectIds,
+        }),
+        loggerMock.create()
+      );
+
+      client.trackAgentBuilderKnowledgeIndicatorCreated(
+        { ki_kind: 'query', tool_id: 'ki_query_create', success: true, source_id: 'source-a' },
+        request
+      );
+
+      expect(getLinkedProjectIds).not.toHaveBeenCalled();
+      expect(analyticsService.reportEvent).toHaveBeenCalledWith(
+        SIGNIFICANT_EVENTS_AGENT_BUILDER_KNOWLEDGE_INDICATOR_CREATED_EVENT_TYPE,
+        expect.objectContaining({
+          space_id: 'space-a',
+          target_cluster_scope: 'origin',
+          target_cluster_ids: ['origin-project'],
           target_cluster_ids_complete: true,
         })
       );

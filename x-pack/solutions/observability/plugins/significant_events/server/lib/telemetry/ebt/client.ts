@@ -74,7 +74,7 @@ export class EbtTelemetryClient {
       SIGNIFICANT_EVENTS_AGENT_BUILDER_KNOWLEDGE_INDICATOR_CREATED_EVENT_TYPE,
       params,
       request,
-      'all'
+      'origin'
     );
   }
 
