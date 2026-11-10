@@ -8,6 +8,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import { waitFor } from '@testing-library/react';
 import {
   ADD_CANVAS_ELEMENT_TRIGGER,
   ADD_PANEL_TRIGGER,
@@ -64,8 +65,6 @@ jest.mock('./async_module', () => ({
   getVegaVisRenderer: mockGetVegaVisRenderer,
   vegaVisType: {},
 }));
-
-const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 
 describe('VegaPlugin', () => {
   const setup = () => {
@@ -167,15 +166,16 @@ describe('VegaPlugin', () => {
   describe('vega.asCodeEnabled feature flag', () => {
     it('lists and offers library items when the flag is enabled', async () => {
       const { embeddable, visualizations } = startPlugin(setup(), new BehaviorSubject(true));
-      await flushPromises();
 
-      expect(visualizations.registerAlias).toHaveBeenCalledWith(mockVegaLibraryVisTypeAlias);
+      await waitFor(() =>
+        expect(visualizations.registerAlias).toHaveBeenCalledWith(mockVegaLibraryVisTypeAlias)
+      );
       expect(mockRegisterVegaAddFromLibrary).toHaveBeenCalledWith(embeddable);
     });
 
     it('neither lists nor offers library items when the flag is disabled', async () => {
       const { visualizations } = startPlugin(setup());
-      await flushPromises();
+      await new Promise((resolve) => setImmediate(resolve));
 
       expect(visualizations.registerAlias).not.toHaveBeenCalled();
       expect(mockRegisterVegaAddFromLibrary).not.toHaveBeenCalled();
@@ -187,15 +187,14 @@ describe('VegaPlugin', () => {
 
       asCodeEnabled$.next(false);
       asCodeEnabled$.next(true);
-      await flushPromises();
 
-      expect(visualizations.registerAlias).toHaveBeenCalledTimes(1);
+      await waitFor(() => expect(visualizations.registerAlias).toHaveBeenCalledTimes(1));
       expect(mockRegisterVegaAddFromLibrary).toHaveBeenCalledTimes(1);
     });
 
     it('opens the library editor with the start services', async () => {
       const { startCore, startDeps } = startPlugin(setup(), new BehaviorSubject(true));
-      await flushPromises();
+      await waitFor(() => expect(mockGetVegaLibraryVisTypeAlias).toHaveBeenCalled());
       const [openLibraryEditor] = mockGetVegaLibraryVisTypeAlias.mock.calls[0];
 
       await openLibraryEditor('item-1');
@@ -245,12 +244,13 @@ describe('VegaPlugin', () => {
       );
     });
 
-    it('stops responding to the flag after the plugin stops', () => {
+    it('stops responding to the flag after the plugin stops', async () => {
       const asCodeEnabled$ = new BehaviorSubject(false);
       const { plugin, uiActions, visualizations } = startPlugin(setup(), asCodeEnabled$);
 
       plugin.stop();
       asCodeEnabled$.next(true);
+      await new Promise((resolve) => setImmediate(resolve));
 
       expect(uiActions.attachAction).not.toHaveBeenCalledWith(
         ADD_PANEL_TRIGGER,
