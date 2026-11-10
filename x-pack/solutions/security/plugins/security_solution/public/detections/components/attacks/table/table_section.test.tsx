@@ -9,7 +9,6 @@ import React from 'react';
 import { act, render, waitFor } from '@testing-library/react';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 import type { GroupingBucket, ParsedGroupingAggregation } from '@kbn/grouping/src';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 import { TestProviders } from '../../../../common/mock';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -31,7 +30,6 @@ import { useGroupStats } from './grouping_settings/use_group_stats';
 import { useKibana } from '../../../../common/lib/kibana';
 import { AttacksEventTypes } from '../../../../common/lib/telemetry';
 import { useLocalStorage } from '../../../../common/components/local_storage';
-import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
 import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../../../flyout_v2/use_flyout_api.mock';
 
@@ -39,9 +37,7 @@ jest.mock('../../../../common/components/local_storage', () => ({
   useLocalStorage: jest.fn(),
 }));
 jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../common/hooks/use_is_new_flyout_enabled');
 jest.mock('../../../../flyout_v2/use_flyout_api');
-jest.mock('@kbn/expandable-flyout');
 jest.mock('../../user_info');
 jest.mock('../../../containers/detection_engine/lists/use_lists_config');
 jest.mock('../../../hooks/attacks/use_get_default_group_title_renderers');
@@ -97,7 +93,6 @@ const mockUseGetDefaultGroupTitleRenderers = useGetDefaultGroupTitleRenderers as
 const mockUseAttackGroupHandler = useAttackGroupHandler as jest.Mock;
 const mockGroupedAlertsTable = GroupedAlertsTable as unknown as jest.Mock;
 const mockEmptyResultsPrompt = EmptyResultsPrompt as unknown as jest.Mock;
-const mockUseExpandableFlyoutApi = useExpandableFlyoutApi as jest.Mock;
 const mockUseGroupStats = useGroupStats as jest.Mock;
 
 const reportEvent = jest.fn();
@@ -123,7 +118,6 @@ describe('<TableSection />', () => {
 
     flyoutApi = createFlyoutApiMock();
     jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         telemetry: {
@@ -150,9 +144,6 @@ describe('<TableSection />', () => {
         {props.emptyGroupingComponent}
       </div>
     ));
-    mockUseExpandableFlyoutApi.mockReturnValue({
-      openFlyout: jest.fn(),
-    });
     (useUserData as jest.Mock).mockReturnValue([
       {
         loading: false,
@@ -226,41 +217,7 @@ describe('<TableSection />', () => {
     });
   });
 
-  it('should call openFlyout (legacy) when enableNewFlyout is false', async () => {
-    const mockOpenFlyout = jest.fn();
-    mockUseExpandableFlyoutApi.mockReturnValue({ openFlyout: mockOpenFlyout });
-    mockUseAttackGroupHandler.mockReturnValue({
-      getAttack: jest.fn().mockReturnValue({ id: 'attack-1' }),
-      isLoading: false,
-    });
-
-    render(
-      <TestProviders>
-        <TableSection {...defaultProps} />
-      </TestProviders>
-    );
-
-    await waitFor(() => {
-      expect(mockUseGetDefaultGroupTitleRenderers).toHaveBeenCalled();
-    });
-
-    const { openAttackDetailsFlyout } = mockUseGetDefaultGroupTitleRenderers.mock.calls[0][0];
-    openAttackDetailsFlyout('group-1', {});
-
-    expect(mockOpenFlyout).toHaveBeenCalledWith({
-      right: {
-        id: expect.any(String),
-        params: {
-          attackId: 'attack-1',
-          indexName: '.alerts-security.alerts-default',
-        },
-      },
-    });
-    expect(flyoutApi.openAttackFlyout).not.toHaveBeenCalled();
-  });
-
-  it('should call openAttackFlyout when enableNewFlyout is true', async () => {
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+  it('should call openAttackFlyout when opening the attack details flyout', async () => {
     mockUseAttackGroupHandler.mockReturnValue({
       getAttack: jest.fn().mockReturnValue({ id: 'attack-1' }),
       isLoading: false,

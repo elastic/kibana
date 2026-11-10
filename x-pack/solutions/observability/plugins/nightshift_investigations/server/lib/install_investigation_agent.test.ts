@@ -14,30 +14,41 @@ import {
 import { installInvestigationAgent } from './install_investigation_agent';
 
 describe('installInvestigationAgent', () => {
-  it('ensures a system-owned persisted typed agent in the requested space, visible in the agent picker', async () => {
+  it.each([true, false, undefined])(
+    'ensures a system-owned persisted typed agent in the default space with hidden: %s',
+    async (hidden) => {
+      const agentBuilder = agentBuilderMocks.createStart();
+      const availability = { cacheMode: 'space' as const, handler: jest.fn() };
+
+      await installInvestigationAgent({ agentBuilder, spaceId: 'default', availability, hidden });
+
+      expect(agentBuilder.agents.ensure).toHaveBeenCalledWith({
+        spaceId: 'default',
+        availability,
+        hidden,
+        agent: {
+          id: NIGHTSHIFT_INVESTIGATION_AGENT_ID,
+          type: NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID,
+          name: 'Nightshift Investigator',
+          description: expect.any(String),
+          labels: ['observability', 'significant-events', 'investigation', 'wiki', 'sandbox'],
+          avatar_symbol: 'NI',
+          access_control: { access_mode: AgentAccessControlMode.Public },
+          configuration: {
+            tools: [],
+            skill_ids: [],
+          },
+        },
+      });
+    }
+  );
+  it('refuses to install the investigator in another space', async () => {
     const agentBuilder = agentBuilderMocks.createStart();
     const availability = { cacheMode: 'space' as const, handler: jest.fn() };
 
-    await installInvestigationAgent({ agentBuilder, spaceId: 'space-1', availability });
-
-    expect(agentBuilder.agents.ensure).toHaveBeenCalledWith({
-      spaceId: 'space-1',
-      availability,
-      hidden: false,
-      agent: {
-        id: NIGHTSHIFT_INVESTIGATION_AGENT_ID,
-        type: NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID,
-        name: 'Nightshift Investigator',
-        description: expect.any(String),
-        labels: ['observability', 'significant-events', 'investigation', 'cortex', 'sandbox'],
-        avatar_symbol: 'NI',
-        access_control: { access_mode: AgentAccessControlMode.Public },
-        configuration: {
-          tools: [],
-          skill_ids: [],
-          connector_ids: [],
-        },
-      },
-    });
+    await expect(
+      installInvestigationAgent({ agentBuilder, spaceId: 'marketing', availability })
+    ).rejects.toThrow(/only available in the "default" space/);
+    expect(agentBuilder.agents.ensure).not.toHaveBeenCalled();
   });
 });

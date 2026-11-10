@@ -49,14 +49,15 @@ const createSeed = (): number => Math.floor(Math.random() * (ACTION_POLICY_TEST_
 
 export interface SendTestNotificationParams {
   policyId: string;
-  seed: number;
+  payload: ActionPolicyWorkflowPayload;
   destinationIds: readonly string[];
 }
 
 /**
- * Builds test notifications of a saved action policy from synthetic alerts, and sends them to the
- * policy destinations as workflow test runs of the current user. Reads only the policy and its
- * destination workflows. Writes nothing to `.alert-actions` and emits no dispatcher events.
+ * Builds test notifications of a saved action policy from synthetic alerts, and sends a test
+ * payload to the policy destinations as workflow test runs of the current user. Reads only the
+ * policy and its destination workflows. Writes nothing to `.alert-actions` and emits no
+ * dispatcher events.
  */
 @injectable()
 export class ActionPolicyTestService {
@@ -86,15 +87,20 @@ export class ActionPolicyTestService {
       this.actionPolicyClient.getActionPolicy({ id: policyId }),
       this.privilegeChecker.getWorkflowPrivileges(),
     ]);
-    const groups = this.buildScenario(policy, seed);
+    const groups = buildTestScenario({
+      policy: this.toDispatcherPolicy(policy),
+      kibanaBaseUrl: this.kibanaBaseUrl,
+      seed,
+      now: new Date(),
+    });
     const destinations = await this.describeDestinations(policy, workflowPrivileges);
 
-    return { seed, groups: groups.map((payload) => ({ ...payload })), destinations };
+    return { seed, groups, destinations };
   }
 
   public async send({
     policyId,
-    seed,
+    payload,
     destinationIds,
   }: SendTestNotificationParams): Promise<ActionPolicyTestSendResponse> {
     await this.licenseService.assertActionPoliciesLicense();
@@ -113,7 +119,6 @@ export class ActionPolicyTestService {
       );
     }
 
-    const [payload] = this.buildScenario(policy, seed);
     const results = await Promise.all(
       workflowIds.map((workflowId) => this.runWorkflowTest(policyId, workflowId, payload))
     );
@@ -121,15 +126,6 @@ export class ActionPolicyTestService {
     this.reportSent(policy, payload, results);
 
     return { results };
-  }
-
-  private buildScenario(policy: ActionPolicyResponse, seed: number): ActionPolicyWorkflowPayload[] {
-    return buildTestScenario({
-      policy: this.toDispatcherPolicy(policy),
-      kibanaBaseUrl: this.kibanaBaseUrl,
-      seed,
-      now: new Date(),
-    });
   }
 
   private toDispatcherPolicy({

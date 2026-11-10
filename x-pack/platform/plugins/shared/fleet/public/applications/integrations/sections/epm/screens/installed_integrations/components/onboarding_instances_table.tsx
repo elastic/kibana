@@ -34,7 +34,7 @@ import { AGENTS_PREFIX } from '../../../../../../../../common/constants';
 import { buildPolicyBaseIdsWithFallbackKuery } from '../../../../../../../../common/services';
 import {
   ONBOARDING_APP_ID,
-  ONBOARDING_AWS_PATH,
+  getOnboardingInstancePath,
 } from '../../../../../../../services/aws_onboarding_override';
 
 import { useOnboardingInstancesAgents } from '../hooks/use_onboarding_instances_agents';
@@ -176,7 +176,7 @@ export const OnboardingInstancesTable: React.FunctionComponent<{
   const openOnboardingInstance = useCallback(
     (deploymentId: string) => {
       application.navigateToApp(ONBOARDING_APP_ID, {
-        path: `${ONBOARDING_AWS_PATH}?deploymentId=${encodeURIComponent(deploymentId)}`,
+        path: getOnboardingInstancePath(deploymentId),
       });
     },
     [application]

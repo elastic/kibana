@@ -8,8 +8,6 @@
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
-import { basicCase } from '../../containers/mock';
-
 import { useUpdateComment } from '../../containers/use_update_comment';
 import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
 import { TestProviders } from '../../common/mock';
@@ -83,7 +81,7 @@ describe('useUserActionsHandler', () => {
     });
 
     act(() => {
-      result.current.handleUpdate(basicCase);
+      result.current.handleUpdate();
     });
 
     expect(useRefreshCaseViewPage()).toHaveBeenCalled();

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEqual } from 'lodash';
 import { withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
@@ -39,7 +40,13 @@ import {
   type Unit,
   type UnitRepository,
 } from '../../../../../services/unit_repository';
-import { getPipelinesWithoutDestinations } from '../../../../../services/unit_connections';
+import {
+  UNCONNECTED_PIPELINE_REASON,
+  getUnconnectedPipelines,
+  getUnfedDestinations,
+  getUnreachableScopes,
+  withPublishedTelemetry,
+} from '../../../../../services/unit_connections';
 import { getFormattedError } from '../../../../../util/errors';
 import {
   CANVAS_URL_STATE_KEY,
@@ -54,6 +61,7 @@ import {
   type CanvasUrlEvent,
   type CanvasState,
   type RouteEdit,
+  type UnitValidationInput,
 } from './types';
 import {
   PROCESSING_FLYOUT_ID,
@@ -196,9 +204,10 @@ export const canvasStateMachine = setup({
       if (event.type !== 'xstate.done.actor.persistUnitDefinition') {
         return {};
       }
+      // Wiring a component save left unhooked stays staged, so it still reads as unsaved.
       return {
         unit: event.output.unitDefinition,
-        nextUnit: event.output.unitDefinition,
+        nextUnit: event.output.stagedUnitDefinition,
         savingUnit: undefined,
         savingComponentIds: undefined,
         savingComponentKind: undefined,
@@ -289,22 +298,17 @@ export const canvasStateMachine = setup({
         if (event.type !== 'xstate.done.actor.persistUnitDefinition') {
           throw new Error('Expected a persisted unit definition');
         }
+        // The component machines derive their next unit.changed from this unit, so hand
+        // them the staged copy or a later create / delete would drop unhooked wiring.
+        const unitDefinition = event.output.stagedUnitDefinition;
         const componentIds = context.savingComponentIds;
         if (context.savingComponentKind === 'source' && componentIds?.length) {
-          return {
-            type: 'unit.persisted' as const,
-            sourceIds: componentIds,
-            unitDefinition: event.output.unitDefinition,
-          };
+          return { type: 'unit.persisted' as const, sourceIds: componentIds, unitDefinition };
         }
         if (context.savingComponentKind === 'destination' && componentIds?.length) {
-          return {
-            type: 'unit.persisted' as const,
-            destinationIds: componentIds,
-            unitDefinition: event.output.unitDefinition,
-          };
+          return { type: 'unit.persisted' as const, destinationIds: componentIds, unitDefinition };
         }
-        return { type: 'unit.loaded' as const, unitDefinition: event.output.unitDefinition };
+        return { type: 'unit.loaded' as const, unitDefinition };
       }
     ),
     syncSavedUnitToPeer: sendTo(
@@ -316,7 +320,7 @@ export const canvasStateMachine = setup({
         if (event.type !== 'xstate.done.actor.persistUnitDefinition') {
           throw new Error('Expected a persisted unit definition');
         }
-        return { type: 'unit.loaded' as const, unitDefinition: event.output.unitDefinition };
+        return { type: 'unit.loaded' as const, unitDefinition: event.output.stagedUnitDefinition };
       }
     ),
     syncComponentSaveFailure: sendTo(
@@ -601,7 +605,10 @@ export const canvasStateMachine = setup({
               invoke: {
                 id: 'validateUnitDefinition',
                 src: 'validateUnitDefinition',
-                input: ({ context }) => context.savingUnit ?? context.nextUnit,
+                input: ({ context }): UnitValidationInput => ({
+                  unit: context.savingUnit ?? context.nextUnit,
+                  checkConnections: context.savingComponentIntent === undefined,
+                }),
                 onDone: {
                   target: 'persisting',
                 },
@@ -793,7 +800,10 @@ function createLoadUnitDefinitionActor({
   return fromPromise(async () => loadUnitDefinition());
 }
 
-async function validateCanvasUnitDefinition(unitDefinition: Unit): Promise<void> {
+async function validateCanvasUnitDefinition({
+  unit: unitDefinition,
+  checkConnections,
+}: UnitValidationInput): Promise<void> {
   const sourceIds = getUnitSources(unitDefinition).map(({ id }) => id);
   if (new Set(sourceIds).size !== sourceIds.length) {
     throw new Error(
@@ -810,11 +820,51 @@ async function validateCanvasUnitDefinition(unitDefinition: Unit): Promise<void>
       })
     );
   }
-  if (getPipelinesWithoutDestinations(unitDefinition).length > 0) {
+  if (!checkConnections) {
+    return;
+  }
+  const unconnected = getUnconnectedPipelines(unitDefinition);
+  if (unconnected.some(({ reason }) => reason === UNCONNECTED_PIPELINE_REASON.noDestination)) {
     throw new Error(
       i18n.translate('xpack.streams.streamDetailCanvas.unconnectedProcessingErrorMessage', {
         defaultMessage:
           'Connect each processing node to a destination before saving. To remove a processing node, delete all of its processors.',
+      })
+    );
+  }
+  if (unconnected.some(({ reason }) => reason === UNCONNECTED_PIPELINE_REASON.noSource)) {
+    throw new Error(
+      i18n.translate('xpack.streams.streamDetailCanvas.unreachableProcessingErrorMessage', {
+        defaultMessage:
+          'Connect a source or a routing rule to each processing and routing node before saving. To remove a processing node, delete all of its processors.',
+      })
+    );
+  }
+  if (unconnected.some(({ reason }) => reason === UNCONNECTED_PIPELINE_REASON.noRuleTarget)) {
+    throw new Error(
+      i18n.translate('xpack.streams.streamDetailCanvas.unconnectedRuleErrorMessage', {
+        defaultMessage:
+          'Connect each routing rule to a destination or a pipeline before saving, or remove the rule.',
+      })
+    );
+  }
+  const [unreachable] = getUnreachableScopes(unitDefinition);
+  if (unreachable) {
+    throw new Error(
+      i18n.translate('xpack.streams.streamDetailCanvas.unreachableScopeErrorMessage', {
+        defaultMessage:
+          'A routing rule of {pipelineId} only handles {signals}, but no source connected to it sends {signals}. Connect such a source before saving, or remove the rule.',
+        values: { pipelineId: unreachable.pipeline.id, signals: unreachable.telemetry.join(', ') },
+      })
+    );
+  }
+  const [unfed] = getUnfedDestinations(unitDefinition);
+  if (unfed) {
+    throw new Error(
+      i18n.translate('xpack.streams.streamDetailCanvas.unfedDestinationErrorMessage', {
+        defaultMessage:
+          '{pipelineId} forwards none of the signals {destinationId} accepts. Connect a source that sends them before saving, or unhook {destinationId}.',
+        values: { pipelineId: unfed.pipeline.id, destinationId: unfed.destinationId },
       })
     );
   }
@@ -825,7 +875,9 @@ function createValidateUnitDefinitionActor({
 }: {
   validateUnitDefinition: NonNullable<CanvasStateServiceDeps['validateUnitDefinition']>;
 }) {
-  return fromPromise(async ({ input }: { input: Unit }) => validateUnitDefinition(input));
+  return fromPromise(async ({ input }: { input: UnitValidationInput }) =>
+    validateUnitDefinition(input)
+  );
 }
 
 function createPersistUnitDefinitionActor({
@@ -834,9 +886,16 @@ function createPersistUnitDefinitionActor({
   persistUnitDefinition: UnitRepository['persist'];
 }) {
   return fromPromise(
-    async ({ input }: { input: { unit: Unit; secrets?: StreamsUnit.Secrets } }) => ({
-      unitDefinition: await persistUnitDefinition(input.unit, input.secrets),
-    })
+    async ({ input }: { input: { unit: Unit; secrets?: StreamsUnit.Secrets } }) => {
+      const unitDefinition = await persistUnitDefinition(input.unit, input.secrets);
+      // The staged unit, narrowed like the stored one. A save that left nothing out
+      // hands back the stored unit itself, so the canvas reads as saved.
+      const staged = withPublishedTelemetry(input.unit);
+      return {
+        unitDefinition,
+        stagedUnitDefinition: isEqual(staged, unitDefinition) ? unitDefinition : staged,
+      };
+    }
   );
 }
 

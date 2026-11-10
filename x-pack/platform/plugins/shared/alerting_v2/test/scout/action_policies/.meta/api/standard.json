@@ -1,5 +1,5 @@
 {
-  "sha1": "db27b3f027980fad569c6a121be95873eb125203",
+  "sha1": "6ac68285466caaba6da9654d1b969eb2004457de",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -2838,6 +2838,38 @@
       }
     },
     {
+      "id": "fdf24ec1e8e4d94-85b5ee7bb75a166",
+      "title": "Match action policies API match: returns tag-matched and catch-all policies with their category for the rule routing tags",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/match_action_policies.spec.ts",
+        "line": 63,
+        "column": 12
+      }
+    },
+    {
+      "id": "fdf24ec1e8e4d94-402ba474af320f4",
+      "title": "Match action policies API match: returns only catch-all policies when the rule has no routing tags",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/match_action_policies.spec.ts",
+        "line": 76,
+        "column": 14
+      }
+    },
+    {
       "id": "fdf24ec1e8e4d94-0a1d1ad5e19389e",
       "title": "Match action policies API validation: rejects rule.tags (policies match on routing tags)",
       "expectedStatus": "passed",
@@ -2849,8 +2881,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/match_action_policies.spec.ts",
-        "line": 22,
-        "column": 21
+        "line": 100,
+        "column": 24
       }
     },
     {
@@ -2865,8 +2897,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/match_action_policies.spec.ts",
-        "line": 30,
-        "column": 42
+        "line": 120,
+        "column": 14
       }
     },
     {
@@ -3000,8 +3032,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/send_test_notification.spec.ts",
-        "line": 85,
-        "column": 99
+        "line": 107,
+        "column": 18
       }
     },
     {
@@ -3015,8 +3047,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/send_test_notification.spec.ts",
-        "line": 101,
-        "column": 32
+        "line": 123,
+        "column": 20
       }
     },
     {
@@ -3030,8 +3062,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/send_test_notification.spec.ts",
-        "line": 119,
-        "column": 13
+        "line": 138,
+        "column": 47
       }
     },
     {
@@ -3045,8 +3077,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/send_test_notification.spec.ts",
-        "line": 164,
-        "column": 11
+        "line": 186,
+        "column": 16
       }
     },
     {
@@ -3060,13 +3092,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/send_test_notification.spec.ts",
-        "line": 188,
-        "column": 49
+        "line": 210,
+        "column": 30
       }
     },
     {
-      "id": "69e4e2aac45ced5-8368f7bf5717740",
-      "title": "Send test notification API reports a policy whose matcher has a KQL expression as unsupported, and does not send it",
+      "id": "69e4e2aac45ced5-9363d40e275fa14",
+      "title": "Send test notification API sends a test notification for a policy whose matcher has a KQL expression",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -3075,8 +3107,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/send_test_notification.spec.ts",
-        "line": 196,
-        "column": 11
+        "line": 217,
+        "column": 16
       }
     },
     {
@@ -3090,8 +3122,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/send_test_notification.spec.ts",
-        "line": 215,
-        "column": 72
+        "line": 237,
+        "column": 18
       }
     },
     {

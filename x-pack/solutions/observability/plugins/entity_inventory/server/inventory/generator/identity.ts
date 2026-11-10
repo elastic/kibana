@@ -6,7 +6,7 @@
  */
 
 import { Parser, isAssignment, isColumn } from '@elastic/esql';
-import { getIdentityFields } from '@kbn/entity-store/common';
+import { getIdentityCompositions, getIdentityFields } from '@kbn/entity-store/common';
 import type { EntityDefinitionWithoutId } from '@kbn/entity-store/common';
 import { euid } from '@kbn/entity-store/common/euid_helpers';
 import { getDynamicBlock } from './dynamic';
@@ -27,7 +27,23 @@ export interface IdentityPlan {
   idEvaluation: string;
   /** Columns the id evaluation assigns besides `entity.id`, in assignment order. */
   helperColumns: string[];
+  /**
+   * The fields of each identity composition, in ranking order: `[[field]]` for a single field, one
+   * list per ranking entry otherwise. An index can serve the identity if it maps every field of one.
+   */
+  compositions: string[][];
+  /**
+   * Grouping field to the column that keeps its raw value, for each grouping field the id
+   * evaluation overwrites (in practice an identity on `entity.id`). The list query copies the
+   * grouped column there before the id evaluation, so the executor can still read whether an index
+   * maps the field.
+   */
+  rawIdentityColumns: ReadonlyMap<string, string>;
 }
+
+// A `:` is outside the store's field-path pattern (`^[A-Za-z0-9_@-]+(\.[A-Za-z0-9_@-]+)*$`) that
+// attribute, identity and helper column names follow, so a raw column cannot collide with any.
+const rawIdentityColumnOf = (field: string): string => `raw:${field}`;
 
 // Reads the assignment targets from the generated text so the names never drift from the store.
 const assignedColumns = (idEvaluation: string): string[] => {
@@ -53,12 +69,21 @@ export const resolveIdentityPlan = (definition: EntityDefinitionWithoutId): Iden
   getDynamicBlock(definition);
   const { identityField } = definition;
   const idEvaluation = euid.esql.getEuidEvaluation(definition, ENTITY_ID_COLUMN);
+  const groupingFields = getIdentityFields(identityField);
+  const assigned = assignedColumns(idEvaluation);
+  const assignedNames = new Set(assigned);
   return {
-    groupingFields: getIdentityFields(identityField),
+    groupingFields,
     // The store leaves a composed filter unparenthesised (`a AND b OR c AND d`); wrap it so it can
     // be ANDed with other predicates.
     presenceFilter: `(${euid.esql.getEuidDocumentsContainsIdFilter(definition)})`,
     idEvaluation,
-    helperColumns: assignedColumns(idEvaluation).filter((name) => name !== ENTITY_ID_COLUMN),
+    helperColumns: assigned.filter((name) => name !== ENTITY_ID_COLUMN),
+    compositions: getIdentityCompositions(identityField),
+    rawIdentityColumns: new Map(
+      groupingFields
+        .filter((field) => assignedNames.has(field))
+        .map((field) => [field, rawIdentityColumnOf(field)])
+    ),
   };
 };
