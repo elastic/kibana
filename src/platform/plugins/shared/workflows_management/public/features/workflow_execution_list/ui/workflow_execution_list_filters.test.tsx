@@ -90,6 +90,12 @@ describe('ExecutionListFilters', () => {
     });
   });
 
+  it('hides the execution name filter when runs do not use execution names', async () => {
+    renderComponent();
+    await openPopover();
+    expect(screen.queryByLabelText('Filter by execution name')).not.toBeInTheDocument();
+  });
+
   it('filters by execution name while keeping the other filters', async () => {
     const onFiltersChange = jest.fn();
     const filters = {
@@ -97,7 +103,7 @@ describe('ExecutionListFilters', () => {
       executionTypes: [ExecutionType.PRODUCTION],
       executedBy: ['user-1'],
     };
-    renderComponent({ filters, onFiltersChange });
+    renderComponent({ filters, onFiltersChange, showExecutionName: true });
     await openPopover();
 
     fireEvent.change(screen.getByLabelText('Filter by execution name'), {

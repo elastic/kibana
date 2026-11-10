@@ -9,9 +9,16 @@
 
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
-import { ExecutionStatus, ExecutionType, type WorkflowExecutionListDto } from '@kbn/workflows';
+import {
+  ExecutionStatus,
+  ExecutionType,
+  type WorkflowDetailDto,
+  type WorkflowExecutionListDto,
+} from '@kbn/workflows';
 import { createMockWorkflowApi, createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
 import { WorkflowExecutionList } from './workflow_execution_list_stateful';
+import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
+import { setWorkflow } from '../../../entities/workflows/store/workflow_detail/slice';
 import {
   WORKFLOW_EXECUTIONS_LIST_POLL_ACTIVE_INTERVAL_MS,
   WORKFLOW_EXECUTIONS_LIST_POLL_INTERVAL_MS,
@@ -152,6 +159,29 @@ describe('WorkflowExecutionList (stateful)', () => {
   it('renders the execution list', () => {
     renderComponent();
     expect(screen.getByTestId('workflowExecutionList')).toBeInTheDocument();
+  });
+
+  it('hides the execution name column when runs do not use execution names', () => {
+    renderComponent();
+    expect(screen.queryByRole('columnheader', { name: 'Execution name' })).not.toBeInTheDocument();
+  });
+
+  it('shows the execution name column when the saved workflow defines run-name', () => {
+    const store = createMockStore();
+    store.dispatch(
+      setWorkflow({
+        id: 'wf-1',
+        definition: { 'run-name': 'Deploy {{ inputs.target }}' },
+      } as WorkflowDetailDto)
+    );
+
+    render(
+      <TestProvider store={store}>
+        <WorkflowExecutionList workflowId="wf-1" />
+      </TestProvider>
+    );
+
+    expect(screen.getByRole('columnheader', { name: 'Execution name' })).toBeInTheDocument();
   });
 
   it('passes loading state from the hook', () => {

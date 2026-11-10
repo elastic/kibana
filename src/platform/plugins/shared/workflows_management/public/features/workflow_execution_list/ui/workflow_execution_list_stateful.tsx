@@ -8,6 +8,7 @@
  */
 
 import React, { useCallback, useRef, useState } from 'react';
+import { useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { useDebouncedValue } from '@kbn/react-hooks';
@@ -16,6 +17,7 @@ import { WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID } from '@kbn/workflows/common/con
 import { useWorkflowsApi, useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { WorkflowExecutionList as WorkflowExecutionListComponent } from './workflow_execution_list';
 import { useWorkflowExecutions } from '../../../entities/workflows/model/use_workflow_executions';
+import { selectWorkflow } from '../../../entities/workflows/store/workflow_detail/selectors';
 import {
   WORKFLOW_EXECUTIONS_LIST_POLL_ACTIVE_INTERVAL_MS,
   WORKFLOW_EXECUTIONS_LIST_POLL_INTERVAL_MS,
@@ -38,6 +40,8 @@ interface WorkflowExecutionListProps {
 
 export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps) {
   const { notifications } = useKibana().services;
+  const workflow = useSelector(selectWorkflow);
+  const workflowUsesExecutionNames = Boolean(workflow?.definition?.['run-name']?.trim());
   const api = useWorkflowsApi();
   const telemetry = useTelemetry();
   const showExecutor = useUiSetting<boolean>(WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID, true);
@@ -170,6 +174,7 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
       filters={executionListFilters}
       onFiltersChange={setFilters}
       setPaginationObserver={setPaginationObserver}
+      workflowUsesExecutionNames={workflowUsesExecutionNames}
       showExecutor={showExecutor}
       hasNextPage={Boolean(hasNextPage)}
       canCancel={canCancelWorkflowExecution}

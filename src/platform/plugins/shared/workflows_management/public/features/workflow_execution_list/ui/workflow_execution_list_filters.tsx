@@ -50,6 +50,8 @@ export interface ExecutionListFiltersProps {
     runName?: string;
   }) => void;
   availableExecutedByOptions?: ExecutedByFilterOption[];
+  /** Hide the execution-name field when this workflow's runs do not use `run-name`. */
+  showExecutionName?: boolean;
   showExecutor?: boolean;
 }
 
@@ -172,6 +174,7 @@ export function ExecutionListFilters({
   filters,
   onFiltersChange,
   availableExecutedByOptions = [],
+  showExecutionName = false,
   showExecutor = false,
 }: ExecutionListFiltersProps) {
   const styles = useMemoCss(componentStyles);
@@ -249,6 +252,8 @@ export function ExecutionListFilters({
     });
   };
 
+  const showExecutionNameField = showExecutionName || Boolean(filters.runName?.trim());
+
   const numActiveFilters =
     statusOptions.filter((item) => item.checked === 'on').length +
     runTypeOptions.filter((item) => item.checked === 'on').length +
@@ -323,36 +328,43 @@ export function ExecutionListFilters({
         </EuiFlexGroup>
       </EuiPopoverTitle>
 
-      <div css={styles.section}>
-        <EuiText size="xs" color="subdued" css={styles.sectionTitle}>
-          <strong>
-            {i18n.translate('workflows.workflowExecutionList.filterIconButton.executionNameLabel', {
-              defaultMessage: 'Execution name',
-            })}
-          </strong>
-        </EuiText>
-        <div css={styles.search}>
-          <EuiFieldSearch
-            compressed
-            fullWidth
-            isClearable
-            aria-label={i18n.translate(
-              'workflows.workflowExecutionList.filterIconButton.executionNameAriaLabel',
-              { defaultMessage: 'Filter by execution name' }
-            )}
-            placeholder={i18n.translate(
-              'workflows.workflowExecutionList.filterIconButton.executionNamePlaceholder',
-              { defaultMessage: 'Filter by execution name' }
-            )}
-            value={filters.runName ?? ''}
-            maxLength={WORKFLOW_RUN_NAME_FILTER_MAX_LENGTH}
-            onChange={(event) => onFiltersChange({ ...filters, runName: event.target.value })}
-            data-test-subj="workflowExecutionListRunNameSearch"
-          />
-        </div>
-      </div>
+      {showExecutionNameField && (
+        <>
+          <div css={styles.section}>
+            <EuiText size="xs" color="subdued" css={styles.sectionTitle}>
+              <strong>
+                {i18n.translate(
+                  'workflows.workflowExecutionList.filterIconButton.executionNameLabel',
+                  {
+                    defaultMessage: 'Execution name',
+                  }
+                )}
+              </strong>
+            </EuiText>
+            <div css={styles.search}>
+              <EuiFieldSearch
+                compressed
+                fullWidth
+                isClearable
+                aria-label={i18n.translate(
+                  'workflows.workflowExecutionList.filterIconButton.executionNameAriaLabel',
+                  { defaultMessage: 'Filter by execution name' }
+                )}
+                placeholder={i18n.translate(
+                  'workflows.workflowExecutionList.filterIconButton.executionNamePlaceholder',
+                  { defaultMessage: 'Filter by execution name' }
+                )}
+                value={filters.runName ?? ''}
+                maxLength={WORKFLOW_RUN_NAME_FILTER_MAX_LENGTH}
+                onChange={(event) => onFiltersChange({ ...filters, runName: event.target.value })}
+                data-test-subj="workflowExecutionListRunNameSearch"
+              />
+            </div>
+          </div>
 
-      <EuiHorizontalRule margin="none" />
+          <EuiHorizontalRule margin="none" />
+        </>
+      )}
 
       <div css={styles.section}>
         <EuiText size="xs" color="subdued" css={styles.sectionTitle}>

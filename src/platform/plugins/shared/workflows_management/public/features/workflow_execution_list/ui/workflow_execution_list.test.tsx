@@ -96,11 +96,12 @@ describe('WorkflowExecutionList', () => {
     expect(screen.getByText('Execution history')).toBeInTheDocument();
   });
 
-  it('shows the execution name column for named and unnamed runs', () => {
-    const { unmount } = renderComponent();
-    expect(screen.getByRole('columnheader', { name: 'Execution name' })).toBeInTheDocument();
-    unmount();
+  it('hides the execution name column when runs do not use execution names', () => {
+    renderComponent();
+    expect(screen.queryByRole('columnheader', { name: 'Execution name' })).not.toBeInTheDocument();
+  });
 
+  it('shows the execution name column when an execution has a name', () => {
     renderComponent({
       executions: {
         ...mockExecutions,
@@ -109,6 +110,11 @@ describe('WorkflowExecutionList', () => {
     });
     expect(screen.getByRole('columnheader', { name: 'Execution name' })).toBeInTheDocument();
     expect(screen.getByText('Deploy staging')).toBeInTheDocument();
+  });
+
+  it('shows the execution name column when the workflow defines run-name', () => {
+    renderComponent({ workflowUsesExecutionNames: true });
+    expect(screen.getByRole('columnheader', { name: 'Execution name' })).toBeInTheDocument();
   });
 
   it('renders the container with the data-test-subj attribute', () => {
@@ -177,6 +183,9 @@ describe('WorkflowExecutionList', () => {
       renderComponent();
       const table = screen.getByTestId('workflowExecutionListTable');
       expect(table).toBeInTheDocument();
+      expect(
+        screen.queryByRole('columnheader', { name: 'Execution name' })
+      ).not.toBeInTheDocument();
       expect(screen.getByText('Status')).toBeInTheDocument();
       expect(screen.getByText('Started')).toBeInTheDocument();
       expect(screen.getByText('Triggered by')).toBeInTheDocument();

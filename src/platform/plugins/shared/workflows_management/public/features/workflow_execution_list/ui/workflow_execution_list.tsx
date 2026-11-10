@@ -52,6 +52,8 @@ export interface WorkflowExecutionListProps {
   /** Last opened execution — persists after Back until a different row is opened. */
   lastViewedId: string | null;
   setPaginationObserver: (ref: HTMLDivElement | null) => void;
+  /** Saved workflow defines `run-name`. Historical names still show the column on their own. */
+  workflowUsesExecutionNames?: boolean;
   showExecutor?: boolean;
   canCancel: boolean;
   isCancelInProgress: boolean;
@@ -74,6 +76,7 @@ export const WorkflowExecutionList = ({
   selectedId,
   lastViewedId,
   setPaginationObserver,
+  workflowUsesExecutionNames = false,
   showExecutor = false,
   canCancel,
   isCancelInProgress,
@@ -136,16 +139,31 @@ export const WorkflowExecutionList = ({
     });
   }, [executedByUserProfiles, executedByValuesToResolve, showUnresolvedExecutors]);
 
+  const showExecutionName = useMemo(() => {
+    if (workflowUsesExecutionNames || Boolean(filters.runName?.trim())) {
+      return true;
+    }
+    return executions?.results.some((execution) => Boolean(execution.runName?.trim())) ?? false;
+  }, [executions, filters.runName, workflowUsesExecutionNames]);
+
   const columns = useMemo(
     () =>
       getExecutionHistoryColumns({
         euiTheme,
+        showExecutionName,
         showExecutor,
         executedByUserProfiles,
         showUnresolvedExecutors,
         timeZoneSetting,
       }),
-    [euiTheme, showExecutor, executedByUserProfiles, showUnresolvedExecutors, timeZoneSetting]
+    [
+      euiTheme,
+      showExecutionName,
+      showExecutor,
+      executedByUserProfiles,
+      showUnresolvedExecutors,
+      timeZoneSetting,
+    ]
   );
 
   const handleRowClick = useCallback(
@@ -346,6 +364,7 @@ export const WorkflowExecutionList = ({
               filters={filters}
               onFiltersChange={onFiltersChange}
               availableExecutedByOptions={availableExecutedByOptions}
+              showExecutionName={showExecutionName}
               showExecutor={showExecutor}
             />
           </EuiFlexItem>
