@@ -171,6 +171,7 @@ export {
   inferVarGroupSelections,
   isVarGroupOptionHiddenInDeploymentMode,
   getFirstVisibleVarGroupOption,
+  sanitizeVarGroupSelections,
 } from './var_group_helpers';
 
 // Cloud Connector accessor module

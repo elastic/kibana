@@ -16,7 +16,10 @@ import type {
 } from '../../../../../../../../../common/types';
 import type { RegistryVarGroup } from '../../../../../../types';
 import { getAllowedOutputTypesForPackagePolicy } from '../../../../../../../../../common/services/output_helpers';
-import { inferVarGroupSelections } from '../../../../../../../../../common/services';
+import {
+  inferVarGroupSelections,
+  sanitizeVarGroupSelections,
+} from '../../../../../../../../../common/services';
 import { useGetOutputs, useLicense } from '../../../../../../hooks';
 
 import {
@@ -194,27 +197,53 @@ export function useVarGroupSelections({
     packagePolicy?.vars,
   ]);
 
-  // Derive current selections from saved or compute them
-  const selections = useMemo((): VarGroupSelection => {
-    if (savedSelections) return savedSelections;
-    return deriveSelections();
-  }, [savedSelections, deriveSelections]);
+  // Drop stored selections that name an option the package no longer
+  // declares, so the group is treated as having no selection and the
+  // derive/inference path below runs for it. Without this the hook returns
+  // the stale name as-is, `shouldShowVar` matches no option and hides every
+  // group-controlled field, while validation (which drops the stale name)
+  // requires the inferred option's vars — the edit page then shows errors
+  // on fields the user cannot see. The `VarGroupSelector`'s own reset only
+  // fires when that selector mounts and always picks the first visible
+  // option, so it cannot replace this: it ignores the inference evidence
+  // in the policy's vars.
+  const sanitizedSavedSelections = useMemo(
+    () => sanitizeVarGroupSelections(varGroups, savedSelections),
+    [varGroups, savedSelections]
+  );
 
-  // Initialize on mount if not already set
+  // Derive current selections: valid saved selections win; groups with no
+  // valid saved selection (none stored, or the stored one was stale) get
+  // the derived value — inference from the policy's populated vars on the
+  // edit page, otherwise the first visible option. This is the same value
+  // validation derives for the group, so the form and validation agree.
+  const selections = useMemo((): VarGroupSelection => {
+    const derived = deriveSelections();
+    return sanitizedSavedSelections
+      ? { ...derived, ...sanitizedSavedSelections }
+      : derived;
+  }, [sanitizedSavedSelections, deriveSelections]);
+
+  // Initialize on mount if not already set, or when a stale saved selection
+  // was normalized away: persist the derived selections so the stored
+  // policy agrees with what the form shows and what validation checks.
+  // (sanitizeVarGroupSelections returns the input object unchanged when
+  // nothing was dropped, so reference equality tells us whether any
+  // selection was stale.)
   useEffect(() => {
-    if (varGroups && varGroups.length > 0 && !savedSelections) {
-      const derived = deriveSelections();
-      if (Object.keys(derived).length > 0) {
-        onSelectionsChange({ var_group_selections: derived });
+    if (varGroups && varGroups.length > 0) {
+      const needsInit = !savedSelections || sanitizedSavedSelections !== savedSelections;
+      if (needsInit && Object.keys(selections).length > 0) {
+        onSelectionsChange({ var_group_selections: selections });
       }
     }
-  }, [varGroups, savedSelections, onSelectionsChange, deriveSelections]);
+  }, [varGroups, savedSelections, sanitizedSavedSelections, selections, onSelectionsChange]);
 
   // Handle selection change with policy effects computation
   const handleSelectionChange = useCallback(
     (groupName: string, optionName: string) => {
       const newSelections: VarGroupSelection = {
-        ...savedSelections,
+        ...sanitizedSavedSelections,
         [groupName]: optionName,
       };
 
@@ -247,7 +276,7 @@ export function useVarGroupSelections({
         ...(clearedStreamVars ? { vars: clearedStreamVars } : {}),
       });
     },
-    [savedSelections, selections, onSelectionsChange, packagePolicy, varGroups, streamVars]
+    [sanitizedSavedSelections, selections, onSelectionsChange, packagePolicy, varGroups, streamVars]
   );
 
   return { selections, handleSelectionChange };

@@ -17,6 +17,7 @@ import {
   inferVarGroupSelections,
   isVarGroupOptionHiddenInDeploymentMode,
   getFirstVisibleVarGroupOption,
+  sanitizeVarGroupSelections,
   type VarGroupSelection,
 } from './var_group_helpers';
 
@@ -560,6 +561,59 @@ describe('var_group_helpers', () => {
       expect(
         getFirstVisibleVarGroupOption(groupWithHiddenFirstOption, 'default', ['log_group_name'])
       ).toBeUndefined();
+    });
+  });
+
+  describe('sanitizeVarGroupSelections', () => {
+    const groups: RegistryVarGroup[] = [
+      {
+        name: 'auth_method',
+        title: 'Authentication',
+        selector_title: 'Select method',
+        options: [
+          { name: 'api_key', title: 'API Key', vars: ['api_key_var'] },
+          { name: 'oauth', title: 'OAuth', vars: ['client_id', 'client_secret'] },
+        ],
+      },
+      {
+        name: 'log_group_source',
+        title: 'Log Group Source',
+        selector_title: 'Select log group source',
+        options: [
+          { name: 'log_group_arn', title: 'Log Group ARN', vars: ['log_group_arn'] },
+          { name: 'log_group_name', title: 'Log Group Name', vars: ['log_group_name'] },
+        ],
+      },
+    ];
+
+    it('should drop a stored selection naming a removed option and keep the valid ones', () => {
+      expect(
+        sanitizeVarGroupSelections(groups, {
+          auth_method: 'saml',
+          log_group_source: 'log_group_name',
+        })
+      ).toEqual({ log_group_source: 'log_group_name' });
+    });
+
+    it('should return the input unchanged when every stored selection names an existing option', () => {
+      const saved = { auth_method: 'oauth', log_group_source: 'log_group_arn' };
+      expect(sanitizeVarGroupSelections(groups, saved)).toBe(saved);
+    });
+
+    it('should keep entries for groups the package no longer declares', () => {
+      expect(
+        sanitizeVarGroupSelections(groups, {
+          auth_method: 'oauth',
+          removed_group: 'whatever',
+        })
+      ).toEqual({ auth_method: 'oauth', removed_group: 'whatever' });
+    });
+
+    it('should return undefined unchanged and not fail without var_groups', () => {
+      expect(sanitizeVarGroupSelections(groups, undefined)).toBeUndefined();
+      expect(sanitizeVarGroupSelections(undefined, { auth_method: 'oauth' })).toEqual({
+        auth_method: 'oauth',
+      });
     });
   });
 });

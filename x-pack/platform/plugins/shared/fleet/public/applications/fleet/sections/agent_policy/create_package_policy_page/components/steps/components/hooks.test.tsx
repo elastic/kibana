@@ -381,6 +381,126 @@ describe('useVarGroupSelections', () => {
     });
   });
 
+  describe('stale saved selections', () => {
+    // Follow-up from the Libra P3 review (2026-11-10): a stored selection
+    // naming an option the package no longer declares was returned as-is,
+    // so shouldShowVar matched no option and hid every group-controlled
+    // field while validation required the inferred option's vars. The hook
+    // must normalize stale selections the same way validation does — treat
+    // them as missing so derive/inference runs and gets persisted.
+    const twoGroups: RegistryVarGroup[] = [...mockVarGroups, ...mockStreamVarGroups];
+
+    it('should infer from populated vars on the edit page when the saved selection is stale', () => {
+      const { result } = renderHook(() =>
+        useVarGroupSelections({
+          varGroups: mockVarGroups,
+          savedSelections: { auth_method: 'saml' },
+          isAgentlessEnabled: false,
+          onSelectionsChange: mockOnSelectionsChange,
+          packagePolicy: {
+            vars: {
+              client_id: { type: 'text', value: 'my-client' },
+              client_secret: { type: 'password', value: 'shhh' },
+            },
+          } as any,
+          isEditPage: true,
+        })
+      );
+
+      // Same value validation derives for this policy (oauth), not the
+      // stale name and not the first visible option (api_key)
+      expect(result.current.selections).toEqual({ auth_method: 'oauth' });
+      expect(mockOnSelectionsChange).toHaveBeenCalledWith({
+        var_group_selections: { auth_method: 'oauth' },
+      });
+    });
+
+    it('should fall back to defaults on the edit page when the saved selection is stale and nothing is populated', () => {
+      const { result } = renderHook(() =>
+        useVarGroupSelections({
+          varGroups: mockVarGroups,
+          savedSelections: { auth_method: 'saml' },
+          isAgentlessEnabled: false,
+          onSelectionsChange: mockOnSelectionsChange,
+          packagePolicy: { vars: {} } as any,
+          isEditPage: true,
+        })
+      );
+
+      expect(result.current.selections).toEqual({ auth_method: 'api_key' });
+      expect(mockOnSelectionsChange).toHaveBeenCalledWith({
+        var_group_selections: { auth_method: 'api_key' },
+      });
+    });
+
+    it('should fall back to defaults on the create page when the saved selection is stale', () => {
+      const { result } = renderHook(() =>
+        useVarGroupSelections({
+          varGroups: mockVarGroups,
+          savedSelections: { auth_method: 'saml' },
+          isAgentlessEnabled: false,
+          onSelectionsChange: mockOnSelectionsChange,
+        })
+      );
+
+      expect(result.current.selections).toEqual({ auth_method: 'api_key' });
+      expect(mockOnSelectionsChange).toHaveBeenCalledWith({
+        var_group_selections: { auth_method: 'api_key' },
+      });
+    });
+
+    it('should keep valid saved selections while normalizing only the stale group', () => {
+      const { result } = renderHook(() =>
+        useVarGroupSelections({
+          varGroups: twoGroups,
+          savedSelections: { auth_method: 'saml', log_group_source: 'log_group_name' },
+          isAgentlessEnabled: false,
+          onSelectionsChange: mockOnSelectionsChange,
+          packagePolicy: {
+            vars: {
+              client_id: { type: 'text', value: 'my-client' },
+              client_secret: { type: 'password', value: 'shhh' },
+            },
+          } as any,
+          isEditPage: true,
+        })
+      );
+
+      expect(result.current.selections).toEqual({
+        auth_method: 'oauth',
+        log_group_source: 'log_group_name',
+      });
+      expect(mockOnSelectionsChange).toHaveBeenCalledWith({
+        var_group_selections: {
+          auth_method: 'oauth',
+          log_group_source: 'log_group_name',
+        },
+      });
+    });
+
+    it('should not resurrect a stale selection when another group changes', () => {
+      const { result } = renderHook(() =>
+        useVarGroupSelections({
+          varGroups: twoGroups,
+          savedSelections: { auth_method: 'saml', log_group_source: 'log_group_arn' },
+          isAgentlessEnabled: false,
+          onSelectionsChange: mockOnSelectionsChange,
+        })
+      );
+
+      // Clear the initialization call
+      mockOnSelectionsChange.mockClear();
+
+      act(() => {
+        result.current.handleSelectionChange('log_group_source', 'log_group_name');
+      });
+
+      expect(mockOnSelectionsChange).toHaveBeenCalledWith({
+        var_group_selections: { auth_method: 'api_key', log_group_source: 'log_group_name' },
+      });
+    });
+  });
+
   describe('initialization effect', () => {
     it('should call onSelectionsChange with defaults on mount when savedSelections is undefined', () => {
       renderHook(() =>

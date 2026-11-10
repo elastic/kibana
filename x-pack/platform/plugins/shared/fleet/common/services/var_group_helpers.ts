@@ -265,3 +265,50 @@ export const getFirstVisibleVarGroupOption = (
       !isVarGroupOptionHiddenInDeploymentMode(option, deploymentMode)
   );
 };
+
+/**
+ * Drops stored var_group selections that name no existing option in their
+ * group, so the group is treated as having no selection and the normal
+ * derive/inference path runs for it.
+ *
+ * This is the same existence rule validation applies in
+ * `getEffectiveVarGroupSelections` (validate_package_policy.ts): a stored
+ * selection for a removed or renamed option must not be treated as
+ * authoritative. The form must apply it too — when the hook returns a stale
+ * name as-is, `shouldShowVar` matches no option and hides every
+ * group-controlled field, while validation requires the inferred option's
+ * vars, so the edit page shows errors on fields the user cannot see.
+ *
+ * Entries for groups the package no longer declares at all are preserved:
+ * they control no vars, so validation ignores them, and the form keeps them
+ * today (dropping them would silently rewrite the stored policy on the next
+ * save for no benefit).
+ *
+ * Returns the input object unchanged (same reference) when nothing is
+ * dropped, so callers can tell by reference equality whether any selection
+ * was stale.
+ */
+export const sanitizeVarGroupSelections = (
+  varGroups: RegistryVarGroup[] | undefined,
+  varGroupSelections: VarGroupSelection | undefined
+): VarGroupSelection | undefined => {
+  if (!varGroupSelections || !varGroups || varGroups.length === 0) {
+    return varGroupSelections;
+  }
+  let dropped = false;
+  const sanitized: VarGroupSelection = {};
+  for (const [groupName, optionName] of Object.entries(varGroupSelections)) {
+    const group = varGroups.find((g) => g.name === groupName);
+    if (!group) {
+      // Group no longer declared by the package: keep the entry as-is.
+      sanitized[groupName] = optionName;
+      continue;
+    }
+    if (group.options.some((option) => option.name === optionName)) {
+      sanitized[groupName] = optionName;
+    } else {
+      dropped = true;
+    }
+  }
+  return dropped ? sanitized : varGroupSelections;
+};
