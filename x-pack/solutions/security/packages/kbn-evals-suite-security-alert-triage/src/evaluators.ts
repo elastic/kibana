@@ -73,17 +73,17 @@ export const createToolUsageEvaluators = (log: ToolingLog) => [
 interface RawToolStep {
   type?: string;
   tool_id?: string;
-  params?: Record<string, unknown>;
   results?: Array<{ type?: string; data?: unknown }>;
 }
 
-// getToolCallSteps from @kbn/evals drops the step params, and the skill-loaded check needs them.
+// getToolCallSteps from @kbn/evals types the step results as unknown[]. These evaluators read result data.
 const getRawToolSteps = (output: unknown): RawToolStep[] =>
   ((output as { steps?: RawToolStep[] })?.steps ?? []).filter((step) => step?.type === 'tool_call');
 
 /**
- * CODE evaluator: 1 when the agent loaded the given skill with load_skill. The agent loads skills
- * with this tool, so it replaces the trace check that looks for a filestore.read of SKILL.md.
+ * CODE evaluator: 1 when the agent loaded the given skill with load_skill, and the tool returned the
+ * skill. A failed call returns an error result, and does not count. The agent loads skills with this
+ * tool, so it replaces the trace check that looks for a filestore.read of SKILL.md.
  */
 export const createSkillLoadedEvaluator = (skillName: string) => ({
   name: `Skill loaded (${skillName})`,
@@ -91,10 +91,14 @@ export const createSkillLoadedEvaluator = (skillName: string) => ({
   direction: 'maximize' as const,
   evaluate: async ({ output }: { output: unknown }) => {
     const loaded = getRawToolSteps(output).some(
-      ({ tool_id: toolId, params }) =>
+      ({ tool_id: toolId, results = [] }) =>
         toolId === internalTools.loadSkill &&
-        typeof params?.skill === 'string' &&
-        params.skill.includes(skillName)
+        results.some(({ type, data }) => {
+          const skill = (data as { skill?: { id?: string; name?: string } })?.skill;
+          return (
+            type === ToolResultType.other && (skill?.id === skillName || skill?.name === skillName)
+          );
+        })
     );
     return { score: loaded ? 1 : 0 };
   },
