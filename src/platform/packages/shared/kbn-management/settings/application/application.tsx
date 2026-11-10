@@ -137,29 +137,29 @@ export const SettingsApplication = () => {
   };
 
   const {
-    spaceFields: spaceAllFields,
-    globalFields: globalAllFields,
-    isLoading: allFieldsLoading,
-    error: allFieldsError,
-  } = useScopeFields();
-  const {
-    spaceFields: spaceFilteredFields,
-    globalFields: globalFilteredFields,
-    isLoading: filteredFieldsLoading,
-    error: filteredFieldsError,
-  } = useScopeFields(query);
-  const isLoading = allFieldsLoading || filteredFieldsLoading;
-  const loadError = allFieldsError ?? filteredFieldsError;
-
-  const [selectedTabId, setSelectedTabId] = useState(SPACE_SETTINGS_TAB_ID);
-
-  const {
     spaceSettings: { save: canSaveSpaceSettings },
     globalSettings: { save: canSaveGlobalSettings, show: canShowGlobalSettings },
   } = getCapabilities();
   if (!canSaveSpaceSettings || (!canSaveGlobalSettings && canShowGlobalSettings)) {
     setBadge(readOnlyBadge);
   }
+
+  const {
+    spaceFields: spaceAllFields,
+    globalFields: globalAllFields,
+    isLoading: allFieldsLoading,
+    error: allFieldsError,
+  } = useScopeFields({ includeGlobal: canShowGlobalSettings });
+  const {
+    spaceFields: spaceFilteredFields,
+    globalFields: globalFilteredFields,
+    isLoading: filteredFieldsLoading,
+    error: filteredFieldsError,
+  } = useScopeFields({ query, includeGlobal: canShowGlobalSettings });
+  const isLoading = allFieldsLoading || filteredFieldsLoading;
+  const loadError = allFieldsError ?? filteredFieldsError;
+
+  const [requestedTabId, setRequestedTabId] = useState(SPACE_SETTINGS_TAB_ID);
 
   // Only enable the Global settings tab if global settings can be shown and there are any global
   // settings. Whether there are any is unknown until the settings load, so keep the tab until then.
@@ -188,7 +188,9 @@ export const SettingsApplication = () => {
     };
   }
 
-  const selectedTab = tabs[selectedTabId] ?? tabs[SPACE_SETTINGS_TAB_ID];
+  // The Global tab shows while settings load, and goes away if there are no global settings.
+  const selectedTabId = tabs[requestedTabId] ? requestedTabId : SPACE_SETTINGS_TAB_ID;
+  const selectedTab = tabs[selectedTabId];
 
   const title = (
     <EuiText>
@@ -230,7 +232,7 @@ export const SettingsApplication = () => {
                 id={id}
                 key={i}
                 name={tabs[id].name}
-                onChangeSelectedTab={() => setSelectedTabId(id)}
+                onChangeSelectedTab={() => setRequestedTabId(id)}
                 isSelected={id === selectedTabId}
               />
             ))}

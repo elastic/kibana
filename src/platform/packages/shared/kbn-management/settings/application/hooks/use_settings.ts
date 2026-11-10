@@ -20,14 +20,15 @@ import { useServices } from '../services';
  * normalizes them to a predictable format, {@link UiSettingMetadata}, and returns
  * them as an observed collection.
  * @param scope The {@link UiSettingsScope} of the settings to be retrieved.
+ * @param isEnabled When false, no settings are fetched, and the result is empty and not loading.
  * @returns An object with settings, a loading flag, and the error if the settings failed to load.
  */
-export const useSettings = (scope: UiSettingsScope) => {
+export const useSettings = (scope: UiSettingsScope, isEnabled: boolean = true) => {
   const { getAllowlistedSettings, subscribeToUpdates, getActiveSpace, subscribeToActiveSpace } =
     useServices();
   const [solutionView, setSolutionView] = useState<SolutionView>();
   const [settings, setSettings] = useState<Record<string, UiSettingMetadata>>({});
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(isEnabled);
   const [error, setError] = useState<Error>();
 
   useEffectOnce(() => {
@@ -44,6 +45,13 @@ export const useSettings = (scope: UiSettingsScope) => {
   });
 
   useEffect(() => {
+    if (!isEnabled) {
+      setSettings({});
+      setError(undefined);
+      setIsLoading(false);
+      return;
+    }
+
     let isCurrent = true;
     setIsLoading(true);
 
@@ -72,7 +80,7 @@ export const useSettings = (scope: UiSettingsScope) => {
       isCurrent = false;
       subscription.unsubscribe();
     };
-  }, [scope, solutionView, getAllowlistedSettings, subscribeToUpdates]);
+  }, [scope, isEnabled, solutionView, getAllowlistedSettings, subscribeToUpdates]);
 
   return { settings, isLoading, error };
 };

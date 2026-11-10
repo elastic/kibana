@@ -22,15 +22,17 @@ import { useSettings } from './use_settings';
  * {@link FieldDefinition} objects derived from those settings.
  * @param scope The {@link UiSettingsScope} of the settings to be retrieved.
  * @param query The {@link Query} to execute for filtering the fields.
+ * @param isEnabled When false, no settings are fetched, and there are no fields.
  * @returns An object with an array of {@link FieldDefinition} objects, a loading flag, and the
  * error if the settings failed to load.
  */
 export const useFields = (
   scope: UiSettingsScope,
-  query?: Query
+  query?: Query,
+  isEnabled: boolean = true
 ): { fields: FieldDefinition[]; isLoading: boolean; error?: Error } => {
   const { isCustomSetting, isOverriddenSetting } = useServices();
-  const { settings, isLoading, error } = useSettings(scope);
+  const { settings, isLoading, error } = useSettings(scope, isEnabled);
 
   const fields = useMemo(() => {
     const allFields = getFieldDefinitions(settings, {

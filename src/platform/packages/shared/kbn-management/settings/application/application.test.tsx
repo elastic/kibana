@@ -32,6 +32,11 @@ import {
 } from './empty_state';
 import { DATA_TEST_SUBJ_PREFIX_TAB } from './tab';
 import { DATA_TEST_SUBJ_SETTINGS_CATEGORY } from '@kbn/management-settings-components-field-category/category';
+import { DATA_TEST_SUBJ_SAVE_BUTTON } from '@kbn/management-settings-components-form/bottom_bar/bottom_bar';
+import type { UiSettingsScope } from '@kbn/core-ui-settings-common';
+import type { UiSettingMetadata } from '@kbn/management-settings-types';
+import { getSettingsMock } from '@kbn/management-settings-utilities/mocks/settings.mock';
+import { getSettingsCapabilitiesMock } from '@kbn/management-settings-utilities/mocks/capabilities.mock';
 import { wrap, createSettingsApplicationServicesMock } from './mocks';
 import type { SettingsApplicationServices } from './services';
 import { SettingsApplicationKibanaProvider } from './services';
@@ -173,6 +178,32 @@ describe('Settings application', () => {
     expect(loadError).toHaveTextContent('Unable to load advanced settings');
     expect(loadError).toHaveTextContent('Internal Server Error');
     expect(queryByTestId(DATA_TEST_SUBJ_SETTINGS_SEARCH_BAR)).toBeNull();
+  });
+
+  it("doesn't fetch the global settings when they can't be shown", async () => {
+    const getAllowlistedSettings = jest.fn((scope: UiSettingsScope) =>
+      scope === 'global'
+        ? Promise.reject(new Error('Forbidden'))
+        : Promise.resolve(getSettingsMock())
+    );
+    const services: SettingsApplicationServices = {
+      ...createSettingsApplicationServicesMock(),
+      getAllowlistedSettings,
+      getCapabilities: () => ({
+        ...getSettingsCapabilitiesMock(),
+        globalSettings: { show: false, save: false },
+      }),
+    };
+
+    const { findByTestId, queryByTestId } = render(wrap(<SettingsApplication />, services));
+
+    for (const category of spaceCategories) {
+      expect(
+        await findByTestId(`${DATA_TEST_SUBJ_SETTINGS_CATEGORY}-${category}`)
+      ).toBeInTheDocument();
+    }
+    expect(queryByTestId(DATA_TEST_SUBJ_SETTINGS_LOAD_ERROR)).toBeNull();
+    expect(getAllowlistedSettings.mock.calls.map(([scope]) => scope)).not.toContain('global');
   });
 
   it('requests the setting definitions once per scope and shows saved values from the client', async () => {
@@ -351,6 +382,45 @@ describe('Settings application', () => {
       for (const category of globalCategories) {
         expect(getByTestId(`${DATA_TEST_SUBJ_SETTINGS_CATEGORY}-${category}`)).toBeInTheDocument();
       }
+    });
+
+    it('saves space settings when the selected Global tab goes away because there are no global settings', async () => {
+      const resolvers: Array<() => void> = [];
+      const services: SettingsApplicationServices = {
+        ...createSettingsApplicationServicesMock(),
+        getAllowlistedSettings: (scope: UiSettingsScope) =>
+          new Promise<Record<string, UiSettingMetadata>>((resolve) => {
+            resolvers.push(() => resolve(scope === 'namespace' ? getSettingsMock() : {}));
+          }),
+      };
+
+      const { findByTestId, findByDisplayValue, queryByTestId } = render(
+        wrap(<SettingsApplication />, services)
+      );
+
+      const globalTab = await findByTestId(globalSettingsTestSubj);
+      act(() => {
+        fireEvent.click(globalTab);
+      });
+      await act(async () => {
+        resolvers.forEach((resolve) => resolve());
+      });
+
+      await waitFor(() => expect(queryByTestId(globalSettingsTestSubj)).toBeNull());
+      const input = await findByDisplayValue('hello world');
+      act(() => {
+        fireEvent.change(input, { target: { value: 'test' } });
+      });
+      const saveButton = await findByTestId(DATA_TEST_SUBJ_SAVE_BUTTON);
+      act(() => {
+        fireEvent.click(saveButton);
+      });
+
+      await waitFor(() => {
+        expect(services.saveChanges).toHaveBeenCalledWith({
+          string: expect.objectContaining({ unsavedValue: 'test', scope: 'namespace' }),
+        });
+      });
     });
   });
 });
