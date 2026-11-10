@@ -97,6 +97,19 @@ export const WorkflowSelector = () => {
     searchQuery === '' &&
     workflowsData?.total === 0;
 
+  // The empty state replaces the combo box (and its onFocus refetch), so refetch on window focus
+  // to pick up a workflow created in the other tab.
+  useEffect(() => {
+    if (!hasNoWorkflows) {
+      return;
+    }
+    const handleFocus = () => {
+      refetch();
+    };
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [hasNoWorkflows, refetch]);
+
   if (!isWorkflowsEnabled) {
     const settingsUrl = application.getUrlForApp('management', {
       path: `/kibana/settings?query=${encodeURIComponent(WORKFLOWS_UI_SETTING_ID)}`,
