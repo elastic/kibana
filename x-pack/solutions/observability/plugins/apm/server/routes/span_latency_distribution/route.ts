@@ -10,7 +10,11 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import { routeDefinitions, type LatencyOverallSpanDistributionResponse } from '@kbn/apm-api-shared';
 import { getOverallLatencyDistribution } from '../latency_distribution/get_overall_latency_distribution';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { SERVICE_NAME, SPAN_NAME } from '../../../common/es_fields/apm';
+import {
+  SERVICE_NAME,
+  SPAN_DESTINATION_SERVICE_RESOURCE,
+  SPAN_NAME,
+} from '../../../common/es_fields/apm';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 
 const latencyOverallSpanDistributionRoute = createApmServerRoute({
@@ -33,6 +37,7 @@ const latencyOverallSpanDistributionRoute = createApmServerRoute({
       termFilters,
       chartType,
       isOtel = false,
+      spanDestinationServiceResources,
     } = resources.params.body;
 
     return getOverallLatencyDistribution({
@@ -47,6 +52,13 @@ const latencyOverallSpanDistributionRoute = createApmServerRoute({
           filter: [
             ...termQuery(SERVICE_NAME, serviceName),
             ...termQuery(SPAN_NAME, spanName),
+            ...(spanDestinationServiceResources?.length
+              ? [
+                  {
+                    terms: { [SPAN_DESTINATION_SERVICE_RESOURCE]: spanDestinationServiceResources },
+                  },
+                ]
+              : []),
             ...(termFilters?.flatMap((fieldValuePair): QueryDslQueryContainer[] =>
               termQuery(fieldValuePair.fieldName, fieldValuePair.fieldValue)
             ) ?? []),

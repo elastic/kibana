@@ -25,6 +25,7 @@ import type {
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_task';
+import { findParamVaultReferenceError } from '../secret_connection/connection_utils';
 
 export const ParamsObjectSchema = z
   .strictObject({
@@ -80,6 +81,15 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
       const { id: spaceId } = (await server.spaces?.spacesService.getActiveSpace(request)) ?? {
         id: DEFAULT_SPACE_ID,
       };
+
+      const params = [request.body].flat() as SyntheticsParamRequest[];
+      const vaultReferenceError = await findParamVaultReferenceError(
+        { savedObjectsClient, server },
+        params.map(({ value }) => value)
+      );
+      if (vaultReferenceError) {
+        return response.badRequest({ body: { message: vaultReferenceError } });
+      }
 
       const savedObjectsData = parseParamBody(
         spaceId,

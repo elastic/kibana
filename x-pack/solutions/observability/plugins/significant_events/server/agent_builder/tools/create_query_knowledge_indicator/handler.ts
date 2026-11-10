@@ -8,7 +8,9 @@
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import {
   deriveQueryType,
+  findNonColumnFullTextArguments,
   findOverBroadMatchPredicates,
+  renderNonColumnFullTextArgumentError,
   renderOverBroadMatchError,
 } from '@kbn/streams-schema';
 import { type StreamQuery } from '@kbn/significant-events-schema';
@@ -49,6 +51,12 @@ export async function createQueryKnowledgeIndicatorToolHandler({
     esqlQuery: queryInput.esql.query,
     viewName: source.view_name,
   });
+
+  // Before the over-broad check: its MATCH_PHRASE advice is moot while the field is a cast.
+  const nonColumnArguments = findNonColumnFullTextArguments(queryInput.esql.query);
+  if (nonColumnArguments.length > 0) {
+    throw new EsqlQueryValidationError(renderNonColumnFullTextArgumentError(nonColumnArguments));
+  }
 
   const overBroad = findOverBroadMatchPredicates(queryInput.esql.query);
   if (overBroad.length > 0) {

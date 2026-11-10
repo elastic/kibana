@@ -319,4 +319,55 @@ steps:
       });
     });
   });
+
+  describe('retry of a size limit error', () => {
+    const buildYaml = (condition?: string) => `
+steps:
+  - name: large_step
+    type: ${FakeConnectors.large_response.actionTypeId}
+    connector-id: ${FakeConnectors.large_response.name}
+    max-step-size: 1kb
+    with:
+      sizeBytes: 5120
+    on-failure:
+      retry:
+        max-attempts: 2
+        ${condition ? `condition: "${condition}"` : ''}
+      fallback:
+        - name: after_size_error
+          type: data.set
+          with:
+            failed_with: "{{ error.type }}"
+      continue: true
+`;
+    const stepExecutionsOf = (fixture: WorkflowRunFixture, stepId: string, stepType: string) =>
+      Array.from(fixture.stepExecutionRepositoryMock.stepExecutions.values()).filter(
+        (stepExecution) => stepExecution.stepId === stepId && stepExecution.stepType === stepType
+      );
+    const attemptsOf = (fixture: WorkflowRunFixture) =>
+      stepExecutionsOf(fixture, 'large_step', FakeConnectors.large_response.actionTypeId);
+
+    it('is not retried without a condition, and goes to the fallback', async () => {
+      const fixture = new WorkflowRunFixture();
+      await fixture.runWorkflow({ workflowYaml: buildYaml() });
+
+      const attempts = attemptsOf(fixture);
+      expect(attempts).toHaveLength(1);
+      expect(attempts[0].error).toEqual(
+        expect.objectContaining({ type: 'StepSizeLimitExceeded', retryable: false })
+      );
+      expect(stepExecutionsOf(fixture, 'after_size_error', 'data.set')[0]?.status).toBe(
+        ExecutionStatus.COMPLETED
+      );
+    });
+
+    it('is retried when a condition allows it', async () => {
+      const fixture = new WorkflowRunFixture();
+      await fixture.runWorkflow({
+        workflowYaml: buildYaml("${{ error.type == 'StepSizeLimitExceeded' }}"),
+      });
+
+      expect(attemptsOf(fixture)).toHaveLength(3);
+    });
+  });
 });

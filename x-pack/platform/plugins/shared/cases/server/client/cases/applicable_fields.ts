@@ -70,11 +70,14 @@ export const toApplicableField = (
 export const resolveApplicableFields = async ({
   owner,
   templateId,
+  templateVersion,
   templatesService,
   fieldDefinitionsService,
 }: {
   owner: string;
   templateId?: string | null;
+  /** Pins resolution to this template version (an existing case's applied version); latest when omitted. */
+  templateVersion?: number;
   templatesService: TemplatesService;
   fieldDefinitionsService: FieldDefinitionsService;
 }): Promise<TaggedField[]> => {
@@ -92,9 +95,11 @@ export const resolveApplicableFields = async ({
   }
 
   if (templateId) {
-    const templateSO = await templatesService.getTemplate(templateId, undefined, {
-      includeDeleted: true,
-    });
+    const templateSO = await templatesService.getTemplate(
+      templateId,
+      templateVersion !== undefined ? String(templateVersion) : undefined,
+      { includeDeleted: true }
+    );
     // `templatesService` is unsecured — `owner` here is already authorized (either the
     // caller-supplied owner for pre-create discovery, or the case's owner for existing-case
     // discovery), so reject a template belonging to a different owner rather than leaking its
@@ -160,6 +165,7 @@ export const getApplicableFields = async (
 
   let owner: string;
   let templateId: string | null | undefined;
+  let templateVersion: number | undefined;
 
   if ('caseId' in params) {
     const theCase = await caseService.getCase({ id: params.caseId });
@@ -169,6 +175,8 @@ export const getApplicableFields = async (
     });
     owner = theCase.attributes.owner;
     templateId = theCase.attributes.template?.id;
+    // Write-time validation is pinned to the case's stored version, so discovery must be too.
+    templateVersion = theCase.attributes.template?.version;
   } else {
     owner = params.owner;
     templateId = params.templateId;
@@ -181,6 +189,7 @@ export const getApplicableFields = async (
   const resolved = await resolveApplicableFields({
     owner,
     templateId,
+    templateVersion,
     templatesService,
     fieldDefinitionsService,
   });

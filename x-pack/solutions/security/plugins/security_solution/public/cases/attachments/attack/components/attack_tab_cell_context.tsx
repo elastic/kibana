@@ -17,6 +17,8 @@ export interface AttackGridCellContextValue {
   areAllRowsSelected: boolean;
   canInvestigateInTimeline: boolean;
   investigateAttackInTimeline: (attack: AttackDiscoveryAlert | undefined) => void;
+  /** Removes 1 attack from the case. Unset when the user can't remove. */
+  onRemoveAttack?: (attackId: string) => void;
   rows: AttackRow[];
   /** Rows that resolved to a live document. */
   selectableRowCount: number;

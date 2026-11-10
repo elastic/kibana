@@ -7,7 +7,7 @@
 
 import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { mockAwsPackage, navigateToOnboardingStep } from './onboarding';
+import { mockAwsPackage, navigateToOnboardingStep, selectStaticKeysAuth } from './onboarding';
 import { ACCESS_KEY_REF, SECRET_KEY_REF, fulfillJson } from './stored_secrets';
 
 // Two services of the `aws` package: adding the second one to a deployed first one must update the
@@ -19,8 +19,8 @@ const template = (name: string) => ({
   deployment_modes: { agentless: { enabled: true } },
   inputs: [{ type: 'aws-s3' }],
 });
-// guardduty has an optional setting, so its settings flyout (where the namespace is set) can be
-// opened; elb has none and stays untouched.
+// guardduty has an optional setting, so its settings flyout can be opened; elb has none and stays
+// untouched.
 const dataStream = (name: string, vars: unknown[] = []) => ({
   path: `${name}_logs`,
   type: 'logs',
@@ -150,7 +150,7 @@ export async function deployElbWithTypedKeys(
     selectedServiceIds: ['elb'],
     globalRegion: 'us-east-1',
   });
-  await page.getByRole('radio', { name: /access keys/i }).click({ force: true });
+  await selectStaticKeysAuth(page);
   await page.testSubj.locator('awsStaticKeysForm-accessKeyId').fill('mi1');
   await page.testSubj.locator('awsStaticKeysForm-secretAccessKey').fill('mis1');
   const deployButton = page.testSubj.locator('managedIntegrationsSection-deployButton');
@@ -184,4 +184,52 @@ export async function backToServiceSettings(page: ScoutPage, toggleServiceIds: s
 export async function continueToDeploy(page: ScoutPage) {
   await page.testSubj.locator('serviceSettingsStep-continueButton').click();
   await expect(page.testSubj.locator('onboardingStep-authenticate-and-deploy')).toBeVisible();
+}
+
+export interface PackageUpdateRequests {
+  /** `PUT /epm/packages/<name>/<version>` calls, which is how a namespace gets dedicated templates. */
+  updates: Array<{ packageName: string; version: string; body: Record<string, any> }>;
+}
+
+/**
+ * Serves the `aws` package as installed, with the namespaces that already have dedicated index
+ * templates, and records the PUTs that change them. Call it after `mockManagedIntegrations`, so
+ * these routes answer first.
+ */
+export async function mockInstalledAwsPackage(
+  page: ScoutPage,
+  enabledFor: string[] = []
+): Promise<PackageUpdateRequests> {
+  const requests: PackageUpdateRequests = { updates: [] };
+  const installed = {
+    item: {
+      ...TWO_SERVICE_AWS_PACKAGE.item,
+      // The assets list is part of the real shape. Pages that read the installed package, such as
+      // the detect and review step, destructure it and fail when it is missing.
+      installationInfo: {
+        version: '7.1.1',
+        installed_kibana: [],
+        namespace_customization_enabled_for: enabledFor,
+      },
+    },
+  };
+  await page.route(
+    (url) => /\/api\/fleet\/epm\/packages\/aws(\/[^/]+)?$/.test(url.pathname),
+    async (route) => {
+      if (route.request().method() === 'PUT') {
+        const [packageName, version] = new URL(route.request().url()).pathname
+          .split('/packages/')[1]
+          .split('/');
+        requests.updates.push({
+          packageName,
+          version,
+          body: JSON.parse(route.request().postData() ?? '{}'),
+        });
+        await route.fulfill(fulfillJson({ item: {} }));
+        return;
+      }
+      await route.fulfill(fulfillJson(installed));
+    }
+  );
+  return requests;
 }

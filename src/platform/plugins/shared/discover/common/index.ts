@@ -12,6 +12,10 @@ export const APP_ICON = 'discoverApp';
 
 export { APP_STATE_URL_KEY, GLOBAL_STATE_URL_KEY } from './constants';
 export { DISCOVER_APP_LOCATOR } from './app_locator';
+export {
+  CHANGE_POINT_GRID_EMBEDDABLE_TYPE,
+  CHANGE_POINT_GRID_MAX_SERIES,
+} from './embeddable/change_point_grid';
 export type {
   DiscoverAppLocator,
   DiscoverAppLocatorParams,

@@ -142,15 +142,18 @@ export function isVariableValue(value: unknown): boolean {
   return VARIABLE_VALUE_REGEX.test(value);
 }
 
-// Regex to match Liquid tags: {% ... %} or {%- ... -%} (with optional dashes)
-// Matches both single-line and multi-line Liquid tag blocks
-export const LIQUID_TAG_VALUE_REGEX = /\{\%-?\s*[^%]*?\s*-?\%\}/s;
+/**
+ * Matches Liquid tags: {% ... %} or {%- ... -%}, single-line or multi-line. The dashes and
+ * the padding are already matched by `[^%]*`, so the pattern needs no `-?` / `\s*` around it.
+ * Padding it with `\s*` (as an earlier form did) made an unclosed `{%` followed by a
+ * whitespace run cubic, because the engine tried every split of the run (CodeQL
+ * `js/polynomial-redos`).
+ */
+export const LIQUID_TAG_VALUE_REGEX = /\{\%[^%]*\%\}/;
 
 /**
  * Checks if a value contains Liquid tag patterns ({% ... %} or {%- ... -%})
  * Examples: {% if condition %}, {%- if condition -%}, multi-line blocks with Liquid tags
- * Pattern: matches {% or {%- followed by content and %} or -%}
- * The 's' flag allows . to match newlines for multi-line support
  */
 export function isLiquidTagValue(value: unknown): boolean {
   if (typeof value !== 'string') {

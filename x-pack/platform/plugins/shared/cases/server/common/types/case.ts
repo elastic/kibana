@@ -6,10 +6,9 @@
  */
 
 import type { SavedObject } from '@kbn/core-saved-objects-server';
-import type { Type } from 'io-ts';
-import { exact, partial, strict, string, number } from 'io-ts';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { CaseAttributes, Observable } from '../../../common/types/domain';
-import { CaseAttributesRt } from '../../../common/types/domain';
+import { CaseAttributesSchema } from '../../../common/types/domain';
 import type { ConnectorPersisted } from './connectors';
 import type { ExternalServicePersisted } from './external_service';
 import type { User, UserProfile } from './user';
@@ -39,7 +38,10 @@ export interface CasePersistedAttributes {
   duration: number | null;
   external_service: ExternalServicePersisted | null;
   owner: string;
-  settings: { syncAlerts: boolean; extractObservables?: boolean };
+  settings: {
+    syncAlerts: boolean;
+    extractObservables?: boolean;
+  };
   severity: CasePersistedSeverity;
   status: CasePersistedStatus;
   tags: string[];
@@ -62,6 +64,11 @@ export interface CasePersistedAttributes {
     version: number;
   } | null;
   extended_fields?: Record<string, unknown> | null;
+  /**
+   * Which path set `settings.extractObservables`. Server-owned: it is never part of a request or
+   * a response, and only the write codec for new cases keeps it.
+   */
+  extract_observables_source?: string;
 }
 
 type CasePersistedCustomFields = Array<{
@@ -77,31 +84,39 @@ export type CaseTransformedAttributesWithAttachmentStats = CaseAttributes & {
   total_events: number;
 };
 
-export const CaseTransformedAttributesRt = CaseAttributesRt;
+export const CaseTransformedAttributesSchema = CaseAttributesSchema;
 
-export const getPartialCaseTransformedAttributesRt = (): Type<
-  Partial<CaseTransformedAttributesWithAttachmentStats>
-> => {
-  const caseTransformedAttributesProps = CaseAttributesRt.types.reduce(
-    (acc, type) => Object.assign(acc, type.type.props),
-    {}
-  );
+export const ExtractObservablesSourceSchema = lazySchema(() =>
+  z.enum(['explicit', 'template', 'space_default', 'rule'])
+);
 
-  return exact(
-    /**
-     * We add the `total_comments`, `total_alerts`, and `total_events` properties to allow the
-     * attachments stats to be updated.
-     */
-    partial({
-      ...caseTransformedAttributesProps,
-      total_comments: number,
-      total_alerts: number,
-      total_events: number,
-    })
-  );
+export type ExtractObservablesSource = z.infer<typeof ExtractObservablesSourceSchema>;
+
+/**
+ * Write schema for new cases. `extract_observables_source` is set only by the server. It is outside
+ * `CaseAttributesSchema` on purpose: that schema also shapes the public request and response.
+ * Read schemas keep dropping this key, so it never reaches an API response.
+ */
+export const CaseCreateAttributesSchema = CaseAttributesSchema.extend({
+  extract_observables_source: lazySchema(() => ExtractObservablesSourceSchema.optional()),
+});
+
+export type CaseCreateAttributes = CaseTransformedAttributes & {
+  extract_observables_source?: ExtractObservablesSource;
 };
+
+/**
+ * We add the `total_comments`, `total_alerts`, and `total_events` properties to allow the
+ * attachments stats to be updated.
+ */
+export const getPartialCaseTransformedAttributesSchema = () =>
+  CaseAttributesSchema.partial().extend({
+    total_comments: z.number().optional(),
+    total_alerts: z.number().optional(),
+    total_events: z.number().optional(),
+  });
 
 export type CaseSavedObject = SavedObject<CasePersistedAttributes>;
 export type CaseSavedObjectTransformed = SavedObject<CaseTransformedAttributes>;
 
-export const OwnerRt = strict({ owner: string });
+export const OwnerSchema = z.object({ owner: z.string() });

@@ -13,10 +13,7 @@ import { EXPAND_ALERT_TEST_ID, RiskInputsTab } from './risk_inputs_tab';
 import { alertInputDataMock } from '../../mocks';
 import { RiskSeverity } from '../../../../../../common/search_strategy';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
-import {
-  EntityDetailsLeftPanelTab,
-  RiskScoreLeftPanelSubTab,
-} from '../../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import { RiskScoreLeftPanelSubTab } from '../../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 
 const mockUseRiskContributingAlerts = jest
   .fn()
@@ -42,6 +39,8 @@ jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
 jest.mock('../../../risk_score_timeline', () => ({
   RiskScoreTimeline: (props: {
     entityId: string;
+    from: string;
+    to: string;
     scoreType?: string;
     onPointSelect: (timestamp: string | undefined) => void;
     onRangeChange: (range: { from: string; to: string }) => void;
@@ -50,6 +49,8 @@ jest.mock('../../../risk_score_timeline', () => ({
       data-test-subj="mockRiskScoreTimeline"
       data-entity-id={props.entityId}
       data-score-type={props.scoreType}
+      data-from={props.from}
+      data-to={props.to}
     >
       <button
         type="button"
@@ -131,25 +132,7 @@ jest.mock('../../../../../flyout/entity_details/shared/hooks/use_entity_from_sto
   useEntityFromStore: (params: unknown) => mockUseEntityFromStore(params),
 }));
 
-const mockUseStableExpandableFlyoutState = jest.fn().mockReturnValue({});
-
-jest.mock('../../../../../flyout/shared/hooks/use_stable_expandable_flyout_state', () => ({
-  useStableExpandableFlyoutState: () => mockUseStableExpandableFlyoutState(),
-}));
-
-const mockOpenPreviewPanel = jest.fn();
-const mockOpenLeftPanel = jest.fn();
 const mockOnShowAlert = jest.fn();
-
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: () => ({
-    openPreviewPanel: mockOpenPreviewPanel,
-    openLeftPanel: mockOpenLeftPanel,
-  }),
-  useExpandableFlyoutState: () => ({}),
-  useExpandableFlyoutHistory: () => [],
-  ExpandableFlyout: () => null,
-}));
 
 const riskScore = {
   '@timestamp': '2021-08-19T16:00:00.000Z',
@@ -202,7 +185,6 @@ describe('RiskInputsTab', () => {
     mockUseResolutionGroup.mockReturnValue({ data: undefined });
     mockUseGetWatchlists.mockReturnValue({ data: [] });
     mockUseEntityFromStore.mockReturnValue({ entityRecord: null });
-    mockUseStableExpandableFlyoutState.mockReturnValue({});
     mockUseRiskScoreHistory.mockReturnValue({ data: undefined, isFetching: false });
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
     mockUseNewEntityAnalyticsPage.mockReturnValue(false);
@@ -1070,17 +1052,7 @@ describe('RiskInputsTab', () => {
     expect(getByTestId('risk-input-contexts-table')).toHaveTextContent('+4.50');
   });
 
-  it('initializes to resolution view when flyout state subTab is "resolution"', () => {
-    mockUseStableExpandableFlyoutState.mockReturnValue({
-      left: {
-        params: {
-          path: {
-            tab: EntityDetailsLeftPanelTab.RISK_INPUTS,
-            subTab: RiskScoreLeftPanelSubTab.RESOLUTION,
-          },
-        },
-      },
-    });
+  it('initializes to resolution view when the subTab prop is "resolution"', () => {
     mockUseResolutionGroup.mockReturnValue({
       data: {
         target: {
@@ -1107,6 +1079,7 @@ describe('RiskInputsTab', () => {
           entityName="elastic"
           onShowAlert={mockOnShowAlert}
           entityId="user:elastic"
+          subTab={RiskScoreLeftPanelSubTab.RESOLUTION}
         />
       </TestProviders>
     );
@@ -1275,17 +1248,8 @@ describe('RiskInputsTab', () => {
     expect(getByTestId('risk-input-contexts-table')).toHaveTextContent('wl-resolution');
   });
 
-  it('user tab selection overrides initial subTab from URL', () => {
-    mockUseStableExpandableFlyoutState.mockReturnValue({
-      left: {
-        params: {
-          path: {
-            tab: EntityDetailsLeftPanelTab.RISK_INPUTS,
-            subTab: RiskScoreLeftPanelSubTab.RESOLUTION,
-          },
-        },
-      },
-    });
+  it('user tab selection overrides the subTab prop and calls onSubTabChange', () => {
+    const onSubTabChange = jest.fn();
     mockUseResolutionGroup.mockReturnValue({
       data: {
         target: {
@@ -1312,6 +1276,8 @@ describe('RiskInputsTab', () => {
           entityName="elastic"
           onShowAlert={mockOnShowAlert}
           entityId="user:elastic"
+          subTab={RiskScoreLeftPanelSubTab.RESOLUTION}
+          onSubTabChange={onSubTabChange}
         />
       </TestProviders>
     );
@@ -1328,16 +1294,7 @@ describe('RiskInputsTab', () => {
       'true'
     );
 
-    expect(mockOpenLeftPanel).toHaveBeenCalledWith(
-      expect.objectContaining({
-        params: expect.objectContaining({
-          path: expect.objectContaining({
-            tab: EntityDetailsLeftPanelTab.RISK_INPUTS,
-            subTab: RiskScoreLeftPanelSubTab.ENTITY,
-          }),
-        }),
-      })
-    );
+    expect(onSubTabChange).toHaveBeenCalledWith(RiskScoreLeftPanelSubTab.ENTITY);
   });
 
   it('renders watchlist modifiers in context section', () => {
@@ -1603,7 +1560,9 @@ describe('RiskInputsTab', () => {
         (flag: string) => flag === 'riskScoreHistoryEnabled'
       );
 
-    const renderTab = () =>
+    const renderTab = (
+      props: Partial<React.ComponentProps<typeof RiskInputsTab<EntityType.user>>> = {}
+    ) =>
       render(
         <TestProviders>
           <RiskInputsTab
@@ -1611,6 +1570,7 @@ describe('RiskInputsTab', () => {
             entityName="elastic"
             entityId="user:elastic"
             onShowAlert={mockOnShowAlert}
+            {...props}
           />
         </TestProviders>
       );
@@ -1635,6 +1595,26 @@ describe('RiskInputsTab', () => {
       );
 
       expect(queryByTestId('mockRiskScoreTimeline')).not.toBeInTheDocument();
+    });
+
+    it('opens the timeline over the last 90 days by default', () => {
+      enableHistoryFlag();
+
+      const { getByTestId } = renderTab();
+
+      const timeline = getByTestId('mockRiskScoreTimeline');
+      expect(timeline).toHaveAttribute('data-from', 'now-90d');
+      expect(timeline).toHaveAttribute('data-to', 'now');
+    });
+
+    it('opens the timeline over the given history range', () => {
+      enableHistoryFlag();
+
+      const { getByTestId } = renderTab({ historyDefaultRange: { from: 'now-7d', to: 'now' } });
+
+      const timeline = getByTestId('mockRiskScoreTimeline');
+      expect(timeline).toHaveAttribute('data-from', 'now-7d');
+      expect(timeline).toHaveAttribute('data-to', 'now');
     });
 
     it('renders the timeline without a PiT indicator when no point is selected', () => {
@@ -1864,7 +1844,6 @@ describe('RiskInputsTab', () => {
 describe('RiskInputsTab - alert preview navigation', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseStableExpandableFlyoutState.mockReturnValue({});
     mockUseGetWatchlists.mockReturnValue({ data: [] });
     mockUseResolutionGroup.mockReturnValue({ data: undefined });
     mockUseEntityFromStore.mockReturnValue({ entityRecord: null });

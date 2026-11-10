@@ -60,7 +60,7 @@ export function MetricsChart({ chart, fetchStatus }: Props) {
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
-            <span>{chart.title}</span>
+            <h2>{chart.title}</h2>
           </EuiTitle>
         </EuiFlexItem>
         {chart.description && (

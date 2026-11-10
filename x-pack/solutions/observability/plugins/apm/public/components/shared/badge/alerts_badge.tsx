@@ -141,7 +141,9 @@ export function getAlertsBadgeDescriptor({
           query: {
             environment: navigationProps.environment,
             rangeFrom: navigationProps.rangeFrom,
-            rangeTo: navigationProps.rangeTo,
+            // Badge click-through: open Alerts with rangeTo=now so the list matches
+            // currently-active badge counts (end bump / lifetime overlap).
+            rangeTo: 'now',
           },
         })
       : undefined);

@@ -25,6 +25,7 @@ import {
   isPersistedLinkedByValueAnnotationsLayer,
   isRuntimeByReferenceAnnotationsLayer,
 } from '@kbn/lens-common';
+import { DataViewNotFoundError } from '../../../errors';
 import type {
   AnnotationLayerByValueType,
   AnnotationLayerType,
@@ -101,7 +102,7 @@ function convertDataLayerToAPI(
       throw new Error('X axis must be a bucket operation');
     }
 
-    // eslint-disable-next-line @typescript-eslint/naming-convention
+    // eslint-disable-next-line @kbn/compat/typescript-naming-convention
     const breakdown_by =
       visualization.splitAccessors && visualization.splitAccessors.length > 0
         ? operationFromColumn(visualization.splitAccessors[0], layer) // TODO temp fix for this PR until XY API will be upgraded to support multiple splits
@@ -134,7 +135,7 @@ function convertDataLayerToAPI(
           };
         })
         .filter(nonNullable) ?? [];
-    // eslint-disable-next-line @typescript-eslint/naming-convention
+    // eslint-disable-next-line @kbn/compat/typescript-naming-convention
     const aggregate_first =
       visualization.splitAccessors &&
       visualization.splitAccessors.length > 0 &&
@@ -162,7 +163,7 @@ function convertDataLayerToAPI(
   }
 
   const x = visualization.xAccessor ? getValueApiColumn(visualization.xAccessor, layer) : undefined;
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+  // eslint-disable-next-line @kbn/compat/typescript-naming-convention
   const breakdown_by =
     visualization.splitAccessors && visualization.splitAccessors.length > 0
       ? getValueApiColumn(visualization.splitAccessors[0], layer) // TODO temp fix for this PR until XY API will be upgraded to support multiple splits
@@ -344,25 +345,6 @@ function convertReferenceLineLayerToAPI(
 
 export function buildAPIReferenceLinesLayer(
   visualization: XYReferenceLineLayerConfig,
-  layer: Omit<FormBasedLayer, 'indexPatternId'>,
-  adHocDataViews: Record<string, unknown>,
-  resolveAxisId: ResolveAxisId,
-  references: SavedObjectReference[],
-  adhocReferences?: SavedObjectReference[]
-): ReferenceLineLayerTypeNoESQL;
-/**
- * @deprecated ES|QL reference lines are not yet supported
- */
-export function buildAPIReferenceLinesLayer(
-  visualization: XYReferenceLineLayerConfig,
-  layer: TextBasedLayer,
-  adHocDataViews: Record<string, unknown>,
-  resolveAxisId: ResolveAxisId,
-  references: SavedObjectReference[],
-  adhocReferences?: SavedObjectReference[]
-): ReferenceLineLayerTypeESQL;
-export function buildAPIReferenceLinesLayer(
-  visualization: XYReferenceLineLayerConfig,
   layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
   adHocDataViews: Record<string, unknown>,
   resolveAxisId: ResolveAxisId,
@@ -472,7 +454,7 @@ export function buildAPIAnnotationsLayer(
 
   if (hasQueryAnnotation && !dataViewId) {
     // A query annotation without a resolvable data view cannot be represented.
-    throw new Error('XY visualization: cannot find data view ID for annotation layer.');
+    throw new DataViewNotFoundError(layer.layerId);
   }
 
   const dataSource: DataSourceTypeNoESQL | null =

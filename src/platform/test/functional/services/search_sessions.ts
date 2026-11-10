@@ -12,6 +12,7 @@ import { INITIAL_SEARCH_SESSION_REST_VERSION } from '@kbn/data-plugin/server';
 import expect from '@kbn/expect';
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { FtrService } from '../ftr_provider_context';
 
 const APP_MENU_OVERFLOW_BUTTON = 'app-menu-overflow-button';
@@ -202,6 +203,7 @@ export class SearchSessionsService extends FtrService {
         .post('/internal/session/_find')
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_SEARCH_SESSION_REST_VERSION)
         .set('kbn-xsrf', 'anything')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .set('kbn-system-request', 'true')
         .send({
           page: 1,
@@ -227,6 +229,7 @@ export class SearchSessionsService extends FtrService {
             .delete(`/internal/session/${so.id}`)
             .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_SEARCH_SESSION_REST_VERSION)
             .set(`kbn-xsrf`, `anything`)
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .expect(200);
         })
       );

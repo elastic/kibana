@@ -5,26 +5,35 @@
  * 2.0.
  */
 
+import { screen } from '@testing-library/react';
 import { LicensePageHeader } from '../public/application/sections/license_dashboard/license_page_header';
 import { createMockLicense, getComponent } from './util';
 
 describe('LicenseStatus component', () => {
   test('should display normally when license is active', () => {
-    const rendered = getComponent(
+    getComponent(
       {
         license: createMockLicense('gold'),
       },
       LicensePageHeader
     );
-    expect(rendered.renderResult.asFragment()).toMatchSnapshot();
+    expect(screen.getByTestId('appHeaderTitle')).toHaveTextContent('Your Gold license is active');
+    expect(screen.getByTestId('appHeaderBadge')).toHaveTextContent('Active');
+    expect(screen.getByTestId('appHeaderDescription')).toHaveTextContent(
+      'Your license will expire on October 12, 2099 8:00 PM EDT'
+    );
   });
   test('should display display warning is expired', () => {
-    const rendered = getComponent(
+    getComponent(
       {
         license: createMockLicense('platinum', 0),
       },
       LicensePageHeader
     );
-    expect(rendered.renderResult.asFragment()).toMatchSnapshot();
+    expect(screen.getByTestId('appHeaderTitle')).toHaveTextContent(
+      'Your Platinum license has expired'
+    );
+    expect(screen.getByTestId('appHeaderBadge')).toHaveTextContent('Inactive');
+    expect(screen.getByTestId('appHeaderDescription')).toHaveTextContent('Your license expired on');
   });
 });
