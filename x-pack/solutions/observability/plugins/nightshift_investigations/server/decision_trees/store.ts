@@ -49,8 +49,9 @@ const RETRY_DELAY_MS = 50;
  * counts again.
  */
 export class DecisionTreeVersionWriteError extends Error {
-  constructor(public readonly pending: PendingVersionWrite) {
-    super(`Saved ${pending.treeId} but its version history write failed`);
+  constructor(public readonly pending: PendingVersionWrite, options?: { cause?: unknown }) {
+    const reason = options?.cause instanceof Error ? `: ${options.cause.message}` : '';
+    super(`Saved ${pending.treeId} but its version history write failed${reason}`, options);
     this.name = 'DecisionTreeVersionWriteError';
   }
 }
@@ -361,6 +362,15 @@ const commitContent = (
 
 const isConflict = (error: unknown): boolean => isResponseError(error) && error.statusCode === 409;
 
+/** A 4xx other than a timeout or throttle fails the same way again, so it is not retried. */
+const isPermanentClientError = (error: unknown): boolean =>
+  isResponseError(error) &&
+  error.statusCode !== undefined &&
+  error.statusCode >= 400 &&
+  error.statusCode < 500 &&
+  error.statusCode !== 408 &&
+  error.statusCode !== 429;
+
 const delay = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 
 /** Runs `attempt` again after a version conflict, up to {@link MAX_WRITE_ATTEMPTS} times in all. */
@@ -430,9 +440,13 @@ export const createDecisionTreeStore = ({
           { signal }
         );
         return;
-      } catch {
-        if (attemptNumber >= MAX_WRITE_ATTEMPTS) {
-          throw new DecisionTreeVersionWriteError(pending);
+      } catch (error) {
+        if (
+          signal?.aborted ||
+          isPermanentClientError(error) ||
+          attemptNumber >= MAX_WRITE_ATTEMPTS
+        ) {
+          throw new DecisionTreeVersionWriteError(pending, { cause: error });
         }
         await delay(RETRY_DELAY_MS * attemptNumber);
       }

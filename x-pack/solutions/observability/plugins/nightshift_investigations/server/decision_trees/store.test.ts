@@ -860,7 +860,8 @@ describe('version writes that fail after the head was saved', () => {
 
     expect(error).toBeInstanceOf(DecisionTreeVersionWriteError);
     expect(error).toMatchObject({
-      message: 'Saved symptom:checkout-high-latency but its version history write failed',
+      message:
+        'Saved symptom:checkout-high-latency but its version history write failed: version shard down',
       pending: {
         treeId: 'symptom:checkout-high-latency',
         version: 2,
@@ -896,5 +897,23 @@ describe('version writes that fail after the head was saved', () => {
     expect(error).toBeInstanceOf(DecisionTreeVersionWriteError);
     expect(error).toMatchObject({ pending });
     expect(esClient.index).toHaveBeenCalledTimes(5);
+  });
+
+  it('does not retry a version write the cluster rejects as invalid', async () => {
+    const pending = await pendingOfFailedCommit();
+    const esClient = createEsClient();
+    const rejected = new errors.ResponseError({
+      statusCode: 400,
+      body: { error: { type: 'mapper_parsing_exception' } },
+    } as never);
+    esClient.index.mockRejectedValue(rejected);
+
+    const error = await createStore(esClient)
+      .writePendingVersion(pending)
+      .catch((thrown: Error) => thrown);
+
+    expect(error).toBeInstanceOf(DecisionTreeVersionWriteError);
+    expect(error).toMatchObject({ cause: rejected });
+    expect(esClient.index).toHaveBeenCalledTimes(1);
   });
 });
