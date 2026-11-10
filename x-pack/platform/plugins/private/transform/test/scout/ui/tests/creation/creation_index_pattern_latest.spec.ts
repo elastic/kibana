@@ -46,7 +46,6 @@ test.describe('Create latest transform from a data view', { tag: tags.deployment
     const { transformManagement, transformWizard, datePicker } = pageObjects;
 
     await test.step('opens the wizard for the source data view', async () => {
-      await expect(transformManagement.statsBar).toBeVisible();
       await transformManagement.startTransformCreation('latest');
       await transformManagement.selectSource(testData.DATA_VIEWS.ECOMMERCE.title);
       await expect(transformWizard.defineStep).toBeVisible();

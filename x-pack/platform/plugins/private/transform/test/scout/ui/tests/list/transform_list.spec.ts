@@ -7,11 +7,22 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { test, testData } from '../../fixtures';
+import { getPivotTransformConfig, test, testData } from '../../fixtures';
 
 test.describe('Transform list', { tag: tags.deploymentAgnostic }, () => {
+  const transformConfig = getPivotTransformConfig('list_smoke', false);
+
+  test.beforeAll(async ({ apiServices }) => {
+    await apiServices.transform.createAndRunTransform(transformConfig);
+  });
+
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsTransformManager();
+  });
+
+  test.afterAll(async ({ apiServices }) => {
+    await apiServices.transform.deleteTransforms([transformConfig.transform_id]);
+    await apiServices.transform.deleteIndices({ index: transformConfig.dest.index });
   });
 
   test('renders the list and opens the creation wizard', async ({ page, pageObjects, config }) => {
@@ -20,7 +31,7 @@ test.describe('Transform list', { tag: tags.deploymentAgnostic }, () => {
     await test.step('loads the transform list page', async () => {
       await transformManagement.goto();
       expect(page.url()).toContain('/transform');
-      await expect(transformManagement.emptyPrompt).toBeVisible();
+      await expect(transformManagement.statsBar).toBeVisible();
       await expect(transformManagement.createButton).toBeVisible();
     });
 

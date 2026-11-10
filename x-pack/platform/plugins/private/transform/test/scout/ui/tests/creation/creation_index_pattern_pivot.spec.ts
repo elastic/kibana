@@ -157,7 +157,6 @@ test.describe('Create pivot transform from a data view', { tag: tags.deploymentA
       const destinationIndex = getDestinationIndex(data.transformId);
 
       await test.step('opens the wizard for the source data view', async () => {
-        await expect(transformManagement.statsBar).toBeVisible();
         await transformManagement.startTransformCreation('pivot');
         await transformManagement.selectSource(testData.DATA_VIEWS.ECOMMERCE.title);
         await expect(transformWizard.defineStep).toBeVisible();
