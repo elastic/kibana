@@ -43,7 +43,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...findTestPluginPaths(
           path.resolve(
             __dirname,
-            '../../plugins/private/test/response_ops/reporting_api_integration'
+            '../../test_plugins/response_ops/reporting_api_integration'
           )
         ),
       ],

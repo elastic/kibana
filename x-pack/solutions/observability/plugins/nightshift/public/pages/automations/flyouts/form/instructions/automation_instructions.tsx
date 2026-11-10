@@ -83,11 +83,13 @@ export const AutomationInstructions = ({
       fullWidth
       label={label}
       labelAppend={
-        <EuiText size="xs" color="subdued">
-          {isScheduled ? labels.required : labels.optional}
-        </EuiText>
+        readOnly ? undefined : (
+          <EuiText size="xs" color="subdued">
+            {isScheduled ? labels.required : labels.optional}
+          </EuiText>
+        )
       }
-      helpText={labels.limit}
+      helpText={readOnly ? undefined : labels.limit}
       isInvalid={!readOnly && Boolean(error)}
       error={readOnly ? undefined : error}
     >

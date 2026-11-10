@@ -117,8 +117,8 @@ describe('server/tracing/background_trace', () => {
             'nightshift.applied_writes',
             JSON.stringify([
               {
-                store: 'cortex',
-                item_id: 'cortex_service_checkout',
+                store: 'wiki',
+                item_id: 'wiki_service_checkout',
                 action: 'upsert',
                 before_content: 'secret before',
                 after_content: 'secret after',
@@ -153,8 +153,8 @@ describe('server/tracing/background_trace', () => {
       // With default includeLlmResponses: false / includeToolDetails: false, before/after content is stripped
       expect(JSON.parse(String(spanAttrWrites))).toEqual([
         {
-          store: 'cortex',
-          item_id: 'cortex_service_checkout',
+          store: 'wiki',
+          item_id: 'wiki_service_checkout',
           action: 'upsert',
         },
       ]);
@@ -164,7 +164,7 @@ describe('server/tracing/background_trace', () => {
       let receivedSpanWithoutSettings: unknown = 'not-called';
       const res1 = await withNightshiftBackgroundSpan(
         {
-          name: 'nightshift.cortexHydrate',
+          name: 'nightshift.wikiHydrate',
           traceId: 'be01f25c8dec495ba1346f752bdce9e0',
           spaceId: 'default',
         },

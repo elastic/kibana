@@ -82,12 +82,15 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
         `--plugin-path=${join(
           __dirname,
-          '../../plugins/private/test/response_ops/functional_with_es_ssl/alerts'
+          '../../test_plugins/response_ops/functional_with_es_ssl/alerts'
         )}`,
-        `--plugin-path=${join(__dirname, 'plugins/cases')}`,
         `--plugin-path=${join(
           __dirname,
-          '../../plugins/private/test/response_ops/alerting_api_integration/actions_simulators'
+          '../../test_plugins/security_investigations/functional_with_es_ssl/cases'
+        )}`,
+        `--plugin-path=${join(
+          __dirname,
+          '../../test_plugins/response_ops/alerting_api_integration/actions_simulators'
         )}`,
         `--xpack.trigger_actions_ui.enableExperimental=${JSON.stringify([
           'stackAlertsPage',

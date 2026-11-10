@@ -796,6 +796,78 @@ describe('cloudOnboardingDeploymentService', () => {
     });
   });
 
+  describe('update — dedicatedNamespaceTemplates', () => {
+    const writtenAttributes = () => soClient.create.mock.calls[0][1] as Record<string, unknown>;
+
+    it('stores the switch turned on', async () => {
+      const existing = makeAttributes({});
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', existing));
+      soClient.create.mockResolvedValue(makeSOResponse('deploy-1', existing));
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', {
+        dedicatedNamespaceTemplates: true,
+      });
+
+      expect(writtenAttributes()).toEqual(
+        expect.objectContaining({ dedicatedNamespaceTemplates: true })
+      );
+    });
+
+    it('keeps the stored value when an update does not mention it', async () => {
+      const existing = makeAttributes({ dedicatedNamespaceTemplates: true });
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', existing));
+      soClient.create.mockResolvedValue(makeSOResponse('deploy-1', existing));
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', { status: 'deploying' });
+
+      expect(writtenAttributes()).toEqual(
+        expect.objectContaining({ dedicatedNamespaceTemplates: true })
+      );
+    });
+
+    it('turns the switch off with false', async () => {
+      const existing = makeAttributes({ dedicatedNamespaceTemplates: true });
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', existing));
+      soClient.create.mockResolvedValue(makeSOResponse('deploy-1', existing));
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', {
+        dedicatedNamespaceTemplates: false,
+      });
+
+      expect(writtenAttributes()).toEqual(
+        expect.objectContaining({ dedicatedNamespaceTemplates: false })
+      );
+    });
+  });
+
+  describe('update — policySettings', () => {
+    const writtenAttributes = () => soClient.create.mock.calls[0][1] as Record<string, unknown>;
+
+    it('replaces the stored settings, so a setting left out is removed', async () => {
+      const existing = makeAttributes({
+        policySettings: { output_id: 'logstash-1', other: 'x' },
+      });
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', existing));
+      soClient.create.mockResolvedValue(makeSOResponse('deploy-1', existing));
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', {
+        policySettings: { output_id: 'kafka-1' },
+      });
+
+      expect(writtenAttributes().policySettings).toEqual({ output_id: 'kafka-1' });
+    });
+
+    it('keeps the stored settings when an update does not mention them', async () => {
+      const existing = makeAttributes({ policySettings: { output_id: 'logstash-1' } });
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', existing));
+      soClient.create.mockResolvedValue(makeSOResponse('deploy-1', existing));
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', { status: 'deploying' });
+
+      expect(writtenAttributes().policySettings).toEqual({ output_id: 'logstash-1' });
+    });
+  });
+
   describe('update — full-replace semantics', () => {
     it('removed serviceVars and policyIdsByInstance keys are absent from the written SO', async () => {
       // Initial record has stale keys that the update intentionally omits.

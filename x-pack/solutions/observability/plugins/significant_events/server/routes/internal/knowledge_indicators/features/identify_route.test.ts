@@ -91,7 +91,7 @@ const makeMaintenanceService = (state: SignificantEventsMaintenanceState = 'enab
 });
 
 const makeRequest = () => ({
-  spaceId: 'space-a',
+  spaceId: 'default',
   events: {
     aborted$: {
       subscribe: jest.fn(),
@@ -413,7 +413,7 @@ describe('inferred feature identification route', () => {
     const getKnowledgeIndicatorClient = jest.fn();
     const handlerParams = {
       params: { path: { sourceId: 'logs.test' }, body: null },
-      request: {},
+      request: { spaceId: 'default' },
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
         getKnowledgeIndicatorClient,
@@ -471,7 +471,7 @@ describe('inferred feature identification route', () => {
       })
     );
     expect(telemetry.trackFeaturesIdentified).not.toHaveBeenCalled();
-    expect(ensureEnabled).toHaveBeenCalledWith({ request, spaceId: 'space-a' });
+    expect(ensureEnabled).toHaveBeenCalledWith({ request, spaceId: 'default' });
   });
 
   it('installs the feature identification agent in the request space before identifying', async () => {
@@ -481,7 +481,7 @@ describe('inferred feature identification route', () => {
 
     expect(agentBuilder.agents.ensure).toHaveBeenCalledWith(
       expect.objectContaining({
-        spaceId: 'space-a',
+        spaceId: 'default',
         agent: expect.objectContaining({ id: FEATURE_IDENTIFICATION_AGENT_ID }),
       })
     );
@@ -547,7 +547,7 @@ describe('computed feature identification route', () => {
     const getKnowledgeIndicatorClient = jest.fn();
     const handlerParams = {
       params: { path: { sourceId: 'logs.test' }, body: null },
-      request: {},
+      request: { spaceId: 'default' },
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
         getKnowledgeIndicatorClient,
@@ -618,7 +618,7 @@ describe('should identify features route', () => {
         path: { sourceId: 'logs.test' },
         query: { thresholdHours: 24 },
       },
-      request: {},
+      request: { spaceId: 'default' },
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
         sourcesClient: { get: jest.fn().mockResolvedValue({ source: { id: 'logs.test' } }) },

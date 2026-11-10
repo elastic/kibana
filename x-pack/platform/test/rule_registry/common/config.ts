@@ -90,7 +90,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...findTestPluginPaths([
             path.resolve(
               __dirname,
-              '../../../plugins/private/test/response_ops/alerting_api_integration'
+              '../../../test_plugins/response_ops/alerting_api_integration'
             ),
           ]),
           '--xpack.ruleRegistry.write.enabled=true',

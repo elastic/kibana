@@ -10,7 +10,7 @@ import { createTestConfig } from '../../config.base';
 
 const sampleTaskPlugin = path.resolve(
   __dirname,
-  '../../../../../plugins/private/test/response_ops/plugin_api_integration/sample_task_plugin'
+  '../../../../../test_plugins/response_ops/plugin_api_integration/sample_task_plugin'
 );
 
 /**

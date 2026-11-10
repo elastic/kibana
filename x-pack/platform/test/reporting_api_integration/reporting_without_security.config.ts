@@ -12,7 +12,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const apiConfig = await readConfigFile(require.resolve('./reporting_and_security.config'));
   const pluginPath = path.resolve(
     __dirname,
-    '../../plugins/private/test/response_ops/reporting_api_integration'
+    '../../test_plugins/response_ops/reporting_api_integration'
   );
   return {
     ...apiConfig.getAll(),
