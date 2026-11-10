@@ -18,6 +18,9 @@ export default createServerlessFeatureFlagTestConfig<typeof services>({
     '--xpack.alerting_v2.enabled=true',
     // Rules run as the space's detection service account, which is off by default on Serverless.
     '--xpack.security.serviceAccounts.enabled=true',
+    // A UIAM service account that schedules a rule executor task needs a UIAM key; Task Manager
+    // only grants one when this is on, and otherwise tries an Elasticsearch key and fails.
+    '--xpack.task_manager.grant_uiam_api_keys=true',
     '--uiSettings.globalOverrides.alerting:v2:enabled=true',
   ],
   junit: {
