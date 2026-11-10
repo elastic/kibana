@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DynamicToolDefinition } from '@kbn/agent-builder-server';
+import type { DynamicToolDefinition } from '@kbn/agent-builder-common';
 import { formatDynamicToolsNotice, getDynamicToolsInstructions } from './dynamic_tools';
 
 describe('dynamic tools prompt', () => {

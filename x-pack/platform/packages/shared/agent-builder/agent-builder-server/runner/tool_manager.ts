@@ -6,12 +6,7 @@
  */
 
 import type { StructuredTool } from '@langchain/core/tools';
-import type {
-  BrowserApiToolMetadata,
-  ToolDefinitionWithSchema,
-  ToolOrigin,
-  ToolType,
-} from '@kbn/agent-builder-common';
+import type { BrowserApiToolMetadata, ToolOrigin, ToolType } from '@kbn/agent-builder-common';
 import type { Logger } from '@kbn/logging';
 import type { ToolReturnSummarizerFn } from '../tools/builtin';
 import type { AgentEventEmitterFn, ExecutableTool } from '..';
@@ -28,16 +23,6 @@ export interface AddToolOptions {
 
 export type ExecutableToolWithOrigin = ExecutableTool & { origin: ToolOrigin };
 export type BrowserToolWithOrigin = BrowserApiToolMetadata & { origin: ToolOrigin };
-
-/**
- * A tool reachable through the `execute_dynamic_tool` meta-tool, as written into the transcript.
- * `parameters` is the same JSON schema the provider receives for a natively bound tool.
- */
-export interface DynamicToolDefinition {
-  tool_id: string;
-  description: string;
-  parameters: ToolDefinitionWithSchema['schema'];
-}
 
 export enum ToolManagerToolType {
   executable = 'executable',

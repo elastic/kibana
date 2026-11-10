@@ -7,7 +7,7 @@
 
 import type { JsonObject } from '@kbn/utility-types';
 import type { UserIdAndName, UserPrincipalType } from '../base/users';
-import type { ToolOrigin, ToolType } from '../tools/definition';
+import type { ToolDefinitionWithSchema, ToolOrigin, ToolType } from '../tools/definition';
 import type { ToolResult } from '../tools/tool_result';
 import type { ExecutionStatus, SerializedExecutionError } from '../agents/execution_status';
 import type {
@@ -1002,4 +1002,21 @@ export interface CompactionSummary {
    * `summarized_up_to` on write, for readers that predate it.
    */
   covered_round_ids?: string[];
+  /**
+   * Definitions of the dynamic tools registered when the summary was generated, re-injected after
+   * it since it hides the tool results that first carried them. Snapshotted rather than read
+   * live so the rendered notice stays identical until the next compaction: a tool loaded later
+   * is seen through its own tool result. Absent when no dynamic tool was registered.
+   */
+  dynamic_tools?: DynamicToolDefinition[];
+}
+
+/**
+ * A tool reachable through the `execute_dynamic_tool` meta-tool, as written into the transcript.
+ * `parameters` is the same JSON schema the provider receives for a natively bound tool.
+ */
+export interface DynamicToolDefinition {
+  tool_id: string;
+  description: string;
+  parameters: ToolDefinitionWithSchema['schema'];
 }

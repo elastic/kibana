@@ -451,6 +451,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
         analyticsService: context.analyticsService,
         agentId,
         executionId,
+        toolManager,
       },
       cycleHooks,
     });

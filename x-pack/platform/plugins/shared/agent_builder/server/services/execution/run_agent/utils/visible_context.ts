@@ -8,9 +8,8 @@
 import type { Logger } from '@kbn/core/server';
 import type { BaseMessage } from '@langchain/core/messages';
 import { isPreExecutionWorkflowStep } from '@kbn/agent-builder-common';
-import type { ToolManager, ToolResultStore } from '@kbn/agent-builder-server/runner';
+import type { ToolResultStore } from '@kbn/agent-builder-server/runner';
 import type { HandoverParams, PromptImageResolver } from '../prompts/types';
-import { renderDynamicToolDefinition } from '../../runner/utils/dynamic_tool_registry';
 import type { CurrentRun } from '../transient_state';
 import type { ProcessedConversation } from './prepare_conversation';
 import type { ToolCallResultTransformer } from './tool_summarization';
@@ -49,12 +48,6 @@ export interface VisibleContextDeps {
   /** Base transformer (tool-specific summarization); substitution marks are layered on top. */
   resultTransformer: ToolCallResultTransformer;
   logger: Logger;
-  /**
-   * Source of the dynamic tools still available, re-injected after the compaction summary since
-   * it hides the tool results that first carried their definitions. Read at render time, as a
-   * skill loaded mid-round adds to it. Not needed by the compactor, which only renders history.
-   */
-  toolManager?: ToolManager;
 }
 
 /** The context as the summary and the substitution marks leave it. */
@@ -121,10 +114,8 @@ export const renderVisibleContext = async (
 ): Promise<BaseMessage[]> => {
   const view = buildContextView({ conversation, run, conversationTimestamp }, deps);
   const notices = noticeRendererFor(conversation);
-  const dynamicToolDefinitions =
-    run.compactionSummary && deps.toolManager
-      ? await Promise.all(deps.toolManager.listDynamicTools().map(renderDynamicToolDefinition))
-      : undefined;
+  // the answer agent has no tools, so it should not get dynamic tool definitions
+  const dynamicToolDefinitions = phase === 'research' ? run.compactionSummary?.dynamic_tools : undefined;
   const history = await prepareMessages({
     conversation,
     roundResultTransformer: view.historyTransformer,

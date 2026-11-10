@@ -8,7 +8,7 @@
 import { internalTools } from '@kbn/agent-builder-common/tools';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
-import type { DynamicToolDefinition } from '@kbn/agent-builder-server';
+import type { DynamicToolDefinition } from '@kbn/agent-builder-common';
 
 const executeDynamicTool = sanitizeToolId(internalTools.executeDynamicTool);
 

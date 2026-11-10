@@ -45,7 +45,6 @@ export type {
   WritableToolResultStore,
   ToolPromptManager,
   ToolStateManager,
-  DynamicToolDefinition,
 } from './runner';
 export { getAgentFromRunContext } from './runner';
 export type {

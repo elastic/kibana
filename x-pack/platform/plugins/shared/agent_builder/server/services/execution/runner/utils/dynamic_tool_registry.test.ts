@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { ToolOrigin, ToolType } from '@kbn/agent-builder-common';
 import type { ExecutableToolWithOrigin } from '@kbn/agent-builder-server/runner/tool_manager';
-import { DynamicToolRegistry, renderDynamicToolDefinition } from './dynamic_tool_registry';
+import { DynamicToolRegistry } from './dynamic_tool_registry';
 
 const createTool = (
   id: string,
@@ -61,55 +61,5 @@ describe('DynamicToolRegistry', () => {
     registry.register([second]);
     expect(registry.get('a')).toBe(second);
     expect(registry.list()).toHaveLength(1);
-  });
-});
-
-describe('renderDynamicToolDefinition', () => {
-  it('renders the id, description and the input JSON schema', async () => {
-    const tool = createTool('platform.core.cases', {
-      getSchema: () =>
-        z.object({
-          query: z.string().describe('The search query'),
-          limit: z.number().optional(),
-        }),
-    });
-
-    const definition = await renderDynamicToolDefinition(tool);
-
-    expect(definition).toEqual({
-      tool_id: 'platform.core.cases',
-      description: 'Description of platform.core.cases',
-      parameters: {
-        type: 'object',
-        properties: {
-          query: { type: 'string', description: 'The search query' },
-          limit: { type: 'number' },
-        },
-        required: ['query'],
-      },
-    });
-  });
-
-  it('prefers getLlmDescription over description, like native binding', async () => {
-    const tool = createTool('a', {
-      configuration: { index: 'logs-*' },
-      getLlmDescription: ({ description, config }) =>
-        `${description} (configured for ${(config as { index: string }).index})`,
-    });
-
-    const definition = await renderDynamicToolDefinition(tool);
-
-    expect(definition.description).toBe('Description of a (configured for logs-*)');
-  });
-
-  it('awaits an async schema', async () => {
-    const tool = createTool('a', {
-      getSchema: async () => z.object({ flag: z.boolean() }),
-    });
-
-    const definition = await renderDynamicToolDefinition(tool);
-
-    expect(definition.parameters.properties).toEqual({ flag: { type: 'boolean' } });
-    expect(definition.parameters.required).toEqual(['flag']);
   });
 });

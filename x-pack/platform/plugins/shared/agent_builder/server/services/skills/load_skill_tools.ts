@@ -7,20 +7,19 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { ToolOrigin } from '@kbn/agent-builder-common';
+import { ToolOrigin, type DynamicToolDefinition } from '@kbn/agent-builder-common';
 import { getAgentFromRunContext } from '@kbn/agent-builder-server';
 import type {
   AgentBuilderAnalytics,
   AgentBuilderTracking,
-  DynamicToolDefinition,
   ToolProvider,
 } from '@kbn/agent-builder-server';
 import type { RunContext, SkillsService, ToolManager } from '@kbn/agent-builder-server/runner';
 import { ToolManagerToolType } from '@kbn/agent-builder-server/runner';
 import type { ExecutableToolWithOrigin } from '@kbn/agent-builder-server/runner/tool_manager';
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
+import { renderDynamicToolDefinition } from '@kbn/agent-builder-genai-utils/langchain';
 import { pickTools } from '../execution/run_agent/utils/select_tools';
-import { renderDynamicToolDefinition } from '../execution/runner/utils/dynamic_tool_registry';
 import { classifySkill } from '../../telemetry/utils';
 
 export const MAX_SKILL_REGISTRY_TOOLS = 25;

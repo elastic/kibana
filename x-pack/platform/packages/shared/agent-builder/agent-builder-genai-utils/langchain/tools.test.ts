@@ -10,7 +10,12 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { ChatEventType, ToolType } from '@kbn/agent-builder-common';
 import type { ExecutableTool } from '@kbn/agent-builder-server';
 import { toDynamicToolEvent } from '@kbn/agent-builder-server/runner';
-import { createToolIdMappings, toolToLangchain, sanitizeToolId } from './tools';
+import {
+  createToolIdMappings,
+  renderDynamicToolDefinition,
+  toolToLangchain,
+  sanitizeToolId,
+} from './tools';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 
 const createTool = (
@@ -301,5 +306,59 @@ describe('sanitizeToolId', () => {
   it('removes forbidden characters', () => {
     expect(sanitizeToolId('test+()')).toEqual('test');
     expect(sanitizeToolId('a&b^c')).toEqual('abc');
+  });
+});
+
+describe('renderDynamicToolDefinition', () => {
+  it('renders the id, description and the input JSON schema', async () => {
+    const tool = createTool('platform.core.cases', {
+      description: 'Description of platform.core.cases',
+      getSchema: () =>
+        z.object({
+          query: z.string().describe('The search query'),
+          limit: z.number().optional(),
+        }),
+    });
+
+    const definition = await renderDynamicToolDefinition(tool);
+
+    expect(definition).toEqual({
+      tool_id: 'platform.core.cases',
+      description: 'Description of platform.core.cases',
+      parameters: {
+        type: 'object',
+        properties: {
+          query: { type: 'string', description: 'The search query' },
+          limit: { type: 'number' },
+        },
+        required: ['query'],
+      },
+    });
+  });
+
+  it('uses the same description as the native binding', async () => {
+    const tool = createTool('a', {
+      description: 'Description of a',
+      configuration: { index: 'logs-*' },
+      getLlmDescription: ({ description, config }) =>
+        `${description} (configured for ${(config as { index: string }).index})`,
+    });
+
+    const definition = await renderDynamicToolDefinition(tool);
+    const langchainTool = await toolToLangchain({ tool, toolId: tool.id, logger });
+
+    expect(definition.description).toBe('Description of a (configured for logs-*)');
+    expect(definition.description).toBe(langchainTool.description);
+  });
+
+  it('awaits an async schema', async () => {
+    const tool = createTool('a', {
+      getSchema: async () => z.object({ flag: z.boolean() }),
+    });
+
+    const definition = await renderDynamicToolDefinition(tool);
+
+    expect(definition.parameters.properties).toEqual({ flag: { type: 'boolean' } });
+    expect(definition.parameters.required).toEqual(['flag']);
   });
 });

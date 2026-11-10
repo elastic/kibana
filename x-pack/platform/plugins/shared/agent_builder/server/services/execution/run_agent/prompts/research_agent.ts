@@ -31,7 +31,6 @@ export const getResearchAgentPrompt = async (
     resultTransformer,
     resultStore,
     logger,
-    toolManager,
     conversationTimestamp,
     imageResolver,
   } = params;
@@ -46,7 +45,7 @@ export const getResearchAgentPrompt = async (
       imageResolver,
       conversationTimestamp,
     },
-    { resultStore, resultTransformer, logger, toolManager }
+    { resultStore, resultTransformer, logger }
   );
 
   return [['system', await getAgentSystemMessage(params)], ...contextMessages];

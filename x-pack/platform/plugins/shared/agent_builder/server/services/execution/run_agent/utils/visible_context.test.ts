@@ -15,6 +15,7 @@ import type {
   Conversation,
   ConversationRoundStep,
   ConverseInput,
+  DynamicToolDefinition,
   RoundCompleteEvent,
   TimelineEvent,
   ToolCallStep,
@@ -26,7 +27,6 @@ import {
   ConversationRoundStatus,
   ConversationRoundStepType,
   TimelineEventType,
-  ToolOrigin,
   ToolResultType,
   createInjectedContextStep,
   createPreExecutionWorkflowStep,
@@ -55,11 +55,7 @@ import {
   createEmptyConversation,
   createRound,
 } from '../../../../test_utils/conversations';
-import {
-  createAgentHandlerContextMock,
-  createToolManagerMock,
-} from '../../../../test_utils/runner';
-import { createMockedExecutableTool } from '../../../../test_utils/tools';
+import { createAgentHandlerContextMock } from '../../../../test_utils/runner';
 import { createRootStateChunkEvent } from '../../../../test_utils/graph_stream';
 import { roundsToEvents, userMessageActor } from '../../../conversation/client/rounds_to_events';
 import { sourceEvents } from '../../../conversation/client/source_events';
@@ -330,26 +326,28 @@ describe('renderVisibleContext', () => {
   });
 
   describe('dynamic tool definitions', () => {
-    const toolManagerListing = (ids: string[]) => {
-      const toolManager = createToolManagerMock();
-      toolManager.listDynamicTools.mockReturnValue(
-        ids.map((id) => ({
-          ...createMockedExecutableTool({ id, description: `${id} description` }),
-          origin: ToolOrigin.inline,
-        }))
-      );
-      return toolManager;
+    const definition = (id: string): DynamicToolDefinition => ({
+      tool_id: id,
+      description: `${id} description`,
+      parameters: { type: 'object', properties: {} },
+    });
+
+    const runWithSnapshot = (dynamicTools?: DynamicToolDefinition[]): CurrentRun => {
+      const current = run([], { cursor: { round_id: 'a', tool_call_id: 'a1' } });
+      return {
+        ...current,
+        compactionSummary: { ...current.compactionSummary!, dynamic_tools: dynamicTools },
+      };
     };
 
-    it('re-injects the registry definitions right after the summary, read at render time', async () => {
-      const toolManager = toolManagerListing(['dynamic-1']);
+    it('re-injects the summary snapshot right after the summary', async () => {
       const messages = await renderVisibleContext(
         {
           conversation: conversation(twoRoundTimeline()),
-          run: run([], { cursor: { round_id: 'a', tool_call_id: 'a1' } }),
+          run: runWithSnapshot([definition('dynamic-1')]),
           phase: 'research',
         },
-        { ...deps(), toolManager }
+        deps()
       );
       const rendered = text(messages);
 
@@ -360,27 +358,53 @@ describe('renderVisibleContext', () => {
       expect(rendered).toContain('dynamic-1 description');
     });
 
-    it('renders nothing without a summary, even with registered tools', async () => {
-      const toolManager = toolManagerListing(['dynamic-1']);
-      const messages = await renderVisibleContext(
-        { conversation: conversation(twoRoundTimeline()), run: run([]), phase: 'research' },
-        { ...deps(), toolManager }
+    it('renders the same notice when tools are loaded after the compaction', async () => {
+      const snapshot = runWithSnapshot([definition('dynamic-1')]);
+      const before = await renderVisibleContext(
+        { conversation: conversation(twoRoundTimeline()), run: snapshot, phase: 'research' },
+        deps()
+      );
+      // a skill loaded after the compaction adds a tool call to the run, not to the snapshot
+      const after = await renderVisibleContext(
+        {
+          conversation: conversation(twoRoundTimeline()),
+          run: { ...snapshot, steps: [...snapshot.steps, call('late-load')] },
+          phase: 'research',
+        },
+        deps()
       );
 
-      expect(toolManager.listDynamicTools).not.toHaveBeenCalled();
-      expect(text(messages)).not.toContain('<dynamic_tools>');
+      const notice = (messages: BaseMessage[]) =>
+        messages.find((message) => String(message.content).startsWith('<dynamic_tools>'))?.content;
+      expect(notice(after)).toEqual(notice(before));
+      expect(text(after)).not.toContain('late-load description');
     });
 
-    it('renders nothing when the registry is empty', async () => {
+    it('renders nothing for a summary without a snapshot', async () => {
       const messages = await renderVisibleContext(
         {
           conversation: conversation(twoRoundTimeline()),
-          run: run([], { cursor: { round_id: 'a', tool_call_id: 'a1' } }),
+          run: runWithSnapshot(undefined),
           phase: 'research',
         },
-        { ...deps(), toolManager: toolManagerListing([]) }
+        deps()
       );
 
+      expect(text(messages)).toContain('SUMMARY_TEXT');
+      expect(text(messages)).not.toContain('<dynamic_tools>');
+    });
+
+    it('renders nothing in the answer phase, which has no tools', async () => {
+      const messages = await renderVisibleContext(
+        {
+          conversation: conversation(twoRoundTimeline()),
+          run: runWithSnapshot([definition('dynamic-1')]),
+          phase: 'answer',
+        },
+        deps()
+      );
+
+      expect(text(messages)).toContain('SUMMARY_TEXT');
       expect(text(messages)).not.toContain('<dynamic_tools>');
     });
   });

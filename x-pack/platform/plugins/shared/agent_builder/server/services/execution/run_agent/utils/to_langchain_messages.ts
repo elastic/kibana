@@ -19,12 +19,8 @@ import {
 } from '@kbn/agent-builder-common';
 import { createAIMessage, createUserMessage } from '@kbn/agent-builder-genai-utils/langchain';
 import { generateXmlTree, type XmlNode } from '@kbn/agent-builder-genai-utils/tools/utils';
-import type {
-  ProcessedAttachment,
-  ProcessedRoundInput,
-  DynamicToolDefinition,
-} from '@kbn/agent-builder-server';
-import type { CompactionSummary } from '@kbn/agent-builder-common';
+import type { ProcessedAttachment, ProcessedRoundInput } from '@kbn/agent-builder-server';
+import type { CompactionSummary, DynamicToolDefinition } from '@kbn/agent-builder-common';
 import {
   formatAwaitingPromptNotice,
   formatInterruptionNotice,
