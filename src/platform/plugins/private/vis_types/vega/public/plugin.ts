@@ -17,16 +17,11 @@ import {
   take,
   type Subscription,
 } from 'rxjs';
-import { i18n } from '@kbn/i18n';
 import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type {
-  BasicVisualizationClient,
-  VisTypeAlias,
-  VisualizationsSetup,
-} from '@kbn/visualizations-plugin/public';
+import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import type {
   Setup as InspectorSetup,
   Start as InspectorStart,
@@ -57,19 +52,17 @@ import {
 import type { IServiceSettings } from './vega_view/vega_map_view/service_settings/service_settings_types';
 
 import type { ConfigSchema } from '../server/config';
-import type { VegaByReferenceState } from '../server/embeddable/schema';
 
 import { getVegaInspectorView } from './vega_inspector/vega_inspector';
 import { getServiceSettingsLazy } from './vega_view/vega_map_view/service_settings/get_service_settings_lazy';
 import {
   VEGA_API_ENABLED_FLAG,
   VEGA_EMBEDDABLE_TYPE,
-  VEGA_SAVED_OBJECT_TYPE,
   VEGA_STANDALONE_EMBEDDABLE_FLAG,
 } from '../common/constants';
 import { ADD_VEGA_EMBEDDABLE_ACTION_ID, ADD_VEGA_PANEL_ACTION_ID } from './constants';
-import { getVegaVisualizationClient } from './library/vega_library_client';
-import { VegaIcon, vegaTitleInWizard } from './vega_icon';
+import { registerVegaAddFromLibrary } from './embeddable/register_vega_add_from_library';
+import { getVegaLibraryVisTypeAlias } from './vega_library_vis_type_alias';
 
 /** @internal */
 export interface VegaVisualizationDependencies {
@@ -159,41 +152,9 @@ export class VegaPlugin implements Plugin<void, void> {
       return vegaVisType;
     });
 
-    // Lists Vega library items in the Visualize library next to legacy Vega visualizations.
-    const libraryAlias: VisTypeAlias = {
-      name: 'vegaLibrary',
-      title: vegaTitleInWizard,
-      icon: 'visualizeApp',
-      description: i18n.translate('visTypeVega.libraryAlias.description', {
-        defaultMessage: 'Use the Vega syntax to create new types of visualizations.',
-        description: 'Vega and Vega-Lite are product names and should not be translated',
-      }),
-      stage: 'production',
-      disableCreate: true,
-      appExtensions: {
-        visualizations: {
-          docTypes: [VEGA_SAVED_OBJECT_TYPE],
-          searchFields: ['title^3', 'description'],
-          client: (_contentManagement, http) =>
-            getVegaVisualizationClient(http) as BasicVisualizationClient,
-          toListItem: ({ id, type, attributes, updatedAt, managed }) => ({
-            id,
-            title: attributes.title,
-            description: attributes.description,
-            updatedAt,
-            managed,
-            icon: VegaIcon,
-            typeTitle: vegaTitleInWizard,
-            stage: 'production',
-            savedObjectType: type,
-            editor: { onEdit: openLibraryEditor },
-          }),
-        },
-      },
-    };
-
     // Registered in `start`, once the feature flag can be read.
-    this.registerLibraryAlias = () => visualizations.registerAlias(libraryAlias);
+    this.registerLibraryAlias = () =>
+      visualizations.registerAlias(getVegaLibraryVisTypeAlias(openLibraryEditor));
 
     embeddable.registerEmbeddablePublicDefinition(VEGA_EMBEDDABLE_TYPE, async () => {
       const [[startCore, startDeps], { vegaEmbeddableFactory }] = await Promise.all([
@@ -211,18 +172,7 @@ export class VegaPlugin implements Plugin<void, void> {
     });
 
     // Registered in `start`, once the feature flags can be read.
-    this.registerAddFromLibrary = () =>
-      embeddable.registerAddFromLibraryType({
-        onAdd: (container, savedObject) => {
-          container.addNewPanel<VegaByReferenceState>(
-            { panelType: VEGA_EMBEDDABLE_TYPE, serializedState: { ref_id: savedObject.id } },
-            { displaySuccessMessage: true }
-          );
-        },
-        savedObjectType: VEGA_SAVED_OBJECT_TYPE,
-        savedObjectName: vegaTitleInWizard,
-        getIconForSavedObject: () => VegaIcon,
-      });
+    this.registerAddFromLibrary = () => registerVegaAddFromLibrary(embeddable);
   }
 
   public start(core: CoreStart, deps: VegaPluginStartDependencies) {
