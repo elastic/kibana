@@ -13,17 +13,9 @@
 
 import { tags } from '@kbn/scout';
 import type { EsClient } from '@kbn/scout';
-import {
-  selectEvaluators,
-  type DefaultEvaluators,
-  type EvaluationDataset,
-  type EvalsExecutorClient,
-  type Example,
-} from '@kbn/evals';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { HttpHandler } from '@kbn/core/public';
 import { evaluate as base } from '../src/evaluate';
-import { callConverse } from '../src/converse_task';
+import { createEvaluateConverse } from '../src/evaluate_converse';
 import {
   createAlertRowsEvaluator,
   createSkillLoadedEvaluator,
@@ -150,68 +142,25 @@ const buildListAlertDoc = (index: number) => {
   };
 };
 
-interface ListAlertsEvalExample extends Example {
-  input: { question: string };
-  output: { expected: string };
-}
-
-function createEvaluateAlertList({
-  fetch,
-  connector,
-  evaluators,
-  executorClient,
-  log,
-}: {
-  fetch: HttpHandler;
-  connector: { id: string };
-  evaluators: DefaultEvaluators;
-  executorClient: EvalsExecutorClient;
-  log: ToolingLog;
-}) {
-  return async function evaluateAlertList({
-    dataset,
-    criteria,
-  }: {
-    dataset: { name: string; description: string; examples: ListAlertsEvalExample[] };
-    criteria: string[];
-  }) {
-    const selectedEvaluators = selectEvaluators([
-      evaluators.criteria(criteria),
-      ...createToolUsageEvaluators(log),
-      createAlertRowsEvaluator(log),
-      createSkillLoadedEvaluator('alert-analysis'),
-      ...Object.values(evaluators.traceBasedEvaluators),
-    ]);
-
-    await executorClient.runExperiment(
-      {
-        datasets: [
-          {
-            name: dataset.name,
-            description: dataset.description,
-            examples: dataset.examples,
-          } satisfies EvaluationDataset,
-        ],
-        task: async ({ input }) =>
-          callConverse({
-            fetch,
-            connectorId: connector.id,
-            question: input.question,
-            attachments: [],
-            log,
-          }),
-      },
-      selectedEvaluators
-    );
-  };
-}
-
-type EvaluateAlertList = ReturnType<typeof createEvaluateAlertList>;
+type EvaluateAlertList = ReturnType<typeof createEvaluateConverse>;
 
 const evaluate = base.extend<{ evaluateAlertList: EvaluateAlertList }, {}>({
   evaluateAlertList: [
     ({ fetch, connector, evaluators, executorClient, log }, use) => {
-      use(createEvaluateAlertList({ fetch, connector, evaluators, executorClient, log }));
+      use(
+        createEvaluateConverse({
+          fetch,
+          connector,
+          evaluators,
+          executorClient,
+          log,
+          extraEvaluators: [
+            ...createToolUsageEvaluators(log),
+            createAlertRowsEvaluator(log),
+            createSkillLoadedEvaluator('alert-analysis'),
+          ],
+        })
+      );
     },
     { scope: 'test' },
   ],

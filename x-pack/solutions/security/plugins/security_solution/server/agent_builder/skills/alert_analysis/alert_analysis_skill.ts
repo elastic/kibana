@@ -62,10 +62,10 @@ Use this skill when:
   - IOC context for IPs, domains, or file hashes found in the alert
 
 ### 4. Assess Entity Risk
-- Look up the involved hosts and users, including their risk scores, using 'security.get_entity'
+- If 'security.get_entity' is available, use it to look up the involved hosts and users, including their risk scores
+- If it is not available, skip this step and state that entity risk was not checked. Do not load another skill or search for another tool to replace it
 - High risk scores (>80) on involved entities increase alert priority
 - Compare current risk level with historical baseline
-- For deeper entity profiling (asset criticality, behavioral history, entity store lookups), reference the entity-analytics skill
 
 ### 5. Determine Disposition
 - **True Positive** → Escalate: Create a case, attach the alert, recommend containment actions
@@ -77,12 +77,12 @@ Use this skill when:
 - Compile a comprehensive analysis with supporting evidence
 - Provide clear threat assessment: severity, confidence level, affected scope
 - Recommend specific next steps based on disposition
-- Reference the entity-analytics skill for deeper entity profiling or asset criticality review
+- Suggest the entity-analytics skill to the user for deeper entity profiling or asset criticality review. Do not load it unless the user asks
 
 ## Tool Selection Guardrails
 - For list/prioritization/count questions about security alerts (e.g. "how many alerts", "high/critical alerts in last 24h"), use only 'security.alerts' unless explicit correlation by alertId is requested.
 - For Security Labs intel questions (e.g. "Lazarus Group techniques"), use only 'security.security_labs_search'.
-- For risk score questions (e.g. "risk score for host DC01"), use only 'security.get_entity'.
+- For risk score questions (e.g. "risk score for host DC01"), use only 'security.get_entity'. If it is not available, say that risk scores are not available and do not load another skill or search for another tool.
 - For correlation requests that include an alertId, call 'security.alert-analysis.get-related-alerts' directly.
 - Do NOT use platform.core.generate_esql, platform.core.execute_esql, platform.core.search, or workflow tools for alert inventory, count, or related-alert correlation. Those platform tools can cross Kibana spaces; 'security.alerts' stays scoped to the current space.
 

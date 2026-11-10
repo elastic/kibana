@@ -45,6 +45,11 @@ export const SECURITY_ALERTS_TOOL_ID = securityTool('alerts');
 // Caps the raw alert rows handed to the model: an uncapped list-style query returned 100 alerts and ~160k tokens of context.
 export const MAX_ALERT_ROWS = 25;
 
+// One row more than the cap. The query generator writes `LIMIT <this>` when the user gives no number, so
+// getting this many rows back shows that more rows exist. With a limit equal to the cap, a full page
+// would look the same as "exactly this many rows exist".
+const ALERT_QUERY_ROW_LIMIT = MAX_ALERT_ROWS + 1;
+
 // `_id` duplicates `kibana.alert.uuid`, and `_index` is a metadata field that fails ES|QL validation in KEEP.
 const KEEP_EXCLUDED_METADATA_FIELDS = new Set(['_id', '_index']);
 
@@ -72,27 +77,40 @@ const enhanceQueryForAlerts = (nlQuery: string, isCount?: boolean): string => {
 const isEsqlResult = (result: ToolHandlerResult): result is ToolHandlerResult<EsqlResults> =>
   result.type === ToolResultType.esqlResults;
 
-// Aggregated results (STATS) have small rows and the user may have asked for a number of them, so they are not capped.
+// Aggregated results (STATS) have small rows and the user may have asked for a number of them, so they are not cut.
 const isAggregation = (query: string): boolean => /\bSTATS\b/i.test(query);
+
+const buildNote = (message: string): ToolHandlerResult => ({
+  tool_result_id: getToolResultId(),
+  type: ToolResultType.other,
+  data: { message },
+});
 
 const capAlertRows = (results: ToolHandlerResult[]): ToolHandlerResult[] =>
   results.flatMap((result) => {
-    if (!isEsqlResult(result) || isAggregation(result.data.query)) {
+    if (!isEsqlResult(result)) {
       return [result];
     }
-    const { values } = result.data;
+    const { query, values } = result.data;
+    if (isAggregation(query)) {
+      // At the default limit, the generator may have cut the groups. Say so, and do not cut more.
+      return values.length === ALERT_QUERY_ROW_LIMIT
+        ? [
+            result,
+            buildNote(
+              `The query returned ${values.length} grouped rows, which is the default limit, so there may be more groups. Ask for a larger number explicitly or narrow the query to see them.`
+            ),
+          ]
+        : [result];
+    }
     if (values.length <= MAX_ALERT_ROWS) {
       return [result];
     }
     return [
       { ...result, data: { ...result.data, values: values.slice(0, MAX_ALERT_ROWS) } },
-      {
-        tool_result_id: getToolResultId(),
-        type: ToolResultType.other,
-        data: {
-          message: `Showing the first ${MAX_ALERT_ROWS} of ${values.length} rows returned by the query. Narrow the query (shorter time window, severity, host or rule) to see the rest.`,
-        },
-      },
+      buildNote(
+        `Showing the first ${MAX_ALERT_ROWS} of at least ${values.length} matching rows. Narrow the query (shorter time window, severity, host or rule) to see the rest.`
+      ),
     ];
   });
 
@@ -108,6 +126,7 @@ export const alertsTool = (
       'This is THE tool for finding, counting, aggregating, or summarizing Security detection alerts in the current Kibana space ' +
       '(e.g. "how many alerts", "high/critical alerts in last 24h", "summarize open alerts"). ' +
       "Always searches the current space's exact alerts alias only. " +
+      `List-style results show at most ${MAX_ALERT_ROWS} alert rows, and a note says when rows were cut: narrow the question (shorter time window, severity, host or rule) to see the rest. Grouped (STATS) results are not cut, and a note says when they may be limited by the query. ` +
       'When the user asks for a count, set isCount to true.',
     schema: alertsSchema,
     availability: {
@@ -170,7 +189,7 @@ export const alertsTool = (
         events,
         logger,
         timeRange,
-        rowLimit: MAX_ALERT_ROWS,
+        rowLimit: ALERT_QUERY_ROW_LIMIT,
       });
 
       return { results: capAlertRows(results) };

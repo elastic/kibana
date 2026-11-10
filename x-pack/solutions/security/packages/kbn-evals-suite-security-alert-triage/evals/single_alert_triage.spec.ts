@@ -19,17 +19,9 @@
 
 import { tags } from '@kbn/scout';
 import type { EsClient } from '@kbn/scout';
-import {
-  selectEvaluators,
-  type DefaultEvaluators,
-  type EvaluationDataset,
-  type EvalsExecutorClient,
-  type Example,
-} from '@kbn/evals';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { HttpHandler } from '@kbn/core/public';
 import { evaluate as base } from '../src/evaluate';
-import { callConverse } from '../src/converse_task';
+import { createEvaluateConverse } from '../src/evaluate_converse';
 import {
   attachmentReadCompliance,
   createSkillLoadedEvaluator,
@@ -57,86 +49,25 @@ const SINGLE_ALERT_DOC = {
   'threat.technique.name': 'OS Credential Dumping',
 };
 
-// ── Types ─────────────────────────────────────────────────────────────────────
-
-interface SingleAlertEvalExample extends Example {
-  input: { question: string };
-  output: { expected: string };
-  metadata?: {
-    attachments?: Array<{ type: string; data?: unknown }>;
-    expectedAttachmentReads?: number;
-  };
-}
-
-// ── Fixture factory ───────────────────────────────────────────────────────────
-
-function createEvaluateSingleAlertTriage({
-  fetch,
-  connector,
-  evaluators,
-  executorClient,
-  log,
-}: {
-  fetch: HttpHandler;
-  connector: { id: string };
-  evaluators: DefaultEvaluators;
-  executorClient: EvalsExecutorClient;
-  log: ToolingLog;
-}) {
-  return async function evaluateSingleAlertTriage({
-    dataset,
-    criteria,
-  }: {
-    dataset: { name: string; description: string; examples: SingleAlertEvalExample[] };
-    criteria: string[];
-  }) {
-    const selectedEvaluators = selectEvaluators([
-      evaluators.criteria(criteria),
-      attachmentReadCompliance,
-      ...createToolUsageEvaluators(log),
-      createSkillLoadedEvaluator('alert-analysis'),
-      ...Object.values(evaluators.traceBasedEvaluators),
-    ]);
-
-    await executorClient.runExperiment(
-      {
-        datasets: [
-          {
-            name: dataset.name,
-            description: dataset.description,
-            examples: dataset.examples,
-          } satisfies EvaluationDataset,
-        ],
-        task: async ({ input, metadata }) => {
-          const { attachments = [] } = metadata ?? {};
-          return callConverse({
-            fetch,
-            connectorId: connector.id,
-            question: input.question,
-            attachments,
-            log,
-          });
-        },
-      },
-      selectedEvaluators
-    );
-  };
-}
-
 // ── Evaluate fixture extension ─────────────────────────────────────────────────
 
-type EvaluateSingleAlertTriage = ReturnType<typeof createEvaluateSingleAlertTriage>;
+type EvaluateSingleAlertTriage = ReturnType<typeof createEvaluateConverse>;
 
 const evaluate = base.extend<{ evaluateSingleAlertTriage: EvaluateSingleAlertTriage }, {}>({
   evaluateSingleAlertTriage: [
     ({ fetch, connector, evaluators, executorClient, log }, use) => {
       use(
-        createEvaluateSingleAlertTriage({
+        createEvaluateConverse({
           fetch,
           connector,
           evaluators,
           executorClient,
           log,
+          extraEvaluators: [
+            attachmentReadCompliance,
+            ...createToolUsageEvaluators(log),
+            createSkillLoadedEvaluator('alert-analysis'),
+          ],
         })
       );
     },

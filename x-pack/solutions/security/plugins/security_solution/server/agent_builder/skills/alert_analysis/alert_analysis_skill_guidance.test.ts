@@ -57,6 +57,19 @@ describe('alertAnalysisSkill guidance for literal-following models (security-tea
     expect(fetchesUnconditionally && !isConditionalOnAttachment).toBe(false);
   });
 
+  // Why: security.get_entity exists only when the Entity Store V2 index exists. Where it is missing,
+  // a skill that names it without a fallback sends the model looking for it (extra load_skill calls).
+  it('says what to do when security.get_entity is not available', () => {
+    const { content } = alertAnalysisSkill;
+    const step4 = content.slice(content.indexOf('### 4.'), content.indexOf('### 5.'));
+
+    expect(step4).toMatch(/if 'security\.get_entity' is available/i);
+    expect(step4).toMatch(/if it is not available, skip this step/i);
+    expect(step4).not.toMatch(/entity-analytics skill/i);
+    expect(content).toMatch(/do not load another skill or search for another tool/i);
+    expect(content).toMatch(/do not load it unless the user asks/i);
+  });
+
   it('only names registry tools that are loadable when skills are enabled', async () => {
     const skillsEnabledUiSettings = uiSettingsServiceMock.createClient();
     skillsEnabledUiSettings.get.mockResolvedValue(true); // agentBuilder:experimentalFeatures

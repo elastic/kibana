@@ -77,6 +77,7 @@ interface RawToolStep {
   results?: Array<{ type?: string; data?: unknown }>;
 }
 
+// getToolCallSteps from @kbn/evals drops the step params, and the skill-loaded check needs them.
 const getRawToolSteps = (output: unknown): RawToolStep[] =>
   ((output as { steps?: RawToolStep[] })?.steps ?? []).filter((step) => step?.type === 'tool_call');
 

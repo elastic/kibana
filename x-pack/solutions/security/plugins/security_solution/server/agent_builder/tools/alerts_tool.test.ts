@@ -109,6 +109,11 @@ describe('alertsTool', () => {
       expect(tool.tags).toEqual(['security', 'alerts']);
     });
 
+    it('tells the model about the row limit and that grouped results are not cut', () => {
+      expect(tool.description).toContain(`at most ${MAX_ALERT_ROWS} alert rows`);
+      expect(tool.description).toContain('Grouped (STATS) results are not cut');
+    });
+
     it('describes space-scoped search behavior', () => {
       expect(tool.description).toContain("current space's exact alerts alias");
       expect(tool.description).toMatch(/^Do NOT use platform\.core\.generate_esql/);
@@ -168,7 +173,7 @@ describe('alertsTool', () => {
         modelProvider: mockModelProvider,
         events: mockEvents,
         logger: mockLogger,
-        rowLimit: MAX_ALERT_ROWS,
+        rowLimit: MAX_ALERT_ROWS + 1,
       });
     });
 
@@ -216,13 +221,16 @@ describe('alertsTool', () => {
           })
         )) as ToolHandlerStandardReturn;
 
-      it('asks the search tool to limit generated queries to the row cap', async () => {
+      // Why one more than the cap: the generator writes `LIMIT <rowLimit>` when the user gives no
+      // number. With a limit equal to the cap, a full page of 25 rows looks the same as "exactly 25
+      // rows exist", and the model cannot tell that rows are missing. One extra row shows it.
+      it('asks the query generator for one row more than the cap, to detect overflow', async () => {
         (runSearchTool as jest.Mock).mockResolvedValue([]);
 
         await callHandler();
 
         expect(runSearchTool).toHaveBeenCalledWith(
-          expect.objectContaining({ rowLimit: MAX_ALERT_ROWS })
+          expect.objectContaining({ rowLimit: MAX_ALERT_ROWS + 1 })
         );
       });
 
@@ -239,7 +247,7 @@ describe('alertsTool', () => {
         expect(note).toMatchObject({
           type: ToolResultType.other,
           data: {
-            message: expect.stringContaining(`${MAX_ALERT_ROWS} of ${total}`),
+            message: expect.stringContaining(`${MAX_ALERT_ROWS} of at least ${total}`),
           },
         });
       });
@@ -265,6 +273,35 @@ describe('alertsTool', () => {
         const { results } = await callHandler();
 
         expect(results).toEqual([grouped]);
+      });
+
+      it('cuts the probe row and says that more rows exist when the generator hit its default limit', async () => {
+        (runSearchTool as jest.Mock).mockResolvedValue([buildEsqlResult(MAX_ALERT_ROWS + 1)]);
+
+        const { results } = await callHandler();
+
+        const [esqlResult, note] = results;
+        expect((esqlResult.data as { values: unknown[][] }).values).toHaveLength(MAX_ALERT_ROWS);
+        expect(note).toMatchObject({
+          data: {
+            message: expect.stringContaining(`${MAX_ALERT_ROWS} of at least ${MAX_ALERT_ROWS + 1}`),
+          },
+        });
+      });
+
+      // Why: a grouped result at the default limit may be cut by the generator, and nothing else says so.
+      it('keeps a grouped result at the default limit and says that more groups may exist', async () => {
+        const groupedQuery = 'FROM alerts | STATS count = COUNT(*) BY host.name | LIMIT 26';
+        const grouped = buildEsqlResult(MAX_ALERT_ROWS + 1, groupedQuery, 'host.name');
+        (runSearchTool as jest.Mock).mockResolvedValue([grouped]);
+
+        const { results } = await callHandler();
+
+        expect(results[0]).toEqual(grouped);
+        expect(results[1]).toMatchObject({
+          type: ToolResultType.other,
+          data: { message: expect.stringContaining('may be more groups') },
+        });
       });
 
       it('passes error results through untouched', async () => {
