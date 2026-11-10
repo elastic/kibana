@@ -48,8 +48,8 @@ const copyToDashboardDisabledLabel = i18n.translate(
   }
 );
 
-const deletePanelsLabel = i18n.translate('dashboard.selectedPanelsToolbar.deletePanelsLabel', {
-  defaultMessage: 'Delete panels',
+const removeLabel = i18n.translate('dashboard.selectedPanelsToolbar.removeButtonLabel', {
+  defaultMessage: 'Remove',
 });
 
 /** Floating toolbar shown while panels are selected; exposes the bulk actions available for the selection */
@@ -136,13 +136,13 @@ export const SelectedPanelsToolbar = () => {
           </EuiFlexItem>
         )}
         <EuiFlexItem grow={false}>
-          <EuiToolTip content={deletePanelsLabel} disableScreenReaderOutput>
+          <EuiToolTip content={removeLabel} disableScreenReaderOutput>
             <EuiButtonIcon
               iconType="trash"
               color="danger"
               size="s"
               iconSize="m"
-              aria-label={deletePanelsLabel}
+              aria-label={removeLabel}
               onClick={onRemove}
               data-test-subj="dashboardSelectedPanelsRemove"
             />

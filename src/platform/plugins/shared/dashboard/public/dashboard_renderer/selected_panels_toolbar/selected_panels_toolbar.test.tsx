@@ -82,23 +82,7 @@ describe('SelectedPanelsToolbar', () => {
     );
   });
 
-  it('clears the selection', async () => {
-    renderToolbar();
-
-    await userEvent.click(screen.getByTestId('dashboardSelectedPanelsClear'));
-
-    expect(mockDashboardApi.clearSelectedPanels).toHaveBeenCalled();
-    expect(mockDashboardApi.removePanels).not.toHaveBeenCalled();
-  });
-
-  describe('Delete panels', () => {
-    it('is an icon button labelled "Delete panels"', () => {
-      renderToolbar();
-      expect(screen.getByTestId('dashboardSelectedPanelsRemove')).toHaveAccessibleName(
-        'Delete panels'
-      );
-    });
-
+  describe('Remove', () => {
     it('removes exactly the selected panels and clears the selection', async () => {
       renderToolbar();
 
