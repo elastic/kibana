@@ -208,24 +208,40 @@ function lineageGraph() {
     });
   });
 
-  // An accepted candidate *is* the next incumbent, so children attach to its config hash.
-  const byHash = new Map();
-  nodes.forEach((node) => { if (node.hash) byHash.set(node.hash, node.id); });
+  // Only an accepted candidate becomes the next incumbent, so only accepted nodes can be
+  // parents. Registering every variant meant a rejected round whose edit happened to produce
+  // the same tree as an earlier accepted one (round 14 reproduced round 9's) overwrote the
+  // mapping, adopted its own siblings and became its own parent — which collapsed five
+  // generations into three and pushed ten rounds outside the drawing.
+  const byHash = new Map([[DATA.baseHash, DATA.baseHash]]);
+  DATA.rounds.forEach((round) => {
+    if (round.gate && round.gate.accepted && round.configHash) {
+      byHash.set(round.configHash, round.configHash + '-' + round.round);
+    }
+  });
   nodes.forEach((node) => {
     if (!node.parent) return;
     // Children attach to the *node* whose variant hash they branched from: an accepted
     // candidate is the next incumbent, so later rounds hang off it rather than off start.
-    node.parentId = byHash.has(node.parent) ? byHash.get(node.parent) : DATA.baseHash;
+    const parentId = byHash.has(node.parent) ? byHash.get(node.parent) : DATA.baseHash;
+    node.parentId = parentId === node.id ? DATA.baseHash : parentId;
   });
 
   // depth = generation; siblings are stacked vertically within their generation
-  const depthOf = (node, guard = 0) =>
-    !node.parentId || guard > 20 ? 0 : depthOf(nodes.get(node.parentId), guard + 1) + 1;
+  const depthCache = new Map();
+  const depthOf = (node, seen = new Set()) => {
+    if (!node || !node.parentId || seen.has(node.id)) return 0;
+    if (depthCache.has(node.id)) return depthCache.get(node.id);
+    seen.add(node.id);
+    const depth = depthOf(nodes.get(node.parentId), seen) + 1;
+    depthCache.set(node.id, depth);
+    return depth;
+  };
   const list = [...nodes.values()].map((node) => ({ ...node, depth: depthOf(node) }));
   const byDepth = new Map();
   list.forEach((node) => { byDepth.set(node.depth, [...(byDepth.get(node.depth) || []), node]); });
 
-  const W = 230, H = 74, GX = 70, GY = 18;
+  const W = 210, H = 66, GX = 56, GY = 12;
   const position = new Map();
   [...byDepth.keys()].sort((a, b) => a - b).forEach((depth) => {
     byDepth.get(depth).sort((a, b) => (a.round ?? -1) - (b.round ?? -1)).forEach((node, index) => {
@@ -233,8 +249,11 @@ function lineageGraph() {
     });
   });
 
-  const width = 20 + ([...byDepth.keys()].length) * (W + GX);
-  const height = 20 + Math.max(...[...byDepth.values()].map((group) => group.length)) * (H + GY);
+  // Size from the furthest node actually placed, not from the number of distinct depths: those
+  // differ the moment a depth is skipped, and anything beyond the viewBox is silently invisible.
+  const placed = [...position.values()];
+  const width = 20 + Math.max(...placed.map((point) => point.x)) + W;
+  const height = 20 + Math.max(...placed.map((point) => point.y)) + H;
 
   const edges = list.filter((node) => node.parentId).map((node) => {
     const from = position.get(node.parentId), to = position.get(node.id);
@@ -261,10 +280,17 @@ function lineageGraph() {
       '</g>';
   }).join('');
 
-  return '<div style="overflow:auto;border:1px solid var(--line);border-radius:8px;background:var(--bg)">' +
-    '<svg width="' + width + '" height="' + height + '" style="display:block">' + edges + boxes + '</svg></div>' +
-    '<p class="muted">' + campaigns.length + ' campaign(s). Each column is a generation: every candidate hangs off the variant it was proposed from. ' +
-    'Green edges are acceptances — only those extend the chain; red nodes are dead ends that were measured and rejected.</p>';
+  // Scale to the panel rather than overflowing it: the graph is wider than a viewport by the
+  // third generation and taller than one by the ninth sibling, and a scrollbar hid two thirds
+  // of the rounds — the whole point of the view is seeing the shape at once.
+  return '<div style="border:1px solid var(--line);border-radius:8px;background:var(--bg);padding:6px">' +
+    '<svg viewBox="0 0 ' + width + ' ' + height + '" width="100%" height="' +
+    Math.min(height, 620) + '" preserveAspectRatio="xMinYMin meet" style="display:block">' +
+    edges + boxes + '</svg></div>' +
+    '<p class="muted">' + (nodes.size - 1) + ' rounds across ' + campaigns.length +
+    ' campaign(s). Each column is a generation: every candidate hangs off the variant it was ' +
+    'proposed from. Green edges are acceptances — only those extend the chain; red nodes are ' +
+    'dead ends that were measured and rejected, yellow ones never reached the gate.</p>';
 }
 
 /* ------------------------------------------------------------- campaign */
