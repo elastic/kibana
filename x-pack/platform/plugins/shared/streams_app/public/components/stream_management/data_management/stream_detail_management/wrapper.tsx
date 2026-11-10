@@ -30,9 +30,10 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamDetail } from '../../../../hooks/use_stream_detail';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
 import {
-  useNavigateToStreamsList,
-  useStreamsListLink,
-} from '../../../streams_layout/use_streams_list_link';
+  useNavigateToStreamsHome,
+  useStreamOrigin,
+  useStreamsHomeLink,
+} from '../../../../hooks/use_streams_home_link';
 import {
   STREAMS_HISTOGRAM_NUM_DATA_POINTS,
   useStreamDocCountsFetch,
@@ -75,8 +76,9 @@ export function Wrapper({
   topContent?: ReactNode;
 }) {
   const router = useStreamsAppRouter();
-  const streamsListLink = useStreamsListLink();
-  const navigateToStreamsList = useNavigateToStreamsList();
+  const streamsHomeLink = useStreamsHomeLink();
+  const navigateToStreamsHome = useNavigateToStreamsHome();
+  const origin = useStreamOrigin();
   const { definition } = useStreamDetail();
   const {
     dependencies: {
@@ -280,8 +282,8 @@ export function Wrapper({
       params: { path: { name: definition.stream.name } },
       signal: abortController.signal,
     });
-    navigateToStreamsList();
-  }, [definition, abortController.signal, navigateToStreamsList, streamsRepositoryClient]);
+    navigateToStreamsHome();
+  }, [definition, abortController.signal, navigateToStreamsHome, streamsRepositoryClient]);
 
   const backToStreamsLabel = i18n.translate('xpack.streams.streamDetailView.backToStreamsLabel', {
     defaultMessage: 'Streams',
@@ -338,7 +340,7 @@ export function Wrapper({
     label: currentTab.label,
     href: router.link('/{key}/management/{tab}', {
       path: { key: streamId, tab: tabName },
-      query: { rangeFrom, rangeTo },
+      query: { rangeFrom, rangeTo, origin },
     }),
     isSelected: tab === tabName,
     'data-test-subj': getTabTestSubj(tabName, currentTab),
@@ -350,7 +352,7 @@ export function Wrapper({
     <>
       <StreamsAppHeader
         title={streamId}
-        back={{ href: streamsListLink, label: backToStreamsLabel }}
+        back={{ href: streamsHomeLink, label: backToStreamsLabel }}
         badges={appHeaderBadges}
         tabs={appHeaderTabs}
         menu={appHeaderMenu}

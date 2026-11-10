@@ -12,7 +12,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { MissingDataStreamCallout } from './missing_data_stream_callout';
 
 const mockFetch = jest.fn();
-const mockNavigateToStreamsList = jest.fn();
+const mockNavigateToStreamsHome = jest.fn();
 const mockAddSuccess = jest.fn();
 const mockOpenConfirm = jest.fn();
 
@@ -34,8 +34,8 @@ jest.mock('../../../../hooks/use_kibana', () => ({
   }),
 }));
 
-jest.mock('../../../streams_layout/use_streams_list_link', () => ({
-  useNavigateToStreamsList: () => mockNavigateToStreamsList,
+jest.mock('../../../../hooks/use_streams_home_link', () => ({
+  useNavigateToStreamsHome: () => mockNavigateToStreamsHome,
 }));
 
 describe('MissingDataStreamCallout', () => {
@@ -109,7 +109,7 @@ describe('MissingDataStreamCallout', () => {
       signal: expect.anything(),
     });
     expect(mockAddSuccess).toHaveBeenCalled();
-    expect(mockNavigateToStreamsList).toHaveBeenCalled();
+    expect(mockNavigateToStreamsHome).toHaveBeenCalled();
   });
 
   it('does not delete if confirmation is cancelled', async () => {
@@ -133,7 +133,7 @@ describe('MissingDataStreamCallout', () => {
       'DELETE /api/streams/{name} 2023-10-31',
       expect.anything()
     );
-    expect(mockNavigateToStreamsList).not.toHaveBeenCalled();
+    expect(mockNavigateToStreamsHome).not.toHaveBeenCalled();
   });
 
   describe('canDelete prop', () => {

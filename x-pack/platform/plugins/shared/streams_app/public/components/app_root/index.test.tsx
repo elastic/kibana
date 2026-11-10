@@ -11,10 +11,6 @@ import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { StreamsAppStartDependencies } from '../../types';
 import type { StreamsAppServices } from '../../services/types';
 import { useShowClassicTab } from '../streams_layout/use_show_classic_tab';
-import {
-  CLASSIC_TAB_ORIGIN_KEY,
-  rememberClassicTabOrigin,
-} from '../streams_layout/use_streams_list_link';
 import { AppRoot } from '.';
 
 const mockFetch = jest.fn();
@@ -77,13 +73,5 @@ describe('AppRoot', () => {
       expect(screen.getByTestId('classicTabProbe')).toHaveTextContent('false-true')
     );
     expect(mockFetch).toHaveBeenCalledTimes(2);
-  });
-
-  it('forgets the Classic tab origin when the app unmounts', () => {
-    mockFetch.mockResolvedValue({ streams: [] });
-    rememberClassicTabOrigin(true);
-    renderAppRoot().unmount();
-
-    expect(sessionStorage.getItem(CLASSIC_TAB_ORIGIN_KEY)).toBeNull();
   });
 });

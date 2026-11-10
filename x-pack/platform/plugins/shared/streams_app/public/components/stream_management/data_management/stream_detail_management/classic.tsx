@@ -10,7 +10,7 @@ import type { Streams } from '@kbn/streams-schema';
 import type { AppHeaderBadge } from '@kbn/app-header';
 import { useStreamsAppParams } from '../../../../hooks/use_streams_app_params';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
-import { useStreamsListLink } from '../../../streams_layout/use_streams_list_link';
+import { useStreamsHomeLink } from '../../../../hooks/use_streams_home_link';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -91,7 +91,7 @@ function ClassicStreamDetailManagementContent({
     path: { key, tab },
   } = useStreamsAppParams('/{key}/management/{tab}');
   const router = useStreamsAppRouter();
-  const streamsListLink = useStreamsListLink();
+  const streamsHomeLink = useStreamsHomeLink();
   const { rangeFrom, rangeTo } = useTimeRange();
   const importLifecycleFlyout = useImportLifecycleFlyoutContext();
 
@@ -124,7 +124,7 @@ function ClassicStreamDetailManagementContent({
       <>
         <StreamsAppHeader
           title={key}
-          back={{ href: streamsListLink, label: backToStreamsLabel }}
+          back={{ href: streamsHomeLink, label: backToStreamsLabel }}
           badges={classicErrorBadges}
         />
         <StreamsAppPageTemplate.Body>

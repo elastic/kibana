@@ -15,6 +15,7 @@ import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-
 import type { AppHeaderTabAction, AppHeaderTabActions } from '@kbn/app-header';
 import { buildRequestPreviewCodeContent } from '../shared/utils';
 import type { StatefulStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
+import type { StreamOrigin } from '../../../../hooks/use_streams_home_link';
 
 interface LifecycleTabActionsParams {
   definition: Streams.ingest.all.GetResponse;
@@ -22,6 +23,7 @@ interface LifecycleTabActionsParams {
   share: SharePublicStart;
   router: StatefulStreamsAppRouter;
   timeRange: { rangeFrom: string; rangeTo: string };
+  origin?: StreamOrigin;
   onImportFromStream?: () => void;
   isImportFromStreamDisabled?: boolean;
 }
@@ -38,6 +40,7 @@ export const buildLifecycleTabActions = ({
   share,
   router,
   timeRange,
+  origin,
   onImportFromStream,
   isImportFromStreamDisabled = false,
 }: LifecycleTabActionsParams): AppHeaderTabActions => {
@@ -130,7 +133,7 @@ export const buildLifecycleTabActions = ({
         onClick: () => {
           router.push('/{key}/management/{tab}', {
             path: { key: parentId, tab: 'lifecycle' },
-            query: { rangeFrom: timeRange.rangeFrom, rangeTo: timeRange.rangeTo },
+            query: { rangeFrom: timeRange.rangeFrom, rangeTo: timeRange.rangeTo, origin },
           });
         },
       });

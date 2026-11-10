@@ -14,9 +14,10 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsAppParams } from '../../../../hooks/use_streams_app_params';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
 import {
-  useNavigateToStreamsList,
-  useStreamsListLink,
-} from '../../../streams_layout/use_streams_list_link';
+  useNavigateToStreamsHome,
+  useStreamOrigin,
+  useStreamsHomeLink,
+} from '../../../../hooks/use_streams_home_link';
 import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { QueryStreamSchemaEditor } from '../../../query_streams/query_stream_schema_editor';
@@ -52,8 +53,9 @@ export function QueryStreamDetailManagement({
     },
   } = useKibana();
   const router = useStreamsAppRouter();
-  const streamsListLink = useStreamsListLink();
-  const navigateToStreamsList = useNavigateToStreamsList();
+  const streamsHomeLink = useStreamsHomeLink();
+  const navigateToStreamsHome = useNavigateToStreamsHome();
+  const origin = useStreamOrigin();
   const {
     path: { key, tab },
   } = useStreamsAppParams('/{key}/management/{tab}');
@@ -119,11 +121,11 @@ export function QueryStreamDetailManagement({
       params: { path: { name: definition.stream.name } },
       signal: abortController.signal,
     });
-    navigateToStreamsList();
+    navigateToStreamsHome();
   }, [
     definition.stream.name,
     abortController.signal,
-    navigateToStreamsList,
+    navigateToStreamsHome,
     streamsRepositoryClient,
   ]);
 
@@ -171,7 +173,7 @@ export function QueryStreamDetailManagement({
     label,
     href: router.link('/{key}/management/{tab}', {
       path: { key, tab: tabKey },
-      query: { rangeFrom, rangeTo },
+      query: { rangeFrom, rangeTo, origin },
     }),
     isSelected: tab === tabKey,
     'data-test-subj': `queryStreamDetails-${tabKey}-tab`,
@@ -187,7 +189,7 @@ export function QueryStreamDetailManagement({
     <>
       <StreamsAppHeader
         title={key}
-        back={{ href: streamsListLink, label: backToStreamsLabel }}
+        back={{ href: streamsHomeLink, label: backToStreamsLabel }}
         badges={badges}
         tabs={appHeaderTabs}
         menu={appHeaderMenu}

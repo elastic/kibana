@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { AppHeaderTab } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
@@ -19,7 +19,6 @@ import { DEFAULT_STREAMS_LAYOUT_TAB, isStreamsLayoutTab, STREAMS_LAYOUT_TABS } f
 import { streamsLayoutTabs } from './tabs';
 import { UnitNotFoundPrompt } from './unit_not_found_prompt';
 import { useShowClassicTab } from './use_show_classic_tab';
-import { rememberClassicTabOrigin } from './use_streams_list_link';
 import { useUnitCheck } from './use_unit_check';
 
 const techPreviewBadge = {
@@ -29,11 +28,27 @@ const techPreviewBadge = {
   }),
 };
 
+/** Renders the V2 layout once the Classic tab check has settled, so the tab bar never changes. */
+export function StreamsV2LayoutGate() {
+  const { loading, showClassic } = useShowClassicTab();
+
+  if (loading) {
+    return (
+      <StreamsAppPageTemplate.EmptyPrompt
+        data-test-subj="streamsClassicTabLoading"
+        icon={<EuiLoadingSpinner size="xl" />}
+      />
+    );
+  }
+
+  return <StreamsLayout showClassic={showClassic} />;
+}
+
 /**
  * Top-level tabbed layout for Streams. It owns the tab bar and delegates each
  * tab's content to the matching entry in the tab registry.
  */
-export function StreamsLayout() {
+export function StreamsLayout({ showClassic }: { showClassic: boolean }) {
   const {
     path: { unitId, tab },
   } = useStreamsAppParams('/v2/unit/{unitId}/{tab}');
@@ -41,11 +56,6 @@ export function StreamsLayout() {
   const { rangeFrom, rangeTo } = useTimeRange();
   const { access } = useStreamsPrivileges();
   const unitCheck = useUnitCheck(unitId);
-  const { loading, showClassic } = useShowClassicTab();
-
-  useEffect(() => {
-    rememberClassicTabOrigin(tab === 'classic');
-  }, [tab]);
 
   // Classic stays reachable by URL, so an empty cluster keeps the V1 create and settings controls.
   const classicOpen = tab === 'classic' && access.legacy;
@@ -89,14 +99,7 @@ export function StreamsLayout() {
 
   const { Component, noPadding, ownsHeader } = streamsLayoutTabs[tab];
   if (ownsHeader) {
-    return loading ? (
-      <StreamsAppPageTemplate.EmptyPrompt
-        data-test-subj="streamsClassicTabLoading"
-        icon={<EuiLoadingSpinner size="xl" />}
-      />
-    ) : (
-      <Component tabs={appHeaderTabs} />
-    );
+    return <Component tabs={appHeaderTabs} openedFromV2 />;
   }
 
   const title = i18n.translate('xpack.streams.streamsLayout.pageHeaderTitle', {

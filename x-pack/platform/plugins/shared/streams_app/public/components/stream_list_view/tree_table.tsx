@@ -59,6 +59,7 @@ import { useTimefilter } from '../../hooks/use_timefilter';
 import { useStreamsIngestionRates } from '../../hooks/use_streams_ingestion_rates';
 import { useStreamsStorageStats } from '../../hooks/use_streams_storage_stats';
 import { useTimeRange } from '../../hooks/use_time_range';
+import type { StreamOrigin } from '../../hooks/use_streams_home_link';
 import { IngestionColumn } from './ingestion_column';
 import { StorageColumn } from './storage_column';
 import { RetentionColumn } from './retention_column';
@@ -101,11 +102,13 @@ export function StreamsTreeTable({
   streams = [],
   wiredStreamsStatus,
   openFlyout,
+  origin,
 }: {
   streams?: ListStreamDetail[];
   loading?: boolean;
   wiredStreamsStatus?: WiredStreamsStatus;
   openFlyout?: () => void;
+  origin?: StreamOrigin;
 }) {
   const router = useStreamsAppRouter();
   const { dependencies } = useKibana();
@@ -527,7 +530,7 @@ export function StreamsTreeTable({
                         data-test-subj={`streamsNameLink-${item.stream.name}`}
                         href={router.link('/{key}', {
                           path: { key: item.stream.name },
-                          query: { rangeFrom, rangeTo },
+                          query: { rangeFrom, rangeTo, origin },
                         })}
                         className={css`
                           overflow: hidden;
@@ -539,7 +542,7 @@ export function StreamsTreeTable({
                           e.preventDefault();
                           router.push('/{key}', {
                             path: { key: item.stream.name },
-                            query: { rangeFrom, rangeTo },
+                            query: { rangeFrom, rangeTo, origin },
                           });
                         }}
                       >
@@ -689,6 +692,7 @@ export function StreamsTreeTable({
                 item.data_stream ? (
                   <DataQualityColumn
                     streamName={item.stream.name}
+                    origin={origin}
                     quality={item.dataQuality as QualityIndicators}
                     isLoading={
                       totalDocsResult.loading ||

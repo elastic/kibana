@@ -17,7 +17,7 @@ import { StreamManagementDefaultRedirect } from '../components/stream_management
 import { StreamsRootRedirect } from '../components/streams_root_redirect';
 import { StreamDetailRoot } from '../components/stream_root';
 import { StreamDetailManagement } from '../components/stream_management/data_management/stream_detail_management';
-import { StreamsLayout } from '../components/streams_layout';
+import { StreamsV2LayoutGate } from '../components/streams_layout';
 import { DEFAULT_STREAMS_LAYOUT_TAB } from '../components/streams_layout/tab_ids';
 import { IndexInspectPage } from '../components/index_inspect/index_inspect_page';
 import { DEFAULT_INDEX_INSPECT_TAB } from '../components/index_inspect/types';
@@ -31,6 +31,13 @@ const timeRangeQueryParams = t.partial({
   rangeTo: t.string,
 });
 
+/**
+ * Set by the Classic tab of the V2 layout, so the stream page links back to that tab.
+ */
+const streamOriginQueryParams = t.partial({
+  origin: t.literal('v2'),
+});
+
 const flyoutParams = t.partial({
   flyoutName: t.string,
   flyoutTab: t.string,
@@ -40,12 +47,15 @@ const flyoutParams = t.partial({
  * Extended query params for management routes that may include
  * additional feature-specific params (e.g., data quality page state).
  */
-const managementQueryParams = t.partial({
-  rangeFrom: t.string,
-  rangeTo: t.string,
-  // Data quality page state
-  pageState: t.string,
-});
+const managementQueryParams = t.intersection([
+  t.partial({
+    rangeFrom: t.string,
+    rangeTo: t.string,
+    // Data quality page state
+    pageState: t.string,
+  }),
+  streamOriginQueryParams,
+]);
 
 /**
  * The unit an index page was opened from, used only for its back link.
@@ -120,7 +130,7 @@ const streamsAppRoutes = {
             ]),
           },
           '/v2/unit/{unitId}/{tab}': {
-            element: <StreamsLayout />,
+            element: <StreamsV2LayoutGate />,
             params: t.intersection([
               t.type({
                 path: t.type({
@@ -180,7 +190,7 @@ const streamsAppRoutes = {
             }),
           }),
           t.partial({
-            query: timeRangeQueryParams,
+            query: t.intersection([timeRangeQueryParams, streamOriginQueryParams]),
           }),
         ]),
         children: {
@@ -199,7 +209,7 @@ const streamsAppRoutes = {
                 }),
               }),
               t.partial({
-                query: timeRangeQueryParams,
+                query: t.intersection([timeRangeQueryParams, streamOriginQueryParams]),
               }),
             ]),
           },

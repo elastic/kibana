@@ -14,8 +14,7 @@ import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { useShowClassicTab } from './use_show_classic_tab';
 import { useUnitCheck, type UnitCheck } from './use_unit_check';
-import { CLASSIC_TAB_ORIGIN_KEY } from './use_streams_list_link';
-import { StreamsLayout } from '.';
+import { StreamsLayout, StreamsV2LayoutGate } from '.';
 
 const mockTabMounted = jest.fn();
 const mockHeaderProps = jest.fn();
@@ -56,8 +55,13 @@ jest.mock('./tabs', () => {
       classic: {
         label: 'classic',
         ownsHeader: true,
-        Component: ({ tabs }: { tabs?: AppHeaderTab[] }) => (
-          <div data-test-subj="streamsLayoutTabContent-classic">{tabs?.length}</div>
+        Component: ({ tabs, openedFromV2 }: { tabs?: AppHeaderTab[]; openedFromV2?: boolean }) => (
+          <div
+            data-test-subj="streamsLayoutTabContent-classic"
+            data-opened-from-v2={String(openedFromV2)}
+          >
+            {tabs?.length}
+          </div>
         ),
       },
     },
@@ -113,7 +117,11 @@ const setup = ({
   } as unknown as ReturnType<typeof useStreamsPrivileges>);
   jest.mocked(useUnitCheck).mockReturnValue(check);
   jest.mocked(useShowClassicTab).mockReturnValue({ loading, showClassic });
+  return { showClassic };
 };
+
+const renderLayout = (options: Parameters<typeof setup>[0]) =>
+  render(<StreamsLayout showClassic={setup(options).showClassic} />);
 
 describe('StreamsLayout', () => {
   beforeEach(() => {
@@ -121,15 +129,13 @@ describe('StreamsLayout', () => {
   });
 
   it('redirects to / without V2 access', () => {
-    setup({ v2: false });
-    render(<StreamsLayout />);
+    renderLayout({ v2: false });
 
     expect(screen.getByTestId('redirectTo')).toHaveAttribute('data-path', '/');
   });
 
   it('shows a spinner and no tabs while the unit is checked', () => {
-    setup({ check: 'checking' });
-    render(<StreamsLayout />);
+    renderLayout({ check: 'checking' });
 
     expect(screen.getByTestId('streamsUnitCheckLoading')).toBeInTheDocument();
     expect(screen.getByTestId('streamsLayoutHeader')).toHaveTextContent('0');
@@ -137,8 +143,7 @@ describe('StreamsLayout', () => {
   });
 
   it('shows the not-found prompt and no tabs for a missing unit', () => {
-    setup({ check: 'notFound', unitId: 'edge' });
-    render(<StreamsLayout />);
+    renderLayout({ check: 'notFound', unitId: 'edge' });
 
     expect(screen.getByTestId('streamsUnitNotFoundPrompt')).toHaveTextContent('edge');
     expect(screen.getByTestId('streamsLayoutHeader')).toHaveTextContent('0');
@@ -146,8 +151,7 @@ describe('StreamsLayout', () => {
   });
 
   it('redirects an unknown tab of a missing unit to the map', () => {
-    setup({ check: 'notFound', tab: 'bogus' });
-    render(<StreamsLayout />);
+    renderLayout({ check: 'notFound', tab: 'bogus' });
 
     expect(screen.getByTestId('redirectTo')).toHaveAttribute(
       'data-params',
@@ -157,32 +161,37 @@ describe('StreamsLayout', () => {
   });
 
   it('renders the classic tab with its own header and without a unit check', () => {
-    setup({ tab: 'classic', check: 'checking' });
-    render(<StreamsLayout />);
+    renderLayout({ tab: 'classic', check: 'checking' });
 
     expect(screen.getByTestId('streamsLayoutTabContent-classic')).toHaveTextContent('4');
     expect(screen.queryByTestId('streamsLayoutHeader')).not.toBeInTheDocument();
     expect(screen.queryByTestId('streamsUnitCheckLoading')).not.toBeInTheDocument();
   });
 
+  it('tells the classic tab that it was opened from the V2 layout', () => {
+    renderLayout({ tab: 'classic' });
+
+    expect(screen.getByTestId('streamsLayoutTabContent-classic')).toHaveAttribute(
+      'data-opened-from-v2',
+      'true'
+    );
+  });
+
   it('hides the classic tab when the stream check finds none', () => {
-    setup({ tab: 'map', showClassic: false });
-    render(<StreamsLayout />);
+    renderLayout({ tab: 'map', showClassic: false });
 
     expect(screen.getByTestId('streamsLayoutHeader')).toHaveTextContent('3');
   });
 
   it('keeps the classic tab reachable by URL when the stream check finds none', () => {
-    setup({ tab: 'classic', showClassic: false });
-    render(<StreamsLayout />);
+    renderLayout({ tab: 'classic', showClassic: false });
 
     expect(screen.getByTestId('streamsLayoutTabContent-classic')).toHaveTextContent('4');
     expect(screen.queryByTestId('redirectTo')).not.toBeInTheDocument();
   });
 
   it('redirects the classic tab to the map without Streams access', () => {
-    setup({ tab: 'classic', showClassic: false, legacy: false });
-    render(<StreamsLayout />);
+    renderLayout({ tab: 'classic', showClassic: false, legacy: false });
 
     expect(screen.getByTestId('redirectTo')).toHaveAttribute(
       'data-params',
@@ -191,17 +200,8 @@ describe('StreamsLayout', () => {
     expect(screen.queryByTestId('streamsLayoutTabContent-classic')).not.toBeInTheDocument();
   });
 
-  it('waits for the stream check before rendering the classic tab', () => {
-    setup({ tab: 'classic', loading: true, showClassic: true });
-    render(<StreamsLayout />);
-
-    expect(screen.getByTestId('streamsClassicTabLoading')).toBeInTheDocument();
-    expect(screen.queryByTestId('streamsLayoutTabContent-classic')).not.toBeInTheDocument();
-  });
-
   it('marks only the new tabs as technical preview', () => {
-    setup({ tab: 'map' });
-    render(<StreamsLayout />);
+    renderLayout({ tab: 'map' });
 
     const { tabs } = mockHeaderProps.mock.calls.at(-1)[0] as { tabs: AppHeaderTab[] };
     const badges = Object.fromEntries(tabs.map(({ id, badge }) => [id, badge]));
@@ -216,8 +216,7 @@ describe('StreamsLayout', () => {
   });
 
   it('renders the tab and unit scoped tab links for a found unit', () => {
-    setup({ unitId: 'edge', tab: 'sources' });
-    render(<StreamsLayout />);
+    renderLayout({ unitId: 'edge', tab: 'sources' });
 
     expect(screen.getByTestId('streamsLayoutTabContent-sources')).toBeInTheDocument();
     expect(screen.getByTestId('streamsLayoutHeader')).toHaveTextContent('4');
@@ -227,22 +226,38 @@ describe('StreamsLayout', () => {
     );
   });
 
-  it('remembers whether the Classic tab is open', () => {
-    setup({ tab: 'classic' });
-    const { rerender } = render(<StreamsLayout />);
-    expect(sessionStorage.getItem(CLASSIC_TAB_ORIGIN_KEY)).toBe('true');
-
-    setup({ tab: 'map' });
-    rerender(<StreamsLayout />);
-    expect(sessionStorage.getItem(CLASSIC_TAB_ORIGIN_KEY)).toBeNull();
-  });
-
   it('remounts the tab when the unit changes', () => {
     setup({ unitId: 'edge', tab: 'sources' });
-    const { rerender } = render(<StreamsLayout />);
+    const { rerender } = render(<StreamsLayout showClassic />);
     setup({ unitId: 'default', tab: 'sources' });
-    rerender(<StreamsLayout />);
+    rerender(<StreamsLayout showClassic />);
 
     expect(mockTabMounted).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('StreamsV2LayoutGate', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('waits for the stream check before rendering any tab', () => {
+    setup({ tab: 'map', loading: true });
+    render(<StreamsV2LayoutGate />);
+
+    expect(screen.getByTestId('streamsClassicTabLoading')).toBeInTheDocument();
+    expect(screen.queryByTestId('streamsLayoutHeader')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('streamsLayoutTabContent-map')).not.toBeInTheDocument();
+  });
+
+  it.each([
+    [true, '4'],
+    [false, '3'],
+  ])('renders the layout with the settled answer (showClassic %s)', (showClassic, tabCount) => {
+    setup({ tab: 'map', showClassic });
+    render(<StreamsV2LayoutGate />);
+
+    expect(screen.getByTestId('streamsLayoutHeader')).toHaveTextContent(tabCount);
+    expect(screen.getByTestId('streamsLayoutTabContent-map')).toBeInTheDocument();
   });
 });

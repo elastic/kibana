@@ -10,14 +10,14 @@ import { EuiButton, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { StreamsAppPageTemplate } from '../streams_app_page_template';
-import { useStreamsListLink } from '../streams_layout/use_streams_list_link';
+import { useStreamsHomeLink } from '../../hooks/use_streams_home_link';
 
 interface StreamNotFoundPromptProps {
   streamName: string;
 }
 
 export function StreamNotFoundPrompt({ streamName }: StreamNotFoundPromptProps) {
-  const streamsListLink = useStreamsListLink();
+  const streamsHomeLink = useStreamsHomeLink();
 
   return (
     <StreamsAppPageTemplate.EmptyPrompt
@@ -42,7 +42,7 @@ export function StreamNotFoundPrompt({ streamName }: StreamNotFoundPromptProps) 
         </EuiText>
       }
       actions={
-        <EuiButton data-test-subj="streamNotFoundBackButton" fill href={streamsListLink}>
+        <EuiButton data-test-subj="streamNotFoundBackButton" fill href={streamsHomeLink}>
           {i18n.translate('xpack.streams.streamNotFound.backButton', {
             defaultMessage: 'Go to streams list',
           })}

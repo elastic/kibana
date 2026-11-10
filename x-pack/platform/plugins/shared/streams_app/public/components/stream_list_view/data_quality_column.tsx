@@ -10,15 +10,18 @@ import { DatasetQualityIndicator } from '@kbn/dataset-quality-plugin/public';
 import type { QualityIndicators } from '@kbn/dataset-quality-plugin/common';
 import { EuiLink } from '@elastic/eui';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
+import type { StreamOrigin } from '../../hooks/use_streams_home_link';
 
 export function DataQualityColumn({
   streamName,
   quality,
   isLoading,
+  origin,
 }: {
   streamName: string;
   quality: QualityIndicators;
   isLoading: boolean;
+  origin?: StreamOrigin;
 }) {
   const router = useStreamsAppRouter();
 
@@ -26,6 +29,7 @@ export function DataQualityColumn({
     <EuiLink
       href={router.link('/{key}/management/{tab}', {
         path: { key: streamName, tab: 'dataQuality' },
+        query: { origin },
       })}
       data-test-subj={`streamsDataQualityLink-${streamName}`}
     >

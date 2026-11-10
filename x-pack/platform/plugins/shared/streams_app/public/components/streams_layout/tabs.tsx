@@ -16,7 +16,7 @@ import type { StreamsLayoutTab } from './tab_ids';
 
 interface StreamsLayoutTabConfig {
   label: string;
-  Component: ComponentType<{ tabs?: AppHeaderTab[] }>;
+  Component: ComponentType<{ tabs?: AppHeaderTab[]; openedFromV2?: boolean }>;
   /**
    * Set for tabs that own their full-bleed surface, so the page body drops its
    * padding instead of framing the content.

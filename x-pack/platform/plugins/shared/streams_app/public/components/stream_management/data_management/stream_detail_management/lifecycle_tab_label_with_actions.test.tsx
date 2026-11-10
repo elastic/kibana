@@ -267,6 +267,25 @@ describe('buildLifecycleTabActions', () => {
       });
     });
 
+    it('keeps the origin of the stream page when it opens the parent stream', () => {
+      const router = createRouter();
+      const actions = buildLifecycleTabActions({
+        definition: createMockWiredStreamDefinition(),
+        notifications: createNotifications(),
+        share: createShare(),
+        router,
+        timeRange,
+        origin: 'v2',
+      });
+
+      actions.items.find((item) => item.id === 'editParentStream')!.onClick();
+
+      expect(router.push).toHaveBeenCalledWith('/{key}/management/{tab}', {
+        path: { key: 'logs', tab: 'lifecycle' },
+        query: { rangeFrom: 'now-15m', rangeTo: 'now', origin: 'v2' },
+      });
+    });
+
     it('omits the edit parent stream action for a root stream', () => {
       const actions = buildLifecycleTabActions({
         definition: createMockWiredStreamDefinition({
