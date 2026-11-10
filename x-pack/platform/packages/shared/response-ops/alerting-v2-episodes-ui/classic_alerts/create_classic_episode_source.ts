@@ -14,7 +14,7 @@ import {
   type LocatorHost,
 } from '@kbn/rule-data-utils';
 import type { EpisodeDataSource, SeverityExtension } from '../types/episode_data_source';
-import { classicActionExtensions } from './action_extensions';
+import { classicActionExtensions, getActionContext } from './action_extensions';
 import {
   EPISODE_SEVERITY_WARNING_LABEL,
   EPISODE_SEVERITY_MINOR_LABEL,
@@ -121,10 +121,25 @@ export const createClassicEpisodeSource = ({
 
   resolveRules: ({ services, ids }) => resolveClassicRules({ ids, services }),
 
-  fetchSearchFields: ({ services, abortSignal }) =>
-    fetchClassicSearchFields({ ruleTypeIds, services, abortSignal }),
+  fetchSearchFields: ({ services, abortSignal, ruleTypeIds: scopedRuleTypeIds }) =>
+    fetchClassicSearchFields({
+      ruleTypeIds: scopedRuleTypeIds?.length ? scopedRuleTypeIds : ruleTypeIds,
+      services,
+      abortSignal,
+    }),
 
   actionExtensions: classicActionExtensions,
+
+  supportsConditionalSnooze: true,
+
+  getRuleTypeIds: (episodes) => {
+    const ids = new Set<string>();
+    for (const episode of episodes) {
+      const { ruleTypeId } = getActionContext(episode);
+      if (ruleTypeId) ids.add(ruleTypeId);
+    }
+    return [...ids];
+  },
 
   getRuleDetailsHref: (ruleId) =>
     `${host.appBasePath ?? `/app/${host.app}`}${host.pathPrefix}${getRuleDetailsRoute(ruleId)}`,

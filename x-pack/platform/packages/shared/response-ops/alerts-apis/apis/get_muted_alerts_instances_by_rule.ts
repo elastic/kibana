@@ -7,7 +7,7 @@
 
 import type { HttpStart } from '@kbn/core-http-browser';
 import { nodeBuilder } from '@kbn/es-query';
-import type { SnoozedInstance, SnoozeCondition } from '../types';
+import type { SnoozedInstance, SnoozeCondition, SnoozeConditionOperator } from '../types';
 
 const INTERNAL_FIND_MUTED_ALERT_INSTANCES_URL = '/internal/alerting/rules/_find_muted_alerts';
 
@@ -15,7 +15,7 @@ interface SnoozedAlertInstanceApiResponse {
   instance_id: string;
   expires_at?: string;
   conditions?: SnoozeCondition[];
-  condition_operator?: 'any' | 'all';
+  condition_operator?: SnoozeConditionOperator;
   snoozed_at: string;
   snoozed_by: string;
 }

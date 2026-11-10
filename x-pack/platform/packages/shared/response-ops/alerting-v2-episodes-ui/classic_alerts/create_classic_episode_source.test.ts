@@ -6,6 +6,8 @@
  */
 
 import { STACK_MANAGEMENT_RULES_HOST } from '@kbn/rule-data-utils';
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { AlertEpisode } from '../queries/episodes_query';
 import { createClassicEpisodeSource } from './create_classic_episode_source';
 
 describe('createClassicEpisodeSource', () => {
@@ -37,6 +39,59 @@ describe('createClassicEpisodeSource', () => {
         host: { app: 'myApp', pathPrefix: '/rules' },
       });
       expect(source.getRuleDetailsHref!('rule-1')).toBe('/app/myApp/rules/rule/rule-1');
+    });
+  });
+
+  describe('getRuleTypeIds', () => {
+    const episodeWith = (ruleTypeId?: string) =>
+      ({ source_action_context: ruleTypeId ? { ruleTypeId } : {} } as AlertEpisode);
+
+    it('collects the distinct rule types of the given rows', () => {
+      const source = createClassicEpisodeSource({ ruleTypeIds: ['a', 'b'] });
+
+      expect(
+        source.getRuleTypeIds!([
+          episodeWith('observability.rules.custom_threshold'),
+          episodeWith('observability.rules.custom_threshold'),
+          episodeWith('.es-query'),
+        ])
+      ).toEqual(['observability.rules.custom_threshold', '.es-query']);
+    });
+
+    it('ignores rows without a rule type in their context', () => {
+      const source = createClassicEpisodeSource({ ruleTypeIds: ['a'] });
+
+      expect(source.getRuleTypeIds!([episodeWith(), {} as AlertEpisode])).toEqual([]);
+    });
+  });
+
+  describe('fetchSearchFields', () => {
+    const makeServices = () => ({
+      http: { get: jest.fn().mockResolvedValue({ fields: [] }) } as unknown as HttpStart,
+    });
+
+    it('requests fields for every covered rule type by default', async () => {
+      const source = createClassicEpisodeSource({ ruleTypeIds: ['a', 'b'] });
+      const services = makeServices();
+
+      await source.fetchSearchFields!({ services });
+
+      expect(services.http.get).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({ query: { ruleTypeIds: ['a', 'b'] } })
+      );
+    });
+
+    it('narrows the request to the given rule types', async () => {
+      const source = createClassicEpisodeSource({ ruleTypeIds: ['a', 'b'] });
+      const services = makeServices();
+
+      await source.fetchSearchFields!({ services, ruleTypeIds: ['b'] });
+
+      expect(services.http.get).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({ query: { ruleTypeIds: ['b'] } })
+      );
     });
   });
 });

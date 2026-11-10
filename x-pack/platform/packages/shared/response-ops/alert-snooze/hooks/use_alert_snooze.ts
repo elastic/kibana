@@ -12,8 +12,8 @@ import { useMuteAlertInstance } from '@kbn/response-ops-alerts-apis/hooks/use_mu
 import { useUnmuteAlertInstance } from '@kbn/response-ops-alerts-apis/hooks/use_unmute_alert_instance';
 import { useSnoozeAlertInstance } from '@kbn/response-ops-alerts-apis/hooks/use_snooze_alert_instance';
 import { useUnsnoozeAlertInstance } from '@kbn/response-ops-alerts-apis/hooks/use_unsnooze_alert_instance';
-import type { SnoozeCondition } from '@kbn/response-ops-alerts-apis/types';
 import type { AlertSnoozePayload } from '../components/use_snooze_form';
+import { toApiSnoozeConditions } from '../utils/to_api_snooze_conditions';
 
 export interface UseAlertSnoozeParams {
   http: HttpStart;
@@ -90,16 +90,17 @@ export const useAlertSnooze = ({
   const snoozeAlert = useCallback(
     async (payload: AlertSnoozePayload): Promise<boolean> => {
       if (!ruleId || !instanceId) return false;
+      const conditions = toApiSnoozeConditions(payload.conditions);
       try {
-        if (payload.expiresAt === null && !payload.conditions?.length) {
+        if (payload.expiresAt === null && !conditions.length) {
           await muteInstance({ ruleId, alertInstanceId: instanceId });
         } else {
           await snoozeInstance({
             ruleId,
             alertInstanceId: instanceId,
             ...(payload.expiresAt !== undefined && { expiresAt: payload.expiresAt ?? undefined }),
-            ...(payload.conditions?.length && {
-              conditions: payload.conditions as SnoozeCondition[],
+            ...(conditions.length && {
+              conditions,
               conditionOperator: payload.conditionOperator,
             }),
           });

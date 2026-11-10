@@ -7,7 +7,7 @@
 
 import type { HttpStart } from '@kbn/core-http-browser';
 import { BASE_ALERTING_API_PATH } from '../constants';
-import type { SnoozeCondition } from '../types';
+import type { SnoozeCondition, SnoozeConditionOperator } from '../types';
 
 export interface SnoozeAlertInstanceParams {
   id: string;
@@ -18,7 +18,7 @@ export interface SnoozeAlertInstanceParams {
    */
   expiresAt?: string;
   conditions?: SnoozeCondition[];
-  conditionOperator?: 'any' | 'all';
+  conditionOperator?: SnoozeConditionOperator;
 }
 
 export const snoozeAlertInstance = ({
