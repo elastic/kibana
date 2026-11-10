@@ -8,19 +8,24 @@
 import React from 'react';
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { initializeTitleManager } from '@kbn/presentation-publishing';
-import { initializeStateApi, type StateComparators } from '@kbn/presentation-publishing';
+import { initializeStateApi } from '@kbn/presentation-publishing';
 import { merge } from 'rxjs';
 import { LENS_EMBEDDABLE_TYPE, type LensRuntimeState } from '@kbn/lens-common';
 import type { LensApi, LensWireAPIConfig } from '@kbn/lens-common-2';
 
-import { getComparators } from '../../common/get_comparators';
 import { loadEmbeddableData } from './data_loader';
 import { isTextBasedLanguage, deserializeState } from './helper';
 import { initializeEditApi } from './initializers/initialize_edit';
 import { initializeInspector } from './initializers/initialize_inspector';
-import { initializeDashboardServices } from './initializers/initialize_dashboard_services';
+import {
+  dashboardServicesComparators,
+  initializeDashboardServices,
+} from './initializers/initialize_dashboard_services';
 import { initializeInternalApi } from './initializers/initialize_internal_api';
-import { initializeSearchContext } from './initializers/initialize_search_context';
+import {
+  initializeSearchContext,
+  searchContextComparators,
+} from './initializers/initialize_search_context';
 import { initializeActionApi } from './initializers/initialize_actions';
 import { initializeIntegrations } from './initializers/initialize_integrations';
 import { initializeStateManagement } from './initializers/initialize_state_management';
@@ -33,7 +38,6 @@ export const createLensEmbeddableFactory = (
 ): EmbeddablePublicDefinition<LensWireAPIConfig, LensApi> => {
   return {
     type: LENS_EMBEDDABLE_TYPE,
-    getComparators,
     /**
      * This is called after the deserialize, so some assumptions can be made about its arguments:
      * @param uuid      a unique identifier for the embeddable panel
@@ -156,13 +160,22 @@ export const createLensEmbeddableFactory = (
           stateConfig.anyStateChange$,
           searchContextConfig.anyStateChange$
         ),
-        getComparators: (state) => {
-          const comparators = getComparators(state);
+        getComparators: () => {
+          const comparators = {
+            ...stateConfig.getComparators(),
+            ...actionsConfig.getComparators(),
+            ...dashboardServicesComparators,
+            ...searchContextComparators,
+            isNewPanel: 'skip',
+            references: 'skip',
+          } as const;
           // set all comparators to 'skip' when inline editing is in progress
           if (internalApi.isEditingInProgress()) {
-            return Object.fromEntries(
-              Object.keys(comparators).map((key) => [key, 'skip'])
-            ) as unknown as StateComparators<LensWireAPIConfig>;
+            const keys = Object.keys(comparators) as (keyof typeof comparators)[];
+            return keys.reduce((acc, key) => {
+              acc[key] = 'skip';
+              return acc;
+            }, {} as Record<keyof typeof comparators, 'skip'>);
           }
           return comparators;
         },

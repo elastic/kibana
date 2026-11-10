@@ -14,6 +14,7 @@ import {
   type PublishesRendered,
 } from '@kbn/presentation-publishing';
 import deepEqual from 'fast-deep-equal';
+import { isPlainObject } from 'lodash';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import type {
@@ -24,7 +25,6 @@ import type {
 } from '@kbn/lens-common';
 import type { LensWireAPIConfig } from '@kbn/lens-common-2';
 import { isFlattenedAPIConfig, unflattenAPIConfig } from '../../../common/transforms/utils';
-import { omitUndefinedKeys } from '../../../common/get_comparators';
 
 export interface StateManagementConfig {
   api: Pick<IntegrationCallbacks, 'updateAttributes' | 'updateRefId'> &
@@ -39,6 +39,23 @@ export interface StateManagementConfig {
   getLatestState: () => Pick<LensRuntimeState, 'attributes' | 'ref_id'>;
   cleanup: () => void;
 }
+
+/**
+ * Drops object keys holding `undefined`, which are lost once state is persisted as JSON.
+ */
+const omitUndefinedKeys = (value: unknown): unknown => {
+  if (Array.isArray(value)) {
+    return value.map(omitUndefinedKeys);
+  }
+  if (isPlainObject(value)) {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>)
+        .filter(([, entryValue]) => entryValue !== undefined)
+        .map(([key, entryValue]) => [key, omitUndefinedKeys(entryValue)])
+    );
+  }
+  return value;
+};
 
 /**
  * Due to inline editing we need something advanced to handle the state
