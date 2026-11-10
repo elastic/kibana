@@ -112,7 +112,7 @@ describe('workflow migration routes', () => {
     });
 
     const invokeHandler = async (
-      method: RouteMethod,
+      method: Exclude<RouteMethod, 'options'>,
       path: string,
       request: ReturnType<typeof requestMock.create>
     ) => {
