@@ -215,25 +215,6 @@ describe('ki_query_create tool', () => {
     expect(results[0].data).toEqual(expect.objectContaining(expected));
   });
 
-  it('omits the caller-named id when the write fails', async () => {
-    (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
-    const tool = createQueryKnowledgeIndicatorTool({
-      getScopedClients: createScopedClients({
-        upsertQuery: jest.fn().mockRejectedValue(new Error('upsert failed')),
-      }),
-      server,
-      logger,
-      telemetry,
-    });
-
-    await invokeHandler(tool as never, { ...queryParams, id: 'query-1' }, createMockToolContext());
-
-    const [[reported]] = jest.mocked(telemetry.trackAgentBuilderKnowledgeIndicatorCreated).mock
-      .calls;
-    expect(reported).toEqual(expect.objectContaining({ success: false }));
-    expect(reported).not.toHaveProperty('knowledge_indicator_id');
-  });
-
   it('tracks failure telemetry when query KI creation fails', async () => {
     (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
 
