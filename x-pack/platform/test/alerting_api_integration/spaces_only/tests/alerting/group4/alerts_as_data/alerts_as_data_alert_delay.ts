@@ -188,7 +188,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       // --------------------------
       // RUN 2 - 0 new alerts
       // --------------------------
-      await alertUtils.runSoonWhenIdle(ruleId, taskManagerUtils);
+      await alertUtils.runSoonWhenIdle(ruleId, retry, taskManagerUtils);
 
       events = await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 2 }]]));
       executeEvent = events[1];
@@ -215,7 +215,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       // --------------------------
       // RUN 3 - 1 new alert
       // --------------------------
-      await alertUtils.runSoonWhenIdle(ruleId, taskManagerUtils);
+      await alertUtils.runSoonWhenIdle(ruleId, retry, taskManagerUtils);
 
       events = await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 3 }]]));
       executeEvent = events[2];
@@ -273,7 +273,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       // --------------------------
       // RUN 4 - 1 active alert
       // --------------------------
-      await alertUtils.runSoonWhenIdle(ruleId, taskManagerUtils);
+      await alertUtils.runSoonWhenIdle(ruleId, retry, taskManagerUtils);
 
       events = await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 4 }]]));
       executeEvent = events[3];
@@ -327,7 +327,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       // --------------------------
       // RUN 5 - 1 recovered alert
       // --------------------------
-      await alertUtils.runSoonWhenIdle(ruleId, taskManagerUtils);
+      await alertUtils.runSoonWhenIdle(ruleId, retry, taskManagerUtils);
 
       events = await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 5 }]]));
       executeEvent = events[4];
@@ -386,7 +386,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       // --------------------------
       // RUN 6 - 0 new alerts
       // --------------------------
-      await alertUtils.runSoonWhenIdle(ruleId, taskManagerUtils);
+      await alertUtils.runSoonWhenIdle(ruleId, retry, taskManagerUtils);
 
       events = await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 6 }]]));
       executeEvent = events[5];
@@ -493,7 +493,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       // --------------------------
       // RUN 2 - 0 new alerts
       // --------------------------
-      await alertUtils.runSoonWhenIdle(ruleId, taskManagerUtils);
+      await alertUtils.runSoonWhenIdle(ruleId, retry, taskManagerUtils);
 
       events = await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 2 }]]));
       executeEvent = events[1];
@@ -521,7 +521,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       // --------------------------
       // RUN 3 - 0 new alerts
       // --------------------------
-      await alertUtils.runSoonWhenIdle(ruleId, taskManagerUtils);
+      await alertUtils.runSoonWhenIdle(ruleId, retry, taskManagerUtils);
 
       events = await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 3 }]]));
       executeEvent = events[2];
@@ -637,7 +637,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       // --------------------------
       // RUN 2 - 0 new alerts
       // --------------------------
-      await alertUtils.runSoonWhenIdle(ruleId, taskManagerUtils);
+      await alertUtils.runSoonWhenIdle(ruleId, retry, taskManagerUtils);
 
       events = await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 2 }]]));
       executeEvent = events[1];
@@ -664,7 +664,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       // --------------------------
       // RUN 3 - 1 new alert
       // --------------------------
-      await alertUtils.runSoonWhenIdle(ruleId, taskManagerUtils);
+      await alertUtils.runSoonWhenIdle(ruleId, retry, taskManagerUtils);
 
       events = await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 3 }]]));
       executeEvent = events[2];
@@ -722,7 +722,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       // --------------------------
       // RUN 4 - 1 active alert
       // --------------------------
-      await alertUtils.runSoonWhenIdle(ruleId, taskManagerUtils);
+      await alertUtils.runSoonWhenIdle(ruleId, retry, taskManagerUtils);
 
       events = await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 4 }]]));
       executeEvent = events[3];
@@ -776,7 +776,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       // --------------------------
       // RUN 5 - 1 recovered alert
       // --------------------------
-      await alertUtils.runSoonWhenIdle(ruleId, taskManagerUtils);
+      await alertUtils.runSoonWhenIdle(ruleId, retry, taskManagerUtils);
 
       events = await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 5 }]]));
       executeEvent = events[4];
@@ -830,7 +830,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       // --------------------------
       // RUN 6 - 0 new alerts
       // --------------------------
-      await alertUtils.runSoonWhenIdle(ruleId, taskManagerUtils);
+      await alertUtils.runSoonWhenIdle(ruleId, retry, taskManagerUtils);
 
       events = await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 6 }]]));
       executeEvent = events[5];
@@ -939,7 +939,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       // --------------------------
       // RUN 2 - 0 new alerts
       // --------------------------
-      await alertUtils.runSoonWhenIdle(ruleId, taskManagerUtils);
+      await alertUtils.runSoonWhenIdle(ruleId, retry, taskManagerUtils);
 
       events = await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 2 }]]));
       executeEvent = events[1];
@@ -968,7 +968,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       // --------------------------
       // RUN 3 - 1 new alert
       // --------------------------
-      await alertUtils.runSoonWhenIdle(ruleId, taskManagerUtils);
+      await alertUtils.runSoonWhenIdle(ruleId, retry, taskManagerUtils);
 
       events = await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 3 }]]));
       executeEvent = events[2];

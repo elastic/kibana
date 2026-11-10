@@ -8,7 +8,10 @@
 import expect from '@kbn/expect';
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import type { AlertsFilter } from '@kbn/alerting-plugin/common/rule';
-import type { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
+import type {
+  RetryService,
+  SupertestWithoutAuthProviderType,
+} from '@kbn/ftr-common-functional-services';
 import type { SnoozeBody } from '@kbn/alerting-plugin/common/routes/rule/apis/snooze';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import type { Space, User } from '../types';
@@ -582,12 +585,20 @@ export class AlertUtils {
 
   // `_run_soon` soft-fails with a 200 ("Rule is already running") and queues nothing if it lands
   // before the rule's previous run releases its task, so wait for idle first and require a 204.
-  public async runSoonWhenIdle(ruleId: string, taskManagerUtils: TaskManagerUtils) {
-    await taskManagerUtils.waitForIdle(ruleId);
+  // Task Manager can also reclaim an idle-but-due task between the idle check and this POST, so
+  // the whole sequence is retried rather than just the idle wait.
+  public async runSoonWhenIdle(
+    ruleId: string,
+    retry: RetryService,
+    taskManagerUtils: TaskManagerUtils
+  ) {
+    return await retry.try(async () => {
+      await taskManagerUtils.waitForIdle(ruleId);
 
-    const response = await this.runSoon(ruleId);
-    expect(response.status).to.eql(204);
-    return response;
+      const response = await this.runSoon(ruleId);
+      expect(response.status).to.eql(204);
+      return response;
+    });
   }
 
   public async createInternallyManagedRule(objectRemover?: ObjectRemover) {
