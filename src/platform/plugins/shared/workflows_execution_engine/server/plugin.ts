@@ -174,6 +174,7 @@ export class WorkflowsExecutionEnginePlugin
 {
   private readonly logger: Logger;
   private readonly config: WorkflowsExecutionEngineConfig;
+  private readonly instanceUuid: string;
   private concurrencyManager!: ConcurrencyManager;
   private setupDependencies?: SetupDependencies;
   private coreSetup?: CoreSetup<
@@ -250,6 +251,7 @@ export class WorkflowsExecutionEnginePlugin
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.config = initializerContext.config.get<WorkflowsExecutionEngineConfig>();
+    this.instanceUuid = initializerContext.env.instanceUuid;
   }
 
   public setup(
@@ -261,7 +263,11 @@ export class WorkflowsExecutionEnginePlugin
     // Register telemetry event schemas
     WorkflowExecutionTelemetryClient.setup(core.analytics);
 
-    registerPerfProfilerRoutes(core.http.createRouter(), this.logger.get('perfProfiler'));
+    registerPerfProfilerRoutes(
+      core.http.createRouter(),
+      this.logger.get('perfProfiler'),
+      this.instanceUuid
+    );
 
     const logger = this.logger;
     const config = this.config;

@@ -73,7 +73,11 @@ const captureProfiles = async (
 };
 
 /** Registers internal superuser-only routes that profile this Kibana process (perf builds only). */
-export const registerPerfProfilerRoutes = (router: IRouter, logger: Logger): void => {
+export const registerPerfProfilerRoutes = (
+  router: IRouter,
+  logger: Logger,
+  serverUuid: string
+): void => {
   const eventLoopDelay = monitorEventLoopDelay({ resolution: 10 });
   eventLoopDelay.enable();
   let lastElu: EventLoopUtilization = performance.eventLoopUtilization();
@@ -103,7 +107,7 @@ export const registerPerfProfilerRoutes = (router: IRouter, logger: Logger): voi
         activeCapture = undefined;
       };
       activeCapture = capture.then(release, release);
-      return res.ok({ body: await capture });
+      return res.ok({ body: { server_uuid: serverUuid, ...(await capture) } });
     }
   );
 
@@ -118,6 +122,7 @@ export const registerPerfProfilerRoutes = (router: IRouter, logger: Logger): voi
       const now = Date.now();
       const elu = performance.eventLoopUtilization(lastElu);
       const body = {
+        server_uuid: serverUuid,
         pid: process.pid,
         window_ms: now - lastRuntimeAt,
         event_loop_utilization: elu.utilization,
