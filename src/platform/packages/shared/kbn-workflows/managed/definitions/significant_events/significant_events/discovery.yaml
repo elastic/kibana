@@ -9,7 +9,8 @@ settings:
     strategy: drop
     max: 1
   # Reports the failed run for telemetry (nightshift-program#1956); the engine restores the error
-  # afterwards, so the workflow still fails. A cancelled or timed-out run never gets here.
+  # afterwards, so the workflow still fails. Never reached by a step that declares its own
+  # `on-failure`, a cancelled run, or the workflow timeout.
   on-failure:
     fallback:
       - name: report_discovery_failed
@@ -19,7 +20,9 @@ settings:
           path: '/s/{{ workflow.spaceId }}/internal/streams/significant_events/discovery/_completed'
           body:
             discovery_execution_id: '{{ execution.id }}'
+            parent_execution_id: '{{ parent.executionId }}'
             outcome: failed
+            error_type: '{{ error.type }}'
             error_message: '${{ error.message | default: "" | truncate: 1024, "" }}'
           headers:
             x-elastic-internal-origin: 'kibana'
@@ -140,6 +143,21 @@ consts:
   DETECTIONS_INDEX: '.significant_events-detections'
 
 steps:
+  # `discovery-triggered` only covers manual runs: scheduled review calls this workflow directly.
+  - name: report_discovery_started
+    type: kibana.request
+    with:
+      method: POST
+      path: '/s/{{ workflow.spaceId }}/internal/streams/significant_events/discovery/_started'
+      body:
+        discovery_execution_id: '{{ execution.id }}'
+        parent_execution_id: '{{ parent.executionId }}'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+    timeout: '10s'
+    on-failure:
+      continue: true
+
   - name: bootstrap_cleanup_workflow
     type: kibana.request
     with:
@@ -175,9 +193,11 @@ steps:
           path: '/s/{{ workflow.spaceId }}/internal/streams/significant_events/discovery/_completed'
           body:
             discovery_execution_id: '{{ execution.id }}'
+            parent_execution_id: '{{ parent.executionId }}'
             outcome: completed
             has_work: false
             processed_count: 0
+            budget_denied: true
           headers:
             x-elastic-internal-origin: 'kibana'
         timeout: '10s'
@@ -369,6 +389,7 @@ steps:
           path: '/s/{{ workflow.spaceId }}/internal/streams/significant_events/discovery/_completed'
           body:
             discovery_execution_id: '{{ execution.id }}'
+            parent_execution_id: '{{ parent.executionId }}'
             outcome: completed
             has_work: false
             processed_count: '${{ steps.compute_batch_size.output.processedCount | default: 0 }}'
@@ -413,6 +434,8 @@ steps:
     product-feature: 'nightshift'
     create-conversation: true
     public-conversation: true
+    # Below the workflow timeout: only a step timeout reaches the failure report.
+    timeout: '40m'
     with:
       message: |
         ## Detection batch
@@ -437,8 +460,6 @@ steps:
               get stamped as processed. Full discovery data is written via the
               events_write tool — this is a compact summary only.
         required: [written_rule_uuids]
-    on-failure:
-      continue: false
 
   - name: compute_written_rule_uuids
     # Normalise the agent's self-reported summary into a plain array for the stamping gate below.
@@ -491,8 +512,6 @@ steps:
                 - range:
                     '@timestamp':
                       gte: '{{ inputs.detectionLookback }}'
-        on-failure:
-          continue: false
 
       - name: foreach_stamp_processed
         type: foreach
@@ -522,6 +541,7 @@ steps:
       path: '/s/{{ workflow.spaceId }}/internal/streams/significant_events/discovery/_completed'
       body:
         discovery_execution_id: '{{ execution.id }}'
+        parent_execution_id: '{{ parent.executionId }}'
         outcome: completed
         has_work: true
         processed_count: '${{ steps.compute_batch_size.output.processedCount | default: 0 }}'

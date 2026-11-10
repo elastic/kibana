@@ -110,19 +110,24 @@ interface DiscoveryTriggeredProps {
   space_id: string;
 }
 
-interface DiscoveryCompletedProps {
+interface DiscoveryRunIdentityProps {
   execution_id?: string;
   discovery_execution_id: string;
   space_id: string;
   alert_source: string;
-  outcome: 'completed' | 'failed';
+}
+
+type DiscoveryStartedProps = DiscoveryRunIdentityProps;
+
+interface DiscoveryCompletedProps extends DiscoveryRunIdentityProps {
+  outcome: 'completed' | 'failed' | 'timed_out';
   duration_ms?: number;
   has_work?: boolean;
+  budget_denied?: boolean;
   processed_count?: number;
   skipped_count?: number;
   held_back_count?: number;
   needs_agent_count?: number;
-  written_event_count?: number;
   written_rule_count?: number;
   classifier_failed?: boolean;
   error_message?: string;
@@ -201,6 +206,7 @@ export {
   type AgentToolEventWriteProps,
   type DetectionScanProps,
   type DiscoveryCompletedProps,
+  type DiscoveryStartedProps,
   type DiscoveryTriggeredProps,
   type KnowledgeIndicatorQueriesGeneratedProps,
   type KnowledgeIndicatorFeaturesIdentifiedProps,

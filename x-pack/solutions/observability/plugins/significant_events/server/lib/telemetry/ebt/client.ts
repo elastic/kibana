@@ -18,6 +18,7 @@ import type {
   KnowledgeIndicatorOnboardingScheduledProps,
   DetectionScanProps,
   DiscoveryCompletedProps,
+  DiscoveryStartedProps,
   DiscoveryTriggeredProps,
   AgentToolEventWriteProps,
 } from './types';
@@ -31,6 +32,7 @@ import {
   SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_STATUS_UPDATE_EVENT_TYPE,
   SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_INVESTIGATION_ATTACH_EVENT_TYPE,
   SIGNIFICANT_EVENTS_DISCOVERY_COMPLETED_EVENT_TYPE,
+  SIGNIFICANT_EVENTS_DISCOVERY_STARTED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_DISCOVERY_TRIGGERED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_DETECTION_SCAN_EVENT_TYPE,
   SIGNIFICANT_EVENTS_ONBOARDING_SCHEDULED_EVENT_TYPE,
@@ -85,6 +87,10 @@ export class EbtTelemetryClient {
       SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_INVESTIGATION_ATTACH_EVENT_TYPE,
       params
     );
+  }
+
+  public trackSignificantEventsDiscoveryStarted(params: DiscoveryStartedProps) {
+    this.analytics.reportEvent(SIGNIFICANT_EVENTS_DISCOVERY_STARTED_EVENT_TYPE, params);
   }
 
   public trackSignificantEventsDiscoveryCompleted(params: DiscoveryCompletedProps) {

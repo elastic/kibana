@@ -99,6 +99,32 @@ it('passes a strict connector override and request-scoped resolver to the discov
   });
 });
 
+describe('discovery started report', () => {
+  const startedRoute =
+    internalDiscoveryRoutes['POST /internal/streams/significant_events/discovery/_started'];
+  type StartedParams = Parameters<typeof startedRoute.handler>[0];
+
+  it('reports the run with the execution that started it', async () => {
+    const track = jest.fn();
+
+    await startedRoute.handler({
+      params: { body: { discovery_execution_id: 'discovery-1', parent_execution_id: 'review-1' } },
+      request: { spaceId: 'default' },
+      getScopedClients: jest.fn().mockResolvedValue({ licensing: {} }),
+      getSpaceId: jest.fn().mockResolvedValue('space-a'),
+      server: {},
+      telemetry: { trackSignificantEventsDiscoveryStarted: track },
+    } as unknown as StartedParams);
+
+    expect(track).toHaveBeenCalledWith({
+      execution_id: 'review-1',
+      discovery_execution_id: 'discovery-1',
+      space_id: 'space-a',
+      alert_source: 'elastic.significant_events',
+    });
+  });
+});
+
 describe('discovery completed report', () => {
   const completedRoute =
     internalDiscoveryRoutes['POST /internal/streams/significant_events/discovery/_completed'];
@@ -109,11 +135,9 @@ describe('discovery completed report', () => {
       startedAt: new Date(Date.now() - 90_000).toISOString(),
       finishedAt: undefined,
     }),
-    getLastExecution = jest.fn().mockResolvedValue({ id: 'orchestrator-1' }),
     body = {},
   }: {
     getExecution?: jest.Mock;
-    getLastExecution?: jest.Mock;
     body?: Record<string, unknown>;
   } = {}) => {
     const track = jest.fn();
@@ -123,17 +147,18 @@ describe('discovery completed report', () => {
         params: {
           body: {
             discovery_execution_id: 'discovery-1',
+            parent_execution_id: 'orchestrator-1',
             outcome: 'completed',
             has_work: true,
             processed_count: 4,
-            written_event_count: 2,
+            written_rule_count: 2,
             ...body,
           },
         },
-        request: {},
+        request: { spaceId: 'default' },
         getScopedClients: jest.fn().mockResolvedValue({ licensing: {} }),
         workflowClients: {
-          significantEventsDiscoveryClient: { getExecution, getLastExecution },
+          significantEventsDiscoveryClient: { getExecution },
         },
         getSpaceId: jest.fn().mockResolvedValue('space-a'),
         server: {},
@@ -143,7 +168,7 @@ describe('discovery completed report', () => {
     };
   };
 
-  it('pairs the report with the orchestrator run and measures the discovery execution', async () => {
+  it('pairs the report with the parent execution and measures the discovery execution', async () => {
     const { handlerParams, track } = makeParams();
 
     await expect(completedRoute.handler(handlerParams)).resolves.toEqual({ acknowledged: true });
@@ -157,31 +182,45 @@ describe('discovery completed report', () => {
       outcome: 'completed',
       has_work: true,
       processed_count: 4,
-      written_event_count: 2,
+      written_rule_count: 2,
     });
     expect(reported.duration_ms).toBeGreaterThanOrEqual(90_000);
     expect(reported).not.toHaveProperty('error_message');
   });
 
-  it('still reports when the execution records cannot be read', async () => {
+  it('still reports when the execution record cannot be read', async () => {
     const { handlerParams, track } = makeParams({
       getExecution: jest.fn().mockRejectedValue(new Error('not found')),
-      getLastExecution: jest.fn().mockRejectedValue(new Error('unavailable')),
       body: { outcome: 'failed', error_message: 'agent step failed' },
     });
 
     await completedRoute.handler(handlerParams);
 
     const [[reported]] = track.mock.calls;
-    expect(reported).toMatchObject({ outcome: 'failed', error_message: 'agent step failed' });
-    expect(reported).not.toHaveProperty('execution_id');
+    expect(reported).toMatchObject({
+      execution_id: 'orchestrator-1',
+      outcome: 'failed',
+      error_message: 'agent step failed',
+    });
     expect(reported).not.toHaveProperty('duration_ms');
   });
 
-  it('reports without a duration when the execution id is unknown', async () => {
+  it('reports a step timeout from the failure fallback as timed out', async () => {
+    const { handlerParams, track } = makeParams({
+      body: { outcome: 'failed', error_type: 'TimeoutError', error_message: 'too long' },
+    });
+
+    await completedRoute.handler(handlerParams);
+
+    const [[reported]] = track.mock.calls;
+    expect(reported).toMatchObject({ outcome: 'timed_out', error_message: 'too long' });
+    expect(reported).not.toHaveProperty('error_type');
+  });
+
+  it('reports without a duration or a parent when discovery ran directly and its execution is unknown', async () => {
     const { handlerParams, track } = makeParams({
       getExecution: jest.fn().mockResolvedValue(null),
-      getLastExecution: jest.fn().mockResolvedValue(null),
+      body: { parent_execution_id: '' },
     });
 
     await completedRoute.handler(handlerParams);

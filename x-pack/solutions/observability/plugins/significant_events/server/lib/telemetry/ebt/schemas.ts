@@ -16,6 +16,7 @@ import type {
   AgentToolKnowledgeIndicatorIdentificationStartedProps,
   DetectionScanProps,
   DiscoveryCompletedProps,
+  DiscoveryStartedProps,
   KnowledgeIndicatorFeaturesIdentifiedProps,
   KnowledgeIndicatorQueriesGeneratedProps,
   KnowledgeIndicatorOnboardingScheduledProps,
@@ -454,12 +455,12 @@ const optionalCount = (description: string) => ({
   _meta: { description, optional: true as const },
 });
 
-const discoveryCompletedSchema: RootSchema<DiscoveryCompletedProps> = {
+const discoveryStartedSchema: RootSchema<DiscoveryStartedProps> = {
   execution_id: {
     type: 'keyword',
     _meta: {
       description:
-        'The orchestrator workflow execution this run belongs to, the same id `discovery-triggered` carries; absent when no orchestrator execution was found for the space',
+        'The workflow execution that started this run: the orchestrator execution `discovery-triggered` carries for a manual run, the scheduled review execution for a scheduled one (several runs can share it, one per review pass); absent when the discovery workflow was run directly',
       optional: true,
     },
   },
@@ -467,7 +468,7 @@ const discoveryCompletedSchema: RootSchema<DiscoveryCompletedProps> = {
     type: 'keyword',
     _meta: {
       description:
-        'The discovery sub-workflow execution that reported; joins the workflow engine events for that execution',
+        'The discovery workflow execution that reported; pairs `discovery-started` with `discovery-completed` and joins the workflow engine events for that execution',
     },
   },
   space_id: {
@@ -481,11 +482,15 @@ const discoveryCompletedSchema: RootSchema<DiscoveryCompletedProps> = {
         'The `.rule-events` `source` of the alerts this run produces; always `elastic.significant_events` until other sources feed discovery',
     },
   },
+};
+
+const discoveryCompletedSchema: RootSchema<DiscoveryCompletedProps> = {
+  ...discoveryStartedSchema,
   outcome: {
     type: 'keyword',
     _meta: {
       description:
-        '`completed` when the workflow reached an exit, `failed` when a step failed and the workflow-level fallback reported. A cancelled or timed-out run never reports; pair with the workflow engine `workflows_execution_workflow_cancelled` event',
+        '`completed` when the workflow reached an exit, `failed` when a step failed and `timed_out` when the discovery agent step exceeded its timeout; the workflow-level fallback reports both. A cancelled run, or one ended by the workflow timeout, never reports; pair with the workflow engine `workflows_execution_workflow_cancelled` event',
     },
   },
   duration_ms: {
@@ -503,14 +508,21 @@ const discoveryCompletedSchema: RootSchema<DiscoveryCompletedProps> = {
       optional: true,
     },
   },
+  budget_denied: {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Whether the run ended before reading any detection because the run quota denied it',
+      optional: true,
+    },
+  },
   processed_count: optionalCount('Detections handed to the run after classification'),
   skipped_count: optionalCount('Detections the classifier skipped'),
   held_back_count: optionalCount('Detections the classifier held back'),
   needs_agent_count: optionalCount('Detections the classifier routed to the agent'),
-  written_event_count: optionalCount(
-    'Significant Event versions the agent reported written in this run: the discoveries produced'
+  written_rule_count: optionalCount(
+    'Distinct rules the agent reported done in this run, including those whose detections it wrote no event for'
   ),
-  written_rule_count: optionalCount('Distinct rules the written events cover'),
   classifier_failed: {
     type: 'boolean',
     _meta: {
@@ -808,6 +820,7 @@ export {
   agentToolKnowledgeIndicatorIdentificationStartedSchema,
   detectionScanSchema,
   discoveryCompletedSchema,
+  discoveryStartedSchema,
   discoveryTriggeredSchema,
   knowledgeIndicatorFeaturesIdentifiedSchema,
   knowledgeIndicatorQueriesGeneratedSchema,
