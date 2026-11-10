@@ -188,7 +188,7 @@ Vendor specs are sometimes wrong about authentication too. Trello's declares onl
 
 Responses come from, in order of preference:
 
-1. **Fixtures**: hand-written responses passed as `fixtures`, for operations where nothing else is good enough. A fixture with `when` answers only the requests it matches (see below);
+1. **Fixtures**: hand-written responses passed as `fixtures`, for operations where nothing else is good enough. A fixture with `when` answers only the requests it matches, and one with `responses` answers them in turn (see below);
 2. **Recordings**: responses captured from the real vendor API, passed as `recordings`. A recording is served only while it conforms to the spec; one that doesn't, or that names an operation the spec lacks, is listed in `rejectedResponses` (with the `spec` it contradicts, for named specs), which signals drift on the vendor's side. Recorded error responses are not served by default;
 3. **Spec examples**: the response media type's `example` or `examples`, when they match the schema;
 4. **Samples** of the response schema.
@@ -233,6 +233,22 @@ const { fetch } = createEmulatorFetch({
 ```
 
 A request gets the fixture that checks the most values among those it matches, else the operation's fixture without `when`. A `when.path` naming a parameter the operation doesn't have is listed in `rejectedResponses`. Recordings match the request they recorded the same way, by its `pathParameters`, query and body (not its headers), and other requests get the operation's first recording. `when` applies to OpenAPI operations; GraphQL and MCP fixtures name their operation instead.
+
+**Sequences.** A handler that polls inside one action, such as Firecrawl's `crawlAndWait` until its job is `completed`, sends the same request until the answer changes, so one response per fixture can't take it through its waiting path. A fixture of an OpenAPI operation can give `responses` in place of `response`: the requests it answers get them in turn, and the last one repeats.
+
+```ts
+const fixtures: ResponseFixture[] = [
+  {
+    operation: { method: 'GET', path: '/crawl/{id}' },
+    responses: [
+      { status: 200, body: { status: 'scraping' } },
+      { status: 200, body: { status: 'completed', data: [] } },
+    ],
+  },
+];
+```
+
+Each fixture keeps its own count, so sequences with different `when`s advance separately, and `reset()` starts every sequence again. Sequences work wherever fixtures do: at creation, in `--fixtures` files and as runtime fixtures, where each response is checked like a single one, and the violations' paths start with `responses` and the index of the response they belong to. A response can be an error status, such as urlscan.io's 404 until a scan finishes. GraphQL and MCP fixtures take one `response`; a sequence for them is listed in `rejectedResponses`.
 
 Examples and samples use the lowest declared 2xx response (then `2XX`, then `default`; operations without one, such as downloads that redirect or endpoints the vendor removed, get their lowest declared 3xx, then their lowest declared status) and the content type that best matches the request's `Accept` header, preferring JSON; the mock answers **406** when no content type matches. Sampled values come from the schema's first `examples` entry, `example` or `default` that conforms to the schema, then its `const` or first `enum` value, and otherwise from a placeholder that stays within the schema's type, format and bounds (`minimum`/`maximum`, `multipleOf`, `minLength`/`maxLength`, `minItems`/`maxItems`, and `pattern`, sampled from the regex). Vendors' examples often contradict their own schemas (a date-time under `format: date`, a number for a string), so non-conforming ones are skipped; examples of schemas merged from `allOf` parts are used unchecked. For `oneOf`, the first variant whose sample matches exactly one variant is used. Below a fixed depth only required properties are generated, which keeps recursive schemas finite. Required properties the schema doesn't declare are filled from `additionalProperties`, or with `null`.
 

@@ -778,6 +778,21 @@ A fixture can take a `when`, to answer only some requests. A request gets the ma
 ]
 ```
 
+For an action that polls until a job finishes, such as Firecrawl's `crawlAndWait`, give `responses` in place of `status`, `headers` and `body`. The requests the fixture answers get them in turn, the last one repeating, and `POST /_mock/reset` starts the sequence again:
+
+```json
+[
+  {
+    "method": "GET",
+    "path": "/crawl/{id}",
+    "responses": [
+      { "status": 200, "body": { "status": "scraping" } },
+      { "status": 200, "body": { "status": "completed", "data": [] } }
+    ]
+  }
+]
+```
+
 Paths are the spec's path templates, relative to its server URL. Fixtures are served first, then conforming recordings (those given for the run ahead of any committed in `vendor_api/recordings/`), then the spec's examples and samples. Fixtures and recordings the spec rejects are listed on startup.
 
 It logs every request with its status, where the response came from (`[fixture]` or `[recording]`), and the violations of failed ones. Tests read and reset the calls through the control endpoints on the proxy's own origin (`GET /_mock/calls`, `POST /_mock/reset`, `GET /_mock/operations`, or `createEmulatorControl` from `@kbn/connector-emulate`). On startup it prints the Kibana settings to use: `xpack.actions.proxyUrl` pointing at the proxy, and `xpack.actions.customHostSettings` entries that trust its CA for the vendor hosts in the specs, including per-operation servers and OAuth token URLs. Vendor hosts that come from connector config, such as a tenant's subdomain, need the CA trusted for every host instead, by starting Kibana with `NODE_EXTRA_CA_CERTS=data/connector_emulate/ca.crt`. The CA is created there on first use and reused afterwards, so Kibana keeps trusting it when the mock restarts.

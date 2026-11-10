@@ -139,6 +139,20 @@ describe('createEmulatorMcpHandler', () => {
     expect((await parsed('list_calls', { since: 1 })).calls).toEqual([]);
   });
 
+  it('sets a response sequence, served in turn', async () => {
+    await parsed('set_fixtures', {
+      fixtures: [
+        {
+          operation: listItems,
+          responses: [{ status: 429 }, { status: 200, body: [{ id: 7 }] }],
+        },
+      ],
+    });
+
+    expect((await emulator.fetch(ITEMS)).status).toBe(429);
+    expect(await (await emulator.fetch(ITEMS)).json()).toEqual([{ id: 7 }]);
+  });
+
   it('reports fixtures the spec rejects, and malformed ones, as tool errors', async () => {
     const rejected = await callTool('set_fixtures', {
       fixtures: [{ operation: listItems, response: { status: 200, body: [{ name: 'no id' }] } }],

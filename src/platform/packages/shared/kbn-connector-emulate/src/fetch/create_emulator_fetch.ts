@@ -617,6 +617,7 @@ export const createEmulatorFetch = ({
       calls.length = 0;
       state.clear();
       engine.runtime.clear();
+      engine.restartSequences();
     },
   };
 };

@@ -19,18 +19,38 @@ const requestMatcherSchema = z
   })
   .strict();
 
-const responseOverrideSchema = z
-  .object({
-    source: z.string().optional(),
-    method: z.string(),
-    path: z.string(),
-    /** Answers only the requests with these values; without it, every other request. */
-    when: requestMatcherSchema.optional(),
-    status: z.number().int(),
-    headers: z.record(z.string(), z.string()).optional(),
-    body: z.unknown().optional(),
-  })
-  .strict();
+const storedResponseFields = {
+  status: z.number().int(),
+  headers: z.record(z.string(), z.string()).optional(),
+  body: z.unknown().optional(),
+};
+
+const storedResponseSchema = z.object(storedResponseFields).strict();
+
+const overrideFields = {
+  source: z.string().optional(),
+  method: z.string(),
+  path: z.string(),
+  /** Answers only the requests with these values; without it, every other request. */
+  when: requestMatcherSchema.optional(),
+};
+
+const responseOverrideSchema = z.union(
+  [
+    z.object({ ...overrideFields, ...storedResponseFields }).strict(),
+    z
+      .object({
+        ...overrideFields,
+        /** Served in turn, the last one repeating, for handlers that poll until a job finishes. */
+        responses: z.array(storedResponseSchema).min(1),
+      })
+      .strict(),
+  ],
+  {
+    error:
+      'A response override is { source?, method, path, when?, status, headers?, body? }, or has responses, a non-empty list of { status, headers?, body? }, in place of status, headers and body',
+  }
+);
 
 const queryOperationSchema = z
   .object({
@@ -72,11 +92,22 @@ export type QueryOperation = z.infer<typeof queryOperationSchema>;
 export type ResponseOverride = z.infer<typeof responseOverrideSchema>;
 export type VendorApiFixtures = z.infer<typeof vendorApiFixturesSchema>;
 
+const toStoredResponse = ({ status, headers, body }: z.infer<typeof storedResponseSchema>) => ({
+  status,
+  ...(headers === undefined ? {} : { headers }),
+  body,
+});
+
 export const toResponseFixtures = (
   responses: readonly ResponseOverride[] = []
 ): ResponseFixture[] =>
-  responses.map(({ source, method, path, when, status, headers, body }) => ({
-    operation: { method, path, ...(source === undefined ? {} : { source }) },
-    ...(when === undefined ? {} : { when }),
-    response: { status, ...(headers === undefined ? {} : { headers }), body },
-  }));
+  responses.map((override) => {
+    const { source, method, path, when } = override;
+    const base = {
+      operation: { method, path, ...(source === undefined ? {} : { source }) },
+      ...(when === undefined ? {} : { when }),
+    };
+    return 'responses' in override
+      ? { ...base, responses: override.responses.map(toStoredResponse) }
+      : { ...base, response: toStoredResponse(override) };
+  });

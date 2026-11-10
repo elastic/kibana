@@ -58,7 +58,8 @@ another page, a value the vendor just added):
 1. list_operations to find the vendor operation the action calls;
 2. describe_operation for its responses, schemas and a sample that conforms;
 3. set_fixtures with the response you want, starting from the sample; use \`when\` to answer only
-   some requests. Responses the vendor's spec doesn't allow are rejected with the reasons, except
+   some requests, and \`responses\` for a sequence, such as a job that is pending and then
+   finished for an action that polls. Responses the vendor's spec doesn't allow are rejected with the reasons, except
    error statuses it doesn't declare (such as 429);
 4. run the action through Kibana, then list_calls to see what it sent and what it got;
 5. clear_fixtures or reset when done.`;
@@ -70,9 +71,20 @@ change only one of them; set_fixtures needs it when several connectors have the 
 
 const LIMIT = { maxLength: 500 } as const;
 
+const responseSchema = {
+  type: 'object',
+  required: ['status'],
+  properties: {
+    status: { type: 'integer', minimum: 200, maximum: 599 },
+    headers: { type: 'object', additionalProperties: { type: 'string', ...LIMIT } },
+    body: { description: 'The response body, as JSON' },
+  },
+};
+
 const fixtureSchema = {
   type: 'object',
-  required: ['operation', 'response'],
+  required: ['operation'],
+  oneOf: [{ required: ['response'] }, { required: ['responses'] }],
   properties: {
     operation: {
       type: 'object',
@@ -95,14 +107,14 @@ const fixtureSchema = {
         body: {},
       },
     },
-    response: {
-      type: 'object',
-      required: ['status'],
-      properties: {
-        status: { type: 'integer', minimum: 200, maximum: 599 },
-        headers: { type: 'object', additionalProperties: { type: 'string', ...LIMIT } },
-        body: { description: 'The response body, as JSON' },
-      },
+    response: responseSchema,
+    responses: {
+      type: 'array',
+      description:
+        'Instead of response: responses served in turn to the requests the fixture answers, the last one repeating, e.g. a pending status and then a finished one for a handler that polls. reset starts the sequence again',
+      minItems: 1,
+      maxItems: 100,
+      items: responseSchema,
     },
   },
 };

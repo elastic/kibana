@@ -16,13 +16,26 @@ const MAX_FIXTURES = 1000;
 const isStringRecord = (value: unknown): boolean =>
   isRecord(value) && Object.values(value).every((entry) => typeof entry === 'string');
 
-// The shape of a fixture; whether the spec allows its response is checked when it is set.
+// The most responses in one fixture's sequence.
+const MAX_RESPONSES = 100;
+
+const responseShapeError = (response: unknown, at: string): string | undefined => {
+  if (!isRecord(response) || !Number.isInteger(response.status)) {
+    return `${at} must be { status, headers?, body? }`;
+  }
+  if (response.headers !== undefined && !isStringRecord(response.headers)) {
+    return `${at}.headers must map names to strings`;
+  }
+  return undefined;
+};
+
+// The shape of a fixture; whether the spec allows its responses is checked when it is set.
 const fixtureShapeError = (fixture: unknown, index: number): string | undefined => {
   const at = `fixtures[${index}]`;
   if (!isRecord(fixture)) {
     return `${at} must be an object`;
   }
-  const { operation, when, response } = fixture;
+  const { operation, when, response, responses } = fixture;
   const namesOperation =
     isRecord(operation) &&
     (typeof operation.name === 'string' ||
@@ -33,13 +46,18 @@ const fixtureShapeError = (fixture: unknown, index: number): string | undefined 
   if (when !== undefined && !isRecord(when)) {
     return `${at}.when must be an object`;
   }
-  if (!isRecord(response) || !Number.isInteger(response.status)) {
-    return `${at}.response must be { status, headers?, body? }`;
+  if ((response === undefined) === (responses === undefined)) {
+    return `${at} must have either response or responses`;
   }
-  if (response.headers !== undefined && !isStringRecord(response.headers)) {
-    return `${at}.response.headers must map names to strings`;
+  if (responses === undefined) {
+    return responseShapeError(response, `${at}.response`);
   }
-  return undefined;
+  if (!Array.isArray(responses) || responses.length === 0 || responses.length > MAX_RESPONSES) {
+    return `${at}.responses must be a list of 1 to ${MAX_RESPONSES} responses`;
+  }
+  return responses
+    .map((entry, position) => responseShapeError(entry, `${at}.responses[${position}]`))
+    .find((error) => error !== undefined);
 };
 
 /** Checks that a value is `{ fixtures: ResponseFixture[] }` in shape, at most `MAX_FIXTURES`. */

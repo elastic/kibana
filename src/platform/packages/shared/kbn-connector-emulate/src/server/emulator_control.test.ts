@@ -123,6 +123,20 @@ describe('createEmulatorControlHandler', () => {
     expect(emulator.runtimeFixtures.list()).toEqual([]);
   });
 
+  it('sets a response sequence on PUT /_mock/fixtures', async () => {
+    const fixture = {
+      operation: { method: 'GET', path: '/items' },
+      responses: [{ status: 429 }, { status: 200 }],
+    };
+    const statusOfItems = async () =>
+      (await emulator.fetch('https://api.vendor.example/v1/items')).status;
+
+    expect((await handle(putJson('/_mock/fixtures', { fixtures: [fixture] }))).status).toBe(200);
+    expect([await statusOfItems(), await statusOfItems(), await statusOfItems()]).toEqual([
+      429, 200, 200,
+    ]);
+  });
+
   it('answers 400 with the rejected fixtures, and sets none, when the spec rejects one', async () => {
     const response = await handle(
       putJson('/_mock/fixtures', {
@@ -145,6 +159,29 @@ describe('createEmulatorControlHandler', () => {
       'a fixture without a status',
       { fixtures: [{ operation: { name: 'query boards' }, response: {} }] },
       'response',
+    ],
+    [
+      'a fixture with both a response and responses',
+      {
+        fixtures: [
+          {
+            operation: { method: 'GET', path: '/items' },
+            response: { status: 200 },
+            responses: [{ status: 200 }],
+          },
+        ],
+      },
+      'either response or responses',
+    ],
+    [
+      'an empty sequence',
+      { fixtures: [{ operation: { method: 'GET', path: '/items' }, responses: [] }] },
+      'responses must be a list',
+    ],
+    [
+      'a sequence response without a status',
+      { fixtures: [{ operation: { method: 'GET', path: '/items' }, responses: [{}] }] },
+      'responses[0]',
     ],
   ])('answers 400 to a body with %s', async (_case, body, detail) => {
     const response = await handle(

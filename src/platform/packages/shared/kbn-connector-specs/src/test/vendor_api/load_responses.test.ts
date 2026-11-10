@@ -127,6 +127,35 @@ describe('load_responses', () => {
       await expect(readResponseFixtures(file)).rejects.toThrow(/Unrecognized key: "params"/);
     });
 
+    it('reads a response sequence', async () => {
+      const file = await write('fixtures.json', [
+        {
+          method: 'GET',
+          path: '/jobs/{id}',
+          responses: [{ status: 404 }, { status: 200, body: { status: 'completed' } }],
+        },
+      ]);
+
+      expect(await readResponseFixtures(file)).toEqual([
+        {
+          operation: { method: 'GET', path: '/jobs/{id}' },
+          responses: [
+            { status: 404, body: undefined },
+            { status: 200, body: { status: 'completed' } },
+          ],
+        },
+      ]);
+    });
+
+    it.each([
+      ['both a status and responses', { status: 200, responses: [{ status: 200 }] }],
+      ['an empty sequence', { responses: [] }],
+    ])('rejects an override with %s', async (_case, fields) => {
+      const file = await write('fixtures.json', [{ method: 'GET', path: '/items', ...fields }]);
+
+      await expect(readResponseFixtures(file)).rejects.toThrow("doesn't have the expected shape");
+    });
+
     it('names the file and the problem when the shape is wrong', async () => {
       const file = await write('fixtures.json', [{ method: 'GET', path: '/items' }]);
 
