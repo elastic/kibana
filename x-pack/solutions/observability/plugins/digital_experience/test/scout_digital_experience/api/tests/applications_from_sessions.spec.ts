@@ -158,9 +158,20 @@ const deleteEvents = (esClient: EsClient) =>
     ignore_unavailable: true,
   });
 
-/** The row without the order of its environments, which the sources list by their own counts. */
+/** The sessions of a trend, all its buckets together. */
+const totalOf = (trend: ApplicationsResponse['sessionsOverTime']) =>
+  trend?.reduce((total, { count }) => total + count, 0);
+
+/**
+ * The row without what only one source has: the order of its environments, which the sources list
+ * by their own counts, and the sessions, which only the sessions index counts.
+ */
 const comparable = (application?: ApplicationSummary) =>
-  application && { ...application, environments: [...application.environments].sort() };
+  application && {
+    ...application,
+    sessions: null,
+    environments: [...application.environments].sort(),
+  };
 
 apiTest.describe(
   'Digital Experience applications API from the sessions index',
@@ -223,11 +234,18 @@ apiTest.describe(
     });
 
     apiTest('reads the raw events while sessions are not set up', async ({ apiClient }) => {
-      const { applications, environments } = await getApplications(apiClient, viewerHeaders);
+      const { applications, environments, sessionsOverTime } = await getApplications(
+        apiClient,
+        viewerHeaders
+      );
 
+      // The raw events don't count sessions, so there is no trend of them either.
+      expect(sessionsOverTime).toBeNull();
       rawApplication = findApplication(applications, APP, 'otel');
       expect(rawApplication).toMatchObject({
         pageLoads: { count: 4 },
+        // The raw events don't count sessions.
+        sessions: null,
         jsErrors: { count: 1, perPageLoad: 0.25 },
         httpRequests: { count: 5, failedCount: 3, failedRatio: 0.6 },
         webVitals: {
@@ -329,7 +347,14 @@ apiTest.describe(
           )
           .toStrictEqual(comparable(rawApplication));
 
-        const { environments } = await getApplications(apiClient, viewerHeaders);
+        const { applications, environments, sessionsOverTime } = await getApplications(
+          apiClient,
+          viewerHeaders
+        );
+        expect(findApplication(applications, APP, 'otel')?.sessions).toStrictEqual({ count: 3 });
+        // All three sessions started within the range, in the buckets of the page loads; the trend
+        // covers every application, so other suites' sessions may add to it.
+        expect(totalOf(sessionsOverTime)).toBeGreaterThanOrEqual(3);
         expect(environments).toStrictEqual(
           expect.arrayContaining([PRODUCTION, STAGING, NOT_DEFINED])
         );
@@ -341,10 +366,13 @@ apiTest.describe(
       expect(findApplication(staging.applications, APP, 'otel')).toMatchObject({
         environments: [STAGING],
         pageLoads: { count: 1 },
+        sessions: { count: 1 },
         jsErrors: { count: 0, perPageLoad: 0 },
         httpRequests: { count: 2, failedCount: 1, failedRatio: 0.5 },
         webVitals: { lcp: { sampleCount: 1, ratings: { good: 0, needsImprovement: 0, poor: 1 } } },
       });
+      // Only this suite has sessions in `staging`, so the trend of that environment is its one.
+      expect(totalOf(staging.sessionsOverTime)).toBe(1);
       // The picker keeps every environment, whatever the selected one.
       expect(staging.environments).toStrictEqual(
         expect.arrayContaining([PRODUCTION, STAGING, NOT_DEFINED])
@@ -354,6 +382,7 @@ apiTest.describe(
       expect(findApplication(notDefined.applications, APP, 'otel')).toMatchObject({
         environments: [],
         pageLoads: { count: 1 },
+        sessions: { count: 1 },
         httpRequests: { count: 0, failedCount: 0, failedRatio: null },
       });
     });

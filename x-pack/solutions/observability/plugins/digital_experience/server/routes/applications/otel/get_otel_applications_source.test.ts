@@ -33,11 +33,13 @@ const FROM_SESSIONS: SourceApplications = {
   applications: [application('from-sessions')],
   environments: ['production'],
   pageLoadsOverTime: [],
+  sessionsOverTime: [],
 };
 const FROM_RAW: SourceApplications = {
   applications: [application('from-raw')],
   environments: ['staging'],
   pageLoadsOverTime: [],
+  sessionsOverTime: null,
 };
 
 const status = (overrides: Partial<SessionsStatus> = {}) =>

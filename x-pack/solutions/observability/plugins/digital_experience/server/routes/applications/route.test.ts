@@ -66,11 +66,13 @@ describe('GET /internal/digital_experience/applications', () => {
       applications: [],
       environments: ['production'],
       pageLoadsOverTime: [],
+      sessionsOverTime: null,
     });
     mockedClassic.mockResolvedValue({
       applications: [],
       environments: ['staging'],
       pageLoadsOverTime: [],
+      sessionsOverTime: null,
     });
   });
 

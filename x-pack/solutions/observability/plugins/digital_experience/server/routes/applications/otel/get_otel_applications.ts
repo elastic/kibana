@@ -63,6 +63,7 @@ const searchOtelApplications = async ({
     applications,
     environments: pickerEnvironments(logs),
     pageLoadsOverTime: toTimeSeries(logs?.inEnvironment.pageLoadsOverTime?.histogram),
+    sessionsOverTime: null,
   };
 };
 

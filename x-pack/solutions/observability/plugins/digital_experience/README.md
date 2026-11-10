@@ -23,11 +23,18 @@ The monitored applications in the selected time range, served by
 `GET /internal/digital_experience/applications`, which requires the Digital Experience and APM
 privileges like the app.
 
-- **Summary:** applications, page loads, JS errors per page load, failed HTTP requests and the
-  applications with a poor Core Web Vital. Like the chart, it covers the selected environment and
-  source; the search narrows only the table.
+- **Summary:** applications, sessions, page loads, JS errors per page load, failed HTTP requests and
+  the applications with a poor Core Web Vital. Like the chart, it covers the selected environment and
+  source; the search narrows only the table. The sessions are the total of the EDOT Browser
+  applications, which only the sessions index counts, so it shows a dash while they are read from
+  the raw events (sessions not set up, a range past their lookback, no access to them) and for Classic
+  RUM, which has no sessions.
 - **Partial data:** when one source fails to load, a warning above the summary names it.
-- **Page loads chart:** page loads over time; drag over it to zoom into that range.
+- **Chart:** page loads over time, or the sessions that started, picked with a toggle whose choice
+  is kept in local storage; drag over it to zoom into that range. The sessions are counted only
+  while the applications are read from the sessions index, so the toggle disables **Sessions**, and
+  says why, when they are not or when only Classic RUM is selected. The choice is kept until they are
+  back, the chart showing page loads meanwhile.
 - **Filters:** environment and source (kept in the URL), and a search on the name.
 - **Table:** per application, its source, page loads, JS errors per page load, LCP / INP / CLS / FCP /
   TTFB p75 colored by rating (with the good / needs improvement / poor shares in the tooltip), JS

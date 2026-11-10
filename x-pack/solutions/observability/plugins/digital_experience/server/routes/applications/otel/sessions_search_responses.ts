@@ -25,6 +25,8 @@ export interface SessionsVitalBucket {
 /** One application in `sessionsSearch`. */
 export type SessionsBucket = Record<CoreWebVital, SessionsVitalBucket> & {
   key: string;
+  /** The sessions of the application that overlap the time range. */
+  doc_count: number;
   environments: TermsAggregation;
   pageLoads: SumAggregation;
   jsErrors: SumAggregation;
@@ -39,6 +41,9 @@ export interface SessionsAggregations {
   environmentNotDefined: { doc_count: number };
   inEnvironment: {
     applications: { buckets: SessionsBucket[] };
-    pageLoadsOverTime: { buckets: Array<{ key: number; pageLoads: SumAggregation }> };
+    pageLoadsOverTime: {
+      // The sessions that started in the bucket, and the page loads they hold.
+      buckets: Array<{ key: number; doc_count: number; pageLoads: SumAggregation }>;
+    };
   };
 }

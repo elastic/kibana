@@ -32,6 +32,7 @@ const toVitalAggregation = ({
 /** One application from its sessions bucket. */
 export const toSessionsApplication = ({
   key,
+  doc_count: sessionCount,
   environments,
   pageLoads,
   jsErrors,
@@ -48,6 +49,7 @@ export const toSessionsApplication = ({
   source: APPLICATION_SOURCE.otel,
   environments: bucketKeys(environments),
   pageLoads: { count: pageLoads.value },
+  sessions: { count: sessionCount },
   webVitals: toWebVitals({
     lcp: toVitalAggregation(lcp),
     inp: toVitalAggregation(inp),
@@ -67,4 +69,13 @@ export const toSessionsTimeSeries = (
   (aggregations?.pageLoadsOverTime.buckets ?? []).map(({ key, pageLoads }) => ({
     timestamp: key,
     count: pageLoads.value,
+  }));
+
+/** The sessions that started in each bucket, which the buckets already count. */
+export const toStartedSessionsTimeSeries = (
+  aggregations?: SessionsAggregations['inEnvironment']
+): TimeSeriesPoint[] =>
+  (aggregations?.pageLoadsOverTime.buckets ?? []).map(({ key, doc_count: count }) => ({
+    timestamp: key,
+    count,
   }));

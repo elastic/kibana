@@ -25,6 +25,8 @@ const ALL_GOOD = { good: 1, needsImprovement: 0, poor: 0 };
 
 const application = (key: string, overrides: Record<string, unknown> = {}) => ({
   key,
+  // The sessions of the application that overlap the time range.
+  doc_count: 1,
   environments: terms(),
   pageLoads: sum(1),
   jsErrors: sum(0),
@@ -54,6 +56,7 @@ describe('getSessionsApplications', () => {
         applications: {
           buckets: [
             application('web', {
+              doc_count: 40,
               environments: terms('production', 'canary'),
               pageLoads: sum(12),
               jsErrors: sum(3),
@@ -81,6 +84,7 @@ describe('getSessionsApplications', () => {
           source: 'otel',
           environments: ['production', 'canary'],
           pageLoads: { count: 12 },
+          sessions: { count: 40 },
           webVitals: {
             lcp: { p75Ms: 2412.5, sampleCount: 10, ratings: ALL_GOOD },
             inp: { p75Ms: 180.25, sampleCount: 4, ratings: ALL_GOOD },
@@ -160,6 +164,29 @@ describe('getSessionsApplications', () => {
     ]);
   });
 
+  it('counts the sessions that started in each bucket, which the buckets already count', async () => {
+    const esClient = setup({
+      environments: terms(),
+      environmentNotDefined: { doc_count: 0 },
+      inEnvironment: {
+        applications: { buckets: [] },
+        pageLoadsOverTime: {
+          buckets: [
+            { key: 1000, doc_count: 5, pageLoads: sum(7) },
+            { key: 2000, doc_count: 0, pageLoads: sum(0) },
+          ],
+        },
+      },
+    });
+
+    const { sessionsOverTime } = await getSessionsApplications({ esClient, start: 1, end: 2 });
+
+    expect(sessionsOverTime).toEqual([
+      { timestamp: 1000, count: 5 },
+      { timestamp: 2000, count: 0 },
+    ]);
+  });
+
   it('returns nothing without aggregations, e.g. when the index does not exist', async () => {
     const esClient = setup(undefined);
 
@@ -167,6 +194,7 @@ describe('getSessionsApplications', () => {
       applications: [],
       environments: [],
       pageLoadsOverTime: [],
+      sessionsOverTime: [],
     });
   });
 

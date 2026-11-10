@@ -13,7 +13,11 @@ import type { SourceApplications } from '../types';
 import type { GetOtelApplicationsParams } from './get_otel_applications';
 import { sessionsSearch } from './sessions_search_requests';
 import type { SessionsAggregations } from './sessions_search_responses';
-import { toSessionsApplication, toSessionsTimeSeries } from './sessions_to_application';
+import {
+  toSessionsApplication,
+  toSessionsTimeSeries,
+  toStartedSessionsTimeSeries,
+} from './sessions_to_application';
 
 /**
  * EDOT Browser applications and their metrics from the sessions index, in one search. It reads what
@@ -37,5 +41,6 @@ export const getSessionsApplications = ({
         aggregations?.environmentNotDefined.doc_count ?? 0
       ),
       pageLoadsOverTime: toSessionsTimeSeries(aggregations?.inEnvironment),
+      sessionsOverTime: toStartedSessionsTimeSeries(aggregations?.inEnvironment),
     };
   });
