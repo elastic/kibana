@@ -45,6 +45,7 @@ describe('executeCompositeAction', () => {
     await executeCompositeAction({
       episodes: [makeEpisode('e1'), makeEpisode('e2'), makeSourceEpisode('s1')],
       nativeExecute,
+      actionName: 'Test action',
       deps,
     });
 
@@ -75,6 +76,7 @@ describe('executeCompositeAction', () => {
       episodes: [makeEpisode('e1'), makeSourceEpisode('s1')],
       nativeExecute,
       extension,
+      actionName: 'Test action',
       deps,
     });
 
@@ -101,6 +103,7 @@ describe('executeCompositeAction', () => {
       episodes: [makeSourceEpisode('s1'), makeSourceEpisode('s2')],
       nativeExecute,
       extension,
+      actionName: 'Test action',
       deps,
     });
 
@@ -115,20 +118,25 @@ describe('executeCompositeAction', () => {
   it('shows success toast when all succeed', async () => {
     const deps = makeDeps();
     const nativeExecute = jest.fn().mockResolvedValue({ affected_count: 2, errors: [] });
+    const onSuccess = jest.fn();
 
     await executeCompositeAction({
       episodes: [makeEpisode('e1'), makeEpisode('e2')],
       nativeExecute,
+      actionName: 'Test action',
+      onSuccess,
       deps,
     });
 
     expect(deps.notifications.toasts.add).toHaveBeenCalledWith(
       expect.objectContaining({ color: 'success' })
     );
+    expect(onSuccess).toHaveBeenCalledTimes(1);
   });
 
   it('shows warning toast on partial failure from BulkResponse errors', async () => {
     const deps = makeDeps();
+    const onSuccess = jest.fn();
     const nativeExecute = jest.fn().mockResolvedValue({
       affected_count: 1,
       errors: [{ id: 'e2', error: { code: 'ALERT_NOT_FOUND', message: 'err' } }],
@@ -137,11 +145,18 @@ describe('executeCompositeAction', () => {
     await executeCompositeAction({
       episodes: [makeEpisode('e1'), makeEpisode('e2')],
       nativeExecute,
+      actionName: 'Unresolve',
+      onSuccess,
       deps,
     });
 
-    expect(deps.notifications.toasts.add).toHaveBeenCalledWith(
-      expect.objectContaining({ color: 'warning' })
+    expect(onSuccess).toHaveBeenCalledTimes(1);
+    expect(deps.notifications.toasts.addError).toHaveBeenCalledWith(
+      expect.objectContaining({ stack: 'e2 — err' }),
+      {
+        title: 'Unresolve completed with 1 error.',
+        toastMessage: 'err',
+      }
     );
   });
 
@@ -155,6 +170,7 @@ describe('executeCompositeAction', () => {
     await executeCompositeAction({
       episodes: [makeEpisode('e1'), makeEpisode('e2')],
       nativeExecute,
+      actionName: 'Test action',
       deps,
     });
 
@@ -165,6 +181,7 @@ describe('executeCompositeAction', () => {
 
   it('reports that nothing needed changing when every item was already in the requested state', async () => {
     const deps = makeDeps();
+    const onSuccess = jest.fn();
     const nativeExecute = jest.fn().mockResolvedValue({
       affected_count: 0,
       errors: [
@@ -178,6 +195,8 @@ describe('executeCompositeAction', () => {
     await executeCompositeAction({
       episodes: [makeEpisode('e1')],
       nativeExecute,
+      actionName: 'Test action',
+      onSuccess,
       deps,
     });
 
@@ -185,6 +204,61 @@ describe('executeCompositeAction', () => {
       title: 'No changes were needed.',
       color: 'success',
     });
+    expect(onSuccess).not.toHaveBeenCalled();
+  });
+
+  it('reports that nothing needed changing when a source extension returns unchanged alerts', async () => {
+    const deps = makeDeps();
+    const onSuccess = jest.fn();
+    const extension: EpisodeActionExtension = {
+      actionId: 'test',
+      isCompatible: () => true,
+      execute: jest.fn().mockResolvedValue({ succeeded: 0, failed: 0, unchanged: 1 }),
+    };
+
+    await executeCompositeAction({
+      episodes: [makeSourceEpisode('s1')],
+      nativeExecute: jest.fn(),
+      extension,
+      actionName: 'Edit alert tags',
+      onSuccess,
+      deps,
+    });
+
+    expect(onSuccess).not.toHaveBeenCalled();
+    expect(deps.notifications.toasts.add).toHaveBeenCalledWith({
+      title: 'No changes were needed.',
+      color: 'success',
+    });
+  });
+
+  it('reports a source failure when native alerts needed no changes', async () => {
+    const deps = makeDeps();
+    const onSuccess = jest.fn();
+    const nativeExecute = jest.fn().mockResolvedValue({
+      affected_count: 0,
+      errors: [{ id: 'e1', error: { code: 'ALERT_ACTION_NO_OP', message: 'already done' } }],
+    });
+    const extension: EpisodeActionExtension = {
+      actionId: 'test',
+      isCompatible: () => true,
+      execute: jest.fn().mockRejectedValue(new Error('source failed')),
+    };
+
+    await executeCompositeAction({
+      episodes: [makeEpisode('e1'), makeSourceEpisode('s1')],
+      nativeExecute,
+      extension,
+      actionName: 'Resolve',
+      onSuccess,
+      deps,
+    });
+
+    expect(onSuccess).not.toHaveBeenCalled();
+    expect(deps.notifications.toasts.addError).toHaveBeenCalledWith(
+      expect.objectContaining({ stack: 's1 — source failed' }),
+      expect.anything()
+    );
   });
 
   it('shows no toast when there are no episodes to process', async () => {
@@ -194,6 +268,7 @@ describe('executeCompositeAction', () => {
     await executeCompositeAction({
       episodes: [],
       nativeExecute,
+      actionName: 'Test action',
       deps,
     });
 
@@ -216,6 +291,7 @@ describe('executeCompositeAction', () => {
       nativeExecute,
       extension,
       extensionContext: { tags: ['important'] },
+      actionName: 'Test action',
       deps,
     });
 
@@ -238,6 +314,7 @@ describe('executeCompositeAction', () => {
       episodes: [makeEpisode('e1'), makeEpisode('e2'), makeSourceEpisode('s1')],
       nativeExecute,
       extension,
+      actionName: 'Test action',
       deps,
     });
 
@@ -246,7 +323,7 @@ describe('executeCompositeAction', () => {
     );
   });
 
-  it('shows warning toast when one side succeeds and the other rejects', async () => {
+  it('shows an expandable error toast when one side succeeds and the other rejects', async () => {
     const deps = makeDeps();
     const nativeExecute = jest.fn().mockResolvedValue({ affected_count: 1, errors: [] });
     const extensionExecute = jest.fn().mockRejectedValue(new Error('source failed'));
@@ -260,26 +337,107 @@ describe('executeCompositeAction', () => {
       episodes: [makeEpisode('e1'), makeSourceEpisode('s1')],
       nativeExecute,
       extension,
+      actionName: 'Resolve',
       deps,
     });
 
-    expect(deps.notifications.toasts.add).toHaveBeenCalledWith(
-      expect.objectContaining({ color: 'warning' })
+    expect(deps.notifications.toasts.addError).toHaveBeenCalledWith(
+      expect.objectContaining({ stack: 's1 — source failed' }),
+      {
+        title: 'Resolve completed with 1 error.',
+        toastMessage: 'source failed',
+      }
     );
   });
 
-  it('throws when all operations fail', async () => {
+  it('shows the rejected error and reports that nothing was applied', async () => {
     const deps = makeDeps();
+    const onSuccess = jest.fn();
     const nativeExecute = jest.fn().mockRejectedValue(new Error('native failed'));
 
-    await expect(
-      executeCompositeAction({
-        episodes: [makeEpisode('e1')],
-        nativeExecute,
-        deps,
-      })
-    ).rejects.toThrow('All composite action operations failed');
+    await executeCompositeAction({
+      episodes: [makeEpisode('e1')],
+      nativeExecute,
+      actionName: 'Acknowledge',
+      onSuccess,
+      deps,
+    });
 
+    expect(onSuccess).not.toHaveBeenCalled();
+    expect(deps.notifications.toasts.addError).toHaveBeenCalledWith(
+      expect.objectContaining({ stack: 'e1 — native failed' }),
+      {
+        title: 'Acknowledge failed for 1 alert.',
+        toastMessage: 'native failed',
+      }
+    );
     expect(deps.notifications.toasts.add).not.toHaveBeenCalled();
+  });
+
+  it('prefers the API response message for a rejected HTTP request', async () => {
+    const deps = makeDeps();
+    const httpError = Object.assign(new Error('Bad Request'), {
+      body: { message: 'The alert cannot be updated' },
+    });
+    const nativeExecute = jest.fn().mockRejectedValue(httpError);
+
+    await executeCompositeAction({
+      episodes: [makeEpisode('e1')],
+      nativeExecute,
+      actionName: 'Acknowledge',
+      deps,
+    });
+
+    expect(deps.notifications.toasts.addError).toHaveBeenCalledWith(
+      expect.objectContaining({ stack: 'e1 — The alert cannot be updated' }),
+      expect.objectContaining({ toastMessage: 'The alert cannot be updated' })
+    );
+  });
+
+  it('surfaces a synchronous execution error through the same error toast', async () => {
+    const deps = makeDeps();
+    const onSuccess = jest.fn();
+    const nativeExecute = jest.fn().mockImplementation(() => {
+      throw new Error('sync failure');
+    });
+
+    await executeCompositeAction({
+      episodes: [makeEpisode('e1')],
+      nativeExecute,
+      actionName: 'Resolve',
+      onSuccess,
+      deps,
+    });
+    expect(onSuccess).not.toHaveBeenCalled();
+    expect(deps.notifications.toasts.addError).toHaveBeenCalledWith(
+      expect.objectContaining({ stack: 'e1 — sync failure' }),
+      expect.anything()
+    );
+  });
+
+  it('shows API errors on total failure and reports that nothing was applied', async () => {
+    const deps = makeDeps();
+    const onSuccess = jest.fn();
+    const nativeExecute = jest.fn().mockResolvedValue({
+      affected_count: 0,
+      errors: [{ id: 'e1', error: { code: 'ALERT_NOT_FOUND', message: 'Alert not found' } }],
+    });
+
+    await executeCompositeAction({
+      episodes: [makeEpisode('e1')],
+      nativeExecute,
+      actionName: 'Resolve',
+      onSuccess,
+      deps,
+    });
+
+    expect(onSuccess).not.toHaveBeenCalled();
+    expect(deps.notifications.toasts.addError).toHaveBeenCalledWith(
+      expect.objectContaining({ stack: 'e1 — Alert not found' }),
+      {
+        title: 'Resolve failed for 1 alert.',
+        toastMessage: 'Alert not found',
+      }
+    );
   });
 });

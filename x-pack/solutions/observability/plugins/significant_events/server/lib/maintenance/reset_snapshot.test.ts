@@ -11,10 +11,10 @@ import { collectResetSnapshot } from './reset_snapshot';
 
 const createClient = () =>
   ({
-    getStreamNamesWithKnowledgeIndicators: jest.fn().mockResolvedValue(['logs.web']),
-    findStreamNamesWithOwnedRules: jest.fn().mockResolvedValue(['logs.web', 'logs.orphan']),
+    getSourceIdsWithKnowledgeIndicators: jest.fn().mockResolvedValue(['logs.web']),
+    findSourceIdsWithOwnedRules: jest.fn().mockResolvedValue(['logs.web', 'logs.orphan']),
     countKnowledgeIndicators: jest.fn().mockResolvedValue(2),
-    getStreamToQueryLinksMap: jest.fn().mockResolvedValue({
+    getSourceToQueryLinksMap: jest.fn().mockResolvedValue({
       'logs.web': [{ rule_backed: true, rule_id: 'linked-rule' }, { rule_backed: false }],
       'logs.orphan': [],
     }),
@@ -33,10 +33,10 @@ describe('collectResetSnapshot', () => {
       storedQueries: 2,
       ruleIds: ['linked-rule', 'owned-rule', 'orphan-rule'],
     });
-    expect(client.getStreamToQueryLinksMap).toHaveBeenCalledWith(['logs.web', 'logs.orphan'], {
+    expect(client.getSourceToQueryLinksMap).toHaveBeenCalledWith(['logs.web', 'logs.orphan'], {
       includeExpired: true,
     });
-    expect(client.getStreamToQueryLinksMap).toHaveBeenCalledTimes(1);
+    expect(client.getSourceToQueryLinksMap).toHaveBeenCalledTimes(1);
     expect(client.countKnowledgeIndicators).toHaveBeenCalledWith(KI_TYPE_FEATURE);
     expect(client.countKnowledgeIndicators).toHaveBeenCalledWith(KI_TYPE_QUERY);
     expect(failures).toEqual([]);
@@ -44,10 +44,10 @@ describe('collectResetSnapshot', () => {
 
   it('still discovers tag-owned orphan rules when the KI stream lookup fails', async () => {
     const client = createClient();
-    client.getStreamNamesWithKnowledgeIndicators.mockRejectedValueOnce(
+    client.getSourceIdsWithKnowledgeIndicators.mockRejectedValueOnce(
       new Error('knowledge indicator stream missing')
     );
-    client.getStreamToQueryLinksMap.mockRejectedValue(new Error('query stream missing'));
+    client.getSourceToQueryLinksMap.mockRejectedValue(new Error('query stream missing'));
     client.countKnowledgeIndicators.mockImplementation(async (type) => {
       if (type === KI_TYPE_FEATURE) {
         throw new Error('feature count failed');
@@ -79,9 +79,9 @@ describe('collectResetSnapshot', () => {
   it('limits owned-rule lookups and preserves stream order', async () => {
     const streamNames = Array.from({ length: 25 }, (_, index) => `logs.${index}`);
     const client = createClient();
-    client.getStreamNamesWithKnowledgeIndicators.mockResolvedValue(streamNames);
-    client.findStreamNamesWithOwnedRules.mockResolvedValue([]);
-    client.getStreamToQueryLinksMap.mockResolvedValue({});
+    client.getSourceIdsWithKnowledgeIndicators.mockResolvedValue(streamNames);
+    client.findSourceIdsWithOwnedRules.mockResolvedValue([]);
+    client.getSourceToQueryLinksMap.mockResolvedValue({});
     let active = 0;
     let maxActive = 0;
     client.findOwnedRuleIds.mockImplementation(async (streamName) => {

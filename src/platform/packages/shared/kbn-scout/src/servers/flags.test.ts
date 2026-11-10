@@ -8,7 +8,7 @@
  */
 
 import { FlagsReader } from '@kbn/dev-cli-runner';
-import { parseServerFlags } from './flags';
+import { parseServerFlags, parseStartServerFlags } from './flags';
 
 describe('parseServerFlags', () => {
   it(`should throw an error with incorrect '--arch' flag`, () => {
@@ -34,7 +34,6 @@ describe('parseServerFlags', () => {
       headed: false,
       logToFile: false,
       preserveEsData: false,
-      serverConfigSet: 'default',
     });
     const result = parseServerFlags(flags);
 
@@ -43,7 +42,6 @@ describe('parseServerFlags', () => {
       installDir: undefined,
       logsDir: undefined,
       preserveEsData: false,
-      serverConfigSet: 'default',
       testTarget: {
         arch: 'serverless',
         domain: 'observability_complete',
@@ -60,7 +58,6 @@ describe('parseServerFlags', () => {
       esFrom: 'snapshot',
       logToFile: false,
       preserveEsData: false,
-      serverConfigSet: 'default',
     });
     const result = parseServerFlags(flags);
 
@@ -69,35 +66,9 @@ describe('parseServerFlags', () => {
       installDir: undefined,
       logsDir: undefined,
       preserveEsData: false,
-      serverConfigSet: 'default',
       testTarget: {
         arch: 'stateful',
         domain: 'observability_complete',
-        location: 'cloud',
-      },
-    });
-  });
-
-  it(`should parse serverConfigSet flag`, () => {
-    const flags = new FlagsReader({
-      location: 'cloud',
-      arch: 'stateful',
-      domain: 'classic',
-      logToFile: false,
-      preserveEsData: false,
-      serverConfigSet: 'uiam_local',
-    });
-    const result = parseServerFlags(flags);
-
-    expect(result).toEqual({
-      esFrom: undefined,
-      installDir: undefined,
-      logsDir: undefined,
-      preserveEsData: false,
-      serverConfigSet: 'uiam_local',
-      testTarget: {
-        arch: 'stateful',
-        domain: 'classic',
         location: 'cloud',
       },
     });
@@ -110,7 +81,6 @@ describe('parseServerFlags', () => {
       domain: 'security_complete',
       logToFile: false,
       preserveEsData: true,
-      serverConfigSet: 'default',
     });
     const result = parseServerFlags(flags);
 
@@ -119,11 +89,37 @@ describe('parseServerFlags', () => {
       installDir: undefined,
       logsDir: undefined,
       preserveEsData: true,
-      serverConfigSet: 'default',
       testTarget: {
         arch: 'serverless',
         domain: 'security_complete',
         location: 'local',
+      },
+    });
+  });
+});
+
+describe('parseStartServerFlags', () => {
+  it(`should parse serverConfigSet flag`, () => {
+    const flags = new FlagsReader({
+      location: 'cloud',
+      arch: 'stateful',
+      domain: 'classic',
+      logToFile: false,
+      preserveEsData: false,
+      serverConfigSet: 'uiam_local',
+    });
+    const result = parseStartServerFlags(flags);
+
+    expect(result).toEqual({
+      esFrom: undefined,
+      installDir: undefined,
+      logsDir: undefined,
+      preserveEsData: false,
+      serverConfigSet: 'uiam_local',
+      testTarget: {
+        arch: 'stateful',
+        domain: 'classic',
+        location: 'cloud',
       },
     });
   });

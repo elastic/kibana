@@ -29,16 +29,30 @@ const m = (name: string) => `${SCOPE}.${name}`;
  * boundaries sized to what it actually measures instead.
  */
 const DURATION_MS_BOUNDARIES = [10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000, 30000, 60000];
+// A whole task run is structurally longer than one sub-operation query, so it gets its own
+// boundaries instead of collapsing into the last bucket or two of DURATION_MS_BOUNDARIES.
+const TASK_DURATION_MS_BOUNDARIES = [
+  500, 1000, 2500, 5000, 7500, 10000, 15000, 20000, 25000, 30000, 40000, 50000, 60000, 90000,
+  120000,
+];
 // Wider range for operations that scan/rewrite the whole entities index rather than one bounded
 // extraction query, which can realistically run for minutes on a large store.
 const LONG_DURATION_MS_BOUNDARIES = [
   100, 500, 1000, 5000, 15000, 30000, 60000, 300000, 600000, 1800000, 3600000,
 ];
+// Finer resolution between one and five minutes, the range that distinguishes mild from
+// meaningful lag.
 const LAG_MS_BOUNDARIES = [
-  1000, 5000, 15000, 30000, 60000, 300000, 900000, 1800000, 3600000, 7200000, 21600000, 86400000,
+  1000, 5000, 15000, 30000, 60000, 90000, 120000, 180000, 300000, 450000, 600000, 900000, 1800000,
+  3600000, 7200000, 21600000, 86400000,
 ];
-const FRACTION_BOUNDARIES = [0, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95, 0.99, 1];
-const LOGS_COUNT_BOUNDARIES = [0, 100, 1000, 5000, 10000, 25000, 50000, 75000, 100000, 250000];
+// Finer resolution just above the sampling floor (0.1), where adaptive rates commonly land.
+const FRACTION_BOUNDARIES = [0, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5, 0.75, 0.9, 0.95, 0.99, 1];
+// Finer resolution around the default per-window volume cap (100,000), where most runs land.
+const LOGS_COUNT_BOUNDARIES = [
+  0, 100, 1000, 5000, 10000, 25000, 50000, 70000, 80000, 90000, 95000, 100000, 120000, 150000,
+  200000, 300000, 500000,
+];
 const ENTITY_COUNT_BOUNDARIES = [0, 100, 1000, 10000, 100000, 500000, 1000000, 5000000];
 
 /**
@@ -122,7 +136,7 @@ export const entityStoreMetrics = {
       'Duration of the extraction step of one task run (excludes per-tick bootstrap work such as ensureScheduled). The two processes run on different cadences, so overlap between a long non-priority run and the next priority run is visible here',
     unit: 'ms',
     valueType: ValueType.DOUBLE,
-    advice: { explicitBucketBoundaries: DURATION_MS_BOUNDARIES },
+    advice: { explicitBucketBoundaries: TASK_DURATION_MS_BOUNDARIES },
   }),
 
   extractionLagMs: histogram<ExtractionAttributes>(m('extraction.lag_ms'), {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EntityStoreEuid } from '@kbn/entity-store/public';
+import type { EntityStoreEuidApi } from '@kbn/entity-store/public';
 
 import { HostsType } from '../../../../explore/hosts/store/model';
 import type { CriteriaFields } from '../types';
@@ -15,13 +15,13 @@ export const getCriteriaFromHostType = (
   type: HostsType,
   hostName: string | undefined,
   identityFields?: Record<string, string>,
-  euid?: EntityStoreEuid
+  euidApi?: EntityStoreEuidApi
 ): CriteriaFields[] => {
   if (type !== HostsType.details || hostName == null) {
     return [];
   }
   return getCriteriaFieldsForAnomaliesTable({
-    euid,
+    euidApi,
     entityType: 'host',
     isScopedToEntity: true,
     identityFields,

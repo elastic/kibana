@@ -10,13 +10,11 @@ import {
   type CausalFeature,
   type SignificantEvent,
   type SignalEntry,
-  MAX_SIGNAL_DESCRIPTION_LENGTH,
+  MAX_TEXT_LENGTH,
 } from '@kbn/significant-events-schema';
 
 type EpisodeContextSource = Pick<SignificantEvent, '@timestamp'> &
-  Partial<
-    Pick<SignificantEvent, 'stream_names' | 'causal_features' | 'blast_radius' | 'confidence'>
-  >;
+  Partial<Pick<SignificantEvent, 'source_ids' | 'causal_features' | 'blast_radius' | 'confidence'>>;
 
 export const extractRuleUuids = (signals: SignalEntry[] | undefined): string[] => {
   const uuids = (signals ?? [])
@@ -54,18 +52,18 @@ export const addsNewDetectionRules = (
 };
 
 /**
- * Collision-safe (for current stream name and UUID formats) length-prefixed stream-and-rules identity used for duplicate detection.
+ * Collision-safe (for current source id and UUID formats) length-prefixed source-and-rules identity used for duplicate detection.
  * Uses exact-set matching: `['A']` produces a distinct key from `['A', 'B']`.
  * Length prefixes ensure `['a|b']` and `['a', 'b']` cannot collide.
  */
 export const makeIdentity = ({
-  streamNames,
+  sourceIds,
   ruleUuids,
 }: {
-  streamNames: string[];
+  sourceIds: string[];
   ruleUuids: string[];
 }): string =>
-  [streamNames.length, ...[...streamNames].sort(), ruleUuids.length, ...[...ruleUuids].sort()].join(
+  [sourceIds.length, ...[...sourceIds].sort(), ruleUuids.length, ...[...ruleUuids].sort()].join(
     '|'
   );
 
@@ -104,20 +102,20 @@ export const mergeSignalsLatestPerRule = (
     ],
     (signal) => (signal.type === 'detection' ? signal.metadata?.rule_uuid ?? undefined : undefined)
   ).map((signal) =>
-    signal.description.length <= MAX_SIGNAL_DESCRIPTION_LENGTH
+    signal.description.length <= MAX_TEXT_LENGTH
       ? signal
-      : { ...signal, description: signal.description.slice(0, MAX_SIGNAL_DESCRIPTION_LENGTH) }
+      : { ...signal, description: signal.description.slice(0, MAX_TEXT_LENGTH) }
   );
 
-/** Unions stream names and topology across prior episode documents and the submitted payload. */
+/** Unions source ids and topology across prior episode documents and the submitted payload. */
 export const mergeEpisodeContext = (
   priorDocs: EpisodeContextSource[],
   submitted: Omit<EpisodeContextSource, '@timestamp'> & {
-    stream_names: SignificantEvent['stream_names'];
+    source_ids: SignificantEvent['source_ids'];
   },
   submittedTimestamp: string
 ): {
-  streamNames: string[];
+  sourceIds: string[];
   causalFeatures: CausalFeature[];
   blastRadius: BlastRadiusEntry[];
   confidence: number;
@@ -127,7 +125,7 @@ export const mergeEpisodeContext = (
     { ...submitted, '@timestamp': submittedTimestamp },
   ];
 
-  const streamNames = new Set(contexts.flatMap((ctx) => ctx.stream_names ?? []));
+  const sourceIds = new Set(contexts.flatMap((ctx) => ctx.source_ids ?? []));
   const causal = new Map<string, { timestamp: string; entry: CausalFeature }>();
   const blast = new Map<string, { timestamp: string; entry: BlastRadiusEntry }>();
 
@@ -162,7 +160,7 @@ export const mergeEpisodeContext = (
       : confidences.reduce((acc, value) => acc + value, 0) / confidences.length;
 
   return {
-    streamNames: [...streamNames].sort(),
+    sourceIds: [...sourceIds].sort(),
     causalFeatures: [...causal.values()].sort(byFeatureId).map(({ entry }) => entry),
     blastRadius: [...blast.values()].sort(byFeatureId).map(({ entry }) => entry),
     confidence,

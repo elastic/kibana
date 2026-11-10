@@ -8,7 +8,6 @@
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
 import { significantEventsAgentPrompt } from '@kbn/nightshift-ai';
-import { SCS_AGENT_BUILDER_TOOL_IDS } from '../../../lib/semantic_code_search_grounding/semantic_code_search_tools';
 import { KI_QUERY_GENERATION_SKILL_ID } from '../../skills/ki_query_generation';
 import { KI_QUERY_GENERATION_AGENT_ID } from '../../../../common/constants';
 import groundingInstructions from './instructions.md.text';
@@ -20,7 +19,7 @@ export const kiQueryGenerationAgentType = {
   id: KI_QUERY_GENERATION_AGENT_TYPE_ID,
   name: 'KI Query Generation',
   description:
-    'Generates feature-grounded ES|QL detection queries for a Streams target and validates them against its data.',
+    'Generates feature-grounded ES|QL detection queries for a source and validates them against its data.',
   avatar_icon: 'logoElastic',
   baseConfiguration: {
     instructions: `${significantEventsAgentPrompt}\n\n${groundingInstructions}`,
@@ -31,25 +30,6 @@ export const kiQueryGenerationAgentType = {
   },
 } as const satisfies AgentTypeDefinition;
 
-export const createKIQueryGenerationAgentType = ({
-  isSemanticCodeSearchGroundingEnabled,
-}: {
-  isSemanticCodeSearchGroundingEnabled: () => Promise<boolean>;
-}): AgentTypeDefinition => ({
-  ...kiQueryGenerationAgentType,
-  baseConfiguration: async () => ({
-    ...kiQueryGenerationAgentType.baseConfiguration,
-    tools: (await isSemanticCodeSearchGroundingEnabled())
-      ? [{ tool_ids: [...SCS_AGENT_BUILDER_TOOL_IDS] }]
-      : [],
-  }),
-});
-
-export const registerKIQueryGenerationAgentType = (
-  agentBuilder: AgentBuilderPluginSetup,
-  isSemanticCodeSearchGroundingEnabled: () => Promise<boolean>
-): void => {
-  agentBuilder.agents.registerType(
-    createKIQueryGenerationAgentType({ isSemanticCodeSearchGroundingEnabled })
-  );
+export const registerKIQueryGenerationAgentType = (agentBuilder: AgentBuilderPluginSetup): void => {
+  agentBuilder.agents.registerType(kiQueryGenerationAgentType);
 };

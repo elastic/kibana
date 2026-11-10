@@ -13,14 +13,14 @@ import type {
   kqlCustomIndicatorSchema,
   metricCustomIndicatorSchema,
 } from '@kbn/slo-schema';
-import type * as t from 'io-ts';
+import type { z } from '@kbn/zod';
 
-type APMTransactionErrorRateIndicator = t.TypeOf<typeof apmTransactionErrorRateIndicatorSchema>;
-type APMTransactionDurationIndicator = t.TypeOf<typeof apmTransactionDurationIndicatorSchema>;
-type KQLCustomIndicator = t.TypeOf<typeof kqlCustomIndicatorSchema>;
-type MetricCustomIndicator = t.TypeOf<typeof metricCustomIndicatorSchema>;
-type Indicator = t.TypeOf<typeof indicatorSchema>;
-type IndicatorTypes = t.TypeOf<typeof indicatorTypesSchema>;
+type APMTransactionErrorRateIndicator = z.output<typeof apmTransactionErrorRateIndicatorSchema>;
+type APMTransactionDurationIndicator = z.output<typeof apmTransactionDurationIndicatorSchema>;
+type KQLCustomIndicator = z.output<typeof kqlCustomIndicatorSchema>;
+type MetricCustomIndicator = z.output<typeof metricCustomIndicatorSchema>;
+type Indicator = z.output<typeof indicatorSchema>;
+type IndicatorTypes = z.output<typeof indicatorTypesSchema>;
 
 export type {
   Indicator,

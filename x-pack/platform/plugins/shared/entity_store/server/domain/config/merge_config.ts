@@ -60,17 +60,12 @@ const setFields = (
   ) as Partial<LogExtractionConfig>;
 
 /**
- * Fields that control log extraction volume and throughput behaviour. These are exclusive to the
- * non-priority process — the shared layers must not reach them, so the process-mode defaults
- * (e.g. maxLogsPerWindowCapBehavior: 'drop') and the nonPriorityLogExtractionConfig layer are
- * the only way to set them for non-priority.
+ * Fields exclusive to the non-priority process — the shared layers must not reach them, so the
+ * process-mode defaults and the nonPriorityLogExtractionConfig layer are the only way to set them
+ * for non-priority.
  */
 export const NON_PRIORITY_EXCLUSIVE_FIELDS = new Set<keyof LogExtractionConfig>([
-  'maxLogsPerPage',
-  'maxTimeWindowSize',
-  'maxLogsPerWindow',
   'maxLogsPerWindowCapBehavior',
-  'docsLimit',
 ]);
 
 /** A shared layer's set fields, minus the ones only the non-priority layer may set. */
@@ -113,10 +108,9 @@ export type MergedLogExtractionConfig = LogExtractionConfig & { samplingRate?: n
  * Shared base (all modes):
  *   code defaults → per-type code defaults → per-process defaults → globalOverrides
  *
- * For non-priority, both shared layers are filtered: NON_PRIORITY_EXCLUSIVE_FIELDS are stripped
- * so that volume/throughput fields (maxLogsPerPage, maxTimeWindowSize, maxLogsPerWindow,
- * maxLogsPerWindowCapBehavior, docsLimit) cannot be set by the shared API. The non-priority mode
- * default is the floor; nonPriorityLogExtractionConfig is the ceiling.
+ * For non-priority, both shared layers are filtered: NON_PRIORITY_EXCLUSIVE_FIELDS
+ * (maxLogsPerWindowCapBehavior) are stripped so the cap behaviour cannot be set by the shared API.
+ * The non-priority mode default is the floor; nonPriorityLogExtractionConfig is the ceiling.
  *
  * Final layer for single / priority:
  *   all fields from typeOverride

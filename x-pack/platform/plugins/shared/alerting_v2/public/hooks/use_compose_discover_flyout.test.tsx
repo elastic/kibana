@@ -8,6 +8,7 @@
 import '@testing-library/jest-dom';
 import React from 'react';
 import { render, screen, act, waitFor } from '@testing-library/react';
+import type { RuleTemplateResponse } from '@kbn/alerting-v2-schemas';
 import type { RuleApiResponse } from '../services/rules_api';
 
 const mockCreateMutate = jest.fn();
@@ -48,9 +49,11 @@ const mockActionPolicyGetRedirectUrl = jest.fn(
   ({ actionPolicyId }: { actionPolicyId: string }) =>
     `/app/alerting_v2/action-policies/edit/${actionPolicyId}`
 );
+const mockRulesNavigateSync = jest.fn();
 jest.mock('../application/locator_context', () => ({
   useAlertingLocators: () => ({
     actionPolicyLocators: { getRedirectUrl: mockActionPolicyGetRedirectUrl },
+    rulesLocators: { navigateSync: mockRulesNavigateSync },
   }),
 }));
 
@@ -162,6 +165,92 @@ describe('useComposeDiscoverFlyout — create submission wiring', () => {
       expect(mockNavigateToUrl).toHaveBeenCalledWith(REDIRECT_PATH);
       expect(screen.queryByTestId('mockComposeDiscoverFlyout')).not.toBeInTheDocument();
     });
+  });
+});
+
+describe('useComposeDiscoverFlyout — create from template wiring', () => {
+  const template = {
+    id: 'template-1',
+    engine: 'v2',
+    rule: {
+      kind: 'signal',
+      metadata: { name: 'CPU usage' },
+      time_field: '@timestamp',
+      schedule: { every: '1m', lookback: '5m' },
+      query: { base: 'FROM logs-*' },
+    },
+  } as unknown as RuleTemplateResponse;
+
+  const openFromTemplate = async () => {
+    render(<Harness />);
+    act(() => {
+      hookApi!.openCreateFromTemplateFlyout(template);
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
+    });
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    capturedFlyoutProps = {};
+    hookApi = undefined;
+    mockCreateMutate.mockImplementation((_vars, opts) => opts?.onSuccess?.());
+  });
+
+  it('saves the edited rule through the install API for the opened template', async () => {
+    await openFromTemplate();
+    callOnCreateRule();
+
+    expect(mockCreateMutate).toHaveBeenCalledWith(
+      { payload: { metadata: { name: 'My rule' } }, templateId: 'template-1' },
+      expect.any(Object)
+    );
+  });
+
+  it('does not carry the template over to a rule created afterwards', async () => {
+    await openFromTemplate();
+    act(() => {
+      hookApi!.openCreateFlyout();
+    });
+    callOnCreateRule();
+
+    expect(mockCreateMutate).toHaveBeenCalledWith(
+      { payload: { metadata: { name: 'My rule' } }, templateId: undefined },
+      expect.any(Object)
+    );
+  });
+
+  it('does not carry the template over after the flyout is closed', async () => {
+    await openFromTemplate();
+    act(() => {
+      (capturedFlyoutProps.onClose as () => void)();
+    });
+    await waitFor(() => {
+      expect(screen.queryByTestId('mockComposeDiscoverFlyout')).not.toBeInTheDocument();
+    });
+    act(() => {
+      hookApi!.openCreateFlyout();
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
+    });
+    callOnCreateRule();
+
+    expect(mockCreateMutate).toHaveBeenCalledWith(
+      expect.objectContaining({ templateId: undefined }),
+      expect.any(Object)
+    );
+  });
+
+  it('creates without a template when the flyout was not opened from one', async () => {
+    await renderAndOpenCreate();
+    callOnCreateRule();
+
+    expect(mockCreateMutate).toHaveBeenCalledWith(
+      { payload: { metadata: { name: 'My rule' } }, templateId: undefined },
+      expect.any(Object)
+    );
   });
 });
 
@@ -317,5 +406,125 @@ describe('useComposeDiscoverFlyout — builder-to-ES|QL confirmation', () => {
 
     expect(capturedFlyoutProps.builderType).toBe('threshold');
     expect(screen.queryByTestId('alertingV2ConfirmBuilderToEsqlModal')).not.toBeInTheDocument();
+  });
+});
+
+describe('useComposeDiscoverFlyout — page-based builders', () => {
+  const sequenceRule = {
+    id: 'seq-1',
+    metadata: { name: 'My sequence', builder: { type: 'sequence' } },
+  } as unknown as RuleApiResponse;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    capturedFlyoutProps = {};
+    hookApi = undefined;
+  });
+
+  it('navigates to the host-aware sequence edit page instead of opening the flyout', () => {
+    render(<Harness />);
+
+    act(() => {
+      hookApi!.openEditFlyout(sequenceRule);
+    });
+
+    expect(mockRulesNavigateSync).toHaveBeenCalledWith({
+      page: 'sequence_edit',
+      ruleId: 'seq-1',
+    });
+    expect(mockNavigateToUrl).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('mockComposeDiscoverFlyout')).not.toBeInTheDocument();
+  });
+
+  it('navigates to the host-aware sequence clone page instead of opening the flyout', () => {
+    render(<Harness />);
+
+    act(() => {
+      hookApi!.openCloneFlyout(sequenceRule);
+    });
+
+    expect(mockRulesNavigateSync).toHaveBeenCalledWith({
+      page: 'sequence_clone',
+      ruleId: 'seq-1',
+    });
+    expect(mockNavigateToUrl).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('mockComposeDiscoverFlyout')).not.toBeInTheDocument();
+  });
+
+  it('still opens the flyout for builders without a page', async () => {
+    mockParseState.mockReturnValue({ stats: [{ fn: 'count', alias: 'count' }] });
+    render(<Harness />);
+
+    act(() => {
+      hookApi!.openEditFlyout({
+        id: 'rule-threshold',
+        metadata: { name: 'Threshold rule', builder: { type: 'threshold' } },
+        query: { base: 'FROM logs-*' },
+      } as unknown as RuleApiResponse);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
+    });
+    expect(mockRulesNavigateSync).not.toHaveBeenCalled();
+  });
+});
+
+describe('useComposeDiscoverFlyout — session history', () => {
+  const sharedKey = Symbol('picker');
+
+  const SessionHarness = ({ historyKey }: { historyKey?: symbol }) => {
+    const api = useComposeDiscoverFlyout({ historyKey });
+    hookApi = api;
+    return <>{api.flyout}</>;
+  };
+
+  beforeEach(() => {
+    capturedFlyoutProps = {};
+    hookApi = undefined;
+  });
+
+  it('uses the shared key only when one is provided at open', () => {
+    render(<SessionHarness historyKey={sharedKey} />);
+
+    act(() => {
+      hookApi!.openCreateFlyout();
+    });
+
+    expect(capturedFlyoutProps.historyKey).toBe(sharedKey);
+    expect(capturedFlyoutProps.stackedOnPicker).toBe(true);
+  });
+
+  it('keeps a private key when the picker opens after the form', () => {
+    const view = render(<SessionHarness />);
+
+    act(() => {
+      hookApi!.openCreateFlyout();
+    });
+    const keyWhilePickerClosed = capturedFlyoutProps.historyKey;
+    expect(keyWhilePickerClosed).not.toBe(sharedKey);
+    expect(capturedFlyoutProps.stackedOnPicker).toBe(false);
+
+    view.rerender(<SessionHarness historyKey={sharedKey} />);
+
+    expect(capturedFlyoutProps.historyKey).toBe(keyWhilePickerClosed);
+    expect(capturedFlyoutProps.stackedOnPicker).toBe(false);
+  });
+
+  it('clears the previous builder seed when opening ES|QL', () => {
+    render(<SessionHarness />);
+
+    act(() => {
+      hookApi!.openCreateBuilderFlyout('threshold');
+    });
+    expect(capturedFlyoutProps.builderType).toBe('threshold');
+
+    act(() => {
+      hookApi!.openCreateFlyout();
+    });
+
+    expect(capturedFlyoutProps.builderType).toBeUndefined();
+    expect(capturedFlyoutProps.initialBuilderState).toBeUndefined();
+    expect(capturedFlyoutProps.rule).toBeUndefined();
   });
 });

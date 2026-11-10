@@ -803,6 +803,198 @@ export default function (providerContext: FtrProviderContext) {
         }
       });
 
+      // A credential an output keeps as a secret must survive an update that does not touch it,
+      // and a plain text value sent for it must be stored as a secret too. Getting either wrong
+      // leaves the output pointing at a secret that no longer exists, and every agent using it
+      // fails with `key file not configured accessing 'logstash.ssl'`.
+      describe('updating an output that keeps a credential as a secret', () => {
+        const expectSecretDeleted = async (id: string) => {
+          // the error is read outside of any `try`, so that a secret that still exists fails the
+          // test, and an error other than a not found does too
+          const error = await getSecretById(id).then(
+            () => undefined,
+            (e) => e
+          );
+          expect(error?.meta?.statusCode).to.be(404);
+        };
+
+        const createLogstashOutputWithSecretKey = async () => {
+          const res = await supertest
+            .post(`/api/fleet/outputs`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: `Logstash Output ${uuidV4()}`,
+              type: 'logstash',
+              hosts: ['test.fr:443'],
+              ssl: {
+                certificate: 'CERTIFICATE',
+                certificate_authorities: ['CA1', 'CA2'],
+              },
+              secrets: { ssl: { key: 'KEY' } },
+            })
+            .expect(200);
+
+          return { id: res.body.item.id, secretId: res.body.item.secrets.ssl.key.id };
+        };
+
+        it('keeps the ssl key when only the name is updated', async function () {
+          const { id, secretId } = await createLogstashOutputWithSecretKey();
+
+          await supertest
+            .put(`/api/fleet/outputs/${id}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ name: `Logstash Output renamed ${uuidV4()}` })
+            .expect(200);
+
+          // the secret is still stored, so the reference the output keeps resolves
+          const secret = await getSecretById(secretId);
+          // @ts-ignore _source unknown type
+          expect(secret._source.value).to.equal('KEY');
+
+          const { body } = await supertest.get(`/api/fleet/outputs/${id}`).expect(200);
+          expect(body.item.secrets.ssl.key.id).to.equal(secretId);
+          expect(body.item.ssl.certificate).to.equal('CERTIFICATE');
+        });
+
+        it('stores a plain text ssl key as a secret and removes the previous one', async function () {
+          const { id, secretId } = await createLogstashOutputWithSecretKey();
+
+          const updateRes = await supertest
+            .put(`/api/fleet/outputs/${id}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              ssl: {
+                certificate: 'NEW_CERTIFICATE',
+                certificate_authorities: ['CA1', 'CA2'],
+                key: 'PLAIN_KEY',
+              },
+            })
+            .expect(200);
+
+          const newSecretId = updateRes.body.item.secrets.ssl.key.id;
+          expect(newSecretId).not.to.equal(secretId);
+          // the plain text value is not stored next to the secret
+          expect(updateRes.body.item.ssl.key).to.equal(undefined);
+          expect(updateRes.body.item.ssl.certificate).to.equal('NEW_CERTIFICATE');
+
+          const secret = await getSecretById(newSecretId);
+          // @ts-ignore _source unknown type
+          expect(secret._source.value).to.equal('PLAIN_KEY');
+          await expectSecretDeleted(secretId);
+        });
+
+        it('removes the ssl key when ssl is explicitly cleared', async function () {
+          const { id, secretId } = await createLogstashOutputWithSecretKey();
+
+          const updateRes = await supertest
+            .put(`/api/fleet/outputs/${id}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ ssl: null })
+            .expect(200);
+
+          expect(updateRes.body.item.secrets?.ssl?.key).to.equal(undefined);
+          await expectSecretDeleted(secretId);
+        });
+
+        it('removes only the ssl key when it is cleared with an explicit null', async function () {
+          const { id, secretId } = await createLogstashOutputWithSecretKey();
+
+          const updateRes = await supertest
+            .put(`/api/fleet/outputs/${id}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              ssl: { certificate: 'CERTIFICATE', certificate_authorities: ['CA1', 'CA2'] },
+              secrets: { ssl: { key: null } },
+            })
+            .expect(200);
+
+          expect(updateRes.body.item.secrets?.ssl?.key).to.equal(undefined);
+          expect(updateRes.body.item.ssl.certificate).to.equal('CERTIFICATE');
+          await expectSecretDeleted(secretId);
+        });
+
+        it('removes the password of a kafka output when the authentication type changes', async function () {
+          const res = await supertest
+            .post(`/api/fleet/outputs`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: `Kafka Output ${uuidV4()}`,
+              type: 'kafka',
+              hosts: ['test.fr:2000'],
+              auth_type: 'user_pass',
+              username: 'user',
+              topic: 'topic1',
+              secrets: { password: 'pass' },
+            })
+            .expect(200);
+          const outputId = res.body.item.id;
+          const secretId = res.body.item.secrets.password.id;
+
+          const updateRes = await supertest
+            .put(`/api/fleet/outputs/${outputId}`)
+            .set('kbn-xsrf', 'xxxx')
+            // the Kafka update payload requires a name
+            .send({ name: `Kafka Output renamed ${uuidV4()}`, auth_type: 'none' })
+            .expect(200);
+
+          expect(updateRes.body.item.secrets?.password).to.equal(undefined);
+          await expectSecretDeleted(secretId);
+        });
+
+        it('keeps the password of a kafka output when only the name is updated', async function () {
+          const res = await supertest
+            .post(`/api/fleet/outputs`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: `Kafka Output ${uuidV4()}`,
+              type: 'kafka',
+              hosts: ['test.fr:2000'],
+              auth_type: 'user_pass',
+              username: 'user',
+              topic: 'topic1',
+              secrets: { password: 'pass' },
+            })
+            .expect(200);
+          const outputId = res.body.item.id;
+          const secretId = res.body.item.secrets.password.id;
+
+          await supertest
+            .put(`/api/fleet/outputs/${outputId}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ name: `Kafka Output renamed ${uuidV4()}` })
+            .expect(200);
+
+          const secret = await getSecretById(secretId);
+          // @ts-ignore _source unknown type
+          expect(secret._source.value).to.equal('pass');
+        });
+
+        it('keeps the service token of a remote elasticsearch output when only the name is updated', async function () {
+          const res = await supertest
+            .post(`/api/fleet/outputs`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: `Remote Elasticsearch Output ${uuidV4()}`,
+              type: 'remote_elasticsearch',
+              hosts: ['https://remote-es:9200'],
+              secrets: { service_token: 'token' },
+            })
+            .expect(200);
+          const outputId = res.body.item.id;
+          const secretId = res.body.item.secrets.service_token.id;
+
+          await supertest
+            .put(`/api/fleet/outputs/${outputId}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ name: `Remote Elasticsearch Output renamed ${uuidV4()}` })
+            .expect(200);
+
+          const secret = await getSecretById(secretId);
+          // @ts-ignore _source unknown type
+          expect(secret._source.value).to.equal('token');
+        });
+      });
+
       it('should allow to update kibana_api_key on an existing remote_elasticsearch output', async function () {
         const res = await supertest
           .post(`/api/fleet/outputs`)
@@ -2299,6 +2491,784 @@ export default function (providerContext: FtrProviderContext) {
             .set('kbn-xsrf', 'xxxx')
             .expect(200);
         });
+      });
+    });
+
+    describe('Kafka output with OAuth2 authentication', () => {
+      const TOKEN_URL = 'https://idp.example.com/oauth2/token';
+      const createdOutputIds: string[] = [];
+      const createdAgentPolicyIds: string[] = [];
+
+      const oauth2Output = (fields: Record<string, unknown> = {}) => ({
+        name: `Kafka OAuth2 output ${uuidV4()}`,
+        type: 'kafka',
+        hosts: ['test.fr:2000'],
+        auth_type: 'oauth2',
+        topic: 'topic1',
+        oauth2: { client_id: 'my-client', token_url: TOKEN_URL },
+        secrets: { oauth2: { client_secret: 'my-secret' } },
+        ...fields,
+      });
+
+      const createOutput = async (body: Record<string, unknown>, expectedStatus = 200) => {
+        const res = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send(body)
+          .expect(expectedStatus);
+        if (res.body.item?.id) {
+          createdOutputIds.push(res.body.item.id);
+        }
+        return res.body;
+      };
+
+      const updateOutput = async (
+        id: string,
+        body: Record<string, unknown>,
+        expectedStatus = 200
+      ) => {
+        const res = await supertest
+          .put(`/api/fleet/outputs/${id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send(body)
+          .expect(expectedStatus);
+        return res.body;
+      };
+
+      const getFullAgentPolicy = async (dataOutputId: string) => {
+        const { item: agentPolicy } = await createAgentPolicy(undefined, dataOutputId);
+        createdAgentPolicyIds.push(agentPolicy.id);
+        const { body } = await supertest
+          .get(`/api/fleet/agent_policies/${agentPolicy.id}/full`)
+          .expect(200);
+        return { agentPolicyId: agentPolicy.id as string, fullPolicy: body.item };
+      };
+
+      const expectSecretToBeDeleted = async (secretId: string) => {
+        let secretExists = true;
+        try {
+          await getSecretById(secretId);
+        } catch (e) {
+          // not found
+          secretExists = false;
+        }
+        expect(secretExists).to.be(false);
+      };
+
+      beforeEach(async () => {
+        // The OAuth2 authentication needs every Fleet Server on 9.6.0 or later, and the output
+        // secrets storage.
+        await enableOutputSecrets();
+        await clearAgents();
+        await createFleetServerAgent(fleetServerPolicyId, 'server_1', '9.6.0');
+      });
+
+      afterEach(async () => {
+        for (const id of createdAgentPolicyIds.splice(0)) {
+          await deleteAgentPolicy(id);
+        }
+        for (const id of createdOutputIds.splice(0)) {
+          await supertest.delete(`/api/fleet/outputs/${id}`).set('kbn-xsrf', 'xxxx');
+        }
+      });
+
+      after(async () => {
+        await clearAgents();
+      });
+
+      it('should create an output, storing the client secret as a secret', async () => {
+        const body = await createOutput(
+          oauth2Output({
+            oauth2: {
+              client_id: 'my-client',
+              token_url: TOKEN_URL,
+              scopes: ['read', 'write'],
+              endpoint_params: { audience: ['kafka'] },
+              timeout: 10,
+              expiry_buffer: 90,
+            },
+          })
+        );
+
+        expect(body.item.auth_type).to.eql('oauth2');
+        expect(body.item.oauth2).to.eql({
+          client_id: 'my-client',
+          token_url: TOKEN_URL,
+          scopes: ['read', 'write'],
+          endpoint_params: { audience: ['kafka'] },
+          timeout: 10,
+          expiry_buffer: 90,
+        });
+        expect(body.item.username).to.be(undefined);
+        expect(body.item.password).to.be(undefined);
+        expect(body.item.sasl).to.be(undefined);
+        // the value of the secret is never returned
+        expect(Object.keys(body.item.secrets.oauth2)).to.eql(['client_secret']);
+        const secretId = body.item.secrets.oauth2.client_secret.id;
+        const secret = await getSecretById(secretId);
+        expect((secret._source as any).value).to.equal('my-secret');
+      });
+
+      it('should give the agent the settings it expects in the agent policy', async () => {
+        const body = await createOutput(
+          oauth2Output({
+            oauth2: {
+              client_id: 'my-client',
+              token_url: TOKEN_URL,
+              scopes: ['read'],
+              endpoint_params: { audience: ['kafka'] },
+              timeout: 10,
+              expiry_buffer: 90,
+            },
+          })
+        );
+        const secretId = body.item.secrets.oauth2.client_secret.id;
+
+        const { fullPolicy } = await getFullAgentPolicy(body.item.id);
+        const output = fullPolicy.outputs[body.item.id];
+
+        expect(output.type).to.eql('kafka');
+        expect(output.sasl).to.eql({ mechanism: 'OAUTHBEARER' });
+        expect(output.auth).to.eql({
+          oauth2client: {
+            client_id: 'my-client',
+            token_url: TOKEN_URL,
+            scopes: ['read'],
+            endpoint_params: { audience: ['kafka'] },
+            // the agent reads the durations as nanoseconds
+            timeout: 10_000_000_000,
+            expiry_buffer: 90_000_000_000,
+          },
+        });
+        // the agent cannot run OAuth2 for an output with a timeout
+        expect(output.timeout).to.be(undefined);
+        expect(output.username).to.be(undefined);
+        // Fleet Server writes the value of the secret where the agent expects the setting
+        expect(output.secrets).to.eql({
+          auth: { oauth2client: { client_secret: { id: secretId } } },
+        });
+        expect(fullPolicy.secret_references).to.eql([{ id: secretId }]);
+      });
+
+      it('should create an output with the JWT bearer grant and its private key as a secret', async () => {
+        const body = await createOutput(
+          oauth2Output({
+            oauth2: {
+              grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+              client_id: 'my-client',
+              token_url: TOKEN_URL,
+              signature_algorithm: 'RS512',
+              iss: 'issuer',
+              audience: 'audience',
+              claims: { sub: 'my-client' },
+            },
+            secrets: { oauth2: { client_certificate_key: 'PRIVATE KEY' } },
+          })
+        );
+
+        expect(Object.keys(body.item.secrets.oauth2)).to.eql(['client_certificate_key']);
+        const secretId = body.item.secrets.oauth2.client_certificate_key.id;
+        const secret = await getSecretById(secretId);
+        expect((secret._source as any).value).to.equal('PRIVATE KEY');
+
+        const { fullPolicy } = await getFullAgentPolicy(body.item.id);
+        const output = fullPolicy.outputs[body.item.id];
+        expect(output.auth.oauth2client).to.eql({
+          grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+          client_id: 'my-client',
+          token_url: TOKEN_URL,
+          signature_algorithm: 'RS512',
+          iss: 'issuer',
+          audience: 'audience',
+          claims: { sub: 'my-client' },
+        });
+        expect(output.secrets).to.eql({
+          auth: { oauth2client: { client_certificate_key: { id: secretId } } },
+        });
+      });
+
+      it('should accept the files of the client id and of the client secret instead of the values', async () => {
+        const body = await createOutput(
+          oauth2Output({
+            oauth2: {
+              client_id_file: '/etc/client_id',
+              client_secret_file: '/etc/client_secret',
+              token_url: TOKEN_URL,
+            },
+            secrets: undefined,
+          })
+        );
+
+        expect(body.item.oauth2.client_id_file).to.eql('/etc/client_id');
+        expect(body.item.secrets?.oauth2).to.be(undefined);
+      });
+
+      describe('Fleet Server version', () => {
+        it('should not create an output when a Fleet Server is below 9.6.0', async () => {
+          await clearAgents();
+          await createFleetServerAgent(fleetServerPolicyId, 'server_1', '9.5.0');
+
+          const body = await createOutput(oauth2Output(), 400);
+
+          expect(body.message).to.contain('9.6.0');
+        });
+
+        it('should not switch an output to OAuth2 when a Fleet Server is below 9.6.0', async () => {
+          const created = await createOutput({
+            name: 'Kafka output',
+            type: 'kafka',
+            hosts: ['test.fr:2000'],
+            auth_type: 'none',
+            topic: 'topic1',
+          });
+          await clearAgents();
+          await createFleetServerAgent(fleetServerPolicyId, 'server_1', '9.5.0');
+
+          const body = await updateOutput(
+            created.item.id,
+            {
+              name: 'Kafka output',
+              type: 'kafka',
+              hosts: ['test.fr:2000'],
+              auth_type: 'oauth2',
+              topic: 'topic1',
+              oauth2: { client_id: 'my-client', token_url: TOKEN_URL },
+              secrets: { oauth2: { client_secret: 'my-secret' } },
+            },
+            400
+          );
+
+          expect(body.message).to.contain('9.6.0');
+        });
+
+        it('should not check the outputs that do not use OAuth2', async () => {
+          await clearAgents();
+          await createFleetServerAgent(fleetServerPolicyId, 'server_1', '9.5.0');
+
+          await createOutput({
+            name: 'Kafka output',
+            type: 'kafka',
+            hosts: ['test.fr:2000'],
+            auth_type: 'user_pass',
+            username: 'user',
+            password: 'pass',
+            topic: 'topic1',
+          });
+        });
+      });
+
+      describe('validation', () => {
+        it('should require a client secret', async () => {
+          const body = await createOutput(oauth2Output({ secrets: undefined }), 400);
+
+          expect(body.message).to.contain(
+            'secrets.oauth2.client_secret or oauth2.client_secret_file is required'
+          );
+        });
+
+        it('should require a client id', async () => {
+          const body = await createOutput(oauth2Output({ oauth2: { token_url: TOKEN_URL } }), 400);
+
+          expect(body.message).to.contain('oauth2.client_id or oauth2.client_id_file is required');
+        });
+
+        it('should require a token url', async () => {
+          const body = await createOutput(
+            oauth2Output({ oauth2: { client_id: 'my-client' } }),
+            400
+          );
+
+          expect(body.message).to.contain('token_url');
+        });
+
+        it('should require the oauth2 settings', async () => {
+          const body = await createOutput(oauth2Output({ oauth2: undefined }), 400);
+
+          expect(body.message).to.contain('oauth2 is required when auth_type is oauth2');
+        });
+
+        it('should require a private key for the JWT bearer grant', async () => {
+          const body = await createOutput(
+            oauth2Output({
+              oauth2: {
+                grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+                client_id: 'my-client',
+                token_url: TOKEN_URL,
+              },
+            }),
+            400
+          );
+
+          expect(body.message).to.contain('client_certificate_key');
+        });
+
+        it('should reject a duration out of range, and an unknown setting', async () => {
+          await createOutput(
+            oauth2Output({ oauth2: { client_id: 'my-client', token_url: TOKEN_URL, timeout: -1 } }),
+            400
+          );
+          await createOutput(
+            oauth2Output({ oauth2: { client_id: 'my-client', token_url: TOKEN_URL, unknown: 1 } }),
+            400
+          );
+        });
+      });
+
+      describe('switching the authentication method', () => {
+        it('should clear the oauth2 settings and delete the secret when the output stops using OAuth2', async () => {
+          const created = await createOutput(oauth2Output());
+          const secretId = created.item.secrets.oauth2.client_secret.id;
+
+          const updated = await updateOutput(created.item.id, {
+            name: created.item.name,
+            type: 'kafka',
+            hosts: ['test.fr:2000'],
+            auth_type: 'ssl',
+            topic: 'topic1',
+          });
+
+          expect(updated.item.auth_type).to.eql('ssl');
+          expect(updated.item.oauth2 ?? null).to.eql(null);
+          expect(updated.item.secrets?.oauth2).to.be(undefined);
+          await expectSecretToBeDeleted(secretId);
+
+          // the agent policy does not point at the deleted secret
+          const { fullPolicy } = await getFullAgentPolicy(created.item.id);
+          expect(fullPolicy.outputs[created.item.id].secrets).to.be(undefined);
+          expect(fullPolicy.secret_references ?? []).to.eql([]);
+        });
+
+        it('should delete the secret of the grant the output stops using', async () => {
+          const created = await createOutput(oauth2Output());
+          const clientSecretId = created.item.secrets.oauth2.client_secret.id;
+
+          const updated = await updateOutput(created.item.id, {
+            name: created.item.name,
+            type: 'kafka',
+            hosts: ['test.fr:2000'],
+            auth_type: 'oauth2',
+            topic: 'topic1',
+            oauth2: {
+              grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+              client_id: 'my-client',
+              token_url: TOKEN_URL,
+            },
+            secrets: { oauth2: { client_certificate_key: 'PRIVATE KEY' } },
+          });
+
+          // only the private key is left
+          expect(Object.keys(updated.item.secrets.oauth2)).to.eql(['client_certificate_key']);
+          await expectSecretToBeDeleted(clientSecretId);
+
+          // the agent policy only points at the private key
+          const keyId = updated.item.secrets.oauth2.client_certificate_key.id;
+          const { fullPolicy } = await getFullAgentPolicy(created.item.id);
+          expect(fullPolicy.outputs[created.item.id].secrets).to.eql({
+            auth: { oauth2client: { client_certificate_key: { id: keyId } } },
+          });
+          expect(fullPolicy.secret_references).to.eql([{ id: keyId }]);
+        });
+
+        it('should switch an output to OAuth2, clearing its credentials', async () => {
+          const created = await createOutput({
+            name: 'Kafka output',
+            type: 'kafka',
+            hosts: ['test.fr:2000'],
+            auth_type: 'user_pass',
+            username: 'user',
+            password: 'pass',
+            topic: 'topic1',
+          });
+
+          const updated = await updateOutput(created.item.id, {
+            name: 'Kafka output',
+            type: 'kafka',
+            hosts: ['test.fr:2000'],
+            auth_type: 'oauth2',
+            topic: 'topic1',
+            oauth2: { client_id: 'my-client', token_url: TOKEN_URL },
+            secrets: { oauth2: { client_secret: 'my-secret' } },
+          });
+
+          expect(updated.item.auth_type).to.eql('oauth2');
+          expect(updated.item.oauth2).to.eql({ client_id: 'my-client', token_url: TOKEN_URL });
+          expect(updated.item.username ?? null).to.eql(null);
+          expect(updated.item.password ?? null).to.eql(null);
+          const secretId = updated.item.secrets.oauth2.client_secret.id;
+          const secret = await getSecretById(secretId);
+          expect((secret._source as any).value).to.equal('my-secret');
+        });
+
+        it('should keep the saved secret when it is sent back as a reference', async () => {
+          const created = await createOutput(oauth2Output());
+          const secretId = created.item.secrets.oauth2.client_secret.id;
+
+          const updated = await updateOutput(created.item.id, {
+            name: 'Kafka OAuth2 output renamed',
+            type: 'kafka',
+            hosts: ['test.fr:2000'],
+            auth_type: 'oauth2',
+            topic: 'topic1',
+            oauth2: { client_id: 'my-client', token_url: TOKEN_URL },
+            secrets: { oauth2: { client_secret: { id: secretId } } },
+          });
+
+          expect(updated.item.name).to.eql('Kafka OAuth2 output renamed');
+          expect(updated.item.secrets.oauth2.client_secret.id).to.eql(secretId);
+          const secret = await getSecretById(secretId);
+          expect((secret._source as any).value).to.equal('my-secret');
+        });
+
+        it('should keep the OAuth2 settings and the secret when the update does not touch the authentication', async () => {
+          const created = await createOutput(oauth2Output());
+          const secretId = created.item.secrets.oauth2.client_secret.id;
+
+          const updated = await updateOutput(created.item.id, {
+            type: 'kafka',
+            name: 'Kafka OAuth2 output renamed',
+          });
+
+          expect(updated.item.name).to.eql('Kafka OAuth2 output renamed');
+          expect(updated.item.auth_type).to.eql('oauth2');
+          expect(updated.item.oauth2).to.eql({ client_id: 'my-client', token_url: TOKEN_URL });
+          expect(updated.item.secrets.oauth2.client_secret.id).to.eql(secretId);
+          const secret = await getSecretById(secretId);
+          expect((secret._source as any).value).to.equal('my-secret');
+        });
+
+        it('should remove the OAuth2 settings that are not sent anymore', async () => {
+          const created = await createOutput(
+            oauth2Output({
+              oauth2: {
+                client_id: 'my-client',
+                token_url: TOKEN_URL,
+                scopes: ['read'],
+                tls: { ca_file: '/etc/ca.pem', insecure_skip_verify: true },
+              },
+            })
+          );
+
+          // the verification is not skipped anymore and there are no scopes anymore
+          const updated = await updateOutput(created.item.id, {
+            name: created.item.name,
+            type: 'kafka',
+            hosts: ['test.fr:2000'],
+            auth_type: 'oauth2',
+            topic: 'topic1',
+            oauth2: {
+              client_id: 'my-client',
+              token_url: TOKEN_URL,
+              tls: { ca_file: '/etc/ca.pem' },
+            },
+            secrets: {
+              oauth2: { client_secret: { id: created.item.secrets.oauth2.client_secret.id } },
+            },
+          });
+
+          const expectedOAuth2 = {
+            client_id: 'my-client',
+            token_url: TOKEN_URL,
+            tls: { ca_file: '/etc/ca.pem' },
+          };
+          expect(updated.item.oauth2).to.eql(expectedOAuth2);
+          // what is saved
+          const { body } = await supertest.get(`/api/fleet/outputs/${created.item.id}`).expect(200);
+          expect(body.item.oauth2).to.eql(expectedOAuth2);
+          // what the agent gets
+          const { fullPolicy } = await getFullAgentPolicy(created.item.id);
+          expect(fullPolicy.outputs[created.item.id].auth.oauth2client).to.eql(expectedOAuth2);
+        });
+
+        it('should replace the secret when a new value is sent', async () => {
+          const created = await createOutput(oauth2Output());
+
+          const updated = await updateOutput(created.item.id, {
+            name: created.item.name,
+            type: 'kafka',
+            hosts: ['test.fr:2000'],
+            auth_type: 'oauth2',
+            topic: 'topic1',
+            oauth2: { client_id: 'my-client', token_url: TOKEN_URL },
+            secrets: { oauth2: { client_secret: 'new-secret' } },
+          });
+
+          const secret = await getSecretById(updated.item.secrets.oauth2.client_secret.id);
+          expect((secret._source as any).value).to.equal('new-secret');
+        });
+
+        it('should not keep the oauth2 settings of an output that does not use OAuth2', async () => {
+          const body = await createOutput(
+            oauth2Output({
+              auth_type: 'ssl',
+              oauth2: { client_id: 'my-client', token_url: TOKEN_URL },
+              secrets: { oauth2: { client_secret: 'my-secret' } },
+            })
+          );
+
+          expect(body.item.auth_type).to.eql('ssl');
+          expect(body.item.oauth2).to.be(undefined);
+          expect(body.item.secrets?.oauth2).to.be(undefined);
+        });
+      });
+
+      it('should delete the secrets when the output is deleted', async () => {
+        const created = await createOutput(oauth2Output());
+        const secretId = created.item.secrets.oauth2.client_secret.id;
+
+        await supertest
+          .delete(`/api/fleet/outputs/${created.item.id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        await expectSecretToBeDeleted(secretId);
+      });
+    });
+
+    describe('Kafka output with Kerberos authentication', () => {
+      const createdOutputIds: string[] = [];
+      const createdAgentPolicyIds: string[] = [];
+
+      const keytabKerberos = {
+        auth_type: 'keytab',
+        config_path: '/etc/krb5.conf',
+        keytab: '/etc/kafka.keytab',
+        realm: 'EXAMPLE.COM',
+      };
+      const passwordKerberos = {
+        auth_type: 'password',
+        config_path: '/etc/krb5.conf',
+        username: 'kafka',
+        service_name: 'kafka',
+        realm: 'EXAMPLE.COM',
+        enable_krb5_fast: true,
+      };
+
+      const kerberosOutput = (fields: Record<string, unknown> = {}) => ({
+        name: `Kafka Kerberos output ${uuidV4()}`,
+        type: 'kafka',
+        hosts: ['test.fr:2000'],
+        auth_type: 'kerberos',
+        topic: 'topic1',
+        kerberos: keytabKerberos,
+        ...fields,
+      });
+
+      const createOutput = async (body: Record<string, unknown>, expectedStatus = 200) => {
+        const res = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send(body)
+          .expect(expectedStatus);
+        if (res.body.item?.id) {
+          createdOutputIds.push(res.body.item.id);
+        }
+        return res.body;
+      };
+
+      const updateOutput = async (
+        id: string,
+        body: Record<string, unknown>,
+        expectedStatus = 200
+      ) => {
+        const res = await supertest
+          .put(`/api/fleet/outputs/${id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send(body)
+          .expect(expectedStatus);
+        return res.body;
+      };
+
+      const getFullAgentPolicy = async (dataOutputId: string) => {
+        const { item: agentPolicy } = await createAgentPolicy(undefined, dataOutputId);
+        createdAgentPolicyIds.push(agentPolicy.id);
+        const { body } = await supertest
+          .get(`/api/fleet/agent_policies/${agentPolicy.id}/full`)
+          .expect(200);
+        return body.item;
+      };
+
+      const expectSecretToBeDeleted = async (secretId: string) => {
+        let secretExists = true;
+        try {
+          await getSecretById(secretId);
+        } catch (e) {
+          // not found
+          secretExists = false;
+        }
+        expect(secretExists).to.be(false);
+      };
+
+      beforeEach(async () => {
+        // The password is a secret, so the output secrets storage is needed.
+        await enableOutputSecrets();
+        await clearAgents();
+        await createFleetServerAgent(fleetServerPolicyId, 'server_1', '9.6.0');
+      });
+
+      afterEach(async () => {
+        for (const id of createdAgentPolicyIds.splice(0)) {
+          await deleteAgentPolicy(id);
+        }
+        for (const id of createdOutputIds.splice(0)) {
+          await supertest.delete(`/api/fleet/outputs/${id}`).set('kbn-xsrf', 'xxxx');
+        }
+      });
+
+      after(async () => {
+        await clearAgents();
+      });
+
+      it('should create an output with the keytab authentication', async () => {
+        const body = await createOutput(kerberosOutput());
+
+        expect(body.item.auth_type).to.eql('kerberos');
+        expect(body.item.kerberos).to.eql(keytabKerberos);
+        expect(body.item.username).to.be(undefined);
+        expect(body.item.sasl).to.be(undefined);
+        expect(body.item.secrets).to.be(undefined);
+      });
+
+      it('should create an output with the password authentication, storing the password as a secret', async () => {
+        const body = await createOutput(
+          kerberosOutput({
+            kerberos: passwordKerberos,
+            secrets: { kerberos: { password: 'my-password' } },
+          })
+        );
+
+        expect(body.item.kerberos).to.eql(passwordKerberos);
+        // the value of the secret is never returned
+        expect(Object.keys(body.item.secrets.kerberos)).to.eql(['password']);
+        const secret = await getSecretById(body.item.secrets.kerberos.password.id);
+        expect((secret._source as any).value).to.equal('my-password');
+      });
+
+      it('should give the agent the kerberos settings, and the timeout, in the agent policy', async () => {
+        const body = await createOutput(
+          kerberosOutput({
+            kerberos: passwordKerberos,
+            secrets: { kerberos: { password: 'my-password' } },
+          })
+        );
+        const secretId = body.item.secrets.kerberos.password.id;
+
+        const fullPolicy = await getFullAgentPolicy(body.item.id);
+        const output = fullPolicy.outputs[body.item.id];
+
+        expect(output.type).to.eql('kafka');
+        expect(output.kerberos).to.eql({ enabled: true, ...passwordKerberos });
+        // Kerberos also runs on the Beats runtime, so the timeout is kept
+        expect(output.timeout).to.be(30);
+        expect(output.sasl).to.be(undefined);
+        expect(output.username).to.be(undefined);
+        // Fleet Server writes the value of the secret at kerberos.password
+        expect(output.secrets).to.eql({ kerberos: { password: { id: secretId } } });
+        expect(fullPolicy.secret_references).to.eql([{ id: secretId }]);
+      });
+
+      it('should not accept an output without its required settings', async () => {
+        await createOutput(kerberosOutput({ kerberos: undefined }), 400);
+        await createOutput(kerberosOutput({ kerberos: { ...keytabKerberos, realm: '' } }), 400);
+        await createOutput(
+          kerberosOutput({ kerberos: { ...keytabKerberos, keytab: undefined } }),
+          400
+        );
+        // the password authentication needs a username and a password
+        await createOutput(kerberosOutput({ kerberos: passwordKerberos }), 400);
+        await createOutput(
+          kerberosOutput({
+            kerberos: { ...passwordKerberos, username: undefined },
+            secrets: { kerberos: { password: 'my-password' } },
+          }),
+          400
+        );
+      });
+
+      it('should keep the settings and the secret when an update does not name the auth type', async () => {
+        const body = await createOutput(
+          kerberosOutput({
+            kerberos: passwordKerberos,
+            secrets: { kerberos: { password: 'my-password' } },
+          })
+        );
+
+        const updated = await updateOutput(body.item.id, { name: 'renamed', type: 'kafka' });
+
+        expect(updated.item.name).to.eql('renamed');
+        expect(updated.item.auth_type).to.eql('kerberos');
+        expect(updated.item.kerberos).to.eql(passwordKerberos);
+        expect(updated.item.secrets.kerberos.password.id).to.eql(
+          body.item.secrets.kerberos.password.id
+        );
+      });
+
+      it('should remove the settings that are no longer sent when the authentication changes within Kerberos', async () => {
+        const body = await createOutput(kerberosOutput());
+
+        const updated = await updateOutput(body.item.id, {
+          name: body.item.name,
+          type: 'kafka',
+          hosts: ['test.fr:2000'],
+          topic: 'topic1',
+          auth_type: 'kerberos',
+          kerberos: {
+            auth_type: 'password',
+            config_path: '/etc/krb5.conf',
+            username: 'kafka',
+            realm: 'EXAMPLE.COM',
+          },
+          secrets: { kerberos: { password: 'my-password' } },
+        });
+
+        // the keytab of the previous authentication is gone
+        expect(updated.item.kerberos).to.eql({
+          auth_type: 'password',
+          config_path: '/etc/krb5.conf',
+          username: 'kafka',
+          realm: 'EXAMPLE.COM',
+        });
+      });
+
+      it('should clear the settings and delete the secret when the output switches to another authentication', async () => {
+        const body = await createOutput(
+          kerberosOutput({
+            kerberos: passwordKerberos,
+            secrets: { kerberos: { password: 'my-password' } },
+          })
+        );
+        const secretId = body.item.secrets.kerberos.password.id;
+
+        const updated = await updateOutput(body.item.id, {
+          name: body.item.name,
+          type: 'kafka',
+          hosts: ['test.fr:2000'],
+          topic: 'topic1',
+          auth_type: 'user_pass',
+          username: 'user',
+          secrets: { password: 'pass' },
+        });
+
+        expect(updated.item.auth_type).to.eql('user_pass');
+        expect(updated.item.kerberos ?? null).to.eql(null);
+        expect(updated.item.secrets?.kerberos).to.be(undefined);
+        await expectSecretToBeDeleted(secretId);
+      });
+
+      it('should delete the secret when the output is deleted', async () => {
+        const body = await createOutput(
+          kerberosOutput({
+            kerberos: passwordKerberos,
+            secrets: { kerberos: { password: 'my-password' } },
+          })
+        );
+        const secretId = body.item.secrets.kerberos.password.id;
+
+        await supertest
+          .delete(`/api/fleet/outputs/${body.item.id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        await expectSecretToBeDeleted(secretId);
       });
     });
   });

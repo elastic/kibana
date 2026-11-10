@@ -5,18 +5,7 @@
  * 2.0.
  */
 
-import { MAX_BUCKETS } from '@kbn/profiling-data-access-plugin/server';
 import type { ProfilingSetupOptions } from '@kbn/profiling-data-access-plugin/server';
-
-export async function setMaximumBuckets({ client }: ProfilingSetupOptions) {
-  await client.getEsClient().cluster.putSettings({
-    persistent: {
-      search: {
-        max_buckets: MAX_BUCKETS,
-      },
-    },
-  });
-}
 
 export async function enableResourceManagement({ client }: ProfilingSetupOptions) {
   await client.getEsClient().cluster.putSettings({

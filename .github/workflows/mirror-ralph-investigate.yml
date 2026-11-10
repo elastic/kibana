@@ -59,7 +59,7 @@ jobs:
       - name: Check live issue state
         id: livecheck
         env:
-          GH_TOKEN: ${{ secrets.KIBANAMACHINE_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
         run: |
           # The job `if` reads github.event.issue.labels from the immutable event payload.

@@ -7,4 +7,5 @@
 
 export { ContextEngineAnalyticsService } from './analytics_service';
 export type { KiWriteAction } from './analytics_service';
+export { registerContextEngineUsageCollector } from './usage_collector';
 export { errorTypeForTelemetry, isAbortError } from './error_utils';

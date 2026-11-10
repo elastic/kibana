@@ -140,25 +140,110 @@ describe('WorkflowExecutionRepository', () => {
       );
     });
 
-    it('should throw when the bulk response contains an item-level error', async () => {
+    describe('on a create version conflict', () => {
+      beforeEach(() => {
+        workflowExecutionsDataClient.bulk.mockResolvedValue(
+          asBulkResponse({
+            errors: true,
+            items: [
+              {
+                id: '1',
+                error: {
+                  type: 'version_conflict_engine_exception',
+                  reason: 'document already exists',
+                },
+              },
+            ],
+          })
+        );
+      });
+
+      it('treats a stored document from an earlier attempt of the same create as created', async () => {
+        workflowExecutionsDataClient.getByIds.mockResolvedValueOnce(
+          createMockGetExecutionsByIdsResponse([
+            { id: '1', workflowId: 'wf', spaceId: 'default' } as any,
+          ])
+        );
+
+        await expect(
+          repository.createWorkflowExecution({ id: '1', workflowId: 'wf', spaceId: 'default' })
+        ).resolves.toBeUndefined();
+        expect(workflowExecutionsDataClient.getByIds).toHaveBeenCalledWith(['1'], {
+          sourceIncludes: ['spaceId', 'workflowId'],
+        });
+        expect(workflowExecutionsDataClient.refresh).not.toHaveBeenCalled();
+      });
+
+      it.each([true, 'wait_for'] as const)(
+        'refreshes after recovering the create when refresh is %s',
+        async (refresh) => {
+          workflowExecutionsDataClient.getByIds.mockResolvedValueOnce(
+            createMockGetExecutionsByIdsResponse([
+              { id: '1', workflowId: 'wf', spaceId: 'default' } as any,
+            ])
+          );
+
+          await repository.createWorkflowExecution(
+            { id: '1', workflowId: 'wf', spaceId: 'default' },
+            { refresh }
+          );
+
+          expect(workflowExecutionsDataClient.refresh).toHaveBeenCalledTimes(1);
+        }
+      );
+
+      it('does not refresh when the conflict is not recovered', async () => {
+        workflowExecutionsDataClient.getByIds.mockResolvedValueOnce(
+          createMockGetExecutionsByIdsResponse([
+            { id: '1', workflowId: 'other', spaceId: 'default' } as any,
+          ])
+        );
+
+        await expect(
+          repository.createWorkflowExecution(
+            { id: '1', workflowId: 'wf', spaceId: 'default' },
+            { refresh: 'wait_for' }
+          )
+        ).rejects.toThrow('Failed to create workflow execution 1');
+        expect(workflowExecutionsDataClient.refresh).not.toHaveBeenCalled();
+      });
+
+      it.each([
+        ['space', { id: '1', workflowId: 'wf', spaceId: 'other' }],
+        ['workflow', { id: '1', workflowId: 'other', spaceId: 'default' }],
+      ])('throws when the stored document belongs to another %s', async (_, stored) => {
+        workflowExecutionsDataClient.getByIds.mockResolvedValueOnce(
+          createMockGetExecutionsByIdsResponse([stored as any])
+        );
+
+        await expect(
+          repository.createWorkflowExecution({ id: '1', workflowId: 'wf', spaceId: 'default' })
+        ).rejects.toThrow('Failed to create workflow execution 1: document already exists');
+      });
+
+      it('throws when the stored document is not found', async () => {
+        workflowExecutionsDataClient.getByIds.mockResolvedValueOnce(
+          createMockGetExecutionsByIdsResponse([], { missing: ['1'] })
+        );
+
+        await expect(
+          repository.createWorkflowExecution({ id: '1', workflowId: 'wf', spaceId: 'default' })
+        ).rejects.toThrow('Failed to create workflow execution 1: document already exists');
+      });
+    });
+
+    it('throws on other item-level errors without reading the stored document', async () => {
       workflowExecutionsDataClient.bulk.mockResolvedValue(
         asBulkResponse({
           errors: true,
-          items: [
-            {
-              id: '1',
-              error: {
-                type: 'version_conflict_engine_exception',
-                reason: 'document already exists',
-              },
-            },
-          ],
+          items: [{ id: '1', error: { type: 'mapper_parsing_exception', reason: 'bad field' } }],
         })
       );
 
       await expect(
         repository.createWorkflowExecution({ id: '1', workflowId: 'wf', spaceId: 'default' })
-      ).rejects.toThrow('Failed to create workflow execution 1: document already exists');
+      ).rejects.toThrow('Failed to create workflow execution 1: bad field');
+      expect(workflowExecutionsDataClient.getByIds).not.toHaveBeenCalled();
     });
   });
 
@@ -227,6 +312,9 @@ describe('WorkflowExecutionRepository', () => {
           ],
         })
       );
+      workflowExecutionsDataClient.getByIds.mockResolvedValueOnce(
+        createMockGetExecutionsByIdsResponse([], { missing: ['e2'] })
+      );
 
       const result = await repository.bulkCreateWorkflowExecutions([
         { id: 'e1' },
@@ -239,6 +327,95 @@ describe('WorkflowExecutionRepository', () => {
         { id: 'e2', error: 'doc already exists' },
         { id: 'e3' },
       ]);
+    });
+
+    it('treats conflicts on documents from an earlier attempt of the same create as created', async () => {
+      const conflict = {
+        type: 'version_conflict_engine_exception',
+        reason: 'doc already exists',
+      };
+      workflowExecutionsDataClient.bulk.mockResolvedValue(
+        asBulkResponse({
+          errors: true,
+          items: [
+            { id: 'e1' },
+            { id: 'e2', error: conflict },
+            { id: 'e3', error: conflict },
+            { id: 'e4', error: { type: 'mapper_parsing_exception', reason: 'bad field' } },
+          ],
+        })
+      );
+      workflowExecutionsDataClient.getByIds.mockResolvedValueOnce(
+        createMockGetExecutionsByIdsResponse([
+          { id: 'e2', workflowId: 'wf', spaceId: 'default' } as any,
+          { id: 'e3', workflowId: 'wf', spaceId: 'other' } as any,
+        ])
+      );
+
+      const result = await repository.bulkCreateWorkflowExecutions([
+        { id: 'e1', workflowId: 'wf', spaceId: 'default' },
+        { id: 'e2', workflowId: 'wf', spaceId: 'default' },
+        { id: 'e3', workflowId: 'wf', spaceId: 'default' },
+        { id: 'e4', workflowId: 'wf', spaceId: 'default' },
+      ]);
+
+      expect(result).toEqual([
+        { id: 'e1' },
+        { id: 'e2' },
+        { id: 'e3', error: 'doc already exists' },
+        { id: 'e4', error: 'bad field' },
+      ]);
+      expect(workflowExecutionsDataClient.getByIds).toHaveBeenCalledTimes(1);
+      expect(workflowExecutionsDataClient.getByIds).toHaveBeenCalledWith(['e2', 'e3'], {
+        sourceIncludes: ['spaceId', 'workflowId'],
+      });
+      expect(workflowExecutionsDataClient.refresh).not.toHaveBeenCalled();
+    });
+
+    describe('refresh after recovered conflicts', () => {
+      const conflict = {
+        type: 'version_conflict_engine_exception',
+        reason: 'doc already exists',
+      };
+      const executions = [
+        { id: 'e1', workflowId: 'wf', spaceId: 'default' },
+        { id: 'e2', workflowId: 'wf', spaceId: 'default' },
+      ];
+
+      beforeEach(() => {
+        workflowExecutionsDataClient.bulk.mockResolvedValue(
+          asBulkResponse({
+            errors: true,
+            items: [
+              { id: 'e1', error: conflict },
+              { id: 'e2', error: conflict },
+            ],
+          })
+        );
+      });
+
+      it('refreshes once when several conflicts are recovered', async () => {
+        workflowExecutionsDataClient.getByIds.mockResolvedValueOnce(
+          createMockGetExecutionsByIdsResponse(executions as any[])
+        );
+
+        const result = await repository.bulkCreateWorkflowExecutions(executions, {
+          refresh: 'wait_for',
+        });
+
+        expect(result).toEqual([{ id: 'e1' }, { id: 'e2' }]);
+        expect(workflowExecutionsDataClient.refresh).toHaveBeenCalledTimes(1);
+      });
+
+      it('does not refresh when no conflict is recovered', async () => {
+        workflowExecutionsDataClient.getByIds.mockResolvedValueOnce(
+          createMockGetExecutionsByIdsResponse([], { missing: ['e1', 'e2'] })
+        );
+
+        await repository.bulkCreateWorkflowExecutions(executions, { refresh: 'wait_for' });
+
+        expect(workflowExecutionsDataClient.refresh).not.toHaveBeenCalled();
+      });
     });
 
     it('throws when any execution is missing an id and does not call ES', async () => {
@@ -1389,6 +1566,293 @@ describe('WorkflowExecutionRepository', () => {
       });
 
       expect(result).toBe(false);
+    });
+  });
+
+  describe('tryRevertResumeContext', () => {
+    const params = {
+      workflowExecutionId: 'exec-1',
+      spaceId: 'default',
+      resumedBy: 'analyst',
+      resumedAt: '2026-10-20T16:00:48.350Z',
+      previousContext: {
+        resumeInput: null,
+        resumedBy: 'earlier-analyst',
+        resumedAt: '2026-10-19T09:00:00.000Z',
+        pendingInteractiveResume: false,
+      },
+    };
+    const pendingDoc = (overrides: Record<string, unknown> = {}) => ({
+      spaceId: 'default',
+      status: ExecutionStatus.WAITING_FOR_INPUT,
+      context: {
+        inputs: { a: 1 },
+        resumeInput: { approved: false },
+        resumedBy: 'analyst',
+        resumedAt: '2026-10-20T16:00:48.350Z',
+        pendingInteractiveResume: true,
+        ...overrides,
+      },
+    });
+    /** Runs the updater against each document, as the bulk helper does across conflict retries. */
+    const mockBulkRunningUpdater = (result: 'updated' | 'noop', ...docs: unknown[]) =>
+      workflowExecutionsDataClient.bulk.mockImplementation(async ({ items }) => {
+        const [item] = items;
+        if (!isBulkUpdaterItem(item)) {
+          throw new Error('expected bulk updater item');
+        }
+        docs.forEach((doc) => item.updater(doc as never));
+        return asBulkResponse({
+          errors: false,
+          items: [{ id: 'exec-1', index: '.workflows-executions', result }],
+        });
+      });
+
+    it('restores the context values the response replaced', async () => {
+      mockBulkRunningUpdater('updated', pendingDoc());
+
+      await expect(repository.tryRevertResumeContext(params)).resolves.toBe('reverted');
+
+      expect(workflowExecutionsDataClient.bulk).toHaveBeenCalledWith({
+        refresh: false,
+        items: [
+          expect.objectContaining({
+            operation: 'update',
+            documentId: 'exec-1',
+            sourceFields: ['spaceId', 'status', 'context'],
+            retryOnConflict: 3,
+          }),
+        ],
+      });
+      const [item] = workflowExecutionsDataClient.bulk.mock.calls[0][0].items;
+      if (!isBulkUpdaterItem(item)) {
+        throw new Error('expected bulk updater item');
+      }
+      expect(item.updater(pendingDoc() as never)).toEqual({
+        context: {
+          resumeInput: null,
+          resumedBy: 'earlier-analyst',
+          resumedAt: '2026-10-19T09:00:00.000Z',
+          pendingInteractiveResume: false,
+        },
+      });
+    });
+
+    it('writes nulls for the values that were absent before the response', async () => {
+      mockBulkRunningUpdater('updated', pendingDoc());
+
+      await repository.tryRevertResumeContext({ ...params, previousContext: undefined });
+
+      const [item] = workflowExecutionsDataClient.bulk.mock.calls[0][0].items;
+      if (!isBulkUpdaterItem(item)) {
+        throw new Error('expected bulk updater item');
+      }
+      expect(item.updater(pendingDoc() as never)).toEqual({
+        context: {
+          resumeInput: null,
+          resumedBy: null,
+          resumedAt: null,
+          pendingInteractiveResume: null,
+        },
+      });
+    });
+
+    it.each([
+      ['not_pending', 'it is in another space', { ...pendingDoc(), spaceId: 'other' }, params],
+      [
+        'not_pending',
+        'the response was never written',
+        pendingDoc({ resumedAt: 'earlier', resumedBy: 'earlier-analyst' }),
+        params,
+      ],
+      ['not_pending', 'another responder wrote it', pendingDoc({ resumedBy: 'other' }), params],
+      ['consumed', 'a runner took the response', pendingDoc({ resumeInput: null }), params],
+      [
+        'consumed',
+        'a runner marked the response as taken',
+        pendingDoc({ resumeInputTakenFor: '2026-10-20T16:00:48.350Z' }),
+        params,
+      ],
+      [
+        'in_flight',
+        'a runner is processing the execution',
+        { ...pendingDoc(), status: ExecutionStatus.RUNNING },
+        params,
+      ],
+      [
+        'conflict',
+        'an earlier response was still pending',
+        pendingDoc(),
+        { ...params, previousContext: { resumeInput: { approved: true } } },
+      ],
+    ])('returns %s without writing when %s', async (expected, _, doc, revertParams) => {
+      mockBulkRunningUpdater('noop', doc);
+
+      await expect(repository.tryRevertResumeContext(revertParams)).resolves.toBe(expected);
+    });
+
+    it('reverts the response of a terminated execution that never consumed it', async () => {
+      mockBulkRunningUpdater('updated', { ...pendingDoc(), status: ExecutionStatus.CANCELLED });
+
+      await expect(repository.tryRevertResumeContext(params)).resolves.toBe('reverted');
+    });
+
+    it('lets the last updater run decide after a version conflict', async () => {
+      mockBulkRunningUpdater('noop', pendingDoc(), pendingDoc({ resumeInput: null }));
+
+      await expect(repository.tryRevertResumeContext(params)).resolves.toBe('consumed');
+    });
+
+    it.each([
+      ['document_missing_exception', 'not_found'],
+      ['version_conflict_engine_exception', 'conflict'],
+    ])('maps a %s item error to %s', async (type, expected) => {
+      workflowExecutionsDataClient.bulk.mockResolvedValue(
+        asBulkResponse({
+          errors: true,
+          items: [{ id: 'exec-1', index: '.workflows-executions', error: { type, reason: type } }],
+        })
+      );
+
+      await expect(repository.tryRevertResumeContext(params)).resolves.toBe(expected);
+    });
+
+    it('throws on an unexpected item error', async () => {
+      workflowExecutionsDataClient.bulk.mockResolvedValue(
+        asBulkResponse({
+          errors: true,
+          items: [
+            {
+              id: 'exec-1',
+              index: '.workflows-executions',
+              error: { type: 'es_rejected_execution_exception', reason: 'queue full' },
+            },
+          ],
+        })
+      );
+
+      await expect(repository.tryRevertResumeContext(params)).rejects.toThrow(
+        'Bulk updater write failed for exec-1'
+      );
+    });
+  });
+
+  describe('tryTakeResumeInput', () => {
+    const ref = {
+      workflowExecutionId: 'exec-1',
+      spaceId: 'default',
+      resumedBy: 'analyst',
+      resumedAt: '2026-10-20T16:00:48.350Z',
+    };
+    const storedDoc = (overrides: Record<string, unknown> = {}) => ({
+      spaceId: 'default',
+      context: {
+        resumeInput: { approved: false },
+        resumedBy: 'analyst',
+        resumedAt: '2026-10-20T16:00:48.350Z',
+        ...overrides,
+      },
+    });
+    const mockBulkRunningUpdater = (
+      result: 'updated' | 'noop',
+      ...docs: unknown[]
+    ): Array<unknown> => {
+      const patches: unknown[] = [];
+      workflowExecutionsDataClient.bulk.mockImplementation(async ({ items }) => {
+        const [item] = items;
+        if (!isBulkUpdaterItem(item)) {
+          throw new Error('expected bulk updater item');
+        }
+        patches.push(...docs.map((doc) => item.updater(doc as never)));
+        return asBulkResponse({
+          errors: false,
+          items: [{ id: 'exec-1', index: '.workflows-executions', result }],
+        });
+      });
+      return patches;
+    };
+
+    it('marks the stored response as taken', async () => {
+      const patches = mockBulkRunningUpdater('updated', storedDoc());
+
+      await expect(repository.tryTakeResumeInput(ref)).resolves.toBe(true);
+
+      expect(patches).toEqual([{ context: { resumeInputTakenFor: ref.resumedAt } }]);
+      expect(workflowExecutionsDataClient.bulk).toHaveBeenCalledWith({
+        refresh: false,
+        items: [
+          expect.objectContaining({
+            operation: 'update',
+            documentId: 'exec-1',
+            sourceFields: ['spaceId', 'context'],
+            retryOnConflict: 3,
+          }),
+        ],
+      });
+    });
+
+    it('treats a response an earlier run already marked as taken', async () => {
+      const patches = mockBulkRunningUpdater(
+        'noop',
+        storedDoc({ resumeInputTakenFor: ref.resumedAt })
+      );
+
+      await expect(repository.tryTakeResumeInput(ref)).resolves.toBe(true);
+
+      expect(patches).toEqual(['noop']);
+    });
+
+    it.each([
+      ['it was taken back', storedDoc({ resumeInput: null, resumedBy: null, resumedAt: null })],
+      ['it was already applied', storedDoc({ resumeInput: null })],
+      ['a newer response replaced it', storedDoc({ resumedAt: '2026-10-20T16:05:00.000Z' })],
+      ['it is in another space', { ...storedDoc(), spaceId: 'other' }],
+    ])('refuses the response when %s', async (_, doc) => {
+      mockBulkRunningUpdater('noop', doc);
+
+      await expect(repository.tryTakeResumeInput(ref)).resolves.toBe(false);
+    });
+
+    it('lets the last updater run decide after a version conflict', async () => {
+      mockBulkRunningUpdater('noop', storedDoc(), storedDoc({ resumeInput: null }));
+
+      await expect(repository.tryTakeResumeInput(ref)).resolves.toBe(false);
+    });
+
+    it('refuses when the execution is gone', async () => {
+      workflowExecutionsDataClient.bulk.mockResolvedValue(
+        asBulkResponse({
+          errors: true,
+          items: [
+            {
+              id: 'exec-1',
+              index: '.workflows-executions',
+              error: { type: 'document_missing_exception', reason: 'missing' },
+            },
+          ],
+        })
+      );
+
+      await expect(repository.tryTakeResumeInput(ref)).resolves.toBe(false);
+    });
+
+    it('throws when version conflicts outlast the retries', async () => {
+      workflowExecutionsDataClient.bulk.mockResolvedValue(
+        asBulkResponse({
+          errors: true,
+          items: [
+            {
+              id: 'exec-1',
+              index: '.workflows-executions',
+              error: { type: 'version_conflict_engine_exception', reason: 'conflict' },
+            },
+          ],
+        })
+      );
+
+      await expect(repository.tryTakeResumeInput(ref)).rejects.toThrow(
+        'Version conflict taking the resume input of workflow execution exec-1'
+      );
     });
   });
 });

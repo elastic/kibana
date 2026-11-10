@@ -9,12 +9,16 @@
 
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
-import { Subscription, switchMap } from 'rxjs';
+import { BehaviorSubject, Subscription, switchMap } from 'rxjs';
 
 import { PANEL_BADGE_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { triggers } from '@kbn/ui-actions-plugin/public';
-import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import {
+  apiHasDisableTriggers,
+  useStateFromPublishingSubject,
+  type EmbeddableApiContext,
+} from '@kbn/presentation-publishing';
 import { uiActions } from '../../../kibana_services';
 import type { DefaultPresentationPanelApi, PresentationPanelProps } from '../types';
 
@@ -26,6 +30,14 @@ export const useBadges = <
   getActions: PresentationPanelProps['getActions']
 ) => {
   const [badges, setBadges] = useState<Action<EmbeddableApiContext>[]>([]);
+  const disableTriggersSubject = useMemo(
+    () =>
+      apiHasDisableTriggers(api.parentApi)
+        ? api.parentApi.disableTriggers$
+        : new BehaviorSubject<boolean>(false),
+    [api.parentApi]
+  );
+  const disableTriggers = useStateFromPublishingSubject(disableTriggersSubject);
 
   /**
    * Get all actions once on mount of the panel. Any actions that are Frequent Compatibility
@@ -64,6 +76,10 @@ export const useBadges = <
     };
 
     (async () => {
+      if (disableTriggers) {
+        setBadges([]);
+        return;
+      }
       const initialBadges = await getActionsForTrigger(PANEL_BADGE_TRIGGER);
       if (canceled) return;
       setBadges(initialBadges as Action<EmbeddableApiContext>[]);
@@ -98,7 +114,7 @@ export const useBadges = <
       canceled = true;
       subscriptions.unsubscribe();
     };
-  }, [showBadges, api, getActions]);
+  }, [showBadges, api, getActions, disableTriggers]);
 
   return useMemo(() => {
     return badges?.map((badge) => {

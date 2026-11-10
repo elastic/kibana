@@ -8,7 +8,7 @@
  */
 
 import { EuiPanel } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
@@ -136,12 +136,63 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
 
     const {
       waitingStepExecutionId,
+      waitingStepStartedAt,
       resumeMessage,
       resumeSchema,
       approvalLabels,
       hasResumeError,
       retryResume,
     } = useWaitingStepResume(executionId, workflowExecution);
+
+    const [isResumeSubmitting, setIsResumeSubmitting] = useState(false);
+    const [isResumeSubmitted, setIsResumeSubmitted] = useState(false);
+    const resumeSubmitState = useMemo(
+      () => ({
+        isSubmitting: isResumeSubmitting,
+        isSubmitted: isResumeSubmitted,
+        setSubmitting: setIsResumeSubmitting,
+        setSubmitted: setIsResumeSubmitted,
+      }),
+      [isResumeSubmitting, isResumeSubmitted]
+    );
+
+    useEffect(() => {
+      setIsResumeSubmitting(false);
+      setIsResumeSubmitted(false);
+    }, [executionId]);
+
+    useEffect(() => {
+      setIsResumeSubmitting(false);
+      setIsResumeSubmitted(false);
+    }, [waitingStepExecutionId]);
+
+    const waitingAction = useMemo(
+      () =>
+        waitingStepExecutionId
+          ? {
+              stepExecutionId: waitingStepExecutionId,
+              message: resumeMessage,
+              executionId,
+              workflowId: workflowExecution?.workflowId,
+              stepStartedAt: waitingStepStartedAt,
+              resumeSchema,
+              approvalLabels,
+              autoOpen: shouldAutoResume,
+              submitState: resumeSubmitState,
+            }
+          : undefined,
+      [
+        approvalLabels,
+        executionId,
+        resumeMessage,
+        resumeSchema,
+        resumeSubmitState,
+        shouldAutoResume,
+        waitingStepExecutionId,
+        waitingStepStartedAt,
+        workflowExecution?.workflowId,
+      ]
+    );
 
     // For pseudo-steps (overview, trigger), build from execution context directly
     const isPseudoStep =
@@ -251,6 +302,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
               childExecutionsMap={childExecutions}
               isLoadingChildExecutions={isLoadingChildExecutions}
               onBeforeDiagnose={() => setSelectedStepExecutionId(null)}
+              waitingAction={waitingAction}
             />
           }
           fixedPanelSize={sidebarWidth}
@@ -271,6 +323,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
               resumeSchema={resumeSchema}
               approvalLabels={approvalLabels}
               shouldAutoResume={shouldAutoResume}
+              submitState={resumeSubmitState}
               waitingStepExecutionId={waitingStepExecutionId}
               resumeExecutionId={resolvedExecutionId}
               hasResumeError={hasResumeError}

@@ -6,21 +6,20 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import type { EuiTextColorProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiText, EuiHorizontalRule, EuiSpacer, EuiTextColor } from '@elastic/eui';
+import { EuiText, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
+import { ActionHostStatusMessage } from './components/action_host_status_message';
 import { getAgentActionState } from './utils';
 import { FormattedDate } from '../../../../common/components/formatted_date';
-import { RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP } from '../../../../../common/endpoint/service/response_actions/constants';
-import { MemoryDumpResponseActionOutputResult } from '../../memory_dump_response_action_output_result';
-import { CancelActionResults } from '../../cancel_action_results';
+import { MemoryDumpResponseActionOutputResult } from './components/memory_dump_results/memory_dump_response_action_output_result';
+import { CancelActionResults } from './components/cancel_results/cancel_action_results';
 import { RunscriptActionResult } from './components/runscript_results';
 import { ScanResults } from './components/scan_results';
-import { EndpointUploadActionResult } from '../../endpoint_upload_action_result';
+import { EndpointUploadActionResult } from './components/upload_results/endpoint_upload_action_result';
 import { GetFileResults } from './components/get_file_results';
 import { IsolationResults } from './components/isolation_results';
 import type { ResponseActionResultsProps } from './types';
-import { KillSuspendProcessActionResult } from '../../kill_process_action_result';
+import { KillSuspendProcessActionResult } from './components/kill_process_results/kill_process_action_result';
 import { OUTPUT_MESSAGES } from '../../endpoint_response_actions_list/translations';
 import { KeyValueDisplay } from '../../key_value_display';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
@@ -52,7 +51,6 @@ export const ResponseActionResults = memo<ResponseActionResultsProps>(
 
     const isMultiAgent = agents.length > 1;
     const command = action.command;
-    const consoleCommandName = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[command];
 
     if (agentId && !action.agents.includes(agentId)) {
       window.console.warn(
@@ -67,26 +65,12 @@ export const ResponseActionResults = memo<ResponseActionResultsProps>(
         {agents.map((hostAgentId, index) => {
           const agentActionState = getAgentActionState(action, hostAgentId);
           const hostName = action.hosts[hostAgentId]?.name ?? hostAgentId;
-          const hostStatusMessage = !agentActionState.isCompleted
-            ? OUTPUT_MESSAGES.isPending(consoleCommandName)
-            : agentActionState.wasCanceled
-            ? OUTPUT_MESSAGES.wasCanceled(consoleCommandName)
-            : agentActionState.wasSuccessful
-            ? OUTPUT_MESSAGES.wasSuccessful(consoleCommandName)
-            : action.isExpired
-            ? OUTPUT_MESSAGES.hasExpired(consoleCommandName)
-            : OUTPUT_MESSAGES.hasFailed(consoleCommandName);
-          const hostStatusMessageColor: EuiTextColorProps['color'] = !agentActionState.isCompleted
-            ? 'warning'
-            : agentActionState.wasCanceled
-            ? 'default'
-            : agentActionState.wasSuccessful
-            ? 'success'
-            : 'danger';
           const hostStatusDisplay = (
-            <EuiTextColor data-test-subj={getTestId('hostStatus')} color={hostStatusMessageColor}>
-              {hostStatusMessage}
-            </EuiTextColor>
+            <ActionHostStatusMessage
+              action={action}
+              agentId={hostAgentId}
+              data-test-subj={getTestId('hostStatus')}
+            />
           );
 
           return (

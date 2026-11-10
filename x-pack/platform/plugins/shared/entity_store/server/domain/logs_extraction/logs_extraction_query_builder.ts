@@ -16,12 +16,9 @@ import {
   type EntityField,
   type EntityType,
   type GatedEntityDefinition,
+  type ManagedEntityDefinition,
 } from '../../../common/domain/definitions/entity_schema';
-import type { EntityDefinitionOptions } from '../../../common/domain/definitions/registry';
-import {
-  getEuidEsqlEvaluation,
-  getFieldEvaluationsEsqlFromDefinition,
-} from '../../../common/domain/euid/esql';
+import { getEuidEsqlEvaluation, getFieldEvaluationsEsql } from '../../../common/domain/euid/esql';
 
 import {
   buildExtractionSourceClause,
@@ -64,8 +61,7 @@ const FIELDS_TO_KEEP = [
 interface LogsExtractionQueryParams {
   indexPatterns: string[];
   latestIndex: string;
-  entityDefinition: GatedEntityDefinition;
-  entityDefinitionOptions?: EntityDefinitionOptions;
+  entityDefinition: GatedEntityDefinition<ManagedEntityDefinition>;
   docsLimit: number;
   fromDateISO: string;
   toDateISO: string;
@@ -78,7 +74,6 @@ interface LogsExtractionQueryParams {
 export function buildLogsExtractionEsqlQuery({
   indexPatterns,
   entityDefinition,
-  entityDefinitionOptions,
   fromDateISO,
   toDateISO,
   docsLimit,
@@ -88,7 +83,8 @@ export function buildLogsExtractionEsqlQuery({
   logsPageCursorEnd,
   samplingRate,
 }: LogsExtractionQueryParams): string {
-  const { fields, type, entityTypeFallback } = entityDefinition;
+  const { type, extraction } = entityDefinition;
+  const { fields, entityTypeFallback, postAggFilter } = extraction;
 
   if (
     samplingRate !== undefined &&
@@ -121,16 +117,17 @@ export function buildLogsExtractionEsqlQuery({
 
   // Single | EVAL stage: later assignments can reference columns from earlier ones.
   {
-    const fieldEvalsEsql = getFieldEvaluationsEsqlFromDefinition(entityDefinition);
-    const euidEsql = getEuidEsqlEvaluation(type, recentData(ENGINE_METADATA_UNTYPED_ID_FIELD), {
-      withTypeId: false,
-      options: entityDefinitionOptions,
-    });
+    const fieldEvalsEsql = getFieldEvaluationsEsql(entityDefinition);
+    const euidEsql = getEuidEsqlEvaluation(
+      entityDefinition,
+      recentData(ENGINE_METADATA_UNTYPED_ID_FIELD),
+      { withTypeId: false }
+    );
     parts.push(`| EVAL ${fieldEvalsEsql ? `${fieldEvalsEsql},\n ${euidEsql}` : euidEsql}`);
   }
 
-  if (entityDefinition.whenConditionTrueSetFieldsPreAgg?.length) {
-    for (const entry of entityDefinition.whenConditionTrueSetFieldsPreAgg) {
+  if (extraction.whenConditionTrueSetFieldsPreAgg?.length) {
+    for (const entry of extraction.whenConditionTrueSetFieldsPreAgg) {
       parts.push(buildSetFieldsByCondition(entry));
     }
   }
@@ -143,7 +140,7 @@ export function buildLogsExtractionEsqlQuery({
 
   // If there is no post aggregation filter we can paginate before the lookup join
   // and save some performance
-  if (!entityDefinition.postAggFilter) {
+  if (!postAggFilter) {
     parts.push(...buildPaginationSection(docsLimit, MAIN_EXTRACTION_PAGINATION_FIELDS, pagination));
   }
 
@@ -159,25 +156,22 @@ export function buildLogsExtractionEsqlQuery({
   parts.push(`| LOOKUP JOIN _coordinator:${latestIndex}
       ON ${recentData(MAIN_ENTITY_ID_FIELD)} == ${MAIN_ENTITY_ID_FIELD}`);
 
-  if (entityDefinition.postAggFilter) {
+  if (postAggFilter) {
     // If it has post aggregation filter, we filter it right after lookup join
     parts.push(
-      buildPostAggFilter(
-        mapPostAggFilterFieldsToRecentForEsql(entityDefinition.postAggFilter, entityDefinition)
-      )
+      buildPostAggFilter(mapPostAggFilterFieldsToRecentForEsql(postAggFilter, entityDefinition))
     );
     // then we can paginate after the post aggregation filter
     parts.push(...buildPaginationSection(docsLimit, MAIN_EXTRACTION_PAGINATION_FIELDS, pagination));
   }
 
-  if (entityDefinition.whenConditionTrueSetFieldsAfterStats?.length) {
+  if (extraction.whenConditionTrueSetFieldsAfterStats?.length) {
     // Merge all post-STATS overrides into a single | EVAL stage.
-    const postStatsAssignments = entityDefinition.whenConditionTrueSetFieldsAfterStats.map(
-      (entry) =>
-        buildSetFieldsByConditionAssignments(entry, {
-          entityFields: fields,
-          useRecentDataPrefix: true,
-        })
+    const postStatsAssignments = extraction.whenConditionTrueSetFieldsAfterStats.map((entry) =>
+      buildSetFieldsByConditionAssignments(entry, {
+        entityFields: fields,
+        useRecentDataPrefix: true,
+      })
     );
     parts.push(`| EVAL ${postStatsAssignments.join(',\n    ')}`);
   }

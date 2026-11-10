@@ -45,6 +45,7 @@ import {
   saveAlertAnalysisWorkflowSettings,
   type AlertAnalysisWorkflowSettingsWithConnector,
 } from './api';
+import { AlertAnalysisWorkflowDeprecationCallout } from './deprecation_callout';
 import { AlertAnalysisWorkflowRuleAttachmentSection } from './rule_attachment_section';
 import { useAlertAnalysisWorkflowAgents } from './use_alert_analysis_workflow_agents';
 import * as translations from './translations';
@@ -109,6 +110,9 @@ const AlertAnalysisWorkflowContent: React.FC = () => {
   >();
   const isDirty = !isEqual(pageSettings, savedSettings);
   const isWorkflowEnabled = pageSettings?.workflowEnabled ?? true;
+  // With the prompt option on, the agent and its conversations are not used, so their controls are
+  // disabled. Their values are kept and apply again when the option is turned off.
+  const isPromptSelected = pageSettings?.usePrompt ?? false;
   // The confidence thresholds only apply to auto-close, so their range is only validated (and only
   // blocks saving) when auto-close is enabled. When it is off the inputs are disabled and their
   // values are irrelevant.
@@ -200,6 +204,8 @@ const AlertAnalysisWorkflowContent: React.FC = () => {
             />
           }
         />
+        <AlertAnalysisWorkflowDeprecationCallout />
+        <EuiSpacer size="l" />
         {isSettingsError && !pageSettings ? (
           <EuiEmptyPrompt
             color="danger"
@@ -294,6 +300,42 @@ const AlertAnalysisWorkflowContent: React.FC = () => {
               title={
                 <h4>
                   <FormattedMessage
+                    id="xpack.securitySolution.alertAnalysisWorkflow.usePromptSectionTitle"
+                    defaultMessage="Use a prompt instead of an agent"
+                  />
+                </h4>
+              }
+              description={
+                <p>
+                  <FormattedMessage
+                    id="xpack.securitySolution.alertAnalysisWorkflow.usePromptSectionDescription"
+                    defaultMessage="When enabled, each batch of alerts is classified with a single prompt to the AI connector instead of an Agent Builder agent. This is faster and uses fewer tokens, but the selected agent and conversations are not used. The Alert Triage Worker always uses a prompt."
+                  />
+                </p>
+              }
+            >
+              <EuiFormRow fullWidth>
+                <EuiSwitch
+                  data-test-subj="alertAnalysisWorkflowUsePrompt"
+                  showLabel={false}
+                  aria-label={translations.USE_PROMPT_ARIA_LABEL}
+                  label={translations.USE_PROMPT_HIDDEN_LABEL}
+                  checked={isPromptSelected}
+                  disabled={!isWorkflowEnabled}
+                  onChange={(event) =>
+                    setPageSettings({
+                      ...pageSettings,
+                      usePrompt: event.target.checked,
+                    })
+                  }
+                />
+              </EuiFormRow>
+            </EuiDescribedFormGroup>
+            <EuiDescribedFormGroup
+              fullWidth
+              title={
+                <h4>
+                  <FormattedMessage
                     id="xpack.securitySolution.alertAnalysisWorkflow.agentSectionTitle"
                     defaultMessage="Agent"
                   />
@@ -308,13 +350,17 @@ const AlertAnalysisWorkflowContent: React.FC = () => {
                 </p>
               }
             >
-              <EuiFormRow fullWidth label={translations.AGENT_LABEL}>
+              <EuiFormRow
+                fullWidth
+                label={translations.AGENT_LABEL}
+                helpText={isPromptSelected ? translations.NOT_USED_WITH_PROMPT_HELP : undefined}
+              >
                 <EuiSuperSelect
                   data-test-subj="alertAnalysisWorkflowAgentSelector"
                   options={agentOptions}
                   valueOfSelected={selectedAgentId}
                   isLoading={isLoadingAgents}
-                  disabled={!isWorkflowEnabled}
+                  disabled={!isWorkflowEnabled || isPromptSelected}
                   aria-label={translations.AGENT_ARIA_LABEL}
                   onChange={(agentId) =>
                     setPageSettings((prev) => (prev ? { ...prev, agentId } : prev))
@@ -341,14 +387,17 @@ const AlertAnalysisWorkflowContent: React.FC = () => {
                 </p>
               }
             >
-              <EuiFormRow fullWidth>
+              <EuiFormRow
+                fullWidth
+                helpText={isPromptSelected ? translations.NOT_USED_WITH_PROMPT_HELP : undefined}
+              >
                 <EuiSwitch
                   data-test-subj="alertAnalysisWorkflowCreateConversation"
                   showLabel={false}
                   aria-label={translations.CREATE_CONVERSATION_ARIA_LABEL}
                   label={translations.CREATE_CONVERSATION_HIDDEN_LABEL}
                   checked={pageSettings.createConversation ?? true}
-                  disabled={!isWorkflowEnabled}
+                  disabled={!isWorkflowEnabled || isPromptSelected}
                   onChange={(event) =>
                     setPageSettings({
                       ...pageSettings,

@@ -31,6 +31,4 @@ fileGroups:
     - jest.config.js
     - lib.js
     - oxlint_plugin.js
-  jest-config:
-    - jest.config.js
 tasks: {}

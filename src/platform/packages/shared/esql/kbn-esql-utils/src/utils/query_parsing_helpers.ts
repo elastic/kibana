@@ -85,6 +85,21 @@ export function getRemoteClustersFromESQLQuery(esql?: string): string[] | undefi
 }
 
 /**
+ * Returns true when the query contains a STATS or PROMQL command, including nested
+ * FORK branches. KEEP and INLINE STATS are not aggregating.
+ */
+export function hasAggregatingCommand(esql?: string): boolean {
+  if (!esql) return false;
+  const { root } = Parser.parse(esql);
+  return (
+    Walker.findAll(
+      root,
+      (node) => node.type === 'command' && (node.name === 'stats' || node.name === 'promql')
+    ).length > 0
+  );
+}
+
+/**
  * Determines if an ES|QL query contains transformational commands.
  *
  * For ES|QL, we consider the following as transformational commands:

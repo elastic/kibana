@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import type { RouteDependencies } from '../../../types';
 import { addInternalBasePath } from '..';
+import { quoteEsqlIndexName } from '../../../lib/quote_esql_index_name';
 
 export function registerPostIndexDocCountRoute({
   router,
@@ -38,7 +39,9 @@ export function registerPostIndexDocCountRoute({
       try {
         // use ES since index list is too long for query dsl
         const result = await client.esql.query({
-          query: `FROM ${indexNames.join(',')} METADATA _index | STATS count() BY _index`,
+          query: `FROM ${indexNames
+            .map(quoteEsqlIndexName)
+            .join(',')} METADATA _index | STATS count() BY _index`,
           // return partial results instead of failing the whole request when some shards are unavailable
           allow_partial_results: true,
         });

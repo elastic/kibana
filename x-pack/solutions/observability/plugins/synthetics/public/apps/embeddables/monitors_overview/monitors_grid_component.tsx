@@ -34,11 +34,13 @@ export const StatusGridComponent = ({
   reload$,
   filters,
   view,
+  isInteractive = true,
   requestCancellationManager,
 }: {
   reload$: Subject<boolean>;
   filters: MonitorFilters;
   view: OverviewView;
+  isInteractive?: boolean;
   requestCancellationManager: RequestCancellationManager;
 }) => {
   const overviewStore = useRef(getOverviewStore(requestCancellationManager));
@@ -53,7 +55,12 @@ export const StatusGridComponent = ({
       reduxStore={overviewStore.current}
       onAutoRefresh={() => requestCancellationManager.resumeAfterCancellation()}
     >
-      <MonitorsOverviewList filters={filters} singleMonitor={singleMonitor} view={view} />
+      <MonitorsOverviewList
+        filters={filters}
+        singleMonitor={singleMonitor}
+        view={view}
+        isInteractive={isInteractive}
+      />
     </SyntheticsEmbeddableContext>
   );
 
@@ -68,7 +75,7 @@ export const StatusGridComponent = ({
   );
 };
 
-const SingleMonitorView = () => {
+const SingleMonitorView = ({ isInteractive = true }: { isInteractive?: boolean }) => {
   const trendData = useSelector(selectOverviewTrends);
   const dispatch = useDispatch();
 
@@ -119,7 +126,12 @@ const SingleMonitorView = () => {
 
   return (
     <>
-      <MetricItem monitor={monitor} onClick={setFlyoutConfigCallback} style={style} />
+      <MetricItem
+        monitor={monitor}
+        onClick={setFlyoutConfigCallback}
+        style={style}
+        isInteractive={isInteractive}
+      />
       <MaybeMonitorDetailsFlyout setFlyoutConfigCallback={setFlyoutConfigCallback} />
     </>
   );
@@ -129,10 +141,12 @@ const MonitorsOverviewList = ({
   filters,
   singleMonitor,
   view,
+  isInteractive,
 }: {
   filters: MonitorFilters;
   singleMonitor?: boolean;
   view: OverviewView;
+  isInteractive: boolean;
 }) => {
   const dispatch = useDispatch();
 
@@ -152,8 +166,8 @@ const MonitorsOverviewList = ({
   }, [dispatch, filters]);
 
   if (singleMonitor && view === 'cardView') {
-    return <SingleMonitorView />;
+    return <SingleMonitorView isInteractive={isInteractive} />;
   }
 
-  return <OverviewGrid view={view} isEmbeddable />;
+  return <OverviewGrid view={view} isEmbeddable isInteractive={isInteractive} />;
 };

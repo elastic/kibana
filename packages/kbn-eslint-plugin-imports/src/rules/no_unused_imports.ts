@@ -7,34 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Rule, Scope, AST } from 'eslint';
-import type { Comment } from 'estree';
-import type * as T from '@babel/types';
-import type { TSESTree } from '@typescript-eslint/typescript-estree';
+import type {
+  Comment,
+  CreateOnceRule,
+  Definition,
+  ESTree,
+  Fix,
+  Fixer,
+  Range,
+  Scope,
+  SourceCode,
+  Variable,
+} from '@oxlint/plugins';
 
-import { isImportDeclaration } from '../helpers/ast';
+import type { SomeNode } from '../helpers/ast';
 import { RUNNING_IN_EDITOR } from '../helpers/running_in_editor';
 
-type WithParent<TNode> = TNode & { parent?: WithParent<TNode> };
-type SomeNode = WithParent<T.Node> | TSESTree.Node;
-type SomeImportNode = NonNullable<ReturnType<typeof findImportParent>>;
+/** Matches the JSX pragma comment that `react/jsx-uses-react` reads: an `@jsx` tag and a name */
+const JSX_PRAGMA_COMMENT = /@jsx\s+([^\s]+)/;
 
-function findImportParent(def: Scope.Definition) {
-  let cursor: SomeNode | undefined = def.node;
-  while (cursor) {
-    if (isImportDeclaration(cursor)) {
-      return cursor;
-    }
-    cursor = cursor.parent;
-  }
-  return;
-}
-
-function isEslintUsed(variable: any) {
+function isEslintUsed(variable: Variable & { eslintUsed?: boolean }) {
   return !!variable.eslintUsed;
 }
 
-function findUnusedImportDefs(globalScope: Scope.Scope) {
+function findUnusedImportDefs(globalScope: Scope) {
   if (globalScope.type !== 'global') {
     throw new Error('pass the global scope');
   }
@@ -52,11 +48,10 @@ function findUnusedImportDefs(globalScope: Scope.Scope) {
       }
 
       for (const def of variable.defs) {
-        const importParent = findImportParent(def);
-        if (importParent) {
+        if (def.parent?.type === 'ImportDeclaration') {
           unused.push({
             def,
-            importParent,
+            importParent: def.parent,
           });
         }
       }
@@ -75,7 +70,7 @@ function isTsOrEslintIgnore(comment: Comment) {
   );
 }
 
-export const NoUnusedImportsRule: Rule.RuleModule = {
+export const NoUnusedImportsRule: CreateOnceRule = {
   meta: {
     hasSuggestions: true,
     fixable: 'code',
@@ -83,35 +78,13 @@ export const NoUnusedImportsRule: Rule.RuleModule = {
       url: 'https://github.com/elastic/kibana/blob/main/packages/kbn-eslint-plugin-imports/README.mdx#kbnimportsno_unused_imports',
     },
   },
-  create(context) {
-    const source = context.getSourceCode();
+  createOnce(context) {
+    let source: SourceCode;
+    let jsxPragma: string | undefined;
 
-    function getRange(
-      nodeA: { loc?: AST.SourceLocation | null },
-      nodeB: { loc?: AST.SourceLocation | null } | number = nodeA
-    ): AST.Range {
-      if (!nodeA.loc) {
-        throw new Error('unable to use babel AST nodes without locations');
-      }
-      const nodeBLoc = typeof nodeB === 'number' ? nodeB : nodeB.loc;
-      if (nodeBLoc == null) {
-        throw new Error('unable to use babel AST nodes without locations');
-      }
-      return [
-        source.getIndexFromLoc(nodeA.loc.start),
-        typeof nodeBLoc === 'number'
-          ? source.getIndexFromLoc(nodeA.loc.end) + nodeBLoc
-          : source.getIndexFromLoc(nodeBLoc.end),
-      ];
-    }
-
-    function report(
-      node: SomeNode,
-      msg: string,
-      fix: (fixer: Rule.RuleFixer) => IterableIterator<Rule.Fix>
-    ) {
+    function report(node: SomeNode, msg: string, fix: (fixer: Fixer) => IterableIterator<Fix>) {
       context.report({
-        node: node as any,
+        node,
         message: msg,
         ...(RUNNING_IN_EDITOR
           ? {
@@ -128,12 +101,41 @@ export const NoUnusedImportsRule: Rule.RuleModule = {
       });
     }
 
+    /**
+     * In ESLint, `react/jsx-uses-react` marks the JSX pragma (`React` unless a `@jsx` comment names
+     * another one) and `Fragment` as used. That rule doesn't run alongside this one in Oxlint.
+     */
+    function markJsxPragmaAsUsed(node: SomeNode) {
+      jsxPragma ??=
+        source
+          .getAllComments()
+          .find(({ value }) => JSX_PRAGMA_COMMENT.test(value))
+          ?.value.match(JSX_PRAGMA_COMMENT)?.[1]
+          .split('.')[0] ?? 'React';
+      source.markVariableAsUsed(jsxPragma, node);
+    }
+
     return {
+      before() {
+        source = context.sourceCode;
+        jsxPragma = undefined;
+      },
+      JSXOpeningElement: markJsxPragmaAsUsed,
+      JSXOpeningFragment: markJsxPragmaAsUsed,
+      JSXFragment(node) {
+        source.markVariableAsUsed('Fragment', node);
+      },
       'Program:exit': (node) => {
-        const unusedByImport = new Map<SomeImportNode, Scope.Definition[]>();
-        for (const { importParent, def } of findUnusedImportDefs(
-          context.sourceCode.getScope(node)
-        )) {
+        // only import specifiers can be unused imports, so skip the costly scope analysis without them
+        const hasImportSpecifiers = node.body.some(
+          (statement) => statement.type === 'ImportDeclaration' && statement.specifiers.length > 0
+        );
+        if (!hasImportSpecifiers) {
+          return;
+        }
+
+        const unusedByImport = new Map<ESTree.ImportDeclaration, Definition[]>();
+        for (const { importParent, def } of findUnusedImportDefs(source.getScope(node))) {
           const group = unusedByImport.get(importParent);
           if (group) {
             group.push(def);
@@ -149,16 +151,15 @@ export const NoUnusedImportsRule: Rule.RuleModule = {
               `All imports from "${importParent.source.value}" are unused and should be removed`,
               function* (fixer) {
                 // remove entire import including trailing newline if it's detected
-                const textPlus1 = source.getText(importParent as any, 0, 1);
-                const range = getRange(importParent, textPlus1.endsWith('\n') ? 1 : importParent);
+                const [start, end] = importParent.range;
+                const textPlus1 = source.getText(importParent, 0, 1);
+                const range: Range = [start, textPlus1.endsWith('\n') ? end + 1 : end];
 
                 // if the import is preceeded by one or more eslint/tslint disable comments then remove them
-                for (const comment of source.getCommentsBefore(importParent as any)) {
+                for (const comment of source.getCommentsBefore(importParent)) {
                   if (isTsOrEslintIgnore(comment)) {
-                    const cRange = getRange(comment);
-                    yield fixer.removeRange(
-                      source.text[cRange[1]] !== '\n' ? cRange : getRange(comment, 1)
-                    );
+                    const [cStart, cEnd] = comment.range;
+                    yield fixer.removeRange([cStart, source.text[cEnd] === '\n' ? cEnd + 1 : cEnd]);
                   }
                 }
 
@@ -172,9 +173,8 @@ export const NoUnusedImportsRule: Rule.RuleModule = {
                 `${def.name.name} is unused and should be removed`,
                 function* (fixer) {
                   const nextToken = source.getTokenAfter(def.node);
-                  yield fixer.removeRange(
-                    getRange(def.node, nextToken?.value === ',' ? nextToken : undefined)
-                  );
+                  const end = nextToken?.value === ',' ? nextToken.range[1] : def.node.range[1];
+                  yield fixer.removeRange([def.node.range[0], end]);
                 }
               );
             }

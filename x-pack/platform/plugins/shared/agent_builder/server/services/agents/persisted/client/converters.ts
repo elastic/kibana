@@ -11,6 +11,7 @@ import {
   agentBuilderDefaultAgentId,
   chatAgentTypeId,
   getDefaultAgentAccessControl,
+  normalizeAgentApprovals,
 } from '@kbn/agent-builder-common';
 import type { AgentCreateRequest, AgentUpdateRequest } from '../../../../../common/agents';
 import type { AgentConfigurationProperties, AgentProperties } from './storage';
@@ -53,6 +54,7 @@ export const fromEs = (document: Document): PersistedAgentDefinition => {
     created_at: document._source.created_at,
     updated_by: readOwner(document._source.updated_by_id, document._source.updated_by_name),
     updated_at: document._source.updated_at,
+    service_account_id: document._source.service_account_id,
     configuration: {
       instructions: configuration.instructions,
       tools: configuration.tools,
@@ -66,6 +68,7 @@ export const fromEs = (document: Document): PersistedAgentDefinition => {
       connector_ids: configuration.connector_ids,
       ai_indices: configuration.ai_indices,
       subagent_ids: configuration.subagent_ids ?? [],
+      approvals: normalizeAgentApprovals(configuration.approvals),
     },
   };
 };
@@ -129,6 +132,7 @@ export const createRequestToEs = ({
       connector_ids: profile.configuration.connector_ids,
       ai_indices: profile.configuration.ai_indices,
       subagent_ids: profile.configuration.subagent_ids,
+      approvals: normalizeAgentApprovals(profile.configuration.approvals),
     },
     created_at: creationDate.toISOString(),
     updated_by_id: user.id,
@@ -152,6 +156,7 @@ export const updateRequestToEs = ({
 }): AgentProperties => {
   const currentConfig = currentProps.configuration ?? currentProps.config;
   const { configuration, access_control, ...restUpdate } = update;
+  const { approvals: nextApprovals, ...restConfiguration } = configuration ?? {};
   const currentAccessControl = normalizeAccessControl(currentProps);
 
   // Strip legacy fields from the persisted doc: `access_control` and `config` are now the source of
@@ -172,7 +177,8 @@ export const updateRequestToEs = ({
       : currentAccessControl,
     config: {
       ...currentConfig,
-      ...configuration,
+      ...restConfiguration,
+      ...(nextApprovals !== undefined && { approvals: normalizeAgentApprovals(nextApprovals) }),
     },
     ...(user && { updated_by_id: user.id, updated_by_name: user.username }),
     updated_at: updateDate.toISOString(),

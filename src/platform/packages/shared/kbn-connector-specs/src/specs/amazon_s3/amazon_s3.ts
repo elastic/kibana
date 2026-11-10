@@ -40,7 +40,7 @@ export const AmazonS3: ConnectorSpec = {
   metadata: {
     id: '.amazon_s3',
     displayName: 'Amazon S3',
-    description: i18n.translate('core.kibanaConnectorSpecs.amazonS3.metadata.description', {
+    description: i18n.translate('connectorSpecs.amazonS3.metadata.description', {
       defaultMessage: 'List buckets and download files from Amazon S3',
     }),
     minimumLicense: 'enterprise',
@@ -58,10 +58,10 @@ export const AmazonS3: ConnectorSpec = {
         .describe('AWS region')
         .meta({
           widget: 'text',
-          label: i18n.translate('core.kibanaConnectorSpecs.amazonS3.config.region.label', {
+          label: i18n.translate('connectorSpecs.amazonS3.config.region.label', {
             defaultMessage: 'AWS Region',
           }),
-          helpText: i18n.translate('core.kibanaConnectorSpecs.amazonS3.config.region.helpText', {
+          helpText: i18n.translate('connectorSpecs.amazonS3.config.region.helpText', {
             defaultMessage:
               'The AWS Region where your S3 buckets are located (for example, us-east-1)',
           }),
@@ -246,7 +246,7 @@ export const AmazonS3: ConnectorSpec = {
   ].join('\n'),
 
   test: {
-    description: i18n.translate('core.kibanaConnectorSpecs.amazonS3.test.description', {
+    description: i18n.translate('connectorSpecs.amazonS3.test.description', {
       defaultMessage: 'Verifies AWS S3 connection by listing buckets',
     }),
     handler: async (ctx) => {

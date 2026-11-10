@@ -59,6 +59,7 @@ export const VisualizationsSection = memo(
           >
             <EntityGraphPreviewContainer
               entityId={entityId}
+              scopeId={scopeId}
               // header link + arrow only shown when navigation is wired up (onShowGraph set)
               showIcon={!isPreviewMode && openDetailsPanel != null && !hideHeaderIcons}
               onShowGraph={

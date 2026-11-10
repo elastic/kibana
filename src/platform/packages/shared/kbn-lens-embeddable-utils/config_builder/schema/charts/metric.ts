@@ -183,6 +183,7 @@ const visMetricIconConfigSchema = lazySchema(() =>
           z.literal('heart'),
           z.literal('map_marker'),
           z.literal('pin'),
+          z.literal('popout'),
           z.literal('sort_down'),
           z.literal('sort_up'),
           z.literal('star_empty'),

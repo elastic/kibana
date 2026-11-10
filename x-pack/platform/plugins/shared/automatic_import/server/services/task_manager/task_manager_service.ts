@@ -30,6 +30,7 @@ import type { AutomaticImportSamplesIndexService } from '../samples_index/index_
 import { generateFieldMappings } from '../build_integration/fields';
 import { validateFieldMappings } from '../build_integration/validate_fields';
 import type { FieldMapping } from '../../agents/state';
+import type { UserProvidedContext } from '../../agents/user_context';
 import type { LangSmithOptions } from '../../routes/types';
 import type { AutomaticImportPluginStartDependencies } from '../../types';
 import type { AutomaticImportSavedObjectService } from '../saved_objects/saved_objects_service';
@@ -287,9 +288,17 @@ export class TaskManagerService {
         );
       };
 
+      const userContext = await this.getUserContext(
+        automaticImportSavedObjectService,
+        integrationId,
+        dataStreamId
+      );
+      this.throwIfAborted(abortSignal);
+
       const result = await this.agentService.invokeAutomaticImportAgent(
         integrationId,
         dataStreamId,
+        userContext,
         esClient,
         model,
         fieldsMetadataClient,
@@ -471,6 +480,39 @@ export class TaskManagerService {
     } catch (telemetryError) {
       this.logger.warn(`Failed to report telemetry: ${telemetryError}`);
     }
+  }
+
+  private async getUserContext(
+    automaticImportSavedObjectService: AutomaticImportSavedObjectService,
+    integrationId: string,
+    dataStreamId: string
+  ): Promise<UserProvidedContext> {
+    const [integrationResult, dataStreamResult] = await Promise.allSettled([
+      automaticImportSavedObjectService.getIntegration(integrationId),
+      automaticImportSavedObjectService.getDataStream(dataStreamId, integrationId),
+    ]);
+
+    if (integrationResult.status === 'rejected') {
+      this.logger.warn(
+        `Failed to load integration description for ${integrationId}: ${integrationResult.reason}`
+      );
+    }
+    if (dataStreamResult.status === 'rejected') {
+      this.logger.warn(
+        `Failed to load data stream description for ${dataStreamId}: ${dataStreamResult.reason}`
+      );
+    }
+
+    return {
+      integrationDescription:
+        integrationResult.status === 'fulfilled'
+          ? integrationResult.value.metadata.description
+          : undefined,
+      dataStreamDescription:
+        dataStreamResult.status === 'fulfilled'
+          ? dataStreamResult.value.attributes.description
+          : undefined,
+    };
   }
 
   private throwIfAborted(abortSignal: AbortSignal) {

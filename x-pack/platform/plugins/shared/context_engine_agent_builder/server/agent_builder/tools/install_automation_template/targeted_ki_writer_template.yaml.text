@@ -27,7 +27,7 @@ version: "1"
 #      verifiers fail; without the key they skip it.
 #
 # Leave the shape alone: the `verifiers` on create_ki are what keep a KI carrying broken ES|QL
-# out of the index.
+# out of search: it is written as `verification_failed`.
 name: Targeted KI writer
 description: >
   Writes one or more targeted Knowledge Indicators (constraint, workaround, disambiguation,

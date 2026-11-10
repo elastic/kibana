@@ -6,7 +6,12 @@
  */
 
 import type { z } from '@kbn/zod/v4';
-import type { WatchAutonomyLevel, WorkerScheduleInterval, WorkerSettingsExtras } from '../schemas';
+import type {
+  WatchAutonomyLevel,
+  WorkerScheduleInterval,
+  WorkerSettings,
+  WorkerSettingsExtras,
+} from '../schemas';
 
 /**
  * The one declaration a Worker makes about its settings. Everything else — the complete read/write
@@ -32,4 +37,16 @@ export interface WorkerSettingsDeclaration<
    * `extras` object: it is validated whole on every write and every read.
    */
   extras?: { schema: z.ZodType<TExtras>; defaultValue: TExtras };
+  /**
+   * Rules that span fields, such as an extras value that is only valid for a given schedule. Checked
+   * only when settings are written, never when they are read: the settings contract check cannot
+   * compare a refinement in the schema, and a rule applied on read could make a stored document
+   * unreadable after an upgrade.
+   */
+  crossFieldIssues?: (settings: WorkerSettings) => readonly WorkerSettingsIssue[];
+}
+
+export interface WorkerSettingsIssue {
+  path: readonly string[];
+  message: string;
 }

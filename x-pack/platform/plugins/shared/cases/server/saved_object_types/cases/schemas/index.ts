@@ -17,3 +17,4 @@ export { casesSchema as casesSchemaV7 } from './v7';
 export { casesSchema as casesSchemaV8 } from './v8';
 export { casesSchema as casesSchemaV9 } from './v9';
 export { casesSchema as casesSchemaV10 } from './v10';
+export { casesSchema as casesSchemaV11 } from './v11';

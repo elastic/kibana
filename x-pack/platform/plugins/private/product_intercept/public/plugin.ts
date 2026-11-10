@@ -31,7 +31,6 @@ interface ProductInterceptPluginStartDeps {
 const PRODUCT_OFFERING_BY_PROJECT_TYPE: Record<string, string> = {
   search: 'Elasticsearch',
   vectordb: 'Elastic Vector Database',
-  workplaceai: 'Elastic Workplace AI',
 };
 
 export class ProductInterceptPublicPlugin implements Plugin {

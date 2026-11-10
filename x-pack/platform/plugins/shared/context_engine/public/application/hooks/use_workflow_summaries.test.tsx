@@ -29,7 +29,9 @@ const renderSummaries = (initialIds: string[]) => {
 
 describe('useWorkflowSummaries', () => {
   beforeEach(() => {
-    mockMgetWorkflows.mockResolvedValue([{ id: 'wf-1', name: 'My workflow', enabled: true }]);
+    mockMgetWorkflows.mockResolvedValue([
+      { id: 'wf-1', name: 'My workflow', enabled: true, definition: null },
+    ]);
   });
 
   afterEach(() => {
@@ -48,11 +50,15 @@ describe('useWorkflowSummaries', () => {
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    expect(mockMgetWorkflows).toHaveBeenCalledWith({ ids: ['wf-1'] });
+    expect(mockMgetWorkflows).toHaveBeenCalledWith({
+      ids: ['wf-1'],
+      source: ['id', 'name', 'enabled', 'definition'],
+    });
     expect(result.current.summaries.get('wf-1')).toEqual({
       id: 'wf-1',
       name: 'My workflow',
       enabled: true,
+      definition: null,
     });
   });
 
@@ -63,7 +69,10 @@ describe('useWorkflowSummaries', () => {
     rerender({ ids: ['wf-1', 'wf-2'] });
 
     expect(mockMgetWorkflows).toHaveBeenCalledTimes(1);
-    expect(mockMgetWorkflows).toHaveBeenCalledWith({ ids: ['wf-1', 'wf-2'] });
+    expect(mockMgetWorkflows).toHaveBeenCalledWith({
+      ids: ['wf-1', 'wf-2'],
+      source: ['id', 'name', 'enabled', 'definition'],
+    });
   });
 
   it('sets missingReadPrivilege true when the API rejects with a 403 response', async () => {

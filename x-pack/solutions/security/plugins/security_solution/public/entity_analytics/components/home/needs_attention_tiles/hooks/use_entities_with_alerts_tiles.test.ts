@@ -21,8 +21,6 @@ describe('parseAlertBasedTilesResponse', () => {
       severeAlertsEntityIds: [],
       watchlistedCount: 0,
       watchlistedEntityIds: [],
-      newAlertingCount: 0,
-      newAlertingEntityIds: [],
     });
   });
 
@@ -34,10 +32,8 @@ describe('parseAlertBasedTilesResponse', () => {
           { name: 'severe_alerts_entity_ids', type: 'keyword' },
           { name: 'watchlisted_count', type: 'long' },
           { name: 'watchlisted_entity_ids', type: 'keyword' },
-          { name: 'new_alerting_count', type: 'long' },
-          { name: 'new_alerting_entity_ids', type: 'keyword' },
         ],
-        [[42, ['host:web01', 'user:alice@okta'], 3, ['user:alice@okta'], 1, ['host:web01']]]
+        [[42, ['host:web01', 'user:alice@okta'], 3, ['user:alice@okta']]]
       )
     );
     expect(result).toEqual({
@@ -45,8 +41,24 @@ describe('parseAlertBasedTilesResponse', () => {
       severeAlertsEntityIds: ['host:web01', 'user:alice@okta'],
       watchlistedCount: 3,
       watchlistedEntityIds: ['user:alice@okta'],
-      newAlertingCount: 1,
-      newAlertingEntityIds: ['host:web01'],
+    });
+  });
+
+  it('reads the counts of a count-only response (the previous period), with no id lists', () => {
+    const result = parseAlertBasedTilesResponse(
+      makeResponse(
+        [
+          { name: 'severe_alerts_count', type: 'long' },
+          { name: 'watchlisted_count', type: 'long' },
+        ],
+        [[42, 3]]
+      )
+    );
+    expect(result).toEqual({
+      severeAlertsCount: 42,
+      severeAlertsEntityIds: [],
+      watchlistedCount: 3,
+      watchlistedEntityIds: [],
     });
   });
 

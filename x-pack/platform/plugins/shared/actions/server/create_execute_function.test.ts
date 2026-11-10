@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { v4 as uuidv4 } from 'uuid';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { createBulkExecutionEnqueuerFunction } from './create_execute_function';
@@ -76,7 +77,7 @@ describe('bulkExecute()', () => {
       {
         id: '123',
         params: { baz: false },
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
         executionId: '123abc',
         apiKey: Buffer.from('123:abc').toString('base64'),
         source: asHttpRequestExecutionSource(request),
@@ -163,7 +164,7 @@ describe('bulkExecute()', () => {
       {
         id: '123',
         params: { baz: false },
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
         executionId: '123abc',
         apiKey: 'essu_user_created_key',
         uiamApiKeyExternal: true,
@@ -219,7 +220,7 @@ describe('bulkExecute()', () => {
       {
         id: '123',
         params: { baz: false },
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
         executionId: '123abc',
         apiKey: 'essu_secret',
         uiamApiKeyId: 'uiam-key-id',
@@ -281,7 +282,7 @@ describe('bulkExecute()', () => {
       {
         id: '123',
         params: { baz: false },
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
         executionId: '123abc',
         consumer: 'test-consumer',
         apiKey: Buffer.from('123:abc').toString('base64'),
@@ -372,7 +373,7 @@ describe('bulkExecute()', () => {
       {
         id: '123',
         params: { baz: false },
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
         apiKey: Buffer.from('123:abc').toString('base64'),
         source: asHttpRequestExecutionSource(request),
         executionId: '123abc',
@@ -470,7 +471,7 @@ describe('bulkExecute()', () => {
       {
         id: '123',
         params: { baz: false },
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
         executionId: '123abc',
         apiKey: Buffer.from('123:abc').toString('base64'),
         source: asSavedObjectExecutionSource(source),
@@ -566,7 +567,7 @@ describe('bulkExecute()', () => {
       {
         id: 'system-connector-test.system-action',
         params: { baz: false },
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
         executionId: 'system-connector-.casesabc',
         apiKey: Buffer.from('system-connector-test.system-action:abc').toString('base64'),
         source: asSavedObjectExecutionSource(source),
@@ -662,7 +663,7 @@ describe('bulkExecute()', () => {
       {
         id: '123',
         params: { baz: false },
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
         apiKey: Buffer.from('123:abc').toString('base64'),
         source: asSavedObjectExecutionSource(source),
         executionId: '123abc',
@@ -779,7 +780,7 @@ describe('bulkExecute()', () => {
       {
         id: 'system-connector-test.system-action',
         params: { baz: false },
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
         apiKey: Buffer.from('system-connector-test.system-action:abc').toString('base64'),
         source: asSavedObjectExecutionSource(source),
         executionId: 'system-connector-.casesabc',
@@ -864,7 +865,7 @@ describe('bulkExecute()', () => {
         {
           id: '123',
           params: { baz: false },
-          spaceId: 'default',
+          spaceId: DEFAULT_SPACE_ID,
           executionId: '123abc',
           apiKey: null,
           source: asHttpRequestExecutionSource(request),
@@ -926,7 +927,7 @@ describe('bulkExecute()', () => {
       {
         id: '123',
         params: { baz: false },
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
         executionId: '123abc',
         apiKey: null,
         source: asHttpRequestExecutionSource(request),
@@ -935,7 +936,7 @@ describe('bulkExecute()', () => {
       {
         id: '234',
         params: { baz: false },
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
         executionId: '123abc',
         apiKey: null,
         source: asHttpRequestExecutionSource(request),
@@ -1002,7 +1003,7 @@ describe('bulkExecute()', () => {
       {
         id: '123',
         params: { baz: false },
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
         executionId: '123abc',
         apiKey: null,
         source: asHttpRequestExecutionSource(request),
@@ -1067,7 +1068,7 @@ describe('bulkExecute()', () => {
       {
         id: '123',
         params: { baz: false },
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
         executionId: '123abc',
         apiKey: null,
         source: asHttpRequestExecutionSource(request),
@@ -1125,7 +1126,7 @@ describe('bulkExecute()', () => {
       {
         id: '123',
         params: { baz: false },
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
         executionId: '123abc',
         apiKey: null,
         source: asHttpRequestExecutionSource(request),
@@ -1164,7 +1165,7 @@ describe('bulkExecute()', () => {
         {
           id: '123',
           params: { baz: false },
-          spaceId: 'default',
+          spaceId: DEFAULT_SPACE_ID,
           executionId: '123abc',
           apiKey: null,
           source: asHttpRequestExecutionSource(request),
@@ -1224,7 +1225,7 @@ describe('bulkExecute()', () => {
         {
           id: '123',
           params: { baz: false },
-          spaceId: 'default',
+          spaceId: DEFAULT_SPACE_ID,
           executionId: '123abc',
           apiKey: null,
           source: asHttpRequestExecutionSource(request),
@@ -1234,7 +1235,7 @@ describe('bulkExecute()', () => {
         {
           id: '123',
           params: { baz: false },
-          spaceId: 'default',
+          spaceId: DEFAULT_SPACE_ID,
           executionId: '456xyz',
           apiKey: null,
           source: asHttpRequestExecutionSource(request),
@@ -1313,7 +1314,7 @@ describe('bulkExecute()', () => {
         {
           id: '123',
           params: { baz: false },
-          spaceId: 'default',
+          spaceId: DEFAULT_SPACE_ID,
           executionId: '123abc',
           apiKey: null,
           source: asHttpRequestExecutionSource(request),
@@ -1323,7 +1324,7 @@ describe('bulkExecute()', () => {
         {
           id: '123',
           params: { baz: false },
-          spaceId: 'default',
+          spaceId: DEFAULT_SPACE_ID,
           executionId: '456xyz',
           apiKey: null,
           source: asHttpRequestExecutionSource(request),
@@ -1402,7 +1403,7 @@ describe('bulkExecute()', () => {
         {
           id: '123',
           params: { baz: false },
-          spaceId: 'default',
+          spaceId: DEFAULT_SPACE_ID,
           executionId: '123abc',
           apiKey: null,
           source: asHttpRequestExecutionSource(request),
@@ -1412,7 +1413,7 @@ describe('bulkExecute()', () => {
         {
           id: '123',
           params: { baz: false },
-          spaceId: 'default',
+          spaceId: DEFAULT_SPACE_ID,
           executionId: '456xyz',
           apiKey: null,
           source: asHttpRequestExecutionSource(request),

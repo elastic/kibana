@@ -103,16 +103,35 @@ test.describe(
       await expect(serviceFlyoutPage.flyout).toBeHidden();
     });
 
-    test('shows popover when clicking on an edge', async ({ pageObjects: { serviceMapPage } }) => {
+    test('opens the request flyout when clicking on an edge', async ({
+      pageObjects: { serviceMapPage },
+      page,
+    }) => {
       await serviceMapPage.clickFitView();
       await serviceMapPage.waitForEdgeToLoad(EDGE_OPBEANS_JAVA_TO_POSTGRESQL);
-      await serviceMapPage.openEdgePopover(EDGE_OPBEANS_JAVA_TO_POSTGRESQL);
-      await expect(serviceMapPage.serviceMapPopoverContent).toBeVisible();
-      await expect(serviceMapPage.serviceMapEdgeExploreTracesButton).toBeVisible();
-      await expect(serviceMapPage.serviceMapEdgeExploreTracesButton).toHaveText('Explore traces');
+      await serviceMapPage.openEdgeFlyout(EDGE_OPBEANS_JAVA_TO_POSTGRESQL);
 
-      const popoverTitle = await serviceMapPage.getPopoverTitle();
-      expect(popoverTitle).toContain(`${SERVICE_OPBEANS_JAVA} → ${DEPENDENCY_POSTGRESQL}`);
+      await expect(serviceMapPage.requestFlyoutTitle).toHaveText(
+        `${SERVICE_OPBEANS_JAVA} → ${DEPENDENCY_POSTGRESQL}`
+      );
+
+      // The operations table loads the fixture's PostgreSQL operation and opens its child flyout.
+      const operationLink = page.testSubj
+        .locator('requestFlyoutOperationNameLink')
+        .filter({ hasText: 'SELECT * FROM product' });
+      await expect(operationLink).toBeVisible({ timeout: EXTENDED_TIMEOUT });
+      await operationLink.click();
+      await expect(page.testSubj.locator('requestFlyoutOperationDetailHeader')).toContainText(
+        'SELECT * FROM product',
+        { timeout: EXTENDED_TIMEOUT }
+      );
+
+      // The first Escape closes the operation child only, the second the request flyout itself.
+      await page.keyboard.press('Escape');
+      await expect(page.testSubj.locator('requestFlyoutOperationDetailHeader')).toBeHidden();
+      await expect(serviceMapPage.requestFlyout).toBeVisible();
+      await page.keyboard.press('Escape');
+      await expect(serviceMapPage.requestFlyout).toBeHidden();
     });
 
     test('shows popover when clicking on a dependency node', async ({

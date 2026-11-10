@@ -8,42 +8,33 @@
 import { i18n } from '@kbn/i18n';
 
 export const CONVERSATION_CARD_LABELS = Object.freeze({
-  watchedBy: i18n.translate('xpack.alertzero.conversationCard.watchedBy', {
+  watchedBy: i18n.translate('xpack.agenticInvestigations.conversationCard.watchedBy', {
     defaultMessage: 'Watched by',
   }),
-  inMotion: i18n.translate('xpack.alertzero.conversationCard.inMotion', {
+  inMotion: i18n.translate('xpack.agenticInvestigations.conversationCard.inMotion', {
     defaultMessage: 'In motion',
   }),
   pendingProposals: (count: number) =>
-    i18n.translate('xpack.alertzero.conversationCard.pendingProposals', {
+    i18n.translate('xpack.agenticInvestigations.conversationCard.pendingProposals', {
       defaultMessage: '{count, plural, one {# pending proposal} other {# pending proposals}}',
       values: { count },
     }),
 });
 
-export const CONVERSATION_CARD_ACTIONS = Object.freeze({
-  default: i18n.translate('xpack.alertzero.conversationCard.defaultAction', {
-    defaultMessage: 'Review',
-  }),
-  viewDetails: i18n.translate('xpack.alertzero.conversationCard.viewDetails', {
-    defaultMessage: 'View details',
-  }),
-});
-
 export const WATCH_TIER_LABELS = Object.freeze({
-  officer: i18n.translate('xpack.alertzero.conversationCard.watchTier.officer', {
+  officer: i18n.translate('xpack.agenticInvestigations.conversationCard.watchTier.officer', {
     defaultMessage: 'Watch Officer',
   }),
-  hunt: i18n.translate('xpack.alertzero.conversationCard.watchTier.hunt', {
+  hunt: i18n.translate('xpack.agenticInvestigations.conversationCard.watchTier.hunt', {
     defaultMessage: 'Hunt Watch',
   }),
-  deep: i18n.translate('xpack.alertzero.conversationCard.watchTier.deep', {
+  deep: i18n.translate('xpack.agenticInvestigations.conversationCard.watchTier.deep', {
     defaultMessage: 'Deep Watch',
   }),
-  detection: i18n.translate('xpack.alertzero.brief.watchTier.detection', {
+  detection: i18n.translate('xpack.agenticInvestigations.brief.watchTier.detection', {
     defaultMessage: 'Detection Watch',
   }),
-  floor: i18n.translate('xpack.alertzero.brief.watchTier.floor', {
+  floor: i18n.translate('xpack.agenticInvestigations.brief.watchTier.floor', {
     defaultMessage: 'Watch Floor',
   }),
 });

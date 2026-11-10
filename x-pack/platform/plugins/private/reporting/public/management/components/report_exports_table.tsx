@@ -242,7 +242,7 @@ export class ReportExportsTable extends Component<ListingPropsInternal, State> {
             <div css={({ euiTheme }: UseEuiTheme) => css({ paddingLeft: euiTheme.size.s })}>
               <EuiIconTip
                 type={guessAppIconTypeFromObjectType(job.objectType)}
-                size="s"
+                size="m"
                 data-test-subj="reportJobType"
                 content={getDisplayNameFromObjectType(job.objectType)}
               />
@@ -424,7 +424,7 @@ export class ReportExportsTable extends Component<ListingPropsInternal, State> {
             ),
             available: (job) => job.canLinkToKibanaApp,
             type: 'icon',
-            icon: 'external',
+            icon: (job) => guessAppIconTypeFromObjectType(job.objectType),
             onClick: (job) => {
               const href = this.props.apiClient.getKibanaAppHref(job);
               window.open(href, '_blank');
