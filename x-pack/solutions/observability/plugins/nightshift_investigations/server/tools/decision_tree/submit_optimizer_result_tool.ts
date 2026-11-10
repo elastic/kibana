@@ -28,11 +28,12 @@ import {
   validateEvidenceMetadata,
 } from '@kbn/nightshift-decision-trees';
 import type { DecisionTreeView, LearningRecord } from '@kbn/nightshift-decision-trees';
-import type { SandboxPluginStart, SandboxSession } from '@kbn/sandbox-plugin/server';
+import type { AuditedSandboxSession, NightshiftSandboxStart } from '../../sandbox_audit';
 import type { DecisionTreeDetail, DecisionTreeStore } from '../../decision_trees/store';
 import type { AppliedWriteRecord, WriteProvenance } from '../../investigation_round';
 import {
   getConversationId,
+  getSandboxCaller,
   getScopedConversationId,
   resolveAbsolutePath,
 } from '../sandbox_bash/tool_utils';
@@ -102,7 +103,7 @@ export const createSubmitOptimizerResultTool = ({
   onAppliedWrite,
   logger,
 }: {
-  getSandboxStart: () => SandboxPluginStart | undefined;
+  getSandboxStart: () => NightshiftSandboxStart | undefined;
   getStore: (esClient: ElasticsearchClient, request: KibanaRequest) => DecisionTreeStore;
   getSpaceId: (request: KibanaRequest) => string;
   /** Resolves the authenticated user, recorded as the version author. */
@@ -146,9 +147,13 @@ export const createSubmitOptimizerResultTool = ({
       };
     }
 
-    let session: SandboxSession;
+    let session: AuditedSandboxSession;
     try {
-      session = sandboxStart.getSession(context.request, rawConversationId);
+      session = sandboxStart.getSession(
+        context.request,
+        rawConversationId,
+        getSandboxCaller(context)
+      );
     } catch (err) {
       return {
         results: [
@@ -287,7 +292,7 @@ const persistSubmission = async ({
   onAppliedWrite,
 }: {
   submission: z.infer<typeof submissionSchema>;
-  session: SandboxSession;
+  session: AuditedSandboxSession;
   store: DecisionTreeStore;
   author: string;
   summary: string;

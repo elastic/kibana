@@ -36,6 +36,11 @@ export interface InvestigationCardProps {
    * the card button so actions are not nested interactive controls.
    */
   actions?: React.ReactNode;
+  /**
+   * Drop the card's own border and shadow so a host can wrap it in a custom frame (for example an
+   * AI gradient ring) without reaching into the card's DOM.
+   */
+  borderless?: boolean;
 }
 
 const EntityChips = ({ investigation }: { investigation: InvestigationSummary }) => {
@@ -79,6 +84,7 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
   onClick,
   isSelected = false,
   actions,
+  borderless = false,
 }) => {
   const { euiTheme } = useEuiTheme();
   const { labelCss: aiLabelCss } = useAiButtonGradientStyles({ variant: 'outlined' });
@@ -151,6 +157,12 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
         background: ${isSelected
           ? euiTheme.colors.backgroundBaseInteractiveSelect
           : euiTheme.colors.backgroundBasePlain};
+        ${borderless
+          ? css`
+              border: none;
+              box-shadow: none;
+            `
+          : ''}
         ${isInteractive && !isSelected
           ? `&:has([data-test-subj='investigationCardButton']:hover) {
               background: ${euiTheme.colors.backgroundBaseInteractiveHover};

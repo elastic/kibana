@@ -78,7 +78,7 @@ export const LandingLinksImages: React.FC<LandingLinksImagesProps> = React.memo(
           const linkProps = getKibanaLinkProps({ item, urlState, onLinkClick });
           const { id, title, description, landingImage, isBeta, betaOptions } = item;
           return (
-            <EuiFlexItem key={id} data-test-subj="LandingItem">
+            <EuiFlexItem key={id} data-test-subj={`LandingItem LandingItem-${id}`}>
               <LinkAnchor {...linkProps} css={styles.link}>
                 {/* Empty onClick is to force hover style on `EuiPanel` */}
                 <EuiPanel element="div" hasBorder hasShadow={false} paddingSize="m" onClick={noop}>
