@@ -203,6 +203,33 @@ components:
             supervises:
               $ref: '#/components/schemas/EntityRelationship'
               description: Entities supervised by this entity.
+            member_of:
+              $ref: '#/components/schemas/EntityRelationship'
+              description: Groups this entity is a member of.
+            sso_to_role:
+              $ref: '#/components/schemas/EntityRelationship'
+              description: Roles this group maps to on a single sign-on application (for example, the AWS federation app).
+            can_assume:
+              $ref: '#/components/schemas/EntityRelationship'
+              description: Roles this entity may assume (identity federation, trust policies).
+            can_connect:
+              $ref: '#/components/schemas/EntityRelationship'
+              description: Hosts this entity may open a session on (for example, Session Manager access).
+            runs_as:
+              $ref: '#/components/schemas/EntityRelationship'
+              description: Roles this entity runs as (for example, an instance profile).
+            grants_access_to:
+              $ref: '#/components/schemas/EntityRelationship'
+              description: Resources this entity grants access to (attached and resource policies).
+            executed:
+              $ref: '#/components/schemas/EntityRelationship'
+              description: Indicators (process hashes) this entity executed.
+            dropped:
+              $ref: '#/components/schemas/EntityRelationship'
+              description: Indicators (file hashes) this entity wrote.
+            connected_to:
+              $ref: '#/components/schemas/EntityRelationship'
+              description: Indicators (external addresses) this entity connected to.
             resolution:
               type: object
               description: Resolution metadata linking this entity to another.

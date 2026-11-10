@@ -1,0 +1,50 @@
+version: '2'
+id: okta-user-to-aws-resources
+name: Okta user to AWS resources
+description: >
+  Blast radius of a compromised Okta user across AWS, from the entity store alone. The user
+  entity lists the Okta groups it is a member of; each group entity lists the IAM roles it
+  maps to on the AWS federation app; role, instance and bucket entities list what they reach
+  through configuration: roles they may assume (trust policies), instances they may open a
+  session on, the role an instance runs as (instance profile), and the buckets a role may
+  access (attached and bucket policies). The walk follows those relationships until the hop
+  budget or the frontier runs out.
+seed:
+  type: user
+  description: The entity store id of the compromised user, for example user:john.doe@acmecrm.com@okta
+# Two Okta hops plus five AWS hops; every other limit is the default.
+limits:
+  max_hops: 7
+hops:
+  - name: okta_groups
+    description: Okta groups the user is a member of
+    relationships:
+      - member_of
+    payload_fields:
+      - entity.name
+    source_type: user
+    target_type: group
+  - name: okta_federation_roles
+    description: IAM roles each group maps to on the AWS federation app
+    relationships:
+      - sso_to_role
+    payload_fields:
+      - entity.name
+    source_type: group
+    target_type: role
+  - name: aws_asset_relationships
+    description: >
+      Configuration edges on AWS asset entities: trust policies, Session Manager access,
+      instance profiles and bucket access. Repeated so a role can chain into another role,
+      reach an instance, pick up the instance role and reach a bucket.
+    relationships:
+      - can_assume
+      - can_connect
+      - runs_as
+      - grants_access_to
+    payload_fields:
+      - entity.name
+      - entity.sub_type
+    source_type: asset
+    target_type: asset
+    repeat: 5

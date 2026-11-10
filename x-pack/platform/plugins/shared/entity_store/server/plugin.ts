@@ -18,12 +18,17 @@ import type {
   EntityStoreSetupContract,
 } from './types';
 import { createRequestHandlerContext } from './request_context_factory';
+import type { GraphTraversalWorkflowRunner } from './domain/graph_traversal';
 import { PLUGIN_ID } from '../common';
 import { registerTasks } from './tasks/register_tasks';
 import { getExtractEntityTaskId } from './tasks/extract_entity_task';
 import { scheduleLegacySecurityAssetsMigrationIfNeeded } from './tasks/legacy_security_assets_migration_task';
 import { registerTriggers } from './workflow/triggers';
 import { registerSteps } from './workflow/steps';
+import {
+  installManagedWorkflows,
+  registerManagedWorkflowOwner,
+} from './workflow/managed_workflows';
 import { registerUiSettings } from './infra/feature_flags/register';
 import {
   EngineDescriptorType,
@@ -73,6 +78,12 @@ export class EntityStorePlugin
   private readonly isServerless: boolean;
   private readonly stop$ = new Subject<void>();
   private readonly entityDefinitionRegistry: EntityDefinitionRegistry;
+  /**
+   * Workflows management is a runtime dependency (a static one would be circular), so its
+   * API is looked up through core once that plugin has set up.
+   */
+  private workflowsManagementPromise: Promise<GraphTraversalWorkflowRunner | undefined> =
+    Promise.resolve(undefined);
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -96,6 +107,18 @@ export class EntityStorePlugin
       registerEntityStoreUsageCollector(plugins.usageCollection);
     }
 
+    this.workflowsManagementPromise = core.plugins
+      .onSetup<{ workflowsManagement: { management: GraphTraversalWorkflowRunner } }>(
+        'workflowsManagement'
+      )
+      .then(({ workflowsManagement }) =>
+        workflowsManagement.found ? workflowsManagement.contract.management : undefined
+      )
+      .catch((error) => {
+        this.logger.debug(`Workflows management is unavailable: ${error}`);
+        return undefined;
+      });
+
     const router = core.http.createRouter<EntityStoreRequestHandlerContext>();
     core.http.registerRouteHandlerContext<EntityStoreRequestHandlerContext, typeof PLUGIN_ID>(
       PLUGIN_ID,
@@ -107,12 +130,14 @@ export class EntityStorePlugin
           request,
           isServerless: this.isServerless,
           analytics: createReportEvent(core.analytics),
+          getWorkflowsManagement: () => this.workflowsManagementPromise,
         })
     );
 
     registerTasks(plugins.taskManager, this.logger, core, this.isServerless);
     registerTriggers(plugins.workflowsExtensions);
     registerSteps(plugins.workflowsExtensions, core);
+    registerManagedWorkflowOwner(plugins.workflowsExtensions);
     this.logger.debug('Registering routes');
     registerRoutes(router);
 
@@ -153,6 +178,8 @@ export class EntityStorePlugin
     // Kibana starts plugins only after every plugin's setup has finished, so code registration closes here.
     this.entityDefinitionRegistry.closeSetupRegistration();
     this.logger.info('Initializing plugin');
+
+    void installManagedWorkflows(plugins.workflowsExtensions, this.logger);
 
     plugins.taskManager.registerEncryptedSavedObjectsClient(
       plugins.encryptedSavedObjects.getClient({

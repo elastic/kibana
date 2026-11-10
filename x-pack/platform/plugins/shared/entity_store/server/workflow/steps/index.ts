@@ -8,6 +8,12 @@
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { EntityStoreCoreSetup } from '../../types';
 import { getUpdateAssetCriticalityStepDefinition } from './update_asset_criticality';
+import {
+  loadEntityGraphTraversalScenarioStepDefinition,
+  resolveEntityGraphTraversalNodesStepDefinition,
+  runEntityGraphTraversalHopStepDefinition,
+  traceEntityGraphTraversalRoutesStepDefinition,
+} from './entity_graph_traversal';
 
 export const registerSteps = (
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup,
@@ -23,4 +29,9 @@ export const registerSteps = (
       () => startServices.then(([, pluginsStart]) => pluginsStart.security)
     )
   );
+
+  workflowsExtensions.registerStepDefinition(loadEntityGraphTraversalScenarioStepDefinition);
+  workflowsExtensions.registerStepDefinition(runEntityGraphTraversalHopStepDefinition);
+  workflowsExtensions.registerStepDefinition(resolveEntityGraphTraversalNodesStepDefinition);
+  workflowsExtensions.registerStepDefinition(traceEntityGraphTraversalRoutesStepDefinition);
 };

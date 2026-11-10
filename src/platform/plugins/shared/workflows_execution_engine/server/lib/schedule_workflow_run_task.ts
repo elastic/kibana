@@ -64,6 +64,23 @@ const markExecutionsFailed = async (
 };
 
 /** Schedules one workflow run task; if scheduling throws, marks its execution FAILED and rethrows. */
+// A freshly scheduled run is due at once, but an idle Task Manager only polls every few
+// seconds, so the run would wait for the next poll. The nudge asks for a claim cycle right
+// away. It is best effort: without it the task still runs on the next poll, so a failure
+// to request it is not a scheduling failure.
+const requestImmediateClaim = async (
+  { taskManager, logger }: ScheduleWorkflowRunTaskDeps,
+  taskId: string
+): Promise<void> => {
+  try {
+    await taskManager.runSoon(taskId, { requestImmediateClaim: true });
+  } catch (error) {
+    logger.debug(
+      `Immediate claim not requested for workflow run task ${taskId}: ${getErrorMessage(error)}`
+    );
+  }
+};
+
 export const scheduleRunTaskOrMarkFailed = async (
   deps: ScheduleWorkflowRunTaskDeps,
   taskInstance: WorkflowRunTaskInstance,
@@ -75,6 +92,7 @@ export const scheduleRunTaskOrMarkFailed = async (
     await markExecutionsFailed(deps, [taskInstance.params.workflowRunId], getErrorMessage(error));
     throw error;
   }
+  await requestImmediateClaim(deps, taskInstance.id);
 };
 
 /** Bulk-schedules workflow run tasks and marks FAILED the executions whose task was not saved. */

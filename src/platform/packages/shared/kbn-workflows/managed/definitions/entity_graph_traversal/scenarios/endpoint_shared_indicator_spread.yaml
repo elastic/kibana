@@ -1,0 +1,27 @@
+version: '2'
+id: endpoint-shared-indicator-spread
+name: Endpoint shared indicator spread
+description: >
+  Hosts that share a compromised host's malicious artifacts, from the entity store alone. A
+  host entity lists the hashes it executed or wrote and the external addresses it connected to
+  as relationships to indicator entities. The walk follows those edges in both directions, so
+  it goes host, indicator, host: the outbound leg reaches the indicators a host carries and
+  the inbound leg reaches every host whose relationships point at an indicator.
+seed:
+  type: host
+  description: >-
+    The entity store id of the compromised host, which the host engine keys on host.id, for
+    example host:8f2c41e0-1d2b-4c6f-9a3e-5b7d8e9f0a11
+direction: both
+hops:
+  - name: shared_indicators
+    description: Hashes a host ran or wrote and external addresses it connected to
+    relationships:
+      - executed
+      - dropped
+      - connected_to
+    payload_fields:
+      - entity.name
+    source_type: host
+    target_type: indicator
+    repeat: 6
