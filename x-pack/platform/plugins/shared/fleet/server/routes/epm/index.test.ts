@@ -206,6 +206,7 @@ describe('schema validation', () => {
         csp_rule_template: [],
         osquery_pack_asset: [],
         osquery_saved_query: [],
+        workflow: [],
       },
       elasticsearch: {
         index_template: [],

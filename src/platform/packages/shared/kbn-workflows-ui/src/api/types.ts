@@ -66,6 +66,7 @@ export interface ExportWorkflowsResponse {
 export interface GetAggsParams {
   fields: string[];
   managed?: WorkflowsSearchParams['managed'];
+  visibilityContext?: WorkflowsSearchParams['visibilityContext'];
 }
 
 export interface GetSchemaParams {

@@ -6,7 +6,11 @@
  */
 
 import fs from 'fs/promises';
-import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  httpServerMock,
+  savedObjectsClientMock,
+} from '@kbn/core/server/mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { ElasticsearchClient, SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
 
@@ -35,7 +39,10 @@ import { isAgentlessEnabled, isOnlyAgentlessIntegration } from '../../utils/agen
 import * as Registry from '../registry';
 import { setPackageInfo, deleteVerificationResult } from '../archive';
 
-import { parsePackageAndCollectSignals } from './upload_preflight_authz';
+import {
+  checkUploadPackageAssetPrivileges,
+  parsePackageAndCollectSignals,
+} from './upload_preflight_authz';
 
 import {
   createInstallation,
@@ -136,7 +143,9 @@ jest.mock('./upload_preflight_authz', () => ({
       archiveSignals: { gatedTypesFound: new Set(), hasMlSecurityRules: false },
     })
   ),
-  checkUploadPackageAssetPrivileges: jest.fn(),
+  checkUploadPackageAssetPrivileges: jest.fn(() =>
+    Promise.resolve({ destinationSpaces: [], workflowAssetsAuthorized: false })
+  ),
 }));
 jest.mock('../../audit_logging');
 
@@ -1290,6 +1299,33 @@ describe('install', () => {
       );
     });
 
+    it.each([true, false])(
+      'passes the preflight workflow decision (%s) to the install',
+      async (workflowAssetsAuthorized) => {
+        jest.mocked(getInstallationObject).mockResolvedValueOnce(uploadedInstallationSO('1.2.0'));
+        jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+        jest
+          .mocked(checkUploadPackageAssetPrivileges)
+          .mockResolvedValueOnce({ destinationSpaces: [], workflowAssetsAuthorized });
+
+        const response = await installPackage({
+          spaceId: DEFAULT_SPACE_ID,
+          installSource: 'upload',
+          archiveBuffer: {} as Buffer,
+          contentType: '',
+          savedObjectsClient: savedObjectsClientMock.create(),
+          esClient: {} as ElasticsearchClient,
+          request: httpServerMock.createKibanaRequest(),
+        });
+
+        expect(response.error).toBeUndefined();
+        expect(checkUploadPackageAssetPrivileges).toHaveBeenCalled();
+        expect(installStateMachine._stateMachineInstallPackage).toHaveBeenCalledWith(
+          expect.objectContaining({ workflowAssetsAuthorized })
+        );
+      }
+    );
+
     it('consumes the install-by-upload rate limit window for genuine uploads', async () => {
       jest.mocked(getInstallationObject).mockResolvedValueOnce(uploadedInstallationSO('1.2.0'));
       jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
@@ -1666,6 +1702,42 @@ describe('handleInstallPackageFailure', () => {
       })
     );
     jest.mocked(getInstallationObject).mockReset();
+  });
+
+  describe('when the upload did not authorize workflow assets', () => {
+    const failInstall = (installedVersion: string) => {
+      const installedPkg = {
+        id: 'test-package',
+        references: [],
+        attributes: { name: pkgName, version: installedVersion, install_version: installedVersion },
+      } as unknown as SavedObject<Installation>;
+      return handleInstallPackageFailure({
+        savedObjectsClient,
+        error: new FleetError('test 123'),
+        esClient: {} as ElasticsearchClient,
+        installedPkg,
+        pkgName,
+        pkgVersion: '2.0.0',
+        spaceId: 'default',
+        workflowAssetsAuthorized: false,
+      });
+    };
+
+    it('carries the decision into the update rollback', async () => {
+      await failInstall('1.0.0');
+
+      expect(installStateMachine._stateMachineInstallPackage).toHaveBeenCalledWith(
+        expect.objectContaining({ force: true, workflowAssetsAuthorized: false })
+      );
+    });
+
+    it('carries the decision into the reinstall retry', async () => {
+      await failInstall('2.0.0');
+
+      expect(installStateMachine._stateMachineInstallPackage).toHaveBeenCalledWith(
+        expect.objectContaining({ retryFromLastState: true, workflowAssetsAuthorized: false })
+      );
+    });
   });
 
   describe('when installtype is update', () => {

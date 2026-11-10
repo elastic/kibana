@@ -76,6 +76,9 @@ export enum KibanaAssetType {
   osqueryPackAsset = 'osquery_pack_asset',
   osquerySavedQuery = 'osquery_saved_query',
   tag = 'tag',
+  // Not a saved object; reused so package paths and KibanaAssetReference share these enums.
+  // Excluded from SO install via validKibanaAssetTypes in kibana/assets/install.ts.
+  workflow = 'workflow',
 }
 
 /*
@@ -98,6 +101,8 @@ export enum KibanaSavedObjectType {
   osquerySavedQuery = 'osquery-saved-query',
   tag = 'tag',
   alert = 'alert',
+  // Not a saved object; see KibanaAssetType.workflow. Used only as an asset ref type.
+  workflow = 'workflow',
 }
 
 export enum ElasticsearchAssetType {
@@ -803,6 +808,7 @@ export enum INSTALL_STATES {
   SAVE_ARCHIVE_ENTRIES = 'save_archive_entries_from_assets_map',
   SAVE_KNOWLEDGE_BASE = 'save_knowledge_base',
   RESOLVE_KIBANA_PROMISE = 'resolve_kibana_promise',
+  INSTALL_WORKFLOWS = 'install_workflows',
   VERIFY_ASSETS = 'verify_assets',
   UPDATE_SO = 'update_so',
 }

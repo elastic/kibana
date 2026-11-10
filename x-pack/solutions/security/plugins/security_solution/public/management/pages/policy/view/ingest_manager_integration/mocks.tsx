@@ -177,6 +177,7 @@ export const generateFleetPackageInfo = (): PackageInfo => {
         security_ai_prompt: [],
         osquery_pack_asset: [],
         osquery_saved_query: [],
+        workflow: [],
       },
       elasticsearch: {
         ingest_pipeline: [],

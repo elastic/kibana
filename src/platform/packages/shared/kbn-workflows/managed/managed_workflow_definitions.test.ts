@@ -9,7 +9,7 @@
 
 import { parse } from 'yaml';
 import { z } from '@kbn/zod/v4';
-import { managedWorkflowDefinitions } from '.';
+import { getManagedWorkflowVisibilityContexts, managedWorkflowDefinitions } from '.';
 import type { ManagedWorkflowTemplateValuesById } from '.';
 import {
   ALERTZERO_ACTION_CLOSE_ATTACK_DISCOVERY_INVESTIGATION_WORKFLOW_ID,
@@ -38,6 +38,8 @@ import {
   CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID,
   EXAMPLE_MANAGED_WORKFLOW_ID,
   EXAMPLE_SERVICE_ACCOUNT_WORKFLOW_ID,
+  FLEET_PACKAGE_WORKFLOW,
+  FLEET_PACKAGE_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_DECISION_TREE_HYDRATE_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID,
@@ -105,6 +107,9 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
   [NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW_ID]: { serviceAccountId: 'kibana/nightshift_agent' },
   [EXAMPLE_MANAGED_WORKFLOW_ID]: {
     recipient: 'World',
+  },
+  [FLEET_PACKAGE_WORKFLOW_ID]: {
+    yaml: 'name: Package workflow\nenabled: true\ntriggers:\n  - type: manual\nsteps:\n  - name: hello\n    type: console\n    with:\n      message: hello\n',
   },
   [CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID]: {
     aiIndexId: 'my-ai-index',
@@ -406,6 +411,12 @@ function getNamedTier(step: Record<string, unknown>, field: string): unknown {
 }
 
 describe('managedWorkflowDefinitions', () => {
+  it('lists Fleet package workflows on the workflows page', () => {
+    const { visibility } = FLEET_PACKAGE_WORKFLOW;
+
+    expect(getManagedWorkflowVisibilityContexts(visibility)).toEqual(['list:workflows']);
+  });
+
   it('contains unique workflow ids', () => {
     const ids = managedWorkflowDefinitions.map(({ id }) => id);
     expect(new Set(ids).size).toBe(ids.length);

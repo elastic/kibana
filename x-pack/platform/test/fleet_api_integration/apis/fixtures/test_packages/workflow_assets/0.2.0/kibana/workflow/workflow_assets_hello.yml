@@ -1,0 +1,10 @@
+name: Hello updated
+description: Says hello again
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: log
+    type: console
+    with:
+      message: "hello again"

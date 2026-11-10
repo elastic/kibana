@@ -26,7 +26,14 @@ import type {
   InstallRuleAssetsRequestSchema,
 } from '../../types';
 import { createArchiveIteratorFromMap } from '../../services/epm/archive/archive_iterator';
+import { stepInstallWorkflows } from '../../services/epm/packages/install_state_machine/steps/step_install_workflows';
 import { stepCreateAlertingAssets } from '../../services/epm/packages/install_state_machine/steps/step_create_alerting_assets';
+import { checkWorkflowAssetPrivilegesForSpaces } from '../../services/epm/packages/upload_preflight_authz';
+import {
+  getInstalledWorkflowRefs,
+  isWorkflowAssetPath,
+} from '../../services/epm/kibana/workflows/install';
+import { getWorkflowAssetsClient } from '../../services/epm/kibana/workflows/availability';
 
 export async function checkIntegrationsAllPrivilegesForSpaces(
   request: KibanaRequest,
@@ -81,6 +88,22 @@ export const installPackageKibanaAssetsHandler: FleetRequestHandler<
 
   const spaceIds = request.body?.space_ids ?? [spaceId];
 
+  // Workflows are written through the requestless managed client, so mirror the upload preflight
+  // and require the caller's Workflows privileges before reinstalling an uploaded package's workflows.
+  const primarySpaceId = installation.attributes.installed_kibana_space_id ?? DEFAULT_SPACE_ID;
+  const touchesWorkflows =
+    installedPkgWithAssets.paths.some(isWorkflowAssetPath) ||
+    spaceIds.some(
+      (id) => getInstalledWorkflowRefs(installation, id, id !== primarySpaceId).length > 0
+    );
+  if (
+    installation.attributes.install_source === 'upload' &&
+    touchesWorkflows &&
+    (await getWorkflowAssetsClient())
+  ) {
+    await checkWorkflowAssetPrivilegesForSpaces(request, spaceIds);
+  }
+
   for (const spaceToInstallId of spaceIds) {
     const spaceScopedClient = appContextService.getInternalUserSOClientForSpaceId(spaceToInstallId);
     const installAsAdditionalSpace =
@@ -102,6 +125,16 @@ export const installPackageKibanaAssetsHandler: FleetRequestHandler<
       assetTags: installedPkgWithAssets.packageInfo?.asset_tags,
       installedPkg: installation,
       packageInstallContext,
+    });
+
+    await stepInstallWorkflows({
+      logger,
+      savedObjectsClient: spaceScopedClient,
+      packageInstallContext,
+      spaceId: spaceToInstallId,
+      installedPkg: installation,
+      installAsAdditionalSpace,
+      upgradeAdditionalSpaces: false,
     });
 
     await stepCreateAlertingAssets({

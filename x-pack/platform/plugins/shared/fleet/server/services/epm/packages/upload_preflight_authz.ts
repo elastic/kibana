@@ -10,6 +10,7 @@ import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
 
 import type { ArchivePackage } from '../../../types';
 import { KibanaAssetType, KibanaSavedObjectType, type Installation } from '../../../types';
@@ -17,6 +18,8 @@ import { FleetUnauthorizedError } from '../../../errors';
 import { appContextService } from '../../app_context';
 import { getPathParts, traverseArchiveEntries } from '../archive';
 import { filterAssetPathForParseAndVerifyArchive, parseAndVerifyArchive } from '../archive/parse';
+import { getWorkflowAssetsClient } from '../kibana/workflows/availability';
+
 import { PACKAGES_TO_INSTALL_WITH_STREAMING } from './streaming_packages';
 
 // Single source of truth: asset type → required Kibana API privileges.
@@ -24,6 +27,14 @@ import { PACKAGES_TO_INSTALL_WITH_STREAMING } from './streaming_packages';
 const GATED_TYPE_REQUIRED_PRIVILEGES: Partial<Record<KibanaAssetType, readonly string[]>> = {
   [KibanaAssetType.securityRule]: ['rules-all'],
   [KibanaAssetType.securityAIPrompt]: ['elasticAssistant'],
+  // Package workflows are managed, so replacing their YAML must require the managed-update grant
+  // on top of the privileges for creating and updating workflows.
+  [KibanaAssetType.workflow]: [
+    ...new Set([
+      ...WorkflowsManagementOperationPrivileges.create,
+      ...WorkflowsManagementOperationPrivileges.updateManaged,
+    ]),
+  ],
 };
 
 const GATED_ASSET_TYPES = new Set(Object.keys(GATED_TYPE_REQUIRED_PRIVILEGES) as KibanaAssetType[]);
@@ -32,6 +43,7 @@ const GATED_ASSET_TYPES = new Set(Object.keys(GATED_TYPE_REQUIRED_PRIVILEGES) as
 const SO_TYPE_TO_ASSET_TYPE = new Map<KibanaSavedObjectType, KibanaAssetType>([
   [KibanaSavedObjectType.securityRule, KibanaAssetType.securityRule],
   [KibanaSavedObjectType.securityAIPrompt, KibanaAssetType.securityAIPrompt],
+  [KibanaSavedObjectType.workflow, KibanaAssetType.workflow],
 ]);
 
 export interface ArchiveSignals {
@@ -147,6 +159,32 @@ export function buildRequiredActions(
   return [...privilegeNames].map((name) => security.authz.actions.api.get(name));
 }
 
+/**
+ * Requires the caller to hold the workflow asset privileges an upload would require, in every space.
+ */
+export async function checkWorkflowAssetPrivilegesForSpaces(
+  request: KibanaRequest,
+  spaceIds: string[]
+): Promise<void> {
+  const security = appContextService.getSecurity();
+  if (!security) {
+    throw new FleetUnauthorizedError(
+      'Installing workflow assets from uploaded packages requires the security plugin to be enabled'
+    );
+  }
+
+  const actions = buildRequiredActions(
+    { gatedTypesFound: new Set([KibanaAssetType.workflow]), hasMlSecurityRules: false },
+    security
+  );
+  const checkResult = await security.authz
+    .checkPrivilegesWithRequest(request)
+    .atSpaces(spaceIds, { kibana: actions });
+  if (!checkResult.hasAllRequested) {
+    throw new FleetUnauthorizedError('Insufficient privileges to install workflow assets');
+  }
+}
+
 export interface CheckUploadPackageAssetPrivilegesOptions {
   request: KibanaRequest;
   archiveSignals: ArchiveSignals;
@@ -156,6 +194,15 @@ export interface CheckUploadPackageAssetPrivilegesOptions {
   savedObjectsClient: SavedObjectsClientContract;
 }
 
+export interface UploadPackageAssetPrivilegesResult {
+  destinationSpaces: string[];
+  /**
+   * True only when the upload touches workflows and the Workflows privileges were checked.
+   * Passed to the install so it never writes workflows that preflight did not authorize.
+   */
+  workflowAssetsAuthorized: boolean;
+}
+
 export async function checkUploadPackageAssetPrivileges({
   request,
   archiveSignals: signals,
@@ -163,7 +210,7 @@ export async function checkUploadPackageAssetPrivileges({
   pkgName,
   installation,
   savedObjectsClient,
-}: CheckUploadPackageAssetPrivilegesOptions): Promise<string[]> {
+}: CheckUploadPackageAssetPrivilegesOptions): Promise<UploadPackageAssetPrivilegesResult> {
   // Compute destination spaces first — needed for both the existing-asset scan
   // and the privilege check, so the two are always consistent.
   const effectivePrimarySpace =
@@ -261,9 +308,19 @@ export async function checkUploadPackageAssetPrivileges({
     spaceData.set(space, { types, hasMlRules });
   }
 
+  // The install skips workflow assets (install and cleanup) unless authorized here, so don't
+  // require Workflows privileges when workflow assets can't be installed.
+  const touchesWorkflows = [...spaceData.values()].some(({ types }) =>
+    types.has(KibanaAssetType.workflow)
+  );
+  const workflowAssetsAuthorized = touchesWorkflows && !!(await getWorkflowAssetsClient());
+  if (!workflowAssetsAuthorized) {
+    spaceData.forEach(({ types }) => types.delete(KibanaAssetType.workflow));
+  }
+
   const anyGated = [...spaceData.values()].some((d) => d.types.size > 0 || d.hasMlRules);
   if (!anyGated) {
-    return [];
+    return { destinationSpaces: [], workflowAssetsAuthorized };
   }
 
   // Preflight authz requires the security plugin. Kibana deployments with security
@@ -303,5 +360,5 @@ export async function checkUploadPackageAssetPrivileges({
     }
   }
 
-  return destinationSpaces;
+  return { destinationSpaces, workflowAssetsAuthorized };
 }

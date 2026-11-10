@@ -261,6 +261,37 @@ describe('WorkflowsPage authorization', () => {
     expect(screen.queryByTestId('managed-filter-popover-button')).not.toBeInTheDocument();
   });
 
+  it('requests managed workflows listed on the workflows page when the setting is disabled', () => {
+    mockCapabilities(true, true);
+    mockUseWorkflows.mockReturnValue({
+      ...emptyWorkflowsResult,
+      data: { results: [{}], total: 1 },
+    } as any);
+
+    renderPage();
+
+    expect(mockUseWorkflows).toHaveBeenLastCalledWith(
+      expect.objectContaining({ managed: 'all', visibilityContext: ['list:workflows'] })
+    );
+  });
+
+  it('does not request managed workflows when the managed workflow read privilege is missing', () => {
+    mockCapabilities(true, true, { readManagedWorkflow: false });
+    mockUseWorkflows.mockReturnValue({
+      ...emptyWorkflowsResult,
+      data: { results: [{}], total: 1 },
+    } as any);
+
+    renderPage();
+
+    expect(mockUseWorkflows).toHaveBeenLastCalledWith(
+      expect.not.objectContaining({ managed: expect.anything() })
+    );
+    expect(mockUseWorkflows).toHaveBeenLastCalledWith(
+      expect.not.objectContaining({ visibilityContext: expect.anything() })
+    );
+  });
+
   it('shows the workflow type filter when the managed workflow setting is enabled', () => {
     mockCapabilities(true, true);
     mockUseShowManagedWorkflowsSetting.mockReturnValue(true);
@@ -301,7 +332,25 @@ describe('WorkflowsPage authorization', () => {
     expect(screen.queryByTestId('managed-filter-popover-button')).not.toBeInTheDocument();
     expect(mockUseWorkflowFiltersOptions).toHaveBeenLastCalledWith(
       ['enabled', 'createdBy', 'tags'],
-      undefined
+      readManagedWorkflow ? 'all' : undefined,
+      readManagedWorkflow ? expect.any(Array) : undefined
+    );
+  });
+
+  it('loads workflow filter options with the listed managed workflows scope when the managed setting is disabled', () => {
+    mockCapabilities(true, true);
+    mockUseShowManagedWorkflowsSetting.mockReturnValue(false);
+    mockUseWorkflows.mockReturnValue({
+      ...emptyWorkflowsResult,
+      data: { results: [{}], total: 1 },
+    } as any);
+
+    renderPage();
+
+    expect(mockUseWorkflowFiltersOptions).toHaveBeenLastCalledWith(
+      ['enabled', 'createdBy', 'tags'],
+      'all',
+      expect.any(Array)
     );
   });
 
@@ -345,7 +394,8 @@ describe('WorkflowsPage authorization', () => {
 
     expect(mockUseWorkflowFiltersOptions).toHaveBeenLastCalledWith(
       ['enabled', 'createdBy', 'tags'],
-      'all'
+      'all',
+      undefined
     );
 
     fireEvent.click(screen.getByTestId('managed-filter-popover-button'));
@@ -354,7 +404,8 @@ describe('WorkflowsPage authorization', () => {
     await waitFor(() => {
       expect(mockUseWorkflowFiltersOptions).toHaveBeenLastCalledWith(
         ['enabled', 'createdBy', 'tags'],
-        'all'
+        'all',
+        undefined
       );
     });
   });

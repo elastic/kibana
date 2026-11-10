@@ -53955,6 +53955,7 @@ paths:
         - `security_rule`: `rules-all`
         - `security_rule` with type `machine_learning`: `rules-all` and `ml:canCreateJob`
         - `security_ai_prompt`: `elasticAssistant`
+        - `workflow`: `workflowsManagement:create`, `workflowsManagement:update` and `workflowsManagement:managed:update`
 
         If any required privilege is missing, the request returns 403 and no assets are written. To learn more, refer to [Upload an integration to Kibana](https://www.elastic.co/docs/extend/integrations/upload-new-integration).<br/><br/>[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
       operationId: post-fleet-epm-packages
@@ -145242,6 +145243,16 @@ paths:
               - managed
               - unmanaged
             type: string
+        - description: When managed workflows are included, only aggregate managed workflows visible in these contexts.
+          in: query
+          name: visibilityContext
+          required: false
+          schema:
+            items:
+              maxLength: 128
+              type: string
+            maxItems: 1000
+            type: array
       responses:
         '200':
           content:

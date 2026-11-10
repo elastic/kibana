@@ -284,6 +284,7 @@ export async function handleInstallPackageFailure({
   spaceId,
   request,
   keepFailedInstallation,
+  workflowAssetsAuthorized,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   error: FleetError | Boom.Boom | Error;
@@ -294,6 +295,7 @@ export async function handleInstallPackageFailure({
   spaceId: string;
   request?: KibanaRequest;
   keepFailedInstallation?: boolean;
+  workflowAssetsAuthorized?: boolean;
 }) {
   if (error instanceof ConcurrentInstallOperationError) {
     return;
@@ -352,6 +354,7 @@ export async function handleInstallPackageFailure({
         spaceId,
         request,
         retryFromLastState: true,
+        workflowAssetsAuthorized,
       });
       return;
     }
@@ -373,6 +376,7 @@ export async function handleInstallPackageFailure({
         spaceId,
         force: true,
         request,
+        workflowAssetsAuthorized,
       });
     }
   } catch (e) {
@@ -424,6 +428,11 @@ interface InstallRegistryPackageParams {
   /** Reject upgrades whose version range includes breaking changes, unless acknowledged. */
   checkBreakingChanges?: boolean;
   acknowledgeBreakingChanges?: boolean;
+  /**
+   * Upload preflight decision on workflow assets, carried into retries and rollbacks. When false,
+   * the install skips workflow assets; when undefined, availability alone decides.
+   */
+  workflowAssetsAuthorized?: boolean;
 }
 
 export interface CustomPackageDatasetConfiguration {
@@ -452,6 +461,7 @@ interface InstallUploadedArchiveParams {
   skipDataStreamRollover?: boolean;
   isBundledPackage?: boolean;
   skipRateLimitCheck?: boolean;
+  workflowAssetsAuthorized?: boolean;
 }
 
 function getTelemetryEvent(pkgName: string, pkgVersion: string): PackageUpdateEvent {
@@ -514,6 +524,7 @@ async function installPackageFromRegistry({
   skipDependencyCheck = false,
   checkBreakingChanges = false,
   acknowledgeBreakingChanges = false,
+  workflowAssetsAuthorized,
 }: InstallRegistryPackageParams): Promise<InstallResult> {
   const logger = appContextService.getLogger();
   // TODO: change epm API to /packageName/version so we don't need to do this
@@ -637,6 +648,7 @@ async function installPackageFromRegistry({
       automaticInstall,
       installedAsDependencyOf,
       skipDependencyCheck,
+      workflowAssetsAuthorized,
     });
 
     // After a successful, user-initiated (non-automatic) non-content-package install, trigger an
@@ -720,6 +732,7 @@ export async function installPackageWithStateMachine(options: {
   installedAsDependencyOf?: { name: string; version: string };
   skipDependencyCheck?: boolean;
   authorizedSpaces?: string[];
+  workflowAssetsAuthorized?: boolean;
 }): Promise<InstallResult> {
   const packageInfo = options.packageInstallContext.packageInfo;
 
@@ -745,6 +758,7 @@ export async function installPackageWithStateMachine(options: {
     installedAsDependencyOf,
     skipDependencyCheck,
     authorizedSpaces,
+    workflowAssetsAuthorized,
   } = options;
   let { telemetryEvent } = options;
   const logger = appContextService.getLogger();
@@ -872,6 +886,7 @@ export async function installPackageWithStateMachine(options: {
       installedAsDependencyOf,
       skipDependencyCheck,
       authorizedSpaces,
+      workflowAssetsAuthorized,
     })
       .then(async (assets) => {
         logger.debug(`Removing old assets from previous versions of ${pkgName}`);
@@ -906,6 +921,7 @@ export async function installPackageWithStateMachine(options: {
           esClient,
           request,
           keepFailedInstallation,
+          workflowAssetsAuthorized,
         });
         sendEventWithLatestState(
           telemetryEvent,
@@ -943,6 +959,7 @@ async function installPackageByUpload({
   skipDataStreamRollover,
   isBundledPackage,
   skipRateLimitCheck,
+  workflowAssetsAuthorized: inheritedWorkflowAssetsAuthorized,
 }: InstallUploadedArchiveParams): Promise<InstallResult> {
   const logger = appContextService.getLogger();
 
@@ -992,19 +1009,20 @@ async function installPackageByUpload({
 
     installType = getInstallType({ pkgVersion, installedPkg });
 
+    let workflowAssetsAuthorized = inheritedWorkflowAssetsAuthorized;
     if (
       !isBundledPackage &&
       request &&
       !appContextService.getConfig()?.internal?.skipUploadPackageValidation
     ) {
-      await checkUploadPackageAssetPrivileges({
+      ({ workflowAssetsAuthorized } = await checkUploadPackageAssetPrivileges({
         request,
         archiveSignals,
         spaceId,
         pkgName,
         installation: installedPkg,
         savedObjectsClient,
-      });
+      }));
     }
 
     const { paths, archiveIterator } = await unpackBufferToAssetsMap({
@@ -1060,6 +1078,7 @@ async function installPackageByUpload({
       ignoreMappingUpdateErrors,
       skipDataStreamRollover,
       useStreaming,
+      workflowAssetsAuthorized,
     });
   } catch (e) {
     return {
@@ -1115,6 +1134,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       skipDependencyCheck,
       checkBreakingChanges,
       acknowledgeBreakingChanges,
+      workflowAssetsAuthorized,
     } = args;
 
     const matchingBundledPackage = await getBundledPackageByPkgKey(pkgkey);
@@ -1162,6 +1182,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
         skipDataStreamRollover,
         isBundledPackage: true,
         skipRateLimitCheck: true,
+        workflowAssetsAuthorized,
       });
 
       return { ...response, installSource: 'bundled' };
@@ -1189,6 +1210,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       skipDependencyCheck,
       checkBreakingChanges,
       acknowledgeBreakingChanges,
+      workflowAssetsAuthorized,
     });
 
     return response;
