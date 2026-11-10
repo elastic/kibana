@@ -1337,6 +1337,7 @@ x-pack/platform/plugins/shared/task_manager @elastic/response-ops
 x-pack/platform/plugins/shared/triggers_actions_ui @elastic/response-ops
 x-pack/platform/plugins/shared/usage_api @elastic/kibana-core
 x-pack/platform/test
+x-pack/platform/test_plugins/agent_builder_sml_test_types @elastic/workchat-eng
 x-pack/platform/test_plugins/response_ops/alerting_api_integration/aad @elastic/response-ops
 x-pack/platform/test_plugins/response_ops/alerting_api_integration/actions_simulators @elastic/response-ops
 x-pack/platform/test_plugins/response_ops/alerting_api_integration/alerts @elastic/response-ops
@@ -1353,7 +1354,6 @@ x-pack/platform/test_plugins/security_investigations/cases_api_integration/cases
 x-pack/platform/test_plugins/security_investigations/cases_api_integration/observability @elastic/security-investigations
 x-pack/platform/test_plugins/security_investigations/cases_api_integration/security_solution @elastic/security-investigations
 x-pack/platform/test_plugins/security_investigations/functional_with_es_ssl/cases @elastic/security-investigations
-x-pack/platform/test/agent_builder_sml/plugins/sml_test_types @elastic/workchat-eng
 x-pack/platform/test/cloud_integration/plugins/saml_provider @elastic/kibana-core
 x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin @elastic/kibana-security
 x-pack/platform/test/functional_cors/plugins/kibana_cors_test @elastic/kibana-security
@@ -2578,8 +2578,6 @@ packages/kbn-eslint-plugin-eslint/rules/no_unsafe_hash.js @elastic/kibana-securi
 /x-pack/platform/test/upgrade/apps/rules @elastic/response-ops
 /x-pack/platform/test/examples/triggers_actions_ui_examples @elastic/response-ops # Assigned per https://github.com/elastic/kibana/blob/main/x-pack/examples/triggers_actions_ui_example/kibana.jsonc#L4
 /x-pack/platform/test/functional/services/rules @elastic/response-ops
-/x-pack/platform/test/plugin_api_integration/plugins/sample_task_plugin @elastic/response-ops
-/x-pack/platform/test/functional_with_es_ssl/plugins/alerts @elastic/response-ops
 /x-pack/platform/test/screenshot_creation/apps/response_ops_docs @elastic/response-ops
 /x-pack/solutions/observability/test/screenshot_creation/ @elastic/response-ops
 /x-pack/solutions/security/test/screenshot_creation/ @elastic/response-ops
