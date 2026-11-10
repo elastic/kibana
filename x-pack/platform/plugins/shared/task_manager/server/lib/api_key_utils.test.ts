@@ -7,6 +7,9 @@
 
 import {
   isRequestApiKeyType,
+  hasApiKeyAuthorizationScheme,
+  hasApiKey,
+  shouldCloneApiKeyFromRequest,
   getApiKeyFromRequest,
   getUiamApiKeyId,
   getUiamApiKeySecret,
@@ -112,6 +115,131 @@ describe('api_key_utils', () => {
 
       const result = getApiKeyFromRequest(request);
       expect(result).toEqual({ api_key: 'essu_user_created_key' });
+    });
+  });
+
+  describe('hasApiKeyAuthorizationScheme', () => {
+    const requestWith = (authorization?: string) =>
+      httpServerMock.createKibanaRequest({ headers: authorization ? { authorization } : {} });
+
+    test.each(['ApiKey', 'apikey', 'APIKEY'])('is true for the %s scheme', (scheme) => {
+      expect(hasApiKeyAuthorizationScheme(requestWith(`${scheme} abc`))).toBe(true);
+    });
+
+    test.each(['Bearer token', 'Basic dXNlcjpwYXNz'])('is false for "%s"', (authorization) => {
+      expect(hasApiKeyAuthorizationScheme(requestWith(authorization))).toBe(false);
+    });
+
+    test('is false without an authorization header', () => {
+      expect(hasApiKeyAuthorizationScheme(requestWith())).toBe(false);
+    });
+  });
+
+  describe('hasApiKey', () => {
+    const apiKeyUser = { authentication_type: 'api_key' } as AuthenticatedUser;
+    const sessionUser = { authentication_type: 'token' } as AuthenticatedUser;
+    const apiKeyHeader = { authorization: `ApiKey ${Buffer.from('id:key').toString('base64')}` };
+
+    describe('real request', () => {
+      test('follows the authenticated user', () => {
+        const request = httpServerMock.createKibanaRequest({ headers: apiKeyHeader });
+
+        expect(hasApiKey(apiKeyUser, request)).toBe(true);
+        expect(hasApiKey(sessionUser, request)).toBe(false);
+      });
+
+      test('ignores an ApiKey header that Core did not authenticate (route with authc disabled)', () => {
+        // Unchanged from before: the schedule goes through the grant, which rejects the `ApiKey`
+        // scheme, instead of storing an unverified header as a user-created key that is never
+        // invalidated.
+        const request = httpServerMock.createKibanaRequest({ headers: apiKeyHeader });
+
+        expect(hasApiKey(null, request)).toBe(false);
+      });
+    });
+
+    describe('fake request', () => {
+      test('follows the authorization scheme', () => {
+        expect(
+          hasApiKey(null, httpServerMock.createFakeKibanaRequest({ headers: apiKeyHeader }))
+        ).toBe(true);
+        expect(
+          hasApiKey(
+            null,
+            httpServerMock.createFakeKibanaRequest({ headers: { authorization: 'Bearer token' } })
+          )
+        ).toBe(false);
+        expect(
+          hasApiKey(
+            null,
+            httpServerMock.createFakeKibanaRequest({
+              headers: { authorization: 'Basic dXNlcjpwYXNz' },
+            })
+          )
+        ).toBe(false);
+      });
+
+      test('does not consult the enriched user, which names who the request acts for', () => {
+        const enrichedUser = { username: 'jdoe', profile_uid: 'u_jdoe' } as AuthenticatedUser;
+        const bearerRequest = httpServerMock.createFakeKibanaRequest({
+          headers: { authorization: 'Bearer token' },
+        });
+
+        expect(hasApiKey(enrichedUser, bearerRequest)).toBe(false);
+        expect(
+          hasApiKey(enrichedUser, httpServerMock.createFakeKibanaRequest({ headers: apiKeyHeader }))
+        ).toBe(true);
+      });
+    });
+  });
+
+  describe('shouldCloneApiKeyFromRequest', () => {
+    const apiKeyUser = { authentication_type: 'api_key' } as AuthenticatedUser;
+    const apiKeyHeader = { authorization: `ApiKey ${Buffer.from('id:key').toString('base64')}` };
+    const security = coreMock.createStart().security;
+
+    test('clones a real API key request only when the caller asks for it', () => {
+      const request = httpServerMock.createKibanaRequest({ headers: apiKeyHeader });
+
+      expect(
+        shouldCloneApiKeyFromRequest(security, request, { cloneApiKey: true }, apiKeyUser)
+      ).toBe(true);
+      expect(shouldCloneApiKeyFromRequest(security, request, {}, apiKeyUser)).toBe(false);
+      expect(shouldCloneApiKeyFromRequest(security, request, undefined, apiKeyUser)).toBe(false);
+    });
+
+    test('never clones a request without an API key, even when asked to', () => {
+      const sessionUser = { authentication_type: 'token' } as AuthenticatedUser;
+      const realBearer = httpServerMock.createKibanaRequest({
+        headers: { authorization: 'Bearer token' },
+      });
+      const fakeBearer = httpServerMock.createFakeKibanaRequest({
+        headers: { authorization: 'Bearer token' },
+      });
+
+      expect(
+        shouldCloneApiKeyFromRequest(security, realBearer, { cloneApiKey: true }, sessionUser)
+      ).toBe(false);
+      expect(shouldCloneApiKeyFromRequest(security, fakeBearer, { cloneApiKey: true }, null)).toBe(
+        false
+      );
+    });
+
+    test('always clones a fake request that carries an API key', () => {
+      const request = httpServerMock.createFakeKibanaRequest({ headers: apiKeyHeader });
+
+      expect(shouldCloneApiKeyFromRequest(security, request, undefined, null)).toBe(true);
+      expect(shouldCloneApiKeyFromRequest(security, request, { cloneApiKey: false }, null)).toBe(
+        true
+      );
+    });
+
+    test('resolves the user from the request when none is given', () => {
+      const request = httpServerMock.createKibanaRequest({ headers: apiKeyHeader });
+      (security.authc.getCurrentUser as jest.Mock).mockReturnValueOnce(apiKeyUser);
+
+      expect(shouldCloneApiKeyFromRequest(security, request, { cloneApiKey: true })).toBe(true);
+      expect(security.authc.getCurrentUser).toHaveBeenCalledWith(request);
     });
   });
 

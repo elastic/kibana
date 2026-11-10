@@ -102,16 +102,21 @@ export const isRequestApiKeyType = (user: AuthenticatedUser | null) => {
 
 /**
  * Whether the request's `Authorization` header uses the `ApiKey` scheme (an Elasticsearch or UIAM
- * API key). Fake requests have no authenticated user to ask, so the scheme is the only signal:
- * a fake request can also carry a bearer token or basic credentials, which Elasticsearch can
- * grant an API key from but not clone.
+ * API key), matched case-insensitively.
  */
 export const hasApiKeyAuthorizationScheme = (request: KibanaRequest): boolean =>
   HTTPAuthorizationHeader.parseFromRequest(request)?.scheme.toLowerCase() === 'apikey';
 
-export const hasApiKey = (user: AuthenticatedUser | null, request: KibanaRequest) => {
-  return isRequestApiKeyType(user) || hasApiKeyAuthorizationScheme(request);
-};
+/**
+ * Whether the request carries an API key. A real request answers through the user Core
+ * authenticated, so an `ApiKey` header on a route that did not authenticate it does not count
+ * and is not reused. A fake request never met the authenticator and its enriched user (if any)
+ * names who it acts for, not how it authenticates, so its `Authorization` scheme is the only
+ * signal: a fake request can carry a bearer token or basic credentials, which Elasticsearch can
+ * grant an API key from but not clone.
+ */
+export const hasApiKey = (user: AuthenticatedUser | null, request: KibanaRequest): boolean =>
+  request.isFakeRequest ? hasApiKeyAuthorizationScheme(request) : isRequestApiKeyType(user);
 
 export const requestHasApiKey = (security: SecurityServiceStart, request: KibanaRequest) => {
   const user = security.authc.getCurrentUser(request);

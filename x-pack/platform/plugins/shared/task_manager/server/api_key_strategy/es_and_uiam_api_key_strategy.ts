@@ -104,28 +104,27 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
       userName: user?.username,
     });
 
-    // When cloning a UIAM-authenticated request there is no Elasticsearch API key to clone:
-    // `cloneAsInternalUser` hits the native ES clone endpoint, which rejects raw `essu_`
-    // credentials. Persist a single freshly granted UIAM key and skip the ES clone path
-    // entirely. Non-clone requests keep the existing ES (+ optional UIAM) behavior.
-    //
-    // A UIAM service account takes the same branch, cloned or not. Elasticsearch can't grant a
-    // key for it, so the UIAM key is its only credential and a failed grant fails the request.
-    //
-    // A fake request carrying a UIAM credential also stays on this branch regardless of
-    // `cloneApiKey`. Fake requests have no principal (except for those minted by the service
-    // accounts backend). A UIAM service-account token on a fake request with no principal
-    // (like the Actions inbound events route scheduling on behalf of Relay) is indistinguishable
-    // from a UIAM session token, and the ES grant fails for the former. Until all fake requests
-    // carry a principal, the UIAM grant is the only one that works for every `essu_` bearer.
     const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
     const isUiamRequest = !!authorizationHeader && isUiamCredential(authorizationHeader);
+
+    // A UIAM credential that must not be reused as-is gets a single freshly granted UIAM key
+    // and skips the ES path: UIAM has no clone endpoint, and `cloneAsInternalUser` rejects raw
+    // `essu_` credentials. That is every clone, and every fake request. A fake request's key
+    // belongs to another task, and a fake request's bearer token has no principal (unless the
+    // service accounts backend minted it), so a UIAM service-account token on one (e.g. the
+    // Actions inbound events route scheduling on behalf of Relay) cannot be told apart from a
+    // session token, and the ES grant fails for the former. Until all fake requests carry a
+    // principal, the UIAM grant is the only one that works for every `essu_` bearer. Real
+    // non-clone requests keep the existing ES (+ UIAM) behavior.
+    const mintsFreshUiamKey = isUiamRequest && (cloneApiKey || request.isFakeRequest);
+
+    // A UIAM service account takes the same branch, cloned or not: Elasticsearch cannot grant a
+    // key for it, so the UIAM key is its only credential.
     const principal = security.authc.getPrincipal(request);
     const isUiamServiceAccount =
       principal?.type === 'service_account' && principal.variant === 'uiam';
-    const uiamOnlyRequest =
-      ((isUiamRequest && (cloneApiKey || request.isFakeRequest)) || isUiamServiceAccount) &&
-      opts?.onEsKey !== true;
+
+    const uiamOnlyRequest = (mintsFreshUiamKey || isUiamServiceAccount) && opts?.onEsKey !== true;
 
     if (uiamOnlyRequest) {
       // The UIAM key is the only credential the task gets on this branch, so a refused grant

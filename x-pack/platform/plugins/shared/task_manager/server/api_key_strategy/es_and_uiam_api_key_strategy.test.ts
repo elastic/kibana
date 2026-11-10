@@ -392,6 +392,38 @@ describe('EsAndUiamApiKeyStrategy', () => {
       );
     });
 
+    test('grants a single fresh UIAM key for the fake request Task Manager builds at run time (ApiKey essu_, no cloneApiKey option)', async () => {
+      const { strategy, coreStart, mockUiam } = createStrategy(ApiKeyType.ES);
+      const request = httpServerMock.createFakeKibanaRequest({
+        headers: { authorization: 'ApiKey essu_other-task-key' },
+      });
+      // What `api_key_utils` answers for this request: it carries an API key, and a fake request's
+      // key is always cloned because it belongs to another task.
+      hasApiKeyMock.mockReturnValue(true);
+      shouldCloneApiKeyFromRequestMock.mockReturnValue(true);
+      (coreStart.security.authc.getCurrentUser as jest.Mock).mockReturnValue(null);
+      (coreStart.security.authc.getPrincipal as jest.Mock).mockReturnValue(null);
+      mockUiam.grant.mockResolvedValueOnce({
+        id: 'runtime-uiam-id',
+        name: 'test',
+        api_key: 'essu_runtime-secret',
+      });
+
+      const tasks = [{ id: 'task-1', taskType: 'report', params: {}, state: {} }];
+      const result = await strategy.grantApiKeys(tasks, request, coreStart.security);
+
+      expect(createApiKeyMock).not.toHaveBeenCalled();
+      expect(mockUiam.grant).toHaveBeenCalledTimes(1);
+      expect(result.get('task-1')).toEqual({
+        uiamApiKey: 'essu_runtime-secret',
+        userScope: expect.objectContaining({
+          apiKeyId: 'runtime-uiam-id',
+          uiamApiKeyId: 'runtime-uiam-id',
+          apiKeyCreatedByUser: false,
+        }),
+      });
+    });
+
     describe('fake request carrying a UIAM bearer token, without a principal', () => {
       // The Actions inbound events route schedules workflows from a fake request it builds
       // itself from Relay's UIAM service-account token. The route has authc disabled, so the
