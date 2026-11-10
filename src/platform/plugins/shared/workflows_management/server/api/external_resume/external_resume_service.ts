@@ -241,22 +241,16 @@ async function resolveExternalResumeContext(
   }
 
   const storedToken = readHitlExternalResumeToken(stepExecution);
-  const expiresAt = storedToken?.expiresAt;
-  const expiresAtMs = typeof expiresAt === 'string' ? Date.parse(expiresAt) : NaN;
-  if (!Number.isFinite(expiresAtMs) || expiresAtMs <= Date.now()) {
+  const expiresAtMs = storedToken ? Date.parse(storedToken.expiresAt) : NaN;
+  if (!storedToken || !Number.isFinite(expiresAtMs) || expiresAtMs <= Date.now()) {
     throw new ExternalResumeError('Link expired or already used', 401);
   }
 
-  const storedHash = storedToken?.hash;
-  if (typeof storedHash !== 'string') {
-    throw new ExternalResumeError('Invalid resume token', 401);
-  }
-
   const computed = Buffer.from(
-    computeTokenHmac(token, executionId, stepId, String(expiresAt)),
+    computeTokenHmac(token, executionId, stepId, storedToken.expiresAt),
     'hex'
   );
-  const stored = Buffer.from(storedHash, 'hex');
+  const stored = Buffer.from(storedToken.hash, 'hex');
   if (computed.length !== stored.length || !timingSafeEqual(computed, stored)) {
     throw new ExternalResumeError('Invalid resume token', 401);
   }
