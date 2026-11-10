@@ -38,7 +38,7 @@ describe('AttachmentActions', () => {
   it('uses the primary action as the main button and puts secondary and overflow actions in the menu', async () => {
     const run = createButton({ label: 'Run', type: ActionButtonType.PRIMARY });
     const copy = createButton({ label: 'Copy', type: ActionButtonType.SECONDARY });
-    const remove = createButton({ label: 'Delete', type: ActionButtonType.OVERFLOW });
+    const remove = createButton({ label: 'Delete', type: ActionButtonType.SECONDARY });
     render(<AttachmentActions buttons={[copy, run, remove]} />);
 
     expect(screen.getByRole('button', { name: 'Run' })).toBeInTheDocument();
@@ -83,8 +83,8 @@ describe('AttachmentActions', () => {
   });
 
   it('renders a menu-only button when all actions are overflow actions', async () => {
-    const remove = createButton({ label: 'Delete', type: ActionButtonType.OVERFLOW });
-    const archive = createButton({ label: 'Archive', type: ActionButtonType.OVERFLOW });
+    const remove = createButton({ label: 'Delete', type: ActionButtonType.SECONDARY });
+    const archive = createButton({ label: 'Archive', type: ActionButtonType.SECONDARY });
     render(<AttachmentActions buttons={[remove, archive]} />);
 
     expect(screen.queryByRole('button', { name: 'Delete' })).not.toBeInTheDocument();
