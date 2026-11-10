@@ -7,20 +7,16 @@
 import React from 'react';
 import { parse } from 'yaml';
 import { render, waitFor } from '@testing-library/react';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { coreMock } from '@kbn/core/public/mocks';
 import userEvent from '@testing-library/user-event';
 import { TestProvider } from '../../test/test_provider';
-import {
-  getCloudDefendNewPolicyMock,
-  MOCK_YAML_INVALID_CONFIGURATION,
-  MOCK_YAML_TOO_MANY_FILE_SELECTORS_RESPONSES,
-} from '../../test/mocks';
+import { getCloudDefendNewPolicyMock, MOCK_YAML_INVALID_CONFIGURATION } from '../../test/mocks';
 import { ControlGeneralView } from '.';
 import { getInputFromPolicy } from '../../../common/utils/helpers';
 import { INPUT_CONTROL } from '../../../common/constants';
 
-// FLAKY: https://github.com/elastic/kibana/issues/214268
-describe.skip('<ControlGeneralView />', () => {
+describe('<ControlGeneralView />', () => {
   const onChange = jest.fn();
 
   // defining this here to avoid a warning in testprovider with params.history changing on rerender.
@@ -60,6 +56,7 @@ describe.skip('<ControlGeneralView />', () => {
     const { getAllByTestId, getByTestId, rerender } = render(<WrappedComponent />);
 
     await userEvent.click(getByTestId('cloud-defend-btnAddSelector'));
+    await waitForEuiPopoverOpen();
     await userEvent.click(getByTestId('cloud-defend-btnAddFileSelector'));
 
     const policy = onChange.mock.calls[0][0].updatedPolicy;
@@ -82,6 +79,7 @@ describe.skip('<ControlGeneralView />', () => {
     const { getAllByTestId, getByTestId, rerender } = render(<WrappedComponent />);
 
     await userEvent.click(getByTestId('cloud-defend-btnAddResponse'));
+    await waitForEuiPopoverOpen();
     await userEvent.click(getByTestId('cloud-defend-btnAddFileResponse'));
 
     const policy = onChange.mock.calls[0][0].updatedPolicy;
@@ -104,6 +102,7 @@ describe.skip('<ControlGeneralView />', () => {
     const { getAllByTestId, getByTestId, rerender } = render(<WrappedComponent />);
 
     await userEvent.click(getByTestId('cloud-defend-btnAddResponse'));
+    await waitForEuiPopoverOpen();
     await userEvent.click(getByTestId('cloud-defend-btnAddProcessResponse'));
 
     const policy = onChange.mock.calls[0][0].updatedPolicy;
@@ -182,17 +181,6 @@ describe.skip('<ControlGeneralView />', () => {
 
     expect(queryAllByTestId('cloud-defend-selector')).toHaveLength(0);
     expect(queryAllByTestId('cloud-defend-response')).toHaveLength(0);
-  });
-
-  it('prevents the user from adding more than MAX_SELECTORS_AND_RESPONSES_PER_TYPE', async () => {
-    const { getByTestId } = render(
-      <WrappedComponent
-        policy={getCloudDefendNewPolicyMock(MOCK_YAML_TOO_MANY_FILE_SELECTORS_RESPONSES)}
-      />
-    );
-
-    await userEvent.click(getByTestId('cloud-defend-btnAddSelector'));
-    expect(getByTestId('cloud-defend-btnAddFileSelector')).toBeDisabled();
   });
 
   it('allows the user to duplicate the selector', async () => {

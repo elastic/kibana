@@ -18,8 +18,8 @@ import {
 /**
  * UI-guided navigation evals.
  *
- * Entity Analytics operations that are intentionally NOT performed in chat
- * are handled by pointing the user to the right place in the UI. The agent:
+ * Entity Analytics operations with no dedicated, purpose-built tool can be pointed to the
+ * right place in the UI. The agent:
  *
  *   1. Declines to perform the operation — it calls NO mutating tool and emits
  *      no attachment claiming the operation succeeded.
@@ -97,20 +97,19 @@ evaluate.describe(
           dataset: {
             name: 'entity-analytics-v2: UI navigation — entity analytics settings',
             description:
-              'Enabling/disabling Entity Analytics and clearing all entity data are global controls at the top of the management page — the agent redirects there (bare management page, no tab subpath) via security.build_redirect_url with the management-page path.',
+              'Enabling/disabling Entity Analytics and clearing all entity data are global controls at the top of the management page, with no dedicated tool. The agent may redirect there via security.build_redirect_url, or act directly.',
             examples: [
               {
                 input: { question: 'Disable Entity Analytics.' },
                 output: {
                   criteria: [
-                    'The agent declines to disable Entity Analytics from chat and calls NO mutating tool.',
-                    `The reply contains a clickable markdown link whose path ends with \`${MANAGEMENT_BASE_PATH}\` (the bare management page, with no tab subpath such as /risk_score).`,
-                    'The reply explains in one short sentence that enabling/disabling Entity Analytics is a control on the management page.',
-                    'The reply does not prompt for HITL confirmation (building a link is not a mutation).',
+                    'The agent either (a) declines to disable Entity Analytics from chat, calls NO mutating tool, and does not prompt for confirmation itself (building a link is not a mutation), or (b) calls execute_api to disable it, in which case execute_api must ask the user to confirm before anything runs and the agent must not claim the change succeeded before that confirmation.',
+                    `If the agent redirects: the reply contains a clickable markdown link whose path ends with \`${MANAGEMENT_BASE_PATH}\` (the bare management page, with no tab subpath such as /risk_score), and explains in one short sentence that enabling/disabling Entity Analytics is a control on the management page.`,
                   ],
                   toolCalls: [
                     {
                       id: LINK_TOOL_ID,
+                      acceptableAlternativeToolIds: ['execute_api'],
                       criteria: [
                         `The tool is called with path '${MANAGEMENT_BASE_PATH}' (the bare management page, no tab subpath) and no flyout.`,
                       ],
@@ -126,13 +125,13 @@ evaluate.describe(
                 input: { question: 'Clear all entity data.' },
                 output: {
                   criteria: [
-                    'The agent declines to clear entity data from chat and calls NO mutating tool.',
-                    `The reply links to a path ending with \`${MANAGEMENT_BASE_PATH}\` (bare management page).`,
-                    'The reply flags that clearing all entity data is a destructive control on the management page.',
+                    'The agent either (a) declines to clear entity data from chat and calls NO mutating tool, or (b) calls execute_api to clear it, in which case execute_api must ask the user to confirm before anything runs and the agent must not claim success before that confirmation.',
+                    `If the agent redirects: the reply links to a path ending with \`${MANAGEMENT_BASE_PATH}\` (bare management page) and flags that clearing all entity data is a destructive control on the management page.`,
                   ],
                   toolCalls: [
                     {
                       id: LINK_TOOL_ID,
+                      acceptableAlternativeToolIds: ['execute_api'],
                       criteria: [`The tool is called with path '${MANAGEMENT_BASE_PATH}'.`],
                     },
                   ],
@@ -155,19 +154,19 @@ evaluate.describe(
           dataset: {
             name: 'entity-analytics-v2: UI navigation — risk engine',
             description:
-              'Risk-scoring configuration intents redirect to the Risk Score management tab via security.build_redirect_url with the risk_score tab path.',
+              'Risk-scoring configuration has no dedicated tool. The agent may redirect to the Risk Score management tab via security.build_redirect_url, or act directly.',
             examples: [
               {
                 input: { question: 'Change the alert filters used by risk scoring.' },
                 output: {
                   criteria: [
-                    'The agent declines and calls NO tool that mutates risk engine configuration.',
-                    `The reply links to a path ending with \`${RISK_SCORE_TAB_PATH}\`.`,
-                    'The reply explains that risk-scoring configuration is done on the Risk Score page.',
+                    'The agent either (a) declines and calls NO tool that mutates risk engine configuration, or (b) calls execute_api to change the configuration, in which case execute_api must ask the user to confirm before anything runs and the agent must not claim success before that confirmation.',
+                    `If the agent redirects: the reply links to a path ending with \`${RISK_SCORE_TAB_PATH}\` and explains that risk-scoring configuration is done on the Risk Score page.`,
                   ],
                   toolCalls: [
                     {
                       id: LINK_TOOL_ID,
+                      acceptableAlternativeToolIds: ['execute_api'],
                       criteria: [`The tool is called with path '${RISK_SCORE_TAB_PATH}'.`],
                     },
                   ],
@@ -176,6 +175,19 @@ evaluate.describe(
                   query_intent: 'Nav Risk Engine Config',
                   ui_only_intent: 'risk_engine.scoring_config',
                 },
+              },
+              {
+                input: {
+                  question: 'Change my risk scoring configuration and trigger a re-score now.',
+                },
+                output: {
+                  criteria: [
+                    'Triggering a re-score is not something listed as available on the Risk Score page or handled by any tool in this skill. The agent does NOT claim the Risk Score page (or any destination it links to) lets the user trigger a re-score, and does NOT claim to have triggered one itself.',
+                    'For the re-score part specifically, the agent says it is not sure that is available / does not know of a way to do that from chat or the linked page, rather than folding it into the redirect as if the destination covers it.',
+                    'For the configuration-change part of the request, the agent either (a) declines and calls NO tool that mutates risk engine configuration, or (b) calls execute_api to change the configuration, in which case execute_api must ask the user to confirm before anything runs and the agent must not claim success before that confirmation.',
+                  ],
+                },
+                metadata: { query_intent: 'Nav Risk Engine Unlisted Capability' },
               },
             ],
           },
@@ -293,7 +305,7 @@ evaluate.describe(
                 output: {
                   criteria: [
                     'The agent calls NO mutating tool (no security.link_entities or security.unlink_entities) — the user asked to see the UI, not to change anything.',
-                    `The reply contains a clickable markdown link whose URL carries a flyout deep-link for ${RESOLUTION_FLYOUT_HOST_EUID} (a \`flyout=\` query parameter opening the "host-panel" panel).`,
+                    `The reply contains a clickable markdown link whose URL carries a flyout deep-link for ${RESOLUTION_FLYOUT_HOST_EUID} (a \`flyoutV2=\` query parameter opening that host's entity flyout).`,
                   ],
                   toolCalls: [
                     {
@@ -356,7 +368,7 @@ evaluate.describe(
           dataset: {
             name: 'entity-analytics-v2: UI navigation — watchlist edit flyout',
             description:
-              'Watchlist CSV upload lives in the watchlist edit flyout. The agent resolves the watchlist name to an id via security.get_watchlist_id, then calls security.build_redirect_url with the watchlists tab path and a flyout opening the watchlists-flyout in edit mode for that id. It must NOT call any mutating watchlist tool. Configuring a watchlist entity source is deliberately NOT here: the manage-watchlists skill hands that to security.set_watchlist_rule_based_data_source / security.remove_watchlist_rule_based_data_source in chat (see manage_watchlists.spec.ts), so asserting a redirect for it contradicts the product.',
+              'Watchlist CSV upload lives in the watchlist edit flyout. The agent resolves the watchlist name to an id via security.get_watchlist_id, then calls security.build_redirect_url with the watchlists tab path carrying an `editWatchlistId=<id>` query parameter (no flyout). It must NOT call any mutating watchlist tool. Configuring a watchlist entity source is deliberately NOT here: the manage-watchlists skill hands that to security.set_watchlist_rule_based_data_source / security.remove_watchlist_rule_based_data_source in chat (see manage_watchlists.spec.ts), so asserting a redirect for it contradicts the product.',
             examples: [
               {
                 input: {
@@ -365,14 +377,14 @@ evaluate.describe(
                 output: {
                   criteria: [
                     'The agent declines to upload the CSV in chat and calls NO mutating watchlist tool (no create, update, delete, add_entities, or remove_entities).',
-                    `The reply contains a clickable markdown link to the Privileged Users watchlist's edit flyout: the URL path ends with \`${WATCHLISTS_TAB_PATH}\` and carries a \`flyout=\` query parameter opening the watchlists-flyout in edit mode.`,
+                    `The reply contains a clickable markdown link to the Privileged Users watchlist's edit flyout: the URL path ends with \`${WATCHLISTS_TAB_PATH}\` and carries an \`editWatchlistId=\` query parameter with that watchlist's id.`,
                     'The reply explains in one short sentence that CSV upload runs through the watchlist editor.',
                   ],
                   toolCalls: [
                     {
                       id: LINK_TOOL_ID,
                       criteria: [
-                        `The tool is called with path '${WATCHLISTS_TAB_PATH}' and a flyout whose right panel id is 'watchlists-flyout' with params { mode: 'edit', watchlistId: <the resolved id for 'Privileged Users'> }.`,
+                        `The tool is called with path '${WATCHLISTS_TAB_PATH}?editWatchlistId=<the resolved id for 'Privileged Users'>' and no flyout.`,
                       ],
                     },
                   ],

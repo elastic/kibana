@@ -33,6 +33,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { Loading } from '../../../../agents/components';
 import { useGetSettings } from '../../../../../hooks';
 import type { AgentPolicy } from '../../../../../../../../common';
+import { canAddToAgentPolicy } from '../../../../../../../../common/services';
 import { CreatePackagePolicySinglePage } from '../../../create_package_policy_page/single_page_layout';
 import { useAvailablePackages } from '../../../../../../integrations/sections/epm/screens/home/hooks/use_available_packages';
 import { PackageIcon } from '../../../../../../../components';
@@ -58,8 +59,10 @@ export const AddIntegrationFlyout: React.FunctionComponent<{
   });
 
   const options = useMemo(() => {
+    // Assets-only and documentation-only packages have nothing to configure on an agent policy
     return filteredCards
       .filter((pkg) => ['integration', 'input'].includes(pkg.type ?? ''))
+      .filter(canAddToAgentPolicy)
       .map((pkg) => ({
         label: pkg.title,
         value: pkg.name,

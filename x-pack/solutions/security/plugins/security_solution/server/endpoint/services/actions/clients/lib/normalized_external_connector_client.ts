@@ -13,7 +13,7 @@ import type { Logger } from '@kbn/logging';
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
 import { once } from 'lodash';
 import type { RelatedSavedObjects } from '@kbn/actions-plugin/server/lib';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { brandSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { stringify } from '../../../../utils/stringify';
 import { ResponseActionsClientError, ResponseActionsConnectorNotConfiguredError } from '../errors';
 
@@ -141,7 +141,7 @@ export class NormalizedExternalConnectorClient {
     };
 
     if (this.isUnsecuredActionsClient(this.connectorsClient)) {
-      const spaceId = this.options?.spaceId ?? DEFAULT_SPACE_ID;
+      const spaceId = brandSpaceId(this.options?.spaceId ?? DEFAULT_SPACE_ID);
 
       this.log.debug(
         `Executing  action [${params.subAction}] of connector [${connectorTypeId}] (unsecured) in space [${this.options?.spaceId}]`
@@ -171,11 +171,12 @@ export class NormalizedExternalConnectorClient {
   protected async getAll(): ReturnType<ActionsClient['getAll']> {
     this.ensureSetupDone();
     if (this.isUnsecuredActionsClient(this.connectorsClient)) {
-      if (!this.options?.spaceId) {
+      const spaceId = this.options?.spaceId;
+      if (!spaceId) {
         throw new ResponseActionsClientError('options.spaceId is required');
       }
 
-      return this.connectorsClient.getAll(this.options.spaceId);
+      return this.connectorsClient.getAll(brandSpaceId(spaceId));
     }
 
     return this.connectorsClient.getAll();

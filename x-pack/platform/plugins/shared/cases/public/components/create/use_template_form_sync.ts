@@ -12,7 +12,7 @@ import { useFormContext, useFormData } from '@kbn/es-ui-shared-plugin/static/for
 import type { ParsedTemplate } from '../../../common/types/domain/template/v1';
 import { CASE_EXTENDED_FIELDS, NONE_CONNECTOR_ID } from '../../../common/constants';
 import { ConnectorTypes } from '../../../common/types/domain';
-import type { CaseConnectorWithoutName } from '../../../common/types/domain_zod/connector/v1';
+import type { CaseConnectorWithoutName } from '../../../common/types/domain/connector/v1';
 import { useGetTemplate } from '../templates_v2/hooks/use_get_template';
 import {
   buildExtendedFieldsDefaults,
@@ -24,7 +24,7 @@ import { useGetSupportedActionConnectors } from '../../containers/configure/use_
 import { useGetAllCaseConfigurations } from '../../containers/configure/use_get_all_case_configurations';
 import { getConfigurationByOwner } from '../../containers/configure/utils';
 import { getSpaceExtractObservables } from './utils';
-import { isObservablesExtractionBlocked } from '../../../common/utils/case_settings';
+import { canStoreExtractObservablesTrue } from '../../../common/utils/case_settings';
 
 /**
  * Values a template applies by default and reverts to when it stops applying them. Sync alerts
@@ -214,11 +214,12 @@ export const useTemplateFormSync = (
       owner: caseOwner,
     })
   );
-  // Apply the owner-level gate: blocked owners (e.g. Observability) never extract observables,
-  // regardless of the space configuration or what a partial template settings block omits.
-  const effectiveExtractObservables = isObservablesExtractionBlocked(caseOwner ?? '')
-    ? false
-    : spaceExtractObservables;
+  // Apply the owner-level gate: owners that cannot store true (Stack, Observability) never extract
+  // observables, regardless of the space configuration or what a partial template settings block
+  // omits.
+  const effectiveExtractObservables = canStoreExtractObservablesTrue(caseOwner ?? '')
+    ? spaceExtractObservables
+    : false;
   const appliedRef = useRef<string | undefined>(undefined);
   // Track whether the applied template set the connector / settings, so switching or clearing only
   // reverts what a template actually changed (preserving the configuration's default connector).

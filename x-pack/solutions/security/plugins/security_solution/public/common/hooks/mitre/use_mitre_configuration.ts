@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_MITRE_FRAMEWORK } from '@kbn/security-mitre-attack-common';
 import type {
   MitreEntitySummaryBuckets,
   MitreEntitySummaryCollection,
@@ -33,6 +34,13 @@ export const useMitreConfiguration = (
   // Feature flag from the mitreAttack plugin start contract: true → use managed API.
   const isManagedSourceEnabled = services.mitreAttack?.isEnabled ?? false;
 
+  // The bundled legacy blob is ATT&CK Enterprise only; refuse other frameworks rather than
+  // serving Enterprise data under another framework's name.
+  const isUnsupportedLegacyFramework =
+    !isManagedSourceEnabled &&
+    params?.framework !== undefined &&
+    params.framework !== DEFAULT_MITRE_FRAMEWORK;
+
   // Exactly one of the two queries below is enabled at a time.
   // Both produce the same MitreEntitySummaryBuckets shape, so consumers don't branch.
   const managedQuery = useFetchMitreEntitiesQuery(services.http, params ?? {}, {
@@ -42,7 +50,7 @@ export const useMitreConfiguration = (
   // Legacy path: loads the bundled blob via lazy import. Goes away when the blob is removed.
   // Only `types` is meaningful here; the blob is one framework/version with no revoked/deprecated data.
   const legacyQuery = useFetchLegacyMitreQuery(params?.types, {
-    enabled: !isManagedSourceEnabled,
+    enabled: !isManagedSourceEnabled && !isUnsupportedLegacyFramework,
   });
 
   const activeQuery = isManagedSourceEnabled ? managedQuery : legacyQuery;
@@ -63,12 +71,17 @@ export const useMitreConfiguration = (
     !managedQuery.isError &&
     managedQuery.data?.framework_version === undefined;
 
-  if (activeQuery.isError || !activeQuery.data || isEmptyManagedResponse) {
+  if (
+    activeQuery.isError ||
+    !activeQuery.data ||
+    isEmptyManagedResponse ||
+    isUnsupportedLegacyFramework
+  ) {
     return {
       ...EMPTY_BUCKETS,
       frameworkVersion: undefined,
-      isLoading: activeQuery.isLoading,
-      isError: activeQuery.isError || isEmptyManagedResponse,
+      isLoading: isUnsupportedLegacyFramework ? false : activeQuery.isLoading,
+      isError: activeQuery.isError || isEmptyManagedResponse || isUnsupportedLegacyFramework,
     };
   }
 

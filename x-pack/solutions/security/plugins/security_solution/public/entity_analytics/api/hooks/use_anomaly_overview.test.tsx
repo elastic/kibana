@@ -59,4 +59,43 @@ describe('useAnomalyOverview', () => {
     const [callArg] = mockFetchAnomalyOverview.mock.calls[0];
     expect(callArg.context).toBeUndefined();
   });
+
+  it('sends no body in single mode when no filters are set', async () => {
+    renderHook(
+      () => useAnomalyOverview({ entityId: 'host-1', entityType: 'host', mode: 'single' }),
+      { wrapper: TestWrapper }
+    );
+
+    await waitFor(() =>
+      expect(mockFetchAnomalyOverview).toHaveBeenCalledWith(
+        expect.objectContaining({ entityId: 'host-1', entityType: 'host', body: undefined })
+      )
+    );
+  });
+
+  it('sends the resolved mode in the body so the server covers the resolution group', async () => {
+    renderHook(
+      () => useAnomalyOverview({ entityId: 'host-1', entityType: 'host', mode: 'resolved' }),
+      { wrapper: TestWrapper }
+    );
+
+    await waitFor(() =>
+      expect(mockFetchAnomalyOverview).toHaveBeenCalledWith(
+        expect.objectContaining({
+          entityId: 'host-1',
+          entityType: 'host',
+          body: expect.objectContaining({ mode: 'resolved' }),
+        })
+      )
+    );
+  });
+
+  it('does not fetch when no entity id is provided', async () => {
+    const { result } = renderHook(() => useAnomalyOverview({ entityId: '', entityType: 'host' }), {
+      wrapper: TestWrapper,
+    });
+
+    expect(result.current.fetchStatus).toBe('idle');
+    expect(mockFetchAnomalyOverview).not.toHaveBeenCalled();
+  });
 });

@@ -73,6 +73,10 @@ export enum ProductFeatureSecurityKey {
    */
   endpointCustomYaraSignatures = 'endpoint_custom_yara_signatures',
   /**
+   * Enables Registry credential hardening in the Elastic Defend policy (Endpoint Complete tier).
+   */
+  endpointRegistryCredentialHardening = 'endpoint_registry_credential_hardening',
+  /**
    * Enables all of endpoint's supported response actions - like host isolation, file operations,
    * process operations, command execution, etc.
    */

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
+import type { TimelineNonEcsData } from '@kbn/securitysolution-timeline-common';
 import { useMemo } from 'react';
 
 export const getMappedNonEcsValue = ({

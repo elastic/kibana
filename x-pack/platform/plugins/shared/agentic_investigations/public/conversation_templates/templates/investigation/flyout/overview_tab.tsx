@@ -14,10 +14,11 @@ import {
   type OverviewSlotRenderProps,
 } from '@kbn/agentic-investigations-common';
 import type { Investigation } from '../../../../../common';
-import { HypothesesList } from '../../../../hypotheses/attachments/hypotheses_view';
+import { HypothesisTreeCard } from '../../../../hypotheses/tree/hypothesis_tree_card';
 import { ImpactContent } from '../../../../impact/attachments/impact_view';
 import { SubjectList } from '../../../../subjects/attachments/subject_view';
 import { useInvestigation } from '../../../../investigations/hooks/use_investigation';
+import { getInvestigationDisplayTitle } from '../to_view_model';
 
 const readMetadataString = (value: unknown): string | undefined =>
   typeof value === 'string' && value.trim().length > 0 ? value : undefined;
@@ -36,6 +37,7 @@ export const toOverviewSections = (
       impact.evidence !== undefined ||
       impact.entities.length > 0);
   const hypotheses = investigation?.hypotheses?.hypotheses ?? [];
+  const conclusion = readMetadataString(investigation?.metadata.verdict) ?? fallbackVerdict;
 
   return {
     subjects: subjects.length > 0 ? <SubjectList subjects={subjects} /> : undefined,
@@ -48,10 +50,20 @@ export const toOverviewSections = (
         onOpenEntity={onOpenEntity}
       />
     ) : undefined,
-    conclusion: readMetadataString(investigation?.metadata.verdict) ?? fallbackVerdict,
-    trace:
-      hypotheses.length > 0 ? (
-        <HypothesesList hypotheses={hypotheses} variant="details" />
+    conclusion,
+    reasoning:
+      investigation && hypotheses.length > 0 ? (
+        <HypothesisTreeCard
+          input={{
+            id: investigation.id,
+            title: getInvestigationDisplayTitle(investigation),
+            subjects,
+            hypotheses,
+            conclusion,
+            proposals: investigation.proposals,
+            isRunning: investigation.in_progress,
+          }}
+        />
       ) : undefined,
   };
 };
@@ -86,6 +98,13 @@ export const InvestigationOverview: React.FC<
     [data, conversation.metadata?.verdict, onOpenEntity]
   );
 
+  // The skeleton only stands in for an empty overview. Once there is anything to read, such as
+  // when an agent resumes after a proposal is decided, the header's running state is enough.
+  const hasFindings =
+    Boolean(investigation.summary?.trim()) ||
+    Object.values(sections).some(Boolean) ||
+    (data?.proposals.length ?? 0) > 0;
+
   return (
     <OverviewTab
       investigation={investigation}
@@ -94,6 +113,7 @@ export const InvestigationOverview: React.FC<
       proposedActionsContent={proposedActionsContent}
       proposedActionsCount={proposedActionsCount}
       sections={sections}
+      showLoadingSection={(data?.in_progress ?? false) && !hasFindings}
     />
   );
 };

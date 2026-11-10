@@ -111,8 +111,12 @@ const dedupContextDataset: EvaluationDataset<DedupContextExample> = {
           id: 'checkout-service',
           title: 'Checkout API',
           description: 'Checkout API service handling checkout requests',
+          type: 'entity',
+          subtype: 'service',
+          properties: { name: 'checkout-api' },
           // Feature confidence is 0-100; the hit is handed to the model verbatim.
           confidence: 99,
+          sources: ['checkout-logs'],
         },
       },
       output: {
@@ -172,8 +176,7 @@ evaluate.describe(
     const failOnMissingSnapshot = hasExplicitDatasetSelection(process.env.SIGEVENTS_DATASET);
     const availableSnapshotsBySource = new Map<string, Set<string>>();
 
-    evaluate.beforeAll(async ({ esClient, kbnClient, log, uiSettings }) => {
-      await uiSettings.set({ 'agentBuilder:experimentalFeatures': true });
+    evaluate.beforeAll(async ({ esClient, kbnClient, log }) => {
       await kbnClient.request({
         path: '/internal/core/_settings',
         method: 'PUT',
@@ -195,8 +198,7 @@ evaluate.describe(
       snapshots.forEach((v, k) => availableSnapshotsBySource.set(k, v));
     });
 
-    evaluate.afterAll(async ({ kbnClient, uiSettings }) => {
-      await uiSettings.unset('agentBuilder:experimentalFeatures');
+    evaluate.afterAll(async ({ kbnClient }) => {
       await kbnClient.request({
         path: '/internal/core/_settings',
         method: 'PUT',

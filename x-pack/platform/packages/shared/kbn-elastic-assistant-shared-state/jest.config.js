@@ -17,7 +17,7 @@ module.exports = {
     '!<rootDir>/x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/*.d.ts',
     '!<rootDir>/x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/*.config.ts',
   ],
-  preset: '@kbn/test',
+  preset: '@kbn/jest',
   rootDir: '../../../../..',
   roots: ['<rootDir>/x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state'],
 };

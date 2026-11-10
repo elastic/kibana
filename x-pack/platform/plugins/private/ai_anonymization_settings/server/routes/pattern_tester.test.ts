@@ -213,11 +213,25 @@ describe('registerPatternTesterRoute', () => {
     );
   });
 
+  // A rule saved before custom patterns moved to RE2 can be tested like it runs: on the engine it
+  // always used. The editor still requires RE2 syntax for new patterns.
+  it('tests a pattern that only the previous engine supports, like the request path runs it', async () => {
+    const { handler } = setup();
+
+    const response = await callHandler(handler, {
+      input: { contact: 'foobar' },
+      rules: [{ type: 'RegExp', enabled: true, entityClass: 'MISC', pattern: 'foo(?=bar)' }],
+    });
+
+    expect(response.customError).not.toHaveBeenCalled();
+    expect(response.ok).toHaveBeenCalled();
+  });
+
   it('returns a 400 when the pattern exceeds the worker timeout', async () => {
     const { handler } = setup();
     jest
       .spyOn(RegexWorkerService.prototype, 'run')
-      .mockRejectedValueOnce(new Error('Regex anonymization task timed out'));
+      .mockRejectedValueOnce(new Error('Anonymization patterns timed out after 15s'));
 
     const response = await callHandler(handler, {
       input: { contact: 'x' },

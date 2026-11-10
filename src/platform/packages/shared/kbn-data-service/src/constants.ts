@@ -34,4 +34,4 @@ export const UI_SETTINGS = {
   DATEFORMAT_TZ: 'dateFormat:tz',
 } as const;
 
-export const DEFAULT_HISTOGRAM_BAR_TARGET = 100;
+export const DEFAULT_HISTOGRAM_BAR_TARGET = 50;

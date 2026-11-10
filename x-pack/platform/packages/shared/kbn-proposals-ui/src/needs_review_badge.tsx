@@ -21,18 +21,21 @@ export interface ProposedActionStatusBadgeProps {
   label?: string;
   /** Swaps the icon for a spinner, for a decision that is still being submitted. */
   isLoading?: boolean;
+  /** Greyed-out look, for a state the user can do nothing about while it settles. */
+  isDisabled?: boolean;
 }
 
 export const ProposedActionStatusBadge = ({
   color = 'primary',
-  iconType = 'clock',
+  iconType = 'eye',
   label = APPROVAL_MODAL_TRANSLATIONS.needsReviewBadge,
   isLoading = false,
+  isDisabled = false,
 }: ProposedActionStatusBadgeProps) => {
   const { euiTheme } = useEuiTheme();
 
   return (
-    <EuiBadge color={color} iconType={isLoading ? undefined : iconType}>
+    <EuiBadge color={color} iconType={isLoading ? undefined : iconType} isDisabled={isDisabled}>
       {isLoading && (
         <EuiLoadingSpinner
           size="s"

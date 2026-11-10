@@ -14,12 +14,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 const getHeaderText = (createMode: boolean) =>
   createMode ? (
     <FormattedMessage
-      id="xpack.search.queryRulesetDetail.queryRuleFlyoutTitle.create"
+      id="xpack.queryRules.queryRulesetDetail.queryRuleFlyoutTitle.create"
       defaultMessage="Create rule"
     />
   ) : (
     <FormattedMessage
-      id="xpack.search.queryRulesetDetail.queryRuleFlyoutTitle.edit"
+      id="xpack.queryRules.queryRulesetDetail.queryRuleFlyoutTitle.edit"
       defaultMessage="Edit rule"
     />
   );
@@ -34,7 +34,7 @@ export const QueryRuleFlyoutHeader: React.FC<QueryRuleFlyoutHeaderProps> = ({
   ruleId,
 }) => {
   const ruleIdTooltipContent = i18n.translate(
-    'xpack.search.queryRulesetDetail.queryRuleFlyout.ruleIdTooltip',
+    'xpack.queryRules.queryRulesetDetail.queryRuleFlyout.ruleIdTooltip',
     {
       defaultMessage:
         'The unique identifier of the query rule within the specified ruleset to retrieve',
@@ -54,7 +54,7 @@ export const QueryRuleFlyoutHeader: React.FC<QueryRuleFlyoutHeaderProps> = ({
             <EuiFlexItem grow={false}>
               <FormattedMessage
                 defaultMessage="Rule ID: {ruleId}"
-                id="xpack.search.queryRulesetDetail.queryRuleFlyout.ruleId"
+                id="xpack.queryRules.queryRulesetDetail.queryRuleFlyout.ruleId"
                 values={{ ruleId }}
               />
             </EuiFlexItem>

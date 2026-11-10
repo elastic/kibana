@@ -1,6 +1,7 @@
 name: Close stale failed-test issues
 
-# Daily sweep that closes `failed-test` issues created by kibanamachine when
+# Daily sweep that closes `failed-test` issues created by kibanamachine, or by
+# the Vault GitHub plugin app that issues CI's short-lived tokens, when
 # they have had no activity for 21 days. Any activity that updates the issue
 # (a new failure comment, a human comment, an edit) restarts the countdown.
 #
@@ -39,7 +40,7 @@ jobs:
           script: |
             const LABEL = 'failed-test';
             const EXCLUDED_LABELS = ['skipped-test'];
-            const CREATOR = 'kibanamachine';
+            const CREATORS = ['kibanamachine', 'elastic-vault-github-plugin-prod[bot]'];
             const DAYS_UNTIL_CLOSE = 21;
             // Drain the backlog gradually to avoid rate limits and a
             // notification storm on the first runs
@@ -50,14 +51,20 @@ jobs:
             const getLabels = (item) =>
               item.labels.map((label) => (typeof label === 'string' ? label : label.name));
 
-            const items = await github.paginate(github.rest.issues.listForRepo, {
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              state: 'open',
-              labels: LABEL,
-              creator: CREATOR,
-              per_page: 100,
-            });
+            // `creator` takes a single login, so list each creator's issues in turn
+            const items = [];
+            for (const creator of CREATORS) {
+              items.push(
+                ...(await github.paginate(github.rest.issues.listForRepo, {
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  state: 'open',
+                  labels: LABEL,
+                  creator,
+                  per_page: 100,
+                }))
+              );
+            }
 
             let closed = 0;
             for (const item of items) {
@@ -117,5 +124,5 @@ jobs:
               core.info(`Closed #${item.number} (updated ${item.updated_at}): ${item.title}`);
             }
             core.info(
-              `Checked ${items.length} open "${LABEL}" issue(s) created by ${CREATOR}, closed ${closed}${dryRun ? ' (dry run)' : ''}`
+              `Checked ${items.length} open "${LABEL}" issue(s) created by ${CREATORS.join(' or ')}, closed ${closed}${dryRun ? ' (dry run)' : ''}`
             );

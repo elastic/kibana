@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import {
-  ADD_INTEGRATION_BTN,
-  MODAL_CONFIRMATION_TITLE,
-  SAVE_AND_CONTINUE_BTN,
-} from '../screens/integrations';
+import { MODAL_CONFIRMATION_TITLE, SAVE_AND_CONTINUE_BTN } from '../screens/integrations';
 
 export const installIntegration = () => {
-  cy.get(ADD_INTEGRATION_BTN).click();
   cy.url({ timeout: 60000 }).should('include', '/add-integration');
 
   cy.get(SAVE_AND_CONTINUE_BTN, { timeout: 30000 })

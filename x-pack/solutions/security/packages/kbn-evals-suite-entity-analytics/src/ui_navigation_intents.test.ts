@@ -42,7 +42,8 @@ const DECLARED_INTENTS = [...specSource.matchAll(/ui_only_intent:\s*'([^']+)'/g)
   (match) => match[1]
 );
 
-const EXAMPLE_COUNT = [...specSource.matchAll(/\binput:\s*\{\s*question:/g)].length;
+// Examples that do not assert a redirect (no LINK_TOOL_ID tool call) may omit the intent.
+const EXAMPLE_COUNT = [...specSource.matchAll(/\bid:\s*LINK_TOOL_ID/g)].length;
 
 const UI_ONLY_IDS = new Set<string>(UI_ONLY_NAVIGATION_INTENTS.map((intent) => intent.id));
 
@@ -52,7 +53,7 @@ describe('entity-analytics UI-navigation spec vs the product skill', () => {
     expect(QUESTIONS.length).toBeGreaterThan(0);
   });
 
-  it('declares metadata.ui_only_intent on every example', () => {
+  it('declares metadata.ui_only_intent on every redirect example', () => {
     expect(DECLARED_INTENTS).toHaveLength(EXAMPLE_COUNT);
   });
 

@@ -45,8 +45,8 @@ describe('snapshot restore completeness', () => {
     .replace('team-a', 'team-b')
     .replace('message: "version-one"', 'message: "version-two"');
 
-  const makeSourceDocument = (yaml: string): WorkflowProperties => {
-    const applied = applyYamlUpdate({ workflowYaml: yaml, zodSchema, triggerDefinitions });
+  const makeSourceDocument = async (yaml: string): Promise<WorkflowProperties> => {
+    const applied = await applyYamlUpdate({ workflowYaml: yaml, zodSchema, triggerDefinitions });
     if (!applied.updatedDataPatch.valid || applied.validationErrors.length > 0) {
       throw new Error(`Test fixture YAML is invalid: ${applied.validationErrors.join(', ')}`);
     }
@@ -84,14 +84,14 @@ describe('snapshot restore completeness', () => {
     return withBlock?.message;
   };
 
-  it('restores full YAML definition (steps, triggers, inputs, settings) from snapshot', () => {
-    const historicalDocument = makeSourceDocument(workflowYamlV1);
+  it('restores full YAML definition (steps, triggers, inputs, settings) from snapshot', async () => {
+    const historicalDocument = await makeSourceDocument(workflowYamlV1);
     const snapshotYaml = snapshotYamlFromDocument(historicalDocument);
 
-    const currentDocument = makeSourceDocument(workflowYamlV2);
+    const currentDocument = await makeSourceDocument(workflowYamlV2);
     expect(currentDocument.definition).not.toEqual(historicalDocument.definition);
 
-    const restored = restoreFromSnapshotYaml(snapshotYaml);
+    const restored = await restoreFromSnapshotYaml(snapshotYaml);
     expect(restored.validationErrors).toEqual([]);
     expect(restored.updatedDataPatch.valid).toBe(true);
     expect(restored.updatedDataPatch.tags).toEqual(['team-a']);
@@ -103,8 +103,8 @@ describe('snapshot restore completeness', () => {
     expect(restored.updatedDataPatch.yaml).toContain('name: comment');
   });
 
-  it('restores enabled state after an enable/disable toggle-only update', () => {
-    const source = makeSourceDocument(workflowYamlV1);
+  it('restores enabled state after an enable/disable toggle-only update', async () => {
+    const source = await makeSourceDocument(workflowYamlV1);
     const { patch } = applyFieldUpdates({ enabled: false }, source);
     const afterToggle = { ...source, ...patch };
 
@@ -112,15 +112,15 @@ describe('snapshot restore completeness', () => {
     expect(afterToggle.yaml).toContain('enabled: false');
 
     const snapshotYaml = snapshotYamlFromDocument(afterToggle);
-    const restored = restoreFromSnapshotYaml(snapshotYaml);
+    const restored = await restoreFromSnapshotYaml(snapshotYaml);
 
     expect(restored.validationErrors).toEqual([]);
     expect(restored.updatedDataPatch.enabled).toBe(false);
     expect(restored.updatedDataPatch.yaml).toContain('enabled: false');
   });
 
-  it('restores tags after a tag-only API update without a YAML body', () => {
-    const source = makeSourceDocument(workflowYamlV1);
+  it('restores tags after a tag-only API update without a YAML body', async () => {
+    const source = await makeSourceDocument(workflowYamlV1);
     const { patch } = applyFieldUpdates({ tags: ['team-a', 'security'] }, source);
     const afterTagUpdate = { ...source, ...patch };
 
@@ -129,14 +129,14 @@ describe('snapshot restore completeness', () => {
     expect(afterTagUpdate.yaml).toContain('security');
 
     const snapshotYaml = snapshotYamlFromDocument(afterTagUpdate);
-    const restored = restoreFromSnapshotYaml(snapshotYaml);
+    const restored = await restoreFromSnapshotYaml(snapshotYaml);
 
     expect(restored.validationErrors).toEqual([]);
     expect(restored.updatedDataPatch.tags).toEqual(['team-a', 'security']);
   });
 
-  it('logs yaml-only snapshots that include field-synced metadata', () => {
-    const source = makeSourceDocument(workflowYamlV1);
+  it('logs yaml-only snapshots that include field-synced metadata', async () => {
+    const source = await makeSourceDocument(workflowYamlV1);
     const { patch } = applyFieldUpdates({ enabled: false, tags: ['restored-tag'] }, source);
     const documentAfterWrite = { ...source, ...patch, version: 4 };
 
@@ -146,7 +146,7 @@ describe('snapshot restore completeness', () => {
     expect(loggedSnapshot.yaml).toContain('enabled: false');
     expect(loggedSnapshot.yaml).toContain('restored-tag');
 
-    const restored = restoreFromSnapshotYaml(loggedSnapshot.yaml);
+    const restored = await restoreFromSnapshotYaml(loggedSnapshot.yaml);
     expect(restored.updatedDataPatch.enabled).toBe(false);
     expect(restored.updatedDataPatch.tags).toEqual(['restored-tag']);
   });

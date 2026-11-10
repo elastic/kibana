@@ -16,22 +16,6 @@ import type { DecisionTreeSummary } from './store';
 import { workspacePathForTree } from './materialize';
 
 /**
- * A confirmed hypothesis in the investigator's structured output is what makes a path causal, and
- * therefore what separates reinforcing a branch from merely extending the tree.
- */
-const CONFIRMED_HYPOTHESIS_RE = /"status"\s*:\s*"confirmed"|\bstatus:\s*['"]?confirmed\b/i;
-
-export const deriveCausalConfirmed = (response: string): boolean =>
-  CONFIRMED_HYPOTHESIS_RE.test(response);
-
-/**
- * Decides whether this round seeds the tree or builds on it, using only trees the investigator
- * actually opened. A first version is still being established; a later version is a follow-up.
- */
-export const deriveTurnKind = (trees: DecisionTreeSummary[]): DecisionTreeTurnKind =>
-  trees.some((tree) => tree.version > 1) ? 'feedback_reinforcement' : 'initial_investigation';
-
-/**
  * Assembles the closing message handed to the reinforcement agent for one round. The
  * investigation itself is not in it: it reaches the agent as conversation history.
  */
@@ -39,19 +23,20 @@ export const buildReinforcementPrompt = ({
   trees,
   learnings,
   connectorNames,
-  response,
+  turnKind,
+  causalConfirmed = false,
 }: {
   trees: DecisionTreeSummary[];
   learnings: LearningRecord[];
   connectorNames: string[];
-  response: string;
-}): { message: string; turnKind: DecisionTreeTurnKind } => {
-  const turnKind = deriveTurnKind(trees);
+  turnKind: DecisionTreeTurnKind;
+  /** A follow-up whose causal check confirmed the cause reinforces the causal path; any other extends. */
+  causalConfirmed?: boolean;
+}): string => {
   const script = selectTurnScript({
     turnKind,
-    causalConfirmed: deriveCausalConfirmed(response),
-    // True only when the investigator read at least one tree file this round. Callers must pass
-    // that accessed subset — not every tree in the index.
+    causalConfirmed,
+    // Callers pass only the trees this investigation used, never every tree in the index.
     hasExistingTrees: trees.length > 0,
     tools: DECISION_TREE_PROMPT_TOOLS,
   });
@@ -64,7 +49,7 @@ export const buildReinforcementPrompt = ({
     return trees.some((tree) => learningSlug === tree.symptom);
   });
 
-  const message = buildTurnPrompt({
+  return buildTurnPrompt({
     editableTreePaths: trees.map(
       (tree) => `${tree.tree_id} — ${workspacePathForTree(tree.tree_id)}`
     ),
@@ -80,6 +65,4 @@ export const buildReinforcementPrompt = ({
     connectorNames,
     script,
   });
-
-  return { message, turnKind };
 };

@@ -307,7 +307,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                           <EuiCallOut
                             size="s"
                             title={i18n.translate(
-                              'workflowsManagement.stepExecutionDetails.inputAccessTitle',
+                              'workflows.stepExecutionDetails.inputAccessTitle',
                               {
                                 defaultMessage: 'Access this data in your workflow',
                               }
@@ -316,7 +316,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                             announceOnMount={false}
                           >
                             <FormattedMessage
-                              id="workflowsManagement.stepExecutionDetails.manualInputsAccessDescription"
+                              id="workflows.stepExecutionDetails.manualInputsAccessDescription"
                               defaultMessage="You can reference these values using {code}"
                               values={{
                                 code: <strong>{'{{ inputs.<field> }}'}</strong>,
@@ -363,7 +363,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                           <EuiCallOut
                             size="s"
                             title={i18n.translate(
-                              'workflowsManagement.stepExecutionDetails.inputAccessTitle',
+                              'workflows.stepExecutionDetails.inputAccessTitle',
                               {
                                 defaultMessage: 'Access this data in your workflow',
                               }
@@ -372,7 +372,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                             announceOnMount={false}
                           >
                             <FormattedMessage
-                              id="workflowsManagement.stepExecutionDetails.inputAccessDescription"
+                              id="workflows.stepExecutionDetails.inputAccessDescription"
                               defaultMessage="You can reference these values using {code}"
                               values={{
                                 code: (

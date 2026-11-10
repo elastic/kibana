@@ -24,5 +24,6 @@
     "@kbn/dev-utils",
     "@kbn/zod",
     "@kbn/connector-specs",
+    "@kbn/core-spaces-common",
   ],
 }

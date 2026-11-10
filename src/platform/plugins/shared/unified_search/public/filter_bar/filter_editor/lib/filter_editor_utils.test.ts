@@ -16,6 +16,9 @@ import {
   stubFields,
 } from '@kbn/data-plugin/common/stubs';
 import { toggleFilterNegated } from '@kbn/es-query';
+import { getDisplayValueFromFilter } from '@kbn/data-plugin/public';
+import type { FilterableSource } from '@kbn/data-source';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import {
   getFieldFromFilter,
   getFilterableFields,
@@ -207,6 +210,51 @@ describe('Filter editor utils', () => {
     it('should return true for exists filter without params', () => {
       const isValid = isFilterValid(stubIndexPattern, stubFields[0], existsOperator);
       expect(isValid).toBe(true);
+    });
+  });
+
+  describe('with the filterable source of an ES|QL query, which is not a data view', () => {
+    let esqlSource: FilterableSource;
+    const hostFilter = {
+      meta: {
+        index: 'esql-mock-@timestamp',
+        type: 'phrase',
+        key: 'host',
+        params: { query: 'web-01' },
+        negate: false,
+        disabled: false,
+        alias: null,
+      },
+      query: { match_phrase: { host: 'web-01' } },
+    };
+
+    beforeAll(async () => {
+      esqlSource = await createMockEsqlSource(
+        [
+          { name: 'host', type: 'string', esType: 'keyword', source: 'index' },
+          { name: 'message', type: 'string', esType: 'text', source: 'index' },
+          { name: 'bytes', type: 'number', esType: 'long', source: 'index' },
+        ],
+        [],
+        '@timestamp'
+      ).toFilterableSource();
+    });
+
+    it('offers the fields of the dataset to filter on', () => {
+      expect(getFilterableFields(esqlSource).map(({ name }) => name)).toEqual([
+        'host',
+        'message',
+        'bytes',
+        '@timestamp',
+      ]);
+    });
+
+    it('finds the field of a filter', () => {
+      expect(getFieldFromFilter(hostFilter, esqlSource)?.name).toBe('host');
+    });
+
+    it('displays the value of a filter on it, without a formatter', () => {
+      expect(getDisplayValueFromFilter(hostFilter, [esqlSource])).toBe('web-01');
     });
   });
 });

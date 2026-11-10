@@ -49,7 +49,7 @@ Authentication
 | `removeUserFromGroup` | Remove a user from a group. Parameters: `userId`, `groupId` (required). |
 | `listUsers` | List users with pagination only. Parameters: `limit`, `after`. Okta does not allow `sortBy` on list queries. |
 | `searchUsers` | Find users by `q`, `search`, or `filter` (do not combine `search` and `filter`). Parameters: `q`, `search`, `filter`, `limit`, `after`, `sortBy`, `sortOrder`. `sortBy` requires `search`. |
-| `getLogs` | Query System Log events. Parameters: `since`, `until`, `filter`, `q`, `limit`, `sortOrder`, `after`. |
+| `getLogs` | Query System Log events. Parameters: `since`, `until`, `filter`, `q`, `limit`, `sortOrder`, `after`. `q` accepts up to 10 space-separated keywords of at most 40 characters each. |
 
 ## Required permissions [okta-required-permissions]
 
