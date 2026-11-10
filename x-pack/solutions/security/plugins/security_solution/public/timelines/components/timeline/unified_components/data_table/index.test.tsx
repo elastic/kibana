@@ -11,7 +11,6 @@ import React from 'react';
 import { TimelineDataTable } from '.';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types';
 import { DataLoadingState } from '@kbn/unified-data-table';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { getColumnHeaders } from '../../body/column_headers/helpers';
@@ -50,7 +49,6 @@ const mockPaginatedDocumentFlyout = jest.fn((_props?: unknown) => (
 
 const updateSampleSizeSpy = jest.spyOn(timelineActions, 'updateSampleSize');
 
-jest.mock('@kbn/expandable-flyout');
 jest.mock('../../../../../flyout_v2/shared/components/flyout_provider', () => ({
   flyoutProviders: ({ children }: { children: React.ReactNode }) => children,
 }));
@@ -152,9 +150,6 @@ describe('unified data table', () => {
   let flyoutApi: ReturnType<typeof createFlyoutApiMock>;
 
   beforeEach(() => {
-    (useExpandableFlyoutApi as jest.Mock).mockReturnValue({
-      closeFlyout: jest.fn(),
-    });
     mockUiSettingsGet.mockReturnValue(false);
     flyoutApi = createFlyoutApiMock();
     jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);

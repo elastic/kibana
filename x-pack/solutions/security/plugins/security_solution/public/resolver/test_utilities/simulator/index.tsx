@@ -82,7 +82,6 @@ export class Simulator {
     history,
     filters,
     shouldUpdate,
-    useLegacyExpandableFlyout = false,
   }: {
     /**
      * A (mock) data access layer that will be used to create the Resolver store.
@@ -103,7 +102,6 @@ export class Simulator {
     history: HistoryPackageHistoryInterface;
     filters: TimeFilters;
     shouldUpdate: boolean;
-    useLegacyExpandableFlyout?: boolean;
   }) {
     // create the spy middleware (for debugging tests)
     this.spyMiddleware = spyMiddlewareFactory();
@@ -143,7 +141,6 @@ export class Simulator {
         indices={indices}
         filters={filters}
         shouldUpdate={shouldUpdate}
-        useLegacyExpandableFlyout={useLegacyExpandableFlyout}
         renderCellActions={cellActionRenderer}
       />
     );

@@ -44,7 +44,6 @@ describe('Host Summary Component', () => {
     hostName: 'testHostName',
     jobNameById: {},
     scopeId: 'default',
-    isFlyoutOpen: false,
   };
 
   beforeEach(() => {

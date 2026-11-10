@@ -111,7 +111,6 @@ export const MockResolver = React.memo((props: MockResolverProps) => {
                       indices={props.indices}
                       shouldUpdate={props.shouldUpdate}
                       filters={props.filters}
-                      useLegacyExpandableFlyout={props.useLegacyExpandableFlyout}
                       renderCellActions={props.renderCellActions}
                     />
                     <DetailsPanel

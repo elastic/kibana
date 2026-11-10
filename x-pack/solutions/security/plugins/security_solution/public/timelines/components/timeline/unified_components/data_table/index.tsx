@@ -20,7 +20,6 @@ import type {
   EuiDataGridCustomBodyProps,
   EuiDataGridProps,
 } from '@elastic/eui';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import {
   SECURITY_CELL_ACTIONS_DEFAULT,
   SECURITY_CELL_ACTIONS_DETAILS_FLYOUT,
@@ -28,7 +27,6 @@ import {
 import { createCellActionRenderer } from '../../../../../flyout_v2/shared/components/cell_actions';
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { JEST_ENVIRONMENT } from '../../../../../../common/constants';
-import { useOnExpandableFlyoutClose } from '../../../../../flyout/shared/hooks/use_on_expandable_flyout_close';
 import { selectTimelineById } from '../../../../store/selectors';
 import { RowRendererCount } from '../../../../../../common/api/timeline';
 import { EmptyComponent } from '../../../../../common/lib/cell_actions/helpers';
@@ -148,8 +146,6 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     const { historyKey: ambientFlyoutHistoryKey } = useFlyoutSessionContext();
 
     const [expandedDoc, setExpandedDoc] = useState<DataTableRecord & TimelineItem>();
-
-    const { closeFlyout } = useExpandableFlyoutApi();
 
     const showTimeCol = useMemo(() => !!dataView && !!dataView.timeFieldName, [dataView]);
 
@@ -274,16 +270,6 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       }
     }, [flyoutDocumentIndex, tableRows]);
 
-    const onCloseExpandableFlyout = useCallback(
-      (id: string) => {
-        setExpandedDoc((prev) => (!prev ? prev : undefined));
-        closePaginatedFlyout();
-      },
-      [closePaginatedFlyout]
-    );
-
-    useOnExpandableFlyoutClose({ callback: onCloseExpandableFlyout });
-
     const handleOnEventDetailPanelOpened = useCallback(
       (eventData: DataTableRecord & TimelineItem) => {
         if (isAttackDiscoveryRow(eventData)) {
@@ -313,11 +299,10 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             handleOnEventDetailPanelOpened(timelineDoc);
           }
         } else {
-          closeFlyout();
           setExpandedDoc(undefined);
         }
       },
-      [tableRows, handleOnEventDetailPanelOpened, closeFlyout]
+      [tableRows, handleOnEventDetailPanelOpened]
     );
 
     const onResizeDataGrid = useCallback<NonNullable<UnifiedDataTableProps['onResize']>>(
