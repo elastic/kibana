@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
@@ -13,7 +12,11 @@ import {
   isTemplateRequiredConnector,
   type EisInferenceEndpointMetadata,
 } from '@kbn/inference-common';
-import { SERVICE_PROVIDERS, ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
+import {
+  SERVICE_PROVIDERS,
+  ServiceProviderKeys,
+  type EisTaskType,
+} from '@kbn/inference-endpoint-ui-common';
 import type { EisInferenceEndpoint, CspRegion } from '../../common/types';
 import { EisModelStatus } from '../../common/types';
 import type { PolicyMode } from '../types';
@@ -43,18 +46,19 @@ export const isTemplateRequiredEisEndpoint = (endpoint: {
   metadata?: EisInferenceEndpointMetadata;
 }): boolean => isTemplateRequiredConnector(endpoint);
 
-export type TaskTypeCategory = 'LLM' | 'Embedding' | 'Rerank';
+export type TaskTypeCategory = 'LLM' | 'Embedding' | 'Rerank' | 'Decision';
 
-export const TASK_TYPE_CATEGORY: Partial<Record<InferenceTaskType, TaskTypeCategory>> = {
+export const TASK_TYPE_CATEGORY: Partial<Record<EisTaskType, TaskTypeCategory>> = {
   chat_completion: 'LLM',
   completion: 'LLM',
   text_embedding: 'Embedding',
   sparse_embedding: 'Embedding',
   embedding: 'Embedding',
   rerank: 'Rerank',
+  decision: 'Decision',
 };
 
-export const TASK_TYPE_DISPLAY_NAME: Record<InferenceTaskType, string> = {
+export const TASK_TYPE_DISPLAY_NAME: Record<EisTaskType, string> = {
   chat_completion: i18n.translate(
     'xpack.searchInferenceEndpoints.eisUtils.taskType.chatCompletion',
     { defaultMessage: 'chat completion' }
@@ -75,6 +79,9 @@ export const TASK_TYPE_DISPLAY_NAME: Record<InferenceTaskType, string> = {
   embedding: i18n.translate('xpack.searchInferenceEndpoints.eisUtils.taskType.embedding', {
     defaultMessage: 'embedding',
   }),
+  decision: i18n.translate('xpack.searchInferenceEndpoints.eisUtils.taskType.decision', {
+    defaultMessage: 'decision',
+  }),
 };
 
 export interface GroupedModel {
@@ -82,7 +89,7 @@ export interface GroupedModel {
   modelName: string;
   modelCreator: string;
   modelStatus: EisModelStatus;
-  taskTypes: InferenceTaskType[];
+  taskTypes: EisTaskType[];
   categories: TaskTypeCategory[];
   endpoints: EisInferenceEndpoint[];
   modelMetadata?: EisInferenceEndpointMetadata;
@@ -243,6 +250,12 @@ export const MODEL_TYPE_FILTERS: Array<{ key: TaskTypeCategory; label: string }>
     key: 'Rerank',
     label: i18n.translate('xpack.searchInferenceEndpoints.eisModelspage.filter.rerank', {
       defaultMessage: 'Rerank',
+    }),
+  },
+  {
+    key: 'Decision',
+    label: i18n.translate('xpack.searchInferenceEndpoints.eisModelspage.filter.decision', {
+      defaultMessage: 'Decision',
     }),
   },
 ];
