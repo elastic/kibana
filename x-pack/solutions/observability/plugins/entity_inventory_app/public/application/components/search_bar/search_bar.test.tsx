@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import moment from 'moment';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import type { Filter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -13,14 +14,15 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { StatefulSearchBarProps } from '@kbn/unified-search-plugin/public';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import type { EntityInventoryEntityCategory } from '../../types';
-import { ENTITY_INVENTORY_APP_NAME } from '../constants';
-import { EntityInventorySearchProvider } from '../context/search_context';
-import { MAX_TIME_RANGE_HINT, SEARCH_BAR_PLACEHOLDERS } from '../translations';
+import type { EntityInventoryEntityCategory } from '../../../types';
+import { ENTITY_INVENTORY_APP_NAME, ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS } from '../../constants';
+import { EntityInventorySearchProvider } from '../../context/search_context';
+import { QUICK_RANGES } from './quick_ranges';
+import { MAX_TIME_RANGE_HINT, SEARCH_BAR_PLACEHOLDERS } from '../../translations';
 import { EntityInventorySearchBar } from './search_bar';
 
 const mockDataView = jest.fn((): DataView | undefined => undefined);
-jest.mock('../hooks/use_entity_inventory_data_view', () => ({
+jest.mock('../../hooks/use_entity_inventory_data_view', () => ({
   useEntityInventoryDataView: () => ({ dataView: mockDataView() }),
 }));
 
@@ -96,6 +98,16 @@ describe('EntityInventorySearchBar', () => {
       })
     );
     expect(lastSearchBarProps().allowSavingQueries).toBeFalsy();
+  });
+
+  it('limits the legacy date picker to the maximum time range', () => {
+    renderSearchBar();
+
+    const { minDate, commonlyUsedRanges } = lastSearchBarProps().legacyDatePickerProps ?? {};
+    const expectedMinDate = moment().subtract(ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS, 'days');
+
+    expect(Math.abs(moment(minDate).diff(expectedMinDate))).toBeLessThan(5000);
+    expect(commonlyUsedRanges).toEqual(QUICK_RANGES);
   });
 
   it.each(['all', 'hosts', 'kubernetes'] as const)(
