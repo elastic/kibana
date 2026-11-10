@@ -39,6 +39,8 @@ export interface ScopedMaterializeClientDeps {
   logger: Logger;
   /** The user's search client. */
   search: Pick<IScopedSearchClient, 'esql'>;
+  /** Whether every index a pattern matches maps a field, checked as the user. */
+  hasField?: (indexPattern: string, field: string) => Promise<boolean>;
   /** The node's validation errors against the runtime's packs, with paths relative to the node. */
   validate: (node: MaterializedNode) => Promise<ValidationError[]>;
   /** The user's field formats and settings, read on first use. */
@@ -84,6 +86,7 @@ export const createScopedMaterializeClient = ({
   isEnabled,
   logger,
   search,
+  hasField,
   validate,
   getKitServices,
   kibanaVersion,
@@ -200,6 +203,7 @@ export const createScopedMaterializeClient = ({
           executeEsql: (request, requestContext, index) =>
             executeEsql(request, requestContext, index, {
               search,
+              hasField,
               abortSignal: scope.abortSignal,
               maxRows: maxRowsPerRequest,
               timeoutMs: dataRequestTimeoutMs,

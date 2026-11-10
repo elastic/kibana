@@ -17,14 +17,7 @@ import type { ConcreteColor } from '../kit/colors';
 import type { ChartColumnRole } from '../kit/types';
 import { collapseTable } from './collapse';
 import { applyLensFormats } from './formats';
-import {
-  collectColumns,
-  findColumn,
-  fixedColor,
-  lensLink,
-  timeFilterLoss,
-  toChartGlyph,
-} from './shared';
+import { collectColumns, findColumn, fixedColor, lensLink, toChartGlyph } from './shared';
 import type { LensMetricConfig, LensSavedObjectReference } from './types';
 
 type MetricValue = MetricNode['value'];
@@ -200,9 +193,7 @@ export const mapLensMetric = (
   kit: MaterializeKit,
   savedObject?: LensSavedObjectReference
 ): MaterializedNode => {
-  const losses: MaterializeLoss[] = [
-    ...timeFilterLoss(chart.data_source.query, kit.context, 'data_source'),
-  ];
+  const losses: MaterializeLoss[] = [];
   const primary = chart.metrics.find(isPrimary);
   const secondary = chart.metrics.find(isSecondary);
   if (!primary || !queried) {

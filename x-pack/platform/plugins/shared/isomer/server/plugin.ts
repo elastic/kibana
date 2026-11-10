@@ -20,6 +20,7 @@ import type { KibanaIsomerRuntime } from '@kbn/isomer';
 import { firstValueFrom } from 'rxjs';
 import { MATERIALIZE_FEATURE_FLAG } from '../common/constants';
 import { createScopedMaterializeClient } from './materialize/materialize_client';
+import { createHasField } from './materialize/has_field';
 import { createKitServices } from './materialize/kit/create_kit';
 import type { LensTransformOut } from './materialize/lens/materializer';
 import { LENS_TYPE, createLensMaterializer } from './materialize/lens/materializer';
@@ -86,6 +87,7 @@ export class IsomerPlugin
   private fieldFormats?: FieldFormatsStart;
   private embeddable?: EmbeddableStart;
   private uiSettings?: CoreStart['uiSettings'];
+  private elasticsearch?: CoreStart['elasticsearch'];
   private readonly registry = new MaterializerRegistry();
   private runtime?: Promise<KibanaIsomerRuntime>;
   private featureFlags?: CoreStart['featureFlags'];
@@ -121,6 +123,7 @@ export class IsomerPlugin
     this.fieldFormats = fieldFormats;
     this.embeddable = embeddable;
     this.uiSettings = core.uiSettings;
+    this.elasticsearch = core.elasticsearch;
     this.featureFlags = core.featureFlags;
     return {
       getRuntime: this.getRuntime,
@@ -143,8 +146,8 @@ export class IsomerPlugin
   };
 
   private readonly createClient = (scope: MaterializeScope): ScopedMaterializeClient => {
-    const { data, fieldFormats, uiSettings } = this;
-    if (!data || !fieldFormats || !uiSettings) {
+    const { data, fieldFormats, uiSettings, elasticsearch } = this;
+    if (!data || !fieldFormats || !uiSettings || !elasticsearch) {
       throw new Error('The isomer plugin materializes only after it starts.');
     }
     return createScopedMaterializeClient({
@@ -153,6 +156,7 @@ export class IsomerPlugin
       isEnabled: this.isMaterializeEnabled,
       logger: this.logger.get('materialize'),
       search: data.search.asScoped(scope.request),
+      hasField: createHasField(elasticsearch.client.asScoped(scope.request).asCurrentUser),
       getKitServices: () =>
         createKitServices(uiSettings.asScopedToClient(scope.savedObjectsClient), fieldFormats),
       validate: this.validateNode,

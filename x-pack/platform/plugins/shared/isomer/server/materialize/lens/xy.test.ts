@@ -156,7 +156,8 @@ describe('Lens xy mapping, against the corpus', () => {
   it('lets a reader brush a date x axis', () => {
     const node = asXy(map(corpusCases.hugePerDay.config, [corpusTable('hugePerDay')]));
     expect(node.interactions?.brush).toEqual({ column: 'day' });
-    expect(node.axes?.x?.scale).toBe('ordinal');
+    // The config says `ordinal`, but Kibana drew a time axis: Lens takes the scale from the column.
+    expect(node.axes?.x?.scale).toBe('temporal');
     expect(node.data.columns.map(({ id, role }) => [id, role])).toEqual([
       ['total', 'metric'],
       ['day', 'dimension'],

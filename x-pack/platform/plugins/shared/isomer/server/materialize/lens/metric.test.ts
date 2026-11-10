@@ -126,18 +126,6 @@ describe('Lens metric mapping, against the corpus', () => {
       valueSizing: 'auto',
     });
   });
-
-  it('records that the time range does not filter a query without ?_tstart', () => {
-    const { config } = corpusCases.signedAverage;
-    const node = asMetric(
-      map(config, [corpusTable('signedAverage')], {
-        timeRange: { from: '2024-01-01T00:00:00.000Z', to: '2024-01-08T00:00:00.000Z' },
-      })
-    );
-    expect(node.losses).toEqual([
-      expect.objectContaining({ path: 'data_source', kind: 'approximated' }),
-    ]);
-  });
 });
 
 describe('Lens metric mapping', () => {

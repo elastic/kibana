@@ -26,7 +26,6 @@ import {
   findColumn,
   fixedColor,
   lensLink,
-  timeFilterLoss,
   toChartGlyph,
 } from './shared';
 import type {
@@ -457,13 +456,6 @@ export const mapLensXy = (
   const queryLayers = xyQueryLayers(chart);
   const tableOf = new Map(queryLayers.map((layer, index) => [layer, tables[index]]));
 
-  queryLayers.forEach((layer) => {
-    const index = layers.indexOf(layer);
-    losses.push(
-      ...timeFilterLoss(layer.data_source.query, kit.context, `layers[${index}].data_source`)
-    );
-  });
-
   const dataLayers = layers.filter(isXyDataLayer);
   const parts = dataLayers.map((layer) => {
     const index = layers.indexOf(layer);
@@ -599,19 +591,21 @@ export const mapLensXy = (
     return undefined;
   };
   const usesY2 = mapped.some(({ layer }) => layer.y.some(({ axis }) => axis === 'y2'));
-  const xScale =
-    chart.axis?.x?.scale ??
-    (xColumn?.meta.type === 'date'
+  // Lens draws the x axis on the scale its column's type implies (`getScaleType`); the API's
+  // `axis.x.scale` only describes it. Without an x column, the configured scale stands.
+  const xScale = xColumn
+    ? xColumn.meta.type === 'date'
       ? 'temporal'
-      : xColumn?.meta.type === 'number'
+      : xColumn.meta.type === 'number'
       ? 'linear'
-      : 'ordinal');
+      : 'ordinal'
+    : chart.axis?.x?.scale;
   const xDomain = chart.axis?.x?.domain;
   const xInterval = xScale === 'ordinal' ? undefined : bucketInterval(xColumn);
   const axes: NodeAxes = {
     x: {
       ...axisOf(chart.axis?.x, xLabel),
-      scale: xScale,
+      ...(xScale ? { scale: xScale } : {}),
       ...(xInterval ? { interval: xInterval } : {}),
       ...(xDomain
         ? {

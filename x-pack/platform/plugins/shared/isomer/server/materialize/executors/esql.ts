@@ -6,7 +6,7 @@
  */
 
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
-import { appendLimitToQuery } from '@kbn/esql-utils';
+import { appendLimitToQuery, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { MaterializeContext } from '../../../common';
@@ -18,6 +18,8 @@ export interface EsqlExecutorDeps {
   abortSignal: AbortSignal;
   maxRows: number;
   timeoutMs: number;
+  /** Whether every index `indexPattern` matches maps `field`, checked as the user. */
+  hasField?: (indexPattern: string, field: string) => Promise<boolean>;
 }
 
 /** A request's table, and what the pipeline dropped from it. */
@@ -63,6 +65,20 @@ export const capRows = (table: Datatable, maxRows: number, index: number): Execu
   };
 };
 
+/** The field the time range filters on: the request's, else its default where every index maps it. */
+const resolveTimeField = async (
+  { query, timeField, defaultTimeField }: EsqlDataRequest,
+  hasField: EsqlExecutorDeps['hasField']
+): Promise<string | undefined> => {
+  if (timeField || !defaultTimeField || !hasField) {
+    return timeField;
+  }
+  const indexPattern = getIndexPatternFromESQLQuery(query);
+  return indexPattern && (await hasField(indexPattern, defaultTimeField))
+    ? defaultTimeField
+    : undefined;
+};
+
 /**
  * Runs an ES|QL request as the user, the way Lens's `esql` expression does: the context's time
  * range, filters, query and control values go through the search service's Kibana query context.
@@ -72,7 +88,7 @@ export const executeEsql = async (
   request: EsqlDataRequest,
   context: MaterializeContext,
   index: number,
-  { search, abortSignal, maxRows: pipelineMaxRows, timeoutMs }: EsqlExecutorDeps
+  { search, abortSignal, maxRows: pipelineMaxRows, timeoutMs, hasField }: EsqlExecutorDeps
 ): Promise<ExecutedTable> => {
   const maxRows = Math.min(request.maxRows ?? pipelineMaxRows, pipelineMaxRows);
   const controller = new AbortController();
@@ -87,6 +103,11 @@ export const executeEsql = async (
     controller.abort();
   }
   try {
+    // Only a default time field needs a lookup; otherwise the search starts in this tick.
+    const timeField =
+      request.timeField || !request.defaultTimeField
+        ? request.timeField
+        : await resolveTimeField(request, hasField);
     const { datatable } = await search.esql(
       {
         query: appendLimitToQuery(request.query, maxRows + 1),
@@ -95,7 +116,7 @@ export const executeEsql = async (
         locale: context.locale,
         kibanaQueryContext: {
           timeRange: context.timeRange,
-          timeField: request.timeField,
+          timeField,
           kibanaFilters: context.filters ?? [],
           kqlQuery: context.query,
           esqlVariables: context.esqlVariables,
