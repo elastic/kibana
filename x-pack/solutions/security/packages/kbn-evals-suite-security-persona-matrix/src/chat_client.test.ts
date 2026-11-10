@@ -317,15 +317,22 @@ describe('PersonaMatrixChatClient HITL prompts', () => {
     expect(result.steps).toEqual([preview, s2, s3]);
   });
 
-  it('throws once the confirmation chain exceeds the cap', async () => {
+  it('fails soft once the confirmation chain exceeds the cap', async () => {
     const fetch = jest.fn().mockResolvedValue({
       conversation_id: 'c1',
       response: { message: '', prompts: [confirmation('p1')] },
     });
 
-    await expect(createClient(fetch).query('q')).rejects.toThrow(/exceeded 3 auto-confirm/);
+    const result = await createClient(fetch).query('q');
+
     // 1 initial POST + MAX_AUTO_CONFIRM_ROUNDS continuations (withRetry does not retry this error)
     expect(fetch).toHaveBeenCalledTimes(1 + MAX_AUTO_CONFIRM_ROUNDS);
+    // The partial trajectory is preserved and the stuck-agent loop is recorded
+    // as an error on the scored row instead of aborting the whole suite.
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0].type).toBe('error');
+    expect(result.errors[0].error.message).toMatch(/exceeded 3 auto-confirm/);
+    expect(result.messages[0].message).toMatch(UNANSWERED_PROMPT_MARKER);
   });
 
   it('marks a round paused on ask_user_question instead of scoring an empty answer', async () => {

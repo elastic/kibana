@@ -46,6 +46,7 @@ import {
   createPersonaMatrixToolCallsEvaluator,
 } from './evaluators/trace_evaluators';
 import type { PersonaMatrixChatClient } from './chat_client';
+import { UNANSWERED_PROMPT_MARKER } from './chat_client';
 import {
   agentProfile as envAgentProfile,
   PERSONA_MATRIX_SUITE_IDS,
@@ -796,7 +797,33 @@ export function createEvaluatePersonaMatrixDataset({
           const input = example.input as PersonaMatrixExampleInput;
           const question = input?.question;
           if (!question) throw new Error('Missing question in example input');
-          const response = await chatClient.query(question, input?.attachment);
+          let response: Awaited<ReturnType<PersonaMatrixChatClient['query']>>;
+          try {
+            response = await chatClient.query(question, input?.attachment);
+          } catch (error) {
+            // Fail soft: one unreachable agent must not abort the whole suite. The
+            // executor has no per-example boundary, so a throw here discards every
+            // (example, rep) pair after it. Record the failure as a scored 'error'
+            // row instead.
+            const message = error instanceof Error ? error.message : String(error);
+            log.error(
+              `[persona-matrix] converse failed for example "${example.id ?? question}": ${message}`
+            );
+            return {
+              messages: [{ message: `${UNANSWERED_PROMPT_MARKER} converse failed: ${message}` }],
+              steps: [],
+              errors: [{ type: 'error' as const, error: { message } }],
+              traceId: null,
+              messageSource: 'response' as const,
+              sampling: { connectorId: '', temperature: null, topP: null, seed: null },
+              trajectoryFingerprint: '',
+              workflowAttachments: [],
+              rawResponse: '',
+              correctnessAnalysis: undefined,
+              groundednessAnalysis: undefined,
+              criteriaAnalysis: undefined,
+            };
+          }
 
           const taskOutput = {
             messages: response.messages,
