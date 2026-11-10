@@ -10,10 +10,11 @@ See the package README for the tab bar.
 
 ## Props
 
-- `title` — required `ReactNode`. Rendered as an `<h3>` with a generated id. That id labels the flyout (see the package README's [Labeling](../../README.md#labeling-and-the-flyout-menu-title)).
+- `title` — required `ReactNode`. Rendered in the `titleElement` heading with a generated id. That id labels the flyout (see the package README's [Labeling](../../README.md#labeling-and-the-flyout-menu-title)).
+- `titleElement` — the title's heading element, `h1` to `h6`, so the flyout fits the heading outline of the page it opens over. Defaults to `h3`. It sets the element only. The title's size is fixed by the template.
 - `titleIcon` — EUI icon type rendered after the title, in both the expanded and the compact layout. Without `titleTooltip`, it is decorative (`aria-hidden`).
 - `titleTooltip` — when set, the title icon becomes a focusable `EuiIconTip`. It uses `titleIcon` as its type, or `info` if `titleIcon` is not set.
-- `isLoading` — shows a loading spinner after the title and any title icon, in both the expanded and the compact layout. The spinner sits outside the `<h3>`, so it does not change the flyout's accessible name.
+- `isLoading` — shows a loading spinner after the title and any title icon, in both the expanded and the compact layout. The spinner sits outside the heading, so it does not change the flyout's accessible name.
 - `loadingLabel` — the spinner's accessible name, saying what is loading (for example, "Syncing attachments"). Without it, the spinner has EUI's generic "Loading" name.
 - `description` — arbitrary `ReactNode` rendered below the title in subdued text. It is not wrapped in a `<p>`, so block content is valid.
 - `collapsed` — always renders the compact layout, regardless of scroll position. See [Starting collapsed](#starting-collapsed).

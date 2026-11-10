@@ -61,10 +61,18 @@ export interface FlyoutBodyTabPanelProps {
   'data-test-subj'?: string;
 }
 
+/** Heading elements the header title can render as. */
+export type FlyoutHeaderTitleElement = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+
 /** Props for the declarative `FlyoutTemplate.Header` zone. */
 export interface FlyoutHeaderProps {
-  /** Title rendered by the header. Rendered as an `<h3>` (heading level is owned by the template). */
+  /** Title rendered by the header, in the heading element set by `titleElement`. */
   title: ReactNode;
+  /**
+   * Heading element for the title, to fit the flyout into the page's heading outline. Defaults to
+   * `h3`. The title's visual size does not depend on it.
+   */
+  titleElement?: FlyoutHeaderTitleElement;
   /**
    * Plain-text form of `title`, used to name the flyout in EUI's flyout menu. Set it when `title`
    * is a `ReactNode`. `flyoutMenuProps.title` wins when both are set. With a string `title`, it also

@@ -233,6 +233,7 @@ type HeaderZoneProps = FlyoutHeaderProps & {
 export const HeaderZone = ({
   title,
   titleText,
+  titleElement: TitleElement = 'h3',
   titleIcon,
   titleTooltip,
   isLoading = false,
@@ -318,13 +319,13 @@ export const HeaderZone = ({
               >
                 <EuiFlexItem grow={false} css={collapseStyles.collapsedTitleItem}>
                   <EuiTitle size="xs">
-                    <h3
+                    <TitleElement
                       id={flyoutTitleId}
                       css={[titleCss, collapseStyles.collapsedTitle]}
                       title={collapsedTitleText}
                     >
                       {title}
-                    </h3>
+                    </TitleElement>
                   </EuiTitle>
                 </EuiFlexItem>
                 {titleIconNode && <EuiFlexItem grow={false}>{titleIconNode}</EuiFlexItem>}
@@ -333,9 +334,9 @@ export const HeaderZone = ({
             ) : (
               renderTitleWithAdornments(
                 <EuiTitle size="m">
-                  <h3 id={flyoutTitleId} css={titleCss}>
+                  <TitleElement id={flyoutTitleId} css={titleCss}>
                     {title}
-                  </h3>
+                  </TitleElement>
                 </EuiTitle>,
                 titleIconNode,
                 titleLoadingNode
