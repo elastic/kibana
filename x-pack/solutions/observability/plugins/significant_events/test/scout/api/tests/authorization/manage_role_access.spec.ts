@@ -39,12 +39,11 @@ import {
   deleteQuery,
   fenceAutomaticOnboarding,
   getFeaturesEndpoint,
-  deleteSignificantEvent,
   executeTool,
   seedFeature,
   seedRuleBackedQuery,
-  seedSignificantEvent,
 } from '../../fixtures/built_in_role_access';
+import { deleteSignificantEvent, seedSignificantEvent } from '../../fixtures/rule_events';
 
 // No Kibana privilege besides Nightshift `all` and Agent Builder `read` (for the tools), and no
 // index privilege besides reading the data the source queries. Anything else Significant Events
@@ -104,7 +103,7 @@ for (const { name, label, role, canChangeSources } of ROLES) {
       apiTest.beforeAll(async ({ apiServices, esClient, kbnClient, samlAuth }) => {
         // Detection writes are rejected while Significant Events is paused.
         await apiServices.significantEventsTest.resumeSignificantEvents();
-        await seedSignificantEvent(esClient, eventId);
+        await seedSignificantEvent(esClient, eventId, { title: 'Built-in role access check' });
         ({
           id: sourceId,
           slug: sourceSlug,
