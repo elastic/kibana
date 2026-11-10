@@ -24,6 +24,8 @@ const mockGetStreamSamplingSource = jest.fn();
 const mockGetStreamTypeFromDefinition = jest.fn();
 const mockIdentifyInferredFeatures = jest.fn();
 const mockIdentifyComputedFeatures = jest.fn();
+const mockIdentifyMetricsEntities = jest.fn();
+const mockIsMetricsEntitiesEnabled = jest.fn();
 const mockShouldIdentifyFeatures = jest.fn();
 const mockResolveNightshiftModelForRequest = jest.fn(
   async ({ requestedId }: { requestedId?: string }) => requestedId ?? 'default-connector'
@@ -50,6 +52,14 @@ jest.mock('../../../../lib/significant_events/features/should_identify_features'
   shouldIdentifyFeatures: (...args: unknown[]) => mockShouldIdentifyFeatures(...args),
 }));
 
+jest.mock('../../../../lib/significant_events/metrics/identify_metrics_entities', () => ({
+  identifyMetricsEntities: (...args: never[]) => mockIdentifyMetricsEntities(...args),
+}));
+
+jest.mock('../../../../lib/feature_flags/is_metrics_entities_enabled', () => ({
+  isMetricsEntitiesEnabled: (...args: never[]) => mockIsMetricsEntitiesEnabled(...args),
+}));
+
 jest.mock('@kbn/nightshift-ai', () => ({
   ...jest.requireActual('@kbn/nightshift-ai'),
   resolveNightshiftModelForRequest: (options: { requestedId?: string }) =>
@@ -64,11 +74,16 @@ const inferredRoute =
   internalIdentifyKIFeaturesRoutes['POST /internal/streams/{sourceId}/features/_identify/inferred'];
 const computedRoute =
   internalIdentifyKIFeaturesRoutes['POST /internal/streams/{sourceId}/features/_identify/computed'];
+const metricsEntitiesRoute =
+  internalIdentifyKIFeaturesRoutes[
+    'POST /internal/streams/{sourceId}/features/_identify/metrics_entities'
+  ];
 const shouldIdentifyRoute =
   internalIdentifyKIFeaturesRoutes['GET /internal/streams/{sourceId}/features/_should_identify'];
 
 type InferredHandlerParams = Parameters<typeof inferredRoute.handler>[0];
 type ComputedHandlerParams = Parameters<typeof computedRoute.handler>[0];
+type MetricsEntitiesHandlerParams = Parameters<typeof metricsEntitiesRoute.handler>[0];
 type ShouldIdentifyHandlerParams = Parameters<typeof shouldIdentifyRoute.handler>[0];
 
 const createInferredParams = (
@@ -601,6 +616,37 @@ describe('computed feature identification route', () => {
         signal: expect.any(AbortSignal),
       })
     );
+  });
+});
+
+describe('metrics entity identification route', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('returns 404 without reading the source when the feature flag is off', async () => {
+    mockIsMetricsEntitiesEnabled.mockResolvedValue(false);
+    const sourcesGet = jest.fn();
+    const featureFlags = {};
+    const handlerParams = {
+      params: { path: { sourceId: 'metrics.test' } },
+      request: { spaceId: 'default' },
+      getScopedClients: jest.fn().mockResolvedValue({
+        licensing: {},
+        streamDataEsClient: {},
+        sourcesClient: { get: sourcesGet },
+      }),
+      context: { core: Promise.resolve({ featureFlags }) },
+      server: {},
+      maintenanceService: makeMaintenanceService(),
+    } as never as MetricsEntitiesHandlerParams;
+
+    await expect(metricsEntitiesRoute.handler(handlerParams)).rejects.toMatchObject({
+      output: { statusCode: 404 },
+    });
+    expect(mockIsMetricsEntitiesEnabled).toHaveBeenCalledWith(featureFlags);
+    expect(sourcesGet).not.toHaveBeenCalled();
+    expect(mockIdentifyMetricsEntities).not.toHaveBeenCalled();
   });
 });
 
