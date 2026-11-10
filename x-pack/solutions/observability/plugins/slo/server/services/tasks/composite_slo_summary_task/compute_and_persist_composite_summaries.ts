@@ -15,22 +15,20 @@ import type {
   SavedObject,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { escapeKuery } from '@kbn/es-query';
-import { ALL_VALUE, compositeSloDefinitionSchema, sloDefinitionSchema } from '@kbn/slo-schema';
-import { chunk, merge } from 'lodash';
+import { ALL_VALUE, compositeSloDefinitionSchema } from '@kbn/slo-schema';
+import { chunk } from 'lodash';
 import { COMPOSITE_SUMMARY_INDEX_NAME } from '../../../../common/constants';
 import type {
   CompositeSLODefinition,
   SLODefinition,
   StoredCompositeSLODefinition,
-  StoredSLODefinition,
 } from '../../../domain/models';
 import { toRichRollingTimeWindow, type TimeWindow } from '../../../domain/models/time_window';
 import { SO_SLO_COMPOSITE_TYPE } from '../../../saved_objects/slo_composite';
-import { SO_SLO_TYPE } from '../../../saved_objects/slo';
 import { DefaultBurnRatesClient } from '../../burn_rates_client';
 import { buildCompositeSloSummaryDocId } from '../../composites/composite_slo_summary_index';
 import { buildCompositeSummaryDoc } from '../../composites/composite_summary_writer';
+import type { SLODefinitionRepository } from '../../slo_definition_repository';
 import { DefaultSummaryClient } from '../../summary_client';
 import {
   computeCompositeSummary,
@@ -53,6 +51,7 @@ interface RunStats {
 interface Dependencies {
   esClient: ElasticsearchClient;
   soClient: SavedObjectsClientContract;
+  sloRepository: SLODefinitionRepository;
   logger: Logger;
   signal: AbortSignal;
 }
@@ -66,6 +65,7 @@ const MEMBER_ID_CHUNK_SIZE = 500;
 export async function computeAndPersistCompositeSummaries({
   esClient,
   soClient,
+  sloRepository,
   logger,
   signal,
 }: Dependencies): Promise<void> {
@@ -118,7 +118,7 @@ export async function computeAndPersistCompositeSummaries({
           name: COMPOSITE_SLO_SUMMARY_TASK_SPAN_NAMES.FETCH_MEMBER_DEFINITIONS,
           ...spanOpts,
         },
-        async () => fetchMemberDefinitions(bySpace, soClient, logger, stats)
+        async () => fetchMemberDefinitions(bySpace, sloRepository, logger, stats)
       );
 
       const summaryResultBySpace = await withSpan(
@@ -223,7 +223,7 @@ function groupBySpace(
 
 async function fetchMemberDefinitions(
   bySpace: Map<string, SpaceItems>,
-  soClient: SavedObjectsClientContract,
+  sloRepository: SLODefinitionRepository,
   logger: Logger,
   stats: RunStats
 ): Promise<Map<string, MemberDefinitionMap>> {
@@ -235,7 +235,7 @@ async function fetchMemberDefinitions(
         ...new Set(items.flatMap(({ compositeSlo }) => compositeSlo.members.map((m) => m.sloId))),
       ];
       try {
-        const slos = await findMemberSLOs(allIds, spaceId, soClient, logger);
+        const slos = await findMemberSLOs(allIds, spaceId, sloRepository);
         memberMapBySpace.set(spaceId, new Map(slos.map((slo) => [slo.id, slo])));
       } catch (err) {
         stats.spaceErrors++;
@@ -405,8 +405,7 @@ function decodeCompositeSLO(
 async function findMemberSLOs(
   ids: string[],
   spaceId: string,
-  soClient: SavedObjectsClientContract,
-  logger: Logger
+  sloRepository: SLODefinitionRepository
 ): Promise<SLODefinition[]> {
   if (ids.length === 0) return [];
 
@@ -419,50 +418,8 @@ async function findMemberSLOs(
   // attributes.id — resolving them would require a find anyway.
   const chunks = chunk(ids, MEMBER_ID_CHUNK_SIZE);
   const responses = await Promise.all(
-    chunks.map((chunkIds) =>
-      soClient.find<StoredSLODefinition>({
-        type: SO_SLO_TYPE,
-        namespaces: [spaceId],
-        page: 1,
-        perPage: chunkIds.length,
-        filter: `${SO_SLO_TYPE}.attributes.id:(${chunkIds.map(escapeKuery).join(' or ')})`,
-      })
-    )
+    chunks.map((chunkIds) => sloRepository.findAllByIds(chunkIds, { namespace: spaceId }))
   );
 
-  return responses
-    .flatMap((r) => r.saved_objects)
-    .map((so) => decodeStoredSLO(so, logger))
-    .filter((slo): slo is SLODefinition => slo !== undefined);
-}
-
-function decodeStoredSLO(
-  so: SavedObject<StoredSLODefinition>,
-  logger: Logger
-): SLODefinition | undefined {
-  const stored = so.attributes;
-  const result = sloDefinitionSchema.safeParse({
-    ...stored,
-    groupBy: stored.groupBy ?? ALL_VALUE,
-    version: stored.version ?? 1,
-    settings: merge(
-      {
-        preventInitialBackfill: false,
-        preventCrossProjectSearch: false,
-        syncDelay: '1m',
-        frequency: '1m',
-      },
-      stored.settings
-    ),
-    createdBy: stored.createdBy ?? so.created_by,
-    updatedBy: stored.updatedBy ?? so.updated_by,
-    artifacts: { dashboards: [] },
-  });
-
-  if (!result.success) {
-    logger.warn(`Invalid stored SLO [${stored.id}], skipping`);
-    return undefined;
-  }
-
-  return result.data;
+  return responses.flat();
 }
