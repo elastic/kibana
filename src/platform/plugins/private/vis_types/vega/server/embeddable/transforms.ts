@@ -34,11 +34,11 @@ export function getTransforms(drilldownTransforms: DrilldownTransforms, logger?:
     transformIn: (
       state: VegaEmbeddableState
     ): { state: StoredVegaState; references: SavedObjectReference[] } => {
-      const { state: drilldownsState, references: drilldownReferences } =
+      const { state: storedState, references: drilldownReferences } =
         drilldownTransforms.transformIn(state);
 
-      if (isVegaByReferenceState(drilldownsState)) {
-        const { ref_id: refId, ...byReferenceState } = drilldownsState;
+      if (isVegaByReferenceState(storedState)) {
+        const { ref_id: refId, ...byReferenceState } = storedState;
         return {
           state: byReferenceState,
           references: [
@@ -48,7 +48,7 @@ export function getTransforms(drilldownTransforms: DrilldownTransforms, logger?:
         };
       }
 
-      const { filters, ...rest } = drilldownsState;
+      const { filters, ...rest } = storedState;
       const { filters: storedFilters, references: filterReferences } =
         extractFilterReferences(filters);
       return {
@@ -60,24 +60,24 @@ export function getTransforms(drilldownTransforms: DrilldownTransforms, logger?:
       storedState: StoredVegaState,
       panelReferences?: SavedObjectReference[]
     ): VegaEmbeddableState => {
-      const drilldownsState = drilldownTransforms.transformOut(storedState, panelReferences);
+      const state = drilldownTransforms.transformOut(storedState, panelReferences);
       const libraryReference = panelReferences?.find(
         ({ name, type }) => name === VEGA_SAVED_OBJECT_REF_NAME && type === VEGA_SAVED_OBJECT_TYPE
       );
       if (libraryReference) {
-        return { ...drilldownsState, ref_id: libraryReference.id } as VegaByReferenceState;
+        return { ...state, ref_id: libraryReference.id } as VegaByReferenceState;
       }
 
-      const { filters: storedFilters, ...state } = drilldownsState as StoredVegaByValueState;
-      if (!storedFilters) return state;
+      const { filters: storedFilters, ...rest } = state as StoredVegaByValueState;
+      if (!storedFilters) return rest;
 
       try {
-        return { ...state, filters: injectFilterReferences(storedFilters, panelReferences) };
+        return { ...rest, filters: injectFilterReferences(storedFilters, panelReferences) };
       } catch (error) {
         logger?.warn(`Unable to transform filter and query state on read. Error: ${error.message}`);
         // Keep the filters, without their unresolved data view, rather than failing the whole panel.
         return {
-          ...state,
+          ...rest,
           filters: storedFilters.map(
             ({ data_view_ref_name: dataViewRefName, ...filter }) => filter
           ),
