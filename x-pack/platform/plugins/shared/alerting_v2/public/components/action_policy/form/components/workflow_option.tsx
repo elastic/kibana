@@ -67,9 +67,9 @@ export const renderWorkflowOption = (
         </EuiFlexItem>
       )}
       <EuiFlexItem css={{ minWidth: 0 }}>
-        <EuiHighlight search={searchValue} className="eui-textTruncate">
-          {label}
-        </EuiHighlight>
+        <div className="eui-textTruncate">
+          <EuiHighlight search={searchValue}>{label}</EuiHighlight>
+        </div>
         <EuiText size="xs" color="subdued" className="eui-textTruncate">
           {value?.description || WORKFLOW_EMPTY_DESCRIPTION}
         </EuiText>
