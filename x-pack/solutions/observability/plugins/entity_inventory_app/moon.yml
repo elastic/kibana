@@ -38,6 +38,7 @@ dependsOn:
   - '@kbn/i18n-react'
   - '@kbn/react-hooks'
   - '@kbn/ui-callout'
+  - '@kbn/shared-ux-router'
 tags:
   - plugin
   - prod
