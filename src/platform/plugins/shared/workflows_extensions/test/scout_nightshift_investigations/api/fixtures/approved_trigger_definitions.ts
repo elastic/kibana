@@ -232,15 +232,15 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'nightshift-investigations.completed',
-    schemaHash: '10335e07c55f890c4d60c464ab26e20b9ba6a72dc9197eaf2dfd68aee8b60d2e',
+    schemaHash: 'a6b68ad87d83616892d0932b99a4035aa3442ae2df9bc5ab2c05d2efe68fc049',
   },
   {
     id: 'nightshift-investigations.failed',
-    schemaHash: '46fdde81f9513e2dfc9fcb3a4a2ec14b7cfc447d3ccd8b52f47d111615a55d25',
+    schemaHash: '496cc04f19c16868bf3a14be917fd06c33d8651a79e788ef5f3b4205b66b88d6',
   },
   {
     id: 'nightshift-investigations.started',
-    schemaHash: '44883ecbb4f7a881ed4c2d6fbbde2f91a20ef64657cadfc4d305bf55b2da086a',
+    schemaHash: '718a4b1f28b06f194600c1e0847b7f520703f63afe222f2386cdb5fca1db1c14',
   },
   {
     id: 'security.alertAssigneesChanged',
