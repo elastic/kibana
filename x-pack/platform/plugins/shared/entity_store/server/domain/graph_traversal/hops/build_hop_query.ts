@@ -51,6 +51,8 @@ export interface HopQuery {
 
 /** Column holding the ids an inbound hub cap kept for one frontier node, before they are exploded. */
 export const HOP_REACHED_COLUMN = '__reached';
+/** Column carrying how many relationships a capped group matched, so the read volume is known. */
+export const HOP_READ_COLUMN = '__read';
 
 export interface BuildHopQueryParams {
   hop: TraversalHop;
@@ -204,20 +206,24 @@ export const buildHopQuery = ({
     // after the fetch still sees more than hubDegree distinct holders and refuses the node,
     // while a hub no longer fills the LIMIT at its neighbours' expense. With payload fields the
     // kept ids are joined back to their documents, as the outbound query does for pointed ids.
+    // The group's own count travels with the kept ids, so the read volume is known.
+    const cappedStats = `${stats}, ${HOP_READ_COLUMN} = MAX(${HOP_READ_COLUMN})`;
     lines.push(
       `| STATS ${HOP_REACHED_COLUMN} = TOP(${match}, ${
         hubDegree + 1
-      }, "asc") BY ${HOP_TARGET_COLUMN} = ${target}`,
+      }, "asc"), ${HOP_READ_COLUMN} = COUNT(*) BY ${HOP_TARGET_COLUMN} = ${target}`,
       `| MV_EXPAND ${HOP_REACHED_COLUMN}`
     );
     if (payloadStats.length > 0) {
       lines.push(
         `| RENAME ${HOP_REACHED_COLUMN} AS ${entityId}`,
         `| LOOKUP JOIN ${lookupIndex} ON ${entityId}`,
-        `${stats} BY ${HOP_SOURCE_COLUMN} = ${entityId}, ${HOP_TARGET_COLUMN}`
+        `${cappedStats} BY ${HOP_SOURCE_COLUMN} = ${entityId}, ${HOP_TARGET_COLUMN}`
       );
     } else {
-      lines.push(`${stats} BY ${HOP_SOURCE_COLUMN} = ${HOP_REACHED_COLUMN}, ${HOP_TARGET_COLUMN}`);
+      lines.push(
+        `${cappedStats} BY ${HOP_SOURCE_COLUMN} = ${HOP_REACHED_COLUMN}, ${HOP_TARGET_COLUMN}`
+      );
     }
   } else if (!inbound && lookupIndex !== undefined) {
     // Keep the frontier id aside, make the pointed id the join key, and drop the frontier

@@ -237,6 +237,9 @@ describe('runHop', () => {
     // cap of four.
     expect(execute.queryLimits).toEqual([4, 4]);
     expect(out.edges.map((e) => e.target)).toEqual(['role-b', 'role-c', 'i-1']);
+    // Uncapped rows are one relationship each; each query's took is kept apart.
+    expect(out.stats.relationships_read).toBe(3);
+    expect(out.stats.es_took_per_query).toEqual([0, 0]);
     expect(out.stats).toMatchObject({ queries: 2, queries_skipped: 0, edges_added: 3 });
     expect(out.truncated).toBe(false);
     expect(out.stop_reason).toBe('');
@@ -307,6 +310,41 @@ describe('runHop', () => {
     );
     expect(arrived).toBe(hop.target_fields.length);
     expect(out.stats.queries).toBe(hop.target_fields.length);
+  });
+
+  it("sums a capped group's matched relationships once from the __read column", async () => {
+    const capped: EsqlResult = {
+      columns: [
+        { name: HOP_SOURCE_COLUMN, type: 'keyword' },
+        { name: HOP_TARGET_COLUMN, type: 'keyword' },
+        { name: HOP_COUNT_COLUMN, type: 'long' },
+        { name: '__read', type: 'long' },
+      ],
+      values: [
+        ['role-a', 'role-b', 1, 5000],
+        ['role-a', 'role-c', 1, 5000],
+      ],
+      took: 7,
+    };
+    const execute = executor([capped, result([['role-a', 'i-1']])]);
+    const out = await runHop(
+      {
+        hop,
+        index: INDEX,
+        direction: 'out',
+        frontier: ['role-a'],
+        visited: ['role-a'],
+        edgesSoFar: 0,
+        truncatedSoFar: false,
+        limits,
+      },
+      execute
+    );
+    // 5000 matched for can_assume (2 kept), plus the one uncapped runs_as row.
+    expect(out.stats.relationships_read).toBe(5001);
+    expect(out.stats.rows_returned).toBe(3);
+    expect(out.stats.es_took_per_query).toEqual([7, 0]);
+    expect(out.stats.es_took_ms).toBe(7);
   });
 
   it('filters visited ids inside the hop query, after the pointer field is exploded', async () => {

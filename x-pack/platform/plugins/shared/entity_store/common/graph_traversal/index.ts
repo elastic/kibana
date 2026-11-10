@@ -136,16 +136,37 @@ export interface GraphTraversalHopStats {
   hop_number: number;
   name: string;
   frontier_size: number;
+  /** Frontier ids cut by `max_frontier`. */
+  dropped_frontier: number;
+  /** Frontier ids removed by an `entity.id` exclusion. */
+  excluded_frontier: number;
   queries: number;
   rows_returned: number;
+  /**
+   * Relationships the hop's queries matched at the index, before the hub cap kept at most
+   * `hub_degree + 1` per node; the read volume behind `rows_returned`.
+   */
+  relationships_read: number;
   edges_added: number;
+  /** Edges cut by the run's edge budget. */
+  dropped_edges: number;
+  /** Edges removed because one end is excluded. */
+  excluded_edges: number;
+  /** Edges onto nodes already reached; they admit no node. */
+  closing_edges: number;
+  /** Nodes admitted this hop that matched a stop condition. */
+  until_matched: number;
+  /** Frontier nodes refused for reaching more than `hub_degree` distinct nodes. */
+  hubs_skipped: string[];
   new_nodes: number;
   /** The whole hop: its queries, parsing and bounding. */
   hop_ms: number;
-  /** The hop's queries round trip, summed. */
+  /** From issuing the hop's queries together to the last response parsed. */
   query_ms: number;
   /** Time Elasticsearch reports for the hop's queries (`took`), summed. */
   es_took_ms: number;
+  /** Each query's `took`, in the order the queries were issued (fields, then the inbound leg). */
+  es_took_per_query: number[];
 }
 
 /** Where a hop engine run spent its time, in milliseconds. */

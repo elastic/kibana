@@ -149,13 +149,22 @@ export class GraphTraversalClient {
         hop_number: hop.hop_number,
         name: hop.name,
         frontier_size: result.stats.frontier_size,
+        dropped_frontier: result.stats.dropped_frontier,
+        excluded_frontier: result.stats.excluded_frontier,
         queries: result.stats.queries,
         rows_returned: result.stats.rows_returned,
+        relationships_read: result.stats.relationships_read,
         edges_added: result.stats.edges_added,
+        dropped_edges: result.stats.dropped_edges,
+        excluded_edges: result.stats.excluded_edges,
+        closing_edges: result.stats.closing_edges,
+        until_matched: result.stats.until_matched,
+        hubs_skipped: result.stats.hubs_skipped,
         new_nodes: result.stats.new_nodes,
         hop_ms: elapsedMs(hopStartedAt),
         query_ms: result.stats.query_ms,
         es_took_ms: result.stats.es_took_ms,
+        es_took_per_query: result.stats.es_took_per_query,
       });
       this.logger.info(
         `entity graph traversal hop ${hop.hop_number} (${hop.name}): ${result.stats.edges_added} edges, ${result.stats.new_nodes} new nodes, stop_reason="${result.stop_reason}"`

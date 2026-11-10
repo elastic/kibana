@@ -20,6 +20,7 @@ import { TRAVERSAL_NODE_ID_FIELD } from '../../../../common/graph_traversal/hop_
 import {
   buildHopQuery,
   HOP_COUNT_COLUMN,
+  HOP_READ_COLUMN,
   HOP_SOURCE_COLUMN,
   HOP_TARGET_COLUMN,
   hopPayloadColumn,
@@ -63,6 +64,12 @@ export interface RunHopStats {
   /** Always 0 since a hop's queries are issued together; kept so the stats shape is stable. */
   queries_skipped: number;
   rows_returned: number;
+  /**
+   * Relationships the hop's queries matched at the index, before the hub cap kept at most
+   * `hub_degree + 1` per node: a capped group's rows carry its count, counted once; every
+   * other row is one relationship.
+   */
+  relationships_read: number;
   edges_added: number;
   dropped_edges: number;
   /** Frontier ids removed by an `entity.id` exclusion. */
@@ -81,6 +88,8 @@ export interface RunHopStats {
   query_ms: number;
   /** Milliseconds Elasticsearch reports it spent on the hop's queries (`took`), summed. */
   es_took_ms: number;
+  /** Each query's `took` in issue order, since `es_took_ms` no longer tells them apart. */
+  es_took_per_query: number[];
 }
 
 export interface RunHopResult {
@@ -107,6 +116,8 @@ interface CollectedEdge {
   frontierNode: string;
   reached: string;
   inbound: boolean;
+  /** How many relationships the row's (frontier node, relation) group matched, when capped. */
+  read?: number;
 }
 
 const toId = (value: unknown): string | undefined => {
@@ -139,6 +150,7 @@ const parseRows = ({
   const sourceIdx = columnIndex(HOP_SOURCE_COLUMN);
   const targetIdx = columnIndex(HOP_TARGET_COLUMN);
   const countIdx = columnIndex(HOP_COUNT_COLUMN);
+  const readIdx = columnIndex(HOP_READ_COLUMN);
   if (sourceIdx < 0 || targetIdx < 0) {
     throw new Error(
       `Hop "${hop.name}" query returned no ${HOP_SOURCE_COLUMN}/${HOP_TARGET_COLUMN} columns`
@@ -174,10 +186,32 @@ const parseRows = ({
         frontierNode: frontierNode as string,
         reached: inbound ? source : target,
         inbound,
+        ...(readIdx >= 0 && typeof row[readIdx] === 'number' && { read: row[readIdx] as number }),
       });
     }
   }
   return edges;
+};
+
+/**
+ * Relationships the queries matched before any cap: a capped (frontier node, relation) group
+ * reports its count on every row it kept, counted once; a row without one is one relationship.
+ */
+const relationshipsRead = (edges: CollectedEdge[]): number => {
+  const counted = new Set<string>();
+  let read = 0;
+  for (const { edge, frontierNode, read: groupRead } of edges) {
+    if (groupRead === undefined) {
+      read += 1;
+      continue;
+    }
+    const key = `${frontierNode}\u0000${edge.relation}`;
+    if (!counted.has(key)) {
+      counted.add(key);
+      read += groupRead;
+    }
+  }
+  return read;
 };
 
 /**
@@ -290,6 +324,7 @@ export const runHop = async (
     queries: 0,
     queries_skipped: 0,
     rows_returned: 0,
+    relationships_read: 0,
     edges_added: 0,
     dropped_edges: 0,
     excluded_frontier: distinctFrontier.length - uniqueFrontier.length,
@@ -301,6 +336,7 @@ export const runHop = async (
     setup_ms: 0,
     query_ms: 0,
     es_took_ms: 0,
+    es_took_per_query: [],
   };
 
   const untilMatches: string[] = [];
@@ -375,12 +411,15 @@ export const runHop = async (
   const collected: CollectedEdge[] = [];
   requests.forEach(({ inbound, relation }, position) => {
     const result = results[position];
-    if (typeof result.took === 'number') stats.es_took_ms += result.took;
+    const took = typeof result.took === 'number' ? result.took : 0;
+    stats.es_took_ms += took;
+    stats.es_took_per_query.push(took);
     stats.queries += 1;
     stats.rows_returned += result.values.length;
     if (result.values.length >= limit) truncated = true;
     collected.push(...parseRows({ result, hop, relation, frontier: frontierSet, inbound }));
   });
+  stats.relationships_read = relationshipsRead(collected);
 
   // 4. Excluded nodes (the query already left out excluded documents and pointer values;
   //    this covers whichever end the query could not filter)

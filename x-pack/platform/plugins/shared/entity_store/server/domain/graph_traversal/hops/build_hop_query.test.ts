@@ -286,11 +286,11 @@ describe('lookbackToEsqlSpan', () => {
           '| WHERE MV_INTERSECTS(`entity.relationships.can_assume.ids`, ?) AND `entity.id` IS NOT NULL',
           '| MV_EXPAND `entity.relationships.can_assume.ids`',
           '| WHERE `entity.relationships.can_assume.ids` IN (?)',
-          '| STATS __reached = TOP(`entity.id`, 201, "asc") BY __target = `entity.relationships.can_assume.ids`',
+          '| STATS __reached = TOP(`entity.id`, 201, "asc"), __read = COUNT(*) BY __target = `entity.relationships.can_assume.ids`',
           '| MV_EXPAND __reached',
           '| RENAME __reached AS `entity.id`',
           `| LOOKUP JOIN ${LOOKUP} ON \`entity.id\``,
-          `| STATS __count = COUNT(*), __payload_0 = VALUES(\`entity.name\`), __payload_1 = VALUES(\`entity.sub_type\`) BY __source = \`entity.id\`, __target`,
+          `| STATS __count = COUNT(*), __payload_0 = VALUES(\`entity.name\`), __payload_1 = VALUES(\`entity.sub_type\`), __read = MAX(__read) BY __source = \`entity.id\`, __target`,
           '| LIMIT 500',
         ].join('\n')
       );
@@ -308,9 +308,9 @@ describe('lookbackToEsqlSpan', () => {
       });
       expect(query).toContain(
         [
-          '| STATS __reached = TOP(`entity.id`, 3, "asc") BY __target = `entity.relationships.can_assume.ids`',
+          '| STATS __reached = TOP(`entity.id`, 3, "asc"), __read = COUNT(*) BY __target = `entity.relationships.can_assume.ids`',
           '| MV_EXPAND __reached',
-          '| STATS __count = COUNT(*) BY __source = __reached, __target',
+          '| STATS __count = COUNT(*), __read = MAX(__read) BY __source = __reached, __target',
         ].join('\n')
       );
       expect(query).not.toContain('LOOKUP JOIN');
