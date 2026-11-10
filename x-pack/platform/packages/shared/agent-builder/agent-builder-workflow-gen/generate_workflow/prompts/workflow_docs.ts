@@ -171,6 +171,20 @@ Use double curly braces for variable substitution:
 "{{ variable.path }}"
 \`\`\`
 
+\`{{ }}\` always renders a **string**. To pass a value with its original type
+(object, array, number, boolean), use \`\${{ }}\` as the whole field value:
+
+\`\`\`yaml
+with:
+  query: \${{ inputs.query_params }}   # object stays an object
+  size: \${{ inputs.limit }}           # number stays a number
+  ids: \${{ steps.search.output.ids }} # array stays an array
+\`\`\`
+
+Never write \`"{{ inputs.some_object }}"\` for a field typed as object, array,
+number, or boolean: the step receives the string \`"{...}"\` and fails at run time
+with \`expected record, received string\` (or similar).
+
 ### Variable Contexts
 
 | Context | Description | Example |
@@ -473,6 +487,27 @@ url: |
   {%- assign limit = inputs.limit | default: 100 -%}
   {{ base }}/search?q={{ query }}&limit={{ limit }}
 \`\`\`
+
+#### HTTP Request Through a Connector
+
+Default to \`connector-id\` for \`http\` steps: the connector stores the base URL
+and secrets (tokens, API keys, passwords), so they never appear in the YAML.
+Put the route in \`path\` (not \`url\`), and pass query parameters as an object
+in \`query\`:
+
+\`\`\`yaml
+- name: call_api
+  type: http
+  connector-id: my-api-connector
+  with:
+    method: GET
+    path: "{{ inputs.path }}"
+    query: \${{ inputs.query_params }}
+\`\`\`
+
+Omit \`connector-id\` only for public endpoints that need no auth, or when the
+user asks for it. Then set an absolute \`url\` instead of \`path\`. Never put
+secrets in \`headers\`, \`query\`, \`url\`, or \`consts\`.
 
 #### Conditional API Parameters
 

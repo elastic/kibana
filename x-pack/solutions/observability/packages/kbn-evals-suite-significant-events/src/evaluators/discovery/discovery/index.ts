@@ -19,6 +19,7 @@ import {
   createEvidenceDescriptionEvaluator,
   createNarrativeFieldsEvaluator,
   createSignalEvidenceConsistencyEvaluator,
+  skipWhenNoSignificantEvents,
 } from '../common/evidence_quality';
 import { groupingCorrectnessEvaluator } from './grouping/grouping_correctness';
 import { topologyCorrectnessEvaluator } from './grouping/topology_correctness';
@@ -69,7 +70,11 @@ export const createDiscoveryEvaluators = (
 
   return [
     ...base,
-    createScenarioCriteriaLlmEvaluator({ criteriaFn, criteria }),
+    createScenarioCriteriaLlmEvaluator({
+      criteriaFn,
+      criteria,
+      skipWhen: skipWhenNoSignificantEvents,
+    }),
     createEvidenceDescriptionEvaluator({ criteriaFn }),
     createNarrativeFieldsEvaluator({ criteriaFn }),
     createSignalEvidenceConsistencyEvaluator({ criteriaFn }),

@@ -19,12 +19,6 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { GroupStatsItem, RawBucket } from '@kbn/grouping';
 import { capitalize } from 'lodash';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import {
-  EntityPanelKeyByType,
-  EntityPanelParamByType,
-} from '../../../../../flyout/entity_details/shared/constants';
-import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { ENTITY_ANALYTICS_TABLE_ID } from '../../constants';
@@ -59,8 +53,6 @@ const ResolutionGroupPanel = ({
   targetMetadata: TargetMetadataMap;
   tableId: string;
 }) => {
-  const enableNewFlyout = useIsNewFlyoutEnabled();
-  const { openFlyout } = useExpandableFlyoutApi();
   const { openEntityFlyout } = useFlyoutApi();
 
   const entityId = String(bucket.key_as_string ?? bucket.key);
@@ -77,27 +69,16 @@ const ResolutionGroupPanel = ({
       e.stopPropagation();
       if (!targetEntityName || !entityType) return;
 
-      const sharedParams = { entityId, contextID: tableId, scopeId: tableId };
-
-      if (enableNewFlyout) {
-        openEntityFlyout({
-          engineType: entityType,
-          entityName: targetEntityName,
-          origin: FLYOUT_ORIGIN.ENTITIES_TABLE,
-          ...sharedParams,
-        });
-        return;
-      }
-
-      const panelKey = EntityPanelKeyByType[entityType];
-      const paramName = EntityPanelParamByType[entityType];
-      if (panelKey && paramName) {
-        openFlyout({
-          right: { id: panelKey, params: { [paramName]: targetEntityName, ...sharedParams } },
-        });
-      }
+      openEntityFlyout({
+        engineType: entityType,
+        entityName: targetEntityName,
+        origin: FLYOUT_ORIGIN.ENTITIES_TABLE,
+        entityId,
+        contextID: tableId,
+        scopeId: tableId,
+      });
     },
-    [enableNewFlyout, openFlyout, openEntityFlyout, targetEntityName, entityType, entityId, tableId]
+    [openEntityFlyout, targetEntityName, entityType, entityId, tableId]
   );
 
   return (

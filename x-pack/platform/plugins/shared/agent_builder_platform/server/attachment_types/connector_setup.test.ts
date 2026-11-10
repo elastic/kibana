@@ -20,6 +20,7 @@ import {
   type ConnectorSetupAttachmentData,
 } from '../../common/attachments';
 import { createConnectorSetupAttachmentType } from './connector_setup';
+import { SURFACE_BASE_URL, renderSurface, surfaceContext } from './test_utils';
 
 jest.mock('@kbn/connector-specs', () => ({
   getConnectorSpec: jest.fn(),
@@ -253,6 +254,72 @@ describe('connector_setup attachment type', () => {
       await expect(
         createType(agentsStart).onOriginUpdated!(completedAttachment, originContext)
       ).rejects.toThrow('read-only');
+    });
+  });
+});
+
+describe('connector_setup toSurfaceComposition', () => {
+  const definition = createConnectorSetupAttachmentType({
+    getAgentsStart: jest.fn(),
+    getActionsStart: jest.fn(),
+    logger: loggingSystemMock.createLogger(),
+  });
+  const configureButton = (primary?: boolean) => ({
+    type: 'actions',
+    buttons: [
+      {
+        label: 'Configure in Kibana',
+        url: `${SURFACE_BASE_URL}/app/agent_builder/agents/ops-agent/connectors`,
+        ...(primary ? { primary } : {}),
+      },
+    ],
+  });
+
+  beforeEach(() => {
+    getConnectorSpecMock.mockReturnValue(undefined);
+  });
+
+  it("shows the reason and links to the agent's connectors page in Kibana", async () => {
+    const composition = await definition.toSurfaceComposition?.(
+      createAttachment(validData),
+      surfaceContext
+    );
+
+    expect(composition).toEqual({
+      type: 'view',
+      title: 'GitHub',
+      subtitle: 'Setup',
+      body: [
+        { type: 'markdown', text: 'Investigate issues across services' },
+        configureButton(true),
+      ],
+    });
+
+    const { valid, slack } = await renderSurface(composition);
+    expect(valid).toBe(true);
+    expect(slack).toContain(
+      `"url":"${SURFACE_BASE_URL}/app/agent_builder/agents/ops-agent/connectors"`
+    );
+    expect(slack).toContain('"style":"primary"');
+  });
+
+  it('says it is connected once the connector is created, and still links to it', async () => {
+    const composition = await definition.toSurfaceComposition?.(
+      { ...createAttachment({ connector_type: '.github' }), origin: 'connector-1' },
+      surfaceContext
+    );
+
+    expect(composition).toEqual({
+      type: 'view',
+      title: '.github',
+      subtitle: 'Connected',
+      body: [
+        {
+          type: 'markdown',
+          text: 'Configure the .github connector so the agent can use it here.',
+        },
+        configureButton(),
+      ],
     });
   });
 });

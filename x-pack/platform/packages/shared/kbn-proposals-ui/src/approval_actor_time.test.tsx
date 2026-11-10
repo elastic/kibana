@@ -13,24 +13,22 @@ import { ApprovalActorTime } from './approval_actor_time';
 const AT = '2026-10-20T11:36:00.000Z';
 
 describe('ApprovalActorTime', () => {
-  it('shows the full date and time in a tooltip on the time of a settled decision', async () => {
-    renderWithKibanaRenderContext(
-      <ApprovalActorTime actorName="elastic" at={AT} outcome="approved" />
-    );
+  it('shows who decided and the full date and time of a settled decision', () => {
+    renderWithKibanaRenderContext(<ApprovalActorTime actorName="elastic" at={AT} />);
 
-    fireEvent.mouseOver(screen.getByText(/^\d{1,2}:\d{2}/));
-
-    expect(await screen.findByRole('tooltip')).toHaveTextContent(/^20 Oct 2026, \d{2}:\d{2}$/);
+    expect(screen.getByText(/^elastic • 20 Oct 2026, \d{2}:\d{2}$/)).toBeInTheDocument();
+    expect(screen.queryByText(/ago$/)).not.toBeInTheDocument();
   });
 
-  it('shows no tooltip while the decision is still being sent', () => {
-    const { container } = renderWithKibanaRenderContext(
-      <ApprovalActorTime actorName="elastic" at={AT} live />
+  it('shows the full date and time in a tooltip on the relative time of a decision in flight', async () => {
+    const startedAt = new Date(Date.now() - 5000).toISOString();
+    renderWithKibanaRenderContext(<ApprovalActorTime actorName="elastic" at={startedAt} live />);
+
+    fireEvent.mouseOver(screen.getByText(/seconds ago$/));
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(
+      /^\d{1,2} [A-Z][a-z]{2} \d{4}, \d{2}:\d{2}$/
     );
-
-    container.querySelectorAll('*').forEach((element) => fireEvent.mouseOver(element));
-
-    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
   });
 
   it('shows no time and no tooltip when the decision has no time', () => {

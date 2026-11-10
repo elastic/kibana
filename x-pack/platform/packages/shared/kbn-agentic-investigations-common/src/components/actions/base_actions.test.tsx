@@ -61,6 +61,28 @@ describe('BaseActions copy link', () => {
   });
 });
 
+describe('BaseActions recommended action', () => {
+  it('does not offer the recommended action in the menu', () => {
+    renderWithKibanaRenderContext(
+      <BaseActions
+        investigation={{
+          ...investigation,
+          recommendedAction: 'respond',
+          primaryActionLabel: 'Revoke sessions',
+        }}
+        onClickAction={jest.fn()}
+        onCopyLink={jest.fn()}
+        data-test-subj="actions"
+      />
+    );
+
+    openMenu();
+
+    expect(screen.queryByText('Revoke sessions')).not.toBeInTheDocument();
+    expect(screen.getByText('Copy link')).toBeInTheDocument();
+  });
+});
+
 describe('BaseActions open and close', () => {
   const renderMenu = (props: Partial<React.ComponentProps<typeof BaseActions>> = {}) => {
     const onClickAction = jest.fn();

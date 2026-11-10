@@ -1201,6 +1201,42 @@ describe('useTemplateFormSync', () => {
       expect(mockSetFieldValue).toHaveBeenCalledWith('extractObservables', false);
     });
 
+    it('forces extractObservables to false for the Stack owner when the space configuration is true', () => {
+      // Stack cannot store true. A stored space value of true must not reach the form when the
+      // template omits the key, or the server would receive an explicit true.
+      mockUseGetAllCaseConfigurations.mockReturnValue({
+        data: [
+          {
+            id: 'cfg-stack',
+            owner: 'cases',
+            extractObservables: true,
+            closureType: 'close-by-user',
+            connector: { fields: null, id: 'none', name: 'none', type: '.none' },
+            customFields: [],
+            templates: [],
+            mappings: [],
+            version: '1',
+            observableTypes: [],
+          },
+        ],
+        isLoading: false,
+      });
+      mockUseFormData.mockReturnValue([{ templateId: 'template-stack', owner: 'cases' }]);
+      mockUseGetTemplate.mockReturnValue({
+        data: {
+          templateId: 'template-stack',
+          templateVersion: 1,
+          definition: { name: 'Stack', fields: [], settings: { syncAlerts: false } },
+        },
+        isLoading: false,
+      });
+
+      renderHook(() => useTemplateFormSync(innerForm, new Set()));
+
+      expect(mockSetFieldValue).toHaveBeenCalledWith('extractObservables', false);
+      expect(mockSetFieldValue).not.toHaveBeenCalledWith('extractObservables', true);
+    });
+
     it('resets undeclared settings keys when switching to a template with a partial settings block', () => {
       // A declares both `true`; B declares only `syncAlerts`. B's omitted `extractObservables` must
       // reset to the space default rather than inheriting A's value.

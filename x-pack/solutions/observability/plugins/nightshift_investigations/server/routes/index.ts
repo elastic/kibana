@@ -10,12 +10,14 @@ import { emitLifecycleEventRoute } from './emit_lifecycle_event';
 import { ensureInvestigationRoute } from './ensure_investigation';
 import { findOrCreateSlackThreadInvestigationRoute } from './find_or_create_slack_thread_investigation';
 import { getInvestigationAvailabilityRoute } from './get_investigation_availability';
-import { listCortexPagesRoute } from './list_cortex_pages';
-import { getCortexPageRoute } from './get_cortex_page';
-import { createCortexPageRoute, updateCortexPageRoute } from './write_cortex_page';
-import { archiveCortexPageRoute } from './archive_cortex_page';
-import { getCortexAvailabilityRoute } from './get_cortex_availability';
-import { sandboxSecretsRoutes } from './sandbox_secrets';
+import { listWikiPagesRoute } from './list_wiki_pages';
+import { getWikiPageRoute } from './get_wiki_page';
+import { createWikiPageRoute, updateWikiPageRoute } from './write_wiki_page';
+import { archiveWikiPageRoute } from './archive_wiki_page';
+import { getWikiAvailabilityRoute } from './get_wiki_availability';
+import { getSandboxConnectorsRoute } from './get_sandbox_connectors';
+import { getSandboxConnectorTypesRoute } from './get_sandbox_connector_types';
+import { sandboxAllowlistRoutes } from './sandbox_allowlist';
 import { customContextRoutes } from './custom_context';
 import { onboardingRoutes } from './onboarding';
 import { getDecisionTreesAvailabilityRoute } from './get_decision_trees_availability';
@@ -50,13 +52,15 @@ export const nightshiftInvestigationsRouteRepository = {
   ...ensureInvestigationRoute,
   ...findOrCreateSlackThreadInvestigationRoute,
   ...getInvestigationAvailabilityRoute,
-  ...listCortexPagesRoute,
-  ...getCortexPageRoute,
-  ...createCortexPageRoute,
-  ...updateCortexPageRoute,
-  ...archiveCortexPageRoute,
-  ...getCortexAvailabilityRoute,
-  ...sandboxSecretsRoutes,
+  ...listWikiPagesRoute,
+  ...getWikiPageRoute,
+  ...createWikiPageRoute,
+  ...updateWikiPageRoute,
+  ...archiveWikiPageRoute,
+  ...getWikiAvailabilityRoute,
+  ...getSandboxConnectorsRoute,
+  ...getSandboxConnectorTypesRoute,
+  ...sandboxAllowlistRoutes,
   ...customContextRoutes,
   ...onboardingRoutes,
   ...getDecisionTreesAvailabilityRoute,

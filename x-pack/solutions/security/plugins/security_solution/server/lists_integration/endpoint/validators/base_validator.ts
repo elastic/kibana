@@ -116,11 +116,24 @@ export const BasicEndpointExceptionDataSchema = schema.object(
   { unknowns: 'ignore' }
 );
 
+/** Import validation slower than this is logged as a warning (otherwise as debug), together with the slowest items. */
+const IMPORT_VALIDATION_WARN_THRESHOLD_MS = 10_000;
+const IMPORT_VALIDATION_SLOWEST_ITEMS_LOGGED = 5;
+
+/**
+ * IDs come from the import file. The pattern log layout keeps newlines and interprets `%` conversions
+ * (e.g. `%date{...}`, which throws for an unknown format) inside messages, so they are logged URI-encoded.
+ * Lone surrogates are replaced first, as `encodeURIComponent` throws for them.
+ */
+const toLoggableId = (id: string): string => encodeURIComponent(id.toWellFormed());
+
 /**
  * Provides base methods for doing validation that apply across endpoint exception entries
  */
 export class BaseValidator {
   private readonly endpointAuthzPromise: ReturnType<EndpointAppContextService['getEndpointAuthz']>;
+  /** Cached for the lifetime of the validator (one request): import validates every item against it. */
+  private accessibleSpaceIdsPromise: Promise<string[]> | undefined;
   protected readonly logger: Logger;
 
   constructor(
@@ -415,9 +428,17 @@ export class BaseValidator {
       );
     }
 
-    const accessibleSpaces = await this.endpointAppContext.getAccessibleSpaces(this.request);
+    if (!this.accessibleSpaceIdsPromise) {
+      this.accessibleSpaceIdsPromise = this.endpointAppContext
+        .getAccessibleSpaces(this.request)
+        .then((accessibleSpaces) => accessibleSpaces.map((space) => space.id))
+        .catch((error) => {
+          this.accessibleSpaceIdsPromise = undefined;
+          throw error;
+        });
+    }
 
-    return accessibleSpaces.map((space) => space.id);
+    return this.accessibleSpaceIdsPromise;
   }
 
   protected async validateCanCreateGlobalArtifacts(item: ExceptionItemLikeOptions): Promise<void> {
@@ -563,6 +584,10 @@ export class BaseValidator {
     validator: (item: ExceptionItemLikeOptions) => Promise<void>
   ): Promise<void> {
     const validatedItems: PromiseFromStreams['items'] = [];
+    const itemDurations: Array<{ itemId: string; durationMs: number }> = [];
+    const listIds = new Set<string>();
+    let invalidItemCount = 0;
+    const started = performance.now();
 
     for (const _item of items.items) {
       if (_item instanceof Error) {
@@ -578,6 +603,13 @@ export class BaseValidator {
           comments: _item.comments,
           listId: _item.list_id,
         };
+
+        // Validators can run long synchronous work (e.g. libyara compile), and the items may not
+        // trigger any I/O: release the event loop between items so Kibana keeps serving requests.
+        await new Promise<void>((resolve) => setImmediate(resolve));
+
+        listIds.add(_item.list_id);
+        const itemStarted = performance.now();
 
         try {
           await validator(item);
@@ -595,12 +627,61 @@ export class BaseValidator {
             list_id: item.listId ?? _item.list_id,
           });
         } catch (error) {
+          invalidItemCount++;
           validatedItems.push(new ExceptionItemImportError(error, _item.list_id, _item.item_id));
+        } finally {
+          itemDurations.push({
+            itemId: _item.item_id,
+            durationMs: performance.now() - itemStarted,
+          });
         }
       }
     }
 
     items.items = validatedItems;
+
+    this.logImportValidationSummary({
+      listIds,
+      itemDurations,
+      invalidItemCount,
+      totalDurationMs: performance.now() - started,
+    });
+  }
+
+  private logImportValidationSummary({
+    listIds,
+    itemDurations,
+    invalidItemCount,
+    totalDurationMs,
+  }: {
+    listIds: Set<string>;
+    itemDurations: Array<{ itemId: string; durationMs: number }>;
+    invalidItemCount: number;
+    totalDurationMs: number;
+  }): void {
+    if (itemDurations.length === 0) {
+      return;
+    }
+
+    const buildMessage = (): string => {
+      const slowestItems = [...itemDurations]
+        .sort((a, b) => b.durationMs - a.durationMs)
+        .slice(0, IMPORT_VALIDATION_SLOWEST_ITEMS_LOGGED)
+        .map(({ itemId, durationMs }) => `${toLoggableId(itemId)} (${Math.round(durationMs)}ms)`)
+        .join(', ');
+
+      return `Validated ${itemDurations.length} items of [${[...listIds]
+        .map(toLoggableId)
+        .join(', ')}] for import in ${(totalDurationMs / 1000).toFixed(
+        1
+      )}s (${invalidItemCount} invalid). Slowest: ${slowestItems}`;
+    };
+
+    if (totalDurationMs > IMPORT_VALIDATION_WARN_THRESHOLD_MS) {
+      this.logger.warn(buildMessage());
+    } else {
+      this.logger.debug(buildMessage);
+    }
   }
 
   protected async removeInvalidPolicyIds(item: ExceptionItemLikeOptions): Promise<void> {

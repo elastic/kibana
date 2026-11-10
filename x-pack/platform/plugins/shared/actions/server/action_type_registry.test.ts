@@ -10,6 +10,7 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { z } from '@kbn/zod/v4';
 import type { ActionTypeRegistryOpts } from './action_type_registry';
 import { ActionTypeRegistry } from './action_type_registry';
+import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import type { ActionType } from './types';
 import type { ILicenseState } from './lib';
 import { ActionExecutionSourceType, ActionExecutor, TaskRunnerFactory } from './lib';
@@ -437,6 +438,28 @@ describe('actionTypeRegistry', () => {
       }
       expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalled();
       expect(mockedLicenseState.isLicenseValidForActionType).toHaveBeenCalled();
+    });
+
+    test('returns only sandbox-capable connector types when asked', () => {
+      mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      actionTypeRegistry.register(getConnectorType());
+      actionTypeRegistry.register(
+        getConnectorType({ id: 'spec-type', sandboxSupportedAuthTypes: ['bearer'] })
+      );
+      actionTypeRegistry.register(
+        getConnectorType({ id: 'hook-type', isSandboxCapable: () => true })
+      );
+
+      expect(actionTypeRegistry.list({ sandboxCapableOnly: true }).map(({ id }) => id)).toEqual([
+        'spec-type',
+        'hook-type',
+      ]);
+      expect(actionTypeRegistry.list().map(({ id }) => id)).toEqual([
+        'my-connector-type',
+        'spec-type',
+        'hook-type',
+      ]);
     });
 
     test('returns list of connector types filtered by feature id if provided', () => {
@@ -950,6 +973,28 @@ describe('actionTypeRegistry', () => {
 
       const result = registry.isDeprecated('test.action');
       expect(result).toBe(true);
+    });
+  });
+
+  describe('isSpecActionType()', () => {
+    it('returns true for a spec-sourced type', () => {
+      const registry = new ActionTypeRegistry(actionTypeRegistryParams);
+      registry.register(getConnectorType({ id: 'spec-backed', source: ACTION_TYPE_SOURCES.spec }));
+
+      expect(registry.isSpecActionType('spec-backed')).toBe(true);
+    });
+
+    it('returns false for a classic type', () => {
+      const registry = new ActionTypeRegistry(actionTypeRegistryParams);
+      registry.register(getConnectorType());
+
+      expect(registry.isSpecActionType('my-connector-type')).toBe(false);
+    });
+
+    it('returns false for an unknown id without throwing', () => {
+      const registry = new ActionTypeRegistry(actionTypeRegistryParams);
+
+      expect(registry.isSpecActionType('unknown')).toBe(false);
     });
   });
 

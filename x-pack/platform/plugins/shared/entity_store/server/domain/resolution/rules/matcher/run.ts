@@ -19,16 +19,22 @@ import type { ResolutionClient } from '../../resolution_client';
 import { selectTarget, type TargetSelectionEntity } from '../../target_selection';
 import type { MaintainerTelemetryClient } from '../../../../tasks/entity_maintainers/maintainer_telemetry_client';
 import type { PerRuleState } from '../maintainers/automated_resolution/types';
-import type { MatcherSpec } from '../rule_registry';
+import { isExpressionMatchSpec, type MatcherSpec } from '../rule_registry';
 import {
   ENTITY_NAMESPACE_FIELD,
   GROUP_SIZE_CEILING,
   MATCH_GROUP_COLUMNS,
+  MATCHER_CANDIDATE_PAGE_SIZE,
   MATCHER_PAGE_SIZE,
   RESOLVED_TO_FIELD,
   WATERMARK_COLUMN,
 } from './constants';
-import { buildMatchGroupsQuery, buildWatermarkQuery } from './query';
+import {
+  buildCandidateValuesQuery,
+  buildMatchGroupsQuery,
+  buildNewerEntityQuery,
+  buildWatermarkQuery,
+} from './query';
 
 export interface RunEsqlMatcherDeps {
   state: PerRuleState;
@@ -143,19 +149,68 @@ export async function runEsqlMatcherRule(deps: RunEsqlMatcherDeps): Promise<PerR
   }
 
   const stats = emptyStats();
+  // Custom rules keep the single-query scan: their expressions can trip the
+  // candidate step on multi-valued fields (see the follow-up on custom rules).
+  const useCandidateValues = !isExpressionMatchSpec(spec);
+  const candidatePageSize = Math.min(pageSize, MATCHER_CANDIDATE_PAGE_SIZE);
+  // A newer entity, resolved or not, is a new group member, so nothing newer
+  // means no group can have a new member. An unresolved one is already known
+  // from the watermark query, so only its absence needs the extra check.
+  const nothingNew =
+    state.lastProcessedTimestamp !== null &&
+    maxTimestamp === null &&
+    !(await hasNewerEntity(esClient, index, spec, state.lastProcessedTimestamp, signal));
+  if (nothingNew) {
+    logger.debug(`${ruleId}: no entities newer than the watermark, skipping match groups`);
+  }
   let afterMatchValue: string | undefined;
 
-  do {
-    const query = buildMatchGroupsQuery({
-      index,
-      spec,
-      afterMatchValue,
-      watermark: state.lastProcessedTimestamp,
-      pageSize,
-    });
-    const response = await executeEsqlQuery({ esClient, query, signal });
-    assertCompleteEsqlResults(response, ruleId);
-    const rows = parseMatchGroupRows(response);
+  while (!nothingNew && !signal.aborted) {
+    let rows: MatchGroupRow[];
+    let isLastPage: boolean;
+    let nextAfterMatchValue: string | undefined;
+
+    if (useCandidateValues) {
+      const candidates = await readCandidateValues({
+        esClient,
+        index,
+        spec,
+        afterMatchValue,
+        watermark: state.lastProcessedTimestamp,
+        pageSize: candidatePageSize,
+        signal,
+        ruleId,
+      });
+      if (candidates.length === 0) {
+        break;
+      }
+
+      const query = buildMatchGroupsQuery({
+        index,
+        spec,
+        watermark: state.lastProcessedTimestamp,
+        pageSize: candidates.length,
+        matchValues: candidates,
+      });
+      const response = await executeEsqlQuery({ esClient, query, signal });
+      assertCompleteEsqlResults(response, ruleId);
+      rows = parseMatchGroupRows(response);
+      isLastPage = candidates.length < candidatePageSize;
+      nextAfterMatchValue = candidates[candidates.length - 1];
+    } else {
+      const query = buildMatchGroupsQuery({
+        index,
+        spec,
+        afterMatchValue,
+        watermark: state.lastProcessedTimestamp,
+        pageSize,
+      });
+      const response = await executeEsqlQuery({ esClient, query, signal });
+      assertCompleteEsqlResults(response, ruleId);
+      rows = parseMatchGroupRows(response);
+      isLastPage = rows.length < pageSize;
+      nextAfterMatchValue = rows[rows.length - 1]?.matchValue;
+    }
 
     for (const row of rows) {
       if (signal.aborted) {
@@ -174,11 +229,11 @@ export async function runEsqlMatcherRule(deps: RunEsqlMatcherDeps): Promise<PerR
       });
     }
 
-    if (rows.length < pageSize) {
+    if (isLastPage || !nextAfterMatchValue) {
       break;
     }
-    afterMatchValue = rows[rows.length - 1].matchValue;
-  } while (afterMatchValue && !signal.aborted);
+    afterMatchValue = nextAfterMatchValue;
+  }
 
   if (signal.aborted) {
     return state;
@@ -242,6 +297,48 @@ export async function runEsqlMatcherRule(deps: RunEsqlMatcherDeps): Promise<PerR
       cascadesBlocked: stats.cascadesBlocked,
     },
   };
+}
+
+async function readCandidateValues({
+  esClient,
+  index,
+  spec,
+  afterMatchValue,
+  watermark,
+  pageSize,
+  signal,
+  ruleId,
+}: {
+  esClient: ElasticsearchClient;
+  index: string;
+  spec: MatcherSpec;
+  afterMatchValue: string | undefined;
+  watermark: string | null;
+  pageSize: number;
+  signal: AbortSignal;
+  ruleId: string;
+}): Promise<string[]> {
+  const query = buildCandidateValuesQuery({ index, spec, afterMatchValue, watermark, pageSize });
+  const response = await executeEsqlQuery({ esClient, query, signal });
+  assertCompleteEsqlResults(response, ruleId);
+  const matchValueIdx = requireColumn(response, MATCH_GROUP_COLUMNS.matchValue);
+  return response.values.flatMap((row) => {
+    const value = row[matchValueIdx];
+    return value == null || value === '' ? [] : [String(value)];
+  });
+}
+
+async function hasNewerEntity(
+  esClient: ElasticsearchClient,
+  index: string,
+  spec: MatcherSpec,
+  watermark: string,
+  signal: AbortSignal
+): Promise<boolean> {
+  const query = buildNewerEntityQuery({ index, spec, watermark });
+  const response = await executeEsqlQuery({ esClient, query, signal });
+  assertCompleteEsqlResults(response, 'newer entity');
+  return response.values.length > 0;
 }
 
 async function readWatermarkCandidate(

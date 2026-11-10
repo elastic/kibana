@@ -23,7 +23,10 @@ import {
 import { selectUnit } from '@formatjs/intl-utils';
 import { getEbtProps } from '@kbn/ebt-click';
 import { FormattedRelativeTime } from '@kbn/i18n-react';
-import { isSignificantEventsSortField } from '@kbn/significant-events-plugin/common';
+import {
+  isSignificantEventsSortField,
+  type SignificantEventsSortField,
+} from '@kbn/significant-events-plugin/common';
 import type { SignificantEventResponse } from '@kbn/significant-events-schema';
 import React, { useMemo } from 'react';
 import {
@@ -31,7 +34,7 @@ import {
   NIGHTSHIFT_EBT_DETAILS,
   NIGHTSHIFT_EBT_ELEMENTS,
 } from '../../../common/ebt_constants';
-import { useFormatTimestamp } from '../../../common/format_timestamp';
+import { useFormatTimestamp } from '../../../hooks/use_format_timestamp';
 import {
   isNeedsActionStatus,
   SIGNIFICANT_EVENT_INVESTIGATION_STATE_LABELS,
@@ -42,6 +45,8 @@ import { SeverityBadge } from '../../../components/ui/severity_badge';
 import { getInvestigationState } from '../../../data/significant_events/investigation_state';
 import {
   ACTIONS_COLUMN_LABEL,
+  CREATED_AT_COLUMN_LABEL,
+  CREATED_AT_COLUMN_TOOLTIP,
   EVENT_COLUMN_LABEL,
   EVENTS_TABLE_CAPTION,
   INVESTIGATE_LABEL,
@@ -49,13 +54,39 @@ import {
   LOADING_EVENTS_MESSAGE,
   SEVERITY_LABEL,
   STATUS_LABEL,
-  TIME_COLUMN_LABEL,
-  TIME_COLUMN_TOOLTIP,
+  UPDATED_AT_COLUMN_LABEL,
+  UPDATED_AT_COLUMN_TOOLTIP,
   VIEW_INVESTIGATION_LABEL,
 } from './translations';
 import type { EventsSort } from './use_events_url_state';
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
+
+const RelativeTimeCell = ({ timestamp }: { timestamp: string }): React.ReactElement => {
+  const formatTimestamp = useFormatTimestamp();
+  const time = Date.parse(timestamp);
+  if (Number.isNaN(time)) {
+    return <EuiText size="s">{formatTimestamp(timestamp)}</EuiText>;
+  }
+  const { value, unit } = selectUnit(time);
+  return (
+    <EuiToolTip content={formatTimestamp(timestamp)}>
+      <EuiText size="s" tabIndex={0}>
+        <FormattedRelativeTime value={value} unit={unit} numeric="always" style="short" />
+      </EuiText>
+    </EuiToolTip>
+  );
+};
+
+const toTableSortField = (field: SignificantEventsSortField): keyof SignificantEventResponse =>
+  field === 'updated_at' ? '@timestamp' : field;
+
+const toSortField = (
+  field?: keyof SignificantEventResponse
+): SignificantEventsSortField | undefined => {
+  const mapped = field === '@timestamp' ? 'updated_at' : field;
+  return isSignificantEventsSortField(mapped) ? mapped : undefined;
+};
 
 export interface EventsTableProps {
   events: SignificantEventResponse[];
@@ -84,13 +115,13 @@ export const EventsTable = ({
   onSortChange,
   onOpenButtonMount,
 }: EventsTableProps): React.ReactElement => {
-  const formatTimestamp = useFormatTimestamp();
   const { euiTheme } = useEuiTheme();
   const columns = useMemo<Array<EuiBasicTableColumn<SignificantEventResponse>>>(
     () => [
       {
         field: 'title',
         name: EVENT_COLUMN_LABEL,
+        minWidth: '280px',
         render: (title: string, event: SignificantEventResponse) => (
           <div
             css={css`
@@ -98,34 +129,33 @@ export const EventsTable = ({
             `}
           >
             <EuiText size="s">
-              <strong>{title}</strong>
+              <EuiTextBlockTruncate lines={2} cloneElement>
+                <strong title={title}>{title}</strong>
+              </EuiTextBlockTruncate>
             </EuiText>
             <EuiText size="xs" color="subdued">
-              <EuiTextBlockTruncate lines={2}>{event.summary}</EuiTextBlockTruncate>
+              <EuiTextBlockTruncate lines={2} title={event.summary}>
+                {event.summary}
+              </EuiTextBlockTruncate>
             </EuiText>
           </div>
         ),
       },
       {
-        field: 'created_at',
-        name: TIME_COLUMN_LABEL,
-        nameTooltip: { content: TIME_COLUMN_TOOLTIP },
+        field: '@timestamp',
+        name: UPDATED_AT_COLUMN_LABEL,
+        nameTooltip: { content: UPDATED_AT_COLUMN_TOOLTIP },
         width: '9em',
         sortable: true,
-        render: (createdAt: string) => {
-          const time = Date.parse(createdAt);
-          if (Number.isNaN(time)) {
-            return <EuiText size="s">{formatTimestamp(createdAt)}</EuiText>;
-          }
-          const { value, unit } = selectUnit(time);
-          return (
-            <EuiToolTip content={formatTimestamp(createdAt)}>
-              <EuiText size="s" tabIndex={0}>
-                <FormattedRelativeTime value={value} unit={unit} numeric="always" style="short" />
-              </EuiText>
-            </EuiToolTip>
-          );
-        },
+        render: (updatedAt: string) => <RelativeTimeCell timestamp={updatedAt} />,
+      },
+      {
+        field: 'created_at',
+        name: CREATED_AT_COLUMN_LABEL,
+        nameTooltip: { content: CREATED_AT_COLUMN_TOOLTIP },
+        width: '9em',
+        sortable: true,
+        render: (createdAt: string) => <RelativeTimeCell timestamp={createdAt} />,
       },
       {
         field: 'status',
@@ -165,7 +195,7 @@ export const EventsTable = ({
       },
       {
         name: INVESTIGATION_LABEL,
-        width: '10em',
+        width: '8em',
         render: (event: SignificantEventResponse) => {
           const state = getInvestigationState(event);
           const label = SIGNIFICANT_EVENT_INVESTIGATION_STATE_LABELS[state];
@@ -225,18 +255,21 @@ export const EventsTable = ({
         },
       },
     ],
-    [euiTheme, formatTimestamp, onEventClick, onOpenButtonMount]
+    [euiTheme, onEventClick, onOpenButtonMount]
   );
 
   return (
     <EuiBasicTable<SignificantEventResponse>
       data-test-subj="nightshiftDetectionEventsTable"
       tableCaption={EVENTS_TABLE_CAPTION}
+      stickyHeader
+      tableLayout="auto"
+      scrollableInline
       itemId="event_id"
       items={events}
       columns={columns}
       loading={isLoading}
-      sorting={{ sort: { field: sort.field, direction: sort.order } }}
+      sorting={{ sort: { field: toTableSortField(sort.field), direction: sort.order } }}
       pagination={{
         pageIndex: page - 1,
         pageSize: perPage,
@@ -247,10 +280,10 @@ export const EventsTable = ({
         page: nextPage,
         sort: nextSort,
       }: CriteriaWithPagination<SignificantEventResponse>) => {
-        const nextSortField = nextSort?.field;
+        const nextSortField = toSortField(nextSort?.field);
         if (
           nextSort &&
-          isSignificantEventsSortField(nextSortField) &&
+          nextSortField &&
           (nextSortField !== sort.field || nextSort.direction !== sort.order)
         ) {
           onSortChange({ field: nextSortField, order: nextSort.direction });

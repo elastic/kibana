@@ -1666,14 +1666,20 @@ export class TaskStore {
     }));
     const searches = queries.flatMap((query) => [{}, query]);
 
-    const result = await this.esClient.msearch<SavedObjectsRawDoc['_source']>(
-      {
-        index: this.index,
-        ignore_unavailable: true,
-        searches,
-      },
-      { retryOnTimeout: false }
-    );
+    let result: estypes.MsearchResponse<SavedObjectsRawDoc['_source']>;
+    try {
+      result = await this.esClient.msearch<SavedObjectsRawDoc['_source']>(
+        {
+          index: this.index,
+          ignore_unavailable: true,
+          searches,
+        },
+        { retryOnTimeout: false }
+      );
+    } catch (e) {
+      this.errors$.next(e);
+      throw e;
+    }
     const { responses } = result;
 
     const versionMap = this.createVersionMap([]);

@@ -9,6 +9,7 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Suggestion } from '@kbn/lens-plugin/public';
+import type { TextBasedPersistedState } from '@kbn/lens-common';
 import {
   canImportVisContext,
   exportVisContext,
@@ -19,6 +20,7 @@ import {
 } from './external_vis_context';
 import type { QueryParams } from './external_vis_context';
 import { getLensVisMock } from '../__mocks__/lens_vis';
+import { allSuggestionsMock } from '../__mocks__/suggestions';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 import { tableMock, tableQueryMock } from '../__mocks__/table';
 import type { UnifiedHistogramVisContext } from '../types';
@@ -38,13 +40,39 @@ describe('external_vis_context', () => {
         breakdownField: undefined,
         columns: [],
         table: tableMock,
+        allSuggestions: allSuggestionsMock.map((suggestion) => {
+          const datasourceState = suggestion.datasourceState as TextBasedPersistedState;
+          return {
+            ...suggestion,
+            datasourceState: {
+              ...datasourceState,
+              layers: Object.fromEntries(
+                Object.entries(datasourceState.layers).map(([id, layer]) => [
+                  id,
+                  { ...layer, query: tableQueryMock },
+                ])
+              ),
+            },
+          };
+        }),
       });
 
       const visContext = lensVis.visContext;
-
+      const layers = visContext?.attributes.state.datasourceStates.textBased?.layers ?? {};
+      expect(Object.keys(layers).length).toBeGreaterThan(0);
+      for (const layer of Object.values(layers)) {
+        expect(layer.table).toEqual(tableMock);
+      }
       expect(visContext).toMatchSnapshot();
 
       exportedVisContext = exportVisContext(visContext);
+      expect(exportedVisContext).toBeDefined();
+      const exportedLayers =
+        exportedVisContext?.attributes.state.datasourceStates.textBased?.layers ?? {};
+      expect(Object.keys(exportedLayers)).toEqual(Object.keys(layers));
+      for (const layer of Object.values(exportedLayers)) {
+        expect(layer).not.toHaveProperty('table');
+      }
       expect(exportedVisContext).toMatchSnapshot();
     });
   });

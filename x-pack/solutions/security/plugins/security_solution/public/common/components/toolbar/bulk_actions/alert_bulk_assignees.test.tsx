@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TimelineItem } from '@kbn/timelines-plugin/common';
+import type { TimelineItem } from '@kbn/securitysolution-timeline-common';
 import { act, fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../mock';
