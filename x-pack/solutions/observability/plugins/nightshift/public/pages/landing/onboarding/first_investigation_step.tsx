@@ -623,4 +623,3 @@ function ComposeCard({
     </div>
   );
 }
-

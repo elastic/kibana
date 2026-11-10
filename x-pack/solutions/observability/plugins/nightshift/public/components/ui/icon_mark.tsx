@@ -34,23 +34,22 @@ export function IconMark({
 }: IconMarkProps): React.ReactElement {
   const { euiTheme } = useEuiTheme();
   const plateShadow = useEuiShadow('xs');
-  const plate =
-    isLogo
-      ? css`
-          background: ${euiTheme.colors.backgroundBasePlain};
-          color: ${euiTheme.colors.textHeading};
-          ${plateShadow}
-        `
-      : color === 'ai'
-        ? css`
-            background: ${surface ??
-            `linear-gradient(99.4deg, ${euiTheme.colors.backgroundLightPrimary} 3.97%, ${euiTheme.colors.backgroundLightAssistance} 65.6%)`};
-          `
-        : css`
-            background: ${euiTheme.colors.backgroundBaseHighlighted};
-            border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
-            color: ${euiTheme.colors.textParagraph};
-          `;
+  const plate = isLogo
+    ? css`
+        background: ${euiTheme.colors.backgroundBasePlain};
+        color: ${euiTheme.colors.textHeading};
+        ${plateShadow}
+      `
+    : color === 'ai'
+    ? css`
+        background: ${surface ??
+        `linear-gradient(99.4deg, ${euiTheme.colors.backgroundLightPrimary} 3.97%, ${euiTheme.colors.backgroundLightAssistance} 65.6%)`};
+      `
+    : css`
+        background: ${euiTheme.colors.backgroundBaseHighlighted};
+        border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
+        color: ${euiTheme.colors.textParagraph};
+      `;
 
   return (
     <div
