@@ -174,9 +174,16 @@ const heldOutChecks = (runs: ReturnType<typeof loadRuns>) => {
         when: new Date(Number(group.replace('verify-', '')) || 0).toISOString(),
         seeds: seeds.size,
         repeats,
+        // Both sides' models, because they are allowed to differ: a model switch can be part of
+        // an accepted variant, and then replaying the chain means replaying the switch too.
         models: [
           ...new Set(
             current.map((result) => (result.connectorId ?? '').replace('harness-opt-', ''))
+          ),
+        ].filter(Boolean),
+        baselineModels: [
+          ...new Set(
+            baseline.map((result) => (result.connectorId ?? '').replace('harness-opt-', ''))
           ),
         ].filter(Boolean),
         variantHash:

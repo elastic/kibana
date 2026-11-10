@@ -47,6 +47,39 @@ const snapshotTool = (worktree: string): { restore: () => void; path: string } =
   };
 };
 
+interface LedgerEntry {
+  round: number;
+  model?: string;
+  gate?: { accepted?: boolean };
+}
+
+/**
+ * Which model each side of the check must run on.
+ *
+ * The model a variant runs on is part of the variant, not a setting of the measurement: round 9
+ * was accepted *because* it paired a prose rule with a switch to a cheaper model. Measuring both
+ * sides on one model therefore hands the baseline an improvement the campaign had to earn, and
+ * the first run of this check did exactly that and reported "no held-out gain" for a chain whose
+ * largest accepted step was the model.
+ *
+ * So the chain is replayed: the baseline runs on the model the first round started from, the
+ * current harness on the model the last accepted round left behind. `--model` /
+ * `--baseline-model` override a side explicitly; `code default` means "pin nothing".
+ */
+const modelsFromLedger = (lineageDir: string): { baseline?: string; current?: string } => {
+  const path = Path.join(lineageDir, 'ledger.json');
+  if (!Fs.existsSync(path)) return {};
+  const ledger = JSON.parse(Fs.readFileSync(path, 'utf8')) as LedgerEntry[];
+  const named = (model?: string): string | undefined =>
+    model && model !== 'code default' ? model : undefined;
+
+  const accepted = ledger.filter((entry) => entry.gate?.accepted);
+  return {
+    baseline: named(ledger[0]?.model),
+    current: named(accepted[accepted.length - 1]?.model),
+  };
+};
+
 const pool = (runs: RunSummary[], label: string): RunSummary => ({
   label,
   configHash: label,
@@ -100,6 +133,7 @@ export const verifySealed = async ({
   target,
   restartCommand,
   modelAlias,
+  baselineModelAlias,
   log,
 }: {
   worktree: string;
@@ -121,25 +155,60 @@ export const verifySealed = async ({
   target: HarnessTarget;
   restartCommand: string;
   /**
-   * Model both sides are measured on.
+   * Model the current harness is measured on; defaults to the last accepted round's model.
    *
-   * Both, or neither: an incumbent pinned to one model compared against a baseline on another
-   * measures the model, not the change — which is exactly how four rounds were wasted.
+   * Pass this together with `baselineModelAlias` when the question is "does this prose help on
+   * model X" rather than "is the harness better than what we started with" — one model on both
+   * sides answers the first question and silently erases an accepted model switch in the second.
    */
   modelAlias?: string;
+  /** Model the baseline is measured on; defaults to the model the campaign started from. */
+  baselineModelAlias?: string;
   log: ToolingLog;
 }): Promise<void> => {
   const { runsDir, lineageDir } = harnessPaths();
   const outputDir = Path.join(runsDir, `verify-${Date.now()}`);
-  const connectorId = readModelChoices().find(
-    (choice) => choice.inferenceId.replace('harness-opt-', '') === modelAlias
-  )?.connectorId;
-  const laneEnv: Record<string, string> = connectorId
-    ? { ESQL_HARNESS_MODEL_CONNECTOR: connectorId }
-    : {};
-  if (connectorId) {
-    await restartLane({ command: restartCommand, url: target.kibanaUrl, env: laneEnv, log });
+  const fromLedger = modelsFromLedger(lineageDir);
+  const currentModel = modelAlias ?? fromLedger.current;
+  const baselineModel = baselineModelAlias ?? fromLedger.baseline;
+
+  const connectorFor = (alias?: string): string | undefined =>
+    alias
+      ? readModelChoices().find(
+          (choice) => choice.inferenceId.replace('harness-opt-', '') === alias
+        )?.connectorId
+      : undefined;
+
+  for (const [side, alias] of [
+    ['current', currentModel],
+    ['baseline', baselineModel],
+  ] as const) {
+    if (alias && !connectorFor(alias)) {
+      throw new Error(
+        `[verify] no connector for the ${side} model "${alias}" — run setup-models, or name a model from ~/.esql-harness/models.json`
+      );
+    }
   }
+
+  // An empty env is not the same as "leave the lane as it is": whatever the last run pinned is
+  // still pinned, so a side that should run the code's own choice has to be restarted too.
+  const laneEnvFor = (alias?: string): Record<string, string> => {
+    const connectorId = connectorFor(alias);
+    return connectorId ? { ESQL_HARNESS_MODEL_CONNECTOR: connectorId } : {};
+  };
+
+  log.info(
+    `[verify] models — current: ${currentModel ?? 'code default'}, baseline: ${
+      baselineModel ?? 'code default'
+    }${modelAlias || baselineModelAlias ? ' (overridden)' : ' (from the ledger)'}`
+  );
+
+  await restartLane({
+    command: restartCommand,
+    url: target.kibanaUrl,
+    env: laneEnvFor(currentModel),
+    log,
+  });
   const goldRows = await buildGoldRowCache({ esClient, examples });
   const currentHash = treeHash(worktree);
 
@@ -178,16 +247,26 @@ export const verifySealed = async ({
     } else {
       await execFileAsync('git', ['checkout', baselineRef, '--', TOOL_DIR], { cwd: worktree });
     }
-    await restartLane({ command: restartCommand, url: target.kibanaUrl, env: laneEnv, log });
+    await restartLane({
+      command: restartCommand,
+      url: target.kibanaUrl,
+      env: laneEnvFor(baselineModel),
+      log,
+    });
     log.info(`[verify] measuring the baseline (${baselineRef}, ${treeHash(worktree)})`);
     baselineRuns = await measure('sealed-baseline', treeHash(worktree));
   } finally {
     snapshot.restore();
-    await restartLane({ command: restartCommand, url: target.kibanaUrl, env: laneEnv, log });
     // `git checkout <ref> -- <path>` also stages what it writes, so the index would stay dirty
     // with the baseline's version of files the restore has already put back.
     await execFileAsync('git', ['reset', '--quiet'], { cwd: worktree }).catch(() => undefined);
-    await restartLane({ command: restartCommand, url: target.kibanaUrl, log });
+    // Leave the lane as the incumbent, on the incumbent's model — the next round starts here.
+    await restartLane({
+      command: restartCommand,
+      url: target.kibanaUrl,
+      env: laneEnvFor(currentModel),
+      log,
+    });
   }
 
   const candidate = pool(candidateRuns, 'current');
@@ -201,9 +280,9 @@ export const verifySealed = async ({
     `# Held-out check — ${new Date().toISOString()}`,
     '',
     `Split: ${examples.length} examples · ${repeats} repeat(s) × ${rollouts} rollout(s) per side`,
-    `Current: ${currentHash} · baseline: ${baselineDir ?? baselineRef} · model: ${
-      modelAlias ?? 'code default'
-    }`,
+    `Current: ${currentHash} on ${currentModel ?? 'the code default model'} · baseline: ${
+      baselineDir ?? baselineRef
+    } on ${baselineModel ?? 'the code default model'}`,
     '',
     '| metric | baseline | current | Δ |',
     '|---|---|---|---|',

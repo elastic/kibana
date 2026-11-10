@@ -70,7 +70,8 @@ export const cli = () =>
   generate-corpus [--probes n]      synthesize, back-translate and difficulty-label a corpus
   baseline [--tiers ids]            measure this worktree's harness, per model tier
   round / campaign --rounds n       propose → validate → gate → promote, repeatedly
-  check [--baseline ref]            held-out check: current harness vs baseline, repeated + paired
+  check [--baseline ref]            held-out check: current harness vs baseline, repeated + paired,
+                                    each side on its own variant's model
   sealed [--tiers id]               score the current worktree on the sealed split
   verify-tiers --tiers a,b          score the current worktree on each model, one lane restart each
   report [--serve] [--port n]       write (or serve) the HTML report
@@ -324,6 +325,7 @@ Both lanes' Kibana processes must run with ESQL_HARNESS_TRACE_FILE pointing at
             process.env.HARNESS_RESTART_INCUMBENT ??
             'true',
           modelAlias: optionalFlag(flags.model),
+          baselineModelAlias: optionalFlag(flags['baseline-model']),
           log,
         });
         return;
@@ -436,6 +438,7 @@ Both lanes' Kibana processes must run with ESQL_HARNESS_TRACE_FILE pointing at
           'restart-incumbent',
           'restart-candidate',
           'baseline',
+          'baseline-model',
           'repeats',
           'model',
           'es-repo',
@@ -454,6 +457,8 @@ Both lanes' Kibana processes must run with ESQL_HARNESS_TRACE_FILE pointing at
         --baseline <ref>     git ref to compare against in check (default origin/main)
         --repeats <n>        measurements per side in check (default 2)
         --model <alias>      model the incumbent starts on (campaign) or is measured on (check)
+        --baseline-model <a> model the baseline is measured on in check; both sides default to
+                             the models the ledger recorded for that point in the chain
         --kibana-url <url>   default http://localhost:5601
         --es-url <url>       default http://localhost:9200
         `,

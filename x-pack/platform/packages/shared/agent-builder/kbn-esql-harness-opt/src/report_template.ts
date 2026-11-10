@@ -310,7 +310,12 @@ function heldOutCheck(check) {
 
   return '<p class="muted">' + esc(check.when.slice(0, 16).replace('T', ' ')) + ' · variant ' +
     esc(check.variantHash) + ' · ' + check.seeds + ' seeds × ' + check.repeats +
-    ' repeat(s) per side · ' + esc(check.models.join(', ') || 'code default') + '</p>' +
+    ' repeat(s) per side</p>' +
+    '<p class="muted">baseline on ' + esc((check.baselineModels || []).join(', ') || 'the code default model') +
+    ' · current on ' + esc((check.models || []).join(', ') || 'the code default model') +
+    (JSON.stringify(check.baselineModels || []) === JSON.stringify(check.models || [])
+      ? ''
+      : ' — the model is part of the variant, so each side runs its own') + '</p>' +
     '<table><tr><th>metric</th><th>baseline</th><th>current</th><th>Δ</th></tr>' +
     row('reward (all)', check.baseline.meanReward, check.current.meanReward) +
     provenances.map((provenance) => row(
