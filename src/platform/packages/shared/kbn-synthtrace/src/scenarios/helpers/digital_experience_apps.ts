@@ -91,6 +91,13 @@ export interface DigitalExperienceScenarioOpts {
   /** How much a recorded session weighs: `light` (~50 KB), `typical` (~0.5 MB) or `heavy` (4 to 5 MB). */
   replaySize: ReplaySize;
   /**
+   * How long sessions run: `typical` (1 to 5 page views, seconds to a few minutes), `long` (15 to
+   * 40 page views, mostly 15 to 40 minutes) or `marathon` (60 to 120 page views, mostly 30 minutes
+   * to 2 hours). A session ends at the time it is generated for, so a range shorter than the
+   * session cuts off its start, and replay leaves out the page loads that started before the range.
+   */
+  sessionLength: SessionLength;
+  /**
    * Multiplies the number of sessions per minute of every app. Fractions of a session add up over
    * time, so a scale below 1 thins out every app in proportion.
    */
@@ -111,6 +118,7 @@ const DEFAULT_SCENARIO_OPTS: Omit<DigitalExperienceScenarioOpts, 'seed'> = {
   replayRate: 0,
   errorReplayRate: 0,
   replaySize: 'typical',
+  sessionLength: 'typical',
   scale: 1,
 };
 
@@ -958,6 +966,28 @@ export const parseReplaySize = (value: unknown, defaultValue: ReplaySize): Repla
   return size;
 };
 
+const SESSION_LENGTHS = {
+  typical: { minPageViews: 1, maxPageViews: 5, dwell: undefined },
+  long: { minPageViews: 15, maxPageViews: 40, dwell: { median: 40_000, sigma: 0.8 } },
+  marathon: { minPageViews: 60, maxPageViews: 120, dwell: { median: 40_000, sigma: 0.8 } },
+} as const;
+
+export type SessionLength = keyof typeof SESSION_LENGTHS;
+
+const SESSION_LENGTH_NAMES = Object.keys(SESSION_LENGTHS) as SessionLength[];
+
+/** Parses the `sessionLength` scenario option. */
+export const parseSessionLength = (value: unknown, defaultValue: SessionLength): SessionLength => {
+  if (value === undefined) {
+    return defaultValue;
+  }
+  const length = SESSION_LENGTH_NAMES.find((name) => name === value);
+  if (length === undefined) {
+    throw new Error(`sessionLength must be one of ${SESSION_LENGTH_NAMES.join(', ')}`);
+  }
+  return length;
+};
+
 /** Parses the `scale` scenario option, a positive number. */
 export const parseScale = (value: unknown, defaultValue: number): number => {
   if (value === undefined) {
@@ -1015,13 +1045,11 @@ export const parseDigitalExperienceScenarioOpts = (
       DEFAULT_SCENARIO_OPTS.errorReplayRate
     ),
     replaySize: parseReplaySize(opts?.replaySize, DEFAULT_SCENARIO_OPTS.replaySize),
+    sessionLength: parseSessionLength(opts?.sessionLength, DEFAULT_SCENARIO_OPTS.sessionLength),
     scale: parseScale(opts?.scale, DEFAULT_SCENARIO_OPTS.scale),
     seed: parseSeed(opts?.seed, getDefaultSeed(from)),
   };
 };
-
-const MIN_PAGE_VIEWS = 1;
-const MAX_PAGE_VIEWS = 5;
 
 const MS_PER_MINUTE = 60_000;
 
@@ -1135,11 +1163,13 @@ export const generateEdotBrowserSessions = (
     replayRate,
     errorReplayRate,
     replaySize,
+    sessionLength,
     scale,
     seed,
   }: DigitalExperienceScenarioOpts & { environment: string; from: number }
-): Array<SynthtraceGenerator<EdotBrowserDocument>> =>
-  DIGITAL_EXPERIENCE_APPS.flatMap(
+): Array<SynthtraceGenerator<EdotBrowserDocument>> => {
+  const { minPageViews, maxPageViews, dwell } = SESSION_LENGTHS[sessionLength];
+  return DIGITAL_EXPERIENCE_APPS.flatMap(
     ({
       serviceName,
       serviceVersion,
@@ -1193,7 +1223,7 @@ export const generateEdotBrowserSessions = (
           ({ time, index }) => {
             const random = createSeededRandom(`${seed}:${sessionKey}:${index}`);
             const pageViews =
-              MIN_PAGE_VIEWS + Math.floor(random() * (MAX_PAGE_VIEWS - MIN_PAGE_VIEWS + 1));
+              minPageViews + Math.floor(random() * (maxPageViews - minPageViews + 1));
             const pickedProfile = edotBrowser.pickBrowserProfile(random, browserWeights);
             // Drawn apart from the session, so that the option doesn't change the rest of its draws
             const profile =
@@ -1231,6 +1261,7 @@ export const generateEdotBrowserSessions = (
                 random,
                 client: visitClient,
                 pageViews: views,
+                dwell,
                 resumed,
                 ...reporting,
                 ...anchor,
@@ -1345,3 +1376,4 @@ export const generateEdotBrowserSessions = (
       });
     }
   );
+};

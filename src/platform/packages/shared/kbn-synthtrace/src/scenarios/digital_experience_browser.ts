@@ -90,6 +90,11 @@
  * - replaySize (`light`, `typical` or `heavy`, default: `typical`): about 50 KB, 0.5 MB and 4 to 5 MB
  *   of uncompressed rrweb events per recorded session. Replay is about 10 times the bytes of the
  *   rest of the data: use `--workers` and a lower `replayRate` for volume runs
+ * - sessionLength (`typical`, `long` or `marathon`, default: `typical`): 1 to 5 page views of seconds
+ *   to a few minutes, 15 to 40 page views over mostly 15 to 40 minutes, or 60 to 120 page views over
+ *   mostly 30 minutes to 2 hours. Replay grows with it: a marathon session has about 4,000 to 14,000
+ *   replay events at `light` and up to 8 times that at `heavy`. A session ends at the time it is
+ *   generated for, so use a range longer than the session (`--from=now-3h` for marathon)
  * - scale (number, default: 1): multiplies the number of sessions per minute of every app
  * - seed (string or number, default: the run's `from` in milliseconds): makes the data
  *   reproducible
@@ -100,6 +105,7 @@
  *   node scripts/synthtrace digital_experience_browser --from=now-1h --to=now --scenarioOpts environments=true
  *   node scripts/synthtrace digital_experience_browser --from=now-1h --to=now --scenarioOpts edgeCases=true,scale=3
  *   node scripts/synthtrace digital_experience_browser --from=now-1h --to=now --scenarioOpts replayRate=0.3,errorReplayRate=0.5
+ *   node scripts/synthtrace digital_experience_browser --from=now-3h --to=now --scenarioOpts replayRate=1,sessionLength=marathon,scale=0.05
  */
 
 import type { Scenario } from '../cli/scenario';

@@ -13,6 +13,7 @@ import {
   generateEdotBrowserSessions,
   parseDigitalExperienceScenarioOpts,
   type DigitalExperienceScenarioOpts,
+  type SessionLength,
 } from './digital_experience_apps';
 
 const REPLAY_INDEX = 'logs-rum.replay.otel-default';
@@ -41,6 +42,7 @@ const generate = (
     replayRate: 0,
     errorReplayRate: 0,
     replaySize: 'light' as ReplaySize,
+    sessionLength: 'typical' as SessionLength,
     scale: 1,
     seed: 'digital-experience-replay-test',
     ...opts,
@@ -109,6 +111,18 @@ describe('digital experience session replay', () => {
         )
       ).toEqual(
         expect.objectContaining({ replayRate: 0.3, errorReplayRate: 0, replaySize: 'light' })
+      );
+    });
+
+    it('has typical sessions by default, and accepts the other lengths', () => {
+      expect(parseDigitalExperienceScenarioOpts(undefined, FROM).sessionLength).toBe('typical');
+      ['typical', 'long', 'marathon'].forEach((sessionLength) =>
+        expect(parseDigitalExperienceScenarioOpts({ sessionLength }, FROM).sessionLength).toBe(
+          sessionLength
+        )
+      );
+      expect(() => parseDigitalExperienceScenarioOpts({ sessionLength: 'forever' }, FROM)).toThrow(
+        'sessionLength must be one of typical, long, marathon'
       );
     });
 
@@ -232,6 +246,46 @@ describe('digital experience session replay', () => {
         )
       );
       expect(triggers).toEqual(new Set(['sampled', 'error']));
+    });
+
+    describe('session length', () => {
+      const spans = (length: SessionLength, extra: Partial<DigitalExperienceScenarioOpts> = {}) => {
+        const docs = generate(
+          { replayRate: 1, sessionLength: length, withSessionId: true, ...extra },
+          { from: WIDE_FROM }
+        );
+        const times = new Map<string, number[]>();
+        docs
+          .filter((doc) => !isReplay(doc) && sessionIdOf(doc))
+          .forEach((doc) =>
+            times.set(sessionIdOf(doc), [
+              ...(times.get(sessionIdOf(doc)) ?? []),
+              Number(doc['@timestamp']),
+            ])
+          );
+        const replayEvents = new Map<string, number>();
+        docs
+          .filter((doc) => isReplay(doc) && eventNameOf(doc) === 'elastic.replay.event')
+          .forEach((doc) =>
+            replayEvents.set(sessionIdOf(doc), (replayEvents.get(sessionIdOf(doc)) ?? 0) + 1)
+          );
+        const longest = Math.max(
+          ...[...times.values()].map((values) => Math.max(...values) - Math.min(...values))
+        );
+        return { longestMs: longest, maxReplayEvents: Math.max(0, ...replayEvents.values()) };
+      };
+
+      it('is the same as before with typical sessions', () => {
+        expect(generate({ replayRate: 0.3, sessionLength: 'typical' })).toEqual(withReplay);
+      });
+
+      it('makes long sessions run for minutes, with more replay events than typical ones', () => {
+        const typical = spans('typical');
+        const long = spans('long');
+        expect(long.longestMs).toBeGreaterThan(10 * 60_000);
+        expect(long.longestMs).toBeGreaterThan(typical.longestMs);
+        expect(long.maxReplayEvents).toBeGreaterThan(typical.maxReplayEvents);
+      });
     });
 
     describe('edge cases', () => {
