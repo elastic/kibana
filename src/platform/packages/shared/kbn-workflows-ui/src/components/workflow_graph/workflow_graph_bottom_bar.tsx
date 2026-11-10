@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiPanel,
   EuiPopover,
   EuiToolTip,
   useEuiShadow,
@@ -379,26 +380,22 @@ export function WorkflowDetailBottomBar({
   return (
     <WorkflowBottomBarContext.Provider value={{ isExpanded }}>
       <div ref={containerRef} css={barCss} data-test-subj="workflowDetailBottomBar">
-        <div
-          css={[
-            {
-              pointerEvents: isExpanded ? 'auto' : 'none',
-              opacity: isExpanded ? 1 : 0,
-              transition: 'opacity 200ms ease',
-              background: euiTheme.colors.backgroundBasePlain,
-              borderRadius: 12,
-              paddingBlock: euiTheme.size.s,
-              paddingLeft: 12,
-              paddingRight: euiTheme.size.s,
-              display: 'inline-flex',
-              maxWidth: 'min(980px, 100%)',
-              position: 'relative',
-              zIndex: 1,
-            },
-            floatingShadow,
-          ]}
+        <EuiPanel
+          hasShadow
+          hasBorder
+          paddingSize="s"
+          css={{
+            pointerEvents: isExpanded ? 'auto' : 'none',
+            opacity: isExpanded ? 1 : 0,
+            transition: 'opacity 200ms ease',
+            display: 'inline-flex',
+            maxWidth: 'min(980px, 100%)',
+            position: 'relative',
+            zIndex: 1,
+          }}
           onMouseEnter={handleExpandedMouseEnter}
           onMouseLeave={handleExpandedMouseLeave}
+          data-test-subj="workflowDetailBottomBarContent"
         >
           <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center" wrap={false}>
             {/* Left section — yaml actions slot, only shown in yaml view. */}
@@ -447,7 +444,7 @@ export function WorkflowDetailBottomBar({
               </EuiFlexItem>
             ) : null}
           </EuiFlexGroup>
-        </div>
+        </EuiPanel>
 
         {/* Collapsed pill — hover to expand */}
         <div
