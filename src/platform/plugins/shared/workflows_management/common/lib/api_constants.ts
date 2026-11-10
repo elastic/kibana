@@ -15,12 +15,3 @@ export const PAGE_LINK_API_PATH = '/internal/workflows/pages/{workflowId}/link';
 
 /** Authenticated route that retires the current page URL and returns a new one. */
 export const PAGE_ROTATE_API_PATH = '/internal/workflows/pages/{workflowId}/_rotate';
-
-/** Base route of the public page app. The page URL is `/pages/{workflowId}/k/{secret}`. */
-export const PAGE_APP_ROUTE = '/pages';
-
-/**
- * Unauthenticated route that returns the form definition of a page (title, description,
- * schema, ui). The secret in the path is the credential, as on the page URL.
- */
-export const PAGE_DEFINITION_API_PATH = '/internal/workflows/pages/{workflowId}/k/{secret}';

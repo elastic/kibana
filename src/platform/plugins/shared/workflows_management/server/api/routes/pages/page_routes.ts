@@ -127,9 +127,8 @@ export function registerPageAppRoute(deps: RouteDependencies) {
           ...request.params,
           spaceId: spaces.getSpaceId(request),
         });
-        // SPIKE: anonymous pages load only plugins with `enabledOnAnonymousPages`, and
-        // workflowsManagement cannot be one. Until the page app moves to a small anonymous
-        // plugin, only a logged-in visitor gets a working page.
+        // A visitor without a session gets the anonymous app. The `workflowsPages` plugin
+        // loads there and draws the form.
         return request.auth.isAuthenticated
           ? response.renderCoreApp()
           : response.renderAnonymousCoreApp();

@@ -44,7 +44,6 @@ import type {
   WorkflowsServices,
 } from './types';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
-import { PAGE_APP_ROUTE } from '../common/lib/api_constants';
 import { stepSchemas } from '../common/step_schemas';
 
 export class WorkflowsPlugin
@@ -126,37 +125,7 @@ export class WorkflowsPlugin
       },
     });
 
-    this.registerPageApp(core);
-
     return {};
-  }
-
-  /**
-   * The anonymous, chromeless app behind a workflow page URL. The server checks the URL
-   * secret before it serves the app, so this only draws the form.
-   */
-  private registerPageApp(core: CoreSetup<WorkflowsPublicPluginStartDependencies>): void {
-    // Anonymous paths match exactly, and every page URL is unique. Register the current
-    // one so the security plugin does not send the visitor to the login page.
-    const currentPath = core.http.basePath.remove(window.location.pathname);
-    if (currentPath.startsWith(`${PAGE_APP_ROUTE}/`)) {
-      core.http.anonymousPaths.register(currentPath);
-    }
-
-    core.application.register({
-      id: `${PLUGIN_ID}_page`,
-      title: PLUGIN_NAME,
-      appRoute: PAGE_APP_ROUTE,
-      chromeless: true,
-      visibleIn: [],
-      mount: async ({ element }: AppMountParameters) => {
-        const [[coreStart], { renderPageApp }] = await Promise.all([
-          core.getStartServices(),
-          import('./workflow_page/page_app'),
-        ]);
-        return renderPageApp(coreStart, element);
-      },
-    });
   }
 
   public start(

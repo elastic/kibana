@@ -246,6 +246,7 @@
       "src/platform/packages/shared/kbn-workflows",
       "src/platform/packages/shared/kbn-workflows-library",
       "src/platform/plugins/shared/workflows_management",
+      "src/platform/plugins/shared/workflows_pages",
       "x-pack/platform/plugins/shared/agent_builder_workflows"
     ],
     "workflowsExecutionEngine": "src/platform/plugins/shared/workflows_execution_engine",

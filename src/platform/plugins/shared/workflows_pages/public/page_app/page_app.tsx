@@ -28,7 +28,7 @@ import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { PageInputs, PageUi } from '@kbn/workflows/spec/schema/triggers/page_trigger_schema';
 import { PageFormValidator } from './page_validator';
 import { pageTemplates, pageWidgets, toRenderSchema, withWidgetComponents } from './page_widgets';
-import { PAGE_DEFINITION_API_PATH } from '../../common/lib/api_constants';
+import { PAGE_DEFINITION_API_PATH } from '../../common';
 
 /** The form definition returned by the server, after the secret check. */
 interface PageDefinition {
@@ -79,7 +79,7 @@ const toFormUiSchema = (ui: PageUi | undefined): UiSchema => {
     ...ui,
     ...(withRest ? { 'ui:order': withRest } : {}),
     'ui:submitButtonOptions': {
-      submitText: i18n.translate('workflowsManagement.page.submit', { defaultMessage: 'Submit' }),
+      submitText: i18n.translate('workflows.pages.submit', { defaultMessage: 'Submit' }),
       ...ui?.['ui:submitButtonOptions'],
     },
   } as UiSchema;
@@ -160,12 +160,12 @@ export const PageApp = ({ http, page }: { http: HttpSetup; page: PageRef | undef
         iconType="warning"
         title={
           <h2>
-            {i18n.translate('workflowsManagement.page.notFound', {
+            {i18n.translate('workflows.pages.notFound', {
               defaultMessage: 'This page is not available',
             })}
           </h2>
         }
-        body={i18n.translate('workflowsManagement.page.notFoundBody', {
+        body={i18n.translate('workflows.pages.notFoundBody', {
           defaultMessage: 'The link may be wrong or retired. Ask the page owner for a new link.',
         })}
       />
@@ -177,7 +177,7 @@ export const PageApp = ({ http, page }: { http: HttpSetup; page: PageRef | undef
         color="success"
         title={
           <h2>
-            {i18n.translate('workflowsManagement.page.submitted', {
+            {i18n.translate('workflows.pages.submitted', {
               defaultMessage: 'Thank you. Your response was sent.',
             })}
           </h2>

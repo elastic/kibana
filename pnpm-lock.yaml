@@ -4162,6 +4162,9 @@ importers:
       '@kbn/workflows-management-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/workflows_management
+      '@kbn/workflows-pages-plugin':
+        specifier: workspace:*
+        version: link:src/platform/plugins/shared/workflows_pages
       '@kbn/workflows-ui':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-workflows-ui
@@ -8805,6 +8808,8 @@ importers:
   src/platform/plugins/shared/workflows_extensions: {}
 
   src/platform/plugins/shared/workflows_management: {}
+
+  src/platform/plugins/shared/workflows_pages: {}
 
   src/platform/test: {}
 

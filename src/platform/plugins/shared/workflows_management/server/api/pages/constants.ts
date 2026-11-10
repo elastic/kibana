@@ -17,11 +17,8 @@
  */
 export const PAGE_FORM_PATH = '/pages/{workflowId}/k/{secret}';
 
-export {
-  PAGE_DEFINITION_API_PATH,
-  PAGE_LINK_API_PATH,
-  PAGE_ROTATE_API_PATH,
-} from '../../../common/lib/api_constants';
+export { PAGE_DEFINITION_API_PATH } from '@kbn/workflows-pages-plugin/common';
+export { PAGE_LINK_API_PATH, PAGE_ROTATE_API_PATH } from '../../../common/lib/api_constants';
 
 export const PAGE_WORKFLOW_ID_MAX_LENGTH = 255;
 
