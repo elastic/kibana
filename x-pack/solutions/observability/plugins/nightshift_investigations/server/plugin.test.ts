@@ -22,6 +22,7 @@ const createPlugin = (memoryEnabled = false) =>
       wiki: { enabled: false },
       decision_trees: { enabled: true },
       memory: { enabled: memoryEnabled },
+      learning: { enabled: true },
       findings_recorder: { enabled: true },
     })
   );
@@ -40,6 +41,7 @@ describe('NightshiftInvestigationsPlugin setup', () => {
         wiki: { enabled: false },
         decision_trees: { enabled: false },
         memory: { enabled: false },
+        learning: { enabled: true },
       })
     );
     plugin.setup(coreMock.createSetup(), {
@@ -134,6 +136,8 @@ describe('NightshiftInvestigationsPlugin setup', () => {
         'nightshift_investigation_process@1.0.0',
         'nightshift_conclusion_quality@1.0.0',
         'nightshift_alert_outcome_rca_accuracy@1.0.0',
+        'nightshift_alert_outcome_benign_classification@1.0.0',
+        'nightshift_alert_outcome_rca_reporting_gap@1.0.0',
         'nightshift_wiki_pages_read@1.0.0',
         'nightshift_wiki_page_influence@1.0.0',
       ]

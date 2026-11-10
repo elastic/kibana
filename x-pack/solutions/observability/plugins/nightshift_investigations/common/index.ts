@@ -21,6 +21,7 @@ export {
   EXTERNAL_ALERT_SOURCE,
   MAX_AUTOMATION_INSTRUCTIONS_LENGTH,
 } from './automation_limits';
+export { isScheduleOnlyAutomation } from './automation_run';
 export { parsePresetSchedule, presetScheduleSchema } from './automation_schedule';
 export type { PresetSchedule } from './automation_schedule';
 
@@ -54,6 +55,7 @@ export {
   investigationSubjectSchema,
   MAX_ALERTS_PER_INVESTIGATION,
   MAX_INVESTIGATION_NOTIFICATIONS,
+  MAX_V2_ALERT_DATA_LENGTH,
   v2AlertSnapshotSchema,
 } from './schemas';
 
@@ -138,6 +140,8 @@ export interface StartInvestigationResponse {
    * after a first start the id may not resolve yet.
    */
   investigation_id: string;
+  /** The execution started for an automation, used to follow its investigation after dispatch. */
+  execution_id?: string;
 }
 
 export const NIGHTSHIFT_INVESTIGATION_AGENT_ID = 'nightshift.investigation';

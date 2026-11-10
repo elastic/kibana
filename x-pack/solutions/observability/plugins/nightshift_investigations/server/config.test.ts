@@ -17,6 +17,10 @@ describe('Nightshift investigations configuration', () => {
   it('preserves an explicit Wiki opt-out', () => {
     expect(config.schema.validate({ wiki: { enabled: false } }).wiki.enabled).toBe(false);
   });
+
+  it('enables learning by default', () => {
+    expect(config.schema.validate({}).learning.enabled).toBe(true);
+  });
 });
 
 describe('Nightshift investigations configuration deprecations', () => {
