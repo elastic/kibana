@@ -246,6 +246,29 @@ export async function rollbackBatch(
   const actionIds: string[] = [];
 
   const errorsByActionId: Record<string, Record<Agent['id'], Error>> = {};
+  // Which agents already have an error result under each action, so that a group written inside
+  // the loop and the pre-action errors assigned afterwards cannot produce two results for one
+  // agent.
+  const agentsWithErrorResults: Record<string, Set<string>> = {};
+
+  const writeErrorActionResults = async (actionId: string) => {
+    const written = (agentsWithErrorResults[actionId] ??= new Set());
+    const pending = Object.entries(errorsByActionId[actionId] ?? {}).filter(
+      ([agentId]) => !written.has(agentId)
+    );
+    if (pending.length === 0) {
+      return;
+    }
+    await createErrorActionResults(
+      esClient,
+      actionId,
+      Object.fromEntries(pending),
+      'no valid rollback available for agent'
+    );
+    for (const [agentId] of pending) {
+      written.add(agentId);
+    }
+  };
   const now = new Date().toISOString();
   const namespaces = spaceIds ?? options.spaceIds ?? [];
 
@@ -285,9 +308,12 @@ export async function rollbackBatch(
 
     // Only the agents whose bookkeeping actually landed are named by the action. An agent whose
     // update failed was never marked as rolling back, so there is nothing to dispatch to it, and
-    // listing it anyway is what would make a replay filter it out on the strength of a document
-    // that says it was handled — leaving it with neither a rollback nor a result. Left out, it is
-    // picked up again by the next run, which either marks it or records why it could not.
+    // naming it anyway would have it waited on for an acknowledgement it can never send.
+    //
+    // It is still accounted for: the error results written just below record why it was not
+    // actioned, which is what `total` counts it against and what a replay reads to leave it alone.
+    // Only a run that dies before that write leaves it with neither a document nor a result, and
+    // that is the case where it should be picked up again.
     const agentsToDispatch = agents.filter((agent) => !errorsByActionId[actionId][agent.id]);
 
     try {
@@ -339,6 +365,13 @@ export async function rollbackBatch(
     }
 
     actionIds.push(actionId);
+
+    // Written as soon as the document they belong to exists, rather than at the end of the
+    // function. They are what accounts for the agents this action counts but did not dispatch to,
+    // so every write between here and there is another way for the action to be left counting
+    // agents that can never resolve under its id. Not inside the try above: a failure here is not
+    // a failed dispatch, and compensating for it would unmark agents whose rollback is live.
+    await writeErrorActionResults(actionId);
   }
 
   // Create actions for versions that have errors but no eligible agents
@@ -404,21 +437,17 @@ export async function rollbackBatch(
     }
   }
 
-  // Errors for agents with rollback data are assigned to their version-specific action. Written
-  // after the action documents, not before: results written first would be left under an action id
-  // that never got a document if the action write then failed, and deduplication reads a result as
-  // "this agent was handled" — so the retry would skip those agents while `action_status` ignored
-  // their results, the action having no document to attach them to.
+  // Whatever is left: the error-only actions, and the pre-action errors assigned above to an
+  // action whose own results were already written. Anything written in the loop is skipped rather
+  // than written twice.
+  //
+  // Never before the action document it belongs to, which an earlier revision tried: a result
+  // written first is orphaned under an action id that never got a document if the action write
+  // then fails, and deduplication reads a result as "this agent was handled" — so a replay would
+  // skip the agent while `action_status`, which only reads results for actions that exist,
+  // ignored the result it left behind.
   for (const actionId of actionIds) {
-    const actionErrors = errorsByActionId[actionId];
-    if (actionErrors && Object.keys(actionErrors).length > 0) {
-      await createErrorActionResults(
-        esClient,
-        actionId,
-        actionErrors,
-        'no valid rollback available for agent'
-      );
-    }
+    await writeErrorActionResults(actionId);
   }
 
   return {

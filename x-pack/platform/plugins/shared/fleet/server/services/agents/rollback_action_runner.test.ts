@@ -242,9 +242,11 @@ describe('rollbackBatch', () => {
     );
   });
 
-  it('writes the error results after the action document, not before', async () => {
-    // results written first would be orphaned under an action id that never got a document if the
-    // action write then failed, and dedupe reads a result as "this agent was handled"
+  it('writes the error results of a group right after its document, and not before', async () => {
+    // before: a result is orphaned under an action id that never got a document if the action
+    // write then fails, and dedupe reads a result as "this agent was handled". Later than this:
+    // every write in between is another way to leave the action counting an agent that can never
+    // resolve under its id
     const order: string[] = [];
     mockedCreateErrorActionResults.mockImplementation(async () => {
       order.push('createErrorActionResults');
@@ -265,6 +267,79 @@ describe('rollbackBatch', () => {
     );
 
     expect(order).toEqual(['createAgentAction', 'createErrorActionResults']);
+  });
+
+  it('writes the results of a group before moving on to the next group', async () => {
+    const order: string[] = [];
+    mockedCreateErrorActionResults.mockImplementation(async (_esClient, actionId) => {
+      order.push(`results:${actionId}`);
+    });
+    mockedCreateAgentAction.mockImplementation(async (_esClient, _soClient, action) => {
+      order.push(`action:${action.id}`);
+      return {} as never;
+    });
+    mockedBulkUpdateAgents.mockImplementation(async (_esClient, updates, errors) => {
+      errors[updates[0].agentId] = new Error('version conflict');
+    });
+
+    const { actionIds } = await rollbackBatch(
+      esClient,
+      [createAgent('agent-0', '8.18.0'), createAgent('agent-1', '8.17.0')],
+      {},
+      {}
+    );
+
+    expect(order).toEqual([
+      `action:${actionIds[0]}`,
+      `results:${actionIds[0]}`,
+      `action:${actionIds[1]}`,
+      `results:${actionIds[1]}`,
+    ]);
+  });
+
+  it('does not write an error result twice for one agent', async () => {
+    // a group's own results are written in the loop, and the pre-action errors are assigned to the
+    // first action afterwards
+    mockedBulkUpdateAgents.mockImplementation(async (_esClient, _updates, errors) => {
+      errors['agent-1'] = new Error('version conflict');
+    });
+
+    await rollbackBatch(
+      esClient,
+      [
+        createAgent('agent-0', '8.18.0'),
+        createAgent('agent-1', '8.18.0'),
+        { id: 'agent-2', upgrade: { rollbacks: [] } } as unknown as Agent,
+      ],
+      {},
+      {}
+    );
+
+    const writtenAgentIds = mockedCreateErrorActionResults.mock.calls.flatMap(([, , errors]) =>
+      Object.keys(errors)
+    );
+    expect(writtenAgentIds).toEqual([...new Set(writtenAgentIds)]);
+    expect(writtenAgentIds).toEqual(expect.arrayContaining(['agent-1', 'agent-2']));
+  });
+
+  it('does not compensate the bookkeeping when the results write fails', async () => {
+    // the action document exists by then, so those agents really are rolling back
+    mockedBulkUpdateAgents.mockImplementation(async (_esClient, _updates, errors) => {
+      errors['agent-1'] = new Error('version conflict');
+    });
+    mockedCreateErrorActionResults.mockRejectedValue(new Error('Request timed out'));
+
+    await expect(
+      rollbackBatch(
+        esClient,
+        [createAgent('agent-0', '8.18.0'), createAgent('agent-1', '8.18.0')],
+        {},
+        {}
+      )
+    ).rejects.toThrow('Request timed out');
+
+    // the forward write only, no restore
+    expect(mockedBulkUpdateAgents).toHaveBeenCalledTimes(1);
   });
 
   it('does not create the action when the agent bookkeeping fails', async () => {

@@ -51,6 +51,8 @@ import {
   toCompiledSecretRef,
 } from '../secrets';
 
+import { retryTransientEsErrors } from '../epm/elasticsearch/retry';
+
 import { bulkUpdateAgents } from './crud';
 
 const ONE_MONTH_IN_MS = 2592000000;
@@ -268,6 +270,12 @@ export async function createErrorActionResults(
   }
 }
 
+/** How many refused agents one log line names before it is cut short. */
+const MAX_LOGGED_RESULT_FAILURES = 10;
+
+/** How many times a result write is attempted before its refused items are only logged. */
+const MAX_RESULT_WRITE_ATTEMPTS = 3;
+
 export async function bulkCreateAgentActionResults(
   esClient: ElasticsearchClient,
   results: Array<{
@@ -281,56 +289,70 @@ export async function bulkCreateAgentActionResults(
     return;
   }
 
-  const bulkBody = results.flatMap((result) => {
-    const body = {
-      '@timestamp': new Date().toISOString(),
-      action_id: result.actionId,
-      agent_id: result.agentId,
-      namespaces: result.namespaces,
-      error: result.error,
-    };
-
-    return [
-      {
-        create: {
-          _id: uuidv4(),
-        },
-      },
-      body,
-    ];
-  });
-
   for (const result of results) {
     auditLoggingService.writeCustomAuditLog({
       message: `User created Fleet action result [id=${result.actionId}]`,
     });
   }
 
-  const res = await esClient.bulk({
-    index: AGENT_ACTIONS_RESULTS_INDEX,
-    operations: bulkBody,
-    refresh: 'wait_for',
-  });
+  const logger = appContextService.getLogger();
+
+  /** Writes the given results and hands back the ones Elasticsearch refused, in request order. */
+  const writeResults = async (toWrite: typeof results) => {
+    const operations = toWrite.flatMap((result) => [
+      { create: { _id: uuidv4() } },
+      {
+        '@timestamp': new Date().toISOString(),
+        action_id: result.actionId,
+        agent_id: result.agentId,
+        namespaces: result.namespaces,
+        error: result.error,
+      },
+    ]);
+
+    const res = await retryTransientEsErrors(
+      () =>
+        esClient.bulk({
+          index: AGENT_ACTIONS_RESULTS_INDEX,
+          operations,
+          refresh: 'wait_for',
+        }),
+      { logger }
+    );
+    if (!res.errors) {
+      return [];
+    }
+    // Items come back in request order, so this is which of `toWrite` did not land. A refused item
+    // indexed nothing, so rewriting it cannot produce a second result for that agent.
+    return toWrite.filter((_, index) => {
+      const item = res.items[index]?.create ?? res.items[index]?.index;
+      return !!item?.error;
+    });
+  };
 
   // A bulk reports per item failures in its response rather than throwing, so a write that only
-  // partly landed would otherwise read as complete. This is surfaced rather than thrown: callers
-  // write these results for a whole batch at once, and failing the batch would have it rewrite the
-  // results that did land, counting those agents twice. The callers that depend on a result being
-  // present read it back before acting on it instead.
-  if (res.errors) {
-    const failures = res.items
-      .map((item) => item.create ?? item.index)
-      .filter((item) => item?.error)
-      .map((item) => `${item!._id}: ${item!.error?.reason}`);
-    if (failures.length > 0) {
-      appContextService
-        .getLogger()
-        .error(
-          `Failed to write ${failures.length} of ${
-            results.length
-          } agent action results: ${failures.join(', ')}`
-        );
-    }
+  // partly landed would otherwise read as complete, and an action counting an agent whose result
+  // never arrived waits for it forever. The refused items are therefore written again before this
+  // gives up on them.
+  let pending = await writeResults(results);
+  for (let attempt = 0; attempt < MAX_RESULT_WRITE_ATTEMPTS - 1 && pending.length > 0; attempt++) {
+    pending = await writeResults(pending);
+  }
+
+  if (pending.length > 0) {
+    // Not thrown: these results are written for a whole batch at once, and failing the batch would
+    // have the retry rewrite the ones that did land under a new action id while the action they
+    // belong to stayed short either way. Logging is what is left.
+    const failedAgentIds = pending.map(({ agentId }) => agentId);
+    // Naming one agent per line would be one line per agent, so only the first few are named: a
+    // mapping problem or a full disk refuses every item of a batch that can hold ten thousand.
+    logger.error(
+      `Failed to write ${pending.length} of ${
+        results.length
+      } agent action results, for agents ${failedAgentIds
+        .slice(0, MAX_LOGGED_RESULT_FAILURES)
+        .join(', ')}${failedAgentIds.length > MAX_LOGGED_RESULT_FAILURES ? ', …' : ''}`
+    );
   }
 }
 

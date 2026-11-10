@@ -304,7 +304,7 @@ describe('Agent actions', () => {
     });
   });
 
-  describe('bulkCreateAgentActionResults', () => {
+  describe('bulkCreateAgentActionResults refused items', () => {
     it('should call audit logger', async () => {
       const mockEsClient = elasticsearchServiceMock.createInternalClient();
 
@@ -919,6 +919,70 @@ describe('Agent actions', () => {
           password: '$co.elastic.secret{passwordref1}',
         },
       });
+    });
+  });
+
+  describe('bulkCreateAgentActionResults', () => {
+    const okResponse = { errors: false, items: [] };
+    const results = [
+      { actionId: 'action1', agentId: 'agent1' },
+      { actionId: 'action1', agentId: 'agent2' },
+    ];
+
+    it('writes nothing when there is nothing to write', async () => {
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+
+      await bulkCreateAgentActionResults(esClientMock, []);
+
+      expect(esClientMock.bulk).not.toHaveBeenCalled();
+    });
+
+    it('writes the refused items again rather than only logging them', async () => {
+      // an action counting an agent whose result never arrived waits for it forever, and a refused
+      // item indexed nothing, so rewriting it cannot produce a second result for that agent
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+      esClientMock.bulk
+        .mockResolvedValueOnce({
+          errors: true,
+          items: [{ create: {} }, { create: { error: { reason: 'rejected' } } }],
+        } as any)
+        .mockResolvedValueOnce(okResponse as any);
+
+      await bulkCreateAgentActionResults(esClientMock, results);
+
+      expect(esClientMock.bulk).toHaveBeenCalledTimes(2);
+      // only the one that did not land
+      const retried = (esClientMock.bulk.mock.calls[1][0] as any).operations;
+      expect(retried).toHaveLength(2);
+      expect(retried[1].agent_id).toEqual('agent2');
+      expect(mockContext.logger.error).not.toHaveBeenCalled();
+    });
+
+    it('gives up after a bounded number of attempts and names the agents', async () => {
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+      esClientMock.bulk.mockResolvedValue({
+        errors: true,
+        items: [{ create: { error: { reason: 'rejected' } } }, { create: {} }],
+      } as any);
+
+      await bulkCreateAgentActionResults(esClientMock, results);
+
+      expect(esClientMock.bulk).toHaveBeenCalledTimes(3);
+      expect(mockContext.logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to write 1 of 2 agent action results, for agents agent1')
+      );
+    });
+
+    it('does not throw when items are refused', async () => {
+      // failing the batch would have the retry rewrite the results that did land, under a new
+      // action id, while the action they belong to stayed short either way
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+      esClientMock.bulk.mockResolvedValue({
+        errors: true,
+        items: [{ create: { error: { reason: 'rejected' } } }, { create: {} }],
+      } as any);
+
+      await expect(bulkCreateAgentActionResults(esClientMock, results)).resolves.toBeUndefined();
     });
   });
 
