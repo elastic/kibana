@@ -23,3 +23,36 @@ export {
   WorkflowRunFixture,
   type WorkflowRunFixtureOptions,
 } from './integration_tests/workflow_run_fixture';
+
+/**
+ * Runs a shipped managed workflow with every outside boundary faked (custom steps,
+ * Kibana and Elasticsearch steps, child workflows), and checks that a set of test
+ * cases covers every step and branch of the workflow.
+ */
+export {
+  runManagedWorkflow,
+  type ElasticsearchCall,
+  type FakeChildWorkflow,
+  type FakeElasticsearchStep,
+  type FakeKibanaStep,
+  type FakeStep,
+  type KibanaApiCall,
+  type KibanaApiResponse,
+  type ManagedWorkflowFakes,
+  type ManagedWorkflowRun,
+  type RecordedCall,
+  type RunEnd,
+} from './integration_tests/managed_workflow_harness';
+export {
+  describeBranchCoverage,
+  managedWorkflow,
+  matchesStepSchema,
+  parseWorkflow,
+  stepSchema,
+  workflowInputErrors,
+  type CoveredRun,
+  type JsonSchema,
+  type ParsedWorkflow,
+  type YamlStep,
+  type YamlWorkflow,
+} from './integration_tests/workflow_coverage';
