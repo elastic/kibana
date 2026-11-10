@@ -1205,6 +1205,7 @@ packages:
   - 'x-pack/examples/gen_ai_streaming_response_example'
   - 'x-pack/examples/lens_config_builder_example'
   - 'x-pack/examples/lens_embeddable_inline_editing_example'
+  - 'x-pack/examples/lens_exemplars_example'
   - 'x-pack/examples/screenshotting_example'
   - 'x-pack/examples/testing_embedded_lens'
   - 'x-pack/examples/third_party_lens_navigation_prompt'

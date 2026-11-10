@@ -2607,6 +2607,9 @@ importers:
       '@kbn/lens-embeddable-utils':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-lens-embeddable-utils
+      '@kbn/lens-exemplars-example-plugin':
+        specifier: workspace:*
+        version: link:x-pack/examples/lens_exemplars_example
       '@kbn/lens-formula-docs':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-lens-formula-docs
@@ -8909,6 +8912,8 @@ importers:
   x-pack/examples/lens_config_builder_example: {}
 
   x-pack/examples/lens_embeddable_inline_editing_example: {}
+
+  x-pack/examples/lens_exemplars_example: {}
 
   x-pack/examples/screenshotting_example: {}
 

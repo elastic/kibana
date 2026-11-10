@@ -893,6 +893,7 @@
     "@kbn/lens-common-2": "workspace:*",
     "@kbn/lens-config-builder-example-plugin": "workspace:*",
     "@kbn/lens-embeddable-utils": "workspace:*",
+    "@kbn/lens-exemplars-example-plugin": "workspace:*",
     "@kbn/lens-formula-docs": "workspace:*",
     "@kbn/lens-inline-editing-example-plugin": "workspace:*",
     "@kbn/lens-plugin": "workspace:*",

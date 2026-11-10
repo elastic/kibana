@@ -1779,6 +1779,8 @@
       "@kbn/lens-config-builder-example-plugin/*": ["./x-pack/examples/lens_config_builder_example/*"],
       "@kbn/lens-embeddable-utils": ["./src/platform/packages/shared/kbn-lens-embeddable-utils"],
       "@kbn/lens-embeddable-utils/*": ["./src/platform/packages/shared/kbn-lens-embeddable-utils/*"],
+      "@kbn/lens-exemplars-example-plugin": ["./x-pack/examples/lens_exemplars_example"],
+      "@kbn/lens-exemplars-example-plugin/*": ["./x-pack/examples/lens_exemplars_example/*"],
       "@kbn/lens-formula-docs": ["./src/platform/packages/private/kbn-lens-formula-docs"],
       "@kbn/lens-formula-docs/*": ["./src/platform/packages/private/kbn-lens-formula-docs/*"],
       "@kbn/lens-inline-editing-example-plugin": ["./x-pack/examples/lens_embeddable_inline_editing_example"],

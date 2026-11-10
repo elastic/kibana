@@ -1004,6 +1004,7 @@ x-pack/examples/exploratory_view_example @elastic/obs-signals-logs-team
 x-pack/examples/gen_ai_streaming_response_example @elastic/response-ops
 x-pack/examples/lens_config_builder_example @elastic/kibana-dashboards
 x-pack/examples/lens_embeddable_inline_editing_example @elastic/kibana-dashboards
+x-pack/examples/lens_exemplars_example @elastic/kibana-dashboards
 x-pack/examples/screenshotting_example @elastic/response-ops
 x-pack/examples/testing_embedded_lens @elastic/kibana-dashboards
 x-pack/examples/third_party_lens_navigation_prompt @elastic/kibana-dashboards
