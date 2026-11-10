@@ -89,6 +89,8 @@ const SUMMARIES: Record<FailureCategory, string> = {
   cluster_health: 'An Elasticsearch cluster health issue prevented generation from completing.',
   concurrent_conflict: 'A concurrent conflict occurred. Retry generation.',
   connector_error: 'A connector error prevented generation from completing.',
+  content_filter:
+    "The model's content filter stopped the response. Sending fewer alerts will not help; choose a different model.",
   context_length_exceeded:
     'The request exceeded the model context window. Reduce the number of alerts, or use a model with a larger context window.',
   interrupted: 'The run was interrupted (e.g. a Kibana restart or crash). Retry generation.',

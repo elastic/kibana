@@ -267,18 +267,39 @@ describe('composable pages', () => {
       expect(screen.getByTestId('ruleDetailsRoute')).toBeInTheDocument();
     });
 
-    it('RulesPage redirects sequence-builder URLs to the list when experimental features are disabled', () => {
-      mockAlertingV2ExperimentalFeaturesEnabled = false;
+    it('RulesPage renders the sequence builder at parent/sequence/:ruleId/edit', async () => {
       renderAtRoute(
         '/rules/v2',
-        '/rules/v2/sequence/create',
+        '/rules/v2/sequence/some-rule/edit',
         <AlertingV2RulesPage {...defaultProps()} />
       );
-
-      expect(screen.getByTestId('rulesListPage')).toBeInTheDocument();
-      expect(screen.queryByTestId('sequenceBuilderPage')).not.toBeInTheDocument();
-      mockAlertingV2ExperimentalFeaturesEnabled = true;
+      expect(await screen.findByTestId('sequenceBuilderPage')).toBeInTheDocument();
     });
+
+    it('RulesPage renders the sequence builder at parent/sequence/create for a clone', async () => {
+      renderAtRoute(
+        '/rules/v2',
+        '/rules/v2/sequence/create?cloneFrom=some-rule',
+        <AlertingV2RulesPage {...defaultProps()} />
+      );
+      expect(await screen.findByTestId('sequenceBuilderPage')).toBeInTheDocument();
+    });
+
+    it.each([
+      ['create', '/rules/v2/sequence/create'],
+      ['clone', '/rules/v2/sequence/create?cloneFrom=some-rule'],
+      ['edit', '/rules/v2/sequence/some-rule/edit'],
+    ])(
+      'RulesPage redirects the sequence %s URL to the list when experimental features are disabled',
+      (_name, location) => {
+        mockAlertingV2ExperimentalFeaturesEnabled = false;
+        renderAtRoute('/rules/v2', location, <AlertingV2RulesPage {...defaultProps()} />);
+
+        expect(screen.getByTestId('rulesListPage')).toBeInTheDocument();
+        expect(screen.queryByTestId('sequenceBuilderPage')).not.toBeInTheDocument();
+        mockAlertingV2ExperimentalFeaturesEnabled = true;
+      }
+    );
 
     it('ActionPoliciesPage renders list when parent route matches', () => {
       renderAtRoute(

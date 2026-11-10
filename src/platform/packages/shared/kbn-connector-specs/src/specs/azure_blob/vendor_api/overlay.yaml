@@ -1,0 +1,15 @@
+overlay: 1.0.0
+info:
+  title: Azure Blob Storage corrections
+  version: 1.0.0
+actions:
+  - target: $..parameters[?@.name == 'x-ms-version'].schema.enum
+    description: >-
+      The connector sends x-ms-version 2021-06-08, a Blob service version
+      (https://learn.microsoft.com/en-us/rest/api/storageservices/versioning-for-the-azure-storage-services)
+      that azure-rest-api-specs publishes no blob.json for. The operations the connector calls
+      (List Containers, List Blobs, Get Blob, Get Blob Properties) and their parameters are
+      identical in the 2021-04-10 and 2021-08-06 specs apart from this enum, so 2021-06-08 is
+      accepted here.
+    update:
+      - '2021-06-08'

@@ -26,7 +26,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
-import { useWorkflowsMonacoTheme } from '@kbn/workflows-ui';
 import { z } from '@kbn/zod/v4';
 import { ENABLED_STEP_TRIGGER_TABS } from './constants';
 import { NOT_READY_SENTINEL, StepExecuteHistoricalForm } from './step_execute_historical_form';
@@ -75,7 +74,6 @@ export const StepExecuteModal = React.memo<StepExecuteModalProps>(
     stepId,
     workflowGraph,
   }) => {
-    useWorkflowsMonacoTheme();
     const { euiTheme } = useEuiTheme();
     const stepContextOverride = useMemo(
       () => initialcontextOverride.stepContext ?? {},

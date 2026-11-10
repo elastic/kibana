@@ -22,9 +22,16 @@ import { merge } from 'lodash';
 import React, { useMemo } from 'react';
 import { Subject } from 'rxjs';
 import type { DeepPartial } from 'utility-types';
+import type { ComponentCatalogue } from '@kbn/streams-schema';
 import type { StreamsAppKibanaContext } from '../public/hooks/use_kibana';
+import componentCatalogueSnapshot from '../public/services/component_catalogue/catalogue_snapshot/components_v1.json';
 import { StreamsTelemetryService } from '../public/telemetry/service';
 import type { StreamsAppStartDependencies } from '../public/types';
+
+const componentCatalogueFixture = {
+  catalogue: componentCatalogueSnapshot as ComponentCatalogue,
+  stale: false,
+};
 
 export function getMockStreamsAppContext(): StreamsAppKibanaContext {
   const appParams = coreMock.createAppMountParameters();
@@ -112,6 +119,10 @@ export function getMockStreamsAppContext(): StreamsAppKibanaContext {
     services: {
       dataStreamsClient: Promise.resolve({} as unknown as DataStreamsStatsClient),
       telemetryClient: telemetryService.getClient(),
+      componentCatalogue: {
+        getCatalogue: () => Promise.resolve(componentCatalogueFixture),
+        getLastCatalogue: () => componentCatalogueFixture,
+      },
       version: '1.0.0',
     },
     isServerless: false,

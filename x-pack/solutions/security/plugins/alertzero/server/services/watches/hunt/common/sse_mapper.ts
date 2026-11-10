@@ -21,10 +21,23 @@
 
 import { createHash } from 'crypto';
 import dateMath from '@kbn/datemath';
-import { HuntIoc } from '@kbn/alertzero-common';
+import { HUNT_MATCHED_IOCS_MAX, HuntIoc } from '@kbn/alertzero-common';
 import type { SignificantSecurityEventAttachmentData } from '../../../../../common/significant_security_event_schema';
 import type { SeverityLevel } from '../../../../../common/attachment_enums';
+import {
+  buildSummary,
+  classifyBasis,
+  deriveDetections,
+  iocOfDetection,
+  type SseDetection,
+  SSE_CONFIRMED_HIT_BULLET_PREFIX,
+  SSE_TIER1_HIT_BULLET_PREFIX,
+  SSE_TIER2_HIT_BULLET_PREFIX,
+} from '../../../../../common/sse_view';
+import { splitRemoteCluster, stripBackingPrefix } from '../../../../../common/remote_cluster';
 import type { HuntCoordinatorCoreResult } from '../hunt_coordinator';
+import { clausesOf, type HuntFilterClause } from '../tier2/report_grounding';
+import { HostOrigins, toEntityOrigin } from './host_origin';
 
 /**
  * Full SSE attachment payload produced by this mapper. Derived from the
@@ -57,7 +70,6 @@ const CAPABILITY_ID = 'continuous_threat_hunt';
 const MAX_ENTITIES = 50;
 const MAX_HIT_REFS = 50;
 const MAX_EVIDENCE = 50;
-const MAX_TIMELINE = 50;
 /**
  * Schema caps the mapper must hold the coordinator's output to. Tier 1 aggregates
  * up to 500 `per_index` buckets and echoes up to 100 request IOCs; the SSE schema
@@ -301,23 +313,50 @@ const buildEntities = (
     (entity) => `${entity.field}|${entity.value}`
   );
 
-  return { entities: taken, truncated, originalCount };
+  const origins = hostOrigins(result, onlyTechniqueId);
+  const entities = taken.map((entity): SseEntityRef => {
+    const origin = entity.field === 'host.name' ? origins.originOf(entity.value) : undefined;
+    return origin ? { ...entity, ...origin } : entity;
+  });
+  return { entities, truncated, originalCount };
 };
 
-const DATA_STREAM_BACKING_PREFIX = '.ds-';
+/**
+ * Where each host entity was seen, merged over every place this entry names it: Tier 1's
+ * assets and the scoped behaviors' rows. `takeAlternating` keeps one copy of a host both
+ * tiers name, so the origin is merged here rather than read off whichever copy survived.
+ */
+const hostOrigins = (result: HuntCoordinatorCoreResult, onlyTechniqueId?: string): HostOrigins => {
+  const origins = new HostOrigins();
+  for (const host of result.tier1.affected_assets.hosts) {
+    origins.add(host.name, toEntityOrigin(host));
+  }
+  for (const behavior of scopedBehaviors(result, onlyTechniqueId)) {
+    const byName = new Map(
+      (behavior.affected_host_origins ?? []).map((origin) => [origin.name, toEntityOrigin(origin)])
+    );
+    for (const host of behavior.affected_hosts ?? []) origins.add(host, byName.get(host));
+  }
+  return origins;
+};
 
 /**
  * Alerts indices are hidden (`.alerts-security.alerts-*` and their
  * `.internal.alerts-*` backing indices), and the attachment schema rejects a
- * hidden index as an event source. Strip a data stream backing prefix first so
- * `.ds-logs-aws...` is not mistaken for a hidden index.
+ * hidden index as an event source. Strip a remote `<cluster>:` and a data stream
+ * backing prefix first so `.ds-logs-aws...` is not mistaken for a hidden index and
+ * `remote:.alerts-...` is not mistaken for an event index.
  */
-const isAlertsIndex = (index: string): boolean => {
-  const bare = index.startsWith(DATA_STREAM_BACKING_PREFIX)
-    ? index.slice(DATA_STREAM_BACKING_PREFIX.length)
-    : index;
-  return bare.startsWith('.');
-};
+const isAlertsIndex = (name: string): boolean =>
+  splitRemoteCluster(stripBackingPrefix(name)).index.startsWith('.');
+
+/**
+ * Every alert exit ramp is pinned to this space's local alerts alias, so an alert on a
+ * remote cluster has nothing to open and gets no ref. Its hit still counts in
+ * `hunt_result.tier1.per_index` and the tier counts.
+ */
+const isRemoteAlertsIndex = (name: string): boolean =>
+  isAlertsIndex(name) && splitRemoteCluster(name).cluster !== undefined;
 
 /**
  * A hit's `timestamp` is the raw indexed `@timestamp` string, so it may carry an
@@ -336,11 +375,72 @@ const toEventMatched = (
   // The coordinator types `ioc.type` as a free string; the SSE schema only
   // accepts the IOC enum, so drop an ioc the schema would reject.
   const ioc = matched.ioc ? HuntIoc.safeParse(matched.ioc) : undefined;
+  const iocs = (matched.iocs ?? [])
+    .map((entry) => {
+      const parsed = HuntIoc.safeParse({ type: entry.type, value: entry.value });
+      return parsed.success
+        ? { type: parsed.data.type, value: parsed.data.value, field: entry.field }
+        : undefined;
+    })
+    .filter((entry): entry is NonNullable<typeof entry> => entry !== undefined)
+    // Tier 1 already caps the list; hold the SSE copy to the same bound regardless.
+    .slice(0, HUNT_MATCHED_IOCS_MAX);
   return {
     field: matched.field,
     ...(ioc?.success ? { ioc: ioc.data } : {}),
+    ...(iocs.length > 0 ? { iocs } : {}),
     ...(matched.technique_id ? { technique_id: matched.technique_id } : {}),
   };
+};
+
+/**
+ * Resolve Tier 2 `matched.field` from the query's first comparable clause (never `_id`).
+ * `clauses` is the behavior's parsed query, computed once per behavior (not per hit).
+ */
+const behaviorMatchedField = (
+  clauses: HuntFilterClause[] | undefined,
+  fields: Record<string, string> | undefined
+): string => {
+  if (!clauses) return Object.keys(fields ?? {})[0] ?? 'host.name';
+  if (clauses.length === 0) {
+    return Object.keys(fields ?? {})[0] ?? 'host.name';
+  }
+  for (const clause of clauses) {
+    const value = fields?.[clause.column];
+    if (value === undefined) continue;
+    if (clause.operator === '==' || clause.operator === 'in') {
+      if (clause.literals.includes(value)) return clause.column;
+    }
+    if (clause.operator === 'like') {
+      const matched = clause.literals.some((pattern) => {
+        const escaped = pattern
+          .replace(/[.+^${}()|[\]\\]/g, '\\$&')
+          .replace(/\*/g, '.*')
+          .replace(/\?/g, '.');
+        return new RegExp(`^${escaped}$`, 'i').test(value);
+      });
+      if (matched) return clause.column;
+    }
+  }
+  // No clause resolved against retained values: first filter column (never `_id`).
+  return clauses[0].column;
+};
+
+/**
+ * Tier 1 hits in scope for an entry: every hit for the report-wide entry; for a
+ * technique-scoped one, hits attributed to that technique plus IOC-only / unscoped hits,
+ * never a hit attributed to a different technique.
+ */
+const scopedTier1Hits = (
+  result: HuntCoordinatorCoreResult,
+  onlyTechniqueId?: string
+): HuntCoordinatorCoreResult['tier1']['hits'] => {
+  if (!onlyTechniqueId) return result.tier1.hits;
+  const scopedTechnique = onlyTechniqueId.toUpperCase();
+  return result.tier1.hits.filter((hit) => {
+    const attributedTechnique = hit.matched?.technique_id?.toUpperCase();
+    return !attributedTechnique || attributedTechnique === scopedTechnique;
+  });
 };
 
 /**
@@ -348,20 +448,20 @@ const toEventMatched = (
  * - include hits with `matched.technique_id === onlyTechniqueId`
  * - include IOC-only / unscoped hits (no technique_id) as shared context
  * - exclude hits attributed to a different technique
+ *
+ * `unlinkedCount` counts in-scope remote alert hits, which get no ref but are still Tier 1
+ * evidence for this entry.
  */
 const splitHits = (
   result: HuntCoordinatorCoreResult,
   onlyTechniqueId?: string
-): { events: SseEventRef[]; alerts: SseAlertRef[] } => {
+): { events: SseEventRef[]; alerts: SseAlertRef[]; unlinkedCount: number } => {
   const events: SseEventRef[] = [];
   const alerts: SseAlertRef[] = [];
-  for (const hit of result.tier1.hits) {
-    const attributedTechnique = hit.matched?.technique_id?.toUpperCase();
-    if (
-      onlyTechniqueId &&
-      attributedTechnique &&
-      attributedTechnique !== onlyTechniqueId.toUpperCase()
-    ) {
+  let unlinkedCount = 0;
+  for (const hit of scopedTier1Hits(result, onlyTechniqueId)) {
+    if (isRemoteAlertsIndex(hit.index)) {
+      unlinkedCount += 1;
       continue;
     }
     const timestamp = hitTimestamp(hit);
@@ -377,11 +477,14 @@ const splitHits = (
         event_id: hit.id,
         source_index: hit.index,
         ...(timestamp ? { timestamp } : {}),
+        ...(hit.host ? { host: hit.host.slice(0, MAX_ENTITY_NAME_LENGTH) } : {}),
+        ...(hit.user ? { user: hit.user.slice(0, MAX_ENTITY_NAME_LENGTH) } : {}),
+        ...(hit.fields && Object.keys(hit.fields).length > 0 ? { fields: hit.fields } : {}),
         ...(matched ? { matched } : {}),
       });
     }
   }
-  return { events, alerts };
+  return { events, alerts, unlinkedCount };
 };
 
 /** Tier 2 execute hits as refs, split the same way Tier 1's are. */
@@ -391,7 +494,9 @@ const behaviorHitRefs = (
   const events: SseEventRef[] = [];
   const alerts: SseAlertRef[] = [];
   for (const behavior of behaviors) {
+    const clauses = behavior.validated_esql ? clausesOf(behavior.validated_esql) : undefined;
     for (const ref of behavior.hits ?? []) {
+      if (isRemoteAlertsIndex(ref.index)) continue;
       const timestamp = hitTimestamp(ref);
       if (isAlertsIndex(ref.index)) {
         alerts.push({
@@ -400,13 +505,17 @@ const behaviorHitRefs = (
           ...(timestamp ? { timestamp } : {}),
         });
       } else {
+        const fields = ref.fields && Object.keys(ref.fields).length > 0 ? ref.fields : undefined;
         events.push({
           event_id: ref.id,
           source_index: ref.index,
           ...(timestamp ? { timestamp } : {}),
+          ...(ref.host ? { host: ref.host.slice(0, MAX_ENTITY_NAME_LENGTH) } : {}),
+          ...(ref.user ? { user: ref.user.slice(0, MAX_ENTITY_NAME_LENGTH) } : {}),
+          ...(fields ? { fields } : {}),
           matched: {
             technique_id: behavior.technique_id,
-            field: '_id',
+            field: behaviorMatchedField(clauses, fields),
           },
         });
       }
@@ -420,7 +529,8 @@ const behaviorHitRefs = (
  * Tier 1 returns up to the coordinator's `size: 100`, so appending Tier 2 after it
  * could drop every ref to the behavior that confirmed the technique, leaving its
  * SSE with no navigable evidence of its own hit. `tier1RefCount` counts the Tier 1
- * refs the entry ends up carrying, not the ones offered.
+ * refs the entry ends up carrying, not the ones offered. `tier1UnlinkedCount` counts the
+ * in-scope Tier 1 hits that could get no ref (remote alerts).
  */
 const mergeTierHitRefs = ({
   result,
@@ -428,8 +538,17 @@ const mergeTierHitRefs = ({
 }: {
   result: HuntCoordinatorCoreResult;
   onlyTechniqueId?: string;
-}): { events: SseEventRef[]; alerts: SseAlertRef[]; tier1RefCount: number } => {
-  const { events: tier1Events, alerts: tier1Alerts } = splitHits(result, onlyTechniqueId);
+}): {
+  events: SseEventRef[];
+  alerts: SseAlertRef[];
+  tier1RefCount: number;
+  tier1UnlinkedCount: number;
+} => {
+  const {
+    events: tier1Events,
+    alerts: tier1Alerts,
+    unlinkedCount,
+  } = splitHits(result, onlyTechniqueId);
   const { events: tier2Events, alerts: tier2Alerts } = behaviorHitRefs(
     scopedBehaviors(result, onlyTechniqueId)
   );
@@ -451,6 +570,7 @@ const mergeTierHitRefs = ({
     events: events.taken,
     alerts: alerts.taken,
     tier1RefCount: events.tier1Count + alerts.tier1Count,
+    tier1UnlinkedCount: unlinkedCount,
   };
 };
 
@@ -498,20 +618,20 @@ const mapBehavior = (behavior: CoordinatorBehavior): SseBehavior => ({
 const resolveHitSources = ({
   result,
   onlyTechniqueId,
-  tier1RefCount,
+  tier1EvidenceCount,
 }: {
   result: HuntCoordinatorCoreResult;
   onlyTechniqueId?: string;
-  tier1RefCount: number;
+  tier1EvidenceCount: number;
 }): { has_confirmed_hit: boolean; hit_sources: SseHitSource[] } => {
   const sources: SseHitSource[] = [];
 
   const tier1Source =
     result.tier1.has_confirmed_hit &&
     // Report-scoped: any Tier 1 confirmed hit counts.
-    // Technique-scoped: only when this entry still carries Tier 1 refs
-    // (technique-attributed or shared IOC-only).
-    (!onlyTechniqueId || tier1RefCount > 0);
+    // Technique-scoped: only when this entry still has Tier 1 evidence
+    // (technique-attributed or shared IOC-only), whether or not it could carry a ref.
+    (!onlyTechniqueId || tier1EvidenceCount > 0);
   if (tier1Source) {
     sources.push('tier1');
   }
@@ -533,11 +653,12 @@ const buildHuntResult = (
   result: HuntCoordinatorCoreResult,
   {
     onlyTechniqueId,
-    tier1RefCount,
+    tier1EvidenceCount,
     forceNow,
   }: {
     onlyTechniqueId?: string;
-    tier1RefCount: number;
+    /** Tier 1 refs the entry carries plus in-scope hits that could get no ref. */
+    tier1EvidenceCount: number;
     forceNow: Date;
   }
 ): SseHuntResult => {
@@ -546,7 +667,7 @@ const buildHuntResult = (
   const { has_confirmed_hit, hit_sources } = resolveHitSources({
     result,
     onlyTechniqueId,
-    tier1RefCount,
+    tier1EvidenceCount,
   });
 
   // Tier 1 orders its buckets by doc count, so a list that overflows the schema cap
@@ -573,6 +694,34 @@ const buildHuntResult = (
       resolved_iocs: tier1.resolved_iocs
         .slice(0, MAX_RESOLVED_IOCS)
         .map((ioc) => ({ type: ioc.type, value: ioc.value })),
+      ...(tier1.per_ioc && tier1.per_ioc.length > 0
+        ? {
+            per_ioc: tier1.per_ioc.slice(0, 30).flatMap((entry) => {
+              const parsed = HuntIoc.safeParse({ type: entry.type, value: entry.value });
+              if (!parsed.success) return [];
+              // Aggregation `value_as_string` follows the index's date format; normalize
+              // like a document timestamp so an epoch digit string never reaches the schema.
+              const firstSeen = toIsoInstant(entry.first_seen);
+              const lastSeen = toIsoInstant(entry.last_seen);
+              return [
+                {
+                  type: parsed.data.type,
+                  value: parsed.data.value,
+                  field: entry.field,
+                  count: entry.count,
+                  ...(entry.host_count !== undefined ? { host_count: entry.host_count } : {}),
+                  ...(entry.user_count !== undefined ? { user_count: entry.user_count } : {}),
+                  ...(firstSeen ? { first_seen: firstSeen } : {}),
+                  ...(lastSeen ? { last_seen: lastSeen } : {}),
+                },
+              ];
+            }),
+          }
+        : {}),
+      ...(tier1.per_ioc_truncated ? { per_ioc_truncated: true } : {}),
+      ...(typeof tier1.searched_ioc_count === 'number'
+        ? { searched_ioc_count: tier1.searched_ioc_count }
+        : {}),
       // `evidence_for` points readers at `per_index` for the breakdown, so a silent cut
       // would read as the whole distribution.
       ...(tier1.per_index.length > MAX_PER_INDEX ? { per_index_truncated: true } : {}),
@@ -606,16 +755,12 @@ const buildChrome = ({
   runId,
   huntResult,
   behavior,
-  events,
-  alerts,
   tier1RefCount,
 }: {
   reportId: string;
   runId: string;
   huntResult: SseHuntResult;
   behavior?: CoordinatorBehavior;
-  events: SseEventRef[];
-  alerts: SseAlertRef[];
   /** Tier 1 refs this entry carries, which is not the report's Tier 1 total. */
   tier1RefCount: number;
 }): Pick<
@@ -624,7 +769,6 @@ const buildChrome = ({
   | 'severity'
   | 'confidence'
   | 'status'
-  | 'timeline'
   | 'hypothesis_tested'
   | 'evidence_for'
   | 'evidence_against'
@@ -647,6 +791,9 @@ const buildChrome = ({
     `Hunt Watch evaluated report ${reportId} against the environment.`
   ).slice(0, 4000);
 
+  // Always written, even when `detections[]` tells the same story: packaging builds its
+  // evidence lines from these bullets. A renderer that shows the detections table hides the
+  // restatement itself (`filterRestatedEvidence`), keyed on the shared prefixes below.
   const evidenceFor: string[] = [];
   if (huntResult.hit_sources.includes('tier1')) {
     // Two things this sentence must not overstate. `counts.total_hits` spans required and
@@ -657,17 +804,17 @@ const buildChrome = ({
     // it it carries. `per_index` holds the required/optional split either way.
     evidenceFor.push(
       behavior
-        ? `Tier 1 matched ${huntResult.tier1.counts.total_hits} event(s) for this report in the hunt window, at least one in a required index; ${tier1RefCount} are referenced here (see hunt_result.tier1.per_index for the required/optional split).`
-        : `Tier 1 matched ${huntResult.tier1.counts.total_hits} event(s) in the hunt window, at least one in a required index (see hunt_result.tier1.per_index for the required/optional split).`
+        ? `${SSE_TIER1_HIT_BULLET_PREFIX}${huntResult.tier1.counts.total_hits} event(s) for this report in the hunt window, at least one in a required index; ${tier1RefCount} are referenced here (see hunt_result.tier1.per_index for the required/optional split).`
+        : `${SSE_TIER1_HIT_BULLET_PREFIX}${huntResult.tier1.counts.total_hits} event(s) in the hunt window, at least one in a required index (see hunt_result.tier1.per_index for the required/optional split).`
     );
   }
   if (huntResult.hit_sources.includes('tier2') && behavior?.execution?.hit) {
     evidenceFor.push(
-      `Tier 2 executed ${behavior.technique_id} with ${behavior.execution.row_count} required-index row(s).`
+      `${SSE_TIER2_HIT_BULLET_PREFIX}${behavior.technique_id} with ${behavior.execution.row_count} required-index row(s).`
     );
   }
   if (evidenceFor.length === 0 && huntResult.has_confirmed_hit) {
-    evidenceFor.push('Environment hit confirmed; see hunt_result for structured detail.');
+    evidenceFor.push(`${SSE_CONFIRMED_HIT_BULLET_PREFIX}; see hunt_result for structured detail.`);
   }
 
   // The report-scoped entry carries every proposed behavior, including the ones that executed
@@ -689,31 +836,13 @@ const buildChrome = ({
   );
   if (executedClean.length > 0) {
     evidenceAgainst.push(
-      `Tier 2 executed ${
+      `Behavior Hunt executed ${
         executedClean.length
       } proposed technique(s) with no required-index rows: ${executedClean
         .map((proposed) => proposed.technique_id)
         .join(', ')}.`.slice(0, 2000)
     );
   }
-  const timeline: SseAttachmentData['timeline'] = [];
-  for (const event of events) {
-    if (timeline.length >= MAX_TIMELINE) break;
-    if (!event.timestamp) continue;
-    timeline.push({
-      at: event.timestamp,
-      what: `Event ${event.event_id} in ${event.source_index}`.slice(0, 2000),
-    });
-  }
-  for (const alert of alerts) {
-    if (timeline.length >= MAX_TIMELINE) break;
-    if (!alert.timestamp) continue;
-    timeline.push({
-      at: alert.timestamp,
-      what: `Alert ${alert.alert_id} in ${alert.index}`.slice(0, 2000),
-    });
-  }
-
   const evalRef = `eval:hunt:${reportId}:${runId}`.slice(0, 512);
 
   return {
@@ -721,7 +850,6 @@ const buildChrome = ({
     severity,
     confidence,
     status: 'open',
-    timeline,
     hypothesis_tested: hypothesisTested,
     evidence_for: evidenceFor.slice(0, MAX_EVIDENCE),
     evidence_against: evidenceAgainst.slice(0, MAX_EVIDENCE),
@@ -778,26 +906,60 @@ const buildEntry = ({
    */
   forceNow: Date;
 }): SseEntry => {
-  const { events, alerts, tier1RefCount } = mergeTierHitRefs({
+  const { events, alerts, tier1RefCount, tier1UnlinkedCount } = mergeTierHitRefs({
     result,
     onlyTechniqueId: techniqueId,
   });
   const { entities, truncated, originalCount } = buildEntities(result, techniqueId);
   const huntResult = buildHuntResult(result, {
     onlyTechniqueId: techniqueId,
-    tier1RefCount,
+    tier1EvidenceCount: tier1RefCount + tier1UnlinkedCount,
     forceNow,
   });
   const behavior = techniqueId
     ? result.tier2?.behaviors.find((b) => b.technique_id === techniqueId)
     : undefined;
+
+  // Derive from the normalized SSE copy, not the raw coordinator output: `per_ioc`
+  // first/last_seen and hit timestamps are only ISO after `buildHuntResult` /
+  // `toIsoInstant`, and `detections[]` carries them under the same datetime schema.
+  //
+  // `per_ioc` is aggregated over the whole report. A technique-scoped entry derives its
+  // IOC detections from the hits in its own scope instead (sampled, `from_sample`), so an
+  // IOC matched only by another technique's alert cannot appear under this technique or
+  // upgrade its basis.
+  const detections = deriveDetections(
+    {
+      tier1: {
+        counts: result.tier1.counts,
+        ...(techniqueId ? {} : { per_ioc: huntResult.tier1.per_ioc }),
+        hits: scopedTier1Hits(result, techniqueId).map((hit) => {
+          const timestamp = toIsoInstant(hit.timestamp);
+          return timestamp ? { ...hit, timestamp } : { ...hit, timestamp: undefined };
+        }),
+        resolved_iocs: result.tier1.resolved_iocs,
+      },
+      tier2: result.tier2 ? { behaviors: scopedBehaviors(result, techniqueId) } : undefined,
+    },
+    events,
+    { techniqueId }
+  );
+  const stampedEvents = stampMatchedDetection(events, detections);
+  // From the scoped behaviors themselves, not from `detections`: the 30-detection cap
+  // must never turn a behavior hit into an IOC-only basis.
+  const hasBehaviorHit = scopedBehaviors(result, techniqueId).some(
+    (scopedBehavior) => scopedBehavior.execution?.hit === true
+  );
+  const basisIocs = detections
+    .map(iocOfDetection)
+    .filter((ioc): ioc is NonNullable<typeof ioc> => ioc !== undefined);
+  const basis = classifyBasis(basisIocs, hasBehaviorHit);
+  const summary = buildSummary(detections, { techniqueId });
   const chrome = buildChrome({
     reportId,
     runId: result.run_id,
     huntResult,
     behavior,
-    events,
-    alerts,
     tier1RefCount,
   });
 
@@ -805,6 +967,8 @@ const buildEntry = ({
     attachment_id: buildSseAttachmentId({ spaceId, reportId, techniqueId }),
     data: {
       ...chrome,
+      ...(summary.length > 0 ? { summary } : {}),
+      ...(detections.length > 0 ? { basis, detections } : {}),
       source_watch: SOURCE_WATCH_MANAGED_ID,
       capability: CAPABILITY_ID,
       run_id: result.run_id,
@@ -813,7 +977,7 @@ const buildEntry = ({
       security_knowledge_indicators: buildSecurityKnowledgeIndicators(result, techniqueId),
       entities,
       alerts,
-      events,
+      events: stampedEvents,
       hunt_result: huntResult,
       ...(result.recommendations && result.recommendations.length > 0
         ? { maps_to_proposal: { manual_remediation: result.recommendations } }
@@ -821,6 +985,39 @@ const buildEntry = ({
       ...(truncated ? { truncated: true, truncated_original_count: originalCount } : {}),
     },
   };
+};
+
+/** Attach `matched.detection` pointing at an existing detection id, so readers group by it. */
+const stampMatchedDetection = (
+  events: SseEventRef[],
+  detections: SseDetection[]
+): SseEventRef[] => {
+  if (detections.length === 0) return events;
+  const byIocValue = new Map<string, string>();
+  const byTechnique = new Map<string, string>();
+  for (const detection of detections) {
+    if (detection.kind === 'ioc') {
+      const ioc = iocOfDetection(detection);
+      if (ioc) byIocValue.set(ioc.value, detection.id);
+    } else if (detection.technique_id) {
+      byTechnique.set(detection.technique_id.toUpperCase(), detection.id);
+    }
+  }
+  return events.map((event) => {
+    if (!event.matched) return event;
+    if (event.matched.detection) return event;
+    const iocValue = event.matched.ioc?.value ?? event.matched.iocs?.[0]?.value;
+    const detectionId =
+      (iocValue ? byIocValue.get(iocValue) : undefined) ??
+      (event.matched.technique_id
+        ? byTechnique.get(event.matched.technique_id.toUpperCase())
+        : undefined);
+    if (!detectionId) return event;
+    return {
+      ...event,
+      matched: { ...event.matched, detection: detectionId },
+    };
+  });
 };
 
 /**

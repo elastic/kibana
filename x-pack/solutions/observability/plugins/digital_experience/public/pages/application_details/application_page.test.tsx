@@ -6,26 +6,82 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render as rtlRender, screen } from '@testing-library/react';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { ApplicationPage } from './application_page';
 import { useKibanaServices } from '../../hooks/use_kibana_services';
 import { useRouteBreadcrumb } from '../../breadcrumbs/use_route_breadcrumb';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { useEnvironment } from '../../hooks/use_environment';
+import { useApplicationLinks } from '../../hooks/use_application_links';
 
+const historyReplace = jest.fn();
+jest.mock('react-router-dom', () => {
+  return {
+    ...jest.requireActual('react-router-dom'),
+    useHistory: () => {
+      return { replace: historyReplace };
+    },
+  };
+});
 jest.mock('../../hooks/use_kibana_services');
 jest.mock('../../hooks/use_environment');
 jest.mock('../../breadcrumbs/use_route_breadcrumb');
-jest.mock('../../hooks/use_time_range', () => ({
-  ...jest.requireActual('../../hooks/use_time_range'),
-  useTimeRange: jest.fn(),
+jest.mock('../../hooks/use_applications_href', () => ({
+  useApplicationsHref: () => '/app/digital_experience/?rangeFrom=now-7d&rangeTo=now',
 }));
+// The Overview fetches its own data; this page only has to render it for OTel applications.
+jest.mock('./otel_overview/otel_overview', () => ({
+  OtelOverview: ({ serviceName }: { serviceName: string }) => (
+    <div data-test-subj="otelOverview">{serviceName}</div>
+  ),
+}));
+jest.mock('../../hooks/use_application_links');
+jest.mock('../errors/errors_tab', () => {
+  return {
+    ErrorsTab: ({ serviceName }: { serviceName: string }) => {
+      return <div data-test-subj="errorsTab">{serviceName}</div>;
+    },
+  };
+});
+jest.mock('../network/network_tab', () => {
+  return {
+    NetworkTab: ({ serviceName }: { serviceName: string }) => {
+      return <div data-test-subj="networkTab">{serviceName}</div>;
+    },
+  };
+});
+jest.mock('../sessions/sessions_tab', () => {
+  return {
+    SessionsTab: ({ serviceName }: { serviceName: string }) => {
+      return <div data-test-subj="sessionsTab">{serviceName}</div>;
+    },
+  };
+});
+jest.mock('../../hooks/use_time_range', () => {
+  return {
+    ...jest.requireActual('../../hooks/use_time_range'),
+    useTimeRange: jest.fn(),
+  };
+});
 
 const useKibanaServicesMock = jest.mocked(useKibanaServices);
 const timeRange = { rangeFrom: 'now-7d', rangeTo: 'now' };
 const setTimeRange = jest.fn();
 
+const render = (ui: React.ReactElement) => rtlRender(ui, { wrapper: MockAppHeaderProvider });
+
 beforeEach(() => {
+  historyReplace.mockClear();
+  jest.mocked(useApplicationLinks).mockReturnValue({
+    overviewHref: '/overview-href',
+    overviewPath: '/my-app?source=classic',
+    errorsHref: '/errors-href',
+    networkHref: '/network-href',
+    sessionsHref: () => '/sessions-href',
+    sessionHref: () => '/session-href',
+  });
   jest
     .mocked(useEnvironment)
     .mockReturnValue({ environment: undefined, setEnvironment: jest.fn() });
@@ -46,10 +102,13 @@ describe('ApplicationPage', () => {
       ux: { getClassicRumDashboard },
     } as unknown as ReturnType<typeof useKibanaServices>);
 
-    render(<ApplicationPage serviceName="my-app" source="classic" />);
+    render(<ApplicationPage serviceName="my-app" source="classic" selectedTab="overview" />);
 
     expect(await screen.findByTestId('classicRumDashboard')).toHaveTextContent('my-app');
-    expect(useRouteBreadcrumb).toHaveBeenCalledWith([{ text: 'my-app' }, { text: 'Overview' }]);
+    expect(useRouteBreadcrumb).toHaveBeenCalledWith([
+      { text: 'my-app', href: '/overview-href' },
+      { text: 'Overview' },
+    ]);
     expect(ClassicRumDashboard.mock.calls[0][0]).toEqual({
       serviceName: 'my-app',
       environment: undefined,
@@ -58,6 +117,20 @@ describe('ApplicationPage', () => {
     });
     expect(getClassicRumDashboard).toHaveBeenCalledTimes(1);
     expect(screen.getByTestId('digitalExperienceTab-overview')).toBeInTheDocument();
+    // Sessions are built from EDOT Browser data only.
+    expect(screen.queryByTestId('digitalExperienceTab-sessions')).not.toBeInTheDocument();
+  });
+
+  it('renders the application name as the title, with a back link to the Applications list', () => {
+    useKibanaServicesMock.mockReturnValue({} as ReturnType<typeof useKibanaServices>);
+
+    render(<ApplicationPage serviceName="my-app" source="otel" selectedTab="overview" />);
+
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('my-app');
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toHaveAttribute(
+      'href',
+      '/app/digital_experience/?rangeFrom=now-7d&rangeTo=now'
+    );
   });
 
   it('opens the Classic RUM dashboard in the environment selected in the list', async () => {
@@ -71,7 +144,7 @@ describe('ApplicationPage', () => {
       ux: { getClassicRumDashboard: jest.fn().mockResolvedValue(ClassicRumDashboard) },
     } as unknown as ReturnType<typeof useKibanaServices>);
 
-    render(<ApplicationPage serviceName="my-app" source="classic" />);
+    render(<ApplicationPage serviceName="my-app" source="classic" selectedTab="overview" />);
 
     await screen.findByTestId('classicRumDashboard');
     expect(ClassicRumDashboard.mock.calls[0][0]).toMatchObject({ environment: 'production' });
@@ -82,7 +155,7 @@ describe('ApplicationPage', () => {
       ux: { getClassicRumDashboard: jest.fn(() => new Promise(() => {})) },
     } as unknown as ReturnType<typeof useKibanaServices>);
 
-    render(<ApplicationPage serviceName="my-app" source="classic" />);
+    render(<ApplicationPage serviceName="my-app" source="classic" selectedTab="overview" />);
 
     expect(screen.getByTestId('digitalExperienceOverviewLoading')).toHaveTextContent(
       'Loading the Overview'
@@ -94,7 +167,7 @@ describe('ApplicationPage', () => {
       ux: { getClassicRumDashboard: jest.fn().mockRejectedValue(new Error('chunk failed')) },
     } as unknown as ReturnType<typeof useKibanaServices>);
 
-    render(<ApplicationPage serviceName="my-app" source="classic" />);
+    render(<ApplicationPage serviceName="my-app" source="classic" selectedTab="overview" />);
 
     expect(await screen.findByTestId('digitalExperienceOverviewEmpty')).toBeInTheDocument();
   });
@@ -102,23 +175,125 @@ describe('ApplicationPage', () => {
   it('renders an empty prompt without the ux plugin, as on serverless', async () => {
     useKibanaServicesMock.mockReturnValue({} as ReturnType<typeof useKibanaServices>);
 
-    render(<ApplicationPage serviceName="my-app" source="classic" />);
+    render(<ApplicationPage serviceName="my-app" source="classic" selectedTab="overview" />);
 
     expect(await screen.findByTestId('digitalExperienceOverviewEmpty')).toBeInTheDocument();
   });
 
-  it('renders the placeholder for an OTel application without loading the Classic dashboard', async () => {
+  it('renders the OTel Overview without loading the Classic dashboard', async () => {
     const getClassicRumDashboard = jest.fn();
     useKibanaServicesMock.mockReturnValue({
       ux: { getClassicRumDashboard },
     } as unknown as ReturnType<typeof useKibanaServices>);
 
-    render(<ApplicationPage serviceName="my-app" source="otel" />);
+    render(<ApplicationPage serviceName="my-app" source="otel" selectedTab="overview" />);
 
-    expect(
-      await screen.findByTestId('digitalExperienceOtelOverviewPlaceholder')
-    ).toBeInTheDocument();
+    expect(await screen.findByTestId('otelOverview')).toHaveTextContent('my-app');
     expect(getClassicRumDashboard).not.toHaveBeenCalled();
     expect(screen.queryByTestId('classicRumDashboard')).not.toBeInTheDocument();
+  });
+
+  it('renders the OTel Overview without the ux plugin, as on serverless', async () => {
+    useKibanaServicesMock.mockReturnValue({} as ReturnType<typeof useKibanaServices>);
+
+    render(<ApplicationPage serviceName="my-app" source="otel" selectedTab="overview" />);
+
+    expect(await screen.findByTestId('otelOverview')).toBeInTheDocument();
+    expect(screen.queryByTestId('digitalExperienceOverviewEmpty')).not.toBeInTheDocument();
+  });
+
+  it('links the Overview, Errors, Network and Sessions tabs of an EDOT Browser application', () => {
+    useKibanaServicesMock.mockReturnValue({} as ReturnType<typeof useKibanaServices>);
+
+    render(<ApplicationPage serviceName="my-app" source="otel" selectedTab="overview" />);
+
+    const tabs = screen.getAllByTestId(/^digitalExperienceTab-/);
+    expect(
+      tabs.map((tab) => {
+        return tab.getAttribute('data-test-subj');
+      })
+    ).toEqual([
+      'digitalExperienceTab-overview',
+      'digitalExperienceTab-errors',
+      'digitalExperienceTab-network',
+      'digitalExperienceTab-sessions',
+    ]);
+    expect(
+      tabs.map((tab) => {
+        return tab.getAttribute('href');
+      })
+    ).toEqual(['/overview-href', '/errors-href', '/network-href', '/sessions-href']);
+  });
+
+  it('renders the errors of the application on the Errors tab', () => {
+    useKibanaServicesMock.mockReturnValue({} as ReturnType<typeof useKibanaServices>);
+
+    render(<ApplicationPage serviceName="my-app" source="otel" selectedTab="errors" />);
+
+    expect(screen.getByTestId('errorsTab')).toHaveTextContent('my-app');
+    expect(screen.queryByTestId('otelOverview')).not.toBeInTheDocument();
+    expect(useRouteBreadcrumb).toHaveBeenCalledWith([
+      { text: 'my-app', href: '/overview-href' },
+      { text: 'Errors' },
+    ]);
+  });
+
+  it('renders the requests and resources of the application on the Network tab', () => {
+    useKibanaServicesMock.mockReturnValue({} as ReturnType<typeof useKibanaServices>);
+
+    render(<ApplicationPage serviceName="my-app" source="otel" selectedTab="network" />);
+
+    expect(screen.getByTestId('networkTab')).toHaveTextContent('my-app');
+    expect(useRouteBreadcrumb).toHaveBeenCalledWith([
+      { text: 'my-app', href: '/overview-href' },
+      { text: 'Network' },
+    ]);
+  });
+
+  it.each(['errors', 'network'] as const)(
+    'replaces the %s route of a Classic RUM application with its Overview',
+    (tab) => {
+      useKibanaServicesMock.mockReturnValue({} as ReturnType<typeof useKibanaServices>);
+
+      render(<ApplicationPage serviceName="my-app" source="classic" selectedTab={tab} />);
+
+      expect(historyReplace).toHaveBeenCalledWith('/my-app?source=classic');
+      expect(screen.queryByTestId(`${tab}Tab`)).not.toBeInTheDocument();
+      expect(screen.queryByTestId(`digitalExperienceTab-${tab}`)).not.toBeInTheDocument();
+    }
+  );
+
+  it('never redirects an EDOT Browser application', () => {
+    useKibanaServicesMock.mockReturnValue({} as ReturnType<typeof useKibanaServices>);
+
+    render(<ApplicationPage serviceName="my-app" source="otel" selectedTab="errors" />);
+
+    expect(historyReplace).not.toHaveBeenCalled();
+  });
+
+  it('renders the sessions of the application on the Sessions tab', () => {
+    const getClassicRumDashboard = jest.fn();
+    useKibanaServicesMock.mockReturnValue({
+      ux: { getClassicRumDashboard },
+    } as unknown as ReturnType<typeof useKibanaServices>);
+
+    render(<ApplicationPage serviceName="my-app" source="otel" selectedTab="sessions" />);
+
+    expect(screen.getByTestId('sessionsTab')).toHaveTextContent('my-app');
+    expect(screen.queryByTestId('otelOverview')).not.toBeInTheDocument();
+    expect(useRouteBreadcrumb).toHaveBeenCalledWith([
+      { text: 'my-app', href: '/overview-href' },
+      { text: 'Sessions' },
+    ]);
+    expect(getClassicRumDashboard).not.toHaveBeenCalled();
+  });
+
+  it('explains that a Classic RUM application has no sessions', () => {
+    useKibanaServicesMock.mockReturnValue({} as ReturnType<typeof useKibanaServices>);
+
+    render(<ApplicationPage serviceName="my-app" source="classic" selectedTab="sessions" />);
+
+    expect(screen.getByTestId('digitalExperienceSessionsUnavailable')).toBeInTheDocument();
+    expect(screen.queryByTestId('sessionsTab')).not.toBeInTheDocument();
   });
 });

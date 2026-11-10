@@ -116,37 +116,54 @@ export const createSecurityDocumentProfileProviders = (
             title,
             renderHeader,
             docViewsRegistry: (registry) => {
+              const { registry: featureRegistry } = providerServices.discoverShared.features;
+
               if (isIOC) {
+                const overviewTab = featureRegistry.getById(
+                  'security-solution-ioc-flyout-overview-tab'
+                );
+
                 registry.add({
                   id: 'doc_view_ioc_overview',
                   title: i18n.iocOverviewTabTitle,
                   order: 0,
+                  shareableStateSchema: overviewTab?.shareableStateSchema,
                   render: (props) => (
-                    <EnhancedIOCOverviewLazy {...props} providerServices={providerServices} />
+                    <EnhancedIOCOverviewLazy {...props} overviewTab={overviewTab} />
                   ),
                 });
               } else if (isAttack) {
+                const overviewTab = featureRegistry.getById(
+                  'security-solution-attack-flyout-overview-tab'
+                );
+
                 registry.add({
                   id: 'doc_view_attack_overview',
                   title: i18n.attackOverviewTabTitle,
                   order: 0,
+                  shareableStateSchema: overviewTab?.shareableStateSchema,
                   render: (props) => (
                     <EnhancedAttackEventOverviewLazy
                       {...props}
-                      providerServices={providerServices}
+                      overviewTab={overviewTab}
                       refreshData={toolkit.actions.refreshData}
                     />
                   ),
                 });
               } else if (isAlert || isEvent) {
+                const overviewTab = featureRegistry.getById(
+                  'security-solution-alert-flyout-overview-tab'
+                );
+
                 registry.add({
                   id: 'doc_view_alerts_overview',
                   title: i18n.overviewTabTitle(isAlert),
                   order: 0,
+                  shareableStateSchema: overviewTab?.shareableStateSchema,
                   render: (props) => (
                     <EnhancedAlertEventOverviewLazy
                       {...props}
-                      providerServices={providerServices}
+                      overviewTab={overviewTab}
                       refreshData={toolkit.actions.refreshData}
                     />
                   ),

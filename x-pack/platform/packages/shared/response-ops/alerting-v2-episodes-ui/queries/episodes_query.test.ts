@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EPISODE_SOURCE_FILTER_UNIVERSAL } from '@kbn/alerting-v2-common-queries';
 import {
   buildEpisodesKpisQuery,
   buildEpisodesHistogramQuery,
@@ -99,6 +100,16 @@ describe('buildEpisodesKpisQuery', () => {
     expect(output).toContain('WHERE group_hash == "abc123"');
     expect(output.indexOf('WHERE group_hash ==')).toBeLessThan(output.indexOf('INLINE STATS'));
   });
+
+  it('applies the source filter after the aggregations', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID, {
+      sources: [EPISODE_SOURCE_FILTER_UNIVERSAL],
+    });
+    expect(output).toContain('| WHERE source IS NULL OR source == "" OR source == "internal"');
+    expect(output.indexOf('| WHERE source IS NULL')).toBeGreaterThan(
+      output.indexOf('WHERE @timestamp == last_timestamp')
+    );
+  });
 });
 
 describe('buildEpisodesHistogramQuery', () => {
@@ -154,6 +165,14 @@ describe('buildEpisodesHistogramQuery', () => {
       'basic'
     );
     expect(output).toContain('user-xyz');
+  });
+
+  it('includes the source filter after the aggregations', () => {
+    const output = buildEpisodesHistogramQuery('default', { sources: ['zabbix'] }).print('basic');
+    expect(output).toContain('| WHERE source IN ("zabbix")');
+    expect(output.indexOf('| WHERE source IN')).toBeGreaterThan(
+      output.indexOf('WHERE @timestamp == last_timestamp')
+    );
   });
 });
 

@@ -51,6 +51,7 @@ import { isReportIntervalExpired } from '../common/is_report_interval_expired';
 
 export interface FetcherTaskDepsStart {
   telemetryCollectionManager: TelemetryCollectionManagerPluginStart;
+  getIsOptedInFromFeatureFlag: () => boolean | undefined;
 }
 
 interface TelemetryConfig {
@@ -78,6 +79,7 @@ export class FetcherTask {
   private readonly lastReported$ = new BehaviorSubject<number>(0);
   private internalRepository?: ISavedObjectsRepository;
   private telemetryCollectionManager?: TelemetryCollectionManagerPluginStart;
+  private getIsOptedInFromFeatureFlag: () => boolean | undefined = () => undefined;
 
   constructor(initializerContext: PluginInitializerContext<TelemetryConfigType>) {
     this.config$ = initializerContext.config.create();
@@ -85,7 +87,11 @@ export class FetcherTask {
     this.logger = initializerContext.logger.get('fetcher');
   }
 
-  public start({ savedObjects }: CoreStart, { telemetryCollectionManager }: FetcherTaskDepsStart) {
+  public start(
+    { savedObjects }: CoreStart,
+    { telemetryCollectionManager, getIsOptedInFromFeatureFlag }: FetcherTaskDepsStart
+  ) {
+    this.getIsOptedInFromFeatureFlag = getIsOptedInFromFeatureFlag;
     this.internalRepository = savedObjects.createInternalRepository([TELEMETRY_SAVED_OBJECT_TYPE]);
     this.telemetryCollectionManager = telemetryCollectionManager;
 
@@ -243,6 +249,7 @@ export class FetcherTask {
         telemetrySavedObject,
         allowChangingOptInStatus,
         configTelemetryOptIn,
+        isOptedInFromFeatureFlag: this.getIsOptedInFromFeatureFlag(),
       }),
       telemetrySendUsageFrom: getTelemetrySendUsageFrom({
         telemetrySavedObject,

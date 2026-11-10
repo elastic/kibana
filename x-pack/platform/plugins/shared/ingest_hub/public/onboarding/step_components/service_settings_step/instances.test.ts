@@ -6,7 +6,7 @@
  */
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
-import { reconcileInstances } from './instances';
+import { getBaseServiceId, reconcileInstances } from './instances';
 import type { ServiceInstance } from './use_service_settings';
 
 const makeService = (id: string, overrides: Partial<AwsServiceMatrixEntry> = {}) =>
@@ -76,5 +76,20 @@ describe('reconcileInstances', () => {
     const persisted = [base('cloudtrail'), duplicate('cloudtrail', 1)];
 
     expect(reconcileInstances(persisted, ['cloudtrail'], new Map())).toEqual(persisted);
+  });
+});
+
+describe('getBaseServiceId', () => {
+  it('returns the id itself for an original', () => {
+    expect(getBaseServiceId('cloudtrail')).toBe('cloudtrail');
+  });
+
+  it('returns the service of a duplicate', () => {
+    expect(getBaseServiceId('cloudtrail__dup-1')).toBe('cloudtrail');
+    expect(getBaseServiceId('cloudtrail__dup-12')).toBe('cloudtrail');
+  });
+
+  it('keeps the dots and underscores of the service id', () => {
+    expect(getBaseServiceId('aws.cloud_trail__dup-2')).toBe('aws.cloud_trail');
   });
 });

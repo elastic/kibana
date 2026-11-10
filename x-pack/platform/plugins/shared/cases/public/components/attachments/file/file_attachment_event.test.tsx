@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, screen } from '@testing-library/react';
 
 import type { DownloadableFile } from './types';
 
@@ -20,26 +19,26 @@ describe('FileAttachmentEvent', () => {
     jest.clearAllMocks();
   });
 
-  it('renders clickable name', async () => {
+  it('renders clickable name', () => {
     renderWithTestingProviders(
       <FileAttachmentEvent file={basicFileMock as unknown as DownloadableFile} />
     );
 
-    const nameLink = await screen.findByTestId('cases-files-name-link');
+    const nameLink = screen.getByTestId('cases-files-name-link');
 
     expect(nameLink).toBeInTheDocument();
 
-    await userEvent.click(nameLink);
+    fireEvent.click(nameLink);
 
-    expect(await screen.findByTestId('cases-files-image-preview')).toBeInTheDocument();
+    expect(screen.getByTestId('cases-files-image-preview')).toBeInTheDocument();
   });
 
-  it('renders the name as plain text when the file attachment is deleted', async () => {
+  it('renders the name as plain text when the file attachment is deleted', () => {
     renderWithTestingProviders(
       <FileAttachmentEvent file={basicFileMock as unknown as DownloadableFile} isDeleted />
     );
 
-    expect(await screen.findByTestId('cases-files-name-text')).toBeInTheDocument();
+    expect(screen.getByTestId('cases-files-name-text')).toBeInTheDocument();
     expect(screen.queryByTestId('cases-files-name-link')).not.toBeInTheDocument();
   });
 });

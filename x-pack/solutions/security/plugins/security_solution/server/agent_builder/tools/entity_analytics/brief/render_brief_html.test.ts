@@ -24,11 +24,17 @@ const fixtureViewModel: BriefViewModel = {
     spaceId: 'default',
     entityFilters: [],
   },
-  notes: [],
+  notChecked: { unreadable: [] },
   summary:
     'Five entities have alerts this period, including one privileged user newly rated high/critical and on the watchlist, and two hosts seen for the first time in the last few days.',
   counts: [
-    { tileId: 'entitiesWithAlerts', title: 'Entities with alerts', value: 5, delta: 5 },
+    {
+      tileId: 'entitiesWithAlerts',
+      title: 'Entities with alerts',
+      description: 'Entities with at least one open alert.',
+      value: 5,
+      delta: 5,
+    },
     { tileId: 'entitiesWithAnomalies', title: 'Entities with anomalies', value: 0 },
     { tileId: 'riskMovers', title: 'Risk movers', value: 0 },
     { tileId: 'newlyHighCritical', title: 'Newly high/critical', value: 1 },
@@ -119,7 +125,9 @@ describe('renderBriefHtml', () => {
 
     expect(html).toMatchSnapshot();
     // The recommended step comes before the priorities, and there is no footer.
-    expect(html.indexOf('Recommended next step')).toBeLessThan(html.indexOf('<h2>Priorities</h2>'));
+    expect(html.indexOf('Recommended next step')).toBeLessThan(
+      html.indexOf('<h2>Entities to investigate first</h2>')
+    );
     expect(html).not.toContain('<footer');
   });
 
@@ -130,46 +138,46 @@ describe('renderBriefHtml', () => {
     expect(html).toContain('.brief .priority{');
   });
 
-  it('shows up to three watchlists as pills, and counts the rest', () => {
-    const watchlists = ['One', 'Two', 'Three', 'Four', 'Five'];
+  it('puts first seen and the watchlists on one facts line under the badges', () => {
     const { html } = renderBriefHtml({
       ...fixtureViewModel,
-      priorities: [{ ...fixtureViewModel.priorities[0], watchlists }],
+      priorities: [
+        {
+          ...fixtureViewModel.priorities[1],
+          watchlists: ['One', 'Two', 'Three', 'Four'],
+        },
+      ],
     });
 
-    expect(html.match(/class="pill watchlist"/g)).toHaveLength(3);
-    expect(html).not.toContain('>Four<');
-    expect(html).toContain('+2 more');
+    expect(html).toContain('<strong>First seen:</strong> 2 days ago');
+    expect(html).toContain('<strong>Watchlist:</strong> One, Two, Three, Four');
+    expect(html).not.toContain('class="pill');
   });
 
-  it('keeps a long watchlist name whole in the pill title, which the stylesheet clips, and makes room for pills that wrap under the title', () => {
-    const withWatchlists = (watchlists: string[]) => ({
-      ...fixtureViewModel,
-      priorities: [{ ...fixtureViewModel.priorities[0], watchlists }],
-    });
-    const longName = 'w'.repeat(100);
+  it('makes room for a facts line that wraps', () => {
+    const withWatchlists = (watchlists: string[]) =>
+      renderBriefHtml({
+        ...fixtureViewModel,
+        priorities: [{ ...fixtureViewModel.priorities[0], watchlists }],
+      }).height;
 
-    expect(renderBriefHtml(withWatchlists([longName])).html).toContain(
-      `title="Watchlist: ${longName}"`
+    expect(withWatchlists(['a', 'b', 'c', 'd'].map((letter) => letter.repeat(40)))).toBeGreaterThan(
+      withWatchlists(['Privileged User']) + 15
     );
-    expect(renderBriefHtml(withWatchlists([longName])).html).toContain('.watchlist{');
-    // Three pills of 31 characters don't fit beside the title: they take a second row under it.
-    expect(
-      renderBriefHtml(withWatchlists(['a', 'b', 'c'].map((letter) => letter.repeat(31)))).height
-    ).toBeGreaterThan(renderBriefHtml(withWatchlists(['Privileged User'])).height + 30);
   });
 
-  it("heads the card with the model's title and puts the scope line under it, or heads it with the scope", () => {
+  it("heads the card with the model's title, or with a fixed one, and lists the facts under it", () => {
     const withTitle = renderBriefHtml({
       ...fixtureViewModel,
       title: 'Alerts spread across hosts',
     }).html;
     expect(withTitle).toContain('<h1>Alerts spread across hosts</h1>');
-    expect(withTitle).toContain('Last 7 days · Captured 20 Oct 2026, 10:53 UTC.');
+    expect(withTitle).toContain('<strong>Captured:</strong> 20 Oct 2026, 10:53 UTC');
+    expect(withTitle).toContain('<strong>Time range:</strong> Last 7 days');
 
-    const withoutTitle = renderBriefHtml(fixtureViewModel).html;
-    expect(withoutTitle).toContain('<h1>Last 7 days</h1>');
-    expect(withoutTitle).toContain('Captured 20 Oct 2026, 10:53 UTC.');
+    expect(renderBriefHtml(fixtureViewModel).html).toContain(
+      '<h1>Nothing to prioritize right now</h1>'
+    );
   });
 
   it('shows only the counts above zero or changed, and says when there is nothing to compare', () => {
@@ -177,7 +185,8 @@ describe('renderBriefHtml', () => {
 
     expect(html.match(/class="count"/g)).toHaveLength(4);
     expect(html).not.toContain('Entities with anomalies');
-    expect(html).toContain('+5');
+    expect(html).toContain('+5 ↑');
+    expect(html).toContain('Entities with at least one open alert.');
     expect(html).toContain('No change');
     expect(html).toContain('No comparison');
   });
@@ -211,7 +220,7 @@ describe('renderBriefHtml', () => {
       recommendation: undefined,
     });
 
-    expect(html).toContain('<h2>Priorities</h2>');
+    expect(html).toContain('<h2>Entities to investigate first</h2>');
     expect(html).toContain('No entity in this view has enough evidence to prioritize.');
     expect(html).not.toContain('This period at a glance');
     expect(height).toBeLessThan(500);
@@ -227,7 +236,7 @@ describe('renderBriefHtml', () => {
     });
 
     expect(html.split(noPriorities)).toHaveLength(2);
-    expect(html).not.toContain('<h2>Priorities</h2>');
+    expect(html).not.toContain('<h2>Entities to investigate first</h2>');
   });
 
   it('keeps the chart however tall the brief is, and opens the card at its maximum', () => {

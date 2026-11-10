@@ -74,6 +74,42 @@ describe('buildEpisodeMenuPanels', () => {
     ]);
   });
 
+  it('places navigation actions directly under view details, ahead of workflow actions', () => {
+    const items = getItems(
+      [
+        makeAction('ALERTING_V2_EDIT_EPISODE_TAGS'),
+        makeAction('ALERTING_V2_ACK_EPISODE'),
+        makeAction('CUSTOM_NAVIGATION', { isNavigationAction: true }),
+      ],
+      '/alerts/ep-1'
+    );
+
+    expect(describeItems(items)).toEqual([
+      'alertingV2EpisodeTakeAction-viewDetails',
+      'alertingV2EpisodeTakeAction-CUSTOM_NAVIGATION',
+      '|',
+      'alertingV2EpisodeTakeAction-ALERTING_V2_ACK_EPISODE',
+      '|',
+      'alertingV2EpisodeTakeAction-ALERTING_V2_EDIT_EPISODE_TAGS',
+    ]);
+  });
+
+  it('leads the menu with navigation actions when there is no view details link', () => {
+    const items = getItems(
+      [
+        makeAction('ALERTING_V2_ACK_EPISODE'),
+        makeAction('CUSTOM_NAVIGATION', { isNavigationAction: true }),
+      ],
+      null
+    );
+
+    expect(describeItems(items)).toEqual([
+      'alertingV2EpisodeTakeAction-CUSTOM_NAVIGATION',
+      '|',
+      'alertingV2EpisodeTakeAction-ALERTING_V2_ACK_EPISODE',
+    ]);
+  });
+
   it('links view details to the href and leaves it without an onClick', () => {
     const [viewDetails] = getItems([], '/alerts/ep-1') ?? [];
 
@@ -115,5 +151,24 @@ describe('buildEpisodeMenuPanels', () => {
       surface: 'details_flyout',
     });
     expect(assignee.execute).not.toHaveBeenCalled();
+  });
+
+  it('renders an incompatible action as disabled and does not execute it', () => {
+    const unresolve = makeAction('ALERTING_V2_UNRESOLVE_EPISODE', {
+      displayName: 'Unresolve',
+      isCompatible: () => false,
+      disabledTooltip: 'Unresolve is not available for classic alerts',
+    });
+    const [item] = getItems([unresolve]) ?? [];
+
+    expect(item).toEqual({
+      name: 'Unresolve',
+      icon: 'check',
+      disabled: true,
+      toolTipContent: 'Unresolve is not available for classic alerts',
+      'data-test-subj': 'alertingV2EpisodeTakeAction-ALERTING_V2_UNRESOLVE_EPISODE',
+    });
+    expect(item.onClick).toBeUndefined();
+    expect(unresolve.execute).not.toHaveBeenCalled();
   });
 });
