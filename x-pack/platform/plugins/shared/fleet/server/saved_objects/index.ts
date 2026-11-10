@@ -2289,7 +2289,8 @@ export const getSavedObjectTypes = (
           },
         },
         8: {
-          // Added dedicatedNamespaceTemplates. No mappings_addition — it is not indexed (dynamic: false).
+          // Added dedicatedNamespaceTemplates and raised the policySettings value limit so a condition
+          // fits. No mappings_addition — neither is indexed (dynamic: false).
           changes: [],
           schemas: {
             forwardCompatibility: CloudOnboardingDeploymentSchemaV8.extends(
