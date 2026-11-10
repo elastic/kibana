@@ -249,7 +249,9 @@ fewer models, list it under `specModelGroups` in
 - Every model in `specModelGroups` must be in `weeklyEisModelGroups`, and every model there must
   be in the weekly step's `EVAL_MODEL_GROUPS` in `llm_evals.yml`. Both are checked in PR CI. The
   weekly run requests `EVAL_MODEL_GROUPS`; EIS provisions every model it discovers.
-- `shards` are unrelated. They decide which specs share a CI step, not which models run.
+- `shards` are unrelated. They decide which specs share a CI step, not which models run. A shard
+  can also set `judge` to an evaluation connector id (for example `"judge": "eis-openai-gpt-5-4"`)
+  to pin the judge for its steps only; shards without one keep the suite-wide judge.
 - Only the weekly run (`KBN_EVALS_WEEKLY=1`) applies this. PR and on-demand runs still run every
   model against every spec.
 
@@ -257,7 +259,7 @@ fewer models, list it under `specModelGroups` in
 names a model outside the weekly list, or leaves a spec on disk unlisted.
 
 **Preview the fanout locally.** `get_fanout_matrix.js` prints one `{ connectorId, shardId,
-specFiles }` line per CI step. It needs an endpoint for every weekly model, so fake them from the
+specFiles, judge? }` line per CI step. It needs an endpoint for every weekly model, so fake them from the
 suite config. Drop `KBN_EVALS_WEEKLY=1` to see the PR / on-demand fanout.
 
 ```bash

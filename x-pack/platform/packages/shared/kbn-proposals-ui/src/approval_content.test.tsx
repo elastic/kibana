@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { IBasePath } from '@kbn/core-http-browser';
 import moment from 'moment';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
@@ -106,7 +107,7 @@ describe('ApprovalContent', () => {
         supersededBy: 'successor',
       },
     });
-    expect(screen.getByText('elastic')).toBeInTheDocument();
+    expect(screen.getByText(/elastic • \d{1,2} Oct 2026, \d{2}:\d{2}/)).toBeInTheDocument();
     expect(screen.queryByTestId('approvalContent-outcome')).not.toBeInTheDocument();
   });
 
@@ -138,8 +139,9 @@ describe('ApprovalContent', () => {
         executionError: 'HTTP 500: host unreachable',
       },
     });
-    expect(screen.getByText('This attempt failed to execute the action')).toBeInTheDocument();
-    expect(screen.getByText('HTTP 500: host unreachable')).toBeInTheDocument();
+    expect(screen.getByTestId('approvalContent-failed-attempt')).toHaveTextContent(
+      'This attempt failed to execute the action • HTTP 500: host unreachable'
+    );
     expect(screen.getByTestId('approvalContent-failed-attempt')).toHaveClass('euiCallOut--danger');
     expect(
       isBefore(
@@ -172,7 +174,7 @@ describe('ApprovalContent', () => {
     expect(screen.queryByText('Failed')).not.toBeInTheDocument();
   });
 
-  it('prefixes the actor with "executed" when the approved action failed', () => {
+  it('names who ran the failed action, and when, in the outcome banner', () => {
     renderContent({
       proposal: {
         ...baseProposal,
@@ -182,7 +184,9 @@ describe('ApprovalContent', () => {
         decidedAt: '2026-10-09T14:05:00.000Z',
       },
     });
-    expect(screen.getByText(/executed by/)).toBeInTheDocument();
+    expect(screen.getByTestId('approvalContent-outcome')).toHaveTextContent(
+      /^Failed • elastic on \d{1,2} Oct 2026, \d{2}:\d{2}$/
+    );
   });
 
   it('restores the comment and disables decisions when replaced during dismissal', () => {
@@ -241,6 +245,25 @@ describe('ApprovalContent', () => {
     ).toBeInTheDocument();
   });
 
+  it('keeps the caption once decided, without the deadline, and names the decider in the banner', () => {
+    renderContent({
+      proposal: {
+        ...baseProposal,
+        category: 'configure',
+        action: { name: 'Block IP', reversible: true, approvalPolicy: 'always-gate' },
+        expiresAt: '2024-01-05T17:00:00.000Z',
+        decision: 'approved',
+        decidedBy: { username: 'elastic', fullName: null, email: null },
+        decidedAt: '2024-01-01T17:20:00.000Z',
+        status: 'succeeded',
+      },
+    });
+    expect(screen.getByText('Configure • Reversible • Critical impact')).toBeInTheDocument();
+    expect(screen.getByTestId('approvalContent-outcome')).toHaveTextContent(
+      /^Applied • elastic on 1 Jan 2024, \d{2}:\d{2}$/
+    );
+  });
+
   it('shows the expiry date and time in the caption after the deadline', () => {
     const expiresAt = '2024-01-05T17:00:00.000Z';
     renderContent({ proposal: { ...baseProposal, status: 'expired', expiresAt } });
@@ -267,6 +290,24 @@ describe('ApprovalContent', () => {
     const link = screen.getByRole('link', { name: /the runbook/ });
     expect(link).toHaveAttribute('target', '_blank');
     expect(link).toHaveAttribute('rel', expect.stringContaining('noopener'));
+  });
+
+  it('resolves in-app links in the comment against the base path, so they survive server.basePath', () => {
+    const basePath = {
+      serverBasePath: '/kbn',
+      prepend: (path: string) => `/kbn${path}`,
+    } as unknown as IBasePath;
+    renderContent({
+      proposal: {
+        ...baseProposal,
+        comment: '**Rule:** [Noisy rule](/s/default/app/security/rules/id/abc)',
+      },
+      basePath,
+    });
+    expect(screen.getByRole('link', { name: /Noisy rule/ })).toHaveAttribute(
+      'href',
+      '/kbn/app/security/rules/id/abc'
+    );
   });
 
   it('renders a GFM table in the comment, which is how a proposal lists what it touches', () => {
@@ -303,12 +344,12 @@ describe('ApprovalContent', () => {
   });
 
   describe('to-do proposal', () => {
-    it("offers a single I've applied button instead of Approve and Decline", () => {
+    it('offers Mark as applied and Decline instead of Approve', () => {
       renderContent({ proposal: todoProposal, secondaryActions: undefined, onDismiss: jest.fn() });
 
-      expect(screen.getByTestId('approvalContent-confirm')).toHaveTextContent("I've applied");
+      expect(screen.getByTestId('approvalContent-confirm')).toHaveTextContent('Mark as applied');
       expect(screen.queryByText('Approve')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('approvalContent-dismiss')).not.toBeInTheDocument();
+      expect(screen.getByTestId('approvalContent-dismiss')).toBeInTheDocument();
     });
 
     const appliedTodo: ApprovalProposal = {
@@ -357,7 +398,7 @@ describe('ApprovalContent', () => {
       expect(screen.getByTestId('approvalContent-reopen')).toBeDisabled();
     });
 
-    it("records the application through onApprove when I've applied is clicked", async () => {
+    it('records the application through onApprove when Mark as applied is clicked', async () => {
       const onApprove = jest.fn();
       renderContent({ proposal: todoProposal, onApprove });
 
@@ -366,10 +407,10 @@ describe('ApprovalContent', () => {
       await waitFor(() => expect(onApprove).toHaveBeenCalledTimes(1));
     });
 
-    it('reads its category as "To do" in the caption', () => {
+    it('reads its category as "Apply manually" in the caption', () => {
       renderContent({ proposal: todoProposal });
 
-      expect(screen.getByText(/^To do/)).toBeInTheDocument();
+      expect(screen.getByText(/Apply manually • .+ impact/)).toBeInTheDocument();
     });
 
     it('keeps Approve and Decline for a proposal without an action in another category', () => {
@@ -447,11 +488,12 @@ describe('ApprovalContent', () => {
     renderContent({
       proposal: { ...baseProposal, previousExecutionError: 'HTTP 400: something went wrong' },
     });
-    expect(screen.getByText('A previous attempt at this action failed')).toBeInTheDocument();
-    expect(screen.getByText('HTTP 400: something went wrong')).toBeInTheDocument();
+    expect(screen.getByTestId('approvalContent-previous-failure')).toHaveTextContent(
+      'Previous attempt to apply this proposal failed • HTTP 400: something went wrong'
+    );
     expect(
       isBefore(
-        screen.getByText('A previous attempt at this action failed'),
+        screen.getByTestId('approvalContent-previous-failure'),
         screen.getByTestId('approvalContent-confirm')
       )
     ).toBe(true);
@@ -476,16 +518,14 @@ describe('ApprovalContent', () => {
         decidedAt: '2026-01-01T00:00:00.000Z',
       },
     });
-    expect(screen.queryByText('A previous attempt at this action failed')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('approvalContent-previous-failure')).not.toBeInTheDocument();
   });
 
   it('renders an expiry explanation once the workflow settles the proposal as expired', () => {
     renderContent({ proposal: { ...baseProposal, status: 'expired' } });
-    expect(
-      screen.getByText(
-        'This proposal expired before a decision was made and can no longer be actioned.'
-      )
-    ).toBeInTheDocument();
+    expect(screen.getByTestId('approvalContent-expired')).toHaveTextContent(
+      'Expired and can no longer be applied'
+    );
   });
 
   it('shows why the proposal expired', () => {
@@ -533,7 +573,7 @@ describe('ApprovalContent', () => {
 
       // The badge and the outcome banner's own title both say it.
       expect(screen.getAllByText('Applying').length).toBeGreaterThanOrEqual(2);
-      expect(screen.getByTestId('approvalContent-outcome')).toHaveTextContent(/^Applying$/);
+      expect(screen.getByTestId('approvalContent-outcome')).toHaveTextContent(/^Applying • Ava$/);
       expect(screen.queryByTestId('approvalContent-confirm')).not.toBeInTheDocument();
       expect(screen.getAllByText(/Ava/).length).toBeGreaterThan(0);
     });
@@ -593,9 +633,8 @@ describe('ApprovalContent', () => {
         />
       );
 
-      // The badge's own short label and the banner's own full title.
-      expect(screen.getByText('Applied')).toBeInTheDocument();
-      expect(screen.getByText('Applied successfully')).toBeInTheDocument();
+      // The badge's own label and the banner's own title.
+      expect(screen.getAllByText('Applied')).toHaveLength(2);
     });
 
     it('shows a Failed outcome when the action the approval started did not succeed', () => {
@@ -609,8 +648,8 @@ describe('ApprovalContent', () => {
         },
       });
 
-      expect(screen.getByText('Failed')).toBeInTheDocument();
-      expect(screen.getByText('Action failed')).toBeInTheDocument();
+      // The badge's own label and the banner's own title.
+      expect(screen.getAllByText('Failed')).toHaveLength(2);
       expect(screen.queryByTestId('approvalContent-confirm')).not.toBeInTheDocument();
     });
 
@@ -672,11 +711,9 @@ describe('ApprovalContent', () => {
       expect(screen.queryByText('Needs review')).not.toBeInTheDocument();
       expect(screen.queryByTestId('approvalContent-confirm')).not.toBeInTheDocument();
       expect(screen.queryByTestId('approvalContent-dismiss')).not.toBeInTheDocument();
-      expect(
-        screen.getByText(
-          'This proposal expired before a decision was made and can no longer be actioned.'
-        )
-      ).toBeInTheDocument();
+      expect(screen.getByTestId('approvalContent-expired')).toHaveTextContent(
+        'Expired and can no longer be applied'
+      );
     });
   });
 
@@ -809,7 +846,8 @@ describe('ApprovalContent', () => {
         />
       );
       expect(screen.queryByTestId('card-decline-form')).not.toBeInTheDocument();
-      expect(screen.getByTestId('card-outcome')).toHaveTextContent(/^Declining$/);
+      expect(screen.getByTestId('card-comment')).toHaveTextContent(baseProposal.comment ?? '');
+      expect(screen.getByTestId('card-outcome')).toHaveTextContent(/^Declining • You$/);
     });
   });
 });

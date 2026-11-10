@@ -31,6 +31,7 @@ import { CodeEditor } from '@kbn/code-editor';
 import { XJsonLang } from '@kbn/monaco';
 import type { DataStreamResponse } from '../../../../../common';
 import { useGetDataStreamResults, useUpdateDataStreamPipeline } from '../../../../common';
+import { useAuthorization } from '../../../../common/hooks/use_authorization';
 import { useUIState } from '../../contexts';
 import { useTelemetry } from '../../../telemetry_context';
 import * as i18n from './translations';
@@ -67,6 +68,9 @@ export const EditPipelineFlyout = ({
     dataStream.dataStreamId
   );
   const { updateDataStreamPipelineMutation } = useUpdateDataStreamPipeline();
+  // Users without the Automatic Import "all" privilege can only view results and the pipeline.
+  const { canEditIntegration } = useAuthorization();
+  const isReadOnly = !canEditIntegration;
 
   const tableData = useMemo<TableRow[]>(() => {
     if (!data?.results || data.results.length === 0) return [];
@@ -247,20 +251,22 @@ export const EditPipelineFlyout = ({
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="xs"
-              iconType="save"
-              onClick={handleSave}
-              isLoading={updateDataStreamPipelineMutation.isLoading}
-              isDisabled={
-                selectedPipelineTab !== 'pipeline' || !pipelineText.trim() || !hasUnsavedChanges
-              }
-              data-test-subj="editPipelineFlyoutSaveButton"
-            >
-              {i18n.EDIT_PIPELINE_FLYOUT.saveButton}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
+          {!isReadOnly && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="xs"
+                iconType="save"
+                onClick={handleSave}
+                isLoading={updateDataStreamPipelineMutation.isLoading}
+                isDisabled={
+                  selectedPipelineTab !== 'pipeline' || !pipelineText.trim() || !hasUnsavedChanges
+                }
+                data-test-subj="editPipelineFlyoutSaveButton"
+              >
+                {i18n.EDIT_PIPELINE_FLYOUT.saveButton}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
         <EuiTabs>
           <EuiTab
@@ -337,7 +343,7 @@ export const EditPipelineFlyout = ({
             searchFormat="text"
             search={search}
             tableCaption={i18n.EDIT_PIPELINE_FLYOUT.tableCaption}
-            pagination
+            pagination={{ pageSizeOptions: [10, 25, 50, 100] }}
             sorting
           />
         )}
@@ -361,7 +367,7 @@ export const EditPipelineFlyout = ({
               height="calc(100vh - 280px)"
               width="100%"
               options={{
-                readOnly: false,
+                readOnly: isReadOnly,
                 automaticLayout: true,
                 tabSize: 2,
                 wordWrap: 'on',

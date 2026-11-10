@@ -6,9 +6,7 @@
  */
 
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import type { ErrorResponse } from '@kbn/alerting-v2-schemas';
-
-const RULE_NOT_FOUND_CODE = 'RULE_NOT_FOUND';
+import { RULE_NOT_FOUND_CODE, type ErrorResponse } from '@kbn/alerting-v2-schemas';
 
 export const isRuleNotFoundError = (error: unknown): boolean => {
   const httpError = error as IHttpFetchError<ErrorResponse> | undefined;

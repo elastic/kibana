@@ -7,6 +7,8 @@
 
 import { NEVER } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { encode } from '@kbn/rison';
+import { encodeOverviewFilters } from '../../../common/overview_filters_param';
 import type { ApplicationOverviewResponse } from '../../../common/types/overview';
 import { getOtelOverview } from './otel/get_otel_overview';
 import { APPLICATION_OVERVIEW_ENDPOINT, overviewRouteRepository } from './route';
@@ -25,12 +27,18 @@ const RESPONSE = {
 
 const esClient = { search: jest.fn() };
 
+const include = (...values: string[]) => values.map((value) => ({ value, exclude: false }));
+const exclude = (...values: string[]) => values.map((value) => ({ value, exclude: true }));
+
 const runHandler = ({
   serviceName = 'shop',
   query = { start: START, end: END },
 }: {
   serviceName?: string;
-  query?: { start: string; end: string; environment?: string };
+  // As the schema parses it: the percentile is a number by now.
+  query?: { start: string; end: string; environment?: string; percentile?: number } & Partial<
+    Record<'filters' | 'kuery', string>
+  >;
 } = {}) => {
   const handler = overviewRouteRepository[APPLICATION_OVERVIEW_ENDPOINT].handler as unknown as (
     resources: unknown
@@ -50,7 +58,11 @@ const querySchema = () => {
   const { params } = overviewRouteRepository[APPLICATION_OVERVIEW_ENDPOINT];
   return (
     params as unknown as {
-      shape: { query: { safeParse: (query: unknown) => { success: boolean } } };
+      shape: {
+        query: {
+          safeParse: (query: unknown) => { success: boolean; data?: { percentile?: number } };
+        };
+      };
     }
   ).shape.query;
 };
@@ -102,6 +114,73 @@ describe('GET /internal/digital_experience/applications/{serviceName}/overview',
     );
   });
 
+  it('passes the selected filters as values, included or excluded, and none when left out', async () => {
+    await runHandler({
+      query: {
+        start: START,
+        end: END,
+        filters: encodeOverviewFilters({
+          browser: [...include('Chrome'), ...exclude('Safari')],
+          os: include('macOS'),
+          device: include('iPhone'),
+          country: include('DE'),
+          pageUrl: include('https://shop.example.com/a,b'),
+        }),
+      },
+    });
+
+    expect(mockedOtel).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filters: {
+          browser: [
+            { value: 'Chrome', exclude: false },
+            { value: 'Safari', exclude: true },
+          ],
+          os: [{ value: 'macOS', exclude: false }],
+          device: [{ value: 'iPhone', exclude: false }],
+          country: [{ value: 'DE', exclude: false }],
+          pageUrl: [{ value: 'https://shop.example.com/a,b', exclude: false }],
+        },
+      })
+    );
+
+    await runHandler();
+
+    expect(mockedOtel).toHaveBeenLastCalledWith(expect.objectContaining({ filters: {} }));
+  });
+
+  it('passes the percentile, and none when it is left out', async () => {
+    await runHandler({ query: { start: START, end: END, percentile: 95 } });
+
+    expect(mockedOtel).toHaveBeenCalledWith(expect.objectContaining({ percentile: 95 }));
+
+    await runHandler();
+
+    expect(mockedOtel).toHaveBeenLastCalledWith(expect.objectContaining({ percentile: undefined }));
+  });
+
+  it('passes the KQL query as a query, and none when it is left out', async () => {
+    await runHandler({ query: { start: START, end: END, kuery: 'user_agent.name: Chrome' } });
+
+    expect(mockedOtel).toHaveBeenCalledWith(
+      expect.objectContaining({
+        kuery: expect.objectContaining({ bool: expect.anything() }),
+      })
+    );
+
+    await runHandler();
+
+    expect(mockedOtel).toHaveBeenLastCalledWith(expect.objectContaining({ kuery: undefined }));
+  });
+
+  it('answers a KQL query that does not parse with a 400 and searches nothing', async () => {
+    await expect(
+      runHandler({ query: { start: START, end: END, kuery: 'user_agent.name: (Chrome' } })
+    ).rejects.toMatchObject({ isBoom: true, output: { statusCode: 400 } });
+
+    expect(mockedOtel).not.toHaveBeenCalled();
+  });
+
   it('answers a failed search without the Elasticsearch details', async () => {
     mockedOtel.mockRejectedValue(new Error('no such index [logs-generic.otel-default]'));
 
@@ -137,6 +216,86 @@ describe('GET /internal/digital_experience/applications/{serviceName}/overview',
     expect(withEnvironment(1024).success).toBe(true);
     expect(withEnvironment(1025).success).toBe(false);
     expect(withEnvironment(0).success).toBe(false);
+  });
+
+  it('accepts each filter value up to its length, and rejects an empty or longer one', () => {
+    const withFilter = (name: string, value: string) =>
+      querySchema().safeParse({
+        start: START,
+        end: END,
+        filters: encodeOverviewFilters({ [name]: include(value) }),
+      }).success;
+    const lengths = {
+      browser: 256,
+      os: 256,
+      device: 256,
+      country: 16,
+      appVersion: 256,
+      pageUrl: 1024,
+      pageContains: 256,
+    };
+
+    Object.entries(lengths).forEach(([name, length]) => {
+      expect(withFilter(name, 'x'.repeat(length))).toBe(true);
+      expect(withFilter(name, 'x'.repeat(length + 1))).toBe(false);
+      expect(withFilter(name, '')).toBe(false);
+    });
+  });
+
+  it('accepts several values of a filter, included and excluded', () => {
+    const withFilters = (filters: string | undefined) =>
+      querySchema().safeParse({ start: START, end: END, filters }).success;
+
+    expect(
+      withFilters(
+        encodeOverviewFilters({
+          browser: [...include('Chrome', 'Firefox'), ...exclude('Safari')],
+          os: exclude('Linux'),
+        })
+      )
+    ).toBe(true);
+    expect(withFilters(undefined)).toBe(true);
+  });
+
+  it('rejects a filters param that would be repaired instead of answering with other filters', () => {
+    const withFilters = (filters: string) =>
+      querySchema().safeParse({ start: START, end: END, filters }).success;
+    const phrases = (...params: string[]) => ({
+      meta: { key: 'browser', type: 'phrases', params, negate: false },
+    });
+    const ten = Array.from({ length: 10 }, (_, index) => `b${index}`);
+
+    expect(withFilters(encode([phrases(...ten)]))).toBe(true);
+    expect(withFilters(encode([phrases(...ten, 'b10')]))).toBe(false);
+    expect(withFilters(encode([phrases('Chrome', 'Chrome')]))).toBe(false);
+    expect(withFilters('')).toBe(false);
+    expect(withFilters('not rison ((')).toBe(false);
+    expect(withFilters(encode([{ meta: { key: 'user.email', type: 'phrase' } }]))).toBe(false);
+  });
+
+  it('accepts the percentiles the Overview offers only, and reads them as numbers', () => {
+    const parse = (raw: string) =>
+      querySchema().safeParse({ start: START, end: END, percentile: raw });
+
+    ['50', '75', '90', '95', '99'].forEach((raw) => {
+      const { success, data } = parse(raw);
+      expect(success).toBe(true);
+      expect(data?.percentile).toBe(Number(raw));
+    });
+    ['', '0', '100', '75.5', 'p95', '9'.repeat(1_000_000)].forEach((raw) =>
+      expect(parse(raw).success).toBe(false)
+    );
+    expect(querySchema().safeParse({ start: START, end: END }).data?.percentile).toBeUndefined();
+  });
+
+  it('bounds the KQL query to 2048 characters', () => {
+    const withKuery = (raw: string) =>
+      querySchema().safeParse({ start: START, end: END, kuery: raw }).success;
+
+    expect(withKuery('a: b')).toBe(true);
+    expect(withKuery('x'.repeat(2048))).toBe(true);
+    expect(withKuery('x'.repeat(2049))).toBe(false);
+    expect(withKuery('')).toBe(false);
   });
 
   it('requires an application name of up to 1024 characters', () => {

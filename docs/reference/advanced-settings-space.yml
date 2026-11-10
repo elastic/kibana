@@ -617,75 +617,7 @@ groups:
       - setting: "ai:anonymizationSettings"
         id: ai-anonymization-settings
         description: |
-          Configuration for anonymizing LLM requests sent through the {{product.kibana}} Inference chat completion API. Requests that bypass that API, such as connectors called directly, are not anonymized. `maskingEnabled` turns anonymization on or off, `onFailure` sets what happens when a rule cannot run (`block` fails the request, `allow_unsafe` skips a pattern that does not compile, and sends the request unmasked if the patterns fail to run), and `rules` lists the regular expression patterns, including built-in ones, and Named Entity Recognition (NER) models used to identify and anonymize sensitive data.
-
-          :::{dropdown} Default configuration
-          :applies_to: stack: preview 9.6+
-          ```json
-          {
-            "maskingEnabled": false,
-            "onFailure": "block",
-            "rules": [
-              {
-                "id": "builtin-email",
-                "name": "Email addresses",
-                "entityClass": "EMAIL",
-                "type": "RegExp",
-                "pattern": "[\\w.%+'À-ſΑ-я-]{1,64}@(?:[A-Za-z0-9À-ſΑ-я](?:[A-Za-z0-9À-ſΑ-я-]{0,61}[A-Za-z0-9À-ſΑ-я])?\\.){1,8}[A-Za-zÀ-ſΑ-я]{2,24}",
-                "enabled": true,
-                "builtIn": true
-              },
-              {
-                "id": "builtin-ipv4",
-                "name": "IPv4 addresses",
-                "entityClass": "IP",
-                "type": "RegExp",
-                "pattern": "\\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(?:\\.[0-9]{1,3}){0,4}\\b",
-                "enabled": true,
-                "builtIn": true
-              },
-              {
-                "id": "builtin-ipv6",
-                "name": "IPv6 addresses",
-                "entityClass": "IP",
-                "type": "RegExp",
-                "pattern": "(?:::(?:[0-9A-Fa-f]{1,4}:){0,5}(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))|(?:(?:[0-9A-Fa-f]{1,4}:){1,6}:(?:[0-9A-Fa-f]{1,4}:){0,5}(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))|(?:(?:[0-9A-Fa-f]{1,4}:){6}(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))|(?:(?:[0-9A-Fa-f]{1,4}:){7}[0-9A-Fa-f]{1,4})|(?:[0-9A-Fa-f]{1,4}:(?::[0-9A-Fa-f]{1,4}){1,6})|(?:(?:[0-9A-Fa-f]{1,4}:){1,2}(?::[0-9A-Fa-f]{1,4}){1,5})|(?:(?:[0-9A-Fa-f]{1,4}:){1,3}(?::[0-9A-Fa-f]{1,4}){1,4})|(?:(?:[0-9A-Fa-f]{1,4}:){1,4}(?::[0-9A-Fa-f]{1,4}){1,3})|(?:(?:[0-9A-Fa-f]{1,4}:){1,5}(?::[0-9A-Fa-f]{1,4}){1,2})|(?:(?:[0-9A-Fa-f]{1,4}:){1,6}:[0-9A-Fa-f]{1,4})|(?:(?:[0-9A-Fa-f]{1,4}:){1,7}:)|(?::(?::[0-9A-Fa-f]{1,4}){1,7})",
-                "enabled": true,
-                "builtIn": true
-              },
-              {
-                "id": "builtin-host-name",
-                "name": "Host and machine names",
-                "entityClass": "HOST_NAME",
-                "type": "RegExp",
-                "pattern": "\\b(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\\.){1,10}(?:[cC][oO][mM]|[nN][eE][tT]|[oO][rR][gG]|[iI][oO]|[cC][oO]|[eE][dD][uU]|[gG][oO][vV]|[mM][iI][lL]|[bB][iI][zZ]|[xX][yY][zZ])(?:(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?){0,8}\\.(?:[cC][lL][oO][uU][dD]|[dD][eE][vV]|[aA][pP][pP]|[aA][iI]|[iI][nN][tT]|[lL][oO][cC][aA][lL]|[iI][nN][tT][eE][rR][nN][aA][lL]|[cC][oO][rR][pP]|[lL][aA][nN]|[hH][oO][mM][eE]|[sS][vV][cC]|[cC][lL][uU][sS][tT][eE][rR]|[tT][eE][cC][hH]|[oO][nN][lL][iI][nN][eE]|[sS][iI][tT][eE]|[lL][iI][vV][eE]|[lL][iI][nN][kK]|[cC][lL][iI][cC][kK]|[wW][oO][rR][lL][dD]|[sS][yY][sS][tT][eE][mM][sS]|[sS][oO][lL][uU][tT][iI][oO][nN][sS]|[sS][eE][rR][vV][iI][cC][eE][sS]|[eE][uU]|[uU][sS]|[uU][kK]|[dD][eE]|[fF][rR]|[jJ][pP]|[cC][nN]|[rR][uU]|[nN][lL]|[sS][eE]|[dD][kK]|[fF][iI]|[cC][hH]|[nN][zZ]|[sS][gG]|[kK][rR]|[mM][xX]|[hH][kK]|[tT][wW]|[cC][aA]|[aA][uU]|[bB][rR]|[eE][sS]|[iI][tT]|[bB][eE]|[aA][tT]|[nN][oO]|[iI][eE]|[pP][tT]|[gG][rR]|[cC][zZ]|[hH][uU]|[rR][oO]|[bB][gG]|[sS][kK]|[sS][iI]|[hH][rR]|[rR][sS]|[uU][aA]|[tT][rR]|[iI][lL]|[iI][nN]|[pP][hH]|[tT][hH]|[vV][nN]|[pP][kK]|[bB][dD]|[aA][eE]|[sS][aA]|[zZ][aA]|[nN][gG]|[kK][eE]|[eE][gG]|[aA][rR]|[cC][lL]|[pP][eE]|[vV][eE]|[pP][lL]|[mM][eE]|[tT][vV]))?\\b|\\b(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\\.){2,10}(?:[cC][lL][oO][uU][dD]|[dD][eE][vV]|[aA][pP][pP]|[aA][iI]|[iI][nN][tT]|[lL][oO][cC][aA][lL]|[iI][nN][tT][eE][rR][nN][aA][lL]|[cC][oO][rR][pP]|[lL][aA][nN]|[hH][oO][mM][eE]|[sS][vV][cC]|[cC][lL][uU][sS][tT][eE][rR]|[tT][eE][cC][hH]|[oO][nN][lL][iI][nN][eE]|[sS][iI][tT][eE]|[lL][iI][vV][eE]|[lL][iI][nN][kK]|[cC][lL][iI][cC][kK]|[wW][oO][rR][lL][dD]|[sS][yY][sS][tT][eE][mM][sS]|[sS][oO][lL][uU][tT][iI][oO][nN][sS]|[sS][eE][rR][vV][iI][cC][eE][sS]|[eE][uU]|[uU][sS]|[uU][kK]|[dD][eE]|[fF][rR]|[jJ][pP]|[cC][nN]|[rR][uU]|[nN][lL]|[sS][eE]|[dD][kK]|[fF][iI]|[cC][hH]|[nN][zZ]|[sS][gG]|[kK][rR]|[mM][xX]|[hH][kK]|[tT][wW]|[cC][aA]|[aA][uU]|[bB][rR]|[eE][sS]|[iI][tT]|[bB][eE]|[aA][tT]|[nN][oO]|[iI][eE]|[pP][tT]|[gG][rR]|[cC][zZ]|[hH][uU]|[rR][oO]|[bB][gG]|[sS][kK]|[sS][iI]|[hH][rR]|[rR][sS]|[uU][aA]|[tT][rR]|[iI][lL]|[iI][nN]|[pP][hH]|[tT][hH]|[vV][nN]|[pP][kK]|[bB][dD]|[aA][eE]|[sS][aA]|[zZ][aA]|[nN][gG]|[kK][eE]|[eE][gG]|[aA][rR]|[cC][lL]|[pP][eE]|[vV][eE]|[pP][lL]|[mM][eE]|[tT][vV])\\b",
-                "enabled": true,
-                "builtIn": true
-              },
-              {
-                "id": "builtin-account-login",
-                "name": "Account and login names",
-                "entityClass": "USER_NAME",
-                "type": "RegExp",
-                "pattern": "\\b[A-Z][A-Z0-9-]{1,14}\\\\{1,16}(?:[A-Zac-eg-mo-qsw-z1-9][A-Za-z0-9._$-]{0,63}|[nrtbfuv0][a-z0-9][A-Za-z0-9._$-]{0,62})",
-                "enabled": false,
-                "builtIn": true
-              },
-              {
-                "type": "NER",
-                "modelId": "elastic__distilbert-base-uncased-finetuned-conll03-english",
-                "enabled": false,
-                "allowedEntityClasses": [
-                  "PER",
-                  "ORG",
-                  "LOC"
-                ],
-                "timeoutSeconds": 30
-              }
-            ]
-          }
-          ```
-          :::
+          List of rules used to anonymize sensitive data in requests sent to a large language model through the {{product.kibana}} Inference chat completion API. Requests that bypass that API, such as connectors called directly, are not anonymized. Each rule is either a regular expression pattern (`RegExp`) paired with an entity class such as `EMAIL`, or a Named Entity Recognition (NER) model.
 
           :::{dropdown} Default configuration
           :applies_to: stack: preview 9.2-9.5
@@ -715,17 +647,94 @@ groups:
           :::
         datatype: string
         applies_to:
-          stack: preview 9.2+
+          stack: preview 9.2-9.5, removed 9.6+
           ech: ga
           ece: ga
           eck: ga
           self: ga
-          observability: preview
-          elasticsearch: preview
-          security: preview
+          serverless: unavailable
         note: |
           :applies_to: {stack: preview 9.6+, serverless: preview}
-          The `ai:anonymizationSettings` setting is no longer listed in Advanced Settings. Configure it on the **Anonymization** management page. The setting itself still exists and can be set through the Advanced Settings API or `uiSettings.overrides` in `kibana.yml`.
+          The `ai:anonymizationSettings` setting is no longer available on the **Advanced Settings** page. Configure anonymization on the **Anonymization** page under **AI** in {{stack-manage-app}}. Masking is off by default; on that page you can turn it on and choose which patterns apply.
+
+      - setting: "agentBuilder:apiDiscovery"
+        id: agent-builder-api-discovery
+        description: |
+          When on, [Elastic Agent Builder](docs-content://explore-analyze/ai-features/elastic-agent-builder.md) can browse the full {{product.elasticsearch}} and {{product.kibana}} API surface to find operations. For details, refer to [API discovery](docs-content://explore-analyze/ai-features/agent-builder/tools/builtin-tools-reference.md#api-discovery).
+        datatype: bool
+        default: false
+        applies_to:
+          stack: preview 9.6+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless:
+            elasticsearch: ga
+            observability: ga
+            vectordb: ga
+
+      - setting: "agentBuilder:bashSupport"
+        id: agent-builder-bash-support
+        description: |
+          When on, [Elastic Agent Builder](docs-content://explore-analyze/ai-features/elastic-agent-builder.md) can use an experimental bash tool. Use this setting only for controlled experimentation.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: experimental 9.5+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless:
+            elasticsearch: ga
+            observability: ga
+            vectordb: ga
+
+      - setting: "agentBuilder:experimentalFeatures"
+        id: agent-builder-experimental-features
+        description: |
+          When on, turns on experimental features for [Elastic Agent Builder](docs-content://explore-analyze/ai-features/elastic-agent-builder.md).
+        datatype: bool
+        default: false
+        applies_to:
+          stack: experimental 9.4+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless:
+            elasticsearch: ga
+            observability: ga
+            vectordb: ga
+
+      - setting: "agentBuilder:includeFrozenByDefault"
+        id: agent-builder-include-frozen-by-default
+        description: |
+          When on, the [built-in Elastic Agent Builder tools](docs-content://explore-analyze/ai-features/agent-builder/tools/builtin-tools-reference.md) include data from the [frozen tier](docs-content://manage-data/lifecycle/data-tiers.md#frozen-tier) by default.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: ga 9.4+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "contextEngine:enabled"
+        id: context-engine-enabled
+        description: |
+          When on, turns on [Context Engine](docs-content://explore-analyze/ai-features/context-engine.md).
+        datatype: bool
+        default: false
+        applies_to:
+          stack: experimental 9.5+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: ga
 
   - group: Presentation Labs
     id: presentation-labs
@@ -1046,6 +1055,20 @@ groups:
         default: true
         applies_to:
           stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "discover:enableSolutionProfilesInClassic"
+        id: discover-enablesolutionprofilesinclassic
+        description: |
+          Controls whether **Discover** switches to a [tailored experience](docs-content://explore-analyze/discover/discover-get-started.md#context-aware-discover) for Observability and Security data when you use Classic navigation, with columns, cell renderers, and document details that suit that data. Turn this setting off to always use the default **Discover** experience. Changing this setting requires a page reload.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga 9.6
           ech: ga
           ece: ga
           eck: ga
@@ -1435,6 +1458,20 @@ groups:
         default: 500
         applies_to:
           stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          observability: ga
+
+      - setting: "observability:apmMaxNumberOfServices"
+        id: observability-apm-max-number-of-services
+        description: |
+          Sets the maximum number of services shown in the {{product.apm}} Service inventory. Values must be between 1 and 5000. Higher values slow down queries and use more memory on {{es}}. Above 2000 the query can exceed the [`search.max_buckets`](elasticsearch://reference/elasticsearch/configuration-reference/search-settings.md#search-settings-max-buckets) cluster setting, which defaults to 65536.
+        datatype: int
+        default: 1000
+        applies_to:
+          stack: ga 9.6+
           ech: ga
           ece: ga
           eck: ga
@@ -1895,8 +1932,7 @@ groups:
           ece: ga
           eck: ga
           self: ga
-          elasticsearch: preview 9.4
-          serverless: unavailable
+          serverless: ga
 
       - setting: "courier:ignoreFilterIfFieldNotInIndex"
         id: courier-ignorefilteriffieldnotinindex
@@ -1993,6 +2029,23 @@ groups:
     id: kibana-siem-settings
     settings:
 
+      - setting: "securitySolution:enableAlertZero"
+        id: securitysolution-enablealertzero
+        description: |
+          Turns on [AlertZero](docs-content://solutions/security/alertzero/index.md) in the space. AlertZero Workers triage alerts, hunt for threats, tune detection rules, and investigate attacks in the background, then bring you the proposed actions that need a person to decide.
+
+          AlertZero works only in spaces that use the Security solution view. After you turn on this setting, open **AlertZero** to select which Workers to run. Turning the setting off hides AlertZero in the space but doesn't turn off its Workers. For the requirements and steps, refer to [Set up AlertZero](docs-content://solutions/security/alertzero/set-up-alertzero.md).
+        datatype: bool
+        default: false
+        applies_to:
+          stack: preview 9.6+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless:
+            security: preview
+
       - setting: "securitySolution:refreshIntervalDefaults"
         id: securitysolution-refreshintervaldefaults
         description: |
@@ -2028,9 +2081,11 @@ groups:
       - setting: "securitySolution:defaultIndex"
         id: securitysolution-defaultindex
         description: |
-          A comma-delimited list of {{es}} indices from which the {{security-app}} collects events. The {{security-app}} uses this list to generate the [default Security data view](docs-content://solutions/security/get-started/data-views-elastic-security.md#default-data-view-security). The [entity store](docs-content://solutions/security/advanced-entity-analytics/entity-store.md) also extracts entities from these indices.
+          A comma-delimited list of {{es}} indices from which the {{security-app}} collects events. The {{security-app}} uses this list to generate the [default Security data view](docs-content://solutions/security/get-started/data-views-elastic-security.md#default-data-view-security), which most {{security-app}} pages query, including the [Indicators page](docs-content://solutions/security/investigate/indicators-of-compromise.md) (**Security** → **Intelligence**). The [entity store](docs-content://solutions/security/advanced-entity-analytics/entity-store.md) also extracts entities from these indices.
 
           Index patterns can use wildcards. For example, `filebeat-*` matches all indices that start with `filebeat-`.
+
+          To display indicators stored on a remote cluster on the Indicators page, add the matching [cross-cluster search](docs-content://explore-analyze/cross-cluster-search.md) pattern to this list, for example `*:logs-ti_*`. Adding the pattern to `securitySolution:defaultThreatIndex` alone doesn't make those indicators appear on the Indicators page.
 
           If you leave the `-*elastic-cloud-logs-*` pattern in the list, Elastic Cloud monitoring logs are excluded from {{security-app}} queries.
         datatype: array
@@ -2050,7 +2105,9 @@ groups:
       - setting: "securitySolution:defaultThreatIndex"
         id: securitysolution-threatindices
         description: |
-          A comma-delimited list of threat intelligence indices from which the {{security-app}} collects indicators. Features that query these indices include the Threat Intelligence view on the Overview dashboard, indicator match rules, and the alert enrichment query.
+          A comma-delimited list of threat intelligence indices from which the {{security-app}} collects indicators for detection and enrichment. Features that query these indices are the Threat Intelligence view on the Overview dashboard, the default indicator index of indicator match rules, and the alert enrichment query.
+
+          This setting doesn't affect the [Indicators page](docs-content://solutions/security/investigate/indicators-of-compromise.md) (**Security** → **Intelligence**), which queries the default Security data view generated from `securitySolution:defaultIndex`. Refer to [Troubleshoot indicators of compromise](docs-content://troubleshoot/security/indicators-of-compromise.md).
 
           Do not remove or overwrite the `logs-ti_*` index pattern as it is used by {{agent}} integrations.
         datatype: array
@@ -2229,22 +2286,6 @@ groups:
           self: ga
           serverless:
             security: ga
-
-      - setting: "securitySolution:enableNewFlyout"
-        id: security-solution-enable-new-flyout
-        description: |
-          Enables the new flyout system for document (alert and event), attack, host, user, rule, network, indicator of compromise, misconfigurations, and vulnerabilities details.
-
-          Turn this setting off to use the previous flyout layout, which uses right, left, and preview panels instead of a single flyout with [child flyouts](docs-content://solutions/security/get-started/elastic-security-ui.md#details-flyouts).
-        datatype: bool
-        default: true
-        applies_to:
-          stack: ga 9.5+
-          ech: ga
-          ece: ga
-          eck: ga
-          self: ga
-          serverless: unavailable
 
       - setting: "securitySolution:enableRuleChangesHistory"
         id: security-solution-enable-rule-changes-history

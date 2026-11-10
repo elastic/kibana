@@ -30,6 +30,10 @@ export const visorStyles = (
     ${euiTheme.components.buttons.backgroundAssistanceHover} 83%
   )`;
 
+  // With an outline the row is inset from the shell border, so reserve room for the bottom inset.
+  const visibleHeight =
+    hasOutline && isInline ? `calc(${euiTheme.size.xl} + ${euiTheme.size.xs})` : euiTheme.size.xl;
+
   return {
     visorContainer: css`
       display: flex;
@@ -39,20 +43,22 @@ export const visorStyles = (
       width: 100%;
       position: relative;
       z-index: ${euiTheme.levels.menu};
+      ${hasOutline && isInline
+        ? `padding-inline: ${euiTheme.size.xs}; padding-block-end: ${
+            isVisible ? euiTheme.size.xs : '0'
+          }; box-sizing: border-box;`
+        : ''}
       ${isInline
         ? `
-          min-height: ${isVisible ? euiTheme.size.xl : '0'};
-          height: ${isVisible ? euiTheme.size.xl : '0'};
-          max-height: ${isVisible ? euiTheme.size.xl : '0'};
+          min-height: ${isVisible ? visibleHeight : '0'};
+          height: ${isVisible ? visibleHeight : '0'};
+          max-height: ${isVisible ? visibleHeight : '0'};
           opacity: ${isVisible ? 1 : 0};
           pointer-events: ${isVisible ? 'auto' : 'none'};
           overflow: ${isVisible ? 'visible' : 'hidden'};
-          transition: min-height 0.3s cubic-bezier(0.25, 0.1, 0.25, 1), max-height 0.3s cubic-bezier(0.25, 0.1, 0.25, 1), opacity 0.3s cubic-bezier(0.25, 0.1, 0.25, 1)${
-            hasOutline ? ', margin-top 0.3s cubic-bezier(0.25, 0.1, 0.25, 1)' : ''
-          };
+          transition: min-height 0.3s cubic-bezier(0.25, 0.1, 0.25, 1), max-height 0.3s cubic-bezier(0.25, 0.1, 0.25, 1), opacity 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
         `
         : `min-height: ${euiTheme.size.xl};`}
-      ${hasOutline ? `margin-top: ${isVisible ? euiTheme.size.s : '0'};` : ''}
     `,
     inputSlot: css`
       flex: 1;

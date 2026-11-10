@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { timeoutSignal } from '@kbn/std';
 import Fs from 'fs';
 import Path from 'path';
 import type { FlagsReader } from '@kbn/dev-cli-runner';
@@ -51,8 +52,15 @@ export const redactUrlCredentials = (value: string): string => {
 
 export const probeHttp = async (url: string): Promise<boolean> => {
   try {
-    await fetch(url, { signal: AbortSignal.timeout(2000) });
-    return true;
+    const deadline = timeoutSignal(2000);
+    try {
+      const response = await fetch(url, { signal: deadline });
+      // Headers are enough. Cancel the unread body before dispose(), which does not abort the download.
+      await response.body?.cancel().catch(() => undefined);
+      return true;
+    } finally {
+      deadline.dispose();
+    }
   } catch {
     return false;
   }

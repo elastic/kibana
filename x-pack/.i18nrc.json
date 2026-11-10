@@ -44,7 +44,10 @@
       "platform/plugins/shared/context_engine",
       "platform/plugins/shared/context_engine_agent_builder"
     ],
-    "xpack.agenticInvestigations": "platform/plugins/shared/agentic_investigations",
+    "xpack.agenticInvestigations": [
+      "platform/plugins/shared/agentic_investigations",
+      "platform/packages/shared/kbn-agentic-investigations-common"
+    ],
     "xpack.proposals": [
       "platform/plugins/shared/proposals",
       "platform/packages/shared/kbn-proposals-common",
@@ -149,12 +152,13 @@
     "xpack.agentBuilderPlatform": "platform/plugins/shared/agent_builder_platform",
     "xpack.osquery": ["platform/plugins/shared/osquery"],
     "xpack.painlessLab": "platform/plugins/private/painless_lab",
-    "xpack.alertzero": ["solutions/security/plugins/alertzero", "solutions/security/packages/kbn-alertzero-common", "platform/packages/shared/kbn-agentic-investigations-common"],
+    "xpack.alertzero": ["solutions/security/plugins/alertzero", "solutions/security/packages/kbn-alertzero-common"],
     "xpack.queryActivity": "platform/plugins/shared/query_activity",
     "xpack.profiling": ["solutions/observability/plugins/profiling"],
     "xpack.reindexService": "platform/plugins/private/reindex_service",
     "xpack.remoteClusters": "platform/plugins/private/remote_clusters",
     "xpack.reporting": ["platform/plugins/private/reporting"],
+    "xpack.resolverTest": "solutions/security/test_plugins/resolver_test",
     "xpack.rollupJobs": ["platform/packages/private/rollup", "platform/plugins/private/rollup"],
     "xpack.runtimeFields": "platform/plugins/private/runtime_fields",
     "xpack.screenshotting": "platform/plugins/shared/screenshotting",

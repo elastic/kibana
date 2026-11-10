@@ -21,9 +21,12 @@ import type { PolicyData } from '../../../../common/endpoint/types';
 import { getPolicyDataForUpdate } from '../../../../common/endpoint/service/policy';
 import type { EndpointAppContextService } from '../../endpoint_app_context_services';
 
+const STOPPED_MESSAGE = 'PolicyWatcher stopped, abandoning in-flight endpoint policy license check';
+
 export class PolicyWatcher {
   private logger: Logger;
   private subscription: Subscription | undefined;
+  private isStopped = false;
 
   constructor(private readonly endpointServices: EndpointAppContextService) {
     this.logger = endpointServices.createLogger('PolicyWatcher');
@@ -33,7 +36,10 @@ export class PolicyWatcher {
     this.subscription = licenseService.getLicenseInformation$()?.subscribe(this.watch.bind(this));
   }
 
+  /** Unsubscribes from license changes and abandons any in-flight check before endpoint services stop */
   public stop() {
+    this.isStopped = true;
+
     if (this.subscription) {
       this.subscription.unsubscribe();
       this.subscription = undefined;
@@ -60,6 +66,10 @@ export class PolicyWatcher {
       try {
         await pRetry(
           async () => {
+            if (this.isStopped) {
+              throw new pRetry.AbortError(STOPPED_MESSAGE);
+            }
+
             const soClient =
               this.endpointServices.savedObjects.createInternalUnscopedSoClient(false);
 
@@ -88,6 +98,9 @@ export class PolicyWatcher {
           }
         );
       } catch {
+        if (this.isStopped) {
+          this.logger.debug(STOPPED_MESSAGE);
+        }
         return;
       }
 
@@ -96,6 +109,11 @@ export class PolicyWatcher {
       );
 
       for (const policy of response.items as PolicyData[]) {
+        if (this.isStopped) {
+          this.logger.debug(STOPPED_MESSAGE);
+          return;
+        }
+
         const updatePolicy = getPolicyDataForUpdate(policy);
         const policyConfig = updatePolicy.inputs[0].config.policy.value;
 
@@ -118,6 +136,10 @@ export class PolicyWatcher {
 
             await pRetry(
               async () => {
+                if (this.isStopped) {
+                  throw new pRetry.AbortError(STOPPED_MESSAGE);
+                }
+
                 await fleetServices.packagePolicy.update(
                   soClientForPolicyUpdate,
                   esClient,
@@ -145,6 +167,11 @@ export class PolicyWatcher {
             totalUpdates++;
           }
         } catch (error) {
+          if (this.isStopped) {
+            this.logger.debug(STOPPED_MESSAGE);
+            return;
+          }
+
           this.logger.warn(
             `Failure while attempting to verify Endpoint Policy features for policy [${policy.id}]`
           );
