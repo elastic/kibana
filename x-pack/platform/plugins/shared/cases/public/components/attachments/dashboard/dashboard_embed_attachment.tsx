@@ -9,7 +9,6 @@ import React, { useCallback, useMemo } from 'react';
 import deepEqual from 'fast-deep-equal';
 import {
   attachmentDataToDashboardState,
-  DEFAULT_TIME_RANGE,
   type DashboardAttachmentData as DashboardAttachmentApiData,
 } from '@kbn/agent-builder-dashboards-common';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
@@ -69,7 +68,6 @@ const DashboardEmbedAttachmentImpl: React.FC<DashboardViewProps> = ({ attachment
     () =>
       data
         ? {
-            time_range: DEFAULT_TIME_RANGE,
             // Local `DashboardConfig` is a permissive structural subset of the
             // upstream API type; the tripwire above guarantees field parity.
             ...attachmentDataToDashboardState(data.config as DashboardAttachmentApiData),
