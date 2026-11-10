@@ -665,10 +665,10 @@ describe('runPackageReport', () => {
   });
 
   // An already-installed Worker that has not yet picked up the call site supplying this field
-  // (its `yamlTemplate` hash does not cover the imported YAML it renders, so it only updates
-  // once its own `version` bumps) must not have its packaging calls start erroring just because
-  // this step's schema grew a field it does not send -- that would turn a staleness gap into an
-  // outage. Omitting the field has to behave exactly as it did before this check existed.
+  // (it keeps running its previous YAML until it is re-rendered) must not have its packaging
+  // calls start erroring just because this step's schema grew a field it does not send -- that
+  // would turn a staleness gap into an outage. Omitting the field has to behave exactly as it
+  // did before this check existed.
   it('skips the shortfall check when expectedSseCount is omitted', async () => {
     const result = await runPackageReport({
       spaceId: 'default',

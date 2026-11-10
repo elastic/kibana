@@ -50,7 +50,9 @@ const childCalls = managedWorkflowDefinitions
   .flatMap((definition) => {
     const yaml =
       'yamlTemplate' in definition
-        ? (definition.yamlTemplate as (values: typeof TEMPLATE_VALUES) => string)(TEMPLATE_VALUES)
+        ? (definition.yamlTemplate.render as (values: typeof TEMPLATE_VALUES) => string)(
+            TEMPLATE_VALUES
+          )
         : definition.yaml;
     return flatten((parse(yaml) as { steps: YamlStep[] }).steps)
       .filter(({ type }) => type === 'workflow.execute' || type === 'workflow.executeAsync')

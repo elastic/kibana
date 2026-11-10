@@ -27,13 +27,14 @@ export const ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW = {
   id: ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID,
   management: ALERTZERO_WORKER_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  // Version 8 renders the prorated alert cap and the 12h workflow timeout. The
-  // fingerprint test requires the bump: yamlTemplate hashing does not see this
-  // file's imported YAML, so installed spaces would keep the previous render.
+  // Version 8 renders the prorated alert cap and the 12h workflow timeout.
   version: 9,
-  yamlTemplate: (values: ScheduledWorkerTemplateValues): string =>
-    renderAttackDiscoveryWorkerYaml(
-      FLOOR_ATTACK_DISCOVERY_YAML,
-      upgradeStoredWorkerSettings(ATTACK_DISCOVERY_WORKER_SETTINGS_DEFAULTS, values)
-    ),
+  yamlTemplate: {
+    hashValues: { settingsVersion: 1, autonomyLevel: 'manual', scheduleInterval: '24h' },
+    render: (values: ScheduledWorkerTemplateValues): string =>
+      renderAttackDiscoveryWorkerYaml(
+        FLOOR_ATTACK_DISCOVERY_YAML,
+        upgradeStoredWorkerSettings(ATTACK_DISCOVERY_WORKER_SETTINGS_DEFAULTS, values)
+      ),
+  },
 } as const satisfies ManagedWorkflowDefinition<ScheduledWorkerTemplateValues>;

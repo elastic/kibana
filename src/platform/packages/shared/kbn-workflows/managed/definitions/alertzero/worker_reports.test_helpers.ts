@@ -172,7 +172,7 @@ const renderYaml = (definition: ManagedWorkflowDefinition): string => {
   if (!values || !definition.yamlTemplate) {
     throw new Error(`No template values for ${definition.id}; add them to WORKER_TEMPLATE_VALUES`);
   }
-  return definition.yamlTemplate(values as never);
+  return definition.yamlTemplate.render(values as never);
 };
 
 /** The top-level steps of a definition, rendering a `yamlTemplate` with representative values. */

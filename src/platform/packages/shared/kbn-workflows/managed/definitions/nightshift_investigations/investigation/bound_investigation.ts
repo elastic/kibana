@@ -52,7 +52,10 @@ export const NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW = {
   // 2: the caller's timeout caps the investigation step (`timeout_seconds`, at most an hour).
   version: 2,
   billable: false,
-  yamlTemplate: renderBoundInvestigationYaml,
+  yamlTemplate: {
+    hashValues: { serviceAccountId: 'kibana/nightshift_agent' },
+    render: renderBoundInvestigationYaml,
+  },
   management: {
     lifecycle: 'dynamic',
     versionStrategy: 'auto',

@@ -34,7 +34,10 @@ export const NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW = {
   // 3: the investigation call records `context.entry_point: slack`.
   version: 3,
   billable: false,
-  yamlTemplate: renderBoundSlackThreadYaml,
+  yamlTemplate: {
+    hashValues: { serviceAccountId: 'kibana/nightshift_agent' },
+    render: renderBoundSlackThreadYaml,
+  },
   management: {
     lifecycle: 'dynamic',
     versionStrategy: 'auto',

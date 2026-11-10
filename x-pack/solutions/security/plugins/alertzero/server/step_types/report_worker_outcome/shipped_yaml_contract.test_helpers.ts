@@ -121,7 +121,7 @@ export const getManagedYaml = (workflowId: string): string => {
   if (!definition || !definition.yamlTemplate || !values) {
     throw new Error(`Managed workflow "${workflowId}" has no YAML to render`);
   }
-  return definition.yamlTemplate(values as never);
+  return definition.yamlTemplate.render(values as never);
 };
 
 /** Every report step of a workflow's YAML, at any depth. */

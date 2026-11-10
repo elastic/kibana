@@ -27,9 +27,24 @@ export const ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW = {
   management: ALERTZERO_WORKER_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   version: 18,
-  yamlTemplate: (values: AlertTriageWorkerTemplateValues): string =>
-    renderAlertTriageWorkerYaml(
-      FLOOR_ALERT_TRIAGE_YAML,
-      upgradeStoredWorkerSettings(ALERT_TRIAGE_WORKER_SETTINGS_DEFAULTS, values)
-    ),
+  yamlTemplate: {
+    hashValues: {
+      settingsVersion: 2,
+      autonomyLevel: 'manual',
+      scheduleInterval: '15m',
+      extras: {
+        autoCloseConfidenceScoreMinThreshold: 0.85,
+        budgetPerHour: 1300,
+        lookbackHours: 24,
+        minSeverity: 'low',
+        excludeBuildingBlocks: false,
+        excludedRuleTags: [],
+      },
+    },
+    render: (values: AlertTriageWorkerTemplateValues): string =>
+      renderAlertTriageWorkerYaml(
+        FLOOR_ALERT_TRIAGE_YAML,
+        upgradeStoredWorkerSettings(ALERT_TRIAGE_WORKER_SETTINGS_DEFAULTS, values)
+      ),
+  },
 } as const satisfies ManagedWorkflowDefinition<AlertTriageWorkerTemplateValues>;

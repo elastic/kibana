@@ -69,7 +69,7 @@ const alertzeroDefinitions: ManagedWorkflowDefinition[] = getManagedWorkflowDefi
 
 const callSitesFor = (targetWorkflowId: string) =>
   alertzeroDefinitions.flatMap((definition) => {
-    const yaml = definition.yaml ?? definition.yamlTemplate(TEMPLATE_VALUES);
+    const yaml = definition.yaml ?? definition.yamlTemplate.render(TEMPLATE_VALUES);
     const workflow = parse(yaml) as ParsedWorkflow;
 
     return flatten(workflow.steps ?? [])

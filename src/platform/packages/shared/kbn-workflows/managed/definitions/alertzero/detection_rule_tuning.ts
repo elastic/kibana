@@ -28,9 +28,17 @@ export const ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW = {
   management: ALERTZERO_WORKER_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   version: 12,
-  yamlTemplate: (values: RuleTuningWorkerTemplateValues): string =>
-    renderRuleTuningWorkerYaml(
-      DETECTION_RULE_TUNING_YAML,
-      upgradeStoredWorkerSettings(RULE_TUNING_WORKER_SETTINGS_DEFAULTS, values)
-    ),
+  yamlTemplate: {
+    hashValues: {
+      settingsVersion: 1,
+      autonomyLevel: 'manual',
+      scheduleInterval: '2h',
+      extras: { analysisWindowDays: 7, fpCountThreshold: 10, fpRateThresholdPct: 50 },
+    },
+    render: (values: RuleTuningWorkerTemplateValues): string =>
+      renderRuleTuningWorkerYaml(
+        DETECTION_RULE_TUNING_YAML,
+        upgradeStoredWorkerSettings(RULE_TUNING_WORKER_SETTINGS_DEFAULTS, values)
+      ),
+  },
 } as const satisfies ManagedWorkflowDefinition<RuleTuningWorkerTemplateValues>;

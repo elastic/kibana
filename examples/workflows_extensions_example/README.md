@@ -112,7 +112,9 @@ import type { ManagedWorkflowDefinition } from '@kbn/workflows/managed';
 export const EXAMPLE_MANAGED_WORKFLOW: ManagedWorkflowDefinition = {
   id: 'system-example-greeting',
   pluginId: 'workflowsExtensionsExample',
-  yamlTemplate: ({ recipient }) => `name: Example Greeting - ${recipient}
+  yamlTemplate: {
+    hashValues: { recipient: 'World' },
+    render: ({ recipient }) => `name: Example Greeting - ${recipient}
 enabled: true
 triggers:
   - type: workflows.failed
@@ -125,6 +127,7 @@ steps:
     with:
       message: "Hello, ${recipient}! This is a managed workflow example."
 `,
+  },
   management: {
     lifecycle: 'static',
     versionStrategy: 'auto',
@@ -136,7 +139,7 @@ steps:
 ### Key concepts
 
 - **`system-` prefix** is reserved for managed workflow IDs; user-created workflows cannot use it.
-- **`yamlTemplate(values)`** enables install-time parameterization; `values` are persisted and reused on upgrades.
+- **`yamlTemplate.render(values)`** enables install-time parameterization; `values` are persisted and reused on upgrades. **`yamlTemplate.hashValues`** are fixed values the platform renders with to compute the definition hash, so template changes roll out without a version bump.
 - **`versionStrategy: 'auto'`** means the platform re-installs the workflow on startup when the template changes.
 - **`enablement: 'restorable'`** preserves user-toggled enabled state across managed updates.
 - **`spaceId`** is mandatory — use `'*'` (the global space constant) for workflows visible from every space.

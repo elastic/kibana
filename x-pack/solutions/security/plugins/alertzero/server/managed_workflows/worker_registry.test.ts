@@ -97,7 +97,7 @@ const getYamlTemplate = (workerId: RegisteredWorkerId) => {
   if (!definition || !('yamlTemplate' in definition) || !definition.yamlTemplate) {
     throw new Error(`Worker "${workerId}" is missing a yamlTemplate`);
   }
-  return definition.yamlTemplate;
+  return definition.yamlTemplate.render;
 };
 
 describe('workerRegistry', () => {

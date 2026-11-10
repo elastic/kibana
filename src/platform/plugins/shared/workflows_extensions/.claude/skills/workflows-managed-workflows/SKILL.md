@@ -63,8 +63,8 @@ See [MANAGED_WORKFLOWS.md](../../dev_docs/MANAGED_WORKFLOWS.md) for rationale an
 | `pluginId`              | Same id in definition, `registerManagedWorkflowOwner`, and client init                  |
 | Registry                | Definition in `managedWorkflowDefinitions` + id re-exported from `definitions/index.ts` |
 | `management`            | Explicit `lifecycle`, `versionStrategy`, `enablement` — no runtime default              |
-| `yaml` / `yamlTemplate` | Exactly one. A YAML change alone already triggers rollout via `definitionHash`          |
-| `version`               | Bump for non-YAML config, `yamlTemplate` closing over imports, or a deliberate signal   |
+| `yaml` / `yamlTemplate` | Exactly one. A YAML change alone already triggers rollout via `definitionHash`; for templates it hashes `render(hashValues)` |
+| `version`               | Bump for non-YAML config, template changes `hashValues` do not reach, or a deliberate signal |
 | `setup()`               | `registerManagedWorkflowOwner` only — never `install`                                   |
 | `start()`               | `initManagedWorkflowsClient` → static `install`s → `ready()`                            |
 | `spaceId`               | Required on every operation; use `GLOBAL_WORKFLOW_SPACE_ID` explicitly for global       |
@@ -155,6 +155,7 @@ When adding a managed workflow:
    - [ ] Exactly one of `yaml` or `yamlTemplate`
    - [ ] Explicit `management` policy chosen intentionally
    - [ ] Template defs use `as const satisfies ManagedWorkflowDefinition<TValues>`
+   - [ ] Template defs set `yamlTemplate.hashValues` in code, reaching every branch of `render`
    - [ ] Added to `managedWorkflowDefinitions` in `definitions/index.ts`
    - [ ] Id re-exported from `definitions/index.ts`
    - [ ] Every raw request path (top-level `path` on `kibana.request`, `with.request.path`,

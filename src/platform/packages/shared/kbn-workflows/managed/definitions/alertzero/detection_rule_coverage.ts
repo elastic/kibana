@@ -28,9 +28,17 @@ export const ALERTZERO_WORKER_DETECTION_RULE_COVERAGE_WORKFLOW = {
   management: ALERTZERO_WORKER_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   version: 5,
-  yamlTemplate: (values: RuleCoverageWorkerTemplateValues): string =>
-    renderRuleCoverageWorkerYaml(
-      DETECTION_RULE_COVERAGE_YAML,
-      upgradeStoredWorkerSettings(RULE_COVERAGE_WORKER_SETTINGS_DEFAULTS, values)
-    ),
+  yamlTemplate: {
+    hashValues: {
+      settingsVersion: 1,
+      autonomyLevel: 'manual',
+      scheduleInterval: '1h',
+      extras: { lookbackDays: 14, maxGapsPerRun: 5 },
+    },
+    render: (values: RuleCoverageWorkerTemplateValues): string =>
+      renderRuleCoverageWorkerYaml(
+        DETECTION_RULE_COVERAGE_YAML,
+        upgradeStoredWorkerSettings(RULE_COVERAGE_WORKER_SETTINGS_DEFAULTS, values)
+      ),
+  },
 } as const satisfies ManagedWorkflowDefinition<RuleCoverageWorkerTemplateValues>;

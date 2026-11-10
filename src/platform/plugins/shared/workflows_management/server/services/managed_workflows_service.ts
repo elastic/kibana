@@ -957,7 +957,7 @@ export class ManagedWorkflowsService {
           `Managed workflow '${definition.id}' uses yamlTemplate but no template values were provided and none are persisted`
         );
       }
-      const yaml = definition.yamlTemplate(templateValues);
+      const yaml = definition.yamlTemplate.render(templateValues);
       return {
         yaml,
         managedTemplateValues: templateValues,
@@ -983,7 +983,8 @@ export class ManagedWorkflowsService {
 
   private computeManagedDefinitionHash(definition: ManagedWorkflowDefinition): string {
     if (definition.yamlTemplate) {
-      return computeDefinitionHash(definition.yamlTemplate.toString());
+      const { render, hashValues } = definition.yamlTemplate;
+      return computeDefinitionHash(render(hashValues));
     }
     if (!definition.yaml) {
       throw new Error(

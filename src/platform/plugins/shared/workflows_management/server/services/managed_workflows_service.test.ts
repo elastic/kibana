@@ -72,7 +72,10 @@ interface TemplateValues extends ManagedWorkflowTemplateValues {
 
 type YamlManagedWorkflowDefinition = ManagedWorkflowDefinition & { yaml: string };
 type TemplateManagedWorkflowDefinition = ManagedWorkflowDefinition<TemplateValues> & {
-  yamlTemplate: (values: TemplateValues) => string;
+  yamlTemplate: {
+    hashValues: TemplateValues;
+    render: (values: TemplateValues) => string;
+  };
 };
 
 const workflowYaml = ({
@@ -90,6 +93,10 @@ steps: []
 const definitionHash = (yaml: string): string => {
   return createHash('sha256').update(yaml.trim()).digest('hex');
 };
+
+const templateDefinitionHash = ({
+  yamlTemplate: { hashValues, render },
+}: TemplateManagedWorkflowDefinition): string => definitionHash(render(hashValues));
 
 const createDefinition = (
   overrides: {
@@ -119,6 +126,7 @@ const createTemplateDefinition = (
     id?: string;
     pluginId?: string;
     billable?: boolean;
+    importedYaml?: string;
     management?: Partial<ManagedWorkflowManagement>;
   } = {}
 ): TemplateManagedWorkflowDefinition => ({
@@ -126,8 +134,13 @@ const createTemplateDefinition = (
   pluginId: overrides.pluginId ?? PLUGIN_ID,
   version: 1,
   billable: overrides.billable ?? false,
-  yamlTemplate: ({ recipient, enabled }) =>
-    workflowYaml({ name: `Managed Workflow - ${recipient}`, enabled }),
+  yamlTemplate: {
+    hashValues: { recipient: 'Hash', enabled: true },
+    render: ({ recipient, enabled }) =>
+      `${workflowYaml({ name: `Managed Workflow - ${recipient}`, enabled })}${
+        overrides.importedYaml ?? ''
+      }`,
+  },
   management: {
     ...defaultManagement,
     ...overrides.management,
@@ -932,7 +945,7 @@ describe('ManagedWorkflowsService', () => {
       crudService.getWorkflowDocumentWithVersion.mockResolvedValue(
         createVersionedDocument(
           createWorkflowSource({
-            definitionHash: definitionHash(definition.yamlTemplate.toString()),
+            definitionHash: templateDefinitionHash(definition),
             managedTemplateValues: { recipient: 'Original', enabled: true },
             yaml: workflowYaml({ name: 'Managed Workflow - Original', enabled: true }),
           })
@@ -984,7 +997,7 @@ describe('ManagedWorkflowsService', () => {
       crudService.getWorkflowDocumentWithVersion.mockResolvedValue(
         createVersionedDocument(
           createWorkflowSource({
-            definitionHash: definitionHash(definition.yamlTemplate.toString()),
+            definitionHash: templateDefinitionHash(definition),
             managedTemplateValues: templateValues,
           })
         )
@@ -997,6 +1010,31 @@ describe('ManagedWorkflowsService', () => {
       );
 
       expectNoOccWrites(crudService);
+    });
+
+    it('reindexes a template definition when only the YAML it imports changed', async () => {
+      const templateValues: TemplateValues = { recipient: 'World', enabled: true };
+      const install = async (importedYaml: string, stored: WorkflowProperties | null) => {
+        const definition = createTemplateDefinition({ importedYaml });
+        mockManagedWorkflowDefinitions = [definition];
+        const { crudService, service } = createService();
+        crudService.getWorkflowDocumentWithVersion.mockResolvedValue(
+          stored && createVersionedDocument(stored)
+        );
+        await service.installManagedWorkflow(
+          WORKFLOW_ID,
+          { spaceId: SPACE_ID, values: templateValues },
+          definition.pluginId
+        );
+        return crudService;
+      };
+
+      const storedV1 = getIndexedDocument(await install('# imported v1', null));
+      const crudServiceV2 = await install('# imported v2', storedV1);
+
+      expect(getIndexedDocument(crudServiceV2)).toEqual(
+        expect.objectContaining({ yaml: expect.stringContaining('# imported v2') })
+      );
     });
 
     it('reindexes when the definition version changed but the hash is unchanged', async () => {
@@ -1034,7 +1072,7 @@ describe('ManagedWorkflowsService', () => {
       crudService.getWorkflowDocumentWithVersion.mockResolvedValue(
         createVersionedDocument(
           createWorkflowSource({
-            definitionHash: definitionHash(definition.yamlTemplate.toString()),
+            definitionHash: templateDefinitionHash(definition),
             managedTemplateValues: { recipient: 'World', enabled: true },
           })
         )
@@ -1063,7 +1101,7 @@ describe('ManagedWorkflowsService', () => {
         createVersionedDocument(
           createWorkflowSource({
             version: 9,
-            definitionHash: definitionHash(definition.yamlTemplate.toString()),
+            definitionHash: templateDefinitionHash(definition),
             managedTemplateValues: { recipient: 'World', enabled: true },
           })
         )
@@ -1093,7 +1131,7 @@ describe('ManagedWorkflowsService', () => {
         createVersionedDocument(
           createWorkflowSource({
             version: 9,
-            definitionHash: definitionHash(definition.yamlTemplate.toString()),
+            definitionHash: templateDefinitionHash(definition),
             managedTemplateValues: { recipient: 'World', enabled: true },
           })
         )
@@ -1119,7 +1157,7 @@ describe('ManagedWorkflowsService', () => {
       wireOccAwareCrudWrites(crudService, logger);
       const stored = createWorkflowSource({
         version: 9,
-        definitionHash: definitionHash(definition.yamlTemplate.toString()),
+        definitionHash: templateDefinitionHash(definition),
         managedTemplateValues: { recipient: 'World', enabled: true },
       });
       const reads = [

@@ -61,18 +61,26 @@ export const SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW = {
   //
   // Defaults below only matter on a Kibana restart with an install from before these fields
   // existed: this workflow re-renders from old persisted values on boot, which won't have them.
-  yamlTemplate: ({
-    detectionIntervalMinutes,
-    detectionBucketIntervalMinutes = 1,
-    detectionLookbackMinutes = 40,
-    targetCoverageMinutes = 30,
-  }) =>
-    renderTemplate(SCHEDULED_DETECTION_YAML, {
-      __DETECTION_INTERVAL_MINUTES__: detectionIntervalMinutes,
-      __DETECTION_BUCKET_INTERVAL_MINUTES__: detectionBucketIntervalMinutes,
-      __DETECTION_LOOKBACK_MINUTES__: detectionLookbackMinutes,
-      __TARGET_COVERAGE_MINUTES__: targetCoverageMinutes,
-    }),
+  yamlTemplate: {
+    hashValues: {
+      detectionIntervalMinutes: 30,
+      detectionBucketIntervalMinutes: 1,
+      detectionLookbackMinutes: 40,
+      targetCoverageMinutes: 30,
+    },
+    render: ({
+      detectionIntervalMinutes,
+      detectionBucketIntervalMinutes = 1,
+      detectionLookbackMinutes = 40,
+      targetCoverageMinutes = 30,
+    }) =>
+      renderTemplate(SCHEDULED_DETECTION_YAML, {
+        __DETECTION_INTERVAL_MINUTES__: detectionIntervalMinutes,
+        __DETECTION_BUCKET_INTERVAL_MINUTES__: detectionBucketIntervalMinutes,
+        __DETECTION_LOOKBACK_MINUTES__: detectionLookbackMinutes,
+        __TARGET_COVERAGE_MINUTES__: targetCoverageMinutes,
+      }),
+  },
   management: SCHEDULED_SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition<SignificantEventsScheduledDetectionWorkflowTemplateValues>;
 
@@ -84,21 +92,31 @@ export const SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW = {
   // Defaults on the 3 flaky-rule fields only matter on a Kibana restart with a pre-upgrade
   // install: this workflow re-renders from old persisted values on boot, and without a
   // default the missing fields would render as the literal string "undefined".
-  yamlTemplate: ({
-    reviewIntervalMinutes,
-    discoveryBatchSize,
-    maxReviewPasses,
-    flakyRuleDetectionThreshold = 10,
-    flakyRuleProbeAfterMinutes = 360,
-    flakyRuleExemptSeverityScore = 80,
-  }) =>
-    renderTemplate(SCHEDULED_REVIEW_YAML, {
-      __REVIEW_INTERVAL_MINUTES__: reviewIntervalMinutes,
-      __MAX_REVIEW_PASSES__: maxReviewPasses,
-      __DISCOVERY_BATCH_SIZE__: discoveryBatchSize,
-      __FLAKY_RULE_DETECTION_THRESHOLD__: flakyRuleDetectionThreshold,
-      __FLAKY_RULE_PROBE_AFTER_MINUTES__: flakyRuleProbeAfterMinutes,
-      __FLAKY_RULE_EXEMPT_SEVERITY_SCORE__: flakyRuleExemptSeverityScore,
-    }),
+  yamlTemplate: {
+    hashValues: {
+      reviewIntervalMinutes: 10,
+      discoveryBatchSize: 3,
+      maxReviewPasses: 3,
+      flakyRuleDetectionThreshold: 10,
+      flakyRuleProbeAfterMinutes: 360,
+      flakyRuleExemptSeverityScore: 80,
+    },
+    render: ({
+      reviewIntervalMinutes,
+      discoveryBatchSize,
+      maxReviewPasses,
+      flakyRuleDetectionThreshold = 10,
+      flakyRuleProbeAfterMinutes = 360,
+      flakyRuleExemptSeverityScore = 80,
+    }) =>
+      renderTemplate(SCHEDULED_REVIEW_YAML, {
+        __REVIEW_INTERVAL_MINUTES__: reviewIntervalMinutes,
+        __MAX_REVIEW_PASSES__: maxReviewPasses,
+        __DISCOVERY_BATCH_SIZE__: discoveryBatchSize,
+        __FLAKY_RULE_DETECTION_THRESHOLD__: flakyRuleDetectionThreshold,
+        __FLAKY_RULE_PROBE_AFTER_MINUTES__: flakyRuleProbeAfterMinutes,
+        __FLAKY_RULE_EXEMPT_SEVERITY_SCORE__: flakyRuleExemptSeverityScore,
+      }),
+  },
   management: SCHEDULED_SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition<SignificantEventsScheduledReviewWorkflowTemplateValues>;

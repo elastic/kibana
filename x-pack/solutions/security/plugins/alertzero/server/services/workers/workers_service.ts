@@ -69,7 +69,7 @@ const getDefinitionFromTemplate = (registration: WorkerRegistration): WorkflowYa
     registration.id
   );
   if (managedDef && 'yamlTemplate' in managedDef) {
-    const yaml = managedDef.yamlTemplate?.(registration.settings.createDefaultValues());
+    const yaml = managedDef.yamlTemplate?.render(registration.settings.createDefaultValues());
     if (yaml) {
       const result = parseWorkflowYamlToJSON(yaml, WorkflowSchema);
       return result.success ? (result.data as unknown as WorkflowYaml) : null;

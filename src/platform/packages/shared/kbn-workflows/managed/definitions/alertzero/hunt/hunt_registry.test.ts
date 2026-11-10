@@ -20,7 +20,7 @@ import {
 const renderWorkflowYaml = (definition: (typeof managedWorkflowDefinitions)[number]): string =>
   'yaml' in definition
     ? definition.yaml
-    : definition.yamlTemplate({
+    : definition.yamlTemplate.render({
         settingsVersion: 1,
         autonomyLevel: 'manual',
         serviceAccountId: 'kibana/nightshift_agent',

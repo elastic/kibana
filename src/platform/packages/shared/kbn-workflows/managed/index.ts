@@ -64,7 +64,7 @@ export type ManagedWorkflowId = keyof ManagedWorkflowDefinitionById;
 type ManagedWorkflowDefinitionEntry = ManagedWorkflowDefinitionById[ManagedWorkflowId];
 
 type ManagedWorkflowTemplateValuesForDefinition<TDefinition> = TDefinition extends {
-  yamlTemplate: (values: infer TValues) => string;
+  yamlTemplate: { render: (values: infer TValues) => string };
 }
   ? TValues
   : never;

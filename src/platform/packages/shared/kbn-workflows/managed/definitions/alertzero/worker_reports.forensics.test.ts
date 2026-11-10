@@ -87,7 +87,7 @@ describe('Endpoint Analysis close reports', () => {
 describe('Endpoint Analysis outcome reports', () => {
   describe('the Worker (forensics_endpoint_analysis.yaml)', () => {
     const steps = topLevelSteps(
-      ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW.yamlTemplate({
+      ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW.yamlTemplate.render({
         autonomyLevel: 'manual',
         settingsVersion: 1,
       })

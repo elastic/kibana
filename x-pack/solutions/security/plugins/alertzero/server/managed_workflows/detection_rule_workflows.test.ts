@@ -46,7 +46,7 @@ const getManagedYaml = (workflowId: string): string => {
   if ('yamlTemplate' in definition && definition.yamlTemplate) {
     const registration = workerRegistry.get(workflowId);
     if (!registration) throw new Error(`Worker "${workflowId}" is not registered`);
-    return definition.yamlTemplate(registration.settings.createDefaultValues());
+    return definition.yamlTemplate.render(registration.settings.createDefaultValues());
   }
   throw new Error(`Managed workflow definition "${workflowId}" has no YAML source`);
 };
@@ -58,7 +58,7 @@ const renderRuleTuningWorker = (extras: RuleTuningWorkerExtras): string => {
   if (!definition || !('yamlTemplate' in definition) || !definition.yamlTemplate) {
     throw new Error('Rule Tuning worker definition has no YAML template');
   }
-  return definition.yamlTemplate({
+  return definition.yamlTemplate.render({
     settingsVersion: 1,
     autonomyLevel: 'assisted',
     scheduleInterval: '6h',
@@ -73,7 +73,7 @@ const renderRuleCoverageWorker = (extras: RuleCoverageWorkerExtras): string => {
   if (!definition || !('yamlTemplate' in definition) || !definition.yamlTemplate) {
     throw new Error('Rule Coverage worker definition has no YAML template');
   }
-  return definition.yamlTemplate({
+  return definition.yamlTemplate.render({
     settingsVersion: 1,
     autonomyLevel: 'assisted',
     scheduleInterval: '6h',

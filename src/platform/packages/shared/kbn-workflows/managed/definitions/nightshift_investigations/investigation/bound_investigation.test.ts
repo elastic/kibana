@@ -19,7 +19,7 @@ import { SERVICE_ACCOUNT_ID_TOKEN } from '../render_bound_yaml';
 
 describe('Nightshift bound investigation workflow', () => {
   const render = (serviceAccountId: string) =>
-    NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW.yamlTemplate({ serviceAccountId });
+    NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW.yamlTemplate.render({ serviceAccountId });
 
   it('is a dynamic, per-space definition owned by nightshiftInvestigations', () => {
     expect(NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW.id).toBe(

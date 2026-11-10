@@ -14,7 +14,7 @@ import { WorkflowSchema } from '../../../../spec/schema';
 
 describe('Nightshift bound Slack thread workflow', () => {
   const render = () =>
-    NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW.yamlTemplate({
+    NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW.yamlTemplate.render({
       serviceAccountId: 'kibana/nightshift_agent',
     });
 
@@ -39,7 +39,7 @@ describe('Nightshift bound Slack thread workflow', () => {
 
   it('refuses to render without an account', () => {
     expect(() =>
-      NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW.yamlTemplate({ serviceAccountId: '' })
+      NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW.yamlTemplate.render({ serviceAccountId: '' })
     ).toThrow(/requires a serviceAccountId/);
   });
 });

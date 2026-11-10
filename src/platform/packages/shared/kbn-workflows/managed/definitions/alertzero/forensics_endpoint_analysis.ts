@@ -29,9 +29,12 @@ export const ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW = {
   management: ALERTZERO_WORKER_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   version: 7,
-  yamlTemplate: (values: CommonWorkerTemplateValues): string =>
-    renderCommonWorkerYaml(
-      FORENSICS_ENDPOINT_ANALYSIS_YAML,
-      upgradeStoredWorkerSettings(ENDPOINT_ANALYSIS_WORKER_SETTINGS_DEFAULTS, values)
-    ),
+  yamlTemplate: {
+    hashValues: { settingsVersion: 1, autonomyLevel: 'manual' },
+    render: (values: CommonWorkerTemplateValues): string =>
+      renderCommonWorkerYaml(
+        FORENSICS_ENDPOINT_ANALYSIS_YAML,
+        upgradeStoredWorkerSettings(ENDPOINT_ANALYSIS_WORKER_SETTINGS_DEFAULTS, values)
+      ),
+  },
 } as const satisfies ManagedWorkflowDefinition<CommonWorkerTemplateValues>;
