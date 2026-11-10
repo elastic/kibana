@@ -32,8 +32,6 @@ allowBuilds:
   'core-js': false # donation banner
   'core-js-pure': false # donation banner
   'es5-ext': false # prints an informational message
-  'lmdb': false # native bindings; prebuilds are sufficient
-  'msgpackr-extract': false # native bindings; prebuilds are sufficient
   'msw': false # copies a worker script if configured; unused
   'nice-napi': false # optional piscina nice-value helper
   'node-liblzma': false # optional native dep of just-bash; lazy-loads with fallback
