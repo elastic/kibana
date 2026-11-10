@@ -33,7 +33,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       const dashboardName = `Security cases dashboard ${uuidv4()}`;
       let dashboardId: string | undefined;
 
-      before(async () => {
+      before(async function () {
+        // Login, two archive loads and the Lens-on-dashboard UI flow take ~100s on CI.
+        this.timeout(240_000);
+
         await svlCommonPage.loginAsAdmin();
         await esArchiver.loadIfNeeded(
           'x-pack/platform/test/fixtures/es_archives/logstash_functional'
