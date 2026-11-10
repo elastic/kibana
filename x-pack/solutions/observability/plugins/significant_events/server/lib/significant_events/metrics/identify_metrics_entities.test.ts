@@ -6,7 +6,11 @@
  */
 
 import { identifyMetricsEntities } from './identify_metrics_entities';
-import { getDataStreamFamily } from './entity_key_table';
+import {
+  buildKubernetesEntityId,
+  getDataStreamFamily,
+  KUBERNETES_ENTITY_STORE_TYPES,
+} from './entity_key_table';
 
 const catalogueColumns = [
   { name: 'metric_name', type: 'keyword' },
@@ -29,6 +33,7 @@ const workloadColumns = [
 const nodeColumns = [
   { name: 'orchestrator.cluster.name', type: 'keyword' },
   { name: 'kubernetes.node.name', type: 'keyword' },
+  { name: 'replicas', type: 'long' },
   { name: 'last_seen', type: 'date' },
 ];
 
@@ -92,8 +97,22 @@ describe('getDataStreamFamily', () => {
   });
 });
 
+describe('buildKubernetesEntityId', () => {
+  it('uses the entity store type map for workload and node ids', () => {
+    expect([
+      buildKubernetesEntityId({ kind: 'deployment', namespace: 'payments', name: 'checkout' }),
+      buildKubernetesEntityId({ kind: 'daemonset', namespace: 'payments', name: 'metricbeat' }),
+      buildKubernetesEntityId({ kind: 'node', name: 'node-a' }),
+    ]).toEqual([
+      `${KUBERNETES_ENTITY_STORE_TYPES.deployment}:payments/checkout`,
+      `${KUBERNETES_ENTITY_STORE_TYPES.daemonset}:payments/metricbeat`,
+      `${KUBERNETES_ENTITY_STORE_TYPES.node}:node-a`,
+    ]);
+  });
+});
+
 describe('identifyMetricsEntities', () => {
-  it('writes complete workload and node rows and drops an incomplete workload', async () => {
+  it('folds clusters while keeping equal deployment and daemonset names separate', async () => {
     const firstCataloguePage = {
       columns: catalogueColumns,
       values: Array.from({ length: 100 }, (_, index) =>
@@ -113,12 +132,17 @@ describe('identifyMetricsEntities', () => {
       columns: workloadColumns,
       values: [
         ['cluster-a', 'payments', 'deployment', 'checkout', 3, '2026-11-10T12:00:00.000Z'],
+        ['cluster-b', 'payments', 'deployment', 'checkout', 2, '2026-11-10T12:05:00.000Z'],
+        ['cluster-a', 'payments', 'daemonset', 'checkout', 4, '2026-11-10T12:03:00.000Z'],
         ['cluster-a', null, 'deployment', 'missing-namespace', 1, '2026-11-10T12:00:00.000Z'],
       ],
     };
     const nodes = {
       columns: nodeColumns,
-      values: [['cluster-a', 'node-a', '2026-11-10T12:00:00.000Z']],
+      values: [
+        ['cluster-a', 'node-a', 1, '2026-11-10T12:00:00.000Z'],
+        ['cluster-b', 'node-a', 1, '2026-11-10T12:06:00.000Z'],
+      ],
     };
     const harness = createHarness([firstCataloguePage, secondCataloguePage, workloads, nodes]);
 
@@ -132,11 +156,11 @@ describe('identifyMetricsEntities', () => {
 
     expect(result).toEqual(
       expect.objectContaining({
-        metricsEntitiesCount: 2,
+        metricsEntitiesCount: 3,
         metricsCatalogueRowsCount: 116,
         matchedEntityKeyRowsCount: 2,
         uncoveredDataStreamsCount: 0,
-        metricsEntityRowsCount: 3,
+        metricsEntityRowsCount: 6,
         droppedIncompleteRowsCount: 1,
         droppedOverflowRowsCount: 0,
         handled: true,
@@ -145,31 +169,39 @@ describe('identifyMetricsEntities', () => {
     );
     expect(harness.bulk).toHaveBeenCalledTimes(1);
     const operations = harness.bulk.mock.calls[0][1];
-    expect(operations).toHaveLength(2);
+    expect(operations).toHaveLength(3);
     expect(
       operations.map(({ index }: { index: { feature: { id: string } } }) => index.feature.id)
-    ).toEqual(['cluster-a/payments/deployment/checkout', 'cluster-a/node-a']);
+    ).toEqual([
+      'k8s.deployment:payments/checkout',
+      'k8s.daemonset:payments/checkout',
+      'k8s.node:node-a',
+    ]);
     expect(operations[0].index.feature).toEqual({
       type: 'entity',
       subtype: 'k8s_workload',
-      id: 'cluster-a/payments/deployment/checkout',
+      id: 'k8s.deployment:payments/checkout',
       title: 'checkout',
-      description: 'Kubernetes deployment checkout in namespace payments, cluster cluster-a.',
+      description: 'Kubernetes deployment checkout in namespace payments.',
       filter: {
         and: [
-          { field: 'orchestrator.cluster.name', eq: 'cluster-a' },
           { field: 'kubernetes.namespace', eq: 'payments' },
           { field: 'kubernetes.deployment.name', eq: 'checkout' },
         ],
       },
       properties: {
         identity: {
-          'orchestrator.cluster.name': 'cluster-a',
           'kubernetes.namespace': 'payments',
           'kubernetes.deployment.name': 'checkout',
         },
-        replicas: 3,
-        last_seen: '2026-11-10T12:00:00.000Z',
+        breakdown: ['orchestrator.cluster.name'],
+        entity_store_type: 'k8s.deployment',
+        clusters: {
+          'cluster-a': { replicas: 3, last_seen: '2026-11-10T12:00:00.000Z' },
+          'cluster-b': { replicas: 2, last_seen: '2026-11-10T12:05:00.000Z' },
+        },
+        replicas: 5,
+        last_seen: '2026-11-10T12:05:00.000Z',
         origin: 'metrics',
         key_row: 'ecs.k8s_workload',
       },

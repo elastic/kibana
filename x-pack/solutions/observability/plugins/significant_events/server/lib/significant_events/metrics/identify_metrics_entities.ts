@@ -185,15 +185,9 @@ export const identifyMetricsEntities = async ({
     )) as ESQLSearchResponse;
     const rows = rowsFromResponse(response);
     metricsEntityRowsCount += rows.length;
-
-    for (const row of rows) {
-      const feature = keyRow.toEntity(row);
-      if (feature) {
-        features.push(feature);
-      } else {
-        droppedIncompleteRowsCount += 1;
-      }
-    }
+    const folded = keyRow.foldRows(rows);
+    features.push(...folded.features);
+    droppedIncompleteRowsCount += folded.droppedIncompleteRowsCount;
   }
 
   const selectedFeatures = [...features].sort(
