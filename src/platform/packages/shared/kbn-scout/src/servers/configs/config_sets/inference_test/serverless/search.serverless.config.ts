@@ -14,7 +14,7 @@ import type { ScoutServerConfig } from '../../../../../types';
 
 const pluginPath = `--plugin-path=${resolve(
   REPO_ROOT,
-  'x-pack/platform/test_fixtures/search_inference_endpoints_fixture'
+  'x-pack/platform/test_plugins/search_inference_endpoints_fixtures'
 )}`;
 
 export const servers: ScoutServerConfig = {

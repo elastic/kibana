@@ -15,7 +15,7 @@ project:
   description: Moon project for @kbn/search-inference-endpoints-fixture-plugin
   channel: ''
   owner: '@elastic/search-ml-ux'
-  sourceRoot: x-pack/platform/test_fixtures/search_inference_endpoints_fixture
+  sourceRoot: x-pack/platform/test_plugins/search_inference_endpoints_fixtures
 dependsOn:
   - '@kbn/core'
   - '@kbn/core-plugins-server'

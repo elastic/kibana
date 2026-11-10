@@ -3371,7 +3371,7 @@ importers:
         version: link:x-pack/platform/plugins/shared/search_inference_endpoints
       '@kbn/search-inference-endpoints-fixture-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test_fixtures/search_inference_endpoints_fixture
+        version: link:x-pack/platform/test_plugins/search_inference_endpoints_fixtures
       '@kbn/search-navigation':
         specifier: workspace:*
         version: link:x-pack/solutions/search/plugins/search_navigation
@@ -9645,7 +9645,7 @@ importers:
 
   x-pack/platform/test/usage_collection/plugins/stack_management_usage_test: {}
 
-  x-pack/platform/test_fixtures/search_inference_endpoints_fixture: {}
+  x-pack/platform/test_plugins/search_inference_endpoints_fixtures: {}
 
   x-pack/solutions/observability/packages/alert-details: {}
 
