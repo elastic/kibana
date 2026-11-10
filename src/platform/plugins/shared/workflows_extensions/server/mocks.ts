@@ -39,6 +39,7 @@ export const createWorkflowsClientMock = (
 ): WorkflowsClient => ({
   isWorkflowsAvailable: true,
   emitEvent: jest.fn(),
+  resumeExternalHitl: jest.fn(),
   managedWorkflows: createManagedWorkflowsMock(),
   ...overrides,
 });

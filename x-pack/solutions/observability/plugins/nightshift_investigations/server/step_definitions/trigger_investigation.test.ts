@@ -50,7 +50,9 @@ const createDefinition = (start: jest.Mock, soClient = savedObjectsClientMock.cr
   const getEpisodeLookup = jest.fn().mockReturnValue({ spaceId: 'test-space' });
   const getActions = jest.fn().mockReturnValue(undefined);
   const settingsLocator = { getRedirectUrl: jest.fn() } as never;
+  const telemetry = { reportInvestigationSkipped: jest.fn() };
   return {
+    telemetry,
     getAutomationsSoClient,
     getAlertsClient,
     getEpisodeLookup,
@@ -60,7 +62,8 @@ const createDefinition = (start: jest.Mock, soClient = savedObjectsClientMock.cr
       getAlertsClient,
       getEpisodeLookup,
       getActions,
-      settingsLocator
+      settingsLocator,
+      telemetry as never
     ),
     getActions,
     getInvestigationsClient,
@@ -574,7 +577,7 @@ describe('automation budget enforcement before dispatch', () => {
   it.each(['manual', 'alert', 'significant_event'])(
     'skips %s dispatches when the limit is reached',
     async (subjectType) => {
-      const { start, definition, soClient } = setup(2, 2);
+      const { start, definition, soClient, telemetry } = setup(2, 2);
       start.mockImplementation(async (_request, { automationBudget }) => {
         await automationBudget.consume();
         return { investigation_id: 'inv-1' };
@@ -586,12 +589,25 @@ describe('automation budget enforcement before dispatch', () => {
       ).toEqual({
         output: { skip_reason: 'daily_limit', daily_limit: 2 },
       });
+      expect(telemetry.reportInvestigationSkipped).toHaveBeenCalledWith({
+        trigger: 'automation',
+        origin: subjectType,
+        automation_id: 'a1',
+        skip_reason: 'automation_daily_limit',
+      });
       expect(soClient.update).not.toHaveBeenCalled();
       expect(logger.info).toHaveBeenCalledWith(
         expect.stringContaining('for automation a1: daily limit of 2 reached')
       );
     }
   );
+
+  it('leaves the deployment quota denial to the client', async () => {
+    const { start, definition, telemetry } = setup(2, 0);
+    start.mockRejectedValue(new InvestigationQuotaDeniedError());
+    await definition.handler(createContext(input));
+    expect(telemetry.reportInvestigationSkipped).not.toHaveBeenCalled();
+  });
 
   it('charges the budget only when the client opens a new investigation', async () => {
     const { start, definition, soClient } = setup(2, 1);
