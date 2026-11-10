@@ -67,7 +67,6 @@ describe('isFromEarlierThanTo + dateRangeRefinement', () => {
     const result = schema.safeParse({ from, to });
 
     expect(result.success).toBe(false);
-    console.log(result.error);
     expect(result.error?.issues[0]).toMatchObject({
       message: 'from must be earlier than to',
       path: ['to'],
