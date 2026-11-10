@@ -90,7 +90,7 @@ export const createEsSearchIterable = <
 
     // @ts-expect-error TS2638: Type NonNullable<TResultDocument> may represent a primitive value, which is not permitted as the right operand of the in operator.
     if (value && 'then' in value && typeof value.then === 'function') {
-      // eslint-disable-next-line require-atomic-updates
+      // eslint-disable-next-line @kbn/compat/eslint-require-atomic-updates
       value = await value;
     }
   };
@@ -137,9 +137,9 @@ export const createEsSearchIterable = <
       return;
     }
 
-    // eslint-disable-next-line require-atomic-updates
+    // eslint-disable-next-line @kbn/compat/eslint-require-atomic-updates
     searchAfterValue = lastSearchHit.sort;
-    // eslint-disable-next-line require-atomic-updates
+    // eslint-disable-next-line @kbn/compat/eslint-require-atomic-updates
     pointInTime = Promise.resolve({ id: searchResult.pit_id ?? '' });
     await setValue(searchResult);
 

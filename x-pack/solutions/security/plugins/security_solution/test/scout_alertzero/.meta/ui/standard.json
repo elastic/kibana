@@ -1,9 +1,23 @@
 {
-  "sha1": "89e6cfe6d52b9c1e9fe052659b1d640c53d41493",
+  "sha1": "4f5a2d58e1b5d21374cfe552bdb927991236acf4",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "c1e17ebfa263323-d2572eefe71a2f9",
+      "title": "AlertZero approved proposal caption names who approved a proposal that had no action to run, and when",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/approved_proposal_caption.spec.ts",
+        "line": 38,
+        "column": 37
+      }
+    },
     {
       "id": "8d66d7ea541899f-15fe7a1d89d5355",
       "title": "AlertZero onboarding - post-enable page and closed window post-enable app root is the queue, not onboarding",
@@ -280,8 +294,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/queue_page_width.spec.ts",
-        "line": 54,
-        "column": 26
+        "line": 29,
+        "column": 5
       }
     },
     {

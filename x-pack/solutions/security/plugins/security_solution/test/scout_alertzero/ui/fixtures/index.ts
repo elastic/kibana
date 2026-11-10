@@ -62,3 +62,5 @@ export {
   type SeededProposal,
   type SpacesService,
 } from './onboarding';
+export { createInvestigation, deleteInvestigation, enableAlertZero } from './investigations';
+export { cleanupProposalsOfConversation, seedApprovedNoActionProposal } from './proposals';

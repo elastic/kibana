@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { ApplicationStart } from '@kbn/core/public';
+import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import {
   NIGHTSHIFT_SEARCH_QUERY_PARAM,
   NIGHTSHIFT_SEVERITY_QUERY_PARAM,
@@ -35,6 +37,17 @@ export const buildNightshiftEventFlyoutShareUrl = (eventId: string): string => {
   const url = new URL(window.location.href);
   url.searchParams.set(NIGHTSHIFT_EVENT_ID_QUERY_PARAM, eventId);
   return url.toString();
+};
+
+/** The link to an event on Nightshift's events page, which restores its flyout from `eventId`. */
+export const buildNightshiftEventsPageUrl = (
+  getUrlForApp: ApplicationStart['getUrlForApp'],
+  eventId: string
+): string => {
+  const path = `/detections/events?${new URLSearchParams({
+    [NIGHTSHIFT_EVENT_ID_QUERY_PARAM]: eventId,
+  }).toString()}`;
+  return new URL(getUrlForApp(NIGHTSHIFT_APP_ID, { path }), window.location.origin).toString();
 };
 
 export const NIGHTSHIFT_RULE_ID_QUERY_PARAM = 'ruleId';

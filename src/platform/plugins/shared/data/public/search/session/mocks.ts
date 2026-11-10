@@ -61,6 +61,7 @@ export function getSessionServiceMock(
     isRestore: jest.fn(),
     save: jest.fn(),
     isCurrentSession: jest.fn(),
+    hasSession: jest.fn().mockReturnValue(false),
     getSearchOptions: jest.fn(),
     enableStorage: jest.fn(),
     isSessionStorageReady: jest.fn(() => true),

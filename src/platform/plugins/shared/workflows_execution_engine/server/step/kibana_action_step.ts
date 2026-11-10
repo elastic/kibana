@@ -95,7 +95,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
 
   public getInput() {
     const stepWith = this.node.configuration?.with || {};
-    return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(stepWith);
+    return this.stepExecutionRuntime.contextManager.renderObjectAccordingToContextAsync(stepWith);
   }
 
   public async _run(withInputs?: any): Promise<RunStepResult> {
@@ -208,7 +208,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
     return firstValueFrom(
       this.stepExecutionRuntime.contextManager
         .getCoreStart()
-        .featureFlags.getBooleanValue$(WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG, false)
+        .featureFlags.getBooleanValue$(WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG, true)
     );
   }
 

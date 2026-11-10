@@ -10,7 +10,7 @@ import {
   RANGE_SLIDER_CONTROL,
   TIME_SLIDER_CONTROL,
 } from '@kbn/controls-constants';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 const controlWidthSchema = z
   .enum(['small', 'medium', 'large'])
@@ -22,13 +22,15 @@ const dataControlFields = {
     .min(1)
     .max(256)
     .describe('Exact name of a field mapped on `index` (e.g. "service.name").'),
-  index: z
-    .string()
-    .min(1)
-    .max(256)
-    .describe(
-      'Index, alias, or datastream to query for values. Use the same index as the panels the control filters (e.g. "logs-*").'
-    ),
+  index: lazySchema(() =>
+    z
+      .string()
+      .min(1)
+      .max(256)
+      .describe(
+        'Index, alias, or datastream to query for values. Use the same index as the panels the control filters (e.g. "logs-*").'
+      )
+  ),
 };
 
 const controlLayoutFields = {
@@ -40,21 +42,27 @@ const controlLayoutFields = {
 };
 
 const userRequestedFields = {
-  user_requested: z
-    .boolean()
-    .optional()
-    .describe('True only when the user asked explicitly for the controls.'),
+  user_requested: lazySchema(() =>
+    z
+      .boolean()
+      .optional()
+      .describe(
+        'True only when the user asked explicitly for the controls. A control that cannot be added is then reported in `failures` instead of left out silently.'
+      )
+  ),
 };
 
 const controlIdFields = {
-  id: z
-    .string()
-    .min(1)
-    .max(256)
-    .optional()
-    .describe(
-      'Control id. An existing control id replaces that control with this definition in place; a new id adds a control with this id. Omit it to add a control with a generated readable id, shown in the result.'
-    ),
+  id: lazySchema(() =>
+    z
+      .string()
+      .min(1)
+      .max(256)
+      .optional()
+      .describe(
+        'Control id. An existing control id replaces that control in place with this definition, so omitted fields take their defaults; a new id adds a control with this id. Omit it to add a control with a generated readable id, shown in the result.'
+      )
+  ),
 };
 
 const dataControlInputFields = {

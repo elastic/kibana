@@ -138,7 +138,7 @@ export const RuleCanvasContent = ({
   return (
     <QueryClientProvider client={queryClient}>
       <LocatorProvider locators={locators}>
-        <EuiPanel paddingSize="l" hasShadow={false}>
+        <EuiPanel paddingSize="m" hasShadow={false} hasBorder={false}>
           <RuleSummaryBody rule={summaryRule}>
             <RuleSummaryAboutSection />
             <RuleSummaryQueryPreviewSection />

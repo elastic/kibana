@@ -70,12 +70,16 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
     useWidePageLayout,
   }) => {
     const isAdd = useMemo(() => ['package', 'policy'].includes(from), [from]);
-    const isEdit = useMemo(() => ['edit', 'package-edit'].includes(from), [from]);
+    const isEdit = useMemo(
+      () => ['edit', 'package-edit', 'installed-integrations'].includes(from),
+      [from]
+    );
     const isUpgrade = useMemo(
       () =>
         [
           'upgrade-from-fleet-policy-list',
           'upgrade-from-integrations-policy-list',
+          'upgrade-from-installed-integrations',
           'upgrade-from-extension',
         ].includes(from),
       [from]

@@ -67,6 +67,15 @@ export const RETRIES = {
 } as const;
 
 /**
+ * Agent queue for each type of Jest job, and how many Jest config processes one job runs at once
+ * (`JEST_MAX_PARALLEL`). ci-stats sizes the groups for the same number of processes.
+ */
+export const JEST_AGENTS = {
+  UNIT: { queue: 'n2-8-spot', maxParallel: 6 },
+  INTEGRATION: { queue: 'n2-4-spot', maxParallel: 1 },
+} as const;
+
+/**
  * ci-stats duration estimation parameters spread into each test-type group.
  * Controls how configs are binned into parallel jobs.
  */
@@ -75,13 +84,13 @@ export const CI_STATS_DEFAULTS = {
     defaultMin: 4,
     overheadMin: 0.2,
     warmupMin: 4,
-    concurrency: 3,
+    concurrency: JEST_AGENTS.UNIT.maxParallel,
   },
   JEST_INTEGRATION: {
     defaultMin: 15,
     overheadMin: 0.2,
     warmupMin: 5,
-    concurrency: 1,
+    concurrency: JEST_AGENTS.INTEGRATION.maxParallel,
   },
   FUNCTIONAL: {
     defaultMin: 60,
@@ -116,11 +125,13 @@ export const PIPELINES = {
   ES_SERVERLESS_VERIFY: 'kibana-elasticsearch-serverless-verify-and-promote',
 } as const;
 
-/** Buildkite step/group keys registered for cancel-on-gate-failure. */
+/** Buildkite step/group keys of the picker and the test steps it uploads. */
 export const STEP_KEYS = {
+  PICK_TEST_GROUP_RUN_ORDER: 'pick_test_group_run_order',
   JEST_UNIT: 'jest',
   JEST_INTEGRATION: 'jest-integration',
   FTR_GROUP: 'ftr-configs',
+  FTR_CONFIG_PREFIX: 'ftr_configs_',
 } as const;
 
 /** PR label that prevents selective testing. */

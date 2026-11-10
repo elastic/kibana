@@ -38,83 +38,6 @@ describe('QueryService', () => {
 
   describe('executeQuery', () => {
     const mockQuery = 'FROM .alerting-* | LIMIT 10';
-    const mockFilter = {
-      bool: {
-        filter: [
-          {
-            range: {
-              '@timestamp': {
-                gte: '2025-01-01T00:00:00.000Z',
-                lte: '2025-01-02T00:00:00.000Z',
-              },
-            },
-          },
-        ],
-      },
-    };
-
-    const mockResponse: EsqlQueryResponse = {
-      columns: [
-        { name: '@timestamp', type: 'date' },
-        { name: 'rule_id', type: 'keyword' },
-      ],
-      values: [
-        [new Date().toISOString(), 'rule-1'],
-        [new Date().toISOString(), 'rule-2'],
-      ],
-    };
-
-    it('should successfully execute ES|QL query', async () => {
-      mockEsClient.esql.query.mockResolvedValue(mockResponse);
-
-      const result = await queryService.executeQuery({
-        query: mockQuery,
-        filter: mockFilter,
-      });
-
-      expect(mockEsClient.esql.query).toHaveBeenCalledTimes(1);
-      expect(mockEsClient.esql.query).toHaveBeenCalledWith(
-        {
-          query: mockQuery,
-          drop_null_columns: true,
-          filter: mockFilter,
-          params: undefined,
-        },
-        { signal: undefined }
-      );
-
-      expect(result).toEqual(mockResponse);
-      expect(mockLogger.error).not.toHaveBeenCalled();
-    });
-
-    it('should pass abort signal to ES client', async () => {
-      mockEsClient.esql.query.mockResolvedValue(mockResponse);
-      const abortController = new AbortController();
-
-      await queryService.executeQuery({
-        query: mockQuery,
-        abortSignal: abortController.signal,
-      });
-
-      expect(mockEsClient.esql.query).toHaveBeenCalledWith(expect.any(Object), {
-        signal: abortController.signal,
-      });
-    });
-
-    it('should throw and log error when query execution fails', async () => {
-      const error = new Error('ES|QL syntax error');
-      mockEsClient.esql.query.mockRejectedValue(error);
-
-      await expect(queryService.executeQuery({ query: mockQuery })).rejects.toThrow(
-        'ES|QL syntax error'
-      );
-
-      expect(mockLogger.error).toHaveBeenCalled();
-    });
-  });
-
-  describe('executeQueryRows', () => {
-    const mockQuery = 'FROM .alerting-* | LIMIT 10';
 
     const mockResponse: EsqlQueryResponse = {
       columns: [
@@ -130,7 +53,7 @@ describe('QueryService', () => {
     it('should return typed rows from ES|QL response', async () => {
       mockEsClient.esql.query.mockResolvedValue(mockResponse);
 
-      const result = await queryService.executeQueryRows<{ host: string; count: number }>({
+      const result = await queryService.executeQuery<{ host: string; count: number }>({
         query: mockQuery,
       });
 
@@ -138,6 +61,7 @@ describe('QueryService', () => {
         { host: 'host-a', count: 1 },
         { host: 'host-b', count: 2 },
       ]);
+      expect(mockLogger.error).not.toHaveBeenCalled();
     });
 
     it('should coerce BigInt values to Number', async () => {
@@ -149,7 +73,7 @@ describe('QueryService', () => {
         values: [['host-a', BigInt(80)]],
       } as unknown as EsqlQueryResponse);
 
-      const result = await queryService.executeQueryRows<{ host: string; cpu: number }>({
+      const result = await queryService.executeQuery<{ host: string; cpu: number }>({
         query: mockQuery,
       });
 
@@ -163,7 +87,7 @@ describe('QueryService', () => {
         values: [],
       });
 
-      const result = await queryService.executeQueryRows({ query: mockQuery });
+      const result = await queryService.executeQuery({ query: mockQuery });
 
       expect(result).toEqual([]);
     });
@@ -173,7 +97,7 @@ describe('QueryService', () => {
       const abortController = new AbortController();
       const filter = { bool: { filter: [] } };
 
-      await queryService.executeQueryRows({
+      await queryService.executeQuery({
         query: mockQuery,
         filter,
         abortSignal: abortController.signal,
@@ -190,12 +114,11 @@ describe('QueryService', () => {
       );
     });
 
-    it('should throw an error when query fails', async () => {
+    it('should throw and log an error when query fails', async () => {
       mockEsClient.esql.query.mockRejectedValue(new Error('Query failed'));
 
-      await expect(queryService.executeQueryRows({ query: mockQuery })).rejects.toThrow(
-        'Query failed'
-      );
+      await expect(queryService.executeQuery({ query: mockQuery })).rejects.toThrow('Query failed');
+      expect(mockLogger.error).toHaveBeenCalled();
     });
   });
 

@@ -24,6 +24,7 @@ import type {
 import { syncAgentlessDeployments } from '../../services/agentless/deployment_sync';
 import { agentlessAgentService } from '../../services/agents/agentless_agent';
 import { getPolicyThroughput } from '../../services/agentless/throughput';
+import { assertOnboardingAccessByIds } from '../../services/package_policies/onboarding_access';
 
 // Each per-policy search runs a nested date_histogram aggregation; cap it
 // to avoid overwhelming the cluster when a page has many agentless policies.
@@ -87,13 +88,19 @@ export const createAgentlessPolicyHandler: FleetRequestHandler<
 
 export const updateAgentlessPolicyHandler: FleetRequestHandler<
   TypeOf<typeof UpdateAgentlessPolicyRequestSchema.params>,
-  undefined,
+  TypeOf<typeof UpdateAgentlessPolicyRequestSchema.query>,
   TypeOf<typeof UpdateAgentlessPolicyRequestSchema.body>
 > = async (context, request, response) => {
   const [coreContext, fleetContext] = await Promise.all([context.core, context.fleet]);
 
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
+
+  await assertOnboardingAccessByIds(
+    soClient,
+    [request.params.policyId],
+    request.query.onboarding_deployment_id
+  );
 
   const logger = appContextService.getLogger().get('agentless');
 
@@ -140,7 +147,9 @@ export const bulkUpgradeAgentlessPoliciesHandler: FleetRequestHandler<
   );
 
   const policyIds = uniq(request.body.policyIds);
-  const body = await agentlessPoliciesService.bulkUpgradeAgentlessPolicies(policyIds, request);
+  const body = await agentlessPoliciesService.bulkUpgradeAgentlessPolicies(policyIds, request, {
+    acknowledgeBreakingChanges: request.body.acknowledge_breaking_changes,
+  });
 
   // Unlike the package-policy bulk upgrade handler, we deliberately do NOT promote the first
   // per-policy fatal error to a top-level HTTP status. The batch always returns 200 with the
@@ -256,6 +265,12 @@ export const deleteAgentlessPolicyHandler: FleetRequestHandler<
 
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
+
+  await assertOnboardingAccessByIds(
+    soClient,
+    [request.params.policyId],
+    request.query.onboarding_deployment_id
+  );
 
   const logger = appContextService.getLogger().get('agentless');
 
