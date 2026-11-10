@@ -19,7 +19,6 @@ storeDir: .pnpm-store
 strictDepBuilds: true
 allowBuilds:
   # Allowed — the script does required work:
-  'chromedriver': true # downloads the chromedriver binary for functional tests
   'cypress': true # downloads the Cypress binary for functional tests
   'esbuild': true # downloads the platform esbuild binary (transitive via esbuild-register)
   'geckodriver': true # downloads the geckodriver binary for functional tests

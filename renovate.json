@@ -1925,8 +1925,6 @@
     {
       "groupName": "ftr",
       "matchDepNames": [
-        "chromedriver",
-        "@types/chromedriver",
         "@types/selenium-webdriver",
         "geckodriver",
         "selenium-webdriver"
