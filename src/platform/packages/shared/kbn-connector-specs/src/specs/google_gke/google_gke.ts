@@ -454,7 +454,7 @@ export const GoogleGke: ConnectorSpec = {
   metadata: {
     id: '.google_gke',
     displayName: 'Google Kubernetes Engine',
-    description: i18n.translate('core.kibanaConnectorSpecs.googleGke.metadata.description', {
+    description: i18n.translate('connectorSpecs.googleGke.metadata.description', {
       defaultMessage:
         'List clusters and node pools, scale and autoscale node pools, upgrade, roll back, and harden GKE clusters, and track the resulting operations',
     }),
@@ -477,16 +477,13 @@ export const GoogleGke: ConnectorSpec = {
         .optional()
         .describe('Optional default Google Cloud project id used when an action omits one')
         .meta({
-          label: i18n.translate('core.kibanaConnectorSpecs.googleGke.config.defaultProjectId', {
+          label: i18n.translate('connectorSpecs.googleGke.config.defaultProjectId', {
             defaultMessage: 'Default project ID',
           }),
-          helpText: i18n.translate(
-            'core.kibanaConnectorSpecs.googleGke.config.defaultProjectIdHelp',
-            {
-              defaultMessage:
-                'Optional. The project used when an action does not specify one, for example my-project-123. Defaults to the project the service account key belongs to. Actions that take an explicit project id always win.',
-            }
-          ),
+          helpText: i18n.translate('connectorSpecs.googleGke.config.defaultProjectIdHelp', {
+            defaultMessage:
+              'Optional. The project used when an action does not specify one, for example my-project-123. Defaults to the project the service account key belongs to. Actions that take an explicit project id always win.',
+          }),
           placeholder: 'my-project-123',
         }),
       defaultLocation: z
@@ -495,16 +492,13 @@ export const GoogleGke: ConnectorSpec = {
         .optional()
         .describe('Optional default zone or region used when an action omits one')
         .meta({
-          label: i18n.translate('core.kibanaConnectorSpecs.googleGke.config.defaultLocation', {
+          label: i18n.translate('connectorSpecs.googleGke.config.defaultLocation', {
             defaultMessage: 'Default location',
           }),
-          helpText: i18n.translate(
-            'core.kibanaConnectorSpecs.googleGke.config.defaultLocationHelp',
-            {
-              defaultMessage:
-                'Optional. The zone (for example us-central1-a) or region (for example us-central1) used when an action does not specify one. Leave empty to list across every location and require a location on cluster actions.',
-            }
-          ),
+          helpText: i18n.translate('connectorSpecs.googleGke.config.defaultLocationHelp', {
+            defaultMessage:
+              'Optional. The zone (for example us-central1-a) or region (for example us-central1) used when an action does not specify one. Leave empty to list across every location and require a location on cluster actions.',
+          }),
           placeholder: 'us-central1',
         }),
     })
@@ -1073,7 +1067,7 @@ export const GoogleGke: ConnectorSpec = {
 
   test: {
     enabled: true,
-    description: i18n.translate('core.kibanaConnectorSpecs.googleGke.test.description', {
+    description: i18n.translate('connectorSpecs.googleGke.test.description', {
       defaultMessage:
         'Verifies the Google Kubernetes Engine connection by listing the clusters the service account can see',
     }),

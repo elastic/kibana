@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
+
 export interface AnomalyHit {
   _id: string;
   entityId: string;
@@ -13,8 +15,8 @@ export interface AnomalyHit {
   detectorFunction: string;
   timestamp: number;
   recordScore: number;
-  actual: number;
-  typical: number;
+  actual?: number;
+  typical?: number;
   fieldName?: string;
   byFieldName?: string;
   byFieldValue?: string;
@@ -40,6 +42,8 @@ export interface RawAnomalyRecord {
   partition_field_value?: string;
   actual?: number[];
   typical?: number[];
+  // Population analysis only: per-cause records carrying `actual` / `typical`.
+  causes?: MlAnomalyRecordDoc['causes'];
 }
 
 export type EnrichedAnomalyHit = AnomalyHit & {

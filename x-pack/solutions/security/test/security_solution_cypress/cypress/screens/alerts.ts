@@ -26,10 +26,6 @@ export const ALERT_GRID_CELL = '[data-test-subj="dataGridRowCell"]';
 
 export const ALERT_RULE_NAME = '[data-test-subj="formatted-field-kibana.alert.rule.name"]';
 
-export const ALERT_RISK_SCORE = '[data-test-subj="formatted-field-kibana.alert.risk_score"]';
-
-export const ALERT_SEVERITY = '[data-test-subj="formatted-field-kibana.alert.severity"]';
-
 export const ALERT_DATA_GRID = '[data-test-subj="euiDataGridBody"]';
 
 export const ALERT_DATA_GRID_ROW = `${ALERT_DATA_GRID} .euiDataGridRow`;

@@ -18,10 +18,16 @@ import {
 import { i18n } from '@kbn/i18n';
 import styled from '@emotion/styled';
 import type { InfraMetadata } from '../../../../../common/http_api';
+import { firstValue } from '../../../../utils/first_value';
 import { MetadataContext } from '../containers/metadata_context';
 
 interface FieldDef {
+  // ECS path, also the stable key used to look a field up by name.
   field: string;
+  // Tried in order when `field` is empty. OpenTelemetry resource attributes reach this response
+  // either under their ECS alias (`os.type` -> `host.os.platform`) or verbatim under
+  // `resource.attributes.*`, and some ECS fields have no semantic conventions equivalent at all.
+  fallbacks?: string[];
   label: string;
   isBoolean?: boolean;
 }
@@ -29,23 +35,27 @@ interface FieldDef {
 const FIELDS = [
   {
     field: 'cloud.instance.id',
+    fallbacks: ['cloud.resource_id', 'resource.attributes.cloud.resource_id'],
     label: i18n.translate('xpack.infra.nodeDetails.labels.instanceId', {
       defaultMessage: 'Instance ID',
     }),
   },
   {
     field: 'cloud.provider',
+    fallbacks: ['resource.attributes.cloud.provider'],
     label: i18n.translate('xpack.infra.nodeDetails.labels.cloudProvider', {
       defaultMessage: 'Cloud Provider',
     }),
   },
   {
     field: 'host.os.name',
+    fallbacks: ['resource.attributes.os.name', 'host.os.platform', 'resource.attributes.os.type'],
     label: i18n.translate('xpack.infra.nodeDetails.labels.operatinSystem', {
       defaultMessage: 'Operating System',
     }),
   },
   {
+    // No OpenTelemetry semantic conventions equivalent.
     field: 'host.os.kernel',
     label: i18n.translate('xpack.infra.nodeDetails.labels.kernelVersion', {
       defaultMessage: 'Kernel Version',
@@ -53,11 +63,13 @@ const FIELDS = [
   },
   {
     field: 'host.name',
+    fallbacks: ['resource.attributes.host.name'],
     label: i18n.translate('xpack.infra.nodeDetails.labels.hostname', {
       defaultMessage: 'Hostname',
     }),
   },
   {
+    // No OpenTelemetry semantic conventions equivalent.
     field: 'host.containerized',
     label: i18n.translate('xpack.infra.nodeDetails.labels.containerized', {
       defaultMessage: 'Containerized',
@@ -72,12 +84,14 @@ const FIELDS = [
   },
   {
     field: 'cloud.availability_zone',
+    fallbacks: ['resource.attributes.cloud.availability_zone'],
     label: i18n.translate('xpack.infra.nodeDetails.labels.availabilityZone', {
       defaultMessage: 'Availability Zone',
     }),
   },
   {
     field: 'cloud.machine.type',
+    fallbacks: ['host.type', 'resource.attributes.host.type'],
     label: i18n.translate('xpack.infra.nodeDetails.labels.machineType', {
       defaultMessage: 'Machine Type',
     }),
@@ -90,19 +104,25 @@ const FIELDS = [
   },
 ] as FieldDef[];
 
+const NOT_AVAILABLE = '--';
+
 const getLabelForField = ({ field }: FieldDef) => {
   const fieldDef = FIELDS.find((f) => f.field === field);
   if (!fieldDef) return field;
   return fieldDef.label;
 };
 
-const getValueForField = (metadata: InfraMetadata, { field, isBoolean }: FieldDef) => {
+const getValueForField = (metadata: InfraMetadata, { field, fallbacks, isBoolean }: FieldDef) => {
   if (isBoolean) {
     return get(metadata.info, field, false)
       ? i18n.translate('xpack.infra.nodeDetails.yes', { defaultMessage: 'Yes' })
       : i18n.translate('xpack.infra.nodeDetails.no', { defaultMessage: 'No' });
   }
-  return get(metadata.info, field, '--');
+
+  return (
+    firstValue(...[field, ...(fallbacks ?? [])].map((path) => get(metadata.info, path))) ??
+    NOT_AVAILABLE
+  );
 };
 
 interface Props {
@@ -166,7 +186,11 @@ export const MetadataDetails = (props: Props) => {
       ) : null}
       <EuiFlexGrid columns={NUMBER_OF_COLUMNS} style={{ flexGrow: 1 }} gutterSize="s">
         {fields.map((field) => (
-          <EuiFlexItem key={field.field} style={{ minWidth: 0 }}>
+          <EuiFlexItem
+            key={field.field}
+            data-test-subj={`infraMetadataDetailsItem-${field.field}`}
+            style={{ minWidth: 0 }}
+          >
             <EuiTitle size="xs">
               <h5>{getLabelForField(field)}</h5>
             </EuiTitle>

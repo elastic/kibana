@@ -9,13 +9,20 @@ import { escapeQuotes } from '@kbn/es-query';
 import type { AgentStatus } from '@kbn/fleet-plugin/common';
 import { RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES } from '../../../../../../common/endpoint/service/response_actions/constants';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
-import { HostStatus } from '../../../../../../common/endpoint/types';
 import type {
   EndpointAppContextService,
   ScopedEndpointServices,
 } from '../../../../../endpoint/endpoint_app_context_services';
 import { NotFoundError } from '../../../../../endpoint/errors';
-import { fleetAgentStatusToEndpointHostStatus } from '../../../../../endpoint/utils/fleet_agent_status_to_endpoint_host_status';
+import {
+  MAX_AMBIGUOUS_CANDIDATES,
+  collectPages,
+  getMetadataAgentId,
+  isLiveFleetStatus,
+  isLiveHostStatus,
+  selectEndpointHost,
+  toHostStatus,
+} from '../../../../../endpoint/services/endpoint_host_selection';
 import { resolveAgentTypeFromPackages } from '../types';
 
 /**
@@ -35,13 +42,35 @@ export const LOOKUP_PAGE_SIZE = 25;
  */
 export const MAX_LOOKUP_PAGES = 20;
 
-/** Ambiguity candidates returned to the model, newest/most-live first. */
-export const MAX_AMBIGUOUS_CANDIDATES = 10;
+export { MAX_AMBIGUOUS_CANDIDATES };
 
 export interface ResolvedEndpoint {
   agentId: string;
   agentType: ResponseActionAgentType;
   packages: string[];
+  /**
+   * The hostname Fleet records for the agent (`local_metadata.host.name`).
+   * Set only by `resolveByAgentId`, where the caller supplied an ID rather
+   * than a name, so the audit label and confirmation can name the host that
+   * will really be acted on. Under an agent policy whose hostname format is
+   * FQDN this is the FQDN, not the short name Defend reports — see
+   * {@link defendHostNames}.
+   */
+  hostName?: string;
+  /**
+   * Other hostnames the same agent is known by in the Defend united metadata
+   * index (`host.hostname`, the name `list_endpoints` shows). Set only by
+   * `resolveByAgentId`, from a read keyed on that agent's own id, so these can
+   * only ever be this machine's names — never another agent's alias.
+   */
+  defendHostNames?: string[];
+  /**
+   * Status of the resolved agent in the `HostStatus` vocabulary (Fleet's
+   * `unenrolled` / `uninstalled` both report `unenrolled`). Lets a write tool
+   * refuse an agent that can no longer receive actions without changing what
+   * the read-only status tool resolves.
+   */
+  status?: string;
 }
 
 /** A Fleet agent record that matched the hostname but could not be selected. */
@@ -76,21 +105,12 @@ export type EndpointLookupResult =
 
 export interface EndpointLookupService {
   resolveByHostName(hostName: string): Promise<EndpointLookupResult>;
-}
-
-interface CandidatePage<T> {
-  items: T[];
-  total?: number;
   /**
-   * Raw backend page length before space-based visibility filtering.
-   *
-   * Page termination must be judged on this, never on `items.length`: a page
-   * that is full on the backend but has some agents hidden from the caller's
-   * space filters down to fewer visible items, and treating that as "the last
-   * page" stops the walk early — reporting a matching endpoint on a later page
-   * as not-found.
+   * Resolves one specific agent by its Fleet agent ID, behind the same space
+   * and supported-integration gates as the hostname walk. Never `ambiguous`:
+   * an ID names exactly one agent.
    */
-  rawItemCount?: number;
+  resolveByAgentId(agentId: string): Promise<EndpointLookupResult>;
 }
 
 /** Structural view of the metadata-index fields this lookup reads. */
@@ -100,50 +120,12 @@ interface MetadataCandidate {
     agent?: { id?: string };
     /** Fleet agent id — the identity actions and Fleet candidates key on. */
     elastic?: { agent?: { id?: string } };
+    /** Names Defend reports for the host; `hostname` is what `list_endpoints` shows. */
+    host?: { hostname?: string; name?: string };
   };
   host_status?: string;
   /** HostInfo `last_checkin` — ISO timestamp used for the recency tiebreak. */
   last_checkin?: string;
-}
-
-/**
- * Walks pages until the backend reports it has handed over everything it
- * matched, and reports whether the walk had to stop early. `total` is optional
- * because a backend that does not report it gives no evidence of more results;
- * an unknown total is treated as "nothing further", matching the pre-paging
- * behavior.
- *
- * The walk tracks the RAW record count, not the accumulated (possibly
- * filtered) `items`: `total` counts pre-filter records, so comparing the
- * filtered length against it would keep the loop running to
- * `MAX_LOOKUP_PAGES` whenever any record was hidden, and `truncated` would
- * then be reported for a hostname that had in fact been fully examined.
- */
-async function collectPages<T>(
-  fetchPage: (page: number) => Promise<CandidatePage<T>>
-): Promise<{ items: T[]; truncated: boolean; total?: number }> {
-  const items: T[] = [];
-  let total: number | undefined;
-  let rawCount = 0;
-
-  for (let page = 1; page <= MAX_LOOKUP_PAGES; page++) {
-    const { items: pageItems, total: pageTotal, rawItemCount } = await fetchPage(page);
-    items.push(...pageItems);
-    total = pageTotal;
-
-    const pageLength = rawItemCount ?? pageItems.length;
-    rawCount += pageLength;
-
-    if (pageLength < LOOKUP_PAGE_SIZE) {
-      break;
-    }
-
-    if (pageTotal === undefined || rawCount >= pageTotal) {
-      break;
-    }
-  }
-
-  return { items, truncated: total !== undefined && rawCount < total, total };
 }
 
 /**
@@ -157,11 +139,10 @@ async function collectPages<T>(
  * preferring Fleet's number would report `totalCandidates: 0` next to a
  * candidate list that is plainly not empty.
  */
-function totalCandidatesOf(
-  fleet: { truncated: boolean; total?: number },
-  metadata: { truncated: boolean; total?: number }
-): { totalCandidates?: number } {
-  const totals = [fleet, metadata]
+function totalCandidatesOf(...collections: Array<{ truncated: boolean; total?: number }>): {
+  totalCandidates?: number;
+} {
+  const totals = collections
     .filter((collection) => collection.truncated && collection.total !== undefined)
     .map((collection) => collection.total as number);
 
@@ -202,22 +183,6 @@ function totalCandidatesOf(
  *        coexist; querying metadata only when Fleet is empty would silently
  *        prefer the origin host and never detect the collision.
  */
-/**
- * Fleet statuses the shared `fleetAgentStatusToEndpointHostStatus` mapper has
- * no entry for (it falls back to `unhealthy`) although the record is gone, not
- * unhealthy: the metadata path reports them as `unenrolled`. They are exactly
- * the not-live statuses (`isLive`) without a `HostStatus` entry. The shared
- * mapper is left alone because its other caller (`host_status` on the
- * metadata API) would change behavior. `orphaned` stays `unhealthy`: Fleet
- * counts it as an active agent (`ActiveAgentStatuses`), so it is live here too.
- */
-const GONE_FLEET_STATUSES: ReadonlySet<string> = new Set(['unenrolled', 'uninstalled']);
-
-const toHostStatus = (status: AgentStatus): HostStatus =>
-  GONE_FLEET_STATUSES.has(status)
-    ? HostStatus.UNENROLLED
-    : fleetAgentStatusToEndpointHostStatus(status);
-
 export function createEndpointLookupService(
   endpointAppContextService: EndpointAppContextService,
   spaceId: string,
@@ -232,10 +197,43 @@ export function createEndpointLookupService(
      * Defend-metadata read reports a live, healthy host as not-found.
      */
     agentTypes?: ResponseActionAgentType[];
+    /**
+     * `'dispatch'` tightens hostname resolution for write actions; read tools
+     * keep the default. Two differences:
+     *
+     * 1. Any two visible candidates are ambiguous, regardless of liveness.
+     *    Read tools treat several same-named records with one live agent as
+     *    normal Fleet bookkeeping (re-enrollment history) and resolve to the
+     *    live one; a write must not guess between two offline duplicates
+     *    either — which of two stale records is the real machine is exactly
+     *    as unknowable as between two live ones.
+     * 2. Resolution stays origin-only. The request-scoped metadata read still
+     *    runs, but only to WIDEN the collision set: a same-named endpoint in
+     *    a linked project must surface as ambiguity instead of the origin
+     *    host being offered on a card. A host only a linked project has can
+     *    never win resolution, because the response-actions client dispatches
+     *    through origin Fleet (an action issued here would sit pending
+     *    forever on an agent enrolled elsewhere).
+     */
+    resolutionMode?: 'dispatch';
   }
 ): EndpointLookupService {
   const fleetServices = endpointAppContextService.getInternalFleetServices(spaceId);
   const supportedAgentTypes = options?.agentTypes;
+  const dispatchMode = options?.resolutionMode === 'dispatch';
+
+  // Packages of the response-action integrations this lookup may resolve.
+  // When the caller scopes the lookup (`agentTypes`), the set narrows
+  // accordingly. Shared by the hostname walk and the agent-ID lookup so both
+  // paths agree on which agents are response-action targets.
+  const supportedPackages = new Set(
+    Object.entries(RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES)
+      .filter(
+        ([agentType]) =>
+          !supportedAgentTypes || supportedAgentTypes.includes(agentType as ResponseActionAgentType)
+      )
+      .flatMap(([, packageNames]) => packageNames)
+  );
 
   interface NormalizedCandidate {
     agentId: string;
@@ -261,6 +259,15 @@ export function createEndpointLookupService(
   interface CandidateCollection {
     candidates: NormalizedCandidate[];
     truncated: boolean;
+    /**
+     * Fleet agent ids that matched the hostname but are not response-action
+     * targets (no supported integration in `packages`). They are dropped from
+     * `candidates`, but a Defend metadata document for the same agent id can
+     * still match the hostname, so the metadata merge has to know about them —
+     * otherwise the id is offered as an ambiguity candidate and then rejected
+     * as `endpoint_not_found` when the model retries with it.
+     */
+    unsupportedAgentIds?: Set<string>;
     total?: number;
   }
 
@@ -269,91 +276,73 @@ export function createEndpointLookupService(
   // (at least one hidden agent) falls back per-agent WITHIN that page only —
   // a mixed-visibility page costs page-size checks, not the whole walk.
   const listVisibleFleetCandidates = async (hostName: string): Promise<CandidateCollection> => {
-    const { items, truncated } = await collectPages<RawFleetAgent>(async (page) => {
-      const response = await fleetServices.agent.listAgents({
-        showInactive: true,
-        // Exact match on the `.keyword` subfield: `local_metadata.host.name`
-        // is `text`, so a plain value compiles to an analyzed `match` and
-        // `web-01` also matches `web-02`/`db-01` (false ambiguity or the
-        // wrong agent). Quoting alone only gives `match_phrase` on text.
-        kuery: `local_metadata.host.name.keyword: "${escapeQuotes(hostName)}"`,
-        page,
-        perPage: LOOKUP_PAGE_SIZE,
-      });
-      const pageCandidates = response?.agents ?? [];
+    const { items, truncated } = await collectPages<RawFleetAgent>(
+      async (page) => {
+        const response = await fleetServices.agent.listAgents({
+          showInactive: true,
+          kuery: `local_metadata.host.name.keyword: "${escapeQuotes(hostName)}"`,
+          page,
+          perPage: LOOKUP_PAGE_SIZE,
+        });
+        const pageCandidates = response?.agents ?? [];
 
-      const pageIds = pageCandidates.map((candidate) => candidate.id);
-      let visibleIds: Set<string>;
-      try {
-        await fleetServices.ensureInCurrentSpace({ agentIds: pageIds });
-        visibleIds = new Set(pageIds);
-      } catch (e) {
-        if (!(e instanceof NotFoundError)) {
-          // A transient Fleet/ES failure is a real error and must propagate
-          // rather than be misreported as "host not found".
-          throw e;
-        }
+        const pageIds = pageCandidates.map((candidate) => candidate.id);
+        let visibleIds: Set<string>;
+        try {
+          await fleetServices.ensureInCurrentSpace({ agentIds: pageIds });
+          visibleIds = new Set(pageIds);
+        } catch (e) {
+          if (!(e instanceof NotFoundError)) {
+            throw e;
+          }
 
-        // At least one agent on the page is not visible in the caller's
-        // space. Re-check one-by-one to keep the individually visible ones.
-        visibleIds = new Set();
-        for (const candidate of pageCandidates) {
-          try {
-            await fleetServices.ensureInCurrentSpace({ agentIds: [candidate.id] });
-            visibleIds.add(candidate.id);
-          } catch (perAgentError) {
-            if (!(perAgentError instanceof NotFoundError)) {
-              throw perAgentError;
+          visibleIds = new Set();
+          for (const candidate of pageCandidates) {
+            try {
+              await fleetServices.ensureInCurrentSpace({ agentIds: [candidate.id] });
+              visibleIds.add(candidate.id);
+            } catch (perAgentError) {
+              if (!(perAgentError instanceof NotFoundError)) {
+                throw perAgentError;
+              }
             }
           }
         }
-      }
 
-      return {
-        items: pageCandidates.filter((candidate) => visibleIds.has(candidate.id)),
-        total: response?.total,
-        // Raw backend page length: `items` above is space-filtered, so a page
-        // holding any hidden agent would otherwise look like a short (final)
-        // page and cut the walk short.
-        rawItemCount: pageCandidates.length,
-      };
-    });
+        return {
+          items: pageCandidates.filter((candidate) => visibleIds.has(candidate.id)),
+          total: response?.total,
+          fetchedCount: pageCandidates.length,
+        };
+      },
+      { pageSize: LOOKUP_PAGE_SIZE, maxPages: MAX_LOOKUP_PAGES }
+    );
 
     // This skill acts on response-action-capable endpoints, so agents that
     // merely share the hostname without a supported integration (e.g. an
     // auditing agent) must not surface as candidates — they would otherwise
     // inflate the ambiguity set or win the tiebreak over a real endpoint.
-    // When the caller scopes the lookup (`agentTypes`), the package set
-    // narrows accordingly.
-    const supportedPackages = new Set(
-      Object.entries(RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES)
-        .filter(
-          ([agentType]) =>
-            !supportedAgentTypes ||
-            supportedAgentTypes.includes(agentType as ResponseActionAgentType)
-        )
-        .flatMap(([, packageNames]) => packageNames)
+    const isSupported = (candidate: RawFleetAgent) =>
+      (candidate.packages ?? []).some((p) => supportedPackages.has(p));
+    const unsupportedAgentIds = new Set(
+      items.filter((candidate) => !isSupported(candidate)).map((candidate) => candidate.id)
     );
-    const visible: NormalizedCandidate[] = items
-      .filter((candidate) => (candidate.packages ?? []).some((p) => supportedPackages.has(p)))
-      .map((candidate) => ({
-        agentId: candidate.id,
-        // Mirror Fleet's own ActiveAgentStatuses: only records that are
-        // definitively gone count as not live — `updating`, `degraded`,
-        // `enrolling` and `error` are active machines, so two same-named agents
-        // in those states must still surface as `ambiguous` rather than one
-        // being silently picked.
-        isLive: !['offline', 'inactive', 'unenrolled', 'uninstalled', 'decommissioned'].includes(
-          candidate.status ?? ''
-        ),
-        // Reported in the `HostStatus` vocabulary every other status the tool
-        // returns uses (metadata candidates, the found result); `isLive`
-        // above stays on the raw Fleet status, where the active/gone
-        // distinction is defined.
-        status: candidate.status ? toHostStatus(candidate.status as AgentStatus) : 'unknown',
-        packages: candidate.packages,
-        sortKey: candidate.enrolled_at,
-      }));
+    const visible: NormalizedCandidate[] = items.filter(isSupported).map((candidate) => ({
+      agentId: candidate.id,
+      // Mirror Fleet's own ActiveAgentStatuses: only records that are
+      // definitively gone count as not live — `updating`, `degraded`,
+      // `enrolling` and `error` are active machines, so two same-named agents
+      // in those states must still surface as `ambiguous` rather than one
+      // being silently picked.
+      isLive: isLiveFleetStatus(candidate.status ?? ''),
+      // Reported in the `HostStatus` vocabulary every other status the tool
+      // returns uses (metadata candidates, the found result); `isLive`
+      // above stays on the raw Fleet status, where the active/gone
+      // distinction is defined.
+      status: candidate.status ? toHostStatus(candidate.status as AgentStatus) : 'unknown',
+      packages: candidate.packages,
+      sortKey: candidate.enrolled_at,
+    }));
 
     // `truncated` is safe to keep: it says only "there were more pages", which
     // the caller already learns from the space-filtered candidate list being
@@ -361,7 +350,55 @@ export function createEndpointLookupService(
     // `ensureInCurrentSpace` drops the ones this caller cannot see, so returning
     // it would let a hostname probe learn how many matching agent records exist
     // in other Spaces. Drop it and let the count be derived from visible data.
-    return { candidates: visible, truncated };
+    return { candidates: visible, truncated, unsupportedAgentIds };
+  };
+
+  /**
+   * Hostnames Defend itself reports for one agent, read from the united
+   * metadata index keyed on *that agent's id*. Keying on the id is the point:
+   * the read can only return documents belonging to the agent the caller
+   * already named, so a hostname that is another machine's alias can never be
+   * accepted through it.
+   *
+   * Needed because Fleet and Defend disagree about the name of the same host
+   * when the agent policy's hostname format is FQDN: Fleet's
+   * `local_metadata.host.name` is then the FQDN while Defend keeps writing the
+   * short OS hostname that `list_endpoints` shows. Without these names a
+   * correct `{ hostName: <short name>, agentId: <that same agent> }` call is
+   * refused as ambiguous.
+   *
+   * Best effort by design: the names only *widen* what counts as a match for
+   * the agent the caller already named, so an outage here leaves them with
+   * Fleet's hostname alone (the stricter, pre-existing behaviour) instead of
+   * failing a dispatch that Fleet resolved fine.
+   */
+  const listDefendHostNames = async (agentId: string): Promise<string[]> => {
+    try {
+      // Fleet agent id first, endpoint's own id as the legacy fallback — the
+      // same join `getAgentHostNamesWithIds` and the status read use.
+      const quotedAgentId = `"${escapeQuotes(agentId)}"`;
+      const { data } = await endpointAppContextService
+        .getEndpointMetadataService(spaceId)
+        .getHostMetadataList(
+          {
+            page: 0,
+            pageSize: LOOKUP_PAGE_SIZE,
+            kuery: `(united.agent.agent.id: ${quotedAgentId} OR agent.id: ${quotedAgentId})`,
+          },
+          // Dispatch mode keeps every read origin-only: the alias check must
+          // not adopt a linked-project record for a host origin Fleet holds.
+          dispatchMode ? undefined : scoped
+        );
+
+      const names = (data ?? []).flatMap((entry) => [
+        entry.metadata?.host?.hostname,
+        entry.metadata?.host?.name,
+      ]);
+
+      return [...new Set(names.filter((name): name is string => Boolean(name)))];
+    } catch {
+      return [];
+    }
   };
 
   /**
@@ -389,21 +426,21 @@ export function createEndpointLookupService(
 
     const metadataService = endpointAppContextService.getEndpointMetadataService(spaceId);
 
-    const { items, truncated, total } = await collectPages<MetadataCandidate>(async (page) => {
-      const { data, total: pageTotal } = await metadataService.getHostMetadataList(
-        {
-          // The metadata service pages from 0, unlike Fleet's 1-based pages.
-          page: page - 1,
-          pageSize: LOOKUP_PAGE_SIZE,
-          // `keyword` field (`strings_as_keyword` in metrics-metadata-united.json): the quoted
-          // value is an exact match, so `web-01` cannot match `web-01-copy`.
-          kuery: `united.endpoint.host.hostname: "${escapeQuotes(hostName)}"`,
-        },
-        scopedServices
-      );
+    const { items, truncated, total } = await collectPages<MetadataCandidate>(
+      async (page) => {
+        const { data, total: pageTotal } = await metadataService.getHostMetadataList(
+          {
+            page: page - 1,
+            pageSize: LOOKUP_PAGE_SIZE,
+            kuery: `united.endpoint.host.hostname: "${escapeQuotes(hostName)}"`,
+          },
+          scopedServices
+        );
 
-      return { items: data ?? [], total: pageTotal };
-    });
+        return { items: data ?? [], total: pageTotal, fetchedCount: data?.length ?? 0 };
+      },
+      { pageSize: LOOKUP_PAGE_SIZE, maxPages: MAX_LOOKUP_PAGES }
+    );
 
     const candidates: NormalizedCandidate[] = items.flatMap((entry) => {
       // Identity: report the FLEET agent id (`elastic.agent.id`), not the
@@ -413,7 +450,7 @@ export function createEndpointLookupService(
       // ambiguity), and downstream reads filtering on the Fleet id miss the
       // metadata doc. Fleet-id-first with the endpoint id as fallback
       // mirrors `EndpointMetadataService.getEnrichedHostMetadata()`.
-      const agentId = entry.metadata?.elastic?.agent?.id || entry.metadata?.agent?.id;
+      const agentId = getMetadataAgentId(entry);
       if (!agentId) {
         return [];
       }
@@ -424,9 +461,7 @@ export function createEndpointLookupService(
           // agent-level `online`. Only records that are definitively gone
           // (offline / inactive / unenrolled) count as not live; `updating` and
           // `unhealthy` are still potentially-reachable machines.
-          isLive: ![HostStatus.OFFLINE, HostStatus.INACTIVE, HostStatus.UNENROLLED].includes(
-            entry.host_status as HostStatus
-          ),
+          isLive: isLiveHostStatus(entry.host_status as string),
           status: entry.host_status as string,
           sortKey: entry.last_checkin,
         },
@@ -436,17 +471,92 @@ export function createEndpointLookupService(
     return { candidates, truncated, total };
   };
 
+  /**
+   * Merges Fleet candidates with one or more metadata candidate
+   * collections, de-duplicated by agent id. Metadata docs of agents Fleet
+   * already rejected for lacking a supported integration are dropped:
+   * `resolveByAgentId` would answer `not_found` for the id this result
+   * offers.
+   */
+  const mergeCandidates = (
+    fleet: CandidateCollection,
+    ...metadataCollections: CandidateCollection[]
+  ): NormalizedCandidate[] => {
+    const seen = new Set(fleet.candidates.map((c) => c.agentId));
+    return [
+      ...fleet.candidates,
+      ...metadataCollections.flatMap((collection) =>
+        collection.candidates.filter((c) => {
+          if (seen.has(c.agentId) || fleet.unsupportedAgentIds?.has(c.agentId)) {
+            return false;
+          }
+          seen.add(c.agentId);
+          return true;
+        })
+      ),
+    ];
+  };
+
   return {
+    async resolveByAgentId(agentId: string): Promise<EndpointLookupResult> {
+      // The same space gate the hostname walk applies per page: an agent
+      // outside the caller's space answers `not_found`, so an ID probe cannot
+      // reveal that an agent exists in another space.
+      try {
+        await fleetServices.ensureInCurrentSpace({ agentIds: [agentId] });
+      } catch (e) {
+        if (e instanceof NotFoundError) {
+          return { kind: 'not_found' };
+        }
+        throw e;
+      }
+
+      const agent = await fleetServices.agent.getAgent(agentId);
+      const packages = agent.packages ?? [];
+
+      // An agent without a supported (or, when scoped, requested) integration
+      // is not a response-action target — same filter as the hostname path.
+      if (!packages.some((p) => supportedPackages.has(p))) {
+        return { kind: 'not_found' };
+      }
+
+      const fleetHostName = agent.local_metadata?.host?.name;
+      const agentType = resolveAgentTypeFromPackages(packages);
+      // Fleet's name for the agent is not the only identity a correct caller
+      // can supply — see `listDefendHostNames`. Only a Defend agent has
+      // documents in the metadata index, so only it needs that read.
+      const defendHostNames = agentType === 'endpoint' ? await listDefendHostNames(agent.id) : [];
+
+      return {
+        kind: 'found',
+        endpoint: {
+          agentId: agent.id,
+          agentType,
+          packages,
+          ...(agent.status ? { status: toHostStatus(agent.status) } : {}),
+          ...(typeof fleetHostName === 'string' && fleetHostName
+            ? { hostName: fleetHostName }
+            : {}),
+          ...(defendHostNames.length ? { defendHostNames } : {}),
+        },
+      };
+    },
+
     async resolveByHostName(hostName: string): Promise<EndpointLookupResult> {
-      const [fleet, metadata] = await Promise.all([
+      // Read tools pass the request-scoped services straight through, so
+      // linked-project hosts resolve like origin ones. Dispatch mode resolves
+      // on ORIGIN sources only and — when CPS reads are active — ALSO fetches
+      // the scoped candidate set, used solely to widen collision detection
+      // (see `resolutionMode` in `createEndpointLookupService`).
+      const [fleet, resolutionMetadata, scopedMetadata] = await Promise.all([
         listVisibleFleetCandidates(hostName),
-        listMetadataCandidates(hostName, scoped),
+        listMetadataCandidates(hostName, dispatchMode ? undefined : scoped),
+        dispatchMode && scoped?.isCpsRead() ? listMetadataCandidates(hostName, scoped) : undefined,
       ]);
 
       // Fleet is the authority when it has the record — prefer it (it carries
       // `packages`, needed for `agentType`) and only add metadata candidates
       // Fleet doesn't already know about, so a host isn't double-counted.
-      const fleetIds = new Set(fleet.candidates.map((c) => c.agentId));
       // Accepted legacy ambiguity: a legacy metadata doc without
       // `elastic.agent.id` falls back to the endpoint's own `agent.id`,
       // which differs from Fleet's id, so one physical host can surface here
@@ -455,10 +565,11 @@ export function createEndpointLookupService(
       // analyst disambiguates; no wrong-host read, no leak), legacy docs are
       // transient, and joining on hostname instead would risk merging two
       // genuinely different hosts that happen to share a name.
-      const merged = [
-        ...fleet.candidates,
-        ...metadata.candidates.filter((c) => !fleetIds.has(c.agentId)),
-      ];
+      const merged = mergeCandidates(
+        fleet,
+        resolutionMetadata,
+        ...(scopedMetadata ? [scopedMetadata] : [])
+      );
 
       // Space isolation first: when the walk hit the hard cap and nothing
       // visible was found, answer `not_found`. Spaces are a security boundary —
@@ -467,47 +578,33 @@ export function createEndpointLookupService(
       // false-negative for a visible agent living beyond the cap is accepted
       // for that isolation; the cap is high enough (500 records) that real
       // hostnames never reach it.
-      const truncated = fleet.truncated || metadata.truncated;
+      const truncated =
+        fleet.truncated || resolutionMetadata.truncated || Boolean(scopedMetadata?.truncated);
+      const selection = selectEndpointHost(merged, {
+        truncated,
+        ...(dispatchMode
+          ? { dispatch: { originCandidates: mergeCandidates(fleet, resolutionMetadata) } }
+          : {}),
+      });
 
-      if (!merged.length) {
+      if (selection.kind === 'not_found') {
         return { kind: 'not_found' };
       }
 
-      const sorted = [...merged].sort((a, b) => {
-        const aLive = a.isLive ? 1 : 0;
-        const bLive = b.isLive ? 1 : 0;
-        if (aLive !== bLive) return bLive - aLive;
-        return (b.sortKey ?? '').localeCompare(a.sortKey ?? '');
-      });
-
-      // More than one agent matching the hostname is normal Fleet bookkeeping
-      // (re-enrollment, reinstall, agent upgrade) as long as only ONE of them
-      // is live. Two live machines genuinely sharing a hostname — including a
-      // same-named endpoint in a linked project — is different: picking either
-      // one silently would report, or isolate, the wrong host, so surface the
-      // ambiguity instead of guessing.
-      //
-      // An incomplete candidate set is treated the same way as a genuine
-      // duplicate for the same reason: an unexamined record could be another
-      // live machine. This applies only when at least one visible candidate
-      // was found — the zero-visibility case is answered `not_found` above so
-      // cross-space existence never leaks.
-      const live = sorted.filter((c) => c.isLive);
-
-      if (truncated || live.length > 1) {
-        const toReport = truncated ? sorted : live;
-
+      if (selection.kind === 'ambiguous') {
         return {
           kind: 'ambiguous',
-          candidates: toReport
-            .slice(0, MAX_AMBIGUOUS_CANDIDATES)
-            .map((c) => ({ agentId: c.agentId, status: c.status })),
-          ...(truncated ? { truncated: true as const } : {}),
-          ...totalCandidatesOf(fleet, metadata),
+          candidates: selection.candidates.map((c) => ({ agentId: c.agentId, status: c.status })),
+          ...(selection.truncated ? { truncated: true as const } : {}),
+          ...totalCandidatesOf(
+            fleet,
+            resolutionMetadata,
+            ...(scopedMetadata ? [scopedMetadata] : [])
+          ),
         };
       }
 
-      const chosen = sorted[0];
+      const chosen = selection.candidate;
 
       return {
         kind: 'found',
@@ -515,6 +612,7 @@ export function createEndpointLookupService(
           agentId: chosen.agentId,
           agentType: resolveAgentTypeFromPackages(chosen.packages ?? []),
           packages: chosen.packages ?? [],
+          status: chosen.status,
         },
       };
     },

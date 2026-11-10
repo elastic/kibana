@@ -11,13 +11,16 @@ import React, { useMemo, type ReactNode } from 'react';
 import { SourceDocument, type DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import type { ShouldShowFieldInTableHandler } from '@kbn/discover-utils';
 import {
-  formatFieldStringValueWithHighlights,
   getMessageFieldWithFallbacks,
   getLogLevelCoalescedValue,
-  getLogLevelColor,
   LOG_LEVEL_REGEX,
+  MAX_RENDERED_FIELD_VALUE_LENGTH,
   OTEL_MESSAGE_FIELD,
 } from '@kbn/discover-utils';
+import {
+  formatFieldStringValueWithHighlights,
+  getLogLevelColor,
+} from '@kbn/discover-utils/components';
 import { MESSAGE_FIELD } from '@kbn/discover-utils';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { makeHighContrastColor, useEuiTheme } from '@elastic/eui';
@@ -194,6 +197,7 @@ export const Content = ({
       hit: row.raw,
       fieldFormats,
       fieldName: field,
+      maxDisplayLength: MAX_RENDERED_FIELD_VALUE_LENGTH,
     });
 
     // Then apply log level highlighting on top, preserving search highlights

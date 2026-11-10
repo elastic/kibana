@@ -46,6 +46,7 @@ export class UpdateActionPolicyRoute extends BaseAlertingRoute {
   };
   static routeOptions = {
     access: 'public' as const,
+    availability: { stability: 'stable', since: '9.6.0' },
     summary: 'Partially update an action policy.',
     description: ACTION_POLICY_PATCH_SEMANTICS_DESCRIPTION,
     oasOperationObject: updateActionPolicyOasExamples,
@@ -97,8 +98,8 @@ export class UpdateActionPolicyRoute extends BaseAlertingRoute {
 
   protected async execute() {
     const updated = await this.actionPolicyClient.updateActionPolicy({
+      id: this.request.params.id,
       data: this.request.body,
-      options: { id: this.request.params.id },
     });
 
     return this.ctx.response.ok({ body: updated });

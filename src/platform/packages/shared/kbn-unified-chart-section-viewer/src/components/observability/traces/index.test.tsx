@@ -23,7 +23,10 @@ jest.mock('./throughput', () => ({ ThroughputChart: () => null }));
 jest.mock('../../charts_grid', () => ({
   ChartsGrid: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
-jest.mock('@kbn/unified-histogram', () => ({ UnifiedBreakdownFieldSelector: () => null }));
+jest.mock('@kbn/unified-histogram', () => ({
+  UnifiedBreakdownFieldSelector: () => null,
+  resolveBreakdownField: () => undefined,
+}));
 
 describe('TraceMetricsGrid', () => {
   it('passes the remote cluster prefixes of the ES|QL sources to the charts', async () => {

@@ -11,7 +11,7 @@ import { FILE_ATTACHMENT_TYPE } from '../../../../common/constants';
 import {
   FileAttachmentPayloadSchema,
   type FileAttachmentMetadata,
-} from '../../../../common/types/domain_zod/attachment/file/v2';
+} from '../../../../common/types/domain/attachment/file/v2';
 import {
   AttachmentActionType,
   defineAttachment,
@@ -150,6 +150,7 @@ export const getFileAttachmentType = () =>
     getCreationActivity: getFileCreationActivity,
     getRemovalActivity: getFileRemovalActivity,
     getAttachmentList: () => ({ children: CaseViewFiles }),
+    getCountLabel: ({ count }) => i18n.FILES_COUNT(count),
     schema: FileAttachmentPayloadSchema,
     // File attachments reference uploaded files by id; workflow authors can't
     // produce that id from YAML, so file is excluded from workflow steps.

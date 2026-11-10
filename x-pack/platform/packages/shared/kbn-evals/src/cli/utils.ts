@@ -15,9 +15,32 @@ export type KbnEvalsVaultType = 'ci-prod' | 'dev';
 
 export const KBN_EVALS_VAULT_TYPES: ReadonlyArray<KbnEvalsVaultType> = ['ci-prod', 'dev'];
 
+/** Secret holding the config shared by every suite; suites can add their own via `vaultSecret`. */
+export const KBN_EVALS_GENERAL_VAULT_SECRET = 'golden';
+
+const KBN_EVALS_VAULT_PATH_PREFIXES: Record<KbnEvalsVaultType, string> = {
+  'ci-prod': 'kv/ci-shared/kbn-evals',
+  dev: 'secret/kibana-issues/dev/kbn-evals',
+};
+
+const VAULT_SECRET_NAME_PATTERN = /^[a-z0-9][a-z0-9_-]*$/;
+
+/** Vault path of a kbn-evals secret, the general config by default. */
+export const getKbnEvalsVaultPath = (
+  vault: KbnEvalsVaultType,
+  secret: string = KBN_EVALS_GENERAL_VAULT_SECRET
+): string => {
+  if (!VAULT_SECRET_NAME_PATTERN.test(secret)) {
+    throw new Error(
+      `Invalid kbn-evals vault secret name "${secret}": use lowercase letters, digits, "-" and "_"`
+    );
+  }
+  return `${KBN_EVALS_VAULT_PATH_PREFIXES[vault]}/${secret}`;
+};
+
 export const KBN_EVALS_VAULT_PATHS: Record<KbnEvalsVaultType, string> = {
-  'ci-prod': 'kv/ci-shared/kbn-evals/golden',
-  dev: 'secret/kibana-issues/dev/kbn-evals/golden',
+  'ci-prod': getKbnEvalsVaultPath('ci-prod'),
+  dev: getKbnEvalsVaultPath('dev'),
 };
 
 export const KBN_EVALS_VAULT_LOGIN_COMMANDS: Record<KbnEvalsVaultType, string> = {

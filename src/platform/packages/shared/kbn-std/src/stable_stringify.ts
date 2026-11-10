@@ -28,7 +28,8 @@ export interface StableStringifyOptions {
  * - Creating hashes for comparison
  * - Cryptographic operations requiring deterministic input
  *
- * Also handles circular references safely by replacing them with "[Circular]".
+ * Also handles circular references safely by replacing them with "[Circular: N]",
+ * where N is the depth of the referenced ancestor.
  *
  * @param value - The value to stringify
  * @param options - Optional configuration for formatting

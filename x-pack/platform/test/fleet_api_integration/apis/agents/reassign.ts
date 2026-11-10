@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { AGENTS_INDEX, AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { testUsers } from '../test_users';
 
@@ -15,6 +16,8 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const fleetAndAgents = getService('fleetAndAgents');
+  const kibanaServer = getService('kibanaServer');
+  const esClient = getService('es');
 
   describe('fleet_reassign_agent', () => {
     before(async () => {
@@ -149,7 +152,7 @@ export default function (providerContext: FtrProviderContext) {
             policy_id: 'policy2',
           })
           .expect(400);
-        expect(body.message).to.eql('No agents to reassign, already assigned or hosted agents');
+        expect(body.message).to.eql('No agents to reassign, already assigned or managed agents');
 
         const [agent2data, agent3data] = await Promise.all([
           supertest.get(`/api/fleet/agents/agent2`),
@@ -242,6 +245,91 @@ export default function (providerContext: FtrProviderContext) {
             policy_id: 'policy2',
           })
           .expect(403);
+      });
+    });
+
+    describe('agentless agents', () => {
+      const setSupportsAgentless = (policyId: string, supportsAgentless: boolean) =>
+        kibanaServer.savedObjects.update({
+          type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+          id: policyId,
+          attributes: { supports_agentless: supportsAgentless },
+        });
+
+      const getAgentPolicyId = async (agentId: string) => {
+        const { _source: agentDoc } = await esClient.get<{ policy_id: string }>({
+          index: AGENTS_INDEX,
+          id: agentId,
+        });
+        return agentDoc?.policy_id;
+      };
+
+      beforeEach(async () => {
+        // agent1, agent2 and agent3 are enrolled in policy1: make it an agentless policy.
+        // Setting the flag through the API would deploy a real agentless agent.
+        await setSupportsAgentless('policy1', true);
+      });
+
+      it('should not reassign an agentless agent to another policy', async () => {
+        await supertest
+          .post(`/api/fleet/agents/agent1/reassign`)
+          .set('kbn-xsrf', 'xxx')
+          .send({ policy_id: 'policy2' })
+          .expect(400);
+
+        expect(await getAgentPolicyId('agent1')).to.eql('policy1');
+      });
+
+      it('should not bulk reassign agentless agents to another policy', async () => {
+        const { body } = await supertest
+          .post(`/api/fleet/agents/bulk_reassign`)
+          .set('kbn-xsrf', 'xxx')
+          .send({ agents: ['agent1', 'agent2'], policy_id: 'policy2' })
+          .expect(400);
+        expect(body.message).to.eql('No agents to reassign, already assigned or managed agents');
+
+        expect(await getAgentPolicyId('agent1')).to.eql('policy1');
+        expect(await getAgentPolicyId('agent2')).to.eql('policy1');
+      });
+
+      it('should not reassign an agent to an agentless policy', async () => {
+        await setSupportsAgentless('policy1', false);
+        await setSupportsAgentless('policy2', true);
+
+        await supertest
+          .post(`/api/fleet/agents/agent1/reassign`)
+          .set('kbn-xsrf', 'xxx')
+          .send({ policy_id: 'policy2' })
+          .expect(400);
+
+        expect(await getAgentPolicyId('agent1')).to.eql('policy1');
+      });
+
+      it('should allow to reassign an agentless agent to a variant of its own policy and back', async () => {
+        await supertest
+          .post(`/api/fleet/agents/agent1/reassign`)
+          .set('kbn-xsrf', 'xxx')
+          .send({ policy_id: 'policy1#9.6' })
+          .expect(200);
+        expect(await getAgentPolicyId('agent1')).to.eql('policy1#9.6');
+
+        await supertest
+          .post(`/api/fleet/agents/agent1/reassign`)
+          .set('kbn-xsrf', 'xxx')
+          .send({ policy_id: 'policy1' })
+          .expect(200);
+        expect(await getAgentPolicyId('agent1')).to.eql('policy1');
+      });
+
+      it('should allow to bulk reassign agentless agents to a variant of their own policy', async () => {
+        await supertest
+          .post(`/api/fleet/agents/bulk_reassign`)
+          .set('kbn-xsrf', 'xxx')
+          .send({ agents: ['agent1', 'agent2'], policy_id: 'policy1#9.6' })
+          .expect(200);
+
+        expect(await getAgentPolicyId('agent1')).to.eql('policy1#9.6');
+        expect(await getAgentPolicyId('agent2')).to.eql('policy1#9.6');
       });
     });
   });

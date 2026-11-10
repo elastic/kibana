@@ -6,21 +6,29 @@
  */
 
 import { coreMock } from '@kbn/core/server/mocks';
-import { consumeRunQuota, createRunQuotaInternalRepository } from './lib/run_quotas';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import {
+  consumeInvestigationRunQuota,
+  createRunQuotaInternalRepository,
+  dayKey,
+} from './lib/run_quotas';
 import { knowledgeIndicatorsDataStream } from './lib/knowledge_indicators';
 import { detectionsDataStream } from './lib/significant_events/detections';
 import type { SignificantEventsPluginSetupDependencies } from './types';
 import { SignificantEventsPlugin } from './plugin';
 
 jest.mock('./lib/run_quotas', () => ({
-  consumeRunQuota: jest.fn(),
+  consumeInvestigationRunQuota: jest.fn(),
   createRunQuotaInternalRepository: jest.fn(),
+  dayKey: jest.fn(),
+  resolveDailyWindow: jest.fn(),
 }));
 
 jest.mock('./routes', () => ({ significantEventsRouteRepository: {} }));
 
-const consumeRunQuotaMock = jest.mocked(consumeRunQuota);
+const consumeInvestigationRunQuotaMock = jest.mocked(consumeInvestigationRunQuota);
 const createRunQuotaInternalRepositoryMock = jest.mocked(createRunQuotaInternalRepository);
+const dayKeyMock = jest.mocked(dayKey);
 
 const createPlugin = () => new SignificantEventsPlugin(coreMock.createPluginInitializerContext());
 
@@ -54,7 +62,7 @@ const createSetupDeps = ({
 describe('SignificantEventsPlugin setup', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    consumeRunQuotaMock.mockResolvedValue({ allowed: true });
+    consumeInvestigationRunQuotaMock.mockResolvedValue({ allowed: true, release: jest.fn() });
   });
 
   it('supports the investigations plugin being absent', () => {
@@ -111,29 +119,95 @@ describe('SignificantEventsPlugin setup', () => {
     plugin.setup(createCoreSetup(), createSetupDeps({ registerInvestigationQuota }));
     const [callback] = registerInvestigationQuota.mock.calls[0];
 
-    await expect(callback()).rejects.toThrow('Significant Events start services are unavailable');
+    await expect(callback('manual')).rejects.toThrow(
+      'Significant Events start services are unavailable'
+    );
     expect(createRunQuotaInternalRepositoryMock).not.toHaveBeenCalled();
   });
 
-  it('consumes the investigation quota with the existing internal repository when invoked', async () => {
-    const registerInvestigationQuota = jest.fn();
+  describe('when invoked', () => {
     const internalRepository = {} as ReturnType<typeof createRunQuotaInternalRepository>;
-    createRunQuotaInternalRepositoryMock.mockReturnValue(internalRepository);
+    const setupCallback = () => {
+      const registerInvestigationQuota = jest.fn();
+      createRunQuotaInternalRepositoryMock.mockReturnValue(internalRepository);
+      dayKeyMock.mockReturnValue('2026-10-29');
+      const plugin = createPlugin();
+      plugin.setup(createCoreSetup(), createSetupDeps({ registerInvestigationQuota }));
+      const server = plugin.server;
+      if (!server) {
+        throw new Error('Expected Significant Events server');
+      }
+      server.core = coreMock.createStart();
+      return registerInvestigationQuota.mock.calls[0][0];
+    };
+
+    it.each([
+      ['automatic', 'investigation'],
+      ['manual', 'manual_investigation'],
+    ])('charges a %s start to the %s limit', async (trigger, group) => {
+      const release = jest.fn();
+      consumeInvestigationRunQuotaMock.mockResolvedValue({ allowed: true, release });
+
+      await expect(setupCallback()(trigger)).resolves.toEqual({ allowed: true, release });
+      expect(consumeInvestigationRunQuotaMock).toHaveBeenCalledWith({
+        internalRepository,
+        group,
+        date: '2026-10-29',
+      });
+    });
+
+    it.each([
+      ['manual_investigation', 'manual'],
+      ['total_investigation', 'all'],
+    ] as const)('reports a denial by %s as %s', async (deniedGroup, deniedBy) => {
+      consumeInvestigationRunQuotaMock.mockResolvedValue({
+        allowed: false,
+        deniedBy: deniedGroup,
+        limit: 4,
+      });
+
+      await expect(setupCallback()('manual')).resolves.toEqual({
+        allowed: false,
+        deniedBy,
+        limit: 4,
+      });
+    });
+  });
+});
+
+describe('SignificantEventsPlugin alerting v2 rules client', () => {
+  it('requests the alerting v2 rules client attributed to nightshift', async () => {
+    const getRulesClientWithRequestInSpace = jest.fn().mockResolvedValue({});
+    const core = createCoreSetup();
+    core.getStartServices.mockResolvedValue([
+      coreMock.createStart(),
+      {
+        inference: { getClient: jest.fn() },
+        licensing: {
+          getLicense: jest.fn().mockResolvedValue({ getFeature: () => ({ isEnabled: true }) }),
+        },
+        fieldsMetadata: { getClient: jest.fn().mockResolvedValue({}) },
+        nightshiftSources: { getSourcesClient: jest.fn().mockResolvedValue({}) },
+        alertingVTwo: { getRulesClientWithRequestInSpace },
+      },
+      {},
+    ] as unknown as Awaited<ReturnType<typeof core.getStartServices>>);
     const plugin = createPlugin();
-    plugin.setup(createCoreSetup(), createSetupDeps({ registerInvestigationQuota }));
-    const server = plugin.server;
-    if (!server) {
-      throw new Error('Expected Significant Events server');
-    }
-    server.core = coreMock.createStart();
-    const [callback] = registerInvestigationQuota.mock.calls[0];
+    plugin.setup(core, createSetupDeps());
+    const request = httpServerMock.createKibanaRequest({ spaceId: 'default' });
+    const getScopedClients = (
+      plugin as unknown as {
+        getScopedClients: (params: {
+          request: typeof request;
+        }) => Promise<{ getSignificantEventsAlertingContext: () => Promise<unknown> }>;
+      }
+    ).getScopedClients;
 
-    await expect(callback()).resolves.toEqual({ allowed: true });
+    const scoped = await getScopedClients({ request });
+    await scoped.getSignificantEventsAlertingContext();
 
-    expect(createRunQuotaInternalRepositoryMock).toHaveBeenCalledWith(server);
-    expect(consumeRunQuotaMock).toHaveBeenCalledWith({
-      internalRepository,
-      group: 'investigation',
+    expect(getRulesClientWithRequestInSpace).toHaveBeenCalledWith(request, 'default', {
+      app: 'nightshift',
     });
   });
 });

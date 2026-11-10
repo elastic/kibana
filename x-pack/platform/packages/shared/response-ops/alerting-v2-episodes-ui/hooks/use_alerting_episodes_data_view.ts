@@ -73,6 +73,16 @@ const computedFields: Record<string, RuntimeField> = {
     script: { source: "emit('')" },
     customLabel: i18n.SOURCE_FIELD_LABEL,
   },
+  suppressed: {
+    type: 'keyword',
+    script: { source: "emit('')" },
+    customLabel: i18n.SUPPRESSED_FIELD_LABEL,
+  },
+  reason: {
+    type: 'keyword',
+    script: { source: "emit('')" },
+    customLabel: i18n.REASON_FIELD_LABEL,
+  },
 };
 
 const keywordFieldSpec = (name: string): FieldSpec => ({

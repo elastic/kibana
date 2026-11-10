@@ -8,6 +8,7 @@
  */
 
 import { handleEventPropagation } from './handle_event_propagation';
+import { DEVELOPER_TOOLBAR_ID, INSPECT_OVERLAY_ID } from '../constants';
 
 describe('handleEventPropagation', () => {
   let callbackMock: jest.Mock;
@@ -61,6 +62,64 @@ describe('handleEventPropagation', () => {
     expect(callbackMock).toHaveBeenCalledTimes(1);
     expect(callbackMock).toHaveBeenCalledWith(eventMock);
   });
+
+  describe('developer toolbar', () => {
+    const toolbar = document.createElement('div');
+    toolbar.id = DEVELOPER_TOOLBAR_ID;
+
+    beforeEach(() => {
+      document.body.appendChild(toolbar);
+    });
+
+    afterEach(() => {
+      toolbar.remove();
+    });
+
+    it('should leave events originating from the developer toolbar untouched', () => {
+      const modeButton = document.createElement('button');
+      toolbar.appendChild(modeButton);
+
+      eventMock = { ...eventMock, target: modeButton, type: 'click' } as unknown as MouseEvent;
+
+      handleEventPropagation({ event: eventMock, callback: callbackMock });
+
+      expect(eventMock.stopPropagation).not.toHaveBeenCalled();
+      expect(eventMock.preventDefault).not.toHaveBeenCalled();
+      expect(callbackMock).not.toHaveBeenCalled();
+    });
+
+    it('should still handle clicks on the overlay, which is rendered by a toolbar item', () => {
+      const overlay = document.createElement('div');
+      overlay.id = INSPECT_OVERLAY_ID;
+      const highlightBox = document.createElement('div');
+      overlay.appendChild(highlightBox);
+      toolbar.appendChild(overlay);
+
+      eventMock = { ...eventMock, target: highlightBox, type: 'click' } as unknown as MouseEvent;
+
+      handleEventPropagation({ event: eventMock, callback: callbackMock });
+
+      expect(callbackMock).toHaveBeenCalledWith(eventMock);
+    });
+  });
+
+  it.each(['pointerdown', 'mousedown', 'mouseup'])(
+    'should stop but not cancel %s events originating from the overlay',
+    (type) => {
+      const overlay = document.createElement('div');
+      overlay.id = INSPECT_OVERLAY_ID;
+      const highlightBox = document.createElement('div');
+      overlay.appendChild(highlightBox);
+
+      eventMock = { ...eventMock, target: highlightBox, type } as unknown as MouseEvent;
+
+      handleEventPropagation({ event: eventMock, callback: callbackMock });
+
+      expect(eventMock.stopPropagation).toHaveBeenCalledTimes(1);
+      expect(eventMock.preventDefault).not.toHaveBeenCalled();
+      expect(callbackMock).not.toHaveBeenCalled();
+    }
+  );
 
   it('should not call callback when event is not click and element is not disabled', () => {
     eventMock = {

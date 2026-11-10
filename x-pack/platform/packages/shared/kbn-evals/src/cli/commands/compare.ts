@@ -14,6 +14,7 @@ import type { BaselineExperiment } from '../../utils/evals_client';
 import { EvalsClient } from '../../utils/evals_client';
 import { getEvaluationsKbnClient } from '../../utils/evaluations_kbn_client';
 import { getSpaceIdsFromEnv } from '../../utils/space_ids';
+import { buildExecutionCompareUrl } from '../../utils/evals_ui_url';
 import { readSpaceIdsFlag } from '../run_helpers';
 import { formatCompareReport } from '../../utils/reporting/compare_report';
 import { formatMarkdownCompareReport } from '../../utils/reporting/compare_markdown_report';
@@ -102,7 +103,7 @@ export const compareCmd: Command<void> = {
       throw createFlagError(
         [
           error instanceof Error ? error.message : String(error),
-          'Set EVAL_KBN_URL to a Kibana instance with xpack.evals.enabled=true.',
+          'Set EVAL_KBN_URL to a Kibana instance with xpack.evals.enabled=true and xpack.evals.mode=full.',
           'Set EVAL_KBN_API_KEY when authenticating to a non-local target.',
         ].join('\n')
       );
@@ -285,20 +286,17 @@ export const compareCmd: Command<void> = {
     }
 
     if (format === 'markdown') {
-      let comparePageUrl: string | undefined;
       const effectiveKibanaUrl = kibanaUrl ?? evaluationsKbnUrl;
-      if (effectiveKibanaUrl) {
-        try {
-          const urlObj = new URL(effectiveKibanaUrl);
-          urlObj.username = '';
-          urlObj.password = '';
-          const baseUrl = urlObj.toString().replace(/\/+$/, '');
-          comparePageUrl = `${baseUrl}/app/evals/compare?type=execution&baseline=${encodeURIComponent(
-            baselineExperimentId
-          )}&target=${encodeURIComponent(targetExperimentId)}`;
-        } catch {
-          log.warning(`Invalid Kibana URL for compare page link: ${effectiveKibanaUrl}`);
-        }
+      const comparePageUrl = effectiveKibanaUrl
+        ? buildExecutionCompareUrl({
+            kibanaUrl: effectiveKibanaUrl,
+            spaceId: spaceIds?.[0],
+            baselineExecutionId: baselineExperimentId,
+            targetExecutionId: targetExperimentId,
+          })
+        : undefined;
+      if (effectiveKibanaUrl && !comparePageUrl) {
+        log.warning('Invalid Kibana URL for compare page link.');
       }
 
       const markdown = formatMarkdownCompareReport({

@@ -34,12 +34,17 @@ export interface ResolvedServices {
 const getAgentConfiguration = async ({
   agentRegistry,
   agentId,
+  runAs,
 }: {
   agentRegistry: AgentRegistry;
   agentId: string;
+  runAs?: string;
 }): Promise<AgentConfiguration> => {
   try {
-    const { configuration } = await agentRegistry.get(agentId);
+    const { configuration } =
+      runAs !== undefined
+        ? await agentRegistry.get(agentId, { runAs })
+        : await agentRegistry.get(agentId);
     return configuration;
   } catch (error) {
     throw isAgentNotFoundError(error)
@@ -100,6 +105,7 @@ const resolveAgentReasoningLevel = async ({
  * is ignored.
  * @param reasoningLevel - Reasoning level requested by the caller. When set, it overrides the
  * agent's default `reasoning_level`.
+ * @param runAs - Service account the execution runs as; see `GetAgentOptions.runAs`.
  * @returns The model provider, the selected connector and the reasoning level the run uses.
  * @throws {AgentBuilderError} with code `agentNotFound` when the agent does not exist or the
  * caller cannot access it.
@@ -110,6 +116,7 @@ export const resolveServices = async ({
   connectorId,
   reasoningLevel,
   telemetryMetadata,
+  runAs,
   request,
   logger,
   inference,
@@ -123,6 +130,7 @@ export const resolveServices = async ({
   connectorId?: string;
   reasoningLevel?: ChatCompletionReasoningEffort;
   telemetryMetadata?: ConnectorTelemetryMetadata;
+  runAs?: string;
   request: KibanaRequest;
   logger: Logger;
   inference: InferenceServerStart;
@@ -134,7 +142,7 @@ export const resolveServices = async ({
 }): Promise<ResolvedServices> => {
   const agentRegistry = await agentService.getRegistry({ request });
   const { inference_feature_id: agentInferenceFeatureId, reasoning_level: agentReasoningLevel } =
-    await getAgentConfiguration({ agentRegistry, agentId });
+    await getAgentConfiguration({ agentRegistry, agentId, runAs });
   const inferenceFeatureId = connectorId === undefined ? agentInferenceFeatureId : undefined;
 
   const {

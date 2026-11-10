@@ -11,7 +11,7 @@ import type { RunWorkflowExecutor, RunWorkflowPanelProps } from '@kbn/workflows-
 export interface RunCaseWorkflowModalProps
   extends Pick<
     RunWorkflowPanelProps,
-    'inputs' | 'sortWorkflow' | 'filterWorkflow' | 'onExecutionSettled'
+    'inputs' | 'sortWorkflow' | 'filterWorkflow' | 'onExecutionSettled' | 'telemetry'
   > {
   runWorkflow: RunWorkflowExecutor;
   onClose: () => void;

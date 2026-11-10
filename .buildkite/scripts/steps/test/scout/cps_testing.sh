@@ -29,7 +29,6 @@ run_cps_tests() {
 
   if ! node scripts/scout run-tests \
     --location local \
-    --serverConfigSet cps_local \
     --arch serverless \
     --domain "$domain" \
     --config "$config_path" \

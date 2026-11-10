@@ -13,6 +13,8 @@ import {
   AgentAccessControlMode,
   AgentAccessControlRole,
   agentIdMaxLength,
+  AGENT_NAME_MAX_LENGTH,
+  AGENT_DESCRIPTION_MAX_LENGTH,
 } from '@kbn/agent-builder-common';
 import { MAX_AI_INDEX_ID_LENGTH } from '@kbn/context-engine-plugin/common/constants';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
@@ -374,12 +376,15 @@ export function registerAgentRoutes({
           request: {
             body: schema.object({
               id: schema.string({
+                maxLength: agentIdMaxLength,
                 meta: { description: 'Unique identifier for the agent.' },
               }),
               name: schema.string({
+                maxLength: AGENT_NAME_MAX_LENGTH,
                 meta: { description: 'Display name for the agent.' },
               }),
               description: schema.string({
+                maxLength: AGENT_DESCRIPTION_MAX_LENGTH,
                 meta: { description: 'Description of what the agent does.' },
               }),
               avatar_color: schema.maybe(
@@ -526,11 +531,13 @@ export function registerAgentRoutes({
             body: schema.object({
               name: schema.maybe(
                 schema.string({
+                  maxLength: AGENT_NAME_MAX_LENGTH,
                   meta: { description: 'Updated display name for the agent.' },
                 })
               ),
               description: schema.maybe(
                 schema.string({
+                  maxLength: AGENT_DESCRIPTION_MAX_LENGTH,
                   meta: { description: 'Updated description of what the agent does.' },
                 })
               ),
