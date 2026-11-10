@@ -88,16 +88,19 @@ const OPTIONAL_HINT = i18n.translate('xpack.nightshift.onboarding.steps.optional
 
 const INVESTIGATE_SECTION_TITLE = i18n.translate(
   'xpack.nightshift.onboarding.investigate.sectionTitle',
-  { defaultMessage: 'Try your first investigation' }
+  { defaultMessage: 'Try first investigation' }
 );
 
 const ENABLE_SECTION_TITLE = i18n.translate('xpack.nightshift.onboarding.enable.sectionTitle', {
   defaultMessage: 'Enable Elastic nightshift',
 });
 
-const AUTOMATE_SECTION_TITLE = i18n.translate('xpack.nightshift.onboarding.automate.trialTitle', {
-  defaultMessage: 'Your first investigation',
-});
+const AUTOMATE_SECTION_TITLE = i18n.translate(
+  'xpack.nightshift.onboarding.automate.tryFirstInvestigationTitle',
+  {
+    defaultMessage: 'Try first investigation',
+  }
+);
 
 /**
  * First-run Nightshift: enable the space, add telemetry data, connect other sources, try a first
@@ -112,7 +115,7 @@ export function NightshiftOnboarding({
 }: {
   latestInvestigation?: InvestigationSummary;
   automationsHref?: string;
-  /** "I'll do it later" on the last step. */
+  /** "Skip this step" / Done on the last step. */
   onFinish: () => void;
 }): React.ReactElement {
   const { euiTheme } = useEuiTheme();
@@ -227,17 +230,17 @@ export function NightshiftOnboarding({
     const index = ONBOARDING_STEP_IDS.indexOf(id);
     return index < currentIndex ? 'complete' : index > currentIndex ? 'disabled' : 'current';
   };
-  // Links follow what the user has done, not position: a passed step stays reachable from a
-  // detour to an earlier one, and a step not done yet cannot be jumped to. Enable never links.
-  const isDone: Record<OnboardingStepId, boolean> = {
-    enable: isEnabled,
-    addData: isEnabled && (isConnected || hasTelemetrySource),
-    connectSources: isConnected,
-    investigate: latestInvestigation != null,
-    automate: false,
+  // Links follow reachability, not position: a step links whenever its Proceed path is open, so
+  // a step stays reachable from a detour to an earlier one, and a step not reachable yet cannot
+  // be jumped to. Enable and Automate never link.
+  const isReachable: Record<'addData' | 'connectSources' | 'investigate', boolean> = {
+    addData: isEnabled,
+    // Same gate as Proceed on Add data.
+    connectSources: isEnabled && (isConnected || hasTelemetrySource),
+    investigate: isConnected,
   };
   const linkTo = (id: 'addData' | 'connectSources' | 'investigate') =>
-    isDone[id] && step !== id ? () => setStepOverride(id) : undefined;
+    isReachable[id] && step !== id ? () => setStepOverride(id) : undefined;
 
   const steps: Record<OnboardingStepId, OnboardingStepState> = {
     enable: { status: statusOf('enable') },
@@ -303,7 +306,7 @@ export function NightshiftOnboarding({
           onClick={() => setStepOverride(undefined)}
           data-test-subj="nightshiftOnboardingProceedToAutomationButton"
         >
-          {PROCEED_LABEL}
+          {SKIP_LABEL}
         </EuiButton>
       )
     ) : step === 'automate' ? (
@@ -322,9 +325,7 @@ export function NightshiftOnboarding({
           ? i18n.translate('xpack.nightshift.onboarding.doneButton', {
               defaultMessage: 'Done',
             })
-          : i18n.translate('xpack.nightshift.onboarding.doItLaterButton', {
-              defaultMessage: "I'll do it later",
-            })}
+          : SKIP_LABEL}
       </EuiButton>
     ) : undefined;
 
@@ -362,7 +363,7 @@ export function NightshiftOnboarding({
       )}
       {sectionTitle && (
         <>
-          <EuiTitle size={step === 'automate' ? 'xs' : 's'}>
+          <EuiTitle size="xs">
             <h3 data-test-subj="nightshiftOnboardingStepTitle">{sectionTitle}</h3>
           </EuiTitle>
           <EuiSpacer size="m" />
@@ -397,6 +398,7 @@ export function NightshiftOnboarding({
           ) : (
             <OnboardingAutomationStep
               investigation={latestInvestigation}
+              isInvestigationSelected={selectedInvestigationId === latestInvestigation.id}
               automations={automations.data?.automations ?? []}
               automationsAvailable={automationsHref != null}
               onInvestigationClick={openInvestigation}

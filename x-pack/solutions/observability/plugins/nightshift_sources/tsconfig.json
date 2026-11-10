@@ -18,6 +18,7 @@
     "@kbn/server-route-repository-client",
     "@kbn/scout-oblt",
     "@kbn/streams-schema",
+    "@kbn/task-manager-plugin",
     "@kbn/zod",
     "@kbn/server-route-repository-utils",
     "@kbn/core-spaces-common"
