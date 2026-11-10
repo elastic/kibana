@@ -44,6 +44,7 @@ export class EventLoopWatchdog {
   private profilingEnabled = false;
   /** Set when the worker ran out of memory while profiling was on. */
   private profilingStoppedByOom = false;
+  private profilingLoggedOn = false;
 
   constructor(private readonly params: EventLoopWatchdogParams) {}
 
@@ -97,6 +98,7 @@ export class EventLoopWatchdog {
           logger.error(
             'Event loop watchdog worker ran out of memory while profiling was on; profiling stays off until Kibana restarts'
           );
+          this.logProfiling();
         }
       },
       // Can't fire with unlimited restarts; keeps the heartbeat from outliving a future limit.
@@ -104,6 +106,7 @@ export class EventLoopWatchdog {
     });
     this.worker.start();
     logger.info('Event loop watchdog started');
+    this.logProfiling();
     this.warnIfSilent();
   }
 
@@ -151,12 +154,22 @@ export class EventLoopWatchdog {
   public setProfiling(enabled: boolean): void {
     this.profilingEnabled = enabled;
     this.writeProfilingSlot();
+    this.logProfiling();
   }
 
   private writeProfilingSlot(): void {
     const on = this.profilingEnabled && !this.profilingStoppedByOom;
     if (this.shared) {
       Atomics.store(this.shared, Slot.profiling, on ? 1n : 0n);
+    }
+  }
+
+  /** Logs whether a running worker can profile, not what the flags ask for. */
+  private logProfiling(): void {
+    const on = this.shared !== undefined && this.profilingEnabled && !this.profilingStoppedByOom;
+    if (on !== this.profilingLoggedOn) {
+      this.profilingLoggedOn = on;
+      this.params.logger.info(`Event loop watchdog profiling ${on ? 'on' : 'off'} for this node`);
     }
   }
 
@@ -170,6 +183,7 @@ export class EventLoopWatchdog {
     }
     this.worker = undefined;
     this.shared = undefined;
+    this.logProfiling();
     this.clearHeartbeat();
     this.stopping = worker
       .stop()

@@ -221,6 +221,52 @@ describe('EventLoopWatchdog', () => {
     expect(logger.error).not.toHaveBeenCalled();
   });
 
+  describe('profiling log line', () => {
+    const ON = 'Event loop watchdog profiling on for this node';
+    const OFF = 'Event loop watchdog profiling off for this node';
+    const profilingLines = () =>
+      logger.info.mock.calls
+        .map(([message]) => message)
+        .filter((message) => String(message).includes('profiling o'));
+
+    it('logs each change while the worker runs', () => {
+      const watchdog = create();
+      watchdog.start();
+      watchdog.setProfiling(true);
+      watchdog.setProfiling(true);
+      watchdog.setProfiling(false);
+      expect(profilingLines()).toEqual([ON, OFF]);
+    });
+
+    it('logs nothing while the worker is stopped, and on once it starts', () => {
+      const watchdog = create();
+      watchdog.setProfiling(true);
+      expect(profilingLines()).toEqual([]);
+      watchdog.start();
+      expect(profilingLines()).toEqual([ON]);
+    });
+
+    it('logs off when the worker stops', async () => {
+      const watchdog = create();
+      watchdog.start();
+      watchdog.setProfiling(true);
+      const stopped = watchdog.stop();
+      expect(profilingLines()).toEqual([ON, OFF]);
+      resolveStop();
+      await stopped;
+    });
+
+    it('logs off after running out of memory, and nothing when the flag turns on again', () => {
+      const watchdog = create();
+      watchdog.setProfiling(true);
+      watchdog.start();
+      options().onExit!({ reason: 'oom', exitCode: 1 });
+      watchdog.setProfiling(false);
+      watchdog.setProfiling(true);
+      expect(profilingLines()).toEqual([ON, OFF]);
+    });
+  });
+
   it('stops the heartbeat and the worker', async () => {
     const watchdog = create();
     watchdog.start();

@@ -193,13 +193,10 @@ export class EventLoopWatchdogService {
       .pipe(
         map((values) => values.some(Boolean)),
         distinctUntilChanged(),
-        // Profiling starts off, so nodes whose profiling flags have never been on log nothing.
+        // Profiling starts off, so there's nothing to apply until a flag is first on.
         skipWhile((enabled) => !enabled)
       )
-      .subscribe((enabled) => {
-        watchdog.setProfiling(enabled);
-        this.logger.info(`Event loop watchdog profiling ${enabled ? 'on' : 'off'} for this node`);
-      });
+      .subscribe((enabled) => watchdog.setProfiling(enabled));
   }
 
   private logFailure(level: 'warn' | 'error', message: string, error: Error): void {

@@ -32,8 +32,6 @@ const available: ServiceStatus = { level: ServiceStatusLevels.available, summary
 const degraded: ServiceStatus = { level: ServiceStatusLevels.degraded, summary: '' };
 const BG_PROFILING_FLAG = 'core.eventLoopWatchdog.profiling.backgroundTasks.enabled';
 const UI_PROFILING_FLAG = 'core.eventLoopWatchdog.profiling.ui.enabled';
-const ON = 'Event loop watchdog profiling on for this node';
-const OFF = 'Event loop watchdog profiling off for this node';
 
 describe('EventLoopWatchdogService', () => {
   let overall$: BehaviorSubject<ServiceStatus>;
@@ -43,11 +41,6 @@ describe('EventLoopWatchdogService', () => {
   let logger: ReturnType<typeof loggingSystemMock.create>;
 
   const watchdog = () => EventLoopWatchdogMock.mock.instances[0] as jest.Mocked<EventLoopWatchdog>;
-  const profilingLines = () =>
-    loggingSystemMock
-      .collect(logger)
-      .info.map(([message]) => message)
-      .filter((message) => String(message).includes('profiling o'));
   const params = () => EventLoopWatchdogMock.mock.calls[0][0];
 
   const setup = async (
@@ -313,14 +306,13 @@ describe('EventLoopWatchdogService', () => {
     it.each([
       ['background_tasks', BG_PROFILING_FLAG],
       ['ui', UI_PROFILING_FLAG],
-    ])('turns profiling on and off with the %s flag, and logs each change', async (role, flag) => {
+    ])('turns profiling on and off with the %s flag', async (role, flag) => {
       await start({}, [role]);
       profilingFlags[flag].next(false);
       profilingFlags[flag].next(true);
       expect(watchdog().setProfiling).toHaveBeenLastCalledWith(true);
       profilingFlags[flag].next(false);
       expect(watchdog().setProfiling).toHaveBeenLastCalledWith(false);
-      expect(profilingLines()).toEqual([ON, OFF]);
     });
 
     it('does nothing while the profiling flags have never been on', async () => {
@@ -329,7 +321,6 @@ describe('EventLoopWatchdogService', () => {
       profilingFlags[UI_PROFILING_FLAG].next(false);
       profilingFlags[UI_PROFILING_FLAG].next(false);
       expect(watchdog().setProfiling).not.toHaveBeenCalled();
-      expect(profilingLines()).toEqual([]);
     });
 
     it("profiles when any of the node's role flags are on", async () => {
