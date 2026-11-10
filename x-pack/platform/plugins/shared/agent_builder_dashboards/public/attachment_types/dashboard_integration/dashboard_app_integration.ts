@@ -61,7 +61,7 @@ export interface DashboardAppIntegrationParams {
   /** The attachment whose changes opened this dashboard as a new one. */
   linkedAttachmentId?: string;
   /** Links the next dashboard that opens to the attachment whose changes it shows. */
-  linkNextDashboard: (attachmentId: string) => void;
+  linkNextDashboard: (attachmentId: string) => () => void;
 }
 
 interface State {
@@ -87,6 +87,7 @@ export const registerDashboardAppIntegration = ({
   };
 
   let pendingAddAttachmentTimeout: ReturnType<typeof setTimeout> | undefined;
+  const unlinkedStagedAttachmentIds = new Set<string>();
 
   const addAttachmentFromDashboard = () => {
     // agent changes to a dashboard the user can't edit open in a new dashboard, so don't link the attachment to it
@@ -100,8 +101,12 @@ export const registerDashboardAppIntegration = ({
 
     // update an existing linked attachment, or add a draft attachment only when the conversation is new
     if (syncAttachment || !state.conversationId) {
+      const attachmentId = syncAttachment?.id ?? draftAttachmentId.current;
+      if (!isLinkable) {
+        unlinkedStagedAttachmentIds.add(attachmentId);
+      }
       agentBuilder.addAttachment({
-        id: syncAttachment?.id ?? draftAttachmentId.current,
+        id: attachmentId,
         origin: dashboardId,
         type: DASHBOARD_ATTACHMENT_TYPE,
         data: dashboardData,
@@ -172,6 +177,7 @@ export const registerDashboardAppIntegration = ({
     dashboardLocator,
     toasts,
     linkedAttachmentId,
+    isStagedFromDashboard: (attachmentId) => unlinkedStagedAttachmentIds.has(attachmentId),
     linkNextDashboard,
     onOtherDashboardUpdated: otherDashboardUpdateNotifier.notify,
     upsertAttachment: (attachment: DashboardAttachment) => {

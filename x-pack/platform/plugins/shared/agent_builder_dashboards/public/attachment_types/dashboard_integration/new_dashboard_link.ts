@@ -8,8 +8,11 @@
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 
 export interface NewDashboardLink {
-  /** Links the next dashboard that opens after `fromApi` to the attachment whose changes it shows. */
-  linkNextDashboard: (fromApi: DashboardApi, attachmentId: string) => void;
+  /**
+   * Links the next dashboard that opens after `fromApi` to the attachment whose changes it shows.
+   * Returns a function that removes the link when no dashboard has taken it over yet.
+   */
+  linkNextDashboard: (fromApi: DashboardApi, attachmentId: string) => () => void;
   /** Takes over the link `linkNextDashboard` left, when the dashboard is a new, unsaved one. */
   claim: (api: DashboardApi) => void;
   getLinkedAttachmentId: (api: DashboardApi) => string | undefined;
@@ -25,7 +28,13 @@ export const createNewDashboardLink = (): NewDashboardLink => {
 
   return {
     linkNextDashboard: (fromApi, attachmentId) => {
-      nextLink = { fromApi, attachmentId };
+      const link = { fromApi, attachmentId };
+      nextLink = link;
+      return () => {
+        if (nextLink === link) {
+          nextLink = undefined;
+        }
+      };
     },
     claim: (api) => {
       // the dashboard the changes were opened from is published again when the chat reopens

@@ -24,7 +24,7 @@ interface HandlePreviewParams {
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
   openCanvas?: () => void;
   linkedAttachmentId?: string;
-  linkNextDashboard?: (attachmentId: string) => void;
+  linkNextDashboard?: (attachmentId: string) => () => void;
 }
 
 /** Previews the attachment, showing an error toast when it can't be opened. */

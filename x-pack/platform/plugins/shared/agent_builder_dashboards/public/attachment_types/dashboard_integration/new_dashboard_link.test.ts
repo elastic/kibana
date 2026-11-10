@@ -55,4 +55,15 @@ describe('createNewDashboardLink', () => {
 
     expect(link.getLinkedAttachmentId(laterDashboardApi)).toBeUndefined();
   });
+
+  it('does not link the next dashboard once the link is removed', () => {
+    const link = createNewDashboardLink();
+    const newDashboardApi = buildDashboardApi();
+
+    const unlink = link.linkNextDashboard(buildDashboardApi('managed-dashboard'), 'attachment-1');
+    unlink();
+    link.claim(newDashboardApi);
+
+    expect(link.getLinkedAttachmentId(newDashboardApi)).toBeUndefined();
+  });
 });

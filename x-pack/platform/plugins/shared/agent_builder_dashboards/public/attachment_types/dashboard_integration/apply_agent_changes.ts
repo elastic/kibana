@@ -18,8 +18,11 @@ interface ApplyAgentChangesParams {
   canWriteDashboards: boolean;
   dashboardLocator?: DashboardRendererProps['locator'];
   toasts: NotificationsStart['toasts'];
-  /** Called right before the changes open in a new dashboard, so it can be linked to them. */
-  onOpenInNewDashboard?: () => void;
+  /**
+   * Called right before the changes open in a new dashboard, so it can be linked to them.
+   * The function it returns is called when the new dashboard fails to open.
+   */
+  onOpenInNewDashboard?: () => (() => void) | void;
 }
 
 export const APPLY_AGENT_CHANGES_ERROR_TITLE = i18n.translate(
@@ -63,12 +66,17 @@ export const applyAgentChangesToDashboard = async ({
     if (!dashboardLocator) {
       return;
     }
-    onOpenInNewDashboard?.();
-    await dashboardLocator.navigate({
-      ...toDashboardLocatorParams(dashboardState),
-      viewMode: 'edit',
-      changedBy: ['agent'],
-    });
+    const unlink = onOpenInNewDashboard?.();
+    try {
+      await dashboardLocator.navigate({
+        ...toDashboardLocatorParams(dashboardState),
+        viewMode: 'edit',
+        changedBy: ['agent'],
+      });
+    } catch (error) {
+      unlink?.();
+      throw error;
+    }
     toasts.addWarning({
       title: i18n.translate(
         'xpack.agentBuilderDashboards.applyAgentChanges.newDashboardToastTitle',

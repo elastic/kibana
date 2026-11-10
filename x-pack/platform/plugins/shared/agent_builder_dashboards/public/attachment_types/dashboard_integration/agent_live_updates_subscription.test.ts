@@ -39,11 +39,13 @@ const createHarness = (
     isManaged = false,
     linkedAttachmentId,
     canWriteDashboards = true,
+    stagedAttachmentIds = ['attachment-1'],
   }: {
     isNewConversation?: boolean;
     isManaged?: boolean;
     linkedAttachmentId?: string;
     canWriteDashboards?: boolean;
+    stagedAttachmentIds?: string[];
   } = {}
 ) => {
   const chatEvents$ = new Subject();
@@ -75,6 +77,7 @@ const createHarness = (
     dashboardLocator,
     toasts: toasts as unknown as NotificationsStart['toasts'],
     linkedAttachmentId,
+    isStagedFromDashboard: (attachmentId) => stagedAttachmentIds.includes(attachmentId),
     linkNextDashboard,
     onOtherDashboardUpdated,
     upsertAttachment,
@@ -180,6 +183,21 @@ describe('createAgentLiveUpdatesSubscription', () => {
     subscription.unsubscribe();
   });
 
+  it('leaves a managed dashboard open when the agent updates an unlinked attachment it did not stage', async () => {
+    const { chatEvents$, dashboardLocator, onOtherDashboardUpdated, subscription } = createHarness(
+      'managed-dashboard',
+      { isManaged: true, stagedAttachmentIds: [] }
+    );
+    const attachment = buildAttachment(undefined);
+
+    chatEvents$.next(buildToolUiEvent(attachment));
+    await new Promise(process.nextTick);
+
+    expect(dashboardLocator.navigate).not.toHaveBeenCalled();
+    expect(onOtherDashboardUpdated).toHaveBeenCalledWith(attachment);
+    subscription.unsubscribe();
+  });
+
   it('links the new dashboard to the attachment when opening the changes in it', async () => {
     const { chatEvents$, linkNextDashboard, subscription } = createHarness('managed-dashboard', {
       isManaged: true,
@@ -189,6 +207,35 @@ describe('createAgentLiveUpdatesSubscription', () => {
     await new Promise(process.nextTick);
 
     expect(linkNextDashboard).toHaveBeenCalledWith('attachment-1');
+    subscription.unsubscribe();
+  });
+
+  it('opens a single new dashboard when more updates arrive while it opens', async () => {
+    const { chatEvents$, dashboardLocator, toasts, subscription } = createHarness(
+      'managed-dashboard',
+      { isManaged: true }
+    );
+
+    chatEvents$.next(buildToolUiEvent(buildAttachment('managed-dashboard')));
+    chatEvents$.next(buildToolUiEvent(buildAttachment('managed-dashboard')));
+    await new Promise(process.nextTick);
+
+    expect(dashboardLocator.navigate).toHaveBeenCalledTimes(1);
+    expect(toasts.addWarning).toHaveBeenCalledTimes(1);
+    subscription.unsubscribe();
+  });
+
+  it("warns only once that the changes weren't applied when the user can't write dashboards", async () => {
+    const { chatEvents$, setState, toasts, subscription } = createHarness(undefined, {
+      canWriteDashboards: false,
+    });
+
+    chatEvents$.next(buildToolUiEvent(buildAttachment(undefined)));
+    chatEvents$.next(buildToolUiEvent(buildAttachment(undefined)));
+    await new Promise(process.nextTick);
+
+    expect(setState).not.toHaveBeenCalled();
+    expect(toasts.addWarning).toHaveBeenCalledTimes(1);
     subscription.unsubscribe();
   });
 

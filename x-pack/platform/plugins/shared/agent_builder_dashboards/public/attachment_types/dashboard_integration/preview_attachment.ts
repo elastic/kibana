@@ -9,7 +9,7 @@ import type { NotificationsStart } from '@kbn/core/public';
 import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common/types';
 import { attachmentDataToDashboardState } from '@kbn/agent-builder-dashboards-common';
 import type { DashboardApi, DashboardRendererProps } from '@kbn/dashboard-plugin/public';
-import { applyAgentChangesToDashboard } from './apply_agent_changes';
+import { applyAgentChangesToDashboard, canApplyAgentChangesInPlace } from './apply_agent_changes';
 import { toDashboardLocatorParams } from './dashboard_locator_params';
 
 interface PreviewAttachmentInDashboardParams {
@@ -22,7 +22,7 @@ interface PreviewAttachmentInDashboardParams {
   /** The attachment whose changes opened this dashboard as a new one. */
   linkedAttachmentId?: string;
   /** Links the next dashboard that opens to the attachment whose changes it shows. */
-  linkNextDashboard?: (attachmentId: string) => void;
+  linkNextDashboard?: (attachmentId: string) => () => void;
 }
 
 export const previewAttachmentInDashboard = async ({
@@ -59,8 +59,12 @@ export const previewAttachmentInDashboard = async ({
     ? await checkSavedDashboardExist(attachment.origin)
     : false;
 
-  if (!currentSavedObjectId && !linkedDashboardExists) {
-    // b) Viewing unsaved dashboard + attachment linked to deleted dashboard
+  // b) Attachment not linked to an existing dashboard + viewing an unsaved dashboard, or one the user
+  // can't edit (the changes then open in a new dashboard)
+  if (
+    !linkedDashboardExists &&
+    (!currentSavedObjectId || !canApplyAgentChangesInPlace(dashboardApi, canWriteDashboards))
+  ) {
     return applyAgentChanges();
   }
 

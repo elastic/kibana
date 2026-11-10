@@ -146,6 +146,24 @@ describe('applyAgentChangesToDashboard', () => {
     );
   });
 
+  it('removes the link to the new dashboard when it fails to open', async () => {
+    const dashboardLocator = buildLocator();
+    dashboardLocator.navigate.mockRejectedValue(new Error('Navigation failed'));
+    const unlink = jest.fn();
+
+    await expect(
+      applyAgentChangesToDashboard({
+        api: buildDashboardApi({ isManaged: true }) as unknown as DashboardApi,
+        dashboardState,
+        canWriteDashboards: true,
+        dashboardLocator,
+        toasts: buildToasts() as unknown as NotificationsStart['toasts'],
+        onOpenInNewDashboard: () => unlink,
+      })
+    ).rejects.toThrow('Navigation failed');
+    expect(unlink).toHaveBeenCalledTimes(1);
+  });
+
   it('does not link a new dashboard when applying the changes in place', async () => {
     const onOpenInNewDashboard = jest.fn();
 

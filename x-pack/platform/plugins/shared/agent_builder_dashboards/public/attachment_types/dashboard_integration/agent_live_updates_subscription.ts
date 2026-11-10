@@ -16,7 +16,6 @@ import { DASHBOARD_UPDATED_UI_EVENT, type DashboardUpdatedUiEventData } from '..
 import {
   APPLY_AGENT_CHANGES_ERROR_TITLE,
   applyAgentChangesToDashboard,
-  canApplyAgentChangesInPlace,
 } from './apply_agent_changes';
 
 export interface AgentLiveUpdatesSubscriptionParams {
@@ -27,7 +26,9 @@ export interface AgentLiveUpdatesSubscriptionParams {
   toasts: NotificationsStart['toasts'];
   /** The attachment whose changes opened this dashboard as a new one. */
   linkedAttachmentId?: string;
-  linkNextDashboard: (attachmentId: string) => void;
+  /** Whether the open dashboard staged the attachment, which is left unlinked when the user can't edit it. */
+  isStagedFromDashboard: (attachmentId: string) => boolean;
+  linkNextDashboard: (attachmentId: string) => () => void;
   /** Called instead of applying an update that belongs to another saved dashboard. */
   onOtherDashboardUpdated: (attachment: DashboardAttachment) => void;
   upsertAttachment: (attachment: DashboardAttachment) => void;
@@ -49,11 +50,16 @@ export const createAgentLiveUpdatesSubscription = ({
   dashboardLocator,
   toasts,
   linkedAttachmentId,
+  isStagedFromDashboard,
   linkNextDashboard,
   onOtherDashboardUpdated,
   upsertAttachment,
-}: AgentLiveUpdatesSubscriptionParams): Subscription =>
-  agentBuilder.events.ui.activeConversation$
+}: AgentLiveUpdatesSubscriptionParams): Subscription => {
+  // the open dashboard stays until the new one replaces it, so later updates would open more of them
+  let isOpeningNewDashboard = false;
+  let hasWarnedAboutWritePermission = false;
+
+  return agentBuilder.events.ui.activeConversation$
     .pipe(
       switchMap((conversation) =>
         conversation?.id ? agentBuilder.events.getChatEvents$(conversation.id) : EMPTY
@@ -68,11 +74,10 @@ export const createAgentLiveUpdatesSubscription = ({
       upsertAttachment(attachment);
 
       const currentSavedObjectId = api.savedObjectId$.getValue();
-      // Attachments staged from a dashboard the user can't edit are left unlinked
       const isOwnAttachment =
         attachment.id === linkedAttachmentId ||
         attachment.origin === currentSavedObjectId ||
-        (!attachment.origin && !canApplyAgentChangesInPlace(api, canWriteDashboards));
+        (!attachment.origin && isStagedFromDashboard(attachment.id));
 
       // Skip if viewing a saved dashboard that differs from the attachment's linked dashboard
       if (currentSavedObjectId && !isOwnAttachment) {
@@ -83,14 +88,24 @@ export const createAgentLiveUpdatesSubscription = ({
         return;
       }
 
+      if (isOpeningNewDashboard || (!canWriteDashboards && hasWarnedAboutWritePermission)) {
+        return;
+      }
+      hasWarnedAboutWritePermission = !canWriteDashboards;
+
       applyAgentChangesToDashboard({
         api,
         dashboardState: attachmentDataToDashboardState(attachment.data),
         canWriteDashboards,
         dashboardLocator,
         toasts,
-        onOpenInNewDashboard: () => linkNextDashboard(attachment.id),
-      }).catch((error: Error) =>
-        toasts.addError(error, { title: APPLY_AGENT_CHANGES_ERROR_TITLE })
-      );
+        onOpenInNewDashboard: () => {
+          isOpeningNewDashboard = true;
+          return linkNextDashboard(attachment.id);
+        },
+      }).catch((error: Error) => {
+        isOpeningNewDashboard = false;
+        toasts.addError(error, { title: APPLY_AGENT_CHANGES_ERROR_TITLE });
+      });
     });
+};

@@ -213,6 +213,28 @@ describe('handlePreview with a published dashboard', () => {
     expect(linkNextDashboard).toHaveBeenCalledWith('attachment-1');
   });
 
+  it('opens an unlinked attachment in a new dashboard linked to it and warns when the viewed dashboard is managed', async () => {
+    const dashboardApi = { ...buildDashboardApi('dashboard-1'), isManaged: true };
+    const dashboardLocator = buildLocator();
+    const toasts = buildToasts();
+    const linkNextDashboard = jest.fn();
+
+    await handlePreview({
+      attachment: buildAttachment(undefined),
+      dashboardApi: dashboardApi as unknown as DashboardApi,
+      canWriteDashboards: true,
+      isSidebar: true,
+      dashboardLocator,
+      toasts,
+      checkSavedDashboardExist: async () => true,
+      linkNextDashboard,
+    });
+
+    expect(dashboardApi.setState).not.toHaveBeenCalled();
+    expect(toasts.addWarning).toHaveBeenCalledTimes(1);
+    expect(linkNextDashboard).toHaveBeenCalledWith('attachment-1');
+  });
+
   it('applies the attachment in place on the new dashboard it opened, even though it still points to the managed dashboard', async () => {
     const dashboardApi = buildDashboardApi(undefined);
     const dashboardLocator = buildLocator();
