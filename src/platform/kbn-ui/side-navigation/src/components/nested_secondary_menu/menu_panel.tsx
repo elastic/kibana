@@ -10,10 +10,12 @@
 import React, { useCallback } from 'react';
 import type { FC, ReactNode } from 'react';
 
-import { EuiScreenReaderOnly, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiScreenReaderOnly, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { SecondaryMenu } from '../secondary_menu';
 import { getFocusableElements } from '../../utils/get_focusable_elements';
+import { scrollLayoutStyles, useScroll } from '../../hooks/use_scroll';
 import { useNestedMenu } from './use_nested_menu';
 import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
 
@@ -26,12 +28,22 @@ export type PanelChildren = ReactNode | ((ids: PanelIds) => ReactNode);
 
 export interface PanelProps {
   children: PanelChildren;
+  /**
+   * Content shown below the scrolling panel body.
+   */
+  footer?: ReactNode;
+  /**
+   * Content shown above the scrolling panel body when the panel has no `title`.
+   */
+  header?: PanelChildren;
   id: string;
   title?: string;
 }
 
-export const Panel: FC<PanelProps> = ({ children, id, title }) => {
+export const Panel: FC<PanelProps> = ({ children, footer, header, id, title }) => {
   const { currentPanel, panelStackDepth, returnFocusId } = useNestedMenu();
+  const { euiTheme } = useEuiTheme();
+  const scrollStyles = useScroll(true);
   const nestedPanelTestSubj = `${NAVIGATION_SELECTOR_PREFIX}-nestedPanel-${id}`;
   const panelNavigationInstructionsId = useGeneratedHtmlId({
     prefix: `panel-navigation-instructions-${id}`,
@@ -80,22 +92,35 @@ export const Panel: FC<PanelProps> = ({ children, id, title }) => {
     [currentPanel, id, returnFocusId, isRootPanel]
   );
 
-  const renderChildren = () => {
-    if (typeof children === 'function') {
-      return children({
+  const renderContent = (content: PanelChildren) => {
+    if (typeof content === 'function') {
+      return content({
         panelNavigationInstructionsId,
         panelEnterSubmenuInstructionsId,
       });
     }
-    return children;
+    return content;
   };
 
   if (currentPanel !== id) return null;
+
+  const footerStyles = css`
+    flex-shrink: 0;
+    // Less top padding since the section above already ends with padding, mirrors the menu header
+    padding: ${euiTheme.size.xxs} ${euiTheme.size.m} ${euiTheme.size.m};
+  `;
+
+  const footerNode = footer ? (
+    <div css={footerStyles} data-test-subj={`${nestedPanelTestSubj}-footer`}>
+      {footer}
+    </div>
+  ) : null;
 
   if (title) {
     return (
       <SecondaryMenu
         data-test-subj={nestedPanelTestSubj}
+        footer={footerNode}
         ref={panelRef}
         title={title}
         isPanel={false}
@@ -106,17 +131,21 @@ export const Panel: FC<PanelProps> = ({ children, id, title }) => {
         <EuiScreenReaderOnly>
           <p id={panelEnterSubmenuInstructionsId}>{enterSubmenuInstructions}</p>
         </EuiScreenReaderOnly>
-        {renderChildren()}
+        {renderContent(children)}
       </SecondaryMenu>
     );
   }
 
   return (
-    <div data-test-subj={nestedPanelTestSubj} ref={panelRef}>
-      <EuiScreenReaderOnly>
-        <p id={panelNavigationInstructionsId}>{navigationInstructions}</p>
-      </EuiScreenReaderOnly>
-      {renderChildren()}
+    <div css={scrollLayoutStyles} data-test-subj={nestedPanelTestSubj} ref={panelRef}>
+      {renderContent(header)}
+      <div css={scrollStyles}>
+        <EuiScreenReaderOnly>
+          <p id={panelNavigationInstructionsId}>{navigationInstructions}</p>
+        </EuiScreenReaderOnly>
+        {renderContent(children)}
+      </div>
+      {footerNode}
     </div>
   );
 };

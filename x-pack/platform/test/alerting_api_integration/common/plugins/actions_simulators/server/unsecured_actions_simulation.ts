@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { brandSpaceId } from '@kbn/core-spaces-common';
 import type {
   CoreSetup,
   RequestHandlerContext,
@@ -96,7 +97,7 @@ export function initPlugin(router: IRouter, coreSetup: CoreSetup<FixtureStartDep
           requesterId,
           id,
           params,
-          spaceId,
+          spaceId: brandSpaceId(spaceId),
           relatedSavedObjects,
         });
 
@@ -133,7 +134,7 @@ export function initPlugin(router: IRouter, coreSetup: CoreSetup<FixtureStartDep
       try {
         const unsecuredActionsClient = actions.getUnsecuredActionsClient();
         const { spaceId } = body;
-        const result = await unsecuredActionsClient.getAll(spaceId);
+        const result = await unsecuredActionsClient.getAll(brandSpaceId(spaceId));
 
         return res.ok({ body: { status: 'success', result } });
       } catch (err) {

@@ -171,4 +171,46 @@ describe('runWorkflowYamlValidations', () => {
 
     model.dispose();
   });
+
+  it('warns about kibana fetcher only when the self-client path is on', () => {
+    const yaml = [
+      "version: '1'",
+      'name: kibana-fetcher',
+      'enabled: true',
+      'triggers:',
+      '  - type: manual',
+      'steps:',
+      '  - name: status',
+      '    type: kibana.request',
+      '    with:',
+      '      method: GET',
+      '      path: /api/status',
+      '      fetcher:',
+      '        skip_ssl_verification: true',
+    ].join('\n');
+
+    const computed = performComputation(yaml);
+    const model = monaco.editor.createModel(yaml, 'yaml');
+    const shared = {
+      registry: emptyRegistry,
+      yamlString: yaml,
+      model,
+      yamlDocument: computed.yamlDocument!,
+      lineCounter: computed.yamlLineCounter!,
+      workflowLookup: computed.workflowLookup,
+      workflowGraph: computed.workflowGraph,
+      workflowDefinition: computed.workflowDefinition ?? undefined,
+    };
+
+    expect(
+      runWorkflowYamlValidations(shared).some((result) => result.ruleId === 'ignoredFetcherSetting')
+    ).toBe(false);
+    expect(
+      runWorkflowYamlValidations({ ...shared, warnIgnoredKibanaFetcher: true }).some(
+        (result) => result.ruleId === 'ignoredFetcherSetting'
+      )
+    ).toBe(true);
+
+    model.dispose();
+  });
 });

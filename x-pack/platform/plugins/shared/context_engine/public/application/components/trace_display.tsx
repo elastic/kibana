@@ -5,24 +5,13 @@
  * 2.0.
  */
 
-import { EuiAvatar, EuiBadge, type IconType } from '@elastic/eui';
+import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useAgentBuilderAgents } from '../hooks/use_agent_builder_agents';
 import { ItemRow } from './item_row';
+import { ItemRowIcon } from './item_row_icon';
 import type { EditableAiIndexTrace } from './trace_selector';
-
-const TraceIcon = ({ iconType, typeLabel }: { iconType: IconType; typeLabel: string }) => (
-  <EuiAvatar
-    type="space"
-    size="m"
-    color="subdued"
-    name={typeLabel}
-    iconType={iconType}
-    iconColor="primary"
-    iconSize="m"
-  />
-);
 
 const ElasticAgentTraceDisplay = ({ value }: { value: string }) => {
   const { agents } = useAgentBuilderAgents();
@@ -34,7 +23,7 @@ const ElasticAgentTraceDisplay = ({ value }: { value: string }) => {
   return (
     <ItemRow
       label={label}
-      icon={<TraceIcon iconType="productAgent" typeLabel={typeLabel} />}
+      icon={<ItemRowIcon iconType="productAgent" />}
       badge={
         <EuiBadge color="hollow" data-test-subj="contextSourceTypeBadge">
           {typeLabel}
@@ -55,7 +44,7 @@ const IndexTraceDisplay = ({ value }: { value: string }) => {
   return (
     <ItemRow
       label={value}
-      icon={<TraceIcon iconType="listBullet" typeLabel={typeLabel} />}
+      icon={<ItemRowIcon iconType="chartWaterfall" />}
       badge={
         <EuiBadge color="hollow" data-test-subj="contextSourceTypeBadge">
           {typeLabel}

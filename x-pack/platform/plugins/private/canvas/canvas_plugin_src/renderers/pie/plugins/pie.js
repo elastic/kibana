@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import $ from 'jquery';
+import $ from '@kbn/flot-charts';
 
 /* Flot plugin for rendering pie charts.
 

@@ -1,5 +1,5 @@
 {
-  "sha1": "",
+  "sha1": "70155fd9330f66ae92063e7d14ed99257fc813a8",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -16,8 +16,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/tools/api/tests/mcp_connector_output_schema_api.spec.ts",
-        "line": 34,
-        "column": 47
+        "line": 36,
+        "column": 15
       }
     },
     {
@@ -277,6 +277,38 @@
       }
     },
     {
+      "id": "31b522466669efc-f4f6936c0eb79d2",
+      "title": "Agent Builder — ES|QL tools API POST persists include_frozen",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/tools/api/tests/tools_esql_api.spec.ts",
+        "line": 100,
+        "column": 64
+      }
+    },
+    {
+      "id": "31b522466669efc-e0b5d372722d714",
+      "title": "Agent Builder — ES|QL tools API POST validates include_frozen is boolean",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/tools/api/tests/tools_esql_api.spec.ts",
+        "line": 116,
+        "column": 23
+      }
+    },
+    {
       "id": "31b522466669efc-94a3866cbe23338",
       "title": "Agent Builder — ES|QL tools API POST /tools/_execute with indexed ES|QL data POST /tools/_execute executes indexed ES|QL tool",
       "expectedStatus": "passed",
@@ -288,8 +320,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/tools/api/tests/tools_esql_api.spec.ts",
-        "line": 159,
-        "column": 11
+        "line": 189,
+        "column": 33
       }
     },
     {
@@ -304,8 +336,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/tools/api/tests/tools_esql_api.spec.ts",
-        "line": 167,
-        "column": 11
+        "line": 197,
+        "column": 28
       }
     },
     {
@@ -320,8 +352,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/tools/api/tests/tools_esql_api.spec.ts",
-        "line": 181,
-        "column": 24
+        "line": 208,
+        "column": 23
       }
     },
     {
@@ -336,8 +368,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/tools/api/tests/tools_esql_api.spec.ts",
-        "line": 189,
-        "column": 13
+        "line": 216,
+        "column": 14
       }
     },
     {
@@ -352,8 +384,24 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/tools/api/tests/tools_esql_api.spec.ts",
-        "line": 201,
-        "column": 25
+        "line": 231,
+        "column": 39
+      }
+    },
+    {
+      "id": "31b522466669efc-ef6e9f43a153d84",
+      "title": "Agent Builder — ES|QL tools API PUT updates include_frozen",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/tools/api/tests/tools_esql_api.spec.ts",
+        "line": 246,
+        "column": 37
       }
     },
     {
@@ -368,8 +416,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/tools/api/tests/tools_esql_api.spec.ts",
-        "line": 216,
-        "column": 23
+        "line": 262,
+        "column": 83
       }
     },
     {
@@ -384,8 +432,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/tools/api/tests/tools_esql_api.spec.ts",
-        "line": 224,
-        "column": 9
+        "line": 270,
+        "column": 50
       }
     },
     {
@@ -400,8 +448,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/tools/api/tests/tools_esql_api.spec.ts",
-        "line": 238,
-        "column": 43
+        "line": 285,
+        "column": 7
       }
     },
     {
@@ -565,8 +613,8 @@
       }
     },
     {
-      "id": "c241a40a81ea734-7b17e4ad0ff5b9f",
-      "title": "Agent Builder — index search tools API GET retrieves index search tool",
+      "id": "c241a40a81ea734-f61b6f6972b7a05",
+      "title": "Agent Builder — index search tools API POST persists include_frozen",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -581,6 +629,38 @@
       }
     },
     {
+      "id": "c241a40a81ea734-96ddd0e2abbac0b",
+      "title": "Agent Builder — index search tools API POST validates include_frozen is boolean",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/tools/api/tests/tools_index_search_api.spec.ts",
+        "line": 123,
+        "column": 13
+      }
+    },
+    {
+      "id": "c241a40a81ea734-7b17e4ad0ff5b9f",
+      "title": "Agent Builder — index search tools API GET retrieves index search tool",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/tools/api/tests/tools_index_search_api.spec.ts",
+        "line": 135,
+        "column": 9
+      }
+    },
+    {
       "id": "c241a40a81ea734-a166c2c1102afd0",
       "title": "Agent Builder — index search tools API GET returns 404 for missing tool",
       "expectedStatus": "passed",
@@ -592,8 +672,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/tools/api/tests/tools_index_search_api.spec.ts",
-        "line": 120,
-        "column": 57
+        "line": 148,
+        "column": 9
       }
     },
     {
@@ -608,8 +688,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/tools/api/tests/tools_index_search_api.spec.ts",
-        "line": 123,
-        "column": 23
+        "line": 153,
+        "column": 37
       }
     },
     {
@@ -624,8 +704,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/tools/api/tests/tools_index_search_api.spec.ts",
-        "line": 157,
-        "column": 30
+        "line": 185,
+        "column": 25
       }
     },
     {
@@ -640,8 +720,24 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/tools/api/tests/tools_index_search_api.spec.ts",
-        "line": 169,
-        "column": 22
+        "line": 197,
+        "column": 7
+      }
+    },
+    {
+      "id": "c241a40a81ea734-f36c9e047d0111d",
+      "title": "Agent Builder — index search tools API PUT updates PUT updates include_frozen",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/tools/api/tests/tools_index_search_api.spec.ts",
+        "line": 208,
+        "column": 16
       }
     },
     {
@@ -656,8 +752,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/tools/api/tests/tools_index_search_api.spec.ts",
-        "line": 180,
-        "column": 65
+        "line": 219,
+        "column": 9
       }
     },
     {
@@ -672,8 +768,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/tools/api/tests/tools_index_search_api.spec.ts",
-        "line": 187,
-        "column": 9
+        "line": 227,
+        "column": 11
       }
     },
     {
@@ -688,8 +784,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/tools/api/tests/tools_index_search_api.spec.ts",
-        "line": 207,
-        "column": 13
+        "line": 242,
+        "column": 11
       }
     },
     {

@@ -72,6 +72,10 @@ import type { MitreAttackPublicStart } from '@kbn/mitre-attack-plugin/public';
 import type { Logger } from '@kbn/logging';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
+import type {
+  AgenticInvestigationsPublicPluginSetup,
+  AgenticInvestigationsPublicPluginStart,
+} from '@kbn/agentic-investigations-plugin/public';
 import type { EvalsPublicStart } from '@kbn/evals-plugin/public';
 import type { EsqlPluginSetup } from '@kbn/esql/public';
 import type { ResolverPluginSetup } from './resolver/types';
@@ -125,6 +129,7 @@ export interface SetupPlugins {
   discoverShared: DiscoverSharedPublicStart;
   esql?: EsqlPluginSetup;
   workflowsExtensions?: WorkflowsExtensionsPublicPluginSetup;
+  agenticInvestigations?: AgenticInvestigationsPublicPluginSetup;
   /**
    * Optional. When present, `enabled` is the AlertZero soft-enable switch
    * (`xpack.alertzero.enabled`). Threat-intel supply gates on this.
@@ -185,6 +190,7 @@ export interface StartPlugins {
   inference: InferencePublicStart;
   share?: SharePluginStart;
   agentBuilder?: AgentBuilderPluginStart;
+  agenticInvestigations?: AgenticInvestigationsPublicPluginStart;
   mitreAttack?: MitreAttackPublicStart;
   cps?: CPSPluginStart;
   evals?: EvalsPublicStart;

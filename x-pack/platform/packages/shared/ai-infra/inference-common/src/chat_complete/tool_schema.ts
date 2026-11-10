@@ -15,6 +15,10 @@ export interface ToolSchemaTypeObject extends ToolSchemaFragmentBase {
   type: 'object';
   properties: Record<string, ToolSchemaType>;
   required?: string[] | readonly string[];
+  /** Referenced sub-schemas (JSON Schema 2019-09+) */
+  $defs?: Record<string, ToolSchemaType>;
+  /** Referenced sub-schemas (draft-07) */
+  definitions?: Record<string, ToolSchemaType>;
 }
 
 interface ToolSchemaTypeString extends ToolSchemaFragmentBase {

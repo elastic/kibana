@@ -8,7 +8,7 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { EuiThemeProvider } from '@elastic/eui';
-import { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
+import { SERVICE_PROVIDERS, ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import { ServiceProvider } from './service_provider';
 
@@ -58,7 +58,9 @@ describe('ServiceProvider component', () => {
     it('renders the component with service details (model shown in Model column)', () => {
       renderComponent(ServiceProviderKeys.openai, mockEndpoint);
 
-      expect(screen.getByText('OpenAI')).toBeInTheDocument();
+      expect(
+        screen.getByText(SERVICE_PROVIDERS[ServiceProviderKeys.openai].name)
+      ).toBeInTheDocument();
       const icon = screen.getByTestId('table-column-service-provider-openai');
       expect(icon).toBeInTheDocument();
       // Model name is now shown in the dedicated Model column, not in Service column

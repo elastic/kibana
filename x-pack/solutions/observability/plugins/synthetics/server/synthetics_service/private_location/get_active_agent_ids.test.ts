@@ -14,14 +14,27 @@ const NOW = 1_700_000_000_000;
 const WINDOW = 180_000;
 
 const search = jest.fn();
+const hasPrivileges = jest.fn();
+const getDecryptedAsInternalUser = jest.fn();
 
-const makeServer = (): SyntheticsServerSetup =>
+const makeServer = (service?: { manifestUrl?: string; devUrl?: string }): SyntheticsServerSetup =>
   ({
+    config: { service },
     coreStart: {
-      elasticsearch: { client: { asScoped: () => ({ asCurrentUser: { search } }) } },
+      elasticsearch: {
+        client: { asScoped: () => ({ asCurrentUser: { search, security: { hasPrivileges } } }) },
+      },
+    },
+    encryptedSavedObjects: {
+      getClient: () => ({ getDecryptedAsInternalUser }),
+    },
+    security: {
+      authc: { apiKeys: { validate: jest.fn().mockResolvedValue(true) } },
     },
     logger: loggerMock.create(),
   } as unknown as SyntheticsServerSetup);
+
+const withServiceConfig = () => makeServer({ manifestUrl: 'https://example' });
 
 const mockValidApiKey = () =>
   jest
@@ -55,9 +68,10 @@ describe('getRecentlyActiveAgentIds', () => {
       aggregations: { agents: { buckets: [{ key: 'a' }, { key: 'c' }] } },
     });
 
-    const active = await getActive(makeServer(), ['a', 'b', 'c']);
+    const active = await getActive(withServiceConfig(), ['a', 'b', 'c']);
 
     expect([...active].sort()).toEqual(['a', 'c']);
+    expect(getDecryptedAsInternalUser).not.toHaveBeenCalled();
     expect(search).toHaveBeenCalledWith(
       expect.objectContaining({
         query: {
@@ -78,17 +92,65 @@ describe('getRecentlyActiveAgentIds', () => {
       .spyOn(getApiKeyModule, 'getAPIKeyForSyntheticsService')
       .mockResolvedValue({ isValid: false } as never);
 
-    const active = await getActive(makeServer(), ['a']);
+    const active = await getActive(withServiceConfig(), ['a']);
 
     expect(active.size).toBe(0);
     expect(search).not.toHaveBeenCalled();
+  });
+
+  it('uses the private-location sharding key when the service key is unavailable', async () => {
+    jest
+      .spyOn(getApiKeyModule, 'getAPIKeyForSyntheticsService')
+      .mockResolvedValue({ isValid: false } as never);
+    getDecryptedAsInternalUser.mockResolvedValue({
+      attributes: { id: 'sharding-key', apiKey: 'secret', name: 'private-location-sharding' },
+    });
+    hasPrivileges.mockResolvedValue({
+      index: {
+        'synthetics-*': {
+          read: true,
+          view_index_metadata: true,
+        },
+      },
+    });
+    search.mockResolvedValue({
+      aggregations: { agents: { buckets: [{ key: 'a' }] } },
+    });
+
+    const active = await getActive(withServiceConfig(), ['a']);
+
+    expect(active).toEqual(new Set(['a']));
+    expect(search).toHaveBeenCalled();
+  });
+
+  it('reads only the sharding key when no service manifest or dev URL is configured', async () => {
+    const getApiKey = jest.spyOn(getApiKeyModule, 'getAPIKeyForSyntheticsService');
+    getDecryptedAsInternalUser.mockResolvedValue({
+      attributes: { id: 'sharding-key', apiKey: 'secret', name: 'private-location-sharding' },
+    });
+    hasPrivileges.mockResolvedValue({
+      index: {
+        'synthetics-*': {
+          read: true,
+          view_index_metadata: true,
+        },
+      },
+    });
+    search.mockResolvedValue({
+      aggregations: { agents: { buckets: [{ key: 'a' }] } },
+    });
+
+    const active = await getActive(makeServer(), ['a']);
+
+    expect(getApiKey).not.toHaveBeenCalled();
+    expect(active).toEqual(new Set(['a']));
   });
 
   it('is best-effort: returns an empty set if the query throws (falls back to check-in)', async () => {
     mockValidApiKey();
     search.mockRejectedValue(new Error('es boom'));
 
-    const active = await getActive(makeServer(), ['a']);
+    const active = await getActive(withServiceConfig(), ['a']);
 
     expect(active.size).toBe(0);
   });
@@ -101,6 +163,6 @@ describe('getRecentlyActiveAgentIds', () => {
       signal.throwIfAborted();
     });
 
-    await expect(getActive(makeServer(), ['a'], abortController.signal)).rejects.toThrow();
+    await expect(getActive(withServiceConfig(), ['a'], abortController.signal)).rejects.toThrow();
   });
 });

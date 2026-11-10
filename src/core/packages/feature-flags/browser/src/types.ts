@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Provider } from '@openfeature/web-sdk';
 import { type EvaluationContext as OpenFeatureEvaluationContext } from '@openfeature/core';
 import type { Observable } from 'rxjs';
 
@@ -94,14 +93,6 @@ export interface FeatureFlagsSetup {
   getInitialFeatureFlags: () => Record<string, unknown>;
 
   /**
-   * Registers an OpenFeature provider to talk to the
-   * 3rd-party service that manages the Feature Flags.
-   * @param provider The {@link Provider | OpenFeature Provider} to handle the communication with the feature flags management system.
-   * @public
-   */
-  setProvider(provider: Provider): void;
-
-  /**
    * Appends new keys to the evaluation context.
    * @param contextToAppend The additional keys that should be appended/modified in the evaluation context.
    * @public
@@ -120,39 +111,6 @@ export interface FeatureFlagsStart {
    * @public
    */
   appendContext(contextToAppend: EvaluationContext): Promise<void>;
-
-  /**
-   * Evaluates a boolean flag
-   * @param flagName The flag ID to evaluate
-   * @param fallbackValue If the flag cannot be evaluated for whatever reason, the fallback value is provided.
-   * @public
-   * @deprecated Use {@link useBooleanValue} in React, or {@link getBooleanValue$} elsewhere. The provider initializes asynchronously, so a single evaluation
-   * can return the fallback before the provider is ready, and it will not update when flags or evaluation context change,
-   * so different parts of the application can see different values for the same flag.
-   */
-  getBooleanValue(flagName: string, fallbackValue: boolean): boolean;
-
-  /**
-   * Evaluates a string flag
-   * @param flagName The flag ID to evaluate
-   * @param fallbackValue If the flag cannot be evaluated for whatever reason, the fallback value is provided.
-   * @public
-   * @deprecated Use {@link useStringValue} in React, or {@link getStringValue$} elsewhere. The provider initializes asynchronously, so a single evaluation
-   * can return the fallback before the provider is ready, and it will not update when flags or evaluation context change,
-   * so different parts of the application can see different values for the same flag.
-   */
-  getStringValue<Value extends string>(flagName: string, fallbackValue: Value): Value;
-
-  /**
-   * Evaluates a number flag
-   * @param flagName The flag ID to evaluate
-   * @param fallbackValue If the flag cannot be evaluated for whatever reason, the fallback value is provided.
-   * @public
-   * @deprecated Use {@link useNumberValue} in React, or {@link getNumberValue$} elsewhere. The provider initializes asynchronously, so a single evaluation
-   * can return the fallback before the provider is ready, and it will not update when flags or evaluation context change,
-   * so different parts of the application can see different values for the same flag.
-   */
-  getNumberValue<Value extends number>(flagName: string, fallbackValue: Value): Value;
 
   /**
    * Returns an observable of a boolean flag

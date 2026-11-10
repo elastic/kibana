@@ -59,7 +59,7 @@ describe('EditEpisodeAssigneeModal', () => {
 
     expect(screen.getByTestId('alertingV2EditEpisodeAssigneeModal')).toHaveAttribute(
       'aria-label',
-      'Edit assignee of 3 episodes'
+      'Edit assignee of 3 alerts'
     );
   });
 });

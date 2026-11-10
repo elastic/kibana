@@ -1,0 +1,3 @@
+File a bug: in Security > Rules > Manage value lists, adding an item with an invalid IP (for example `abc`) to an ip-type value list shows a raw Elasticsearch error toast instead of a user-friendly message. Kibana 9.3.0 on ECH, default space, role superuser, no feature flag, plain UI bug with nothing security-sensitive. Steps: 1) open Security > Rules > Manage value lists, 2) create a value list of type ip, 3) add the item `abc`. Current: the toast reads: `document_parsing_exception: [1:42] failed to parse field [ip] of type [ip]`. Expected: a friendly "invalid IP" message.
+
+Test harness: run the search command with STUB_MODE=identifier.

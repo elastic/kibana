@@ -6,3 +6,4 @@
  */
 
 export { registerRuleAttachment } from './rule_attachment';
+export { registerRulesFlyoutGroupedAttachment } from './register_rules_flyout_grouped_attachment';

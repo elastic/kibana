@@ -9,7 +9,7 @@ import type { GroupingMode, ThrottleStrategy } from '@kbn/alerting-v2-schemas';
 import {
   AGGREGATE_STRATEGIES,
   needsInterval,
-  PER_EPISODE_STRATEGIES,
+  PER_ALERT_STRATEGIES,
 } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import { GROUPING_MODE_OPTIONS } from './form/constants';
@@ -27,6 +27,14 @@ export const DISPATCH_PER_LABEL = i18n.translate(
 export const GROUP_BY_LABEL = i18n.translate('xpack.alertingV2.actionPolicyDefinition.groupBy', {
   defaultMessage: 'Group by',
 });
+
+export const ACTION_POLICIES_LICENSE_REQUIRED_MESSAGE = i18n.translate(
+  'xpack.alertingV2.actionPolicy.license.requiredMessage',
+  {
+    defaultMessage:
+      'Action policies run Workflows, which require an active Enterprise license. You can view, disable, snooze, and delete existing policies, but you cannot create, edit, or enable them.',
+  }
+);
 
 export const FREQUENCY_LABEL = i18n.translate('xpack.alertingV2.actionPolicyDefinition.frequency', {
   defaultMessage: 'Frequency',
@@ -51,7 +59,7 @@ export const getFrequencyLabel = (
   const strategy = throttle?.strategy;
   if (strategy == null || mode == null) return NOT_CONFIGURED_LABEL;
 
-  const allowed = mode === 'per_episode' ? PER_EPISODE_STRATEGIES : AGGREGATE_STRATEGIES;
+  const allowed = mode === 'per_alert' ? PER_ALERT_STRATEGIES : AGGREGATE_STRATEGIES;
   if (!allowed.has(strategy)) return NOT_CONFIGURED_LABEL;
 
   const interval = formatInterval(throttle?.interval ?? '');

@@ -8,6 +8,10 @@ import type { Parent } from 'mdast';
 import type { Node } from 'unist';
 import type { ConversationRoundStep } from '@kbn/agent-builder-common';
 import type { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import {
+  getCustomElementAttribute,
+  splitCustomElements,
+} from '@kbn/agent-builder-common/tools/custom_rendering';
 
 export type MutableNode = Node & {
   value?: string;
@@ -28,15 +32,6 @@ export const createTagParser = <T extends Record<string, string | undefined>>(co
   createNode: (attributes: T, position: MutableNode['position']) => MutableNode;
 }) => {
   return () => {
-    const extractAttribute = (value: string, attr: string) => {
-      // (?:^|\s) prevents a short attr name like "id" from matching inside a
-      // longer attribute name (e.g. "field-id") that ends with the same string.
-      const regex = new RegExp(`(?:^|\\s)${attr}="([^"]*)"`, 'i');
-      return value.match(regex)?.[1];
-    };
-
-    const tagRegex = new RegExp(`<${config.tagName}\\b[^>]*\\/?>`, 'gi');
-
     const visitParent = (parent: Parent) => {
       for (let index = 0; index < parent.children.length; index++) {
         const child = parent.children[index] as MutableNode;
@@ -58,37 +53,22 @@ export const createTagParser = <T extends Record<string, string | undefined>>(co
         // remark cannot tokenize tag names containing underscores into their own
         // html nodes, so the tag is frequently embedded inside a text node along
         // with surrounding prose (e.g. "Rule:\n<render_attachment .../>").
-        const matches = Array.from(rawValue.matchAll(tagRegex));
-        if (matches.length === 0) {
+        const segments = splitCustomElements(rawValue, config.tagName);
+        if (!segments.some(({ type }) => type === 'element')) {
           continue;
         }
 
         // Rebuild the node as a sequence of [leading text, tag, text, tag, ...]
-        // preserving any prose around the tag(s).
-        const replacementNodes: Node[] = [];
-        let cursorIndex = 0;
-
-        const pushTextSegment = (text: string) => {
-          // Drop whitespace-only gaps (e.g. newlines between stacked tags) so we
-          // don't introduce empty paragraphs between rendered attachments.
-          if (text.trim().length === 0) {
-            return;
-          }
-          replacementNodes.push({
-            type: 'text',
-            value: text,
-            position: child.position,
-          } as MutableNode);
-        };
-
-        for (const match of matches) {
-          const matchIndex = match.index ?? 0;
-          pushTextSegment(rawValue.slice(cursorIndex, matchIndex));
-          const attributes = config.getAttributes(match[0], extractAttribute);
-          replacementNodes.push(config.createNode(attributes, child.position));
-          cursorIndex = matchIndex + match[0].length;
-        }
-        pushTextSegment(rawValue.slice(cursorIndex));
+        // preserving any prose around the tag(s). Whitespace-only gaps are dropped, so
+        // stacked tags don't get empty paragraphs between them.
+        const replacementNodes: Node[] = segments.map((segment) =>
+          segment.type === 'text'
+            ? ({ type: 'text', value: segment.text, position: child.position } as MutableNode)
+            : config.createNode(
+                config.getAttributes(segment.tag, getCustomElementAttribute),
+                child.position
+              )
+        );
 
         const siblings = parent.children as Node[];
         siblings.splice(index, 1, ...replacementNodes);

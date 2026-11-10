@@ -1,6 +1,6 @@
 responses:
   200:
-    description: 'Indicates a successful response. If the page exceeds Kibana''s response buffer, the handler still returns 200 with results: [] and the page total.'
+    description: 'Indicates a successful response.'
     content:
       application/json:
         examples:
@@ -26,6 +26,8 @@ responses:
               total: 1
               page: 1
               size: 1000
+  413:
+    description: 'The step page exceeds the response size limit. Request fewer steps per page.'
 x-codeSamples:
   - lang: curl
     source: |

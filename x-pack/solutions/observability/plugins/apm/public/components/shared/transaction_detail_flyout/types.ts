@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { APMIndices } from '@kbn/apm-sources-access-plugin/common/config_schema';
 import type { ServiceSchemaType } from '@kbn/apm-types';
+import type { ApmIndicesSource } from '../../../hooks/use_apm_indices';
 
 export interface TransactionDetailFlyoutFilters {
   serviceName: string;
@@ -42,5 +42,14 @@ export interface TransactionDetailFlyoutProps {
    */
   preferDocumentBasedCharts?: boolean;
   schema?: ServiceSchemaType;
-  indices?: APMIndices | null;
+  /**
+   * When set, the parent owns APM indices, including while they are still loading.
+   * Omit so this flyout fetches them — standalone hosts such as Discover.
+   */
+  indicesSource?: ApmIndicesSource;
+  /**
+   * Active alerts for this transaction, typically from the parent transactions table.
+   * When absent or 0, the header hides the alerts badge.
+   */
+  alertsCount?: number;
 }

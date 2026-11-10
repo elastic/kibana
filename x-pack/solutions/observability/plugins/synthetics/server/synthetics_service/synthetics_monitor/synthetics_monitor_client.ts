@@ -5,11 +5,14 @@
  * 2.0.
  */
 import type { SavedObject } from '@kbn/core/server';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import type { SyntheticsServerSetup } from '../../types';
 import { normalizeSecrets, redactInspectedSecrets } from '../utils';
 import type { PrivateConfig } from '../private_location/synthetics_private_location';
+import { getSyntheticsParams } from '../get_synthetics_params';
+import { getMaintenanceWindows } from '../maintenance_windows/get_maintenance_windows';
 import { SyntheticsPrivateLocation } from '../private_location/synthetics_private_location';
-import type { SyntheticsService } from '../synthetics_service';
+import type { ServiceManagedLocations } from '../service_managed_locations';
 import type {
   EncryptedSyntheticsMonitorAttributes,
   HeartbeatConfig,
@@ -35,25 +38,38 @@ const LONG_TIME_MONTH = '43800';
 
 export class SyntheticsMonitorClient {
   public server: SyntheticsServerSetup;
-  public syntheticsService: SyntheticsService;
+  public serviceManagedLocations: ServiceManagedLocations;
   public privateLocationAPI: SyntheticsPrivateLocation;
 
-  constructor(syntheticsService: SyntheticsService, server: SyntheticsServerSetup) {
+  constructor(serviceManagedLocations: ServiceManagedLocations, server: SyntheticsServerSetup) {
     this.server = server;
-    this.syntheticsService = syntheticsService;
+    this.serviceManagedLocations = serviceManagedLocations;
     this.privateLocationAPI = new SyntheticsPrivateLocation(server);
+  }
+
+  getSyntheticsParams(options?: Parameters<typeof getSyntheticsParams>[1]) {
+    return getSyntheticsParams(this.server, options);
+  }
+
+  getMaintenanceWindows(spaceId: string) {
+    return getMaintenanceWindows(this.server, spaceId);
   }
 
   async addMonitors(
     monitors: Array<{ monitor: MonitorFields; id: string }>,
     allPrivateLocations: SyntheticsPrivateLocations,
-    spaceId: string
+    spaceId: string,
+    maintenanceWindows?: MaintenanceWindow[]
   ) {
     const privateConfigs: PrivateConfig[] = [];
     const publicConfigs: ConfigData[] = [];
 
-    const paramsBySpace = await this.syntheticsService.getSyntheticsParams({ spaceId });
-    const maintenanceWindows = await this.syntheticsService.getMaintenanceWindows(spaceId);
+    const [paramsBySpace, resolvedMaintenanceWindows] = await Promise.all([
+      this.getSyntheticsParams({ spaceId }),
+      maintenanceWindows
+        ? Promise.resolve(maintenanceWindows)
+        : this.getMaintenanceWindows(spaceId),
+    ]);
 
     for (const monitorObj of monitors) {
       const { formattedConfig, params, config } = await this.formatConfigWithParams(
@@ -76,10 +92,13 @@ export class SyntheticsMonitorClient {
       privateConfigs,
       allPrivateLocations,
       spaceId,
-      maintenanceWindows
+      resolvedMaintenanceWindows
     );
 
-    const syncErrors = this.syntheticsService.addConfigs(publicConfigs, maintenanceWindows);
+    const syncErrors = this.serviceManagedLocations.addMonitors(
+      publicConfigs,
+      resolvedMaintenanceWindows
+    );
 
     return await Promise.all([newPolicies, syncErrors]);
   }
@@ -99,8 +118,8 @@ export class SyntheticsMonitorClient {
     const publicConfigs: ConfigData[] = [];
     const deletedPublicConfigs: ConfigData[] = [];
 
-    const paramsBySpace = await this.syntheticsService.getSyntheticsParams({ spaceId });
-    const maintenanceWindows = await this.syntheticsService.getMaintenanceWindows(spaceId);
+    const paramsBySpace = await this.getSyntheticsParams({ spaceId });
+    const maintenanceWindows = await this.getMaintenanceWindows(spaceId);
 
     for (const editedMonitor of monitors) {
       const { str: paramsString, params } = mixParamsWithGlobalParams(
@@ -144,7 +163,7 @@ export class SyntheticsMonitorClient {
     }
 
     if (deletedPublicConfigs.length > 0) {
-      await this.syntheticsService.deleteConfigs(deletedPublicConfigs);
+      await this.serviceManagedLocations.deleteMonitors(deletedPublicConfigs);
     }
 
     const privateEditPromise = this.privateLocationAPI.editMonitors(
@@ -154,7 +173,7 @@ export class SyntheticsMonitorClient {
       maintenanceWindows
     );
 
-    const publicConfigsPromise = this.syntheticsService.editConfig(
+    const publicConfigsPromise = this.serviceManagedLocations.editMonitors(
       publicConfigs,
       true,
       maintenanceWindows
@@ -169,10 +188,54 @@ export class SyntheticsMonitorClient {
 
     return { failedPolicyUpdates, publicSyncErrors };
   }
+  /**
+   * Creates the package policies of the given monitors for a single private location,
+   * without touching their other locations.
+   */
+  async addPrivateLocationPackagePolicies({
+    monitors,
+    locationId,
+    allPrivateLocations,
+    spaceId,
+  }: {
+    monitors: Array<{ monitor: MonitorFields; id: string }>;
+    locationId: string;
+    allPrivateLocations: SyntheticsPrivateLocations;
+    spaceId: string;
+  }) {
+    const paramsBySpace = await this.getSyntheticsParams({ spaceId });
+    const maintenanceWindows = await this.getMaintenanceWindows(spaceId);
+
+    const privateConfigs: PrivateConfig[] = [];
+    for (const monitorObj of monitors) {
+      const { formattedConfig, params } = await this.formatConfigWithParams(
+        monitorObj,
+        spaceId,
+        paramsBySpace
+      );
+      privateConfigs.push({
+        config: {
+          ...formattedConfig,
+          locations: formattedConfig.locations.filter(
+            (loc) => !loc.isServiceManaged && loc.id === locationId
+          ),
+        },
+        globalParams: params,
+      });
+    }
+
+    return this.privateLocationAPI.createPackagePolicies(
+      privateConfigs,
+      allPrivateLocations,
+      spaceId,
+      maintenanceWindows
+    );
+  }
+
   async deleteMonitors(monitors: SyntheticsMonitorWithId[], spaceId: string) {
     const privateDeletePromise = this.privateLocationAPI.deleteMonitors(monitors, spaceId);
 
-    const publicDeletePromise = this.syntheticsService.deleteConfigs(
+    const publicDeletePromise = this.serviceManagedLocations.deleteMonitors(
       monitors.map((monitor) => ({ spaceId, monitor, configId: monitor.config_id, params: {} }))
     );
     const [pubicResponse] = await Promise.all([publicDeletePromise, privateDeletePromise]);
@@ -189,7 +252,7 @@ export class SyntheticsMonitorClient {
     let privateConfig: PrivateConfig | undefined;
     let publicConfig: ConfigData | undefined;
 
-    const paramsBySpace = await this.syntheticsService.getSyntheticsParams({ spaceId });
+    const paramsBySpace = await this.getSyntheticsParams({ spaceId });
 
     const { formattedConfig, params, config } = await this.formatConfigWithParams(
       monitor,
@@ -231,9 +294,12 @@ export class SyntheticsMonitorClient {
       runOnce
     );
 
-    const syncErrors = this.syntheticsService.runOnceConfigs(publicConfig);
+    const syncErrors = this.serviceManagedLocations.runMonitorOnce(publicConfig);
 
-    return await Promise.all([newPolicies, syncErrors]);
+    const [policies, publicErrors] = await Promise.all([newPolicies, syncErrors]);
+    const errors = [...(publicErrors ?? []), ...(policies.errors ?? [])];
+
+    return [policies, errors.length > 0 ? errors : undefined] as const;
   }
 
   hasPrivateLocations(previousMonitor: SavedObject<EncryptedSyntheticsMonitorAttributes>) {
@@ -304,12 +370,12 @@ export class SyntheticsMonitorClient {
     canSave: boolean
   ) {
     const privateConfigs: PrivateConfig[] = [];
-    const paramsBySpace = await this.syntheticsService.getSyntheticsParams({
+    const paramsBySpace = await this.getSyntheticsParams({
       spaceId,
       canSave,
       hideParams,
     });
-    const maintenanceWindows = await this.syntheticsService.getMaintenanceWindows(spaceId);
+    const maintenanceWindows = await this.getMaintenanceWindows(spaceId);
 
     const { formattedConfig, params, config } = await this.formatConfigWithParams(
       monitorObj,
@@ -327,7 +393,7 @@ export class SyntheticsMonitorClient {
       privateConfigs.push({ config: formattedConfig, globalParams: params });
     }
 
-    const publicPromise = this.syntheticsService.inspectConfig(
+    const publicPromise = this.serviceManagedLocations.inspectMonitor(
       publicLocations.length > 0 ? config : null,
       maintenanceWindows
     );

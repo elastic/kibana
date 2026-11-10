@@ -11,7 +11,6 @@ import type { PackagePolicy, UpdatePackagePolicyWithId } from '@kbn/fleet-plugin
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { uniqBy } from 'lodash';
 import type { SyntheticsServerSetup } from '../../types';
 import { AgentPolicyRevisionBatcher } from './agent_policy_revision_batcher';
 import type { ConditionUpdate, ShardedPackagePolicy } from './rebalance_writes';
@@ -65,7 +64,7 @@ const getInternalEsClientFor = (server: SyntheticsServerSetup) =>
  * attaches no extensions, matching {@link listByAgentPolicy}'s existing
  * cross-space Fleet lookup in this same file.
  */
-const bumpAgentPolicyRevision = async (
+export const bumpAgentPolicyRevision = async (
   server: SyntheticsServerSetup,
   policyId: string
 ): Promise<void> => {
@@ -143,6 +142,29 @@ export class PackagePolicyService {
     return getSpaceSoClientFor(this.server, spaceId);
   }
 
+  /**
+   * Bumps every agent policy collected in `deferredBumps` (see the write
+   * methods), once each. Callers that pass `deferredBumps` must call this when
+   * done, also on failure: those package policies were written with
+   * `bumpRevision: false`, so Fleet does not redeploy them until this runs.
+   */
+  async scheduleRevisionBumps(deferredBumps: Set<string>): Promise<void> {
+    const policyIds = [...deferredBumps];
+    deferredBumps.clear();
+    await this.revisionBatcher.schedule(policyIds);
+  }
+
+  private async scheduleOrDeferRevisionBumps(
+    policyIds: string[],
+    deferredBumps?: Set<string>
+  ): Promise<void> {
+    if (deferredBumps) {
+      policyIds.forEach((policyId) => deferredBumps.add(policyId));
+      return;
+    }
+    await this.revisionBatcher.schedule(policyIds);
+  }
+
   private getInternalEsClient() {
     return getInternalEsClientFor(this.server);
   }
@@ -182,7 +204,11 @@ export class PackagePolicyService {
     // For legacy reasons, we always include the default space in addition to
     // the request's space (older package policies were created there).
     const spaceIds = [...new Set([spaceId, DEFAULT_SPACE_ID, ...(additionalSpaceIds ?? [])])];
-    const soClient = this.server.coreStart.savedObjects.getUnsafeInternalClient();
+    // `spaceIds` can contain `*` (all-spaces monitors), so read through an
+    // extension-free internal repository: getUnsafeInternalClient()'s spaces
+    // extension resolves `*` with a credential-less `_has_privileges` call that
+    // fails with a 401 (see bumpAgentPolicyRevision).
+    const soClient = this.server.coreStart.savedObjects.createInternalRepository();
 
     if (fields) {
       return this.server.fleet.packagePolicyService.getByIDs(soClient, packagePolicyIds, {
@@ -245,9 +271,12 @@ export class PackagePolicyService {
   async bulkCreate({
     newPolicies,
     spaceId,
+    deferredBumps,
   }: {
     newPolicies: NewPackagePolicyWithId[];
     spaceId: string;
+    /** Collects the agent policy ids to bump instead of bumping them now. */
+    deferredBumps?: Set<string>;
   }) {
     if (newPolicies.length === 0) {
       return { created: [], failed: [] };
@@ -269,7 +298,9 @@ export class PackagePolicyService {
               ),
             ]
           : []),
-        ...(batched.length > 0 ? [this.bulkCreateWithBatchedRevision(client, batched)] : []),
+        ...(batched.length > 0
+          ? [this.bulkCreateWithBatchedRevision(client, batched, deferredBumps)]
+          : []),
       ];
     });
 
@@ -284,9 +315,12 @@ export class PackagePolicyService {
   async bulkUpdate({
     policiesToUpdate,
     spaceId,
+    deferredBumps,
   }: {
     policiesToUpdate: UpdatePackagePolicyWithId[];
     spaceId: string;
+    /** Collects the agent policy ids to bump instead of bumping them now. */
+    deferredBumps?: Set<string>;
   }) {
     if (policiesToUpdate.length === 0) {
       return [];
@@ -308,7 +342,9 @@ export class PackagePolicyService {
               ),
             ]
           : []),
-        ...(batched.length > 0 ? [this.bulkUpdateWithBatchedRevision(client, batched)] : []),
+        ...(batched.length > 0
+          ? [this.bulkUpdateWithBatchedRevision(client, batched, deferredBumps)]
+          : []),
       ];
     });
 
@@ -375,9 +411,12 @@ export class PackagePolicyService {
   async bulkDelete({
     policyIdsToDelete,
     spaceId,
+    deferredBumps,
   }: {
     policyIdsToDelete: string[];
     spaceId: string;
+    /** Collects the agent policy ids to bump instead of bumping them now. */
+    deferredBumps?: Set<string>;
   }) {
     if (policyIdsToDelete.length === 0) {
       return;
@@ -406,7 +445,9 @@ export class PackagePolicyService {
               ),
             ]
           : []),
-        ...(batched.length > 0 ? [this.bulkDeleteWithBatchedRevision(client, batched)] : []),
+        ...(batched.length > 0
+          ? [this.bulkDeleteWithBatchedRevision(client, batched, deferredBumps)]
+          : []),
       ];
     });
 
@@ -433,7 +474,8 @@ export class PackagePolicyService {
 
   private async bulkCreateWithBatchedRevision(
     client: SavedObjectsClientContract,
-    policies: NewPackagePolicyWithId[]
+    policies: NewPackagePolicyWithId[],
+    deferredBumps?: Set<string>
   ) {
     const result = await this.server.fleet.packagePolicyService.bulkCreate(
       client,
@@ -442,15 +484,17 @@ export class PackagePolicyService {
       { asyncDeploy: true, bumpRevision: false }
     );
 
-    await this.revisionBatcher.schedule(
-      result.created.flatMap(({ policy_ids: policyIds }) => policyIds)
+    await this.scheduleOrDeferRevisionBumps(
+      result.created.flatMap(({ policy_ids: policyIds }) => policyIds),
+      deferredBumps
     );
     return result;
   }
 
   private async bulkUpdateWithBatchedRevision(
     client: SavedObjectsClientContract,
-    policies: UpdatePackagePolicyWithId[]
+    policies: UpdatePackagePolicyWithId[],
+    deferredBumps?: Set<string>
   ) {
     const result = await this.server.fleet.packagePolicyService.bulkUpdate(
       client,
@@ -459,15 +503,17 @@ export class PackagePolicyService {
       { force: true, asyncDeploy: true, bumpRevision: false }
     );
 
-    await this.revisionBatcher.schedule(
-      result.updatedPolicies?.flatMap(({ policy_ids: policyIds }) => policyIds) ?? []
+    await this.scheduleOrDeferRevisionBumps(
+      result.updatedPolicies?.flatMap(({ policy_ids: policyIds }) => policyIds) ?? [],
+      deferredBumps
     );
     return result;
   }
 
   private async bulkDeleteWithBatchedRevision(
     client: SavedObjectsClientContract,
-    policies: PackagePolicyWithAgentPolicyIds[]
+    policies: PackagePolicyWithAgentPolicyIds[],
+    deferredBumps?: Set<string>
   ) {
     const result = await this.server.fleet.packagePolicyService.delete(
       client,
@@ -476,8 +522,9 @@ export class PackagePolicyService {
       { force: true, asyncDeploy: true, bumpRevision: false }
     );
 
-    await this.revisionBatcher.schedule(
-      result.flatMap(({ success, policy_ids: policyIds }) => (success ? policyIds ?? [] : []))
+    await this.scheduleOrDeferRevisionBumps(
+      result.flatMap(({ success, policy_ids: policyIds }) => (success ? policyIds ?? [] : [])),
+      deferredBumps
     );
     return result;
   }
@@ -519,8 +566,9 @@ export class PackagePolicyService {
     ).flat();
 
     const agentPolicyById = new Map(agentPolicies.map((ap) => [ap.id, ap]));
-    const defaultSpacePackagePolicies: T[] = [];
-    const spacePackagePolicies: T[] = [];
+    // Dedupe by reference, not id: Test Now policies have no id until Fleet assigns one.
+    const defaultSpacePackagePolicies = new Set<T>();
+    const spacePackagePolicies = new Set<T>();
 
     for (const pkgPolicy of policies) {
       if (pkgPolicy.policy_ids && pkgPolicy.policy_ids.length > 0) {
@@ -530,13 +578,13 @@ export class PackagePolicyService {
             agentPolicy?.space_ids?.includes(spaceId) ||
             agentPolicy?.space_ids?.includes(ALL_SPACES_ID)
           ) {
-            spacePackagePolicies.push(pkgPolicy);
+            spacePackagePolicies.add(pkgPolicy);
           } else {
-            defaultSpacePackagePolicies.push(pkgPolicy);
+            defaultSpacePackagePolicies.add(pkgPolicy);
           }
         });
       } else {
-        defaultSpacePackagePolicies.push(pkgPolicy);
+        defaultSpacePackagePolicies.add(pkgPolicy);
       }
     }
 
@@ -545,14 +593,11 @@ export class PackagePolicyService {
       policies: T[];
     }[] = [];
 
-    if (defaultSpacePackagePolicies.length > 0) {
-      res.push({
-        client: defaultSpaceSoClient,
-        policies: uniqBy(defaultSpacePackagePolicies, 'id'),
-      });
+    if (defaultSpacePackagePolicies.size > 0) {
+      res.push({ client: defaultSpaceSoClient, policies: [...defaultSpacePackagePolicies] });
     }
-    if (spacePackagePolicies.length > 0) {
-      res.push({ client: spaceSoClient, policies: uniqBy(spacePackagePolicies, 'id') });
+    if (spacePackagePolicies.size > 0) {
+      res.push({ client: spaceSoClient, policies: [...spacePackagePolicies] });
     }
 
     return res;

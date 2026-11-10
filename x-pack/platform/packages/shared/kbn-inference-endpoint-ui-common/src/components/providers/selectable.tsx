@@ -15,6 +15,7 @@ import {
   SERVICE_PROVIDERS,
   ServiceProviderIcon,
   ServiceProviderName,
+  getServiceProviderSearchableLabel,
   solutionKeys,
 } from './render_service_provider/service_provider';
 import type { ServiceProviderKeys } from '../../constants';
@@ -136,6 +137,7 @@ export const SelectableProvider: React.FC<SelectableProviderProps> = ({
     return providers?.map((p) => ({
       label: p.service,
       key: p.service,
+      searchableLabel: getServiceProviderSearchableLabel(p.service),
     })) as EuiSelectableOption[];
   }, [providers]);
 

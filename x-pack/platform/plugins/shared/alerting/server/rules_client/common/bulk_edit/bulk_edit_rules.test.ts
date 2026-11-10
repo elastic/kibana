@@ -65,6 +65,7 @@ const rulesClientContext: RulesClientContext = {
   spaceId: 'default',
   namespace: 'default',
   getUserName: jest.fn(),
+  getProfileUid: jest.fn(),
   createAPIKey: createAPIKeyMock,
   cloneAPIKey: jest.fn(),
   logger,
@@ -433,18 +434,22 @@ describe('bulkEditRules', () => {
     expect(updateFn).toHaveBeenNthCalledWith(1, {
       apiKeysMap: expect.any(Map),
       errors: [],
+      hasMigratedLegacyActions: false,
       rule: decryptedRule1,
       rules: [],
       skipped: [],
       username: undefined,
+      profileUid: undefined,
     });
     expect(updateFn).toHaveBeenNthCalledWith(2, {
       apiKeysMap: expect.any(Map),
       errors: [],
+      hasMigratedLegacyActions: false,
       rule: decryptedRule2,
       rules: [],
       skipped: [],
       username: undefined,
+      profileUid: undefined,
     });
     expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
   });

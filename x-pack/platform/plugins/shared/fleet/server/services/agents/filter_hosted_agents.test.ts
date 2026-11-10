@@ -8,14 +8,20 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
+import {
+  AgentlessAgentRestrictionError,
+  HostedAgentPolicyRestrictionRelatedError,
+} from '../../errors';
 import type { Agent } from '../../types';
 
 import { filterHostedPolicies } from './filter_hosted_agents';
 
 jest.mock('./hosted_agent', () => ({
   ...jest.requireActual('./hosted_agent'),
-  getHostedPolicies: jest.fn().mockResolvedValue({ hosted: true }),
+  getAgentPolicyRestrictions: jest.fn().mockResolvedValue({
+    hosted: { is_managed: true, supports_agentless: false },
+    agentless: { is_managed: false, supports_agentless: true },
+  }),
 }));
 
 describe('filterHostedPolicies', () => {
@@ -34,12 +40,32 @@ describe('filterHostedPolicies', () => {
         { id: 'agent2', policy_id: 'other', policy_base_id: 'other' },
       ] as Agent[],
       outgoingErrors,
-      'error'
+      'error',
+      'agentless error'
     );
 
     expect(agents).toEqual([{ id: 'agent2', policy_id: 'other', policy_base_id: 'other' }]);
     expect(outgoingErrors).toEqual({
       agent1: new HostedAgentPolicyRestrictionRelatedError('error'),
+    });
+  });
+
+  it('should filter out agents with agentless policies', async () => {
+    const outgoingErrors = {};
+    const agents = await filterHostedPolicies(
+      soClient,
+      [
+        { id: 'agent1', policy_id: 'agentless', policy_base_id: 'agentless' },
+        { id: 'agent2', policy_id: 'other', policy_base_id: 'other' },
+      ] as Agent[],
+      outgoingErrors,
+      'error',
+      'agentless error'
+    );
+
+    expect(agents).toEqual([{ id: 'agent2', policy_id: 'other', policy_base_id: 'other' }]);
+    expect(outgoingErrors).toEqual({
+      agent1: new AgentlessAgentRestrictionError('agentless error'),
     });
   });
 });

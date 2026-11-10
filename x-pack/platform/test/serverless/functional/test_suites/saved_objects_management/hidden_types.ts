@@ -86,7 +86,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.savedObjects.clickCheckboxByTitle('hidden object 1');
 
         await PageObjects.savedObjects.clickDelete({ confirmDelete: false });
-        expect(await testSubjects.exists('cannotDeleteObjectsConfirmWarning')).to.eql(true);
+        await testSubjects.existOrFail('cannotDeleteObjectsConfirmWarning', { timeout: 5000 });
       });
 
       it('should not delete the hidden objects when performing the operation', async () => {

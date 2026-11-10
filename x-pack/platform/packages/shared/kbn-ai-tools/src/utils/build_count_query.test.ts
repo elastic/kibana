@@ -23,4 +23,10 @@ describe('buildCountQuery', () => {
       'FROM logs-* | WHERE KQL("service.name : \\"foo\\"") | STATS total = COUNT(*)'
     );
   });
+
+  it('applies the time range as an inline WHERE', () => {
+    expect(buildCountQuery({ index: 'logs-*', start: 100, end: 200 })).toBe(
+      'FROM logs-* | WHERE @timestamp >= "1970-01-01T00:00:00.100Z" AND @timestamp <= "1970-01-01T00:00:00.200Z" | STATS total = COUNT(*)'
+    );
+  });
 });

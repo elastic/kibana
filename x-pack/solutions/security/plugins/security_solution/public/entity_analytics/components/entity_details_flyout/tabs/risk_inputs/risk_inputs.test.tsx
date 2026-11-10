@@ -13,10 +13,7 @@ import { EXPAND_ALERT_TEST_ID, RiskInputsTab } from './risk_inputs_tab';
 import { alertInputDataMock } from '../../mocks';
 import { RiskSeverity } from '../../../../../../common/search_strategy';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
-import {
-  EntityDetailsLeftPanelTab,
-  RiskScoreLeftPanelSubTab,
-} from '../../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import { RiskScoreLeftPanelSubTab } from '../../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 
 const mockUseRiskContributingAlerts = jest
   .fn()
@@ -42,6 +39,8 @@ jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
 jest.mock('../../../risk_score_timeline', () => ({
   RiskScoreTimeline: (props: {
     entityId: string;
+    from: string;
+    to: string;
     scoreType?: string;
     onPointSelect: (timestamp: string | undefined) => void;
     onRangeChange: (range: { from: string; to: string }) => void;
@@ -50,6 +49,8 @@ jest.mock('../../../risk_score_timeline', () => ({
       data-test-subj="mockRiskScoreTimeline"
       data-entity-id={props.entityId}
       data-score-type={props.scoreType}
+      data-from={props.from}
+      data-to={props.to}
     >
       <button
         type="button"
@@ -75,6 +76,8 @@ jest.mock('@kbn/entity-store/public', () => ({
     euid: {
       getEuidFromObject: (...args: unknown[]) => mockGetEuidFromObject(...args),
     },
+    getBuiltInEntityDefinition: jest.requireActual('@kbn/entity-store/common/euid_helpers')
+      .getBuiltInEntityDefinition,
   }),
 }));
 
@@ -113,7 +116,14 @@ jest.mock('../../../../api/hooks/use_get_watchlists', () => ({
 const mockUseResolutionGroup = jest.fn().mockReturnValue({ data: undefined });
 
 jest.mock('../../../entity_resolution/hooks/use_resolution_group', () => ({
-  useResolutionGroup: (entityId: string) => mockUseResolutionGroup(entityId),
+  useResolutionGroup: (entityId: string, options?: { enabled?: boolean }) =>
+    mockUseResolutionGroup(entityId, options),
+}));
+
+const mockUseNewEntityAnalyticsPage = jest.fn().mockReturnValue(false);
+
+jest.mock('../../../../hooks/use_new_entity_analytics_page', () => ({
+  useNewEntityAnalyticsPage: () => mockUseNewEntityAnalyticsPage(),
 }));
 
 const mockUseEntityFromStore = jest.fn().mockReturnValue({ entityRecord: null });
@@ -122,25 +132,7 @@ jest.mock('../../../../../flyout/entity_details/shared/hooks/use_entity_from_sto
   useEntityFromStore: (params: unknown) => mockUseEntityFromStore(params),
 }));
 
-const mockUseStableExpandableFlyoutState = jest.fn().mockReturnValue({});
-
-jest.mock('../../../../../flyout/shared/hooks/use_stable_expandable_flyout_state', () => ({
-  useStableExpandableFlyoutState: () => mockUseStableExpandableFlyoutState(),
-}));
-
-const mockOpenPreviewPanel = jest.fn();
-const mockOpenLeftPanel = jest.fn();
 const mockOnShowAlert = jest.fn();
-
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: () => ({
-    openPreviewPanel: mockOpenPreviewPanel,
-    openLeftPanel: mockOpenLeftPanel,
-  }),
-  useExpandableFlyoutState: () => ({}),
-  useExpandableFlyoutHistory: () => [],
-  ExpandableFlyout: () => null,
-}));
 
 const riskScore = {
   '@timestamp': '2021-08-19T16:00:00.000Z',
@@ -193,9 +185,9 @@ describe('RiskInputsTab', () => {
     mockUseResolutionGroup.mockReturnValue({ data: undefined });
     mockUseGetWatchlists.mockReturnValue({ data: [] });
     mockUseEntityFromStore.mockReturnValue({ entityRecord: null });
-    mockUseStableExpandableFlyoutState.mockReturnValue({});
     mockUseRiskScoreHistory.mockReturnValue({ data: undefined, isFetching: false });
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+    mockUseNewEntityAnalyticsPage.mockReturnValue(false);
     mockUseMissingRiskEnginePrivileges.mockReturnValue({
       isLoading: false,
       hasAllRequiredPrivileges: true,
@@ -1060,17 +1052,7 @@ describe('RiskInputsTab', () => {
     expect(getByTestId('risk-input-contexts-table')).toHaveTextContent('+4.50');
   });
 
-  it('initializes to resolution view when flyout state subTab is "resolution"', () => {
-    mockUseStableExpandableFlyoutState.mockReturnValue({
-      left: {
-        params: {
-          path: {
-            tab: EntityDetailsLeftPanelTab.RISK_INPUTS,
-            subTab: RiskScoreLeftPanelSubTab.RESOLUTION,
-          },
-        },
-      },
-    });
+  it('initializes to resolution view when the subTab prop is "resolution"', () => {
     mockUseResolutionGroup.mockReturnValue({
       data: {
         target: {
@@ -1097,6 +1079,7 @@ describe('RiskInputsTab', () => {
           entityName="elastic"
           onShowAlert={mockOnShowAlert}
           entityId="user:elastic"
+          subTab={RiskScoreLeftPanelSubTab.RESOLUTION}
         />
       </TestProviders>
     );
@@ -1265,17 +1248,8 @@ describe('RiskInputsTab', () => {
     expect(getByTestId('risk-input-contexts-table')).toHaveTextContent('wl-resolution');
   });
 
-  it('user tab selection overrides initial subTab from URL', () => {
-    mockUseStableExpandableFlyoutState.mockReturnValue({
-      left: {
-        params: {
-          path: {
-            tab: EntityDetailsLeftPanelTab.RISK_INPUTS,
-            subTab: RiskScoreLeftPanelSubTab.RESOLUTION,
-          },
-        },
-      },
-    });
+  it('user tab selection overrides the subTab prop and calls onSubTabChange', () => {
+    const onSubTabChange = jest.fn();
     mockUseResolutionGroup.mockReturnValue({
       data: {
         target: {
@@ -1302,6 +1276,8 @@ describe('RiskInputsTab', () => {
           entityName="elastic"
           onShowAlert={mockOnShowAlert}
           entityId="user:elastic"
+          subTab={RiskScoreLeftPanelSubTab.RESOLUTION}
+          onSubTabChange={onSubTabChange}
         />
       </TestProviders>
     );
@@ -1318,16 +1294,7 @@ describe('RiskInputsTab', () => {
       'true'
     );
 
-    expect(mockOpenLeftPanel).toHaveBeenCalledWith(
-      expect.objectContaining({
-        params: expect.objectContaining({
-          path: expect.objectContaining({
-            tab: EntityDetailsLeftPanelTab.RISK_INPUTS,
-            subTab: RiskScoreLeftPanelSubTab.ENTITY,
-          }),
-        }),
-      })
-    );
+    expect(onSubTabChange).toHaveBeenCalledWith(RiskScoreLeftPanelSubTab.ENTITY);
   });
 
   it('renders watchlist modifiers in context section', () => {
@@ -1414,6 +1381,160 @@ describe('RiskInputsTab', () => {
     expect(getByTestId('risk-input-contexts-table')).toHaveTextContent('High Risk Vendors');
   });
 
+  describe('new entity analytics page (fixed view, no sub-tabs)', () => {
+    const entityRiskScore = riskScoreWithAssetCriticalityContribution(2);
+    const resolutionRiskScore = {
+      '@timestamp': '2021-08-19T16:00:00.000Z',
+      user: {
+        name: 'elastic',
+        risk: {
+          ...riskScore.user.risk,
+          calculated_score_norm: 42,
+          modifiers: [
+            { type: 'watchlist', contribution: 1.25, metadata: { watchlist_id: 'wl-123' } },
+          ],
+          inputs: [{ ...alertInputDataMock.input, id: 'resolution-alert-id' }],
+        },
+      },
+    };
+    const resolutionGroup = {
+      target: {
+        entity: { id: 'user:elastic', name: 'elastic', attributes: { watchlists: [] } },
+        asset: { criticality: 'high_impact' },
+      },
+      aliases: [
+        {
+          entity: { id: 'user:entity-1', name: 'entity-1', attributes: { watchlists: ['wl-123'] } },
+          asset: { criticality: 'extreme_impact' },
+        },
+      ],
+      group_size: 2,
+    };
+
+    const lastAlertsRiskScore = () =>
+      mockUseRiskContributingAlerts.mock.calls.at(-1)?.[0]?.riskScore;
+
+    beforeEach(() => {
+      mockUseNewEntityAnalyticsPage.mockReturnValue(true);
+      mockUseResolutionGroup.mockReturnValue({ data: resolutionGroup, isInitialLoading: false });
+      mockUseRiskScore.mockImplementation((params?: { filterQuery?: unknown; skip?: boolean }) =>
+        params?.skip
+          ? { loading: false, error: false, data: [] }
+          : isResolutionFilter(params)
+          ? { loading: false, error: false, data: [resolutionRiskScore] }
+          : { loading: false, error: false, data: [entityRiskScore] }
+      );
+      mockUseRiskContributingAlerts.mockReturnValue({
+        loading: false,
+        error: false,
+        data: [alertInputDataMock],
+        hasAlertsRead: true,
+      });
+    });
+
+    it('shows only the resolution-group data when opened for the resolution score', () => {
+      const { getByTestId, queryByTestId } = render(
+        <TestProviders>
+          <RiskInputsTab
+            entityType={EntityType.user}
+            entityName="elastic"
+            onShowAlert={mockOnShowAlert}
+            entityId="user:elastic"
+            subTab={RiskScoreLeftPanelSubTab.RESOLUTION}
+          />
+        </TestProviders>
+      );
+
+      expect(queryByTestId('risk-input-score-view-toggle')).not.toBeInTheDocument();
+      expect(getByTestId('risk-input-contexts-table')).toHaveTextContent('entity-1');
+      expect(getByTestId('risk-input-alert-title').parentElement).toHaveTextContent('Entity');
+      expect(lastAlertsRiskScore()).toBe(resolutionRiskScore);
+      expect(mockUseResolutionGroup).toHaveBeenLastCalledWith(
+        'user:elastic',
+        expect.objectContaining({ enabled: true })
+      );
+    });
+
+    it('shows only the entity data when opened for the entity score, even though the entity belongs to a group', () => {
+      const { getByTestId, queryByTestId } = render(
+        <TestProviders>
+          <RiskInputsTab
+            entityType={EntityType.user}
+            entityName="elastic"
+            onShowAlert={mockOnShowAlert}
+            entityId="user:elastic"
+            subTab={RiskScoreLeftPanelSubTab.ENTITY}
+          />
+        </TestProviders>
+      );
+
+      expect(queryByTestId('risk-input-score-view-toggle')).not.toBeInTheDocument();
+      expect(getByTestId('risk-input-contexts-table')).not.toHaveTextContent('entity-1');
+      expect(getByTestId('risk-input-alert-title').parentElement).not.toHaveTextContent('Entity');
+      expect(lastAlertsRiskScore()).toBe(entityRiskScore);
+    });
+
+    it('does not look up the resolution group or score for the entity view', () => {
+      render(
+        <TestProviders>
+          <RiskInputsTab
+            entityType={EntityType.user}
+            entityName="elastic"
+            onShowAlert={mockOnShowAlert}
+            entityId="user:elastic"
+            subTab={RiskScoreLeftPanelSubTab.ENTITY}
+          />
+        </TestProviders>
+      );
+
+      expect(mockUseResolutionGroup).toHaveBeenLastCalledWith(
+        'user:elastic',
+        expect.objectContaining({ enabled: false })
+      );
+      const resolutionScoreCalls = mockUseRiskScore.mock.calls.filter(([params]) =>
+        isResolutionFilter(params)
+      );
+      expect(resolutionScoreCalls).toHaveLength(0);
+    });
+
+    it('defaults to the entity view without a sub-tab', () => {
+      const { queryByTestId } = render(
+        <TestProviders>
+          <RiskInputsTab
+            entityType={EntityType.user}
+            entityName="elastic"
+            onShowAlert={mockOnShowAlert}
+            entityId="user:elastic"
+          />
+        </TestProviders>
+      );
+
+      expect(queryByTestId('risk-input-score-view-toggle')).not.toBeInTheDocument();
+      expect(lastAlertsRiskScore()).toBe(entityRiskScore);
+    });
+
+    it('stays on the resolution view while the group is still loading instead of falling back to the entity score', () => {
+      // Group still loading: no resolution score yet. The legacy toggle would show the entity
+      // score here; the fixed view stays on the (loading) resolution score instead.
+      mockUseResolutionGroup.mockReturnValue({ data: undefined, isInitialLoading: true });
+
+      const { queryByTestId } = render(
+        <TestProviders>
+          <RiskInputsTab
+            entityType={EntityType.user}
+            entityName="elastic"
+            onShowAlert={mockOnShowAlert}
+            entityId="user:elastic"
+            subTab={RiskScoreLeftPanelSubTab.RESOLUTION}
+          />
+        </TestProviders>
+      );
+
+      expect(queryByTestId('risk-input-score-view-toggle')).not.toBeInTheDocument();
+      expect(lastAlertsRiskScore()).toBeUndefined();
+    });
+  });
+
   describe('point-in-time contributions', () => {
     const PIT_TIMESTAMP = '2021-08-10T14:00:00.000Z';
 
@@ -1439,7 +1560,9 @@ describe('RiskInputsTab', () => {
         (flag: string) => flag === 'riskScoreHistoryEnabled'
       );
 
-    const renderTab = () =>
+    const renderTab = (
+      props: Partial<React.ComponentProps<typeof RiskInputsTab<EntityType.user>>> = {}
+    ) =>
       render(
         <TestProviders>
           <RiskInputsTab
@@ -1447,6 +1570,7 @@ describe('RiskInputsTab', () => {
             entityName="elastic"
             entityId="user:elastic"
             onShowAlert={mockOnShowAlert}
+            {...props}
           />
         </TestProviders>
       );
@@ -1471,6 +1595,26 @@ describe('RiskInputsTab', () => {
       );
 
       expect(queryByTestId('mockRiskScoreTimeline')).not.toBeInTheDocument();
+    });
+
+    it('opens the timeline over the last 90 days by default', () => {
+      enableHistoryFlag();
+
+      const { getByTestId } = renderTab();
+
+      const timeline = getByTestId('mockRiskScoreTimeline');
+      expect(timeline).toHaveAttribute('data-from', 'now-90d');
+      expect(timeline).toHaveAttribute('data-to', 'now');
+    });
+
+    it('opens the timeline over the given history range', () => {
+      enableHistoryFlag();
+
+      const { getByTestId } = renderTab({ historyDefaultRange: { from: 'now-7d', to: 'now' } });
+
+      const timeline = getByTestId('mockRiskScoreTimeline');
+      expect(timeline).toHaveAttribute('data-from', 'now-7d');
+      expect(timeline).toHaveAttribute('data-to', 'now');
     });
 
     it('renders the timeline without a PiT indicator when no point is selected', () => {
@@ -1700,7 +1844,6 @@ describe('RiskInputsTab', () => {
 describe('RiskInputsTab - alert preview navigation', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseStableExpandableFlyoutState.mockReturnValue({});
     mockUseGetWatchlists.mockReturnValue({ data: [] });
     mockUseResolutionGroup.mockReturnValue({ data: undefined });
     mockUseEntityFromStore.mockReturnValue({ entityRecord: null });

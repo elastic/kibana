@@ -100,6 +100,19 @@ export const getJudgedByLabel = (modelId: string) =>
     values: { modelId },
   });
 
+export const getEvaluatorVersionLabel = (version: string) =>
+  i18n.translate('xpack.evals.exampleScoresTable.evaluatorVersionLabel', {
+    defaultMessage: 'v{version}',
+    values: { version },
+  });
+
+export const getEvaluatorVersionTooltip = (version: string) =>
+  i18n.translate('xpack.evals.exampleScoresTable.evaluatorVersionTooltip', {
+    defaultMessage:
+      'Scored by version {version} of this evaluator. A definition can change after a run, so scores only compare across versions that share a major.',
+    values: { version },
+  });
+
 export const getEvaluatorAccordionAriaLabel = (evaluatorName: string) =>
   i18n.translate('xpack.evals.exampleScoresTable.evaluatorAccordionAriaLabel', {
     defaultMessage: 'Toggle details for evaluator {evaluatorName}',

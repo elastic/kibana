@@ -15,16 +15,17 @@ import {
   TEST_SUBJ_ALERT_COUNT_BUTTON,
   TEST_SUBJ_EVENT_COUNT,
   TEST_SUBJ_EVENT_COUNT_BUTTON,
+  TEST_SUBJ_EVENT_ICON,
 } from './label_node_badges';
 import { analyzeDocuments } from './analyze_documents';
 
 describe('LabelNodeBadges', () => {
-  test('renders nothing for single event', () => {
+  test('renders event icon badge (no count) for single event', () => {
     const analysis = analyzeDocuments({ uniqueEventsCount: 1, uniqueAlertsCount: 0 });
 
-    const { container } = render(<LabelNodeBadges analysis={analysis} />);
+    render(<LabelNodeBadges analysis={analysis} />);
 
-    expect(container.firstChild).toBe(null);
+    expect(screen.getByTestId(TEST_SUBJ_EVENT_ICON)).toBeInTheDocument();
     expect(screen.queryByTestId(TEST_SUBJ_EVENT_COUNT)).not.toBeInTheDocument();
     expect(screen.queryByTestId(TEST_SUBJ_ALERT_ICON)).not.toBeInTheDocument();
     expect(screen.queryByTestId(TEST_SUBJ_ALERT_COUNT)).not.toBeInTheDocument();
@@ -40,15 +41,14 @@ describe('LabelNodeBadges', () => {
     expect(screen.queryByTestId(TEST_SUBJ_ALERT_COUNT)).not.toBeInTheDocument();
   });
 
-  test('renders event badge with counter for multiple events', () => {
+  test('renders event badge with icon and +N count for multiple events', () => {
     const uniqueEventsCount = 3;
     const analysis = analyzeDocuments({ uniqueEventsCount, uniqueAlertsCount: 0 });
 
     render(<LabelNodeBadges analysis={analysis} />);
 
-    expect(screen.getByTestId(TEST_SUBJ_EVENT_COUNT)).toHaveTextContent(
-      uniqueEventsCount.toString()
-    );
+    expect(screen.getByTestId(TEST_SUBJ_EVENT_ICON)).toBeInTheDocument();
+    expect(screen.getByTestId(TEST_SUBJ_EVENT_COUNT)).toHaveTextContent('+3');
     expect(screen.queryByTestId(TEST_SUBJ_ALERT_ICON)).not.toBeInTheDocument();
     expect(screen.queryByTestId(TEST_SUBJ_ALERT_COUNT)).not.toBeInTheDocument();
   });
@@ -61,35 +61,31 @@ describe('LabelNodeBadges', () => {
 
     expect(screen.queryByTestId(TEST_SUBJ_EVENT_COUNT)).not.toBeInTheDocument();
     expect(screen.queryByTestId(TEST_SUBJ_ALERT_ICON)).toBeInTheDocument();
-    expect(screen.getByTestId(TEST_SUBJ_ALERT_COUNT)).toHaveTextContent(
-      uniqueAlertsCount.toString()
-    );
+    expect(screen.getByTestId(TEST_SUBJ_ALERT_COUNT)).toHaveTextContent('+3');
   });
 
-  test('renders event badge with counter and alert badge with icon and counter for one event and one alert', () => {
+  test('renders event icon badge and alert icon badge (no counts) for one event and one alert', () => {
     const analysis = analyzeDocuments({ uniqueEventsCount: 1, uniqueAlertsCount: 1 });
 
     render(<LabelNodeBadges analysis={analysis} />);
 
-    expect(screen.getByTestId(TEST_SUBJ_EVENT_COUNT)).toHaveTextContent('1');
+    expect(screen.getByTestId(TEST_SUBJ_EVENT_ICON)).toBeInTheDocument();
+    expect(screen.queryByTestId(TEST_SUBJ_EVENT_COUNT)).not.toBeInTheDocument();
     expect(screen.queryByTestId(TEST_SUBJ_ALERT_ICON)).toBeInTheDocument();
-    expect(screen.queryByTestId(TEST_SUBJ_ALERT_COUNT)).toBeInTheDocument();
+    expect(screen.queryByTestId(TEST_SUBJ_ALERT_COUNT)).not.toBeInTheDocument();
   });
 
-  test('renders event badge with counter and alert badge with icon and counter for multiple events and alerts', () => {
+  test('renders event badge with icon and +N count and alert badge with N count for multiple events and alerts', () => {
     const uniqueEventsCount = 2;
     const uniqueAlertsCount = 2;
     const analysis = analyzeDocuments({ uniqueEventsCount, uniqueAlertsCount });
 
     render(<LabelNodeBadges analysis={analysis} />);
 
-    expect(screen.getByTestId(TEST_SUBJ_EVENT_COUNT)).toHaveTextContent(
-      uniqueEventsCount.toString()
-    );
+    expect(screen.getByTestId(TEST_SUBJ_EVENT_ICON)).toBeInTheDocument();
+    expect(screen.getByTestId(TEST_SUBJ_EVENT_COUNT)).toHaveTextContent('+2');
     expect(screen.queryByTestId(TEST_SUBJ_ALERT_ICON)).toBeInTheDocument();
-    expect(screen.getByTestId(TEST_SUBJ_ALERT_COUNT)).toHaveTextContent(
-      uniqueAlertsCount.toString()
-    );
+    expect(screen.getByTestId(TEST_SUBJ_ALERT_COUNT)).toHaveTextContent('+2');
   });
 
   test('renders event badge with abbreviated counter and alert badge with icon and abbreviated counter for very large numbers of events and alerts', () => {
@@ -101,9 +97,10 @@ describe('LabelNodeBadges', () => {
 
     render(<LabelNodeBadges analysis={analysis} />);
 
-    expect(screen.getByTestId(TEST_SUBJ_EVENT_COUNT)).toHaveTextContent('1.2m');
+    expect(screen.getByTestId(TEST_SUBJ_EVENT_ICON)).toBeInTheDocument();
+    expect(screen.getByTestId(TEST_SUBJ_EVENT_COUNT)).toHaveTextContent('+1.2m');
     expect(screen.queryByTestId(TEST_SUBJ_ALERT_ICON)).toBeInTheDocument();
-    expect(screen.getByTestId(TEST_SUBJ_ALERT_COUNT)).toHaveTextContent('1.2m');
+    expect(screen.getByTestId(TEST_SUBJ_ALERT_COUNT)).toHaveTextContent('+1.2m');
   });
 
   describe('Popover', () => {
@@ -136,13 +133,13 @@ describe('LabelNodeBadges', () => {
       expect(eventBadge).toBeInTheDocument();
     });
 
-    test('does not render event badge when single event', () => {
+    test('renders event icon badge only (no count button) when single event', () => {
       const analysis = analyzeDocuments({ uniqueEventsCount: 1, uniqueAlertsCount: 0 });
 
       render(<LabelNodeBadges analysis={analysis} onEventClick={mockOnEventClick} />);
 
-      const eventBadgeButton = screen.queryByTestId(TEST_SUBJ_EVENT_COUNT_BUTTON);
-      expect(eventBadgeButton).not.toBeInTheDocument();
+      expect(screen.getByTestId(TEST_SUBJ_EVENT_ICON)).toBeInTheDocument();
+      expect(screen.queryByTestId(TEST_SUBJ_EVENT_COUNT_BUTTON)).not.toBeInTheDocument();
     });
 
     test('calls onEventClick when alert count badge button is clicked', async () => {

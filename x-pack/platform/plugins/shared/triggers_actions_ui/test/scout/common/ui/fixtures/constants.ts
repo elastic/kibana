@@ -108,7 +108,14 @@ export const RULE_DETAILS_TEST_SUBJECTS = {
   RULE_NAME: 'appHeaderTitle',
   ALERTS_SEARCH_BAR_ROW: 'ruleDetailsAlertsSearchBarRow',
   ALERTS_TABLE_EMPTY_STATE: 'alertsTableEmptyState',
+  ROW_EXPAND: 'expand-event',
+  ALERT_FLYOUT: 'alertFlyout',
+  FLYOUT_TABLE_TAB: 'alertFlyoutTableTab',
+  FLYOUT_TABLE_TAB_PANEL: 'alertFlyoutTableTabPanel',
+  FLYOUT_FIELDS_TABLE_FILTER_INPUT: 'alertFieldsTableFilterInput',
 } as const;
+
+export const ALERTS_TABLE_EXPAND_COLUMN_ID = 'expandColumn';
 
 export const STACK_ALERTS_PAGE_PATH =
   '/app/management/insightsAndAlerting/triggersActionsAlerts' as const;

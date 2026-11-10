@@ -429,7 +429,9 @@ describe('registerConversationRoutes', () => {
         response()
       );
 
-      expect(updateAccessControl).toHaveBeenCalledWith('conversation-1', body);
+      expect(updateAccessControl).toHaveBeenCalledWith('conversation-1', body, {
+        source: 'http_api',
+      });
       expect(result.payload).toBe(persisted);
     });
   });
@@ -522,7 +524,8 @@ describe('POST /conversations', () => {
     const result = await createHandler!(defaultCtx, { body: {} }, defaultResponse);
 
     expect(mockCreate).toHaveBeenCalledWith(
-      expect.objectContaining({ title: DEFAULT_CONVERSATION_TITLE, rounds: [] })
+      expect.objectContaining({ title: DEFAULT_CONVERSATION_TITLE, rounds: [] }),
+      { source: 'http_api' }
     );
     expect(mockGet).not.toHaveBeenCalled();
     expect(result.status).toBe(200);
@@ -570,7 +573,8 @@ describe('POST /conversations', () => {
       expect.objectContaining({
         title: 'My chat',
         access_control: { access_mode: 'public', entries: [] },
-      })
+      }),
+      { source: 'http_api' }
     );
   });
 
@@ -696,7 +700,8 @@ describe('POST /conversations', () => {
       expect.objectContaining({
         template_id: 'incident-response',
         metadata: { severity: 'high', services: ['checkout'] },
-      })
+      }),
+      { source: 'http_api' }
     );
   });
 
@@ -819,7 +824,10 @@ describe('POST /conversations/{conversation_id}/_add_events', () => {
       defaultResponse
     );
 
-    expect(mockAddCustomEvents).toHaveBeenCalledWith({ id: 'conv-1', events: requestBody.events });
+    expect(mockAddCustomEvents).toHaveBeenCalledWith(
+      { id: 'conv-1', events: requestBody.events },
+      { source: 'http_api' }
+    );
     expect(result.status).toBe(200);
     expect(result.payload).toEqual({ events: materializedEvents });
   });

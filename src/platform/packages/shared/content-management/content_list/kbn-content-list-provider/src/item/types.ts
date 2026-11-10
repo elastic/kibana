@@ -122,7 +122,8 @@ interface ActionConfigBase {
   /**
    * Per-item restriction. Returns a reason string when the action is
    * not permitted on the item; `undefined` otherwise. Drives row icon
-   * disabling and tooltip reasons.
+   * disabling and tooltip reasons. Managed items are not
+   * restricted automatically; check `item.managed` when applicable.
    */
   restriction?: ActionRestriction;
 }

@@ -41,8 +41,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       });
       await testSubjects.click('configure-case-button');
       await header.waitUntilLoadingHasFinished();
-      await retry.waitFor('cases-redesign-settings-panel exist', async () => {
-        return await testSubjects.exists('cases-redesign-settings-panel');
+      await retry.waitFor('cases-settings-panel exist', async () => {
+        return await testSubjects.exists('cases-settings-panel');
       });
       await svlCommonScreenshots.takeScreenshot(
         'observability-cases-settings',

@@ -181,6 +181,14 @@ describe('prepareRoutes', () => {
       output: [{ path: '/api/baz', options: { access: pub } }],
       filters: { excludePathsMatching: ['/api/bar'], access: pub },
     },
+    {
+      input: [
+        { path: '/api/foo', options: { access: pub, options: { excludeFromOAS: true } } },
+        { path: '/api/baz', options: { access: pub, options: {} } },
+      ],
+      output: [{ path: '/api/baz', options: { access: pub, options: {} } }],
+      filters: { access: pub },
+    },
   ])('returns the expected routes #%#', ({ input, output, filters }) => {
     expect(prepareRoutes(input, filters)).toEqual(output);
   });

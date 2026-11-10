@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 import {
   BulkEditActionSummary,
@@ -23,12 +23,14 @@ import { toApiExecutionError } from './to_api_execution_error';
  * `error`). Parsing the full response instead could reject an otherwise
  * recoverable partial success over a field we never read.
  */
-const bulkRuleActionResponseSchema = z.object({
-  attributes: z.object({
-    summary: BulkEditActionSummary,
-    errors: z.array(NormalizedRuleError).optional(),
-  }),
-});
+const bulkRuleActionResponseSchema = lazySchema(() =>
+  z.object({
+    attributes: z.object({
+      summary: BulkEditActionSummary,
+      errors: z.array(NormalizedRuleError).optional(),
+    }),
+  })
+);
 
 /**
  * Builds the step output for a successful (2xx) bulk-action response.

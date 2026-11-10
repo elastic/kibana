@@ -18,6 +18,7 @@ project:
   sourceRoot: x-pack/solutions/vectordb/test
 dependsOn:
   - '@kbn/test'
+  - '@kbn/expect'
   - '@kbn/test-suites-xpack-platform'
 tags:
   - test-helper

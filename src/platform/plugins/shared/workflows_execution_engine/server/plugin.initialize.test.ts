@@ -32,6 +32,7 @@ const createPlugin = (): WorkflowsExecutionEnginePlugin => {
   const initializerContext = coreMock.createPluginInitializerContext({
     logging: { console: false },
     eventDriven: { enabled: true, logEvents: true, maxChainDepth: 10 },
+    storage: { source: 'plain_index', dataRetention: '90d' },
   });
   return new WorkflowsExecutionEnginePlugin(initializerContext);
 };

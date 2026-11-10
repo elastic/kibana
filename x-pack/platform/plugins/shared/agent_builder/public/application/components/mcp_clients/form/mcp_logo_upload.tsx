@@ -124,6 +124,7 @@ export const McpLogoUpload = ({ value, onChange }: McpLogoUploadProps) => {
         </EuiFlexGroup>
       )}
       <EuiFilePicker
+        aria-label={labels.tools.mcpClients.form.uploadLogoPrompt}
         data-test-subj="mcpClientLogoUpload"
         initialPromptText={labels.tools.mcpClients.form.uploadLogoPrompt}
         accept={ACCEPT_ATTRIBUTE}

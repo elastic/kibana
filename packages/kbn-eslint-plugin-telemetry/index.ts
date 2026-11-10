@@ -7,14 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { eslintCompatPlugin } from '@oxlint/plugins';
 import { EventGeneratingElementsShouldBeInstrumented } from './rules/event_generating_elements_should_be_instrumented';
 import { EbtPropsShouldBePresent } from './rules/ebt_props_should_be_present';
 
 /**
- * Custom ESLint rules, add `'@kbn/eslint-plugin-telemetry'` to your eslint config to use them
+ * Custom rules run by Oxlint through `oxlint_plugin.js`; `eslintCompatPlugin` keeps them loadable
+ * by ESLint as `'@kbn/eslint-plugin-telemetry'`.
  * @internal
  */
-export const rules = {
-  event_generating_elements_should_be_instrumented: EventGeneratingElementsShouldBeInstrumented,
-  ebt_props_should_be_present: EbtPropsShouldBePresent,
-};
+export const { meta, rules } = eslintCompatPlugin({
+  meta: { name: '@kbn/telemetry' },
+  rules: {
+    event_generating_elements_should_be_instrumented: EventGeneratingElementsShouldBeInstrumented,
+    ebt_props_should_be_present: EbtPropsShouldBePresent,
+  },
+});

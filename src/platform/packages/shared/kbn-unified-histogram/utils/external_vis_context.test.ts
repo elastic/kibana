@@ -9,15 +9,18 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Suggestion } from '@kbn/lens-plugin/public';
+import type { TextBasedPersistedState } from '@kbn/lens-common';
 import {
   canImportVisContext,
   exportVisContext,
   isSuggestionShapeAndVisContextCompatible,
   injectESQLQueryIntoLensLayers,
+  isPreferredEsqlVisCompatibleWithCurrentQuery,
   deriveLensSuggestionFromLensAttributes,
 } from './external_vis_context';
 import type { QueryParams } from './external_vis_context';
 import { getLensVisMock } from '../__mocks__/lens_vis';
+import { allSuggestionsMock } from '../__mocks__/suggestions';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 import { tableMock, tableQueryMock } from '../__mocks__/table';
 import type { UnifiedHistogramVisContext } from '../types';
@@ -36,15 +39,40 @@ describe('external_vis_context', () => {
         timeInterval: 'auto',
         breakdownField: undefined,
         columns: [],
-        isPlainRecord: true,
         table: tableMock,
+        allSuggestions: allSuggestionsMock.map((suggestion) => {
+          const datasourceState = suggestion.datasourceState as TextBasedPersistedState;
+          return {
+            ...suggestion,
+            datasourceState: {
+              ...datasourceState,
+              layers: Object.fromEntries(
+                Object.entries(datasourceState.layers).map(([id, layer]) => [
+                  id,
+                  { ...layer, query: tableQueryMock },
+                ])
+              ),
+            },
+          };
+        }),
       });
 
       const visContext = lensVis.visContext;
-
+      const layers = visContext?.attributes.state.datasourceStates.textBased?.layers ?? {};
+      expect(Object.keys(layers).length).toBeGreaterThan(0);
+      for (const layer of Object.values(layers)) {
+        expect(layer.table).toEqual(tableMock);
+      }
       expect(visContext).toMatchSnapshot();
 
       exportedVisContext = exportVisContext(visContext);
+      expect(exportedVisContext).toBeDefined();
+      const exportedLayers =
+        exportedVisContext?.attributes.state.datasourceStates.textBased?.layers ?? {};
+      expect(Object.keys(exportedLayers)).toEqual(Object.keys(layers));
+      for (const layer of Object.values(exportedLayers)) {
+        expect(layer).not.toHaveProperty('table');
+      }
       expect(exportedVisContext).toMatchSnapshot();
     });
   });
@@ -290,6 +318,121 @@ describe('external_vis_context', () => {
           'timestamp every 10 minutes'
         )
       ).toStrictEqual(expectedAttributes);
+    });
+
+    it('should update the layer index when a current data view id is provided', () => {
+      const attributes = {
+        visualizationType: 'lnsXY',
+        state: {
+          visualization: { preferredSeriesType: 'line' },
+          datasourceStates: {
+            textBased: {
+              layers: {
+                layer1: { index: 'esql-old', query: { esql: 'from foo | limit 10' } },
+              },
+            },
+          },
+        },
+      } as unknown as UnifiedHistogramVisContext['attributes'];
+
+      expect(
+        injectESQLQueryIntoLensLayers(
+          attributes,
+          { esql: 'from foo | limit 100' },
+          undefined,
+          'esql-new'
+        )
+      ).toEqual(
+        expect.objectContaining({
+          state: expect.objectContaining({
+            datasourceStates: {
+              textBased: {
+                layers: {
+                  layer1: {
+                    index: 'esql-new',
+                    query: { esql: 'from foo | limit 100' },
+                  },
+                },
+              },
+            },
+          }),
+        })
+      );
+    });
+  });
+
+  describe('isPreferredEsqlVisCompatibleWithCurrentQuery', () => {
+    const getAttributes = (
+      layerQuery: string,
+      timeField?: string
+    ): UnifiedHistogramVisContext['attributes'] =>
+      ({
+        visualizationType: 'lnsXY',
+        state: {
+          visualization: { preferredSeriesType: 'line' },
+          datasourceStates: {
+            textBased: {
+              layers: {
+                layer1: { index: 'esql-old', query: { esql: layerQuery }, timeField },
+              },
+            },
+          },
+        },
+      } as unknown as UnifiedHistogramVisContext['attributes']);
+
+    it('should keep a customized vis when only a compatible query clause changes', () => {
+      expect(
+        isPreferredEsqlVisCompatibleWithCurrentQuery(
+          getAttributes(
+            'from logstash-* | limit 10 | STATS results = COUNT(*) BY timestamp = BUCKET(@timestamp, 30 minute)',
+            '@timestamp'
+          ),
+          { esql: 'from logstash-* | limit 100' },
+          '@timestamp'
+        )
+      ).toBe(true);
+    });
+
+    it('should drop a customized vis when the index pattern changes', () => {
+      expect(
+        isPreferredEsqlVisCompatibleWithCurrentQuery(
+          getAttributes(
+            'from logstash-* | limit 10 | STATS results = COUNT(*) BY timestamp = BUCKET(@timestamp, 30 minute)',
+            '@timestamp'
+          ),
+          { esql: 'from logs* | limit 100' },
+          '@timestamp'
+        )
+      ).toBe(false);
+    });
+
+    it('should drop a customized vis when the time field changes', () => {
+      expect(
+        isPreferredEsqlVisCompatibleWithCurrentQuery(
+          getAttributes('from logstash-* | limit 10', '@timestamp'),
+          { esql: 'from logstash-* | limit 10' },
+          'event.created'
+        )
+      ).toBe(false);
+    });
+
+    it('should keep a customized vis when only one side has a time field', () => {
+      expect(
+        isPreferredEsqlVisCompatibleWithCurrentQuery(
+          getAttributes('from logstash-* | limit 10'),
+          { esql: 'from logstash-* | limit 100' },
+          '@timestamp'
+        )
+      ).toBe(true);
+    });
+
+    it('should drop a customized vis when the current query is not ES|QL', () => {
+      expect(
+        isPreferredEsqlVisCompatibleWithCurrentQuery(getAttributes('from logstash-* | limit 10'), {
+          language: 'kuery',
+          query: '*',
+        })
+      ).toBe(false);
     });
   });
 

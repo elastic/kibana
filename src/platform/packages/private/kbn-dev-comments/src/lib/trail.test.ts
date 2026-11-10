@@ -9,7 +9,7 @@
 
 import { IGNORE_ATTR } from '../constants';
 import { createLocation, flush, mockLayout, query, renderPage } from '../test_helpers';
-import { createTrailRecorder, isTrailControl, type TrailRecorder } from './trail';
+import { createTrailRecorder, hoverStepFor, isTrailControl, type TrailRecorder } from './trail';
 
 describe('trail', () => {
   mockLayout();
@@ -66,6 +66,18 @@ describe('trail', () => {
     expect(isTrailControl(query('[role="switch"]'))).toBe(false);
     expect(isTrailControl(query('input'))).toBe(false);
     expect(isTrailControl(query('[role="option"]'))).toBe(false);
+  });
+
+  it('describes hovering an element as a step, with its label', () => {
+    renderPage(`<button id="save" aria-label="Save">S</button>`);
+
+    expect(hoverStepFor(query('#save'))).toEqual({
+      kind: 'hover',
+      label: 'Save',
+      anchor: expect.objectContaining({
+        locators: expect.arrayContaining([{ type: 'id', value: 'save' }]),
+      }),
+    });
   });
 
   it('records a control once the page has handled the click, from the state before it', () => {

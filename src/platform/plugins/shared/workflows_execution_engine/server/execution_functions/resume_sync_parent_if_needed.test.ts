@@ -152,6 +152,9 @@ describe('resumeSyncParentIfNeeded', () => {
     });
 
     expect(internalResumeWorkflowExecution).toHaveBeenCalledTimes(8);
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Attempting fail-close recovery')
+    );
     expect(mockMarkFailed).toHaveBeenCalledWith(
       repos.workflowExecutionRepository,
       repos.stepExecutionRepository,
@@ -160,6 +163,9 @@ describe('resumeSyncParentIfNeeded', () => {
         type: TASK_RECOVERY_ERROR_TYPE,
         message: expect.stringContaining('had no authenticated resume task to wake'),
       })
+    );
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.stringContaining(`Marked parent workflow ${parentExecId} FAILED`)
     );
     expect(repos.workflowTaskManager.scheduleAndRunImmediateResume).not.toHaveBeenCalled();
   });
@@ -226,6 +232,36 @@ describe('resumeSyncParentIfNeeded', () => {
 
     expect(workflowTaskManager.runExistingResumeTask).toHaveBeenCalledWith(parentExecId);
     expect(mockMarkFailed).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Attempting fail-close recovery')
+    );
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('retries ancestor cleanup when an earlier attempt already finalized the immediate parent', async () => {
+    const deps = createDeps();
+    deps.internalResumeWorkflowExecution.mockImplementation(async (id) => {
+      if (id === parentExecId) throw new Error('Parent task is gone');
+    });
+    deps.workflowExecutionRepository.getWorkflowExecutionById.mockResolvedValue(
+      createChild({
+        id: parentExecId,
+        status: ExecutionStatus.FAILED,
+        context: { parentWorkflowInvocation: 'sync', parentWorkflowExecutionId: 'grandparent' },
+      })
+    );
+    await resumeSyncParentIfNeeded({
+      childExecution: createChild(),
+      spaceId,
+      logger,
+      ...deps,
+      throwOnFailure: true,
+    });
+    expect(deps.internalResumeWorkflowExecution).toHaveBeenLastCalledWith(
+      'grandparent',
+      spaceId,
+      undefined
+    );
   });
 
   it('does not fail-close the parent when it is already running', async () => {
@@ -246,6 +282,10 @@ describe('resumeSyncParentIfNeeded', () => {
     });
 
     expect(mockMarkFailed).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Attempting fail-close recovery')
+    );
+    expect(logger.error).not.toHaveBeenCalled();
   });
 
   it('does not fail-close the parent when cancel has already been requested', async () => {

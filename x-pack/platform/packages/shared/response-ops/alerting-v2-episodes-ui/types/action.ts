@@ -14,6 +14,7 @@ export interface EpisodeActionState {
   lastAckActor: string | null;
   lastDeactivateAction: string | null;
   lastDeactivateActor: string | null;
+  tags?: string[];
 }
 
 export interface AlertEpisodeGroupAction {
@@ -21,13 +22,12 @@ export interface AlertEpisodeGroupAction {
   ruleId: string | null;
   lastDeactivateAction: string | null;
   lastSnoozeAction: string | null;
-  snoozeExpiry: string | null;
-  tags: string[];
+  snoozedUntil: string | null;
   lastSnoozeActor: string | null;
   lastDeactivateActor: string | null;
 }
 
 export interface EpisodeStatusGroupAction {
   lastSnoozeAction: string | null;
-  snoozeExpiry: string | null;
+  snoozedUntil: string | null;
 }

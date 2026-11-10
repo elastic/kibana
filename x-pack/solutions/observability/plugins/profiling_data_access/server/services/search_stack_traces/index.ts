@@ -6,8 +6,9 @@
  */
 
 import { decodeStackTraceResponse } from '@kbn/profiling-utils';
+import type { ProfilingSchema } from '@kbn/profiling-utils';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { ProfilingESClient } from '../../../common/profiling_es_client';
+import type { ProfilingESClient } from '../../utils/profiling_es_client';
 
 interface Params {
   client: ProfilingESClient;
@@ -24,6 +25,7 @@ interface Params {
   indices?: string[];
   stacktraceIdsField?: string;
   query: QueryDslQueryContainer;
+  schema?: ProfilingSchema;
 }
 
 export async function searchStackTraces({
@@ -41,6 +43,7 @@ export async function searchStackTraces({
   indices,
   query,
   stacktraceIdsField,
+  schema,
 }: Params) {
   const response = await client.profilingStacktraces({
     query,
@@ -55,6 +58,7 @@ export async function searchStackTraces({
     azureCostDiscountRate,
     indices,
     stacktraceIdsField,
+    schema,
   });
 
   return decodeStackTraceResponse(response, showErrorFrames);

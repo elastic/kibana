@@ -7,12 +7,13 @@
 
 import type { RootSchema } from '@elastic/ebt/client';
 import type {
+  AlertCreationAttemptIdentityProps,
+  ExistingAlertIdentityProps,
   AgentBuilderKnowledgeIndicatorCreatedProps,
   AgentToolEventCreateProps,
   AgentToolEventInvestigationAttachProps,
   AgentToolEventStatusUpdateProps,
   AgentToolKnowledgeIndicatorIdentificationStartedProps,
-  CodeAnalysisGroundingProps,
   DetectionScanProps,
   KnowledgeIndicatorFeaturesIdentifiedProps,
   KnowledgeIndicatorQueriesGeneratedProps,
@@ -59,16 +60,10 @@ const knowledgeIndicatorQueriesGeneratedSchema: RootSchema<KnowledgeIndicatorQue
         description: 'Duration of the query generation operation in milliseconds',
       },
     },
-    stream_type: {
+    source_id: {
       type: 'keyword',
       _meta: {
-        description: 'The type of the stream: wired or classic',
-      },
-    },
-    stream_name: {
-      type: 'keyword',
-      _meta: {
-        description: 'The name of the Stream',
+        description: 'The Nightshift source id the queries were generated for',
       },
     },
     external_content_tool_continuations: {
@@ -226,16 +221,10 @@ const knowledgeIndicatorFeaturesIdentifiedSchema: RootSchema<KnowledgeIndicatorF
         description: 'Duration of this iteration in milliseconds',
       },
     },
-    stream_type: {
+    source_id: {
       type: 'keyword',
       _meta: {
-        description: 'The type of the stream: wired or classic',
-      },
-    },
-    stream_name: {
-      type: 'keyword',
-      _meta: {
-        description: 'The name of the Stream',
+        description: 'The Nightshift source id the features were identified for',
       },
     },
     state: {
@@ -285,16 +274,10 @@ const agentBuilderKnowledgeIndicatorCreatedSchema: RootSchema<AgentBuilderKnowle
         description: 'Whether KI creation succeeded',
       },
     },
-    stream_name: {
+    source_id: {
       type: 'keyword',
       _meta: {
-        description: 'The name of the Stream',
-      },
-    },
-    stream_type: {
-      type: 'keyword',
-      _meta: {
-        description: 'The type of the stream: wired, classic, query, or unknown',
+        description: 'The Nightshift source id the knowledge indicator was created for',
       },
     },
     error_message: {
@@ -314,10 +297,10 @@ const agentToolKnowledgeIndicatorIdentificationStartedSchema: RootSchema<AgentTo
         description: 'Whether starting KI identification succeeded',
       },
     },
-    stream_name: {
+    source_id: {
       type: 'keyword',
       _meta: {
-        description: 'The name of the Stream',
+        description: 'The Nightshift source id identification was started for',
       },
     },
     error_message: {
@@ -329,23 +312,68 @@ const agentToolKnowledgeIndicatorIdentificationStartedSchema: RootSchema<AgentTo
     },
   };
 
+const alertSourceSchema = {
+  type: 'keyword' as const,
+  _meta: {
+    description:
+      'The `.rule-events` `source` of the alert: `internal` for Elastic-configured Alerting v2 rules, an `elastic.`-prefixed value for Elastic-produced alerts, or the sender-supplied value for external alerts',
+  },
+};
+
+const alertSpaceIdSchema = {
+  type: 'keyword' as const,
+  _meta: { description: 'The Kibana space that owns the alert' },
+};
+
+const fingerprintDescription =
+  'The stable caller-visible series identity of the alert the operation addressed, before Alerting v2 hashes it with space and source into `group_hash`. The operation may have failed; filter on `success` to keep only alerts that exist in `.rule-events`';
+
+const groupHashSchema = {
+  type: 'keyword' as const,
+  _meta: {
+    description:
+      'The Alerting v2 `group_hash` series key returned by the write that created the alert. Absent when the operation did not create it',
+    optional: true as const,
+  },
+};
+
+const existingAlertIdentitySchema: RootSchema<ExistingAlertIdentityProps> = {
+  alert_source: alertSourceSchema,
+  fingerprint: { type: 'keyword', _meta: { description: fingerprintDescription } },
+  space_id: alertSpaceIdSchema,
+};
+
+const alertCreationAttemptIdentitySchema: RootSchema<AlertCreationAttemptIdentityProps> = {
+  alert_source: alertSourceSchema,
+  fingerprint: {
+    type: 'keyword',
+    _meta: {
+      description: `${fingerprintDescription}. Absent when the server generated the id for an event it did not persist`,
+      optional: true,
+    },
+  },
+  group_hash: groupHashSchema,
+  space_id: alertSpaceIdSchema,
+};
+
 const agentToolEventCreateSchema: RootSchema<AgentToolEventCreateProps> = {
+  ...alertCreationAttemptIdentitySchema,
   success: {
     type: 'boolean',
     _meta: {
       description: 'Whether the event creation succeeded',
     },
   },
-  stream_names: {
+  source_ids: {
     type: 'array',
     items: {
       type: 'keyword',
       _meta: {
-        description: 'A stream name',
+        description: 'A Nightshift source id',
       },
     },
     _meta: {
-      description: 'The names of the Streams associated with the event',
+      description: 'The Nightshift source ids associated with the event',
     },
   },
   error_message: {
@@ -358,6 +386,7 @@ const agentToolEventCreateSchema: RootSchema<AgentToolEventCreateProps> = {
 };
 
 const agentToolEventStatusUpdateSchema: RootSchema<AgentToolEventStatusUpdateProps> = {
+  ...existingAlertIdentitySchema,
   success: {
     type: 'boolean',
     _meta: {
@@ -367,7 +396,16 @@ const agentToolEventStatusUpdateSchema: RootSchema<AgentToolEventStatusUpdatePro
   event_uuid: {
     type: 'keyword',
     _meta: {
-      description: 'The identifier of the updated significant event',
+      description:
+        'Deprecated — superseded by `event_id`. The identifier of the updated significant event',
+      optional: true,
+    },
+  },
+  event_id: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'The stable event id of the updated significant event; the same value as `fingerprint`, kept for compatibility',
     },
   },
   status: {
@@ -381,47 +419,6 @@ const agentToolEventStatusUpdateSchema: RootSchema<AgentToolEventStatusUpdatePro
     _meta: {
       description: 'Error message when event status update fails',
       optional: true,
-    },
-  },
-};
-
-const codeAnalysisGroundingSchema: RootSchema<CodeAnalysisGroundingProps> = {
-  stream_name: {
-    type: 'keyword',
-    _meta: {
-      description: 'The name of the Stream',
-    },
-  },
-  stream_type: {
-    type: 'keyword',
-    _meta: {
-      description: 'The type of the stream: wired or classic',
-    },
-  },
-  status: {
-    type: 'keyword',
-    _meta: {
-      description:
-        'Outcome of code_analysis grounding: feature, no_match, no_candidates, no_strings, or unavailable',
-    },
-  },
-  repository: {
-    type: 'keyword',
-    _meta: {
-      description: 'The repository/index selected to ground the stream against',
-      optional: true,
-    },
-  },
-  candidate_count: {
-    type: 'long',
-    _meta: {
-      description: 'The number of candidate code repositories considered',
-    },
-  },
-  verified_count: {
-    type: 'long',
-    _meta: {
-      description: 'The number of distinctive log strings verified against the selected code',
     },
   },
 };
@@ -520,10 +517,10 @@ const detectionScanSchema: RootSchema<DetectionScanProps> = {
 };
 
 const onboardingScheduledSchema: RootSchema<KnowledgeIndicatorOnboardingScheduledProps> = {
-  stream_name: {
+  source_id: {
     type: 'keyword',
     _meta: {
-      description: 'The name of the stream being onboarded',
+      description: 'The Nightshift source id being onboarded',
     },
   },
   execution_id: {
@@ -561,6 +558,7 @@ const onboardingScheduledSchema: RootSchema<KnowledgeIndicatorOnboardingSchedule
 
 const agentToolEventInvestigationAttachSchema: RootSchema<AgentToolEventInvestigationAttachProps> =
   {
+    ...existingAlertIdentitySchema,
     success: {
       type: 'boolean',
       _meta: {
@@ -570,7 +568,17 @@ const agentToolEventInvestigationAttachSchema: RootSchema<AgentToolEventInvestig
     event_uuid: {
       type: 'keyword',
       _meta: {
-        description: 'The identifier of the significant event the investigation was attached to',
+        description:
+          'Deprecated — superseded by `event_id`. The identifier of the significant event the investigation was attached to',
+        optional: true,
+      },
+    },
+    event_id: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'The stable event id of the significant event the investigation was attached to; the same value as `fingerprint`, kept for compatibility',
+        optional: true,
       },
     },
     workflow_execution_id: {
@@ -589,6 +597,7 @@ const agentToolEventInvestigationAttachSchema: RootSchema<AgentToolEventInvestig
   };
 
 const agentToolEventWriteSchema: RootSchema<AgentToolEventWriteProps> = {
+  ...alertCreationAttemptIdentitySchema,
   success: {
     type: 'boolean',
     _meta: {
@@ -598,13 +607,15 @@ const agentToolEventWriteSchema: RootSchema<AgentToolEventWriteProps> = {
   event_id: {
     type: 'keyword',
     _meta: {
-      description: 'The stable event id associated with the written event',
+      description:
+        'The stable event id associated with the written event, or `unknown` when the item had none; kept for compatibility, join on `fingerprint` instead',
     },
   },
   status: {
     type: 'keyword',
     _meta: {
       description: 'The status value set on the significant event',
+      optional: true,
     },
   },
   written: {
@@ -613,22 +624,29 @@ const agentToolEventWriteSchema: RootSchema<AgentToolEventWriteProps> = {
       description: 'Whether a new event version was actually written (false when status unchanged)',
     },
   },
-  stream_names: {
+  source_ids: {
     type: 'array',
     items: {
       type: 'keyword',
       _meta: {
-        description: 'A stream name',
+        description: 'A Nightshift source id',
       },
     },
     _meta: {
-      description: 'The names of the streams associated with the event',
+      description: 'The Nightshift source ids associated with the event',
     },
   },
   error_message: {
     type: 'text',
     _meta: {
       description: 'Error message when the workflow event write fails',
+      optional: true,
+    },
+  },
+  severity: {
+    type: 'keyword',
+    _meta: {
+      description: 'The severity tier actually stored. Present only when written is true.',
       optional: true,
     },
   },
@@ -653,10 +671,10 @@ const agentToolEventSearchSchema: RootSchema<AgentToolEventSearchProps> = {
       description: 'Whether the search included a query filter',
     },
   },
-  has_stream_filter: {
+  has_source_filter: {
     type: 'boolean',
     _meta: {
-      description: 'Whether the search included a stream_names filter',
+      description: 'Whether the search included a source_ids filter',
     },
   },
   status_filter: {
@@ -695,7 +713,6 @@ export {
   agentToolEventStatusUpdateSchema,
   agentToolEventWriteSchema,
   agentToolKnowledgeIndicatorIdentificationStartedSchema,
-  codeAnalysisGroundingSchema,
   detectionScanSchema,
   discoveryTriggeredSchema,
   knowledgeIndicatorFeaturesIdentifiedSchema,

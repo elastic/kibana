@@ -24,6 +24,7 @@ export type MitreEntitySummary =
   | MitreTechniqueSummary
   | MitreSubtechniqueSummary;
 
+/** Entities grouped by type. Order is guaranteed: tactics ascending by position (matrix order), techniques and subtechniques ascending by name. */
 export interface MitreEntitySummaryBuckets {
   tactics: MitreTacticSummary[];
   techniques: MitreTechniqueSummary[];
@@ -40,14 +41,19 @@ export interface MitreEntitySummaryCollection extends MitreEntitySummaryBuckets 
   frameworkVersion?: string;
 }
 
-/** Entities grouped by type but without the containing framework metadata. */
+/** Entities grouped by type. Order is guaranteed: tactics ascending by position (matrix order), techniques and subtechniques ascending by name. */
 export interface MitreEntityBuckets {
   tactics: MitreTactic[];
   techniques: MitreTechnique[];
   subtechniques: MitreSubtechnique[];
 }
 
-/** Full result of a list operation: buckets plus the resolved framework / version. */
+/**
+ * Full result of a list operation: buckets plus the resolved framework / version.
+ * A collection always holds exactly one framework. Consumers that need several
+ * frameworks (for example ATT&CK Enterprise and ATLAS) call list() once per framework
+ * rather than receiving a merged collection, so each framework keeps its own version.
+ */
 export interface MitreEntityCollection extends MitreEntityBuckets {
   framework: MitreFramework;
   /**

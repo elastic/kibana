@@ -79,6 +79,7 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
   }
 
   const username = await context.getUserName();
+  const profileUid = await context.getProfileUid();
   const actionsClient = await context.getActionsClient();
   const successfulIds: string[] = [];
   const errors: BulkOperationError[] = [];
@@ -115,6 +116,7 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
     const result = await runBatch<Params>({
       context,
       username,
+      profileUid,
       actionsClient,
       batch,
       changeTracking,
@@ -256,6 +258,7 @@ async function preValidate<Params extends RuleParams>({
 interface RunBatchArgs<Params extends RuleParams> {
   context: RulesClientContext;
   username: string | null;
+  profileUid: string | null;
   actionsClient: Awaited<ReturnType<RulesClientContext['getActionsClient']>>;
   batch: Array<{ id: string; rule: BulkCreateRulesItem<Params> }>;
   changeTracking?: RuleChangeTracking;
@@ -265,6 +268,7 @@ interface RunBatchArgs<Params extends RuleParams> {
 async function runBatch<Params extends RuleParams>({
   context,
   username,
+  profileUid,
   actionsClient,
   batch,
   changeTracking,
@@ -288,6 +292,7 @@ async function runBatch<Params extends RuleParams>({
           context,
           actionsClient,
           username,
+          profileUid,
           id,
           rule,
           apiKeys,
@@ -318,7 +323,14 @@ async function runBatch<Params extends RuleParams>({
 
   if (enabledRules.length > 0) {
     try {
-      const scheduledTasks = await bulkScheduleTask(context, enabledRules);
+      const scheduledTasks = await withSpan(
+        {
+          name: 'bulkCreateRules.runBatch.bulkScheduleTask',
+          type: 'rules',
+          labels: { count: String(enabledRules.length) },
+        },
+        () => bulkScheduleTask(context, enabledRules)
+      );
       scheduledTasks.forEach((t) => taskIds.add(t.id));
 
       // Silent per-task drops: bulkSchedule's `taskInstanceToAttributes` logs+skips

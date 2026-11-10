@@ -83,7 +83,7 @@ export const fetchSyntheticsMonitor = async ({
   spaceId?: string;
 }): Promise<SyntheticsMonitorWithId> => {
   return apiService.get<SyntheticsMonitorWithId>(
-    SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', monitorId),
+    SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR.replace('{id}', monitorId),
     {
       internal: true,
       spaceId,

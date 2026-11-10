@@ -230,4 +230,55 @@ describe('getExpressionRendererProps', () => {
       );
     });
   });
+
+  describe('execution context', () => {
+    const baseParams = {
+      unifiedSearch: {
+        query: { query: '', language: 'kuery' },
+        filters: [],
+      },
+      isApproximate: false,
+      timeRange: { from: 'now-15m', to: 'now' },
+      disableTriggers: false,
+      settings: {
+        syncColors: true,
+        syncCursor: true,
+        syncTooltips: false,
+      },
+      onRender: jest.fn(),
+      onEvent: jest.fn(),
+      onData: jest.fn(),
+    };
+
+    it('nests the visualization context on child so it is included in x-opaque-id', async () => {
+      const vis = createMockVis({
+        id: 'vis-id',
+        title: 'My visualization',
+      });
+      const result = await getExpressionRendererProps({
+        ...baseParams,
+        vis,
+        parentExecutionContext: {
+          type: 'dashboard',
+          name: 'dashboards',
+          id: 'dash-id',
+          url: '/app/dashboards',
+        },
+      });
+
+      expect(result.params?.executionContext).toEqual({
+        type: 'dashboard',
+        name: 'dashboards',
+        id: 'dash-id',
+        url: '/app/dashboards',
+        child: {
+          type: 'agg_based',
+          name: 'area',
+          id: 'vis-id',
+          description: 'My visualization',
+        },
+      });
+      expect(result.params?.executionContext).not.toHaveProperty('childContext');
+    });
+  });
 });

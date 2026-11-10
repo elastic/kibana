@@ -8,6 +8,7 @@
 export { EscalationQueue } from './escalation_queue';
 export { EscalationCard } from './escalation_card';
 export { AssignToUsers } from './assign_to_users';
+export { AssigneeAvatarStack } from './assignee_avatar_stack';
 export { EscalationMetaInfo } from './escalation_meta_info';
 export { LinkedInvestigationsBadge } from './linked_investigations_badge';
 export type { EscalationQueueItem, EscalationStatus } from './types';

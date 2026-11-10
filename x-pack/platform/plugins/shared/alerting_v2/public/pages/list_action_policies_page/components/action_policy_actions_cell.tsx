@@ -10,6 +10,8 @@ import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ActionPolicyActionsMenu } from '../../../components/action_policy/action_policy_actions_menu';
+import { ACTION_POLICIES_LICENSE_REQUIRED_MESSAGE } from '../../../components/action_policy/labels';
+import { useIsActionPoliciesLicenseValid } from '../../../hooks/use_is_action_policies_license_valid';
 
 interface ActionPolicyActionsCellProps {
   policy: ActionPolicyResponse;
@@ -32,45 +34,44 @@ export const ActionPolicyActionsCell = ({
   onUpdateApiKey,
   isDisabled = false,
 }: ActionPolicyActionsCellProps) => {
+  const isLicenseValid = useIsActionPoliciesLicenseValid();
+
   return (
     <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
       {canWrite && (
-        <>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              content={i18n.translate(
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            content={
+              isLicenseValid
+                ? i18n.translate('xpack.alertingV2.actionPoliciesList.action.edit.description', {
+                    defaultMessage: 'Edit this action policy',
+                  })
+                : ACTION_POLICIES_LICENSE_REQUIRED_MESSAGE
+            }
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              iconType="pencil"
+              color="text"
+              aria-label={i18n.translate(
                 'xpack.alertingV2.actionPoliciesList.action.edit.description',
-                {
-                  defaultMessage: 'Edit this action policy',
-                }
+                { defaultMessage: 'Edit this action policy' }
               )}
-              disableScreenReaderOutput
-            >
-              <EuiButtonIcon
-                iconType="pencil"
-                color="text"
-                aria-label={i18n.translate(
-                  'xpack.alertingV2.actionPoliciesList.action.edit.description',
-                  { defaultMessage: 'Edit this action policy' }
-                )}
-                onClick={() => onEdit(policy.id)}
-                isDisabled={isDisabled}
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <ActionPolicyActionsMenu
-              policy={policy}
-              onViewDetails={onViewDetails}
-              onEdit={onEdit}
-              onClone={onClone}
-              onDelete={onDelete}
-              onUpdateApiKey={onUpdateApiKey}
-              isDisabled={isDisabled}
+              onClick={() => onEdit(policy.id)}
+              isDisabled={isDisabled || !isLicenseValid}
+              data-test-subj={`editActionPolicyButton-${policy.id}`}
             />
-          </EuiFlexItem>
-        </>
+          </EuiToolTip>
+        </EuiFlexItem>
       )}
+      <EuiFlexItem grow={false}>
+        {/* Readers reach the details through the name link, so their menu only offers the test. */}
+        <ActionPolicyActionsMenu
+          policy={policy}
+          {...(canWrite && { onViewDetails, onEdit, onClone, onDelete, onUpdateApiKey })}
+          isDisabled={isDisabled}
+        />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

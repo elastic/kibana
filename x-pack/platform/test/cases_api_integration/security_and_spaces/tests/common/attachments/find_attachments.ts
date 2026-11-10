@@ -21,6 +21,7 @@ import {
   createComment,
   findAttachmentsV2,
   ensureSavedObjectIsAuthorized,
+  seedUnreadableAttachment,
   superUserSpace1Auth,
 } from '../../../../common/lib/api';
 import {
@@ -79,6 +80,37 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(attachments.data.length).to.eql(1);
       expect(attachments.data[0].id).to.eql(patchedCase.comments![0].id);
     });
+
+    it('skips a stored attachment that cannot be read but still counts it in `total`', async () => {
+      const postedCase = await createCase(supertest, postCaseReq);
+      const patchedCase = await createComment({
+        supertest,
+        caseId: postedCase.id,
+        params: postCommentUserReq,
+      });
+      await seedUnreadableAttachment({ es, caseId: postedCase.id });
+
+      const attachments = await findAttachmentsV2({ supertest, caseId: postedCase.id });
+
+      expect(attachments.data.map(({ id }) => id)).to.eql([patchedCase.comments![0].id]);
+      expect(attachments.total).to.be(2);
+    });
+
+    for (const type of ['user', 'foo']) {
+      it(`returns an empty list when \`type\` is "${type}", which matches no stored type`, async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        await createComment({ supertest, caseId: postedCase.id, params: postCommentUserReq });
+
+        const attachments = await findAttachmentsV2({
+          supertest,
+          caseId: postedCase.id,
+          query: { type },
+        });
+
+        expect(attachments.data).to.eql([]);
+        expect(attachments.total).to.eql(0);
+      });
+    }
 
     describe('rbac', () => {
       const supertestWithoutAuth = getService('supertestWithoutAuth');

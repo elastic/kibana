@@ -188,6 +188,18 @@ export const REMOVED_FILE = i18n.translate('xpack.cases.caseView.files.removedFi
   defaultMessage: 'removed file',
 });
 
+export const REMOVED_FILE_NAME = (fileName: string) =>
+  i18n.translate('xpack.cases.caseView.files.removedFileName', {
+    defaultMessage: 'removed file {fileName}',
+    values: { fileName },
+  });
+
+export const FILES_COUNT = (count: number) =>
+  i18n.translate('xpack.cases.caseView.files.filesCount', {
+    defaultMessage: '{count, plural, one {# file} other {# files}}',
+    values: { count },
+  });
+
 export const FILE_ACTIONS_POPOVER_ARIA_LABEL = i18n.translate(
   'xpack.cases.caseView.files.fileActionsPopoverAriaLabel',
   {

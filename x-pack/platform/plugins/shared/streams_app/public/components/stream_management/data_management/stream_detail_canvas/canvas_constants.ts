@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { DESTINATION_NODE_TYPE, SOURCE_NODE_TYPE } from './types';
+import {
+  DESTINATION_NODE_TYPE,
+  PROCESSING_NODE_TYPE,
+  ROUTING_NODE_TYPE,
+  SOURCE_NODE_TYPE,
+} from './types';
 
 /**
  * Background dot grid spacing (px). Column/row gaps are multiples of this so
@@ -50,17 +55,30 @@ export const PAN_MARGIN = 500;
 /** Fixed card widths (px) for each node kind; the single source of truth used
  * by both the node components and the pan-bound estimate below. */
 export const SOURCE_NODE_WIDTH = 246;
-export const DESTINATION_NODE_WIDTH = 184;
+// Wide enough for the stats footer: a status, a rate and an index count on one row.
+export const DESTINATION_NODE_WIDTH = 260;
+export const ROUTING_NODE_WIDTH = 172;
+export const PROCESSING_NODE_WIDTH = 130;
 
 /**
  * Revisit whenever a card gains or loses a content row.
  */
-export const SOURCE_NODE_HEIGHT = 74;
-export const DESTINATION_NODE_HEIGHT = 50;
+// The stats footer of a source that reports metrics adds 28 (a 24 row and a 4 margin). A direct
+// source has no footer, so its card is shorter than the height the layout reserves.
+export const SOURCE_NODE_HEIGHT = 102;
+// The stats footer of an Elasticsearch destination adds 28 (a 24 row and a 4 margin). An S3
+// destination has no footer, so its card is shorter than the height the layout reserves.
+export const DESTINATION_NODE_HEIGHT = 106;
+/** A routing card with a single rule. Each extra rule adds a row. */
+export const ROUTING_NODE_HEIGHT = 96;
+// Two lines of stats (40) plus the card's padding and border (18).
+export const PROCESSING_NODE_HEIGHT = 58;
 
 export const NODE_HEIGHT_BY_TYPE: Readonly<Record<string, number>> = {
   [SOURCE_NODE_TYPE]: SOURCE_NODE_HEIGHT,
   [DESTINATION_NODE_TYPE]: DESTINATION_NODE_HEIGHT,
+  [ROUTING_NODE_TYPE]: ROUTING_NODE_HEIGHT,
+  [PROCESSING_NODE_TYPE]: PROCESSING_NODE_HEIGHT,
 };
 
 /**
@@ -69,7 +87,7 @@ export const NODE_HEIGHT_BY_TYPE: Readonly<Record<string, number>> = {
  * estimate never undershoots the real content.
  */
 export const NODE_WIDTH_ESTIMATE = Math.max(SOURCE_NODE_WIDTH, DESTINATION_NODE_WIDTH);
-export const NODE_HEIGHT_ESTIMATE = 80;
+export const NODE_HEIGHT_ESTIMATE = Math.max(SOURCE_NODE_HEIGHT, DESTINATION_NODE_HEIGHT);
 
 /** Minimap overview dimensions (px), matching the prototype. */
 export const MINIMAP_WIDTH = 150;

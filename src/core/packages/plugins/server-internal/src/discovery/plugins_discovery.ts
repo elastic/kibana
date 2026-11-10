@@ -69,6 +69,7 @@ export function discover({
         allowlistPluginGroups: config.allowlistPluginGroups,
         oss: coreContext.env.cliArgs.oss,
         examples: coreContext.env.cliArgs.runExamples,
+        devOnly: coreContext.env.mode.dev,
         paths: config.additionalPluginPaths,
         parentDirs: config.pluginSearchPaths,
       })

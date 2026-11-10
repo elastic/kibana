@@ -95,6 +95,24 @@ describe('roundtrip: AsCode → stored → AsCode', () => {
       expect(fromStoredFields(runtimeFieldMap, fieldFormats, fieldAttrs)).toEqual(fieldSettings);
     });
 
+    it('preserves a color format with a numeral pattern', () => {
+      const fieldSettings: NonNullable<AsCodeDataViewSpec['field_settings']> = {
+        my_field: {
+          type: 'long',
+          format: {
+            type: 'color',
+            params: {
+              field_type: 'number',
+              pattern: '0,0.00',
+              colors: [{ range: '0:100', text: '#FFFFFF', background: '#000000' }],
+            },
+          },
+        },
+      };
+      const { runtimeFieldMap, fieldFormats, fieldAttrs } = toStoredFromAsCodeFields(fieldSettings);
+      expect(fromStoredFields(runtimeFieldMap, fieldFormats, fieldAttrs)).toEqual(fieldSettings);
+    });
+
     it('preserves a field with all optional attrs set', () => {
       const fieldSettings: NonNullable<AsCodeDataViewSpec['field_settings']> = {
         my_field: {

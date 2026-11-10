@@ -151,7 +151,7 @@ Use the solution-specific skill's page object and API service templates as start
 
 | Cypress | Scout |
 |---------|-------|
-| `cy.visit()` | `page.gotoApp()` or page object `goto()` |
+| `cy.visit()` | Page object `goto()` using `page.gotoApp(app, { readyWhen })` on the app's ready element (see **Gate app navigation on the app's own ready element** in `docs/extend/testing/ui-best-practices.md`) |
 | `cy.get('[data-test-subj="x"]')` | `page.testSubj.locator('x')` |
 | `cy.intercept()` for stubbing/mocking | `page.route()` in a dedicated `fixtures/mocks.ts` helper |
 | `cy.wait('@alias')` for synchronization | Wait for the resulting UI readiness signal with a locator assertion or `expect.poll()` |
@@ -192,6 +192,7 @@ Read the `scout-ui-testing` or `scout-api-testing` skill for implementation deta
 Key rules:
 - **Tags are required** — Scout validates UI test tags at runtime
 - **One suite per file** — single top-level `test.describe()` or `spaceTest.describe()`
+- **One role + one flow** — split when roles or flows diverge, or when the spec would become a worker bottleneck or give a skip a large blast radius; aim for about a minute per spec.
 - **UI actions in page objects**, assertions in specs
 - **API-based setup/teardown** via `apiServices` / `kbnClient`
 - **Use `test.step()`** for multi-step flows to reuse browser context
@@ -238,6 +239,7 @@ After the Scout test is verified:
 - Putting assertions in page objects (keep in specs)
 - Skipping the "make sure your test fails" verification
 - Batching multiple spec migrations into a single PR
+- Porting a large Cypress spec 1:1 into one Scout file instead of splitting by role and user flow
 - Merging without running the Flaky Test Runner
 - Using `fill()` on Kibana query bars — `QueryStringInput` submits React props, not DOM value; use `pressSequentially()` (see best practices)
 - Asserting `.euiTableRow` count as 0 — `EuiBasicTable` always renders an empty-state row; assert on the message text instead (see best practices)

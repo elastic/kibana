@@ -7,7 +7,7 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { ALERT_RULE_NAME, ALERT_STATUS } from '@kbn/rule-data-utils';
+import { ALERT_INSTANCE_ID, ALERT_RULE_NAME, ALERT_STATUS } from '@kbn/rule-data-utils';
 import { test } from '../fixtures';
 
 const TEST_RUN_ID = Date.now();
@@ -15,9 +15,10 @@ const INDEX_THRESHOLD_RULE_NAME = `Scout Rule Details Index Threshold ${TEST_RUN
 const ALERTS_INDEX_PATTERN = '.alerts-stack.alerts-*';
 const STATEFUL_ALERTS_INDEX = '.internal.alerts-stack.alerts-default-000001';
 const INDEX_THRESHOLD_RULE_TYPE_ID = '.index-threshold';
+const MATCHING_ALERT_INSTANCE_ID = `scout-matching-alert-${TEST_RUN_ID}`;
+const OTHER_ALERT_INSTANCE_ID = `scout-other-alert-${TEST_RUN_ID}`;
 
-// Failing: See https://github.com/elastic/kibana/issues/255610
-test.describe.skip('Rule details alerts tab', { tag: tags.stateful.classic }, () => {
+test.describe('Rule details alerts tab', { tag: tags.stateful.classic }, () => {
   let indexThresholdRuleId: string;
 
   test.beforeAll(async ({ apiServices }) => {
@@ -87,7 +88,7 @@ test.describe.skip('Rule details alerts tab', { tag: tags.stateful.classic }, ()
       ruleTypeId,
       ruleCategory,
       ruleConsumer,
-      status,
+      instanceId,
     }: {
       idSuffix: string;
       ruleId: string;
@@ -95,13 +96,14 @@ test.describe.skip('Rule details alerts tab', { tag: tags.stateful.classic }, ()
       ruleTypeId: string;
       ruleCategory: string;
       ruleConsumer: string;
-      status: string;
+      instanceId: string;
     }) => ({
       '@timestamp': now,
       'kibana.alert.uuid': `${ruleId}-${idSuffix}-${TEST_RUN_ID}`,
       'kibana.alert.start': now,
-      'kibana.alert.status': status,
+      'kibana.alert.status': 'active',
       'kibana.alert.workflow_status': 'open',
+      'kibana.alert.instance.id': instanceId,
       'kibana.alert.rule.name': ruleName,
       'kibana.alert.rule.uuid': ruleId,
       'kibana.alert.rule.rule_type_id': ruleTypeId,
@@ -118,13 +120,13 @@ test.describe.skip('Rule details alerts tab', { tag: tags.stateful.classic }, ()
         index: STATEFUL_ALERTS_INDEX,
         refresh: 'wait_for',
         document: createAlertDocument({
-          idSuffix: 'active',
+          idSuffix: 'matching',
           ruleId: indexThresholdRuleId,
           ruleName: INDEX_THRESHOLD_RULE_NAME,
           ruleTypeId: INDEX_THRESHOLD_RULE_TYPE_ID,
           ruleCategory: 'index threshold',
           ruleConsumer: 'alerts',
-          status: 'active',
+          instanceId: MATCHING_ALERT_INSTANCE_ID,
         }),
       });
 
@@ -132,13 +134,13 @@ test.describe.skip('Rule details alerts tab', { tag: tags.stateful.classic }, ()
         index: STATEFUL_ALERTS_INDEX,
         refresh: 'wait_for',
         document: createAlertDocument({
-          idSuffix: 'recovered',
+          idSuffix: 'other',
           ruleId: indexThresholdRuleId,
           ruleName: INDEX_THRESHOLD_RULE_NAME,
           ruleTypeId: INDEX_THRESHOLD_RULE_TYPE_ID,
           ruleCategory: 'index threshold',
           ruleConsumer: 'alerts',
-          status: 'recovered',
+          instanceId: OTHER_ALERT_INSTANCE_ID,
         }),
       });
     });
@@ -147,20 +149,32 @@ test.describe.skip('Rule details alerts tab', { tag: tags.stateful.classic }, ()
     await expect(pageObjects.ruleDetailsPage.ruleName).toHaveText(INDEX_THRESHOLD_RULE_NAME);
     await pageObjects.ruleDetailsPage.expectAlertsTabLoaded();
 
-    await test.step('filter alerts by status', async () => {
-      await expect(pageObjects.ruleDetailsPage.alertSummaryTotalCount).toHaveText('2');
-      await pageObjects.ruleDetailsPage.filterAlertsByKql('kibana.alert.status : "active"');
-
+    await test.step('filter alerts by alert instance', async () => {
       await expect(pageObjects.ruleDetailsPage.alertsTable.locator).toBeVisible();
-      const ruleNameCells = pageObjects.ruleDetailsPage.alertsTable.cells(ALERT_RULE_NAME);
-      await expect(ruleNameCells).toHaveCount(1);
-      await expect(ruleNameCells).toContainText(INDEX_THRESHOLD_RULE_NAME);
 
       const statusCells = pageObjects.ruleDetailsPage.alertsTable.cells(ALERT_STATUS);
+      await expect(statusCells).toHaveCount(2);
+
+      const kqlQuery = `${ALERT_INSTANCE_ID} : "${MATCHING_ALERT_INSTANCE_ID}"`;
+      await pageObjects.queryBar.setQuery(kqlQuery);
+      await expect(pageObjects.ruleDetailsPage.alertsQueryInput).toHaveValue(kqlQuery);
+      await pageObjects.ruleDetailsPage.submitAlertsQuery();
+
       await expect(statusCells).toHaveCount(1);
       await expect(statusCells).toHaveText(/active/i);
 
-      await expect(pageObjects.ruleDetailsPage.alertSummaryTotalCount).toHaveText('1');
+      const ruleNameCells = pageObjects.ruleDetailsPage.alertsTable.cells(ALERT_RULE_NAME);
+      await expect(ruleNameCells).toHaveCount(1);
+      await expect(ruleNameCells).toContainText(INDEX_THRESHOLD_RULE_NAME);
+    });
+
+    await test.step('confirm the surviving row is the matching alert instance', async () => {
+      await pageObjects.ruleDetailsPage.openAlertFieldsTable();
+      await pageObjects.ruleDetailsPage.filterAlertFieldsTable(ALERT_INSTANCE_ID);
+
+      await expect(pageObjects.ruleDetailsPage.alertFlyoutFieldsTablePanel).toContainText(
+        MATCHING_ALERT_INSTANCE_ID
+      );
     });
   });
 });

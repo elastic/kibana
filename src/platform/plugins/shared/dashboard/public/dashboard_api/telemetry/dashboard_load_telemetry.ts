@@ -11,7 +11,7 @@ import { combineLatest, map, pairwise, startWith, switchMap, skipWhile, of } fro
 
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { PublishesPhaseEvents } from '@kbn/presentation-publishing';
-import { apiPublishesPhaseEvents } from '@kbn/presentation-publishing';
+import { apiPublishesEsql, apiPublishesPhaseEvents } from '@kbn/presentation-publishing';
 import {
   clearPerformanceTrackersByType,
   getMeanFromPerformanceMeasures,
@@ -121,9 +121,19 @@ export function startTrackingDashboardLoadTelemetry(
           panelCount,
           totalLoadTime: completeLoadDuration,
           loadType,
+          children: Object.values(dashboard.children$.getValue()),
         });
       }
     });
+}
+
+/**
+ * Returns whether any panel used ES|QL approximation.
+ */
+function getApproximationApplied(children: unknown[]): boolean {
+  return children.some(
+    (child) => apiPublishesEsql(child) && child.approximationApplied$.getValue() === true
+  );
 }
 
 function reportPerformanceMetrics({
@@ -131,11 +141,13 @@ function reportPerformanceMetrics({
   panelCount,
   totalLoadTime,
   loadType,
+  children,
 }: {
   timeToData: number;
   panelCount: number;
   totalLoadTime: number;
   loadType: DashboardLoadType;
+  children: unknown[];
 }) {
   const duration =
     loadType === 'dashboardSubsequentLoad' ? timeToData : Math.max(timeToData, totalLoadTime);
@@ -165,6 +177,9 @@ function reportPerformanceMetrics({
     value8: meanPanelPrerender,
     key9: 'mean_panel_rendering',
     value9: meanPanelRenderComplete,
+    meta: {
+      approximationApplied: getApproximationApplied(children),
+    },
   };
 
   reportPerformanceMetricEvent(coreServices.analytics, performanceMetricEvent);

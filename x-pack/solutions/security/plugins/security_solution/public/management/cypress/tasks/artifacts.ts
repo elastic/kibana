@@ -302,8 +302,13 @@ export const blocklistFormSelectors = {
     cy.getByTestSubj('blocklist-form-field-select').click();
     cy.getByTestSubj('blocklist-form-file.Ext.code_signature').click();
   },
-  selectOperator: (operator: 'is one of' | 'is') => {
-    const matchOperator = operator === 'is' ? 'match' : 'match_any';
+  selectField: (field: 'file.path' | 'file.path.caseless' | 'file.name' | 'file.name.caseless') => {
+    cy.getByTestSubj('blocklist-form-field-select').click();
+    cy.getByTestSubj(`blocklist-form-${field}`).click();
+  },
+  selectOperator: (operator: 'is one of' | 'is' | 'Match') => {
+    const matchOperator =
+      operator === 'is' ? 'match' : operator === 'Match' ? 'wildcard' : 'match_any';
     cy.getByTestSubj('blocklist-form-operator-select-multi').click();
     cy.get(`button[role="option"][id="${matchOperator}"]`).click();
   },
@@ -325,8 +330,8 @@ export const blocklistFormSelectors = {
       cy.getByTestSubj('comboBoxSearchInput').type(`Elastic, Inc.{enter}`);
     });
   },
-  setSingleValue: () => {
-    cy.getByTestSubj('blocklist-form-value-input').type('Elastic, Inc.');
+  setSingleValue: (value: string = 'Elastic, Inc.') => {
+    cy.getByTestSubj('blocklist-form-value-input').type(value);
   },
   submitBlocklist: () => {
     cy.getByTestSubj('blocklistPage-flyout-submitButton').click();
@@ -372,13 +377,6 @@ export const blocklistFormSelectors = {
   },
 };
 
-export const fetchEndpointExceptionPerPolicyOptInStatus = (): Cypress.Chainable<boolean> =>
-  request<GetEndpointExceptionsPerPolicyOptInResponse>({
-    method: 'GET',
-    url: ENDPOINT_EXCEPTIONS_PER_POLICY_OPT_IN_ROUTE,
-    headers: { 'elastic-api-version': '1' },
-  }).then((response) => response.body.status);
-
 export const enableEndpointExceptionPerPolicyOptIn = () =>
   request<GetEndpointExceptionsPerPolicyOptInResponse>({
     method: 'POST',
@@ -386,18 +384,3 @@ export const enableEndpointExceptionPerPolicyOptIn = () =>
     headers: { 'elastic-api-version': '1' },
     failOnStatusCode: false,
   });
-
-export const resetEndpointExceptionPerPolicyOptInStatus = () => {
-  const index = '.kibana_security_solution';
-  const id = 'security:reference-data:ENDPOINT-EXCEPTIONS-PER-POLICY-OPT-IN-STATUS';
-
-  return cy.request({
-    method: 'DELETE',
-    url: `${Cypress.env('ELASTICSEARCH_URL')}/${index}/_doc/${id}`,
-    auth: {
-      user: Cypress.env('ELASTICSEARCH_USERNAME'),
-      pass: Cypress.env('ELASTICSEARCH_PASSWORD'),
-    },
-    failOnStatusCode: false,
-  });
-};

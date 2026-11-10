@@ -171,7 +171,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
   }: ESQLDataCascadeLeafCellProps) => {
     const services = useDiscoverServices();
     const {
-      cascadedColumnsMeta,
+      cascadedLeafDataSource,
       expandedDoc$,
       expandedDocOwner$,
       getExpandedDocSetter,
@@ -270,19 +270,19 @@ export const ESQLDataCascadeLeafCell = React.memo(
     );
     return (
       <UnifiedDataTable
-        isPlainRecord
         dataView={dataView}
         showTimeCol={showTimeCol}
         services={services}
         sort={EMPTY_SORT}
         isSortEnabled={false}
+        enableComparisonMode
         enableInTableSearch={false}
         showKeyboardShortcuts={false}
         ariaLabelledBy="data-cascade-leaf-cell"
         rows={cellData}
         loadingState={DataLoadingState.loaded}
         columns={selectedColumns}
-        columnsMeta={cascadedColumnsMeta}
+        dataSource={cascadedLeafDataSource}
         onSetColumns={setSelectedColumns}
         renderCustomToolbar={renderCustomToolbarWithElements}
         expandedDoc={expandedDocOwner === cellId ? expandedDoc : undefined}

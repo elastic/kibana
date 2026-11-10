@@ -27,15 +27,19 @@ module.exports = {
     fixable: null,
     schema: [],
   },
-  create: (context) => {
-    const filename = context.getFilename();
-
-    // Only apply to files in parallel_tests directories, excluding global.setup.ts
-    if (!filename.includes('/parallel_tests/') || path.basename(filename) === 'global.setup.ts') {
-      return {};
-    }
-
+  createOnce(context) {
     return {
+      before() {
+        const filename = context.filename;
+
+        // Only apply to files in parallel_tests directories, excluding global.setup.ts
+        if (
+          !filename.includes('/parallel_tests/') ||
+          path.basename(filename) === 'global.setup.ts'
+        ) {
+          return false;
+        }
+      },
       CallExpression(node) {
         const { callee } = node;
 

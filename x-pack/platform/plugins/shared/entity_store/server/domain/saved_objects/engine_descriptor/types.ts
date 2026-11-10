@@ -455,6 +455,28 @@ const version11: SavedObjectsFullModelVersion = {
   },
 };
 
+const logExtractionRuntimeStateSchemaV12 = logExtractionRuntimeStateSchemaV7.extends({
+  sliceSamplingRate: schema.nullable(schema.number({ min: MIN_SAMPLING_RATE, max: 1 })),
+});
+
+const engineDescriptorSchemaV12 = engineDescriptorSchemaV11.extends({
+  logExtractionState: logExtractionRuntimeStateSchemaV12,
+  nonPriorityLogExtractionState: schema.nullable(logExtractionRuntimeStateSchemaV12),
+});
+
+// Adds sliceSamplingRate to the runtime cursor state, pinning the rate applied to an in-progress
+// log slice so a resumed run reuses it instead of recomputing from a skipped (and therefore
+// zeroed) volume probe. schema.nullable defaults absent keys to null, so no backfill is needed.
+// Runtime cursor fields are stored but not indexed (mappings are dynamic: false), so there is no
+// mappings addition either.
+const version12: SavedObjectsFullModelVersion = {
+  changes: [],
+  schemas: {
+    create: engineDescriptorSchemaV12,
+    forwardCompatibility: engineDescriptorSchemaV12.extends({}, { unknowns: 'ignore' }),
+  },
+};
+
 export const EngineDescriptorType: SavedObjectsType = {
   name: EngineDescriptorTypeName,
   hidden: false,
@@ -472,6 +494,7 @@ export const EngineDescriptorType: SavedObjectsType = {
     9: version9,
     10: version10,
     11: version11,
+    12: version12,
   },
   hiddenFromHttpApis: true,
 };

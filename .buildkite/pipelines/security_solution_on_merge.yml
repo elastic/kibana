@@ -8,7 +8,8 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 3
     retry:
@@ -26,9 +27,9 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
-      diskSizeGb: 130
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 3
     retry:
@@ -46,9 +47,9 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
-      diskSizeGb: 130
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 11
     retry:
@@ -66,9 +67,9 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
-      diskSizeGb: 130
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 6
     retry:
@@ -87,7 +88,8 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 1
     retry:
@@ -106,7 +108,8 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 2
     retry:
@@ -125,7 +128,8 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 1
     retry:
@@ -144,7 +148,8 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 2
     retry:
@@ -162,7 +167,8 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 5
     retry:
@@ -180,7 +186,8 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 2
     retry:
@@ -198,7 +205,8 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 2
     retry:
@@ -216,7 +224,8 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 2
     retry:
@@ -234,7 +243,8 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 2
     retry:
@@ -253,7 +263,8 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 7
     retry:
@@ -272,7 +283,8 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 4
     retry:
@@ -290,7 +302,8 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 8
     retry:
@@ -308,7 +321,8 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 3
     retry:
@@ -327,7 +341,8 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 2
     retry:
@@ -344,9 +359,9 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
-      diskSizeGb: 130
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 1
     retry:
@@ -364,7 +379,8 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 2
     retry:
@@ -382,8 +398,8 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
-      diskSizeGb: 130
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 5
     retry:
@@ -400,9 +416,9 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
-      diskSizeGb: 130
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 9
     retry:
@@ -418,10 +434,10 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n2-highmem-4
-      diskSizeGb: 130
+      machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 8
     retry:
@@ -438,10 +454,10 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n2-highmem-4
-      diskSizeGb: 130
+      machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 8
     retry:
@@ -458,10 +474,10 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       enableNestedVirtualization: true
-      machineType: n2-highmem-4
-      diskSizeGb: 130
+      machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 24
     retry:
@@ -479,10 +495,10 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       enableNestedVirtualization: true
-      machineType: n2-highmem-4
-      diskSizeGb: 130
+      machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 60
     parallelism: 16
     retry:

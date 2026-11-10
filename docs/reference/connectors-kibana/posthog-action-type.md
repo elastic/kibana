@@ -9,11 +9,15 @@ applies_to:
 
 # PostHog connector [posthog-action-type]
 
-The PostHog connector connects directly to the PostHog REST API. It lets a workflow or agent find, own, and act on a product error without leaving Elastic: list and read error-tracking issues, set their status, assign an owner, run a HogQL query for enrichment, toggle a feature flag as a mitigation lever, mark events on charts with annotations, and look up session recordings around an error.
+The PostHog connector connects directly to the PostHog REST API. It lets an agent find, own, and act on a product error without leaving Elastic: list and read error-tracking issues, set their status, assign an owner, run a HogQL query for enrichment, toggle a feature flag as a mitigation lever, mark events on charts with annotations, and look up session recordings around an error.
+
+::::{note}
+This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release.
+::::
 
 ## Overview
 
-This is a **custom connector** that uses PostHog's REST API with personal API key (Bearer token) authentication. Works with PostHog US Cloud, EU Cloud, or a self-managed instance.
+The PostHog connector uses PostHog's REST API with personal API key (Bearer token) authentication. It works with PostHog US Cloud, EU Cloud, or a self-managed instance.
 
 ## Create connectors in {{kib}} [define-posthog-ui]
 
@@ -36,7 +40,7 @@ Personal API Key
 |--------|-------------|
 | `listIssues` | List error-tracking issues. Parameters: `status` (defaults to `active`), `assigneeId`, `assigneeType`, `dateFrom`, `dateTo`, `searchQuery`, `orderBy`, `orderDirection`, `limit`, `offset`. |
 | `getIssue` | Get a single error-tracking issue by ID. Parameters: `issueId` (required). |
-| `updateIssueStatus` | Move an issue to a new status (`active`, `resolved`, `archived`, `suppressed`, `pending_release`). Parameters: `issueId`, `status` (both required). |
+| `updateIssueStatus` | Move an issue to a new status (`active`, `resolved`, `suppressed`). Parameters: `issueId`, `status` (both required). |
 | `assignIssue` | Assign or reassign an issue to a user or role. Parameters: `issueId`, `assigneeId` (both required), `assigneeType`. |
 | `runQuery` | Run a HogQL query and return the result rows. Parameters: `query` (required), `name`. |
 | `updateFeatureFlag` | Toggle a feature flag active/inactive or change its rollout percentage. Parameters: `flagId` (required), `active`, `rolloutPercentage`. |

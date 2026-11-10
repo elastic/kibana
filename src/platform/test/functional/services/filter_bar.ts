@@ -74,8 +74,32 @@ export class FilterBarService extends FtrService {
   private readonly config = this.ctx.getService('config');
   private readonly defaultTryTimeout = this.config.get('timeouts.try');
   private readonly browser = this.ctx.getService('browser');
+
+  private getFilterTestSubj(
+    key: string,
+    value: string,
+    enabled: boolean,
+    pinned: boolean,
+    negated: boolean
+  ): string {
+    const filterActivationState = enabled ? 'enabled' : 'disabled';
+    const filterPinnedState = pinned ? 'pinned' : 'unpinned';
+    const filterNegatedState = negated ? '~filter-negated' : '';
+    return [
+      '~filter',
+      `~filter-${filterActivationState}`,
+      key !== '' && `~filter-key-${key}`,
+      value !== '' && `~filter-value-${value}`,
+      `~filter-${filterPinnedState}`,
+      filterNegatedState,
+    ]
+      .filter(Boolean)
+      .join(' & ');
+  }
+
   /**
-   * Checks if specified filter exists
+   * Checks immediately whether a filter is present on the filter bar. To assert after an action
+   * that changes filters, use `expectFilter` or `expectNoFilter`.
    *
    * @param key field name
    * @param value filter value
@@ -90,21 +114,38 @@ export class FilterBarService extends FtrService {
     pinned: boolean = false,
     negated: boolean = false
   ): Promise<boolean> {
-    const filterActivationState = enabled ? 'enabled' : 'disabled';
-    const filterPinnedState = pinned ? 'pinned' : 'unpinned';
-    const filterNegatedState = negated ? '~filter-negated' : '';
-    const dataSubj = [
-      '~filter',
-      `~filter-${filterActivationState}`,
-      key !== '' && `~filter-key-${key}`,
-      value !== '' && `~filter-value-${value}`,
-      `~filter-${filterPinnedState}`,
-      filterNegatedState,
-    ]
-      .filter(Boolean)
-      .join(' & ');
+    return await this.testSubjects.exists(
+      this.getFilterTestSubj(key, value, enabled, pinned, negated),
+      { allowHidden: true }
+    );
+  }
 
-    return this.testSubjects.exists(dataSubj, { allowHidden: true });
+  /** Polls until the filter is present on the filter bar. */
+  public async expectFilter(
+    key: string,
+    value: string,
+    enabled: boolean = true,
+    pinned: boolean = false,
+    negated: boolean = false
+  ): Promise<void> {
+    await this.testSubjects.existOrFail(
+      this.getFilterTestSubj(key, value, enabled, pinned, negated),
+      { allowHidden: true, timeout: 10000 }
+    );
+  }
+
+  /** Polls until the filter is absent from the filter bar; returns immediately if it already is. */
+  public async expectNoFilter(
+    key: string,
+    value: string,
+    enabled: boolean = true,
+    pinned: boolean = false,
+    negated: boolean = false
+  ): Promise<void> {
+    await this.testSubjects.missingOrFail(
+      this.getFilterTestSubj(key, value, enabled, pinned, negated),
+      { timeout: 10000 }
+    );
   }
 
   public async hasFilterWithId(
@@ -380,9 +421,10 @@ export class FilterBarService extends FtrService {
    * Closes field editor modal window
    */
   public async ensureFieldEditorModalIsClosed(): Promise<void> {
-    const cancelSaveFilterModalButtonExists = await this.testSubjects.exists('cancelSaveFilter', {
-      timeout: 1000,
-    });
+    const cancelSaveFilterModalButtonExists = await this.testSubjects.waitForExists(
+      'cancelSaveFilter',
+      { timeout: 1000 }
+    );
     if (cancelSaveFilterModalButtonExists) {
       await this.testSubjects.click('cancelSaveFilter');
     }

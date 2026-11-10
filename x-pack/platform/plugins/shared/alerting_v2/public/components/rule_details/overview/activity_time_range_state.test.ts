@@ -174,11 +174,11 @@ describe('activity_time_range_state', () => {
 
     it('preserves other _a sub-keys when writing', async () => {
       const urlStorage = await createKbnTestUrlStorage(undefined, {
-        episodesList: { status: 'recovering' },
+        alertsList: { status: 'recovering' },
       });
       await writeActivityTimeRangeToUrl(urlStorage, CUSTOM_RANGE);
       expect(urlStorage.get('_a')).toEqual({
-        episodesList: { status: 'recovering' },
+        alertsList: { status: 'recovering' },
         [ACTIVITY_TIME_RANGE_APP_STATE_KEY]: CUSTOM_RANGE,
       });
     });

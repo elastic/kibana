@@ -35,6 +35,7 @@ import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
  *   - `action.*` — the user-action shape: `type`, `verb`, the
  *     polymorphic `payload` stringified as `action.payload_json`, plus
  *     a curated set of typed extracts for the common analytical pivots.
+ *   - `source.*` — mirrors the SO `source` (origin of the action).
  *
  * Intentional divergences from the SO mapping:
  *   - `payload`: SO uses `dynamic: false` with a sparse set of indexed
@@ -134,6 +135,18 @@ export const ACTIVITY_INDEX_MAPPING: MappingTypeMapping = {
         // `attachment.attachment_id` (referenced alert/event/external-ref
         // ids). Unset for non-comment actions.
         attachment_reference_id: { type: 'keyword' },
+      },
+    },
+
+    // Mirrors the user-action SO `source`: the origin of the action
+    // (agent, workflow, rule, attack, api, user). Absent when the SO has no
+    // `source` or the row predates this mapping. Not ECS `source.*` (network origin).
+    source: {
+      properties: {
+        type: { type: 'keyword' },
+        id: { type: 'keyword' },
+        name: { type: 'keyword' },
+        run_id: { type: 'keyword' },
       },
     },
   },

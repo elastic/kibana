@@ -16,11 +16,15 @@
  *   export KIBANA_EIS_CCM_API_KEY="..."
  *   node x-pack/platform/packages/shared/kbn-evals/scripts/local_repros/enable_eis_ccm.js
  *
+ * A serverless Scout cluster serves https with the dev CA, which `fetch` only trusts via:
+ *   NODE_EXTRA_CA_CERTS=src/platform/packages/shared/kbn-dev-utils/certs/ca.crt node x-pack/...
+ * (`node scripts/evals start` sets it automatically.)
+ *
  * Options:
  *   --scout-config-path <path>   Path to Scout servers JSON (default: .scout/servers/local.json)
  *   --es-url <url>               Elasticsearch base URL (overrides scout config)
- *   --username <u>               Basic auth username (default: elastic)
- *   --password <p>               Basic auth password (default: changeme)
+ *   --username <u>               Basic auth username (default: Scout config auth, else elastic)
+ *   --password <p>               Basic auth password (default: Scout config auth, else changeme)
  *   --retries <n>                Endpoint wait attempts (default: 10)
  *   --delay-ms <n>               Delay between attempts (default: 3000)
  */
@@ -86,7 +90,7 @@ async function sleep(ms) {
   await new Promise((r) => setTimeout(r, ms));
 }
 
-function loadEsUrlFromScoutConfig(scoutConfigPath) {
+function loadScoutConfig(scoutConfigPath) {
   const abs = Path.resolve(scoutConfigPath);
   if (!Fs.existsSync(abs)) {
     die(
@@ -99,14 +103,18 @@ function loadEsUrlFromScoutConfig(scoutConfigPath) {
   if (typeof esUrl !== 'string' || !esUrl.trim()) {
     die(`Failed to read hosts.elasticsearch from ${abs}`);
   }
-  return esUrl.trim();
+  // Serverless Scout uses `elastic_serverless` rather than `elastic`.
+  return { esUrl: esUrl.trim(), auth: (parsed && parsed.auth) || {} };
 }
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   const scoutConfigPath = String(args['scout-config-path'] || '.scout/servers/local.json');
-  const username = String(args.username || 'elastic');
-  const password = String(args.password || 'changeme');
+  const scoutConfig = args['es-url']
+    ? { esUrl: args['es-url'], auth: {} }
+    : loadScoutConfig(scoutConfigPath);
+  const username = String(args.username || scoutConfig.auth.username || 'elastic');
+  const password = String(args.password || scoutConfig.auth.password || 'changeme');
   const apiKey = String(args['api-key'] || process.env.KIBANA_EIS_CCM_API_KEY || '');
   const retries = Number.parseInt(String(args.retries || '10'), 10);
   const delayMs = Number.parseInt(String(args['delay-ms'] || '3000'), 10);
@@ -121,7 +129,7 @@ async function main() {
     die(`Invalid --delay-ms: ${args['delay-ms']}`);
   }
 
-  const esUrl = normalizeBaseUrl(args['es-url'] || loadEsUrlFromScoutConfig(scoutConfigPath));
+  const esUrl = normalizeBaseUrl(scoutConfig.esUrl);
   const auth = basicAuthHeader(username, password);
   const headers = {
     authorization: auth,

@@ -30,6 +30,7 @@ const ILLUSTRATION_IMAGE_SIZE_PX = 96;
 export interface CustomizeLandingEmptyStateProps {
   illustrationSrc: string;
   title: React.ReactNode;
+  titleBadge?: React.ReactNode;
   description: React.ReactNode;
   learnMoreHref: string;
   learnMoreLabel?: string;
@@ -44,6 +45,7 @@ export interface CustomizeLandingEmptyStateProps {
 export const CustomizeLandingEmptyState: React.FC<CustomizeLandingEmptyStateProps> = ({
   illustrationSrc,
   title,
+  titleBadge,
   description,
   learnMoreHref,
   learnMoreLabel = labels.customizeLandingEmptyState.learnMore,
@@ -130,9 +132,20 @@ export const CustomizeLandingEmptyState: React.FC<CustomizeLandingEmptyStateProp
             css={responsiveStack}
           >
             <EuiFlexItem grow>
-              <EuiTitle size="m">
-                <h2>{title}</h2>
-              </EuiTitle>
+              {titleBadge ? (
+                <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle size="m">
+                      <h2>{title}</h2>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>{titleBadge}</EuiFlexItem>
+                </EuiFlexGroup>
+              ) : (
+                <EuiTitle size="m">
+                  <h2>{title}</h2>
+                </EuiTitle>
+              )}
               <EuiSpacer size="m" />
               <EuiText
                 size="m"

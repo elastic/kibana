@@ -144,3 +144,23 @@ export const taskSchemaV13 = taskSchemaV12.extends({
     })
   ),
 });
+
+export const taskSchemaV14 = taskSchemaV13.extends({
+  // Only `type` is required and it is a plain string rather than literals, so this version can still
+  // read credential types added later. credential is part of the AAD of the encrypted attributes, so
+  // fields added by a later version must survive a read and full rewrite by this version, or
+  // decryption fails.
+  credential: schema.maybe(
+    schema.object(
+      {
+        type: schema.string({ maxLength: 100 }),
+        workloadType: schema.maybe(schema.string({ maxLength: 1024 })),
+        workloadId: schema.maybe(schema.string({ maxLength: 1024 })),
+        spaceId: schema.maybe(schema.string({ maxLength: 1024 })),
+        expectedServiceAccountId: schema.maybe(schema.nullable(schema.string({ maxLength: 1024 }))),
+      },
+      { unknowns: 'allow' }
+    )
+  ),
+  encryptedCredential: schema.maybe(schema.string()),
+});

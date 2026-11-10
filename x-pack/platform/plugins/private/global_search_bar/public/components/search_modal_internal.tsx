@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiFormRow,
   EuiHorizontalRule,
   EuiIcon,
   EuiModalBody,
@@ -18,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
 import { i18nStrings } from '../strings';
 import { SearchFooter } from './search_footer';
 import { SearchPlaceholder } from './search_placeholder';
@@ -25,6 +27,7 @@ import { useSearchState } from '../hooks/use_search_state';
 import type { SearchModalProps } from './types';
 import { EmptyMessage } from './empty_message';
 import { SEARCH_MODAL_ROW_HEIGHT_PX, SEARCH_MODAL_SELECTOR_PREFIX } from './types';
+import { ErrorMessage } from './error_message';
 import { CharLimitExceededMessage } from './char_limit_exceeded_message';
 
 export const SearchModalInternal = ({
@@ -32,7 +35,6 @@ export const SearchModalInternal = ({
   taggingApi,
   navigateToUrl,
   reportEvent,
-  basePathUrl,
   onClose,
 }: SearchModalProps) => {
   const { euiTheme } = useEuiTheme();
@@ -44,6 +46,7 @@ export const SearchModalInternal = ({
     options,
     isLoading,
     searchCharLimitExceeded,
+    searchError,
     onChange,
     setSearchRef,
     triggerInitialLoad,
@@ -68,11 +71,21 @@ export const SearchModalInternal = ({
     prepend: option.icon ? <EuiIcon color="subdued" size="l" {...option.icon} /> : option.prepend,
   }));
 
+  const getErrorMessage = () => {
+    if (searchCharLimitExceeded) return <CharLimitExceededMessage />;
+    if (searchError) return <ErrorMessage type={searchError} />;
+    return null;
+  };
+
   const headerStyles = css`
     ${mediumAndUpBreakpoint} {
       padding-block: ${euiTheme.size.base};
       padding-inline: ${euiTheme.size.base};
     }
+  `;
+
+  const searchRowStyles = css`
+    inline-size: 100%;
   `;
 
   const bodyStyles = css`
@@ -114,17 +127,33 @@ export const SearchModalInternal = ({
         placeholder: i18nStrings.placeholderText,
         fullWidth: true,
         isClearable: true,
+        isInvalid: searchCharLimitExceeded,
       }}
-      errorMessage={
-        searchCharLimitExceeded ? <CharLimitExceededMessage basePathUrl={basePathUrl} /> : null
-      }
+      errorMessage={getErrorMessage()}
       emptyMessage={<EmptyMessage />}
-      noMatchesMessage={<SearchPlaceholder basePath={basePathUrl} />}
+      noMatchesMessage={<SearchPlaceholder />}
       searchable
     >
       {(list, search) => (
         <>
-          <EuiModalHeader css={headerStyles}>{search}</EuiModalHeader>
+          <EuiModalHeader css={headerStyles}>
+            {search ? (
+              <EuiFormRow
+                css={searchRowStyles}
+                fullWidth
+                isInvalid={searchCharLimitExceeded}
+                error={i18n.translate(
+                  'xpack.globalSearchBar.searchBar.charLimitExceededErrorMessage',
+                  {
+                    defaultMessage: 'Search cannot exceed {limit} characters.',
+                    values: { limit: globalSearch.searchCharLimit },
+                  }
+                )}
+              >
+                {search}
+              </EuiFormRow>
+            ) : null}
+          </EuiModalHeader>
           <EuiHorizontalRule margin="none" />
           <EuiModalBody css={bodyStyles}>{list}</EuiModalBody>
           <EuiHorizontalRule margin="none" />

@@ -26,6 +26,7 @@
     "@kbn/encrypted-saved-objects-plugin",
     "@kbn/es-query",
     "@kbn/features-plugin",
+    "@kbn/content-sanitization",
     "@kbn/licensing-plugin",
     "@kbn/spaces-plugin",
     "@kbn/core-spaces-common",
@@ -128,6 +129,7 @@
     "@kbn/unsaved-changes-prompt",
     "@kbn/ui-callout",
     "@kbn/zod",
+    "@kbn/zod-helpers",
   ],
   "exclude": ["target/**/*"]
 }

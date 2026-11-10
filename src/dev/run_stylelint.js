@@ -9,47 +9,72 @@
 
 import { spawnSync } from 'child_process';
 import { dirname, resolve } from 'path';
-import { pathToFileURL } from 'url';
+import { parseArgs } from 'util';
 
-async function main() {
-  const args = process.argv.slice(2);
-  const { default: meow } = await import('meow');
-  const { input } = meow({
-    argv: args,
-    allowUnknownFlags: true,
-    autoHelp: false,
-    autoVersion: false,
-    booleanDefault: undefined,
-    importMeta: { url: pathToFileURL(__filename).href },
-  });
-  const stylelintConfigPath = resolve(__dirname, '..', '..', '.stylelintrc');
-  const stylelintIgnorePath = resolve(__dirname, '..', '..', '.stylelintignore');
-  const { bin } = require('stylelint/package.json');
-  const stylelintExecutable = resolve(
-    dirname(require.resolve('stylelint/package.json')),
-    bin.stylelint
-  );
+// stylelint flags that consume the following argument as their value.
+// `--fix` and `--suppress` are excluded because their value is optional.
+const VALUE_FLAGS = {
+  'cache-location': { type: 'string' },
+  'cache-strategy': { type: 'string' },
+  config: { type: 'string', short: 'c' },
+  'config-basedir': { type: 'string' },
+  'custom-formatter': { type: 'string' },
+  'custom-syntax': { type: 'string' },
+  formatter: { type: 'string', short: 'f' },
+  'globby-options': { type: 'string' },
+  go: { type: 'string' },
+  'ignore-path': { type: 'string', short: 'i', multiple: true },
+  'ignore-pattern': { type: 'string', multiple: true },
+  ip: { type: 'string', multiple: true },
+  'max-warnings': { type: 'string' },
+  mw: { type: 'string' },
+  'output-file': { type: 'string', short: 'o' },
+  'stdin-filename': { type: 'string' },
+  'suppress-location': { type: 'string' },
+};
 
-  if (!input.length) {
-    args.push('**/*.s+(a|c)ss');
-  }
-  args.push('--max-warnings', '0'); // return nonzero exit code on any warnings
-  args.push('--config', stylelintConfigPath); // configuration file
-  args.push('--ignore-path', stylelintIgnorePath); // ignore file
+// Values stylelint accepts as the mode in `--fix <mode>` instead of treating them as inputs
+const FIX_MODES = ['true', 'strict', 'lax'];
 
-  const { error, status } = spawnSync(process.execPath, [stylelintExecutable, ...args], {
-    stdio: 'inherit',
-  });
+const isFixMode = (token, previousToken) =>
+  previousToken?.kind === 'option' &&
+  previousToken.name === 'fix' &&
+  previousToken.value === undefined &&
+  FIX_MODES.includes(token.value);
 
-  if (error) {
-    throw error;
-  }
+const args = process.argv.slice(2);
+const { tokens } = parseArgs({
+  args,
+  options: VALUE_FLAGS,
+  strict: false,
+  allowPositionals: true,
+  tokens: true,
+});
+const hasInput = tokens.some(
+  (token, index) => token.kind === 'positional' && !isFixMode(token, tokens[index - 1])
+);
 
-  process.exitCode = status ?? 1;
+const stylelintConfigPath = resolve(__dirname, '..', '..', '.stylelintrc');
+const stylelintIgnorePath = resolve(__dirname, '..', '..', '.stylelintignore');
+const { bin } = require('stylelint/package.json');
+const stylelintExecutable = resolve(
+  dirname(require.resolve('stylelint/package.json')),
+  bin.stylelint
+);
+
+if (!hasInput) {
+  args.push('**/*.s+(a|c)ss');
+}
+args.push('--max-warnings', '0'); // return nonzero exit code on any warnings
+args.push('--config', stylelintConfigPath); // configuration file
+args.push('--ignore-path', stylelintIgnorePath); // ignore file
+
+const { error, status } = spawnSync(process.execPath, [stylelintExecutable, ...args], {
+  stdio: 'inherit',
+});
+
+if (error) {
+  throw error;
 }
 
-main().catch((error) => {
-  process.nextTick(() => {
-    throw error;
-  });
-});
+process.exitCode = status ?? 1;

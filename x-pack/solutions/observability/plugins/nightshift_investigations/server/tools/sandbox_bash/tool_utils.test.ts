@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { scopeConversationId } from './tool_utils';
+import { scopeConversationId, unscopeConversationId } from './tool_utils';
 
 /** Docker's container name rule, which the sandbox service applies to `sandbox-<scoped id>`. */
 const DOCKER_CONTAINER_NAME = /^[a-zA-Z0-9][a-zA-Z0-9_.-]*$/;
@@ -31,5 +31,13 @@ describe('scopeConversationId', () => {
       const scoped = scopeConversationId(spaceId, '95c9734f-b913-4459-9ec9-93034615bfe3');
       expect(`sandbox-${scoped}`).toMatch(DOCKER_CONTAINER_NAME);
     }
+  });
+});
+
+describe('unscopeConversationId', () => {
+  it('strips the space prefix the plugin will re-apply', () => {
+    expect(unscopeConversationId('default', 'default__conv-1')).toBe('conv-1');
+    expect(unscopeConversationId('marketing', 'marketing__conv-1')).toBe('conv-1');
+    expect(unscopeConversationId('default', 'conv-1')).toBe('conv-1');
   });
 });

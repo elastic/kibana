@@ -12,14 +12,14 @@ import { MAX_KQL_LENGTH } from '@kbn/alerting-v2-schemas';
 export const alertingV2ScopeSchema = schema.object(
   {
     enabled: schema.boolean({
-      meta: { description: 'Whether the maintenance window applies to alerting v2 episodes.' },
+      meta: { description: 'Whether the maintenance window applies to alerting v2 alerts.' },
     }),
     kql: schema.maybe(
       schema.string({
         maxLength: MAX_KQL_LENGTH,
         meta: {
           description:
-            'A filter written in Kibana Query Language (KQL). Evaluated in memory against the alerting v2 episode context (episode_id, episode_status, group_hash, last_event_timestamp, severity, data.*).',
+            'A filter written in Kibana Query Language (KQL). Evaluated in memory against the alerting v2 alert context (alert_id, alert_status, group_hash, last_event_timestamp, severity, data.*).',
         },
       })
     ),

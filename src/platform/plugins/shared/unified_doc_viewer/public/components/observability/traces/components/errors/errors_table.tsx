@@ -69,7 +69,11 @@ export const ErrorsTable = forwardRef<ScrollableSectionWrapperApi, Props>(
 
     const { discoverUrl, esqlQueryString } = useDiscoverLinkAndEsqlQuery({
       indexPattern: errorsIndexPattern,
-      whereClause: createTraceContextWhereClauseForErrors({ traceId, spanId: docId }),
+      whereClause: createTraceContextWhereClauseForErrors({
+        traceId,
+        spanId: docId,
+        transactionId: docId,
+      }),
     });
 
     const openInDiscoverSectionAction = useOpenInDiscoverSectionAction({

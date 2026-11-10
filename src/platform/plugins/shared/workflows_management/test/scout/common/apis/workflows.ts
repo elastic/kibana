@@ -132,7 +132,7 @@ export class WorkflowsApiService {
   async hardDelete(workflowId: string): Promise<void> {
     await this.kbnClient.request({
       method: 'DELETE',
-      path: `/s/${this.spaceId}/api/workflows/workflow/${workflowId}?force=true`,
+      path: `/s/${this.spaceId}/api/workflows/workflow/${workflowId}?force=true&acknowledgeAclLoss=true`,
     });
   }
 
@@ -286,18 +286,20 @@ export class WorkflowsApiService {
     workflowExecutionId,
     status,
     timeout = 20_000,
+    includeInput = false,
     includeOutput = false,
     until,
   }: {
     workflowExecutionId: string;
     status: ExecutionStatus | readonly ExecutionStatus[];
     timeout?: number;
+    includeInput?: boolean;
     includeOutput?: boolean;
     until?: (execution: WorkflowExecutionDto) => boolean;
   }): Promise<WorkflowExecutionDto> {
     const expected = Array.isArray(status) ? status : [status];
     const execution = await waitForConditionOrThrow({
-      action: () => this.getExecution(workflowExecutionId, { includeOutput }),
+      action: () => this.getExecution(workflowExecutionId, { includeInput, includeOutput }),
       condition: (next) =>
         next != null &&
         expected.includes(next.status as ExecutionStatus) &&

@@ -9,6 +9,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ESQLCallbacks } from '@kbn/esql-types';
+import { clearESQLSourceInfoCache } from '@kbn/esql-utils';
 import { ESQLLang, monaco, type MonacoMessage } from '@kbn/code-editor';
 import type { MapCache } from 'lodash';
 import {
@@ -283,9 +284,11 @@ export const useQueryValidation = ({
     queryValidationRef.current();
   }, [pickerProjectRouting]);
 
-  // Refresh the fields cache when a new field has been added to the lookup index
+  // Refresh the fields caches when a new field has been added to the lookup index; the
+  // editor's fields cache sits on top of the shared source info cache, so clear both.
   const onNewFieldsAddedToLookupIndex = useCallback(async () => {
     esqlFieldsCache.clear?.();
+    clearESQLSourceInfoCache();
 
     await queryValidation({ invalidateColumnsCache: true });
   }, [esqlFieldsCache, queryValidation]);

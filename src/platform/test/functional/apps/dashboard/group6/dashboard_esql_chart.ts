@@ -54,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(panelCount).to.eql(1);
       });
 
-      expect(await testSubjects.exists('lnsDataTable')).to.be(true);
+      await testSubjects.existOrFail('lnsDataTable', { timeout: 5000 });
     });
 
     it('should remove the panel if cancel button is clicked', async () => {

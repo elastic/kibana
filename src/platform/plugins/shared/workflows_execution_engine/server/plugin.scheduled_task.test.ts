@@ -35,18 +35,23 @@ jest.mock('elastic-apm-node', () => ({
 }));
 
 const mockGetWorkflow = jest.fn();
+const mockIsWorkflowEnabledRealtime = jest.fn().mockResolvedValue(true);
 jest.mock('@kbn/workflows', () => {
   const actual = jest.requireActual('@kbn/workflows');
   return {
     ...actual,
     WorkflowRepository: jest.fn().mockImplementation(() => ({
       getWorkflow: mockGetWorkflow,
+      isWorkflowEnabledRealtime: mockIsWorkflowEnabledRealtime,
     })),
   };
 });
 
 jest.mock('./lib/get_user', () => ({
-  getAuthenticatedUser: jest.fn().mockResolvedValue('test-user'),
+  getAuthenticatedUser: jest.fn().mockResolvedValue({
+    executedBy: 'test-user',
+    user: { name: 'Test User', username: 'test-user' },
+  }),
 }));
 
 const mockRunWorkflow = jest.fn();
@@ -78,11 +83,13 @@ jest.mock('./concurrency/concurrency_manager', () => ({
   })),
 }));
 
+const mockDiscardUnstartedExecution = jest.fn().mockResolvedValue(undefined);
 const mockCreateWorkflowExecution = jest.fn().mockResolvedValue(undefined);
 const mockGetWorkflowExecutionById = jest.fn().mockResolvedValue(null);
 jest.mock('./repositories/workflow_execution_repository', () => ({
   WorkflowExecutionRepository: jest.fn().mockImplementation(() => ({
     createWorkflowExecution: mockCreateWorkflowExecution,
+    discardUnstartedExecution: mockDiscardUnstartedExecution,
     getWorkflowExecutionById: mockGetWorkflowExecutionById,
   })),
 }));
@@ -127,6 +134,7 @@ describe('workflow:scheduled task runner', () => {
     initializerContext = coreMock.createPluginInitializerContext({
       logging: { console: false },
       eventDriven: { enabled: true, logEvents: true, maxChainDepth: 10 },
+      storage: { source: 'plain_index', dataRetention: '90d' },
     });
     plugin = new WorkflowsExecutionEnginePlugin(initializerContext);
     const coreSetup = coreMock.createSetup();
@@ -250,6 +258,36 @@ describe('workflow:scheduled task runner', () => {
     });
   });
 
+  it('rejects a scheduled bound execution if deletion wins during its write', async () => {
+    setupPlugin();
+    mockGetWorkflow.mockResolvedValue({
+      id: workflowId,
+      enabled: true,
+      yaml: 'name: test',
+      definition: {
+        name: 'test',
+        enabled: true,
+        triggers: [{ type: 'scheduled' }],
+        steps: [],
+        settings: { run_as: 'account' },
+      },
+    });
+    mockCreateWorkflowExecution.mockImplementationOnce(async (_execution, options) => {
+      expect(options.refresh).toBe('wait_for');
+      mockIsWorkflowEnabledRealtime.mockResolvedValueOnce(false);
+    });
+    const definition = taskDefinitions[WORKFLOW_SCHEDULED_TASK_TYPE];
+    const runner = definition.createTaskRunner(
+      taskManagerMock.createRunContext({
+        taskInstance: createTaskInstance(),
+        fakeRequest: {} as KibanaRequest,
+      })
+    );
+    await expect(runner.run()).rejects.toThrow('Workflow is disabled');
+    expect(mockDiscardUnstartedExecution).toHaveBeenCalledWith(expect.any(String), spaceId);
+    expect(mockRunWorkflow).not.toHaveBeenCalled();
+  });
+
   it('stamps skipped when dedupe check skips the scheduled run', async () => {
     setupPlugin();
     mockGetWorkflow.mockResolvedValue({
@@ -367,6 +405,48 @@ describe('workflow:scheduled task runner', () => {
       space_id: spaceId,
       outcome: 'completed',
     });
+  });
+
+  it('stamps the scheduled run event with the task runAt so a retry of the same slot keeps it', async () => {
+    setupPlugin();
+    mockGetWorkflow.mockResolvedValue({
+      id: workflowId,
+      enabled: true,
+      yaml: 'name: test',
+      definition: {
+        name: 'test',
+        enabled: true,
+        triggers: [{ type: 'scheduled' }],
+        steps: [],
+      },
+    });
+    mockCreateWorkflowExecution.mockImplementation(async (execution: { id: string }) => {
+      mockGetWorkflowExecutionById.mockResolvedValue({
+        id: execution.id,
+        workflowId,
+        spaceId,
+        status: ExecutionStatus.COMPLETED,
+      });
+    });
+
+    const runner = taskDefinitions[WORKFLOW_SCHEDULED_TASK_TYPE]!.createTaskRunner(
+      taskManagerMock.createRunContext({
+        taskInstance: createTaskInstance(),
+        fakeRequest: {} as KibanaRequest,
+        setCustomTaskRunEventFields: jest.fn(),
+      })
+    );
+
+    await runner.run();
+
+    expect(mockCreateWorkflowExecution).toHaveBeenCalledWith(
+      expect.objectContaining({
+        context: expect.objectContaining({
+          event: expect.objectContaining({ scheduledFor: '2024-01-01T10:00:00.000Z' }),
+        }),
+      }),
+      expect.anything()
+    );
   });
 
   it('stamps failed with workflow_execution_id when run fails after create', async () => {

@@ -25,23 +25,33 @@ describe('NotificationsService', () => {
       uiSettings: uiSettingsServiceMock.createSetupContract(),
       analytics: analyticsServiceMock.createAnalyticsServiceSetup(),
     });
-    service.start({
+    const notifications = service.start({
       overlays: overlayServiceMock.createStartContract(),
       rendering: renderingServiceMock.create(),
       analytics: analyticsServiceMock.createAnalyticsServiceStart(),
       settings: settingsServiceMock.createStartContract(),
       targetDomElement,
     });
-    return service;
+    return { service, notifications };
   };
 
   it('marks the toasts container to preserve its z-index in full-screen data grids', () => {
     const targetDomElement = document.createElement('div');
-    const service = setupAndStart(targetDomElement);
+    const { service } = setupAndStart(targetDomElement);
 
     const toastsContainer = targetDomElement.firstElementChild;
     expect(toastsContainer).not.toBeNull();
     expect(toastsContainer!.getAttribute('data-kbn-preserve-zindex')).toBe('true');
+
+    service.stop();
+  });
+
+  it('exposes the screen reader announcer, rendered after the toasts', () => {
+    const targetDomElement = document.createElement('div');
+    const { service, notifications } = setupAndStart(targetDomElement);
+
+    expect(notifications.screenReader.notify).toEqual(expect.any(Function));
+    expect(targetDomElement.childElementCount).toBe(2);
 
     service.stop();
   });

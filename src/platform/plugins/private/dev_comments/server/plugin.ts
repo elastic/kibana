@@ -23,16 +23,14 @@ export class DevCommentsServerPlugin implements Plugin {
   }
 
   public setup(core: CoreSetup) {
-    // Nothing of the storage (indices, internal-user client, routes without
-    // authorization) exists outside dev mode. The routes are registered here and
-    // now, so they are in place before the browser can call them; the storage
-    // code itself is loaded once Kibana has started, the handlers wait for it.
+    // Nothing of the storage (indices, internal-user client, unauthorized routes) exists
+    // outside dev mode. The routes are registered now; the storage loads once Kibana has started.
     if (this.isEnabled && this.isDev) {
       const client = core.getStartServices().then(async ([{ elasticsearch }]) => {
         const { createCommentsClient } = await import('./comments_client');
         return createCommentsClient(elasticsearch.client.asInternalUser, this.logger);
       });
-      // Every request is answered with the failure again; this only keeps it from going unhandled meanwhile.
+      // Every request gets the failure again; this only keeps it from going unhandled meanwhile.
       client.catch((error) => {
         this.logger.error(`Failed to load the dev comments storage: ${error}`);
       });

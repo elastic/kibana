@@ -6,9 +6,16 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
+import type { CoreStart } from '@kbn/core/server';
 import type { AvailabilityContext } from '@kbn/agent-builder-server';
-import { aiIndexToolsAvailability } from './ai_index_tools_availability';
+import {
+  CONTEXT_ENGINE_ENABLED_SETTING_ID,
+  CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID,
+} from '@kbn/management-settings-ids';
+import {
+  aiIndexToolsAvailability,
+  createMemoryToolsAvailability,
+} from './ai_index_tools_availability';
 
 describe('aiIndexToolsAvailability', () => {
   const createContext = (settings: Record<string, boolean | Error>): AvailabilityContext => ({
@@ -52,5 +59,44 @@ describe('aiIndexToolsAvailability', () => {
     );
 
     expect(result.status).toBe('unavailable');
+  });
+
+  describe('memory tools', () => {
+    const createAvailability = (memoryEnabled: boolean) => {
+      const coreStart = {
+        savedObjects: { getScopedClient: jest.fn().mockReturnValue({}) },
+        uiSettings: {
+          globalAsScopedToClient: jest.fn().mockReturnValue({
+            get: jest.fn(async (key: string) =>
+              key === CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID ? memoryEnabled : undefined
+            ),
+          }),
+        },
+      } as unknown as CoreStart;
+      return createMemoryToolsAvailability(async () => coreStart);
+    };
+
+    it('does not cache the global memory flag', () => {
+      expect(createAvailability(true).cacheMode).toBe('none');
+    });
+
+    it('is available when Context Engine and memory are enabled', async () => {
+      const availability = createAvailability(true);
+
+      await expect(
+        availability.handler(createContext({ [CONTEXT_ENGINE_ENABLED_SETTING_ID]: true }))
+      ).resolves.toEqual({ status: 'available' });
+    });
+
+    it('is unavailable when the global memory flag is disabled', async () => {
+      const availability = createAvailability(false);
+
+      await expect(
+        availability.handler(createContext({ [CONTEXT_ENGINE_ENABLED_SETTING_ID]: true }))
+      ).resolves.toEqual({
+        status: 'unavailable',
+        reason: 'Context Engine memory is disabled.',
+      });
+    });
   });
 });
