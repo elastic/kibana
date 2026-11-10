@@ -15,6 +15,7 @@ import type { DataRequest, EsqlDataRequest, MaterializeContextOverride } from '.
 import { createUnsupportedNode } from '../unsupported';
 import type {
   LensApiConfig,
+  LensDatatableConfig,
   LensMetricConfig,
   LensXyConfig,
   LensXyDataLayer,
@@ -25,8 +26,14 @@ import type {
 /** The time field Kibana's ES|QL time field resolution falls back to. */
 const DEFAULT_TIME_FIELD = '@timestamp';
 
-/** The chart types the Lens materializer maps. */
-const MAPPED_TYPES: ReadonlySet<string> = new Set(['metric', 'xy']);
+/** A chart that runs one ES|QL query, whose table it maps. */
+export type LensSingleQueryConfig = LensMetricConfig | LensDatatableConfig;
+
+/** The chart types that run one query, which the Lens materializer maps. */
+const SINGLE_QUERY_TYPES: ReadonlySet<string> = new Set<LensSingleQueryConfig['type']>([
+  'metric',
+  'data_table',
+]);
 
 interface EsqlSource {
   data_source: { type: 'esql'; query: string };
@@ -79,12 +86,11 @@ const unsupportedDataView = () =>
 /** The chart, narrowed to the ES|QL chart types the materializer maps, or why it can't be. */
 export const asMappedChart = (
   chart: LensApiConfig
-): { metric: LensMetricConfig } | { xy: LensXyConfig } | UnsupportedNode => {
-  if (!MAPPED_TYPES.has(chart.type)) {
-    return unsupportedType(chart.type);
-  }
-  if (chart.type === 'metric') {
-    return isEsqlSource(chart) ? { metric: chart as LensMetricConfig } : unsupportedDataView();
+): { single: LensSingleQueryConfig } | { xy: LensXyConfig } | UnsupportedNode => {
+  if (SINGLE_QUERY_TYPES.has(chart.type)) {
+    return isEsqlSource(chart as { data_source?: { type: string } })
+      ? { single: chart as LensSingleQueryConfig }
+      : unsupportedDataView();
   }
   if (chart.type === 'xy') {
     // Annotation layers never read the chart's data; the mapping records the ones it can't draw.
@@ -139,8 +145,8 @@ export const planLensChart = (
     return mapped;
   }
   const filters = panelFilters(chart);
-  if ('metric' in mapped) {
-    return [esqlRequest(mapped.metric as EsqlSource, filters)];
+  if ('single' in mapped) {
+    return [esqlRequest(mapped.single as EsqlSource, filters)];
   }
   return xyQueryLayers(mapped.xy).map((layer) => esqlRequest(layer as EsqlSource, filters));
 };

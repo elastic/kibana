@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { lensApiConfigSchema } from '@kbn/lens-embeddable-utils';
 import type { Materializer } from '../types';
 import { openInLensLabel } from './shared';
+import { mapLensDatatable } from './datatable';
 import { mapLensMetric } from './metric';
 import { asMappedChart, planLensChart } from './plan';
 import type { LensApiConfig, LensMaterializeConfig, LensSavedObjectReference } from './types';
@@ -19,7 +20,7 @@ import { mapLensXy } from './xy';
 export const LENS_TYPE = 'lens';
 
 /** Bump when the nodes the Lens materializer produces change. */
-const LENS_MATERIALIZER_VERSION = 1;
+const LENS_MATERIALIZER_VERSION = 2;
 
 /** Lens's server `transformOut`: stored panel state to Lens's API format. */
 export type LensTransformOut = (
@@ -123,8 +124,15 @@ export const createLensMaterializer = ({
     if ('type' in mapped) {
       return mapped;
     }
-    return 'metric' in mapped
-      ? mapLensMetric(mapped.metric, tables, kit, savedObject)
-      : mapLensXy(mapped.xy, tables, kit, savedObject);
+    if ('xy' in mapped) {
+      return mapLensXy(mapped.xy, tables, kit, savedObject);
+    }
+    const { single } = mapped;
+    switch (single.type) {
+      case 'metric':
+        return mapLensMetric(single, tables, kit, savedObject);
+      case 'data_table':
+        return mapLensDatatable(single, tables, kit, savedObject);
+    }
   },
 });

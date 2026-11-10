@@ -158,12 +158,12 @@ describe('Lens materializer: plan', () => {
     [
       'a chart type it does not map',
       {
-        type: 'tag_cloud',
+        type: 'region_map',
         data_source: { type: 'esql', query: 'FROM a' },
         metric: { column: 'c' },
-        tag_by: { column: 't' },
+        region: { column: 'r' },
       },
-      'Lens "tag_cloud" charts cannot be materialized yet.',
+      'Lens "region_map" charts cannot be materialized yet.',
     ],
     [
       'a data view metric',

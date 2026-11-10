@@ -38,6 +38,7 @@
     "@kbn/as-code-shared-transforms",
     "@kbn/controls-constants",
     "@kbn/controls-schemas",
-    "@kbn/lens-common"
+    "@kbn/lens-common",
+    "@kbn/charts-plugin"
   ]
 }
