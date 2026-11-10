@@ -74,6 +74,7 @@ export {
   buildJoinedFilter,
 } from './utils/append_to_query/utils';
 export { appendStatsByToQuery } from './utils/append_to_query/append_stats_by';
+export { appendCategorizeToESQLQuery } from './utils/append_to_query/append_categorize';
 export { appendWhereClauseToESQLQuery } from './utils/append_to_query/append_where';
 export { appendLimitToQuery } from './utils/append_to_query/append_limit';
 export { buildMetricsInfoQuery } from './utils/append_to_query/append_metrics_info';
