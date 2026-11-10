@@ -6,22 +6,12 @@
  */
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHighlight,
-  EuiIcon,
-  EuiText,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiHighlight, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowListDto } from '@kbn/workflows';
 import {
   DISABLED_BADGE_LABEL,
-  DISABLED_WORKFLOW_TOOLTIP,
   MANAGED_BADGE_LABEL,
-  MANAGED_BADGE_TOOLTIP,
   WORKFLOW_EMPTY_DESCRIPTION,
 } from '@kbn/workflows-ui';
 import React from 'react';
@@ -58,59 +48,47 @@ export const renderWorkflowOption = (
   searchValue: string
 ) => {
   const tags = value?.tags ?? [];
+  // Plain text only: the option is a <button> in a listbox, so nested tooltips or focusable
+  // badges are neither reachable by keyboard nor reliably hoverable when the option is disabled.
+  const details = [
+    value?.description || WORKFLOW_EMPTY_DESCRIPTION,
+    ...(tags.length > 0
+      ? [
+          i18n.translate('xpack.alertingV2.actionPolicy.form.destination.workflowTags', {
+            defaultMessage: 'Tags: {tags}',
+            values: { tags: tags.join(', ') },
+          }),
+        ]
+      : []),
+  ].join(' · ');
 
-  const content = (
+  return (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-      {disabled && (
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="minusCircle" color="subdued" aria-label={DISABLED_BADGE_LABEL} />
-        </EuiFlexItem>
-      )}
       <EuiFlexItem css={{ minWidth: 0 }}>
         <div className="eui-textTruncate">
           <EuiHighlight search={searchValue}>{label}</EuiHighlight>
         </div>
-        <EuiText size="xs" color="subdued" className="eui-textTruncate">
-          {value?.description || WORKFLOW_EMPTY_DESCRIPTION}
+        <EuiText
+          size="xs"
+          color="subdued"
+          className="eui-textTruncate"
+          data-test-subj="workflowOptionDetails"
+        >
+          {details}
         </EuiText>
       </EuiFlexItem>
-      {value?.managed && (
+      {disabled && (
         <EuiFlexItem grow={false}>
-          <EuiToolTip content={MANAGED_BADGE_TOOLTIP}>
-            <EuiBadge color="hollow" tabIndex={0}>
-              {MANAGED_BADGE_LABEL}
-            </EuiBadge>
-          </EuiToolTip>
+          <EuiBadge color="default" data-test-subj="workflowOptionDisabledBadge">
+            {DISABLED_BADGE_LABEL}
+          </EuiBadge>
         </EuiFlexItem>
       )}
-      {tags.length > 0 && (
+      {value?.managed && (
         <EuiFlexItem grow={false}>
-          <EuiToolTip content={tags.join(', ')}>
-            <EuiBadge
-              color="hollow"
-              iconType="tag"
-              tabIndex={0}
-              // EuiBadge defaults `title` to its text (the count), which adds a native tooltip.
-              title=""
-              aria-label={i18n.translate(
-                'xpack.alertingV2.actionPolicy.form.destination.workflowTagsAriaLabel',
-                { defaultMessage: 'Tags: {tags}', values: { tags: tags.join(', ') } }
-              )}
-              data-test-subj="workflowOptionTagsBadge"
-            >
-              {tags.length}
-            </EuiBadge>
-          </EuiToolTip>
+          <EuiBadge color="hollow">{MANAGED_BADGE_LABEL}</EuiBadge>
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
-  );
-
-  return disabled ? (
-    <EuiToolTip content={DISABLED_WORKFLOW_TOOLTIP} anchorProps={{ css: { width: '100%' } }}>
-      {content}
-    </EuiToolTip>
-  ) : (
-    content
   );
 };

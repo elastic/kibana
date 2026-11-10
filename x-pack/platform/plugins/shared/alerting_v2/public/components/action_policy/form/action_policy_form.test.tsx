@@ -520,11 +520,12 @@ describe('ActionPolicyForm', () => {
       expect(screen.queryByTestId('actionPolicyFormDestinationCards')).not.toBeInTheDocument();
     });
 
-    it('shows the workflow tags on hover without selecting the option', async () => {
+    it('lists the workflow tags as text in the option', async () => {
       mockWorkflowResults = [
         {
           id: 'workflow-1',
           name: 'Workflow 1',
+          description: 'Sends alerts to Slack',
           enabled: true,
           definition: { tags: ['slack', 'alerts'] },
         },
@@ -534,10 +535,30 @@ describe('ActionPolicyForm', () => {
 
       await user.click(within(screen.getByTestId('destinationsInput')).getByRole('combobox'));
       const option = await screen.findByRole('option', { name: /Workflow 1/ });
-      await user.hover(within(option).getByTestId('workflowOptionTagsBadge'));
 
-      expect(await screen.findByText('slack, alerts')).toBeInTheDocument();
-      expect(screen.queryByTestId('actionPolicyFormDestinationCards')).not.toBeInTheDocument();
+      expect(within(option).getByTestId('workflowOptionDetails')).toHaveTextContent(
+        'Sends alerts to Slack · Tags: slack, alerts'
+      );
+    });
+
+    it('does not add a selected workflow twice when its pill label differs from the option', async () => {
+      // The selected workflow is outside the initial search results, so its pill shows the id.
+      mockWorkflowResults = [{ id: 'workflow-2', name: 'Workflow 2', enabled: true }];
+      const user = userEvent.setup({ delay: null });
+      const { onSubmit } = renderForm(VALID_FORM_STATE);
+
+      mockWorkflowResults = [{ id: 'workflow-1', name: 'Workflow 1', enabled: true }];
+      const combobox = within(screen.getByTestId('destinationsInput')).getByRole('combobox');
+      await user.click(combobox);
+      await user.type(combobox, 'Workflow 1');
+      await user.click(await screen.findByRole('option', { name: /Workflow 1/ }));
+
+      await user.click(screen.getByTestId(TEST_SUBJ.submit));
+
+      await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
+      expect(onSubmit.mock.calls[0][0].destinations).toEqual([
+        { type: 'workflow', id: 'workflow-1' },
+      ]);
     });
 
     it('warns about selected workflows that are disabled without blocking submit', async () => {
