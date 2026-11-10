@@ -42,7 +42,7 @@ const alertsSchema = lazySchema(() =>
 
 export const SECURITY_ALERTS_TOOL_ID = securityTool('alerts');
 
-// Caps the rows handed to the model: an uncapped list-style query returned 100 alerts and ~160k tokens of context.
+// Caps the raw alert rows handed to the model: an uncapped list-style query returned 100 alerts and ~160k tokens of context.
 export const MAX_ALERT_ROWS = 25;
 
 // `_id` duplicates `kibana.alert.uuid`, and `_index` is a metadata field that fails ES|QL validation in KEEP.
@@ -72,9 +72,12 @@ const enhanceQueryForAlerts = (nlQuery: string, isCount?: boolean): string => {
 const isEsqlResult = (result: ToolHandlerResult): result is ToolHandlerResult<EsqlResults> =>
   result.type === ToolResultType.esqlResults;
 
+// Aggregated results (STATS) have small rows and the user may have asked for a number of them, so they are not capped.
+const isAggregation = (query: string): boolean => /\bSTATS\b/i.test(query);
+
 const capAlertRows = (results: ToolHandlerResult[]): ToolHandlerResult[] =>
   results.flatMap((result) => {
-    if (!isEsqlResult(result)) {
+    if (!isEsqlResult(result) || isAggregation(result.data.query)) {
       return [result];
     }
     const { values } = result.data;

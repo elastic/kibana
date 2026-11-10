@@ -193,12 +193,16 @@ describe('alertsTool', () => {
     });
 
     describe('result size cap', () => {
-      const buildEsqlResult = (rowCount: number) => ({
+      const buildEsqlResult = (
+        rowCount: number,
+        query = 'FROM alerts | LIMIT 100',
+        columnName = 'kibana.alert.uuid'
+      ) => ({
         tool_result_id: 'esql-result',
         type: ToolResultType.esqlResults,
         data: {
-          query: 'FROM alerts | LIMIT 100',
-          columns: [{ name: 'kibana.alert.uuid', type: 'keyword' }],
+          query,
+          columns: [{ name: columnName, type: 'keyword' }],
           values: Array.from({ length: rowCount }, (_, i) => [`alert-${i}`]),
         },
       });
@@ -247,6 +251,20 @@ describe('alertsTool', () => {
         const { results } = await callHandler();
 
         expect(results).toEqual([atCap]);
+      });
+
+      // Why: grouped rows are small, and a user who asks for "top 40 rules" must get 40 rows.
+      it('does not truncate aggregated results, which are small and were asked for by number', async () => {
+        const grouped = buildEsqlResult(
+          MAX_ALERT_ROWS + 15,
+          'FROM alerts | STATS count = COUNT(*) BY kibana.alert.rule.name | SORT count DESC | LIMIT 40',
+          'kibana.alert.rule.name'
+        );
+        (runSearchTool as jest.Mock).mockResolvedValue([grouped]);
+
+        const { results } = await callHandler();
+
+        expect(results).toEqual([grouped]);
       });
 
       it('passes error results through untouched', async () => {
