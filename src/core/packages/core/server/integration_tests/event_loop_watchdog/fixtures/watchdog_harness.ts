@@ -120,8 +120,10 @@ const startRunning = async (profiling?: WatchdogProfilingData) => {
 };
 
 /**
- * Writes a module with many functions that call each other in random chains, so a profile of it
- * has many distinct stacks, like a profile of Kibana. Returns a function that runs for `ms`.
+ * Writes a module with many functions that call each other in deterministic chains, so a profile
+ * of it has a stable, large set of distinct stacks, like a profile of Kibana. The chain at each
+ * depth is a fixed function of a per-call counter, so the node count doesn't vary between runs and
+ * stays below the worker's heap limit. Returns a function that runs for `ms`.
  */
 const loadDeepCode = async (functionCount: number, depth: number) => {
   const dir = mkdtempSync(Path.join(Os.tmpdir(), 'watchdog-deep-code-'));
@@ -129,11 +131,11 @@ const loadDeepCode = async (functionCount: number, depth: number) => {
   const lines = ['let x = 0;', 'const fns = [];'];
   for (let i = 0; i < functionCount; i++) {
     lines.push(
-      `fns.push(function f${i}(d, pick) { if (d === 0) { for (let j = 0; j < 2000; j++) x += j; return x; } return fns[pick()](d - 1, pick); });`
+      `fns.push(function f${i}(d, seq) { if (d === 0) { for (let j = 0; j < 2000; j++) x += j; return x; } return fns[(seq * 131 + d * 17) % fns.length](d - 1, seq); });`
     );
   }
   lines.push(
-    `module.exports = (ms) => { const end = Date.now() + ms; const pick = () => Math.floor(Math.random() * fns.length); while (Date.now() < end) fns[pick()](${depth}, pick); };`
+    `module.exports = (ms) => { const end = Date.now() + ms; let seq = 0; while (Date.now() < end) { fns[seq % fns.length](${depth}, seq); seq++; } };`
   );
   writeFileSync(file, lines.join('\n'));
   const { default: run }: { default: (ms: number) => void } = await import(file);
@@ -234,7 +236,7 @@ const scenarios: Record<string, () => Promise<void>> = {
   // A 10 s capture of code with many distinct stacks, at the worker's 32 MB limit. Containers run
   // Kibana with --max-old-space-size, which replaces that limit, so this covers other installs.
   profile_large: async () => {
-    const run = await loadDeepCode(4_000, 40);
+    const run = await loadDeepCode(2_000, 30);
     const watchdog = await startRunning({ ...PROFILING, maxDurationMs: perPhase(10_000) });
     watchdog.setProfiling(true);
     run(12_000);

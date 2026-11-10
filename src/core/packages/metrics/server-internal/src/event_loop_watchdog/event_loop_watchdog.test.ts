@@ -193,57 +193,6 @@ describe('EventLoopWatchdog', () => {
     expect(slots(1)[Slot.profiling]).toBe(1n);
   });
 
-  it('keeps profiling off after the worker runs out of memory while profiling', () => {
-    const watchdog = create();
-    watchdog.setProfiling(true);
-    watchdog.start();
-    options().onExit!({ reason: 'oom', exitCode: 1 });
-    options().onExit!({ reason: 'oom', exitCode: 1 });
-    expect(slots()[Slot.profiling]).toBe(0n);
-    expect(logger.error).toHaveBeenCalledTimes(1);
-    expect(logger.error).toHaveBeenCalledWith(
-      'Event loop watchdog worker ran out of memory while profiling was on; profiling stays off until Kibana restarts'
-    );
-    watchdog.setProfiling(true);
-    expect(slots()[Slot.profiling]).toBe(0n);
-  });
-
-  it('keeps profiling off after running out of memory once the flag turned off mid-capture', () => {
-    const watchdog = create();
-    watchdog.setProfiling(true);
-    watchdog.start();
-    watchdog.setProfiling(false);
-    options().onExit!({ reason: 'oom', exitCode: 1 });
-    watchdog.setProfiling(true);
-    expect(slots()[Slot.profiling]).toBe(0n);
-    expect(logger.error).toHaveBeenCalledTimes(1);
-  });
-
-  it('keeps profiling available after running out of memory in a worker that never could profile', () => {
-    const watchdog = create();
-    watchdog.setProfiling(true);
-    watchdog.start();
-    watchdog.setProfiling(false);
-    options().onExit!({ reason: 'error', exitCode: 1 });
-    options().onExit!({ reason: 'oom', exitCode: 1 });
-    watchdog.setProfiling(true);
-    expect(slots()[Slot.profiling]).toBe(1n);
-    expect(logger.error).not.toHaveBeenCalled();
-  });
-
-  it.each([
-    ['another exit while profiling', 'error', true],
-    ['running out of memory while not profiling', 'oom', false],
-  ] as const)('keeps profiling available after %s', (_, reason, profilingOn) => {
-    const watchdog = create();
-    watchdog.setProfiling(profilingOn);
-    watchdog.start();
-    options().onExit!({ reason, exitCode: 1 });
-    watchdog.setProfiling(true);
-    expect(slots()[Slot.profiling]).toBe(1n);
-    expect(logger.error).not.toHaveBeenCalled();
-  });
-
   describe('profiling log line', () => {
     const ON = 'Event loop watchdog profiling on for this node';
     const OFF = 'Event loop watchdog profiling off for this node';
@@ -277,16 +226,6 @@ describe('EventLoopWatchdog', () => {
       expect(profilingLines()).toEqual([ON, OFF]);
       resolveStop();
       await stopped;
-    });
-
-    it('logs off after running out of memory, and nothing when the flag turns on again', () => {
-      const watchdog = create();
-      watchdog.setProfiling(true);
-      watchdog.start();
-      options().onExit!({ reason: 'oom', exitCode: 1 });
-      watchdog.setProfiling(false);
-      watchdog.setProfiling(true);
-      expect(profilingLines()).toEqual([ON, OFF]);
     });
   });
 
