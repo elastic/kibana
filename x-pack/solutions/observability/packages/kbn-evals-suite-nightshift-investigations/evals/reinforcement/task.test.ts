@@ -9,7 +9,7 @@ import type { Client } from '@elastic/elasticsearch';
 import type { HttpHandler } from '@kbn/core/public';
 import { ExecutionStatus } from '@kbn/workflows';
 import { NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID } from '@kbn/workflows/managed';
-import { submitArgumentsEvaluator } from './evaluators';
+import { submitArgumentsEvaluator } from './judges';
 import { runReinforcementExample, treesAfterRun } from './task';
 import { reinforcementExamples } from './traces';
 import type { SubmitArguments } from './types';
@@ -208,14 +208,13 @@ describe('runReinforcementExample', () => {
       .mockResolvedValue({ id: EXECUTION_ID, status: ExecutionStatus.CANCELLED });
     const fetch = fakeFetch(events, { readExecution });
 
-    await expect(
-      runReinforcementExample({
-        esClient,
-        fetch: fetch as unknown as HttpHandler,
-        connectorId: 'connector',
-        example,
-      })
-    ).rejects.toThrow('Service unavailable');
+    const output = await runReinforcementExample({
+      esClient,
+      fetch: fetch as unknown as HttpHandler,
+      connectorId: 'connector',
+      example,
+    });
+    expect(output.execution_error).toContain('Service unavailable');
 
     const cancelAt = events.indexOf(`fetch:POST ${CANCEL_PATH}`);
     const restoreAt = events.lastIndexOf(`es:delete ${SEEDED_HEAD_ID}`);
@@ -223,6 +222,48 @@ describe('runReinforcementExample', () => {
     expect(restoreAt).toBeGreaterThan(cancelAt);
     expect(readExecution).toHaveBeenCalledTimes(2);
     expect([...docs.keys()]).toEqual([OTHER_HEAD_ID]);
+  });
+
+  it('keeps polling through a transient 5xx on an execution read', async () => {
+    const events: string[] = [];
+    const { esClient } = fakeEsClient(events, {});
+    const readExecution = jest
+      .fn()
+      .mockRejectedValueOnce(
+        Object.assign(new Error('no shard available'), { response: { status: 503 } })
+      )
+      .mockResolvedValue(completedExecution);
+    const fetch = fakeFetch(events, { readExecution });
+
+    const output = await runReinforcementExample({
+      esClient,
+      fetch: fetch as unknown as HttpHandler,
+      connectorId: 'connector',
+      example,
+    });
+
+    expect(readExecution).toHaveBeenCalledTimes(2);
+    expect(output.workflow_status).toBe(ExecutionStatus.COMPLETED);
+    expect(events).not.toContain(`fetch:POST ${CANCEL_PATH}`);
+  });
+
+  it('reports a failed rollback on the run instead of rejecting the experiment', async () => {
+    const events: string[] = [];
+    const { esClient } = fakeEsClient(events, {});
+    jest.mocked(esClient.delete).mockRejectedValue(new Error('delete failed'));
+    const log = { warning: jest.fn() };
+    const fetch = fakeFetch(events, { readExecution: async () => completedExecution });
+
+    const output = await runReinforcementExample({
+      esClient,
+      fetch: fetch as unknown as HttpHandler,
+      connectorId: 'connector',
+      example,
+      log,
+    });
+
+    expect(output.execution_error).toContain('Rolling back the replay');
+    expect(log.warning).toHaveBeenCalledWith(expect.stringContaining('delete failed'));
   });
 
   it('cancels an execution that is still running when the wait runs out', async () => {
@@ -272,15 +313,14 @@ describe('runReinforcementExample', () => {
       },
     });
 
-    await expect(
-      runReinforcementExample({
-        esClient,
-        fetch: fetch as unknown as HttpHandler,
-        connectorId: 'connector',
-        example,
-        log,
-      })
-    ).rejects.toThrow('Service unavailable');
+    const output = await runReinforcementExample({
+      esClient,
+      fetch: fetch as unknown as HttpHandler,
+      connectorId: 'connector',
+      example,
+      log,
+    });
+    expect(output.execution_error).toContain('Service unavailable');
 
     expect(events.lastIndexOf(`es:delete ${SEEDED_HEAD_ID}`)).toBeGreaterThan(
       events.indexOf(`fetch:POST ${CANCEL_PATH}`)
@@ -506,14 +546,13 @@ describe('runReinforcementExample', () => {
         .mockResolvedValue({ id: EXECUTION_ID, status: ExecutionStatus.CANCELLED });
       const fetch: jest.Mock = fakeFetch(events, { readExecution });
 
-      await expect(
-        runReinforcementExample({
-          esClient,
-          fetch: fetch as unknown as HttpHandler,
-          connectorId: 'connector',
-          example,
-        })
-      ).rejects.toThrow('Service unavailable');
+      const output = await runReinforcementExample({
+        esClient,
+        fetch: fetch as unknown as HttpHandler,
+        connectorId: 'connector',
+        example,
+      });
+      expect(output.execution_error).toContain('Service unavailable');
 
       expect(docs.get(OTHER_HEAD_ID)).toEqual(otherTree);
       expect(docs.get('default:dtree_foreign')?.content).toBe('edited by another investigation');

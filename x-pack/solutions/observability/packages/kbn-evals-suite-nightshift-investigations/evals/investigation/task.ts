@@ -85,7 +85,8 @@ const isNotFound = (error: unknown): boolean => httpStatus(error) === 404;
  * investigation keeps running, so a poll treats that like "not yet" and tries again.
  */
 const TRANSIENT_READ_STATUSES = new Set([500, 502, 503, 504]);
-const isTransientReadError = (error: unknown): boolean => {
+/** A 500-504 read, which a poll retries instead of failing the run. */
+export const isTransientReadError = (error: unknown): boolean => {
   const status = httpStatus(error);
   return status !== undefined && TRANSIENT_READ_STATUSES.has(status);
 };

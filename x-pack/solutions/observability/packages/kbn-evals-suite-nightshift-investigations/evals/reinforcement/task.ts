@@ -32,7 +32,7 @@ import {
 } from '@kbn/workflows';
 import { NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { Hypothesis } from '@kbn/agentic-investigations-plugin/common';
-import { runInvestigation } from '../investigation/task';
+import { isTransientReadError, runInvestigation } from '../investigation/task';
 import type { InvestigationExample } from '../investigation/types';
 import { parseSubmissions, treeIdsInSubmission } from './arguments';
 import type { ReinforcementExample, ReinforcementTaskOutput, SubmitArguments } from './types';
@@ -517,12 +517,16 @@ export const runReinforcementExample = async ({
     submissions: [],
   };
 
-  const snapshots = await snapshotDecisionTrees(esClient, [treeId]);
   const conversationId = replayConversationId(example.metadata.case_id);
+  let snapshots: Map<string, IndexedTreeDoc[]> | undefined;
   let submissions: SubmitArguments[] = [];
   let executionId: string | undefined;
   let sawTerminal = false;
+  let result: ReinforcementTaskOutput;
+  // A failure becomes this run's execution_error, so it counts against the spec's pass rate instead
+  // of rejecting the whole experiment.
   try {
+    snapshots = await snapshotDecisionTrees(esClient, [treeId]);
     await seedPriorTree(esClient, example);
     const started = (await fetch(
       `/api/workflows/workflow/${encodeURIComponent(NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID)}/run`,
@@ -548,12 +552,17 @@ export const runReinforcementExample = async ({
 
     executionId = started.workflowExecutionId;
     const deadline = Date.now() + MAX_WAIT_MS;
-    let execution = await readExecution(fetch, executionId);
-    sawTerminal = isTerminal(execution.status);
+    let execution = await readExecutionOrKeep(fetch, executionId, undefined);
+    sawTerminal = execution !== undefined && isTerminal(execution.status);
     while (!sawTerminal && Date.now() < deadline) {
       await delay(POLL_INTERVAL_MS);
-      execution = await readExecution(fetch, executionId);
-      sawTerminal = isTerminal(execution.status);
+      execution = await readExecutionOrKeep(fetch, executionId, execution);
+      sawTerminal = execution !== undefined && isTerminal(execution.status);
+    }
+    if (!execution) {
+      throw new Error(
+        `Workflow execution ${executionId} could not be read before the wait ran out`
+      );
     }
 
     const reinforce = reinforceStep(execution);
@@ -579,7 +588,7 @@ export const runReinforcementExample = async ({
     const failed =
       !finished || execution.status !== ExecutionStatus.COMPLETED || !reinforced || submitRejected;
 
-    return {
+    result = {
       ...base,
       execution_id: executionId,
       ...(output?.trace_id ? { traceId: output.trace_id } : {}),
@@ -596,17 +605,53 @@ export const runReinforcementExample = async ({
       submitted_mermaid: trees[0].submitted_mermaid,
       trees,
     };
-  } finally {
+  } catch (error) {
+    result = {
+      ...base,
+      ...(executionId ? { execution_id: executionId } : {}),
+      submissions,
+      execution_error: `The replay failed: ${errorMessage(error)}`,
+    };
+  }
+
+  try {
     if (executionId && !sawTerminal) {
       await cancelExecution(fetch, executionId, log);
     }
     // A submit names trees it may never have written, so only the seeded tree and the trees the
-    // replay's writes are stamped with count as its own.
-    await restoreDecisionTrees(esClient, snapshots, {
-      treeIds: [treeId],
-      candidateIds: submittedTreeIds(submissions),
-      conversationId,
-    });
+    // replay's writes are stamped with count as its own. Nothing was seeded without a snapshot.
+    if (snapshots) {
+      await restoreDecisionTrees(esClient, snapshots, {
+        treeIds: [treeId],
+        candidateIds: submittedTreeIds(submissions),
+        conversationId,
+      });
+    }
+  } catch (error) {
+    const rollback = `Rolling back the replay's decision trees failed: ${errorMessage(error)}`;
+    log?.warning(rollback);
+    result = {
+      ...result,
+      execution_error: [result.execution_error, rollback].filter(Boolean).join('\n'),
+    };
+  }
+  return result;
+};
+
+const errorMessage = (error: unknown): string =>
+  error instanceof Error ? error.message : String(error);
+
+/** Reads the execution, keeping `previous` when the read fails with a transient 500-504. */
+const readExecutionOrKeep = async (
+  fetch: HttpHandler,
+  executionId: string,
+  previous: WorkflowExecutionDto | undefined
+): Promise<WorkflowExecutionDto | undefined> => {
+  try {
+    return await readExecution(fetch, executionId);
+  } catch (error) {
+    if (!isTransientReadError(error)) throw error;
+    return previous;
   }
 };
 
