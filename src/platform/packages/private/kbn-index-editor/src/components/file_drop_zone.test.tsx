@@ -153,17 +153,17 @@ describe('FileDropzone', () => {
 
   describe('Drag and Drop', () => {
     const file = new File(['a,b,c\n1,2,3'], 'test.csv', { type: 'text/csv' });
+    const dataTransfer = {
+      files: [file],
+      items: [{ kind: 'file', type: file.type, getAsFile: () => file }],
+      types: ['Files'],
+    };
 
     it('handles file drop, gets confirmation, and adds file', async () => {
       const { container } = renderWithI18n(<TestComponent />);
       const dropzone = container.firstChild as HTMLElement;
 
-      fireEvent.drop(dropzone, {
-        dataTransfer: {
-          files: [file],
-          types: ['Files'],
-        },
-      });
+      fireEvent.drop(dropzone, { dataTransfer });
 
       await waitFor(() => {
         expect(mockGetOverrideConfirmation).toHaveBeenCalled();
@@ -177,12 +177,7 @@ describe('FileDropzone', () => {
       const { container } = renderWithI18n(<TestComponent />);
       const dropzone = container.firstChild as HTMLElement;
 
-      fireEvent.drop(dropzone, {
-        dataTransfer: {
-          files: [file],
-          types: ['Files'],
-        },
-      });
+      fireEvent.drop(dropzone, { dataTransfer });
 
       await waitFor(() => {
         expect(mockGetOverrideConfirmation).toHaveBeenCalled();
