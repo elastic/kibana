@@ -355,8 +355,8 @@ importers:
         specifier: 4.1.1
         version: 4.1.1
       '@dagrejs/dagre':
-        specifier: 3.1.1
-        version: 3.1.1
+        specifier: 3.1.3
+        version: 3.1.3
       '@dnd-kit/core':
         specifier: 6.3.1
         version: 6.3.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -11061,11 +11061,11 @@ packages:
   '@dabh/diagnostics@2.0.9':
     resolution: {integrity: sha512-R6siwR65Hm+3yfgP7o8DKhNvputQAwfoz9zTc3kyDudnomj2/BcLmD+uGQQPICjuFUp8ounPBU+jmKsocwVVAg==}
 
-  '@dagrejs/dagre@3.1.1':
-    resolution: {integrity: sha512-zroZB1dFOFiGgv4Xcrn1DckB1o4aOikPqD2NDQPV0WM//CXGcS6xiD0rNkqHmw6FEg4tabt4nxPLwgCWT+Vb2A==}
+  '@dagrejs/dagre@3.1.3':
+    resolution: {integrity: sha512-X4aUTwOReZvthaZWOVHqlJ52/ZdhZFEM4+Lh/uR4XooUSLE6p71bcy7MPGzYnNUcNh+nj+i/qJQpCMIdQnSmrg==}
 
-  '@dagrejs/graphlib@4.0.5':
-    resolution: {integrity: sha512-7xrBTqIts3o+PMUZX97wSc+7TUbW+/rULzGNCTP6yooNVDXbzw4Wutg/H/xOutTB/c/k0YqOAavgPh4/Zk9PFA==}
+  '@dagrejs/graphlib@4.0.6':
+    resolution: {integrity: sha512-Hjv7hbfmSBMP4nVXMFt4gusqWWHghQF0qNT4V5KHo4Jatvd+2L5VHKFnnIjXVuDnaHIRz7ZuHSnlf0RuZkOwWA==}
 
   '@date-fns/tz@1.5.0':
     resolution: {integrity: sha512-lwYN/vDPeNRULcepoE/LO2Pgx+7/RV+S9ARfbc9lr2DtGkOD7pAiruHvbR1RX3Qyf6ja47EWJDMsNK5vK08DJg==}
@@ -26993,11 +26993,11 @@ snapshots:
       enabled: 2.0.0
       kuler: 2.0.0
 
-  '@dagrejs/dagre@3.1.1':
+  '@dagrejs/dagre@3.1.3':
     dependencies:
-      '@dagrejs/graphlib': 4.0.5
+      '@dagrejs/graphlib': 4.0.6
 
-  '@dagrejs/graphlib@4.0.5': {}
+  '@dagrejs/graphlib@4.0.6': {}
 
   '@date-fns/tz@1.5.0': {}
 
