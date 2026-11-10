@@ -159502,6 +159502,14 @@ components:
                   type: object
                 proxy_url:
                   type: string
+                reserve_diskspace:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    enabled:
+                      type: boolean
+                  required:
+                    - enabled
                 secrets:
                   additionalProperties: true
                   type: object
