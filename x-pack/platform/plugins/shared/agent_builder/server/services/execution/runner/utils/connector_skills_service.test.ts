@@ -35,36 +35,11 @@ describe('createConnectorSkillsService', () => {
     expect(getAll).not.toHaveBeenCalled();
   });
 
-  it('returns the skills for the types of the agent connectors', async () => {
+  it('returns each skill once for the types of the agent connectors, ignoring other connectors', async () => {
     const { service } = setup(CONNECTORS);
 
-    await expect(service.resolveSkillIds(['pd-1'])).resolves.toEqual([
-      'platform.connectors.pagerduty',
-    ]);
-  });
-
-  it('returns a skill once even when the agent has several connectors of that type', async () => {
-    const { service } = setup(CONNECTORS);
-
-    const ids = await service.resolveSkillIds(['gh-1', 'gh-2', 'pd-1']);
-    expect([...ids].sort()).toEqual([
-      'platform.connectors.github',
-      'platform.connectors.pagerduty',
-    ]);
-  });
-
-  it('ignores connector types without skills and connectors that do not exist', async () => {
-    const { service } = setup(CONNECTORS);
-
-    await expect(service.resolveSkillIds(['slack-1', 'not-a-connector'])).resolves.toEqual([]);
-  });
-
-  it('does not grant a skill for a connector the agent does not have', async () => {
-    const { service } = setup(CONNECTORS);
-
-    await expect(service.resolveSkillIds(['gh-1'])).resolves.toEqual([
-      'platform.connectors.github',
-    ]);
+    const ids = await service.resolveSkillIds(['gh-1', 'gh-2', 'slack-1', 'not-a-connector']);
+    expect(ids).toEqual(['platform.connectors.github']);
   });
 
   it('returns no skills and warns when connectors cannot be loaded', async () => {

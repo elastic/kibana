@@ -36,24 +36,14 @@ describe('registerConnectorSkills', () => {
     );
   });
 
-  it('keeps the skills out of the library and the default capabilities, under the connectors path', () => {
+  it('registers hidden skills under the connectors path, with the workflow and list_connectors tools', async () => {
     for (const skill of registerSkillsWith()) {
       expect(skill.basePath).toBe(CONNECTORS_SKILLS_BASE_PATH);
       expect(skill.hidden).toBe(true);
       expect(skill.excludeFromElasticCapabilities).toBe(true);
-    }
-  });
-
-  it('grants the workflow tool', async () => {
-    for (const skill of registerSkillsWith()) {
       expect(await skill.getRegistryTools?.()).toEqual([platformCoreTools.executeWorkflow]);
-    }
-  });
-
-  it('lets the agent list its connectors to find the connector id', async () => {
-    for (const skill of registerSkillsWith()) {
-      const tools = await skill.getInlineTools?.();
-      expect((tools ?? []).map((tool: { id: string }) => tool.id)).toEqual(['list_connectors']);
+      const inlineTools = (await skill.getInlineTools?.()) ?? [];
+      expect(inlineTools.map((tool: { id: string }) => tool.id)).toEqual(['list_connectors']);
     }
   });
 

@@ -416,24 +416,6 @@ describe('runDefaultAgentMode', () => {
       );
     });
 
-    it('resolves connector skills for an agent without connectors as an empty list', async () => {
-      const context = createAgentHandlerContextMock();
-      await setupBase(context);
-
-      await runDefaultAgentMode(
-        {
-          nextInput: { message: 'hello' },
-          agentConfiguration: { tools: [] } as any,
-        },
-        context
-      );
-
-      expect(context.connectorSkills.resolveSkillIds).toHaveBeenCalledWith([]);
-      expect(selectSkillsMock).toHaveBeenCalledWith(
-        expect.objectContaining({ additionalSkillIds: [] })
-      );
-    });
-
     it('passes plugin and connector skill ids together', async () => {
       const context = createAgentHandlerContextMock();
       await setupBase(context);

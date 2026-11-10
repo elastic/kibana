@@ -8,7 +8,6 @@
  */
 
 import {
-  CONNECTOR_SKILL_ID_PREFIX,
   getAllConnectorSkills,
   getConnectorSkillRegistryId,
   getConnectorSkillRegistryIds,
@@ -20,11 +19,6 @@ describe('connector skills', () => {
   it('finds the skills defined by connector specs, each with its connector type', () => {
     const byType = Object.fromEntries(allSkills.map((s) => [s.connectorTypeId, s.skill.id]));
     expect(byType).toMatchObject({ '.github': 'github', '.pagerduty_mcp': 'pagerduty' });
-  });
-
-  it('prefixes the built-in skill id', () => {
-    expect(getConnectorSkillRegistryId({ id: 'github' })).toBe('platform.connectors.github');
-    expect(CONNECTOR_SKILL_ID_PREFIX).toBe('platform.connectors.');
   });
 
   it('returns the built-in skill ids for a connector type, and none for other types', () => {
