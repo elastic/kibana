@@ -15,7 +15,7 @@ import type {
 } from '@kbn/global-search-plugin/server';
 import { i18n } from '@kbn/i18n';
 
-import { fetchConnectors } from '@kbn/search-connectors';
+import { fetchConnectors } from '@kbn/search-connectors/server';
 
 import { ENTERPRISE_SEARCH_DATA_PLUGIN } from '../../common/constants';
 

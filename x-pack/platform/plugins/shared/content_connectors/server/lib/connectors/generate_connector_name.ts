@@ -9,9 +9,9 @@ import { v4 as uuidv4 } from 'uuid';
 
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
-import { MANAGED_CONNECTOR_INDEX_PREFIX } from '@kbn/search-connectors';
+import { MANAGED_CONNECTOR_INDEX_PREFIX } from '@kbn/search-connectors/server';
 
-import { toAlphanumeric } from '@kbn/search-connectors';
+import { toAlphanumeric } from '@kbn/search-connectors/server';
 import { ErrorCode } from '../../../common/types/error_codes';
 
 import { indexOrAliasExists } from '../indices/exists_index';

@@ -10,7 +10,8 @@ import { AgentlessConnectorsInfraService } from '@kbn/content-connectors-plugin/
 import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
 
 import { i18n } from '@kbn/i18n';
-import type { ConnectorStatus, FilteringRule } from '@kbn/search-connectors';
+import { cancelSyncs } from '@kbn/search-connectors/lib/cancel_syncs';
+import type { ConnectorStatus, FilteringRule } from '@kbn/search-connectors/server';
 import {
   CONNECTORS_INDEX,
   cancelSync,
@@ -27,10 +28,9 @@ import {
   updateConnectorStatus,
   updateFiltering,
   updateFilteringDraft,
-} from '@kbn/search-connectors';
+} from '@kbn/search-connectors/server';
 
-import { SyncJobType } from '@kbn/search-connectors';
-import { cancelSyncs } from '@kbn/search-connectors/lib/cancel_syncs';
+import { SyncJobType } from '@kbn/search-connectors/server';
 import {
   isResourceNotFoundException,
   isStatusTransitionException,

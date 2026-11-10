@@ -11,7 +11,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 
 import { ByteSizeValue } from '@kbn/config-schema';
-import type { ElasticsearchIndex } from '@kbn/search-connectors';
+import type { ElasticsearchIndex } from '@kbn/search-connectors/server';
 
 export const mapIndexStats = (
   indexData: IndicesIndexState,

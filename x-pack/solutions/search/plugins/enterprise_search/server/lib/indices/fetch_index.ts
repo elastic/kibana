@@ -7,12 +7,12 @@
 
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 
-import type { Connector, ConnectorSyncJobDocument } from '@kbn/search-connectors';
+import type { Connector, ConnectorSyncJobDocument } from '@kbn/search-connectors/server';
 import {
   CONNECTORS_JOBS_INDEX,
   fetchConnectorByIndexName,
   SyncStatus,
-} from '@kbn/search-connectors';
+} from '@kbn/search-connectors/server';
 
 import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../common/constants';
 import type { ElasticsearchIndexWithIngestion } from '../../../common/types/indices';

@@ -7,8 +7,8 @@
 
 import type { IScopedClusterClient } from '@kbn/core/server';
 
-import type { IngestPipelineParams } from '@kbn/search-connectors';
-import { CURRENT_CONNECTORS_INDEX } from '@kbn/search-connectors';
+import type { IngestPipelineParams } from '@kbn/search-connectors/server';
+import { CURRENT_CONNECTORS_INDEX } from '@kbn/search-connectors/server';
 
 import { DEFAULT_PIPELINE_VALUES } from '../../../common/constants';
 
