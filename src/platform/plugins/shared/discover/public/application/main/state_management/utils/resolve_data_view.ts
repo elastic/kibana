@@ -110,7 +110,7 @@ export async function loadDataView({
   }
 
   return {
-    // We can be certain that a data view exists due to an earlier hasData check
+    // We can be certain that a data view exists due to an earlier data view availability check
     loadedDataView: (fetchedDataView || defaultDataView || defaultAdHocDataView)!,
     requestedDataViewId: fetchId,
     requestedDataViewFound: Boolean(fetchId) && Boolean(fetchedDataView),

@@ -62,13 +62,13 @@ describe('data availability', () => {
     const concurrentDataViewRequest = internalState.dispatch(
       internalStateActions.loadDataViewAvailabilityOnce()
     );
-    const dataRequest = internalState.dispatch(internalStateActions.loadESDataAvailabilityOnce());
-    const concurrentDataRequest = internalState.dispatch(
+    const esDataRequest = internalState.dispatch(internalStateActions.loadESDataAvailabilityOnce());
+    const concurrentESDataRequest = internalState.dispatch(
       internalStateActions.loadESDataAvailabilityOnce()
     );
 
-    await expect(dataRequest).resolves.toBe(true);
-    await expect(concurrentDataRequest).resolves.toBe(true);
+    await expect(esDataRequest).resolves.toBe(true);
+    await expect(concurrentESDataRequest).resolves.toBe(true);
 
     dataViews.resolve(false);
     await expect(dataViewRequest).resolves.toBe(false);
