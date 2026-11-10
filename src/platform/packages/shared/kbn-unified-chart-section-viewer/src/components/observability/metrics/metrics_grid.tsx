@@ -46,6 +46,10 @@ import {
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
 import { getExemplarsFetchFailedUserMessage } from '../../../common/utils/user_messages';
+import {
+  useExemplarsClusterSupport,
+  type ExemplarsClusterSupport,
+} from './hooks/use_exemplars_cluster_support';
 import { useFetchExemplars } from './hooks/use_fetch_exemplars';
 
 const EMPTY_APPLICABLE_DIMENSIONS: Dimension[] = [];
@@ -149,6 +153,12 @@ export const MetricsGrid = ({
   const { euiTheme } = useEuiTheme();
   const { flyoutState, onFlyoutStateChange, profileId, gridSettings, onMetricExplored } =
     useMetricsExperienceState();
+  const exemplarsClusterSupport = useExemplarsClusterSupport({
+    fetchParams,
+    services,
+    profileId,
+    isComponentVisible,
+  });
 
   const gridColumns = columns || 1;
   const gridRows = Math.ceil(metricItems.length / gridColumns);
@@ -294,6 +304,7 @@ export const MetricsGrid = ({
                   gridSettings={gridSettings}
                   onMetricExplored={onMetricExplored}
                   isComponentVisible={isComponentVisible}
+                  exemplarsClusterSupport={exemplarsClusterSupport}
                   histogramBounds={histogramBounds}
                   histogramBoundsLoading={histogramBoundsLoading}
                 />
@@ -340,6 +351,7 @@ interface ChartItemProps
   gridSettings: MetricsGridSettings;
   onMetricExplored?: (metricUniqueKey: string) => void;
   isComponentVisible: boolean;
+  exemplarsClusterSupport: ExemplarsClusterSupport;
   histogramBounds: HistogramBoundsByMetricKey;
   histogramBoundsLoading: boolean;
 }
@@ -373,6 +385,7 @@ const ChartItem = React.memo(
     gridSettings,
     onMetricExplored,
     isComponentVisible,
+    exemplarsClusterSupport,
     histogramBounds,
     histogramBoundsLoading,
   }: ChartItemProps) => {
@@ -403,6 +416,7 @@ const ChartItem = React.memo(
       metricItem.dimensionFields
     );
 
+    // `unsigned_long` has no time-series chart query, so there is no series to attach exemplars to.
     const isSupported = firstNonNullable(metricItem.fieldTypes) !== 'unsigned_long';
 
     const { shouldRenderHistogram, boundsError, distributionQuery, heatmapConfig } =
@@ -434,8 +448,10 @@ const ChartItem = React.memo(
       originalSource: userSource,
       gridSettings,
       profileId,
+      // Heatmaps also have no series query, so they skip the exemplar fetch with `unsigned_long`.
       isSupported: isSupported && !shouldRenderHistogram,
       isComponentVisible,
+      clusterSupport: exemplarsClusterSupport,
     });
     // TODO(kibana#289722): feed `exemplars` into useChartLayers as a points layer.
     void exemplars;

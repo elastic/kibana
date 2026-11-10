@@ -33,6 +33,7 @@ import {
 import { useFeatureFlag } from '../../../hooks/use_feature_flag';
 import { getExemplarsFetchFailedUserMessage } from '../../../common/utils/user_messages';
 import { useFetchExemplars } from './hooks/use_fetch_exemplars';
+import { useExemplarsClusterSupport } from './hooks/use_exemplars_cluster_support';
 import { dismissAllFlyoutsExceptFor, METRICS_GRID_SETTINGS_DEFAULTS } from '@kbn/discover-utils';
 import {
   MetricsExperienceStateProvider,
@@ -44,6 +45,13 @@ import type { FlyoutState } from '../../../restorable_state';
 jest.mock('./hooks/use_fetch_exemplars', () => ({
   useFetchExemplars: jest.fn(() => ({ exemplars: undefined, hasError: false, isLoading: false })),
 }));
+
+jest.mock('./hooks/use_exemplars_cluster_support', () => {
+  const supportedCluster = { status: 'supported' };
+  return {
+    useExemplarsClusterSupport: jest.fn(() => supportedCluster),
+  };
+});
 
 jest.mock('@kbn/discover-utils', () => {
   const {
@@ -316,6 +324,21 @@ describe('MetricsGrid', () => {
     });
 
     expect(useFetchExemplars).toHaveBeenCalledWith(expect.objectContaining({ isSupported: false }));
+  });
+
+  it('probes exemplar support once and passes that gate to every chart', () => {
+    renderMetricsGrid();
+
+    expect(useExemplarsClusterSupport).toHaveBeenCalledTimes(1);
+    expect(useFetchExemplars).toHaveBeenCalledTimes(metricItems.length);
+    expect(useFetchExemplars).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ clusterSupport: { status: 'supported' } })
+    );
+    expect(useFetchExemplars).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ clusterSupport: { status: 'supported' } })
+    );
   });
 
   it('keeps the chart loading until exemplars are fetched', () => {

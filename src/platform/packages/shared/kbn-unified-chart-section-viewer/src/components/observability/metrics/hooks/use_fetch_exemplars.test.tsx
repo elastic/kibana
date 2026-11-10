@@ -10,9 +10,6 @@
 jest.mock('../utils/execute_esql_query', () => ({
   executeEsqlQuery: jest.fn(),
 }));
-jest.mock('../../../../hooks/use_feature_flag', () => ({
-  useFeatureFlag: jest.fn(),
-}));
 jest.mock('../../../../common/utils/esql/create_exemplars_query', () => ({
   createExemplarsQuery: jest.fn(),
 }));
@@ -31,8 +28,6 @@ import type { DataSource } from '@kbn/data-source';
 import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { getFetchParamsMock } from '@kbn/unified-histogram/__mocks__/fetch_params';
-import { FEATURE_FLAGS } from '../../../../common/constants';
-import { useFeatureFlag } from '../../../../hooks/use_feature_flag';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { MetricsExecutionContextName } from '../utils/execution_context_enums';
 import { createExemplarsQuery } from '../../../../common/utils/esql/create_exemplars_query';
@@ -40,7 +35,6 @@ import type { ParsedMetricItem } from '../../../../types';
 import { useFetchExemplars, type UseFetchExemplarsParams } from './use_fetch_exemplars';
 
 const mockExecuteEsqlQuery = executeEsqlQuery as jest.MockedFunction<typeof executeEsqlQuery>;
-const mockUseFeatureFlag = useFeatureFlag as jest.MockedFunction<typeof useFeatureFlag>;
 const mockCreateExemplarsQuery = createExemplarsQuery as jest.MockedFunction<
   typeof createExemplarsQuery
 >;
@@ -104,6 +98,7 @@ const createParams = (
   profileId: TEST_PROFILE_ID,
   isSupported: true,
   isComponentVisible: true,
+  clusterSupport: { status: 'supported' },
   ...overrides,
 });
 
@@ -113,7 +108,6 @@ const flushAsync = () => act(async () => new Promise<void>((resolve) => setTimeo
 describe('useFetchExemplars', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseFeatureFlag.mockReturnValue(true);
     mockCreateExemplarsQuery.mockReturnValue(TEST_ESQL_QUERY);
     mockExecuteEsqlQuery.mockResolvedValue({
       documents: [],
@@ -126,28 +120,73 @@ describe('useFetchExemplars', () => {
     });
   });
 
-  describe('when the feature flag is off', () => {
-    beforeEach(() => {
-      mockUseFeatureFlag.mockReturnValue(false);
-    });
+  describe('when the cluster gate blocks per-chart searches', () => {
+    it('does not fetch when exemplars are disabled', async () => {
+      const params = createParams({ clusterSupport: { status: 'disabled' } });
+      const reportedLoading: boolean[] = [];
+      const { result } = renderHook(() => {
+        const state = useFetchExemplars(params);
+        reportedLoading.push(state.isLoading);
+        return state;
+      });
 
-    it('does not fetch, and returns undefined', async () => {
-      const params = createParams();
-      const { result } = renderHook(() => useFetchExemplars(params));
+      expect(result.current.isLoading).toBe(false);
+      expect(reportedLoading).not.toContain(true);
+      expect(mockCreateExemplarsQuery).not.toHaveBeenCalled();
+      expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
 
       await flushAsync();
       expect(mockCreateExemplarsQuery).not.toHaveBeenCalled();
       expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
       expect(result.current).toEqual(IDLE_FETCH);
+      expect(reportedLoading).not.toContain(true);
     });
-  });
 
-  it('reads the exemplars feature flag with its registered default', async () => {
-    const params = createParams();
-    renderHook(() => useFetchExemplars(params));
+    it('stays loading without fetching while cluster support is still being checked', async () => {
+      const params = createParams({ clusterSupport: { status: 'checking' } });
+      const { result } = renderHook(() => useFetchExemplars(params));
 
-    await flushAsync();
-    expect(mockUseFeatureFlag).toHaveBeenCalledWith(FEATURE_FLAGS.IS_EXEMPLARS_ENABLED, false);
+      await flushAsync();
+      expect(mockCreateExemplarsQuery).not.toHaveBeenCalled();
+      expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
+      expect(mockReportError).not.toHaveBeenCalled();
+      expect(result.current).toEqual({ ...IDLE_FETCH, isLoading: true });
+    });
+
+    it('surfaces an unsupported cluster without a per-chart search', async () => {
+      const errorMessage = 'verification_exception: unknown setting [exemplars]';
+      const params = createParams({
+        clusterSupport: { status: 'unsupported', errorMessage },
+      });
+      const { result } = renderHook(() => useFetchExemplars(params));
+
+      await flushAsync();
+      expect(mockCreateExemplarsQuery).not.toHaveBeenCalled();
+      expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
+      expect(mockReportError).not.toHaveBeenCalled();
+      expect(result.current).toEqual({
+        exemplars: undefined,
+        hasError: true,
+        errorMessage,
+        isLoading: false,
+      });
+    });
+
+    it('surfaces a transient probe failure without a per-chart search', async () => {
+      const errorMessage = 'network failure';
+      const params = createParams({ clusterSupport: { status: 'failed', errorMessage } });
+      const { result } = renderHook(() => useFetchExemplars(params));
+
+      await flushAsync();
+      expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
+      expect(mockReportError).not.toHaveBeenCalled();
+      expect(result.current).toEqual({
+        exemplars: undefined,
+        hasError: true,
+        errorMessage,
+        isLoading: false,
+      });
+    });
   });
 
   it('does nothing without a data source', async () => {

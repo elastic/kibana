@@ -11,14 +11,13 @@ import type { MetricsGridSettings } from '@kbn/discover-utils';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { useAbortableAsync } from '@kbn/react-hooks';
-import { FEATURE_FLAG_DEFAULTS, FEATURE_FLAGS } from '../../../../common/constants';
-import { useFeatureFlag } from '../../../../hooks/use_feature_flag';
 import type { ParsedMetricItem } from '../../../../types';
 import { isSuppressedFetchError } from '../../../chart/utils/is_suppressed_fetch_error';
 import { useReportChartSectionError } from '../../../chart/hooks/use_report_chart_section_error';
 import { createExemplarsQuery } from '../../../../common/utils/esql/create_exemplars_query';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { MetricsExecutionContextName } from '../utils/execution_context_enums';
+import type { ExemplarsClusterSupport } from './use_exemplars_cluster_support';
 
 export type ExemplarsResponse = Pick<ESQLSearchResponse, 'columns' | 'values'>;
 
@@ -37,6 +36,11 @@ export interface UseFetchExemplarsResult extends ExemplarsFetchState {
 }
 
 const IDLE_EXEMPLARS_FETCH: ExemplarsFetchState = { exemplars: undefined, hasError: false };
+const CHECKING_EXEMPLARS_FETCH: UseFetchExemplarsResult = {
+  exemplars: undefined,
+  hasError: false,
+  isLoading: true,
+};
 
 export interface UseFetchExemplarsParams {
   fetchParams: ChartSectionProps['fetchParams'];
@@ -51,12 +55,17 @@ export interface UseFetchExemplarsParams {
   isSupported: boolean;
   /** False while Discover keeps the grid mounted but hidden; nothing is fetched then. */
   isComponentVisible: boolean;
+  /**
+   * Grid-level gate. Per-chart searches run only when this is `supported`.
+   * `checking`, `unsupported`, and `failed` do not send a search.
+   */
+  clusterSupport: ExemplarsClusterSupport;
 }
 
 /**
- * Fetches the exemplars for a metric chart. `exemplars` is absent while in flight, when
- * the flag is off, or when the metric has no time-series query. A failed fetch sets
- * `hasError` and does not throw.
+ * Fetches the exemplars for one metric chart. `exemplars` is absent while in flight, when
+ * the grid gate is not `supported`, or when the metric has no time-series query. A failed
+ * fetch sets `hasError` and does not throw. A shared cluster failure is not reported again here.
  */
 export const useFetchExemplars = ({
   fetchParams,
@@ -69,11 +78,8 @@ export const useFetchExemplars = ({
   profileId,
   isSupported,
   isComponentVisible,
+  clusterSupport,
 }: UseFetchExemplarsParams): UseFetchExemplarsResult => {
-  const isExemplarsEnabled = useFeatureFlag(
-    FEATURE_FLAGS.IS_EXEMPLARS_ENABLED,
-    FEATURE_FLAG_DEFAULTS[FEATURE_FLAGS.IS_EXEMPLARS_ENABLED]
-  );
   const reportError = useReportChartSectionError();
   const { dataSource } = fetchParams;
   const timeFieldName = dataSource?.timeFieldName;
@@ -84,9 +90,10 @@ export const useFetchExemplars = ({
     uiSettings,
   } = services;
 
+  const clusterReady = clusterSupport.status === 'supported';
   // String identity stays put when METRICS_INFO replaces `metricItem` with an equal object.
   const esqlQuery =
-    isExemplarsEnabled && isComponentVisible && dataSource && isSupported
+    clusterReady && isComponentVisible && dataSource && isSupported
       ? createExemplarsQuery({
           metricItem,
           whereStatements,
@@ -153,6 +160,22 @@ export const useFetchExemplars = ({
     // Drop the previous rows as soon as a refetch starts so stale exemplars never render.
     { clearValueOnNext: true }
   );
+
+  if (clusterSupport.status === 'checking') {
+    return CHECKING_EXEMPLARS_FETCH;
+  }
+  // The flag-off path never searches. Ignore the abortable hook's loading tick.
+  if (clusterSupport.status === 'disabled') {
+    return { ...IDLE_EXEMPLARS_FETCH, isLoading: false };
+  }
+  if (clusterSupport.status === 'unsupported' || clusterSupport.status === 'failed') {
+    return {
+      exemplars: undefined,
+      hasError: true,
+      errorMessage: clusterSupport.errorMessage,
+      isLoading: false,
+    };
+  }
 
   return { ...(value ?? IDLE_EXEMPLARS_FETCH), isLoading: loading };
 };
