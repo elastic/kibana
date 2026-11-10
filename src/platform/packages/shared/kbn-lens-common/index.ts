@@ -316,6 +316,18 @@ export type {
   LensAppLocator,
 } from './locator_types';
 export type { NavigateToLensLayer, NavigateToLensContext } from './convert_to_lens_types';
+export type {
+  LensExtension,
+  LensExtensionLayer,
+  LensExtensionMatchContext,
+  LensExtensionFetchContext,
+  LensExtensionOverlay,
+  LensExtensionOverlayData,
+  LensExtensionsRuntimeConfig,
+  LensOverlayPoint,
+  LensOverlayPointClickEvent,
+  LensPointsOverlay,
+} from './extensions/types';
 
 /**
  * Constants are used by both the expression language and the lens code
@@ -534,6 +546,7 @@ export {
   isTextBasedAttributes,
   hasTextBasedLayers,
   getTextBasedLayerQueries,
+  getTextBasedLayerQueriesById,
   getRepresentativeQuery,
   getChartScopedFilterQuery,
   withLegacyAggregateQuerySlot,

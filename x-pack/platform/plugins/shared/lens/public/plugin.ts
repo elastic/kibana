@@ -47,6 +47,7 @@ import {
   type DatasourceMap,
   type VisualizationMap,
   type LensTopNavMenuEntryGenerator,
+  type LensExtension,
   type VisualizeEditorContext,
   type EditorFrameSetup,
   type LensDocument,
@@ -141,6 +142,7 @@ import type { Visualization, LensSerializedState, TypedLensByValueInput, Suggest
 import type { LensEmbeddableStartServices } from './react_embeddable/types';
 import type { EditorFrameServiceValue } from './editor_frame_service/editor_frame_service_context';
 import { setLensBuilder } from './lazy_builder';
+import { createLensExtensionRegistry, type LensExtensionRegistry } from './extensions';
 
 export type { SaveProps } from './app_plugin';
 
@@ -213,6 +215,15 @@ export interface LensPublicSetup {
   registerTopNavMenuEntryGenerator: (
     navigationPromptGenerator: LensTopNavMenuEntryGenerator
   ) => void;
+  /**
+   * Register a capability that Lens applies at render time to every chart matching its rules,
+   * such as an overlay of points drawn over XY layers. Nothing is persisted in the chart.
+   *
+   * This API might undergo breaking changes even in minor versions.
+   *
+   * @experimental
+   */
+  registerExtension: (extension: LensExtension) => void;
 }
 
 export interface LensPublicStart {
@@ -304,6 +315,7 @@ export class LensPlugin {
   private gaugeVisualization: GaugeVisualizationType | undefined;
   private tagcloudVisualization: TagcloudVisualizationType | undefined;
   private topNavMenuEntries: LensTopNavMenuEntryGenerator[] = [];
+  private extensionRegistry: LensExtensionRegistry = createLensExtensionRegistry();
   private hasDiscoverAccess: boolean = false;
   private dataViewsService: DataViewsPublicPluginStart | undefined;
   private locator?: LensAppLocator;
@@ -573,6 +585,9 @@ export class LensPlugin {
       },
       registerTopNavMenuEntryGenerator: (menuEntryGenerator: LensTopNavMenuEntryGenerator) => {
         this.topNavMenuEntries.push(menuEntryGenerator);
+      },
+      registerExtension: (extension: LensExtension) => {
+        this.extensionRegistry.register(extension);
       },
     };
   }
