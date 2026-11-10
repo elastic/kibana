@@ -24,6 +24,8 @@ dependsOn:
   - '@kbn/management-plugin'
   - '@kbn/app-header'
   - '@kbn/scout'
+  - '@kbn/storybook'
+  - '@kbn/kibana-react-plugin'
 tags:
   - plugin
   - prod
@@ -37,5 +39,6 @@ fileGroups:
     - public/**/*
     - server/**/*
     - test/**/*
+    - .storybook/**/*
     - '!target/**/*'
 tasks: {}

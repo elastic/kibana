@@ -25,3 +25,12 @@ Or start the servers and run the tests in one go:
 ```sh
 node scripts/scout run-tests --location local --arch serverless --domain vectordb --config x-pack/platform/plugins/private/search_boost/test/scout_search_boost/ui/playwright.config.ts
 ```
+
+## Storybook
+
+Stateless components have stories (`*.stories.tsx`) next to them. Core services are mocked in
+`.storybook/decorator.tsx`. To start the Storybook:
+
+```sh
+pnpm storybook search_boost
+```
