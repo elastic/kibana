@@ -6,6 +6,11 @@
  */
 
 import expect from '@kbn/expect';
+import {
+  DASHBOARD_ATTACHMENT_TYPE,
+  DASHBOARD_SO_TYPE,
+} from '@kbn/cases-plugin/common/constants/attachments';
+import type { BulkCreateUnifiedAttachmentsRequest } from '@kbn/cases-plugin/common/types/api';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { getPostCaseRequest, postCaseReq } from '../../../../common/lib/mock';
 import {
@@ -49,6 +54,31 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(await searchCaseIds('unified searchable comment', ['cases-comments.comment'])).to.eql([
         postedCase.id,
       ]);
+    });
+
+    it('finds every case when more than 10 attachments match', async () => {
+      const postedCases = await Promise.all(
+        Array.from({ length: 11 }, () => createCase(supertest, postCaseReq))
+      );
+      await Promise.all(
+        postedCases.map(({ id }) =>
+          bulkCreateAttachments({
+            supertest,
+            caseId: id,
+            params: [
+              {
+                type: 'comment' as const,
+                data: { content: 'shared searchable comment' },
+                owner: 'securitySolutionFixture',
+              },
+            ],
+          })
+        )
+      );
+
+      const caseIds = await searchCaseIds('shared searchable comment', ['cases-comments.comment']);
+
+      expect(caseIds.sort()).to.eql(postedCases.map(({ id }) => id).sort());
     });
 
     it('finds a case by the id of a unified alert', async () => {
@@ -102,6 +132,26 @@ export default ({ getService }: FtrProviderContext): void => {
         postedCase.id,
       ]);
       expect(await searchCaseIds('search-event-id', ['cases-comments.alertId'])).to.eql([]);
+    });
+
+    it('does not match a non-alert, non-event attachment with the same attachmentId', async () => {
+      const postedCase = await createCase(supertest, postCaseReq);
+      await bulkCreateAttachments({
+        supertest,
+        caseId: postedCase.id,
+        params: [
+          {
+            type: DASHBOARD_ATTACHMENT_TYPE,
+            attachmentId: 'colliding-id',
+            metadata: { title: 'My dashboard', soType: DASHBOARD_SO_TYPE },
+            owner: 'securitySolutionFixture',
+          },
+        ] as unknown as BulkCreateUnifiedAttachmentsRequest,
+      });
+
+      expect(
+        await searchCaseIds('colliding-id', ['cases-comments.alertId', 'cases-comments.eventId'])
+      ).to.eql([]);
     });
   });
 };
