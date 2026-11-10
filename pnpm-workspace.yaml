@@ -1197,7 +1197,7 @@ packages:
   - 'src/platform/test/plugin_functional/plugins/usage_collection'
   - 'src/platform/test/server_integration/plugins/status_plugin_a'
   - 'src/platform/test/server_integration/plugins/status_plugin_b'
-  - 'src/platform/test_plugins/user_storage_test'
+  - 'src/platform/test_plugins/user_storage'
   - 'src/setup_node_env'
   - 'x-pack/examples/alerting_example'
   - 'x-pack/examples/embedded_lens_example'

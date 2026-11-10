@@ -169,7 +169,7 @@ describe('plugin_discovery', () => {
 
 describe('discoverPlugins with explicit paths', () => {
   it('keeps the user storage test plugin opt-in', async () => {
-    const pluginPath = Path.resolve(REPO_ROOT, 'src/platform/test_plugins/user_storage_test');
+    const pluginPath = Path.resolve(REPO_ROOT, 'src/platform/test_plugins/user_storage');
     const [defaultPlugins, testPlugins, explicitPlugins] = await Promise.all([
       discoverPlugins({ repoRoot: REPO_ROOT }),
       discoverPlugins({ repoRoot: REPO_ROOT, testPlugins: true }),

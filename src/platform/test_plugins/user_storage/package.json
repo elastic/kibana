@@ -1,7 +1,7 @@
 {
   "name": "@kbn/user-storage-test-plugin",
   "version": "1.0.0",
-  "main": "target/test_plugins/user_storage_test",
+  "main": "target/test_plugins/user_storage",
   "kibana": {
     "version": "kibana",
     "templateVersion": "1.0.0"
