@@ -520,7 +520,7 @@ describe('ActionPolicyForm', () => {
       expect(screen.queryByTestId('actionPolicyFormDestinationCards')).not.toBeInTheDocument();
     });
 
-    it('does not select the option when the tags badge is clicked', async () => {
+    it('shows the workflow tags on hover without selecting the option', async () => {
       mockWorkflowResults = [
         {
           id: 'workflow-1',
@@ -534,9 +534,9 @@ describe('ActionPolicyForm', () => {
 
       await user.click(within(screen.getByTestId('destinationsInput')).getByRole('combobox'));
       const option = await screen.findByRole('option', { name: /Workflow 1/ });
-      await user.click(within(option).getByLabelText('Show tags'));
+      await user.hover(within(option).getByTestId('workflowOptionTagsBadge'));
 
-      expect(await screen.findByText('alerts')).toBeInTheDocument();
+      expect(await screen.findByText('slack, alerts')).toBeInTheDocument();
       expect(screen.queryByTestId('actionPolicyFormDestinationCards')).not.toBeInTheDocument();
     });
 
