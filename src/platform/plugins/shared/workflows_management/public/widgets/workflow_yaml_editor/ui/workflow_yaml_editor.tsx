@@ -35,6 +35,7 @@ import {
   useWorkflowEventsOnDecorations,
   useWorkflowIdDecorations,
 } from './decorations';
+import { useBreakpointDecorations } from './decorations/use_breakpoint_decorations';
 import { useServiceAccountDecorations } from './decorations/use_service_account_decorations';
 import { EditorSettingsPopover } from './editor_settings_popover';
 import type { ExtraAction } from './extra_actions_bar';
@@ -332,6 +333,7 @@ export const WorkflowYAMLEditor = ({
 
   // Lifecycle
   const [isEditorMounted, setIsEditorMounted] = useState(false);
+  const { styles: breakpointStyles } = useBreakpointDecorations(editorRef.current, isEditorMounted);
   // Mounted editor instance exposed to the minimap as state (null until handleEditorDidMount).
   // Using state (rather than editorRef + isEditorMounted) gives the minimap a single prop with
   // well-defined null/non-null semantics and avoids the ref-then-boolean timing pattern.
@@ -939,8 +941,8 @@ export const WorkflowYAMLEditor = ({
   );
 
   const editorWrapperCss = useMemo(
-    () => css([styles.container, stepExecutionStyles]),
-    [styles.container, stepExecutionStyles]
+    () => css([styles.container, stepExecutionStyles, breakpointStyles]),
+    [styles.container, stepExecutionStyles, breakpointStyles]
   );
 
   return (

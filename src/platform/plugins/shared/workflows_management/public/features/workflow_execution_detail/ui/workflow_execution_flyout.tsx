@@ -90,6 +90,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
       resumeMessage,
       resumeSchema,
       approvalLabels,
+      isBreakpointPause,
       hasResumeError,
       retryResume,
     } = useWaitingStepResume(executionId, workflowExecution);
@@ -105,6 +106,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
               stepStartedAt: waitingStepStartedAt,
               resumeSchema,
               approvalLabels,
+              isBreakpointPause,
               autoOpen: shouldAutoResume,
               submitState: resumeSubmitState,
             }
@@ -112,6 +114,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
       [
         approvalLabels,
         executionId,
+        isBreakpointPause,
         resumeMessage,
         resumeSchema,
         resumeSubmitState,

@@ -49,13 +49,29 @@ export function registerTestWorkflowRoute(deps: RouteDependencies) {
               inputs: schema.recordOf(schema.string(), schema.any(), {
                 meta: { description: 'Key-value inputs for the test execution.' },
               }),
+              debug: schema.maybe(
+                schema.object({
+                  enabled: schema.boolean({
+                    meta: { description: 'Whether debug mode (mocks and breakpoints) is enabled.' },
+                  }),
+                  breakpoints: schema.maybe(
+                    schema.arrayOf(schema.string({ minLength: 1, maxLength: 512 }), {
+                      maxSize: 200,
+                      meta: {
+                        description:
+                          'Step names where execution should pause before running the step.',
+                      },
+                    })
+                  ),
+                })
+              ),
             }),
           },
         },
       },
       withAvailabilityCheck(async (context, request, response) => {
         try {
-          const { workflowId, workflowYaml, inputs: rawInputs } = request.body;
+          const { workflowId, workflowYaml, inputs: rawInputs, debug } = request.body;
 
           if (!workflowId && !workflowYaml) {
             return response.badRequest({
@@ -75,6 +91,7 @@ export function registerTestWorkflowRoute(deps: RouteDependencies) {
             workflowId,
             workflowYaml,
             inputs,
+            debug,
             spaceId,
             request,
           });

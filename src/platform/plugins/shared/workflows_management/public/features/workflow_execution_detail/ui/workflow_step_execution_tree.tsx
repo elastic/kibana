@@ -18,6 +18,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowExecutionDto, WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import {
   ExecutionStatus,
+  getStepByNameFromNestedSteps,
   getTriggerName,
   isDangerousStatus,
   isFailedBeforeSteps,
@@ -321,6 +322,7 @@ function convertTreeToOpenNodes(
     /** Sibling-aware derived statuses (includes trailing not-run constraint). */
     iterationStatusOverrides?: Map<number, ExecutionStatus>;
     definition?: WorkflowYaml | null;
+    isDebugExecution?: boolean;
     /**
      * When false, foreach/while iteration children render as a full list
      * (every iteration pinned, no gap rows). Defaults to true (Table tab).
@@ -738,14 +740,30 @@ function convertTreeToOpenNodes(
       status === ExecutionStatus.WAITING_FOR_CHILD ||
       status === ExecutionStatus.PENDING;
 
+    const isStepMocked = Boolean(
+      options?.isDebugExecution &&
+        !isTriggerPseudoStep &&
+        !isBranchLabel &&
+        !isIterationStepType(stepType) &&
+        options?.definition?.steps &&
+        (
+          getStepByNameFromNestedSteps(options.definition.steps, stepId) as {
+            mock?: unknown;
+          } | null
+        )?.mock != null
+    );
+
     const rowStateTags = (() => {
+      const tags: Array<'running' | 'final' | 'recovered' | 'mocked'> = [];
       if (item.isRetryAttempt && item.isFinalAttempt) {
-        return isInFlightAttempt ? (['running'] as const) : (['final'] as const);
+        tags.push(isInFlightAttempt ? 'running' : 'final');
+      } else if (item.retryRecovered) {
+        tags.push('recovered');
       }
-      if (item.retryRecovered) {
-        return ['recovered'] as const;
+      if (isStepMocked) {
+        tags.push('mocked');
       }
-      return undefined;
+      return tags.length > 0 ? tags : undefined;
     })();
 
     const retryMaxAttempts = (() => {
@@ -1509,6 +1527,9 @@ export const WorkflowStepExecutionTree = ({
         errorArrivalPulseStepId,
         isExecutionComplete: isTerminalStatus(execution.status),
         definition,
+        isDebugExecution: Boolean(
+          (execution.context?.debug as { enabled?: boolean } | undefined)?.enabled
+        ),
         diagnose: diagnoseOptions,
         waitingAction,
       }

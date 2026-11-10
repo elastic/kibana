@@ -73,7 +73,7 @@ export class WorkflowExecutionPage {
    * @param timeout - The timeout in milliseconds
    */
   async waitForExecutionStatus(
-    status: 'completed' | 'failed' | 'running' | 'cancelled',
+    status: 'completed' | 'failed' | 'running' | 'cancelled' | 'waiting_for_input',
     timeout: number
   ) {
     await this.waitForExecutionView(timeout);

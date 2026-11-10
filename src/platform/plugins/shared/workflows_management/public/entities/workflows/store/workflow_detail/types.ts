@@ -67,6 +67,8 @@ export interface WorkflowDetailState {
   focusedTriggerId?: string;
   /** The step id that is highlighted in the workflow yaml editor */
   highlightedStepId?: string;
+  /** Step IDs with active debugger breakpoints */
+  breakpoints: string[];
   /** The modal to test the workflow is open */
   isTestModalOpen: boolean;
   /** When set, Test Step modal is open for this step id (undefined = closed) */

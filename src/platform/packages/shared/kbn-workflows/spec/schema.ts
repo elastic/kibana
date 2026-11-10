@@ -87,13 +87,41 @@ const IfConditionSchema = z
     'KQL condition that controls whether this step runs, e.g. "steps.prev.output.status : \'success\'"'
   );
 
+export const BaseSerializedErrorSchema = lazySchema(() =>
+  z.object({
+    type: z.string(),
+    message: z.string(),
+    details: z.record(z.string(), z.unknown()).optional(),
+    /** `false` when retrying cannot succeed, so `on-failure.retry` without a `condition` skips it. */
+    retryable: z.boolean().optional(),
+  })
+);
+export type SerializedError = z.infer<typeof BaseSerializedErrorSchema>;
+
+export const StepMockSchema = lazySchema(() =>
+  z
+    .union([
+      z.object({
+        output: z.unknown(),
+      }),
+      z.object({
+        error: BaseSerializedErrorSchema,
+      }),
+    ])
+    .describe('Mocked step output or error used only when running the workflow in debug mode.')
+);
+export type StepMock = z.infer<typeof StepMockSchema>;
+
 // Base step schema, with recursive steps property
-export const BaseStepSchema = z.object({
-  name: z.string().min(1),
-  type: z.string(),
-  'max-step-size': ByteSizeSchema.optional(),
-  if: IfConditionSchema.optional(),
-});
+export const BaseStepSchema = lazySchema(() =>
+  z.object({
+    name: z.string().min(1),
+    type: z.string(),
+    'max-step-size': ByteSizeSchema.optional(),
+    if: IfConditionSchema.optional(),
+    mock: StepMockSchema.optional(),
+  })
+);
 export type BaseStep = z.infer<typeof BaseStepSchema>;
 
 export const WorkflowOnFailureSchema = z.object({
@@ -309,6 +337,7 @@ export const BuiltInStepProperties = [
   'type',
   'with',
   'if',
+  'mock',
   'foreach',
   'timeout',
   'max-step-size',
@@ -1700,17 +1729,6 @@ export const ForEachContextSchema = z.object({
   total: z.number().int(),
 });
 export type ForEachContext = z.infer<typeof ForEachContextSchema>;
-
-export const BaseSerializedErrorSchema = lazySchema(() =>
-  z.object({
-    type: z.string(),
-    message: z.string(),
-    details: z.record(z.string(), z.unknown()).optional(),
-    /** `false` when retrying cannot succeed, so `on-failure.retry` without a `condition` skips it. */
-    retryable: z.boolean().optional(),
-  })
-);
-export type SerializedError = z.infer<typeof BaseSerializedErrorSchema>;
 
 export const WhileContextSchema = z.object({
   iteration: z.number().int(),

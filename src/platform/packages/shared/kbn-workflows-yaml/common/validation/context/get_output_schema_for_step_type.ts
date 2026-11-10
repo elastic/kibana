@@ -14,10 +14,48 @@ import { z } from '@kbn/zod/v4';
 import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
 import type { WorkflowContextRegistry } from './registry';
 import { structuralStepOutputSchemas } from './structural_step_output_schemas';
+import { inferZodType } from '../../zod/infer_zod_type';
 
 const waitForInputFallbackSchema: z.ZodSchema = z.record(z.string(), z.unknown());
 
+function applyMockOutputSchema(baseSchema: z.ZodSchema, node: GraphNodeUnion): z.ZodSchema {
+  if (!('configuration' in node) || !node.configuration || typeof node.configuration !== 'object') {
+    return baseSchema;
+  }
+  const mock = (node.configuration as { mock?: { output?: unknown } }).mock;
+  if (!mock || !('output' in mock) || mock.output === undefined) {
+    return baseSchema;
+  }
+  const inferredMock = inferZodType(mock.output);
+  if (baseSchema instanceof z.ZodUnknown || baseSchema instanceof z.ZodAny) {
+    return inferredMock;
+  }
+  if (baseSchema instanceof z.ZodObject && inferredMock instanceof z.ZodObject) {
+    const mergedShape: Record<string, z.ZodType> = { ...baseSchema.shape };
+    for (const [key, mockFieldSchema] of Object.entries(inferredMock.shape)) {
+      const existingField = mergedShape[key];
+      if (
+        !existingField ||
+        existingField instanceof z.ZodUnknown ||
+        existingField instanceof z.ZodAny
+      ) {
+        mergedShape[key] = mockFieldSchema as z.ZodType;
+      }
+    }
+    return z.object(mergedShape);
+  }
+  return baseSchema;
+}
+
 export const getOutputSchemaForStepType = (
+  registry: WorkflowContextRegistry,
+  node: GraphNodeUnion
+): z.ZodSchema => {
+  const baseSchema = resolveBaseOutputSchemaForStepType(registry, node);
+  return applyMockOutputSchema(baseSchema, node);
+};
+
+const resolveBaseOutputSchemaForStepType = (
   registry: WorkflowContextRegistry,
   node: GraphNodeUnion
 ): z.ZodSchema => {

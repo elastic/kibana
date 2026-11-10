@@ -12,6 +12,7 @@ import { useDispatch, useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import { useRunWorkflow, useTestWorkflow, useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import {
+  selectBreakpoints,
   selectEditorYaml,
   selectIsTestModalOpen,
   selectReplayExecutionId,
@@ -46,6 +47,7 @@ export const WorkflowDetailTestModal = () => {
   const definition = useSelector(selectWorkflowDefinition);
   const workflowId = useSelector(selectWorkflowId);
   const yamlString = useSelector(selectEditorYaml);
+  const breakpoints = useSelector(selectBreakpoints);
 
   const testWorkflow = useAsyncThunk(testWorkflowThunk);
   const { mutateAsync: runWorkflow } = useRunWorkflow();
@@ -111,6 +113,24 @@ export const WorkflowDetailTestModal = () => {
     ]
   );
 
+  const handleDebugWorkflow = useCallback(
+    async (inputs: Record<string, unknown>, triggerTab?: WorkflowTriggerTab) => {
+      const executionId = await testWorkflow({
+        inputs,
+        triggerTab,
+        debug: {
+          enabled: true,
+          breakpoints,
+        },
+      });
+
+      if (executionId) {
+        selectEditorRun(executionId.workflowExecutionId);
+      }
+    },
+    [breakpoints, selectEditorRun, testWorkflow]
+  );
+
   const closeModal = useCallback(() => {
     dispatch(setIsTestModalOpen(false));
     dispatch(clearReplay());
@@ -166,6 +186,8 @@ export const WorkflowDetailTestModal = () => {
       yamlString={yamlString}
       onClose={closeModal}
       onSubmit={handleRunWorkflow}
+      onDebugSubmit={isReplay ? undefined : handleDebugWorkflow}
+      hasBreakpoints={breakpoints.length > 0}
       initialExecutionId={replayExecutionId ?? undefined}
     />
   );

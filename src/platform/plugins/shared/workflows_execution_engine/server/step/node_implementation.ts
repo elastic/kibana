@@ -9,7 +9,8 @@
 
 import apm from 'elastic-apm-node';
 import type { ByteSizeValue } from '@kbn/config-schema';
-import type { SerializedError } from '@kbn/workflows';
+import type { SerializedError, StepMock } from '@kbn/workflows';
+import { ExecutionStatus } from '@kbn/workflows';
 import { ExecutionError } from '@kbn/workflows/server';
 import {
   DEFAULT_MAX_STEP_SIZE,
@@ -19,6 +20,7 @@ import {
   toExecutionError,
 } from './errors';
 import type { ConnectorExecutor } from '../connector_executor';
+import { RESUME_INPUT_TAKEN_FOR_KEY } from '../repositories/resume_context_revert';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 
@@ -161,6 +163,7 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
     }
 
     let input: Record<string, unknown> = {};
+    this.clearBreakpointPauseOnResume();
     this.stepExecutionRuntime.startStep();
 
     // Start the span after a microtask so it does not stay in the caller's APM context
@@ -178,7 +181,18 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
     try {
       input = await this.getInput();
       this.stepExecutionRuntime.setInput(input);
-      const result = await this._run(input);
+
+      if (this.shouldPauseAtBreakpoint()) {
+        this.enterBreakpointPause();
+        suspended = true;
+        if (stepSpan) {
+          stepSpan.setOutcome('unknown');
+        }
+        return;
+      }
+
+      const mockConfig = this.getActiveDebugMock();
+      const result = mockConfig ? this.runStepMock(input, mockConfig) : await this._run(input);
 
       // Layer 2: Enforce output size limit before storing in execution state.
       // This is the generic catch-all that protects every step type against
@@ -309,6 +323,120 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
       input,
       output: undefined,
       error: toExecutionError(error),
+    };
+  }
+
+  private getNodeConfiguration(): Record<string, unknown> | undefined {
+    if (
+      'configuration' in this.stepExecutionRuntime.node &&
+      this.stepExecutionRuntime.node.configuration &&
+      typeof this.stepExecutionRuntime.node.configuration === 'object'
+    ) {
+      return this.stepExecutionRuntime.node.configuration as Record<string, unknown>;
+    }
+    return undefined;
+  }
+
+  private isDebugEnabled(): boolean {
+    const execution = this.workflowExecutionRuntime.getWorkflowExecution();
+    const debug = execution?.context?.debug as { enabled?: boolean } | undefined;
+    return Boolean(execution?.isTestRun && debug?.enabled === true);
+  }
+
+  private shouldPauseAtBreakpoint(): boolean {
+    if (!this.isDebugEnabled()) {
+      return false;
+    }
+    const execution = this.workflowExecutionRuntime.getWorkflowExecution();
+    const debug = execution?.context?.debug as { breakpoints?: unknown } | undefined;
+    if (!Array.isArray(debug?.breakpoints) || debug.breakpoints.length === 0) {
+      return false;
+    }
+    const nodeConfig = this.getNodeConfiguration();
+    const stepName =
+      (typeof nodeConfig?.name === 'string' && nodeConfig.name.length > 0
+        ? nodeConfig.name
+        : undefined) ?? this.step.name;
+    if (!debug.breakpoints.includes(stepName)) {
+      return false;
+    }
+    return this.stepExecutionRuntime.getCurrentStepState()?.breakpointHit !== true;
+  }
+
+  private enterBreakpointPause(): void {
+    const existingState = this.stepExecutionRuntime.getCurrentStepState() ?? {};
+    this.stepExecutionRuntime.setCurrentStepState({
+      ...existingState,
+      breakpointPaused: true,
+      breakpointHit: true,
+    });
+    this.stepExecutionRuntime.tryEnterWaitUntil(undefined, ExecutionStatus.WAITING_FOR_INPUT);
+  }
+
+  private clearBreakpointPauseOnResume(): void {
+    const currentState = this.stepExecutionRuntime.getCurrentStepState();
+    if (!currentState?.breakpointPaused) {
+      return;
+    }
+    this.stepExecutionRuntime.setCurrentStepState({
+      ...currentState,
+      breakpointPaused: false,
+    });
+    const context = this.workflowExecutionRuntime.getWorkflowExecution()?.context;
+    if (context != null && typeof context === 'object' && 'resumeInput' in context) {
+      this.stepExecutionRuntime.updateWorkflowExecution({
+        context: {
+          ...context,
+          resumeInput: null,
+          pendingInteractiveResume: false,
+          [RESUME_INPUT_TAKEN_FOR_KEY]: null,
+        },
+      });
+    }
+  }
+
+  private getActiveDebugMock(): StepMock | undefined {
+    if (!this.isDebugEnabled()) {
+      return undefined;
+    }
+    const nodeConfig = this.getNodeConfiguration();
+    const mock = nodeConfig?.mock ?? (this.step as { mock?: StepMock }).mock;
+    if (mock && typeof mock === 'object' && ('output' in mock || 'error' in mock)) {
+      return mock as StepMock;
+    }
+    return undefined;
+  }
+
+  private runStepMock(input: Record<string, unknown>, mock: StepMock): RunStepResult {
+    const ctx = this.stepExecutionRuntime.contextManager;
+    if ('error' in mock && mock.error) {
+      const renderedError = ctx.renderValueAccordingToContext(mock.error);
+      return {
+        input,
+        output: undefined,
+        error: {
+          type:
+            typeof renderedError.type === 'string' && renderedError.type.length > 0
+              ? renderedError.type
+              : 'MockStepError',
+          message:
+            typeof renderedError.message === 'string'
+              ? renderedError.message
+              : String(renderedError.message ?? 'Mocked step error'),
+          ...(renderedError.details ? { details: renderedError.details } : {}),
+          ...(typeof renderedError.retryable === 'boolean'
+            ? { retryable: renderedError.retryable }
+            : {}),
+        },
+      };
+    }
+
+    const renderedOutput =
+      'output' in mock ? ctx.renderValueAccordingToContext(mock.output) : undefined;
+    return {
+      input,
+      output: renderedOutput,
+      error: undefined,
     };
   }
 }

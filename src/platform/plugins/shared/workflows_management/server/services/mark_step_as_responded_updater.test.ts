@@ -109,6 +109,19 @@ describe('createMarkStepAsRespondedUpdater', () => {
     ).toEqual(expect.objectContaining({ hitl: expect.objectContaining({ respondedBy: 'alice' }) }));
   });
 
+  it('claims a step paused at a debugger breakpoint', () => {
+    const updater = createMarkStepAsRespondedUpdater(audit, 'default', 'run-1');
+    expect(
+      updater({
+        spaceId: 'default',
+        workflowRunId: 'run-1',
+        stepType: 'console',
+        status: ExecutionStatus.WAITING_FOR_INPUT,
+        state: { breakpointPaused: true, breakpointHit: true },
+      })
+    ).toEqual(expect.objectContaining({ hitl: expect.objectContaining({ respondedBy: 'alice' }) }));
+  });
+
   it('no-ops when finishedAt is set', () => {
     const updater = createMarkStepAsRespondedUpdater(audit, 'default', 'run-1');
     expect(

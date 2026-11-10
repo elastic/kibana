@@ -27,6 +27,7 @@ export const MARK_STEP_AS_RESPONDED_SOURCE_FIELDS = [
   'status',
   'hitl',
   'input',
+  'state',
 ] as const satisfies ReadonlyArray<keyof EsWorkflowStepExecution & string>;
 
 export interface MarkStepAsRespondedAudit {
@@ -74,7 +75,7 @@ export const createMarkStepAsRespondedUpdater = (
       return 'noop';
     }
     // Container steps (foreach, if) stay `running` while a nested wait is paused and must not win the claim.
-    if (!isHitlWaitStepType(current.stepType)) {
+    if (!isHitlWaitStepType(current.stepType) && current.state?.breakpointPaused !== true) {
       return 'noop';
     }
     if (current.finishedAt != null) {

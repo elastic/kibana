@@ -242,6 +242,18 @@ export class WorkflowEditorPage {
   }
 
   /**
+   * Toggle a debugger breakpoint on a given step from the step actions toolbar.
+   */
+  async toggleStepBreakpoint(stepId: string): Promise<void> {
+    const searchText = `name: ${stepId}`;
+    await this.setCursorToText(searchText);
+    await this.page.testSubj
+      .locator(`workflowStepActionsContainer-${stepId}`)
+      .waitFor({ state: 'visible' });
+    await this.page.testSubj.click('workflowToggleBreakpoint');
+  }
+
+  /**
    * Set the Monaco cursor to the Nth occurrence of `searchText` in the YAML
    * editor and scroll it into view.
    */

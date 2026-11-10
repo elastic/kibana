@@ -851,14 +851,26 @@ export class WorkflowExecutionQueryService {
       if (execution.stepExecutionIds?.length) {
         const { items: steps } = await this.deps.stepExecutionsDataClient.getByIds(
           execution.stepExecutionIds,
-          { sourceIncludes: ['id', 'spaceId', 'workflowRunId', 'stepType', 'status', 'finishedAt'] }
+          {
+            sourceIncludes: [
+              'id',
+              'spaceId',
+              'workflowRunId',
+              'stepType',
+              'status',
+              'finishedAt',
+              'state',
+            ],
+          }
         );
         return (
           steps.findLast(
             ({ document: step }) =>
               step.spaceId === spaceId &&
               step.workflowRunId === executionId &&
-              (step.stepType === 'waitForInput' || step.stepType === 'waitForApproval') &&
+              (step.stepType === 'waitForInput' ||
+                step.stepType === 'waitForApproval' ||
+                step.state?.breakpointPaused === true) &&
               step.status === 'waiting_for_input' &&
               !step.finishedAt
           )?.document.id ?? null

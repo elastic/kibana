@@ -29,6 +29,7 @@ import { useFetchAlertsIndexNamesQuery } from '@kbn/alerts-ui-shared';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowYaml } from '@kbn/workflows';
+import { walkStepTree } from '@kbn/workflows/graph_layout/walk_step_tree';
 import { extractNormalizedInputsFromYaml } from '@kbn/workflows/spec/lib/field_conversion';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { TRIGGER_TABS_DESCRIPTIONS, TRIGGER_TABS_LABELS } from './translations';
@@ -64,12 +65,27 @@ export interface WorkflowExecuteModalProps {
   isTestRun: boolean;
   onClose: () => void;
   onSubmit: (data: Record<string, unknown>, triggerTab: WorkflowTriggerTab) => void | Promise<void>;
+  onDebugSubmit?: (
+    data: Record<string, unknown>,
+    triggerTab: WorkflowTriggerTab
+  ) => void | Promise<void>;
+  hasBreakpoints?: boolean;
   yamlString?: string;
   /** When set, open with Historical tab and this execution pre-selected */
   initialExecutionId?: string;
 }
 export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
-  ({ definition, workflowId, onClose, onSubmit, isTestRun, yamlString, initialExecutionId }) => {
+  ({
+    definition,
+    workflowId,
+    onClose,
+    onSubmit,
+    onDebugSubmit,
+    hasBreakpoints = false,
+    isTestRun,
+    yamlString,
+    initialExecutionId,
+  }) => {
     const modalTitleId = useGeneratedHtmlId();
     const runExecuteForbiddenTooltipDescriptionId = useGeneratedHtmlId({
       prefix: 'workflowExecuteModalRunForbidden',
@@ -175,74 +191,93 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
       setEventTriggerTableSelectionCount(count);
     }, []);
 
-    const handleSubmit = useCallback(async () => {
-      if (!canExecuteWorkflow) {
+    const submitWithHandler = useCallback(
+      async (
+        submitFn: (
+          data: Record<string, unknown>,
+          triggerTab: WorkflowTriggerTab
+        ) => void | Promise<void>
+      ) => {
+        if (!canExecuteWorkflow) {
+          return;
+        }
+        const trimmed = executionInput.trim();
+        if (selectedTrigger === 'event' && trimmed === '') {
+          setExecutionInputErrors(
+            i18n.translate('workflows.workflowExecuteModal.eventSelectionRequired', {
+              defaultMessage: 'Select a trigger event row to use as the run input.',
+            })
+          );
+          return;
+        }
+        if (selectedTrigger === 'alert' && trimmed === '') {
+          setExecutionInputErrors(
+            i18n.translate('workflows.workflowExecuteModal.alertSelectionRequired', {
+              defaultMessage: 'Select one or more alerts to use as the run input.',
+            })
+          );
+          return;
+        }
+        if (selectedTrigger === 'index' && trimmed === '') {
+          setExecutionInputErrors(
+            i18n.translate('workflows.workflowExecuteModal.documentSelectionRequired', {
+              defaultMessage: 'Select one or more documents to use as the run input.',
+            })
+          );
+          return;
+        }
+        if (selectedTrigger === 'event' && eventTriggerTableSelectionCount > 1) {
+          setExecutionInputErrors(
+            i18n.translate('workflows.workflowExecuteModal.eventMultipleRowsSelected', {
+              defaultMessage: 'Select only one trigger event row before running the workflow.',
+            })
+          );
+          return;
+        }
+        let parsed: Record<string, unknown>;
+        try {
+          parsed = trimmed === '' ? {} : (JSON.parse(executionInput) as Record<string, unknown>);
+        } catch {
+          setExecutionInputErrors(
+            i18n.translate('workflows.workflowExecuteModal.invalidRunPayloadJson', {
+              defaultMessage: 'Fix invalid JSON in the run payload before continuing.',
+            })
+          );
+          return;
+        }
+        setExecutionInputErrors(null);
+        const submittedInput =
+          selectedTrigger === 'manual'
+            ? omitUnchangedWorkflowInputDefaults(parsed, normalizedInputs)
+            : parsed;
+        try {
+          await submitFn(submittedInput, selectedTrigger);
+          onClose();
+        } catch {
+          // Keep the modal open so the user can retry after a failed run.
+        }
+      },
+      [
+        canExecuteWorkflow,
+        selectedTrigger,
+        onClose,
+        executionInput,
+        eventTriggerTableSelectionCount,
+        normalizedInputs,
+      ]
+    );
+
+    const handleSubmit = useCallback(
+      () => submitWithHandler(onSubmit),
+      [submitWithHandler, onSubmit]
+    );
+
+    const handleDebugSubmit = useCallback(() => {
+      if (!onDebugSubmit) {
         return;
       }
-      const trimmed = executionInput.trim();
-      if (selectedTrigger === 'event' && trimmed === '') {
-        setExecutionInputErrors(
-          i18n.translate('workflows.workflowExecuteModal.eventSelectionRequired', {
-            defaultMessage: 'Select a trigger event row to use as the run input.',
-          })
-        );
-        return;
-      }
-      if (selectedTrigger === 'alert' && trimmed === '') {
-        setExecutionInputErrors(
-          i18n.translate('workflows.workflowExecuteModal.alertSelectionRequired', {
-            defaultMessage: 'Select one or more alerts to use as the run input.',
-          })
-        );
-        return;
-      }
-      if (selectedTrigger === 'index' && trimmed === '') {
-        setExecutionInputErrors(
-          i18n.translate('workflows.workflowExecuteModal.documentSelectionRequired', {
-            defaultMessage: 'Select one or more documents to use as the run input.',
-          })
-        );
-        return;
-      }
-      if (selectedTrigger === 'event' && eventTriggerTableSelectionCount > 1) {
-        setExecutionInputErrors(
-          i18n.translate('workflows.workflowExecuteModal.eventMultipleRowsSelected', {
-            defaultMessage: 'Select only one trigger event row before running the workflow.',
-          })
-        );
-        return;
-      }
-      let parsed: Record<string, unknown>;
-      try {
-        parsed = trimmed === '' ? {} : (JSON.parse(executionInput) as Record<string, unknown>);
-      } catch {
-        setExecutionInputErrors(
-          i18n.translate('workflows.workflowExecuteModal.invalidRunPayloadJson', {
-            defaultMessage: 'Fix invalid JSON in the run payload before continuing.',
-          })
-        );
-        return;
-      }
-      setExecutionInputErrors(null);
-      const submittedInput =
-        selectedTrigger === 'manual'
-          ? omitUnchangedWorkflowInputDefaults(parsed, normalizedInputs)
-          : parsed;
-      try {
-        await onSubmit(submittedInput, selectedTrigger);
-        onClose();
-      } catch {
-        // Keep the modal open so the user can retry after a failed run.
-      }
-    }, [
-      canExecuteWorkflow,
-      selectedTrigger,
-      onSubmit,
-      onClose,
-      executionInput,
-      eventTriggerTableSelectionCount,
-      normalizedInputs,
-    ]);
+      return submitWithHandler(onDebugSubmit);
+    }, [submitWithHandler, onDebugSubmit]);
 
     const handleChangeTrigger = useCallback(
       (trigger: WorkflowTriggerTab): void => {
@@ -260,8 +295,24 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
       [triggerTabAvailability, selectedTrigger]
     );
 
+    const hasStepMocks = useMemo(() => {
+      if (!definition?.steps) {
+        return false;
+      }
+      let found = false;
+      walkStepTree(definition.steps as unknown as Parameters<typeof walkStepTree>[0], (step) => {
+        if ((step as { mock?: unknown }).mock != null) {
+          found = true;
+        }
+      });
+      return found;
+    }, [definition]);
+
     const shouldAutoRun = useMemo(() => {
       if (!definition) {
+        return false;
+      }
+      if (isTestRun && (hasBreakpoints || hasStepMocks)) {
         return false;
       }
       if (hasCustomEventTrigger(definition)) {
@@ -269,7 +320,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
       }
       const hasAlertTrigger = definition.triggers?.some((trigger) => trigger.type === 'alert');
       return !hasAlertTrigger && !hasWorkflowInputFields(normalizedInputs);
-    }, [definition, normalizedInputs]);
+    }, [definition, normalizedInputs, isTestRun, hasBreakpoints, hasStepMocks]);
 
     const autoRunFiredRef = useRef(false);
 
@@ -400,6 +451,19 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
         <FormattedMessage id="workflows.runButtonText" defaultMessage="Run" ignoreTag />
       </EuiButton>
     );
+
+    const renderDebugWorkflowButton = () =>
+      isTestRun && onDebugSubmit ? (
+        <EuiButton
+          onClick={handleDebugSubmit}
+          iconType="bug"
+          disabled={runIsDisabled}
+          color="primary"
+          data-test-subj="debugWorkflowButton"
+        >
+          <FormattedMessage id="workflows.debugButtonText" defaultMessage="Debug" ignoreTag />
+        </EuiButton>
+      ) : null;
 
     return (
       <>
@@ -638,6 +702,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
             </EuiFlexGroup>
           </EuiModalBody>
           <EuiModalFooter>
+            {renderDebugWorkflowButton()}
             {!canExecuteWorkflow ? (
               <>
                 <EuiScreenReaderOnly>

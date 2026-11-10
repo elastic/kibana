@@ -22,6 +22,7 @@ export type TreeStateTagKind =
   | 'running'
   | 'final'
   | 'recovered'
+  | 'mocked'
   | 'waitingForInput';
 
 export interface TreeStateTagProps {
@@ -50,6 +51,10 @@ const labelFor = (kind: TreeStateTagKind): string => {
     case 'recovered':
       return i18n.translate('workflows.stepExecutionTreeRow.recoveredTag', {
         defaultMessage: 'recovered',
+      });
+    case 'mocked':
+      return i18n.translate('workflows.stepExecutionTreeRow.mockedTag', {
+        defaultMessage: 'mocked',
       });
     case 'waitingForInput':
       return i18n.translate('workflows.stepExecutionTreeRow.waitingForInputTag', {

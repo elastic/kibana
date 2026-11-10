@@ -21,6 +21,7 @@ export interface WaitingStepAction {
   stepStartedAt?: string;
   resumeSchema?: JsonModelSchemaType;
   approvalLabels?: ApprovalLabels;
+  isBreakpointPause?: boolean;
   autoOpen?: boolean;
   submitState?: React.ComponentProps<typeof ResumeExecutionButton>['submitState'];
 }
@@ -34,6 +35,11 @@ interface WaitingStepActionPanelProps {
 const defaultMessage = i18n.translate(
   'workflows.executionFlyout.waitingStep.userActionRequiredDescription',
   { defaultMessage: 'User action is required' }
+);
+
+const breakpointPausedMessage = i18n.translate(
+  'workflows.executionFlyout.waitingStep.breakpointPausedDescription',
+  { defaultMessage: 'Paused at breakpoint' }
 );
 
 /**
@@ -61,7 +67,10 @@ export const WaitingStepActionPanel = React.memo<WaitingStepActionPanelProps>(
           }}
         >
           <EuiText size="xs" color="warning" data-test-subj="workflowWaitingStepActionMessage">
-            <p>{action.message ?? defaultMessage}</p>
+            <p>
+              {action.message ??
+                (action.isBreakpointPause ? breakpointPausedMessage : defaultMessage)}
+            </p>
           </EuiText>
           <EuiFlexGroup
             gutterSize="s"
@@ -78,6 +87,7 @@ export const WaitingStepActionPanel = React.memo<WaitingStepActionPanelProps>(
                 resumeMessage={action.message}
                 resumeSchema={action.resumeSchema}
                 approvalLabels={action.approvalLabels}
+                isBreakpointPause={action.isBreakpointPause}
                 autoOpen={action.autoOpen}
                 waitingStepExecutionId={action.stepExecutionId}
                 submitState={action.submitState}
