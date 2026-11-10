@@ -59,6 +59,7 @@ const defaultActionsConfig: ActionsConfig = {
     ...defaultInboundEventsLimitConfigs,
   },
   connectorSigningKeys: { enabled: false },
+  catalog: { enabled: false },
 };
 
 describe('ensureUriAllowed', () => {
@@ -1130,6 +1131,21 @@ describe('isConnectorSigningKeysEnabled()', () => {
       connectorSigningKeys: { enabled: true },
     });
     expect(acu.isConnectorSigningKeysEnabled()).toBe(true);
+  });
+});
+
+describe('isConnectorCatalogEnabled()', () => {
+  test('returns false by default', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    expect(acu.isConnectorCatalogEnabled()).toBe(false);
+  });
+
+  test('returns true when catalog.enabled is true', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      catalog: { enabled: true },
+    });
+    expect(acu.isConnectorCatalogEnabled()).toBe(true);
   });
 });
 

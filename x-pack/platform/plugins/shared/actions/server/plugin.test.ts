@@ -87,6 +87,7 @@ function getConfig(overrides = {}) {
       ...defaultInboundEventsLimitConfigs,
     },
     connectorSigningKeys: { enabled: false },
+    catalog: { enabled: false },
     ...overrides,
   };
 }
@@ -123,36 +124,7 @@ describe('Actions Plugin', () => {
     let pluginsSetup: jest.Mocked<ActionsPluginsSetup>;
 
     beforeEach(() => {
-      context = coreMock.createPluginInitializerContext<ActionsConfig>({
-        enabledActionTypes: ['*'],
-        allowedHosts: ['*'],
-        preconfiguredAlertHistoryEsIndex: false,
-        preconfigured: {},
-        maxResponseContentLength: new ByteSizeValue(1000000),
-        responseTimeout: moment.duration(60000),
-        enableFooterInEmail: true,
-        microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
-        microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
-        microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
-        usage: {
-          url: 'ca.path',
-        },
-        auth: {
-          oauth_authorization_code: {
-            rate_limits: {
-              authorize: { lookbackWindow: '1h', limit: 100 },
-              callback: { lookbackWindow: '1h', limit: 100 },
-            },
-          },
-        },
-        inboundEvents: {
-          enabled: false,
-          maxBodyBytes: new ByteSizeValue(1024 * 1024),
-          maxEmitted: 25,
-          ...defaultInboundEventsLimitConfigs,
-        },
-        connectorSigningKeys: { enabled: false },
-      });
+      context = coreMock.createPluginInitializerContext<ActionsConfig>(getConfig());
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
 
@@ -563,43 +535,7 @@ describe('Actions Plugin', () => {
     let pluginsStart: jest.Mocked<ActionsPluginsStart>;
 
     beforeEach(() => {
-      context = coreMock.createPluginInitializerContext<ActionsConfig>({
-        enabledActionTypes: ['*'],
-        allowedHosts: ['*'],
-        preconfiguredAlertHistoryEsIndex: false,
-        preconfigured: {
-          preconfiguredServerLog: {
-            actionTypeId: '.server-log',
-            name: 'preconfigured-server-log',
-            config: {},
-            secrets: {},
-          },
-        },
-        maxResponseContentLength: new ByteSizeValue(1000000),
-        responseTimeout: moment.duration(60000),
-        enableFooterInEmail: true,
-        microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
-        microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
-        microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
-        usage: {
-          url: 'ca.path',
-        },
-        auth: {
-          oauth_authorization_code: {
-            rate_limits: {
-              authorize: { lookbackWindow: '1h', limit: 100 },
-              callback: { lookbackWindow: '1h', limit: 100 },
-            },
-          },
-        },
-        inboundEvents: {
-          enabled: false,
-          maxBodyBytes: new ByteSizeValue(1024 * 1024),
-          maxEmitted: 25,
-          ...defaultInboundEventsLimitConfigs,
-        },
-        connectorSigningKeys: { enabled: false },
-      });
+      context = coreMock.createPluginInitializerContext<ActionsConfig>(getConfig());
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
       coreStart = coreMock.createStart();
@@ -665,6 +601,19 @@ describe('Actions Plugin', () => {
 
         plugin.stop();
         expect(connectorCatalogEnabled$.observed).toBe(false);
+      });
+
+      it('does not read the feature flag when xpack.actions.catalog.enabled is true', async () => {
+        const catalogEnabledPlugin = new ActionsPlugin(
+          coreMock.createPluginInitializerContext<ActionsConfig>(
+            getConfig({ catalog: { enabled: true } })
+          )
+        );
+
+        await catalogEnabledPlugin.setup(coreSetup, pluginsSetup);
+        catalogEnabledPlugin.start(coreStart, pluginsStart);
+
+        expect(coreStart.featureFlags.getBooleanValue$).not.toHaveBeenCalled();
       });
     });
 

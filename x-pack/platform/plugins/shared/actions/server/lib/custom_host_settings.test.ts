@@ -96,6 +96,7 @@ describe('custom_host_settings', () => {
         ...defaultInboundEventsLimitConfigs,
       },
       connectorSigningKeys: { enabled: false },
+      catalog: { enabled: false },
     };
 
     test('ensure it copies over the config parts that it does not touch', () => {

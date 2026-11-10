@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Subscription } from 'rxjs';
+import { of, type Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { extractApiKeyIdFromAuthzHeader } from '@kbn/core-security-server';
 import type { PublicMethodsOf, Writable } from '@kbn/utility-types';
@@ -636,13 +636,6 @@ export class ActionsPlugin
       );
     }
 
-    this.connectorCatalogFeatureFlagSubscription = core.featureFlags
-      .getBooleanValue$(ACTIONS_CONNECTOR_CATALOG_ENABLED_FLAG, false)
-      .subscribe((isConnectorCatalogEnabled: boolean) => {
-        return isConnectorCatalogEnabled;
-        // TODO: implement the connector catalog logic
-      });
-
     const {
       logger,
       licenseState,
@@ -656,6 +649,19 @@ export class ActionsPlugin
     } = this;
 
     const actionsConfigUtils = getActionsConfigurationUtilities(actionsConfig);
+
+    // `xpack.actions.catalog.enabled` is the self-managed switch: on-prem has no flag provider, so the
+    // flag always resolves its fallback there. The flag is the Serverless/ECH switch.
+    const isConnectorCatalogEnabled$ = actionsConfigUtils.isConnectorCatalogEnabled()
+      ? of(true)
+      : core.featureFlags.getBooleanValue$(ACTIONS_CONNECTOR_CATALOG_ENABLED_FLAG, false);
+
+    this.connectorCatalogFeatureFlagSubscription = isConnectorCatalogEnabled$.subscribe(
+      (isConnectorCatalogEnabled: boolean) => {
+        return isConnectorCatalogEnabled;
+        // TODO: implement the connector catalog logic
+      }
+    );
 
     licenseState?.setNotifyUsage(plugins.licensing.featureUsage.notifyUsage);
 
