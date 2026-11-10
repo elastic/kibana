@@ -79,6 +79,10 @@
     "@kbn/lock-manager",
     "@kbn/cloud-plugin",
     "@kbn/connector-specs",
-    "@kbn/server-route-repository-utils"
+    "@kbn/server-route-repository-utils",
+    "@kbn/isomer",
+    "@kbn/isomer-plugin",
+    "@kbn/isomer-components",
+    "@kbn/core-security-server"
   ]
 }
