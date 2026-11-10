@@ -45,7 +45,7 @@ export {
 };
 
 type ActionPolicyAuthoringSkillDeps = ManageActionPolicyToolDeps &
-  AttachActionPolicyToolDeps & 
+  AttachActionPolicyToolDeps &
   LinkRuleAndActionPolicyToolDeps & {
     availability: AvailabilityConfig;
   };
@@ -277,8 +277,8 @@ When the user asks how a notification gets from a rule firing to email/Slack, co
 ### Workflow Dispatch Payload
 When choosing Liquid variables for a notification workflow, including query-specific \`alert.data.*\` fields, consult the [workflow-dispatch-payload reference](./references/workflow-dispatch-payload.md).`,
     getInlineTools: () => [
-      manageActionPolicyTool(deps), 
-      attachActionPolicyTool(deps), 
+      manageActionPolicyTool(deps),
+      attachActionPolicyTool(deps),
       linkRuleAndActionPolicyTool(deps),
     ],
   });
