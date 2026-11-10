@@ -114,8 +114,8 @@ export async function executeKIQueryGenerationAgent({
           productFeature: NIGHTSHIFT_USAGE_PRODUCT_FEATURE,
           interactionId,
         },
+        workflowExecutionId: getWorkflowExecutionIdFromRequest(request),
       },
-      workflowExecutionId: getWorkflowExecutionIdFromRequest(request),
     });
 
     const events = await firstValueFrom(events$.pipe(toArray()));
