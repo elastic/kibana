@@ -178,7 +178,7 @@ if [[ "${EVAL_FANOUT:-}" == "1" ]] && [[ -z "${EVAL_PROJECT:-}" ]]; then
   if ! command -v buildkite-agent >/dev/null 2>&1; then
     echo "EVAL_FANOUT=1 requires buildkite-agent; falling back to running all projects in-process"
   else
-    # One JSON object per line: { connectorId, shardId, specFiles }. Read below with `jq`.
+    # One JSON object per line: { connectorId, shardId, specFiles, judge? }. Read below with `jq`.
     # Weekly runs apply specModelGroups[] so a connector only gets the specs in a shard that asked for it.
     FANOUT_MATRIX="$(
       EVAL_SUITE_INFO="${EVAL_SUITE_INFO}" \
@@ -265,6 +265,11 @@ EOF
         fi
         fanout_step_keys+=("$step_key")
 
+        # A shard's `judge` in evals.suites.json pins its evaluation connector. The agent model
+        # stays EVAL_PROJECT, and shards without one keep the suite-wide judge.
+        row_judge="$(jq -r '.judge // ""' <<<"$row")"
+        step_judge_connector="${row_judge:-${EVAL_CONNECTOR_ID:-}}"
+
         cat >>"$FANOUT_PIPELINE_FILE" <<EOF
       - label: "${step_label}"
         key: "${step_key}"
@@ -275,7 +280,7 @@ EOF
           FTR_EIS_CCM: "${FTR_EIS_CCM:-}"
           EVAL_INCLUDE_EIS_MODELS: "${EVAL_INCLUDE_EIS_MODELS:-}"
           EVAL_MODEL_GROUPS: "${EVAL_MODEL_GROUPS:-}"
-          EVAL_CONNECTOR_ID: "${EVAL_CONNECTOR_ID:-}"
+          EVAL_CONNECTOR_ID: "${step_judge_connector}"
           EVAL_SUITE_ID: "${EVAL_SUITE_ID}"
           EVAL_SUITE_NAME: "${EVAL_SUITE_NAME:-}"
           EVAL_SUITE_SLACK_CHANNEL: "${EVAL_SUITE_SLACK_CHANNEL:-}"
@@ -310,6 +315,7 @@ EOF
         if [[ "$fanout_preemptible" == "true" ]]; then
           cat >>"$FANOUT_PIPELINE_FILE" <<EOF
           preemptible: true
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
         retry:
           automatic:
             - exit_status: "-1"
@@ -336,7 +342,7 @@ EOF
       EVAL_NOTIFY_BRANCH="${BUILDKITE_PIPELINE_DEFAULT_BRANCH:-main}"
       
       # Enable the suite owner notify step when there is somewhere to send triage:
-      # - weekly: the suite's team channel
+      # - weekly and daily: their channel, on the default branch only
       # - any run: a PR comment (PR context) or EVAL_SLACK_NOTIFICATION_CHANNEL
       enable_suite_owner_notify="false"
       if [[ "${KBN_EVALS_WEEKLY:-}" =~ ^(1|true)$ ]] && [[ -n "${EVAL_SUITE_SLACK_CHANNEL:-}" ]] && [[ "${BUILDKITE_BRANCH:-}" == "${EVAL_NOTIFY_BRANCH}" ]]; then
@@ -344,7 +350,13 @@ EOF
       elif [[ -n "${resolved_pr_number}" ]]; then
         enable_suite_owner_notify="true"
       elif [[ -n "${EVAL_SLACK_NOTIFICATION_CHANNEL:-}" ]]; then
-        enable_suite_owner_notify="true"
+        # A daily build on another branch (possible by overriding the pipeline's branch filter)
+        # would otherwise report that branch as a daily regression.
+        if [[ "${KBN_EVALS_DAILY:-}" =~ ^(1|true)$ ]] && [[ "${BUILDKITE_BRANCH:-}" != "${EVAL_NOTIFY_BRANCH}" ]]; then
+          echo "Daily evals on ${BUILDKITE_BRANCH:-?}: skipping the Slack notification (only ${EVAL_NOTIFY_BRANCH} posts)"
+        else
+          enable_suite_owner_notify="true"
+        fi
       fi
 
       if [[ "${enable_suite_owner_notify}" == "true" ]]; then
@@ -355,6 +367,7 @@ EOF
         env:
           KBN_EVALS: "1"
           KBN_EVALS_WEEKLY: "${KBN_EVALS_WEEKLY:-}"
+          KBN_EVALS_DAILY: "${KBN_EVALS_DAILY:-}"
           EVAL_SUITE_ID: "${EVAL_SUITE_ID}"
           EVAL_SUITE_SLACK_CHANNEL: "${EVAL_SUITE_SLACK_CHANNEL:-}"
           EVAL_SLACK_NOTIFICATION_CHANNEL: "${EVAL_SLACK_NOTIFICATION_CHANNEL:-}"
@@ -376,6 +389,7 @@ EOF
           provider: gcp
           machineType: n2-standard-2
           preemptible: true
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
 EOF
       fi
 
@@ -408,6 +422,7 @@ EOF
           provider: gcp
           machineType: n2-standard-2
           preemptible: true
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
 EOF
         # Refresh baseline block + trigger (top-level — 2-space indent).
         # The trigger fires a fresh main eval run so the PR comment is updated
@@ -468,6 +483,7 @@ EOF
           provider: gcp
           machineType: n2-standard-2
           preemptible: true
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
 EOF
       fi
 

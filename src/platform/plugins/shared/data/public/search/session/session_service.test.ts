@@ -609,13 +609,17 @@ describe('Session service', () => {
 
   it('can continue an old session', () => {
     const firstSessionId = sessionService.start();
+    expect(sessionService.hasSession(firstSessionId)).toBe(true);
+    expect(sessionService.hasSession('unknown')).toBe(false);
 
     for (let i = 0; i < 30; i++) {
       sessionService.start();
     }
 
+    expect(sessionService.hasSession(firstSessionId)).toBe(true);
     sessionService.continue(firstSessionId!);
     expect(sessionService.getSessionId()).toBe(firstSessionId);
+    expect(sessionService.hasSession(firstSessionId)).toBe(true);
   });
 
   it('holds a maximum of 30 sessions', () => {
@@ -625,6 +629,7 @@ describe('Session service', () => {
       sessionService.start();
     }
 
+    expect(sessionService.hasSession(firstSessionId)).toBe(false);
     sessionService.continue(firstSessionId!);
     expect(sessionService.getSessionId()).not.toBe(firstSessionId);
   });

@@ -635,7 +635,11 @@ export const MappingEditor = ({
         }}
         executeQueryOptions={{ defaultFields: ['name', 'effectiveType', 'value'] }}
         tableCaption={EDIT_PIPELINE_FLYOUT.tableCaption}
-        pagination={{ pageIndex: Math.min(pageIndex, lastPageIndex), pageSize }}
+        pagination={{
+          pageIndex: Math.min(pageIndex, lastPageIndex),
+          pageSize,
+          pageSizeOptions: [10, 25, 50, 100],
+        }}
         onTableChange={onTableChange}
         sorting
       />

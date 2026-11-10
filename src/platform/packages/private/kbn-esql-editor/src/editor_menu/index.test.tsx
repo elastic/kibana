@@ -9,7 +9,7 @@
 import React from 'react';
 import '@testing-library/jest-dom';
 import { BehaviorSubject } from 'rxjs';
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock, notificationServiceMock } from '@kbn/core/public/mocks';
 import { ESQLMenu } from '.';
@@ -62,7 +62,12 @@ const renderMenu = async (
 
 describe('ESQLMenu', () => {
   beforeEach(() => {
+    localStorage.clear();
     setCanCreateView(true);
+  });
+
+  afterEach(() => {
+    localStorage.clear();
   });
 
   it('does not render the visor (search) button by default when the editor is not inline', async () => {
@@ -108,6 +113,25 @@ describe('ESQLMenu', () => {
     expect(screen.getByTestId('ESQLEditor-create-view-dot')).toBeInTheDocument();
   });
 
+  it('dismisses the create view dot on click and remembers it after remounting', async () => {
+    await renderMenu({ enableCreateView: true }, { currentQuery: 'FROM logs-*' });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Create view' }));
+
+    const dialog = await screen.findByRole('dialog', { name: 'Create view' });
+    expect(screen.queryByTestId('ESQLEditor-create-view-dot')).not.toBeInTheDocument();
+
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Cancel' }));
+    expect(screen.queryByRole('dialog', { name: 'Create view' })).not.toBeInTheDocument();
+    expect(screen.queryByTestId('ESQLEditor-create-view-dot')).not.toBeInTheDocument();
+
+    cleanup();
+    await renderMenu({ enableCreateView: true }, { currentQuery: 'FROM logs-*' });
+
+    expect(screen.queryByTestId('ESQLEditor-create-view-dot')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Create view' })).toBeEnabled();
+  });
+
   it('hides create view when the user lacks the create privilege, even if the host opts in', async () => {
     setCanCreateView(false);
     await renderMenu({ enableCreateView: true }, { currentQuery: 'FROM logs-*' });
@@ -116,7 +140,13 @@ describe('ESQLMenu', () => {
 
   it('disables create view when the query is empty', async () => {
     await renderMenu({ enableCreateView: true });
-    expect(screen.getByRole('button', { name: 'Create view' })).toBeDisabled();
+    const createButton = screen.getByRole('button', { name: 'Create view' });
+    expect(createButton).toBeDisabled();
+
+    fireEvent.click(createButton);
+
+    expect(screen.getByTestId('ESQLEditor-create-view-dot')).toBeInTheDocument();
+    expect(screen.queryByRole('dialog', { name: 'Create view' })).not.toBeInTheDocument();
   });
 
   it('opens the create view modal for the current query', async () => {

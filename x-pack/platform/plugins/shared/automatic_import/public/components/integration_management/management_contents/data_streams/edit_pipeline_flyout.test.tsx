@@ -492,6 +492,14 @@ describe('EditPipelineFlyout', () => {
       expect(screen.getByText('message')).toBeInTheDocument();
     });
 
+    it('should offer 100 rows per page', async () => {
+      render(<EditPipelineFlyout {...defaultProps} />);
+
+      await userEvent.click(screen.getByTestId('tablePaginationPopoverButton'));
+
+      expect(screen.getByTestId('tablePagination-100-rows')).toBeInTheDocument();
+    });
+
     it('should switch to table tab when clicked', async () => {
       mockUIState.selectedPipelineTab = 'pipeline';
 
