@@ -51,10 +51,11 @@ describe('createDigitalExperienceServerRoute', () => {
     expect(handler).not.toHaveBeenCalled();
   });
 
-  it('logs a failure to evaluate the feature flag and does not call the handler', async () => {
+  it('leaves a failure to evaluate the feature flag to the route framework, not as a data failure', async () => {
     const handler = jest.fn().mockResolvedValue({ ok: true });
     const { getBooleanValue, resources } = createResources(true);
-    getBooleanValue.mockRejectedValue(new Error('flag provider down'));
+    const flagError = new Error('flag provider down');
+    getBooleanValue.mockRejectedValue(flagError);
     const route = createDigitalExperienceServerRoute({
       endpoint: ENDPOINT,
       options: { access: 'internal' },
@@ -63,9 +64,9 @@ describe('createDigitalExperienceServerRoute', () => {
     });
     const wrapped = route[ENDPOINT].handler as unknown as (resources: unknown) => Promise<unknown>;
 
-    await expect(wrapped(resources)).rejects.toMatchObject({ output: { statusCode: 500 } });
+    await expect(wrapped(resources)).rejects.toBe(flagError);
     expect(handler).not.toHaveBeenCalled();
-    expect(logger.error).toHaveBeenCalledWith(`${ENDPOINT} failed: flag provider down`);
+    expect(logger.error).not.toHaveBeenCalled();
   });
 
   it('evaluates the feature flag with a false fallback and calls the handler when it is on', async () => {

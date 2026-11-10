@@ -19,9 +19,13 @@ Experience and APM privileges, with the ux plugin enabled) see it instead of the
 navigation entry; users without Digital Experience access keep whatever the legacy entry shows them,
 which needs APM access. `/app/ux` stays reachable by URL.
 
+The flag doesn't hide what the plugin registers at setup: the "Digital experience" feature and its
+"Sessions" sub-feature are listed in Roles and in Spaces feature visibility, and the sessions health
+task type, the stored API key saved object type and its encryption are registered, whatever the flag.
+
 - **Serverless and Elastic Cloud Hosted:** a LaunchDarkly rule on `digitalExperience.enabled`, per project or deployment.
 - **On-prem and local:** set `feature_flags.overrides: { digitalExperience.enabled: true }` in `kibana.yml`.
-- **Kill switch:** turn the flag off. It takes effect on the next page load, and the sessions health task is removed from Task Manager.
+- **Kill switch:** turn the flag off. It takes effect on the next page load and on the next API request. The sessions health task is disabled in Task Manager, keeping its state, and is enabled again when the flag turns back on.
 - **GA:** the flag goes away.
 
 `xpack.digital_experience.enabled` is deprecated and ignored; Kibana logs a warning when it is set.
