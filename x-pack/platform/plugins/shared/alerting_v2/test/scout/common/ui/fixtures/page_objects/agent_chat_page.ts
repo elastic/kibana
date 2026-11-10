@@ -21,7 +21,7 @@ export class AgentChatPage {
   public readonly responseMessage: Locator;
   /** The Preview button on the inline attachment card in the agent's response. */
   public readonly previewButton: Locator;
-  /** The Unsaved changes badge in the inline attachment card's header. */
+  /** The icon-only Unsaved changes badge in the inline attachment card's header. */
   public readonly inlineUnsavedChangesBadge: Locator;
   /** The Unsaved changes badge in the canvas header, next to the Update action. */
   public readonly canvasUnsavedChangesBadge: Locator;
@@ -31,9 +31,9 @@ export class AgentChatPage {
     this.renderErrorCallout = this.page.getByText(RENDER_ERROR_TITLE);
     this.responseMessage = this.page.testSubj.locator('agentBuilderResponseMessage');
     this.previewButton = this.responseMessage.getByRole('button', { name: 'Preview', exact: true });
-    this.inlineUnsavedChangesBadge = this.responseMessage.getByText(UNSAVED_CHANGES_BADGE, {
-      exact: true,
-    });
+    this.inlineUnsavedChangesBadge = this.responseMessage.locator(
+      `[data-test-subj="attachmentHeaderIconBadge"][aria-label="${UNSAVED_CHANGES_BADGE}"]`
+    );
     this.canvasUnsavedChangesBadge = this.canvas.getByText(UNSAVED_CHANGES_BADGE, { exact: true });
   }
 
