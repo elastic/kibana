@@ -11,7 +11,7 @@ import { test, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 // Mirrors the `register()` call in
-// `src/platform/plugins/test/user_storage_test/server/plugin.ts`.
+// `src/platform/test_plugins/user_storage_test/server/plugin.ts`.
 // Keep both in sync when changing the test fixture.
 const TEST_STRING_KEY_DEFAULT = 'default_value';
 const LAZY_TEST_STRING_KEY_DEFAULT = 'lazy_default_value';

@@ -194,7 +194,7 @@ class Package {
     const example = dir.startsWith('examples/') || dir.startsWith('x-pack/examples/');
     const testPlugin =
       dir.startsWith('src/platform/test/') ||
-      dir.startsWith('src/platform/plugins/test/') ||
+      dir.startsWith('src/platform/test_plugins/') ||
       dir.startsWith('x-pack/platform/test/') ||
       dir.startsWith('x-pack/solutions/search/test/') ||
       dir.startsWith('x-pack/solutions/observability/test/') ||

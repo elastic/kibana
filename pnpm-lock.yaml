@@ -4064,7 +4064,7 @@ importers:
         version: link:x-pack/platform/test/security_api_integration/plugins/user_profiles_consumer
       '@kbn/user-storage-test-plugin':
         specifier: workspace:*
-        version: link:src/platform/plugins/test/user_storage_test
+        version: link:src/platform/test_plugins/user_storage_test
       '@kbn/utility-types':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-utility-types
@@ -8807,7 +8807,7 @@ importers:
 
   src/platform/plugins/shared/workflows_management: {}
 
-  src/platform/plugins/test/user_storage_test: {}
+  src/platform/test_plugins/user_storage_test: {}
 
   src/platform/test: {}
 

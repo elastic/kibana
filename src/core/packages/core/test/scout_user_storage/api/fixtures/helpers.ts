@@ -10,7 +10,7 @@
 import { INTERNAL_HEADERS } from './constants';
 
 // Mirrors the `register()` call in
-// `src/platform/plugins/test/user_storage_test/server/plugin.ts`.
+// `src/platform/test_plugins/user_storage_test/server/plugin.ts`.
 // Keep both in sync when changing the test fixture.
 export const ALL_KEYS = [
   'test:string_key',
