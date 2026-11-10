@@ -8,7 +8,11 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import type {
+  DocView,
+  DocViewRenderProps,
+  DocViewRestorableStateProps,
+} from '@kbn/unified-doc-viewer/types';
 import type { FunctionComponent } from 'react';
 import type React from 'react';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
@@ -148,10 +152,24 @@ interface SecuritySolutionAlertFlyoutRenderProps extends DocViewRenderProps {
   onAlertUpdated: () => void;
 }
 
-export interface SecuritySolutionAlertFlyoutOverviewTabFeature {
-  id: 'security-solution-alert-flyout-overview-tab';
-  render: (props: SecuritySolutionAlertFlyoutRenderProps) => JSX.Element;
+/**
+ * An overview tab of the Security doc views. It takes part in the doc viewer's restorable state,
+ * and may declare which slice of it is deep-linkable.
+ */
+interface SecuritySolutionOverviewTabFeature<
+  TId extends string,
+  TRenderProps extends DocViewRenderProps
+> {
+  id: TId;
+  render: (props: TRenderProps & DocViewRestorableStateProps) => JSX.Element;
+  /** Deep-linkable subset of the overview tab state, registered on the Discover doc view. */
+  shareableStateSchema?: DocView['shareableStateSchema'];
 }
+
+export type SecuritySolutionAlertFlyoutOverviewTabFeature = SecuritySolutionOverviewTabFeature<
+  'security-solution-alert-flyout-overview-tab',
+  SecuritySolutionAlertFlyoutRenderProps
+>;
 
 export interface SecuritySolutionAlertFlyoutHeaderTitleFeature {
   id: 'security-solution-alert-flyout-header-title';
@@ -163,10 +181,10 @@ export interface SecuritySolutionAlertFlyoutFooterFeature {
   renderFooter: (props: SecuritySolutionAlertFlyoutRenderProps) => JSX.Element;
 }
 
-export interface SecuritySolutionIOCFlyoutOverviewTabFeature {
-  id: 'security-solution-ioc-flyout-overview-tab';
-  render: (props: DocViewRenderProps) => JSX.Element;
-}
+export type SecuritySolutionIOCFlyoutOverviewTabFeature = SecuritySolutionOverviewTabFeature<
+  'security-solution-ioc-flyout-overview-tab',
+  DocViewRenderProps
+>;
 
 export interface SecuritySolutionIOCFlyoutHeaderFeature {
   id: 'security-solution-ioc-flyout-header';
@@ -182,10 +200,10 @@ interface SecuritySolutionAttackFlyoutRenderProps extends DocViewRenderProps {
   onAttackUpdated: () => void;
 }
 
-export interface SecuritySolutionAttackFlyoutOverviewTabFeature {
-  id: 'security-solution-attack-flyout-overview-tab';
-  render: (props: SecuritySolutionAttackFlyoutRenderProps) => JSX.Element;
-}
+export type SecuritySolutionAttackFlyoutOverviewTabFeature = SecuritySolutionOverviewTabFeature<
+  'security-solution-attack-flyout-overview-tab',
+  SecuritySolutionAttackFlyoutRenderProps
+>;
 
 export interface SecuritySolutionAttackFlyoutHeaderFeature {
   id: 'security-solution-attack-flyout-header';

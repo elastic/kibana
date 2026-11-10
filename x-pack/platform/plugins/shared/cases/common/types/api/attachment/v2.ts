@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import {
   MAX_ATTACHMENT_ID_LENGTH,
+  MAX_ATTACHMENT_JSON_DEPTH,
   MAX_ATTACHMENT_JSON_LENGTH,
   MAX_BULK_CREATE_ATTACHMENTS,
   MAX_BULK_GET_ATTACHMENTS,
@@ -45,10 +46,12 @@ const attachmentIdSchema = z.union([
 const attachmentDataSchema = limitedJsonObjectSchema({
   fieldName: 'data',
   max: MAX_ATTACHMENT_JSON_LENGTH,
+  maxDepth: MAX_ATTACHMENT_JSON_DEPTH,
 });
 const attachmentMetadataSchema = limitedJsonObjectSchema({
   fieldName: 'metadata',
   max: MAX_ATTACHMENT_JSON_LENGTH,
+  maxDepth: MAX_ATTACHMENT_JSON_DEPTH,
 });
 
 /**

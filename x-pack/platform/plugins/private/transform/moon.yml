@@ -105,6 +105,7 @@ tags:
   - group-platform
   - private
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*

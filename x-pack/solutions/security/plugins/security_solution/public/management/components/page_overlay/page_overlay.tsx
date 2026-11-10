@@ -328,7 +328,12 @@ export const PageOverlay = memo<PageOverlayProps>(
     // flyout instead. Because we stop the event below `window`, this works regardless of which layer
     // mounted first. Inner widgets that handle Escape themselves (e.g. the console's input popover,
     // via `EuiPopover`) call `stopPropagation()` before the event bubbles to `document`, so they keep
-    // precedence. Only active while the overlay is actually visible.
+    // precedence. An Escape from a layer stacked above the overlay and portaled outside of it (e.g.
+    // a popover menu or a flyout opened from the overlay) belongs to that layer, which closes itself
+    // via its own `document`/`window` listener, so it is ignored here. Only active while the overlay
+    // is actually visible.
+    const overlayContainerRef = useRef<HTMLDivElement>(null);
+
     useEffect(() => {
       if (isHidden) {
         return;
@@ -336,6 +341,15 @@ export const PageOverlay = memo<PageOverlayProps>(
 
       const onKeyDown = (ev: KeyboardEvent) => {
         if (ev.key !== 'Escape' || ev.defaultPrevented) {
+          return;
+        }
+
+        const { target } = ev;
+        if (
+          target instanceof Node &&
+          target !== document.body &&
+          !overlayContainerRef.current?.contains(target)
+        ) {
           return;
         }
 
@@ -354,6 +368,7 @@ export const PageOverlay = memo<PageOverlayProps>(
     return (
       <EuiPortal portalRef={setPortalEleRef}>
         <OverlayRootContainer
+          ref={overlayContainerRef}
           data-test-subj={dataTestSubj}
           className={containerClassName}
           style={containerCssOverrides}

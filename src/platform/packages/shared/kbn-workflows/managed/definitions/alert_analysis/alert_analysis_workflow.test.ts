@@ -406,6 +406,130 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(agentStep['create-conversation']).toBe('${{ variables.create_conversation }}');
   });
 
+  it('makes the conversation readable by the analyst and links it from the verdict note', () => {
+    const agentStep = findStepByName(workflow.steps, 'runAgent_step') as {
+      'public-conversation': string;
+    };
+    // A private conversation belongs to the run-as identity, so the linked page would be
+    // unreachable for the analyst who started the run. It must follow create-conversation.
+    expect(agentStep['public-conversation']).toBe('${{ variables.create_conversation }}');
+
+    const normalizeStep = findStepByName(workflow.steps, 'normalize_batch_result') as {
+      with: Record<string, string>;
+    };
+    // The prompt path creates no conversation, so the id must fall back to "" there.
+    expect(normalizeStep.with.batch_result_conversation_id).toBe(
+      "{{ steps.runAgent_step.output.conversation_id | default: '' }}"
+    );
+
+    const verdictNoteStep = findStepByName(workflow.steps, 'add_verdict_note_to_alert') as {
+      with: { body: { note: { note: string } } };
+    };
+    const { note } = verdictNoteStep.with.body.note;
+    expect(note).toContain('variables.alert_conversation_count > 0');
+    expect(note).toContain(
+      '/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ variables.alert_conversation_id }}'
+    );
+  });
+
+  it('links each alert to the conversation of its own batch, not the last batch', () => {
+    // The notes are written by apply_verdicts after every batch has run, so a link read from
+    // batch_result_conversation_id would hold the last batch's id for every alert.
+    const engine = createWorkflowLiquidEngine();
+    const buildStep = findStepByName(workflow.steps, 'build_batch_conversation_entry') as {
+      with: Record<string, unknown>;
+    };
+    const pushStep = findStepByName(workflow.steps, 'push_batch_conversation_id') as {
+      with: Record<string, unknown>;
+    };
+    const selectStep = findStepByName(workflow.steps, 'select_alert_verdict') as {
+      with: Record<string, unknown>;
+    };
+    const noteStep = findStepByName(workflow.steps, 'add_verdict_note_to_alert') as {
+      with: { body: { note: { note: string } } };
+    };
+    const linkBlock = noteStep.with.body.note.note.match(
+      /\{% if variables\.alert_conversation_count[\s\S]*?\{%- endif %\}/
+    )?.[0];
+    expect(linkBlock).toBeDefined();
+    // An alert of a batch that returned no verdict for it gets the same link on its error note.
+    const errorNoteStep = findStepByName(workflow.steps, 'add_no_data_note_to_alert') as {
+      with: { body: { note: { note: string } } };
+    };
+    expect(errorNoteStep.with.body.note.note).toContain(linkBlock);
+
+    // Variables merge in execution order, so replay the two batches through the real steps.
+    let variables: Record<string, unknown> = { batch_conversations: [] };
+    [
+      { conversation: 'conversation-1', alertIds: ['alert-1', 'alert-2'] },
+      { conversation: 'conversation-2', alertIds: ['alert-3'] },
+    ].forEach(({ conversation, alertIds }) => {
+      variables = { ...variables, batch_result_conversation_id: conversation };
+      const foreach = { item: alertIds.map((_id) => ({ _id })) };
+      variables = {
+        ...variables,
+        ...(renderValueRecursively(engine, buildStep.with, { variables, foreach }) as object),
+      };
+      variables = {
+        ...variables,
+        ...(renderValueRecursively(engine, pushStep.with, { variables }) as object),
+      };
+    });
+
+    const renderLink = (alertId: string): string => {
+      const context = {
+        variables,
+        foreach: { item: { _id: alertId } },
+        workflow: { spaceId: 'default' },
+      };
+      const selected = renderValueRecursively(engine, selectStep.with, context) as object;
+      return engine.parseAndRenderSync(linkBlock as string, {
+        ...context,
+        variables: { ...variables, ...selected },
+      });
+    };
+
+    expect(renderLink('alert-1')).toContain('/app/agent_builder/conversations/conversation-1)');
+    expect(renderLink('alert-2')).toContain('/app/agent_builder/conversations/conversation-1)');
+    expect(renderLink('alert-3')).toContain('/app/agent_builder/conversations/conversation-2)');
+    // An alert that no conversation covers gets no link and no leftover id.
+    expect(renderLink('alert-without-batch')).not.toContain('Conversation');
+  });
+
+  it('collects one conversation id per batch and exposes them as a workflow output', () => {
+    const initStep = findStepByName(workflow.steps, 'set_workflow_variables') as {
+      with: { batch_conversations: unknown[] };
+    };
+    expect(initStep.with.batch_conversations).toEqual([]);
+
+    // Gated on a non-empty id, so a batch without a conversation adds nothing.
+    const gate = findStepByName(workflow.steps, 'collect_batch_conversation_id') as {
+      condition: string;
+    };
+    expect(gate.condition).toBe("${{ variables.batch_result_conversation_id != '' }}");
+    // Outside the verdict check, so a batch that returned no verdicts still records its
+    // conversation.
+    const verdictCheck = findStepByName(workflow.steps, 'check_batch_output_exists') as Step;
+    expect(findStepByName([verdictCheck], 'collect_batch_conversation_id')).toBeUndefined();
+
+    const emitStep = findStepByName(workflow.steps, 'emit_workflow_output') as {
+      with: Record<string, string>;
+    };
+    const output = evaluateExpression(
+      createWorkflowLiquidEngine(),
+      emitStep.with.conversation_ids,
+      {
+        variables: {
+          batch_conversations: [
+            { conversation_id: 'conversation-1', alert_ids: ['alert-1'] },
+            { conversation_id: 'conversation-2', alert_ids: ['alert-2'] },
+          ],
+        },
+      }
+    );
+    expect(output).toEqual(['conversation-1', 'conversation-2']);
+  });
+
   it('lets one failed batch fall through instead of aborting the whole execution', () => {
     const agentStep = findStepByName(workflow.steps, 'runAgent_step') as {
       'on-failure': { retry: { 'max-attempts': number }; continue: boolean };

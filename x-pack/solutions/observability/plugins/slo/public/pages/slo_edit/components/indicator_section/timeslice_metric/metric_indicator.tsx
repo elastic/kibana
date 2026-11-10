@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { first, range, xor } from 'lodash';
 import React from 'react';
-import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
+import { Controller, useFieldArray, useFormContext, useFormState, useWatch } from 'react-hook-form';
 import { QueryBuilder } from '../../common/query_builder';
 import { COMPARATOR_OPTIONS } from '../../../constants';
 import type { CreateSLOForm } from '../../../types';
@@ -80,14 +80,15 @@ const thresholdTooltip = (
 );
 
 export function MetricIndicator({ indexFields, isLoadingIndex, dataView }: MetricIndicatorProps) {
-  const { control, watch, setValue, register, getFieldState } = useFormContext<CreateSLOForm>();
+  const { control, setValue, register, getFieldState } = useFormContext<CreateSLOForm>();
+  const formState = useFormState({ control, name: 'indicator.params.metric.threshold' });
 
   const { fields, append, remove } = useFieldArray({
     control,
     name: `indicator.params.metric.metrics`,
   });
-  const equation = watch(`indicator.params.metric.equation`);
-  const indexPattern = watch('indicator.params.index');
+  const equation = useWatch({ control, name: `indicator.params.metric.equation` });
+  const indexPattern = useWatch({ control, name: 'indicator.params.index' });
 
   const disableAdd = fields?.length === MAX_VARIABLES || !indexPattern;
   const disableDelete = fields?.length === 1 || !indexPattern;
@@ -279,7 +280,7 @@ export function MetricIndicator({ indexFields, isLoadingIndex, dataView }: Metri
           <EuiFlexItem grow={0}>
             <EuiFormRow
               fullWidth
-              isInvalid={getFieldState('indicator.params.metric.threshold').invalid}
+              isInvalid={getFieldState('indicator.params.metric.threshold', formState).invalid}
               label={
                 <span>
                   {thresholdLabel} {thresholdTooltip}

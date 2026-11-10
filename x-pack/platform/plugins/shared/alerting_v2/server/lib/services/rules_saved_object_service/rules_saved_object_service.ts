@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { PluginStart } from '@kbn/core-di';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { inject, injectable } from 'inversify';
 import type {
   SavedObjectReference,
@@ -18,10 +16,9 @@ import type { SavedObjectError } from '@kbn/core/types';
 import { TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { RuleSavedObjectAttributes } from '../../../saved_objects';
-import type { AlertingServerStartDependencies } from '../../../types';
 import { convertEveryToSchedulesPerMinute } from '../../duration';
 import { escapeTermsInclude } from '../../escape_terms_include';
-import { spaceIdToNamespace } from '../../space_id_to_namespace';
+import { SpacesService } from '../spaces_service/spaces_service';
 import { RuleSavedObjectsClientToken } from './tokens';
 
 /**
@@ -194,8 +191,7 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
   constructor(
     @inject(RuleSavedObjectsClientToken)
     private readonly client: SavedObjectsClientContract,
-    @inject(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'))
-    private readonly spaces: SpacesPluginStart
+    @inject(SpacesService) private readonly spacesService: SpacesService
   ) {}
   public async create({
     attrs,
@@ -254,7 +250,7 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
   }
 
   public async get(id: string, spaceId?: string): Promise<RuleSavedObjectDoc> {
-    const namespace = spaceIdToNamespace(this.spaces, spaceId);
+    const namespace = this.spacesService.spaceIdToNamespace(spaceId);
     const doc = await this.client.get<RuleSavedObjectAttributes>(
       RULE_SAVED_OBJECT_TYPE,
       id,
@@ -272,7 +268,7 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
     ids: string[],
     spaceId?: string
   ): Promise<RulesSavedObjectsBulkGetResultItem[]> {
-    const namespace = spaceIdToNamespace(this.spaces, spaceId);
+    const namespace = this.spacesService.spaceIdToNamespace(spaceId);
     if (ids.length === 0) {
       return [];
     }
@@ -303,7 +299,7 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
       return [];
     }
 
-    const namespace = spaceIdToNamespace(this.spaces, spaceId);
+    const namespace = this.spacesService.spaceIdToNamespace(spaceId);
     const filter = ruleIds
       .map((id) => `${RULE_SAVED_OBJECT_TYPE}.id: "${RULE_SAVED_OBJECT_TYPE}:${id}"`)
       .join(' OR ');

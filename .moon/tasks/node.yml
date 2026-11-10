@@ -8,27 +8,28 @@ fileGroups:
   default:
     - '**/*'
   production: [ ]
+  scoutGlobals:
+    - '/scripts/scout.js'
+    - '/package.json'
+    - '/pnpm-lock.yaml'
+    - '/.nvmrc'
+    - '/src/setup_node_env/**/*'
 
 tasks:
-  # This task can be used to make a task depend on the source files in the workspace
-  source:
-    command: 'true'
+  # Carry runtime source changes to downstream test suites.
+  test-source-upstream:
+    command: noop
     inputs:
-      - '@group(src)'
-    options:
-      internal: true
-      runFromWorkspaceRoot: true
-
-  # This task can be used to make a task depend on the full upstream source files of a select project
-  source-upstream:
-    command: 'true'
-    inputs:
-      - '@group(src)'
+      - '@group(default)'
+      - '!README*'
+      - '!jest.config.{js,cjs,json}'
+      - '!**/*.test.{js,mjs,ts,tsx}'
+      - '!**/*.spec.{js,mjs,ts,tsx}'
+      - '!**/__snapshots__/**/*'
+      - '!test/scout*/**/*playwright.config.ts'
+      - '!tests/**/*'
     deps:
-      # Moon 2.3+ defaults output-less deps to cacheStrategy: ignored; keep hash so
-      # transitive upstream source changes invalidate dependents (e.g. jest).
-      - target: '^:source-upstream'
+      - target: '^:test-source-upstream'
         cacheStrategy: hash
     options:
       internal: true
-      runFromWorkspaceRoot: true

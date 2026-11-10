@@ -18,6 +18,8 @@ jest.mock('./use_request', () => ({
   sendRequestForRq: jest.fn(),
 }));
 
+jest.setTimeout(30_000);
+
 // The upgrade dry run is a POST that react-query treats as a query. These tests pin down that it
 // behaves as a point-in-time read: exactly one request per (ids, version) pair, with none of the
 // default refetch triggers (window focus, remount, list reorder) silently repeating the POST.

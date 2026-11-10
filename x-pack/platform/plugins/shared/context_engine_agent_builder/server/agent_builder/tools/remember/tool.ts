@@ -12,9 +12,9 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getAgentFromRunContext } from '@kbn/agent-builder-server';
 import { randomUUID } from 'crypto';
 import { aiIndexIdFieldSchema } from '@kbn/context-engine-plugin/common/ai_index_schemas';
+import { MAX_KI_CONTENT_LENGTH } from '@kbn/context-engine-plugin/common/constants';
 import { MEMORY_KI_TYPES } from '@kbn/context-engine-plugin/common/memory';
 import {
-  MAX_KI_CONTENT_LENGTH,
   MAX_KI_DESCRIPTION_LENGTH,
   MAX_KI_ID_LENGTH,
   MAX_KI_TAG_LENGTH,

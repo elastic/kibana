@@ -43,6 +43,7 @@ components:
         - splunk
         - qradar
         - microsoft-sentinel
+        - tines
 
     MigrationComment:
       type: object
