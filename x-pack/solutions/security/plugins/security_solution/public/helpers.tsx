@@ -24,6 +24,7 @@ import {
   CASES_FEATURE_ID,
   CASES_PATH,
   COVERAGE_OVERVIEW_PATH,
+  CONFIGURATIONS_PATH,
   DASHBOARDS_PATH,
   EXCEPTIONS_PATH,
   RULES_ADD_PATH,
@@ -234,6 +235,15 @@ export const isCoverageOverviewPath = (pathname: string): boolean =>
 export const isCloudSecurityPosturePath = (pathname: string): boolean =>
   !!matchPath(pathname, {
     path: CLOUD_SECURITY_POSTURE_BASE_PATH,
+    strict: false,
+  });
+
+/**
+ * Matches the Configurations page, whose app header owns the page actions.
+ */
+export const isConfigurationsPath = (pathname: string): boolean =>
+  !!matchPath(pathname, {
+    path: CONFIGURATIONS_PATH,
     strict: false,
   });
 

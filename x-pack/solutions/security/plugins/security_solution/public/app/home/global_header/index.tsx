@@ -22,6 +22,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import {
   isCloudSecurityPosturePath,
   isCoverageOverviewPath,
+  isConfigurationsPath,
   isDashboardViewPath,
   isDetectionsPath,
   isRuleChangesHistoryPath,
@@ -75,6 +76,8 @@ export const GlobalHeader = React.memo(() => {
   const onboardingPath = isOnboardingPath(pathname);
   // Cloud Security Posture pages own "Add integrations" in their own app header.
   const cloudSecurityPosturePath = isCloudSecurityPosturePath(pathname);
+  // The Configurations page owns its actions in its own app header.
+  const configurationsPath = isConfigurationsPath(pathname);
 
   const { href, onClick } = useAddIntegrationsUrl();
 
@@ -83,9 +86,10 @@ export const GlobalHeader = React.memo(() => {
       return;
     }
 
-    // The Rules, Add Elastic rules, MITRE coverage, Shared Exception Lists, Exception list details
-    // and Cloud Security Posture page app headers render their own actions (ML job settings, Add
-    // integrations), so clear the global header action menu there to avoid duplicating them.
+    // The Rules, Add Elastic rules, MITRE coverage, Shared Exception Lists, Exception list details,
+    // Cloud Security Posture and Configurations page app headers render their own actions (ML job
+    // settings, Add integrations), so clear the global header action menu there to avoid duplicating
+    // them.
     // Onboarding is a page without the global header action menu
     if (
       changesHistoryPath ||
@@ -94,7 +98,8 @@ export const GlobalHeader = React.memo(() => {
       coverageOverviewPath ||
       exceptionsPath ||
       onboardingPath ||
-      cloudSecurityPosturePath
+      cloudSecurityPosturePath ||
+      configurationsPath
     ) {
       setHeaderActionMenu(undefined);
       return;
@@ -129,6 +134,7 @@ export const GlobalHeader = React.memo(() => {
     exceptionsPath,
     onboardingPath,
     cloudSecurityPosturePath,
+    configurationsPath,
   ]);
 
   return (
