@@ -156,6 +156,43 @@ describe('createClientStrategy', () => {
     });
   });
 
+  describe('tag references', () => {
+    it('forwards an included tag as a reference', async () => {
+      const mockFindItems = createMockFindItems([createMockItem('1')]);
+      const { findItems } = createClientStrategy(mockFindItems);
+
+      await findItems(createParams({ filters: { tag: { include: ['tag-1'] } } }));
+
+      expect(mockFindItems).toHaveBeenCalledWith(
+        '',
+        { references: [{ type: 'tag', id: 'tag-1' }] },
+        undefined
+      );
+    });
+
+    it('forwards an excluded tag as referencesToExclude', async () => {
+      const mockFindItems = createMockFindItems([createMockItem('1')]);
+      const { findItems } = createClientStrategy(mockFindItems);
+
+      await findItems(createParams({ filters: { tag: { exclude: ['tag-2'] } } }));
+
+      expect(mockFindItems).toHaveBeenCalledWith(
+        '',
+        { referencesToExclude: [{ type: 'tag', id: 'tag-2' }] },
+        undefined
+      );
+    });
+
+    it('omits the options argument when no tags are active', async () => {
+      const mockFindItems = createMockFindItems([createMockItem('1')]);
+      const { findItems } = createClientStrategy(mockFindItems);
+
+      await findItems(createParams({ filters: { tag: { include: [] } } }));
+
+      expect(mockFindItems).toHaveBeenCalledWith('', undefined, undefined);
+    });
+  });
+
   describe('caching', () => {
     it('does not call the server when searchQuery is unchanged', async () => {
       const mockItems = [createMockItem('1')];
@@ -177,6 +214,32 @@ describe('createClientStrategy', () => {
       await findItems(createParams({ searchQuery: 'second' }));
 
       expect(mockFindItems).toHaveBeenCalledTimes(2);
+    });
+
+    it('calls the server when the tag filter changes', async () => {
+      const mockFindItems = createMockFindItems([createMockItem('1')]);
+      const { findItems } = createClientStrategy(mockFindItems);
+
+      await findItems(createParams({ filters: { tag: { include: ['tag-1'] } } }));
+      await findItems(createParams({ filters: { tag: { include: ['tag-2'] } } }));
+
+      expect(mockFindItems).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not call the server when the tag filter is unchanged', async () => {
+      const mockFindItems = createMockFindItems([createMockItem('1')]);
+      const { findItems } = createClientStrategy(mockFindItems);
+
+      await findItems(createParams({ filters: { tag: { include: ['tag-1'] } } }));
+      await findItems(
+        createParams({
+          filters: { tag: { include: ['tag-1'] } },
+          sort: { field: 'title', direction: 'desc' },
+          page: { index: 1, size: 5 },
+        })
+      );
+
+      expect(mockFindItems).toHaveBeenCalledTimes(1);
     });
 
     it('reuses cached items when only filters change', async () => {

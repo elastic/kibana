@@ -21,8 +21,13 @@ import {
   MANAGED_USER_FILTER,
   NO_CREATOR_USER_FILTER,
   getCreatorKey,
+  TAG_FILTER_ID,
 } from '@kbn/content-list-provider';
-import type { TableListViewFindItemsFn } from './types';
+import type {
+  SavedObjectReference,
+  TableListViewFindItemsFn,
+  TableListViewFindItemsOptions,
+} from './types';
 import type { ContentListFilterMap } from './filters';
 import { matchesFilterValue } from './filters';
 import type { ContentListSortFieldMap } from './sorting';
@@ -61,10 +66,10 @@ export interface ClientStrategy {
   /**
    * Fetches items and applies client-side filtering, sorting, and pagination.
    *
-   * Internally caches the server response keyed by `searchQuery`. Calls to
-   * `findItems` with the same `searchQuery` reuse the cache and only
-   * recompute the client-side transforms. A new `searchQuery` triggers a
-   * fresh server fetch.
+   * Internally caches the server response keyed by `searchQuery` and the active
+   * tag filters, both of which are resolved server-side. Calls with the same key
+   * reuse the cache and only recompute the client-side transforms; a change to
+   * either triggers a fresh server fetch.
    *
    * The core provider calls {@link ClientStrategy.onInvalidate} before
    * refetching after mutations so the next call always hits the server.
@@ -236,6 +241,23 @@ const asIncludeExclude = (value: ActiveFilters[string]): IncludeExcludeFilter | 
     ? (value as IncludeExcludeFilter)
     : undefined;
 
+/**
+ * Converts tag filter values into saved object references.
+ *
+ * The values are tag IDs: `@kbn/content-list-provider` registers a `tag` field
+ * definition that resolves tag names to IDs while parsing the query text, so
+ * both the Tags filter and a typed `tag:("name")` clause arrive here as IDs.
+ */
+const toTagReferences = (tagIds?: string[]): SavedObjectReference[] | undefined =>
+  tagIds?.length ? tagIds.map((id) => ({ type: 'tag', id })) : undefined;
+
+/**
+ * Identifies a server fetch. Tag filters are part of the key because they are
+ * sent to the server, so changing them has to invalidate the cached snapshot.
+ */
+const getFetchKey = (searchQuery: string, tagFilter?: IncludeExcludeFilter): string =>
+  JSON.stringify([searchQuery, tagFilter?.include ?? [], tagFilter?.exclude ?? []]);
+
 const RESERVED_FILTER_KEYS = new Set<string>(['search']);
 
 /**
@@ -344,9 +366,13 @@ const transformItem = (item: UserContentCommonSchema): ContentListItem => {
 /**
  * Creates a client strategy that wraps a `TableListView`-style `findItems` function.
  *
- * The strategy caches the server response keyed by `searchQuery`. When filters,
- * sort, or page change without a new search query, the cached items are reused
- * and only the client-side transforms are reapplied — no server fetch occurs.
+ * The strategy caches the server response keyed by `searchQuery` and the active
+ * tag filters. Sort, page, and the remaining filters are applied client-side, so
+ * changing them reuses the cached items without a server fetch.
+ *
+ * Tag filters are the exception because they are resolved server-side: they are
+ * forwarded as `references` / `referencesToExclude` so the consumer's search API
+ * applies them before `listingLimit` truncates the result.
  *
  * The core provider calls {@link ClientStrategy.onInvalidate} before any
  * explicit refetch (e.g. after a delete) to force the next `findItems` call
@@ -366,7 +392,7 @@ export const createClientStrategy = (
 ): ClientStrategy => {
   let rawItems: UserContentCommonSchema[] = [];
   let decoratedItems: UserContentCommonSchema[] = [];
-  let lastSearchQuery: string | undefined;
+  let lastFetchKey: string | undefined;
   const listeners = new Set<ItemsSnapshotListener>();
 
   const notify = () => {
@@ -383,10 +409,21 @@ export const createClientStrategy = (
   const findItemsFn: FindItemsFn = async (params: FindItemsParams): Promise<FindItemsResult> => {
     const { searchQuery, filters, sort, page, signal } = params;
 
-    if (lastSearchQuery !== searchQuery) {
+    const tagFilter = asIncludeExclude(filters[TAG_FILTER_ID]);
+    const fetchKey = getFetchKey(searchQuery, tagFilter);
+
+    if (lastFetchKey !== fetchKey) {
+      const references = toTagReferences(tagFilter?.include);
+      const referencesToExclude = toTagReferences(tagFilter?.exclude);
+      const options: TableListViewFindItemsOptions = {
+        ...(listingLimit !== undefined && { listingLimit }),
+        ...(references && { references }),
+        ...(referencesToExclude && { referencesToExclude }),
+      };
+
       const result = await tableListViewFindItems(
         searchQuery,
-        listingLimit !== undefined ? { listingLimit } : undefined,
+        Object.keys(options).length > 0 ? options : undefined,
         signal
       );
       if (signal?.aborted) {
@@ -394,7 +431,7 @@ export const createClientStrategy = (
       }
       rawItems = result.hits;
       await applyDecoration();
-      lastSearchQuery = searchQuery;
+      lastFetchKey = fetchKey;
     }
 
     let items = filterItems(decoratedItems, filters, resolveConfig(customFilters));
@@ -413,7 +450,7 @@ export const createClientStrategy = (
   };
 
   const onInvalidate = () => {
-    lastSearchQuery = undefined;
+    lastFetchKey = undefined;
     rawItems = [];
     decoratedItems = [];
     notify();
