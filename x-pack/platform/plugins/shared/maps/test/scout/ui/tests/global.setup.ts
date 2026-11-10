@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export default function ({ loadTestFile }) {
-  describe('managed content', function () {
-    loadTestFile(require.resolve('./managed_content'));
-  });
-}
+import { globalSetupHook } from '@kbn/scout';
+
+globalSetupHook('Load managed content test data', async ({ esArchiver }) => {
+  await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/logstash_functional');
+});
