@@ -371,7 +371,7 @@ describe('esqlExecutor', () => {
       expect(result.errors).toEqual([]);
       expect(result.createdSignalsCount).toBe(1);
       expect(result.warningMessages).toEqual([
-        expect.stringContaining('metadata columns _source, _ignored'),
+        expect.stringContaining('metadata column(s) _source, _ignored'),
       ]);
     });
 
@@ -442,7 +442,9 @@ describe('esqlExecutor', () => {
       const [alertDocument] = ruleServices.alertWithPersistence.mock.calls[0][0];
       expect(alertDocument._source).not.toHaveProperty('_source');
       expect(alertDocument._source).toMatchObject({ 'agent.name': 'test-1' });
-      expect(result.warningMessages).toEqual([expect.stringContaining('metadata column _source')]);
+      expect(result.warningMessages).toEqual([
+        expect.stringContaining('metadata column(s) _source'),
+      ]);
     });
 
     describe('when the search needs more than one iteration', () => {
@@ -488,7 +490,7 @@ describe('esqlExecutor', () => {
         const result = await esqlExecutor(mockedArguments);
 
         expect(result.warningMessages).toEqual([
-          expect.stringContaining('metadata columns _source, _ignored'),
+          expect.stringContaining('metadata column(s) _source, _ignored'),
         ]);
       });
 
@@ -502,7 +504,7 @@ describe('esqlExecutor', () => {
         expect(result.success).toBe(false);
         expect(result.errors).toEqual([expect.stringContaining('boom')]);
         expect(result.warningMessages).toEqual([
-          expect.stringContaining('metadata column _source'),
+          expect.stringContaining('metadata column(s) _source'),
         ]);
       });
     });
