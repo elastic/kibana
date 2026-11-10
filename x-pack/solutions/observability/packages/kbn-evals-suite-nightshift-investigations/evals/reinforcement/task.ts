@@ -444,14 +444,16 @@ const headContent = (treeId: string, docs: readonly IndexedTreeDoc[] | undefined
 };
 
 /**
- * The seeded tree and every other tree the submissions name, each with its head before the replay
- * and after it, so the grader checks every tree the replay touched. Must run before rollback.
+ * The seeded tree and every other tree the run saved or its last submit named, each with its head
+ * before the replay and after it, so the grader checks every tree the replay touched. A tree named
+ * only by an earlier, rejected submit is left out. Must run before rollback.
  */
 const replayTreesAfterRun = async (
   esClient: Client,
   example: ReinforcementExample,
   submissions: readonly SubmitArguments[],
-  snapshots: ReadonlyMap<string, readonly IndexedTreeDoc[]>
+  snapshots: ReadonlyMap<string, readonly IndexedTreeDoc[]>,
+  conversationId: string
 ): Promise<NonNullable<ReinforcementTaskOutput['trees']>> => {
   const { tree_id: seededId, markdown: seededMarkdown } = example.input.prior_tree;
   const trees: NonNullable<ReinforcementTaskOutput['trees']> = [
@@ -465,7 +467,14 @@ const replayTreesAfterRun = async (
   const otherIds = new Set(
     submittedTreeIds(submissions).filter((id) => symptomSlugFromTreeId(id) !== seededSlug)
   );
+  const lastSubmitted = new Set(submittedTreeIds(submissions.slice(-1)));
   for (const treeId of otherIds) {
+    if (
+      !lastSubmitted.has(treeId) &&
+      !writtenByRun(await readTreeDoc(esClient, headId(treeId)), conversationId)
+    ) {
+      continue;
+    }
     trees.push({
       tree_id: treeId,
       prior_mermaid: headContent(treeId, snapshots.get(treeId)),
@@ -552,7 +561,13 @@ export const runReinforcementExample = async ({
         }
       | undefined;
     submissions = parseSubmissions(output?.submissions_json);
-    const trees = await replayTreesAfterRun(esClient, example, submissions, snapshots);
+    const trees = await replayTreesAfterRun(
+      esClient,
+      example,
+      submissions,
+      snapshots,
+      conversationId
+    );
     const finished = sawTerminal;
     const reinforced = reinforce?.status === ExecutionStatus.COMPLETED && output?.skipped !== true;
     const submitRejected = output?.submit_rejected === true;
@@ -609,6 +624,11 @@ interface StoredTree {
   };
 }
 
+/** True when `conversationId` committed the tree or wrote its counts. */
+const writtenByRun = (head: StoredTree | undefined, conversationId: string): boolean =>
+  head?.attributes?.conversation_id === conversationId ||
+  head?.attributes?.counts_conversation_id === conversationId;
+
 const readTreeDoc = async (esClient: Client, id: string): Promise<StoredTree | undefined> => {
   try {
     const response = await esClient.get<StoredTree>({
@@ -650,8 +670,7 @@ export const treesAfterRun = async (
   for (const treeId of submittedTreeIds(submissions)) {
     const head = await readTreeDoc(esClient, headId(treeId));
     const committed = head?.attributes?.conversation_id === conversationId;
-    const counted = head?.attributes?.counts_conversation_id === conversationId;
-    if (!lastSubmitted.has(treeId) && !committed && !counted) continue;
+    if (!lastSubmitted.has(treeId) && !writtenByRun(head, conversationId)) continue;
     const version = Number(head?.attributes?.version);
     const previous =
       committed && version > 1

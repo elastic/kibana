@@ -342,6 +342,29 @@ describe('runReinforcementExample', () => {
     expect(graded.score).toBe(0);
   });
 
+  it('leaves out a tree named only by a rejected submit the retry corrected', async () => {
+    const events: string[] = [];
+    const { esClient } = fakeEsClient(events, {});
+    const fetch = fakeFetch(events, {
+      readExecution: async () =>
+        completedWith([
+          { traversals: [{ tree_id: 'symptom:eql-slo-burn-rat', visited_path: ['S1'] }] },
+          { traversals: [{ tree_id: example.input.prior_tree.tree_id, visited_path: ['S1'] }] },
+        ]),
+    });
+
+    const output = await runReinforcementExample({
+      esClient,
+      fetch: fetch as unknown as HttpHandler,
+      connectorId: 'connector',
+      example,
+    });
+
+    expect(output.trees?.map(({ tree_id: treeId }) => treeId)).toEqual([
+      example.input.prior_tree.tree_id,
+    ]);
+  });
+
   describe('rollback', () => {
     it('leaves alone a tree another investigation writes during the replay', async () => {
       const events: string[] = [];
