@@ -22,9 +22,9 @@ import { COLOR_MAP_TYPE } from '../../../../../../common/constants';
 import type {
   CategoryColorStop,
   OrdinalColorStop,
+  ColorStop,
 } from '../../../../../../common/descriptor_types';
 import type { DynamicColorProperty } from '../../properties/dynamic_color_property';
-import type { ColorStop } from '../../../../../../common/descriptor_types';
 import { ColorStopsCategorical } from './color_stops_categorical';
 import { CATEGORICAL_COLOR_PALETTES, NUMERICAL_COLOR_PALETTES } from '../../../color_palettes';
 
