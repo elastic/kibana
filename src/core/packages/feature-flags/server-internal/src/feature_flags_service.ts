@@ -36,9 +36,9 @@ import {
   firstValueFrom,
   timeout,
   EMPTY,
-  distinctUntilChanged,
   skip,
-  exhaustMap,
+  concatMap,
+  debounceTime,
 } from 'rxjs';
 import { get } from 'lodash';
 import type { InitialFeatureFlagsGetter } from '@kbn/core-feature-flags-server/src/contracts';
@@ -210,14 +210,14 @@ export class FeatureFlagsService {
         // Provider ready changes to true (we need to reevaluate)
         this.providerReady$.pipe(
           skip(1), // skip the first value because it is the initial value (it's a BehaviorSubject)
-          distinctUntilChanged(),
           filter((ready) => ready),
           map(() => [flagName])
         )
       ).pipe(
         filter((flagNames) => flagNames.includes(flagName)),
         startWith([flagName]), // only to emit on the first call
-        takeUntil(this.stop$) // stop the observable when the service stops
+        takeUntil(this.stop$), // stop the observable when the service stops
+        debounceTime(10) // debounce the emissions to avoid too many reevaluations caused by rapid fired feature flag changes + context changes + provider ready changes
       );
 
     return {
@@ -238,14 +238,14 @@ export class FeatureFlagsService {
         ),
       getBooleanValue$: (flagName, fallbackValue) => {
         return observeFeatureFlag$(flagName).pipe(
-          exhaustMap(() =>
+          concatMap(() =>
             this.evaluateFlag(this.featureFlagsClient.getBooleanValue, flagName, fallbackValue)
           )
         );
       },
       getStringValue$: <Value extends string>(flagName: string, fallbackValue: Value) => {
         return observeFeatureFlag$(flagName).pipe(
-          exhaustMap(() =>
+          concatMap(() =>
             this.evaluateFlag<Value>(
               this.featureFlagsClient.getStringValue,
               flagName,
@@ -256,7 +256,7 @@ export class FeatureFlagsService {
       },
       getNumberValue$: <Value extends number>(flagName: string, fallbackValue: Value) => {
         return observeFeatureFlag$(flagName).pipe(
-          exhaustMap(() =>
+          concatMap(() =>
             this.evaluateFlag<Value>(
               this.featureFlagsClient.getNumberValue,
               flagName,
