@@ -89,7 +89,7 @@ const OPTIONAL_HINT = i18n.translate('xpack.nightshift.onboarding.steps.optional
 
 const INVESTIGATE_SECTION_TITLE = i18n.translate(
   'xpack.nightshift.onboarding.investigate.sectionTitle',
-  { defaultMessage: 'Try your first investigation' }
+  { defaultMessage: 'Try first investigation' }
 );
 
 const ENABLE_SECTION_TITLE = i18n.translate('xpack.nightshift.onboarding.enable.sectionTitle', {
@@ -231,17 +231,17 @@ export function NightshiftOnboarding({
     const index = ONBOARDING_STEP_IDS.indexOf(id);
     return index < currentIndex ? 'complete' : index > currentIndex ? 'disabled' : 'current';
   };
-  // Links follow what the user has done, not position: a passed step stays reachable from a
-  // detour to an earlier one, and a step not done yet cannot be jumped to. Enable never links.
-  const isDone: Record<OnboardingStepId, boolean> = {
-    enable: isEnabled,
-    addData: isEnabled && (isConnected || hasTelemetrySource),
-    connectSources: isConnected,
-    investigate: latestInvestigation != null,
-    automate: false,
+  // Links follow reachability, not position: a step links whenever its Proceed path is open, so
+  // a step stays reachable from a detour to an earlier one, and a step not reachable yet cannot
+  // be jumped to. Enable and Automate never link.
+  const isReachable: Record<'addData' | 'connectSources' | 'investigate', boolean> = {
+    addData: isEnabled,
+    // Same gate as Proceed on Add data.
+    connectSources: isEnabled && (isConnected || hasTelemetrySource),
+    investigate: isConnected,
   };
   const linkTo = (id: 'addData' | 'connectSources' | 'investigate') =>
-    isDone[id] && step !== id ? () => setStepOverride(id) : undefined;
+    isReachable[id] && step !== id ? () => setStepOverride(id) : undefined;
 
   const steps: Record<OnboardingStepId, OnboardingStepState> = {
     enable: { status: statusOf('enable') },
