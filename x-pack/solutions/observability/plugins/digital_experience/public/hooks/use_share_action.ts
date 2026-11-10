@@ -82,7 +82,10 @@ export const useShareAction = ({
         // The app has no embeddable view, so only its link is shared.
         objectTypeMeta: { title: SHARE_TITLE, config: { embed: { disabled: true } } },
         shareableUrl: window.location.href,
-        shareableUrlLocatorParams: { locator, params },
+        // The locator only makes short URLs and gives the modal its "Use absolute time range" switch.
+        // A long link is copied as it is, so without short URLs the switch would promise fixed dates
+        // that the link does not have.
+        shareableUrlLocatorParams: allowShortUrl ? { locator, params } : undefined,
         sharingData: { title: serviceName, locatorParams: { id: locator.id, params } },
         onClose: returnFocus,
       });

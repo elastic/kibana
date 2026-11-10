@@ -110,11 +110,15 @@ describe('useShareAction', () => {
     });
   });
 
-  it('offers short URLs only with the privilege to create them', async () => {
+  it('offers short URLs, and the locator that makes them, only with the privilege to create them', async () => {
     useServices({ createShortUrl: false });
 
-    await renderAction('')?.onClick({ returnFocus: jest.fn() });
+    await renderAction('?rangeFrom=now-3h&rangeTo=now')?.onClick({ returnFocus: jest.fn() });
 
-    expect(toggleShareContextMenu.mock.calls[0][0]).toMatchObject({ allowShortUrl: false });
+    const [options] = toggleShareContextMenu.mock.calls[0];
+    expect(options).toMatchObject({ allowShortUrl: false });
+    // Without the locator the modal has no "Use absolute time range" switch, which a long link ignores.
+    expect(options.shareableUrlLocatorParams).toBeUndefined();
+    expect(options.sharingData.locatorParams.id).toBe(DIGITAL_EXPERIENCE_LOCATOR_ID);
   });
 });
