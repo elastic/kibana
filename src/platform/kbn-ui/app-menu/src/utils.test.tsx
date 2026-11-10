@@ -9,7 +9,7 @@
 
 import { isValidElement } from 'react';
 import { render } from '@testing-library/react';
-import type { ReactElement } from 'react';
+import type { MouseEvent, ReactElement } from 'react';
 import { EuiSwitch, EuiToolTip, type EuiThemeComputed } from '@elastic/eui';
 import {
   createReturnFocus,
@@ -483,6 +483,28 @@ describe('utils', () => {
       expect(result).not.toHaveProperty('data-ebt-action');
       expect(result).not.toHaveProperty('data-ebt-element');
       expect(result).not.toHaveProperty('data-ebt-detail');
+    });
+
+    it('should return focus past the dismissed popover item, even while it is still mounted', () => {
+      const run = jest.fn();
+      const anchorElement = document.createElement('button');
+      const menuItem = document.createElement('button');
+      document.body.append(anchorElement, menuItem);
+
+      const { onClick } = mapAppMenuItemToPanelItem(
+        { ...baseItem, run },
+        undefined,
+        jest.fn(),
+        undefined,
+        anchorElement
+      );
+      onClick?.({ currentTarget: menuItem } as unknown as MouseEvent);
+      run.mock.calls[0][0].returnFocus();
+
+      expect(document.activeElement).toBe(anchorElement);
+
+      anchorElement.remove();
+      menuItem.remove();
     });
 
     it('should include tooltip content and title', () => {
