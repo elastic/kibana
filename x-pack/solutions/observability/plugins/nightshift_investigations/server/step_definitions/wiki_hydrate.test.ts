@@ -7,7 +7,7 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
-import type { SandboxPluginStart, SandboxSession } from '@kbn/sandbox-plugin/server';
+import type { AuditedSandboxSession, NightshiftSandboxStart } from '../sandbox_audit';
 import { hydrateWikiWorkspace } from '../wiki/register_wiki';
 import { wikiHydrateStepDefinition } from './wiki_hydrate';
 
@@ -22,10 +22,13 @@ jest.mock('../wiki/register_wiki', () => ({
 describe('wikiHydrateStepDefinition', () => {
   const esClient = { search: jest.fn() };
   const getScopedEsClient = jest.fn().mockReturnValue(esClient);
-  const mockSession = { writeFiles: jest.fn(), mkdirs: jest.fn() } as unknown as SandboxSession;
+  const mockSession = {
+    writeFiles: jest.fn(),
+    mkdirs: jest.fn(),
+  } as unknown as AuditedSandboxSession;
   const analytics = coreMock.createSetup().analytics;
 
-  const makeSandboxStart = (): SandboxPluginStart => ({
+  const makeSandboxStart = (): NightshiftSandboxStart => ({
     getSession: jest.fn(),
     getSessionForSpace: jest.fn().mockReturnValue(mockSession),
   });
@@ -70,7 +73,11 @@ describe('wikiHydrateStepDefinition', () => {
 
     const result = await definition.handler(createContext('default__conv-1'));
 
-    expect(sandboxStart.getSessionForSpace).toHaveBeenCalledWith('default', 'conv-1');
+    expect(sandboxStart.getSessionForSpace).toHaveBeenCalledWith(
+      'default',
+      'conv-1',
+      expect.objectContaining({ type: 'workflow_step' })
+    );
     expect(hydrateWikiWorkspace).toHaveBeenCalledWith({
       session: mockSession,
       esClient,
@@ -99,7 +106,11 @@ describe('wikiHydrateStepDefinition', () => {
 
     const result = await definition.handler(createContext('marketing__conv-1', 'marketing'));
 
-    expect(sandboxStart.getSessionForSpace).toHaveBeenCalledWith('marketing', 'conv-1');
+    expect(sandboxStart.getSessionForSpace).toHaveBeenCalledWith(
+      'marketing',
+      'conv-1',
+      expect.objectContaining({ type: 'workflow_step' })
+    );
     expect(hydrateWikiWorkspace).toHaveBeenCalledWith(
       expect.objectContaining({ spaceId: 'marketing', conversationId: 'conv-1' })
     );
@@ -122,7 +133,11 @@ describe('wikiHydrateStepDefinition', () => {
 
     const result = await definition.handler(createContext(undefined, 'marketing', 'conv-1'));
 
-    expect(sandboxStart.getSessionForSpace).toHaveBeenCalledWith('marketing', 'conv-1');
+    expect(sandboxStart.getSessionForSpace).toHaveBeenCalledWith(
+      'marketing',
+      'conv-1',
+      expect.objectContaining({ type: 'workflow_step' })
+    );
     expect(hydrateWikiWorkspace).toHaveBeenCalledWith(
       expect.objectContaining({ spaceId: 'marketing', conversationId: 'conv-1' })
     );

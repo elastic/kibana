@@ -11,7 +11,12 @@ import {
   ToolResultType,
 } from '@kbn/agent-builder-common';
 import type { Investigation } from '@kbn/agentic-investigations-plugin/common';
-import { INVESTIGATION_TIMEOUT_MS, UNPERSISTED_CONVERSATION_ERROR, runInvestigation } from './task';
+import {
+  INVESTIGATION_TIMEOUT_MS,
+  UNPERSISTED_CONVERSATION_ERROR,
+  runInvestigation,
+  waitForInvestigationToEnd,
+} from './task';
 import { ungradedPlaceholder } from './placeholder';
 
 jest.mock('timers/promises', () => ({ setTimeout: jest.fn().mockResolvedValue(undefined) }));
@@ -414,4 +419,31 @@ it('reports an investigation that never appeared', async () => {
   } finally {
     clock.mockRestore();
   }
+});
+
+describe('waitForInvestigationToEnd', () => {
+  const finished = { rounds: [{ status: ConversationRoundStatus.completed, steps: [] }] };
+
+  it('waits until the investigation and its last round have ended', async () => {
+    const fetch = jest
+      .fn()
+      .mockResolvedValueOnce(investigation({ in_progress: true }))
+      .mockResolvedValueOnce(investigation())
+      .mockResolvedValueOnce(finished);
+
+    await expect(waitForInvestigationToEnd(fetch, 'investigation', 60_000)).resolves.toBe(true);
+    expect(fetch).toHaveBeenCalledTimes(3);
+  });
+
+  it('gives up once the investigation is still running at the deadline', async () => {
+    const fetch = jest.fn().mockResolvedValue(investigation({ in_progress: true }));
+
+    await expect(waitForInvestigationToEnd(fetch, 'investigation', 0)).resolves.toBe(false);
+  });
+
+  it('does not take an investigation that is not found yet as ended', async () => {
+    const fetch = jest.fn().mockRejectedValue(notFound());
+
+    await expect(waitForInvestigationToEnd(fetch, 'investigation', 0)).resolves.toBe(false);
+  });
 });
