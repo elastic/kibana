@@ -6,7 +6,6 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { errors as EsErrors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type {
   QueryDslQueryContainer,
@@ -295,7 +294,7 @@ const PERMANENT_RESULT_STATUS_CODES = [
   400, // malformed, or a mapping failure
   403, // forbidden
   404, // no such index
-  409, // already written, which a fresh id makes impossible but is not a reason to write another
+  409, // only reached if the id were reused outside a retry, which it is not
 ];
 
 export async function bulkCreateAgentActionResults(
@@ -322,53 +321,28 @@ export async function bulkCreateAgentActionResults(
   const permanentlyRefused: typeof results = [];
 
   /**
-   * Sends one bulk, retrying only the failure that says for certain nothing was sent.
+   * Each result's document id, generated once and reused by every attempt below.
    *
-   * `NoLivingConnectionsError` comes from the connection pool before a request is serialized, so a
-   * second attempt cannot write what the first one did not. Every other transport failure — a
-   * timeout, a dropped connection — may have landed, and each item carries a freshly generated
-   * `_id`, so retrying one of those would write a second result for every agent in the batch.
-   * `action_status` counts result documents rather than agents, so that inflates failures, drives
-   * the acknowledged count negative and can complete an action early.
+   * This is what makes the write idempotent, and so retryable at all. With a fresh id per attempt,
+   * a retry of a request that had in fact landed writes a second result for every agent in the
+   * batch — and `action_status` counts result documents rather than agents, so that inflates
+   * failures, drives the acknowledged count negative and can complete an action early. Reusing the
+   * id turns that case into a per item 409 instead, which is read below as "already written".
    *
-   * Letting the rest throw replays the batch under a new action id, where its results cannot
-   * collide with these — except for update tags, whose retry re-queries with a kuery that excludes
-   * the agents it already tagged, so a batch replayed there cannot rewrite their results. That is
-   * what makes even this narrow retry worth having.
+   * The ids stay local to this call rather than being derived from the action and agent: nothing
+   * here owns the `_id` scheme of an index Fleet Server also writes to.
    */
-  const writeBulk = async (operations: object[]) => {
-    for (let attempt = 1; ; attempt++) {
-      try {
-        return await esClient.bulk({
-          index: AGENT_ACTIONS_RESULTS_INDEX,
-          operations,
-          refresh: 'wait_for',
-        });
-      } catch (error) {
-        if (
-          !(error instanceof EsErrors.NoLivingConnectionsError) ||
-          attempt >= MAX_RESULT_WRITE_ATTEMPTS
-        ) {
-          throw error;
-        }
-        logger.warn(
-          `Could not reach Elasticsearch to write ${results.length} agent action results, retrying: ${error.message}`
-        );
-        await delay(RESULT_WRITE_RETRY_DELAY_MS * attempt);
-      }
-    }
-  };
+  let pending = results.map((result) => ({ documentId: uuidv4(), result }));
 
   /**
-   * Writes the given results and hands back the ones Elasticsearch refused and might yet accept,
-   * in request order.
+   * Sends one bulk and hands back the entries to try again, in request order.
    *
-   * Deliberately not wrapped in `retryTransientEsErrors`, which is for idempotent operations and
-   * this is not; see `writeBulk` for what is retried instead.
+   * Deliberately not wrapped in `retryTransientEsErrors`: its contract is idempotent operations,
+   * and what makes this one idempotent is the ids above rather than anything that wrapper knows.
    */
-  const writeResults = async (toWrite: typeof results) => {
-    const operations = toWrite.flatMap((result) => [
-      { create: { _id: uuidv4() } },
+  const writeOnce = async (toWrite: typeof pending) => {
+    const operations = toWrite.flatMap(({ documentId, result }) => [
+      { create: { _id: documentId } },
       {
         '@timestamp': new Date().toISOString(),
         action_id: result.actionId,
@@ -378,41 +352,64 @@ export async function bulkCreateAgentActionResults(
       },
     ]);
 
-    const res = await writeBulk(operations);
+    const res = await esClient.bulk({
+      index: AGENT_ACTIONS_RESULTS_INDEX,
+      operations,
+      refresh: 'wait_for',
+    });
     if (!res.errors) {
       return [];
     }
-    // Items come back in request order, so this is which of `toWrite` did not land. A refused item
-    // indexed nothing, so rewriting it cannot produce a second result for that agent; the ones
-    // Elasticsearch can only refuse again are set aside instead, to be reported rather than
-    // rewritten.
-    const retryable: typeof results = [];
-    toWrite.forEach((result, index) => {
+
+    // Items come back in request order, so this is which of `toWrite` did not land. A conflict
+    // means an earlier attempt of this same write did land, which is success. The ones
+    // Elasticsearch can only refuse again are set aside to be reported rather than rewritten.
+    const retryable: typeof pending = [];
+    toWrite.forEach((entry, index) => {
       const item = res.items[index]?.create ?? res.items[index]?.index;
-      if (!item?.error) {
+      if (!item?.error || item.status === 409) {
         return;
       }
       if (PERMANENT_RESULT_STATUS_CODES.includes(item.status)) {
-        permanentlyRefused.push(result);
+        permanentlyRefused.push(entry.result);
       } else {
-        retryable.push(result);
+        retryable.push(entry);
       }
     });
     return retryable;
   };
 
-  // A bulk reports per item failures in its response rather than throwing, so a write that only
-  // partly landed would otherwise read as complete, and an action counting an agent whose result
-  // never arrived waits for it forever. The refused items are therefore written again, after a
-  // wait: what gets an item refused rather than the whole request is a full write queue, which
-  // milliseconds will not have cleared.
-  let pending = await writeResults(results);
-  for (let attempt = 1; attempt < MAX_RESULT_WRITE_ATTEMPTS && pending.length > 0; attempt++) {
-    await delay(RESULT_WRITE_RETRY_DELAY_MS * attempt);
-    pending = await writeResults(pending);
+  // Two things are retried here, and the stable ids above are what make both safe. A bulk reports
+  // per item failures in its response rather than throwing, so a write that only partly landed
+  // would otherwise read as complete; and a transport failure leaves it unknown whether anything
+  // landed at all. Either way an action counting an agent whose result never arrived waits for it
+  // forever — and update tags cannot even recover by replaying the batch, since its retry
+  // re-queries with a kuery that excludes the agents it already tagged.
+  //
+  // The wait between attempts is deliberate: what gets an item refused rather than the whole
+  // request is a full write queue, which milliseconds will not have cleared.
+  let transportError: Error | undefined;
+  for (let attempt = 1; attempt <= MAX_RESULT_WRITE_ATTEMPTS && pending.length > 0; attempt++) {
+    if (attempt > 1) {
+      await delay(RESULT_WRITE_RETRY_DELAY_MS * (attempt - 1));
+    }
+    try {
+      pending = await writeOnce(pending);
+      transportError = undefined;
+    } catch (error) {
+      transportError = error;
+      logger.warn(
+        `Could not write ${pending.length} agent action results, attempt ${attempt} of ${MAX_RESULT_WRITE_ATTEMPTS}: ${error.message}`
+      );
+    }
   }
 
-  const refused = [...permanentlyRefused, ...pending];
+  // Nothing is known about what landed, so the caller has to hear about it.
+  if (transportError) {
+    throw transportError;
+  }
+
+  const refused = [...permanentlyRefused, ...pending.map(({ result }) => result)];
   if (refused.length > 0) {
     // Not thrown: these results are written for a whole batch at once, and failing the batch would
     // have the retry rewrite the ones that did land under a new action id while the action they

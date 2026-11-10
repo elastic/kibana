@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { errors as EsErrors } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { merge } from 'lodash';
 
@@ -989,23 +988,62 @@ describe('Agent actions', () => {
       }
     });
 
-    it('retries the request itself only when nothing can have been sent', async () => {
+    it('reuses each document id across attempts, so a replay cannot duplicate', async () => {
       jest.useFakeTimers();
       try {
-        // the connection pool raises this before a request is serialized, so a second attempt
-        // cannot write what the first one did not
+        // the transport retries internally and can raise NoLivingConnectionsError after a request
+        // was already dispatched, so no transport error proves nothing was written; reusing the id
+        // is what turns that case into a conflict instead of a second result for every agent
         const esClientMock = elasticsearchServiceMock.createInternalClient();
         esClientMock.bulk
-          .mockRejectedValueOnce(
-            new EsErrors.NoLivingConnectionsError('No living connections', {} as any)
-          )
+          .mockRejectedValueOnce(new Error('socket hang up'))
           .mockResolvedValueOnce(okResponse as any);
 
         const written = bulkCreateAgentActionResults(esClientMock, results);
         await jest.advanceTimersByTimeAsync(60_000);
         await written;
 
-        expect(esClientMock.bulk).toHaveBeenCalledTimes(2);
+        const firstIds = (esClientMock.bulk.mock.calls[0][0] as any).operations
+          .filter((op: any) => op.create)
+          .map((op: any) => op.create._id);
+        const secondIds = (esClientMock.bulk.mock.calls[1][0] as any).operations
+          .filter((op: any) => op.create)
+          .map((op: any) => op.create._id);
+        expect(secondIds).toEqual(firstIds);
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it('reads a conflict as already written rather than as a failure', async () => {
+      // which is what an attempt that did land, and then looked like it had not, comes back as
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+      esClientMock.bulk.mockResolvedValue({
+        errors: true,
+        items: [
+          { create: { status: 409, error: { reason: 'version_conflict_engine_exception' } } },
+          { create: {} },
+        ],
+      } as any);
+
+      await bulkCreateAgentActionResults(esClientMock, results);
+
+      expect(esClientMock.bulk).toHaveBeenCalledTimes(1);
+      expect(mockContext.logger.error).not.toHaveBeenCalled();
+    });
+
+    it('throws when it cannot tell whether anything was written', async () => {
+      jest.useFakeTimers();
+      try {
+        const esClientMock = elasticsearchServiceMock.createInternalClient();
+        esClientMock.bulk.mockRejectedValue(new Error('socket hang up'));
+
+        const written = bulkCreateAgentActionResults(esClientMock, results);
+        const assertion = expect(written).rejects.toThrow('socket hang up');
+        await jest.advanceTimersByTimeAsync(60_000);
+        await assertion;
+
+        expect(esClientMock.bulk).toHaveBeenCalledTimes(3);
       } finally {
         jest.useRealTimers();
       }
@@ -1033,19 +1071,6 @@ describe('Agent actions', () => {
       } finally {
         jest.useRealTimers();
       }
-    });
-
-    it('does not write the whole bulk again when it throws', async () => {
-      // every item carries a freshly generated id, so this write is not idempotent and the
-      // failures a transient retry covers are the ones that reach it with the bulk already
-      // indexed; replaying the batch under a new action id is what keeps results from colliding
-      const esClientMock = elasticsearchServiceMock.createInternalClient();
-      esClientMock.bulk.mockRejectedValue(new EsErrors.TimeoutError('Request timed out'));
-
-      await expect(bulkCreateAgentActionResults(esClientMock, results)).rejects.toThrow(
-        'Request timed out'
-      );
-      expect(esClientMock.bulk).toHaveBeenCalledTimes(1);
     });
 
     it('does not write an item again that Elasticsearch will refuse again', async () => {
