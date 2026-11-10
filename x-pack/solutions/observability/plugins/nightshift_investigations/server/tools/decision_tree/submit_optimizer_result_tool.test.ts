@@ -94,6 +94,11 @@ const createSandboxStart = (markdown: string) => {
 const createContext = (conversationId = 'conv-1') => ({
   request: {} as never,
   runContext: { stack: [{ type: 'agent', conversationId }] },
+  callContext: {
+    toolId: 'nightshift_submit_optimizer_result',
+    toolCallId: 'call-1',
+    callSource: 'agent',
+  },
   esClient: { asCurrentUser: {} },
   agentConfiguration: { connector_ids: [] },
 });

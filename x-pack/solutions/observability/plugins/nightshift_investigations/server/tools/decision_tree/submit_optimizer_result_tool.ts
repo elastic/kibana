@@ -40,7 +40,7 @@ import type {
   DecisionTreeView,
   LearningRecord,
 } from '@kbn/nightshift-decision-trees';
-import type { SandboxPluginStart, SandboxSession } from '@kbn/sandbox-plugin/server';
+import type { AuditedSandboxSession, NightshiftSandboxStart } from '../../sandbox_audit';
 import {
   DecisionTreeVersionWriteError,
   type DecisionTreeDetail,
@@ -51,6 +51,7 @@ import {
 import type { AppliedWriteRecord, WriteProvenance } from '../../investigation_round';
 import {
   getConversationId,
+  getSandboxCaller,
   getScopedConversationId,
   resolveAbsolutePath,
 } from '../sandbox_bash/tool_utils';
@@ -281,7 +282,7 @@ export const createSubmitOptimizerResultTool = ({
   onAppliedWrite,
   logger,
 }: {
-  getSandboxStart: () => SandboxPluginStart | undefined;
+  getSandboxStart: () => NightshiftSandboxStart | undefined;
   getStore: (esClient: ElasticsearchClient, request: KibanaRequest) => DecisionTreeStore;
   getSpaceId: (request: KibanaRequest) => string;
   /** Resolves the authenticated user, recorded as the version author. */
@@ -343,9 +344,13 @@ export const createSubmitOptimizerResultTool = ({
         };
       }
 
-      let session: SandboxSession;
+      let session: AuditedSandboxSession;
       try {
-        session = sandboxStart.getSession(context.request, rawConversationId);
+        session = sandboxStart.getSession(
+          context.request,
+          rawConversationId,
+          getSandboxCaller(context)
+        );
       } catch (err) {
         return {
           results: [
@@ -828,7 +833,7 @@ const versionWriteRejection = (
 
 /** The submitted file's text, or undefined when it cannot be read. Validation reports that later. */
 const readSubmittedMarkdown = async (
-  session: SandboxSession,
+  session: AuditedSandboxSession,
   filePath: string
 ): Promise<string | undefined> => {
   try {
@@ -862,7 +867,7 @@ const persistSubmission = async ({
   counting: TraversalCounting;
   /** An earlier attempt of this turn created the tree. */
   createdThisTurn: boolean;
-  session: SandboxSession;
+  session: AuditedSandboxSession;
   store: DecisionTreeStore;
   author: string;
   summary: string;
