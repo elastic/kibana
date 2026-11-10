@@ -18,6 +18,7 @@ const alertTrigger = (overrides: Partial<AlertTrigger> = {}): AlertTrigger => ({
   ruleNamePattern: '',
   ruleNames: [],
   ruleTags: [],
+  severities: [],
   alertSources: [],
   alertSourceMode: 'include',
   ...overrides,

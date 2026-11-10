@@ -26,6 +26,7 @@ import { NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID } from '@kbn/workflows/ma
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { InvestigationAttachmentDocService } from '@kbn/agentic-investigations-plugin/server';
 import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
+import { LockManagerService } from '@kbn/lock-manager';
 import type { NightshiftInvestigationsConfig } from './config';
 import {
   InvestigationLocatorDefinition,
@@ -170,12 +171,14 @@ export class NightshiftInvestigationsPlugin
   private uiSettings?: CoreStart['uiSettings'];
   private featureFlags?: CoreStart['featureFlags'];
   private actionsStart?: ActionsPluginStart;
+  private nightshiftSources?: NightshiftInvestigationsStartDeps['nightshiftSources'];
   private cloudSetup?: NightshiftInvestigationsSetupDeps['cloud'];
   private esHosts: string[] = [];
   private securityStart?: NightshiftInvestigationsStartDeps['security'];
   private security?: CoreStart['security'];
   private coreStart?: CoreStart;
   private investigatorServiceAccountService?: InvestigatorServiceAccountService;
+  private lockManager?: LockManagerService;
   /** The managed workflows client of this plugin, shared by startup installs and setup. */
   private managedWorkflowsClient?: Promise<ManagedWorkflowsClient>;
   private notificationRoutingService?: InvestigationAttachmentDocService<StoredNotificationRouting>;
@@ -196,6 +199,7 @@ export class NightshiftInvestigationsPlugin
     plugins: NightshiftInvestigationsSetupDeps
   ): NightshiftInvestigationsServerSetup {
     this.workflowsManagement = plugins.workflowsManagement;
+    this.lockManager = new LockManagerService(core, this.logger);
     const investigationLocator = plugins.share.url.locators.create(
       new InvestigationLocatorDefinition()
     );
@@ -339,6 +343,7 @@ export class NightshiftInvestigationsPlugin
         sandboxEnabled: plugins.sandbox?.isAvailable ?? false,
         wikiEnabled: this.wikiEnabled,
         memoryEnabled: this.memoryEnabled,
+        learningEnabled: config.learning.enabled,
         investigationToolsEnabled: Boolean(plugins.agenticInvestigations),
         proposalsEnabled: Boolean(plugins.proposals),
         getCustomContextInstructions: ({ request, spaceId }) =>
@@ -383,13 +388,14 @@ export class NightshiftInvestigationsPlugin
               if (!sandboxStart) return undefined;
               // The same per-request check the investigator's sandbox tools pass: a user who may
               // not use the sandbox must not have its files read on their behalf either.
+              const spaceId = this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
               const access = await checkSandboxAccess({
                 request,
+                spaceId,
                 featureFlags: this.featureFlags,
                 security: this.securityStart,
               });
               if (access.status !== 'available') return undefined;
-              const spaceId = this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
               const redactor = await getRecorderOutputRedactor({
                 request,
                 allowedConnectorIds,
@@ -801,6 +807,7 @@ export class NightshiftInvestigationsPlugin
     this.uiSettings = coreStart.uiSettings;
     this.featureFlags = coreStart.featureFlags;
     this.actionsStart = plugins.actions;
+    this.nightshiftSources = plugins.nightshiftSources;
     this.securityStart = plugins.security;
     this.security = coreStart.security;
     this.coreStart = coreStart;
@@ -862,6 +869,13 @@ export class NightshiftInvestigationsPlugin
       isAssistantEnabled: () => this.assistantEnabled,
     };
   }
+
+  private getNightshiftSources = () => {
+    if (!this.nightshiftSources) {
+      throw new Error('nightshiftSources is not available — plugin start() has not been called');
+    }
+    return this.nightshiftSources;
+  };
 
   /** Created once so every `agents.ensure` call registers the same gate; deps read lazily. */
   private getInvestigationAvailability = (): AvailabilityConfig => {
@@ -963,8 +977,10 @@ export class NightshiftInvestigationsPlugin
     if (this.investigatorServiceAccountService) {
       return this.investigatorServiceAccountService;
     }
-    if (!this.coreStart || !this.workflowsExtensionsStart) {
-      throw new Error('workflowsExtensions is not available — plugin start() has not been called');
+    if (!this.coreStart || !this.workflowsExtensionsStart || !this.lockManager) {
+      throw new Error(
+        'Required start services are unavailable — plugin start() has not been called'
+      );
     }
     this.investigatorServiceAccountService = createInvestigatorServiceAccountService({
       core: this.coreStart,
@@ -979,6 +995,14 @@ export class NightshiftInvestigationsPlugin
       getAgentAvailability: () => this.getInvestigationAvailability(),
       isAssistantEnabled: () => this.assistantEnabled,
       getAutomationsSoClient: this.getAutomationsSoClient,
+      lockManager: this.lockManager,
+      listInstalledWorkflowStates: async () => {
+        const client = await this.managedWorkflowsClient;
+        return client ? client.listInstalledWorkflowStates() : [];
+      },
+      scheduleSourceVolumeTask: (request) =>
+        this.getNightshiftSources().scheduleSourceVolumeTask(request),
+      removeSourceVolumeTask: () => this.getNightshiftSources().removeSourceVolumeTask(),
       isUniversalAlertingAvailable: () => this.alertingVTwo !== undefined,
       isServerless: this.ctx.env.packageInfo.buildFlavor === 'serverless',
       logger: this.logger.get('service_account'),
