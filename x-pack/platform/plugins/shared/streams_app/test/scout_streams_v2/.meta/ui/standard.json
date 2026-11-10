@@ -1,5 +1,5 @@
 {
-  "sha1": "fa6b08526c86d4fabc9ed3a78b91731e87351150",
+  "sha1": "8dcff1a54b22ba8b55e43f1da1dbd1dd84ba4a7f",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -67,7 +67,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/canvas_processing.spec.ts",
-        "line": 285,
+        "line": 286,
         "column": 24
       }
     },
@@ -179,7 +179,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/canvas.spec.ts",
-        "line": 150,
+        "line": 151,
         "column": 24
       }
     },
@@ -235,7 +235,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/canvas.spec.ts",
-        "line": 193,
+        "line": 194,
         "column": 24
       }
     },
