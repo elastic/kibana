@@ -34,10 +34,17 @@ const suggestion = (title: string, index: number) => ({
   source: 'alert' as const,
 });
 
-const renderStep = (execution: OnboardingSuggestionsExecution) =>
+const renderStep = (
+  execution: OnboardingSuggestionsExecution,
+  { previewOnly = false }: { previewOnly?: boolean } = {}
+) =>
   render(
     <I18nProvider>
-      <OnboardingFirstInvestigationStep execution={execution} onInvestigationStarted={jest.fn()} />
+      <OnboardingFirstInvestigationStep
+        execution={execution}
+        previewOnly={previewOnly}
+        onInvestigationStarted={jest.fn()}
+      />
     </I18nProvider>
   );
 
@@ -112,5 +119,63 @@ describe('OnboardingFirstInvestigationStep', () => {
 
     fireEvent.click(screen.getByTestId('nightshiftOnboardingRetryButton'));
     expect(mockRetry).toHaveBeenCalled();
+  });
+
+  describe('previewOnly', () => {
+    it('does not start an investigation from a suggestion click', () => {
+      renderStep(
+        {
+          execution_id: 'design-preview',
+          status: 'succeeded',
+          suggestions: [suggestion('Sample', 0)],
+        },
+        { previewOnly: true }
+      );
+
+      const investigate = screen.getByTestId('nightshiftOnboardingSuggestionInvestigateButton');
+      expect(investigate).toBeDisabled();
+      fireEvent.click(investigate);
+
+      expect(mockStartInvestigation).not.toHaveBeenCalled();
+    });
+
+    it('does not start an investigation from compose click or Ctrl/Cmd+Enter', () => {
+      renderStep(
+        {
+          execution_id: 'design-preview',
+          status: 'succeeded',
+          suggestions: [suggestion('Sample', 0)],
+        },
+        { previewOnly: true }
+      );
+
+      const prompt = screen.getByTestId('nightshiftOnboardingCustomPrompt');
+      fireEvent.change(prompt, { target: { value: 'Why is checkout slow?' } });
+
+      const investigate = screen.getByTestId('nightshiftOnboardingInvestigateButton');
+      expect(investigate).toBeDisabled();
+      fireEvent.click(investigate);
+      expect(mockStartInvestigation).not.toHaveBeenCalled();
+
+      fireEvent.keyDown(prompt, { key: 'Enter', metaKey: true });
+      expect(mockStartInvestigation).not.toHaveBeenCalled();
+
+      fireEvent.keyDown(prompt, { key: 'Enter', ctrlKey: true });
+      expect(mockStartInvestigation).not.toHaveBeenCalled();
+    });
+
+    it('does not retry the suggestions workflow from the empty state', () => {
+      renderStep(
+        { execution_id: 'design-preview', status: 'succeeded', suggestions: [] },
+        { previewOnly: true }
+      );
+
+      const retry = screen.getByTestId('nightshiftOnboardingRetryButton');
+      expect(retry).toBeDisabled();
+      fireEvent.click(retry);
+
+      expect(mockRetry).not.toHaveBeenCalled();
+      expect(mockStartInvestigation).not.toHaveBeenCalled();
+    });
   });
 });
