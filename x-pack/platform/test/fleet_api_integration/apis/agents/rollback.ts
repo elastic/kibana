@@ -16,6 +16,9 @@ export default function (providerContext: FtrProviderContext) {
   const es = getService('es');
   let policy1: any;
 
+  /** Key for an action that carries only errors for agents with no rollback, so has no version. */
+  const NO_ROLLBACK_VERSION = 'none';
+
   async function createAgentWithRollback(
     agentId: string,
     rollbackVersion: string,
@@ -85,7 +88,9 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       const action: any = actionsRes.hits.hits[0]._source;
-      const version = action.data.version;
+      // An action created only to carry errors for agents that have no rollback at all has no
+      // version to group under, so it gets a key of its own rather than an `undefined` one.
+      const version = action.data.version ?? NO_ROLLBACK_VERSION;
       if (!versionToActionIds[version]) {
         versionToActionIds[version] = [];
       }
@@ -455,7 +460,13 @@ export default function (providerContext: FtrProviderContext) {
 
           const versionToActionIds = await getActionIdsPerVersion(body.actionIds);
 
-          expect(Object.keys(versionToActionIds).length).to.eql(4);
+          // Batches are paged in `agent.id` order, which puts agent8 and agent9 — the two with no
+          // rollback at all — in a batch of their own. A batch with nothing to roll back has no
+          // version to group its errors under, so they get an action outside the four versions.
+          const rollbackVersions = Object.keys(versionToActionIds).filter(
+            (version) => version !== NO_ROLLBACK_VERSION
+          );
+          expect(rollbackVersions.length).to.eql(4);
           expect(Object.keys(versionToActionIds)).to.contain('9.3.0');
           expect(versionToActionIds['9.3.0'].length).to.be.greaterThan(2);
           expect(versionToActionIds['9.3.0'].length).to.be.lessThan(7);
